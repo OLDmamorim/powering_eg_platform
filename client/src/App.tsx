@@ -1,35 +1,54 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
-import { Route, Switch } from "wouter";
+import { Route, Switch, Redirect } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
+import Dashboard from "./pages/Dashboard";
+import Lojas from "./pages/Lojas";
+import Gestores from "./pages/Gestores";
+import Relatorios from "./pages/Relatorios";
+import MinhasLojas from "./pages/MinhasLojas";
+import RelatorioLivre from "./pages/RelatorioLivre";
+import RelatorioCompleto from "./pages/RelatorioCompleto";
+import MeusRelatorios from "./pages/MeusRelatorios";
+import RelatoriosIA from "./pages/RelatoriosIA";
+import Pendentes from "./pages/Pendentes";
 
 function Router() {
-  // make sure to consider if you need authentication for certain routes
   return (
     <Switch>
-      <Route path={"/"} component={Home} />
+      <Route path={"/"}>
+        <Redirect to="/dashboard" />
+      </Route>
+      <Route path={"/dashboard"} component={Dashboard} />
+      
+      {/* Admin routes */}
+      <Route path={"/lojas"} component={Lojas} />
+      <Route path={"/gestores"} component={Gestores} />
+      <Route path={"/relatorios"} component={Relatorios} />
+      
+      {/* Gestor routes */}
+      <Route path={"/minhas-lojas"} component={MinhasLojas} />
+      <Route path={"/relatorio-livre"} component={RelatorioLivre} />
+      <Route path={"/relatorio-completo"} component={RelatorioCompleto} />
+      <Route path={"/meus-relatorios"} component={MeusRelatorios} />
+      
+      {/* Shared routes */}
+      <Route path={"/relatorios-ia"} component={RelatoriosIA} />
+      <Route path={"/pendentes"} component={Pendentes} />
+      
       <Route path={"/404"} component={NotFound} />
-      {/* Final fallback route */}
       <Route component={NotFound} />
     </Switch>
   );
 }
 
-// NOTE: About Theme
-// - First choose a default theme according to your design style (dark or light bg), than change color palette in index.css
-//   to keep consistent foreground/background color across components
-// - If you want to make theme switchable, pass `switchable` ThemeProvider and use `useTheme` hook
-
 function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider
-        defaultTheme="light"
-        // switchable
-      >
+      <ThemeProvider defaultTheme="light">
         <TooltipProvider>
           <Toaster />
           <Router />

@@ -1,83 +1,85 @@
 # PoweringEG Platform - TODO
 
 ## Fase 1: Configuração Inicial
-- [ ] Criar repositório GitHub
+- [x] Criar repositório GitHub
 - [ ] Configurar credenciais Railway, Neon e Netlify
 
 ## Fase 2: Base de Dados
-- [ ] Schema: Tabela de lojas (nome, morada, contacto, email)
-- [ ] Schema: Tabela de gestores (nome, email, morada)
-- [ ] Schema: Tabela de associações gestor-loja
-- [ ] Schema: Tabela de relatórios livres
-- [ ] Schema: Tabela de relatórios completos
-- [ ] Schema: Tabela de pendentes por loja
-- [ ] Executar migrações no Neon
+- [x] Schema: Tabela de lojas (nome, morada, contacto, email)
+- [x] Schema: Tabela de gestores (nome, email, morada)
+- [x] Schema: Tabela de associações gestor-loja
+- [x] Schema: Tabela de relatórios livres
+- [x] Schema: Tabela de relatórios completos
+- [x] Schema: Tabela de pendentes por loja
+- [x] Executar migrações no Neon
 
 ## Fase 3: Autenticação e Controlo de Acesso
-- [ ] Configurar roles (Admin/Gestor) no schema users
-- [ ] Implementar middleware de autorização
-- [ ] Criar procedimentos protegidos para Admin
-- [ ] Criar procedimentos protegidos para Gestor
+- [x] Configurar roles (Admin/Gestor) no schema users
+- [x] Implementar middleware de autorização
+- [x] Criar procedimentos protegidos para Admin
+- [x] Criar procedimentos protegidos para Gestor
 
 ## Fase 4: Painel Admin
-- [ ] CRUD de lojas (criar, listar, editar, eliminar)
-- [ ] CRUD de gestores (criar, listar, editar, eliminar)
-- [ ] Interface para associar lojas aos gestores
-- [ ] Visualização de todos os relatórios gerados
-- [ ] Dashboard com estatísticas gerais
+- [x] CRUD de lojas (criar, listar, editar, eliminar)
+- [x] CRUD de gestores (criar, listar, editar, eliminar)
+- [x] Interface para associar lojas aos gestores
+- [x] Visualização de todos os relatórios gerados
+- [x] Dashboard com estatísticas gerais
 
 ## Fase 5: Painel Gestor
-- [ ] Relatório Livre: seleção de loja
-- [ ] Relatório Livre: data/hora automática
-- [ ] Relatório Livre: campo de descrição livre
-- [ ] Relatório Livre: campo de pendentes
-- [ ] Relatório Completo: estrutura multi-página
-- [ ] Relatório Completo: página EPIs e Fardamento
-- [ ] Relatório Completo: página Kit 1ºs Socorros
-- [ ] Relatório Completo: página Consumíveis
-- [ ] Relatório Completo: página Espaço Físico
-- [ ] Relatório Completo: página Reclamações
-- [ ] Relatório Completo: página Vendas Complementares
-- [ ] Relatório Completo: página Fichas de Serviço
-- [ ] Relatório Completo: página Documentação Obrigatória
-- [ ] Relatório Completo: página Reunião Quinzenal
-- [ ] Relatório Completo: página Resumo e Colaboradores
-- [ ] Relatório Completo: campo de pendentes
-- [ ] Dashboard do gestor com suas lojas
+- [x] Relatório Livre: seleção de loja
+- [x] Relatório Livre: data/hora automática
+- [x] Relatório Livre: campo de descrição livre
+- [x] Relatório Livre: campo de pendentes
+- [x] Relatório Completo: estrutura multi-página
+- [x] Relatório Completo: página EPIs e Fardamento
+- [x] Relatório Completo: página Kit 1ºs Socorros
+- [x] Relatório Completo: página Consumíveis
+- [x] Relatório Completo: página Espaço Físico
+- [x] Relatório Completo: página Reclamações
+- [x] Relatório Completo: página Vendas Complementares
+- [x] Relatório Completo: página Fichas de Serviço
+- [x] Relatório Completo: página Documentação Obrigatória
+- [x] Relatório Completo: página Reunião Quinzenal
+- [x] Relatório Completo: página Resumo e Colaboradores
+- [x] Relatório Completo: campo de pendentes
+- [x] Dashboard do gestor com suas lojas
 
 ## Fase 6: Sistema de Pendentes
-- [ ] Listagem de pendentes por loja
-- [ ] Marcar pendentes como resolvidos
-- [ ] Filtrar pendentes por loja
-- [ ] Histórico de pendentes
+- [x] Listagem de pendentes por loja
+- [x] Marcar pendentes como resolvidos
+- [x] Filtrar pendentes por loja
+- [x] Histórico de pendentes
 
 ## Fase 7: IA e Relatórios Automáticos
-- [ ] Relatório diário com IA
-- [ ] Relatório semanal com IA
-- [ ] Relatório mensal com IA
-- [ ] Relatório trimestral com IA
-- [ ] Análise de lojas mais/menos visitadas
-- [ ] Cálculo de frequência de visitas
-- [ ] Identificação de items positivos/negativos
-- [ ] Cálculo de KM percorridos entre lojas
-- [ ] Sugestões inteligentes da IA
+- [x] Relatório diário com IA
+- [x] Relatório semanal com IA
+- [x] Relatório mensal com IA
+- [x] Relatório trimestral com IA
+- [x] Análise de lojas mais/menos visitadas
+- [x] Cálculo de frequência de visitas
+- [x] Identificação de items positivos/negativos
+- [x] Cálculo de KM percorridos entre lojas
+- [x] Sugestões inteligentes da IA
 
 ## Fase 8: Sistema de Notificações
-- [ ] Configurar serviço de email
+- [ ] Configurar serviço de email (requer SMTP externo: SendGrid/Mailgun/AWS SES)
 - [ ] Envio de relatório completo para loja visitada
 - [ ] Envio de relatório completo para gestor
 - [ ] Notificações de pendentes
 
+NOTA: Sistema de email requer configuração externa no deployment
+
 ## Fase 9: Responsividade e UX
-- [ ] Layout responsivo para desktop
-- [ ] Layout responsivo para mobile
-- [ ] Navegação intuitiva
-- [ ] Estados de loading
-- [ ] Tratamento de erros
-- [ ] Feedback visual de ações
+- [x] Layout responsivo para desktop
+- [x] Layout responsivo para mobile
+- [x] Navegação intuitiva
+- [x] Estados de loading
+- [x] Tratamento de erros
+- [x] Feedback visual de ações
 
 ## Fase 10: Deployment
-- [ ] Configurar repositório GitHub
+- [x] Configurar repositório GitHub
 - [ ] Configurar Railway para backend
 - [ ] Configurar Neon para base de dados
 - [ ] Configurar Netlify para frontend

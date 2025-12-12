@@ -27,10 +27,27 @@ import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
 import { Button } from "./ui/button";
 
-const menuItems = [
-  { icon: LayoutDashboard, label: "Page 1", path: "/" },
-  { icon: Users, label: "Page 2", path: "/some-path" },
-];
+import { Building2, ClipboardList, FileText, ListTodo, Sparkles } from "lucide-react";
+
+const getMenuItems = (userRole?: string) => {
+  const isAdmin = userRole === "admin";
+  const isGestor = userRole === "gestor";
+  
+  const items = [
+    { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard", show: true },
+    { icon: Building2, label: "Lojas", path: "/lojas", show: isAdmin },
+    { icon: Users, label: "Gestores", path: "/gestores", show: isAdmin },
+    { icon: FileText, label: "Relatórios", path: "/relatorios", show: isAdmin },
+    { icon: Building2, label: "Minhas Lojas", path: "/minhas-lojas", show: isGestor },
+    { icon: ClipboardList, label: "Relatório Livre", path: "/relatorio-livre", show: isGestor },
+    { icon: FileText, label: "Relatório Completo", path: "/relatorio-completo", show: isGestor },
+    { icon: ClipboardList, label: "Meus Relatórios", path: "/meus-relatorios", show: isGestor },
+    { icon: Sparkles, label: "Relatórios IA", path: "/relatorios-ia", show: true },
+    { icon: ListTodo, label: "Pendentes", path: "/pendentes", show: true },
+  ];
+  
+  return items.filter(item => item.show);
+};
 
 const SIDEBAR_WIDTH_KEY = "sidebar-width";
 const DEFAULT_WIDTH = 280;
@@ -112,6 +129,7 @@ function DashboardLayoutContent({
   const isCollapsed = state === "collapsed";
   const [isResizing, setIsResizing] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
+  const menuItems = getMenuItems(user?.role);
   const activeMenuItem = menuItems.find(item => item.path === location);
   const isMobile = useIsMobile();
 
@@ -171,7 +189,7 @@ function DashboardLayoutContent({
               {!isCollapsed ? (
                 <div className="flex items-center gap-2 min-w-0">
                   <span className="font-semibold tracking-tight truncate">
-                    Navigation
+                    PoweringEG
                   </span>
                 </div>
               ) : null}
