@@ -93,3 +93,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [ ] Testes de email
 - [ ] Documentação final
 - [ ] Checkpoint final
+
+## Deployment Railway
+- [ ] Criar ficheiro railway.json
+- [ ] Criar ficheiro .env.example
+- [ ] Documentar variáveis de ambiente necessárias
+- [ ] Fazer push para GitHub
+- [ ] Fornecer instruções de deploy
