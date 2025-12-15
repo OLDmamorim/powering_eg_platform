@@ -33,9 +33,6 @@ export const lojas = mysqlTable("lojas", {
   nome: varchar("nome", { length: 255 }).notNull(),
   contacto: varchar("contacto", { length: 50 }),
   email: varchar("email", { length: 320 }),
-  latitude: decimal("latitude", { precision: 10, scale: 7 }),
-  longitude: decimal("longitude", { precision: 10, scale: 7 }),
-  ativa: boolean("ativa").default(true).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

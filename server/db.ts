@@ -126,7 +126,7 @@ export async function getAllLojas(): Promise<Loja[]> {
   const db = await getDb();
   if (!db) return [];
   
-  return await db.select().from(lojas).where(eq(lojas.ativa, true)).orderBy(lojas.nome);
+  return await db.select().from(lojas).orderBy(lojas.nome);
 }
 
 export async function getLojaById(id: number): Promise<Loja | undefined> {
@@ -148,8 +148,8 @@ export async function deleteLoja(id: number): Promise<void> {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
-  // Soft delete
-  await db.update(lojas).set({ ativa: false }).where(eq(lojas.id, id));
+  // Hard delete (remover registo)
+  await db.delete(lojas).where(eq(lojas.id, id));
 }
 
 // ==================== GESTORES ====================
@@ -256,10 +256,7 @@ export async function getLojasByGestorId(gestorId: number): Promise<Loja[]> {
     .select({ loja: lojas })
     .from(gestorLojas)
     .innerJoin(lojas, eq(gestorLojas.lojaId, lojas.id))
-    .where(and(
-      eq(gestorLojas.gestorId, gestorId),
-      eq(lojas.ativa, true)
-    ));
+    .where(eq(gestorLojas.gestorId, gestorId));
   
   return result.map(r => r.loja);
 }

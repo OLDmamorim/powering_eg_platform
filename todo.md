@@ -112,3 +112,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Criar formulário com campos Nome e Email
 - [x] Implementar lógica de criação de user + gestor
 - [x] Permitir associação de lojas após criação
+
+## Correção de Erro SQL
+- [x] Remover colunas latitude, longitude, ativa das queries de lojas
+- [x] Verificar schema de lojas no drizzle
+- [x] Testar criação de lojas e gestores
