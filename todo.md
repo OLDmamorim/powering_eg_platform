@@ -182,3 +182,15 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Alterar página MeusRelatorios (gestor) para mostrar cards compactos
 - [x] Implementar expansão ao clicar para ver conteúdo completo (Collapsible)
 - [x] Testar visualização em ambas as páginas
+
+## Funcionalidades v2.0 - Filtros, PDF e Fotos
+- [x] Filtros de pesquisa por loja nos relatórios
+- [x] Filtros de pesquisa por data (intervalo) nos relatórios
+- [x] Filtros de pesquisa por gestor nos relatórios (admin)
+- [x] Exportar relatório individual para PDF (botão Download)
+- [x] Exportar múltiplos relatórios para PDF (lote)
+- [x] Adicionar campo de fotos no schema de relatórios
+- [x] Upload de fotos no formulário de relatório livre
+- [x] Upload de fotos no formulário de relatório completo
+- [x] Visualização de fotos nos cards de relatório
+- [x] Testar todas as funcionalidades

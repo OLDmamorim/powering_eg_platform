@@ -174,6 +174,7 @@ export const appRouter = router({
         lojaId: z.number(),
         dataVisita: z.date(),
         descricao: z.string().min(1),
+        fotos: z.string().optional(),
         pendentes: z.array(z.string()).optional(),
       }))
       .mutation(async ({ input, ctx }) => {
@@ -228,6 +229,7 @@ export const appRouter = router({
         reuniaoQuinzenal: z.boolean().optional(),
         resumoSupervisao: z.string().optional(),
         colaboradoresPresentes: z.string().optional(),
+        fotos: z.string().optional(),
         pendentes: z.array(z.string()).optional(),
       }))
       .mutation(async ({ input, ctx }) => {

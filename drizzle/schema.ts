@@ -75,6 +75,7 @@ export const relatoriosLivres = mysqlTable("relatorios_livres", {
   lojaId: int("lojaId").notNull(), // FK para lojas.id
   dataVisita: timestamp("dataVisita").notNull(),
   descricao: text("descricao").notNull(),
+  fotos: text("fotos"), // JSON array de URLs das fotos
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
@@ -105,6 +106,7 @@ export const relatoriosCompletos = mysqlTable("relatorios_completos", {
   colaboradoresPresentes: text("colaboradoresPresentes"),
   
   emailEnviado: boolean("emailEnviado").default(false).notNull(),
+  fotos: text("fotos"), // JSON array de URLs das fotos
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
