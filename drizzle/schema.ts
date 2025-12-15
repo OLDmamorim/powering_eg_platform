@@ -152,3 +152,19 @@ export const alertas = mysqlTable("alertas", {
 
 export type Alerta = typeof alertas.$inferSelect;
 export type InsertAlerta = typeof alertas.$inferInsert;
+
+
+/**
+ * Configurações de Alertas - Configurações personalizáveis para o sistema de alertas
+ */
+export const configuracoesAlertas = mysqlTable("configuracoes_alertas", {
+  id: int("id").autoincrement().primaryKey(),
+  chave: varchar("chave", { length: 100 }).notNull().unique(),
+  valor: text("valor").notNull(),
+  descricao: text("descricao"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type ConfiguracaoAlerta = typeof configuracoesAlertas.$inferSelect;
+export type InsertConfiguracaoAlerta = typeof configuracoesAlertas.$inferInsert;

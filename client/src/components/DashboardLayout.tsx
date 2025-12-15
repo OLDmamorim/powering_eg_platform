@@ -1,5 +1,7 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { trpc } from "@/lib/trpc";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,25 +30,26 @@ import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
 import { useTheme } from "@/contexts/ThemeContext";
 import { Button } from "./ui/button";
 
-import { Building2, ClipboardList, FileText, ListTodo, Sparkles, History, Bell } from "lucide-react";
+import { Building2, ClipboardList, FileText, ListTodo, Sparkles, History, Bell, Settings } from "lucide-react";
 
 const getMenuItems = (userRole?: string) => {
   const isAdmin = userRole === "admin";
   const isGestor = userRole === "gestor";
   
   const items = [
-    { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard", show: true },
-    { icon: Building2, label: "Lojas", path: "/lojas", show: isAdmin },
-    { icon: Users, label: "Gestores", path: "/gestores", show: isAdmin },
-    { icon: FileText, label: "Relatórios", path: "/relatorios", show: isAdmin },
-    { icon: Building2, label: "Minhas Lojas", path: "/minhas-lojas", show: isGestor },
-    { icon: ClipboardList, label: "Relatório Livre", path: "/relatorio-livre", show: isGestor },
-    { icon: FileText, label: "Relatório Completo", path: "/relatorio-completo", show: isGestor },
-    { icon: ClipboardList, label: "Meus Relatórios", path: "/meus-relatorios", show: isGestor },
-    { icon: Sparkles, label: "Relatórios IA", path: "/relatorios-ia", show: true },
-    { icon: History, label: "Histórico Pontos", path: "/historico-pontos", show: isAdmin },
-    { icon: Bell, label: "Alertas", path: "/alertas", show: isAdmin },
-    { icon: ListTodo, label: "Pendentes", path: "/pendentes", show: true },
+    { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard", show: true, showBadge: false },
+    { icon: Building2, label: "Lojas", path: "/lojas", show: isAdmin, showBadge: false },
+    { icon: Users, label: "Gestores", path: "/gestores", show: isAdmin, showBadge: false },
+    { icon: FileText, label: "Relatórios", path: "/relatorios", show: isAdmin, showBadge: false },
+    { icon: Building2, label: "Minhas Lojas", path: "/minhas-lojas", show: isGestor, showBadge: false },
+    { icon: ClipboardList, label: "Relatório Livre", path: "/relatorio-livre", show: isGestor, showBadge: false },
+    { icon: FileText, label: "Relatório Completo", path: "/relatorio-completo", show: isGestor, showBadge: false },
+    { icon: ClipboardList, label: "Meus Relatórios", path: "/meus-relatorios", show: isGestor, showBadge: false },
+    { icon: Sparkles, label: "Relatórios IA", path: "/relatorios-ia", show: true, showBadge: false },
+    { icon: History, label: "Histórico Pontos", path: "/historico-pontos", show: isAdmin, showBadge: false },
+    { icon: Bell, label: "Alertas", path: "/alertas", show: isAdmin, showBadge: true },
+    { icon: Settings, label: "Config. Alertas", path: "/configuracoes-alertas", show: isAdmin, showBadge: false },
+    { icon: ListTodo, label: "Pendentes", path: "/pendentes", show: true, showBadge: false },
   ];
   
   return items.filter(item => item.show);
@@ -137,6 +140,13 @@ function DashboardLayoutContent({
   const menuItems = getMenuItems(user?.role);
   const activeMenuItem = menuItems.find(item => item.path === location);
   const isMobile = useIsMobile();
+  
+  // Query para contar alertas pendentes (apenas para admin)
+  const { data: alertasPendentes } = trpc.alertas.listPendentes.useQuery(undefined, {
+    enabled: user?.role === "admin",
+    refetchInterval: 30000, // Atualizar a cada 30 segundos
+  });
+  const alertasCount = alertasPendentes?.length || 0;
 
   useEffect(() => {
     if (isCollapsed) {
@@ -205,18 +215,29 @@ function DashboardLayoutContent({
             <SidebarMenu className="px-2 py-1">
               {menuItems.map(item => {
                 const isActive = location === item.path;
+                const showAlertBadge = item.showBadge && alertasCount > 0;
                 return (
                   <SidebarMenuItem key={item.path}>
                     <SidebarMenuButton
                       isActive={isActive}
                       onClick={() => setLocation(item.path)}
                       tooltip={item.label}
-                      className={`h-10 transition-all font-normal`}
+                      className={`h-10 transition-all font-normal relative`}
                     >
-                      <item.icon
-                        className={`h-4 w-4 ${isActive ? "text-primary" : ""}`}
-                      />
-                      <span>{item.label}</span>
+                      <div className="relative">
+                        <item.icon
+                          className={`h-4 w-4 ${isActive ? "text-primary" : ""}`}
+                        />
+                        {showAlertBadge && isCollapsed && (
+                          <span className="absolute -top-1 -right-1 h-2 w-2 bg-red-500 rounded-full" />
+                        )}
+                      </div>
+                      <span className="flex-1">{item.label}</span>
+                      {showAlertBadge && !isCollapsed && (
+                        <Badge variant="destructive" className="h-5 min-w-5 px-1.5 text-xs font-medium">
+                          {alertasCount}
+                        </Badge>
+                      )}
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 );
@@ -304,7 +325,7 @@ function DashboardLayoutContent({
             </button>
           )}
           <div className="fixed bottom-4 right-4 text-xs text-foreground/60 select-none pointer-events-none">
-            v2.5
+            v2.6
           </div>
         </main>
       </SidebarInset>

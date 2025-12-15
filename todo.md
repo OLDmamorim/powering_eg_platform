@@ -239,3 +239,11 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Dashboard de alertas dedicado
 - [x] Estados de alerta: "pendente" e "resolvido"
 - [x] Testar todas as funcionalidades
+
+## Funcionalidades v2.6 - Notificações e Configurações de Alertas
+- [x] Badge de contagem de alertas pendentes no menu lateral
+- [x] Atualização em tempo real do badge quando alertas mudam (a cada 30s)
+- [x] Página de configurações de alertas
+- [x] Configurar threshold de pontos negativos consecutivos
+- [x] Guardar configurações na base de dados
+- [x] Testar todas as funcionalidades

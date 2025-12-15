@@ -23,7 +23,10 @@ import {
   InsertPendente,
   alertas,
   Alerta,
-  InsertAlerta
+  InsertAlerta,
+  configuracoesAlertas,
+  ConfiguracaoAlerta,
+  InsertConfiguracaoAlerta
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -833,4 +836,116 @@ export async function existeAlertaPendente(lojaId: number, tipo: string): Promis
     .limit(1);
   
   return !!existing;
+}
+
+
+// ==================== CONFIGURAÇÕES DE ALERTAS ====================
+
+// Valores padrão das configurações
+const DEFAULT_CONFIGS: Record<string, { valor: string; descricao: string }> = {
+  threshold_pontos_negativos: { 
+    valor: "3", 
+    descricao: "Número de pontos negativos consecutivos para disparar alerta" 
+  },
+  dias_sem_visita_alerta: { 
+    valor: "30", 
+    descricao: "Número de dias sem visita para disparar alerta" 
+  },
+  dias_pendente_antigo: { 
+    valor: "14", 
+    descricao: "Número de dias para considerar um pendente como antigo" 
+  },
+  alertas_ativos: { 
+    valor: "true", 
+    descricao: "Se o sistema de alertas está ativo" 
+  },
+};
+
+export async function getConfiguracao(chave: string): Promise<string> {
+  const db = await getDb();
+  if (!db) return DEFAULT_CONFIGS[chave]?.valor || "";
+  
+  const [config] = await db
+    .select()
+    .from(configuracoesAlertas)
+    .where(eq(configuracoesAlertas.chave, chave))
+    .limit(1);
+  
+  if (config) return config.valor;
+  
+  // Se não existe, criar com valor padrão
+  const defaultConfig = DEFAULT_CONFIGS[chave];
+  if (defaultConfig) {
+    await db.insert(configuracoesAlertas).values({
+      chave,
+      valor: defaultConfig.valor,
+      descricao: defaultConfig.descricao,
+    });
+    return defaultConfig.valor;
+  }
+  
+  return "";
+}
+
+export async function setConfiguracao(chave: string, valor: string): Promise<ConfiguracaoAlerta | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  // Verificar se existe
+  const [existing] = await db
+    .select()
+    .from(configuracoesAlertas)
+    .where(eq(configuracoesAlertas.chave, chave))
+    .limit(1);
+  
+  if (existing) {
+    await db
+      .update(configuracoesAlertas)
+      .set({ valor })
+      .where(eq(configuracoesAlertas.chave, chave));
+  } else {
+    const defaultConfig = DEFAULT_CONFIGS[chave];
+    await db.insert(configuracoesAlertas).values({
+      chave,
+      valor,
+      descricao: defaultConfig?.descricao || "",
+    });
+  }
+  
+  const [updated] = await db
+    .select()
+    .from(configuracoesAlertas)
+    .where(eq(configuracoesAlertas.chave, chave))
+    .limit(1);
+  
+  return updated || null;
+}
+
+export async function getAllConfiguracoes(): Promise<ConfiguracaoAlerta[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  // Garantir que todas as configurações padrão existem
+  for (const [chave, config] of Object.entries(DEFAULT_CONFIGS)) {
+    const [existing] = await db
+      .select()
+      .from(configuracoesAlertas)
+      .where(eq(configuracoesAlertas.chave, chave))
+      .limit(1);
+    
+    if (!existing) {
+      await db.insert(configuracoesAlertas).values({
+        chave,
+        valor: config.valor,
+        descricao: config.descricao,
+      });
+    }
+  }
+  
+  return await db.select().from(configuracoesAlertas);
+}
+
+export async function getThresholdPontosNegativos(): Promise<number> {
+  const valor = await getConfiguracao("threshold_pontos_negativos");
+  return parseInt(valor) || 3;
 }

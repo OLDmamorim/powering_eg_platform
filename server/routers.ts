@@ -410,6 +410,46 @@ export const appRouter = router({
         return await db.deleteAlerta(input.id);
       }),
   }),
+
+  // ==================== CONFIGURAÇÕES DE ALERTAS ====================
+  configuracoes: router({
+    // Obter todas as configurações
+    list: adminProcedure.query(async () => {
+      return await db.getAllConfiguracoes();
+    }),
+    
+    // Obter uma configuração específica
+    get: adminProcedure
+      .input(z.object({ chave: z.string() }))
+      .query(async ({ input }) => {
+        return await db.getConfiguracao(input.chave);
+      }),
+    
+    // Atualizar uma configuração
+    update: adminProcedure
+      .input(z.object({
+        chave: z.string(),
+        valor: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        return await db.setConfiguracao(input.chave, input.valor);
+      }),
+    
+    // Atualizar múltiplas configurações de uma vez
+    updateMultiple: adminProcedure
+      .input(z.array(z.object({
+        chave: z.string(),
+        valor: z.string(),
+      })))
+      .mutation(async ({ input }) => {
+        const results = [];
+        for (const config of input) {
+          const result = await db.setConfiguracao(config.chave, config.valor);
+          results.push(result);
+        }
+        return results;
+      }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;
