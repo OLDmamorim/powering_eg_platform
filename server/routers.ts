@@ -6,6 +6,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import * as db from "./db";
 import { gerarRelatorioComIA } from "./aiService";
+import { enviarResumoSemanal } from "./weeklyReport";
 
 // Middleware para verificar se o utilizador é admin
 const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
@@ -37,6 +38,14 @@ const gestorProcedure = protectedProcedure.use(async ({ ctx, next }) => {
 
 export const appRouter = router({
   system: systemRouter,
+  
+  // ==================== NOTIFICAÇÕES ====================
+  notificacoes: router({
+    enviarResumoSemanal: adminProcedure.mutation(async () => {
+      const enviado = await enviarResumoSemanal();
+      return { success: enviado };
+    }),
+  }),
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {

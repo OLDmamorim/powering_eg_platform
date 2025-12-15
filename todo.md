@@ -204,3 +204,12 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Resumo por loja no relatório mensal
 - [x] Estatísticas de visitas e pendentes no relatório mensal
 - [x] Testar todas as funcionalidades
+
+## Funcionalidades v2.2 - Comparação, Email e Modo Escuro
+- [x] Comparação mensal com variação percentual nos cards de estatísticas (já implementado em v2.1)
+- [x] Indicadores visuais de subida/descida (setas verdes/vermelhas) (já implementado em v2.1)
+- [x] Sistema de notificações semanal ao owner (via notifyOwner - já implementado)
+- [x] Resumo de pendentes e visitas na notificação (weeklyReport.ts)
+- [x] Toggle de modo escuro/claro (botão flutuante no canto inferior direito)
+- [x] Persistir preferência de tema no localStorage (via ThemeProvider)
+- [x] Testar todas as funcionalidades

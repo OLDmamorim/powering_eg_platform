@@ -21,10 +21,11 @@ import {
 } from "@/components/ui/sidebar";
 import { getLoginUrl } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
-import { LayoutDashboard, LogOut, PanelLeft, Users } from "lucide-react";
+import { LayoutDashboard, LogOut, PanelLeft, Users, Moon, Sun } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
+import { useTheme } from "@/contexts/ThemeContext";
 import { Button } from "./ui/button";
 
 import { Building2, ClipboardList, FileText, ListTodo, Sparkles } from "lucide-react";
@@ -64,6 +65,7 @@ export default function DashboardLayout({
     return saved ? parseInt(saved, 10) : DEFAULT_WIDTH;
   });
   const { loading, user } = useAuth();
+  const { theme, toggleTheme, switchable } = useTheme();
 
   useEffect(() => {
     localStorage.setItem(SIDEBAR_WIDTH_KEY, sidebarWidth.toString());
@@ -124,6 +126,7 @@ function DashboardLayoutContent({
   setSidebarWidth,
 }: DashboardLayoutContentProps) {
   const { user, logout } = useAuth();
+  const { theme, toggleTheme, switchable } = useTheme();
   const [location, setLocation] = useLocation();
   const { state, toggleSidebar } = useSidebar();
   const isCollapsed = state === "collapsed";
@@ -238,7 +241,19 @@ function DashboardLayoutContent({
                   </div>
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuContent align="end" side="top" className="w-48">
+                {switchable && (
+                  <DropdownMenuItem
+                    onClick={toggleTheme}
+                    className="cursor-pointer"
+                  >
+                    {theme === 'light' ? (
+                      <><Moon className="mr-2 h-4 w-4" /><span>Modo Escuro</span></>
+                    ) : (
+                      <><Sun className="mr-2 h-4 w-4" /><span>Modo Claro</span></>
+                    )}
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem
                   onClick={logout}
                   className="cursor-pointer text-destructive focus:text-destructive"
@@ -277,8 +292,17 @@ function DashboardLayoutContent({
         )}
         <main className="flex-1 p-4 relative">
           {children}
-          <div className="fixed bottom-4 right-4 text-xs text-black/60 select-none pointer-events-none">
-            v2.1
+          {switchable && (
+            <button
+              onClick={toggleTheme}
+              className="fixed bottom-14 right-4 p-2 rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 transition-colors z-50"
+              title={theme === 'light' ? 'Mudar para Modo Escuro' : 'Mudar para Modo Claro'}
+            >
+              {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
+            </button>
+          )}
+          <div className="fixed bottom-4 right-4 text-xs text-foreground/60 select-none pointer-events-none">
+            v2.2
           </div>
         </main>
       </SidebarInset>
