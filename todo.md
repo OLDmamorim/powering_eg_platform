@@ -121,3 +121,6 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## Correção de Erro ao Listar Gestores
 - [x] Corrigir getAllGestores() para fazer JOIN com users
 - [x] Testar criação de gestor
+
+## Indicador de Versão
+- [x] Adicionar versão no canto inferior direito do DashboardLayout

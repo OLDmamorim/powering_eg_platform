@@ -275,7 +275,12 @@ function DashboardLayoutContent({
             </div>
           </div>
         )}
-        <main className="flex-1 p-4">{children}</main>
+        <main className="flex-1 p-4 relative">
+          {children}
+          <div className="fixed bottom-4 right-4 text-xs text-muted-foreground/50 select-none pointer-events-none">
+            v1.5
+          </div>
+        </main>
       </SidebarInset>
     </>
   );
