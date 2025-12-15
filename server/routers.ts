@@ -5,7 +5,7 @@ import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import * as db from "./db";
-import { gerarRelatorioComIA } from "./aiService";
+import { gerarRelatorioComIA, gerarDicaDashboard } from "./aiService";
 import { enviarResumoSemanal, verificarENotificarAlertas } from "./weeklyReport";
 
 // Middleware para verificar se o utilizador é admin
@@ -427,6 +427,27 @@ export const appRouter = router({
       .query(async ({ input, ctx }) => {
         const gestorId = ctx.user.role === "admin" ? undefined : ctx.gestor?.id;
         return await gerarRelatorioComIA(input.periodo, gestorId);
+      }),
+  }),
+
+  // ==================== DICA IA DASHBOARD ====================
+  dicaIA: router({
+    gerar: protectedProcedure
+      .input(z.object({
+        totalLojas: z.number(),
+        totalGestores: z.number(),
+        relatoriosLivresMes: z.number(),
+        relatoriosCompletosMes: z.number(),
+        pendentesAtivos: z.number(),
+        alertasPendentes: z.number(),
+      }))
+      .query(async ({ input, ctx }) => {
+        const dica = await gerarDicaDashboard({
+          ...input,
+          userName: ctx.user.name || 'Utilizador',
+          userRole: ctx.user.role || 'user',
+        });
+        return { dica };
       }),
   }),
 

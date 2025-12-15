@@ -4,8 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { trpc } from "@/lib/trpc";
-import { Building2, ClipboardList, FileText, ListTodo, AlertTriangle, TrendingUp, TrendingDown, Calendar, Download, Minus } from "lucide-react";
-import { useMemo } from "react";
+import { Building2, ClipboardList, FileText, ListTodo, AlertTriangle, TrendingUp, TrendingDown, Calendar, Download, Minus, Sparkles, RefreshCw } from "lucide-react";
+import { useMemo, useState } from "react";
 import { useLocation } from "wouter";
 
 // Componente de indicador de variação
@@ -122,6 +122,41 @@ export default function Dashboard() {
   const { data: relLivresNaoVistos } = trpc.relatoriosLivres.countNaoVistos.useQuery(undefined, { enabled: isAdmin });
   const { data: relCompletosNaoVistos } = trpc.relatoriosCompletos.countNaoVistos.useQuery(undefined, { enabled: isAdmin });
   const { data: pendentesNaoVistos } = trpc.pendentes.countNaoVistos.useQuery(undefined, { enabled: isAdmin });
+  
+  // Contagem de alertas pendentes
+  const { data: alertas } = trpc.alertas.list.useQuery();
+  const alertasPendentes = alertas?.filter((a: any) => a.status === 'pendente').length || 0;
+  
+  // Calcular totais para dica IA
+  const totalLojas = isAdmin ? (lojas?.length || 0) : (minhasLojas?.length || 0);
+  const totalGestores = gestores?.length || 0;
+  const pendentesAtivos = pendentes?.filter((p: any) => !p.resolvido).length || 0;
+  
+  // Query para dica IA
+  const [dicaKey, setDicaKey] = useState(0);
+  const { data: dicaData, isLoading: dicaLoading, refetch: refetchDica } = trpc.dicaIA.gerar.useQuery(
+    {
+      totalLojas,
+      totalGestores,
+      relatoriosLivresMes: relatoriosLivres?.filter((r: any) => {
+        const d = new Date(r.dataVisita);
+        const inicioMes = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+        return d >= inicioMes;
+      }).length || 0,
+      relatoriosCompletosMes: relatoriosCompletos?.filter((r: any) => {
+        const d = new Date(r.dataVisita);
+        const inicioMes = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+        return d >= inicioMes;
+      }).length || 0,
+      pendentesAtivos,
+      alertasPendentes,
+    },
+    { 
+      enabled: !!user && totalLojas >= 0,
+      staleTime: 5 * 60 * 1000, // 5 minutos
+      refetchOnWindowFocus: false,
+    }
+  );
 
   // Calcular pendentes antigos (mais de 7 dias)
   const pendentesAntigos = useMemo(() => {
@@ -237,6 +272,25 @@ export default function Dashboard() {
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Olá, {user?.name || 'Utilizador'}</h1>
             <p className="text-muted-foreground">Bem-vindo ao PoweringEG Platform</p>
+            <div className="flex items-center gap-2 mt-2">
+              <Sparkles className="h-4 w-4 text-amber-500" />
+              <p className="text-sm text-muted-foreground italic">
+                {dicaLoading ? (
+                  <span className="animate-pulse">A gerar dica...</span>
+                ) : (
+                  dicaData?.dica || "Tudo em ordem! Continua o bom trabalho."
+                )}
+              </p>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-6 w-6 text-muted-foreground hover:text-foreground"
+                onClick={() => refetchDica()}
+                disabled={dicaLoading}
+              >
+                <RefreshCw className={`h-3 w-3 ${dicaLoading ? 'animate-spin' : ''}`} />
+              </Button>
+            </div>
           </div>
           <Button onClick={gerarRelatorioMensal} variant="outline" className="gap-2">
             <Download className="h-4 w-4" />Relatório Mensal

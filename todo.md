@@ -302,3 +302,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## Funcionalidade v3.0.1 - Título Personalizado
 - [x] Alterar título do dashboard para mostrar nome do utilizador
 - [x] Testar alteração
+
+## Funcionalidade v3.1 - Dica IA no Dashboard
+- [x] Criar procedure backend para gerar dica personalizada com IA
+- [x] Analisar dados do dashboard (pendentes, relatórios, alertas) para contexto
+- [x] Adicionar componente de dica abaixo do "Bem-vindo"
+- [x] Atualizar dica periodicamente ou ao carregar página (botão de refresh)
+- [x] Testar funcionalidade

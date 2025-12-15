@@ -259,3 +259,88 @@ function calcularDataInicio(
       return new Date(agora.setMonth(agora.getMonth() - 3));
   }
 }
+
+
+/**
+ * Gera uma dica personalizada para o dashboard baseada nos dados atuais
+ */
+export async function gerarDicaDashboard(contexto: {
+  totalLojas: number;
+  totalGestores: number;
+  relatoriosLivresMes: number;
+  relatoriosCompletosMes: number;
+  pendentesAtivos: number;
+  alertasPendentes: number;
+  userName: string;
+  userRole: string;
+}): Promise<string> {
+  const {
+    totalLojas,
+    totalGestores,
+    relatoriosLivresMes,
+    relatoriosCompletosMes,
+    pendentesAtivos,
+    alertasPendentes,
+    userName,
+    userRole
+  } = contexto;
+
+  const isAdmin = userRole === 'admin';
+  const totalRelatorios = relatoriosLivresMes + relatoriosCompletosMes;
+
+  const prompt = `És um assistente de gestão da plataforma PoweringEG (supervisão de lojas Express Glass).
+  
+Dados atuais do dashboard:
+- Total de lojas: ${totalLojas}
+- Total de gestores: ${totalGestores}
+- Relatórios livres este mês: ${relatoriosLivresMes}
+- Relatórios completos este mês: ${relatoriosCompletosMes}
+- Pendentes ativos: ${pendentesAtivos}
+- Alertas pendentes: ${alertasPendentes}
+- Utilizador: ${userName} (${isAdmin ? 'Administrador' : 'Gestor'})
+
+Gera UMA ÚNICA frase curta (máximo 15 palavras) e motivadora/útil para mostrar no dashboard.
+A frase deve ser:
+- Personalizada com base nos dados (ex: se há pendentes, sugerir resolvê-los; se há alertas, chamar atenção)
+- Em português europeu
+- Positiva e encorajadora
+- Prática e acionável quando possível
+
+Exemplos de estilo:
+- "Tens 3 pendentes por resolver. Que tal começar por aí?"
+- "Excelente! Todas as lojas foram visitadas esta semana."
+- "Há 2 alertas que precisam da tua atenção."
+- "Bom trabalho! Os relatórios estão em dia."
+
+Responde APENAS com a frase, sem aspas nem formatação extra.`;
+
+  try {
+    const response = await invokeLLM({
+      messages: [
+        {
+          role: "system",
+          content: "Respondes apenas com uma frase curta em português europeu. Sem aspas, sem formatação, apenas a frase.",
+        },
+        { role: "user", content: prompt },
+      ],
+    });
+
+    const content = response.choices[0]?.message?.content;
+    const dica = typeof content === 'string' ? content.trim() : "Bem-vindo ao PoweringEG Platform!";
+    return dica;
+  } catch (error) {
+    console.error("Erro ao gerar dica com IA:", error);
+    
+    // Fallback com dicas estáticas baseadas nos dados
+    if (pendentesAtivos > 0) {
+      return `Tens ${pendentesAtivos} pendente${pendentesAtivos > 1 ? 's' : ''} por resolver. Vamos a isso!`;
+    }
+    if (alertasPendentes > 0) {
+      return `Atenção: ${alertasPendentes} alerta${alertasPendentes > 1 ? 's' : ''} a aguardar revisão.`;
+    }
+    if (totalRelatorios === 0) {
+      return "Ainda não há relatórios este mês. Altura de fazer uma visita!";
+    }
+    return "Tudo em ordem! Continua o bom trabalho.";
+  }
+}
