@@ -309,3 +309,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar componente de dica abaixo do "Bem-vindo"
 - [x] Atualizar dica periodicamente ou ao carregar página (botão de refresh)
 - [x] Testar funcionalidade
+
+## Correção v3.1.1 - Dicas Diferenciadas por Role
+- [x] Admin: Dicas baseadas em novos relatórios, pendentes, alertas e dados da plataforma
+- [x] Gestores: Dicas de gestão, motivação e boas práticas para as lojas
+- [x] Testar ambos os tipos de dicas

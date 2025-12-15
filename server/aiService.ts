@@ -288,31 +288,56 @@ export async function gerarDicaDashboard(contexto: {
   const isAdmin = userRole === 'admin';
   const totalRelatorios = relatoriosLivresMes + relatoriosCompletosMes;
 
-  const prompt = `És um assistente de gestão da plataforma PoweringEG (supervisão de lojas Express Glass).
+  // Prompts diferenciados por role
+  const promptAdmin = `És um assistente de gestão da plataforma PoweringEG (supervisão de lojas Express Glass).
   
-Dados atuais do dashboard:
+Dados atuais do dashboard (visão ADMINISTRADOR):
 - Total de lojas: ${totalLojas}
 - Total de gestores: ${totalGestores}
 - Relatórios livres este mês: ${relatoriosLivresMes}
 - Relatórios completos este mês: ${relatoriosCompletosMes}
 - Pendentes ativos: ${pendentesAtivos}
 - Alertas pendentes: ${alertasPendentes}
-- Utilizador: ${userName} (${isAdmin ? 'Administrador' : 'Gestor'})
 
-Gera UMA ÚNICA frase curta (máximo 15 palavras) e motivadora/útil para mostrar no dashboard.
+Gera UMA ÚNICA frase curta (máximo 15 palavras) para o ADMINISTRADOR.
+A frase deve ser baseada nos DADOS e RELATÓRIOS:
+- Se há novos relatórios, comentar sobre eles
+- Se há pendentes ou alertas, chamar atenção
+- Se os dados estão bons, elogiar a equipa
+- Foco em análise de dados e supervisão
+
+Exemplos:
+- "${relatoriosLivresMes} novos relatórios este mês. Revisa os pontos críticos."
+- "Atenção: ${alertasPendentes} alertas pendentes requerem análise."
+- "Equipa produtiva! ${totalRelatorios} relatórios já submetidos."
+
+Responde APENAS com a frase, sem aspas.`;
+
+  const promptGestor = `És um coach de gestão para gestores de lojas Express Glass.
+  
+Contexto do gestor ${userName}:
+- Lojas sob sua responsabilidade: ${totalLojas}
+- Relatórios livres este mês: ${relatoriosLivresMes}
+- Relatórios completos este mês: ${relatoriosCompletosMes}
+- Pendentes por resolver: ${pendentesAtivos}
+
+Gera UMA ÚNICA frase curta (máximo 15 palavras) de MOTIVAÇÃO e DICAS DE GESTÃO.
 A frase deve ser:
-- Personalizada com base nos dados (ex: se há pendentes, sugerir resolvê-los; se há alertas, chamar atenção)
-- Em português europeu
-- Positiva e encorajadora
-- Prática e acionável quando possível
+- Motivacional e encorajadora
+- Com dicas práticas de gestão de loja
+- Focada em liderança, equipa, atendimento ao cliente
+- NÃO mencionar dados específicos, focar em boas práticas
 
-Exemplos de estilo:
-- "Tens 3 pendentes por resolver. Que tal começar por aí?"
-- "Excelente! Todas as lojas foram visitadas esta semana."
-- "Há 2 alertas que precisam da tua atenção."
-- "Bom trabalho! Os relatórios estão em dia."
+Exemplos:
+- "Lembra-te: uma equipa motivada é uma equipa produtiva!"
+- "Hoje é um bom dia para reconhecer o esforço da tua equipa."
+- "Pequenos gestos de liderança fazem grande diferença."
+- "Foca no cliente e os resultados seguirão."
+- "A consistência nas visitas constrói confiança."
 
-Responde APENAS com a frase, sem aspas nem formatação extra.`;
+Responde APENAS com a frase, sem aspas.`;
+
+  const prompt = isAdmin ? promptAdmin : promptGestor;
 
   try {
     const response = await invokeLLM({
@@ -331,16 +356,32 @@ Responde APENAS com a frase, sem aspas nem formatação extra.`;
   } catch (error) {
     console.error("Erro ao gerar dica com IA:", error);
     
-    // Fallback com dicas estáticas baseadas nos dados
-    if (pendentesAtivos > 0) {
-      return `Tens ${pendentesAtivos} pendente${pendentesAtivos > 1 ? 's' : ''} por resolver. Vamos a isso!`;
+    // Fallback com dicas estáticas diferenciadas por role
+    if (isAdmin) {
+      // Dicas para Admin baseadas em dados
+      if (pendentesAtivos > 0) {
+        return `Atenção: ${pendentesAtivos} pendente${pendentesAtivos > 1 ? 's' : ''} a aguardar resolução.`;
+      }
+      if (alertasPendentes > 0) {
+        return `${alertasPendentes} alerta${alertasPendentes > 1 ? 's' : ''} pendente${alertasPendentes > 1 ? 's' : ''} requer${alertasPendentes > 1 ? 'em' : ''} análise.`;
+      }
+      if (totalRelatorios === 0) {
+        return "Sem relatórios este mês. Verifica a atividade dos gestores.";
+      }
+      return `${totalRelatorios} relatório${totalRelatorios > 1 ? 's' : ''} este mês. Equipa a trabalhar bem!`;
+    } else {
+      // Dicas motivacionais para Gestores
+      const dicasGestor = [
+        "Uma equipa motivada é uma equipa produtiva!",
+        "Pequenos gestos de liderança fazem grande diferença.",
+        "Foca no cliente e os resultados seguirão.",
+        "A consistência nas visitas constrói confiança.",
+        "Hoje é um bom dia para reconhecer a tua equipa.",
+        "Lidera pelo exemplo e inspira os outros.",
+        "Cada visita é uma oportunidade de melhoria.",
+        "O sucesso é construído um dia de cada vez."
+      ];
+      return dicasGestor[Math.floor(Math.random() * dicasGestor.length)];
     }
-    if (alertasPendentes > 0) {
-      return `Atenção: ${alertasPendentes} alerta${alertasPendentes > 1 ? 's' : ''} a aguardar revisão.`;
-    }
-    if (totalRelatorios === 0) {
-      return "Ainda não há relatórios este mês. Altura de fazer uma visita!";
-    }
-    return "Tudo em ordem! Continua o bom trabalho.";
   }
 }
