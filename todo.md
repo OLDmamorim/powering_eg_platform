@@ -298,3 +298,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Reorganizar visualização para gestor: mostrar apenas "Loja"
 - [x] Adicionar confirmação antes de apagar
 - [x] Testar todas as funcionalidades
+
+## Funcionalidade v3.0.1 - Título Personalizado
+- [x] Alterar título do dashboard para mostrar nome do utilizador
+- [x] Testar alteração
