@@ -247,3 +247,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Configurar threshold de pontos negativos consecutivos
 - [x] Guardar configurações na base de dados
 - [x] Testar todas as funcionalidades
+
+## Correção v2.6.1 - Cores dos Cards
+- [x] Aumentar intensidade das cores nos cards do dashboard
+- [x] Garantir boa visibilidade em modo escuro
+- [x] Testar em ambos os modos (claro e escuro)

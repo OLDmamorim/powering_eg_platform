@@ -252,7 +252,7 @@ export default function Dashboard() {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {isAdmin && (
             <>
-              <Card className="bg-blue-50/50 dark:bg-blue-950/20 border-blue-200/50 dark:border-blue-800/30">
+              <Card className="bg-blue-100 dark:bg-blue-900/50 border-blue-300 dark:border-blue-700">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Total de Lojas</CardTitle>
                   <Building2 className="h-4 w-4 text-blue-600 dark:text-blue-400" />
@@ -263,7 +263,7 @@ export default function Dashboard() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-purple-50/50 dark:bg-purple-950/20 border-purple-200/50 dark:border-purple-800/30">
+              <Card className="bg-purple-100 dark:bg-purple-900/50 border-purple-300 dark:border-purple-700">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Gestores</CardTitle>
                   <FileText className="h-4 w-4 text-purple-600 dark:text-purple-400" />
@@ -277,7 +277,7 @@ export default function Dashboard() {
           )}
 
           {isGestor && (
-            <Card className="bg-blue-50/50 dark:bg-blue-950/20 border-blue-200/50 dark:border-blue-800/30">
+            <Card className="bg-blue-100 dark:bg-blue-900/50 border-blue-300 dark:border-blue-700">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Minhas Lojas</CardTitle>
                 <Building2 className="h-4 w-4 text-blue-600 dark:text-blue-400" />
@@ -289,7 +289,7 @@ export default function Dashboard() {
             </Card>
           )}
 
-          <Card className="bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-200/50 dark:border-emerald-800/30">
+          <Card className="bg-emerald-100 dark:bg-emerald-900/50 border-emerald-300 dark:border-emerald-700">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Relatórios Livres</CardTitle>
               <ClipboardList className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
@@ -303,7 +303,7 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card className="bg-teal-50/50 dark:bg-teal-950/20 border-teal-200/50 dark:border-teal-800/30">
+          <Card className="bg-teal-100 dark:bg-teal-900/50 border-teal-300 dark:border-teal-700">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Relatórios Completos</CardTitle>
               <FileText className="h-4 w-4 text-teal-600 dark:text-teal-400" />
@@ -317,7 +317,7 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card className="bg-amber-50/50 dark:bg-amber-950/20 border-amber-200/50 dark:border-amber-800/30">
+          <Card className="bg-amber-100 dark:bg-amber-900/50 border-amber-300 dark:border-amber-700">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Pendentes</CardTitle>
               <ListTodo className="h-4 w-4 text-amber-600 dark:text-amber-400" />
