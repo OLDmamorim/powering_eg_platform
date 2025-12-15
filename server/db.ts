@@ -154,7 +154,7 @@ export async function deleteLoja(id: number): Promise<void> {
 
 // ==================== GESTORES ====================
 
-export async function createGestor(nome: string, email: string): Promise<Gestor> {
+export async function createGestor(nome: string, email: string): Promise<any> {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
@@ -182,8 +182,19 @@ export async function createGestor(nome: string, email: string): Promise<Gestor>
   // Criar registo de gestor
   const result = await db.insert(gestores).values({ userId });
   const insertId = (result as any).insertId;
-  const newGestor = await db.select().from(gestores).where(eq(gestores.id, Number(insertId))).limit(1);
-  return newGestor[0]!;
+  
+  // Buscar gestor com dados do user
+  const gestorComUser = await db
+    .select({
+      gestor: gestores,
+      user: users
+    })
+    .from(gestores)
+    .innerJoin(users, eq(gestores.userId, users.id))
+    .where(eq(gestores.id, Number(insertId)))
+    .limit(1);
+  
+  return { ...gestorComUser[0]!.gestor, user: gestorComUser[0]!.user };
 }
 
 export async function getGestorByUserId(userId: number): Promise<Gestor | undefined> {

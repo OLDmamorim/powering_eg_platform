@@ -117,3 +117,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Remover colunas latitude, longitude, ativa das queries de lojas
 - [x] Verificar schema de lojas no drizzle
 - [x] Testar criação de lojas e gestores
+
+## Correção de Erro ao Listar Gestores
+- [x] Corrigir getAllGestores() para fazer JOIN com users
+- [x] Testar criação de gestor
