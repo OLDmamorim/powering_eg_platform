@@ -194,3 +194,13 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Upload de fotos no formulário de relatório completo
 - [x] Visualização de fotos nos cards de relatório
 - [x] Testar todas as funcionalidades
+
+## Funcionalidades v2.1 - Notificações, Gráficos e Relatório Mensal
+- [x] Sistema de notificações push para pendentes há mais de 7 dias (alerta visual)
+- [x] Criar componente de alerta no dashboard para pendentes antigos
+- [x] Dashboard com gráfico de evolução de visitas ao longo do tempo (linha)
+- [x] Dashboard com gráfico de pendentes por loja (barras)
+- [x] Exportar relatório mensal consolidado em PDF
+- [x] Resumo por loja no relatório mensal
+- [x] Estatísticas de visitas e pendentes no relatório mensal
+- [x] Testar todas as funcionalidades
