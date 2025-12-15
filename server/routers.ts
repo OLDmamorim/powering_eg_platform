@@ -112,12 +112,8 @@ export const appRouter = router({
         email: z.string().email(),
       }))
       .mutation(async ({ input }) => {
-        // Criar user primeiro (simulado - em produção seria via OAuth)
-        // Por agora, retornamos erro pedindo para criar via OAuth
-        throw new TRPCError({ 
-          code: 'BAD_REQUEST', 
-          message: 'Gestores devem ser criados através do sistema de autenticação OAuth' 
-        });
+        const gestor = await db.createGestor(input.nome, input.email);
+        return gestor;
       }),
     
     // update: Removido porque não há campos para atualizar

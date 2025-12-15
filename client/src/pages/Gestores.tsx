@@ -19,8 +19,10 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { DialogFooter } from "@/components/ui/dialog";
 import { trpc } from "@/lib/trpc";
-import { Building2, Edit, Trash2, User } from "lucide-react";
+import { Building2, Edit, Plus, Trash2, User } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
@@ -29,8 +31,10 @@ export default function Gestores() {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [selectedGestor, setSelectedGestor] = useState<any>(null);
   const [selectedLojas, setSelectedLojas] = useState<number[]>([]);
+  const [formData, setFormData] = useState({ nome: "", email: "" });
 
   const utils = trpc.useUtils();
   const { data: gestores, isLoading } = trpc.gestores.list.useQuery();
@@ -54,6 +58,18 @@ export default function Gestores() {
     onSuccess: () => {
       toast.success("Loja removida com sucesso");
       utils.gestores.getLojas.invalidate();
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const createMutation = trpc.gestores.create.useMutation({
+    onSuccess: () => {
+      toast.success("Gestor criado com sucesso");
+      utils.gestores.list.invalidate();
+      setCreateDialogOpen(false);
+      setFormData({ nome: "", email: "" });
     },
     onError: (error) => {
       toast.error(error.message);
@@ -110,6 +126,10 @@ export default function Gestores() {
               Gerir gestores e associações com lojas
             </p>
           </div>
+          <Button onClick={() => setCreateDialogOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Novo Gestor
+          </Button>
         </div>
 
         {isLoading ? (
@@ -176,6 +196,55 @@ export default function Gestores() {
           </div>
         )}
       </div>
+
+      <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Novo Gestor</DialogTitle>
+            <DialogDescription>
+              Criar um novo gestor. Após a criação, poderá associar lojas.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={(e) => {
+            e.preventDefault();
+            createMutation.mutate(formData);
+          }}>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="nome">Nome *</Label>
+                <Input
+                  id="nome"
+                  value={formData.nome}
+                  onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email *</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  required
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setCreateDialogOpen(false)}
+              >
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={createMutation.isPending}>
+                Criar
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-2xl">

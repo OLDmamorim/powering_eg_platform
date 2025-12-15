@@ -106,3 +106,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Remover campo morada de gestores
 - [x] Atualizar formulários
 - [x] Executar migração da base de dados
+
+## Criação Manual de Gestores
+- [x] Adicionar botão "Novo Gestor" na página Gestores
+- [x] Criar formulário com campos Nome e Email
+- [x] Implementar lógica de criação de user + gestor
+- [x] Permitir associação de lojas após criação

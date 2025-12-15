@@ -154,10 +154,32 @@ export async function deleteLoja(id: number): Promise<void> {
 
 // ==================== GESTORES ====================
 
-export async function createGestor(userId: number): Promise<Gestor> {
+export async function createGestor(nome: string, email: string): Promise<Gestor> {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
+  // Verificar se já existe user com este email
+  const existingUser = await db.select().from(users).where(eq(users.email, email)).limit(1);
+  
+  let userId: number;
+  
+  if (existingUser.length > 0) {
+    // User já existe, atualizar role para gestor
+    userId = existingUser[0]!.id;
+    await db.update(users).set({ role: 'gestor' }).where(eq(users.id, userId));
+  } else {
+    // Criar novo user
+    const userResult = await db.insert(users).values({
+      openId: `pending-${email}-${Date.now()}`, // OpenID temporário até fazer login
+      name: nome,
+      email: email,
+      role: 'gestor',
+      loginMethod: 'pending',
+    });
+    userId = (userResult as any).insertId;
+  }
+  
+  // Criar registo de gestor
   const result = await db.insert(gestores).values({ userId });
   const insertId = (result as any).insertId;
   const newGestor = await db.select().from(gestores).where(eq(gestores.id, Number(insertId))).limit(1);
