@@ -252,3 +252,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Aumentar intensidade das cores nos cards do dashboard
 - [x] Garantir boa visibilidade em modo escuro
 - [x] Testar em ambos os modos (claro e escuro)
+
+## Funcionalidade v2.6.2 - Animação nos Cards
+- [x] Animação de pulse suave nos cards quando há dados novos
+- [x] Piscar suavemente para chamar atenção a mudanças
+- [x] Testar animação

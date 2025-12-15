@@ -289,7 +289,7 @@ export default function Dashboard() {
             </Card>
           )}
 
-          <Card className="bg-emerald-100 dark:bg-emerald-900/50 border-emerald-300 dark:border-emerald-700">
+          <Card className={`bg-emerald-100 dark:bg-emerald-900/50 border-emerald-300 dark:border-emerald-700 transition-all ${estatisticas.relLivres.atual > estatisticas.relLivres.anterior ? 'animate-soft-pulse-emerald' : ''}`}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Relatórios Livres</CardTitle>
               <ClipboardList className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
@@ -303,7 +303,7 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card className="bg-teal-100 dark:bg-teal-900/50 border-teal-300 dark:border-teal-700">
+          <Card className={`bg-teal-100 dark:bg-teal-900/50 border-teal-300 dark:border-teal-700 transition-all ${estatisticas.relCompletos.atual > estatisticas.relCompletos.anterior ? 'animate-soft-pulse-teal' : ''}`}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Relatórios Completos</CardTitle>
               <FileText className="h-4 w-4 text-teal-600 dark:text-teal-400" />
@@ -317,7 +317,7 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card className="bg-amber-100 dark:bg-amber-900/50 border-amber-300 dark:border-amber-700">
+          <Card className={`bg-amber-100 dark:bg-amber-900/50 border-amber-300 dark:border-amber-700 transition-all ${estatisticas.pendentes.atual > estatisticas.pendentes.anterior ? 'animate-soft-pulse-amber' : ''}`}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Pendentes</CardTitle>
               <ListTodo className="h-4 w-4 text-amber-600 dark:text-amber-400" />
