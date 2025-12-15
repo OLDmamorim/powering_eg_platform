@@ -252,7 +252,10 @@ export default function Dashboard() {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {isAdmin && (
             <>
-              <Card className="bg-blue-100 dark:bg-blue-900/50 border-blue-300 dark:border-blue-700">
+              <Card 
+                className="bg-blue-100 dark:bg-blue-900/50 border-blue-300 dark:border-blue-700 cursor-pointer hover:scale-[1.02] hover:shadow-lg transition-all duration-200"
+                onClick={() => setLocation('/lojas')}
+              >
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Total de Lojas</CardTitle>
                   <Building2 className="h-4 w-4 text-blue-600 dark:text-blue-400" />
@@ -263,7 +266,10 @@ export default function Dashboard() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-purple-100 dark:bg-purple-900/50 border-purple-300 dark:border-purple-700">
+              <Card 
+                className="bg-purple-100 dark:bg-purple-900/50 border-purple-300 dark:border-purple-700 cursor-pointer hover:scale-[1.02] hover:shadow-lg transition-all duration-200"
+                onClick={() => setLocation('/gestores')}
+              >
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Gestores</CardTitle>
                   <FileText className="h-4 w-4 text-purple-600 dark:text-purple-400" />
@@ -277,7 +283,10 @@ export default function Dashboard() {
           )}
 
           {isGestor && (
-            <Card className="bg-blue-100 dark:bg-blue-900/50 border-blue-300 dark:border-blue-700">
+            <Card 
+              className="bg-blue-100 dark:bg-blue-900/50 border-blue-300 dark:border-blue-700 cursor-pointer hover:scale-[1.02] hover:shadow-lg transition-all duration-200"
+              onClick={() => setLocation('/lojas')}
+            >
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Minhas Lojas</CardTitle>
                 <Building2 className="h-4 w-4 text-blue-600 dark:text-blue-400" />
@@ -289,7 +298,10 @@ export default function Dashboard() {
             </Card>
           )}
 
-          <Card className={`bg-emerald-100 dark:bg-emerald-900/50 border-emerald-300 dark:border-emerald-700 transition-all ${estatisticas.relLivres.atual > estatisticas.relLivres.anterior ? 'animate-soft-pulse-emerald' : ''}`}>
+          <Card 
+            className={`bg-emerald-100 dark:bg-emerald-900/50 border-emerald-300 dark:border-emerald-700 cursor-pointer hover:scale-[1.02] hover:shadow-lg transition-all duration-200 ${estatisticas.relLivres.atual > estatisticas.relLivres.anterior ? 'animate-soft-pulse-emerald' : ''}`}
+            onClick={() => setLocation('/relatorios')}
+          >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Relatórios Livres</CardTitle>
               <ClipboardList className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
@@ -303,7 +315,10 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card className={`bg-teal-100 dark:bg-teal-900/50 border-teal-300 dark:border-teal-700 transition-all ${estatisticas.relCompletos.atual > estatisticas.relCompletos.anterior ? 'animate-soft-pulse-teal' : ''}`}>
+          <Card 
+            className={`bg-teal-100 dark:bg-teal-900/50 border-teal-300 dark:border-teal-700 cursor-pointer hover:scale-[1.02] hover:shadow-lg transition-all duration-200 ${estatisticas.relCompletos.atual > estatisticas.relCompletos.anterior ? 'animate-soft-pulse-teal' : ''}`}
+            onClick={() => setLocation('/relatorios')}
+          >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Relatórios Completos</CardTitle>
               <FileText className="h-4 w-4 text-teal-600 dark:text-teal-400" />
@@ -317,7 +332,10 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card className={`bg-amber-100 dark:bg-amber-900/50 border-amber-300 dark:border-amber-700 transition-all ${estatisticas.pendentes.atual > estatisticas.pendentes.anterior ? 'animate-soft-pulse-amber' : ''}`}>
+          <Card 
+            className={`bg-amber-100 dark:bg-amber-900/50 border-amber-300 dark:border-amber-700 cursor-pointer hover:scale-[1.02] hover:shadow-lg transition-all duration-200 ${estatisticas.pendentes.atual > estatisticas.pendentes.anterior ? 'animate-soft-pulse-amber' : ''}`}
+            onClick={() => setLocation('/pendentes')}
+          >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Pendentes</CardTitle>
               <ListTodo className="h-4 w-4 text-amber-600 dark:text-amber-400" />

@@ -257,3 +257,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Animação de pulse suave nos cards quando há dados novos
 - [x] Piscar suavemente para chamar atenção a mudanças
 - [x] Testar animação
+
+## Funcionalidade v2.6.3 - Cards Clicáveis
+- [x] Tornar cards do dashboard clicáveis
+- [x] Navegar para página correspondente ao clicar
+- [x] Adicionar efeito hover para indicar interatividade
+- [x] Testar navegação
