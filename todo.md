@@ -322,3 +322,21 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar botão "Enviar" no final de cada relatório livre
 - [x] Mostrar confirmação após envio bem-sucedido (toast)
 - [x] Testar funcionalidade completa
+
+## Funcionalidade v3.3 - Editar Gestores
+- [x] Adicionar procedure de update para gestores no backend
+- [ ] Criar modal de edição com campos: nome, email, telefone
+- [ ] Adicionar botão de editar na lista de gestores
+- [ ] Validar campos antes de guardar
+- [ ] Testar funcionalidade completa
+
+## Funcionalidade v3.3 - Edição de Gestores
+- [x] Adicionar botão de editar na tabela de gestores
+- [x] Criar modal de edição com campos Nome e Email
+- [x] Implementar mutation de atualização no frontend
+- [x] Endpoint de update já existente no backend
+- [x] Função updateGestor já existente no db.ts
+- [x] Validação de email no formulário
+- [x] Toast de sucesso/erro após atualização
+- [x] Criar testes unitários para edição de gestores
+- [x] Testar funcionalidade completa

@@ -330,12 +330,16 @@ export async function getAllGestores(): Promise<any[]> {
   }));
 }
 
-export async function updateGestor(id: number): Promise<void> {
+export async function updateGestor(id: number, nome: string, email: string): Promise<void> {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
-  // Função mantida para compatibilidade, mas sem campos para atualizar
-  // Pode ser removida se não for necessária
+  // Primeiro, obter o gestor para encontrar o userId
+  const gestor = await db.select().from(gestores).where(eq(gestores.id, id)).limit(1);
+  if (gestor.length === 0) throw new Error("Gestor not found");
+  
+  // Atualizar o user associado com o novo nome e email
+  await db.update(users).set({ name: nome, email }).where(eq(users.id, gestor[0].userId));
 }
 
 export async function deleteGestor(id: number): Promise<void> {

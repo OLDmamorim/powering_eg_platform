@@ -35,6 +35,8 @@ export default function Gestores() {
   const [selectedGestor, setSelectedGestor] = useState<any>(null);
   const [selectedLojas, setSelectedLojas] = useState<number[]>([]);
   const [formData, setFormData] = useState({ nome: "", email: "" });
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editFormData, setEditFormData] = useState({ id: 0, nome: "", email: "" });
 
   const utils = trpc.useUtils();
   const { data: gestores, isLoading } = trpc.gestores.list.useQuery();
@@ -96,6 +98,18 @@ export default function Gestores() {
     },
   });
 
+  const updateMutation = trpc.gestores.update.useMutation({
+    onSuccess: () => {
+      toast.success("Gestor atualizado com sucesso");
+      utils.gestores.list.invalidate();
+      setEditDialogOpen(false);
+      setEditFormData({ id: 0, nome: "", email: "" });
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
   if (user?.role !== "admin") {
     setLocation("/dashboard");
     return null;
@@ -134,6 +148,15 @@ export default function Gestores() {
     ) {
       promoteMutation.mutate({ gestorId });
     }
+  };
+
+  const handleEdit = (gestor: any) => {
+    setEditFormData({
+      id: gestor.id,
+      nome: gestor.user.name || "",
+      email: gestor.user.email || "",
+    });
+    setEditDialogOpen(true);
   };
 
   return (
@@ -183,6 +206,14 @@ export default function Gestores() {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleEdit(gestor)}
+                            title="Editar gestor"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
                           <Button
                             variant="ghost"
                             size="icon"
@@ -322,6 +353,56 @@ export default function Gestores() {
               </p>
             )}
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal de Edição de Gestor */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editar Gestor</DialogTitle>
+            <DialogDescription>
+              Atualizar os dados do gestor
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={(e) => {
+            e.preventDefault();
+            updateMutation.mutate(editFormData);
+          }}>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-nome">Nome *</Label>
+                <Input
+                  id="edit-nome"
+                  value={editFormData.nome}
+                  onChange={(e) => setEditFormData({ ...editFormData, nome: e.target.value })}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-email">Email *</Label>
+                <Input
+                  id="edit-email"
+                  type="email"
+                  value={editFormData.email}
+                  onChange={(e) => setEditFormData({ ...editFormData, email: e.target.value })}
+                  required
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setEditDialogOpen(false)}
+              >
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={updateMutation.isPending}>
+                {updateMutation.isPending ? "A guardar..." : "Guardar"}
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
     </DashboardLayout>

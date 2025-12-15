@@ -126,7 +126,16 @@ export const appRouter = router({
         return gestor;
       }),
     
-    // update: Removido porque não há campos para atualizar
+    update: adminProcedure
+      .input(z.object({
+        id: z.number(),
+        nome: z.string().min(1),
+        email: z.string().email(),
+      }))
+      .mutation(async ({ input }) => {
+        await db.updateGestor(input.id, input.nome, input.email);
+        return { success: true };
+      }),
     
     delete: adminProcedure
       .input(z.object({ id: z.number() }))
