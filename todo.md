@@ -168,3 +168,11 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Eliminar user duplicado (420018 eliminado)
 - [x] Atualizar gestor "Teste" para apontar ao user correto (420030)
 - [x] Testar fluxo completo de login
+
+## Bug v1.9.1 - Erro SQL na criação de Relatório Livre
+- [x] Identificar origem do erro NaN na query de relatório livre
+- [x] Corrigir função createRelatorioLivre no db.ts (com fallback)
+- [x] Corrigir função createRelatorioCompleto no db.ts (com fallback)
+- [x] Corrigir função createLoja no db.ts (com fallback)
+- [x] Corrigir função createPendente no db.ts (com fallback)
+- [ ] Testar criação de relatório livre

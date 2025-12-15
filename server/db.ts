@@ -160,8 +160,22 @@ export async function createLoja(loja: InsertLoja): Promise<Loja> {
   if (!db) throw new Error("Database not available");
   
   const insertResult = await db.insert(lojas).values(loja);
-  const insertId = (insertResult as any).insertId;
-  const newLoja = await db.select().from(lojas).where(eq(lojas.id, Number(insertId))).limit(1);
+  const rawInsertId = (insertResult as any).insertId;
+  const insertId = typeof rawInsertId === 'bigint' ? Number(rawInsertId) : Number(rawInsertId);
+  
+  if (!insertId || isNaN(insertId)) {
+    // Fallback: buscar a última loja inserida por nome
+    const lastLoja = await db.select().from(lojas)
+      .where(eq(lojas.nome, loja.nome))
+      .orderBy(desc(lojas.id))
+      .limit(1);
+    if (lastLoja.length > 0) {
+      return lastLoja[0]!;
+    }
+    throw new Error('Falha ao obter ID da loja inserida');
+  }
+  
+  const newLoja = await db.select().from(lojas).where(eq(lojas.id, insertId)).limit(1);
   return newLoja[0]!;
 }
 
@@ -409,8 +423,24 @@ export async function createRelatorioLivre(relatorio: InsertRelatorioLivre): Pro
   if (!db) throw new Error("Database not available");
   
   const relatorioInsertResult = await db.insert(relatoriosLivres).values(relatorio);
-  const insertId = (relatorioInsertResult as any).insertId;
-  const newRelatorio = await db.select().from(relatoriosLivres).where(eq(relatoriosLivres.id, Number(insertId))).limit(1);
+  const rawInsertId = (relatorioInsertResult as any).insertId;
+  const insertId = typeof rawInsertId === 'bigint' ? Number(rawInsertId) : Number(rawInsertId);
+  
+  console.log('[createRelatorioLivre] rawInsertId:', rawInsertId, 'type:', typeof rawInsertId, 'insertId:', insertId);
+  
+  if (!insertId || isNaN(insertId)) {
+    // Fallback: buscar o último relatório inserido por gestorId e lojaId
+    const lastRelatorio = await db.select().from(relatoriosLivres)
+      .where(eq(relatoriosLivres.gestorId, relatorio.gestorId))
+      .orderBy(desc(relatoriosLivres.id))
+      .limit(1);
+    if (lastRelatorio.length > 0) {
+      return lastRelatorio[0]!;
+    }
+    throw new Error('Falha ao obter ID do relatório inserido');
+  }
+  
+  const newRelatorio = await db.select().from(relatoriosLivres).where(eq(relatoriosLivres.id, insertId)).limit(1);
   return newRelatorio[0]!;
 }
 
@@ -448,8 +478,24 @@ export async function createRelatorioCompleto(relatorio: InsertRelatorioCompleto
   if (!db) throw new Error("Database not available");
   
   const relatorioCompletoInsertResult = await db.insert(relatoriosCompletos).values(relatorio);
-  const insertId = (relatorioCompletoInsertResult as any).insertId;
-  const newRelatorio = await db.select().from(relatoriosCompletos).where(eq(relatoriosCompletos.id, Number(insertId))).limit(1);
+  const rawInsertId = (relatorioCompletoInsertResult as any).insertId;
+  const insertId = typeof rawInsertId === 'bigint' ? Number(rawInsertId) : Number(rawInsertId);
+  
+  console.log('[createRelatorioCompleto] rawInsertId:', rawInsertId, 'type:', typeof rawInsertId, 'insertId:', insertId);
+  
+  if (!insertId || isNaN(insertId)) {
+    // Fallback: buscar o último relatório inserido por gestorId
+    const lastRelatorio = await db.select().from(relatoriosCompletos)
+      .where(eq(relatoriosCompletos.gestorId, relatorio.gestorId))
+      .orderBy(desc(relatoriosCompletos.id))
+      .limit(1);
+    if (lastRelatorio.length > 0) {
+      return lastRelatorio[0]!;
+    }
+    throw new Error('Falha ao obter ID do relatório completo inserido');
+  }
+  
+  const newRelatorio = await db.select().from(relatoriosCompletos).where(eq(relatoriosCompletos.id, insertId)).limit(1);
   return newRelatorio[0]!;
 }
 
@@ -487,8 +533,21 @@ export async function createPendente(pendente: InsertPendente): Promise<Pendente
   if (!db) throw new Error("Database not available");
   
   const pendenteInsertResult = await db.insert(pendentes).values(pendente);
-  const insertId = (pendenteInsertResult as any).insertId;
-  const newPendente = await db.select().from(pendentes).where(eq(pendentes.id, Number(insertId))).limit(1);
+  const rawInsertId = (pendenteInsertResult as any).insertId;
+  const insertId = typeof rawInsertId === 'bigint' ? Number(rawInsertId) : Number(rawInsertId);
+  
+  if (!insertId || isNaN(insertId)) {
+    // Fallback: buscar o último pendente inserido por relatório
+    const lastPendente = await db.select().from(pendentes)
+      .orderBy(desc(pendentes.id))
+      .limit(1);
+    if (lastPendente.length > 0) {
+      return lastPendente[0]!;
+    }
+    throw new Error('Falha ao obter ID do pendente inserido');
+  }
+  
+  const newPendente = await db.select().from(pendentes).where(eq(pendentes.id, insertId)).limit(1);
   return newPendente[0]!;
 }
 
