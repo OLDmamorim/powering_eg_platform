@@ -302,7 +302,7 @@ function DashboardLayoutContent({
             </button>
           )}
           <div className="fixed bottom-4 right-4 text-xs text-foreground/60 select-none pointer-events-none">
-            v2.2
+            v2.3
           </div>
         </main>
       </SidebarInset>

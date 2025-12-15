@@ -13,10 +13,12 @@ import {
   BarChart3,
   CheckCircle2,
   Lightbulb,
-  MapPin,
   TrendingDown,
   TrendingUp,
   XCircle,
+  ThumbsUp,
+  ThumbsDown,
+  LineChart,
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -158,21 +160,6 @@ export default function RelatoriosIA() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <MapPin className="h-5 w-5 text-blue-500" />
-                  KM Percorridos (Estimativa)
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-3xl font-bold">{analise.kmPercorridos} km</p>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Baseado no número de lojas visitadas
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
                   <CheckCircle2 className="h-5 w-5 text-green-500" />
                   Pontos Positivos
                 </CardTitle>
@@ -205,6 +192,74 @@ export default function RelatoriosIA() {
                     </li>
                   ))}
                 </ul>
+              </CardContent>
+            </Card>
+
+            {/* Nova secção: Análise dos Pontos Destacados pelos Gestores */}
+            <Card className="border-2 border-primary/20">
+              <CardHeader className="bg-primary/5">
+                <CardTitle className="flex items-center gap-2">
+                  <LineChart className="h-5 w-5 text-primary" />
+                  Análise dos Pontos Destacados pelos Gestores
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-4 space-y-6">
+                {/* Tendências */}
+                <div className="p-4 bg-muted/50 rounded-lg">
+                  <h4 className="font-semibold mb-2 flex items-center gap-2">
+                    <LineChart className="h-4 w-4" />
+                    Tendências Observadas
+                  </h4>
+                  <p className="text-muted-foreground">
+                    {analise.analisePontosDestacados?.tendencias || "Sem dados suficientes para identificar tendências."}
+                  </p>
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  {/* Análise Pontos Positivos */}
+                  <div className="space-y-3">
+                    <h4 className="font-semibold flex items-center gap-2 text-green-600">
+                      <ThumbsUp className="h-4 w-4" />
+                      Pontos Positivos Destacados
+                    </h4>
+                    <ul className="space-y-2">
+                      {analise.analisePontosDestacados?.positivos?.length > 0 ? (
+                        analise.analisePontosDestacados.positivos.map((ponto, index) => (
+                          <li key={index} className="flex items-start gap-2 text-sm">
+                            <ThumbsUp className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
+                            <span>{ponto}</span>
+                          </li>
+                        ))
+                      ) : (
+                        <li className="text-sm text-muted-foreground">
+                          Nenhum ponto positivo destacado neste período.
+                        </li>
+                      )}
+                    </ul>
+                  </div>
+
+                  {/* Análise Pontos Negativos */}
+                  <div className="space-y-3">
+                    <h4 className="font-semibold flex items-center gap-2 text-red-600">
+                      <ThumbsDown className="h-4 w-4" />
+                      Pontos Negativos Destacados
+                    </h4>
+                    <ul className="space-y-2">
+                      {analise.analisePontosDestacados?.negativos?.length > 0 ? (
+                        analise.analisePontosDestacados.negativos.map((ponto, index) => (
+                          <li key={index} className="flex items-start gap-2 text-sm">
+                            <ThumbsDown className="h-4 w-4 text-red-500 mt-0.5 shrink-0" />
+                            <span>{ponto}</span>
+                          </li>
+                        ))
+                      ) : (
+                        <li className="text-sm text-muted-foreground">
+                          Nenhum ponto negativo destacado neste período.
+                        </li>
+                      )}
+                    </ul>
+                  </div>
+                </div>
               </CardContent>
             </Card>
 

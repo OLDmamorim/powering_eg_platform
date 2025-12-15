@@ -44,6 +44,8 @@ export default function RelatorioCompleto() {
     reuniaoQuinzenal: undefined as boolean | undefined,
     resumoSupervisao: "",
     colaboradoresPresentes: "",
+    pontosPositivos: "",
+    pontosNegativos: "",
   });
 
   const utils = trpc.useUtils();
@@ -77,6 +79,7 @@ export default function RelatorioCompleto() {
     { title: "Documentação Obrigatória", fields: ["documentacaoObrigatoria"] },
     { title: "Reunião Quinzenal", fields: ["reuniaoQuinzenal"] },
     { title: "Resumo e Colaboradores", fields: ["resumoSupervisao", "colaboradoresPresentes"] },
+    { title: "Pontos a Destacar", fields: ["pontosPositivos", "pontosNegativos"] },
     { title: "Fotos", fields: ["fotos"] },
     { title: "Pendentes", fields: ["pendentes"] },
   ];
@@ -427,6 +430,42 @@ export default function RelatorioCompleto() {
 
       case 11:
         return (
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="pontosPositivos">Pontos Positivos a Destacar</Label>
+              <Textarea
+                id="pontosPositivos"
+                value={formData.pontosPositivos}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    pontosPositivos: e.target.value,
+                  })
+                }
+                placeholder="Descreva os pontos positivos observados durante a visita (ex: boa organização, equipa motivada, loja limpa, etc.)"
+                rows={5}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="pontosNegativos">Pontos Negativos a Destacar</Label>
+              <Textarea
+                id="pontosNegativos"
+                value={formData.pontosNegativos}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    pontosNegativos: e.target.value,
+                  })
+                }
+                placeholder="Descreva os pontos negativos observados durante a visita (ex: falta de stock, problemas de organização, etc.)"
+                rows={5}
+              />
+            </div>
+          </div>
+        );
+
+      case 12:
+        return (
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <Label className="flex items-center gap-2">
@@ -483,7 +522,7 @@ export default function RelatorioCompleto() {
           </div>
         );
 
-      case 12:
+      case 13:
         return (
           <div className="space-y-3">
             <div className="flex items-center justify-between">

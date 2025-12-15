@@ -7,6 +7,8 @@ interface RelatorioAnalise {
   dataVisita: Date;
   tipo: "livre" | "completo";
   conteudo: string;
+  pontosPositivosRelatorio?: string;
+  pontosNegativosRelatorio?: string;
 }
 
 interface AnaliseIA {
@@ -15,31 +17,13 @@ interface AnaliseIA {
   frequenciaVisitas: { [loja: string]: number };
   pontosPositivos: string[];
   pontosNegativos: string[];
-  kmPercorridos: number;
   sugestoes: string[];
   resumo: string;
-}
-
-/**
- * Calcula a distância aproximada entre duas coordenadas (fórmula de Haversine simplificada)
- */
-function calcularDistancia(
-  lat1: number,
-  lon1: number,
-  lat2: number,
-  lon2: number
-): number {
-  const R = 6371; // Raio da Terra em km
-  const dLat = ((lat2 - lat1) * Math.PI) / 180;
-  const dLon = ((lon2 - lon1) * Math.PI) / 180;
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
+  analisePontosDestacados: {
+    positivos: string[];
+    negativos: string[];
+    tendencias: string;
+  };
 }
 
 /**
@@ -81,6 +65,8 @@ export async function gerarRelatorioComIA(
       dataVisita: new Date(r.dataVisita),
       tipo: "completo" as const,
       conteudo: `EPIs: ${r.episFardamento || "N/A"}\nKit 1ºs Socorros: ${r.kitPrimeirosSocorros || "N/A"}\nResumo: ${r.resumoSupervisao || "N/A"}`,
+      pontosPositivosRelatorio: r.pontosPositivos || undefined,
+      pontosNegativosRelatorio: r.pontosNegativos || undefined,
     })),
   ];
 
@@ -104,9 +90,18 @@ export async function gerarRelatorioComIA(
       }
     : null;
 
-  // Calcular KM percorridos (estimativa baseada em número de lojas diferentes)
-  const lojasUnicas = new Set(todosRelatorios.map((r) => r.lojaId));
-  const kmPercorridos = lojasUnicas.size * 25; // Estimativa: 25km por loja visitada
+  // Coletar pontos positivos e negativos dos relatórios completos
+  const pontosPositivosRelatados: string[] = [];
+  const pontosNegativosRelatados: string[] = [];
+  
+  relatoriosCompletosFiltrados.forEach((r: any) => {
+    if (r.pontosPositivos && r.pontosPositivos.trim()) {
+      pontosPositivosRelatados.push(`[${r.loja?.nome || 'Loja'}] ${r.pontosPositivos}`);
+    }
+    if (r.pontosNegativos && r.pontosNegativos.trim()) {
+      pontosNegativosRelatados.push(`[${r.loja?.nome || 'Loja'}] ${r.pontosNegativos}`);
+    }
+  });
 
   // Preparar prompt para IA
   const relatoriosTexto = todosRelatorios
@@ -116,21 +111,38 @@ export async function gerarRelatorioComIA(
     )
     .join("\n\n");
 
+  // Preparar texto dos pontos destacados pelos gestores
+  const pontosDestacadosTexto = `
+PONTOS POSITIVOS DESTACADOS PELOS GESTORES:
+${pontosPositivosRelatados.length > 0 ? pontosPositivosRelatados.join('\n') : 'Nenhum ponto positivo registado neste período.'}
+
+PONTOS NEGATIVOS DESTACADOS PELOS GESTORES:
+${pontosNegativosRelatados.length > 0 ? pontosNegativosRelatados.join('\n') : 'Nenhum ponto negativo registado neste período.'}
+`;
+
   const prompt = `Analisa os seguintes relatórios de supervisão de lojas da Express Glass do período ${periodo}:
 
 ${relatoriosTexto}
 
-Com base nestes relatórios, identifica:
+${pontosDestacadosTexto}
+
+Com base nestes relatórios e nos pontos destacados pelos gestores, identifica:
 1. 3-5 pontos positivos principais (aspetos bem executados, melhorias observadas)
 2. 3-5 pontos negativos principais (problemas recorrentes, áreas de preocupação)
 3. 3-5 sugestões práticas para melhorar a operação
+4. Análise específica dos pontos positivos e negativos destacados pelos gestores, identificando padrões e tendências
 
 Responde em formato JSON com as seguintes chaves:
 {
   "pontosPositivos": ["ponto 1", "ponto 2", ...],
   "pontosNegativos": ["ponto 1", "ponto 2", ...],
   "sugestoes": ["sugestão 1", "sugestão 2", ...],
-  "resumo": "Um parágrafo resumindo a análise geral do período"
+  "resumo": "Um parágrafo resumindo a análise geral do período",
+  "analisePontosDestacados": {
+    "positivos": ["análise do ponto positivo 1", "análise do ponto positivo 2", ...],
+    "negativos": ["análise do ponto negativo 1", "análise do ponto negativo 2", ...],
+    "tendencias": "Descrição das tendências observadas nos pontos destacados pelos gestores"
+  }
 }`;
 
   try {
@@ -170,8 +182,29 @@ Responde em formato JSON com as seguintes chaves:
                 type: "string",
                 description: "Resumo geral da análise",
               },
+              analisePontosDestacados: {
+                type: "object",
+                properties: {
+                  positivos: {
+                    type: "array",
+                    items: { type: "string" },
+                    description: "Análise dos pontos positivos destacados pelos gestores",
+                  },
+                  negativos: {
+                    type: "array",
+                    items: { type: "string" },
+                    description: "Análise dos pontos negativos destacados pelos gestores",
+                  },
+                  tendencias: {
+                    type: "string",
+                    description: "Tendências observadas nos pontos destacados",
+                  },
+                },
+                required: ["positivos", "negativos", "tendencias"],
+                additionalProperties: false,
+              },
             },
-            required: ["pontosPositivos", "pontosNegativos", "sugestoes", "resumo"],
+            required: ["pontosPositivos", "pontosNegativos", "sugestoes", "resumo", "analisePontosDestacados"],
             additionalProperties: false,
           },
         },
@@ -187,9 +220,9 @@ Responde em formato JSON com as seguintes chaves:
       frequenciaVisitas,
       pontosPositivos: analise.pontosPositivos,
       pontosNegativos: analise.pontosNegativos,
-      kmPercorridos,
       sugestoes: analise.sugestoes,
       resumo: analise.resumo,
+      analisePontosDestacados: analise.analisePontosDestacados,
     };
   } catch (error) {
     console.error("Erro ao gerar análise com IA:", error);
@@ -200,9 +233,13 @@ Responde em formato JSON com as seguintes chaves:
       frequenciaVisitas,
       pontosPositivos: ["Análise de IA temporariamente indisponível"],
       pontosNegativos: ["Análise de IA temporariamente indisponível"],
-      kmPercorridos,
       sugestoes: ["Análise de IA temporariamente indisponível"],
       resumo: `Período ${periodo}: ${todosRelatorios.length} relatórios analisados.`,
+      analisePontosDestacados: {
+        positivos: ["Análise de IA temporariamente indisponível"],
+        negativos: ["Análise de IA temporariamente indisponível"],
+        tendencias: "Análise de IA temporariamente indisponível",
+      },
     };
   }
 }

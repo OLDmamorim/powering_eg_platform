@@ -104,6 +104,8 @@ export const relatoriosCompletos = mysqlTable("relatorios_completos", {
   reuniaoQuinzenal: boolean("reuniaoQuinzenal"),
   resumoSupervisao: text("resumoSupervisao"),
   colaboradoresPresentes: text("colaboradoresPresentes"),
+  pontosPositivos: text("pontosPositivos"),
+  pontosNegativos: text("pontosNegativos"),
   
   emailEnviado: boolean("emailEnviado").default(false).notNull(),
   fotos: text("fotos"), // JSON array de URLs das fotos

@@ -213,3 +213,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Toggle de modo escuro/claro (botão flutuante no canto inferior direito)
 - [x] Persistir preferência de tema no localStorage (via ThemeProvider)
 - [x] Testar todas as funcionalidades
+
+## Funcionalidades v2.3 - Melhorias nos Relatórios
+- [x] Remover km percorridos do relatório de IA
+- [x] Adicionar campo "Pontos Positivos a Destacar" no relatório completo
+- [x] Adicionar campo "Pontos Negativos a Destacar" no relatório completo
+- [x] Incluir análise dos pontos positivos/negativos no relatório de IA
+- [x] Testar todas as alterações

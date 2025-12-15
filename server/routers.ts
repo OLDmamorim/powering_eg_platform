@@ -238,6 +238,8 @@ export const appRouter = router({
         reuniaoQuinzenal: z.boolean().optional(),
         resumoSupervisao: z.string().optional(),
         colaboradoresPresentes: z.string().optional(),
+        pontosPositivos: z.string().optional(),
+        pontosNegativos: z.string().optional(),
         fotos: z.string().optional(),
         pendentes: z.array(z.string()).optional(),
       }))
