@@ -110,6 +110,49 @@ export async function getUserByOpenId(openId: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
+export async function getUserByEmail(email: string) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot get user by email: database not available");
+    return undefined;
+  }
+
+  const result = await db.select().from(users).where(eq(users.email, email)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function updateUserOpenId(userId: number, newOpenId: string, name?: string | null) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot update user openId: database not available");
+    return;
+  }
+
+  const updateData: Record<string, unknown> = {
+    openId: newOpenId,
+    updatedAt: new Date()
+  };
+  
+  if (name) {
+    updateData.name = name;
+  }
+
+  await db.update(users).set(updateData).where(eq(users.id, userId));
+}
+
+export async function updateUserLastSignedIn(userId: number) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot update lastSignedIn: database not available");
+    return;
+  }
+
+  await db.update(users).set({ 
+    lastSignedIn: new Date(),
+    updatedAt: new Date()
+  }).where(eq(users.id, userId));
+}
+
 // ==================== LOJAS ====================
 
 export async function createLoja(loja: InsertLoja): Promise<Loja> {

@@ -15,6 +15,7 @@ import RelatorioCompleto from "./pages/RelatorioCompleto";
 import MeusRelatorios from "./pages/MeusRelatorios";
 import RelatoriosIA from "./pages/RelatoriosIA";
 import Pendentes from "./pages/Pendentes";
+import LoginNaoAutorizado from "./pages/LoginNaoAutorizado";
 
 function Router() {
   return (
@@ -39,6 +40,7 @@ function Router() {
       <Route path={"/relatorios-ia"} component={RelatoriosIA} />
       <Route path={"/pendentes"} component={Pendentes} />
       
+      <Route path={"/login-nao-autorizado"} component={LoginNaoAutorizado} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>

@@ -154,3 +154,17 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar diálogo de confirmação antes de promover
 - [x] Testar promoção de gestor a admin (3 testes passaram)
 - [x] Criar checkpoint v1.8
+
+## Bug v1.8.2 - Lojas não aparecem para gestor
+- [ ] Investigar função getLojasByGestorId ou similar
+- [ ] Verificar se associação está a ser guardada corretamente na tabela gestor_lojas
+- [ ] Corrigir query ou lógica de carregamento
+- [ ] Testar com gestor "Teste" e loja "Guimarães"
+
+## Autenticação Restrita v1.9
+- [x] Modificar OAuth callback para verificar email existente antes de criar user
+- [x] Atualizar openId de users "pending" quando fazem primeiro login
+- [x] Rejeitar logins de emails não registados pelo admin (página /login-nao-autorizado)
+- [x] Eliminar user duplicado (420018 eliminado)
+- [x] Atualizar gestor "Teste" para apontar ao user correto (420030)
+- [x] Testar fluxo completo de login

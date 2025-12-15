@@ -1,0 +1,28 @@
+{
+  "query": "SELECT gl.*, g.id as gestor_id, u.name as gestor_name, l.nome as loja_nome \nFROM gestor_lojas gl \nLEFT JOIN gestores g ON gl.gestorId = g.id \nLEFT JOIN users u ON g.userId = u.id \nLEFT JOIN lojas l ON gl.lojaId = l.id",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT gl.*, g.id as gestor_id, u.name as gestor_name, l.nome as loja_nome \nFROM gestor_lojas gl \nLEFT JOIN gestores g ON gl.gestorId = g.id \nLEFT JOIN users u ON g.userId = u.id \nLEFT JOIN lojas l ON gl.lojaId = l.id",
+  "rows": [
+    {
+      "id": "1",
+      "gestorId": "2",
+      "lojaId": "30001",
+      "createdAt": "2025-12-15 01:00:22",
+      "gestor_id": "2",
+      "gestor_name": "Marco Amorim",
+      "loja_nome": "Braga"
+    },
+    {
+      "id": "30001",
+      "gestorId": "30001",
+      "lojaId": "3",
+      "createdAt": "2025-12-15 12:35:47",
+      "gestor_id": "30001",
+      "gestor_name": "Teste",
+      "loja_nome": "Guimarães"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tgestorId\tlojaId\tcreatedAt\tgestor_id\tgestor_name\tloja_nome\n1\t2\t30001\t2025-12-15 01:00:22\t2\tMarco Amorim\tBraga\n30001\t30001\t3\t2025-12-15 12:35:47\t30001\tTeste\tGuimarães\n",
+  "stderr": "",
+  "execution_time_ms": 80
+}
