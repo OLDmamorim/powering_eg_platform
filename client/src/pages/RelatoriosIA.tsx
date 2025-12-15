@@ -19,14 +19,18 @@ import {
   ThumbsUp,
   ThumbsDown,
   LineChart,
+  FileDown,
+  Loader2,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { toast } from "sonner";
 
 export default function RelatoriosIA() {
   const [periodo, setPeriodo] = useState<
     "diario" | "semanal" | "mensal" | "trimestral"
   >("semanal");
+  const [exportando, setExportando] = useState(false);
+  const relatorioRef = useRef<HTMLDivElement>(null);
 
   const { data: analise, isLoading, refetch } = trpc.relatoriosIA.gerar.useQuery(
     { periodo },
@@ -36,6 +40,291 @@ export default function RelatoriosIA() {
   const handleGerar = () => {
     toast.info("A gerar relatório com IA...");
     refetch();
+  };
+
+  const handleExportPDF = async () => {
+    if (!analise) {
+      toast.error("Gere primeiro um relatório para exportar");
+      return;
+    }
+
+    setExportando(true);
+    toast.info("A preparar PDF...");
+
+    try {
+      // Criar conteúdo HTML para o PDF
+      const periodoTexto = {
+        diario: "Diário",
+        semanal: "Semanal",
+        mensal: "Mensal",
+        trimestral: "Trimestral"
+      }[periodo];
+
+      const dataAtual = new Date().toLocaleDateString('pt-PT', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric'
+      });
+
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <title>Relatório IA - PoweringEG</title>
+          <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { 
+              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+              line-height: 1.6; 
+              color: #333;
+              padding: 40px;
+              max-width: 800px;
+              margin: 0 auto;
+            }
+            .header { 
+              text-align: center; 
+              margin-bottom: 30px; 
+              padding-bottom: 20px;
+              border-bottom: 2px solid #2563eb;
+            }
+            .header h1 { 
+              color: #2563eb; 
+              font-size: 28px;
+              margin-bottom: 5px;
+            }
+            .header p { 
+              color: #666; 
+              font-size: 14px;
+            }
+            .section { 
+              margin-bottom: 25px; 
+              page-break-inside: avoid;
+            }
+            .section-title { 
+              font-size: 18px; 
+              color: #2563eb; 
+              margin-bottom: 10px;
+              padding-bottom: 5px;
+              border-bottom: 1px solid #e5e7eb;
+            }
+            .section-content { 
+              padding: 15px;
+              background: #f9fafb;
+              border-radius: 8px;
+            }
+            .grid { 
+              display: grid; 
+              grid-template-columns: 1fr 1fr; 
+              gap: 20px; 
+            }
+            .card { 
+              background: #fff; 
+              padding: 15px; 
+              border-radius: 8px;
+              border: 1px solid #e5e7eb;
+            }
+            .card-title { 
+              font-weight: 600; 
+              margin-bottom: 8px;
+              font-size: 14px;
+              color: #374151;
+            }
+            .card-value { 
+              font-size: 20px; 
+              font-weight: bold;
+              color: #111827;
+            }
+            .card-subtitle { 
+              font-size: 12px; 
+              color: #6b7280;
+            }
+            .list { 
+              list-style: none; 
+            }
+            .list li { 
+              padding: 8px 0; 
+              border-bottom: 1px solid #f3f4f6;
+              display: flex;
+              align-items: flex-start;
+              gap: 10px;
+            }
+            .list li:last-child { 
+              border-bottom: none; 
+            }
+            .icon-positive { color: #22c55e; }
+            .icon-negative { color: #ef4444; }
+            .icon-suggestion { color: #eab308; }
+            .highlight-box {
+              background: #eff6ff;
+              border-left: 4px solid #2563eb;
+              padding: 15px;
+              margin: 15px 0;
+              border-radius: 0 8px 8px 0;
+            }
+            .frequency-bar {
+              display: flex;
+              align-items: center;
+              gap: 10px;
+              padding: 8px 0;
+            }
+            .frequency-name { 
+              flex: 1; 
+              font-weight: 500;
+            }
+            .frequency-value { 
+              font-size: 14px; 
+              color: #6b7280;
+              min-width: 40px;
+              text-align: right;
+            }
+            .footer { 
+              margin-top: 40px; 
+              padding-top: 20px;
+              border-top: 1px solid #e5e7eb;
+              text-align: center;
+              font-size: 12px;
+              color: #9ca3af;
+            }
+            @media print {
+              body { padding: 20px; }
+              .section { page-break-inside: avoid; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>Relatório de Análise IA</h1>
+            <p>Período: ${periodoTexto} | Gerado em: ${dataAtual}</p>
+            <p>PoweringEG Platform</p>
+          </div>
+
+          <div class="section">
+            <h2 class="section-title">📊 Resumo Geral</h2>
+            <div class="section-content">
+              <p>${analise.resumo}</p>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="grid">
+              <div class="card">
+                <div class="card-title">📈 Loja Mais Visitada</div>
+                ${analise.lojaMaisVisitada ? `
+                  <div class="card-value">${analise.lojaMaisVisitada.nome}</div>
+                  <div class="card-subtitle">${analise.lojaMaisVisitada.visitas} visitas</div>
+                ` : '<div class="card-subtitle">Sem dados suficientes</div>'}
+              </div>
+              <div class="card">
+                <div class="card-title">📉 Loja Menos Visitada</div>
+                ${analise.lojaMenosVisitada ? `
+                  <div class="card-value">${analise.lojaMenosVisitada.nome}</div>
+                  <div class="card-subtitle">${analise.lojaMenosVisitada.visitas} visitas</div>
+                ` : '<div class="card-subtitle">Sem dados suficientes</div>'}
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <h2 class="section-title">✅ Pontos Positivos</h2>
+            <div class="section-content">
+              <ul class="list">
+                ${analise.pontosPositivos.map(ponto => `
+                  <li><span class="icon-positive">✓</span> ${ponto}</li>
+                `).join('')}
+              </ul>
+            </div>
+          </div>
+
+          <div class="section">
+            <h2 class="section-title">❌ Pontos Negativos</h2>
+            <div class="section-content">
+              <ul class="list">
+                ${analise.pontosNegativos.map(ponto => `
+                  <li><span class="icon-negative">✗</span> ${ponto}</li>
+                `).join('')}
+              </ul>
+            </div>
+          </div>
+
+          <div class="section">
+            <h2 class="section-title">📋 Análise dos Pontos Destacados pelos Gestores</h2>
+            <div class="highlight-box">
+              <strong>Tendências Observadas:</strong><br>
+              ${analise.analisePontosDestacados?.tendencias || "Sem dados suficientes para identificar tendências."}
+            </div>
+            <div class="grid">
+              <div class="card">
+                <div class="card-title" style="color: #22c55e;">👍 Pontos Positivos Destacados</div>
+                <ul class="list">
+                  ${analise.analisePontosDestacados?.positivos?.length > 0 
+                    ? analise.analisePontosDestacados.positivos.map(p => `<li><span class="icon-positive">✓</span> ${p}</li>`).join('')
+                    : '<li>Nenhum ponto positivo destacado neste período.</li>'}
+                </ul>
+              </div>
+              <div class="card">
+                <div class="card-title" style="color: #ef4444;">👎 Pontos Negativos Destacados</div>
+                <ul class="list">
+                  ${analise.analisePontosDestacados?.negativos?.length > 0 
+                    ? analise.analisePontosDestacados.negativos.map(p => `<li><span class="icon-negative">✗</span> ${p}</li>`).join('')
+                    : '<li>Nenhum ponto negativo destacado neste período.</li>'}
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <h2 class="section-title">💡 Sugestões de Melhoria</h2>
+            <div class="section-content">
+              <ul class="list">
+                ${analise.sugestoes.map(sugestao => `
+                  <li><span class="icon-suggestion">💡</span> ${sugestao}</li>
+                `).join('')}
+              </ul>
+            </div>
+          </div>
+
+          <div class="section">
+            <h2 class="section-title">📊 Frequência de Visitas por Loja</h2>
+            <div class="section-content">
+              ${Object.entries(analise.frequenciaVisitas)
+                .sort((a, b) => (b[1] as number) - (a[1] as number))
+                .map(([loja, visitas]) => `
+                  <div class="frequency-bar">
+                    <span class="frequency-name">${loja}</span>
+                    <span class="frequency-value">${visitas}x</span>
+                  </div>
+                `).join('')}
+            </div>
+          </div>
+
+          <div class="footer">
+            <p>Relatório gerado automaticamente pelo PoweringEG Platform</p>
+            <p>© ${new Date().getFullYear()} PoweringEG - Todos os direitos reservados</p>
+          </div>
+        </body>
+        </html>
+      `;
+
+      // Criar blob e fazer download
+      const blob = new Blob([htmlContent], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      
+      // Abrir em nova janela para impressão/PDF
+      const printWindow = window.open(url, '_blank');
+      if (printWindow) {
+        printWindow.onload = () => {
+          printWindow.print();
+        };
+      }
+
+      toast.success("PDF preparado! Use Ctrl+P ou Cmd+P para guardar como PDF.");
+    } catch (error) {
+      console.error('Erro ao exportar PDF:', error);
+      toast.error("Erro ao exportar PDF");
+    } finally {
+      setExportando(false);
+    }
   };
 
   return (
@@ -73,9 +362,25 @@ export default function RelatoriosIA() {
                   </SelectContent>
                 </Select>
               </div>
-              <Button onClick={handleGerar} disabled={isLoading}>
-                {isLoading ? "A gerar..." : "Gerar Relatório"}
-              </Button>
+              <div className="flex gap-2">
+                <Button onClick={handleGerar} disabled={isLoading}>
+                  {isLoading ? "A gerar..." : "Gerar Relatório"}
+                </Button>
+                {analise && (
+                  <Button 
+                    variant="outline" 
+                    onClick={handleExportPDF}
+                    disabled={exportando}
+                  >
+                    {exportando ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <FileDown className="h-4 w-4 mr-2" />
+                    )}
+                    Exportar PDF
+                  </Button>
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -92,7 +397,7 @@ export default function RelatoriosIA() {
         )}
 
         {analise && !isLoading && (
-          <div className="space-y-4">
+          <div className="space-y-4" ref={relatorioRef}>
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">

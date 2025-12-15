@@ -6,7 +6,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import * as db from "./db";
 import { gerarRelatorioComIA } from "./aiService";
-import { enviarResumoSemanal } from "./weeklyReport";
+import { enviarResumoSemanal, verificarENotificarAlertas } from "./weeklyReport";
 
 // Middleware para verificar se o utilizador é admin
 const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
@@ -266,6 +266,17 @@ export const appRouter = router({
           }
         }
         
+        // Verificar alertas de pontos negativos consecutivos
+        if (input.pontosNegativos && input.pontosNegativos.trim()) {
+          const loja = await db.getLojaById(input.lojaId);
+          if (loja) {
+            // Verificar e notificar em background (não bloquear a resposta)
+            verificarENotificarAlertas(input.lojaId, loja.nome).catch(err => {
+              console.error('[Alertas] Erro ao verificar alertas:', err);
+            });
+          }
+        }
+        
         return relatorio;
       }),
   }),
@@ -317,6 +328,35 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         await db.deletePendente(input.id);
         return { success: true };
+      }),
+  }),
+
+  // ==================== HISTÓRICO DE PONTOS ====================
+  historicoPontos: router({
+    byLoja: protectedProcedure
+      .input(z.object({ lojaId: z.number() }))
+      .query(async ({ input }) => {
+        return await db.getHistoricoPontosByLojaId(input.lojaId);
+      }),
+    
+    all: protectedProcedure.query(async () => {
+      return await db.getHistoricoPontosAllLojas();
+    }),
+  }),
+
+  // ==================== ALERTAS ====================
+  alertas: router({
+    checkLoja: protectedProcedure
+      .input(z.object({ lojaId: z.number(), threshold: z.number().optional() }))
+      .query(async ({ input }) => {
+        const temAlerta = await db.checkAlertasPontosNegativos(input.lojaId, input.threshold || 3);
+        return { temAlerta };
+      }),
+    
+    lojasComAlertas: adminProcedure
+      .input(z.object({ threshold: z.number().optional() }).optional())
+      .query(async ({ input }) => {
+        return await db.getLojasComAlertasNegativos(input?.threshold || 3);
       }),
   }),
 });

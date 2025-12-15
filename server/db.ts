@@ -581,3 +581,122 @@ export async function deletePendente(id: number): Promise<void> {
   
   await db.delete(pendentes).where(eq(pendentes.id, id));
 }
+
+
+// ==================== HISTÓRICO DE PONTOS POR LOJA ====================
+
+export interface PontosHistorico {
+  lojaId: number;
+  lojaNome: string;
+  dataVisita: Date;
+  pontosPositivos: string | null;
+  pontosNegativos: string | null;
+  gestorNome: string | null;
+}
+
+export async function getHistoricoPontosByLojaId(lojaId: number): Promise<PontosHistorico[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const result = await db
+    .select({
+      lojaId: relatoriosCompletos.lojaId,
+      lojaNome: lojas.nome,
+      dataVisita: relatoriosCompletos.dataVisita,
+      pontosPositivos: relatoriosCompletos.pontosPositivos,
+      pontosNegativos: relatoriosCompletos.pontosNegativos,
+      gestorNome: users.name,
+    })
+    .from(relatoriosCompletos)
+    .innerJoin(lojas, eq(relatoriosCompletos.lojaId, lojas.id))
+    .innerJoin(gestores, eq(relatoriosCompletos.gestorId, gestores.id))
+    .innerJoin(users, eq(gestores.userId, users.id))
+    .where(eq(relatoriosCompletos.lojaId, lojaId))
+    .orderBy(desc(relatoriosCompletos.dataVisita));
+  
+  return result;
+}
+
+export async function getHistoricoPontosAllLojas(): Promise<PontosHistorico[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const result = await db
+    .select({
+      lojaId: relatoriosCompletos.lojaId,
+      lojaNome: lojas.nome,
+      dataVisita: relatoriosCompletos.dataVisita,
+      pontosPositivos: relatoriosCompletos.pontosPositivos,
+      pontosNegativos: relatoriosCompletos.pontosNegativos,
+      gestorNome: users.name,
+    })
+    .from(relatoriosCompletos)
+    .innerJoin(lojas, eq(relatoriosCompletos.lojaId, lojas.id))
+    .innerJoin(gestores, eq(relatoriosCompletos.gestorId, gestores.id))
+    .innerJoin(users, eq(gestores.userId, users.id))
+    .orderBy(desc(relatoriosCompletos.dataVisita));
+  
+  return result;
+}
+
+// Função para verificar alertas de pontos negativos consecutivos
+export async function checkAlertasPontosNegativos(lojaId: number, threshold: number = 3): Promise<boolean> {
+  const db = await getDb();
+  if (!db) return false;
+  
+  // Buscar os últimos N relatórios completos da loja
+  const ultimosRelatorios = await db
+    .select({
+      pontosNegativos: relatoriosCompletos.pontosNegativos,
+    })
+    .from(relatoriosCompletos)
+    .where(eq(relatoriosCompletos.lojaId, lojaId))
+    .orderBy(desc(relatoriosCompletos.dataVisita))
+    .limit(threshold);
+  
+  // Verificar se todos têm pontos negativos preenchidos
+  if (ultimosRelatorios.length < threshold) return false;
+  
+  const todosComNegativos = ultimosRelatorios.every(r => 
+    r.pontosNegativos && r.pontosNegativos.trim().length > 0
+  );
+  
+  return todosComNegativos;
+}
+
+export async function getLojasComAlertasNegativos(threshold: number = 3): Promise<Array<{lojaId: number, lojaNome: string, ultimosNegativos: string[]}>> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  // Buscar todas as lojas
+  const todasLojas = await db.select().from(lojas);
+  
+  const lojasComAlertas: Array<{lojaId: number, lojaNome: string, ultimosNegativos: string[]}> = [];
+  
+  for (const loja of todasLojas) {
+    const ultimosRelatorios = await db
+      .select({
+        pontosNegativos: relatoriosCompletos.pontosNegativos,
+      })
+      .from(relatoriosCompletos)
+      .where(eq(relatoriosCompletos.lojaId, loja.id))
+      .orderBy(desc(relatoriosCompletos.dataVisita))
+      .limit(threshold);
+    
+    if (ultimosRelatorios.length >= threshold) {
+      const negativos = ultimosRelatorios
+        .map(r => r.pontosNegativos)
+        .filter((n): n is string => n !== null && n.trim().length > 0);
+      
+      if (negativos.length >= threshold) {
+        lojasComAlertas.push({
+          lojaId: loja.id,
+          lojaNome: loja.nome,
+          ultimosNegativos: negativos
+        });
+      }
+    }
+  }
+  
+  return lojasComAlertas;
+}

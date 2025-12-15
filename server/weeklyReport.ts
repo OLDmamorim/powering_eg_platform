@@ -3,7 +3,7 @@ import * as db from "./db";
 
 /**
  * Gera e envia um resumo semanal ao owner do projeto
- * Inclui estatísticas de visitas, pendentes e alertas
+ * Inclui estatísticas de visitas, pendentes e alertas de pontos negativos
  */
 export async function enviarResumoSemanal(): Promise<boolean> {
   try {
@@ -17,6 +17,9 @@ export async function enviarResumoSemanal(): Promise<boolean> {
     const relatoriosLivres = await db.getAllRelatoriosLivres();
     const relatoriosCompletos = await db.getAllRelatoriosCompletos();
     const pendentes = await db.getAllPendentes();
+
+    // Buscar alertas de pontos negativos consecutivos
+    const lojasComAlertas = await db.getLojasComAlertasNegativos(3);
 
     // Filtrar relatórios da última semana
     const relLivresSemana = relatoriosLivres.filter((r: any) => 
@@ -75,6 +78,22 @@ export async function enviarResumoSemanal(): Promise<boolean> {
       }
     }
 
+    // Alertas de pontos negativos consecutivos
+    if (lojasComAlertas.length > 0) {
+      content += `\n🚨 **ALERTA CRÍTICO: ${lojasComAlertas.length} loja(s) com pontos negativos consecutivos!**\n`;
+      content += `As seguintes lojas têm 3 ou mais relatórios consecutivos com pontos negativos:\n\n`;
+      
+      lojasComAlertas.forEach((alerta) => {
+        content += `**${alerta.lojaNome}**\n`;
+        alerta.ultimosNegativos.slice(0, 3).forEach((neg, idx) => {
+          content += `  ${idx + 1}. ${neg.substring(0, 100)}${neg.length > 100 ? '...' : ''}\n`;
+        });
+        content += `\n`;
+      });
+      
+      content += `⚠️ Recomenda-se ação imediata para investigar e resolver os problemas identificados.\n`;
+    }
+
     content += `\n---\nRelatório gerado automaticamente pelo PoweringEG Platform`;
 
     // Enviar notificação
@@ -89,6 +108,45 @@ export async function enviarResumoSemanal(): Promise<boolean> {
     return enviado;
   } catch (error) {
     console.error('[WeeklyReport] Erro ao gerar resumo semanal:', error);
+    return false;
+  }
+}
+
+/**
+ * Verifica alertas de pontos negativos e notifica o owner se necessário
+ * Pode ser chamado após cada relatório completo ser submetido
+ */
+export async function verificarENotificarAlertas(lojaId: number, lojaNome: string): Promise<boolean> {
+  try {
+    const temAlerta = await db.checkAlertasPontosNegativos(lojaId, 3);
+    
+    if (temAlerta) {
+      const historico = await db.getHistoricoPontosByLojaId(lojaId);
+      const ultimosNegativos = historico
+        .slice(0, 3)
+        .map(h => h.pontosNegativos)
+        .filter((n): n is string => n !== null && n.trim().length > 0);
+      
+      const title = `🚨 Alerta: ${lojaNome} com pontos negativos consecutivos`;
+      let content = `A loja **${lojaNome}** tem 3 relatórios consecutivos com pontos negativos.\n\n`;
+      content += `**Últimos pontos negativos registados:**\n`;
+      ultimosNegativos.forEach((neg, idx) => {
+        content += `${idx + 1}. ${neg}\n`;
+      });
+      content += `\n⚠️ Recomenda-se investigação imediata.`;
+      
+      const enviado = await notifyOwner({ title, content });
+      
+      if (enviado) {
+        console.log(`[Alertas] Notificação de alerta enviada para loja ${lojaNome}`);
+      }
+      
+      return enviado;
+    }
+    
+    return false;
+  } catch (error) {
+    console.error('[Alertas] Erro ao verificar alertas:', error);
     return false;
   }
 }

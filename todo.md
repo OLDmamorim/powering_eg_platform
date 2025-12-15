@@ -220,3 +220,14 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar campo "Pontos Negativos a Destacar" no relatório completo
 - [x] Incluir análise dos pontos positivos/negativos no relatório de IA
 - [x] Testar todas as alterações
+
+## Funcionalidades v2.4 - Histórico, Alertas e Exportação PDF
+- [x] Histórico de pontos destacados por loja (evolução ao longo do tempo)
+- [x] Página dedicada para visualizar histórico de pontos positivos/negativos
+- [x] Estatísticas de pontos por loja com cards interativos
+- [x] Sistema de alertas automáticos para lojas com 3+ pontos negativos consecutivos
+- [x] Notificação ao admin quando alerta é disparado (após criar relatório completo)
+- [x] Alertas incluídos no relatório semanal
+- [x] Exportar relatório IA para PDF
+- [x] Botão de download PDF na página de Relatórios IA
+- [x] Testar todas as funcionalidades

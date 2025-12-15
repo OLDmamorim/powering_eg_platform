@@ -16,6 +16,7 @@ import MeusRelatorios from "./pages/MeusRelatorios";
 import RelatoriosIA from "./pages/RelatoriosIA";
 import Pendentes from "./pages/Pendentes";
 import LoginNaoAutorizado from "./pages/LoginNaoAutorizado";
+import HistoricoPontos from "./pages/HistoricoPontos";
 
 function Router() {
   return (
@@ -39,6 +40,7 @@ function Router() {
       {/* Shared routes */}
       <Route path={"/relatorios-ia"} component={RelatoriosIA} />
       <Route path={"/pendentes"} component={Pendentes} />
+      <Route path={"/historico-pontos"} component={HistoricoPontos} />
       
       <Route path={"/login-nao-autorizado"} component={LoginNaoAutorizado} />
       <Route path={"/404"} component={NotFound} />
