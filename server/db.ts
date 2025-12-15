@@ -205,19 +205,27 @@ export async function getGestorByUserId(userId: number): Promise<Gestor | undefi
   return result[0];
 }
 
-export async function getAllGestores(): Promise<Array<Gestor & { user: typeof users.$inferSelect }>> {
+export async function getAllGestores(): Promise<any[]> {
   const db = await getDb();
   if (!db) return [];
   
   const result = await db
     .select({
-      gestor: gestores,
-      user: users
+      id: gestores.id,
+      userId: gestores.userId,
+      createdAt: gestores.createdAt,
+      updatedAt: gestores.updatedAt,
+      user: {
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        role: users.role,
+      }
     })
     .from(gestores)
     .innerJoin(users, eq(gestores.userId, users.id));
   
-  return result.map(r => ({ ...r.gestor, user: r.user }));
+  return result;
 }
 
 export async function updateGestor(id: number): Promise<void> {

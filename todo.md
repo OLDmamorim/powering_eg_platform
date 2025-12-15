@@ -124,3 +124,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 
 ## Indicador de Versão
 - [x] Adicionar versão no canto inferior direito do DashboardLayout
+
+## Correção Final de Listagem de Gestores
+- [x] Simplificar getAllGestores() para retornar apenas id, nome, email, role
+- [x] Testar criação e listagem sem erros
