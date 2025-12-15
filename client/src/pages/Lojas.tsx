@@ -33,7 +33,6 @@ export default function Lojas() {
   const [editingLoja, setEditingLoja] = useState<any>(null);
   const [formData, setFormData] = useState({
     nome: "",
-    morada: "",
     contacto: "",
     email: "",
   });
@@ -83,7 +82,6 @@ export default function Lojas() {
   const resetForm = () => {
     setFormData({
       nome: "",
-      morada: "",
       contacto: "",
       email: "",
     });
@@ -95,7 +93,6 @@ export default function Lojas() {
       setEditingLoja(loja);
       setFormData({
         nome: loja.nome,
-        morada: loja.morada,
         contacto: loja.contacto || "",
         email: loja.email || "",
       });
@@ -146,7 +143,6 @@ export default function Lojas() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Nome</TableHead>
-                  <TableHead>Morada</TableHead>
                   <TableHead>Contacto</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead className="text-right">Ações</TableHead>
@@ -162,7 +158,6 @@ export default function Lojas() {
                           {loja.nome}
                         </div>
                       </TableCell>
-                      <TableCell>{loja.morada}</TableCell>
                       <TableCell>{loja.contacto || "-"}</TableCell>
                       <TableCell>{loja.email || "-"}</TableCell>
                       <TableCell className="text-right">
@@ -187,7 +182,7 @@ export default function Lojas() {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8">
+                    <TableCell colSpan={4} className="text-center py-8">
                       <p className="text-muted-foreground">
                         Nenhuma loja registada
                       </p>
@@ -225,17 +220,7 @@ export default function Lojas() {
                   required
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="morada">Morada *</Label>
-                <Textarea
-                  id="morada"
-                  value={formData.morada}
-                  onChange={(e) =>
-                    setFormData({ ...formData, morada: e.target.value })
-                  }
-                  required
-                />
-              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="contacto">Contacto</Label>
                 <Input

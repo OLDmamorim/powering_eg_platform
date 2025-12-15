@@ -123,7 +123,6 @@ export default function Gestores() {
                 <TableRow>
                   <TableHead>Nome</TableHead>
                   <TableHead>Email</TableHead>
-                  <TableHead>Morada</TableHead>
                   <TableHead>Role</TableHead>
                   <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
@@ -139,7 +138,6 @@ export default function Gestores() {
                         </div>
                       </TableCell>
                       <TableCell>{gestor.user.email}</TableCell>
-                      <TableCell>{gestor.morada || "-"}</TableCell>
                       <TableCell>
                         <Badge variant="outline">{gestor.user.role}</Badge>
                       </TableCell>
@@ -166,7 +164,7 @@ export default function Gestores() {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8">
+                    <TableCell colSpan={4} className="text-center py-8">
                       <p className="text-muted-foreground">
                         Nenhum gestor registado
                       </p>
@@ -214,9 +212,6 @@ export default function Gestores() {
                     >
                       <div>
                         <p className="font-medium">{loja.nome}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {loja.morada}
-                        </p>
                       </div>
                     </Label>
                   </div>

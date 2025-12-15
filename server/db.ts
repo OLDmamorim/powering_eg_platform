@@ -154,11 +154,11 @@ export async function deleteLoja(id: number): Promise<void> {
 
 // ==================== GESTORES ====================
 
-export async function createGestor(userId: number, morada?: string): Promise<Gestor> {
+export async function createGestor(userId: number): Promise<Gestor> {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
-  const result = await db.insert(gestores).values({ userId, morada });
+  const result = await db.insert(gestores).values({ userId });
   const insertId = (result as any).insertId;
   const newGestor = await db.select().from(gestores).where(eq(gestores.id, Number(insertId))).limit(1);
   return newGestor[0]!;
@@ -187,11 +187,12 @@ export async function getAllGestores(): Promise<Array<Gestor & { user: typeof us
   return result.map(r => ({ ...r.gestor, user: r.user }));
 }
 
-export async function updateGestor(id: number, morada: string): Promise<void> {
+export async function updateGestor(id: number): Promise<void> {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
-  await db.update(gestores).set({ morada }).where(eq(gestores.id, id));
+  // Função mantida para compatibilidade, mas sem campos para atualizar
+  // Pode ser removida se não for necessária
 }
 
 export async function deleteGestor(id: number): Promise<void> {

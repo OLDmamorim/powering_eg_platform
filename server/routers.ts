@@ -63,7 +63,6 @@ export const appRouter = router({
     create: adminProcedure
       .input(z.object({
         nome: z.string().min(1),
-        morada: z.string().min(1),
         contacto: z.string().optional(),
         email: z.string().email().optional(),
         latitude: z.string().optional(),
@@ -77,7 +76,6 @@ export const appRouter = router({
       .input(z.object({
         id: z.number(),
         nome: z.string().min(1).optional(),
-        morada: z.string().min(1).optional(),
         contacto: z.string().optional(),
         email: z.string().email().optional(),
         latitude: z.string().optional(),
@@ -112,7 +110,6 @@ export const appRouter = router({
       .input(z.object({
         nome: z.string().min(1),
         email: z.string().email(),
-        morada: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
         // Criar user primeiro (simulado - em produção seria via OAuth)
@@ -123,15 +120,7 @@ export const appRouter = router({
         });
       }),
     
-    update: adminProcedure
-      .input(z.object({
-        id: z.number(),
-        morada: z.string(),
-      }))
-      .mutation(async ({ input }) => {
-        await db.updateGestor(input.id, input.morada);
-        return { success: true };
-      }),
+    // update: Removido porque não há campos para atualizar
     
     delete: adminProcedure
       .input(z.object({ id: z.number() }))

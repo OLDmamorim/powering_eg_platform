@@ -100,3 +100,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Criar ficheiro README.md com documentação
 - [x] Fazer push para GitHub
 - [x] Fornecer instruções de deploy
+
+## Ajustes Solicitados
+- [x] Remover campo morada de lojas
+- [x] Remover campo morada de gestores
+- [x] Atualizar formulários
+- [x] Executar migração da base de dados

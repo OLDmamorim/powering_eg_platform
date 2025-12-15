@@ -31,7 +31,6 @@ export type InsertUser = typeof users.$inferInsert;
 export const lojas = mysqlTable("lojas", {
   id: int("id").autoincrement().primaryKey(),
   nome: varchar("nome", { length: 255 }).notNull(),
-  morada: text("morada").notNull(),
   contacto: varchar("contacto", { length: 50 }),
   email: varchar("email", { length: 320 }),
   latitude: decimal("latitude", { precision: 10, scale: 7 }),
@@ -50,7 +49,6 @@ export type InsertLoja = typeof lojas.$inferInsert;
 export const gestores = mysqlTable("gestores", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(), // FK para users.id
-  morada: text("morada"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
