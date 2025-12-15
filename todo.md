@@ -128,3 +128,21 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## Correção Final de Listagem de Gestores
 - [x] Simplificar getAllGestores() para retornar apenas id, nome, email, role
 - [x] Testar criação e listagem sem erros
+
+## Ajustes Finais
+- [x] Alterar cor da versão de cinza para preto
+- [x] Corrigir createGestor() - erro ao fazer INSERT
+
+## Investigação de Erro Persistente
+- [x] Verificar logs do servidor
+- [x] Identificar causa exata do erro SQL (campos duplicados no SELECT)
+- [x] Corrigir definitivamente (usar aliases específicos)
+
+## Correção Definitiva de Erro SQL v1.7
+- [x] Reescrever todas as funções de gestores em db.ts com aliases únicos
+- [x] Corrigir createGestor() - eliminar variáveis result duplicadas
+- [x] Corrigir getAllGestores() - usar aliases explícitos (gestorId, userName, etc)
+- [x] Corrigir getGestoresByLojaId() - usar aliases para todos os campos
+- [x] Corrigir resolvePendente() - usar dataResolucao em vez de resolvidoEm
+- [x] Testar criação de gestor com sucesso (Fábio Dias criado)
+- [x] Verificar listagem de gestores sem erros SQL

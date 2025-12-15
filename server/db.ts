@@ -116,8 +116,8 @@ export async function createLoja(loja: InsertLoja): Promise<Loja> {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
-  const result = await db.insert(lojas).values(loja);
-  const insertId = (result as any).insertId;
+  const insertResult = await db.insert(lojas).values(loja);
+  const insertId = (insertResult as any).insertId;
   const newLoja = await db.select().from(lojas).where(eq(lojas.id, Number(insertId))).limit(1);
   return newLoja[0]!;
 }
@@ -133,8 +133,8 @@ export async function getLojaById(id: number): Promise<Loja | undefined> {
   const db = await getDb();
   if (!db) return undefined;
   
-  const result = await db.select().from(lojas).where(eq(lojas.id, id)).limit(1);
-  return result[0];
+  const lojasResult = await db.select().from(lojas).where(eq(lojas.id, id)).limit(1);
+  return lojasResult[0];
 }
 
 export async function updateLoja(id: number, data: Partial<InsertLoja>): Promise<void> {
@@ -180,52 +180,71 @@ export async function createGestor(nome: string, email: string): Promise<any> {
   }
   
   // Criar registo de gestor
-  const result = await db.insert(gestores).values({ userId });
-  const insertId = (result as any).insertId;
+  const gestorInsertResult = await db.insert(gestores).values({ 
+    userId,
+    createdAt: new Date(),
+    updatedAt: new Date()
+  });
+  const gestorId = (gestorInsertResult as any).insertId;
   
   // Buscar gestor com dados do user
   const gestorComUser = await db
     .select({
-      gestor: gestores,
-      user: users
+      id: gestores.id,
+      userId: gestores.userId,
+      userName: users.name,
+      userEmail: users.email,
+      userRole: users.role,
     })
     .from(gestores)
     .innerJoin(users, eq(gestores.userId, users.id))
-    .where(eq(gestores.id, Number(insertId)))
+    .where(eq(gestores.id, Number(gestorId)))
     .limit(1);
   
-  return { ...gestorComUser[0]!.gestor, user: gestorComUser[0]!.user };
+  const gestor = gestorComUser[0]!;
+  return { 
+    id: gestor.id, 
+    userId: gestor.userId,
+    user: { 
+      name: gestor.userName, 
+      email: gestor.userEmail, 
+      role: gestor.userRole 
+    } 
+  };
 }
 
 export async function getGestorByUserId(userId: number): Promise<Gestor | undefined> {
   const db = await getDb();
   if (!db) return undefined;
   
-  const result = await db.select().from(gestores).where(eq(gestores.userId, userId)).limit(1);
-  return result[0];
+  const gestorResult = await db.select().from(gestores).where(eq(gestores.userId, userId)).limit(1);
+  return gestorResult[0];
 }
 
 export async function getAllGestores(): Promise<any[]> {
   const db = await getDb();
   if (!db) return [];
   
-  const result = await db
+  const gestoresResults = await db
     .select({
       id: gestores.id,
       userId: gestores.userId,
-      createdAt: gestores.createdAt,
-      updatedAt: gestores.updatedAt,
-      user: {
-        id: users.id,
-        name: users.name,
-        email: users.email,
-        role: users.role,
-      }
+      userName: users.name,
+      userEmail: users.email,
+      userRole: users.role,
     })
     .from(gestores)
     .innerJoin(users, eq(gestores.userId, users.id));
   
-  return result;
+  return gestoresResults.map(r => ({
+    id: r.id,
+    userId: r.userId,
+    user: {
+      name: r.userName,
+      email: r.userEmail,
+      role: r.userRole
+    }
+  }));
 }
 
 export async function updateGestor(id: number): Promise<void> {
@@ -271,30 +290,57 @@ export async function getLojasByGestorId(gestorId: number): Promise<Loja[]> {
   const db = await getDb();
   if (!db) return [];
   
-  const result = await db
+  const lojasGestorResult = await db
     .select({ loja: lojas })
     .from(gestorLojas)
     .innerJoin(lojas, eq(gestorLojas.lojaId, lojas.id))
     .where(eq(gestorLojas.gestorId, gestorId));
   
-  return result.map(r => r.loja);
+  return lojasGestorResult.map(r => r.loja);
 }
 
 export async function getGestoresByLojaId(lojaId: number): Promise<Array<Gestor & { user: typeof users.$inferSelect }>> {
   const db = await getDb();
   if (!db) return [];
   
-  const result = await db
+  const gestoresLojaResult = await db
     .select({
-      gestor: gestores,
-      user: users
+      gestorId: gestores.id,
+      gestorUserId: gestores.userId,
+      gestorCreatedAt: gestores.createdAt,
+      gestorUpdatedAt: gestores.updatedAt,
+      userId: users.id,
+      userName: users.name,
+      userEmail: users.email,
+      userRole: users.role,
+      userOpenId: users.openId,
+      userLoginMethod: users.loginMethod,
+      userLastSignedIn: users.lastSignedIn,
+      userCreatedAt: users.createdAt,
+      userUpdatedAt: users.updatedAt,
     })
     .from(gestorLojas)
     .innerJoin(gestores, eq(gestorLojas.gestorId, gestores.id))
     .innerJoin(users, eq(gestores.userId, users.id))
     .where(eq(gestorLojas.lojaId, lojaId));
   
-  return result.map(r => ({ ...r.gestor, user: r.user }));
+  return gestoresLojaResult.map(r => ({
+    id: r.gestorId,
+    userId: r.gestorUserId,
+    createdAt: r.gestorCreatedAt,
+    updatedAt: r.gestorUpdatedAt,
+    user: {
+      id: r.userId,
+      name: r.userName,
+      email: r.userEmail,
+      role: r.userRole,
+      openId: r.userOpenId,
+      loginMethod: r.userLoginMethod,
+      lastSignedIn: r.userLastSignedIn,
+      createdAt: r.userCreatedAt,
+      updatedAt: r.userUpdatedAt,
+    }
+  }));
 }
 
 // ==================== RELATÓRIOS LIVRES ====================
@@ -303,8 +349,8 @@ export async function createRelatorioLivre(relatorio: InsertRelatorioLivre): Pro
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
-  const result = await db.insert(relatoriosLivres).values(relatorio);
-  const insertId = (result as any).insertId;
+  const relatorioInsertResult = await db.insert(relatoriosLivres).values(relatorio);
+  const insertId = (relatorioInsertResult as any).insertId;
   const newRelatorio = await db.select().from(relatoriosLivres).where(eq(relatoriosLivres.id, Number(insertId))).limit(1);
   return newRelatorio[0]!;
 }
@@ -320,7 +366,7 @@ export async function getAllRelatoriosLivres(): Promise<Array<RelatorioLivre & {
   const db = await getDb();
   if (!db) return [];
   
-  const result = await db
+  const relatoriosLivresResult = await db
     .select({
       relatorio: relatoriosLivres,
       loja: lojas,
@@ -333,7 +379,7 @@ export async function getAllRelatoriosLivres(): Promise<Array<RelatorioLivre & {
     .innerJoin(users, eq(gestores.userId, users.id))
     .orderBy(desc(relatoriosLivres.dataVisita));
   
-  return result.map(r => ({ ...r.relatorio, loja: r.loja, gestor: { ...r.gestor, user: r.user } }));
+  return relatoriosLivresResult.map(r => ({ ...r.relatorio, loja: r.loja, gestor: { ...r.gestor, user: r.user } }));
 }
 
 // ==================== RELATÓRIOS COMPLETOS ====================
@@ -342,8 +388,8 @@ export async function createRelatorioCompleto(relatorio: InsertRelatorioCompleto
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
-  const result = await db.insert(relatoriosCompletos).values(relatorio);
-  const insertId = (result as any).insertId;
+  const relatorioCompletoInsertResult = await db.insert(relatoriosCompletos).values(relatorio);
+  const insertId = (relatorioCompletoInsertResult as any).insertId;
   const newRelatorio = await db.select().from(relatoriosCompletos).where(eq(relatoriosCompletos.id, Number(insertId))).limit(1);
   return newRelatorio[0]!;
 }
@@ -359,7 +405,7 @@ export async function getAllRelatoriosCompletos(): Promise<Array<RelatorioComple
   const db = await getDb();
   if (!db) return [];
   
-  const result = await db
+  const relatoriosCompletosResult = await db
     .select({
       relatorio: relatoriosCompletos,
       loja: lojas,
@@ -372,14 +418,7 @@ export async function getAllRelatoriosCompletos(): Promise<Array<RelatorioComple
     .innerJoin(users, eq(gestores.userId, users.id))
     .orderBy(desc(relatoriosCompletos.dataVisita));
   
-  return result.map(r => ({ ...r.relatorio, loja: r.loja, gestor: { ...r.gestor, user: r.user } }));
-}
-
-export async function updateRelatorioCompletoEmailStatus(id: number, emailEnviado: boolean): Promise<void> {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
-  await db.update(relatoriosCompletos).set({ emailEnviado }).where(eq(relatoriosCompletos.id, id));
+  return relatoriosCompletosResult.map(r => ({ ...r.relatorio, loja: r.loja, gestor: { ...r.gestor, user: r.user } }));
 }
 
 // ==================== PENDENTES ====================
@@ -388,39 +427,24 @@ export async function createPendente(pendente: InsertPendente): Promise<Pendente
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
-  const result = await db.insert(pendentes).values(pendente);
-  const insertId = (result as any).insertId;
+  const pendenteInsertResult = await db.insert(pendentes).values(pendente);
+  const insertId = (pendenteInsertResult as any).insertId;
   const newPendente = await db.select().from(pendentes).where(eq(pendentes.id, Number(insertId))).limit(1);
   return newPendente[0]!;
+}
+
+export async function getAllPendentes(): Promise<Pendente[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.select().from(pendentes).orderBy(desc(pendentes.createdAt));
 }
 
 export async function getPendentesByLojaId(lojaId: number): Promise<Pendente[]> {
   const db = await getDb();
   if (!db) return [];
   
-  return await db.select().from(pendentes).where(
-    and(
-      eq(pendentes.lojaId, lojaId),
-      eq(pendentes.resolvido, false)
-    )
-  ).orderBy(pendentes.createdAt);
-}
-
-export async function getAllPendentes(): Promise<Array<Pendente & { loja: Loja }>> {
-  const db = await getDb();
-  if (!db) return [];
-  
-  const result = await db
-    .select({
-      pendente: pendentes,
-      loja: lojas
-    })
-    .from(pendentes)
-    .innerJoin(lojas, eq(pendentes.lojaId, lojas.id))
-    .where(eq(pendentes.resolvido, false))
-    .orderBy(pendentes.createdAt);
-  
-  return result.map(r => ({ ...r.pendente, loja: r.loja }));
+  return await db.select().from(pendentes).where(eq(pendentes.lojaId, lojaId)).orderBy(desc(pendentes.createdAt));
 }
 
 export async function resolvePendente(id: number): Promise<void> {
