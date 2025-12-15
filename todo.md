@@ -271,3 +271,13 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] D=Dashboard, L=Lojas, G=Gestores, R=Relatórios, P=Pendentes, I=IA, H=Histórico, A=Alertas
 - [x] Indicador visual dos atalhos disponíveis (botão com ícone de teclado)
 - [x] Testar todas as funcionalidades
+
+## Funcionalidades v2.8 - Sistema de Itens Não Vistos
+- [x] Adicionar campo 'visto' ao schema de relatórios livres
+- [x] Adicionar campo 'visto' ao schema de relatórios completos
+- [x] Adicionar campo 'visto' ao schema de pendentes
+- [x] Criar procedure para marcar como visto ao visualizar
+- [x] Atualizar dashboard para contar apenas itens não vistos
+- [x] Cards mostram contagem de novos (não vistos) com badge colorido
+- [x] Ao clicar no card ou ver lista, marcar como vistos automaticamente
+- [x] Testar todas as funcionalidades

@@ -949,3 +949,75 @@ export async function getThresholdPontosNegativos(): Promise<number> {
   const valor = await getConfiguracao("threshold_pontos_negativos");
   return parseInt(valor) || 3;
 }
+
+
+// ==================== FUNÇÕES DE ITENS NÃO VISTOS ====================
+
+/**
+ * Conta relatórios livres não vistos
+ */
+export async function countRelatoriosLivresNaoVistos(): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  const result = await db.select({ count: sql<number>`count(*)` })
+    .from(relatoriosLivres)
+    .where(eq(relatoriosLivres.visto, false));
+  return result[0]?.count || 0;
+}
+
+/**
+ * Conta relatórios completos não vistos
+ */
+export async function countRelatoriosCompletosNaoVistos(): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  const result = await db.select({ count: sql<number>`count(*)` })
+    .from(relatoriosCompletos)
+    .where(eq(relatoriosCompletos.visto, false));
+  return result[0]?.count || 0;
+}
+
+/**
+ * Conta pendentes não vistos (apenas não resolvidos)
+ */
+export async function countPendentesNaoVistos(): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  const result = await db.select({ count: sql<number>`count(*)` })
+    .from(pendentes)
+    .where(and(eq(pendentes.visto, false), eq(pendentes.resolvido, false)));
+  return result[0]?.count || 0;
+}
+
+/**
+ * Marca todos os relatórios livres como vistos
+ */
+export async function marcarRelatoriosLivresComoVistos(): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(relatoriosLivres)
+    .set({ visto: true })
+    .where(eq(relatoriosLivres.visto, false));
+}
+
+/**
+ * Marca todos os relatórios completos como vistos
+ */
+export async function marcarRelatoriosCompletosComoVistos(): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(relatoriosCompletos)
+    .set({ visto: true })
+    .where(eq(relatoriosCompletos.visto, false));
+}
+
+/**
+ * Marca todos os pendentes como vistos
+ */
+export async function marcarPendentesComoVistos(): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(pendentes)
+    .set({ visto: true })
+    .where(eq(pendentes.visto, false));
+}

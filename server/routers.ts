@@ -172,10 +172,16 @@ export const appRouter = router({
   relatoriosLivres: router({
     list: gestorProcedure.query(async ({ ctx }) => {
       if (ctx.user.role === 'admin') {
+        // Marcar como vistos quando admin visualiza
+        await db.marcarRelatoriosLivresComoVistos();
         return await db.getAllRelatoriosLivres();
       }
       if (!ctx.gestor) return [];
       return await db.getRelatoriosLivresByGestorId(ctx.gestor.id);
+    }),
+    
+    countNaoVistos: adminProcedure.query(async () => {
+      return await db.countRelatoriosLivresNaoVistos();
     }),
     
     create: gestorProcedure
@@ -217,10 +223,16 @@ export const appRouter = router({
   relatoriosCompletos: router({
     list: gestorProcedure.query(async ({ ctx }) => {
       if (ctx.user.role === 'admin') {
+        // Marcar como vistos quando admin visualiza
+        await db.marcarRelatoriosCompletosComoVistos();
         return await db.getAllRelatoriosCompletos();
       }
       if (!ctx.gestor) return [];
       return await db.getRelatoriosCompletosByGestorId(ctx.gestor.id);
+    }),
+    
+    countNaoVistos: adminProcedure.query(async () => {
+      return await db.countRelatoriosCompletosNaoVistos();
     }),
     
     create: gestorProcedure
@@ -297,6 +309,8 @@ export const appRouter = router({
   pendentes: router({
     list: gestorProcedure.query(async ({ ctx }) => {
       if (ctx.user.role === 'admin') {
+        // Marcar como vistos quando admin visualiza
+        await db.marcarPendentesComoVistos();
         return await db.getAllPendentes();
       }
       // Para gestores, retornar pendentes das suas lojas
@@ -308,6 +322,10 @@ export const appRouter = router({
         pendentes.push(...lojasPendentes.map(p => ({ ...p, loja })));
       }
       return pendentes;
+    }),
+    
+    countNaoVistos: adminProcedure.query(async () => {
+      return await db.countPendentesNaoVistos();
     }),
     
     getByLoja: gestorProcedure

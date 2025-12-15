@@ -76,6 +76,7 @@ export const relatoriosLivres = mysqlTable("relatorios_livres", {
   dataVisita: timestamp("dataVisita").notNull(),
   descricao: text("descricao").notNull(),
   fotos: text("fotos"), // JSON array de URLs das fotos
+  visto: boolean("visto").default(false).notNull(), // Se o admin já viu este relatório
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
@@ -109,6 +110,7 @@ export const relatoriosCompletos = mysqlTable("relatorios_completos", {
   
   emailEnviado: boolean("emailEnviado").default(false).notNull(),
   fotos: text("fotos"), // JSON array de URLs das fotos
+  visto: boolean("visto").default(false).notNull(), // Se o admin já viu este relatório
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
@@ -127,6 +129,7 @@ export const pendentes = mysqlTable("pendentes", {
   descricao: text("descricao").notNull(),
   resolvido: boolean("resolvido").default(false).notNull(),
   dataResolucao: timestamp("dataResolucao"),
+  visto: boolean("visto").default(false).notNull(), // Se o admin já viu este pendente
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

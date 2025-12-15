@@ -117,6 +117,11 @@ export default function Dashboard() {
   const { data: relatoriosLivres } = trpc.relatoriosLivres.list.useQuery();
   const { data: relatoriosCompletos } = trpc.relatoriosCompletos.list.useQuery();
   const { data: pendentes } = trpc.pendentes.list.useQuery();
+  
+  // Contagem de itens não vistos (apenas para admin)
+  const { data: relLivresNaoVistos } = trpc.relatoriosLivres.countNaoVistos.useQuery(undefined, { enabled: isAdmin });
+  const { data: relCompletosNaoVistos } = trpc.relatoriosCompletos.countNaoVistos.useQuery(undefined, { enabled: isAdmin });
+  const { data: pendentesNaoVistos } = trpc.pendentes.countNaoVistos.useQuery(undefined, { enabled: isAdmin });
 
   // Calcular pendentes antigos (mais de 7 dias)
   const pendentesAntigos = useMemo(() => {
@@ -299,11 +304,18 @@ export default function Dashboard() {
           )}
 
           <Card 
-            className={`bg-emerald-100 dark:bg-emerald-900/50 border-emerald-300 dark:border-emerald-700 cursor-pointer hover:scale-[1.02] hover:shadow-lg transition-all duration-200 ${estatisticas.relLivres.atual > estatisticas.relLivres.anterior ? 'animate-soft-pulse-emerald' : ''}`}
+            className={`bg-emerald-100 dark:bg-emerald-900/50 border-emerald-300 dark:border-emerald-700 cursor-pointer hover:scale-[1.02] hover:shadow-lg transition-all duration-200 ${(relLivresNaoVistos || 0) > 0 ? 'animate-soft-pulse-emerald' : ''}`}
             onClick={() => setLocation('/relatorios')}
           >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Relatórios Livres</CardTitle>
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                Relatórios Livres
+                {isAdmin && (relLivresNaoVistos || 0) > 0 && (
+                  <span className="bg-emerald-600 text-white text-xs px-2 py-0.5 rounded-full font-bold">
+                    {relLivresNaoVistos} novo{relLivresNaoVistos !== 1 ? 's' : ''}
+                  </span>
+                )}
+              </CardTitle>
               <ClipboardList className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
             </CardHeader>
             <CardContent>
@@ -316,11 +328,18 @@ export default function Dashboard() {
           </Card>
 
           <Card 
-            className={`bg-teal-100 dark:bg-teal-900/50 border-teal-300 dark:border-teal-700 cursor-pointer hover:scale-[1.02] hover:shadow-lg transition-all duration-200 ${estatisticas.relCompletos.atual > estatisticas.relCompletos.anterior ? 'animate-soft-pulse-teal' : ''}`}
+            className={`bg-teal-100 dark:bg-teal-900/50 border-teal-300 dark:border-teal-700 cursor-pointer hover:scale-[1.02] hover:shadow-lg transition-all duration-200 ${(relCompletosNaoVistos || 0) > 0 ? 'animate-soft-pulse-teal' : ''}`}
             onClick={() => setLocation('/relatorios')}
           >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Relatórios Completos</CardTitle>
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                Relatórios Completos
+                {isAdmin && (relCompletosNaoVistos || 0) > 0 && (
+                  <span className="bg-teal-600 text-white text-xs px-2 py-0.5 rounded-full font-bold">
+                    {relCompletosNaoVistos} novo{relCompletosNaoVistos !== 1 ? 's' : ''}
+                  </span>
+                )}
+              </CardTitle>
               <FileText className="h-4 w-4 text-teal-600 dark:text-teal-400" />
             </CardHeader>
             <CardContent>
@@ -333,11 +352,18 @@ export default function Dashboard() {
           </Card>
 
           <Card 
-            className={`bg-amber-100 dark:bg-amber-900/50 border-amber-300 dark:border-amber-700 cursor-pointer hover:scale-[1.02] hover:shadow-lg transition-all duration-200 ${estatisticas.pendentes.atual > estatisticas.pendentes.anterior ? 'animate-soft-pulse-amber' : ''}`}
+            className={`bg-amber-100 dark:bg-amber-900/50 border-amber-300 dark:border-amber-700 cursor-pointer hover:scale-[1.02] hover:shadow-lg transition-all duration-200 ${(pendentesNaoVistos || 0) > 0 ? 'animate-soft-pulse-amber' : ''}`}
             onClick={() => setLocation('/pendentes')}
           >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Pendentes</CardTitle>
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                Pendentes
+                {isAdmin && (pendentesNaoVistos || 0) > 0 && (
+                  <span className="bg-amber-600 text-white text-xs px-2 py-0.5 rounded-full font-bold">
+                    {pendentesNaoVistos} novo{pendentesNaoVistos !== 1 ? 's' : ''}
+                  </span>
+                )}
+              </CardTitle>
               <ListTodo className="h-4 w-4 text-amber-600 dark:text-amber-400" />
             </CardHeader>
             <CardContent>
