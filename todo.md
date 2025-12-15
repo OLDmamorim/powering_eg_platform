@@ -288,3 +288,13 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Toggle visual para alternar entre "Todos" e "Não vistos"
 - [x] Manter estado do filtro durante a sessão
 - [x] Testar todas as funcionalidades
+
+## Funcionalidades v3.0 - Gestão de Relatórios
+- [x] Adicionar funcionalidade de apagar relatórios livres
+- [x] Adicionar funcionalidade de apagar relatórios completos
+- [x] Adicionar funcionalidade de editar relatórios livres
+- [x] Adicionar funcionalidade de editar relatórios completos
+- [x] Reorganizar visualização para admin: mostrar "Gestor → Loja"
+- [x] Reorganizar visualização para gestor: mostrar apenas "Loja"
+- [x] Adicionar confirmação antes de apagar
+- [x] Testar todas as funcionalidades

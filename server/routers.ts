@@ -225,6 +225,56 @@ export const appRouter = router({
         
         return relatorio;
       }),
+    
+    update: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        dataVisita: z.date().optional(),
+        descricao: z.string().min(1).optional(),
+        fotos: z.string().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const relatorio = await db.getRelatorioLivreById(input.id);
+        if (!relatorio) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Relatório não encontrado' });
+        }
+        
+        // Admin pode editar qualquer relatório, gestor só os seus
+        if (ctx.user.role !== 'admin') {
+          const gestor = await db.getGestorByUserId(ctx.user.id);
+          if (!gestor || relatorio.gestorId !== gestor.id) {
+            throw new TRPCError({ code: 'FORBIDDEN', message: 'Sem permissão para editar este relatório' });
+          }
+        }
+        
+        return await db.updateRelatorioLivre(input.id, {
+          dataVisita: input.dataVisita,
+          descricao: input.descricao,
+          fotos: input.fotos,
+        });
+      }),
+    
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input, ctx }) => {
+        const relatorio = await db.getRelatorioLivreById(input.id);
+        if (!relatorio) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Relatório não encontrado' });
+        }
+        
+        // Admin pode apagar qualquer relatório, gestor só os seus
+        if (ctx.user.role !== 'admin') {
+          const gestor = await db.getGestorByUserId(ctx.user.id);
+          if (!gestor || relatorio.gestorId !== gestor.id) {
+            throw new TRPCError({ code: 'FORBIDDEN', message: 'Sem permissão para apagar este relatório' });
+          }
+        }
+        
+        // Apagar pendentes associados primeiro
+        await db.deletePendentesByRelatorio(input.id, 'livre');
+        
+        return await db.deleteRelatorioLivre(input.id);
+      }),
   }),
 
   // ==================== RELATÓRIOS COMPLETOS ====================
@@ -306,6 +356,65 @@ export const appRouter = router({
         }
         
         return relatorio;
+      }),
+    
+    update: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        dataVisita: z.date().optional(),
+        episFardamento: z.string().optional(),
+        kitPrimeirosSocorros: z.string().optional(),
+        consumiveis: z.string().optional(),
+        espacoFisico: z.string().optional(),
+        reclamacoes: z.string().optional(),
+        vendasComplementares: z.string().optional(),
+        fichasServico: z.string().optional(),
+        documentacaoObrigatoria: z.string().optional(),
+        reuniaoQuinzenal: z.boolean().optional(),
+        resumoSupervisao: z.string().optional(),
+        colaboradoresPresentes: z.string().optional(),
+        pontosPositivos: z.string().optional(),
+        pontosNegativos: z.string().optional(),
+        fotos: z.string().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const relatorio = await db.getRelatorioCompletoById(input.id);
+        if (!relatorio) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Relatório não encontrado' });
+        }
+        
+        // Admin pode editar qualquer relatório, gestor só os seus
+        if (ctx.user.role !== 'admin') {
+          const gestor = await db.getGestorByUserId(ctx.user.id);
+          if (!gestor || relatorio.gestorId !== gestor.id) {
+            throw new TRPCError({ code: 'FORBIDDEN', message: 'Sem permissão para editar este relatório' });
+          }
+        }
+        
+        const { id, ...updateData } = input;
+        return await db.updateRelatorioCompleto(id, updateData);
+      }),
+    
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input, ctx }) => {
+        const relatorio = await db.getRelatorioCompletoById(input.id);
+        if (!relatorio) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Relatório não encontrado' });
+        }
+        
+        // Admin pode apagar qualquer relatório, gestor só os seus
+        if (ctx.user.role !== 'admin') {
+          const gestor = await db.getGestorByUserId(ctx.user.id);
+          if (!gestor || relatorio.gestorId !== gestor.id) {
+            throw new TRPCError({ code: 'FORBIDDEN', message: 'Sem permissão para apagar este relatório' });
+          }
+        }
+        
+        // Apagar pendentes associados primeiro
+        await db.deletePendentesByRelatorio(input.id, 'completo');
+        
+        return await db.deleteRelatorioCompleto(input.id);
       }),
   }),
 

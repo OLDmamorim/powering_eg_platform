@@ -477,6 +477,30 @@ export async function getAllRelatoriosLivres(): Promise<Array<RelatorioLivre & {
   return relatoriosLivresResult.map(r => ({ ...r.relatorio, loja: r.loja, gestor: { ...r.gestor, user: r.user } }));
 }
 
+export async function getRelatorioLivreById(id: number): Promise<RelatorioLivre | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const result = await db.select().from(relatoriosLivres).where(eq(relatoriosLivres.id, id)).limit(1);
+  return result[0] || null;
+}
+
+export async function updateRelatorioLivre(id: number, data: Partial<InsertRelatorioLivre>): Promise<RelatorioLivre | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  await db.update(relatoriosLivres).set(data).where(eq(relatoriosLivres.id, id));
+  return await getRelatorioLivreById(id);
+}
+
+export async function deleteRelatorioLivre(id: number): Promise<boolean> {
+  const db = await getDb();
+  if (!db) return false;
+  
+  await db.delete(relatoriosLivres).where(eq(relatoriosLivres.id, id));
+  return true;
+}
+
 // ==================== RELATÓRIOS COMPLETOS ====================
 
 export async function createRelatorioCompleto(relatorio: InsertRelatorioCompleto): Promise<RelatorioCompleto> {
@@ -530,6 +554,30 @@ export async function getAllRelatoriosCompletos(): Promise<Array<RelatorioComple
     .orderBy(desc(relatoriosCompletos.dataVisita));
   
   return relatoriosCompletosResult.map(r => ({ ...r.relatorio, loja: r.loja, gestor: { ...r.gestor, user: r.user } }));
+}
+
+export async function getRelatorioCompletoById(id: number): Promise<RelatorioCompleto | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const result = await db.select().from(relatoriosCompletos).where(eq(relatoriosCompletos.id, id)).limit(1);
+  return result[0] || null;
+}
+
+export async function updateRelatorioCompleto(id: number, data: Partial<InsertRelatorioCompleto>): Promise<RelatorioCompleto | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  await db.update(relatoriosCompletos).set(data).where(eq(relatoriosCompletos.id, id));
+  return await getRelatorioCompletoById(id);
+}
+
+export async function deleteRelatorioCompleto(id: number): Promise<boolean> {
+  const db = await getDb();
+  if (!db) return false;
+  
+  await db.delete(relatoriosCompletos).where(eq(relatoriosCompletos.id, id));
+  return true;
 }
 
 // ==================== PENDENTES ====================
@@ -586,6 +634,18 @@ export async function deletePendente(id: number): Promise<void> {
   if (!db) throw new Error("Database not available");
   
   await db.delete(pendentes).where(eq(pendentes.id, id));
+}
+
+export async function deletePendentesByRelatorio(relatorioId: number, tipoRelatorio: 'livre' | 'completo'): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.delete(pendentes).where(
+    and(
+      eq(pendentes.relatorioId, relatorioId),
+      eq(pendentes.tipoRelatorio, tipoRelatorio)
+    )
+  );
 }
 
 
