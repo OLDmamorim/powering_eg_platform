@@ -358,6 +358,57 @@ export const appRouter = router({
       .query(async ({ input }) => {
         return await db.getLojasComAlertasNegativos(input?.threshold || 3);
       }),
+    
+    // Listar todos os alertas
+    list: adminProcedure.query(async () => {
+      return await db.getAllAlertas();
+    }),
+    
+    // Listar apenas alertas pendentes
+    listPendentes: adminProcedure.query(async () => {
+      return await db.getAlertasPendentes();
+    }),
+    
+    // Obter alerta por ID
+    getById: adminProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        return await db.getAlertaById(input.id);
+      }),
+    
+    // Criar novo alerta
+    create: adminProcedure
+      .input(z.object({
+        lojaId: z.number(),
+        tipo: z.enum(["pontos_negativos_consecutivos", "pendentes_antigos", "sem_visitas"]),
+        descricao: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        // Verificar se já existe alerta pendente
+        const existe = await db.existeAlertaPendente(input.lojaId, input.tipo);
+        if (existe) {
+          throw new Error("Já existe um alerta pendente deste tipo para esta loja");
+        }
+        return await db.createAlerta(input);
+      }),
+    
+    // Atualizar estado do alerta
+    updateEstado: adminProcedure
+      .input(z.object({
+        id: z.number(),
+        estado: z.enum(["pendente", "resolvido"]),
+        notasResolucao: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        return await db.updateAlertaEstado(input.id, input.estado, input.notasResolucao);
+      }),
+    
+    // Eliminar alerta
+    delete: adminProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        return await db.deleteAlerta(input.id);
+      }),
   }),
 });
 

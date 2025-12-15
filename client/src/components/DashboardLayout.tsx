@@ -28,7 +28,7 @@ import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
 import { useTheme } from "@/contexts/ThemeContext";
 import { Button } from "./ui/button";
 
-import { Building2, ClipboardList, FileText, ListTodo, Sparkles, History } from "lucide-react";
+import { Building2, ClipboardList, FileText, ListTodo, Sparkles, History, Bell } from "lucide-react";
 
 const getMenuItems = (userRole?: string) => {
   const isAdmin = userRole === "admin";
@@ -45,6 +45,7 @@ const getMenuItems = (userRole?: string) => {
     { icon: ClipboardList, label: "Meus Relatórios", path: "/meus-relatorios", show: isGestor },
     { icon: Sparkles, label: "Relatórios IA", path: "/relatorios-ia", show: true },
     { icon: History, label: "Histórico Pontos", path: "/historico-pontos", show: isAdmin },
+    { icon: Bell, label: "Alertas", path: "/alertas", show: isAdmin },
     { icon: ListTodo, label: "Pendentes", path: "/pendentes", show: true },
   ];
   
@@ -303,7 +304,7 @@ function DashboardLayoutContent({
             </button>
           )}
           <div className="fixed bottom-4 right-4 text-xs text-foreground/60 select-none pointer-events-none">
-            v2.4
+            v2.5
           </div>
         </main>
       </SidebarInset>

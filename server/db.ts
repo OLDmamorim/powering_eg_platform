@@ -20,7 +20,10 @@ import {
   InsertRelatorioCompleto,
   pendentes,
   Pendente,
-  InsertPendente
+  InsertPendente,
+  alertas,
+  Alerta,
+  InsertAlerta
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -699,4 +702,135 @@ export async function getLojasComAlertasNegativos(threshold: number = 3): Promis
   }
   
   return lojasComAlertas;
+}
+
+
+// ==================== ALERTAS ====================
+
+export async function createAlerta(data: InsertAlerta): Promise<Alerta | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  await db.insert(alertas).values(data);
+  
+  const [created] = await db
+    .select()
+    .from(alertas)
+    .where(and(
+      eq(alertas.lojaId, data.lojaId),
+      eq(alertas.tipo, data.tipo)
+    ))
+    .orderBy(desc(alertas.createdAt))
+    .limit(1);
+  
+  return created || null;
+}
+
+export async function getAlertaById(id: number): Promise<Alerta | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const [alerta] = await db
+    .select()
+    .from(alertas)
+    .where(eq(alertas.id, id));
+  
+  return alerta || null;
+}
+
+export async function getAllAlertas(): Promise<Array<Alerta & { lojaNome: string }>> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const result = await db
+    .select({
+      id: alertas.id,
+      lojaId: alertas.lojaId,
+      tipo: alertas.tipo,
+      descricao: alertas.descricao,
+      estado: alertas.estado,
+      dataResolucao: alertas.dataResolucao,
+      notasResolucao: alertas.notasResolucao,
+      createdAt: alertas.createdAt,
+      updatedAt: alertas.updatedAt,
+      lojaNome: lojas.nome,
+    })
+    .from(alertas)
+    .innerJoin(lojas, eq(alertas.lojaId, lojas.id))
+    .orderBy(desc(alertas.createdAt));
+  
+  return result;
+}
+
+export async function getAlertasPendentes(): Promise<Array<Alerta & { lojaNome: string }>> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const result = await db
+    .select({
+      id: alertas.id,
+      lojaId: alertas.lojaId,
+      tipo: alertas.tipo,
+      descricao: alertas.descricao,
+      estado: alertas.estado,
+      dataResolucao: alertas.dataResolucao,
+      notasResolucao: alertas.notasResolucao,
+      createdAt: alertas.createdAt,
+      updatedAt: alertas.updatedAt,
+      lojaNome: lojas.nome,
+    })
+    .from(alertas)
+    .innerJoin(lojas, eq(alertas.lojaId, lojas.id))
+    .where(eq(alertas.estado, "pendente"))
+    .orderBy(desc(alertas.createdAt));
+  
+  return result;
+}
+
+export async function updateAlertaEstado(
+  id: number, 
+  estado: "pendente" | "resolvido",
+  notasResolucao?: string
+): Promise<Alerta | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const updateData: Partial<Alerta> = {
+    estado,
+    notasResolucao: notasResolucao || null,
+    dataResolucao: estado === "resolvido" ? new Date() : null,
+  };
+  
+  await db
+    .update(alertas)
+    .set(updateData)
+    .where(eq(alertas.id, id));
+  
+  return getAlertaById(id);
+}
+
+export async function deleteAlerta(id: number): Promise<boolean> {
+  const db = await getDb();
+  if (!db) return false;
+  
+  await db.delete(alertas).where(eq(alertas.id, id));
+  return true;
+}
+
+// Verificar se já existe alerta pendente para uma loja
+export async function existeAlertaPendente(lojaId: number, tipo: string): Promise<boolean> {
+  const db = await getDb();
+  if (!db) return false;
+  
+  const [existing] = await db
+    .select()
+    .from(alertas)
+    .where(and(
+      eq(alertas.lojaId, lojaId),
+      eq(alertas.tipo, tipo as any),
+      eq(alertas.estado, "pendente")
+    ))
+    .limit(1);
+  
+  return !!existing;
 }

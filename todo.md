@@ -231,3 +231,11 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Exportar relatório IA para PDF
 - [x] Botão de download PDF na página de Relatórios IA
 - [x] Testar todas as funcionalidades
+
+## Funcionalidades v2.5 - Melhorias Visuais e Dashboard de Alertas
+- [x] Cores suaves nos cards do dashboard para melhor distinção visual
+- [x] Filtro por período no histórico de pontos (seletor de datas)
+- [x] Comparação entre lojas (vista lado-a-lado)
+- [x] Dashboard de alertas dedicado
+- [x] Estados de alerta: "pendente" e "resolvido"
+- [x] Testar todas as funcionalidades

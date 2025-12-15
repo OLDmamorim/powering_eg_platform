@@ -17,6 +17,7 @@ import RelatoriosIA from "./pages/RelatoriosIA";
 import Pendentes from "./pages/Pendentes";
 import LoginNaoAutorizado from "./pages/LoginNaoAutorizado";
 import HistoricoPontos from "./pages/HistoricoPontos";
+import DashboardAlertas from "./pages/DashboardAlertas";
 
 function Router() {
   return (
@@ -41,6 +42,7 @@ function Router() {
       <Route path={"/relatorios-ia"} component={RelatoriosIA} />
       <Route path={"/pendentes"} component={Pendentes} />
       <Route path={"/historico-pontos"} component={HistoricoPontos} />
+      <Route path={"/alertas"} component={DashboardAlertas} />
       
       <Route path={"/login-nao-autorizado"} component={LoginNaoAutorizado} />
       <Route path={"/404"} component={NotFound} />

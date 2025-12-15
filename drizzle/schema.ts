@@ -133,3 +133,22 @@ export const pendentes = mysqlTable("pendentes", {
 
 export type Pendente = typeof pendentes.$inferSelect;
 export type InsertPendente = typeof pendentes.$inferInsert;
+
+
+/**
+ * Alertas - Alertas gerados automaticamente para lojas com problemas
+ */
+export const alertas = mysqlTable("alertas", {
+  id: int("id").autoincrement().primaryKey(),
+  lojaId: int("lojaId").notNull(), // FK para lojas.id
+  tipo: mysqlEnum("tipo", ["pontos_negativos_consecutivos", "pendentes_antigos", "sem_visitas"]).notNull(),
+  descricao: text("descricao").notNull(),
+  estado: mysqlEnum("estado", ["pendente", "resolvido"]).default("pendente").notNull(),
+  dataResolucao: timestamp("dataResolucao"),
+  notasResolucao: text("notasResolucao"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Alerta = typeof alertas.$inferSelect;
+export type InsertAlerta = typeof alertas.$inferInsert;
