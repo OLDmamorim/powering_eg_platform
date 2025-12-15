@@ -263,3 +263,11 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Navegar para página correspondente ao clicar
 - [x] Adicionar efeito hover para indicar interatividade
 - [x] Testar navegação
+
+## Funcionalidades v2.7 - Breadcrumbs e Atalhos de Teclado
+- [x] Breadcrumbs de navegação no topo das páginas
+- [x] Trilho de navegação para facilitar retorno
+- [x] Atalhos de teclado para navegação rápida
+- [x] D=Dashboard, L=Lojas, G=Gestores, R=Relatórios, P=Pendentes, I=IA, H=Histórico, A=Alertas
+- [x] Indicador visual dos atalhos disponíveis (botão com ícone de teclado)
+- [x] Testar todas as funcionalidades

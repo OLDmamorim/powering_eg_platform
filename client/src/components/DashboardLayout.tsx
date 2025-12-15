@@ -28,6 +28,9 @@ import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
 import { useTheme } from "@/contexts/ThemeContext";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
+import { KeyboardShortcutsHelp } from "@/components/KeyboardShortcutsHelp";
 import { Button } from "./ui/button";
 
 import { Building2, ClipboardList, FileText, ListTodo, Sparkles, History, Bell, Settings } from "lucide-react";
@@ -147,6 +150,9 @@ function DashboardLayoutContent({
     refetchInterval: 30000, // Atualizar a cada 30 segundos
   });
   const alertasCount = alertasPendentes?.length || 0;
+  
+  // Atalhos de teclado
+  useKeyboardShortcuts();
 
   useEffect(() => {
     if (isCollapsed) {
@@ -314,6 +320,7 @@ function DashboardLayoutContent({
           </div>
         )}
         <main className="flex-1 p-4 relative">
+          <Breadcrumbs />
           {children}
           {switchable && (
             <button
@@ -324,8 +331,9 @@ function DashboardLayoutContent({
               {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
             </button>
           )}
+          <KeyboardShortcutsHelp />
           <div className="fixed bottom-4 right-4 text-xs text-foreground/60 select-none pointer-events-none">
-            v2.6.3
+            v2.7
           </div>
         </main>
       </SidebarInset>
