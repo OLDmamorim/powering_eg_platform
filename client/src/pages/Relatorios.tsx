@@ -26,11 +26,14 @@ export default function Relatorios() {
   const [filtroDataInicio, setFiltroDataInicio] = useState<string>("");
   const [filtroDataFim, setFiltroDataFim] = useState<string>("");
   const [showFilters, setShowFilters] = useState(false);
+  const [apenasNaoVistos, setApenasNaoVistos] = useState(false);
 
   const { data: relatoriosLivres, isLoading: loadingLivres } =
-    trpc.relatoriosLivres.list.useQuery();
+    trpc.relatoriosLivres.list.useQuery({ apenasNaoVistos });
   const { data: relatoriosCompletos, isLoading: loadingCompletos } =
-    trpc.relatoriosCompletos.list.useQuery();
+    trpc.relatoriosCompletos.list.useQuery({ apenasNaoVistos });
+  const { data: countLivresNaoVistos } = trpc.relatoriosLivres.countNaoVistos.useQuery();
+  const { data: countCompletosNaoVistos } = trpc.relatoriosCompletos.countNaoVistos.useQuery();
   const { data: lojas } = trpc.lojas.list.useQuery();
   const { data: gestores } = trpc.gestores.list.useQuery();
 
@@ -278,6 +281,25 @@ export default function Relatorios() {
         {showFilters && (
           <Card>
             <CardContent className="pt-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setApenasNaoVistos(!apenasNaoVistos)}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                      apenasNaoVistos 
+                        ? 'bg-primary text-primary-foreground' 
+                        : 'bg-muted hover:bg-muted/80'
+                    }`}
+                  >
+                    {apenasNaoVistos ? '✓ Apenas Não Vistos' : 'Mostrar Apenas Não Vistos'}
+                  </button>
+                  {(countLivresNaoVistos || 0) + (countCompletosNaoVistos || 0) > 0 && (
+                    <Badge variant="destructive">
+                      {(countLivresNaoVistos || 0) + (countCompletosNaoVistos || 0)} por ver
+                    </Badge>
+                  )}
+                </div>
+              </div>
               <div className="grid gap-4 md:grid-cols-4">
                 <div className="space-y-2">
                   <Label>Loja</Label>
@@ -304,7 +326,7 @@ export default function Relatorios() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">Todos os gestores</SelectItem>
-                      {gestores?.map((gestor: any) => (
+                      {gestores?.filter((g: any) => g.gestorId).map((gestor: any) => (
                         <SelectItem key={gestor.gestorId} value={gestor.gestorId.toString()}>
                           {gestor.userName}
                         </SelectItem>

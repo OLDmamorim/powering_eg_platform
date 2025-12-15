@@ -4,14 +4,19 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { trpc } from "@/lib/trpc";
-import { Building2, Check, Trash2 } from "lucide-react";
+import { Building2, Check, Trash2, Filter } from "lucide-react";
 import { toast } from "sonner";
+import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
 
 export default function Pendentes() {
   const { user } = useAuth();
   const utils = trpc.useUtils();
+  const [apenasNaoVistos, setApenasNaoVistos] = useState(false);
+  const isAdmin = user?.role === 'admin';
 
-  const { data: pendentes, isLoading } = trpc.pendentes.list.useQuery();
+  const { data: pendentes, isLoading } = trpc.pendentes.list.useQuery({ apenasNaoVistos });
+  const { data: countNaoVistos } = trpc.pendentes.countNaoVistos.useQuery(undefined, { enabled: isAdmin });
 
   const resolveMutation = trpc.pendentes.resolve.useMutation({
     onSuccess: () => {
@@ -59,11 +64,33 @@ export default function Pendentes() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Pendentes</h1>
-          <p className="text-muted-foreground">
-            Items a serem revistos nas próximas visitas
-          </p>
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Pendentes</h1>
+            <p className="text-muted-foreground">
+              Items a serem revistos nas próximas visitas
+            </p>
+          </div>
+          {isAdmin && (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setApenasNaoVistos(!apenasNaoVistos)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
+                  apenasNaoVistos 
+                    ? 'bg-primary text-primary-foreground' 
+                    : 'bg-muted hover:bg-muted/80'
+                }`}
+              >
+                <Filter className="h-4 w-4" />
+                {apenasNaoVistos ? '✓ Apenas Não Vistos' : 'Mostrar Apenas Não Vistos'}
+              </button>
+              {(countNaoVistos || 0) > 0 && (
+                <Badge variant="destructive">
+                  {countNaoVistos} por ver
+                </Badge>
+              )}
+            </div>
+          )}
         </div>
 
         {isLoading ? (

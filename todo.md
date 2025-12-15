@@ -281,3 +281,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Cards mostram contagem de novos (não vistos) com badge colorido
 - [x] Ao clicar no card ou ver lista, marcar como vistos automaticamente
 - [x] Testar todas as funcionalidades
+
+## Funcionalidades v2.9 - Filtro de Não Vistos
+- [x] Adicionar opção de filtrar apenas itens não vistos na lista de relatórios
+- [x] Adicionar opção de filtrar apenas itens não vistos na lista de pendentes
+- [x] Toggle visual para alternar entre "Todos" e "Não vistos"
+- [x] Manter estado do filtro durante a sessão
+- [x] Testar todas as funcionalidades

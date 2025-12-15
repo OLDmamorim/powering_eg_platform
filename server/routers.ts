@@ -170,11 +170,19 @@ export const appRouter = router({
 
   // ==================== RELATÓRIOS LIVRES ====================
   relatoriosLivres: router({
-    list: gestorProcedure.query(async ({ ctx }) => {
+    list: gestorProcedure
+      .input(z.object({ apenasNaoVistos: z.boolean().optional() }).optional())
+      .query(async ({ ctx, input }) => {
       if (ctx.user.role === 'admin') {
-        // Marcar como vistos quando admin visualiza
-        await db.marcarRelatoriosLivresComoVistos();
-        return await db.getAllRelatoriosLivres();
+        // Se filtro ativo, não marcar como vistos
+        if (!input?.apenasNaoVistos) {
+          await db.marcarRelatoriosLivresComoVistos();
+        }
+        const todos = await db.getAllRelatoriosLivres();
+        if (input?.apenasNaoVistos) {
+          return todos.filter((r: any) => !r.visto);
+        }
+        return todos;
       }
       if (!ctx.gestor) return [];
       return await db.getRelatoriosLivresByGestorId(ctx.gestor.id);
@@ -221,11 +229,19 @@ export const appRouter = router({
 
   // ==================== RELATÓRIOS COMPLETOS ====================
   relatoriosCompletos: router({
-    list: gestorProcedure.query(async ({ ctx }) => {
+    list: gestorProcedure
+      .input(z.object({ apenasNaoVistos: z.boolean().optional() }).optional())
+      .query(async ({ ctx, input }) => {
       if (ctx.user.role === 'admin') {
-        // Marcar como vistos quando admin visualiza
-        await db.marcarRelatoriosCompletosComoVistos();
-        return await db.getAllRelatoriosCompletos();
+        // Se filtro ativo, não marcar como vistos
+        if (!input?.apenasNaoVistos) {
+          await db.marcarRelatoriosCompletosComoVistos();
+        }
+        const todos = await db.getAllRelatoriosCompletos();
+        if (input?.apenasNaoVistos) {
+          return todos.filter((r: any) => !r.visto);
+        }
+        return todos;
       }
       if (!ctx.gestor) return [];
       return await db.getRelatoriosCompletosByGestorId(ctx.gestor.id);
@@ -307,11 +323,19 @@ export const appRouter = router({
 
   // ==================== PENDENTES ====================
   pendentes: router({
-    list: gestorProcedure.query(async ({ ctx }) => {
+    list: gestorProcedure
+      .input(z.object({ apenasNaoVistos: z.boolean().optional() }).optional())
+      .query(async ({ ctx, input }) => {
       if (ctx.user.role === 'admin') {
-        // Marcar como vistos quando admin visualiza
-        await db.marcarPendentesComoVistos();
-        return await db.getAllPendentes();
+        // Se filtro ativo, não marcar como vistos
+        if (!input?.apenasNaoVistos) {
+          await db.marcarPendentesComoVistos();
+        }
+        const todos = await db.getAllPendentes();
+        if (input?.apenasNaoVistos) {
+          return todos.filter((p: any) => !p.visto && !p.resolvido);
+        }
+        return todos;
       }
       // Para gestores, retornar pendentes das suas lojas
       if (!ctx.gestor) return [];
