@@ -278,7 +278,7 @@ function DashboardLayoutContent({
         <main className="flex-1 p-4 relative">
           {children}
           <div className="fixed bottom-4 right-4 text-xs text-black/60 select-none pointer-events-none">
-            v1.9.1
+            v1.9.2
           </div>
         </main>
       </SidebarInset>

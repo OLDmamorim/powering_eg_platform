@@ -176,3 +176,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Corrigir função createLoja no db.ts (com fallback)
 - [x] Corrigir função createPendente no db.ts (com fallback)
 - [ ] Testar criação de relatório livre
+
+## Funcionalidade v1.9.2 - Relatórios em Cards Expansíveis
+- [x] Alterar página Relatórios (admin) para mostrar cards compactos
+- [x] Alterar página MeusRelatorios (gestor) para mostrar cards compactos
+- [x] Implementar expansão ao clicar para ver conteúdo completo (Collapsible)
+- [x] Testar visualização em ambas as páginas
