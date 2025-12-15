@@ -265,6 +265,22 @@ export async function deleteGestor(id: number): Promise<void> {
   await db.delete(gestores).where(eq(gestores.id, id));
 }
 
+export async function promoteGestorToAdmin(gestorId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  // Buscar gestor para obter userId
+  const gestorResult = await db.select().from(gestores).where(eq(gestores.id, gestorId)).limit(1);
+  if (gestorResult.length === 0) {
+    throw new Error("Gestor não encontrado");
+  }
+  
+  const gestor = gestorResult[0];
+  
+  // Atualizar role do user para admin
+  await db.update(users).set({ role: 'admin' }).where(eq(users.id, gestor.userId));
+}
+
 // ==================== GESTOR-LOJAS ====================
 
 export async function associateGestorLoja(gestorId: number, lojaId: number): Promise<void> {

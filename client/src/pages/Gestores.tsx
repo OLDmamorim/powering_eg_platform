@@ -22,7 +22,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { DialogFooter } from "@/components/ui/dialog";
 import { trpc } from "@/lib/trpc";
-import { Building2, Edit, Plus, Trash2, User } from "lucide-react";
+import { Building2, Edit, Plus, Trash2, User, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
@@ -86,6 +86,16 @@ export default function Gestores() {
     },
   });
 
+  const promoteMutation = trpc.gestores.promoteToAdmin.useMutation({
+    onSuccess: () => {
+      toast.success("Gestor promovido a Admin com sucesso");
+      utils.gestores.list.invalidate();
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
   if (user?.role !== "admin") {
     setLocation("/dashboard");
     return null;
@@ -113,6 +123,16 @@ export default function Gestores() {
       )
     ) {
       deleteMutation.mutate({ id });
+    }
+  };
+
+  const handlePromote = (gestorId: number, gestorName: string) => {
+    if (
+      confirm(
+        `Tem a certeza que deseja promover ${gestorName} a Admin? Esta ação dará acesso total ao sistema.`
+      )
+    ) {
+      promoteMutation.mutate({ gestorId });
     }
   };
 
@@ -171,6 +191,16 @@ export default function Gestores() {
                           >
                             <Building2 className="h-4 w-4" />
                           </Button>
+                          {gestor.user.role !== "admin" && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handlePromote(gestor.id, gestor.user.name)}
+                              title="Promover a Admin"
+                            >
+                              <ShieldCheck className="h-4 w-4 text-green-600" />
+                            </Button>
+                          )}
                           <Button
                             variant="ghost"
                             size="icon"

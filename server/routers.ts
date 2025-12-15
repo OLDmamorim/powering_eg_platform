@@ -150,6 +150,13 @@ export const appRouter = router({
       .query(async ({ input }) => {
         return await db.getLojasByGestorId(input.gestorId);
       }),
+    
+    promoteToAdmin: adminProcedure
+      .input(z.object({ gestorId: z.number() }))
+      .mutation(async ({ input }) => {
+        await db.promoteGestorToAdmin(input.gestorId);
+        return { success: true };
+      }),
   }),
 
   // ==================== RELATÓRIOS LIVRES ====================

@@ -146,3 +146,11 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Corrigir resolvePendente() - usar dataResolucao em vez de resolvidoEm
 - [x] Testar criação de gestor com sucesso (Fábio Dias criado)
 - [x] Verificar listagem de gestores sem erros SQL
+
+## Funcionalidade de Promoção a Admin v1.8
+- [x] Adicionar função promoteGestorToAdmin() no backend (server/db.ts)
+- [x] Adicionar mutation promoteToAdmin no router de gestores (server/routers.ts)
+- [x] Adicionar botão "Promover a Admin" na página Gestores (frontend)
+- [x] Adicionar diálogo de confirmação antes de promover
+- [x] Testar promoção de gestor a admin (3 testes passaram)
+- [x] Criar checkpoint v1.8
