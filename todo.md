@@ -314,3 +314,11 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Admin: Dicas baseadas em novos relatórios, pendentes, alertas e dados da plataforma
 - [x] Gestores: Dicas de gestão, motivação e boas práticas para as lojas
 - [x] Testar ambos os tipos de dicas
+
+## Funcionalidade v3.2 - Envio de Relatório por Email
+- [x] Adicionar campo de email ao cadastro de lojas (já existe)
+- [x] Criar serviço de geração de HTML do relatório
+- [x] Criar serviço de envio de email
+- [x] Adicionar botão "Enviar" no final de cada relatório livre
+- [x] Mostrar confirmação após envio bem-sucedido (toast)
+- [x] Testar funcionalidade completa

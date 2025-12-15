@@ -11,7 +11,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { trpc } from "@/lib/trpc";
-import { Building2, Calendar, User, ChevronDown, ChevronUp, FileText, ClipboardList, Filter, Download, Image, X, Pencil, Trash2 } from "lucide-react";
+import { Building2, Calendar, User, ChevronDown, ChevronUp, FileText, ClipboardList, Filter, Download, Image, X, Pencil, Trash2, Mail, Loader2 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useState, useMemo } from "react";
 import { toast } from "sonner";
@@ -91,6 +91,15 @@ export default function Relatorios() {
     },
     onError: (error) => {
       toast.error(error.message || "Erro ao eliminar relatório");
+    }
+  });
+
+  const enviarEmailLivreMutation = trpc.relatoriosLivres.enviarEmail.useMutation({
+    onSuccess: (data) => {
+      toast.success(`Relatório enviado para ${data.email}`);
+    },
+    onError: (error) => {
+      toast.error(error.message || "Erro ao enviar email");
     }
   });
 
@@ -570,6 +579,23 @@ export default function Relatorios() {
                               >
                                 <Download className="h-3 w-3" />
                                 PDF
+                              </Button>
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  enviarEmailLivreMutation.mutate({ id: relatorio.id });
+                                }}
+                                disabled={enviarEmailLivreMutation.isPending}
+                                className="gap-1 text-blue-600 hover:text-blue-700 dark:text-blue-400"
+                              >
+                                {enviarEmailLivreMutation.isPending ? (
+                                  <Loader2 className="h-3 w-3 animate-spin" />
+                                ) : (
+                                  <Mail className="h-3 w-3" />
+                                )}
+                                Enviar
                               </Button>
                             </div>
                           </div>

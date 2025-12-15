@@ -6,6 +6,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import * as db from "./db";
 import { gerarRelatorioComIA, gerarDicaDashboard } from "./aiService";
+import { sendEmail, gerarHTMLRelatorioLivre, gerarHTMLRelatorioCompleto } from "./emailService";
 import { enviarResumoSemanal, verificarENotificarAlertas } from "./weeklyReport";
 
 // Middleware para verificar se o utilizador é admin
@@ -274,6 +275,52 @@ export const appRouter = router({
         await db.deletePendentesByRelatorio(input.id, 'livre');
         
         return await db.deleteRelatorioLivre(input.id);
+      }),
+    
+    enviarEmail: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const relatorio = await db.getRelatorioLivreById(input.id);
+        if (!relatorio) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Relatório não encontrado' });
+        }
+        
+        // Obter dados da loja e gestor
+        const loja = await db.getLojaById(relatorio.lojaId);
+        const gestor = await db.getGestorById(relatorio.gestorId);
+        
+        if (!loja) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Loja não encontrada' });
+        }
+        
+        if (!loja.email) {
+          throw new TRPCError({ code: 'BAD_REQUEST', message: 'A loja não tem email configurado' });
+        }
+        
+        // Obter pendentes do relatório
+        const pendentes = await db.getPendentesByRelatorio(input.id, 'livre');
+        
+        // Gerar HTML do relatório
+        const html = gerarHTMLRelatorioLivre({
+          lojaNome: loja.nome,
+          gestorNome: gestor?.nome || 'Desconhecido',
+          dataVisita: relatorio.dataVisita,
+          observacoes: relatorio.descricao || '',
+          pendentes: pendentes.map(p => ({ descricao: p.descricao, resolvido: p.resolvido })),
+        });
+        
+        // Enviar email
+        const enviado = await sendEmail({
+          to: loja.email,
+          subject: `Relatório de Visita - ${loja.nome} - ${new Date(relatorio.dataVisita).toLocaleDateString('pt-PT')}`,
+          html,
+        });
+        
+        if (!enviado) {
+          throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Falha ao enviar email' });
+        }
+        
+        return { success: true, email: loja.email };
       }),
   }),
 

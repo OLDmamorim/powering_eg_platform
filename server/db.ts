@@ -284,6 +284,26 @@ export async function getGestorByUserId(userId: number): Promise<Gestor | undefi
   return gestorResult[0];
 }
 
+export async function getGestorById(id: number): Promise<{ id: number; nome: string } | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  
+  const result = await db
+    .select({
+      id: gestores.id,
+      nome: users.name,
+    })
+    .from(gestores)
+    .innerJoin(users, eq(gestores.userId, users.id))
+    .where(eq(gestores.id, id))
+    .limit(1);
+  
+  if (result[0]) {
+    return { id: result[0].id, nome: result[0].nome || 'Desconhecido' };
+  }
+  return undefined;
+}
+
 export async function getAllGestores(): Promise<any[]> {
   const db = await getDb();
   if (!db) return [];
@@ -634,6 +654,17 @@ export async function deletePendente(id: number): Promise<void> {
   if (!db) throw new Error("Database not available");
   
   await db.delete(pendentes).where(eq(pendentes.id, id));
+}
+
+export async function getPendentesByRelatorio(relatorioId: number, tipoRelatorio: 'livre' | 'completo'): Promise<Pendente[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.select().from(pendentes)
+    .where(and(
+      eq(pendentes.relatorioId, relatorioId),
+      eq(pendentes.tipoRelatorio, tipoRelatorio)
+    ));
 }
 
 export async function deletePendentesByRelatorio(relatorioId: number, tipoRelatorio: 'livre' | 'completo'): Promise<void> {
