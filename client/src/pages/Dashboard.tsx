@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { trpc } from "@/lib/trpc";
-import { Building2, ClipboardList, FileText, ListTodo, AlertTriangle, TrendingUp, TrendingDown, Calendar, Download, Minus, Sparkles, RefreshCw } from "lucide-react";
+import { Building2, ClipboardList, FileText, ListTodo, AlertTriangle, TrendingUp, TrendingDown, Calendar, Download, Minus, Sparkles, RefreshCw, Activity, Eye, Zap, MapPin, Clock, CheckCircle, XCircle } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useLocation } from "wouter";
 
@@ -125,6 +125,13 @@ export default function Dashboard() {
   
   // Contagem de alertas pendentes
   const { data: alertas } = trpc.alertas.list.useQuery();
+  
+  // Previsões e Feed de Atividades (apenas admin)
+  const { data: previsoes, isLoading: previsoesLoading, refetch: refetchPrevisoes } = trpc.previsoes.list.useQuery(undefined, { enabled: isAdmin });
+  const { data: atividades, isLoading: atividadesLoading } = trpc.atividades.list.useQuery({ limite: 20 }, { enabled: isAdmin });
+  const gerarPrevisoesMutation = trpc.previsoes.gerarEGuardar.useMutation({
+    onSuccess: () => refetchPrevisoes(),
+  });
   const alertasPendentes = alertas?.filter((a: any) => a.status === 'pendente').length || 0;
   
   // Calcular totais para dica IA
@@ -453,6 +460,161 @@ export default function Dashboard() {
             </CardContent>
           </Card>
         </div>
+
+{/* Seção de Previsões e Feed de Atividades - Apenas Admin */}
+        {isAdmin && (
+          <div className="grid gap-4 md:grid-cols-2">
+            {/* Card de Previsões da IA */}
+            <Card className="border-purple-200 dark:border-purple-800">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <Eye className="h-4 w-4 text-purple-600" />
+                  Previsões da Semana
+                </CardTitle>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => gerarPrevisoesMutation.mutate()}
+                  disabled={gerarPrevisoesMutation.isPending}
+                  className="text-purple-600 border-purple-300 hover:bg-purple-50"
+                >
+                  {gerarPrevisoesMutation.isPending ? (
+                    <RefreshCw className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Zap className="h-4 w-4" />
+                  )}
+                  <span className="ml-1">Analisar</span>
+                </Button>
+              </CardHeader>
+              <CardContent>
+                {previsoesLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <RefreshCw className="h-6 w-6 animate-spin text-muted-foreground" />
+                  </div>
+                ) : previsoes && previsoes.length > 0 ? (
+                  <div className="space-y-3">
+                    {previsoes.slice(0, 5).map((previsao: any) => (
+                      <div
+                        key={previsao.id}
+                        className={`p-3 rounded-lg border ${
+                          previsao.probabilidade >= 70
+                            ? 'bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800'
+                            : previsao.probabilidade >= 40
+                            ? 'bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800'
+                            : 'bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <MapPin className="h-3 w-3 text-muted-foreground" />
+                              <span className="text-sm font-medium">{previsao.lojaNome}</span>
+                              <span className={`text-xs px-1.5 py-0.5 rounded ${
+                                previsao.probabilidade >= 70
+                                  ? 'bg-red-500 text-white'
+                                  : previsao.probabilidade >= 40
+                                  ? 'bg-amber-500 text-white'
+                                  : 'bg-blue-500 text-white'
+                              }`}>
+                                {previsao.probabilidade}%
+                              </span>
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-1">{previsao.descricao}</p>
+                            {previsao.sugestaoAcao && (
+                              <p className="text-xs text-purple-600 dark:text-purple-400 mt-1 flex items-center gap-1">
+                                <Sparkles className="h-3 w-3" />
+                                {previsao.sugestaoAcao}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <Eye className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                    <p className="text-sm text-muted-foreground">Nenhuma previsão ativa</p>
+                    <p className="text-xs text-muted-foreground mt-1">Clique em "Analisar" para gerar previsões</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Card de Feed de Atividades */}
+            <Card className="border-indigo-200 dark:border-indigo-800">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Activity className="h-4 w-4 text-indigo-600" />
+                  Feed de Atividades
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {atividadesLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <RefreshCw className="h-6 w-6 animate-spin text-muted-foreground" />
+                  </div>
+                ) : atividades && atividades.length > 0 ? (
+                  <div className="space-y-3 max-h-80 overflow-y-auto">
+                    {atividades.map((atividade: any) => {
+                      const tipoIcons: Record<string, any> = {
+                        visita_realizada: <MapPin className="h-3 w-3 text-green-600" />,
+                        relatorio_livre: <ClipboardList className="h-3 w-3 text-emerald-600" />,
+                        relatorio_completo: <FileText className="h-3 w-3 text-teal-600" />,
+                        pendente_criado: <ListTodo className="h-3 w-3 text-amber-600" />,
+                        pendente_resolvido: <CheckCircle className="h-3 w-3 text-green-600" />,
+                        alerta_gerado: <AlertTriangle className="h-3 w-3 text-red-600" />,
+                        alerta_resolvido: <CheckCircle className="h-3 w-3 text-green-600" />,
+                        gestor_criado: <Building2 className="h-3 w-3 text-blue-600" />,
+                        loja_criada: <Building2 className="h-3 w-3 text-purple-600" />,
+                      };
+                      const icon = tipoIcons[atividade.tipo] || <Activity className="h-3 w-3" />;
+                      
+                      return (
+                        <div key={atividade.id} className="flex items-start gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors">
+                          <div className="mt-0.5 p-1.5 rounded-full bg-muted">
+                            {icon}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm">
+                              {atividade.gestorNome && (
+                                <span className="font-medium">{atividade.gestorNome}</span>
+                              )}
+                              {atividade.gestorNome && ' - '}
+                              {atividade.descricao}
+                            </p>
+                            <div className="flex items-center gap-2 mt-0.5">
+                              {atividade.lojaNome && (
+                                <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                  <MapPin className="h-2.5 w-2.5" />
+                                  {atividade.lojaNome}
+                                </span>
+                              )}
+                              <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                <Clock className="h-2.5 w-2.5" />
+                                {new Date(atividade.createdAt).toLocaleString('pt-PT', { 
+                                  day: '2-digit', 
+                                  month: '2-digit', 
+                                  hour: '2-digit', 
+                                  minute: '2-digit' 
+                                })}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <Activity className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                    <p className="text-sm text-muted-foreground">Nenhuma atividade registada</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
         <div className="grid gap-4 md:grid-cols-2">
           <Card>

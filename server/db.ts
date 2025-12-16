@@ -26,7 +26,19 @@ import {
   InsertAlerta,
   configuracoesAlertas,
   ConfiguracaoAlerta,
-  InsertConfiguracaoAlerta
+  InsertConfiguracaoAlerta,
+  atividades,
+  Atividade,
+  InsertAtividade,
+  previsoes,
+  Previsao,
+  InsertPrevisao,
+  sugestoesMelhoria,
+  SugestaoMelhoria,
+  InsertSugestaoMelhoria,
+  planosVisitas,
+  PlanoVisitas,
+  InsertPlanoVisitas
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -643,6 +655,14 @@ export async function getPendentesByLojaId(lojaId: number): Promise<Pendente[]> 
   return await db.select().from(pendentes).where(eq(pendentes.lojaId, lojaId)).orderBy(desc(pendentes.createdAt));
 }
 
+export async function getPendenteById(id: number): Promise<Pendente | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  
+  const result = await db.select().from(pendentes).where(eq(pendentes.id, id)).limit(1);
+  return result[0];
+}
+
 export async function resolvePendente(id: number): Promise<void> {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
@@ -1115,4 +1135,430 @@ export async function marcarPendentesComoVistos(): Promise<void> {
   await db.update(pendentes)
     .set({ visto: true })
     .where(eq(pendentes.visto, false));
+}
+
+
+// ==================== ATIVIDADES ====================
+
+/**
+ * Registar uma nova atividade no feed
+ */
+export async function registarAtividade(data: {
+  gestorId?: number;
+  lojaId?: number;
+  tipo: InsertAtividade['tipo'];
+  descricao: string;
+  metadata?: Record<string, any>;
+}): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  
+  await db.insert(atividades).values({
+    gestorId: data.gestorId || null,
+    lojaId: data.lojaId || null,
+    tipo: data.tipo,
+    descricao: data.descricao,
+    metadata: data.metadata ? JSON.stringify(data.metadata) : null,
+  });
+}
+
+/**
+ * Obter atividades recentes (para o feed do admin)
+ */
+export async function getAtividadesRecentes(limite: number = 50): Promise<any[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const result = await db.select({
+    id: atividades.id,
+    gestorId: atividades.gestorId,
+    lojaId: atividades.lojaId,
+    tipo: atividades.tipo,
+    descricao: atividades.descricao,
+    metadata: atividades.metadata,
+    createdAt: atividades.createdAt,
+  })
+    .from(atividades)
+    .orderBy(desc(atividades.createdAt))
+    .limit(limite);
+  
+  // Enriquecer com nomes de gestores e lojas
+  const enriched = await Promise.all(result.map(async (ativ) => {
+    let gestorNome = null;
+    let lojaNome = null;
+    
+    if (ativ.gestorId) {
+      const gestor = await getGestorById(ativ.gestorId);
+      gestorNome = gestor?.nome || 'Gestor';
+    }
+    
+    if (ativ.lojaId) {
+      const loja = await getLojaById(ativ.lojaId);
+      lojaNome = loja?.nome || 'Loja';
+    }
+    
+    return {
+      ...ativ,
+      gestorNome,
+      lojaNome,
+      metadata: ativ.metadata ? JSON.parse(ativ.metadata) : null,
+    };
+  }));
+  
+  return enriched;
+}
+
+// ==================== PREVISÕES ====================
+
+/**
+ * Criar uma nova previsão
+ */
+export async function criarPrevisao(data: {
+  lojaId: number;
+  tipo: InsertPrevisao['tipo'];
+  descricao: string;
+  probabilidade?: number;
+  sugestaoAcao?: string;
+  validaAte?: Date;
+}): Promise<{ id: number }> {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  
+  const result = await db.insert(previsoes).values({
+    lojaId: data.lojaId,
+    tipo: data.tipo,
+    descricao: data.descricao,
+    probabilidade: data.probabilidade || null,
+    sugestaoAcao: data.sugestaoAcao || null,
+    validaAte: data.validaAte || null,
+  });
+  
+  return { id: Number(result[0].insertId) };
+}
+
+/**
+ * Obter previsões ativas
+ */
+export async function getPrevisoesAtivas(): Promise<any[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const result = await db.select({
+    id: previsoes.id,
+    lojaId: previsoes.lojaId,
+    tipo: previsoes.tipo,
+    descricao: previsoes.descricao,
+    probabilidade: previsoes.probabilidade,
+    sugestaoAcao: previsoes.sugestaoAcao,
+    estado: previsoes.estado,
+    validaAte: previsoes.validaAte,
+    createdAt: previsoes.createdAt,
+  })
+    .from(previsoes)
+    .where(eq(previsoes.estado, 'ativa'))
+    .orderBy(desc(previsoes.probabilidade));
+  
+  // Enriquecer com nome da loja
+  const enriched = await Promise.all(result.map(async (prev) => {
+    const loja = await getLojaById(prev.lojaId);
+    return {
+      ...prev,
+      lojaNome: loja?.nome || 'Loja',
+    };
+  }));
+  
+  return enriched;
+}
+
+/**
+ * Atualizar estado de uma previsão
+ */
+export async function atualizarEstadoPrevisao(id: number, estado: 'ativa' | 'confirmada' | 'descartada'): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  
+  await db.update(previsoes)
+    .set({ estado })
+    .where(eq(previsoes.id, id));
+}
+
+// ==================== SUGESTÕES DE MELHORIA ====================
+
+/**
+ * Criar uma sugestão de melhoria
+ */
+export async function criarSugestaoMelhoria(data: {
+  relatorioId: number;
+  tipoRelatorio: 'livre' | 'completo';
+  lojaId: number;
+  gestorId: number;
+  sugestao: string;
+  categoria: InsertSugestaoMelhoria['categoria'];
+  prioridade?: 'baixa' | 'media' | 'alta';
+}): Promise<{ id: number }> {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  
+  const result = await db.insert(sugestoesMelhoria).values({
+    relatorioId: data.relatorioId,
+    tipoRelatorio: data.tipoRelatorio,
+    lojaId: data.lojaId,
+    gestorId: data.gestorId,
+    sugestao: data.sugestao,
+    categoria: data.categoria,
+    prioridade: data.prioridade || 'media',
+  });
+  
+  return { id: Number(result[0].insertId) };
+}
+
+/**
+ * Obter sugestões de melhoria por relatório
+ */
+export async function getSugestoesByRelatorio(relatorioId: number, tipoRelatorio: 'livre' | 'completo'): Promise<any[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.select()
+    .from(sugestoesMelhoria)
+    .where(and(
+      eq(sugestoesMelhoria.relatorioId, relatorioId),
+      eq(sugestoesMelhoria.tipoRelatorio, tipoRelatorio)
+    ))
+    .orderBy(desc(sugestoesMelhoria.createdAt));
+}
+
+/**
+ * Obter sugestões recentes para uma loja
+ */
+export async function getSugestoesRecentesByLoja(lojaId: number, limite: number = 10): Promise<any[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.select()
+    .from(sugestoesMelhoria)
+    .where(eq(sugestoesMelhoria.lojaId, lojaId))
+    .orderBy(desc(sugestoesMelhoria.createdAt))
+    .limit(limite);
+}
+
+// ==================== PLANOS DE VISITAS ====================
+
+/**
+ * Criar um plano de visitas semanal
+ */
+export async function criarPlanoVisitas(data: {
+  gestorId: number;
+  semanaInicio: Date;
+  semanaFim: Date;
+  visitasSugeridas: Array<{
+    lojaId: number;
+    lojaNome: string;
+    diaSugerido: string;
+    motivo: string;
+    prioridade: 'alta' | 'media' | 'baixa';
+  }>;
+}): Promise<{ id: number }> {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  
+  const result = await db.insert(planosVisitas).values({
+    gestorId: data.gestorId,
+    semanaInicio: data.semanaInicio,
+    semanaFim: data.semanaFim,
+    visitasSugeridas: JSON.stringify(data.visitasSugeridas),
+  });
+  
+  return { id: Number(result[0].insertId) };
+}
+
+/**
+ * Obter plano de visitas atual de um gestor
+ */
+export async function getPlanoVisitasAtual(gestorId: number): Promise<any | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const hoje = new Date();
+  
+  const result = await db.select()
+    .from(planosVisitas)
+    .where(and(
+      eq(planosVisitas.gestorId, gestorId),
+      sql`${planosVisitas.semanaInicio} <= ${hoje}`,
+      sql`${planosVisitas.semanaFim} >= ${hoje}`
+    ))
+    .limit(1);
+  
+  if (result.length === 0) return null;
+  
+  return {
+    ...result[0],
+    visitasSugeridas: JSON.parse(result[0].visitasSugeridas as string),
+    visitasRealizadas: result[0].visitasRealizadas ? JSON.parse(result[0].visitasRealizadas as string) : [],
+  };
+}
+
+/**
+ * Obter plano de visitas da próxima semana
+ */
+export async function getPlanoVisitasProximaSemana(gestorId: number): Promise<any | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const hoje = new Date();
+  const proximaSegunda = new Date(hoje);
+  proximaSegunda.setDate(hoje.getDate() + (8 - hoje.getDay()) % 7);
+  proximaSegunda.setHours(0, 0, 0, 0);
+  
+  const result = await db.select()
+    .from(planosVisitas)
+    .where(and(
+      eq(planosVisitas.gestorId, gestorId),
+      sql`DATE(${planosVisitas.semanaInicio}) = DATE(${proximaSegunda})`
+    ))
+    .limit(1);
+  
+  if (result.length === 0) return null;
+  
+  return {
+    ...result[0],
+    visitasSugeridas: JSON.parse(result[0].visitasSugeridas as string),
+    visitasRealizadas: result[0].visitasRealizadas ? JSON.parse(result[0].visitasRealizadas as string) : [],
+  };
+}
+
+/**
+ * Atualizar estado do plano de visitas
+ */
+export async function atualizarEstadoPlanoVisitas(id: number, estado: 'pendente' | 'aceite' | 'modificado' | 'rejeitado'): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  
+  await db.update(planosVisitas)
+    .set({ estado })
+    .where(eq(planosVisitas.id, id));
+}
+
+/**
+ * Obter dados para gerar previsões (análise de padrões)
+ */
+export async function getDadosParaPrevisoes(): Promise<{
+  lojas: any[];
+  relatoriosRecentes: any[];
+  pendentesAtivos: any[];
+  alertasAtivos: any[];
+}> {
+  const db = await getDb();
+  if (!db) return { lojas: [], relatoriosRecentes: [], pendentesAtivos: [], alertasAtivos: [] };
+  
+  const todasLojas = await getAllLojas();
+  
+  // Relatórios dos últimos 90 dias
+  const dataLimite = new Date();
+  dataLimite.setDate(dataLimite.getDate() - 90);
+  
+  const relatoriosLivresRecentes = await db.select()
+    .from(relatoriosLivres)
+    .where(sql`${relatoriosLivres.dataVisita} >= ${dataLimite}`);
+  
+  const relatoriosCompletosRecentes = await db.select()
+    .from(relatoriosCompletos)
+    .where(sql`${relatoriosCompletos.dataVisita} >= ${dataLimite}`);
+  
+  const pendentesAtivos = await db.select()
+    .from(pendentes)
+    .where(eq(pendentes.resolvido, false));
+  
+  const alertasAtivos = await db.select()
+    .from(alertas)
+    .where(eq(alertas.estado, 'pendente'));
+  
+  return {
+    lojas: todasLojas,
+    relatoriosRecentes: [...relatoriosLivresRecentes, ...relatoriosCompletosRecentes],
+    pendentesAtivos,
+    alertasAtivos,
+  };
+}
+
+/**
+ * Obter dados para gerar plano de visitas de um gestor
+ */
+export async function getDadosParaPlanoVisitas(gestorId: number): Promise<{
+  lojas: any[];
+  ultimasVisitas: Map<number, Date>;
+  pendentes: Map<number, number>;
+  alertas: Map<number, number>;
+}> {
+  const db = await getDb();
+  if (!db) return { lojas: [], ultimasVisitas: new Map(), pendentes: new Map(), alertas: new Map() };
+  
+  // Lojas do gestor
+  const lojasGestor = await getLojasByGestorId(gestorId);
+  
+  // Última visita a cada loja
+  const ultimasVisitas = new Map<number, Date>();
+  for (const loja of lojasGestor) {
+    const ultimaVisita = await db.select({ dataVisita: relatoriosLivres.dataVisita })
+      .from(relatoriosLivres)
+      .where(and(
+        eq(relatoriosLivres.lojaId, loja.id),
+        eq(relatoriosLivres.gestorId, gestorId)
+      ))
+      .orderBy(desc(relatoriosLivres.dataVisita))
+      .limit(1);
+    
+    if (ultimaVisita.length > 0) {
+      ultimasVisitas.set(loja.id, ultimaVisita[0].dataVisita);
+    }
+    
+    // Verificar também relatórios completos
+    const ultimaVisitaCompleta = await db.select({ dataVisita: relatoriosCompletos.dataVisita })
+      .from(relatoriosCompletos)
+      .where(and(
+        eq(relatoriosCompletos.lojaId, loja.id),
+        eq(relatoriosCompletos.gestorId, gestorId)
+      ))
+      .orderBy(desc(relatoriosCompletos.dataVisita))
+      .limit(1);
+    
+    if (ultimaVisitaCompleta.length > 0) {
+      const dataExistente = ultimasVisitas.get(loja.id);
+      if (!dataExistente || ultimaVisitaCompleta[0].dataVisita > dataExistente) {
+        ultimasVisitas.set(loja.id, ultimaVisitaCompleta[0].dataVisita);
+      }
+    }
+  }
+  
+  // Pendentes por loja
+  const pendentesMap = new Map<number, number>();
+  for (const loja of lojasGestor) {
+    const count = await db.select({ count: sql<number>`count(*)` })
+      .from(pendentes)
+      .where(and(
+        eq(pendentes.lojaId, loja.id),
+        eq(pendentes.resolvido, false)
+      ));
+    pendentesMap.set(loja.id, count[0]?.count || 0);
+  }
+  
+  // Alertas por loja
+  const alertasMap = new Map<number, number>();
+  for (const loja of lojasGestor) {
+    const count = await db.select({ count: sql<number>`count(*)` })
+      .from(alertas)
+      .where(and(
+        eq(alertas.lojaId, loja.id),
+        eq(alertas.estado, 'pendente')
+      ));
+    alertasMap.set(loja.id, count[0]?.count || 0);
+  }
+  
+  return {
+    lojas: lojasGestor,
+    ultimasVisitas,
+    pendentes: pendentesMap,
+    alertas: alertasMap,
+  };
 }

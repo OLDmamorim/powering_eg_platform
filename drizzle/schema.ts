@@ -171,3 +171,102 @@ export const configuracoesAlertas = mysqlTable("configuracoes_alertas", {
 
 export type ConfiguracaoAlerta = typeof configuracoesAlertas.$inferSelect;
 export type InsertConfiguracaoAlerta = typeof configuracoesAlertas.$inferInsert;
+
+
+/**
+ * Atividades - Feed de atividades dos gestores para o admin
+ */
+export const atividades = mysqlTable("atividades", {
+  id: int("id").autoincrement().primaryKey(),
+  gestorId: int("gestorId"), // FK para gestores.id (pode ser null para atividades do sistema)
+  lojaId: int("lojaId"), // FK para lojas.id (opcional)
+  tipo: mysqlEnum("tipo", [
+    "visita_realizada",
+    "relatorio_livre",
+    "relatorio_completo",
+    "pendente_criado",
+    "pendente_resolvido",
+    "alerta_gerado",
+    "alerta_resolvido",
+    "gestor_criado",
+    "loja_criada"
+  ]).notNull(),
+  descricao: text("descricao").notNull(),
+  metadata: text("metadata"), // JSON com dados adicionais
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type Atividade = typeof atividades.$inferSelect;
+export type InsertAtividade = typeof atividades.$inferInsert;
+
+
+/**
+ * Previsões - Previsões de problemas geradas pela IA
+ */
+export const previsoes = mysqlTable("previsoes", {
+  id: int("id").autoincrement().primaryKey(),
+  lojaId: int("lojaId").notNull(), // FK para lojas.id
+  tipo: mysqlEnum("tipo", [
+    "risco_pendentes",
+    "padrao_negativo",
+    "sem_visita_prolongada",
+    "tendencia_problemas"
+  ]).notNull(),
+  descricao: text("descricao").notNull(),
+  probabilidade: int("probabilidade"), // 0-100
+  sugestaoAcao: text("sugestaoAcao"),
+  estado: mysqlEnum("estado", ["ativa", "confirmada", "descartada"]).default("ativa").notNull(),
+  validaAte: timestamp("validaAte"), // Data até quando a previsão é válida
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Previsao = typeof previsoes.$inferSelect;
+export type InsertPrevisao = typeof previsoes.$inferInsert;
+
+
+/**
+ * Sugestões de Melhoria - Sugestões geradas pela IA após relatórios
+ */
+export const sugestoesMelhoria = mysqlTable("sugestoes_melhoria", {
+  id: int("id").autoincrement().primaryKey(),
+  relatorioId: int("relatorioId").notNull(),
+  tipoRelatorio: mysqlEnum("tipoRelatorio", ["livre", "completo"]).notNull(),
+  lojaId: int("lojaId").notNull(),
+  gestorId: int("gestorId").notNull(),
+  sugestao: text("sugestao").notNull(),
+  categoria: mysqlEnum("categoria", [
+    "stock",
+    "epis",
+    "limpeza",
+    "atendimento",
+    "documentacao",
+    "equipamentos",
+    "geral"
+  ]).notNull(),
+  prioridade: mysqlEnum("prioridade", ["baixa", "media", "alta"]).default("media").notNull(),
+  implementada: boolean("implementada").default(false).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type SugestaoMelhoria = typeof sugestoesMelhoria.$inferSelect;
+export type InsertSugestaoMelhoria = typeof sugestoesMelhoria.$inferInsert;
+
+
+/**
+ * Planos de Visitas - Planos semanais sugeridos automaticamente
+ */
+export const planosVisitas = mysqlTable("planos_visitas", {
+  id: int("id").autoincrement().primaryKey(),
+  gestorId: int("gestorId").notNull(), // FK para gestores.id
+  semanaInicio: timestamp("semanaInicio").notNull(), // Segunda-feira da semana
+  semanaFim: timestamp("semanaFim").notNull(), // Domingo da semana
+  visitasSugeridas: text("visitasSugeridas").notNull(), // JSON array de {lojaId, diaSugerido, motivo, prioridade}
+  estado: mysqlEnum("estado", ["pendente", "aceite", "modificado", "rejeitado"]).default("pendente").notNull(),
+  visitasRealizadas: text("visitasRealizadas"), // JSON array de lojaIds visitados
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type PlanoVisitas = typeof planosVisitas.$inferSelect;
+export type InsertPlanoVisitas = typeof planosVisitas.$inferInsert;

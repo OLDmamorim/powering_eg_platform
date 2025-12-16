@@ -64,6 +64,13 @@
       "when": 1765821983909,
       "tag": "0008_bored_starjammers",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "5",
+      "when": 1765844796219,
+      "tag": "0009_motionless_shape",
+      "breakpoints": true
     }
   ]
 }

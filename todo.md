@@ -340,3 +340,30 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Toast de sucesso/erro após atualização
 - [x] Criar testes unitários para edição de gestores
 - [x] Testar funcionalidade completa
+
+## Funcionalidades Inovadoras v3.4
+
+### 2.2 Previsão de Problemas com IA
+- [x] Criar função de análise de padrões históricos
+- [x] Gerar alertas preditivos baseados em tendências
+- [x] Mostrar previsões no dashboard do admin
+- [x] Card "Previsões da Semana" com código de cores
+
+### 2.3 Sugestões de Melhoria Automáticas
+- [x] Analisar conteúdo do relatório após submissão
+- [x] Gerar sugestões contextuais com IA
+- [x] Guardar histórico de sugestões
+- [ ] Mostrar sugestões em modal/toast após criar relatório (pendente UI)
+
+### 4.3 Feed de Atividade para Admin
+- [x] Criar tabela de atividades no schema
+- [x] Registar atividades: visitas, pendentes resolvidos, alertas
+- [x] Componente de timeline no dashboard admin
+- [ ] Atualização em tempo real do feed (futuro)
+
+### 6.1 Agendamento Automático de Visitas
+- [x] Criar lógica de sugestão de visitas baseada em critérios
+- [x] Considerar: tempo desde última visita, pendentes, alertas
+- [x] Gerar plano semanal às sextas-feiras
+- [x] Interface para visualizar e aceitar/modificar plano
+- [ ] Notificar gestores com plano sugerido (futuro)

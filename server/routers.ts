@@ -8,6 +8,9 @@ import * as db from "./db";
 import { gerarRelatorioComIA, gerarDicaDashboard } from "./aiService";
 import { sendEmail, gerarHTMLRelatorioLivre, gerarHTMLRelatorioCompleto } from "./emailService";
 import { enviarResumoSemanal, verificarENotificarAlertas } from "./weeklyReport";
+import { gerarPrevisoes, gerarEGuardarPrevisoes } from "./previsaoService";
+import { gerarSugestoesMelhoria, formatarRelatorioLivre, formatarRelatorioCompleto } from "./sugestaoService";
+import { gerarPlanoVisitasSemanal, gerarPlanosSemanaisParaTodosGestores, verificarEGerarPlanosSexta } from "./planoVisitasService";
 
 // Middleware para verificar se o utilizador é admin
 const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
@@ -230,8 +233,34 @@ export const appRouter = router({
               tipoRelatorio: 'livre',
               descricao,
             });
+            
+            // Registar atividade de pendente criado
+            await db.registarAtividade({
+              gestorId: ctx.gestor.id,
+              lojaId: input.lojaId,
+              tipo: 'pendente_criado',
+              descricao: `Novo pendente criado: ${descricao.substring(0, 50)}...`,
+            });
           }
         }
+        
+        // Registar atividade de relatório criado
+        const loja = await db.getLojaById(input.lojaId);
+        await db.registarAtividade({
+          gestorId: ctx.gestor.id,
+          lojaId: input.lojaId,
+          tipo: 'relatorio_livre',
+          descricao: `Relatório livre criado para ${loja?.nome || 'loja'}`,
+          metadata: { relatorioId: relatorio.id },
+        });
+        
+        // Gerar sugestões de melhoria com IA (async, não bloqueia)
+        const conteudo = formatarRelatorioLivre({
+          descricao: input.descricao,
+          dataVisita: input.dataVisita,
+        });
+        gerarSugestoesMelhoria(relatorio.id, 'livre', input.lojaId, ctx.gestor.id, conteudo)
+          .catch(err => console.error('[Sugestões] Erro ao gerar:', err));
         
         return relatorio;
       }),
@@ -397,8 +426,31 @@ export const appRouter = router({
               tipoRelatorio: 'completo',
               descricao,
             });
+            
+            // Registar atividade de pendente criado
+            await db.registarAtividade({
+              gestorId: ctx.gestor.id,
+              lojaId: input.lojaId,
+              tipo: 'pendente_criado',
+              descricao: `Novo pendente criado: ${descricao.substring(0, 50)}...`,
+            });
           }
         }
+        
+        // Registar atividade de relatório criado
+        const lojaInfo = await db.getLojaById(input.lojaId);
+        await db.registarAtividade({
+          gestorId: ctx.gestor.id,
+          lojaId: input.lojaId,
+          tipo: 'relatorio_completo',
+          descricao: `Relatório completo criado para ${lojaInfo?.nome || 'loja'}`,
+          metadata: { relatorioId: relatorio.id },
+        });
+        
+        // Gerar sugestões de melhoria com IA (async, não bloqueia)
+        const conteudoCompleto = formatarRelatorioCompleto(input);
+        gerarSugestoesMelhoria(relatorio.id, 'completo', input.lojaId, ctx.gestor.id, conteudoCompleto)
+          .catch(err => console.error('[Sugestões] Erro ao gerar:', err));
         
         // Verificar alertas de pontos negativos consecutivos
         if (input.pontosNegativos && input.pontosNegativos.trim()) {
@@ -546,8 +598,22 @@ export const appRouter = router({
     
     resolve: gestorProcedure
       .input(z.object({ id: z.number() }))
-      .mutation(async ({ input }) => {
+      .mutation(async ({ input, ctx }) => {
+        // Obter info do pendente antes de resolver
+        const pendente = await db.getPendenteById(input.id);
+        
         await db.resolvePendente(input.id);
+        
+        // Registar atividade de pendente resolvido
+        if (pendente && ctx.gestor) {
+          await db.registarAtividade({
+            gestorId: ctx.gestor.id,
+            lojaId: pendente.lojaId,
+            tipo: 'pendente_resolvido',
+            descricao: `Pendente resolvido: ${pendente.descricao?.substring(0, 50) || 'sem descrição'}...`,
+          });
+        }
+        
         return { success: true };
       }),
     
@@ -676,6 +742,110 @@ export const appRouter = router({
           results.push(result);
         }
         return results;
+      }),
+  }),
+
+  // ==================== PREVISÕES ====================
+  previsoes: router({
+    // Obter previsões ativas
+    list: adminProcedure.query(async () => {
+      return await db.getPrevisoesAtivas();
+    }),
+    
+    // Gerar novas previsões com IA
+    gerar: adminProcedure.mutation(async () => {
+      const resultado = await gerarPrevisoes();
+      return resultado;
+    }),
+    
+    // Gerar e guardar previsões
+    gerarEGuardar: adminProcedure.mutation(async () => {
+      const count = await gerarEGuardarPrevisoes();
+      return { count };
+    }),
+    
+    // Atualizar estado de uma previsão
+    atualizarEstado: adminProcedure
+      .input(z.object({
+        id: z.number(),
+        estado: z.enum(['ativa', 'confirmada', 'descartada']),
+      }))
+      .mutation(async ({ input }) => {
+        await db.atualizarEstadoPrevisao(input.id, input.estado);
+        return { success: true };
+      }),
+  }),
+
+  // ==================== ATIVIDADES (Feed) ====================
+  atividades: router({
+    // Obter atividades recentes
+    list: adminProcedure
+      .input(z.object({ limite: z.number().optional() }).optional())
+      .query(async ({ input }) => {
+        return await db.getAtividadesRecentes(input?.limite || 50);
+      }),
+  }),
+
+  // ==================== PLANOS DE VISITAS ====================
+  planosVisitas: router({
+    // Obter plano atual do gestor
+    atual: gestorProcedure.query(async ({ ctx }) => {
+      if (!ctx.gestor) return null;
+      return await db.getPlanoVisitasAtual(ctx.gestor.id);
+    }),
+    
+    // Obter plano da próxima semana
+    proximaSemana: gestorProcedure.query(async ({ ctx }) => {
+      if (!ctx.gestor) return null;
+      return await db.getPlanoVisitasProximaSemana(ctx.gestor.id);
+    }),
+    
+    // Gerar plano para um gestor específico (admin)
+    gerarParaGestor: adminProcedure
+      .input(z.object({ gestorId: z.number() }))
+      .mutation(async ({ input }) => {
+        const plano = await gerarPlanoVisitasSemanal(input.gestorId);
+        return plano;
+      }),
+    
+    // Gerar planos para todos os gestores (admin)
+    gerarParaTodos: adminProcedure.mutation(async () => {
+      const count = await gerarPlanosSemanaisParaTodosGestores();
+      return { count };
+    }),
+    
+    // Atualizar estado do plano
+    atualizarEstado: gestorProcedure
+      .input(z.object({
+        id: z.number(),
+        estado: z.enum(['pendente', 'aceite', 'modificado', 'rejeitado']),
+      }))
+      .mutation(async ({ input }) => {
+        await db.atualizarEstadoPlanoVisitas(input.id, input.estado);
+        return { success: true };
+      }),
+  }),
+
+  // ==================== SUGESTÕES DE MELHORIA ====================
+  sugestoes: router({
+    // Obter sugestões por relatório
+    byRelatorio: protectedProcedure
+      .input(z.object({
+        relatorioId: z.number(),
+        tipoRelatorio: z.enum(['livre', 'completo']),
+      }))
+      .query(async ({ input }) => {
+        return await db.getSugestoesByRelatorio(input.relatorioId, input.tipoRelatorio);
+      }),
+    
+    // Obter sugestões recentes por loja
+    byLoja: protectedProcedure
+      .input(z.object({
+        lojaId: z.number(),
+        limite: z.number().optional(),
+      }))
+      .query(async ({ input }) => {
+        return await db.getSugestoesRecentesByLoja(input.lojaId, input.limite || 10);
       }),
   }),
 });
