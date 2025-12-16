@@ -37,6 +37,7 @@ import {
   BarChart3,
 } from "lucide-react";
 import { EstadoAcompanhamentoSelect, EstadoAcompanhamentoBadge } from "@/components/EstadoAcompanhamento";
+import { RelatorioDetalheModal } from "@/components/RelatorioDetalheModal";
 
 export default function Categorias() {
   const { user } = useAuth();
@@ -44,6 +45,10 @@ export default function Categorias() {
   const [expandedCategorias, setExpandedCategorias] = useState<string[]>([]);
   const [filtroEstado, setFiltroEstado] = useState<string>("all");
   const [pesquisa, setPesquisa] = useState("");
+  
+  // Estado para modal de detalhes
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedRelatorio, setSelectedRelatorio] = useState<{ id: number; tipo: "livre" | "completo" } | null>(null);
 
   const utils = trpc.useUtils();
 
@@ -356,7 +361,13 @@ export default function Categorias() {
                             className="py-4 first:pt-4"
                           >
                             <div className="flex items-start justify-between gap-4">
-                              <div className="flex-1 min-w-0">
+                              <div 
+                                className="flex-1 min-w-0 cursor-pointer hover:bg-muted/50 rounded-lg p-2 -m-2 transition-colors"
+                                onClick={() => {
+                                  setSelectedRelatorio({ id: rel.id, tipo: rel.tipo as "livre" | "completo" });
+                                  setModalOpen(true);
+                                }}
+                              >
                                 <div className="flex items-center gap-2 flex-wrap mb-2">
                                   <Badge
                                     variant="outline"
@@ -425,6 +436,14 @@ export default function Categorias() {
           </div>
         )}
       </div>
+      
+      {/* Modal de detalhes do relatório */}
+      <RelatorioDetalheModal
+        open={modalOpen}
+        onOpenChange={setModalOpen}
+        relatorioId={selectedRelatorio?.id || null}
+        tipoRelatorio={selectedRelatorio?.tipo || null}
+      />
     </DashboardLayout>
   );
 }

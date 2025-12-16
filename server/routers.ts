@@ -205,6 +205,23 @@ export const appRouter = router({
       return await db.countRelatoriosLivresNaoVistos();
     }),
     
+    getById: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        const relatorio = await db.getRelatorioLivreById(input.id);
+        if (!relatorio) return null;
+        
+        // Obter dados relacionados
+        const loja = await db.getLojaById(relatorio.lojaId);
+        const gestor = await db.getGestorById(relatorio.gestorId);
+        
+        return {
+          ...relatorio,
+          loja,
+          gestor,
+        };
+      }),
+    
     create: gestorProcedure
       .input(z.object({
         lojaId: z.number(),
@@ -385,6 +402,23 @@ export const appRouter = router({
     countNaoVistos: adminProcedure.query(async () => {
       return await db.countRelatoriosCompletosNaoVistos();
     }),
+    
+    getById: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        const relatorio = await db.getRelatorioCompletoById(input.id);
+        if (!relatorio) return null;
+        
+        // Obter dados relacionados
+        const loja = await db.getLojaById(relatorio.lojaId);
+        const gestor = await db.getGestorById(relatorio.gestorId);
+        
+        return {
+          ...relatorio,
+          loja,
+          gestor,
+        };
+      }),
     
     create: gestorProcedure
       .input(z.object({

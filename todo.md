@@ -414,3 +414,18 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Integrar no RelatorioLivre
 - [x] Integrar no RelatorioCompleto
 - [x] Atualizar estado dos pendentes ao submeter relatório
+
+## Visualização de Relatórios nas Categorias v3.9
+
+### Bug/Melhoria
+- [ ] Permitir clicar no relatório para ver conteúdo completo
+- [ ] Criar modal com detalhes do relatório
+- [ ] Mostrar descrição, pendentes, fotos e dados completos
+
+## Visualização de Relatórios nas Categorias v3.9
+
+- [x] Criar modal de detalhes do relatório (RelatorioDetalheModal)
+- [x] Adicionar endpoints getById para relatórios livres e completos
+- [x] Adicionar clique no card para abrir modal
+- [x] Mostrar todos os campos do relatório no modal
+- [x] Mostrar fotos e pendentes no modal
