@@ -133,7 +133,7 @@ export function gerarHTMLRelatorioLivre(relatorio: {
   ` : ''}
   
   <div class="footer">
-    Relatório gerado automaticamente pela PoweringEG Platform<br>
+    Relatório enviado por <strong>${gestorNome}</strong> via PoweringEG Platform<br>
     ${new Date().toLocaleDateString('pt-PT')} às ${new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })}
   </div>
 </body>
@@ -276,7 +276,7 @@ export function gerarHTMLRelatorioCompleto(relatorio: {
   ` : ''}
   
   <div class="footer">
-    Relatório gerado automaticamente pela PoweringEG Platform<br>
+    Relatório enviado por <strong>${gestorNome}</strong> via PoweringEG Platform<br>
     ${new Date().toLocaleDateString('pt-PT')} às ${new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })}
   </div>
 </body>

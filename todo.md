@@ -543,3 +543,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Criar componente EmailConfirmDialog
 - [x] Adicionar mutation enviarEmail para relatórios completos
 - [x] Fluxo: Email Dialog → Sugestões Modal → Meus Relatórios
+
+## Melhoria v4.8.1 - Rodapé de Email Personalizado
+- [x] Alterar rodapé do email de relatório livre para mostrar nome do gestor
+- [x] Alterar rodapé do email de relatório completo para mostrar nome do gestor
+- [x] Formato: "Relatório enviado por [Nome do Gestor] via PoweringEG Platform - [Data/Hora]"
+- [x] Aplicado em ambos os templates com uma única edição
