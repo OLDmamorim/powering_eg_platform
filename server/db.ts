@@ -1796,3 +1796,30 @@ export async function getEstatisticasCategorias(): Promise<{
     porEstado,
   };
 }
+
+
+// ==================== COMENTÁRIOS DO ADMIN ====================
+
+/**
+ * Atualizar comentário do admin num relatório livre
+ */
+export async function updateComentarioRelatorioLivre(relatorioId: number, comentario: string): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  
+  await db.update(relatoriosLivres)
+    .set({ comentarioAdmin: comentario })
+    .where(eq(relatoriosLivres.id, relatorioId));
+}
+
+/**
+ * Atualizar comentário do admin num relatório completo
+ */
+export async function updateComentarioRelatorioCompleto(relatorioId: number, comentario: string): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  
+  await db.update(relatoriosCompletos)
+    .set({ comentarioAdmin: comentario })
+    .where(eq(relatoriosCompletos.id, relatorioId));
+}

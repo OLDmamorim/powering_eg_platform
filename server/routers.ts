@@ -963,6 +963,22 @@ export const appRouter = router({
       .query(async () => {
         return await db.getEstatisticasCategorias();
       }),
+    
+    // Atualizar comentário do admin
+    updateComentario: adminProcedure
+      .input(z.object({
+        relatorioId: z.number(),
+        tipoRelatorio: z.enum(['livre', 'completo']),
+        comentario: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        if (input.tipoRelatorio === 'livre') {
+          await db.updateComentarioRelatorioLivre(input.relatorioId, input.comentario);
+        } else {
+          await db.updateComentarioRelatorioCompleto(input.relatorioId, input.comentario);
+        }
+        return { success: true };
+      }),
   }),
 });
 

@@ -35,6 +35,8 @@ import {
   FileText,
   ClipboardList,
   BarChart3,
+  Download,
+  Loader2,
 } from "lucide-react";
 import { EstadoAcompanhamentoSelect, EstadoAcompanhamentoBadge } from "@/components/EstadoAcompanhamento";
 import { RelatorioDetalheModal } from "@/components/RelatorioDetalheModal";
@@ -49,8 +51,110 @@ export default function Categorias() {
   // Estado para modal de detalhes
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedRelatorio, setSelectedRelatorio] = useState<{ id: number; tipo: "livre" | "completo" } | null>(null);
+  const [exportingCategoria, setExportingCategoria] = useState<string | null>(null);
 
   const utils = trpc.useUtils();
+  
+  // Função para exportar categoria para PDF
+  const exportarCategoriaPDF = async (categoria: string) => {
+    setExportingCategoria(categoria);
+    try {
+      const cat = relatoriosPorCategoria?.find(c => c.categoria === categoria);
+      if (!cat) {
+        toast.error("Categoria não encontrada");
+        return;
+      }
+      
+      // Criar conteúdo HTML para o PDF
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <title>Categoria: ${categoria}</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 20px; }
+            h1 { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
+            .stats { background: #f5f5f5; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+            .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+            .stat-item { text-align: center; }
+            .stat-value { font-size: 24px; font-weight: bold; color: #007bff; }
+            .stat-label { font-size: 12px; color: #666; }
+            .relatorio { border: 1px solid #ddd; border-radius: 8px; padding: 15px; margin-bottom: 15px; }
+            .relatorio-header { display: flex; justify-content: space-between; margin-bottom: 10px; }
+            .relatorio-tipo { background: #e3f2fd; color: #1976d2; padding: 2px 8px; border-radius: 4px; font-size: 12px; }
+            .relatorio-completo { background: #f3e5f5; color: #7b1fa2; }
+            .relatorio-info { color: #666; font-size: 14px; margin-bottom: 5px; }
+            .relatorio-descricao { margin-top: 10px; padding: 10px; background: #fafafa; border-radius: 4px; }
+            .estado { padding: 2px 8px; border-radius: 4px; font-size: 11px; }
+            .estado-acompanhar { background: #fff3e0; color: #e65100; }
+            .estado-em_tratamento { background: #e3f2fd; color: #1565c0; }
+            .estado-tratado { background: #e8f5e9; color: #2e7d32; }
+          </style>
+        </head>
+        <body>
+          <h1>🏷️ Categoria: ${categoria}</h1>
+          <p>Exportado em ${new Date().toLocaleDateString('pt-PT', { dateStyle: 'full' })}</p>
+          
+          <div class="stats">
+            <h3>Estatísticas</h3>
+            <div class="stats-grid">
+              <div class="stat-item">
+                <div class="stat-value">${cat.contadores.total}</div>
+                <div class="stat-label">Total</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-value" style="color: #e65100;">${cat.contadores.acompanhar}</div>
+                <div class="stat-label">Acompanhar</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-value" style="color: #1565c0;">${cat.contadores.emTratamento}</div>
+                <div class="stat-label">Em Tratamento</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-value" style="color: #2e7d32;">${cat.contadores.tratado}</div>
+                <div class="stat-label">Tratado</div>
+              </div>
+            </div>
+          </div>
+          
+          <h2>Relatórios (${cat.relatorios.length})</h2>
+          ${cat.relatorios.map((rel, index) => `
+            <div class="relatorio">
+              <div class="relatorio-header">
+                <span class="relatorio-tipo ${rel.tipo === 'completo' ? 'relatorio-completo' : ''}">
+                  ${rel.tipo === 'livre' ? '📄 Livre' : '📋 Completo'}
+                </span>
+                ${rel.estadoAcompanhamento ? `<span class="estado estado-${rel.estadoAcompanhamento}">${rel.estadoAcompanhamento === 'acompanhar' ? '👁 Acompanhar' : rel.estadoAcompanhamento === 'em_tratamento' ? '⏳ Em Tratamento' : '✅ Tratado'}</span>` : ''}
+              </div>
+              <div class="relatorio-info">🏪 <strong>${rel.lojaNome}</strong></div>
+              <div class="relatorio-info">👤 ${rel.gestorNome}</div>
+              <div class="relatorio-info">📅 ${new Date(rel.dataVisita).toLocaleDateString('pt-PT')}</div>
+              ${rel.descricao ? `<div class="relatorio-descricao">${rel.descricao}</div>` : ''}
+            </div>
+          `).join('')}
+        </body>
+        </html>
+      `;
+      
+      // Criar blob e download
+      const blob = new Blob([htmlContent], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `categoria-${categoria.toLowerCase().replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.html`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      toast.success(`Categoria "${categoria}" exportada com sucesso`);
+    } catch (error) {
+      toast.error("Erro ao exportar categoria");
+    } finally {
+      setExportingCategoria(null);
+    }
+  };
 
   // Queries
   const { data: relatoriosPorCategoria, isLoading } =
@@ -343,6 +447,22 @@ export default function Categorias() {
                               </Badge>
                             )}
                           </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              exportarCategoriaPDF(cat.categoria);
+                            }}
+                            disabled={exportingCategoria === cat.categoria}
+                          >
+                            {exportingCategoria === cat.categoria ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Download className="h-4 w-4" />
+                            )}
+                          </Button>
                           {expandedCategorias.includes(cat.categoria) ? (
                             <ChevronUp className="h-5 w-5 text-muted-foreground" />
                           ) : (

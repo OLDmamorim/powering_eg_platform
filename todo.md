@@ -429,3 +429,21 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar clique no card para abrir modal
 - [x] Mostrar todos os campos do relatório no modal
 - [x] Mostrar fotos e pendentes no modal
+
+## Melhorias nas Categorias v4.0
+
+### Edição de Categoria Inline
+- [x] Adicionar campo editável de categoria no modal de detalhes
+- [x] Usar componente CategoriaAutocomplete existente
+- [x] Atualizar categoria ao sair do campo
+
+### Comentários do Admin
+- [x] Adicionar campo comentarioAdmin ao schema de relatórios
+- [x] Criar endpoint para atualizar comentário
+- [x] Campo de texto no modal para adicionar/editar comentário
+- [x] Mostrar comentário existente no modal
+
+### Exportar Categoria para PDF
+- [x] Botão de exportar na página de Categorias
+- [x] Gerar HTML com todos os relatórios da categoria
+- [x] Incluir resumo estatístico no início do documento

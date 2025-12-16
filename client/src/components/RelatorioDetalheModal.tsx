@@ -18,8 +18,16 @@ import {
   Tag,
   CheckCircle2,
   XCircle,
+  MessageSquare,
+  Save,
 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
+import { useState, useEffect } from "react";
+import { CategoriaAutocomplete } from "@/components/CategoriaAutocomplete";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { useAuth } from "@/_core/hooks/useAuth";
 
 interface RelatorioDetalheModalProps {
   open: boolean;
@@ -34,6 +42,18 @@ export function RelatorioDetalheModal({
   relatorioId,
   tipoRelatorio,
 }: RelatorioDetalheModalProps) {
+  const { user } = useAuth();
+  const utils = trpc.useUtils();
+  const [comentario, setComentario] = useState("");
+  const [categoria, setCategoria] = useState("");
+  const [comentarioEditado, setComentarioEditado] = useState(false);
+  
+  // Query para obter categorias existentes
+  const { data: categoriasExistentes = [] } = trpc.categorizacao.getCategorias.useQuery(
+    undefined,
+    { enabled: open && user?.role === "admin" }
+  );
+  
   // Query para relatório livre
   const { data: relatorioLivre, isLoading: loadingLivre } =
     trpc.relatoriosLivres.getById.useQuery(
@@ -51,6 +71,57 @@ export function RelatorioDetalheModal({
   const isLoading = loadingLivre || loadingCompleto;
   const relatorio = (tipoRelatorio === "livre" ? relatorioLivre : relatorioCompleto) as any;
   const relatorioCompleteData = relatorioCompleto as any;
+  
+  // Mutations para atualizar categoria e comentário
+  const updateCategoriaMutation = trpc.categorizacao.updateCategoria.useMutation({
+    onSuccess: () => {
+      toast.success("Categoria atualizada");
+      utils.relatoriosLivres.getById.invalidate();
+      utils.relatoriosCompletos.getById.invalidate();
+      utils.categorizacao.getRelatoriosPorCategoria.invalidate();
+    },
+    onError: () => toast.error("Erro ao atualizar categoria"),
+  });
+  
+  const updateComentarioMutation = trpc.categorizacao.updateComentario.useMutation({
+    onSuccess: () => {
+      toast.success("Comentário guardado");
+      setComentarioEditado(false);
+      utils.relatoriosLivres.getById.invalidate();
+      utils.relatoriosCompletos.getById.invalidate();
+    },
+    onError: () => toast.error("Erro ao guardar comentário"),
+  });
+  
+  // Sincronizar estado local com dados do relatório
+  useEffect(() => {
+    if (relatorio) {
+      setComentario(relatorio.comentarioAdmin || "");
+      setCategoria(relatorio.categoria || "");
+      setComentarioEditado(false);
+    }
+  }, [relatorio?.id, relatorio?.comentarioAdmin, relatorio?.categoria]);
+  
+  const handleCategoriaChange = (novaCategoria: string) => {
+    setCategoria(novaCategoria);
+    if (relatorioId && tipoRelatorio) {
+      updateCategoriaMutation.mutate({
+        relatorioId,
+        tipoRelatorio,
+        categoria: novaCategoria,
+      });
+    }
+  };
+  
+  const handleSaveComentario = () => {
+    if (relatorioId && tipoRelatorio) {
+      updateComentarioMutation.mutate({
+        relatorioId,
+        tipoRelatorio,
+        comentario,
+      });
+    }
+  };
 
   // Parse fotos
   const fotos = relatorio?.fotos ? JSON.parse(relatorio.fotos) : [];
@@ -113,14 +184,17 @@ export function RelatorioDetalheModal({
                     </p>
                   </div>
                 </div>
-                {relatorio.categoria && (
-                  <div className="flex items-center gap-2">
+                {user?.role === "admin" && (
+                  <div className="flex items-center gap-2 col-span-2">
                     <Tag className="h-4 w-4 text-primary" />
-                    <div>
-                      <p className="text-xs text-muted-foreground">Categoria</p>
-                      <Badge variant="outline" className="mt-1">
-                        {relatorio.categoria}
-                      </Badge>
+                    <div className="flex-1">
+                      <p className="text-xs text-muted-foreground mb-1">Categoria</p>
+                      <CategoriaAutocomplete
+                        value={categoria}
+                        onChange={handleCategoriaChange}
+                        sugestoes={categoriasExistentes}
+                        placeholder="Atribuir categoria..."
+                      />
                     </div>
                   </div>
                 )}
@@ -282,6 +356,38 @@ export function RelatorioDetalheModal({
                         <span className="text-sm">{pendente}</span>
                       </div>
                     ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Comentário do Admin */}
+              {user?.role === "admin" && (
+                <div>
+                  <Separator className="my-4" />
+                  <h4 className="font-medium mb-2 flex items-center gap-2">
+                    <MessageSquare className="h-4 w-4 text-primary" />
+                    Notas do Admin
+                  </h4>
+                  <div className="space-y-2">
+                    <Textarea
+                      value={comentario}
+                      onChange={(e) => {
+                        setComentario(e.target.value);
+                        setComentarioEditado(true);
+                      }}
+                      placeholder="Adicionar notas ou comentários sobre este relatório..."
+                      className="min-h-[100px]"
+                    />
+                    {comentarioEditado && (
+                      <Button
+                        size="sm"
+                        onClick={handleSaveComentario}
+                        disabled={updateComentarioMutation.isPending}
+                      >
+                        <Save className="h-4 w-4 mr-2" />
+                        {updateComentarioMutation.isPending ? "A guardar..." : "Guardar Comentário"}
+                      </Button>
+                    )}
                   </div>
                 </div>
               )}
