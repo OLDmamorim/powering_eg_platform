@@ -486,11 +486,24 @@ export async function createRelatorioLivre(relatorio: InsertRelatorioLivre): Pro
   return newRelatorio[0]!;
 }
 
-export async function getRelatoriosLivresByGestorId(gestorId: number): Promise<RelatorioLivre[]> {
+export async function getRelatoriosLivresByGestorId(gestorId: number): Promise<Array<RelatorioLivre & { loja: Loja }>> {
   const db = await getDb();
   if (!db) return [];
   
-  return await db.select().from(relatoriosLivres).where(eq(relatoriosLivres.gestorId, gestorId)).orderBy(desc(relatoriosLivres.dataVisita));
+  const result = await db
+    .select({
+      relatorio: relatoriosLivres,
+      loja: lojas
+    })
+    .from(relatoriosLivres)
+    .innerJoin(lojas, eq(relatoriosLivres.lojaId, lojas.id))
+    .where(eq(relatoriosLivres.gestorId, gestorId))
+    .orderBy(desc(relatoriosLivres.dataVisita));
+  
+  return result.map(r => ({
+    ...r.relatorio,
+    loja: r.loja
+  }));
 }
 
 export async function getAllRelatoriosLivres(): Promise<Array<RelatorioLivre & { loja: Loja, gestor: Gestor & { user: typeof users.$inferSelect } }>> {
@@ -565,11 +578,24 @@ export async function createRelatorioCompleto(relatorio: InsertRelatorioCompleto
   return newRelatorio[0]!;
 }
 
-export async function getRelatoriosCompletosByGestorId(gestorId: number): Promise<RelatorioCompleto[]> {
+export async function getRelatoriosCompletosByGestorId(gestorId: number): Promise<Array<RelatorioCompleto & { loja: Loja }>> {
   const db = await getDb();
   if (!db) return [];
   
-  return await db.select().from(relatoriosCompletos).where(eq(relatoriosCompletos.gestorId, gestorId)).orderBy(desc(relatoriosCompletos.dataVisita));
+  const result = await db
+    .select({
+      relatorio: relatoriosCompletos,
+      loja: lojas
+    })
+    .from(relatoriosCompletos)
+    .innerJoin(lojas, eq(relatoriosCompletos.lojaId, lojas.id))
+    .where(eq(relatoriosCompletos.gestorId, gestorId))
+    .orderBy(desc(relatoriosCompletos.dataVisita));
+  
+  return result.map(r => ({
+    ...r.relatorio,
+    loja: r.loja
+  }));
 }
 
 export async function getAllRelatoriosCompletos(): Promise<Array<RelatorioCompleto & { loja: Loja, gestor: Gestor & { user: typeof users.$inferSelect } }>> {

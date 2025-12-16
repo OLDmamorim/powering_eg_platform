@@ -478,3 +478,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] UI para definir prazo ao criar pendente
 - [x] Destaque visual para pendentes vencidos ou próximos do vencimento
 - [x] Badge de alerta nos pendentes com prazo expirado
+
+## Bug Fix - Meus Relatórios v4.3
+
+- [x] Corrigir exibição do nome da loja na página Meus Relatórios (mostra "Loja" em vez do nome real)
