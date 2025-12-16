@@ -135,6 +135,7 @@ export const pendentes = mysqlTable("pendentes", {
   descricao: text("descricao").notNull(),
   resolvido: boolean("resolvido").default(false).notNull(),
   dataResolucao: timestamp("dataResolucao"),
+  dataLimite: timestamp("dataLimite"), // Prazo para resolução do pendente
   visto: boolean("visto").default(false).notNull(), // Se o admin já viu este pendente
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),

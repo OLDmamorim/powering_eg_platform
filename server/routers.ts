@@ -663,12 +663,38 @@ export const appRouter = router({
       .input(z.object({
         lojaId: z.number(),
         descricao: z.string().min(1),
+        dataLimite: z.string().optional(), // ISO date string
       }))
       .mutation(async ({ input }) => {
         const pendente = await db.createPendente({
           lojaId: input.lojaId,
           descricao: input.descricao,
+          dataLimite: input.dataLimite ? new Date(input.dataLimite) : undefined,
         });
+        
+        // Enviar notificação ao gestor responsável pela loja
+        try {
+          const loja = await db.getLojaById(input.lojaId);
+          const gestoresLoja = await db.getGestoresByLojaId(input.lojaId);
+          
+          if (gestoresLoja.length > 0 && loja) {
+            const gestorNomes = gestoresLoja.map((g: any) => g.user?.name || 'Gestor').join(', ');
+            const prazoTexto = input.dataLimite 
+              ? ` com prazo até ${new Date(input.dataLimite).toLocaleDateString('pt-PT')}`
+              : '';
+            
+            // Registar atividade para notificar gestores
+            await db.registarAtividade({
+              gestorId: gestoresLoja[0].id,
+              lojaId: input.lojaId,
+              tipo: 'pendente_criado',
+              descricao: `Novo pendente criado pelo admin para ${loja.nome}${prazoTexto}: ${input.descricao.substring(0, 50)}...`,
+            });
+          }
+        } catch (e) {
+          console.error('Erro ao notificar gestor:', e);
+        }
+        
         return pendente;
       }),
     

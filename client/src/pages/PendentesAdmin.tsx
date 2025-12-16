@@ -26,6 +26,8 @@ import {
   Trash2,
   Loader2,
   Plus,
+  AlertCircle,
+  CalendarClock,
 } from "lucide-react";
 import {
   Dialog,
@@ -43,6 +45,7 @@ export default function PendentesAdmin() {
   const [pesquisa, setPesquisa] = useState("");
   const [novoLojaId, setNovoLojaId] = useState<number | null>(null);
   const [novaDescricao, setNovaDescricao] = useState("");
+  const [novaDataLimite, setNovaDataLimite] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const utils = trpc.useUtils();
@@ -70,14 +73,27 @@ export default function PendentesAdmin() {
 
   const criarMutation = trpc.pendentes.criar.useMutation({
     onSuccess: () => {
-      toast.success("Pendente criado com sucesso");
+      toast.success("Pendente criado com sucesso. Gestor notificado.");
       setNovaDescricao("");
       setNovoLojaId(null);
+      setNovaDataLimite("");
       setDialogOpen(false);
       utils.pendentes.list.invalidate();
     },
     onError: () => toast.error("Erro ao criar pendente"),
   });
+  
+  // Função para verificar se pendente está vencido ou próximo do vencimento
+  const getStatusPrazo = (dataLimite: string | null) => {
+    if (!dataLimite) return null;
+    const hoje = new Date();
+    const limite = new Date(dataLimite);
+    const diffDias = Math.ceil((limite.getTime() - hoje.getTime()) / (1000 * 60 * 60 * 24));
+    
+    if (diffDias < 0) return 'vencido';
+    if (diffDias <= 3) return 'proximo';
+    return 'ok';
+  };
 
   // Verificar se é admin
   if (user?.role !== "admin") {
@@ -183,16 +199,29 @@ export default function PendentesAdmin() {
                     placeholder="Descreva o pendente..."
                   />
                 </div>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Prazo (opcional)</label>
+                  <Input
+                    type="date"
+                    value={novaDataLimite}
+                    onChange={(e) => setNovaDataLimite(e.target.value)}
+                    min={new Date().toISOString().split('T')[0]}
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Se definido, o gestor receberá alertas quando o prazo estiver próximo
+                  </p>
+                </div>
                 <Button
                   className="w-full"
                   onClick={() => {
                     if (!novoLojaId || !novaDescricao.trim()) {
-                      toast.error("Preencha todos os campos");
+                      toast.error("Preencha a loja e descrição");
                       return;
                     }
                     criarMutation.mutate({
                       lojaId: novoLojaId,
                       descricao: novaDescricao.trim(),
+                      dataLimite: novaDataLimite || undefined,
                     });
                   }}
                   disabled={criarMutation.isPending}
@@ -298,7 +327,7 @@ export default function PendentesAdmin() {
         ) : (
           <div className="space-y-3">
             {pendentesFiltrados.map((pendente: any) => (
-              <Card key={pendente.id} className={pendente.resolvido ? "opacity-60" : ""}>
+             <Card key={pendente.id} className={`${pendente.resolvido ? "opacity-60" : ""} ${!pendente.resolvido && getStatusPrazo(pendente.dataLimite) === 'vencido' ? 'border-red-500 bg-red-500/5' : ''} ${!pendente.resolvido && getStatusPrazo(pendente.dataLimite) === 'proximo' ? 'border-amber-500 bg-amber-500/5' : ''}`}>
                 <CardContent className="py-4">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
@@ -316,6 +345,23 @@ export default function PendentesAdmin() {
                           <Badge className="bg-amber-500/10 text-amber-600 border-amber-500/20">
                             <Clock className="h-3 w-3 mr-1" />
                             Pendente
+                          </Badge>
+                        )}
+                        {!pendente.resolvido && pendente.dataLimite && (
+                          <Badge className={`flex items-center gap-1 ${
+                            getStatusPrazo(pendente.dataLimite) === 'vencido' 
+                              ? 'bg-red-500/10 text-red-600 border-red-500/20' 
+                              : getStatusPrazo(pendente.dataLimite) === 'proximo'
+                                ? 'bg-amber-500/10 text-amber-600 border-amber-500/20'
+                                : 'bg-blue-500/10 text-blue-600 border-blue-500/20'
+                          }`}>
+                            {getStatusPrazo(pendente.dataLimite) === 'vencido' ? (
+                              <><AlertCircle className="h-3 w-3" /> Vencido</>
+                            ) : getStatusPrazo(pendente.dataLimite) === 'proximo' ? (
+                              <><CalendarClock className="h-3 w-3" /> Vence em breve</>
+                            ) : (
+                              <><Calendar className="h-3 w-3" /> {new Date(pendente.dataLimite).toLocaleDateString('pt-PT')}</>
+                            )}
                           </Badge>
                         )}
                       </div>

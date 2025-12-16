@@ -1,0 +1,1 @@
+ALTER TABLE `pendentes` ADD `dataLimite` timestamp;

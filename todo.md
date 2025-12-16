@@ -465,3 +465,16 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Listar todos os pendentes de todas as lojas
 - [x] Filtros por loja, estado (resolvido/pendente)
 - [x] Adicionar link no menu lateral do admin
+
+## Notificações e Prazos nos Pendentes v4.2
+
+### Notificação ao Gestor
+- [x] Enviar notificação quando admin cria pendente
+- [x] Identificar gestor responsável pela loja
+- [x] Usar sistema de notificações existente (atividade registada)
+
+### Prazo nos Pendentes
+- [x] Adicionar campo dataLimite ao schema de pendentes
+- [x] UI para definir prazo ao criar pendente
+- [x] Destaque visual para pendentes vencidos ou próximos do vencimento
+- [x] Badge de alerta nos pendentes com prazo expirado

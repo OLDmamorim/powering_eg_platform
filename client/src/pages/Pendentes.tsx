@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { trpc } from "@/lib/trpc";
-import { Building2, Check, Trash2, Filter } from "lucide-react";
+import { Building2, Check, Trash2, Filter, AlertCircle, CalendarClock, Calendar } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
@@ -46,6 +46,18 @@ export default function Pendentes() {
     if (confirm("Tem a certeza que deseja eliminar este pendente?")) {
       deleteMutation.mutate({ id });
     }
+  };
+  
+  // Função para verificar status do prazo
+  const getStatusPrazo = (dataLimite: string | null) => {
+    if (!dataLimite) return null;
+    const hoje = new Date();
+    const limite = new Date(dataLimite);
+    const diffDias = Math.ceil((limite.getTime() - hoje.getTime()) / (1000 * 60 * 60 * 24));
+    
+    if (diffDias < 0) return 'vencido';
+    if (diffDias <= 3) return 'proximo';
+    return 'ok';
   };
 
   // Agrupar pendentes por loja
@@ -112,7 +124,7 @@ export default function Pendentes() {
                     {grupo.pendentes.map((pendente: any) => (
                       <div
                         key={pendente.id}
-                        className="flex items-start gap-3 p-3 border rounded-lg hover:bg-accent/50 transition-colors"
+                        className={`flex items-start gap-3 p-3 border rounded-lg hover:bg-accent/50 transition-colors ${!pendente.resolvido && getStatusPrazo(pendente.dataLimite) === 'vencido' ? 'border-red-500 bg-red-500/5' : ''} ${!pendente.resolvido && getStatusPrazo(pendente.dataLimite) === 'proximo' ? 'border-amber-500 bg-amber-500/5' : ''}`}
                       >
                         <Checkbox
                           id={`pendente-${pendente.id}`}
@@ -145,6 +157,23 @@ export default function Pendentes() {
                                 {pendente.tipoRelatorio === "livre"
                                   ? "Relatório Livre"
                                   : "Relatório Completo"}
+                              </span>
+                            )}
+                            {!pendente.resolvido && pendente.dataLimite && (
+                              <span className={`text-xs px-2 py-0.5 rounded flex items-center gap-1 ${
+                                getStatusPrazo(pendente.dataLimite) === 'vencido' 
+                                  ? 'bg-red-500/10 text-red-600' 
+                                  : getStatusPrazo(pendente.dataLimite) === 'proximo'
+                                    ? 'bg-amber-500/10 text-amber-600'
+                                    : 'bg-blue-500/10 text-blue-600'
+                              }`}>
+                                {getStatusPrazo(pendente.dataLimite) === 'vencido' ? (
+                                  <><AlertCircle className="h-3 w-3" /> Vencido</>
+                                ) : getStatusPrazo(pendente.dataLimite) === 'proximo' ? (
+                                  <><CalendarClock className="h-3 w-3" /> Vence em breve</>
+                                ) : (
+                                  <><Calendar className="h-3 w-3" /> Prazo: {new Date(pendente.dataLimite).toLocaleDateString('pt-PT')}</>
+                                )}
                               </span>
                             )}
                           </div>
