@@ -259,7 +259,10 @@ export default function Categorias() {
         {/* Estatísticas */}
         {estatisticas && (
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-            <Card className="bg-gradient-to-br from-primary/10 to-primary/5">
+            <Card 
+              className={`bg-gradient-to-br from-primary/10 to-primary/5 cursor-pointer transition-all hover:scale-105 hover:shadow-md ${filtroEstado === 'all' ? 'ring-2 ring-primary' : ''}`}
+              onClick={() => setFiltroEstado('all')}
+            >
               <CardContent className="pt-4">
                 <div className="flex items-center gap-2">
                   <Tag className="h-5 w-5 text-primary" />
@@ -272,7 +275,10 @@ export default function Categorias() {
                 </p>
               </CardContent>
             </Card>
-            <Card className="bg-gradient-to-br from-blue-500/10 to-blue-500/5">
+            <Card 
+              className={`bg-gradient-to-br from-blue-500/10 to-blue-500/5 cursor-pointer transition-all hover:scale-105 hover:shadow-md ${filtroEstado === 'acompanhar' ? 'ring-2 ring-blue-500' : ''}`}
+              onClick={() => setFiltroEstado('acompanhar')}
+            >
               <CardContent className="pt-4">
                 <div className="flex items-center gap-2">
                   <Eye className="h-5 w-5 text-blue-500" />
@@ -285,7 +291,10 @@ export default function Categorias() {
                 </p>
               </CardContent>
             </Card>
-            <Card className="bg-gradient-to-br from-amber-500/10 to-amber-500/5">
+            <Card 
+              className={`bg-gradient-to-br from-amber-500/10 to-amber-500/5 cursor-pointer transition-all hover:scale-105 hover:shadow-md ${filtroEstado === 'em_tratamento' ? 'ring-2 ring-amber-500' : ''}`}
+              onClick={() => setFiltroEstado('em_tratamento')}
+            >
               <CardContent className="pt-4">
                 <div className="flex items-center gap-2">
                   <Clock className="h-5 w-5 text-amber-500" />
@@ -298,7 +307,10 @@ export default function Categorias() {
                 </p>
               </CardContent>
             </Card>
-            <Card className="bg-gradient-to-br from-green-500/10 to-green-500/5">
+            <Card 
+              className={`bg-gradient-to-br from-green-500/10 to-green-500/5 cursor-pointer transition-all hover:scale-105 hover:shadow-md ${filtroEstado === 'tratado' ? 'ring-2 ring-green-500' : ''}`}
+              onClick={() => setFiltroEstado('tratado')}
+            >
               <CardContent className="pt-4">
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="h-5 w-5 text-green-500" />

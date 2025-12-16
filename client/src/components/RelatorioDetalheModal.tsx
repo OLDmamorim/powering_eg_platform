@@ -20,7 +20,10 @@ import {
   XCircle,
   MessageSquare,
   Save,
+  Plus,
+  Loader2,
 } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { trpc } from "@/lib/trpc";
 import { useState, useEffect } from "react";
 import { CategoriaAutocomplete } from "@/components/CategoriaAutocomplete";
@@ -47,6 +50,8 @@ export function RelatorioDetalheModal({
   const [comentario, setComentario] = useState("");
   const [categoria, setCategoria] = useState("");
   const [comentarioEditado, setComentarioEditado] = useState(false);
+  const [novoPendente, setNovoPendente] = useState("");
+  const [mostrarFormPendente, setMostrarFormPendente] = useState(false);
   
   // Query para obter categorias existentes
   const { data: categoriasExistentes = [] } = trpc.categorizacao.getCategorias.useQuery(
@@ -121,6 +126,30 @@ export function RelatorioDetalheModal({
         comentario,
       });
     }
+  };
+  
+  // Mutation para criar pendente
+  const criarPendenteMutation = trpc.pendentes.criar.useMutation({
+    onSuccess: () => {
+      toast.success("Pendente criado com sucesso");
+      setNovoPendente("");
+      setMostrarFormPendente(false);
+      utils.relatoriosLivres.getById.invalidate();
+      utils.relatoriosCompletos.getById.invalidate();
+      utils.pendentes.list.invalidate();
+    },
+    onError: () => toast.error("Erro ao criar pendente"),
+  });
+  
+  const handleCriarPendente = () => {
+    if (!novoPendente.trim() || !relatorio?.lojaId) {
+      toast.error("Preencha a descrição do pendente");
+      return;
+    }
+    criarPendenteMutation.mutate({
+      lojaId: relatorio.lojaId,
+      descricao: novoPendente.trim(),
+    });
   };
 
   // Parse fotos
@@ -338,12 +367,52 @@ export function RelatorioDetalheModal({
               )}
 
               {/* Pendentes */}
-              {pendentes.length > 0 && (
-                <div>
-                  <h4 className="font-medium mb-2 flex items-center gap-2">
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="font-medium flex items-center gap-2">
                     <AlertTriangle className="h-4 w-4 text-amber-500" />
                     Pendentes ({pendentes.length})
                   </h4>
+                  {user?.role === "admin" && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setMostrarFormPendente(!mostrarFormPendente)}
+                    >
+                      <Plus className="h-4 w-4 mr-1" />
+                      Adicionar
+                    </Button>
+                  )}
+                </div>
+                
+                {/* Formulário para criar pendente */}
+                {mostrarFormPendente && user?.role === "admin" && (
+                  <div className="mb-4 p-3 bg-muted/50 rounded-lg border">
+                    <p className="text-sm text-muted-foreground mb-2">
+                      Criar novo pendente para a loja <strong>{relatorio?.loja?.nome}</strong>
+                    </p>
+                    <div className="flex gap-2">
+                      <Input
+                        value={novoPendente}
+                        onChange={(e) => setNovoPendente(e.target.value)}
+                        placeholder="Descrição do pendente..."
+                        className="flex-1"
+                      />
+                      <Button
+                        onClick={handleCriarPendente}
+                        disabled={criarPendenteMutation.isPending || !novoPendente.trim()}
+                      >
+                        {criarPendenteMutation.isPending ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          "Criar"
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+                
+                {pendentes.length > 0 ? (
                   <div className="space-y-2">
                     {pendentes.map((pendente: string, index: number) => (
                       <div
@@ -357,8 +426,10 @@ export function RelatorioDetalheModal({
                       </div>
                     ))}
                   </div>
-                </div>
-              )}
+                ) : (
+                  <p className="text-sm text-muted-foreground">Sem pendentes registados</p>
+                )}
+              </div>
 
               {/* Comentário do Admin */}
               {user?.role === "admin" && (

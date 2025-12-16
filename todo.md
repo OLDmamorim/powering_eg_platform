@@ -447,3 +447,21 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Botão de exportar na página de Categorias
 - [x] Gerar HTML com todos os relatórios da categoria
 - [x] Incluir resumo estatístico no início do documento
+
+## Melhorias Categorias e Pendentes Admin v4.1
+
+### Cards Clicáveis como Filtro
+- [x] Tornar cards de estatísticas clicáveis
+- [x] Ao clicar, filtrar relatórios por estado correspondente
+- [x] Destacar card selecionado visualmente
+
+### Adicionar Pendentes no Modal de Relatório
+- [x] Botão para criar novo pendente no modal de detalhes
+- [x] Formulário para adicionar descrição do pendente
+- [x] Associar pendente à loja do relatório
+
+### Separador Pendentes no Menu Admin
+- [x] Criar página PendentesAdmin.tsx
+- [x] Listar todos os pendentes de todas as lojas
+- [x] Filtros por loja, estado (resolvido/pendente)
+- [x] Adicionar link no menu lateral do admin

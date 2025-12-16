@@ -658,6 +658,20 @@ export const appRouter = router({
         return { success: true };
       }),
     
+    // Criar novo pendente (admin)
+    criar: adminProcedure
+      .input(z.object({
+        lojaId: z.number(),
+        descricao: z.string().min(1),
+      }))
+      .mutation(async ({ input }) => {
+        const pendente = await db.createPendente({
+          lojaId: input.lojaId,
+          descricao: input.descricao,
+        });
+        return pendente;
+      }),
+    
     // Atualizar múltiplos pendentes (resolvido ou continua)
     updateBatch: gestorProcedure
       .input(z.object({

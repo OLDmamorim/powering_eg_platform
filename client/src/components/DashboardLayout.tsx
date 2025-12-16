@@ -53,7 +53,7 @@ const getMenuItems = (userRole?: string) => {
     { icon: Bell, label: "Alertas", path: "/alertas", show: isAdmin, showBadge: true },
     { icon: Settings, label: "Config. Alertas", path: "/configuracoes-alertas", show: isAdmin, showBadge: false },
     { icon: Tag, label: "Categorias", path: "/categorias", show: isAdmin, showBadge: false },
-    { icon: ListTodo, label: "Pendentes", path: "/pendentes", show: true, showBadge: false },
+    { icon: ListTodo, label: "Pendentes", path: isAdmin ? "/pendentes-admin" : "/pendentes", show: true, showBadge: false },
 
   ];
   
@@ -335,7 +335,7 @@ function DashboardLayoutContent({
           )}
           <KeyboardShortcutsHelp />
           <div className="fixed bottom-4 right-4 text-xs text-foreground/60 select-none pointer-events-none">
-            v4.0
+            v4.1
           </div>
         </main>
       </SidebarInset>

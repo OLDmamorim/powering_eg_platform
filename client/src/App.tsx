@@ -20,6 +20,7 @@ import HistoricoPontos from "./pages/HistoricoPontos";
 import DashboardAlertas from "./pages/DashboardAlertas";
 import ConfiguracoesAlertas from "./pages/ConfiguracoesAlertas";
 import Categorias from "./pages/Categorias";
+import PendentesAdmin from "./pages/PendentesAdmin";
 
 
 function Router() {
@@ -34,6 +35,7 @@ function Router() {
       <Route path={"/lojas"} component={Lojas} />
       <Route path={"/gestores"} component={Gestores} />
       <Route path={"/relatorios"} component={Relatorios} />
+      <Route path={"/pendentes-admin"} component={PendentesAdmin} />
       
       {/* Gestor routes */}
       <Route path={"/minhas-lojas"} component={MinhasLojas} />
