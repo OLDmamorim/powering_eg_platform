@@ -534,3 +534,12 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Instalar nodemailer
 - [x] Reescrever sendEmail para usar Gmail SMTP
 - [x] Testar envio de email com sucesso (teste passou)
+
+## Funcionalidade v4.7.1 - Confirmação Automática de Envio de Email
+- [x] Adicionar diálogo de confirmação após criar relatório livre
+- [x] Adicionar diálogo de confirmação após criar relatório completo
+- [x] Perguntar "Deseja enviar este relatório por email para a loja?"
+- [x] Botões: "Enviar Email" e "Não Enviar"
+- [x] Criar componente EmailConfirmDialog
+- [x] Adicionar mutation enviarEmail para relatórios completos
+- [x] Fluxo: Email Dialog → Sugestões Modal → Meus Relatórios

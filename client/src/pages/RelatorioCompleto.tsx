@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import { useLocation } from "wouter";
 import { SugestoesModal } from "@/components/SugestoesModal";
 import { PendentesLoja } from "@/components/PendentesLoja";
+import { EmailConfirmDialog } from "@/components/EmailConfirmDialog";
 
 export default function RelatorioCompleto() {
   const { user } = useAuth();
@@ -31,8 +32,10 @@ export default function RelatorioCompleto() {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showSugestoesModal, setShowSugestoesModal] = useState(false);
+  const [showEmailDialog, setShowEmailDialog] = useState(false);
   const [relatorioIdCriado, setRelatorioIdCriado] = useState<number | null>(null);
   const [lojaNomeSelecionada, setLojaNomeSelecionada] = useState<string>("");
+  const [lojaEmailSelecionada, setLojaEmailSelecionada] = useState<string>("");
   const [pendentesExistentes, setPendentesExistentes] = useState<{id: number; status: "resolvido" | "continua" | null}[]>([]);
   const [dataHoraPersonalizada, setDataHoraPersonalizada] = useState<string>("");
 
@@ -62,11 +65,13 @@ export default function RelatorioCompleto() {
     onSuccess: (data) => {
       toast.success("Relatório completo criado com sucesso");
       utils.relatoriosCompletos.list.invalidate();
-      // Mostrar modal de sugestões
+      // Guardar dados para os diálogos
       setRelatorioIdCriado(data.id);
       const loja = lojas?.find(l => l.id === parseInt(lojaId));
       setLojaNomeSelecionada(loja?.nome || "");
-      setShowSugestoesModal(true);
+      setLojaEmailSelecionada(loja?.email || "");
+      // Mostrar diálogo de confirmação de email primeiro
+      setShowEmailDialog(true);
     },
     onError: (error) => {
       toast.error(error.message);
@@ -672,6 +677,20 @@ export default function RelatorioCompleto() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Diálogo de Confirmação de Email */}
+      <EmailConfirmDialog
+        open={showEmailDialog}
+        onClose={() => {
+          setShowEmailDialog(false);
+          // Após fechar diálogo de email, mostrar sugestões
+          setShowSugestoesModal(true);
+        }}
+        relatorioId={relatorioIdCriado}
+        tipoRelatorio="completo"
+        lojaNome={lojaNomeSelecionada}
+        lojaEmail={lojaEmailSelecionada}
+      />
 
       {/* Modal de Sugestões */}
       <SugestoesModal

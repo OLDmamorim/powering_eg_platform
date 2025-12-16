@@ -558,6 +558,54 @@ export const appRouter = router({
         
         return await db.deleteRelatorioCompleto(input.id);
       }),
+    
+    enviarEmail: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const relatorio = await db.getRelatorioCompletoById(input.id);
+        if (!relatorio) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Relatório não encontrado' });
+        }
+        
+        // Obter dados da loja e gestor
+        const loja = await db.getLojaById(relatorio.lojaId);
+        const gestor = await db.getGestorById(relatorio.gestorId);
+        
+        if (!loja) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Loja não encontrada' });
+        }
+        
+        // Obter pendentes
+        const pendentes = await db.getPendentesByRelatorio(relatorio.id, 'completo');
+        
+        // Gerar HTML do relatório
+        const html = gerarHTMLRelatorioCompleto({
+          lojaNome: loja.nome,
+          gestorNome: gestor?.nome || 'Desconhecido',
+          dataVisita: relatorio.dataVisita,
+          observacoesGerais: relatorio.resumoSupervisao || '',
+          pontosPositivos: relatorio.pontosPositivos || '',
+          pontosNegativos: relatorio.pontosNegativos || '',
+          pendentes: pendentes.map(p => ({ descricao: p.descricao, resolvido: p.resolvido })),
+        });
+        
+        // Enviar email
+        if (!loja.email) {
+          throw new TRPCError({ code: 'BAD_REQUEST', message: 'Loja não tem email configurado' });
+        }
+        
+        const enviado = await sendEmail({
+          to: loja.email,
+          subject: `Relatório Completo de Visita - ${loja.nome} - ${new Date(relatorio.dataVisita).toLocaleDateString('pt-PT')}`,
+          html,
+        });
+        
+        if (!enviado) {
+          throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Falha ao enviar email' });
+        }
+        
+        return { success: true, email: loja.email };
+      }),
   }),
 
   // ==================== RELATÓRIOS COM IA ====================
