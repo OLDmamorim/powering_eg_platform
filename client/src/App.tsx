@@ -19,7 +19,7 @@ import LoginNaoAutorizado from "./pages/LoginNaoAutorizado";
 import HistoricoPontos from "./pages/HistoricoPontos";
 import DashboardAlertas from "./pages/DashboardAlertas";
 import ConfiguracoesAlertas from "./pages/ConfiguracoesAlertas";
-import PlanoVisitas from "./pages/PlanoVisitas";
+
 
 function Router() {
   return (
@@ -46,7 +46,7 @@ function Router() {
       <Route path={"/historico-pontos"} component={HistoricoPontos} />
       <Route path={"/alertas"} component={DashboardAlertas} />
       <Route path={"/configuracoes-alertas"} component={ConfiguracoesAlertas} />
-      <Route path={"/plano-visitas"} component={PlanoVisitas} />
+      
       
       <Route path={"/login-nao-autorizado"} component={LoginNaoAutorizado} />
       <Route path={"/404"} component={NotFound} />

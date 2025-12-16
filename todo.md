@@ -367,3 +367,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Gerar plano semanal às sextas-feiras
 - [x] Interface para visualizar e aceitar/modificar plano
 - [ ] Notificar gestores com plano sugerido (futuro)
+
+## Remoção - Plano de Visitas v3.5
+
+- [x] Remover link do menu lateral (DashboardLayout.tsx)
+- [x] Remover rota do App.tsx
+- [x] Remover página PlanoVisitas.tsx
+- [x] Manter tabelas e serviços no backend (podem ser úteis futuramente)
