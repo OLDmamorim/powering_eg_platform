@@ -499,3 +499,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Botões para ordenar por data (recente/antigo)
 - [x] Botão para ordenar por loja (A-Z)
 - [x] Dropdown com opções de ordenação
+
+## Bug Fix - Pendentes Gestor v4.5
+
+- [x] Corrigir exibição do nome da loja na página Pendentes do gestor (mostra "Loja" em vez do nome real)

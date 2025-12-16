@@ -674,11 +674,24 @@ export async function getAllPendentes(): Promise<Pendente[]> {
   return await db.select().from(pendentes).orderBy(desc(pendentes.createdAt));
 }
 
-export async function getPendentesByLojaId(lojaId: number): Promise<Pendente[]> {
+export async function getPendentesByLojaId(lojaId: number): Promise<Array<Pendente & { loja: Loja }>> {
   const db = await getDb();
   if (!db) return [];
   
-  return await db.select().from(pendentes).where(eq(pendentes.lojaId, lojaId)).orderBy(desc(pendentes.createdAt));
+  const result = await db
+    .select({
+      pendente: pendentes,
+      loja: lojas
+    })
+    .from(pendentes)
+    .innerJoin(lojas, eq(pendentes.lojaId, lojas.id))
+    .where(eq(pendentes.lojaId, lojaId))
+    .orderBy(desc(pendentes.createdAt));
+  
+  return result.map(r => ({
+    ...r.pendente,
+    loja: r.loja
+  }));
 }
 
 export async function getPendenteById(id: number): Promise<Pendente | undefined> {

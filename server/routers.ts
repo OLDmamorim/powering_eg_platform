@@ -615,7 +615,7 @@ export const appRouter = router({
       const pendentes = [];
       for (const loja of lojas) {
         const lojasPendentes = await db.getPendentesByLojaId(loja.id);
-        pendentes.push(...lojasPendentes.map(p => ({ ...p, loja })));
+        pendentes.push(...lojasPendentes);
       }
       return pendentes;
     }),
