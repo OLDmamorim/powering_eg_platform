@@ -28,6 +28,16 @@ export default function Pendentes() {
     },
   });
 
+  const unresolveMutation = trpc.pendentes.unresolve.useMutation({
+    onSuccess: () => {
+      toast.success("Pendente desmarcado como não resolvido");
+      utils.pendentes.list.invalidate();
+    },
+    onError: (error: any) => {
+      toast.error(error.message);
+    },
+  });
+
   const deleteMutation = trpc.pendentes.delete.useMutation({
     onSuccess: () => {
       toast.success("Pendente eliminado");
@@ -40,6 +50,10 @@ export default function Pendentes() {
 
   const handleResolve = (id: number) => {
     resolveMutation.mutate({ id });
+  };
+
+  const handleUnresolve = (id: number) => {
+    unresolveMutation.mutate({ id });
   };
 
   const handleDelete = (id: number) => {
@@ -129,10 +143,14 @@ export default function Pendentes() {
                         <Checkbox
                           id={`pendente-${pendente.id}`}
                           checked={pendente.resolvido}
-                          onCheckedChange={() => handleResolve(pendente.id)}
-                          disabled={
-                            resolveMutation.isPending || pendente.resolvido
-                          }
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              handleResolve(pendente.id);
+                            } else {
+                              handleUnresolve(pendente.id);
+                            }
+                          }}
+                          disabled={resolveMutation.isPending || unresolveMutation.isPending}
                           className="mt-1"
                         />
                         <div className="flex-1 min-w-0">

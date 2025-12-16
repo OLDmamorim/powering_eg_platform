@@ -651,6 +651,13 @@ export const appRouter = router({
         return { success: true };
       }),
     
+    unresolve: gestorProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await db.unresolvePendente(input.id);
+        return { success: true };
+      }),
+    
     delete: gestorProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input }) => {

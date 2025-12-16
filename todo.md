@@ -503,3 +503,24 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## Bug Fix - Pendentes Gestor v4.5
 
 - [x] Corrigir exibição do nome da loja na página Pendentes do gestor (mostra "Loja" em vez do nome real)
+
+## Correções v4.6
+
+### Checkbox Pendente Editável
+- [x] Permitir desmarcar checkbox do pendente após marcar
+- [x] Adicionar mutation para desmarcar pendente como não resolvido
+
+### Data/Hora Personalizada nos Relatórios
+- [ ] Adicionar campo de data/hora nos formulários de relatório
+- [ ] Usar data/hora escolhida em vez de automática
+- [ ] Validar que data não é futura
+
+## Funcionalidades v4.6 - Data/Hora Personalizada e Pendentes Editáveis
+- [x] Checkbox de pendentes editável (já estava implementado - unresolve mutation)
+- [x] Adicionar campo de data/hora personalizada no formulário de Relatório Livre
+- [x] Adicionar campo de data/hora personalizada no formulário de Relatório Completo
+- [x] Validação para não permitir datas futuras (max=data atual)
+- [x] Usar data personalizada se fornecida, senão usar data atual
+- [x] Corrigir bug no createGestor - adicionar fallback para userId e gestorId quando insertId é NaN
+- [x] Criar testes unitários para data/hora personalizada (4 testes passaram)
+- [x] Testar criação de relatórios com data personalizada

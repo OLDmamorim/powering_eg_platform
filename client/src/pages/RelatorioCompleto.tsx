@@ -34,6 +34,7 @@ export default function RelatorioCompleto() {
   const [relatorioIdCriado, setRelatorioIdCriado] = useState<number | null>(null);
   const [lojaNomeSelecionada, setLojaNomeSelecionada] = useState<string>("");
   const [pendentesExistentes, setPendentesExistentes] = useState<{id: number; status: "resolvido" | "continua" | null}[]>([]);
+  const [dataHoraPersonalizada, setDataHoraPersonalizada] = useState<string>("");
 
   const FORGE_API_URL = import.meta.env.VITE_FRONTEND_FORGE_API_URL;
   const FORGE_API_KEY = import.meta.env.VITE_FRONTEND_FORGE_API_KEY;
@@ -218,9 +219,13 @@ export default function RelatorioCompleto() {
 
     const pendentesValidos = pendentes.filter((p) => p.trim() !== "");
 
+    const dataVisita = dataHoraPersonalizada 
+      ? new Date(dataHoraPersonalizada)
+      : new Date();
+
     createMutation.mutate({
       lojaId: Number(lojaId),
-      dataVisita: new Date(),
+      dataVisita,
       ...formData,
       fotos: fotos.length > 0 ? JSON.stringify(fotos) : undefined,
       pendentes: pendentesValidos.length > 0 ? pendentesValidos : undefined,
@@ -257,16 +262,16 @@ export default function RelatorioCompleto() {
             )}
             
             <div className="space-y-2">
-              <Label htmlFor="data">Data e Hora</Label>
+              <Label htmlFor="dataHora">Data e Hora da Visita (opcional)</Label>
               <Input
-                id="data"
-                type="text"
-                value={new Date().toLocaleString("pt-PT")}
-                disabled
-                className="bg-muted"
+                id="dataHora"
+                type="datetime-local"
+                value={dataHoraPersonalizada}
+                onChange={(e) => setDataHoraPersonalizada(e.target.value)}
+                max={new Date().toISOString().slice(0, 16)}
               />
               <p className="text-xs text-muted-foreground">
-                A data e hora são registadas automaticamente
+                Se não especificar, será usada a data/hora atual
               </p>
             </div>
           </div>

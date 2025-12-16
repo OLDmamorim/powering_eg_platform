@@ -251,7 +251,15 @@ export async function createGestor(nome: string, email: string): Promise<any> {
       role: 'gestor',
       loginMethod: 'pending',
     });
-    userId = (userResult as any).insertId;
+    const insertId = Number((userResult as any).insertId);
+    
+    // Fallback: se insertId for NaN, buscar o user recém-criado
+    if (isNaN(insertId)) {
+      const newUser = await db.select().from(users).where(eq(users.email, email)).limit(1);
+      userId = newUser[0]!.id;
+    } else {
+      userId = insertId;
+    }
   }
   
   // Criar registo de gestor
@@ -260,7 +268,13 @@ export async function createGestor(nome: string, email: string): Promise<any> {
     createdAt: new Date(),
     updatedAt: new Date()
   });
-  const gestorId = (gestorInsertResult as any).insertId;
+  let gestorId = Number((gestorInsertResult as any).insertId);
+  
+  // Fallback: se gestorId for NaN, buscar o gestor recém-criado
+  if (isNaN(gestorId)) {
+    const newGestor = await db.select().from(gestores).where(eq(gestores.userId, userId)).limit(1);
+    gestorId = newGestor[0]!.id;
+  }
   
   // Buscar gestor com dados do user
   const gestorComUser = await db
@@ -709,6 +723,16 @@ export async function resolvePendente(id: number): Promise<void> {
   await db.update(pendentes).set({ 
     resolvido: true,
     dataResolucao: new Date()
+  }).where(eq(pendentes.id, id));
+}
+
+export async function unresolvePendente(id: number): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.update(pendentes).set({ 
+    resolvido: false,
+    dataResolucao: null
   }).where(eq(pendentes.id, id));
 }
 

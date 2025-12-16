@@ -36,6 +36,7 @@ export default function RelatorioLivre() {
   const [relatorioIdCriado, setRelatorioIdCriado] = useState<number | null>(null);
   const [lojaNomeSelecionada, setLojaNomeSelecionada] = useState<string>("");
   const [pendentesExistentes, setPendentesExistentes] = useState<{id: number; status: "resolvido" | "continua" | null}[]>([]);
+  const [dataHoraPersonalizada, setDataHoraPersonalizada] = useState<string>("");
 
   const utils = trpc.useUtils();
   const { data: lojas } = trpc.lojas.getByGestor.useQuery();
@@ -172,9 +173,13 @@ export default function RelatorioLivre() {
 
     const pendentesValidos = pendentes.filter((p) => p.trim() !== "");
 
+    const dataVisita = dataHoraPersonalizada 
+      ? new Date(dataHoraPersonalizada)
+      : new Date();
+
     createMutation.mutate({
       lojaId: Number(lojaId),
-      dataVisita: new Date(),
+      dataVisita,
       descricao,
       fotos: fotos.length > 0 ? JSON.stringify(fotos) : undefined,
       pendentes: pendentesValidos.length > 0 ? pendentesValidos : undefined,
@@ -215,6 +220,20 @@ export default function RelatorioLivre() {
                 </Select>
               </div>
 
+              <div className="space-y-2">
+                <Label htmlFor="dataHora">Data e Hora da Visita (opcional)</Label>
+                <Input
+                  id="dataHora"
+                  type="datetime-local"
+                  value={dataHoraPersonalizada}
+                  onChange={(e) => setDataHoraPersonalizada(e.target.value)}
+                  max={new Date().toISOString().slice(0, 16)}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Se não especificar, será usada a data/hora atual
+                </p>
+              </div>
+
               {/* Pendentes da Loja Selecionada */}
               {lojaId && (
                 <PendentesLoja
@@ -222,20 +241,6 @@ export default function RelatorioLivre() {
                   onPendentesChange={setPendentesExistentes}
                 />
               )}
-
-              <div className="space-y-2">
-                <Label htmlFor="data">Data e Hora</Label>
-                <Input
-                  id="data"
-                  type="text"
-                  value={new Date().toLocaleString("pt-PT")}
-                  disabled
-                  className="bg-muted"
-                />
-                <p className="text-xs text-muted-foreground">
-                  A data e hora são registadas automaticamente
-                </p>
-              </div>
 
               <div className="space-y-2">
                 <Label htmlFor="descricao">Descrição *</Label>
