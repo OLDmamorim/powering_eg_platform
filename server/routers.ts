@@ -623,6 +623,35 @@ export const appRouter = router({
         await db.deletePendente(input.id);
         return { success: true };
       }),
+    
+    // Atualizar múltiplos pendentes (resolvido ou continua)
+    updateBatch: gestorProcedure
+      .input(z.object({
+        pendentes: z.array(z.object({
+          id: z.number(),
+          status: z.enum(['resolvido', 'continua']),
+        })),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        for (const p of input.pendentes) {
+          if (p.status === 'resolvido') {
+            const pendente = await db.getPendenteById(p.id);
+            await db.resolvePendente(p.id);
+            
+            // Registar atividade
+            if (pendente && ctx.gestor) {
+              await db.registarAtividade({
+                gestorId: ctx.gestor.id,
+                lojaId: pendente.lojaId,
+                tipo: 'pendente_resolvido',
+                descricao: `Pendente resolvido: ${pendente.descricao?.substring(0, 50) || 'sem descrição'}...`,
+              });
+            }
+          }
+          // Se "continua", não fazemos nada - o pendente permanece ativo
+        }
+        return { success: true };
+      }),
   }),
 
   // ==================== HISTÓRICO DE PONTOS ====================

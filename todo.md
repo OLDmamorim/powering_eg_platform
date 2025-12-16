@@ -405,3 +405,12 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Agrupamento de relatórios por categoria
 - [x] Filtros por estado
 - [x] Contadores por categoria/estado
+
+## Pendentes ao Criar Relatório v3.8
+
+### Funcionalidade
+- [x] Ao selecionar loja, mostrar pendentes ativos dessa loja
+- [x] Cada pendente com opção: "Resolvido" ou "Continua até próxima visita"
+- [x] Integrar no RelatorioLivre
+- [x] Integrar no RelatorioCompleto
+- [x] Atualizar estado dos pendentes ao submeter relatório

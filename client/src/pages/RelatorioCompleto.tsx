@@ -19,6 +19,7 @@ import { useState, useRef } from "react";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
 import { SugestoesModal } from "@/components/SugestoesModal";
+import { PendentesLoja } from "@/components/PendentesLoja";
 
 export default function RelatorioCompleto() {
   const { user } = useAuth();
@@ -32,6 +33,7 @@ export default function RelatorioCompleto() {
   const [showSugestoesModal, setShowSugestoesModal] = useState(false);
   const [relatorioIdCriado, setRelatorioIdCriado] = useState<number | null>(null);
   const [lojaNomeSelecionada, setLojaNomeSelecionada] = useState<string>("");
+  const [pendentesExistentes, setPendentesExistentes] = useState<{id: number; status: "resolvido" | "continua" | null}[]>([]);
 
   const FORGE_API_URL = import.meta.env.VITE_FRONTEND_FORGE_API_URL;
   const FORGE_API_KEY = import.meta.env.VITE_FRONTEND_FORGE_API_KEY;
@@ -165,10 +167,21 @@ export default function RelatorioCompleto() {
     setFotos(fotos.filter((_, i) => i !== index));
   };
 
+  // Mutation para atualizar pendentes existentes
+  const updatePendentesMutation = trpc.pendentes.updateBatch.useMutation();
+
   const handleNext = () => {
     if (currentPage === 0 && !lojaId) {
       toast.error("Por favor selecione uma loja");
       return;
+    }
+    // Verificar pendentes na página 0
+    if (currentPage === 0 && pendentesExistentes.length > 0) {
+      const pendentesSemEstado = pendentesExistentes.filter(p => p.status === null);
+      if (pendentesSemEstado.length > 0) {
+        toast.error("Por favor indique o estado de todos os pendentes antes de avançar");
+        return;
+      }
     }
     if (currentPage < pages.length - 1) {
       setCurrentPage(currentPage + 1);
@@ -181,10 +194,26 @@ export default function RelatorioCompleto() {
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!lojaId) {
       toast.error("Por favor selecione uma loja");
       return;
+    }
+
+    // Atualizar pendentes existentes primeiro
+    const pendentesComEstado = pendentesExistentes.filter(p => p.status !== null);
+    if (pendentesComEstado.length > 0) {
+      try {
+        await updatePendentesMutation.mutateAsync({
+          pendentes: pendentesComEstado.map(p => ({
+            id: p.id,
+            status: p.status as 'resolvido' | 'continua',
+          })),
+        });
+      } catch (error) {
+        toast.error("Erro ao atualizar pendentes");
+        return;
+      }
     }
 
     const pendentesValidos = pendentes.filter((p) => p.trim() !== "");
@@ -218,6 +247,15 @@ export default function RelatorioCompleto() {
                 </SelectContent>
               </Select>
             </div>
+            
+            {/* Pendentes da Loja Selecionada */}
+            {lojaId && (
+              <PendentesLoja
+                lojaId={parseInt(lojaId)}
+                onPendentesChange={setPendentesExistentes}
+              />
+            )}
+            
             <div className="space-y-2">
               <Label htmlFor="data">Data e Hora</Label>
               <Input
