@@ -524,3 +524,13 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Corrigir bug no createGestor - adicionar fallback para userId e gestorId quando insertId é NaN
 - [x] Criar testes unitários para data/hora personalizada (4 testes passaram)
 - [x] Testar criação de relatórios com data personalizada
+
+## Bug v4.6.1 - Erro ao Enviar Email de Relatório
+- [x] Investigar causa do erro "Falha ao enviar email" nos relatórios livres
+- [x] Verificar função sendEmail no emailService.ts
+- [x] Identificado: API de email da Manus não existe (404)
+- [x] Configurar Gmail SMTP como alternativa
+- [x] Adicionar credenciais SMTP como secrets (egpowering@gmail.com)
+- [x] Instalar nodemailer
+- [x] Reescrever sendEmail para usar Gmail SMTP
+- [x] Testar envio de email com sucesso (teste passou)

@@ -1,3 +1,4 @@
+import nodemailer from 'nodemailer';
 import { ENV } from "./_core/env";
 
 export type EmailPayload = {
@@ -12,50 +13,53 @@ export type EmailPayload = {
 };
 
 /**
- * Envia email através do serviço Forge da Manus
- * Usa a API de notificações para enviar emails
+ * Envia email através do Gmail SMTP
+ * Usa nodemailer com as credenciais configuradas
  */
 export async function sendEmail(payload: EmailPayload): Promise<boolean> {
   const { to, subject, html, attachments } = payload;
 
-  if (!ENV.forgeApiUrl || !ENV.forgeApiKey) {
-    console.error("[Email] Forge API não configurada");
+  // Verificar se as credenciais SMTP estão configuradas
+  const smtpEmail = process.env.SMTP_EMAIL;
+  const smtpPassword = process.env.SMTP_PASSWORD;
+
+  if (!smtpEmail || !smtpPassword) {
+    console.error("[Email] Credenciais SMTP não configuradas");
     return false;
   }
 
-  // Usar a API de email do Forge
-  const endpoint = `${ENV.forgeApiUrl.replace(/\/$/, "")}/email.v1.EmailService/SendEmail`;
-
   try {
-    const response = await fetch(endpoint, {
-      method: "POST",
-      headers: {
-        accept: "application/json",
-        authorization: `Bearer ${ENV.forgeApiKey}`,
-        "content-type": "application/json",
-        "connect-protocol-version": "1",
+    // Criar transporter do nodemailer
+    const transporter = nodemailer.createTransport({
+      host: 'smtp.gmail.com',
+      port: 587,
+      secure: false, // true para 465, false para outras portas
+      auth: {
+        user: smtpEmail,
+        pass: smtpPassword,
       },
-      body: JSON.stringify({
-        to,
-        subject,
-        html,
-        attachments: attachments?.map(att => ({
-          filename: att.filename,
-          content: att.content,
-          content_type: att.contentType,
-        })),
-      }),
     });
 
-    if (!response.ok) {
-      const detail = await response.text().catch(() => "");
-      console.warn(`[Email] Falha ao enviar email (${response.status}): ${detail}`);
-      return false;
-    }
+    // Preparar anexos se existirem
+    const mailAttachments = attachments?.map(att => ({
+      filename: att.filename,
+      content: Buffer.from(att.content, 'base64'),
+      contentType: att.contentType,
+    }));
 
+    // Enviar email
+    const info = await transporter.sendMail({
+      from: `"PoweringEG Platform" <${smtpEmail}>`,
+      to,
+      subject,
+      html,
+      attachments: mailAttachments,
+    });
+
+    console.log(`[Email] Email enviado com sucesso: ${info.messageId}`);
     return true;
   } catch (error) {
-    console.warn("[Email] Erro ao enviar email:", error);
+    console.error("[Email] Erro ao enviar email:", error);
     return false;
   }
 }
