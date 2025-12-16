@@ -482,3 +482,20 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## Bug Fix - Meus Relatórios v4.3
 
 - [x] Corrigir exibição do nome da loja na página Meus Relatórios (mostra "Loja" em vez do nome real)
+
+## Melhorias Meus Relatórios v4.4
+
+### Filtro por Loja
+- [x] Dropdown para selecionar loja específica
+- [x] Opção "Todas as lojas" para limpar filtro
+- [x] Aplicar filtro em ambas as tabs (Livres e Completos)
+
+### Pesquisa por Texto
+- [x] Campo de pesquisa para buscar pela descrição
+- [x] Pesquisa em tempo real enquanto digita
+- [x] Filtro aplicado automaticamente
+
+### Ordenação
+- [x] Botões para ordenar por data (recente/antigo)
+- [x] Botão para ordenar por loja (A-Z)
+- [x] Dropdown com opções de ordenação

@@ -4,8 +4,11 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc";
-import { Building2, Calendar, ChevronDown, ChevronUp, FileText, ClipboardList } from "lucide-react";
+import { Building2, Calendar, ChevronDown, ChevronUp, FileText, ClipboardList, Search, ArrowUpDown, SortAsc } from "lucide-react";
 import { useLocation } from "wouter";
 import { useState } from "react";
 
@@ -14,6 +17,9 @@ export default function MeusRelatorios() {
   const [, setLocation] = useLocation();
   const [expandedLivres, setExpandedLivres] = useState<number[]>([]);
   const [expandedCompletos, setExpandedCompletos] = useState<number[]>([]);
+  const [lojaFiltro, setLojaFiltro] = useState<string>("");
+  const [pesquisa, setPesquisa] = useState("");
+  const [ordenacao, setOrdenacao] = useState<"data-desc" | "data-asc" | "loja-az">("data-desc");
 
   const { data: relatoriosLivres, isLoading: loadingLivres } =
     trpc.relatoriosLivres.list.useQuery();
@@ -36,6 +42,48 @@ export default function MeusRelatorios() {
       prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
     );
   };
+  
+  // Obter lista única de lojas
+  const lojasUnicas = Array.from(
+    new Set(
+      [...(relatoriosLivres || []), ...(relatoriosCompletos || [])]
+        .map((r: any) => r.loja?.nome)
+        .filter(Boolean)
+    )
+  ).sort();
+  
+  // Função de filtro e ordenação
+  const filtrarEOrdenar = (relatorios: any[]) => {
+    if (!relatorios) return [];
+    
+    let resultado = [...relatorios];
+    
+    // Aplicar filtro de loja
+    if (lojaFiltro) {
+      resultado = resultado.filter((r: any) => r.loja?.nome === lojaFiltro);
+    }
+    
+    // Aplicar pesquisa
+    if (pesquisa) {
+      resultado = resultado.filter((r: any) => 
+        r.descricao?.toLowerCase().includes(pesquisa.toLowerCase())
+      );
+    }
+    
+    // Aplicar ordenação
+    if (ordenacao === "data-desc") {
+      resultado.sort((a: any, b: any) => new Date(b.dataVisita).getTime() - new Date(a.dataVisita).getTime());
+    } else if (ordenacao === "data-asc") {
+      resultado.sort((a: any, b: any) => new Date(a.dataVisita).getTime() - new Date(b.dataVisita).getTime());
+    } else if (ordenacao === "loja-az") {
+      resultado.sort((a: any, b: any) => (a.loja?.nome || "").localeCompare(b.loja?.nome || ""));
+    }
+    
+    return resultado;
+  };
+  
+  const relatoriosLivresFiltrados = filtrarEOrdenar(relatoriosLivres || []);
+  const relatoriosCompletosFiltrados = filtrarEOrdenar(relatoriosCompletos || []);
 
   return (
     <DashboardLayout>
@@ -48,16 +96,71 @@ export default function MeusRelatorios() {
             Histórico dos seus relatórios de supervisão
           </p>
         </div>
+        
+        {/* Controles de Filtro e Pesquisa */}
+        <Card>
+          <CardContent className="py-4">
+            <div className="flex flex-col md:flex-row gap-3">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Pesquisar por descrição..."
+                  value={pesquisa}
+                  onChange={(e) => setPesquisa(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+              <Select value={lojaFiltro} onValueChange={setLojaFiltro}>
+                <SelectTrigger className="w-full md:w-[200px]">
+                  <SelectValue placeholder="Todas as lojas" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Todas as lojas</SelectItem>
+                  {lojasUnicas.map((loja) => (
+                    <SelectItem key={loja} value={loja}>
+                      {loja}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={ordenacao} onValueChange={(v: any) => setOrdenacao(v)}>
+                <SelectTrigger className="w-full md:w-[180px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="data-desc">
+                    <div className="flex items-center gap-2">
+                      <ArrowUpDown className="h-3 w-3" />
+                      Mais recente
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="data-asc">
+                    <div className="flex items-center gap-2">
+                      <ArrowUpDown className="h-3 w-3" />
+                      Mais antigo
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="loja-az">
+                    <div className="flex items-center gap-2">
+                      <SortAsc className="h-3 w-3" />
+                      Loja (A-Z)
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </CardContent>
+        </Card>
 
         <Tabs defaultValue="livres" className="space-y-4">
           <TabsList>
             <TabsTrigger value="livres">
               <FileText className="h-4 w-4 mr-2" />
-              Livres ({relatoriosLivres?.length || 0})
+              Livres ({relatoriosLivresFiltrados.length})
             </TabsTrigger>
             <TabsTrigger value="completos">
               <ClipboardList className="h-4 w-4 mr-2" />
-              Completos ({relatoriosCompletos?.length || 0})
+              Completos ({relatoriosCompletosFiltrados.length})
             </TabsTrigger>
           </TabsList>
 
@@ -66,9 +169,9 @@ export default function MeusRelatorios() {
               <div className="flex justify-center py-8">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
               </div>
-            ) : relatoriosLivres && relatoriosLivres.length > 0 ? (
+            ): relatoriosLivresFiltrados && relatoriosLivresFiltrados.length > 0 ? (
               <div className="space-y-2">
-                {relatoriosLivres.map((relatorio: any) => (
+                {relatoriosLivresFiltrados.map((relatorio: any) => (
                   <Collapsible 
                     key={relatorio.id} 
                     open={expandedLivres.includes(relatorio.id)}
@@ -132,9 +235,9 @@ export default function MeusRelatorios() {
               <div className="flex justify-center py-8">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
               </div>
-            ) : relatoriosCompletos && relatoriosCompletos.length > 0 ? (
+            ): relatoriosCompletosFiltrados && relatoriosCompletosFiltrados.length > 0 ? (
               <div className="space-y-2">
-                {relatoriosCompletos.map((relatorio: any) => (
+                {relatoriosCompletosFiltrados.map((relatorio: any) => (
                   <Collapsible 
                     key={relatorio.id} 
                     open={expandedCompletos.includes(relatorio.id)}
