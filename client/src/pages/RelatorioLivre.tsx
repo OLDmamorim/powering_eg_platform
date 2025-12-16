@@ -17,6 +17,7 @@ import { Plus, Save, X, Image, Upload, Loader2 } from "lucide-react";
 import { useState, useRef } from "react";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
+import { SugestoesModal } from "@/components/SugestoesModal";
 
 const FORGE_API_URL = import.meta.env.VITE_FRONTEND_FORGE_API_URL;
 const FORGE_API_KEY = import.meta.env.VITE_FRONTEND_FORGE_API_KEY;
@@ -30,15 +31,22 @@ export default function RelatorioLivre() {
   const [fotos, setFotos] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [showSugestoesModal, setShowSugestoesModal] = useState(false);
+  const [relatorioIdCriado, setRelatorioIdCriado] = useState<number | null>(null);
+  const [lojaNomeSelecionada, setLojaNomeSelecionada] = useState<string>("");
 
   const utils = trpc.useUtils();
   const { data: lojas } = trpc.lojas.getByGestor.useQuery();
 
   const createMutation = trpc.relatoriosLivres.create.useMutation({
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast.success("Relatório criado com sucesso");
       utils.relatoriosLivres.list.invalidate();
-      setLocation("/meus-relatorios");
+      // Mostrar modal de sugestões
+      setRelatorioIdCriado(data.id);
+      const loja = lojas?.find(l => l.id === parseInt(lojaId));
+      setLojaNomeSelecionada(loja?.nome || "");
+      setShowSugestoesModal(true);
     },
     onError: (error) => {
       toast.error(error.message);
@@ -318,6 +326,18 @@ export default function RelatorioLivre() {
           </Card>
         </form>
       </div>
+
+      {/* Modal de Sugestões */}
+      <SugestoesModal
+        open={showSugestoesModal}
+        onClose={() => {
+          setShowSugestoesModal(false);
+          setLocation("/meus-relatorios");
+        }}
+        relatorioId={relatorioIdCriado}
+        tipoRelatorio="livre"
+        lojaNome={lojaNomeSelecionada}
+      />
     </DashboardLayout>
   );
 }

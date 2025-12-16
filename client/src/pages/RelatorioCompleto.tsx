@@ -18,6 +18,7 @@ import { ChevronLeft, ChevronRight, Plus, Save, X, Image, Upload, Loader2 } from
 import { useState, useRef } from "react";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
+import { SugestoesModal } from "@/components/SugestoesModal";
 
 export default function RelatorioCompleto() {
   const { user } = useAuth();
@@ -28,6 +29,9 @@ export default function RelatorioCompleto() {
   const [fotos, setFotos] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [showSugestoesModal, setShowSugestoesModal] = useState(false);
+  const [relatorioIdCriado, setRelatorioIdCriado] = useState<number | null>(null);
+  const [lojaNomeSelecionada, setLojaNomeSelecionada] = useState<string>("");
 
   const FORGE_API_URL = import.meta.env.VITE_FRONTEND_FORGE_API_URL;
   const FORGE_API_KEY = import.meta.env.VITE_FRONTEND_FORGE_API_KEY;
@@ -52,10 +56,14 @@ export default function RelatorioCompleto() {
   const { data: lojas } = trpc.lojas.getByGestor.useQuery();
 
   const createMutation = trpc.relatoriosCompletos.create.useMutation({
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast.success("Relatório completo criado com sucesso");
       utils.relatoriosCompletos.list.invalidate();
-      setLocation("/meus-relatorios");
+      // Mostrar modal de sugestões
+      setRelatorioIdCriado(data.id);
+      const loja = lojas?.find(l => l.id === parseInt(lojaId));
+      setLojaNomeSelecionada(loja?.nome || "");
+      setShowSugestoesModal(true);
     },
     onError: (error) => {
       toast.error(error.message);
@@ -621,6 +629,18 @@ export default function RelatorioCompleto() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Modal de Sugestões */}
+      <SugestoesModal
+        open={showSugestoesModal}
+        onClose={() => {
+          setShowSugestoesModal(false);
+          setLocation("/meus-relatorios");
+        }}
+        relatorioId={relatorioIdCriado}
+        tipoRelatorio="completo"
+        lojaNome={lojaNomeSelecionada}
+      />
     </DashboardLayout>
   );
 }

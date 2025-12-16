@@ -374,3 +374,11 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Remover rota do App.tsx
 - [x] Remover página PlanoVisitas.tsx
 - [x] Manter tabelas e serviços no backend (podem ser úteis futuramente)
+
+## Modal de Sugestões Pós-Relatório v3.6
+
+- [x] Criar endpoint para obter sugestões por relatório
+- [x] Criar componente SugestoesModal
+- [x] Integrar modal no RelatorioLivre após submissão
+- [x] Integrar modal no RelatorioCompleto após submissão
+- [x] Testar funcionalidade completa
