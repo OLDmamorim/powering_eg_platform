@@ -848,6 +848,59 @@ export const appRouter = router({
         return await db.getSugestoesRecentesByLoja(input.lojaId, input.limite || 10);
       }),
   }),
+
+  // ==================== CATEGORIZAÇÃO DE RELATÓRIOS ====================
+  categorizacao: router({
+    // Obter todas as categorias únicas
+    getCategorias: adminProcedure
+      .query(async () => {
+        return await db.getCategoriasUnicas();
+      }),
+    
+    // Atualizar categoria de um relatório
+    updateCategoria: adminProcedure
+      .input(z.object({
+        relatorioId: z.number(),
+        tipoRelatorio: z.enum(['livre', 'completo']),
+        categoria: z.string().min(1).max(100),
+      }))
+      .mutation(async ({ input }) => {
+        if (input.tipoRelatorio === 'livre') {
+          await db.updateCategoriaRelatorioLivre(input.relatorioId, input.categoria);
+        } else {
+          await db.updateCategoriaRelatorioCompleto(input.relatorioId, input.categoria);
+        }
+        return { success: true };
+      }),
+    
+    // Atualizar estado de acompanhamento
+    updateEstado: adminProcedure
+      .input(z.object({
+        relatorioId: z.number(),
+        tipoRelatorio: z.enum(['livre', 'completo']),
+        estado: z.enum(['acompanhar', 'em_tratamento', 'tratado']),
+      }))
+      .mutation(async ({ input }) => {
+        if (input.tipoRelatorio === 'livre') {
+          await db.updateEstadoRelatorioLivre(input.relatorioId, input.estado);
+        } else {
+          await db.updateEstadoRelatorioCompleto(input.relatorioId, input.estado);
+        }
+        return { success: true };
+      }),
+    
+    // Obter relatórios agrupados por categoria
+    getRelatoriosPorCategoria: adminProcedure
+      .query(async () => {
+        return await db.getRelatoriosPorCategoria();
+      }),
+    
+    // Obter estatísticas de categorias
+    getEstatisticas: adminProcedure
+      .query(async () => {
+        return await db.getEstatisticasCategorias();
+      }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;

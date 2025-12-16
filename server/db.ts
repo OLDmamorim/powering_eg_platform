@@ -1562,3 +1562,237 @@ export async function getDadosParaPlanoVisitas(gestorId: number): Promise<{
     alertas: alertasMap,
   };
 }
+
+// ==================== CATEGORIZAÇÃO DE RELATÓRIOS ====================
+
+/**
+ * Obter todas as categorias únicas utilizadas nos relatórios
+ */
+export async function getCategoriasUnicas(): Promise<string[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  // Obter categorias dos relatórios livres
+  const categoriasLivres = await db.selectDistinct({ categoria: relatoriosLivres.categoria })
+    .from(relatoriosLivres)
+    .where(sql`${relatoriosLivres.categoria} IS NOT NULL AND ${relatoriosLivres.categoria} != ''`);
+  
+  // Obter categorias dos relatórios completos
+  const categoriasCompletos = await db.selectDistinct({ categoria: relatoriosCompletos.categoria })
+    .from(relatoriosCompletos)
+    .where(sql`${relatoriosCompletos.categoria} IS NOT NULL AND ${relatoriosCompletos.categoria} != ''`);
+  
+  // Combinar e remover duplicados
+  const todasCategorias = new Set<string>();
+  categoriasLivres.forEach(c => c.categoria && todasCategorias.add(c.categoria));
+  categoriasCompletos.forEach(c => c.categoria && todasCategorias.add(c.categoria));
+  
+  return Array.from(todasCategorias).sort();
+}
+
+/**
+ * Atualizar categoria de um relatório livre
+ */
+export async function updateCategoriaRelatorioLivre(relatorioId: number, categoria: string): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  
+  await db.update(relatoriosLivres)
+    .set({ categoria })
+    .where(eq(relatoriosLivres.id, relatorioId));
+}
+
+/**
+ * Atualizar categoria de um relatório completo
+ */
+export async function updateCategoriaRelatorioCompleto(relatorioId: number, categoria: string): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  
+  await db.update(relatoriosCompletos)
+    .set({ categoria })
+    .where(eq(relatoriosCompletos.id, relatorioId));
+}
+
+/**
+ * Atualizar estado de acompanhamento de um relatório livre
+ */
+export async function updateEstadoRelatorioLivre(relatorioId: number, estado: 'acompanhar' | 'em_tratamento' | 'tratado'): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  
+  await db.update(relatoriosLivres)
+    .set({ estadoAcompanhamento: estado })
+    .where(eq(relatoriosLivres.id, relatorioId));
+}
+
+/**
+ * Atualizar estado de acompanhamento de um relatório completo
+ */
+export async function updateEstadoRelatorioCompleto(relatorioId: number, estado: 'acompanhar' | 'em_tratamento' | 'tratado'): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  
+  await db.update(relatoriosCompletos)
+    .set({ estadoAcompanhamento: estado })
+    .where(eq(relatoriosCompletos.id, relatorioId));
+}
+
+/**
+ * Obter relatórios agrupados por categoria
+ */
+export async function getRelatoriosPorCategoria(): Promise<{
+  categoria: string;
+  relatorios: Array<{
+    id: number;
+    tipo: 'livre' | 'completo';
+    lojaId: number;
+    lojaNome: string;
+    gestorNome: string;
+    dataVisita: Date;
+    descricao: string;
+    estadoAcompanhamento: string | null;
+  }>;
+  contadores: {
+    total: number;
+    acompanhar: number;
+    emTratamento: number;
+    tratado: number;
+    semEstado: number;
+  };
+}[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  // Obter relatórios livres com categoria
+  const livres = await db.select({
+    id: relatoriosLivres.id,
+    lojaId: relatoriosLivres.lojaId,
+    gestorId: relatoriosLivres.gestorId,
+    dataVisita: relatoriosLivres.dataVisita,
+    descricao: relatoriosLivres.descricao,
+    categoria: relatoriosLivres.categoria,
+    estadoAcompanhamento: relatoriosLivres.estadoAcompanhamento,
+  })
+    .from(relatoriosLivres)
+    .where(sql`${relatoriosLivres.categoria} IS NOT NULL AND ${relatoriosLivres.categoria} != ''`)
+    .orderBy(desc(relatoriosLivres.dataVisita));
+  
+  // Obter relatórios completos com categoria
+  const completos = await db.select({
+    id: relatoriosCompletos.id,
+    lojaId: relatoriosCompletos.lojaId,
+    gestorId: relatoriosCompletos.gestorId,
+    dataVisita: relatoriosCompletos.dataVisita,
+    descricao: relatoriosCompletos.resumoSupervisao,
+    categoria: relatoriosCompletos.categoria,
+    estadoAcompanhamento: relatoriosCompletos.estadoAcompanhamento,
+  })
+    .from(relatoriosCompletos)
+    .where(sql`${relatoriosCompletos.categoria} IS NOT NULL AND ${relatoriosCompletos.categoria} != ''`)
+    .orderBy(desc(relatoriosCompletos.dataVisita));
+  
+  // Agrupar por categoria
+  const categoriaMap = new Map<string, any[]>();
+  
+  for (const rel of livres) {
+    if (!rel.categoria) continue;
+    const loja = await getLojaById(rel.lojaId);
+    const gestor = await getGestorById(rel.gestorId);
+    const item = {
+      id: rel.id,
+      tipo: 'livre' as const,
+      lojaId: rel.lojaId,
+      lojaNome: loja?.nome || 'Desconhecida',
+      gestorNome: gestor?.nome || 'Desconhecido',
+      dataVisita: rel.dataVisita,
+      descricao: rel.descricao?.substring(0, 150) + (rel.descricao && rel.descricao.length > 150 ? '...' : ''),
+      estadoAcompanhamento: rel.estadoAcompanhamento,
+    };
+    
+    if (!categoriaMap.has(rel.categoria)) {
+      categoriaMap.set(rel.categoria, []);
+    }
+    categoriaMap.get(rel.categoria)!.push(item);
+  }
+  
+  for (const rel of completos) {
+    if (!rel.categoria) continue;
+    const loja = await getLojaById(rel.lojaId);
+    const gestor = await getGestorById(rel.gestorId);
+    const item = {
+      id: rel.id,
+      tipo: 'completo' as const,
+      lojaId: rel.lojaId,
+      lojaNome: loja?.nome || 'Desconhecida',
+      gestorNome: gestor?.nome || 'Desconhecido',
+      dataVisita: rel.dataVisita,
+      descricao: rel.descricao?.substring(0, 150) + (rel.descricao && rel.descricao.length > 150 ? '...' : ''),
+      estadoAcompanhamento: rel.estadoAcompanhamento,
+    };
+    
+    if (!categoriaMap.has(rel.categoria)) {
+      categoriaMap.set(rel.categoria, []);
+    }
+    categoriaMap.get(rel.categoria)!.push(item);
+  }
+  
+  // Converter para array e calcular contadores
+  const result = Array.from(categoriaMap.entries()).map(([categoria, relatorios]) => {
+    const contadores = {
+      total: relatorios.length,
+      acompanhar: relatorios.filter(r => r.estadoAcompanhamento === 'acompanhar').length,
+      emTratamento: relatorios.filter(r => r.estadoAcompanhamento === 'em_tratamento').length,
+      tratado: relatorios.filter(r => r.estadoAcompanhamento === 'tratado').length,
+      semEstado: relatorios.filter(r => !r.estadoAcompanhamento).length,
+    };
+    
+    return { categoria, relatorios, contadores };
+  });
+  
+  // Ordenar por total de relatórios
+  result.sort((a, b) => b.contadores.total - a.contadores.total);
+  
+  return result;
+}
+
+/**
+ * Obter estatísticas de categorias
+ */
+export async function getEstatisticasCategorias(): Promise<{
+  totalCategorias: number;
+  totalRelatoriosCategorizados: number;
+  porEstado: {
+    acompanhar: number;
+    emTratamento: number;
+    tratado: number;
+    semEstado: number;
+  };
+}> {
+  const db = await getDb();
+  if (!db) return {
+    totalCategorias: 0,
+    totalRelatoriosCategorizados: 0,
+    porEstado: { acompanhar: 0, emTratamento: 0, tratado: 0, semEstado: 0 }
+  };
+  
+  const categorias = await getCategoriasUnicas();
+  const relatoriosPorCategoria = await getRelatoriosPorCategoria();
+  
+  let totalRelatorios = 0;
+  const porEstado = { acompanhar: 0, emTratamento: 0, tratado: 0, semEstado: 0 };
+  
+  for (const cat of relatoriosPorCategoria) {
+    totalRelatorios += cat.contadores.total;
+    porEstado.acompanhar += cat.contadores.acompanhar;
+    porEstado.emTratamento += cat.contadores.emTratamento;
+    porEstado.tratado += cat.contadores.tratado;
+    porEstado.semEstado += cat.contadores.semEstado;
+  }
+  
+  return {
+    totalCategorias: categorias.length,
+    totalRelatoriosCategorizados: totalRelatorios,
+    porEstado,
+  };
+}

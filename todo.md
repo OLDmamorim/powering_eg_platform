@@ -382,3 +382,26 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Integrar modal no RelatorioLivre após submissão
 - [x] Integrar modal no RelatorioCompleto após submissão
 - [x] Testar funcionalidade completa
+
+## Sistema de Categorização de Relatórios v3.7
+
+### Estrutura de Dados
+- [x] Criar tabela de categorias no schema
+- [x] Adicionar campos categoria e estado aos relatórios
+- [x] Criar funções de base de dados para categorias
+
+### Campo de Categoria com Autocomplete
+- [x] Endpoint para listar categorias existentes
+- [x] Endpoint para atualizar categoria do relatório
+- [x] Componente de autocomplete com sugestões
+
+### Estados de Acompanhamento
+- [x] Estados: Acompanhar, Em Tratamento, Tratado
+- [x] Endpoint para atualizar estado
+- [x] UI para alterar estado nos relatórios
+
+### Página de Categorias
+- [x] Nova página no menu admin
+- [x] Agrupamento de relatórios por categoria
+- [x] Filtros por estado
+- [x] Contadores por categoria/estado

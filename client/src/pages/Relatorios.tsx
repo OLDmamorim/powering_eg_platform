@@ -11,10 +11,12 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { trpc } from "@/lib/trpc";
-import { Building2, Calendar, User, ChevronDown, ChevronUp, FileText, ClipboardList, Filter, Download, Image, X, Pencil, Trash2, Mail, Loader2 } from "lucide-react";
+import { Building2, Calendar, User, ChevronDown, ChevronUp, FileText, ClipboardList, Filter, Download, Image, X, Pencil, Trash2, Mail, Loader2, Tag } from "lucide-react";
 import { useLocation } from "wouter";
 import { useState, useMemo } from "react";
 import { toast } from "sonner";
+import { CategoriaAutocomplete } from "@/components/CategoriaAutocomplete";
+import { EstadoAcompanhamentoSelect, EstadoAcompanhamentoBadge } from "@/components/EstadoAcompanhamento";
 
 export default function Relatorios() {
   const { user } = useAuth();
@@ -46,6 +48,11 @@ export default function Relatorios() {
   const { data: countCompletosNaoVistos } = trpc.relatoriosCompletos.countNaoVistos.useQuery();
   const { data: lojas } = trpc.lojas.list.useQuery();
   const { data: gestores } = trpc.gestores.list.useQuery();
+  
+  // Query para categorias (apenas admin)
+  const { data: categorias } = trpc.categorizacao.getCategorias.useQuery(undefined, {
+    enabled: user?.role === 'admin',
+  });
 
   // Mutations
   const updateLivreMutation = trpc.relatoriosLivres.update.useMutation({
@@ -100,6 +107,30 @@ export default function Relatorios() {
     },
     onError: (error) => {
       toast.error(error.message || "Erro ao enviar email");
+    }
+  });
+
+  // Mutations para categorização
+  const updateCategoriaMutation = trpc.categorizacao.updateCategoria.useMutation({
+    onSuccess: () => {
+      toast.success("Categoria atualizada");
+      utils.relatoriosLivres.list.invalidate();
+      utils.relatoriosCompletos.list.invalidate();
+      utils.categorizacao.getCategorias.invalidate();
+    },
+    onError: (error) => {
+      toast.error(error.message || "Erro ao atualizar categoria");
+    }
+  });
+
+  const updateEstadoMutation = trpc.categorizacao.updateEstado.useMutation({
+    onSuccess: () => {
+      toast.success("Estado atualizado");
+      utils.relatoriosLivres.list.invalidate();
+      utils.relatoriosCompletos.list.invalidate();
+    },
+    onError: (error) => {
+      toast.error(error.message || "Erro ao atualizar estado");
     }
   });
 
@@ -538,6 +569,48 @@ export default function Relatorios() {
                           
                           <FotosGaleria fotos={relatorio.fotos} />
                           
+                          {/* Categorização - apenas para admin */}
+                          {isAdmin && (
+                            <div className="mt-4 p-3 bg-muted/50 rounded-lg border border-dashed">
+                              <div className="flex items-center gap-2 mb-3">
+                                <Tag className="h-4 w-4 text-primary" />
+                                <span className="text-sm font-medium">Categorização</span>
+                              </div>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                  <Label className="text-xs">Categoria</Label>
+                                  <CategoriaAutocomplete
+                                    value={relatorio.categoria || ""}
+                                    onChange={(categoria) => {
+                                      updateCategoriaMutation.mutate({
+                                        relatorioId: relatorio.id,
+                                        tipoRelatorio: relatorio.resumoSupervisao !== undefined ? 'completo' : 'livre',
+                                        categoria,
+                                      });
+                                    }}
+                                    sugestoes={categorias || []}
+                                    placeholder="Escreva ou selecione..."
+                                  />
+                                </div>
+                                <div className="space-y-2">
+                                  <Label className="text-xs">Estado</Label>
+                                  <EstadoAcompanhamentoSelect
+                                    value={relatorio.estadoAcompanhamento || null}
+                                    onChange={(estado) => {
+                                      if (estado) {
+                                        updateEstadoMutation.mutate({
+                                          relatorioId: relatorio.id,
+                                          tipoRelatorio: relatorio.resumoSupervisao !== undefined ? 'completo' : 'livre',
+                                          estado,
+                                        });
+                                      }
+                                    }}
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                          
                           <div className="mt-4 flex items-center justify-between">
                             <div className="text-xs text-muted-foreground">
                               Criado em: {new Date(relatorio.createdAt).toLocaleString("pt-PT")}
@@ -737,6 +810,48 @@ export default function Relatorios() {
                           </div>
                           
                           <FotosGaleria fotos={relatorio.fotos} />
+                          
+                          {/* Categorização - apenas para admin */}
+                          {isAdmin && (
+                            <div className="mt-4 p-3 bg-muted/50 rounded-lg border border-dashed">
+                              <div className="flex items-center gap-2 mb-3">
+                                <Tag className="h-4 w-4 text-primary" />
+                                <span className="text-sm font-medium">Categorização</span>
+                              </div>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                  <Label className="text-xs">Categoria</Label>
+                                  <CategoriaAutocomplete
+                                    value={relatorio.categoria || ""}
+                                    onChange={(categoria) => {
+                                      updateCategoriaMutation.mutate({
+                                        relatorioId: relatorio.id,
+                                        tipoRelatorio: relatorio.resumoSupervisao !== undefined ? 'completo' : 'livre',
+                                        categoria,
+                                      });
+                                    }}
+                                    sugestoes={categorias || []}
+                                    placeholder="Escreva ou selecione..."
+                                  />
+                                </div>
+                                <div className="space-y-2">
+                                  <Label className="text-xs">Estado</Label>
+                                  <EstadoAcompanhamentoSelect
+                                    value={relatorio.estadoAcompanhamento || null}
+                                    onChange={(estado) => {
+                                      if (estado) {
+                                        updateEstadoMutation.mutate({
+                                          relatorioId: relatorio.id,
+                                          tipoRelatorio: relatorio.resumoSupervisao !== undefined ? 'completo' : 'livre',
+                                          estado,
+                                        });
+                                      }
+                                    }}
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          )}
                           
                           <div className="mt-4 flex items-center justify-between">
                             <div className="text-xs text-muted-foreground">

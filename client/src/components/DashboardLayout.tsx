@@ -33,7 +33,7 @@ import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { KeyboardShortcutsHelp } from "@/components/KeyboardShortcutsHelp";
 import { Button } from "./ui/button";
 
-import { Building2, ClipboardList, FileText, ListTodo, Sparkles, History, Bell, Settings } from "lucide-react";
+import { Building2, ClipboardList, FileText, ListTodo, Sparkles, History, Bell, Settings, Tag } from "lucide-react";
 
 const getMenuItems = (userRole?: string) => {
   const isAdmin = userRole === "admin";
@@ -52,6 +52,7 @@ const getMenuItems = (userRole?: string) => {
     { icon: History, label: "Histórico Pontos", path: "/historico-pontos", show: isAdmin, showBadge: false },
     { icon: Bell, label: "Alertas", path: "/alertas", show: isAdmin, showBadge: true },
     { icon: Settings, label: "Config. Alertas", path: "/configuracoes-alertas", show: isAdmin, showBadge: false },
+    { icon: Tag, label: "Categorias", path: "/categorias", show: isAdmin, showBadge: false },
     { icon: ListTodo, label: "Pendentes", path: "/pendentes", show: true, showBadge: false },
 
   ];
@@ -334,7 +335,7 @@ function DashboardLayoutContent({
           )}
           <KeyboardShortcutsHelp />
           <div className="fixed bottom-4 right-4 text-xs text-foreground/60 select-none pointer-events-none">
-            v3.6
+            v3.7
           </div>
         </main>
       </SidebarInset>

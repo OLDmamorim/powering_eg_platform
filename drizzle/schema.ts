@@ -77,6 +77,8 @@ export const relatoriosLivres = mysqlTable("relatorios_livres", {
   descricao: text("descricao").notNull(),
   fotos: text("fotos"), // JSON array de URLs das fotos
   visto: boolean("visto").default(false).notNull(), // Se o admin já viu este relatório
+  categoria: varchar("categoria", { length: 100 }), // Categoria atribuída pelo admin
+  estadoAcompanhamento: mysqlEnum("estadoAcompanhamento", ["acompanhar", "em_tratamento", "tratado"]), // Estado de acompanhamento
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
@@ -111,6 +113,8 @@ export const relatoriosCompletos = mysqlTable("relatorios_completos", {
   emailEnviado: boolean("emailEnviado").default(false).notNull(),
   fotos: text("fotos"), // JSON array de URLs das fotos
   visto: boolean("visto").default(false).notNull(), // Se o admin já viu este relatório
+  categoria: varchar("categoria", { length: 100 }), // Categoria atribuída pelo admin
+  estadoAcompanhamento: mysqlEnum("estadoAcompanhamento", ["acompanhar", "em_tratamento", "tratado"]), // Estado de acompanhamento
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
