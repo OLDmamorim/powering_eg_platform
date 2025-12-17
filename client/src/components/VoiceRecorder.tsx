@@ -34,9 +34,24 @@ export function VoiceRecorder({ onTranscriptionComplete, disabled }: VoiceRecord
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream, {
-        mimeType: 'audio/webm',
-      });
+      
+      // Tentar diferentes formatos de áudio (compatibilidade mobile)
+      let mimeType = 'audio/webm';
+      if (!MediaRecorder.isTypeSupported('audio/webm')) {
+        if (MediaRecorder.isTypeSupported('audio/mp4')) {
+          mimeType = 'audio/mp4';
+        } else if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+          mimeType = 'audio/webm;codecs=opus';
+        } else {
+          mimeType = ''; // Usar formato padrão do browser
+        }
+      }
+      
+      console.log('[VoiceRecorder] Usando mimeType:', mimeType);
+      
+      const mediaRecorder = new MediaRecorder(stream, mimeType ? {
+        mimeType: mimeType,
+      } : undefined);
 
       chunksRef.current = [];
 
@@ -47,7 +62,10 @@ export function VoiceRecorder({ onTranscriptionComplete, disabled }: VoiceRecord
       };
 
       mediaRecorder.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
+        const actualMimeType = mediaRecorder.mimeType || 'audio/webm';
+        console.log('[VoiceRecorder] Gravação concluída com mimeType:', actualMimeType);
+        const blob = new Blob(chunksRef.current, { type: actualMimeType });
+        console.log('[VoiceRecorder] Blob criado, tamanho:', blob.size, 'bytes');
         setAudioBlob(blob);
         stream.getTracks().forEach(track => track.stop());
       };
@@ -92,13 +110,33 @@ export function VoiceRecorder({ onTranscriptionComplete, disabled }: VoiceRecord
       toast.error("Áudio muito grande (máx 16MB). Grave um áudio mais curto.");
       return;
     }
+    
+    // Verificar variáveis de ambiente
+    const apiUrl = import.meta.env.VITE_FRONTEND_FORGE_API_URL;
+    const apiKey = import.meta.env.VITE_FRONTEND_FORGE_API_KEY;
+    
+    if (!apiUrl || !apiKey) {
+      console.error('[VoiceRecorder] Variáveis de ambiente não configuradas:', { apiUrl, apiKey: apiKey ? 'presente' : 'ausente' });
+      toast.error("Erro de configuração: variáveis de ambiente não encontradas");
+      return;
+    }
 
     setIsProcessing(true);
 
     try {
+      console.log('[VoiceRecorder] Iniciando processamento de áudio...');
+      console.log('[VoiceRecorder] Tamanho do blob:', audioBlob.size, 'bytes');
+      toast.info('1/3: Iniciando upload do áudio...');
+      
       // Upload para S3
       const formData = new FormData();
-      formData.append('file', audioBlob, 'recording.webm');
+      // Determinar extensão baseada no mimeType
+      const extension = audioBlob.type.includes('mp4') ? 'mp4' : 
+                       audioBlob.type.includes('mpeg') ? 'mp3' : 'webm';
+      const filename = `recording.${extension}`;
+      console.log('[VoiceRecorder] Blob type:', audioBlob.type, '| Filename:', filename);
+      formData.append('file', audioBlob, filename);
+      console.log('[VoiceRecorder] FormData criado, iniciando upload...');
 
       const uploadResponse = await fetch(`${import.meta.env.VITE_FRONTEND_FORGE_API_URL}/storage/upload`, {
         method: 'POST',
@@ -108,34 +146,62 @@ export function VoiceRecorder({ onTranscriptionComplete, disabled }: VoiceRecord
         body: formData,
       });
 
+      console.log('[VoiceRecorder] Upload response status:', uploadResponse.status);
+
       if (!uploadResponse.ok) {
+        const errorText = await uploadResponse.text();
+        console.error('[VoiceRecorder] Erro no upload:', errorText);
+        toast.error(`Erro no upload (status ${uploadResponse.status})`);
         throw new Error('Erro ao fazer upload do áudio');
       }
 
-      const { url: audioUrl } = await uploadResponse.json();
+      const uploadData = await uploadResponse.json();
+      const audioUrl = uploadData.url;
+      console.log('[VoiceRecorder] Upload bem-sucedido, URL:', audioUrl);
+      toast.success('2/3: Upload concluído! Iniciando transcrição...');
 
       // Chamar backend para transcrição usando tRPC
+      console.log('[VoiceRecorder] Iniciando transcrição...');
       const transcriptionResult = await transcribeMutation.mutateAsync({
         audioUrl,
         language: 'pt',
       });
       
+      console.log('[VoiceRecorder] Resultado da transcrição:', transcriptionResult);
+      
       // Verificar se houve erro
       if ('error' in transcriptionResult) {
+        console.error('[VoiceRecorder] Erro na transcrição:', transcriptionResult.error);
+        toast.error(`Erro na transcrição: ${String(transcriptionResult.error).substring(0, 50)}`);
         throw new Error(String(transcriptionResult.error));
       }
       
       const transcription = transcriptionResult.text;
+      console.log('[VoiceRecorder] Transcrição bem-sucedida, texto:', transcription.substring(0, 100));
+      toast.success('3/3: Transcrição concluída!');
 
-      toast.success("Transcrição concluída!");
+      // toast.success já foi mostrado acima
       onTranscriptionComplete(transcription);
       
       // Limpar estado
       setAudioBlob(null);
       setRecordingTime(0);
     } catch (error) {
-      console.error("Erro ao processar áudio:", error);
-      toast.error("Erro ao processar áudio. Tente novamente.");
+      console.error('[VoiceRecorder] Erro ao processar áudio:', error);
+      
+      let errorMessage = "Erro desconhecido";
+      
+      if (error instanceof Error) {
+        console.error('[VoiceRecorder] Stack trace:', error.stack);
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      } else if (error && typeof error === 'object') {
+        errorMessage = JSON.stringify(error).substring(0, 100);
+      }
+      
+      // Mostrar erro com duração longa para dar tempo de ler
+      toast.error(`Erro: ${errorMessage}`, { duration: 10000 });
     } finally {
       setIsProcessing(false);
     }

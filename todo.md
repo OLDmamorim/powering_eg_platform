@@ -668,3 +668,11 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Verificar implementação do backend de transcrição
 - [x] Criar testes unitários para validação (5 testes passaram)
 - [x] Guardar checkpoint
+
+## Bug v5.3.3 - Erro persistente ao processar áudio (após correção v5.3.2)
+- [ ] Verificar logs do servidor para identificar erro exato
+- [ ] Adicionar logging detalhado no VoiceRecorder e backend
+- [ ] Verificar se variáveis de ambiente estão corretas
+- [ ] Corrigir problema identificado
+- [ ] Testar com áudio real gravado no mobile
+- [ ] Guardar checkpoint
