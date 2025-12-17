@@ -150,6 +150,14 @@ export default function RelatorioCompleto() {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
+    // Validar env vars
+    if (!FORGE_API_URL || !FORGE_API_KEY) {
+      console.error('FORGE_API_URL ou FORGE_API_KEY não definidos');
+      toast.error('Erro de configuração do sistema. Contacte o administrador.');
+      return;
+    }
+
+    console.log('Iniciando upload de', files.length, 'ficheiro(s)');
     setUploading(true);
     const newFotos: string[] = [];
 
@@ -169,11 +177,14 @@ export default function RelatorioCompleto() {
           initialQuality: 0.8, // Qualidade 80%
         };
         
+        console.log('Comprimindo ficheiro:', file.name, 'tamanho original:', file.size);
         const compressedFile = await imageCompression(file, options);
+        console.log('Ficheiro comprimido:', compressedFile.name, 'novo tamanho:', compressedFile.size);
 
         const formData = new FormData();
         formData.append('file', compressedFile);
 
+        console.log('Enviando para:', `${FORGE_API_URL}/storage/upload`);
         const response = await fetch(`${FORGE_API_URL}/storage/upload`, {
           method: 'POST',
           headers: {
@@ -182,11 +193,15 @@ export default function RelatorioCompleto() {
           body: formData,
         });
 
+        console.log('Resposta do servidor:', response.status, response.statusText);
         if (!response.ok) {
-          throw new Error(`Erro ao fazer upload de ${file.name}`);
+          const errorText = await response.text();
+          console.error('Erro no upload:', errorText);
+          throw new Error(`Erro ao fazer upload de ${file.name}: ${response.statusText}`);
         }
 
         const result = await response.json();
+        console.log('Resultado do upload:', result);
         if (result.url) {
           newFotos.push(result.url);
         }

@@ -778,4 +778,13 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Estatísticas: total visitas, pendentes ativos, lojas visitadas, taxa resolução
 - [x] Design da página com cards e visualizações
 - [x] Criar testes unitários (2 testes passaram)
+- [x] Guardar checkpoint (v5.7 - 433302b9)
+
+## Bug v5.7.1 - Botões de Foto Não Funcionam no Mobile
+- [x] Adicionar logs de debug detalhados
+- [x] Adicionar validação de env vars (FORGE_API_URL, FORGE_API_KEY)
+- [x] Logs de compressão (tamanho antes/depois)
+- [x] Logs de resposta do servidor
+- [x] Aplicar em RelatorioLivre.tsx e RelatorioCompleto.tsx
+- [ ] Testar no mobile e verificar console do browser
 - [ ] Guardar checkpoint
