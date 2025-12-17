@@ -16,6 +16,7 @@ export function VoiceRecorder({ onTranscriptionComplete, disabled }: VoiceRecord
   const [recordingTime, setRecordingTime] = useState(0);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   
+  const uploadMutation = trpc.voiceTranscription.uploadAudio.useMutation();
   const transcribeMutation = trpc.voiceTranscription.transcribe.useMutation();
   
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -128,35 +129,19 @@ export function VoiceRecorder({ onTranscriptionComplete, disabled }: VoiceRecord
       console.log('[VoiceRecorder] Tamanho do blob:', audioBlob.size, 'bytes');
       toast.info('1/3: Iniciando upload do áudio...');
       
-      // Upload para S3
-      const formData = new FormData();
-      // Determinar extensão baseada no mimeType
-      const extension = audioBlob.type.includes('mp4') ? 'mp4' : 
-                       audioBlob.type.includes('mpeg') ? 'mp3' : 'webm';
-      const filename = `recording.${extension}`;
-      console.log('[VoiceRecorder] Blob type:', audioBlob.type, '| Filename:', filename);
-      formData.append('file', audioBlob, filename);
-      console.log('[VoiceRecorder] FormData criado, iniciando upload...');
-
-      const uploadResponse = await fetch(`${import.meta.env.VITE_FRONTEND_FORGE_API_URL}/storage/upload`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${import.meta.env.VITE_FRONTEND_FORGE_API_KEY}`,
-        },
-        body: formData,
+      // Converter blob para base64
+      const arrayBuffer = await audioBlob.arrayBuffer();
+      const base64Audio = Buffer.from(arrayBuffer).toString('base64');
+      console.log('[VoiceRecorder] Blob convertido para base64');
+      
+      // Upload para S3 via tRPC
+      console.log('[VoiceRecorder] Iniciando upload via backend...');
+      const uploadResult = await uploadMutation.mutateAsync({
+        audioBase64: base64Audio,
+        mimeType: audioBlob.type,
       });
-
-      console.log('[VoiceRecorder] Upload response status:', uploadResponse.status);
-
-      if (!uploadResponse.ok) {
-        const errorText = await uploadResponse.text();
-        console.error('[VoiceRecorder] Erro no upload:', errorText);
-        toast.error(`Erro no upload (status ${uploadResponse.status})`);
-        throw new Error('Erro ao fazer upload do áudio');
-      }
-
-      const uploadData = await uploadResponse.json();
-      const audioUrl = uploadData.url;
+      
+      const audioUrl = uploadResult.url;
       console.log('[VoiceRecorder] Upload bem-sucedido, URL:', audioUrl);
       toast.success('2/3: Upload concluído! Iniciando transcrição...');
 

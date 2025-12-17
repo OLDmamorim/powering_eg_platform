@@ -1125,6 +1125,32 @@ export const appRouter = router({
   
   // ==================== TRANSCRIÇÃO DE VOZ ====================
   voiceTranscription: router({
+    uploadAudio: gestorProcedure
+      .input(z.object({
+        audioBase64: z.string(),
+        mimeType: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        const { storagePut } = await import('./storage');
+        
+        // Converter base64 para buffer
+        const audioBuffer = Buffer.from(input.audioBase64, 'base64');
+        
+        // Determinar extensão baseada no mimeType
+        const extension = input.mimeType.includes('mp4') ? 'mp4' : 
+                         input.mimeType.includes('mpeg') ? 'mp3' : 'webm';
+        
+        // Gerar nome único para o arquivo
+        const timestamp = Date.now();
+        const randomSuffix = Math.random().toString(36).substring(7);
+        const fileKey = `voice-recordings/${timestamp}-${randomSuffix}.${extension}`;
+        
+        // Upload para S3
+        const { url } = await storagePut(fileKey, audioBuffer, input.mimeType);
+        
+        return { url };
+      }),
+    
     transcribe: gestorProcedure
       .input(z.object({
         audioUrl: z.string(),

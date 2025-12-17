@@ -676,3 +676,11 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [ ] Corrigir problema identificado
 - [ ] Testar com áudio real gravado no mobile
 - [ ] Guardar checkpoint
+
+## Bug v5.3.4 - Erro ao fazer upload do áudio para S3
+- [x] Identificado problema: upload direto do frontend para S3 falhava
+- [x] Implementado novo endpoint tRPC uploadAudio no backend
+- [x] Upload agora passa pelo backend (mais seguro e confiável)
+- [x] Blob convertido para base64 e enviado via tRPC
+- [x] Backend faz upload para S3 usando storagePut
+- [x] Guardar checkpoint para publicação
