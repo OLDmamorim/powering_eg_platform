@@ -33,7 +33,6 @@ export default function Lojas() {
   const [editingLoja, setEditingLoja] = useState<any>(null);
   const [formData, setFormData] = useState({
     nome: "",
-    contacto: "",
     email: "",
   });
 
@@ -82,7 +81,6 @@ export default function Lojas() {
   const resetForm = () => {
     setFormData({
       nome: "",
-      contacto: "",
       email: "",
     });
     setEditingLoja(null);
@@ -93,7 +91,6 @@ export default function Lojas() {
       setEditingLoja(loja);
       setFormData({
         nome: loja.nome,
-        contacto: loja.contacto || "",
         email: loja.email || "",
       });
     } else {
@@ -143,7 +140,6 @@ export default function Lojas() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Nome</TableHead>
-                  <TableHead>Contacto</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
@@ -158,7 +154,6 @@ export default function Lojas() {
                           {loja.nome}
                         </div>
                       </TableCell>
-                      <TableCell>{loja.contacto || "-"}</TableCell>
                       <TableCell>{loja.email || "-"}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
@@ -221,16 +216,6 @@ export default function Lojas() {
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="contacto">Contacto</Label>
-                <Input
-                  id="contacto"
-                  value={formData.contacto}
-                  onChange={(e) =>
-                    setFormData({ ...formData, contacto: e.target.value })
-                  }
-                />
-              </div>
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input

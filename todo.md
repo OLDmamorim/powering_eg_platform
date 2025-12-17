@@ -620,3 +620,12 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Análise baseada em relatórios de todos os gestores
 - [x] Alterar procedure de gestorProcedure para protectedProcedure
 - [x] Item aparece no menu do admin
+
+## Ajuste v5.2.2 - Remover Campo Contacto das Lojas
+- [x] Remover campo contacto do formulário de criação de loja
+- [x] Remover campo contacto do formulário de edição de loja
+- [x] Remover campo contacto da visualização de detalhes da loja (tabela)
+- [x] Atualizar validações no backend (remover contacto de create/update)
+- [x] Remover coluna Contacto da tabela de lojas
+- [x] Manter apenas email como campo de contacto
+- [x] Campo contacto continua na BD mas não aparece na UI
