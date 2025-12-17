@@ -343,7 +343,8 @@ export async function getAllGestores(): Promise<any[]> {
       userRole: users.role,
     })
     .from(gestores)
-    .innerJoin(users, eq(gestores.userId, users.id));
+    .innerJoin(users, eq(gestores.userId, users.id))
+    .where(eq(users.role, 'gestor')); // Filtrar apenas gestores (excluir admins)
   
   return gestoresResults.map(r => ({
     id: r.id,
@@ -479,7 +480,7 @@ export async function getGestoresByLojaId(lojaId: number): Promise<Array<Gestor 
     .from(gestorLojas)
     .innerJoin(gestores, eq(gestorLojas.gestorId, gestores.id))
     .innerJoin(users, eq(gestores.userId, users.id))
-    .where(eq(gestorLojas.lojaId, lojaId));
+    .where(and(eq(gestorLojas.lojaId, lojaId), eq(users.role, 'gestor'))); // Filtrar apenas gestores
   
   return gestoresLojaResult.map(r => ({
     id: r.gestorId,

@@ -734,4 +734,11 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Verificar se loja com mesmo nome já existe antes de criar
 - [x] Ignorar duplicados em vez de criar ou dar erro
 - [x] Atualizar testes unitários (6 testes passaram)
+- [x] Guardar checkpoint (v5.4.1 - 14d14293)
+
+## Correção v5.4.2 - Contagem de Gestores
+- [x] Corrigir contagem de gestores no dashboard para excluir admins
+- [x] Filtrar apenas users com role='gestor' (não contar role='admin')
+- [x] Verificar outras queries que possam estar a contar admins como gestores
+- [x] Testar contagem no dashboard (agora mostra 6 gestores)
 - [ ] Guardar checkpoint
