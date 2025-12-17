@@ -654,3 +654,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Testar criação de relatório com múltiplas lojas
 - [x] Testar criação de relatório com apenas 1 loja (compatibilidade)
 - [x] Testar rejeição de relatório sem lojas selecionadas
+
+## Bug v5.3.1 - Erro na página Meus Relatórios
+- [x] Identificar componente Select que causa erro "value prop must not be an empty string"
+- [x] Corrigir Select para aceitar valor vazio ou usar valor padrão ("todas")
+- [x] Atualizar lógica de filtro para considerar "todas" como sem filtro
+- [x] Testar página Meus Relatórios sem erros
+- [x] Guardar checkpoint

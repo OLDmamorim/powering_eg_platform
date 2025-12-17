@@ -17,7 +17,7 @@ export default function MeusRelatorios() {
   const [, setLocation] = useLocation();
   const [expandedLivres, setExpandedLivres] = useState<number[]>([]);
   const [expandedCompletos, setExpandedCompletos] = useState<number[]>([]);
-  const [lojaFiltro, setLojaFiltro] = useState<string>("");
+  const [lojaFiltro, setLojaFiltro] = useState<string>("todas");
   const [pesquisa, setPesquisa] = useState("");
   const [ordenacao, setOrdenacao] = useState<"data-desc" | "data-asc" | "loja-az">("data-desc");
 
@@ -59,7 +59,7 @@ export default function MeusRelatorios() {
     let resultado = [...relatorios];
     
     // Aplicar filtro de loja
-    if (lojaFiltro) {
+    if (lojaFiltro && lojaFiltro !== "todas") {
       resultado = resultado.filter((r: any) => r.loja?.nome === lojaFiltro);
     }
     
@@ -110,12 +110,12 @@ export default function MeusRelatorios() {
                   className="pl-9"
                 />
               </div>
-              <Select value={lojaFiltro} onValueChange={setLojaFiltro}>
+              <Select value={lojaFiltro || "todas"} onValueChange={setLojaFiltro}>
                 <SelectTrigger className="w-full md:w-[200px]">
                   <SelectValue placeholder="Todas as lojas" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todas as lojas</SelectItem>
+                  <SelectItem value="todas">Todas as lojas</SelectItem>
                   {lojasUnicas.map((loja) => (
                     <SelectItem key={loja} value={loja}>
                       {loja}
