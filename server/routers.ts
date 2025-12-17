@@ -109,6 +109,78 @@ export const appRouter = router({
       if (!ctx.gestor) return [];
       return await db.getLojasByGestorId(ctx.gestor.id);
     }),
+    
+    importExcel: adminProcedure
+      .input(z.object({
+        base64Data: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        const XLSX = await import('xlsx');
+        
+        // Converter base64 para buffer
+        const buffer = Buffer.from(input.base64Data, 'base64');
+        
+        // Ler ficheiro Excel
+        const workbook = XLSX.read(buffer, { type: 'buffer' });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        
+        // Converter para JSON
+        const data = XLSX.utils.sheet_to_json(worksheet) as Array<{
+          Nome?: string;
+          Localização?: string;
+          Email?: string;
+        }>;
+        
+        const resultados = {
+          importadas: 0,
+          erros: [] as Array<{ linha: number; motivo: string }>,
+        };
+        
+        // Processar cada linha
+        for (let i = 0; i < data.length; i++) {
+          const linha = data[i];
+          const numeroLinha = i + 2; // +2 porque linha 1 é cabeçalho e arrays começam em 0
+          
+          try {
+            // Validar campos obrigatórios
+            if (!linha.Nome || linha.Nome.trim() === '') {
+              resultados.erros.push({
+                linha: numeroLinha,
+                motivo: 'Nome é obrigatório',
+              });
+              continue;
+            }
+            
+            // Validar email se fornecido
+            if (linha.Email && linha.Email.trim() !== '') {
+              const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+              if (!emailRegex.test(linha.Email)) {
+                resultados.erros.push({
+                  linha: numeroLinha,
+                  motivo: 'Email inválido',
+                });
+                continue;
+              }
+            }
+            
+            // Criar loja (campo Localização não é guardado na BD)
+            await db.createLoja({
+              nome: linha.Nome.trim(),
+              email: linha.Email?.trim() || undefined,
+            });
+            
+            resultados.importadas++;
+          } catch (error) {
+            resultados.erros.push({
+              linha: numeroLinha,
+              motivo: error instanceof Error ? error.message : 'Erro desconhecido',
+            });
+          }
+        }
+        
+        return resultados;
+      }),
   }),
 
   // ==================== GESTORES ====================

@@ -708,3 +708,21 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionado logging de mimeType e nome de ficheiro
 - [x] Testado com sucesso no PC (transcrição funcionou)
 - [x] Guardar checkpoint e publicar
+
+## Funcionalidade v5.4 - Importação de Lojas por Excel
+- [ ] Criar endpoint backend para processar ficheiro Excel
+- [ ] Validar formato e dados do Excel (nome, localização obrigatórios)
+- [ ] Criar interface frontend com botão de upload
+- [ ] Adicionar preview de lojas antes de importar
+- [ ] Testar com ficheiro de exemplo
+- [ ] Criar documentação de formato esperado
+- [ ] Guardar checkpoint
+
+## Funcionalidade v5.4 - Importação de Lojas por Excel ✅
+- [x] Criar endpoint backend para processar ficheiro Excel
+- [x] Validar formato e dados do Excel (nome obrigatório, email opcional)
+- [x] Criar interface frontend com botão de upload
+- [x] Adicionar preview de lojas antes de importar
+- [x] Testar com ficheiro de exemplo (5 testes unitários passaram)
+- [x] Criar documentação de formato esperado (botão de template)
+- [ ] Guardar checkpoint
