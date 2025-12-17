@@ -759,4 +759,11 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Aplicar em RelatorioLivre.tsx
 - [x] Aplicar em RelatorioCompleto.tsx
 - [ ] Testar no telemóvel (requer teste no mobile)
+- [x] Guardar checkpoint (v5.6 - 8b5c5329)
+
+## Correção v5.6.1 - Links dos Cards de Relatórios no Dashboard
+- [x] Separar navegação dos cards de Relatórios Livres e Completos
+- [x] Card "Relatórios Livres" vai para /relatorios?tipo=livres
+- [x] Card "Relatórios Completos" vai para /relatorios?tipo=completos
+- [x] Página Relatorios lê query param e abre aba correspondente
 - [ ] Guardar checkpoint

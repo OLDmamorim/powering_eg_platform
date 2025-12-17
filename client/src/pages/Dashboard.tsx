@@ -383,7 +383,7 @@ export default function Dashboard() {
 
           <Card 
             className={`bg-emerald-100 dark:bg-emerald-900/50 border-emerald-300 dark:border-emerald-700 cursor-pointer hover:scale-[1.02] hover:shadow-lg transition-all duration-200 ${(relLivresNaoVistos || 0) > 0 ? 'animate-soft-pulse-emerald' : ''}`}
-            onClick={() => setLocation('/relatorios')}
+            onClick={() => setLocation('/relatorios?tipo=livres')}
           >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -407,7 +407,7 @@ export default function Dashboard() {
 
           <Card 
             className={`bg-teal-100 dark:bg-teal-900/50 border-teal-300 dark:border-teal-700 cursor-pointer hover:scale-[1.02] hover:shadow-lg transition-all duration-200 ${(relCompletosNaoVistos || 0) > 0 ? 'animate-soft-pulse-teal' : ''}`}
-            onClick={() => setLocation('/relatorios')}
+            onClick={() => setLocation('/relatorios?tipo=completos')}
           >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium flex items-center gap-2">

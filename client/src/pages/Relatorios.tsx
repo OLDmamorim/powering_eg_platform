@@ -20,9 +20,14 @@ import { EstadoAcompanhamentoSelect, EstadoAcompanhamentoBadge } from "@/compone
 
 export default function Relatorios() {
   const { user } = useAuth();
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const [expandedLivres, setExpandedLivres] = useState<number[]>([]);
   const [expandedCompletos, setExpandedCompletos] = useState<number[]>([]);
+  
+  // Ler query param para definir aba ativa
+  const urlParams = new URLSearchParams(location.split('?')[1] || '');
+  const tipoParam = urlParams.get('tipo');
+  const [activeTab, setActiveTab] = useState<string>(tipoParam === 'completos' ? 'completos' : 'livres');
   
   // Filtros
   const [filtroLoja, setFiltroLoja] = useState<string>("all");
@@ -505,7 +510,7 @@ export default function Relatorios() {
           </Card>
         )}
 
-        <Tabs defaultValue="livres" className="space-y-4">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
           <TabsList>
             <TabsTrigger value="livres">
               <FileText className="h-4 w-4 mr-2" />
