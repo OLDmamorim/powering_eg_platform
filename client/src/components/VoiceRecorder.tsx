@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Mic, Square, Loader2, CheckCircle, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
+import { trpc } from "@/lib/trpc";
 
 interface VoiceRecorderProps {
   onTranscriptionComplete: (transcription: string) => void;
@@ -14,6 +15,8 @@ export function VoiceRecorder({ onTranscriptionComplete, disabled }: VoiceRecord
   const [isProcessing, setIsProcessing] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+  
+  const transcribeMutation = trpc.voiceTranscription.transcribe.useMutation();
   
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -111,24 +114,18 @@ export function VoiceRecorder({ onTranscriptionComplete, disabled }: VoiceRecord
 
       const { url: audioUrl } = await uploadResponse.json();
 
-      // Chamar backend para transcrição
-      const transcriptionResponse = await fetch('/api/trpc/voiceTranscription.transcribe', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          audioUrl,
-          language: 'pt',
-        }),
+      // Chamar backend para transcrição usando tRPC
+      const transcriptionResult = await transcribeMutation.mutateAsync({
+        audioUrl,
+        language: 'pt',
       });
-
-      if (!transcriptionResponse.ok) {
-        throw new Error('Erro ao transcrever áudio');
+      
+      // Verificar se houve erro
+      if ('error' in transcriptionResult) {
+        throw new Error(String(transcriptionResult.error));
       }
-
-      const transcriptionData = await transcriptionResponse.json();
-      const transcription = transcriptionData.result.data.text;
+      
+      const transcription = transcriptionResult.text;
 
       toast.success("Transcrição concluída!");
       onTranscriptionComplete(transcription);

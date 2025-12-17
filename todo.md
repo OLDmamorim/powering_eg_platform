@@ -661,3 +661,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Atualizar lógica de filtro para considerar "todas" como sem filtro
 - [x] Testar página Meus Relatórios sem erros
 - [x] Guardar checkpoint
+
+## Bug v5.3.2 - Erro ao processar áudio no Relatório por Voz
+- [x] Investigar causa do erro "Erro ao processar áudio. Tente novamente."
+- [x] Corrigir VoiceRecorder para usar tRPC client em vez de fetch manual
+- [x] Verificar implementação do backend de transcrição
+- [x] Criar testes unitários para validação (5 testes passaram)
+- [x] Guardar checkpoint
