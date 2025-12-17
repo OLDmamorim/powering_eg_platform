@@ -7,6 +7,10 @@ export interface TranscriptionResult {
 }
 
 export async function transcribeAndProcess(audioUrl: string, language?: string): Promise<TranscriptionResult> {
+  console.log('[transcribeAndProcess] Iniciando processamento...');
+  console.log('[transcribeAndProcess] audioUrl:', audioUrl);
+  console.log('[transcribeAndProcess] language:', language);
+  
   // Transcrever áudio
   const transcription = await transcribeAudio({
     audioUrl,
@@ -16,8 +20,15 @@ export async function transcribeAndProcess(audioUrl: string, language?: string):
 
   // Verificar se é erro
   if ('error' in transcription) {
-    throw new Error(transcription.error);
+    console.error('[transcribeAndProcess] Erro na transcrição:', transcription);
+    // Incluir detalhes do erro na mensagem
+    const errorMessage = transcription.details 
+      ? `${transcription.error}: ${transcription.details}`
+      : transcription.error;
+    throw new Error(errorMessage);
   }
+  
+  console.log('[transcribeAndProcess] Transcrição bem-sucedida, tamanho do texto:', transcription.text.length);
 
   return {
     text: transcription.text,

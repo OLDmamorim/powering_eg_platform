@@ -35,19 +35,23 @@ export function VoiceRecorder({ onTranscriptionComplete, disabled }: VoiceRecord
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            // Priorizar formatos mais compatíveis com Whisper API
+      // Ordem de preferência: mp4 > wav > webm
+      let mimeType = '';
       
-      // Tentar diferentes formatos de áudio (compatibilidade mobile)
-      let mimeType = 'audio/webm';
-      if (!MediaRecorder.isTypeSupported('audio/webm')) {
-        if (MediaRecorder.isTypeSupported('audio/mp4')) {
-          mimeType = 'audio/mp4';
-        } else if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
-          mimeType = 'audio/webm;codecs=opus';
-        } else {
-          mimeType = ''; // Usar formato padrão do browser
-        }
-      }
-      
+      if (MediaRecorder.isTypeSupported('audio/mp4')) {
+        mimeType = 'audio/mp4';
+      } else if (MediaRecorder.isTypeSupported('audio/wav')) {
+        mimeType = 'audio/wav';
+      } else if (MediaRecorder.isTypeSupported('audio/mpeg')) {
+        mimeType = 'audio/mpeg';
+      } else if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+        mimeType = 'audio/webm;codecs=opus';
+      } else if (MediaRecorder.isTypeSupported('audio/webm')) {
+        mimeType = 'audio/webm';
+      } else {
+        mimeType = ''; // Usar formato padrão do browser
+      }      
       console.log('[VoiceRecorder] Usando mimeType:', mimeType);
       
       const mediaRecorder = new MediaRecorder(stream, mimeType ? {

@@ -139,9 +139,14 @@ export async function transcribeAudio(
     // Step 3: Create FormData for multipart upload to Whisper API
     const formData = new FormData();
     
+    // Limpar mimeType (remover codecs e parâmetros)
+    const cleanMimeType = mimeType.split(';')[0].trim();
+    console.log('[transcribeAudio] mimeType limpo:', cleanMimeType);
+    
     // Create a Blob from the buffer and append to form
-    const filename = `audio.${getFileExtension(mimeType)}`;
-    const audioBlob = new Blob([new Uint8Array(audioBuffer)], { type: mimeType });
+    const filename = `audio.${getFileExtension(cleanMimeType)}`;
+    console.log('[transcribeAudio] Nome do ficheiro:', filename);
+    const audioBlob = new Blob([new Uint8Array(audioBuffer)], { type: cleanMimeType });
     formData.append("file", audioBlob, filename);
     
     formData.append("model", "whisper-1");
@@ -216,6 +221,9 @@ export async function transcribeAudio(
  * Helper function to get file extension from MIME type
  */
 function getFileExtension(mimeType: string): string {
+  // Limpar mimeType (remover codecs se houver)
+  const cleanType = mimeType.split(';')[0].trim();
+  
   const mimeToExt: Record<string, string> = {
     'audio/webm': 'webm',
     'audio/mp3': 'mp3',
@@ -223,11 +231,18 @@ function getFileExtension(mimeType: string): string {
     'audio/wav': 'wav',
     'audio/wave': 'wav',
     'audio/ogg': 'ogg',
+    'audio/oga': 'oga',
     'audio/m4a': 'm4a',
-    'audio/mp4': 'm4a',
+    'audio/mp4': 'mp4',  // Usar mp4 em vez de m4a
+    'audio/x-m4a': 'm4a',
+    'audio/flac': 'flac',
+    'audio/x-flac': 'flac',
   };
   
-  return mimeToExt[mimeType] || 'audio';
+  const ext = mimeToExt[cleanType];
+  console.log(`[getFileExtension] ${cleanType} -> ${ext || 'mp3 (fallback)'}`);
+  
+  return ext || 'mp3';  // Fallback para mp3 em vez de 'audio'
 }
 
 /**

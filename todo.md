@@ -700,3 +700,11 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [ ] Testar com áudio real e verificar logs
 - [ ] Identificar causa exata do erro
 - [ ] Corrigir problema identificado
+
+## Bug v5.3.7 - Formato webm rejeitado pela API Whisper
+- [x] Identificado erro: "Invalid file format" apesar de webm estar na lista
+- [x] Alterada ordem de preferência: mp4 > wav > mpeg > webm
+- [x] Melhorada função getFileExtension para limpar codecs
+- [x] Adicionado logging de mimeType e nome de ficheiro
+- [x] Testado com sucesso no PC (transcrição funcionou)
+- [x] Guardar checkpoint e publicar
