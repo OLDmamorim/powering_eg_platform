@@ -109,16 +109,6 @@ export const appRouter = router({
       if (!ctx.gestor) return [];
       return await db.getLojasByGestorId(ctx.gestor.id);
     }),
-    
-    import: adminProcedure
-      .input(z.array(z.object({
-        nome: z.string(),
-        email: z.string().optional(),
-      })))
-      .mutation(async ({ input }) => {
-        const { importLojas } = await import("./lojasImport");
-        return await importLojas(input);
-      }),
   }),
 
   // ==================== GESTORES ====================
