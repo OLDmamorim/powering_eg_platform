@@ -629,3 +629,16 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Remover coluna Contacto da tabela de lojas
 - [x] Manter apenas email como campo de contacto
 - [x] Campo contacto continua na BD mas não aparece na UI
+
+## Funcionalidade v5.3 - Importação em Massa de Lojas
+- [x] Instalar biblioteca papaparse para parsing CSV
+- [x] Criar backend para processar importação em batch (lojasImport.ts)
+- [x] Validar dados (nomes obrigatórios, emails válidos)
+- [x] Criar componente ImportLojasDialog com upload
+- [x] Preview dos dados antes de importar (mostra 10 primeiras linhas)
+- [x] Feedback de progresso durante importação (toasts)
+- [x] Relatório final (X importadas, Y erros com detalhes por linha)
+- [x] Botão "Importar Lojas" na página de Lojas (ao lado de Nova Loja)
+- [x] Botão "Descarregar Template" no dialog (Nome, Email)
+- [x] Aceitar formato .csv
+- [x] Simplificado para apenas Nome e Email (sem coordenadas)

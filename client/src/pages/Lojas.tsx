@@ -1,5 +1,6 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import DashboardLayout from "@/components/DashboardLayout";
+import ImportLojasDialog from "@/components/ImportLojasDialog";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -21,7 +22,7 @@ import {
 } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { trpc } from "@/lib/trpc";
-import { Building2, Edit, Plus, Trash2 } from "lucide-react";
+import { Building2, Edit, Plus, Trash2, Upload } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
@@ -30,6 +31,7 @@ export default function Lojas() {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [editingLoja, setEditingLoja] = useState<any>(null);
   const [formData, setFormData] = useState({
     nome: "",
@@ -124,10 +126,16 @@ export default function Lojas() {
               Gerir lojas da rede Express Glass
             </p>
           </div>
-          <Button onClick={() => handleOpenDialog()}>
-            <Plus className="mr-2 h-4 w-4" />
-            Nova Loja
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setImportDialogOpen(true)}>
+              <Upload className="mr-2 h-4 w-4" />
+              Importar Lojas
+            </Button>
+            <Button onClick={() => handleOpenDialog()}>
+              <Plus className="mr-2 h-4 w-4" />
+              Nova Loja
+            </Button>
+          </div>
         </div>
 
         {isLoading ? (
@@ -248,6 +256,12 @@ export default function Lojas() {
           </form>
         </DialogContent>
       </Dialog>
+      
+      <ImportLojasDialog
+        open={importDialogOpen}
+        onOpenChange={setImportDialogOpen}
+        onSuccess={() => utils.lojas.list.invalidate()}
+      />
     </DashboardLayout>
   );
 }
