@@ -128,14 +128,18 @@ export const appRouter = router({
         // Converter para JSON
         const data = XLSX.utils.sheet_to_json(worksheet) as Array<{
           Nome?: string;
-          Localização?: string;
           Email?: string;
         }>;
         
         const resultados = {
           importadas: 0,
+          ignoradas: 0,
           erros: [] as Array<{ linha: number; motivo: string }>,
         };
+        
+        // Obter lojas existentes para verificar duplicados
+        const lojasExistentes = await db.getAllLojas();
+        const nomesExistentes = new Set(lojasExistentes.map(l => l.nome.toLowerCase().trim()));
         
         // Processar cada linha
         for (let i = 0; i < data.length; i++) {
@@ -152,6 +156,12 @@ export const appRouter = router({
               continue;
             }
             
+            // Verificar se loja já existe (ignorar duplicados)
+            if (nomesExistentes.has(linha.Nome.trim().toLowerCase())) {
+              resultados.ignoradas++;
+              continue;
+            }
+            
             // Validar email se fornecido
             if (linha.Email && linha.Email.trim() !== '') {
               const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -164,11 +174,14 @@ export const appRouter = router({
               }
             }
             
-            // Criar loja (campo Localização não é guardado na BD)
+            // Criar loja
             await db.createLoja({
               nome: linha.Nome.trim(),
               email: linha.Email?.trim() || undefined,
             });
+            
+            // Adicionar ao set para evitar duplicados no mesmo ficheiro
+            nomesExistentes.add(linha.Nome.trim().toLowerCase());
             
             resultados.importadas++;
           } catch (error) {

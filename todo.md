@@ -725,4 +725,13 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar preview de lojas antes de importar
 - [x] Testar com ficheiro de exemplo (5 testes unitários passaram)
 - [x] Criar documentação de formato esperado (botão de template)
+- [x] Guardar checkpoint (v5.4 - 8bce2ad2)
+
+## Correção v5.4.1 - Ajustes na Importação de Excel
+- [x] Remover campo Localização do template Excel
+- [x] Remover coluna Localização do preview
+- [x] Template deve ter apenas: Nome (coluna A) e Email (coluna B)
+- [x] Verificar se loja com mesmo nome já existe antes de criar
+- [x] Ignorar duplicados em vez de criar ou dar erro
+- [x] Atualizar testes unitários (6 testes passaram)
 - [ ] Guardar checkpoint

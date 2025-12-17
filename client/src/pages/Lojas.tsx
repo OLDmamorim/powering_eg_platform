@@ -80,12 +80,24 @@ export default function Lojas() {
 
   const importMutation = trpc.lojas.importExcel.useMutation({
     onSuccess: (result) => {
+      const mensagens = [];
       if (result.importadas > 0) {
-        toast.success(`${result.importadas} loja(s) importada(s) com sucesso`);
+        mensagens.push(`${result.importadas} loja(s) importada(s)`);
+      }
+      if (result.ignoradas > 0) {
+        mensagens.push(`${result.ignoradas} loja(s) ignorada(s) (já existem)`);
       }
       if (result.erros.length > 0) {
-        toast.error(`${result.erros.length} erro(s) encontrado(s). Verifique o relatório.`);
+        mensagens.push(`${result.erros.length} erro(s)`);
       }
+      
+      if (result.importadas > 0 || result.ignoradas > 0) {
+        toast.success(mensagens.join(', '));
+      }
+      if (result.erros.length > 0) {
+        toast.error(`${result.erros.length} erro(s) encontrado(s)`);
+      }
+      
       utils.lojas.list.invalidate();
       setImportDialogOpen(false);
       setImportFile(null);
@@ -139,8 +151,9 @@ export default function Lojas() {
 
   const handleDownloadTemplate = () => {
     const template = [
-      { Nome: 'Exemplo Loja 1', Localização: 'Porto', Email: 'loja1@example.com' },
-      { Nome: 'Exemplo Loja 2', Localização: 'Lisboa', Email: 'loja2@example.com' },
+      { Nome: 'Exemplo Loja 1', Email: 'loja1@example.com' },
+      { Nome: 'Exemplo Loja 2', Email: 'loja2@example.com' },
+      { Nome: 'Exemplo Loja 3', Email: 'loja3@example.com' },
     ];
     
     const ws = XLSX.utils.json_to_sheet(template);
@@ -336,7 +349,7 @@ export default function Lojas() {
           <DialogHeader>
             <DialogTitle>Importar Lojas por Excel</DialogTitle>
             <DialogDescription>
-              Carregue um ficheiro Excel (.xlsx) com as colunas: Nome, Localização, Email
+              Carregue um ficheiro Excel (.xlsx) com as colunas: Nome (coluna A), Email (coluna B)
             </DialogDescription>
           </DialogHeader>
           
@@ -383,7 +396,6 @@ export default function Lojas() {
                     <TableHeader>
                       <TableRow>
                         <TableHead>Nome</TableHead>
-                        <TableHead>Localização</TableHead>
                         <TableHead>Email</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -391,7 +403,6 @@ export default function Lojas() {
                       {importPreview.map((row: any, idx) => (
                         <TableRow key={idx}>
                           <TableCell>{row.Nome || '-'}</TableCell>
-                          <TableCell>{row.Localização || '-'}</TableCell>
                           <TableCell>{row.Email || '-'}</TableCell>
                         </TableRow>
                       ))}
