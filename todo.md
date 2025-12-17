@@ -799,4 +799,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Atualizar RelatorioCompleto.tsx
 - [x] Remover imports não usados (FORGE_API_URL, FORGE_API_KEY)
 - [ ] Testar upload novamente no mobile
+- [x] Guardar checkpoint (v5.7.2 - a7680ef3)
+
+## Melhoria v5.7.3 - Ordenar Lojas Alfabeticamente
+- [x] Ordenar lista de lojas por nome (A-Z) em RelatorioLivre.tsx
+- [x] Ordenar lista de lojas por nome (A-Z) em RelatorioCompleto.tsx
 - [ ] Guardar checkpoint

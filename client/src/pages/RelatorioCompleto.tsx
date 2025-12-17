@@ -317,7 +317,7 @@ export default function RelatorioCompleto() {
             <div className="space-y-2">
               <Label htmlFor="loja">Lojas * (pode selecionar várias)</Label>
               <div className="border rounded-md p-3 space-y-2 max-h-48 overflow-y-auto">
-                {lojas?.map((loja: any) => (
+                {lojas?.sort((a: any, b: any) => a.nome.localeCompare(b.nome)).map((loja: any) => (
                   <label key={loja.id} className="flex items-center space-x-2 cursor-pointer hover:bg-accent p-2 rounded">
                     <input
                       type="checkbox"
