@@ -74,7 +74,15 @@ export async function transcribeAudio(
   options: TranscribeOptions
 ): Promise<TranscriptionResponse | TranscriptionError> {
   try {
+    console.log('[transcribeAudio] Iniciando transcrição...');
+    console.log('[transcribeAudio] audioUrl:', options.audioUrl);
+    console.log('[transcribeAudio] language:', options.language);
+    
     // Step 1: Validate environment configuration
+    console.log('[transcribeAudio] Validando configuração...');
+    console.log('[transcribeAudio] forgeApiUrl:', ENV.forgeApiUrl ? 'definido' : 'NÃO DEFINIDO');
+    console.log('[transcribeAudio] forgeApiKey:', ENV.forgeApiKey ? 'definido' : 'NÃO DEFINIDO');
+    
     if (!ENV.forgeApiUrl) {
       return {
         error: "Voice transcription service is not configured",
@@ -91,10 +99,12 @@ export async function transcribeAudio(
     }
 
     // Step 2: Download audio from URL
+    console.log('[transcribeAudio] Baixando áudio de:', options.audioUrl);
     let audioBuffer: Buffer;
     let mimeType: string;
     try {
       const response = await fetch(options.audioUrl);
+      console.log('[transcribeAudio] Response status:', response.status, response.statusText);
       if (!response.ok) {
         return {
           error: "Failed to download audio file",
@@ -105,9 +115,12 @@ export async function transcribeAudio(
       
       audioBuffer = Buffer.from(await response.arrayBuffer());
       mimeType = response.headers.get('content-type') || 'audio/mpeg';
+      console.log('[transcribeAudio] Áudio baixado, tamanho:', audioBuffer.length, 'bytes');
+      console.log('[transcribeAudio] mimeType:', mimeType);
       
       // Check file size (16MB limit)
       const sizeMB = audioBuffer.length / (1024 * 1024);
+      console.log('[transcribeAudio] Tamanho em MB:', sizeMB.toFixed(2));
       if (sizeMB > 16) {
         return {
           error: "Audio file exceeds maximum size limit",
@@ -151,6 +164,9 @@ export async function transcribeAudio(
       "v1/audio/transcriptions",
       baseUrl
     ).toString();
+    
+    console.log('[transcribeAudio] Chamando API Whisper:', fullUrl);
+    console.log('[transcribeAudio] Filename:', filename);
 
     const response = await fetch(fullUrl, {
       method: "POST",
@@ -163,6 +179,8 @@ export async function transcribeAudio(
 
     if (!response.ok) {
       const errorText = await response.text().catch(() => "");
+      console.error('[transcribeAudio] Erro na API Whisper:', response.status, response.statusText);
+      console.error('[transcribeAudio] Detalhes do erro:', errorText);
       return {
         error: "Transcription service request failed",
         code: "TRANSCRIPTION_FAILED",

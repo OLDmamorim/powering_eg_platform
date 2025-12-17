@@ -691,3 +691,12 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] FileReader.readAsDataURL converte blob para base64
 - [x] Removido prefixo "data:audio/...;base64," do resultado
 - [x] Guardar checkpoint e publicar
+
+## Bug v5.3.6 - Erro "Transcription service request failed"
+- [x] Verificar logs do servidor (sem logs encontrados)
+- [x] Adicionar logging detalhado na função transcribeAudio
+- [x] Logs adicionados em todas as etapas (validação, download, API call)
+- [ ] Publicar checkpoint com logging
+- [ ] Testar com áudio real e verificar logs
+- [ ] Identificar causa exata do erro
+- [ ] Corrigir problema identificado
