@@ -34,6 +34,7 @@ export default function RelatorioCompleto() {
   const [fotos, setFotos] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   const [showSugestoesModal, setShowSugestoesModal] = useState(false);
   const [showEmailDialog, setShowEmailDialog] = useState(false);
   const [relatorioIdCriado, setRelatorioIdCriado] = useState<number | null>(null);
@@ -613,20 +614,40 @@ export default function RelatorioCompleto() {
                 <Image className="h-4 w-4" />
                 Fotos
               </Label>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={uploading}
-              >
-                {uploading ? (
-                  <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                ) : (
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => cameraInputRef.current?.click()}
+                  disabled={uploading}
+                >
+                  {uploading ? (
+                    <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                  ) : (
+                    <Image className="h-4 w-4 mr-1" />
+                  )}
+                  {uploading ? 'A enviar...' : 'Tirar Foto'}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                >
                   <Upload className="h-4 w-4 mr-1" />
-                )}
-                {uploading ? 'A enviar...' : 'Adicionar Fotos'}
-              </Button>
+                  Carregar Ficheiro
+                </Button>
+              </div>
+              <input
+                ref={cameraInputRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                onChange={handleFileSelect}
+                className="hidden"
+              />
               <input
                 ref={fileInputRef}
                 type="file"

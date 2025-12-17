@@ -37,6 +37,7 @@ export default function RelatorioLivre() {
   const [fotos, setFotos] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   const [showSugestoesModal, setShowSugestoesModal] = useState(false);
   const [showEmailDialog, setShowEmailDialog] = useState(false);
   const [relatorioIdCriado, setRelatorioIdCriado] = useState<number | null>(null);
@@ -351,10 +352,23 @@ export default function RelatorioLivre() {
               {/* Upload de Fotos */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <Label className="flex items-center gap-2">
-                    <Image className="h-4 w-4" />
-                    Fotos
-                  </Label>
+                  <Label>Fotos</Label>
+                  <div className="flex items-center gap-2">
+                  <Image className="h-5 w-5 text-muted-foreground" />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => cameraInputRef.current?.click()}
+                    disabled={uploading}
+                  >
+                    {uploading ? (
+                      <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                    ) : (
+                      <Image className="h-4 w-4 mr-1" />
+                    )}
+                    {uploading ? 'A enviar...' : 'Tirar Foto'}
+                  </Button>
                   <Button
                     type="button"
                     variant="outline"
@@ -362,13 +376,17 @@ export default function RelatorioLivre() {
                     onClick={() => fileInputRef.current?.click()}
                     disabled={uploading}
                   >
-                    {uploading ? (
-                      <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                    ) : (
-                      <Upload className="h-4 w-4 mr-1" />
-                    )}
-                    {uploading ? 'A enviar...' : 'Adicionar Fotos'}
+                    <Upload className="h-4 w-4 mr-1" />
+                    Carregar Ficheiro
                   </Button>
+                  <input
+                    ref={cameraInputRef}
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    onChange={handleFileSelect}
+                    className="hidden"
+                  />
                   <input
                     ref={fileInputRef}
                     type="file"
@@ -377,7 +395,7 @@ export default function RelatorioLivre() {
                     onChange={handleFileSelect}
                     className="hidden"
                   />
-                </div>
+                </div></div>
                 <p className="text-sm text-muted-foreground">
                   Adicione fotos de evidências da visita (comprimidas automaticamente)
                 </p>

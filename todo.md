@@ -750,4 +750,13 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Qualidade JPEG: 80% (balanço qualidade/tamanho)
 - [x] Mostrar progresso durante compressão (toast automático)
 - [ ] Testar com fotos grandes (10MB+) de telemóvel (requer teste no mobile)
+- [x] Guardar checkpoint (v5.5 - 01c37117)
+
+## Funcionalidade v5.6 - Tirar Foto Diretamente pela Câmara
+- [x] Adicionar botão "Tirar Foto" separado de "Carregar Ficheiro"
+- [x] Usar atributo capture="environment" para câmara traseira
+- [x] Manter botão "Carregar Ficheiro" para galeria
+- [x] Aplicar em RelatorioLivre.tsx
+- [x] Aplicar em RelatorioCompleto.tsx
+- [ ] Testar no telemóvel (requer teste no mobile)
 - [ ] Guardar checkpoint
