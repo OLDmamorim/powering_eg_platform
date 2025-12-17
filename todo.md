@@ -590,3 +590,25 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar handler de transcrição que preenche campos automaticamente
 - [x] Componente mostra feedback visual (tempo, tamanho, estado)
 - [x] Processamento automático preenche descrição, categoria, estado, pendentes
+
+## Funcionalidade v5.1 - Análise Automática de Fotos
+- [x] Criar backend para análise de imagens com Vision API (GPT-4 Vision)
+- [x] Identificar problemas visíveis (vidros rachados, desorganização, sinalética)
+- [x] Gerar pendentes sugeridos automaticamente
+- [x] Adicionar descrições contextuais às fotos
+- [x] Integrar análise no upload de fotos do Relatório Livre
+- [x] Integrar análise no upload de fotos do Relatório Completo
+- [x] Mostrar resultados da análise ao gestor com toasts
+- [x] Pendentes sugeridos adicionados automaticamente à lista
+
+## Funcionalidade v5.2 - Histórico Inteligente da Loja
+- [x] Criar página "Histórico da Loja" no menu Relatórios (apenas gestor)
+- [x] Seletor de loja na página
+- [x] Backend: buscar todos os relatórios da loja (livres + completos + pendentes)
+- [x] Backend: processar com IA para gerar resumo inteligente
+- [x] Mostrar evolução ao longo do tempo dividida em períodos
+- [x] Identificar problemas recorrentes com frequência e gravidade
+- [x] Destacar pontos fortes consistentes
+- [x] Analisar tendências e padrões
+- [x] Gerar recomendações prioritárias com justificativa
+- [x] Design visual atrativo com cards coloridos e ícones

@@ -85,6 +85,7 @@ export default function RelatorioLivre() {
   };
 
   const processTranscriptionMutation = trpc.voiceTranscription.processRelatorioLivre.useMutation();
+  const analyzePhotosMutation = trpc.photoAnalysis.analyzePhotos.useMutation();
 
   const handleVoiceTranscription = async (transcription: string) => {
     try {
@@ -165,6 +166,34 @@ export default function RelatorioLivre() {
       setFotos([...fotos, ...newFotos]);
       if (newFotos.length > 0) {
         toast.success(`${newFotos.length} foto(s) adicionada(s)`);
+        
+        // Analisar fotos automaticamente com IA
+        toast.info("⚡ A analisar fotos com IA...");
+        try {
+          const analyses = await analyzePhotosMutation.mutateAsync({ imageUrls: newFotos });
+          
+          // Coletar pendentes sugeridos
+          const allSuggestedPendentes: string[] = [];
+          analyses.forEach(analysis => {
+            if (analysis.suggestedPendentes.length > 0) {
+              allSuggestedPendentes.push(...analysis.suggestedPendentes);
+            }
+          });
+          
+          // Adicionar pendentes sugeridos aos existentes
+          if (allSuggestedPendentes.length > 0) {
+            setPendentes(prev => {
+              const filtered = prev.filter(p => p.trim() !== "");
+              return [...filtered, ...allSuggestedPendentes];
+            });
+            toast.success(`🤖 IA identificou ${allSuggestedPendentes.length} pendente(s) nas fotos!`);
+          } else {
+            toast.success("✅ IA não identificou problemas nas fotos");
+          }
+        } catch (error) {
+          console.error("Erro ao analisar fotos:", error);
+          toast.warning("Não foi possível analisar as fotos automaticamente");
+        }
       }
     } catch (error) {
       console.error('Erro no upload:', error);

@@ -1145,6 +1145,42 @@ export const appRouter = router({
         return result;
       }),
   }),
+  
+  // ==================== ANÁLISE DE FOTOS ====================
+  photoAnalysis: router({
+    analyzePhoto: gestorProcedure
+      .input(z.object({
+        imageUrl: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        const { analyzePhoto } = await import('./photoAnalysis');
+        const result = await analyzePhoto(input.imageUrl);
+        return result;
+      }),
+    
+    analyzePhotos: gestorProcedure
+      .input(z.object({
+        imageUrls: z.array(z.string()),
+      }))
+      .mutation(async ({ input }) => {
+        const { analyzePhotos } = await import('./photoAnalysis');
+        const results = await analyzePhotos(input.imageUrls);
+        return results;
+      }),
+  }),
+  
+  // ==================== HISTÓRICO DA LOJA ====================
+  lojaHistory: router({
+    generate: gestorProcedure
+      .input(z.object({
+        lojaId: z.number(),
+      }))
+      .query(async ({ input }) => {
+        const { generateLojaHistory } = await import('./lojaHistory');
+        const result = await generateLojaHistory(input.lojaId);
+        return result;
+      }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;

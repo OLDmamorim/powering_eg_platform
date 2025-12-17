@@ -21,6 +21,7 @@ import DashboardAlertas from "./pages/DashboardAlertas";
 import ConfiguracoesAlertas from "./pages/ConfiguracoesAlertas";
 import Categorias from "./pages/Categorias";
 import PendentesAdmin from "./pages/PendentesAdmin";
+import HistoricoLoja from "./pages/HistoricoLoja";
 
 
 function Router() {
@@ -45,6 +46,7 @@ function Router() {
       
       {/* Shared routes */}
       <Route path={"/relatorios-ia"} component={RelatoriosIA} />
+      <Route path={"/historico-loja"} component={HistoricoLoja} />
       <Route path={"/pendentes"} component={Pendentes} />
       <Route path={"/historico-pontos"} component={HistoricoPontos} />
       <Route path={"/alertas"} component={DashboardAlertas} />
