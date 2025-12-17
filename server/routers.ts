@@ -468,21 +468,44 @@ export const appRouter = router({
           }
         }
         
-        // Gerar HTML do relatório
+        // Preparar anexos de fotos (fazer download do S3 e converter para base64)
+        const fotoAttachments = await Promise.all(
+          fotos.map(async (fotoUrl, index) => {
+            try {
+              const response = await fetch(fotoUrl);
+              const buffer = await response.arrayBuffer();
+              const base64 = Buffer.from(buffer).toString('base64');
+              return {
+                filename: `foto_${index + 1}.jpg`,
+                content: base64,
+                contentType: 'image/jpeg',
+              };
+            } catch (error) {
+              console.error(`Erro ao fazer download da foto ${index + 1}:`, error);
+              return null;
+            }
+          })
+        );
+        
+        // Filtrar anexos que falharam
+        const validAttachments = fotoAttachments.filter(a => a !== null) as Array<{filename: string; content: string; contentType: string}>;
+        
+        // Gerar HTML do relatório (sem fotos inline, pois serão anexos)
         const html = gerarHTMLRelatorioLivre({
           lojaNome: loja.nome,
           gestorNome: gestor?.nome || 'Desconhecido',
           dataVisita: relatorio.dataVisita,
           observacoes: relatorio.descricao || '',
           pendentes: pendentes.map(p => ({ descricao: p.descricao, resolvido: p.resolvido })),
-          fotos: fotos.length > 0 ? fotos : undefined,
+          fotos: undefined, // Não incluir fotos inline, serão anexos
         });
         
-        // Enviar email
+        // Enviar email com fotos como anexos
         const enviado = await sendEmail({
           to: loja.email,
           subject: `Relatório de Visita - ${loja.nome} - ${new Date(relatorio.dataVisita).toLocaleDateString('pt-PT')}`,
-          html,
+          html: html + (validAttachments.length > 0 ? `<p style="margin-top: 20px; color: #10b981;"><strong>📷 ${validAttachments.length} foto(s) anexada(s) a este email</strong></p>` : ''),
+          attachments: validAttachments,
         });
         
         if (!enviado) {
@@ -709,7 +732,29 @@ export const appRouter = router({
           }
         }
         
-        // Gerar HTML do relatório
+        // Preparar anexos de fotos (fazer download do S3 e converter para base64)
+        const fotoAttachments = await Promise.all(
+          fotos.map(async (fotoUrl, index) => {
+            try {
+              const response = await fetch(fotoUrl);
+              const buffer = await response.arrayBuffer();
+              const base64 = Buffer.from(buffer).toString('base64');
+              return {
+                filename: `foto_${index + 1}.jpg`,
+                content: base64,
+                contentType: 'image/jpeg',
+              };
+            } catch (error) {
+              console.error(`Erro ao fazer download da foto ${index + 1}:`, error);
+              return null;
+            }
+          })
+        );
+        
+        // Filtrar anexos que falharam
+        const validAttachments = fotoAttachments.filter(a => a !== null) as Array<{filename: string; content: string; contentType: string}>;
+        
+        // Gerar HTML do relatório (sem fotos inline, pois serão anexos)
         const html = gerarHTMLRelatorioCompleto({
           lojaNome: loja.nome,
           gestorNome: gestor?.nome || 'Desconhecido',
@@ -718,7 +763,7 @@ export const appRouter = router({
           pontosPositivos: relatorio.pontosPositivos || '',
           pontosNegativos: relatorio.pontosNegativos || '',
           pendentes: pendentes.map(p => ({ descricao: p.descricao, resolvido: p.resolvido })),
-          fotos: fotos.length > 0 ? fotos : undefined,
+          fotos: undefined, // Não incluir fotos inline, serão anexos
         });
         
         // Enviar email
@@ -729,7 +774,8 @@ export const appRouter = router({
         const enviado = await sendEmail({
           to: loja.email,
           subject: `Relatório Completo de Visita - ${loja.nome} - ${new Date(relatorio.dataVisita).toLocaleDateString('pt-PT')}`,
-          html,
+          html: html + (validAttachments.length > 0 ? `<p style="margin-top: 20px; color: #10b981;"><strong>📷 ${validAttachments.length} foto(s) anexada(s) a este email</strong></p>` : ''),
+          attachments: validAttachments,
         });
         
         if (!enviado) {

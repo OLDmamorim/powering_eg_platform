@@ -804,4 +804,14 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## Melhoria v5.7.3 - Ordenar Lojas Alfabeticamente
 - [x] Ordenar lista de lojas por nome (A-Z) em RelatorioLivre.tsx
 - [x] Ordenar lista de lojas por nome (A-Z) em RelatorioCompleto.tsx
+- [x] Guardar checkpoint (v5.7.3 - eda69faa)
+
+## Correção v5.7.4 - Fotos como Anexos em Emails
+- [x] Modificar envio de emails para anexar fotos diretamente
+- [x] Fazer download das fotos do S3 antes de enviar email
+- [x] Adicionar fotos como attachments no nodemailer (base64)
+- [x] Remover fotos inline do template HTML
+- [x] Adicionar mensagem informativa sobre anexos
+- [x] Aplicar em Relatório Livre e Relatório Completo
+- [ ] Testar envio de email com múltiplas fotos
 - [ ] Guardar checkpoint
