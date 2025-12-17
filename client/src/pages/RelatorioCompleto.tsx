@@ -21,6 +21,7 @@ import { useLocation } from "wouter";
 import { SugestoesModal } from "@/components/SugestoesModal";
 import { PendentesLoja } from "@/components/PendentesLoja";
 import { EmailConfirmDialog } from "@/components/EmailConfirmDialog";
+import { VoiceRecorder } from "@/components/VoiceRecorder";
 import imageCompression from 'browser-image-compression';
 
 export default function RelatorioCompleto() {
@@ -113,6 +114,33 @@ export default function RelatorioCompleto() {
     const newPendentes = [...pendentes];
     newPendentes[index] = value;
     setPendentes(newPendentes);
+  };
+
+  const processTranscriptionMutation = trpc.voiceTranscription.processRelatorioCompleto.useMutation();
+
+  const handleVoiceTranscription = async (transcription: string) => {
+    try {
+      toast.info("A processar transcrição...");
+      const processed = await processTranscriptionMutation.mutateAsync({ transcription });
+      
+      // Preencher campos automaticamente
+      setFormData(prev => ({
+        ...prev,
+        resumoSupervisao: processed.resumoSupervisao,
+        pontosPositivos: processed.pontosPositivos.join("\n"),
+        pontosNegativos: processed.pontosNegativos.join("\n"),
+      }));
+      
+      // Adicionar pendentes identificados
+      if (processed.pendentes.length > 0) {
+        setPendentes(processed.pendentes);
+      }
+      
+      toast.success("Relatório preenchido automaticamente!");
+    } catch (error) {
+      console.error("Erro ao processar transcrição:", error);
+      toast.error("Erro ao processar transcrição. Tente novamente.");
+    }
   };
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -269,6 +297,14 @@ export default function RelatorioCompleto() {
               <PendentesLoja
                 lojaId={parseInt(lojaId)}
                 onPendentesChange={setPendentesExistentes}
+              />
+            )}
+            
+            {/* Relatório por Voz */}
+            {lojaId && (
+              <VoiceRecorder
+                onTranscriptionComplete={handleVoiceTranscription}
+                disabled={createMutation.isPending}
               />
             )}
             

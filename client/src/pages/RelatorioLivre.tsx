@@ -20,6 +20,7 @@ import { useLocation } from "wouter";
 import { SugestoesModal } from "@/components/SugestoesModal";
 import { PendentesLoja } from "@/components/PendentesLoja";
 import { EmailConfirmDialog } from "@/components/EmailConfirmDialog";
+import { VoiceRecorder } from "@/components/VoiceRecorder";
 import imageCompression from 'browser-image-compression';
 
 const FORGE_API_URL = import.meta.env.VITE_FRONTEND_FORGE_API_URL;
@@ -30,6 +31,8 @@ export default function RelatorioLivre() {
   const [, setLocation] = useLocation();
   const [lojaId, setLojaId] = useState("");
   const [descricao, setDescricao] = useState("");
+  const [categoria, setCategoria] = useState("");
+  const [estadoAcompanhamento, setEstadoAcompanhamento] = useState<"acompanhar" | "em_tratamento" | "tratado">("acompanhar");
   const [pendentes, setPendentes] = useState<string[]>([""]);
   const [fotos, setFotos] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -79,6 +82,37 @@ export default function RelatorioLivre() {
     const newPendentes = [...pendentes];
     newPendentes[index] = value;
     setPendentes(newPendentes);
+  };
+
+  const processTranscriptionMutation = trpc.voiceTranscription.processRelatorioLivre.useMutation();
+
+  const handleVoiceTranscription = async (transcription: string) => {
+    try {
+      toast.info("A processar transcrição...");
+      const processed = await processTranscriptionMutation.mutateAsync({ transcription });
+      
+      // Preencher campos automaticamente
+      setDescricao(processed.descricao);
+      setCategoria(processed.categoria);
+      // Mapear estado da IA para o enum do schema
+      const estadoMap: Record<string, "acompanhar" | "em_tratamento" | "tratado"> = {
+        "Em Progresso": "em_tratamento",
+        "Concluído": "tratado",
+        "Pendente": "acompanhar",
+        "Requer Atenção": "acompanhar"
+      };
+      setEstadoAcompanhamento(estadoMap[processed.estadoAcompanhamento] || "acompanhar");
+      
+      // Adicionar pendentes identificados
+      if (processed.pendentes.length > 0) {
+        setPendentes(processed.pendentes);
+      }
+      
+      toast.success("Relatório preenchido automaticamente!");
+    } catch (error) {
+      console.error("Erro ao processar transcrição:", error);
+      toast.error("Erro ao processar transcrição. Tente novamente.");
+    }
   };
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -229,6 +263,14 @@ export default function RelatorioLivre() {
                   </SelectContent>
                 </Select>
               </div>
+
+              {/* Relatório por Voz */}
+              {lojaId && (
+                <VoiceRecorder
+                  onTranscriptionComplete={handleVoiceTranscription}
+                  disabled={createMutation.isPending}
+                />
+              )}
 
               <div className="space-y-2">
                 <Label htmlFor="dataHora">Data e Hora da Visita (opcional)</Label>

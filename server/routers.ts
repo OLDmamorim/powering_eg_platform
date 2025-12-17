@@ -1111,6 +1111,40 @@ export const appRouter = router({
         return { success: true };
       }),
   }),
+  
+  // ==================== TRANSCRIÇÃO DE VOZ ====================
+  voiceTranscription: router({
+    transcribe: gestorProcedure
+      .input(z.object({
+        audioUrl: z.string(),
+        language: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { transcribeAndProcess } = await import('./voiceTranscription');
+        const result = await transcribeAndProcess(input.audioUrl, input.language);
+        return result;
+      }),
+    
+    processRelatorioLivre: gestorProcedure
+      .input(z.object({
+        transcription: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        const { processTranscriptionRelatorioLivre } = await import('./voiceTranscription');
+        const result = await processTranscriptionRelatorioLivre(input.transcription);
+        return result;
+      }),
+    
+    processRelatorioCompleto: gestorProcedure
+      .input(z.object({
+        transcription: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        const { processTranscriptionRelatorioCompleto } = await import('./voiceTranscription');
+        const result = await processTranscriptionRelatorioCompleto(input.transcription);
+        return result;
+      }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;

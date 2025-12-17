@@ -578,3 +578,15 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Botão "Gerar Relatório IA" redireciona para /relatorios-ia
 - [x] Botão "Lembrar Mais Tarde" atualiza lastReminderDate
 - [x] Design elegante com ícone Sparkles e lista de benefícios
+
+## Funcionalidade v5.0 - Relatórios por Voz (Ponto 4)
+- [x] Criar componente VoiceRecorder com gravação de áudio
+- [x] Implementar upload automático para S3
+- [x] Criar backend de transcrição usando Whisper API
+- [x] Criar processamento inteligente com LLM para estruturar relatórios
+- [x] Adicionar router voiceTranscription no backend
+- [x] Integrar VoiceRecorder no Relatório Livre
+- [x] Integrar VoiceRecorder no Relatório Completo
+- [x] Adicionar handler de transcrição que preenche campos automaticamente
+- [x] Componente mostra feedback visual (tempo, tamanho, estado)
+- [x] Processamento automático preenche descrição, categoria, estado, pendentes
