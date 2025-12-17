@@ -394,6 +394,33 @@ export async function promoteGestorToAdmin(gestorId: number): Promise<void> {
   await db.update(users).set({ role: 'admin' }).where(eq(users.id, gestor.userId));
 }
 
+export async function checkReminderNeeded(gestorId: number): Promise<boolean> {
+  const db = await getDb();
+  if (!db) return false;
+  
+  const gestorResult = await db.select().from(gestores).where(eq(gestores.id, gestorId)).limit(1);
+  if (gestorResult.length === 0) return false;
+  
+  const gestor = gestorResult[0];
+  
+  // Se nunca viu lembrete, mostrar
+  if (!gestor.lastReminderDate) return true;
+  
+  // Verificar se passaram 15 dias desde o último lembrete
+  const now = new Date();
+  const lastReminder = new Date(gestor.lastReminderDate);
+  const daysDiff = Math.floor((now.getTime() - lastReminder.getTime()) / (1000 * 60 * 60 * 24));
+  
+  return daysDiff >= 15;
+}
+
+export async function updateReminderDate(gestorId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.update(gestores).set({ lastReminderDate: new Date() }).where(eq(gestores.id, gestorId));
+}
+
 // ==================== GESTOR-LOJAS ====================
 
 export async function associateGestorLoja(gestorId: number, lojaId: number): Promise<void> {
@@ -436,6 +463,7 @@ export async function getGestoresByLojaId(lojaId: number): Promise<Array<Gestor 
     .select({
       gestorId: gestores.id,
       gestorUserId: gestores.userId,
+      gestorLastReminderDate: gestores.lastReminderDate,
       gestorCreatedAt: gestores.createdAt,
       gestorUpdatedAt: gestores.updatedAt,
       userId: users.id,
@@ -456,6 +484,7 @@ export async function getGestoresByLojaId(lojaId: number): Promise<Array<Gestor 
   return gestoresLojaResult.map(r => ({
     id: r.gestorId,
     userId: r.gestorUserId,
+    lastReminderDate: r.gestorLastReminderDate,
     createdAt: r.gestorCreatedAt,
     updatedAt: r.gestorUpdatedAt,
     user: {

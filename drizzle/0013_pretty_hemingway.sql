@@ -1,0 +1,1 @@
+ALTER TABLE `gestores` ADD `lastReminderDate` timestamp;

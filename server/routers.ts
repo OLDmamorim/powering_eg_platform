@@ -179,6 +179,20 @@ export const appRouter = router({
         await db.promoteGestorToAdmin(input.gestorId);
         return { success: true };
       }),
+    
+    checkReminder: gestorProcedure
+      .query(async ({ ctx }) => {
+        if (!ctx.gestor) return { needed: false };
+        const needed = await db.checkReminderNeeded(ctx.gestor.id);
+        return { needed };
+      }),
+    
+    dismissReminder: gestorProcedure
+      .mutation(async ({ ctx }) => {
+        if (!ctx.gestor) throw new TRPCError({ code: 'UNAUTHORIZED' });
+        await db.updateReminderDate(ctx.gestor.id);
+        return { success: true };
+      }),
   }),
 
   // ==================== RELATÓRIOS LIVRES ====================

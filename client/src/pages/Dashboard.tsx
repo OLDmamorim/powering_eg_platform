@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { trpc } from "@/lib/trpc";
 import { Building2, ClipboardList, FileText, ListTodo, AlertTriangle, TrendingUp, TrendingDown, Calendar, Download, Minus, Sparkles, RefreshCw, Activity, Eye, Zap, MapPin, Clock, CheckCircle, XCircle } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useLocation } from "wouter";
+import { ReminderDialog } from "@/components/ReminderDialog";
 
 // Componente de indicador de variação
 function VariationIndicator({ current, previous, suffix = "" }: { current: number; previous: number; suffix?: string }) {
@@ -110,6 +111,7 @@ export default function Dashboard() {
   const [, setLocation] = useLocation();
   const isAdmin = user?.role === "admin";
   const isGestor = user?.role === "gestor";
+  const [showReminder, setShowReminder] = useState(false);
 
   const { data: lojas } = trpc.lojas.list.useQuery(undefined, { enabled: isAdmin });
   const { data: gestores } = trpc.gestores.list.useQuery(undefined, { enabled: isAdmin });
@@ -117,6 +119,21 @@ export default function Dashboard() {
   const { data: relatoriosLivres } = trpc.relatoriosLivres.list.useQuery();
   const { data: relatoriosCompletos } = trpc.relatoriosCompletos.list.useQuery();
   const { data: pendentes } = trpc.pendentes.list.useQuery();
+  
+  // Verificar se precisa mostrar lembrete de relatório IA
+  const { data: reminderCheck } = trpc.gestores.checkReminder.useQuery(undefined, { enabled: isGestor });
+  const dismissReminderMutation = trpc.gestores.dismissReminder.useMutation();
+  
+  useEffect(() => {
+    if (reminderCheck?.needed && isGestor) {
+      setShowReminder(true);
+    }
+  }, [reminderCheck, isGestor]);
+  
+  const handleDismissReminder = () => {
+    setShowReminder(false);
+    dismissReminderMutation.mutate();
+  };
   
   // Contagem de itens não vistos (apenas para admin)
   const { data: relLivresNaoVistos } = trpc.relatoriosLivres.countNaoVistos.useQuery(undefined, { enabled: isAdmin });
@@ -668,6 +685,11 @@ export default function Dashboard() {
           </Card>
         </div>
       </div>
+      
+      <ReminderDialog 
+        open={showReminder} 
+        onDismiss={handleDismissReminder}
+      />
     </DashboardLayout>
   );
 }

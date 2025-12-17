@@ -566,3 +566,15 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Configurar: max 1920px largura, max 1MB, formato JPEG
 - [x] Remover validação de 5MB (já não necessária com compressão)
 - [x] Usar Web Worker para não bloquear UI durante compressão
+
+## Funcionalidade v4.11 - Lembretes Quinzenais de Relatório IA
+- [x] Adicionar campo lastReminderDate na tabela gestores
+- [x] Migrar schema com db:push (migração 0013)
+- [x] Criar funções checkReminderNeeded e updateReminderDate no db.ts
+- [x] Criar procedures checkReminder e dismissReminder no backend
+- [x] Criar componente ReminderDialog no frontend
+- [x] Integrar verificação automática no Dashboard
+- [x] Popup aparece de 15 em 15 dias sugerindo relatório IA
+- [x] Botão "Gerar Relatório IA" redireciona para /relatorios-ia
+- [x] Botão "Lembrar Mais Tarde" atualiza lastReminderDate
+- [x] Design elegante com ícone Sparkles e lista de benefícios
