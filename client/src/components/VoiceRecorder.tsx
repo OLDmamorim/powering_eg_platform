@@ -129,10 +129,20 @@ export function VoiceRecorder({ onTranscriptionComplete, disabled }: VoiceRecord
       console.log('[VoiceRecorder] Tamanho do blob:', audioBlob.size, 'bytes');
       toast.info('1/3: Iniciando upload do áudio...');
       
-      // Converter blob para base64
-      const arrayBuffer = await audioBlob.arrayBuffer();
-      const base64Audio = Buffer.from(arrayBuffer).toString('base64');
-      console.log('[VoiceRecorder] Blob convertido para base64');
+      // Converter blob para base64 usando FileReader (API do browser)
+      console.log('[VoiceRecorder] Convertendo blob para base64...');
+      const base64Audio = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const base64String = reader.result as string;
+          // Remover prefixo "data:audio/...;base64,"
+          const base64Data = base64String.split(',')[1];
+          resolve(base64Data);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(audioBlob);
+      });
+      console.log('[VoiceRecorder] Blob convertido para base64, tamanho:', base64Audio.length, 'caracteres');
       
       // Upload para S3 via tRPC
       console.log('[VoiceRecorder] Iniciando upload via backend...');

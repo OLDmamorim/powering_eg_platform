@@ -684,3 +684,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Blob convertido para base64 e enviado via tRPC
 - [x] Backend faz upload para S3 usando storagePut
 - [x] Guardar checkpoint para publicação
+
+## Bug v5.3.5 - Erro "Buffer is not defined" no frontend
+- [x] Identificado problema: Buffer não existe no browser (apenas Node.js)
+- [x] Substituído Buffer.from() por FileReader (API nativa do browser)
+- [x] FileReader.readAsDataURL converte blob para base64
+- [x] Removido prefixo "data:audio/...;base64," do resultado
+- [x] Guardar checkpoint e publicar
