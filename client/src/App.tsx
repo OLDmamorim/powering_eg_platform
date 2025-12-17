@@ -22,6 +22,7 @@ import ConfiguracoesAlertas from "./pages/ConfiguracoesAlertas";
 import Categorias from "./pages/Categorias";
 import PendentesAdmin from "./pages/PendentesAdmin";
 import HistoricoLoja from "./pages/HistoricoLoja";
+import ResumoGlobal from "./pages/ResumoGlobal";
 
 
 function Router() {
@@ -43,6 +44,7 @@ function Router() {
       <Route path={"/relatorio-livre"} component={RelatorioLivre} />
       <Route path={"/relatorio-completo"} component={RelatorioCompleto} />
       <Route path={"/meus-relatorios"} component={MeusRelatorios} />
+      <Route path={"/resumo-global"} component={ResumoGlobal} />
       
       {/* Shared routes */}
       <Route path={"/relatorios-ia"} component={RelatoriosIA} />

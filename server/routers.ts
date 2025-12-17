@@ -1303,6 +1303,15 @@ export const appRouter = router({
         return result;
       }),
   }),
+
+  // ==================== RESUMO GLOBAL ====================
+  resumoGlobal: router({
+    gerar: gestorProcedure.query(async ({ ctx }) => {
+      const { gerarResumoGlobal } = await import('./resumoGlobalService');
+      const resumo = await gerarResumoGlobal(ctx.gestor?.id || 0);
+      return resumo;
+    }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;

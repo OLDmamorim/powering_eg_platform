@@ -766,4 +766,16 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Card "Relatórios Livres" vai para /relatorios?tipo=livres
 - [x] Card "Relatórios Completos" vai para /relatorios?tipo=completos
 - [x] Página Relatorios lê query param e abre aba correspondente
+- [x] Guardar checkpoint (v5.6.1 - 34e37625)
+
+## Funcionalidade v5.7 - Resumo Global com IA
+- [x] Criar página ResumoGlobal.tsx
+- [x] Adicionar rota /resumo-global no App.tsx
+- [x] Adicionar item no menu lateral (DashboardLayout) para gestores
+- [x] Criar endpoint backend para gerar resumo com IA (resumoGlobalService.ts)
+- [x] Agregar dados de todos os relatórios (livres + completos) dos últimos 30 dias
+- [x] Gerar análise IA: resumo executivo, pontos positivos/negativos, ações recomendadas, insights
+- [x] Estatísticas: total visitas, pendentes ativos, lojas visitadas, taxa resolução
+- [x] Design da página com cards e visualizações
+- [x] Criar testes unitários (2 testes passaram)
 - [ ] Guardar checkpoint
