@@ -1270,6 +1270,29 @@ export const appRouter = router({
   
   // ==================== ANÁLISE DE FOTOS ====================
   photoAnalysis: router({
+    uploadPhoto: gestorProcedure
+      .input(z.object({
+        photoBase64: z.string(),
+        mimeType: z.string(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const { storagePut } = await import('./storage');
+        
+        // Converter base64 para buffer
+        const photoBuffer = Buffer.from(input.photoBase64, 'base64');
+        
+        // Gerar nome único para o arquivo
+        const timestamp = Date.now();
+        const randomSuffix = Math.random().toString(36).substring(7);
+        const gestorId = ctx.gestor?.id || 0;
+        const fileKey = `relatorio-fotos/${gestorId}/${timestamp}-${randomSuffix}.jpg`;
+        
+        // Upload para S3
+        const { url } = await storagePut(fileKey, photoBuffer, input.mimeType);
+        
+        return { url };
+      }),
+    
     analyzePhoto: gestorProcedure
       .input(z.object({
         imageUrl: z.string(),

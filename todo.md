@@ -786,5 +786,17 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Logs de compressão (tamanho antes/depois)
 - [x] Logs de resposta do servidor
 - [x] Aplicar em RelatorioLivre.tsx e RelatorioCompleto.tsx
-- [ ] Testar no mobile e verificar console do browser
+- [x] Testar no mobile e verificar console do browser
+- [x] Problema identificado: endpoint /storage/upload retorna 404
+- [x] Guardar checkpoint (v5.7.1 - e957d9b3)
+
+## Bug v5.7.2 - Corrigir Endpoint de Upload (404)
+- [x] Verificar endpoint correto da API Forge para upload (/v1/storage/upload com query param path)
+- [x] Criar endpoint backend dedicado (photoAnalysis.uploadPhoto)
+- [x] Usar storagePut do backend em vez de fetch direto do frontend
+- [x] Converter foto para base64 e enviar via tRPC
+- [x] Atualizar RelatorioLivre.tsx
+- [x] Atualizar RelatorioCompleto.tsx
+- [x] Remover imports não usados (FORGE_API_URL, FORGE_API_KEY)
+- [ ] Testar upload novamente no mobile
 - [ ] Guardar checkpoint

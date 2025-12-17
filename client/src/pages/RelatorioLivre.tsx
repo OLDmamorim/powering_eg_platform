@@ -23,9 +23,6 @@ import { EmailConfirmDialog } from "@/components/EmailConfirmDialog";
 import { VoiceRecorder } from "@/components/VoiceRecorder";
 import imageCompression from 'browser-image-compression';
 
-const FORGE_API_URL = import.meta.env.VITE_FRONTEND_FORGE_API_URL;
-const FORGE_API_KEY = import.meta.env.VITE_FRONTEND_FORGE_API_KEY;
-
 export default function RelatorioLivre() {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
@@ -117,16 +114,11 @@ export default function RelatorioLivre() {
     }
   };
 
+  const uploadPhotoMutation = trpc.photoAnalysis.uploadPhoto.useMutation();
+
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
-
-    // Validar env vars
-    if (!FORGE_API_URL || !FORGE_API_KEY) {
-      console.error('FORGE_API_URL ou FORGE_API_KEY não definidos');
-      toast.error('Erro de configuração do sistema. Contacte o administrador.');
-      return;
-    }
 
     console.log('Iniciando upload de', files.length, 'ficheiro(s)');
     setUploading(true);
@@ -153,27 +145,26 @@ export default function RelatorioLivre() {
         const compressedFile = await imageCompression(file, options);
         console.log('Ficheiro comprimido:', compressedFile.name, 'novo tamanho:', compressedFile.size);
         
-        // Upload para S3 via Forge API
-        const formData = new FormData();
-        formData.append('file', compressedFile);
-
-        console.log('Enviando para:', `${FORGE_API_URL}/storage/upload`);
-        const response = await fetch(`${FORGE_API_URL}/storage/upload`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${FORGE_API_KEY}`,
-          },
-          body: formData,
+        // Converter para base64
+        const reader = new FileReader();
+        const base64Promise = new Promise<string>((resolve, reject) => {
+          reader.onload = () => {
+            const base64 = (reader.result as string).split(',')[1];
+            resolve(base64);
+          };
+          reader.onerror = reject;
+          reader.readAsDataURL(compressedFile);
         });
-
-        console.log('Resposta do servidor:', response.status, response.statusText);
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error('Erro no upload:', errorText);
-          throw new Error(`Erro ao fazer upload de ${file.name}: ${response.statusText}`);
-        }
-
-        const result = await response.json();
+        
+        const photoBase64 = await base64Promise;
+        
+        // Upload via backend tRPC
+        console.log('Enviando para backend via tRPC');
+        const result = await uploadPhotoMutation.mutateAsync({
+          photoBase64,
+          mimeType: compressedFile.type,
+        });
+        
         console.log('Resultado do upload:', result);
         if (result.url) {
           newFotos.push(result.url);
