@@ -236,7 +236,7 @@ export const appRouter = router({
     
     create: gestorProcedure
       .input(z.object({
-        lojaId: z.number(),
+        lojasIds: z.array(z.number()).min(1),
         dataVisita: z.date(),
         descricao: z.string().min(1),
         fotos: z.string().optional(),
@@ -247,17 +247,21 @@ export const appRouter = router({
           throw new TRPCError({ code: 'FORBIDDEN', message: 'Gestor não encontrado' });
         }
         
-        const { pendentes, ...relatorioData } = input;
+        const { pendentes, lojasIds, ...relatorioData } = input;
+        
+        // Criar relatório com primeira loja (compatibilidade) e array de lojas
         const relatorio = await db.createRelatorioLivre({
           ...relatorioData,
+          lojaId: lojasIds[0], // Primeira loja para compatibilidade
+          lojasIds: JSON.stringify(lojasIds), // Array de lojas em JSON
           gestorId: ctx.gestor.id,
         });
         
-        // Criar pendentes se existirem
+        // Criar pendentes se existirem (apenas para primeira loja)
         if (pendentes && pendentes.length > 0) {
           for (const descricao of pendentes) {
             await db.createPendente({
-              lojaId: input.lojaId,
+              lojaId: lojasIds[0],
               relatorioId: relatorio.id,
               tipoRelatorio: 'livre',
               descricao,
@@ -266,29 +270,31 @@ export const appRouter = router({
             // Registar atividade de pendente criado
             await db.registarAtividade({
               gestorId: ctx.gestor.id,
-              lojaId: input.lojaId,
+              lojaId: lojasIds[0],
               tipo: 'pendente_criado',
               descricao: `Novo pendente criado: ${descricao.substring(0, 50)}...`,
             });
           }
         }
         
-        // Registar atividade de relatório criado
-        const loja = await db.getLojaById(input.lojaId);
-        await db.registarAtividade({
-          gestorId: ctx.gestor.id,
-          lojaId: input.lojaId,
-          tipo: 'relatorio_livre',
-          descricao: `Relatório livre criado para ${loja?.nome || 'loja'}`,
-          metadata: { relatorioId: relatorio.id },
-        });
+        // Registar atividade de relatório criado para cada loja
+        for (const lojaId of lojasIds) {
+          const loja = await db.getLojaById(lojaId);
+          await db.registarAtividade({
+            gestorId: ctx.gestor.id,
+            lojaId,
+            tipo: 'relatorio_livre',
+            descricao: `Relatório livre criado para ${loja?.nome || 'loja'}`,
+            metadata: { relatorioId: relatorio.id },
+          });
+        }
         
         // Gerar sugestões de melhoria com IA (async, não bloqueia)
         const conteudo = formatarRelatorioLivre({
           descricao: input.descricao,
           dataVisita: input.dataVisita,
         });
-        gerarSugestoesMelhoria(relatorio.id, 'livre', input.lojaId, ctx.gestor.id, conteudo)
+        gerarSugestoesMelhoria(relatorio.id, 'livre', lojasIds[0], ctx.gestor.id, conteudo)
           .catch(err => console.error('[Sugestões] Erro ao gerar:', err));
         
         return relatorio;
@@ -445,7 +451,7 @@ export const appRouter = router({
     
     create: gestorProcedure
       .input(z.object({
-        lojaId: z.number(),
+        lojasIds: z.array(z.number()).min(1),
         dataVisita: z.date(),
         episFardamento: z.string().optional(),
         kitPrimeirosSocorros: z.string().optional(),
@@ -468,17 +474,21 @@ export const appRouter = router({
           throw new TRPCError({ code: 'FORBIDDEN', message: 'Gestor não encontrado' });
         }
         
-        const { pendentes, ...relatorioData } = input;
+        const { pendentes, lojasIds, ...relatorioData } = input;
+        
+        // Criar relatório com primeira loja (compatibilidade) e array de lojas
         const relatorio = await db.createRelatorioCompleto({
           ...relatorioData,
+          lojaId: lojasIds[0], // Primeira loja para compatibilidade
+          lojasIds: JSON.stringify(lojasIds), // Array de lojas em JSON
           gestorId: ctx.gestor.id,
         });
         
-        // Criar pendentes se existirem
+        // Criar pendentes se existirem (apenas para primeira loja)
         if (pendentes && pendentes.length > 0) {
           for (const descricao of pendentes) {
             await db.createPendente({
-              lojaId: input.lojaId,
+              lojaId: lojasIds[0],
               relatorioId: relatorio.id,
               tipoRelatorio: 'completo',
               descricao,
@@ -487,34 +497,37 @@ export const appRouter = router({
             // Registar atividade de pendente criado
             await db.registarAtividade({
               gestorId: ctx.gestor.id,
-              lojaId: input.lojaId,
+              lojaId: lojasIds[0],
               tipo: 'pendente_criado',
               descricao: `Novo pendente criado: ${descricao.substring(0, 50)}...`,
             });
           }
         }
         
-        // Registar atividade de relatório criado
-        const lojaInfo = await db.getLojaById(input.lojaId);
-        await db.registarAtividade({
-          gestorId: ctx.gestor.id,
-          lojaId: input.lojaId,
-          tipo: 'relatorio_completo',
-          descricao: `Relatório completo criado para ${lojaInfo?.nome || 'loja'}`,
-          metadata: { relatorioId: relatorio.id },
-        });
+        // Registar atividade de relatório criado para cada loja
+        for (const lojaId of lojasIds) {
+          const lojaInfo = await db.getLojaById(lojaId);
+          await db.registarAtividade({
+            gestorId: ctx.gestor.id,
+            lojaId,
+            tipo: 'relatorio_completo',
+            descricao: `Relatório completo criado para ${lojaInfo?.nome || 'loja'}`,
+            metadata: { relatorioId: relatorio.id },
+          });
+        }
         
         // Gerar sugestões de melhoria com IA (async, não bloqueia)
-        const conteudoCompleto = formatarRelatorioCompleto(input);
-        gerarSugestoesMelhoria(relatorio.id, 'completo', input.lojaId, ctx.gestor.id, conteudoCompleto)
+        const { lojasIds: _, ...inputSemLojasIds } = input;
+        const conteudoCompleto = formatarRelatorioCompleto(inputSemLojasIds);
+        gerarSugestoesMelhoria(relatorio.id, 'completo', lojasIds[0], ctx.gestor.id, conteudoCompleto)
           .catch(err => console.error('[Sugestões] Erro ao gerar:', err));
         
-        // Verificar alertas de pontos negativos consecutivos
+        // Verificar alertas de pontos negativos consecutivos (apenas primeira loja)
         if (input.pontosNegativos && input.pontosNegativos.trim()) {
-          const loja = await db.getLojaById(input.lojaId);
+          const loja = await db.getLojaById(lojasIds[0]);
           if (loja) {
             // Verificar e notificar em background (não bloquear a resposta)
-            verificarENotificarAlertas(input.lojaId, loja.nome).catch(err => {
+            verificarENotificarAlertas(lojasIds[0], loja.nome).catch(err => {
               console.error('[Alertas] Erro ao verificar alertas:', err);
             });
           }

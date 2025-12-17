@@ -29,7 +29,7 @@ const FORGE_API_KEY = import.meta.env.VITE_FRONTEND_FORGE_API_KEY;
 export default function RelatorioLivre() {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
-  const [lojaId, setLojaId] = useState("");
+  const [lojasIds, setLojasIds] = useState<string[]>([]);
   const [descricao, setDescricao] = useState("");
   const [categoria, setCategoria] = useState("");
   const [estadoAcompanhamento, setEstadoAcompanhamento] = useState<"acompanhar" | "em_tratamento" | "tratado">("acompanhar");
@@ -54,9 +54,9 @@ export default function RelatorioLivre() {
       utils.relatoriosLivres.list.invalidate();
       // Guardar dados para os diálogos
       setRelatorioIdCriado(data.id);
-      const loja = lojas?.find(l => l.id === parseInt(lojaId));
-      setLojaNomeSelecionada(loja?.nome || "");
-      setLojaEmailSelecionada(loja?.email || "");
+      const primeiraLoja = lojas?.find(l => l.id === parseInt(lojasIds[0]));
+      setLojaNomeSelecionada(primeiraLoja?.nome || "");
+      setLojaEmailSelecionada(primeiraLoja?.email || "");
       // Mostrar diálogo de confirmação de email primeiro
       setShowEmailDialog(true);
     },
@@ -215,8 +215,8 @@ export default function RelatorioLivre() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!lojaId) {
-      toast.error("Por favor selecione uma loja");
+    if (lojasIds.length === 0) {
+      toast.error("Por favor selecione pelo menos uma loja");
       return;
     }
 
@@ -251,7 +251,7 @@ export default function RelatorioLivre() {
       : new Date();
 
     createMutation.mutate({
-      lojaId: Number(lojaId),
+      lojasIds: lojasIds.map(id => Number(id)),
       dataVisita,
       descricao,
       fotos: fotos.length > 0 ? JSON.stringify(fotos) : undefined,
@@ -278,23 +278,35 @@ export default function RelatorioLivre() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="loja">Loja *</Label>
-                <Select value={lojaId} onValueChange={setLojaId} required>
-                  <SelectTrigger id="loja">
-                    <SelectValue placeholder="Selecione uma loja" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {lojas?.map((loja: any) => (
-                      <SelectItem key={loja.id} value={loja.id.toString()}>
-                        {loja.nome}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Label htmlFor="loja">Lojas * (pode selecionar várias)</Label>
+                <div className="border rounded-md p-3 space-y-2 max-h-48 overflow-y-auto">
+                  {lojas?.map((loja: any) => (
+                    <label key={loja.id} className="flex items-center space-x-2 cursor-pointer hover:bg-accent p-2 rounded">
+                      <input
+                        type="checkbox"
+                        checked={lojasIds.includes(loja.id.toString())}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setLojasIds([...lojasIds, loja.id.toString()]);
+                          } else {
+                            setLojasIds(lojasIds.filter(id => id !== loja.id.toString()));
+                          }
+                        }}
+                        className="rounded border-gray-300"
+                      />
+                      <span className="text-sm">{loja.nome}</span>
+                    </label>
+                  ))}
+                </div>
+                {lojasIds.length > 0 && (
+                  <p className="text-sm text-muted-foreground">
+                    {lojasIds.length} loja{lojasIds.length > 1 ? 's' : ''} selecionada{lojasIds.length > 1 ? 's' : ''}
+                  </p>
+                )}
               </div>
 
               {/* Relatório por Voz */}
-              {lojaId && (
+              {lojasIds.length > 0 && (
                 <VoiceRecorder
                   onTranscriptionComplete={handleVoiceTranscription}
                   disabled={createMutation.isPending}
@@ -316,9 +328,9 @@ export default function RelatorioLivre() {
               </div>
 
               {/* Pendentes da Loja Selecionada */}
-              {lojaId && (
+              {lojasIds.length === 1 && (
                 <PendentesLoja
-                  lojaId={parseInt(lojaId)}
+                  lojaId={parseInt(lojasIds[0])}
                   onPendentesChange={setPendentesExistentes}
                 />
               )}

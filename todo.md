@@ -629,3 +629,28 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Remover coluna Contacto da tabela de lojas
 - [x] Manter apenas email como campo de contacto
 - [x] Campo contacto continua na BD mas não aparece na UI
+
+## Funcionalidade v5.5 - Seleção Múltipla de Lojas nos Relatórios
+- [ ] Adicionar campo lojasIds (TEXT, opcional) ao schema
+- [ ] Migrar schema com db:push
+- [ ] Substituir Select por multi-select no Relatório Livre
+- [ ] Substituir Select por multi-select no Relatório Completo
+- [ ] Atualizar backend para guardar array em lojasIds
+- [ ] Primeira loja do array vai para lojaId (compatibilidade)
+- [ ] Testar criação de relatório com múltiplas lojas
+- [ ] Apenas para novos relatórios (sem efeito retroativo)
+
+## Funcionalidade v5.3 - Seleção Múltipla de Lojas nos Relatórios
+- [x] Adicionar campo lojasIds (TEXT com JSON array) ao schema de relatoriosLivres
+- [x] Adicionar campo lojasIds (TEXT com JSON array) ao schema de relatoriosCompletos
+- [x] Substituir Select simples por multi-select com checkboxes no Relatório Livre
+- [x] Substituir Select simples por multi-select com checkboxes no Relatório Completo
+- [x] Atualizar backend para aceitar lojasIds array no create de relatórios livres
+- [x] Atualizar backend para aceitar lojasIds array no create de relatórios completos
+- [x] Guardar primeira loja em lojaId para compatibilidade com queries existentes
+- [x] Guardar array completo de lojas em lojasIds como JSON
+- [x] Registar atividades para todas as lojas selecionadas
+- [x] Criar testes unitários (5 testes passaram com sucesso)
+- [x] Testar criação de relatório com múltiplas lojas
+- [x] Testar criação de relatório com apenas 1 loja (compatibilidade)
+- [x] Testar rejeição de relatório sem lojas selecionadas

@@ -29,6 +29,7 @@ export default function RelatorioCompleto() {
   const [, setLocation] = useLocation();
   const [currentPage, setCurrentPage] = useState(0);
   const [lojaId, setLojaId] = useState("");
+  const [lojasIds, setLojasIds] = useState<string[]>([]);
   const [pendentes, setPendentes] = useState<string[]>([""]);
   const [fotos, setFotos] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -69,9 +70,9 @@ export default function RelatorioCompleto() {
       utils.relatoriosCompletos.list.invalidate();
       // Guardar dados para os diálogos
       setRelatorioIdCriado(data.id);
-      const loja = lojas?.find(l => l.id === parseInt(lojaId));
-      setLojaNomeSelecionada(loja?.nome || "");
-      setLojaEmailSelecionada(loja?.email || "");
+      const primeiraLoja = lojas?.find(l => l.id === parseInt(lojasIds[0]));
+      setLojaNomeSelecionada(primeiraLoja?.nome || "");
+      setLojaEmailSelecionada(primeiraLoja?.email || "");
       // Mostrar diálogo de confirmação de email primeiro
       setShowEmailDialog(true);
     },
@@ -240,8 +241,8 @@ export default function RelatorioCompleto() {
   const updatePendentesMutation = trpc.pendentes.updateBatch.useMutation();
 
   const handleNext = () => {
-    if (currentPage === 0 && !lojaId) {
-      toast.error("Por favor selecione uma loja");
+    if (currentPage === 0 && lojasIds.length === 0) {
+      toast.error("Por favor selecione pelo menos uma loja");
       return;
     }
     // Verificar pendentes na página 0
@@ -264,8 +265,8 @@ export default function RelatorioCompleto() {
   };
 
   const handleSubmit = async () => {
-    if (!lojaId) {
-      toast.error("Por favor selecione uma loja");
+    if (lojasIds.length === 0) {
+      toast.error("Por favor selecione pelo menos uma loja");
       return;
     }
 
@@ -292,7 +293,7 @@ export default function RelatorioCompleto() {
       : new Date();
 
     createMutation.mutate({
-      lojaId: Number(lojaId),
+      lojasIds: lojasIds.map(id => Number(id)),
       dataVisita,
       ...formData,
       fotos: fotos.length > 0 ? JSON.stringify(fotos) : undefined,
@@ -306,31 +307,43 @@ export default function RelatorioCompleto() {
         return (
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="loja">Loja *</Label>
-              <Select value={lojaId} onValueChange={setLojaId} required>
-                <SelectTrigger id="loja">
-                  <SelectValue placeholder="Selecione uma loja" />
-                </SelectTrigger>
-                <SelectContent>
-                  {lojas?.map((loja: any) => (
-                    <SelectItem key={loja.id} value={loja.id.toString()}>
-                      {loja.nome}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label htmlFor="loja">Lojas * (pode selecionar várias)</Label>
+              <div className="border rounded-md p-3 space-y-2 max-h-48 overflow-y-auto">
+                {lojas?.map((loja: any) => (
+                  <label key={loja.id} className="flex items-center space-x-2 cursor-pointer hover:bg-accent p-2 rounded">
+                    <input
+                      type="checkbox"
+                      checked={lojasIds.includes(loja.id.toString())}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setLojasIds([...lojasIds, loja.id.toString()]);
+                        } else {
+                          setLojasIds(lojasIds.filter(id => id !== loja.id.toString()));
+                        }
+                      }}
+                      className="rounded border-gray-300"
+                    />
+                    <span className="text-sm">{loja.nome}</span>
+                  </label>
+                ))}
+              </div>
+              {lojasIds.length > 0 && (
+                <p className="text-sm text-muted-foreground">
+                  {lojasIds.length} loja{lojasIds.length > 1 ? 's' : ''} selecionada{lojasIds.length > 1 ? 's' : ''}
+                </p>
+              )}
             </div>
             
             {/* Pendentes da Loja Selecionada */}
-            {lojaId && (
+            {lojasIds.length === 1 && (
               <PendentesLoja
-                lojaId={parseInt(lojaId)}
+                lojaId={parseInt(lojasIds[0])}
                 onPendentesChange={setPendentesExistentes}
               />
             )}
             
             {/* Relatório por Voz */}
-            {lojaId && (
+            {lojasIds.length > 0 && (
               <VoiceRecorder
                 onTranscriptionComplete={handleVoiceTranscription}
                 disabled={createMutation.isPending}

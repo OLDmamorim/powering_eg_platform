@@ -77,6 +77,7 @@ export const relatoriosLivres = mysqlTable("relatorios_livres", {
   dataVisita: timestamp("dataVisita").notNull(),
   descricao: text("descricao").notNull(),
   fotos: text("fotos"), // JSON array de URLs das fotos
+  lojasIds: text("lojasIds"), // JSON array de IDs das lojas quando múltiplas lojas [1,2,3]
   visto: boolean("visto").default(false).notNull(), // Se o admin já viu este relatório
   categoria: varchar("categoria", { length: 100 }), // Categoria atribuída pelo admin
   estadoAcompanhamento: mysqlEnum("estadoAcompanhamento", ["acompanhar", "em_tratamento", "tratado"]), // Estado de acompanhamento
@@ -114,6 +115,7 @@ export const relatoriosCompletos = mysqlTable("relatorios_completos", {
   
   emailEnviado: boolean("emailEnviado").default(false).notNull(),
   fotos: text("fotos"), // JSON array de URLs das fotos
+  lojasIds: text("lojasIds"), // JSON array de IDs das lojas quando múltiplas lojas [1,2,3]
   visto: boolean("visto").default(false).notNull(), // Se o admin já viu este relatório
   categoria: varchar("categoria", { length: 100 }), // Categoria atribuída pelo admin
   estadoAcompanhamento: mysqlEnum("estadoAcompanhamento", ["acompanhar", "em_tratamento", "tratado"]), // Estado de acompanhamento
