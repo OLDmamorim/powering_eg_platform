@@ -165,6 +165,7 @@ export default function RelatorioCompleto() {
           maxWidthOrHeight: 1920,
           useWebWorker: true,
           fileType: 'image/jpeg' as const,
+          initialQuality: 0.8, // Qualidade 80%
         };
         
         const compressedFile = await imageCompression(file, options);
@@ -636,7 +637,7 @@ export default function RelatorioCompleto() {
               />
             </div>
             <p className="text-sm text-muted-foreground">
-              Adicione fotos de evidências da visita (máx. 5MB por foto)
+              Adicione fotos de evidências da visita (comprimidas automaticamente)
             </p>
             
             {fotos.length > 0 && (

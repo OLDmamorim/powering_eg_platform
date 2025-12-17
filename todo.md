@@ -741,4 +741,13 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Filtrar apenas users com role='gestor' (não contar role='admin')
 - [x] Verificar outras queries que possam estar a contar admins como gestores
 - [x] Testar contagem no dashboard (agora mostra 6 gestores)
+- [x] Guardar checkpoint (v5.4.2 - d0941068)
+
+## Funcionalidade v5.5 - Compressão Automática de Fotos
+- [x] Remover limite de 5MB no upload de fotos (texto atualizado)
+- [x] Implementar compressão de imagens no frontend (browser-image-compression já estava instalado)
+- [x] Comprimir para máximo 1920px de largura/altura
+- [x] Qualidade JPEG: 80% (balanço qualidade/tamanho)
+- [x] Mostrar progresso durante compressão (toast automático)
+- [ ] Testar com fotos grandes (10MB+) de telemóvel (requer teste no mobile)
 - [ ] Guardar checkpoint
