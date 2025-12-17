@@ -21,6 +21,7 @@ import { useLocation } from "wouter";
 import { SugestoesModal } from "@/components/SugestoesModal";
 import { PendentesLoja } from "@/components/PendentesLoja";
 import { EmailConfirmDialog } from "@/components/EmailConfirmDialog";
+import imageCompression from 'browser-image-compression';
 
 export default function RelatorioCompleto() {
   const { user } = useAuth();
@@ -123,18 +124,23 @@ export default function RelatorioCompleto() {
 
     try {
       for (const file of Array.from(files)) {
-        if (file.size > 5 * 1024 * 1024) {
-          toast.error(`Ficheiro ${file.name} excede 5MB`);
-          continue;
-        }
-
         if (!file.type.startsWith('image/')) {
           toast.error(`Ficheiro ${file.name} não é uma imagem`);
           continue;
         }
 
+        // Comprimir imagem antes de fazer upload
+        const options = {
+          maxSizeMB: 1,
+          maxWidthOrHeight: 1920,
+          useWebWorker: true,
+          fileType: 'image/jpeg' as const,
+        };
+        
+        const compressedFile = await imageCompression(file, options);
+
         const formData = new FormData();
-        formData.append('file', file);
+        formData.append('file', compressedFile);
 
         const response = await fetch(`${FORGE_API_URL}/storage/upload`, {
           method: 'POST',

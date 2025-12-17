@@ -558,3 +558,11 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Atualizar mutations enviarEmail para buscar e passar fotos
 - [x] Grid responsivo de fotos no email (200px por foto)
 - [x] Fotos só aparecem se o relatório tiver fotos anexadas
+
+## Funcionalidade v4.9.1 - Compressão Automática de Fotos
+- [x] Adicionar biblioteca browser-image-compression ao projeto
+- [x] Implementar função de compressão no RelatorioLivre.tsx
+- [x] Implementar função de compressão no RelatorioCompleto.tsx
+- [x] Configurar: max 1920px largura, max 1MB, formato JPEG
+- [x] Remover validação de 5MB (já não necessária com compressão)
+- [x] Usar Web Worker para não bloquear UI durante compressão
