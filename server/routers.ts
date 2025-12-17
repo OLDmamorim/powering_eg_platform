@@ -1171,7 +1171,7 @@ export const appRouter = router({
   
   // ==================== HISTÓRICO DA LOJA ====================
   lojaHistory: router({
-    generate: gestorProcedure
+    generate: protectedProcedure
       .input(z.object({
         lojaId: z.number(),
       }))

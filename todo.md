@@ -612,3 +612,11 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Analisar tendências e padrões
 - [x] Gerar recomendações prioritárias com justificativa
 - [x] Design visual atrativo com cards coloridos e ícones
+
+## Melhoria v5.2.1 - Histórico da Loja para Admin
+- [x] Adicionar item "Histórico da Loja" no menu do admin
+- [x] Atualizar página para mostrar todas as lojas ao admin (não apenas as do gestor)
+- [x] Admin pode selecionar qualquer loja da rede (9 lojas)
+- [x] Análise baseada em relatórios de todos os gestores
+- [x] Alterar procedure de gestorProcedure para protectedProcedure
+- [x] Item aparece no menu do admin

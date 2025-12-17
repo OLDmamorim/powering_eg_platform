@@ -22,13 +22,15 @@ export default function HistoricoLoja() {
   const [lojaId, setLojaId] = useState("");
   const [historyData, setHistoryData] = useState<any>(null);
 
-  const { data: lojas } = trpc.lojas.getByGestor.useQuery();
+  const { data: lojasGestor } = trpc.lojas.getByGestor.useQuery(undefined, { enabled: user?.role === 'gestor' });
+  const { data: lojasAdmin } = trpc.lojas.list.useQuery(undefined, { enabled: user?.role === 'admin' });
+  const lojas = user?.role === 'admin' ? lojasAdmin : lojasGestor;
   const generateHistoryMutation = trpc.lojaHistory.generate.useQuery(
     { lojaId: parseInt(lojaId) },
     { enabled: false }
   );
 
-  if (user?.role !== "gestor") {
+  if (!user || (user.role !== "gestor" && user.role !== "admin")) {
     setLocation("/dashboard");
     return null;
   }
