@@ -355,6 +355,16 @@ export const appRouter = router({
         // Obter pendentes do relatório
         const pendentes = await db.getPendentesByRelatorio(input.id, 'livre');
         
+        // Parsear fotos do JSON
+        let fotos: string[] = [];
+        if (relatorio.fotos) {
+          try {
+            fotos = JSON.parse(relatorio.fotos);
+          } catch (e) {
+            console.error('Erro ao parsear fotos:', e);
+          }
+        }
+        
         // Gerar HTML do relatório
         const html = gerarHTMLRelatorioLivre({
           lojaNome: loja.nome,
@@ -362,6 +372,7 @@ export const appRouter = router({
           dataVisita: relatorio.dataVisita,
           observacoes: relatorio.descricao || '',
           pendentes: pendentes.map(p => ({ descricao: p.descricao, resolvido: p.resolvido })),
+          fotos: fotos.length > 0 ? fotos : undefined,
         });
         
         // Enviar email
@@ -578,6 +589,16 @@ export const appRouter = router({
         // Obter pendentes
         const pendentes = await db.getPendentesByRelatorio(relatorio.id, 'completo');
         
+        // Parsear fotos do JSON
+        let fotos: string[] = [];
+        if (relatorio.fotos) {
+          try {
+            fotos = JSON.parse(relatorio.fotos);
+          } catch (e) {
+            console.error('Erro ao parsear fotos:', e);
+          }
+        }
+        
         // Gerar HTML do relatório
         const html = gerarHTMLRelatorioCompleto({
           lojaNome: loja.nome,
@@ -587,6 +608,7 @@ export const appRouter = router({
           pontosPositivos: relatorio.pontosPositivos || '',
           pontosNegativos: relatorio.pontosNegativos || '',
           pendentes: pendentes.map(p => ({ descricao: p.descricao, resolvido: p.resolvido })),
+          fotos: fotos.length > 0 ? fotos : undefined,
         });
         
         // Enviar email

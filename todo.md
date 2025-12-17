@@ -549,3 +549,12 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Alterar rodapé do email de relatório completo para mostrar nome do gestor
 - [x] Formato: "Relatório enviado por [Nome do Gestor] via PoweringEG Platform - [Data/Hora]"
 - [x] Aplicado em ambos os templates com uma única edição
+
+## Funcionalidade v4.8.2 - Fotos nos Emails de Relatórios
+- [x] Atualizar template HTML de relatório livre para incluir seção de fotos
+- [x] Atualizar template HTML de relatório completo para incluir seção de fotos
+- [x] Adicionar parâmetro fotos nas funções de geração de HTML
+- [x] Parsear fotos do JSON no backend
+- [x] Atualizar mutations enviarEmail para buscar e passar fotos
+- [x] Grid responsivo de fotos no email (200px por foto)
+- [x] Fotos só aparecem se o relatório tiver fotos anexadas

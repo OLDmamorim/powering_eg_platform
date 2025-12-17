@@ -73,8 +73,9 @@ export function gerarHTMLRelatorioLivre(relatorio: {
   dataVisita: Date;
   observacoes: string;
   pendentes?: Array<{ descricao: string; resolvido: boolean }>;
+  fotos?: string[];
 }): string {
-  const { lojaNome, gestorNome, dataVisita, observacoes, pendentes } = relatorio;
+  const { lojaNome, gestorNome, dataVisita, observacoes, pendentes, fotos } = relatorio;
   
   const dataFormatada = new Date(dataVisita).toLocaleDateString('pt-PT', {
     day: '2-digit',
@@ -101,6 +102,9 @@ export function gerarHTMLRelatorioLivre(relatorio: {
     .pendente { padding: 10px; margin-bottom: 8px; border-radius: 6px; }
     .pendente-ativo { background: #fef3c7; border-left: 4px solid #f59e0b; }
     .pendente-resolvido { background: #d1fae5; border-left: 4px solid #10b981; text-decoration: line-through; }
+    .fotos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
+    .foto-item { border-radius: 8px; overflow: hidden; border: 1px solid #e5e7eb; }
+    .foto-item img { width: 100%; height: auto; display: block; }
     .footer { margin-top: 40px; text-align: center; font-size: 12px; color: #9ca3af; }
   </style>
 </head>
@@ -132,6 +136,19 @@ export function gerarHTMLRelatorioLivre(relatorio: {
   </div>
   ` : ''}
   
+  ${fotos && fotos.length > 0 ? `
+  <div class="section">
+    <div class="section-title">Fotos da Visita</div>
+    <div class="fotos-grid">
+      ${fotos.map(foto => `
+        <div class="foto-item">
+          <img src="${foto}" alt="Foto da visita" />
+        </div>
+      `).join('')}
+    </div>
+  </div>
+  ` : ''}
+  
   <div class="footer">
     Relatório enviado por <strong>${gestorNome}</strong> via PoweringEG Platform<br>
     ${new Date().toLocaleDateString('pt-PT')} às ${new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })}
@@ -158,11 +175,12 @@ export function gerarHTMLRelatorioCompleto(relatorio: {
   pontosPositivos?: string;
   pontosNegativos?: string;
   pendentes?: Array<{ descricao: string; resolvido: boolean }>;
+  fotos?: string[];
 }): string {
   const { 
     lojaNome, gestorNome, dataVisita,
     atendimentoCliente, organizacaoLoja, limpezaGeral, stockProdutos, apresentacaoEquipa,
-    observacoesGerais, pontosPositivos, pontosNegativos, pendentes
+    observacoesGerais, pontosPositivos, pontosNegativos, pendentes, fotos
   } = relatorio;
   
   const dataFormatada = new Date(dataVisita).toLocaleDateString('pt-PT', {
@@ -202,6 +220,9 @@ export function gerarHTMLRelatorioCompleto(relatorio: {
     .pendente { padding: 10px; margin-bottom: 8px; border-radius: 6px; }
     .pendente-ativo { background: #fef3c7; border-left: 4px solid #f59e0b; }
     .pendente-resolvido { background: #d1fae5; border-left: 4px solid #10b981; text-decoration: line-through; }
+    .fotos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
+    .foto-item { border-radius: 8px; overflow: hidden; border: 1px solid #e5e7eb; }
+    .foto-item img { width: 100%; height: auto; display: block; }
     .footer { margin-top: 40px; text-align: center; font-size: 12px; color: #9ca3af; }
   </style>
 </head>
@@ -272,6 +293,19 @@ export function gerarHTMLRelatorioCompleto(relatorio: {
         ${p.descricao}
       </div>
     `).join('')}
+  </div>
+  ` : ''}
+  
+  ${fotos && fotos.length > 0 ? `
+  <div class="section">
+    <div class="section-title">Fotos da Visita</div>
+    <div class="fotos-grid">
+      ${fotos.map(foto => `
+        <div class="foto-item">
+          <img src="${foto}" alt="Foto da visita" />
+        </div>
+      `).join('')}
+    </div>
   </div>
   ` : ''}
   
