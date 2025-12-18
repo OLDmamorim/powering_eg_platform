@@ -1252,6 +1252,14 @@ export const appRouter = router({
         }
         return { success: true };
       }),
+    
+    // Gerar relatório IA estruturado por categorias para reuniões de board
+    gerarRelatorioIA: adminProcedure
+      .mutation(async () => {
+        const { gerarRelatorioIACategorias } = await import('./relatorioCategoriasService');
+        const relatorio = await gerarRelatorioIACategorias();
+        return { relatorio };
+      }),
   }),
   
   // ==================== TRANSCRIÇÃO DE VOZ ====================

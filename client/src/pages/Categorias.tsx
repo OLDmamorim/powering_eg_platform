@@ -40,6 +40,7 @@ import {
 } from "lucide-react";
 import { EstadoAcompanhamentoSelect, EstadoAcompanhamentoBadge } from "@/components/EstadoAcompanhamento";
 import { RelatorioDetalheModal } from "@/components/RelatorioDetalheModal";
+import { RelatorioIACategorias } from "@/components/RelatorioIACategorias";
 
 export default function Categorias() {
   const { user } = useAuth();
@@ -52,6 +53,9 @@ export default function Categorias() {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedRelatorio, setSelectedRelatorio] = useState<{ id: number; tipo: "livre" | "completo" } | null>(null);
   const [exportingCategoria, setExportingCategoria] = useState<string | null>(null);
+  const [generatingRelatorioIA, setGeneratingRelatorioIA] = useState(false);
+  const [relatorioIA, setRelatorioIA] = useState<string | null>(null);
+  const [showRelatorioIA, setShowRelatorioIA] = useState(false);
 
   const utils = trpc.useUtils();
   
@@ -246,14 +250,24 @@ export default function Categorias() {
     <DashboardLayout>
       <div className="space-y-6">
         {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
-            <Tag className="h-8 w-8 text-primary" />
-            Categorias
-          </h1>
-          <p className="text-muted-foreground">
-            Gerir e acompanhar relatórios organizados por categoria
-          </p>
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
+              <Tag className="h-8 w-8 text-primary" />
+              Categorias
+            </h1>
+            <p className="text-muted-foreground">
+              Gerir e acompanhar relatórios organizados por categoria
+            </p>
+          </div>
+          <Button
+            onClick={() => setShowRelatorioIA(true)}
+            className="gap-2"
+            size="lg"
+          >
+            <BarChart3 className="h-5 w-5" />
+            Gerar Relatório IA para Board
+          </Button>
         </div>
 
         {/* Estatísticas */}
@@ -575,6 +589,11 @@ export default function Categorias() {
         onOpenChange={setModalOpen}
         relatorioId={selectedRelatorio?.id || null}
         tipoRelatorio={selectedRelatorio?.tipo || null}
+      />
+      
+      <RelatorioIACategorias
+        open={showRelatorioIA}
+        onOpenChange={setShowRelatorioIA}
       />
     </DashboardLayout>
   );

@@ -813,5 +813,22 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Remover fotos inline do template HTML
 - [x] Adicionar mensagem informativa sobre anexos
 - [x] Aplicar em Relatório Livre e Relatório Completo
-- [ ] Testar envio de email com múltiplas fotos
+- [ ] Testar envio de email com múltiplas fotos (requer teste real)
+- [x] Guardar checkpoint (v5.7.4 - f90ccbe7)
+- [x] Atualizar número de versão no DashboardLayout.tsx
+
+## Funcionalidade v5.8 - Relatório IA por Categorias para Board
+- [x] Adicionar botão "Gerar Relatório IA" na página Categorias
+- [x] Criar endpoint backend para gerar relatório por categorias (relatorioCategoriasService.ts)
+- [x] Agregar pendentes por categoria e status (acompanhar, tratado, etc.)
+- [x] Calcular métricas: total por categoria, taxa resolução
+- [x] Gerar análise IA estruturada:
+  - Resumo executivo por categoria
+  - Categorias críticas (mais pendentes ativos)
+  - Tendências (aumento/diminuição vs período anterior)
+  - Comparação entre zonas por categoria
+  - Recomendações prioritárias para board
+- [x] Interface para visualizar relatório gerado (Dialog com Streamdown)
+- [x] Opção de descarregar Markdown
+- [x] Criar testes unitários (2 testes passaram em 34s)
 - [ ] Guardar checkpoint
