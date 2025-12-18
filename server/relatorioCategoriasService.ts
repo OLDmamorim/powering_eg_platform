@@ -1,7 +1,27 @@
 import * as db from "./db";
 import { invokeLLM } from "./_core/llm";
 
-export async function gerarRelatorioIACategorias(userId: number): Promise<string> {
+interface DadosGraficos {
+  distribuicaoStatus: Array<{
+    categoria: string;
+    acompanhar: number;
+    emTratamento: number;
+    tratado: number;
+  }>;
+  taxaResolucao: Array<{
+    categoria: string;
+    taxa: number;
+  }>;
+  topCategoriasCriticas: Array<{
+    categoria: string;
+    total: number;
+  }>;
+}
+
+export async function gerarRelatorioIACategorias(userId: number): Promise<{
+  relatorio: string;
+  dadosGraficos: DadosGraficos;
+}> {
   // Obter todos os relatórios agrupados por categoria
   const relatoriosPorCategoria = await db.getRelatoriosPorCategoria();
   const estatisticas = await db.getEstatisticasCategorias();
@@ -123,12 +143,35 @@ Liste 5-7 ações concretas priorizadas por impacto:
   const content = response.choices[0].message.content;
   const relatorio = typeof content === 'string' ? content : "Erro ao gerar relatório";
   
+  // Preparar dados para gráficos
+  const dadosGraficos: DadosGraficos = {
+    distribuicaoStatus: dadosParaIA.map(cat => ({
+      categoria: cat.categoria,
+      acompanhar: cat.contadores.acompanhar,
+      emTratamento: cat.contadores.em_tratamento,
+      tratado: cat.contadores.tratado,
+    })),
+    taxaResolucao: dadosParaIA
+      .map(cat => ({
+        categoria: cat.categoria,
+        taxa: cat.taxaResolucao,
+      }))
+      .sort((a, b) => a.taxa - b.taxa), // Ordenar por taxa crescente
+    topCategoriasCriticas: dadosParaIA
+      .map(cat => ({
+        categoria: cat.categoria,
+        total: cat.contadores.total,
+      }))
+      .sort((a, b) => b.total - a.total) // Ordenar por total decrescente
+      .slice(0, 5), // Top 5
+  };
+  
   // Salvar relatório no histórico
   await db.salvarRelatorioIACategoria({
     conteudo: relatorio,
     geradoPor: userId,
-    versao: '5.9',
+    versao: '5.10',
   });
   
-  return relatorio;
+  return { relatorio, dadosGraficos };
 }

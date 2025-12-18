@@ -843,4 +843,17 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Dialog de visualização para relatórios históricos
 - [x] Expandir/colapsar lista (mostrar 3 por padrão)
 - [x] Criar testes unitários (2 testes passaram em 12.5s)
+- [x] Guardar checkpoint (v5.9 - 7758366a)
+
+## Funcionalidade v5.10 - Gráficos Visuais no Relatório IA por Categorias
+- [x] Modificar endpoint para retornar dados estruturados para gráficos
+- [x] Calcular dados: distribuição status, taxa resolução, top 5 críticas
+- [x] Instalar react-chartjs-2 e chart.js
+- [x] Criar componente GraficosRelatorioIA.tsx com Chart.js
+- [x] Gráfico 1: Distribuição de status por categoria (barras empilhadas)
+- [x] Gráfico 2: Taxa de resolução por categoria (barras horizontais com cores)
+- [x] Gráfico 3: Top 5 categorias críticas (barras)
+- [x] Integrar gráficos no dialog RelatorioIACategorias com Tabs
+- [x] Tabs: Gráficos (padrão) e Análise IA
+- [x] Criar testes unitários (4 testes)
 - [ ] Guardar checkpoint

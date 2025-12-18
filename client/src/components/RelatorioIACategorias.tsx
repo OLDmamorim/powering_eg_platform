@@ -5,6 +5,8 @@ import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Loader2, Download, BarChart3 } from "lucide-react";
 import { Streamdown } from "streamdown";
+import { GraficosRelatorioIA } from "@/components/GraficosRelatorioIA";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface RelatorioIACategoriasProps {
   open: boolean;
@@ -13,11 +15,13 @@ interface RelatorioIACategoriasProps {
 
 export function RelatorioIACategorias({ open, onOpenChange }: RelatorioIACategoriasProps) {
   const [relatorioIA, setRelatorioIA] = useState<string | null>(null);
+  const [dadosGraficos, setDadosGraficos] = useState<any>(null);
   const [isGenerating, setIsGenerating] = useState(false);
 
   const generateRelatorioMutation = trpc.categorizacao.gerarRelatorioIA.useMutation({
     onSuccess: (data) => {
       setRelatorioIA(data.relatorio);
+      setDadosGraficos(data.dadosGraficos);
       setIsGenerating(false);
       toast.success("Relatório IA gerado com sucesso!");
     },
@@ -52,6 +56,7 @@ export function RelatorioIACategorias({ open, onOpenChange }: RelatorioIACategor
 
   const handleClose = () => {
     setRelatorioIA(null);
+    setDadosGraficos(null);
     setIsGenerating(false);
     onOpenChange(false);
   };
@@ -76,7 +81,7 @@ export function RelatorioIACategorias({ open, onOpenChange }: RelatorioIACategor
               Isto pode demorar alguns segundos
             </p>
           </div>
-        ) : relatorioIA ? (
+        ) : relatorioIA && dadosGraficos ? (
           <div className="space-y-4">
             <div className="flex justify-end gap-2">
               <Button onClick={handleDownload} variant="outline" className="gap-2">
@@ -84,9 +89,23 @@ export function RelatorioIACategorias({ open, onOpenChange }: RelatorioIACategor
                 Descarregar Markdown
               </Button>
             </div>
-            <div className="prose prose-sm max-w-none dark:prose-invert">
-              <Streamdown>{relatorioIA}</Streamdown>
-            </div>
+            
+            <Tabs defaultValue="graficos" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="graficos">Gráficos</TabsTrigger>
+                <TabsTrigger value="texto">Análise IA</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="graficos" className="mt-4">
+                <GraficosRelatorioIA dados={dadosGraficos} />
+              </TabsContent>
+              
+              <TabsContent value="texto" className="mt-4">
+                <div className="prose prose-sm max-w-none dark:prose-invert">
+                  <Streamdown>{relatorioIA}</Streamdown>
+                </div>
+              </TabsContent>
+            </Tabs>
           </div>
         ) : (
           <div className="text-center py-12 text-muted-foreground">

@@ -1257,8 +1257,8 @@ export const appRouter = router({
     gerarRelatorioIA: adminProcedure
       .mutation(async ({ ctx }) => {
         const { gerarRelatorioIACategorias } = await import('./relatorioCategoriasService');
-        const relatorio = await gerarRelatorioIACategorias(ctx.user.id);
-        return { relatorio };
+        const resultado = await gerarRelatorioIACategorias(ctx.user.id);
+        return resultado;
       }),
     
     // Listar histórico de relatórios IA gerados
