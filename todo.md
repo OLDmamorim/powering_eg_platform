@@ -856,4 +856,13 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Integrar gráficos no dialog RelatorioIACategorias com Tabs
 - [x] Tabs: Gráficos (padrão) e Análise IA
 - [x] Criar testes unitários (4 testes)
+- [x] Guardar checkpoint (v5.10 - adff0927)
+
+## Funcionalidade v5.11 - Visualização Completa de Pendentes Gerados por IA
+- [x] Criar componente Dialog para visualizar pendente completo (VisualizarPendente.tsx)
+- [x] Mostrar texto completo do pendente
+- [x] Adicionar botão de editar com modo edição inline
+- [x] Tornar pendentes clicáveis com ícone Eye
+- [x] Aplicar em RelatorioLivre.tsx
+- [x] Testar visualização (status OK, sem erros TypeScript)
 - [ ] Guardar checkpoint

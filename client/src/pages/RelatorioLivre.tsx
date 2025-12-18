@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { trpc } from "@/lib/trpc";
-import { Plus, Save, X, Image, Upload, Loader2 } from "lucide-react";
+import { Plus, Save, X, Image, Upload, Loader2, Eye } from "lucide-react";
 import { useState, useRef } from "react";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
@@ -21,6 +21,7 @@ import { SugestoesModal } from "@/components/SugestoesModal";
 import { PendentesLoja } from "@/components/PendentesLoja";
 import { EmailConfirmDialog } from "@/components/EmailConfirmDialog";
 import { VoiceRecorder } from "@/components/VoiceRecorder";
+import { VisualizarPendente } from "@/components/VisualizarPendente";
 import imageCompression from 'browser-image-compression';
 
 export default function RelatorioLivre() {
@@ -42,6 +43,7 @@ export default function RelatorioLivre() {
   const [lojaEmailSelecionada, setLojaEmailSelecionada] = useState<string>("");
   const [pendentesExistentes, setPendentesExistentes] = useState<{id: number; status: "resolvido" | "continua" | null}[]>([]);
   const [dataHoraPersonalizada, setDataHoraPersonalizada] = useState<string>("");
+  const [pendenteVisualizando, setPendenteVisualizando] = useState<number | null>(null);
 
   const utils = trpc.useUtils();
   const { data: lojas } = trpc.lojas.getByGestor.useQuery();
@@ -453,7 +455,19 @@ export default function RelatorioLivre() {
                           handlePendenteChange(index, e.target.value)
                         }
                         placeholder={`Pendente ${index + 1}`}
+                        className="cursor-text"
                       />
+                      {pendente && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setPendenteVisualizando(index)}
+                          title="Visualizar pendente completo"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      )}
                       {pendentes.length > 1 && (
                         <Button
                           type="button"
@@ -512,6 +526,23 @@ export default function RelatorioLivre() {
         tipoRelatorio="livre"
         lojaNome={lojaNomeSelecionada}
       />
+
+      {/* Dialog de Visualização de Pendente */}
+      {pendenteVisualizando !== null && (
+        <VisualizarPendente
+          open={pendenteVisualizando !== null}
+          onOpenChange={(open) => {
+            if (!open) setPendenteVisualizando(null);
+          }}
+          pendente={{
+            descricao: pendentes[pendenteVisualizando] || "",
+            categoria: categoria,
+          }}
+          onSave={(novaDescricao) => {
+            handlePendenteChange(pendenteVisualizando, novaDescricao);
+          }}
+        />
+      )}
     </DashboardLayout>
   );
 }
