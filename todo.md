@@ -831,4 +831,16 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Interface para visualizar relatório gerado (Dialog com Streamdown)
 - [x] Opção de descarregar Markdown
 - [x] Criar testes unitários (2 testes passaram em 34s)
+- [x] Guardar checkpoint (v5.8 - 71b682c1)
+
+## Funcionalidade v5.9 - Histórico de Relatórios IA por Categorias
+- [x] Criar tabela no banco de dados para armazenar relatórios IA gerados
+- [x] Campos: id, conteudo, createdAt, geradoPor (userId), versao
+- [x] Salvar relatório IA automaticamente após geração
+- [x] Criar endpoint para listar histórico (ordenado por data DESC)
+- [x] Adicionar secção "Histórico de Relatórios IA" na página Categorias
+- [x] Mostrar lista com: data, gerado por, botão "Visualizar"
+- [x] Dialog de visualização para relatórios históricos
+- [x] Expandir/colapsar lista (mostrar 3 por padrão)
+- [x] Criar testes unitários (2 testes passaram em 12.5s)
 - [ ] Guardar checkpoint

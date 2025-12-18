@@ -280,3 +280,18 @@ export const planosVisitas = mysqlTable("planos_visitas", {
 
 export type PlanoVisitas = typeof planosVisitas.$inferSelect;
 export type InsertPlanoVisitas = typeof planosVisitas.$inferInsert;
+
+/**
+ * Histórico de Relatórios IA por Categorias
+ * Armazena relatórios IA gerados para consulta futura e comparação temporal
+ */
+export const relatoriosIACategorias = mysqlTable("relatoriosIACategorias", {
+  id: int("id").autoincrement().primaryKey(),
+  conteudo: text("conteudo").notNull(), // Conteúdo markdown do relatório IA
+  geradoPor: int("geradoPor").notNull(), // FK para users.id (quem gerou)
+  versao: varchar("versao", { length: 20 }).default("5.8").notNull(), // Versão da plataforma
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type RelatorioIACategoria = typeof relatoriosIACategorias.$inferSelect;
+export type InsertRelatorioIACategoria = typeof relatoriosIACategorias.$inferInsert;

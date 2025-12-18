@@ -1,7 +1,7 @@
 import * as db from "./db";
 import { invokeLLM } from "./_core/llm";
 
-export async function gerarRelatorioIACategorias(): Promise<string> {
+export async function gerarRelatorioIACategorias(userId: number): Promise<string> {
   // Obter todos os relatórios agrupados por categoria
   const relatoriosPorCategoria = await db.getRelatoriosPorCategoria();
   const estatisticas = await db.getEstatisticasCategorias();
@@ -122,5 +122,13 @@ Liste 5-7 ações concretas priorizadas por impacto:
 
   const content = response.choices[0].message.content;
   const relatorio = typeof content === 'string' ? content : "Erro ao gerar relatório";
+  
+  // Salvar relatório no histórico
+  await db.salvarRelatorioIACategoria({
+    conteudo: relatorio,
+    geradoPor: userId,
+    versao: '5.9',
+  });
+  
   return relatorio;
 }

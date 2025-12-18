@@ -1255,10 +1255,17 @@ export const appRouter = router({
     
     // Gerar relatório IA estruturado por categorias para reuniões de board
     gerarRelatorioIA: adminProcedure
-      .mutation(async () => {
+      .mutation(async ({ ctx }) => {
         const { gerarRelatorioIACategorias } = await import('./relatorioCategoriasService');
-        const relatorio = await gerarRelatorioIACategorias();
+        const relatorio = await gerarRelatorioIACategorias(ctx.user.id);
         return { relatorio };
+      }),
+    
+    // Listar histórico de relatórios IA gerados
+    getHistoricoRelatoriosIA: adminProcedure
+      .query(async () => {
+        const historico = await db.getHistoricoRelatoriosIA();
+        return historico;
       }),
   }),
   

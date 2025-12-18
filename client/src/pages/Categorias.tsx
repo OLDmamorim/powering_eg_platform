@@ -41,6 +41,7 @@ import {
 import { EstadoAcompanhamentoSelect, EstadoAcompanhamentoBadge } from "@/components/EstadoAcompanhamento";
 import { RelatorioDetalheModal } from "@/components/RelatorioDetalheModal";
 import { RelatorioIACategorias } from "@/components/RelatorioIACategorias";
+import { HistoricoRelatoriosIA } from "@/components/HistoricoRelatoriosIA";
 
 export default function Categorias() {
   const { user } = useAuth();
@@ -270,6 +271,9 @@ export default function Categorias() {
           </Button>
         </div>
 
+        {/* Histórico de Relatórios IA */}
+        <HistoricoRelatoriosIA />
+        
         {/* Estatísticas */}
         {estatisticas && (
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
