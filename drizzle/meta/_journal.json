@@ -141,6 +141,13 @@
       "when": 1766054081030,
       "tag": "0019_fine_firebrand",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "5",
+      "when": 1766148771351,
+      "tag": "0020_wise_lady_mastermind",
+      "breakpoints": true
     }
   ]
 }

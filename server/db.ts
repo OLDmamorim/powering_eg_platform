@@ -2039,3 +2039,177 @@ export async function getRelatorioIACategoriaById(id: number): Promise<Relatorio
   
   return relatorio || null;
 }
+
+
+/**
+ * Calcular progresso de relatórios de uma loja no mês atual
+ */
+export async function calcularProgressoRelatorios(lojaId: number): Promise<{
+  minimoLivres: number;
+  minimoCompletos: number;
+  realizadosLivres: number;
+  realizadosCompletos: number;
+  percentualLivres: number;
+  percentualCompletos: number;
+  emAtrasoLivres: boolean;
+  emAtrasoCompletos: boolean;
+}> {
+  const db = await getDb();
+  if (!db) {
+    return {
+      minimoLivres: 0,
+      minimoCompletos: 0,
+      realizadosLivres: 0,
+      realizadosCompletos: 0,
+      percentualLivres: 0,
+      percentualCompletos: 0,
+      emAtrasoLivres: false,
+      emAtrasoCompletos: false,
+    };
+  }
+
+  // Buscar configuração da loja
+  const [loja] = await db.select().from(lojas).where(eq(lojas.id, lojaId)).limit(1);
+  if (!loja) {
+    throw new Error(`Loja ${lojaId} não encontrada`);
+  }
+
+  const minimoLivres = loja.minimoRelatoriosLivres || 0;
+  const minimoCompletos = loja.minimoRelatoriosCompletos || 0;
+
+  // Calcular início e fim do mês atual
+  const hoje = new Date();
+  const inicioMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+  const fimMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0, 23, 59, 59);
+
+  // Contar relatórios livres do mês
+  const [resultLivres] = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(relatoriosLivres)
+    .where(
+      and(
+        eq(relatoriosLivres.lojaId, lojaId),
+        sql`${relatoriosLivres.createdAt} >= ${inicioMes}`,
+        sql`${relatoriosLivres.createdAt} <= ${fimMes}`
+      )
+    );
+
+  // Contar relatórios completos do mês
+  const [resultCompletos] = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(relatoriosCompletos)
+    .where(
+      and(
+        eq(relatoriosCompletos.lojaId, lojaId),
+        sql`${relatoriosCompletos.createdAt} >= ${inicioMes}`,
+        sql`${relatoriosCompletos.createdAt} <= ${fimMes}`
+      )
+    );
+
+  const realizadosLivres = Number(resultLivres?.count || 0);
+  const realizadosCompletos = Number(resultCompletos?.count || 0);
+
+  // Calcular percentuais
+  const percentualLivres = minimoLivres > 0 ? Math.round((realizadosLivres / minimoLivres) * 100) : 100;
+  const percentualCompletos = minimoCompletos > 0 ? Math.round((realizadosCompletos / minimoCompletos) * 100) : 100;
+
+  // Verificar se está em atraso (metade do mês passou e não atingiu proporcional)
+  const diaAtual = hoje.getDate();
+  const diasNoMes = fimMes.getDate();
+  const metadeMes = diasNoMes / 2;
+  
+  const proporcionalLivres = Math.ceil((minimoLivres * diaAtual) / diasNoMes);
+  const proporcionalCompletos = Math.ceil((minimoCompletos * diaAtual) / diasNoMes);
+
+  const emAtrasoLivres = minimoLivres > 0 && diaAtual >= metadeMes && realizadosLivres < proporcionalLivres;
+  const emAtrasoCompletos = minimoCompletos > 0 && diaAtual >= metadeMes && realizadosCompletos < proporcionalCompletos;
+
+  return {
+    minimoLivres,
+    minimoCompletos,
+    realizadosLivres,
+    realizadosCompletos,
+    percentualLivres,
+    percentualCompletos,
+    emAtrasoLivres,
+    emAtrasoCompletos,
+  };
+}
+
+/**
+ * Verificar lojas em atraso para um gestor específico
+ */
+export async function verificarAtrasosGestor(gestorId: number): Promise<Array<{
+  lojaId: number;
+  lojaNome: string;
+  minimoLivres: number;
+  minimoCompletos: number;
+  realizadosLivres: number;
+  realizadosCompletos: number;
+  emAtrasoLivres: boolean;
+  emAtrasoCompletos: boolean;
+}>> {
+  const db = await getDb();
+  if (!db) return [];
+
+  // Buscar lojas do gestor
+  const lojasGestor = await getLojasByGestorId(gestorId);
+
+  const resultado = [];
+
+  for (const loja of lojasGestor) {
+    const progresso = await calcularProgressoRelatorios(loja.id);
+    
+    // Incluir apenas lojas com atraso
+    if (progresso.emAtrasoLivres || progresso.emAtrasoCompletos) {
+      resultado.push({
+        lojaId: loja.id,
+        lojaNome: loja.nome,
+        minimoLivres: progresso.minimoLivres,
+        minimoCompletos: progresso.minimoCompletos,
+        realizadosLivres: progresso.realizadosLivres,
+        realizadosCompletos: progresso.realizadosCompletos,
+        emAtrasoLivres: progresso.emAtrasoLivres,
+        emAtrasoCompletos: progresso.emAtrasoCompletos,
+      });
+    }
+  }
+
+  return resultado;
+}
+
+/**
+ * Obter progresso de todas as lojas de um gestor
+ */
+export async function getProgressoTodasLojasGestor(gestorId: number): Promise<Array<{
+  lojaId: number;
+  lojaNome: string;
+  minimoLivres: number;
+  minimoCompletos: number;
+  realizadosLivres: number;
+  realizadosCompletos: number;
+  percentualLivres: number;
+  percentualCompletos: number;
+  emAtrasoLivres: boolean;
+  emAtrasoCompletos: boolean;
+}>> {
+  const db = await getDb();
+  if (!db) return [];
+
+  // Buscar lojas do gestor
+  const lojasGestor = await getLojasByGestorId(gestorId);
+
+  const resultado = [];
+
+  for (const loja of lojasGestor) {
+    const progresso = await calcularProgressoRelatorios(loja.id);
+    
+    resultado.push({
+      lojaId: loja.id,
+      lojaNome: loja.nome,
+      ...progresso,
+    });
+  }
+
+  return resultado;
+}

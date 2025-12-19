@@ -120,6 +120,10 @@ export default function Dashboard() {
   const { data: relatoriosCompletos } = trpc.relatoriosCompletos.list.useQuery();
   const { data: pendentes } = trpc.pendentes.list.useQuery();
   
+  // Progresso e atrasos de relatórios (apenas para gestor)
+  const { data: progressoLojas } = trpc.lojas.getProgressoGestor.useQuery(undefined, { enabled: isGestor });
+  const { data: atrasosLojas } = trpc.lojas.getAtrasosGestor.useQuery(undefined, { enabled: isGestor });
+  
   // Verificar se precisa mostrar lembrete de relatório IA
   const { data: reminderCheck } = trpc.gestores.checkReminder.useQuery(undefined, { enabled: isGestor });
   const dismissReminderMutation = trpc.gestores.dismissReminder.useMutation();
@@ -322,12 +326,47 @@ export default function Dashboard() {
         </div>
 
         {pendentesAntigos.length > 0 && (
-          <Alert variant="destructive" className="border-orange-500 bg-orange-50 text-orange-900">
+          <Alert variant="destructive" className="border-orange-500 bg-orange-50 text-orange-900 dark:bg-orange-950/30 dark:text-orange-200">
             <AlertTriangle className="h-4 w-4" />
             <AlertTitle>Atenção: Pendentes por resolver</AlertTitle>
             <AlertDescription className="flex items-center justify-between">
               <span>Existem <strong>{pendentesAntigos.length}</strong> pendente(s) há mais de 7 dias sem resolução.</span>
-              <Button variant="outline" size="sm" onClick={() => setLocation('/pendentes')} className="border-orange-500 text-orange-700 hover:bg-orange-100">Ver Pendentes</Button>
+              <Button variant="outline" size="sm" onClick={() => setLocation('/pendentes')} className="border-orange-500 text-orange-700 hover:bg-orange-100 dark:text-orange-200 dark:hover:bg-orange-950">Ver Pendentes</Button>
+            </AlertDescription>
+          </Alert>
+        )}
+        
+        {isGestor && atrasosLojas && atrasosLojas.length > 0 && (
+          <Alert className="border-red-500 bg-red-50 text-red-900 dark:bg-red-950/30 dark:text-red-200">
+            <Clock className="h-4 w-4" />
+            <AlertTitle>Atenção: Lojas com relatórios em atraso</AlertTitle>
+            <AlertDescription className="space-y-2">
+              <p className="mb-3">As seguintes lojas estão abaixo do mínimo mensal esperado:</p>
+              <div className="space-y-2">
+                {atrasosLojas.map((atraso) => (
+                  <div key={atraso.lojaId} className="flex items-center justify-between bg-white dark:bg-red-950/50 p-2 rounded border border-red-200 dark:border-red-800">
+                    <div>
+                      <p className="font-semibold">{atraso.lojaNome}</p>
+                      <div className="text-xs space-y-0.5 mt-1">
+                        {atraso.emAtrasoLivres && (
+                          <p>📄 Livres: {atraso.realizadosLivres}/{atraso.minimoLivres} (mínimo mensal)</p>
+                        )}
+                        {atraso.emAtrasoCompletos && (
+                          <p>📊 Completos: {atraso.realizadosCompletos}/{atraso.minimoCompletos} (mínimo mensal)</p>
+                        )}
+                      </div>
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => setLocation('/relatorios')}
+                      className="border-red-500 text-red-700 hover:bg-red-100 dark:text-red-200 dark:hover:bg-red-950"
+                    >
+                      Criar Relatório
+                    </Button>
+                  </div>
+                ))}
+              </div>
             </AlertDescription>
           </Alert>
         )}
@@ -476,6 +515,69 @@ export default function Dashboard() {
               )}
             </CardContent>
           </Card>
+          
+          {isGestor && progressoLojas && progressoLojas.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2"><CheckCircle className="h-4 w-4" />Progresso de Relatórios</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <p className="text-sm text-muted-foreground mb-3">Mínimos mensais por loja</p>
+                  {progressoLojas.map((progresso) => (
+                    <div key={progresso.lojaId} className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium">{progresso.lojaNome}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {progresso.minimoLivres === 0 && progresso.minimoCompletos === 0 ? 'Sem mínimo' : ''}
+                        </span>
+                      </div>
+                      
+                      {progresso.minimoLivres > 0 && (
+                        <div className="space-y-1">
+                          <div className="flex justify-between text-xs">
+                            <span>Livres: {progresso.realizadosLivres}/{progresso.minimoLivres}</span>
+                            <span className={progresso.emAtrasoLivres ? 'text-red-600 font-semibold' : 'text-green-600'}>
+                              {progresso.percentualLivres}%
+                            </span>
+                          </div>
+                          <div className="h-2 bg-muted rounded-full overflow-hidden">
+                            <div 
+                              className={`h-full rounded-full transition-all ${
+                                progresso.emAtrasoLivres ? 'bg-red-500' : 
+                                progresso.percentualLivres >= 100 ? 'bg-green-500' : 'bg-yellow-500'
+                              }`}
+                              style={{ width: `${Math.min(progresso.percentualLivres, 100)}%` }}
+                            />
+                          </div>
+                        </div>
+                      )}
+                      
+                      {progresso.minimoCompletos > 0 && (
+                        <div className="space-y-1">
+                          <div className="flex justify-between text-xs">
+                            <span>Completos: {progresso.realizadosCompletos}/{progresso.minimoCompletos}</span>
+                            <span className={progresso.emAtrasoCompletos ? 'text-red-600 font-semibold' : 'text-green-600'}>
+                              {progresso.percentualCompletos}%
+                            </span>
+                          </div>
+                          <div className="h-2 bg-muted rounded-full overflow-hidden">
+                            <div 
+                              className={`h-full rounded-full transition-all ${
+                                progresso.emAtrasoCompletos ? 'bg-red-500' : 
+                                progresso.percentualCompletos >= 100 ? 'bg-green-500' : 'bg-yellow-500'
+                              }`}
+                              style={{ width: `${Math.min(progresso.percentualCompletos, 100)}%` }}
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
 
 {/* Seção de Previsões e Feed de Atividades - Apenas Admin */}

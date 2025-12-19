@@ -33,6 +33,8 @@ export const lojas = mysqlTable("lojas", {
   nome: varchar("nome", { length: 255 }).notNull(),
   contacto: varchar("contacto", { length: 50 }),
   email: varchar("email", { length: 320 }),
+  minimoRelatoriosLivres: int("minimoRelatoriosLivres").default(0).notNull(), // Mínimo mensal de relatórios livres (0 = sem mínimo)
+  minimoRelatoriosCompletos: int("minimoRelatoriosCompletos").default(0).notNull(), // Mínimo mensal de relatórios completos (0 = sem mínimo)
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

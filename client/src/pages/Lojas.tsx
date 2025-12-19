@@ -36,6 +36,8 @@ export default function Lojas() {
   const [formData, setFormData] = useState({
     nome: "",
     email: "",
+    minimoRelatoriosLivres: 0,
+    minimoRelatoriosCompletos: 0,
   });
   const [importFile, setImportFile] = useState<File | null>(null);
   const [importPreview, setImportPreview] = useState<any[]>([]);
@@ -117,6 +119,8 @@ export default function Lojas() {
     setFormData({
       nome: "",
       email: "",
+      minimoRelatoriosLivres: 0,
+      minimoRelatoriosCompletos: 0,
     });
     setEditingLoja(null);
   };
@@ -127,6 +131,8 @@ export default function Lojas() {
       setFormData({
         nome: loja.nome,
         email: loja.email || "",
+        minimoRelatoriosLivres: loja.minimoRelatoriosLivres || 0,
+        minimoRelatoriosCompletos: loja.minimoRelatoriosCompletos || 0,
       });
     } else {
       resetForm();
@@ -320,6 +326,34 @@ export default function Lojas() {
                     setFormData({ ...formData, email: e.target.value })
                   }
                 />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="minimoLivres">Mínimo Mensal de Relatórios Livres</Label>
+                <Input
+                  id="minimoLivres"
+                  type="number"
+                  min="0"
+                  value={formData.minimoRelatoriosLivres}
+                  onChange={(e) =>
+                    setFormData({ ...formData, minimoRelatoriosLivres: parseInt(e.target.value) || 0 })
+                  }
+                />
+                <p className="text-xs text-muted-foreground">0 = sem mínimo obrigatório</p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="minimoCompletos">Mínimo Mensal de Relatórios Completos</Label>
+                <Input
+                  id="minimoCompletos"
+                  type="number"
+                  min="0"
+                  value={formData.minimoRelatoriosCompletos}
+                  onChange={(e) =>
+                    setFormData({ ...formData, minimoRelatoriosCompletos: parseInt(e.target.value) || 0 })
+                  }
+                />
+                <p className="text-xs text-muted-foreground">0 = sem mínimo obrigatório</p>
               </div>
             </div>
             <DialogFooter>

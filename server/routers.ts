@@ -91,6 +91,8 @@ export const appRouter = router({
         email: z.string().email().optional(),
         latitude: z.string().optional(),
         longitude: z.string().optional(),
+        minimoRelatoriosLivres: z.number().min(0).optional(),
+        minimoRelatoriosCompletos: z.number().min(0).optional(),
       }))
       .mutation(async ({ input }) => {
         const { id, ...data } = input;
@@ -193,6 +195,24 @@ export const appRouter = router({
         }
         
         return resultados;
+      }),
+    
+    getProgresso: protectedProcedure
+      .input(z.object({ lojaId: z.number() }))
+      .query(async ({ input }) => {
+        return await db.calcularProgressoRelatorios(input.lojaId);
+      }),
+    
+    getProgressoGestor: gestorProcedure
+      .query(async ({ ctx }) => {
+        if (!ctx.gestor) return [];
+        return await db.getProgressoTodasLojasGestor(ctx.gestor.id);
+      }),
+    
+    getAtrasosGestor: gestorProcedure
+      .query(async ({ ctx }) => {
+        if (!ctx.gestor) return [];
+        return await db.verificarAtrasosGestor(ctx.gestor.id);
       }),
   }),
 

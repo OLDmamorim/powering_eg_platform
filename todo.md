@@ -905,3 +905,14 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Envolver HistoricoRelatoriosIA.tsx com DashboardLayout
 - [x] Envolver ComparacaoRelatoriosIA.tsx com DashboardLayout
 - [x] Testar navegação entre páginas
+
+## Funcionalidade v5.17 - Periodicidade Mínima de Relatórios
+- [x] Adicionar campos minimoRelatoriosLivres e minimoRelatoriosCompletos ao schema lojas
+- [x] Migrar schema com db:push
+- [x] Criar função calcularProgressoRelatorios() no backend
+- [x] Criar função verificarAtrasos() para detectar lojas em atraso
+- [x] Atualizar UI de edição de loja (admin) com campos de mínimos
+- [x] Criar card de progresso no dashboard do gestor
+- [x] Implementar banner de alertas no topo quando há atrasos
+- [x] Lógica: alertar quando metade do mês passou sem atingir proporcional
+- [x] Testar cenários: sem mínimo (0), com mínimo, em dia, em atraso
