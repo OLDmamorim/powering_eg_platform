@@ -891,3 +891,12 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Destacar visualmente diferenças entre períodos (cores diferentes nos headers)
 - [x] Botão para exportar comparação para PDF
 - [x] Testar funcionalidade completa
+
+## Funcionalidade v5.15 - Marcadores de Destaque na Comparação
+- [x] Adicionar botão "Adicionar Marcador" em cada relatório
+- [x] Implementar campo de texto para nota/comentário do marcador
+- [x] Sistema de cores para categorizar marcadores (importante, atenção, positivo, negativo)
+- [x] Lista de marcadores criados abaixo de cada relatório
+- [x] Persistir marcadores no localStorage por sessão
+- [x] Botão para limpar todos os marcadores
+- [x] Testar funcionalidade completa

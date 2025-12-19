@@ -1,17 +1,32 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeftRight, Download, Calendar } from "lucide-react";
+import { ArrowLeftRight, Download, Calendar, Highlighter, Trash2, Plus } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import { Streamdown } from "streamdown";
 import jsPDF from "jspdf";
 import { toast } from "sonner";
 
+interface Marcador {
+  id: string;
+  texto: string;
+  nota: string;
+  cor: string;
+  timestamp: number;
+}
+
 export default function ComparacaoRelatoriosIA() {
   const [relatorio1Id, setRelatorio1Id] = useState<string>("");
   const [relatorio2Id, setRelatorio2Id] = useState<string>("");
+  const [marcadores1, setMarcadores1] = useState<Marcador[]>([]);
+  const [marcadores2, setMarcadores2] = useState<Marcador[]>([]);
+  const [novaMarca1, setNovaMarca1] = useState("");
+  const [novaMarca2, setNovaMarca2] = useState("");
+  const [corSelecionada, setCorSelecionada] = useState("yellow");
 
   const { data: relatorios, isLoading } = trpc.relatoriosIA.getHistorico.useQuery();
   const { data: relatorio1 } = trpc.relatoriosIA.getById.useQuery(
@@ -24,6 +39,74 @@ export default function ComparacaoRelatoriosIA() {
   );
 
   const podeComparar = relatorio1 && relatorio2;
+
+  // Persistir marcadores no localStorage
+  useEffect(() => {
+    if (relatorio1Id && relatorio2Id) {
+      const key = `marcadores_${relatorio1Id}_${relatorio2Id}`;
+      const saved = localStorage.getItem(key);
+      if (saved) {
+        const { m1, m2 } = JSON.parse(saved);
+        setMarcadores1(m1 || []);
+        setMarcadores2(m2 || []);
+      }
+    }
+  }, [relatorio1Id, relatorio2Id]);
+
+  useEffect(() => {
+    if (relatorio1Id && relatorio2Id) {
+      const key = `marcadores_${relatorio1Id}_${relatorio2Id}`;
+      localStorage.setItem(key, JSON.stringify({ m1: marcadores1, m2: marcadores2 }));
+    }
+  }, [marcadores1, marcadores2, relatorio1Id, relatorio2Id]);
+
+  const adicionarMarcador = (lado: 1 | 2) => {
+    const texto = lado === 1 ? novaMarca1 : novaMarca2;
+    if (!texto.trim()) {
+      toast.error("Digite uma nota para o marcador");
+      return;
+    }
+
+    const novoMarcador: Marcador = {
+      id: Date.now().toString(),
+      texto: texto.trim(),
+      nota: texto.trim(),
+      cor: corSelecionada,
+      timestamp: Date.now(),
+    };
+
+    if (lado === 1) {
+      setMarcadores1([...marcadores1, novoMarcador]);
+      setNovaMarca1("");
+    } else {
+      setMarcadores2([...marcadores2, novoMarcador]);
+      setNovaMarca2("");
+    }
+
+    toast.success("Marcador adicionado!");
+  };
+
+  const removerMarcador = (lado: 1 | 2, id: string) => {
+    if (lado === 1) {
+      setMarcadores1(marcadores1.filter(m => m.id !== id));
+    } else {
+      setMarcadores2(marcadores2.filter(m => m.id !== id));
+    }
+    toast.success("Marcador removido");
+  };
+
+  const limparMarcadores = () => {
+    setMarcadores1([]);
+    setMarcadores2([]);
+    toast.success("Todos os marcadores foram removidos");
+  };
+
+  const cores = [
+    { valor: "yellow", label: "Importante", classe: "bg-yellow-200 dark:bg-yellow-900" },
+    { valor: "red", label: "Aten\u00e7\u00e3o", classe: "bg-red-200 dark:bg-red-900" },
+    { valor: "green", label: "Positivo", classe: "bg-green-200 dark:bg-green-900" },
+    { valor: "blue", label: "Negativo", classe: "bg-blue-200 dark:bg-blue-900" },
+  ];
 
   const downloadComparacaoPDF = () => {
     if (!relatorio1 || !relatorio2) return;
@@ -180,11 +263,30 @@ export default function ComparacaoRelatoriosIA() {
           </div>
 
           {podeComparar && (
-            <div className="mt-4 flex gap-2">
+            <div className="mt-4 flex flex-wrap gap-2">
               <Button onClick={downloadComparacaoPDF} variant="outline">
                 <Download className="h-4 w-4 mr-2" />
-                Exportar Comparação PDF
+                Exportar Compara\u00e7\u00e3o PDF
               </Button>
+              {(marcadores1.length > 0 || marcadores2.length > 0) && (
+                <Button onClick={limparMarcadores} variant="outline" className="text-destructive">
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Limpar Marcadores
+                </Button>
+              )}
+              <div className="flex gap-2 items-center ml-auto">
+                <span className="text-sm text-muted-foreground">Cor:</span>
+                {cores.map(cor => (
+                  <button
+                    key={cor.valor}
+                    onClick={() => setCorSelecionada(cor.valor)}
+                    className={`w-6 h-6 rounded-full border-2 ${
+                      corSelecionada === cor.valor ? "border-foreground" : "border-transparent"
+                    } ${cor.classe}`}
+                    title={cor.label}
+                  />
+                ))}
+              </div>
             </div>
           )}
         </CardContent>
@@ -210,9 +312,63 @@ export default function ComparacaoRelatoriosIA() {
                 })}
               </CardDescription>
             </CardHeader>
-            <CardContent className="pt-6">
+            <CardContent className="pt-6 space-y-4">
               <div className="prose prose-sm max-w-none dark:prose-invert">
                 <Streamdown>{relatorio1.conteudo}</Streamdown>
+              </div>
+              
+              {/* Marcadores Relatório 1 */}
+              <div className="border-t pt-4 space-y-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <Highlighter className="h-4 w-4" />
+                  <span className="text-sm font-medium">Marcadores ({marcadores1.length})</span>
+                </div>
+                
+                <div className="flex gap-2">
+                  <Textarea
+                    placeholder="Adicione uma nota ou comentário..."
+                    value={novaMarca1}
+                    onChange={(e) => setNovaMarca1(e.target.value)}
+                    className="flex-1"
+                    rows={2}
+                  />
+                  <Button
+                    onClick={() => adicionarMarcador(1)}
+                    size="sm"
+                    className="self-start"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+                
+                {marcadores1.length > 0 && (
+                  <div className="space-y-2">
+                    {marcadores1.map((marcador) => {
+                      const corInfo = cores.find(c => c.valor === marcador.cor);
+                      return (
+                        <div
+                          key={marcador.id}
+                          className={`p-3 rounded-lg ${corInfo?.classe} flex items-start justify-between gap-2`}
+                        >
+                          <div className="flex-1">
+                            <p className="text-sm">{marcador.nota}</p>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {new Date(marcador.timestamp).toLocaleString("pt-PT")}
+                            </p>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removerMarcador(1, marcador.id)}
+                            className="h-6 w-6 p-0"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -234,9 +390,63 @@ export default function ComparacaoRelatoriosIA() {
                 })}
               </CardDescription>
             </CardHeader>
-            <CardContent className="pt-6">
+            <CardContent className="pt-6 space-y-4">
               <div className="prose prose-sm max-w-none dark:prose-invert">
                 <Streamdown>{relatorio2.conteudo}</Streamdown>
+              </div>
+              
+              {/* Marcadores Relatório 2 */}
+              <div className="border-t pt-4 space-y-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <Highlighter className="h-4 w-4" />
+                  <span className="text-sm font-medium">Marcadores ({marcadores2.length})</span>
+                </div>
+                
+                <div className="flex gap-2">
+                  <Textarea
+                    placeholder="Adicione uma nota ou comentário..."
+                    value={novaMarca2}
+                    onChange={(e) => setNovaMarca2(e.target.value)}
+                    className="flex-1"
+                    rows={2}
+                  />
+                  <Button
+                    onClick={() => adicionarMarcador(2)}
+                    size="sm"
+                    className="self-start"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+                
+                {marcadores2.length > 0 && (
+                  <div className="space-y-2">
+                    {marcadores2.map((marcador) => {
+                      const corInfo = cores.find(c => c.valor === marcador.cor);
+                      return (
+                        <div
+                          key={marcador.id}
+                          className={`p-3 rounded-lg ${corInfo?.classe} flex items-start justify-between gap-2`}
+                        >
+                          <div className="flex-1">
+                            <p className="text-sm">{marcador.nota}</p>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {new Date(marcador.timestamp).toLocaleString("pt-PT")}
+                            </p>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removerMarcador(2, marcador.id)}
+                            className="h-6 w-6 p-0"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
