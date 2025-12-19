@@ -1,0 +1,9 @@
+{
+  "query": "UPDATE users SET name = 'Mauro Furtado', email = 'mfurtado@expressglass.pt' WHERE id = 2 AND role = 'admin'",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute UPDATE users SET name = 'Mauro Furtado', email = 'mfurtado@expressglass.pt' WHERE id = 2 AND role = 'admin'",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 600
+}

@@ -1,0 +1,24 @@
+{
+  "query": "SELECT id, name, email, role, openId FROM users WHERE role = 'admin' ORDER BY id",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT id, name, email, role, openId FROM users WHERE role = 'admin' ORDER BY id",
+  "rows": [
+    {
+      "id": "1",
+      "name": "Marco Amorim",
+      "email": "mramorim78@gmail.com",
+      "role": "admin",
+      "openId": "JwvyMVKfrKUJQ7cLCJGEkL"
+    },
+    {
+      "id": "240006",
+      "name": "Mauro Furtado",
+      "email": "mfurtado@expressglass.pt",
+      "role": "admin",
+      "openId": "pending-mamorim@expressglass.pt-1765759519555"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\temail\trole\topenId\n1\tMarco Amorim\tmramorim78@gmail.com\tadmin\tJwvyMVKfrKUJQ7cLCJGEkL\n240006\tMauro Furtado\tmfurtado@expressglass.pt\tadmin\tpending-mamorim@expressglass.pt-1765759519555\n",
+  "stderr": "",
+  "execution_time_ms": 50
+}

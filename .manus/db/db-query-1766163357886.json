@@ -1,0 +1,98 @@
+{
+  "query": "SELECT id, name, email, role, createdAt, lastSignedIn FROM users ORDER BY id",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT id, name, email, role, createdAt, lastSignedIn FROM users ORDER BY id",
+  "rows": [
+    {
+      "id": "1",
+      "name": "Marco Amorim",
+      "email": "mramorim78@gmail.com",
+      "role": "admin",
+      "createdAt": "2025-12-12 17:44:16",
+      "lastSignedIn": "2025-12-19 16:50:42"
+    },
+    {
+      "id": "240006",
+      "name": "Mauro Furtado",
+      "email": "mfurtado@expressglass.pt",
+      "role": "admin",
+      "createdAt": "2025-12-15 00:45:19",
+      "lastSignedIn": "2025-12-15 00:45:19"
+    },
+    {
+      "id": "240121",
+      "name": "Fábio Dias",
+      "email": "fdias@expressglass.pt",
+      "role": "gestor",
+      "createdAt": "2025-12-15 01:06:45",
+      "lastSignedIn": "2025-12-19 13:59:32"
+    },
+    {
+      "id": "300014",
+      "name": "Test Promote User",
+      "email": "testpromote@test.com",
+      "role": "gestor",
+      "createdAt": "2025-12-15 02:15:08",
+      "lastSignedIn": "2025-12-15 02:15:08"
+    },
+    {
+      "id": "420030",
+      "name": "Marco Amorim ",
+      "email": "mamorim@expressglass.pt",
+      "role": "gestor",
+      "createdAt": "2025-12-15 12:34:33",
+      "lastSignedIn": "2025-12-19 16:49:06"
+    },
+    {
+      "id": "1410004",
+      "name": "Gestor Teste Data/Hora",
+      "email": "gestor.datahora@test.com",
+      "role": "gestor",
+      "createdAt": "2025-12-16 19:08:48",
+      "lastSignedIn": "2025-12-16 19:08:48"
+    },
+    {
+      "id": "2010096",
+      "name": "Gestor Multi-Lojas Test",
+      "email": "gestor.multilojas@test.com",
+      "role": "gestor",
+      "createdAt": "2025-12-17 12:32:27",
+      "lastSignedIn": "2025-12-17 12:32:27"
+    },
+    {
+      "id": "2160121",
+      "name": "Marco Vilar",
+      "email": "mvilar@expressglass.pt",
+      "role": "gestor",
+      "createdAt": "2025-12-17 22:44:52",
+      "lastSignedIn": "2025-12-17 22:44:52"
+    },
+    {
+      "id": "2160125",
+      "name": "Mónica Correira",
+      "email": "mcorreia@expressglass.pt",
+      "role": "gestor",
+      "createdAt": "2025-12-17 22:45:15",
+      "lastSignedIn": "2025-12-17 22:45:15"
+    },
+    {
+      "id": "2160129",
+      "name": "Carlos Eduardo",
+      "email": "carlos.eduardo@expressglass.pt",
+      "role": "gestor",
+      "createdAt": "2025-12-17 22:45:43",
+      "lastSignedIn": "2025-12-17 22:45:43"
+    },
+    {
+      "id": "2160144",
+      "name": "Rui Adrião",
+      "email": "rui.adriao@expressglass.pt",
+      "role": "gestor",
+      "createdAt": "2025-12-17 22:47:30",
+      "lastSignedIn": "2025-12-17 22:47:30"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\temail\trole\tcreatedAt\tlastSignedIn\n1\tMarco Amorim\tmramorim78@gmail.com\tadmin\t2025-12-12 17:44:16\t2025-12-19 16:50:42\n240006\tMauro Furtado\tmfurtado@expressglass.pt\tadmin\t2025-12-15 00:45:19\t2025-12-15 00:45:19\n240121\tFábio Dias\tfdias@expressglass.pt\tgestor\t2025-12-15 01:06:45\t2025-12-19 13:59:32\n300014\tTest Promote User\ttestpromote@test.com\tgestor\t2025-12-15 02:15:08\t2025-12-15 02:15:08\n420030\tMarco Amorim \tmamorim@expressglass.pt\tgestor\t2025-12-15 12:34:33\t2025-12-19 16:49:06\n1410004\tGestor Teste Data/Hora\tgestor.datahora@test.com\tgestor\t2025-12-16 19:08:48\t2025-12-16 19:08:48\n2010096\tGestor Multi-Lojas Test\tgestor.multilojas@test.com\tgestor\t2025-12-17 12:32:27\t2025-12-17 12:32:27\n2160121\tMarco Vilar\tmvilar@expressglass.pt\tgestor\t2025-12-17 22:44:52\t2025-12-17 22:44:52\n2160125\tMónica Correira\tmcorreia@expressglass.pt\tgestor\t2025-12-17 22:45:15\t2025-12-17 22:45:15\n2160129\tCarlos Eduardo\tcarlos.eduardo@expressglass.pt\tgestor\t2025-12-17 22:45:43\t2025-12-17 22:45:43\n2160144\tRui Adrião\trui.adriao@expressglass.pt\tgestor\t2025-12-17 22:47:30\t2025-12-17 22:47:30\n",
+  "stderr": "",
+  "execution_time_ms": 64
+}

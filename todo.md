@@ -923,3 +923,14 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Aplicar style maxWidth: 100% para forçar largura completa
 - [x] Corrigir HistoricoRelatoriosIA.tsx e ComparacaoRelatoriosIA.tsx
 - [x] Testar responsividade em diferentes resoluções
+
+## Funcionalidade v5.19 - Gestão de Utilizadores (Admin)
+- [x] Criar procedure getAllUsers() no backend
+- [x] Criar procedure updateUser() para editar nome, email, role
+- [x] Criar página GestaoUtilizadores.tsx para admin
+- [x] Tabela com todos os utilizadores (id, nome, email, role, data criação)
+- [x] Modal/formulário de edição de utilizador
+- [x] Dropdown para alterar role (user, gestor, admin)
+- [x] Adicionar link no menu lateral do admin
+- [x] Interface pronta para atualizar email do Mauro Furtado
+- [x] Testar funcionalidade completa

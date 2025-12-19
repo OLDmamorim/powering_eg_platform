@@ -1,0 +1,76 @@
+{
+  "query": "SELECT id, name, email, role FROM users ORDER BY id LIMIT 20",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT id, name, email, role FROM users ORDER BY id LIMIT 20",
+  "rows": [
+    {
+      "id": "1",
+      "name": "Marco Amorim",
+      "email": "mramorim78@gmail.com",
+      "role": "admin"
+    },
+    {
+      "id": "240006",
+      "name": "Mauro Furtado",
+      "email": "mfurtado@expressglass.pt",
+      "role": "admin"
+    },
+    {
+      "id": "240121",
+      "name": "Fábio Dias",
+      "email": "fdias@expressglass.pt",
+      "role": "gestor"
+    },
+    {
+      "id": "300014",
+      "name": "Test Promote User",
+      "email": "testpromote@test.com",
+      "role": "gestor"
+    },
+    {
+      "id": "420030",
+      "name": "Marco Amorim ",
+      "email": "mamorim@expressglass.pt",
+      "role": "gestor"
+    },
+    {
+      "id": "1410004",
+      "name": "Gestor Teste Data/Hora",
+      "email": "gestor.datahora@test.com",
+      "role": "gestor"
+    },
+    {
+      "id": "2010096",
+      "name": "Gestor Multi-Lojas Test",
+      "email": "gestor.multilojas@test.com",
+      "role": "gestor"
+    },
+    {
+      "id": "2160121",
+      "name": "Marco Vilar",
+      "email": "mvilar@expressglass.pt",
+      "role": "gestor"
+    },
+    {
+      "id": "2160125",
+      "name": "Mónica Correira",
+      "email": "mcorreia@expressglass.pt",
+      "role": "gestor"
+    },
+    {
+      "id": "2160129",
+      "name": "Carlos Eduardo",
+      "email": "carlos.eduardo@expressglass.pt",
+      "role": "gestor"
+    },
+    {
+      "id": "2160144",
+      "name": "Rui Adrião",
+      "email": "rui.adriao@expressglass.pt",
+      "role": "gestor"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\temail\trole\n1\tMarco Amorim\tmramorim78@gmail.com\tadmin\n240006\tMauro Furtado\tmfurtado@expressglass.pt\tadmin\n240121\tFábio Dias\tfdias@expressglass.pt\tgestor\n300014\tTest Promote User\ttestpromote@test.com\tgestor\n420030\tMarco Amorim \tmamorim@expressglass.pt\tgestor\n1410004\tGestor Teste Data/Hora\tgestor.datahora@test.com\tgestor\n2010096\tGestor Multi-Lojas Test\tgestor.multilojas@test.com\tgestor\n2160121\tMarco Vilar\tmvilar@expressglass.pt\tgestor\n2160125\tMónica Correira\tmcorreia@expressglass.pt\tgestor\n2160129\tCarlos Eduardo\tcarlos.eduardo@expressglass.pt\tgestor\n2160144\tRui Adrião\trui.adriao@expressglass.pt\tgestor\n",
+  "stderr": "",
+  "execution_time_ms": 73
+}

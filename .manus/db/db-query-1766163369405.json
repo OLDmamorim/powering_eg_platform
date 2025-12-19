@@ -1,0 +1,32 @@
+{
+  "query": "SELECT * FROM users WHERE role = 'admin' ORDER BY id",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT * FROM users WHERE role = 'admin' ORDER BY id",
+  "rows": [
+    {
+      "id": "1",
+      "openId": "JwvyMVKfrKUJQ7cLCJGEkL",
+      "name": "Marco Amorim",
+      "email": "mramorim78@gmail.com",
+      "loginMethod": "google",
+      "role": "admin",
+      "createdAt": "2025-12-12 17:44:16",
+      "updatedAt": "2025-12-19 16:50:41",
+      "lastSignedIn": "2025-12-19 16:50:42"
+    },
+    {
+      "id": "240006",
+      "openId": "pending-mamorim@expressglass.pt-1765759519555",
+      "name": "Mauro Furtado",
+      "email": "mfurtado@expressglass.pt",
+      "loginMethod": "pending",
+      "role": "admin",
+      "createdAt": "2025-12-15 00:45:19",
+      "updatedAt": "2025-12-19 16:50:15",
+      "lastSignedIn": "2025-12-15 00:45:19"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\topenId\tname\temail\tloginMethod\trole\tcreatedAt\tupdatedAt\tlastSignedIn\n1\tJwvyMVKfrKUJQ7cLCJGEkL\tMarco Amorim\tmramorim78@gmail.com\tgoogle\tadmin\t2025-12-12 17:44:16\t2025-12-19 16:50:41\t2025-12-19 16:50:42\n240006\tpending-mamorim@expressglass.pt-1765759519555\tMauro Furtado\tmfurtado@expressglass.pt\tpending\tadmin\t2025-12-15 00:45:19\t2025-12-19 16:50:15\t2025-12-15 00:45:19\n",
+  "stderr": "",
+  "execution_time_ms": 64
+}

@@ -25,6 +25,7 @@ import HistoricoLoja from "./pages/HistoricoLoja";
 import ResumoGlobal from "./pages/ResumoGlobal";
 import HistoricoRelatoriosIA from "./pages/HistoricoRelatoriosIA";
 import ComparacaoRelatoriosIA from "./pages/ComparacaoRelatoriosIA";
+import GestaoUtilizadores from "./pages/GestaoUtilizadores";
 
 
 function Router() {
@@ -38,6 +39,7 @@ function Router() {
       {/* Admin routes */}
       <Route path={"/lojas"} component={Lojas} />
       <Route path={"/gestores"} component={Gestores} />
+      <Route path={"/utilizadores"} component={GestaoUtilizadores} />
       <Route path={"/relatorios"} component={Relatorios} />
       <Route path={"/pendentes-admin"} component={PendentesAdmin} />
       

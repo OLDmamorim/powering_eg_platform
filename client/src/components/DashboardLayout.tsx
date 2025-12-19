@@ -33,7 +33,7 @@ import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { KeyboardShortcutsHelp } from "@/components/KeyboardShortcutsHelp";
 import { Button } from "./ui/button";
 
-import { Building2, ClipboardList, FileText, ListTodo, Sparkles, History, Bell, Settings, Tag, BarChart3 } from "lucide-react";
+import { Building2, ClipboardList, FileText, ListTodo, Sparkles, History, Bell, Settings, Tag, BarChart3, UserCog } from "lucide-react";
 
 const getMenuItems = (userRole?: string) => {
   const isAdmin = userRole === "admin";
@@ -43,6 +43,7 @@ const getMenuItems = (userRole?: string) => {
     { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard", show: true, showBadge: false },
     { icon: Building2, label: "Lojas", path: "/lojas", show: isAdmin, showBadge: false },
     { icon: Users, label: "Gestores", path: "/gestores", show: isAdmin, showBadge: false },
+    { icon: UserCog, label: "Utilizadores", path: "/utilizadores", show: isAdmin, showBadge: false },
     { icon: FileText, label: "Relatórios", path: "/relatorios", show: isAdmin, showBadge: false },
     { icon: Building2, label: "Minhas Lojas", path: "/minhas-lojas", show: isGestor, showBadge: false },
     { icon: ClipboardList, label: "Relatório Livre", path: "/relatorio-livre", show: isGestor, showBadge: false },

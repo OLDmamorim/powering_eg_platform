@@ -2213,3 +2213,33 @@ export async function getProgressoTodasLojasGestor(gestorId: number): Promise<Ar
 
   return resultado;
 }
+
+
+/**
+ * Gestão de Utilizadores (Admin)
+ */
+
+// Obter todos os utilizadores com informação completa
+export async function getAllUsers(): Promise<Array<typeof users.$inferSelect>> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.select().from(users).orderBy(users.createdAt);
+}
+
+// Atualizar dados de um utilizador (nome, email, role)
+export async function updateUser(userId: number, data: {
+  name?: string;
+  email?: string;
+  role?: 'user' | 'admin' | 'gestor';
+}): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  
+  await db.update(users)
+    .set({
+      ...data,
+      updatedAt: new Date()
+    })
+    .where(eq(users.id, userId));
+}
