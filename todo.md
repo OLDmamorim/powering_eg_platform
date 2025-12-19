@@ -945,5 +945,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## Bug v5.21 - Lojas Atribuídas Aparecem Disponíveis
 - [x] Identificar componente de atribuição de lojas a gestores
 - [x] Filtrar lojas já atribuídas (gestorId não null) da lista de seleção
-- [x] Testar que loja atribuída não aparece para outros gestores
-- [x] Testar que loja pode ser reatribuída após remover gestor atual
+- [x] BUG CORRIGIDO: gestorId não estava disponível no frontend
+- [x] Modificar getAllLojas() para fazer LEFT JOIN com gestorLojas
+- [x] Retornar gestorId em cada loja (NULL se não atribuída)
+- [x] Testar que filtro funciona corretamente

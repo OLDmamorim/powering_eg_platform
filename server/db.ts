@@ -200,11 +200,28 @@ export async function createLoja(loja: InsertLoja): Promise<Loja> {
   return newLoja[0]!;
 }
 
-export async function getAllLojas(): Promise<Loja[]> {
+export async function getAllLojas() {
   const db = await getDb();
   if (!db) return [];
   
-  return await db.select().from(lojas).orderBy(lojas.nome);
+  // LEFT JOIN com gestorLojas para saber se loja está atribuída
+  const result = await db
+    .select({
+      id: lojas.id,
+      nome: lojas.nome,
+      contacto: lojas.contacto,
+      email: lojas.email,
+      minimoRelatoriosLivres: lojas.minimoRelatoriosLivres,
+      minimoRelatoriosCompletos: lojas.minimoRelatoriosCompletos,
+      createdAt: lojas.createdAt,
+      updatedAt: lojas.updatedAt,
+      gestorId: gestorLojas.gestorId, // NULL se não atribuída
+    })
+    .from(lojas)
+    .leftJoin(gestorLojas, eq(lojas.id, gestorLojas.lojaId))
+    .orderBy(lojas.nome);
+  
+  return result;
 }
 
 export async function getLojaById(id: number): Promise<Loja | undefined> {
