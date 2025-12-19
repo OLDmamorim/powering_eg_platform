@@ -10,6 +10,7 @@ import { useLocation } from "wouter";
 import { Streamdown } from "streamdown";
 import jsPDF from "jspdf";
 import { toast } from "sonner";
+import DashboardLayout from "@/components/DashboardLayout";
 
 export default function HistoricoRelatoriosIA() {
   const [, navigate] = useLocation();
@@ -93,6 +94,7 @@ export default function HistoricoRelatoriosIA() {
   }
 
   return (
+    <DashboardLayout>
     <div className="container py-8">
       <div className="mb-8">
         <div className="flex items-start justify-between">
@@ -239,5 +241,6 @@ export default function HistoricoRelatoriosIA() {
         </p>
       )}
     </div>
+    </DashboardLayout>
   );
 }

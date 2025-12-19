@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Streamdown } from "streamdown";
 import jsPDF from "jspdf";
 import { toast } from "sonner";
+import DashboardLayout from "@/components/DashboardLayout";
 
 interface Marcador {
   id: string;
@@ -202,6 +203,7 @@ export default function ComparacaoRelatoriosIA() {
   }
 
   return (
+    <DashboardLayout>
     <div className="container py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Comparação de Relatórios IA</h1>
@@ -463,5 +465,6 @@ export default function ComparacaoRelatoriosIA() {
         </Card>
       )}
     </div>
+    </DashboardLayout>
   );
 }

@@ -900,3 +900,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Persistir marcadores no localStorage por sessão
 - [x] Botão para limpar todos os marcadores
 - [x] Testar funcionalidade completa
+
+## Bug v5.16 - Páginas IA sem DashboardLayout
+- [x] Envolver HistoricoRelatoriosIA.tsx com DashboardLayout
+- [x] Envolver ComparacaoRelatoriosIA.tsx com DashboardLayout
+- [x] Testar navegação entre páginas
