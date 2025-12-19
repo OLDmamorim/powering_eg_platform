@@ -315,7 +315,7 @@ export default function ComparacaoRelatoriosIA() {
               </CardDescription>
             </CardHeader>
             <CardContent className="pt-6 space-y-4">
-              <div className="prose prose-sm max-w-none dark:prose-invert">
+              <div className="prose prose-sm dark:prose-invert" style={{ maxWidth: '100%' }}>
                 <Streamdown>{relatorio1.conteudo}</Streamdown>
               </div>
               
@@ -393,7 +393,7 @@ export default function ComparacaoRelatoriosIA() {
               </CardDescription>
             </CardHeader>
             <CardContent className="pt-6 space-y-4">
-              <div className="prose prose-sm max-w-none dark:prose-invert">
+              <div className="prose prose-sm dark:prose-invert" style={{ maxWidth: '100%' }}>
                 <Streamdown>{relatorio2.conteudo}</Streamdown>
               </div>
               

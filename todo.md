@@ -916,3 +916,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Implementar banner de alertas no topo quando há atrasos
 - [x] Lógica: alertar quando metade do mês passou sem atingir proporcional
 - [x] Testar cenários: sem mínimo (0), com mínimo, em dia, em atraso
+
+## Bug v5.18 - Layout Relatórios IA Board Pequeno no PC
+- [x] Identificar componente de visualização de relatórios IA board
+- [x] Remover limitação de largura do prose (max-w-none não funcionava)
+- [x] Aplicar style maxWidth: 100% para forçar largura completa
+- [x] Corrigir HistoricoRelatoriosIA.tsx e ComparacaoRelatoriosIA.tsx
+- [x] Testar responsividade em diferentes resoluções

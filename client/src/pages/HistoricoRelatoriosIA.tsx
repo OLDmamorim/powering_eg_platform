@@ -223,8 +223,10 @@ export default function HistoricoRelatoriosIA() {
                 <CollapsibleContent>
                   <CardContent className="pt-0">
                     <div className="border-t pt-4">
-                      <div className="prose prose-sm max-w-none dark:prose-invert">
-                        <Streamdown>{relatorio.conteudo}</Streamdown>
+                      <div className="w-full">
+                        <div className="prose prose-sm dark:prose-invert" style={{ maxWidth: '100%' }}>
+                          <Streamdown>{relatorio.conteudo}</Streamdown>
+                        </div>
                       </div>
                     </div>
                   </CardContent>
