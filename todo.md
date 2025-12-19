@@ -941,3 +941,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar botão "Eliminar" na tabela de utilizadores
 - [x] Dialog de confirmação antes de eliminar
 - [x] Testar funcionalidade completa
+
+## Bug v5.21 - Lojas Atribuídas Aparecem Disponíveis
+- [x] Identificar componente de atribuição de lojas a gestores
+- [x] Filtrar lojas já atribuídas (gestorId não null) da lista de seleção
+- [x] Testar que loja atribuída não aparece para outros gestores
+- [x] Testar que loja pode ser reatribuída após remover gestor atual

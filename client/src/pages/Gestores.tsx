@@ -317,7 +317,12 @@ export default function Gestores() {
           </DialogHeader>
           <div className="space-y-4 py-4 max-h-96 overflow-y-auto">
             {lojas && lojas.length > 0 ? (
-              lojas.map((loja: any) => {
+              lojas
+                .filter((loja: any) => {
+                  // Mostrar loja se: não está atribuída OU está atribuída ao gestor atual
+                  return !loja.gestorId || loja.gestorId === selectedGestor?.id;
+                })
+                .map((loja: any) => {
                 const isAssociated = gestorLojas?.some(
                   (gl: any) => gl.id === loja.id
                 );
