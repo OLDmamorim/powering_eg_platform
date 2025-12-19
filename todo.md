@@ -934,3 +934,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar link no menu lateral do admin
 - [x] Interface pronta para atualizar email do Mauro Furtado
 - [x] Testar funcionalidade completa
+
+## Funcionalidade v5.20 - Eliminar Utilizadores
+- [x] Criar procedure deleteUser() no backend
+- [x] Adicionar mutation delete no router utilizadores
+- [x] Adicionar botão "Eliminar" na tabela de utilizadores
+- [x] Dialog de confirmação antes de eliminar
+- [x] Testar funcionalidade completa

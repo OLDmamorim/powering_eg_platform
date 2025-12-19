@@ -2243,3 +2243,12 @@ export async function updateUser(userId: number, data: {
     })
     .where(eq(users.id, userId));
 }
+
+
+// Eliminar um utilizador
+export async function deleteUser(userId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  
+  await db.delete(users).where(eq(users.id, userId));
+}

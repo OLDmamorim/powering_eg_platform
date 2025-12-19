@@ -7,11 +7,12 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Users, Edit, Shield, UserCog } from "lucide-react";
+import { Users, Edit, Shield, UserCog, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 export default function GestaoUtilizadores() {
   const [editandoUser, setEditandoUser] = useState<any | null>(null);
+  const [eliminandoUser, setEliminandoUser] = useState<any | null>(null);
   const [formData, setFormData] = useState({ name: "", email: "", role: "" });
 
   const { data: utilizadores, isLoading, refetch } = trpc.utilizadores.getAll.useQuery();
@@ -23,6 +24,17 @@ export default function GestaoUtilizadores() {
     },
     onError: (error) => {
       toast.error(`Erro ao atualizar: ${error.message}`);
+    },
+  });
+
+  const deleteMutation = trpc.utilizadores.delete.useMutation({
+    onSuccess: () => {
+      toast.success("Utilizador eliminado com sucesso!");
+      setEliminandoUser(null);
+      refetch();
+    },
+    onError: (error) => {
+      toast.error(`Erro ao eliminar: ${error.message}`);
     },
   });
 
@@ -44,6 +56,11 @@ export default function GestaoUtilizadores() {
       email: formData.email,
       role: formData.role as 'user' | 'admin' | 'gestor',
     });
+  };
+
+  const handleDelete = () => {
+    if (!eliminandoUser) return;
+    deleteMutation.mutate({ userId: eliminandoUser.id });
   };
 
   const getRoleBadge = (role: string) => {
@@ -120,14 +137,25 @@ export default function GestaoUtilizadores() {
                           {new Date(user.lastSignedIn).toLocaleDateString('pt-PT')}
                         </td>
                         <td className="p-3 text-right">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleEdit(user)}
-                          >
-                            <Edit className="h-4 w-4 mr-1" />
-                            Editar
-                          </Button>
+                          <div className="flex gap-2 justify-end">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleEdit(user)}
+                            >
+                              <Edit className="h-4 w-4 mr-1" />
+                              Editar
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setEliminandoUser(user)}
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            >
+                              <Trash2 className="h-4 w-4 mr-1" />
+                              Eliminar
+                            </Button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -200,6 +228,36 @@ export default function GestaoUtilizadores() {
               </Button>
               <Button onClick={handleSave} disabled={updateMutation.isPending}>
                 {updateMutation.isPending ? "A guardar..." : "Guardar Alterações"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dialog de Confirmação de Eliminação */}
+        <Dialog open={!!eliminandoUser} onOpenChange={(open) => !open && setEliminandoUser(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <Trash2 className="h-5 w-5" />
+                Eliminar Utilizador?
+              </DialogTitle>
+              <DialogDescription>
+                Tem a certeza que pretende eliminar permanentemente o utilizador <strong>{eliminandoUser?.name || eliminandoUser?.email || `#${eliminandoUser?.id}`}</strong>?
+                <br />
+                <span className="text-red-600 font-medium">Esta ação não pode ser revertida.</span>
+              </DialogDescription>
+            </DialogHeader>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setEliminandoUser(null)}>
+                Cancelar
+              </Button>
+              <Button 
+                variant="destructive" 
+                onClick={handleDelete} 
+                disabled={deleteMutation.isPending}
+              >
+                {deleteMutation.isPending ? "A eliminar..." : "Eliminar Definitivamente"}
               </Button>
             </DialogFooter>
           </DialogContent>

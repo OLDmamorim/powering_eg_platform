@@ -1452,6 +1452,15 @@ export const appRouter = router({
         await db.updateUser(userId, data);
         return { success: true };
       }),
+
+    delete: adminProcedure
+      .input(z.object({
+        userId: z.number(),
+      }))
+      .mutation(async ({ input }) => {
+        await db.deleteUser(input.userId);
+        return { success: true };
+      }),
   }),
 });
 
