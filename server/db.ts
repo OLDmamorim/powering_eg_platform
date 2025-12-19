@@ -714,11 +714,23 @@ export async function createPendente(pendente: InsertPendente): Promise<Pendente
   return newPendente[0]!;
 }
 
-export async function getAllPendentes(): Promise<Pendente[]> {
+export async function getAllPendentes(): Promise<Array<Pendente & { loja: Loja }>> {
   const db = await getDb();
   if (!db) return [];
   
-  return await db.select().from(pendentes).orderBy(desc(pendentes.createdAt));
+  const result = await db
+    .select({
+      pendente: pendentes,
+      loja: lojas
+    })
+    .from(pendentes)
+    .innerJoin(lojas, eq(pendentes.lojaId, lojas.id))
+    .orderBy(desc(pendentes.createdAt));
+  
+  return result.map(r => ({
+    ...r.pendente,
+    loja: r.loja
+  }));
 }
 
 export async function getPendentesByLojaId(lojaId: number): Promise<Array<Pendente & { loja: Loja }>> {

@@ -865,4 +865,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Tornar pendentes clicáveis com ícone Eye
 - [x] Aplicar em RelatorioLivre.tsx
 - [x] Testar visualização (status OK, sem erros TypeScript)
-- [ ] Guardar checkpoint
+- [x] Guardar checkpoint (v5.11 - eaabd3bf)
+
+## Bug v5.11 - Pendentes Sem Loja (Admin)
+- [x] Investigar por que pendentes aparecem como "Sem loja" para admin
+- [x] Verificar query getPendentes() e joins com tabela lojas
+- [x] Corrigir associação de loja aos pendentes
+- [x] Testar visualização de pendentes no painel admin
