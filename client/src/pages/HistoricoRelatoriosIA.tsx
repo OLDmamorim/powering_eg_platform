@@ -5,12 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown, ChevronUp, Download, Calendar, FileText } from "lucide-react";
+import { ChevronDown, ChevronUp, Download, Calendar, FileText, ArrowLeftRight } from "lucide-react";
+import { useLocation } from "wouter";
 import { Streamdown } from "streamdown";
 import jsPDF from "jspdf";
 import { toast } from "sonner";
 
 export default function HistoricoRelatoriosIA() {
+  const [, navigate] = useLocation();
   const [dataInicio, setDataInicio] = useState("");
   const [dataFim, setDataFim] = useState("");
   const [openCards, setOpenCards] = useState<Record<number, boolean>>({});
@@ -93,10 +95,18 @@ export default function HistoricoRelatoriosIA() {
   return (
     <div className="container py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Histórico de Relatórios IA</h1>
-        <p className="text-muted-foreground">
-          Consulte todos os relatórios IA gerados (semanais, mensais, trimestrais)
-        </p>
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">Histórico de Relatórios IA</h1>
+            <p className="text-muted-foreground">
+              Consulte todos os relatórios IA gerados (semanais, mensais, trimestrais)
+            </p>
+          </div>
+          <Button onClick={() => navigate("/comparacao-relatorios-ia")}>
+            <ArrowLeftRight className="h-4 w-4 mr-2" />
+            Comparar Relatórios
+          </Button>
+        </div>
       </div>
 
       {/* Filtros */}

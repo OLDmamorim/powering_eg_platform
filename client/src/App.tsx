@@ -24,6 +24,7 @@ import PendentesAdmin from "./pages/PendentesAdmin";
 import HistoricoLoja from "./pages/HistoricoLoja";
 import ResumoGlobal from "./pages/ResumoGlobal";
 import HistoricoRelatoriosIA from "./pages/HistoricoRelatoriosIA";
+import ComparacaoRelatoriosIA from "./pages/ComparacaoRelatoriosIA";
 
 
 function Router() {
@@ -50,6 +51,7 @@ function Router() {
       {/* Shared routes */}
       <Route path={"/relatorios-ia"} component={RelatoriosIA} />
       <Route path={"/historico-relatorios-ia"} component={HistoricoRelatoriosIA} />
+      <Route path={"/comparacao-relatorios-ia"} component={ComparacaoRelatoriosIA} />
       <Route path={"/historico-loja"} component={HistoricoLoja} />
       <Route path={"/pendentes"} component={Pendentes} />
       <Route path={"/historico-pontos"} component={HistoricoPontos} />

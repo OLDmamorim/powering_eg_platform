@@ -882,3 +882,12 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Botão de download PDF para cada relatório
 - [x] Adicionar link no menu lateral do gestor
 - [x] Testar funcionalidade completa
+
+## Funcionalidade v5.14 - Comparação de Relatórios IA
+- [x] Adicionar botão "Comparar" na página Histórico IA
+- [x] Criar página ComparacaoRelatoriosIA.tsx
+- [x] Implementar seleção de dois relatórios via dropdown/select
+- [x] Layout lado-a-lado (split view) com scroll sincronizado
+- [x] Destacar visualmente diferenças entre períodos (cores diferentes nos headers)
+- [x] Botão para exportar comparação para PDF
+- [x] Testar funcionalidade completa
