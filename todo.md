@@ -872,3 +872,13 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Verificar query getPendentes() e joins com tabela lojas
 - [x] Corrigir associação de loja aos pendentes
 - [x] Testar visualização de pendentes no painel admin
+
+## Funcionalidade v5.13 - Histórico de Relatórios IA para Gestores
+- [x] Criar procedure getRelatoriosIAByGestor() no backend
+- [x] Filtrar relatórios IA apenas das lojas do gestor
+- [x] Criar página HistoricoRelatoriosIA.tsx para gestores
+- [x] Adicionar filtros: tipo (semanal/mensal/trimestral), período (data início/fim)
+- [x] Cards expansíveis para visualizar conteúdo completo de cada relatório
+- [x] Botão de download PDF para cada relatório
+- [x] Adicionar link no menu lateral do gestor
+- [x] Testar funcionalidade completa

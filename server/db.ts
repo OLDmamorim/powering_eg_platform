@@ -1993,6 +1993,38 @@ export async function getHistoricoRelatoriosIA(): Promise<Array<RelatorioIACateg
 }
 
 /**
+ * Obter histórico de relatórios IA filtrado por gestor
+ * Retorna apenas relatórios gerados pelo gestor especificado
+ */
+export async function getHistoricoRelatoriosIAByGestor(gestorUserId: number): Promise<Array<RelatorioIACategoria & { geradoPorNome: string }>> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const result = await db
+    .select({
+      id: relatoriosIACategorias.id,
+      conteudo: relatoriosIACategorias.conteudo,
+      geradoPor: relatoriosIACategorias.geradoPor,
+      versao: relatoriosIACategorias.versao,
+      createdAt: relatoriosIACategorias.createdAt,
+      geradoPorNome: users.name,
+    })
+    .from(relatoriosIACategorias)
+    .innerJoin(users, eq(relatoriosIACategorias.geradoPor, users.id))
+    .where(eq(relatoriosIACategorias.geradoPor, gestorUserId))
+    .orderBy(desc(relatoriosIACategorias.createdAt));
+  
+  return result.map(r => ({
+    id: r.id,
+    conteudo: r.conteudo,
+    geradoPor: r.geradoPor,
+    versao: r.versao,
+    createdAt: r.createdAt,
+    geradoPorNome: r.geradoPorNome || 'Desconhecido',
+  }));
+}
+
+/**
  * Obter relatório IA por ID
  */
 export async function getRelatorioIACategoriaById(id: number): Promise<RelatorioIACategoria | null> {

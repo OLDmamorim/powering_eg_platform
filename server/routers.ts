@@ -796,6 +796,23 @@ export const appRouter = router({
         const gestorId = ctx.user.role === "admin" ? undefined : ctx.gestor?.id;
         return await gerarRelatorioComIA(input.periodo, gestorId);
       }),
+    
+    getHistorico: protectedProcedure
+      .query(async ({ ctx }) => {
+        if (ctx.user.role === "admin") {
+          // Admin vê todos os relatórios IA
+          return await db.getHistoricoRelatoriosIA();
+        } else {
+          // Gestor vê apenas seus próprios relatórios
+          return await db.getHistoricoRelatoriosIAByGestor(ctx.user.id);
+        }
+      }),
+    
+    getById: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        return await db.getRelatorioIACategoriaById(input.id);
+      }),
   }),
 
   // ==================== DICA IA DASHBOARD ====================
