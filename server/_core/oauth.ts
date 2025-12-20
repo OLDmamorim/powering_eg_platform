@@ -47,12 +47,13 @@ export function registerOAuthRoutes(app: Express) {
       if (existingUserByEmail.openId.startsWith('pending-')) {
         // Primeiro login do user - atualizar openId para o real
         console.log(`[OAuth] Primeiro login de ${userInfo.email} - atualizando openId`);
-        await db.updateUserOpenId(existingUserByEmail.id, userInfo.openId, userInfo.name || existingUserByEmail.name);
+        // Preservar o nome existente na BD (definido quando gestor foi criado)
+        await db.updateUserOpenId(existingUserByEmail.id, userInfo.openId, existingUserByEmail.name || userInfo.name);
       } else if (existingUserByEmail.openId !== userInfo.openId) {
         // OpenId diferente - pode ser login com outro provider
         console.log(`[OAuth] Login com provider diferente para ${userInfo.email}`);
-        // Atualizar para o novo openId (permite trocar de Google para Microsoft, etc.)
-        await db.updateUserOpenId(existingUserByEmail.id, userInfo.openId, userInfo.name || existingUserByEmail.name);
+        // Preservar o nome existente na BD
+        await db.updateUserOpenId(existingUserByEmail.id, userInfo.openId, existingUserByEmail.name || userInfo.name);
       }
 
       // Atualizar lastSignedIn

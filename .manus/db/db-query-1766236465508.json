@@ -1,0 +1,16 @@
+{
+  "query": "SELECT id, name, email, role FROM users WHERE email LIKE '%mamorim%' LIMIT 5",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT id, name, email, role FROM users WHERE email LIKE '%mamorim%' LIMIT 5",
+  "rows": [
+    {
+      "id": "420030",
+      "name": "mamorim",
+      "email": "mamorim@expressglass.pt",
+      "role": "gestor"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\temail\trole\n420030\tmamorim\tmamorim@expressglass.pt\tgestor\n",
+  "stderr": "",
+  "execution_time_ms": 113
+}

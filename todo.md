@@ -999,3 +999,25 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Modificado server/routers.ts - lojas.getByGestor agora retorna getAllLojas() para admin
 - [x] Criar testes unitários (3 testes passaram)
 - [x] Validar que gestor continua vendo apenas suas lojas
+
+## Bug v5.27 - Nome de utilizador exibido incorretamente
+- [ ] Dashboard mostra "mamorim" (parte do email) em vez do nome completo
+- [ ] Investigar de onde vem o nome exibido
+- [ ] Verificar se user.name está correto na base de dados
+- [ ] Corrigir componente que exibe o nome do utilizador
+- [ ] Testar com gestores e admin
+
+## Bug v5.27 - Nome de utilizador exibido incorretamente
+- [x] Dashboard mostra "mamorim" (parte do email) em vez do nome completo do gestor
+- [x] Investigar de onde vem o nome exibido no dashboard
+- [x] Problema identificado: OAuth sobrescreve nome com userInfo.name do provider
+- [x] Corrigido server/_core/oauth.ts para preservar nome existente na BD
+- [x] Agora usa existingUserByEmail.name em vez de userInfo.name
+
+## Bug v5.28 - Admin não consegue selecionar lojas (continuação v5.26)
+- [x] Campo de seleção de lojas aparece vazio
+- [x] Verificar se query getByGestor retorna dados para admin
+- [x] Problema identificado: verificação de ctx.gestor ANTES de verificar role admin
+- [x] Corrigido server/routers.ts - invertida ordem de verificação
+- [x] Admin agora vê todas as lojas antes de verificar ctx.gestor
+- [x] Testes unitários passaram (3 testes)
