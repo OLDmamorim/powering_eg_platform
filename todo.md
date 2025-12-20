@@ -991,3 +991,11 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Mostrar notas do admin na página Meus Relatórios (gestor)
 - [x] Destacar visualmente as notas do admin (fundo roxo)
 - [x] Criar testes unitários (5 testes passaram)
+
+## Bug v5.26 - Admin não consegue selecionar lojas nos formulários de relatórios
+- [x] Investigar query de lojas usada nos formulários (getByGestor)
+- [x] Verificar se admin tem acesso a todas as lojas
+- [x] Corrigir query para retornar todas as lojas quando user é admin
+- [x] Modificado server/routers.ts - lojas.getByGestor agora retorna getAllLojas() para admin
+- [x] Criar testes unitários (3 testes passaram)
+- [x] Validar que gestor continua vendo apenas suas lojas

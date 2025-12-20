@@ -110,6 +110,10 @@ export const appRouter = router({
     
     getByGestor: gestorProcedure.query(async ({ ctx }) => {
       if (!ctx.gestor) return [];
+      // Admin vê todas as lojas, gestor vê apenas as suas
+      if (ctx.user?.role === 'admin') {
+        return await db.getAllLojas();
+      }
       return await db.getLojasByGestorId(ctx.gestor.id);
     }),
     
