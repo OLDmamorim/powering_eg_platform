@@ -117,6 +117,12 @@ export const appRouter = router({
       if (!ctx.gestor) return [];
       return await db.getLojasByGestorId(ctx.gestor.id);
     }),
+
+    contarRelatoriosMesAtual: gestorProcedure
+      .input(z.object({ lojaId: z.number() }))
+      .query(async ({ input }) => {
+        return await db.contarRelatoriosMesAtualPorLoja(input.lojaId);
+      }),
     
     importExcel: adminProcedure
       .input(z.object({

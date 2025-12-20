@@ -5,11 +5,38 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import { trpc } from "@/lib/trpc";
-import { Building2, Mail, MapPin, Phone, Edit, FileText } from "lucide-react";
+import { Building2, Mail, MapPin, Phone, Edit, CheckCircle2, AlertCircle } from "lucide-react";
 import { useLocation } from "wouter";
 import { useState } from "react";
 import { toast } from "sonner";
+
+// Componente para mostrar badge de cumprimento de relatórios
+function BadgeCumprimento({ lojaId, minimo, tipo }: { lojaId: number; minimo: number; tipo: 'livres' | 'completos' }) {
+  const { data: contagem, isLoading } = trpc.lojas.contarRelatoriosMesAtual.useQuery({ lojaId });
+  
+  if (isLoading) {
+    return <span className="text-xs text-muted-foreground">A carregar...</span>;
+  }
+
+  const realizados = tipo === 'livres' ? (contagem?.relatoriosLivres || 0) : (contagem?.relatoriosCompletos || 0);
+  const cumpre = realizados >= minimo;
+
+  return (
+    <Badge 
+      variant={cumpre ? "default" : "destructive"}
+      className="gap-1"
+    >
+      {cumpre ? (
+        <CheckCircle2 className="h-3 w-3" />
+      ) : (
+        <AlertCircle className="h-3 w-3" />
+      )}
+      {realizados}/{minimo}
+    </Badge>
+  );
+}
 
 export default function MinhasLojas() {
   const { user } = useAuth();
@@ -169,25 +196,42 @@ export default function MinhasLojas() {
                     </div>
                   )}
 
-                  {/* Relatórios Mínimos */}
-                  <div className="pt-3 border-t space-y-2">
+                  {/* Relatórios Mínimos com Badges de Cumprimento */}
+                  <div className="pt-3 border-t space-y-3">
                     <div className="text-sm font-medium text-muted-foreground">
                       Relatórios Mínimos Mensais:
                     </div>
+                    
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground">Livres:</span>
-                      <span className="font-semibold text-primary">
-                        {loja.minimoRelatoriosLivres || 0}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-muted-foreground">
+                          {loja.minimoRelatoriosLivres || 0} mínimo
+                        </span>
+                        <BadgeCumprimento 
+                          lojaId={loja.id} 
+                          minimo={loja.minimoRelatoriosLivres || 0}
+                          tipo="livres"
+                        />
+                      </div>
                     </div>
+                    
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground">Completos:</span>
-                      <span className="font-semibold text-primary">
-                        {loja.minimoRelatoriosCompletos || 0}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-muted-foreground">
+                          {loja.minimoRelatoriosCompletos || 0} mínimo
+                        </span>
+                        <BadgeCumprimento 
+                          lojaId={loja.id} 
+                          minimo={loja.minimoRelatoriosCompletos || 0}
+                          tipo="completos"
+                        />
+                      </div>
                     </div>
+                    
                     <p className="text-xs text-muted-foreground italic">
-                      (Apenas admin pode editar)
+                      (Apenas admin pode editar mínimos)
                     </p>
                   </div>
                 </CardContent>

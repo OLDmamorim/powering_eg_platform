@@ -1,4 +1,4 @@
-import { eq, and, desc, sql, inArray } from "drizzle-orm";
+import { eq, and, desc, sql, inArray, gte, lte } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { 
   InsertUser, 
@@ -2300,4 +2300,50 @@ export async function deleteUser(userId: number): Promise<void> {
   if (!db) throw new Error('Database not available');
   
   await db.delete(users).where(eq(users.id, userId));
+}
+
+
+/**
+ * Contar relatórios do mês atual por loja (para indicador de cumprimento de mínimos)
+ */
+export async function contarRelatoriosMesAtualPorLoja(lojaId: number): Promise<{
+  relatoriosLivres: number;
+  relatoriosCompletos: number;
+}> {
+  const db = await getDb();
+  if (!db) return { relatoriosLivres: 0, relatoriosCompletos: 0 };
+
+  // Calcular início e fim do mês atual
+  const agora = new Date();
+  const inicioMes = new Date(agora.getFullYear(), agora.getMonth(), 1);
+  const fimMes = new Date(agora.getFullYear(), agora.getMonth() + 1, 0, 23, 59, 59);
+
+  // Contar relatórios livres do mês (lojaId direto ou em lojasIds JSON)
+  const livres = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(relatoriosLivres)
+    .where(
+      and(
+        sql`(${relatoriosLivres.lojaId} = ${lojaId} OR JSON_CONTAINS(${relatoriosLivres.lojasIds}, CAST(${lojaId} AS JSON)))`,
+        gte(relatoriosLivres.dataVisita, inicioMes),
+        lte(relatoriosLivres.dataVisita, fimMes)
+      )
+    );
+
+  // Contar relatórios completos do mês
+  const completos = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(relatoriosCompletos)
+    .where(
+      and(
+        eq(relatoriosCompletos.lojaId, lojaId),
+        gte(relatoriosCompletos.dataVisita, inicioMes),
+        lte(relatoriosCompletos.dataVisita, fimMes)
+      )
+    );
+
+  return {
+    relatoriosLivres: Number(livres[0]?.count || 0),
+    relatoriosCompletos: Number(completos[0]?.count || 0),
+  };
 }

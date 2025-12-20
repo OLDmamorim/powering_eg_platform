@@ -1040,3 +1040,16 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Permitir editar nome, morada, contacto (gestor)
 - [x] Relatórios mínimos editáveis APENAS por admin (campo read-only para gestor)
 - [x] Admin já tem formulário completo em Lojas.tsx (linhas 332-357)
+
+## Funcionalidade v5.31 - Indicador Visual de Cumprimento de Relatórios Mínimos
+- [x] Criar query para contar relatórios livres do mês atual por loja
+- [x] Criar query para contar relatórios completos do mês atual por loja
+- [x] Criada função contarRelatoriosMesAtualPorLoja em server/db.ts
+- [x] Suporta lojaId direto e lojasIds JSON (múltiplas lojas)
+- [x] Adicionar tRPC procedure lojas.contarRelatoriosMesAtual
+- [x] Adicionar badges verde/vermelho na página MinhasLojas
+- [x] Criado componente BadgeCumprimento com CheckCircle2/AlertCircle
+- [x] Badge verde quando loja cumpre mínimos (≥ mínimo exigido)
+- [x] Badge vermelho quando loja está abaixo do mínimo (< mínimo exigido)
+- [x] Mostrar números: "X/Y" (realizados/mínimo)
+- [x] Criar testes unitários (4 testes passaram)
