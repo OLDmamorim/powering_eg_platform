@@ -25,23 +25,23 @@ export async function gerarResumoGlobal(gestorId: number): Promise<ResumoGlobal>
     const dataInicio = new Date(agora.getFullYear(), agora.getMonth(), 1);
     const dataFim = new Date(agora.getFullYear(), agora.getMonth() + 1, 0, 23, 59, 59);
 
-    // Buscar relatórios livres do mês atual
-    const relatoriosLivres = await db.getAllRelatoriosLivres();
+    // Buscar relatórios livres do mês atual (apenas do gestor)
+    const relatoriosLivres = await db.getRelatoriosLivresByGestorId(gestorId);
     const relatoriosLivresRecentes = relatoriosLivres.filter((r: any) => {
       const dataVisita = new Date(r.dataVisita);
       return dataVisita >= dataInicio && dataVisita <= dataFim;
     });
 
-    // Buscar relatórios completos do mês atual
-    const relatoriosCompletos = await db.getAllRelatoriosCompletos();
+    // Buscar relatórios completos do mês atual (apenas do gestor)
+    const relatoriosCompletos = await db.getRelatoriosCompletosByGestorId(gestorId);
     const relatoriosCompletosRecentes = relatoriosCompletos.filter((r: any) => {
       const dataVisita = new Date(r.dataVisita);
       return dataVisita >= dataInicio && dataVisita <= dataFim;
     });
 
-    // Buscar pendentes
-    const pendentes = await db.getAllPendentes();
-    const pendentesAtivos = pendentes.filter((p: any) => p.status === 'pendente');
+    // Buscar pendentes (apenas do gestor)
+    const pendentes = await db.getPendentesByGestorId(gestorId);
+    const pendentesAtivos = pendentes.filter((p: any) => !p.resolvido);
 
     // Calcular estatísticas
     const totalVisitas = relatoriosLivresRecentes.length + relatoriosCompletosRecentes.length;

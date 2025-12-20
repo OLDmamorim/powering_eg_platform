@@ -2347,3 +2347,37 @@ export async function contarRelatoriosMesAtualPorLoja(lojaId: number): Promise<{
     relatoriosCompletos: Number(completos[0]?.count || 0),
   };
 }
+
+/**
+ * Buscar pendentes das lojas atribuídas a um gestor
+ */
+export async function getPendentesByGestorId(gestorId: number): Promise<Array<Pendente & { loja: Loja }>> {
+  const db = await getDb();
+  if (!db) return [];
+
+  const result = await db
+    .select({
+      id: pendentes.id,
+      lojaId: pendentes.lojaId,
+      relatorioId: pendentes.relatorioId,
+      tipoRelatorio: pendentes.tipoRelatorio,
+      descricao: pendentes.descricao,
+      resolvido: pendentes.resolvido,
+      dataResolucao: pendentes.dataResolucao,
+      dataLimite: pendentes.dataLimite,
+      visto: pendentes.visto,
+      createdAt: pendentes.createdAt,
+      updatedAt: pendentes.updatedAt,
+      loja: lojas,
+    })
+    .from(pendentes)
+    .innerJoin(lojas, eq(pendentes.lojaId, lojas.id))
+    .innerJoin(gestorLojas, eq(lojas.id, gestorLojas.lojaId))
+    .where(eq(gestorLojas.gestorId, gestorId))
+    .orderBy(desc(pendentes.createdAt));
+
+  return result.map((row: any) => ({
+    ...row,
+    loja: row.loja,
+  }));
+}

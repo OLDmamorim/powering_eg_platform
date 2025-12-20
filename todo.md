@@ -1062,3 +1062,14 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Atualizado labels "Últimos 30 dias" para "Este mês"
 - [x] Agora ambos mostram números consistentes (mês atual)
 - [x] Alinhado com sistema de relatórios mínimos mensais
+
+## Bug v5.33 - Discrepância persistente após v5.32
+- [x] Resumo Global mostrava "14 visitas" (todos os gestores)
+- [x] Dashboard mostrava "8 livres + 2 completos = 10" (apenas gestor logado)
+- [x] Pendentes também estavam inconsistentes (0 vs 11)
+- [x] Causa: Dashboard filtra por gestor, Resumo Global contava TODOS os gestores
+- [x] Corrigido resumoGlobalService.ts para usar getRelatoriosLivresByGestorId
+- [x] Corrigido para usar getRelatoriosCompletosByGestorId
+- [x] Criada função getPendentesByGestorId em server/db.ts
+- [x] Corrigido filtro de pendentes ativos (status -> resolvido)
+- [x] Agora todos os números são consistentes entre páginas
