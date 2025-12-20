@@ -1,0 +1,17 @@
+{
+  "query": "SELECT u.id, u.name, u.email, u.openId, g.id as gestor_id FROM users u LEFT JOIN gestores g ON u.id = g.userId WHERE u.email = 'mamorim@expressglass.pt'",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT u.id, u.name, u.email, u.openId, g.id as gestor_id FROM users u LEFT JOIN gestores g ON u.id = g.userId WHERE u.email = 'mamorim@expressglass.pt'",
+  "rows": [
+    {
+      "id": "420030",
+      "name": "mamorim",
+      "email": "mamorim@expressglass.pt",
+      "openId": "M6W777U2ZPR3y5QVg75RaS",
+      "gestor_id": "30001"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\temail\topenId\tgestor_id\n420030\tmamorim\tmamorim@expressglass.pt\tM6W777U2ZPR3y5QVg75RaS\t30001\n",
+  "stderr": "",
+  "execution_time_ms": 81
+}

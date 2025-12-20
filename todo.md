@@ -1021,3 +1021,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Corrigido server/routers.ts - invertida ordem de verificação
 - [x] Admin agora vê todas as lojas antes de verificar ctx.gestor
 - [x] Testes unitários passaram (3 testes)
+
+## Tarefa v5.29 - Restaurar nomes corretos dos gestores na BD
+- [x] Verificar quais users têm nome incorreto (parte do email)
+- [x] Criado script fix-names.mjs para investigar
+- [x] Identificado 1 user afetado: mamorim@expressglass.pt (ID: 420030)
+- [x] Atualizado nome para "Marco Amorim" via SQL
+- [x] Correção do OAuth (v5.27) previne problema em futuros logins
