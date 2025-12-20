@@ -148,6 +148,13 @@
       "when": 1766148771351,
       "tag": "0020_wise_lady_mastermind",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "5",
+      "when": 1766249554961,
+      "tag": "0021_panoramic_hannibal_king",
+      "breakpoints": true
     }
   ]
 }

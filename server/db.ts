@@ -41,7 +41,10 @@ import {
   InsertPlanoVisitas,
   relatoriosIACategorias,
   RelatorioIACategoria,
-  InsertRelatorioIACategoria
+  InsertRelatorioIACategoria,
+  relatoriosIA,
+  RelatorioIA,
+  InsertRelatorioIA
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -2380,4 +2383,119 @@ export async function getPendentesByGestorId(gestorId: number): Promise<Array<Pe
     ...row,
     loja: row.loja,
   }));
+}
+
+
+/**
+ * Criar relatório IA (diário/semanal/mensal/trimestral)
+ */
+export async function createRelatorioIA(data: {
+  periodo: "diario" | "semanal" | "mensal" | "trimestral";
+  conteudo: string; // JSON stringificado da análise
+  geradoPor: number;
+}): Promise<RelatorioIA> {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  
+  const result = await db.insert(relatoriosIA).values({
+    periodo: data.periodo,
+    conteudo: data.conteudo,
+    geradoPor: data.geradoPor,
+  });
+  
+  const insertId = Number(result[0].insertId);
+  if (isNaN(insertId)) {
+    // Fallback: buscar último relatório inserido
+    const [ultimoRelatorio] = await db
+      .select()
+      .from(relatoriosIA)
+      .orderBy(desc(relatoriosIA.id))
+      .limit(1);
+    return ultimoRelatorio!;
+  }
+  
+  const [novoRelatorio] = await db
+    .select()
+    .from(relatoriosIA)
+    .where(eq(relatoriosIA.id, insertId))
+    .limit(1);
+  
+  return novoRelatorio!;
+}
+
+/**
+ * Obter histórico de relatórios IA (ordenado por data DESC)
+ */
+export async function getHistoricoRelatoriosIANormal(): Promise<Array<RelatorioIA & { geradoPorNome: string }>> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const result = await db
+    .select({
+      id: relatoriosIA.id,
+      periodo: relatoriosIA.periodo,
+      conteudo: relatoriosIA.conteudo,
+      geradoPor: relatoriosIA.geradoPor,
+      createdAt: relatoriosIA.createdAt,
+      geradoPorNome: users.name,
+    })
+    .from(relatoriosIA)
+    .innerJoin(users, eq(relatoriosIA.geradoPor, users.id))
+    .orderBy(desc(relatoriosIA.createdAt));
+  
+  return result.map(r => ({
+    id: r.id,
+    periodo: r.periodo,
+    conteudo: r.conteudo,
+    geradoPor: r.geradoPor,
+    createdAt: r.createdAt,
+    geradoPorNome: r.geradoPorNome || 'Desconhecido',
+  }));
+}
+
+/**
+ * Obter histórico de relatórios IA por gestor (ordenado por data DESC)
+ */
+export async function getHistoricoRelatoriosIANormalByGestor(gestorUserId: number): Promise<Array<RelatorioIA & { geradoPorNome: string }>> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const result = await db
+    .select({
+      id: relatoriosIA.id,
+      periodo: relatoriosIA.periodo,
+      conteudo: relatoriosIA.conteudo,
+      geradoPor: relatoriosIA.geradoPor,
+      createdAt: relatoriosIA.createdAt,
+      geradoPorNome: users.name,
+    })
+    .from(relatoriosIA)
+    .innerJoin(users, eq(relatoriosIA.geradoPor, users.id))
+    .where(eq(relatoriosIA.geradoPor, gestorUserId))
+    .orderBy(desc(relatoriosIA.createdAt));
+  
+  return result.map(r => ({
+    id: r.id,
+    periodo: r.periodo,
+    conteudo: r.conteudo,
+    geradoPor: r.geradoPor,
+    createdAt: r.createdAt,
+    geradoPorNome: r.geradoPorNome || 'Desconhecido',
+  }));
+}
+
+/**
+ * Obter relatório IA por ID
+ */
+export async function getRelatorioIAById(id: number): Promise<RelatorioIA | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const [relatorio] = await db
+    .select()
+    .from(relatoriosIA)
+    .where(eq(relatoriosIA.id, id))
+    .limit(1);
+  
+  return relatorio || null;
 }

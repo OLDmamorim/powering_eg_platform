@@ -297,3 +297,18 @@ export const relatoriosIACategorias = mysqlTable("relatoriosIACategorias", {
 
 export type RelatorioIACategoria = typeof relatoriosIACategorias.$inferSelect;
 export type InsertRelatorioIACategoria = typeof relatoriosIACategorias.$inferInsert;
+
+/**
+ * Relatórios IA (Diário/Semanal/Mensal/Trimestral)
+ * Armazena relatórios IA gerados na página "Relatórios IA"
+ */
+export const relatoriosIA = mysqlTable("relatorios_ia", {
+  id: int("id").autoincrement().primaryKey(),
+  periodo: mysqlEnum("periodo", ["diario", "semanal", "mensal", "trimestral"]).notNull(),
+  conteudo: text("conteudo").notNull(), // JSON stringificado da análise IA
+  geradoPor: int("geradoPor").notNull(), // FK para users.id (quem gerou)
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type RelatorioIA = typeof relatoriosIA.$inferSelect;
+export type InsertRelatorioIA = typeof relatoriosIA.$inferInsert;

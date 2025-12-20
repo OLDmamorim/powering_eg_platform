@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,72 @@ import { Streamdown } from "streamdown";
 import jsPDF from "jspdf";
 import { toast } from "sonner";
 import DashboardLayout from "@/components/DashboardLayout";
+
+// Função helper para converter JSON de análise IA para markdown
+function analiseToMarkdown(conteudoJSON: string): string {
+  try {
+    const analise = JSON.parse(conteudoJSON);
+    
+    let markdown = `## 📊 Resumo Geral\n\n${analise.resumo}\n\n`;
+    
+    if (analise.lojaMaisVisitada) {
+      markdown += `### 📈 Loja Mais Visitada\n**${analise.lojaMaisVisitada.nome}** - ${analise.lojaMaisVisitada.visitas} visitas\n\n`;
+    }
+    
+    if (analise.lojaMenosVisitada) {
+      markdown += `### 📉 Loja Menos Visitada\n**${analise.lojaMenosVisitada.nome}** - ${analise.lojaMenosVisitada.visitas} visitas\n\n`;
+    }
+    
+    markdown += `### ✅ Pontos Positivos\n\n`;
+    analise.pontosPositivos?.forEach((ponto: string) => {
+      markdown += `- ${ponto}\n`;
+    });
+    
+    markdown += `\n### ❌ Pontos Negativos\n\n`;
+    analise.pontosNegativos?.forEach((ponto: string) => {
+      markdown += `- ${ponto}\n`;
+    });
+    
+    markdown += `\n### 💡 Sugestões de Melhoria\n\n`;
+    analise.sugestoes?.forEach((sugestao: string) => {
+      markdown += `- ${sugestao}\n`;
+    });
+    
+    if (analise.analisePontosDestacados) {
+      markdown += `\n### 📋 Análise dos Pontos Destacados pelos Gestores\n\n`;
+      markdown += `**Tendências Observadas:**\n${analise.analisePontosDestacados.tendencias}\n\n`;
+      
+      if (analise.analisePontosDestacados.positivos?.length > 0) {
+        markdown += `**👍 Pontos Positivos Destacados:**\n`;
+        analise.analisePontosDestacados.positivos.forEach((p: string) => {
+          markdown += `- ${p}\n`;
+        });
+        markdown += `\n`;
+      }
+      
+      if (analise.analisePontosDestacados.negativos?.length > 0) {
+        markdown += `**👎 Pontos Negativos Destacados:**\n`;
+        analise.analisePontosDestacados.negativos.forEach((p: string) => {
+          markdown += `- ${p}\n`;
+        });
+      }
+    }
+    
+    if (analise.frequenciaVisitas && Object.keys(analise.frequenciaVisitas).length > 0) {
+      markdown += `\n### 📊 Frequência de Visitas por Loja\n\n`;
+      Object.entries(analise.frequenciaVisitas)
+        .sort((a: any, b: any) => b[1] - a[1])
+        .forEach(([loja, visitas]) => {
+          markdown += `- **${loja}**: ${visitas}x\n`;
+        });
+    }
+    
+    return markdown;
+  } catch (error) {
+    console.error('Erro ao parsear conteúdo JSON:', error);
+    return 'Erro ao carregar conteúdo do relatório.';
+  }
+}
 
 export default function HistoricoRelatoriosIA() {
   const [, navigate] = useLocation();
@@ -195,7 +261,7 @@ export default function HistoricoRelatoriosIA() {
                               })}
                             </span>
                             <span>👤 Gerado por: {relatorio.geradoPorNome}</span>
-                            <span className="text-xs">Versão: {relatorio.versao}</span>
+                            <span className="text-xs">Período: {relatorio.periodo.charAt(0).toUpperCase() + relatorio.periodo.slice(1)}</span>
                           </div>
                         </CardDescription>
                       </div>
@@ -225,7 +291,7 @@ export default function HistoricoRelatoriosIA() {
                     <div className="border-t pt-4">
                       <div className="w-full">
                         <div className="prose prose-sm dark:prose-invert" style={{ maxWidth: '100%' }}>
-                          <Streamdown>{relatorio.conteudo}</Streamdown>
+                          <Streamdown>{analiseToMarkdown(relatorio.conteudo)}</Streamdown>
                         </div>
                       </div>
                     </div>

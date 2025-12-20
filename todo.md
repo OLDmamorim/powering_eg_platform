@@ -1073,3 +1073,22 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Criada função getPendentesByGestorId em server/db.ts
 - [x] Corrigido filtro de pendentes ativos (status -> resolvido)
 - [x] Agora todos os números são consistentes entre páginas
+
+## Bug v5.34 - Relatórios IA não aparecem no Histórico IA
+- [ ] Relatório IA gerado na página "Relatórios IA"
+- [ ] Histórico IA mostra "Nenhum relatório IA encontrado"
+- [ ] Verificar se relatórios são guardados na tabela relatorios_ia
+- [ ] Verificar query de listagem no Histórico IA
+- [ ] Corrigir salvamento ou query de listagem
+- [ ] Testar geração e visualização no histórico
+
+
+## Bug v5.34 - Relatórios IA não aparecem no Histórico IA ✅ RESOLVIDO
+- [x] Relatório IA gerado na página "Relatórios IA"
+- [x] Histórico IA mostra "Nenhum relatório IA encontrado"
+- [x] Criada nova tabela relatorios_ia no schema
+- [x] Adicionadas funções CRUD para relatórios IA no db.ts
+- [x] Modificado router para salvar automaticamente após gerar
+- [x] Atualizada página HistoricoRelatoriosIA para converter JSON para markdown
+- [x] Criados testes unitários (5 testes passaram)
+- [x] Testado salvamento e visualização no histórico

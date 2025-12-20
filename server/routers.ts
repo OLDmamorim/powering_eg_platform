@@ -840,24 +840,38 @@ export const appRouter = router({
       }))
       .query(async ({ input, ctx }) => {
         const gestorId = ctx.user.role === "admin" ? undefined : ctx.gestor?.id;
-        return await gerarRelatorioComIA(input.periodo, gestorId);
+        const analise = await gerarRelatorioComIA(input.periodo, gestorId);
+        
+        // Salvar relatório IA na base de dados
+        try {
+          await db.createRelatorioIA({
+            periodo: input.periodo,
+            conteudo: JSON.stringify(analise),
+            geradoPor: ctx.user.id,
+          });
+          console.log('[RelatoriosIA] Relatório salvo com sucesso na BD');
+        } catch (error) {
+          console.error('[RelatoriosIA] Erro ao salvar relatório:', error);
+        }
+        
+        return analise;
       }),
     
     getHistorico: protectedProcedure
       .query(async ({ ctx }) => {
         if (ctx.user.role === "admin") {
           // Admin vê todos os relatórios IA
-          return await db.getHistoricoRelatoriosIA();
+          return await db.getHistoricoRelatoriosIANormal();
         } else {
           // Gestor vê apenas seus próprios relatórios
-          return await db.getHistoricoRelatoriosIAByGestor(ctx.user.id);
+          return await db.getHistoricoRelatoriosIANormalByGestor(ctx.user.id);
         }
       }),
     
     getById: protectedProcedure
       .input(z.object({ id: z.number() }))
       .query(async ({ input }) => {
-        return await db.getRelatorioIACategoriaById(input.id);
+        return await db.getRelatorioIAById(input.id);
       }),
   }),
 
