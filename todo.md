@@ -979,3 +979,15 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Incluir link direto para visualizar o relatório
 - [x] Testar envio de email em ambos os tipos de relatório (livre e completo)
 - [x] Criar testes unitários (3 testes passaram)
+
+## Funcionalidade v5.25 - Comentários/Notas do Admin nos Relatórios
+- [x] Adicionar campo notasAdmin ao schema de relatórios livres (já existia)
+- [x] Adicionar campo notasAdmin ao schema de relatórios completos (já existia)
+- [x] Adicionar campo ao input schema das mutations (backend)
+- [x] Adicionar campo de texto no formulário de relatório livre (admin)
+- [x] Adicionar campo de texto no formulário de relatório completo (admin)
+- [x] Remover restrições de acesso para admin criar relatórios
+- [x] Mostrar notas do admin na página Relatórios (admin)
+- [x] Mostrar notas do admin na página Meus Relatórios (gestor)
+- [x] Destacar visualmente as notas do admin (fundo roxo)
+- [x] Criar testes unitários (5 testes passaram)

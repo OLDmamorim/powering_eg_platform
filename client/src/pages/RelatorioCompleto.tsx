@@ -58,6 +58,7 @@ export default function RelatorioCompleto() {
     colaboradoresPresentes: "",
     pontosPositivos: "",
     pontosNegativos: "",
+    comentarioAdmin: "",
   });
 
   const utils = trpc.useUtils();
@@ -80,7 +81,7 @@ export default function RelatorioCompleto() {
     },
   });
 
-  if (user?.role !== "gestor") {
+  if (user?.role !== "gestor" && user?.role !== "admin") {
     setLocation("/dashboard");
     return null;
   }
@@ -609,6 +610,29 @@ export default function RelatorioCompleto() {
                 rows={5}
               />
             </div>
+            
+            {/* Campo de Comentários do Admin (apenas visível para admin) */}
+            {user?.role === 'admin' && (
+              <div className="space-y-2">
+                <Label htmlFor="comentarioAdmin">Notas do Admin (opcional)</Label>
+                <Textarea
+                  id="comentarioAdmin"
+                  value={formData.comentarioAdmin}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      comentarioAdmin: e.target.value,
+                    })
+                  }
+                  placeholder="Adicione observações, instruções ou feedback para o gestor..."
+                  rows={4}
+                  className="border-purple-200 focus:border-purple-400 dark:border-purple-800 dark:focus:border-purple-600"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Estas notas serão visíveis para o gestor responsável pela loja
+                </p>
+              </div>
+            )}
           </div>
         );
 

@@ -215,6 +215,21 @@ export default function MeusRelatorios() {
                               {relatorio.descricao}
                             </p>
                           </div>
+                          
+                          {/* Notas do Admin */}
+                          {relatorio.comentarioAdmin && (
+                            <div className="mt-3 p-3 bg-purple-50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800 rounded-lg">
+                              <div className="flex items-center gap-2 mb-2">
+                                <Badge variant="secondary" className="bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300">
+                                  📝 Notas do Admin
+                                </Badge>
+                              </div>
+                              <p className="text-sm whitespace-pre-wrap text-purple-900 dark:text-purple-100">
+                                {relatorio.comentarioAdmin}
+                              </p>
+                            </div>
+                          )}
+                          
                           <div className="mt-2 text-xs text-muted-foreground">
                             Criado em: {new Date(relatorio.createdAt).toLocaleString("pt-PT")}
                           </div>
@@ -354,6 +369,21 @@ export default function MeusRelatorios() {
                               </div>
                             )}
                           </div>
+                          
+                          {/* Notas do Admin */}
+                          {relatorio.comentarioAdmin && (
+                            <div className="mt-3 p-3 bg-purple-50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800 rounded-lg">
+                              <div className="flex items-center gap-2 mb-2">
+                                <Badge variant="secondary" className="bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300">
+                                  📝 Notas do Admin
+                                </Badge>
+                              </div>
+                              <p className="text-sm whitespace-pre-wrap text-purple-900 dark:text-purple-100">
+                                {relatorio.comentarioAdmin}
+                              </p>
+                            </div>
+                          )}
+                          
                           <div className="mt-3 text-xs text-muted-foreground">
                             Criado em: {new Date(relatorio.createdAt).toLocaleString("pt-PT")}
                           </div>

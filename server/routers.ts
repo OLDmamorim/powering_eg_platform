@@ -345,6 +345,7 @@ export const appRouter = router({
         lojasIds: z.array(z.number()).min(1),
         dataVisita: z.date(),
         descricao: z.string().min(1),
+        comentarioAdmin: z.string().optional(),
         fotos: z.string().optional(),
         pendentes: z.array(z.string()).optional(),
       }))
@@ -601,6 +602,7 @@ export const appRouter = router({
         colaboradoresPresentes: z.string().optional(),
         pontosPositivos: z.string().optional(),
         pontosNegativos: z.string().optional(),
+        comentarioAdmin: z.string().optional(),
         fotos: z.string().optional(),
         pendentes: z.array(z.string()).optional(),
       }))

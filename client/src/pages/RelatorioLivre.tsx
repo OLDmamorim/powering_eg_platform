@@ -29,6 +29,7 @@ export default function RelatorioLivre() {
   const [, setLocation] = useLocation();
   const [lojasIds, setLojasIds] = useState<string[]>([]);
   const [descricao, setDescricao] = useState("");
+  const [comentarioAdmin, setComentarioAdmin] = useState("");
   const [categoria, setCategoria] = useState("");
   const [estadoAcompanhamento, setEstadoAcompanhamento] = useState<"acompanhar" | "em_tratamento" | "tratado">("acompanhar");
   const [pendentes, setPendentes] = useState<string[]>([""]);
@@ -65,7 +66,7 @@ export default function RelatorioLivre() {
     },
   });
 
-  if (user?.role !== "gestor") {
+  if (user?.role !== "gestor" && user?.role !== "admin") {
     setLocation("/dashboard");
     return null;
   }
@@ -264,6 +265,7 @@ export default function RelatorioLivre() {
       lojasIds: lojasIds.map(id => Number(id)),
       dataVisita,
       descricao,
+      comentarioAdmin: comentarioAdmin.trim() || undefined,
       fotos: fotos.length > 0 ? JSON.stringify(fotos) : undefined,
       pendentes: pendentesValidos.length > 0 ? pendentesValidos : undefined,
     });
@@ -356,6 +358,24 @@ export default function RelatorioLivre() {
                   required
                 />
               </div>
+
+              {/* Campo de Comentários do Admin (apenas visível para admin) */}
+              {user?.role === 'admin' && (
+                <div className="space-y-2">
+                  <Label htmlFor="comentarioAdmin">Notas do Admin (opcional)</Label>
+                  <Textarea
+                    id="comentarioAdmin"
+                    value={comentarioAdmin}
+                    onChange={(e) => setComentarioAdmin(e.target.value)}
+                    placeholder="Adicione observações, instruções ou feedback para o gestor..."
+                    rows={4}
+                    className="border-purple-200 focus:border-purple-400 dark:border-purple-800 dark:focus:border-purple-600"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Estas notas serão visíveis para o gestor responsável pela loja
+                  </p>
+                </div>
+              )}
 
               {/* Upload de Fotos */}
               <div className="space-y-3">
