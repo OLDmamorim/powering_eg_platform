@@ -407,7 +407,7 @@ export default function Dashboard() {
           {isGestor && (
             <Card 
               className="bg-blue-100 dark:bg-blue-900/50 border-blue-300 dark:border-blue-700 cursor-pointer hover:scale-[1.02] hover:shadow-lg transition-all duration-200"
-              onClick={() => setLocation('/lojas')}
+              onClick={() => setLocation('/minhas-lojas')}
             >
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Minhas Lojas</CardTitle>

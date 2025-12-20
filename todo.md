@@ -1028,3 +1028,15 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Identificado 1 user afetado: mamorim@expressglass.pt (ID: 420030)
 - [x] Atualizado nome para "Marco Amorim" via SQL
 - [x] Correção do OAuth (v5.27) previne problema em futuros logins
+
+## Funcionalidade v5.30 - Melhorias na Página de Lojas (Gestor)
+- [x] Tornar card "Minhas Lojas" clicável no dashboard do gestor
+- [x] Corrigido redirecionamento de /lojas para /minhas-lojas
+- [x] Ordenar lojas alfabeticamente na listagem
+- [x] Mostrar relatórios mínimos (mensais) na visualização da loja
+- [x] Mostrar minimoRelatoriosLivres e minimoRelatoriosCompletos separadamente
+- [x] Adicionar botão de edição em cada loja (Dialog com formulário)
+- [x] Permitir editar email da loja (gestor)
+- [x] Permitir editar nome, morada, contacto (gestor)
+- [x] Relatórios mínimos editáveis APENAS por admin (campo read-only para gestor)
+- [x] Admin já tem formulário completo em Lojas.tsx (linhas 332-357)
