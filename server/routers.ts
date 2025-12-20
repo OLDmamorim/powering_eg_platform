@@ -11,6 +11,7 @@ import { enviarResumoSemanal, verificarENotificarAlertas } from "./weeklyReport"
 import { gerarPrevisoes, gerarEGuardarPrevisoes } from "./previsaoService";
 import { gerarSugestoesMelhoria, formatarRelatorioLivre, formatarRelatorioCompleto } from "./sugestaoService";
 import { gerarPlanoVisitasSemanal, gerarPlanosSemanaisParaTodosGestores, verificarEGerarPlanosSexta } from "./planoVisitasService";
+import { notificarGestorRelatorioAdmin } from "./notificacaoGestor";
 
 // Middleware para verificar se o utilizador é admin
 const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
@@ -402,6 +403,12 @@ export const appRouter = router({
         gerarSugestoesMelhoria(relatorio.id, 'livre', lojasIds[0], ctx.gestor.id, conteudo)
           .catch(err => console.error('[Sugestões] Erro ao gerar:', err));
         
+        // Se admin criou o relatório, notificar gestor responsável pela loja
+        if (ctx.user.role === 'admin') {
+          notificarGestorRelatorioAdmin(relatorio.id, 'livre', lojasIds[0], ctx.user.name || 'Admin')
+            .catch((err: unknown) => console.error('[Email] Erro ao notificar gestor:', err));
+        }
+        
         return relatorio;
       }),
     
@@ -649,6 +656,12 @@ export const appRouter = router({
         const conteudoCompleto = formatarRelatorioCompleto(inputSemLojasIds);
         gerarSugestoesMelhoria(relatorio.id, 'completo', lojasIds[0], ctx.gestor.id, conteudoCompleto)
           .catch(err => console.error('[Sugestões] Erro ao gerar:', err));
+        
+        // Se admin criou o relatório, notificar gestor responsável pela loja
+        if (ctx.user.role === 'admin') {
+          notificarGestorRelatorioAdmin(relatorio.id, 'completo', lojasIds[0], ctx.user.name || 'Admin')
+            .catch((err: unknown) => console.error('[Email] Erro ao notificar gestor:', err));
+        }
         
         // Verificar alertas de pontos negativos consecutivos (apenas primeira loja)
         if (input.pontosNegativos && input.pontosNegativos.trim()) {

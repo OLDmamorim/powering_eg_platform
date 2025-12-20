@@ -970,3 +970,12 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Modificar getRelatoriosCompletosByGestorId para buscar por lojas atribuídas
 - [x] Criar testes unitários (4 testes passaram)
 - [x] Testar criação de relatório pelo admin e visualização pelo gestor
+
+## Funcionalidade v5.24 - Notificação Email ao Gestor (Relatório Admin)
+- [x] Identificar quando admin cria relatório (verificar role do user)
+- [x] Buscar email do gestor responsável pela loja
+- [x] Criar template de email de notificação
+- [x] Enviar email automático após criação do relatório
+- [x] Incluir link direto para visualizar o relatório
+- [x] Testar envio de email em ambos os tipos de relatório (livre e completo)
+- [x] Criar testes unitários (3 testes passaram)
