@@ -949,3 +949,24 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Modificar getAllLojas() para fazer LEFT JOIN com gestorLojas
 - [x] Retornar gestorId em cada loja (NULL se não atribuída)
 - [x] Testar que filtro funciona corretamente
+
+## Funcionalidade v5.23 - Admin Criar Relatórios para Qualquer Loja
+- [ ] Adicionar links "Relatórios" no menu lateral do admin
+- [ ] Admin pode aceder páginas RelatorioLivre e RelatorioCompleto
+- [ ] Admin vê dropdown com TODAS as lojas (não apenas as suas)
+- [ ] Modificar queries para incluir dados do autor (user.name, user.role)
+- [ ] Adicionar badge/indicador "Criado por Admin" nos relatórios
+- [ ] Gestores veem todos os relatórios das suas lojas (incluindo os do admin)
+- [ ] Testar criação de relatório pelo admin e visualização pelo gestor
+
+## Funcionalidade v5.23 - Admin Criar Relatórios para Qualquer Loja
+- [x] Adicionar links "Relatórios" no menu lateral do admin
+- [x] Admin pode aceder páginas RelatorioLivre e RelatorioCompleto
+- [x] Admin vê dropdown com TODAS as lojas (não apenas as suas)
+- [x] Modificar queries para incluir dados do autor (user.name, user.role)
+- [x] Adicionar badge/indicador "Criado por Admin" nos relatórios
+- [x] Gestores veem todos os relatórios das suas lojas (incluindo os do admin)
+- [x] Modificar getRelatoriosLivresByGestorId para buscar por lojas atribuídas
+- [x] Modificar getRelatoriosCompletosByGestorId para buscar por lojas atribuídas
+- [x] Criar testes unitários (4 testes passaram)
+- [x] Testar criação de relatório pelo admin e visualização pelo gestor

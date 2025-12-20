@@ -1,4 +1,4 @@
-import { eq, and, desc, sql } from "drizzle-orm";
+import { eq, and, desc, sql, inArray } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { 
   InsertUser, 
@@ -550,23 +550,39 @@ export async function createRelatorioLivre(relatorio: InsertRelatorioLivre): Pro
   return newRelatorio[0]!;
 }
 
-export async function getRelatoriosLivresByGestorId(gestorId: number): Promise<Array<RelatorioLivre & { loja: Loja }>> {
+export async function getRelatoriosLivresByGestorId(gestorId: number): Promise<Array<RelatorioLivre & { loja: Loja, gestor: Gestor & { user: typeof users.$inferSelect } }>> {
   const db = await getDb();
   if (!db) return [];
   
+  // Buscar IDs das lojas atribuídas ao gestor
+  const lojasDoGestor = await db
+    .select({ lojaId: gestorLojas.lojaId })
+    .from(gestorLojas)
+    .where(eq(gestorLojas.gestorId, gestorId));
+  
+  const lojaIds = lojasDoGestor.map(l => l.lojaId);
+  
+  if (lojaIds.length === 0) return [];
+  
+  // Buscar TODOS os relatórios das lojas do gestor (independente de quem criou)
   const result = await db
     .select({
       relatorio: relatoriosLivres,
-      loja: lojas
+      loja: lojas,
+      gestor: gestores,
+      user: users
     })
     .from(relatoriosLivres)
     .innerJoin(lojas, eq(relatoriosLivres.lojaId, lojas.id))
-    .where(eq(relatoriosLivres.gestorId, gestorId))
+    .innerJoin(gestores, eq(relatoriosLivres.gestorId, gestores.id))
+    .innerJoin(users, eq(gestores.userId, users.id))
+    .where(inArray(relatoriosLivres.lojaId, lojaIds))
     .orderBy(desc(relatoriosLivres.dataVisita));
   
   return result.map(r => ({
     ...r.relatorio,
-    loja: r.loja
+    loja: r.loja,
+    gestor: { ...r.gestor, user: r.user }
   }));
 }
 
@@ -642,23 +658,39 @@ export async function createRelatorioCompleto(relatorio: InsertRelatorioCompleto
   return newRelatorio[0]!;
 }
 
-export async function getRelatoriosCompletosByGestorId(gestorId: number): Promise<Array<RelatorioCompleto & { loja: Loja }>> {
+export async function getRelatoriosCompletosByGestorId(gestorId: number): Promise<Array<RelatorioCompleto & { loja: Loja, gestor: Gestor & { user: typeof users.$inferSelect } }>> {
   const db = await getDb();
   if (!db) return [];
   
+  // Buscar IDs das lojas atribuídas ao gestor
+  const lojasDoGestor = await db
+    .select({ lojaId: gestorLojas.lojaId })
+    .from(gestorLojas)
+    .where(eq(gestorLojas.gestorId, gestorId));
+  
+  const lojaIds = lojasDoGestor.map(l => l.lojaId);
+  
+  if (lojaIds.length === 0) return [];
+  
+  // Buscar TODOS os relatórios das lojas do gestor (independente de quem criou)
   const result = await db
     .select({
       relatorio: relatoriosCompletos,
-      loja: lojas
+      loja: lojas,
+      gestor: gestores,
+      user: users
     })
     .from(relatoriosCompletos)
     .innerJoin(lojas, eq(relatoriosCompletos.lojaId, lojas.id))
-    .where(eq(relatoriosCompletos.gestorId, gestorId))
+    .innerJoin(gestores, eq(relatoriosCompletos.gestorId, gestores.id))
+    .innerJoin(users, eq(gestores.userId, users.id))
+    .where(inArray(relatoriosCompletos.lojaId, lojaIds))
     .orderBy(desc(relatoriosCompletos.dataVisita));
   
   return result.map(r => ({
     ...r.relatorio,
-    loja: r.loja
+    loja: r.loja,
+    gestor: { ...r.gestor, user: r.user }
   }));
 }
 

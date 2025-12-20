@@ -185,6 +185,11 @@ export default function MeusRelatorios() {
                               <div className="flex items-center gap-2">
                                 <Building2 className="h-4 w-4 text-primary" />
                                 <span className="font-medium">{relatorio.loja?.nome || "Loja"}</span>
+                                {relatorio.gestor?.user?.role === 'admin' && (
+                                  <Badge variant="secondary" className="text-xs bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300">
+                                    Criado por {relatorio.gestor?.user?.name}
+                                  </Badge>
+                                )}
                               </div>
                               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                 <Calendar className="h-3 w-3" />
@@ -251,6 +256,11 @@ export default function MeusRelatorios() {
                               <div className="flex items-center gap-2">
                                 <Building2 className="h-4 w-4 text-primary" />
                                 <span className="font-medium">{relatorio.loja?.nome || "Loja"}</span>
+                                {relatorio.gestor?.user?.role === 'admin' && (
+                                  <Badge variant="secondary" className="text-xs bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300">
+                                    Criado por {relatorio.gestor?.user?.name}
+                                  </Badge>
+                                )}
                               </div>
                               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                 <Calendar className="h-3 w-3" />
