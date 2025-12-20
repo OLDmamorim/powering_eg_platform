@@ -1053,3 +1053,12 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Badge vermelho quando loja está abaixo do mínimo (< mínimo exigido)
 - [x] Mostrar números: "X/Y" (realizados/mínimo)
 - [x] Criar testes unitários (4 testes passaram)
+
+## Bug v5.32 - Inconsistência entre Resumo Global e Dashboard
+- [x] Resumo Global mostrava "14 relatórios" (últimos 30 dias)
+- [x] Dashboard mostrava "8 livres + 2 completos = 10" (mês atual)
+- [x] Causa identificada: períodos diferentes (30 dias vs mês calendário)
+- [x] Alterado resumoGlobalService.ts para usar mês atual
+- [x] Atualizado labels "Últimos 30 dias" para "Este mês"
+- [x] Agora ambos mostram números consistentes (mês atual)
+- [x] Alinhado com sistema de relatórios mínimos mensais

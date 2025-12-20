@@ -20,21 +20,24 @@ interface ResumoGlobal {
 
 export async function gerarResumoGlobal(gestorId: number): Promise<ResumoGlobal> {
   try {
-    // Buscar dados dos últimos 30 dias
-    const dataInicio = new Date();
-    dataInicio.setDate(dataInicio.getDate() - 30);
+    // Buscar dados do mês atual (calendário)
+    const agora = new Date();
+    const dataInicio = new Date(agora.getFullYear(), agora.getMonth(), 1);
+    const dataFim = new Date(agora.getFullYear(), agora.getMonth() + 1, 0, 23, 59, 59);
 
-    // Buscar relatórios livres
+    // Buscar relatórios livres do mês atual
     const relatoriosLivres = await db.getAllRelatoriosLivres();
-    const relatoriosLivresRecentes = relatoriosLivres.filter((r: any) => 
-      new Date(r.dataVisita) >= dataInicio
-    );
+    const relatoriosLivresRecentes = relatoriosLivres.filter((r: any) => {
+      const dataVisita = new Date(r.dataVisita);
+      return dataVisita >= dataInicio && dataVisita <= dataFim;
+    });
 
-    // Buscar relatórios completos
+    // Buscar relatórios completos do mês atual
     const relatoriosCompletos = await db.getAllRelatoriosCompletos();
-    const relatoriosCompletosRecentes = relatoriosCompletos.filter((r: any) => 
-      new Date(r.dataVisita) >= dataInicio
-    );
+    const relatoriosCompletosRecentes = relatoriosCompletos.filter((r: any) => {
+      const dataVisita = new Date(r.dataVisita);
+      return dataVisita >= dataInicio && dataVisita <= dataFim;
+    });
 
     // Buscar pendentes
     const pendentes = await db.getAllPendentes();
@@ -56,7 +59,7 @@ export async function gerarResumoGlobal(gestorId: number): Promise<ResumoGlobal>
 
     // Preparar contexto para IA
     const contexto = `
-Análise de Relatórios de Visitas - Últimos 30 dias
+Análise de Relatórios de Visitas - Mês Atual
 
 ESTATÍSTICAS:
 - Total de visitas: ${totalVisitas}

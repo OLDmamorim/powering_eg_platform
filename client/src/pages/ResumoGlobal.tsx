@@ -67,7 +67,7 @@ export default function ResumoGlobal() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{resumo.estatisticas?.totalVisitas || 0}</div>
-                  <p className="text-xs text-muted-foreground">Últimos 30 dias</p>
+                  <p className="text-xs text-muted-foreground">Este mês</p>
                 </CardContent>
               </Card>
 
@@ -87,7 +87,7 @@ export default function ResumoGlobal() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{resumo.estatisticas?.lojasVisitadas || 0}</div>
-                  <p className="text-xs text-muted-foreground">Últimos 30 dias</p>
+                  <p className="text-xs text-muted-foreground">Este mês</p>
                 </CardContent>
               </Card>
 
