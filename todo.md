@@ -1098,3 +1098,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Alterar nome do menu "Relatórios" para "Relatórios Gestores" quando utilizador é admin
 - [x] Manter "Relatórios" para gestores
 - [x] Testar visualização em ambos os perfis
+
+
+## Melhoria v5.36 - Atualizar Nome da Plataforma para 2.0
+- [x] Alterar "PoweringEG Platform" para "PoweringEG Platform 2.0" no Dashboard
+- [x] Verificar outros locais onde o nome aparece (HistoricoRelatoriosIA, Relatorios, RelatoriosIA)
+- [x] Testar visualização

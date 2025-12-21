@@ -110,7 +110,7 @@ export default function HistoricoRelatoriosIA() {
       // Título
       doc.setFontSize(16);
       doc.setFont("helvetica", "bold");
-      doc.text("Relatório IA - PoweringEG Platform", margin, 20);
+      doc.text("Relatório IA - PoweringEG Platform 2.0", margin, 20);
       
       // Data
       doc.setFontSize(10);

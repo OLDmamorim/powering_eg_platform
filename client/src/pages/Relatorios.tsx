@@ -289,7 +289,7 @@ export default function Relatorios() {
   ${camposHtml}
   ${fotosHtml}
   <div class="footer">
-    <p>PoweringEG Platform - Relatório gerado em ${new Date().toLocaleString('pt-PT')}</p>
+    <p>PoweringEG Platform 2.0 - Relatório gerado em ${new Date().toLocaleString('pt-PT')}</p>
   </div>
 </body>
 </html>`;

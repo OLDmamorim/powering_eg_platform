@@ -196,7 +196,7 @@ export default function RelatoriosIA() {
           <div class="header">
             <h1>Relatório de Análise IA</h1>
             <p>Período: ${periodoTexto} | Gerado em: ${dataAtual}</p>
-            <p>PoweringEG Platform</p>
+            <p>PoweringEG Platform 2.0</p>
           </div>
 
           <div class="section">
@@ -299,7 +299,7 @@ export default function RelatoriosIA() {
           </div>
 
           <div class="footer">
-            <p>Relatório gerado automaticamente pelo PoweringEG Platform</p>
+            <p>Relatório gerado automaticamente pelo PoweringEG Platform 2.0</p>
             <p>© ${new Date().getFullYear()} PoweringEG - Todos os direitos reservados</p>
           </div>
         </body>

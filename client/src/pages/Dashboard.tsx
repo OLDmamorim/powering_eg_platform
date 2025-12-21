@@ -287,7 +287,7 @@ export default function Dashboard() {
     <h2>📍 Resumo por Loja</h2>${Object.entries(porLoja).map(([loja, rels]) => `<div class="loja-section"><h3>${loja}</h3><p><strong>${rels.length}</strong> visita(s) este mês</p>
     <table><thead><tr><th>Data</th><th>Tipo</th><th>Descrição</th></tr></thead><tbody>${rels.map((r: any) => `<tr><td>${new Date(r.dataVisita).toLocaleDateString('pt-PT')}</td><td>${r.descricao !== undefined ? 'Livre' : 'Completo'}</td><td>${r.descricao || r.resumoSupervisao || '-'}</td></tr>`).join('')}</tbody></table></div>`).join('')}
     ${pendentesAntigos.length > 0 ? `<h2>⚠️ Pendentes há mais de 7 dias</h2><table><thead><tr><th>Loja</th><th>Descrição</th><th>Criado em</th></tr></thead><tbody>${pendentesAntigos.map((p: any) => `<tr><td>${p.loja?.nome || '-'}</td><td>${p.descricao}</td><td>${new Date(p.createdAt).toLocaleDateString('pt-PT')}</td></tr>`).join('')}</tbody></table>` : ''}
-    <div class="footer"><p>PoweringEG Platform - Relatório gerado automaticamente</p></div></body></html>`;
+     <div class="footer"><p>PoweringEG Platform 2.0 - Relatório gerado automaticamente</p></div></body></html>`;
     
     const printWindow = window.open('', '_blank');
     if (printWindow) { printWindow.document.write(html); printWindow.document.close(); setTimeout(() => printWindow.print(), 500); }
@@ -299,7 +299,7 @@ export default function Dashboard() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Olá, {user?.name || 'Utilizador'}</h1>
-            <p className="text-muted-foreground">Bem-vindo ao PoweringEG Platform</p>
+            <p className="text-muted-foreground">Bem-vindo ao PoweringEG Platform 2.0</p>
             <div className="flex items-center gap-2 mt-2">
               <Sparkles className="h-4 w-4 text-amber-500" />
               <p className="text-sm text-muted-foreground italic">
