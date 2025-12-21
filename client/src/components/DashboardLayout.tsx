@@ -323,9 +323,21 @@ function DashboardLayoutContent({
                 </div>
               </div>
             </div>
+            <img 
+              src="/eglass-logo.png" 
+              alt="ExpressGlass Logo" 
+              className="h-8 w-auto object-contain"
+            />
           </div>
         )}
         <main className="flex-1 p-4 relative">
+          {!isMobile && (
+            <img 
+              src="/eglass-logo.png" 
+              alt="ExpressGlass Logo" 
+              className="fixed top-4 right-4 h-10 w-auto object-contain z-40 bg-background/95 backdrop-blur px-3 py-2 rounded-lg border shadow-sm"
+            />
+          )}
           <Breadcrumbs />
           {children}
           {switchable && (

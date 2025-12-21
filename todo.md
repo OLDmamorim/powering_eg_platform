@@ -1104,3 +1104,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Alterar "PoweringEG Platform" para "PoweringEG Platform 2.0" no Dashboard
 - [x] Verificar outros locais onde o nome aparece (HistoricoRelatoriosIA, Relatorios, RelatoriosIA)
 - [x] Testar visualização
+
+
+## Melhoria v5.37 - Adicionar Logo ExpressGlass no Topo
+- [x] Copiar logo para pasta public do projeto
+- [x] Adicionar logo no header do DashboardLayout (lado direito)
+- [x] Garantir responsividade mobile (logo não quebra interface)
+- [x] Testar em diferentes tamanhos de ecrã
