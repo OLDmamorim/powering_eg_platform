@@ -298,13 +298,15 @@ export default function Dashboard() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-start gap-4">
-            <img 
-              src="/eglass-logo.png" 
-              alt="ExpressGlass Logo" 
-              className="h-12 w-auto object-contain mt-1"
-            />
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">Olá, {user?.name || 'Utilizador'}</h1>
+              <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
+                Olá, {user?.name || 'Utilizador'}
+                <img 
+                  src="/eglass-logo.png" 
+                  alt="ExpressGlass Logo" 
+                  className="h-10 w-auto object-contain"
+                />
+              </h1>
               <p className="text-muted-foreground">Bem-vindo ao PoweringEG Platform 2.0</p>
               <div className="flex items-center gap-2 mt-2">
                 <Sparkles className="h-4 w-4 text-amber-500" />

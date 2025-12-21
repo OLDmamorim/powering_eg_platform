@@ -1126,3 +1126,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar logo no header junto ao título "Olá, [nome]"
 - [x] Logo maior (h-12) e sem fundo/borda
 - [x] Testar visualização em desktop
+
+
+## Ajuste v5.40 - Logo Depois do Nome
+- [x] Mover logo da esquerda para a direita do título "Olá, [nome]"
+- [x] Testar visualização
