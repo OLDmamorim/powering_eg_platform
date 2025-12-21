@@ -110,7 +110,8 @@ export function gerarHTMLRelatorioLivre(relatorio: {
 </head>
 <body>
   <div class="header">
-    <div class="logo">PoweringEG Platform</div>
+    <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663088836799/YrkmGCRDVqYgFnZO.png" alt="ExpressGlass" style="max-width: 200px; height: auto; margin-bottom: 10px;" />
+    <div class="logo">PoweringEG Platform 2.0</div>
     <div class="title">Relatório de Visita</div>
   </div>
   
@@ -228,7 +229,8 @@ export function gerarHTMLRelatorioCompleto(relatorio: {
 </head>
 <body>
   <div class="header">
-    <div class="logo">PoweringEG Platform</div>
+    <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663088836799/YrkmGCRDVqYgFnZO.png" alt="ExpressGlass" style="max-width: 200px; height: auto; margin-bottom: 10px;" />
+    <div class="logo">PoweringEG Platform 2.0</div>
     <div class="title">Relatório Completo de Visita</div>
   </div>
   

@@ -1111,3 +1111,11 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar logo no header do DashboardLayout (lado direito)
 - [x] Garantir responsividade mobile (logo não quebra interface)
 - [x] Testar em diferentes tamanhos de ecrã
+
+
+## Melhoria v5.38 - Favicon e Logo nos Emails
+- [x] Criar favicon a partir do logo ExpressGlass
+- [x] Configurar favicon no index.html
+- [x] Adicionar logo ExpressGlass nos emails de relatórios (livre e completo)
+- [x] Upload do logo para CDN pública
+- [x] Testar visualização do favicon no navegador
