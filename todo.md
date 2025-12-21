@@ -1092,3 +1092,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Atualizada página HistoricoRelatoriosIA para converter JSON para markdown
 - [x] Criados testes unitários (5 testes passaram)
 - [x] Testado salvamento e visualização no histórico
+
+
+## Melhoria v5.35 - Nome do Menu "Relatórios Gestores" para Admin
+- [x] Alterar nome do menu "Relatórios" para "Relatórios Gestores" quando utilizador é admin
+- [x] Manter "Relatórios" para gestores
+- [x] Testar visualização em ambos os perfis

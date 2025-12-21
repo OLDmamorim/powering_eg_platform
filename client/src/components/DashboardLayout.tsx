@@ -44,7 +44,7 @@ const getMenuItems = (userRole?: string) => {
     { icon: Building2, label: "Lojas", path: "/lojas", show: isAdmin, showBadge: false },
     { icon: Users, label: "Gestores", path: "/gestores", show: isAdmin, showBadge: false },
     { icon: UserCog, label: "Utilizadores", path: "/utilizadores", show: isAdmin, showBadge: false },
-    { icon: FileText, label: "Relatórios", path: "/relatorios", show: isAdmin, showBadge: false },
+    { icon: FileText, label: "Relatórios Gestores", path: "/relatorios", show: isAdmin, showBadge: false },
     { icon: ClipboardList, label: "Relatório Livre", path: "/relatorio-livre", show: true, showBadge: false },
     { icon: FileText, label: "Relatório Completo", path: "/relatorio-completo", show: true, showBadge: false },
     { icon: Building2, label: "Minhas Lojas", path: "/minhas-lojas", show: isGestor, showBadge: false },
