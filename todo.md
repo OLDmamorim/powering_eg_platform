@@ -1131,3 +1131,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## Ajuste v5.40 - Logo Depois do Nome
 - [x] Mover logo da esquerda para a direita do título "Olá, [nome]"
 - [x] Testar visualização
+
+
+## Ajuste v5.41 - Aumentar Tamanho do Logo
+- [x] Aumentar logo de h-10 para h-14 (56px)
+- [x] Testar visualização
