@@ -1119,3 +1119,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar logo ExpressGlass nos emails de relatórios (livre e completo)
 - [x] Upload do logo para CDN pública
 - [x] Testar visualização do favicon no navegador
+
+
+## Melhoria v5.39 - Reposicionar Logo Desktop
+- [x] Remover logo fixo do canto superior direito em desktop
+- [x] Adicionar logo no header junto ao título "Olá, [nome]"
+- [x] Logo maior (h-12) e sem fundo/borda
+- [x] Testar visualização em desktop

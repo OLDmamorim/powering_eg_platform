@@ -297,27 +297,34 @@ export default function Dashboard() {
     <DashboardLayout>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Olá, {user?.name || 'Utilizador'}</h1>
-            <p className="text-muted-foreground">Bem-vindo ao PoweringEG Platform 2.0</p>
-            <div className="flex items-center gap-2 mt-2">
-              <Sparkles className="h-4 w-4 text-amber-500" />
-              <p className="text-sm text-muted-foreground italic">
-                {dicaLoading ? (
-                  <span className="animate-pulse">A gerar dica...</span>
-                ) : (
-                  dicaData?.dica || "Tudo em ordem! Continua o bom trabalho."
-                )}
-              </p>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-6 w-6 text-muted-foreground hover:text-foreground"
-                onClick={() => refetchDica()}
-                disabled={dicaLoading}
-              >
-                <RefreshCw className={`h-3 w-3 ${dicaLoading ? 'animate-spin' : ''}`} />
-              </Button>
+          <div className="flex items-start gap-4">
+            <img 
+              src="/eglass-logo.png" 
+              alt="ExpressGlass Logo" 
+              className="h-12 w-auto object-contain mt-1"
+            />
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">Olá, {user?.name || 'Utilizador'}</h1>
+              <p className="text-muted-foreground">Bem-vindo ao PoweringEG Platform 2.0</p>
+              <div className="flex items-center gap-2 mt-2">
+                <Sparkles className="h-4 w-4 text-amber-500" />
+                <p className="text-sm text-muted-foreground italic">
+                  {dicaLoading ? (
+                    <span className="animate-pulse">A gerar dica...</span>
+                  ) : (
+                    dicaData?.dica || "Tudo em ordem! Continua o bom trabalho."
+                  )}
+                </p>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-6 w-6 text-muted-foreground hover:text-foreground"
+                  onClick={() => refetchDica()}
+                  disabled={dicaLoading}
+                >
+                  <RefreshCw className={`h-3 w-3 ${dicaLoading ? 'animate-spin' : ''}`} />
+                </Button>
+              </div>
             </div>
           </div>
           <Button onClick={gerarRelatorioMensal} variant="outline" className="gap-2">
