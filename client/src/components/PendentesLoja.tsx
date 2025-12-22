@@ -33,7 +33,7 @@ export function PendentesLoja({ lojaId, onPendentesChange }: PendentesLojaProps)
     if (pendentes) {
       const initialStatus = pendentes.map((p: any) => ({
         id: p.id,
-        status: null as "resolvido" | "continua" | null,
+        status: "continua" as "resolvido" | "continua" | null,
       }));
       setPendentesStatus(initialStatus);
       onPendentesChange(initialStatus);

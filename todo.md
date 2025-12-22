@@ -1171,3 +1171,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Modificar para mostrar pendentes de TODAS as lojas selecionadas
 - [x] Agrupar pendentes por loja com nome da loja no título
 - [x] Testar com 2-3 lojas selecionadas
+
+
+## Feature v5.47 - Pré-selecionar "Continua" nos Pendentes
+- [x] Modificar PendentesLoja para inicializar status como "continua" em vez de null
+- [x] Utilizador pode alterar individualmente para "resolvido"
+- [x] Testar submissão rápida sem precisar clicar em todos os pendentes
