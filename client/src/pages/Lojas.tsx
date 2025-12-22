@@ -240,6 +240,7 @@ export default function Lojas() {
                 <TableRow>
                   <TableHead>Nome</TableHead>
                   <TableHead>Email</TableHead>
+                  <TableHead>Gestor</TableHead>
                   <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
               </TableHeader>
@@ -254,6 +255,7 @@ export default function Lojas() {
                         </div>
                       </TableCell>
                       <TableCell>{loja.email || "-"}</TableCell>
+                      <TableCell>{loja.gestorNome || ""}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
                           <Button

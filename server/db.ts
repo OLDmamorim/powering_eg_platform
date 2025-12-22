@@ -207,24 +207,32 @@ export async function getAllLojas() {
   const db = await getDb();
   if (!db) return [];
   
-  // LEFT JOIN com gestorLojas para saber se loja está atribuída
-  const result = await db
-    .select({
-      id: lojas.id,
-      nome: lojas.nome,
-      contacto: lojas.contacto,
-      email: lojas.email,
-      minimoRelatoriosLivres: lojas.minimoRelatoriosLivres,
-      minimoRelatoriosCompletos: lojas.minimoRelatoriosCompletos,
-      createdAt: lojas.createdAt,
-      updatedAt: lojas.updatedAt,
-      gestorId: gestorLojas.gestorId, // NULL se não atribuída
-    })
-    .from(lojas)
-    .leftJoin(gestorLojas, eq(lojas.id, gestorLojas.lojaId))
-    .orderBy(lojas.nome);
+  // Buscar todas as lojas
+  const todasLojas = await db.select().from(lojas).orderBy(lojas.nome);
   
-  return result;
+  // Para cada loja, buscar o gestor atribuído (apenas o primeiro)
+  const lojasComGestor = await Promise.all(
+    todasLojas.map(async (loja) => {
+      const gestorLoja = await db
+        .select({
+          gestorId: gestorLojas.gestorId,
+          gestorNome: users.name,
+        })
+        .from(gestorLojas)
+        .leftJoin(gestores, eq(gestorLojas.gestorId, gestores.id))
+        .leftJoin(users, eq(gestores.userId, users.id))
+        .where(eq(gestorLojas.lojaId, loja.id))
+        .limit(1);
+      
+      return {
+        ...loja,
+        gestorId: gestorLoja[0]?.gestorId || null,
+        gestorNome: gestorLoja[0]?.gestorNome || null,
+      };
+    })
+  );
+  
+  return lojasComGestor;
 }
 
 export async function getLojaById(id: number): Promise<Loja | undefined> {

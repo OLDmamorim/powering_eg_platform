@@ -1142,3 +1142,17 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar classe hidden md:block ao logo no conteúdo
 - [x] Manter apenas logo do header mobile visível
 - [x] Testar em mobile e desktop
+
+
+## Feature v5.43 - Coluna Gestor na Página Lojas (Admin)
+- [x] Verificar schema da tabela lojas (campo gestorId via gestor_lojas)
+- [x] Modificar query no backend para incluir nome do gestor (JOIN com gestores e users)
+- [x] Adicionar coluna "Gestor" na tabela frontend
+- [x] Mostrar nome do gestor ou campo vazio se não atribuído
+- [x] Testar visualização
+
+
+## Ajuste v5.44 - Uma Loja = Um Gestor
+- [x] Modificar getAllLojas para buscar gestor separadamente com LIMIT 1
+- [x] Garantir que cada loja mostre apenas um gestor
+- [x] Testar visualização
