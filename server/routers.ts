@@ -1488,6 +1488,11 @@ export const appRouter = router({
         dataFim: z.date(),
       }))
       .mutation(async ({ input, ctx }) => {
+        // Permitir admin e gestor gerarem resumos
+        if (ctx.user.role !== 'admin' && ctx.user.role !== 'gestor') {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Apenas administradores e gestores podem gerar resumos globais' });
+        }
+        
         const { gerarResumoGlobalComIA } = await import('./resumoGlobalService');
         const resumo = await gerarResumoGlobalComIA(
           input.periodo,

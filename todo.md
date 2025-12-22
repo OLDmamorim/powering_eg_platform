@@ -1186,13 +1186,23 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Testar contagem no dashboard e histórico de cada loja
 
 
-## Feature v5.49 - Sistema de Resumos Globais (EM PROGRESSO)
+## Feature v5.49 - Sistema de Resumos Globais
 - [x] Criar tabela `resumos_globais` no schema
 - [x] Criar router `resumosGlobais` com procedures (gerar, listar, getById, getUltimoPorPeriodo)
 - [x] Implementar lógica de geração com IA (mensal/trimestral/semestral/anual)
 - [x] Adicionar funções CRUD no db.ts
-- [ ] Criar página "Resumos Globais" para gerar novos resumos
-- [ ] Criar página "Histórico Resumos Globais" para consultar
-- [ ] Adicionar lembretes no Dashboard quando for altura de gerar
-- [ ] Adicionar rotas no App.tsx e menu no DashboardLayout
-- [ ] Testar geração e visualização de resumos
+- [x] Criar página "Resumos Globais" para gerar novos resumos
+- [x] Criar página "Histórico Resumos Globais" para consultar
+- [x] Adicionar lembretes no Dashboard quando for altura de gerar
+- [x] Adicionar rotas no App.tsx e menu no DashboardLayout
+- [x] Testar geração e visualização de resumos
+
+
+## Correção v6.1 - Lembretes Resumos Globais para Gestores
+- [x] Alterar lembretes para aparecerem nos PRIMEIROS 5 dias de cada período (não últimos)
+- [x] Permitir gestores gerarem resumos globais (não apenas admin)
+- [x] Adicionar verificação se resumo do período anterior já foi gerado
+- [x] Mostrar lembretes apenas se resumo ainda não foi gerado
+- [x] Atualizar permissões no router resumosGlobais.gerar (protectedProcedure)
+- [x] Atualizar lógica de lembretes no Dashboard.tsx
+- [x] Testar funcionalidade completa
