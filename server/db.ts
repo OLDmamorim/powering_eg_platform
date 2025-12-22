@@ -44,7 +44,10 @@ import {
   InsertRelatorioIACategoria,
   relatoriosIA,
   RelatorioIA,
-  InsertRelatorioIA
+  InsertRelatorioIA,
+  resumosGlobais,
+  ResumoGlobal,
+  InsertResumoGlobal
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -2506,4 +2509,93 @@ export async function getRelatorioIAById(id: number): Promise<RelatorioIA | null
     .limit(1);
   
   return relatorio || null;
+}
+
+
+/**
+ * Criar resumo global
+ */
+export async function createResumoGlobal(data: InsertResumoGlobal): Promise<ResumoGlobal> {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  
+  const [novoResumo] = await db
+    .insert(resumosGlobais)
+    .values(data)
+    .$returningId();
+  
+  const [resumo] = await db
+    .select()
+    .from(resumosGlobais)
+    .where(eq(resumosGlobais.id, novoResumo.id))
+    .limit(1);
+  
+  return resumo!;
+}
+
+/**
+ * Obter histórico de resumos globais (ordenado por data DESC)
+ */
+export async function getHistoricoResumosGlobais(): Promise<Array<ResumoGlobal & { geradoPorNome: string }>> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const result = await db
+    .select({
+      id: resumosGlobais.id,
+      periodo: resumosGlobais.periodo,
+      dataInicio: resumosGlobais.dataInicio,
+      dataFim: resumosGlobais.dataFim,
+      conteudo: resumosGlobais.conteudo,
+      geradoPor: resumosGlobais.geradoPor,
+      createdAt: resumosGlobais.createdAt,
+      geradoPorNome: users.name,
+    })
+    .from(resumosGlobais)
+    .innerJoin(users, eq(resumosGlobais.geradoPor, users.id))
+    .orderBy(desc(resumosGlobais.createdAt));
+  
+  return result.map(r => ({
+    id: r.id,
+    periodo: r.periodo,
+    dataInicio: r.dataInicio,
+    dataFim: r.dataFim,
+    conteudo: r.conteudo,
+    geradoPor: r.geradoPor,
+    createdAt: r.createdAt,
+    geradoPorNome: r.geradoPorNome || 'Desconhecido',
+  }));
+}
+
+/**
+ * Obter resumo global por ID
+ */
+export async function getResumoGlobalById(id: number): Promise<ResumoGlobal | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const [resumo] = await db
+    .select()
+    .from(resumosGlobais)
+    .where(eq(resumosGlobais.id, id))
+    .limit(1);
+  
+  return resumo || null;
+}
+
+/**
+ * Obter último resumo global de um período específico
+ */
+export async function getUltimoResumoGlobalPorPeriodo(periodo: 'mensal' | 'trimestral' | 'semestral' | 'anual'): Promise<ResumoGlobal | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const [resumo] = await db
+    .select()
+    .from(resumosGlobais)
+    .where(eq(resumosGlobais.periodo, periodo))
+    .orderBy(desc(resumosGlobais.createdAt))
+    .limit(1);
+  
+  return resumo || null;
 }

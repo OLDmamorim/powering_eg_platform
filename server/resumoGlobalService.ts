@@ -18,6 +18,191 @@ interface ResumoGlobal {
   };
 }
 
+/**
+ * Gerar resumo global com IA para um período específico (NOVA VERSÃO)
+ */
+export async function gerarResumoGlobalComIA(
+  periodo: 'mensal' | 'trimestral' | 'semestral' | 'anual',
+  dataInicio: Date,
+  dataFim: Date,
+  userId: number
+) {
+  // 1. Coletar dados do período
+  const lojas = await db.getAllLojas();
+  const relatoriosLivres = await db.getAllRelatoriosLivres();
+  const relatoriosCompletos = await db.getAllRelatoriosCompletos();
+  const pendentes = await db.getAllPendentes();
+  const alertas = await db.getAllAlertas();
+  
+  // Filtrar dados pelo período
+  const relatoriosLivresPeriodo = relatoriosLivres.filter(r => {
+    const data = new Date(r.createdAt);
+    return data >= dataInicio && data <= dataFim;
+  });
+  
+  const relatoriosCompletosPeriodo = relatoriosCompletos.filter(r => {
+    const data = new Date(r.createdAt);
+    return data >= dataInicio && data <= dataFim;
+  });
+  
+  const pendentesPeriodo = pendentes.filter(p => {
+    const data = new Date(p.createdAt);
+    return data >= dataInicio && data <= dataFim;
+  });
+  
+  const alertasPeriodo = alertas.filter(a => {
+    const data = new Date(a.createdAt);
+    return data >= dataInicio && data <= dataFim;
+  });
+  
+  // 2. Calcular estatísticas
+  const stats = {
+    totalLojas: lojas.length,
+    lojasAtivas: lojas.length, // Todas as lojas retornadas são consideradas ativas
+    totalRelatoriosLivres: relatoriosLivresPeriodo.length,
+    totalRelatoriosCompletos: relatoriosCompletosPeriodo.length,
+    totalPendentes: pendentesPeriodo.length,
+    pendentesResolvidos: pendentesPeriodo.filter(p => p.resolvido).length,
+    pendentesContinuam: pendentesPeriodo.filter(p => !p.resolvido).length,
+    totalAlertas: alertasPeriodo.length,
+    alertasResolvidos: alertasPeriodo.filter(a => a.estado === 'resolvido').length,
+  };
+  
+  // 3. Identificar lojas com mais pendentes
+  const lojasPendentes = pendentesPeriodo.reduce((acc, p) => {
+    if (!acc[p.lojaId]) acc[p.lojaId] = 0;
+    acc[p.lojaId]++;
+    return acc;
+  }, {} as Record<number, number>);
+  
+  const top5LojasPendentes = Object.entries(lojasPendentes)
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, 5)
+    .map(([lojaId, count]) => {
+      const loja = lojas.find(l => l.id === parseInt(lojaId));
+      return { loja: loja?.nome || 'Desconhecida', pendentes: count };
+    });
+  
+  // 4. Preparar prompt para IA
+  const periodoTexto = {
+    mensal: 'mensal',
+    trimestral: 'trimestral (3 meses)',
+    semestral: 'semestral (6 meses)',
+    anual: 'anual (12 meses)',
+  }[periodo];
+  
+  const prompt = `Você é um analista de negócios especializado em redes de retalho. Analise os dados abaixo e gere um resumo executivo ${periodoTexto} completo e profissional.
+
+**Período de Análise:**
+- Início: ${dataInicio.toLocaleDateString('pt-PT')}
+- Fim: ${dataFim.toLocaleDateString('pt-PT')}
+
+**Estatísticas Gerais:**
+- Total de Lojas: ${stats.totalLojas} (${stats.lojasAtivas} ativas)
+- Relatórios Livres: ${stats.totalRelatoriosLivres}
+- Relatórios Completos: ${stats.totalRelatoriosCompletos}
+- Pendentes: ${stats.totalPendentes} (${stats.pendentesResolvidos} resolvidos, ${stats.pendentesContinuam} continuam)
+- Alertas: ${stats.totalAlertas} (${stats.alertasResolvidos} resolvidos)
+
+**Top 5 Lojas com Mais Pendentes:**
+${top5LojasPendentes.map((l, i) => `${i + 1}. ${l.loja}: ${l.pendentes} pendentes`).join('\n')}
+
+**Formato do Resumo (JSON):**
+Retorne APENAS um objeto JSON válido com a seguinte estrutura:
+{
+  "titulo": "Resumo ${periodoTexto.charAt(0).toUpperCase() + periodoTexto.slice(1)} - [Mês/Período]",
+  "resumoExecutivo": "Parágrafo de 3-4 linhas com visão geral do período",
+  "destaques": [
+    "Destaque positivo 1",
+    "Destaque positivo 2",
+    "Destaque positivo 3"
+  ],
+  "pontosCriticos": [
+    "Ponto crítico 1 que requer atenção",
+    "Ponto crítico 2 que requer atenção"
+  ],
+  "recomendacoes": [
+    "Recomendação estratégica 1",
+    "Recomendação estratégica 2",
+    "Recomendação estratégica 3"
+  ],
+  "metricas": {
+    "taxaResolucaoPendentes": "${stats.totalPendentes > 0 ? ((stats.pendentesResolvidos / stats.totalPendentes) * 100).toFixed(1) : '0'}%",
+    "taxaResolucaoAlertas": "${stats.totalAlertas > 0 ? ((stats.alertasResolvidos / stats.totalAlertas) * 100).toFixed(1) : '0'}%",
+    "mediaRelatoriosPorLoja": "${stats.lojasAtivas > 0 ? ((stats.totalRelatoriosLivres + stats.totalRelatoriosCompletos) / stats.lojasAtivas).toFixed(1) : '0'}"
+  }
+}`;
+
+  // 5. Chamar IA
+  const response = await invokeLLM({
+    messages: [
+      {
+        role: "system",
+        content: "Você é um analista de negócios especializado em redes de retalho. Retorne APENAS JSON válido, sem texto adicional."
+      },
+      {
+        role: "user",
+        content: prompt
+      }
+    ],
+    response_format: {
+      type: "json_schema",
+      json_schema: {
+        name: "resumo_global",
+        strict: true,
+        schema: {
+          type: "object",
+          properties: {
+            titulo: { type: "string" },
+            resumoExecutivo: { type: "string" },
+            destaques: {
+              type: "array",
+              items: { type: "string" }
+            },
+            pontosCriticos: {
+              type: "array",
+              items: { type: "string" }
+            },
+            recomendacoes: {
+              type: "array",
+              items: { type: "string" }
+            },
+            metricas: {
+              type: "object",
+              properties: {
+                taxaResolucaoPendentes: { type: "string" },
+                taxaResolucaoAlertas: { type: "string" },
+                mediaRelatoriosPorLoja: { type: "string" }
+              },
+              required: ["taxaResolucaoPendentes", "taxaResolucaoAlertas", "mediaRelatoriosPorLoja"],
+              additionalProperties: false
+            }
+          },
+          required: ["titulo", "resumoExecutivo", "destaques", "pontosCriticos", "recomendacoes", "metricas"],
+          additionalProperties: false
+        }
+      }
+    }
+  });
+  
+  const content = response.choices[0].message.content;
+  const analiseIA = JSON.parse(typeof content === 'string' ? content : '{}');
+  
+  // 6. Salvar na BD
+  const resumo = await db.createResumoGlobal({
+    periodo,
+    dataInicio,
+    dataFim,
+    conteudo: JSON.stringify(analiseIA),
+    geradoPor: userId,
+  });
+  
+  return resumo;
+}
+
+/**
+ * Função antiga mantida para compatibilidade (deprecated)
+ */
 export async function gerarResumoGlobal(gestorId: number): Promise<ResumoGlobal> {
   try {
     // Buscar dados do mês atual (calendário)

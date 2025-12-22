@@ -1184,3 +1184,15 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Verificar se cria apenas 1 registro (CONFIRMADO - bug encontrado)
 - [x] Modificar para criar um relatório individual por cada loja selecionada
 - [x] Testar contagem no dashboard e histórico de cada loja
+
+
+## Feature v5.49 - Sistema de Resumos Globais (EM PROGRESSO)
+- [x] Criar tabela `resumos_globais` no schema
+- [x] Criar router `resumosGlobais` com procedures (gerar, listar, getById, getUltimoPorPeriodo)
+- [x] Implementar lógica de geração com IA (mensal/trimestral/semestral/anual)
+- [x] Adicionar funções CRUD no db.ts
+- [ ] Criar página "Resumos Globais" para gerar novos resumos
+- [ ] Criar página "Histórico Resumos Globais" para consultar
+- [ ] Adicionar lembretes no Dashboard quando for altura de gerar
+- [ ] Adicionar rotas no App.tsx e menu no DashboardLayout
+- [ ] Testar geração e visualização de resumos

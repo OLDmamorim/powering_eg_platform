@@ -312,3 +312,20 @@ export const relatoriosIA = mysqlTable("relatorios_ia", {
 
 export type RelatorioIA = typeof relatoriosIA.$inferSelect;
 export type InsertRelatorioIA = typeof relatoriosIA.$inferInsert;
+
+/**
+ * Resumos Globais - Análises periódicas de toda a rede de lojas
+ * Gerados mensalmente, trimestralmente, semestralmente ou anualmente
+ */
+export const resumosGlobais = mysqlTable("resumos_globais", {
+  id: int("id").autoincrement().primaryKey(),
+  periodo: mysqlEnum("periodo", ["mensal", "trimestral", "semestral", "anual"]).notNull(),
+  dataInicio: timestamp("dataInicio").notNull(), // Início do período analisado
+  dataFim: timestamp("dataFim").notNull(), // Fim do período analisado
+  conteudo: text("conteudo").notNull(), // JSON stringificado da análise IA
+  geradoPor: int("geradoPor").notNull(), // FK para users.id (quem gerou)
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type ResumoGlobal = typeof resumosGlobais.$inferSelect;
+export type InsertResumoGlobal = typeof resumosGlobais.$inferInsert;

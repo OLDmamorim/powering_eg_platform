@@ -1470,13 +1470,49 @@ export const appRouter = router({
       }),
   }),
 
-  // ==================== RESUMO GLOBAL ====================
+  // ==================== RESUMO GLOBAL (ANTIGO - DEPRECATED) ====================
   resumoGlobal: router({
     gerar: gestorProcedure.query(async ({ ctx }) => {
       const { gerarResumoGlobal } = await import('./resumoGlobalService');
       const resumo = await gerarResumoGlobal(ctx.gestor?.id || 0);
       return resumo;
     }),
+  }),
+
+  // ==================== RESUMOS GLOBAIS (NOVO) ====================
+  resumosGlobais: router({
+    gerar: protectedProcedure
+      .input(z.object({
+        periodo: z.enum(['mensal', 'trimestral', 'semestral', 'anual']),
+        dataInicio: z.date(),
+        dataFim: z.date(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const { gerarResumoGlobalComIA } = await import('./resumoGlobalService');
+        const resumo = await gerarResumoGlobalComIA(
+          input.periodo,
+          input.dataInicio,
+          input.dataFim,
+          ctx.user.id
+        );
+        return resumo;
+      }),
+    
+    getHistorico: protectedProcedure.query(async () => {
+      return await db.getHistoricoResumosGlobais();
+    }),
+    
+    getById: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        return await db.getResumoGlobalById(input.id);
+      }),
+    
+    getUltimoPorPeriodo: protectedProcedure
+      .input(z.object({ periodo: z.enum(['mensal', 'trimestral', 'semestral', 'anual']) }))
+      .query(async ({ input }) => {
+        return await db.getUltimoResumoGlobalPorPeriodo(input.periodo);
+      }),
   }),
 
   // ==================== GESTÃO DE UTILIZADORES (ADMIN) ====================
