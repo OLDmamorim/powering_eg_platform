@@ -22,6 +22,11 @@ export function PendentesLoja({ lojaId, onPendentesChange }: PendentesLojaProps)
     { lojaId: lojaId! },
     { enabled: !!lojaId }
   );
+  
+  const { data: loja } = trpc.lojas.getById.useQuery(
+    { id: lojaId! },
+    { enabled: !!lojaId }
+  );
 
   // Reset quando muda a loja
   useEffect(() => {
@@ -72,9 +77,9 @@ export function PendentesLoja({ lojaId, onPendentesChange }: PendentesLojaProps)
   return (
     <Card className="border-amber-500/30 bg-amber-500/5" data-pendentes-loja>
       <CardHeader className="pb-3">
-        <CardTitle className="text-lg flex items-center gap-2">
+        <CardTitle className="text-lg flex items-center gap-2 flex-wrap">
           <AlertTriangle className="h-5 w-5 text-amber-500" />
-          Pendentes desta Loja
+          Pendentes: {loja?.nome || "Loja"}
           <Badge variant="outline" className="ml-2 bg-amber-500/10 text-amber-600 border-amber-500/20">
             {pendentes.length} pendente{pendentes.length !== 1 ? "s" : ""}
           </Badge>

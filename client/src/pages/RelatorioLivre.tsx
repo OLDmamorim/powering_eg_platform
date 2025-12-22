@@ -344,12 +344,27 @@ export default function RelatorioLivre() {
                 </p>
               </div>
 
-              {/* Pendentes da Loja Selecionada */}
-              {lojasIds.length === 1 && (
-                <PendentesLoja
-                  lojaId={parseInt(lojasIds[0])}
-                  onPendentesChange={setPendentesExistentes}
-                />
+              {/* Pendentes das Lojas Selecionadas */}
+              {lojasIds.length > 0 && (
+                <div className="space-y-4">
+                  {lojasIds.map((lojaId) => (
+                    <PendentesLoja
+                      key={lojaId}
+                      lojaId={parseInt(lojaId)}
+                      onPendentesChange={(pendentes) => {
+                        // Atualizar pendentes desta loja específica
+                        setPendentesExistentes((prev) => {
+                          // Remover pendentes antigos desta loja
+                          const outrasLojas = prev.filter(
+                            (p) => !pendentes.some((np) => np.id === p.id)
+                          );
+                          // Adicionar pendentes atualizados
+                          return [...outrasLojas, ...pendentes];
+                        });
+                      }}
+                    />
+                  ))}
+                </div>
               )}
 
               <div className="space-y-2">

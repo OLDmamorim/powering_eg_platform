@@ -1164,3 +1164,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Melhorar mensagem de erro para indicar quantos pendentes precisam de estado
 - [x] Adicionar scroll automático para secção "Pendentes desta Loja"
 - [x] Testar submissão de relatório com pendentes
+
+
+## Bug v5.46 - Pendentes Não Aparecem com Múltiplas Lojas ✅ RESOLVIDO
+- [x] Investigar condição `lojasIds.length === 1` no RelatorioLivre
+- [x] Modificar para mostrar pendentes de TODAS as lojas selecionadas
+- [x] Agrupar pendentes por loja com nome da loja no título
+- [x] Testar com 2-3 lojas selecionadas
