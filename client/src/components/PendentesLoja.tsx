@@ -70,7 +70,7 @@ export function PendentesLoja({ lojaId, onPendentesChange }: PendentesLojaProps)
   }
 
   return (
-    <Card className="border-amber-500/30 bg-amber-500/5">
+    <Card className="border-amber-500/30 bg-amber-500/5" data-pendentes-loja>
       <CardHeader className="pb-3">
         <CardTitle className="text-lg flex items-center gap-2">
           <AlertTriangle className="h-5 w-5 text-amber-500" />

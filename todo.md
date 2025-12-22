@@ -1156,3 +1156,11 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Modificar getAllLojas para buscar gestor separadamente com LIMIT 1
 - [x] Garantir que cada loja mostre apenas um gestor
 - [x] Testar visualização
+
+
+## Bug v5.45 - Pendentes Sem Estado no Relatório Livre ✅ RESOLVIDO
+- [x] Investigar página RelatorioLivre.tsx
+- [x] Identificar que erro é sobre pendentes EXISTENTES (não novos)
+- [x] Melhorar mensagem de erro para indicar quantos pendentes precisam de estado
+- [x] Adicionar scroll automático para secção "Pendentes desta Loja"
+- [x] Testar submissão de relatório com pendentes

@@ -236,7 +236,12 @@ export default function RelatorioLivre() {
     const pendentesSemEstado = pendentesExistentes.filter(p => p.status === null);
     
     if (pendentesSemEstado.length > 0) {
-      toast.error("Por favor indique o estado de todos os pendentes antes de submeter");
+      toast.error(`Por favor indique o estado dos ${pendentesSemEstado.length} pendente(s) existente(s) da loja antes de submeter`);
+      // Scroll para a secção de pendentes existentes
+      const pendentesSection = document.querySelector('[data-pendentes-loja]');
+      if (pendentesSection) {
+        pendentesSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
       return;
     }
 
