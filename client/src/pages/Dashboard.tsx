@@ -380,6 +380,70 @@ export default function Dashboard() {
           </Alert>
         )}
 
+        {/* Lembretes de Resumos Globais */}
+        {isAdmin && (() => {
+          const agora = new Date();
+          const lembretes: Array<{periodo: string; mensagem: string; cor: string}> = [];
+          
+          // Mensal - últimos 3 dias do mês
+          const ultimoDiaMes = new Date(agora.getFullYear(), agora.getMonth() + 1, 0).getDate();
+          if (agora.getDate() >= ultimoDiaMes - 2) {
+            lembretes.push({
+              periodo: 'mensal',
+              mensagem: 'Está na altura de gerar o Resumo Global Mensal',
+              cor: 'blue'
+            });
+          }
+          
+          // Trimestral - últimos 5 dias do trimestre
+          const mesAtual = agora.getMonth();
+          const ultimoMesTrimestre = [2, 5, 8, 11].includes(mesAtual);
+          if (ultimoMesTrimestre && agora.getDate() >= ultimoDiaMes - 4) {
+            lembretes.push({
+              periodo: 'trimestral',
+              mensagem: 'Está na altura de gerar o Resumo Global Trimestral',
+              cor: 'purple'
+            });
+          }
+          
+          // Semestral - últimos 7 dias do semestre
+          const ultimoMesSemestre = [5, 11].includes(mesAtual);
+          if (ultimoMesSemestre && agora.getDate() >= ultimoDiaMes - 6) {
+            lembretes.push({
+              periodo: 'semestral',
+              mensagem: 'Está na altura de gerar o Resumo Global Semestral',
+              cor: 'emerald'
+            });
+          }
+          
+          // Anual - últimos 10 dias do ano
+          if (mesAtual === 11 && agora.getDate() >= ultimoDiaMes - 9) {
+            lembretes.push({
+              periodo: 'anual',
+              mensagem: 'Está na altura de gerar o Resumo Global Anual',
+              cor: 'amber'
+            });
+          }
+          
+          return lembretes.map((lembrete, index) => (
+            <Alert key={index} className={`border-${lembrete.cor}-500 bg-${lembrete.cor}-50 text-${lembrete.cor}-900 dark:bg-${lembrete.cor}-950/30 dark:text-${lembrete.cor}-200`}>
+              <Calendar className="h-4 w-4" />
+              <AlertTitle>Lembrete: Resumo Global {lembrete.periodo.charAt(0).toUpperCase() + lembrete.periodo.slice(1)}</AlertTitle>
+              <AlertDescription className="flex items-center justify-between">
+                <span>{lembrete.mensagem}</span>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => setLocation('/resumos-globais')}
+                  className={`border-${lembrete.cor}-500 text-${lembrete.cor}-700 hover:bg-${lembrete.cor}-100 dark:text-${lembrete.cor}-200 dark:hover:bg-${lembrete.cor}-950`}
+                >
+                  Gerar Resumo
+                </Button>
+              </AlertDescription>
+            </Alert>
+          ));
+        })()}
+
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {isAdmin && (
             <>

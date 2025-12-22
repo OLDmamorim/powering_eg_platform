@@ -57,6 +57,8 @@ const getMenuItems = (userRole?: string) => {
     { icon: Bell, label: "Alertas", path: "/alertas", show: isAdmin, showBadge: true },
     { icon: Settings, label: "Config. Alertas", path: "/configuracoes-alertas", show: isAdmin, showBadge: false },
     { icon: Tag, label: "Categorias", path: "/categorias", show: isAdmin, showBadge: false },
+    { icon: BarChart3, label: "Resumos Globais", path: "/resumos-globais", show: isAdmin, showBadge: false },
+    { icon: History, label: "Histórico Resumos", path: "/historico-resumos-globais", show: isAdmin, showBadge: false },
     { icon: ListTodo, label: "Pendentes", path: isAdmin ? "/pendentes-admin" : "/pendentes", show: true, showBadge: false },
 
   ];

@@ -26,6 +26,8 @@ import ResumoGlobal from "./pages/ResumoGlobal";
 import HistoricoRelatoriosIA from "./pages/HistoricoRelatoriosIA";
 import ComparacaoRelatoriosIA from "./pages/ComparacaoRelatoriosIA";
 import GestaoUtilizadores from "./pages/GestaoUtilizadores";
+import ResumosGlobais from "./pages/ResumosGlobais";
+import HistoricoResumosGlobais from "./pages/HistoricoResumosGlobais";
 
 
 function Router() {
@@ -60,6 +62,8 @@ function Router() {
       <Route path={"/alertas"} component={DashboardAlertas} />
       <Route path={"/configuracoes-alertas"} component={ConfiguracoesAlertas} />
       <Route path={"/categorias"} component={Categorias} />
+      <Route path={"/resumos-globais"} component={ResumosGlobais} />
+      <Route path={"/historico-resumos-globais"} component={HistoricoResumosGlobais} />
       
       
       <Route path={"/login-nao-autorizado"} component={LoginNaoAutorizado} />
