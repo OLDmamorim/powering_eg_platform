@@ -1136,3 +1136,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## Ajuste v5.41 - Aumentar Tamanho do Logo
 - [x] Aumentar logo de h-10 para h-14 (56px)
 - [x] Testar visualização
+
+
+## Ajuste v5.42 - Ocultar Logo em Mobile
+- [x] Adicionar classe hidden md:block ao logo no conteúdo
+- [x] Manter apenas logo do header mobile visível
+- [x] Testar em mobile e desktop

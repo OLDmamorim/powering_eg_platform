@@ -304,7 +304,7 @@ export default function Dashboard() {
                 <img 
                   src="/eglass-logo.png" 
                   alt="ExpressGlass Logo" 
-                  className="h-14 w-auto object-contain"
+                  className="hidden md:block h-14 w-auto object-contain"
                 />
               </h1>
               <p className="text-muted-foreground">Bem-vindo ao PoweringEG Platform 2.0</p>
