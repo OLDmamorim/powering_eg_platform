@@ -367,36 +367,40 @@ export const appRouter = router({
         
         const { pendentes, lojasIds, ...relatorioData } = input;
         
-        // Criar relatório com primeira loja (compatibilidade) e array de lojas
-        const relatorio = await db.createRelatorioLivre({
-          ...relatorioData,
-          lojaId: lojasIds[0], // Primeira loja para compatibilidade
-          lojasIds: JSON.stringify(lojasIds), // Array de lojas em JSON
-          gestorId: ctx.gestor.id,
-        });
+        const relatoriosCriados = [];
         
-        // Criar pendentes se existirem (apenas para primeira loja)
-        if (pendentes && pendentes.length > 0) {
-          for (const descricao of pendentes) {
-            await db.createPendente({
-              lojaId: lojasIds[0],
-              relatorioId: relatorio.id,
-              tipoRelatorio: 'livre',
-              descricao,
-            });
-            
-            // Registar atividade de pendente criado
-            await db.registarAtividade({
-              gestorId: ctx.gestor.id,
-              lojaId: lojasIds[0],
-              tipo: 'pendente_criado',
-              descricao: `Novo pendente criado: ${descricao.substring(0, 50)}...`,
-            });
-          }
-        }
-        
-        // Registar atividade de relatório criado para cada loja
+        // Criar um relatório individual para cada loja selecionada
         for (const lojaId of lojasIds) {
+          const relatorio = await db.createRelatorioLivre({
+            ...relatorioData,
+            lojaId,
+            lojasIds: JSON.stringify([lojaId]), // Apenas esta loja
+            gestorId: ctx.gestor.id,
+          });
+          
+          relatoriosCriados.push(relatorio);
+          
+          // Criar pendentes se existirem (para esta loja)
+          if (pendentes && pendentes.length > 0) {
+            for (const descricao of pendentes) {
+              await db.createPendente({
+                lojaId,
+                relatorioId: relatorio.id,
+                tipoRelatorio: 'livre',
+                descricao,
+              });
+              
+              // Registar atividade de pendente criado
+              await db.registarAtividade({
+                gestorId: ctx.gestor.id,
+                lojaId,
+                tipo: 'pendente_criado',
+                descricao: `Novo pendente criado: ${descricao.substring(0, 50)}...`,
+              });
+            }
+          }
+          
+          // Registar atividade de relatório criado
           const loja = await db.getLojaById(lojaId);
           await db.registarAtividade({
             gestorId: ctx.gestor.id,
@@ -405,23 +409,24 @@ export const appRouter = router({
             descricao: `Relatório livre criado para ${loja?.nome || 'loja'}`,
             metadata: { relatorioId: relatorio.id },
           });
+          
+          // Gerar sugestões de melhoria com IA (async, não bloqueia)
+          const conteudo = formatarRelatorioLivre({
+            descricao: input.descricao,
+            dataVisita: input.dataVisita,
+          });
+          gerarSugestoesMelhoria(relatorio.id, 'livre', lojaId, ctx.gestor.id, conteudo)
+            .catch(err => console.error('[Sugestões] Erro ao gerar:', err));
+          
+          // Se admin criou o relatório, notificar gestor responsável pela loja
+          if (ctx.user.role === 'admin') {
+            notificarGestorRelatorioAdmin(relatorio.id, 'livre', lojaId, ctx.user.name || 'Admin')
+              .catch((err: unknown) => console.error('[Email] Erro ao notificar gestor:', err));
+          }
         }
         
-        // Gerar sugestões de melhoria com IA (async, não bloqueia)
-        const conteudo = formatarRelatorioLivre({
-          descricao: input.descricao,
-          dataVisita: input.dataVisita,
-        });
-        gerarSugestoesMelhoria(relatorio.id, 'livre', lojasIds[0], ctx.gestor.id, conteudo)
-          .catch(err => console.error('[Sugestões] Erro ao gerar:', err));
-        
-        // Se admin criou o relatório, notificar gestor responsável pela loja
-        if (ctx.user.role === 'admin') {
-          notificarGestorRelatorioAdmin(relatorio.id, 'livre', lojasIds[0], ctx.user.name || 'Admin')
-            .catch((err: unknown) => console.error('[Email] Erro ao notificar gestor:', err));
-        }
-        
-        return relatorio;
+        // Retornar primeiro relatório (para compatibilidade com frontend)
+        return relatoriosCriados[0];
       }),
     
     update: protectedProcedure

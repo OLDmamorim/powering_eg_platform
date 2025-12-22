@@ -1177,3 +1177,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Modificar PendentesLoja para inicializar status como "continua" em vez de null
 - [x] Utilizador pode alterar individualmente para "resolvido"
 - [x] Testar submissão rápida sem precisar clicar em todos os pendentes
+
+
+## Bug v5.48 - Relatório com 3 Lojas Conta como 1 Relatório ✅ RESOLVIDO
+- [x] Investigar router de criação de relatório livre
+- [x] Verificar se cria apenas 1 registro (CONFIRMADO - bug encontrado)
+- [x] Modificar para criar um relatório individual por cada loja selecionada
+- [x] Testar contagem no dashboard e histórico de cada loja
