@@ -1206,3 +1206,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Atualizar permissões no router resumosGlobais.gerar (protectedProcedure)
 - [x] Atualizar lógica de lembretes no Dashboard.tsx
 - [x] Testar funcionalidade completa
+
+## Limpeza v6.2 - Remover Resumo Global Antigo
+- [x] Remover item "Resumo Global" do menu lateral (DashboardLayout.tsx)
+- [x] Manter apenas "Resumos Globais" (novo sistema)
+- [x] Testar menu
