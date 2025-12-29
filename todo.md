@@ -1418,3 +1418,6 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [ ] Menu dropdown com opções PDF e Excel (skipped - apenas Excel)
 
 - [x] Corrigir filtro de lojas no Dashboard de Resultados (gestores): adicionar "Minhas Lojas" e "Todas as Lojas" no início do dropdown
+
+- [x] Pré-selecionar "Minhas Lojas" por padrão para gestores no Dashboard de Resultados
+- [x] Adicionar badges de contagem ao lado de cada opção do filtro de lojas (ex: "Minhas Lojas (5)", "Todas as Lojas (70)")

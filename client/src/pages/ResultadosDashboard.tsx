@@ -4,6 +4,7 @@ import DashboardLayout from '../components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Button } from '../components/ui/button';
+import { Badge } from '../components/ui/badge';
 import { Loader2, TrendingUp, TrendingDown, Target, Award, BarChart3, LineChart, MapPin, Download } from 'lucide-react';
 import { useAuth } from '../_core/hooks/useAuth';
 
@@ -24,6 +25,13 @@ export function ResultadosDashboard() {
   // Estado dos filtros
   const [periodoSelecionado, setPeriodoSelecionado] = useState<{ mes: number; ano: number } | null>(null);
   const [lojaSelecionada, setLojaSelecionada] = useState<number | 'minhas' | null>(null);
+  
+  // Definir loja padrão como "minhas" para gestores
+  useMemo(() => {
+    if (user?.role === 'gestor' && gestorData && lojaSelecionada === null) {
+      setLojaSelecionada('minhas');
+    }
+  }, [user, gestorData, lojaSelecionada]);
   const [metricaRanking, setMetricaRanking] = useState<'totalServicos' | 'taxaReparacao' | 'desvioPercentualMes' | 'servicosPorColaborador'>('totalServicos');
   const [exportando, setExportando] = useState(false);
   
@@ -193,9 +201,23 @@ export function ResultadosDashboard() {
                 </SelectTrigger>
                 <SelectContent>
                   {user?.role === 'gestor' && gestorData && (
-                    <SelectItem value="minhas">Minhas Lojas</SelectItem>
+                    <SelectItem value="minhas">
+                      <div className="flex items-center gap-2">
+                        <span>Minhas Lojas</span>
+                        <Badge variant="secondary" className="text-xs">
+                          {lojas?.length || 0}
+                        </Badge>
+                      </div>
+                    </SelectItem>
                   )}
-                  <SelectItem value="todas">Todas as Lojas</SelectItem>
+                  <SelectItem value="todas">
+                    <div className="flex items-center gap-2">
+                      <span>Todas as Lojas</span>
+                      <Badge variant="secondary" className="text-xs">
+                        {estatisticas?.totalLojas || 0}
+                      </Badge>
+                    </div>
+                  </SelectItem>
                   {lojas?.map((loja) => (
                     <SelectItem key={loja.id} value={loja.id.toString()}>
                       {loja.nome}
