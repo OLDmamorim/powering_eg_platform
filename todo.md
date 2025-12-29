@@ -1373,3 +1373,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 ### Testes
 - [x] Criar testes para comparação de lojas
 - [x] Validar cálculos de diferenças percentuais
+
+
+## Correção - Navegação após Upload v4.1.1
+
+- [x] Adicionar DashboardLayout à página ResultadosUpload
+- [x] Adicionar botão "Voltar ao Dashboard" após upload concluído
+- [x] Testar navegação

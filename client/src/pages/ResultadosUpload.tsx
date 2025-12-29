@@ -4,10 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Upload, FileSpreadsheet, CheckCircle, AlertCircle } from 'lucide-react';
+import { Upload, FileSpreadsheet, CheckCircle, AlertCircle, Home } from 'lucide-react';
+import DashboardLayout from '@/components/DashboardLayout';
+import { useLocation } from 'wouter';
 // Toast removido - usando alerts
 
 export default function ResultadosUpload() {
+  const [, setLocation] = useLocation();
   // Toast removido
   const [file, setFile] = useState<File | null>(null);
   const [mes, setMes] = useState<string>('');
@@ -104,7 +107,8 @@ export default function ResultadosUpload() {
   };
 
   return (
-    <div className="container mx-auto py-8">
+    <DashboardLayout>
+      <div className="container mx-auto py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold">Upload de Resultados</h1>
         <p className="text-muted-foreground mt-2">
@@ -228,6 +232,15 @@ export default function ResultadosUpload() {
                   </div>
                 </div>
               )}
+              
+              <Button
+                onClick={() => setLocation('/')}
+                variant="outline"
+                className="w-full"
+              >
+                <Home className="mr-2 h-4 w-4" />
+                Voltar ao Dashboard
+              </Button>
             </CardContent>
           </Card>
         )}
@@ -246,6 +259,7 @@ export default function ResultadosUpload() {
           </CardContent>
         </Card>
       </div>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 }
