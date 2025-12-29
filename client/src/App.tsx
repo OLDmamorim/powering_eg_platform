@@ -32,6 +32,7 @@ import ReuniõesGestores from "./pages/ReuniõesGestores";
 import ReuniõesLojas from "./pages/ReuniõesLojas";
 import ResultadosUpload from "./pages/ResultadosUpload";
 import { ResultadosDashboard } from "./pages/ResultadosDashboard";
+import { ComparacaoLojas } from "./pages/ComparacaoLojas";
 
 
 function Router() {
@@ -72,6 +73,7 @@ function Router() {
       <Route path={"/reunioes-lojas"} component={ReuniõesLojas} />
       <Route path={"/resultados-upload"} component={ResultadosUpload} />
       <Route path={"/resultados-dashboard"} component={ResultadosDashboard} />
+      <Route path={"/comparacao-lojas"} component={ComparacaoLojas} />
       
       
       <Route path={"/login-nao-autorizado"} component={LoginNaoAutorizado} />

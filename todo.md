@@ -1355,3 +1355,21 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Criar testes para queries de evolução
 - [x] Criar testes para rankings
 - [x] Criar testes para comparações
+
+
+## Comparação Lado-a-Lado de Lojas v4.1
+
+### Frontend
+- [x] Criar página ComparacaoLojas.tsx
+- [x] Adicionar seleção de 2 lojas (dropdowns)
+- [x] Adicionar seleção de período (mês/ano)
+- [x] Implementar cards paralelos com métricas de cada loja
+- [x] Criar gráficos de barras comparativos
+- [x] Adicionar indicadores de diferença (%, setas, cores)
+- [x] Implementar análise automática com resumo textual
+- [x] Adicionar rota /comparacao-lojas
+- [x] Adicionar item no menu lateral
+
+### Testes
+- [x] Criar testes para comparação de lojas
+- [x] Validar cálculos de diferenças percentuais
