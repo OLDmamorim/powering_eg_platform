@@ -36,6 +36,9 @@ export function ResultadosDashboard() {
   const { data: periodos, isLoading: loadingPeriodos } = trpc.resultados.periodos.useQuery();
   const { data: lojas, isLoading: loadingLojas } = trpc.lojas.getByGestor.useQuery();
   
+  // Query para obter total global de lojas (sem filtro de gestor)
+  const { data: todasLojas } = trpc.lojas.list.useQuery();
+  
   // Definir período padrão (mais recente)
   useMemo(() => {
     if (periodos && periodos.length > 0 && !periodoSelecionado) {
@@ -311,7 +314,7 @@ export function ResultadosDashboard() {
                     <div className="flex items-center gap-2">
                       <span>Todas as Lojas</span>
                       <Badge variant="secondary" className="text-xs">
-                        {estatisticas?.totalLojas || 0}
+                        {todasLojas?.length || estatisticas?.totalLojas || 0}
                       </Badge>
                     </div>
                   </SelectItem>

@@ -1433,3 +1433,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Corrigir opção "Minhas Lojas" para aparecer SEMPRE para gestores
 - [x] Pré-selecionar "Minhas Lojas" automaticamente quando gestor abre a página
 - [x] Filtrar dados corretamente quando "Minhas Lojas" está selecionado
+
+## Correção v4.8 - Badge "Todas as Lojas" mostra total do país
+- [x] Corrigir badge de "Todas as Lojas" para mostrar 69 (total do país) em vez de 14 (lojas do gestor)
+- [x] Garantir que selecionar "Todas as Lojas" mostra dados de todas as 69 lojas
