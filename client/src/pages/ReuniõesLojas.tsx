@@ -20,6 +20,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { AtribuirAcoesModal } from "@/components/AtribuirAcoesModal";
 import { EnviarEmailModal } from "@/components/EnviarEmailModal";
 import DashboardLayout from "@/components/DashboardLayout";
+import { FiltrosReunioes } from "@/components/FiltrosReunioes";
 
 export default function ReuniõesLojas() {
   const { user } = useAuth();
@@ -38,12 +39,13 @@ export default function ReuniõesLojas() {
   const [reuniaoSelecionada, setReuniaoSelecionada] = useState<number | null>(null);
   const [modalAtribuir, setModalAtribuir] = useState(false);
   const [modalEmail, setModalEmail] = useState(false);
+  const [filtros, setFiltros] = useState<any>({});
 
   const { data: todasLojas } = trpc.lojas.list.useQuery();
   const { data: minhasLojas } = trpc.lojas.list.useQuery(undefined, {
     enabled: !isAdmin,
   });
-  const { data: historico, refetch } = trpc.reunioesLojas.listar.useQuery();
+  const { data: historico, refetch } = trpc.reunioesLojas.listar.useQuery(filtros);
   const criarMutation = trpc.reunioesLojas.criar.useMutation();
   const atribuirAcoesMutation = trpc.reunioesLojas.atribuirAcoes.useMutation();
   const enviarEmailMutation = trpc.reunioesLojas.enviarEmail.useMutation();
@@ -119,6 +121,15 @@ export default function ReuniõesLojas() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
+      {/* Filtros */}
+      {!mostrarFormulario && historico && (
+        <FiltrosReunioes
+          onFiltrar={setFiltros}
+          todasTags={Array.from(new Set(historico.flatMap(r => r.tags ? JSON.parse(r.tags) : [])))}
+          gestores={gestores?.map(g => ({ id: g.id, nome: g.nome }))}
+        />
+      )}
+      
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Reuniões de Lojas</h1>

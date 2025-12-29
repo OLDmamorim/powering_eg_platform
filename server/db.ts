@@ -2652,7 +2652,13 @@ export async function updateReuniaoGestores(
 /**
  * Obter histórico de reuniões de gestores (ordenado por data DESC)
  */
-export async function getHistoricoReuniõesGestores(): Promise<Array<ReuniaoGestores & { criadoPorNome: string }>> {
+export async function getHistoricoReuniõesGestores(filtros?: {
+  dataInicio?: Date;
+  dataFim?: Date;
+  tags?: string[];
+  criadoPor?: number;
+  pesquisa?: string;
+}): Promise<Array<ReuniaoGestores & { criadoPorNome: string | null }>> {
   const db = await getDb();
   if (!db) return [];
   
@@ -2674,19 +2680,44 @@ export async function getHistoricoReuniõesGestores(): Promise<Array<ReuniaoGest
     .innerJoin(users, eq(reunioesGestores.criadoPor, users.id))
     .orderBy(desc(reunioesGestores.data));
   
-  return result.map(r => ({
-    id: r.id,
-    data: r.data,
-    presencas: r.presencas,
-    outrosPresentes: r.outrosPresentes,
-    conteudo: r.conteudo,
-    resumoIA: r.resumoIA,
-    tags: r.tags,
-    criadoPor: r.criadoPor,
-    createdAt: r.createdAt,
-    updatedAt: r.updatedAt,
-    criadoPorNome: r.criadoPorNome || 'Desconhecido',
-  }));
+  // Aplicar todos os filtros
+  let filtered = result;
+  
+  if (filtros?.dataInicio) {
+    const dataInicioTs = filtros.dataInicio.getTime();
+    filtered = filtered.filter(r => {
+      const dataTs = typeof r.data === 'number' ? r.data : new Date(r.data).getTime();
+      return dataTs >= dataInicioTs;
+    });
+  }
+  if (filtros?.dataFim) {
+    const dataFimTs = filtros.dataFim.getTime();
+    filtered = filtered.filter(r => {
+      const dataTs = typeof r.data === 'number' ? r.data : new Date(r.data).getTime();
+      return dataTs <= dataFimTs;
+    });
+  }
+  if (filtros?.criadoPor) {
+    filtered = filtered.filter(r => r.criadoPor === filtros.criadoPor);
+  }
+  
+  if (filtros?.tags && filtros.tags.length > 0) {
+    filtered = filtered.filter(r => {
+      if (!r.tags) return false;
+      const reuniaoTags = JSON.parse(r.tags);
+      return filtros.tags!.some(tag => reuniaoTags.includes(tag));
+    });
+  }
+  
+  if (filtros?.pesquisa) {
+    const pesquisaLower = filtros.pesquisa.toLowerCase();
+    filtered = filtered.filter(r => 
+      r.conteudo.toLowerCase().includes(pesquisaLower) ||
+      (r.resumoIA && r.resumoIA.toLowerCase().includes(pesquisaLower))
+    );
+  }
+  
+  return filtered;
 }
 
 /**
@@ -2748,12 +2779,19 @@ export async function updateReuniaoLojas(
  * Obter histórico de reuniões de lojas (filtrado por gestor se fornecido)
  */
 export async function getHistoricoReuniõesLojas(
-  gestorId?: number
+  gestorId?: number,
+  filtros?: {
+    dataInicio?: Date;
+    dataFim?: Date;
+    tags?: string[];
+    criadoPor?: number;
+    pesquisa?: string;
+  }
 ): Promise<Array<ReuniaoLojas & { criadoPorNome: string; lojasNomes: string[] }>> {
   const db = await getDb();
   if (!db) return [];
   
-  let query = db
+  const result = await db
     .select({
       id: reunioesLojas.id,
       data: reunioesLojas.data,
@@ -2771,8 +2809,6 @@ export async function getHistoricoReuniõesLojas(
     .innerJoin(users, eq(reunioesLojas.criadoPor, users.id))
     .orderBy(desc(reunioesLojas.data));
   
-  const result = await query;
-  
   // Se é gestor, filtrar apenas reuniões das suas lojas
   let filteredResult = result;
   if (gestorId) {
@@ -2783,6 +2819,42 @@ export async function getHistoricoReuniõesLojas(
       const lojaIds = JSON.parse(r.lojaIds) as number[];
       return lojaIds.some(id => lojaIdsGestor.includes(id));
     });
+  }
+  
+  // Aplicar filtros de data e criador
+  if (filtros?.dataInicio) {
+    const dataInicioTs = filtros.dataInicio.getTime();
+    filteredResult = filteredResult.filter(r => {
+      const dataTs = typeof r.data === 'number' ? r.data : new Date(r.data).getTime();
+      return dataTs >= dataInicioTs;
+    });
+  }
+  if (filtros?.dataFim) {
+    const dataFimTs = filtros.dataFim.getTime();
+    filteredResult = filteredResult.filter(r => {
+      const dataTs = typeof r.data === 'number' ? r.data : new Date(r.data).getTime();
+      return dataTs <= dataFimTs;
+    });
+  }
+  if (filtros?.criadoPor) {
+    filteredResult = filteredResult.filter(r => r.criadoPor === filtros.criadoPor);
+  }
+  
+  // Aplicar filtros de tags e pesquisa antes de buscar nomes
+  if (filtros?.tags && filtros.tags.length > 0) {
+    filteredResult = filteredResult.filter(r => {
+      if (!r.tags) return false;
+      const reuniaoTags = JSON.parse(r.tags);
+      return filtros.tags!.some(tag => reuniaoTags.includes(tag));
+    });
+  }
+  
+  if (filtros?.pesquisa) {
+    const pesquisaLower = filtros.pesquisa.toLowerCase();
+    filteredResult = filteredResult.filter(r => 
+      r.conteudo.toLowerCase().includes(pesquisaLower) ||
+      (r.resumoIA && r.resumoIA.toLowerCase().includes(pesquisaLower))
+    );
   }
   
   // Buscar nomes das lojas

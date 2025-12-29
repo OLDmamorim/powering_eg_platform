@@ -1263,3 +1263,20 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Envolver ReuniõesGestores.tsx com DashboardLayout
 - [x] Envolver ReuniõesLojas.tsx com DashboardLayout
 - [x] Testar navegação entre páginas
+
+## Feature v6.6 - Filtros no Histórico de Reuniões
+### Backend
+- [x] Atualizar procedure listar de reuniões de gestores com filtros
+- [x] Atualizar procedure listar de reuniões de lojas com filtros
+- [x] Adicionar filtros: dataInicio, dataFim, tags, criadoPor, pesquisa
+
+### Frontend
+- [x] Criar componente de filtros reutilizável
+- [x] Adicionar filtros na página ReuniõesGestores
+- [x] Adicionar filtros na página ReuniõesLojas
+- [x] Implementar pesquisa por texto no conteúdo
+- [x] Adicionar botão "Limpar Filtros"
+
+### Testes
+- [x] Verificar funcionalidade no browser
+- [x] Validar integração frontend-backend

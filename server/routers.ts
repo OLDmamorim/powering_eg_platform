@@ -1608,9 +1608,18 @@ export const appRouter = router({
         return { success: true };
       }),
     
-    listar: protectedProcedure.query(async () => {
-      return await db.getHistoricoReuniõesGestores();
-    }),
+    listar: protectedProcedure
+      .input(z.object({
+        dataInicio: z.date().optional(),
+        dataFim: z.date().optional(),
+        tags: z.array(z.string()).optional(),
+        criadoPor: z.number().optional(),
+        pesquisa: z.string().optional(),
+      }).optional())
+      .query(async ({ input }) => {
+        const filtros = input || {};
+        return await db.getHistoricoReuniõesGestores(filtros);
+      }),
     
     getById: protectedProcedure
       .input(z.object({ id: z.number() }))
@@ -1803,16 +1812,25 @@ export const appRouter = router({
         return { success: true };
       }),
     
-    listar: protectedProcedure.query(async ({ ctx }) => {
-      // Admin vê todas, gestor vê apenas das suas lojas
-      if (ctx.user.role === 'admin') {
-        return await db.getHistoricoReuniõesLojas();
-      } else {
-        const gestor = await db.getGestorByUserId(ctx.user.id);
-        if (!gestor) return [];
-        return await db.getHistoricoReuniõesLojas(gestor.id);
-      }
-    }),
+    listar: protectedProcedure
+      .input(z.object({
+        dataInicio: z.date().optional(),
+        dataFim: z.date().optional(),
+        tags: z.array(z.string()).optional(),
+        criadoPor: z.number().optional(),
+        pesquisa: z.string().optional(),
+      }).optional())
+      .query(async ({ ctx, input }) => {
+        const filtros = input || {};
+        // Admin vê todas, gestor vê apenas das suas lojas
+        if (ctx.user.role === 'admin') {
+          return await db.getHistoricoReuniõesLojas(undefined, filtros);
+        } else {
+          const gestor = await db.getGestorByUserId(ctx.user.id);
+          if (!gestor) return [];
+          return await db.getHistoricoReuniõesLojas(gestor.id, filtros);
+        }
+      }),
     
     getById: protectedProcedure
       .input(z.object({ id: z.number() }))
