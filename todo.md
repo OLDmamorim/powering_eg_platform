@@ -1426,3 +1426,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 
 - [x] Bug: Adicionar opção "Minhas Lojas" no dropdown de filtro do Dashboard de Resultados (para gestores)
 - [x] Bug: Fazer filtro de loja afetar TODOS os dados (estatísticas, ranking, zona), não apenas gráfico de evolução
+
+- [ ] Bug CRÍTICO: Opção "Minhas Lojas" não aparece no dropdown do Dashboard de Resultados para gestores
+
+## Correção v4.7 - Filtro "Minhas Lojas" no Dashboard de Resultados
+- [x] Corrigir opção "Minhas Lojas" para aparecer SEMPRE para gestores
+- [x] Pré-selecionar "Minhas Lojas" automaticamente quando gestor abre a página
+- [x] Filtrar dados corretamente quando "Minhas Lojas" está selecionado

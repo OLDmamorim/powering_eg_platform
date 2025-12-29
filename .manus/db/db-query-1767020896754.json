@@ -1,0 +1,130 @@
+{
+  "query": "SELECT u.id as user_id, u.name, u.email, u.role, g.id as gestor_id, COUNT(gl.id) as num_lojas\nFROM users u \nLEFT JOIN gestores g ON g.userId = u.id\nLEFT JOIN gestor_lojas gl ON gl.gestorId = g.id\nWHERE u.role = 'gestor'\nGROUP BY u.id, u.name, u.email, u.role, g.id;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT u.id as user_id, u.name, u.email, u.role, g.id as gestor_id, COUNT(gl.id) as num_lojas\nFROM users u \nLEFT JOIN gestores g ON g.userId = u.id\nLEFT JOIN gestor_lojas gl ON gl.gestorId = g.id\nWHERE u.role = 'gestor'\nGROUP BY u.id, u.name, u.email, u.role, g.id;",
+  "rows": [
+    {
+      "user_id": "2160144",
+      "name": "Rui Adrião",
+      "email": "rui.adriao@expressglass.pt",
+      "role": "gestor",
+      "gestor_id": "120004",
+      "num_lojas": "3"
+    },
+    {
+      "user_id": "4050002",
+      "name": "Gestor Email Test",
+      "email": "gestor.email@test.com",
+      "role": "gestor",
+      "gestor_id": "NULL",
+      "num_lojas": "0"
+    },
+    {
+      "user_id": "4080005",
+      "name": "Gestor Comentarios Test",
+      "email": "gestor.comentarios@test.com",
+      "role": "gestor",
+      "gestor_id": "NULL",
+      "num_lojas": "0"
+    },
+    {
+      "user_id": "2160129",
+      "name": "Carlos Eduardo",
+      "email": "carlos.eduardo@expressglass.pt",
+      "role": "gestor",
+      "gestor_id": "120003",
+      "num_lojas": "12"
+    },
+    {
+      "user_id": "4500008",
+      "name": "Gestor Teste IA",
+      "email": "gestor-ia-test-1766250017757@test.com",
+      "role": "gestor",
+      "gestor_id": "NULL",
+      "num_lojas": "0"
+    },
+    {
+      "user_id": "6030027",
+      "name": "Gestor Reunioes Filtro",
+      "email": "gestor-reunioes-filtro@test.com",
+      "role": "gestor",
+      "gestor_id": "NULL",
+      "num_lojas": "0"
+    },
+    {
+      "user_id": "4020004",
+      "name": "Gestor Teste",
+      "email": "gestor@test.com",
+      "role": "gestor",
+      "gestor_id": "NULL",
+      "num_lojas": "0"
+    },
+    {
+      "user_id": "4500004",
+      "name": "Gestor Teste IA",
+      "email": "gestor-ia-test-1766249833201@test.com",
+      "role": "gestor",
+      "gestor_id": "NULL",
+      "num_lojas": "0"
+    },
+    {
+      "user_id": "4080053",
+      "name": "Gestor Lojas Test",
+      "email": "gestor.lojas@test.com",
+      "role": "gestor",
+      "gestor_id": "NULL",
+      "num_lojas": "0"
+    },
+    {
+      "user_id": "4350004",
+      "name": "Gestor Cumprimento 1766241280954",
+      "email": "cumprimento-1766241280954@test.com",
+      "role": "gestor",
+      "gestor_id": "NULL",
+      "num_lojas": "0"
+    },
+    {
+      "user_id": "4500006",
+      "name": "Gestor Teste IA",
+      "email": "gestor-ia-test-1766249884192@test.com",
+      "role": "gestor",
+      "gestor_id": "NULL",
+      "num_lojas": "0"
+    },
+    {
+      "user_id": "420030",
+      "name": "Marco Amorim",
+      "email": "mamorim@expressglass.pt",
+      "role": "gestor",
+      "gestor_id": "30001",
+      "num_lojas": "16"
+    },
+    {
+      "user_id": "2160121",
+      "name": "Marco Vilar",
+      "email": "mvilar@expressglass.pt",
+      "role": "gestor",
+      "gestor_id": "120001",
+      "num_lojas": "12"
+    },
+    {
+      "user_id": "2160125",
+      "name": "Mónica Correira",
+      "email": "mcorreia@expressglass.pt",
+      "role": "gestor",
+      "gestor_id": "120002",
+      "num_lojas": "16"
+    },
+    {
+      "user_id": "240121",
+      "name": "Fábio Dias",
+      "email": "fdias@expressglass.pt",
+      "role": "gestor",
+      "gestor_id": "180001",
+      "num_lojas": "13"
+    }
+  ],
+  "messages": [],
+  "stdout": "user_id\tname\temail\trole\tgestor_id\tnum_lojas\n2160144\tRui Adrião\trui.adriao@expressglass.pt\tgestor\t120004\t3\n4050002\tGestor Email Test\tgestor.email@test.com\tgestor\tNULL\t0\n4080005\tGestor Comentarios Test\tgestor.comentarios@test.com\tgestor\tNULL\t0\n2160129\tCarlos Eduardo\tcarlos.eduardo@expressglass.pt\tgestor\t120003\t12\n4500008\tGestor Teste IA\tgestor-ia-test-1766250017757@test.com\tgestor\tNULL\t0\n6030027\tGestor Reunioes Filtro\tgestor-reunioes-filtro@test.com\tgestor\tNULL\t0\n4020004\tGestor Teste\tgestor@test.com\tgestor\tNULL\t0\n4500004\tGestor Teste IA\tgestor-ia-test-1766249833201@test.com\tgestor\tNULL\t0\n4080053\tGestor Lojas Test\tgestor.lojas@test.com\tgestor\tNULL\t0\n4350004\tGestor Cumprimento 1766241280954\tcumprimento-1766241280954@test.com\tgestor\tNULL\t0\n4500006\tGestor Teste IA\tgestor-ia-test-1766249884192@test.com\tgestor\tNULL\t0\n420030\tMarco Amorim\tmamorim@expressglass.pt\tgestor\t30001\t16\n2160121\tMarco Vilar\tmvilar@expressglass.pt\tgestor\t120001\t12\n2160125\tMónica Correira\tmcorreia@expressglass.pt\tgestor\t120002\t16\n240121\tFábio Dias\tfdias@expressglass.pt\tgestor\t180001\t13\n",
+  "stderr": "",
+  "execution_time_ms": 59
+}

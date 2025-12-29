@@ -230,6 +230,24 @@ export const appRouter = router({
 
   // ==================== GESTORES ====================
   gestores: router({
+    // Endpoint para gestor obter os seus próprios dados (acessível por gestores)
+    me: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user.role !== 'gestor' && ctx.user.role !== 'admin') {
+        return null;
+      }
+      const gestor = await db.getGestorByUserId(ctx.user.id);
+      if (!gestor) return null;
+      
+      // Buscar lojas associadas ao gestor
+      const lojasDoGestor = await db.getLojasByGestorId(gestor.id);
+      
+      return {
+        ...gestor,
+        lojas: lojasDoGestor,
+        user: ctx.user
+      };
+    }),
+    
     list: adminProcedure.query(async () => {
       return await db.getAllGestores();
     }),

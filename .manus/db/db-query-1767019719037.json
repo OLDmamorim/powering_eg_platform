@@ -1,0 +1,43 @@
+{
+  "query": "SELECT * FROM users WHERE email LIKE '%marco%' OR name LIKE '%Marco%';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT * FROM users WHERE email LIKE '%marco%' OR name LIKE '%Marco%';",
+  "rows": [
+    {
+      "id": "1",
+      "openId": "JwvyMVKfrKUJQ7cLCJGEkL",
+      "name": "Marco Amorim",
+      "email": "mramorim78@gmail.com",
+      "loginMethod": "google",
+      "role": "admin",
+      "createdAt": "2025-12-12 17:44:16",
+      "updatedAt": "2025-12-29 13:51:26",
+      "lastSignedIn": "2025-12-29 13:51:27"
+    },
+    {
+      "id": "420030",
+      "openId": "M6W777U2ZPR3y5QVg75RaS",
+      "name": "Marco Amorim",
+      "email": "mamorim@expressglass.pt",
+      "loginMethod": "google",
+      "role": "gestor",
+      "createdAt": "2025-12-15 12:34:33",
+      "updatedAt": "2025-12-29 14:45:38",
+      "lastSignedIn": "2025-12-29 14:45:39"
+    },
+    {
+      "id": "2160121",
+      "openId": "pending-mvilar@expressglass.pt-1766011492113",
+      "name": "Marco Vilar",
+      "email": "mvilar@expressglass.pt",
+      "loginMethod": "pending",
+      "role": "gestor",
+      "createdAt": "2025-12-17 22:44:52",
+      "updatedAt": "2025-12-17 22:44:52",
+      "lastSignedIn": "2025-12-17 22:44:52"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\topenId\tname\temail\tloginMethod\trole\tcreatedAt\tupdatedAt\tlastSignedIn\n1\tJwvyMVKfrKUJQ7cLCJGEkL\tMarco Amorim\tmramorim78@gmail.com\tgoogle\tadmin\t2025-12-12 17:44:16\t2025-12-29 13:51:26\t2025-12-29 13:51:27\n420030\tM6W777U2ZPR3y5QVg75RaS\tMarco Amorim\tmamorim@expressglass.pt\tgoogle\tgestor\t2025-12-15 12:34:33\t2025-12-29 14:45:38\t2025-12-29 14:45:39\n2160121\tpending-mvilar@expressglass.pt-1766011492113\tMarco Vilar\tmvilar@expressglass.pt\tpending\tgestor\t2025-12-17 22:44:52\t2025-12-17 22:44:52\t2025-12-17 22:44:52\n",
+  "stderr": "",
+  "execution_time_ms": 55
+}

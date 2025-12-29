@@ -14,13 +14,11 @@ export function ResultadosDashboard() {
   const { user } = useAuth();
   
   // Buscar dados do gestor se usuário for gestor
-  const { data: gestorData } = trpc.gestores.list.useQuery(
+  const { data: gestorData, isLoading: loadingGestorData } = trpc.gestores.me.useQuery(
     undefined,
-    { 
-      enabled: user?.role === 'gestor',
-      select: (gestores) => gestores.find(g => g.user.id === user?.id)
-    }
+    { enabled: user?.role === 'gestor' }
   );
+  
   
   // Estado dos filtros
   const [periodoSelecionado, setPeriodoSelecionado] = useState<{ mes: number; ano: number } | null>(null);
@@ -28,12 +26,6 @@ export function ResultadosDashboard() {
   const [periodoComparacao2, setPeriodoComparacao2] = useState<{ mes: number; ano: number } | null>(null);
   const [lojaSelecionada, setLojaSelecionada] = useState<number | 'minhas' | null>(null);
   
-  // Definir loja padrão como "minhas" para gestores
-  useMemo(() => {
-    if (user?.role === 'gestor' && gestorData && lojaSelecionada === null) {
-      setLojaSelecionada('minhas');
-    }
-  }, [user, gestorData, lojaSelecionada]);
   const [metricaRanking, setMetricaRanking] = useState<'totalServicos' | 'taxaReparacao' | 'desvioPercentualMes' | 'servicosPorColaborador'>('totalServicos');
   const [exportando, setExportando] = useState(false);
   
@@ -51,15 +43,21 @@ export function ResultadosDashboard() {
     }
   }, [periodos, periodoSelecionado]);
   
+  // Definir loja padrão como "minhas" para gestores
+  useMemo(() => {
+    if (user?.role === 'gestor' && lojaSelecionada === null) {
+      setLojaSelecionada('minhas');
+    }
+  }, [user, lojaSelecionada]);
+  
   // Preparar filtro de lojas
   const lojasIdsParaFiltro = useMemo(() => {
-    if (lojaSelecionada === 'minhas' && gestorData) {
-      return lojas?.filter(l => 
-        gestorData.lojas?.some((gl: any) => gl.id === l.id)
-      ).map(l => l.id) || [];
+    if (lojaSelecionada === 'minhas' && user?.role === 'gestor' && lojas) {
+      // Para gestores, "Minhas Lojas" são todas as lojas que o endpoint retorna
+      return lojas.map(l => l.id);
     }
     return undefined;
-  }, [lojaSelecionada, gestorData, lojas]);
+  }, [lojaSelecionada, user, lojas]);
   
   // Queries condicionais (apenas quando há período selecionado)
   const { data: estatisticas, isLoading: loadingEstatisticas } = trpc.resultados.estatisticas.useQuery(
@@ -298,7 +296,8 @@ export function ResultadosDashboard() {
                   <SelectValue placeholder="Selecione uma loja" />
                 </SelectTrigger>
                 <SelectContent>
-                  {user?.role === 'gestor' && gestorData && (
+                  {/* Minhas Lojas - aparece SEMPRE para gestores */}
+                  {user?.role === 'gestor' && (
                     <SelectItem value="minhas">
                       <div className="flex items-center gap-2">
                         <span>Minhas Lojas</span>
