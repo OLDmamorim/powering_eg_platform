@@ -1437,3 +1437,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## Correção v4.8 - Badge "Todas as Lojas" mostra total do país
 - [x] Corrigir badge de "Todas as Lojas" para mostrar 69 (total do país) em vez de 14 (lojas do gestor)
 - [x] Garantir que selecionar "Todas as Lojas" mostra dados de todas as 69 lojas
+
+## Bug v4.8.1 - Filtro "Todas as Lojas" não funciona
+- [x] Corrigir lógica: quando "Todas as Lojas" selecionado, não passar filtro de lojas (mostrar dados globais)
+- [x] Garantir que estatísticas, ranking e gráficos mostram dados de todas as 69 lojas

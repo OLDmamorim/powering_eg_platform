@@ -24,7 +24,7 @@ export function ResultadosDashboard() {
   const [periodoSelecionado, setPeriodoSelecionado] = useState<{ mes: number; ano: number } | null>(null);
   const [periodoComparacao1, setPeriodoComparacao1] = useState<{ mes: number; ano: number } | null>(null);
   const [periodoComparacao2, setPeriodoComparacao2] = useState<{ mes: number; ano: number } | null>(null);
-  const [lojaSelecionada, setLojaSelecionada] = useState<number | 'minhas' | null>(null);
+  const [lojaSelecionada, setLojaSelecionada] = useState<number | 'minhas' | 'todas' | null>(null);
   
   const [metricaRanking, setMetricaRanking] = useState<'totalServicos' | 'taxaReparacao' | 'desvioPercentualMes' | 'servicosPorColaborador'>('totalServicos');
   const [exportando, setExportando] = useState(false);
@@ -55,8 +55,12 @@ export function ResultadosDashboard() {
   
   // Preparar filtro de lojas
   const lojasIdsParaFiltro = useMemo(() => {
+    // "Todas as Lojas" = sem filtro (undefined)
+    if (lojaSelecionada === 'todas' || lojaSelecionada === null) {
+      return undefined;
+    }
+    // "Minhas Lojas" = filtrar pelas lojas do gestor
     if (lojaSelecionada === 'minhas' && user?.role === 'gestor' && lojas) {
-      // Para gestores, "Minhas Lojas" são todas as lojas que o endpoint retorna
       return lojas.map(l => l.id);
     }
     return undefined;
@@ -290,7 +294,7 @@ export function ResultadosDashboard() {
               <Select
                 value={lojaSelecionada?.toString() || 'todas'}
                 onValueChange={(value) => {
-                  if (value === 'todas') setLojaSelecionada(null);
+                  if (value === 'todas') setLojaSelecionada('todas');
                   else if (value === 'minhas') setLojaSelecionada('minhas');
                   else setLojaSelecionada(Number(value));
                 }}
