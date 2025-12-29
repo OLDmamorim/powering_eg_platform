@@ -1,6 +1,6 @@
 import * as XLSX from 'xlsx';
 import { getDb } from './db';
-import { resultadosMensais, lojas } from '../drizzle/schema';
+import { resultadosMensais, lojas, totaisMensais } from '../drizzle/schema';
 import { eq, and } from 'drizzle-orm';
 
 export interface ResultadoExcel {
@@ -22,6 +22,7 @@ export interface ResultadoExcel {
 
 /**
  * Processa ficheiro Excel e extrai dados da folha "Faturados" (colunas A-N)
+ * Guarda dados por loja E totais globais (incluindo PROMOTOR)
  */
 export async function processarExcelResultados(
   fileBuffer: Buffer,
@@ -50,16 +51,67 @@ export async function processarExcelResultados(
     // Converter para JSON (linhas como arrays)
     const data: any[][] = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
-    // Linha 8 (índice 7) contém os cabeçalhos
-    // Linha 10+ (índice 9+) contém os dados das lojas
-    // Ignorar linha 10 (Total Serviços Faturados)
-    
     // Buscar todas as lojas da base de dados para matching
     const todasLojas = await db.select().from(lojas);
     const lojasMap = new Map<string, number>();
     todasLojas.forEach(loja => {
       lojasMap.set(normalizeName(loja.nome), loja.id);
     });
+
+    // Extrair totais globais da linha "Total Serviços Faturados" (linha 10, índice 9)
+    const linhaTotais = data[9];
+    if (linhaTotais && String(linhaTotais[1] || '').toLowerCase().includes('total')) {
+      const totaisGlobais = {
+        totalServicos: parseNumber(linhaTotais[2]),
+        objetivoMensal: parseNumber(linhaTotais[6]),
+        numColaboradores: parseNumber(linhaTotais[4]),
+        taxaReparacao: parseNumber(linhaTotais[10]),
+        qtdReparacoes: parseNumber(linhaTotais[11]),
+        qtdParaBrisas: parseNumber(linhaTotais[12]),
+      };
+
+      // Guardar ou atualizar totais globais
+      const existenteTotais = await db
+        .select()
+        .from(totaisMensais)
+        .where(
+          and(
+            eq(totaisMensais.mes, mes),
+            eq(totaisMensais.ano, ano)
+          )
+        )
+        .limit(1);
+
+      if (existenteTotais.length > 0) {
+        await db
+          .update(totaisMensais)
+          .set({
+            totalServicos: totaisGlobais.totalServicos,
+            objetivoMensal: totaisGlobais.objetivoMensal,
+            numColaboradores: totaisGlobais.numColaboradores,
+            taxaReparacao: totaisGlobais.taxaReparacao?.toString(),
+            qtdReparacoes: totaisGlobais.qtdReparacoes,
+            qtdParaBrisas: totaisGlobais.qtdParaBrisas,
+            nomeArquivo,
+            uploadedBy,
+            updatedAt: new Date(),
+          })
+          .where(eq(totaisMensais.id, existenteTotais[0].id));
+      } else {
+        await db.insert(totaisMensais).values({
+          mes,
+          ano,
+          totalServicos: totaisGlobais.totalServicos,
+          objetivoMensal: totaisGlobais.objetivoMensal,
+          numColaboradores: totaisGlobais.numColaboradores,
+          taxaReparacao: totaisGlobais.taxaReparacao?.toString(),
+          qtdReparacoes: totaisGlobais.qtdReparacoes,
+          qtdParaBrisas: totaisGlobais.qtdParaBrisas,
+          nomeArquivo,
+          uploadedBy,
+        });
+      }
+    }
 
     // Processar cada linha de dados (começar na linha 11, índice 10)
     for (let rowIdx = 10; rowIdx < data.length; rowIdx++) {

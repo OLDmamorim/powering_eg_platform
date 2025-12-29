@@ -60,6 +60,9 @@ import {
   resultadosMensais,
   ResultadoMensal,
   InsertResultadoMensal,
+  totaisMensais,
+  TotalMensal,
+  InsertTotalMensal,
   User
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
@@ -3434,4 +3437,31 @@ export async function getEvolucaoAgregadaPorGestor(gestorId: number, mesesAtras:
     desvioPercentualMes: r.desvioPercentualMes ? parseFloat(r.desvioPercentualMes.toString()) : null,
     taxaReparacao: r.taxaReparacao ? parseFloat(r.taxaReparacao.toString()) : null,
   }));
+}
+
+/**
+ * Obtém totais mensais globais (incluindo PROMOTOR e outras categorias não-loja)
+ */
+export async function getTotaisMensais(mes: number, ano: number) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const result = await db
+    .select()
+    .from(totaisMensais)
+    .where(
+      and(
+        eq(totaisMensais.mes, mes),
+        eq(totaisMensais.ano, ano)
+      )
+    )
+    .limit(1);
+  
+  if (result.length === 0) return null;
+  
+  const totais = result[0];
+  return {
+    ...totais,
+    taxaReparacao: totais.taxaReparacao ? parseFloat(totais.taxaReparacao.toString()) : null,
+  };
 }

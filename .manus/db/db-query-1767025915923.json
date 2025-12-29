@@ -1,0 +1,15 @@
+{
+  "query": "SELECT \n  SUM(totalServicos) as total_servicos,\n  SUM(objetivoMensal) as objetivo_total,\n  COUNT(*) as num_registos\nFROM resultados_mensais \nWHERE mes = 12 AND ano = 2025;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT \n  SUM(totalServicos) as total_servicos,\n  SUM(objetivoMensal) as objetivo_total,\n  COUNT(*) as num_registos\nFROM resultados_mensais \nWHERE mes = 12 AND ano = 2025;",
+  "rows": [
+    {
+      "total_servicos": "3718",
+      "objetivo_total": "4882",
+      "num_registos": "70"
+    }
+  ],
+  "messages": [],
+  "stdout": "total_servicos\tobjetivo_total\tnum_registos\n3718\t4882\t70\n",
+  "stderr": "",
+  "execution_time_ms": 114
+}

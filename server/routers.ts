@@ -2141,6 +2141,16 @@ export const appRouter = router({
         return await db.getEstatisticasPeriodo(input.mes, input.ano, input.lojaId, input.lojasIds);
       }),
     
+    // Obter totais globais (incluindo PROMOTOR)
+    totaisGlobais: protectedProcedure
+      .input(z.object({
+        mes: z.number(),
+        ano: z.number(),
+      }))
+      .query(async ({ input }) => {
+        return await db.getTotaisMensais(input.mes, input.ano);
+      }),
+    
     // Exportar relatório Excel "Minhas Lojas"
     exportarExcel: protectedProcedure
       .input(z.object({

@@ -66,6 +66,15 @@ export function ResultadosDashboard() {
     return undefined;
   }, [lojaSelecionada, user, lojas]);
   
+  // Query de totais globais (incluindo PROMOTOR)
+  const { data: totaisGlobais } = trpc.resultados.totaisGlobais.useQuery(
+    { 
+      mes: periodoSelecionado?.mes || 1, 
+      ano: periodoSelecionado?.ano || 2025
+    },
+    { enabled: !!periodoSelecionado && (lojaSelecionada === 'todas' || lojaSelecionada === null) }
+  );
+  
   // Queries condicionais (apenas quando há período selecionado)
   const { data: estatisticas, isLoading: loadingEstatisticas } = trpc.resultados.estatisticas.useQuery(
     { 
@@ -581,9 +590,18 @@ export function ResultadosDashboard() {
                 <BarChart3 className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{estatisticas.somaServicos?.toLocaleString() || 0}</div>
+                <div className="text-2xl font-bold">
+                  {/* Usar totais globais quando "todas" selecionado, senão usar soma das lojas */}
+                  {(lojaSelecionada === 'todas' || lojaSelecionada === null) && totaisGlobais?.totalServicos
+                    ? totaisGlobais.totalServicos.toLocaleString()
+                    : estatisticas.somaServicos?.toLocaleString() || 0
+                  }
+                </div>
                 <p className="text-xs text-muted-foreground">
-                  Objetivo: {estatisticas.somaObjetivos?.toLocaleString() || 0}
+                  Objetivo: {(lojaSelecionada === 'todas' || lojaSelecionada === null) && totaisGlobais?.objetivoMensal
+                    ? totaisGlobais.objetivoMensal.toLocaleString()
+                    : estatisticas.somaObjetivos?.toLocaleString() || 0
+                  }
                 </p>
               </CardContent>
             </Card>

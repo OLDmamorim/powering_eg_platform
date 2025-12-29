@@ -446,3 +446,30 @@ export const resultadosMensais = mysqlTable("resultados_mensais", {
 
 export type ResultadoMensal = typeof resultadosMensais.$inferSelect;
 export type InsertResultadoMensal = typeof resultadosMensais.$inferInsert;
+
+/**
+ * Totais Mensais Globais - Totais do Excel incluindo PROMOTOR e outras categorias não-loja
+ * Estes valores representam os totais reais da rede (linha "Total Serviços Faturados" do Excel)
+ */
+export const totaisMensais = mysqlTable("totais_mensais", {
+  id: int("id").autoincrement().primaryKey(),
+  mes: int("mes").notNull(), // 1-12
+  ano: int("ano").notNull(), // 2025, 2026, etc.
+  
+  // Totais globais (incluindo PROMOTOR)
+  totalServicos: int("totalServicos"), // Total de serviços faturados
+  objetivoMensal: int("objetivoMensal"), // Objetivo mensal total
+  numColaboradores: int("numColaboradores"), // Total de colaboradores
+  taxaReparacao: decimal("taxaReparacao", { precision: 5, scale: 4 }), // Taxa média de reparação
+  qtdReparacoes: int("qtdReparacoes"), // Quantidade total de reparações
+  qtdParaBrisas: int("qtdParaBrisas"), // Quantidade total de para-brisas
+  
+  // Metadados
+  nomeArquivo: varchar("nomeArquivo", { length: 255 }),
+  uploadedBy: int("uploadedBy").notNull(), // FK para users.id
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type TotalMensal = typeof totaisMensais.$inferSelect;
+export type InsertTotalMensal = typeof totaisMensais.$inferInsert;
