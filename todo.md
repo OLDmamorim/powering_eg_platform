@@ -1312,3 +1312,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Identificar por que nomes de gestores não aparecem nos checkboxes
 - [x] Corrigir renderização para mostrar nome ao lado de cada checkbox
 - [x] Testar em Reuniões de Gestores (admin)
+
+## Ordenação Alfabética de Gestores
+- [x] Adicionar ordenação alfabética na query getAllGestores (backend)
+- [x] Verificar se frontend precisa de ordenação adicional
+- [x] Testar em Reuniões de Gestores e outras páginas

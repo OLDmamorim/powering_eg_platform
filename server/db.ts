@@ -387,7 +387,8 @@ export async function getAllGestores(): Promise<any[]> {
     })
     .from(gestores)
     .innerJoin(users, eq(gestores.userId, users.id))
-    .where(eq(users.role, 'gestor')); // Filtrar apenas gestores (excluir admins)
+    .where(eq(users.role, 'gestor')) // Filtrar apenas gestores (excluir admins)
+    .orderBy(users.name); // Ordenar alfabeticamente por nome
   
   return gestoresResults.map(r => ({
     id: r.id,
