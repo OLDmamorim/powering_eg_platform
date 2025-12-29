@@ -1295,3 +1295,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [ ] Incluir anexos nos PDFs de reuniões
 - [ ] Incluir anexos nos emails de reuniões
 - [ ] Criar testes unitários para upload de anexos
+
+## Ordenação Alfabética de Lojas
+- [x] Ordenar lojas alfabeticamente nas queries de base de dados (getAllLojas, getLojasByGestorId)
+- [x] Ordenar lojas alfabeticamente nos dropdowns de seleção (Reuniões, Relatórios)
+- [x] Ordenar lojas alfabeticamente nas listagens e tabelas
+- [x] Verificar ordenação em todos os componentes que usam lojas

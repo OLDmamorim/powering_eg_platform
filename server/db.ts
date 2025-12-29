@@ -494,7 +494,8 @@ export async function getLojasByGestorId(gestorId: number): Promise<Loja[]> {
     .select({ loja: lojas })
     .from(gestorLojas)
     .innerJoin(lojas, eq(gestorLojas.lojaId, lojas.id))
-    .where(eq(gestorLojas.gestorId, gestorId));
+    .where(eq(gestorLojas.gestorId, gestorId))
+    .orderBy(lojas.nome);
   
   return lojasGestorResult.map(r => r.loja);
 }

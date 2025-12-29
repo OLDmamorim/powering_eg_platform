@@ -68,8 +68,7 @@ export default function MinhasLojas() {
     return null;
   }
 
-  // Ordenar lojas alfabeticamente
-  const lojasSorted = lojas ? [...lojas].sort((a, b) => a.nome.localeCompare(b.nome)) : [];
+  // Lojas já vêm ordenadas do backend
 
   const handleEdit = (loja: any) => {
     setEditingLoja(loja);
@@ -104,9 +103,9 @@ export default function MinhasLojas() {
           <div className="flex justify-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
           </div>
-        ) : lojasSorted && lojasSorted.length > 0 ? (
+        ) : lojas && lojas.length > 0 ? (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {lojasSorted.map((loja: any) => (
+            {lojas.map((loja: any) => (
               <Card key={loja.id}>
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between gap-2">
