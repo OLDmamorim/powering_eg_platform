@@ -31,7 +31,7 @@ export function ResultadosDashboard() {
     { enabled: !!periodoSelecionado }
   );
   
-  const { data: ranking, isLoading: loadingRanking } = trpc.resultados.ranking.useQuery(
+  const { data: rankingCompleto, isLoading: loadingRanking } = trpc.resultados.ranking.useQuery(
     { 
       metrica: metricaRanking, 
       mes: periodoSelecionado?.mes || 1, 
@@ -40,6 +40,11 @@ export function ResultadosDashboard() {
     },
     { enabled: !!periodoSelecionado }
   );
+  
+  // Filtrar ranking se loja estiver selecionada
+  const ranking = lojaSelecionada && rankingCompleto
+    ? rankingCompleto.filter(r => r.lojaId === lojaSelecionada)
+    : rankingCompleto;
   
   const { data: porZona, isLoading: loadingZona } = trpc.resultados.porZona.useQuery(
     { mes: periodoSelecionado?.mes || 1, ano: periodoSelecionado?.ano || 2025 },

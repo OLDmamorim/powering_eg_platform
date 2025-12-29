@@ -1380,3 +1380,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar DashboardLayout à página ResultadosUpload
 - [x] Adicionar botão "Voltar ao Dashboard" após upload concluído
 - [x] Testar navegação
+
+
+## Correção - Filtro de Loja no Dashboard v4.1.2
+
+- [x] Analisar lógica atual do filtro de loja
+- [x] Fazer filtro de loja afetar tabela de ranking
+- [x] Testar filtro em todos os componentes
