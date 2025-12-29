@@ -1454,3 +1454,6 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar botões de edição visíveis na página Meus Relatórios do gestor
 - [x] Corrigir Dashboard Resultados: mostrar todas as lojas do gestor no ranking quando "Minhas Lojas" selecionado
 - [x] Incluir vendas complementares no Dashboard de Resultados (importação Excel + visualização)
+
+## Resumos Globais - Incluir Análise de Resultados v5.20
+- [x] Incluir dados de resultados mensais (serviços, objetivos, taxa reparação) na análise IA dos Resumos Globais
