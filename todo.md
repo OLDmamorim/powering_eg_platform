@@ -1416,3 +1416,5 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Implementar download de ficheiro Excel gerado
 - [x] Adicionar loading state durante geração
 - [ ] Menu dropdown com opções PDF e Excel (skipped - apenas Excel)
+
+- [x] Corrigir filtro de lojas no Dashboard de Resultados (gestores): adicionar "Minhas Lojas" e "Todas as Lojas" no início do dropdown

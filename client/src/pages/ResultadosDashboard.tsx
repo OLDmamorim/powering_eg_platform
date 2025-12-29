@@ -192,10 +192,10 @@ export function ResultadosDashboard() {
                   <SelectValue placeholder="Selecione uma loja" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="todas">Todas as lojas</SelectItem>
                   {user?.role === 'gestor' && gestorData && (
-                    <SelectItem value="minhas">Apenas minhas lojas</SelectItem>
+                    <SelectItem value="minhas">Minhas Lojas</SelectItem>
                   )}
+                  <SelectItem value="todas">Todas as Lojas</SelectItem>
                   {lojas?.map((loja) => (
                     <SelectItem key={loja.id} value={loja.id.toString()}>
                       {loja.nome}
