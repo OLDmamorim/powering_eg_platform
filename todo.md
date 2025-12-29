@@ -1301,3 +1301,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Ordenar lojas alfabeticamente nos dropdowns de seleção (Reuniões, Relatórios)
 - [x] Ordenar lojas alfabeticamente nas listagens e tabelas
 - [x] Verificar ordenação em todos os componentes que usam lojas
+
+## Correção de Erro no Logout
+- [x] Investigar erro React #300 ao fazer sign out
+- [x] Corrigir fluxo de navegação após logout
+- [x] Garantir limpeza correta do estado da aplicação
+- [x] Testar logout em diferentes cenários
