@@ -1,0 +1,14 @@
+{
+  "query": "SELECT l.id, l.nome \nFROM lojas l \nLEFT JOIN resultados_mensais rm ON l.id = rm.lojaId AND rm.mes = 12 AND rm.ano = 2025\nWHERE rm.id IS NULL\nORDER BY l.nome;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT l.id, l.nome \nFROM lojas l \nLEFT JOIN resultados_mensais rm ON l.id = rm.lojaId AND rm.mes = 12 AND rm.ano = 2025\nWHERE rm.id IS NULL\nORDER BY l.nome;",
+  "rows": [
+    {
+      "id": "180042",
+      "nome": "Porto - zona industrial"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tnome\n180042\tPorto - zona industrial\n",
+  "stderr": "",
+  "execution_time_ms": 51
+}

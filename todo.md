@@ -1441,3 +1441,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## Bug v4.8.1 - Filtro "Todas as Lojas" não funciona
 - [x] Corrigir lógica: quando "Todas as Lojas" selecionado, não passar filtro de lojas (mostrar dados globais)
 - [x] Garantir que estatísticas, ranking e gráficos mostram dados de todas as 69 lojas
+
+
+## Bug v4.8.2 - Aparecem 69 lojas em vez de 70
+- [x] Investigar porque aparecem 69 lojas no Dashboard de Resultados em vez de 70
+- [x] Verificar se todas as 70 lojas estão no ficheiro Excel importado
+- [x] Verificar se todas as 70 lojas foram importadas para a BD
+- [x] Corrigir a causa raiz da discrepância

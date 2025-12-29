@@ -1,0 +1,286 @@
+{
+  "query": "SELECT DISTINCT rm.lojaId, l.nome \nFROM resultados_mensais rm \nJOIN lojas l ON rm.lojaId = l.id \nWHERE rm.mes = 12 AND rm.ano = 2025 \nORDER BY l.nome;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT DISTINCT rm.lojaId, l.nome \nFROM resultados_mensais rm \nJOIN lojas l ON rm.lojaId = l.id \nWHERE rm.mes = 12 AND rm.ano = 2025 \nORDER BY l.nome;",
+  "rows": [
+    {
+      "lojaId": "180001",
+      "nome": "Abrantes"
+    },
+    {
+      "lojaId": "180002",
+      "nome": "Aeroporto porto"
+    },
+    {
+      "lojaId": "180003",
+      "nome": "Águeda"
+    },
+    {
+      "lojaId": "180004",
+      "nome": "Algés"
+    },
+    {
+      "lojaId": "180005",
+      "nome": "Almada"
+    },
+    {
+      "lojaId": "180006",
+      "nome": "Amadora"
+    },
+    {
+      "lojaId": "180007",
+      "nome": "Amoreiras"
+    },
+    {
+      "lojaId": "180008",
+      "nome": "Aveiro"
+    },
+    {
+      "lojaId": "60002",
+      "nome": "Barcelos"
+    },
+    {
+      "lojaId": "180009",
+      "nome": "Beira baixa sm"
+    },
+    {
+      "lojaId": "180010",
+      "nome": "Braga - minho center"
+    },
+    {
+      "lojaId": "180011",
+      "nome": "Braga sm"
+    },
+    {
+      "lojaId": "180012",
+      "nome": "Caldas da rainha"
+    },
+    {
+      "lojaId": "180013",
+      "nome": "Castanheira do ribatejo"
+    },
+    {
+      "lojaId": "180014",
+      "nome": "Coimbra"
+    },
+    {
+      "lojaId": "180015",
+      "nome": "Coimbra sm"
+    },
+    {
+      "lojaId": "180016",
+      "nome": "Coimbra sul"
+    },
+    {
+      "lojaId": "180017",
+      "nome": "Costa de prata sm"
+    },
+    {
+      "lojaId": "180018",
+      "nome": "Entroncamento"
+    },
+    {
+      "lojaId": "60001",
+      "nome": "Famalicão"
+    },
+    {
+      "lojaId": "180019",
+      "nome": "Famalicão sm"
+    },
+    {
+      "lojaId": "180020",
+      "nome": "Faro"
+    },
+    {
+      "lojaId": "180021",
+      "nome": "Faro sm"
+    },
+    {
+      "lojaId": "180022",
+      "nome": "Gondomar"
+    },
+    {
+      "lojaId": "180023",
+      "nome": "Guarda"
+    },
+    {
+      "lojaId": "180024",
+      "nome": "Guimarães shopping"
+    },
+    {
+      "lojaId": "180025",
+      "nome": "Leiria"
+    },
+    {
+      "lojaId": "180026",
+      "nome": "Leiria sm"
+    },
+    {
+      "lojaId": "180027",
+      "nome": "Leziria sm"
+    },
+    {
+      "lojaId": "180028",
+      "nome": "Lisboa sm"
+    },
+    {
+      "lojaId": "180029",
+      "nome": "Lisboa smr"
+    },
+    {
+      "lojaId": "180030",
+      "nome": "Maia - maiashopping"
+    },
+    {
+      "lojaId": "180031",
+      "nome": "Maia - moreira"
+    },
+    {
+      "lojaId": "180032",
+      "nome": "Maia sm"
+    },
+    {
+      "lojaId": "180033",
+      "nome": "Matosinhos"
+    },
+    {
+      "lojaId": "180034",
+      "nome": "Montijo"
+    },
+    {
+      "lojaId": "180035",
+      "nome": "Movida"
+    },
+    {
+      "lojaId": "180036",
+      "nome": "Mycarcenter"
+    },
+    {
+      "lojaId": "180037",
+      "nome": "Odivelas - loures"
+    },
+    {
+      "lojaId": "60007",
+      "nome": "Paços de Ferreira "
+    },
+    {
+      "lojaId": "60006",
+      "nome": "Paredes"
+    },
+    {
+      "lojaId": "180038",
+      "nome": "Paredes sm"
+    },
+    {
+      "lojaId": "180039",
+      "nome": "Pombal"
+    },
+    {
+      "lojaId": "180040",
+      "nome": "Portimão"
+    },
+    {
+      "lojaId": "180041",
+      "nome": "Porto - marquês"
+    },
+    {
+      "lojaId": "180043",
+      "nome": "Porto alto"
+    },
+    {
+      "lojaId": "180044",
+      "nome": "Porto sul sm"
+    },
+    {
+      "lojaId": "180045",
+      "nome": "Póvoa de santa iria"
+    },
+    {
+      "lojaId": "60005",
+      "nome": "Póvoa de Varzim"
+    },
+    {
+      "lojaId": "180046",
+      "nome": "Rotunda do relógio"
+    },
+    {
+      "lojaId": "180047",
+      "nome": "Sacavém"
+    },
+    {
+      "lojaId": "180048",
+      "nome": "Santa maria da feira"
+    },
+    {
+      "lojaId": "180049",
+      "nome": "Santarém"
+    },
+    {
+      "lojaId": "180050",
+      "nome": "Seia"
+    },
+    {
+      "lojaId": "180051",
+      "nome": "Seia sm"
+    },
+    {
+      "lojaId": "180052",
+      "nome": "Sm caldas da rainha"
+    },
+    {
+      "lojaId": "180053",
+      "nome": "Sm castanheira do ribatejo"
+    },
+    {
+      "lojaId": "180063",
+      "nome": "Sm pesados porto"
+    },
+    {
+      "lojaId": "180054",
+      "nome": "Sm viseu2"
+    },
+    {
+      "lojaId": "180055",
+      "nome": "Telheiras"
+    },
+    {
+      "lojaId": "180056",
+      "nome": "Vale do tejo sm"
+    },
+    {
+      "lojaId": "60004",
+      "nome": "Viana do Castelo "
+    },
+    {
+      "lojaId": "180057",
+      "nome": "Viana do castelo sm"
+    },
+    {
+      "lojaId": "180058",
+      "nome": "Vila nova de gaia"
+    },
+    {
+      "lojaId": "180059",
+      "nome": "Vila nova de gaia - canelas"
+    },
+    {
+      "lojaId": "60003",
+      "nome": "Vila Verde"
+    },
+    {
+      "lojaId": "180060",
+      "nome": "Viseu"
+    },
+    {
+      "lojaId": "180061",
+      "nome": "Viseu sm"
+    },
+    {
+      "lojaId": "180062",
+      "nome": "Viseu smr"
+    }
+  ],
+  "messages": [],
+  "stdout": "lojaId\tnome\n180001\tAbrantes\n180002\tAeroporto porto\n180003\tÁgueda\n180004\tAlgés\n180005\tAlmada\n180006\tAmadora\n180007\tAmoreiras\n180008\tAveiro\n60002\tBarcelos\n180009\tBeira baixa sm\n180010\tBraga - minho center\n180011\tBraga sm\n180012\tCaldas da rainha\n180013\tCastanheira do ribatejo\n180014\tCoimbra\n180015\tCoimbra sm\n180016\tCoimbra sul\n180017\tCosta de prata sm\n180018\tEntroncamento\n60001\tFamalicão\n180019\tFamalicão sm\n180020\tFaro\n180021\tFaro sm\n180022\tGondomar\n180023\tGuarda\n180024\tGuimarães shopping\n180025\tLeiria\n180026\tLeiria sm\n180027\tLeziria sm\n180028\tLisboa sm\n180029\tLisboa smr\n180030\tMaia - maiashopping\n180031\tMaia - moreira\n180032\tMaia sm\n180033\tMatosinhos\n180034\tMontijo\n180035\tMovida\n180036\tMycarcenter\n180037\tOdivelas - loures\n60007\tPaços de Ferreira \n60006\tParedes\n180038\tParedes sm\n180039\tPombal\n180040\tPortimão\n180041\tPorto - marquês\n180043\tPorto alto\n180044\tPorto sul sm\n180045\tPóvoa de santa iria\n60005\tPóvoa de Varzim\n180046\tRotunda do relógio\n180047\tSacavém\n180048\tSanta maria da feira\n180049\tSantarém\n180050\tSeia\n180051\tSeia sm\n180052\tSm caldas da rainha\n180053\tSm castanheira do ribatejo\n180063\tSm pesados porto\n180054\tSm viseu2\n180055\tTelheiras\n180056\tVale do tejo sm\n60004\tViana do Castelo \n180057\tViana do castelo sm\n180058\tVila nova de gaia\n180059\tVila nova de gaia - canelas\n60003\tVila Verde\n180060\tViseu\n180061\tViseu sm\n180062\tViseu smr\n",
+  "stderr": "",
+  "execution_time_ms": 58
+}

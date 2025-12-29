@@ -58,7 +58,7 @@ export async function processarExcelResultados(
     const todasLojas = await db.select().from(lojas);
     const lojasMap = new Map<string, number>();
     todasLojas.forEach(loja => {
-      lojasMap.set(loja.nome.toLowerCase().trim(), loja.id);
+      lojasMap.set(normalizeName(loja.nome), loja.id);
     });
 
     // Processar cada linha de dados (começar na linha 11, índice 10)
@@ -71,15 +71,16 @@ export async function processarExcelResultados(
       }
 
       const nomeLoja = String(row[1]).trim();
+      const nomeNormalizado = normalizeName(nomeLoja);
       
       // Ignorar linhas de total ou subtotal
-      if (nomeLoja.toLowerCase().includes('total') || 
-          nomeLoja.toLowerCase().includes('zona ')) {
+      if (nomeNormalizado.includes('total') || 
+          nomeNormalizado.includes('zona ')) {
         continue;
       }
 
       // Encontrar ID da loja na base de dados
-      const lojaId = lojasMap.get(nomeLoja.toLowerCase());
+      const lojaId = lojasMap.get(nomeNormalizado);
       
       if (!lojaId) {
         erros.push(`Loja "${nomeLoja}" não encontrada na base de dados (linha ${rowIdx + 1})`);
@@ -175,6 +176,26 @@ export async function processarExcelResultados(
   } catch (error: any) {
     throw new Error(`Erro ao processar Excel: ${error.message}`);
   }
+}
+
+/**
+ * Normaliza nome de loja para matching
+ * - Converte para minúsculas
+ * - Remove espaços extras
+ * - Substitui caracteres especiais (non-breaking spaces, dashes)
+ */
+function normalizeName(name: string): string {
+  return name
+    .toLowerCase()
+    .trim()
+    // Substituir non-breaking spaces por espaços normais
+    .replace(/\u00A0/g, ' ')
+    // Substituir en-dash e em-dash por hífen normal
+    .replace(/[\u2013\u2014]/g, '-')
+    // Remover espaços múltiplos
+    .replace(/\s+/g, ' ')
+    // Normalizar espaços ao redor de hífens
+    .replace(/\s*-\s*/g, ' - ');
 }
 
 /**
