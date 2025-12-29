@@ -1,4 +1,4 @@
-import { eq, and, desc, sql, inArray, gte, lte } from "drizzle-orm";
+import { eq, and, desc, sql, inArray, gte, lte, or, gt } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { 
   InsertUser, 
@@ -3159,4 +3159,213 @@ export async function compararPeriodos(
   });
   
   return comparacao;
+}
+
+/**
+ * Obtém evolução mensal de uma loja (múltiplos meses)
+ * Retorna dados ordenados por ano/mês para gráficos de linha
+ */
+export async function getEvolucaoMensal(lojaId: number, mesesAtras: number = 6) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const dataLimite = new Date();
+  dataLimite.setMonth(dataLimite.getMonth() - mesesAtras);
+  const anoLimite = dataLimite.getFullYear();
+  const mesLimite = dataLimite.getMonth() + 1;
+
+  const resultados = await db
+    .select({
+      mes: resultadosMensais.mes,
+      ano: resultadosMensais.ano,
+      totalServicos: resultadosMensais.totalServicos,
+      objetivoMensal: resultadosMensais.objetivoMensal,
+      desvioPercentualMes: resultadosMensais.desvioPercentualMes,
+      taxaReparacao: resultadosMensais.taxaReparacao,
+      qtdReparacoes: resultadosMensais.qtdReparacoes,
+      servicosPorColaborador: resultadosMensais.servicosPorColaborador,
+      numColaboradores: resultadosMensais.numColaboradores,
+    })
+    .from(resultadosMensais)
+    .where(
+      and(
+        eq(resultadosMensais.lojaId, lojaId),
+        or(
+          gt(resultadosMensais.ano, anoLimite),
+          and(
+            eq(resultadosMensais.ano, anoLimite),
+            gte(resultadosMensais.mes, mesLimite)
+          )
+        )
+      )
+    )
+    .orderBy(resultadosMensais.ano, resultadosMensais.mes);
+
+  return resultados.map(r => ({
+    ...r,
+    servicosPorColaborador: r.servicosPorColaborador ? parseFloat(r.servicosPorColaborador.toString()) : null,
+    desvioPercentualMes: r.desvioPercentualMes ? parseFloat(r.desvioPercentualMes.toString()) : null,
+    taxaReparacao: r.taxaReparacao ? parseFloat(r.taxaReparacao.toString()) : null,
+  }));
+}
+
+/**
+ * Obtém ranking de lojas por uma métrica específica num período
+ * @param metrica - nome do campo a ordenar (totalServicos, taxaReparacao, etc)
+ * @param mes - mês (1-12)
+ * @param ano - ano (2025, etc)
+ * @param limit - número de lojas a retornar (default: 10)
+ */
+export async function getRankingLojas(
+  metrica: 'totalServicos' | 'taxaReparacao' | 'desvioPercentualMes' | 'servicosPorColaborador',
+  mes: number,
+  ano: number,
+  limit: number = 10
+) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const campo = resultadosMensais[metrica];
+  
+  const ranking = await db
+    .select({
+      lojaId: resultadosMensais.lojaId,
+      lojaNome: lojas.nome,
+      zona: resultadosMensais.zona,
+      valor: campo,
+      totalServicos: resultadosMensais.totalServicos,
+      objetivoMensal: resultadosMensais.objetivoMensal,
+      desvioPercentualMes: resultadosMensais.desvioPercentualMes,
+      taxaReparacao: resultadosMensais.taxaReparacao,
+    })
+    .from(resultadosMensais)
+    .innerJoin(lojas, eq(resultadosMensais.lojaId, lojas.id))
+    .where(
+      and(
+        eq(resultadosMensais.mes, mes),
+        eq(resultadosMensais.ano, ano)
+      )
+    )
+    .orderBy(desc(campo))
+    .limit(limit);
+
+  return ranking.map(r => ({
+    ...r,
+    valor: r.valor ? parseFloat(r.valor.toString()) : null,
+    desvioPercentualMes: r.desvioPercentualMes ? parseFloat(r.desvioPercentualMes.toString()) : null,
+    taxaReparacao: r.taxaReparacao ? parseFloat(r.taxaReparacao.toString()) : null,
+  }));
+}
+
+/**
+ * Compara resultados de duas lojas num período específico
+ */
+export async function compararLojas(
+  lojaId1: number,
+  lojaId2: number,
+  mes: number,
+  ano: number
+) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const resultados = await db
+    .select({
+      lojaId: resultadosMensais.lojaId,
+      lojaNome: lojas.nome,
+      zona: resultadosMensais.zona,
+      totalServicos: resultadosMensais.totalServicos,
+      objetivoMensal: resultadosMensais.objetivoMensal,
+      desvioPercentualMes: resultadosMensais.desvioPercentualMes,
+      taxaReparacao: resultadosMensais.taxaReparacao,
+      qtdReparacoes: resultadosMensais.qtdReparacoes,
+      servicosPorColaborador: resultadosMensais.servicosPorColaborador,
+      numColaboradores: resultadosMensais.numColaboradores,
+    })
+    .from(resultadosMensais)
+    .innerJoin(lojas, eq(resultadosMensais.lojaId, lojas.id))
+    .where(
+      and(
+        eq(resultadosMensais.mes, mes),
+        eq(resultadosMensais.ano, ano),
+        or(
+          eq(resultadosMensais.lojaId, lojaId1),
+          eq(resultadosMensais.lojaId, lojaId2)
+        )
+      )
+    );
+
+  return resultados.map(r => ({
+    ...r,
+    servicosPorColaborador: r.servicosPorColaborador ? parseFloat(r.servicosPorColaborador.toString()) : null,
+    desvioPercentualMes: r.desvioPercentualMes ? parseFloat(r.desvioPercentualMes.toString()) : null,
+    taxaReparacao: r.taxaReparacao ? parseFloat(r.taxaReparacao.toString()) : null,
+  }));
+}
+
+/**
+ * Agrega resultados por zona geográfica
+ */
+export async function getResultadosPorZona(mes: number, ano: number) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const resultados = await db
+    .select({
+      zona: resultadosMensais.zona,
+      totalLojas: sql<number>`COUNT(DISTINCT ${resultadosMensais.lojaId})`,
+      somaServicos: sql<number>`SUM(${resultadosMensais.totalServicos})`,
+      mediaDesvioPercentual: sql<number>`AVG(${resultadosMensais.desvioPercentualMes})`,
+      mediaTaxaReparacao: sql<number>`AVG(${resultadosMensais.taxaReparacao})`,
+      somaReparacoes: sql<number>`SUM(${resultadosMensais.qtdReparacoes})`,
+    })
+    .from(resultadosMensais)
+    .where(
+      and(
+        eq(resultadosMensais.mes, mes),
+        eq(resultadosMensais.ano, ano)
+      )
+    )
+    .groupBy(resultadosMensais.zona);
+
+  return resultados.map(r => ({
+    ...r,
+    mediaDesvioPercentual: r.mediaDesvioPercentual ? parseFloat(r.mediaDesvioPercentual.toString()) : null,
+    mediaTaxaReparacao: r.mediaTaxaReparacao ? parseFloat(r.mediaTaxaReparacao.toString()) : null,
+  }));
+}
+
+/**
+ * Obtém estatísticas gerais de um período
+ */
+export async function getEstatisticasPeriodo(mes: number, ano: number) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const stats = await db
+    .select({
+      totalLojas: sql<number>`COUNT(DISTINCT ${resultadosMensais.lojaId})`,
+      somaServicos: sql<number>`SUM(${resultadosMensais.totalServicos})`,
+      somaObjetivos: sql<number>`SUM(${resultadosMensais.objetivoMensal})`,
+      mediaDesvioPercentual: sql<number>`AVG(${resultadosMensais.desvioPercentualMes})`,
+      mediaTaxaReparacao: sql<number>`AVG(${resultadosMensais.taxaReparacao})`,
+      somaReparacoes: sql<number>`SUM(${resultadosMensais.qtdReparacoes})`,
+      lojasAcimaObjetivo: sql<number>`SUM(CASE WHEN ${resultadosMensais.desvioPercentualMes} >= 0 THEN 1 ELSE 0 END)`,
+    })
+    .from(resultadosMensais)
+    .where(
+      and(
+        eq(resultadosMensais.mes, mes),
+        eq(resultadosMensais.ano, ano)
+      )
+    );
+
+  const result = stats[0];
+  if (!result) return null;
+  
+  return {
+    ...result,
+    mediaDesvioPercentual: result.mediaDesvioPercentual ? parseFloat(result.mediaDesvioPercentual.toString()) : null,
+    mediaTaxaReparacao: result.mediaTaxaReparacao ? parseFloat(result.mediaTaxaReparacao.toString()) : null,
+  };
 }

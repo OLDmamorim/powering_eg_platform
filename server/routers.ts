@@ -2056,6 +2056,60 @@ export const appRouter = router({
       .query(async ({ input, ctx }) => {
         return await db.compararPeriodos(input, ctx.user);
       }),
+    
+    // Dashboard - Evolução mensal de uma loja
+    evolucao: protectedProcedure
+      .input(z.object({
+        lojaId: z.number(),
+        mesesAtras: z.number().optional(),
+      }))
+      .query(async ({ input }) => {
+        return await db.getEvolucaoMensal(input.lojaId, input.mesesAtras);
+      }),
+    
+    // Dashboard - Ranking de lojas
+    ranking: protectedProcedure
+      .input(z.object({
+        metrica: z.enum(['totalServicos', 'taxaReparacao', 'desvioPercentualMes', 'servicosPorColaborador']),
+        mes: z.number().min(1).max(12),
+        ano: z.number(),
+        limit: z.number().optional(),
+      }))
+      .query(async ({ input }) => {
+        return await db.getRankingLojas(input.metrica, input.mes, input.ano, input.limit);
+      }),
+    
+    // Dashboard - Comparar duas lojas
+    compararLojas: protectedProcedure
+      .input(z.object({
+        lojaId1: z.number(),
+        lojaId2: z.number(),
+        mes: z.number().min(1).max(12),
+        ano: z.number(),
+      }))
+      .query(async ({ input }) => {
+        return await db.compararLojas(input.lojaId1, input.lojaId2, input.mes, input.ano);
+      }),
+    
+    // Dashboard - Resultados por zona
+    porZona: protectedProcedure
+      .input(z.object({
+        mes: z.number().min(1).max(12),
+        ano: z.number(),
+      }))
+      .query(async ({ input }) => {
+        return await db.getResultadosPorZona(input.mes, input.ano);
+      }),
+    
+    // Dashboard - Estatísticas do período
+    estatisticas: protectedProcedure
+      .input(z.object({
+        mes: z.number().min(1).max(12),
+        ano: z.number(),
+      }))
+      .query(async ({ input }) => {
+        return await db.getEstatisticasPeriodo(input.mes, input.ano);
+      }),
   }),
 
   // ==================== UPLOAD DE ANEXOS ====================

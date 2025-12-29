@@ -1328,3 +1328,30 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Implementar comparação entre períodos (próxima iteração)
 - [x] Adicionar gráficos de evolução e performance (próxima iteração)
 - [x] Testar com Excel real de Dezembro 2025
+
+
+## Dashboard de Resultados - Visualização e Filtros (Fase 2)
+
+### Backend
+- [x] Criar função getEvolucaoMensal() - evolução de métricas por loja
+- [x] Criar função getRankingLojas() - ranking por métrica específica
+- [x] Criar função compararLojas() - comparar duas lojas
+- [x] Criar função getResultadosPorZona() - agregar por zona geográfica
+- [x] Criar função getEstatisticasPeriodo() - estatísticas gerais
+- [x] Adicionar procedures tRPC para dashboard de resultados
+
+### Frontend
+- [x] Criar página ResultadosDashboard.tsx
+- [x] Implementar filtros (período, loja, zona)
+- [x] Adicionar gráfico de evolução mensal (linha)
+- [x] Adicionar gráfico de comparação vs objetivos (barras)
+- [x] Adicionar cards de métricas principais
+- [x] Implementar ranking de lojas
+- [x] Adicionar comparação entre períodos
+- [x] Adicionar rota /resultados-dashboard
+- [x] Adicionar item no menu lateral
+
+### Testes
+- [x] Criar testes para queries de evolução
+- [x] Criar testes para rankings
+- [x] Criar testes para comparações

@@ -60,7 +60,8 @@ const getMenuItems = (userRole?: string) => {
     { icon: History, label: "Histórico Resumos", path: "/historico-resumos-globais", show: true, showBadge: false },
     { icon: CalendarDays, label: "Reuniões Gestores", path: "/reunioes-gestores", show: true, showBadge: false },
     { icon: Store, label: "Reuniões Lojas", path: "/reunioes-lojas", show: true, showBadge: false },
-    { icon: TrendingUp, label: "Resultados", path: "/resultados-upload", show: isAdmin, showBadge: false },
+    { icon: TrendingUp, label: "Upload Resultados", path: "/resultados-upload", show: isAdmin, showBadge: false },
+    { icon: BarChart3, label: "Dashboard Resultados", path: "/resultados-dashboard", show: true, showBadge: false },
     { icon: ListTodo, label: "Pendentes", path: isAdmin ? "/pendentes-admin" : "/pendentes", show: true, showBadge: false },
 
   ];
