@@ -5,12 +5,16 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { trpc } from "@/lib/trpc";
-import { Building2, Calendar, ChevronDown, ChevronUp, FileText, ClipboardList, Search, ArrowUpDown, SortAsc } from "lucide-react";
+import { Building2, Calendar, ChevronDown, ChevronUp, FileText, ClipboardList, Search, ArrowUpDown, SortAsc, Pencil, Mail, Loader2 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useState } from "react";
+import { toast } from "sonner";
 
 export default function MeusRelatorios() {
   const { user } = useAuth();
@@ -20,11 +24,51 @@ export default function MeusRelatorios() {
   const [lojaFiltro, setLojaFiltro] = useState<string>("todas");
   const [pesquisa, setPesquisa] = useState("");
   const [ordenacao, setOrdenacao] = useState<"data-desc" | "data-asc" | "loja-az">("data-desc");
+  
+  // Estados para edição
+  const [editingLivre, setEditingLivre] = useState<any>(null);
+  const [editingCompleto, setEditingCompleto] = useState<any>(null);
+  const [editDescricao, setEditDescricao] = useState("");
+  const [editDataVisita, setEditDataVisita] = useState("");
+  
+  const utils = trpc.useUtils();
 
   const { data: relatoriosLivres, isLoading: loadingLivres } =
     trpc.relatoriosLivres.list.useQuery();
   const { data: relatoriosCompletos, isLoading: loadingCompletos } =
     trpc.relatoriosCompletos.list.useQuery();
+
+  // Mutations para edição
+  const updateLivreMutation = trpc.relatoriosLivres.update.useMutation({
+    onSuccess: () => {
+      toast.success("Relatório atualizado com sucesso");
+      utils.relatoriosLivres.list.invalidate();
+      setEditingLivre(null);
+    },
+    onError: (error) => {
+      toast.error(error.message || "Erro ao atualizar relatório");
+    }
+  });
+
+  const updateCompletoMutation = trpc.relatoriosCompletos.update.useMutation({
+    onSuccess: () => {
+      toast.success("Relatório atualizado com sucesso");
+      utils.relatoriosCompletos.list.invalidate();
+      setEditingCompleto(null);
+    },
+    onError: (error) => {
+      toast.error(error.message || "Erro ao atualizar relatório");
+    }
+  });
+
+  const enviarEmailLivreMutation = trpc.relatoriosLivres.enviarEmail.useMutation({
+    onSuccess: (data) => {
+      toast.success(`Relatório enviado para ${data.email}`);
+    },
+    onError: (error) => {
+      toast.error(error.message || "Erro ao enviar email");
+    }
+  });
 
   if (user?.role !== "gestor") {
     setLocation("/dashboard");
@@ -230,8 +274,43 @@ export default function MeusRelatorios() {
                             </div>
                           )}
                           
-                          <div className="mt-2 text-xs text-muted-foreground">
-                            Criado em: {new Date(relatorio.createdAt).toLocaleString("pt-PT")}
+                          <div className="mt-4 flex items-center justify-between">
+                            <div className="text-xs text-muted-foreground">
+                              Criado em: {new Date(relatorio.createdAt).toLocaleString("pt-PT")}
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setEditingLivre(relatorio);
+                                  setEditDescricao(relatorio.descricao || "");
+                                  setEditDataVisita(new Date(relatorio.dataVisita).toISOString().split('T')[0]);
+                                }}
+                                className="gap-1"
+                              >
+                                <Pencil className="h-3 w-3" />
+                                Editar
+                              </Button>
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  enviarEmailLivreMutation.mutate({ id: relatorio.id });
+                                }}
+                                disabled={enviarEmailLivreMutation.isPending}
+                                className="gap-1 text-blue-600 hover:text-blue-700 dark:text-blue-400"
+                              >
+                                {enviarEmailLivreMutation.isPending ? (
+                                  <Loader2 className="h-3 w-3 animate-spin" />
+                                ) : (
+                                  <Mail className="h-3 w-3" />
+                                )}
+                                Enviar
+                              </Button>
+                            </div>
                           </div>
                         </CardContent>
                       </CollapsibleContent>
@@ -405,6 +484,81 @@ export default function MeusRelatorios() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Modal de Edição de Relatório Livre */}
+      <Dialog open={!!editingLivre} onOpenChange={(open) => !open && setEditingLivre(null)}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Editar Relatório Livre</DialogTitle>
+            <DialogDescription>
+              {editingLivre?.loja?.nome} - {editingLivre && new Date(editingLivre.dataVisita).toLocaleDateString("pt-PT")}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Data da Visita</Label>
+              <Input
+                type="date"
+                value={editDataVisita}
+                onChange={(e) => setEditDataVisita(e.target.value)}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label>Descrição da Visita</Label>
+              <Textarea
+                value={editDescricao}
+                onChange={(e) => setEditDescricao(e.target.value)}
+                rows={8}
+                className="resize-none"
+              />
+            </div>
+            
+            {/* Fotos */}
+            {editingLivre?.fotos && (() => {
+              try {
+                const fotos = JSON.parse(editingLivre.fotos);
+                if (fotos.length > 0) {
+                  return (
+                    <div className="space-y-2">
+                      <Label>Fotos ({fotos.length})</Label>
+                      <div className="grid grid-cols-3 gap-2">
+                        {fotos.map((foto: string, idx: number) => (
+                          <div key={idx} className="relative aspect-square rounded-lg overflow-hidden border">
+                            <img src={foto} alt={`Foto ${idx + 1}`} className="w-full h-full object-cover" />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                }
+              } catch (e) {
+                return null;
+              }
+              return null;
+            })()}
+          </div>
+          
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setEditingLivre(null)}>
+              Cancelar
+            </Button>
+            <Button
+              onClick={() => {
+                updateLivreMutation.mutate({
+                  id: editingLivre.id,
+                  descricao: editDescricao,
+                  dataVisita: editDataVisita ? new Date(editDataVisita) : undefined,
+                });
+              }}
+              disabled={updateLivreMutation.isPending}
+            >
+              {updateLivreMutation.isPending ? "A guardar..." : "Guardar Alterações"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 }

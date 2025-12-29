@@ -1451,3 +1451,4 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Corrigir taxa de reparação no Dashboard de Resultados (deve ser 28% do Excel, não 19.6%)
 - [x] Corrigir erro no envio de email do relatório livre (Falha ao enviar email)
 - [x] Melhorar funcionalidade de edição de relatórios (modal para ver e editar antes de enviar)
+- [x] Adicionar botões de edição visíveis na página Meus Relatórios do gestor
