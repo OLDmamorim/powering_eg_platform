@@ -633,9 +633,12 @@ export function ResultadosDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {estatisticas.mediaTaxaReparacao 
-                    ? `${(estatisticas.mediaTaxaReparacao * 100).toFixed(1)}%`
-                    : 'N/A'
+                  {/* Usar taxa dos totais globais quando "todas" selecionado, senão usar média das lojas */}
+                  {(lojaSelecionada === 'todas' || lojaSelecionada === null) && totaisGlobais?.taxaReparacao
+                    ? `${(totaisGlobais.taxaReparacao * 100).toFixed(1)}%`
+                    : estatisticas.mediaTaxaReparacao 
+                      ? `${(estatisticas.mediaTaxaReparacao * 100).toFixed(1)}%`
+                      : 'N/A'
                   }
                 </div>
                 <p className="text-xs text-muted-foreground">

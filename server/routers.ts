@@ -453,6 +453,7 @@ export const appRouter = router({
         dataVisita: z.date().optional(),
         descricao: z.string().min(1).optional(),
         fotos: z.string().optional(),
+        comentarioAdmin: z.string().optional(),
       }))
       .mutation(async ({ input, ctx }) => {
         const relatorio = await db.getRelatorioLivreById(input.id);
@@ -468,11 +469,18 @@ export const appRouter = router({
           }
         }
         
-        return await db.updateRelatorioLivre(input.id, {
+        // Apenas admin pode editar comentário admin
+        const updateData: any = {
           dataVisita: input.dataVisita,
           descricao: input.descricao,
           fotos: input.fotos,
-        });
+        };
+        
+        if (ctx.user.role === 'admin' && input.comentarioAdmin !== undefined) {
+          updateData.comentarioAdmin = input.comentarioAdmin;
+        }
+        
+        return await db.updateRelatorioLivre(input.id, updateData);
       }),
     
     delete: protectedProcedure
@@ -731,6 +739,7 @@ export const appRouter = router({
         pontosPositivos: z.string().optional(),
         pontosNegativos: z.string().optional(),
         fotos: z.string().optional(),
+        comentarioAdmin: z.string().optional(),
       }))
       .mutation(async ({ input, ctx }) => {
         const relatorio = await db.getRelatorioCompletoById(input.id);
@@ -746,8 +755,15 @@ export const appRouter = router({
           }
         }
         
-        const { id, ...updateData } = input;
-        return await db.updateRelatorioCompleto(id, updateData);
+        const { id, comentarioAdmin, ...updateData } = input;
+        
+        // Apenas admin pode editar comentário admin
+        const finalUpdateData: any = { ...updateData };
+        if (ctx.user.role === 'admin' && comentarioAdmin !== undefined) {
+          finalUpdateData.comentarioAdmin = comentarioAdmin;
+        }
+        
+        return await db.updateRelatorioCompleto(id, finalUpdateData);
       }),
     
     delete: protectedProcedure

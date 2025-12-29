@@ -1448,3 +1448,6 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Verificar se todas as 70 lojas estão no ficheiro Excel importado
 - [x] Verificar se todas as 70 lojas foram importadas para a BD
 - [x] Corrigir a causa raiz da discrepância
+- [x] Corrigir taxa de reparação no Dashboard de Resultados (deve ser 28% do Excel, não 19.6%)
+- [x] Corrigir erro no envio de email do relatório livre (Falha ao enviar email)
+- [x] Melhorar funcionalidade de edição de relatórios (modal para ver e editar antes de enviar)

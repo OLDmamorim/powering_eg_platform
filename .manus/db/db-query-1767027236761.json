@@ -1,0 +1,19 @@
+{
+  "query": "SELECT id, mes, ano, totalServicos, objetivoMensal, taxaReparacao, qtdReparacoes FROM totais_mensais",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT id, mes, ano, totalServicos, objetivoMensal, taxaReparacao, qtdReparacoes FROM totais_mensais",
+  "rows": [
+    {
+      "id": "1",
+      "mes": "12",
+      "ano": "2025",
+      "totalServicos": "3818",
+      "objetivoMensal": "5005",
+      "taxaReparacao": "0.2799",
+      "qtdReparacoes": "578"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tmes\tano\ttotalServicos\tobjetivoMensal\ttaxaReparacao\tqtdReparacoes\n1\t12\t2025\t3818\t5005\t0.2799\t578\n",
+  "stderr": "",
+  "execution_time_ms": 52
+}

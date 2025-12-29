@@ -1,0 +1,20 @@
+{
+  "query": "SELECT id, nome, email FROM lojas WHERE nome LIKE '%famalicao%' OR nome LIKE '%Famalicão%'",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT id, nome, email FROM lojas WHERE nome LIKE '%famalicao%' OR nome LIKE '%Famalicão%'",
+  "rows": [
+    {
+      "id": "60001",
+      "nome": "Famalicão",
+      "email": "famalicao@expressglass.pt"
+    },
+    {
+      "id": "180019",
+      "nome": "Famalicão sm",
+      "email": "famalicao@expressglass.pt"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tnome\temail\n60001\tFamalicão\tfamalicao@expressglass.pt\n180019\tFamalicão sm\tfamalicao@expressglass.pt\n",
+  "stderr": "",
+  "execution_time_ms": 53
+}

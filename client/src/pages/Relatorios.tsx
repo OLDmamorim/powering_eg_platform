@@ -42,6 +42,8 @@ export default function Relatorios() {
   const [editingCompleto, setEditingCompleto] = useState<any>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<{ id: number; tipo: 'livre' | 'completo' } | null>(null);
   const [editDescricao, setEditDescricao] = useState("");
+  const [editDataVisita, setEditDataVisita] = useState<string>("");
+  const [editComentarioAdmin, setEditComentarioAdmin] = useState("");
 
   const utils = trpc.useUtils();
 
@@ -400,6 +402,8 @@ export default function Relatorios() {
     updateLivreMutation.mutate({
       id: editingLivre.id,
       descricao: editDescricao,
+      dataVisita: editDataVisita ? new Date(editDataVisita) : undefined,
+      comentarioAdmin: isAdmin ? editComentarioAdmin : undefined,
     });
   };
 
@@ -648,7 +652,9 @@ export default function Relatorios() {
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setEditingLivre(relatorio);
-                                  setEditDescricao(relatorio.descricao);
+                                  setEditDescricao(relatorio.descricao || "");
+                                  setEditDataVisita(new Date(relatorio.dataVisita).toISOString().split('T')[0]);
+                                  setEditComentarioAdmin(relatorio.comentarioAdmin || "");
                                 }}
                                 className="gap-1"
                               >
@@ -959,25 +965,89 @@ export default function Relatorios() {
 
       {/* Dialog de Edição de Relatório Livre */}
       <Dialog open={!!editingLivre} onOpenChange={(open) => !open && setEditingLivre(null)}>
-        <DialogContent>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Editar Relatório Livre</DialogTitle>
             <DialogDescription>
-              Altere a descrição do relatório
+              Visualize e edite os detalhes do relatório antes de enviar
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label>Descrição</Label>
-              <Textarea
-                value={editDescricao}
-                onChange={(e) => setEditDescricao(e.target.value)}
-                rows={6}
-                placeholder="Descrição da visita..."
-              />
+          {editingLivre && (
+            <div className="space-y-4 py-4">
+              {/* Informações do Relatório */}
+              <div className="p-3 bg-muted rounded-lg">
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="font-medium">Loja:</span>{" "}
+                    <span className="text-muted-foreground">{editingLivre.loja?.nome || "N/A"}</span>
+                  </div>
+                  <div>
+                    <span className="font-medium">Gestor:</span>{" "}
+                    <span className="text-muted-foreground">{editingLivre.gestor?.user?.name || "N/A"}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Data da Visita */}
+              <div className="space-y-2">
+                <Label>Data da Visita</Label>
+                <Input
+                  type="date"
+                  value={editDataVisita}
+                  onChange={(e) => setEditDataVisita(e.target.value)}
+                />
+              </div>
+
+              {/* Descrição */}
+              <div className="space-y-2">
+                <Label>Descrição da Visita</Label>
+                <Textarea
+                  value={editDescricao}
+                  onChange={(e) => setEditDescricao(e.target.value)}
+                  rows={8}
+                  placeholder="Descrição da visita..."
+                  className="resize-none"
+                />
+              </div>
+
+              {/* Fotos */}
+              {editingLivre.fotos && JSON.parse(editingLivre.fotos).length > 0 && (
+                <div className="space-y-2">
+                  <Label>Fotos ({JSON.parse(editingLivre.fotos).length})</Label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {JSON.parse(editingLivre.fotos).map((foto: string, idx: number) => (
+                      <div key={idx} className="relative aspect-square rounded-lg overflow-hidden border">
+                        <img src={foto} alt={`Foto ${idx + 1}`} className="w-full h-full object-cover" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Notas do Admin - apenas para admin */}
+              {isAdmin && (
+                <div className="space-y-2">
+                  <Label>Notas do Admin (privadas)</Label>
+                  <Textarea
+                    value={editComentarioAdmin}
+                    onChange={(e) => setEditComentarioAdmin(e.target.value)}
+                    rows={3}
+                    placeholder="Adicione notas internas sobre este relatório..."
+                    className="resize-none bg-purple-50 dark:bg-purple-950/20 border-purple-200 dark:border-purple-800"
+                  />
+                </div>
+              )}
+
+              {/* Informações adicionais */}
+              <div className="text-xs text-muted-foreground border-t pt-3">
+                <p>Criado em: {new Date(editingLivre.createdAt).toLocaleString("pt-PT")}</p>
+                {editingLivre.updatedAt !== editingLivre.createdAt && (
+                  <p>Última atualização: {new Date(editingLivre.updatedAt).toLocaleString("pt-PT")}</p>
+                )}
+              </div>
             </div>
-          </div>
-          <DialogFooter>
+          )}
+          <DialogFooter className="gap-2">
             <Button variant="outline" onClick={() => setEditingLivre(null)}>
               Cancelar
             </Button>
@@ -985,7 +1055,7 @@ export default function Relatorios() {
               onClick={handleSaveEditLivre}
               disabled={updateLivreMutation.isPending}
             >
-              {updateLivreMutation.isPending ? "A guardar..." : "Guardar"}
+              {updateLivreMutation.isPending ? "A guardar..." : "Guardar Alterações"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1008,6 +1078,7 @@ export default function Relatorios() {
               }}
               onCancel={() => setEditingCompleto(null)}
               isPending={updateCompletoMutation.isPending}
+              isAdmin={isAdmin}
             />
           )}
         </DialogContent>
@@ -1046,14 +1117,17 @@ function EditarRelatorioCompletoForm({
   relatorio, 
   onSave, 
   onCancel,
-  isPending 
+  isPending,
+  isAdmin
 }: { 
   relatorio: any; 
   onSave: (data: any) => void; 
   onCancel: () => void;
   isPending: boolean;
+  isAdmin: boolean;
 }) {
   const [formData, setFormData] = useState({
+    dataVisita: new Date(relatorio.dataVisita).toISOString().split('T')[0],
     episFardamento: relatorio.episFardamento || "",
     kitPrimeirosSocorros: relatorio.kitPrimeirosSocorros || "",
     consumiveis: relatorio.consumiveis || "",
@@ -1066,14 +1140,49 @@ function EditarRelatorioCompletoForm({
     colaboradoresPresentes: relatorio.colaboradoresPresentes || "",
     pontosPositivos: relatorio.pontosPositivos || "",
     pontosNegativos: relatorio.pontosNegativos || "",
+    comentarioAdmin: relatorio.comentarioAdmin || "",
   });
 
   const handleChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  // Parse fotos
+  let fotos: string[] = [];
+  if (relatorio.fotos) {
+    try {
+      fotos = JSON.parse(relatorio.fotos);
+    } catch (e) {
+      // ignore
+    }
+  }
+
   return (
     <div className="space-y-4 py-4">
+      {/* Informações do Relatório */}
+      <div className="p-3 bg-muted rounded-lg">
+        <div className="grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <span className="font-medium">Loja:</span>{" "}
+            <span className="text-muted-foreground">{relatorio.loja?.nome || "N/A"}</span>
+          </div>
+          <div>
+            <span className="font-medium">Gestor:</span>{" "}
+            <span className="text-muted-foreground">{relatorio.gestor?.user?.name || "N/A"}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Data da Visita */}
+      <div className="space-y-2">
+        <Label>Data da Visita</Label>
+        <Input
+          type="date"
+          value={formData.dataVisita}
+          onChange={(e) => handleChange('dataVisita', e.target.value)}
+        />
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label>EPIs e Fardamento</Label>
@@ -1174,15 +1283,62 @@ function EditarRelatorioCompletoForm({
           />
         </div>
       </div>
-      <DialogFooter>
+
+      {/* Fotos */}
+      {fotos.length > 0 && (
+        <div className="space-y-2">
+          <Label>Fotos ({fotos.length})</Label>
+          <div className="grid grid-cols-4 gap-2">
+            {fotos.map((foto: string, idx: number) => (
+              <div key={idx} className="relative aspect-square rounded-lg overflow-hidden border">
+                <img src={foto} alt={`Foto ${idx + 1}`} className="w-full h-full object-cover" />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Notas do Admin - apenas para admin */}
+      {isAdmin && (
+        <div className="space-y-2">
+          <Label>Notas do Admin (privadas)</Label>
+          <Textarea
+            value={formData.comentarioAdmin}
+            onChange={(e) => handleChange('comentarioAdmin', e.target.value)}
+            rows={3}
+            placeholder="Adicione notas internas sobre este relatório..."
+            className="resize-none bg-purple-50 dark:bg-purple-950/20 border-purple-200 dark:border-purple-800"
+          />
+        </div>
+      )}
+
+      {/* Informações adicionais */}
+      <div className="text-xs text-muted-foreground border-t pt-3">
+        <p>Criado em: {new Date(relatorio.createdAt).toLocaleString("pt-PT")}</p>
+        {relatorio.updatedAt !== relatorio.createdAt && (
+          <p>Última atualização: {new Date(relatorio.updatedAt).toLocaleString("pt-PT")}</p>
+        )}
+      </div>
+
+      <DialogFooter className="gap-2">
         <Button variant="outline" onClick={onCancel}>
           Cancelar
         </Button>
         <Button 
-          onClick={() => onSave(formData)}
+          onClick={() => {
+            const saveData = {
+              ...formData,
+              dataVisita: formData.dataVisita ? new Date(formData.dataVisita) : undefined,
+            };
+            // Remover comentarioAdmin se não for admin
+            if (!isAdmin) {
+              delete (saveData as any).comentarioAdmin;
+            }
+            onSave(saveData);
+          }}
           disabled={isPending}
         >
-          {isPending ? "A guardar..." : "Guardar"}
+          {isPending ? "A guardar..." : "Guardar Alterações"}
         </Button>
       </DialogFooter>
     </div>
