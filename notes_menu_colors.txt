@@ -1,0 +1,11 @@
+Observação do screenshot:
+
+O menu lateral não mostra as cores de fundo dos grupos.
+As cores definidas são muito suaves (50/50 opacity) e podem não ser visíveis.
+
+Vou aumentar a intensidade das cores para serem mais visíveis:
+- bg-blue-50/50 -> bg-blue-100/70
+- bg-emerald-50/50 -> bg-emerald-100/70
+- etc.
+
+Também preciso verificar se os grupos estão a ser renderizados corretamente.

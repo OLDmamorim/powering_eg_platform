@@ -1,0 +1,13 @@
+Observação do screenshot após reiniciar servidor:
+
+As cores estão agora visíveis no menu lateral:
+- Gestão (Lojas, Gestores, Utilizadores) - tom azul claro
+- Relatórios - tom verde claro
+- Histórico - tom âmbar/amarelo claro
+- Alertas - tom vermelho claro
+- Resumos - tom roxo claro
+- Reuniões - tom ciano claro
+- Resultados - tom laranja claro
+- Pendentes - tom rosa claro
+
+As cores são suaves e permitem identificar visualmente os diferentes blocos de funcionalidades.

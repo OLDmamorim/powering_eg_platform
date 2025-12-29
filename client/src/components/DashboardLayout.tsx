@@ -35,39 +35,129 @@ import { Button } from "./ui/button";
 
 import { Building2, ClipboardList, FileText, ListTodo, Sparkles, History, Bell, Settings, Tag, BarChart3, UserCog, CalendarDays, Store, TrendingUp, GitCompare } from "lucide-react";
 
-const getMenuItems = (userRole?: string) => {
+// Grupos de menu com cores
+type MenuGroup = {
+  id: string;
+  label: string;
+  color: string; // Cor de fundo suave para o grupo
+  items: MenuItem[];
+};
+
+type MenuItem = {
+  icon: any;
+  label: string;
+  path: string;
+  show: boolean;
+  showBadge: boolean;
+};
+
+const getMenuGroups = (userRole?: string): MenuGroup[] => {
   const isAdmin = userRole === "admin";
   const isGestor = userRole === "gestor";
   
-  const items = [
-    { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard", show: true, showBadge: false },
-    { icon: Building2, label: "Lojas", path: "/lojas", show: isAdmin, showBadge: false },
-    { icon: Users, label: "Gestores", path: "/gestores", show: isAdmin, showBadge: false },
-    { icon: UserCog, label: "Utilizadores", path: "/utilizadores", show: isAdmin, showBadge: false },
-    { icon: FileText, label: "Relatórios Gestores", path: "/relatorios", show: isAdmin, showBadge: false },
-    { icon: ClipboardList, label: "Relatório Livre", path: "/relatorio-livre", show: true, showBadge: false },
-    { icon: FileText, label: "Relatório Completo", path: "/relatorio-completo", show: true, showBadge: false },
-    { icon: Building2, label: "Minhas Lojas", path: "/minhas-lojas", show: isGestor, showBadge: false },
-    { icon: ClipboardList, label: "Meus Relatórios", path: "/meus-relatorios", show: isGestor, showBadge: false },
-    { icon: Sparkles, label: "Relatórios IA", path: "/relatorios-ia", show: true, showBadge: false },
-    { icon: History, label: "Histórico IA", path: "/historico-relatorios-ia", show: isGestor, showBadge: false },
-    { icon: History, label: "Histórico da Loja", path: "/historico-loja", show: true, showBadge: false },
-    { icon: History, label: "Histórico Pontos", path: "/historico-pontos", show: isAdmin, showBadge: false },
-    { icon: Bell, label: "Alertas", path: "/alertas", show: isAdmin, showBadge: true },
-    { icon: Settings, label: "Config. Alertas", path: "/configuracoes-alertas", show: isAdmin, showBadge: false },
-    { icon: Tag, label: "Categorias", path: "/categorias", show: isAdmin, showBadge: false },
-    { icon: BarChart3, label: "Resumos Globais", path: "/resumos-globais", show: true, showBadge: false },
-    { icon: History, label: "Histórico Resumos", path: "/historico-resumos-globais", show: true, showBadge: false },
-    { icon: CalendarDays, label: "Reuniões Gestores", path: "/reunioes-gestores", show: true, showBadge: false },
-    { icon: Store, label: "Reuniões Lojas", path: "/reunioes-lojas", show: true, showBadge: false },
-    { icon: TrendingUp, label: "Upload Resultados", path: "/resultados-upload", show: isAdmin, showBadge: false },
-    { icon: BarChart3, label: "Dashboard Resultados", path: "/resultados-dashboard", show: true, showBadge: false },
-    { icon: GitCompare, label: "Comparação Lojas", path: "/comparacao-lojas", show: true, showBadge: false },
-    { icon: ListTodo, label: "Pendentes", path: isAdmin ? "/pendentes-admin" : "/pendentes", show: true, showBadge: false },
-
+  const groups: MenuGroup[] = [
+    {
+      id: 'main',
+      label: 'Principal',
+      color: '',
+      items: [
+        { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard", show: true, showBadge: false },
+      ]
+    },
+    {
+      id: 'management',
+      label: 'Gestão',
+      color: 'bg-blue-100/80 dark:bg-blue-900/30',
+      items: [
+        { icon: Building2, label: "Lojas", path: "/lojas", show: isAdmin, showBadge: false },
+        { icon: Users, label: "Gestores", path: "/gestores", show: isAdmin, showBadge: false },
+        { icon: UserCog, label: "Utilizadores", path: "/utilizadores", show: isAdmin, showBadge: false },
+        { icon: Building2, label: "Minhas Lojas", path: "/minhas-lojas", show: isGestor, showBadge: false },
+      ]
+    },
+    {
+      id: 'reports',
+      label: 'Relatórios',
+      color: 'bg-emerald-100/80 dark:bg-emerald-900/30',
+      items: [
+        { icon: FileText, label: "Relatórios Gestores", path: "/relatorios", show: isAdmin, showBadge: false },
+        { icon: ClipboardList, label: "Relatório Livre", path: "/relatorio-livre", show: true, showBadge: false },
+        { icon: FileText, label: "Relatório Completo", path: "/relatorio-completo", show: true, showBadge: false },
+        { icon: ClipboardList, label: "Meus Relatórios", path: "/meus-relatorios", show: isGestor, showBadge: false },
+        { icon: Sparkles, label: "Relatórios IA", path: "/relatorios-ia", show: true, showBadge: false },
+        { icon: History, label: "Histórico IA", path: "/historico-relatorios-ia", show: isGestor, showBadge: false },
+      ]
+    },
+    {
+      id: 'history',
+      label: 'Histórico',
+      color: 'bg-amber-100/80 dark:bg-amber-900/30',
+      items: [
+        { icon: History, label: "Histórico da Loja", path: "/historico-loja", show: true, showBadge: false },
+        { icon: History, label: "Histórico Pontos", path: "/historico-pontos", show: isAdmin, showBadge: false },
+      ]
+    },
+    {
+      id: 'alerts',
+      label: 'Alertas',
+      color: 'bg-red-100/80 dark:bg-red-900/30',
+      items: [
+        { icon: Bell, label: "Alertas", path: "/alertas", show: isAdmin, showBadge: true },
+        { icon: Settings, label: "Config. Alertas", path: "/configuracoes-alertas", show: isAdmin, showBadge: false },
+        { icon: Tag, label: "Categorias", path: "/categorias", show: isAdmin, showBadge: false },
+      ]
+    },
+    {
+      id: 'summaries',
+      label: 'Resumos',
+      color: 'bg-purple-100/80 dark:bg-purple-900/30',
+      items: [
+        { icon: BarChart3, label: "Resumos Globais", path: "/resumos-globais", show: true, showBadge: false },
+        { icon: History, label: "Histórico Resumos", path: "/historico-resumos-globais", show: true, showBadge: false },
+      ]
+    },
+    {
+      id: 'meetings',
+      label: 'Reuniões',
+      color: 'bg-cyan-100/80 dark:bg-cyan-900/30',
+      items: [
+        { icon: CalendarDays, label: "Reuniões Gestores", path: "/reunioes-gestores", show: true, showBadge: false },
+        { icon: Store, label: "Reuniões Lojas", path: "/reunioes-lojas", show: true, showBadge: false },
+      ]
+    },
+    {
+      id: 'results',
+      label: 'Resultados',
+      color: 'bg-orange-100/80 dark:bg-orange-900/30',
+      items: [
+        { icon: TrendingUp, label: "Upload Resultados", path: "/resultados-upload", show: isAdmin, showBadge: false },
+        { icon: BarChart3, label: "Dashboard Resultados", path: "/resultados-dashboard", show: true, showBadge: false },
+        { icon: GitCompare, label: "Comparação Lojas", path: "/comparacao-lojas", show: true, showBadge: false },
+      ]
+    },
+    {
+      id: 'pending',
+      label: 'Pendentes',
+      color: 'bg-rose-100/80 dark:bg-rose-900/30',
+      items: [
+        { icon: ListTodo, label: "Pendentes", path: isAdmin ? "/pendentes-admin" : "/pendentes", show: true, showBadge: false },
+      ]
+    },
   ];
   
-  return items.filter(item => item.show);
+  // Filtrar grupos que têm pelo menos um item visível
+  return groups
+    .map(group => ({
+      ...group,
+      items: group.items.filter(item => item.show)
+    }))
+    .filter(group => group.items.length > 0);
+};
+
+// Manter função antiga para compatibilidade
+const getMenuItems = (userRole?: string) => {
+  const groups = getMenuGroups(userRole);
+  return groups.flatMap(group => group.items);
 };
 
 const SIDEBAR_WIDTH_KEY = "sidebar-width";
@@ -153,6 +243,7 @@ function DashboardLayoutContent({
   const [isResizing, setIsResizing] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
   const menuItems = getMenuItems(user?.role);
+  const menuGroups = getMenuGroups(user?.role);
   const activeMenuItem = menuItems.find(item => item.path === location);
   const isMobile = useIsMobile();
   
@@ -229,38 +320,42 @@ function DashboardLayoutContent({
             </div>
           </SidebarHeader>
 
-          <SidebarContent className="gap-0">
-            <SidebarMenu className="px-2 py-1">
-              {menuItems.map(item => {
-                const isActive = location === item.path;
-                const showAlertBadge = item.showBadge && alertasCount > 0;
-                return (
-                  <SidebarMenuItem key={item.path}>
-                    <SidebarMenuButton
-                      isActive={isActive}
-                      onClick={() => setLocation(item.path)}
-                      tooltip={item.label}
-                      className={`h-10 transition-all font-normal relative`}
-                    >
-                      <div className="relative">
-                        <item.icon
-                          className={`h-4 w-4 ${isActive ? "text-primary" : ""}`}
-                        />
-                        {showAlertBadge && isCollapsed && (
-                          <span className="absolute -top-1 -right-1 h-2 w-2 bg-red-500 rounded-full" />
-                        )}
-                      </div>
-                      <span className="flex-1">{item.label}</span>
-                      {showAlertBadge && !isCollapsed && (
-                        <Badge variant="destructive" className="h-5 min-w-5 px-1.5 text-xs font-medium">
-                          {alertasCount}
-                        </Badge>
-                      )}
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
+          <SidebarContent className="gap-0 overflow-y-auto">
+            {menuGroups.map((group, groupIndex) => (
+              <div key={group.id} className={`${group.color} ${groupIndex > 0 ? 'mt-1' : ''} rounded-lg mx-1 py-1`}>
+                <SidebarMenu className="px-1">
+                  {group.items.map(item => {
+                    const isActive = location === item.path;
+                    const showAlertBadge = item.showBadge && alertasCount > 0;
+                    return (
+                      <SidebarMenuItem key={item.path}>
+                        <SidebarMenuButton
+                          isActive={isActive}
+                          onClick={() => setLocation(item.path)}
+                          tooltip={item.label}
+                          className={`h-10 transition-all font-normal relative`}
+                        >
+                          <div className="relative">
+                            <item.icon
+                              className={`h-4 w-4 ${isActive ? "text-primary" : ""}`}
+                            />
+                            {showAlertBadge && isCollapsed && (
+                              <span className="absolute -top-1 -right-1 h-2 w-2 bg-red-500 rounded-full" />
+                            )}
+                          </div>
+                          <span className="flex-1">{item.label}</span>
+                          {showAlertBadge && !isCollapsed && (
+                            <Badge variant="destructive" className="h-5 min-w-5 px-1.5 text-xs font-medium">
+                              {alertasCount}
+                            </Badge>
+                          )}
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    );
+                  })}
+                </SidebarMenu>
+              </div>
+            ))}
           </SidebarContent>
 
           <SidebarFooter className="p-3">
