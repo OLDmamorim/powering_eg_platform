@@ -1465,3 +1465,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar botão 'Eliminar Selecionados' na página de Lojas
 - [x] Adicionar checkboxes na página de Gestores
 - [x] Adicionar botão 'Eliminar Selecionados' na página de Gestores
+
+## Remoção - Resumos Globais v5.22
+- [x] Remover itens de Resumos Globais do menu lateral
+- [x] Remover rotas de Resumos Globais do App.tsx
+

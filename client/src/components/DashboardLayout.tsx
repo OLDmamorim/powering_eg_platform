@@ -107,15 +107,7 @@ const getMenuGroups = (userRole?: string): MenuGroup[] => {
         { icon: Tag, label: "Categorias", path: "/categorias", show: isAdmin, showBadge: false },
       ]
     },
-    {
-      id: 'summaries',
-      label: 'Resumos',
-      color: 'bg-purple-100/80 dark:bg-purple-900/30',
-      items: [
-        { icon: BarChart3, label: "Resumos Globais", path: "/resumos-globais", show: true, showBadge: false },
-        { icon: History, label: "Histórico Resumos", path: "/historico-resumos-globais", show: true, showBadge: false },
-      ]
-    },
+
     {
       id: 'meetings',
       label: 'Reuniões',

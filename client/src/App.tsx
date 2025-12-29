@@ -22,12 +22,9 @@ import ConfiguracoesAlertas from "./pages/ConfiguracoesAlertas";
 import Categorias from "./pages/Categorias";
 import PendentesAdmin from "./pages/PendentesAdmin";
 import HistoricoLoja from "./pages/HistoricoLoja";
-import ResumoGlobal from "./pages/ResumoGlobal";
 import HistoricoRelatoriosIA from "./pages/HistoricoRelatoriosIA";
 import ComparacaoRelatoriosIA from "./pages/ComparacaoRelatoriosIA";
 import GestaoUtilizadores from "./pages/GestaoUtilizadores";
-import ResumosGlobais from "./pages/ResumosGlobais";
-import HistoricoResumosGlobais from "./pages/HistoricoResumosGlobais";
 import ReuniõesGestores from "./pages/ReuniõesGestores";
 import ReuniõesLojas from "./pages/ReuniõesLojas";
 import ResultadosUpload from "./pages/ResultadosUpload";
@@ -55,7 +52,6 @@ function Router() {
       <Route path={"/relatorio-livre"} component={RelatorioLivre} />
       <Route path={"/relatorio-completo"} component={RelatorioCompleto} />
       <Route path={"/meus-relatorios"} component={MeusRelatorios} />
-      <Route path={"/resumo-global"} component={ResumoGlobal} />
       
       {/* Shared routes */}
       <Route path={"/relatorios-ia"} component={RelatoriosIA} />
@@ -67,8 +63,6 @@ function Router() {
       <Route path={"/alertas"} component={DashboardAlertas} />
       <Route path={"/configuracoes-alertas"} component={ConfiguracoesAlertas} />
       <Route path={"/categorias"} component={Categorias} />
-      <Route path={"/resumos-globais"} component={ResumosGlobais} />
-      <Route path={"/historico-resumos-globais"} component={HistoricoResumosGlobais} />
       <Route path={"/reunioes-gestores"} component={ReuniõesGestores} />
       <Route path={"/reunioes-lojas"} component={ReuniõesLojas} />
       <Route path={"/resultados-upload"} component={ResultadosUpload} />
