@@ -4,7 +4,7 @@ import DashboardLayout from '../components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Button } from '../components/ui/button';
-import { Loader2, TrendingUp, TrendingDown, Target, Award, BarChart3, LineChart, MapPin } from 'lucide-react';
+import { Loader2, TrendingUp, TrendingDown, Target, Award, BarChart3, LineChart, MapPin, Download } from 'lucide-react';
 import { useAuth } from '../_core/hooks/useAuth';
 
 
@@ -25,6 +25,10 @@ export function ResultadosDashboard() {
   const [periodoSelecionado, setPeriodoSelecionado] = useState<{ mes: number; ano: number } | null>(null);
   const [lojaSelecionada, setLojaSelecionada] = useState<number | 'minhas' | null>(null);
   const [metricaRanking, setMetricaRanking] = useState<'totalServicos' | 'taxaReparacao' | 'desvioPercentualMes' | 'servicosPorColaborador'>('totalServicos');
+  const [exportando, setExportando] = useState(false);
+  
+  // Mutation de exportação
+  const exportarMutation = trpc.resultados.exportarExcel.useMutation();
   
   // Queries
   const { data: periodos, isLoading: loadingPeriodos } = trpc.resultados.periodos.useQuery();
@@ -222,6 +226,61 @@ export function ResultadosDashboard() {
             </div>
           </CardContent>
         </Card>
+        
+        {/* Botão de Exportar (apenas quando "Apenas minhas lojas" selecionado) */}
+        {lojaSelecionada === 'minhas' && gestorData && periodoSelecionado && (
+          <div className="flex justify-end">
+            <Button
+              onClick={async () => {
+                if (!gestorData || !periodoSelecionado) return;
+                
+                setExportando(true);
+                try {
+                  const resultado = await exportarMutation.mutateAsync({
+                    gestorId: gestorData.id,
+                    gestorNome: gestorData.user.name || 'Gestor',
+                    gestorEmail: gestorData.user.email || '',
+                    mes: periodoSelecionado.mes,
+                    ano: periodoSelecionado.ano,
+                  });
+                  
+                  // Download do ficheiro
+                  const blob = new Blob(
+                    [Uint8Array.from(atob(resultado.fileData), c => c.charCodeAt(0))],
+                    { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }
+                  );
+                  const url = window.URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = resultado.fileName;
+                  document.body.appendChild(a);
+                  a.click();
+                  window.URL.revokeObjectURL(url);
+                  document.body.removeChild(a);
+                } catch (error) {
+                  console.error('Erro ao exportar:', error);
+                  alert('Erro ao gerar relatório. Tente novamente.');
+                } finally {
+                  setExportando(false);
+                }
+              }}
+              disabled={exportando}
+              className="gap-2"
+            >
+              {exportando ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  A gerar relatório...
+                </>
+              ) : (
+                <>
+                  <Download className="h-4 w-4" />
+                  Exportar Relatório Excel
+                </>
+              )}
+            </Button>
+          </div>
+        )}
         
         {/* Cards de Estatísticas */}
         {loadingEstatisticas ? (

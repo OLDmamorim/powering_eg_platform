@@ -2120,6 +2120,32 @@ export const appRouter = router({
       .query(async ({ input }) => {
         return await db.getEstatisticasPeriodo(input.mes, input.ano);
       }),
+    
+    // Exportar relatório Excel "Minhas Lojas"
+    exportarExcel: protectedProcedure
+      .input(z.object({
+        gestorId: z.number(),
+        gestorNome: z.string(),
+        gestorEmail: z.string(),
+        mes: z.number().min(1).max(12),
+        ano: z.number(),
+      }))
+      .mutation(async ({ input }) => {
+        const { gerarExcelMinhasLojas } = await import('./relatorioExporter');
+        const buffer = await gerarExcelMinhasLojas(
+          input.gestorId,
+          input.gestorNome,
+          input.gestorEmail,
+          input.mes,
+          input.ano
+        );
+        
+        // Retornar base64 para download no frontend
+        return {
+          fileName: `Minhas_Lojas_${input.mes}_${input.ano}.xlsx`,
+          fileData: buffer.toString('base64'),
+        };
+      }),
   }),
 
   // ==================== UPLOAD DE ANEXOS ====================

@@ -1400,3 +1400,19 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Implementar lógica de agregação quando opção selecionada
 - [x] Filtrar ranking para mostrar apenas lojas do gestor
 - [x] Atualizar gráfico de evolução com dados agregados
+
+
+## Exportação de Relatório "Minhas Lojas" v4.3
+
+### Backend
+- [x] Criar função para gerar dados de exportação agregados
+- [ ] Criar endpoint tRPC para exportar PDF (skipped - apenas Excel)
+- [x] Criar endpoint tRPC para exportar Excel
+- [ ] Formatar dados para PDF (skipped - apenas Excel)
+- [x] Formatar dados para Excel (múltiplas folhas)
+
+### Frontend
+- [x] Adicionar botão "Exportar Relatório" (visível quando "Apenas minhas lojas" selecionado)
+- [x] Implementar download de ficheiro Excel gerado
+- [x] Adicionar loading state durante geração
+- [ ] Menu dropdown com opções PDF e Excel (skipped - apenas Excel)
