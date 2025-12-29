@@ -56,7 +56,11 @@ import {
   InsertReuniaoLojas,
   acoesReunioes,
   AcaoReuniao,
-  InsertAcaoReuniao
+  InsertAcaoReuniao,
+  resultadosMensais,
+  ResultadoMensal,
+  InsertResultadoMensal,
+  User
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -2984,4 +2988,175 @@ export async function updateAcaoReuniao(
     .update(acoesReunioes)
     .set({ status })
     .where(eq(acoesReunioes.id, id));
+}
+
+// ==================== RESULTADOS MENSAIS ====================
+
+/**
+ * Obter resultados mensais com filtros
+ */
+export async function getResultadosMensais(
+  filtros: { mes?: number; ano?: number; lojaId?: number },
+  user: User
+): Promise<any[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  // Construir condições de filtro
+  const conditions: any[] = [];
+  
+  // Se for gestor, filtrar apenas suas lojas
+  if (user.role === 'gestor') {
+    const gestor = await getGestorByUserId(user.id);
+    if (gestor) {
+      const lojasGestor = await getLojasByGestorId(gestor.id);
+      const lojaIds = lojasGestor.map(l => l.id);
+      conditions.push(inArray(resultadosMensais.lojaId, lojaIds));
+    }
+  } else if (filtros.lojaId) {
+    // Admin pode filtrar por loja específica
+    conditions.push(eq(resultadosMensais.lojaId, filtros.lojaId));
+  }
+  
+  // Filtros de período
+  if (filtros.mes) conditions.push(eq(resultadosMensais.mes, filtros.mes));
+  if (filtros.ano) conditions.push(eq(resultadosMensais.ano, filtros.ano));
+  
+  // Executar query
+  const baseQuery = db
+    .select({
+      id: resultadosMensais.id,
+      lojaId: resultadosMensais.lojaId,
+      lojaNome: lojas.nome,
+      mes: resultadosMensais.mes,
+      ano: resultadosMensais.ano,
+      zona: resultadosMensais.zona,
+      totalServicos: resultadosMensais.totalServicos,
+      servicosPorColaborador: resultadosMensais.servicosPorColaborador,
+      numColaboradores: resultadosMensais.numColaboradores,
+      objetivoDiaAtual: resultadosMensais.objetivoDiaAtual,
+      objetivoMensal: resultadosMensais.objetivoMensal,
+      desvioObjetivoAcumulado: resultadosMensais.desvioObjetivoAcumulado,
+      desvioPercentualDia: resultadosMensais.desvioPercentualDia,
+      desvioPercentualMes: resultadosMensais.desvioPercentualMes,
+      taxaReparacao: resultadosMensais.taxaReparacao,
+      qtdReparacoes: resultadosMensais.qtdReparacoes,
+      qtdParaBrisas: resultadosMensais.qtdParaBrisas,
+      gapReparacoes22: resultadosMensais.gapReparacoes22,
+      nomeArquivo: resultadosMensais.nomeArquivo,
+      createdAt: resultadosMensais.createdAt,
+    })
+    .from(resultadosMensais)
+    .innerJoin(lojas, eq(resultadosMensais.lojaId, lojas.id));
+  
+  const resultados = conditions.length > 0
+    ? await baseQuery.where(and(...conditions)).orderBy(lojas.nome)
+    : await baseQuery.orderBy(lojas.nome);
+  
+  return resultados.map(r => ({
+    ...r,
+    servicosPorColaborador: r.servicosPorColaborador ? parseFloat(r.servicosPorColaborador) : null,
+    objetivoDiaAtual: r.objetivoDiaAtual ? parseFloat(r.objetivoDiaAtual) : null,
+    desvioObjetivoAcumulado: r.desvioObjetivoAcumulado ? parseFloat(r.desvioObjetivoAcumulado) : null,
+    desvioPercentualDia: r.desvioPercentualDia ? parseFloat(r.desvioPercentualDia) : null,
+    desvioPercentualMes: r.desvioPercentualMes ? parseFloat(r.desvioPercentualMes) : null,
+    taxaReparacao: r.taxaReparacao ? parseFloat(r.taxaReparacao) : null,
+  }));
+}
+
+/**
+ * Obter períodos disponíveis (mês/ano únicos)
+ */
+export async function getPeriodosDisponiveis(): Promise<Array<{ mes: number; ano: number; label: string }>> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const periodos = await db
+    .selectDistinct({
+      mes: resultadosMensais.mes,
+      ano: resultadosMensais.ano,
+    })
+    .from(resultadosMensais)
+    .orderBy(desc(resultadosMensais.ano), desc(resultadosMensais.mes));
+  
+  const meses = [
+    'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+  ];
+  
+  return periodos.map(p => ({
+    mes: p.mes,
+    ano: p.ano,
+    label: `${meses[p.mes - 1]} ${p.ano}`,
+  }));
+}
+
+/**
+ * Comparar dois períodos
+ */
+export async function compararPeriodos(
+  input: {
+    periodo1: { mes: number; ano: number };
+    periodo2: { mes: number; ano: number };
+    lojaId?: number;
+  },
+  user: User
+): Promise<any> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  // Buscar dados do período 1
+  const dados1 = await getResultadosMensais(
+    { mes: input.periodo1.mes, ano: input.periodo1.ano, lojaId: input.lojaId },
+    user
+  );
+  
+  // Buscar dados do período 2
+  const dados2 = await getResultadosMensais(
+    { mes: input.periodo2.mes, ano: input.periodo2.ano, lojaId: input.lojaId },
+    user
+  );
+  
+  // Criar mapa de lojas para comparação
+  const comparacao: any[] = [];
+  
+  dados1.forEach(d1 => {
+    const d2 = dados2.find(d => d.lojaId === d1.lojaId);
+    
+    if (d2) {
+      comparacao.push({
+        lojaId: d1.lojaId,
+        lojaNome: d1.lojaNome,
+        periodo1: {
+          mes: d1.mes,
+          ano: d1.ano,
+          totalServicos: d1.totalServicos,
+          objetivoMensal: d1.objetivoMensal,
+          desvioPercentualMes: d1.desvioPercentualMes,
+          taxaReparacao: d1.taxaReparacao,
+        },
+        periodo2: {
+          mes: d2.mes,
+          ano: d2.ano,
+          totalServicos: d2.totalServicos,
+          objetivoMensal: d2.objetivoMensal,
+          desvioPercentualMes: d2.desvioPercentualMes,
+          taxaReparacao: d2.taxaReparacao,
+        },
+        variacao: {
+          totalServicos: d2.totalServicos && d1.totalServicos 
+            ? ((d2.totalServicos - d1.totalServicos) / d1.totalServicos) * 100 
+            : null,
+          desvioPercentualMes: d2.desvioPercentualMes && d1.desvioPercentualMes
+            ? d2.desvioPercentualMes - d1.desvioPercentualMes
+            : null,
+          taxaReparacao: d2.taxaReparacao && d1.taxaReparacao
+            ? d2.taxaReparacao - d1.taxaReparacao
+            : null,
+        },
+      });
+    }
+  });
+  
+  return comparacao;
 }

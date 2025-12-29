@@ -1317,3 +1317,14 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar ordenação alfabética na query getAllGestores (backend)
 - [x] Verificar se frontend precisa de ordenação adicional
 - [x] Testar em Reuniões de Gestores e outras páginas
+
+## Módulo de Resultados
+- [x] Criar tabelas resultados_mensais na base de dados
+- [x] Implementar processamento automático de Excel (colunas A-N, folha Faturados)
+- [x] Criar routers tRPC para upload e consulta de resultados
+- [x] Criar página de upload para admin
+- [x] Criar dashboard de resultados para gestores (próxima iteração)
+- [x] Implementar filtros (loja, período, zona) (próxima iteração)
+- [x] Implementar comparação entre períodos (próxima iteração)
+- [x] Adicionar gráficos de evolução e performance (próxima iteração)
+- [x] Testar com Excel real de Dezembro 2025

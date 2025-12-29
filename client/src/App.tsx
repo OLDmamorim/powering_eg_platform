@@ -30,6 +30,7 @@ import ResumosGlobais from "./pages/ResumosGlobais";
 import HistoricoResumosGlobais from "./pages/HistoricoResumosGlobais";
 import ReuniõesGestores from "./pages/ReuniõesGestores";
 import ReuniõesLojas from "./pages/ReuniõesLojas";
+import ResultadosUpload from "./pages/ResultadosUpload";
 
 
 function Router() {
@@ -68,6 +69,7 @@ function Router() {
       <Route path={"/historico-resumos-globais"} component={HistoricoResumosGlobais} />
       <Route path={"/reunioes-gestores"} component={ReuniõesGestores} />
       <Route path={"/reunioes-lojas"} component={ReuniõesLojas} />
+      <Route path={"/resultados-upload"} component={ResultadosUpload} />
       
       
       <Route path={"/login-nao-autorizado"} component={LoginNaoAutorizado} />

@@ -2005,6 +2005,59 @@ export const appRouter = router({
       }),
   }),
 
+  // ==================== RESULTADOS MENSAIS ====================
+  resultados: router({
+    upload: adminProcedure
+      .input(z.object({
+        fileData: z.string(), // Base64
+        fileName: z.string(),
+        mes: z.number().min(1).max(12),
+        ano: z.number().min(2020).max(2100),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const { processarExcelResultados } = await import('./excelProcessor');
+        
+        // Decodificar base64
+        const buffer = Buffer.from(input.fileData, 'base64');
+        
+        // Processar Excel
+        const resultado = await processarExcelResultados(
+          buffer,
+          input.mes,
+          input.ano,
+          ctx.user.id,
+          input.fileName
+        );
+        
+        return resultado;
+      }),
+    
+    listar: protectedProcedure
+      .input(z.object({
+        mes: z.number().optional(),
+        ano: z.number().optional(),
+        lojaId: z.number().optional(),
+      }).optional())
+      .query(async ({ input, ctx }) => {
+        return await db.getResultadosMensais(input || {}, ctx.user);
+      }),
+    
+    periodos: protectedProcedure
+      .query(async () => {
+        return await db.getPeriodosDisponiveis();
+      }),
+    
+    comparar: protectedProcedure
+      .input(z.object({
+        periodo1: z.object({ mes: z.number(), ano: z.number() }),
+        periodo2: z.object({ mes: z.number(), ano: z.number() }),
+        lojaId: z.number().optional(),
+      }))
+      .query(async ({ input, ctx }) => {
+        return await db.compararPeriodos(input, ctx.user);
+      }),
+  }),
+
   // ==================== UPLOAD DE ANEXOS ====================
   uploadAnexo: protectedProcedure
     .input(z.object({

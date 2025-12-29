@@ -387,3 +387,62 @@ export const acoesReunioes = mysqlTable("acoes_reunioes", {
 
 export type AcaoReuniao = typeof acoesReunioes.$inferSelect;
 export type InsertAcaoReuniao = typeof acoesReunioes.$inferInsert;
+
+/**
+ * Resultados Mensais - Dados de performance das lojas extraídos do Excel mensal
+ * Colunas A-N da folha "Faturados"
+ */
+export const resultadosMensais = mysqlTable("resultados_mensais", {
+  id: int("id").autoincrement().primaryKey(),
+  lojaId: int("lojaId").notNull(), // FK para lojas.id
+  mes: int("mes").notNull(), // 1-12
+  ano: int("ano").notNull(), // 2025, 2026, etc.
+  
+  // Coluna A: Zona
+  zona: varchar("zona", { length: 255 }),
+  
+  // Coluna C: Total Serviços Faturados
+  totalServicos: int("totalServicos"),
+  
+  // Coluna D: Nº Serv Diários por Colaborador
+  servicosPorColaborador: decimal("servicosPorColaborador", { precision: 10, scale: 4 }),
+  
+  // Coluna E: Nº Colaboradores Loja
+  numColaboradores: int("numColaboradores"),
+  
+  // Coluna F: Objetivo ao dia Actual
+  objetivoDiaAtual: decimal("objetivoDiaAtual", { precision: 10, scale: 2 }),
+  
+  // Coluna G: Objetivo Mensal
+  objetivoMensal: int("objetivoMensal"),
+  
+  // Coluna H: Serv. Diários Acumulados Vs Obj
+  desvioObjetivoAcumulado: decimal("desvioObjetivoAcumulado", { precision: 10, scale: 2 }),
+  
+  // Coluna I: Vs. Obj Dia (%)
+  desvioPercentualDia: decimal("desvioPercentualDia", { precision: 5, scale: 4 }),
+  
+  // Coluna J: Vs. Obj Mês (%)
+  desvioPercentualMes: decimal("desvioPercentualMes", { precision: 5, scale: 4 }),
+  
+  // Coluna K: Taxa de Reparação QIV
+  taxaReparacao: decimal("taxaReparacao", { precision: 5, scale: 4 }),
+  
+  // Coluna L: Qtd Reparações
+  qtdReparacoes: int("qtdReparacoes"),
+  
+  // Coluna M: Qtd Para-Brisas
+  qtdParaBrisas: int("qtdParaBrisas"),
+  
+  // Coluna N: Qtd Reparações em falta para Taxa 22%
+  gapReparacoes22: int("gapReparacoes22"),
+  
+  // Metadados
+  nomeArquivo: varchar("nomeArquivo", { length: 255 }), // Nome do arquivo Excel original
+  uploadedBy: int("uploadedBy").notNull(), // FK para users.id (admin que fez upload)
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type ResultadoMensal = typeof resultadosMensais.$inferSelect;
+export type InsertResultadoMensal = typeof resultadosMensais.$inferInsert;
