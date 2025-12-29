@@ -473,3 +473,57 @@ export const totaisMensais = mysqlTable("totais_mensais", {
 
 export type TotalMensal = typeof totaisMensais.$inferSelect;
 export type InsertTotalMensal = typeof totaisMensais.$inferInsert;
+
+
+/**
+ * Vendas Complementares - Dados da folha "Complementares" do Excel
+ * Inclui escovas, polimento, tratamentos, lavagens e películas
+ */
+export const vendasComplementares = mysqlTable("vendas_complementares", {
+  id: int("id").autoincrement().primaryKey(),
+  lojaId: int("lojaId").notNull(), // FK para lojas.id
+  mes: int("mes").notNull(), // 1-12
+  ano: int("ano").notNull(), // 2025, 2026, etc.
+  
+  // Total Vendas Complementares (excluindo películas)
+  totalVendas: decimal("totalVendas", { precision: 10, scale: 2 }),
+  
+  // Escovas
+  escovasVendas: decimal("escovasVendas", { precision: 10, scale: 2 }),
+  escovasQtd: int("escovasQtd"),
+  escovasPercent: decimal("escovasPercent", { precision: 5, scale: 4 }), // % vs Serviços
+  
+  // Polimento Faróis
+  polimentoQtd: int("polimentoQtd"),
+  polimentoVendas: decimal("polimentoVendas", { precision: 10, scale: 2 }),
+  
+  // Tratamento Carroçarias
+  tratamentoQtd: int("tratamentoQtd"),
+  tratamentoVendas: decimal("tratamentoVendas", { precision: 10, scale: 2 }),
+  
+  // Outros (Lavagens, Elevadores, Colagens, etc.)
+  outrosQtd: int("outrosQtd"),
+  outrosVendas: decimal("outrosVendas", { precision: 10, scale: 2 }),
+  
+  // Películas (contabilizadas separadamente)
+  peliculaVendas: decimal("peliculaVendas", { precision: 10, scale: 2 }),
+  
+  // Lavagens ECO (6 tipos)
+  lavagensEcoExterior: int("lavagensEcoExterior"), // EGLVG01
+  lavagensEcoNormal: int("lavagensEcoNormal"), // EGLVG02
+  lavagensEcoFresh: int("lavagensEcoFresh"), // EGLVG03
+  lavagensEcoProtecao: int("lavagensEcoProtecao"), // EGLVG04
+  lavagensEcoEstofos: int("lavagensEcoEstofos"), // EGLVG05
+  lavagensEcoTop: int("lavagensEcoTop"), // EGLVG06
+  lavagensTotal: int("lavagensTotal"),
+  lavagensVendas: decimal("lavagensVendas", { precision: 10, scale: 2 }),
+  
+  // Metadados
+  nomeArquivo: varchar("nomeArquivo", { length: 255 }),
+  uploadedBy: int("uploadedBy").notNull(), // FK para users.id
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type VendaComplementar = typeof vendasComplementares.$inferSelect;
+export type InsertVendaComplementar = typeof vendasComplementares.$inferInsert;

@@ -63,6 +63,9 @@ import {
   totaisMensais,
   TotalMensal,
   InsertTotalMensal,
+  vendasComplementares,
+  VendaComplementar,
+  InsertVendaComplementar,
   User
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
@@ -3472,4 +3475,233 @@ export async function getTotaisMensais(mes: number, ano: number) {
     ...totais,
     taxaReparacao: totais.taxaReparacao ? parseFloat(totais.taxaReparacao.toString()) : null,
   };
+}
+
+
+// ==================== VENDAS COMPLEMENTARES ====================
+
+/**
+ * Obtém vendas complementares de um período
+ */
+export async function getVendasComplementares(
+  mes: number,
+  ano: number,
+  lojaId?: number,
+  lojasIds?: number[]
+) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  // Construir condições de filtro
+  const conditions = [
+    eq(vendasComplementares.mes, mes),
+    eq(vendasComplementares.ano, ano)
+  ];
+  
+  // Filtrar por loja específica ou lista de lojas
+  if (lojaId) {
+    conditions.push(eq(vendasComplementares.lojaId, lojaId));
+  } else if (lojasIds && lojasIds.length > 0) {
+    conditions.push(inArray(vendasComplementares.lojaId, lojasIds));
+  }
+  
+  const resultados = await db
+    .select({
+      id: vendasComplementares.id,
+      lojaId: vendasComplementares.lojaId,
+      lojaNome: lojas.nome,
+      mes: vendasComplementares.mes,
+      ano: vendasComplementares.ano,
+      totalVendas: vendasComplementares.totalVendas,
+      escovasVendas: vendasComplementares.escovasVendas,
+      escovasQtd: vendasComplementares.escovasQtd,
+      escovasPercent: vendasComplementares.escovasPercent,
+      polimentoQtd: vendasComplementares.polimentoQtd,
+      polimentoVendas: vendasComplementares.polimentoVendas,
+      tratamentoQtd: vendasComplementares.tratamentoQtd,
+      tratamentoVendas: vendasComplementares.tratamentoVendas,
+      outrosQtd: vendasComplementares.outrosQtd,
+      outrosVendas: vendasComplementares.outrosVendas,
+      peliculaVendas: vendasComplementares.peliculaVendas,
+      lavagensTotal: vendasComplementares.lavagensTotal,
+      lavagensVendas: vendasComplementares.lavagensVendas,
+    })
+    .from(vendasComplementares)
+    .innerJoin(lojas, eq(vendasComplementares.lojaId, lojas.id))
+    .where(and(...conditions));
+
+  return resultados.map(r => ({
+    ...r,
+    totalVendas: r.totalVendas ? parseFloat(r.totalVendas.toString()) : null,
+    escovasVendas: r.escovasVendas ? parseFloat(r.escovasVendas.toString()) : null,
+    escovasPercent: r.escovasPercent ? parseFloat(r.escovasPercent.toString()) : null,
+    polimentoVendas: r.polimentoVendas ? parseFloat(r.polimentoVendas.toString()) : null,
+    tratamentoVendas: r.tratamentoVendas ? parseFloat(r.tratamentoVendas.toString()) : null,
+    outrosVendas: r.outrosVendas ? parseFloat(r.outrosVendas.toString()) : null,
+    peliculaVendas: r.peliculaVendas ? parseFloat(r.peliculaVendas.toString()) : null,
+    lavagensVendas: r.lavagensVendas ? parseFloat(r.lavagensVendas.toString()) : null,
+  }));
+}
+
+/**
+ * Obtém estatísticas agregadas de vendas complementares
+ */
+export async function getEstatisticasComplementares(
+  mes: number,
+  ano: number,
+  lojaId?: number,
+  lojasIds?: number[]
+) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  // Construir condições de filtro
+  const conditions = [
+    eq(vendasComplementares.mes, mes),
+    eq(vendasComplementares.ano, ano)
+  ];
+  
+  // Filtrar por loja específica ou lista de lojas
+  if (lojaId) {
+    conditions.push(eq(vendasComplementares.lojaId, lojaId));
+  } else if (lojasIds && lojasIds.length > 0) {
+    conditions.push(inArray(vendasComplementares.lojaId, lojasIds));
+  }
+  
+  const stats = await db
+    .select({
+      totalLojas: sql<number>`COUNT(DISTINCT ${vendasComplementares.lojaId})`,
+      lojasComVendas: sql<number>`SUM(CASE WHEN ${vendasComplementares.totalVendas} > 0 THEN 1 ELSE 0 END)`,
+      somaVendas: sql<number>`SUM(${vendasComplementares.totalVendas})`,
+      somaEscovas: sql<number>`SUM(${vendasComplementares.escovasVendas})`,
+      somaPolimento: sql<number>`SUM(${vendasComplementares.polimentoVendas})`,
+      somaTratamento: sql<number>`SUM(${vendasComplementares.tratamentoVendas})`,
+      somaOutros: sql<number>`SUM(${vendasComplementares.outrosVendas})`,
+      somaPeliculas: sql<number>`SUM(${vendasComplementares.peliculaVendas})`,
+      somaLavagens: sql<number>`SUM(${vendasComplementares.lavagensVendas})`,
+      totalEscovasQtd: sql<number>`SUM(${vendasComplementares.escovasQtd})`,
+      totalPolimentoQtd: sql<number>`SUM(${vendasComplementares.polimentoQtd})`,
+      totalTratamentoQtd: sql<number>`SUM(${vendasComplementares.tratamentoQtd})`,
+      totalLavagensQtd: sql<number>`SUM(${vendasComplementares.lavagensTotal})`,
+      mediaEscovasPercent: sql<number>`AVG(${vendasComplementares.escovasPercent})`,
+      lojasComEscovas: sql<number>`SUM(CASE WHEN ${vendasComplementares.escovasQtd} > 0 THEN 1 ELSE 0 END)`,
+    })
+    .from(vendasComplementares)
+    .where(and(...conditions));
+
+  const result = stats[0];
+  if (!result) return null;
+  
+  return {
+    totalLojas: result.totalLojas || 0,
+    lojasComVendas: result.lojasComVendas || 0,
+    lojasSemVendas: (result.totalLojas || 0) - (result.lojasComVendas || 0),
+    somaVendas: result.somaVendas ? parseFloat(result.somaVendas.toString()) : 0,
+    somaEscovas: result.somaEscovas ? parseFloat(result.somaEscovas.toString()) : 0,
+    somaPolimento: result.somaPolimento ? parseFloat(result.somaPolimento.toString()) : 0,
+    somaTratamento: result.somaTratamento ? parseFloat(result.somaTratamento.toString()) : 0,
+    somaOutros: result.somaOutros ? parseFloat(result.somaOutros.toString()) : 0,
+    somaPeliculas: result.somaPeliculas ? parseFloat(result.somaPeliculas.toString()) : 0,
+    somaLavagens: result.somaLavagens ? parseFloat(result.somaLavagens.toString()) : 0,
+    totalEscovasQtd: result.totalEscovasQtd || 0,
+    totalPolimentoQtd: result.totalPolimentoQtd || 0,
+    totalTratamentoQtd: result.totalTratamentoQtd || 0,
+    totalLavagensQtd: result.totalLavagensQtd || 0,
+    mediaEscovasPercent: result.mediaEscovasPercent ? parseFloat(result.mediaEscovasPercent.toString()) : 0,
+    lojasComEscovas: result.lojasComEscovas || 0,
+    percentLojasComEscovas: result.totalLojas ? ((result.lojasComEscovas || 0) / result.totalLojas) * 100 : 0,
+  };
+}
+
+/**
+ * Ranking de lojas por vendas complementares
+ */
+export async function getRankingComplementares(
+  metrica: 'totalVendas' | 'escovasVendas' | 'escovasPercent' | 'polimentoVendas',
+  mes: number,
+  ano: number,
+  limit: number = 10,
+  lojasIds?: number[]
+) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  // Construir condições de filtro
+  const conditions = [
+    eq(vendasComplementares.mes, mes),
+    eq(vendasComplementares.ano, ano)
+  ];
+  
+  // Filtrar por lista de lojas se fornecida
+  if (lojasIds && lojasIds.length > 0) {
+    conditions.push(inArray(vendasComplementares.lojaId, lojasIds));
+  }
+  
+  // Determinar campo de ordenação
+  let orderField;
+  switch (metrica) {
+    case 'totalVendas':
+      orderField = vendasComplementares.totalVendas;
+      break;
+    case 'escovasVendas':
+      orderField = vendasComplementares.escovasVendas;
+      break;
+    case 'escovasPercent':
+      orderField = vendasComplementares.escovasPercent;
+      break;
+    case 'polimentoVendas':
+      orderField = vendasComplementares.polimentoVendas;
+      break;
+    default:
+      orderField = vendasComplementares.totalVendas;
+  }
+  
+  const resultados = await db
+    .select({
+      lojaId: vendasComplementares.lojaId,
+      lojaNome: lojas.nome,
+      totalVendas: vendasComplementares.totalVendas,
+      escovasVendas: vendasComplementares.escovasVendas,
+      escovasQtd: vendasComplementares.escovasQtd,
+      escovasPercent: vendasComplementares.escovasPercent,
+      polimentoVendas: vendasComplementares.polimentoVendas,
+      polimentoQtd: vendasComplementares.polimentoQtd,
+      tratamentoVendas: vendasComplementares.tratamentoVendas,
+      peliculaVendas: vendasComplementares.peliculaVendas,
+    })
+    .from(vendasComplementares)
+    .innerJoin(lojas, eq(vendasComplementares.lojaId, lojas.id))
+    .where(and(...conditions))
+    .orderBy(desc(orderField))
+    .limit(limit);
+
+  return resultados.map(r => ({
+    ...r,
+    totalVendas: r.totalVendas ? parseFloat(r.totalVendas.toString()) : 0,
+    escovasVendas: r.escovasVendas ? parseFloat(r.escovasVendas.toString()) : 0,
+    escovasPercent: r.escovasPercent ? parseFloat(r.escovasPercent.toString()) : 0,
+    polimentoVendas: r.polimentoVendas ? parseFloat(r.polimentoVendas.toString()) : 0,
+    tratamentoVendas: r.tratamentoVendas ? parseFloat(r.tratamentoVendas.toString()) : 0,
+    peliculaVendas: r.peliculaVendas ? parseFloat(r.peliculaVendas.toString()) : 0,
+  }));
+}
+
+/**
+ * Verifica se existem dados de vendas complementares para um período
+ */
+export async function temDadosComplementares(mes: number, ano: number): Promise<boolean> {
+  const db = await getDb();
+  if (!db) return false;
+  
+  const result = await db
+    .select({ count: sql<number>`COUNT(*)` })
+    .from(vendasComplementares)
+    .where(
+      and(
+        eq(vendasComplementares.mes, mes),
+        eq(vendasComplementares.ano, ano)
+      )
+    );
+  
+  return (result[0]?.count || 0) > 0;
 }

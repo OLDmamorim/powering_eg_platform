@@ -2049,13 +2049,13 @@ export const appRouter = router({
         ano: z.number().min(2020).max(2100),
       }))
       .mutation(async ({ input, ctx }) => {
-        const { processarExcelResultados } = await import('./excelProcessor');
+        const { processarExcelResultados, processarExcelComplementares } = await import('./excelProcessor');
         
         // Decodificar base64
         const buffer = Buffer.from(input.fileData, 'base64');
         
-        // Processar Excel
-        const resultado = await processarExcelResultados(
+        // Processar folha Faturados
+        const resultadoFaturados = await processarExcelResultados(
           buffer,
           input.mes,
           input.ano,
@@ -2063,7 +2063,23 @@ export const appRouter = router({
           input.fileName
         );
         
-        return resultado;
+        // Processar folha Complementares (se existir)
+        const resultadoComplementares = await processarExcelComplementares(
+          buffer,
+          input.mes,
+          input.ano,
+          ctx.user.id,
+          input.fileName
+        );
+        
+        return {
+          sucesso: resultadoFaturados.sucesso,
+          erros: resultadoFaturados.erros,
+          complementares: {
+            sucesso: resultadoComplementares.sucesso,
+            erros: resultadoComplementares.erros,
+          }
+        };
       }),
     
     listar: protectedProcedure
@@ -2192,6 +2208,56 @@ export const appRouter = router({
           fileName: `Minhas_Lojas_${input.mes}_${input.ano}.xlsx`,
           fileData: buffer.toString('base64'),
         };
+      }),
+  }),
+
+  // ==================== VENDAS COMPLEMENTARES ====================
+  complementares: router({
+    // Listar vendas complementares
+    listar: protectedProcedure
+      .input(z.object({
+        mes: z.number().min(1).max(12),
+        ano: z.number(),
+        lojaId: z.number().optional(),
+        lojasIds: z.array(z.number()).optional(),
+      }))
+      .query(async ({ input }) => {
+        return await db.getVendasComplementares(input.mes, input.ano, input.lojaId, input.lojasIds);
+      }),
+    
+    // Estatísticas agregadas
+    estatisticas: protectedProcedure
+      .input(z.object({
+        mes: z.number().min(1).max(12),
+        ano: z.number(),
+        lojaId: z.number().optional(),
+        lojasIds: z.array(z.number()).optional(),
+      }))
+      .query(async ({ input }) => {
+        return await db.getEstatisticasComplementares(input.mes, input.ano, input.lojaId, input.lojasIds);
+      }),
+    
+    // Ranking de vendas complementares
+    ranking: protectedProcedure
+      .input(z.object({
+        metrica: z.enum(['totalVendas', 'escovasVendas', 'escovasPercent', 'polimentoVendas']),
+        mes: z.number().min(1).max(12),
+        ano: z.number(),
+        limit: z.number().optional(),
+        lojasIds: z.array(z.number()).optional(),
+      }))
+      .query(async ({ input }) => {
+        return await db.getRankingComplementares(input.metrica, input.mes, input.ano, input.limit, input.lojasIds);
+      }),
+    
+    // Verificar se existem dados
+    temDados: protectedProcedure
+      .input(z.object({
+        mes: z.number().min(1).max(12),
+        ano: z.number(),
+      }))
+      .query(async ({ input }) => {
+        return await db.temDadosComplementares(input.mes, input.ano);
       }),
   }),
 

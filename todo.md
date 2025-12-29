@@ -1453,3 +1453,4 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Melhorar funcionalidade de edição de relatórios (modal para ver e editar antes de enviar)
 - [x] Adicionar botões de edição visíveis na página Meus Relatórios do gestor
 - [x] Corrigir Dashboard Resultados: mostrar todas as lojas do gestor no ranking quando "Minhas Lojas" selecionado
+- [x] Incluir vendas complementares no Dashboard de Resultados (importação Excel + visualização)

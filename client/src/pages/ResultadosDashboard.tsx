@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
-import { Loader2, TrendingUp, TrendingDown, Target, Award, BarChart3, LineChart, MapPin, Download } from 'lucide-react';
+import { Loader2, TrendingUp, TrendingDown, Target, Award, BarChart3, LineChart, MapPin, Download, ShoppingBag, Package } from 'lucide-react';
 import { useAuth } from '../_core/hooks/useAuth';
 
 
@@ -150,6 +150,33 @@ export function ResultadosDashboard() {
   const { data: porZona, isLoading: loadingZona } = trpc.resultados.porZona.useQuery(
     { mes: periodoSelecionado?.mes || 1, ano: periodoSelecionado?.ano || 2025 },
     { enabled: !!periodoSelecionado }
+  );
+  
+  // Queries de vendas complementares
+  const { data: temDadosComplementares } = trpc.complementares.temDados.useQuery(
+    { mes: periodoSelecionado?.mes || 1, ano: periodoSelecionado?.ano || 2025 },
+    { enabled: !!periodoSelecionado }
+  );
+  
+  const { data: estatisticasComplementares, isLoading: loadingComplementares } = trpc.complementares.estatisticas.useQuery(
+    { 
+      mes: periodoSelecionado?.mes || 1, 
+      ano: periodoSelecionado?.ano || 2025,
+      lojaId: typeof lojaSelecionada === 'number' ? lojaSelecionada : undefined,
+      lojasIds: lojasIdsParaFiltro
+    },
+    { enabled: !!periodoSelecionado && !!temDadosComplementares }
+  );
+  
+  const { data: rankingComplementares, isLoading: loadingRankingComplementares } = trpc.complementares.ranking.useQuery(
+    { 
+      metrica: 'totalVendas', 
+      mes: periodoSelecionado?.mes || 1, 
+      ano: periodoSelecionado?.ano || 2025,
+      limit: rankingLimit,
+      lojasIds: rankingLojasIds
+    },
+    { enabled: !!periodoSelecionado && !!temDadosComplementares }
   );
   
   // Query de evolução individual
@@ -781,6 +808,127 @@ export function ResultadosDashboard() {
             )}
           </CardContent>
         </Card>
+        
+        {/* Vendas Complementares */}
+        {temDadosComplementares && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <ShoppingBag className="h-5 w-5" />
+                Vendas Complementares
+              </CardTitle>
+              <CardDescription>
+                {periodoSelecionado && periodos.find(p => p.mes === periodoSelecionado.mes && p.ano === periodoSelecionado.ano)?.label}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {loadingComplementares ? (
+                <div className="flex items-center justify-center h-32">
+                  <Loader2 className="h-6 w-6 animate-spin" />
+                </div>
+              ) : estatisticasComplementares ? (
+                <div className="space-y-6">
+                  {/* Resumo Geral */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="bg-green-50 dark:bg-green-950 rounded-lg p-4">
+                      <div className="text-sm text-muted-foreground">Total Vendas</div>
+                      <div className="text-2xl font-bold text-green-600">
+                        €{estatisticasComplementares.somaVendas?.toLocaleString('pt-PT', { minimumFractionDigits: 2 }) || '0,00'}
+                      </div>
+                      <div className="text-xs text-muted-foreground">excl. películas</div>
+                    </div>
+                    <div className="bg-blue-50 dark:bg-blue-950 rounded-lg p-4">
+                      <div className="text-sm text-muted-foreground">Escovas</div>
+                      <div className="text-2xl font-bold text-blue-600">
+                        €{estatisticasComplementares.somaEscovas?.toLocaleString('pt-PT', { minimumFractionDigits: 2 }) || '0,00'}
+                      </div>
+                      <div className="text-xs text-muted-foreground">{estatisticasComplementares.totalEscovasQtd || 0} unidades</div>
+                    </div>
+                    <div className="bg-purple-50 dark:bg-purple-950 rounded-lg p-4">
+                      <div className="text-sm text-muted-foreground">Películas</div>
+                      <div className="text-2xl font-bold text-purple-600">
+                        €{estatisticasComplementares.somaPeliculas?.toLocaleString('pt-PT', { minimumFractionDigits: 2 }) || '0,00'}
+                      </div>
+                    </div>
+                    <div className="bg-orange-50 dark:bg-orange-950 rounded-lg p-4">
+                      <div className="text-sm text-muted-foreground">Lojas com Vendas</div>
+                      <div className="text-2xl font-bold text-orange-600">
+                        {estatisticasComplementares.lojasComVendas || 0}/{estatisticasComplementares.totalLojas || 0}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {estatisticasComplementares.percentLojasComEscovas?.toFixed(0) || 0}% venderam escovas
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Breakdown por Categoria */}
+                  <div>
+                    <h4 className="font-medium mb-3">Breakdown por Categoria</h4>
+                    <div className="space-y-2">
+                      {[
+                        { label: 'Escovas', valor: estatisticasComplementares.somaEscovas, total: estatisticasComplementares.somaVendas, cor: 'bg-blue-500' },
+                        { label: 'Polimento Faróis', valor: estatisticasComplementares.somaPolimento, total: estatisticasComplementares.somaVendas, cor: 'bg-yellow-500' },
+                        { label: 'Tratamento Carroçarias', valor: estatisticasComplementares.somaTratamento, total: estatisticasComplementares.somaVendas, cor: 'bg-red-500' },
+                        { label: 'Outros', valor: estatisticasComplementares.somaOutros, total: estatisticasComplementares.somaVendas, cor: 'bg-gray-500' },
+                        { label: 'Lavagens ECO', valor: estatisticasComplementares.somaLavagens, total: estatisticasComplementares.somaVendas, cor: 'bg-green-500' },
+                      ].map((cat, idx) => {
+                        const percent = cat.total && cat.total > 0 ? ((cat.valor || 0) / cat.total) * 100 : 0;
+                        return (
+                          <div key={idx} className="flex items-center gap-3">
+                            <div className="w-32 text-sm">{cat.label}</div>
+                            <div className="flex-1 bg-secondary rounded-full h-4 overflow-hidden">
+                              <div 
+                                className={`h-full ${cat.cor} transition-all`}
+                                style={{ width: `${percent}%` }}
+                              />
+                            </div>
+                            <div className="w-24 text-right text-sm">
+                              €{(cat.valor || 0).toLocaleString('pt-PT', { minimumFractionDigits: 2 })}
+                            </div>
+                            <div className="w-16 text-right text-sm text-muted-foreground">
+                              {percent.toFixed(1)}%
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  
+                  {/* Top 5 Lojas */}
+                  {rankingComplementares && rankingComplementares.length > 0 && (
+                    <div>
+                      <h4 className="font-medium mb-3">Top 5 Lojas - Vendas Complementares</h4>
+                      <div className="space-y-2">
+                        {rankingComplementares.slice(0, 5).map((item, idx) => (
+                          <div key={idx} className="flex items-center gap-3">
+                            <div className={`
+                              flex items-center justify-center w-6 h-6 rounded-full font-bold text-xs
+                              ${idx === 0 ? 'bg-yellow-500 text-white' : ''}
+                              ${idx === 1 ? 'bg-gray-400 text-white' : ''}
+                              ${idx === 2 ? 'bg-orange-600 text-white' : ''}
+                              ${idx > 2 ? 'bg-secondary text-foreground' : ''}
+                            `}>
+                              {idx + 1}
+                            </div>
+                            <div className="flex-1 text-sm">{item.lojaNome}</div>
+                            <div className="text-right">
+                              <div className="font-medium">€{item.totalVendas?.toLocaleString('pt-PT', { minimumFractionDigits: 2 })}</div>
+                              <div className="text-xs text-muted-foreground">{item.escovasQtd || 0} escovas</div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <p className="text-center text-muted-foreground py-8">
+                  Sem dados de vendas complementares para este período
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        )}
         
         {/* Resultados por Zona */}
         <Card>
