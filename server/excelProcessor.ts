@@ -73,13 +73,14 @@ export async function processarExcelResultados(
       const nomeLoja = String(row[1]).trim();
       const nomeNormalizado = normalizeName(nomeLoja);
       
-      // Ignorar linhas de total ou subtotal
+      // Ignorar linhas de total, subtotal, PROMOTOR ou subtotais por zona (não são lojas)
       if (nomeNormalizado.includes('total') || 
-          nomeNormalizado.includes('zona ')) {
+          nomeNormalizado.includes('promotor') ||
+          nomeNormalizado === 'zona') {
         continue;
       }
 
-      // Encontrar ID da loja na base de dados
+      // Encontrar ID da loja na base de dados (matching case-insensitive)
       const lojaId = lojasMap.get(nomeNormalizado);
       
       if (!lojaId) {
