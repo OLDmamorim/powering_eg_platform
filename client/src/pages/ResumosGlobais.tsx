@@ -3,7 +3,8 @@ import { trpc } from '@/lib/trpc';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, FileText, Calendar, Download } from 'lucide-react';
+import { Loader2, FileText, Calendar, Download, Home, ChevronRight } from 'lucide-react';
+import { Link } from 'wouter';
 import { toast } from 'sonner';
 import { Streamdown } from 'streamdown';
 import jsPDF from 'jspdf';
@@ -137,6 +138,16 @@ export default function ResumosGlobais() {
 
   return (
     <div className="container mx-auto py-8 space-y-6">
+      {/* Breadcrumb */}
+      <nav className="flex items-center gap-2 text-sm text-muted-foreground">
+        <Link href="/" className="flex items-center gap-1 hover:text-foreground transition-colors">
+          <Home className="h-4 w-4" />
+          Dashboard
+        </Link>
+        <ChevronRight className="h-4 w-4" />
+        <span className="text-foreground font-medium">Resumos Globais</span>
+      </nav>
+
       <div>
         <h1 className="text-3xl font-bold">Resumos Globais</h1>
         <p className="text-muted-foreground mt-2">
