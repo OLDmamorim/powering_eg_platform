@@ -1307,3 +1307,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Corrigir fluxo de navegação após logout
 - [x] Garantir limpeza correta do estado da aplicação
 - [x] Testar logout em diferentes cenários
+
+## Correção de Checkboxes de Gestores
+- [x] Identificar por que nomes de gestores não aparecem nos checkboxes
+- [x] Corrigir renderização para mostrar nome ao lado de cada checkbox
+- [x] Testar em Reuniões de Gestores (admin)

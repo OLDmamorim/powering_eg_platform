@@ -172,7 +172,7 @@ export default function ReuniõesGestores() {
                         }
                       }}
                     />
-                    <label className="text-sm">{gestor.nome}</label>
+                    <label className="text-sm cursor-pointer">{gestor.user?.name || 'Sem nome'}</label>
                   </div>
                 ))}
               </div>
