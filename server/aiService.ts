@@ -24,6 +24,13 @@ interface AnaliseIA {
     negativos: string[];
     tendencias: string;
   };
+  analiseResultados?: {
+    resumoPerformance: string;
+    lojasDestaque: string[];
+    lojasAtencao: string[];
+    tendenciasServicos: string;
+    recomendacoes: string[];
+  };
 }
 
 /**
@@ -103,6 +110,28 @@ export async function gerarRelatorioComIA(
     }
   });
 
+  // Buscar dados de Resultados (Excel) para o período
+  let dadosResultados: any[] = [];
+  let statsResultados: any = null;
+  try {
+    const agora = new Date();
+    const mesAtual = agora.getMonth() + 1;
+    const anoAtual = agora.getFullYear();
+    
+    // Determinar meses a buscar baseado no período
+    const mesesAtras = periodo === 'diario' ? 1 : periodo === 'semanal' ? 1 : periodo === 'mensal' ? 1 : 3;
+    
+    if (gestorId) {
+      // Buscar evolução agregada do gestor
+      dadosResultados = await db.getEvolucaoAgregadaPorGestor(gestorId, mesesAtras);
+    } else {
+      // Para admin, buscar stats globais do mês atual
+      statsResultados = await db.getEstatisticasPeriodo(mesAtual, anoAtual);
+    }
+  } catch (error) {
+    console.log('[RelatoriosIA] Sem dados de resultados disponíveis:', error);
+  }
+
   // Preparar prompt para IA
   const relatoriosTexto = todosRelatorios
     .map(
@@ -120,17 +149,48 @@ PONTOS NEGATIVOS DESTACADOS PELOS GESTORES:
 ${pontosNegativosRelatados.length > 0 ? pontosNegativosRelatados.join('\n') : 'Nenhum ponto negativo registado neste período.'}
 `;
 
+  // Preparar texto dos dados de Resultados
+  let resultadosTexto = '';
+  if (dadosResultados.length > 0) {
+    const ultimoMes = dadosResultados[dadosResultados.length - 1];
+    const totalServicos = ultimoMes?.totalServicos || 0;
+    const objetivoMensal = ultimoMes?.objetivoMensal || 0;
+    const taxaReparacao = ultimoMes?.taxaReparacao || 0;
+    const desvioPercentual = ultimoMes?.desvioPercentualMes || 0;
+    
+    resultadosTexto = `
+DADOS DE PERFORMANCE (RESULTADOS DO EXCEL):
+- Total de Serviços: ${totalServicos}
+- Objetivo Mensal: ${objetivoMensal}
+- Desvio vs Objetivo: ${desvioPercentual >= 0 ? '+' : ''}${desvioPercentual?.toFixed(1)}%
+- Taxa de Reparação: ${taxaReparacao?.toFixed(1)}%
+- Evolução últimos ${dadosResultados.length} meses disponível
+`;
+  } else if (statsResultados) {
+    const { somaServicos, somaObjetivos, mediaDesvioPercentual, mediaTaxaReparacao, lojasAcimaObjetivo, totalLojas } = statsResultados;
+    resultadosTexto = `
+DADOS DE PERFORMANCE GLOBAL (RESULTADOS DO EXCEL):
+- Total de Serviços (rede): ${somaServicos || 0}
+- Objetivo Mensal (rede): ${somaObjetivos || 0}
+- Desvio Médio vs Objetivo: ${mediaDesvioPercentual >= 0 ? '+' : ''}${mediaDesvioPercentual?.toFixed(1) || 0}%
+- Taxa de Reparação Média: ${mediaTaxaReparacao?.toFixed(1) || 0}%
+- Lojas acima do objetivo: ${lojasAcimaObjetivo || 0} de ${totalLojas || 0}
+`;
+  }
+
   const prompt = `Analisa os seguintes relatórios de supervisão de lojas da Express Glass do período ${periodo}:
 
 ${relatoriosTexto}
 
 ${pontosDestacadosTexto}
+${resultadosTexto}
 
-Com base nestes relatórios e nos pontos destacados pelos gestores, identifica:
+Com base nestes relatórios, pontos destacados e dados de performance, identifica:
 1. 3-5 pontos positivos principais (aspetos bem executados, melhorias observadas)
 2. 3-5 pontos negativos principais (problemas recorrentes, áreas de preocupação)
 3. 3-5 sugestões práticas para melhorar a operação
 4. Análise específica dos pontos positivos e negativos destacados pelos gestores, identificando padrões e tendências
+5. Análise dos dados de performance (se disponíveis): resumo da performance, lojas em destaque, lojas que precisam atenção, tendências de serviços e recomendações
 
 Responde em formato JSON com as seguintes chaves:
 {
@@ -142,6 +202,13 @@ Responde em formato JSON com as seguintes chaves:
     "positivos": ["análise do ponto positivo 1", "análise do ponto positivo 2", ...],
     "negativos": ["análise do ponto negativo 1", "análise do ponto negativo 2", ...],
     "tendencias": "Descrição das tendências observadas nos pontos destacados pelos gestores"
+  },
+  "analiseResultados": {
+    "resumoPerformance": "Resumo da performance geral baseada nos dados do Excel",
+    "lojasDestaque": ["loja que se destacou positivamente", ...],
+    "lojasAtencao": ["loja que precisa de atenção", ...],
+    "tendenciasServicos": "Análise das tendências de serviços e objetivos",
+    "recomendacoes": ["recomendação baseada nos dados", ...]
   }
 }`;
 
@@ -203,8 +270,38 @@ Responde em formato JSON com as seguintes chaves:
                 required: ["positivos", "negativos", "tendencias"],
                 additionalProperties: false,
               },
+              analiseResultados: {
+                type: "object",
+                properties: {
+                  resumoPerformance: {
+                    type: "string",
+                    description: "Resumo da performance geral baseada nos dados do Excel",
+                  },
+                  lojasDestaque: {
+                    type: "array",
+                    items: { type: "string" },
+                    description: "Lojas que se destacaram positivamente",
+                  },
+                  lojasAtencao: {
+                    type: "array",
+                    items: { type: "string" },
+                    description: "Lojas que precisam de atenção",
+                  },
+                  tendenciasServicos: {
+                    type: "string",
+                    description: "Análise das tendências de serviços e objetivos",
+                  },
+                  recomendacoes: {
+                    type: "array",
+                    items: { type: "string" },
+                    description: "Recomendações baseadas nos dados de performance",
+                  },
+                },
+                required: ["resumoPerformance", "lojasDestaque", "lojasAtencao", "tendenciasServicos", "recomendacoes"],
+                additionalProperties: false,
+              },
             },
-            required: ["pontosPositivos", "pontosNegativos", "sugestoes", "resumo", "analisePontosDestacados"],
+            required: ["pontosPositivos", "pontosNegativos", "sugestoes", "resumo", "analisePontosDestacados", "analiseResultados"],
             additionalProperties: false,
           },
         },
@@ -223,6 +320,7 @@ Responde em formato JSON com as seguintes chaves:
       sugestoes: analise.sugestoes,
       resumo: analise.resumo,
       analisePontosDestacados: analise.analisePontosDestacados,
+      analiseResultados: analise.analiseResultados,
     };
   } catch (error) {
     console.error("Erro ao gerar análise com IA:", error);
@@ -239,6 +337,13 @@ Responde em formato JSON com as seguintes chaves:
         positivos: ["Análise de IA temporariamente indisponível"],
         negativos: ["Análise de IA temporariamente indisponível"],
         tendencias: "Análise de IA temporariamente indisponível",
+      },
+      analiseResultados: {
+        resumoPerformance: "Análise de IA temporariamente indisponível",
+        lojasDestaque: [],
+        lojasAtencao: [],
+        tendenciasServicos: "Análise de IA temporariamente indisponível",
+        recomendacoes: [],
       },
     };
   }

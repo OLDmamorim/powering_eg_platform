@@ -1470,3 +1470,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Remover itens de Resumos Globais do menu lateral
 - [x] Remover rotas de Resumos Globais do App.tsx
 
+
+## Relatórios IA com Resultados v5.23
+- [x] Adicionar análise de Resultados aos Relatórios IA dos gestores
+- [x] Incluir métricas: serviços, objetivos, taxa reparação, vendas complementares
+- [x] Testar geração de relatório IA com dados de Resultados
+

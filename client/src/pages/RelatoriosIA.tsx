@@ -21,6 +21,10 @@ import {
   LineChart,
   FileDown,
   Loader2,
+  Target,
+  Star,
+  AlertTriangle,
+  Activity,
 } from "lucide-react";
 import { useState, useRef } from "react";
 import { toast } from "sonner";
@@ -272,6 +276,48 @@ export default function RelatoriosIA() {
               </div>
             </div>
           </div>
+
+          ${analise.analiseResultados ? `
+          <div class="section">
+            <h2 class="section-title">🎯 Análise de Performance (Resultados)</h2>
+            <div class="section-content">
+              <div class="highlight-box" style="background: #fff7ed; border-left-color: #f97316;">
+                <strong>Resumo de Performance:</strong><br>
+                ${analise.analiseResultados.resumoPerformance || "Sem dados de performance disponíveis."}
+              </div>
+              <div class="highlight-box" style="background: #eff6ff; border-left-color: #3b82f6; margin-top: 15px;">
+                <strong>Tendências de Serviços:</strong><br>
+                ${analise.analiseResultados.tendenciasServicos || "Sem dados suficientes para identificar tendências."}
+              </div>
+              <div class="grid" style="margin-top: 15px;">
+                <div class="card">
+                  <div class="card-title" style="color: #22c55e;">⭐ Lojas em Destaque</div>
+                  <ul class="list">
+                    ${analise.analiseResultados.lojasDestaque?.length > 0 
+                      ? analise.analiseResultados.lojasDestaque.map(l => `<li><span class="icon-positive">★</span> ${l}</li>`).join('')
+                      : '<li>Sem dados de lojas em destaque.</li>'}
+                  </ul>
+                </div>
+                <div class="card">
+                  <div class="card-title" style="color: #f59e0b;">⚠️ Lojas que Precisam Atenção</div>
+                  <ul class="list">
+                    ${analise.analiseResultados.lojasAtencao?.length > 0 
+                      ? analise.analiseResultados.lojasAtencao.map(l => `<li><span style="color: #f59e0b;">⚠</span> ${l}</li>`).join('')
+                      : '<li>Nenhuma loja requer atenção especial.</li>'}
+                  </ul>
+                </div>
+              </div>
+              ${analise.analiseResultados.recomendacoes?.length > 0 ? `
+              <div style="margin-top: 15px;">
+                <strong>🎯 Recomendações de Performance:</strong>
+                <ul class="list">
+                  ${analise.analiseResultados.recomendacoes.map(r => `<li><span style="color: #3b82f6;">▶</span> ${r}</li>`).join('')}
+                </ul>
+              </div>
+              ` : ''}
+            </div>
+          </div>
+          ` : ''}
 
           <div class="section">
             <h2 class="section-title">💡 Sugestões de Melhoria</h2>
@@ -567,6 +613,105 @@ export default function RelatoriosIA() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Nova secção: Análise de Resultados (Performance) */}
+            {analise.analiseResultados && (
+              <Card className="border-2 border-orange-200 dark:border-orange-800">
+                <CardHeader className="bg-orange-50 dark:bg-orange-900/20">
+                  <CardTitle className="flex items-center gap-2">
+                    <Target className="h-5 w-5 text-orange-500" />
+                    Análise de Performance (Resultados)
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-4 space-y-6">
+                  {/* Resumo de Performance */}
+                  <div className="p-4 bg-muted/50 rounded-lg">
+                    <h4 className="font-semibold mb-2 flex items-center gap-2">
+                      <Activity className="h-4 w-4" />
+                      Resumo de Performance
+                    </h4>
+                    <p className="text-muted-foreground">
+                      {analise.analiseResultados.resumoPerformance || "Sem dados de performance disponíveis."}
+                    </p>
+                  </div>
+
+                  {/* Tendências de Serviços */}
+                  <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                    <h4 className="font-semibold mb-2 flex items-center gap-2 text-blue-600 dark:text-blue-400">
+                      <LineChart className="h-4 w-4" />
+                      Tendências de Serviços
+                    </h4>
+                    <p className="text-muted-foreground">
+                      {analise.analiseResultados.tendenciasServicos || "Sem dados suficientes para identificar tendências."}
+                    </p>
+                  </div>
+
+                  <div className="grid gap-4 md:grid-cols-2">
+                    {/* Lojas em Destaque */}
+                    <div className="space-y-3">
+                      <h4 className="font-semibold flex items-center gap-2 text-green-600">
+                        <Star className="h-4 w-4" />
+                        Lojas em Destaque
+                      </h4>
+                      <ul className="space-y-2">
+                        {analise.analiseResultados.lojasDestaque?.length > 0 ? (
+                          analise.analiseResultados.lojasDestaque.map((loja, index) => (
+                            <li key={index} className="flex items-start gap-2 text-sm">
+                              <Star className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
+                              <span>{loja}</span>
+                            </li>
+                          ))
+                        ) : (
+                          <li className="text-sm text-muted-foreground">
+                            Sem dados de lojas em destaque.
+                          </li>
+                        )}
+                      </ul>
+                    </div>
+
+                    {/* Lojas que Precisam Atenção */}
+                    <div className="space-y-3">
+                      <h4 className="font-semibold flex items-center gap-2 text-amber-600">
+                        <AlertTriangle className="h-4 w-4" />
+                        Lojas que Precisam Atenção
+                      </h4>
+                      <ul className="space-y-2">
+                        {analise.analiseResultados.lojasAtencao?.length > 0 ? (
+                          analise.analiseResultados.lojasAtencao.map((loja, index) => (
+                            <li key={index} className="flex items-start gap-2 text-sm">
+                              <AlertTriangle className="h-4 w-4 text-amber-500 mt-0.5 shrink-0" />
+                              <span>{loja}</span>
+                            </li>
+                          ))
+                        ) : (
+                          <li className="text-sm text-muted-foreground">
+                            Nenhuma loja requer atenção especial.
+                          </li>
+                        )}
+                      </ul>
+                    </div>
+                  </div>
+
+                  {/* Recomendações baseadas em Performance */}
+                  {analise.analiseResultados.recomendacoes?.length > 0 && (
+                    <div className="space-y-3">
+                      <h4 className="font-semibold flex items-center gap-2 text-primary">
+                        <Target className="h-4 w-4" />
+                        Recomendações de Performance
+                      </h4>
+                      <ul className="space-y-2">
+                        {analise.analiseResultados.recomendacoes.map((rec, index) => (
+                          <li key={index} className="flex items-start gap-2 text-sm">
+                            <Target className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                            <span>{rec}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
 
             <Card>
               <CardHeader>
