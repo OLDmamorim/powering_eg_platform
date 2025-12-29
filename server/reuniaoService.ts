@@ -171,6 +171,18 @@ export async function gerarPDFReuniao(reuniao: any, tipo: 'gestores' | 'lojas'):
   
   pdfContent += `CONTEÚDO COMPLETO:\n${reuniao.conteudo}\n`;
   
+  // Adicionar anexos se existirem
+  if (reuniao.anexos) {
+    const anexos = JSON.parse(reuniao.anexos);
+    if (anexos.length > 0) {
+      pdfContent += `\nANEXOS (${anexos.length}):\n`;
+      anexos.forEach((anexo: any, i: number) => {
+        pdfContent += `${i + 1}. ${anexo.nome} (${anexo.tipo})\n`;
+        pdfContent += `   URL: ${anexo.url}\n`;
+      });
+    }
+  }
+  
   // Por agora, retornar o conteúdo como texto simples em buffer
   // TODO: Implementar geração de PDF real com formatação
   return Buffer.from(pdfContent, 'utf-8');

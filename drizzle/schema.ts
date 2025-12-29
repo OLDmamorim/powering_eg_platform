@@ -341,6 +341,7 @@ export const reunioesGestores = mysqlTable("reunioes_gestores", {
   conteudo: text("conteudo").notNull(), // Descrição da reunião
   resumoIA: text("resumoIA"), // Resumo gerado pela IA (tópicos, ações)
   tags: text("tags"), // JSON array de tags para organização
+  anexos: text("anexos"), // JSON array de anexos (documentos, fotos) com {nome, url, tipo}
   criadoPor: int("criadoPor").notNull(), // FK para users.id (admin)
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
@@ -360,6 +361,7 @@ export const reunioesLojas = mysqlTable("reunioes_lojas", {
   conteudo: text("conteudo").notNull(), // Descrição da reunião
   resumoIA: text("resumoIA"), // Resumo gerado pela IA (tópicos, ações)
   tags: text("tags"), // JSON array de tags para organização
+  anexos: text("anexos"), // JSON array de anexos (documentos, fotos) com {nome, url, tipo}
   criadoPor: int("criadoPor").notNull(), // FK para users.id (admin ou gestor)
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),

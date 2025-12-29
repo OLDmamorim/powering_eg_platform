@@ -169,6 +169,13 @@
       "when": 1766975697071,
       "tag": "0023_curved_dragon_man",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "5",
+      "when": 1766997682785,
+      "tag": "0024_open_karma",
+      "breakpoints": true
     }
   ]
 }

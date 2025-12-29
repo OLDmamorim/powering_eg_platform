@@ -10,7 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, CalendarIcon, Plus, X, Save, Store, FileText, Tag, Info, Download, Mail, UserPlus } from "lucide-react";
+import { Loader2, CalendarIcon, Plus, X, Save, Store, FileText, Tag, Info, Download, Mail, UserPlus, Image as ImageIcon } from "lucide-react";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -21,6 +21,7 @@ import { AtribuirAcoesModal } from "@/components/AtribuirAcoesModal";
 import { EnviarEmailModal } from "@/components/EnviarEmailModal";
 import DashboardLayout from "@/components/DashboardLayout";
 import { FiltrosReunioes } from "@/components/FiltrosReunioes";
+import { AnexosUpload } from "@/components/AnexosUpload";
 
 export default function ReuniõesLojas() {
   const { user } = useAuth();
@@ -34,6 +35,7 @@ export default function ReuniõesLojas() {
   const [conteudo, setConteudo] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [novaTag, setNovaTag] = useState("");
+  const [anexos, setAnexos] = useState<Array<{ nome: string; url: string; tipo: "documento" | "imagem" }>>([]);
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [miniResumo, setMiniResumo] = useState<string | null>(null);
   const [reuniaoSelecionada, setReuniaoSelecionada] = useState<number | null>(null);
@@ -91,6 +93,7 @@ export default function ReuniõesLojas() {
         presencas,
         conteudo,
         tags: tags.length > 0 ? tags : undefined,
+        anexos: anexos.length > 0 ? anexos : undefined,
       });
 
       toast.success("Reunião criada com sucesso!");
@@ -101,6 +104,7 @@ export default function ReuniõesLojas() {
       setPresencas("");
       setConteudo("");
       setTags([]);
+      setAnexos([]);
       setMiniResumo(null);
       setMostrarFormulario(false);
       
@@ -260,6 +264,13 @@ export default function ReuniõesLojas() {
               )}
             </div>
 
+            {/* Anexos */}
+            <AnexosUpload
+              anexos={anexos}
+              onChange={setAnexos}
+              maxFiles={10}
+            />
+
             <Button onClick={handleSubmit} disabled={criarMutation.isPending} className="w-full">
               {criarMutation.isPending ? (
                 <>
@@ -297,6 +308,7 @@ export default function ReuniõesLojas() {
               {historico.map((reuniao: any) => {
                 const resumoIA = reuniao.resumoIA ? JSON.parse(reuniao.resumoIA) : null;
                 const tagsReuniao = reuniao.tags ? (JSON.parse(reuniao.tags) as string[]) : [];
+                const anexosReuniao = reuniao.anexos ? (JSON.parse(reuniao.anexos) as Array<{ nome: string; url: string; tipo: string }>) : [];
 
                 return (
                   <Card key={reuniao.id}>
@@ -379,6 +391,35 @@ export default function ReuniõesLojas() {
                           {reuniao.conteudo}
                         </div>
                       </details>
+
+                      {/* Anexos */}
+                      {anexosReuniao.length > 0 && (
+                        <div>
+                          <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
+                            <FileText className="h-4 w-4" />
+                            Anexos ({anexosReuniao.length})
+                          </h4>
+                          <div className="flex flex-wrap gap-2">
+                            {anexosReuniao.map((anexo, idx) => (
+                              <a
+                                key={idx}
+                                href={anexo.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-2 px-3 py-2 border rounded-md hover:bg-accent transition-colors"
+                              >
+                                {anexo.tipo === "imagem" ? (
+                                  <ImageIcon className="h-4 w-4" />
+                                ) : (
+                                  <FileText className="h-4 w-4" />
+                                )}
+                                <span className="text-sm truncate max-w-[200px]">{anexo.nome}</span>
+                                <Download className="h-3 w-3 ml-1" />
+                              </a>
+                            ))}
+                          </div>
+                        </div>
+                      )}
 
                       {/* Ações */}
                       <div className="flex gap-2 pt-2">

@@ -9,7 +9,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, CalendarIcon, Plus, X, Save, Users, FileText, Tag, Download, Mail, UserPlus } from "lucide-react";
+import { Loader2, CalendarIcon, Plus, X, Save, Users, FileText, Tag, Download, Mail, UserPlus, Image as ImageIcon } from "lucide-react";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -20,6 +20,7 @@ import { AtribuirAcoesModal } from "@/components/AtribuirAcoesModal";
 import { EnviarEmailModal } from "@/components/EnviarEmailModal";
 import DashboardLayout from "@/components/DashboardLayout";
 import { FiltrosReunioes } from "@/components/FiltrosReunioes";
+import { AnexosUpload } from "@/components/AnexosUpload";
 
 export default function ReuniõesGestores() {
   const { user } = useAuth();
@@ -33,6 +34,7 @@ export default function ReuniõesGestores() {
   const [conteudo, setConteudo] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [novaTag, setNovaTag] = useState("");
+  const [anexos, setAnexos] = useState<Array<{ nome: string; url: string; tipo: "documento" | "imagem" }>>([]);
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [reuniaoSelecionada, setReuniaoSelecionada] = useState<number | null>(null);
   const [modalAtribuir, setModalAtribuir] = useState(false);
@@ -66,6 +68,7 @@ export default function ReuniõesGestores() {
         outrosPresentes: outrosPresentes.trim() || undefined,
         conteudo,
         tags: tags.length > 0 ? tags : undefined,
+        anexos: anexos.length > 0 ? anexos : undefined,
       });
 
       toast.success("Reunião criada com sucesso!");
@@ -76,6 +79,7 @@ export default function ReuniõesGestores() {
       setOutrosPresentes("");
       setConteudo("");
       setTags([]);
+      setAnexos([]);
       setMostrarFormulario(false);
       
       refetch();
@@ -224,6 +228,13 @@ export default function ReuniõesGestores() {
               )}
             </div>
 
+            {/* Anexos */}
+            <AnexosUpload
+              anexos={anexos}
+              onChange={setAnexos}
+              maxFiles={10}
+            />
+
             <Button onClick={handleSubmit} disabled={criarMutation.isPending} className="w-full">
               {criarMutation.isPending ? (
                 <>
@@ -261,6 +272,7 @@ export default function ReuniõesGestores() {
                 const presencas = JSON.parse(reuniao.presencas) as number[];
                 const gestoresPresentes = gestores?.filter((g: any) => presencas.includes(g.id)) || [];
                 const tagsReuniao = reuniao.tags ? (JSON.parse(reuniao.tags) as string[]) : [];
+                const anexosReuniao = reuniao.anexos ? (JSON.parse(reuniao.anexos) as Array<{ nome: string; url: string; tipo: string }>) : [];
 
                 return (
                   <Card key={reuniao.id}>
@@ -354,6 +366,35 @@ export default function ReuniõesGestores() {
                           {reuniao.conteudo}
                         </div>
                       </details>
+
+                      {/* Anexos */}
+                      {anexosReuniao.length > 0 && (
+                        <div>
+                          <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
+                            <FileText className="h-4 w-4" />
+                            Anexos ({anexosReuniao.length})
+                          </h4>
+                          <div className="flex flex-wrap gap-2">
+                            {anexosReuniao.map((anexo, idx) => (
+                              <a
+                                key={idx}
+                                href={anexo.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-2 px-3 py-2 border rounded-md hover:bg-accent transition-colors"
+                              >
+                                {anexo.tipo === "imagem" ? (
+                                  <ImageIcon className="h-4 w-4" />
+                                ) : (
+                                  <FileText className="h-4 w-4" />
+                                )}
+                                <span className="text-sm truncate max-w-[200px]">{anexo.nome}</span>
+                                <Download className="h-3 w-3 ml-1" />
+                              </a>
+                            ))}
+                          </div>
+                        </div>
+                      )}
 
                       {/* Ações (apenas admin) */}
                       {isAdmin && (

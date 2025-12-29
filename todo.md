@@ -1284,3 +1284,14 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## Correções Reuniões de Lojas
 - [x] Filtrar lojas disponíveis por gestor (não mostrar todas as 70 lojas)
 - [x] Aumentar tamanho da caixa de conteúdo da reunião (Textarea maior)
+
+## Sistema de Anexos em Reuniões
+- [x] Adicionar campo 'anexos' ao schema de reunioes_gestores (JSON array)
+- [x] Adicionar campo 'anexos' ao schema de reunioes_lojas (JSON array)
+- [x] Criar endpoint de upload de anexos no backend
+- [x] Adicionar componente de upload no formulário de Reuniões Gestores
+- [x] Adicionar componente de upload no formulário de Reuniões Lojas
+- [x] Exibir anexos no histórico de reuniões (cards expansíveis)
+- [ ] Incluir anexos nos PDFs de reuniões
+- [ ] Incluir anexos nos emails de reuniões
+- [ ] Criar testes unitários para upload de anexos

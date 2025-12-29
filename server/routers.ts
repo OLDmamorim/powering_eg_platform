@@ -1558,6 +1558,11 @@ export const appRouter = router({
         outrosPresentes: z.string().optional(),
         conteudo: z.string(),
         tags: z.array(z.string()).optional(),
+        anexos: z.array(z.object({
+          nome: z.string(),
+          url: z.string(),
+          tipo: z.string(), // 'documento' ou 'imagem'
+        })).optional(),
       }))
       .mutation(async ({ input, ctx }) => {
         const { gerarResumoReuniaoComIA } = await import('./reuniaoService');
@@ -1573,6 +1578,7 @@ export const appRouter = router({
           conteudo: input.conteudo,
           resumoIA: JSON.stringify(resumoIA),
           tags: input.tags ? JSON.stringify(input.tags) : null,
+          anexos: input.anexos ? JSON.stringify(input.anexos) : null,
           criadoPor: ctx.user.id,
         });
         
@@ -1587,6 +1593,11 @@ export const appRouter = router({
         outrosPresentes: z.string().optional(),
         conteudo: z.string().optional(),
         tags: z.array(z.string()).optional(),
+        anexos: z.array(z.object({
+          nome: z.string(),
+          url: z.string(),
+          tipo: z.string(),
+        })).optional(),
       }))
       .mutation(async ({ input }) => {
         const { id, ...updateData } = input;
@@ -1602,6 +1613,7 @@ export const appRouter = router({
           ...updateData,
           presencas: updateData.presencas ? JSON.stringify(updateData.presencas) : undefined,
           tags: updateData.tags ? JSON.stringify(updateData.tags) : undefined,
+          anexos: updateData.anexos ? JSON.stringify(updateData.anexos) : undefined,
           resumoIA: resumoIA ? JSON.stringify(resumoIA) : undefined,
         });
         
@@ -1690,6 +1702,18 @@ export const appRouter = router({
         
         emailContent += `<h3>Conteúdo Completo</h3><pre>${reuniao.conteudo}</pre>`;
         
+        // Adicionar anexos se existirem
+        if (reuniao.anexos) {
+          const anexos = JSON.parse(reuniao.anexos);
+          if (anexos.length > 0) {
+            emailContent += `<h3>Anexos (${anexos.length})</h3><ul>`;
+            anexos.forEach((anexo: any) => {
+              emailContent += `<li><a href="${anexo.url}" target="_blank">${anexo.nome}</a> (${anexo.tipo})</li>`;
+            });
+            emailContent += `</ul>`;
+          }
+        }
+        
         // Enviar email para cada gestor selecionado
         const { notifyOwner } = await import('./_core/notification');
         for (const gestor of gestoresSelecionados) {
@@ -1730,6 +1754,11 @@ export const appRouter = router({
         presencas: z.string(),
         conteudo: z.string(),
         tags: z.array(z.string()).optional(),
+        anexos: z.array(z.object({
+          nome: z.string(),
+          url: z.string(),
+          tipo: z.string(), // 'documento' ou 'imagem'
+        })).optional(),
       }))
       .mutation(async ({ input, ctx }) => {
         // Verificar permissões: gestor só pode criar para suas lojas
@@ -1759,6 +1788,7 @@ export const appRouter = router({
           conteudo: input.conteudo,
           resumoIA: JSON.stringify(resumoIA),
           tags: input.tags ? JSON.stringify(input.tags) : null,
+          anexos: input.anexos ? JSON.stringify(input.anexos) : null,
           criadoPor: ctx.user.id,
         });
         
@@ -1773,6 +1803,11 @@ export const appRouter = router({
         presencas: z.string().optional(),
         conteudo: z.string().optional(),
         tags: z.array(z.string()).optional(),
+        anexos: z.array(z.object({
+          nome: z.string(),
+          url: z.string(),
+          tipo: z.string(),
+        })).optional(),
       }))
       .mutation(async ({ input, ctx }) => {
         const { id, ...updateData } = input;
@@ -1806,6 +1841,7 @@ export const appRouter = router({
           ...updateData,
           lojaIds: updateData.lojaIds ? JSON.stringify(updateData.lojaIds) : undefined,
           tags: updateData.tags ? JSON.stringify(updateData.tags) : undefined,
+          anexos: updateData.anexos ? JSON.stringify(updateData.anexos) : undefined,
           resumoIA: resumoIA ? JSON.stringify(resumoIA) : undefined,
         });
         
@@ -1929,6 +1965,18 @@ export const appRouter = router({
         
         emailContent += `<h3>Conteúdo Completo</h3><pre>${reuniao.conteudo}</pre>`;
         
+        // Adicionar anexos se existirem
+        if (reuniao.anexos) {
+          const anexos = JSON.parse(reuniao.anexos);
+          if (anexos.length > 0) {
+            emailContent += `<h3>Anexos (${anexos.length})</h3><ul>`;
+            anexos.forEach((anexo: any) => {
+              emailContent += `<li><a href="${anexo.url}" target="_blank">${anexo.nome}</a> (${anexo.tipo})</li>`;
+            });
+            emailContent += `</ul>`;
+          }
+        }
+        
         // Enviar email
         const { notifyOwner } = await import('./_core/notification');
         await notifyOwner({
@@ -1956,6 +2004,30 @@ export const appRouter = router({
         return { url };
       }),
   }),
+
+  // ==================== UPLOAD DE ANEXOS ====================
+  uploadAnexo: protectedProcedure
+    .input(z.object({
+      fileName: z.string(),
+      fileData: z.string(), // Base64
+      contentType: z.string(),
+    }))
+    .mutation(async ({ input }) => {
+      const { storagePut } = await import('./storage');
+      
+      // Decodificar base64
+      const buffer = Buffer.from(input.fileData, 'base64');
+      
+      // Criar nome único para o arquivo
+      const timestamp = Date.now();
+      const randomSuffix = Math.random().toString(36).substring(7);
+      const fileKey = `reunioes-anexos/${timestamp}-${randomSuffix}-${input.fileName}`;
+      
+      // Upload para S3
+      const { url } = await storagePut(fileKey, buffer, input.contentType);
+      
+      return { url, fileKey };
+    }),
 });
 
 export type AppRouter = typeof appRouter;
