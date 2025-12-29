@@ -1387,3 +1387,16 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Analisar lógica atual do filtro de loja
 - [x] Fazer filtro de loja afetar tabela de ranking
 - [x] Testar filtro em todos os componentes
+
+
+## Filtro "Apenas minhas lojas" para Gestores v4.2
+
+### Backend
+- [x] Criar query getEvolucaoAgregadaPorGestor() - soma de todas lojas do gestor
+- [x] Adicionar procedure tRPC para evolução agregada
+
+### Frontend
+- [x] Adicionar opção "Apenas minhas lojas" no filtro (só para gestores)
+- [x] Implementar lógica de agregação quando opção selecionada
+- [x] Filtrar ranking para mostrar apenas lojas do gestor
+- [x] Atualizar gráfico de evolução com dados agregados

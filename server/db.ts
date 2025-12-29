@@ -3369,3 +3369,61 @@ export async function getEstatisticasPeriodo(mes: number, ano: number) {
     mediaTaxaReparacao: result.mediaTaxaReparacao ? parseFloat(result.mediaTaxaReparacao.toString()) : null,
   };
 }
+
+/**
+ * Obtém evolução mensal agregada de todas as lojas de um gestor
+ */
+export async function getEvolucaoAgregadaPorGestor(gestorId: number, mesesAtras: number = 6) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  // Buscar IDs das lojas do gestor
+  const lojasDoGestor = await db
+    .select({ lojaId: gestorLojas.lojaId })
+    .from(gestorLojas)
+    .where(eq(gestorLojas.gestorId, gestorId));
+  
+  const lojaIds = lojasDoGestor.map(l => l.lojaId);
+  
+  if (lojaIds.length === 0) return [];
+  
+  const dataLimite = new Date();
+  dataLimite.setMonth(dataLimite.getMonth() - mesesAtras);
+  const anoLimite = dataLimite.getFullYear();
+  const mesLimite = dataLimite.getMonth() + 1;
+
+  const resultados = await db
+    .select({
+      mes: resultadosMensais.mes,
+      ano: resultadosMensais.ano,
+      totalServicos: sql<number>`SUM(${resultadosMensais.totalServicos})`,
+      objetivoMensal: sql<number>`SUM(${resultadosMensais.objetivoMensal})`,
+      desvioPercentualMes: sql<number>`AVG(${resultadosMensais.desvioPercentualMes})`,
+      taxaReparacao: sql<number>`AVG(${resultadosMensais.taxaReparacao})`,
+      qtdReparacoes: sql<number>`SUM(${resultadosMensais.qtdReparacoes})`,
+      servicosPorColaborador: sql<number>`AVG(${resultadosMensais.servicosPorColaborador})`,
+      numColaboradores: sql<number>`SUM(${resultadosMensais.numColaboradores})`,
+    })
+    .from(resultadosMensais)
+    .where(
+      and(
+        inArray(resultadosMensais.lojaId, lojaIds),
+        or(
+          gt(resultadosMensais.ano, anoLimite),
+          and(
+            eq(resultadosMensais.ano, anoLimite),
+            gte(resultadosMensais.mes, mesLimite)
+          )
+        )
+      )
+    )
+    .groupBy(resultadosMensais.mes, resultadosMensais.ano)
+    .orderBy(resultadosMensais.ano, resultadosMensais.mes);
+
+  return resultados.map(r => ({
+    ...r,
+    servicosPorColaborador: r.servicosPorColaborador ? parseFloat(r.servicosPorColaborador.toString()) : null,
+    desvioPercentualMes: r.desvioPercentualMes ? parseFloat(r.desvioPercentualMes.toString()) : null,
+    taxaReparacao: r.taxaReparacao ? parseFloat(r.taxaReparacao.toString()) : null,
+  }));
+}

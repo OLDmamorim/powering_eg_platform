@@ -2067,6 +2067,16 @@ export const appRouter = router({
         return await db.getEvolucaoMensal(input.lojaId, input.mesesAtras);
       }),
     
+    // Dashboard - Evolução agregada de todas as lojas do gestor
+    evolucaoAgregada: protectedProcedure
+      .input(z.object({
+        gestorId: z.number(),
+        mesesAtras: z.number().optional(),
+      }))
+      .query(async ({ input }) => {
+        return await db.getEvolucaoAgregadaPorGestor(input.gestorId, input.mesesAtras);
+      }),
+    
     // Dashboard - Ranking de lojas
     ranking: protectedProcedure
       .input(z.object({

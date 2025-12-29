@@ -5,13 +5,25 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Button } from '../components/ui/button';
 import { Loader2, TrendingUp, TrendingDown, Target, Award, BarChart3, LineChart, MapPin } from 'lucide-react';
+import { useAuth } from '../_core/hooks/useAuth';
 
 
 export function ResultadosDashboard() {
   
+  const { user } = useAuth();
+  
+  // Buscar dados do gestor se usuário for gestor
+  const { data: gestorData } = trpc.gestores.list.useQuery(
+    undefined,
+    { 
+      enabled: user?.role === 'gestor',
+      select: (gestores) => gestores.find(g => g.user.id === user?.id)
+    }
+  );
+  
   // Estado dos filtros
   const [periodoSelecionado, setPeriodoSelecionado] = useState<{ mes: number; ano: number } | null>(null);
-  const [lojaSelecionada, setLojaSelecionada] = useState<number | null>(null);
+  const [lojaSelecionada, setLojaSelecionada] = useState<number | 'minhas' | null>(null);
   const [metricaRanking, setMetricaRanking] = useState<'totalServicos' | 'taxaReparacao' | 'desvioPercentualMes' | 'servicosPorColaborador'>('totalServicos');
   
   // Queries
@@ -42,19 +54,43 @@ export function ResultadosDashboard() {
   );
   
   // Filtrar ranking se loja estiver selecionada
-  const ranking = lojaSelecionada && rankingCompleto
-    ? rankingCompleto.filter(r => r.lojaId === lojaSelecionada)
-    : rankingCompleto;
+  const ranking = useMemo(() => {
+    if (!rankingCompleto) return rankingCompleto;
+    
+    if (typeof lojaSelecionada === 'number') {
+      // Filtrar por loja específica
+      return rankingCompleto.filter(r => r.lojaId === lojaSelecionada);
+    } else if (lojaSelecionada === 'minhas' && gestorData) {
+      // Filtrar por lojas do gestor
+      const lojasDoGestor = lojas?.filter(l => 
+        gestorData.lojas?.some((gl: any) => gl.id === l.id)
+      ).map(l => l.id) || [];
+      return rankingCompleto.filter(r => lojasDoGestor.includes(r.lojaId));
+    }
+    
+    return rankingCompleto;
+  }, [lojaSelecionada, rankingCompleto, gestorData, lojas]);
   
   const { data: porZona, isLoading: loadingZona } = trpc.resultados.porZona.useQuery(
     { mes: periodoSelecionado?.mes || 1, ano: periodoSelecionado?.ano || 2025 },
     { enabled: !!periodoSelecionado }
   );
   
-  const { data: evolucao, isLoading: loadingEvolucao } = trpc.resultados.evolucao.useQuery(
-    { lojaId: lojaSelecionada || 0, mesesAtras: 6 },
-    { enabled: !!lojaSelecionada }
+  // Query de evolução individual
+  const { data: evolucaoIndividual, isLoading: loadingEvolucaoIndividual } = trpc.resultados.evolucao.useQuery(
+    { lojaId: typeof lojaSelecionada === 'number' ? lojaSelecionada : 0, mesesAtras: 6 },
+    { enabled: typeof lojaSelecionada === 'number' }
   );
+  
+  // Query de evolução agregada (minhas lojas)
+  const { data: evolucaoAgregada, isLoading: loadingEvolucaoAgregada } = trpc.resultados.evolucaoAgregada.useQuery(
+    { gestorId: gestorData?.id || 0, mesesAtras: 6 },
+    { enabled: lojaSelecionada === 'minhas' && !!gestorData?.id }
+  );
+  
+  // Escolher qual evolução usar
+  const evolucao = lojaSelecionada === 'minhas' ? evolucaoAgregada : evolucaoIndividual;
+  const loadingEvolucao = lojaSelecionada === 'minhas' ? loadingEvolucaoAgregada : loadingEvolucaoIndividual;
   
   // Labels de métricas
   const metricaLabels = {
@@ -142,13 +178,20 @@ export function ResultadosDashboard() {
               <label className="text-sm font-medium">Loja (Evolução)</label>
               <Select
                 value={lojaSelecionada?.toString() || 'todas'}
-                onValueChange={(value) => setLojaSelecionada(value === 'todas' ? null : Number(value))}
+                onValueChange={(value) => {
+                  if (value === 'todas') setLojaSelecionada(null);
+                  else if (value === 'minhas') setLojaSelecionada('minhas');
+                  else setLojaSelecionada(Number(value));
+                }}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione uma loja" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="todas">Todas as lojas</SelectItem>
+                  {user?.role === 'gestor' && gestorData && (
+                    <SelectItem value="minhas">Apenas minhas lojas</SelectItem>
+                  )}
                   {lojas?.map((loja) => (
                     <SelectItem key={loja.id} value={loja.id.toString()}>
                       {loja.nome}
@@ -261,7 +304,7 @@ export function ResultadosDashboard() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <LineChart className="h-5 w-5" />
-                Evolução Mensal - {lojas?.find(l => l.id === lojaSelecionada)?.nome}
+                Evolução Mensal - {lojaSelecionada === 'minhas' ? 'Minhas Lojas (Agregado)' : lojas?.find(l => l.id === lojaSelecionada)?.nome}
               </CardTitle>
               <CardDescription>Últimos 6 meses</CardDescription>
             </CardHeader>
