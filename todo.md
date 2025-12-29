@@ -1258,3 +1258,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Criar testes unitários (8 testes passaram)
 - [x] Validar procedures de email e PDF
 - [x] Validar função de geração de PDF
+
+## Correção v6.5 - Navegação nas Páginas de Reuniões
+- [x] Envolver ReuniõesGestores.tsx com DashboardLayout
+- [x] Envolver ReuniõesLojas.tsx com DashboardLayout
+- [x] Testar navegação entre páginas

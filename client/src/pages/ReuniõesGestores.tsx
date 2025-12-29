@@ -18,10 +18,13 @@ import { Streamdown } from "streamdown";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { AtribuirAcoesModal } from "@/components/AtribuirAcoesModal";
 import { EnviarEmailModal } from "@/components/EnviarEmailModal";
+import DashboardLayout from "@/components/DashboardLayout";
 
 export default function ReuniõesGestores() {
   const { user } = useAuth();
   const isAdmin = user?.role === "admin";
+  
+  if (!user) return null;
   
   const [data, setData] = useState<Date>(new Date());
   const [gestoresSelecionados, setGestoresSelecionados] = useState<number[]>([]);
@@ -91,7 +94,8 @@ export default function ReuniõesGestores() {
   };
 
   return (
-    <div className="container py-6 space-y-6">
+    <DashboardLayout>
+      <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Reuniões de Gestores</h1>
@@ -424,6 +428,7 @@ export default function ReuniõesGestores() {
           />
         </>
       )}
-    </div>
+      </div>
+    </DashboardLayout>
   );
 }

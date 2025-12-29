@@ -19,10 +19,13 @@ import { Streamdown } from "streamdown";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { AtribuirAcoesModal } from "@/components/AtribuirAcoesModal";
 import { EnviarEmailModal } from "@/components/EnviarEmailModal";
+import DashboardLayout from "@/components/DashboardLayout";
 
 export default function ReuniõesLojas() {
   const { user } = useAuth();
   const isAdmin = user?.role === "admin";
+  
+  if (!user) return null;
   
   const [data, setData] = useState<Date>(new Date());
   const [lojasSelecionadas, setLojasSelecionadas] = useState<number[]>([]);
@@ -114,7 +117,8 @@ export default function ReuniõesLojas() {
   };
 
   return (
-    <div className="container py-6 space-y-6">
+    <DashboardLayout>
+      <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Reuniões de Lojas</h1>
@@ -443,6 +447,7 @@ export default function ReuniõesLojas() {
           />
         </>
       )}
-    </div>
+      </div>
+    </DashboardLayout>
   );
 }
