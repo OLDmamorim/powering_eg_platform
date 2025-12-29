@@ -473,11 +473,11 @@ export function ResultadosDashboard() {
                       {periodos.find(p => p.mes === periodoSelecionado?.mes && p.ano === periodoSelecionado?.ano)?.label || 'Período Principal'}
                     </h3>
                     <div className="space-y-3">
-                      <div className="bg-muted/50 p-3 rounded-lg min-h-[76px]">
+                      <div className="bg-muted/50 p-3 rounded-lg h-[96px]">
                         <p className="text-xs text-muted-foreground">Total de Lojas</p>
                         <p className="text-2xl font-bold">{estatisticas.totalLojas}</p>
                       </div>
-                      <div className="bg-muted/50 p-3 rounded-lg min-h-[76px]">
+                      <div className="bg-muted/50 p-3 rounded-lg h-[96px]">
                         <p className="text-xs text-muted-foreground">Total de Serviços</p>
                         <p className="text-2xl font-bold">{estatisticas.somaServicos?.toLocaleString() || 0}</p>
                       </div>
@@ -502,7 +502,7 @@ export function ResultadosDashboard() {
                       {periodos.find(p => p.mes === periodoComparacao1.mes && p.ano === periodoComparacao1.ano)?.label || 'Comparação 1'}
                     </h3>
                     <div className="space-y-3">
-                      <div className="bg-muted/50 p-3 rounded-lg min-h-[76px]">
+                      <div className="bg-muted/50 p-3 rounded-lg h-[96px]">
                         <p className="text-xs text-muted-foreground">Total de Lojas</p>
                         <p className="text-2xl font-bold">{estatisticasComp1.totalLojas}</p>
                         {estatisticas && (
@@ -517,7 +517,7 @@ export function ResultadosDashboard() {
                           </p>
                         )}
                       </div>
-                      <div className="bg-muted/50 p-3 rounded-lg min-h-[76px]">
+                      <div className="bg-muted/50 p-3 rounded-lg h-[96px]">
                         <p className="text-xs text-muted-foreground">Total de Serviços</p>
                         <p className="text-2xl font-bold">{estatisticasComp1.somaServicos?.toLocaleString() || 0}</p>
                         {estatisticas && estatisticas.somaServicos && estatisticasComp1.somaServicos && (
@@ -553,7 +553,7 @@ export function ResultadosDashboard() {
                       {periodos.find(p => p.mes === periodoComparacao2.mes && p.ano === periodoComparacao2.ano)?.label || 'Comparação 2'}
                     </h3>
                     <div className="space-y-3">
-                      <div className="bg-muted/50 p-3 rounded-lg min-h-[76px]">
+                      <div className="bg-muted/50 p-3 rounded-lg h-[96px]">
                         <p className="text-xs text-muted-foreground">Total de Lojas</p>
                         <p className="text-2xl font-bold">{estatisticasComp2.totalLojas}</p>
                         {estatisticas && (
@@ -568,7 +568,7 @@ export function ResultadosDashboard() {
                           </p>
                         )}
                       </div>
-                      <div className="bg-muted/50 p-3 rounded-lg min-h-[76px]">
+                      <div className="bg-muted/50 p-3 rounded-lg h-[96px]">
                         <p className="text-xs text-muted-foreground">Total de Serviços</p>
                         <p className="text-2xl font-bold">{estatisticasComp2.somaServicos?.toLocaleString() || 0}</p>
                         {estatisticas && estatisticas.somaServicos && estatisticasComp2.somaServicos && (
