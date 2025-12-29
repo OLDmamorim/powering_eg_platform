@@ -121,7 +121,7 @@ export default function ResultadosUpload() {
           <CardHeader>
             <CardTitle>Ficheiro Excel</CardTitle>
             <CardDescription>
-              Selecione o ficheiro Excel com a folha "Faturados" (colunas A-N)
+              Selecione o ficheiro Excel com as folhas "Faturados" e "Complementares"
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -247,7 +247,7 @@ export default function ResultadosUpload() {
 
         <Card className="bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800">
           <CardHeader>
-            <CardTitle className="text-blue-900 dark:text-blue-100">Instruções</CardTitle>
+            <CardTitle className="text-blue-900 dark:text-blue-100">Instruções - Folha "Faturados"</CardTitle>
           </CardHeader>
           <CardContent className="text-sm text-blue-800 dark:text-blue-200 space-y-2">
             <p>• O ficheiro Excel deve conter uma folha chamada <strong>"Faturados"</strong></p>
@@ -256,6 +256,19 @@ export default function ResultadosUpload() {
             <p>• Os dados das lojas começam na <strong>linha 11</strong></p>
             <p>• Os nomes das lojas devem corresponder aos registados no sistema</p>
             <p>• Se já existirem dados para o mesmo mês/ano, serão <strong>substituídos</strong></p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800">
+          <CardHeader>
+            <CardTitle className="text-green-900 dark:text-green-100">Instruções - Folha "Complementares" (Opcional)</CardTitle>
+          </CardHeader>
+          <CardContent className="text-sm text-green-800 dark:text-green-200 space-y-2">
+            <p>• Se existir uma folha chamada <strong>"Complementares"</strong>, será processada automaticamente</p>
+            <p>• A <strong>linha 9</strong> deve conter os cabeçalhos das colunas</p>
+            <p>• Os dados das lojas começam na <strong>linha 11</strong></p>
+            <p>• Colunas processadas: <strong>Escovas, Polimento, Tratamentos, Outros, Películas, Lavagens ECO</strong></p>
+            <p>• Os dados aparecem na secção <strong>"Vendas Complementares"</strong> do Dashboard de Resultados</p>
           </CardContent>
         </Card>
       </div>
