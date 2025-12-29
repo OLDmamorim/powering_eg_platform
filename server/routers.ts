@@ -108,6 +108,21 @@ export const appRouter = router({
         return { success: true };
       }),
     
+    deleteMany: adminProcedure
+      .input(z.object({ ids: z.array(z.number()).min(1) }))
+      .mutation(async ({ input }) => {
+        let deleted = 0;
+        for (const id of input.ids) {
+          try {
+            await db.deleteLoja(id);
+            deleted++;
+          } catch (error) {
+            console.error(`Erro ao eliminar loja ${id}:`, error);
+          }
+        }
+        return { success: true, deleted };
+      }),
+    
     getByGestor: gestorProcedure.query(async ({ ctx }) => {
       // Admin vê todas as lojas (verificar ANTES de ctx.gestor)
       if (ctx.user?.role === 'admin') {
@@ -278,6 +293,21 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         await db.deleteGestor(input.id);
         return { success: true };
+      }),
+    
+    deleteMany: adminProcedure
+      .input(z.object({ ids: z.array(z.number()).min(1) }))
+      .mutation(async ({ input }) => {
+        let deleted = 0;
+        for (const id of input.ids) {
+          try {
+            await db.deleteGestor(id);
+            deleted++;
+          } catch (error) {
+            console.error(`Erro ao eliminar gestor ${id}:`, error);
+          }
+        }
+        return { success: true, deleted };
       }),
     
     associateLoja: adminProcedure

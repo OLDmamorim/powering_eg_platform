@@ -1457,3 +1457,11 @@ NOTA: Sistema de email requer configuração externa no deployment
 
 ## Resumos Globais - Incluir Análise de Resultados v5.20
 - [x] Incluir dados de resultados mensais (serviços, objetivos, taxa reparação) na análise IA dos Resumos Globais
+
+## Seleção Múltipla para Eliminar Lojas e Gestores v5.21
+- [x] Criar endpoint backend para eliminar múltiplas lojas
+- [x] Criar endpoint backend para eliminar múltiplos gestores
+- [x] Adicionar checkboxes na página de Lojas
+- [x] Adicionar botão 'Eliminar Selecionados' na página de Lojas
+- [x] Adicionar checkboxes na página de Gestores
+- [x] Adicionar botão 'Eliminar Selecionados' na página de Gestores

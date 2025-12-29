@@ -7,6 +7,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import {
   Table,
@@ -20,7 +21,6 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { DialogFooter } from "@/components/ui/dialog";
 import { trpc } from "@/lib/trpc";
 import { Building2, Edit, Plus, Trash2, User, ShieldCheck } from "lucide-react";
 import { useState } from "react";
@@ -33,10 +33,13 @@ export default function Gestores() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [selectedGestor, setSelectedGestor] = useState<any>(null);
-  const [selectedLojas, setSelectedLojas] = useState<number[]>([]);
   const [formData, setFormData] = useState({ nome: "", email: "" });
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editFormData, setEditFormData] = useState({ id: 0, nome: "", email: "" });
+  
+  // Estado para seleção múltipla
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 
   const utils = trpc.useUtils();
   const { data: gestores, isLoading } = trpc.gestores.list.useQuery();
@@ -82,6 +85,18 @@ export default function Gestores() {
     onSuccess: () => {
       toast.success("Gestor eliminado com sucesso");
       utils.gestores.list.invalidate();
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const deleteManyMutation = trpc.gestores.deleteMany.useMutation({
+    onSuccess: (result) => {
+      toast.success(`${result.deleted} gestor(es) eliminado(s) com sucesso`);
+      utils.gestores.list.invalidate();
+      setSelectedIds([]);
+      setDeleteConfirmOpen(false);
     },
     onError: (error) => {
       toast.error(error.message);
@@ -140,6 +155,37 @@ export default function Gestores() {
     }
   };
 
+  const handleDeleteSelected = () => {
+    if (selectedIds.length === 0) {
+      toast.error("Selecione pelo menos um gestor para eliminar");
+      return;
+    }
+    setDeleteConfirmOpen(true);
+  };
+
+  const confirmDeleteSelected = () => {
+    deleteManyMutation.mutate({ ids: selectedIds });
+  };
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked && gestores) {
+      setSelectedIds(gestores.map((g: any) => g.id));
+    } else {
+      setSelectedIds([]);
+    }
+  };
+
+  const handleSelectOne = (id: number, checked: boolean) => {
+    if (checked) {
+      setSelectedIds([...selectedIds, id]);
+    } else {
+      setSelectedIds(selectedIds.filter(i => i !== id));
+    }
+  };
+
+  const isAllSelected = gestores && gestores.length > 0 && selectedIds.length === gestores.length;
+  const isSomeSelected = selectedIds.length > 0 && selectedIds.length < (gestores?.length || 0);
+
   const handlePromote = (gestorId: number, gestorName: string) => {
     if (
       confirm(
@@ -169,10 +215,18 @@ export default function Gestores() {
               Gerir gestores e associações com lojas
             </p>
           </div>
-          <Button onClick={() => setCreateDialogOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" />
-            Novo Gestor
-          </Button>
+          <div className="flex gap-2">
+            {selectedIds.length > 0 && (
+              <Button variant="destructive" onClick={handleDeleteSelected}>
+                <Trash2 className="mr-2 h-4 w-4" />
+                Eliminar ({selectedIds.length})
+              </Button>
+            )}
+            <Button onClick={() => setCreateDialogOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              Novo Gestor
+            </Button>
+          </div>
         </div>
 
         {isLoading ? (
@@ -184,6 +238,14 @@ export default function Gestores() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-12">
+                    <Checkbox
+                      checked={isAllSelected}
+                      onCheckedChange={handleSelectAll}
+                      aria-label="Selecionar todos"
+                      className={isSomeSelected ? "data-[state=checked]:bg-primary/50" : ""}
+                    />
+                  </TableHead>
                   <TableHead>Nome</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Role</TableHead>
@@ -193,7 +255,14 @@ export default function Gestores() {
               <TableBody>
                 {gestores && gestores.length > 0 ? (
                   gestores.map((gestor: any) => (
-                    <TableRow key={gestor.id}>
+                    <TableRow key={gestor.id} className={selectedIds.includes(gestor.id) ? "bg-muted/50" : ""}>
+                      <TableCell>
+                        <Checkbox
+                          checked={selectedIds.includes(gestor.id)}
+                          onCheckedChange={(checked) => handleSelectOne(gestor.id, !!checked)}
+                          aria-label={`Selecionar ${gestor.user.name}`}
+                        />
+                      </TableCell>
                       <TableCell className="font-medium">
                         <div className="flex items-center gap-2">
                           <User className="h-4 w-4 text-muted-foreground" />
@@ -245,7 +314,7 @@ export default function Gestores() {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center py-8">
+                    <TableCell colSpan={5} className="text-center py-8">
                       <p className="text-muted-foreground">
                         Nenhum gestor registado
                       </p>
@@ -312,7 +381,7 @@ export default function Gestores() {
           <DialogHeader>
             <DialogTitle>Gerir Lojas - {selectedGestor?.user.name}</DialogTitle>
             <DialogDescription>
-              Selecione as lojas que este gestor pode supervisionar
+              Selecione as lojas que este gestor irá supervisionar
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4 max-h-96 overflow-y-auto">
@@ -408,6 +477,36 @@ export default function Gestores() {
               </Button>
             </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog de confirmação de eliminação em lote */}
+      <Dialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmar Eliminação</DialogTitle>
+            <DialogDescription>
+              Tem a certeza que deseja eliminar {selectedIds.length} gestor(es) selecionado(s)?
+              Todas as associações com lojas serão removidas. Esta ação não pode ser revertida.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setDeleteConfirmOpen(false)}
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={confirmDeleteSelected}
+              disabled={deleteManyMutation.isPending}
+            >
+              {deleteManyMutation.isPending ? 'A eliminar...' : `Eliminar ${selectedIds.length} gestor(es)`}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </DashboardLayout>

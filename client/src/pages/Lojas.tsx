@@ -1,6 +1,7 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -19,7 +20,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Textarea } from "@/components/ui/textarea";
 import { trpc } from "@/lib/trpc";
 import { Building2, Edit, Plus, Trash2, Upload, Download } from "lucide-react";
 import { useState, useRef } from "react";
@@ -42,6 +42,10 @@ export default function Lojas() {
   const [importFile, setImportFile] = useState<File | null>(null);
   const [importPreview, setImportPreview] = useState<any[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Estado para seleção múltipla
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 
   const utils = trpc.useUtils();
   const { data: lojas, isLoading } = trpc.lojas.list.useQuery();
@@ -74,6 +78,18 @@ export default function Lojas() {
     onSuccess: () => {
       toast.success("Loja eliminada com sucesso");
       utils.lojas.list.invalidate();
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const deleteManyMutation = trpc.lojas.deleteMany.useMutation({
+    onSuccess: (result) => {
+      toast.success(`${result.deleted} loja(s) eliminada(s) com sucesso`);
+      utils.lojas.list.invalidate();
+      setSelectedIds([]);
+      setDeleteConfirmOpen(false);
     },
     onError: (error) => {
       toast.error(error.message);
@@ -155,6 +171,37 @@ export default function Lojas() {
     }
   };
 
+  const handleDeleteSelected = () => {
+    if (selectedIds.length === 0) {
+      toast.error("Selecione pelo menos uma loja para eliminar");
+      return;
+    }
+    setDeleteConfirmOpen(true);
+  };
+
+  const confirmDeleteSelected = () => {
+    deleteManyMutation.mutate({ ids: selectedIds });
+  };
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked && lojas) {
+      setSelectedIds(lojas.map((l: any) => l.id));
+    } else {
+      setSelectedIds([]);
+    }
+  };
+
+  const handleSelectOne = (id: number, checked: boolean) => {
+    if (checked) {
+      setSelectedIds([...selectedIds, id]);
+    } else {
+      setSelectedIds(selectedIds.filter(i => i !== id));
+    }
+  };
+
+  const isAllSelected = lojas && lojas.length > 0 && selectedIds.length === lojas.length;
+  const isSomeSelected = selectedIds.length > 0 && selectedIds.length < (lojas?.length || 0);
+
   const handleDownloadTemplate = () => {
     const template = [
       { Nome: 'Exemplo Loja 1', Email: 'loja1@example.com' },
@@ -218,6 +265,12 @@ export default function Lojas() {
             </p>
           </div>
           <div className="flex gap-2">
+            {selectedIds.length > 0 && (
+              <Button variant="destructive" onClick={handleDeleteSelected}>
+                <Trash2 className="mr-2 h-4 w-4" />
+                Eliminar ({selectedIds.length})
+              </Button>
+            )}
             <Button variant="outline" onClick={() => setImportDialogOpen(true)}>
               <Upload className="mr-2 h-4 w-4" />
               Importar Excel
@@ -238,6 +291,14 @@ export default function Lojas() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-12">
+                    <Checkbox
+                      checked={isAllSelected}
+                      onCheckedChange={handleSelectAll}
+                      aria-label="Selecionar todas"
+                      className={isSomeSelected ? "data-[state=checked]:bg-primary/50" : ""}
+                    />
+                  </TableHead>
                   <TableHead>Nome</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Gestor</TableHead>
@@ -247,7 +308,14 @@ export default function Lojas() {
               <TableBody>
                 {lojas && lojas.length > 0 ? (
                   lojas.map((loja: any) => (
-                    <TableRow key={loja.id}>
+                    <TableRow key={loja.id} className={selectedIds.includes(loja.id) ? "bg-muted/50" : ""}>
+                      <TableCell>
+                        <Checkbox
+                          checked={selectedIds.includes(loja.id)}
+                          onCheckedChange={(checked) => handleSelectOne(loja.id, !!checked)}
+                          aria-label={`Selecionar ${loja.nome}`}
+                        />
+                      </TableCell>
                       <TableCell className="font-medium">
                         <div className="flex items-center gap-2">
                           <Building2 className="h-4 w-4 text-muted-foreground" />
@@ -278,7 +346,7 @@ export default function Lojas() {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center py-8">
+                    <TableCell colSpan={5} className="text-center py-8">
                       <p className="text-muted-foreground">
                         Nenhuma loja registada
                       </p>
@@ -467,6 +535,36 @@ export default function Lojas() {
               disabled={!importFile || importMutation.isPending}
             >
               {importMutation.isPending ? 'A importar...' : 'Importar'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog de confirmação de eliminação em lote */}
+      <Dialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmar Eliminação</DialogTitle>
+            <DialogDescription>
+              Tem a certeza que deseja eliminar {selectedIds.length} loja(s) selecionada(s)?
+              Esta ação não pode ser revertida.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setDeleteConfirmOpen(false)}
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={confirmDeleteSelected}
+              disabled={deleteManyMutation.isPending}
+            >
+              {deleteManyMutation.isPending ? 'A eliminar...' : `Eliminar ${selectedIds.length} loja(s)`}
             </Button>
           </DialogFooter>
         </DialogContent>
