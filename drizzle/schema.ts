@@ -329,3 +329,59 @@ export const resumosGlobais = mysqlTable("resumos_globais", {
 
 export type ResumoGlobal = typeof resumosGlobais.$inferSelect;
 export type InsertResumoGlobal = typeof resumosGlobais.$inferInsert;
+
+/**
+ * Reuniões de Gestores - Reuniões operacionais entre gestores (apenas admin cria/edita)
+ */
+export const reunioesGestores = mysqlTable("reunioes_gestores", {
+  id: int("id").autoincrement().primaryKey(),
+  data: timestamp("data").notNull(), // Data da reunião
+  presencas: text("presencas").notNull(), // JSON array de IDs de gestores presentes
+  outrosPresentes: text("outrosPresentes"), // Nomes de outros presentes (texto livre)
+  conteudo: text("conteudo").notNull(), // Descrição da reunião
+  resumoIA: text("resumoIA"), // Resumo gerado pela IA (tópicos, ações)
+  tags: text("tags"), // JSON array de tags para organização
+  criadoPor: int("criadoPor").notNull(), // FK para users.id (admin)
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type ReuniaoGestores = typeof reunioesGestores.$inferSelect;
+export type InsertReuniaoGestores = typeof reunioesGestores.$inferInsert;
+
+/**
+ * Reuniões de Lojas - Reuniões operacionais com lojas específicas
+ */
+export const reunioesLojas = mysqlTable("reunioes_lojas", {
+  id: int("id").autoincrement().primaryKey(),
+  data: timestamp("data").notNull(), // Data da reunião
+  lojaIds: text("lojaIds").notNull(), // JSON array de IDs de lojas (pode ser múltiplas)
+  presencas: text("presencas").notNull(), // Nomes dos presentes (texto livre)
+  conteudo: text("conteudo").notNull(), // Descrição da reunião
+  resumoIA: text("resumoIA"), // Resumo gerado pela IA (tópicos, ações)
+  tags: text("tags"), // JSON array de tags para organização
+  criadoPor: int("criadoPor").notNull(), // FK para users.id (admin ou gestor)
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type ReuniaoLojas = typeof reunioesLojas.$inferSelect;
+export type InsertReuniaoLojas = typeof reunioesLojas.$inferInsert;
+
+/**
+ * Ações de Reuniões - Ações definidas em reuniões e atribuídas a gestores
+ * Integradas com o sistema de pendentes
+ */
+export const acoesReunioes = mysqlTable("acoes_reunioes", {
+  id: int("id").autoincrement().primaryKey(),
+  reuniaoId: int("reuniaoId").notNull(), // FK para reunioes_gestores.id ou reunioes_lojas.id
+  tipoReuniao: mysqlEnum("tipoReuniao", ["gestores", "lojas"]).notNull(), // Tipo de reunião
+  descricao: text("descricao").notNull(), // Descrição da ação
+  gestorIds: text("gestorIds").notNull(), // JSON array de IDs de gestores atribuídos
+  status: mysqlEnum("status", ["pendente", "concluida"]).default("pendente").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type AcaoReuniao = typeof acoesReunioes.$inferSelect;
+export type InsertAcaoReuniao = typeof acoesReunioes.$inferInsert;

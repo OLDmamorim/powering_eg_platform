@@ -1211,3 +1211,30 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Remover item "Resumo Global" do menu lateral (DashboardLayout.tsx)
 - [x] Manter apenas "Resumos Globais" (novo sistema)
 - [x] Testar menu
+
+## Feature v6.3 - Sistema de Reuniões Operacionais
+### Backend
+- [x] Criar tabela `reunioes_gestores` (data, presenças, outrosPresentes, conteudo, resumoIA, tags, criadoPor)
+- [x] Criar tabela `reunioes_lojas` (data, lojaIds, presenças, conteudo, resumoIA, tags, criadoPor)
+- [x] Criar tabela `acoes_reunioes` (reuniaoId, tipo, descricao, gestorIds, status)
+- [x] Criar serviço de IA para gerar resumo de reunião (tópicos, ações)
+- [x] Criar router `reunioesGestores` (criar, editar, listar, getById, atribuirAcoes)
+- [x] Criar router `reunioesLojas` (criar, editar, listar, getById, getMiniResumo)
+- [x] Adicionar funções CRUD em db.ts
+- [x] Sistema de ações criado (integração com pendentes adiada)
+
+### Frontend
+- [x] Criar página ReuniõesGestores (formulário + histórico)
+- [x] Criar página ReuniõesLojas (formulário + histórico)
+- [x] Implementar seleção de presenças (gestores pré-selecionados)
+- [x] Implementar mini resumo da reunião anterior
+- [x] Implementar sistema de tags
+- [ ] Implementar atribuição de ações a gestores (UI)
+- [ ] Implementar envio de email e download PDF
+- [x] Adicionar menu lateral (Reuniões Gestores e Reuniões Lojas)
+- [x] Adicionar rotas no App.tsx
+
+### Testes
+- [x] Criar testes unitários para reuniões (6 testes passaram)
+- [x] Validar estrutura de routers e serviços
+- [x] Validar funções CRUD no db.ts

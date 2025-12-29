@@ -28,6 +28,8 @@ import ComparacaoRelatoriosIA from "./pages/ComparacaoRelatoriosIA";
 import GestaoUtilizadores from "./pages/GestaoUtilizadores";
 import ResumosGlobais from "./pages/ResumosGlobais";
 import HistoricoResumosGlobais from "./pages/HistoricoResumosGlobais";
+import ReuniõesGestores from "./pages/ReuniõesGestores";
+import ReuniõesLojas from "./pages/ReuniõesLojas";
 
 
 function Router() {
@@ -64,6 +66,8 @@ function Router() {
       <Route path={"/categorias"} component={Categorias} />
       <Route path={"/resumos-globais"} component={ResumosGlobais} />
       <Route path={"/historico-resumos-globais"} component={HistoricoResumosGlobais} />
+      <Route path={"/reunioes-gestores"} component={ReuniõesGestores} />
+      <Route path={"/reunioes-lojas"} component={ReuniõesLojas} />
       
       
       <Route path={"/login-nao-autorizado"} component={LoginNaoAutorizado} />

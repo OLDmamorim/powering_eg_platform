@@ -47,7 +47,16 @@ import {
   InsertRelatorioIA,
   resumosGlobais,
   ResumoGlobal,
-  InsertResumoGlobal
+  InsertResumoGlobal,
+  reunioesGestores,
+  ReuniaoGestores,
+  InsertReuniaoGestores,
+  reunioesLojas,
+  ReuniaoLojas,
+  InsertReuniaoLojas,
+  acoesReunioes,
+  AcaoReuniao,
+  InsertAcaoReuniao
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -2598,4 +2607,304 @@ export async function getUltimoResumoGlobalPorPeriodo(periodo: 'mensal' | 'trime
     .limit(1);
   
   return resumo || null;
+}
+
+
+// ==================== REUNIÕES DE GESTORES ====================
+
+/**
+ * Criar reunião de gestores
+ */
+export async function createReuniaoGestores(data: InsertReuniaoGestores): Promise<ReuniaoGestores> {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  
+  const [novaReuniao] = await db
+    .insert(reunioesGestores)
+    .values(data)
+    .$returningId();
+  
+  const [reuniao] = await db
+    .select()
+    .from(reunioesGestores)
+    .where(eq(reunioesGestores.id, novaReuniao.id))
+    .limit(1);
+  
+  return reuniao!;
+}
+
+/**
+ * Atualizar reunião de gestores
+ */
+export async function updateReuniaoGestores(
+  id: number,
+  data: Partial<InsertReuniaoGestores>
+): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  
+  await db
+    .update(reunioesGestores)
+    .set(data)
+    .where(eq(reunioesGestores.id, id));
+}
+
+/**
+ * Obter histórico de reuniões de gestores (ordenado por data DESC)
+ */
+export async function getHistoricoReuniõesGestores(): Promise<Array<ReuniaoGestores & { criadoPorNome: string }>> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const result = await db
+    .select({
+      id: reunioesGestores.id,
+      data: reunioesGestores.data,
+      presencas: reunioesGestores.presencas,
+      outrosPresentes: reunioesGestores.outrosPresentes,
+      conteudo: reunioesGestores.conteudo,
+      resumoIA: reunioesGestores.resumoIA,
+      tags: reunioesGestores.tags,
+      criadoPor: reunioesGestores.criadoPor,
+      createdAt: reunioesGestores.createdAt,
+      updatedAt: reunioesGestores.updatedAt,
+      criadoPorNome: users.name,
+    })
+    .from(reunioesGestores)
+    .innerJoin(users, eq(reunioesGestores.criadoPor, users.id))
+    .orderBy(desc(reunioesGestores.data));
+  
+  return result.map(r => ({
+    id: r.id,
+    data: r.data,
+    presencas: r.presencas,
+    outrosPresentes: r.outrosPresentes,
+    conteudo: r.conteudo,
+    resumoIA: r.resumoIA,
+    tags: r.tags,
+    criadoPor: r.criadoPor,
+    createdAt: r.createdAt,
+    updatedAt: r.updatedAt,
+    criadoPorNome: r.criadoPorNome || 'Desconhecido',
+  }));
+}
+
+/**
+ * Obter reunião de gestores por ID
+ */
+export async function getReuniaoGestoresById(id: number): Promise<ReuniaoGestores | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const [reuniao] = await db
+    .select()
+    .from(reunioesGestores)
+    .where(eq(reunioesGestores.id, id))
+    .limit(1);
+  
+  return reuniao || null;
+}
+
+// ==================== REUNIÕES DE LOJAS ====================
+
+/**
+ * Criar reunião de lojas
+ */
+export async function createReuniaoLojas(data: InsertReuniaoLojas): Promise<ReuniaoLojas> {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  
+  const [novaReuniao] = await db
+    .insert(reunioesLojas)
+    .values(data)
+    .$returningId();
+  
+  const [reuniao] = await db
+    .select()
+    .from(reunioesLojas)
+    .where(eq(reunioesLojas.id, novaReuniao.id))
+    .limit(1);
+  
+  return reuniao!;
+}
+
+/**
+ * Atualizar reunião de lojas
+ */
+export async function updateReuniaoLojas(
+  id: number,
+  data: Partial<InsertReuniaoLojas>
+): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  
+  await db
+    .update(reunioesLojas)
+    .set(data)
+    .where(eq(reunioesLojas.id, id));
+}
+
+/**
+ * Obter histórico de reuniões de lojas (filtrado por gestor se fornecido)
+ */
+export async function getHistoricoReuniõesLojas(
+  gestorId?: number
+): Promise<Array<ReuniaoLojas & { criadoPorNome: string; lojasNomes: string[] }>> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  let query = db
+    .select({
+      id: reunioesLojas.id,
+      data: reunioesLojas.data,
+      lojaIds: reunioesLojas.lojaIds,
+      presencas: reunioesLojas.presencas,
+      conteudo: reunioesLojas.conteudo,
+      resumoIA: reunioesLojas.resumoIA,
+      tags: reunioesLojas.tags,
+      criadoPor: reunioesLojas.criadoPor,
+      createdAt: reunioesLojas.createdAt,
+      updatedAt: reunioesLojas.updatedAt,
+      criadoPorNome: users.name,
+    })
+    .from(reunioesLojas)
+    .innerJoin(users, eq(reunioesLojas.criadoPor, users.id))
+    .orderBy(desc(reunioesLojas.data));
+  
+  const result = await query;
+  
+  // Se é gestor, filtrar apenas reuniões das suas lojas
+  let filteredResult = result;
+  if (gestorId) {
+    const lojasGestor = await getLojasByGestorId(gestorId);
+    const lojaIdsGestor = lojasGestor.map((l: any) => l.id);
+    
+    filteredResult = result.filter(r => {
+      const lojaIds = JSON.parse(r.lojaIds) as number[];
+      return lojaIds.some(id => lojaIdsGestor.includes(id));
+    });
+  }
+  
+  // Buscar nomes das lojas
+  const todasLojas = await getAllLojas();
+  
+  return filteredResult.map(r => {
+    const lojaIds = JSON.parse(r.lojaIds) as number[];
+    const lojasNomes = lojaIds
+      .map(id => todasLojas.find(l => l.id === id)?.nome)
+      .filter(Boolean) as string[];
+    
+    return {
+      id: r.id,
+      data: r.data,
+      lojaIds: r.lojaIds,
+      presencas: r.presencas,
+      conteudo: r.conteudo,
+      resumoIA: r.resumoIA,
+      tags: r.tags,
+      criadoPor: r.criadoPor,
+      createdAt: r.createdAt,
+      updatedAt: r.updatedAt,
+      criadoPorNome: r.criadoPorNome || 'Desconhecido',
+      lojasNomes,
+    };
+  });
+}
+
+/**
+ * Obter reunião de lojas por ID
+ */
+export async function getReuniaoLojasById(id: number): Promise<ReuniaoLojas | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const [reuniao] = await db
+    .select()
+    .from(reunioesLojas)
+    .where(eq(reunioesLojas.id, id))
+    .limit(1);
+  
+  return reuniao || null;
+}
+
+/**
+ * Obter última reunião de uma loja específica
+ */
+export async function getUltimaReuniaoLoja(lojaId: number): Promise<ReuniaoLojas | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const todasReunioes = await db
+    .select()
+    .from(reunioesLojas)
+    .orderBy(desc(reunioesLojas.data));
+  
+  // Filtrar reuniões que incluem esta loja
+  const reuniaoLoja = todasReunioes.find(r => {
+    const lojaIds = JSON.parse(r.lojaIds) as number[];
+    return lojaIds.includes(lojaId);
+  });
+  
+  return reuniaoLoja || null;
+}
+
+// ==================== AÇÕES DE REUNIÕES ====================
+
+/**
+ * Criar ação de reunião
+ */
+export async function createAcaoReuniao(data: InsertAcaoReuniao): Promise<AcaoReuniao> {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  
+  const [novaAcao] = await db
+    .insert(acoesReunioes)
+    .values(data)
+    .$returningId();
+  
+  const [acao] = await db
+    .select()
+    .from(acoesReunioes)
+    .where(eq(acoesReunioes.id, novaAcao.id))
+    .limit(1);
+  
+  return acao!;
+}
+
+/**
+ * Obter ações de uma reunião específica
+ */
+export async function getAcoesReuniao(
+  reuniaoId: number,
+  tipoReuniao: 'gestores' | 'lojas'
+): Promise<AcaoReuniao[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db
+    .select()
+    .from(acoesReunioes)
+    .where(
+      and(
+        eq(acoesReunioes.reuniaoId, reuniaoId),
+        eq(acoesReunioes.tipoReuniao, tipoReuniao)
+      )
+    )
+    .orderBy(desc(acoesReunioes.createdAt));
+}
+
+/**
+ * Atualizar status de ação
+ */
+export async function updateAcaoReuniao(
+  id: number,
+  status: 'pendente' | 'concluida'
+): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  
+  await db
+    .update(acoesReunioes)
+    .set({ status })
+    .where(eq(acoesReunioes.id, id));
 }

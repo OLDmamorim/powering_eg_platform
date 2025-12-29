@@ -1548,6 +1548,254 @@ export const appRouter = router({
         return { success: true };
       }),
   }),
+
+  // ==================== REUNIÕES OPERACIONAIS ====================
+  reunioesGestores: router({
+    criar: adminProcedure
+      .input(z.object({
+        data: z.date(),
+        presencas: z.array(z.number()), // IDs dos gestores presentes
+        outrosPresentes: z.string().optional(),
+        conteudo: z.string(),
+        tags: z.array(z.string()).optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const { gerarResumoReuniaoComIA } = await import('./reuniaoService');
+        
+        // Gerar resumo com IA
+        const resumoIA = await gerarResumoReuniaoComIA(input.conteudo, 'gestores');
+        
+        // Criar reunião
+        const reuniao = await db.createReuniaoGestores({
+          data: input.data,
+          presencas: JSON.stringify(input.presencas),
+          outrosPresentes: input.outrosPresentes || null,
+          conteudo: input.conteudo,
+          resumoIA: JSON.stringify(resumoIA),
+          tags: input.tags ? JSON.stringify(input.tags) : null,
+          criadoPor: ctx.user.id,
+        });
+        
+        return { reuniao, resumoIA };
+      }),
+    
+    editar: adminProcedure
+      .input(z.object({
+        id: z.number(),
+        data: z.date().optional(),
+        presencas: z.array(z.number()).optional(),
+        outrosPresentes: z.string().optional(),
+        conteudo: z.string().optional(),
+        tags: z.array(z.string()).optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { id, ...updateData } = input;
+        
+        // Se conteudo foi alterado, regerar resumo IA
+        let resumoIA = undefined;
+        if (updateData.conteudo) {
+          const { gerarResumoReuniaoComIA } = await import('./reuniaoService');
+          resumoIA = await gerarResumoReuniaoComIA(updateData.conteudo, 'gestores');
+        }
+        
+        await db.updateReuniaoGestores(id, {
+          ...updateData,
+          presencas: updateData.presencas ? JSON.stringify(updateData.presencas) : undefined,
+          tags: updateData.tags ? JSON.stringify(updateData.tags) : undefined,
+          resumoIA: resumoIA ? JSON.stringify(resumoIA) : undefined,
+        });
+        
+        return { success: true };
+      }),
+    
+    listar: protectedProcedure.query(async () => {
+      return await db.getHistoricoReuniõesGestores();
+    }),
+    
+    getById: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        return await db.getReuniaoGestoresById(input.id);
+      }),
+    
+    atribuirAcoes: adminProcedure
+      .input(z.object({
+        reuniaoId: z.number(),
+        acoes: z.array(z.object({
+          descricao: z.string(),
+          gestorIds: z.array(z.number()),
+        })),
+      }))
+      .mutation(async ({ input }) => {
+        // Criar ações atribuídas a gestores
+        for (const acao of input.acoes) {
+          await db.createAcaoReuniao({
+            reuniaoId: input.reuniaoId,
+            tipoReuniao: 'gestores',
+            descricao: acao.descricao,
+            gestorIds: JSON.stringify(acao.gestorIds),
+            status: 'pendente',
+          });
+        }
+        
+        return { success: true };
+      }),
+  }),
+
+  reunioesLojas: router({
+    criar: protectedProcedure
+      .input(z.object({
+        data: z.date(),
+        lojaIds: z.array(z.number()),
+        presencas: z.string(),
+        conteudo: z.string(),
+        tags: z.array(z.string()).optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        // Verificar permissões: gestor só pode criar para suas lojas
+        if (ctx.user.role === 'gestor') {
+          const gestor = await db.getGestorByUserId(ctx.user.id);
+          if (!gestor) throw new TRPCError({ code: 'NOT_FOUND', message: 'Gestor não encontrado' });
+          
+          const lojasGestor = await db.getLojasByGestorId(gestor.id);
+          const lojaIdsGestor = lojasGestor.map((l: any) => l.id);
+          
+          const todasPermitidas = input.lojaIds.every(id => lojaIdsGestor.includes(id));
+          if (!todasPermitidas) {
+            throw new TRPCError({ code: 'FORBIDDEN', message: 'Não pode criar reunião para lojas que não gere' });
+          }
+        }
+        
+        const { gerarResumoReuniaoComIA } = await import('./reuniaoService');
+        
+        // Gerar resumo com IA
+        const resumoIA = await gerarResumoReuniaoComIA(input.conteudo, 'lojas');
+        
+        // Criar reunião
+        const reuniao = await db.createReuniaoLojas({
+          data: input.data,
+          lojaIds: JSON.stringify(input.lojaIds),
+          presencas: input.presencas,
+          conteudo: input.conteudo,
+          resumoIA: JSON.stringify(resumoIA),
+          tags: input.tags ? JSON.stringify(input.tags) : null,
+          criadoPor: ctx.user.id,
+        });
+        
+        return { reuniao, resumoIA };
+      }),
+    
+    editar: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        data: z.date().optional(),
+        lojaIds: z.array(z.number()).optional(),
+        presencas: z.string().optional(),
+        conteudo: z.string().optional(),
+        tags: z.array(z.string()).optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const { id, ...updateData } = input;
+        
+        // Verificar permissões
+        const reuniaoExistente = await db.getReuniaoLojasById(id);
+        if (!reuniaoExistente) throw new TRPCError({ code: 'NOT_FOUND' });
+        
+        if (ctx.user.role === 'gestor') {
+          const gestor = await db.getGestorByUserId(ctx.user.id);
+          if (!gestor) throw new TRPCError({ code: 'NOT_FOUND', message: 'Gestor não encontrado' });
+          
+          const lojasGestor = await db.getLojasByGestorId(gestor.id);
+          const lojaIdsGestor = lojasGestor.map((l: any) => l.id);
+          
+          const lojaIdsReuniao = JSON.parse(reuniaoExistente.lojaIds) as number[];
+          const todasPermitidas = lojaIdsReuniao.every(id => lojaIdsGestor.includes(id));
+          if (!todasPermitidas) {
+            throw new TRPCError({ code: 'FORBIDDEN', message: 'Não pode editar reunião de lojas que não gere' });
+          }
+        }
+        
+        // Se conteudo foi alterado, regerar resumo IA
+        let resumoIA = undefined;
+        if (updateData.conteudo) {
+          const { gerarResumoReuniaoComIA } = await import('./reuniaoService');
+          resumoIA = await gerarResumoReuniaoComIA(updateData.conteudo, 'lojas');
+        }
+        
+        await db.updateReuniaoLojas(id, {
+          ...updateData,
+          lojaIds: updateData.lojaIds ? JSON.stringify(updateData.lojaIds) : undefined,
+          tags: updateData.tags ? JSON.stringify(updateData.tags) : undefined,
+          resumoIA: resumoIA ? JSON.stringify(resumoIA) : undefined,
+        });
+        
+        return { success: true };
+      }),
+    
+    listar: protectedProcedure.query(async ({ ctx }) => {
+      // Admin vê todas, gestor vê apenas das suas lojas
+      if (ctx.user.role === 'admin') {
+        return await db.getHistoricoReuniõesLojas();
+      } else {
+        const gestor = await db.getGestorByUserId(ctx.user.id);
+        if (!gestor) return [];
+        return await db.getHistoricoReuniõesLojas(gestor.id);
+      }
+    }),
+    
+    getById: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input, ctx }) => {
+        const reuniao = await db.getReuniaoLojasById(input.id);
+        if (!reuniao) return null;
+        
+        // Verificar permissões para gestor
+        if (ctx.user.role === 'gestor') {
+          const gestor = await db.getGestorByUserId(ctx.user.id);
+          if (!gestor) return null;
+          
+          const lojasGestor = await db.getLojasByGestorId(gestor.id);
+          const lojaIdsGestor = lojasGestor.map((l: any) => l.id);
+          
+          const lojaIdsReuniao = JSON.parse(reuniao.lojaIds) as number[];
+          const temPermissao = lojaIdsReuniao.some(id => lojaIdsGestor.includes(id));
+          if (!temPermissao) return null;
+        }
+        
+        return reuniao;
+      }),
+    
+    getMiniResumo: protectedProcedure
+      .input(z.object({ lojaId: z.number() }))
+      .query(async ({ input }) => {
+        const ultimaReuniao = await db.getUltimaReuniaoLoja(input.lojaId);
+        const { gerarMiniResumoReuniaoAnterior } = await import('./reuniaoService');
+        return await gerarMiniResumoReuniaoAnterior(ultimaReuniao);
+      }),
+    
+    atribuirAcoes: protectedProcedure
+      .input(z.object({
+        reuniaoId: z.number(),
+        acoes: z.array(z.object({
+          descricao: z.string(),
+          gestorIds: z.array(z.number()),
+        })),
+      }))
+      .mutation(async ({ input }) => {
+        // Criar ações atribuídas a gestores
+        for (const acao of input.acoes) {
+          await db.createAcaoReuniao({
+            reuniaoId: input.reuniaoId,
+            tipoReuniao: 'lojas',
+            descricao: acao.descricao,
+            gestorIds: JSON.stringify(acao.gestorIds),
+            status: 'pendente',
+          });
+        }
+        
+        return { success: true };
+      }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;

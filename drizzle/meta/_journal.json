@@ -162,6 +162,13 @@
       "when": 1766435148934,
       "tag": "0022_smooth_nicolaos",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "5",
+      "when": 1766975697071,
+      "tag": "0023_curved_dragon_man",
+      "breakpoints": true
     }
   ]
 }
