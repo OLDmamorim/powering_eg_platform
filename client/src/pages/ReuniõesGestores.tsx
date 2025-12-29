@@ -193,7 +193,8 @@ export default function ReuniõesGestores() {
                 placeholder="Descreva os tópicos discutidos, decisões tomadas, etc..."
                 value={conteudo}
                 onChange={(e) => setConteudo(e.target.value)}
-                rows={8}
+                rows={15}
+                className="min-h-[300px]"
               />
             </div>
 

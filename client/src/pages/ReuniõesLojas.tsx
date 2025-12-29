@@ -41,8 +41,11 @@ export default function ReuniõesLojas() {
   const [modalEmail, setModalEmail] = useState(false);
   const [filtros, setFiltros] = useState<any>({});
 
-  const { data: todasLojas } = trpc.lojas.list.useQuery();
-  const { data: minhasLojas } = trpc.lojas.list.useQuery(undefined, {
+  // Admin vê todas as lojas, gestor vê apenas as suas
+  const { data: todasLojas } = trpc.lojas.list.useQuery(undefined, {
+    enabled: isAdmin,
+  });
+  const { data: minhasLojas } = trpc.lojas.getByGestor.useQuery(undefined, {
     enabled: !isAdmin,
   });
   const { data: historico, refetch } = trpc.reunioesLojas.listar.useQuery(filtros);
@@ -226,7 +229,8 @@ export default function ReuniõesLojas() {
                 placeholder="Descreva os tópicos discutidos, decisões tomadas, etc..."
                 value={conteudo}
                 onChange={(e) => setConteudo(e.target.value)}
-                rows={8}
+                rows={15}
+                className="min-h-[300px]"
               />
             </div>
 

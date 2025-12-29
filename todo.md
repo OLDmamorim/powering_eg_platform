@@ -1280,3 +1280,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 ### Testes
 - [x] Verificar funcionalidade no browser
 - [x] Validar integração frontend-backend
+
+## Correções Reuniões de Lojas
+- [x] Filtrar lojas disponíveis por gestor (não mostrar todas as 70 lojas)
+- [x] Aumentar tamanho da caixa de conteúdo da reunião (Textarea maior)
