@@ -107,33 +107,45 @@ export function ResultadosDashboard() {
     { enabled: !!periodoComparacao2 }
   );
   
+  // Calcular limite e filtro para ranking
+  const rankingLimit = useMemo(() => {
+    // Se "Minhas Lojas" selecionado, buscar todas as lojas do gestor (até 100)
+    if (lojaSelecionada === 'minhas' && lojas) {
+      return Math.max(lojas.length, 10);
+    }
+    // Se loja individual, buscar apenas 1
+    if (typeof lojaSelecionada === 'number') {
+      return 10;
+    }
+    // Caso contrário, top 10
+    return 10;
+  }, [lojaSelecionada, lojas]);
+  
+  const rankingLojasIds = useMemo(() => {
+    // Se "Minhas Lojas" selecionado, filtrar pelo backend
+    if (lojaSelecionada === 'minhas' && lojas) {
+      return lojas.map(l => l.id);
+    }
+    // Se loja individual, filtrar pelo backend
+    if (typeof lojaSelecionada === 'number') {
+      return [lojaSelecionada];
+    }
+    return undefined;
+  }, [lojaSelecionada, lojas]);
+  
   const { data: rankingCompleto, isLoading: loadingRanking } = trpc.resultados.ranking.useQuery(
     { 
       metrica: metricaRanking, 
       mes: periodoSelecionado?.mes || 1, 
       ano: periodoSelecionado?.ano || 2025,
-      limit: 10
+      limit: rankingLimit,
+      lojasIds: rankingLojasIds
     },
     { enabled: !!periodoSelecionado }
   );
   
-  // Filtrar ranking se loja estiver selecionada
-  const ranking = useMemo(() => {
-    if (!rankingCompleto) return rankingCompleto;
-    
-    if (typeof lojaSelecionada === 'number') {
-      // Filtrar por loja específica
-      return rankingCompleto.filter(r => r.lojaId === lojaSelecionada);
-    } else if (lojaSelecionada === 'minhas' && gestorData) {
-      // Filtrar por lojas do gestor
-      const lojasDoGestor = lojas?.filter(l => 
-        gestorData.lojas?.some((gl: any) => gl.id === l.id)
-      ).map(l => l.id) || [];
-      return rankingCompleto.filter(r => lojasDoGestor.includes(r.lojaId));
-    }
-    
-    return rankingCompleto;
-  }, [lojaSelecionada, rankingCompleto, gestorData, lojas]);
+  // Ranking já vem filtrado do backend, apenas usar diretamente
+  const ranking = rankingCompleto;
   
   const { data: porZona, isLoading: loadingZona } = trpc.resultados.porZona.useQuery(
     { mes: periodoSelecionado?.mes || 1, ano: periodoSelecionado?.ano || 2025 },
@@ -707,7 +719,12 @@ export function ResultadosDashboard() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Award className="h-5 w-5" />
-              Top 10 Lojas - {metricaLabels[metricaRanking]}
+              {lojaSelecionada === 'minhas' 
+                ? `Minhas Lojas (${ranking?.length || 0}) - ${metricaLabels[metricaRanking]}`
+                : typeof lojaSelecionada === 'number'
+                  ? `Loja Selecionada - ${metricaLabels[metricaRanking]}`
+                  : `Top 10 Lojas - ${metricaLabels[metricaRanking]}`
+              }
             </CardTitle>
             <CardDescription>
               {periodoSelecionado && periodos.find(p => p.mes === periodoSelecionado.mes && p.ano === periodoSelecionado.ano)?.label}

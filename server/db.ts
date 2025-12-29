@@ -3218,17 +3218,30 @@ export async function getEvolucaoMensal(lojaId: number, mesesAtras: number = 6) 
  * @param mes - mês (1-12)
  * @param ano - ano (2025, etc)
  * @param limit - número de lojas a retornar (default: 10)
+ * @param lojasIds - opcional: filtrar apenas por estas lojas (para "Minhas Lojas")
  */
 export async function getRankingLojas(
   metrica: 'totalServicos' | 'taxaReparacao' | 'desvioPercentualMes' | 'servicosPorColaborador',
   mes: number,
   ano: number,
-  limit: number = 10
+  limit: number = 10,
+  lojasIds?: number[]
 ) {
   const db = await getDb();
   if (!db) return [];
   
   const campo = resultadosMensais[metrica];
+  
+  // Construir condições de filtro
+  const conditions = [
+    eq(resultadosMensais.mes, mes),
+    eq(resultadosMensais.ano, ano)
+  ];
+  
+  // Se lojasIds fornecido, filtrar apenas por essas lojas
+  if (lojasIds && lojasIds.length > 0) {
+    conditions.push(inArray(resultadosMensais.lojaId, lojasIds));
+  }
   
   const ranking = await db
     .select({
@@ -3243,12 +3256,7 @@ export async function getRankingLojas(
     })
     .from(resultadosMensais)
     .innerJoin(lojas, eq(resultadosMensais.lojaId, lojas.id))
-    .where(
-      and(
-        eq(resultadosMensais.mes, mes),
-        eq(resultadosMensais.ano, ano)
-      )
-    )
+    .where(and(...conditions))
     .orderBy(desc(campo))
     .limit(limit);
 

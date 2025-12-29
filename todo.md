@@ -1452,3 +1452,4 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Corrigir erro no envio de email do relatório livre (Falha ao enviar email)
 - [x] Melhorar funcionalidade de edição de relatórios (modal para ver e editar antes de enviar)
 - [x] Adicionar botões de edição visíveis na página Meus Relatórios do gestor
+- [x] Corrigir Dashboard Resultados: mostrar todas as lojas do gestor no ranking quando "Minhas Lojas" selecionado

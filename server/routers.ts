@@ -2118,9 +2118,10 @@ export const appRouter = router({
         mes: z.number().min(1).max(12),
         ano: z.number(),
         limit: z.number().optional(),
+        lojasIds: z.array(z.number()).optional(),
       }))
       .query(async ({ input }) => {
-        return await db.getRankingLojas(input.metrica, input.mes, input.ano, input.limit);
+        return await db.getRankingLojas(input.metrica, input.mes, input.ano, input.limit, input.lojasIds);
       }),
     
     // Dashboard - Comparar duas lojas
