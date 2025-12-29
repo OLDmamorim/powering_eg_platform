@@ -41,12 +41,16 @@ export async function processarExcelResultados(
     // Ler ficheiro Excel
     const workbook = XLSX.read(fileBuffer, { type: 'buffer' });
 
-    // Verificar se folha "Faturados" existe
-    if (!workbook.SheetNames.includes('Faturados')) {
+    // Verificar se folha "Faturados" existe (pode ter espaço no final)
+    const faturadosSheet = workbook.SheetNames.find(name => 
+      name.trim().toLowerCase() === 'faturados'
+    );
+    
+    if (!faturadosSheet) {
       throw new Error('Folha "Faturados" não encontrada no ficheiro Excel');
     }
 
-    const worksheet = workbook.Sheets['Faturados'];
+    const worksheet = workbook.Sheets[faturadosSheet];
     
     // Converter para JSON (linhas como arrays)
     const data: any[][] = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
@@ -311,13 +315,17 @@ export async function processarExcelComplementares(
     // Ler ficheiro Excel
     const workbook = XLSX.read(fileBuffer, { type: 'buffer' });
 
-    // Verificar se folha "Complementares" existe
-    if (!workbook.SheetNames.includes('Complementares')) {
+    // Verificar se folha "Complementares" existe (pode ter espaço no final)
+    const complementaresSheet = workbook.SheetNames.find(name => 
+      name.trim().toLowerCase() === 'complementares'
+    );
+    
+    if (!complementaresSheet) {
       // Não é erro crítico - pode não ter folha Complementares
       return { sucesso: 0, erros: ['Folha "Complementares" não encontrada no ficheiro Excel'] };
     }
 
-    const worksheet = workbook.Sheets['Complementares'];
+    const worksheet = workbook.Sheets[complementaresSheet];
     
     // Converter para JSON (linhas como arrays)
     const data: any[][] = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
