@@ -10,13 +10,15 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, CalendarIcon, Plus, X, Save, Store, FileText, Tag, Info, Download, Mail } from "lucide-react";
+import { Loader2, CalendarIcon, Plus, X, Save, Store, FileText, Tag, Info, Download, Mail, UserPlus } from "lucide-react";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { Streamdown } from "streamdown";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { AtribuirAcoesModal } from "@/components/AtribuirAcoesModal";
+import { EnviarEmailModal } from "@/components/EnviarEmailModal";
 
 export default function ReuniõesLojas() {
   const { user } = useAuth();
@@ -30,6 +32,9 @@ export default function ReuniõesLojas() {
   const [novaTag, setNovaTag] = useState("");
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [miniResumo, setMiniResumo] = useState<string | null>(null);
+  const [reuniaoSelecionada, setReuniaoSelecionada] = useState<number | null>(null);
+  const [modalAtribuir, setModalAtribuir] = useState(false);
+  const [modalEmail, setModalEmail] = useState(false);
 
   const { data: todasLojas } = trpc.lojas.list.useQuery();
   const { data: minhasLojas } = trpc.lojas.list.useQuery(undefined, {
@@ -37,6 +42,10 @@ export default function ReuniõesLojas() {
   });
   const { data: historico, refetch } = trpc.reunioesLojas.listar.useQuery();
   const criarMutation = trpc.reunioesLojas.criar.useMutation();
+  const atribuirAcoesMutation = trpc.reunioesLojas.atribuirAcoes.useMutation();
+  const enviarEmailMutation = trpc.reunioesLojas.enviarEmail.useMutation();
+  const { data: gestores } = trpc.gestores.list.useQuery();
+  const utils = trpc.useUtils();
   const getMiniResumoQuery = trpc.reunioesLojas.getMiniResumo.useQuery(
     { lojaId: lojasSelecionadas[0] || 0 },
     { enabled: lojasSelecionadas.length === 1 }
@@ -353,12 +362,44 @@ export default function ReuniõesLojas() {
                       </details>
 
                       {/* Ações */}
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm">
+                      <div className="flex gap-2 pt-2">
+                        {resumoIA && resumoIA.acoes.length > 0 && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setReuniaoSelecionada(reuniao.id);
+                              setModalAtribuir(true);
+                            }}
+                          >
+                            <UserPlus className="h-4 w-4 mr-2" />
+                            Atribuir Ações
+                          </Button>
+                        )}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setReuniaoSelecionada(reuniao.id);
+                            setModalEmail(true);
+                          }}
+                        >
                           <Mail className="h-4 w-4 mr-2" />
                           Enviar Email
                         </Button>
-                        <Button variant="outline" size="sm">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={async () => {
+                            try {
+                              const result = await utils.client.reunioesLojas.gerarPDF.query({ reuniaoId: reuniao.id });
+                              window.open(result.url, '_blank');
+                              toast.success('PDF gerado com sucesso!');
+                            } catch (error: any) {
+                              toast.error(error.message || 'Erro ao gerar PDF');
+                            }
+                          }}
+                        >
                           <Download className="h-4 w-4 mr-2" />
                           Download PDF
                         </Button>
@@ -371,6 +412,37 @@ export default function ReuniõesLojas() {
           )}
         </CardContent>
       </Card>
+
+      {/* Modais */}
+      {reuniaoSelecionada && (
+        <>
+          <AtribuirAcoesModal
+            open={modalAtribuir}
+            onOpenChange={setModalAtribuir}
+            reuniaoId={reuniaoSelecionada}
+            gestores={gestores || []}
+            acoesIA={historico?.find(r => r.id === reuniaoSelecionada)?.resumoIA
+              ? JSON.parse(historico.find(r => r.id === reuniaoSelecionada)!.resumoIA!).acoes
+              : []}
+            onSuccess={() => refetch()}
+            onAtribuir={async (reuniaoId, acoes) => {
+              await atribuirAcoesMutation.mutateAsync({ reuniaoId, acoes });
+            }}
+          />
+          <EnviarEmailModal
+            open={modalEmail}
+            onOpenChange={setModalEmail}
+            reuniaoId={reuniaoSelecionada}
+            tipo="lojas"
+            onEnviar={async (reuniaoId, emailDestino) => {
+              await enviarEmailMutation.mutateAsync({
+                reuniaoId,
+                emailDestino: emailDestino as string,
+              });
+            }}
+          />
+        </>
+      )}
     </div>
   );
 }

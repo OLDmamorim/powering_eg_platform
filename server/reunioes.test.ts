@@ -40,6 +40,19 @@ describe('Sistema de Reuniões Operacionais', () => {
     expect(typeof gerarMiniResumoReuniaoAnterior).toBe('function');
   });
 
+  it('deve ter procedures de email e PDF', () => {
+    expect(appRouter.reunioesGestores.enviarEmail).toBeDefined();
+    expect(appRouter.reunioesGestores.gerarPDF).toBeDefined();
+    expect(appRouter.reunioesLojas.enviarEmail).toBeDefined();
+    expect(appRouter.reunioesLojas.gerarPDF).toBeDefined();
+  });
+
+  it('deve ter função de geração de PDF', async () => {
+    const { gerarPDFReuniao } = await import('./reuniaoService');
+    expect(gerarPDFReuniao).toBeDefined();
+    expect(typeof gerarPDFReuniao).toBe('function');
+  });
+
   it('deve ter funções CRUD no db.ts', async () => {
     const db = await import('./db');
     

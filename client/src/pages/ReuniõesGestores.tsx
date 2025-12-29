@@ -9,13 +9,15 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, CalendarIcon, Plus, X, Save, Users, FileText, Tag } from "lucide-react";
+import { Loader2, CalendarIcon, Plus, X, Save, Users, FileText, Tag, Download, Mail, UserPlus } from "lucide-react";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { Streamdown } from "streamdown";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { AtribuirAcoesModal } from "@/components/AtribuirAcoesModal";
+import { EnviarEmailModal } from "@/components/EnviarEmailModal";
 
 export default function ReuniõesGestores() {
   const { user } = useAuth();
@@ -28,10 +30,16 @@ export default function ReuniõesGestores() {
   const [tags, setTags] = useState<string[]>([]);
   const [novaTag, setNovaTag] = useState("");
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
+  const [reuniaoSelecionada, setReuniaoSelecionada] = useState<number | null>(null);
+  const [modalAtribuir, setModalAtribuir] = useState(false);
+  const [modalEmail, setModalEmail] = useState(false);
 
   const { data: gestores } = trpc.gestores.list.useQuery();
   const { data: historico, refetch } = trpc.reunioesGestores.listar.useQuery();
   const criarMutation = trpc.reunioesGestores.criar.useMutation();
+  const atribuirAcoesMutation = trpc.reunioesGestores.atribuirAcoes.useMutation();
+  const enviarEmailMutation = trpc.reunioesGestores.enviarEmail.useMutation();
+  const utils = trpc.useUtils();
 
   // Pré-selecionar todos os gestores
   useState(() => {
@@ -330,6 +338,52 @@ export default function ReuniõesGestores() {
                           {reuniao.conteudo}
                         </div>
                       </details>
+
+                      {/* Ações (apenas admin) */}
+                      {isAdmin && (
+                        <div className="flex gap-2 pt-2">
+                          {resumoIA && resumoIA.acoes.length > 0 && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setReuniaoSelecionada(reuniao.id);
+                                setModalAtribuir(true);
+                              }}
+                            >
+                              <UserPlus className="h-4 w-4 mr-2" />
+                              Atribuir Ações
+                            </Button>
+                          )}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setReuniaoSelecionada(reuniao.id);
+                              setModalEmail(true);
+                            }}
+                          >
+                            <Mail className="h-4 w-4 mr-2" />
+                            Enviar Email
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={async () => {
+                              try {
+                                const result = await utils.client.reunioesGestores.gerarPDF.query({ reuniaoId: reuniao.id });
+                                window.open(result.url, '_blank');
+                                toast.success('PDF gerado com sucesso!');
+                              } catch (error: any) {
+                                toast.error(error.message || 'Erro ao gerar PDF');
+                              }
+                            }}
+                          >
+                            <Download className="h-4 w-4 mr-2" />
+                            Download PDF
+                          </Button>
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
                 );
@@ -338,6 +392,38 @@ export default function ReuniõesGestores() {
           )}
         </CardContent>
       </Card>
+
+      {/* Modais */}
+      {reuniaoSelecionada && (
+        <>
+          <AtribuirAcoesModal
+            open={modalAtribuir}
+            onOpenChange={setModalAtribuir}
+            reuniaoId={reuniaoSelecionada}
+            gestores={gestores || []}
+            acoesIA={historico?.find(r => r.id === reuniaoSelecionada)?.resumoIA
+              ? JSON.parse(historico.find(r => r.id === reuniaoSelecionada)!.resumoIA!).acoes
+              : []}
+            onSuccess={() => refetch()}
+            onAtribuir={async (reuniaoId, acoes) => {
+              await atribuirAcoesMutation.mutateAsync({ reuniaoId, acoes });
+            }}
+          />
+          <EnviarEmailModal
+            open={modalEmail}
+            onOpenChange={setModalEmail}
+            reuniaoId={reuniaoSelecionada}
+            tipo="gestores"
+            gestores={gestores}
+            onEnviar={async (reuniaoId, destinatarios) => {
+              await enviarEmailMutation.mutateAsync({
+                reuniaoId,
+                gestorIds: destinatarios as number[],
+              });
+            }}
+          />
+        </>
+      )}
     </div>
   );
 }

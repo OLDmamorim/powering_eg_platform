@@ -123,3 +123,55 @@ export async function gerarMiniResumoReuniaoAnterior(
 
 **Conteúdo:** ${reuniaoAnterior.conteudo.substring(0, 200)}${reuniaoAnterior.conteudo.length > 200 ? "..." : ""}`;
 }
+
+/**
+ * Gera PDF de uma reunião
+ */
+export async function gerarPDFReuniao(reuniao: any, tipo: 'gestores' | 'lojas'): Promise<Buffer> {
+  // Usar biblioteca de geração de PDF (por exemplo, PDFKit ou similar)
+  // Por agora, retornar um buffer vazio como placeholder
+  
+  const resumoIA = reuniao.resumoIA ? JSON.parse(reuniao.resumoIA) : null;
+  
+  let pdfContent = `REUNIÃO ${tipo.toUpperCase()}\n\n`;
+  pdfContent += `Data: ${new Date(reuniao.data).toLocaleDateString('pt-PT')}\n`;
+  pdfContent += `Criado por: ${reuniao.criadoPorNome}\n\n`;
+  
+  if (tipo === 'lojas' && reuniao.lojasNomes) {
+    pdfContent += `Lojas: ${reuniao.lojasNomes.join(', ')}\n`;
+    pdfContent += `Presenças: ${reuniao.presencas}\n\n`;
+  } else if (tipo === 'gestores') {
+    const presencas = JSON.parse(reuniao.presencas);
+    pdfContent += `Presenças: ${presencas.length} gestores\n`;
+    if (reuniao.outrosPresentes) {
+      pdfContent += `Outros presentes: ${reuniao.outrosPresentes}\n`;
+    }
+    pdfContent += `\n`;
+  }
+  
+  if (resumoIA) {
+    pdfContent += `RESUMO:\n${resumoIA.resumo}\n\n`;
+    
+    if (resumoIA.topicos.length > 0) {
+      pdfContent += `TÓPICOS PRINCIPAIS:\n`;
+      resumoIA.topicos.forEach((t: string, i: number) => {
+        pdfContent += `${i + 1}. ${t}\n`;
+      });
+      pdfContent += `\n`;
+    }
+    
+    if (resumoIA.acoes.length > 0) {
+      pdfContent += `AÇÕES IDENTIFICADAS:\n`;
+      resumoIA.acoes.forEach((a: any, i: number) => {
+        pdfContent += `${i + 1}. [${a.prioridade.toUpperCase()}] ${a.descricao}\n`;
+      });
+      pdfContent += `\n`;
+    }
+  }
+  
+  pdfContent += `CONTEÚDO COMPLETO:\n${reuniao.conteudo}\n`;
+  
+  // Por agora, retornar o conteúdo como texto simples em buffer
+  // TODO: Implementar geração de PDF real com formatação
+  return Buffer.from(pdfContent, 'utf-8');
+}

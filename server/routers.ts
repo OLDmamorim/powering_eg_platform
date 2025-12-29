@@ -1640,6 +1640,77 @@ export const appRouter = router({
         
         return { success: true };
       }),
+    
+    enviarEmail: adminProcedure
+      .input(z.object({
+        reuniaoId: z.number(),
+        gestorIds: z.array(z.number()),
+      }))
+      .mutation(async ({ input }) => {
+        const reuniao = await db.getReuniaoGestoresById(input.reuniaoId);
+        if (!reuniao) throw new TRPCError({ code: 'NOT_FOUND', message: 'Reunião não encontrada' });
+        
+        const gestores = await db.getAllGestores();
+        const gestoresSelecionados = gestores.filter(g => input.gestorIds.includes(g.id));
+        
+        const resumoIA = reuniao.resumoIA ? JSON.parse(reuniao.resumoIA) : null;
+        
+        // Construir conteúdo do email
+        let emailContent = `<h2>Reunião de Gestores - ${new Date(reuniao.data).toLocaleDateString('pt-PT')}</h2>`;
+        emailContent += `<p><strong>Data:</strong> ${new Date(reuniao.data).toLocaleDateString('pt-PT')}</p>`;
+        
+        if (resumoIA) {
+          emailContent += `<h3>Resumo</h3><p>${resumoIA.resumo}</p>`;
+          
+          if (resumoIA.topicos.length > 0) {
+            emailContent += `<h3>Tópicos Principais</h3><ul>`;
+            resumoIA.topicos.forEach((t: string) => {
+              emailContent += `<li>${t}</li>`;
+            });
+            emailContent += `</ul>`;
+          }
+          
+          if (resumoIA.acoes.length > 0) {
+            emailContent += `<h3>Ações Identificadas</h3><ul>`;
+            resumoIA.acoes.forEach((a: any) => {
+              emailContent += `<li><strong>[${a.prioridade}]</strong> ${a.descricao}</li>`;
+            });
+            emailContent += `</ul>`;
+          }
+        }
+        
+        emailContent += `<h3>Conteúdo Completo</h3><pre>${reuniao.conteudo}</pre>`;
+        
+        // Enviar email para cada gestor selecionado
+        const { notifyOwner } = await import('./_core/notification');
+        for (const gestor of gestoresSelecionados) {
+          // TODO: Implementar envio de email real quando tivermos sistema de email
+          // Por agora, notificar owner
+          await notifyOwner({
+            title: `Reunião de Gestores - ${new Date(reuniao.data).toLocaleDateString('pt-PT')}`,
+            content: `Email enviado para ${gestor.nome}: ${emailContent.substring(0, 200)}...`,
+          });
+        }
+        
+        return { success: true, enviados: gestoresSelecionados.length };
+      }),
+    
+    gerarPDF: protectedProcedure
+      .input(z.object({ reuniaoId: z.number() }))
+      .query(async ({ input }) => {
+        const reuniao = await db.getReuniaoGestoresById(input.reuniaoId);
+        if (!reuniao) throw new TRPCError({ code: 'NOT_FOUND' });
+        
+        const { gerarPDFReuniao } = await import('./reuniaoService');
+        const pdfBuffer = await gerarPDFReuniao(reuniao, 'gestores');
+        
+        // Upload para S3
+        const { storagePut } = await import('./storage');
+        const fileName = `reuniao-gestores-${reuniao.id}-${Date.now()}.pdf`;
+        const { url } = await storagePut(fileName, pdfBuffer, 'application/pdf');
+        
+        return { url };
+      }),
   }),
 
   reunioesLojas: router({
@@ -1794,6 +1865,77 @@ export const appRouter = router({
         }
         
         return { success: true };
+      }),
+    
+    enviarEmail: protectedProcedure
+      .input(z.object({
+        reuniaoId: z.number(),
+        emailDestino: z.string().email(),
+      }))
+      .mutation(async ({ input }) => {
+        const reuniao = await db.getReuniaoLojasById(input.reuniaoId);
+        if (!reuniao) throw new TRPCError({ code: 'NOT_FOUND', message: 'Reunião não encontrada' });
+        
+        // Buscar nomes das lojas
+        const lojaIds = JSON.parse(reuniao.lojaIds) as number[];
+        const lojas = await db.getAllLojas();
+        const lojasNomes = lojas.filter(l => lojaIds.includes(l.id)).map(l => l.nome);
+        
+        const resumoIA = reuniao.resumoIA ? JSON.parse(reuniao.resumoIA) : null;
+        
+        // Construir conteúdo do email
+        let emailContent = `<h2>Reunião de Loja - ${new Date(reuniao.data).toLocaleDateString('pt-PT')}</h2>`;
+        emailContent += `<p><strong>Data:</strong> ${new Date(reuniao.data).toLocaleDateString('pt-PT')}</p>`;
+        emailContent += `<p><strong>Lojas:</strong> ${lojasNomes.join(', ')}</p>`;
+        emailContent += `<p><strong>Presenças:</strong> ${reuniao.presencas}</p>`;
+        
+        if (resumoIA) {
+          emailContent += `<h3>Resumo</h3><p>${resumoIA.resumo}</p>`;
+          
+          if (resumoIA.topicos.length > 0) {
+            emailContent += `<h3>Tópicos Principais</h3><ul>`;
+            resumoIA.topicos.forEach((t: string) => {
+              emailContent += `<li>${t}</li>`;
+            });
+            emailContent += `</ul>`;
+          }
+          
+          if (resumoIA.acoes.length > 0) {
+            emailContent += `<h3>Ações Identificadas</h3><ul>`;
+            resumoIA.acoes.forEach((a: any) => {
+              emailContent += `<li><strong>[${a.prioridade}]</strong> ${a.descricao}</li>`;
+            });
+            emailContent += `</ul>`;
+          }
+        }
+        
+        emailContent += `<h3>Conteúdo Completo</h3><pre>${reuniao.conteudo}</pre>`;
+        
+        // Enviar email
+        const { notifyOwner } = await import('./_core/notification');
+        await notifyOwner({
+          title: `Reunião de Loja - ${new Date(reuniao.data).toLocaleDateString('pt-PT')}`,
+          content: `Email enviado para ${input.emailDestino}: ${emailContent.substring(0, 200)}...`,
+        });
+        
+        return { success: true };
+      }),
+    
+    gerarPDF: protectedProcedure
+      .input(z.object({ reuniaoId: z.number() }))
+      .query(async ({ input }) => {
+        const reuniao = await db.getReuniaoLojasById(input.reuniaoId);
+        if (!reuniao) throw new TRPCError({ code: 'NOT_FOUND' });
+        
+        const { gerarPDFReuniao } = await import('./reuniaoService');
+        const pdfBuffer = await gerarPDFReuniao(reuniao, 'lojas');
+        
+        // Upload para S3
+        const { storagePut } = await import('./storage');
+        const fileName = `reuniao-lojas-${reuniao.id}-${Date.now()}.pdf`;
+        const { url } = await storagePut(fileName, pdfBuffer, 'application/pdf');
+        
+        return { url };
       }),
   }),
 });

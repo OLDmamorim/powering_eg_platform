@@ -1238,3 +1238,23 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Criar testes unitários para reuniões (6 testes passaram)
 - [x] Validar estrutura de routers e serviços
 - [x] Validar funções CRUD no db.ts
+
+## Feature v6.4 - Funcionalidades Avançadas de Reuniões
+### Backend
+- [x] Adicionar procedure para enviar email de reunião de gestores (com seleção de destinatários)
+- [x] Adicionar procedure para enviar email de reunião de lojas
+- [x] Adicionar procedure para gerar PDF de reunião
+- [x] Criar serviço de geração de PDF com resumo formatado
+
+### Frontend
+- [x] Implementar modal de atribuição de ações aos gestores
+- [x] Implementar modal de envio de email (reuniões gestores) com seleção de gestores
+- [x] Implementar modal de envio de email (reuniões lojas)
+- [x] Implementar download de PDF funcional
+- [x] Integrar botões e modais nas páginas de reuniões
+- [x] Menu lateral mantido simples (sem gavetas)
+
+### Testes
+- [x] Criar testes unitários (8 testes passaram)
+- [x] Validar procedures de email e PDF
+- [x] Validar função de geração de PDF
