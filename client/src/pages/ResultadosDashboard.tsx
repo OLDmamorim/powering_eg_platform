@@ -24,6 +24,8 @@ export function ResultadosDashboard() {
   
   // Estado dos filtros
   const [periodoSelecionado, setPeriodoSelecionado] = useState<{ mes: number; ano: number } | null>(null);
+  const [periodoComparacao1, setPeriodoComparacao1] = useState<{ mes: number; ano: number } | null>(null);
+  const [periodoComparacao2, setPeriodoComparacao2] = useState<{ mes: number; ano: number } | null>(null);
   const [lojaSelecionada, setLojaSelecionada] = useState<number | 'minhas' | null>(null);
   
   // Definir loja padrão como "minhas" para gestores
@@ -53,6 +55,17 @@ export function ResultadosDashboard() {
   const { data: estatisticas, isLoading: loadingEstatisticas } = trpc.resultados.estatisticas.useQuery(
     { mes: periodoSelecionado?.mes || 1, ano: periodoSelecionado?.ano || 2025 },
     { enabled: !!periodoSelecionado }
+  );
+  
+  // Queries para períodos de comparação
+  const { data: estatisticasComp1, isLoading: loadingEstatisticasComp1 } = trpc.resultados.estatisticas.useQuery(
+    { mes: periodoComparacao1?.mes || 1, ano: periodoComparacao1?.ano || 2025 },
+    { enabled: !!periodoComparacao1 }
+  );
+  
+  const { data: estatisticasComp2, isLoading: loadingEstatisticasComp2 } = trpc.resultados.estatisticas.useQuery(
+    { mes: periodoComparacao2?.mes || 1, ano: periodoComparacao2?.ano || 2025 },
+    { enabled: !!periodoComparacao2 }
   );
   
   const { data: rankingCompleto, isLoading: loadingRanking } = trpc.resultados.ranking.useQuery(
@@ -161,29 +174,89 @@ export function ResultadosDashboard() {
           <CardHeader>
             <CardTitle>Filtros</CardTitle>
           </CardHeader>
-          <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Período */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Período</label>
-              <Select
-                value={periodoSelecionado ? `${periodoSelecionado.mes}-${periodoSelecionado.ano}` : undefined}
-                onValueChange={(value) => {
-                  const [mes, ano] = value.split('-').map(Number);
-                  setPeriodoSelecionado({ mes, ano });
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o período" />
-                </SelectTrigger>
-                <SelectContent>
-                  {periodos.map((p) => (
-                    <SelectItem key={`${p.mes}-${p.ano}`} value={`${p.mes}-${p.ano}`}>
-                      {p.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Período Principal */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Período Principal</label>
+                <Select
+                  value={periodoSelecionado ? `${periodoSelecionado.mes}-${periodoSelecionado.ano}` : undefined}
+                  onValueChange={(value) => {
+                    const [mes, ano] = value.split('-').map(Number);
+                    setPeriodoSelecionado({ mes, ano });
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o período" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {periodos.map((p) => (
+                      <SelectItem key={`${p.mes}-${p.ano}`} value={`${p.mes}-${p.ano}`}>
+                        {p.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              {/* Período de Comparação 1 */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Comparar com (opcional)</label>
+                <Select
+                  value={periodoComparacao1 ? `${periodoComparacao1.mes}-${periodoComparacao1.ano}` : "nenhum"}
+                  onValueChange={(value) => {
+                    if (value === "nenhum") {
+                      setPeriodoComparacao1(null);
+                    } else {
+                      const [mes, ano] = value.split('-').map(Number);
+                      setPeriodoComparacao1({ mes, ano });
+                    }
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Nenhum" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="nenhum">Nenhum</SelectItem>
+                    {periodos.map((p) => (
+                      <SelectItem key={`comp1-${p.mes}-${p.ano}`} value={`${p.mes}-${p.ano}`}>
+                        {p.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              {/* Período de Comparação 2 */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Comparar com 2 (opcional)</label>
+                <Select
+                  value={periodoComparacao2 ? `${periodoComparacao2.mes}-${periodoComparacao2.ano}` : "nenhum"}
+                  onValueChange={(value) => {
+                    if (value === "nenhum") {
+                      setPeriodoComparacao2(null);
+                    } else {
+                      const [mes, ano] = value.split('-').map(Number);
+                      setPeriodoComparacao2({ mes, ano });
+                    }
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Nenhum" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="nenhum">Nenhum</SelectItem>
+                    {periodos.map((p) => (
+                      <SelectItem key={`comp2-${p.mes}-${p.ano}`} value={`${p.mes}-${p.ano}`}>
+                        {p.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             
             {/* Loja (para gráfico de evolução) */}
             <div className="space-y-2">
@@ -246,6 +319,7 @@ export function ResultadosDashboard() {
                 </SelectContent>
               </Select>
             </div>
+            </div>
           </CardContent>
         </Card>
         
@@ -304,12 +378,156 @@ export function ResultadosDashboard() {
           </div>
         )}
         
-        {/* Cards de Estatísticas */}
-        {loadingEstatisticas ? (
+        {/* Seção de Comparação Temporal */}
+        {(periodoComparacao1 || periodoComparacao2) && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Comparação Temporal</CardTitle>
+              <CardDescription>Compare estatísticas entre diferentes períodos</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Período Principal */}
+                {estatisticas && (
+                  <div className="space-y-4">
+                    <h3 className="font-semibold text-lg border-b pb-2">
+                      {periodos.find(p => p.mes === periodoSelecionado?.mes && p.ano === periodoSelecionado?.ano)?.label || 'Período Principal'}
+                    </h3>
+                    <div className="space-y-3">
+                      <div className="bg-muted/50 p-3 rounded-lg">
+                        <p className="text-xs text-muted-foreground">Total de Lojas</p>
+                        <p className="text-2xl font-bold">{estatisticas.totalLojas}</p>
+                      </div>
+                      <div className="bg-muted/50 p-3 rounded-lg">
+                        <p className="text-xs text-muted-foreground">Total de Serviços</p>
+                        <p className="text-2xl font-bold">{estatisticas.somaServicos?.toLocaleString() || 0}</p>
+                      </div>
+                      <div className="bg-muted/50 p-3 rounded-lg">
+                        <p className="text-xs text-muted-foreground">Acima do Objetivo</p>
+                        <p className="text-2xl font-bold">{estatisticas.lojasAcimaObjetivo} / {estatisticas.totalLojas}</p>
+                      </div>
+                      <div className="bg-muted/50 p-3 rounded-lg">
+                        <p className="text-xs text-muted-foreground">Taxa Média Reparação</p>
+                        <p className="text-2xl font-bold">
+                          {estatisticas.mediaTaxaReparacao ? `${(estatisticas.mediaTaxaReparacao * 100).toFixed(1)}%` : 'N/A'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Período de Comparação 1 */}
+                {periodoComparacao1 && estatisticasComp1 && (
+                  <div className="space-y-4">
+                    <h3 className="font-semibold text-lg border-b pb-2">
+                      {periodos.find(p => p.mes === periodoComparacao1.mes && p.ano === periodoComparacao1.ano)?.label || 'Comparação 1'}
+                    </h3>
+                    <div className="space-y-3">
+                      <div className="bg-muted/50 p-3 rounded-lg">
+                        <p className="text-xs text-muted-foreground">Total de Lojas</p>
+                        <p className="text-2xl font-bold">{estatisticasComp1.totalLojas}</p>
+                        {estatisticas && (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {estatisticasComp1.totalLojas > estatisticas.totalLojas ? (
+                              <span className="text-green-600">+{estatisticasComp1.totalLojas - estatisticas.totalLojas}</span>
+                            ) : estatisticasComp1.totalLojas < estatisticas.totalLojas ? (
+                              <span className="text-red-600">{estatisticasComp1.totalLojas - estatisticas.totalLojas}</span>
+                            ) : (
+                              <span className="text-muted-foreground">Igual</span>
+                            )}
+                          </p>
+                        )}
+                      </div>
+                      <div className="bg-muted/50 p-3 rounded-lg">
+                        <p className="text-xs text-muted-foreground">Total de Serviços</p>
+                        <p className="text-2xl font-bold">{estatisticasComp1.somaServicos?.toLocaleString() || 0}</p>
+                        {estatisticas && estatisticas.somaServicos && estatisticasComp1.somaServicos && (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {estatisticasComp1.somaServicos > estatisticas.somaServicos ? (
+                              <span className="text-green-600">+{(estatisticasComp1.somaServicos - estatisticas.somaServicos).toLocaleString()}</span>
+                            ) : estatisticasComp1.somaServicos < estatisticas.somaServicos ? (
+                              <span className="text-red-600">{(estatisticasComp1.somaServicos - estatisticas.somaServicos).toLocaleString()}</span>
+                            ) : (
+                              <span className="text-muted-foreground">Igual</span>
+                            )}
+                          </p>
+                        )}
+                      </div>
+                      <div className="bg-muted/50 p-3 rounded-lg">
+                        <p className="text-xs text-muted-foreground">Acima do Objetivo</p>
+                        <p className="text-2xl font-bold">{estatisticasComp1.lojasAcimaObjetivo} / {estatisticasComp1.totalLojas}</p>
+                      </div>
+                      <div className="bg-muted/50 p-3 rounded-lg">
+                        <p className="text-xs text-muted-foreground">Taxa Média Reparação</p>
+                        <p className="text-2xl font-bold">
+                          {estatisticasComp1.mediaTaxaReparacao ? `${(estatisticasComp1.mediaTaxaReparacao * 100).toFixed(1)}%` : 'N/A'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Período de Comparação 2 */}
+                {periodoComparacao2 && estatisticasComp2 && (
+                  <div className="space-y-4">
+                    <h3 className="font-semibold text-lg border-b pb-2">
+                      {periodos.find(p => p.mes === periodoComparacao2.mes && p.ano === periodoComparacao2.ano)?.label || 'Comparação 2'}
+                    </h3>
+                    <div className="space-y-3">
+                      <div className="bg-muted/50 p-3 rounded-lg">
+                        <p className="text-xs text-muted-foreground">Total de Lojas</p>
+                        <p className="text-2xl font-bold">{estatisticasComp2.totalLojas}</p>
+                        {estatisticas && (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {estatisticasComp2.totalLojas > estatisticas.totalLojas ? (
+                              <span className="text-green-600">+{estatisticasComp2.totalLojas - estatisticas.totalLojas}</span>
+                            ) : estatisticasComp2.totalLojas < estatisticas.totalLojas ? (
+                              <span className="text-red-600">{estatisticasComp2.totalLojas - estatisticas.totalLojas}</span>
+                            ) : (
+                              <span className="text-muted-foreground">Igual</span>
+                            )}
+                          </p>
+                        )}
+                      </div>
+                      <div className="bg-muted/50 p-3 rounded-lg">
+                        <p className="text-xs text-muted-foreground">Total de Serviços</p>
+                        <p className="text-2xl font-bold">{estatisticasComp2.somaServicos?.toLocaleString() || 0}</p>
+                        {estatisticas && estatisticas.somaServicos && estatisticasComp2.somaServicos && (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {estatisticasComp2.somaServicos > estatisticas.somaServicos ? (
+                              <span className="text-green-600">+{(estatisticasComp2.somaServicos - estatisticas.somaServicos).toLocaleString()}</span>
+                            ) : estatisticasComp2.somaServicos < estatisticas.somaServicos ? (
+                              <span className="text-red-600">{(estatisticasComp2.somaServicos - estatisticas.somaServicos).toLocaleString()}</span>
+                            ) : (
+                              <span className="text-muted-foreground">Igual</span>
+                            )}
+                          </p>
+                        )}
+                      </div>
+                      <div className="bg-muted/50 p-3 rounded-lg">
+                        <p className="text-xs text-muted-foreground">Acima do Objetivo</p>
+                        <p className="text-2xl font-bold">{estatisticasComp2.lojasAcimaObjetivo} / {estatisticasComp2.totalLojas}</p>
+                      </div>
+                      <div className="bg-muted/50 p-3 rounded-lg">
+                        <p className="text-xs text-muted-foreground">Taxa Média Reparação</p>
+                        <p className="text-2xl font-bold">
+                          {estatisticasComp2.mediaTaxaReparacao ? `${(estatisticasComp2.mediaTaxaReparacao * 100).toFixed(1)}%` : 'N/A'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+        
+        {/* Cards de Estatísticas (quando não há comparação) */}
+        {!periodoComparacao1 && !periodoComparacao2 && loadingEstatisticas ? (
           <div className="flex items-center justify-center h-32">
             <Loader2 className="h-6 w-6 animate-spin" />
           </div>
-        ) : estatisticas ? (
+        ) : !periodoComparacao1 && !periodoComparacao2 && estatisticas ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Total de Lojas */}
             <Card>

@@ -1421,3 +1421,5 @@ NOTA: Sistema de email requer configuração externa no deployment
 
 - [x] Pré-selecionar "Minhas Lojas" por padrão para gestores no Dashboard de Resultados
 - [x] Adicionar badges de contagem ao lado de cada opção do filtro de lojas (ex: "Minhas Lojas (5)", "Todas as Lojas (70)")
+
+- [x] Implementar comparação temporal no Dashboard de Resultados (até 3 meses lado-a-lado)
