@@ -3338,9 +3338,22 @@ export async function getResultadosPorZona(mes: number, ano: number) {
 /**
  * Obtém estatísticas gerais de um período
  */
-export async function getEstatisticasPeriodo(mes: number, ano: number) {
+export async function getEstatisticasPeriodo(mes: number, ano: number, lojaId?: number, lojasIds?: number[]) {
   const db = await getDb();
   if (!db) return null;
+  
+  // Construir condições de filtro
+  const conditions = [
+    eq(resultadosMensais.mes, mes),
+    eq(resultadosMensais.ano, ano)
+  ];
+  
+  // Filtrar por loja específica ou lista de lojas
+  if (lojaId) {
+    conditions.push(eq(resultadosMensais.lojaId, lojaId));
+  } else if (lojasIds && lojasIds.length > 0) {
+    conditions.push(inArray(resultadosMensais.lojaId, lojasIds));
+  }
   
   const stats = await db
     .select({
@@ -3353,12 +3366,7 @@ export async function getEstatisticasPeriodo(mes: number, ano: number) {
       lojasAcimaObjetivo: sql<number>`SUM(CASE WHEN ${resultadosMensais.desvioPercentualMes} >= 0 THEN 1 ELSE 0 END)`,
     })
     .from(resultadosMensais)
-    .where(
-      and(
-        eq(resultadosMensais.mes, mes),
-        eq(resultadosMensais.ano, ano)
-      )
-    );
+    .where(and(...conditions));
 
   const result = stats[0];
   if (!result) return null;

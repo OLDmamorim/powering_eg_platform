@@ -2116,9 +2116,11 @@ export const appRouter = router({
       .input(z.object({
         mes: z.number().min(1).max(12),
         ano: z.number(),
+        lojaId: z.number().optional(),
+        lojasIds: z.array(z.number()).optional(),
       }))
       .query(async ({ input }) => {
-        return await db.getEstatisticasPeriodo(input.mes, input.ano);
+        return await db.getEstatisticasPeriodo(input.mes, input.ano, input.lojaId, input.lojasIds);
       }),
     
     // Exportar relatório Excel "Minhas Lojas"

@@ -1423,3 +1423,6 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar badges de contagem ao lado de cada opção do filtro de lojas (ex: "Minhas Lojas (5)", "Todas as Lojas (70)")
 
 - [x] Implementar comparação temporal no Dashboard de Resultados (até 3 meses lado-a-lado)
+
+- [x] Bug: Adicionar opção "Minhas Lojas" no dropdown de filtro do Dashboard de Resultados (para gestores)
+- [x] Bug: Fazer filtro de loja afetar TODOS os dados (estatísticas, ranking, zona), não apenas gráfico de evolução

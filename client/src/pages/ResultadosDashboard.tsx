@@ -51,20 +51,45 @@ export function ResultadosDashboard() {
     }
   }, [periodos, periodoSelecionado]);
   
+  // Preparar filtro de lojas
+  const lojasIdsParaFiltro = useMemo(() => {
+    if (lojaSelecionada === 'minhas' && gestorData) {
+      return lojas?.filter(l => 
+        gestorData.lojas?.some((gl: any) => gl.id === l.id)
+      ).map(l => l.id) || [];
+    }
+    return undefined;
+  }, [lojaSelecionada, gestorData, lojas]);
+  
   // Queries condicionais (apenas quando há período selecionado)
   const { data: estatisticas, isLoading: loadingEstatisticas } = trpc.resultados.estatisticas.useQuery(
-    { mes: periodoSelecionado?.mes || 1, ano: periodoSelecionado?.ano || 2025 },
+    { 
+      mes: periodoSelecionado?.mes || 1, 
+      ano: periodoSelecionado?.ano || 2025,
+      lojaId: typeof lojaSelecionada === 'number' ? lojaSelecionada : undefined,
+      lojasIds: lojasIdsParaFiltro
+    },
     { enabled: !!periodoSelecionado }
   );
   
   // Queries para períodos de comparação
   const { data: estatisticasComp1, isLoading: loadingEstatisticasComp1 } = trpc.resultados.estatisticas.useQuery(
-    { mes: periodoComparacao1?.mes || 1, ano: periodoComparacao1?.ano || 2025 },
+    { 
+      mes: periodoComparacao1?.mes || 1, 
+      ano: periodoComparacao1?.ano || 2025,
+      lojaId: typeof lojaSelecionada === 'number' ? lojaSelecionada : undefined,
+      lojasIds: lojasIdsParaFiltro
+    },
     { enabled: !!periodoComparacao1 }
   );
   
   const { data: estatisticasComp2, isLoading: loadingEstatisticasComp2 } = trpc.resultados.estatisticas.useQuery(
-    { mes: periodoComparacao2?.mes || 1, ano: periodoComparacao2?.ano || 2025 },
+    { 
+      mes: periodoComparacao2?.mes || 1, 
+      ano: periodoComparacao2?.ano || 2025,
+      lojaId: typeof lojaSelecionada === 'number' ? lojaSelecionada : undefined,
+      lojasIds: lojasIdsParaFiltro
+    },
     { enabled: !!periodoComparacao2 }
   );
   
