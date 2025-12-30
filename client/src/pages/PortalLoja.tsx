@@ -294,8 +294,12 @@ export default function PortalLoja() {
 
       {/* Stats Cards */}
       <div className="container mx-auto px-4 py-6">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-          <Card>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+          {/* Card Pendentes - Clicável */}
+          <Card 
+            className={`cursor-pointer transition-all hover:scale-105 hover:shadow-md ${activeTab === 'pendentes' ? 'ring-2 ring-amber-500 bg-amber-50 dark:bg-amber-900/30' : ''}`}
+            onClick={() => setActiveTab('pendentes')}
+          >
             <CardContent className="pt-4">
               <div className="flex items-center gap-2">
                 <AlertTriangle className="h-5 w-5 text-amber-500" />
@@ -306,21 +310,24 @@ export default function PortalLoja() {
               </div>
             </CardContent>
           </Card>
-          <Card>
+          
+          {/* Card To-Do - Clicável */}
+          <Card 
+            className={`cursor-pointer transition-all hover:scale-105 hover:shadow-md ${activeTab === 'todos' ? 'ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-900/30' : ''}`}
+            onClick={() => setActiveTab('todos')}
+          >
             <CardContent className="pt-4">
               <div className="flex items-center gap-2">
-                <Calendar className="h-5 w-5 text-blue-500" />
+                <ListTodo className="h-5 w-5 text-blue-500" />
                 <div>
-                  <p className="text-sm font-medium">
-                    {dadosLoja?.ultimaReuniao
-                      ? new Date(dadosLoja.ultimaReuniao.dataReuniao).toLocaleDateString('pt-PT')
-                      : "Nunca"}
-                  </p>
-                  <p className="text-xs text-muted-foreground">Última Reunião</p>
+                  <p className="text-2xl font-bold">{todosCount || 0}</p>
+                  <p className="text-xs text-muted-foreground">Tarefas To-Do</p>
                 </div>
               </div>
             </CardContent>
           </Card>
+          
+          {/* Card Gestor - Informativo */}
           <Card>
             <CardContent className="pt-4">
               <div className="flex items-center gap-2">
@@ -328,17 +335,6 @@ export default function PortalLoja() {
                 <div>
                   <p className="text-sm font-medium">{dadosLoja?.gestorNome || "N/A"}</p>
                   <p className="text-xs text-muted-foreground">Gestor</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-4">
-              <div className="flex items-center gap-2">
-                <FileText className="h-5 w-5 text-purple-500" />
-                <div>
-                  <p className="text-2xl font-bold">{reunioes?.length || 0}</p>
-                  <p className="text-xs text-muted-foreground">Total Reuniões</p>
                 </div>
               </div>
             </CardContent>

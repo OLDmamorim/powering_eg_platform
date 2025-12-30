@@ -1538,3 +1538,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 
 ## Melhorias To-Do v5.25
 - [x] To-Do: Destacar loja atribuída no card da tarefa (mais visível)
+
+## Melhorias Portal Loja v5.26
+- [x] Portal Loja: Criar card To-Do com contagem de tarefas pendentes
+- [x] Portal Loja: Remover cards de reuniões (Total Reuniões, Última Reunião)
+- [x] Portal Loja: Cards clicáveis como filtros
