@@ -1476,3 +1476,28 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Incluir métricas: serviços, objetivos, taxa reparação, vendas complementares
 - [x] Testar geração de relatório IA com dados de Resultados
 
+
+## Sistema de Reuniões Quinzenais para Lojas v5.24
+- [ ] Adicionar role 'loja' ao schema de users
+- [ ] Criar tabela de reuniões quinzenais (reunioes_lojas)
+- [ ] Criar tabela de pendentes de loja (pendentes_loja)
+- [ ] Sistema de autenticação para lojas via email
+- [ ] Interface de reunião para lojas (menu restrito)
+- [ ] Gestão de pendentes (marcar resolvido/pendente)
+- [ ] Histórico de reuniões anteriores
+- [ ] Vista de consulta para admin/gestor
+- [ ] Alertas de lojas sem reunião há mais de 15 dias
+- [ ] Envio automático de email ao gestor ao concluir reunião
+- [ ] Testar fluxo completo
+
+
+## Reuniões Quinzenais para Lojas (v5.23)
+- [x] Criar schema de tabelas para reuniões quinzenais
+- [x] Criar tabela de tokens de acesso para lojas
+- [x] Criar tabela de pendentes de loja
+- [x] Implementar sistema de autenticação via token
+- [x] Criar routers para reuniões quinzenais
+- [x] Criar página Portal da Loja (acesso público via token)
+- [x] Criar página de gestão de reuniões quinzenais (admin/gestor)
+- [x] Implementar envio automático de email ao concluir reunião
+- [x] Adicionar menu de Reuniões Quinzenais ao sidebar

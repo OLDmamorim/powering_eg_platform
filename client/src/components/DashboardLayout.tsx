@@ -33,7 +33,7 @@ import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { KeyboardShortcutsHelp } from "@/components/KeyboardShortcutsHelp";
 import { Button } from "./ui/button";
 
-import { Building2, ClipboardList, FileText, ListTodo, Sparkles, History, Bell, Settings, Tag, BarChart3, UserCog, CalendarDays, Store, TrendingUp, GitCompare } from "lucide-react";
+import { Building2, ClipboardList, FileText, ListTodo, Sparkles, History, Bell, Settings, Tag, BarChart3, UserCog, CalendarDays, Store, TrendingUp, GitCompare, Users2 } from "lucide-react";
 
 // Grupos de menu com cores
 type MenuGroup = {
@@ -115,6 +115,7 @@ const getMenuGroups = (userRole?: string): MenuGroup[] => {
       items: [
         { icon: CalendarDays, label: "Reuniões Gestores", path: "/reunioes-gestores", show: true, showBadge: false },
         { icon: Store, label: "Reuniões Lojas", path: "/reunioes-lojas", show: true, showBadge: false },
+        { icon: Users2, label: "Reuniões Quinzenais", path: "/reunioes-quinzenais", show: true, showBadge: false },
       ]
     },
     {

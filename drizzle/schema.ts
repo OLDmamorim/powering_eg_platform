@@ -527,3 +527,76 @@ export const vendasComplementares = mysqlTable("vendas_complementares", {
 
 export type VendaComplementar = typeof vendasComplementares.$inferSelect;
 export type InsertVendaComplementar = typeof vendasComplementares.$inferInsert;
+
+
+/**
+ * Pendentes de Loja - Pendentes criados pelo gestor/admin para a loja resolver nas reuniões quinzenais
+ */
+export const pendentesLoja = mysqlTable("pendentes_loja", {
+  id: int("id").autoincrement().primaryKey(),
+  lojaId: int("lojaId").notNull(), // FK para lojas.id
+  criadoPor: int("criadoPor").notNull(), // FK para users.id (gestor ou admin que criou)
+  descricao: text("descricao").notNull(),
+  prioridade: mysqlEnum("prioridade", ["baixa", "media", "alta", "urgente"]).default("media").notNull(),
+  estado: mysqlEnum("estado", ["pendente", "em_progresso", "resolvido"]).default("pendente").notNull(),
+  comentarioLoja: text("comentarioLoja"), // Comentário da loja sobre o pendente
+  dataResolucao: timestamp("dataResolucao"),
+  resolvidoNaReuniaoId: int("resolvidoNaReuniaoId"), // FK para reunioes_quinzenais.id (em qual reunião foi resolvido)
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type PendenteLoja = typeof pendentesLoja.$inferSelect;
+export type InsertPendenteLoja = typeof pendentesLoja.$inferInsert;
+
+/**
+ * Reuniões Quinzenais - Reuniões quinzenais realizadas pelas lojas (acesso via token)
+ */
+export const reunioesQuinzenais = mysqlTable("reunioes_quinzenais", {
+  id: int("id").autoincrement().primaryKey(),
+  lojaId: int("lojaId").notNull(), // FK para lojas.id
+  dataReuniao: timestamp("dataReuniao").notNull(),
+  
+  // Participantes
+  participantes: text("participantes").notNull(), // JSON array de nomes dos participantes
+  
+  // Conteúdo da reunião
+  temasDiscutidos: text("temasDiscutidos"), // Temas abordados na reunião
+  decisoesTomadas: text("decisoesTomadas"), // Decisões tomadas
+  observacoes: text("observacoes"), // Observações gerais
+  
+  // Análise de dados (preenchido pela loja)
+  analiseResultados: text("analiseResultados"), // Análise dos resultados do período
+  planosAcao: text("planosAcao"), // Planos de ação definidos
+  
+  // Status
+  estado: mysqlEnum("estado", ["rascunho", "concluida", "enviada"]).default("rascunho").notNull(),
+  dataEnvio: timestamp("dataEnvio"), // Quando foi enviada ao gestor
+  emailEnviadoPara: varchar("emailEnviadoPara", { length: 320 }), // Email do gestor para quem foi enviado
+  
+  // Feedback do gestor (opcional)
+  feedbackGestor: text("feedbackGestor"),
+  dataFeedback: timestamp("dataFeedback"),
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type ReuniaoQuinzenal = typeof reunioesQuinzenais.$inferSelect;
+export type InsertReuniaoQuinzenal = typeof reunioesQuinzenais.$inferInsert;
+
+/**
+ * Tokens de Acesso de Loja - Tokens para lojas acederem à plataforma via email
+ */
+export const tokensLoja = mysqlTable("tokens_loja", {
+  id: int("id").autoincrement().primaryKey(),
+  lojaId: int("lojaId").notNull().unique(), // FK para lojas.id (1 token por loja)
+  token: varchar("token", { length: 64 }).notNull().unique(), // Token único de acesso
+  ativo: boolean("ativo").default(true).notNull(),
+  ultimoAcesso: timestamp("ultimoAcesso"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type TokenLoja = typeof tokensLoja.$inferSelect;
+export type InsertTokenLoja = typeof tokensLoja.$inferInsert;

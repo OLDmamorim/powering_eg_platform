@@ -66,6 +66,15 @@ import {
   vendasComplementares,
   VendaComplementar,
   InsertVendaComplementar,
+  pendentesLoja,
+  PendenteLoja,
+  InsertPendenteLoja,
+  reunioesQuinzenais,
+  ReuniaoQuinzenal,
+  InsertReuniaoQuinzenal,
+  tokensLoja,
+  TokenLoja,
+  InsertTokenLoja,
   User
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
@@ -3704,4 +3713,552 @@ export async function temDadosComplementares(mes: number, ano: number): Promise<
     );
   
   return (result[0]?.count || 0) > 0;
+}
+
+
+// ============================================
+// SISTEMA DE REUNIÕES QUINZENAIS PARA LOJAS
+// ============================================
+
+/**
+ * Gera um token único para uma loja
+ */
+function generateToken(): string {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let token = '';
+  for (let i = 0; i < 64; i++) {
+    token += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return token;
+}
+
+/**
+ * Cria ou obtém token de acesso para uma loja
+ */
+export async function getOrCreateTokenLoja(lojaId: number): Promise<TokenLoja | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  // Verificar se já existe token
+  const existing = await db
+    .select()
+    .from(tokensLoja)
+    .where(eq(tokensLoja.lojaId, lojaId))
+    .limit(1);
+  
+  if (existing.length > 0) {
+    return existing[0];
+  }
+  
+  // Criar novo token
+  const token = generateToken();
+  await db.insert(tokensLoja).values({
+    lojaId,
+    token,
+    ativo: true,
+  });
+  
+  const newToken = await db
+    .select()
+    .from(tokensLoja)
+    .where(eq(tokensLoja.lojaId, lojaId))
+    .limit(1);
+  
+  return newToken[0] || null;
+}
+
+/**
+ * Valida token de acesso de loja e retorna dados da loja
+ */
+export async function validarTokenLoja(token: string): Promise<{ loja: Loja; tokenData: TokenLoja } | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const tokenData = await db
+    .select()
+    .from(tokensLoja)
+    .where(and(
+      eq(tokensLoja.token, token),
+      eq(tokensLoja.ativo, true)
+    ))
+    .limit(1);
+  
+  if (tokenData.length === 0) return null;
+  
+  // Atualizar último acesso
+  await db
+    .update(tokensLoja)
+    .set({ ultimoAcesso: new Date() })
+    .where(eq(tokensLoja.id, tokenData[0].id));
+  
+  // Buscar dados da loja
+  const lojaData = await db
+    .select()
+    .from(lojas)
+    .where(eq(lojas.id, tokenData[0].lojaId))
+    .limit(1);
+  
+  if (lojaData.length === 0) return null;
+  
+  return { loja: lojaData[0], tokenData: tokenData[0] };
+}
+
+/**
+ * Lista todos os tokens de loja (para admin)
+ */
+export async function listarTokensLoja(): Promise<Array<TokenLoja & { lojaNome: string; lojaEmail: string | null }>> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const result = await db
+    .select({
+      id: tokensLoja.id,
+      lojaId: tokensLoja.lojaId,
+      token: tokensLoja.token,
+      ativo: tokensLoja.ativo,
+      ultimoAcesso: tokensLoja.ultimoAcesso,
+      createdAt: tokensLoja.createdAt,
+      updatedAt: tokensLoja.updatedAt,
+      lojaNome: lojas.nome,
+      lojaEmail: lojas.email,
+    })
+    .from(tokensLoja)
+    .innerJoin(lojas, eq(tokensLoja.lojaId, lojas.id))
+    .orderBy(lojas.nome);
+  
+  return result;
+}
+
+/**
+ * Ativa/desativa token de loja
+ */
+export async function toggleTokenLoja(tokenId: number, ativo: boolean): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  
+  await db
+    .update(tokensLoja)
+    .set({ ativo })
+    .where(eq(tokensLoja.id, tokenId));
+}
+
+/**
+ * Regenera token de uma loja
+ */
+export async function regenerarTokenLoja(lojaId: number): Promise<TokenLoja | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const newToken = generateToken();
+  
+  await db
+    .update(tokensLoja)
+    .set({ token: newToken, ativo: true })
+    .where(eq(tokensLoja.lojaId, lojaId));
+  
+  const updated = await db
+    .select()
+    .from(tokensLoja)
+    .where(eq(tokensLoja.lojaId, lojaId))
+    .limit(1);
+  
+  return updated[0] || null;
+}
+
+// ============================================
+// PENDENTES DE LOJA (para reuniões quinzenais)
+// ============================================
+
+/**
+ * Cria um pendente para uma loja (criado pelo gestor/admin)
+ */
+export async function criarPendenteLoja(data: InsertPendenteLoja): Promise<PendenteLoja | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  await db.insert(pendentesLoja).values(data);
+  
+  const created = await db
+    .select()
+    .from(pendentesLoja)
+    .where(eq(pendentesLoja.lojaId, data.lojaId))
+    .orderBy(desc(pendentesLoja.id))
+    .limit(1);
+  
+  return created[0] || null;
+}
+
+/**
+ * Lista pendentes de uma loja
+ */
+export async function listarPendentesLoja(lojaId: number, apenasAtivos: boolean = false): Promise<Array<PendenteLoja & { criadoPorNome: string | null }>> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const conditions = [eq(pendentesLoja.lojaId, lojaId)];
+  if (apenasAtivos) {
+    conditions.push(
+      or(
+        eq(pendentesLoja.estado, 'pendente'),
+        eq(pendentesLoja.estado, 'em_progresso')
+      )!
+    );
+  }
+  
+  const result = await db
+    .select({
+      id: pendentesLoja.id,
+      lojaId: pendentesLoja.lojaId,
+      criadoPor: pendentesLoja.criadoPor,
+      descricao: pendentesLoja.descricao,
+      prioridade: pendentesLoja.prioridade,
+      estado: pendentesLoja.estado,
+      comentarioLoja: pendentesLoja.comentarioLoja,
+      dataResolucao: pendentesLoja.dataResolucao,
+      resolvidoNaReuniaoId: pendentesLoja.resolvidoNaReuniaoId,
+      createdAt: pendentesLoja.createdAt,
+      updatedAt: pendentesLoja.updatedAt,
+      criadoPorNome: users.name,
+    })
+    .from(pendentesLoja)
+    .leftJoin(users, eq(pendentesLoja.criadoPor, users.id))
+    .where(and(...conditions))
+    .orderBy(desc(pendentesLoja.createdAt));
+  
+  return result;
+}
+
+/**
+ * Atualiza estado de um pendente de loja (pela loja)
+ */
+export async function atualizarPendenteLoja(
+  pendenteId: number,
+  estado: 'pendente' | 'em_progresso' | 'resolvido',
+  comentarioLoja?: string,
+  reuniaoId?: number
+): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  
+  const updateData: Partial<PendenteLoja> = {
+    estado,
+    comentarioLoja,
+  };
+  
+  if (estado === 'resolvido') {
+    updateData.dataResolucao = new Date();
+    if (reuniaoId) {
+      updateData.resolvidoNaReuniaoId = reuniaoId;
+    }
+  }
+  
+  await db
+    .update(pendentesLoja)
+    .set(updateData)
+    .where(eq(pendentesLoja.id, pendenteId));
+}
+
+/**
+ * Conta pendentes ativos por loja (para dashboard)
+ */
+export async function contarPendentesLojaAtivos(lojaId: number): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  
+  const result = await db
+    .select({ count: sql<number>`COUNT(*)` })
+    .from(pendentesLoja)
+    .where(and(
+      eq(pendentesLoja.lojaId, lojaId),
+      or(
+        eq(pendentesLoja.estado, 'pendente'),
+        eq(pendentesLoja.estado, 'em_progresso')
+      )
+    ));
+  
+  return result[0]?.count || 0;
+}
+
+// ============================================
+// REUNIÕES QUINZENAIS
+// ============================================
+
+/**
+ * Cria uma nova reunião quinzenal
+ */
+export async function criarReuniaoQuinzenal(data: InsertReuniaoQuinzenal): Promise<ReuniaoQuinzenal | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  await db.insert(reunioesQuinzenais).values(data);
+  
+  const created = await db
+    .select()
+    .from(reunioesQuinzenais)
+    .where(eq(reunioesQuinzenais.lojaId, data.lojaId))
+    .orderBy(desc(reunioesQuinzenais.id))
+    .limit(1);
+  
+  return created[0] || null;
+}
+
+/**
+ * Atualiza uma reunião quinzenal
+ */
+export async function atualizarReuniaoQuinzenal(
+  reuniaoId: number,
+  data: Partial<InsertReuniaoQuinzenal>
+): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  
+  await db
+    .update(reunioesQuinzenais)
+    .set(data)
+    .where(eq(reunioesQuinzenais.id, reuniaoId));
+}
+
+/**
+ * Obtém uma reunião quinzenal por ID
+ */
+export async function getReuniaoQuinzenal(reuniaoId: number): Promise<ReuniaoQuinzenal | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const result = await db
+    .select()
+    .from(reunioesQuinzenais)
+    .where(eq(reunioesQuinzenais.id, reuniaoId))
+    .limit(1);
+  
+  return result[0] || null;
+}
+
+/**
+ * Lista reuniões quinzenais de uma loja
+ */
+export async function listarReunioesQuinzenaisLoja(lojaId: number): Promise<ReuniaoQuinzenal[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db
+    .select()
+    .from(reunioesQuinzenais)
+    .where(eq(reunioesQuinzenais.lojaId, lojaId))
+    .orderBy(desc(reunioesQuinzenais.dataReuniao));
+}
+
+/**
+ * Lista todas as reuniões quinzenais (para admin/gestor)
+ */
+export async function listarTodasReunioesQuinzenais(
+  lojasIds?: number[],
+  estado?: 'rascunho' | 'concluida' | 'enviada'
+): Promise<Array<ReuniaoQuinzenal & { lojaNome: string }>> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const conditions = [];
+  
+  if (lojasIds && lojasIds.length > 0) {
+    conditions.push(inArray(reunioesQuinzenais.lojaId, lojasIds));
+  }
+  
+  if (estado) {
+    conditions.push(eq(reunioesQuinzenais.estado, estado));
+  }
+  
+  const result = await db
+    .select({
+      id: reunioesQuinzenais.id,
+      lojaId: reunioesQuinzenais.lojaId,
+      dataReuniao: reunioesQuinzenais.dataReuniao,
+      participantes: reunioesQuinzenais.participantes,
+      temasDiscutidos: reunioesQuinzenais.temasDiscutidos,
+      decisoesTomadas: reunioesQuinzenais.decisoesTomadas,
+      observacoes: reunioesQuinzenais.observacoes,
+      analiseResultados: reunioesQuinzenais.analiseResultados,
+      planosAcao: reunioesQuinzenais.planosAcao,
+      estado: reunioesQuinzenais.estado,
+      dataEnvio: reunioesQuinzenais.dataEnvio,
+      emailEnviadoPara: reunioesQuinzenais.emailEnviadoPara,
+      feedbackGestor: reunioesQuinzenais.feedbackGestor,
+      dataFeedback: reunioesQuinzenais.dataFeedback,
+      createdAt: reunioesQuinzenais.createdAt,
+      updatedAt: reunioesQuinzenais.updatedAt,
+      lojaNome: lojas.nome,
+    })
+    .from(reunioesQuinzenais)
+    .innerJoin(lojas, eq(reunioesQuinzenais.lojaId, lojas.id))
+    .where(conditions.length > 0 ? and(...conditions) : undefined)
+    .orderBy(desc(reunioesQuinzenais.dataReuniao));
+  
+  return result;
+}
+
+/**
+ * Obtém a última reunião quinzenal de uma loja
+ */
+export async function getUltimaReuniaoQuinzenal(lojaId: number): Promise<ReuniaoQuinzenal | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const result = await db
+    .select()
+    .from(reunioesQuinzenais)
+    .where(eq(reunioesQuinzenais.lojaId, lojaId))
+    .orderBy(desc(reunioesQuinzenais.dataReuniao))
+    .limit(1);
+  
+  return result[0] || null;
+}
+
+/**
+ * Verifica lojas sem reunião há mais de X dias
+ */
+export async function getLojasAtrasadasReuniao(diasLimite: number = 15): Promise<Array<{ loja: Loja; ultimaReuniao: Date | null; diasSemReuniao: number }>> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const dataLimite = new Date();
+  dataLimite.setDate(dataLimite.getDate() - diasLimite);
+  
+  // Buscar todas as lojas
+  const todasLojas = await db.select().from(lojas);
+  
+  const resultado = [];
+  
+  for (const loja of todasLojas) {
+    const ultimaReuniao = await getUltimaReuniaoQuinzenal(loja.id);
+    
+    const diasSemReuniao = ultimaReuniao
+      ? Math.floor((Date.now() - new Date(ultimaReuniao.dataReuniao).getTime()) / (1000 * 60 * 60 * 24))
+      : 999; // Se nunca teve reunião
+    
+    if (diasSemReuniao > diasLimite) {
+      resultado.push({
+        loja,
+        ultimaReuniao: ultimaReuniao?.dataReuniao || null,
+        diasSemReuniao,
+      });
+    }
+  }
+  
+  return resultado.sort((a, b) => b.diasSemReuniao - a.diasSemReuniao);
+}
+
+/**
+ * Adiciona feedback do gestor a uma reunião
+ */
+export async function adicionarFeedbackReuniao(
+  reuniaoId: number,
+  feedback: string
+): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  
+  await db
+    .update(reunioesQuinzenais)
+    .set({
+      feedbackGestor: feedback,
+      dataFeedback: new Date(),
+    })
+    .where(eq(reunioesQuinzenais.id, reuniaoId));
+}
+
+/**
+ * Obtém o gestor responsável por uma loja
+ */
+export async function getGestorDaLoja(lojaId: number): Promise<{ gestorId: number; userId: number; nome: string | null; email: string | null } | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const result = await db
+    .select({
+      gestorId: gestores.id,
+      userId: gestores.userId,
+      nome: users.name,
+      email: users.email,
+    })
+    .from(gestorLojas)
+    .innerJoin(gestores, eq(gestorLojas.gestorId, gestores.id))
+    .innerJoin(users, eq(gestores.userId, users.id))
+    .where(eq(gestorLojas.lojaId, lojaId))
+    .limit(1);
+  
+  return result[0] || null;
+}
+
+/**
+ * Marca reunião como enviada
+ */
+export async function marcarReuniaoEnviada(
+  reuniaoId: number,
+  emailGestor: string
+): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  
+  await db
+    .update(reunioesQuinzenais)
+    .set({
+      estado: 'enviada',
+      dataEnvio: new Date(),
+      emailEnviadoPara: emailGestor,
+    })
+    .where(eq(reunioesQuinzenais.id, reuniaoId));
+}
+
+/**
+ * Estatísticas de reuniões quinzenais (para dashboard admin)
+ */
+export async function getEstatisticasReunioesQuinzenais(): Promise<{
+  totalReunioesEsteMes: number;
+  lojasComReuniao: number;
+  lojasSemReuniao: number;
+  mediaParticipantes: number;
+  reunioesPendentes: number;
+}> {
+  const db = await getDb();
+  if (!db) return {
+    totalReunioesEsteMes: 0,
+    lojasComReuniao: 0,
+    lojasSemReuniao: 0,
+    mediaParticipantes: 0,
+    reunioesPendentes: 0,
+  };
+  
+  const agora = new Date();
+  const inicioMes = new Date(agora.getFullYear(), agora.getMonth(), 1);
+  
+  // Total de reuniões este mês
+  const reunioesMes = await db
+    .select({ count: sql<number>`COUNT(*)` })
+    .from(reunioesQuinzenais)
+    .where(gte(reunioesQuinzenais.dataReuniao, inicioMes));
+  
+  // Lojas distintas com reunião este mês
+  const lojasComReuniao = await db
+    .select({ count: sql<number>`COUNT(DISTINCT ${reunioesQuinzenais.lojaId})` })
+    .from(reunioesQuinzenais)
+    .where(gte(reunioesQuinzenais.dataReuniao, inicioMes));
+  
+  // Total de lojas
+  const totalLojas = await db
+    .select({ count: sql<number>`COUNT(*)` })
+    .from(lojas);
+  
+  // Reuniões em rascunho (pendentes de conclusão)
+  const reunioesPendentes = await db
+    .select({ count: sql<number>`COUNT(*)` })
+    .from(reunioesQuinzenais)
+    .where(eq(reunioesQuinzenais.estado, 'rascunho'));
+  
+  return {
+    totalReunioesEsteMes: reunioesMes[0]?.count || 0,
+    lojasComReuniao: lojasComReuniao[0]?.count || 0,
+    lojasSemReuniao: (totalLojas[0]?.count || 0) - (lojasComReuniao[0]?.count || 0),
+    mediaParticipantes: 0, // TODO: calcular média
+    reunioesPendentes: reunioesPendentes[0]?.count || 0,
+  };
 }

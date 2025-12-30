@@ -2314,6 +2314,472 @@ export const appRouter = router({
       
       return { url, fileKey };
     }),
+
+  // ==================== REUNIÕES QUINZENAIS (LOJAS) ====================
+  reunioesQuinzenais: router({
+    // Autenticar loja via token
+    autenticarLoja: publicProcedure
+      .input(z.object({ token: z.string() }))
+      .mutation(async ({ input }) => {
+        const result = await db.validarTokenLoja(input.token);
+        if (!result) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido ou inativo' });
+        }
+        return {
+          lojaId: result.loja.id,
+          lojaNome: result.loja.nome,
+          lojaEmail: result.loja.email,
+        };
+      }),
+    
+    // Listar pendentes da loja (para a loja ver)
+    listarPendentes: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        apenasAtivos: z.boolean().optional(),
+      }))
+      .query(async ({ input }) => {
+        const auth = await db.validarTokenLoja(input.token);
+        if (!auth) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        return await db.listarPendentesLoja(auth.loja.id, input.apenasAtivos ?? true);
+      }),
+    
+    // Atualizar estado de pendente (pela loja)
+    atualizarPendente: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        pendenteId: z.number(),
+        estado: z.enum(['pendente', 'em_progresso', 'resolvido']),
+        comentario: z.string().optional(),
+        reuniaoId: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const auth = await db.validarTokenLoja(input.token);
+        if (!auth) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        await db.atualizarPendenteLoja(input.pendenteId, input.estado, input.comentario, input.reuniaoId);
+        return { success: true };
+      }),
+    
+    // Criar nova reunião quinzenal
+    criarReuniao: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        dataReuniao: z.string(),
+        participantes: z.array(z.string()),
+      }))
+      .mutation(async ({ input }) => {
+        const auth = await db.validarTokenLoja(input.token);
+        if (!auth) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        return await db.criarReuniaoQuinzenal({
+          lojaId: auth.loja.id,
+          dataReuniao: new Date(input.dataReuniao),
+          participantes: JSON.stringify(input.participantes),
+          estado: 'rascunho',
+        });
+      }),
+    
+    // Atualizar reunião quinzenal
+    atualizarReuniao: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        reuniaoId: z.number(),
+        temasDiscutidos: z.string().optional(),
+        decisoesTomadas: z.string().optional(),
+        observacoes: z.string().optional(),
+        analiseResultados: z.string().optional(),
+        planosAcao: z.string().optional(),
+        participantes: z.array(z.string()).optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const auth = await db.validarTokenLoja(input.token);
+        if (!auth) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        const { token, reuniaoId, participantes, ...data } = input;
+        const updateData: Record<string, unknown> = { ...data };
+        if (participantes) {
+          updateData.participantes = JSON.stringify(participantes);
+        }
+        await db.atualizarReuniaoQuinzenal(reuniaoId, updateData);
+        return { success: true };
+      }),
+    
+    // Concluir e enviar reunião ao gestor
+    concluirReuniao: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        reuniaoId: z.number(),
+      }))
+      .mutation(async ({ input }) => {
+        const auth = await db.validarTokenLoja(input.token);
+        if (!auth) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        
+        // Buscar gestor da loja
+        const gestor = await db.getGestorDaLoja(auth.loja.id);
+        if (!gestor || !gestor.email) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Gestor não encontrado ou sem email' });
+        }
+        
+        // Buscar dados da reunião
+        const reuniao = await db.getReuniaoQuinzenal(input.reuniaoId);
+        if (!reuniao) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Reunião não encontrada' });
+        }
+        
+        // Buscar pendentes resolvidos nesta reunião
+        const pendentes = await db.listarPendentesLoja(auth.loja.id, false);
+        
+        // Gerar HTML do email
+        const participantes = JSON.parse(reuniao.participantes || '[]');
+        const htmlEmail = gerarHTMLReuniaoQuinzenal({
+          lojaNome: auth.loja.nome,
+          dataReuniao: reuniao.dataReuniao,
+          participantes,
+          temasDiscutidos: reuniao.temasDiscutidos || '',
+          decisoesTomadas: reuniao.decisoesTomadas || '',
+          observacoes: reuniao.observacoes || '',
+          analiseResultados: reuniao.analiseResultados || '',
+          planosAcao: reuniao.planosAcao || '',
+          pendentes,
+        });
+        
+        // Enviar email
+        await sendEmail({
+          to: gestor.email,
+          subject: `Reunião Quinzenal - ${auth.loja.nome} - ${new Date(reuniao.dataReuniao).toLocaleDateString('pt-PT')}`,
+          html: htmlEmail,
+        });
+        
+        // Marcar reunião como enviada
+        await db.marcarReuniaoEnviada(input.reuniaoId, gestor.email);
+        
+        return { success: true, emailEnviadoPara: gestor.email };
+      }),
+    
+    // Listar reuniões da loja (histórico)
+    listarReunioesLoja: publicProcedure
+      .input(z.object({ token: z.string() }))
+      .query(async ({ input }) => {
+        const auth = await db.validarTokenLoja(input.token);
+        if (!auth) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        return await db.listarReunioesQuinzenaisLoja(auth.loja.id);
+      }),
+    
+    // Obter reunião por ID
+    getReuniao: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        reuniaoId: z.number(),
+      }))
+      .query(async ({ input }) => {
+        const auth = await db.validarTokenLoja(input.token);
+        if (!auth) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        return await db.getReuniaoQuinzenal(input.reuniaoId);
+      }),
+    
+    // Obter dados da loja para o dashboard
+    getDadosLoja: publicProcedure
+      .input(z.object({ token: z.string() }))
+      .query(async ({ input }) => {
+        const auth = await db.validarTokenLoja(input.token);
+        if (!auth) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        
+        const pendentesAtivos = await db.contarPendentesLojaAtivos(auth.loja.id);
+        const ultimaReuniao = await db.getUltimaReuniaoQuinzenal(auth.loja.id);
+        const gestor = await db.getGestorDaLoja(auth.loja.id);
+        
+        return {
+          loja: auth.loja,
+          pendentesAtivos,
+          ultimaReuniao,
+          gestorNome: gestor?.nome || null,
+        };
+      }),
+  }),
+  
+  // ==================== GESTÃO DE TOKENS DE LOJA (ADMIN) ====================
+  tokensLoja: router({
+    // Listar todos os tokens
+    listar: adminProcedure.query(async () => {
+      return await db.listarTokensLoja();
+    }),
+    
+    // Criar/obter token para uma loja
+    criarToken: adminProcedure
+      .input(z.object({ lojaId: z.number() }))
+      .mutation(async ({ input }) => {
+        return await db.getOrCreateTokenLoja(input.lojaId);
+      }),
+    
+    // Ativar/desativar token
+    toggleAtivo: adminProcedure
+      .input(z.object({
+        tokenId: z.number(),
+        ativo: z.boolean(),
+      }))
+      .mutation(async ({ input }) => {
+        await db.toggleTokenLoja(input.tokenId, input.ativo);
+        return { success: true };
+      }),
+    
+    // Regenerar token
+    regenerar: adminProcedure
+      .input(z.object({ lojaId: z.number() }))
+      .mutation(async ({ input }) => {
+        return await db.regenerarTokenLoja(input.lojaId);
+      }),
+  }),
+  
+  // ==================== PENDENTES DE LOJA (ADMIN/GESTOR) ====================
+  pendentesLoja: router({
+    // Criar pendente para uma loja
+    criar: protectedProcedure
+      .input(z.object({
+        lojaId: z.number(),
+        descricao: z.string(),
+        prioridade: z.enum(['baixa', 'media', 'alta', 'urgente']).optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        return await db.criarPendenteLoja({
+          lojaId: input.lojaId,
+          criadoPor: ctx.user.id,
+          descricao: input.descricao,
+          prioridade: input.prioridade || 'media',
+        });
+      }),
+    
+    // Listar pendentes de uma loja (para gestor/admin ver)
+    listar: protectedProcedure
+      .input(z.object({
+        lojaId: z.number(),
+        apenasAtivos: z.boolean().optional(),
+      }))
+      .query(async ({ input }) => {
+        return await db.listarPendentesLoja(input.lojaId, input.apenasAtivos);
+      }),
+    
+    // Listar todos os pendentes das lojas do gestor
+    listarTodos: gestorProcedure.query(async ({ ctx }) => {
+      if (ctx.user.role === 'admin') {
+        // Admin vê todos
+        const todasLojas = await db.getAllLojas();
+        const pendentes = [];
+        for (const loja of todasLojas) {
+          const p = await db.listarPendentesLoja(loja.id, true);
+          pendentes.push(...p.map(pend => ({ ...pend, lojaNome: loja.nome })));
+        }
+        return pendentes;
+      } else if (ctx.gestor) {
+        // Gestor vê apenas das suas lojas
+        const lojas = await db.getLojasByGestorId(ctx.gestor.id);
+        const pendentes = [];
+        for (const loja of lojas) {
+          const p = await db.listarPendentesLoja(loja.id, true);
+          pendentes.push(...p.map(pend => ({ ...pend, lojaNome: loja.nome })));
+        }
+        return pendentes;
+      }
+      return [];
+    }),
+  }),
+  
+  // ==================== CONSULTA DE REUNIÕES (ADMIN/GESTOR) ====================
+  consultaReunioes: router({
+    // Listar todas as reuniões quinzenais
+    listar: gestorProcedure
+      .input(z.object({
+        estado: z.enum(['rascunho', 'concluida', 'enviada']).optional(),
+      }).optional())
+      .query(async ({ ctx, input }) => {
+        if (ctx.user.role === 'admin') {
+          return await db.listarTodasReunioesQuinzenais(undefined, input?.estado);
+        } else if (ctx.gestor) {
+          const lojas = await db.getLojasByGestorId(ctx.gestor.id);
+          const lojasIds = lojas.map(l => l.id);
+          return await db.listarTodasReunioesQuinzenais(lojasIds, input?.estado);
+        }
+        return [];
+      }),
+    
+    // Obter reunião por ID
+    getById: gestorProcedure
+      .input(z.object({ reuniaoId: z.number() }))
+      .query(async ({ input }) => {
+        return await db.getReuniaoQuinzenal(input.reuniaoId);
+      }),
+    
+    // Adicionar feedback a uma reunião
+    adicionarFeedback: gestorProcedure
+      .input(z.object({
+        reuniaoId: z.number(),
+        feedback: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        await db.adicionarFeedbackReuniao(input.reuniaoId, input.feedback);
+        return { success: true };
+      }),
+    
+    // Lojas atrasadas (sem reunião há mais de 15 dias)
+    lojasAtrasadas: gestorProcedure
+      .input(z.object({ diasLimite: z.number().optional() }).optional())
+      .query(async ({ input }) => {
+        return await db.getLojasAtrasadasReuniao(input?.diasLimite || 15);
+      }),
+    
+    // Estatísticas de reuniões
+    estatisticas: adminProcedure.query(async () => {
+      return await db.getEstatisticasReunioesQuinzenais();
+    }),
+  }),
 });
+
+// Função auxiliar para gerar HTML do email de reunião quinzenal
+function gerarHTMLReuniaoQuinzenal(dados: {
+  lojaNome: string;
+  dataReuniao: Date;
+  participantes: string[];
+  temasDiscutidos: string;
+  decisoesTomadas: string;
+  observacoes: string;
+  analiseResultados: string;
+  planosAcao: string;
+  pendentes: Array<{ descricao: string; estado: string; comentarioLoja: string | null }>;
+}): string {
+  const dataFormatada = new Date(dados.dataReuniao).toLocaleDateString('pt-PT', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+  
+  const pendentesResolvidos = dados.pendentes.filter(p => p.estado === 'resolvido');
+  const pendentesPendentes = dados.pendentes.filter(p => p.estado !== 'resolvido');
+  
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <title>Reunião Quinzenal - ${dados.lojaNome}</title>
+      <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white; padding: 30px; border-radius: 10px 10px 0 0; text-align: center; }
+        .header h1 { margin: 0; font-size: 24px; }
+        .header p { margin: 10px 0 0; opacity: 0.9; }
+        .content { background: #f9fafb; padding: 30px; border: 1px solid #e5e7eb; }
+        .section { margin-bottom: 25px; }
+        .section-title { font-size: 16px; font-weight: 600; color: #2563eb; margin-bottom: 10px; padding-bottom: 5px; border-bottom: 2px solid #e5e7eb; }
+        .section-content { background: white; padding: 15px; border-radius: 8px; border: 1px solid #e5e7eb; }
+        .participantes { display: flex; flex-wrap: wrap; gap: 8px; }
+        .participante { background: #eff6ff; color: #2563eb; padding: 4px 12px; border-radius: 20px; font-size: 14px; }
+        .pendente { padding: 10px; margin: 5px 0; border-radius: 6px; }
+        .pendente.resolvido { background: #dcfce7; border-left: 4px solid #22c55e; }
+        .pendente.pendente-status { background: #fef3c7; border-left: 4px solid #f59e0b; }
+        .footer { background: #1f2937; color: white; padding: 20px; border-radius: 0 0 10px 10px; text-align: center; font-size: 12px; }
+        pre { white-space: pre-wrap; word-wrap: break-word; margin: 0; font-family: inherit; }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <h1>📝 Reunião Quinzenal</h1>
+        <p>${dados.lojaNome} - ${dataFormatada}</p>
+      </div>
+      
+      <div class="content">
+        <div class="section">
+          <div class="section-title">👥 Participantes</div>
+          <div class="section-content">
+            <div class="participantes">
+              ${dados.participantes.map(p => `<span class="participante">${p}</span>`).join('')}
+            </div>
+          </div>
+        </div>
+        
+        ${dados.temasDiscutidos ? `
+        <div class="section">
+          <div class="section-title">💬 Temas Discutidos</div>
+          <div class="section-content"><pre>${dados.temasDiscutidos}</pre></div>
+        </div>
+        ` : ''}
+        
+        ${dados.decisoesTomadas ? `
+        <div class="section">
+          <div class="section-title">✅ Decisões Tomadas</div>
+          <div class="section-content"><pre>${dados.decisoesTomadas}</pre></div>
+        </div>
+        ` : ''}
+        
+        ${dados.analiseResultados ? `
+        <div class="section">
+          <div class="section-title">📊 Análise de Resultados</div>
+          <div class="section-content"><pre>${dados.analiseResultados}</pre></div>
+        </div>
+        ` : ''}
+        
+        ${dados.planosAcao ? `
+        <div class="section">
+          <div class="section-title">🎯 Planos de Ação</div>
+          <div class="section-content"><pre>${dados.planosAcao}</pre></div>
+        </div>
+        ` : ''}
+        
+        ${pendentesResolvidos.length > 0 ? `
+        <div class="section">
+          <div class="section-title">✅ Pendentes Resolvidos (${pendentesResolvidos.length})</div>
+          <div class="section-content">
+            ${pendentesResolvidos.map(p => `
+              <div class="pendente resolvido">
+                <strong>${p.descricao}</strong>
+                ${p.comentarioLoja ? `<br><small>💬 ${p.comentarioLoja}</small>` : ''}
+              </div>
+            `).join('')}
+          </div>
+        </div>
+        ` : ''}
+        
+        ${pendentesPendentes.length > 0 ? `
+        <div class="section">
+          <div class="section-title">⚠️ Pendentes em Aberto (${pendentesPendentes.length})</div>
+          <div class="section-content">
+            ${pendentesPendentes.map(p => `
+              <div class="pendente pendente-status">
+                <strong>${p.descricao}</strong>
+                ${p.comentarioLoja ? `<br><small>💬 ${p.comentarioLoja}</small>` : ''}
+              </div>
+            `).join('')}
+          </div>
+        </div>
+        ` : ''}
+        
+        ${dados.observacoes ? `
+        <div class="section">
+          <div class="section-title">📝 Observações</div>
+          <div class="section-content"><pre>${dados.observacoes}</pre></div>
+        </div>
+        ` : ''}
+      </div>
+      
+      <div class="footer">
+        <p>PoweringEG Platform 2.0 - Sistema de Reuniões Quinzenais</p>
+        <p>Este email foi gerado automaticamente após a conclusão da reunião.</p>
+      </div>
+    </body>
+    </html>
+  `;
+}
 
 export type AppRouter = typeof appRouter;
