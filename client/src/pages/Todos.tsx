@@ -86,7 +86,7 @@ export default function Todos() {
   });
   
   const { data: categorias, refetch: refetchCategorias } = trpc.todoCategories.listar.useQuery();
-  const { data: lojas } = trpc.lojas.list.useQuery();
+  const { data: lojas } = trpc.lojas.getByGestor.useQuery();
   const { data: gestores } = trpc.gestores.list.useQuery();
   const { data: estatisticas } = trpc.todos.estatisticas.useQuery();
   
@@ -254,9 +254,12 @@ export default function Todos() {
           </div>
         </div>
         
-        {/* Estatísticas */}
+        {/* Estatísticas - Cards Clicáveis como Filtros */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card className="bg-gray-50 dark:bg-gray-800/50">
+          <Card 
+            className={`cursor-pointer transition-all hover:scale-105 hover:shadow-md ${filtroEstado === 'pendente' ? 'ring-2 ring-gray-500 bg-gray-100 dark:bg-gray-700' : 'bg-gray-50 dark:bg-gray-800/50'}`}
+            onClick={() => setFiltroEstado(filtroEstado === 'pendente' ? 'todos' : 'pendente')}
+          >
             <CardContent className="pt-4">
               <div className="flex items-center gap-2">
                 <AlertTriangle className="h-5 w-5 text-gray-500" />
@@ -267,7 +270,10 @@ export default function Todos() {
               </div>
             </CardContent>
           </Card>
-          <Card className="bg-blue-50 dark:bg-blue-900/20">
+          <Card 
+            className={`cursor-pointer transition-all hover:scale-105 hover:shadow-md ${filtroEstado === 'em_progresso' ? 'ring-2 ring-blue-500 bg-blue-100 dark:bg-blue-800/40' : 'bg-blue-50 dark:bg-blue-900/20'}`}
+            onClick={() => setFiltroEstado(filtroEstado === 'em_progresso' ? 'todos' : 'em_progresso')}
+          >
             <CardContent className="pt-4">
               <div className="flex items-center gap-2">
                 <Clock className="h-5 w-5 text-blue-500" />
@@ -278,7 +284,10 @@ export default function Todos() {
               </div>
             </CardContent>
           </Card>
-          <Card className="bg-green-50 dark:bg-green-900/20">
+          <Card 
+            className={`cursor-pointer transition-all hover:scale-105 hover:shadow-md ${filtroEstado === 'concluida' ? 'ring-2 ring-green-500 bg-green-100 dark:bg-green-800/40' : 'bg-green-50 dark:bg-green-900/20'}`}
+            onClick={() => setFiltroEstado(filtroEstado === 'concluida' ? 'todos' : 'concluida')}
+          >
             <CardContent className="pt-4">
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="h-5 w-5 text-green-500" />
@@ -289,7 +298,10 @@ export default function Todos() {
               </div>
             </CardContent>
           </Card>
-          <Card className="bg-orange-50 dark:bg-orange-900/20">
+          <Card 
+            className={`cursor-pointer transition-all hover:scale-105 hover:shadow-md ${filtroEstado === 'devolvida' ? 'ring-2 ring-orange-500 bg-orange-100 dark:bg-orange-800/40' : 'bg-orange-50 dark:bg-orange-900/20'}`}
+            onClick={() => setFiltroEstado(filtroEstado === 'devolvida' ? 'todos' : 'devolvida')}
+          >
             <CardContent className="pt-4">
               <div className="flex items-center gap-2">
                 <RotateCcw className="h-5 w-5 text-orange-500" />

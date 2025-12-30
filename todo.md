@@ -1531,3 +1531,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [ ] Portal Loja: Marcar como concluída ou devolver ao criador
 - [ ] Notificações: Email quando tarefa é atribuída
 - [ ] Testar fluxo completo
+
+## Melhorias To-Do v5.24
+- [x] To-Do: Cards clicáveis como filtros de estado
+- [x] To-Do: Filtro de lojas mostra apenas lojas do gestor (não todas)
