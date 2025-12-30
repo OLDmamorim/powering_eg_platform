@@ -1554,3 +1554,11 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Portal Loja: Modal de criação com título, descrição, categoria e prioridade
 - [x] Portal Loja: Tarefa criada pela loja é automaticamente atribuída ao gestor responsável
 - [x] Backend: Endpoint para loja criar tarefa (via token de acesso)
+
+## Widget PWA To-Do v5.29
+- [x] PWA: Configurar manifest.json para instalação no telemóvel
+- [x] PWA: Criar service worker para funcionamento offline
+- [x] PWA: Página widget compacta com lista de tarefas To-Do
+- [x] PWA: Botão "Adicionar ao Ecrã Inicial" no Portal da Loja
+- [x] PWA: Ícones para Android e iOS
+- [x] PWA: Atualização automática das tarefas (30 segundos)

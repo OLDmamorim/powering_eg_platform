@@ -39,6 +39,8 @@ import {
   ListTodo,
   RotateCcw,
   Tag,
+  Download,
+  Smartphone,
 } from "lucide-react";
 
 interface LojaAuth {
@@ -63,6 +65,45 @@ export default function PortalLoja() {
   const [novaTarefaCategoriaId, setNovaTarefaCategoriaId] = useState<number | undefined>(undefined);
   const [participantes, setParticipantes] = useState<string[]>([""]);
   const [reuniaoAtual, setReuniaoAtual] = useState<number | null>(null);
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [showInstallBanner, setShowInstallBanner] = useState(false);
+
+  // PWA: Capturar evento de instalação
+  useEffect(() => {
+    const handler = (e: any) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      // Mostrar banner se ainda não instalou
+      const installed = localStorage.getItem('pwa_installed');
+      if (!installed) {
+        setShowInstallBanner(true);
+      }
+    };
+    window.addEventListener('beforeinstallprompt', handler);
+    
+    // Registar service worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(console.error);
+    }
+    
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
+  const handleInstallPWA = async () => {
+    if (!deferredPrompt) {
+      // Mostrar instruções manuais
+      toast.info('Para instalar: Menu do browser > "Adicionar ao Ecrã Inicial"');
+      return;
+    }
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      localStorage.setItem('pwa_installed', 'true');
+      toast.success('App instalada com sucesso!');
+    }
+    setDeferredPrompt(null);
+    setShowInstallBanner(false);
+  };
 
   // Verificar token na URL ou localStorage
   useEffect(() => {
@@ -309,12 +350,55 @@ export default function PortalLoja() {
               <p className="text-xs text-muted-foreground">Portal de Reuniões</p>
             </div>
           </div>
-          <Button variant="ghost" size="sm" onClick={handleLogout}>
-            <LogOut className="h-4 w-4 mr-2" />
-            Sair
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleInstallPWA}
+              className="text-emerald-600 border-emerald-300 hover:bg-emerald-50"
+            >
+              <Smartphone className="h-4 w-4 mr-2" />
+              <span className="hidden sm:inline">Instalar App</span>
+            </Button>
+            <Button variant="ghost" size="sm" onClick={handleLogout}>
+              <LogOut className="h-4 w-4 mr-2" />
+              Sair
+            </Button>
+          </div>
         </div>
       </header>
+
+      {/* Banner de Instalação PWA */}
+      {showInstallBanner && (
+        <div className="bg-emerald-600 text-white px-4 py-3">
+          <div className="container mx-auto flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Download className="h-5 w-5" />
+              <div>
+                <p className="font-medium text-sm">Instale o Widget de Tarefas</p>
+                <p className="text-xs text-emerald-100">Acesso rápido às suas tarefas no ecrã inicial</p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button 
+                size="sm" 
+                variant="secondary"
+                onClick={handleInstallPWA}
+              >
+                Instalar
+              </Button>
+              <Button 
+                size="sm" 
+                variant="ghost"
+                className="text-white hover:bg-emerald-700"
+                onClick={() => setShowInstallBanner(false)}
+              >
+                Depois
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Stats Cards */}
       <div className="container mx-auto px-4 py-6">

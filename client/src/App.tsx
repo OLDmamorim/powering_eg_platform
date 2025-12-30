@@ -31,6 +31,7 @@ import ResultadosUpload from "./pages/ResultadosUpload";
 import { ResultadosDashboard } from "./pages/ResultadosDashboard";
 import { ComparacaoLojas } from "./pages/ComparacaoLojas";
 import PortalLoja from "./pages/PortalLoja";
+import PortalLojaWidget from "./pages/PortalLojaWidget";
 import ReunioesQuinzenais from "./pages/ReunioesQuinzenais";
 import Todos from "./pages/Todos";
 
@@ -80,6 +81,7 @@ function Router() {
       
       {/* Portal da Loja (acesso público via token) */}
       <Route path={"/portal-loja"} component={PortalLoja} />
+      <Route path={"/portal-loja/widget"} component={PortalLojaWidget} />
       
       <Route path={"/login-nao-autorizado"} component={LoginNaoAutorizado} />
       <Route path={"/404"} component={NotFound} />
