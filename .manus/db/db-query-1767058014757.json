@@ -1,0 +1,18 @@
+{
+  "query": "SELECT id, nome FROM lojas WHERE nome LIKE '%Braga%' OR nome LIKE '%minho%'",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT id, nome FROM lojas WHERE nome LIKE '%Braga%' OR nome LIKE '%minho%'",
+  "rows": [
+    {
+      "id": "180010",
+      "nome": "Braga - minho center"
+    },
+    {
+      "id": "180011",
+      "nome": "Braga sm"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tnome\n180010\tBraga - minho center\n180011\tBraga sm\n",
+  "stderr": "",
+  "execution_time_ms": 1511
+}

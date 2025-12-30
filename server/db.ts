@@ -3889,15 +3889,32 @@ export async function criarPendenteLoja(data: InsertPendenteLoja): Promise<Pende
 }
 
 /**
- * Lista pendentes de uma loja
+ * Lista pendentes de uma loja (inclui tabela antiga e nova)
  */
-export async function listarPendentesLoja(lojaId: number, apenasAtivos: boolean = false): Promise<Array<PendenteLoja & { criadoPorNome: string | null }>> {
+export async function listarPendentesLoja(lojaId: number, apenasAtivos: boolean = false): Promise<Array<{
+  id: number;
+  lojaId: number;
+  criadoPor: number | null;
+  descricao: string;
+  prioridade: string;
+  estado: string;
+  comentarioLoja: string | null;
+  dataResolucao: Date | null;
+  resolvidoNaReuniaoId: number | null;
+  createdAt: Date;
+  updatedAt: Date;
+  criadoPorNome: string | null;
+  tipoRelatorio: string | null;
+  relatorioId: number | null;
+  origem: 'novo' | 'antigo';
+}>> {
   const db = await getDb();
   if (!db) return [];
   
-  const conditions = [eq(pendentesLoja.lojaId, lojaId)];
+  // Buscar pendentes da tabela nova (pendentesLoja)
+  const conditionsNova = [eq(pendentesLoja.lojaId, lojaId)];
   if (apenasAtivos) {
-    conditions.push(
+    conditionsNova.push(
       or(
         eq(pendentesLoja.estado, 'pendente'),
         eq(pendentesLoja.estado, 'em_progresso')
@@ -3905,7 +3922,7 @@ export async function listarPendentesLoja(lojaId: number, apenasAtivos: boolean 
     );
   }
   
-  const result = await db
+  const resultNova = await db
     .select({
       id: pendentesLoja.id,
       lojaId: pendentesLoja.lojaId,
@@ -3922,10 +3939,62 @@ export async function listarPendentesLoja(lojaId: number, apenasAtivos: boolean 
     })
     .from(pendentesLoja)
     .leftJoin(users, eq(pendentesLoja.criadoPor, users.id))
-    .where(and(...conditions))
+    .where(and(...conditionsNova))
     .orderBy(desc(pendentesLoja.createdAt));
   
-  return result;
+  // Buscar pendentes da tabela antiga (pendentes)
+  const conditionsAntiga = [eq(pendentes.lojaId, lojaId)];
+  if (apenasAtivos) {
+    conditionsAntiga.push(eq(pendentes.resolvido, false));
+  }
+  
+  const resultAntiga = await db
+    .select({
+      id: pendentes.id,
+      lojaId: pendentes.lojaId,
+      descricao: pendentes.descricao,
+      resolvido: pendentes.resolvido,
+      dataResolucao: pendentes.dataResolucao,
+      createdAt: pendentes.createdAt,
+      updatedAt: pendentes.updatedAt,
+      tipoRelatorio: pendentes.tipoRelatorio,
+      relatorioId: pendentes.relatorioId,
+      dataLimite: pendentes.dataLimite,
+    })
+    .from(pendentes)
+    .where(and(...conditionsAntiga))
+    .orderBy(desc(pendentes.createdAt));
+  
+  // Combinar resultados
+  const pendentesNovos = resultNova.map(p => ({
+    ...p,
+    tipoRelatorio: null,
+    relatorioId: null,
+    origem: 'novo' as const,
+  }));
+  
+  const pendentesAntigos = resultAntiga.map(p => ({
+    id: p.id,
+    lojaId: p.lojaId,
+    criadoPor: null,
+    descricao: p.descricao,
+    prioridade: 'media',
+    estado: p.resolvido ? 'resolvido' : 'pendente',
+    comentarioLoja: null,
+    dataResolucao: p.dataResolucao,
+    resolvidoNaReuniaoId: null,
+    createdAt: p.createdAt,
+    updatedAt: p.updatedAt,
+    criadoPorNome: null,
+    tipoRelatorio: p.tipoRelatorio,
+    relatorioId: p.relatorioId,
+    origem: 'antigo' as const,
+  }));
+  
+  // Ordenar por data de criação (mais recentes primeiro)
+  return [...pendentesNovos, ...pendentesAntigos].sort((a, b) => 
+    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
 }
 
 /**
@@ -3960,12 +4029,14 @@ export async function atualizarPendenteLoja(
 
 /**
  * Conta pendentes ativos por loja (para dashboard)
+ * Inclui pendentes da tabela antiga (pendentes) e da nova (pendentesLoja)
  */
 export async function contarPendentesLojaAtivos(lojaId: number): Promise<number> {
   const db = await getDb();
   if (!db) return 0;
   
-  const result = await db
+  // Contar pendentes da tabela nova (pendentesLoja)
+  const resultNova = await db
     .select({ count: sql<number>`COUNT(*)` })
     .from(pendentesLoja)
     .where(and(
@@ -3976,7 +4047,16 @@ export async function contarPendentesLojaAtivos(lojaId: number): Promise<number>
       )
     ));
   
-  return result[0]?.count || 0;
+  // Contar pendentes da tabela antiga (pendentes) - não resolvidos
+  const resultAntiga = await db
+    .select({ count: sql<number>`COUNT(*)` })
+    .from(pendentes)
+    .where(and(
+      eq(pendentes.lojaId, lojaId),
+      eq(pendentes.resolvido, false)
+    ));
+  
+  return (resultNova[0]?.count || 0) + (resultAntiga[0]?.count || 0);
 }
 
 // ============================================

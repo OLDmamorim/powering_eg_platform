@@ -1515,3 +1515,4 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Permitir gestores editarem email das suas lojas (não só admin)
 - [x] Mostrar todas as lojas do gestor na tab Tokens (mesmo sem token)
 - [x] Permitir gestores criarem tokens para suas lojas
+- [x] Bug: Pendentes não aparecem no Portal da Loja (mostra 0 quando existem pendentes)
