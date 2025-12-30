@@ -83,10 +83,7 @@ export default function ReunioesQuinzenais() {
     { enabled: isAdmin }
   );
 
-  const { data: tokens, refetch: refetchTokens } = trpc.tokensLoja.listar.useQuery(
-    undefined,
-    { enabled: isAdmin }
-  );
+  const { data: tokens, refetch: refetchTokens } = trpc.tokensLoja.listar.useQuery();
 
   const { data: lojas } = trpc.lojas.list.useQuery();
 
@@ -118,6 +115,13 @@ export default function ReunioesQuinzenais() {
     onSuccess: () => {
       toast.success("Token regenerado!");
       refetchTokens();
+    },
+    onError: (error) => toast.error(error.message),
+  });
+
+  const enviarEmailTokenMutation = trpc.tokensLoja.enviarEmail.useMutation({
+    onSuccess: (data) => {
+      toast.success(`Email enviado com sucesso para ${data.email}!`);
     },
     onError: (error) => toast.error(error.message),
   });
@@ -341,12 +345,10 @@ export default function ReunioesQuinzenais() {
                 <Badge variant="destructive" className="ml-2">{pendentesTodos.length}</Badge>
               )}
             </TabsTrigger>
-            {isAdmin && (
-              <TabsTrigger value="tokens">
-                <Key className="h-4 w-4 mr-2" />
-                Tokens de Acesso
-              </TabsTrigger>
-            )}
+            <TabsTrigger value="tokens">
+              <Key className="h-4 w-4 mr-2" />
+              Tokens de Acesso
+            </TabsTrigger>
             {isAdmin && lojasAtrasadas && lojasAtrasadas.length > 0 && (
               <TabsTrigger value="atrasadas">
                 <AlertTriangle className="h-4 w-4 mr-2" />
@@ -639,126 +641,169 @@ export default function ReunioesQuinzenais() {
             )}
           </TabsContent>
 
-          {/* Tab: Tokens (Admin) */}
-          {isAdmin && (
-            <TabsContent value="tokens" className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Tokens de Acesso das Lojas</CardTitle>
-                  <CardDescription>
-                    Gere tokens de acesso para as lojas acederem ao portal de reuniões
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Loja</TableHead>
-                        <TableHead>Token</TableHead>
-                        <TableHead>Estado</TableHead>
-                        <TableHead>Último Acesso</TableHead>
-                        <TableHead className="text-right">Ações</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {lojas?.map((loja) => {
-                        const tokenData = tokens?.find(t => t.lojaId === loja.id);
-                        return (
-                          <TableRow key={loja.id}>
-                            <TableCell className="font-medium">
-                              <div className="flex items-center gap-2">
-                                <Store className="h-4 w-4 text-muted-foreground" />
-                                {loja.nome}
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              {tokenData ? (
+          {/* Tab: Tokens (Admin/Gestor) */}
+          <TabsContent value="tokens" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Tokens de Acesso das Lojas</CardTitle>
+                <CardDescription>
+                  Gere tokens de acesso para as lojas acederem ao portal de reuniões.
+                  {!isAdmin && " Apenas as lojas atribuídas a si são mostradas."}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {/* Mostrar lojas do gestor ou todas para admin */}
+                {(() => {
+                  // Para gestor, filtrar apenas lojas que têm token associado
+                  const lojasParaMostrar = isAdmin 
+                    ? lojas 
+                    : tokens?.map(t => ({ id: t.lojaId, nome: t.lojaNome, email: t.lojaEmail }));
+                  
+                  if (!lojasParaMostrar || lojasParaMostrar.length === 0) {
+                    return (
+                      <div className="text-center py-8 text-muted-foreground">
+                        <Key className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                        <p>Nenhuma loja com token encontrada.</p>
+                        {!isAdmin && <p className="text-sm mt-2">Contacte o administrador para criar tokens para as suas lojas.</p>}
+                      </div>
+                    );
+                  }
+                  
+                  return (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Loja</TableHead>
+                          <TableHead>Email</TableHead>
+                          <TableHead>Token</TableHead>
+                          <TableHead>Estado</TableHead>
+                          <TableHead>Último Acesso</TableHead>
+                          <TableHead className="text-right">Ações</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {lojasParaMostrar?.map((loja) => {
+                          const tokenData = tokens?.find(t => t.lojaId === loja.id);
+                          return (
+                            <TableRow key={loja.id}>
+                              <TableCell className="font-medium">
                                 <div className="flex items-center gap-2">
-                                  <code className="text-xs bg-muted px-2 py-1 rounded">
-                                    {tokenData.token.substring(0, 12)}...
-                                  </code>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-6 w-6"
-                                    onClick={() => copyToClipboard(getPortalUrl(tokenData.token))}
-                                  >
-                                    <Copy className="h-3 w-3" />
-                                  </Button>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-6 w-6"
-                                    onClick={() => window.open(getPortalUrl(tokenData.token), '_blank')}
-                                  >
-                                    <ExternalLink className="h-3 w-3" />
-                                  </Button>
+                                  <Store className="h-4 w-4 text-muted-foreground" />
+                                  {loja.nome}
                                 </div>
-                              ) : (
-                                <span className="text-muted-foreground text-sm">Sem token</span>
-                              )}
-                            </TableCell>
-                            <TableCell>
-                              {tokenData ? (
-                                <Badge className={tokenData.ativo ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}>
-                                  {tokenData.ativo ? "Ativo" : "Inativo"}
-                                </Badge>
-                              ) : (
-                                "-"
-                              )}
-                            </TableCell>
-                            <TableCell className="text-sm text-muted-foreground">
-                              {tokenData?.ultimoAcesso
-                                ? new Date(tokenData.ultimoAcesso).toLocaleDateString('pt-PT')
-                                : "-"}
-                            </TableCell>
-                            <TableCell className="text-right">
-                              {tokenData ? (
-                                <div className="flex justify-end gap-2">
+                              </TableCell>
+                              <TableCell className="text-sm text-muted-foreground">
+                                {loja.email || <span className="text-amber-600">Sem email</span>}
+                              </TableCell>
+                              <TableCell>
+                                {tokenData ? (
+                                  <div className="flex items-center gap-2">
+                                    <code className="text-xs bg-muted px-2 py-1 rounded">
+                                      {tokenData.token.substring(0, 12)}...
+                                    </code>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-6 w-6"
+                                      onClick={() => copyToClipboard(getPortalUrl(tokenData.token))}
+                                      title="Copiar link"
+                                    >
+                                      <Copy className="h-3 w-3" />
+                                    </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-6 w-6"
+                                      onClick={() => window.open(getPortalUrl(tokenData.token), '_blank')}
+                                      title="Abrir portal"
+                                    >
+                                      <ExternalLink className="h-3 w-3" />
+                                    </Button>
+                                  </div>
+                                ) : (
+                                  <span className="text-muted-foreground text-sm">Sem token</span>
+                                )}
+                              </TableCell>
+                              <TableCell>
+                                {tokenData ? (
+                                  <Badge className={tokenData.ativo ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}>
+                                    {tokenData.ativo ? "Ativo" : "Inativo"}
+                                  </Badge>
+                                ) : (
+                                  "-"
+                                )}
+                              </TableCell>
+                              <TableCell className="text-sm text-muted-foreground">
+                                {tokenData?.ultimoAcesso
+                                  ? new Date(tokenData.ultimoAcesso).toLocaleDateString('pt-PT')
+                                  : "-"}
+                              </TableCell>
+                              <TableCell className="text-right">
+                                {tokenData ? (
+                                  <div className="flex justify-end gap-2">
+                                    {/* Botão Enviar Email */}
+                                    <Button
+                                      variant="default"
+                                      size="sm"
+                                      onClick={() => enviarEmailTokenMutation.mutate({ lojaId: loja.id })}
+                                      disabled={!loja.email || enviarEmailTokenMutation.isPending}
+                                      title={loja.email ? "Enviar token por email" : "Loja sem email configurado"}
+                                    >
+                                      {enviarEmailTokenMutation.isPending ? (
+                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                      ) : (
+                                        <>
+                                          <Send className="h-4 w-4 mr-2" />
+                                          Enviar Email
+                                        </>
+                                      )}
+                                    </Button>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => toggleTokenMutation.mutate({
+                                        tokenId: tokenData.id,
+                                        ativo: !tokenData.ativo,
+                                      })}
+                                    >
+                                      {tokenData.ativo ? "Desativar" : "Ativar"}
+                                    </Button>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => regenerarTokenMutation.mutate({ lojaId: loja.id })}
+                                      title="Regenerar token"
+                                    >
+                                      <RefreshCw className="h-4 w-4" />
+                                    </Button>
+                                  </div>
+                                ) : (
                                   <Button
-                                    variant="outline"
                                     size="sm"
-                                    onClick={() => toggleTokenMutation.mutate({
-                                      tokenId: tokenData.id,
-                                      ativo: !tokenData.ativo,
-                                    })}
+                                    onClick={() => criarTokenMutation.mutate({ lojaId: loja.id })}
+                                    disabled={criarTokenMutation.isPending}
                                   >
-                                    {tokenData.ativo ? "Desativar" : "Ativar"}
+                                    {criarTokenMutation.isPending ? (
+                                      <Loader2 className="h-4 w-4 animate-spin" />
+                                    ) : (
+                                      <>
+                                        <Key className="h-4 w-4 mr-2" />
+                                        Criar Token
+                                      </>
+                                    )}
                                   </Button>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => regenerarTokenMutation.mutate({ lojaId: loja.id })}
-                                  >
-                                    <RefreshCw className="h-4 w-4" />
-                                  </Button>
-                                </div>
-                              ) : (
-                                <Button
-                                  size="sm"
-                                  onClick={() => criarTokenMutation.mutate({ lojaId: loja.id })}
-                                  disabled={criarTokenMutation.isPending}
-                                >
-                                  {criarTokenMutation.isPending ? (
-                                    <Loader2 className="h-4 w-4 animate-spin" />
-                                  ) : (
-                                    <>
-                                      <Key className="h-4 w-4 mr-2" />
-                                      Criar Token
-                                    </>
-                                  )}
-                                </Button>
-                              )}
-                            </TableCell>
-                          </TableRow>
-                        );
-                      })}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          )}
+                                )}
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                      </TableBody>
+                    </Table>
+                  );
+                })()}
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           {/* Tab: Lojas Atrasadas (Admin) */}
           {isAdmin && lojasAtrasadas && lojasAtrasadas.length > 0 && (

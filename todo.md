@@ -1501,3 +1501,12 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Criar página de gestão de reuniões quinzenais (admin/gestor)
 - [x] Implementar envio automático de email ao concluir reunião
 - [x] Adicionar menu de Reuniões Quinzenais ao sidebar
+
+## Tokens de Acesso para Lojas (v5.24)
+- [x] Criar tabela tokens_acesso_lojas no schema (já existia)
+- [x] Implementar funções CRUD de tokens no db.ts (já existia + listarTokensLojaByGestor)
+- [x] Criar router tokensLoja com endpoints (atualizado para gestores)
+- [x] Adicionar separador "Tokens de Acesso" na página Reuniões Quinzenais
+- [x] Interface para criar/listar/ativar/desativar tokens
+- [x] Botão "Enviar por Email" que envia token para email da loja
+- [x] Gestores só veem tokens das suas lojas, admin vê todos

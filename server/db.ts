@@ -4262,3 +4262,37 @@ export async function getEstatisticasReunioesQuinzenais(): Promise<{
     reunioesPendentes: reunioesPendentes[0]?.count || 0,
   };
 }
+
+
+/**
+ * Lista tokens de loja para um gestor específico (apenas das suas lojas)
+ */
+export async function listarTokensLojaByGestor(gestorId: number): Promise<Array<TokenLoja & { lojaNome: string; lojaEmail: string | null }>> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  // Buscar lojas do gestor
+  const lojasGestor = await getLojasByGestorId(gestorId);
+  if (lojasGestor.length === 0) return [];
+  
+  const lojaIds = lojasGestor.map(l => l.id);
+  
+  const result = await db
+    .select({
+      id: tokensLoja.id,
+      lojaId: tokensLoja.lojaId,
+      token: tokensLoja.token,
+      ativo: tokensLoja.ativo,
+      ultimoAcesso: tokensLoja.ultimoAcesso,
+      createdAt: tokensLoja.createdAt,
+      updatedAt: tokensLoja.updatedAt,
+      lojaNome: lojas.nome,
+      lojaEmail: lojas.email,
+    })
+    .from(tokensLoja)
+    .innerJoin(lojas, eq(tokensLoja.lojaId, lojas.id))
+    .where(inArray(tokensLoja.lojaId, lojaIds))
+    .orderBy(lojas.nome);
+  
+  return result;
+}

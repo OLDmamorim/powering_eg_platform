@@ -2511,36 +2511,148 @@ export const appRouter = router({
       }),
   }),
   
-  // ==================== GESTÃO DE TOKENS DE LOJA (ADMIN) ====================
+  // ==================== GESTÃO DE TOKENS DE LOJA (ADMIN/GESTOR) ====================
   tokensLoja: router({
-    // Listar todos os tokens
-    listar: adminProcedure.query(async () => {
-      return await db.listarTokensLoja();
+    // Listar tokens (admin vê todos, gestor vê apenas das suas lojas)
+    listar: gestorProcedure.query(async ({ ctx }) => {
+      if (ctx.user.role === 'admin') {
+        return await db.listarTokensLoja();
+      }
+      // Gestor: apenas tokens das suas lojas
+      const gestor = await db.getGestorByUserId(ctx.user.id);
+      if (!gestor) return [];
+      return await db.listarTokensLojaByGestor(gestor.id);
     }),
     
-    // Criar/obter token para uma loja
-    criarToken: adminProcedure
+    // Criar/obter token para uma loja (gestor só pode criar para suas lojas)
+    criarToken: gestorProcedure
       .input(z.object({ lojaId: z.number() }))
-      .mutation(async ({ input }) => {
+      .mutation(async ({ input, ctx }) => {
+        // Verificar se gestor tem acesso à loja
+        if (ctx.user.role !== 'admin') {
+          const gestor = await db.getGestorByUserId(ctx.user.id);
+          if (!gestor) throw new TRPCError({ code: 'FORBIDDEN', message: 'Gestor não encontrado' });
+          const lojasGestor = await db.getLojasByGestorId(gestor.id);
+          if (!lojasGestor.some(l => l.id === input.lojaId)) {
+            throw new TRPCError({ code: 'FORBIDDEN', message: 'Não tem acesso a esta loja' });
+          }
+        }
         return await db.getOrCreateTokenLoja(input.lojaId);
       }),
     
-    // Ativar/desativar token
-    toggleAtivo: adminProcedure
+    // Ativar/desativar token (gestor só pode para suas lojas)
+    toggleAtivo: gestorProcedure
       .input(z.object({
         tokenId: z.number(),
         ativo: z.boolean(),
       }))
-      .mutation(async ({ input }) => {
+      .mutation(async ({ input, ctx }) => {
+        // Verificar acesso
+        if (ctx.user.role !== 'admin') {
+          const gestor = await db.getGestorByUserId(ctx.user.id);
+          if (!gestor) throw new TRPCError({ code: 'FORBIDDEN', message: 'Gestor não encontrado' });
+          const tokens = await db.listarTokensLojaByGestor(gestor.id);
+          if (!tokens.some(t => t.id === input.tokenId)) {
+            throw new TRPCError({ code: 'FORBIDDEN', message: 'Não tem acesso a este token' });
+          }
+        }
         await db.toggleTokenLoja(input.tokenId, input.ativo);
         return { success: true };
       }),
     
-    // Regenerar token
-    regenerar: adminProcedure
+    // Regenerar token (gestor só pode para suas lojas)
+    regenerar: gestorProcedure
       .input(z.object({ lojaId: z.number() }))
-      .mutation(async ({ input }) => {
+      .mutation(async ({ input, ctx }) => {
+        // Verificar acesso
+        if (ctx.user.role !== 'admin') {
+          const gestor = await db.getGestorByUserId(ctx.user.id);
+          if (!gestor) throw new TRPCError({ code: 'FORBIDDEN', message: 'Gestor não encontrado' });
+          const lojasGestor = await db.getLojasByGestorId(gestor.id);
+          if (!lojasGestor.some(l => l.id === input.lojaId)) {
+            throw new TRPCError({ code: 'FORBIDDEN', message: 'Não tem acesso a esta loja' });
+          }
+        }
         return await db.regenerarTokenLoja(input.lojaId);
+      }),
+    
+    // Enviar token por email para a loja
+    enviarEmail: gestorProcedure
+      .input(z.object({ lojaId: z.number() }))
+      .mutation(async ({ input, ctx }) => {
+        // Verificar acesso
+        if (ctx.user.role !== 'admin') {
+          const gestor = await db.getGestorByUserId(ctx.user.id);
+          if (!gestor) throw new TRPCError({ code: 'FORBIDDEN', message: 'Gestor não encontrado' });
+          const lojasGestor = await db.getLojasByGestorId(gestor.id);
+          if (!lojasGestor.some(l => l.id === input.lojaId)) {
+            throw new TRPCError({ code: 'FORBIDDEN', message: 'Não tem acesso a esta loja' });
+          }
+        }
+        
+        // Obter loja e token
+        const loja = await db.getLojaById(input.lojaId);
+        if (!loja) throw new TRPCError({ code: 'NOT_FOUND', message: 'Loja não encontrada' });
+        if (!loja.email) throw new TRPCError({ code: 'BAD_REQUEST', message: 'Loja não tem email configurado' });
+        
+        const token = await db.getOrCreateTokenLoja(input.lojaId);
+        if (!token) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Erro ao criar token' });
+        
+        // Construir URL do portal
+        const baseUrl = process.env.VITE_APP_URL || 'https://poweringeg.manus.space';
+        const portalUrl = `${baseUrl}/portal-loja?token=${token.token}`;
+        
+        // Enviar email
+        const html = `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <div style="background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%); padding: 30px; text-align: center;">
+              <h1 style="color: white; margin: 0;">PoweringEG Platform</h1>
+            </div>
+            <div style="padding: 30px; background: #f9fafb;">
+              <h2 style="color: #1e3a5f;">Olá ${loja.nome}!</h2>
+              <p style="color: #374151; line-height: 1.6;">
+                Foi-lhe enviado um link de acesso ao Portal de Reuniões Quinzenais.
+              </p>
+              <p style="color: #374151; line-height: 1.6;">
+                Através deste portal poderá:
+              </p>
+              <ul style="color: #374151; line-height: 1.8;">
+                <li>Ver os pendentes atribuídos à sua loja</li>
+                <li>Registar as reuniões quinzenais</li>
+                <li>Enviar a ata da reunião automaticamente</li>
+              </ul>
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${portalUrl}" style="background: #1e3a5f; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">
+                  Aceder ao Portal
+                </a>
+              </div>
+              <p style="color: #6b7280; font-size: 14px;">
+                Este link é único e permanente. Guarde-o para acesso futuro.
+              </p>
+              <p style="color: #6b7280; font-size: 12px; margin-top: 20px;">
+                Se não conseguir clicar no botão, copie e cole este link no seu navegador:<br/>
+                <a href="${portalUrl}" style="color: #2563eb;">${portalUrl}</a>
+              </p>
+            </div>
+            <div style="background: #1e3a5f; padding: 20px; text-align: center;">
+              <p style="color: #9ca3af; margin: 0; font-size: 12px;">
+                © ${new Date().getFullYear()} PoweringEG Platform - Express Glass
+              </p>
+            </div>
+          </div>
+        `;
+        
+        const enviado = await sendEmail({
+          to: loja.email,
+          subject: `Acesso ao Portal de Reuniões Quinzenais - ${loja.nome}`,
+          html,
+        });
+        
+        if (!enviado) {
+          throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Erro ao enviar email' });
+        }
+        
+        return { success: true, email: loja.email };
       }),
   }),
   
