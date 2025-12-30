@@ -1562,3 +1562,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] PWA: Botão "Adicionar ao Ecrã Inicial" no Portal da Loja
 - [x] PWA: Ícones para Android e iOS
 - [x] PWA: Atualização automática das tarefas (30 segundos)
+
+## Widget PWA To-Do para Gestores v5.30
+- [x] PWA Gestor: Página widget compacta (/todo-widget) com lista de tarefas
+- [x] PWA Gestor: Botão "Instalar App" na página To-Do dos gestores
+- [x] PWA Gestor: Atualização automática das tarefas a cada 30 segundos
+- [x] PWA Gestor: Interface otimizada para mobile com ações rápidas
+- [x] PWA Gestor: Filtros por loja e estado

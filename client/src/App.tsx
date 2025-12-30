@@ -34,6 +34,7 @@ import PortalLoja from "./pages/PortalLoja";
 import PortalLojaWidget from "./pages/PortalLojaWidget";
 import ReunioesQuinzenais from "./pages/ReunioesQuinzenais";
 import Todos from "./pages/Todos";
+import TodoWidget from "./pages/TodoWidget";
 
 
 function Router() {
@@ -78,6 +79,7 @@ function Router() {
       
       {/* To-Do */}
       <Route path={"/todos"} component={Todos} />
+      <Route path={"/todo-widget"} component={TodoWidget} />
       
       {/* Portal da Loja (acesso público via token) */}
       <Route path={"/portal-loja"} component={PortalLoja} />

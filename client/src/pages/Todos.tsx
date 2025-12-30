@@ -47,6 +47,8 @@ import {
   Calendar,
   ListTodo,
   Settings,
+  Smartphone,
+  Download,
 } from "lucide-react";
 
 export default function Todos() {
@@ -240,7 +242,15 @@ export default function Todos() {
             </h1>
             <p className="text-muted-foreground">Gestão de tarefas e atribuições</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
+            <Button 
+              variant="outline" 
+              onClick={() => window.open('/todo-widget', '_blank')}
+              className="bg-blue-50 hover:bg-blue-100 border-blue-200"
+            >
+              <Smartphone className="h-4 w-4 mr-2" />
+              Instalar App
+            </Button>
             {user?.role === "admin" && (
               <Button variant="outline" onClick={() => setCategoriasOpen(true)}>
                 <Settings className="h-4 w-4 mr-2" />
