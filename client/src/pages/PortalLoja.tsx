@@ -56,6 +56,11 @@ export default function PortalLoja() {
   const [todoSelecionado, setTodoSelecionado] = useState<number | null>(null);
   const [devolverTodoOpen, setDevolverTodoOpen] = useState(false);
   const [novaReuniaoOpen, setNovaReuniaoOpen] = useState(false);
+  const [novaTarefaOpen, setNovaTarefaOpen] = useState(false);
+  const [novaTarefaTitulo, setNovaTarefaTitulo] = useState("");
+  const [novaTarefaDescricao, setNovaTarefaDescricao] = useState("");
+  const [novaTarefaPrioridade, setNovaTarefaPrioridade] = useState<"baixa" | "media" | "alta" | "urgente">("media");
+  const [novaTarefaCategoriaId, setNovaTarefaCategoriaId] = useState<number | undefined>(undefined);
   const [participantes, setParticipantes] = useState<string[]>([""]);
   const [reuniaoAtual, setReuniaoAtual] = useState<number | null>(null);
 
@@ -191,6 +196,25 @@ export default function PortalLoja() {
     },
     onError: (error) => toast.error(error.message),
   });
+
+  const criarTarefaMutation = trpc.todosPortalLoja.criar.useMutation({
+    onSuccess: () => {
+      toast.success("Tarefa criada e enviada ao gestor!");
+      setNovaTarefaOpen(false);
+      setNovaTarefaTitulo("");
+      setNovaTarefaDescricao("");
+      setNovaTarefaPrioridade("media");
+      setNovaTarefaCategoriaId(undefined);
+      refetchTodos();
+    },
+    onError: (error) => toast.error(error.message),
+  });
+
+  // Query de categorias (público, não precisa de autenticação)
+  const { data: categorias } = trpc.todoCategories.listar.useQuery(
+    { apenasAtivas: true },
+    { enabled: !!lojaAuth }
+  );
 
   const handleLogin = () => {
     if (!inputToken.trim()) {
@@ -621,6 +645,16 @@ export default function PortalLoja() {
         {/* Tab To-Do */}
         {activeTab === "todos" && (
           <div className="space-y-4">
+            {/* Botão Nova Tarefa */}
+            <div className="flex justify-end">
+              <Button
+                onClick={() => setNovaTarefaOpen(true)}
+                className="bg-emerald-600 hover:bg-emerald-700"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Nova Tarefa para o Gestor
+              </Button>
+            </div>
             {!todosList || todosList.length === 0 ? (
               <Card>
                 <CardContent className="py-12 text-center">
@@ -773,6 +807,118 @@ export default function PortalLoja() {
                 disabled={devolverTodoMutation.isPending}
               >
                 {devolverTodoMutation.isPending ? "A devolver..." : "Devolver"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dialog Nova Tarefa */}
+        <Dialog open={novaTarefaOpen} onOpenChange={setNovaTarefaOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Plus className="h-5 w-5 text-emerald-600" />
+                Nova Tarefa para o Gestor
+              </DialogTitle>
+              <DialogDescription>
+                Crie uma tarefa que será enviada ao gestor responsável pela sua loja.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Título *</label>
+                <Input
+                  placeholder="Ex: Precisamos de formação sobre novo produto"
+                  value={novaTarefaTitulo}
+                  onChange={(e) => setNovaTarefaTitulo(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Descrição</label>
+                <Textarea
+                  placeholder="Descreva a tarefa com mais detalhes..."
+                  value={novaTarefaDescricao}
+                  onChange={(e) => setNovaTarefaDescricao(e.target.value)}
+                  rows={3}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Prioridade</label>
+                  <Select
+                    value={novaTarefaPrioridade}
+                    onValueChange={(value) => setNovaTarefaPrioridade(value as typeof novaTarefaPrioridade)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="baixa">Baixa</SelectItem>
+                      <SelectItem value="media">Média</SelectItem>
+                      <SelectItem value="alta">Alta</SelectItem>
+                      <SelectItem value="urgente">Urgente</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Categoria</label>
+                  <Select
+                    value={novaTarefaCategoriaId?.toString() || "none"}
+                    onValueChange={(value) => setNovaTarefaCategoriaId(value === "none" ? undefined : parseInt(value))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecionar..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">Sem categoria</SelectItem>
+                      {categorias?.map((cat: any) => (
+                        <SelectItem key={cat.id} value={cat.id.toString()}>
+                          {cat.nome}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => {
+                setNovaTarefaOpen(false);
+                setNovaTarefaTitulo("");
+                setNovaTarefaDescricao("");
+                setNovaTarefaPrioridade("media");
+                setNovaTarefaCategoriaId(undefined);
+              }}>
+                Cancelar
+              </Button>
+              <Button
+                className="bg-emerald-600 hover:bg-emerald-700"
+                onClick={() => {
+                  if (!novaTarefaTitulo.trim()) {
+                    toast.error("O título é obrigatório");
+                    return;
+                  }
+                  criarTarefaMutation.mutate({
+                    token,
+                    titulo: novaTarefaTitulo.trim(),
+                    descricao: novaTarefaDescricao.trim() || undefined,
+                    prioridade: novaTarefaPrioridade,
+                    categoriaId: novaTarefaCategoriaId,
+                  });
+                }}
+                disabled={criarTarefaMutation.isPending}
+              >
+                {criarTarefaMutation.isPending ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    A criar...
+                  </>
+                ) : (
+                  <>
+                    <Send className="h-4 w-4 mr-2" />
+                    Enviar ao Gestor
+                  </>
+                )}
               </Button>
             </DialogFooter>
           </DialogContent>

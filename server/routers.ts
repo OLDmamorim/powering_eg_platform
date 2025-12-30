@@ -3114,6 +3114,65 @@ export const appRouter = router({
         
         return { success: true };
       }),
+    
+    // Criar To-Do (pela loja, atribuído ao gestor responsável)
+    criar: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        titulo: z.string().min(1, 'Título é obrigatório'),
+        descricao: z.string().optional(),
+        categoriaId: z.number().optional(),
+        prioridade: z.enum(['baixa', 'media', 'alta', 'urgente']).optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const auth = await db.validarTokenLoja(input.token);
+        if (!auth) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        
+        // Obter o gestor responsável pela loja
+        const gestorDaLoja = await db.getGestorDaLoja(auth.loja.id);
+        if (!gestorDaLoja) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Não foi encontrado um gestor responsável por esta loja' });
+        }
+        
+        // Criar a tarefa atribuída ao gestor
+        const todo = await db.createTodo({
+          titulo: input.titulo,
+          descricao: input.descricao,
+          categoriaId: input.categoriaId,
+          prioridade: input.prioridade || 'media',
+          atribuidoUserId: gestorDaLoja.userId, // Atribuir ao gestor
+          atribuidoLojaId: null, // Não é atribuída à loja, é criada pela loja
+          criadoPorId: gestorDaLoja.userId, // Usar o userId do gestor como proxy (a loja não tem userId)
+        });
+        
+        if (!todo) {
+          throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Erro ao criar tarefa' });
+        }
+        
+        // Notificar gestor por email
+        if (gestorDaLoja.email) {
+          try {
+            await sendEmail({
+              to: gestorDaLoja.email,
+              subject: `Nova Tarefa da Loja ${auth.loja.nome}: ${input.titulo}`,
+              html: gerarHTMLNotificacaoTodo({
+                tipo: 'nova_da_loja',
+                titulo: input.titulo,
+                descricao: input.descricao || '',
+                prioridade: input.prioridade || 'media',
+                criadoPor: auth.loja.nome,
+                lojaNome: auth.loja.nome,
+              }),
+            });
+          } catch (e) {
+            console.error('Erro ao enviar email de notificação:', e);
+          }
+        }
+        
+        return { success: true, todoId: todo.id };
+      }),
   }),
 });
 
@@ -3254,7 +3313,7 @@ function gerarHTMLReuniaoQuinzenal(dados: {
 
 // Função auxiliar para gerar HTML do email de notificação de To-Do
 function gerarHTMLNotificacaoTodo(dados: {
-  tipo: 'nova' | 'reatribuida' | 'devolvida' | 'concluida';
+  tipo: 'nova' | 'reatribuida' | 'devolvida' | 'concluida' | 'nova_da_loja';
   titulo: string;
   descricao: string;
   prioridade: string;
@@ -3274,6 +3333,7 @@ function gerarHTMLNotificacaoTodo(dados: {
     reatribuida: 'Tarefa Reatribuída',
     devolvida: 'Tarefa Devolvida',
     concluida: 'Tarefa Concluída',
+    nova_da_loja: 'Nova Tarefa da Loja',
   }[dados.tipo];
   
   const corTipo = {
@@ -3281,6 +3341,7 @@ function gerarHTMLNotificacaoTodo(dados: {
     reatribuida: '#8b5cf6',
     devolvida: '#f59e0b',
     concluida: '#22c55e',
+    nova_da_loja: '#10b981',
   }[dados.tipo];
   
   return `

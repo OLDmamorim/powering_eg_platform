@@ -1548,3 +1548,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Portal Loja: Animação pulse suave nos cards quando há tarefas não vistas
 - [x] Portal Loja: Mini-lista das 3 tarefas mais urgentes nos cards
 - [x] Portal Loja: Botão de ação rápida no card To-Do (Iniciar tarefa)
+
+## Portal Loja - Criar Tarefas v5.28
+- [x] Portal Loja: Botão "Nova Tarefa" para loja criar tarefas
+- [x] Portal Loja: Modal de criação com título, descrição, categoria e prioridade
+- [x] Portal Loja: Tarefa criada pela loja é automaticamente atribuída ao gestor responsável
+- [x] Backend: Endpoint para loja criar tarefa (via token de acesso)
