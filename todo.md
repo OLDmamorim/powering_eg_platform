@@ -1510,3 +1510,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Interface para criar/listar/ativar/desativar tokens
 - [x] Botão "Enviar por Email" que envia token para email da loja
 - [x] Gestores só veem tokens das suas lojas, admin vê todos
+
+## Correções v5.25 - Permissões de Gestores
+- [x] Permitir gestores editarem email das suas lojas (não só admin)
+- [x] Mostrar todas as lojas do gestor na tab Tokens (mesmo sem token)
+- [x] Permitir gestores criarem tokens para suas lojas

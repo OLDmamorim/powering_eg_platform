@@ -85,19 +85,37 @@ export const appRouter = router({
         return await db.createLoja(input);
       }),
     
-    update: adminProcedure
+    update: gestorProcedure
       .input(z.object({
         id: z.number(),
         nome: z.string().min(1).optional(),
-        email: z.string().email().optional(),
+        email: z.string().email().optional().nullable(),
+        contacto: z.string().optional().nullable(),
         latitude: z.string().optional(),
         longitude: z.string().optional(),
         minimoRelatoriosLivres: z.number().min(0).optional(),
         minimoRelatoriosCompletos: z.number().min(0).optional(),
       }))
-      .mutation(async ({ input }) => {
+      .mutation(async ({ input, ctx }) => {
         const { id, ...data } = input;
-        await db.updateLoja(id, data);
+        
+        // Verificar se gestor tem acesso à loja
+        if (ctx.user.role !== 'admin') {
+          const gestor = await db.getGestorByUserId(ctx.user.id);
+          if (!gestor) throw new TRPCError({ code: 'FORBIDDEN', message: 'Gestor não encontrado' });
+          const lojasGestor = await db.getLojasByGestorId(gestor.id);
+          if (!lojasGestor.some(l => l.id === id)) {
+            throw new TRPCError({ code: 'FORBIDDEN', message: 'Não tem acesso a esta loja' });
+          }
+          // Gestor só pode editar email e contacto, não nome ou mínimos
+          const gestorData: any = {};
+          if (data.email !== undefined) gestorData.email = data.email;
+          if (data.contacto !== undefined) gestorData.contacto = data.contacto;
+          await db.updateLoja(id, gestorData);
+        } else {
+          // Admin pode editar tudo
+          await db.updateLoja(id, data);
+        }
         return { success: true };
       }),
     

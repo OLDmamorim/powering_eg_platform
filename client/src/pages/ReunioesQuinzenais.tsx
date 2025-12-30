@@ -86,6 +86,7 @@ export default function ReunioesQuinzenais() {
   const { data: tokens, refetch: refetchTokens } = trpc.tokensLoja.listar.useQuery();
 
   const { data: lojas } = trpc.lojas.list.useQuery();
+  const { data: minhasLojas } = trpc.lojas.getByGestor.useQuery();
 
   const { data: reuniaoDetalhe } = trpc.consultaReunioes.getById.useQuery(
     { reuniaoId: reuniaoSelecionada! },
@@ -654,17 +655,15 @@ export default function ReunioesQuinzenais() {
               <CardContent>
                 {/* Mostrar lojas do gestor ou todas para admin */}
                 {(() => {
-                  // Para gestor, filtrar apenas lojas que têm token associado
-                  const lojasParaMostrar = isAdmin 
-                    ? lojas 
-                    : tokens?.map(t => ({ id: t.lojaId, nome: t.lojaNome, email: t.lojaEmail }));
+                  // Para gestor, mostrar TODAS as suas lojas (não só as que têm token)
+                  const lojasParaMostrar = isAdmin ? lojas : minhasLojas;
                   
                   if (!lojasParaMostrar || lojasParaMostrar.length === 0) {
                     return (
                       <div className="text-center py-8 text-muted-foreground">
                         <Key className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                        <p>Nenhuma loja com token encontrada.</p>
-                        {!isAdmin && <p className="text-sm mt-2">Contacte o administrador para criar tokens para as suas lojas.</p>}
+                        <p>Nenhuma loja encontrada.</p>
+                        {!isAdmin && <p className="text-sm mt-2">Não tem lojas atribuídas. Contacte o administrador.</p>}
                       </div>
                     );
                   }
