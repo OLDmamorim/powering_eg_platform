@@ -1,0 +1,9 @@
+{
+  "query": "INSERT INTO todo_categories (nome, cor, ativo, createdAt, updatedAt) VALUES \n('Manutenção', '#EF4444', 1, NOW(), NOW()),\n('Stock', '#3B82F6', 1, NOW(), NOW()),\n('Administrativo', '#8B5CF6', 1, NOW(), NOW()),\n('Formação', '#22C55E', 1, NOW(), NOW()),\n('Marketing', '#F59E0B', 1, NOW(), NOW()),\n('Urgente', '#DC2626', 1, NOW(), NOW());",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute INSERT INTO todo_categories (nome, cor, ativo, createdAt, updatedAt) VALUES \n('Manutenção', '#EF4444', 1, NOW(), NOW()),\n('Stock', '#3B82F6', 1, NOW(), NOW()),\n('Administrativo', '#8B5CF6', 1, NOW(), NOW()),\n('Formação', '#22C55E', 1, NOW(), NOW()),\n('Marketing', '#F59E0B', 1, NOW(), NOW()),\n('Urgente', '#DC2626', 1, NOW(), NOW());",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 1611
+}

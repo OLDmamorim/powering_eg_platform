@@ -1516,3 +1516,18 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Mostrar todas as lojas do gestor na tab Tokens (mesmo sem token)
 - [x] Permitir gestores criarem tokens para suas lojas
 - [x] Bug: Pendentes não aparecem no Portal da Loja (mostra 0 quando existem pendentes)
+
+## Sistema To-Do Colaborativo v5.13
+- [ ] Schema: Tabela de categorias de To-Do (configuráveis)
+- [ ] Schema: Tabela de To-Do com atribuições
+- [ ] DB: Funções CRUD para categorias
+- [ ] DB: Funções CRUD para To-Do
+- [ ] Router: Procedures para gestão de categorias
+- [ ] Router: Procedures para gestão de To-Do
+- [ ] UI Admin: Página de To-Do com filtros (por loja, atribuído, estado, categoria)
+- [ ] UI Admin: Criar/editar tarefas com atribuição
+- [ ] UI Admin: Gestão de categorias
+- [ ] Portal Loja: Secção To-Do com tarefas atribuídas
+- [ ] Portal Loja: Marcar como concluída ou devolver ao criador
+- [ ] Notificações: Email quando tarefa é atribuída
+- [ ] Testar fluxo completo

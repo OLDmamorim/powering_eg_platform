@@ -36,6 +36,9 @@ import {
   LogOut,
   Loader2,
   MessageSquare,
+  ListTodo,
+  RotateCcw,
+  Tag,
 } from "lucide-react";
 
 interface LojaAuth {
@@ -48,7 +51,10 @@ export default function PortalLoja() {
   const [token, setToken] = useState<string>("");
   const [inputToken, setInputToken] = useState<string>("");
   const [lojaAuth, setLojaAuth] = useState<LojaAuth | null>(null);
-  const [activeTab, setActiveTab] = useState<"reuniao" | "pendentes" | "historico">("reuniao");
+  const [activeTab, setActiveTab] = useState<"reuniao" | "pendentes" | "historico" | "todos">("reuniao");
+  const [todoComentario, setTodoComentario] = useState<string>("");
+  const [todoSelecionado, setTodoSelecionado] = useState<number | null>(null);
+  const [devolverTodoOpen, setDevolverTodoOpen] = useState(false);
   const [novaReuniaoOpen, setNovaReuniaoOpen] = useState(false);
   const [participantes, setParticipantes] = useState<string[]>([""]);
   const [reuniaoAtual, setReuniaoAtual] = useState<number | null>(null);
@@ -109,6 +115,17 @@ export default function PortalLoja() {
     { enabled: !!token && !!lojaAuth && !!reuniaoAtual }
   );
 
+  // To-Do Queries
+  const { data: todosList, refetch: refetchTodos } = trpc.todosPortalLoja.listar.useQuery(
+    { token, apenasAtivos: true },
+    { enabled: !!token && !!lojaAuth }
+  );
+
+  const { data: todosCount } = trpc.todosPortalLoja.contar.useQuery(
+    { token },
+    { enabled: !!token && !!lojaAuth }
+  );
+
   // Mutations
   const criarReuniaoMutation = trpc.reunioesQuinzenais.criarReuniao.useMutation({
     onSuccess: (data) => {
@@ -143,6 +160,34 @@ export default function PortalLoja() {
     onSuccess: () => {
       toast.success("Pendente atualizado!");
       refetchPendentes();
+    },
+    onError: (error) => toast.error(error.message),
+  });
+
+  // To-Do Mutations
+  const atualizarEstadoTodoMutation = trpc.todosPortalLoja.atualizarEstado.useMutation({
+    onSuccess: () => {
+      toast.success("Estado atualizado!");
+      refetchTodos();
+    },
+    onError: (error) => toast.error(error.message),
+  });
+
+  const concluirTodoMutation = trpc.todosPortalLoja.concluir.useMutation({
+    onSuccess: () => {
+      toast.success("Tarefa concluída!");
+      refetchTodos();
+    },
+    onError: (error) => toast.error(error.message),
+  });
+
+  const devolverTodoMutation = trpc.todosPortalLoja.devolver.useMutation({
+    onSuccess: () => {
+      toast.success("Tarefa devolvida ao gestor!");
+      setDevolverTodoOpen(false);
+      setTodoComentario("");
+      setTodoSelecionado(null);
+      refetchTodos();
     },
     onError: (error) => toast.error(error.message),
   });
@@ -325,6 +370,16 @@ export default function PortalLoja() {
           >
             <History className="h-4 w-4 mr-2" />
             Histórico
+          </Button>
+          <Button
+            variant={activeTab === "todos" ? "default" : "outline"}
+            onClick={() => setActiveTab("todos")}
+          >
+            <ListTodo className="h-4 w-4 mr-2" />
+            To-Do
+            {(todosCount || 0) > 0 && (
+              <Badge variant="secondary" className="ml-2">{todosCount}</Badge>
+            )}
           </Button>
         </div>
 
@@ -515,6 +570,166 @@ export default function PortalLoja() {
             )}
           </div>
         )}
+
+        {/* Tab To-Do */}
+        {activeTab === "todos" && (
+          <div className="space-y-4">
+            {!todosList || todosList.length === 0 ? (
+              <Card>
+                <CardContent className="py-12 text-center">
+                  <ListTodo className="h-12 w-12 mx-auto text-green-500 mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">Sem tarefas!</h3>
+                  <p className="text-muted-foreground">
+                    Não existem tarefas atribuídas a esta loja.
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              todosList.map((todo: any) => (
+                <Card key={todo.id} className="hover:shadow-md transition-shadow">
+                  <CardContent className="py-4">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap mb-2">
+                          {todo.estado === 'pendente' && <Clock className="h-4 w-4 text-gray-500" />}
+                          {todo.estado === 'em_progresso' && <Clock className="h-4 w-4 text-blue-500" />}
+                          <h3 className="font-semibold">{todo.titulo}</h3>
+                          <Badge className={
+                            todo.prioridade === 'urgente' ? 'bg-red-100 text-red-800' :
+                            todo.prioridade === 'alta' ? 'bg-orange-100 text-orange-800' :
+                            todo.prioridade === 'media' ? 'bg-blue-100 text-blue-800' :
+                            todo.prioridade === 'baixa' ? 'bg-green-100 text-green-800' :
+                            'bg-gray-100 text-gray-800'
+                          }>
+                            {todo.prioridade}
+                          </Badge>
+                          <Badge variant="outline" className={
+                            todo.estado === 'pendente' ? 'bg-gray-50' :
+                            todo.estado === 'em_progresso' ? 'bg-blue-50 text-blue-700' : ''
+                          }>
+                            {todo.estado === 'pendente' ? 'Pendente' : 'Em Progresso'}
+                          </Badge>
+                          {todo.categoriaNome && (
+                            <Badge variant="outline" style={{ borderColor: todo.categoriaCor || undefined, color: todo.categoriaCor || undefined }}>
+                              <Tag className="h-3 w-3 mr-1" />
+                              {todo.categoriaNome}
+                            </Badge>
+                          )}
+                        </div>
+                        
+                        {todo.descricao && (
+                          <p className="text-sm text-muted-foreground mb-3">
+                            {todo.descricao}
+                          </p>
+                        )}
+                        
+                        <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
+                          <span>Criado por: {todo.criadoPorNome || 'N/A'}</span>
+                          <span>{new Date(todo.createdAt).toLocaleDateString('pt-PT')}</span>
+                          {todo.dataLimite && (
+                            <span className="text-orange-600">
+                              Prazo: {new Date(todo.dataLimite).toLocaleDateString('pt-PT')}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      
+                      <div className="flex flex-col gap-2">
+                        {todo.estado === 'pendente' && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => atualizarEstadoTodoMutation.mutate({
+                              token,
+                              todoId: todo.id,
+                              estado: 'em_progresso',
+                            })}
+                            disabled={atualizarEstadoTodoMutation.isPending}
+                          >
+                            <Clock className="h-4 w-4 mr-1" />
+                            Iniciar
+                          </Button>
+                        )}
+                        <Button
+                          size="sm"
+                          variant="default"
+                          className="bg-green-600 hover:bg-green-700"
+                          onClick={() => concluirTodoMutation.mutate({
+                            token,
+                            todoId: todo.id,
+                          })}
+                          disabled={concluirTodoMutation.isPending}
+                        >
+                          <CheckCircle2 className="h-4 w-4 mr-1" />
+                          Concluir
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-orange-600 border-orange-300 hover:bg-orange-50"
+                          onClick={() => {
+                            setTodoSelecionado(todo.id);
+                            setDevolverTodoOpen(true);
+                          }}
+                        >
+                          <RotateCcw className="h-4 w-4 mr-1" />
+                          Devolver
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
+          </div>
+        )}
+
+        {/* Dialog Devolver To-Do */}
+        <Dialog open={devolverTodoOpen} onOpenChange={setDevolverTodoOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Devolver Tarefa</DialogTitle>
+              <DialogDescription>
+                Indique o motivo pelo qual está a devolver esta tarefa ao gestor.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <Textarea
+                placeholder="Descreva o motivo da devolução..."
+                value={todoComentario}
+                onChange={(e) => setTodoComentario(e.target.value)}
+                rows={4}
+              />
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => {
+                setDevolverTodoOpen(false);
+                setTodoComentario("");
+                setTodoSelecionado(null);
+              }}>
+                Cancelar
+              </Button>
+              <Button
+                onClick={() => {
+                  if (!todoComentario.trim()) {
+                    toast.error("Deve indicar o motivo da devolução");
+                    return;
+                  }
+                  if (todoSelecionado) {
+                    devolverTodoMutation.mutate({
+                      token,
+                      todoId: todoSelecionado,
+                      comentario: todoComentario.trim(),
+                    });
+                  }
+                }}
+                disabled={devolverTodoMutation.isPending}
+              >
+                {devolverTodoMutation.isPending ? "A devolver..." : "Devolver"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

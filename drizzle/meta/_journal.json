@@ -204,6 +204,13 @@
       "when": 1767055007881,
       "tag": "0028_empty_yellow_claw",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "5",
+      "when": 1767086995431,
+      "tag": "0029_brown_wallop",
+      "breakpoints": true
     }
   ]
 }

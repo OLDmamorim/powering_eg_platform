@@ -600,3 +600,61 @@ export const tokensLoja = mysqlTable("tokens_loja", {
 
 export type TokenLoja = typeof tokensLoja.$inferSelect;
 export type InsertTokenLoja = typeof tokensLoja.$inferInsert;
+
+
+/**
+ * Categorias de To-Do - Categorias configuráveis para organizar tarefas
+ */
+export const todoCategories = mysqlTable("todo_categories", {
+  id: int("id").autoincrement().primaryKey(),
+  nome: varchar("nome", { length: 100 }).notNull(),
+  cor: varchar("cor", { length: 7 }).default("#3B82F6").notNull(), // Cor hex para identificação visual
+  icone: varchar("icone", { length: 50 }), // Nome do ícone (opcional)
+  ativo: boolean("ativo").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type TodoCategory = typeof todoCategories.$inferSelect;
+export type InsertTodoCategory = typeof todoCategories.$inferInsert;
+
+/**
+ * To-Do - Sistema de tarefas colaborativo com atribuições
+ */
+export const todos = mysqlTable("todos", {
+  id: int("id").autoincrement().primaryKey(),
+  
+  // Conteúdo da tarefa
+  titulo: varchar("titulo", { length: 255 }).notNull(),
+  descricao: text("descricao"),
+  
+  // Categorização
+  categoriaId: int("categoriaId"), // FK para todo_categories.id (opcional)
+  prioridade: mysqlEnum("prioridade", ["baixa", "media", "alta", "urgente"]).default("media").notNull(),
+  
+  // Atribuição - pode ser atribuído a uma loja OU a um user (gestor/admin)
+  atribuidoLojaId: int("atribuidoLojaId"), // FK para lojas.id (se atribuído a uma loja)
+  atribuidoUserId: int("atribuidoUserId"), // FK para users.id (se atribuído a um gestor/admin)
+  
+  // Quem criou
+  criadoPorId: int("criadoPorId").notNull(), // FK para users.id
+  
+  // Estado e fluxo
+  estado: mysqlEnum("estado", ["pendente", "em_progresso", "concluida", "devolvida"]).default("pendente").notNull(),
+  
+  // Comentários/Notas (para quando a loja devolve ou conclui)
+  comentario: text("comentario"),
+  
+  // Histórico de atribuição (para rastrear devoluções)
+  historicoAtribuicoes: text("historicoAtribuicoes"), // JSON array de {de, para, data, motivo}
+  
+  // Datas
+  dataLimite: timestamp("dataLimite"),
+  dataConclusao: timestamp("dataConclusao"),
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Todo = typeof todos.$inferSelect;
+export type InsertTodo = typeof todos.$inferInsert;

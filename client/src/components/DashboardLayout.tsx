@@ -130,9 +130,10 @@ const getMenuGroups = (userRole?: string): MenuGroup[] => {
     },
     {
       id: 'pending',
-      label: 'Pendentes',
+      label: 'Tarefas',
       color: 'bg-rose-100/80 dark:bg-rose-900/30',
       items: [
+        { icon: ListTodo, label: "To-Do", path: "/todos", show: true, showBadge: false },
         { icon: ListTodo, label: "Pendentes", path: isAdmin ? "/pendentes-admin" : "/pendentes", show: true, showBadge: false },
       ]
     },

@@ -75,6 +75,12 @@ import {
   tokensLoja,
   TokenLoja,
   InsertTokenLoja,
+  todoCategories,
+  TodoCategory,
+  InsertTodoCategory,
+  todos,
+  Todo,
+  InsertTodo,
   User
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
@@ -173,6 +179,17 @@ export async function getUserByEmail(email: string) {
   }
 
   const result = await db.select().from(users).where(eq(users.email, email)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getUserById(userId: number) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot get user by id: database not available");
+    return undefined;
+  }
+
+  const result = await db.select().from(users).where(eq(users.id, userId)).limit(1);
   return result.length > 0 ? result[0] : undefined;
 }
 
@@ -4375,4 +4392,411 @@ export async function listarTokensLojaByGestor(gestorId: number): Promise<Array<
     .orderBy(lojas.nome);
   
   return result;
+}
+
+
+// ============================================
+// TO-DO CATEGORIES
+// ============================================
+
+/**
+ * Criar categoria de To-Do
+ */
+export async function createTodoCategory(data: InsertTodoCategory): Promise<TodoCategory | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  await db.insert(todoCategories).values(data);
+  
+  const created = await db
+    .select()
+    .from(todoCategories)
+    .orderBy(desc(todoCategories.id))
+    .limit(1);
+  
+  return created[0] || null;
+}
+
+/**
+ * Listar todas as categorias de To-Do
+ */
+export async function getAllTodoCategories(apenasAtivas: boolean = true): Promise<TodoCategory[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  if (apenasAtivas) {
+    return await db
+      .select()
+      .from(todoCategories)
+      .where(eq(todoCategories.ativo, true))
+      .orderBy(todoCategories.nome);
+  }
+  
+  return await db
+    .select()
+    .from(todoCategories)
+    .orderBy(todoCategories.nome);
+}
+
+/**
+ * Atualizar categoria de To-Do
+ */
+export async function updateTodoCategory(id: number, data: Partial<InsertTodoCategory>): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  
+  await db
+    .update(todoCategories)
+    .set(data)
+    .where(eq(todoCategories.id, id));
+}
+
+/**
+ * Eliminar categoria de To-Do (soft delete - desativar)
+ */
+export async function deleteTodoCategory(id: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  
+  await db
+    .update(todoCategories)
+    .set({ ativo: false })
+    .where(eq(todoCategories.id, id));
+}
+
+// ============================================
+// TO-DO
+// ============================================
+
+/**
+ * Criar To-Do
+ */
+export async function createTodo(data: InsertTodo): Promise<Todo | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  await db.insert(todos).values(data);
+  
+  const created = await db
+    .select()
+    .from(todos)
+    .orderBy(desc(todos.id))
+    .limit(1);
+  
+  return created[0] || null;
+}
+
+/**
+ * Obter To-Do por ID
+ */
+export async function getTodoById(id: number): Promise<Todo | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const result = await db
+    .select()
+    .from(todos)
+    .where(eq(todos.id, id))
+    .limit(1);
+  
+  return result[0] || null;
+}
+
+/**
+ * Listar todos os To-Dos com filtros
+ */
+export async function getAllTodos(filtros?: {
+  lojaId?: number;
+  userId?: number;
+  estado?: string;
+  categoriaId?: number;
+  prioridade?: string;
+  criadoPorId?: number;
+}): Promise<Array<Todo & { 
+  lojaNome: string | null; 
+  atribuidoUserNome: string | null;
+  criadoPorNome: string | null;
+  categoriaNome: string | null;
+  categoriaCor: string | null;
+}>> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const conditions: any[] = [];
+  
+  if (filtros?.lojaId) {
+    conditions.push(eq(todos.atribuidoLojaId, filtros.lojaId));
+  }
+  if (filtros?.userId) {
+    conditions.push(eq(todos.atribuidoUserId, filtros.userId));
+  }
+  if (filtros?.estado) {
+    conditions.push(eq(todos.estado, filtros.estado as any));
+  }
+  if (filtros?.categoriaId) {
+    conditions.push(eq(todos.categoriaId, filtros.categoriaId));
+  }
+  if (filtros?.prioridade) {
+    conditions.push(eq(todos.prioridade, filtros.prioridade as any));
+  }
+  if (filtros?.criadoPorId) {
+    conditions.push(eq(todos.criadoPorId, filtros.criadoPorId));
+  }
+  
+  // Alias para o user criador
+  const criadoPorUser = users;
+  
+  const result = await db
+    .select({
+      id: todos.id,
+      titulo: todos.titulo,
+      descricao: todos.descricao,
+      categoriaId: todos.categoriaId,
+      prioridade: todos.prioridade,
+      atribuidoLojaId: todos.atribuidoLojaId,
+      atribuidoUserId: todos.atribuidoUserId,
+      criadoPorId: todos.criadoPorId,
+      estado: todos.estado,
+      comentario: todos.comentario,
+      historicoAtribuicoes: todos.historicoAtribuicoes,
+      dataLimite: todos.dataLimite,
+      dataConclusao: todos.dataConclusao,
+      createdAt: todos.createdAt,
+      updatedAt: todos.updatedAt,
+      lojaNome: lojas.nome,
+      atribuidoUserNome: sql<string | null>`(SELECT name FROM users WHERE id = ${todos.atribuidoUserId})`,
+      criadoPorNome: sql<string | null>`(SELECT name FROM users WHERE id = ${todos.criadoPorId})`,
+      categoriaNome: todoCategories.nome,
+      categoriaCor: todoCategories.cor,
+    })
+    .from(todos)
+    .leftJoin(lojas, eq(todos.atribuidoLojaId, lojas.id))
+    .leftJoin(todoCategories, eq(todos.categoriaId, todoCategories.id))
+    .where(conditions.length > 0 ? and(...conditions) : undefined)
+    .orderBy(desc(todos.createdAt));
+  
+  return result;
+}
+
+/**
+ * Listar To-Dos de uma loja específica (para Portal da Loja)
+ */
+export async function getTodosByLojaId(lojaId: number, apenasAtivos: boolean = true): Promise<Array<Todo & {
+  criadoPorNome: string | null;
+  categoriaNome: string | null;
+  categoriaCor: string | null;
+}>> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const conditions = [eq(todos.atribuidoLojaId, lojaId)];
+  
+  if (apenasAtivos) {
+    conditions.push(
+      or(
+        eq(todos.estado, 'pendente'),
+        eq(todos.estado, 'em_progresso')
+      )!
+    );
+  }
+  
+  const result = await db
+    .select({
+      id: todos.id,
+      titulo: todos.titulo,
+      descricao: todos.descricao,
+      categoriaId: todos.categoriaId,
+      prioridade: todos.prioridade,
+      atribuidoLojaId: todos.atribuidoLojaId,
+      atribuidoUserId: todos.atribuidoUserId,
+      criadoPorId: todos.criadoPorId,
+      estado: todos.estado,
+      comentario: todos.comentario,
+      historicoAtribuicoes: todos.historicoAtribuicoes,
+      dataLimite: todos.dataLimite,
+      dataConclusao: todos.dataConclusao,
+      createdAt: todos.createdAt,
+      updatedAt: todos.updatedAt,
+      criadoPorNome: sql<string | null>`(SELECT name FROM users WHERE id = ${todos.criadoPorId})`,
+      categoriaNome: todoCategories.nome,
+      categoriaCor: todoCategories.cor,
+    })
+    .from(todos)
+    .leftJoin(todoCategories, eq(todos.categoriaId, todoCategories.id))
+    .where(and(...conditions))
+    .orderBy(
+      sql`FIELD(${todos.prioridade}, 'urgente', 'alta', 'media', 'baixa')`,
+      desc(todos.createdAt)
+    );
+  
+  return result;
+}
+
+/**
+ * Atualizar To-Do
+ */
+export async function updateTodo(id: number, data: Partial<InsertTodo>): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  
+  await db
+    .update(todos)
+    .set(data)
+    .where(eq(todos.id, id));
+}
+
+/**
+ * Marcar To-Do como concluído
+ */
+export async function concluirTodo(id: number, comentario?: string): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  
+  await db
+    .update(todos)
+    .set({
+      estado: 'concluida',
+      dataConclusao: new Date(),
+      comentario: comentario || null,
+    })
+    .where(eq(todos.id, id));
+}
+
+/**
+ * Devolver To-Do ao criador (pela loja)
+ */
+export async function devolverTodo(id: number, comentario: string): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  
+  // Buscar todo atual para obter histórico
+  const todoAtual = await getTodoById(id);
+  if (!todoAtual) return;
+  
+  // Adicionar ao histórico de atribuições
+  const historicoAtual = todoAtual.historicoAtribuicoes 
+    ? JSON.parse(todoAtual.historicoAtribuicoes) 
+    : [];
+  
+  historicoAtual.push({
+    de: todoAtual.atribuidoLojaId ? `loja:${todoAtual.atribuidoLojaId}` : `user:${todoAtual.atribuidoUserId}`,
+    para: `user:${todoAtual.criadoPorId}`,
+    data: new Date().toISOString(),
+    motivo: comentario,
+  });
+  
+  await db
+    .update(todos)
+    .set({
+      estado: 'devolvida',
+      comentario,
+      historicoAtribuicoes: JSON.stringify(historicoAtual),
+      // Reatribuir ao criador
+      atribuidoUserId: todoAtual.criadoPorId,
+      atribuidoLojaId: null,
+    })
+    .where(eq(todos.id, id));
+}
+
+/**
+ * Reatribuir To-Do
+ */
+export async function reatribuirTodo(
+  id: number, 
+  novaAtribuicao: { lojaId?: number; userId?: number },
+  motivo?: string
+): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  
+  // Buscar todo atual para obter histórico
+  const todoAtual = await getTodoById(id);
+  if (!todoAtual) return;
+  
+  // Adicionar ao histórico de atribuições
+  const historicoAtual = todoAtual.historicoAtribuicoes 
+    ? JSON.parse(todoAtual.historicoAtribuicoes) 
+    : [];
+  
+  historicoAtual.push({
+    de: todoAtual.atribuidoLojaId ? `loja:${todoAtual.atribuidoLojaId}` : `user:${todoAtual.atribuidoUserId}`,
+    para: novaAtribuicao.lojaId ? `loja:${novaAtribuicao.lojaId}` : `user:${novaAtribuicao.userId}`,
+    data: new Date().toISOString(),
+    motivo: motivo || 'Reatribuição',
+  });
+  
+  await db
+    .update(todos)
+    .set({
+      estado: 'pendente',
+      atribuidoLojaId: novaAtribuicao.lojaId || null,
+      atribuidoUserId: novaAtribuicao.userId || null,
+      historicoAtribuicoes: JSON.stringify(historicoAtual),
+    })
+    .where(eq(todos.id, id));
+}
+
+/**
+ * Eliminar To-Do
+ */
+export async function deleteTodo(id: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  
+  await db
+    .delete(todos)
+    .where(eq(todos.id, id));
+}
+
+/**
+ * Contar To-Dos ativos por loja (para dashboard do Portal)
+ */
+export async function contarTodosLojaAtivos(lojaId: number): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  
+  const result = await db
+    .select({ count: sql<number>`COUNT(*)` })
+    .from(todos)
+    .where(and(
+      eq(todos.atribuidoLojaId, lojaId),
+      or(
+        eq(todos.estado, 'pendente'),
+        eq(todos.estado, 'em_progresso')
+      )
+    ));
+  
+  return result[0]?.count || 0;
+}
+
+/**
+ * Contar To-Dos por estado (para estatísticas)
+ */
+export async function contarTodosPorEstado(): Promise<{
+  pendentes: number;
+  emProgresso: number;
+  concluidos: number;
+  devolvidos: number;
+}> {
+  const db = await getDb();
+  if (!db) return { pendentes: 0, emProgresso: 0, concluidos: 0, devolvidos: 0 };
+  
+  const result = await db
+    .select({
+      estado: todos.estado,
+      count: sql<number>`COUNT(*)`,
+    })
+    .from(todos)
+    .groupBy(todos.estado);
+  
+  const stats = { pendentes: 0, emProgresso: 0, concluidos: 0, devolvidos: 0 };
+  
+  for (const row of result) {
+    if (row.estado === 'pendente') stats.pendentes = row.count;
+    if (row.estado === 'em_progresso') stats.emProgresso = row.count;
+    if (row.estado === 'concluida') stats.concluidos = row.count;
+    if (row.estado === 'devolvida') stats.devolvidos = row.count;
+  }
+  
+  return stats;
 }

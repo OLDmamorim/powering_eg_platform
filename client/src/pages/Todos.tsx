@@ -1,0 +1,790 @@
+import { useState } from "react";
+import { trpc } from "@/lib/trpc";
+import { useAuth } from "@/_core/hooks/useAuth";
+import DashboardLayout from "@/components/DashboardLayout";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { toast } from "sonner";
+import {
+  Plus,
+  Filter,
+  CheckCircle2,
+  Clock,
+  AlertTriangle,
+  RotateCcw,
+  MoreVertical,
+  Trash2,
+  Edit,
+  Send,
+  Store,
+  User,
+  Tag,
+  Calendar,
+  ListTodo,
+  Settings,
+} from "lucide-react";
+
+export default function Todos() {
+  const { user } = useAuth();
+  const [filtroLoja, setFiltroLoja] = useState<string>("todas");
+  const [filtroEstado, setFiltroEstado] = useState<string>("todos");
+  const [filtroCategoria, setFiltroCategoria] = useState<string>("todas");
+  const [filtroPrioridade, setFiltroPrioridade] = useState<string>("todas");
+  const [apenasMeus, setApenasMeus] = useState(false);
+  
+  // Dialogs
+  const [novoTodoOpen, setNovoTodoOpen] = useState(false);
+  const [editarTodoOpen, setEditarTodoOpen] = useState(false);
+  const [categoriasOpen, setCategoriasOpen] = useState(false);
+  const [todoSelecionado, setTodoSelecionado] = useState<any>(null);
+  
+  // Form state
+  const [titulo, setTitulo] = useState("");
+  const [descricao, setDescricao] = useState("");
+  const [categoriaId, setCategoriaId] = useState<string>("");
+  const [prioridade, setPrioridade] = useState<string>("media");
+  const [atribuidoLojaId, setAtribuidoLojaId] = useState<string>("");
+  const [atribuidoUserId, setAtribuidoUserId] = useState<string>("");
+  const [dataLimite, setDataLimite] = useState<string>("");
+  
+  // Categoria form
+  const [novaCategoriaNome, setNovaCategoriaNome] = useState("");
+  const [novaCategoriaCor, setNovaCategoriaCor] = useState("#3B82F6");
+  
+  // Queries
+  const { data: todos, refetch: refetchTodos } = trpc.todos.listar.useQuery({
+    lojaId: filtroLoja !== "todas" ? parseInt(filtroLoja) : undefined,
+    estado: filtroEstado !== "todos" ? filtroEstado : undefined,
+    categoriaId: filtroCategoria !== "todas" ? parseInt(filtroCategoria) : undefined,
+    prioridade: filtroPrioridade !== "todas" ? filtroPrioridade : undefined,
+    apenasMeus: apenasMeus,
+  });
+  
+  const { data: categorias, refetch: refetchCategorias } = trpc.todoCategories.listar.useQuery();
+  const { data: lojas } = trpc.lojas.list.useQuery();
+  const { data: gestores } = trpc.gestores.list.useQuery();
+  const { data: estatisticas } = trpc.todos.estatisticas.useQuery();
+  
+  // Mutations
+  const criarTodoMutation = trpc.todos.criar.useMutation({
+    onSuccess: () => {
+      toast.success("Tarefa criada com sucesso!");
+      setNovoTodoOpen(false);
+      resetForm();
+      refetchTodos();
+    },
+    onError: (error) => toast.error(error.message),
+  });
+  
+  const atualizarTodoMutation = trpc.todos.atualizar.useMutation({
+    onSuccess: () => {
+      toast.success("Tarefa atualizada!");
+      setEditarTodoOpen(false);
+      setTodoSelecionado(null);
+      resetForm();
+      refetchTodos();
+    },
+    onError: (error) => toast.error(error.message),
+  });
+  
+  const concluirTodoMutation = trpc.todos.concluir.useMutation({
+    onSuccess: () => {
+      toast.success("Tarefa concluída!");
+      refetchTodos();
+    },
+    onError: (error) => toast.error(error.message),
+  });
+  
+  const eliminarTodoMutation = trpc.todos.eliminar.useMutation({
+    onSuccess: () => {
+      toast.success("Tarefa eliminada!");
+      refetchTodos();
+    },
+    onError: (error) => toast.error(error.message),
+  });
+  
+  const criarCategoriaMutation = trpc.todoCategories.criar.useMutation({
+    onSuccess: () => {
+      toast.success("Categoria criada!");
+      setNovaCategoriaNome("");
+      setNovaCategoriaCor("#3B82F6");
+      refetchCategorias();
+    },
+    onError: (error) => toast.error(error.message),
+  });
+  
+  const eliminarCategoriaMutation = trpc.todoCategories.eliminar.useMutation({
+    onSuccess: () => {
+      toast.success("Categoria eliminada!");
+      refetchCategorias();
+    },
+    onError: (error) => toast.error(error.message),
+  });
+  
+  const resetForm = () => {
+    setTitulo("");
+    setDescricao("");
+    setCategoriaId("");
+    setPrioridade("media");
+    setAtribuidoLojaId("");
+    setAtribuidoUserId("");
+    setDataLimite("");
+  };
+  
+  const handleCriarTodo = () => {
+    if (!titulo.trim()) {
+      toast.error("O título é obrigatório");
+      return;
+    }
+    
+    criarTodoMutation.mutate({
+      titulo: titulo.trim(),
+      descricao: descricao.trim() || undefined,
+      categoriaId: categoriaId ? parseInt(categoriaId) : undefined,
+      prioridade: prioridade as any,
+      atribuidoLojaId: atribuidoLojaId ? parseInt(atribuidoLojaId) : undefined,
+      atribuidoUserId: atribuidoUserId ? parseInt(atribuidoUserId) : undefined,
+      dataLimite: dataLimite || undefined,
+    });
+  };
+  
+  const handleEditarTodo = () => {
+    if (!todoSelecionado) return;
+    
+    atualizarTodoMutation.mutate({
+      id: todoSelecionado.id,
+      titulo: titulo.trim(),
+      descricao: descricao.trim() || undefined,
+      categoriaId: categoriaId ? parseInt(categoriaId) : null,
+      prioridade: prioridade as any,
+      atribuidoLojaId: atribuidoLojaId ? parseInt(atribuidoLojaId) : null,
+      atribuidoUserId: atribuidoUserId ? parseInt(atribuidoUserId) : null,
+      dataLimite: dataLimite || null,
+    });
+  };
+  
+  const abrirEditar = (todo: any) => {
+    setTodoSelecionado(todo);
+    setTitulo(todo.titulo);
+    setDescricao(todo.descricao || "");
+    setCategoriaId(todo.categoriaId?.toString() || "");
+    setPrioridade(todo.prioridade);
+    setAtribuidoLojaId(todo.atribuidoLojaId?.toString() || "");
+    setAtribuidoUserId(todo.atribuidoUserId?.toString() || "");
+    setDataLimite(todo.dataLimite ? new Date(todo.dataLimite).toISOString().split('T')[0] : "");
+    setEditarTodoOpen(true);
+  };
+  
+  const corPrioridade = (prioridade: string) => {
+    switch (prioridade) {
+      case "urgente": return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400";
+      case "alta": return "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400";
+      case "media": return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400";
+      case "baixa": return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400";
+      default: return "bg-gray-100 text-gray-800";
+    }
+  };
+  
+  const corEstado = (estado: string) => {
+    switch (estado) {
+      case "concluida": return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400";
+      case "em_progresso": return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400";
+      case "devolvida": return "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400";
+      default: return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300";
+    }
+  };
+  
+  const iconeEstado = (estado: string) => {
+    switch (estado) {
+      case "concluida": return <CheckCircle2 className="h-4 w-4 text-green-600" />;
+      case "em_progresso": return <Clock className="h-4 w-4 text-blue-600" />;
+      case "devolvida": return <RotateCcw className="h-4 w-4 text-orange-600" />;
+      default: return <AlertTriangle className="h-4 w-4 text-gray-600" />;
+    }
+  };
+
+  return (
+    <DashboardLayout>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h1 className="text-2xl font-bold flex items-center gap-2">
+              <ListTodo className="h-6 w-6" />
+              To-Do
+            </h1>
+            <p className="text-muted-foreground">Gestão de tarefas e atribuições</p>
+          </div>
+          <div className="flex gap-2">
+            {user?.role === "admin" && (
+              <Button variant="outline" onClick={() => setCategoriasOpen(true)}>
+                <Settings className="h-4 w-4 mr-2" />
+                Categorias
+              </Button>
+            )}
+            <Button onClick={() => { resetForm(); setNovoTodoOpen(true); }}>
+              <Plus className="h-4 w-4 mr-2" />
+              Nova Tarefa
+            </Button>
+          </div>
+        </div>
+        
+        {/* Estatísticas */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <Card className="bg-gray-50 dark:bg-gray-800/50">
+            <CardContent className="pt-4">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5 text-gray-500" />
+                <div>
+                  <p className="text-2xl font-bold">{estatisticas?.pendentes || 0}</p>
+                  <p className="text-xs text-muted-foreground">Pendentes</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="bg-blue-50 dark:bg-blue-900/20">
+            <CardContent className="pt-4">
+              <div className="flex items-center gap-2">
+                <Clock className="h-5 w-5 text-blue-500" />
+                <div>
+                  <p className="text-2xl font-bold text-blue-600">{estatisticas?.emProgresso || 0}</p>
+                  <p className="text-xs text-muted-foreground">Em Progresso</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="bg-green-50 dark:bg-green-900/20">
+            <CardContent className="pt-4">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-5 w-5 text-green-500" />
+                <div>
+                  <p className="text-2xl font-bold text-green-600">{estatisticas?.concluidos || 0}</p>
+                  <p className="text-xs text-muted-foreground">Concluídos</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="bg-orange-50 dark:bg-orange-900/20">
+            <CardContent className="pt-4">
+              <div className="flex items-center gap-2">
+                <RotateCcw className="h-5 w-5 text-orange-500" />
+                <div>
+                  <p className="text-2xl font-bold text-orange-600">{estatisticas?.devolvidos || 0}</p>
+                  <p className="text-xs text-muted-foreground">Devolvidos</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+        
+        {/* Filtros */}
+        <Card>
+          <CardContent className="pt-4">
+            <div className="flex flex-wrap gap-3 items-center">
+              <Filter className="h-4 w-4 text-muted-foreground" />
+              
+              <Select value={filtroLoja} onValueChange={setFiltroLoja}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Loja" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todas">Todas as lojas</SelectItem>
+                  {lojas?.map((loja: any) => (
+                    <SelectItem key={loja.id} value={loja.id.toString()}>
+                      {loja.nome}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              
+              <Select value={filtroEstado} onValueChange={setFiltroEstado}>
+                <SelectTrigger className="w-[150px]">
+                  <SelectValue placeholder="Estado" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todos">Todos</SelectItem>
+                  <SelectItem value="pendente">Pendente</SelectItem>
+                  <SelectItem value="em_progresso">Em Progresso</SelectItem>
+                  <SelectItem value="concluida">Concluída</SelectItem>
+                  <SelectItem value="devolvida">Devolvida</SelectItem>
+                </SelectContent>
+              </Select>
+              
+              <Select value={filtroCategoria} onValueChange={setFiltroCategoria}>
+                <SelectTrigger className="w-[150px]">
+                  <SelectValue placeholder="Categoria" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todas">Todas</SelectItem>
+                  {categorias?.map((cat) => (
+                    <SelectItem key={cat.id} value={cat.id.toString()}>
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: cat.cor }} />
+                        {cat.nome}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              
+              <Select value={filtroPrioridade} onValueChange={setFiltroPrioridade}>
+                <SelectTrigger className="w-[150px]">
+                  <SelectValue placeholder="Prioridade" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todas">Todas</SelectItem>
+                  <SelectItem value="urgente">Urgente</SelectItem>
+                  <SelectItem value="alta">Alta</SelectItem>
+                  <SelectItem value="media">Média</SelectItem>
+                  <SelectItem value="baixa">Baixa</SelectItem>
+                </SelectContent>
+              </Select>
+              
+              <Button
+                variant={apenasMeus ? "default" : "outline"}
+                size="sm"
+                onClick={() => setApenasMeus(!apenasMeus)}
+              >
+                <User className="h-4 w-4 mr-1" />
+                Apenas meus
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+        
+        {/* Lista de To-Dos */}
+        <div className="space-y-3">
+          {todos?.length === 0 && (
+            <Card>
+              <CardContent className="py-12 text-center">
+                <ListTodo className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <p className="text-muted-foreground">Nenhuma tarefa encontrada</p>
+                <Button className="mt-4" onClick={() => { resetForm(); setNovoTodoOpen(true); }}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Criar primeira tarefa
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+          
+          {todos?.map((todo) => (
+            <Card key={todo.id} className="hover:shadow-md transition-shadow">
+              <CardContent className="py-4">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap mb-2">
+                      {iconeEstado(todo.estado)}
+                      <h3 className="font-semibold truncate">{todo.titulo}</h3>
+                      <Badge className={corPrioridade(todo.prioridade)}>
+                        {todo.prioridade}
+                      </Badge>
+                      <Badge className={corEstado(todo.estado)}>
+                        {todo.estado.replace('_', ' ')}
+                      </Badge>
+                      {todo.categoriaNome && (
+                        <Badge 
+                          variant="outline" 
+                          style={{ borderColor: todo.categoriaCor || undefined, color: todo.categoriaCor || undefined }}
+                        >
+                          <Tag className="h-3 w-3 mr-1" />
+                          {todo.categoriaNome}
+                        </Badge>
+                      )}
+                    </div>
+                    
+                    {todo.descricao && (
+                      <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
+                        {todo.descricao}
+                      </p>
+                    )}
+                    
+                    <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
+                      {todo.lojaNome && (
+                        <span className="flex items-center gap-1">
+                          <Store className="h-3 w-3" />
+                          {todo.lojaNome}
+                        </span>
+                      )}
+                      {todo.atribuidoUserNome && (
+                        <span className="flex items-center gap-1">
+                          <User className="h-3 w-3" />
+                          {todo.atribuidoUserNome}
+                        </span>
+                      )}
+                      {todo.dataLimite && (
+                        <span className="flex items-center gap-1">
+                          <Calendar className="h-3 w-3" />
+                          {new Date(todo.dataLimite).toLocaleDateString('pt-PT')}
+                        </span>
+                      )}
+                      <span>Criado por: {todo.criadoPorNome || 'N/A'}</span>
+                      <span>{new Date(todo.createdAt).toLocaleDateString('pt-PT')}</span>
+                    </div>
+                    
+                    {todo.comentario && (
+                      <div className="mt-2 p-2 bg-orange-50 dark:bg-orange-900/20 rounded text-sm">
+                        <strong>Comentário:</strong> {todo.comentario}
+                      </div>
+                    )}
+                  </div>
+                  
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon">
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => abrirEditar(todo)}>
+                        <Edit className="h-4 w-4 mr-2" />
+                        Editar
+                      </DropdownMenuItem>
+                      {todo.estado !== 'concluida' && (
+                        <DropdownMenuItem onClick={() => concluirTodoMutation.mutate({ id: todo.id })}>
+                          <CheckCircle2 className="h-4 w-4 mr-2" />
+                          Marcar como concluída
+                        </DropdownMenuItem>
+                      )}
+                      <DropdownMenuItem 
+                        className="text-red-600"
+                        onClick={() => {
+                          if (confirm('Tem certeza que deseja eliminar esta tarefa?')) {
+                            eliminarTodoMutation.mutate({ id: todo.id });
+                          }
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Eliminar
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+        
+        {/* Dialog Nova Tarefa */}
+        <Dialog open={novoTodoOpen} onOpenChange={setNovoTodoOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Nova Tarefa</DialogTitle>
+              <DialogDescription>
+                Crie uma nova tarefa e atribua a uma loja ou utilizador
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Título *</label>
+                <Input
+                  value={titulo}
+                  onChange={(e) => setTitulo(e.target.value)}
+                  placeholder="Título da tarefa"
+                />
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium">Descrição</label>
+                <Textarea
+                  value={descricao}
+                  onChange={(e) => setDescricao(e.target.value)}
+                  placeholder="Descrição detalhada..."
+                  rows={3}
+                />
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium">Categoria</label>
+                  <Select value={categoriaId} onValueChange={setCategoriaId}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecionar..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categorias?.map((cat) => (
+                        <SelectItem key={cat.id} value={cat.id.toString()}>
+                          <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: cat.cor }} />
+                            {cat.nome}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div>
+                  <label className="text-sm font-medium">Prioridade</label>
+                  <Select value={prioridade} onValueChange={setPrioridade}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="baixa">Baixa</SelectItem>
+                      <SelectItem value="media">Média</SelectItem>
+                      <SelectItem value="alta">Alta</SelectItem>
+                      <SelectItem value="urgente">Urgente</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium">Atribuir a Loja</label>
+                <Select value={atribuidoLojaId} onValueChange={(v) => { setAtribuidoLojaId(v); setAtribuidoUserId(""); }}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecionar loja..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {lojas?.map((loja) => (
+                      <SelectItem key={loja.id} value={loja.id.toString()}>
+                        {loja.nome}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium">Ou atribuir a Utilizador</label>
+                <Select value={atribuidoUserId} onValueChange={(v) => { setAtribuidoUserId(v); setAtribuidoLojaId(""); }}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecionar utilizador..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {gestores?.map((g: any) => (
+                      <SelectItem key={g.id} value={g.userId?.toString() || g.id.toString()}>
+                        {g.nome || g.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium">Data Limite (opcional)</label>
+                <Input
+                  type="date"
+                  value={dataLimite}
+                  onChange={(e) => setDataLimite(e.target.value)}
+                />
+              </div>
+            </div>
+            
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setNovoTodoOpen(false)}>
+                Cancelar
+              </Button>
+              <Button onClick={handleCriarTodo} disabled={criarTodoMutation.isPending}>
+                {criarTodoMutation.isPending ? "A criar..." : "Criar Tarefa"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+        
+        {/* Dialog Editar Tarefa */}
+        <Dialog open={editarTodoOpen} onOpenChange={setEditarTodoOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Editar Tarefa</DialogTitle>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Título *</label>
+                <Input
+                  value={titulo}
+                  onChange={(e) => setTitulo(e.target.value)}
+                  placeholder="Título da tarefa"
+                />
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium">Descrição</label>
+                <Textarea
+                  value={descricao}
+                  onChange={(e) => setDescricao(e.target.value)}
+                  placeholder="Descrição detalhada..."
+                  rows={3}
+                />
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium">Categoria</label>
+                  <Select value={categoriaId} onValueChange={setCategoriaId}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecionar..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categorias?.map((cat) => (
+                        <SelectItem key={cat.id} value={cat.id.toString()}>
+                          <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: cat.cor }} />
+                            {cat.nome}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div>
+                  <label className="text-sm font-medium">Prioridade</label>
+                  <Select value={prioridade} onValueChange={setPrioridade}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="baixa">Baixa</SelectItem>
+                      <SelectItem value="media">Média</SelectItem>
+                      <SelectItem value="alta">Alta</SelectItem>
+                      <SelectItem value="urgente">Urgente</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium">Atribuir a Loja</label>
+                <Select value={atribuidoLojaId} onValueChange={(v) => { setAtribuidoLojaId(v); setAtribuidoUserId(""); }}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecionar loja..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {lojas?.map((loja) => (
+                      <SelectItem key={loja.id} value={loja.id.toString()}>
+                        {loja.nome}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium">Ou atribuir a Utilizador</label>
+                <Select value={atribuidoUserId} onValueChange={(v) => { setAtribuidoUserId(v); setAtribuidoLojaId(""); }}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecionar utilizador..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {gestores?.map((g: any) => (
+                      <SelectItem key={g.id} value={g.userId?.toString() || g.id.toString()}>
+                        {g.nome || g.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium">Data Limite</label>
+                <Input
+                  type="date"
+                  value={dataLimite}
+                  onChange={(e) => setDataLimite(e.target.value)}
+                />
+              </div>
+            </div>
+            
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setEditarTodoOpen(false)}>
+                Cancelar
+              </Button>
+              <Button onClick={handleEditarTodo} disabled={atualizarTodoMutation.isPending}>
+                {atualizarTodoMutation.isPending ? "A guardar..." : "Guardar"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+        
+        {/* Dialog Categorias */}
+        <Dialog open={categoriasOpen} onOpenChange={setCategoriasOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Gerir Categorias</DialogTitle>
+              <DialogDescription>
+                Crie e gerencie categorias para organizar as tarefas
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              <div className="flex gap-2">
+                <Input
+                  value={novaCategoriaNome}
+                  onChange={(e) => setNovaCategoriaNome(e.target.value)}
+                  placeholder="Nome da categoria"
+                  className="flex-1"
+                />
+                <Input
+                  type="color"
+                  value={novaCategoriaCor}
+                  onChange={(e) => setNovaCategoriaCor(e.target.value)}
+                  className="w-14"
+                />
+                <Button 
+                  onClick={() => {
+                    if (novaCategoriaNome.trim()) {
+                      criarCategoriaMutation.mutate({ nome: novaCategoriaNome.trim(), cor: novaCategoriaCor });
+                    }
+                  }}
+                  disabled={criarCategoriaMutation.isPending}
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+              
+              <div className="space-y-2 max-h-60 overflow-y-auto">
+                {categorias?.map((cat) => (
+                  <div key={cat.id} className="flex items-center justify-between p-2 bg-muted rounded">
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 rounded-full" style={{ backgroundColor: cat.cor }} />
+                      <span>{cat.nome}</span>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => {
+                        if (confirm('Eliminar esta categoria?')) {
+                          eliminarCategoriaMutation.mutate({ id: cat.id });
+                        }
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4 text-red-500" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+    </DashboardLayout>
+  );
+}

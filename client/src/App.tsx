@@ -32,6 +32,7 @@ import { ResultadosDashboard } from "./pages/ResultadosDashboard";
 import { ComparacaoLojas } from "./pages/ComparacaoLojas";
 import PortalLoja from "./pages/PortalLoja";
 import ReunioesQuinzenais from "./pages/ReunioesQuinzenais";
+import Todos from "./pages/Todos";
 
 
 function Router() {
@@ -73,6 +74,9 @@ function Router() {
       
       {/* Reuniões Quinzenais */}
       <Route path={"/reunioes-quinzenais"} component={ReunioesQuinzenais} />
+      
+      {/* To-Do */}
+      <Route path={"/todos"} component={Todos} />
       
       {/* Portal da Loja (acesso público via token) */}
       <Route path={"/portal-loja"} component={PortalLoja} />

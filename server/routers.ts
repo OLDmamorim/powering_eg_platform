@@ -2775,6 +2775,346 @@ export const appRouter = router({
       return await db.getEstatisticasReunioesQuinzenais();
     }),
   }),
+  
+  // ==================== TO-DO CATEGORIES ====================
+  todoCategories: router({
+    // Listar todas as categorias
+    listar: gestorProcedure
+      .input(z.object({ apenasAtivas: z.boolean().optional() }).optional())
+      .query(async ({ input }) => {
+        return await db.getAllTodoCategories(input?.apenasAtivas ?? true);
+      }),
+    
+    // Criar categoria (apenas admin)
+    criar: adminProcedure
+      .input(z.object({
+        nome: z.string().min(1),
+        cor: z.string().optional(),
+        icone: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        return await db.createTodoCategory(input);
+      }),
+    
+    // Atualizar categoria (apenas admin)
+    atualizar: adminProcedure
+      .input(z.object({
+        id: z.number(),
+        nome: z.string().optional(),
+        cor: z.string().optional(),
+        icone: z.string().optional(),
+        ativo: z.boolean().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        await db.updateTodoCategory(id, data);
+        return { success: true };
+      }),
+    
+    // Eliminar categoria (apenas admin - soft delete)
+    eliminar: adminProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await db.deleteTodoCategory(input.id);
+        return { success: true };
+      }),
+  }),
+  
+  // ==================== TO-DO ====================
+  todos: router({
+    // Listar todos os To-Dos com filtros
+    listar: gestorProcedure
+      .input(z.object({
+        lojaId: z.number().optional(),
+        userId: z.number().optional(),
+        estado: z.string().optional(),
+        categoriaId: z.number().optional(),
+        prioridade: z.string().optional(),
+        criadoPorId: z.number().optional(),
+        apenasMeus: z.boolean().optional(),
+      }).optional())
+      .query(async ({ ctx, input }) => {
+        const filtros = { ...input };
+        
+        // Se apenasMeus, filtrar por user atual
+        if (input?.apenasMeus) {
+          filtros.userId = ctx.user.id;
+        }
+        
+        return await db.getAllTodos(filtros);
+      }),
+    
+    // Obter To-Do por ID
+    getById: gestorProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        return await db.getTodoById(input.id);
+      }),
+    
+    // Criar To-Do
+    criar: gestorProcedure
+      .input(z.object({
+        titulo: z.string().min(1),
+        descricao: z.string().optional(),
+        categoriaId: z.number().optional(),
+        prioridade: z.enum(['baixa', 'media', 'alta', 'urgente']).optional(),
+        atribuidoLojaId: z.number().optional(),
+        atribuidoUserId: z.number().optional(),
+        dataLimite: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const todo = await db.createTodo({
+          ...input,
+          criadoPorId: ctx.user.id,
+          dataLimite: input.dataLimite ? new Date(input.dataLimite) : undefined,
+        });
+        
+        // Enviar notificação por email se atribuído a uma loja
+        if (input.atribuidoLojaId && todo) {
+          const loja = await db.getLojaById(input.atribuidoLojaId);
+          if (loja?.email) {
+            try {
+              await sendEmail({
+                to: loja.email,
+                subject: `Nova Tarefa Atribuída: ${input.titulo}`,
+                html: gerarHTMLNotificacaoTodo({
+                  tipo: 'nova',
+                  titulo: input.titulo,
+                  descricao: input.descricao || '',
+                  prioridade: input.prioridade || 'media',
+                  criadoPor: ctx.user.name || 'Gestor',
+                  lojaNome: loja.nome,
+                }),
+              });
+            } catch (e) {
+              console.error('Erro ao enviar email de notificação:', e);
+            }
+          }
+        }
+        
+        return todo;
+      }),
+    
+    // Atualizar To-Do
+    atualizar: gestorProcedure
+      .input(z.object({
+        id: z.number(),
+        titulo: z.string().optional(),
+        descricao: z.string().optional(),
+        categoriaId: z.number().nullable().optional(),
+        prioridade: z.enum(['baixa', 'media', 'alta', 'urgente']).optional(),
+        estado: z.enum(['pendente', 'em_progresso', 'concluida', 'devolvida']).optional(),
+        atribuidoLojaId: z.number().nullable().optional(),
+        atribuidoUserId: z.number().nullable().optional(),
+        dataLimite: z.string().nullable().optional(),
+        comentario: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        await db.updateTodo(id, {
+          ...data,
+          dataLimite: data.dataLimite ? new Date(data.dataLimite) : null,
+        });
+        return { success: true };
+      }),
+    
+    // Concluir To-Do
+    concluir: gestorProcedure
+      .input(z.object({
+        id: z.number(),
+        comentario: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        await db.concluirTodo(input.id, input.comentario);
+        return { success: true };
+      }),
+    
+    // Devolver To-Do ao criador
+    devolver: gestorProcedure
+      .input(z.object({
+        id: z.number(),
+        comentario: z.string().min(1, 'Deve indicar o motivo da devolução'),
+      }))
+      .mutation(async ({ input }) => {
+        await db.devolverTodo(input.id, input.comentario);
+        return { success: true };
+      }),
+    
+    // Reatribuir To-Do
+    reatribuir: gestorProcedure
+      .input(z.object({
+        id: z.number(),
+        lojaId: z.number().optional(),
+        userId: z.number().optional(),
+        motivo: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        await db.reatribuirTodo(
+          input.id,
+          { lojaId: input.lojaId, userId: input.userId },
+          input.motivo
+        );
+        
+        // Enviar notificação por email se reatribuído a uma loja
+        if (input.lojaId) {
+          const loja = await db.getLojaById(input.lojaId);
+          const todo = await db.getTodoById(input.id);
+          if (loja?.email && todo) {
+            try {
+              await sendEmail({
+                to: loja.email,
+                subject: `Tarefa Reatribuída: ${todo.titulo}`,
+                html: gerarHTMLNotificacaoTodo({
+                  tipo: 'reatribuida',
+                  titulo: todo.titulo,
+                  descricao: todo.descricao || '',
+                  prioridade: todo.prioridade,
+                  criadoPor: ctx.user.name || 'Gestor',
+                  lojaNome: loja.nome,
+                }),
+              });
+            } catch (e) {
+              console.error('Erro ao enviar email de notificação:', e);
+            }
+          }
+        }
+        
+        return { success: true };
+      }),
+    
+    // Eliminar To-Do
+    eliminar: gestorProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await db.deleteTodo(input.id);
+        return { success: true };
+      }),
+    
+    // Estatísticas de To-Dos
+    estatisticas: gestorProcedure.query(async () => {
+      return await db.contarTodosPorEstado();
+    }),
+  }),
+  
+  // ==================== TO-DO PORTAL LOJA ====================
+  todosPortalLoja: router({
+    // Listar To-Dos da loja (via token)
+    listar: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        apenasAtivos: z.boolean().optional(),
+      }))
+      .query(async ({ input }) => {
+        const auth = await db.validarTokenLoja(input.token);
+        if (!auth) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        return await db.getTodosByLojaId(auth.loja.id, input.apenasAtivos ?? true);
+      }),
+    
+    // Contar To-Dos ativos da loja
+    contar: publicProcedure
+      .input(z.object({ token: z.string() }))
+      .query(async ({ input }) => {
+        const auth = await db.validarTokenLoja(input.token);
+        if (!auth) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        return await db.contarTodosLojaAtivos(auth.loja.id);
+      }),
+    
+    // Atualizar estado do To-Do (pela loja)
+    atualizarEstado: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        todoId: z.number(),
+        estado: z.enum(['pendente', 'em_progresso']),
+      }))
+      .mutation(async ({ input }) => {
+        const auth = await db.validarTokenLoja(input.token);
+        if (!auth) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        
+        // Verificar se o To-Do pertence a esta loja
+        const todo = await db.getTodoById(input.todoId);
+        if (!todo || todo.atribuidoLojaId !== auth.loja.id) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Não tem permissão para alterar esta tarefa' });
+        }
+        
+        await db.updateTodo(input.todoId, { estado: input.estado });
+        return { success: true };
+      }),
+    
+    // Concluir To-Do (pela loja)
+    concluir: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        todoId: z.number(),
+        comentario: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const auth = await db.validarTokenLoja(input.token);
+        if (!auth) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        
+        // Verificar se o To-Do pertence a esta loja
+        const todo = await db.getTodoById(input.todoId);
+        if (!todo || todo.atribuidoLojaId !== auth.loja.id) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Não tem permissão para alterar esta tarefa' });
+        }
+        
+        await db.concluirTodo(input.todoId, input.comentario);
+        return { success: true };
+      }),
+    
+    // Devolver To-Do ao criador (pela loja)
+    devolver: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        todoId: z.number(),
+        comentario: z.string().min(1, 'Deve indicar o motivo da devolução'),
+      }))
+      .mutation(async ({ input }) => {
+        const auth = await db.validarTokenLoja(input.token);
+        if (!auth) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        
+        // Verificar se o To-Do pertence a esta loja
+        const todo = await db.getTodoById(input.todoId);
+        if (!todo || todo.atribuidoLojaId !== auth.loja.id) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Não tem permissão para alterar esta tarefa' });
+        }
+        
+        await db.devolverTodo(input.todoId, input.comentario);
+        
+        // Notificar criador por email
+        const criador = await db.getUserById(todo.criadoPorId);
+        if (criador?.email) {
+          try {
+            await sendEmail({
+              to: criador.email,
+              subject: `Tarefa Devolvida: ${todo.titulo}`,
+              html: gerarHTMLNotificacaoTodo({
+                tipo: 'devolvida',
+                titulo: todo.titulo,
+                descricao: todo.descricao || '',
+                prioridade: todo.prioridade,
+                criadoPor: criador.name || 'Gestor',
+                lojaNome: auth.loja.nome,
+                comentario: input.comentario,
+              }),
+            });
+          } catch (e) {
+            console.error('Erro ao enviar email de notificação:', e);
+          }
+        }
+        
+        return { success: true };
+      }),
+  }),
 });
 
 // Função auxiliar para gerar HTML do email de reunião quinzenal
@@ -2906,6 +3246,107 @@ function gerarHTMLReuniaoQuinzenal(dados: {
       <div class="footer">
         <p>PoweringEG Platform 2.0 - Sistema de Reuniões Quinzenais</p>
         <p>Este email foi gerado automaticamente após a conclusão da reunião.</p>
+      </div>
+    </body>
+    </html>
+  `;
+}
+
+// Função auxiliar para gerar HTML do email de notificação de To-Do
+function gerarHTMLNotificacaoTodo(dados: {
+  tipo: 'nova' | 'reatribuida' | 'devolvida' | 'concluida';
+  titulo: string;
+  descricao: string;
+  prioridade: string;
+  criadoPor: string;
+  lojaNome: string;
+  comentario?: string;
+}): string {
+  const corPrioridade = {
+    baixa: '#22c55e',
+    media: '#3b82f6',
+    alta: '#f59e0b',
+    urgente: '#ef4444',
+  }[dados.prioridade] || '#3b82f6';
+  
+  const tipoTexto = {
+    nova: 'Nova Tarefa Atribuída',
+    reatribuida: 'Tarefa Reatribuída',
+    devolvida: 'Tarefa Devolvida',
+    concluida: 'Tarefa Concluída',
+  }[dados.tipo];
+  
+  const corTipo = {
+    nova: '#3b82f6',
+    reatribuida: '#8b5cf6',
+    devolvida: '#f59e0b',
+    concluida: '#22c55e',
+  }[dados.tipo];
+  
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <title>${tipoTexto}</title>
+      <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; background: #f3f4f6; }
+        .container { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .header { background: ${corTipo}; color: white; padding: 24px; text-align: center; }
+        .header h1 { margin: 0; font-size: 20px; }
+        .content { padding: 24px; }
+        .task-title { font-size: 18px; font-weight: 600; margin-bottom: 16px; }
+        .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; text-transform: uppercase; }
+        .badge-prioridade { background: ${corPrioridade}20; color: ${corPrioridade}; }
+        .info-row { display: flex; margin: 12px 0; }
+        .info-label { font-weight: 600; color: #6b7280; width: 100px; }
+        .info-value { flex: 1; }
+        .descricao { background: #f9fafb; padding: 16px; border-radius: 8px; margin: 16px 0; border-left: 4px solid ${corTipo}; }
+        .comentario { background: #fef3c7; padding: 16px; border-radius: 8px; margin: 16px 0; border-left: 4px solid #f59e0b; }
+        .footer { text-align: center; padding: 16px; color: #9ca3af; font-size: 12px; border-top: 1px solid #e5e7eb; }
+        .btn { display: inline-block; background: ${corTipo}; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; margin-top: 16px; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>${tipoTexto}</h1>
+        </div>
+        <div class="content">
+          <div class="task-title">${dados.titulo}</div>
+          <span class="badge badge-prioridade">Prioridade: ${dados.prioridade}</span>
+          
+          <div class="info-row">
+            <span class="info-label">Loja:</span>
+            <span class="info-value">${dados.lojaNome}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Criado por:</span>
+            <span class="info-value">${dados.criadoPor}</span>
+          </div>
+          
+          ${dados.descricao ? `
+          <div class="descricao">
+            <strong>Descrição:</strong><br>
+            ${dados.descricao}
+          </div>
+          ` : ''}
+          
+          ${dados.comentario ? `
+          <div class="comentario">
+            <strong>Comentário:</strong><br>
+            ${dados.comentario}
+          </div>
+          ` : ''}
+          
+          <p style="text-align: center;">
+            <a href="#" class="btn">Ver no Portal</a>
+          </p>
+        </div>
+        <div class="footer">
+          <p>PoweringEG Platform 2.0 - Sistema de Tarefas</p>
+          <p>Este email foi gerado automaticamente.</p>
+        </div>
       </div>
     </body>
     </html>
