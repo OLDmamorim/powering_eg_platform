@@ -1535,3 +1535,6 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## Melhorias To-Do v5.24
 - [x] To-Do: Cards clicáveis como filtros de estado
 - [x] To-Do: Filtro de lojas mostra apenas lojas do gestor (não todas)
+
+## Melhorias To-Do v5.25
+- [x] To-Do: Destacar loja atribuída no card da tarefa (mais visível)

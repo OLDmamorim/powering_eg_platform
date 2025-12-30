@@ -435,13 +435,15 @@ export default function Todos() {
                       </p>
                     )}
                     
+                    {/* Loja atribuída em destaque */}
+                    {todo.lojaNome && (
+                      <div className="flex items-center gap-2 mb-2 p-2 bg-blue-50 dark:bg-blue-900/30 rounded-lg border border-blue-200 dark:border-blue-700">
+                        <Store className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                        <span className="font-medium text-blue-700 dark:text-blue-300">{todo.lojaNome}</span>
+                      </div>
+                    )}
+                    
                     <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
-                      {todo.lojaNome && (
-                        <span className="flex items-center gap-1">
-                          <Store className="h-3 w-3" />
-                          {todo.lojaNome}
-                        </span>
-                      )}
                       {todo.atribuidoUserNome && (
                         <span className="flex items-center gap-1">
                           <User className="h-3 w-3" />
