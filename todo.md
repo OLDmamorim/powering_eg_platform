@@ -1543,3 +1543,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Portal Loja: Criar card To-Do com contagem de tarefas pendentes
 - [x] Portal Loja: Remover cards de reuniões (Total Reuniões, Última Reunião)
 - [x] Portal Loja: Cards clicáveis como filtros
+
+## Melhorias Portal Loja v5.27
+- [x] Portal Loja: Animação pulse suave nos cards quando há tarefas não vistas
+- [x] Portal Loja: Mini-lista das 3 tarefas mais urgentes nos cards
+- [x] Portal Loja: Botão de ação rápida no card To-Do (Iniciar tarefa)

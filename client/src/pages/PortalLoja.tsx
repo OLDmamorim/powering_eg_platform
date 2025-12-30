@@ -294,36 +294,87 @@ export default function PortalLoja() {
 
       {/* Stats Cards */}
       <div className="container mx-auto px-4 py-6">
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
-          {/* Card Pendentes - Clicável */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          {/* Card Pendentes - Clicável com pulse */}
           <Card 
-            className={`cursor-pointer transition-all hover:scale-105 hover:shadow-md ${activeTab === 'pendentes' ? 'ring-2 ring-amber-500 bg-amber-50 dark:bg-amber-900/30' : ''}`}
+            className={`cursor-pointer transition-all hover:scale-105 hover:shadow-md ${activeTab === 'pendentes' ? 'ring-2 ring-amber-500 bg-amber-50 dark:bg-amber-900/30' : ''} ${(dadosLoja?.pendentesAtivos || 0) > 0 ? 'animate-soft-pulse-amber' : ''}`}
             onClick={() => setActiveTab('pendentes')}
           >
             <CardContent className="pt-4">
-              <div className="flex items-center gap-2">
-                <AlertTriangle className="h-5 w-5 text-amber-500" />
-                <div>
-                  <p className="text-2xl font-bold">{dadosLoja?.pendentesAtivos || 0}</p>
-                  <p className="text-xs text-muted-foreground">Pendentes Ativos</p>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="h-5 w-5 text-amber-500" />
+                  <div>
+                    <p className="text-2xl font-bold">{dadosLoja?.pendentesAtivos || 0}</p>
+                    <p className="text-xs text-muted-foreground">Pendentes Ativos</p>
+                  </div>
                 </div>
               </div>
+              {/* Mini-lista de pendentes urgentes */}
+              {pendentesAtivos.length > 0 && (
+                <div className="border-t pt-2 mt-2 space-y-1">
+                  {pendentesAtivos.slice(0, 3).map((p: any) => (
+                    <p key={p.id} className="text-xs text-muted-foreground truncate flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-500 flex-shrink-0"></span>
+                      {p.descricao?.substring(0, 40) || 'Pendente'}...
+                    </p>
+                  ))}
+                  {pendentesAtivos.length > 3 && (
+                    <p className="text-xs text-amber-600 font-medium">+{pendentesAtivos.length - 3} mais</p>
+                  )}
+                </div>
+              )}
             </CardContent>
           </Card>
           
-          {/* Card To-Do - Clicável */}
+          {/* Card To-Do - Clicável com pulse */}
           <Card 
-            className={`cursor-pointer transition-all hover:scale-105 hover:shadow-md ${activeTab === 'todos' ? 'ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-900/30' : ''}`}
+            className={`cursor-pointer transition-all hover:scale-105 hover:shadow-md ${activeTab === 'todos' ? 'ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-900/30' : ''} ${(todosCount || 0) > 0 ? 'animate-soft-pulse-blue' : ''}`}
             onClick={() => setActiveTab('todos')}
           >
             <CardContent className="pt-4">
-              <div className="flex items-center gap-2">
-                <ListTodo className="h-5 w-5 text-blue-500" />
-                <div>
-                  <p className="text-2xl font-bold">{todosCount || 0}</p>
-                  <p className="text-xs text-muted-foreground">Tarefas To-Do</p>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <ListTodo className="h-5 w-5 text-blue-500" />
+                  <div>
+                    <p className="text-2xl font-bold">{todosCount || 0}</p>
+                    <p className="text-xs text-muted-foreground">Tarefas To-Do</p>
+                  </div>
                 </div>
+                {/* Botão de ação rápida - Iniciar tarefa mais urgente */}
+                {todosList && todosList.length > 0 && todosList[0]?.estado === 'pendente' && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-7 text-xs border-blue-300 text-blue-600 hover:bg-blue-50"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      atualizarEstadoTodoMutation.mutate({
+                        token,
+                        todoId: todosList[0].id,
+                        estado: 'em_progresso'
+                      });
+                    }}
+                  >
+                    <Clock className="h-3 w-3 mr-1" />
+                    Iniciar
+                  </Button>
+                )}
               </div>
+              {/* Mini-lista de tarefas urgentes */}
+              {todosList && todosList.length > 0 && (
+                <div className="border-t pt-2 mt-2 space-y-1">
+                  {todosList.slice(0, 3).map((t: any) => (
+                    <p key={t.id} className="text-xs text-muted-foreground truncate flex items-center gap-1">
+                      <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${t.prioridade === 'urgente' ? 'bg-red-500' : t.prioridade === 'alta' ? 'bg-orange-500' : 'bg-blue-500'}`}></span>
+                      {t.titulo?.substring(0, 40) || 'Tarefa'}...
+                    </p>
+                  ))}
+                  {todosList.length > 3 && (
+                    <p className="text-xs text-blue-600 font-medium">+{todosList.length - 3} mais</p>
+                  )}
+                </div>
+              )}
             </CardContent>
           </Card>
           
