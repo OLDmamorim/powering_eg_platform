@@ -1,0 +1,25 @@
+{
+  "query": "SELECT l.nome as lojaNome, gl.gestorId, u.name as gestorNome\nFROM lojas l\nLEFT JOIN gestor_lojas gl ON l.id = gl.lojaId\nLEFT JOIN gestores g ON gl.gestorId = g.id\nLEFT JOIN users u ON g.userId = u.id\nWHERE l.nome IN ('Sm castanheira do ribatejo', 'Sm pesados porto', 'Viseu sm');",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT l.nome as lojaNome, gl.gestorId, u.name as gestorNome\nFROM lojas l\nLEFT JOIN gestor_lojas gl ON l.id = gl.lojaId\nLEFT JOIN gestores g ON gl.gestorId = g.id\nLEFT JOIN users u ON g.userId = u.id\nWHERE l.nome IN ('Sm castanheira do ribatejo', 'Sm pesados porto', 'Viseu sm');",
+  "rows": [
+    {
+      "lojaNome": "Viseu sm",
+      "gestorId": "570003",
+      "gestorNome": "Rui Adriao "
+    },
+    {
+      "lojaNome": "Sm pesados porto",
+      "gestorId": "570003",
+      "gestorNome": "Rui Adriao "
+    },
+    {
+      "lojaNome": "Sm castanheira do ribatejo",
+      "gestorId": "570003",
+      "gestorNome": "Rui Adriao "
+    }
+  ],
+  "messages": [],
+  "stdout": "lojaNome\tgestorId\tgestorNome\nViseu sm\t570003\tRui Adriao \nSm pesados porto\t570003\tRui Adriao \nSm castanheira do ribatejo\t570003\tRui Adriao \n",
+  "stderr": "",
+  "execution_time_ms": 1523
+}

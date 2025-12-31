@@ -1,0 +1,9 @@
+{
+  "query": "SELECT gl.id, gl.gestorId, gl.lojaId, l.nome as lojaNome\nFROM gestor_lojas gl\nLEFT JOIN lojas l ON gl.lojaId = l.id\nLEFT JOIN gestores g ON gl.gestorId = g.id\nLEFT JOIN users u ON g.userId = u.id\nWHERE g.id IS NULL OR u.id IS NULL;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT gl.id, gl.gestorId, gl.lojaId, l.nome as lojaNome\nFROM gestor_lojas gl\nLEFT JOIN lojas l ON gl.lojaId = l.id\nLEFT JOIN gestores g ON gl.gestorId = g.id\nLEFT JOIN users u ON g.userId = u.id\nWHERE g.id IS NULL OR u.id IS NULL;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 1577
+}

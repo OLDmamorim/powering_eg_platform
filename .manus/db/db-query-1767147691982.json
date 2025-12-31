@@ -1,0 +1,37 @@
+{
+  "query": "SELECT gl.id, gl.gestorId, gl.lojaId, l.nome as lojaNome, \n       g.id as gestorExists, u.id as userExists, u.name as userName\nFROM gestor_lojas gl\nLEFT JOIN lojas l ON gl.lojaId = l.id\nLEFT JOIN gestores g ON gl.gestorId = g.id\nLEFT JOIN users u ON g.userId = u.id\nWHERE g.id IS NULL OR u.id IS NULL\nORDER BY gl.lojaId;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT gl.id, gl.gestorId, gl.lojaId, l.nome as lojaNome, \n       g.id as gestorExists, u.id as userExists, u.name as userName\nFROM gestor_lojas gl\nLEFT JOIN lojas l ON gl.lojaId = l.id\nLEFT JOIN gestores g ON gl.gestorId = g.id\nLEFT JOIN users u ON g.userId = u.id\nWHERE g.id IS NULL OR u.id IS NULL\nORDER BY gl.lojaId;",
+  "rows": [
+    {
+      "id": "420042",
+      "gestorId": "120004",
+      "lojaId": "180053",
+      "lojaNome": "Sm castanheira do ribatejo",
+      "gestorExists": "120004",
+      "userExists": "NULL",
+      "userName": "NULL"
+    },
+    {
+      "id": "420046",
+      "gestorId": "120004",
+      "lojaId": "180061",
+      "lojaNome": "Viseu sm",
+      "gestorExists": "120004",
+      "userExists": "NULL",
+      "userName": "NULL"
+    },
+    {
+      "id": "420043",
+      "gestorId": "120004",
+      "lojaId": "180063",
+      "lojaNome": "Sm pesados porto",
+      "gestorExists": "120004",
+      "userExists": "NULL",
+      "userName": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tgestorId\tlojaId\tlojaNome\tgestorExists\tuserExists\tuserName\n420042\t120004\t180053\tSm castanheira do ribatejo\t120004\tNULL\tNULL\n420046\t120004\t180061\tViseu sm\t120004\tNULL\tNULL\n420043\t120004\t180063\tSm pesados porto\t120004\tNULL\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 1500
+}

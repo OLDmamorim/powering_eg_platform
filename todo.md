@@ -1612,3 +1612,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## Bug v5.34.3 - Lista de Lojas não mostra gestor para algumas lojas
 - [ ] Investigar query getAllLojas
 - [ ] Corrigir para buscar gestor da tabela gestor_lojas em vez de loja.gestorId
+
+## Limpeza de Dados v5.35
+- [x] Identificar associações órfãs na tabela gestor_lojas
+- [x] Eliminar associações com gestores inválidos (gestorId 120004)
+- [x] Verificar resultado da limpeza
