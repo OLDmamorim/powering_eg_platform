@@ -4559,6 +4559,7 @@ export async function getAllTodos(filtros?: {
       atribuidoLojaId: todos.atribuidoLojaId,
       atribuidoUserId: todos.atribuidoUserId,
       criadoPorId: todos.criadoPorId,
+      criadoPorLojaId: todos.criadoPorLojaId,
       estado: todos.estado,
       comentario: todos.comentario,
       historicoAtribuicoes: todos.historicoAtribuicoes,
@@ -4568,7 +4569,10 @@ export async function getAllTodos(filtros?: {
       updatedAt: todos.updatedAt,
       lojaNome: lojas.nome,
       atribuidoUserNome: sql<string | null>`(SELECT name FROM users WHERE id = ${todos.atribuidoUserId})`,
-      criadoPorNome: sql<string | null>`(SELECT name FROM users WHERE id = ${todos.criadoPorId})`,
+      criadoPorNome: sql<string | null>`COALESCE(
+        (SELECT nome FROM lojas WHERE id = ${todos.criadoPorLojaId}),
+        (SELECT name FROM users WHERE id = ${todos.criadoPorId})
+      )`,
       categoriaNome: todoCategories.nome,
       categoriaCor: todoCategories.cor,
     })
@@ -4613,6 +4617,7 @@ export async function getTodosByLojaId(lojaId: number, apenasAtivos: boolean = t
       atribuidoLojaId: todos.atribuidoLojaId,
       atribuidoUserId: todos.atribuidoUserId,
       criadoPorId: todos.criadoPorId,
+      criadoPorLojaId: todos.criadoPorLojaId,
       estado: todos.estado,
       comentario: todos.comentario,
       historicoAtribuicoes: todos.historicoAtribuicoes,
@@ -4620,7 +4625,10 @@ export async function getTodosByLojaId(lojaId: number, apenasAtivos: boolean = t
       dataConclusao: todos.dataConclusao,
       createdAt: todos.createdAt,
       updatedAt: todos.updatedAt,
-      criadoPorNome: sql<string | null>`(SELECT name FROM users WHERE id = ${todos.criadoPorId})`,
+      criadoPorNome: sql<string | null>`COALESCE(
+        (SELECT nome FROM lojas WHERE id = ${todos.criadoPorLojaId}),
+        (SELECT name FROM users WHERE id = ${todos.criadoPorId})
+      )`,
       categoriaNome: todoCategories.nome,
       categoriaCor: todoCategories.cor,
     })

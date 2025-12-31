@@ -1623,3 +1623,4 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [ ] Corrigir autenticação por token no Portal da Loja
 - [ ] Testar funcionalidade completa
 - [x] Corrigir bug Portal da Loja - tokens não funcionavam ao criar reunião/tarefa (adicionado endpoint público listarPublico)
+- [x] Corrigir bug: tarefas criadas pela loja mostram nome do gestor em vez do nome da loja como criador

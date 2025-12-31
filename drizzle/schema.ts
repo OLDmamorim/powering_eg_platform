@@ -638,6 +638,7 @@ export const todos = mysqlTable("todos", {
   
   // Quem criou
   criadoPorId: int("criadoPorId").notNull(), // FK para users.id
+  criadoPorLojaId: int("criadoPorLojaId"), // FK para lojas.id (quando criado por uma loja via Portal)
   
   // Estado e fluxo
   estado: mysqlEnum("estado", ["pendente", "em_progresso", "concluida", "devolvida"]).default("pendente").notNull(),

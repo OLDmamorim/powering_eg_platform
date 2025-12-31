@@ -3160,6 +3160,7 @@ export const appRouter = router({
           atribuidoUserId: gestorDaLoja.userId, // Atribuir ao gestor
           atribuidoLojaId: null, // Não é atribuída à loja, é criada pela loja
           criadoPorId: gestorDaLoja.userId, // Usar o userId do gestor como proxy (a loja não tem userId)
+          criadoPorLojaId: auth.loja.id, // Guardar que foi criada pela loja
         });
         
         if (!todo) {
