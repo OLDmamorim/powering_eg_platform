@@ -95,8 +95,12 @@ export default function Todos() {
   
   const { data: categorias, refetch: refetchCategorias } = trpc.todoCategories.listar.useQuery();
   const { data: lojas } = trpc.lojas.getByGestor.useQuery();
-  const { data: gestores } = trpc.gestores.list.useQuery();
-  const { data: estatisticas } = trpc.todos.estatisticas.useQuery();
+  // Usar endpoint acessível a gestores e admins para listar utilizadores
+  const { data: utilizadores } = trpc.gestores.listarParaTodos.useQuery();
+  const { data: estatisticas, refetch: refetchEstatisticas } = trpc.todos.estatisticas.useQuery();
+  
+  // Utils para invalidar queries
+  const utils = trpc.useUtils();
   
   // Mutations
   const criarTodoMutation = trpc.todos.criar.useMutation({
@@ -105,6 +109,8 @@ export default function Todos() {
       setNovoTodoOpen(false);
       resetForm();
       refetchTodos();
+      refetchEstatisticas(); // Atualizar totalizadores
+      utils.todos.countNaoVistos.invalidate(); // Atualizar badge
     },
     onError: (error) => toast.error(error.message),
   });
@@ -124,6 +130,7 @@ export default function Todos() {
     onSuccess: () => {
       toast.success("Tarefa concluída!");
       refetchTodos();
+      refetchEstatisticas(); // Atualizar totalizadores
     },
     onError: (error) => toast.error(error.message),
   });
@@ -132,6 +139,7 @@ export default function Todos() {
     onSuccess: () => {
       toast.success("Tarefa eliminada!");
       refetchTodos();
+      refetchEstatisticas(); // Atualizar totalizadores
     },
     onError: (error) => toast.error(error.message),
   });
@@ -590,9 +598,9 @@ export default function Todos() {
                     <SelectValue placeholder="Selecionar utilizador..." />
                   </SelectTrigger>
                   <SelectContent>
-                    {gestores?.map((g: any) => (
-                      <SelectItem key={g.id} value={g.userId?.toString() || g.id.toString()}>
-                        {g.nome || g.name}
+                    {utilizadores?.map((u: any) => (
+                      <SelectItem key={u.userId} value={u.userId.toString()}>
+                        {u.nome} {u.role === 'admin' ? '(Admin)' : ''}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -706,9 +714,9 @@ export default function Todos() {
                     <SelectValue placeholder="Selecionar utilizador..." />
                   </SelectTrigger>
                   <SelectContent>
-                    {gestores?.map((g: any) => (
-                      <SelectItem key={g.id} value={g.userId?.toString() || g.id.toString()}>
-                        {g.nome || g.name}
+                    {utilizadores?.map((u: any) => (
+                      <SelectItem key={u.userId} value={u.userId.toString()}>
+                        {u.nome} {u.role === 'admin' ? '(Admin)' : ''}
                       </SelectItem>
                     ))}
                   </SelectContent>

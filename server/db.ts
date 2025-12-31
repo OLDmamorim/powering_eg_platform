@@ -440,6 +440,36 @@ export async function getAllGestores(): Promise<any[]> {
   }));
 }
 
+// Listar todos os utilizadores (gestores e admins) para atribuição de tarefas
+export async function getAllUsersParaTodos(): Promise<any[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  // Buscar todos os users que são gestores ou admins
+  const usersResults = await db
+    .select({
+      id: users.id,
+      name: users.name,
+      email: users.email,
+      role: users.role,
+    })
+    .from(users)
+    .where(
+      or(
+        eq(users.role, 'gestor'),
+        eq(users.role, 'admin')
+      )
+    )
+    .orderBy(users.name);
+  
+  return usersResults.map(u => ({
+    userId: u.id,
+    nome: u.name || u.email,
+    email: u.email,
+    role: u.role,
+  }));
+}
+
 export async function updateGestor(id: number, nome: string, email: string): Promise<void> {
   const db = await getDb();
   if (!db) throw new Error("Database not available");

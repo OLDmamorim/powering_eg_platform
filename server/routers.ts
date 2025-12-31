@@ -285,6 +285,11 @@ export const appRouter = router({
       return await db.getAllGestores();
     }),
     
+    // Listar utilizadores para atribuição de tarefas (acessível por gestores e admins)
+    listarParaTodos: gestorProcedure.query(async () => {
+      return await db.getAllUsersParaTodos();
+    }),
+    
     create: adminProcedure
       .input(z.object({
         nome: z.string().min(1),

@@ -1633,3 +1633,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Animação pulse para tarefas não vistas + marcar como visto ao clicar
 - [x] Botão flutuante (FAB) para criação rápida de tarefas
 
+
+## Correções To-Do v2.1
+- [x] Dropdown de utilizadores vazio - mostrar admins e gestores para atribuição
+- [x] Animação pulse muito subtil - mudar para amarelo intenso e mais visível
+- [x] Totalizadores não atualizam - invalidar queries após criar tarefa
