@@ -1644,3 +1644,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Botão FAB com texto "Nova Tarefa" em vez de apenas "+"
 - [x] Filtrar dropdown de utilizadores para excluir Marco Amorim (Admin) e utilizadores de teste
 - [x] Eliminar utilizadores de teste da base de dados (Gestor Teste IA e List Test Name)
+- [x] Adicionar botão/destaque de Minhas Tarefas no Portal da Loja
+- [x] Adicionar botão "Minhas Tarefas" no header do Portal da Loja
+- [x] Adicionar banner de alerta para tarefas urgentes no Portal da Loja
+- [x] Adicionar botão flutuante de acesso rápido às tarefas no Portal da Loja

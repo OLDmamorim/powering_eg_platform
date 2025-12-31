@@ -351,6 +351,22 @@ export default function PortalLoja() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            {/* Botão Minhas Tarefas em destaque */}
+            <Button 
+              variant="default" 
+              size="sm" 
+              onClick={() => setActiveTab('todos')}
+              className="bg-blue-600 hover:bg-blue-700 text-white relative"
+            >
+              <ListTodo className="h-4 w-4 mr-2" />
+              <span className="hidden sm:inline">Minhas Tarefas</span>
+              <span className="sm:hidden">Tarefas</span>
+              {(todosCount || 0) > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold animate-pulse">
+                  {todosCount}
+                </span>
+              )}
+            </Button>
             <Button 
               variant="outline" 
               size="sm" 
@@ -396,6 +412,38 @@ export default function PortalLoja() {
                 Depois
               </Button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Banner de Alerta - Tarefas Urgentes */}
+      {todosList && todosList.some((t: any) => t.prioridade === 'urgente' || t.prioridade === 'alta') && (
+        <div className="bg-gradient-to-r from-red-600 to-orange-500 text-white px-4 py-3 animate-pulse">
+          <div className="container mx-auto flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="bg-white/20 rounded-full p-2">
+                <AlertTriangle className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="font-bold text-sm">
+                  {todosList.filter((t: any) => t.prioridade === 'urgente').length > 0 
+                    ? `⚠️ ${todosList.filter((t: any) => t.prioridade === 'urgente').length} Tarefa(s) URGENTE(S)!`
+                    : `❗ ${todosList.filter((t: any) => t.prioridade === 'alta').length} Tarefa(s) de Alta Prioridade`
+                  }
+                </p>
+                <p className="text-xs text-white/80">
+                  {todosList.filter((t: any) => t.prioridade === 'urgente' || t.prioridade === 'alta')[0]?.titulo?.substring(0, 50) || 'Verifique as suas tarefas'}...
+                </p>
+              </div>
+            </div>
+            <Button 
+              size="sm" 
+              variant="secondary"
+              className="bg-white text-red-600 hover:bg-gray-100 font-semibold"
+              onClick={() => setActiveTab('todos')}
+            >
+              Ver Agora
+            </Button>
           </div>
         </div>
       )}
@@ -1008,6 +1056,27 @@ export default function PortalLoja() {
           </DialogContent>
         </Dialog>
       </div>
+
+      {/* Botão Flutuante de Acesso Rápido às Tarefas */}
+      {activeTab !== 'todos' && (
+        <button
+          onClick={() => setActiveTab('todos')}
+          className="fixed bottom-6 right-6 z-50 bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-2xl transition-all hover:scale-110 group"
+          title="Minhas Tarefas"
+        >
+          <ListTodo className="h-6 w-6" />
+          {/* Badge de contagem */}
+          {(todosCount || 0) > 0 && (
+            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-6 w-6 flex items-center justify-center font-bold animate-bounce">
+              {todosCount}
+            </span>
+          )}
+          {/* Tooltip */}
+          <span className="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-gray-900 text-white text-sm px-3 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+            Minhas Tarefas
+          </span>
+        </button>
+      )}
     </div>
   );
 }
