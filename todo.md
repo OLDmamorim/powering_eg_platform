@@ -1669,3 +1669,13 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [ ] Investigar porque reuniões criadas pelas lojas não aparecem para gestor/admin
 - [ ] Corrigir query ou lógica de listagem
 - [x] Modal de reuniões quinzenais não mostra conteúdo (temas, decisões, planos de ação)
+- [ ] Bug: Reunião enviada ID 1 tem campos de conteúdo vazios na BD (dados não foram guardados antes de enviar)
+
+## Correção v5.12 - Bug Reuniões Quinzenais não guardam dados ao Concluir e Enviar
+- [x] Identificar problema: dados não eram guardados quando clicava diretamente em "Concluir e Enviar"
+- [x] Causa: ReuniaoEditor não passava ID correto quando reunião era recém-criada
+- [x] Solução: Adicionar key ao ReuniaoEditor para forçar re-montagem
+- [x] Solução: Passar reuniaoAtualId como prop e usar como fallback no onConcluir
+- [x] Solução: Modificar botão Concluir para passar reuniaoId junto com os dados
+- [x] Testar: Reunião 60011 enviada com dados corretos
+- [x] Remover logs de debug do frontend e backend

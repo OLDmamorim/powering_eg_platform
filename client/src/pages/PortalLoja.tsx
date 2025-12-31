@@ -591,8 +591,10 @@ export default function PortalLoja() {
           <div className="space-y-4">
             {reuniaoRascunho || reuniaoAtual ? (
               <ReuniaoEditor
+                key={`reuniao-editor-${reuniaoEmEdicao?.id || reuniaoRascunho?.id || reuniaoAtual || 'new'}`}
                 token={token}
                 reuniao={reuniaoEmEdicao || reuniaoRascunho}
+                reuniaoAtualId={reuniaoAtual}
                 pendentes={pendentes || []}
                 onSave={(data) => {
                   atualizarReuniaoMutation.mutate({
@@ -602,16 +604,40 @@ export default function PortalLoja() {
                   });
                 }}
                 onConcluir={async (data) => {
+                  // Usar o reuniaoId passado pelo ReuniaoEditor, com fallbacks
+                  const reuniaoId = data.reuniaoId || reuniaoEmEdicao?.id || reuniaoRascunho?.id || reuniaoAtual || 0;
+                  
+                  // Validar que temos um ID válido
+                  if (!reuniaoId || reuniaoId === 0) {
+                    toast.error('Erro: ID da reunião não encontrado. Por favor, recarregue a página.');
+                    return;
+                  }
+                  
+                  // Extrair os dados sem o reuniaoId para enviar ao servidor
+                  const { reuniaoId: _, ...dadosReuniao } = data;
+                  
                   // Primeiro guardar os dados
-                  await atualizarReuniaoMutation.mutateAsync({
-                    token,
-                    reuniaoId: reuniaoEmEdicao?.id || reuniaoRascunho?.id || 0,
-                    ...data,
-                  });
+                  try {
+                    await atualizarReuniaoMutation.mutateAsync({
+                      token,
+                      reuniaoId,
+                      temasDiscutidos: dadosReuniao.temasDiscutidos || '',
+                      decisoesTomadas: dadosReuniao.decisoesTomadas || '',
+                      analiseResultados: dadosReuniao.analiseResultados || '',
+                      planosAcao: dadosReuniao.planosAcao || '',
+                      observacoes: dadosReuniao.observacoes || '',
+                    });
+
+                  } catch (error) {
+                    console.error('[onConcluir] Erro ao guardar dados:', error);
+                    toast.error('Erro ao guardar os dados da reunião');
+                    return;
+                  }
+                  
                   // Depois concluir e enviar
                   concluirReuniaoMutation.mutate({
                     token,
-                    reuniaoId: reuniaoEmEdicao?.id || reuniaoRascunho?.id || 0,
+                    reuniaoId,
                   });
                 }}
                 onAtualizarPendente={(pendenteId, estado, comentario) => {
@@ -1092,6 +1118,7 @@ export default function PortalLoja() {
 function ReuniaoEditor({
   token,
   reuniao,
+  reuniaoAtualId,
   pendentes,
   onSave,
   onConcluir,
@@ -1101,6 +1128,7 @@ function ReuniaoEditor({
 }: {
   token: string;
   reuniao: any;
+  reuniaoAtualId: number | null;
   pendentes: any[];
   onSave: (data: any) => void;
   onConcluir: (data: any) => void;
@@ -1242,13 +1270,19 @@ function ReuniaoEditor({
           {isSaving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
           Guardar Rascunho
         </Button>
-        <Button onClick={() => onConcluir({
-          temasDiscutidos,
-          decisoesTomadas,
-          analiseResultados,
-          planosAcao,
-          observacoes,
-        })} disabled={isConcluindo}>
+        <Button onClick={() => {
+          // Usar reuniaoAtualId como fallback se reuniao?.id não estiver disponível
+          const reuniaoId = reuniao?.id || reuniaoAtualId;
+          
+          onConcluir({
+            reuniaoId,
+            temasDiscutidos,
+            decisoesTomadas,
+            analiseResultados,
+            planosAcao,
+            observacoes,
+          });
+        }} disabled={isConcluindo}>
           {isConcluindo ? (
             <Loader2 className="h-4 w-4 animate-spin mr-2" />
           ) : (

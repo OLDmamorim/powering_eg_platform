@@ -1,0 +1,23 @@
+{
+  "query": "SELECT id, lojaId, estado, participantes, temasDiscutidos, decisoesTomadas, analiseResultados, planosAcao, observacoes, dataReuniao, dataEnvio FROM reunioes_quinzenais WHERE estado = 'enviada' ORDER BY id DESC LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT id, lojaId, estado, participantes, temasDiscutidos, decisoesTomadas, analiseResultados, planosAcao, observacoes, dataReuniao, dataEnvio FROM reunioes_quinzenais WHERE estado = 'enviada' ORDER BY id DESC LIMIT 5;",
+  "rows": [
+    {
+      "id": "1",
+      "lojaId": "180010",
+      "estado": "enviada",
+      "participantes": "[\"Vânia Oliveira \",\"Tânia Martins \"]",
+      "temasDiscutidos": "NULL",
+      "decisoesTomadas": "NULL",
+      "analiseResultados": "NULL",
+      "planosAcao": "NULL",
+      "observacoes": "NULL",
+      "dataReuniao": "2025-12-31 16:01:45",
+      "dataEnvio": "2025-12-31 16:02:59"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tlojaId\testado\tparticipantes\ttemasDiscutidos\tdecisoesTomadas\tanaliseResultados\tplanosAcao\tobservacoes\tdataReuniao\tdataEnvio\n1\t180010\tenviada\t[\"Vânia Oliveira \",\"Tânia Martins \"]\tNULL\tNULL\tNULL\tNULL\tNULL\t2025-12-31 16:01:45\t2025-12-31 16:02:59\n",
+  "stderr": "",
+  "execution_time_ms": 1538
+}

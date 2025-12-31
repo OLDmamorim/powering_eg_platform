@@ -2424,12 +2424,16 @@ export const appRouter = router({
         if (!auth) {
           throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
         }
+        
         const { token, reuniaoId, participantes, ...data } = input;
+        
         const updateData: Record<string, unknown> = { ...data };
         if (participantes) {
           updateData.participantes = JSON.stringify(participantes);
         }
+        
         await db.atualizarReuniaoQuinzenal(reuniaoId, updateData);
+        
         return { success: true };
       }),
     
