@@ -419,11 +419,15 @@ export default function Gestores() {
                 const isAssociated = gestorLojas?.some(
                   (gl: any) => gl.id === loja.id
                 );
-                const hasOtherGestor = loja.gestorId && loja.gestorId !== selectedGestor?.id;
-                // Mostrar nome do gestor: se é outro gestor, mostrar o nome dele; se é o próprio, mostrar o nome do gestor selecionado
-                const gestorAtribuido = hasOtherGestor 
-                  ? loja.gestorNome 
-                  : (isAssociated ? selectedGestor?.user?.name : null);
+                // Verificar se tem outro gestor: usa gestorNome da lista de lojas OU verifica se não é o gestor atual
+                const hasOtherGestor = loja.gestorNome && !isAssociated;
+                // Mostrar nome do gestor:
+                // - Se está associada ao gestor atual -> mostrar nome do gestor selecionado
+                // - Se tem outro gestor (gestorNome preenchido e não é associada) -> mostrar gestorNome
+                // - Se não tem gestor -> null
+                const gestorAtribuido = isAssociated 
+                  ? selectedGestor?.user?.name 
+                  : (loja.gestorNome || null);
                 return (
                   <div
                     key={loja.id}

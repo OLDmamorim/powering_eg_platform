@@ -1604,3 +1604,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 
 ## Bug v5.34.1 - Atribuída a: vazio no modal Gerir Lojas
 - [x] Mostrar sempre nome do gestor atribuído (mesmo que seja o próprio)
+
+## Bug v5.34.2 - Correção definitiva "Atribuída a:" vazio
+- [x] Corrigir lógica para usar isAssociated em vez de loja.gestorId
+- [x] Mostrar nome do gestor selecionado quando loja está associada a ele
