@@ -1,0 +1,190 @@
+{
+  "query": "SELECT gl.*, g.userId, u.name as gestorNome, l.nome as lojaNome \nFROM gestor_lojas gl \nJOIN gestores g ON gl.gestorId = g.id \nJOIN users u ON g.userId = u.id \nJOIN lojas l ON gl.lojaId = l.id \nORDER BY gl.createdAt DESC \nLIMIT 20;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT gl.*, g.userId, u.name as gestorNome, l.nome as lojaNome \nFROM gestor_lojas gl \nJOIN gestores g ON gl.gestorId = g.id \nJOIN users u ON g.userId = u.id \nJOIN lojas l ON gl.lojaId = l.id \nORDER BY gl.createdAt DESC \nLIMIT 20;",
+  "rows": [
+    {
+      "id": "630015",
+      "gestorId": "570003",
+      "lojaId": "180061",
+      "createdAt": "2025-12-31 01:27:37",
+      "userId": "6600028",
+      "gestorNome": "Rui Adriao ",
+      "lojaNome": "Viseu sm"
+    },
+    {
+      "id": "630014",
+      "gestorId": "570003",
+      "lojaId": "180063",
+      "createdAt": "2025-12-31 01:27:31",
+      "userId": "6600028",
+      "gestorNome": "Rui Adriao ",
+      "lojaNome": "Sm pesados porto"
+    },
+    {
+      "id": "630013",
+      "gestorId": "570003",
+      "lojaId": "180053",
+      "createdAt": "2025-12-31 01:27:27",
+      "userId": "6600028",
+      "gestorNome": "Rui Adriao ",
+      "lojaNome": "Sm castanheira do ribatejo"
+    },
+    {
+      "id": "630012",
+      "gestorId": "480048",
+      "lojaId": "180055",
+      "createdAt": "2025-12-31 01:00:42",
+      "userId": "2160129",
+      "gestorNome": "Carlos Eduardo",
+      "lojaNome": "Telheiras"
+    },
+    {
+      "id": "630011",
+      "gestorId": "480048",
+      "lojaId": "180047",
+      "createdAt": "2025-12-31 01:00:41",
+      "userId": "2160129",
+      "gestorNome": "Carlos Eduardo",
+      "lojaNome": "Sacavém"
+    },
+    {
+      "id": "630010",
+      "gestorId": "480048",
+      "lojaId": "180046",
+      "createdAt": "2025-12-31 01:00:40",
+      "userId": "2160129",
+      "gestorNome": "Carlos Eduardo",
+      "lojaNome": "Rotunda do relógio"
+    },
+    {
+      "id": "630009",
+      "gestorId": "480048",
+      "lojaId": "180045",
+      "createdAt": "2025-12-31 01:00:39",
+      "userId": "2160129",
+      "gestorNome": "Carlos Eduardo",
+      "lojaNome": "Póvoa de santa iria"
+    },
+    {
+      "id": "630008",
+      "gestorId": "480048",
+      "lojaId": "180037",
+      "createdAt": "2025-12-31 01:00:38",
+      "userId": "2160129",
+      "gestorNome": "Carlos Eduardo",
+      "lojaNome": "Odivelas - loures"
+    },
+    {
+      "id": "630007",
+      "gestorId": "480048",
+      "lojaId": "180035",
+      "createdAt": "2025-12-31 01:00:37",
+      "userId": "2160129",
+      "gestorNome": "Carlos Eduardo",
+      "lojaNome": "Movida"
+    },
+    {
+      "id": "630006",
+      "gestorId": "480048",
+      "lojaId": "180029",
+      "createdAt": "2025-12-31 01:00:36",
+      "userId": "2160129",
+      "gestorNome": "Carlos Eduardo",
+      "lojaNome": "Lisboa smr"
+    },
+    {
+      "id": "630005",
+      "gestorId": "480048",
+      "lojaId": "180028",
+      "createdAt": "2025-12-31 01:00:36",
+      "userId": "2160129",
+      "gestorNome": "Carlos Eduardo",
+      "lojaNome": "Lisboa sm"
+    },
+    {
+      "id": "630003",
+      "gestorId": "480048",
+      "lojaId": "180005",
+      "createdAt": "2025-12-31 01:00:35",
+      "userId": "2160129",
+      "gestorNome": "Carlos Eduardo",
+      "lojaNome": "Almada"
+    },
+    {
+      "id": "630004",
+      "gestorId": "480048",
+      "lojaId": "180007",
+      "createdAt": "2025-12-31 01:00:35",
+      "userId": "2160129",
+      "gestorNome": "Carlos Eduardo",
+      "lojaNome": "Amoreiras"
+    },
+    {
+      "id": "630002",
+      "gestorId": "480048",
+      "lojaId": "180006",
+      "createdAt": "2025-12-31 01:00:34",
+      "userId": "2160129",
+      "gestorNome": "Carlos Eduardo",
+      "lojaNome": "Amadora"
+    },
+    {
+      "id": "630001",
+      "gestorId": "480048",
+      "lojaId": "180004",
+      "createdAt": "2025-12-31 01:00:32",
+      "userId": "2160129",
+      "gestorNome": "Carlos Eduardo",
+      "lojaNome": "Algés"
+    },
+    {
+      "id": "600014",
+      "gestorId": "570001",
+      "lojaId": "180043",
+      "createdAt": "2025-12-30 19:02:03",
+      "userId": "6600014",
+      "gestorNome": "Fábio Dias",
+      "lojaNome": "Porto alto"
+    },
+    {
+      "id": "600013",
+      "gestorId": "570001",
+      "lojaId": "180013",
+      "createdAt": "2025-12-30 19:01:43",
+      "userId": "6600014",
+      "gestorNome": "Fábio Dias",
+      "lojaNome": "Castanheira do ribatejo"
+    },
+    {
+      "id": "600012",
+      "gestorId": "570001",
+      "lojaId": "180056",
+      "createdAt": "2025-12-30 19:01:38",
+      "userId": "6600014",
+      "gestorNome": "Fábio Dias",
+      "lojaNome": "Vale do tejo sm"
+    },
+    {
+      "id": "600011",
+      "gestorId": "570001",
+      "lojaId": "180052",
+      "createdAt": "2025-12-30 19:01:31",
+      "userId": "6600014",
+      "gestorNome": "Fábio Dias",
+      "lojaNome": "Sm caldas da rainha"
+    },
+    {
+      "id": "600010",
+      "gestorId": "570001",
+      "lojaId": "180049",
+      "createdAt": "2025-12-30 19:01:30",
+      "userId": "6600014",
+      "gestorNome": "Fábio Dias",
+      "lojaNome": "Santarém"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tgestorId\tlojaId\tcreatedAt\tuserId\tgestorNome\tlojaNome\n630015\t570003\t180061\t2025-12-31 01:27:37\t6600028\tRui Adriao \tViseu sm\n630014\t570003\t180063\t2025-12-31 01:27:31\t6600028\tRui Adriao \tSm pesados porto\n630013\t570003\t180053\t2025-12-31 01:27:27\t6600028\tRui Adriao \tSm castanheira do ribatejo\n630012\t480048\t180055\t2025-12-31 01:00:42\t2160129\tCarlos Eduardo\tTelheiras\n630011\t480048\t180047\t2025-12-31 01:00:41\t2160129\tCarlos Eduardo\tSacavém\n630010\t480048\t180046\t2025-12-31 01:00:40\t2160129\tCarlos Eduardo\tRotunda do relógio\n630009\t480048\t180045\t2025-12-31 01:00:39\t2160129\tCarlos Eduardo\tPóvoa de santa iria\n630008\t480048\t180037\t2025-12-31 01:00:38\t2160129\tCarlos Eduardo\tOdivelas - loures\n630007\t480048\t180035\t2025-12-31 01:00:37\t2160129\tCarlos Eduardo\tMovida\n630006\t480048\t180029\t2025-12-31 01:00:36\t2160129\tCarlos Eduardo\tLisboa smr\n630005\t480048\t180028\t2025-12-31 01:00:36\t2160129\tCarlos Eduardo\tLisboa sm\n630003\t480048\t180005\t2025-12-31 01:00:35\t2160129\tCarlos Eduardo\tAlmada\n630004\t480048\t180007\t2025-12-31 01:00:35\t2160129\tCarlos Eduardo\tAmoreiras\n630002\t480048\t180006\t2025-12-31 01:00:34\t2160129\tCarlos Eduardo\tAmadora\n630001\t480048\t180004\t2025-12-31 01:00:32\t2160129\tCarlos Eduardo\tAlgés\n600014\t570001\t180043\t2025-12-30 19:02:03\t6600014\tFábio Dias\tPorto alto\n600013\t570001\t180013\t2025-12-30 19:01:43\t6600014\tFábio Dias\tCastanheira do ribatejo\n600012\t570001\t180056\t2025-12-30 19:01:38\t6600014\tFábio Dias\tVale do tejo sm\n600011\t570001\t180052\t2025-12-30 19:01:31\t6600014\tFábio Dias\tSm caldas da rainha\n600010\t570001\t180049\t2025-12-30 19:01:30\t6600014\tFábio Dias\tSantarém\n",
+  "stderr": "",
+  "execution_time_ms": 1620
+}

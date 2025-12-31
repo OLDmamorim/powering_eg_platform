@@ -1,0 +1,34 @@
+{
+  "query": "SELECT gl.*, l.nome as lojaNome, u.name as gestorNome\nFROM gestor_lojas gl \nJOIN gestores g ON gl.gestorId = g.id \nJOIN users u ON g.userId = u.id \nJOIN lojas l ON gl.lojaId = l.id \nWHERE u.name LIKE '%Rui%' OR u.email LIKE '%rui%'\nORDER BY gl.createdAt DESC;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT gl.*, l.nome as lojaNome, u.name as gestorNome\nFROM gestor_lojas gl \nJOIN gestores g ON gl.gestorId = g.id \nJOIN users u ON g.userId = u.id \nJOIN lojas l ON gl.lojaId = l.id \nWHERE u.name LIKE '%Rui%' OR u.email LIKE '%rui%'\nORDER BY gl.createdAt DESC;",
+  "rows": [
+    {
+      "id": "630015",
+      "gestorId": "570003",
+      "lojaId": "180061",
+      "createdAt": "2025-12-31 01:27:37",
+      "lojaNome": "Viseu sm",
+      "gestorNome": "Rui Adriao "
+    },
+    {
+      "id": "630014",
+      "gestorId": "570003",
+      "lojaId": "180063",
+      "createdAt": "2025-12-31 01:27:31",
+      "lojaNome": "Sm pesados porto",
+      "gestorNome": "Rui Adriao "
+    },
+    {
+      "id": "630013",
+      "gestorId": "570003",
+      "lojaId": "180053",
+      "createdAt": "2025-12-31 01:27:27",
+      "lojaNome": "Sm castanheira do ribatejo",
+      "gestorNome": "Rui Adriao "
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tgestorId\tlojaId\tcreatedAt\tlojaNome\tgestorNome\n630015\t570003\t180061\t2025-12-31 01:27:37\tViseu sm\tRui Adriao \n630014\t570003\t180063\t2025-12-31 01:27:31\tSm pesados porto\tRui Adriao \n630013\t570003\t180053\t2025-12-31 01:27:27\tSm castanheira do ribatejo\tRui Adriao \n",
+  "stderr": "",
+  "execution_time_ms": 1502
+}

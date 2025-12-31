@@ -1582,3 +1582,17 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Verificar query de lojas disponíveis
 - [x] Corrigir carregamento de lojas (adicionado loading state e responsividade)
 - [x] Testar no desktop (funciona)
+
+
+## Bug v5.33 - Associação de lojas não grava
+- [ ] Investigar função associateLoja no backend
+- [ ] Verificar logs de erro no servidor
+- [ ] Corrigir gravação na base de dados
+- [ ] Testar associação de lojas
+
+
+## Bug v5.33 - Associação de lojas parece não gravar
+- [x] Investigar porque associações parecem não ser gravadas - CONFIRMADO: associações estão a gravar corretamente na BD
+- [x] Verificar mutação associateLoja - funciona corretamente
+- [x] Adicionar invalidação da lista de lojas após associação para atualizar visualização imediata
+- [x] Testar associação - Rui Adriao tem 4 lojas associadas na BD (Abrantes, Sm castanheira do ribatejo, Sm pesados porto, Viseu sm)

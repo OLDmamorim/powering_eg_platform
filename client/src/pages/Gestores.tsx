@@ -53,6 +53,7 @@ export default function Gestores() {
     onSuccess: () => {
       toast.success("Loja associada com sucesso");
       utils.gestores.getLojas.invalidate();
+      utils.lojas.list.invalidate(); // Atualizar lista de lojas para mostrar novo gestor
     },
     onError: (error) => {
       toast.error(error.message);
@@ -63,6 +64,7 @@ export default function Gestores() {
     onSuccess: () => {
       toast.success("Loja removida com sucesso");
       utils.gestores.getLojas.invalidate();
+      utils.lojas.list.invalidate(); // Atualizar lista de lojas para remover gestor
     },
     onError: (error) => {
       toast.error(error.message);
