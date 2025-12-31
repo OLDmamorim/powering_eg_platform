@@ -1661,3 +1661,6 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## Atalho Relatório Board no Dashboard Admin
 - [x] Substituir botão "Relatório Mensal" por "Relatório Board" no Dashboard do Admin
 - [x] Replicar funcionalidade do botão existente na página Categorias
+
+## Reorganização do Menu Lateral
+- [x] Mover "Histórico da Loja" para junto da secção de Resultados

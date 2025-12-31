@@ -93,7 +93,6 @@ const getMenuGroups = (userRole?: string): MenuGroup[] => {
       label: 'Histórico',
       color: 'bg-amber-100/80 dark:bg-amber-900/30',
       items: [
-        { icon: History, label: "Histórico da Loja", path: "/historico-loja", show: true, showBadge: false },
         { icon: History, label: "Histórico Pontos", path: "/historico-pontos", show: isAdmin, showBadge: false },
       ]
     },
@@ -126,6 +125,7 @@ const getMenuGroups = (userRole?: string): MenuGroup[] => {
         { icon: TrendingUp, label: "Upload Resultados", path: "/resultados-upload", show: isAdmin, showBadge: false },
         { icon: BarChart3, label: "Dashboard Resultados", path: "/resultados-dashboard", show: true, showBadge: false },
         { icon: GitCompare, label: "Comparação Lojas", path: "/comparacao-lojas", show: true, showBadge: false },
+        { icon: History, label: "Histórico da Loja", path: "/historico-loja", show: true, showBadge: false },
       ]
     },
     {
