@@ -441,6 +441,7 @@ export async function getAllGestores(): Promise<any[]> {
 }
 
 // Listar todos os utilizadores (gestores e admins) para atribuição de tarefas
+// Exclui utilizadores de teste e o admin "Marco Amorim" (mamorim@expressglass.pt)
 export async function getAllUsersParaTodos(): Promise<any[]> {
   const db = await getDb();
   if (!db) return [];
@@ -462,7 +463,24 @@ export async function getAllUsersParaTodos(): Promise<any[]> {
     )
     .orderBy(users.name);
   
-  return usersResults.map(u => ({
+  // Filtrar utilizadores de teste e o admin Marco Amorim
+  const filteredResults = usersResults.filter(u => {
+    const nome = (u.name || '').toLowerCase();
+    const email = (u.email || '').toLowerCase();
+    
+    // Excluir utilizadores de teste (Gestor Teste IA, List Test Name, etc.)
+    if (nome.includes('test') || nome.includes('teste')) return false;
+    if (nome.includes('gestor teste')) return false;
+    if (nome.includes('list test')) return false;
+    if (email.includes('test')) return false;
+    
+    // Excluir Marco Amorim (Admin) - pelo nome quando é admin
+    if (nome === 'marco amorim' && u.role === 'admin') return false;
+    
+    return true;
+  });
+  
+  return filteredResults.map(u => ({
     userId: u.id,
     nome: u.name || u.email,
     email: u.email,
