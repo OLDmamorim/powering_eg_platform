@@ -1,0 +1,52 @@
+{
+  "query": "SELECT l.id, l.nome, l.email,\n       (SELECT GROUP_CONCAT(CONCAT(g.id, ':', u.name) SEPARATOR ', ')\n        FROM gestor_lojas gl\n        JOIN gestores g ON gl.gestorId = g.id\n        JOIN users u ON g.userId = u.id\n        WHERE gl.lojaId = l.id) as gestores_associados\nFROM lojas l\nWHERE l.nome LIKE '%castanheira%' OR l.nome LIKE '%pesados%' OR l.nome LIKE '%Viseu%'\nORDER BY l.nome",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT l.id, l.nome, l.email,\n       (SELECT GROUP_CONCAT(CONCAT(g.id, ':', u.name) SEPARATOR ', ')\n        FROM gestor_lojas gl\n        JOIN gestores g ON gl.gestorId = g.id\n        JOIN users u ON g.userId = u.id\n        WHERE gl.lojaId = l.id) as gestores_associados\nFROM lojas l\nWHERE l.nome LIKE '%castanheira%' OR l.nome LIKE '%pesados%' OR l.nome LIKE '%Viseu%'\nORDER BY l.nome",
+  "rows": [
+    {
+      "id": "180013",
+      "nome": "Castanheira do ribatejo",
+      "email": "castanheiraribatejo@expressglass.pt",
+      "gestores_associados": "570001:Fábio Dias"
+    },
+    {
+      "id": "180053",
+      "nome": "Sm castanheira do ribatejo",
+      "email": "castanheiradoribatejo@expressglass.pt",
+      "gestores_associados": "570003:Rui Adriao "
+    },
+    {
+      "id": "180063",
+      "nome": "Sm pesados porto",
+      "email": "truckservice@expressglass.pt",
+      "gestores_associados": "570003:Rui Adriao "
+    },
+    {
+      "id": "180054",
+      "nome": "Sm viseu2",
+      "email": "viseu@expressglass.pt",
+      "gestores_associados": "120002:Mónica Correira"
+    },
+    {
+      "id": "180060",
+      "nome": "Viseu",
+      "email": "viseu@expressglass.pt",
+      "gestores_associados": "120002:Mónica Correira"
+    },
+    {
+      "id": "180061",
+      "nome": "Viseu sm",
+      "email": "viseu@expressglass.pt",
+      "gestores_associados": "570003:Rui Adriao "
+    },
+    {
+      "id": "180062",
+      "nome": "Viseu smr",
+      "email": "viseu@expressglass.pt",
+      "gestores_associados": "120002:Mónica Correira"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tnome\temail\tgestores_associados\n180013\tCastanheira do ribatejo\tcastanheiraribatejo@expressglass.pt\t570001:Fábio Dias\n180053\tSm castanheira do ribatejo\tcastanheiradoribatejo@expressglass.pt\t570003:Rui Adriao \n180063\tSm pesados porto\ttruckservice@expressglass.pt\t570003:Rui Adriao \n180054\tSm viseu2\tviseu@expressglass.pt\t120002:Mónica Correira\n180060\tViseu\tviseu@expressglass.pt\t120002:Mónica Correira\n180061\tViseu sm\tviseu@expressglass.pt\t570003:Rui Adriao \n180062\tViseu smr\tviseu@expressglass.pt\t120002:Mónica Correira\n",
+  "stderr": "",
+  "execution_time_ms": 1524
+}

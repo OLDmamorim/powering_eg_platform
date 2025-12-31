@@ -1,0 +1,55 @@
+{
+  "query": "SELECT DISTINCT gl.gestorId, \n       g.id as gestor_exists,\n       u.name as user_name\nFROM gestor_lojas gl\nLEFT JOIN gestores g ON gl.gestorId = g.id\nLEFT JOIN users u ON g.userId = u.id\nORDER BY gl.gestorId",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT DISTINCT gl.gestorId, \n       g.id as gestor_exists,\n       u.name as user_name\nFROM gestor_lojas gl\nLEFT JOIN gestores g ON gl.gestorId = g.id\nLEFT JOIN users u ON g.userId = u.id\nORDER BY gl.gestorId",
+  "rows": [
+    {
+      "gestorId": "2",
+      "gestor_exists": "2",
+      "user_name": "Mauro Furtado"
+    },
+    {
+      "gestorId": "30001",
+      "gestor_exists": "30001",
+      "user_name": "Marco Amorim"
+    },
+    {
+      "gestorId": "120001",
+      "gestor_exists": "120001",
+      "user_name": "Marco Vilar"
+    },
+    {
+      "gestorId": "120002",
+      "gestor_exists": "120002",
+      "user_name": "Mónica Correira"
+    },
+    {
+      "gestorId": "120004",
+      "gestor_exists": "120004",
+      "user_name": "NULL"
+    },
+    {
+      "gestorId": "480048",
+      "gestor_exists": "480048",
+      "user_name": "Carlos Eduardo"
+    },
+    {
+      "gestorId": "540015",
+      "gestor_exists": "540015",
+      "user_name": "Gestor Cumprimento 1767093423418"
+    },
+    {
+      "gestorId": "570001",
+      "gestor_exists": "570001",
+      "user_name": "Fábio Dias"
+    },
+    {
+      "gestorId": "570003",
+      "gestor_exists": "570003",
+      "user_name": "Rui Adriao "
+    }
+  ],
+  "messages": [],
+  "stdout": "gestorId\tgestor_exists\tuser_name\n2\t2\tMauro Furtado\n30001\t30001\tMarco Amorim\n120001\t120001\tMarco Vilar\n120002\t120002\tMónica Correira\n120004\t120004\tNULL\n480048\t480048\tCarlos Eduardo\n540015\t540015\tGestor Cumprimento 1767093423418\n570001\t570001\tFábio Dias\n570003\t570003\tRui Adriao \n",
+  "stderr": "",
+  "execution_time_ms": 1515
+}

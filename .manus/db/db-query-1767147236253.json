@@ -1,0 +1,35 @@
+{
+  "query": "SELECT l.id, l.nome, l.email\nFROM lojas l\nWHERE l.nome LIKE '%castanheira%' OR l.nome LIKE '%pesados%' OR l.nome LIKE '%Viseu sm%' OR l.nome = 'Viseu sm'\nORDER BY l.nome",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT l.id, l.nome, l.email\nFROM lojas l\nWHERE l.nome LIKE '%castanheira%' OR l.nome LIKE '%pesados%' OR l.nome LIKE '%Viseu sm%' OR l.nome = 'Viseu sm'\nORDER BY l.nome",
+  "rows": [
+    {
+      "id": "180013",
+      "nome": "Castanheira do ribatejo",
+      "email": "castanheiraribatejo@expressglass.pt"
+    },
+    {
+      "id": "180053",
+      "nome": "Sm castanheira do ribatejo",
+      "email": "castanheiradoribatejo@expressglass.pt"
+    },
+    {
+      "id": "180063",
+      "nome": "Sm pesados porto",
+      "email": "truckservice@expressglass.pt"
+    },
+    {
+      "id": "180061",
+      "nome": "Viseu sm",
+      "email": "viseu@expressglass.pt"
+    },
+    {
+      "id": "180062",
+      "nome": "Viseu smr",
+      "email": "viseu@expressglass.pt"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tnome\temail\n180013\tCastanheira do ribatejo\tcastanheiraribatejo@expressglass.pt\n180053\tSm castanheira do ribatejo\tcastanheiradoribatejo@expressglass.pt\n180063\tSm pesados porto\ttruckservice@expressglass.pt\n180061\tViseu sm\tviseu@expressglass.pt\n180062\tViseu smr\tviseu@expressglass.pt\n",
+  "stderr": "",
+  "execution_time_ms": 1504
+}

@@ -1,0 +1,19 @@
+{
+  "query": "SELECT g.*, u.name as user_name, u.email as user_email\nFROM gestores g\nLEFT JOIN users u ON g.userId = u.id\nWHERE g.id = 120004",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT g.*, u.name as user_name, u.email as user_email\nFROM gestores g\nLEFT JOIN users u ON g.userId = u.id\nWHERE g.id = 120004",
+  "rows": [
+    {
+      "id": "120004",
+      "userId": "2160144",
+      "createdAt": "2025-12-17 22:47:30",
+      "updatedAt": "2025-12-17 22:47:30",
+      "lastReminderDate": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tuserId\tcreatedAt\tupdatedAt\tlastReminderDate\tuser_name\tuser_email\n120004\t2160144\t2025-12-17 22:47:30\t2025-12-17 22:47:30\tNULL\tNULL\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 1585
+}

@@ -1,0 +1,52 @@
+{
+  "query": "SELECT l.id as loja_id, l.nome as loja_nome, gl.gestorId, g.id as gestor_table_id, u.name as gestor_nome\nFROM lojas l\nLEFT JOIN gestor_lojas gl ON l.id = gl.lojaId\nLEFT JOIN gestores g ON gl.gestorId = g.id\nLEFT JOIN users u ON g.userId = u.id\nWHERE l.nome IN ('Sm castanheira do ribatejo', 'Sm pesados porto', 'Viseu sm')\nORDER BY l.nome",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT l.id as loja_id, l.nome as loja_nome, gl.gestorId, g.id as gestor_table_id, u.name as gestor_nome\nFROM lojas l\nLEFT JOIN gestor_lojas gl ON l.id = gl.lojaId\nLEFT JOIN gestores g ON gl.gestorId = g.id\nLEFT JOIN users u ON g.userId = u.id\nWHERE l.nome IN ('Sm castanheira do ribatejo', 'Sm pesados porto', 'Viseu sm')\nORDER BY l.nome",
+  "rows": [
+    {
+      "loja_id": "180053",
+      "loja_nome": "Sm castanheira do ribatejo",
+      "gestorId": "570003",
+      "gestor_table_id": "570003",
+      "gestor_nome": "Rui Adriao "
+    },
+    {
+      "loja_id": "180053",
+      "loja_nome": "Sm castanheira do ribatejo",
+      "gestorId": "120004",
+      "gestor_table_id": "120004",
+      "gestor_nome": "NULL"
+    },
+    {
+      "loja_id": "180063",
+      "loja_nome": "Sm pesados porto",
+      "gestorId": "570003",
+      "gestor_table_id": "570003",
+      "gestor_nome": "Rui Adriao "
+    },
+    {
+      "loja_id": "180063",
+      "loja_nome": "Sm pesados porto",
+      "gestorId": "120004",
+      "gestor_table_id": "120004",
+      "gestor_nome": "NULL"
+    },
+    {
+      "loja_id": "180061",
+      "loja_nome": "Viseu sm",
+      "gestorId": "570003",
+      "gestor_table_id": "570003",
+      "gestor_nome": "Rui Adriao "
+    },
+    {
+      "loja_id": "180061",
+      "loja_nome": "Viseu sm",
+      "gestorId": "120004",
+      "gestor_table_id": "120004",
+      "gestor_nome": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "loja_id\tloja_nome\tgestorId\tgestor_table_id\tgestor_nome\n180053\tSm castanheira do ribatejo\t570003\t570003\tRui Adriao \n180053\tSm castanheira do ribatejo\t120004\t120004\tNULL\n180063\tSm pesados porto\t570003\t570003\tRui Adriao \n180063\tSm pesados porto\t120004\t120004\tNULL\n180061\tViseu sm\t570003\t570003\tRui Adriao \n180061\tViseu sm\t120004\t120004\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 1589
+}

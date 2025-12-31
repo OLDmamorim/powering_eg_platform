@@ -1,0 +1,55 @@
+{
+  "query": "SELECT gl.gestorId, COUNT(*) as count,\n       (SELECT u.name FROM gestores g JOIN users u ON g.userId = u.id WHERE g.id = gl.gestorId) as gestor_nome\nFROM gestor_lojas gl\nGROUP BY gl.gestorId\nORDER BY gl.gestorId",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT gl.gestorId, COUNT(*) as count,\n       (SELECT u.name FROM gestores g JOIN users u ON g.userId = u.id WHERE g.id = gl.gestorId) as gestor_nome\nFROM gestor_lojas gl\nGROUP BY gl.gestorId\nORDER BY gl.gestorId",
+  "rows": [
+    {
+      "gestorId": "2",
+      "count": "1",
+      "gestor_nome": "Mauro Furtado"
+    },
+    {
+      "gestorId": "30001",
+      "count": "16",
+      "gestor_nome": "Marco Amorim"
+    },
+    {
+      "gestorId": "120001",
+      "count": "12",
+      "gestor_nome": "Marco Vilar"
+    },
+    {
+      "gestorId": "120002",
+      "count": "16",
+      "gestor_nome": "Mónica Correira"
+    },
+    {
+      "gestorId": "120004",
+      "count": "3",
+      "gestor_nome": "NULL"
+    },
+    {
+      "gestorId": "480048",
+      "count": "12",
+      "gestor_nome": "Carlos Eduardo"
+    },
+    {
+      "gestorId": "540015",
+      "count": "1",
+      "gestor_nome": "Gestor Cumprimento 1767093423418"
+    },
+    {
+      "gestorId": "570001",
+      "count": "13",
+      "gestor_nome": "Fábio Dias"
+    },
+    {
+      "gestorId": "570003",
+      "count": "3",
+      "gestor_nome": "Rui Adriao "
+    }
+  ],
+  "messages": [],
+  "stdout": "gestorId\tcount\tgestor_nome\n2\t1\tMauro Furtado\n30001\t16\tMarco Amorim\n120001\t12\tMarco Vilar\n120002\t16\tMónica Correira\n120004\t3\tNULL\n480048\t12\tCarlos Eduardo\n540015\t1\tGestor Cumprimento 1767093423418\n570001\t13\tFábio Dias\n570003\t3\tRui Adriao \n",
+  "stderr": "",
+  "execution_time_ms": 1497
+}

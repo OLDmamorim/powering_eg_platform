@@ -1,0 +1,70 @@
+{
+  "query": "SELECT \n  l.id as loja_id, \n  l.nome as loja_nome,\n  gl.id as assoc_id,\n  gl.gestorId as gestor_id_na_assoc,\n  g.id as gestor_id_real,\n  g.userId as gestor_user_id,\n  u.id as user_id,\n  u.name as user_name\nFROM lojas l\nLEFT JOIN gestor_lojas gl ON l.id = gl.lojaId\nLEFT JOIN gestores g ON gl.gestorId = g.id\nLEFT JOIN users u ON g.userId = u.id\nWHERE l.nome IN ('Sm castanheira do ribatejo', 'Sm pesados porto', 'Viseu sm')\nORDER BY l.nome, gl.id",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT \n  l.id as loja_id, \n  l.nome as loja_nome,\n  gl.id as assoc_id,\n  gl.gestorId as gestor_id_na_assoc,\n  g.id as gestor_id_real,\n  g.userId as gestor_user_id,\n  u.id as user_id,\n  u.name as user_name\nFROM lojas l\nLEFT JOIN gestor_lojas gl ON l.id = gl.lojaId\nLEFT JOIN gestores g ON gl.gestorId = g.id\nLEFT JOIN users u ON g.userId = u.id\nWHERE l.nome IN ('Sm castanheira do ribatejo', 'Sm pesados porto', 'Viseu sm')\nORDER BY l.nome, gl.id",
+  "rows": [
+    {
+      "loja_id": "180053",
+      "loja_nome": "Sm castanheira do ribatejo",
+      "assoc_id": "420042",
+      "gestor_id_na_assoc": "120004",
+      "gestor_id_real": "120004",
+      "gestor_user_id": "2160144",
+      "user_id": "NULL",
+      "user_name": "NULL"
+    },
+    {
+      "loja_id": "180053",
+      "loja_nome": "Sm castanheira do ribatejo",
+      "assoc_id": "630013",
+      "gestor_id_na_assoc": "570003",
+      "gestor_id_real": "570003",
+      "gestor_user_id": "6600028",
+      "user_id": "6600028",
+      "user_name": "Rui Adriao "
+    },
+    {
+      "loja_id": "180063",
+      "loja_nome": "Sm pesados porto",
+      "assoc_id": "420043",
+      "gestor_id_na_assoc": "120004",
+      "gestor_id_real": "120004",
+      "gestor_user_id": "2160144",
+      "user_id": "NULL",
+      "user_name": "NULL"
+    },
+    {
+      "loja_id": "180063",
+      "loja_nome": "Sm pesados porto",
+      "assoc_id": "630014",
+      "gestor_id_na_assoc": "570003",
+      "gestor_id_real": "570003",
+      "gestor_user_id": "6600028",
+      "user_id": "6600028",
+      "user_name": "Rui Adriao "
+    },
+    {
+      "loja_id": "180061",
+      "loja_nome": "Viseu sm",
+      "assoc_id": "420046",
+      "gestor_id_na_assoc": "120004",
+      "gestor_id_real": "120004",
+      "gestor_user_id": "2160144",
+      "user_id": "NULL",
+      "user_name": "NULL"
+    },
+    {
+      "loja_id": "180061",
+      "loja_nome": "Viseu sm",
+      "assoc_id": "630015",
+      "gestor_id_na_assoc": "570003",
+      "gestor_id_real": "570003",
+      "gestor_user_id": "6600028",
+      "user_id": "6600028",
+      "user_name": "Rui Adriao "
+    }
+  ],
+  "messages": [],
+  "stdout": "loja_id\tloja_nome\tassoc_id\tgestor_id_na_assoc\tgestor_id_real\tgestor_user_id\tuser_id\tuser_name\n180053\tSm castanheira do ribatejo\t420042\t120004\t120004\t2160144\tNULL\tNULL\n180053\tSm castanheira do ribatejo\t630013\t570003\t570003\t6600028\t6600028\tRui Adriao \n180063\tSm pesados porto\t420043\t120004\t120004\t2160144\tNULL\tNULL\n180063\tSm pesados porto\t630014\t570003\t570003\t6600028\t6600028\tRui Adriao \n180061\tViseu sm\t420046\t120004\t120004\t2160144\tNULL\tNULL\n180061\tViseu sm\t630015\t570003\t570003\t6600028\t6600028\tRui Adriao \n",
+  "stderr": "",
+  "execution_time_ms": 1506
+}

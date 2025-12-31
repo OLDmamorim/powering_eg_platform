@@ -1,0 +1,34 @@
+{
+  "query": "SELECT gl.*, l.nome as loja_nome, u.name as gestor_nome \nFROM gestor_lojas gl \nJOIN lojas l ON gl.lojaId = l.id \nJOIN gestores g ON gl.gestorId = g.id \nJOIN users u ON g.userId = u.id \nWHERE u.name LIKE '%Rui%' \nORDER BY l.nome",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT gl.*, l.nome as loja_nome, u.name as gestor_nome \nFROM gestor_lojas gl \nJOIN lojas l ON gl.lojaId = l.id \nJOIN gestores g ON gl.gestorId = g.id \nJOIN users u ON g.userId = u.id \nWHERE u.name LIKE '%Rui%' \nORDER BY l.nome",
+  "rows": [
+    {
+      "id": "630013",
+      "gestorId": "570003",
+      "lojaId": "180053",
+      "createdAt": "2025-12-31 01:27:27",
+      "loja_nome": "Sm castanheira do ribatejo",
+      "gestor_nome": "Rui Adriao "
+    },
+    {
+      "id": "630014",
+      "gestorId": "570003",
+      "lojaId": "180063",
+      "createdAt": "2025-12-31 01:27:31",
+      "loja_nome": "Sm pesados porto",
+      "gestor_nome": "Rui Adriao "
+    },
+    {
+      "id": "630015",
+      "gestorId": "570003",
+      "lojaId": "180061",
+      "createdAt": "2025-12-31 01:27:37",
+      "loja_nome": "Viseu sm",
+      "gestor_nome": "Rui Adriao "
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tgestorId\tlojaId\tcreatedAt\tloja_nome\tgestor_nome\n630013\t570003\t180053\t2025-12-31 01:27:27\tSm castanheira do ribatejo\tRui Adriao \n630014\t570003\t180063\t2025-12-31 01:27:31\tSm pesados porto\tRui Adriao \n630015\t570003\t180061\t2025-12-31 01:27:37\tViseu sm\tRui Adriao \n",
+  "stderr": "",
+  "execution_time_ms": 1535
+}

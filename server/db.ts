@@ -258,18 +258,21 @@ export async function getAllLojas() {
   // Buscar todas as lojas
   const todasLojas = await db.select().from(lojas).orderBy(lojas.nome);
   
-  // Para cada loja, buscar o gestor atribuído (apenas o primeiro)
+  // Para cada loja, buscar o gestor atribuído mais recente (com user válido)
   const lojasComGestor = await Promise.all(
     todasLojas.map(async (loja) => {
+      // Buscar associações ordenadas por data (mais recente primeiro)
+      // e filtrar apenas as que têm user válido (innerJoin)
       const gestorLoja = await db
         .select({
           gestorId: gestorLojas.gestorId,
           gestorNome: users.name,
         })
         .from(gestorLojas)
-        .leftJoin(gestores, eq(gestorLojas.gestorId, gestores.id))
-        .leftJoin(users, eq(gestores.userId, users.id))
+        .innerJoin(gestores, eq(gestorLojas.gestorId, gestores.id))
+        .innerJoin(users, eq(gestores.userId, users.id))
         .where(eq(gestorLojas.lojaId, loja.id))
+        .orderBy(desc(gestorLojas.createdAt))
         .limit(1);
       
       return {

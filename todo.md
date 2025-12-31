@@ -1608,3 +1608,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## Bug v5.34.2 - Correção definitiva "Atribuída a:" vazio
 - [x] Corrigir lógica para usar isAssociated em vez de loja.gestorId
 - [x] Mostrar nome do gestor selecionado quando loja está associada a ele
+
+## Bug v5.34.3 - Lista de Lojas não mostra gestor para algumas lojas
+- [ ] Investigar query getAllLojas
+- [ ] Corrigir para buscar gestor da tabela gestor_lojas em vez de loja.gestorId

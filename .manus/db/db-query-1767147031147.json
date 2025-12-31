@@ -1,0 +1,31 @@
+{
+  "query": "SELECT gl.gestorId, gl.lojaId, l.nome as loja_nome, l.email as loja_email, u.name as gestor_nome \nFROM gestor_lojas gl \nJOIN lojas l ON gl.lojaId = l.id \nJOIN gestores g ON gl.gestorId = g.id \nJOIN users u ON g.userId = u.id \nWHERE u.name LIKE '%Rui%' \nORDER BY l.nome",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT gl.gestorId, gl.lojaId, l.nome as loja_nome, l.email as loja_email, u.name as gestor_nome \nFROM gestor_lojas gl \nJOIN lojas l ON gl.lojaId = l.id \nJOIN gestores g ON gl.gestorId = g.id \nJOIN users u ON g.userId = u.id \nWHERE u.name LIKE '%Rui%' \nORDER BY l.nome",
+  "rows": [
+    {
+      "gestorId": "570003",
+      "lojaId": "180053",
+      "loja_nome": "Sm castanheira do ribatejo",
+      "loja_email": "castanheiradoribatejo@expressglass.pt",
+      "gestor_nome": "Rui Adriao "
+    },
+    {
+      "gestorId": "570003",
+      "lojaId": "180063",
+      "loja_nome": "Sm pesados porto",
+      "loja_email": "truckservice@expressglass.pt",
+      "gestor_nome": "Rui Adriao "
+    },
+    {
+      "gestorId": "570003",
+      "lojaId": "180061",
+      "loja_nome": "Viseu sm",
+      "loja_email": "viseu@expressglass.pt",
+      "gestor_nome": "Rui Adriao "
+    }
+  ],
+  "messages": [],
+  "stdout": "gestorId\tlojaId\tloja_nome\tloja_email\tgestor_nome\n570003\t180053\tSm castanheira do ribatejo\tcastanheiradoribatejo@expressglass.pt\tRui Adriao \n570003\t180063\tSm pesados porto\ttruckservice@expressglass.pt\tRui Adriao \n570003\t180061\tViseu sm\tviseu@expressglass.pt\tRui Adriao \n",
+  "stderr": "",
+  "execution_time_ms": 1605
+}
