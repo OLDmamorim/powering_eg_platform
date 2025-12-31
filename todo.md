@@ -1638,3 +1638,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Dropdown de utilizadores vazio - mostrar admins e gestores para atribuição
 - [x] Animação pulse muito subtil - mudar para amarelo intenso e mais visível
 - [x] Totalizadores não atualizam - invalidar queries após criar tarefa
+
+## Melhorias To-Do v2.2
+- [x] Botão atalho Tarefas no Dashboard com contador e animação amarela
+- [x] Botão FAB com texto "Nova Tarefa" em vez de apenas "+"

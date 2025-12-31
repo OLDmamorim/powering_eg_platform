@@ -3066,6 +3066,11 @@ export const appRouter = router({
     estatisticas: gestorProcedure.query(async () => {
       return await db.contarTodosPorEstado();
     }),
+    
+    // Contar tarefas pendentes atribuídas ao utilizador
+    countPendentesAtribuidosAMim: gestorProcedure.query(async ({ ctx }) => {
+      return await db.countTodosPendentesAtribuidosAMim(ctx.user.id);
+    }),
   }),
   
   // ==================== TO-DO PORTAL LOJA ====================

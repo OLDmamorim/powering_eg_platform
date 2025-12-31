@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { trpc } from "@/lib/trpc";
-import { Building2, ClipboardList, FileText, ListTodo, AlertTriangle, TrendingUp, TrendingDown, Calendar, Download, Minus, Sparkles, RefreshCw, Activity, Eye, Zap, MapPin, Clock, CheckCircle, XCircle } from "lucide-react";
+import { Building2, ClipboardList, FileText, ListTodo, AlertTriangle, TrendingUp, TrendingDown, Calendar, Download, Minus, Sparkles, RefreshCw, Activity, Eye, Zap, MapPin, Clock, CheckCircle, XCircle, CheckSquare } from "lucide-react";
 import { useMemo, useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { ReminderDialog } from "@/components/ReminderDialog";
@@ -146,6 +146,9 @@ export default function Dashboard() {
   
   // Contagem de alertas pendentes
   const { data: alertas } = trpc.alertas.list.useQuery();
+  
+  // Contagem de tarefas pendentes atribuídas ao utilizador
+  const { data: tarefasPendentesAMim = 0 } = trpc.todos.countPendentesAtribuidosAMim.useQuery();
   
   // Previsões e Feed de Atividades (apenas admin)
   const { data: previsoes, isLoading: previsoesLoading, refetch: refetchPrevisoes } = trpc.previsoes.list.useQuery(undefined, { enabled: isAdmin });
@@ -329,9 +332,24 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
-          <Button onClick={gerarRelatorioMensal} variant="outline" className="gap-2">
-            <Download className="h-4 w-4" />Relatório Mensal
-          </Button>
+          <div className="flex flex-col gap-2">
+            <Button onClick={gerarRelatorioMensal} variant="outline" className="gap-2">
+              <Download className="h-4 w-4" />Relatório Mensal
+            </Button>
+            <Button 
+              onClick={() => setLocation('/todos?filtro=atribuidas')} 
+              variant="outline" 
+              className={`gap-2 relative ${tarefasPendentesAMim > 0 ? 'animate-pulse border-amber-500 bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/30 dark:hover:bg-amber-950/50' : ''}`}
+            >
+              <CheckSquare className="h-4 w-4" />
+              Minhas Tarefas
+              {tarefasPendentesAMim > 0 && (
+                <span className="absolute -top-2 -right-2 bg-amber-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                  {tarefasPendentesAMim}
+                </span>
+              )}
+            </Button>
+          </div>
         </div>
 
         {pendentesAntigos.length > 0 && (

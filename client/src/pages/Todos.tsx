@@ -810,10 +810,11 @@ export default function Todos() {
       <div className="fixed bottom-6 right-6 z-50">
         <Button
           size="lg"
-          className="h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-110 bg-blue-600 hover:bg-blue-700"
+          className="h-12 px-4 rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-105 bg-blue-600 hover:bg-blue-700 gap-2"
           onClick={() => { resetForm(); setNovoTodoOpen(true); }}
         >
-          <Plus className="h-6 w-6" />
+          <Plus className="h-5 w-5" />
+          <span className="font-medium">Nova Tarefa</span>
         </Button>
       </div>
     </DashboardLayout>

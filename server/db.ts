@@ -4949,3 +4949,27 @@ export async function countTodosNaoVistos(
   
   return result[0]?.count || 0;
 }
+
+
+/**
+ * Conta tarefas pendentes atribuídas diretamente ao utilizador
+ * @param userId - ID do utilizador
+ * @returns Número de tarefas pendentes atribuídas ao utilizador
+ */
+export async function countTodosPendentesAtribuidosAMim(userId: number): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  
+  const result = await db
+    .select({ count: sql<number>`COUNT(*)` })
+    .from(todos)
+    .where(and(
+      eq(todos.atribuidoUserId, userId),
+      or(
+        eq(todos.estado, 'pendente'),
+        eq(todos.estado, 'em_progresso')
+      )
+    ));
+  
+  return result[0]?.count || 0;
+}
