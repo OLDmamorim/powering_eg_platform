@@ -2778,11 +2778,26 @@ export const appRouter = router({
   
   // ==================== TO-DO CATEGORIES ====================
   todoCategories: router({
-    // Listar todas as categorias
+    // Listar todas as categorias (para gestores autenticados)
     listar: gestorProcedure
       .input(z.object({ apenasAtivas: z.boolean().optional() }).optional())
       .query(async ({ input }) => {
         return await db.getAllTodoCategories(input?.apenasAtivas ?? true);
+      }),
+    
+    // Listar categorias para Portal da Loja (via token)
+    listarPublico: publicProcedure
+      .input(z.object({ 
+        token: z.string(),
+        apenasAtivas: z.boolean().optional() 
+      }))
+      .query(async ({ input }) => {
+        // Validar token da loja
+        const auth = await db.validarTokenLoja(input.token);
+        if (!auth) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        return await db.getAllTodoCategories(input.apenasAtivas ?? true);
       }),
     
     // Criar categoria (apenas admin)

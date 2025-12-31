@@ -1617,3 +1617,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Identificar associações órfãs na tabela gestor_lojas
 - [x] Eliminar associações com gestores inválidos (gestorId 120004)
 - [x] Verificar resultado da limpeza
+
+## Bug v5.36 - Portal da Loja tokens não funcionam
+- [ ] Investigar redirecionamento ao clicar em criar reunião/tarefa
+- [ ] Corrigir autenticação por token no Portal da Loja
+- [ ] Testar funcionalidade completa
+- [x] Corrigir bug Portal da Loja - tokens não funcionavam ao criar reunião/tarefa (adicionado endpoint público listarPublico)

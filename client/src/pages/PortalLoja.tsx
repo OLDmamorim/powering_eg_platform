@@ -251,10 +251,10 @@ export default function PortalLoja() {
     onError: (error) => toast.error(error.message),
   });
 
-  // Query de categorias (público, não precisa de autenticação)
-  const { data: categorias } = trpc.todoCategories.listar.useQuery(
-    { apenasAtivas: true },
-    { enabled: !!lojaAuth }
+  // Query de categorias (via token público)
+  const { data: categorias } = trpc.todoCategories.listarPublico.useQuery(
+    { token, apenasAtivas: true },
+    { enabled: !!token && !!lojaAuth }
   );
 
   const handleLogin = () => {
