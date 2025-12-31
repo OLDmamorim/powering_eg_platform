@@ -43,7 +43,7 @@ export default function Gestores() {
 
   const utils = trpc.useUtils();
   const { data: gestores, isLoading } = trpc.gestores.list.useQuery();
-  const { data: lojas } = trpc.lojas.list.useQuery();
+  const { data: lojas, isLoading: isLoadingLojas } = trpc.lojas.list.useQuery();
   const { data: gestorLojas } = trpc.gestores.getLojas.useQuery(
     { gestorId: selectedGestor?.id },
     { enabled: !!selectedGestor }
@@ -377,15 +377,19 @@ export default function Gestores() {
       </Dialog>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl w-[95vw] sm:w-full">
           <DialogHeader>
             <DialogTitle>Gerir Lojas - {selectedGestor?.user.name}</DialogTitle>
             <DialogDescription>
               Selecione as lojas que este gestor irá supervisionar
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-4 max-h-96 overflow-y-auto">
-            {lojas && lojas.length > 0 ? (
+          <div className="space-y-4 py-4 max-h-[60vh] sm:max-h-96 overflow-y-auto">
+            {isLoadingLojas ? (
+              <div className="flex justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              </div>
+            ) : lojas && lojas.length > 0 ? (
               lojas
                 .map((loja: any) => {
                 const isAssociated = gestorLojas?.some(
@@ -412,7 +416,7 @@ export default function Gestores() {
                       className="flex-1 cursor-pointer"
                     >
                       <div>
-                        <p className="font-medium">{loja.nome}</p>
+                        <p className="font-medium text-sm sm:text-base">{loja.nome}</p>
                         {hasOtherGestor && (
                           <p className="text-xs text-muted-foreground">Atribuída a: {loja.gestorNome}</p>
                         )}

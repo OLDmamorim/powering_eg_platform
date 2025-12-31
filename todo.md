@@ -1575,3 +1575,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Corrigir lógica para mostrar todas as lojas (com e sem gestor)
 - [x] Adicionar indicador visual quando loja já tem outro gestor
 - [x] Testar atribuição de lojas ao Rui Adrião
+
+
+## Bug v5.32 - Modal "Gerir Lojas" abre vazio
+- [x] Investigar porque lojas não carregam no modal
+- [x] Verificar query de lojas disponíveis
+- [x] Corrigir carregamento de lojas (adicionado loading state e responsividade)
+- [x] Testar no desktop (funciona)
