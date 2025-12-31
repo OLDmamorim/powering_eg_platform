@@ -1,0 +1,18 @@
+{
+  "query": "SELECT rq.id, rq.lojaId, rq.dataReuniao, rq.estado, rq.createdAt, l.nome as lojaNome FROM reunioes_quinzenais rq LEFT JOIN lojas l ON rq.lojaId = l.id ORDER BY rq.createdAt DESC LIMIT 20;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT rq.id, rq.lojaId, rq.dataReuniao, rq.estado, rq.createdAt, l.nome as lojaNome FROM reunioes_quinzenais rq LEFT JOIN lojas l ON rq.lojaId = l.id ORDER BY rq.createdAt DESC LIMIT 20;",
+  "rows": [
+    {
+      "id": "1",
+      "lojaId": "180010",
+      "dataReuniao": "2025-12-31 16:01:45",
+      "estado": "enviada",
+      "createdAt": "2025-12-31 16:01:45",
+      "lojaNome": "Braga - minho center"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tlojaId\tdataReuniao\testado\tcreatedAt\tlojaNome\n1\t180010\t2025-12-31 16:01:45\tenviada\t2025-12-31 16:01:45\tBraga - minho center\n",
+  "stderr": "",
+  "execution_time_ms": 1731
+}

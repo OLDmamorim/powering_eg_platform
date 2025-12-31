@@ -601,7 +601,14 @@ export default function PortalLoja() {
                     ...data,
                   });
                 }}
-                onConcluir={() => {
+                onConcluir={async (data) => {
+                  // Primeiro guardar os dados
+                  await atualizarReuniaoMutation.mutateAsync({
+                    token,
+                    reuniaoId: reuniaoEmEdicao?.id || reuniaoRascunho?.id || 0,
+                    ...data,
+                  });
+                  // Depois concluir e enviar
                   concluirReuniaoMutation.mutate({
                     token,
                     reuniaoId: reuniaoEmEdicao?.id || reuniaoRascunho?.id || 0,
@@ -1096,7 +1103,7 @@ function ReuniaoEditor({
   reuniao: any;
   pendentes: any[];
   onSave: (data: any) => void;
-  onConcluir: () => void;
+  onConcluir: (data: any) => void;
   onAtualizarPendente: (pendenteId: number, estado: 'pendente' | 'em_progresso' | 'resolvido', comentario?: string) => void;
   isSaving: boolean;
   isConcluindo: boolean;
@@ -1235,7 +1242,13 @@ function ReuniaoEditor({
           {isSaving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
           Guardar Rascunho
         </Button>
-        <Button onClick={onConcluir} disabled={isConcluindo}>
+        <Button onClick={() => onConcluir({
+          temasDiscutidos,
+          decisoesTomadas,
+          analiseResultados,
+          planosAcao,
+          observacoes,
+        })} disabled={isConcluindo}>
           {isConcluindo ? (
             <Loader2 className="h-4 w-4 animate-spin mr-2" />
           ) : (

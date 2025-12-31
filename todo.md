@@ -1664,3 +1664,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 
 ## Reorganização do Menu Lateral
 - [x] Mover "Histórico da Loja" para junto da secção de Resultados
+
+## Bug - Reuniões das Lojas não aparecem no Histórico
+- [ ] Investigar porque reuniões criadas pelas lojas não aparecem para gestor/admin
+- [ ] Corrigir query ou lógica de listagem
+- [x] Modal de reuniões quinzenais não mostra conteúdo (temas, decisões, planos de ação)
