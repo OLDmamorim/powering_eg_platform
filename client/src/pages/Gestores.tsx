@@ -22,7 +22,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { trpc } from "@/lib/trpc";
-import { Building2, Edit, Plus, Trash2, User, ShieldCheck } from "lucide-react";
+import { Building2, Edit, Plus, Trash2, User, ShieldCheck, Search } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
@@ -36,6 +36,7 @@ export default function Gestores() {
   const [formData, setFormData] = useState({ nome: "", email: "" });
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editFormData, setEditFormData] = useState({ id: 0, nome: "", email: "" });
+  const [searchLoja, setSearchLoja] = useState("");
   
   // Estado para seleção múltipla
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
@@ -378,14 +379,32 @@ export default function Gestores() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      <Dialog open={dialogOpen} onOpenChange={(open) => {
+          setDialogOpen(open);
+          if (!open) setSearchLoja(""); // Limpar pesquisa ao fechar
+        }}>
         <DialogContent className="max-w-2xl w-[95vw] sm:w-full">
           <DialogHeader>
-            <DialogTitle>Gerir Lojas - {selectedGestor?.user.name}</DialogTitle>
+            <DialogTitle className="flex items-center justify-between">
+              <span>Gerir Lojas - {selectedGestor?.user.name}</span>
+              <Badge variant="secondary" className="ml-2">
+                {gestorLojas?.length || 0} atribuída(s)
+              </Badge>
+            </DialogTitle>
             <DialogDescription>
               Selecione as lojas que este gestor irá supervisionar
             </DialogDescription>
           </DialogHeader>
+          {/* Campo de pesquisa */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Pesquisar loja..."
+              value={searchLoja}
+              onChange={(e) => setSearchLoja(e.target.value)}
+              className="pl-10"
+            />
+          </div>
           <div className="space-y-4 py-4 max-h-[60vh] sm:max-h-96 overflow-y-auto">
             {isLoadingLojas ? (
               <div className="flex justify-center py-8">
@@ -393,6 +412,9 @@ export default function Gestores() {
               </div>
             ) : lojas && lojas.length > 0 ? (
               lojas
+                .filter((loja: any) => 
+                  loja.nome.toLowerCase().includes(searchLoja.toLowerCase())
+                )
                 .map((loja: any) => {
                 const isAssociated = gestorLojas?.some(
                   (gl: any) => gl.id === loja.id

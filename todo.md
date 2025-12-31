@@ -1596,3 +1596,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Verificar mutação associateLoja - funciona corretamente
 - [x] Adicionar invalidação da lista de lojas após associação para atualizar visualização imediata
 - [x] Testar associação - Rui Adriao tem 4 lojas associadas na BD (Abrantes, Sm castanheira do ribatejo, Sm pesados porto, Viseu sm)
+
+
+## v5.34 - Melhorias no modal "Gerir Lojas"
+- [x] Campo de pesquisa para filtrar lojas rapidamente
+- [x] Contador de lojas atribuídas ao gestor no cabeçalho
