@@ -466,7 +466,10 @@ export default function Todos() {
                           {new Date(todo.dataLimite).toLocaleDateString('pt-PT')}
                         </span>
                       )}
-                      <span>Criado por: {todo.criadoPorNome || 'N/A'}</span>
+                      <span className={todo.criadoPorLojaId ? "flex items-center gap-1 px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full font-medium" : ""}>
+                        {todo.criadoPorLojaId && <Store className="h-3 w-3" />}
+                        Criado por: {todo.criadoPorNome || 'N/A'}
+                      </span>
                       <span>{new Date(todo.createdAt).toLocaleDateString('pt-PT')}</span>
                     </div>
                     

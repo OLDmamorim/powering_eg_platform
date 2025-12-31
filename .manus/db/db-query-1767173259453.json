@@ -1,0 +1,45 @@
+{
+  "query": "SELECT id, titulo, criadoPorId, criadoPorLojaId, createdAt FROM todos ORDER BY id DESC LIMIT 10",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT id, titulo, criadoPorId, criadoPorLojaId, createdAt FROM todos ORDER BY id DESC LIMIT 10",
+  "rows": [
+    {
+      "id": "90002",
+      "titulo": "Teste 2",
+      "criadoPorId": "420030",
+      "criadoPorLojaId": "180010",
+      "createdAt": "2025-12-31 09:23:37"
+    },
+    {
+      "id": "90001",
+      "titulo": "Teste2",
+      "criadoPorId": "420030",
+      "criadoPorLojaId": "NULL",
+      "createdAt": "2025-12-31 09:06:09"
+    },
+    {
+      "id": "60001",
+      "titulo": "Teste",
+      "criadoPorId": "420030",
+      "criadoPorLojaId": "NULL",
+      "createdAt": "2025-12-31 02:29:52"
+    },
+    {
+      "id": "30001",
+      "titulo": "Borracha Famalicão",
+      "criadoPorId": "420030",
+      "criadoPorLojaId": "NULL",
+      "createdAt": "2025-12-30 12:59:17"
+    },
+    {
+      "id": "1",
+      "titulo": "Verificar stock de vidros",
+      "criadoPorId": "1",
+      "criadoPorLojaId": "NULL",
+      "createdAt": "2025-12-30 09:44:53"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitulo\tcriadoPorId\tcriadoPorLojaId\tcreatedAt\n90002\tTeste 2\t420030\t180010\t2025-12-31 09:23:37\n90001\tTeste2\t420030\tNULL\t2025-12-31 09:06:09\n60001\tTeste\t420030\tNULL\t2025-12-31 02:29:52\n30001\tBorracha Famalicão\t420030\tNULL\t2025-12-30 12:59:17\n1\tVerificar stock de vidros\t1\tNULL\t2025-12-30 09:44:53\n",
+  "stderr": "",
+  "execution_time_ms": 1527
+}

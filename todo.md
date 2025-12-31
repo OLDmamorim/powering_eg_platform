@@ -1624,3 +1624,5 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [ ] Testar funcionalidade completa
 - [x] Corrigir bug Portal da Loja - tokens não funcionavam ao criar reunião/tarefa (adicionado endpoint público listarPublico)
 - [x] Corrigir bug: tarefas criadas pela loja mostram nome do gestor em vez do nome da loja como criador
+- [x] Corrigir exibição do nome da loja nas tarefas criadas pela loja (ainda mostra gestor)
+- [x] Adicionar indicador visual (badge/destaque) para tarefas criadas pela loja
