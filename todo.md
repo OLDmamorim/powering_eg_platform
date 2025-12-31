@@ -1643,3 +1643,4 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Botão atalho Tarefas no Dashboard com contador e animação amarela
 - [x] Botão FAB com texto "Nova Tarefa" em vez de apenas "+"
 - [x] Filtrar dropdown de utilizadores para excluir Marco Amorim (Admin) e utilizadores de teste
+- [x] Eliminar utilizadores de teste da base de dados (Gestor Teste IA e List Test Name)

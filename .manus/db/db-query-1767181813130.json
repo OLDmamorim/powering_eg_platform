@@ -1,0 +1,64 @@
+{
+  "query": "SELECT id, name, email, role FROM users WHERE name LIKE '%Gestor Teste%' OR name LIKE '%List Test%' LIMIT 10",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT id, name, email, role FROM users WHERE name LIKE '%Gestor Teste%' OR name LIKE '%List Test%' LIMIT 10",
+  "rows": [
+    {
+      "id": "240121",
+      "name": "List Test Name 1767093557538",
+      "email": "list.test.1767093557538@expressglass.pt",
+      "role": "admin"
+    },
+    {
+      "id": "2160129",
+      "name": "List Test Name 1767172454514",
+      "email": "list.test.1767172454514@expressglass.pt",
+      "role": "admin"
+    },
+    {
+      "id": "6450053",
+      "name": "Gestor Teste Data/Hora",
+      "email": "gestor.datahora@test.com",
+      "role": "gestor"
+    },
+    {
+      "id": "6450054",
+      "name": "Gestor Teste",
+      "email": "gestor@test.com",
+      "role": "gestor"
+    },
+    {
+      "id": "6450057",
+      "name": "Gestor Teste IA",
+      "email": "gestor-ia-test-1767056522223@test.com",
+      "role": "gestor"
+    },
+    {
+      "id": "6540184",
+      "name": "Gestor Teste IA",
+      "email": "gestor-ia-test-1767093406259@test.com",
+      "role": "gestor"
+    },
+    {
+      "id": "6540194",
+      "name": "Gestor Teste IA",
+      "email": "gestor-ia-test-1767093513829@test.com",
+      "role": "gestor"
+    },
+    {
+      "id": "6540201",
+      "name": "Gestor Teste IA",
+      "email": "gestor-ia-test-1767093610104@test.com",
+      "role": "gestor"
+    },
+    {
+      "id": "6900032",
+      "name": "Gestor Teste IA",
+      "email": "gestor-ia-test-1767172405155@test.com",
+      "role": "gestor"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\temail\trole\n240121\tList Test Name 1767093557538\tlist.test.1767093557538@expressglass.pt\tadmin\n2160129\tList Test Name 1767172454514\tlist.test.1767172454514@expressglass.pt\tadmin\n6450053\tGestor Teste Data/Hora\tgestor.datahora@test.com\tgestor\n6450054\tGestor Teste\tgestor@test.com\tgestor\n6450057\tGestor Teste IA\tgestor-ia-test-1767056522223@test.com\tgestor\n6540184\tGestor Teste IA\tgestor-ia-test-1767093406259@test.com\tgestor\n6540194\tGestor Teste IA\tgestor-ia-test-1767093513829@test.com\tgestor\n6540201\tGestor Teste IA\tgestor-ia-test-1767093610104@test.com\tgestor\n6900032\tGestor Teste IA\tgestor-ia-test-1767172405155@test.com\tgestor\n",
+  "stderr": "",
+  "execution_time_ms": 1585
+}
