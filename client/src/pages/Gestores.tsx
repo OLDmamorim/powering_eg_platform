@@ -387,18 +387,15 @@ export default function Gestores() {
           <div className="space-y-4 py-4 max-h-96 overflow-y-auto">
             {lojas && lojas.length > 0 ? (
               lojas
-                .filter((loja: any) => {
-                  // Mostrar loja se: não está atribuída OU está atribuída ao gestor atual
-                  return !loja.gestorId || loja.gestorId === selectedGestor?.id;
-                })
                 .map((loja: any) => {
                 const isAssociated = gestorLojas?.some(
                   (gl: any) => gl.id === loja.id
                 );
+                const hasOtherGestor = loja.gestorId && loja.gestorId !== selectedGestor?.id;
                 return (
                   <div
                     key={loja.id}
-                    className="flex items-center space-x-3 border-b pb-3 last:border-0"
+                    className={`flex items-center space-x-3 border-b pb-3 last:border-0 ${hasOtherGestor ? 'opacity-60' : ''}`}
                   >
                     <Checkbox
                       id={`loja-${loja.id}`}
@@ -416,6 +413,9 @@ export default function Gestores() {
                     >
                       <div>
                         <p className="font-medium">{loja.nome}</p>
+                        {hasOtherGestor && (
+                          <p className="text-xs text-muted-foreground">Atribuída a: {loja.gestorNome}</p>
+                        )}
                       </div>
                     </Label>
                   </div>

@@ -1569,3 +1569,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] PWA Gestor: Atualização automática das tarefas a cada 30 segundos
 - [x] PWA Gestor: Interface otimizada para mobile com ações rápidas
 - [x] PWA Gestor: Filtros por loja e estado
+
+## Bug v5.31 - Lojas sem gestor não aparecem para atribuição
+- [x] Investigar query de lojas disponíveis no modal "Gerir Lojas"
+- [x] Corrigir lógica para mostrar todas as lojas (com e sem gestor)
+- [x] Adicionar indicador visual quando loja já tem outro gestor
+- [x] Testar atribuição de lojas ao Rui Adrião

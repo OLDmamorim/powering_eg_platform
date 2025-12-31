@@ -1,0 +1,8 @@
+Lojas sem gestor encontradas no modal "Gerir Lojas - Rui Adriao":
+
+1. Sm castanheira do ribatejo (loja-180053) - Atribuída a: (vazio)
+2. Sm pesados porto (loja-180063) - Atribuída a: (vazio)
+3. Viseu sm (loja-180061) - Atribuída a: (vazio)
+
+Estas 3 lojas aparecem agora no modal e podem ser atribuídas ao Rui Adrião.
+O bug foi corrigido - agora todas as lojas aparecem no modal, incluindo as que não têm gestor.
