@@ -2856,7 +2856,27 @@ export const appRouter = router({
           filtros.userId = ctx.user.id;
         }
         
-        return await db.getAllTodos(filtros);
+        // Obter contexto do utilizador para filtrar visibilidade
+        let lojasIds: number[] = [];
+        let gestorId: number | undefined;
+        
+        if (ctx.user.role === 'gestor') {
+          const gestor = await db.getGestorByUserId(ctx.user.id);
+          if (gestor) {
+            gestorId = gestor.id;
+            const lojasGestor = await db.getLojasByGestorId(gestor.id);
+            lojasIds = lojasGestor.map(l => l.id);
+          }
+        }
+        
+        const userContext = {
+          userId: ctx.user.id,
+          role: ctx.user.role,
+          gestorId,
+          lojasIds,
+        };
+        
+        return await db.getAllTodos(filtros, userContext);
       }),
     
     // Obter To-Do por ID
@@ -3004,6 +3024,38 @@ export const appRouter = router({
         await db.deleteTodo(input.id);
         return { success: true };
       }),
+    
+    // Marcar To-Do como visto
+    marcarVisto: gestorProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await db.marcarTodoComoVisto(input.id);
+        return { success: true };
+      }),
+    
+    // Marcar múltiplos To-Dos como vistos
+    marcarMultiplosVistos: gestorProcedure
+      .input(z.object({ ids: z.array(z.number()) }))
+      .mutation(async ({ input }) => {
+        for (const id of input.ids) {
+          await db.marcarTodoComoVisto(id);
+        }
+        return { success: true };
+      }),
+    
+    // Contar To-Dos não vistos
+    countNaoVistos: gestorProcedure.query(async ({ ctx }) => {
+      // Obter contexto do utilizador
+      let lojasIds: number[] = [];
+      if (ctx.user.role === 'gestor') {
+        const gestor = await db.getGestorByUserId(ctx.user.id);
+        if (gestor) {
+          const lojasGestor = await db.getLojasByGestorId(gestor.id);
+          lojasIds = lojasGestor.map(l => l.id);
+        }
+      }
+      return await db.countTodosNaoVistos(ctx.user.id, ctx.user.role, lojasIds);
+    }),
     
     // Estatísticas de To-Dos
     estatisticas: gestorProcedure.query(async () => {

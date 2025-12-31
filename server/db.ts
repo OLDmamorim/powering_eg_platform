@@ -1,4 +1,4 @@
-import { eq, and, desc, sql, inArray, gte, lte, or, gt } from "drizzle-orm";
+import { eq, and, desc, sql, inArray, gte, lte, or, gt, isNull } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { 
   InsertUser, 
@@ -4507,6 +4507,8 @@ export async function getTodoById(id: number): Promise<Todo | null> {
 
 /**
  * Listar todos os To-Dos com filtros
+ * @param filtros - Filtros de pesquisa
+ * @param userContext - Contexto do utilizador (para filtrar visibilidade)
  */
 export async function getAllTodos(filtros?: {
   lojaId?: number;
@@ -4515,12 +4517,20 @@ export async function getAllTodos(filtros?: {
   categoriaId?: number;
   prioridade?: string;
   criadoPorId?: number;
+}, userContext?: {
+  userId: number;
+  role: string;
+  gestorId?: number;
+  lojasIds?: number[];
 }): Promise<Array<Todo & { 
   lojaNome: string | null; 
   atribuidoUserNome: string | null;
   criadoPorNome: string | null;
   categoriaNome: string | null;
   categoriaCor: string | null;
+  visto: boolean;
+  vistoEm: Date | null;
+  paraMim: boolean;
 }>> {
   const db = await getDb();
   if (!db) return [];
@@ -4546,8 +4556,28 @@ export async function getAllTodos(filtros?: {
     conditions.push(eq(todos.criadoPorId, filtros.criadoPorId));
   }
   
-  // Alias para o user criador
-  const criadoPorUser = users;
+  // FILTRO DE VISIBILIDADE:
+  // Admin NÃO vê tarefas entre loja e gestor (criadoPorLojaId preenchido)
+  // Gestor vê apenas tarefas das suas lojas ou criadas por ele ou atribuídas a ele
+  if (userContext) {
+    if (userContext.role === 'admin') {
+      // Admin não vê tarefas criadas por lojas (comunicação loja<->gestor)
+      conditions.push(isNull(todos.criadoPorLojaId));
+    } else if (userContext.role === 'gestor' && userContext.lojasIds && userContext.lojasIds.length > 0) {
+      // Gestor vê:
+      // 1. Tarefas criadas por ele
+      // 2. Tarefas atribuídas a ele
+      // 3. Tarefas das suas lojas (criadas pela loja ou atribuídas à loja)
+      conditions.push(
+        or(
+          eq(todos.criadoPorId, userContext.userId),
+          eq(todos.atribuidoUserId, userContext.userId),
+          inArray(todos.atribuidoLojaId, userContext.lojasIds),
+          inArray(todos.criadoPorLojaId, userContext.lojasIds)
+        )
+      );
+    }
+  }
   
   const result = await db
     .select({
@@ -4565,6 +4595,8 @@ export async function getAllTodos(filtros?: {
       historicoAtribuicoes: todos.historicoAtribuicoes,
       dataLimite: todos.dataLimite,
       dataConclusao: todos.dataConclusao,
+      visto: todos.visto,
+      vistoEm: todos.vistoEm,
       createdAt: todos.createdAt,
       updatedAt: todos.updatedAt,
       lojaNome: lojas.nome,
@@ -4582,7 +4614,24 @@ export async function getAllTodos(filtros?: {
     .where(conditions.length > 0 ? and(...conditions) : undefined)
     .orderBy(desc(todos.createdAt));
   
-  return result;
+  // Calcular campo "paraMim" para cada tarefa
+  return result.map(todo => {
+    let paraMim = false;
+    if (userContext) {
+      // É para mim se:
+      // 1. Atribuído diretamente a mim (user)
+      // 2. Atribuído a uma das minhas lojas E criado por uma loja (comunicação loja->gestor)
+      if (todo.atribuidoUserId === userContext.userId) {
+        paraMim = true;
+      } else if (userContext.lojasIds && todo.atribuidoLojaId && userContext.lojasIds.includes(todo.atribuidoLojaId) && todo.criadoPorLojaId !== null) {
+        paraMim = true;
+      }
+    }
+    return {
+      ...todo,
+      paraMim
+    };
+  });
 }
 
 /**
@@ -4623,6 +4672,8 @@ export async function getTodosByLojaId(lojaId: number, apenasAtivos: boolean = t
       historicoAtribuicoes: todos.historicoAtribuicoes,
       dataLimite: todos.dataLimite,
       dataConclusao: todos.dataConclusao,
+      visto: todos.visto,
+      vistoEm: todos.vistoEm,
       createdAt: todos.createdAt,
       updatedAt: todos.updatedAt,
       criadoPorNome: sql<string | null>`COALESCE(
@@ -4810,4 +4861,61 @@ export async function contarTodosPorEstado(): Promise<{
   }
   
   return stats;
+}
+
+
+/**
+ * Marcar To-Do como visto
+ */
+export async function marcarTodoComoVisto(id: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  
+  await db
+    .update(todos)
+    .set({
+      visto: true,
+      vistoEm: new Date(),
+    })
+    .where(eq(todos.id, id));
+}
+
+/**
+ * Contar To-Dos não vistos para um utilizador
+ * @param userId - ID do utilizador
+ * @param role - Role do utilizador (admin/gestor)
+ * @param lojasIds - IDs das lojas do gestor (se aplicável)
+ */
+export async function countTodosNaoVistos(
+  userId: number, 
+  role: string, 
+  lojasIds: number[] = []
+): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  
+  const conditions: any[] = [
+    eq(todos.visto, false),
+  ];
+  
+  // Filtrar por visibilidade
+  if (role === 'admin') {
+    // Admin não vê tarefas criadas por lojas
+    conditions.push(isNull(todos.criadoPorLojaId));
+  } else if (role === 'gestor' && lojasIds.length > 0) {
+    // Gestor vê apenas tarefas destinadas a ele ou às suas lojas
+    conditions.push(
+      or(
+        eq(todos.atribuidoUserId, userId),
+        inArray(todos.atribuidoLojaId, lojasIds)
+      )
+    );
+  }
+  
+  const result = await db
+    .select({ count: sql<number>`COUNT(*)` })
+    .from(todos)
+    .where(and(...conditions));
+  
+  return result[0]?.count || 0;
 }

@@ -49,7 +49,12 @@ import {
   Settings,
   Smartphone,
   Download,
+  ArrowDown,
+  Inbox,
+  SendHorizontal,
+  Eye,
 } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function Todos() {
   const { user } = useAuth();
@@ -58,6 +63,7 @@ export default function Todos() {
   const [filtroCategoria, setFiltroCategoria] = useState<string>("todas");
   const [filtroPrioridade, setFiltroPrioridade] = useState<string>("todas");
   const [apenasMeus, setApenasMeus] = useState(false);
+  const [tabAtivo, setTabAtivo] = useState<string>("recebidas");
   
   // Dialogs
   const [novoTodoOpen, setNovoTodoOpen] = useState(false);
@@ -146,6 +152,12 @@ export default function Todos() {
       refetchCategorias();
     },
     onError: (error) => toast.error(error.message),
+  });
+  
+  const marcarVistoMutation = trpc.todos.marcarVisto.useMutation({
+    onSuccess: () => {
+      refetchTodos();
+    },
   });
   
   const resetForm = () => {
@@ -399,122 +411,95 @@ export default function Todos() {
           </CardContent>
         </Card>
         
-        {/* Lista de To-Dos */}
-        <div className="space-y-3">
-          {todos?.length === 0 && (
-            <Card>
-              <CardContent className="py-12 text-center">
-                <ListTodo className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <p className="text-muted-foreground">Nenhuma tarefa encontrada</p>
-                <Button className="mt-4" onClick={() => { resetForm(); setNovoTodoOpen(true); }}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Criar primeira tarefa
-                </Button>
-              </CardContent>
-            </Card>
-          )}
+        {/* Tabs Recebidas/Enviadas */}
+        <Tabs value={tabAtivo} onValueChange={setTabAtivo} className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-4">
+            <TabsTrigger value="recebidas" className="flex items-center gap-2">
+              <Inbox className="h-4 w-4" />
+              Recebidas
+              {todos && todos.filter(t => t.paraMim).filter(t => !t.visto).length > 0 && (
+                <Badge variant="destructive" className="ml-1 h-5 min-w-5 px-1 animate-pulse">
+                  {todos.filter(t => t.paraMim).filter(t => !t.visto).length}
+                </Badge>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="enviadas" className="flex items-center gap-2">
+              <SendHorizontal className="h-4 w-4" />
+              Enviadas
+              <Badge variant="secondary" className="ml-1 h-5 min-w-5 px-1">
+                {todos?.filter(t => !t.paraMim).length || 0}
+              </Badge>
+            </TabsTrigger>
+          </TabsList>
           
-          {todos?.map((todo) => (
-            <Card key={todo.id} className="hover:shadow-md transition-shadow">
-              <CardContent className="py-4">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap mb-2">
-                      {iconeEstado(todo.estado)}
-                      <h3 className="font-semibold truncate">{todo.titulo}</h3>
-                      <Badge className={corPrioridade(todo.prioridade)}>
-                        {todo.prioridade}
-                      </Badge>
-                      <Badge className={corEstado(todo.estado)}>
-                        {todo.estado.replace('_', ' ')}
-                      </Badge>
-                      {todo.categoriaNome && (
-                        <Badge 
-                          variant="outline" 
-                          style={{ borderColor: todo.categoriaCor || undefined, color: todo.categoriaCor || undefined }}
-                        >
-                          <Tag className="h-3 w-3 mr-1" />
-                          {todo.categoriaNome}
-                        </Badge>
-                      )}
-                    </div>
-                    
-                    {todo.descricao && (
-                      <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
-                        {todo.descricao}
-                      </p>
-                    )}
-                    
-                    {/* Loja atribuída em destaque */}
-                    {todo.lojaNome && (
-                      <div className="flex items-center gap-2 mb-2 p-2 bg-blue-50 dark:bg-blue-900/30 rounded-lg border border-blue-200 dark:border-blue-700">
-                        <Store className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                        <span className="font-medium text-blue-700 dark:text-blue-300">{todo.lojaNome}</span>
-                      </div>
-                    )}
-                    
-                    <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
-                      {todo.atribuidoUserNome && (
-                        <span className="flex items-center gap-1">
-                          <User className="h-3 w-3" />
-                          {todo.atribuidoUserNome}
-                        </span>
-                      )}
-                      {todo.dataLimite && (
-                        <span className="flex items-center gap-1">
-                          <Calendar className="h-3 w-3" />
-                          {new Date(todo.dataLimite).toLocaleDateString('pt-PT')}
-                        </span>
-                      )}
-                      <span className={todo.criadoPorLojaId ? "flex items-center gap-1 px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full font-medium" : ""}>
-                        {todo.criadoPorLojaId && <Store className="h-3 w-3" />}
-                        Criado por: {todo.criadoPorNome || 'N/A'}
-                      </span>
-                      <span>{new Date(todo.createdAt).toLocaleDateString('pt-PT')}</span>
-                    </div>
-                    
-                    {todo.comentario && (
-                      <div className="mt-2 p-2 bg-orange-50 dark:bg-orange-900/20 rounded text-sm">
-                        <strong>Comentário:</strong> {todo.comentario}
-                      </div>
-                    )}
-                  </div>
-                  
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon">
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => abrirEditar(todo)}>
-                        <Edit className="h-4 w-4 mr-2" />
-                        Editar
-                      </DropdownMenuItem>
-                      {todo.estado !== 'concluida' && (
-                        <DropdownMenuItem onClick={() => concluirTodoMutation.mutate({ id: todo.id })}>
-                          <CheckCircle2 className="h-4 w-4 mr-2" />
-                          Marcar como concluída
-                        </DropdownMenuItem>
-                      )}
-                      <DropdownMenuItem 
-                        className="text-red-600"
-                        onClick={() => {
-                          if (confirm('Tem certeza que deseja eliminar esta tarefa?')) {
-                            eliminarTodoMutation.mutate({ id: todo.id });
-                          }
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Eliminar
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+          <TabsContent value="recebidas">
+            <div className="space-y-3">
+              {todos?.filter(t => t.paraMim).length === 0 && (
+                <Card>
+                  <CardContent className="py-12 text-center">
+                    <Inbox className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                    <p className="text-muted-foreground">Nenhuma tarefa recebida</p>
+                  </CardContent>
+                </Card>
+              )}
+              
+              {todos?.filter(t => t.paraMim).map((todo) => (
+                <TodoCard 
+                  key={todo.id} 
+                  todo={todo} 
+                  isParaMim={true}
+                  onEditar={abrirEditar}
+                  onConcluir={(id) => concluirTodoMutation.mutate({ id })}
+                  onEliminar={(id) => {
+                    if (confirm('Tem certeza que deseja eliminar esta tarefa?')) {
+                      eliminarTodoMutation.mutate({ id });
+                    }
+                  }}
+                  onMarcarVisto={(id) => marcarVistoMutation.mutate({ id })}
+                  corPrioridade={corPrioridade}
+                  corEstado={corEstado}
+                  iconeEstado={iconeEstado}
+                />
+              ))}
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="enviadas">
+            <div className="space-y-3">
+              {todos?.filter(t => !t.paraMim).length === 0 && (
+                <Card>
+                  <CardContent className="py-12 text-center">
+                    <SendHorizontal className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                    <p className="text-muted-foreground">Nenhuma tarefa enviada</p>
+                    <Button className="mt-4" onClick={() => { resetForm(); setNovoTodoOpen(true); }}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Criar tarefa
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
+              
+              {todos?.filter(t => !t.paraMim).map((todo) => (
+                <TodoCard 
+                  key={todo.id} 
+                  todo={todo} 
+                  isParaMim={false}
+                  onEditar={abrirEditar}
+                  onConcluir={(id) => concluirTodoMutation.mutate({ id })}
+                  onEliminar={(id) => {
+                    if (confirm('Tem certeza que deseja eliminar esta tarefa?')) {
+                      eliminarTodoMutation.mutate({ id });
+                    }
+                  }}
+                  onMarcarVisto={(id) => marcarVistoMutation.mutate({ id })}
+                  corPrioridade={corPrioridade}
+                  corEstado={corEstado}
+                  iconeEstado={iconeEstado}
+                />
+              ))}
+            </div>
+          </TabsContent>
+        </Tabs>
         
         {/* Dialog Nova Tarefa */}
         <Dialog open={novoTodoOpen} onOpenChange={setNovoTodoOpen}>
@@ -812,6 +797,172 @@ export default function Todos() {
           </DialogContent>
         </Dialog>
       </div>
+      
+      {/* Botão Flutuante (FAB) para Criação Rápida */}
+      <div className="fixed bottom-6 right-6 z-50">
+        <Button
+          size="lg"
+          className="h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-110 bg-blue-600 hover:bg-blue-700"
+          onClick={() => { resetForm(); setNovoTodoOpen(true); }}
+        >
+          <Plus className="h-6 w-6" />
+        </Button>
+      </div>
     </DashboardLayout>
+  );
+}
+
+// Componente TodoCard com destaque visual
+function TodoCard({
+  todo,
+  isParaMim,
+  onEditar,
+  onConcluir,
+  onEliminar,
+  onMarcarVisto,
+  corPrioridade,
+  corEstado,
+  iconeEstado,
+}: {
+  todo: any;
+  isParaMim: boolean;
+  onEditar: (todo: any) => void;
+  onConcluir: (id: number) => void;
+  onEliminar: (id: number) => void;
+  onMarcarVisto: (id: number) => void;
+  corPrioridade: (p: string) => string;
+  corEstado: (e: string) => string;
+  iconeEstado: (e: string) => React.ReactNode;
+}) {
+  // Marcar como visto ao clicar no card (se não visto e é para mim)
+  const handleClick = () => {
+    if (!todo.visto && isParaMim) {
+      onMarcarVisto(todo.id);
+    }
+  };
+  
+  // Classes dinâmicas baseadas no estado
+  const cardClasses = [
+    "hover:shadow-md transition-all cursor-pointer",
+    // Destaque para tarefas "para mim"
+    isParaMim && "border-l-4 border-l-blue-500",
+    // Animação pulse para não vistos
+    !todo.visto && isParaMim && "animate-pulse-subtle bg-blue-50/50 dark:bg-blue-900/20",
+    // Borda mais forte se não visto
+    !todo.visto && isParaMim && "ring-2 ring-blue-400/50",
+  ].filter(Boolean).join(" ");
+  
+  return (
+    <Card className={cardClasses} onClick={handleClick}>
+      <CardContent className="py-4">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap mb-2">
+              {iconeEstado(todo.estado)}
+              <h3 className="font-semibold truncate">{todo.titulo}</h3>
+              
+              {/* Badge "Para si" se é tarefa recebida e não vista */}
+              {isParaMim && !todo.visto && (
+                <Badge className="bg-blue-600 text-white animate-pulse">
+                  <ArrowDown className="h-3 w-3 mr-1" />
+                  Para si
+                </Badge>
+              )}
+              
+              {/* Badge "Visto" se já foi visto */}
+              {isParaMim && todo.visto && (
+                <Badge variant="outline" className="text-green-600 border-green-300">
+                  <Eye className="h-3 w-3 mr-1" />
+                  Visto
+                </Badge>
+              )}
+              
+              <Badge className={corPrioridade(todo.prioridade)}>
+                {todo.prioridade}
+              </Badge>
+              <Badge className={corEstado(todo.estado)}>
+                {todo.estado.replace('_', ' ')}
+              </Badge>
+              {todo.categoriaNome && (
+                <Badge 
+                  variant="outline" 
+                  style={{ borderColor: todo.categoriaCor || undefined, color: todo.categoriaCor || undefined }}
+                >
+                  <Tag className="h-3 w-3 mr-1" />
+                  {todo.categoriaNome}
+                </Badge>
+              )}
+            </div>
+            
+            {todo.descricao && (
+              <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
+                {todo.descricao}
+              </p>
+            )}
+            
+            {/* Loja atribuída em destaque */}
+            {todo.lojaNome && (
+              <div className="flex items-center gap-2 mb-2 p-2 bg-blue-50 dark:bg-blue-900/30 rounded-lg border border-blue-200 dark:border-blue-700">
+                <Store className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                <span className="font-medium text-blue-700 dark:text-blue-300">{todo.lojaNome}</span>
+              </div>
+            )}
+            
+            <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
+              {todo.atribuidoUserNome && (
+                <span className="flex items-center gap-1">
+                  <User className="h-3 w-3" />
+                  {todo.atribuidoUserNome}
+                </span>
+              )}
+              {todo.dataLimite && (
+                <span className="flex items-center gap-1">
+                  <Calendar className="h-3 w-3" />
+                  {new Date(todo.dataLimite).toLocaleDateString('pt-PT')}
+                </span>
+              )}
+              <span className={todo.criadoPorLojaId ? "flex items-center gap-1 px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full font-medium" : ""}>
+                {todo.criadoPorLojaId && <Store className="h-3 w-3" />}
+                Criado por: {todo.criadoPorNome || 'N/A'}
+              </span>
+              <span>{new Date(todo.createdAt).toLocaleDateString('pt-PT')}</span>
+            </div>
+            
+            {todo.comentario && (
+              <div className="mt-2 p-2 bg-orange-50 dark:bg-orange-900/20 rounded text-sm">
+                <strong>Comentário:</strong> {todo.comentario}
+              </div>
+            )}
+          </div>
+          
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+              <Button variant="ghost" size="icon">
+                <MoreVertical className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onEditar(todo); }}>
+                <Edit className="h-4 w-4 mr-2" />
+                Editar
+              </DropdownMenuItem>
+              {todo.estado !== 'concluida' && (
+                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onConcluir(todo.id); }}>
+                  <CheckCircle2 className="h-4 w-4 mr-2" />
+                  Marcar como concluída
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuItem 
+                className="text-red-600"
+                onClick={(e) => { e.stopPropagation(); onEliminar(todo.id); }}
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Eliminar
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

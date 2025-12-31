@@ -653,6 +653,10 @@ export const todos = mysqlTable("todos", {
   dataLimite: timestamp("dataLimite"),
   dataConclusao: timestamp("dataConclusao"),
   
+  // Visibilidade e tracking
+  visto: boolean("visto").default(false).notNull(), // Se o destinatário já viu esta tarefa
+  vistoEm: timestamp("vistoEm"), // Data/hora em que foi visto
+  
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

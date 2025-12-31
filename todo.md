@@ -1626,3 +1626,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Corrigir bug: tarefas criadas pela loja mostram nome do gestor em vez do nome da loja como criador
 - [x] Corrigir exibição do nome da loja nas tarefas criadas pela loja (ainda mostra gestor)
 - [x] Adicionar indicador visual (badge/destaque) para tarefas criadas pela loja
+
+## Melhorias To-Do v2
+- [x] Separação de visibilidade: Admin não vê tarefas loja↔gestor
+- [x] Destaque visual "Para Mim": borda colorida + badge nas tarefas recebidas
+- [x] Animação pulse para tarefas não vistas + marcar como visto ao clicar
+- [x] Botão flutuante (FAB) para criação rápida de tarefas
+
