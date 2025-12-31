@@ -420,6 +420,10 @@ export default function Gestores() {
                   (gl: any) => gl.id === loja.id
                 );
                 const hasOtherGestor = loja.gestorId && loja.gestorId !== selectedGestor?.id;
+                // Mostrar nome do gestor: se é outro gestor, mostrar o nome dele; se é o próprio, mostrar o nome do gestor selecionado
+                const gestorAtribuido = hasOtherGestor 
+                  ? loja.gestorNome 
+                  : (isAssociated ? selectedGestor?.user?.name : null);
                 return (
                   <div
                     key={loja.id}
@@ -441,8 +445,8 @@ export default function Gestores() {
                     >
                       <div>
                         <p className="font-medium text-sm sm:text-base">{loja.nome}</p>
-                        {hasOtherGestor && (
-                          <p className="text-xs text-muted-foreground">Atribuída a: {loja.gestorNome}</p>
+                        {gestorAtribuido && (
+                          <p className="text-xs text-muted-foreground">Atribuída a: {gestorAtribuido}</p>
                         )}
                       </div>
                     </Label>

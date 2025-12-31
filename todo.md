@@ -1601,3 +1601,6 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## v5.34 - Melhorias no modal "Gerir Lojas"
 - [x] Campo de pesquisa para filtrar lojas rapidamente
 - [x] Contador de lojas atribuídas ao gestor no cabeçalho
+
+## Bug v5.34.1 - Atribuída a: vazio no modal Gerir Lojas
+- [x] Mostrar sempre nome do gestor atribuído (mesmo que seja o próprio)
