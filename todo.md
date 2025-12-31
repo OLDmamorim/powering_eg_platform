@@ -1656,3 +1656,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Eliminar lojas de teste
 - [x] Eliminar utilizadores de teste
 
+
+
+## Atalho Relatório Board no Dashboard Admin
+- [x] Substituir botão "Relatório Mensal" por "Relatório Board" no Dashboard do Admin
+- [x] Replicar funcionalidade do botão existente na página Categorias
