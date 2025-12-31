@@ -1,0 +1,64 @@
+{
+  "query": "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'todos' ORDER BY ORDINAL_POSITION",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'todos' ORDER BY ORDINAL_POSITION",
+  "rows": [
+    {
+      "COLUMN_NAME": "id"
+    },
+    {
+      "COLUMN_NAME": "titulo"
+    },
+    {
+      "COLUMN_NAME": "descricao"
+    },
+    {
+      "COLUMN_NAME": "categoriaId"
+    },
+    {
+      "COLUMN_NAME": "prioridade"
+    },
+    {
+      "COLUMN_NAME": "atribuidoLojaId"
+    },
+    {
+      "COLUMN_NAME": "atribuidoUserId"
+    },
+    {
+      "COLUMN_NAME": "criadoPorId"
+    },
+    {
+      "COLUMN_NAME": "estado"
+    },
+    {
+      "COLUMN_NAME": "comentario"
+    },
+    {
+      "COLUMN_NAME": "historicoAtribuicoes"
+    },
+    {
+      "COLUMN_NAME": "dataLimite"
+    },
+    {
+      "COLUMN_NAME": "dataConclusao"
+    },
+    {
+      "COLUMN_NAME": "createdAt"
+    },
+    {
+      "COLUMN_NAME": "updatedAt"
+    },
+    {
+      "COLUMN_NAME": "criadoPorLojaId"
+    },
+    {
+      "COLUMN_NAME": "visto"
+    },
+    {
+      "COLUMN_NAME": "vistoEm"
+    }
+  ],
+  "messages": [],
+  "stdout": "COLUMN_NAME\nid\ntitulo\ndescricao\ncategoriaId\nprioridade\natribuidoLojaId\natribuidoUserId\ncriadoPorId\nestado\ncomentario\nhistoricoAtribuicoes\ndataLimite\ndataConclusao\ncreatedAt\nupdatedAt\ncriadoPorLojaId\nvisto\nvistoEm\n",
+  "stderr": "",
+  "execution_time_ms": 1574
+}

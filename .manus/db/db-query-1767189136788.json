@@ -1,0 +1,18 @@
+{
+  "query": "SELECT 'users' as tabela, COUNT(*) as total FROM users WHERE name LIKE '%teste%' OR name LIKE '%test%' UNION ALL SELECT 'lojas', COUNT(*) FROM lojas WHERE nome LIKE '%teste%' OR nome LIKE '%test%'",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT 'users' as tabela, COUNT(*) as total FROM users WHERE name LIKE '%teste%' OR name LIKE '%test%' UNION ALL SELECT 'lojas', COUNT(*) FROM lojas WHERE nome LIKE '%teste%' OR nome LIKE '%test%'",
+  "rows": [
+    {
+      "tabela": "users",
+      "total": "0"
+    },
+    {
+      "tabela": "lojas",
+      "total": "0"
+    }
+  ],
+  "messages": [],
+  "stdout": "tabela\ttotal\nusers\t0\nlojas\t0\n",
+  "stderr": "",
+  "execution_time_ms": 1513
+}

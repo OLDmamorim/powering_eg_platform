@@ -1648,3 +1648,11 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar botão "Minhas Tarefas" no header do Portal da Loja
 - [x] Adicionar banner de alerta para tarefas urgentes no Portal da Loja
 - [x] Adicionar botão flutuante de acesso rápido às tarefas no Portal da Loja
+
+## Limpeza de Dados de Teste
+- [x] Identificar utilizadores de teste na base de dados
+- [x] Identificar lojas de teste na base de dados
+- [x] Eliminar relatórios associados a dados de teste
+- [x] Eliminar lojas de teste
+- [x] Eliminar utilizadores de teste
+
