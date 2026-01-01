@@ -1,0 +1,27 @@
+{
+  "query": "SELECT * FROM ocorrencias_estruturais ORDER BY createdAt DESC LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT * FROM ocorrencias_estruturais ORDER BY createdAt DESC LIMIT 5;",
+  "rows": [
+    {
+      "id": "1",
+      "gestorId": "NULL",
+      "temaId": "1",
+      "descricao": "Atrasos frequentes na entrega de vidros laminados por parte do fornecedor principal. Situação afeta várias lojas da zona Norte.",
+      "abrangencia": "nacional",
+      "zonaAfetada": "NULL",
+      "lojasAfetadas": "NULL",
+      "impacto": "medio",
+      "fotos": "NULL",
+      "sugestaoAcao": "NULL",
+      "estado": "reportado",
+      "notasAdmin": "NULL",
+      "resolvidoEm": "NULL",
+      "createdAt": "2026-01-01 19:35:06",
+      "updatedAt": "2026-01-01 19:35:06"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tgestorId\ttemaId\tdescricao\tabrangencia\tzonaAfetada\tlojasAfetadas\timpacto\tfotos\tsugestaoAcao\testado\tnotasAdmin\tresolvidoEm\tcreatedAt\tupdatedAt\n1\tNULL\t1\tAtrasos frequentes na entrega de vidros laminados por parte do fornecedor principal. Situação afeta várias lojas da zona Norte.\tnacional\tNULL\tNULL\tmedio\tNULL\tNULL\treportado\tNULL\tNULL\t2026-01-01 19:35:06\t2026-01-01 19:35:06\n",
+  "stderr": "",
+  "execution_time_ms": 117
+}

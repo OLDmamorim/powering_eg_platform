@@ -36,6 +36,8 @@ import ReunioesQuinzenais from "./pages/ReunioesQuinzenais";
 import Todos from "./pages/Todos";
 import TodoWidget from "./pages/TodoWidget";
 import ResumosGlobais from "./pages/ResumosGlobais";
+import OcorrenciaEstrutural from "./pages/OcorrenciaEstrutural";
+import HistoricoOcorrencias from "./pages/HistoricoOcorrencias";
 
 
 function Router() {
@@ -80,6 +82,10 @@ function Router() {
       
       {/* Resumos Globais */}
       <Route path={"/resumos-globais"} component={ResumosGlobais} />
+      
+      {/* Ocorrências Estruturais */}
+      <Route path={"/ocorrencias-estruturais/nova"} component={OcorrenciaEstrutural} />
+      <Route path={"/ocorrencias-estruturais/historico"} component={HistoricoOcorrencias} />
       
       {/* To-Do */}
       <Route path={"/todos"} component={Todos} />

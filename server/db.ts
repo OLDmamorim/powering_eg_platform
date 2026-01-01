@@ -4991,3 +4991,337 @@ export async function countTodosPendentesAtribuidosAMim(userId: number): Promise
   
   return result[0]?.count || 0;
 }
+
+
+// ==================== OCORRÊNCIAS ESTRUTURAIS ====================
+
+import { 
+  temasOcorrencias, 
+  TemaOcorrencia, 
+  InsertTemaOcorrencia,
+  ocorrenciasEstruturais,
+  OcorrenciaEstrutural,
+  InsertOcorrenciaEstrutural
+} from "../drizzle/schema";
+
+/**
+ * Busca todos os temas de ocorrências para autocomplete
+ * Ordenados por frequência de uso (mais usados primeiro)
+ */
+export async function getAllTemasOcorrencias(): Promise<TemaOcorrencia[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db
+    .select()
+    .from(temasOcorrencias)
+    .orderBy(desc(temasOcorrencias.usageCount));
+}
+
+/**
+ * Busca temas que começam com o texto fornecido (para autocomplete)
+ */
+export async function searchTemasOcorrencias(texto: string): Promise<TemaOcorrencia[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db
+    .select()
+    .from(temasOcorrencias)
+    .where(sql`LOWER(${temasOcorrencias.nome}) LIKE LOWER(${texto + '%'})`)
+    .orderBy(desc(temasOcorrencias.usageCount))
+    .limit(10);
+}
+
+/**
+ * Cria um novo tema de ocorrência ou retorna o existente
+ * Se já existir, incrementa o contador de uso
+ */
+export async function getOrCreateTemaOcorrencia(nome: string, criadoPorId: number): Promise<TemaOcorrencia> {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  
+  const nomeNormalizado = nome.trim();
+  
+  // Verificar se já existe (case insensitive)
+  const existente = await db
+    .select()
+    .from(temasOcorrencias)
+    .where(sql`LOWER(${temasOcorrencias.nome}) = LOWER(${nomeNormalizado})`)
+    .limit(1);
+  
+  if (existente.length > 0) {
+    // Incrementar contador de uso
+    await db
+      .update(temasOcorrencias)
+      .set({ usageCount: sql`${temasOcorrencias.usageCount} + 1` })
+      .where(eq(temasOcorrencias.id, existente[0].id));
+    
+    return existente[0];
+  }
+  
+  // Criar novo tema
+  const result = await db
+    .insert(temasOcorrencias)
+    .values({
+      nome: nomeNormalizado,
+      criadoPorId,
+      usageCount: 1
+    });
+  
+  const insertId = result[0]?.insertId;
+  if (!insertId) throw new Error('Erro ao criar tema de ocorrência');
+  
+  const novoTema = await db
+    .select()
+    .from(temasOcorrencias)
+    .where(eq(temasOcorrencias.id, insertId))
+    .limit(1);
+  
+  return novoTema[0];
+}
+
+/**
+ * Cria uma nova ocorrência estrutural
+ */
+export async function createOcorrenciaEstrutural(data: {
+  gestorId: number | null;
+  temaId: number;
+  descricao: string;
+  abrangencia: 'nacional' | 'regional' | 'zona';
+  zonaAfetada?: string;
+  lojasAfetadas?: number[];
+  impacto: 'baixo' | 'medio' | 'alto' | 'critico';
+  fotos?: string[];
+  sugestaoAcao?: string;
+}): Promise<OcorrenciaEstrutural> {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  
+  const result = await db
+    .insert(ocorrenciasEstruturais)
+    .values({
+      gestorId: data.gestorId,
+      temaId: data.temaId,
+      descricao: data.descricao,
+      abrangencia: data.abrangencia,
+      zonaAfetada: data.zonaAfetada || null,
+      lojasAfetadas: data.lojasAfetadas ? JSON.stringify(data.lojasAfetadas) : null,
+      impacto: data.impacto,
+      fotos: data.fotos ? JSON.stringify(data.fotos) : null,
+      sugestaoAcao: data.sugestaoAcao || null,
+      estado: 'reportado'
+    });
+  
+  const insertId = result[0]?.insertId;
+  if (!insertId) throw new Error('Erro ao criar ocorrência estrutural');
+  
+  const novaOcorrencia = await db
+    .select()
+    .from(ocorrenciasEstruturais)
+    .where(eq(ocorrenciasEstruturais.id, insertId))
+    .limit(1);
+  
+  return novaOcorrencia[0];
+}
+
+/**
+ * Busca todas as ocorrências estruturais com informações do tema e gestor
+ */
+export async function getAllOcorrenciasEstruturais(): Promise<Array<OcorrenciaEstrutural & { 
+  temaNome: string;
+  gestorNome: string | null;
+}>> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const result = await db
+    .select({
+      id: ocorrenciasEstruturais.id,
+      gestorId: ocorrenciasEstruturais.gestorId,
+      temaId: ocorrenciasEstruturais.temaId,
+      descricao: ocorrenciasEstruturais.descricao,
+      abrangencia: ocorrenciasEstruturais.abrangencia,
+      zonaAfetada: ocorrenciasEstruturais.zonaAfetada,
+      lojasAfetadas: ocorrenciasEstruturais.lojasAfetadas,
+      impacto: ocorrenciasEstruturais.impacto,
+      fotos: ocorrenciasEstruturais.fotos,
+      sugestaoAcao: ocorrenciasEstruturais.sugestaoAcao,
+      estado: ocorrenciasEstruturais.estado,
+      notasAdmin: ocorrenciasEstruturais.notasAdmin,
+      resolvidoEm: ocorrenciasEstruturais.resolvidoEm,
+      createdAt: ocorrenciasEstruturais.createdAt,
+      updatedAt: ocorrenciasEstruturais.updatedAt,
+      temaNome: temasOcorrencias.nome,
+      gestorNome: users.name
+    })
+    .from(ocorrenciasEstruturais)
+    .innerJoin(temasOcorrencias, eq(ocorrenciasEstruturais.temaId, temasOcorrencias.id))
+    .leftJoin(gestores, eq(ocorrenciasEstruturais.gestorId, gestores.id))
+    .leftJoin(users, eq(gestores.userId, users.id))
+    .orderBy(desc(ocorrenciasEstruturais.createdAt));
+  
+  return result;
+}
+
+/**
+ * Busca ocorrências estruturais de um gestor específico
+ */
+export async function getOcorrenciasEstruturaisByGestorId(gestorId: number): Promise<Array<OcorrenciaEstrutural & { 
+  temaNome: string;
+  gestorNome: string | null;
+}>> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const result = await db
+    .select({
+      id: ocorrenciasEstruturais.id,
+      gestorId: ocorrenciasEstruturais.gestorId,
+      temaId: ocorrenciasEstruturais.temaId,
+      descricao: ocorrenciasEstruturais.descricao,
+      abrangencia: ocorrenciasEstruturais.abrangencia,
+      zonaAfetada: ocorrenciasEstruturais.zonaAfetada,
+      lojasAfetadas: ocorrenciasEstruturais.lojasAfetadas,
+      impacto: ocorrenciasEstruturais.impacto,
+      fotos: ocorrenciasEstruturais.fotos,
+      sugestaoAcao: ocorrenciasEstruturais.sugestaoAcao,
+      estado: ocorrenciasEstruturais.estado,
+      notasAdmin: ocorrenciasEstruturais.notasAdmin,
+      resolvidoEm: ocorrenciasEstruturais.resolvidoEm,
+      createdAt: ocorrenciasEstruturais.createdAt,
+      updatedAt: ocorrenciasEstruturais.updatedAt,
+      temaNome: temasOcorrencias.nome,
+      gestorNome: users.name
+    })
+    .from(ocorrenciasEstruturais)
+    .innerJoin(temasOcorrencias, eq(ocorrenciasEstruturais.temaId, temasOcorrencias.id))
+    .innerJoin(gestores, eq(ocorrenciasEstruturais.gestorId, gestores.id))
+    .innerJoin(users, eq(gestores.userId, users.id))
+    .where(eq(ocorrenciasEstruturais.gestorId, gestorId))
+    .orderBy(desc(ocorrenciasEstruturais.createdAt));
+  
+  return result;
+}
+
+/**
+ * Busca uma ocorrência estrutural por ID
+ */
+export async function getOcorrenciaEstruturalById(id: number): Promise<(OcorrenciaEstrutural & { 
+  temaNome: string;
+  gestorNome: string | null;
+}) | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const result = await db
+    .select({
+      id: ocorrenciasEstruturais.id,
+      gestorId: ocorrenciasEstruturais.gestorId,
+      temaId: ocorrenciasEstruturais.temaId,
+      descricao: ocorrenciasEstruturais.descricao,
+      abrangencia: ocorrenciasEstruturais.abrangencia,
+      zonaAfetada: ocorrenciasEstruturais.zonaAfetada,
+      lojasAfetadas: ocorrenciasEstruturais.lojasAfetadas,
+      impacto: ocorrenciasEstruturais.impacto,
+      fotos: ocorrenciasEstruturais.fotos,
+      sugestaoAcao: ocorrenciasEstruturais.sugestaoAcao,
+      estado: ocorrenciasEstruturais.estado,
+      notasAdmin: ocorrenciasEstruturais.notasAdmin,
+      resolvidoEm: ocorrenciasEstruturais.resolvidoEm,
+      createdAt: ocorrenciasEstruturais.createdAt,
+      updatedAt: ocorrenciasEstruturais.updatedAt,
+      temaNome: temasOcorrencias.nome,
+      gestorNome: users.name
+    })
+    .from(ocorrenciasEstruturais)
+    .innerJoin(temasOcorrencias, eq(ocorrenciasEstruturais.temaId, temasOcorrencias.id))
+    .innerJoin(gestores, eq(ocorrenciasEstruturais.gestorId, gestores.id))
+    .innerJoin(users, eq(gestores.userId, users.id))
+    .where(eq(ocorrenciasEstruturais.id, id))
+    .limit(1);
+  
+  return result[0] || null;
+}
+
+/**
+ * Atualiza o estado de uma ocorrência estrutural (para admin)
+ */
+export async function updateOcorrenciaEstruturalEstado(
+  id: number,
+  estado: 'reportado' | 'em_analise' | 'em_resolucao' | 'resolvido',
+  notasAdmin?: string
+): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  
+  const updateData: Partial<InsertOcorrenciaEstrutural> = { estado };
+  
+  if (notasAdmin !== undefined) {
+    updateData.notasAdmin = notasAdmin;
+  }
+  
+  if (estado === 'resolvido') {
+    updateData.resolvidoEm = new Date();
+  }
+  
+  await db
+    .update(ocorrenciasEstruturais)
+    .set(updateData)
+    .where(eq(ocorrenciasEstruturais.id, id));
+}
+
+/**
+ * Conta ocorrências estruturais por estado
+ */
+export async function countOcorrenciasEstruturaisPorEstado(): Promise<{
+  reportado: number;
+  emAnalise: number;
+  emResolucao: number;
+  resolvido: number;
+  total: number;
+}> {
+  const db = await getDb();
+  if (!db) return { reportado: 0, emAnalise: 0, emResolucao: 0, resolvido: 0, total: 0 };
+  
+  const result = await db
+    .select({
+      estado: ocorrenciasEstruturais.estado,
+      count: sql<number>`COUNT(*)`
+    })
+    .from(ocorrenciasEstruturais)
+    .groupBy(ocorrenciasEstruturais.estado);
+  
+  const counts = {
+    reportado: 0,
+    emAnalise: 0,
+    emResolucao: 0,
+    resolvido: 0,
+    total: 0
+  };
+  
+  for (const row of result) {
+    if (row.estado === 'reportado') counts.reportado = row.count;
+    else if (row.estado === 'em_analise') counts.emAnalise = row.count;
+    else if (row.estado === 'em_resolucao') counts.emResolucao = row.count;
+    else if (row.estado === 'resolvido') counts.resolvido = row.count;
+    counts.total += row.count;
+  }
+  
+  return counts;
+}
+
+/**
+ * Conta ocorrências estruturais não resolvidas (para badge no menu)
+ */
+export async function countOcorrenciasEstruturaisNaoResolvidas(): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  
+  const result = await db
+    .select({ count: sql<number>`COUNT(*)` })
+    .from(ocorrenciasEstruturais)
+    .where(sql`${ocorrenciasEstruturais.estado} != 'resolvido'`);
+  
+  return result[0]?.count || 0;
+}

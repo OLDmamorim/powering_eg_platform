@@ -1691,3 +1691,17 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar logótipo ExpressGlass no cabeçalho do PDF
 - [x] Adicionar gráficos de evolução de métricas ao longo do período
 - [x] Testar geração do PDF com as novas funcionalidades
+
+
+## Funcionalidade v6.3 - Relatório de Ocorrências Estruturais
+- [x] Criar tabela ocorrencias_estruturais no schema (id, gestorId, tema, descricao, abrangencia, impacto, fotos, criadoEm)
+- [x] Criar tabela temas_ocorrencias para guardar temas criados pelos gestores (autocomplete)
+- [x] Implementar funções CRUD no db.ts (createOcorrencia, getAllOcorrencias, getTemasOcorrencias, etc)
+- [x] Criar router ocorrenciasEstruturais com procedures (criar, listar, getTemas)
+- [x] Criar página OcorrenciaEstrutural.tsx para criar nova ocorrência
+- [x] Implementar autocomplete de temas (igual às categorias do admin)
+- [x] Criar página HistoricoOcorrencias.tsx para listar ocorrências
+- [x] Adicionar itens ao menu lateral (grupo Ocorrências)
+- [x] Testar criação de ocorrência com novo tema
+- [x] Testar autocomplete de temas existentes
+- [x] Criar checkpoint v6.3

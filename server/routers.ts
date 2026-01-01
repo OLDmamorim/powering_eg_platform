@@ -3256,6 +3256,110 @@ export const appRouter = router({
         return { success: true, todoId: todo.id };
       }),
   }),
+  
+  // ==================== OCORRÊNCIAS ESTRUTURAIS ====================
+  ocorrenciasEstruturais: router({
+    // Buscar todos os temas para autocomplete
+    getTemas: gestorProcedure.query(async () => {
+      return await db.getAllTemasOcorrencias();
+    }),
+    
+    // Buscar temas por texto (autocomplete)
+    searchTemas: gestorProcedure
+      .input(z.object({ texto: z.string() }))
+      .query(async ({ input }) => {
+        if (input.texto.length < 1) {
+          return await db.getAllTemasOcorrencias();
+        }
+        return await db.searchTemasOcorrencias(input.texto);
+      }),
+    
+    // Criar nova ocorrência estrutural
+    criar: gestorProcedure
+      .input(z.object({
+        tema: z.string().min(1, 'Tema é obrigatório'),
+        descricao: z.string().min(10, 'Descrição deve ter pelo menos 10 caracteres'),
+        abrangencia: z.enum(['nacional', 'regional', 'zona']),
+        zonaAfetada: z.string().optional(),
+        lojasAfetadas: z.array(z.number()).optional(),
+        impacto: z.enum(['baixo', 'medio', 'alto', 'critico']),
+        fotos: z.array(z.string()).optional(),
+        sugestaoAcao: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        // Admin pode criar ocorrências sem ser gestor
+        const gestorId = ctx.gestor?.id || null;
+        
+        // Criar ou obter o tema
+        const tema = await db.getOrCreateTemaOcorrencia(input.tema, ctx.user.id);
+        
+        // Criar a ocorrência
+        const ocorrencia = await db.createOcorrenciaEstrutural({
+          gestorId: gestorId,
+          temaId: tema.id,
+          descricao: input.descricao,
+          abrangencia: input.abrangencia,
+          zonaAfetada: input.zonaAfetada,
+          lojasAfetadas: input.lojasAfetadas,
+          impacto: input.impacto,
+          fotos: input.fotos,
+          sugestaoAcao: input.sugestaoAcao,
+        });
+        
+        // Registar atividade (apenas se for gestor)
+        if (gestorId) {
+          await db.registarAtividade({
+            gestorId: gestorId,
+            tipo: 'ocorrencia_estrutural',
+            descricao: `Nova ocorrência estrutural: ${input.tema}`,
+          });
+        }
+        
+        return ocorrencia;
+      }),
+    
+    // Listar todas as ocorrências (admin)
+    listAll: adminProcedure.query(async () => {
+      return await db.getAllOcorrenciasEstruturais();
+    }),
+    
+    // Listar ocorrências do gestor atual
+    listMinhas: gestorProcedure.query(async ({ ctx }) => {
+      if (!ctx.gestor) {
+        return [];
+      }
+      return await db.getOcorrenciasEstruturaisByGestorId(ctx.gestor.id);
+    }),
+    
+    // Buscar ocorrência por ID
+    getById: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        return await db.getOcorrenciaEstruturalById(input.id);
+      }),
+    
+    // Atualizar estado da ocorrência (admin)
+    updateEstado: adminProcedure
+      .input(z.object({
+        id: z.number(),
+        estado: z.enum(['reportado', 'em_analise', 'em_resolucao', 'resolvido']),
+        notasAdmin: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        await db.updateOcorrenciaEstruturalEstado(input.id, input.estado, input.notasAdmin);
+        return { success: true };
+      }),
+    
+    // Contar ocorrências por estado
+    countPorEstado: protectedProcedure.query(async () => {
+      return await db.countOcorrenciasEstruturaisPorEstado();
+    }),
+    
+    // Contar ocorrências não resolvidas (para badge)
+    countNaoResolvidas: protectedProcedure.query(async () => {
+      return await db.countOcorrenciasEstruturaisNaoResolvidas();
+    }),
+  }),
 });
 
 // Função auxiliar para gerar HTML do email de reunião quinzenal

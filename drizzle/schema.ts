@@ -201,7 +201,8 @@ export const atividades = mysqlTable("atividades", {
     "alerta_gerado",
     "alerta_resolvido",
     "gestor_criado",
-    "loja_criada"
+    "loja_criada",
+    "ocorrencia_estrutural"
   ]).notNull(),
   descricao: text("descricao").notNull(),
   metadata: text("metadata"), // JSON com dados adicionais
@@ -663,3 +664,61 @@ export const todos = mysqlTable("todos", {
 
 export type Todo = typeof todos.$inferSelect;
 export type InsertTodo = typeof todos.$inferInsert;
+
+
+/**
+ * Temas de Ocorrências Estruturais - Tags criadas pelos gestores (autocomplete)
+ */
+export const temasOcorrencias = mysqlTable("temas_ocorrencias", {
+  id: int("id").autoincrement().primaryKey(),
+  nome: varchar("nome", { length: 100 }).notNull().unique(),
+  criadoPorId: int("criadoPorId").notNull(), // FK para users.id (quem criou o tema)
+  usageCount: int("usageCount").default(1).notNull(), // Contador de quantas vezes foi usado
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type TemaOcorrencia = typeof temasOcorrencias.$inferSelect;
+export type InsertTemaOcorrencia = typeof temasOcorrencias.$inferInsert;
+
+/**
+ * Ocorrências Estruturais - Relatórios de situações não ligadas a uma loja específica
+ */
+export const ocorrenciasEstruturais = mysqlTable("ocorrencias_estruturais", {
+  id: int("id").autoincrement().primaryKey(),
+  
+  // Quem reportou (pode ser null se admin criar diretamente)
+  gestorId: int("gestorId"), // FK para gestores.id
+  
+  // Tema/Tag (com autocomplete)
+  temaId: int("temaId").notNull(), // FK para temas_ocorrencias.id
+  
+  // Conteúdo
+  descricao: text("descricao").notNull(),
+  
+  // Abrangência geográfica
+  abrangencia: mysqlEnum("abrangencia", ["nacional", "regional", "zona"]).default("nacional").notNull(),
+  zonaAfetada: varchar("zonaAfetada", { length: 100 }), // Nome da zona se abrangencia = "zona" ou "regional"
+  
+  // Lojas afetadas (opcional - para quando há lojas específicas envolvidas)
+  lojasAfetadas: text("lojasAfetadas"), // JSON array de IDs das lojas [1,2,3]
+  
+  // Impacto
+  impacto: mysqlEnum("impacto", ["baixo", "medio", "alto", "critico"]).default("medio").notNull(),
+  
+  // Evidências
+  fotos: text("fotos"), // JSON array de URLs das fotos
+  
+  // Sugestão de ação
+  sugestaoAcao: text("sugestaoAcao"),
+  
+  // Estado de acompanhamento (para o admin)
+  estado: mysqlEnum("estado", ["reportado", "em_analise", "em_resolucao", "resolvido"]).default("reportado").notNull(),
+  notasAdmin: text("notasAdmin"), // Notas/feedback do admin
+  resolvidoEm: timestamp("resolvidoEm"),
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type OcorrenciaEstrutural = typeof ocorrenciasEstruturais.$inferSelect;
+export type InsertOcorrenciaEstrutural = typeof ocorrenciasEstruturais.$inferInsert;

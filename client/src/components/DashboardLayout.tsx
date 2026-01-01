@@ -33,7 +33,7 @@ import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { KeyboardShortcutsHelp } from "@/components/KeyboardShortcutsHelp";
 import { Button } from "./ui/button";
 
-import { Building2, ClipboardList, FileText, ListTodo, Sparkles, History, Bell, Settings, Tag, BarChart3, UserCog, CalendarDays, Store, TrendingUp, GitCompare, Users2 } from "lucide-react";
+import { Building2, ClipboardList, FileText, ListTodo, Sparkles, History, Bell, Settings, Tag, BarChart3, UserCog, CalendarDays, Store, TrendingUp, GitCompare, Users2, AlertTriangle } from "lucide-react";
 
 // Grupos de menu com cores
 type MenuGroup = {
@@ -127,6 +127,15 @@ const getMenuGroups = (userRole?: string): MenuGroup[] => {
         { icon: BarChart3, label: "Dashboard Resultados", path: "/resultados-dashboard", show: true, showBadge: false },
         { icon: GitCompare, label: "Comparação Lojas", path: "/comparacao-lojas", show: true, showBadge: false },
         { icon: History, label: "Histórico da Loja", path: "/historico-loja", show: true, showBadge: false },
+      ]
+    },
+    {
+      id: 'ocorrencias',
+      label: 'Ocorrências',
+      color: 'bg-purple-100/80 dark:bg-purple-900/30',
+      items: [
+        { icon: AlertTriangle, label: "Nova Ocorrência", path: "/ocorrencias-estruturais/nova", show: isGestor || isAdmin, showBadge: false },
+        { icon: History, label: "Histórico", path: "/ocorrencias-estruturais/historico", show: true, showBadge: false },
       ]
     },
     {

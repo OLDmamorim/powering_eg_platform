@@ -1,0 +1,1 @@
+ALTER TABLE `atividades` MODIFY COLUMN `tipo` enum('visita_realizada','relatorio_livre','relatorio_completo','pendente_criado','pendente_resolvido','alerta_gerado','alerta_resolvido','gestor_criado','loja_criada','ocorrencia_estrutural') NOT NULL;

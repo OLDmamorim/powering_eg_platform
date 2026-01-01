@@ -225,6 +225,27 @@
       "when": 1767176691725,
       "tag": "0031_even_purple_man",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "5",
+      "when": 1767295002301,
+      "tag": "0032_jazzy_catseye",
+      "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "5",
+      "when": 1767295167242,
+      "tag": "0033_curved_the_stranger",
+      "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "5",
+      "when": 1767295997653,
+      "tag": "0034_colossal_miss_america",
+      "breakpoints": true
     }
   ]
 }

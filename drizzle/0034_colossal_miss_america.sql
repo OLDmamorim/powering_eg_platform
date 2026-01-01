@@ -1,0 +1,1 @@
+ALTER TABLE `ocorrencias_estruturais` MODIFY COLUMN `gestorId` int;
