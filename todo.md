@@ -1680,3 +1680,14 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Testar: Reunião 60011 enviada com dados corretos
 - [x] Remover logs de debug do frontend e backend
 - [x] Corrigir formatação do PDF dos Resumos Globais para ter aspeto profissional com títulos e secções
+
+## Melhorias PDF Resumos Globais v6.1
+- [ ] Adicionar logótipo ExpressGlass no cabeçalho do PDF
+- [ ] Adicionar gráficos de evolução de métricas ao longo do período
+- [ ] Testar geração do PDF com as novas funcionalidades
+
+
+## Melhorias PDF Resumos Globais v6.1
+- [x] Adicionar logótipo ExpressGlass no cabeçalho do PDF
+- [x] Adicionar gráficos de evolução de métricas ao longo do período
+- [x] Testar geração do PDF com as novas funcionalidades

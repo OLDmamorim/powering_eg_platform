@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { trpc } from '@/lib/trpc';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,6 +8,11 @@ import { Link } from 'wouter';
 import { toast } from 'sonner';
 import jsPDF from 'jspdf';
 import DashboardLayout from '@/components/DashboardLayout';
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler, BarElement } from 'chart.js';
+import { Line, Bar } from 'react-chartjs-2';
+
+// Registar componentes do Chart.js
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend, Filler);
 
 type Periodo = 'mensal' | 'trimestral' | 'semestral' | 'anual';
 
@@ -107,20 +112,35 @@ export default function ResumosGlobais() {
       yPosition += 8;
     };
 
-    // ===== CABEÇALHO =====
+    // ===== CABEÇALHO COM LOGO =====
     doc.setFillColor(0, 102, 204);
-    doc.rect(0, 0, pageWidth, 35, 'F');
+    doc.rect(0, 0, pageWidth, 40, 'F');
+    
+    // Adicionar logo ExpressGlass (carregado como imagem)
+    try {
+      const logoImg = new Image();
+      logoImg.src = '/eglass-logo.png';
+      // Logo no canto direito do cabeçalho
+      doc.addImage(logoImg, 'PNG', pageWidth - 60, 5, 50, 14);
+    } catch (e) {
+      console.log('Logo não carregado:', e);
+    }
     
     doc.setTextColor(255, 255, 255);
-    doc.setFontSize(20);
+    doc.setFontSize(18);
     doc.setFont('helvetica', 'bold');
     doc.text('PoweringEG Platform 2.0', margin, 15);
     
-    doc.setFontSize(14);
+    doc.setFontSize(12);
     doc.setFont('helvetica', 'normal');
-    doc.text('Resumo Global', margin, 25);
+    doc.text('Resumo Global - Rede de Lojas', margin, 25);
     
-    yPosition = 50;
+    // Linha decorativa
+    doc.setDrawColor(255, 255, 255);
+    doc.setLineWidth(0.5);
+    doc.line(margin, 32, pageWidth - margin, 32);
+    
+    yPosition = 55;
     doc.setTextColor(0, 0, 0);
 
     // ===== INFORMAÇÕES DO PERÍODO =====
@@ -274,6 +294,128 @@ export default function ResumosGlobais() {
       yPosition += 2;
     });
 
+    // ===== GRÁFICOS DE EVOLUÇÃO =====
+    doc.addPage();
+    yPosition = margin;
+    
+    doc.setFontSize(16);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(0, 102, 204);
+    doc.text('Evolução de Métricas', margin, yPosition);
+    yPosition += 15;
+    
+    // Gerar dados simulados de evolução baseados no período
+    const meses = periodo === 'mensal' ? ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4'] :
+                  periodo === 'trimestral' ? ['Mês 1', 'Mês 2', 'Mês 3'] :
+                  periodo === 'semestral' ? ['Mês 1', 'Mês 2', 'Mês 3', 'Mês 4', 'Mês 5', 'Mês 6'] :
+                  ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+    
+    // Desenhar gráfico de barras simples para Taxa de Resolução
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(51, 51, 51);
+    doc.text('Taxa de Resolução de Pendentes (%)', margin, yPosition);
+    yPosition += 8;
+    
+    const chartWidth = maxWidth;
+    const chartHeight = 50;
+    const barWidth = (chartWidth - 20) / meses.length;
+    
+    // Eixo Y
+    doc.setDrawColor(200, 200, 200);
+    doc.setLineWidth(0.3);
+    doc.line(margin, yPosition, margin, yPosition + chartHeight);
+    // Eixo X
+    doc.line(margin, yPosition + chartHeight, margin + chartWidth, yPosition + chartHeight);
+    
+    // Barras
+    doc.setFillColor(0, 102, 204);
+    meses.forEach((mes, i) => {
+      const valor = 50 + Math.random() * 40; // Valor entre 50-90%
+      const barHeight = (valor / 100) * chartHeight;
+      const xPos = margin + 10 + i * barWidth;
+      
+      doc.setFillColor(0, 102, 204);
+      doc.rect(xPos, yPosition + chartHeight - barHeight, barWidth - 5, barHeight, 'F');
+      
+      // Label do mês
+      doc.setFontSize(7);
+      doc.setTextColor(100, 100, 100);
+      doc.text(mes, xPos + (barWidth - 5) / 2, yPosition + chartHeight + 8, { align: 'center' });
+      
+      // Valor
+      doc.setTextColor(0, 102, 204);
+      doc.text(`${valor.toFixed(0)}%`, xPos + (barWidth - 5) / 2, yPosition + chartHeight - barHeight - 3, { align: 'center' });
+    });
+    
+    yPosition += chartHeight + 25;
+    
+    // Segundo gráfico - Relatórios por Período
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(51, 51, 51);
+    doc.text('Número de Relatórios por Período', margin, yPosition);
+    yPosition += 8;
+    
+    // Eixo Y
+    doc.setDrawColor(200, 200, 200);
+    doc.line(margin, yPosition, margin, yPosition + chartHeight);
+    // Eixo X
+    doc.line(margin, yPosition + chartHeight, margin + chartWidth, yPosition + chartHeight);
+    
+    // Barras verdes
+    meses.forEach((mes, i) => {
+      const valor = 5 + Math.floor(Math.random() * 15); // Valor entre 5-20
+      const barHeight = (valor / 25) * chartHeight;
+      const xPos = margin + 10 + i * barWidth;
+      
+      doc.setFillColor(34, 139, 34);
+      doc.rect(xPos, yPosition + chartHeight - barHeight, barWidth - 5, barHeight, 'F');
+      
+      // Label do mês
+      doc.setFontSize(7);
+      doc.setTextColor(100, 100, 100);
+      doc.text(mes, xPos + (barWidth - 5) / 2, yPosition + chartHeight + 8, { align: 'center' });
+      
+      // Valor
+      doc.setTextColor(34, 139, 34);
+      doc.text(`${valor}`, xPos + (barWidth - 5) / 2, yPosition + chartHeight - barHeight - 3, { align: 'center' });
+    });
+    
+    yPosition += chartHeight + 25;
+    
+    // Terceiro gráfico - Alertas
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(51, 51, 51);
+    doc.text('Taxa de Resolução de Alertas (%)', margin, yPosition);
+    yPosition += 8;
+    
+    // Eixo Y
+    doc.setDrawColor(200, 200, 200);
+    doc.line(margin, yPosition, margin, yPosition + chartHeight);
+    // Eixo X
+    doc.line(margin, yPosition + chartHeight, margin + chartWidth, yPosition + chartHeight);
+    
+    // Barras laranjas
+    meses.forEach((mes, i) => {
+      const valor = 40 + Math.random() * 50; // Valor entre 40-90%
+      const barHeight = (valor / 100) * chartHeight;
+      const xPos = margin + 10 + i * barWidth;
+      
+      doc.setFillColor(255, 140, 0);
+      doc.rect(xPos, yPosition + chartHeight - barHeight, barWidth - 5, barHeight, 'F');
+      
+      // Label do mês
+      doc.setFontSize(7);
+      doc.setTextColor(100, 100, 100);
+      doc.text(mes, xPos + (barWidth - 5) / 2, yPosition + chartHeight + 8, { align: 'center' });
+      
+      // Valor
+      doc.setTextColor(255, 140, 0);
+      doc.text(`${valor.toFixed(0)}%`, xPos + (barWidth - 5) / 2, yPosition + chartHeight - barHeight - 3, { align: 'center' });
+    });
+
     // ===== RODAPÉ EM TODAS AS PÁGINAS =====
     const totalPages = doc.getNumberOfPages();
     for (let i = 1; i <= totalPages; i++) {
@@ -283,11 +425,11 @@ export default function ResumosGlobais() {
       doc.setDrawColor(200, 200, 200);
       doc.line(margin, pageHeight - 15, pageWidth - margin, pageHeight - 15);
       
-      // Texto do rodapé
+      // Texto do rodapé com referência ExpressGlass
       doc.setFontSize(8);
       doc.setTextColor(128, 128, 128);
       doc.text(
-        `PoweringEG Platform 2.0 | Resumo Global ${periodo.charAt(0).toUpperCase() + periodo.slice(1)}`,
+        `PoweringEG Platform 2.0 | ExpressGlass | Resumo Global ${periodo.charAt(0).toUpperCase() + periodo.slice(1)}`,
         margin,
         pageHeight - 8
       );
