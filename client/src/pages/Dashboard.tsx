@@ -107,6 +107,113 @@ function SimpleLineChart({ data, title }: { data: { label: string; value: number
   );
 }
 
+// Componente separado para Lembretes de Resumos Globais (evita hooks dentro de map)
+function LembretesResumosGlobais({ isAdmin, isGestor, setLocation }: { isAdmin: boolean; isGestor: boolean; setLocation: (path: string) => void }) {
+  // Buscar últimos resumos de cada período
+  const { data: ultimoMensal } = trpc.resumosGlobais.getUltimoPorPeriodo.useQuery(
+    { periodo: 'mensal' },
+    { enabled: isAdmin || isGestor }
+  );
+  const { data: ultimoTrimestral } = trpc.resumosGlobais.getUltimoPorPeriodo.useQuery(
+    { periodo: 'trimestral' },
+    { enabled: isAdmin || isGestor }
+  );
+  const { data: ultimoSemestral } = trpc.resumosGlobais.getUltimoPorPeriodo.useQuery(
+    { periodo: 'semestral' },
+    { enabled: isAdmin || isGestor }
+  );
+  const { data: ultimoAnual } = trpc.resumosGlobais.getUltimoPorPeriodo.useQuery(
+    { periodo: 'anual' },
+    { enabled: isAdmin || isGestor }
+  );
+
+  if (!isAdmin && !isGestor) return null;
+
+  const agora = new Date();
+  const lembretes: Array<{periodo: 'mensal' | 'trimestral' | 'semestral' | 'anual'; mensagem: string; cor: string; ultimoResumo: any}> = [];
+  
+  // Mensal - primeiros 5 dias do mês
+  if (agora.getDate() <= 5) {
+    const inicioPeriodoAnterior = new Date(agora.getFullYear(), agora.getMonth() - 1, 1);
+    if (!ultimoMensal || new Date(ultimoMensal.dataInicio) < inicioPeriodoAnterior) {
+      lembretes.push({
+        periodo: 'mensal',
+        mensagem: 'Está na altura de gerar o Resumo Global Mensal',
+        cor: 'blue',
+        ultimoResumo: ultimoMensal
+      });
+    }
+  }
+  
+  // Trimestral - primeiros 5 dias do trimestre (jan, abr, jul, out)
+  const mesAtual = agora.getMonth();
+  const primeiroMesTrimestre = [0, 3, 6, 9].includes(mesAtual);
+  if (primeiroMesTrimestre && agora.getDate() <= 5) {
+    const trimestreAnterior = Math.floor((agora.getMonth() - 3) / 3) * 3;
+    const inicioPeriodoAnterior = new Date(agora.getFullYear(), trimestreAnterior, 1);
+    if (!ultimoTrimestral || new Date(ultimoTrimestral.dataInicio) < inicioPeriodoAnterior) {
+      lembretes.push({
+        periodo: 'trimestral',
+        mensagem: 'Está na altura de gerar o Resumo Global Trimestral',
+        cor: 'purple',
+        ultimoResumo: ultimoTrimestral
+      });
+    }
+  }
+  
+  // Semestral - primeiros 5 dias do semestre (jan, jul)
+  const primeiroMesSemestre = [0, 6].includes(mesAtual);
+  if (primeiroMesSemestre && agora.getDate() <= 5) {
+    const semestreAnterior = agora.getMonth() < 6 ? -6 : 0;
+    const inicioPeriodoAnterior = new Date(agora.getFullYear(), semestreAnterior, 1);
+    if (!ultimoSemestral || new Date(ultimoSemestral.dataInicio) < inicioPeriodoAnterior) {
+      lembretes.push({
+        periodo: 'semestral',
+        mensagem: 'Está na altura de gerar o Resumo Global Semestral',
+        cor: 'emerald',
+        ultimoResumo: ultimoSemestral
+      });
+    }
+  }
+  
+  // Anual - primeiros 5 dias do ano (janeiro)
+  if (mesAtual === 0 && agora.getDate() <= 5) {
+    const inicioPeriodoAnterior = new Date(agora.getFullYear() - 1, 0, 1);
+    if (!ultimoAnual || new Date(ultimoAnual.dataInicio) < inicioPeriodoAnterior) {
+      lembretes.push({
+        periodo: 'anual',
+        mensagem: 'Está na altura de gerar o Resumo Global Anual',
+        cor: 'amber',
+        ultimoResumo: ultimoAnual
+      });
+    }
+  }
+
+  if (lembretes.length === 0) return null;
+
+  return (
+    <>
+      {lembretes.map((lembrete, index) => (
+        <Alert key={index} className={`border-${lembrete.cor}-500 bg-${lembrete.cor}-50 text-${lembrete.cor}-900 dark:bg-${lembrete.cor}-950/30 dark:text-${lembrete.cor}-200`}>
+          <Calendar className="h-4 w-4" />
+          <AlertTitle>Lembrete: Resumo Global {lembrete.periodo.charAt(0).toUpperCase() + lembrete.periodo.slice(1)}</AlertTitle>
+          <AlertDescription className="flex items-center justify-between">
+            <span>{lembrete.mensagem}</span>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setLocation('/resumos-globais')}
+              className={`border-${lembrete.cor}-500 text-${lembrete.cor}-700 hover:bg-${lembrete.cor}-100 dark:text-${lembrete.cor}-200 dark:hover:bg-${lembrete.cor}-950`}
+            >
+              Gerar Resumo
+            </Button>
+          </AlertDescription>
+        </Alert>
+      ))}
+    </>
+  );
+}
+
 export default function Dashboard() {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
@@ -407,99 +514,7 @@ export default function Dashboard() {
         )}
 
         {/* Lembretes de Resumos Globais */}
-        {(isAdmin || isGestor) && (() => {
-          const agora = new Date();
-          const lembretes: Array<{periodo: 'mensal' | 'trimestral' | 'semestral' | 'anual'; mensagem: string; cor: string}> = [];
-          
-          // Mensal - primeiros 5 dias do mês
-          if (agora.getDate() <= 5) {
-            lembretes.push({
-              periodo: 'mensal',
-              mensagem: 'Está na altura de gerar o Resumo Global Mensal',
-              cor: 'blue'
-            });
-          }
-          
-          // Trimestral - primeiros 5 dias do trimestre (jan, abr, jul, out)
-          const mesAtual = agora.getMonth();
-          const primeiroMesTrimestre = [0, 3, 6, 9].includes(mesAtual);
-          if (primeiroMesTrimestre && agora.getDate() <= 5) {
-            lembretes.push({
-              periodo: 'trimestral',
-              mensagem: 'Está na altura de gerar o Resumo Global Trimestral',
-              cor: 'purple'
-            });
-          }
-          
-          // Semestral - primeiros 5 dias do semestre (jan, jul)
-          const primeiroMesSemestre = [0, 6].includes(mesAtual);
-          if (primeiroMesSemestre && agora.getDate() <= 5) {
-            lembretes.push({
-              periodo: 'semestral',
-              mensagem: 'Está na altura de gerar o Resumo Global Semestral',
-              cor: 'emerald'
-            });
-          }
-          
-          // Anual - primeiros 5 dias do ano (janeiro)
-          if (mesAtual === 0 && agora.getDate() <= 5) {
-            lembretes.push({
-              periodo: 'anual',
-              mensagem: 'Está na altura de gerar o Resumo Global Anual',
-              cor: 'amber'
-            });
-          }
-          
-          return lembretes.map((lembrete, index) => {
-            // Verificar se já foi gerado o resumo do período anterior
-            const { data: ultimoResumo } = trpc.resumosGlobais.getUltimoPorPeriodo.useQuery(
-              { periodo: lembrete.periodo },
-              { enabled: lembretes.length > 0 }
-            );
-            
-            // Calcular início do período anterior
-            let inicioPeriodoAnterior: Date;
-            switch (lembrete.periodo) {
-              case 'mensal':
-                inicioPeriodoAnterior = new Date(agora.getFullYear(), agora.getMonth() - 1, 1);
-                break;
-              case 'trimestral':
-                const trimestreAnterior = Math.floor((agora.getMonth() - 3) / 3) * 3;
-                inicioPeriodoAnterior = new Date(agora.getFullYear(), trimestreAnterior, 1);
-                break;
-              case 'semestral':
-                const semestreAnterior = agora.getMonth() < 6 ? -6 : 0;
-                inicioPeriodoAnterior = new Date(agora.getFullYear(), semestreAnterior, 1);
-                break;
-              case 'anual':
-                inicioPeriodoAnterior = new Date(agora.getFullYear() - 1, 0, 1);
-                break;
-            }
-            
-            // Se já existe resumo do período anterior, não mostrar lembrete
-            if (ultimoResumo && new Date(ultimoResumo.dataInicio) >= inicioPeriodoAnterior) {
-              return null;
-            }
-            
-            return (
-              <Alert key={index} className={`border-${lembrete.cor}-500 bg-${lembrete.cor}-50 text-${lembrete.cor}-900 dark:bg-${lembrete.cor}-950/30 dark:text-${lembrete.cor}-200`}>
-                <Calendar className="h-4 w-4" />
-                <AlertTitle>Lembrete: Resumo Global {lembrete.periodo.charAt(0).toUpperCase() + lembrete.periodo.slice(1)}</AlertTitle>
-                <AlertDescription className="flex items-center justify-between">
-                  <span>{lembrete.mensagem}</span>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => setLocation('/resumos-globais')}
-                    className={`border-${lembrete.cor}-500 text-${lembrete.cor}-700 hover:bg-${lembrete.cor}-100 dark:text-${lembrete.cor}-200 dark:hover:bg-${lembrete.cor}-950`}
-                  >
-                    Gerar Resumo
-                  </Button>
-                </AlertDescription>
-              </Alert>
-            );
-          }).filter(Boolean);
-        })()}
+        <LembretesResumosGlobais isAdmin={isAdmin} isGestor={isGestor} setLocation={setLocation} />
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {isAdmin && (
