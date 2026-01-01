@@ -439,7 +439,7 @@ function DashboardLayoutContent({
           )}
           <KeyboardShortcutsHelp />
           <div className="fixed bottom-4 right-4 text-xs text-foreground/60 select-none pointer-events-none">
-            v5.11
+            v6.0
           </div>
         </main>
       </SidebarInset>
