@@ -5325,3 +5325,107 @@ export async function countOcorrenciasEstruturaisNaoResolvidas(): Promise<number
   
   return result[0]?.count || 0;
 }
+
+
+/**
+ * Busca ocorrências estruturais para análise IA (últimos 30 dias)
+ * Retorna dados agregados por tema para facilitar análise de padrões
+ */
+export async function getOcorrenciasParaRelatorioIA(): Promise<{
+  ocorrencias: Array<{
+    id: number;
+    tema: string;
+    descricao: string;
+    abrangencia: string;
+    zonaAfetada: string | null;
+    impacto: string;
+    estado: string;
+    gestorNome: string | null;
+    criadoEm: Date;
+    sugestaoAcao: string | null;
+  }>;
+  estatisticas: {
+    total: number;
+    porImpacto: { baixo: number; medio: number; alto: number; critico: number };
+    porAbrangencia: { nacional: number; regional: number; zona: number };
+    porEstado: { reportado: number; emAnalise: number; emResolucao: number; resolvido: number };
+    temasMaisFrequentes: Array<{ tema: string; count: number }>;
+  };
+}> {
+  const db = await getDb();
+  if (!db) return {
+    ocorrencias: [],
+    estatisticas: {
+      total: 0,
+      porImpacto: { baixo: 0, medio: 0, alto: 0, critico: 0 },
+      porAbrangencia: { nacional: 0, regional: 0, zona: 0 },
+      porEstado: { reportado: 0, emAnalise: 0, emResolucao: 0, resolvido: 0 },
+      temasMaisFrequentes: []
+    }
+  };
+  
+  // Buscar ocorrências dos últimos 30 dias
+  const dataLimite = new Date();
+  dataLimite.setDate(dataLimite.getDate() - 30);
+  
+  const ocorrencias = await db
+    .select({
+      id: ocorrenciasEstruturais.id,
+      tema: temasOcorrencias.nome,
+      descricao: ocorrenciasEstruturais.descricao,
+      abrangencia: ocorrenciasEstruturais.abrangencia,
+      zonaAfetada: ocorrenciasEstruturais.zonaAfetada,
+      impacto: ocorrenciasEstruturais.impacto,
+      estado: ocorrenciasEstruturais.estado,
+      gestorNome: users.name,
+      criadoEm: ocorrenciasEstruturais.createdAt,
+      sugestaoAcao: ocorrenciasEstruturais.sugestaoAcao
+    })
+    .from(ocorrenciasEstruturais)
+    .innerJoin(temasOcorrencias, eq(ocorrenciasEstruturais.temaId, temasOcorrencias.id))
+    .leftJoin(gestores, eq(ocorrenciasEstruturais.gestorId, gestores.id))
+    .leftJoin(users, eq(gestores.userId, users.id))
+    .where(gte(ocorrenciasEstruturais.createdAt, dataLimite))
+    .orderBy(desc(ocorrenciasEstruturais.createdAt));
+  
+  // Calcular estatísticas
+  const estatisticas = {
+    total: ocorrencias.length,
+    porImpacto: { baixo: 0, medio: 0, alto: 0, critico: 0 },
+    porAbrangencia: { nacional: 0, regional: 0, zona: 0 },
+    porEstado: { reportado: 0, emAnalise: 0, emResolucao: 0, resolvido: 0 },
+    temasMaisFrequentes: [] as Array<{ tema: string; count: number }>
+  };
+  
+  const temasCount: Record<string, number> = {};
+  
+  for (const oc of ocorrencias) {
+    // Por impacto
+    if (oc.impacto === 'baixo') estatisticas.porImpacto.baixo++;
+    else if (oc.impacto === 'medio') estatisticas.porImpacto.medio++;
+    else if (oc.impacto === 'alto') estatisticas.porImpacto.alto++;
+    else if (oc.impacto === 'critico') estatisticas.porImpacto.critico++;
+    
+    // Por abrangência
+    if (oc.abrangencia === 'nacional') estatisticas.porAbrangencia.nacional++;
+    else if (oc.abrangencia === 'regional') estatisticas.porAbrangencia.regional++;
+    else if (oc.abrangencia === 'zona') estatisticas.porAbrangencia.zona++;
+    
+    // Por estado
+    if (oc.estado === 'reportado') estatisticas.porEstado.reportado++;
+    else if (oc.estado === 'em_analise') estatisticas.porEstado.emAnalise++;
+    else if (oc.estado === 'em_resolucao') estatisticas.porEstado.emResolucao++;
+    else if (oc.estado === 'resolvido') estatisticas.porEstado.resolvido++;
+    
+    // Contar temas
+    temasCount[oc.tema] = (temasCount[oc.tema] || 0) + 1;
+  }
+  
+  // Top 5 temas mais frequentes
+  estatisticas.temasMaisFrequentes = Object.entries(temasCount)
+    .map(([tema, count]) => ({ tema, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 5);
+  
+  return { ocorrencias, estatisticas };
+}

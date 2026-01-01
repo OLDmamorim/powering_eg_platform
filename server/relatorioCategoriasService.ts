@@ -16,6 +16,15 @@ interface DadosGraficos {
     categoria: string;
     total: number;
   }>;
+  // Novos dados para ocorrências estruturais
+  ocorrenciasPorImpacto?: Array<{
+    impacto: string;
+    count: number;
+  }>;
+  ocorrenciasPorTema?: Array<{
+    tema: string;
+    count: number;
+  }>;
 }
 
 export async function gerarRelatorioIACategorias(userId: number): Promise<{
@@ -25,6 +34,9 @@ export async function gerarRelatorioIACategorias(userId: number): Promise<{
   // Obter todos os relatórios agrupados por categoria
   const relatoriosPorCategoria = await db.getRelatoriosPorCategoria();
   const estatisticas = await db.getEstatisticasCategorias();
+  
+  // Obter ocorrências estruturais para análise
+  const { ocorrencias: ocorrenciasEstruturais, estatisticas: estatOcorrencias } = await db.getOcorrenciasParaRelatorioIA();
 
   // Preparar dados para a IA
   const dadosParaIA = relatoriosPorCategoria.map((cat) => {
@@ -51,30 +63,65 @@ export async function gerarRelatorioIACategorias(userId: number): Promise<{
       })),
     };
   });
+  
+  // Preparar dados de ocorrências para a IA
+  const dadosOcorrencias = ocorrenciasEstruturais.map(oc => ({
+    tema: oc.tema,
+    descricao: oc.descricao,
+    abrangencia: oc.abrangencia,
+    zonaAfetada: oc.zonaAfetada,
+    impacto: oc.impacto,
+    estado: oc.estado,
+    reportadoPor: oc.gestorNome,
+    data: oc.criadoEm,
+    sugestaoAcao: oc.sugestaoAcao
+  }));
 
-  // Prompt para a IA
-  const prompt = `Você é um analista executivo especializado em gestão de redes de lojas. Analise os dados de relatórios organizados por categoria e gere um relatório estruturado para apresentação em reunião de board.
+  // Prompt para a IA (atualizado com ocorrências)
+  const prompt = `Você é um analista executivo especializado em gestão de redes de lojas. Analise os dados de relatórios organizados por categoria E as ocorrências estruturais reportadas, gerando um relatório estruturado para apresentação em reunião de board.
 
-**DADOS:**
+**DADOS DE RELATÓRIOS POR CATEGORIA:**
 ${JSON.stringify(dadosParaIA, null, 2)}
 
-**ESTATÍSTICAS GLOBAIS:**
+**ESTATÍSTICAS GLOBAIS DE RELATÓRIOS:**
 - Total de categorias: ${estatisticas.totalCategorias}
 - Total de relatórios: ${estatisticas.totalRelatoriosCategorizados}
 - Pendentes a acompanhar: ${estatisticas.porEstado.acompanhar}
 - Em tratamento: ${estatisticas.porEstado.emTratamento}
 - Tratados: ${estatisticas.porEstado.tratado}
 
+**OCORRÊNCIAS ESTRUTURAIS (últimos 30 dias):**
+${JSON.stringify(dadosOcorrencias, null, 2)}
+
+**ESTATÍSTICAS DE OCORRÊNCIAS ESTRUTURAIS:**
+- Total de ocorrências: ${estatOcorrencias.total}
+- Por Impacto:
+  - Crítico: ${estatOcorrencias.porImpacto.critico}
+  - Alto: ${estatOcorrencias.porImpacto.alto}
+  - Médio: ${estatOcorrencias.porImpacto.medio}
+  - Baixo: ${estatOcorrencias.porImpacto.baixo}
+- Por Abrangência:
+  - Nacional: ${estatOcorrencias.porAbrangencia.nacional}
+  - Regional: ${estatOcorrencias.porAbrangencia.regional}
+  - Zona: ${estatOcorrencias.porAbrangencia.zona}
+- Por Estado:
+  - Reportado: ${estatOcorrencias.porEstado.reportado}
+  - Em Análise: ${estatOcorrencias.porEstado.emAnalise}
+  - Em Resolução: ${estatOcorrencias.porEstado.emResolucao}
+  - Resolvido: ${estatOcorrencias.porEstado.resolvido}
+- Temas Mais Frequentes: ${estatOcorrencias.temasMaisFrequentes.map(t => `${t.tema} (${t.count})`).join(', ') || 'Nenhum'}
+
 **INSTRUÇÕES:**
 Gere um relatório executivo em Markdown com a seguinte estrutura:
 
-# Relatório Executivo por Categorias
+# Relatório Executivo por Categorias e Ocorrências Estruturais
 *Gerado em: [data atual]*
 
 ## 📊 Resumo Executivo
-- Visão geral da situação atual
+- Visão geral da situação atual (relatórios + ocorrências)
 - Principais destaques (3-4 pontos)
 - Indicadores-chave
+- **Alertas de Ocorrências Críticas** (se houver)
 
 ## 🏷️ Análise por Categoria
 
@@ -90,8 +137,34 @@ Para cada categoria, forneça:
 - **Principais Problemas Identificados:** (3-5 pontos)
 - **Lojas/Zonas Mais Afetadas:** (se houver padrão)
 
-## 🎯 Categorias Críticas
-Liste as 3-5 categorias que requerem atenção prioritária, justificando:
+## 🚨 Análise de Ocorrências Estruturais
+
+### Visão Geral
+- Total de ocorrências no período
+- Distribuição por impacto e abrangência
+- Taxa de resolução de ocorrências
+
+### Ocorrências Críticas e de Alto Impacto
+Para cada ocorrência crítica/alta:
+- **Tema:** [Nome]
+- **Abrangência:** [Nacional/Regional/Zona]
+- **Descrição resumida**
+- **Status atual**
+- **Recomendação de ação**
+
+### Padrões Identificados nas Ocorrências
+- Temas recorrentes e suas causas prováveis
+- Zonas/regiões mais afetadas
+- Correlação com problemas identificados nos relatórios de lojas
+- Tendências emergentes
+
+### Ações Preventivas Sugeridas
+- Medidas para evitar recorrência dos problemas estruturais
+- Melhorias de processo recomendadas
+- Investimentos necessários
+
+## 🎯 Categorias e Ocorrências Críticas
+Liste as 3-5 categorias/temas que requerem atenção prioritária, justificando:
 - Por que é crítica (volume, baixa taxa resolução, recorrência)
 - Impacto no negócio
 - Urgência
@@ -101,6 +174,7 @@ Liste as 3-5 categorias que requerem atenção prioritária, justificando:
 - Categorias com melhoria significativa
 - Categorias com deterioração
 - Padrões geográficos ou por gestor (se identificáveis)
+- **Correlação entre ocorrências estruturais e problemas nas lojas**
 
 ## 💡 Recomendações Prioritárias para Board
 Liste 5-7 ações concretas priorizadas por impacto:
@@ -114,24 +188,27 @@ Liste 5-7 ações concretas priorizadas por impacto:
 
 ## 📊 KPIs Sugeridos para Acompanhamento
 - Indicadores específicos por categoria crítica
+- Indicadores para ocorrências estruturais
 - Metas mensuráveis
 
 ---
 
 **IMPORTANTE:**
-- Use dados reais dos relatórios fornecidos
+- Use dados reais dos relatórios e ocorrências fornecidos
 - Seja específico e quantitativo
 - Foque em insights acionáveis
 - Linguagem executiva e objetiva
 - Destaque padrões e tendências
-- Priorize por impacto no negócio`;
+- Priorize por impacto no negócio
+- **Identifique correlações entre ocorrências estruturais e problemas nas lojas**
+- **Sugira ações preventivas baseadas nos padrões identificados**`;
 
   const response = await invokeLLM({
     messages: [
       {
         role: "system",
         content:
-          "Você é um analista executivo especializado em gestão de redes de lojas. Gera relatórios estruturados e acionáveis para reuniões de board.",
+          "Você é um analista executivo especializado em gestão de redes de lojas. Gera relatórios estruturados e acionáveis para reuniões de board, incluindo análise de ocorrências estruturais e padrões preventivos.",
       },
       {
         role: "user",
@@ -143,7 +220,7 @@ Liste 5-7 ações concretas priorizadas por impacto:
   const content = response.choices[0].message.content;
   const relatorio = typeof content === 'string' ? content : "Erro ao gerar relatório";
   
-  // Preparar dados para gráficos
+  // Preparar dados para gráficos (incluindo ocorrências)
   const dadosGraficos: DadosGraficos = {
     distribuicaoStatus: dadosParaIA.map(cat => ({
       categoria: cat.categoria,
@@ -164,13 +241,21 @@ Liste 5-7 ações concretas priorizadas por impacto:
       }))
       .sort((a, b) => b.total - a.total) // Ordenar por total decrescente
       .slice(0, 5), // Top 5
+    // Dados de ocorrências para gráficos
+    ocorrenciasPorImpacto: [
+      { impacto: 'Crítico', count: estatOcorrencias.porImpacto.critico },
+      { impacto: 'Alto', count: estatOcorrencias.porImpacto.alto },
+      { impacto: 'Médio', count: estatOcorrencias.porImpacto.medio },
+      { impacto: 'Baixo', count: estatOcorrencias.porImpacto.baixo },
+    ].filter(item => item.count > 0),
+    ocorrenciasPorTema: estatOcorrencias.temasMaisFrequentes,
   };
   
   // Salvar relatório no histórico
   await db.salvarRelatorioIACategoria({
     conteudo: relatorio,
     geradoPor: userId,
-    versao: '5.10',
+    versao: '6.4',
   });
   
   return { relatorio, dadosGraficos };

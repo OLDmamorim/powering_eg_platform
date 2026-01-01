@@ -1705,3 +1705,11 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Testar criação de ocorrência com novo tema
 - [x] Testar autocomplete de temas existentes
 - [x] Criar checkpoint v6.3
+
+## Funcionalidade v6.4 - Ocorrências Estruturais nos Relatórios IA
+- [x] Criar função para buscar ocorrências estruturais do período
+- [x] Modificar serviço de Relatórios IA para incluir dados de ocorrências
+- [x] Atualizar prompt da IA para analisar padrões de ocorrências
+- [x] Adicionar secção "Análise de Ocorrências Estruturais" no relatório gerado
+- [x] Testar geração de Relatório IA com ocorrências
+- [x] Criar checkpoint v6.4
