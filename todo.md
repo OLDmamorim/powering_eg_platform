@@ -1679,3 +1679,4 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Solução: Modificar botão Concluir para passar reuniaoId junto com os dados
 - [x] Testar: Reunião 60011 enviada com dados corretos
 - [x] Remover logs de debug do frontend e backend
+- [x] Corrigir formatação do PDF dos Resumos Globais para ter aspeto profissional com títulos e secções
