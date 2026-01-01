@@ -1713,3 +1713,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar secção "Análise de Ocorrências Estruturais" no relatório gerado
 - [x] Testar geração de Relatório IA com ocorrências
 - [x] Criar checkpoint v6.4
+
+
+## Funcionalidade v6.5 - Mover Ocorrências para Menu Relatórios
+- [x] Mover "Nova Ocorrência" e "Histórico Ocorrências" do grupo Ocorrências para grupo Relatórios
+- [x] Remover grupo Ocorrências do menu lateral
+- [x] Testar navegação
+- [ ] Criar checkpoint v6.5

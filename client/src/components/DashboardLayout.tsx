@@ -87,6 +87,8 @@ const getMenuGroups = (userRole?: string): MenuGroup[] => {
         { icon: Sparkles, label: "Relatórios IA", path: "/relatorios-ia", show: true, showBadge: false },
         { icon: History, label: "Histórico IA", path: "/historico-relatorios-ia", show: isGestor, showBadge: false },
         { icon: BarChart3, label: "Resumos Globais", path: "/resumos-globais", show: true, showBadge: false },
+        { icon: AlertTriangle, label: "Nova Ocorrência", path: "/ocorrencias-estruturais/nova", show: isGestor || isAdmin, showBadge: false },
+        { icon: History, label: "Histórico Ocorrências", path: "/ocorrencias-estruturais/historico", show: true, showBadge: false },
       ]
     },
     {
@@ -129,15 +131,7 @@ const getMenuGroups = (userRole?: string): MenuGroup[] => {
         { icon: History, label: "Histórico da Loja", path: "/historico-loja", show: true, showBadge: false },
       ]
     },
-    {
-      id: 'ocorrencias',
-      label: 'Ocorrências',
-      color: 'bg-purple-100/80 dark:bg-purple-900/30',
-      items: [
-        { icon: AlertTriangle, label: "Nova Ocorrência", path: "/ocorrencias-estruturais/nova", show: isGestor || isAdmin, showBadge: false },
-        { icon: History, label: "Histórico", path: "/ocorrencias-estruturais/historico", show: true, showBadge: false },
-      ]
-    },
+
     {
       id: 'pending',
       label: 'Tarefas',
