@@ -86,6 +86,7 @@ const getMenuGroups = (userRole?: string): MenuGroup[] => {
         { icon: ClipboardList, label: "Meus Relatórios", path: "/meus-relatorios", show: isGestor, showBadge: false },
         { icon: Sparkles, label: "Relatórios IA", path: "/relatorios-ia", show: true, showBadge: false },
         { icon: History, label: "Histórico IA", path: "/historico-relatorios-ia", show: isGestor, showBadge: false },
+        { icon: BarChart3, label: "Resumos Globais", path: "/resumos-globais", show: true, showBadge: false },
       ]
     },
     {
