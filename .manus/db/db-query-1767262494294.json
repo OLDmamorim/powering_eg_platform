@@ -1,0 +1,94 @@
+{
+  "query": "SELECT id, lojaId, estado, createdAt FROM reunioes_quinzenais ORDER BY createdAt DESC;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT id, lojaId, estado, createdAt FROM reunioes_quinzenais ORDER BY createdAt DESC;",
+  "rows": [
+    {
+      "id": "90001",
+      "lojaId": "180010",
+      "estado": "enviada",
+      "createdAt": "2026-01-01 02:22:17"
+    },
+    {
+      "id": "60011",
+      "lojaId": "180010",
+      "estado": "enviada",
+      "createdAt": "2025-12-31 22:08:37"
+    },
+    {
+      "id": "60010",
+      "lojaId": "180010",
+      "estado": "enviada",
+      "createdAt": "2025-12-31 22:05:42"
+    },
+    {
+      "id": "60009",
+      "lojaId": "180010",
+      "estado": "enviada",
+      "createdAt": "2025-12-31 22:02:56"
+    },
+    {
+      "id": "60008",
+      "lojaId": "180010",
+      "estado": "enviada",
+      "createdAt": "2025-12-31 21:59:48"
+    },
+    {
+      "id": "60007",
+      "lojaId": "180010",
+      "estado": "enviada",
+      "createdAt": "2025-12-31 21:56:10"
+    },
+    {
+      "id": "60006",
+      "lojaId": "180010",
+      "estado": "enviada",
+      "createdAt": "2025-12-31 21:51:30"
+    },
+    {
+      "id": "60005",
+      "lojaId": "180010",
+      "estado": "enviada",
+      "createdAt": "2025-12-31 21:48:42"
+    },
+    {
+      "id": "60004",
+      "lojaId": "180010",
+      "estado": "enviada",
+      "createdAt": "2025-12-31 21:44:37"
+    },
+    {
+      "id": "60003",
+      "lojaId": "180010",
+      "estado": "enviada",
+      "createdAt": "2025-12-31 21:40:34"
+    },
+    {
+      "id": "60002",
+      "lojaId": "180010",
+      "estado": "enviada",
+      "createdAt": "2025-12-31 21:38:01"
+    },
+    {
+      "id": "60001",
+      "lojaId": "180010",
+      "estado": "enviada",
+      "createdAt": "2025-12-31 21:34:44"
+    },
+    {
+      "id": "30001",
+      "lojaId": "180010",
+      "estado": "enviada",
+      "createdAt": "2025-12-31 19:13:00"
+    },
+    {
+      "id": "1",
+      "lojaId": "180010",
+      "estado": "enviada",
+      "createdAt": "2025-12-31 16:01:45"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tlojaId\testado\tcreatedAt\n90001\t180010\tenviada\t2026-01-01 02:22:17\n60011\t180010\tenviada\t2025-12-31 22:08:37\n60010\t180010\tenviada\t2025-12-31 22:05:42\n60009\t180010\tenviada\t2025-12-31 22:02:56\n60008\t180010\tenviada\t2025-12-31 21:59:48\n60007\t180010\tenviada\t2025-12-31 21:56:10\n60006\t180010\tenviada\t2025-12-31 21:51:30\n60005\t180010\tenviada\t2025-12-31 21:48:42\n60004\t180010\tenviada\t2025-12-31 21:44:37\n60003\t180010\tenviada\t2025-12-31 21:40:34\n60002\t180010\tenviada\t2025-12-31 21:38:01\n60001\t180010\tenviada\t2025-12-31 21:34:44\n30001\t180010\tenviada\t2025-12-31 19:13:00\n1\t180010\tenviada\t2025-12-31 16:01:45\n",
+  "stderr": "",
+  "execution_time_ms": 62
+}

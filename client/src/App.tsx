@@ -35,6 +35,7 @@ import PortalLojaWidget from "./pages/PortalLojaWidget";
 import ReunioesQuinzenais from "./pages/ReunioesQuinzenais";
 import Todos from "./pages/Todos";
 import TodoWidget from "./pages/TodoWidget";
+import ResumosGlobais from "./pages/ResumosGlobais";
 
 
 function Router() {
@@ -76,6 +77,9 @@ function Router() {
       
       {/* Reuniões Quinzenais */}
       <Route path={"/reunioes-quinzenais"} component={ReunioesQuinzenais} />
+      
+      {/* Resumos Globais */}
+      <Route path={"/resumos-globais"} component={ResumosGlobais} />
       
       {/* To-Do */}
       <Route path={"/todos"} component={Todos} />

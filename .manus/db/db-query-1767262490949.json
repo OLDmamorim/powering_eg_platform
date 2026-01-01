@@ -1,0 +1,28 @@
+{
+  "query": "SELECT * FROM reunioes_quinzenais LIMIT 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT * FROM reunioes_quinzenais LIMIT 1;",
+  "rows": [
+    {
+      "id": "1",
+      "lojaId": "180010",
+      "dataReuniao": "2025-12-31 16:01:45",
+      "participantes": "[\"Vânia Oliveira \",\"Tânia Martins \"]",
+      "temasDiscutidos": "NULL",
+      "decisoesTomadas": "NULL",
+      "observacoes": "NULL",
+      "analiseResultados": "NULL",
+      "planosAcao": "NULL",
+      "estado": "enviada",
+      "dataEnvio": "2025-12-31 16:02:59",
+      "emailEnviadoPara": "mamorim@expressglass.pt",
+      "feedbackGestor": "NULL",
+      "dataFeedback": "NULL",
+      "createdAt": "2025-12-31 16:01:45",
+      "updatedAt": "2025-12-31 16:02:59"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tlojaId\tdataReuniao\tparticipantes\ttemasDiscutidos\tdecisoesTomadas\tobservacoes\tanaliseResultados\tplanosAcao\testado\tdataEnvio\temailEnviadoPara\tfeedbackGestor\tdataFeedback\tcreatedAt\tupdatedAt\n1\t180010\t2025-12-31 16:01:45\t[\"Vânia Oliveira \",\"Tânia Martins \"]\tNULL\tNULL\tNULL\tNULL\tNULL\tenviada\t2025-12-31 16:02:59\tmamorim@expressglass.pt\tNULL\tNULL\t2025-12-31 16:01:45\t2025-12-31 16:02:59\n",
+  "stderr": "",
+  "execution_time_ms": 109
+}
