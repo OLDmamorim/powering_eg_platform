@@ -1,0 +1,154 @@
+{
+  "query": "SELECT id, nome FROM lojas WHERE nome LIKE '%teste%' OR nome LIKE '%test%' OR nome LIKE '%Teste%' OR nome LIKE '%Test%' ORDER BY id",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT id, nome FROM lojas WHERE nome LIKE '%teste%' OR nome LIKE '%test%' OR nome LIKE '%Teste%' OR nome LIKE '%Test%' ORDER BY id",
+  "rows": [
+    {
+      "id": "690060",
+      "nome": "Loja Teste Data/Hora"
+    },
+    {
+      "id": "690061",
+      "nome": "Loja Email Test"
+    },
+    {
+      "id": "690062",
+      "nome": "Loja Teste Admin"
+    },
+    {
+      "id": "690063",
+      "nome": "Loja Comentarios Test"
+    },
+    {
+      "id": "690067",
+      "nome": "Loja Teste Data/Hora"
+    },
+    {
+      "id": "690068",
+      "nome": "Loja Email Test"
+    },
+    {
+      "id": "690069",
+      "nome": "Loja Teste Admin"
+    },
+    {
+      "id": "690070",
+      "nome": "Loja Comentarios Test"
+    },
+    {
+      "id": "690074",
+      "nome": "Loja Import Test 1"
+    },
+    {
+      "id": "690075",
+      "nome": "Loja Import Test 2"
+    },
+    {
+      "id": "690076",
+      "nome": "Loja Duplicada Test"
+    },
+    {
+      "id": "690077",
+      "nome": "Loja Única Test"
+    },
+    {
+      "id": "690078",
+      "nome": "Loja Válida Test"
+    },
+    {
+      "id": "690079",
+      "nome": "Loja Email Válido Test"
+    },
+    {
+      "id": "690080",
+      "nome": "Loja Sem Email Test"
+    },
+    {
+      "id": "690081",
+      "nome": "Loja Com Email Test"
+    },
+    {
+      "id": "690082",
+      "nome": "Loja Batch Test 1"
+    },
+    {
+      "id": "690083",
+      "nome": "Loja Batch Test 2"
+    },
+    {
+      "id": "690084",
+      "nome": "Loja Batch Test 3"
+    },
+    {
+      "id": "690085",
+      "nome": "Loja Batch Test 4"
+    },
+    {
+      "id": "690086",
+      "nome": "Loja Batch Test 5"
+    },
+    {
+      "id": "690087",
+      "nome": "Loja Batch Test 6"
+    },
+    {
+      "id": "690088",
+      "nome": "Loja Batch Test 7"
+    },
+    {
+      "id": "690089",
+      "nome": "Loja Batch Test 8"
+    },
+    {
+      "id": "690090",
+      "nome": "Loja Batch Test 9"
+    },
+    {
+      "id": "690091",
+      "nome": "Loja Batch Test 10"
+    },
+    {
+      "id": "690092",
+      "nome": "Loja Batch Test 11"
+    },
+    {
+      "id": "690093",
+      "nome": "Loja Batch Test 12"
+    },
+    {
+      "id": "690094",
+      "nome": "Loja Batch Test 13"
+    },
+    {
+      "id": "690095",
+      "nome": "Loja Batch Test 14"
+    },
+    {
+      "id": "690096",
+      "nome": "Loja Batch Test 15"
+    },
+    {
+      "id": "690097",
+      "nome": "Loja Test 1"
+    },
+    {
+      "id": "690098",
+      "nome": "Loja Test 2"
+    },
+    {
+      "id": "690099",
+      "nome": "Loja Test 3"
+    },
+    {
+      "id": "690103",
+      "nome": "Loja Test Cumprimento 1767366283217"
+    },
+    {
+      "id": "690105",
+      "nome": "Loja Teste Ordenação 1767366283567"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tnome\n690060\tLoja Teste Data/Hora\n690061\tLoja Email Test\n690062\tLoja Teste Admin\n690063\tLoja Comentarios Test\n690067\tLoja Teste Data/Hora\n690068\tLoja Email Test\n690069\tLoja Teste Admin\n690070\tLoja Comentarios Test\n690074\tLoja Import Test 1\n690075\tLoja Import Test 2\n690076\tLoja Duplicada Test\n690077\tLoja Única Test\n690078\tLoja Válida Test\n690079\tLoja Email Válido Test\n690080\tLoja Sem Email Test\n690081\tLoja Com Email Test\n690082\tLoja Batch Test 1\n690083\tLoja Batch Test 2\n690084\tLoja Batch Test 3\n690085\tLoja Batch Test 4\n690086\tLoja Batch Test 5\n690087\tLoja Batch Test 6\n690088\tLoja Batch Test 7\n690089\tLoja Batch Test 8\n690090\tLoja Batch Test 9\n690091\tLoja Batch Test 10\n690092\tLoja Batch Test 11\n690093\tLoja Batch Test 12\n690094\tLoja Batch Test 13\n690095\tLoja Batch Test 14\n690096\tLoja Batch Test 15\n690097\tLoja Test 1\n690098\tLoja Test 2\n690099\tLoja Test 3\n690103\tLoja Test Cumprimento 1767366283217\n690105\tLoja Teste Ordenação 1767366283567\n",
+  "stderr": "",
+  "execution_time_ms": 60
+}

@@ -1793,3 +1793,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Corrigir erro 404 ao clicar em "Ver Dashboard Completo"
 - [x] Corrigir inconsistência de valores entre Dashboard principal e Dashboard de Resultados
 - [x] Testar e criar checkpoint
+
+## Manutenção v6.1
+- [x] Atualizar versão do portal de v6.0 para v6.1
+- [x] Limpar lojas de teste da base de dados (36 lojas)
+- [x] Limpar gestores/utilizadores de teste da base de dados (24 users)
+

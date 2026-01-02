@@ -1,0 +1,154 @@
+{
+  "query": "SELECT id, name, email, role FROM users WHERE LOWER(name) LIKE '%teste%' OR LOWER(name) LIKE '%test%' ORDER BY id",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT id, name, email, role FROM users WHERE LOWER(name) LIKE '%teste%' OR LOWER(name) LIKE '%test%' ORDER BY id",
+  "rows": [
+    {
+      "id": "7290138",
+      "name": "Admin Teste",
+      "email": "admin@test.com",
+      "role": "admin"
+    },
+    {
+      "id": "7290139",
+      "name": "Admin Email Test",
+      "email": "admin.email@test.com",
+      "role": "admin"
+    },
+    {
+      "id": "7290140",
+      "name": "Admin Comentarios Test",
+      "email": "admin.comentarios@test.com",
+      "role": "admin"
+    },
+    {
+      "id": "7290141",
+      "name": "Gestor Multi-Lojas Test",
+      "email": "gestor.multilojas@test.com",
+      "role": "gestor"
+    },
+    {
+      "id": "7290142",
+      "name": "Gestor Teste Data/Hora",
+      "email": "gestor.datahora@test.com",
+      "role": "gestor"
+    },
+    {
+      "id": "7290143",
+      "name": "Gestor Teste",
+      "email": "gestor@test.com",
+      "role": "gestor"
+    },
+    {
+      "id": "7290144",
+      "name": "Gestor Comentarios Test",
+      "email": "gestor.comentarios@test.com",
+      "role": "gestor"
+    },
+    {
+      "id": "7290145",
+      "name": "Gestor Email Test",
+      "email": "gestor.email@test.com",
+      "role": "gestor"
+    },
+    {
+      "id": "7290146",
+      "name": "Gestor Teste IA",
+      "email": "gestor-ia-test-1767296676065@test.com",
+      "role": "gestor"
+    },
+    {
+      "id": "7290147",
+      "name": "Admin Teste",
+      "email": "admin-ia-test-1767296676344@test.com",
+      "role": "admin"
+    },
+    {
+      "id": "7290148",
+      "name": "Admin Lojas Test",
+      "email": "admin.lojas@test.com",
+      "role": "admin"
+    },
+    {
+      "id": "7290149",
+      "name": "Gestor Lojas Test",
+      "email": "gestor.lojas@test.com",
+      "role": "gestor"
+    },
+    {
+      "id": "7290153",
+      "name": "Admin Resultados Test",
+      "email": "admin-resultados-1767296695918@test.com",
+      "role": "admin"
+    },
+    {
+      "id": "7350653",
+      "name": "Gestor Ocorrencias Test",
+      "email": "gestor.ocorrencias@test.com",
+      "role": "gestor"
+    },
+    {
+      "id": "7350654",
+      "name": "Outro Gestor Test",
+      "email": "outro.gestor@test.com",
+      "role": "gestor"
+    },
+    {
+      "id": "7350756",
+      "name": "Gestor Teste IA",
+      "email": "gestor-ia-test-1767358542207@test.com",
+      "role": "gestor"
+    },
+    {
+      "id": "7350757",
+      "name": "Admin Teste",
+      "email": "admin-ia-test-1767358542549@test.com",
+      "role": "admin"
+    },
+    {
+      "id": "7350760",
+      "name": "Admin Resultados Test",
+      "email": "admin-resultados-1767358549415@test.com",
+      "role": "admin"
+    },
+    {
+      "id": "7350874",
+      "name": "Gestor Teste IA",
+      "email": "gestor-ia-test-1767363332138@test.com",
+      "role": "gestor"
+    },
+    {
+      "id": "7350875",
+      "name": "Admin Teste",
+      "email": "admin-ia-test-1767363332382@test.com",
+      "role": "admin"
+    },
+    {
+      "id": "7350876",
+      "name": "Admin Resultados Test",
+      "email": "admin-resultados-1767363344206@test.com",
+      "role": "admin"
+    },
+    {
+      "id": "7351214",
+      "name": "Gestor Teste IA",
+      "email": "gestor-ia-test-1767366253982@test.com",
+      "role": "gestor"
+    },
+    {
+      "id": "7351215",
+      "name": "Admin Teste",
+      "email": "admin-ia-test-1767366254293@test.com",
+      "role": "admin"
+    },
+    {
+      "id": "7351217",
+      "name": "Admin Resultados Test",
+      "email": "admin-resultados-1767366278166@test.com",
+      "role": "admin"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\temail\trole\n7290138\tAdmin Teste\tadmin@test.com\tadmin\n7290139\tAdmin Email Test\tadmin.email@test.com\tadmin\n7290140\tAdmin Comentarios Test\tadmin.comentarios@test.com\tadmin\n7290141\tGestor Multi-Lojas Test\tgestor.multilojas@test.com\tgestor\n7290142\tGestor Teste Data/Hora\tgestor.datahora@test.com\tgestor\n7290143\tGestor Teste\tgestor@test.com\tgestor\n7290144\tGestor Comentarios Test\tgestor.comentarios@test.com\tgestor\n7290145\tGestor Email Test\tgestor.email@test.com\tgestor\n7290146\tGestor Teste IA\tgestor-ia-test-1767296676065@test.com\tgestor\n7290147\tAdmin Teste\tadmin-ia-test-1767296676344@test.com\tadmin\n7290148\tAdmin Lojas Test\tadmin.lojas@test.com\tadmin\n7290149\tGestor Lojas Test\tgestor.lojas@test.com\tgestor\n7290153\tAdmin Resultados Test\tadmin-resultados-1767296695918@test.com\tadmin\n7350653\tGestor Ocorrencias Test\tgestor.ocorrencias@test.com\tgestor\n7350654\tOutro Gestor Test\toutro.gestor@test.com\tgestor\n7350756\tGestor Teste IA\tgestor-ia-test-1767358542207@test.com\tgestor\n7350757\tAdmin Teste\tadmin-ia-test-1767358542549@test.com\tadmin\n7350760\tAdmin Resultados Test\tadmin-resultados-1767358549415@test.com\tadmin\n7350874\tGestor Teste IA\tgestor-ia-test-1767363332138@test.com\tgestor\n7350875\tAdmin Teste\tadmin-ia-test-1767363332382@test.com\tadmin\n7350876\tAdmin Resultados Test\tadmin-resultados-1767363344206@test.com\tadmin\n7351214\tGestor Teste IA\tgestor-ia-test-1767366253982@test.com\tgestor\n7351215\tAdmin Teste\tadmin-ia-test-1767366254293@test.com\tadmin\n7351217\tAdmin Resultados Test\tadmin-resultados-1767366278166@test.com\tadmin\n",
+  "stderr": "",
+  "execution_time_ms": 227
+}

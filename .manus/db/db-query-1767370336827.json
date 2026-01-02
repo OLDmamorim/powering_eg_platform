@@ -1,0 +1,17 @@
+{
+  "query": "SELECT \n  (SELECT COUNT(*) FROM lojas) as total_lojas,\n  (SELECT COUNT(*) FROM lojas WHERE LOWER(nome) LIKE '%teste%' OR LOWER(nome) LIKE '%test%') as lojas_teste,\n  (SELECT COUNT(*) FROM users) as total_users,\n  (SELECT COUNT(*) FROM users WHERE LOWER(name) LIKE '%teste%' OR LOWER(name) LIKE '%test%') as users_teste,\n  (SELECT COUNT(*) FROM gestores) as total_gestores",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT \n  (SELECT COUNT(*) FROM lojas) as total_lojas,\n  (SELECT COUNT(*) FROM lojas WHERE LOWER(nome) LIKE '%teste%' OR LOWER(nome) LIKE '%test%') as lojas_teste,\n  (SELECT COUNT(*) FROM users) as total_users,\n  (SELECT COUNT(*) FROM users WHERE LOWER(name) LIKE '%teste%' OR LOWER(name) LIKE '%test%') as users_teste,\n  (SELECT COUNT(*) FROM gestores) as total_gestores",
+  "rows": [
+    {
+      "total_lojas": "116",
+      "lojas_teste": "36",
+      "total_users": "38",
+      "users_teste": "24",
+      "total_gestores": "120"
+    }
+  ],
+  "messages": [],
+  "stdout": "total_lojas\tlojas_teste\ttotal_users\tusers_teste\ttotal_gestores\n116\t36\t38\t24\t120\n",
+  "stderr": "",
+  "execution_time_ms": 61
+}
