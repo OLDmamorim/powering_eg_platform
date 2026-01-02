@@ -1759,3 +1759,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Corrigir destinatário para admin real (Mauro Furtado, não Marco Amorim Admin)
 - [x] Corrigir template HTML para renderizar corretamente (não mostrar código)
 - [x] Aplicar layout profissional consistente com outros emails
+
+## Bug Fix - Anexos no Email de Ocorrências v6.9.2
+- [x] Corrigir anexos no email de ocorrências para que abram corretamente
+- [x] Verificar se anexos estão a ser incluídos como attachments do nodemailer

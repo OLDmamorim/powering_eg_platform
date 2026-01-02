@@ -3456,7 +3456,42 @@ export const appRouter = router({
           throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Admin não encontrado para envio de email' });
         }
         
-        // Gerar HTML do email
+        // Parsear fotos do JSON
+        let fotos: string[] = [];
+        if (ocorrencia.fotos) {
+          try {
+            fotos = JSON.parse(ocorrencia.fotos as string);
+          } catch (e) {
+            console.error('Erro ao parsear fotos:', e);
+          }
+        }
+        
+        // Preparar anexos de fotos (fazer download do S3 e converter para base64)
+        const fotoAttachments = await Promise.all(
+          fotos.map(async (fotoUrl, index) => {
+            try {
+              const response = await fetch(fotoUrl);
+              const buffer = await response.arrayBuffer();
+              const base64 = Buffer.from(buffer).toString('base64');
+              // Detectar extensão da imagem
+              const ext = fotoUrl.toLowerCase().includes('.png') ? 'png' : 'jpg';
+              const contentType = ext === 'png' ? 'image/png' : 'image/jpeg';
+              return {
+                filename: `foto_ocorrencia_${index + 1}.${ext}`,
+                content: base64,
+                contentType,
+              };
+            } catch (error) {
+              console.error(`Erro ao fazer download da foto ${index + 1}:`, error);
+              return null;
+            }
+          })
+        );
+        
+        // Filtrar anexos que falharam
+        const validAttachments = fotoAttachments.filter(a => a !== null) as Array<{filename: string; content: string; contentType: string}>;
+        
+        // Gerar HTML do email (sem fotos inline, pois serão anexos)
         const htmlContent = gerarHTMLOcorrenciaEstrutural({
           gestorNome,
           temaNome,
@@ -3465,16 +3500,29 @@ export const appRouter = router({
           zonaAfetada: ocorrencia.zonaAfetada,
           impacto: ocorrencia.impacto,
           sugestaoAcao: ocorrencia.sugestaoAcao,
-          fotos: ocorrencia.fotos ? JSON.parse(ocorrencia.fotos as string) : [],
+          fotos: [], // Não incluir fotos inline, serão anexos
           criadoEm: ocorrencia.createdAt,
         });
+        
+        // Adicionar nota sobre anexos no HTML
+        const htmlComNota = validAttachments.length > 0 
+          ? htmlContent.replace(
+              '</body>',
+              `<div style="text-align: center; padding: 20px; background: #f0fdf4; margin: 20px 30px; border-radius: 8px; border: 1px solid #22c55e;">
+                <p style="margin: 0; color: #166534; font-weight: 600;">📎 ${validAttachments.length} foto(s) anexada(s) a este email</p>
+                <p style="margin: 5px 0 0; color: #15803d; font-size: 12px;">Verifique os anexos para visualizar as imagens.</p>
+              </div>
+              </body>`
+            )
+          : htmlContent;
         
         // Enviar email via SMTP Gmail (egpowering@gmail.com)
         const assunto = `Ocorrência Estrutural: ${temaNome} - Reportado por ${gestorNome}`;
         const enviado = await sendEmail({
           to: adminReal.email,
           subject: assunto,
-          html: htmlContent,
+          html: htmlComNota,
+          attachments: validAttachments,
         });
         
         if (!enviado) {
