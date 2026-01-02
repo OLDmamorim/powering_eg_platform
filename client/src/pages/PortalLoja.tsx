@@ -41,6 +41,10 @@ import {
   Tag,
   Download,
   Smartphone,
+  Upload,
+  X,
+  Image as ImageIcon,
+  Paperclip,
 } from "lucide-react";
 
 interface LojaAuth {
@@ -68,6 +72,8 @@ export default function PortalLoja() {
   const [novaTarefaCategoriaId, setNovaTarefaCategoriaId] = useState<number | undefined>(undefined);
   const [novaTarefaInterna, setNovaTarefaInterna] = useState(false);
   const [novaTarefaDataLimite, setNovaTarefaDataLimite] = useState<string>("");
+  const [novaTarefaAnexos, setNovaTarefaAnexos] = useState<Array<{url: string; nome: string; tipo: string}>>([]);
+  const [uploadingAnexo, setUploadingAnexo] = useState(false);
   const [editarInternaOpen, setEditarInternaOpen] = useState(false);
   const [tarefaInternaEditando, setTarefaInternaEditando] = useState<any>(null);
   const [participantes, setParticipantes] = useState<string[]>([""]);
@@ -268,6 +274,9 @@ export default function PortalLoja() {
     onError: (error) => toast.error(error.message),
   });
 
+  // Mutation para upload de anexos
+  const uploadAnexoMutation = trpc.uploadAnexoPortalLoja.useMutation();
+  
   const criarTarefaMutation = trpc.todosPortalLoja.criar.useMutation({
     onSuccess: () => {
       toast.success("Tarefa criada e enviada ao gestor!");
@@ -278,6 +287,7 @@ export default function PortalLoja() {
       setNovaTarefaCategoriaId(undefined);
       setNovaTarefaInterna(false);
       setNovaTarefaDataLimite("");
+      setNovaTarefaAnexos([]);
       refetchTodos();
       refetchHistoricoTarefas();
     },
@@ -295,6 +305,7 @@ export default function PortalLoja() {
       setNovaTarefaCategoriaId(undefined);
       setNovaTarefaInterna(false);
       setNovaTarefaDataLimite("");
+      setNovaTarefaAnexos([]);
       refetchTarefasInternas();
     },
     onError: (error) => toast.error(error.message),
@@ -1076,6 +1087,42 @@ export default function PortalLoja() {
                           </div>
                         )}
                         
+                        {/* Anexos */}
+                        {todo.anexos && (() => {
+                          try {
+                            const anexosList = typeof todo.anexos === 'string' ? JSON.parse(todo.anexos) : todo.anexos;
+                            if (Array.isArray(anexosList) && anexosList.length > 0) {
+                              return (
+                                <div className="mb-3">
+                                  <span className="text-sm font-medium flex items-center gap-1 mb-2">
+                                    <Paperclip className="h-4 w-4" />
+                                    Anexos ({anexosList.length})
+                                  </span>
+                                  <div className="flex flex-wrap gap-2">
+                                    {anexosList.map((anexo: {url: string; nome: string; tipo: string}, idx: number) => (
+                                      <a
+                                        key={idx}
+                                        href={anexo.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center gap-1 px-2 py-1 bg-secondary rounded-md text-sm hover:bg-secondary/80 transition-colors"
+                                      >
+                                        {anexo.tipo === 'imagem' ? (
+                                          <ImageIcon className="h-3 w-3 text-blue-500" />
+                                        ) : (
+                                          <FileText className="h-3 w-3 text-orange-500" />
+                                        )}
+                                        <span className="max-w-[150px] truncate">{anexo.nome}</span>
+                                      </a>
+                                    ))}
+                                  </div>
+                                </div>
+                              );
+                            }
+                          } catch (e) {}
+                          return null;
+                        })()}
+                        
                         <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
                           {todo.criadoPorNome && <span>Criado por: {todo.criadoPorNome}</span>}
                           <span>{new Date(todo.createdAt).toLocaleDateString('pt-PT')}</span>
@@ -1395,6 +1442,117 @@ export default function PortalLoja() {
                   />
                 </div>
               )}
+              
+              {/* Upload de Anexos */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium flex items-center gap-2">
+                  <Paperclip className="h-4 w-4" />
+                  Anexos (opcional)
+                </label>
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={uploadingAnexo || novaTarefaAnexos.length >= 5}
+                    onClick={() => document.getElementById("tarefa-anexo-upload")?.click()}
+                  >
+                    {uploadingAnexo ? (
+                      <><Loader2 className="mr-2 h-4 w-4 animate-spin" />A carregar...</>
+                    ) : (
+                      <><Upload className="mr-2 h-4 w-4" />Adicionar Ficheiros</>
+                    )}
+                  </Button>
+                  <input
+                    id="tarefa-anexo-upload"
+                    type="file"
+                    multiple
+                    accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt"
+                    onChange={async (e) => {
+                      const files = Array.from(e.target.files || []);
+                      if (files.length === 0) return;
+                      
+                      if (novaTarefaAnexos.length + files.length > 5) {
+                        toast.error("Máximo de 5 anexos permitidos");
+                        return;
+                      }
+                      
+                      setUploadingAnexo(true);
+                      try {
+                        const novosAnexos: Array<{url: string; nome: string; tipo: string}> = [];
+                        
+                        for (const file of files) {
+                          if (file.size > 10 * 1024 * 1024) {
+                            toast.error(`${file.name} é muito grande (máx 10MB)`);
+                            continue;
+                          }
+                          
+                          const isImage = file.type.startsWith("image/");
+                          const tipo = isImage ? "imagem" : "documento";
+                          
+                          const arrayBuffer = await file.arrayBuffer();
+                          const buffer = new Uint8Array(arrayBuffer);
+                          let binary = '';
+                          for (let i = 0; i < buffer.length; i++) {
+                            binary += String.fromCharCode(buffer[i]);
+                          }
+                          const base64 = btoa(binary);
+                          
+                          const { url } = await uploadAnexoMutation.mutateAsync({
+                            token,
+                            fileName: file.name,
+                            fileData: base64,
+                            contentType: file.type || 'application/octet-stream',
+                          });
+                          
+                          novosAnexos.push({ url, nome: file.name, tipo });
+                        }
+                        
+                        setNovaTarefaAnexos([...novaTarefaAnexos, ...novosAnexos]);
+                        if (novosAnexos.length > 0) {
+                          toast.success(`${novosAnexos.length} ficheiro(s) adicionado(s)`);
+                        }
+                      } catch (error) {
+                        console.error("Erro ao fazer upload:", error);
+                        toast.error("Erro ao fazer upload dos ficheiros");
+                      } finally {
+                        setUploadingAnexo(false);
+                        e.target.value = "";
+                      }
+                    }}
+                    className="hidden"
+                  />
+                  <span className="text-sm text-muted-foreground">
+                    {novaTarefaAnexos.length}/5 ficheiros
+                  </span>
+                </div>
+                
+                {novaTarefaAnexos.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {novaTarefaAnexos.map((anexo, index) => (
+                      <div key={index} className="flex items-center gap-1 bg-secondary px-2 py-1 rounded-md text-sm">
+                        {anexo.tipo === "imagem" ? (
+                          <ImageIcon className="h-3 w-3" />
+                        ) : (
+                          <FileText className="h-3 w-3" />
+                        )}
+                        <span className="max-w-[120px] truncate">{anexo.nome}</span>
+                        <button
+                          type="button"
+                          onClick={() => setNovaTarefaAnexos(novaTarefaAnexos.filter((_, i) => i !== index))}
+                          className="ml-1 rounded-sm hover:bg-secondary-foreground/20 p-0.5"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                <p className="text-xs text-muted-foreground">
+                  Formatos: Imagens, PDF, Word, Excel, PowerPoint (máx 10MB/ficheiro)
+                </p>
+              </div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => {
@@ -1405,6 +1563,7 @@ export default function PortalLoja() {
                 setNovaTarefaCategoriaId(undefined);
                 setNovaTarefaInterna(false);
                 setNovaTarefaDataLimite("");
+                setNovaTarefaAnexos([]);
               }}>
                 Cancelar
               </Button>
@@ -1423,6 +1582,7 @@ export default function PortalLoja() {
                       prioridade: novaTarefaPrioridade,
                       categoriaId: novaTarefaCategoriaId,
                       dataLimite: novaTarefaDataLimite || undefined,
+                      anexos: novaTarefaAnexos.length > 0 ? novaTarefaAnexos : undefined,
                     });
                   } else {
                     criarTarefaMutation.mutate({
@@ -1431,6 +1591,7 @@ export default function PortalLoja() {
                       descricao: novaTarefaDescricao.trim() || undefined,
                       prioridade: novaTarefaPrioridade,
                       categoriaId: novaTarefaCategoriaId,
+                      anexos: novaTarefaAnexos.length > 0 ? novaTarefaAnexos : undefined,
                     });
                   }
                 }}

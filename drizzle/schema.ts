@@ -662,7 +662,10 @@ export const todos = mysqlTable("todos", {
   vistoEm: timestamp("vistoEm"), // Data/hora em que foi visto
   
   // Tarefa interna da loja (não enviada ao gestor)
-  isInterna: boolean("isInterna").default(false).notNull(), // Se é uma tarefa interna da loja
+  isInterna: boolean("isInterna").default(false).notNull(),
+  
+  // Anexos (fotos e documentos)
+  anexos: text("anexos"), // JSON array de URLs dos anexos [{url, nome, tipo}]
   
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),

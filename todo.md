@@ -1780,3 +1780,11 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Botões de criação lado a lado: "Nova Tarefa Interna" e "Nova Tarefa para Gestor"
 - [x] Loja pode responder quando gestor responde a uma tarefa (bidirecional)
 - [x] Testar e criar checkpoint
+
+## Anexos nas Tarefas do Portal da Loja v6.12
+- [x] Adicionar campo anexos ao schema de todos
+- [x] Criar endpoint de upload de anexos para tarefas
+- [x] Criar componente de upload no frontend
+- [x] Integrar upload no formulário de criação de tarefas (Nova para Gestor e Nova Interna)
+- [x] Exibir anexos nas tarefas existentes
+- [x] Testar e criar checkpoint

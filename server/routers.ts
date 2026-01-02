@@ -2338,6 +2338,37 @@ export const appRouter = router({
       
       return { url, fileKey };
     }),
+  
+  // Upload de anexos para Portal da Loja (público, validação por token)
+  uploadAnexoPortalLoja: publicProcedure
+    .input(z.object({
+      token: z.string(),
+      fileName: z.string(),
+      fileData: z.string(), // Base64
+      contentType: z.string(),
+    }))
+    .mutation(async ({ input }) => {
+      // Validar token da loja
+      const auth = await db.validarTokenLoja(input.token);
+      if (!auth) {
+        throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+      }
+      
+      const { storagePut } = await import('./storage');
+      
+      // Decodificar base64
+      const buffer = Buffer.from(input.fileData, 'base64');
+      
+      // Criar nome único para o arquivo
+      const timestamp = Date.now();
+      const randomSuffix = Math.random().toString(36).substring(7);
+      const fileKey = `tarefas-loja-anexos/${auth.loja.id}/${timestamp}-${randomSuffix}-${input.fileName}`;
+      
+      // Upload para S3
+      const { url } = await storagePut(fileKey, buffer, input.contentType);
+      
+      return { url, fileKey };
+    }),
 
   // ==================== REUNIÕES QUINZENAIS (LOJAS) ====================
   reunioesQuinzenais: router({
@@ -3266,6 +3297,11 @@ export const appRouter = router({
         descricao: z.string().optional(),
         categoriaId: z.number().optional(),
         prioridade: z.enum(['baixa', 'media', 'alta', 'urgente']).optional(),
+        anexos: z.array(z.object({
+          url: z.string(),
+          nome: z.string(),
+          tipo: z.string(),
+        })).optional(),
       }))
       .mutation(async ({ input }) => {
         const auth = await db.validarTokenLoja(input.token);
@@ -3289,6 +3325,7 @@ export const appRouter = router({
           atribuidoLojaId: null, // Não é atribuída à loja, é criada pela loja
           criadoPorId: gestorDaLoja.userId, // Usar o userId do gestor como proxy (a loja não tem userId)
           criadoPorLojaId: auth.loja.id, // Guardar que foi criada pela loja
+          anexos: input.anexos ? JSON.stringify(input.anexos) : null,
         });
         
         if (!todo) {
@@ -3338,6 +3375,11 @@ export const appRouter = router({
         categoriaId: z.number().optional(),
         prioridade: z.enum(['baixa', 'media', 'alta', 'urgente']).optional(),
         dataLimite: z.string().optional(),
+        anexos: z.array(z.object({
+          url: z.string(),
+          nome: z.string(),
+          tipo: z.string(),
+        })).optional(),
       }))
       .mutation(async ({ input }) => {
         const auth = await db.validarTokenLoja(input.token);
@@ -3363,6 +3405,7 @@ export const appRouter = router({
           criadoPorLojaId: auth.loja.id, // Criada pela loja
           isInterna: true, // Marcar como interna
           dataLimite: input.dataLimite ? new Date(input.dataLimite) : undefined,
+          anexos: input.anexos ? JSON.stringify(input.anexos) : null,
         });
         
         if (!todo) {
