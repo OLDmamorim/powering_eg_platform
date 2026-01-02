@@ -681,13 +681,13 @@ export default function Dashboard() {
                     <div className="grid grid-cols-2 gap-3">
                       <div className="bg-white/60 dark:bg-white/10 rounded-lg p-3">
                         <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
-                          {resultadosMesAnterior?.somaServicos?.toLocaleString('pt-PT') || totaisMesAnterior?.totalServicos?.toLocaleString('pt-PT') || '—'}
+                          {totaisMesAnterior?.totalServicos?.toLocaleString('pt-PT') || resultadosMesAnterior?.somaServicos?.toLocaleString('pt-PT') || '—'}
                         </div>
                         <div className="text-xs text-muted-foreground">Total Serviços</div>
                       </div>
                       <div className="bg-white/60 dark:bg-white/10 rounded-lg p-3">
                         <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-                          {resultadosMesAnterior?.mediaTaxaReparacao ? `${resultadosMesAnterior.mediaTaxaReparacao.toFixed(1)}%` : totaisMesAnterior?.taxaReparacao ? `${totaisMesAnterior.taxaReparacao.toFixed(1)}%` : '—'}
+                          {totaisMesAnterior?.taxaReparacao ? `${(totaisMesAnterior.taxaReparacao * 100).toFixed(1)}%` : resultadosMesAnterior?.mediaTaxaReparacao ? `${(resultadosMesAnterior.mediaTaxaReparacao * 100).toFixed(1)}%` : '—'}
                         </div>
                         <div className="text-xs text-muted-foreground">Taxa Reparação</div>
                       </div>
@@ -712,7 +712,7 @@ export default function Dashboard() {
                       variant="outline" 
                       size="sm" 
                       className="w-full mt-2 border-indigo-300 text-indigo-700 hover:bg-indigo-100 dark:border-indigo-700 dark:text-indigo-300 dark:hover:bg-indigo-900/50"
-                      onClick={() => setLocation('/dashboard-resultados')}
+                      onClick={() => setLocation('/resultados-dashboard')}
                     >
                       Ver Dashboard Completo
                     </Button>
@@ -725,7 +725,7 @@ export default function Dashboard() {
                       variant="outline" 
                       size="sm" 
                       className="mt-3"
-                      onClick={() => setLocation('/dashboard-resultados')}
+                      onClick={() => setLocation('/resultados-dashboard')}
                     >
                       Importar Resultados
                     </Button>
@@ -866,7 +866,7 @@ export default function Dashboard() {
                       variant="outline" 
                       size="sm" 
                       className="w-full mt-2 border-indigo-300 text-indigo-700 hover:bg-indigo-100 dark:border-indigo-700 dark:text-indigo-300 dark:hover:bg-indigo-900/50"
-                      onClick={() => setLocation('/dashboard-resultados')}
+                      onClick={() => setLocation('/resultados-dashboard')}
                     >
                       Ver Dashboard Completo
                     </Button>

@@ -1788,3 +1788,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Integrar upload no formulário de criação de tarefas (Nova para Gestor e Nova Interna)
 - [x] Exibir anexos nas tarefas existentes
 - [x] Testar e criar checkpoint
+
+## Correção de Bugs Dashboard de Resultados v6.13
+- [x] Corrigir erro 404 ao clicar em "Ver Dashboard Completo"
+- [x] Corrigir inconsistência de valores entre Dashboard principal e Dashboard de Resultados
+- [x] Testar e criar checkpoint

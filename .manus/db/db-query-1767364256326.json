@@ -1,0 +1,16 @@
+{
+  "query": "SELECT \n  COUNT(*) as total_lojas,\n  SUM(totalServicos) as soma_servicos,\n  AVG(taxaReparacao) as media_taxa_reparacao,\n  AVG(desvioPercentualMes) as media_desvio\nFROM resultados_mensais \nWHERE mes = 12 AND ano = 2025;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT \n  COUNT(*) as total_lojas,\n  SUM(totalServicos) as soma_servicos,\n  AVG(taxaReparacao) as media_taxa_reparacao,\n  AVG(desvioPercentualMes) as media_desvio\nFROM resultados_mensais \nWHERE mes = 12 AND ano = 2025;",
+  "rows": [
+    {
+      "total_lojas": "70",
+      "soma_servicos": "3929",
+      "media_taxa_reparacao": "0.19760714",
+      "media_desvio": "-0.22886377"
+    }
+  ],
+  "messages": [],
+  "stdout": "total_lojas\tsoma_servicos\tmedia_taxa_reparacao\tmedia_desvio\n70\t3929\t0.19760714\t-0.22886377\n",
+  "stderr": "",
+  "execution_time_ms": 48
+}
