@@ -61,6 +61,8 @@ export default function PortalLoja() {
   const [filtroTarefas, setFiltroTarefas] = useState<"todas" | "recebidas" | "enviadas" | "internas">("todas");
   const [responderTodoOpen, setResponderTodoOpen] = useState(false);
   const [respostaTodo, setRespostaTodo] = useState("");
+  const [observacaoTodoOpen, setObservacaoTodoOpen] = useState(false);
+  const [observacaoTodo, setObservacaoTodo] = useState("");
   const [todoComentario, setTodoComentario] = useState<string>("");
   const [todoSelecionado, setTodoSelecionado] = useState<number | null>(null);
   const [devolverTodoOpen, setDevolverTodoOpen] = useState(false);
@@ -270,6 +272,17 @@ export default function PortalLoja() {
       setRespostaTodo("");
       setTodoSelecionado(null);
       refetchHistoricoTarefas();
+    },
+    onError: (error) => toast.error(error.message),
+  });
+
+  const adicionarObservacaoMutation = trpc.todosPortalLoja.adicionarObservacao.useMutation({
+    onSuccess: () => {
+      toast.success("Observação enviada ao gestor!");
+      setObservacaoTodoOpen(false);
+      setObservacaoTodo("");
+      setTodoSelecionado(null);
+      refetchTodos();
     },
     onError: (error) => toast.error(error.message),
   });
@@ -1079,11 +1092,19 @@ export default function PortalLoja() {
                           </div>
                         )}
                         
-                        {/* Resposta da loja (se já respondeu) */}
+                        {/* Resposta da loja (se já respondeu) - para tarefas enviadas */}
                         {todo.tipo === 'enviada' && todo.respostaLoja && (
                           <div className="p-3 bg-emerald-50 rounded-lg mb-3">
                             <strong className="text-emerald-700 text-sm">Sua Resposta:</strong>
                             <p className="text-emerald-600 text-sm mt-1">{todo.respostaLoja}</p>
+                          </div>
+                        )}
+                        
+                        {/* Observação da loja (se já adicionou) - para tarefas recebidas */}
+                        {todo.tipo === 'recebida' && todo.respostaLoja && (
+                          <div className="p-3 bg-teal-50 rounded-lg mb-3">
+                            <strong className="text-teal-700 text-sm">Sua Observação:</strong>
+                            <p className="text-teal-600 text-sm mt-1">{todo.respostaLoja}</p>
                           </div>
                         )}
                         
@@ -1183,6 +1204,19 @@ export default function PortalLoja() {
                             >
                               <RotateCcw className="h-4 w-4 mr-1" />
                               Devolver
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-teal-600 border-teal-300 hover:bg-teal-50"
+                              onClick={() => {
+                                setTodoSelecionado(todo.id);
+                                setObservacaoTodo(todo.respostaLoja || '');
+                                setObservacaoTodoOpen(true);
+                              }}
+                            >
+                              <MessageSquare className="h-4 w-4 mr-1" />
+                              {todo.respostaLoja ? 'Editar Obs.' : 'Adicionar Obs.'}
                             </Button>
                           </>
                         )}
@@ -1347,6 +1381,54 @@ export default function PortalLoja() {
                 className="bg-cyan-600 hover:bg-cyan-700"
               >
                 {responderTodoMutation.isPending ? "A enviar..." : "Enviar Resposta"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dialog Adicionar Observação (para tarefas recebidas do gestor) */}
+        <Dialog open={observacaoTodoOpen} onOpenChange={setObservacaoTodoOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Adicionar Observação</DialogTitle>
+              <DialogDescription>
+                Adicione uma observação ou comentário sobre esta tarefa. O gestor será notificado.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <Textarea
+                placeholder="Escreva a sua observação..."
+                value={observacaoTodo}
+                onChange={(e) => setObservacaoTodo(e.target.value)}
+                rows={4}
+              />
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => {
+                setObservacaoTodoOpen(false);
+                setObservacaoTodo("");
+                setTodoSelecionado(null);
+              }}>
+                Cancelar
+              </Button>
+              <Button
+                onClick={() => {
+                  if (!observacaoTodo.trim()) {
+                    toast.error("Deve escrever uma observação");
+                    return;
+                  }
+                  if (todoSelecionado) {
+                    adicionarObservacaoMutation.mutate({
+                      token,
+                      todoId: todoSelecionado,
+                      observacao: observacaoTodo.trim(),
+                    });
+                  }
+                }}
+                disabled={adicionarObservacaoMutation.isPending}
+                className="bg-teal-600 hover:bg-teal-700"
+              >
+                {adicionarObservacaoMutation.isPending ? "A enviar..." : "Enviar Observação"}
               </Button>
             </DialogFooter>
           </DialogContent>

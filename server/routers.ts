@@ -3545,6 +3545,53 @@ export const appRouter = router({
         
         return { success: true };
       }),
+    
+    // Adicionar observação a tarefa RECEBIDA (do gestor)
+    adicionarObservacao: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        todoId: z.number(),
+        observacao: z.string().min(1, 'A observação não pode estar vazia'),
+      }))
+      .mutation(async ({ input }) => {
+        const auth = await db.validarTokenLoja(input.token);
+        if (!auth) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        
+        // Verificar se a tarefa está atribuída a esta loja (tarefas recebidas do gestor)
+        const todo = await db.getTodoById(input.todoId);
+        if (!todo || todo.atribuidoLojaId !== auth.loja.id) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Não tem permissão para adicionar observação a esta tarefa' });
+        }
+        
+        // Atualizar a resposta da loja (usamos o mesmo campo respostaLoja)
+        await db.updateTodo(input.todoId, { respostaLoja: input.observacao });
+        
+        // Notificar o gestor por email
+        const criador = await db.getUserById(todo.criadoPorId);
+        if (criador?.email) {
+          try {
+            await sendEmail({
+              to: criador.email,
+              subject: `Observação da Loja ${auth.loja.nome}: ${todo.titulo}`,
+              html: gerarHTMLNotificacaoTodo({
+                tipo: 'observacao_loja',
+                titulo: todo.titulo,
+                descricao: todo.descricao || '',
+                prioridade: todo.prioridade,
+                criadoPor: auth.loja.nome,
+                lojaNome: auth.loja.nome,
+                comentario: input.observacao,
+              }),
+            });
+          } catch (e) {
+            console.error('Erro ao enviar email de notificação:', e);
+          }
+        }
+        
+        return { success: true };
+      }),
   }),
   
   // ==================== OCORRÊNCIAS ESTRUTURAIS ====================
@@ -3960,7 +4007,7 @@ function gerarHTMLReuniaoQuinzenal(dados: {
 
 // Função auxiliar para gerar HTML do email de notificação de To-Do
 function gerarHTMLNotificacaoTodo(dados: {
-  tipo: 'nova' | 'reatribuida' | 'devolvida' | 'concluida' | 'nova_da_loja' | 'status_atualizado' | 'resposta_loja';
+  tipo: 'nova' | 'reatribuida' | 'devolvida' | 'concluida' | 'nova_da_loja' | 'status_atualizado' | 'resposta_loja' | 'observacao_loja';
   titulo: string;
   descricao: string;
   prioridade: string;
@@ -3985,6 +4032,7 @@ function gerarHTMLNotificacaoTodo(dados: {
     nova_da_loja: 'Nova Tarefa da Loja',
     status_atualizado: `Atualização de Tarefa: ${dados.novoEstado || 'Atualizado'}`,
     resposta_loja: 'Resposta da Loja',
+    observacao_loja: 'Observação da Loja',
   }[dados.tipo];
   
   const corTipo = {
@@ -3995,6 +4043,7 @@ function gerarHTMLNotificacaoTodo(dados: {
     nova_da_loja: '#10b981',
     status_atualizado: '#6366f1',
     resposta_loja: '#06b6d4',
+    observacao_loja: '#14b8a6',
   }[dados.tipo];
   
   return `

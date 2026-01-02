@@ -1813,3 +1813,13 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionado campo vistoGestor ao schema de todos
 - [x] Corrigida função countTodosPendentesAtribuidosAMim para excluir tarefas criadas pelo próprio utilizador
 - [x] Adicionada lógica de marcar como visto pelo gestor ao visualizar tarefa
+
+## Bug v6.3 - Lojas não conseguem responder a tarefas recebidas dos gestores
+- [ ] Lojas só conseguem responder a tarefas que elas próprias criaram
+- [ ] Corrigir para permitir resposta a tarefas RECEBIDAS (criadas pelo gestor para a loja)
+- [ ] Verificar lógica de permissões no Portal da Loja
+- [x] Criado endpoint adicionarObservacao no backend para tarefas recebidas
+- [x] Adicionado botão "Adicionar Obs." / "Editar Obs." para tarefas recebidas no Portal da Loja
+- [x] Adicionado Dialog para escrever observação
+- [x] Adicionada visualização da observação da loja em tarefas recebidas
+- [x] Testes unitários passaram (5/5)
