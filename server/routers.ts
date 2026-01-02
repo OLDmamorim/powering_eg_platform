@@ -3442,18 +3442,50 @@ export const appRouter = router({
         const gestorNome = ocorrencia.gestorNome || ctx.user.name || 'Gestor';
         const temaNome = ocorrencia.temaNome;
         
-        // Gerar HTML do email
-        const htmlContent = gerarHTMLOcorrenciaEstrutural({
+        // Truncar descrição e sugestão se necessário para respeitar limite de 20000 caracteres
+        const MAX_CONTENT_LENGTH = 18000; // Deixar margem para HTML template
+        const MAX_FIELD_LENGTH = 8000; // Limite por campo de texto
+        
+        let descricaoTruncada = ocorrencia.descricao;
+        let sugestaoTruncada = ocorrencia.sugestaoAcao;
+        
+        if (descricaoTruncada && descricaoTruncada.length > MAX_FIELD_LENGTH) {
+          descricaoTruncada = descricaoTruncada.substring(0, MAX_FIELD_LENGTH) + '\n\n[... Descrição truncada. Ver ocorrência completa na plataforma ...]';
+        }
+        
+        if (sugestaoTruncada && sugestaoTruncada.length > MAX_FIELD_LENGTH) {
+          sugestaoTruncada = sugestaoTruncada.substring(0, MAX_FIELD_LENGTH) + '\n\n[... Sugestão truncada. Ver ocorrência completa na plataforma ...]';
+        }
+        
+        // Gerar HTML do email com conteúdo truncado
+        let htmlContent = gerarHTMLOcorrenciaEstrutural({
           gestorNome,
           temaNome,
-          descricao: ocorrencia.descricao,
+          descricao: descricaoTruncada,
           abrangencia: ocorrencia.abrangencia,
           zonaAfetada: ocorrencia.zonaAfetada,
           impacto: ocorrencia.impacto,
-          sugestaoAcao: ocorrencia.sugestaoAcao,
+          sugestaoAcao: sugestaoTruncada,
           fotos: ocorrencia.fotos ? JSON.parse(ocorrencia.fotos as string) : [],
           criadoEm: ocorrencia.createdAt,
         });
+        
+        // Truncar HTML final se ainda exceder o limite
+        if (htmlContent.length > MAX_CONTENT_LENGTH) {
+          // Encontrar ponto de corte seguro (antes do footer)
+          const footerIndex = htmlContent.lastIndexOf('<div class="footer">');
+          if (footerIndex > 0) {
+            const contentBeforeFooter = htmlContent.substring(0, footerIndex);
+            const footer = htmlContent.substring(footerIndex);
+            const availableSpace = MAX_CONTENT_LENGTH - footer.length - 200; // Margem de segurança
+            
+            if (contentBeforeFooter.length > availableSpace) {
+              htmlContent = contentBeforeFooter.substring(0, availableSpace) + 
+                '</div><div class="section"><div class="section-content" style="background: #fef3c7; color: #92400e; text-align: center;">⚠️ Conteúdo truncado devido ao tamanho. Consulte a ocorrência completa na plataforma.</div></div>' + 
+                footer;
+            }
+          }
+        }
         
         // Enviar email via notifyOwner
         const titulo = `Ocorrência de ${gestorNome} - ${temaNome}`;

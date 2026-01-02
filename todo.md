@@ -1750,3 +1750,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Preencher espaço vazio ao lado do "Progresso de Relatórios"
 - [x] Testar e criar checkpoint
 
+
+## Bug Fix - Email de Ocorrências v6.9
+- [x] Corrigir erro 'Notification content must be at most 20000 characters' ao enviar email de ocorrências
+- [x] Truncar conteúdo do email quando exceder o limite
