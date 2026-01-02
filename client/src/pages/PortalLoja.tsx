@@ -53,7 +53,7 @@ export default function PortalLoja() {
   const [token, setToken] = useState<string>("");
   const [inputToken, setInputToken] = useState<string>("");
   const [lojaAuth, setLojaAuth] = useState<LojaAuth | null>(null);
-  const [activeTab, setActiveTab] = useState<"reuniao" | "pendentes" | "historico" | "todos">("reuniao");
+  const [activeTab, setActiveTab] = useState<"reuniao" | "pendentes" | "historico" | "todos" | "internas" | "historicoTarefas">("reuniao");
   const [todoComentario, setTodoComentario] = useState<string>("");
   const [todoSelecionado, setTodoSelecionado] = useState<number | null>(null);
   const [devolverTodoOpen, setDevolverTodoOpen] = useState(false);
@@ -63,6 +63,10 @@ export default function PortalLoja() {
   const [novaTarefaDescricao, setNovaTarefaDescricao] = useState("");
   const [novaTarefaPrioridade, setNovaTarefaPrioridade] = useState<"baixa" | "media" | "alta" | "urgente">("media");
   const [novaTarefaCategoriaId, setNovaTarefaCategoriaId] = useState<number | undefined>(undefined);
+  const [novaTarefaInterna, setNovaTarefaInterna] = useState(false);
+  const [novaTarefaDataLimite, setNovaTarefaDataLimite] = useState<string>("");
+  const [editarInternaOpen, setEditarInternaOpen] = useState(false);
+  const [tarefaInternaEditando, setTarefaInternaEditando] = useState<any>(null);
   const [participantes, setParticipantes] = useState<string[]>([""]);
   const [reuniaoAtual, setReuniaoAtual] = useState<number | null>(null);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
@@ -172,6 +176,18 @@ export default function PortalLoja() {
     { enabled: !!token && !!lojaAuth }
   );
 
+  // Histórico de tarefas enviadas ao gestor
+  const { data: historicoTarefas, refetch: refetchHistoricoTarefas } = trpc.todosPortalLoja.historicoEnviadas.useQuery(
+    { token },
+    { enabled: !!token && !!lojaAuth }
+  );
+
+  // Tarefas internas da loja
+  const { data: tarefasInternas, refetch: refetchTarefasInternas } = trpc.todosPortalLoja.listarInternas.useQuery(
+    { token, apenasAtivas: true },
+    { enabled: !!token && !!lojaAuth }
+  );
+
   // Mutations
   const criarReuniaoMutation = trpc.reunioesQuinzenais.criarReuniao.useMutation({
     onSuccess: (data) => {
@@ -246,7 +262,44 @@ export default function PortalLoja() {
       setNovaTarefaDescricao("");
       setNovaTarefaPrioridade("media");
       setNovaTarefaCategoriaId(undefined);
+      setNovaTarefaInterna(false);
+      setNovaTarefaDataLimite("");
       refetchTodos();
+      refetchHistoricoTarefas();
+    },
+    onError: (error) => toast.error(error.message),
+  });
+
+  // Mutations para tarefas internas
+  const criarTarefaInternaMutation = trpc.todosPortalLoja.criarInterna.useMutation({
+    onSuccess: () => {
+      toast.success("Tarefa interna criada!");
+      setNovaTarefaOpen(false);
+      setNovaTarefaTitulo("");
+      setNovaTarefaDescricao("");
+      setNovaTarefaPrioridade("media");
+      setNovaTarefaCategoriaId(undefined);
+      setNovaTarefaInterna(false);
+      setNovaTarefaDataLimite("");
+      refetchTarefasInternas();
+    },
+    onError: (error) => toast.error(error.message),
+  });
+
+  const atualizarTarefaInternaMutation = trpc.todosPortalLoja.atualizarInterna.useMutation({
+    onSuccess: () => {
+      toast.success("Tarefa atualizada!");
+      setEditarInternaOpen(false);
+      setTarefaInternaEditando(null);
+      refetchTarefasInternas();
+    },
+    onError: (error) => toast.error(error.message),
+  });
+
+  const eliminarTarefaInternaMutation = trpc.todosPortalLoja.eliminarInterna.useMutation({
+    onSuccess: () => {
+      toast.success("Tarefa eliminada!");
+      refetchTarefasInternas();
     },
     onError: (error) => toast.error(error.message),
   });
@@ -583,6 +636,23 @@ export default function PortalLoja() {
             {(todosCount || 0) > 0 && (
               <Badge variant="secondary" className="ml-2">{todosCount}</Badge>
             )}
+          </Button>
+          <Button
+            variant={activeTab === "internas" ? "default" : "outline"}
+            onClick={() => setActiveTab("internas")}
+          >
+            <Store className="h-4 w-4 mr-2" />
+            Internas
+            {(tarefasInternas?.length || 0) > 0 && (
+              <Badge variant="outline" className="ml-2">{tarefasInternas?.length}</Badge>
+            )}
+          </Button>
+          <Button
+            variant={activeTab === "historicoTarefas" ? "default" : "outline"}
+            onClick={() => setActiveTab("historicoTarefas")}
+          >
+            <Send className="h-4 w-4 mr-2" />
+            Enviadas
           </Button>
         </div>
 
@@ -930,6 +1000,201 @@ export default function PortalLoja() {
           </div>
         )}
 
+        {/* Tab Tarefas Internas */}
+        {activeTab === "internas" && (
+          <div className="space-y-4">
+            {/* Botão Nova Tarefa Interna */}
+            <div className="flex justify-end">
+              <Button
+                onClick={() => {
+                  setNovaTarefaInterna(true);
+                  setNovaTarefaOpen(true);
+                }}
+                className="bg-purple-600 hover:bg-purple-700"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Nova Tarefa Interna
+              </Button>
+            </div>
+            {!tarefasInternas || tarefasInternas.length === 0 ? (
+              <Card>
+                <CardContent className="py-12 text-center">
+                  <Store className="h-12 w-12 mx-auto text-purple-500 mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">Sem tarefas internas</h3>
+                  <p className="text-muted-foreground">
+                    Crie tarefas para organizar o trabalho interno da loja.
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              tarefasInternas.map((todo: any) => (
+                <Card key={todo.id} className="hover:shadow-md transition-shadow border-l-4 border-l-purple-500">
+                  <CardContent className="py-4">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap mb-2">
+                          <Store className="h-4 w-4 text-purple-500" />
+                          <h3 className="font-semibold">{todo.titulo}</h3>
+                          <Badge className={
+                            todo.prioridade === 'urgente' ? 'bg-red-100 text-red-800' :
+                            todo.prioridade === 'alta' ? 'bg-orange-100 text-orange-800' :
+                            todo.prioridade === 'media' ? 'bg-blue-100 text-blue-800' :
+                            'bg-green-100 text-green-800'
+                          }>
+                            {todo.prioridade}
+                          </Badge>
+                          <Badge variant="outline" className="bg-purple-50 text-purple-700">
+                            Interna
+                          </Badge>
+                        </div>
+                        
+                        {todo.descricao && (
+                          <p className="text-sm text-muted-foreground mb-3">
+                            {todo.descricao}
+                          </p>
+                        )}
+                        
+                        <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
+                          <span>{new Date(todo.createdAt).toLocaleDateString('pt-PT')}</span>
+                          {todo.dataLimite && (
+                            <span className="text-orange-600">
+                              Prazo: {new Date(todo.dataLimite).toLocaleDateString('pt-PT')}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      
+                      <div className="flex flex-col gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setTarefaInternaEditando(todo);
+                            setEditarInternaOpen(true);
+                          }}
+                        >
+                          Editar
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="default"
+                          className="bg-green-600 hover:bg-green-700"
+                          onClick={() => atualizarTarefaInternaMutation.mutate({
+                            token,
+                            todoId: todo.id,
+                            estado: 'concluida',
+                          })}
+                          disabled={atualizarTarefaInternaMutation.isPending}
+                        >
+                          <CheckCircle2 className="h-4 w-4 mr-1" />
+                          Concluir
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-red-600 border-red-300 hover:bg-red-50"
+                          onClick={() => {
+                            if (confirm('Tem a certeza que deseja eliminar esta tarefa?')) {
+                              eliminarTarefaInternaMutation.mutate({
+                                token,
+                                todoId: todo.id,
+                              });
+                            }
+                          }}
+                          disabled={eliminarTarefaInternaMutation.isPending}
+                        >
+                          Eliminar
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
+          </div>
+        )}
+
+        {/* Tab Histórico de Tarefas Enviadas */}
+        {activeTab === "historicoTarefas" && (
+          <div className="space-y-4">
+            {!historicoTarefas || historicoTarefas.length === 0 ? (
+              <Card>
+                <CardContent className="py-12 text-center">
+                  <Send className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">Sem tarefas enviadas</h3>
+                  <p className="text-muted-foreground">
+                    Ainda não enviou nenhuma tarefa ao gestor.
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              historicoTarefas.map((todo: any) => (
+                <Card key={todo.id} className="hover:shadow-md transition-shadow">
+                  <CardContent className="py-4">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap mb-2">
+                          {todo.estado === 'pendente' && <Clock className="h-4 w-4 text-gray-500" />}
+                          {todo.estado === 'em_progresso' && <Clock className="h-4 w-4 text-blue-500" />}
+                          {todo.estado === 'concluida' && <CheckCircle2 className="h-4 w-4 text-green-500" />}
+                          {todo.estado === 'devolvida' && <RotateCcw className="h-4 w-4 text-orange-500" />}
+                          <h3 className="font-semibold">{todo.titulo}</h3>
+                          <Badge className={
+                            todo.prioridade === 'urgente' ? 'bg-red-100 text-red-800' :
+                            todo.prioridade === 'alta' ? 'bg-orange-100 text-orange-800' :
+                            todo.prioridade === 'media' ? 'bg-blue-100 text-blue-800' :
+                            'bg-green-100 text-green-800'
+                          }>
+                            {todo.prioridade}
+                          </Badge>
+                          <Badge variant="outline" className={
+                            todo.estado === 'pendente' ? 'bg-gray-50' :
+                            todo.estado === 'em_progresso' ? 'bg-blue-50 text-blue-700' :
+                            todo.estado === 'concluida' ? 'bg-green-50 text-green-700' :
+                            'bg-orange-50 text-orange-700'
+                          }>
+                            {todo.estado === 'pendente' ? 'Pendente' : 
+                             todo.estado === 'em_progresso' ? 'Em Progresso' :
+                             todo.estado === 'concluida' ? 'Concluída' : 'Devolvida'}
+                          </Badge>
+                          {todo.visto && (
+                            <Badge variant="outline" className="bg-blue-50 text-blue-600">
+                              Vista pelo Gestor
+                            </Badge>
+                          )}
+                        </div>
+                        
+                        {todo.descricao && (
+                          <p className="text-sm text-muted-foreground mb-3">
+                            {todo.descricao}
+                          </p>
+                        )}
+                        
+                        {/* Mostrar comentário/resposta do gestor se existir */}
+                        {todo.comentario && (
+                          <div className="p-3 bg-blue-50 rounded-lg mb-3">
+                            <strong className="text-blue-700 text-sm">Resposta do Gestor:</strong>
+                            <p className="text-blue-600 text-sm mt-1">{todo.comentario}</p>
+                          </div>
+                        )}
+                        
+                        <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
+                          <span>Enviada em: {new Date(todo.createdAt).toLocaleDateString('pt-PT')}</span>
+                          {todo.dataConclusao && (
+                            <span className="text-green-600">
+                              Concluída em: {new Date(todo.dataConclusao).toLocaleDateString('pt-PT')}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
+          </div>
+        )}
+
         {/* Dialog Devolver To-Do */}
         <Dialog open={devolverTodoOpen} onOpenChange={setDevolverTodoOpen}>
           <DialogContent>
@@ -978,22 +1243,34 @@ export default function PortalLoja() {
         </Dialog>
 
         {/* Dialog Nova Tarefa */}
-        <Dialog open={novaTarefaOpen} onOpenChange={setNovaTarefaOpen}>
+        <Dialog open={novaTarefaOpen} onOpenChange={(open) => {
+          setNovaTarefaOpen(open);
+          if (!open) {
+            setNovaTarefaInterna(false);
+            setNovaTarefaDataLimite("");
+          }
+        }}>
           <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
-                <Plus className="h-5 w-5 text-emerald-600" />
-                Nova Tarefa para o Gestor
+                {novaTarefaInterna ? (
+                  <><Store className="h-5 w-5 text-purple-600" />Nova Tarefa Interna</>
+                ) : (
+                  <><Plus className="h-5 w-5 text-emerald-600" />Nova Tarefa para o Gestor</>
+                )}
               </DialogTitle>
               <DialogDescription>
-                Crie uma tarefa que será enviada ao gestor responsável pela sua loja.
+                {novaTarefaInterna 
+                  ? "Crie uma tarefa para organizar o trabalho interno da loja."
+                  : "Crie uma tarefa que será enviada ao gestor responsável pela sua loja."
+                }
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium">Título *</label>
                 <Input
-                  placeholder="Ex: Precisamos de formação sobre novo produto"
+                  placeholder={novaTarefaInterna ? "Ex: Organizar stock" : "Ex: Precisamos de formação sobre novo produto"}
                   value={novaTarefaTitulo}
                   onChange={(e) => setNovaTarefaTitulo(e.target.value)}
                 />
@@ -1045,6 +1322,16 @@ export default function PortalLoja() {
                   </Select>
                 </div>
               </div>
+              {novaTarefaInterna && (
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Data Limite (opcional)</label>
+                  <Input
+                    type="date"
+                    value={novaTarefaDataLimite}
+                    onChange={(e) => setNovaTarefaDataLimite(e.target.value)}
+                  />
+                </div>
+              )}
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => {
@@ -1053,30 +1340,48 @@ export default function PortalLoja() {
                 setNovaTarefaDescricao("");
                 setNovaTarefaPrioridade("media");
                 setNovaTarefaCategoriaId(undefined);
+                setNovaTarefaInterna(false);
+                setNovaTarefaDataLimite("");
               }}>
                 Cancelar
               </Button>
               <Button
-                className="bg-emerald-600 hover:bg-emerald-700"
+                className={novaTarefaInterna ? "bg-purple-600 hover:bg-purple-700" : "bg-emerald-600 hover:bg-emerald-700"}
                 onClick={() => {
                   if (!novaTarefaTitulo.trim()) {
                     toast.error("O título é obrigatório");
                     return;
                   }
-                  criarTarefaMutation.mutate({
-                    token,
-                    titulo: novaTarefaTitulo.trim(),
-                    descricao: novaTarefaDescricao.trim() || undefined,
-                    prioridade: novaTarefaPrioridade,
-                    categoriaId: novaTarefaCategoriaId,
-                  });
+                  if (novaTarefaInterna) {
+                    criarTarefaInternaMutation.mutate({
+                      token,
+                      titulo: novaTarefaTitulo.trim(),
+                      descricao: novaTarefaDescricao.trim() || undefined,
+                      prioridade: novaTarefaPrioridade,
+                      categoriaId: novaTarefaCategoriaId,
+                      dataLimite: novaTarefaDataLimite || undefined,
+                    });
+                  } else {
+                    criarTarefaMutation.mutate({
+                      token,
+                      titulo: novaTarefaTitulo.trim(),
+                      descricao: novaTarefaDescricao.trim() || undefined,
+                      prioridade: novaTarefaPrioridade,
+                      categoriaId: novaTarefaCategoriaId,
+                    });
+                  }
                 }}
-                disabled={criarTarefaMutation.isPending}
+                disabled={criarTarefaMutation.isPending || criarTarefaInternaMutation.isPending}
               >
-                {criarTarefaMutation.isPending ? (
+                {(criarTarefaMutation.isPending || criarTarefaInternaMutation.isPending) ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin mr-2" />
                     A criar...
+                  </>
+                ) : novaTarefaInterna ? (
+                  <>
+                    <Store className="h-4 w-4 mr-2" />
+                    Criar Tarefa Interna
                   </>
                 ) : (
                   <>
@@ -1084,6 +1389,100 @@ export default function PortalLoja() {
                     Enviar ao Gestor
                   </>
                 )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dialog Editar Tarefa Interna */}
+        <Dialog open={editarInternaOpen} onOpenChange={setEditarInternaOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Store className="h-5 w-5 text-purple-600" />
+                Editar Tarefa Interna
+              </DialogTitle>
+            </DialogHeader>
+            {tarefaInternaEditando && (
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Título *</label>
+                  <Input
+                    value={tarefaInternaEditando.titulo}
+                    onChange={(e) => setTarefaInternaEditando({...tarefaInternaEditando, titulo: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Descrição</label>
+                  <Textarea
+                    value={tarefaInternaEditando.descricao || ''}
+                    onChange={(e) => setTarefaInternaEditando({...tarefaInternaEditando, descricao: e.target.value})}
+                    rows={3}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Prioridade</label>
+                    <Select
+                      value={tarefaInternaEditando.prioridade}
+                      onValueChange={(value) => setTarefaInternaEditando({...tarefaInternaEditando, prioridade: value})}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="baixa">Baixa</SelectItem>
+                        <SelectItem value="media">Média</SelectItem>
+                        <SelectItem value="alta">Alta</SelectItem>
+                        <SelectItem value="urgente">Urgente</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Estado</label>
+                    <Select
+                      value={tarefaInternaEditando.estado}
+                      onValueChange={(value) => setTarefaInternaEditando({...tarefaInternaEditando, estado: value})}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="pendente">Pendente</SelectItem>
+                        <SelectItem value="em_progresso">Em Progresso</SelectItem>
+                        <SelectItem value="concluida">Concluída</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => {
+                setEditarInternaOpen(false);
+                setTarefaInternaEditando(null);
+              }}>
+                Cancelar
+              </Button>
+              <Button
+                className="bg-purple-600 hover:bg-purple-700"
+                onClick={() => {
+                  if (!tarefaInternaEditando?.titulo?.trim()) {
+                    toast.error("O título é obrigatório");
+                    return;
+                  }
+                  atualizarTarefaInternaMutation.mutate({
+                    token,
+                    todoId: tarefaInternaEditando.id,
+                    titulo: tarefaInternaEditando.titulo.trim(),
+                    descricao: tarefaInternaEditando.descricao?.trim() || undefined,
+                    prioridade: tarefaInternaEditando.prioridade,
+                    estado: tarefaInternaEditando.estado,
+                  });
+                }}
+                disabled={atualizarTarefaInternaMutation.isPending}
+              >
+                {atualizarTarefaInternaMutation.isPending ? "A guardar..." : "Guardar"}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -1188,43 +1587,51 @@ function ReuniaoEditor({
           </div>
 
           <div>
-            <label className="text-sm font-medium mb-2 block">Temas Discutidos</label>
+            <label className="text-sm font-medium mb-2 block">Temas Discutidos <span className="text-red-500">*</span></label>
             <Textarea
               placeholder="Quais temas foram abordados na reunião?"
               value={temasDiscutidos}
               onChange={(e) => setTemasDiscutidos(e.target.value)}
               rows={3}
+              className={!temasDiscutidos.trim() ? 'border-red-300' : ''}
             />
+            {!temasDiscutidos.trim() && <p className="text-xs text-red-500 mt-1">Campo obrigatório</p>}
           </div>
 
           <div>
-            <label className="text-sm font-medium mb-2 block">Decisões Tomadas</label>
+            <label className="text-sm font-medium mb-2 block">Decisões Tomadas <span className="text-red-500">*</span></label>
             <Textarea
               placeholder="Que decisões foram tomadas?"
               value={decisoesTomadas}
               onChange={(e) => setDecisoesTomadas(e.target.value)}
               rows={3}
+              className={!decisoesTomadas.trim() ? 'border-red-300' : ''}
             />
+            {!decisoesTomadas.trim() && <p className="text-xs text-red-500 mt-1">Campo obrigatório</p>}
           </div>
 
           <div>
-            <label className="text-sm font-medium mb-2 block">Análise de Resultados</label>
+            <label className="text-sm font-medium mb-2 block">Análise de Resultados <span className="text-red-500">*</span></label>
             <Textarea
               placeholder="Como estão os resultados da loja? O que pode melhorar?"
               value={analiseResultados}
               onChange={(e) => setAnaliseResultados(e.target.value)}
               rows={3}
+              className={!analiseResultados.trim() ? 'border-red-300' : ''}
             />
+            {!analiseResultados.trim() && <p className="text-xs text-red-500 mt-1">Campo obrigatório</p>}
           </div>
 
           <div>
-            <label className="text-sm font-medium mb-2 block">Planos de Ação</label>
+            <label className="text-sm font-medium mb-2 block">Planos de Ação <span className="text-red-500">*</span></label>
             <Textarea
               placeholder="Quais ações serão implementadas?"
               value={planosAcao}
               onChange={(e) => setPlanosAcao(e.target.value)}
               rows={3}
+              className={!planosAcao.trim() ? 'border-red-300' : ''}
             />
+            {!planosAcao.trim() && <p className="text-xs text-red-500 mt-1">Campo obrigatório</p>}
           </div>
 
           <div>
@@ -1271,6 +1678,18 @@ function ReuniaoEditor({
           Guardar Rascunho
         </Button>
         <Button onClick={() => {
+          // Validar campos obrigatórios
+          const camposVazios = [];
+          if (!temasDiscutidos.trim()) camposVazios.push('Temas Discutidos');
+          if (!decisoesTomadas.trim()) camposVazios.push('Decisões Tomadas');
+          if (!analiseResultados.trim()) camposVazios.push('Análise de Resultados');
+          if (!planosAcao.trim()) camposVazios.push('Planos de Ação');
+          
+          if (camposVazios.length > 0) {
+            toast.error(`Preencha os campos obrigatórios: ${camposVazios.join(', ')}`);
+            return;
+          }
+          
           // Usar reuniaoAtualId como fallback se reuniao?.id não estiver disponível
           const reuniaoId = reuniao?.id || reuniaoAtualId;
           
@@ -1282,7 +1701,7 @@ function ReuniaoEditor({
             planosAcao,
             observacoes,
           });
-        }} disabled={isConcluindo}>
+        }} disabled={isConcluindo || !temasDiscutidos.trim() || !decisoesTomadas.trim() || !analiseResultados.trim() || !planosAcao.trim()}>
           {isConcluindo ? (
             <Loader2 className="h-4 w-4 animate-spin mr-2" />
           ) : (

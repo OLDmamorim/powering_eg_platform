@@ -4645,6 +4645,7 @@ export async function getAllTodos(filtros?: {
       dataConclusao: todos.dataConclusao,
       visto: todos.visto,
       vistoEm: todos.vistoEm,
+      isInterna: todos.isInterna,
       createdAt: todos.createdAt,
       updatedAt: todos.updatedAt,
       lojaNome: lojas.nome,
@@ -4722,6 +4723,7 @@ export async function getTodosByLojaId(lojaId: number, apenasAtivos: boolean = t
       dataConclusao: todos.dataConclusao,
       visto: todos.visto,
       vistoEm: todos.vistoEm,
+      isInterna: todos.isInterna,
       createdAt: todos.createdAt,
       updatedAt: todos.updatedAt,
       criadoPorNome: sql<string | null>`COALESCE(
@@ -4733,7 +4735,7 @@ export async function getTodosByLojaId(lojaId: number, apenasAtivos: boolean = t
     })
     .from(todos)
     .leftJoin(todoCategories, eq(todos.categoriaId, todoCategories.id))
-    .where(and(...conditions))
+    .where(and(...conditions, eq(todos.isInterna, false)))
     .orderBy(
       sql`FIELD(${todos.prioridade}, 'urgente', 'alta', 'media', 'baixa')`,
       desc(todos.createdAt)
@@ -4992,6 +4994,114 @@ export async function countTodosPendentesAtribuidosAMim(userId: number): Promise
   return result[0]?.count || 0;
 }
 
+
+/**
+ * Listar tarefas enviadas pela loja ao gestor (histórico)
+ */
+export async function getTodosEnviadosPelaLoja(lojaId: number): Promise<Array<Todo & {
+  criadoPorNome: string | null;
+  categoriaNome: string | null;
+  categoriaCor: string | null;
+}>> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const result = await db
+    .select({
+      id: todos.id,
+      titulo: todos.titulo,
+      descricao: todos.descricao,
+      categoriaId: todos.categoriaId,
+      prioridade: todos.prioridade,
+      atribuidoLojaId: todos.atribuidoLojaId,
+      atribuidoUserId: todos.atribuidoUserId,
+      criadoPorId: todos.criadoPorId,
+      criadoPorLojaId: todos.criadoPorLojaId,
+      estado: todos.estado,
+      comentario: todos.comentario,
+      historicoAtribuicoes: todos.historicoAtribuicoes,
+      dataLimite: todos.dataLimite,
+      dataConclusao: todos.dataConclusao,
+      visto: todos.visto,
+      vistoEm: todos.vistoEm,
+      isInterna: todos.isInterna,
+      createdAt: todos.createdAt,
+      updatedAt: todos.updatedAt,
+      criadoPorNome: sql<string | null>`(SELECT nome FROM lojas WHERE id = ${lojaId})`,
+      categoriaNome: todoCategories.nome,
+      categoriaCor: todoCategories.cor,
+    })
+    .from(todos)
+    .leftJoin(todoCategories, eq(todos.categoriaId, todoCategories.id))
+    .where(and(
+      eq(todos.criadoPorLojaId, lojaId),
+      eq(todos.isInterna, false) // Apenas tarefas enviadas ao gestor (não internas)
+    ))
+    .orderBy(desc(todos.createdAt));
+  
+  return result;
+}
+
+/**
+ * Listar tarefas internas da loja
+ */
+export async function getTodosInternosDaLoja(lojaId: number, apenasAtivos: boolean = true): Promise<Array<Todo & {
+  criadoPorNome: string | null;
+  categoriaNome: string | null;
+  categoriaCor: string | null;
+}>> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const conditions = [
+    eq(todos.criadoPorLojaId, lojaId),
+    eq(todos.isInterna, true)
+  ];
+  
+  if (apenasAtivos) {
+    conditions.push(
+      or(
+        eq(todos.estado, 'pendente'),
+        eq(todos.estado, 'em_progresso')
+      )!
+    );
+  }
+  
+  const result = await db
+    .select({
+      id: todos.id,
+      titulo: todos.titulo,
+      descricao: todos.descricao,
+      categoriaId: todos.categoriaId,
+      prioridade: todos.prioridade,
+      atribuidoLojaId: todos.atribuidoLojaId,
+      atribuidoUserId: todos.atribuidoUserId,
+      criadoPorId: todos.criadoPorId,
+      criadoPorLojaId: todos.criadoPorLojaId,
+      estado: todos.estado,
+      comentario: todos.comentario,
+      historicoAtribuicoes: todos.historicoAtribuicoes,
+      dataLimite: todos.dataLimite,
+      dataConclusao: todos.dataConclusao,
+      visto: todos.visto,
+      vistoEm: todos.vistoEm,
+      isInterna: todos.isInterna,
+      createdAt: todos.createdAt,
+      updatedAt: todos.updatedAt,
+      criadoPorNome: sql<string | null>`(SELECT nome FROM lojas WHERE id = ${lojaId})`,
+      categoriaNome: todoCategories.nome,
+      categoriaCor: todoCategories.cor,
+    })
+    .from(todos)
+    .leftJoin(todoCategories, eq(todos.categoriaId, todoCategories.id))
+    .where(and(...conditions))
+    .orderBy(
+      sql`FIELD(${todos.prioridade}, 'urgente', 'alta', 'media', 'baixa')`,
+      desc(todos.createdAt)
+    );
+  
+  return result;
+}
 
 // ==================== OCORRÊNCIAS ESTRUTURAIS ====================
 

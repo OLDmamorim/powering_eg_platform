@@ -80,6 +80,11 @@ export default function Todos() {
   const [atribuidoUserId, setAtribuidoUserId] = useState<string>("");
   const [dataLimite, setDataLimite] = useState<string>("");
   
+  // Estado para mudança de status
+  const [mudarStatusOpen, setMudarStatusOpen] = useState(false);
+  const [novoStatus, setNovoStatus] = useState<string>("");
+  const [respostaStatus, setRespostaStatus] = useState<string>("");
+  
   // Categoria form
   const [novaCategoriaNome, setNovaCategoriaNome] = useState("");
   const [novaCategoriaCor, setNovaCategoriaCor] = useState("#3B82F6");
@@ -166,6 +171,19 @@ export default function Todos() {
     onSuccess: () => {
       refetchTodos();
     },
+  });
+  
+  const mudarStatusMutation = trpc.todos.mudarStatusComResposta.useMutation({
+    onSuccess: () => {
+      toast.success("Status atualizado e loja notificada!");
+      setMudarStatusOpen(false);
+      setTodoSelecionado(null);
+      setNovoStatus("");
+      setRespostaStatus("");
+      refetchTodos();
+      refetchEstatisticas();
+    },
+    onError: (error: any) => toast.error(error.message),
   });
   
   const resetForm = () => {
@@ -464,6 +482,12 @@ export default function Todos() {
                     }
                   }}
                   onMarcarVisto={(id) => marcarVistoMutation.mutate({ id })}
+                  onMudarStatus={(todo) => {
+                    setTodoSelecionado(todo);
+                    setNovoStatus(todo.estado);
+                    setRespostaStatus("");
+                    setMudarStatusOpen(true);
+                  }}
                   corPrioridade={corPrioridade}
                   corEstado={corEstado}
                   iconeEstado={iconeEstado}
@@ -500,6 +524,12 @@ export default function Todos() {
                     }
                   }}
                   onMarcarVisto={(id) => marcarVistoMutation.mutate({ id })}
+                  onMudarStatus={(todo) => {
+                    setTodoSelecionado(todo);
+                    setNovoStatus(todo.estado);
+                    setRespostaStatus("");
+                    setMudarStatusOpen(true);
+                  }}
                   corPrioridade={corPrioridade}
                   corEstado={corEstado}
                   iconeEstado={iconeEstado}
@@ -744,6 +774,102 @@ export default function Todos() {
           </DialogContent>
         </Dialog>
         
+        {/* Dialog Mudar Status */}
+        <Dialog open={mudarStatusOpen} onOpenChange={setMudarStatusOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Mudar Status da Tarefa</DialogTitle>
+              <DialogDescription>
+                Altere o estado da tarefa e adicione uma resposta para a loja
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              {todoSelecionado && (
+                <div className="p-3 bg-muted rounded-lg">
+                  <p className="font-medium">{todoSelecionado.titulo}</p>
+                  {todoSelecionado.lojaNome && (
+                    <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
+                      <Store className="h-3 w-3" />
+                      {todoSelecionado.lojaNome}
+                    </p>
+                  )}
+                </div>
+              )}
+              
+              <div>
+                <label className="text-sm font-medium">Novo Status *</label>
+                <Select value={novoStatus} onValueChange={setNovoStatus}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecionar status..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pendente">
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-4 w-4 text-yellow-500" />
+                        Pendente
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="em_progresso">
+                      <div className="flex items-center gap-2">
+                        <AlertTriangle className="h-4 w-4 text-blue-500" />
+                        Em Progresso
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="devolvida">
+                      <div className="flex items-center gap-2">
+                        <RotateCcw className="h-4 w-4 text-orange-500" />
+                        Devolver à Loja
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="concluida">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-green-500" />
+                        Concluída
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium">Resposta / Comentário para a Loja</label>
+                <Textarea
+                  value={respostaStatus}
+                  onChange={(e) => setRespostaStatus(e.target.value)}
+                  placeholder="Escreva uma resposta ou instruções para a loja..."
+                  rows={4}
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  A loja será notificada por email sobre esta atualização
+                </p>
+              </div>
+            </div>
+            
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setMudarStatusOpen(false)}>
+                Cancelar
+              </Button>
+              <Button 
+                onClick={() => {
+                  if (!novoStatus) {
+                    toast.error("Selecione um status");
+                    return;
+                  }
+                  mudarStatusMutation.mutate({
+                    id: todoSelecionado.id,
+                    estado: novoStatus as any,
+                    resposta: respostaStatus.trim() || undefined,
+                  });
+                }} 
+                disabled={mudarStatusMutation.isPending}
+              >
+                {mudarStatusMutation.isPending ? "A atualizar..." : "Atualizar Status"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+        
         {/* Dialog Categorias */}
         <Dialog open={categoriasOpen} onOpenChange={setCategoriasOpen}>
           <DialogContent>
@@ -829,6 +955,7 @@ function TodoCard({
   onConcluir,
   onEliminar,
   onMarcarVisto,
+  onMudarStatus,
   corPrioridade,
   corEstado,
   iconeEstado,
@@ -839,6 +966,7 @@ function TodoCard({
   onConcluir: (id: number) => void;
   onEliminar: (id: number) => void;
   onMarcarVisto: (id: number) => void;
+  onMudarStatus: (todo: any) => void;
   corPrioridade: (p: string) => string;
   corEstado: (e: string) => string;
   iconeEstado: (e: string) => React.ReactNode;
@@ -954,6 +1082,10 @@ function TodoCard({
               <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onEditar(todo); }}>
                 <Edit className="h-4 w-4 mr-2" />
                 Editar
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onMudarStatus(todo); }}>
+                <RotateCcw className="h-4 w-4 mr-2" />
+                Mudar Status
               </DropdownMenuItem>
               {todo.estado !== 'concluida' && (
                 <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onConcluir(todo.id); }}>

@@ -1763,3 +1763,13 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## Bug Fix - Anexos no Email de Ocorrências v6.9.2
 - [x] Corrigir anexos no email de ocorrências para que abram corretamente
 - [x] Verificar se anexos estão a ser incluídos como attachments do nodemailer
+
+## Melhorias To-Do e Portal da Loja v6.10
+- [x] Título do email de ocorrências: remover "Estrutural"
+- [x] Tarefas To-Do: adicionar gestão de status (Em Progresso, Devolver, etc.)
+- [x] Tarefas To-Do: permitir adicionar conteúdo ao mudar status para reenviar à loja
+- [x] Tarefas To-Do: loja deve ver quando gestor abriu e mudou status
+- [x] Portal da Loja: adicionar histórico de tarefas enviadas para o gestor
+- [x] Portal da Loja: permitir criar tarefas internas (para a própria loja, sem enviar ao gestor)
+- [x] Reuniões da Loja: campos de preenchimento obrigatório
+- [x] Reuniões da Loja: cor do cabeçalho do email (já estava correto - azul #2563eb)

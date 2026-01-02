@@ -658,6 +658,9 @@ export const todos = mysqlTable("todos", {
   visto: boolean("visto").default(false).notNull(), // Se o destinatário já viu esta tarefa
   vistoEm: timestamp("vistoEm"), // Data/hora em que foi visto
   
+  // Tarefa interna da loja (não enviada ao gestor)
+  isInterna: boolean("isInterna").default(false).notNull(), // Se é uma tarefa interna da loja
+  
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

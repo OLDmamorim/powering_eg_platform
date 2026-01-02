@@ -3076,6 +3076,67 @@ export const appRouter = router({
     countPendentesAtribuidosAMim: gestorProcedure.query(async ({ ctx }) => {
       return await db.countTodosPendentesAtribuidosAMim(ctx.user.id);
     }),
+    
+    // Mudar status com resposta (notifica a loja)
+    mudarStatusComResposta: gestorProcedure
+      .input(z.object({
+        id: z.number(),
+        estado: z.enum(['pendente', 'em_progresso', 'concluida', 'devolvida']),
+        resposta: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const todo = await db.getTodoById(input.id);
+        if (!todo) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Tarefa não encontrada' });
+        }
+        
+        // Atualizar o estado e adicionar resposta ao comentário
+        const comentarioAtualizado = input.resposta 
+          ? `[${new Date().toLocaleDateString('pt-PT')} - ${ctx.user.name}] ${input.resposta}${todo.comentario ? '\n\n--- Histórico ---\n' + todo.comentario : ''}`
+          : todo.comentario;
+        
+        await db.updateTodo(input.id, {
+          estado: input.estado,
+          comentario: comentarioAtualizado,
+          // Marcar como não visto para a loja ver a atualização
+          visto: false,
+          vistoEm: null,
+        });
+        
+        // Notificar a loja por email se a tarefa estava atribuída a uma loja
+        if (todo.atribuidoLojaId) {
+          const loja = await db.getLojaById(todo.atribuidoLojaId);
+          if (loja?.email) {
+            try {
+              const estadoTexto = {
+                'pendente': 'Pendente',
+                'em_progresso': 'Em Progresso',
+                'concluida': 'Concluída',
+                'devolvida': 'Devolvida'
+              }[input.estado] || input.estado;
+              
+              await sendEmail({
+                to: loja.email,
+                subject: `Atualização de Tarefa: ${todo.titulo} - ${estadoTexto}`,
+                html: gerarHTMLNotificacaoTodo({
+                  tipo: 'status_atualizado',
+                  titulo: todo.titulo,
+                  descricao: todo.descricao || '',
+                  prioridade: todo.prioridade,
+                  criadoPor: ctx.user.name || 'Gestor',
+                  lojaNome: loja.nome,
+                  novoEstado: estadoTexto,
+                  resposta: input.resposta,
+                }),
+              });
+            } catch (e) {
+              console.error('Erro ao enviar email de notificação:', e);
+            }
+          }
+        }
+        
+        return { success: true };
+      }),
   }),
   
   // ==================== TO-DO PORTAL LOJA ====================
@@ -3255,6 +3316,123 @@ export const appRouter = router({
         }
         
         return { success: true, todoId: todo.id };
+      }),
+    
+    // Listar histórico de tarefas enviadas ao gestor (criadas pela loja)
+    historicoEnviadas: publicProcedure
+      .input(z.object({ token: z.string() }))
+      .query(async ({ input }) => {
+        const auth = await db.validarTokenLoja(input.token);
+        if (!auth) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        return await db.getTodosEnviadosPelaLoja(auth.loja.id);
+      }),
+    
+    // Criar tarefa interna (fica só na loja, não vai ao gestor)
+    criarInterna: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        titulo: z.string().min(1, 'Título é obrigatório'),
+        descricao: z.string().optional(),
+        categoriaId: z.number().optional(),
+        prioridade: z.enum(['baixa', 'media', 'alta', 'urgente']).optional(),
+        dataLimite: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const auth = await db.validarTokenLoja(input.token);
+        if (!auth) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        
+        // Obter o gestor responsável pela loja (para usar como criadoPorId)
+        const gestorDaLoja = await db.getGestorDaLoja(auth.loja.id);
+        if (!gestorDaLoja) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Não foi encontrado um gestor responsável por esta loja' });
+        }
+        
+        // Criar a tarefa interna (atribuída à própria loja)
+        const todo = await db.createTodo({
+          titulo: input.titulo,
+          descricao: input.descricao,
+          categoriaId: input.categoriaId,
+          prioridade: input.prioridade || 'media',
+          atribuidoLojaId: auth.loja.id, // Atribuída à própria loja
+          atribuidoUserId: null,
+          criadoPorId: gestorDaLoja.userId, // Usar o userId do gestor como proxy
+          criadoPorLojaId: auth.loja.id, // Criada pela loja
+          isInterna: true, // Marcar como interna
+          dataLimite: input.dataLimite ? new Date(input.dataLimite) : undefined,
+        });
+        
+        if (!todo) {
+          throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Erro ao criar tarefa' });
+        }
+        
+        return { success: true, todoId: todo.id };
+      }),
+    
+    // Listar tarefas internas da loja
+    listarInternas: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        apenasAtivas: z.boolean().optional(),
+      }))
+      .query(async ({ input }) => {
+        const auth = await db.validarTokenLoja(input.token);
+        if (!auth) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        return await db.getTodosInternosDaLoja(auth.loja.id, input.apenasAtivas ?? true);
+      }),
+    
+    // Atualizar tarefa interna
+    atualizarInterna: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        todoId: z.number(),
+        titulo: z.string().optional(),
+        descricao: z.string().optional(),
+        estado: z.enum(['pendente', 'em_progresso', 'concluida']).optional(),
+        prioridade: z.enum(['baixa', 'media', 'alta', 'urgente']).optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const auth = await db.validarTokenLoja(input.token);
+        if (!auth) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        
+        // Verificar se a tarefa é interna e pertence a esta loja
+        const todo = await db.getTodoById(input.todoId);
+        if (!todo || !todo.isInterna || todo.criadoPorLojaId !== auth.loja.id) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Não tem permissão para alterar esta tarefa' });
+        }
+        
+        const { token, todoId, ...data } = input;
+        await db.updateTodo(todoId, data);
+        return { success: true };
+      }),
+    
+    // Eliminar tarefa interna
+    eliminarInterna: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        todoId: z.number(),
+      }))
+      .mutation(async ({ input }) => {
+        const auth = await db.validarTokenLoja(input.token);
+        if (!auth) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        
+        // Verificar se a tarefa é interna e pertence a esta loja
+        const todo = await db.getTodoById(input.todoId);
+        if (!todo || !todo.isInterna || todo.criadoPorLojaId !== auth.loja.id) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Não tem permissão para eliminar esta tarefa' });
+        }
+        
+        await db.deleteTodo(input.todoId);
+        return { success: true };
       }),
   }),
   
@@ -3517,7 +3695,7 @@ export const appRouter = router({
           : htmlContent;
         
         // Enviar email via SMTP Gmail (egpowering@gmail.com)
-        const assunto = `Ocorrência Estrutural: ${temaNome} - Reportado por ${gestorNome}`;
+        const assunto = `Ocorrência: ${temaNome} - Reportado por ${gestorNome}`;
         const enviado = await sendEmail({
           to: adminReal.email,
           subject: assunto,
@@ -3671,13 +3849,15 @@ function gerarHTMLReuniaoQuinzenal(dados: {
 
 // Função auxiliar para gerar HTML do email de notificação de To-Do
 function gerarHTMLNotificacaoTodo(dados: {
-  tipo: 'nova' | 'reatribuida' | 'devolvida' | 'concluida' | 'nova_da_loja';
+  tipo: 'nova' | 'reatribuida' | 'devolvida' | 'concluida' | 'nova_da_loja' | 'status_atualizado';
   titulo: string;
   descricao: string;
   prioridade: string;
   criadoPor: string;
   lojaNome: string;
   comentario?: string;
+  novoEstado?: string;
+  resposta?: string;
 }): string {
   const corPrioridade = {
     baixa: '#22c55e',
@@ -3692,6 +3872,7 @@ function gerarHTMLNotificacaoTodo(dados: {
     devolvida: 'Tarefa Devolvida',
     concluida: 'Tarefa Concluída',
     nova_da_loja: 'Nova Tarefa da Loja',
+    status_atualizado: `Atualização de Tarefa: ${dados.novoEstado || 'Atualizado'}`,
   }[dados.tipo];
   
   const corTipo = {
@@ -3700,6 +3881,7 @@ function gerarHTMLNotificacaoTodo(dados: {
     devolvida: '#f59e0b',
     concluida: '#22c55e',
     nova_da_loja: '#10b981',
+    status_atualizado: '#6366f1',
   }[dados.tipo];
   
   return `
@@ -3755,6 +3937,19 @@ function gerarHTMLNotificacaoTodo(dados: {
           <div class="comentario">
             <strong>Comentário:</strong><br>
             ${dados.comentario}
+          </div>
+          ` : ''}
+          
+          ${dados.novoEstado ? `
+          <div style="background: #e0e7ff; padding: 16px; border-radius: 8px; margin: 16px 0; border-left: 4px solid #6366f1;">
+            <strong>Novo Estado:</strong> ${dados.novoEstado}
+          </div>
+          ` : ''}
+          
+          ${dados.resposta ? `
+          <div style="background: #dbeafe; padding: 16px; border-radius: 8px; margin: 16px 0; border-left: 4px solid #3b82f6;">
+            <strong>Resposta do Gestor:</strong><br>
+            ${dados.resposta}
           </div>
           ` : ''}
           
@@ -3839,7 +4034,7 @@ function gerarHTMLOcorrenciaEstrutural(dados: {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ocorrência Estrutural - ${dados.temaNome}</title>
+  <title>Ocorrência - ${dados.temaNome}</title>
 </head>
 <body style="margin: 0; padding: 0; font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif; background-color: #f3f4f6;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f3f4f6; padding: 20px 0;">
@@ -3851,7 +4046,7 @@ function gerarHTMLOcorrenciaEstrutural(dados: {
           <tr>
             <td style="background: linear-gradient(135deg, #dc2626, #b91c1c); padding: 30px; text-align: center;">
               <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663088836799/YrkmGCRDVqYgFnZO.png" alt="ExpressGlass" style="max-width: 180px; height: auto; margin-bottom: 15px;" />
-              <h1 style="margin: 0; font-size: 24px; color: #ffffff; font-weight: 700;">⚠️ Ocorrência Estrutural</h1>
+              <h1 style="margin: 0; font-size: 24px; color: #ffffff; font-weight: 700;">⚠️ Ocorrência</h1>
               <p style="margin: 10px 0 0; font-size: 18px; color: rgba(255,255,255,0.9);">${dados.temaNome}</p>
             </td>
           </tr>

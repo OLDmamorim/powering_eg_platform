@@ -1,0 +1,1 @@
+ALTER TABLE `todos` ADD `isInterna` boolean DEFAULT false NOT NULL;

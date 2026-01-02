@@ -90,12 +90,12 @@ describe("Envio de Email de Ocorrências Estruturais", () => {
     expect(emailEnviado.to).toBe("mfurtado@expressglass.pt");
     
     // Verificar assunto do email
-    expect(emailEnviado.subject).toContain("Ocorrência Estrutural");
+    expect(emailEnviado.subject).toContain("Ocorrência:");
     expect(emailEnviado.subject).toContain("Teste Email SMTP");
     
     // Verificar que HTML está presente e formatado corretamente
     expect(emailEnviado.html).toContain("<!DOCTYPE html>");
-    expect(emailEnviado.html).toContain("Ocorrência Estrutural");
+    expect(emailEnviado.html).toContain("Ocorrência");
     expect(emailEnviado.html).toContain("Gestor Ocorrencias Test");
     expect(emailEnviado.html).toContain("PoweringEG Platform");
   });
