@@ -1,8 +1,9 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -16,19 +17,13 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 import { trpc } from "@/lib/trpc";
 import { 
   Plus, 
-  ChevronDown, 
-  ChevronUp, 
   AlertTriangle, 
   Globe, 
   MapPin, 
@@ -36,11 +31,15 @@ import {
   Clock,
   User,
   CheckCircle2,
-  Search,
   Loader2,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Pencil,
+  Mail,
+  X,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
 
@@ -53,14 +52,27 @@ export default function HistoricoOcorrencias() {
   const [filtroImpacto, setFiltroImpacto] = useState<string>("todos");
   const [filtroTema, setFiltroTema] = useState<string>("todos");
   
-  // Estado de expansão dos cards
-  const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
-  
-  // Modal de detalhes/edição (admin)
+  // Modal de detalhes
   const [selectedOcorrencia, setSelectedOcorrencia] = useState<any>(null);
-  const [showModal, setShowModal] = useState(false);
-  const [novoEstado, setNovoEstado] = useState<string>("");
-  const [notasAdmin, setNotasAdmin] = useState("");
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  
+  // Modal de edição
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editData, setEditData] = useState({
+    descricao: "",
+    abrangencia: "" as "nacional" | "regional" | "zona",
+    zonaAfetada: "",
+    impacto: "" as "baixo" | "medio" | "alto" | "critico",
+    sugestaoAcao: "",
+    estado: "" as "reportado" | "em_analise" | "em_resolucao" | "resolvido",
+    notasAdmin: "",
+  });
+  
+  // Modal de imagem (popup)
+  const [showImageModal, setShowImageModal] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string>("");
+  const [imageList, setImageList] = useState<string[]>([]);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const utils = trpc.useUtils();
   
@@ -71,15 +83,36 @@ export default function HistoricoOcorrencias() {
     : trpc.ocorrenciasEstruturais.listMinhas.useQuery();
   
   const { data: temas } = trpc.ocorrenciasEstruturais.getTemas.useQuery();
-  const { data: contagem } = trpc.ocorrenciasEstruturais.countPorEstado.useQuery();
   
-  // Mutation para atualizar estado (admin)
-  const updateEstadoMutation = trpc.ocorrenciasEstruturais.updateEstado.useMutation({
+  // Contagem: admin vê total, gestor vê só as suas
+  const { data: contagemTotal } = trpc.ocorrenciasEstruturais.countPorEstado.useQuery(undefined, {
+    enabled: isAdmin
+  });
+  const { data: contagemGestor } = trpc.ocorrenciasEstruturais.countPorEstadoGestor.useQuery(undefined, {
+    enabled: !isAdmin
+  });
+  
+  const contagem = isAdmin ? contagemTotal : contagemGestor;
+  
+  // Mutations
+  const editarMutation = trpc.ocorrenciasEstruturais.editar.useMutation({
     onSuccess: () => {
-      toast.success("Estado atualizado com sucesso");
+      toast.success("Ocorrência atualizada com sucesso");
       utils.ocorrenciasEstruturais.listAll.invalidate();
+      utils.ocorrenciasEstruturais.listMinhas.invalidate();
       utils.ocorrenciasEstruturais.countPorEstado.invalidate();
-      setShowModal(false);
+      utils.ocorrenciasEstruturais.countPorEstadoGestor.invalidate();
+      setShowEditModal(false);
+      setShowDetailModal(false);
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+  
+  const enviarEmailMutation = trpc.ocorrenciasEstruturais.enviarEmail.useMutation({
+    onSuccess: () => {
+      toast.success("Email enviado com sucesso para o administrador");
     },
     onError: (error) => {
       toast.error(error.message);
@@ -91,31 +124,63 @@ export default function HistoricoOcorrencias() {
     return null;
   }
 
-  const toggleExpand = (id: number) => {
-    const newExpanded = new Set(expandedIds);
-    if (newExpanded.has(id)) {
-      newExpanded.delete(id);
-    } else {
-      newExpanded.add(id);
-    }
-    setExpandedIds(newExpanded);
-  };
-
-  const handleOpenModal = (ocorrencia: any) => {
+  const handleCardClick = (ocorrencia: any) => {
     setSelectedOcorrencia(ocorrencia);
-    setNovoEstado(ocorrencia.estado);
-    setNotasAdmin(ocorrencia.notasAdmin || "");
-    setShowModal(true);
+    setShowDetailModal(true);
   };
 
-  const handleUpdateEstado = () => {
+  const handleEditClick = (ocorrencia: any) => {
+    setSelectedOcorrencia(ocorrencia);
+    setEditData({
+      descricao: ocorrencia.descricao,
+      abrangencia: ocorrencia.abrangencia,
+      zonaAfetada: ocorrencia.zonaAfetada || "",
+      impacto: ocorrencia.impacto,
+      sugestaoAcao: ocorrencia.sugestaoAcao || "",
+      estado: ocorrencia.estado,
+      notasAdmin: ocorrencia.notasAdmin || "",
+    });
+    setShowEditModal(true);
+  };
+
+  const handleSaveEdit = () => {
     if (!selectedOcorrencia) return;
     
-    updateEstadoMutation.mutate({
+    editarMutation.mutate({
       id: selectedOcorrencia.id,
-      estado: novoEstado as any,
-      notasAdmin: notasAdmin.trim() || undefined,
+      descricao: editData.descricao,
+      abrangencia: editData.abrangencia,
+      zonaAfetada: editData.zonaAfetada || null,
+      impacto: editData.impacto,
+      sugestaoAcao: editData.sugestaoAcao || null,
+      ...(isAdmin && {
+        estado: editData.estado,
+        notasAdmin: editData.notasAdmin || null,
+      }),
     });
+  };
+
+  const handleSendEmail = (ocorrencia: any) => {
+    enviarEmailMutation.mutate({ id: ocorrencia.id });
+  };
+
+  const handleImageClick = (foto: string, fotos: string[]) => {
+    setSelectedImage(foto);
+    setImageList(fotos);
+    setCurrentImageIndex(fotos.indexOf(foto));
+    setShowImageModal(true);
+  };
+
+  const handlePrevImage = () => {
+    const newIndex = currentImageIndex > 0 ? currentImageIndex - 1 : imageList.length - 1;
+    setCurrentImageIndex(newIndex);
+    setSelectedImage(imageList[newIndex]);
+  };
+
+  const handleNextImage = () => {
+    const newIndex = currentImageIndex < imageList.length - 1 ? currentImageIndex + 1 : 0;
+    setCurrentImageIndex(newIndex);
+    setSelectedImage(imageList[newIndex]);
   };
 
   // Filtrar ocorrências
@@ -170,31 +235,31 @@ export default function HistoricoOcorrencias() {
         {/* Estatísticas */}
         {contagem && (
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-            <Card>
+            <Card className="cursor-pointer hover:bg-accent/50 transition-colors" onClick={() => setFiltroEstado("todos")}>
               <CardContent className="pt-4">
                 <div className="text-2xl font-bold">{contagem.total}</div>
                 <p className="text-sm text-muted-foreground">Total</p>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="cursor-pointer hover:bg-accent/50 transition-colors" onClick={() => setFiltroEstado("reportado")}>
               <CardContent className="pt-4">
                 <div className="text-2xl font-bold text-blue-600">{contagem.reportado}</div>
                 <p className="text-sm text-muted-foreground">Reportadas</p>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="cursor-pointer hover:bg-accent/50 transition-colors" onClick={() => setFiltroEstado("em_analise")}>
               <CardContent className="pt-4">
                 <div className="text-2xl font-bold text-yellow-600">{contagem.emAnalise}</div>
                 <p className="text-sm text-muted-foreground">Em Análise</p>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="cursor-pointer hover:bg-accent/50 transition-colors" onClick={() => setFiltroEstado("em_resolucao")}>
               <CardContent className="pt-4">
                 <div className="text-2xl font-bold text-orange-600">{contagem.emResolucao}</div>
                 <p className="text-sm text-muted-foreground">Em Resolução</p>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="cursor-pointer hover:bg-accent/50 transition-colors" onClick={() => setFiltroEstado("resolvido")}>
               <CardContent className="pt-4">
                 <div className="text-2xl font-bold text-green-600">{contagem.resolvido}</div>
                 <p className="text-sm text-muted-foreground">Resolvidas</p>
@@ -282,216 +347,394 @@ export default function HistoricoOcorrencias() {
         ) : (
           <div className="space-y-4">
             {ocorrenciasFiltradas.map((ocorrencia) => {
-              const isExpanded = expandedIds.has(ocorrencia.id);
               const fotos = ocorrencia.fotos ? JSON.parse(ocorrencia.fotos) : [];
-              const lojasAfetadas = ocorrencia.lojasAfetadas ? JSON.parse(ocorrencia.lojasAfetadas) : [];
               
               return (
-                <Collapsible key={ocorrencia.id} open={isExpanded}>
-                  <Card className={`transition-all ${ocorrencia.estado === 'resolvido' ? 'opacity-75' : ''}`}>
-                    <CollapsibleTrigger asChild>
-                      <CardHeader 
-                        className="cursor-pointer hover:bg-accent/50 transition-colors"
-                        onClick={() => toggleExpand(ocorrencia.id)}
-                      >
-                        <div className="flex items-start justify-between">
-                          <div className="space-y-2">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <Badge variant="outline" className="font-semibold">
-                                {ocorrencia.temaNome}
-                              </Badge>
-                              <Badge className={estadoConfig[ocorrencia.estado as keyof typeof estadoConfig]?.color}>
-                                {estadoConfig[ocorrencia.estado as keyof typeof estadoConfig]?.label}
-                              </Badge>
-                              <Badge className={impactoConfig[ocorrencia.impacto as keyof typeof impactoConfig]?.color}>
-                                {impactoConfig[ocorrencia.impacto as keyof typeof impactoConfig]?.label}
-                              </Badge>
-                            </div>
-                            <p className="text-sm text-muted-foreground line-clamp-2">
-                              {ocorrencia.descricao}
-                            </p>
-                            <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                              <span className="flex items-center gap-1">
-                                {abrangenciaIcon[ocorrencia.abrangencia as keyof typeof abrangenciaIcon]}
-                                {ocorrencia.abrangencia === 'nacional' ? 'Nacional' : ocorrencia.zonaAfetada || ocorrencia.abrangencia}
-                              </span>
-                              <span className="flex items-center gap-1">
-                                <User className="h-3 w-3" />
-                                {ocorrencia.gestorNome}
-                              </span>
-                              <span className="flex items-center gap-1">
-                                <Clock className="h-3 w-3" />
-                                {new Date(ocorrencia.createdAt).toLocaleDateString('pt-PT')}
-                              </span>
-                              {fotos.length > 0 && (
-                                <span className="flex items-center gap-1">
-                                  <ImageIcon className="h-3 w-3" />
-                                  {fotos.length} foto(s)
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            {isAdmin && ocorrencia.estado !== 'resolvido' && (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleOpenModal(ocorrencia);
-                                }}
-                              >
-                                Gerir
-                              </Button>
-                            )}
-                            {isExpanded ? (
-                              <ChevronUp className="h-5 w-5 text-muted-foreground" />
-                            ) : (
-                              <ChevronDown className="h-5 w-5 text-muted-foreground" />
-                            )}
-                          </div>
+                <Card 
+                  key={ocorrencia.id} 
+                  className={`cursor-pointer transition-all hover:shadow-md hover:border-primary/50 ${ocorrencia.estado === 'resolvido' ? 'opacity-75' : ''}`}
+                  onClick={() => handleCardClick(ocorrencia)}
+                >
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between">
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <Badge variant="outline" className="font-semibold">
+                            {ocorrencia.temaNome}
+                          </Badge>
+                          <Badge className={estadoConfig[ocorrencia.estado as keyof typeof estadoConfig]?.color}>
+                            {estadoConfig[ocorrencia.estado as keyof typeof estadoConfig]?.label}
+                          </Badge>
+                          <Badge className={impactoConfig[ocorrencia.impacto as keyof typeof impactoConfig]?.color}>
+                            {impactoConfig[ocorrencia.impacto as keyof typeof impactoConfig]?.label}
+                          </Badge>
                         </div>
-                      </CardHeader>
-                    </CollapsibleTrigger>
-                    
-                    <CollapsibleContent>
-                      <CardContent className="pt-0 space-y-4">
-                        {/* Descrição completa */}
-                        <div>
-                          <h4 className="font-medium mb-2">Descrição</h4>
-                          <p className="text-sm whitespace-pre-wrap bg-muted/50 p-3 rounded-md">
-                            {ocorrencia.descricao}
-                          </p>
+                        <p className="text-sm text-muted-foreground line-clamp-2">
+                          {ocorrencia.descricao}
+                        </p>
+                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                          <span className="flex items-center gap-1">
+                            {abrangenciaIcon[ocorrencia.abrangencia as keyof typeof abrangenciaIcon]}
+                            {ocorrencia.abrangencia === 'nacional' ? 'Nacional' : ocorrencia.zonaAfetada || ocorrencia.abrangencia}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <User className="h-3 w-3" />
+                            {ocorrencia.gestorNome}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            {new Date(ocorrencia.createdAt).toLocaleDateString('pt-PT')}
+                          </span>
+                          {fotos.length > 0 && (
+                            <span className="flex items-center gap-1">
+                              <ImageIcon className="h-3 w-3" />
+                              {fotos.length} foto(s)
+                            </span>
+                          )}
                         </div>
-
-                        {/* Sugestão de Ação */}
-                        {ocorrencia.sugestaoAcao && (
-                          <div>
-                            <h4 className="font-medium mb-2">Sugestão de Ação</h4>
-                            <p className="text-sm whitespace-pre-wrap bg-blue-50 dark:bg-blue-950 p-3 rounded-md">
-                              {ocorrencia.sugestaoAcao}
-                            </p>
-                          </div>
-                        )}
-
-                        {/* Notas do Admin */}
-                        {ocorrencia.notasAdmin && (
-                          <div>
-                            <h4 className="font-medium mb-2">Notas do Administrador</h4>
-                            <p className="text-sm whitespace-pre-wrap bg-yellow-50 dark:bg-yellow-950 p-3 rounded-md">
-                              {ocorrencia.notasAdmin}
-                            </p>
-                          </div>
-                        )}
-
-                        {/* Fotos */}
-                        {fotos.length > 0 && (
-                          <div>
-                            <h4 className="font-medium mb-2">Evidências</h4>
-                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-                              {fotos.map((foto: string, index: number) => (
-                                <a
-                                  key={index}
-                                  href={foto}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="block"
-                                >
-                                  <img
-                                    src={foto}
-                                    alt={`Evidência ${index + 1}`}
-                                    className="w-full h-24 object-cover rounded-md hover:opacity-80 transition-opacity"
-                                  />
-                                </a>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Data de resolução */}
-                        {ocorrencia.resolvidoEm && (
-                          <div className="flex items-center gap-2 text-sm text-green-600">
-                            <CheckCircle2 className="h-4 w-4" />
-                            Resolvido em {new Date(ocorrencia.resolvidoEm).toLocaleDateString('pt-PT')}
-                          </div>
-                        )}
-                      </CardContent>
-                    </CollapsibleContent>
-                  </Card>
-                </Collapsible>
+                      </div>
+                    </div>
+                  </CardHeader>
+                </Card>
               );
             })}
           </div>
         )}
       </div>
 
-      {/* Modal de Gestão (Admin) */}
-      <Dialog open={showModal} onOpenChange={setShowModal}>
-        <DialogContent>
+      {/* Modal de Detalhes */}
+      <Dialog open={showDetailModal} onOpenChange={setShowDetailModal}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Gerir Ocorrência</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-orange-500" />
+              Detalhes da Ocorrência
+            </DialogTitle>
             <DialogDescription>
-              Atualize o estado e adicione notas sobre esta ocorrência
+              {selectedOcorrencia?.temaNome}
             </DialogDescription>
           </DialogHeader>
           
           {selectedOcorrencia && (
             <div className="space-y-4">
+              {/* Badges */}
+              <div className="flex items-center gap-2 flex-wrap">
+                <Badge className={estadoConfig[selectedOcorrencia.estado as keyof typeof estadoConfig]?.color}>
+                  {estadoConfig[selectedOcorrencia.estado as keyof typeof estadoConfig]?.label}
+                </Badge>
+                <Badge className={impactoConfig[selectedOcorrencia.impacto as keyof typeof impactoConfig]?.color}>
+                  {impactoConfig[selectedOcorrencia.impacto as keyof typeof impactoConfig]?.label}
+                </Badge>
+              </div>
+              
+              {/* Info Grid */}
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <Label className="text-muted-foreground">Reportado por</Label>
+                  <p className="font-medium">{selectedOcorrencia.gestorNome}</p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Data</Label>
+                  <p className="font-medium">{new Date(selectedOcorrencia.createdAt).toLocaleDateString('pt-PT', { dateStyle: 'long' })}</p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Abrangência</Label>
+                  <p className="font-medium flex items-center gap-1">
+                    {abrangenciaIcon[selectedOcorrencia.abrangencia as keyof typeof abrangenciaIcon]}
+                    {selectedOcorrencia.abrangencia === 'nacional' ? 'Nacional' : selectedOcorrencia.zonaAfetada || selectedOcorrencia.abrangencia}
+                  </p>
+                </div>
+                {selectedOcorrencia.resolvidoEm && (
+                  <div>
+                    <Label className="text-muted-foreground">Resolvido em</Label>
+                    <p className="font-medium text-green-600 flex items-center gap-1">
+                      <CheckCircle2 className="h-4 w-4" />
+                      {new Date(selectedOcorrencia.resolvidoEm).toLocaleDateString('pt-PT')}
+                    </p>
+                  </div>
+                )}
+              </div>
+              
+              {/* Descrição */}
               <div>
-                <Label className="text-sm font-medium">Tema</Label>
-                <p className="text-sm">{selectedOcorrencia.temaNome}</p>
+                <Label className="text-muted-foreground">Descrição</Label>
+                <p className="mt-1 text-sm whitespace-pre-wrap bg-muted/50 p-3 rounded-md">
+                  {selectedOcorrencia.descricao}
+                </p>
               </div>
               
-              <div>
-                <Label className="text-sm font-medium">Reportado por</Label>
-                <p className="text-sm">{selectedOcorrencia.gestorNome}</p>
-              </div>
+              {/* Sugestão de Ação */}
+              {selectedOcorrencia.sugestaoAcao && (
+                <div>
+                  <Label className="text-muted-foreground">Sugestão de Ação</Label>
+                  <p className="mt-1 text-sm whitespace-pre-wrap bg-blue-50 dark:bg-blue-950 p-3 rounded-md">
+                    {selectedOcorrencia.sugestaoAcao}
+                  </p>
+                </div>
+              )}
               
+              {/* Notas do Admin */}
+              {selectedOcorrencia.notasAdmin && (
+                <div>
+                  <Label className="text-muted-foreground">Notas do Administrador</Label>
+                  <p className="mt-1 text-sm whitespace-pre-wrap bg-yellow-50 dark:bg-yellow-950 p-3 rounded-md">
+                    {selectedOcorrencia.notasAdmin}
+                  </p>
+                </div>
+              )}
+              
+              {/* Fotos */}
+              {(() => {
+                const fotos = selectedOcorrencia.fotos ? JSON.parse(selectedOcorrencia.fotos) : [];
+                if (fotos.length === 0) return null;
+                
+                return (
+                  <div>
+                    <Label className="text-muted-foreground">Evidências ({fotos.length} foto(s))</Label>
+                    <div className="mt-2 grid grid-cols-3 sm:grid-cols-4 gap-2">
+                      {fotos.map((foto: string, index: number) => (
+                        <div
+                          key={index}
+                          className="cursor-pointer rounded-md overflow-hidden hover:ring-2 hover:ring-primary transition-all"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleImageClick(foto, fotos);
+                          }}
+                        >
+                          <img
+                            src={foto}
+                            alt={`Evidência ${index + 1}`}
+                            className="w-full h-20 object-cover"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
+              
+              {/* Ações */}
+              <DialogFooter className="flex-col sm:flex-row gap-2">
+                {!isAdmin && selectedOcorrencia.estado !== 'resolvido' && (
+                  <Button
+                    variant="outline"
+                    onClick={() => handleSendEmail(selectedOcorrencia)}
+                    disabled={enviarEmailMutation.isPending}
+                  >
+                    {enviarEmailMutation.isPending ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    ) : (
+                      <Mail className="h-4 w-4 mr-2" />
+                    )}
+                    Enviar por Email
+                  </Button>
+                )}
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowDetailModal(false);
+                    handleEditClick(selectedOcorrencia);
+                  }}
+                >
+                  <Pencil className="h-4 w-4 mr-2" />
+                  Editar
+                </Button>
+                <Button variant="secondary" onClick={() => setShowDetailModal(false)}>
+                  Fechar
+                </Button>
+              </DialogFooter>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal de Edição */}
+      <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Editar Ocorrência</DialogTitle>
+            <DialogDescription>
+              {selectedOcorrencia?.temaNome}
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedOcorrencia && (
+            <div className="space-y-4">
               <div className="space-y-2">
-                <Label>Estado</Label>
-                <Select value={novoEstado} onValueChange={setNovoEstado}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="reportado">Reportado</SelectItem>
-                    <SelectItem value="em_analise">Em Análise</SelectItem>
-                    <SelectItem value="em_resolucao">Em Resolução</SelectItem>
-                    <SelectItem value="resolvido">Resolvido</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="space-y-2">
-                <Label>Notas do Administrador</Label>
+                <Label>Descrição</Label>
                 <Textarea
-                  value={notasAdmin}
-                  onChange={(e) => setNotasAdmin(e.target.value)}
-                  placeholder="Adicione notas ou feedback sobre esta ocorrência..."
+                  value={editData.descricao}
+                  onChange={(e) => setEditData({ ...editData, descricao: e.target.value })}
                   rows={4}
                 />
               </div>
               
-              <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setShowModal(false)}>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Abrangência</Label>
+                  <Select 
+                    value={editData.abrangencia} 
+                    onValueChange={(v) => setEditData({ ...editData, abrangencia: v as any })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="nacional">Nacional</SelectItem>
+                      <SelectItem value="regional">Regional</SelectItem>
+                      <SelectItem value="zona">Zona</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label>Impacto</Label>
+                  <Select 
+                    value={editData.impacto} 
+                    onValueChange={(v) => setEditData({ ...editData, impacto: v as any })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="baixo">Baixo</SelectItem>
+                      <SelectItem value="medio">Médio</SelectItem>
+                      <SelectItem value="alto">Alto</SelectItem>
+                      <SelectItem value="critico">Crítico</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              
+              {editData.abrangencia !== 'nacional' && (
+                <div className="space-y-2">
+                  <Label>Zona Afetada</Label>
+                  <Input
+                    value={editData.zonaAfetada}
+                    onChange={(e) => setEditData({ ...editData, zonaAfetada: e.target.value })}
+                    placeholder="Ex: Norte, Sul, Lisboa..."
+                  />
+                </div>
+              )}
+              
+              <div className="space-y-2">
+                <Label>Sugestão de Ação</Label>
+                <Textarea
+                  value={editData.sugestaoAcao}
+                  onChange={(e) => setEditData({ ...editData, sugestaoAcao: e.target.value })}
+                  rows={3}
+                  placeholder="Sugestões para resolver esta ocorrência..."
+                />
+              </div>
+              
+              {/* Campos apenas para Admin */}
+              {isAdmin && (
+                <>
+                  <div className="space-y-2">
+                    <Label>Estado</Label>
+                    <Select 
+                      value={editData.estado} 
+                      onValueChange={(v) => setEditData({ ...editData, estado: v as any })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="reportado">Reportado</SelectItem>
+                        <SelectItem value="em_analise">Em Análise</SelectItem>
+                        <SelectItem value="em_resolucao">Em Resolução</SelectItem>
+                        <SelectItem value="resolvido">Resolvido</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label>Notas do Administrador</Label>
+                    <Textarea
+                      value={editData.notasAdmin}
+                      onChange={(e) => setEditData({ ...editData, notasAdmin: e.target.value })}
+                      rows={3}
+                      placeholder="Notas internas sobre esta ocorrência..."
+                    />
+                  </div>
+                </>
+              )}
+              
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setShowEditModal(false)}>
                   Cancelar
                 </Button>
                 <Button 
-                  onClick={handleUpdateEstado}
-                  disabled={updateEstadoMutation.isPending}
+                  onClick={handleSaveEdit}
+                  disabled={editarMutation.isPending}
                 >
-                  {updateEstadoMutation.isPending ? (
+                  {editarMutation.isPending ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin mr-2" />
                       A guardar...
                     </>
                   ) : (
-                    "Guardar"
+                    "Guardar Alterações"
                   )}
                 </Button>
-              </div>
+              </DialogFooter>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal de Imagem (Popup) */}
+      <Dialog open={showImageModal} onOpenChange={setShowImageModal}>
+        <DialogContent className="max-w-4xl p-0 bg-black/95">
+          <div className="relative">
+            {/* Botão fechar */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute top-2 right-2 z-10 text-white hover:bg-white/20"
+              onClick={() => setShowImageModal(false)}
+            >
+              <X className="h-6 w-6" />
+            </Button>
+            
+            {/* Navegação */}
+            {imageList.length > 1 && (
+              <>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute left-2 top-1/2 -translate-y-1/2 z-10 text-white hover:bg-white/20"
+                  onClick={handlePrevImage}
+                >
+                  <ChevronLeft className="h-8 w-8" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 z-10 text-white hover:bg-white/20"
+                  onClick={handleNextImage}
+                >
+                  <ChevronRight className="h-8 w-8" />
+                </Button>
+              </>
+            )}
+            
+            {/* Imagem */}
+            <div className="flex items-center justify-center min-h-[400px] max-h-[80vh]">
+              <img
+                src={selectedImage}
+                alt="Evidência"
+                className="max-w-full max-h-[80vh] object-contain"
+              />
+            </div>
+            
+            {/* Contador */}
+            {imageList.length > 1 && (
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white text-sm bg-black/50 px-3 py-1 rounded-full">
+                {currentImageIndex + 1} / {imageList.length}
+              </div>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </DashboardLayout>

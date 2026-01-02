@@ -12,6 +12,7 @@ import { gerarPrevisoes, gerarEGuardarPrevisoes } from "./previsaoService";
 import { gerarSugestoesMelhoria, formatarRelatorioLivre, formatarRelatorioCompleto } from "./sugestaoService";
 import { gerarPlanoVisitasSemanal, gerarPlanosSemanaisParaTodosGestores, verificarEGerarPlanosSexta } from "./planoVisitasService";
 import { notificarGestorRelatorioAdmin } from "./notificacaoGestor";
+import { notifyOwner } from "./_core/notification";
 
 // Middleware para verificar se o utilizador é admin
 const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
@@ -3359,6 +3360,107 @@ export const appRouter = router({
     countNaoResolvidas: protectedProcedure.query(async () => {
       return await db.countOcorrenciasEstruturaisNaoResolvidas();
     }),
+    
+    // Contar ocorrências por estado para o gestor atual
+    countPorEstadoGestor: gestorProcedure.query(async ({ ctx }) => {
+      if (!ctx.gestor) {
+        return { reportado: 0, emAnalise: 0, emResolucao: 0, resolvido: 0, total: 0 };
+      }
+      return await db.countOcorrenciasEstruturaisPorEstadoByGestor(ctx.gestor.id);
+    }),
+    
+    // Editar ocorrência (gestor pode editar as suas, admin pode editar todas)
+    editar: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        tema: z.string().min(1).optional(),
+        descricao: z.string().min(10).optional(),
+        abrangencia: z.enum(['nacional', 'regional', 'zona']).optional(),
+        zonaAfetada: z.string().nullable().optional(),
+        lojasAfetadas: z.array(z.number()).nullable().optional(),
+        impacto: z.enum(['baixo', 'medio', 'alto', 'critico']).optional(),
+        fotos: z.array(z.string()).nullable().optional(),
+        sugestaoAcao: z.string().nullable().optional(),
+        estado: z.enum(['reportado', 'em_analise', 'em_resolucao', 'resolvido']).optional(),
+        notasAdmin: z.string().nullable().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        // Verificar se a ocorrência existe
+        const ocorrencia = await db.getOcorrenciaEstruturalById(input.id);
+        if (!ocorrencia) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Ocorrência não encontrada' });
+        }
+        
+        // Verificar permissões: admin pode editar tudo, gestor só as suas
+        const isAdmin = ctx.user.role === 'admin';
+        const gestor = await db.getGestorByUserId(ctx.user.id);
+        const isOwner = gestor && ocorrencia.gestorId === gestor.id;
+        
+        if (!isAdmin && !isOwner) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Não tem permissão para editar esta ocorrência' });
+        }
+        
+        // Se for gestor, não pode alterar estado ou notas admin
+        const updateData: Parameters<typeof db.updateOcorrenciaEstrutural>[1] = {};
+        
+        if (input.descricao !== undefined) updateData.descricao = input.descricao;
+        if (input.abrangencia !== undefined) updateData.abrangencia = input.abrangencia;
+        if (input.zonaAfetada !== undefined) updateData.zonaAfetada = input.zonaAfetada;
+        if (input.lojasAfetadas !== undefined) updateData.lojasAfetadas = input.lojasAfetadas;
+        if (input.impacto !== undefined) updateData.impacto = input.impacto;
+        if (input.fotos !== undefined) updateData.fotos = input.fotos;
+        if (input.sugestaoAcao !== undefined) updateData.sugestaoAcao = input.sugestaoAcao;
+        
+        // Apenas admin pode alterar tema, estado e notas
+        if (isAdmin) {
+          if (input.tema) {
+            const tema = await db.getOrCreateTemaOcorrencia(input.tema, ctx.user.id);
+            updateData.temaId = tema.id;
+          }
+          if (input.estado !== undefined) updateData.estado = input.estado;
+          if (input.notasAdmin !== undefined) updateData.notasAdmin = input.notasAdmin;
+        }
+        
+        await db.updateOcorrenciaEstrutural(input.id, updateData);
+        return { success: true };
+      }),
+    
+    // Enviar ocorrência por email para o admin
+    enviarEmail: gestorProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        const ocorrencia = await db.getOcorrenciaEstruturalById(input.id);
+        if (!ocorrencia) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Ocorrência não encontrada' });
+        }
+        
+        // Verificar se é o dono da ocorrência
+        if (!ctx.gestor || ocorrencia.gestorId !== ctx.gestor.id) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Só pode enviar as suas próprias ocorrências' });
+        }
+        
+        const gestorNome = ocorrencia.gestorNome || ctx.user.name || 'Gestor';
+        const temaNome = ocorrencia.temaNome;
+        
+        // Gerar HTML do email
+        const htmlContent = gerarHTMLOcorrenciaEstrutural({
+          gestorNome,
+          temaNome,
+          descricao: ocorrencia.descricao,
+          abrangencia: ocorrencia.abrangencia,
+          zonaAfetada: ocorrencia.zonaAfetada,
+          impacto: ocorrencia.impacto,
+          sugestaoAcao: ocorrencia.sugestaoAcao,
+          fotos: ocorrencia.fotos ? JSON.parse(ocorrencia.fotos as string) : [],
+          criadoEm: ocorrencia.createdAt,
+        });
+        
+        // Enviar email via notifyOwner
+        const titulo = `Ocorrência de ${gestorNome} - ${temaNome}`;
+        await notifyOwner({ title: titulo, content: htmlContent });
+        
+        return { success: true, message: 'Email enviado com sucesso' };
+      }),
   }),
 });
 
@@ -3594,6 +3696,134 @@ function gerarHTMLNotificacaoTodo(dados: {
           <p>PoweringEG Platform 2.0 - Sistema de Tarefas</p>
           <p>Este email foi gerado automaticamente.</p>
         </div>
+      </div>
+    </body>
+    </html>
+  `;
+}
+
+// Função auxiliar para gerar HTML do email de ocorrência estrutural
+function gerarHTMLOcorrenciaEstrutural(dados: {
+  gestorNome: string;
+  temaNome: string;
+  descricao: string;
+  abrangencia: string;
+  zonaAfetada: string | null;
+  impacto: string;
+  sugestaoAcao: string | null;
+  fotos: string[];
+  criadoEm: Date;
+}): string {
+  const dataFormatada = new Date(dados.criadoEm).toLocaleDateString('pt-PT', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+  
+  const impactoColors: Record<string, { bg: string; text: string; label: string }> = {
+    baixo: { bg: '#dcfce7', text: '#166534', label: 'Baixo' },
+    medio: { bg: '#fef3c7', text: '#92400e', label: 'Médio' },
+    alto: { bg: '#fed7aa', text: '#c2410c', label: 'Alto' },
+    critico: { bg: '#fecaca', text: '#dc2626', label: 'Crítico' },
+  };
+  
+  const impactoStyle = impactoColors[dados.impacto] || impactoColors.baixo;
+  
+  const abrangenciaLabels: Record<string, string> = {
+    nacional: 'Nacional',
+    regional: 'Regional',
+    zona: 'Zona',
+  };
+  
+  const fotosHtml = dados.fotos.length > 0 
+    ? `
+      <div class="section">
+        <div class="section-title">📷 Anexos (${dados.fotos.length} foto(s))</div>
+        <div class="section-content">
+          <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+            ${dados.fotos.map(foto => `<a href="${foto}" target="_blank" style="color: #2563eb;">Ver foto</a>`).join(' | ')}
+          </div>
+        </div>
+      </div>
+    `
+    : '';
+  
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <title>Ocorrência de ${dados.gestorNome} - ${dados.temaNome}</title>
+      <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #dc2626, #b91c1c); color: white; padding: 30px; border-radius: 10px 10px 0 0; text-align: center; }
+        .header h1 { margin: 0; font-size: 24px; }
+        .header p { margin: 10px 0 0; opacity: 0.9; }
+        .content { background: #f9fafb; padding: 30px; border: 1px solid #e5e7eb; }
+        .section { margin-bottom: 25px; }
+        .section-title { font-size: 16px; font-weight: 600; color: #dc2626; margin-bottom: 10px; padding-bottom: 5px; border-bottom: 2px solid #e5e7eb; }
+        .section-content { background: white; padding: 15px; border-radius: 8px; border: 1px solid #e5e7eb; }
+        .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 14px; font-weight: 500; }
+        .info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+        .info-item { background: #f9fafb; padding: 12px; border-radius: 8px; }
+        .info-label { font-size: 12px; color: #6b7280; margin-bottom: 4px; }
+        .info-value { font-weight: 600; color: #1f2937; }
+        .footer { background: #1f2937; color: white; padding: 20px; border-radius: 0 0 10px 10px; text-align: center; font-size: 12px; }
+        pre { white-space: pre-wrap; word-wrap: break-word; margin: 0; font-family: inherit; }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <h1>⚠️ Ocorrência Estrutural</h1>
+        <p>${dados.temaNome}</p>
+      </div>
+      
+      <div class="content">
+        <div class="section">
+          <div class="section-title">📝 Informações Gerais</div>
+          <div class="section-content">
+            <div class="info-grid">
+              <div class="info-item">
+                <div class="info-label">Reportado por</div>
+                <div class="info-value">${dados.gestorNome}</div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Data</div>
+                <div class="info-value">${dataFormatada}</div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Abrangência</div>
+                <div class="info-value">${abrangenciaLabels[dados.abrangencia] || dados.abrangencia}${dados.zonaAfetada ? ` - ${dados.zonaAfetada}` : ''}</div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Impacto</div>
+                <div class="info-value"><span class="badge" style="background: ${impactoStyle.bg}; color: ${impactoStyle.text};">${impactoStyle.label}</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="section">
+          <div class="section-title">📄 Descrição</div>
+          <div class="section-content"><pre>${dados.descricao}</pre></div>
+        </div>
+        
+        ${dados.sugestaoAcao ? `
+        <div class="section">
+          <div class="section-title">💡 Sugestão de Ação</div>
+          <div class="section-content"><pre>${dados.sugestaoAcao}</pre></div>
+        </div>
+        ` : ''}
+        
+        ${fotosHtml}
+      </div>
+      
+      <div class="footer">
+        <p>PoweringEG Platform - Ocorrências Estruturais</p>
+        <p>Este email foi gerado automaticamente.</p>
       </div>
     </body>
     </html>

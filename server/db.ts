@@ -5429,3 +5429,96 @@ export async function getOcorrenciasParaRelatorioIA(): Promise<{
   
   return { ocorrencias, estatisticas };
 }
+
+
+/**
+ * Conta ocorrências estruturais por estado para um gestor específico
+ */
+export async function countOcorrenciasEstruturaisPorEstadoByGestor(gestorId: number): Promise<{
+  reportado: number;
+  emAnalise: number;
+  emResolucao: number;
+  resolvido: number;
+  total: number;
+}> {
+  const db = await getDb();
+  if (!db) return { reportado: 0, emAnalise: 0, emResolucao: 0, resolvido: 0, total: 0 };
+  
+  const result = await db
+    .select({
+      estado: ocorrenciasEstruturais.estado,
+      count: sql<number>`COUNT(*)`
+    })
+    .from(ocorrenciasEstruturais)
+    .where(eq(ocorrenciasEstruturais.gestorId, gestorId))
+    .groupBy(ocorrenciasEstruturais.estado);
+  
+  const counts = {
+    reportado: 0,
+    emAnalise: 0,
+    emResolucao: 0,
+    resolvido: 0,
+    total: 0
+  };
+  
+  for (const row of result) {
+    if (row.estado === 'reportado') counts.reportado = row.count;
+    else if (row.estado === 'em_analise') counts.emAnalise = row.count;
+    else if (row.estado === 'em_resolucao') counts.emResolucao = row.count;
+    else if (row.estado === 'resolvido') counts.resolvido = row.count;
+    counts.total += row.count;
+  }
+  
+  return counts;
+}
+
+/**
+ * Atualiza uma ocorrência estrutural (edição completa)
+ */
+export async function updateOcorrenciaEstrutural(
+  id: number,
+  data: {
+    temaId?: number;
+    descricao?: string;
+    abrangencia?: 'nacional' | 'regional' | 'zona';
+    zonaAfetada?: string | null;
+    lojasAfetadas?: number[] | null;
+    impacto?: 'baixo' | 'medio' | 'alto' | 'critico';
+    fotos?: string[] | null;
+    sugestaoAcao?: string | null;
+    estado?: 'reportado' | 'em_analise' | 'em_resolucao' | 'resolvido';
+    notasAdmin?: string | null;
+  }
+): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  
+  const updateData: Record<string, unknown> = {
+    updatedAt: new Date()
+  };
+  
+  if (data.temaId !== undefined) updateData.temaId = data.temaId;
+  if (data.descricao !== undefined) updateData.descricao = data.descricao;
+  if (data.abrangencia !== undefined) updateData.abrangencia = data.abrangencia;
+  if (data.zonaAfetada !== undefined) updateData.zonaAfetada = data.zonaAfetada;
+  if (data.lojasAfetadas !== undefined) {
+    updateData.lojasAfetadas = data.lojasAfetadas ? JSON.stringify(data.lojasAfetadas) : null;
+  }
+  if (data.impacto !== undefined) updateData.impacto = data.impacto;
+  if (data.fotos !== undefined) {
+    updateData.fotos = data.fotos ? JSON.stringify(data.fotos) : null;
+  }
+  if (data.sugestaoAcao !== undefined) updateData.sugestaoAcao = data.sugestaoAcao;
+  if (data.estado !== undefined) {
+    updateData.estado = data.estado;
+    if (data.estado === 'resolvido') {
+      updateData.resolvidoEm = new Date();
+    }
+  }
+  if (data.notasAdmin !== undefined) updateData.notasAdmin = data.notasAdmin;
+  
+  await db
+    .update(ocorrenciasEstruturais)
+    .set(updateData)
+    .where(eq(ocorrenciasEstruturais.id, id));
+}

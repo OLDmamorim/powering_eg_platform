@@ -1,4 +1,4 @@
-import { Bar } from "react-chartjs-2";
+import { Bar, Doughnut } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -7,9 +7,10 @@ import {
   Title,
   Tooltip,
   Legend,
+  ArcElement,
 } from "chart.js";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart3, TrendingUp, AlertCircle } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { BarChart3, TrendingUp, AlertCircle, AlertTriangle } from "lucide-react";
 
 // Registrar componentes do Chart.js
 ChartJS.register(
@@ -18,7 +19,8 @@ ChartJS.register(
   BarElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  ArcElement
 );
 
 interface DadosGraficos {
@@ -35,6 +37,15 @@ interface DadosGraficos {
   topCategoriasCriticas: Array<{
     categoria: string;
     total: number;
+  }>;
+  // Dados de ocorrências estruturais
+  ocorrenciasPorImpacto?: Array<{
+    impacto: string;
+    count: number;
+  }>;
+  ocorrenciasPorTema?: Array<{
+    tema: string;
+    count: number;
   }>;
 }
 
@@ -167,8 +178,135 @@ export function GraficosRelatorioIA({ dados }: GraficosRelatorioIAProps) {
     },
   };
 
+  // Gráfico 4: Ocorrências por Impacto (Doughnut)
+  const impactoColors = {
+    'Crítico': { bg: 'rgba(220, 38, 38, 0.8)', border: 'rgba(220, 38, 38, 1)' },
+    'Alto': { bg: 'rgba(249, 115, 22, 0.8)', border: 'rgba(249, 115, 22, 1)' },
+    'Médio': { bg: 'rgba(234, 179, 8, 0.8)', border: 'rgba(234, 179, 8, 1)' },
+    'Baixo': { bg: 'rgba(34, 197, 94, 0.8)', border: 'rgba(34, 197, 94, 1)' },
+  };
+
+  const dadosOcorrenciasImpacto = dados.ocorrenciasPorImpacto && dados.ocorrenciasPorImpacto.length > 0 ? {
+    labels: dados.ocorrenciasPorImpacto.map(d => d.impacto),
+    datasets: [
+      {
+        data: dados.ocorrenciasPorImpacto.map(d => d.count),
+        backgroundColor: dados.ocorrenciasPorImpacto.map(d => 
+          impactoColors[d.impacto as keyof typeof impactoColors]?.bg || 'rgba(156, 163, 175, 0.8)'
+        ),
+        borderColor: dados.ocorrenciasPorImpacto.map(d => 
+          impactoColors[d.impacto as keyof typeof impactoColors]?.border || 'rgba(156, 163, 175, 1)'
+        ),
+        borderWidth: 2,
+      },
+    ],
+  } : null;
+
+  const opcoesOcorrenciasImpacto = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: "right" as const,
+      },
+    },
+  };
+
+  // Gráfico 5: Ocorrências por Tema (Barras Horizontais)
+  const dadosOcorrenciasTema = dados.ocorrenciasPorTema && dados.ocorrenciasPorTema.length > 0 ? {
+    labels: dados.ocorrenciasPorTema.map(d => d.tema),
+    datasets: [
+      {
+        label: "Ocorrências",
+        data: dados.ocorrenciasPorTema.map(d => d.count),
+        backgroundColor: "rgba(147, 51, 234, 0.8)", // purple-600
+        borderColor: "rgba(147, 51, 234, 1)",
+        borderWidth: 1,
+      },
+    ],
+  } : null;
+
+  const opcoesOcorrenciasTema = {
+    indexAxis: "y" as const,
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: false,
+      },
+    },
+    scales: {
+      x: {
+        beginAtZero: true,
+      },
+    },
+  };
+
+  const temOcorrencias = (dados.ocorrenciasPorImpacto && dados.ocorrenciasPorImpacto.length > 0) ||
+                         (dados.ocorrenciasPorTema && dados.ocorrenciasPorTema.length > 0);
+
   return (
     <div className="space-y-6">
+      {/* Seção de Ocorrências Estruturais (se houver dados) */}
+      {temOcorrencias && (
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 text-lg font-semibold text-orange-600 dark:text-orange-400">
+            <AlertTriangle className="h-5 w-5" />
+            Ocorrências Estruturais
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Gráfico: Ocorrências por Impacto */}
+            {dadosOcorrenciasImpacto && (
+              <Card className="border-orange-200 dark:border-orange-800">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <AlertCircle className="h-4 w-4 text-orange-500" />
+                    Ocorrências por Impacto
+                  </CardTitle>
+                  <CardDescription>
+                    Distribuição das ocorrências por nível de impacto
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div style={{ height: "250px" }}>
+                    <Doughnut data={dadosOcorrenciasImpacto} options={opcoesOcorrenciasImpacto} />
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Gráfico: Ocorrências por Tema */}
+            {dadosOcorrenciasTema && (
+              <Card className="border-purple-200 dark:border-purple-800">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <BarChart3 className="h-4 w-4 text-purple-500" />
+                    Top Temas de Ocorrências
+                  </CardTitle>
+                  <CardDescription>
+                    Temas mais frequentes nas ocorrências estruturais
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div style={{ height: "250px" }}>
+                    <Bar data={dadosOcorrenciasTema} options={opcoesOcorrenciasTema} />
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Separador visual se houver ocorrências */}
+      {temOcorrencias && (
+        <div className="flex items-center gap-2 text-lg font-semibold text-blue-600 dark:text-blue-400 pt-4 border-t">
+          <BarChart3 className="h-5 w-5" />
+          Relatórios por Categoria
+        </div>
+      )}
+
       {/* Gráfico 1: Distribuição de Status */}
       <Card>
         <CardHeader>

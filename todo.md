@@ -1719,4 +1719,19 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Mover "Nova Ocorrência" e "Histórico Ocorrências" do grupo Ocorrências para grupo Relatórios
 - [x] Remover grupo Ocorrências do menu lateral
 - [x] Testar navegação
-- [ ] Criar checkpoint v6.5
+- [x] Criar checkpoint v6.5
+
+
+## Funcionalidade v6.6 - Melhorias Ocorrências Estruturais
+- [x] Gestor: Contagem de ocorrências apenas das registadas pelo próprio (não total)
+- [x] Gestor: Cards clicáveis para abrir detalhes da ocorrência
+- [x] Gestor: Permitir edição de ocorrência após gravação
+- [x] Gestor: Opção de enviar por email após gravar (Titulo: "Ocorrência de [Nome Gestor] - [Tema]")
+- [x] Admin: Contagem total de todas as ocorrências (já está correto)
+- [x] Admin: Permitir edição de ocorrências
+- [x] Admin: Anexos abrem em popup/modal (não em nova janela)
+- [x] Gestor: Anexos abrem em popup/modal (não em nova janela)
+- [x] Relatórios IA: Destaque de ocorrências por tema no relatório de board
+- [x] Relatórios IA: Destaque de ocorrências por tema nos relatórios gerais
+- [x] Testar todas as funcionalidades
+- [ ] Criar checkpoint v6.6
