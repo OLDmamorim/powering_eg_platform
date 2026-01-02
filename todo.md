@@ -1734,4 +1734,11 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Relatórios IA: Destaque de ocorrências por tema no relatório de board
 - [x] Relatórios IA: Destaque de ocorrências por tema nos relatórios gerais
 - [x] Testar todas as funcionalidades
-- [ ] Criar checkpoint v6.6
+- [x] Criar checkpoint v6.6
+
+
+## v6.7 - Quadro Resultados Mês Anterior no Dashboard
+- [x] Criar endpoint para buscar resultados do mês anterior
+- [x] Adicionar quadro no Dashboard com métricas do mês anterior
+- [x] Mostrar: Total Serviços, Taxa Reparação, Desvio vs Objetivo
+- [x] Testar e criar checkpoint
