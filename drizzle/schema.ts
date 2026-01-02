@@ -647,6 +647,9 @@ export const todos = mysqlTable("todos", {
   // Comentários/Notas (para quando a loja devolve ou conclui)
   comentario: text("comentario"),
   
+  // Resposta da loja (quando o gestor responde, a loja pode responder de volta)
+  respostaLoja: text("respostaLoja"),
+  
   // Histórico de atribuição (para rastrear devoluções)
   historicoAtribuicoes: text("historicoAtribuicoes"), // JSON array de {de, para, data, motivo}
   

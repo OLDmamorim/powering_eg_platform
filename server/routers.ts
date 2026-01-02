@@ -3434,6 +3434,58 @@ export const appRouter = router({
         await db.deleteTodo(input.todoId);
         return { success: true };
       }),
+    
+    // Responder a tarefa (quando o gestor já respondeu, a loja pode responder de volta)
+    responder: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        todoId: z.number(),
+        resposta: z.string().min(1, 'A resposta não pode estar vazia'),
+      }))
+      .mutation(async ({ input }) => {
+        const auth = await db.validarTokenLoja(input.token);
+        if (!auth) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        
+        // Verificar se a tarefa foi criada pela loja (tarefas enviadas ao gestor)
+        const todo = await db.getTodoById(input.todoId);
+        if (!todo || todo.criadoPorLojaId !== auth.loja.id) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Não tem permissão para responder a esta tarefa' });
+        }
+        
+        // Verificar se o gestor já respondeu (tem comentário)
+        if (!todo.comentario) {
+          throw new TRPCError({ code: 'BAD_REQUEST', message: 'Só pode responder após o gestor ter respondido' });
+        }
+        
+        // Atualizar a resposta da loja
+        await db.updateTodo(input.todoId, { respostaLoja: input.resposta });
+        
+        // Notificar o gestor por email
+        const gestorDaLoja = await db.getGestorDaLoja(auth.loja.id);
+        if (gestorDaLoja?.email) {
+          try {
+            await sendEmail({
+              to: gestorDaLoja.email,
+              subject: `Resposta da Loja ${auth.loja.nome}: ${todo.titulo}`,
+              html: gerarHTMLNotificacaoTodo({
+                tipo: 'resposta_loja',
+                titulo: todo.titulo,
+                descricao: todo.descricao || '',
+                prioridade: todo.prioridade,
+                criadoPor: auth.loja.nome,
+                lojaNome: auth.loja.nome,
+                comentario: input.resposta,
+              }),
+            });
+          } catch (e) {
+            console.error('Erro ao enviar email de notificação:', e);
+          }
+        }
+        
+        return { success: true };
+      }),
   }),
   
   // ==================== OCORRÊNCIAS ESTRUTURAIS ====================
@@ -3849,7 +3901,7 @@ function gerarHTMLReuniaoQuinzenal(dados: {
 
 // Função auxiliar para gerar HTML do email de notificação de To-Do
 function gerarHTMLNotificacaoTodo(dados: {
-  tipo: 'nova' | 'reatribuida' | 'devolvida' | 'concluida' | 'nova_da_loja' | 'status_atualizado';
+  tipo: 'nova' | 'reatribuida' | 'devolvida' | 'concluida' | 'nova_da_loja' | 'status_atualizado' | 'resposta_loja';
   titulo: string;
   descricao: string;
   prioridade: string;
@@ -3873,6 +3925,7 @@ function gerarHTMLNotificacaoTodo(dados: {
     concluida: 'Tarefa Concluída',
     nova_da_loja: 'Nova Tarefa da Loja',
     status_atualizado: `Atualização de Tarefa: ${dados.novoEstado || 'Atualizado'}`,
+    resposta_loja: 'Resposta da Loja',
   }[dados.tipo];
   
   const corTipo = {
@@ -3882,6 +3935,7 @@ function gerarHTMLNotificacaoTodo(dados: {
     concluida: '#22c55e',
     nova_da_loja: '#10b981',
     status_atualizado: '#6366f1',
+    resposta_loja: '#06b6d4',
   }[dados.tipo];
   
   return `

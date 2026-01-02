@@ -1,0 +1,14 @@
+{
+  "query": "SELECT token, lojaId FROM tokens_loja WHERE ativo = 1 LIMIT 1",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT token, lojaId FROM tokens_loja WHERE ativo = 1 LIMIT 1",
+  "rows": [
+    {
+      "token": "ia9KhoIyIL5NTEcLxh1X1D3PgQZskl7Gsy2o0vlIihni458lGY3dKRAgU7DKspea",
+      "lojaId": "180024"
+    }
+  ],
+  "messages": [],
+  "stdout": "token\tlojaId\nia9KhoIyIL5NTEcLxh1X1D3PgQZskl7Gsy2o0vlIihni458lGY3dKRAgU7DKspea\t180024\n",
+  "stderr": "",
+  "execution_time_ms": 437
+}

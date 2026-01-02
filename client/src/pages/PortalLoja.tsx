@@ -53,7 +53,10 @@ export default function PortalLoja() {
   const [token, setToken] = useState<string>("");
   const [inputToken, setInputToken] = useState<string>("");
   const [lojaAuth, setLojaAuth] = useState<LojaAuth | null>(null);
-  const [activeTab, setActiveTab] = useState<"reuniao" | "pendentes" | "historico" | "todos" | "internas" | "historicoTarefas">("reuniao");
+  const [activeTab, setActiveTab] = useState<"reuniao" | "pendentes" | "historico" | "tarefas">("reuniao");
+  const [filtroTarefas, setFiltroTarefas] = useState<"todas" | "recebidas" | "enviadas" | "internas">("todas");
+  const [responderTodoOpen, setResponderTodoOpen] = useState(false);
+  const [respostaTodo, setRespostaTodo] = useState("");
   const [todoComentario, setTodoComentario] = useState<string>("");
   const [todoSelecionado, setTodoSelecionado] = useState<number | null>(null);
   const [devolverTodoOpen, setDevolverTodoOpen] = useState(false);
@@ -254,6 +257,17 @@ export default function PortalLoja() {
     onError: (error) => toast.error(error.message),
   });
 
+  const responderTodoMutation = trpc.todosPortalLoja.responder.useMutation({
+    onSuccess: () => {
+      toast.success("Resposta enviada ao gestor!");
+      setResponderTodoOpen(false);
+      setRespostaTodo("");
+      setTodoSelecionado(null);
+      refetchHistoricoTarefas();
+    },
+    onError: (error) => toast.error(error.message),
+  });
+
   const criarTarefaMutation = trpc.todosPortalLoja.criar.useMutation({
     onSuccess: () => {
       toast.success("Tarefa criada e enviada ao gestor!");
@@ -408,7 +422,7 @@ export default function PortalLoja() {
             <Button 
               variant="default" 
               size="sm" 
-              onClick={() => setActiveTab('todos')}
+              onClick={() => setActiveTab('tarefas')}
               className="bg-blue-600 hover:bg-blue-700 text-white relative"
             >
               <ListTodo className="h-4 w-4 mr-2" />
@@ -493,7 +507,7 @@ export default function PortalLoja() {
               size="sm" 
               variant="secondary"
               className="bg-white text-red-600 hover:bg-gray-100 font-semibold"
-              onClick={() => setActiveTab('todos')}
+              onClick={() => setActiveTab('tarefas')}
             >
               Ver Agora
             </Button>
@@ -536,10 +550,10 @@ export default function PortalLoja() {
             </CardContent>
           </Card>
           
-          {/* Card To-Do - Clicável com pulse */}
+          {/* Card Tarefas - Clicável com pulse */}
           <Card 
-            className={`cursor-pointer transition-all hover:scale-105 hover:shadow-md ${activeTab === 'todos' ? 'ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-900/30' : ''} ${(todosCount || 0) > 0 ? 'animate-soft-pulse-blue' : ''}`}
-            onClick={() => setActiveTab('todos')}
+            className={`cursor-pointer transition-all hover:scale-105 hover:shadow-md ${activeTab === 'tarefas' ? 'ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-900/30' : ''} ${((todosCount || 0) + (tarefasInternas?.length || 0)) > 0 ? 'animate-soft-pulse-blue' : ''}`}
+            onClick={() => setActiveTab('tarefas')}
           >
             <CardContent className="pt-4">
               <div className="flex items-center justify-between mb-3">
@@ -628,31 +642,14 @@ export default function PortalLoja() {
             Histórico
           </Button>
           <Button
-            variant={activeTab === "todos" ? "default" : "outline"}
-            onClick={() => setActiveTab("todos")}
+            variant={activeTab === "tarefas" ? "default" : "outline"}
+            onClick={() => setActiveTab("tarefas")}
           >
             <ListTodo className="h-4 w-4 mr-2" />
-            To-Do
-            {(todosCount || 0) > 0 && (
-              <Badge variant="secondary" className="ml-2">{todosCount}</Badge>
+            Tarefas
+            {((todosCount || 0) + (tarefasInternas?.length || 0)) > 0 && (
+              <Badge variant="secondary" className="ml-2">{(todosCount || 0) + (tarefasInternas?.length || 0)}</Badge>
             )}
-          </Button>
-          <Button
-            variant={activeTab === "internas" ? "default" : "outline"}
-            onClick={() => setActiveTab("internas")}
-          >
-            <Store className="h-4 w-4 mr-2" />
-            Internas
-            {(tarefasInternas?.length || 0) > 0 && (
-              <Badge variant="outline" className="ml-2">{tarefasInternas?.length}</Badge>
-            )}
-          </Button>
-          <Button
-            variant={activeTab === "historicoTarefas" ? "default" : "outline"}
-            onClick={() => setActiveTab("historicoTarefas")}
-          >
-            <Send className="h-4 w-4 mr-2" />
-            Enviadas
           </Button>
         </div>
 
@@ -877,54 +874,178 @@ export default function PortalLoja() {
           </div>
         )}
 
-        {/* Tab To-Do */}
-        {activeTab === "todos" && (
+        {/* Tab Tarefas Unificada */}
+        {activeTab === "tarefas" && (
           <div className="space-y-4">
-            {/* Botão Nova Tarefa */}
-            <div className="flex justify-end">
-              <Button
-                onClick={() => setNovaTarefaOpen(true)}
-                className="bg-emerald-600 hover:bg-emerald-700"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Nova Tarefa para o Gestor
-              </Button>
+            {/* Botões de Criação lado a lado + Filtros */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              {/* Botões de Criação */}
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => {
+                    setNovaTarefaInterna(false);
+                    setNovaTarefaOpen(true);
+                  }}
+                  className="bg-emerald-600 hover:bg-emerald-700"
+                >
+                  <Send className="h-4 w-4 mr-2" />
+                  Nova para Gestor
+                </Button>
+                <Button
+                  onClick={() => {
+                    setNovaTarefaInterna(true);
+                    setNovaTarefaOpen(true);
+                  }}
+                  className="bg-purple-600 hover:bg-purple-700"
+                >
+                  <Store className="h-4 w-4 mr-2" />
+                  Nova Interna
+                </Button>
+              </div>
+              
+              {/* Filtros */}
+              <div className="flex gap-1 bg-muted p-1 rounded-lg">
+                <Button
+                  size="sm"
+                  variant={filtroTarefas === "todas" ? "default" : "ghost"}
+                  onClick={() => setFiltroTarefas("todas")}
+                  className="text-xs"
+                >
+                  Todas
+                </Button>
+                <Button
+                  size="sm"
+                  variant={filtroTarefas === "recebidas" ? "default" : "ghost"}
+                  onClick={() => setFiltroTarefas("recebidas")}
+                  className="text-xs"
+                >
+                  Recebidas
+                  {(todosCount || 0) > 0 && <Badge variant="secondary" className="ml-1 text-xs">{todosCount}</Badge>}
+                </Button>
+                <Button
+                  size="sm"
+                  variant={filtroTarefas === "enviadas" ? "default" : "ghost"}
+                  onClick={() => setFiltroTarefas("enviadas")}
+                  className="text-xs"
+                >
+                  Enviadas
+                  {(historicoTarefas?.length || 0) > 0 && <Badge variant="secondary" className="ml-1 text-xs">{historicoTarefas?.length}</Badge>}
+                </Button>
+                <Button
+                  size="sm"
+                  variant={filtroTarefas === "internas" ? "default" : "ghost"}
+                  onClick={() => setFiltroTarefas("internas")}
+                  className="text-xs"
+                >
+                  Internas
+                  {(tarefasInternas?.length || 0) > 0 && <Badge variant="secondary" className="ml-1 text-xs">{tarefasInternas?.length}</Badge>}
+                </Button>
+              </div>
             </div>
-            {!todosList || todosList.length === 0 ? (
-              <Card>
-                <CardContent className="py-12 text-center">
-                  <ListTodo className="h-12 w-12 mx-auto text-green-500 mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">Sem tarefas!</h3>
-                  <p className="text-muted-foreground">
-                    Não existem tarefas atribuídas a esta loja.
-                  </p>
-                </CardContent>
-              </Card>
-            ) : (
-              todosList.map((todo: any) => (
-                <Card key={todo.id} className="hover:shadow-md transition-shadow">
+            
+            {/* Lista de Tarefas Filtrada */}
+            {(() => {
+              // Combinar todas as tarefas com tipo
+              const todasTarefas = [
+                ...(todosList || []).map((t: any) => ({ ...t, tipo: 'recebida' as const })),
+                ...(historicoTarefas || []).map((t: any) => ({ ...t, tipo: 'enviada' as const })),
+                ...(tarefasInternas || []).map((t: any) => ({ ...t, tipo: 'interna' as const })),
+              ];
+              
+              // Filtrar conforme seleção
+              const tarefasFiltradas = todasTarefas.filter(t => {
+                if (filtroTarefas === 'todas') return true;
+                if (filtroTarefas === 'recebidas') return t.tipo === 'recebida';
+                if (filtroTarefas === 'enviadas') return t.tipo === 'enviada';
+                if (filtroTarefas === 'internas') return t.tipo === 'interna';
+                return true;
+              });
+              
+              // Ordenar por data (mais recentes primeiro)
+              tarefasFiltradas.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+              
+              if (tarefasFiltradas.length === 0) {
+                return (
+                  <Card>
+                    <CardContent className="py-12 text-center">
+                      <ListTodo className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+                      <h3 className="text-lg font-semibold mb-2">Sem tarefas</h3>
+                      <p className="text-muted-foreground">
+                        {filtroTarefas === 'todas' ? 'Não existem tarefas.' :
+                         filtroTarefas === 'recebidas' ? 'Não existem tarefas recebidas do gestor.' :
+                         filtroTarefas === 'enviadas' ? 'Não enviou nenhuma tarefa ao gestor.' :
+                         'Não existem tarefas internas.'}
+                      </p>
+                    </CardContent>
+                  </Card>
+                );
+              }
+              
+              return tarefasFiltradas.map((todo: any) => (
+                <Card 
+                  key={`${todo.tipo}-${todo.id}`} 
+                  className={`hover:shadow-md transition-shadow ${
+                    todo.tipo === 'interna' ? 'border-l-4 border-l-purple-500' :
+                    todo.tipo === 'enviada' ? 'border-l-4 border-l-emerald-500' :
+                    'border-l-4 border-l-blue-500'
+                  }`}
+                >
                   <CardContent className="py-4">
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap mb-2">
-                          {todo.estado === 'pendente' && <Clock className="h-4 w-4 text-gray-500" />}
-                          {todo.estado === 'em_progresso' && <Clock className="h-4 w-4 text-blue-500" />}
+                          {/* Ícone por tipo */}
+                          {todo.tipo === 'interna' && <Store className="h-4 w-4 text-purple-500" />}
+                          {todo.tipo === 'enviada' && <Send className="h-4 w-4 text-emerald-500" />}
+                          {todo.tipo === 'recebida' && (
+                            todo.estado === 'pendente' ? <Clock className="h-4 w-4 text-gray-500" /> :
+                            todo.estado === 'em_progresso' ? <Clock className="h-4 w-4 text-blue-500" /> :
+                            todo.estado === 'concluida' ? <CheckCircle2 className="h-4 w-4 text-green-500" /> :
+                            <RotateCcw className="h-4 w-4 text-orange-500" />
+                          )}
+                          
                           <h3 className="font-semibold">{todo.titulo}</h3>
+                          
+                          {/* Badge de tipo */}
+                          <Badge variant="outline" className={
+                            todo.tipo === 'interna' ? 'bg-purple-50 text-purple-700' :
+                            todo.tipo === 'enviada' ? 'bg-emerald-50 text-emerald-700' :
+                            'bg-blue-50 text-blue-700'
+                          }>
+                            {todo.tipo === 'interna' ? 'Interna' :
+                             todo.tipo === 'enviada' ? 'Enviada' : 'Recebida'}
+                          </Badge>
+                          
+                          {/* Badge de prioridade */}
                           <Badge className={
                             todo.prioridade === 'urgente' ? 'bg-red-100 text-red-800' :
                             todo.prioridade === 'alta' ? 'bg-orange-100 text-orange-800' :
                             todo.prioridade === 'media' ? 'bg-blue-100 text-blue-800' :
-                            todo.prioridade === 'baixa' ? 'bg-green-100 text-green-800' :
-                            'bg-gray-100 text-gray-800'
+                            'bg-green-100 text-green-800'
                           }>
                             {todo.prioridade}
                           </Badge>
+                          
+                          {/* Badge de estado */}
                           <Badge variant="outline" className={
                             todo.estado === 'pendente' ? 'bg-gray-50' :
-                            todo.estado === 'em_progresso' ? 'bg-blue-50 text-blue-700' : ''
+                            todo.estado === 'em_progresso' ? 'bg-blue-50 text-blue-700' :
+                            todo.estado === 'concluida' ? 'bg-green-50 text-green-700' :
+                            'bg-orange-50 text-orange-700'
                           }>
-                            {todo.estado === 'pendente' ? 'Pendente' : 'Em Progresso'}
+                            {todo.estado === 'pendente' ? 'Pendente' : 
+                             todo.estado === 'em_progresso' ? 'Em Progresso' :
+                             todo.estado === 'concluida' ? 'Concluída' : 'Devolvida'}
                           </Badge>
+                          
+                          {/* Badge vista pelo gestor (para enviadas) */}
+                          {todo.tipo === 'enviada' && todo.visto && (
+                            <Badge variant="outline" className="bg-blue-50 text-blue-600">
+                              Vista pelo Gestor
+                            </Badge>
+                          )}
+                          
+                          {/* Categoria */}
                           {todo.categoriaNome && (
                             <Badge variant="outline" style={{ borderColor: todo.categoriaCor || undefined, color: todo.categoriaCor || undefined }}>
                               <Tag className="h-3 w-3 mr-1" />
@@ -939,259 +1060,153 @@ export default function PortalLoja() {
                           </p>
                         )}
                         
-                        <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
-                          <span>Criado por: {todo.criadoPorNome || 'N/A'}</span>
-                          <span>{new Date(todo.createdAt).toLocaleDateString('pt-PT')}</span>
-                          {todo.dataLimite && (
-                            <span className="text-orange-600">
-                              Prazo: {new Date(todo.dataLimite).toLocaleDateString('pt-PT')}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      
-                      <div className="flex flex-col gap-2">
-                        {todo.estado === 'pendente' && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => atualizarEstadoTodoMutation.mutate({
-                              token,
-                              todoId: todo.id,
-                              estado: 'em_progresso',
-                            })}
-                            disabled={atualizarEstadoTodoMutation.isPending}
-                          >
-                            <Clock className="h-4 w-4 mr-1" />
-                            Iniciar
-                          </Button>
-                        )}
-                        <Button
-                          size="sm"
-                          variant="default"
-                          className="bg-green-600 hover:bg-green-700"
-                          onClick={() => concluirTodoMutation.mutate({
-                            token,
-                            todoId: todo.id,
-                          })}
-                          disabled={concluirTodoMutation.isPending}
-                        >
-                          <CheckCircle2 className="h-4 w-4 mr-1" />
-                          Concluir
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="text-orange-600 border-orange-300 hover:bg-orange-50"
-                          onClick={() => {
-                            setTodoSelecionado(todo.id);
-                            setDevolverTodoOpen(true);
-                          }}
-                        >
-                          <RotateCcw className="h-4 w-4 mr-1" />
-                          Devolver
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
-            )}
-          </div>
-        )}
-
-        {/* Tab Tarefas Internas */}
-        {activeTab === "internas" && (
-          <div className="space-y-4">
-            {/* Botão Nova Tarefa Interna */}
-            <div className="flex justify-end">
-              <Button
-                onClick={() => {
-                  setNovaTarefaInterna(true);
-                  setNovaTarefaOpen(true);
-                }}
-                className="bg-purple-600 hover:bg-purple-700"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Nova Tarefa Interna
-              </Button>
-            </div>
-            {!tarefasInternas || tarefasInternas.length === 0 ? (
-              <Card>
-                <CardContent className="py-12 text-center">
-                  <Store className="h-12 w-12 mx-auto text-purple-500 mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">Sem tarefas internas</h3>
-                  <p className="text-muted-foreground">
-                    Crie tarefas para organizar o trabalho interno da loja.
-                  </p>
-                </CardContent>
-              </Card>
-            ) : (
-              tarefasInternas.map((todo: any) => (
-                <Card key={todo.id} className="hover:shadow-md transition-shadow border-l-4 border-l-purple-500">
-                  <CardContent className="py-4">
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap mb-2">
-                          <Store className="h-4 w-4 text-purple-500" />
-                          <h3 className="font-semibold">{todo.titulo}</h3>
-                          <Badge className={
-                            todo.prioridade === 'urgente' ? 'bg-red-100 text-red-800' :
-                            todo.prioridade === 'alta' ? 'bg-orange-100 text-orange-800' :
-                            todo.prioridade === 'media' ? 'bg-blue-100 text-blue-800' :
-                            'bg-green-100 text-green-800'
-                          }>
-                            {todo.prioridade}
-                          </Badge>
-                          <Badge variant="outline" className="bg-purple-50 text-purple-700">
-                            Interna
-                          </Badge>
-                        </div>
-                        
-                        {todo.descricao && (
-                          <p className="text-sm text-muted-foreground mb-3">
-                            {todo.descricao}
-                          </p>
-                        )}
-                        
-                        <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
-                          <span>{new Date(todo.createdAt).toLocaleDateString('pt-PT')}</span>
-                          {todo.dataLimite && (
-                            <span className="text-orange-600">
-                              Prazo: {new Date(todo.dataLimite).toLocaleDateString('pt-PT')}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      
-                      <div className="flex flex-col gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            setTarefaInternaEditando(todo);
-                            setEditarInternaOpen(true);
-                          }}
-                        >
-                          Editar
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="default"
-                          className="bg-green-600 hover:bg-green-700"
-                          onClick={() => atualizarTarefaInternaMutation.mutate({
-                            token,
-                            todoId: todo.id,
-                            estado: 'concluida',
-                          })}
-                          disabled={atualizarTarefaInternaMutation.isPending}
-                        >
-                          <CheckCircle2 className="h-4 w-4 mr-1" />
-                          Concluir
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="text-red-600 border-red-300 hover:bg-red-50"
-                          onClick={() => {
-                            if (confirm('Tem a certeza que deseja eliminar esta tarefa?')) {
-                              eliminarTarefaInternaMutation.mutate({
-                                token,
-                                todoId: todo.id,
-                              });
-                            }
-                          }}
-                          disabled={eliminarTarefaInternaMutation.isPending}
-                        >
-                          Eliminar
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
-            )}
-          </div>
-        )}
-
-        {/* Tab Histórico de Tarefas Enviadas */}
-        {activeTab === "historicoTarefas" && (
-          <div className="space-y-4">
-            {!historicoTarefas || historicoTarefas.length === 0 ? (
-              <Card>
-                <CardContent className="py-12 text-center">
-                  <Send className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">Sem tarefas enviadas</h3>
-                  <p className="text-muted-foreground">
-                    Ainda não enviou nenhuma tarefa ao gestor.
-                  </p>
-                </CardContent>
-              </Card>
-            ) : (
-              historicoTarefas.map((todo: any) => (
-                <Card key={todo.id} className="hover:shadow-md transition-shadow">
-                  <CardContent className="py-4">
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap mb-2">
-                          {todo.estado === 'pendente' && <Clock className="h-4 w-4 text-gray-500" />}
-                          {todo.estado === 'em_progresso' && <Clock className="h-4 w-4 text-blue-500" />}
-                          {todo.estado === 'concluida' && <CheckCircle2 className="h-4 w-4 text-green-500" />}
-                          {todo.estado === 'devolvida' && <RotateCcw className="h-4 w-4 text-orange-500" />}
-                          <h3 className="font-semibold">{todo.titulo}</h3>
-                          <Badge className={
-                            todo.prioridade === 'urgente' ? 'bg-red-100 text-red-800' :
-                            todo.prioridade === 'alta' ? 'bg-orange-100 text-orange-800' :
-                            todo.prioridade === 'media' ? 'bg-blue-100 text-blue-800' :
-                            'bg-green-100 text-green-800'
-                          }>
-                            {todo.prioridade}
-                          </Badge>
-                          <Badge variant="outline" className={
-                            todo.estado === 'pendente' ? 'bg-gray-50' :
-                            todo.estado === 'em_progresso' ? 'bg-blue-50 text-blue-700' :
-                            todo.estado === 'concluida' ? 'bg-green-50 text-green-700' :
-                            'bg-orange-50 text-orange-700'
-                          }>
-                            {todo.estado === 'pendente' ? 'Pendente' : 
-                             todo.estado === 'em_progresso' ? 'Em Progresso' :
-                             todo.estado === 'concluida' ? 'Concluída' : 'Devolvida'}
-                          </Badge>
-                          {todo.visto && (
-                            <Badge variant="outline" className="bg-blue-50 text-blue-600">
-                              Vista pelo Gestor
-                            </Badge>
-                          )}
-                        </div>
-                        
-                        {todo.descricao && (
-                          <p className="text-sm text-muted-foreground mb-3">
-                            {todo.descricao}
-                          </p>
-                        )}
-                        
-                        {/* Mostrar comentário/resposta do gestor se existir */}
-                        {todo.comentario && (
+                        {/* Resposta do gestor (para tarefas enviadas) */}
+                        {todo.tipo === 'enviada' && todo.comentario && (
                           <div className="p-3 bg-blue-50 rounded-lg mb-3">
                             <strong className="text-blue-700 text-sm">Resposta do Gestor:</strong>
                             <p className="text-blue-600 text-sm mt-1">{todo.comentario}</p>
                           </div>
                         )}
                         
+                        {/* Resposta da loja (se já respondeu) */}
+                        {todo.tipo === 'enviada' && todo.respostaLoja && (
+                          <div className="p-3 bg-emerald-50 rounded-lg mb-3">
+                            <strong className="text-emerald-700 text-sm">Sua Resposta:</strong>
+                            <p className="text-emerald-600 text-sm mt-1">{todo.respostaLoja}</p>
+                          </div>
+                        )}
+                        
                         <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
-                          <span>Enviada em: {new Date(todo.createdAt).toLocaleDateString('pt-PT')}</span>
+                          {todo.criadoPorNome && <span>Criado por: {todo.criadoPorNome}</span>}
+                          <span>{new Date(todo.createdAt).toLocaleDateString('pt-PT')}</span>
+                          {todo.dataLimite && (
+                            <span className="text-orange-600">
+                              Prazo: {new Date(todo.dataLimite).toLocaleDateString('pt-PT')}
+                            </span>
+                          )}
                           {todo.dataConclusao && (
                             <span className="text-green-600">
-                              Concluída em: {new Date(todo.dataConclusao).toLocaleDateString('pt-PT')}
+                              Concluída: {new Date(todo.dataConclusao).toLocaleDateString('pt-PT')}
                             </span>
                           )}
                         </div>
                       </div>
+                      
+                      {/* Ações */}
+                      <div className="flex flex-col gap-2">
+                        {/* Ações para tarefas RECEBIDAS (do gestor) */}
+                        {todo.tipo === 'recebida' && todo.estado !== 'concluida' && (
+                          <>
+                            {todo.estado === 'pendente' && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => atualizarEstadoTodoMutation.mutate({
+                                  token,
+                                  todoId: todo.id,
+                                  estado: 'em_progresso',
+                                })}
+                                disabled={atualizarEstadoTodoMutation.isPending}
+                              >
+                                <Clock className="h-4 w-4 mr-1" />
+                                Iniciar
+                              </Button>
+                            )}
+                            <Button
+                              size="sm"
+                              variant="default"
+                              className="bg-green-600 hover:bg-green-700"
+                              onClick={() => concluirTodoMutation.mutate({
+                                token,
+                                todoId: todo.id,
+                              })}
+                              disabled={concluirTodoMutation.isPending}
+                            >
+                              <CheckCircle2 className="h-4 w-4 mr-1" />
+                              Concluir
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-orange-600 border-orange-300 hover:bg-orange-50"
+                              onClick={() => {
+                                setTodoSelecionado(todo.id);
+                                setDevolverTodoOpen(true);
+                              }}
+                            >
+                              <RotateCcw className="h-4 w-4 mr-1" />
+                              Devolver
+                            </Button>
+                          </>
+                        )}
+                        
+                        {/* Ações para tarefas ENVIADAS (ao gestor) */}
+                        {todo.tipo === 'enviada' && todo.comentario && !todo.respostaLoja && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-cyan-600 border-cyan-300 hover:bg-cyan-50"
+                            onClick={() => {
+                              setTodoSelecionado(todo.id);
+                              setResponderTodoOpen(true);
+                            }}
+                          >
+                            <MessageSquare className="h-4 w-4 mr-1" />
+                            Responder
+                          </Button>
+                        )}
+                        
+                        {/* Ações para tarefas INTERNAS */}
+                        {todo.tipo === 'interna' && todo.estado !== 'concluida' && (
+                          <>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setTarefaInternaEditando(todo);
+                                setEditarInternaOpen(true);
+                              }}
+                            >
+                              Editar
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="default"
+                              className="bg-green-600 hover:bg-green-700"
+                              onClick={() => atualizarTarefaInternaMutation.mutate({
+                                token,
+                                todoId: todo.id,
+                                estado: 'concluida',
+                              })}
+                              disabled={atualizarTarefaInternaMutation.isPending}
+                            >
+                              <CheckCircle2 className="h-4 w-4 mr-1" />
+                              Concluir
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-red-600 border-red-300 hover:bg-red-50"
+                              onClick={() => {
+                                if (confirm('Tem a certeza que deseja eliminar esta tarefa?')) {
+                                  eliminarTarefaInternaMutation.mutate({
+                                    token,
+                                    todoId: todo.id,
+                                  });
+                                }
+                              }}
+                              disabled={eliminarTarefaInternaMutation.isPending}
+                            >
+                              Eliminar
+                            </Button>
+                          </>
+                        )}
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
-              ))
-            )}
+              ));
+            })()}
           </div>
         )}
 
@@ -1237,6 +1252,54 @@ export default function PortalLoja() {
                 disabled={devolverTodoMutation.isPending}
               >
                 {devolverTodoMutation.isPending ? "A devolver..." : "Devolver"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dialog Responder Tarefa (quando gestor já respondeu) */}
+        <Dialog open={responderTodoOpen} onOpenChange={setResponderTodoOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Responder ao Gestor</DialogTitle>
+              <DialogDescription>
+                Escreva a sua resposta ao comentário do gestor.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <Textarea
+                placeholder="Escreva a sua resposta..."
+                value={respostaTodo}
+                onChange={(e) => setRespostaTodo(e.target.value)}
+                rows={4}
+              />
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => {
+                setResponderTodoOpen(false);
+                setRespostaTodo("");
+                setTodoSelecionado(null);
+              }}>
+                Cancelar
+              </Button>
+              <Button
+                onClick={() => {
+                  if (!respostaTodo.trim()) {
+                    toast.error("Deve escrever uma resposta");
+                    return;
+                  }
+                  if (todoSelecionado) {
+                    responderTodoMutation.mutate({
+                      token,
+                      todoId: todoSelecionado,
+                      resposta: respostaTodo.trim(),
+                    });
+                  }
+                }}
+                disabled={responderTodoMutation.isPending}
+                className="bg-cyan-600 hover:bg-cyan-700"
+              >
+                {responderTodoMutation.isPending ? "A enviar..." : "Enviar Resposta"}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -1490,9 +1553,9 @@ export default function PortalLoja() {
       </div>
 
       {/* Botão Flutuante de Acesso Rápido às Tarefas */}
-      {activeTab !== 'todos' && (
+      {activeTab !== 'tarefas' && (
         <button
-          onClick={() => setActiveTab('todos')}
+          onClick={() => setActiveTab('tarefas')}
           className="fixed bottom-6 right-6 z-50 bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-2xl transition-all hover:scale-110 group"
           title="Minhas Tarefas"
         >

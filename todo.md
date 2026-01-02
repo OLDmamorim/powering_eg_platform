@@ -1773,3 +1773,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Portal da Loja: permitir criar tarefas internas (para a própria loja, sem enviar ao gestor)
 - [x] Reuniões da Loja: campos de preenchimento obrigatório
 - [x] Reuniões da Loja: cor do cabeçalho do email (já estava correto - azul #2563eb)
+
+## Melhorias Portal da Loja - Tarefas v6.11
+- [x] Unificar tarefas numa única lista (remover tabs separadas)
+- [x] Usar filtros para definir o que a loja vê (internas, enviadas, recebidas, etc.)
+- [x] Botões de criação lado a lado: "Nova Tarefa Interna" e "Nova Tarefa para Gestor"
+- [x] Loja pode responder quando gestor responde a uma tarefa (bidirecional)
+- [x] Testar e criar checkpoint
