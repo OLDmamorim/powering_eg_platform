@@ -274,6 +274,15 @@ export default function Dashboard() {
     ano: mesAnterior.ano,
   }, { enabled: isAdmin });
   
+  // Resultados do mês anterior para gestor (baseado nas suas lojas)
+  const minhasLojasIds = useMemo(() => minhasLojas?.map((l: any) => l.id) || [], [minhasLojas]);
+  
+  const { data: resultadosMesAnteriorGestor } = trpc.resultados.estatisticas.useQuery({
+    mes: mesAnterior.mes,
+    ano: mesAnterior.ano,
+    lojasIds: minhasLojasIds,
+  }, { enabled: isGestor && minhasLojasIds.length > 0 });
+  
   // Contagem de tarefas pendentes atribuídas ao utilizador
   const { data: tarefasPendentesAMim = 0 } = trpc.todos.countPendentesAtribuidosAMim.useQuery();
   
@@ -807,6 +816,68 @@ export default function Dashboard() {
                     </div>
                   ))}
                 </div>
+              </CardContent>
+            </Card>
+          )}
+          
+          {/* Card Resultados Mês Anterior - Apenas Gestor */}
+          {isGestor && minhasLojasIds.length > 0 && (
+            <Card className="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950/50 dark:to-purple-950/50 border-indigo-200 dark:border-indigo-800">
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-indigo-700 dark:text-indigo-300">
+                  <BarChart3 className="h-4 w-4" />
+                  Resultados {mesAnterior.mes === 12 ? 'Dezembro' : new Date(2024, mesAnterior.mes - 1).toLocaleDateString('pt-PT', { month: 'long' })} {mesAnterior.ano}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {resultadosMesAnteriorGestor ? (
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="bg-white/60 dark:bg-white/10 rounded-lg p-3">
+                        <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
+                          {resultadosMesAnteriorGestor.somaServicos?.toLocaleString('pt-PT') || '—'}
+                        </div>
+                        <div className="text-xs text-muted-foreground">Total Serviços</div>
+                      </div>
+                      <div className="bg-white/60 dark:bg-white/10 rounded-lg p-3">
+                        <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                          {resultadosMesAnteriorGestor.mediaTaxaReparacao ? `${resultadosMesAnteriorGestor.mediaTaxaReparacao.toFixed(1)}%` : '—'}
+                        </div>
+                        <div className="text-xs text-muted-foreground">Taxa Reparação</div>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="bg-white/60 dark:bg-white/10 rounded-lg p-3">
+                        <div className={`text-xl font-bold ${(resultadosMesAnteriorGestor.mediaDesvioPercentual ?? 0) >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                          {resultadosMesAnteriorGestor.mediaDesvioPercentual !== undefined && resultadosMesAnteriorGestor.mediaDesvioPercentual !== null
+                            ? `${resultadosMesAnteriorGestor.mediaDesvioPercentual >= 0 ? '+' : ''}${resultadosMesAnteriorGestor.mediaDesvioPercentual.toFixed(1)}%`
+                            : '—'}
+                        </div>
+                        <div className="text-xs text-muted-foreground">Desvio vs Objetivo</div>
+                      </div>
+                      <div className="bg-white/60 dark:bg-white/10 rounded-lg p-3">
+                        <div className="text-xl font-bold text-emerald-600 dark:text-emerald-400">
+                          {resultadosMesAnteriorGestor.lojasAcimaObjetivo ?? '—'}/{resultadosMesAnteriorGestor.totalLojas ?? '—'}
+                        </div>
+                        <div className="text-xs text-muted-foreground">Lojas Acima Obj.</div>
+                      </div>
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="w-full mt-2 border-indigo-300 text-indigo-700 hover:bg-indigo-100 dark:border-indigo-700 dark:text-indigo-300 dark:hover:bg-indigo-900/50"
+                      onClick={() => setLocation('/dashboard-resultados')}
+                    >
+                      Ver Dashboard Completo
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="text-center py-6">
+                    <BarChart3 className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                    <p className="text-sm text-muted-foreground">Sem dados do mês anterior</p>
+                    <p className="text-xs text-muted-foreground mt-1">Aguarde importação de resultados</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           )}

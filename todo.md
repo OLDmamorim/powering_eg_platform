@@ -1742,3 +1742,11 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar quadro no Dashboard com métricas do mês anterior
 - [x] Mostrar: Total Serviços, Taxa Reparação, Desvio vs Objetivo
 - [x] Testar e criar checkpoint
+
+## v6.8 - Resultados do Mês Anterior para Gestores
+
+- [x] Adicionar quadro de Resultados do Mês Anterior no Dashboard do Gestor
+- [x] Mostrar métricas das lojas do gestor (não todas as lojas)
+- [x] Preencher espaço vazio ao lado do "Progresso de Relatórios"
+- [x] Testar e criar checkpoint
+
