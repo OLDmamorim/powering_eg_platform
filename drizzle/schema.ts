@@ -657,9 +657,13 @@ export const todos = mysqlTable("todos", {
   dataLimite: timestamp("dataLimite"),
   dataConclusao: timestamp("dataConclusao"),
   
-  // Visibilidade e tracking
-  visto: boolean("visto").default(false).notNull(), // Se o destinatário já viu esta tarefa
-  vistoEm: timestamp("vistoEm"), // Data/hora em que foi visto
+  // Visibilidade e tracking (para a loja)
+  visto: boolean("visto").default(false).notNull(), // Se a loja já viu esta tarefa
+  vistoEm: timestamp("vistoEm"), // Data/hora em que a loja viu
+  
+  // Visibilidade e tracking (para o gestor)
+  vistoGestor: boolean("vistoGestor").default(false).notNull(), // Se o gestor já viu esta tarefa
+  vistoGestorEm: timestamp("vistoGestorEm"), // Data/hora em que o gestor viu
   
   // Tarefa interna da loja (não enviada ao gestor)
   isInterna: boolean("isInterna").default(false).notNull(),

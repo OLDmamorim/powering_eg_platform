@@ -267,6 +267,13 @@
       "when": 1767362991202,
       "tag": "0037_brown_hellfire_club",
       "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "5",
+      "when": 1767371016055,
+      "tag": "0038_milky_stellaris",
+      "breakpoints": true
     }
   ]
 }

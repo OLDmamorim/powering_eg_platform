@@ -4578,6 +4578,8 @@ export async function getAllTodos(filtros?: {
   categoriaCor: string | null;
   visto: boolean;
   vistoEm: Date | null;
+  vistoGestor: boolean;
+  vistoGestorEm: Date | null;
   paraMim: boolean;
 }>> {
   const db = await getDb();
@@ -4646,6 +4648,8 @@ export async function getAllTodos(filtros?: {
       dataConclusao: todos.dataConclusao,
       visto: todos.visto,
       vistoEm: todos.vistoEm,
+      vistoGestor: todos.vistoGestor,
+      vistoGestorEm: todos.vistoGestorEm,
       isInterna: todos.isInterna,
       anexos: todos.anexos,
       createdAt: todos.createdAt,
@@ -4726,6 +4730,8 @@ export async function getTodosByLojaId(lojaId: number, apenasAtivos: boolean = t
       dataConclusao: todos.dataConclusao,
       visto: todos.visto,
       vistoEm: todos.vistoEm,
+      vistoGestor: todos.vistoGestor,
+      vistoGestorEm: todos.vistoGestorEm,
       isInterna: todos.isInterna,
       anexos: todos.anexos,
       createdAt: todos.createdAt,
@@ -4919,7 +4925,7 @@ export async function contarTodosPorEstado(): Promise<{
 
 
 /**
- * Marcar To-Do como visto
+ * Marcar To-Do como visto (pela loja)
  */
 export async function marcarTodoComoVisto(id: number): Promise<void> {
   const db = await getDb();
@@ -4932,6 +4938,41 @@ export async function marcarTodoComoVisto(id: number): Promise<void> {
       vistoEm: new Date(),
     })
     .where(eq(todos.id, id));
+}
+
+/**
+ * Marcar To-Do como visto pelo gestor
+ * Usado para controlar a animação do botão "Minhas Tarefas"
+ */
+export async function marcarTodoComoVistoGestor(id: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  
+  await db
+    .update(todos)
+    .set({
+      vistoGestor: true,
+      vistoGestorEm: new Date(),
+    })
+    .where(eq(todos.id, id));
+}
+
+/**
+ * Marcar múltiplos To-Dos como vistos pelo gestor
+ */
+export async function marcarMultiplosTodosComoVistoGestor(ids: number[]): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  
+  for (const id of ids) {
+    await db
+      .update(todos)
+      .set({
+        vistoGestor: true,
+        vistoGestorEm: new Date(),
+      })
+      .where(eq(todos.id, id));
+  }
 }
 
 /**
@@ -4976,9 +5017,11 @@ export async function countTodosNaoVistos(
 
 
 /**
- * Conta tarefas pendentes atribuídas diretamente ao utilizador
+ * Conta tarefas NÃO VISTAS atribuídas diretamente ao utilizador
+ * Só conta tarefas que o gestor ainda não viu (visto = false ou vistoGestor = false)
+ * Não conta tarefas que o próprio gestor criou
  * @param userId - ID do utilizador
- * @returns Número de tarefas pendentes atribuídas ao utilizador
+ * @returns Número de tarefas não vistas atribuídas ao utilizador
  */
 export async function countTodosPendentesAtribuidosAMim(userId: number): Promise<number> {
   const db = await getDb();
@@ -4989,6 +5032,14 @@ export async function countTodosPendentesAtribuidosAMim(userId: number): Promise
     .from(todos)
     .where(and(
       eq(todos.atribuidoUserId, userId),
+      // Não conta tarefas criadas pelo próprio utilizador
+      sql`${todos.criadoPorId} != ${userId}`,
+      // Só conta tarefas não vistas pelo gestor
+      or(
+        eq(todos.vistoGestor, false),
+        sql`${todos.vistoGestor} IS NULL`
+      ),
+      // Apenas tarefas pendentes ou em progresso
       or(
         eq(todos.estado, 'pendente'),
         eq(todos.estado, 'em_progresso')
@@ -5029,6 +5080,8 @@ export async function getTodosEnviadosPelaLoja(lojaId: number): Promise<Array<To
       dataConclusao: todos.dataConclusao,
       visto: todos.visto,
       vistoEm: todos.vistoEm,
+      vistoGestor: todos.vistoGestor,
+      vistoGestorEm: todos.vistoGestorEm,
       isInterna: todos.isInterna,
       anexos: todos.anexos,
       createdAt: todos.createdAt,
@@ -5092,6 +5145,8 @@ export async function getTodosInternosDaLoja(lojaId: number, apenasAtivos: boole
       dataConclusao: todos.dataConclusao,
       visto: todos.visto,
       vistoEm: todos.vistoEm,
+      vistoGestor: todos.vistoGestor,
+      vistoGestorEm: todos.vistoGestorEm,
       isInterna: todos.isInterna,
       anexos: todos.anexos,
       createdAt: todos.createdAt,

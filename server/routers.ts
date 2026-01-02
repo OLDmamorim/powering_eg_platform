@@ -3084,6 +3084,22 @@ export const appRouter = router({
         return { success: true };
       }),
     
+    // Marcar To-Do como visto pelo gestor (para controlar animação do botão)
+    marcarVistoGestor: gestorProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await db.marcarTodoComoVistoGestor(input.id);
+        return { success: true };
+      }),
+    
+    // Marcar múltiplos To-Dos como vistos pelo gestor
+    marcarMultiplosVistosGestor: gestorProcedure
+      .input(z.object({ ids: z.array(z.number()) }))
+      .mutation(async ({ input }) => {
+        await db.marcarMultiplosTodosComoVistoGestor(input.ids);
+        return { success: true };
+      }),
+    
     // Contar To-Dos não vistos
     countNaoVistos: gestorProcedure.query(async ({ ctx }) => {
       // Obter contexto do utilizador

@@ -173,6 +173,14 @@ export default function Todos() {
     },
   });
   
+  // Marcar como visto pelo gestor (para controlar animação do botão "Minhas Tarefas")
+  const marcarVistoGestorMutation = trpc.todos.marcarVistoGestor.useMutation({
+    onSuccess: () => {
+      refetchTodos();
+      utils.todos.countPendentesAtribuidosAMim.invalidate();
+    },
+  });
+  
   const mudarStatusMutation = trpc.todos.mudarStatusComResposta.useMutation({
     onSuccess: () => {
       toast.success("Status atualizado e loja notificada!");
@@ -482,6 +490,7 @@ export default function Todos() {
                     }
                   }}
                   onMarcarVisto={(id) => marcarVistoMutation.mutate({ id })}
+                  onMarcarVistoGestor={(id) => marcarVistoGestorMutation.mutate({ id })}
                   onMudarStatus={(todo) => {
                     setTodoSelecionado(todo);
                     setNovoStatus(todo.estado);
@@ -524,6 +533,7 @@ export default function Todos() {
                     }
                   }}
                   onMarcarVisto={(id) => marcarVistoMutation.mutate({ id })}
+                  onMarcarVistoGestor={(id) => marcarVistoGestorMutation.mutate({ id })}
                   onMudarStatus={(todo) => {
                     setTodoSelecionado(todo);
                     setNovoStatus(todo.estado);
@@ -955,6 +965,7 @@ function TodoCard({
   onConcluir,
   onEliminar,
   onMarcarVisto,
+  onMarcarVistoGestor,
   onMudarStatus,
   corPrioridade,
   corEstado,
@@ -966,6 +977,7 @@ function TodoCard({
   onConcluir: (id: number) => void;
   onEliminar: (id: number) => void;
   onMarcarVisto: (id: number) => void;
+  onMarcarVistoGestor: (id: number) => void;
   onMudarStatus: (todo: any) => void;
   corPrioridade: (p: string) => string;
   corEstado: (e: string) => string;
@@ -973,8 +985,13 @@ function TodoCard({
 }) {
   // Marcar como visto ao clicar no card (se não visto e é para mim)
   const handleClick = () => {
+    // Marcar como visto pela loja (campo visto)
     if (!todo.visto && isParaMim) {
       onMarcarVisto(todo.id);
+    }
+    // Marcar como visto pelo gestor (campo vistoGestor) - para controlar animação do botão
+    if (!todo.vistoGestor && isParaMim) {
+      onMarcarVistoGestor(todo.id);
     }
   };
   

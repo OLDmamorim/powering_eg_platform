@@ -1799,3 +1799,17 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Limpar lojas de teste da base de dados (36 lojas)
 - [x] Limpar gestores/utilizadores de teste da base de dados (24 users)
 
+
+## Bug v6.2 - Botão Minhas Tarefas pisca incorretamente
+- [ ] Contador mostra "2" mesmo sem tarefas novas por ler
+- [ ] Botão pisca a amarelo quando gestor muda status ou adiciona obs (não deveria)
+- [ ] Só deve piscar quando há tarefas RECEBIDAS não vistas
+
+
+## Bug v6.2 - Botão Minhas Tarefas pisca incorretamente
+- [x] Contador mostra "2" mesmo sem tarefas novas por ler
+- [x] Botão pisca a amarelo quando gestor muda status ou adiciona obs (não deveria)
+- [x] Só deve piscar quando há tarefas RECEBIDAS não vistas
+- [x] Adicionado campo vistoGestor ao schema de todos
+- [x] Corrigida função countTodosPendentesAtribuidosAMim para excluir tarefas criadas pelo próprio utilizador
+- [x] Adicionada lógica de marcar como visto pelo gestor ao visualizar tarefa

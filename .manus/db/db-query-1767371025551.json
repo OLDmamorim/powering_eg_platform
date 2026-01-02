@@ -1,0 +1,26 @@
+{
+  "query": "SHOW COLUMNS FROM todos WHERE Field IN ('vistoGestor', 'vistoGestorEm')",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SHOW COLUMNS FROM todos WHERE Field IN ('vistoGestor', 'vistoGestorEm')",
+  "rows": [
+    {
+      "Field": "vistoGestor",
+      "Type": "tinyint(1)",
+      "Null": "NO",
+      "Key": "",
+      "Default": "1",
+      "Extra": ""
+    },
+    {
+      "Field": "vistoGestorEm",
+      "Type": "timestamp",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    }
+  ],
+  "messages": [],
+  "stdout": "Field\tType\tNull\tKey\tDefault\tExtra\nvistoGestor\ttinyint(1)\tNO\t\t1\t\nvistoGestorEm\ttimestamp\tYES\t\tNULL\t\n",
+  "stderr": "",
+  "execution_time_ms": 64
+}
