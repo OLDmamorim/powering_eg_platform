@@ -1,0 +1,64 @@
+{
+  "query": "SELECT id, name, email, role FROM users WHERE role = 'admin' ORDER BY id",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT id, name, email, role FROM users WHERE role = 'admin' ORDER BY id",
+  "rows": [
+    {
+      "id": "1",
+      "name": "Marco Amorim",
+      "email": "mramorim78@gmail.com",
+      "role": "admin"
+    },
+    {
+      "id": "240006",
+      "name": "Mauro Furtado",
+      "email": "mfurtado@expressglass.pt",
+      "role": "admin"
+    },
+    {
+      "id": "7290138",
+      "name": "Admin Teste",
+      "email": "admin@test.com",
+      "role": "admin"
+    },
+    {
+      "id": "7290139",
+      "name": "Admin Email Test",
+      "email": "admin.email@test.com",
+      "role": "admin"
+    },
+    {
+      "id": "7290140",
+      "name": "Admin Comentarios Test",
+      "email": "admin.comentarios@test.com",
+      "role": "admin"
+    },
+    {
+      "id": "7290147",
+      "name": "Admin Teste",
+      "email": "admin-ia-test-1767296676344@test.com",
+      "role": "admin"
+    },
+    {
+      "id": "7290148",
+      "name": "Admin Lojas Test",
+      "email": "admin.lojas@test.com",
+      "role": "admin"
+    },
+    {
+      "id": "7290150",
+      "name": "Admin Reunioes Filtro",
+      "email": "admin-reunioes-filtro@test.com",
+      "role": "admin"
+    },
+    {
+      "id": "7290153",
+      "name": "Admin Resultados Test",
+      "email": "admin-resultados-1767296695918@test.com",
+      "role": "admin"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\temail\trole\n1\tMarco Amorim\tmramorim78@gmail.com\tadmin\n240006\tMauro Furtado\tmfurtado@expressglass.pt\tadmin\n7290138\tAdmin Teste\tadmin@test.com\tadmin\n7290139\tAdmin Email Test\tadmin.email@test.com\tadmin\n7290140\tAdmin Comentarios Test\tadmin.comentarios@test.com\tadmin\n7290147\tAdmin Teste\tadmin-ia-test-1767296676344@test.com\tadmin\n7290148\tAdmin Lojas Test\tadmin.lojas@test.com\tadmin\n7290150\tAdmin Reunioes Filtro\tadmin-reunioes-filtro@test.com\tadmin\n7290153\tAdmin Resultados Test\tadmin-resultados-1767296695918@test.com\tadmin\n",
+  "stderr": "",
+  "execution_time_ms": 681
+}

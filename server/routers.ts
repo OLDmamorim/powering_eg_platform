@@ -3442,56 +3442,46 @@ export const appRouter = router({
         const gestorNome = ocorrencia.gestorNome || ctx.user.name || 'Gestor';
         const temaNome = ocorrencia.temaNome;
         
-        // Truncar descrição e sugestão se necessário para respeitar limite de 20000 caracteres
-        const MAX_CONTENT_LENGTH = 18000; // Deixar margem para HTML template
-        const MAX_FIELD_LENGTH = 8000; // Limite por campo de texto
+        // Obter email do admin real (Mauro Furtado - mfurtado@expressglass.pt)
+        // Excluir Marco Amorim (admin de teste) e outros admins de teste
+        const admins = await db.getAllUsers();
+        const adminReal = admins.find(u => 
+          u.role === 'admin' && 
+          u.email && 
+          !u.email.includes('test') &&
+          u.name?.toLowerCase() !== 'marco amorim'
+        );
         
-        let descricaoTruncada = ocorrencia.descricao;
-        let sugestaoTruncada = ocorrencia.sugestaoAcao;
-        
-        if (descricaoTruncada && descricaoTruncada.length > MAX_FIELD_LENGTH) {
-          descricaoTruncada = descricaoTruncada.substring(0, MAX_FIELD_LENGTH) + '\n\n[... Descrição truncada. Ver ocorrência completa na plataforma ...]';
+        if (!adminReal || !adminReal.email) {
+          throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Admin não encontrado para envio de email' });
         }
         
-        if (sugestaoTruncada && sugestaoTruncada.length > MAX_FIELD_LENGTH) {
-          sugestaoTruncada = sugestaoTruncada.substring(0, MAX_FIELD_LENGTH) + '\n\n[... Sugestão truncada. Ver ocorrência completa na plataforma ...]';
-        }
-        
-        // Gerar HTML do email com conteúdo truncado
-        let htmlContent = gerarHTMLOcorrenciaEstrutural({
+        // Gerar HTML do email
+        const htmlContent = gerarHTMLOcorrenciaEstrutural({
           gestorNome,
           temaNome,
-          descricao: descricaoTruncada,
+          descricao: ocorrencia.descricao,
           abrangencia: ocorrencia.abrangencia,
           zonaAfetada: ocorrencia.zonaAfetada,
           impacto: ocorrencia.impacto,
-          sugestaoAcao: sugestaoTruncada,
+          sugestaoAcao: ocorrencia.sugestaoAcao,
           fotos: ocorrencia.fotos ? JSON.parse(ocorrencia.fotos as string) : [],
           criadoEm: ocorrencia.createdAt,
         });
         
-        // Truncar HTML final se ainda exceder o limite
-        if (htmlContent.length > MAX_CONTENT_LENGTH) {
-          // Encontrar ponto de corte seguro (antes do footer)
-          const footerIndex = htmlContent.lastIndexOf('<div class="footer">');
-          if (footerIndex > 0) {
-            const contentBeforeFooter = htmlContent.substring(0, footerIndex);
-            const footer = htmlContent.substring(footerIndex);
-            const availableSpace = MAX_CONTENT_LENGTH - footer.length - 200; // Margem de segurança
-            
-            if (contentBeforeFooter.length > availableSpace) {
-              htmlContent = contentBeforeFooter.substring(0, availableSpace) + 
-                '</div><div class="section"><div class="section-content" style="background: #fef3c7; color: #92400e; text-align: center;">⚠️ Conteúdo truncado devido ao tamanho. Consulte a ocorrência completa na plataforma.</div></div>' + 
-                footer;
-            }
-          }
+        // Enviar email via SMTP Gmail (egpowering@gmail.com)
+        const assunto = `Ocorrência Estrutural: ${temaNome} - Reportado por ${gestorNome}`;
+        const enviado = await sendEmail({
+          to: adminReal.email,
+          subject: assunto,
+          html: htmlContent,
+        });
+        
+        if (!enviado) {
+          throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Falha ao enviar email' });
         }
         
-        // Enviar email via notifyOwner
-        const titulo = `Ocorrência de ${gestorNome} - ${temaNome}`;
-        await notifyOwner({ title: titulo, content: htmlContent });
-        
-        return { success: true, message: 'Email enviado com sucesso' };
+        return { success: true, message: `Email enviado com sucesso para ${adminReal.name || adminReal.email}` };
       }),
   }),
 });
@@ -3735,6 +3725,7 @@ function gerarHTMLNotificacaoTodo(dados: {
 }
 
 // Função auxiliar para gerar HTML do email de ocorrência estrutural
+// Layout profissional consistente com outros emails da plataforma
 function gerarHTMLOcorrenciaEstrutural(dados: {
   gestorNome: string;
   temaNome: string;
@@ -3770,95 +3761,149 @@ function gerarHTMLOcorrenciaEstrutural(dados: {
     zona: 'Zona',
   };
   
+  // Gerar HTML das fotos com imagens embutidas
   const fotosHtml = dados.fotos.length > 0 
     ? `
-      <div class="section">
-        <div class="section-title">📷 Anexos (${dados.fotos.length} foto(s))</div>
-        <div class="section-content">
-          <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-            ${dados.fotos.map(foto => `<a href="${foto}" target="_blank" style="color: #2563eb;">Ver foto</a>`).join(' | ')}
-          </div>
-        </div>
-      </div>
+      <tr>
+        <td style="padding: 20px 30px;">
+          <table width="100%" cellpadding="0" cellspacing="0" style="background: #ffffff; border-radius: 8px; border: 1px solid #e5e7eb;">
+            <tr>
+              <td style="padding: 15px 20px; border-bottom: 2px solid #dc2626;">
+                <span style="font-size: 16px; font-weight: 600; color: #dc2626;">📷 Anexos (${dados.fotos.length} foto(s))</span>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 20px;">
+                ${dados.fotos.map((foto, i) => `
+                  <a href="${foto}" target="_blank" style="display: inline-block; margin: 5px; padding: 8px 16px; background: #2563eb; color: white; text-decoration: none; border-radius: 6px; font-size: 14px;">Ver Foto ${i + 1}</a>
+                `).join('')}
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
     `
     : '';
   
   return `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="UTF-8">
-      <title>Ocorrência de ${dados.gestorNome} - ${dados.temaNome}</title>
-      <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; max-width: 800px; margin: 0 auto; padding: 20px; }
-        .header { background: linear-gradient(135deg, #dc2626, #b91c1c); color: white; padding: 30px; border-radius: 10px 10px 0 0; text-align: center; }
-        .header h1 { margin: 0; font-size: 24px; }
-        .header p { margin: 10px 0 0; opacity: 0.9; }
-        .content { background: #f9fafb; padding: 30px; border: 1px solid #e5e7eb; }
-        .section { margin-bottom: 25px; }
-        .section-title { font-size: 16px; font-weight: 600; color: #dc2626; margin-bottom: 10px; padding-bottom: 5px; border-bottom: 2px solid #e5e7eb; }
-        .section-content { background: white; padding: 15px; border-radius: 8px; border: 1px solid #e5e7eb; }
-        .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 14px; font-weight: 500; }
-        .info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
-        .info-item { background: #f9fafb; padding: 12px; border-radius: 8px; }
-        .info-label { font-size: 12px; color: #6b7280; margin-bottom: 4px; }
-        .info-value { font-weight: 600; color: #1f2937; }
-        .footer { background: #1f2937; color: white; padding: 20px; border-radius: 0 0 10px 10px; text-align: center; font-size: 12px; }
-        pre { white-space: pre-wrap; word-wrap: break-word; margin: 0; font-family: inherit; }
-      </style>
-    </head>
-    <body>
-      <div class="header">
-        <h1>⚠️ Ocorrência Estrutural</h1>
-        <p>${dados.temaNome}</p>
-      </div>
-      
-      <div class="content">
-        <div class="section">
-          <div class="section-title">📝 Informações Gerais</div>
-          <div class="section-content">
-            <div class="info-grid">
-              <div class="info-item">
-                <div class="info-label">Reportado por</div>
-                <div class="info-value">${dados.gestorNome}</div>
-              </div>
-              <div class="info-item">
-                <div class="info-label">Data</div>
-                <div class="info-value">${dataFormatada}</div>
-              </div>
-              <div class="info-item">
-                <div class="info-label">Abrangência</div>
-                <div class="info-value">${abrangenciaLabels[dados.abrangencia] || dados.abrangencia}${dados.zonaAfetada ? ` - ${dados.zonaAfetada}` : ''}</div>
-              </div>
-              <div class="info-item">
-                <div class="info-label">Impacto</div>
-                <div class="info-value"><span class="badge" style="background: ${impactoStyle.bg}; color: ${impactoStyle.text};">${impactoStyle.label}</span></div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div class="section">
-          <div class="section-title">📄 Descrição</div>
-          <div class="section-content"><pre>${dados.descricao}</pre></div>
-        </div>
-        
-        ${dados.sugestaoAcao ? `
-        <div class="section">
-          <div class="section-title">💡 Sugestão de Ação</div>
-          <div class="section-content"><pre>${dados.sugestaoAcao}</pre></div>
-        </div>
-        ` : ''}
-        
-        ${fotosHtml}
-      </div>
-      
-      <div class="footer">
-        <p>PoweringEG Platform - Ocorrências Estruturais</p>
-        <p>Este email foi gerado automaticamente.</p>
-      </div>
-    </body>
-    </html>
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ocorrência Estrutural - ${dados.temaNome}</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif; background-color: #f3f4f6;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f3f4f6; padding: 20px 0;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="max-width: 600px; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+          
+          <!-- Header com Logo -->
+          <tr>
+            <td style="background: linear-gradient(135deg, #dc2626, #b91c1c); padding: 30px; text-align: center;">
+              <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663088836799/YrkmGCRDVqYgFnZO.png" alt="ExpressGlass" style="max-width: 180px; height: auto; margin-bottom: 15px;" />
+              <h1 style="margin: 0; font-size: 24px; color: #ffffff; font-weight: 700;">⚠️ Ocorrência Estrutural</h1>
+              <p style="margin: 10px 0 0; font-size: 18px; color: rgba(255,255,255,0.9);">${dados.temaNome}</p>
+            </td>
+          </tr>
+          
+          <!-- Informações Gerais -->
+          <tr>
+            <td style="padding: 30px;">
+              <table width="100%" cellpadding="0" cellspacing="0" style="background: #ffffff; border-radius: 8px; border: 1px solid #e5e7eb;">
+                <tr>
+                  <td style="padding: 15px 20px; border-bottom: 2px solid #dc2626;">
+                    <span style="font-size: 16px; font-weight: 600; color: #dc2626;">📝 Informações Gerais</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 20px;">
+                    <table width="100%" cellpadding="0" cellspacing="10">
+                      <tr>
+                        <td width="50%" style="background: #f9fafb; padding: 15px; border-radius: 8px; vertical-align: top;">
+                          <div style="font-size: 12px; color: #6b7280; margin-bottom: 5px;">Reportado por</div>
+                          <div style="font-size: 16px; font-weight: 600; color: #1f2937;">${dados.gestorNome}</div>
+                        </td>
+                        <td width="50%" style="background: #f9fafb; padding: 15px; border-radius: 8px; vertical-align: top;">
+                          <div style="font-size: 12px; color: #6b7280; margin-bottom: 5px;">Data</div>
+                          <div style="font-size: 14px; font-weight: 600; color: #1f2937;">${dataFormatada}</div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width="50%" style="background: #f9fafb; padding: 15px; border-radius: 8px; vertical-align: top;">
+                          <div style="font-size: 12px; color: #6b7280; margin-bottom: 5px;">Abrangência</div>
+                          <div style="font-size: 16px; font-weight: 600; color: #1f2937;">${abrangenciaLabels[dados.abrangencia] || dados.abrangencia}${dados.zonaAfetada ? ` - ${dados.zonaAfetada}` : ''}</div>
+                        </td>
+                        <td width="50%" style="background: #f9fafb; padding: 15px; border-radius: 8px; vertical-align: top;">
+                          <div style="font-size: 12px; color: #6b7280; margin-bottom: 5px;">Impacto</div>
+                          <div style="font-size: 16px; font-weight: 600;">
+                            <span style="display: inline-block; padding: 6px 16px; border-radius: 20px; font-size: 14px; font-weight: 600; background: ${impactoStyle.bg}; color: ${impactoStyle.text};">${impactoStyle.label}</span>
+                          </div>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          
+          <!-- Descrição -->
+          <tr>
+            <td style="padding: 0 30px 20px;">
+              <table width="100%" cellpadding="0" cellspacing="0" style="background: #ffffff; border-radius: 8px; border: 1px solid #e5e7eb;">
+                <tr>
+                  <td style="padding: 15px 20px; border-bottom: 2px solid #dc2626;">
+                    <span style="font-size: 16px; font-weight: 600; color: #dc2626;">📄 Descrição</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 20px;">
+                    <div style="font-size: 14px; line-height: 1.6; color: #374151; white-space: pre-wrap;">${dados.descricao}</div>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          
+          ${dados.sugestaoAcao ? `
+          <!-- Sugestão de Ação -->
+          <tr>
+            <td style="padding: 0 30px 20px;">
+              <table width="100%" cellpadding="0" cellspacing="0" style="background: #ffffff; border-radius: 8px; border: 1px solid #e5e7eb;">
+                <tr>
+                  <td style="padding: 15px 20px; border-bottom: 2px solid #10b981;">
+                    <span style="font-size: 16px; font-weight: 600; color: #10b981;">💡 Sugestão de Ação</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 20px; background: #f0fdf4;">
+                    <div style="font-size: 14px; line-height: 1.6; color: #166534; white-space: pre-wrap;">${dados.sugestaoAcao}</div>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          ` : ''}
+          
+          ${fotosHtml}
+          
+          <!-- Footer -->
+          <tr>
+            <td style="background: #1f2937; padding: 25px; text-align: center;">
+              <p style="margin: 0 0 5px; font-size: 14px; color: #ffffff; font-weight: 600;">PoweringEG Platform 2.0</p>
+              <p style="margin: 0; font-size: 12px; color: #9ca3af;">Ocorrências Estruturais</p>
+              <p style="margin: 10px 0 0; font-size: 11px; color: #6b7280;">Este email foi enviado automaticamente. Por favor não responda.</p>
+            </td>
+          </tr>
+          
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
   `;
 }
 

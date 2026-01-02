@@ -1754,3 +1754,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## Bug Fix - Email de Ocorrências v6.9
 - [x] Corrigir erro 'Notification content must be at most 20000 characters' ao enviar email de ocorrências
 - [x] Truncar conteúdo do email quando exceder o limite
+
+- [x] Corrigir email de ocorrências para usar SMTP Gmail (egpowering@gmail.com)
+- [x] Corrigir destinatário para admin real (Mauro Furtado, não Marco Amorim Admin)
+- [x] Corrigir template HTML para renderizar corretamente (não mostrar código)
+- [x] Aplicar layout profissional consistente com outros emails
