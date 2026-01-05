@@ -1997,3 +1997,14 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [ ] O aiService.ts quando recebe gestorId busca relatórios do gestor, mas busca TODOS os dados de ranking sem filtrar
 - [ ] Corrigir para passar lojasIds do gestor ao backend
 
+- [ ] Uniformizar filtros temporais em toda a aplicação (mês atual, mês anterior, trimestre anterior, semestre anterior, ano anterior)
+
+## Uniformização de Filtros Temporais v6.2
+- [x] Uniformizar filtros temporais em toda a aplicação
+- [x] HistoricoPontos.tsx: Alterar de "7d, 30d, 90d, all" para "Mês Atual, Mês Anterior, Trimestre Anterior, Semestre Anterior, Ano Anterior"
+- [x] RelatoriosIA.tsx: Alterar de "diário, semanal, mensal..." para "Mês Atual, Mês Anterior, Trimestre Anterior, Semestre Anterior, Ano Anterior"
+- [x] ResumosGlobais.tsx: Alterar de "mensal, trimestral, semestral, anual" para "Mês Atual, Mês Anterior, Trimestre Anterior, Semestre Anterior, Ano Anterior"
+- [x] Dashboard.tsx: Atualizar lembretes de resumos globais para usar novos nomes de períodos
+- [x] Backend: Atualizar tipos de período em routers.ts, db.ts, resumoGlobalService.ts
+- [x] Schema: Atualizar enum de período na tabela resumos_globais
+- [x] Migração: Atualizar dados existentes na base de dados

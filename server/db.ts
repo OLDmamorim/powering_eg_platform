@@ -2684,7 +2684,7 @@ export async function getResumoGlobalById(id: number): Promise<ResumoGlobal | nu
 /**
  * Obter último resumo global de um período específico
  */
-export async function getUltimoResumoGlobalPorPeriodo(periodo: 'mensal' | 'trimestral' | 'semestral' | 'anual'): Promise<ResumoGlobal | null> {
+export async function getUltimoResumoGlobalPorPeriodo(periodo: 'mes_atual' | 'mes_anterior' | 'trimestre_anterior' | 'semestre_anterior' | 'ano_anterior'): Promise<ResumoGlobal | null> {
   const db = await getDb();
   if (!db) return null;
   

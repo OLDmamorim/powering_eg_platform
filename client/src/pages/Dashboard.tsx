@@ -111,34 +111,34 @@ function SimpleLineChart({ data, title }: { data: { label: string; value: number
 function LembretesResumosGlobais({ isAdmin, isGestor, setLocation }: { isAdmin: boolean; isGestor: boolean; setLocation: (path: string) => void }) {
   // Buscar últimos resumos de cada período
   const { data: ultimoMensal } = trpc.resumosGlobais.getUltimoPorPeriodo.useQuery(
-    { periodo: 'mensal' },
+    { periodo: 'mes_anterior' },
     { enabled: isAdmin || isGestor }
   );
   const { data: ultimoTrimestral } = trpc.resumosGlobais.getUltimoPorPeriodo.useQuery(
-    { periodo: 'trimestral' },
+    { periodo: 'trimestre_anterior' },
     { enabled: isAdmin || isGestor }
   );
   const { data: ultimoSemestral } = trpc.resumosGlobais.getUltimoPorPeriodo.useQuery(
-    { periodo: 'semestral' },
+    { periodo: 'semestre_anterior' },
     { enabled: isAdmin || isGestor }
   );
   const { data: ultimoAnual } = trpc.resumosGlobais.getUltimoPorPeriodo.useQuery(
-    { periodo: 'anual' },
+    { periodo: 'ano_anterior' },
     { enabled: isAdmin || isGestor }
   );
 
   if (!isAdmin && !isGestor) return null;
 
   const agora = new Date();
-  const lembretes: Array<{periodo: 'mensal' | 'trimestral' | 'semestral' | 'anual'; mensagem: string; cor: string; ultimoResumo: any}> = [];
+  const lembretes: Array<{periodo: 'mes_anterior' | 'trimestre_anterior' | 'semestre_anterior' | 'ano_anterior'; mensagem: string; cor: string; ultimoResumo: any}> = [];
   
   // Mensal - primeiros 5 dias do mês
   if (agora.getDate() <= 5) {
     const inicioPeriodoAnterior = new Date(agora.getFullYear(), agora.getMonth() - 1, 1);
     if (!ultimoMensal || new Date(ultimoMensal.dataInicio) < inicioPeriodoAnterior) {
       lembretes.push({
-        periodo: 'mensal',
-        mensagem: 'Está na altura de gerar o Resumo Global Mensal',
+        periodo: 'mes_anterior',
+        mensagem: 'Está na altura de gerar o Resumo Global do Mês Anterior',
         cor: 'blue',
         ultimoResumo: ultimoMensal
       });
@@ -153,8 +153,8 @@ function LembretesResumosGlobais({ isAdmin, isGestor, setLocation }: { isAdmin: 
     const inicioPeriodoAnterior = new Date(agora.getFullYear(), trimestreAnterior, 1);
     if (!ultimoTrimestral || new Date(ultimoTrimestral.dataInicio) < inicioPeriodoAnterior) {
       lembretes.push({
-        periodo: 'trimestral',
-        mensagem: 'Está na altura de gerar o Resumo Global Trimestral',
+        periodo: 'trimestre_anterior',
+        mensagem: 'Está na altura de gerar o Resumo Global do Trimestre Anterior',
         cor: 'purple',
         ultimoResumo: ultimoTrimestral
       });
@@ -168,8 +168,8 @@ function LembretesResumosGlobais({ isAdmin, isGestor, setLocation }: { isAdmin: 
     const inicioPeriodoAnterior = new Date(agora.getFullYear(), semestreAnterior, 1);
     if (!ultimoSemestral || new Date(ultimoSemestral.dataInicio) < inicioPeriodoAnterior) {
       lembretes.push({
-        periodo: 'semestral',
-        mensagem: 'Está na altura de gerar o Resumo Global Semestral',
+        periodo: 'semestre_anterior',
+        mensagem: 'Está na altura de gerar o Resumo Global do Semestre Anterior',
         cor: 'emerald',
         ultimoResumo: ultimoSemestral
       });
@@ -181,8 +181,8 @@ function LembretesResumosGlobais({ isAdmin, isGestor, setLocation }: { isAdmin: 
     const inicioPeriodoAnterior = new Date(agora.getFullYear() - 1, 0, 1);
     if (!ultimoAnual || new Date(ultimoAnual.dataInicio) < inicioPeriodoAnterior) {
       lembretes.push({
-        periodo: 'anual',
-        mensagem: 'Está na altura de gerar o Resumo Global Anual',
+        periodo: 'ano_anterior',
+        mensagem: 'Está na altura de gerar o Resumo Global do Ano Anterior',
         cor: 'amber',
         ultimoResumo: ultimoAnual
       });
@@ -196,7 +196,7 @@ function LembretesResumosGlobais({ isAdmin, isGestor, setLocation }: { isAdmin: 
       {lembretes.map((lembrete, index) => (
         <Alert key={index} className={`border-${lembrete.cor}-500 bg-${lembrete.cor}-50 text-${lembrete.cor}-900 dark:bg-${lembrete.cor}-950/30 dark:text-${lembrete.cor}-200`}>
           <Calendar className="h-4 w-4" />
-          <AlertTitle>Lembrete: Resumo Global {lembrete.periodo.charAt(0).toUpperCase() + lembrete.periodo.slice(1)}</AlertTitle>
+          <AlertTitle>Lembrete: Resumo Global {lembrete.periodo === 'mes_anterior' ? 'Mês Anterior' : lembrete.periodo === 'trimestre_anterior' ? 'Trimestre Anterior' : lembrete.periodo === 'semestre_anterior' ? 'Semestre Anterior' : 'Ano Anterior'}</AlertTitle>
           <AlertDescription className="flex items-center justify-between">
             <span>{lembrete.mensagem}</span>
             <Button 

@@ -14,7 +14,7 @@ import { Line, Bar } from 'react-chartjs-2';
 // Registar componentes do Chart.js
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend, Filler);
 
-type Periodo = 'mes_anterior' | 'mensal' | 'trimestral' | 'semestral' | 'anual';
+type Periodo = 'mes_atual' | 'mes_anterior' | 'trimestre_anterior' | 'semestre_anterior' | 'ano_anterior';
 
 interface ResumoData {
   titulo: string;
@@ -30,7 +30,7 @@ interface ResumoData {
 }
 
 export default function ResumosGlobais() {
-  const [periodo, setPeriodo] = useState<Periodo>('mensal');
+  const [periodo, setPeriodo] = useState<Periodo>('mes_atual');
   const [resumoGerado, setResumoGerado] = useState<ResumoData | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -61,25 +61,32 @@ export default function ResumosGlobais() {
     let dataFim: Date = agora;
 
     switch (periodo) {
+      case 'mes_atual':
+        dataInicio = new Date(agora.getFullYear(), agora.getMonth(), 1);
+        dataFim = agora;
+        break;
       case 'mes_anterior':
-        // Mês anterior: do dia 1 ao último dia do mês passado
         dataInicio = new Date(agora.getFullYear(), agora.getMonth() - 1, 1);
         dataFim = new Date(agora.getFullYear(), agora.getMonth(), 0, 23, 59, 59);
         break;
-      case 'mensal':
-        dataInicio = new Date(agora.getFullYear(), agora.getMonth(), 1);
+      case 'trimestre_anterior':
+        const trimestreAtual = Math.floor(agora.getMonth() / 3);
+        dataInicio = new Date(agora.getFullYear(), (trimestreAtual - 1) * 3, 1);
+        dataFim = new Date(agora.getFullYear(), trimestreAtual * 3, 0, 23, 59, 59);
         break;
-      case 'trimestral':
-        const mesAtual = agora.getMonth();
-        const inicioTrimestre = Math.floor(mesAtual / 3) * 3;
-        dataInicio = new Date(agora.getFullYear(), inicioTrimestre, 1);
+      case 'semestre_anterior':
+        const semestreAtual = agora.getMonth() < 6 ? 0 : 1;
+        if (semestreAtual === 0) {
+          dataInicio = new Date(agora.getFullYear() - 1, 6, 1);
+          dataFim = new Date(agora.getFullYear() - 1, 11, 31, 23, 59, 59);
+        } else {
+          dataInicio = new Date(agora.getFullYear(), 0, 1);
+          dataFim = new Date(agora.getFullYear(), 5, 30, 23, 59, 59);
+        }
         break;
-      case 'semestral':
-        const inicioSemestre = agora.getMonth() < 6 ? 0 : 6;
-        dataInicio = new Date(agora.getFullYear(), inicioSemestre, 1);
-        break;
-      case 'anual':
-        dataInicio = new Date(agora.getFullYear(), 0, 1);
+      case 'ano_anterior':
+        dataInicio = new Date(agora.getFullYear() - 1, 0, 1);
+        dataFim = new Date(agora.getFullYear() - 1, 11, 31, 23, 59, 59);
         break;
     }
 
@@ -310,9 +317,9 @@ export default function ResumosGlobais() {
     yPosition += 15;
     
     // Gerar dados simulados de evolução baseados no período
-    const meses = periodo === 'mensal' ? ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4'] :
-                  periodo === 'trimestral' ? ['Mês 1', 'Mês 2', 'Mês 3'] :
-                  periodo === 'semestral' ? ['Mês 1', 'Mês 2', 'Mês 3', 'Mês 4', 'Mês 5', 'Mês 6'] :
+    const meses = periodo === 'mes_atual' || periodo === 'mes_anterior' ? ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4'] :
+                  periodo === 'trimestre_anterior' ? ['Mês 1', 'Mês 2', 'Mês 3'] :
+                  periodo === 'semestre_anterior' ? ['Mês 1', 'Mês 2', 'Mês 3', 'Mês 4', 'Mês 5', 'Mês 6'] :
                   ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
     
     // Desenhar gráfico de barras simples para Taxa de Resolução
@@ -452,11 +459,11 @@ export default function ResumosGlobais() {
 
   const getPeriodoLabel = (p: Periodo) => {
     const labels: Record<Periodo, string> = {
+      mes_atual: 'Mês Atual',
       mes_anterior: 'Mês Anterior',
-      mensal: 'Mensal',
-      trimestral: 'Trimestral',
-      semestral: 'Semestral',
-      anual: 'Anual',
+      trimestre_anterior: 'Trimestre Anterior',
+      semestre_anterior: 'Semestre Anterior',
+      ano_anterior: 'Ano Anterior',
     };
     return labels[p];
   };
@@ -500,11 +507,11 @@ export default function ResumosGlobais() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="mes_atual">Mês Atual</SelectItem>
                     <SelectItem value="mes_anterior">Mês Anterior</SelectItem>
-                    <SelectItem value="mensal">Mensal (mês atual)</SelectItem>
-                    <SelectItem value="trimestral">Trimestral (trimestre atual)</SelectItem>
-                    <SelectItem value="semestral">Semestral (semestre atual)</SelectItem>
-                    <SelectItem value="anual">Anual (ano atual)</SelectItem>
+                    <SelectItem value="trimestre_anterior">Trimestre Anterior</SelectItem>
+                    <SelectItem value="semestre_anterior">Semestre Anterior</SelectItem>
+                    <SelectItem value="ano_anterior">Ano Anterior</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

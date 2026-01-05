@@ -1,0 +1,22 @@
+{
+  "query": "SELECT DISTINCT periodo FROM resumos_globais",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT DISTINCT periodo FROM resumos_globais",
+  "rows": [
+    {
+      "periodo": "mes_anterior"
+    },
+    {
+      "periodo": "semestre_anterior"
+    },
+    {
+      "periodo": "ano_anterior"
+    },
+    {
+      "periodo": "trimestre_anterior"
+    }
+  ],
+  "messages": [],
+  "stdout": "periodo\nmes_anterior\nsemestre_anterior\nano_anterior\ntrimestre_anterior\n",
+  "stderr": "",
+  "execution_time_ms": 53
+}

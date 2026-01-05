@@ -1,0 +1,62 @@
+{
+  "query": "SELECT id, periodo FROM resumos_globais;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT id, periodo FROM resumos_globais;",
+  "rows": [
+    {
+      "id": "1",
+      "periodo": "mes_anterior"
+    },
+    {
+      "id": "2",
+      "periodo": "trimestral"
+    },
+    {
+      "id": "3",
+      "periodo": "mes_anterior"
+    },
+    {
+      "id": "30001",
+      "periodo": "mes_anterior"
+    },
+    {
+      "id": "30002",
+      "periodo": "mes_anterior"
+    },
+    {
+      "id": "60001",
+      "periodo": "mes_anterior"
+    },
+    {
+      "id": "60002",
+      "periodo": "anual"
+    },
+    {
+      "id": "60003",
+      "periodo": "semestral"
+    },
+    {
+      "id": "60004",
+      "periodo": "mes_anterior"
+    },
+    {
+      "id": "60005",
+      "periodo": "mes_anterior"
+    },
+    {
+      "id": "60006",
+      "periodo": "trimestral"
+    },
+    {
+      "id": "90001",
+      "periodo": "trimestral"
+    },
+    {
+      "id": "120001",
+      "periodo": "mes_anterior"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tperiodo\n1\tmes_anterior\n2\ttrimestral\n3\tmes_anterior\n30001\tmes_anterior\n30002\tmes_anterior\n60001\tmes_anterior\n60002\tanual\n60003\tsemestral\n60004\tmes_anterior\n60005\tmes_anterior\n60006\ttrimestral\n90001\ttrimestral\n120001\tmes_anterior\n",
+  "stderr": "",
+  "execution_time_ms": 66
+}

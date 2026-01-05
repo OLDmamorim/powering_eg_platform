@@ -9,11 +9,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { trpc } from "@/lib/trpc";
 import { TrendingUp, TrendingDown, Calendar, User, Store, AlertTriangle, CheckCircle, XCircle, GitCompare, Filter } from "lucide-react";
 
-type PeriodoFiltro = "7d" | "30d" | "90d" | "all";
+type PeriodoFiltro = "mes_atual" | "mes_anterior" | "trimestre_anterior" | "semestre_anterior" | "ano_anterior";
 
 export default function HistoricoPontos() {
   const [selectedLojaId, setSelectedLojaId] = useState<string>("all");
-  const [periodoFiltro, setPeriodoFiltro] = useState<PeriodoFiltro>("all");
+  const [periodoFiltro, setPeriodoFiltro] = useState<PeriodoFiltro>("mes_atual");
   const [compareLoja1, setCompareLoja1] = useState<string>("");
   const [compareLoja2, setCompareLoja2] = useState<string>("");
   const [activeTab, setActiveTab] = useState<string>("historico");
@@ -22,13 +22,46 @@ export default function HistoricoPontos() {
   const { data: historico, isLoading: historicoLoading } = trpc.historicoPontos.all.useQuery();
   const { data: alertas, isLoading: alertasLoading } = trpc.alertas.lojasComAlertas.useQuery({});
   
-  // Calcular data limite baseada no período
-  const dataLimite = useMemo(() => {
-    if (periodoFiltro === "all") return null;
+  // Calcular datas de início e fim baseadas no período
+  const { dataInicio, dataFim } = useMemo(() => {
     const hoje = new Date();
-    const dias = periodoFiltro === "7d" ? 7 : periodoFiltro === "30d" ? 30 : 90;
-    hoje.setDate(hoje.getDate() - dias);
-    return hoje;
+    let inicio: Date;
+    let fim: Date;
+    
+    switch (periodoFiltro) {
+      case "mes_atual":
+        inicio = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+        fim = hoje;
+        break;
+      case "mes_anterior":
+        inicio = new Date(hoje.getFullYear(), hoje.getMonth() - 1, 1);
+        fim = new Date(hoje.getFullYear(), hoje.getMonth(), 0, 23, 59, 59);
+        break;
+      case "trimestre_anterior":
+        const trimestreAtual = Math.floor(hoje.getMonth() / 3);
+        inicio = new Date(hoje.getFullYear(), (trimestreAtual - 1) * 3, 1);
+        fim = new Date(hoje.getFullYear(), trimestreAtual * 3, 0, 23, 59, 59);
+        break;
+      case "semestre_anterior":
+        const semestreAtual = hoje.getMonth() < 6 ? 0 : 1;
+        if (semestreAtual === 0) {
+          inicio = new Date(hoje.getFullYear() - 1, 6, 1);
+          fim = new Date(hoje.getFullYear() - 1, 11, 31, 23, 59, 59);
+        } else {
+          inicio = new Date(hoje.getFullYear(), 0, 1);
+          fim = new Date(hoje.getFullYear(), 5, 30, 23, 59, 59);
+        }
+        break;
+      case "ano_anterior":
+        inicio = new Date(hoje.getFullYear() - 1, 0, 1);
+        fim = new Date(hoje.getFullYear() - 1, 11, 31, 23, 59, 59);
+        break;
+      default:
+        inicio = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+        fim = hoje;
+    }
+    
+    return { dataInicio: inicio, dataFim: fim };
   }, [periodoFiltro]);
   
   // Filtrar histórico por loja e período
@@ -42,21 +75,23 @@ export default function HistoricoPontos() {
     }
     
     // Filtrar por período
-    if (dataLimite) {
-      filtered = filtered.filter(h => new Date(h.dataVisita) >= dataLimite);
-    }
+    filtered = filtered.filter(h => {
+      const dataVisita = new Date(h.dataVisita);
+      return dataVisita >= dataInicio && dataVisita <= dataFim;
+    });
     
     return filtered;
-  }, [historico, selectedLojaId, dataLimite]);
+  }, [historico, selectedLojaId, dataInicio, dataFim]);
   
   // Agrupar por loja para estatísticas
   const estatisticasPorLoja = useMemo(() => {
     if (!historico) return {};
     
     // Aplicar filtro de período às estatísticas também
-    const historicoParaStats = dataLimite 
-      ? historico.filter(h => new Date(h.dataVisita) >= dataLimite)
-      : historico;
+    const historicoParaStats = historico.filter(h => {
+      const dataVisita = new Date(h.dataVisita);
+      return dataVisita >= dataInicio && dataVisita <= dataFim;
+    });
     
     const stats: Record<number, {
       lojaNome: string;
@@ -88,15 +123,16 @@ export default function HistoricoPontos() {
     });
     
     return stats;
-  }, [historico, dataLimite]);
+  }, [historico, dataInicio, dataFim]);
   
   // Dados para comparação de lojas
   const dadosComparacao = useMemo(() => {
     if (!historico || !compareLoja1 || !compareLoja2) return null;
     
-    const historicoParaComparar = dataLimite 
-      ? historico.filter(h => new Date(h.dataVisita) >= dataLimite)
-      : historico;
+    const historicoParaComparar = historico.filter(h => {
+      const dataVisita = new Date(h.dataVisita);
+      return dataVisita >= dataInicio && dataVisita <= dataFim;
+    });
     
     const loja1Data = historicoParaComparar.filter(h => h.lojaId === parseInt(compareLoja1));
     const loja2Data = historicoParaComparar.filter(h => h.lojaId === parseInt(compareLoja2));
@@ -119,7 +155,7 @@ export default function HistoricoPontos() {
         ...calcStats(loja2Data)
       }
     };
-  }, [historico, compareLoja1, compareLoja2, lojas, dataLimite]);
+  }, [historico, compareLoja1, compareLoja2, lojas, dataInicio, dataFim]);
   
   const formatDate = (date: Date | string) => {
     return new Date(date).toLocaleDateString('pt-PT', {
@@ -226,10 +262,11 @@ export default function HistoricoPontos() {
                         <SelectValue placeholder="Selecionar período" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="7d">Últimos 7 dias</SelectItem>
-                        <SelectItem value="30d">Últimos 30 dias</SelectItem>
-                        <SelectItem value="90d">Últimos 90 dias</SelectItem>
-                        <SelectItem value="all">Todo o período</SelectItem>
+                        <SelectItem value="mes_atual">Mês Atual</SelectItem>
+                        <SelectItem value="mes_anterior">Mês Anterior</SelectItem>
+                        <SelectItem value="trimestre_anterior">Trimestre Anterior</SelectItem>
+                        <SelectItem value="semestre_anterior">Semestre Anterior</SelectItem>
+                        <SelectItem value="ano_anterior">Ano Anterior</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -311,7 +348,7 @@ export default function HistoricoPontos() {
                 </CardTitle>
                 <CardDescription>
                   {selectedLojaId === "all" 
-                    ? `Todas as visitas ${periodoFiltro !== "all" ? `(${periodoFiltro === "7d" ? "últimos 7 dias" : periodoFiltro === "30d" ? "últimos 30 dias" : "últimos 90 dias"})` : ""}` 
+                    ? `Todas as visitas (${periodoFiltro === "mes_atual" ? "mês atual" : periodoFiltro === "mes_anterior" ? "mês anterior" : periodoFiltro === "trimestre_anterior" ? "trimestre anterior" : periodoFiltro === "semestre_anterior" ? "semestre anterior" : "ano anterior"})` 
                     : `Visitas da loja selecionada`}
                 </CardDescription>
               </CardHeader>
@@ -451,10 +488,11 @@ export default function HistoricoPontos() {
                         <SelectValue placeholder="Período" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="7d">Últimos 7 dias</SelectItem>
-                        <SelectItem value="30d">Últimos 30 dias</SelectItem>
-                        <SelectItem value="90d">Últimos 90 dias</SelectItem>
-                        <SelectItem value="all">Todo o período</SelectItem>
+                        <SelectItem value="mes_atual">Mês Atual</SelectItem>
+                        <SelectItem value="mes_anterior">Mês Anterior</SelectItem>
+                        <SelectItem value="trimestre_anterior">Trimestre Anterior</SelectItem>
+                        <SelectItem value="semestre_anterior">Semestre Anterior</SelectItem>
+                        <SelectItem value="ano_anterior">Ano Anterior</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>

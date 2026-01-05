@@ -320,7 +320,7 @@ export type InsertRelatorioIA = typeof relatoriosIA.$inferInsert;
  */
 export const resumosGlobais = mysqlTable("resumos_globais", {
   id: int("id").autoincrement().primaryKey(),
-  periodo: mysqlEnum("periodo", ["mes_anterior", "mensal", "trimestral", "semestral", "anual"]).notNull(),
+  periodo: mysqlEnum("periodo", ["mes_atual", "mes_anterior", "trimestre_anterior", "semestre_anterior", "ano_anterior", "mensal", "trimestral", "semestral", "anual"]).notNull(),
   dataInicio: timestamp("dataInicio").notNull(), // Início do período analisado
   dataFim: timestamp("dataFim").notNull(), // Fim do período analisado
   conteudo: text("conteudo").notNull(), // JSON stringificado da análise IA

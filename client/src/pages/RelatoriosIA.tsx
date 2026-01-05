@@ -41,8 +41,8 @@ import { toast } from "sonner";
 
 export default function RelatoriosIA() {
   const [periodo, setPeriodo] = useState<
-    "diario" | "semanal" | "mensal" | "mes_anterior" | "trimestral" | "semestral" | "anual"
-  >("semanal");
+    "mes_atual" | "mes_anterior" | "trimestre_anterior" | "semestre_anterior" | "ano_anterior"
+  >("mes_atual");
   const [exportando, setExportando] = useState(false);
   const relatorioRef = useRef<HTMLDivElement>(null);
 
@@ -68,13 +68,11 @@ export default function RelatoriosIA() {
     try {
       // Criar conteúdo HTML para o PDF
       const periodoTexto = {
-        diario: "Diário",
-        semanal: "Semanal",
-        mensal: "Mensal (mês atual)",
+        mes_atual: "Mês Atual",
         mes_anterior: "Mês Anterior",
-        trimestral: "Trimestral",
-        semestral: "Semestral",
-        anual: "Anual"
+        trimestre_anterior: "Trimestre Anterior",
+        semestre_anterior: "Semestre Anterior",
+        ano_anterior: "Ano Anterior"
       }[periodo];
 
       const dataAtual = new Date().toLocaleDateString('pt-PT', {
@@ -414,13 +412,11 @@ export default function RelatoriosIA() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="diario">Diário</SelectItem>
-                    <SelectItem value="semanal">Semanal</SelectItem>
-                    <SelectItem value="mensal">Mensal (mês atual)</SelectItem>
+                    <SelectItem value="mes_atual">Mês Atual</SelectItem>
                     <SelectItem value="mes_anterior">Mês Anterior</SelectItem>
-                    <SelectItem value="trimestral">Trimestral</SelectItem>
-                    <SelectItem value="semestral">Semestral</SelectItem>
-                    <SelectItem value="anual">Anual</SelectItem>
+                    <SelectItem value="trimestre_anterior">Trimestre Anterior</SelectItem>
+                    <SelectItem value="semestre_anterior">Semestre Anterior</SelectItem>
+                    <SelectItem value="ano_anterior">Ano Anterior</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

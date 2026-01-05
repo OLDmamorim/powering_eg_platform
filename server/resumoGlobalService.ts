@@ -22,7 +22,7 @@ interface ResumoGlobal {
  * Gerar resumo global com IA para um período específico (NOVA VERSÃO)
  */
 export async function gerarResumoGlobalComIA(
-  periodo: 'mes_anterior' | 'mensal' | 'trimestral' | 'semestral' | 'anual',
+  periodo: 'mes_atual' | 'mes_anterior' | 'trimestre_anterior' | 'semestre_anterior' | 'ano_anterior',
   dataInicio: Date,
   dataFim: Date,
   userId: number
@@ -85,11 +85,11 @@ export async function gerarResumoGlobalComIA(
   
   // 4. Preparar prompt para IA
   const periodoTextoMap: Record<typeof periodo, string> = {
+    mes_atual: 'do mês atual',
     mes_anterior: 'do mês anterior',
-    mensal: 'mensal',
-    trimestral: 'trimestral (3 meses)',
-    semestral: 'semestral (6 meses)',
-    anual: 'anual (12 meses)',
+    trimestre_anterior: 'do trimestre anterior (3 meses)',
+    semestre_anterior: 'do semestre anterior (6 meses)',
+    ano_anterior: 'do ano anterior (12 meses)',
   };
   const periodoTexto = periodoTextoMap[periodo];
   

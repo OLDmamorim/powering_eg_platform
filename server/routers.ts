@@ -1679,7 +1679,7 @@ export const appRouter = router({
   resumosGlobais: router({
     gerar: protectedProcedure
       .input(z.object({
-        periodo: z.enum(['mes_anterior', 'mensal', 'trimestral', 'semestral', 'anual']),
+        periodo: z.enum(['mes_atual', 'mes_anterior', 'trimestre_anterior', 'semestre_anterior', 'ano_anterior']),
         dataInicio: z.date(),
         dataFim: z.date(),
       }))
@@ -1710,7 +1710,7 @@ export const appRouter = router({
       }),
     
     getUltimoPorPeriodo: protectedProcedure
-      .input(z.object({ periodo: z.enum(['mensal', 'trimestral', 'semestral', 'anual']) }))
+      .input(z.object({ periodo: z.enum(['mes_atual', 'mes_anterior', 'trimestre_anterior', 'semestre_anterior', 'ano_anterior']) }))
       .query(async ({ input }) => {
         return await db.getUltimoResumoGlobalPorPeriodo(input.periodo);
       }),
