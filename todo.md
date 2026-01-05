@@ -1869,3 +1869,6 @@ NOTA: Sistema de email requer configuração externa no deployment
 
 ## Bug - Evolução Histórica
 - [x] Corrigir valores de Total Serviços e Total Objetivos que mostram concatenação em vez de soma
+
+## Bug - Taxa de Reparação no Dashboard do Gestor
+- [x] Corrigir Taxa de Reparação que mostra 0.2% em vez do valor correto no card "Resultados Dezembro 2025"

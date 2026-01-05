@@ -841,7 +841,7 @@ export default function Dashboard() {
                       </div>
                       <div className="bg-white/60 dark:bg-white/10 rounded-lg p-3">
                         <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-                          {resultadosMesAnteriorGestor.mediaTaxaReparacao ? `${resultadosMesAnteriorGestor.mediaTaxaReparacao.toFixed(1)}%` : '—'}
+                          {resultadosMesAnteriorGestor.mediaTaxaReparacao ? `${(resultadosMesAnteriorGestor.mediaTaxaReparacao * 100).toFixed(1)}%` : '—'}
                         </div>
                         <div className="text-xs text-muted-foreground">Taxa Reparação</div>
                       </div>
@@ -850,7 +850,7 @@ export default function Dashboard() {
                       <div className="bg-white/60 dark:bg-white/10 rounded-lg p-3">
                         <div className={`text-xl font-bold ${(resultadosMesAnteriorGestor.mediaDesvioPercentual ?? 0) >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                           {resultadosMesAnteriorGestor.mediaDesvioPercentual !== undefined && resultadosMesAnteriorGestor.mediaDesvioPercentual !== null
-                            ? `${resultadosMesAnteriorGestor.mediaDesvioPercentual >= 0 ? '+' : ''}${resultadosMesAnteriorGestor.mediaDesvioPercentual.toFixed(1)}%`
+                            ? `${resultadosMesAnteriorGestor.mediaDesvioPercentual >= 0 ? '+' : ''}${(resultadosMesAnteriorGestor.mediaDesvioPercentual * 100).toFixed(1)}%`
                             : '—'}
                         </div>
                         <div className="text-xs text-muted-foreground">Desvio vs Objetivo</div>
