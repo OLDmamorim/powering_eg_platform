@@ -22,7 +22,7 @@ interface ResumoGlobal {
  * Gerar resumo global com IA para um período específico (NOVA VERSÃO)
  */
 export async function gerarResumoGlobalComIA(
-  periodo: 'mensal' | 'trimestral' | 'semestral' | 'anual',
+  periodo: 'mes_anterior' | 'mensal' | 'trimestral' | 'semestral' | 'anual',
   dataInicio: Date,
   dataFim: Date,
   userId: number
@@ -84,12 +84,14 @@ export async function gerarResumoGlobalComIA(
     });
   
   // 4. Preparar prompt para IA
-  const periodoTexto = {
+  const periodoTextoMap: Record<typeof periodo, string> = {
+    mes_anterior: 'do mês anterior',
     mensal: 'mensal',
     trimestral: 'trimestral (3 meses)',
     semestral: 'semestral (6 meses)',
     anual: 'anual (12 meses)',
-  }[periodo];
+  };
+  const periodoTexto = periodoTextoMap[periodo];
   
   const prompt = `Você é um analista de negócios especializado em redes de retalho. Analise os dados abaixo e gere um resumo executivo ${periodoTexto} completo e profissional.
 

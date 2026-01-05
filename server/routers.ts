@@ -929,7 +929,7 @@ export const appRouter = router({
   relatoriosIA: router({    
     gerar: gestorProcedure
       .input(z.object({
-        periodo: z.enum(["diario", "semanal", "mensal", "trimestral"])
+        periodo: z.enum(["diario", "semanal", "mensal", "mes_anterior", "trimestral", "semestral", "anual"])
       }))
       .query(async ({ input, ctx }) => {
         const gestorId = ctx.user.role === "admin" ? undefined : ctx.gestor?.id;
@@ -1571,7 +1571,7 @@ export const appRouter = router({
   resumosGlobais: router({
     gerar: protectedProcedure
       .input(z.object({
-        periodo: z.enum(['mensal', 'trimestral', 'semestral', 'anual']),
+        periodo: z.enum(['mes_anterior', 'mensal', 'trimestral', 'semestral', 'anual']),
         dataInicio: z.date(),
         dataFim: z.date(),
       }))

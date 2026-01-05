@@ -14,7 +14,7 @@ import { Line, Bar } from 'react-chartjs-2';
 // Registar componentes do Chart.js
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend, Filler);
 
-type Periodo = 'mensal' | 'trimestral' | 'semestral' | 'anual';
+type Periodo = 'mes_anterior' | 'mensal' | 'trimestral' | 'semestral' | 'anual';
 
 interface ResumoData {
   titulo: string;
@@ -61,6 +61,11 @@ export default function ResumosGlobais() {
     let dataFim: Date = agora;
 
     switch (periodo) {
+      case 'mes_anterior':
+        // Mês anterior: do dia 1 ao último dia do mês passado
+        dataInicio = new Date(agora.getFullYear(), agora.getMonth() - 1, 1);
+        dataFim = new Date(agora.getFullYear(), agora.getMonth(), 0, 23, 59, 59);
+        break;
       case 'mensal':
         dataInicio = new Date(agora.getFullYear(), agora.getMonth(), 1);
         break;
@@ -446,7 +451,8 @@ export default function ResumosGlobais() {
   };
 
   const getPeriodoLabel = (p: Periodo) => {
-    const labels = {
+    const labels: Record<Periodo, string> = {
+      mes_anterior: 'Mês Anterior',
       mensal: 'Mensal',
       trimestral: 'Trimestral',
       semestral: 'Semestral',
@@ -494,6 +500,7 @@ export default function ResumosGlobais() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="mes_anterior">Mês Anterior</SelectItem>
                     <SelectItem value="mensal">Mensal (mês atual)</SelectItem>
                     <SelectItem value="trimestral">Trimestral (trimestre atual)</SelectItem>
                     <SelectItem value="semestral">Semestral (semestre atual)</SelectItem>

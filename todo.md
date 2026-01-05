@@ -1823,3 +1823,37 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionado Dialog para escrever observação
 - [x] Adicionada visualização da observação da loja em tarefas recebidas
 - [x] Testes unitários passaram (5/5)
+
+## Bug: Tarefas do gestor não aparecem no Portal da Loja
+- [ ] Investigar lógica de listagem de tarefas no Portal da Loja
+- [ ] Corrigir filtro para mostrar tarefas atribuídas à loja pelo gestor
+- [ ] Testar correção
+
+## Funcionalidades v6.2 - Filtro Mês Anterior e Análise de Resultados
+- [ ] Adicionar filtro 'Mês Anterior' nos Relatórios IA
+- [ ] Adicionar filtro 'Mês Anterior' nos Resumos Globais
+- [ ] Criar secção de Resultados nos Relatórios IA com análise profissional
+- [ ] Incluir gráficos de evolução e comparação (melhor/pior loja, maior/menor evolução)
+- [ ] Adicionar Relatório IA no Dashboard de Resultados
+- [ ] Filtros temporais no Dashboard: mês anterior, mês atual, trimestre, semestre, ano
+- [ ] Testar todas as funcionalidades
+
+
+## Funcionalidades v6.2 - Filtros Temporais e Análise de Resultados nos Relatórios IA
+- [x] Adicionar filtro "Mês Anterior" nos Relatórios IA
+- [x] Adicionar filtro "Mês Anterior" nos Resumos Globais
+- [x] Adicionar filtros "Semestral" e "Anual" nos Relatórios IA
+- [x] Criar secção de Comparação de Lojas nos Relatórios IA com:
+  - [x] Melhor loja (mais serviços)
+  - [x] Pior loja (menos serviços)
+  - [x] Maior evolução vs mês anterior
+  - [x] Menor evolução vs mês anterior
+  - [x] Estatísticas: total lojas, acima/abaixo do objetivo, taxa de sucesso
+  - [x] Gráfico de barras Top 10 lojas por serviços (verde/vermelho por desvio)
+- [x] Adicionar Relatório IA no Dashboard de Resultados com:
+  - [x] Filtros temporais: Mês Anterior, Mês Atual, Trimestre, Semestre, Ano
+  - [x] Comparação de lojas com cards visuais
+  - [x] Gráfico de ranking de serviços
+  - [x] Análise de lojas em destaque e lojas que precisam atenção
+- [x] Atualizar schemas de BD para novos períodos (relatorios_ia, resumos_globais)
+- [x] Executar migrações da base de dados

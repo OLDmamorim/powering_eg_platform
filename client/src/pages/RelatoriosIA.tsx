@@ -25,13 +25,23 @@ import {
   Star,
   AlertTriangle,
   Activity,
+  Trophy,
+  Medal,
+  ArrowUpRight,
+  ArrowDownRight,
+  Store,
 } from "lucide-react";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
+import { Bar } from 'react-chartjs-2';
+
+// Registar componentes do Chart.js
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 import { toast } from "sonner";
 
 export default function RelatoriosIA() {
   const [periodo, setPeriodo] = useState<
-    "diario" | "semanal" | "mensal" | "trimestral"
+    "diario" | "semanal" | "mensal" | "mes_anterior" | "trimestral" | "semestral" | "anual"
   >("semanal");
   const [exportando, setExportando] = useState(false);
   const relatorioRef = useRef<HTMLDivElement>(null);
@@ -60,8 +70,11 @@ export default function RelatoriosIA() {
       const periodoTexto = {
         diario: "Diário",
         semanal: "Semanal",
-        mensal: "Mensal",
-        trimestral: "Trimestral"
+        mensal: "Mensal (mês atual)",
+        mes_anterior: "Mês Anterior",
+        trimestral: "Trimestral",
+        semestral: "Semestral",
+        anual: "Anual"
       }[periodo];
 
       const dataAtual = new Date().toLocaleDateString('pt-PT', {
@@ -403,8 +416,11 @@ export default function RelatoriosIA() {
                   <SelectContent>
                     <SelectItem value="diario">Diário</SelectItem>
                     <SelectItem value="semanal">Semanal</SelectItem>
-                    <SelectItem value="mensal">Mensal</SelectItem>
+                    <SelectItem value="mensal">Mensal (mês atual)</SelectItem>
+                    <SelectItem value="mes_anterior">Mês Anterior</SelectItem>
                     <SelectItem value="trimestral">Trimestral</SelectItem>
+                    <SelectItem value="semestral">Semestral</SelectItem>
+                    <SelectItem value="anual">Anual</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -707,6 +723,151 @@ export default function RelatoriosIA() {
                           </li>
                         ))}
                       </ul>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Nova secção: Comparação de Lojas com Gráficos */}
+            {analise.comparacaoLojas && (
+              <Card className="border-2 border-purple-200 dark:border-purple-800">
+                <CardHeader className="bg-purple-50 dark:bg-purple-900/20">
+                  <CardTitle className="flex items-center gap-2">
+                    <Trophy className="h-5 w-5 text-purple-500" />
+                    Comparação de Lojas - Resultados do Período
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-4 space-y-6">
+                  {/* Cards de Destaques */}
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                    {/* Melhor Loja */}
+                    <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Trophy className="h-5 w-5 text-green-600" />
+                        <span className="font-semibold text-green-700 dark:text-green-400">Melhor Loja</span>
+                      </div>
+                      <p className="text-lg font-bold">{analise.comparacaoLojas.melhorLoja?.nome || 'N/A'}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {analise.comparacaoLojas.melhorLoja?.servicos || 0} serviços
+                        <span className={`ml-2 ${(analise.comparacaoLojas.melhorLoja?.desvio || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          ({(analise.comparacaoLojas.melhorLoja?.desvio || 0) >= 0 ? '+' : ''}{(analise.comparacaoLojas.melhorLoja?.desvio || 0).toFixed(1)}%)
+                        </span>
+                      </p>
+                    </div>
+
+                    {/* Pior Loja */}
+                    <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Store className="h-5 w-5 text-red-600" />
+                        <span className="font-semibold text-red-700 dark:text-red-400">Loja com Menos Serviços</span>
+                      </div>
+                      <p className="text-lg font-bold">{analise.comparacaoLojas.piorLoja?.nome || 'N/A'}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {analise.comparacaoLojas.piorLoja?.servicos || 0} serviços
+                        <span className={`ml-2 ${(analise.comparacaoLojas.piorLoja?.desvio || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          ({(analise.comparacaoLojas.piorLoja?.desvio || 0) >= 0 ? '+' : ''}{(analise.comparacaoLojas.piorLoja?.desvio || 0).toFixed(1)}%)
+                        </span>
+                      </p>
+                    </div>
+
+                    {/* Maior Evolução */}
+                    <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                      <div className="flex items-center gap-2 mb-2">
+                        <ArrowUpRight className="h-5 w-5 text-blue-600" />
+                        <span className="font-semibold text-blue-700 dark:text-blue-400">Maior Evolução</span>
+                      </div>
+                      <p className="text-lg font-bold">{analise.comparacaoLojas.maiorEvolucao?.nome || 'N/A'}</p>
+                      <p className="text-sm text-green-600">
+                        {analise.comparacaoLojas.maiorEvolucao?.variacao ? `+${analise.comparacaoLojas.maiorEvolucao.variacao.toFixed(1)}%` : 'N/A'} vs mês anterior
+                      </p>
+                    </div>
+
+                    {/* Menor Evolução */}
+                    <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
+                      <div className="flex items-center gap-2 mb-2">
+                        <ArrowDownRight className="h-5 w-5 text-amber-600" />
+                        <span className="font-semibold text-amber-700 dark:text-amber-400">Menor Evolução</span>
+                      </div>
+                      <p className="text-lg font-bold">{analise.comparacaoLojas.menorEvolucao?.nome || 'N/A'}</p>
+                      <p className="text-sm text-red-600">
+                        {analise.comparacaoLojas.menorEvolucao?.variacao ? `${analise.comparacaoLojas.menorEvolucao.variacao.toFixed(1)}%` : 'N/A'} vs mês anterior
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Resumo Estatístico */}
+                  <div className="p-4 bg-muted/50 rounded-lg">
+                    <div className="flex items-center justify-between flex-wrap gap-4">
+                      <div className="text-center">
+                        <p className="text-2xl font-bold text-primary">{analise.comparacaoLojas.totalLojas}</p>
+                        <p className="text-sm text-muted-foreground">Lojas Analisadas</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-2xl font-bold text-green-600">{analise.comparacaoLojas.lojasAcimaMedia}</p>
+                        <p className="text-sm text-muted-foreground">Acima do Objetivo</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-2xl font-bold text-red-600">{analise.comparacaoLojas.totalLojas - analise.comparacaoLojas.lojasAcimaMedia}</p>
+                        <p className="text-sm text-muted-foreground">Abaixo do Objetivo</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-2xl font-bold text-blue-600">
+                          {analise.comparacaoLojas.totalLojas > 0 ? ((analise.comparacaoLojas.lojasAcimaMedia / analise.comparacaoLojas.totalLojas) * 100).toFixed(0) : 0}%
+                        </p>
+                        <p className="text-sm text-muted-foreground">Taxa de Sucesso</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Gráfico de Ranking */}
+                  {analise.dadosGraficos?.rankingServicos && analise.dadosGraficos.rankingServicos.length > 0 && (
+                    <div className="p-4 bg-white dark:bg-gray-800 rounded-lg">
+                      <h4 className="font-semibold mb-4 flex items-center gap-2">
+                        <BarChart3 className="h-4 w-4" />
+                        Top 10 Lojas por Serviços
+                      </h4>
+                      <div style={{ height: '300px' }}>
+                        <Bar
+                          data={{
+                            labels: analise.dadosGraficos.rankingServicos.map(l => l.loja.length > 15 ? l.loja.substring(0, 15) + '...' : l.loja),
+                            datasets: [{
+                              label: 'Serviços',
+                              data: analise.dadosGraficos.rankingServicos.map(l => l.servicos),
+                              backgroundColor: analise.dadosGraficos.rankingServicos.map(l => 
+                                l.desvio >= 0 ? 'rgba(34, 197, 94, 0.7)' : 'rgba(239, 68, 68, 0.7)'
+                              ),
+                              borderColor: analise.dadosGraficos.rankingServicos.map(l => 
+                                l.desvio >= 0 ? 'rgb(34, 197, 94)' : 'rgb(239, 68, 68)'
+                              ),
+                              borderWidth: 1,
+                            }]
+                          }}
+                          options={{
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                              legend: { display: false },
+                              tooltip: {
+                                callbacks: {
+                                  afterLabel: (context) => {
+                                    const idx = context.dataIndex;
+                                    const desvio = analise.dadosGraficos?.rankingServicos[idx]?.desvio || 0;
+                                    return `Desvio: ${desvio >= 0 ? '+' : ''}${desvio.toFixed(1)}%`;
+                                  }
+                                }
+                              }
+                            },
+                            scales: {
+                              y: { beginAtZero: true, title: { display: true, text: 'Serviços' } },
+                              x: { ticks: { maxRotation: 45, minRotation: 45 } }
+                            }
+                          }}
+                        />
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-2 text-center">
+                        Verde = Acima do objetivo | Vermelho = Abaixo do objetivo
+                      </p>
                     </div>
                   )}
                 </CardContent>

@@ -31,17 +31,30 @@ interface AnaliseIA {
     tendenciasServicos: string;
     recomendacoes: string[];
   };
+  comparacaoLojas?: {
+    melhorLoja: { nome: string; servicos: number; desvio: number } | null;
+    piorLoja: { nome: string; servicos: number; desvio: number } | null;
+    maiorEvolucao: { nome: string; variacao: number } | null;
+    menorEvolucao: { nome: string; variacao: number } | null;
+    totalLojas: number;
+    lojasAcimaMedia: number;
+  };
+  dadosGraficos?: {
+    rankingServicos: Array<{ loja: string; servicos: number; desvio: number }>;
+    evolucaoMensal: Array<{ mes: string; servicos: number; objetivo: number }>;
+  };
 }
 
 /**
  * Gera relatório automático com análise de IA
  */
 export async function gerarRelatorioComIA(
-  periodo: "diario" | "semanal" | "mensal" | "trimestral",
+  periodo: "diario" | "semanal" | "mensal" | "mes_anterior" | "trimestral" | "semestral" | "anual",
   gestorId?: number
 ): Promise<AnaliseIA> {
   // Buscar relatórios do período
   const dataInicio = calcularDataInicio(periodo);
+  const dataFim = calcularDataFim(periodo);
   const relatoriosLivres = gestorId
     ? await db.getRelatoriosLivresByGestorId(gestorId)
     : await db.getAllRelatoriosLivres();
@@ -49,12 +62,18 @@ export async function gerarRelatorioComIA(
     ? await db.getRelatoriosCompletosByGestorId(gestorId)
     : await db.getAllRelatoriosCompletos();
 
-  // Filtrar por período
+  // Filtrar por período (dataInicio e dataFim)
   const relatoriosLivresFiltrados = relatoriosLivres.filter(
-    (r) => new Date(r.dataVisita) >= dataInicio
+    (r) => {
+      const data = new Date(r.dataVisita);
+      return data >= dataInicio && data <= dataFim;
+    }
   );
   const relatoriosCompletosFiltrados = relatoriosCompletos.filter(
-    (r) => new Date(r.dataVisita) >= dataInicio
+    (r) => {
+      const data = new Date(r.dataVisita);
+      return data >= dataInicio && data <= dataFim;
+    }
   );
 
   // Preparar dados para análise
@@ -113,20 +132,68 @@ export async function gerarRelatorioComIA(
   // Buscar dados de Resultados (Excel) para o período
   let dadosResultados: any[] = [];
   let statsResultados: any = null;
+  let rankingLojas: any[] = [];
+  let comparacaoLojas: any = null;
   try {
     const agora = new Date();
-    const mesAtual = agora.getMonth() + 1;
-    const anoAtual = agora.getFullYear();
+    let mesParaBuscar = agora.getMonth() + 1;
+    let anoParaBuscar = agora.getFullYear();
+    
+    // Para mês anterior, buscar dados do mês passado
+    if (periodo === 'mes_anterior') {
+      mesParaBuscar = agora.getMonth(); // Mês anterior (0-indexed + 1 - 1)
+      if (mesParaBuscar === 0) {
+        mesParaBuscar = 12;
+        anoParaBuscar = agora.getFullYear() - 1;
+      }
+    }
     
     // Determinar meses a buscar baseado no período
-    const mesesAtras = periodo === 'diario' ? 1 : periodo === 'semanal' ? 1 : periodo === 'mensal' ? 1 : 3;
+    const mesesAtras = periodo === 'diario' ? 1 : periodo === 'semanal' ? 1 : periodo === 'mensal' ? 1 : periodo === 'mes_anterior' ? 2 : periodo === 'trimestral' ? 3 : periodo === 'semestral' ? 6 : 12;
     
     if (gestorId) {
       // Buscar evolução agregada do gestor
       dadosResultados = await db.getEvolucaoAgregadaPorGestor(gestorId, mesesAtras);
     } else {
-      // Para admin, buscar stats globais do mês atual
-      statsResultados = await db.getEstatisticasPeriodo(mesAtual, anoAtual);
+      // Para admin, buscar stats globais do mês
+      statsResultados = await db.getEstatisticasPeriodo(mesParaBuscar, anoParaBuscar);
+      
+      // Buscar ranking de lojas para comparações
+      try {
+        rankingLojas = await db.getRankingLojas('totalServicos', mesParaBuscar, anoParaBuscar, 100) || [];
+        
+        // Buscar evolução para identificar maior/menor evolução
+        if (rankingLojas.length > 0) {
+          const evolucoes = await Promise.all(
+            rankingLojas.slice(0, 20).map(async (loja: any) => {
+              try {
+                const evolucao = await db.getEvolucaoMensal(loja.lojaId, 2);
+                if (evolucao && evolucao.length >= 2) {
+                  const atual = evolucao[evolucao.length - 1]?.totalServicos || 0;
+                  const anterior = evolucao[evolucao.length - 2]?.totalServicos || 0;
+                  const variacao = anterior > 0 ? ((atual - anterior) / anterior) * 100 : 0;
+                  return { ...loja, variacao, servicosAtuais: atual, servicosAnteriores: anterior };
+                }
+                return { ...loja, variacao: 0 };
+              } catch {
+                return { ...loja, variacao: 0 };
+              }
+            })
+          );
+          
+          const ordenadosPorVariacao = evolucoes.filter(e => e.variacao !== 0).sort((a, b) => b.variacao - a.variacao);
+          comparacaoLojas = {
+            melhorLoja: rankingLojas[0],
+            piorLoja: rankingLojas[rankingLojas.length - 1],
+            maiorEvolucao: ordenadosPorVariacao[0] || null,
+            menorEvolucao: ordenadosPorVariacao[ordenadosPorVariacao.length - 1] || null,
+            totalLojas: rankingLojas.length,
+            lojasAcimaMedia: rankingLojas.filter((l: any) => l.desvioPercentualMes >= 0).length,
+          };
+        }
+      } catch (rankingError) {
+        console.log('[RelatoriosIA] Erro ao buscar ranking:', rankingError);
+      }
     }
   } catch (error) {
     console.log('[RelatoriosIA] Sem dados de resultados disponíveis:', error);
@@ -176,6 +243,19 @@ DADOS DE PERFORMANCE GLOBAL (RESULTADOS DO EXCEL):
 - Taxa de Reparação Média: ${mediaTaxaReparacao?.toFixed(1) || 0}%
 - Lojas acima do objetivo: ${lojasAcimaObjetivo || 0} de ${totalLojas || 0}
 `;
+    
+    // Adicionar comparação de lojas se disponível
+    if (comparacaoLojas) {
+      resultadosTexto += `
+COMPARAÇÃO DE LOJAS:
+- Melhor Loja (mais serviços): ${comparacaoLojas.melhorLoja?.lojaNome || 'N/A'} - ${comparacaoLojas.melhorLoja?.totalServicos || 0} serviços (${comparacaoLojas.melhorLoja?.desvioPercentualMes >= 0 ? '+' : ''}${comparacaoLojas.melhorLoja?.desvioPercentualMes?.toFixed(1) || 0}% vs objetivo)
+- Pior Loja (menos serviços): ${comparacaoLojas.piorLoja?.lojaNome || 'N/A'} - ${comparacaoLojas.piorLoja?.totalServicos || 0} serviços (${comparacaoLojas.piorLoja?.desvioPercentualMes >= 0 ? '+' : ''}${comparacaoLojas.piorLoja?.desvioPercentualMes?.toFixed(1) || 0}% vs objetivo)
+- Maior Evolução: ${comparacaoLojas.maiorEvolucao?.lojaNome || 'N/A'} - ${comparacaoLojas.maiorEvolucao?.variacao ? '+' + comparacaoLojas.maiorEvolucao.variacao.toFixed(1) + '%' : 'N/A'} vs mês anterior
+- Menor Evolução: ${comparacaoLojas.menorEvolucao?.lojaNome || 'N/A'} - ${comparacaoLojas.menorEvolucao?.variacao ? comparacaoLojas.menorEvolucao.variacao.toFixed(1) + '%' : 'N/A'} vs mês anterior
+- Total de Lojas Analisadas: ${comparacaoLojas.totalLojas || 0}
+- Lojas Acima da Média: ${comparacaoLojas.lojasAcimaMedia || 0}
+`;
+    }
   }
 
   const prompt = `Analisa os seguintes relatórios de supervisão de lojas da Express Glass do período ${periodo}:
@@ -311,6 +391,40 @@ Responde em formato JSON com as seguintes chaves:
     const content = response.choices[0].message.content;
     const analise = JSON.parse(typeof content === 'string' ? content : JSON.stringify(content));
 
+    // Preparar dados de comparação de lojas para gráficos
+    const comparacaoLojasFormatada = comparacaoLojas ? {
+      melhorLoja: comparacaoLojas.melhorLoja ? {
+        nome: comparacaoLojas.melhorLoja.lojaNome,
+        servicos: comparacaoLojas.melhorLoja.totalServicos,
+        desvio: comparacaoLojas.melhorLoja.desvioPercentualMes || 0,
+      } : null,
+      piorLoja: comparacaoLojas.piorLoja ? {
+        nome: comparacaoLojas.piorLoja.lojaNome,
+        servicos: comparacaoLojas.piorLoja.totalServicos,
+        desvio: comparacaoLojas.piorLoja.desvioPercentualMes || 0,
+      } : null,
+      maiorEvolucao: comparacaoLojas.maiorEvolucao ? {
+        nome: comparacaoLojas.maiorEvolucao.lojaNome,
+        variacao: comparacaoLojas.maiorEvolucao.variacao || 0,
+      } : null,
+      menorEvolucao: comparacaoLojas.menorEvolucao ? {
+        nome: comparacaoLojas.menorEvolucao.lojaNome,
+        variacao: comparacaoLojas.menorEvolucao.variacao || 0,
+      } : null,
+      totalLojas: comparacaoLojas.totalLojas || 0,
+      lojasAcimaMedia: comparacaoLojas.lojasAcimaMedia || 0,
+    } : undefined;
+    
+    // Preparar dados para gráficos
+    const dadosGraficos = rankingLojas.length > 0 ? {
+      rankingServicos: rankingLojas.slice(0, 10).map((l: any) => ({
+        loja: l.lojaNome,
+        servicos: l.totalServicos,
+        desvio: l.desvioPercentualMes || 0,
+      })),
+      evolucaoMensal: [], // Pode ser preenchido com dados históricos se necessário
+    } : undefined;
+    
     return {
       lojaMaisVisitada,
       lojaMenosVisitada,
@@ -321,6 +435,8 @@ Responde em formato JSON com as seguintes chaves:
       resumo: analise.resumo,
       analisePontosDestacados: analise.analisePontosDestacados,
       analiseResultados: analise.analiseResultados,
+      comparacaoLojas: comparacaoLojasFormatada,
+      dadosGraficos,
     };
   } catch (error) {
     console.error("Erro ao gerar análise com IA:", error);
@@ -350,7 +466,7 @@ Responde em formato JSON com as seguintes chaves:
 }
 
 function calcularDataInicio(
-  periodo: "diario" | "semanal" | "mensal" | "trimestral"
+  periodo: "diario" | "semanal" | "mensal" | "mes_anterior" | "trimestral" | "semestral" | "anual"
 ): Date {
   const agora = new Date();
   switch (periodo) {
@@ -359,10 +475,30 @@ function calcularDataInicio(
     case "semanal":
       return new Date(agora.setDate(agora.getDate() - 7));
     case "mensal":
-      return new Date(agora.setMonth(agora.getMonth() - 1));
+      // Mês atual: desde o dia 1 do mês atual
+      return new Date(agora.getFullYear(), agora.getMonth(), 1);
+    case "mes_anterior":
+      // Mês anterior: do dia 1 ao último dia do mês passado
+      return new Date(agora.getFullYear(), agora.getMonth() - 1, 1);
     case "trimestral":
       return new Date(agora.setMonth(agora.getMonth() - 3));
+    case "semestral":
+      return new Date(agora.setMonth(agora.getMonth() - 6));
+    case "anual":
+      return new Date(agora.getFullYear(), 0, 1);
   }
+}
+
+function calcularDataFim(
+  periodo: "diario" | "semanal" | "mensal" | "mes_anterior" | "trimestral" | "semestral" | "anual"
+): Date {
+  const agora = new Date();
+  if (periodo === "mes_anterior") {
+    // Último dia do mês anterior
+    return new Date(agora.getFullYear(), agora.getMonth(), 0, 23, 59, 59);
+  }
+  // Para outros períodos, usar data atual
+  return agora;
 }
 
 

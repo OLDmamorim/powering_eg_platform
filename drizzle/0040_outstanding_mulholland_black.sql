@@ -1,0 +1,1 @@
+ALTER TABLE `resumos_globais` MODIFY COLUMN `periodo` enum('mes_anterior','mensal','trimestral','semestral','anual') NOT NULL;
