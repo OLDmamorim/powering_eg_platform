@@ -127,6 +127,7 @@ const getMenuGroups = (userRole?: string): MenuGroup[] => {
       items: [
         { icon: TrendingUp, label: "Upload Resultados", path: "/resultados-upload", show: isAdmin, showBadge: false },
         { icon: BarChart3, label: "Dashboard Resultados", path: "/resultados-dashboard", show: true, showBadge: false },
+        { icon: Sparkles, label: "Relatório IA Resultados", path: "/relatorio-ia-resultados", show: true, showBadge: false },
         { icon: GitCompare, label: "Comparação Lojas", path: "/comparacao-lojas", show: true, showBadge: false },
         { icon: History, label: "Histórico da Loja", path: "/historico-loja", show: true, showBadge: false },
       ]

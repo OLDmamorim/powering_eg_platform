@@ -38,6 +38,7 @@ import TodoWidget from "./pages/TodoWidget";
 import ResumosGlobais from "./pages/ResumosGlobais";
 import OcorrenciaEstrutural from "./pages/OcorrenciaEstrutural";
 import HistoricoOcorrencias from "./pages/HistoricoOcorrencias";
+import { RelatorioIAResultados } from "./pages/RelatorioIAResultados";
 
 
 function Router() {
@@ -76,6 +77,7 @@ function Router() {
       <Route path={"/resultados-upload"} component={ResultadosUpload} />
       <Route path={"/resultados-dashboard"} component={ResultadosDashboard} />
       <Route path={"/comparacao-lojas"} component={ComparacaoLojas} />
+      <Route path={"/relatorio-ia-resultados"} component={RelatorioIAResultados} />
       
       {/* Reuniões Quinzenais */}
       <Route path={"/reunioes-quinzenais"} component={ReunioesQuinzenais} />
