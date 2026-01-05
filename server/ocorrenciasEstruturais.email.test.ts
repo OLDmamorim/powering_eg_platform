@@ -77,11 +77,12 @@ describe("Envio de Email de Ocorrências Estruturais", () => {
     // Verificar se sendEmail foi chamado (SMTP Gmail)
     expect(emailService.sendEmail).toHaveBeenCalled();
     
-    // Verificar parâmetros do email
+    // Verificar parâmetros do email (agora envia 2: admin + cópia gestor)
     const chamadas = vi.mocked(emailService.sendEmail).mock.calls;
-    expect(chamadas.length).toBe(1);
+    expect(chamadas.length).toBe(2); // 1 para admin + 1 cópia para gestor
     
-    const emailEnviado = chamadas[0][0];
+    const emailEnviado = chamadas[0][0]; // Email para admin
+    const emailCopia = chamadas[1][0]; // Cópia para gestor
     
     // Verificar que NÃO foi enviado para Marco Amorim (admin de teste)
     expect(emailEnviado.to).not.toBe("mramorim78@gmail.com");
@@ -98,6 +99,11 @@ describe("Envio de Email de Ocorrências Estruturais", () => {
     expect(emailEnviado.html).toContain("Ocorrência");
     expect(emailEnviado.html).toContain("Gestor Ocorrencias Test");
     expect(emailEnviado.html).toContain("PoweringEG Platform");
+    
+    // Verificar cópia enviada ao gestor
+    expect(emailCopia.to).toBe("gestor.ocorrencias@test.com");
+    expect(emailCopia.subject).toContain("[Cópia]");
+    expect(emailCopia.html).toContain("Esta é uma cópia da ocorrência que reportou");
   });
 
   it("Deve rejeitar envio de email de ocorrência que não pertence ao gestor", async () => {

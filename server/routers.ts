@@ -3893,18 +3893,49 @@ export const appRouter = router({
         
         // Enviar email via SMTP Gmail (egpowering@gmail.com)
         const assunto = `Ocorrência: ${temaNome} - Reportado por ${gestorNome}`;
-        const enviado = await sendEmail({
+        
+        // Enviar para o admin
+        const enviadoAdmin = await sendEmail({
           to: adminReal.email,
           subject: assunto,
           html: htmlComNota,
           attachments: validAttachments,
         });
         
-        if (!enviado) {
-          throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Falha ao enviar email' });
+        if (!enviadoAdmin) {
+          throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Falha ao enviar email para o admin' });
         }
         
-        return { success: true, message: `Email enviado com sucesso para ${adminReal.name || adminReal.email}` };
+        // Enviar cópia para o gestor que reportou
+        const gestorEmail = ctx.user.email;
+        let copiaEnviada = false;
+        if (gestorEmail) {
+          // Gerar HTML da cópia com nota de que é uma cópia
+          const htmlCopia = htmlComNota.replace(
+            '</body>',
+            `<div style="text-align: center; padding: 15px; background: #eff6ff; margin: 20px 30px; border-radius: 8px; border: 1px solid #3b82f6;">
+              <p style="margin: 0; color: #1d4ed8; font-size: 13px;">📋 Esta é uma cópia da ocorrência que reportou. O email original foi enviado para ${adminReal.name || 'o administrador'}.</p>
+            </div>
+            </body>`
+          );
+          
+          copiaEnviada = await sendEmail({
+            to: gestorEmail,
+            subject: `[Cópia] ${assunto}`,
+            html: htmlCopia,
+            attachments: validAttachments,
+          });
+          
+          if (!copiaEnviada) {
+            console.error(`Falha ao enviar cópia para o gestor: ${gestorEmail}`);
+          }
+        }
+        
+        const mensagemSucesso = copiaEnviada 
+          ? `Email enviado com sucesso para ${adminReal.name || adminReal.email} e cópia enviada para ${gestorEmail}`
+          : `Email enviado com sucesso para ${adminReal.name || adminReal.email}`;
+        
+        return { success: true, message: mensagemSucesso };
       }),
   }),
 });

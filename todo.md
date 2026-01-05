@@ -1863,3 +1863,6 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Exportar Relatório IA para PDF com gráficos incluídos
 - [x] Sistema de alertas automáticos de performance (notificar quando loja cai abaixo de limiar)
 - [x] Gráfico de comparação histórica (evolução mensal ao longo do tempo)
+
+## Funcionalidade v3.7 - Cópia de Email para Gestor
+- [x] Enviar cópia do email de ocorrências estruturais para o próprio gestor que reportou
