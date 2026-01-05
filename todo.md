@@ -1954,3 +1954,19 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Filtro por gestor específico (já existia)
 - [x] Dropdown com lista de gestores (já existia)
 - [x] Filtrar lojas atribuídas ao gestor selecionado (já existia)
+
+## Análise Loja a Loja no Relatório IA v4.4
+- [ ] Verificar estrutura atual do relatório IA de resultados
+- [ ] Adicionar secção de análise individual por loja
+- [ ] Incluir resumo de performance por loja (serviços, objetivo, desvio, taxa reparação)
+- [ ] Mostrar tendência vs período anterior
+- [ ] Ordenar lojas por performance ou alfabeticamente
+- [ ] Testar com dados reais
+
+## Análise Loja a Loja no Relatório IA v4.4 - CONCLUÍDO
+- [x] Verificar estrutura atual do relatório IA de resultados
+- [x] Adicionar secção de análise individual por loja
+- [x] Incluir resumo de performance por loja (serviços, objetivo, desvio, taxa reparação)
+- [x] Mostrar status (Acima/Abaixo do objetivo)
+- [x] Ordenar lojas por performance ou alfabeticamente
+- [x] Testar com dados reais

@@ -1,0 +1,23 @@
+Análise Loja a Loja - Nova Secção Implementada
+==============================================
+
+A nova secção "Análise Loja a Loja" foi implementada com sucesso no Relatório IA de Resultados.
+
+Funcionalidades:
+- Tabela com todas as lojas do período selecionado
+- Colunas: #, Loja, Serviços, Objetivo, Desvio, Taxa Rep., Status
+- Ordenação por: Desvio vs Objetivo, Total de Serviços, Ordem Alfabética
+- Linhas coloridas: verde para lojas acima do objetivo, vermelho para abaixo
+- Badge de status: "Acima" (verde) ou "Abaixo" (vermelho)
+- Resumo rápido no final: Total Lojas, Acima do Objetivo, Abaixo do Objetivo, Total Serviços
+
+Exemplo de dados visíveis:
+1. Sacavém - 277 serviços, objetivo 139, desvio +99.28%, taxa rep 36.17% - Acima
+2. Coimbra sul - 125 serviços, objetivo 73, desvio +71.23%, taxa rep 27.17% - Acima
+3. Santarém - 120 serviços, objetivo 99, desvio +21.21%, taxa rep 68.48% - Acima
+...
+10. Aeroporto porto - 138 serviços, objetivo 143, desvio -3.50%, taxa rep 31.58% - Abaixo
+
+Resumo: 10 lojas, 9 acima do objetivo, 1 abaixo, 1544 serviços totais
+
+Screenshot: /home/ubuntu/screenshots/3000-ivfq3xpas0danvd_2026-01-05_17-19-19_7809.webp

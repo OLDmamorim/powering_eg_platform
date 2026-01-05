@@ -40,10 +40,14 @@ export function RelatorioIAResultados() {
     kpis: true,
     rankings: true,
     zonas: true,
+    analiseLojas: false, // Fechado por defeito pois pode ser grande
     insights: true,
     graficos: true,
     recomendacoes: true,
   });
+  
+  // Estado para ordenar a análise loja a loja
+  const [ordenacaoLojas, setOrdenacaoLojas] = useState<'desvio' | 'servicos' | 'alfabetico'>('desvio');
   
   // Queries para obter opções de filtro (apenas admin)
   const { data: zonas } = trpc.relatoriosIA.getZonas.useQuery(undefined, {
@@ -953,7 +957,127 @@ export function RelatorioIAResultados() {
                 </Collapsible>
               )}
 
-              {/* ==================== SECÇÃO 5: INSIGHTS IA ==================== */}
+              {/* ==================== SECÇÃO 5: ANÁLISE LOJA A LOJA ==================== */}
+              {analiseIA.dadosGraficos?.rankingServicos && analiseIA.dadosGraficos.rankingServicos.length > 0 && (
+                <Collapsible open={seccoesAbertas.analiseLojas} onOpenChange={() => toggleSeccao('analiseLojas')}>
+                  <CollapsibleTrigger asChild>
+                    <div className="flex items-center justify-between p-4 bg-slate-100 dark:bg-slate-800/50 rounded-lg border border-slate-300 dark:border-slate-700 cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700/50 transition-colors">
+                      <div className="flex items-center gap-2">
+                        <Store className="h-5 w-5 text-slate-600" />
+                        <h3 className="font-semibold text-lg">Análise Loja a Loja</h3>
+                        <Badge variant="outline" className="ml-2">
+                          {analiseIA.dadosGraficos.rankingServicos.length} lojas
+                        </Badge>
+                      </div>
+                      {seccoesAbertas.analiseLojas ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+                    </div>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="pt-4">
+                    {/* Controlos de ordenação */}
+                    <div className="flex items-center gap-2 mb-4">
+                      <span className="text-sm text-muted-foreground">Ordenar por:</span>
+                      <Select value={ordenacaoLojas} onValueChange={(v) => setOrdenacaoLojas(v as typeof ordenacaoLojas)}>
+                        <SelectTrigger className="w-[180px]">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="desvio">Desvio vs Objetivo</SelectItem>
+                          <SelectItem value="servicos">Total de Serviços</SelectItem>
+                          <SelectItem value="alfabetico">Ordem Alfabética</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    {/* Tabela de análise loja a loja */}
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="w-12">#</TableHead>
+                            <TableHead>Loja</TableHead>
+                            <TableHead className="text-right">Serviços</TableHead>
+                            <TableHead className="text-right">Objetivo</TableHead>
+                            <TableHead className="text-right">Desvio</TableHead>
+                            <TableHead className="text-right">Taxa Rep.</TableHead>
+                            <TableHead className="text-center">Status</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {[...analiseIA.dadosGraficos.rankingServicos]
+                            .sort((a, b) => {
+                              if (ordenacaoLojas === 'desvio') return (b.desvio || 0) - (a.desvio || 0);
+                              if (ordenacaoLojas === 'servicos') return (b.servicos || 0) - (a.servicos || 0);
+                              return a.loja.localeCompare(b.loja);
+                            })
+                            .map((loja, idx) => {
+                              const desvioPercent = (loja.desvio || 0) * 100;
+                              const taxaRepPercent = (loja.taxaReparacao || 0) * 100;
+                              const acimaMeta = desvioPercent >= 0;
+                              
+                              return (
+                                <TableRow key={idx} className={acimaMeta ? 'bg-green-50/50 dark:bg-green-900/10' : 'bg-red-50/50 dark:bg-red-900/10'}>
+                                  <TableCell className="font-medium text-muted-foreground">{idx + 1}</TableCell>
+                                  <TableCell className="font-medium">{loja.loja}</TableCell>
+                                  <TableCell className="text-right font-semibold">{loja.servicos}</TableCell>
+                                  <TableCell className="text-right text-muted-foreground">{loja.objetivo || 'N/A'}</TableCell>
+                                  <TableCell className={`text-right font-semibold ${acimaMeta ? 'text-green-600' : 'text-red-600'}`}>
+                                    {desvioPercent >= 0 ? '+' : ''}{desvioPercent.toFixed(2)}%
+                                  </TableCell>
+                                  <TableCell className="text-right">
+                                    {taxaRepPercent > 0 ? `${taxaRepPercent.toFixed(2)}%` : 'N/A'}
+                                  </TableCell>
+                                  <TableCell className="text-center">
+                                    {acimaMeta ? (
+                                      <Badge variant="default" className="bg-green-600 text-xs">
+                                        <CheckCircle2 className="h-3 w-3 mr-1" />
+                                        Acima
+                                      </Badge>
+                                    ) : (
+                                      <Badge variant="destructive" className="text-xs">
+                                        <XCircle className="h-3 w-3 mr-1" />
+                                        Abaixo
+                                      </Badge>
+                                    )}
+                                  </TableCell>
+                                </TableRow>
+                              );
+                            })}
+                        </TableBody>
+                      </Table>
+                    </div>
+                    
+                    {/* Resumo rápido */}
+                    <div className="mt-4 p-4 bg-muted/30 rounded-lg">
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                        <div>
+                          <p className="text-xs text-muted-foreground">Total Lojas</p>
+                          <p className="text-lg font-bold">{analiseIA.dadosGraficos.rankingServicos.length}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground">Acima do Objetivo</p>
+                          <p className="text-lg font-bold text-green-600">
+                            {analiseIA.dadosGraficos.rankingServicos.filter(l => (l.desvio || 0) >= 0).length}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground">Abaixo do Objetivo</p>
+                          <p className="text-lg font-bold text-red-600">
+                            {analiseIA.dadosGraficos.rankingServicos.filter(l => (l.desvio || 0) < 0).length}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground">Total Serviços</p>
+                          <p className="text-lg font-bold">
+                            {analiseIA.dadosGraficos.rankingServicos.reduce((sum, l) => sum + (l.servicos || 0), 0)}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
+              )}
+
+              {/* ==================== SECÇÃO 6: INSIGHTS IA ==================== */}
               {(analiseIA as any).insightsIA && (
                 <Collapsible open={seccoesAbertas.insights} onOpenChange={() => toggleSeccao('insights')}>
                   <CollapsibleTrigger asChild>
