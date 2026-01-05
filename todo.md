@@ -1866,3 +1866,6 @@ NOTA: Sistema de email requer configuração externa no deployment
 
 ## Funcionalidade v3.7 - Cópia de Email para Gestor
 - [x] Enviar cópia do email de ocorrências estruturais para o próprio gestor que reportou
+
+## Bug - Evolução Histórica
+- [x] Corrigir valores de Total Serviços e Total Objetivos que mostram concatenação em vez de soma

@@ -1,0 +1,66 @@
+{
+  "query": "SELECT \n  mes, \n  ano, \n  CAST(SUM(totalServicos) AS SIGNED) as totalServicos,\n  CAST(SUM(objetivoMensal) AS SIGNED) as objetivoMensal,\n  COUNT(DISTINCT lojaId) as totalLojas\nFROM resultados_mensais\nGROUP BY mes, ano\nORDER BY ano DESC, mes DESC\nLIMIT 8",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT \n  mes, \n  ano, \n  CAST(SUM(totalServicos) AS SIGNED) as totalServicos,\n  CAST(SUM(objetivoMensal) AS SIGNED) as objetivoMensal,\n  COUNT(DISTINCT lojaId) as totalLojas\nFROM resultados_mensais\nGROUP BY mes, ano\nORDER BY ano DESC, mes DESC\nLIMIT 8",
+  "rows": [
+    {
+      "mes": "12",
+      "ano": "2025",
+      "totalServicos": "4803",
+      "objetivoMensal": "4882",
+      "totalLojas": "70"
+    },
+    {
+      "mes": "11",
+      "ano": "2025",
+      "totalServicos": "4426",
+      "objetivoMensal": "4875",
+      "totalLojas": "70"
+    },
+    {
+      "mes": "10",
+      "ano": "2025",
+      "totalServicos": "5015",
+      "objetivoMensal": "5365",
+      "totalLojas": "70"
+    },
+    {
+      "mes": "9",
+      "ano": "2025",
+      "totalServicos": "4575",
+      "objetivoMensal": "4792",
+      "totalLojas": "70"
+    },
+    {
+      "mes": "8",
+      "ano": "2025",
+      "totalServicos": "4387",
+      "objetivoMensal": "4862",
+      "totalLojas": "70"
+    },
+    {
+      "mes": "7",
+      "ano": "2025",
+      "totalServicos": "5748",
+      "objetivoMensal": "5449",
+      "totalLojas": "70"
+    },
+    {
+      "mes": "6",
+      "ano": "2025",
+      "totalServicos": "4719",
+      "objetivoMensal": "4370",
+      "totalLojas": "69"
+    },
+    {
+      "mes": "5",
+      "ano": "2025",
+      "totalServicos": "5217",
+      "objetivoMensal": "5042",
+      "totalLojas": "68"
+    }
+  ],
+  "messages": [],
+  "stdout": "mes\tano\ttotalServicos\tobjetivoMensal\ttotalLojas\n12\t2025\t4803\t4882\t70\n11\t2025\t4426\t4875\t70\n10\t2025\t5015\t5365\t70\n9\t2025\t4575\t4792\t70\n8\t2025\t4387\t4862\t70\n7\t2025\t5748\t5449\t70\n6\t2025\t4719\t4370\t69\n5\t2025\t5217\t5042\t68\n",
+  "stderr": "",
+  "execution_time_ms": 60
+}

@@ -5850,10 +5850,10 @@ export async function getEvolucaoGlobal(mesesAtras: number = 12): Promise<Array<
   return resultados.map(r => ({
     mes: r.mes,
     ano: r.ano,
-    totalServicos: r.totalServicos || 0,
-    objetivoMensal: r.objetivoMensal || 0,
+    totalServicos: Number(r.totalServicos) || 0,
+    objetivoMensal: Number(r.objetivoMensal) || 0,
     desvioPercentualMes: r.desvioPercentualMes ? parseFloat(r.desvioPercentualMes.toString()) * 100 : 0,
     taxaReparacao: r.taxaReparacao ? parseFloat(r.taxaReparacao.toString()) * 100 : 0,
-    totalLojas: r.totalLojas || 0,
+    totalLojas: Number(r.totalLojas) || 0,
   }));
 }
