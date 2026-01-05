@@ -929,17 +929,60 @@ export const appRouter = router({
   relatoriosIA: router({    
     gerar: gestorProcedure
       .input(z.object({
-        periodo: z.enum(["diario", "semanal", "mensal", "mes_anterior", "trimestral", "semestral", "anual"])
+        periodo: z.enum(["diario", "semanal", "mensal", "mes_anterior", "trimestral", "semestral", "anual"]),
+        filtro: z.enum(["pais", "zona", "gestor"]).optional().default("pais"),
+        zonaId: z.string().optional(),
+        gestorIdFiltro: z.number().optional(),
       }))
       .query(async ({ input, ctx }) => {
-        const gestorId = ctx.user.role === "admin" ? undefined : ctx.gestor?.id;
-        const analise = await gerarRelatorioComIA(input.periodo, gestorId);
+        // Determinar gestorId baseado no filtro
+        let gestorId: number | undefined;
+        let lojasIds: number[] | undefined;
+        let filtroDescricao = "Todo o País";
+        
+        if (ctx.user.role !== "admin") {
+          // Gestores só vêem as suas lojas
+          gestorId = ctx.gestor?.id;
+          filtroDescricao = "Minhas Lojas";
+        } else {
+          // Admin pode filtrar
+          if (input.filtro === "gestor" && input.gestorIdFiltro) {
+            // Filtrar por gestor específico
+            const lojasDoGestor = await db.getLojasByGestorId(input.gestorIdFiltro);
+            lojasIds = lojasDoGestor.map(l => l.id);
+            const gestorInfo = await db.getGestorById(input.gestorIdFiltro);
+            filtroDescricao = `Gestor: ${gestorInfo?.nome || 'N/A'}`;
+          } else if (input.filtro === "zona" && input.zonaId) {
+            // Filtrar por zona
+            const agora = new Date();
+            let mesParaBuscar = agora.getMonth() + 1;
+            let anoParaBuscar = agora.getFullYear();
+            if (input.periodo === 'mes_anterior') {
+              mesParaBuscar = agora.getMonth();
+              if (mesParaBuscar === 0) {
+                mesParaBuscar = 12;
+                anoParaBuscar = agora.getFullYear() - 1;
+              }
+            }
+            lojasIds = await db.getLojaIdsPorZona(input.zonaId, mesParaBuscar, anoParaBuscar);
+            filtroDescricao = `Zona: ${input.zonaId}`;
+          }
+          // filtro === "pais" → sem filtro, todas as lojas
+        }
+        
+        const analise = await gerarRelatorioComIA(input.periodo, gestorId, lojasIds);
+        
+        // Adicionar informação do filtro ao resultado
+        const analiseComFiltro = {
+          ...analise,
+          filtroAplicado: filtroDescricao,
+        };
         
         // Salvar relatório IA na base de dados
         try {
           await db.createRelatorioIA({
             periodo: input.periodo,
-            conteudo: JSON.stringify(analise),
+            conteudo: JSON.stringify(analiseComFiltro),
             geradoPor: ctx.user.id,
           });
           console.log('[RelatoriosIA] Relatório salvo com sucesso na BD');
@@ -947,7 +990,23 @@ export const appRouter = router({
           console.error('[RelatoriosIA] Erro ao salvar relatório:', error);
         }
         
-        return analise;
+        return analiseComFiltro;
+      }),
+    
+    // Obter lista de zonas disponíveis
+    getZonas: adminProcedure
+      .query(async () => {
+        return await db.getZonasDistintas();
+      }),
+    
+    // Obter lista de gestores para filtro
+    getGestoresParaFiltro: adminProcedure
+      .query(async () => {
+        const gestores = await db.getAllGestores();
+        return gestores.map(g => ({
+          id: g.id,
+          nome: g.user?.name || g.user?.email || 'Sem nome',
+        }));
       }),
     
     getHistorico: protectedProcedure

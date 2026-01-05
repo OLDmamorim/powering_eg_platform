@@ -47,20 +47,37 @@ interface AnaliseIA {
 
 /**
  * Gera relatório automático com análise de IA
+ * @param periodo - Período de análise
+ * @param gestorId - ID do gestor (opcional, para filtrar por gestor)
+ * @param lojasIds - IDs das lojas a incluir (opcional, para filtrar por zona ou gestor)
  */
 export async function gerarRelatorioComIA(
   periodo: "diario" | "semanal" | "mensal" | "mes_anterior" | "trimestral" | "semestral" | "anual",
-  gestorId?: number
+  gestorId?: number,
+  lojasIds?: number[]
 ): Promise<AnaliseIA> {
   // Buscar relatórios do período
   const dataInicio = calcularDataInicio(periodo);
   const dataFim = calcularDataFim(periodo);
-  const relatoriosLivres = gestorId
-    ? await db.getRelatoriosLivresByGestorId(gestorId)
-    : await db.getAllRelatoriosLivres();
-  const relatoriosCompletos = gestorId
-    ? await db.getRelatoriosCompletosByGestorId(gestorId)
-    : await db.getAllRelatoriosCompletos();
+  
+  let relatoriosLivres: any[];
+  let relatoriosCompletos: any[];
+  
+  if (gestorId) {
+    // Filtrar por gestor
+    relatoriosLivres = await db.getRelatoriosLivresByGestorId(gestorId);
+    relatoriosCompletos = await db.getRelatoriosCompletosByGestorId(gestorId);
+  } else {
+    // Buscar todos
+    relatoriosLivres = await db.getAllRelatoriosLivres();
+    relatoriosCompletos = await db.getAllRelatoriosCompletos();
+  }
+  
+  // Se lojasIds fornecido, filtrar apenas por essas lojas
+  if (lojasIds && lojasIds.length > 0) {
+    relatoriosLivres = relatoriosLivres.filter(r => lojasIds.includes(r.lojaId));
+    relatoriosCompletos = relatoriosCompletos.filter(r => lojasIds.includes(r.lojaId));
+  }
 
   // Filtrar por período (dataInicio e dataFim)
   const relatoriosLivresFiltrados = relatoriosLivres.filter(
@@ -154,8 +171,48 @@ export async function gerarRelatorioComIA(
     if (gestorId) {
       // Buscar evolução agregada do gestor
       dadosResultados = await db.getEvolucaoAgregadaPorGestor(gestorId, mesesAtras);
+    } else if (lojasIds && lojasIds.length > 0) {
+      // Filtrar por lojas específicas (zona ou gestor)
+      statsResultados = await db.getEstatisticasPeriodo(mesParaBuscar, anoParaBuscar, undefined, lojasIds);
+      
+      // Buscar ranking apenas das lojas filtradas
+      try {
+        rankingLojas = await db.getRankingLojas('totalServicos', mesParaBuscar, anoParaBuscar, 100, lojasIds) || [];
+        
+        // Buscar evolução para identificar maior/menor evolução
+        if (rankingLojas.length > 0) {
+          const evolucoes = await Promise.all(
+            rankingLojas.slice(0, 20).map(async (loja: any) => {
+              try {
+                const evolucao = await db.getEvolucaoMensal(loja.lojaId, 2);
+                if (evolucao && evolucao.length >= 2) {
+                  const atual = evolucao[evolucao.length - 1]?.totalServicos || 0;
+                  const anterior = evolucao[evolucao.length - 2]?.totalServicos || 0;
+                  const variacao = anterior > 0 ? ((atual - anterior) / anterior) * 100 : 0;
+                  return { ...loja, variacao, servicosAtuais: atual, servicosAnteriores: anterior };
+                }
+                return { ...loja, variacao: 0 };
+              } catch {
+                return { ...loja, variacao: 0 };
+              }
+            })
+          );
+          
+          const ordenadosPorVariacao = evolucoes.filter(e => e.variacao !== 0).sort((a, b) => b.variacao - a.variacao);
+          comparacaoLojas = {
+            melhorLoja: rankingLojas[0],
+            piorLoja: rankingLojas[rankingLojas.length - 1],
+            maiorEvolucao: ordenadosPorVariacao[0] || null,
+            menorEvolucao: ordenadosPorVariacao[ordenadosPorVariacao.length - 1] || null,
+            totalLojas: rankingLojas.length,
+            lojasAcimaMedia: rankingLojas.filter((l: any) => l.desvioPercentualMes >= 0).length,
+          };
+        }
+      } catch (rankingError) {
+        console.log('[RelatoriosIA] Erro ao buscar ranking filtrado:', rankingError);
+      }
     } else {
-      // Para admin, buscar stats globais do mês
+      // Para admin sem filtro, buscar stats globais do mês
       statsResultados = await db.getEstatisticasPeriodo(mesParaBuscar, anoParaBuscar);
       
       // Buscar ranking de lojas para comparações

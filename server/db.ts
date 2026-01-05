@@ -5857,3 +5857,127 @@ export async function getEvolucaoGlobal(mesesAtras: number = 12): Promise<Array<
     totalLojas: Number(r.totalLojas) || 0,
   }));
 }
+
+
+/**
+ * Obtém lista de zonas distintas dos resultados mensais
+ */
+export async function getZonasDistintas(): Promise<string[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const zonas = await db
+    .selectDistinct({
+      zona: resultadosMensais.zona,
+    })
+    .from(resultadosMensais)
+    .where(sql`${resultadosMensais.zona} IS NOT NULL AND ${resultadosMensais.zona} != ''`)
+    .orderBy(resultadosMensais.zona);
+  
+  return zonas.map(z => z.zona).filter((z): z is string => z !== null);
+}
+
+/**
+ * Obtém IDs das lojas de uma zona específica
+ */
+export async function getLojaIdsPorZona(zona: string, mes: number, ano: number): Promise<number[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const lojas = await db
+    .selectDistinct({
+      lojaId: resultadosMensais.lojaId,
+    })
+    .from(resultadosMensais)
+    .where(
+      and(
+        eq(resultadosMensais.zona, zona),
+        eq(resultadosMensais.mes, mes),
+        eq(resultadosMensais.ano, ano)
+      )
+    );
+  
+  return lojas.map(l => l.lojaId);
+}
+
+/**
+ * Obtém estatísticas de uma zona específica
+ */
+export async function getEstatisticasZona(zona: string, mes: number, ano: number) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const stats = await db
+    .select({
+      totalLojas: sql<number>`COUNT(DISTINCT ${resultadosMensais.lojaId})`,
+      somaServicos: sql<number>`SUM(${resultadosMensais.totalServicos})`,
+      somaObjetivos: sql<number>`SUM(${resultadosMensais.objetivoMensal})`,
+      mediaDesvioPercentual: sql<number>`AVG(${resultadosMensais.desvioPercentualMes})`,
+      mediaTaxaReparacao: sql<number>`AVG(${resultadosMensais.taxaReparacao})`,
+      somaReparacoes: sql<number>`SUM(${resultadosMensais.qtdReparacoes})`,
+      lojasAcimaObjetivo: sql<number>`SUM(CASE WHEN ${resultadosMensais.desvioPercentualMes} >= 0 THEN 1 ELSE 0 END)`,
+    })
+    .from(resultadosMensais)
+    .where(
+      and(
+        eq(resultadosMensais.zona, zona),
+        eq(resultadosMensais.mes, mes),
+        eq(resultadosMensais.ano, ano)
+      )
+    );
+
+  const result = stats[0];
+  if (!result) return null;
+  
+  return {
+    ...result,
+    mediaDesvioPercentual: result.mediaDesvioPercentual ? parseFloat(result.mediaDesvioPercentual.toString()) : null,
+    mediaTaxaReparacao: result.mediaTaxaReparacao ? parseFloat(result.mediaTaxaReparacao.toString()) : null,
+  };
+}
+
+/**
+ * Obtém ranking de lojas filtrado por zona
+ */
+export async function getRankingLojasPorZona(
+  metrica: 'totalServicos' | 'taxaReparacao' | 'desvioPercentualMes' | 'servicosPorColaborador',
+  zona: string,
+  mes: number,
+  ano: number,
+  limit: number = 100
+) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const campo = resultadosMensais[metrica];
+  
+  const ranking = await db
+    .select({
+      lojaId: resultadosMensais.lojaId,
+      lojaNome: lojas.nome,
+      zona: resultadosMensais.zona,
+      valor: campo,
+      totalServicos: resultadosMensais.totalServicos,
+      objetivoMensal: resultadosMensais.objetivoMensal,
+      desvioPercentualMes: resultadosMensais.desvioPercentualMes,
+      taxaReparacao: resultadosMensais.taxaReparacao,
+    })
+    .from(resultadosMensais)
+    .innerJoin(lojas, eq(resultadosMensais.lojaId, lojas.id))
+    .where(
+      and(
+        eq(resultadosMensais.zona, zona),
+        eq(resultadosMensais.mes, mes),
+        eq(resultadosMensais.ano, ano)
+      )
+    )
+    .orderBy(desc(campo))
+    .limit(limit);
+
+  return ranking.map(r => ({
+    ...r,
+    valor: r.valor ? parseFloat(r.valor.toString()) : null,
+    desvioPercentualMes: r.desvioPercentualMes ? parseFloat(r.desvioPercentualMes.toString()) : null,
+    taxaReparacao: r.taxaReparacao ? parseFloat(r.taxaReparacao.toString()) : null,
+  }));
+}

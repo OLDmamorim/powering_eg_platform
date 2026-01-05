@@ -1,36 +1,99 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { trpc } from '../lib/trpc';
 import DashboardLayout from '../components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Button } from '../components/ui/button';
-import { Loader2, TrendingUp, TrendingDown, Target, Award, BarChart3, Sparkles, FileText, Trophy, Store, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { Loader2, TrendingUp, TrendingDown, Target, Award, BarChart3, Sparkles, FileText, Trophy, Store, ArrowUpRight, ArrowDownRight, Globe, MapPin, User, Filter } from 'lucide-react';
 import { useAuth } from '../_core/hooks/useAuth';
 import { toast } from 'sonner';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
 import { ExportarRelatorioIAPDF } from '../components/ExportarRelatorioIAPDF';
+import { Badge } from '../components/ui/badge';
 
 // Registar componentes do Chart.js
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 export function RelatorioIAResultados() {
   const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
   
   // Estado para Relatório IA de Resultados
   const [periodoRelatorioIA, setPeriodoRelatorioIA] = useState<'mes_anterior' | 'mensal' | 'trimestral' | 'semestral' | 'anual'>('mes_anterior');
   const [mostrarRelatorioIA, setMostrarRelatorioIA] = useState(false);
   
+  // Estados para filtros (apenas admin)
+  const [tipoFiltro, setTipoFiltro] = useState<'pais' | 'zona' | 'gestor'>('pais');
+  const [zonaSeleccionada, setZonaSeleccionada] = useState<string>('');
+  const [gestorSeleccionado, setGestorSeleccionado] = useState<number | undefined>(undefined);
+  
+  // Queries para obter opções de filtro (apenas admin)
+  const { data: zonas } = trpc.relatoriosIA.getZonas.useQuery(undefined, {
+    enabled: isAdmin,
+  });
+  
+  const { data: gestores } = trpc.relatoriosIA.getGestoresParaFiltro.useQuery(undefined, {
+    enabled: isAdmin,
+  });
+  
+  // Construir parâmetros da query baseado nos filtros
+  const queryParams = useMemo(() => {
+    const params: {
+      periodo: typeof periodoRelatorioIA;
+      filtro?: 'pais' | 'zona' | 'gestor';
+      zonaId?: string;
+      gestorIdFiltro?: number;
+    } = {
+      periodo: periodoRelatorioIA,
+    };
+    
+    if (isAdmin) {
+      params.filtro = tipoFiltro;
+      if (tipoFiltro === 'zona' && zonaSeleccionada) {
+        params.zonaId = zonaSeleccionada;
+      } else if (tipoFiltro === 'gestor' && gestorSeleccionado) {
+        params.gestorIdFiltro = gestorSeleccionado;
+      }
+    }
+    
+    return params;
+  }, [periodoRelatorioIA, tipoFiltro, zonaSeleccionada, gestorSeleccionado, isAdmin]);
+  
   // Query para Relatório IA
   const { data: analiseIA, isLoading: loadingAnaliseIA, refetch: refetchAnaliseIA } = trpc.relatoriosIA.gerar.useQuery(
-    { periodo: periodoRelatorioIA },
+    queryParams,
     { enabled: false }
   );
 
   const handleGerarRelatorio = async () => {
+    // Validar filtros
+    if (isAdmin) {
+      if (tipoFiltro === 'zona' && !zonaSeleccionada) {
+        toast.error('Selecione uma zona');
+        return;
+      }
+      if (tipoFiltro === 'gestor' && !gestorSeleccionado) {
+        toast.error('Selecione um gestor');
+        return;
+      }
+    }
+    
     toast.info('A gerar relatório IA de resultados...');
     await refetchAnaliseIA();
     setMostrarRelatorioIA(true);
+  };
+  
+  // Obter label do filtro actual
+  const getFiltroLabel = () => {
+    if (!isAdmin) return 'Minhas Lojas';
+    if (tipoFiltro === 'pais') return 'Todo o País';
+    if (tipoFiltro === 'zona') return zonaSeleccionada ? `Zona: ${zonaSeleccionada}` : 'Selecione zona';
+    if (tipoFiltro === 'gestor') {
+      const gestor = gestores?.find(g => g.id === gestorSeleccionado);
+      return gestor ? `Gestor: ${gestor.nome}` : 'Selecione gestor';
+    }
+    return '';
   };
 
   return (
@@ -50,32 +113,126 @@ export function RelatorioIAResultados() {
         {/* Card Principal */}
         <Card className="border-2 border-purple-200 dark:border-purple-800">
           <CardHeader className="bg-purple-50 dark:bg-purple-900/20">
-            <div className="flex items-center justify-between flex-wrap gap-4">
-              <div>
-                <CardTitle className="flex items-center gap-2">
-                  <Sparkles className="h-5 w-5 text-purple-500" />
-                  Gerar Análise IA
-                </CardTitle>
-                <CardDescription>
-                  Selecione o período e gere uma análise detalhada dos resultados
-                </CardDescription>
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center justify-between flex-wrap gap-4">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <Sparkles className="h-5 w-5 text-purple-500" />
+                    Gerar Análise IA
+                  </CardTitle>
+                  <CardDescription>
+                    Selecione o período e filtros para gerar uma análise detalhada dos resultados
+                  </CardDescription>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Select value={periodoRelatorioIA} onValueChange={(v) => setPeriodoRelatorioIA(v as typeof periodoRelatorioIA)}>
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="mes_anterior">Mês Anterior</SelectItem>
-                    <SelectItem value="mensal">Mês Atual</SelectItem>
-                    <SelectItem value="trimestral">Trimestre</SelectItem>
-                    <SelectItem value="semestral">Semestre</SelectItem>
-                    <SelectItem value="anual">Ano</SelectItem>
-                  </SelectContent>
-                </Select>
+              
+              {/* Filtros */}
+              <div className="flex flex-wrap items-end gap-3">
+                {/* Período */}
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-muted-foreground">Período</label>
+                  <Select value={periodoRelatorioIA} onValueChange={(v) => setPeriodoRelatorioIA(v as typeof periodoRelatorioIA)}>
+                    <SelectTrigger className="w-[150px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="mes_anterior">Mês Anterior</SelectItem>
+                      <SelectItem value="mensal">Mês Atual</SelectItem>
+                      <SelectItem value="trimestral">Trimestre</SelectItem>
+                      <SelectItem value="semestral">Semestre</SelectItem>
+                      <SelectItem value="anual">Ano</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                {/* Filtros de Admin */}
+                {isAdmin && (
+                  <>
+                    {/* Tipo de Filtro */}
+                    <div className="space-y-1">
+                      <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                        <Filter className="h-3 w-3" />
+                        Filtrar por
+                      </label>
+                      <Select value={tipoFiltro} onValueChange={(v) => {
+                        setTipoFiltro(v as typeof tipoFiltro);
+                        setZonaSeleccionada('');
+                        setGestorSeleccionado(undefined);
+                      }}>
+                        <SelectTrigger className="w-[150px]">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="pais">
+                            <div className="flex items-center gap-2">
+                              <Globe className="h-4 w-4" />
+                              Todo o País
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="zona">
+                            <div className="flex items-center gap-2">
+                              <MapPin className="h-4 w-4" />
+                              Por Zona
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="gestor">
+                            <div className="flex items-center gap-2">
+                              <User className="h-4 w-4" />
+                              Por Gestor
+                            </div>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    {/* Seletor de Zona */}
+                    {tipoFiltro === 'zona' && (
+                      <div className="space-y-1">
+                        <label className="text-xs font-medium text-muted-foreground">Zona</label>
+                        <Select value={zonaSeleccionada} onValueChange={setZonaSeleccionada}>
+                          <SelectTrigger className="w-[180px]">
+                            <SelectValue placeholder="Selecione zona..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {zonas?.map((zona) => (
+                              <SelectItem key={zona} value={zona}>
+                                {zona}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+                    
+                    {/* Seletor de Gestor */}
+                    {tipoFiltro === 'gestor' && (
+                      <div className="space-y-1">
+                        <label className="text-xs font-medium text-muted-foreground">Gestor</label>
+                        <Select 
+                          value={gestorSeleccionado?.toString() || ''} 
+                          onValueChange={(v) => setGestorSeleccionado(v ? parseInt(v) : undefined)}
+                        >
+                          <SelectTrigger className="w-[200px]">
+                            <SelectValue placeholder="Selecione gestor..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {gestores?.map((gestor) => (
+                              <SelectItem key={gestor.id} value={gestor.id.toString()}>
+                                {gestor.nome}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+                  </>
+                )}
+                
+                {/* Botão Gerar */}
                 <Button 
                   onClick={handleGerarRelatorio}
                   disabled={loadingAnaliseIA}
+                  className="h-10"
                 >
                   {loadingAnaliseIA ? (
                     <><Loader2 className="h-4 w-4 animate-spin mr-2" /> A gerar...</>
@@ -83,10 +240,25 @@ export function RelatorioIAResultados() {
                     <><Sparkles className="h-4 w-4 mr-2" /> Gerar Relatório</>
                   )}
                 </Button>
+                
+                {/* Botão Exportar PDF */}
                 {mostrarRelatorioIA && analiseIA && (
                   <ExportarRelatorioIAPDF analiseIA={analiseIA} periodo={periodoRelatorioIA} />
                 )}
               </div>
+              
+              {/* Badge do Filtro Aplicado */}
+              {mostrarRelatorioIA && analiseIA && (
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground">Filtro aplicado:</span>
+                  <Badge variant="secondary" className="flex items-center gap-1">
+                    {tipoFiltro === 'pais' && <Globe className="h-3 w-3" />}
+                    {tipoFiltro === 'zona' && <MapPin className="h-3 w-3" />}
+                    {tipoFiltro === 'gestor' && <User className="h-3 w-3" />}
+                    {(analiseIA as any).filtroAplicado || getFiltroLabel()}
+                  </Badge>
+                </div>
+              )}
             </div>
           </CardHeader>
           
@@ -313,7 +485,7 @@ export function RelatorioIAResultados() {
                 <div>
                   <h3 className="font-semibold text-lg">Nenhum relatório gerado</h3>
                   <p className="text-muted-foreground">
-                    Selecione um período e clique em "Gerar Relatório" para obter uma análise detalhada dos resultados.
+                    Selecione um período{isAdmin ? ' e filtros' : ''} e clique em "Gerar Relatório" para obter uma análise detalhada dos resultados.
                   </p>
                 </div>
               </div>

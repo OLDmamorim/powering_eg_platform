@@ -1873,3 +1873,19 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## Bug - Taxa de Reparação no Dashboard do Gestor
 - [x] Corrigir Taxa de Reparação que mostra 0.2% em vez do valor correto no card "Resultados Dezembro 2025"
 - [x] Mover Relatório IA de Resultados do Dashboard para menu Resultados
+
+## Filtros Avançados no Relatório IA de Resultados
+- [ ] Adicionar filtro por zona geográfica
+- [ ] Adicionar filtro por gestor (lojas atribuídas ao gestor)
+- [ ] Adicionar filtro "Todo o País" (visão global)
+- [ ] Atualizar análise IA para considerar filtros selecionados
+
+## Filtros Avançados no Relatório IA de Resultados v6.2
+- [x] Filtro por zona (lojas dessa zona)
+- [x] Filtro por gestor (lojas atribuídas ao gestor)
+- [x] Filtro todo o país (sem filtro)
+- [x] Interface de seleção de filtros no frontend
+- [x] Backend para suportar filtros na geração de relatório IA
+- [x] Query para obter zonas distintas
+- [x] Query para obter gestores para filtro
+- [x] Badge mostrando filtro aplicado no relatório
