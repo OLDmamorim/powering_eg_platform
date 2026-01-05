@@ -1970,3 +1970,11 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Mostrar status (Acima/Abaixo do objetivo)
 - [x] Ordenar lojas por performance ou alfabeticamente
 - [x] Testar com dados reais
+
+## Filtros na Análise Loja a Loja v4.5
+- [x] Gestor: filtro Nacional (todas as lojas)
+- [x] Gestor: filtro Minhas Lojas (apenas lojas atribuídas)
+- [x] Admin: filtro Nacional (todas as lojas)
+- [x] Admin: filtro por Gestor (lojas de um gestor específico)
+- [x] Admin: filtro por Zona (lojas de uma zona específica)
+- [x] Testar filtros para ambos os roles (admin testado: Nacional, Por Gestor, Por Zona)

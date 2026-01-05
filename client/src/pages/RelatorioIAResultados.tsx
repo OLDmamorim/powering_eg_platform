@@ -49,6 +49,13 @@ export function RelatorioIAResultados() {
   // Estado para ordenar a análise loja a loja
   const [ordenacaoLojas, setOrdenacaoLojas] = useState<'desvio' | 'servicos' | 'alfabetico'>('desvio');
   
+  // Estados para filtros na análise loja a loja
+  // Gestor: 'nacional' (todas) ou 'minhas' (apenas suas lojas)
+  // Admin: 'nacional' (todas), 'gestor' (por gestor), 'zona' (por zona)
+  const [filtroAnaliseLojas, setFiltroAnaliseLojas] = useState<'nacional' | 'minhas' | 'gestor' | 'zona'>('nacional');
+  const [gestorFiltroLojas, setGestorFiltroLojas] = useState<number | undefined>(undefined);
+  const [zonaFiltroLojas, setZonaFiltroLojas] = useState<string | undefined>(undefined);
+  
   // Queries para obter opções de filtro (apenas admin)
   const { data: zonas } = trpc.relatoriosIA.getZonas.useQuery(undefined, {
     enabled: isAdmin,
@@ -57,6 +64,17 @@ export function RelatorioIAResultados() {
   const { data: gestores } = trpc.relatoriosIA.getGestoresParaFiltro.useQuery(undefined, {
     enabled: isAdmin,
   });
+  
+  // Query para obter lojas do gestor atual (para filtro "Minhas Lojas")
+  const { data: minhasLojas } = trpc.lojas.getByGestor.useQuery(undefined, {
+    enabled: !isAdmin, // Apenas para gestores
+  });
+  
+  // Query para obter lojas do gestor selecionado (para admin filtrar por gestor na análise loja a loja)
+  const { data: lojasDoGestorSelecionado } = trpc.gestores.getLojas.useQuery(
+    { gestorId: gestorFiltroLojas! },
+    { enabled: isAdmin && filtroAnaliseLojas === 'gestor' && !!gestorFiltroLojas }
+  );
   
   // Construir parâmetros da query baseado nos filtros
   const queryParams = useMemo(() => {
@@ -973,19 +991,113 @@ export function RelatorioIAResultados() {
                     </div>
                   </CollapsibleTrigger>
                   <CollapsibleContent className="pt-4">
-                    {/* Controlos de ordenação */}
-                    <div className="flex items-center gap-2 mb-4">
-                      <span className="text-sm text-muted-foreground">Ordenar por:</span>
-                      <Select value={ordenacaoLojas} onValueChange={(v) => setOrdenacaoLojas(v as typeof ordenacaoLojas)}>
-                        <SelectTrigger className="w-[180px]">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="desvio">Desvio vs Objetivo</SelectItem>
-                          <SelectItem value="servicos">Total de Serviços</SelectItem>
-                          <SelectItem value="alfabetico">Ordem Alfabética</SelectItem>
-                        </SelectContent>
-                      </Select>
+                    {/* Controlos de filtro e ordenação */}
+                    <div className="flex flex-wrap items-center gap-4 mb-4 p-3 bg-muted/30 rounded-lg">
+                      {/* Filtro por âmbito - diferente para gestor e admin */}
+                      <div className="flex items-center gap-2">
+                        <Filter className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm font-medium">Filtrar:</span>
+                        <Select 
+                          value={filtroAnaliseLojas} 
+                          onValueChange={(v) => {
+                            setFiltroAnaliseLojas(v as typeof filtroAnaliseLojas);
+                            setGestorFiltroLojas(undefined);
+                            setZonaFiltroLojas(undefined);
+                          }}
+                        >
+                          <SelectTrigger className="w-[160px]">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="nacional">
+                              <div className="flex items-center gap-2">
+                                <Globe className="h-4 w-4" />
+                                Nacional
+                              </div>
+                            </SelectItem>
+                            {!isAdmin && (
+                              <SelectItem value="minhas">
+                                <div className="flex items-center gap-2">
+                                  <Store className="h-4 w-4" />
+                                  Minhas Lojas
+                                </div>
+                              </SelectItem>
+                            )}
+                            {isAdmin && (
+                              <>
+                                <SelectItem value="gestor">
+                                  <div className="flex items-center gap-2">
+                                    <User className="h-4 w-4" />
+                                    Por Gestor
+                                  </div>
+                                </SelectItem>
+                                <SelectItem value="zona">
+                                  <div className="flex items-center gap-2">
+                                    <MapPin className="h-4 w-4" />
+                                    Por Zona
+                                  </div>
+                                </SelectItem>
+                              </>
+                            )}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      {/* Seletor de gestor (apenas admin + filtro gestor) */}
+                      {isAdmin && filtroAnaliseLojas === 'gestor' && gestores && (
+                        <Select 
+                          value={gestorFiltroLojas?.toString() || ''} 
+                          onValueChange={(v) => setGestorFiltroLojas(v ? parseInt(v) : undefined)}
+                        >
+                          <SelectTrigger className="w-[200px]">
+                            <SelectValue placeholder="Selecione gestor..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {gestores.map((g) => (
+                              <SelectItem key={g.id} value={g.id.toString()}>
+                                {g.nome}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
+                      
+                      {/* Seletor de zona (apenas admin + filtro zona) */}
+                      {isAdmin && filtroAnaliseLojas === 'zona' && zonas && (
+                        <Select 
+                          value={zonaFiltroLojas || ''} 
+                          onValueChange={(v) => setZonaFiltroLojas(v || undefined)}
+                        >
+                          <SelectTrigger className="w-[200px]">
+                            <SelectValue placeholder="Selecione zona..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {zonas.map((z) => (
+                              <SelectItem key={z} value={z}>
+                                {z}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
+                      
+                      {/* Separador */}
+                      <div className="h-6 w-px bg-border hidden md:block" />
+                      
+                      {/* Ordenação */}
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-muted-foreground">Ordenar:</span>
+                        <Select value={ordenacaoLojas} onValueChange={(v) => setOrdenacaoLojas(v as typeof ordenacaoLojas)}>
+                          <SelectTrigger className="w-[160px]">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="desvio">Desvio vs Objetivo</SelectItem>
+                            <SelectItem value="servicos">Total de Serviços</SelectItem>
+                            <SelectItem value="alfabetico">Ordem Alfabética</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
                     
                     {/* Tabela de análise loja a loja */}
@@ -995,6 +1107,7 @@ export function RelatorioIAResultados() {
                           <TableRow>
                             <TableHead className="w-12">#</TableHead>
                             <TableHead>Loja</TableHead>
+                            {isAdmin && <TableHead>Zona</TableHead>}
                             <TableHead className="text-right">Serviços</TableHead>
                             <TableHead className="text-right">Objetivo</TableHead>
                             <TableHead className="text-right">Desvio</TableHead>
@@ -1003,13 +1116,41 @@ export function RelatorioIAResultados() {
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {[...analiseIA.dadosGraficos.rankingServicos]
-                            .sort((a, b) => {
+                          {(() => {
+                            // Aplicar filtro
+                            let lojasFiltradas = [...analiseIA.dadosGraficos.rankingServicos];
+                            
+                            // Filtro para gestor: "minhas" = apenas lojas do gestor
+                            if (!isAdmin && filtroAnaliseLojas === 'minhas' && minhasLojas) {
+                              const minhasLojasIds = minhasLojas.map(l => l.id);
+                              lojasFiltradas = lojasFiltradas.filter(l => 
+                                l.lojaId && minhasLojasIds.includes(l.lojaId)
+                              );
+                            }
+                            
+                            // Filtro para admin: por gestor
+                            if (isAdmin && filtroAnaliseLojas === 'gestor' && gestorFiltroLojas && lojasDoGestorSelecionado) {
+                              const lojasIdsDoGestor = lojasDoGestorSelecionado.map(l => l.id);
+                              lojasFiltradas = lojasFiltradas.filter(l => 
+                                l.lojaId && lojasIdsDoGestor.includes(l.lojaId)
+                              );
+                            }
+                            
+                            // Filtro para admin: por zona
+                            if (isAdmin && filtroAnaliseLojas === 'zona' && zonaFiltroLojas) {
+                              lojasFiltradas = lojasFiltradas.filter(l => 
+                                l.zona === zonaFiltroLojas
+                              );
+                            }
+                            
+                            // Ordenar
+                            lojasFiltradas.sort((a, b) => {
                               if (ordenacaoLojas === 'desvio') return (b.desvio || 0) - (a.desvio || 0);
                               if (ordenacaoLojas === 'servicos') return (b.servicos || 0) - (a.servicos || 0);
                               return a.loja.localeCompare(b.loja);
-                            })
-                            .map((loja, idx) => {
+                            });
+                            
+                            return lojasFiltradas.map((loja, idx) => {
                               const desvioPercent = (loja.desvio || 0) * 100;
                               const taxaRepPercent = (loja.taxaReparacao || 0) * 100;
                               const acimaMeta = desvioPercent >= 0;
@@ -1018,6 +1159,7 @@ export function RelatorioIAResultados() {
                                 <TableRow key={idx} className={acimaMeta ? 'bg-green-50/50 dark:bg-green-900/10' : 'bg-red-50/50 dark:bg-red-900/10'}>
                                   <TableCell className="font-medium text-muted-foreground">{idx + 1}</TableCell>
                                   <TableCell className="font-medium">{loja.loja}</TableCell>
+                                  {isAdmin && <TableCell className="text-muted-foreground">{loja.zona || '-'}</TableCell>}
                                   <TableCell className="text-right font-semibold">{loja.servicos}</TableCell>
                                   <TableCell className="text-right text-muted-foreground">{loja.objetivo || 'N/A'}</TableCell>
                                   <TableCell className={`text-right font-semibold ${acimaMeta ? 'text-green-600' : 'text-red-600'}`}>
@@ -1041,38 +1183,63 @@ export function RelatorioIAResultados() {
                                   </TableCell>
                                 </TableRow>
                               );
-                            })}
+                            });
+                          })()}
                         </TableBody>
                       </Table>
                     </div>
                     
-                    {/* Resumo rápido */}
-                    <div className="mt-4 p-4 bg-muted/30 rounded-lg">
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                        <div>
-                          <p className="text-xs text-muted-foreground">Total Lojas</p>
-                          <p className="text-lg font-bold">{analiseIA.dadosGraficos.rankingServicos.length}</p>
+                    {/* Resumo rápido - usa os mesmos filtros */}
+                    {(() => {
+                      // Aplicar os mesmos filtros para o resumo
+                      let lojasFiltradas = [...analiseIA.dadosGraficos.rankingServicos];
+                      
+                      if (!isAdmin && filtroAnaliseLojas === 'minhas' && minhasLojas) {
+                        const minhasLojasIds = minhasLojas.map(l => l.id);
+                        lojasFiltradas = lojasFiltradas.filter(l => 
+                          l.lojaId && minhasLojasIds.includes(l.lojaId)
+                        );
+                      }
+                      
+                      if (isAdmin && filtroAnaliseLojas === 'gestor' && gestorFiltroLojas && lojasDoGestorSelecionado) {
+                        const lojasIdsDoGestor = lojasDoGestorSelecionado.map(l => l.id);
+                        lojasFiltradas = lojasFiltradas.filter(l => 
+                          l.lojaId && lojasIdsDoGestor.includes(l.lojaId)
+                        );
+                      }
+                      
+                      if (isAdmin && filtroAnaliseLojas === 'zona' && zonaFiltroLojas) {
+                        lojasFiltradas = lojasFiltradas.filter(l => l.zona === zonaFiltroLojas);
+                      }
+                      
+                      const totalLojas = lojasFiltradas.length;
+                      const acimaObjetivo = lojasFiltradas.filter(l => (l.desvio || 0) >= 0).length;
+                      const abaixoObjetivo = lojasFiltradas.filter(l => (l.desvio || 0) < 0).length;
+                      const totalServicos = lojasFiltradas.reduce((sum, l) => sum + (l.servicos || 0), 0);
+                      
+                      return (
+                        <div className="mt-4 p-4 bg-muted/30 rounded-lg">
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                            <div>
+                              <p className="text-xs text-muted-foreground">Total Lojas</p>
+                              <p className="text-lg font-bold">{totalLojas}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-muted-foreground">Acima do Objetivo</p>
+                              <p className="text-lg font-bold text-green-600">{acimaObjetivo}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-muted-foreground">Abaixo do Objetivo</p>
+                              <p className="text-lg font-bold text-red-600">{abaixoObjetivo}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-muted-foreground">Total Serviços</p>
+                              <p className="text-lg font-bold">{totalServicos}</p>
+                            </div>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-xs text-muted-foreground">Acima do Objetivo</p>
-                          <p className="text-lg font-bold text-green-600">
-                            {analiseIA.dadosGraficos.rankingServicos.filter(l => (l.desvio || 0) >= 0).length}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-muted-foreground">Abaixo do Objetivo</p>
-                          <p className="text-lg font-bold text-red-600">
-                            {analiseIA.dadosGraficos.rankingServicos.filter(l => (l.desvio || 0) < 0).length}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-muted-foreground">Total Serviços</p>
-                          <p className="text-lg font-bold">
-                            {analiseIA.dadosGraficos.rankingServicos.reduce((sum, l) => sum + (l.servicos || 0), 0)}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
+                      );
+                    })()}
                   </CollapsibleContent>
                 </Collapsible>
               )}

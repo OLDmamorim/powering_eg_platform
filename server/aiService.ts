@@ -90,7 +90,7 @@ interface AnaliseIA {
     mediaTaxaReparacao: number;
   };
   dadosGraficos?: {
-    rankingServicos: Array<{ loja: string; servicos: number; desvio: number; objetivo?: number; taxaReparacao?: number }>;
+    rankingServicos: Array<{ lojaId?: number; loja: string; zona?: string | null; servicos: number; desvio: number; objetivo?: number; taxaReparacao?: number }>;
     evolucaoMensal: Array<{ mes: string; servicos: number; objetivo: number }>;
     distribuicaoDesvios: Array<{ faixa: string; count: number }>;
   };
@@ -669,8 +669,11 @@ Respondes sempre em português europeu e em formato JSON válido.`,
     }
     
     const dadosGraficos = rankingLojas.length > 0 ? {
-      rankingServicos: rankingLojas.slice(0, 10).map((l: any) => ({
+      // Incluir TODAS as lojas para permitir filtragem no frontend
+      rankingServicos: rankingLojas.map((l: any) => ({
+        lojaId: l.lojaId,
         loja: l.lojaNome,
+        zona: l.zona || null,
         servicos: l.totalServicos,
         desvio: l.desvioPercentualMes || 0,
         objetivo: l.objetivoMensal || 0,
