@@ -4,7 +4,7 @@ import DashboardLayout from '../components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Button } from '../components/ui/button';
-import { Loader2, TrendingUp, TrendingDown, Target, Award, BarChart3, Sparkles, FileText, Trophy, Store, ArrowUpRight, ArrowDownRight, Globe, MapPin, User, Filter, AlertTriangle, CheckCircle2, XCircle, Percent, Activity, PieChart } from 'lucide-react';
+import { Loader2, TrendingUp, TrendingDown, Target, Award, BarChart3, Sparkles, FileText, Trophy, Store, ArrowUpRight, ArrowDownRight, Globe, MapPin, User, Filter, AlertTriangle, CheckCircle2, XCircle, Percent, Activity, PieChart, X } from 'lucide-react';
 import { useAuth } from '../_core/hooks/useAuth';
 import { toast } from 'sonner';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement } from 'chart.js';
@@ -13,6 +13,8 @@ import { ExportarRelatorioIAPDF } from '../components/ExportarRelatorioIAPDF';
 import { Badge } from '../components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
 import { Progress } from '../components/ui/progress';
+import { Checkbox } from '../components/ui/checkbox';
+import { Popover, PopoverContent, PopoverTrigger } from '../components/ui/popover';
 
 // Registar componentes do Chart.js
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
@@ -27,7 +29,7 @@ export function RelatorioIAResultados() {
   
   // Estados para filtros (apenas admin)
   const [tipoFiltro, setTipoFiltro] = useState<'pais' | 'zona' | 'gestor'>('pais');
-  const [zonaSeleccionada, setZonaSeleccionada] = useState<string>('');
+  const [zonasSeleccionadas, setZonasSeleccionadas] = useState<string[]>([]);
   const [gestorSeleccionado, setGestorSeleccionado] = useState<number | undefined>(undefined);
   
   // Queries para obter opções de filtro (apenas admin)
@@ -44,7 +46,7 @@ export function RelatorioIAResultados() {
     const params: {
       periodo: typeof periodoRelatorioIA;
       filtro?: 'pais' | 'zona' | 'gestor';
-      zonaId?: string;
+      zonasIds?: string[];
       gestorIdFiltro?: number;
     } = {
       periodo: periodoRelatorioIA,
@@ -52,15 +54,15 @@ export function RelatorioIAResultados() {
     
     if (isAdmin) {
       params.filtro = tipoFiltro;
-      if (tipoFiltro === 'zona' && zonaSeleccionada) {
-        params.zonaId = zonaSeleccionada;
+      if (tipoFiltro === 'zona' && zonasSeleccionadas.length > 0) {
+        params.zonasIds = zonasSeleccionadas;
       } else if (tipoFiltro === 'gestor' && gestorSeleccionado) {
         params.gestorIdFiltro = gestorSeleccionado;
       }
     }
     
     return params;
-  }, [periodoRelatorioIA, tipoFiltro, zonaSeleccionada, gestorSeleccionado, isAdmin]);
+  }, [periodoRelatorioIA, tipoFiltro, zonasSeleccionadas, gestorSeleccionado, isAdmin]);
   
   // Query para Relatório IA
   const { data: analiseIA, isLoading: loadingAnaliseIA, refetch: refetchAnaliseIA } = trpc.relatoriosIA.gerar.useQuery(
@@ -71,8 +73,8 @@ export function RelatorioIAResultados() {
   const handleGerarRelatorio = async () => {
     // Validar filtros
     if (isAdmin) {
-      if (tipoFiltro === 'zona' && !zonaSeleccionada) {
-        toast.error('Selecione uma zona');
+      if (tipoFiltro === 'zona' && zonasSeleccionadas.length === 0) {
+        toast.error('Selecione pelo menos uma zona');
         return;
       }
       if (tipoFiltro === 'gestor' && !gestorSeleccionado) {
@@ -86,11 +88,34 @@ export function RelatorioIAResultados() {
     setMostrarRelatorioIA(true);
   };
   
+  // Funções para gerir seleção de zonas
+  const handleToggleZona = (zona: string) => {
+    setZonasSeleccionadas(prev => 
+      prev.includes(zona) 
+        ? prev.filter(z => z !== zona)
+        : [...prev, zona]
+    );
+  };
+  
+  const handleSelectAllZonas = () => {
+    if (zonas) {
+      setZonasSeleccionadas(zonas);
+    }
+  };
+  
+  const handleClearZonas = () => {
+    setZonasSeleccionadas([]);
+  };
+  
   // Obter label do filtro actual
   const getFiltroLabel = () => {
     if (!isAdmin) return 'Minhas Lojas';
     if (tipoFiltro === 'pais') return 'Todo o País';
-    if (tipoFiltro === 'zona') return zonaSeleccionada ? `Zona: ${zonaSeleccionada}` : 'Selecione zona';
+    if (tipoFiltro === 'zona') {
+      if (zonasSeleccionadas.length === 0) return 'Selecione zona(s)';
+      if (zonasSeleccionadas.length === 1) return `Zona: ${zonasSeleccionadas[0]}`;
+      return `${zonasSeleccionadas.length} zonas selecionadas`;
+    }
     if (tipoFiltro === 'gestor') {
       const gestor = gestores?.find(g => g.id === gestorSeleccionado);
       return gestor ? `Gestor: ${gestor.nome}` : 'Selecione gestor';
@@ -163,7 +188,7 @@ export function RelatorioIAResultados() {
                       </label>
                       <Select value={tipoFiltro} onValueChange={(v) => {
                         setTipoFiltro(v as typeof tipoFiltro);
-                        setZonaSeleccionada('');
+                        setZonasSeleccionadas([]);
                         setGestorSeleccionado(undefined);
                       }}>
                         <SelectTrigger className="w-[150px]">
@@ -192,22 +217,79 @@ export function RelatorioIAResultados() {
                       </Select>
                     </div>
                     
-                    {/* Seletor de Zona */}
+                    {/* Seletor de Zonas (Múltipla Seleção) */}
                     {tipoFiltro === 'zona' && (
                       <div className="space-y-1">
-                        <label className="text-xs font-medium text-muted-foreground">Zona</label>
-                        <Select value={zonaSeleccionada} onValueChange={setZonaSeleccionada}>
-                          <SelectTrigger className="w-[180px]">
-                            <SelectValue placeholder="Selecione zona..." />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {zonas?.map((zona) => (
-                              <SelectItem key={zona} value={zona}>
+                        <label className="text-xs font-medium text-muted-foreground">Zonas</label>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button 
+                              variant="outline" 
+                              className="w-[250px] justify-between font-normal"
+                            >
+                              <span className="truncate">
+                                {zonasSeleccionadas.length === 0 
+                                  ? 'Selecione zona(s)...' 
+                                  : zonasSeleccionadas.length === 1
+                                    ? zonasSeleccionadas[0]
+                                    : `${zonasSeleccionadas.length} zonas selecionadas`
+                                }
+                              </span>
+                              <MapPin className="h-4 w-4 ml-2 shrink-0 opacity-50" />
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-[250px] p-0" align="start">
+                            <div className="p-2 border-b flex gap-2">
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="h-7 text-xs"
+                                onClick={handleSelectAllZonas}
+                              >
+                                Selecionar Todas
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="h-7 text-xs"
+                                onClick={handleClearZonas}
+                              >
+                                Limpar
+                              </Button>
+                            </div>
+                            <div className="max-h-[200px] overflow-y-auto p-2">
+                              {zonas?.map((zona) => (
+                                <div 
+                                  key={zona} 
+                                  className="flex items-center gap-2 py-1.5 px-2 hover:bg-muted rounded cursor-pointer"
+                                  onClick={() => handleToggleZona(zona)}
+                                >
+                                  <Checkbox 
+                                    checked={zonasSeleccionadas.includes(zona)}
+                                    onCheckedChange={() => handleToggleZona(zona)}
+                                  />
+                                  <span className="text-sm">{zona}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </PopoverContent>
+                        </Popover>
+                        {/* Badges das zonas selecionadas */}
+                        {zonasSeleccionadas.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {zonasSeleccionadas.map((zona) => (
+                              <Badge 
+                                key={zona} 
+                                variant="secondary" 
+                                className="text-xs cursor-pointer hover:bg-destructive hover:text-destructive-foreground"
+                                onClick={() => handleToggleZona(zona)}
+                              >
                                 {zona}
-                              </SelectItem>
+                                <X className="h-3 w-3 ml-1" />
+                              </Badge>
                             ))}
-                          </SelectContent>
-                        </Select>
+                          </div>
+                        )}
                       </div>
                     )}
                     

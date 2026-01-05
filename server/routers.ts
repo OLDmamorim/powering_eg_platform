@@ -932,6 +932,7 @@ export const appRouter = router({
         periodo: z.enum(["diario", "semanal", "mensal", "mes_anterior", "trimestral", "semestral", "anual"]),
         filtro: z.enum(["pais", "zona", "gestor"]).optional().default("pais"),
         zonaId: z.string().optional(),
+        zonasIds: z.array(z.string()).optional(), // Novo: múltiplas zonas
         gestorIdFiltro: z.number().optional(),
       }))
       .query(async ({ input, ctx }) => {
@@ -952,8 +953,8 @@ export const appRouter = router({
             lojasIds = lojasDoGestor.map(l => l.id);
             const gestorInfo = await db.getGestorById(input.gestorIdFiltro);
             filtroDescricao = `Gestor: ${gestorInfo?.nome || 'N/A'}`;
-          } else if (input.filtro === "zona" && input.zonaId) {
-            // Filtrar por zona
+          } else if (input.filtro === "zona") {
+            // Filtrar por zona(s)
             const agora = new Date();
             let mesParaBuscar = agora.getMonth() + 1;
             let anoParaBuscar = agora.getFullYear();
@@ -964,8 +965,20 @@ export const appRouter = router({
                 anoParaBuscar = agora.getFullYear() - 1;
               }
             }
-            lojasIds = await db.getLojaIdsPorZona(input.zonaId, mesParaBuscar, anoParaBuscar);
-            filtroDescricao = `Zona: ${input.zonaId}`;
+            
+            // Suportar múltiplas zonas ou zona única
+            if (input.zonasIds && input.zonasIds.length > 0) {
+              lojasIds = await db.getLojaIdsPorZonas(input.zonasIds, mesParaBuscar, anoParaBuscar);
+              if (input.zonasIds.length === 1) {
+                filtroDescricao = `Zona: ${input.zonasIds[0]}`;
+              } else {
+                filtroDescricao = `Zonas: ${input.zonasIds.join(', ')}`;
+              }
+            } else if (input.zonaId) {
+              // Compatibilidade com versão anterior (zona única)
+              lojasIds = await db.getLojaIdsPorZona(input.zonaId, mesParaBuscar, anoParaBuscar);
+              filtroDescricao = `Zona: ${input.zonaId}`;
+            }
           }
           // filtro === "pais" → sem filtro, todas as lojas
         }

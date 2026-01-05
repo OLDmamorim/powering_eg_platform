@@ -1901,3 +1901,12 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [ ] Identificação de padrões de sazonalidade
 - [ ] Recomendações baseadas em dados numéricos
 - [ ] Testar nova análise com dados reais
+
+## Filtro por Zona com Seleção Múltipla v6.4
+- [x] Identificar zonas disponíveis nos dados de resultados
+- [x] Criar endpoint para listar zonas únicas
+- [x] Implementar seleção múltipla de zonas no frontend
+- [x] Adicionar opção "Nacional" (todo o país)
+- [x] Filtrar dados por zonas selecionadas no backend
+- [x] Atualizar análise IA para considerar zonas filtradas
+- [x] Testar combinação de filtros (mês + múltiplas zonas)

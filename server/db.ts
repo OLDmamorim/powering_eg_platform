@@ -5901,6 +5901,30 @@ export async function getLojaIdsPorZona(zona: string, mes: number, ano: number):
 }
 
 /**
+ * Obtém IDs das lojas de múltiplas zonas
+ */
+export async function getLojaIdsPorZonas(zonas: string[], mes: number, ano: number): Promise<number[]> {
+  const db = await getDb();
+  if (!db) return [];
+  if (zonas.length === 0) return [];
+  
+  const lojas = await db
+    .selectDistinct({
+      lojaId: resultadosMensais.lojaId,
+    })
+    .from(resultadosMensais)
+    .where(
+      and(
+        inArray(resultadosMensais.zona, zonas),
+        eq(resultadosMensais.mes, mes),
+        eq(resultadosMensais.ano, ano)
+      )
+    );
+  
+  return lojas.map(l => l.lojaId);
+}
+
+/**
  * Obtém estatísticas de uma zona específica
  */
 export async function getEstatisticasZona(zona: string, mes: number, ano: number) {
