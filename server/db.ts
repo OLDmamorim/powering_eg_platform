@@ -1,4 +1,4 @@
-import { eq, and, desc, sql, inArray, gte, lte, or, gt, isNull } from "drizzle-orm";
+import { eq, and, desc, sql, inArray, gte, lte, or, gt, lt, isNull } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { 
   InsertUser, 
@@ -5694,4 +5694,166 @@ export async function updateOcorrenciaEstrutural(
     .update(ocorrenciasEstruturais)
     .set(updateData)
     .where(eq(ocorrenciasEstruturais.id, id));
+}
+
+
+// ==================== ALERTAS DE PERFORMANCE ====================
+
+/**
+ * Verifica lojas com performance abaixo do limiar e cria alertas automáticos
+ * @param limiarDesvio - Percentual de desvio negativo para disparar alerta (ex: -10 = 10% abaixo do objetivo)
+ * @param mes - Mês a verificar
+ * @param ano - Ano a verificar
+ */
+export async function verificarECriarAlertasPerformance(
+  limiarDesvio: number = -10,
+  mes: number,
+  ano: number
+): Promise<{ alertasCriados: number; lojasVerificadas: number }> {
+  const db = await getDb();
+  if (!db) return { alertasCriados: 0, lojasVerificadas: 0 };
+
+  // Buscar lojas com desvio abaixo do limiar
+  const lojasComPerformanceBaixa = await db
+    .select({
+      lojaId: resultadosMensais.lojaId,
+      lojaNome: lojas.nome,
+      desvioPercentualMes: resultadosMensais.desvioPercentualMes,
+      totalServicos: resultadosMensais.totalServicos,
+      objetivoMensal: resultadosMensais.objetivoMensal,
+    })
+    .from(resultadosMensais)
+    .innerJoin(lojas, eq(resultadosMensais.lojaId, lojas.id))
+    .where(
+      and(
+        eq(resultadosMensais.mes, mes),
+        eq(resultadosMensais.ano, ano),
+        sql`${resultadosMensais.desvioPercentualMes} < ${limiarDesvio / 100}` // Converter percentual para decimal
+      )
+    );
+
+  let alertasCriados = 0;
+
+  for (const loja of lojasComPerformanceBaixa) {
+    // Verificar se já existe alerta pendente para esta loja
+    const existe = await existeAlertaPendente(loja.lojaId, 'performance_baixa');
+    
+    if (!existe) {
+      const desvioPercent = loja.desvioPercentualMes 
+        ? (parseFloat(loja.desvioPercentualMes.toString()) * 100).toFixed(1)
+        : '0';
+      
+      await createAlerta({
+        lojaId: loja.lojaId,
+        tipo: 'performance_baixa',
+        descricao: `Loja ${loja.lojaNome} está ${desvioPercent}% abaixo do objetivo mensal. Serviços: ${loja.totalServicos || 0} / Objetivo: ${loja.objetivoMensal || 0}`,
+      });
+      alertasCriados++;
+    }
+  }
+
+  return { 
+    alertasCriados, 
+    lojasVerificadas: lojasComPerformanceBaixa.length 
+  };
+}
+
+/**
+ * Obtém lojas com performance abaixo do limiar (sem criar alertas)
+ */
+export async function getLojasPerformanceBaixa(
+  limiarDesvio: number = -10,
+  mes: number,
+  ano: number
+): Promise<Array<{
+  lojaId: number;
+  lojaNome: string;
+  desvioPercentualMes: number;
+  totalServicos: number;
+  objetivoMensal: number;
+  zona: string | null;
+}>> {
+  const db = await getDb();
+  if (!db) return [];
+
+  const resultado = await db
+    .select({
+      lojaId: resultadosMensais.lojaId,
+      lojaNome: lojas.nome,
+      desvioPercentualMes: resultadosMensais.desvioPercentualMes,
+      totalServicos: resultadosMensais.totalServicos,
+      objetivoMensal: resultadosMensais.objetivoMensal,
+      zona: resultadosMensais.zona,
+    })
+    .from(resultadosMensais)
+    .innerJoin(lojas, eq(resultadosMensais.lojaId, lojas.id))
+    .where(
+      and(
+        eq(resultadosMensais.mes, mes),
+        eq(resultadosMensais.ano, ano),
+        sql`${resultadosMensais.desvioPercentualMes} < ${limiarDesvio / 100}`
+      )
+    )
+    .orderBy(resultadosMensais.desvioPercentualMes);
+
+  return resultado.map(r => ({
+    ...r,
+    desvioPercentualMes: r.desvioPercentualMes ? parseFloat(r.desvioPercentualMes.toString()) * 100 : 0,
+    totalServicos: r.totalServicos || 0,
+    objetivoMensal: r.objetivoMensal || 0,
+  }));
+}
+
+/**
+ * Obtém evolução global mensal (todas as lojas agregadas)
+ */
+export async function getEvolucaoGlobal(mesesAtras: number = 12): Promise<Array<{
+  mes: number;
+  ano: number;
+  totalServicos: number;
+  objetivoMensal: number;
+  desvioPercentualMes: number;
+  taxaReparacao: number;
+  totalLojas: number;
+}>> {
+  const db = await getDb();
+  if (!db) return [];
+
+  const dataLimite = new Date();
+  dataLimite.setMonth(dataLimite.getMonth() - mesesAtras);
+  const anoLimite = dataLimite.getFullYear();
+  const mesLimite = dataLimite.getMonth() + 1;
+
+  const resultados = await db
+    .select({
+      mes: resultadosMensais.mes,
+      ano: resultadosMensais.ano,
+      totalServicos: sql<number>`SUM(${resultadosMensais.totalServicos})`,
+      objetivoMensal: sql<number>`SUM(${resultadosMensais.objetivoMensal})`,
+      desvioPercentualMes: sql<number>`AVG(${resultadosMensais.desvioPercentualMes})`,
+      taxaReparacao: sql<number>`AVG(${resultadosMensais.taxaReparacao})`,
+      totalLojas: sql<number>`COUNT(DISTINCT ${resultadosMensais.lojaId})`,
+    })
+    .from(resultadosMensais)
+    .where(
+      or(
+        gt(resultadosMensais.ano, anoLimite),
+        and(
+          eq(resultadosMensais.ano, anoLimite),
+          gte(resultadosMensais.mes, mesLimite)
+        )
+      )
+    )
+    .groupBy(resultadosMensais.mes, resultadosMensais.ano)
+    .orderBy(resultadosMensais.ano, resultadosMensais.mes);
+
+  return resultados.map(r => ({
+    mes: r.mes,
+    ano: r.ano,
+    totalServicos: r.totalServicos || 0,
+    objetivoMensal: r.objetivoMensal || 0,
+    desvioPercentualMes: r.desvioPercentualMes ? parseFloat(r.desvioPercentualMes.toString()) * 100 : 0,
+    taxaReparacao: r.taxaReparacao ? parseFloat(r.taxaReparacao.toString()) * 100 : 0,
+    totalLojas: r.totalLojas || 0,
+  }));
 }

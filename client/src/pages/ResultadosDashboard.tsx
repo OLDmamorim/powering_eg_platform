@@ -10,6 +10,9 @@ import { useAuth } from '../_core/hooks/useAuth';
 import { toast } from 'sonner';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
+import { ExportarRelatorioIAPDF } from '../components/ExportarRelatorioIAPDF';
+import { AlertasPerformance } from '../components/AlertasPerformance';
+import { GraficoEvolucaoHistorica } from '../components/GraficoEvolucaoHistorica';
 
 // Registar componentes do Chart.js
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
@@ -1042,6 +1045,9 @@ export function ResultadosDashboard() {
                     <><Sparkles className="h-4 w-4 mr-2" /> Gerar Relatório</>
                   )}
                 </Button>
+                {mostrarRelatorioIA && analiseIA && (
+                  <ExportarRelatorioIAPDF analiseIA={analiseIA} periodo={periodoRelatorioIA} />
+                )}
               </div>
             </div>
           </CardHeader>
@@ -1210,6 +1216,14 @@ export function ResultadosDashboard() {
             </CardContent>
           )}
         </Card>
+
+        {/* Gráfico de Evolução Histórica */}
+        <GraficoEvolucaoHistorica />
+
+        {/* Alertas de Performance (apenas para admin) */}
+        {user?.role === 'admin' && periodos && periodos.length > 0 && (
+          <AlertasPerformance periodos={periodos} />
+        )}
       </div>
     </DashboardLayout>
   );

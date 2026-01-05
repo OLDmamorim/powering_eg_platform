@@ -1,0 +1,1 @@
+ALTER TABLE `alertas` MODIFY COLUMN `tipo` enum('pontos_negativos_consecutivos','pendentes_antigos','sem_visitas','performance_baixa') NOT NULL;

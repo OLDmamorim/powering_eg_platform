@@ -1180,7 +1180,7 @@ export const appRouter = router({
     create: adminProcedure
       .input(z.object({
         lojaId: z.number(),
-        tipo: z.enum(["pontos_negativos_consecutivos", "pendentes_antigos", "sem_visitas"]),
+        tipo: z.enum(["pontos_negativos_consecutivos", "pendentes_antigos", "sem_visitas", "performance_baixa"]),
         descricao: z.string(),
       }))
       .mutation(async ({ input }) => {
@@ -1190,6 +1190,36 @@ export const appRouter = router({
           throw new Error("Já existe um alerta pendente deste tipo para esta loja");
         }
         return await db.createAlerta(input);
+      }),
+    
+    // Verificar e criar alertas de performance baixa
+    verificarPerformance: adminProcedure
+      .input(z.object({
+        limiarDesvio: z.number().default(-10), // -10 = 10% abaixo do objetivo
+        mes: z.number().min(1).max(12),
+        ano: z.number(),
+      }))
+      .mutation(async ({ input }) => {
+        return await db.verificarECriarAlertasPerformance(
+          input.limiarDesvio,
+          input.mes,
+          input.ano
+        );
+      }),
+    
+    // Listar lojas com performance baixa (sem criar alertas)
+    lojasPerformanceBaixa: adminProcedure
+      .input(z.object({
+        limiarDesvio: z.number().default(-10),
+        mes: z.number().min(1).max(12),
+        ano: z.number(),
+      }))
+      .query(async ({ input }) => {
+        return await db.getLojasPerformanceBaixa(
+          input.limiarDesvio,
+          input.mes,
+          input.ano
+        );
       }),
     
     // Atualizar estado do alerta
@@ -2236,6 +2266,15 @@ export const appRouter = router({
       }))
       .query(async ({ input }) => {
         return await db.getTotaisMensais(input.mes, input.ano);
+      }),
+    
+    // Obter evolução global (todas as lojas agregadas ao longo do tempo)
+    evolucaoGlobal: protectedProcedure
+      .input(z.object({
+        mesesAtras: z.number().optional().default(12),
+      }))
+      .query(async ({ input }) => {
+        return await db.getEvolucaoGlobal(input.mesesAtras);
       }),
     
     // Exportar relatório Excel "Minhas Lojas"

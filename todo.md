@@ -1857,3 +1857,9 @@ NOTA: Sistema de email requer configuração externa no deployment
   - [x] Análise de lojas em destaque e lojas que precisam atenção
 - [x] Atualizar schemas de BD para novos períodos (relatorios_ia, resumos_globais)
 - [x] Executar migrações da base de dados
+
+
+## Funcionalidades v6.3 - PDF, Alertas e Histórico
+- [x] Exportar Relatório IA para PDF com gráficos incluídos
+- [x] Sistema de alertas automáticos de performance (notificar quando loja cai abaixo de limiar)
+- [x] Gráfico de comparação histórica (evolução mensal ao longo do tempo)

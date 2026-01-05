@@ -156,7 +156,7 @@ export type InsertPendente = typeof pendentes.$inferInsert;
 export const alertas = mysqlTable("alertas", {
   id: int("id").autoincrement().primaryKey(),
   lojaId: int("lojaId").notNull(), // FK para lojas.id
-  tipo: mysqlEnum("tipo", ["pontos_negativos_consecutivos", "pendentes_antigos", "sem_visitas"]).notNull(),
+  tipo: mysqlEnum("tipo", ["pontos_negativos_consecutivos", "pendentes_antigos", "sem_visitas", "performance_baixa"]).notNull(),
   descricao: text("descricao").notNull(),
   estado: mysqlEnum("estado", ["pendente", "resolvido"]).default("pendente").notNull(),
   dataResolucao: timestamp("dataResolucao"),
