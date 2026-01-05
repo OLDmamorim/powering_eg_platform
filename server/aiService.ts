@@ -30,18 +30,50 @@ interface AnaliseIA {
     lojasAtencao: string[];
     tendenciasServicos: string;
     recomendacoes: string[];
+    // Novas métricas analíticas
+    analiseQuantitativa?: {
+      taxaCumprimentoObjetivo: number; // % de lojas que atingiram objetivo
+      desvioMedioRede: number; // desvio médio vs objetivo
+      taxaReparacaoMedia: number; // taxa média de reparação
+      servicosTotais: number;
+      objetivoTotal: number;
+      variacao: number; // vs período anterior
+    };
+    rankingDetalhado?: Array<{
+      posicao: number;
+      loja: string;
+      servicos: number;
+      objetivo: number;
+      desvio: number;
+      taxaReparacao: number;
+      tendencia: 'subida' | 'descida' | 'estavel';
+      variacaoVsAnterior: number;
+    }>;
+    analiseZonas?: Array<{
+      zona: string;
+      totalLojas: number;
+      servicosTotais: number;
+      desvioMedio: number;
+      melhorLoja: string;
+      piorLoja: string;
+    }>;
+    alertasPerformance?: string[];
   };
   comparacaoLojas?: {
-    melhorLoja: { nome: string; servicos: number; desvio: number } | null;
-    piorLoja: { nome: string; servicos: number; desvio: number } | null;
-    maiorEvolucao: { nome: string; variacao: number } | null;
-    menorEvolucao: { nome: string; variacao: number } | null;
+    melhorLoja: { nome: string; servicos: number; desvio: number; taxaReparacao?: number; objetivo?: number } | null;
+    piorLoja: { nome: string; servicos: number; desvio: number; taxaReparacao?: number; objetivo?: number } | null;
+    maiorEvolucao: { nome: string; variacao: number; servicosAtuais?: number; servicosAnteriores?: number } | null;
+    menorEvolucao: { nome: string; variacao: number; servicosAtuais?: number; servicosAnteriores?: number } | null;
     totalLojas: number;
     lojasAcimaMedia: number;
+    lojasAbaixoMedia: number;
+    mediaServicos: number;
+    mediaTaxaReparacao: number;
   };
   dadosGraficos?: {
-    rankingServicos: Array<{ loja: string; servicos: number; desvio: number }>;
+    rankingServicos: Array<{ loja: string; servicos: number; desvio: number; objetivo?: number; taxaReparacao?: number }>;
     evolucaoMensal: Array<{ mes: string; servicos: number; objetivo: number }>;
+    distribuicaoDesvios: Array<{ faixa: string; count: number }>;
   };
 }
 
@@ -273,8 +305,10 @@ PONTOS NEGATIVOS DESTACADOS PELOS GESTORES:
 ${pontosNegativosRelatados.length > 0 ? pontosNegativosRelatados.join('\n') : 'Nenhum ponto negativo registado neste período.'}
 `;
 
-  // Preparar texto dos dados de Resultados
+  // Preparar texto dos dados de Resultados - ANÁLISE QUANTITATIVA PROFUNDA
   let resultadosTexto = '';
+  let rankingDetalhadoTexto = '';
+  
   if (dadosResultados.length > 0) {
     const ultimoMes = dadosResultados[dadosResultados.length - 1];
     const totalServicos = ultimoMes?.totalServicos || 0;
@@ -292,60 +326,117 @@ DADOS DE PERFORMANCE (RESULTADOS DO EXCEL):
 `;
   } else if (statsResultados) {
     const { somaServicos, somaObjetivos, mediaDesvioPercentual, mediaTaxaReparacao, lojasAcimaObjetivo, totalLojas } = statsResultados;
+    const taxaCumprimento = totalLojas > 0 ? ((lojasAcimaObjetivo || 0) / totalLojas * 100).toFixed(1) : 0;
+    const lojasAbaixoObjetivo = (totalLojas || 0) - (lojasAcimaObjetivo || 0);
+    
     resultadosTexto = `
-DADOS DE PERFORMANCE GLOBAL (RESULTADOS DO EXCEL):
-- Total de Serviços (rede): ${somaServicos || 0}
-- Objetivo Mensal (rede): ${somaObjetivos || 0}
+=== ANÁLISE QUANTITATIVA DE RESULTADOS ===
+
+MÉTRICAS GLOBAIS DA REDE:
+- Total de Serviços Realizados: ${somaServicos || 0}
+- Objetivo Mensal Total: ${somaObjetivos || 0}
 - Desvio Médio vs Objetivo: ${mediaDesvioPercentual >= 0 ? '+' : ''}${mediaDesvioPercentual?.toFixed(1) || 0}%
 - Taxa de Reparação Média: ${mediaTaxaReparacao?.toFixed(1) || 0}%
-- Lojas acima do objetivo: ${lojasAcimaObjetivo || 0} de ${totalLojas || 0}
+
+CUMPRIMENTO DE OBJETIVOS:
+- Lojas ACIMA do objetivo: ${lojasAcimaObjetivo || 0} (${taxaCumprimento}%)
+- Lojas ABAIXO do objetivo: ${lojasAbaixoObjetivo} (${(100 - parseFloat(taxaCumprimento as string)).toFixed(1)}%)
+- Total de Lojas Analisadas: ${totalLojas || 0}
 `;
     
     // Adicionar comparação de lojas se disponível
     if (comparacaoLojas) {
       resultadosTexto += `
-COMPARAÇÃO DE LOJAS:
-- Melhor Loja (mais serviços): ${comparacaoLojas.melhorLoja?.lojaNome || 'N/A'} - ${comparacaoLojas.melhorLoja?.totalServicos || 0} serviços (${comparacaoLojas.melhorLoja?.desvioPercentualMes >= 0 ? '+' : ''}${comparacaoLojas.melhorLoja?.desvioPercentualMes?.toFixed(1) || 0}% vs objetivo)
-- Pior Loja (menos serviços): ${comparacaoLojas.piorLoja?.lojaNome || 'N/A'} - ${comparacaoLojas.piorLoja?.totalServicos || 0} serviços (${comparacaoLojas.piorLoja?.desvioPercentualMes >= 0 ? '+' : ''}${comparacaoLojas.piorLoja?.desvioPercentualMes?.toFixed(1) || 0}% vs objetivo)
-- Maior Evolução: ${comparacaoLojas.maiorEvolucao?.lojaNome || 'N/A'} - ${comparacaoLojas.maiorEvolucao?.variacao ? '+' + comparacaoLojas.maiorEvolucao.variacao.toFixed(1) + '%' : 'N/A'} vs mês anterior
-- Menor Evolução: ${comparacaoLojas.menorEvolucao?.lojaNome || 'N/A'} - ${comparacaoLojas.menorEvolucao?.variacao ? comparacaoLojas.menorEvolucao.variacao.toFixed(1) + '%' : 'N/A'} vs mês anterior
-- Total de Lojas Analisadas: ${comparacaoLojas.totalLojas || 0}
-- Lojas Acima da Média: ${comparacaoLojas.lojasAcimaMedia || 0}
+DESTAQUES DE PERFORMANCE:
+- LÍDER em Serviços: ${comparacaoLojas.melhorLoja?.lojaNome || 'N/A'}
+  → ${comparacaoLojas.melhorLoja?.totalServicos || 0} serviços | Objetivo: ${comparacaoLojas.melhorLoja?.objetivoMensal || 'N/A'} | Desvio: ${comparacaoLojas.melhorLoja?.desvioPercentualMes >= 0 ? '+' : ''}${comparacaoLojas.melhorLoja?.desvioPercentualMes?.toFixed(1) || 0}% | Taxa Rep.: ${comparacaoLojas.melhorLoja?.taxaReparacao?.toFixed(1) || 'N/A'}%
+
+- MENOR Performance: ${comparacaoLojas.piorLoja?.lojaNome || 'N/A'}
+  → ${comparacaoLojas.piorLoja?.totalServicos || 0} serviços | Objetivo: ${comparacaoLojas.piorLoja?.objetivoMensal || 'N/A'} | Desvio: ${comparacaoLojas.piorLoja?.desvioPercentualMes >= 0 ? '+' : ''}${comparacaoLojas.piorLoja?.desvioPercentualMes?.toFixed(1) || 0}% | Taxa Rep.: ${comparacaoLojas.piorLoja?.taxaReparacao?.toFixed(1) || 'N/A'}%
+
+EVOLUÇÃO vs MÊS ANTERIOR:
+- Maior Crescimento: ${comparacaoLojas.maiorEvolucao?.lojaNome || 'N/A'} (${comparacaoLojas.maiorEvolucao?.variacao ? '+' + comparacaoLojas.maiorEvolucao.variacao.toFixed(1) + '%' : 'N/A'})
+  → De ${comparacaoLojas.maiorEvolucao?.servicosAnteriores || 'N/A'} para ${comparacaoLojas.maiorEvolucao?.servicosAtuais || 'N/A'} serviços
+- Maior Decréscimo: ${comparacaoLojas.menorEvolucao?.lojaNome || 'N/A'} (${comparacaoLojas.menorEvolucao?.variacao?.toFixed(1) || 'N/A'}%)
+  → De ${comparacaoLojas.menorEvolucao?.servicosAnteriores || 'N/A'} para ${comparacaoLojas.menorEvolucao?.servicosAtuais || 'N/A'} serviços
 `;
+    }
+    
+    // Adicionar ranking detalhado de todas as lojas
+    if (rankingLojas && rankingLojas.length > 0) {
+      rankingDetalhadoTexto = `
+=== RANKING DETALHADO DE TODAS AS LOJAS ===
+`;
+      rankingLojas.forEach((loja: any, idx: number) => {
+        const statusObj = (loja.desvioPercentualMes || 0) >= 0 ? '✅' : '❌';
+        rankingDetalhadoTexto += `
+${idx + 1}. ${loja.lojaNome} ${statusObj}
+   - Serviços: ${loja.totalServicos || 0} | Objetivo: ${loja.objetivoMensal || 'N/A'}
+   - Desvio: ${(loja.desvioPercentualMes || 0) >= 0 ? '+' : ''}${loja.desvioPercentualMes?.toFixed(1) || 0}%
+   - Taxa Reparação: ${loja.taxaReparacao?.toFixed(1) || 'N/A'}%
+   - Zona: ${loja.zona || 'N/A'}
+`;
+      });
     }
   }
 
-  const prompt = `Analisa os seguintes relatórios de supervisão de lojas da Express Glass do período ${periodo}:
+  const prompt = `És um analista de dados especializado em performance de redes de lojas. Analisa os DADOS QUANTITATIVOS de resultados das lojas Express Glass do período ${periodo}.
 
-${relatoriosTexto}
+${resultadosTexto}
+${rankingDetalhadoTexto}
+
+CONTEXTO ADICIONAL DOS RELATÓRIOS DE SUPERVISÃO:
+${relatoriosTexto ? relatoriosTexto.substring(0, 2000) : 'Sem relatórios de supervisão disponíveis.'}
 
 ${pontosDestacadosTexto}
-${resultadosTexto}
 
-Com base nestes relatórios, pontos destacados e dados de performance, identifica:
-1. 3-5 pontos positivos principais (aspetos bem executados, melhorias observadas)
-2. 3-5 pontos negativos principais (problemas recorrentes, áreas de preocupação)
-3. 3-5 sugestões práticas para melhorar a operação
-4. Análise específica dos pontos positivos e negativos destacados pelos gestores, identificando padrões e tendências
-5. Análise dos dados de performance (se disponíveis): resumo da performance, lojas em destaque, lojas que precisam atenção, tendências de serviços e recomendações
+INSTRUÇÕES IMPORTANTES:
 
-Responde em formato JSON com as seguintes chaves:
+1. LOJAS EM DESTAQUE - Baseado EXCLUSIVAMENTE em DADOS QUANTITATIVOS:
+   - Identificar lojas com MELHOR PERFORMANCE usando métricas: serviços realizados, desvio vs objetivo, taxa de reparação, evolução
+   - Formato OBRIGATÓRIO: "[Nome da Loja] (+X% vs objetivo, Y serviços, taxa rep. Z%)"
+   - Exemplo: "Vila Verde (+15.2% vs objetivo, 89 serviços, taxa rep. 28.5%)"
+   - MÍNIMO 3 lojas, MÁXIMO 5 lojas
+
+2. LOJAS QUE PRECISAM ATENÇÃO - Baseado EXCLUSIVAMENTE em DADOS QUANTITATIVOS:
+   - Identificar lojas com PIOR PERFORMANCE usando métricas: desvio negativo vs objetivo, baixa taxa de reparação, decréscimo de serviços
+   - Formato OBRIGATÓRIO: "[Nome da Loja] (X% vs objetivo, Y serviços, taxa rep. Z%)"
+   - Exemplo: "Braga SM (-23.4% vs objetivo, 45 serviços, taxa rep. 12.1%)"
+   - MÍNIMO 3 lojas, MÁXIMO 5 lojas
+
+3. RESUMO DE PERFORMANCE - Parágrafo analítico com:
+   - Taxa de cumprimento de objetivos da rede (% de lojas acima do objetivo)
+   - Desvio médio global vs objetivos
+   - Comparação com período anterior (se disponível)
+   - Identificação de padrões por zona/região
+
+4. TENDÊNCIAS DE SERVIÇOS - Análise de:
+   - Lojas em crescimento vs lojas em decréscimo
+   - Padrões de sazonalidade
+   - Correlação entre taxa de reparação e volume de serviços
+
+5. RECOMENDAÇÕES - Baseadas em dados:
+   - Ações específicas para lojas abaixo do objetivo
+   - Estratégias para replicar sucesso das melhores lojas
+   - Alertas de performance crítica
+
+Responde em formato JSON:
 {
-  "pontosPositivos": ["ponto 1", "ponto 2", ...],
-  "pontosNegativos": ["ponto 1", "ponto 2", ...],
-  "sugestoes": ["sugestão 1", "sugestão 2", ...],
-  "resumo": "Um parágrafo resumindo a análise geral do período",
+  "pontosPositivos": ["aspeto positivo baseado em dados 1", ...],
+  "pontosNegativos": ["aspeto negativo baseado em dados 1", ...],
+  "sugestoes": ["sugestão baseada em dados 1", ...],
+  "resumo": "Parágrafo analítico com métricas quantitativas",
   "analisePontosDestacados": {
-    "positivos": ["análise do ponto positivo 1", "análise do ponto positivo 2", ...],
-    "negativos": ["análise do ponto negativo 1", "análise do ponto negativo 2", ...],
-    "tendencias": "Descrição das tendências observadas nos pontos destacados pelos gestores"
+    "positivos": ["análise de ponto positivo", ...],
+    "negativos": ["análise de ponto negativo", ...],
+    "tendencias": "Tendências observadas"
   },
   "analiseResultados": {
-    "resumoPerformance": "Resumo da performance geral baseada nos dados do Excel",
-    "lojasDestaque": ["loja que se destacou positivamente", ...],
-    "lojasAtencao": ["loja que precisa de atenção", ...],
-    "tendenciasServicos": "Análise das tendências de serviços e objetivos",
-    "recomendacoes": ["recomendação baseada nos dados", ...]
+    "resumoPerformance": "Resumo quantitativo detalhado da performance da rede",
+    "lojasDestaque": ["[Loja X] (+Y% vs objetivo, Z serviços, taxa rep. W%)", ...],
+    "lojasAtencao": ["[Loja A] (-B% vs objetivo, C serviços, taxa rep. D%)", ...],
+    "tendenciasServicos": "Análise de tendências com dados numéricos",
+    "recomendacoes": ["recomendação específica baseada em dados", ...]
   }
 }`;
 
@@ -355,7 +446,7 @@ Responde em formato JSON com as seguintes chaves:
         {
           role: "system",
           content:
-            "És um assistente especializado em análise de relatórios de supervisão de lojas. Respondes sempre em português europeu e em formato JSON.",
+            "És um analista de dados sénior especializado em performance de redes de retalho. A tua análise deve ser QUANTITATIVA, baseada em métricas e números concretos. Evita descrições vagas ou operacionais. Foca em: serviços realizados, desvios vs objetivos, taxas de reparação, evolução temporal. Respondes sempre em português europeu e em formato JSON.",
         },
         { role: "user", content: prompt },
       ],
@@ -448,38 +539,81 @@ Responde em formato JSON com as seguintes chaves:
     const content = response.choices[0].message.content;
     const analise = JSON.parse(typeof content === 'string' ? content : JSON.stringify(content));
 
-    // Preparar dados de comparação de lojas para gráficos
+    // Preparar dados de comparação de lojas para gráficos - COM MÉTRICAS EXPANDIDAS
+    // Calcular médias
+    const mediaServicos = rankingLojas.length > 0 
+      ? rankingLojas.reduce((sum: number, l: any) => sum + (l.totalServicos || 0), 0) / rankingLojas.length 
+      : 0;
+    const mediaTaxaReparacao = rankingLojas.length > 0 
+      ? rankingLojas.reduce((sum: number, l: any) => sum + (l.taxaReparacao || 0), 0) / rankingLojas.length 
+      : 0;
+    const lojasAbaixoMedia = comparacaoLojas ? (comparacaoLojas.totalLojas || 0) - (comparacaoLojas.lojasAcimaMedia || 0) : 0;
+    
     const comparacaoLojasFormatada = comparacaoLojas ? {
       melhorLoja: comparacaoLojas.melhorLoja ? {
         nome: comparacaoLojas.melhorLoja.lojaNome,
         servicos: comparacaoLojas.melhorLoja.totalServicos,
         desvio: comparacaoLojas.melhorLoja.desvioPercentualMes || 0,
+        taxaReparacao: comparacaoLojas.melhorLoja.taxaReparacao || 0,
+        objetivo: comparacaoLojas.melhorLoja.objetivoMensal || 0,
       } : null,
       piorLoja: comparacaoLojas.piorLoja ? {
         nome: comparacaoLojas.piorLoja.lojaNome,
         servicos: comparacaoLojas.piorLoja.totalServicos,
         desvio: comparacaoLojas.piorLoja.desvioPercentualMes || 0,
+        taxaReparacao: comparacaoLojas.piorLoja.taxaReparacao || 0,
+        objetivo: comparacaoLojas.piorLoja.objetivoMensal || 0,
       } : null,
       maiorEvolucao: comparacaoLojas.maiorEvolucao ? {
         nome: comparacaoLojas.maiorEvolucao.lojaNome,
         variacao: comparacaoLojas.maiorEvolucao.variacao || 0,
+        servicosAtuais: comparacaoLojas.maiorEvolucao.servicosAtuais || 0,
+        servicosAnteriores: comparacaoLojas.maiorEvolucao.servicosAnteriores || 0,
       } : null,
       menorEvolucao: comparacaoLojas.menorEvolucao ? {
         nome: comparacaoLojas.menorEvolucao.lojaNome,
         variacao: comparacaoLojas.menorEvolucao.variacao || 0,
+        servicosAtuais: comparacaoLojas.menorEvolucao.servicosAtuais || 0,
+        servicosAnteriores: comparacaoLojas.menorEvolucao.servicosAnteriores || 0,
       } : null,
       totalLojas: comparacaoLojas.totalLojas || 0,
       lojasAcimaMedia: comparacaoLojas.lojasAcimaMedia || 0,
+      lojasAbaixoMedia: lojasAbaixoMedia,
+      mediaServicos: Math.round(mediaServicos),
+      mediaTaxaReparacao: parseFloat(mediaTaxaReparacao.toFixed(1)),
     } : undefined;
     
-    // Preparar dados para gráficos
+    // Calcular distribuição de desvios para gráfico
+    const distribuicaoDesvios: Array<{ faixa: string; count: number }> = [];
+    if (rankingLojas.length > 0) {
+      const faixas = [
+        { min: -Infinity, max: -20, label: '< -20%' },
+        { min: -20, max: -10, label: '-20% a -10%' },
+        { min: -10, max: 0, label: '-10% a 0%' },
+        { min: 0, max: 10, label: '0% a +10%' },
+        { min: 10, max: 20, label: '+10% a +20%' },
+        { min: 20, max: Infinity, label: '> +20%' },
+      ];
+      faixas.forEach(faixa => {
+        const count = rankingLojas.filter((l: any) => {
+          const desvio = l.desvioPercentualMes || 0;
+          return desvio > faixa.min && desvio <= faixa.max;
+        }).length;
+        distribuicaoDesvios.push({ faixa: faixa.label, count });
+      });
+    }
+    
+    // Preparar dados para gráficos - COM MÉTRICAS EXPANDIDAS
     const dadosGraficos = rankingLojas.length > 0 ? {
       rankingServicos: rankingLojas.slice(0, 10).map((l: any) => ({
         loja: l.lojaNome,
         servicos: l.totalServicos,
         desvio: l.desvioPercentualMes || 0,
+        objetivo: l.objetivoMensal || 0,
+        taxaReparacao: l.taxaReparacao || 0,
       })),
-      evolucaoMensal: [], // Pode ser preenchido com dados históricos se necessário
+      evolucaoMensal: [] as Array<{ mes: string; servicos: number; objetivo: number }>,
+      distribuicaoDesvios: distribuicaoDesvios,
     } : undefined;
     
     return {

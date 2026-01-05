@@ -1889,3 +1889,15 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Query para obter zonas distintas
 - [x] Query para obter gestores para filtro
 - [x] Badge mostrando filtro aplicado no relatório
+
+## Melhoria Analítica do Relatório IA de Resultados v6.3
+- [x] Reformular prompt da IA para análise quantitativa profunda
+- [x] Lojas em Destaque baseado em DADOS de resultados (serviços, taxa reparação, desvio objetivo)
+- [x] Lojas que Precisam Atenção baseado em DADOS de resultados (não situações operacionais)
+- [ ] Análise de tendências de serviços (crescimento/decréscimo por loja)
+- [ ] Análise de cumprimento de objetivos por loja
+- [x] Ranking detalhado com métricas quantitativas
+- [x] Comparação de performance entre lojas do mesmo filtro
+- [ ] Identificação de padrões de sazonalidade
+- [ ] Recomendações baseadas em dados numéricos
+- [ ] Testar nova análise com dados reais

@@ -4,16 +4,18 @@ import DashboardLayout from '../components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Button } from '../components/ui/button';
-import { Loader2, TrendingUp, TrendingDown, Target, Award, BarChart3, Sparkles, FileText, Trophy, Store, ArrowUpRight, ArrowDownRight, Globe, MapPin, User, Filter } from 'lucide-react';
+import { Loader2, TrendingUp, TrendingDown, Target, Award, BarChart3, Sparkles, FileText, Trophy, Store, ArrowUpRight, ArrowDownRight, Globe, MapPin, User, Filter, AlertTriangle, CheckCircle2, XCircle, Percent, Activity, PieChart } from 'lucide-react';
 import { useAuth } from '../_core/hooks/useAuth';
 import { toast } from 'sonner';
-import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
-import { Bar } from 'react-chartjs-2';
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement } from 'chart.js';
+import { Bar, Doughnut } from 'react-chartjs-2';
 import { ExportarRelatorioIAPDF } from '../components/ExportarRelatorioIAPDF';
 import { Badge } from '../components/ui/badge';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
+import { Progress } from '../components/ui/progress';
 
 // Registar componentes do Chart.js
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
 
 export function RelatorioIAResultados() {
   const { user } = useAuth();
@@ -96,6 +98,11 @@ export function RelatorioIAResultados() {
     return '';
   };
 
+  // Calcular taxa de cumprimento
+  const taxaCumprimento = analiseIA?.comparacaoLojas 
+    ? ((analiseIA.comparacaoLojas.lojasAcimaMedia / analiseIA.comparacaoLojas.totalLojas) * 100).toFixed(1)
+    : '0';
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -106,7 +113,7 @@ export function RelatorioIAResultados() {
             Relatório IA de Resultados
           </h1>
           <p className="text-muted-foreground">
-            Análise inteligente dos resultados de serviços com comparação entre lojas
+            Análise quantitativa profunda dos resultados de serviços com métricas detalhadas
           </p>
         </div>
 
@@ -118,10 +125,10 @@ export function RelatorioIAResultados() {
                 <div>
                   <CardTitle className="flex items-center gap-2">
                     <Sparkles className="h-5 w-5 text-purple-500" />
-                    Gerar Análise IA
+                    Gerar Análise Quantitativa
                   </CardTitle>
                   <CardDescription>
-                    Selecione o período e filtros para gerar uma análise detalhada dos resultados
+                    Análise baseada em dados numéricos: serviços, objetivos, taxas e tendências
                   </CardDescription>
                 </div>
               </div>
@@ -264,167 +271,385 @@ export function RelatorioIAResultados() {
           
           {mostrarRelatorioIA && analiseIA && (
             <CardContent className="pt-6 space-y-6">
-              {/* Resumo */}
-              <div className="p-4 bg-muted/50 rounded-lg">
+              {/* Resumo Executivo */}
+              <div className="p-4 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
                 <h4 className="font-semibold mb-2 flex items-center gap-2">
-                  <FileText className="h-4 w-4" />
+                  <FileText className="h-4 w-4 text-purple-600" />
                   Resumo Executivo
                 </h4>
                 <p className="text-muted-foreground">{analiseIA.resumo}</p>
               </div>
 
-              {/* Comparação de Lojas */}
+              {/* KPIs Principais - Cards de Métricas */}
               {analiseIA.comparacaoLojas && (
-                <div className="space-y-4">
-                  <h4 className="font-semibold flex items-center gap-2">
-                    <Trophy className="h-4 w-4 text-purple-500" />
-                    Comparação de Lojas
-                  </h4>
-                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                    {/* Melhor Loja */}
-                    <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Trophy className="h-5 w-5 text-green-600" />
-                        <span className="font-semibold text-green-700 dark:text-green-400 text-sm">Melhor Loja</span>
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+                  {/* Total Lojas */}
+                  <Card className="bg-slate-50 dark:bg-slate-900/50">
+                    <CardContent className="pt-4">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Store className="h-4 w-4 text-slate-600" />
+                        <span className="text-xs text-muted-foreground">Lojas Analisadas</span>
                       </div>
-                      <p className="font-bold truncate">{analiseIA.comparacaoLojas.melhorLoja?.nome || 'N/A'}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {analiseIA.comparacaoLojas.melhorLoja?.servicos || 0} serviços
-                      </p>
-                    </div>
+                      <p className="text-2xl font-bold">{analiseIA.comparacaoLojas.totalLojas}</p>
+                    </CardContent>
+                  </Card>
 
-                    {/* Pior Loja */}
-                    <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Store className="h-5 w-5 text-red-600" />
-                        <span className="font-semibold text-red-700 dark:text-red-400 text-sm">Menos Serviços</span>
+                  {/* Taxa Cumprimento */}
+                  <Card className="bg-blue-50 dark:bg-blue-900/20">
+                    <CardContent className="pt-4">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Percent className="h-4 w-4 text-blue-600" />
+                        <span className="text-xs text-muted-foreground">Taxa Cumprimento</span>
                       </div>
-                      <p className="font-bold truncate">{analiseIA.comparacaoLojas.piorLoja?.nome || 'N/A'}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {analiseIA.comparacaoLojas.piorLoja?.servicos || 0} serviços
-                      </p>
-                    </div>
+                      <p className="text-2xl font-bold text-blue-600">{taxaCumprimento}%</p>
+                      <Progress value={parseFloat(taxaCumprimento)} className="mt-2 h-2" />
+                    </CardContent>
+                  </Card>
 
-                    {/* Maior Evolução */}
-                    <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                      <div className="flex items-center gap-2 mb-2">
-                        <ArrowUpRight className="h-5 w-5 text-blue-600" />
-                        <span className="font-semibold text-blue-700 dark:text-blue-400 text-sm">Maior Evolução</span>
+                  {/* Acima Objetivo */}
+                  <Card className="bg-green-50 dark:bg-green-900/20">
+                    <CardContent className="pt-4">
+                      <div className="flex items-center gap-2 mb-1">
+                        <CheckCircle2 className="h-4 w-4 text-green-600" />
+                        <span className="text-xs text-muted-foreground">Acima Objetivo</span>
                       </div>
-                      <p className="font-bold truncate">{analiseIA.comparacaoLojas.maiorEvolucao?.nome || 'N/A'}</p>
-                      <p className="text-sm text-green-600">
-                        {analiseIA.comparacaoLojas.maiorEvolucao?.variacao ? `+${analiseIA.comparacaoLojas.maiorEvolucao.variacao.toFixed(1)}%` : 'N/A'}
-                      </p>
-                    </div>
+                      <p className="text-2xl font-bold text-green-600">{analiseIA.comparacaoLojas.lojasAcimaMedia}</p>
+                    </CardContent>
+                  </Card>
 
-                    {/* Menor Evolução */}
-                    <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
-                      <div className="flex items-center gap-2 mb-2">
-                        <ArrowDownRight className="h-5 w-5 text-amber-600" />
-                        <span className="font-semibold text-amber-700 dark:text-amber-400 text-sm">Menor Evolução</span>
+                  {/* Abaixo Objetivo */}
+                  <Card className="bg-red-50 dark:bg-red-900/20">
+                    <CardContent className="pt-4">
+                      <div className="flex items-center gap-2 mb-1">
+                        <XCircle className="h-4 w-4 text-red-600" />
+                        <span className="text-xs text-muted-foreground">Abaixo Objetivo</span>
                       </div>
-                      <p className="font-bold truncate">{analiseIA.comparacaoLojas.menorEvolucao?.nome || 'N/A'}</p>
-                      <p className="text-sm text-red-600">
-                        {analiseIA.comparacaoLojas.menorEvolucao?.variacao ? `${analiseIA.comparacaoLojas.menorEvolucao.variacao.toFixed(1)}%` : 'N/A'}
-                      </p>
-                    </div>
-                  </div>
+                      <p className="text-2xl font-bold text-red-600">{analiseIA.comparacaoLojas.lojasAbaixoMedia || (analiseIA.comparacaoLojas.totalLojas - analiseIA.comparacaoLojas.lojasAcimaMedia)}</p>
+                    </CardContent>
+                  </Card>
 
-                  {/* Estatísticas */}
-                  <div className="p-4 bg-muted/30 rounded-lg">
-                    <div className="flex items-center justify-around flex-wrap gap-4">
-                      <div className="text-center">
-                        <p className="text-xl font-bold text-primary">{analiseIA.comparacaoLojas.totalLojas}</p>
-                        <p className="text-xs text-muted-foreground">Lojas Analisadas</p>
+                  {/* Média Serviços */}
+                  <Card className="bg-purple-50 dark:bg-purple-900/20">
+                    <CardContent className="pt-4">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Activity className="h-4 w-4 text-purple-600" />
+                        <span className="text-xs text-muted-foreground">Média Serviços</span>
                       </div>
-                      <div className="text-center">
-                        <p className="text-xl font-bold text-green-600">{analiseIA.comparacaoLojas.lojasAcimaMedia}</p>
-                        <p className="text-xs text-muted-foreground">Acima do Objetivo</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-xl font-bold text-red-600">{analiseIA.comparacaoLojas.totalLojas - analiseIA.comparacaoLojas.lojasAcimaMedia}</p>
-                        <p className="text-xs text-muted-foreground">Abaixo do Objetivo</p>
-                      </div>
-                    </div>
-                  </div>
+                      <p className="text-2xl font-bold text-purple-600">{analiseIA.comparacaoLojas.mediaServicos || 'N/A'}</p>
+                    </CardContent>
+                  </Card>
                 </div>
               )}
 
-              {/* Gráfico de Ranking */}
+              {/* Destaques de Performance - Melhor e Pior */}
+              {analiseIA.comparacaoLojas && (
+                <div className="grid gap-4 md:grid-cols-2">
+                  {/* Líder de Performance */}
+                  <Card className="border-2 border-green-300 dark:border-green-700">
+                    <CardHeader className="pb-2 bg-green-50 dark:bg-green-900/20">
+                      <CardTitle className="text-base flex items-center gap-2 text-green-700 dark:text-green-400">
+                        <Trophy className="h-5 w-5" />
+                        Líder de Performance
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="pt-4">
+                      <p className="text-xl font-bold mb-2">{analiseIA.comparacaoLojas.melhorLoja?.nome || 'N/A'}</p>
+                      <div className="grid grid-cols-2 gap-2 text-sm">
+                        <div className="p-2 bg-muted/50 rounded">
+                          <span className="text-muted-foreground">Serviços:</span>
+                          <span className="font-semibold ml-1">{analiseIA.comparacaoLojas.melhorLoja?.servicos || 0}</span>
+                        </div>
+                        <div className="p-2 bg-muted/50 rounded">
+                          <span className="text-muted-foreground">Objetivo:</span>
+                          <span className="font-semibold ml-1">{analiseIA.comparacaoLojas.melhorLoja?.objetivo || 'N/A'}</span>
+                        </div>
+                        <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded">
+                          <span className="text-muted-foreground">Desvio:</span>
+                          <span className="font-semibold ml-1 text-green-600">+{analiseIA.comparacaoLojas.melhorLoja?.desvio?.toFixed(1) || 0}%</span>
+                        </div>
+                        <div className="p-2 bg-muted/50 rounded">
+                          <span className="text-muted-foreground">Taxa Rep.:</span>
+                          <span className="font-semibold ml-1">{analiseIA.comparacaoLojas.melhorLoja?.taxaReparacao?.toFixed(1) || 'N/A'}%</span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Menor Performance */}
+                  <Card className="border-2 border-red-300 dark:border-red-700">
+                    <CardHeader className="pb-2 bg-red-50 dark:bg-red-900/20">
+                      <CardTitle className="text-base flex items-center gap-2 text-red-700 dark:text-red-400">
+                        <AlertTriangle className="h-5 w-5" />
+                        Menor Performance
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="pt-4">
+                      <p className="text-xl font-bold mb-2">{analiseIA.comparacaoLojas.piorLoja?.nome || 'N/A'}</p>
+                      <div className="grid grid-cols-2 gap-2 text-sm">
+                        <div className="p-2 bg-muted/50 rounded">
+                          <span className="text-muted-foreground">Serviços:</span>
+                          <span className="font-semibold ml-1">{analiseIA.comparacaoLojas.piorLoja?.servicos || 0}</span>
+                        </div>
+                        <div className="p-2 bg-muted/50 rounded">
+                          <span className="text-muted-foreground">Objetivo:</span>
+                          <span className="font-semibold ml-1">{analiseIA.comparacaoLojas.piorLoja?.objetivo || 'N/A'}</span>
+                        </div>
+                        <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded">
+                          <span className="text-muted-foreground">Desvio:</span>
+                          <span className="font-semibold ml-1 text-red-600">{analiseIA.comparacaoLojas.piorLoja?.desvio?.toFixed(1) || 0}%</span>
+                        </div>
+                        <div className="p-2 bg-muted/50 rounded">
+                          <span className="text-muted-foreground">Taxa Rep.:</span>
+                          <span className="font-semibold ml-1">{analiseIA.comparacaoLojas.piorLoja?.taxaReparacao?.toFixed(1) || 'N/A'}%</span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
+
+              {/* Evolução vs Mês Anterior */}
+              {analiseIA.comparacaoLojas && (analiseIA.comparacaoLojas.maiorEvolucao || analiseIA.comparacaoLojas.menorEvolucao) && (
+                <div className="grid gap-4 md:grid-cols-2">
+                  {/* Maior Crescimento */}
+                  <Card className="border border-blue-200 dark:border-blue-800">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base flex items-center gap-2 text-blue-600">
+                        <ArrowUpRight className="h-5 w-5" />
+                        Maior Crescimento vs Mês Anterior
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-lg font-bold">{analiseIA.comparacaoLojas.maiorEvolucao?.nome || 'N/A'}</p>
+                      <div className="flex items-center gap-4 mt-2">
+                        <Badge variant="outline" className="text-green-600 border-green-300">
+                          +{analiseIA.comparacaoLojas.maiorEvolucao?.variacao?.toFixed(1) || 0}%
+                        </Badge>
+                        <span className="text-sm text-muted-foreground">
+                          {analiseIA.comparacaoLojas.maiorEvolucao?.servicosAnteriores || 'N/A'} → {analiseIA.comparacaoLojas.maiorEvolucao?.servicosAtuais || 'N/A'} serviços
+                        </span>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Maior Decréscimo */}
+                  <Card className="border border-amber-200 dark:border-amber-800">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base flex items-center gap-2 text-amber-600">
+                        <ArrowDownRight className="h-5 w-5" />
+                        Maior Decréscimo vs Mês Anterior
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-lg font-bold">{analiseIA.comparacaoLojas.menorEvolucao?.nome || 'N/A'}</p>
+                      <div className="flex items-center gap-4 mt-2">
+                        <Badge variant="outline" className="text-red-600 border-red-300">
+                          {analiseIA.comparacaoLojas.menorEvolucao?.variacao?.toFixed(1) || 0}%
+                        </Badge>
+                        <span className="text-sm text-muted-foreground">
+                          {analiseIA.comparacaoLojas.menorEvolucao?.servicosAnteriores || 'N/A'} → {analiseIA.comparacaoLojas.menorEvolucao?.servicosAtuais || 'N/A'} serviços
+                        </span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
+
+              {/* Gráficos */}
+              <div className="grid gap-4 lg:grid-cols-2">
+                {/* Gráfico de Ranking por Serviços */}
+                {analiseIA.dadosGraficos?.rankingServicos && analiseIA.dadosGraficos.rankingServicos.length > 0 && (
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base flex items-center gap-2">
+                        <BarChart3 className="h-4 w-4" />
+                        Top 10 Lojas por Serviços
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div style={{ height: '300px' }}>
+                        <Bar
+                          data={{
+                            labels: analiseIA.dadosGraficos.rankingServicos.map(l => l.loja.length > 10 ? l.loja.substring(0, 10) + '...' : l.loja),
+                            datasets: [{
+                              label: 'Serviços',
+                              data: analiseIA.dadosGraficos.rankingServicos.map(l => l.servicos),
+                              backgroundColor: analiseIA.dadosGraficos.rankingServicos.map(l => 
+                                l.desvio >= 0 ? 'rgba(34, 197, 94, 0.7)' : 'rgba(239, 68, 68, 0.7)'
+                              ),
+                              borderColor: analiseIA.dadosGraficos.rankingServicos.map(l => 
+                                l.desvio >= 0 ? 'rgb(34, 197, 94)' : 'rgb(239, 68, 68)'
+                              ),
+                              borderWidth: 1,
+                            }]
+                          }}
+                          options={{
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { display: false } },
+                            scales: {
+                              y: { beginAtZero: true },
+                              x: { ticks: { maxRotation: 45, minRotation: 45 } }
+                            }
+                          }}
+                        />
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-2 text-center">
+                        🟢 Acima do objetivo | 🔴 Abaixo do objetivo
+                      </p>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Gráfico de Distribuição de Desvios */}
+                {analiseIA.dadosGraficos?.distribuicaoDesvios && analiseIA.dadosGraficos.distribuicaoDesvios.length > 0 && (
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base flex items-center gap-2">
+                        <PieChart className="h-4 w-4" />
+                        Distribuição de Desvios vs Objetivo
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div style={{ height: '300px' }}>
+                        <Doughnut
+                          data={{
+                            labels: analiseIA.dadosGraficos.distribuicaoDesvios.map(d => d.faixa),
+                            datasets: [{
+                              data: analiseIA.dadosGraficos.distribuicaoDesvios.map(d => d.count),
+                              backgroundColor: [
+                                'rgba(239, 68, 68, 0.8)',   // < -20%
+                                'rgba(249, 115, 22, 0.8)', // -20% a -10%
+                                'rgba(251, 191, 36, 0.8)', // -10% a 0%
+                                'rgba(163, 230, 53, 0.8)', // 0% a +10%
+                                'rgba(34, 197, 94, 0.8)',  // +10% a +20%
+                                'rgba(16, 185, 129, 0.8)', // > +20%
+                              ],
+                              borderWidth: 1,
+                            }]
+                          }}
+                          options={{
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                              legend: {
+                                position: 'right',
+                                labels: { boxWidth: 12, font: { size: 11 } }
+                              }
+                            }
+                          }}
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+
+              {/* Tabela de Ranking Detalhado */}
               {analiseIA.dadosGraficos?.rankingServicos && analiseIA.dadosGraficos.rankingServicos.length > 0 && (
-                <div className="p-4 bg-white dark:bg-gray-800 rounded-lg">
-                  <h4 className="font-semibold mb-4 flex items-center gap-2">
-                    <BarChart3 className="h-4 w-4" />
-                    Top 10 Lojas por Serviços
-                  </h4>
-                  <div style={{ height: '300px' }}>
-                    <Bar
-                      data={{
-                        labels: analiseIA.dadosGraficos.rankingServicos.map(l => l.loja.length > 12 ? l.loja.substring(0, 12) + '...' : l.loja),
-                        datasets: [{
-                          label: 'Serviços',
-                          data: analiseIA.dadosGraficos.rankingServicos.map(l => l.servicos),
-                          backgroundColor: analiseIA.dadosGraficos.rankingServicos.map(l => 
-                            l.desvio >= 0 ? 'rgba(34, 197, 94, 0.7)' : 'rgba(239, 68, 68, 0.7)'
-                          ),
-                          borderColor: analiseIA.dadosGraficos.rankingServicos.map(l => 
-                            l.desvio >= 0 ? 'rgb(34, 197, 94)' : 'rgb(239, 68, 68)'
-                          ),
-                          borderWidth: 1,
-                        }]
-                      }}
-                      options={{
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: { legend: { display: false } },
-                        scales: {
-                          y: { beginAtZero: true },
-                          x: { ticks: { maxRotation: 45, minRotation: 45 } }
-                        }
-                      }}
-                    />
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-2 text-center">
-                    Verde = Acima do objetivo | Vermelho = Abaixo do objetivo
-                  </p>
-                </div>
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <BarChart3 className="h-4 w-4" />
+                      Ranking Detalhado de Performance
+                    </CardTitle>
+                    <CardDescription>
+                      Métricas quantitativas de todas as lojas analisadas
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="w-12">#</TableHead>
+                            <TableHead>Loja</TableHead>
+                            <TableHead className="text-right">Serviços</TableHead>
+                            <TableHead className="text-right">Objetivo</TableHead>
+                            <TableHead className="text-right">Desvio</TableHead>
+                            <TableHead className="text-right">Taxa Rep.</TableHead>
+                            <TableHead className="text-center">Status</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {analiseIA.dadosGraficos.rankingServicos.map((loja, idx) => (
+                            <TableRow key={idx}>
+                              <TableCell className="font-medium">{idx + 1}</TableCell>
+                              <TableCell className="font-medium">{loja.loja}</TableCell>
+                              <TableCell className="text-right">{loja.servicos}</TableCell>
+                              <TableCell className="text-right">{loja.objetivo || 'N/A'}</TableCell>
+                              <TableCell className={`text-right font-semibold ${loja.desvio >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                {loja.desvio >= 0 ? '+' : ''}{loja.desvio?.toFixed(1)}%
+                              </TableCell>
+                              <TableCell className="text-right">{loja.taxaReparacao?.toFixed(1) || 'N/A'}%</TableCell>
+                              <TableCell className="text-center">
+                                {loja.desvio >= 0 ? (
+                                  <Badge variant="outline" className="bg-green-50 text-green-700 border-green-300">
+                                    <CheckCircle2 className="h-3 w-3 mr-1" />
+                                    Acima
+                                  </Badge>
+                                ) : (
+                                  <Badge variant="outline" className="bg-red-50 text-red-700 border-red-300">
+                                    <XCircle className="h-3 w-3 mr-1" />
+                                    Abaixo
+                                  </Badge>
+                                )}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </CardContent>
+                </Card>
               )}
 
-              {/* Análise de Performance */}
+              {/* Análise de Performance - Lojas em Destaque e Atenção */}
               {analiseIA.analiseResultados && (
                 <div className="grid gap-4 md:grid-cols-2">
-                  <div className="space-y-3">
-                    <h4 className="font-semibold text-green-600 flex items-center gap-2">
-                      <TrendingUp className="h-4 w-4" />
-                      Lojas em Destaque
-                    </h4>
-                    <ul className="space-y-1">
-                      {analiseIA.analiseResultados.lojasDestaque?.slice(0, 5).map((loja, idx) => (
-                        <li key={idx} className="text-sm flex items-start gap-2">
-                          <Award className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
-                          <span>{loja}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                  <div className="space-y-3">
-                    <h4 className="font-semibold text-amber-600 flex items-center gap-2">
-                      <Target className="h-4 w-4" />
-                      Lojas que Precisam Atenção
-                    </h4>
-                    <ul className="space-y-1">
-                      {analiseIA.analiseResultados.lojasAtencao?.slice(0, 5).map((loja, idx) => (
-                        <li key={idx} className="text-sm flex items-start gap-2">
-                          <Target className="h-4 w-4 text-amber-500 mt-0.5 shrink-0" />
-                          <span>{loja}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+                  {/* Lojas em Destaque */}
+                  <Card className="border-l-4 border-l-green-500">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base flex items-center gap-2 text-green-700 dark:text-green-400">
+                        <TrendingUp className="h-5 w-5" />
+                        Lojas em Destaque (Dados Quantitativos)
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ul className="space-y-2">
+                        {analiseIA.analiseResultados.lojasDestaque?.slice(0, 5).map((loja, idx) => (
+                          <li key={idx} className="text-sm flex items-start gap-2 p-2 bg-green-50 dark:bg-green-900/20 rounded">
+                            <Award className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />
+                            <span>{loja}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                  </Card>
+
+                  {/* Lojas que Precisam Atenção */}
+                  <Card className="border-l-4 border-l-amber-500">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base flex items-center gap-2 text-amber-700 dark:text-amber-400">
+                        <Target className="h-5 w-5" />
+                        Lojas que Precisam Atenção (Dados Quantitativos)
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ul className="space-y-2">
+                        {analiseIA.analiseResultados.lojasAtencao?.slice(0, 5).map((loja, idx) => (
+                          <li key={idx} className="text-sm flex items-start gap-2 p-2 bg-amber-50 dark:bg-amber-900/20 rounded">
+                            <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
+                            <span>{loja}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                  </Card>
                 </div>
               )}
 
-              {/* Análise Detalhada de Resultados */}
+              {/* Análise Detalhada */}
               {analiseIA.analiseResultados && (
                 <Card>
                   <CardHeader>
@@ -437,20 +662,22 @@ export function RelatorioIAResultados() {
                     {/* Resumo de Performance */}
                     {analiseIA.analiseResultados.resumoPerformance && (
                       <div className="p-4 bg-muted/30 rounded-lg">
+                        <h5 className="font-medium mb-2 flex items-center gap-2">
+                          <Activity className="h-4 w-4" />
+                          Resumo de Performance
+                        </h5>
                         <p className="text-sm">{analiseIA.analiseResultados.resumoPerformance}</p>
                       </div>
                     )}
 
                     {/* Tendências */}
                     {analiseIA.analiseResultados.tendenciasServicos && (
-                      <div>
-                        <h5 className="font-medium mb-2 flex items-center gap-2">
+                      <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                        <h5 className="font-medium mb-2 flex items-center gap-2 text-blue-700 dark:text-blue-400">
                           <TrendingUp className="h-4 w-4" />
                           Tendências Identificadas
                         </h5>
-                        <p className="text-sm p-2 bg-muted/30 rounded">
-                          {analiseIA.analiseResultados.tendenciasServicos}
-                        </p>
+                        <p className="text-sm">{analiseIA.analiseResultados.tendenciasServicos}</p>
                       </div>
                     )}
 
@@ -459,12 +686,12 @@ export function RelatorioIAResultados() {
                       <div>
                         <h5 className="font-medium mb-2 flex items-center gap-2">
                           <Target className="h-4 w-4" />
-                          Recomendações
+                          Recomendações Baseadas em Dados
                         </h5>
                         <ul className="space-y-2">
                           {analiseIA.analiseResultados.recomendacoes.map((rec, idx) => (
-                            <li key={idx} className="text-sm p-2 bg-amber-50 dark:bg-amber-900/20 rounded flex items-start gap-2">
-                              <span className="text-amber-500 font-bold">{idx + 1}.</span>
+                            <li key={idx} className="text-sm p-3 bg-amber-50 dark:bg-amber-900/20 rounded flex items-start gap-2 border-l-2 border-amber-400">
+                              <span className="text-amber-600 font-bold shrink-0">{idx + 1}.</span>
                               <span>{rec}</span>
                             </li>
                           ))}
@@ -485,7 +712,7 @@ export function RelatorioIAResultados() {
                 <div>
                   <h3 className="font-semibold text-lg">Nenhum relatório gerado</h3>
                   <p className="text-muted-foreground">
-                    Selecione um período{isAdmin ? ' e filtros' : ''} e clique em "Gerar Relatório" para obter uma análise detalhada dos resultados.
+                    Selecione um período{isAdmin ? ' e filtros' : ''} e clique em "Gerar Relatório" para obter uma análise quantitativa detalhada dos resultados.
                   </p>
                 </div>
               </div>
