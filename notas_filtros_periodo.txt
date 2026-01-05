@@ -1,0 +1,14 @@
+Filtros de Período Atualizados - Relatório IA de Resultados v4.3
+================================================================
+
+Os filtros temporais foram atualizados para mostrar sempre períodos anteriores:
+
+1. Mês Anterior (opção por defeito)
+2. Trimestre Anterior
+3. Semestre Anterior
+4. Ano Anterior
+5. Mês Atual (em curso) - apenas para análise ocasional
+
+O filtro por gestor específico já existia e permite ver apenas as lojas atribuídas a um determinado gestor.
+
+Screenshot confirmando as opções: /home/ubuntu/screenshots/3000-ivfq3xpas0danvd_2026-01-05_17-13-08_2372.webp

@@ -26,7 +26,7 @@ export function RelatorioIAResultados() {
   const isAdmin = user?.role === 'admin';
   
   // Estado para Relatório IA de Resultados
-  const [periodoRelatorioIA, setPeriodoRelatorioIA] = useState<'mes_anterior' | 'mensal' | 'trimestral' | 'semestral' | 'anual'>('mes_anterior');
+  const [periodoRelatorioIA, setPeriodoRelatorioIA] = useState<'mes_anterior' | 'mes_atual' | 'trimestre_anterior' | 'semestre_anterior' | 'ano_anterior'>('mes_anterior');
   const [mostrarRelatorioIA, setMostrarRelatorioIA] = useState(false);
   
   // Estados para filtros (apenas admin)
@@ -195,15 +195,15 @@ export function RelatorioIAResultados() {
                 <div className="space-y-1">
                   <label className="text-xs font-medium text-muted-foreground">Período</label>
                   <Select value={periodoRelatorioIA} onValueChange={(v) => setPeriodoRelatorioIA(v as typeof periodoRelatorioIA)}>
-                    <SelectTrigger className="w-[150px]">
+                    <SelectTrigger className="w-[180px]">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="mes_anterior">Mês Anterior</SelectItem>
-                      <SelectItem value="mensal">Mês Atual</SelectItem>
-                      <SelectItem value="trimestral">Trimestre</SelectItem>
-                      <SelectItem value="semestral">Semestre</SelectItem>
-                      <SelectItem value="anual">Ano</SelectItem>
+                      <SelectItem value="trimestre_anterior">Trimestre Anterior</SelectItem>
+                      <SelectItem value="semestre_anterior">Semestre Anterior</SelectItem>
+                      <SelectItem value="ano_anterior">Ano Anterior</SelectItem>
+                      <SelectItem value="mes_atual">Mês Atual (em curso)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

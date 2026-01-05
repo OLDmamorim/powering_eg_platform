@@ -141,7 +141,7 @@ interface AnaliseIA {
  * @param lojasIds - IDs das lojas a incluir (opcional, para filtrar por zona ou gestor)
  */
 export async function gerarRelatorioComIA(
-  periodo: "diario" | "semanal" | "mensal" | "mes_anterior" | "trimestral" | "semestral" | "anual",
+  periodo: "diario" | "semanal" | "mensal" | "mes_anterior" | "mes_atual" | "trimestre_anterior" | "semestre_anterior" | "ano_anterior" | "trimestral" | "semestral" | "anual",
   gestorId?: number,
   lojasIds?: number[]
 ): Promise<AnaliseIA> {
@@ -745,7 +745,7 @@ Respondes sempre em português europeu e em formato JSON válido.`,
 }
 
 function calcularDataInicio(
-  periodo: "diario" | "semanal" | "mensal" | "mes_anterior" | "trimestral" | "semestral" | "anual"
+  periodo: "diario" | "semanal" | "mensal" | "mes_anterior" | "mes_atual" | "trimestre_anterior" | "semestre_anterior" | "ano_anterior" | "trimestral" | "semestral" | "anual"
 ): Date {
   const agora = new Date();
   switch (periodo) {
@@ -754,9 +754,28 @@ function calcularDataInicio(
     case "semanal":
       return new Date(agora.setDate(agora.getDate() - 7));
     case "mensal":
+    case "mes_atual":
       return new Date(agora.getFullYear(), agora.getMonth(), 1);
     case "mes_anterior":
       return new Date(agora.getFullYear(), agora.getMonth() - 1, 1);
+    case "trimestre_anterior": {
+      // Trimestre anterior completo (Q1=Jan-Mar, Q2=Abr-Jun, Q3=Jul-Set, Q4=Out-Dez)
+      const mesAtual = agora.getMonth();
+      const trimestreAtual = Math.floor(mesAtual / 3);
+      const trimestreAnterior = trimestreAtual === 0 ? 3 : trimestreAtual - 1;
+      const anoTrimestre = trimestreAtual === 0 ? agora.getFullYear() - 1 : agora.getFullYear();
+      return new Date(anoTrimestre, trimestreAnterior * 3, 1);
+    }
+    case "semestre_anterior": {
+      // Semestre anterior completo (S1=Jan-Jun, S2=Jul-Dez)
+      const mesAtual = agora.getMonth();
+      const semestreAtual = mesAtual < 6 ? 0 : 1;
+      const semestreAnterior = semestreAtual === 0 ? 1 : 0;
+      const anoSemestre = semestreAtual === 0 ? agora.getFullYear() - 1 : agora.getFullYear();
+      return new Date(anoSemestre, semestreAnterior * 6, 1);
+    }
+    case "ano_anterior":
+      return new Date(agora.getFullYear() - 1, 0, 1);
     case "trimestral":
       return new Date(agora.setMonth(agora.getMonth() - 3));
     case "semestral":
@@ -767,13 +786,34 @@ function calcularDataInicio(
 }
 
 function calcularDataFim(
-  periodo: "diario" | "semanal" | "mensal" | "mes_anterior" | "trimestral" | "semestral" | "anual"
+  periodo: "diario" | "semanal" | "mensal" | "mes_anterior" | "mes_atual" | "trimestre_anterior" | "semestre_anterior" | "ano_anterior" | "trimestral" | "semestral" | "anual"
 ): Date {
   const agora = new Date();
-  if (periodo === "mes_anterior") {
-    return new Date(agora.getFullYear(), agora.getMonth(), 0, 23, 59, 59);
+  switch (periodo) {
+    case "mes_anterior":
+      return new Date(agora.getFullYear(), agora.getMonth(), 0, 23, 59, 59);
+    case "trimestre_anterior": {
+      // Último dia do trimestre anterior
+      const mesAtual = agora.getMonth();
+      const trimestreAtual = Math.floor(mesAtual / 3);
+      const trimestreAnterior = trimestreAtual === 0 ? 3 : trimestreAtual - 1;
+      const anoTrimestre = trimestreAtual === 0 ? agora.getFullYear() - 1 : agora.getFullYear();
+      const ultimoMesTrimestre = (trimestreAnterior + 1) * 3;
+      return new Date(anoTrimestre, ultimoMesTrimestre, 0, 23, 59, 59);
+    }
+    case "semestre_anterior": {
+      // Último dia do semestre anterior
+      const mesAtual = agora.getMonth();
+      const semestreAtual = mesAtual < 6 ? 0 : 1;
+      const anoSemestre = semestreAtual === 0 ? agora.getFullYear() - 1 : agora.getFullYear();
+      const ultimoMesSemestre = semestreAtual === 0 ? 12 : 6;
+      return new Date(anoSemestre, ultimoMesSemestre, 0, 23, 59, 59);
+    }
+    case "ano_anterior":
+      return new Date(agora.getFullYear() - 1, 11, 31, 23, 59, 59);
+    default:
+      return agora;
   }
-  return agora;
 }
 
 

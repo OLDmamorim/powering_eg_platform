@@ -1943,3 +1943,14 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] KPIs principais com cards visuais
 - [x] Líder e menor performance destacados
 - [x] Análise de tendências e crescimento
+
+## Ajustes Relatório IA de Resultados v4.3
+- [x] Filtros temporais sempre do período anterior por defeito
+- [x] Mês Anterior como opção principal
+- [x] Trimestre Anterior como opção
+- [x] Semestre Anterior como opção
+- [x] Ano Anterior como opção
+- [x] Mês Atual apenas para análise ocasional
+- [x] Filtro por gestor específico (já existia)
+- [x] Dropdown com lista de gestores (já existia)
+- [x] Filtrar lojas atribuídas ao gestor selecionado (já existia)

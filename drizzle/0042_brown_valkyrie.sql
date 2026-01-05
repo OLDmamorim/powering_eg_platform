@@ -1,0 +1,1 @@
+ALTER TABLE `relatorios_ia` MODIFY COLUMN `periodo` enum('diario','semanal','mensal','mes_anterior','mes_atual','trimestre_anterior','semestre_anterior','ano_anterior','trimestral','semestral','anual') NOT NULL;

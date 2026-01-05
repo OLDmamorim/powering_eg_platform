@@ -929,7 +929,7 @@ export const appRouter = router({
   relatoriosIA: router({    
     gerar: gestorProcedure
       .input(z.object({
-        periodo: z.enum(["diario", "semanal", "mensal", "mes_anterior", "trimestral", "semestral", "anual"]),
+        periodo: z.enum(["diario", "semanal", "mensal", "mes_anterior", "mes_atual", "trimestre_anterior", "semestre_anterior", "ano_anterior", "trimestral", "semestral", "anual"]),
         filtro: z.enum(["pais", "zona", "gestor"]).optional().default("pais"),
         zonaId: z.string().optional(),
         zonasIds: z.array(z.string()).optional(), // Novo: múltiplas zonas
