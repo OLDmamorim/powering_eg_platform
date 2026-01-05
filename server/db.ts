@@ -1,4 +1,4 @@
-import { eq, and, desc, sql, inArray, gte, lte, or, gt, lt, isNull } from "drizzle-orm";
+import { eq, and, desc, asc, sql, inArray, gte, lte, or, gt, lt, isNull } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { 
   InsertUser, 
@@ -6004,4 +6004,621 @@ export async function getRankingLojasPorZona(
     desvioPercentualMes: r.desvioPercentualMes ? parseFloat(r.desvioPercentualMes.toString()) : null,
     taxaReparacao: r.taxaReparacao ? parseFloat(r.taxaReparacao.toString()) : null,
   }));
+}
+
+
+// ============================================
+// ANÁLISES AVANÇADAS PARA RELATÓRIO IA v6.5
+// ============================================
+
+/**
+ * Obtém análise completa de uma loja para o período
+ * Inclui resultados, vendas complementares e evolução
+ */
+export async function getAnaliseCompletaLoja(lojaId: number, mes: number, ano: number) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  // Buscar resultados mensais
+  const resultados = await db
+    .select()
+    .from(resultadosMensais)
+    .where(
+      and(
+        eq(resultadosMensais.lojaId, lojaId),
+        eq(resultadosMensais.mes, mes),
+        eq(resultadosMensais.ano, ano)
+      )
+    );
+  
+  // Buscar vendas complementares
+  const vendas = await db
+    .select()
+    .from(vendasComplementares)
+    .where(
+      and(
+        eq(vendasComplementares.lojaId, lojaId),
+        eq(vendasComplementares.mes, mes),
+        eq(vendasComplementares.ano, ano)
+      )
+    );
+  
+  // Buscar dados do mês anterior para comparação
+  let mesAnterior = mes - 1;
+  let anoAnterior = ano;
+  if (mesAnterior === 0) {
+    mesAnterior = 12;
+    anoAnterior = ano - 1;
+  }
+  
+  const resultadosAnteriores = await db
+    .select()
+    .from(resultadosMensais)
+    .where(
+      and(
+        eq(resultadosMensais.lojaId, lojaId),
+        eq(resultadosMensais.mes, mesAnterior),
+        eq(resultadosMensais.ano, anoAnterior)
+      )
+    );
+  
+  const resultado = resultados[0];
+  const venda = vendas[0];
+  const resultadoAnterior = resultadosAnteriores[0];
+  
+  // Calcular variação vs mês anterior
+  const variacaoServicos = resultado && resultadoAnterior 
+    ? ((resultado.totalServicos || 0) - (resultadoAnterior.totalServicos || 0)) / (resultadoAnterior.totalServicos || 1) * 100
+    : 0;
+  
+  return {
+    lojaId,
+    mes,
+    ano,
+    // Resultados
+    totalServicos: resultado?.totalServicos || 0,
+    objetivoMensal: resultado?.objetivoMensal || 0,
+    desvioPercentualMes: resultado?.desvioPercentualMes ? parseFloat(resultado.desvioPercentualMes.toString()) : 0,
+    taxaReparacao: resultado?.taxaReparacao ? parseFloat(resultado.taxaReparacao.toString()) : 0,
+    qtdReparacoes: resultado?.qtdReparacoes || 0,
+    qtdParaBrisas: resultado?.qtdParaBrisas || 0,
+    zona: resultado?.zona || null,
+    numColaboradores: resultado?.numColaboradores || 0,
+    servicosPorColaborador: resultado?.servicosPorColaborador ? parseFloat(resultado.servicosPorColaborador.toString()) : 0,
+    // Vendas Complementares
+    totalVendasComplementares: venda?.totalVendas ? parseFloat(venda.totalVendas.toString()) : 0,
+    escovasVendas: venda?.escovasVendas ? parseFloat(venda.escovasVendas.toString()) : 0,
+    escovasQtd: venda?.escovasQtd || 0,
+    escovasPercent: venda?.escovasPercent ? parseFloat(venda.escovasPercent.toString()) : 0,
+    polimentoVendas: venda?.polimentoVendas ? parseFloat(venda.polimentoVendas.toString()) : 0,
+    lavagensTotal: venda?.lavagensTotal || 0,
+    // Evolução
+    variacaoServicos: parseFloat(variacaoServicos.toFixed(2)),
+    servicosAnterior: resultadoAnterior?.totalServicos || 0,
+  };
+}
+
+/**
+ * Obtém TOP 5 lojas por taxa de reparação
+ */
+export async function getTop5TaxaReparacao(mes: number, ano: number, lojasIds?: number[]) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const conditions = [
+    eq(resultadosMensais.mes, mes),
+    eq(resultadosMensais.ano, ano),
+    sql`${resultadosMensais.taxaReparacao} IS NOT NULL`,
+    sql`${resultadosMensais.taxaReparacao} > 0`
+  ];
+  
+  if (lojasIds && lojasIds.length > 0) {
+    conditions.push(inArray(resultadosMensais.lojaId, lojasIds));
+  }
+  
+  const ranking = await db
+    .select({
+      lojaId: resultadosMensais.lojaId,
+      lojaNome: lojas.nome,
+      zona: resultadosMensais.zona,
+      taxaReparacao: resultadosMensais.taxaReparacao,
+      qtdReparacoes: resultadosMensais.qtdReparacoes,
+      qtdParaBrisas: resultadosMensais.qtdParaBrisas,
+      totalServicos: resultadosMensais.totalServicos,
+    })
+    .from(resultadosMensais)
+    .innerJoin(lojas, eq(resultadosMensais.lojaId, lojas.id))
+    .where(and(...conditions))
+    .orderBy(desc(resultadosMensais.taxaReparacao))
+    .limit(5);
+  
+  return ranking.map(r => ({
+    ...r,
+    taxaReparacao: r.taxaReparacao ? parseFloat(r.taxaReparacao.toString()) : 0,
+  }));
+}
+
+/**
+ * Obtém BOTTOM 5 lojas por taxa de reparação
+ */
+export async function getBottom5TaxaReparacao(mes: number, ano: number, lojasIds?: number[]) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const conditions = [
+    eq(resultadosMensais.mes, mes),
+    eq(resultadosMensais.ano, ano),
+    sql`${resultadosMensais.taxaReparacao} IS NOT NULL`
+  ];
+  
+  if (lojasIds && lojasIds.length > 0) {
+    conditions.push(inArray(resultadosMensais.lojaId, lojasIds));
+  }
+  
+  const ranking = await db
+    .select({
+      lojaId: resultadosMensais.lojaId,
+      lojaNome: lojas.nome,
+      zona: resultadosMensais.zona,
+      taxaReparacao: resultadosMensais.taxaReparacao,
+      qtdReparacoes: resultadosMensais.qtdReparacoes,
+      qtdParaBrisas: resultadosMensais.qtdParaBrisas,
+      totalServicos: resultadosMensais.totalServicos,
+    })
+    .from(resultadosMensais)
+    .innerJoin(lojas, eq(resultadosMensais.lojaId, lojas.id))
+    .where(and(...conditions))
+    .orderBy(asc(resultadosMensais.taxaReparacao))
+    .limit(5);
+  
+  return ranking.map(r => ({
+    ...r,
+    taxaReparacao: r.taxaReparacao ? parseFloat(r.taxaReparacao.toString()) : 0,
+  }));
+}
+
+/**
+ * Obtém TOP 5 lojas por cumprimento de objetivo (melhor desvio positivo)
+ */
+export async function getTop5CumprimentoObjetivo(mes: number, ano: number, lojasIds?: number[]) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const conditions = [
+    eq(resultadosMensais.mes, mes),
+    eq(resultadosMensais.ano, ano),
+    sql`${resultadosMensais.desvioPercentualMes} IS NOT NULL`
+  ];
+  
+  if (lojasIds && lojasIds.length > 0) {
+    conditions.push(inArray(resultadosMensais.lojaId, lojasIds));
+  }
+  
+  const ranking = await db
+    .select({
+      lojaId: resultadosMensais.lojaId,
+      lojaNome: lojas.nome,
+      zona: resultadosMensais.zona,
+      totalServicos: resultadosMensais.totalServicos,
+      objetivoMensal: resultadosMensais.objetivoMensal,
+      desvioPercentualMes: resultadosMensais.desvioPercentualMes,
+      taxaReparacao: resultadosMensais.taxaReparacao,
+    })
+    .from(resultadosMensais)
+    .innerJoin(lojas, eq(resultadosMensais.lojaId, lojas.id))
+    .where(and(...conditions))
+    .orderBy(desc(resultadosMensais.desvioPercentualMes))
+    .limit(5);
+  
+  return ranking.map(r => ({
+    ...r,
+    desvioPercentualMes: r.desvioPercentualMes ? parseFloat(r.desvioPercentualMes.toString()) : 0,
+    taxaReparacao: r.taxaReparacao ? parseFloat(r.taxaReparacao.toString()) : 0,
+  }));
+}
+
+/**
+ * Obtém BOTTOM 5 lojas por cumprimento de objetivo (pior desvio negativo)
+ */
+export async function getBottom5CumprimentoObjetivo(mes: number, ano: number, lojasIds?: number[]) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const conditions = [
+    eq(resultadosMensais.mes, mes),
+    eq(resultadosMensais.ano, ano),
+    sql`${resultadosMensais.desvioPercentualMes} IS NOT NULL`
+  ];
+  
+  if (lojasIds && lojasIds.length > 0) {
+    conditions.push(inArray(resultadosMensais.lojaId, lojasIds));
+  }
+  
+  const ranking = await db
+    .select({
+      lojaId: resultadosMensais.lojaId,
+      lojaNome: lojas.nome,
+      zona: resultadosMensais.zona,
+      totalServicos: resultadosMensais.totalServicos,
+      objetivoMensal: resultadosMensais.objetivoMensal,
+      desvioPercentualMes: resultadosMensais.desvioPercentualMes,
+      taxaReparacao: resultadosMensais.taxaReparacao,
+    })
+    .from(resultadosMensais)
+    .innerJoin(lojas, eq(resultadosMensais.lojaId, lojas.id))
+    .where(and(...conditions))
+    .orderBy(asc(resultadosMensais.desvioPercentualMes))
+    .limit(5);
+  
+  return ranking.map(r => ({
+    ...r,
+    desvioPercentualMes: r.desvioPercentualMes ? parseFloat(r.desvioPercentualMes.toString()) : 0,
+    taxaReparacao: r.taxaReparacao ? parseFloat(r.taxaReparacao.toString()) : 0,
+  }));
+}
+
+/**
+ * Obtém TOP 5 lojas por vendas complementares
+ */
+export async function getTop5VendasComplementares(mes: number, ano: number, lojasIds?: number[]) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const conditions = [
+    eq(vendasComplementares.mes, mes),
+    eq(vendasComplementares.ano, ano),
+    sql`${vendasComplementares.totalVendas} IS NOT NULL`
+  ];
+  
+  if (lojasIds && lojasIds.length > 0) {
+    conditions.push(inArray(vendasComplementares.lojaId, lojasIds));
+  }
+  
+  const ranking = await db
+    .select({
+      lojaId: vendasComplementares.lojaId,
+      lojaNome: lojas.nome,
+      totalVendas: vendasComplementares.totalVendas,
+      escovasVendas: vendasComplementares.escovasVendas,
+      escovasQtd: vendasComplementares.escovasQtd,
+      escovasPercent: vendasComplementares.escovasPercent,
+      polimentoVendas: vendasComplementares.polimentoVendas,
+      lavagensTotal: vendasComplementares.lavagensTotal,
+    })
+    .from(vendasComplementares)
+    .innerJoin(lojas, eq(vendasComplementares.lojaId, lojas.id))
+    .where(and(...conditions))
+    .orderBy(desc(vendasComplementares.totalVendas))
+    .limit(5);
+  
+  return ranking.map(r => ({
+    ...r,
+    totalVendas: r.totalVendas ? parseFloat(r.totalVendas.toString()) : 0,
+    escovasVendas: r.escovasVendas ? parseFloat(r.escovasVendas.toString()) : 0,
+    escovasPercent: r.escovasPercent ? parseFloat(r.escovasPercent.toString()) : 0,
+    polimentoVendas: r.polimentoVendas ? parseFloat(r.polimentoVendas.toString()) : 0,
+  }));
+}
+
+/**
+ * Obtém BOTTOM 5 lojas por vendas complementares
+ */
+export async function getBottom5VendasComplementares(mes: number, ano: number, lojasIds?: number[]) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const conditions = [
+    eq(vendasComplementares.mes, mes),
+    eq(vendasComplementares.ano, ano)
+  ];
+  
+  if (lojasIds && lojasIds.length > 0) {
+    conditions.push(inArray(vendasComplementares.lojaId, lojasIds));
+  }
+  
+  const ranking = await db
+    .select({
+      lojaId: vendasComplementares.lojaId,
+      lojaNome: lojas.nome,
+      totalVendas: vendasComplementares.totalVendas,
+      escovasVendas: vendasComplementares.escovasVendas,
+      escovasQtd: vendasComplementares.escovasQtd,
+      escovasPercent: vendasComplementares.escovasPercent,
+    })
+    .from(vendasComplementares)
+    .innerJoin(lojas, eq(vendasComplementares.lojaId, lojas.id))
+    .where(and(...conditions))
+    .orderBy(asc(vendasComplementares.totalVendas))
+    .limit(5);
+  
+  return ranking.map(r => ({
+    ...r,
+    totalVendas: r.totalVendas ? parseFloat(r.totalVendas.toString()) : 0,
+    escovasVendas: r.escovasVendas ? parseFloat(r.escovasVendas.toString()) : 0,
+    escovasPercent: r.escovasPercent ? parseFloat(r.escovasPercent.toString()) : 0,
+  }));
+}
+
+/**
+ * Obtém TOP 5 lojas por crescimento vs mês anterior
+ */
+export async function getTop5Crescimento(mes: number, ano: number, lojasIds?: number[]) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  // Calcular mês anterior
+  let mesAnterior = mes - 1;
+  let anoAnterior = ano;
+  if (mesAnterior === 0) {
+    mesAnterior = 12;
+    anoAnterior = ano - 1;
+  }
+  
+  // Buscar dados do mês atual
+  const conditionsAtual = [
+    eq(resultadosMensais.mes, mes),
+    eq(resultadosMensais.ano, ano)
+  ];
+  if (lojasIds && lojasIds.length > 0) {
+    conditionsAtual.push(inArray(resultadosMensais.lojaId, lojasIds));
+  }
+  
+  const dadosAtuais = await db
+    .select({
+      lojaId: resultadosMensais.lojaId,
+      lojaNome: lojas.nome,
+      zona: resultadosMensais.zona,
+      totalServicos: resultadosMensais.totalServicos,
+      objetivoMensal: resultadosMensais.objetivoMensal,
+    })
+    .from(resultadosMensais)
+    .innerJoin(lojas, eq(resultadosMensais.lojaId, lojas.id))
+    .where(and(...conditionsAtual));
+  
+  // Buscar dados do mês anterior
+  const conditionsAnterior = [
+    eq(resultadosMensais.mes, mesAnterior),
+    eq(resultadosMensais.ano, anoAnterior)
+  ];
+  if (lojasIds && lojasIds.length > 0) {
+    conditionsAnterior.push(inArray(resultadosMensais.lojaId, lojasIds));
+  }
+  
+  const dadosAnteriores = await db
+    .select({
+      lojaId: resultadosMensais.lojaId,
+      totalServicos: resultadosMensais.totalServicos,
+    })
+    .from(resultadosMensais)
+    .where(and(...conditionsAnterior));
+  
+  // Mapear dados anteriores
+  const mapAnterior = new Map(dadosAnteriores.map(d => [d.lojaId, d.totalServicos || 0]));
+  
+  // Calcular crescimento
+  const comCrescimento = dadosAtuais
+    .map(atual => {
+      const anterior = mapAnterior.get(atual.lojaId) || 0;
+      const crescimento = anterior > 0 
+        ? ((atual.totalServicos || 0) - anterior) / anterior * 100 
+        : 0;
+      return {
+        ...atual,
+        servicosAnterior: anterior,
+        crescimento: parseFloat(crescimento.toFixed(2)),
+      };
+    })
+    .filter(l => l.crescimento !== 0 && l.servicosAnterior > 0)
+    .sort((a, b) => b.crescimento - a.crescimento)
+    .slice(0, 5);
+  
+  return comCrescimento;
+}
+
+/**
+ * Obtém BOTTOM 5 lojas por crescimento (maior decréscimo)
+ */
+export async function getBottom5Crescimento(mes: number, ano: number, lojasIds?: number[]) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  // Calcular mês anterior
+  let mesAnterior = mes - 1;
+  let anoAnterior = ano;
+  if (mesAnterior === 0) {
+    mesAnterior = 12;
+    anoAnterior = ano - 1;
+  }
+  
+  // Buscar dados do mês atual
+  const conditionsAtual = [
+    eq(resultadosMensais.mes, mes),
+    eq(resultadosMensais.ano, ano)
+  ];
+  if (lojasIds && lojasIds.length > 0) {
+    conditionsAtual.push(inArray(resultadosMensais.lojaId, lojasIds));
+  }
+  
+  const dadosAtuais = await db
+    .select({
+      lojaId: resultadosMensais.lojaId,
+      lojaNome: lojas.nome,
+      zona: resultadosMensais.zona,
+      totalServicos: resultadosMensais.totalServicos,
+      objetivoMensal: resultadosMensais.objetivoMensal,
+    })
+    .from(resultadosMensais)
+    .innerJoin(lojas, eq(resultadosMensais.lojaId, lojas.id))
+    .where(and(...conditionsAtual));
+  
+  // Buscar dados do mês anterior
+  const conditionsAnterior = [
+    eq(resultadosMensais.mes, mesAnterior),
+    eq(resultadosMensais.ano, anoAnterior)
+  ];
+  if (lojasIds && lojasIds.length > 0) {
+    conditionsAnterior.push(inArray(resultadosMensais.lojaId, lojasIds));
+  }
+  
+  const dadosAnteriores = await db
+    .select({
+      lojaId: resultadosMensais.lojaId,
+      totalServicos: resultadosMensais.totalServicos,
+    })
+    .from(resultadosMensais)
+    .where(and(...conditionsAnterior));
+  
+  // Mapear dados anteriores
+  const mapAnterior = new Map(dadosAnteriores.map(d => [d.lojaId, d.totalServicos || 0]));
+  
+  // Calcular decréscimo
+  const comDecrescimo = dadosAtuais
+    .map(atual => {
+      const anterior = mapAnterior.get(atual.lojaId) || 0;
+      const crescimento = anterior > 0 
+        ? ((atual.totalServicos || 0) - anterior) / anterior * 100 
+        : 0;
+      return {
+        ...atual,
+        servicosAnterior: anterior,
+        crescimento: parseFloat(crescimento.toFixed(2)),
+      };
+    })
+    .filter(l => l.crescimento < 0 && l.servicosAnterior > 0)
+    .sort((a, b) => a.crescimento - b.crescimento)
+    .slice(0, 5);
+  
+  return comDecrescimo;
+}
+
+/**
+ * Obtém análise agregada por zona
+ */
+export async function getAnaliseZonas(mes: number, ano: number, lojasIds?: number[]) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const conditions = [
+    eq(resultadosMensais.mes, mes),
+    eq(resultadosMensais.ano, ano),
+    sql`${resultadosMensais.zona} IS NOT NULL`
+  ];
+  
+  if (lojasIds && lojasIds.length > 0) {
+    conditions.push(inArray(resultadosMensais.lojaId, lojasIds));
+  }
+  
+  const analise = await db
+    .select({
+      zona: resultadosMensais.zona,
+      totalLojas: sql<number>`COUNT(DISTINCT ${resultadosMensais.lojaId})`,
+      somaServicos: sql<number>`SUM(${resultadosMensais.totalServicos})`,
+      somaObjetivos: sql<number>`SUM(${resultadosMensais.objetivoMensal})`,
+      mediaDesvio: sql<number>`AVG(${resultadosMensais.desvioPercentualMes})`,
+      mediaTaxaReparacao: sql<number>`AVG(${resultadosMensais.taxaReparacao})`,
+      lojasAcimaObjetivo: sql<number>`SUM(CASE WHEN ${resultadosMensais.desvioPercentualMes} >= 0 THEN 1 ELSE 0 END)`,
+    })
+    .from(resultadosMensais)
+    .where(and(...conditions))
+    .groupBy(resultadosMensais.zona)
+    .orderBy(desc(sql`SUM(${resultadosMensais.totalServicos})`));
+  
+  // Para cada zona, buscar melhor e pior loja
+  const resultado = await Promise.all(analise.map(async (zona) => {
+    // Melhor loja da zona
+    const melhor = await db
+      .select({
+        lojaNome: lojas.nome,
+        desvio: resultadosMensais.desvioPercentualMes,
+      })
+      .from(resultadosMensais)
+      .innerJoin(lojas, eq(resultadosMensais.lojaId, lojas.id))
+      .where(
+        and(
+          eq(resultadosMensais.zona, zona.zona!),
+          eq(resultadosMensais.mes, mes),
+          eq(resultadosMensais.ano, ano)
+        )
+      )
+      .orderBy(desc(resultadosMensais.desvioPercentualMes))
+      .limit(1);
+    
+    // Pior loja da zona
+    const pior = await db
+      .select({
+        lojaNome: lojas.nome,
+        desvio: resultadosMensais.desvioPercentualMes,
+      })
+      .from(resultadosMensais)
+      .innerJoin(lojas, eq(resultadosMensais.lojaId, lojas.id))
+      .where(
+        and(
+          eq(resultadosMensais.zona, zona.zona!),
+          eq(resultadosMensais.mes, mes),
+          eq(resultadosMensais.ano, ano)
+        )
+      )
+      .orderBy(asc(resultadosMensais.desvioPercentualMes))
+      .limit(1);
+    
+    return {
+      zona: zona.zona,
+      totalLojas: zona.totalLojas || 0,
+      somaServicos: zona.somaServicos || 0,
+      somaObjetivos: zona.somaObjetivos || 0,
+      mediaDesvio: zona.mediaDesvio ? parseFloat(zona.mediaDesvio.toString()) : 0,
+      mediaTaxaReparacao: zona.mediaTaxaReparacao ? parseFloat(zona.mediaTaxaReparacao.toString()) : 0,
+      lojasAcimaObjetivo: zona.lojasAcimaObjetivo || 0,
+      taxaCumprimento: zona.totalLojas ? ((zona.lojasAcimaObjetivo || 0) / zona.totalLojas * 100) : 0,
+      melhorLoja: melhor[0]?.lojaNome || 'N/A',
+      melhorLojaDesvio: melhor[0]?.desvio ? parseFloat(melhor[0].desvio.toString()) : 0,
+      piorLoja: pior[0]?.lojaNome || 'N/A',
+      piorLojaDesvio: pior[0]?.desvio ? parseFloat(pior[0].desvio.toString()) : 0,
+    };
+  }));
+  
+  return resultado;
+}
+
+/**
+ * Obtém dados completos para análise avançada do relatório IA
+ */
+export async function getDadosAnaliseAvancada(mes: number, ano: number, lojasIds?: number[]) {
+  const [
+    top5TaxaReparacao,
+    bottom5TaxaReparacao,
+    top5Objetivo,
+    bottom5Objetivo,
+    top5Vendas,
+    bottom5Vendas,
+    top5Crescimento,
+    bottom5Crescimento,
+    analiseZonas,
+    estatisticas,
+    estatisticasComplementares
+  ] = await Promise.all([
+    getTop5TaxaReparacao(mes, ano, lojasIds),
+    getBottom5TaxaReparacao(mes, ano, lojasIds),
+    getTop5CumprimentoObjetivo(mes, ano, lojasIds),
+    getBottom5CumprimentoObjetivo(mes, ano, lojasIds),
+    getTop5VendasComplementares(mes, ano, lojasIds),
+    getBottom5VendasComplementares(mes, ano, lojasIds),
+    getTop5Crescimento(mes, ano, lojasIds),
+    getBottom5Crescimento(mes, ano, lojasIds),
+    getAnaliseZonas(mes, ano, lojasIds),
+    getEstatisticasPeriodo(mes, ano, undefined, lojasIds),
+    getEstatisticasComplementares(mes, ano, undefined, lojasIds),
+  ]);
+  
+  return {
+    rankings: {
+      taxaReparacao: { top5: top5TaxaReparacao, bottom5: bottom5TaxaReparacao },
+      cumprimentoObjetivo: { top5: top5Objetivo, bottom5: bottom5Objetivo },
+      vendasComplementares: { top5: top5Vendas, bottom5: bottom5Vendas },
+      crescimento: { top5: top5Crescimento, bottom5: bottom5Crescimento },
+    },
+    analiseZonas,
+    estatisticas,
+    estatisticasComplementares,
+  };
 }

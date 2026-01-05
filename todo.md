@@ -1910,3 +1910,36 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Filtrar dados por zonas selecionadas no backend
 - [x] Atualizar análise IA para considerar zonas filtradas
 - [x] Testar combinação de filtros (mês + múltiplas zonas)
+
+## Relatório IA de Resultados - Análise Completa e Profissional v6.5
+- [ ] Rankings TOP 5 e BOTTOM 5 por loja:
+  - [ ] Melhor taxa de reparação
+  - [ ] Melhores resultados globais (serviços vs objetivo)
+  - [ ] Melhores vendas complementares
+  - [ ] Piores resultados vs objetivo
+  - [ ] Maior crescimento vs mês anterior
+- [ ] Análise comparativa por zona com métricas agregadas
+- [ ] Métricas detalhadas individuais por loja
+- [ ] Análise de tendências e evolução mensal
+- [ ] Secção de insights profissionais e recomendações específicas
+- [ ] Melhorar prompt do LLM para análise mais profunda e estruturada
+- [ ] Redesenhar interface com secções analíticas expandidas
+- [ ] Exportar PDF com todas as análises detalhadas
+
+
+## Melhorias Relatório IA de Resultados v4.2
+- [x] Rankings detalhados por loja (TOP 5 e BOTTOM 5)
+- [x] Ranking de cumprimento de objetivo
+- [x] Ranking de taxa de reparação
+- [x] Ranking de vendas complementares
+- [x] Ranking de crescimento vs mês anterior
+- [x] Análise detalhada por zona com tabela comparativa
+- [x] Insights IA mais profundos e analíticos
+- [x] Alertas críticos identificados pela IA
+- [x] Recomendações estratégicas detalhadas
+- [x] Gráficos de visualização (barras e donut)
+- [x] Secções colapsáveis para melhor navegação
+- [x] Estatísticas de vendas complementares agregadas
+- [x] KPIs principais com cards visuais
+- [x] Líder e menor performance destacados
+- [x] Análise de tendências e crescimento
