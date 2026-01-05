@@ -1978,3 +1978,22 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Admin: filtro por Gestor (lojas de um gestor específico)
 - [x] Admin: filtro por Zona (lojas de uma zona específica)
 - [x] Testar filtros para ambos os roles (admin testado: Nacional, Por Gestor, Por Zona)
+
+## Filtros Temporais na Análise Loja a Loja v4.6
+- [ ] Adicionar dropdown de período na secção Análise Loja a Loja
+- [ ] Opções: Mês Anterior, Trimestre Anterior, Semestre Anterior, Ano Anterior
+- [ ] Filtrar dados da tabela pelo período selecionado
+- [ ] Atualizar resumo rápido com dados do período
+- [ ] Testar filtros temporais combinados com filtros de zona/gestor
+
+## Bug v5.4.1 - Filtros Análise Loja a Loja para Gestores
+- [ ] Gestores devem ver filtros 'Nacional' e 'Minhas Lojas' na secção Análise Loja a Loja
+- [ ] Por defeito, gestor deve começar com 'Minhas Lojas' selecionado (não 'Nacional')
+
+
+## Bug Fix - Relatório IA Resultados (Filtro Minhas Lojas)
+- [x] Bug: Relatório IA de Resultados não filtra corretamente por 'Minhas Lojas' para gestores - analisa 70 lojas em vez das 14 atribuídas
+- [ ] O backend (routers.ts) passa gestorId para gerarRelatorioComIA, mas não passa lojasIds
+- [ ] O aiService.ts quando recebe gestorId busca relatórios do gestor, mas busca TODOS os dados de ranking sem filtrar
+- [ ] Corrigir para passar lojasIds do gestor ao backend
+

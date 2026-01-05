@@ -1,0 +1,31 @@
+{
+  "query": "SELECT id, name, email, role, openId FROM users WHERE name LIKE '%Marco%' OR email LIKE '%amorim%' ORDER BY id;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT id, name, email, role, openId FROM users WHERE name LIKE '%Marco%' OR email LIKE '%amorim%' ORDER BY id;",
+  "rows": [
+    {
+      "id": "1",
+      "name": "Marco Amorim",
+      "email": "mramorim78@gmail.com",
+      "role": "admin",
+      "openId": "JwvyMVKfrKUJQ7cLCJGEkL"
+    },
+    {
+      "id": "420030",
+      "name": "Marco Amorim",
+      "email": "mamorim@expressglass.pt",
+      "role": "gestor",
+      "openId": "M6W777U2ZPR3y5QVg75RaS"
+    },
+    {
+      "id": "2160121",
+      "name": "Marco Vilar",
+      "email": "mvilar@expressglass.pt",
+      "role": "gestor",
+      "openId": "pending-mvilar@expressglass.pt-1766011492113"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\temail\trole\topenId\n1\tMarco Amorim\tmramorim78@gmail.com\tadmin\tJwvyMVKfrKUJQ7cLCJGEkL\n420030\tMarco Amorim\tmamorim@expressglass.pt\tgestor\tM6W777U2ZPR3y5QVg75RaS\n2160121\tMarco Vilar\tmvilar@expressglass.pt\tgestor\tpending-mvilar@expressglass.pt-1766011492113\n",
+  "stderr": "",
+  "execution_time_ms": 53
+}

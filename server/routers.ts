@@ -945,6 +945,12 @@ export const appRouter = router({
           // Gestores só vêem as suas lojas
           gestorId = ctx.gestor?.id;
           filtroDescricao = "Minhas Lojas";
+          
+          // IMPORTANTE: Buscar IDs das lojas do gestor para filtrar dados de ranking
+          if (gestorId) {
+            const lojasDoGestor = await db.getLojasByGestorId(gestorId);
+            lojasIds = lojasDoGestor.map(l => l.id);
+          }
         } else {
           // Admin pode filtrar
           if (input.filtro === "gestor" && input.gestorIdFiltro) {

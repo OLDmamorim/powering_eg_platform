@@ -1,0 +1,220 @@
+{
+  "query": "SELECT id, name, email, role FROM users ORDER BY id;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT id, name, email, role FROM users ORDER BY id;",
+  "rows": [
+    {
+      "id": "1",
+      "name": "Marco Amorim",
+      "email": "mramorim78@gmail.com",
+      "role": "admin"
+    },
+    {
+      "id": "240006",
+      "name": "Mauro Furtado",
+      "email": "mfurtado@expressglass.pt",
+      "role": "admin"
+    },
+    {
+      "id": "420030",
+      "name": "Marco Amorim",
+      "email": "mamorim@expressglass.pt",
+      "role": "gestor"
+    },
+    {
+      "id": "2160121",
+      "name": "Marco Vilar",
+      "email": "mvilar@expressglass.pt",
+      "role": "gestor"
+    },
+    {
+      "id": "2160125",
+      "name": "Mónica Correira",
+      "email": "mcorreia@expressglass.pt",
+      "role": "gestor"
+    },
+    {
+      "id": "6600014",
+      "name": "List Test Name 1767372508573",
+      "email": "list.test.1767372508573@expressglass.pt",
+      "role": "admin"
+    },
+    {
+      "id": "6600028",
+      "name": "Rui Adriao ",
+      "email": "rui.adriao@expressglass.pt",
+      "role": "gestor"
+    },
+    {
+      "id": "6960011",
+      "name": "Carlos Eduardo",
+      "email": "carlos.eduardo@expressglass.pt",
+      "role": "gestor"
+    },
+    {
+      "id": "7290150",
+      "name": "Admin Reunioes Filtro",
+      "email": "admin-reunioes-filtro@test.com",
+      "role": "admin"
+    },
+    {
+      "id": "7290151",
+      "name": "Gestor Reunioes Filtro",
+      "email": "gestor-reunioes-filtro@test.com",
+      "role": "gestor"
+    },
+    {
+      "id": "7290154",
+      "name": "Gestor Cumprimento 1767296700384",
+      "email": "cumprimento-1767296700384@test.com",
+      "role": "gestor"
+    },
+    {
+      "id": "7350761",
+      "name": "Gestor Cumprimento 1767358550863",
+      "email": "cumprimento-1767358550863@test.com",
+      "role": "gestor"
+    },
+    {
+      "id": "7350877",
+      "name": "Gestor Cumprimento 1767363348383",
+      "email": "cumprimento-1767363348383@test.com",
+      "role": "gestor"
+    },
+    {
+      "id": "7351218",
+      "name": "Gestor Cumprimento 1767366281748",
+      "email": "cumprimento-1767366281748@test.com",
+      "role": "gestor"
+    },
+    {
+      "id": "7410262",
+      "name": "Admin Email Test",
+      "email": "admin.email@test.com",
+      "role": "admin"
+    },
+    {
+      "id": "7410263",
+      "name": "Admin Comentarios Test",
+      "email": "admin.comentarios@test.com",
+      "role": "admin"
+    },
+    {
+      "id": "7410264",
+      "name": "Admin Teste",
+      "email": "admin@test.com",
+      "role": "admin"
+    },
+    {
+      "id": "7410265",
+      "name": "Gestor Teste Data/Hora",
+      "email": "gestor.datahora@test.com",
+      "role": "gestor"
+    },
+    {
+      "id": "7410266",
+      "name": "Gestor Teste",
+      "email": "gestor@test.com",
+      "role": "gestor"
+    },
+    {
+      "id": "7410267",
+      "name": "Gestor Comentarios Test",
+      "email": "gestor.comentarios@test.com",
+      "role": "gestor"
+    },
+    {
+      "id": "7410268",
+      "name": "Gestor Email Test",
+      "email": "gestor.email@test.com",
+      "role": "gestor"
+    },
+    {
+      "id": "7410269",
+      "name": "Gestor Ocorrencias Test",
+      "email": "gestor.ocorrencias@test.com",
+      "role": "gestor"
+    },
+    {
+      "id": "7410270",
+      "name": "Outro Gestor Test",
+      "email": "outro.gestor@test.com",
+      "role": "gestor"
+    },
+    {
+      "id": "7410271",
+      "name": "Gestor Multi-Lojas Test",
+      "email": "gestor.multilojas@test.com",
+      "role": "gestor"
+    },
+    {
+      "id": "7410272",
+      "name": "Gestor Teste IA",
+      "email": "gestor-ia-test-1767372482625@test.com",
+      "role": "gestor"
+    },
+    {
+      "id": "7410273",
+      "name": "Admin Teste",
+      "email": "admin-ia-test-1767372482915@test.com",
+      "role": "admin"
+    },
+    {
+      "id": "7410274",
+      "name": "Admin Lojas Test",
+      "email": "admin.lojas@test.com",
+      "role": "admin"
+    },
+    {
+      "id": "7410275",
+      "name": "Gestor Lojas Test",
+      "email": "gestor.lojas@test.com",
+      "role": "gestor"
+    },
+    {
+      "id": "7410276",
+      "name": "Admin Resultados Test",
+      "email": "admin-resultados-1767372494725@test.com",
+      "role": "admin"
+    },
+    {
+      "id": "7410277",
+      "name": "Gestor Cumprimento 1767372503371",
+      "email": "cumprimento-1767372503371@test.com",
+      "role": "gestor"
+    },
+    {
+      "id": "7470026",
+      "name": "Fábio Dias",
+      "email": "fdias@expressglass.pt",
+      "role": "gestor"
+    },
+    {
+      "id": "7890172",
+      "name": "Gestor Teste IA",
+      "email": "gestor-ia-test-1767637722405@test.com",
+      "role": "gestor"
+    },
+    {
+      "id": "7890173",
+      "name": "Admin Teste",
+      "email": "admin-ia-test-1767637722740@test.com",
+      "role": "admin"
+    },
+    {
+      "id": "7890174",
+      "name": "Admin Resultados Test",
+      "email": "admin-resultados-1767637738683@test.com",
+      "role": "admin"
+    },
+    {
+      "id": "7890176",
+      "name": "Gestor Cumprimento 1767637743576",
+      "email": "cumprimento-1767637743576@test.com",
+      "role": "gestor"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\temail\trole\n1\tMarco Amorim\tmramorim78@gmail.com\tadmin\n240006\tMauro Furtado\tmfurtado@expressglass.pt\tadmin\n420030\tMarco Amorim\tmamorim@expressglass.pt\tgestor\n2160121\tMarco Vilar\tmvilar@expressglass.pt\tgestor\n2160125\tMónica Correira\tmcorreia@expressglass.pt\tgestor\n6600014\tList Test Name 1767372508573\tlist.test.1767372508573@expressglass.pt\tadmin\n6600028\tRui Adriao \trui.adriao@expressglass.pt\tgestor\n6960011\tCarlos Eduardo\tcarlos.eduardo@expressglass.pt\tgestor\n7290150\tAdmin Reunioes Filtro\tadmin-reunioes-filtro@test.com\tadmin\n7290151\tGestor Reunioes Filtro\tgestor-reunioes-filtro@test.com\tgestor\n7290154\tGestor Cumprimento 1767296700384\tcumprimento-1767296700384@test.com\tgestor\n7350761\tGestor Cumprimento 1767358550863\tcumprimento-1767358550863@test.com\tgestor\n7350877\tGestor Cumprimento 1767363348383\tcumprimento-1767363348383@test.com\tgestor\n7351218\tGestor Cumprimento 1767366281748\tcumprimento-1767366281748@test.com\tgestor\n7410262\tAdmin Email Test\tadmin.email@test.com\tadmin\n7410263\tAdmin Comentarios Test\tadmin.comentarios@test.com\tadmin\n7410264\tAdmin Teste\tadmin@test.com\tadmin\n7410265\tGestor Teste Data/Hora\tgestor.datahora@test.com\tgestor\n7410266\tGestor Teste\tgestor@test.com\tgestor\n7410267\tGestor Comentarios Test\tgestor.comentarios@test.com\tgestor\n7410268\tGestor Email Test\tgestor.email@test.com\tgestor\n7410269\tGestor Ocorrencias Test\tgestor.ocorrencias@test.com\tgestor\n7410270\tOutro Gestor Test\toutro.gestor@test.com\tgestor\n7410271\tGestor Multi-Lojas Test\tgestor.multilojas@test.com\tgestor\n7410272\tGestor Teste IA\tgestor-ia-test-1767372482625@test.com\tgestor\n7410273\tAdmin Teste\tadmin-ia-test-1767372482915@test.com\tadmin\n7410274\tAdmin Lojas Test\tadmin.lojas@test.com\tadmin\n7410275\tGestor Lojas Test\tgestor.lojas@test.com\tgestor\n7410276\tAdmin Resultados Test\tadmin-resultados-1767372494725@test.com\tadmin\n7410277\tGestor Cumprimento 1767372503371\tcumprimento-1767372503371@test.com\tgestor\n7470026\tFábio Dias\tfdias@expressglass.pt\tgestor\n7890172\tGestor Teste IA\tgestor-ia-test-1767637722405@test.com\tgestor\n7890173\tAdmin Teste\tadmin-ia-test-1767637722740@test.com\tadmin\n7890174\tAdmin Resultados Test\tadmin-resultados-1767637738683@test.com\tadmin\n7890176\tGestor Cumprimento 1767637743576\tcumprimento-1767637743576@test.com\tgestor\n",
+  "stderr": "",
+  "execution_time_ms": 57
+}

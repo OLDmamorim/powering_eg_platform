@@ -1,10 +1,10 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { trpc } from '../lib/trpc';
 import DashboardLayout from '../components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Button } from '../components/ui/button';
-import { Loader2, TrendingUp, TrendingDown, Target, Award, BarChart3, Sparkles, FileText, Trophy, Store, ArrowUpRight, ArrowDownRight, Globe, MapPin, User, Filter, AlertTriangle, CheckCircle2, XCircle, Percent, Activity, PieChart, X, Wrench, ShoppingBag, Zap, AlertCircle, ChevronDown, ChevronUp, Building2, Lightbulb, TrendingUpIcon } from 'lucide-react';
+import { Loader2, TrendingUp, TrendingDown, Target, Award, BarChart3, Sparkles, FileText, Trophy, Store, ArrowUpRight, ArrowDownRight, Globe, MapPin, User, Filter, AlertTriangle, CheckCircle2, XCircle, Percent, Activity, PieChart, X, Wrench, ShoppingBag, Zap, AlertCircle, ChevronDown, ChevronUp, Building2, Lightbulb, TrendingUpIcon, Calendar } from 'lucide-react';
 import { useAuth } from '../_core/hooks/useAuth';
 import { toast } from 'sonner';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement } from 'chart.js';
@@ -52,9 +52,22 @@ export function RelatorioIAResultados() {
   // Estados para filtros na análise loja a loja
   // Gestor: 'nacional' (todas) ou 'minhas' (apenas suas lojas)
   // Admin: 'nacional' (todas), 'gestor' (por gestor), 'zona' (por zona)
-  const [filtroAnaliseLojas, setFiltroAnaliseLojas] = useState<'nacional' | 'minhas' | 'gestor' | 'zona'>('nacional');
+  // Valor por defeito: gestores começam com 'minhas', admins com 'nacional'
+  const [filtroAnaliseLojas, setFiltroAnaliseLojas] = useState<'nacional' | 'minhas' | 'gestor' | 'zona'>(
+    user?.role === 'admin' ? 'nacional' : 'minhas'
+  );
   const [gestorFiltroLojas, setGestorFiltroLojas] = useState<number | undefined>(undefined);
   const [zonaFiltroLojas, setZonaFiltroLojas] = useState<string | undefined>(undefined);
+  
+  // Estado para período na análise loja a loja (igual aos filtros principais)
+  const [periodoAnaliseLojas, setPeriodoAnaliseLojas] = useState<'mes_anterior' | 'trimestre_anterior' | 'semestre_anterior' | 'ano_anterior'>('mes_anterior');
+  
+  // Efeito para atualizar o filtro quando o user carrega (gestores devem ver 'minhas' por defeito)
+  useEffect(() => {
+    if (user) {
+      setFiltroAnaliseLojas(user.role === 'admin' ? 'nacional' : 'minhas');
+    }
+  }, [user?.role]);
   
   // Queries para obter opções de filtro (apenas admin)
   const { data: zonas } = trpc.relatoriosIA.getZonas.useQuery(undefined, {
@@ -993,6 +1006,26 @@ export function RelatorioIAResultados() {
                   <CollapsibleContent className="pt-4">
                     {/* Controlos de filtro e ordenação */}
                     <div className="flex flex-wrap items-center gap-4 mb-4 p-3 bg-muted/30 rounded-lg">
+                      {/* Filtro por período */}
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm font-medium">Período:</span>
+                        <Select value={periodoAnaliseLojas} onValueChange={(v) => setPeriodoAnaliseLojas(v as typeof periodoAnaliseLojas)}>
+                          <SelectTrigger className="w-[180px]">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="mes_anterior">Mês Anterior</SelectItem>
+                            <SelectItem value="trimestre_anterior">Trimestre Anterior</SelectItem>
+                            <SelectItem value="semestre_anterior">Semestre Anterior</SelectItem>
+                            <SelectItem value="ano_anterior">Ano Anterior</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      {/* Separador */}
+                      <div className="h-6 w-px bg-border hidden md:block" />
+                      
                       {/* Filtro por âmbito - diferente para gestor e admin */}
                       <div className="flex items-center gap-2">
                         <Filter className="h-4 w-4 text-muted-foreground" />
