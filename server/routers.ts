@@ -3911,21 +3911,27 @@ export const appRouter = router({
     // Gerar dados completos do relatório board
     gerarDados: adminProcedure
       .input(z.object({
-        periodo: z.enum(['mes_atual', 'mes_anterior', 'trimestre_anterior', 'semestre_anterior', 'ano_anterior']).optional(),
+        meses: z.array(z.object({
+          mes: z.number().min(1).max(12),
+          ano: z.number().min(2020).max(2100)
+        })).optional(),
       }).optional())
       .query(async ({ input }) => {
-        const { gerarDadosRelatorioBoard } = await import('./relatorioBoardService');
-        return await gerarDadosRelatorioBoard(input?.periodo || 'mes_atual');
+        const { gerarDadosRelatorioBoardPorMeses } = await import('./relatorioBoardService');
+        return await gerarDadosRelatorioBoardPorMeses(input?.meses);
       }),
     
     // Gerar análise IA do relatório board
     gerarAnaliseIA: adminProcedure
       .input(z.object({
-        periodo: z.enum(['mes_atual', 'mes_anterior', 'trimestre_anterior', 'semestre_anterior', 'ano_anterior']).optional(),
+        meses: z.array(z.object({
+          mes: z.number().min(1).max(12),
+          ano: z.number().min(2020).max(2100)
+        })).optional(),
       }).optional())
       .mutation(async ({ input }) => {
-        const { gerarDadosRelatorioBoard, gerarAnaliseIARelatorioBoard } = await import('./relatorioBoardService');
-        const dados = await gerarDadosRelatorioBoard(input?.periodo || 'mes_atual');
+        const { gerarDadosRelatorioBoardPorMeses, gerarAnaliseIARelatorioBoard } = await import('./relatorioBoardService');
+        const dados = await gerarDadosRelatorioBoardPorMeses(input?.meses);
         const analise = await gerarAnaliseIARelatorioBoard(dados);
         return { dados, analise };
       }),

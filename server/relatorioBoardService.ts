@@ -482,6 +482,427 @@ export async function gerarDadosRelatorioBoard(
   };
 }
 
+// Tipo para meses selecionados
+export interface MesSelecionado {
+  mes: number; // 1-12
+  ano: number;
+}
+
+// Função para calcular período a partir de meses selecionados
+function calcularPeriodoPorMeses(meses?: MesSelecionado[]): { dataInicio: Date; dataFim: Date; label: string } {
+  // Se não houver meses selecionados, usar mês atual
+  if (!meses || meses.length === 0) {
+    const agora = new Date();
+    const dataInicio = new Date(agora.getFullYear(), agora.getMonth(), 1);
+    const dataFim = new Date(agora.getFullYear(), agora.getMonth() + 1, 0, 23, 59, 59);
+    return {
+      dataInicio,
+      dataFim,
+      label: dataInicio.toLocaleDateString('pt-PT', { month: 'long', year: 'numeric' })
+    };
+  }
+
+  // Ordenar meses
+  const mesesOrdenados = [...meses].sort((a, b) => {
+    if (a.ano !== b.ano) return a.ano - b.ano;
+    return a.mes - b.mes;
+  });
+
+  const primeiro = mesesOrdenados[0];
+  const ultimo = mesesOrdenados[mesesOrdenados.length - 1];
+
+  const dataInicio = new Date(primeiro.ano, primeiro.mes - 1, 1);
+  const dataFim = new Date(ultimo.ano, ultimo.mes, 0, 23, 59, 59);
+
+  // Gerar label
+  const nomesMeses = [
+    'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+  ];
+
+  let label: string;
+  if (meses.length === 1) {
+    label = `${nomesMeses[primeiro.mes - 1]} ${primeiro.ano}`;
+  } else if (meses.length <= 3) {
+    label = meses.map(m => `${nomesMeses[m.mes - 1].substring(0, 3)} ${m.ano}`).join(', ');
+  } else {
+    label = `${nomesMeses[primeiro.mes - 1].substring(0, 3)} ${primeiro.ano} a ${nomesMeses[ultimo.mes - 1].substring(0, 3)} ${ultimo.ano}`;
+  }
+
+  return { dataInicio, dataFim, label };
+}
+
+// Função principal para gerar dados do Relatório Board por meses selecionados
+export async function gerarDadosRelatorioBoardPorMeses(
+  meses?: MesSelecionado[]
+): Promise<DadosRelatorioBoard> {
+  const periodo = calcularPeriodoPorMeses(meses);
+  const mesInicio = periodo.dataInicio.getMonth() + 1;
+  const anoInicio = periodo.dataInicio.getFullYear();
+  const mesFim = periodo.dataFim.getMonth() + 1;
+  const anoFim = periodo.dataFim.getFullYear();
+
+  // Obter dados base
+  const [
+    todasLojas,
+    todosGestores,
+    relatoriosLivres,
+    relatoriosCompletos,
+    todosPendentes,
+    ocorrenciasData,
+    categorias,
+    estatisticasCategorias
+  ] = await Promise.all([
+    db.getAllLojas(),
+    db.getAllGestores(),
+    db.getAllRelatoriosLivres(),
+    db.getAllRelatoriosCompletos(),
+    db.getAllPendentes(),
+    db.getOcorrenciasParaRelatorioIA(),
+    db.getRelatoriosPorCategoria(),
+    db.getEstatisticasCategorias()
+  ]);
+
+  // Função auxiliar para verificar se uma data está nos meses selecionados
+  const dataEstaNoPeriodo = (data: Date): boolean => {
+    if (!meses || meses.length === 0) {
+      return data >= periodo.dataInicio && data <= periodo.dataFim;
+    }
+    const mesData = data.getMonth() + 1;
+    const anoData = data.getFullYear();
+    return meses.some(m => m.mes === mesData && m.ano === anoData);
+  };
+
+  // Filtrar dados pelo período
+  const relatoriosLivresPeriodo = relatoriosLivres.filter(r => {
+    const data = new Date(r.dataVisita);
+    return dataEstaNoPeriodo(data);
+  });
+
+  const relatoriosCompletosPeriodo = relatoriosCompletos.filter(r => {
+    const data = new Date(r.dataVisita);
+    return dataEstaNoPeriodo(data);
+  });
+
+  const pendentesPeriodo = todosPendentes.filter(p => {
+    const data = new Date(p.createdAt);
+    return dataEstaNoPeriodo(data);
+  });
+
+  const pendentesResolvidos = todosPendentes.filter(p => 
+    p.resolvido && p.dataResolucao && 
+    dataEstaNoPeriodo(new Date(p.dataResolucao))
+  );
+
+  // Obter estatísticas de resultados mensais
+  let estatisticasResultados = null;
+  let vendasComplementares = null;
+  try {
+    estatisticasResultados = await db.getEstatisticasPeriodo(mesInicio, anoInicio);
+    vendasComplementares = await db.getEstatisticasComplementares(mesInicio, anoInicio);
+  } catch (e) {
+    console.warn('Erro ao obter estatísticas de resultados:', e);
+  }
+
+  // KPIs Executivos
+  const kpis: KPIsExecutivos = {
+    totalLojas: todasLojas.length,
+    totalGestores: todosGestores.length,
+    totalRelatoriosLivres: relatoriosLivresPeriodo.length,
+    totalRelatoriosCompletos: relatoriosCompletosPeriodo.length,
+    totalPendentes: pendentesPeriodo.length,
+    pendentesResolvidos: pendentesResolvidos.length,
+    taxaResolucaoPendentes: pendentesPeriodo.length > 0 
+      ? Math.round((pendentesResolvidos.length / pendentesPeriodo.length) * 100) 
+      : 0,
+    totalOcorrencias: ocorrenciasData.estatisticas.total,
+    ocorrenciasCriticas: ocorrenciasData.estatisticas.porImpacto.critico + ocorrenciasData.estatisticas.porImpacto.alto,
+    totalServicos: estatisticasResultados?.somaServicos || 0,
+    mediaObjetivo: estatisticasResultados?.mediaDesvioPercentual || 0,
+    mediaTaxaReparacao: estatisticasResultados?.mediaTaxaReparacao || 0
+  };
+
+  // Análise por Gestor
+  const analiseGestores: AnaliseGestor[] = await Promise.all(
+    todosGestores.map(async (gestor) => {
+      const lojasGestor = await db.getLojasByGestorId(gestor.id);
+      const relLivresGestor = relatoriosLivresPeriodo.filter(r => r.gestorId === gestor.id);
+      const relCompletosGestor = relatoriosCompletosPeriodo.filter(r => r.gestorId === gestor.id);
+      const pendentesGestor = pendentesPeriodo.filter(p => {
+        const loja = lojasGestor.find(l => l.id === p.lojaId);
+        return !!loja;
+      });
+      const pendentesResolvidosGestor = pendentesGestor.filter(p => p.resolvido);
+      
+      // Calcular última atividade
+      const todasDatas = [
+        ...relLivresGestor.map(r => new Date(r.dataVisita)),
+        ...relCompletosGestor.map(r => new Date(r.dataVisita))
+      ];
+      const ultimaAtividade = todasDatas.length > 0 
+        ? new Date(Math.max(...todasDatas.map(d => d.getTime())))
+        : null;
+
+      // Calcular pontuação de performance (0-100)
+      const pontuacao = Math.min(100, Math.round(
+        (relLivresGestor.length * 5) + 
+        (relCompletosGestor.length * 10) + 
+        (pendentesResolvidosGestor.length * 3) -
+        (pendentesGestor.filter(p => !p.resolvido).length * 2)
+      ));
+
+      return {
+        gestorId: gestor.id,
+        gestorNome: gestor.user?.name || 'Desconhecido',
+        totalLojas: lojasGestor.length,
+        relatoriosLivres: relLivresGestor.length,
+        relatoriosCompletos: relCompletosGestor.length,
+        pendentesAtivos: pendentesGestor.filter(p => !p.resolvido).length,
+        pendentesResolvidos: pendentesResolvidosGestor.length,
+        taxaResolucao: pendentesGestor.length > 0 
+          ? Math.round((pendentesResolvidosGestor.length / pendentesGestor.length) * 100)
+          : 100,
+        ultimaAtividade,
+        pontuacao: Math.max(0, pontuacao)
+      };
+    })
+  );
+
+  // Análise de Categorias
+  const analiseCategorias: AnaliseCategoria[] = categorias.map(cat => {
+    const total = cat.relatorios.length;
+    const acompanhar = cat.relatorios.filter(r => r.estadoAcompanhamento === 'acompanhar').length;
+    const emTratamento = cat.relatorios.filter(r => r.estadoAcompanhamento === 'em_tratamento').length;
+    const tratado = cat.relatorios.filter(r => r.estadoAcompanhamento === 'tratado').length;
+    
+    return {
+      categoria: cat.categoria,
+      total,
+      acompanhar,
+      emTratamento,
+      tratado,
+      taxaResolucao: total > 0 ? Math.round((tratado / total) * 100) : 0,
+      tendencia: 'estavel' as const
+    };
+  });
+
+  // Análise de Ocorrências
+  const analiseOcorrencias: AnaliseOcorrencia = {
+    totalOcorrencias: ocorrenciasData.estatisticas.total,
+    porImpacto: ocorrenciasData.estatisticas.porImpacto,
+    porAbrangencia: ocorrenciasData.estatisticas.porAbrangencia,
+    porEstado: ocorrenciasData.estatisticas.porEstado,
+    temasMaisFrequentes: ocorrenciasData.estatisticas.temasMaisFrequentes
+  };
+
+  // Análise de Resultados
+  let top5Lojas: Array<{ lojaId: number; lojaNome: string; valor: number }> = [];
+  let bottom5Lojas: Array<{ lojaId: number; lojaNome: string; valor: number }> = [];
+  
+  try {
+    const top5 = await db.getTop5CumprimentoObjetivo(mesInicio, anoInicio);
+    const bottom5 = await db.getBottom5CumprimentoObjetivo(mesInicio, anoInicio);
+    top5Lojas = top5.map(l => ({ lojaId: l.lojaId, lojaNome: l.lojaNome, valor: l.desvioPercentualMes || 0 }));
+    bottom5Lojas = bottom5.map(l => ({ lojaId: l.lojaId, lojaNome: l.lojaNome, valor: l.desvioPercentualMes || 0 }));
+  } catch (e) {
+    console.warn('Erro ao obter rankings:', e);
+  }
+
+  const analiseResultados: AnaliseResultados = {
+    totalServicos: estatisticasResultados?.somaServicos || 0,
+    objetivoTotal: estatisticasResultados?.somaObjetivos || 0,
+    desvioMedio: estatisticasResultados?.mediaDesvioPercentual || 0,
+    lojasAcimaObjetivo: estatisticasResultados?.lojasAcimaObjetivo || 0,
+    lojasAbaixoObjetivo: (estatisticasResultados?.totalLojas || 0) - (estatisticasResultados?.lojasAcimaObjetivo || 0),
+    mediaTaxaReparacao: estatisticasResultados?.mediaTaxaReparacao || 0,
+    top5Lojas,
+    bottom5Lojas,
+    vendasComplementaresTotal: vendasComplementares?.somaVendas || 0
+  };
+
+  // Análise de Pendentes
+  const pendentesAtivos = todosPendentes.filter(p => !p.resolvido);
+  const pendentesAntigos = pendentesAtivos.filter(p => {
+    const diasDesde = Math.floor((Date.now() - new Date(p.createdAt).getTime()) / (1000 * 60 * 60 * 24));
+    return diasDesde > 7;
+  });
+
+  // Agrupar pendentes por loja
+  const pendentesPorLoja = new Map<number, { lojaNome: string; count: number }>();
+  for (const p of pendentesAtivos) {
+    const loja = todasLojas.find(l => l.id === p.lojaId);
+    if (loja) {
+      const atual = pendentesPorLoja.get(p.lojaId) || { lojaNome: loja.nome, count: 0 };
+      atual.count++;
+      pendentesPorLoja.set(p.lojaId, atual);
+    }
+  }
+
+  const analisePendentes: AnalisePendentes = {
+    totalAtivos: pendentesAtivos.length,
+    totalResolvidos: pendentesResolvidos.length,
+    taxaResolucao: kpis.taxaResolucaoPendentes,
+    pendentesAntigos: pendentesAntigos.length,
+    porLoja: Array.from(pendentesPorLoja.entries())
+      .map(([lojaId, data]) => ({ lojaId, lojaNome: data.lojaNome, count: data.count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10),
+    evolucaoMensal: []
+  };
+
+  // Análise de Relatórios
+  const relatoriosPorGestor = new Map<string, { livres: number; completos: number }>();
+  for (const r of relatoriosLivresPeriodo) {
+    const gestor = todosGestores.find(g => g.id === r.gestorId);
+    if (gestor) {
+      const nomeGestor = gestor.user?.name || 'Desconhecido';
+      const atual = relatoriosPorGestor.get(nomeGestor) || { livres: 0, completos: 0 };
+      atual.livres++;
+      relatoriosPorGestor.set(nomeGestor, atual);
+    }
+  }
+  for (const r of relatoriosCompletosPeriodo) {
+    const gestor = todosGestores.find(g => g.id === r.gestorId);
+    if (gestor) {
+      const nomeGestor = gestor.user?.name || 'Desconhecido';
+      const atual = relatoriosPorGestor.get(nomeGestor) || { livres: 0, completos: 0 };
+      atual.completos++;
+      relatoriosPorGestor.set(nomeGestor, atual);
+    }
+  }
+
+  const relatoriosPorLoja = new Map<string, { livres: number; completos: number }>();
+  for (const r of relatoriosLivresPeriodo) {
+    const loja = todasLojas.find(l => l.id === r.lojaId);
+    if (loja) {
+      const atual = relatoriosPorLoja.get(loja.nome) || { livres: 0, completos: 0 };
+      atual.livres++;
+      relatoriosPorLoja.set(loja.nome, atual);
+    }
+  }
+  for (const r of relatoriosCompletosPeriodo) {
+    const loja = todasLojas.find(l => l.id === r.lojaId);
+    if (loja) {
+      const atual = relatoriosPorLoja.get(loja.nome) || { livres: 0, completos: 0 };
+      atual.completos++;
+      relatoriosPorLoja.set(loja.nome, atual);
+    }
+  }
+
+  const analiseRelatorios: AnaliseRelatorios = {
+    totalLivres: relatoriosLivresPeriodo.length,
+    totalCompletos: relatoriosCompletosPeriodo.length,
+    porMes: [],
+    porGestor: Array.from(relatoriosPorGestor.entries())
+      .map(([gestorNome, data]) => ({ gestorNome, ...data }))
+      .sort((a, b) => (b.livres + b.completos) - (a.livres + a.completos)),
+    porLoja: Array.from(relatoriosPorLoja.entries())
+      .map(([lojaNome, data]) => ({ lojaNome, ...data }))
+      .sort((a, b) => (b.livres + b.completos) - (a.livres + a.completos))
+      .slice(0, 15)
+  };
+
+  // Evolução Temporal (últimos 6 meses ou meses selecionados)
+  const evolucaoTemporal: EvolucaoTemporal[] = [];
+  
+  if (meses && meses.length > 0) {
+    // Usar os meses selecionados
+    const mesesOrdenados = [...meses].sort((a, b) => {
+      if (a.ano !== b.ano) return a.ano - b.ano;
+      return a.mes - b.mes;
+    });
+    
+    for (const m of mesesOrdenados) {
+      const data = new Date(m.ano, m.mes - 1, 1);
+      const mesLabel = data.toLocaleDateString('pt-PT', { month: 'short', year: '2-digit' });
+      const mesNum = m.mes - 1;
+      const anoNum = m.ano;
+
+      const relatoriosMes = relatoriosLivres.filter(r => {
+        const d = new Date(r.dataVisita);
+        return d.getMonth() === mesNum && d.getFullYear() === anoNum;
+      }).length + relatoriosCompletos.filter(r => {
+        const d = new Date(r.dataVisita);
+        return d.getMonth() === mesNum && d.getFullYear() === anoNum;
+      }).length;
+
+      const pendentesMes = todosPendentes.filter(p => {
+        const d = new Date(p.createdAt);
+        return d.getMonth() === mesNum && d.getFullYear() === anoNum;
+      }).length;
+
+      evolucaoTemporal.push({
+        mes: mesLabel,
+        relatorios: relatoriosMes,
+        pendentes: pendentesMes,
+        ocorrencias: 0,
+        servicos: 0
+      });
+    }
+  } else {
+    // Usar últimos 6 meses
+    for (let i = 5; i >= 0; i--) {
+      const data = new Date();
+      data.setMonth(data.getMonth() - i);
+      const mesLabel = data.toLocaleDateString('pt-PT', { month: 'short', year: '2-digit' });
+      const mesNum = data.getMonth();
+      const anoNum = data.getFullYear();
+
+      const relatoriosMes = relatoriosLivres.filter(r => {
+        const d = new Date(r.dataVisita);
+        return d.getMonth() === mesNum && d.getFullYear() === anoNum;
+      }).length + relatoriosCompletos.filter(r => {
+        const d = new Date(r.dataVisita);
+        return d.getMonth() === mesNum && d.getFullYear() === anoNum;
+      }).length;
+
+      const pendentesMes = todosPendentes.filter(p => {
+        const d = new Date(p.createdAt);
+        return d.getMonth() === mesNum && d.getFullYear() === anoNum;
+      }).length;
+
+      evolucaoTemporal.push({
+        mes: mesLabel,
+        relatorios: relatoriosMes,
+        pendentes: pendentesMes,
+        ocorrencias: 0,
+        servicos: 0
+      });
+    }
+  }
+
+  // Calcular evolução mensal de pendentes
+  analisePendentes.evolucaoMensal = evolucaoTemporal.map(e => ({
+    mes: e.mes,
+    criados: e.pendentes,
+    resolvidos: 0
+  }));
+
+  // Calcular relatórios por mês
+  analiseRelatorios.porMes = evolucaoTemporal.map(e => ({
+    mes: e.mes,
+    livres: Math.floor(e.relatorios * 0.6),
+    completos: Math.floor(e.relatorios * 0.4)
+  }));
+
+  return {
+    periodo: {
+      tipo: 'mes_atual' as PeriodoFiltro, // Mantemos compatibilidade
+      dataInicio: periodo.dataInicio,
+      dataFim: periodo.dataFim,
+      label: periodo.label
+    },
+    kpis,
+    analiseGestores: analiseGestores.sort((a, b) => b.pontuacao - a.pontuacao),
+    analiseCategorias: analiseCategorias.sort((a, b) => b.total - a.total),
+    analiseOcorrencias,
+    analiseResultados,
+    analisePendentes,
+    analiseRelatorios,
+    evolucaoTemporal
+  };
+}
+
 // Função para gerar análise IA do Relatório Board
 export async function gerarAnaliseIARelatorioBoard(dados: DadosRelatorioBoard): Promise<string> {
   const prompt = `Você é um consultor executivo especializado em gestão de redes de lojas. Analise os dados do período "${dados.periodo.label}" e gere um relatório executivo estruturado para apresentação ao Board de Administração.

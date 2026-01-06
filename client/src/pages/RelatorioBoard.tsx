@@ -1,9 +1,9 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
 import { HistoricoRelatoriosIA } from "@/components/HistoricoRelatoriosIA";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import FiltroMesesCheckbox, { MesSelecionado, gerarLabelMeses } from "@/components/FiltroMesesCheckbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -68,26 +68,24 @@ ChartJS.register(
   Filler
 );
 
-type PeriodoFiltro = 'mes_atual' | 'mes_anterior' | 'trimestre_anterior' | 'semestre_anterior' | 'ano_anterior';
-
-const periodoLabels: Record<PeriodoFiltro, string> = {
-  mes_atual: 'Mês Atual',
-  mes_anterior: 'Mês Anterior',
-  trimestre_anterior: 'Trimestre Anterior',
-  semestre_anterior: 'Semestre Anterior',
-  ano_anterior: 'Ano Anterior',
-};
-
 export default function RelatorioBoard() {
-  const [periodo, setPeriodo] = useState<PeriodoFiltro>('mes_atual');
+  // Estado para meses selecionados - inicializa com mês atual
+  const [mesesSelecionados, setMesesSelecionados] = useState<MesSelecionado[]>(() => {
+    const hoje = new Date();
+    return [{ mes: hoje.getMonth() + 1, ano: hoje.getFullYear() }];
+  });
   const [analiseIA, setAnaliseIA] = useState<string | null>(null);
   const [isGeneratingIA, setIsGeneratingIA] = useState(false);
   const reportRef = useRef<HTMLDivElement>(null);
 
+  // Memoizar os meses para evitar re-renders
+  const mesesParaQuery = useMemo(() => {
+    return mesesSelecionados.length > 0 ? mesesSelecionados : undefined;
+  }, [mesesSelecionados]);
 
   // Query para obter dados do relatório
   const { data: dadosRelatorio, isLoading, refetch } = trpc.relatorioBoard.gerarDados.useQuery(
-    { periodo },
+    { meses: mesesParaQuery },
     { staleTime: 5 * 60 * 1000 } // 5 minutos
   );
 
@@ -106,7 +104,7 @@ export default function RelatorioBoard() {
 
   const handleGerarAnaliseIA = () => {
     setIsGeneratingIA(true);
-    gerarAnaliseIAMutation.mutate({ periodo });
+    gerarAnaliseIAMutation.mutate({ meses: mesesParaQuery });
   };
 
   const handleDownloadAnaliseIAPDF = () => {
@@ -154,7 +152,7 @@ export default function RelatorioBoard() {
       // Período
       doc.setFontSize(11);
       doc.setFont('helvetica', 'normal');
-      doc.text(`Período: ${periodoLabels[periodo]}`, pageWidth / 2, yPos, { align: 'center' });
+      doc.text(`Período: ${dadosRelatorio?.periodo.label || 'N/A'}`, pageWidth / 2, yPos, { align: 'center' });
       yPos += 6;
       doc.setFontSize(9);
       doc.text(`Gerado em: ${new Date().toLocaleString('pt-PT')}`, pageWidth / 2, yPos, { align: 'center' });
@@ -322,7 +320,7 @@ export default function RelatorioBoard() {
       }
 
       // Download
-      const fileName = `AnaliseIA_Board_${periodoLabels[periodo]}_${new Date().toISOString().split('T')[0]}.pdf`;
+      const fileName = `AnaliseIA_Board_${(dadosRelatorio?.periodo.label || 'periodo').replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
       doc.save(fileName);
       toast.success('PDF exportado com sucesso!');
     } catch (error) {
@@ -612,7 +610,7 @@ export default function RelatorioBoard() {
       }
 
       // Download
-      const fileName = `RelatorioBoard_${periodoLabels[periodo]}_${new Date().toISOString().split('T')[0]}.pdf`;
+      const fileName = `RelatorioBoard_${(dadosRelatorio?.periodo.label || 'periodo').replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
       doc.save(fileName);
       toast.success('PDF exportado com sucesso!');
     } catch (error) {
@@ -780,22 +778,16 @@ export default function RelatorioBoard() {
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <Select value={periodo} onValueChange={(v) => setPeriodo(v as PeriodoFiltro)}>
-              <SelectTrigger className="w-[200px]">
-                <Calendar className="h-4 w-4 mr-2" />
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.entries(periodoLabels).map(([value, label]) => (
-                  <SelectItem key={value} value={value}>{label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <FiltroMesesCheckbox
+              mesesSelecionados={mesesSelecionados}
+              onMesesChange={setMesesSelecionados}
+              placeholder="Selecionar meses"
+              className="w-[250px]"
+            />
             <Button variant="outline" onClick={() => refetch()} disabled={isLoading}>
               <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
               Atualizar
             </Button>
-
           </div>
         </div>
 

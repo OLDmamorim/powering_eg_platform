@@ -2120,3 +2120,6 @@ NOTA: Sistema de email requer configuração externa no deployment
 
 - [x] Adicionar % Serviços de escovas ao Dashboard de Resultados (importante para prémio trimestral)
 - [x] Alterar objetivo mínimo de % Serviços de Escovas de 30%/5% para 7.5%
+
+## Filtros Temporais - Relatório Board
+- [x] Substituir filtros predefinidos por seleção múltipla de meses no Relatório Board
