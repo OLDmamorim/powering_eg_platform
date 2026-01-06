@@ -2126,3 +2126,4 @@ NOTA: Sistema de email requer configuração externa no deployment
 
 ## Filtros Temporais - Apenas 2025
 - [x] Filtrar meses disponíveis para mostrar apenas 2025 em diante (remover 2024)
+- [x] Corrigir filtro de meses para mostrar apenas meses com dados disponíveis (não meses futuros)

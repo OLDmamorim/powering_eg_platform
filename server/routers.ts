@@ -1118,6 +1118,12 @@ export const appRouter = router({
       .query(async ({ input }) => {
         return await db.getRelatorioIAById(input.id);
       }),
+    
+    // Obter meses que têm dados de resultados disponíveis
+    getMesesDisponiveis: protectedProcedure
+      .query(async () => {
+        return await db.getMesesComDadosDisponiveis();
+      }),
   }),
 
   // ==================== DICA IA DASHBOARD ====================

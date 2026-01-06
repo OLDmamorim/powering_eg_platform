@@ -76,6 +76,18 @@ export function RelatorioIAResultados() {
     }
   }, [user?.role]);
   
+  // Query para obter meses que têm dados disponíveis
+  const { data: mesesDisponiveis } = trpc.relatoriosIA.getMesesDisponiveis.useQuery();
+  
+  // Efeito para atualizar meses selecionados quando os meses disponíveis são carregados
+  useEffect(() => {
+    if (mesesDisponiveis && mesesDisponiveis.length > 0) {
+      // Selecionar o mês mais recente disponível por defeito
+      const maisRecente = mesesDisponiveis[0];
+      setMesesSelecionados([{ mes: maisRecente.mes, ano: maisRecente.ano }]);
+    }
+  }, [mesesDisponiveis]);
+  
   // Queries para obter opções de filtro (apenas admin)
   const { data: zonas } = trpc.relatoriosIA.getZonas.useQuery(undefined, {
     enabled: isAdmin,
@@ -244,6 +256,7 @@ export function RelatorioIAResultados() {
                 <div className="space-y-1">
                   <label className="text-xs font-medium text-muted-foreground">Período (selecione meses)</label>
                   <FiltroMesesCheckbox
+                    mesesDisponiveis={mesesDisponiveis}
                     mesesSelecionados={mesesSelecionados}
                     onMesesChange={setMesesSelecionados}
                     placeholder="Selecionar meses"

@@ -6622,3 +6622,23 @@ export async function getDadosAnaliseAvancada(mes: number, ano: number, lojasIds
     estatisticasComplementares,
   };
 }
+
+
+/**
+ * Obtém os meses que têm dados de resultados mensais na base de dados
+ * Retorna lista ordenada do mais recente para o mais antigo
+ */
+export async function getMesesComDadosDisponiveis(): Promise<{ mes: number; ano: number }[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const meses = await db
+    .selectDistinct({
+      mes: resultadosMensais.mes,
+      ano: resultadosMensais.ano,
+    })
+    .from(resultadosMensais)
+    .orderBy(desc(resultadosMensais.ano), desc(resultadosMensais.mes));
+  
+  return meses;
+}
