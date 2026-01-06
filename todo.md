@@ -2090,3 +2090,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## Melhorias Histórico da Loja v6.6
 - [x] Exportar PDF do Histórico da Loja com análise IA completa
 - [x] Comparação entre períodos no Histórico da Loja (ex: Q4 2024 vs Q4 2025)
+
+## Melhorias PDF Histórico da Loja v6.7
+- [x] Reescrever exportação PDF para ficar igual à visualização do portal
+- [x] Incluir todas as secções: métricas, resultados, análise comercial, alertas, problemas, pontos fortes, tendências, recomendações
+- [x] Layout profissional com cores e organização clara

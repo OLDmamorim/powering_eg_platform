@@ -142,7 +142,7 @@ export default function HistoricoLoja() {
     }
   };
 
-  // Função para exportar PDF
+  // Função para exportar PDF - Layout profissional igual ao portal
   const exportarPDF = async () => {
     if (!historyData) {
       toast.error("Gere primeiro a análise para exportar");
@@ -158,264 +158,464 @@ export default function HistoricoLoja() {
 
       const lojaNome = lojas?.find((l: any) => l.id.toString() === lojaId)?.nome || 'Loja';
 
-      // Cores
+      // Cores do portal
       const COLORS = {
         primary: [59, 130, 246] as [number, number, number],
+        primaryLight: [219, 234, 254] as [number, number, number],
         success: [34, 197, 94] as [number, number, number],
+        successLight: [220, 252, 231] as [number, number, number],
         danger: [239, 68, 68] as [number, number, number],
+        dangerLight: [254, 226, 226] as [number, number, number],
         warning: [245, 158, 11] as [number, number, number],
+        warningLight: [254, 243, 199] as [number, number, number],
         purple: [139, 92, 246] as [number, number, number],
+        purpleLight: [237, 233, 254] as [number, number, number],
         indigo: [99, 102, 241] as [number, number, number],
+        indigoLight: [224, 231, 255] as [number, number, number],
         emerald: [16, 185, 129] as [number, number, number],
+        emeraldLight: [209, 250, 229] as [number, number, number],
+        orange: [249, 115, 22] as [number, number, number],
+        orangeLight: [255, 237, 213] as [number, number, number],
+        gray: [107, 114, 128] as [number, number, number],
+        grayLight: [243, 244, 246] as [number, number, number],
+        sky: [14, 165, 233] as [number, number, number],
+        skyLight: [224, 242, 254] as [number, number, number],
       };
 
-      // Função auxiliar para desenhar cabeçalho de secção
-      const drawSectionHeader = (title: string, color: [number, number, number]) => {
-        if (yPos > pageHeight - 30) {
+      // Função para verificar espaço na página
+      const checkPageSpace = (neededSpace: number) => {
+        if (yPos + neededSpace > pageHeight - 20) {
           doc.addPage();
           yPos = 20;
         }
-        doc.setFillColor(color[0], color[1], color[2]);
+      };
+
+      // Função para desenhar card de métrica (igual ao portal)
+      const drawMetricCard = (x: number, y: number, width: number, height: number, value: string, label: string, bgColor: [number, number, number], textColor: [number, number, number]) => {
+        // Fundo do card
+        doc.setFillColor(bgColor[0], bgColor[1], bgColor[2]);
+        doc.roundedRect(x, y, width, height, 3, 3, 'F');
+        // Borda
+        doc.setDrawColor(textColor[0], textColor[1], textColor[2]);
+        doc.setLineWidth(0.3);
+        doc.roundedRect(x, y, width, height, 3, 3, 'S');
+        // Valor
+        doc.setTextColor(textColor[0], textColor[1], textColor[2]);
+        doc.setFontSize(16);
+        doc.setFont('helvetica', 'bold');
+        doc.text(value, x + width / 2, y + height / 2 - 2, { align: 'center' });
+        // Label
+        doc.setFontSize(7);
+        doc.setFont('helvetica', 'normal');
+        doc.text(label, x + width / 2, y + height / 2 + 6, { align: 'center' });
+      };
+
+      // Função para desenhar cabeçalho de secção com ícone
+      const drawSectionHeader = (title: string, bgColor: [number, number, number], textColor: [number, number, number] = [255, 255, 255]) => {
+        checkPageSpace(20);
+        doc.setFillColor(bgColor[0], bgColor[1], bgColor[2]);
         doc.roundedRect(14, yPos, pageWidth - 28, 10, 2, 2, 'F');
-        doc.setTextColor(255, 255, 255);
+        doc.setTextColor(textColor[0], textColor[1], textColor[2]);
         doc.setFontSize(11);
         doc.setFont('helvetica', 'bold');
         doc.text(title, 18, yPos + 7);
         doc.setTextColor(0, 0, 0);
         doc.setFont('helvetica', 'normal');
-        yPos += 15;
+        yPos += 14;
       };
 
-      // Cabeçalho
-      doc.setFillColor(59, 130, 246);
-      doc.rect(0, 0, pageWidth, 3, 'F');
+      // Função para desenhar secção com fundo colorido (igual ao portal)
+      const drawColoredSection = (title: string, bgColor: [number, number, number], borderColor: [number, number, number], contentHeight: number) => {
+        checkPageSpace(contentHeight + 25);
+        // Fundo da secção
+        doc.setFillColor(bgColor[0], bgColor[1], bgColor[2]);
+        doc.roundedRect(14, yPos, pageWidth - 28, contentHeight + 20, 4, 4, 'F');
+        // Borda
+        doc.setDrawColor(borderColor[0], borderColor[1], borderColor[2]);
+        doc.setLineWidth(0.5);
+        doc.roundedRect(14, yPos, pageWidth - 28, contentHeight + 20, 4, 4, 'S');
+        // Título
+        doc.setTextColor(borderColor[0] * 0.7, borderColor[1] * 0.7, borderColor[2] * 0.7);
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.text(title, 20, yPos + 10);
+        doc.setFont('helvetica', 'normal');
+        yPos += 18;
+      };
+
+      // ========== CABEÇALHO DO PDF ==========
+      // Barra superior azul
+      doc.setFillColor(COLORS.primary[0], COLORS.primary[1], COLORS.primary[2]);
+      doc.rect(0, 0, pageWidth, 4, 'F');
       
+      // Título principal
       doc.setTextColor(30, 41, 59);
-      doc.setFontSize(20);
+      doc.setFontSize(22);
       doc.setFont('helvetica', 'bold');
-      doc.text(`Histórico da Loja: ${lojaNome}`, pageWidth / 2, 18, { align: 'center' });
+      doc.text(`Histórico da Loja`, pageWidth / 2, 18, { align: 'center' });
       
-      doc.setFontSize(10);
+      // Nome da loja
+      doc.setFontSize(16);
+      doc.setTextColor(COLORS.primary[0], COLORS.primary[1], COLORS.primary[2]);
+      doc.text(lojaNome, pageWidth / 2, 27, { align: 'center' });
+      
+      // Período e data
+      doc.setFontSize(9);
       doc.setTextColor(100, 116, 139);
       doc.setFont('helvetica', 'normal');
-      doc.text(`Período: ${historyData.periodoAnalisado}  |  Gerado em: ${new Date().toLocaleString('pt-PT')}`, pageWidth / 2, 26, { align: 'center' });
+      doc.text(`Período: ${historyData.periodoAnalisado}  •  Gerado em: ${new Date().toLocaleString('pt-PT')}`, pageWidth / 2, 34, { align: 'center' });
       
+      // Linha separadora
       doc.setDrawColor(200, 200, 200);
       doc.setLineWidth(0.5);
-      doc.line(14, 32, pageWidth - 14, 32);
-      yPos = 40;
+      doc.line(14, 40, pageWidth - 14, 40);
+      yPos = 48;
 
-      // Métricas Resumidas
-      drawSectionHeader('Métricas Gerais', COLORS.primary);
+      // ========== MÉTRICAS GERAIS (6 cards coloridos) ==========
+      drawSectionHeader('📊 Métricas Gerais', COLORS.primary);
       
-      const metricsData = [
-        ['Relatórios Livres', historyData.metricas?.totalRelatoriosLivres?.toString() || '0'],
-        ['Relatórios Completos', historyData.metricas?.totalRelatoriosCompletos?.toString() || '0'],
-        ['Total Pendentes', historyData.metricas?.totalPendentes?.toString() || '0'],
-        ['Taxa Resolução', `${historyData.metricas?.taxaResolucao?.toFixed(0) || 0}%`],
-        ['Ocorrências', historyData.metricas?.totalOcorrencias?.toString() || '0'],
-      ];
+      const cardWidth = (pageWidth - 28 - 10) / 3; // 3 cards por linha
+      const cardHeight = 22;
+      const cardGap = 5;
+      
+      // Linha 1: 3 cards
+      drawMetricCard(14, yPos, cardWidth, cardHeight, 
+        (historyData.metricas?.totalRelatoriosLivres || 0).toString(), 
+        'Relatórios Livres', COLORS.primaryLight, COLORS.primary);
+      drawMetricCard(14 + cardWidth + cardGap, yPos, cardWidth, cardHeight, 
+        (historyData.metricas?.totalRelatoriosCompletos || 0).toString(), 
+        'Relatórios Completos', COLORS.purpleLight, COLORS.purple);
+      drawMetricCard(14 + (cardWidth + cardGap) * 2, yPos, cardWidth, cardHeight, 
+        (historyData.metricas?.totalPendentes || 0).toString(), 
+        'Pendentes', COLORS.orangeLight, COLORS.orange);
+      
+      yPos += cardHeight + cardGap;
+      
+      // Linha 2: 3 cards
+      drawMetricCard(14, yPos, cardWidth, cardHeight, 
+        `${historyData.metricas?.taxaResolucao?.toFixed(0) || 0}%`, 
+        'Taxa Resolução', COLORS.successLight, COLORS.success);
+      drawMetricCard(14 + cardWidth + cardGap, yPos, cardWidth, cardHeight, 
+        (historyData.metricas?.totalOcorrencias || 0).toString(), 
+        'Ocorrências', COLORS.dangerLight, COLORS.danger);
+      drawMetricCard(14 + (cardWidth + cardGap) * 2, yPos, cardWidth, cardHeight, 
+        ((historyData.metricas?.totalRelatoriosLivres || 0) + (historyData.metricas?.totalRelatoriosCompletos || 0)).toString(), 
+        'Total Visitas', COLORS.grayLight, COLORS.gray);
+      
+      yPos += cardHeight + 12;
 
-      autoTable(doc, {
-        startY: yPos,
-        head: [['Métrica', 'Valor']],
-        body: metricsData,
-        theme: 'grid',
-        headStyles: { fillColor: COLORS.primary, textColor: [255, 255, 255] },
-        styles: { fontSize: 10 },
-        columnStyles: { 0: { fontStyle: 'bold' } },
-      });
-      yPos = (doc as any).lastAutoTable.finalY + 10;
-
-      // Análise de Resultados
+      // ========== ANÁLISE DE RESULTADOS ==========
       if (historyData.analiseResultados) {
-        drawSectionHeader('Análise de Resultados', COLORS.indigo);
+        drawColoredSection('🎯 Análise de Resultados', COLORS.indigoLight, COLORS.indigo, 50);
         
-        const resultadosData = [
-          ['Total Serviços', historyData.analiseResultados.totalServicos?.toString() || '0'],
-          ['Objetivo Total', historyData.analiseResultados.objetivoTotal?.toString() || '0'],
-          ['Desvio Médio', `${historyData.analiseResultados.desvioMedio >= 0 ? '+' : ''}${historyData.analiseResultados.desvioMedio}%`],
-          ['Taxa Reparação Média', `${historyData.analiseResultados.taxaReparacaoMedia}%`],
-          ['Tendência', historyData.analiseResultados.tendenciaServicos],
-          ['Melhor Mês', historyData.analiseResultados.melhorMes],
-          ['Pior Mês', historyData.analiseResultados.piorMes],
+        const resultCardWidth = (pageWidth - 48) / 4;
+        const resultCardHeight = 20;
+        
+        // 4 métricas em linha
+        const resultMetrics = [
+          { value: historyData.analiseResultados.totalServicos?.toString() || '0', label: 'Total Serviços' },
+          { value: historyData.analiseResultados.objetivoTotal?.toString() || '0', label: 'Objetivo Total' },
+          { value: `${historyData.analiseResultados.desvioMedio >= 0 ? '+' : ''}${historyData.analiseResultados.desvioMedio}%`, label: 'Desvio Médio' },
+          { value: `${historyData.analiseResultados.taxaReparacaoMedia}%`, label: 'Taxa Reparação' },
         ];
-
-        autoTable(doc, {
-          startY: yPos,
-          head: [['Indicador', 'Valor']],
-          body: resultadosData,
-          theme: 'grid',
-          headStyles: { fillColor: COLORS.indigo, textColor: [255, 255, 255] },
-          styles: { fontSize: 10 },
-          columnStyles: { 0: { fontStyle: 'bold' } },
+        
+        resultMetrics.forEach((metric, i) => {
+          const x = 20 + i * (resultCardWidth + 4);
+          // Card branco
+          doc.setFillColor(255, 255, 255);
+          doc.roundedRect(x, yPos, resultCardWidth, resultCardHeight, 2, 2, 'F');
+          // Valor
+          const valueColor = metric.label === 'Desvio Médio' 
+            ? (historyData.analiseResultados.desvioMedio >= 0 ? COLORS.success : COLORS.danger)
+            : COLORS.indigo;
+          doc.setTextColor(valueColor[0], valueColor[1], valueColor[2]);
+          doc.setFontSize(14);
+          doc.setFont('helvetica', 'bold');
+          doc.text(metric.value, x + resultCardWidth / 2, yPos + 9, { align: 'center' });
+          // Label
+          doc.setTextColor(COLORS.indigo[0], COLORS.indigo[1], COLORS.indigo[2]);
+          doc.setFontSize(7);
+          doc.setFont('helvetica', 'normal');
+          doc.text(metric.label, x + resultCardWidth / 2, yPos + 16, { align: 'center' });
         });
-        yPos = (doc as any).lastAutoTable.finalY + 10;
+        
+        yPos += resultCardHeight + 6;
+        
+        // Tendência e meses
+        doc.setFontSize(8);
+        doc.setTextColor(80, 80, 80);
+        const trendSymbol = historyData.analiseResultados.tendenciaServicos === 'subida' ? '↑' : 
+                           historyData.analiseResultados.tendenciaServicos === 'descida' ? '↓' : '→';
+        doc.text(`Tendência: ${trendSymbol} ${historyData.analiseResultados.tendenciaServicos}   |   Melhor: ${historyData.analiseResultados.melhorMes}   |   Pior: ${historyData.analiseResultados.piorMes}`, 20, yPos);
+        
+        yPos += 18;
       }
 
-      // Análise Comercial
+      // ========== ANÁLISE COMERCIAL ==========
       if (historyData.analiseComercial) {
-        drawSectionHeader('Análise Comercial', COLORS.emerald);
+        drawColoredSection('🛒 Análise Comercial (Vendas Complementares)', COLORS.emeraldLight, COLORS.emerald, 45);
         
-        const comercialData = [
-          ['Total Vendas Complementares', `€${historyData.analiseComercial.totalVendasComplementares}`],
-          ['Média Mensal', `€${historyData.analiseComercial.mediaVendasMensal}`],
-          ['Escovas', `€${historyData.analiseComercial.escovasTotal}`],
-          ['Polimento', `€${historyData.analiseComercial.polimentoTotal}`],
-          ['Tendência', historyData.analiseComercial.tendenciaVendas],
+        const comercialCardWidth = (pageWidth - 48) / 4;
+        const comercialCardHeight = 20;
+        
+        const comercialMetrics = [
+          { value: `€${historyData.analiseComercial.totalVendasComplementares}`, label: 'Total Vendas' },
+          { value: `€${historyData.analiseComercial.mediaVendasMensal}`, label: 'Média Mensal' },
+          { value: `€${historyData.analiseComercial.escovasTotal}`, label: 'Escovas' },
+          { value: `€${historyData.analiseComercial.polimentoTotal}`, label: 'Polimento' },
         ];
-
-        autoTable(doc, {
-          startY: yPos,
-          head: [['Indicador', 'Valor']],
-          body: comercialData,
-          theme: 'grid',
-          headStyles: { fillColor: COLORS.emerald, textColor: [255, 255, 255] },
-          styles: { fontSize: 10 },
-          columnStyles: { 0: { fontStyle: 'bold' } },
+        
+        comercialMetrics.forEach((metric, i) => {
+          const x = 20 + i * (comercialCardWidth + 4);
+          doc.setFillColor(255, 255, 255);
+          doc.roundedRect(x, yPos, comercialCardWidth, comercialCardHeight, 2, 2, 'F');
+          doc.setTextColor(COLORS.emerald[0], COLORS.emerald[1], COLORS.emerald[2]);
+          doc.setFontSize(14);
+          doc.setFont('helvetica', 'bold');
+          doc.text(metric.value, x + comercialCardWidth / 2, yPos + 9, { align: 'center' });
+          doc.setFontSize(7);
+          doc.setFont('helvetica', 'normal');
+          doc.text(metric.label, x + comercialCardWidth / 2, yPos + 16, { align: 'center' });
         });
-        yPos = (doc as any).lastAutoTable.finalY + 10;
+        
+        yPos += comercialCardHeight + 6;
+        
+        const trendSymbol = historyData.analiseComercial.tendenciaVendas === 'subida' ? '↑' : 
+                           historyData.analiseComercial.tendenciaVendas === 'descida' ? '↓' : '→';
+        doc.setFontSize(8);
+        doc.setTextColor(80, 80, 80);
+        doc.text(`Tendência: ${trendSymbol} ${historyData.analiseComercial.tendenciaVendas}`, 20, yPos);
+        
+        yPos += 18;
       }
 
-      // Resumo Executivo
+      // ========== RESUMO EXECUTIVO ==========
       if (historyData.resumoGeral) {
-        drawSectionHeader('Resumo Executivo', COLORS.primary);
+        checkPageSpace(50);
+        drawColoredSection('📋 Resumo Executivo', COLORS.skyLight, COLORS.sky, 35);
         
         doc.setFontSize(10);
-        const resumoLines = doc.splitTextToSize(historyData.resumoGeral, pageWidth - 28);
-        if (yPos + resumoLines.length * 5 > pageHeight - 20) {
-          doc.addPage();
-          yPos = 20;
+        doc.setTextColor(30, 41, 59);
+        const resumoLines = doc.splitTextToSize(historyData.resumoGeral, pageWidth - 48);
+        const maxLines = Math.min(resumoLines.length, 6);
+        for (let i = 0; i < maxLines; i++) {
+          doc.text(resumoLines[i], 20, yPos + i * 5);
         }
-        doc.text(resumoLines, 14, yPos);
-        yPos += resumoLines.length * 5 + 10;
+        if (resumoLines.length > 6) {
+          doc.text('...', 20, yPos + 30);
+        }
+        yPos += Math.min(resumoLines.length * 5, 35) + 15;
       }
 
-      // Alertas Operacionais
+      // ========== ALERTAS OPERACIONAIS ==========
       if (historyData.alertasOperacionais && historyData.alertasOperacionais.length > 0) {
-        drawSectionHeader('Alertas Operacionais', COLORS.danger);
+        checkPageSpace(40);
+        drawSectionHeader('⚠️ Alertas Operacionais', COLORS.danger);
         
-        const alertasData = historyData.alertasOperacionais.map((a: any) => [
-          a.tipo,
-          a.descricao,
-          a.urgencia.toUpperCase()
-        ]);
-
-        autoTable(doc, {
-          startY: yPos,
-          head: [['Tipo', 'Descrição', 'Urgência']],
-          body: alertasData,
-          theme: 'grid',
-          headStyles: { fillColor: COLORS.danger, textColor: [255, 255, 255] },
-          styles: { fontSize: 9 },
-          columnStyles: { 
-            0: { cellWidth: 35 },
-            1: { cellWidth: 'auto' },
-            2: { cellWidth: 25 }
-          },
+        historyData.alertasOperacionais.forEach((alerta: any) => {
+          checkPageSpace(25);
+          const alertBgColor = alerta.urgencia === 'alta' ? COLORS.dangerLight : 
+                              alerta.urgencia === 'média' ? COLORS.orangeLight : COLORS.warningLight;
+          const alertBorderColor = alerta.urgencia === 'alta' ? COLORS.danger : 
+                                   alerta.urgencia === 'média' ? COLORS.orange : COLORS.warning;
+          
+          doc.setFillColor(alertBgColor[0], alertBgColor[1], alertBgColor[2]);
+          doc.roundedRect(14, yPos, pageWidth - 28, 18, 2, 2, 'F');
+          doc.setDrawColor(alertBorderColor[0], alertBorderColor[1], alertBorderColor[2]);
+          doc.setLineWidth(0.5);
+          doc.roundedRect(14, yPos, pageWidth - 28, 18, 2, 2, 'S');
+          
+          // Tipo
+          doc.setTextColor(alertBorderColor[0], alertBorderColor[1], alertBorderColor[2]);
+          doc.setFontSize(9);
+          doc.setFont('helvetica', 'bold');
+          doc.text(alerta.tipo, 18, yPos + 6);
+          
+          // Descrição
+          doc.setFont('helvetica', 'normal');
+          doc.setTextColor(60, 60, 60);
+          doc.setFontSize(8);
+          const descLines = doc.splitTextToSize(alerta.descricao, pageWidth - 80);
+          doc.text(descLines[0], 18, yPos + 13);
+          
+          // Badge de urgência
+          doc.setFillColor(alertBorderColor[0], alertBorderColor[1], alertBorderColor[2]);
+          doc.roundedRect(pageWidth - 40, yPos + 3, 22, 8, 1, 1, 'F');
+          doc.setTextColor(255, 255, 255);
+          doc.setFontSize(6);
+          doc.setFont('helvetica', 'bold');
+          doc.text(alerta.urgencia.toUpperCase(), pageWidth - 29, yPos + 8, { align: 'center' });
+          
+          yPos += 22;
         });
-        yPos = (doc as any).lastAutoTable.finalY + 10;
+        yPos += 5;
       }
 
-      // Problemas Identificados
+      // ========== PROBLEMAS IDENTIFICADOS ==========
       if (historyData.problemasRecorrentes && historyData.problemasRecorrentes.length > 0) {
-        drawSectionHeader('Problemas Identificados', COLORS.warning);
+        checkPageSpace(40);
+        drawSectionHeader('🔍 Problemas Identificados', COLORS.warning);
         
-        const problemasData = historyData.problemasRecorrentes.map((p: any) => [
-          p.problema,
-          p.categoria,
-          p.frequencia,
-          p.gravidade.toUpperCase()
-        ]);
-
-        autoTable(doc, {
-          startY: yPos,
-          head: [['Problema', 'Categoria', 'Frequência', 'Gravidade']],
-          body: problemasData,
-          theme: 'grid',
-          headStyles: { fillColor: COLORS.warning, textColor: [255, 255, 255] },
-          styles: { fontSize: 9 },
+        historyData.problemasRecorrentes.forEach((problema: any) => {
+          checkPageSpace(25);
+          const probBgColor = problema.gravidade === 'alta' ? COLORS.dangerLight : 
+                             problema.gravidade === 'média' ? COLORS.orangeLight : COLORS.warningLight;
+          const probBorderColor = problema.gravidade === 'alta' ? COLORS.danger : 
+                                  problema.gravidade === 'média' ? COLORS.orange : COLORS.warning;
+          
+          doc.setFillColor(probBgColor[0], probBgColor[1], probBgColor[2]);
+          doc.roundedRect(14, yPos, pageWidth - 28, 20, 2, 2, 'F');
+          doc.setDrawColor(probBorderColor[0], probBorderColor[1], probBorderColor[2]);
+          doc.setLineWidth(0.5);
+          doc.roundedRect(14, yPos, pageWidth - 28, 20, 2, 2, 'S');
+          
+          // Problema
+          doc.setTextColor(probBorderColor[0], probBorderColor[1], probBorderColor[2]);
+          doc.setFontSize(9);
+          doc.setFont('helvetica', 'bold');
+          doc.text(problema.problema, 18, yPos + 7);
+          
+          // Categoria e frequência
+          doc.setFont('helvetica', 'normal');
+          doc.setTextColor(80, 80, 80);
+          doc.setFontSize(7);
+          doc.text(`Categoria: ${problema.categoria}  |  ${problema.frequencia}`, 18, yPos + 14);
+          
+          // Badge de gravidade
+          doc.setFillColor(probBorderColor[0], probBorderColor[1], probBorderColor[2]);
+          doc.roundedRect(pageWidth - 40, yPos + 5, 22, 8, 1, 1, 'F');
+          doc.setTextColor(255, 255, 255);
+          doc.setFontSize(6);
+          doc.setFont('helvetica', 'bold');
+          doc.text(problema.gravidade.toUpperCase(), pageWidth - 29, yPos + 10, { align: 'center' });
+          
+          yPos += 24;
         });
-        yPos = (doc as any).lastAutoTable.finalY + 10;
+        yPos += 5;
       }
 
-      // Pontos Fortes
+      // ========== PONTOS FORTES ==========
       if (historyData.pontosFortes && historyData.pontosFortes.length > 0) {
-        drawSectionHeader('Pontos Fortes', COLORS.success);
+        checkPageSpace(40);
+        drawColoredSection('✅ Pontos Fortes', COLORS.successLight, COLORS.success, Math.min(historyData.pontosFortes.length * 8 + 5, 60));
         
-        doc.setFontSize(10);
-        historyData.pontosFortes.forEach((ponto: string, index: number) => {
-          if (yPos > pageHeight - 15) {
-            doc.addPage();
-            yPos = 20;
-          }
-          const lines = doc.splitTextToSize(`• ${ponto}`, pageWidth - 28);
-          doc.text(lines, 14, yPos);
-          yPos += lines.length * 5 + 2;
+        doc.setFontSize(9);
+        doc.setTextColor(COLORS.success[0] * 0.7, COLORS.success[1] * 0.7, COLORS.success[2] * 0.7);
+        
+        historyData.pontosFortes.slice(0, 8).forEach((ponto: string) => {
+          checkPageSpace(10);
+          const lines = doc.splitTextToSize(`✓ ${ponto}`, pageWidth - 48);
+          doc.text(lines[0], 20, yPos);
+          yPos += 7;
         });
-        yPos += 8;
+        
+        if (historyData.pontosFortes.length > 8) {
+          doc.text(`... e mais ${historyData.pontosFortes.length - 8} pontos`, 20, yPos);
+          yPos += 7;
+        }
+        yPos += 10;
       }
 
-      // Tendências
+      // ========== TENDÊNCIAS ==========
       if (historyData.tendencias && historyData.tendencias.length > 0) {
-        drawSectionHeader('Tendências Identificadas', COLORS.primary);
+        checkPageSpace(40);
+        drawSectionHeader('📈 Tendências Identificadas', COLORS.primary);
         
-        doc.setFontSize(10);
-        historyData.tendencias.forEach((tendencia: string) => {
-          if (yPos > pageHeight - 15) {
-            doc.addPage();
-            yPos = 20;
-          }
-          const lines = doc.splitTextToSize(`→ ${tendencia}`, pageWidth - 28);
-          doc.text(lines, 14, yPos);
-          yPos += lines.length * 5 + 2;
+        doc.setFontSize(9);
+        doc.setTextColor(60, 60, 60);
+        
+        historyData.tendencias.slice(0, 6).forEach((tendencia: string) => {
+          checkPageSpace(10);
+          const lines = doc.splitTextToSize(`→ ${tendencia}`, pageWidth - 38);
+          doc.text(lines[0], 18, yPos);
+          yPos += 7;
         });
-        yPos += 8;
+        
+        if (historyData.tendencias.length > 6) {
+          doc.text(`... e mais ${historyData.tendencias.length - 6} tendências`, 18, yPos);
+          yPos += 7;
+        }
+        yPos += 10;
       }
 
-      // Recomendações
+      // ========== RECOMENDAÇÕES PRIORITÁRIAS ==========
       if (historyData.recomendacoes && historyData.recomendacoes.length > 0) {
-        drawSectionHeader('Recomendações Prioritárias', COLORS.purple);
+        checkPageSpace(50);
+        drawColoredSection('💡 Recomendações Prioritárias', COLORS.purpleLight, COLORS.purple, Math.min(historyData.recomendacoes.length * 25 + 10, 100));
         
-        const recomendacoesData = historyData.recomendacoes
-          .sort((a: any, b: any) => {
-            const prioOrder = { alta: 0, média: 1, baixa: 2 };
-            return (prioOrder[a.prioridade as keyof typeof prioOrder] || 2) - (prioOrder[b.prioridade as keyof typeof prioOrder] || 2);
-          })
-          .map((r: any) => [
-            r.prioridade.toUpperCase(),
-            r.recomendacao,
-            r.categoria,
-            r.justificativa
-          ]);
-
-        autoTable(doc, {
-          startY: yPos,
-          head: [['Prioridade', 'Recomendação', 'Categoria', 'Justificativa']],
-          body: recomendacoesData,
-          theme: 'grid',
-          headStyles: { fillColor: COLORS.purple, textColor: [255, 255, 255] },
-          styles: { fontSize: 8 },
-          columnStyles: { 
-            0: { cellWidth: 20 },
-            1: { cellWidth: 50 },
-            2: { cellWidth: 25 },
-            3: { cellWidth: 'auto' }
-          },
+        const sortedRecs = [...historyData.recomendacoes].sort((a: any, b: any) => {
+          const prioOrder: Record<string, number> = { alta: 0, média: 1, baixa: 2 };
+          return (prioOrder[a.prioridade] || 2) - (prioOrder[b.prioridade] || 2);
         });
+        
+        sortedRecs.slice(0, 5).forEach((rec: any) => {
+          checkPageSpace(28);
+          
+          // Card branco
+          doc.setFillColor(255, 255, 255);
+          doc.roundedRect(20, yPos, pageWidth - 48, 22, 2, 2, 'F');
+          doc.setDrawColor(COLORS.purple[0], COLORS.purple[1], COLORS.purple[2]);
+          doc.setLineWidth(0.3);
+          doc.roundedRect(20, yPos, pageWidth - 48, 22, 2, 2, 'S');
+          
+          // Badge de prioridade
+          const prioBgColor = rec.prioridade === 'alta' ? COLORS.danger : 
+                             rec.prioridade === 'média' ? COLORS.orange : COLORS.primary;
+          doc.setFillColor(prioBgColor[0], prioBgColor[1], prioBgColor[2]);
+          doc.roundedRect(24, yPos + 3, 18, 6, 1, 1, 'F');
+          doc.setTextColor(255, 255, 255);
+          doc.setFontSize(5);
+          doc.setFont('helvetica', 'bold');
+          doc.text(rec.prioridade.toUpperCase(), 33, yPos + 7, { align: 'center' });
+          
+          // Recomendação
+          doc.setTextColor(COLORS.purple[0] * 0.7, COLORS.purple[1] * 0.7, COLORS.purple[2] * 0.7);
+          doc.setFontSize(8);
+          doc.setFont('helvetica', 'bold');
+          const recLines = doc.splitTextToSize(rec.recomendacao, pageWidth - 100);
+          doc.text(recLines[0], 46, yPos + 7);
+          
+          // Categoria badge
+          doc.setFillColor(COLORS.purpleLight[0], COLORS.purpleLight[1], COLORS.purpleLight[2]);
+          doc.roundedRect(pageWidth - 65, yPos + 2, 30, 6, 1, 1, 'F');
+          doc.setTextColor(COLORS.purple[0], COLORS.purple[1], COLORS.purple[2]);
+          doc.setFontSize(5);
+          doc.setFont('helvetica', 'normal');
+          doc.text(rec.categoria, pageWidth - 50, yPos + 6, { align: 'center' });
+          
+          // Justificativa
+          doc.setTextColor(100, 100, 100);
+          doc.setFontSize(7);
+          const justLines = doc.splitTextToSize(rec.justificativa, pageWidth - 58);
+          doc.text(justLines[0], 24, yPos + 16);
+          
+          yPos += 26;
+        });
+        
+        if (sortedRecs.length > 5) {
+          doc.setFontSize(8);
+          doc.setTextColor(COLORS.purple[0], COLORS.purple[1], COLORS.purple[2]);
+          doc.text(`... e mais ${sortedRecs.length - 5} recomendações`, 24, yPos);
+          yPos += 10;
+        }
       }
 
-      // Rodapé em todas as páginas
+      // ========== RODAPÉ EM TODAS AS PÁGINAS ==========
       const totalPages = doc.getNumberOfPages();
       for (let i = 1; i <= totalPages; i++) {
         doc.setPage(i);
-        doc.setFontSize(8);
-        doc.setTextColor(150, 150, 150);
-        doc.text(`PoweringEG Platform - Histórico da Loja`, 14, pageHeight - 10);
-        doc.text(`Página ${i} de ${totalPages}`, pageWidth - 14, pageHeight - 10, { align: 'right' });
+        // Linha separadora
+        doc.setDrawColor(200, 200, 200);
+        doc.setLineWidth(0.3);
+        doc.line(14, pageHeight - 15, pageWidth - 14, pageHeight - 15);
+        // Texto do rodapé
+        doc.setFontSize(7);
+        doc.setTextColor(130, 130, 130);
+        doc.text(`PoweringEG Platform  •  Histórico da Loja: ${lojaNome}`, 14, pageHeight - 8);
+        doc.text(`Página ${i} de ${totalPages}`, pageWidth - 14, pageHeight - 8, { align: 'right' });
       }
 
-      // Guardar
+      // ========== GUARDAR PDF ==========
       const fileName = `Historico_${lojaNome.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
       doc.save(fileName);
       toast.success("PDF exportado com sucesso!");
