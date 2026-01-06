@@ -1,0 +1,14 @@
+{
+  "query": "SELECT id, LEFT(conteudo, 500) as conteudo_preview FROM relatorios_ia ORDER BY id DESC LIMIT 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT id, LEFT(conteudo, 500) as conteudo_preview FROM relatorios_ia ORDER BY id DESC LIMIT 1;",
+  "rows": [
+    {
+      "id": "420004",
+      "conteudo_preview": "{\"lojaMaisVisitada\":{\"nome\":\"Loja Test\",\"visitas\":5},\"lojaMenosVisitada\":{\"nome\":\"Loja Test 2\",\"visitas\":1},\"frequenciaVisitas\":{\"Loja Test\":5,\"Loja Test 2\":1},\"pontosPositivos\":[\"Ponto positivo 1\",\"Ponto positivo 2\"],\"pontosNegativos\":[\"Ponto negativo 1\",\"Ponto negativo 2\"],\"sugestoes\":[\"Sugestão 1\",\"Sugestão 2\"],\"resumo\":\"Resumo de teste\",\"analisePontosDestacados\":{\"positivos\":[\"Análise positiva 1\"],\"negativos\":[\"Análise negativa 1\"],\"tendencias\":\"Tendências de teste\"}}"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tconteudo_preview\n420004\t{\"lojaMaisVisitada\":{\"nome\":\"Loja Test\",\"visitas\":5},\"lojaMenosVisitada\":{\"nome\":\"Loja Test 2\",\"visitas\":1},\"frequenciaVisitas\":{\"Loja Test\":5,\"Loja Test 2\":1},\"pontosPositivos\":[\"Ponto positivo 1\",\"Ponto positivo 2\"],\"pontosNegativos\":[\"Ponto negativo 1\",\"Ponto negativo 2\"],\"sugestoes\":[\"Sugestão 1\",\"Sugestão 2\"],\"resumo\":\"Resumo de teste\",\"analisePontosDestacados\":{\"positivos\":[\"Análise positiva 1\"],\"negativos\":[\"Análise negativa 1\"],\"tendencias\":\"Tendências de teste\"}}\n",
+  "stderr": "",
+  "execution_time_ms": 54
+}

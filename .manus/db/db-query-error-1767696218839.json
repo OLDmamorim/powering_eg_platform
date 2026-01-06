@@ -1,0 +1,8 @@
+{
+  "query": "SELECT id, LEFT(content, 500) as content_preview FROM relatoriosIACategorias WHERE content LIKE '%Consultor%' OR content LIKE '%Consultoria%' LIMIT 5",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT id, LEFT(content, 500) as content_preview FROM relatoriosIACategorias WHERE content LIKE '%Consultor%' OR content LIKE '%Consultoria%' LIMIT 5",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 'content' in 'where clause'"
+  ]
+}

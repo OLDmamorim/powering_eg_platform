@@ -1,0 +1,22 @@
+{
+  "query": "SHOW TABLES LIKE '%relatorio%';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SHOW TABLES LIKE '%relatorio%';",
+  "rows": [
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH (%relatorio%)": "relatoriosIACategorias"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH (%relatorio%)": "relatorios_completos"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH (%relatorio%)": "relatorios_ia"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH (%relatorio%)": "relatorios_livres"
+    }
+  ],
+  "messages": [],
+  "stdout": "Tables_in_3c9MozLH35e233uWy5WDtH (%relatorio%)\nrelatoriosIACategorias\nrelatorios_completos\nrelatorios_ia\nrelatorios_livres\n",
+  "stderr": "",
+  "execution_time_ms": 50
+}

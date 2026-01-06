@@ -1,0 +1,22 @@
+{
+  "query": "SELECT id, SUBSTRING(conteudo, 1, 1000) as conteudo_preview FROM relatoriosIACategorias ORDER BY id DESC LIMIT 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT id, SUBSTRING(conteudo, 1, 1000) as conteudo_preview FROM relatoriosIACategorias ORDER BY id DESC LIMIT 1;",
+  "rows": [
+    {
+      "id": "450001",
+      "conteudo_preview": "# Relatório Executivo por Categorias e Ocorrências Estruturais"
+    }
+  ],
+  "messages": [
+    "*Gerado em: 29 de Maio de 2024*",
+    "## 🚨 ASSUNTOS PRIORITÁRIOS PARA DISCUSSÃO NO BOARD",
+    "A análise dos relatórios operacionais revela um estado de alerta máximo, com 100% dos relatórios pendentes de resolução. As três categorias identificadas como prioritárias requerem intervenção imediata da gestão de topo.",
+    "| Categoria | Nº de Relatórios a Acompanhar | Assuntos/Problemas Específicos | Lojas Afetadas | Recomendação de Ação Urgente |",
+    "| :--- | :--- | :--- | :--- | :--- |",
+    "| **Recursos Humanos** | 1 | Paralisia da atividade da loja SM devido à falta crítica de equipa. | Braga SM | **Plano de Contingência de RH:** Aprovação imediata de um plano de recrutamento acelerado (incluindo incentivos ou contratação de agência especializada) para reativar a operação de Braga SM. |",
+    "| **Stocks** | 1 | Graves problemas de armazenamento e excesso de stock (24 vidros de camião) aguardando recolha. | Paredes | **Logística Reversa Imediata:** Coord"
+  ],
+  "stdout": "id\tconteudo_preview\n450001\t# Relatório Executivo por Categorias e Ocorrências Estruturais\n*Gerado em: 29 de Maio de 2024*\n\n## 🚨 ASSUNTOS PRIORITÁRIOS PARA DISCUSSÃO NO BOARD\n\nA análise dos relatórios operacionais revela um estado de alerta máximo, com 100% dos relatórios pendentes de resolução. As três categorias identificadas como prioritárias requerem intervenção imediata da gestão de topo.\n\n| Categoria | Nº de Relatórios a Acompanhar | Assuntos/Problemas Específicos | Lojas Afetadas | Recomendação de Ação Urgente |\n| :--- | :--- | :--- | :--- | :--- |\n| **Recursos Humanos** | 1 | Paralisia da atividade da loja SM devido à falta crítica de equipa. | Braga SM | **Plano de Contingência de RH:** Aprovação imediata de um plano de recrutamento acelerado (incluindo incentivos ou contratação de agência especializada) para reativar a operação de Braga SM. |\n| **Stocks** | 1 | Graves problemas de armazenamento e excesso de stock (24 vidros de camião) aguardando recolha. | Paredes | **Logística Reversa Imediata:** Coord\n",
+  "stderr": "",
+  "execution_time_ms": 50
+}

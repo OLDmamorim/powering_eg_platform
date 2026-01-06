@@ -1,0 +1,22 @@
+{
+  "query": "SELECT id, versao, createdAt, LEFT(conteudo, 500) as preview FROM relatoriosIACategorias ORDER BY createdAt DESC LIMIT 1",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT id, versao, createdAt, LEFT(conteudo, 500) as preview FROM relatoriosIACategorias ORDER BY createdAt DESC LIMIT 1",
+  "rows": [
+    {
+      "id": "450001",
+      "versao": "6.4",
+      "createdAt": "2026-01-06 09:56:09",
+      "preview": "# Relatório Executivo por Categorias e Ocorrências Estruturais"
+    }
+  ],
+  "messages": [
+    "*Gerado em: 29 de Maio de 2024*",
+    "## 🚨 ASSUNTOS PRIORITÁRIOS PARA DISCUSSÃO NO BOARD",
+    "A análise dos relatórios operacionais revela um estado de alerta máximo, com 100% dos relatórios pendentes de resolução. As três categorias identificadas como prioritárias requerem intervenção imediata da gestão de topo.",
+    "| Categoria | Nº de Relatórios a Acompanhar | Assuntos/Problemas Específicos | Lojas Afetadas | Recomendação de Ação Urgente |",
+    "| :"
+  ],
+  "stdout": "id\tversao\tcreatedAt\tpreview\n450001\t6.4\t2026-01-06 09:56:09\t# Relatório Executivo por Categorias e Ocorrências Estruturais\n*Gerado em: 29 de Maio de 2024*\n\n## 🚨 ASSUNTOS PRIORITÁRIOS PARA DISCUSSÃO NO BOARD\n\nA análise dos relatórios operacionais revela um estado de alerta máximo, com 100% dos relatórios pendentes de resolução. As três categorias identificadas como prioritárias requerem intervenção imediata da gestão de topo.\n\n| Categoria | Nº de Relatórios a Acompanhar | Assuntos/Problemas Específicos | Lojas Afetadas | Recomendação de Ação Urgente |\n| :\n",
+  "stderr": "",
+  "execution_time_ms": 53
+}

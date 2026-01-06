@@ -2076,3 +2076,6 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Corrigir Taxa de Reparação Média no Relatório Board (multiplicar por 100 para mostrar percentagem correta)
 - [x] Bug: Mónica Correira e Rui Adriao não aparecem na tabela de Performance por Gestor do Relatório Board (corrigido: remover slice(0,5) no prompt da IA)
 - [x] Remover botão 'Gerar Relatório IA para Board' da página Relatório Board
+- [ ] Corrigir texto '[Seu Nome/Consultoria]' no Relatório Executivo para Board
+- [ ] Corrigir texto '[Seu Nome/Consultoria]' no Relatório Board para mostrar nome do utilizador
+- [x] Verificar e corrigir formatação do PDF descarregado do Relatório Board

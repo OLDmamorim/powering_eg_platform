@@ -1,0 +1,100 @@
+{
+  "query": "SHOW TABLES",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SHOW TABLES",
+  "rows": [
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "__drizzle_migrations"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "acoes_reunioes"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "alertas"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "atividades"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "configuracoes_alertas"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "gestor_lojas"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "gestores"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "lojas"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "ocorrencias_estruturais"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "pendentes"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "pendentes_loja"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "planos_visitas"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "previsoes"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "relatoriosIACategorias"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "relatorios_completos"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "relatorios_ia"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "relatorios_livres"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "resultados_mensais"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "resumos_globais"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "reunioes_gestores"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "reunioes_lojas"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "reunioes_quinzenais"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "sugestoes_melhoria"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "temas_ocorrencias"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "todo_categories"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "todos"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "tokens_loja"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "totais_mensais"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "users"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "vendas_complementares"
+    }
+  ],
+  "messages": [],
+  "stdout": "Tables_in_3c9MozLH35e233uWy5WDtH\n__drizzle_migrations\nacoes_reunioes\nalertas\natividades\nconfiguracoes_alertas\ngestor_lojas\ngestores\nlojas\nocorrencias_estruturais\npendentes\npendentes_loja\nplanos_visitas\nprevisoes\nrelatoriosIACategorias\nrelatorios_completos\nrelatorios_ia\nrelatorios_livres\nresultados_mensais\nresumos_globais\nreunioes_gestores\nreunioes_lojas\nreunioes_quinzenais\nsugestoes_melhoria\ntemas_ocorrencias\ntodo_categories\ntodos\ntokens_loja\ntotais_mensais\nusers\nvendas_complementares\n",
+  "stderr": "",
+  "execution_time_ms": 47
+}

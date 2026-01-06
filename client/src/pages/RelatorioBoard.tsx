@@ -120,6 +120,31 @@ export default function RelatorioBoard() {
       const maxWidth = pageWidth - margin * 2;
       let yPos = 25;
 
+      // Função auxiliar para remover emojis e caracteres especiais
+      const cleanText = (text: string) => {
+        return text
+          // Remover emojis comuns usando lista explícita
+          .replace(/📊|🎯|📈|💡|⚠️|🔍|📋|✅|❌|🏆|📉|🔔|👥|🏪|💰|📅|🚨|⚡|🔴|🟡|🟢|🔵|⭐|💼|📝|🔄|➡️|⬆️|⬇️|✨|💪|🎉|📌|🔥|💎|🛡️|⏰|📞|💬|🌟|🏅|🎖️|🥇|🥈|🥉/g, '')
+          // Remover outros emojis usando padrão mais amplo
+          .replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, '')
+          .replace(/[\u2600-\u27BF]/g, '')
+          .replace(/\s+/g, ' ')
+          .trim();
+      };
+
+      // Função para processar tabelas Markdown
+      const processTable = (tableLines: string[]) => {
+        const rows: string[][] = [];
+        for (const line of tableLines) {
+          if (line.includes('---')) continue; // Ignorar linha separadora
+          const cells = line.split('|').map(cell => cleanText(cell.trim())).filter(cell => cell);
+          if (cells.length > 0) {
+            rows.push(cells);
+          }
+        }
+        return rows;
+      };
+
       // Título
       doc.setFontSize(18);
       doc.setFont('helvetica', 'bold');
@@ -144,11 +169,59 @@ export default function RelatorioBoard() {
       const lines = analiseIA.split('\n');
       doc.setFontSize(10);
       
-      for (const line of lines) {
+      let i = 0;
+      while (i < lines.length) {
+        const line = lines[i];
+        
         // Verificar se precisa de nova página
         if (yPos > pageHeight - 30) {
           doc.addPage();
           yPos = 25;
+        }
+
+        // Detectar início de tabela
+        if (line.trim().startsWith('|') && line.trim().endsWith('|')) {
+          const tableLines: string[] = [];
+          while (i < lines.length && lines[i].trim().startsWith('|')) {
+            tableLines.push(lines[i]);
+            i++;
+          }
+          
+          const tableData = processTable(tableLines);
+          if (tableData.length > 0) {
+            // Desenhar tabela simples
+            const colCount = tableData[0].length;
+            const colWidth = maxWidth / colCount;
+            const rowHeight = 7;
+            
+            for (let rowIdx = 0; rowIdx < tableData.length; rowIdx++) {
+              if (yPos > pageHeight - 30) {
+                doc.addPage();
+                yPos = 25;
+              }
+              
+              const row = tableData[rowIdx];
+              const isHeader = rowIdx === 0;
+              
+              if (isHeader) {
+                doc.setFont('helvetica', 'bold');
+                doc.setFillColor(240, 240, 240);
+                doc.rect(margin, yPos - 4, maxWidth, rowHeight, 'F');
+              } else {
+                doc.setFont('helvetica', 'normal');
+              }
+              
+              doc.setFontSize(8);
+              for (let colIdx = 0; colIdx < row.length; colIdx++) {
+                const cellText = row[colIdx].substring(0, 30); // Limitar tamanho
+                doc.text(cellText, margin + colIdx * colWidth + 2, yPos);
+              }
+              
+              yPos += rowHeight;
+            }
+            yPos += 5;
+          }
+          continue;
         }
 
         // Títulos principais (##)
@@ -156,7 +229,7 @@ export default function RelatorioBoard() {
           yPos += 5;
           doc.setFontSize(14);
           doc.setFont('helvetica', 'bold');
-          const text = line.replace(/^## /, '').replace(/[📊🎯📈💡⚠️🔍📋✅❌🏆📉🔔]/g, '').trim();
+          const text = cleanText(line.replace(/^## /, ''));
           doc.text(text, margin, yPos);
           yPos += 8;
           doc.setFontSize(10);
@@ -167,7 +240,7 @@ export default function RelatorioBoard() {
           yPos += 3;
           doc.setFontSize(12);
           doc.setFont('helvetica', 'bold');
-          const text = line.replace(/^### /, '').replace(/[📊🎯📈💡⚠️🔍📋✅❌🏆📉🔔]/g, '').trim();
+          const text = cleanText(line.replace(/^### /, ''));
           doc.text(text, margin, yPos);
           yPos += 6;
           doc.setFontSize(10);
@@ -176,15 +249,36 @@ export default function RelatorioBoard() {
         // Título principal (#)
         else if (line.startsWith('# ')) {
           // Já tratado no cabeçalho
+          i++;
+          continue;
+        }
+        // Linhas com asteriscos (metadados como *Período: ...* ou *Consultor: ...*)
+        else if (line.trim().startsWith('*') && line.trim().endsWith('*') && !line.includes('**')) {
+          // Ignorar linhas de metadados que já estão no cabeçalho
+          i++;
           continue;
         }
         // Linhas em branco
         else if (line.trim() === '') {
           yPos += 3;
         }
+        // Bullet points numerados (1., 2., etc.)
+        else if (/^\d+\.\s/.test(line.trim())) {
+          const text = cleanText(line.replace(/^\d+\.\s*/, '').replace(/\*\*/g, ''));
+          const num = line.trim().match(/^(\d+)\./)?.[1] || '';
+          const splitText = doc.splitTextToSize(`${num}. ${text}`, maxWidth - 10);
+          for (const splitLine of splitText) {
+            if (yPos > pageHeight - 30) {
+              doc.addPage();
+              yPos = 25;
+            }
+            doc.text(splitLine, margin + 5, yPos);
+            yPos += 5;
+          }
+        }
         // Bullet points
         else if (line.trim().startsWith('- ') || line.trim().startsWith('* ')) {
-          const text = line.replace(/^\s*[-*]\s*/, '').replace(/\*\*/g, '').trim();
+          const text = cleanText(line.replace(/^\s*[-*]\s*/, '').replace(/\*\*/g, ''));
           const splitText = doc.splitTextToSize(`• ${text}`, maxWidth - 10);
           for (const splitLine of splitText) {
             if (yPos > pageHeight - 30) {
@@ -197,7 +291,7 @@ export default function RelatorioBoard() {
         }
         // Texto normal
         else if (line.trim()) {
-          const text = line.replace(/\*\*/g, '').replace(/[📊🎯📈💡⚠️🔍📋✅❌🏆📉🔔]/g, '').trim();
+          const text = cleanText(line.replace(/\*\*/g, ''));
           const splitText = doc.splitTextToSize(text, maxWidth);
           for (const splitLine of splitText) {
             if (yPos > pageHeight - 30) {
@@ -208,6 +302,8 @@ export default function RelatorioBoard() {
             yPos += 5;
           }
         }
+        
+        i++;
       }
 
       // Rodapé em todas as páginas
