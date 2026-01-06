@@ -2081,3 +2081,5 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Verificar e corrigir formatação do PDF descarregado do Relatório Board
 - [x] Melhorar PDF do Relatório IA de Resultados para incluir gráficos, cores e layout visual igual à interface web
 - [x] Remover cabeçalho roxo exagerado do PDF do Relatório IA de Resultados - design mais sóbrio
+- [x] Consolidar layout do Relatório IA de Resultados para gestores (mesmo design profissional do PDF)
+- [x] Corrigir PDF do Relatório IA de Resultados para gestores - aplicar mesmo layout profissional que admins
