@@ -39,6 +39,7 @@ import ResumosGlobais from "./pages/ResumosGlobais";
 import OcorrenciaEstrutural from "./pages/OcorrenciaEstrutural";
 import HistoricoOcorrencias from "./pages/HistoricoOcorrencias";
 import { RelatorioIAResultados } from "./pages/RelatorioIAResultados";
+import RelatorioBoard from "./pages/RelatorioBoard";
 
 
 function Router() {
@@ -78,6 +79,7 @@ function Router() {
       <Route path={"/resultados-dashboard"} component={ResultadosDashboard} />
       <Route path={"/comparacao-lojas"} component={ComparacaoLojas} />
       <Route path={"/relatorio-ia-resultados"} component={RelatorioIAResultados} />
+      <Route path={"/relatorio-board"} component={RelatorioBoard} />
       
       {/* Reuniões Quinzenais */}
       <Route path={"/reunioes-quinzenais"} component={ReunioesQuinzenais} />

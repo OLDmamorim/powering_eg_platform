@@ -470,7 +470,7 @@ export default function Dashboard() {
           </div>
           <div className="flex flex-col gap-2">
             {isAdmin ? (
-              <Button onClick={() => setShowRelatorioBoard(true)} variant="outline" className="gap-2">
+              <Button onClick={() => setLocation('/relatorio-board')} variant="outline" className="gap-2">
                 <BarChart3 className="h-4 w-4" />Relatório Board
               </Button>
             ) : (

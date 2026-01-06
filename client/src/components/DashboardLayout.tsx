@@ -130,6 +130,7 @@ const getMenuGroups = (userRole?: string): MenuGroup[] => {
         { icon: Sparkles, label: "Relatório IA Resultados", path: "/relatorio-ia-resultados", show: true, showBadge: false },
         { icon: GitCompare, label: "Comparação Lojas", path: "/comparacao-lojas", show: true, showBadge: false },
         { icon: History, label: "Histórico da Loja", path: "/historico-loja", show: true, showBadge: false },
+        { icon: BarChart3, label: "Relatório Board", path: "/relatorio-board", show: isAdmin, showBadge: false },
       ]
     },
 

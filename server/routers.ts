@@ -3711,6 +3711,31 @@ export const appRouter = router({
       }),
   }),
   
+  // ==================== RELATÓRIO BOARD (ADMINISTRAÇÃO) ====================
+  relatorioBoard: router({
+    // Gerar dados completos do relatório board
+    gerarDados: adminProcedure
+      .input(z.object({
+        periodo: z.enum(['mes_atual', 'mes_anterior', 'trimestre_anterior', 'semestre_anterior', 'ano_anterior']).optional(),
+      }).optional())
+      .query(async ({ input }) => {
+        const { gerarDadosRelatorioBoard } = await import('./relatorioBoardService');
+        return await gerarDadosRelatorioBoard(input?.periodo || 'mes_atual');
+      }),
+    
+    // Gerar análise IA do relatório board
+    gerarAnaliseIA: adminProcedure
+      .input(z.object({
+        periodo: z.enum(['mes_atual', 'mes_anterior', 'trimestre_anterior', 'semestre_anterior', 'ano_anterior']).optional(),
+      }).optional())
+      .mutation(async ({ input }) => {
+        const { gerarDadosRelatorioBoard, gerarAnaliseIARelatorioBoard } = await import('./relatorioBoardService');
+        const dados = await gerarDadosRelatorioBoard(input?.periodo || 'mes_atual');
+        const analise = await gerarAnaliseIARelatorioBoard(dados);
+        return { dados, analise };
+      }),
+  }),
+  
   // ==================== OCORRÊNCIAS ESTRUTURAIS ====================
   ocorrenciasEstruturais: router({
     // Buscar todos os temas para autocomplete

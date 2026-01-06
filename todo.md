@@ -2008,3 +2008,44 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Backend: Atualizar tipos de período em routers.ts, db.ts, resumoGlobalService.ts
 - [x] Schema: Atualizar enum de período na tabela resumos_globais
 - [x] Migração: Atualizar dados existentes na base de dados
+
+## Relatório Board Completo para Administração v6.3
+- [ ] Análise da estrutura atual do Relatório Board
+- [ ] Implementar filtro temporal (Mês Atual, Mês Anterior, Trimestre Anterior, Semestre Anterior, Ano Anterior)
+- [ ] Secção 1: Resumo Executivo com KPIs principais
+- [ ] Secção 2: Análise de Relatórios (livres e completos)
+- [ ] Secção 3: Análise por Gestor (performance individual)
+- [ ] Secção 4: Análise de Categorias (distribuição e tendências)
+- [ ] Secção 5: Análise de Ocorrências Estruturais (impacto e temas)
+- [ ] Secção 6: Análise de Resultados (vendas e serviços)
+- [ ] Secção 7: Análise de Pendentes (taxa de resolução)
+- [ ] Gráficos interativos (barras, linhas, donut)
+- [ ] Indicadores visuais (cores, badges, ícones)
+- [ ] Recomendações estratégicas da IA
+- [ ] Exportação para PDF profissional
+- [ ] Testar relatório completo
+
+
+## Relatório Board Completo para Administração v3.9
+- [x] Backend: Serviço de dados agregados com filtros temporais (relatorioBoardService.ts)
+- [x] Backend: Análise por gestor (performance individual com score 0-100)
+- [x] Backend: Análise de relatórios (livres e completos por gestor e loja)
+- [x] Backend: Análise de categorias (distribuição e taxa de resolução)
+- [x] Backend: Análise de ocorrências (impacto, abrangência, temas frequentes)
+- [x] Backend: Análise de resultados comerciais (serviços, objetivos, vendas)
+- [x] Backend: Análise de pendentes (ativos, resolvidos, antigos, por loja)
+- [x] Backend: KPIs executivos completos
+- [x] Frontend: Página com 7 tabs organizadas (RelatorioBoard.tsx)
+- [x] Frontend: Tab Resumo com KPIs, indicadores e evolução temporal (6 meses)
+- [x] Frontend: Tab Gestores com score de performance e tabela detalhada
+- [x] Frontend: Tab Relatórios com contagem e top 15 lojas
+- [x] Frontend: Tab Categorias com gráfico de distribuição por estado
+- [x] Frontend: Tab Ocorrências com gráfico de impacto e estatísticas
+- [x] Frontend: Tab Pendentes com gráfico de pendentes por loja
+- [x] Frontend: Tab Análise IA com geração automática de relatório executivo
+- [x] Filtro de período temporal (Mês Atual, Mês Anterior, Trimestre, Semestre, Ano)
+- [x] Gráficos interativos com Chart.js (Line, Bar, Doughnut)
+- [x] Download de relatório IA em Markdown
+- [x] Regenerar análise IA com botão dedicado
+- [x] Link no menu lateral e no Dashboard
+- [x] Testar todas as funcionalidades
