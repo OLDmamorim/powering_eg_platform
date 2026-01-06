@@ -1,0 +1,55 @@
+{
+  "query": "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'ocorrencias_estruturais';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'ocorrencias_estruturais';",
+  "rows": [
+    {
+      "COLUMN_NAME": "id"
+    },
+    {
+      "COLUMN_NAME": "gestorId"
+    },
+    {
+      "COLUMN_NAME": "temaId"
+    },
+    {
+      "COLUMN_NAME": "descricao"
+    },
+    {
+      "COLUMN_NAME": "abrangencia"
+    },
+    {
+      "COLUMN_NAME": "zonaAfetada"
+    },
+    {
+      "COLUMN_NAME": "lojasAfetadas"
+    },
+    {
+      "COLUMN_NAME": "impacto"
+    },
+    {
+      "COLUMN_NAME": "fotos"
+    },
+    {
+      "COLUMN_NAME": "sugestaoAcao"
+    },
+    {
+      "COLUMN_NAME": "estado"
+    },
+    {
+      "COLUMN_NAME": "notasAdmin"
+    },
+    {
+      "COLUMN_NAME": "resolvidoEm"
+    },
+    {
+      "COLUMN_NAME": "createdAt"
+    },
+    {
+      "COLUMN_NAME": "updatedAt"
+    }
+  ],
+  "messages": [],
+  "stdout": "COLUMN_NAME\nid\ngestorId\ntemaId\ndescricao\nabrangencia\nzonaAfetada\nlojasAfetadas\nimpacto\nfotos\nsugestaoAcao\nestado\nnotasAdmin\nresolvidoEm\ncreatedAt\nupdatedAt\n",
+  "stderr": "",
+  "execution_time_ms": 56
+}

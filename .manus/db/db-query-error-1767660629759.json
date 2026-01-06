@@ -1,0 +1,8 @@
+{
+  "query": "SELECT COUNT(*) as total, tema FROM ocorrencias_estruturais WHERE tema LIKE '%Teste%SMTP%' OR tema LIKE '%teste%smtp%' OR descricao LIKE '%teste%SMTP%' GROUP BY tema;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT COUNT(*) as total, tema FROM ocorrencias_estruturais WHERE tema LIKE '%Teste%SMTP%' OR tema LIKE '%teste%smtp%' OR descricao LIKE '%teste%SMTP%' GROUP BY tema;",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 'tema' in 'group statement'"
+  ]
+}

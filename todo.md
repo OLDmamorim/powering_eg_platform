@@ -2049,3 +2049,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Regenerar análise IA com botão dedicado
 - [x] Link no menu lateral e no Dashboard
 - [x] Testar todas as funcionalidades
+
+## Correções Relatório Board v6.4
+- [x] Bug: Nomes dos gestores apareciam como "Desconhecido" - corrigido para usar gestor.user.name
+- [x] Bug: Análise IA usava "Gestor A" em vez do nome real - adicionada instrução explícita no prompt
+- [x] Bug: Taxa de reparação - verificado, mostra valores corretos (0% quando não há dados de resultados)

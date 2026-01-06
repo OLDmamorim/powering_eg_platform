@@ -1,0 +1,25 @@
+{
+  "query": "SELECT id, nome, usageCount FROM temas_ocorrencias ORDER BY usageCount DESC;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT id, nome, usageCount FROM temas_ocorrencias ORDER BY usageCount DESC;",
+  "rows": [
+    {
+      "id": "30002",
+      "nome": "Teste Email SMTP",
+      "usageCount": "32"
+    },
+    {
+      "id": "30001",
+      "nome": "Reelmbolso",
+      "usageCount": "2"
+    },
+    {
+      "id": "1",
+      "nome": "Fornecedor Atrasado",
+      "usageCount": "1"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tnome\tusageCount\n30002\tTeste Email SMTP\t32\n30001\tReelmbolso\t2\n1\tFornecedor Atrasado\t1\n",
+  "stderr": "",
+  "execution_time_ms": 64
+}

@@ -1,0 +1,70 @@
+{
+  "query": "SELECT lojaId, mes, ano, taxaReparacao FROM resultados_mensais WHERE taxaReparacao IS NOT NULL LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT lojaId, mes, ano, taxaReparacao FROM resultados_mensais WHERE taxaReparacao IS NOT NULL LIMIT 10;",
+  "rows": [
+    {
+      "lojaId": "180001",
+      "mes": "12",
+      "ano": "2025",
+      "taxaReparacao": "0.2973"
+    },
+    {
+      "lojaId": "180002",
+      "mes": "12",
+      "ano": "2025",
+      "taxaReparacao": "0.3158"
+    },
+    {
+      "lojaId": "180003",
+      "mes": "12",
+      "ano": "2025",
+      "taxaReparacao": "0.4043"
+    },
+    {
+      "lojaId": "180004",
+      "mes": "12",
+      "ano": "2025",
+      "taxaReparacao": "0.3158"
+    },
+    {
+      "lojaId": "180005",
+      "mes": "12",
+      "ano": "2025",
+      "taxaReparacao": "0.2459"
+    },
+    {
+      "lojaId": "180006",
+      "mes": "12",
+      "ano": "2025",
+      "taxaReparacao": "0.3600"
+    },
+    {
+      "lojaId": "180007",
+      "mes": "12",
+      "ano": "2025",
+      "taxaReparacao": "0.4524"
+    },
+    {
+      "lojaId": "180008",
+      "mes": "12",
+      "ano": "2025",
+      "taxaReparacao": "0.3208"
+    },
+    {
+      "lojaId": "60002",
+      "mes": "12",
+      "ano": "2025",
+      "taxaReparacao": "0.2857"
+    },
+    {
+      "lojaId": "180009",
+      "mes": "12",
+      "ano": "2025",
+      "taxaReparacao": "0.4737"
+    }
+  ],
+  "messages": [],
+  "stdout": "lojaId\tmes\tano\ttaxaReparacao\n180001\t12\t2025\t0.2973\n180002\t12\t2025\t0.3158\n180003\t12\t2025\t0.4043\n180004\t12\t2025\t0.3158\n180005\t12\t2025\t0.2459\n180006\t12\t2025\t0.3600\n180007\t12\t2025\t0.4524\n180008\t12\t2025\t0.3208\n60002\t12\t2025\t0.2857\n180009\t12\t2025\t0.4737\n",
+  "stderr": "",
+  "execution_time_ms": 49
+}

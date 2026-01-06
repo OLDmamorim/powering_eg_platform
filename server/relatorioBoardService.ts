@@ -265,7 +265,7 @@ export async function gerarDadosRelatorioBoard(
 
       return {
         gestorId: gestor.id,
-        gestorNome: gestor.nome,
+        gestorNome: gestor.user?.name || 'Desconhecido',
         totalLojas: lojasGestor.length,
         relatoriosLivres: relLivresGestor.length,
         relatoriosCompletos: relCompletosGestor.length,
@@ -367,17 +367,19 @@ export async function gerarDadosRelatorioBoard(
   for (const r of relatoriosLivresPeriodo) {
     const gestor = todosGestores.find(g => g.id === r.gestorId);
     if (gestor) {
-      const atual = relatoriosPorGestor.get(gestor.nome) || { livres: 0, completos: 0 };
+      const nomeGestor = gestor.user?.name || 'Desconhecido';
+      const atual = relatoriosPorGestor.get(nomeGestor) || { livres: 0, completos: 0 };
       atual.livres++;
-      relatoriosPorGestor.set(gestor.nome, atual);
+      relatoriosPorGestor.set(nomeGestor, atual);
     }
   }
   for (const r of relatoriosCompletosPeriodo) {
     const gestor = todosGestores.find(g => g.id === r.gestorId);
     if (gestor) {
-      const atual = relatoriosPorGestor.get(gestor.nome) || { livres: 0, completos: 0 };
+      const nomeGestor = gestor.user?.name || 'Desconhecido';
+      const atual = relatoriosPorGestor.get(nomeGestor) || { livres: 0, completos: 0 };
       atual.completos++;
-      relatoriosPorGestor.set(gestor.nome, atual);
+      relatoriosPorGestor.set(nomeGestor, atual);
     }
   }
 
@@ -591,7 +593,9 @@ Lista de 5-7 ações prioritárias:
 - Seja específico e quantitativo
 - Foque em insights acionáveis
 - Priorize por impacto no negócio
-- Destaque riscos e oportunidades`;
+- Destaque riscos e oportunidades
+- USE SEMPRE OS NOMES REAIS DOS GESTORES fornecidos nos dados acima (ex: "João Silva", "Maria Santos") - NUNCA use nomes genéricos como "Gestor A", "Gestor B", etc.
+- Quando mencionar gestores, use o nome completo ou primeiro nome conforme fornecido nos dados`;
 
   const response = await invokeLLM({
     messages: [
