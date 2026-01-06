@@ -502,8 +502,8 @@ export async function gerarAnaliseIARelatorioBoard(dados: DadosRelatorioBoard): 
 - Média de Cumprimento de Objetivo: ${dados.kpis.mediaObjetivo?.toFixed(1) || 0}%
 - Média Taxa de Reparação: ${((dados.kpis.mediaTaxaReparacao || 0) * 100).toFixed(1)}%
 
-**ANÁLISE POR GESTOR (Top 5):**
-${dados.analiseGestores.slice(0, 5).map(g => `
+**ANÁLISE POR GESTOR (Todos os ${dados.analiseGestores.length} gestores):**
+${dados.analiseGestores.map(g => `
 - ${g.gestorNome}: ${g.totalLojas} lojas, ${g.relatoriosLivres + g.relatoriosCompletos} relatórios, ${g.pendentesAtivos} pendentes ativos, Score: ${g.pontuacao}/100`).join('')}
 
 **ANÁLISE DE CATEGORIAS (Top 5):**
@@ -552,8 +552,10 @@ Gere um relatório executivo em Markdown com a seguinte estrutura:
 - Tendências identificadas
 
 ## 👥 Performance por Gestor
+- Tabela com TODOS os gestores (não apenas top 5)
 - Ranking de gestores por performance
 - Destaques positivos e áreas de melhoria
+- Identificação de gestores inativos (sem relatórios)
 - Recomendações de ação por gestor
 
 ## 🏪 Análise por Loja/Categoria

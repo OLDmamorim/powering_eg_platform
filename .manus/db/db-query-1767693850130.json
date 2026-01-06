@@ -1,0 +1,250 @@
+{
+  "query": "SELECT g.id, u.name, u.email, u.role \nFROM gestores g \nINNER JOIN users u ON g.userId = u.id \nORDER BY u.name",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT g.id, u.name, u.email, u.role \nFROM gestores g \nINNER JOIN users u ON g.userId = u.id \nORDER BY u.name",
+  "rows": [
+    {
+      "id": "870006",
+      "name": "Admin Comentarios Test",
+      "email": "admin.comentarios@test.com",
+      "role": "admin"
+    },
+    {
+      "id": "750002",
+      "name": "Admin Comentarios Test",
+      "email": "admin.comentarios@test.com",
+      "role": "admin"
+    },
+    {
+      "id": "810003",
+      "name": "Admin Comentarios Test",
+      "email": "admin.comentarios@test.com",
+      "role": "admin"
+    },
+    {
+      "id": "840003",
+      "name": "Admin Comentarios Test",
+      "email": "admin.comentarios@test.com",
+      "role": "admin"
+    },
+    {
+      "id": "840010",
+      "name": "Admin Comentarios Test",
+      "email": "admin.comentarios@test.com",
+      "role": "admin"
+    },
+    {
+      "id": "870005",
+      "name": "Admin Email Test",
+      "email": "admin.email@test.com",
+      "role": "admin"
+    },
+    {
+      "id": "750001",
+      "name": "Admin Email Test",
+      "email": "admin.email@test.com",
+      "role": "admin"
+    },
+    {
+      "id": "810004",
+      "name": "Admin Email Test",
+      "email": "admin.email@test.com",
+      "role": "admin"
+    },
+    {
+      "id": "840004",
+      "name": "Admin Email Test",
+      "email": "admin.email@test.com",
+      "role": "admin"
+    },
+    {
+      "id": "750015",
+      "name": "Admin Lojas Test",
+      "email": "admin.lojas@test.com",
+      "role": "admin"
+    },
+    {
+      "id": "810015",
+      "name": "Admin Lojas Test",
+      "email": "admin.lojas@test.com",
+      "role": "admin"
+    },
+    {
+      "id": "840019",
+      "name": "Admin Lojas Test",
+      "email": "admin.lojas@test.com",
+      "role": "admin"
+    },
+    {
+      "id": "870015",
+      "name": "Admin Lojas Test",
+      "email": "admin.lojas@test.com",
+      "role": "admin"
+    },
+    {
+      "id": "840021",
+      "name": "Admin Reunioes Filtro",
+      "email": "admin-reunioes-filtro@test.com",
+      "role": "admin"
+    },
+    {
+      "id": "870017",
+      "name": "Admin Reunioes Filtro",
+      "email": "admin-reunioes-filtro@test.com",
+      "role": "admin"
+    },
+    {
+      "id": "720030",
+      "name": "Admin Reunioes Filtro",
+      "email": "admin-reunioes-filtro@test.com",
+      "role": "admin"
+    },
+    {
+      "id": "660013",
+      "name": "Admin Reunioes Filtro",
+      "email": "admin-reunioes-filtro@test.com",
+      "role": "admin"
+    },
+    {
+      "id": "720086",
+      "name": "Admin Reunioes Filtro",
+      "email": "admin-reunioes-filtro@test.com",
+      "role": "admin"
+    },
+    {
+      "id": "750017",
+      "name": "Admin Reunioes Filtro",
+      "email": "admin-reunioes-filtro@test.com",
+      "role": "admin"
+    },
+    {
+      "id": "810017",
+      "name": "Admin Reunioes Filtro",
+      "email": "admin-reunioes-filtro@test.com",
+      "role": "admin"
+    },
+    {
+      "id": "720053",
+      "name": "Admin Reunioes Filtro",
+      "email": "admin-reunioes-filtro@test.com",
+      "role": "admin"
+    },
+    {
+      "id": "870014",
+      "name": "Admin Teste",
+      "email": "admin-ia-test-1767691167951@test.com",
+      "role": "admin"
+    },
+    {
+      "id": "840018",
+      "name": "Admin Teste",
+      "email": "admin-ia-test-1767688509911@test.com",
+      "role": "admin"
+    },
+    {
+      "id": "810014",
+      "name": "Admin Teste",
+      "email": "admin-ia-test-1767637722740@test.com",
+      "role": "admin"
+    },
+    {
+      "id": "750014",
+      "name": "Admin Teste",
+      "email": "admin-ia-test-1767372482915@test.com",
+      "role": "admin"
+    },
+    {
+      "id": "750003",
+      "name": "Admin Teste",
+      "email": "admin@test.com",
+      "role": "admin"
+    },
+    {
+      "id": "870001",
+      "name": "Admin Teste",
+      "email": "admin@test.com",
+      "role": "admin"
+    },
+    {
+      "id": "840001",
+      "name": "Admin Teste",
+      "email": "admin@test.com",
+      "role": "admin"
+    },
+    {
+      "id": "810002",
+      "name": "Admin Teste",
+      "email": "admin@test.com",
+      "role": "admin"
+    },
+    {
+      "id": "780002",
+      "name": "Carlos Eduardo",
+      "email": "carlos.eduardo@expressglass.pt",
+      "role": "gestor"
+    },
+    {
+      "id": "900002",
+      "name": "Carlos Eduardo",
+      "email": "carlos.eduardo@expressglass.pt",
+      "role": "gestor"
+    },
+    {
+      "id": "900001",
+      "name": "Fabio Dias",
+      "email": "fdias@expressglass.pt",
+      "role": "gestor"
+    },
+    {
+      "id": "570001",
+      "name": "List Test Name 1767372508573",
+      "email": "list.test.1767372508573@expressglass.pt",
+      "role": "admin"
+    },
+    {
+      "id": "780001",
+      "name": "List Test Name 1767688768007",
+      "email": "list.test.1767688768008@expressglass.pt",
+      "role": "admin"
+    },
+    {
+      "id": "30001",
+      "name": "Marco Amorim",
+      "email": "mamorim@expressglass.pt",
+      "role": "gestor"
+    },
+    {
+      "id": "120001",
+      "name": "Marco Vilar",
+      "email": "mvilar@expressglass.pt",
+      "role": "gestor"
+    },
+    {
+      "id": "2",
+      "name": "Mauro Furtado",
+      "email": "mfurtado@expressglass.pt",
+      "role": "admin"
+    },
+    {
+      "id": "210001",
+      "name": "Mauro Furtado",
+      "email": "mfurtado@expressglass.pt",
+      "role": "admin"
+    },
+    {
+      "id": "120002",
+      "name": "Mónica Correira",
+      "email": "mcorreia@expressglass.pt",
+      "role": "gestor"
+    },
+    {
+      "id": "570003",
+      "name": "Rui Adriao ",
+      "email": "rui.adriao@expressglass.pt",
+      "role": "gestor"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\temail\trole\n870006\tAdmin Comentarios Test\tadmin.comentarios@test.com\tadmin\n750002\tAdmin Comentarios Test\tadmin.comentarios@test.com\tadmin\n810003\tAdmin Comentarios Test\tadmin.comentarios@test.com\tadmin\n840003\tAdmin Comentarios Test\tadmin.comentarios@test.com\tadmin\n840010\tAdmin Comentarios Test\tadmin.comentarios@test.com\tadmin\n870005\tAdmin Email Test\tadmin.email@test.com\tadmin\n750001\tAdmin Email Test\tadmin.email@test.com\tadmin\n810004\tAdmin Email Test\tadmin.email@test.com\tadmin\n840004\tAdmin Email Test\tadmin.email@test.com\tadmin\n750015\tAdmin Lojas Test\tadmin.lojas@test.com\tadmin\n810015\tAdmin Lojas Test\tadmin.lojas@test.com\tadmin\n840019\tAdmin Lojas Test\tadmin.lojas@test.com\tadmin\n870015\tAdmin Lojas Test\tadmin.lojas@test.com\tadmin\n840021\tAdmin Reunioes Filtro\tadmin-reunioes-filtro@test.com\tadmin\n870017\tAdmin Reunioes Filtro\tadmin-reunioes-filtro@test.com\tadmin\n720030\tAdmin Reunioes Filtro\tadmin-reunioes-filtro@test.com\tadmin\n660013\tAdmin Reunioes Filtro\tadmin-reunioes-filtro@test.com\tadmin\n720086\tAdmin Reunioes Filtro\tadmin-reunioes-filtro@test.com\tadmin\n750017\tAdmin Reunioes Filtro\tadmin-reunioes-filtro@test.com\tadmin\n810017\tAdmin Reunioes Filtro\tadmin-reunioes-filtro@test.com\tadmin\n720053\tAdmin Reunioes Filtro\tadmin-reunioes-filtro@test.com\tadmin\n870014\tAdmin Teste\tadmin-ia-test-1767691167951@test.com\tadmin\n840018\tAdmin Teste\tadmin-ia-test-1767688509911@test.com\tadmin\n810014\tAdmin Teste\tadmin-ia-test-1767637722740@test.com\tadmin\n750014\tAdmin Teste\tadmin-ia-test-1767372482915@test.com\tadmin\n750003\tAdmin Teste\tadmin@test.com\tadmin\n870001\tAdmin Teste\tadmin@test.com\tadmin\n840001\tAdmin Teste\tadmin@test.com\tadmin\n810002\tAdmin Teste\tadmin@test.com\tadmin\n780002\tCarlos Eduardo\tcarlos.eduardo@expressglass.pt\tgestor\n900002\tCarlos Eduardo\tcarlos.eduardo@expressglass.pt\tgestor\n900001\tFabio Dias\tfdias@expressglass.pt\tgestor\n570001\tList Test Name 1767372508573\tlist.test.1767372508573@expressglass.pt\tadmin\n780001\tList Test Name 1767688768007\tlist.test.1767688768008@expressglass.pt\tadmin\n30001\tMarco Amorim\tmamorim@expressglass.pt\tgestor\n120001\tMarco Vilar\tmvilar@expressglass.pt\tgestor\n2\tMauro Furtado\tmfurtado@expressglass.pt\tadmin\n210001\tMauro Furtado\tmfurtado@expressglass.pt\tadmin\n120002\tMónica Correira\tmcorreia@expressglass.pt\tgestor\n570003\tRui Adriao \trui.adriao@expressglass.pt\tgestor\n",
+  "stderr": "",
+  "execution_time_ms": 79
+}
