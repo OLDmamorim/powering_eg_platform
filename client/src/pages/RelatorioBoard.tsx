@@ -1,5 +1,4 @@
 import { useState, useRef } from "react";
-import { RelatorioIACategorias } from "@/components/RelatorioIACategorias";
 import { HistoricoRelatoriosIA } from "@/components/HistoricoRelatoriosIA";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -84,7 +83,7 @@ export default function RelatorioBoard() {
   const [analiseIA, setAnaliseIA] = useState<string | null>(null);
   const [isGeneratingIA, setIsGeneratingIA] = useState(false);
   const reportRef = useRef<HTMLDivElement>(null);
-  const [showRelatorioIA, setShowRelatorioIA] = useState(false);
+
 
   // Query para obter dados do relatório
   const { data: dadosRelatorio, isLoading, refetch } = trpc.relatorioBoard.gerarDados.useQuery(
@@ -700,13 +699,7 @@ export default function RelatorioBoard() {
               <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
               Atualizar
             </Button>
-            <Button
-              onClick={() => setShowRelatorioIA(true)}
-              className="gap-2"
-            >
-              <BarChart3 className="h-4 w-4" />
-              Gerar Relatório IA para Board
-            </Button>
+
           </div>
         </div>
 
@@ -1375,11 +1368,7 @@ export default function RelatorioBoard() {
         </Tabs>
       </div>
       
-      {/* Modal de Relatório IA para Board */}
-      <RelatorioIACategorias
-        open={showRelatorioIA}
-        onOpenChange={setShowRelatorioIA}
-      />
+
     </DashboardLayout>
   );
 }
