@@ -2127,3 +2127,12 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## Filtros Temporais - Apenas 2025
 - [x] Filtrar meses disponíveis para mostrar apenas 2025 em diante (remover 2024)
 - [x] Corrigir filtro de meses para mostrar apenas meses com dados disponíveis (não meses futuros)
+- [ ] Implementar seleção múltipla de meses no Dashboard de Resultados (checkboxes como nas outras páginas)
+
+## Funcionalidades v6.2 - Seleção Múltipla de Meses no Dashboard de Resultados
+- [x] Implementar seleção múltipla de meses no Dashboard de Resultados (checkboxes como nas outras páginas)
+- [x] Criar endpoints para estatísticas com múltiplos meses (estatisticasMultiplosMeses)
+- [x] Criar endpoints para ranking com múltiplos meses (rankingMultiplosMeses)
+- [x] Criar endpoints para totais globais com múltiplos meses (totaisGlobaisMultiplosMeses)
+- [x] Atualizar frontend para usar FiltroMesesCheckbox
+- [x] Testar agregação de dados com múltiplos meses selecionados

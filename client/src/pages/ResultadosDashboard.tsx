@@ -13,6 +13,7 @@ import { Bar } from 'react-chartjs-2';
 
 import { AlertasPerformance } from '../components/AlertasPerformance';
 import { GraficoEvolucaoHistorica } from '../components/GraficoEvolucaoHistorica';
+import FiltroMesesCheckbox, { type MesSelecionado, gerarLabelMeses } from '../components/FiltroMesesCheckbox';
 
 // Registar componentes do Chart.js
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
@@ -29,14 +30,20 @@ export function ResultadosDashboard() {
   );
   
   
-  // Estado dos filtros
-  const [periodoSelecionado, setPeriodoSelecionado] = useState<{ mes: number; ano: number } | null>(null);
+  // Estado dos filtros - agora com suporte a múltiplos meses
+  const [mesesSelecionados, setMesesSelecionados] = useState<MesSelecionado[]>([]);
   const [periodoComparacao1, setPeriodoComparacao1] = useState<{ mes: number; ano: number } | null>(null);
   const [periodoComparacao2, setPeriodoComparacao2] = useState<{ mes: number; ano: number } | null>(null);
   const [lojaSelecionada, setLojaSelecionada] = useState<number | 'minhas' | 'todas' | null>(null);
   
   const [metricaRanking, setMetricaRanking] = useState<'totalServicos' | 'taxaReparacao' | 'desvioPercentualMes' | 'servicosPorColaborador'>('totalServicos');
   const [exportando, setExportando] = useState(false);
+  
+  // Compatível com código antigo - primeiro período selecionado
+  const periodoSelecionado = mesesSelecionados.length > 0 ? mesesSelecionados[0] : null;
+  
+  // Flag para saber se está em modo múltiplos meses
+  const modoMultiplosMeses = mesesSelecionados.length > 1;
   
 
   
@@ -54,10 +61,10 @@ export function ResultadosDashboard() {
   
   // Definir período padrão (mais recente)
   useMemo(() => {
-    if (periodos && periodos.length > 0 && !periodoSelecionado) {
-      setPeriodoSelecionado({ mes: periodos[0].mes, ano: periodos[0].ano });
+    if (periodos && periodos.length > 0 && mesesSelecionados.length === 0) {
+      setMesesSelecionados([{ mes: periodos[0].mes, ano: periodos[0].ano }]);
     }
-  }, [periodos, periodoSelecionado]);
+  }, [periodos, mesesSelecionados.length]);
   
   // Definir loja padrão como "minhas" para gestores
   useMemo(() => {
@@ -79,24 +86,20 @@ export function ResultadosDashboard() {
     return undefined;
   }, [lojaSelecionada, user, lojas]);
   
-  // Query de totais globais (incluindo PROMOTOR)
-  const { data: totaisGlobais } = trpc.resultados.totaisGlobais.useQuery(
-    { 
-      mes: periodoSelecionado?.mes || 1, 
-      ano: periodoSelecionado?.ano || 2025
-    },
-    { enabled: !!periodoSelecionado && (lojaSelecionada === 'todas' || lojaSelecionada === null) }
+  // Query de totais globais (incluindo PROMOTOR) - suporta múltiplos meses
+  const { data: totaisGlobais } = trpc.resultados.totaisGlobaisMultiplosMeses.useQuery(
+    { periodos: mesesSelecionados },
+    { enabled: mesesSelecionados.length > 0 && (lojaSelecionada === 'todas' || lojaSelecionada === null) }
   );
   
-  // Queries condicionais (apenas quando há período selecionado)
-  const { data: estatisticas, isLoading: loadingEstatisticas } = trpc.resultados.estatisticas.useQuery(
+  // Queries condicionais - suporta múltiplos meses
+  const { data: estatisticas, isLoading: loadingEstatisticas } = trpc.resultados.estatisticasMultiplosMeses.useQuery(
     { 
-      mes: periodoSelecionado?.mes || 1, 
-      ano: periodoSelecionado?.ano || 2025,
+      periodos: mesesSelecionados,
       lojaId: typeof lojaSelecionada === 'number' ? lojaSelecionada : undefined,
       lojasIds: lojasIdsParaFiltro
     },
-    { enabled: !!periodoSelecionado }
+    { enabled: mesesSelecionados.length > 0 }
   );
   
   // Queries para períodos de comparação
@@ -146,15 +149,15 @@ export function ResultadosDashboard() {
     return undefined;
   }, [lojaSelecionada, lojas]);
   
-  const { data: rankingCompleto, isLoading: loadingRanking } = trpc.resultados.ranking.useQuery(
+  // Query de ranking - suporta múltiplos meses
+  const { data: rankingCompleto, isLoading: loadingRanking } = trpc.resultados.rankingMultiplosMeses.useQuery(
     { 
       metrica: metricaRanking, 
-      mes: periodoSelecionado?.mes || 1, 
-      ano: periodoSelecionado?.ano || 2025,
+      periodos: mesesSelecionados,
       limit: rankingLimit,
       lojasIds: rankingLojasIds
     },
-    { enabled: !!periodoSelecionado }
+    { enabled: mesesSelecionados.length > 0 }
   );
   
   // Ranking já vem filtrado do backend, apenas usar diretamente
@@ -267,27 +270,20 @@ export function ResultadosDashboard() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* Período Principal */}
+              {/* Período Principal - Seleção Múltipla de Meses */}
               <div className="space-y-2">
                 <label className="text-sm font-medium">Período Principal</label>
-                <Select
-                  value={periodoSelecionado ? `${periodoSelecionado.mes}-${periodoSelecionado.ano}` : undefined}
-                  onValueChange={(value) => {
-                    const [mes, ano] = value.split('-').map(Number);
-                    setPeriodoSelecionado({ mes, ano });
-                  }}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o período" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {periodos.map((p) => (
-                      <SelectItem key={`${p.mes}-${p.ano}`} value={`${p.mes}-${p.ano}`}>
-                        {p.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <FiltroMesesCheckbox
+                  mesesDisponiveis={periodos.map(p => ({ mes: p.mes, ano: p.ano }))}
+                  mesesSelecionados={mesesSelecionados}
+                  onMesesChange={setMesesSelecionados}
+                  placeholder="Selecionar meses"
+                />
+                {modoMultiplosMeses && (
+                  <p className="text-xs text-muted-foreground">
+                    Dados agregados de {mesesSelecionados.length} meses
+                  </p>
+                )}
               </div>
               
               {/* Período de Comparação 1 */}
@@ -650,8 +646,8 @@ export function ResultadosDashboard() {
                   }
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Objetivo: {(lojaSelecionada === 'todas' || lojaSelecionada === null) && totaisGlobais?.objetivoMensal
-                    ? totaisGlobais.objetivoMensal.toLocaleString()
+                  Objetivo: {(lojaSelecionada === 'todas' || lojaSelecionada === null) && totaisGlobais?.totalObjetivo
+                    ? totaisGlobais.totalObjetivo.toLocaleString()
                     : estatisticas.somaObjetivos?.toLocaleString() || 0
                   }
                 </p>
@@ -685,12 +681,10 @@ export function ResultadosDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {/* Usar taxa dos totais globais quando "todas" selecionado, senão usar média das lojas */}
-                  {(lojaSelecionada === 'todas' || lojaSelecionada === null) && totaisGlobais?.taxaReparacao
-                    ? `${(totaisGlobais.taxaReparacao * 100).toFixed(1)}%`
-                    : estatisticas.mediaTaxaReparacao 
-                      ? `${(estatisticas.mediaTaxaReparacao * 100).toFixed(1)}%`
-                      : 'N/A'
+                  {/* Usar taxa média das lojas */}
+                  {estatisticas.mediaTaxaReparacao 
+                    ? `${(estatisticas.mediaTaxaReparacao * 100).toFixed(1)}%`
+                    : 'N/A'
                   }
                 </div>
                 <p className="text-xs text-muted-foreground">

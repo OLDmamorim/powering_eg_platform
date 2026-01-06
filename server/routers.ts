@@ -2547,6 +2547,38 @@ export const appRouter = router({
         return await db.getTotaisMensais(input.mes, input.ano);
       }),
     
+    // Dashboard - Estatísticas de múltiplos períodos (meses)
+    estatisticasMultiplosMeses: protectedProcedure
+      .input(z.object({
+        periodos: z.array(z.object({ mes: z.number().min(1).max(12), ano: z.number() })),
+        lojaId: z.number().optional(),
+        lojasIds: z.array(z.number()).optional(),
+      }))
+      .query(async ({ input }) => {
+        return await db.getEstatisticasMultiplosMeses(input.periodos, input.lojaId, input.lojasIds);
+      }),
+    
+    // Dashboard - Ranking de lojas para múltiplos períodos
+    rankingMultiplosMeses: protectedProcedure
+      .input(z.object({
+        metrica: z.enum(['totalServicos', 'taxaReparacao', 'desvioPercentualMes', 'servicosPorColaborador']),
+        periodos: z.array(z.object({ mes: z.number().min(1).max(12), ano: z.number() })),
+        limit: z.number().optional(),
+        lojasIds: z.array(z.number()).optional(),
+      }))
+      .query(async ({ input }) => {
+        return await db.getRankingLojasMultiplosMeses(input.metrica, input.periodos, input.limit, input.lojasIds);
+      }),
+    
+    // Dashboard - Totais globais para múltiplos períodos
+    totaisGlobaisMultiplosMeses: protectedProcedure
+      .input(z.object({
+        periodos: z.array(z.object({ mes: z.number().min(1).max(12), ano: z.number() })),
+      }))
+      .query(async ({ input }) => {
+        return await db.getTotaisMensaisMultiplosMeses(input.periodos);
+      }),
+    
     // Obter evolução global (todas as lojas agregadas ao longo do tempo)
     evolucaoGlobal: protectedProcedure
       .input(z.object({

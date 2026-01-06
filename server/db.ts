@@ -3470,6 +3470,151 @@ export async function getEstatisticasPeriodo(mes: number, ano: number, lojaId?: 
 }
 
 /**
+ * Obtém estatísticas gerais de múltiplos períodos (meses)
+ * Agrega dados de todos os meses selecionados
+ */
+export async function getEstatisticasMultiplosMeses(
+  periodos: Array<{ mes: number; ano: number }>,
+  lojaId?: number,
+  lojasIds?: number[]
+) {
+  const db = await getDb();
+  if (!db) return null;
+  if (periodos.length === 0) return null;
+  
+  // Construir condições OR para múltiplos períodos
+  const periodosConditions = periodos.map(p => 
+    and(
+      eq(resultadosMensais.mes, p.mes),
+      eq(resultadosMensais.ano, p.ano)
+    )
+  );
+  
+  const conditions: any[] = [or(...periodosConditions)];
+  
+  // Filtrar por loja específica ou lista de lojas
+  if (lojaId) {
+    conditions.push(eq(resultadosMensais.lojaId, lojaId));
+  } else if (lojasIds && lojasIds.length > 0) {
+    conditions.push(inArray(resultadosMensais.lojaId, lojasIds));
+  }
+  
+  const stats = await db
+    .select({
+      totalLojas: sql<number>`COUNT(DISTINCT ${resultadosMensais.lojaId})`,
+      somaServicos: sql<number>`SUM(${resultadosMensais.totalServicos})`,
+      somaObjetivos: sql<number>`SUM(${resultadosMensais.objetivoMensal})`,
+      mediaDesvioPercentual: sql<number>`AVG(${resultadosMensais.desvioPercentualMes})`,
+      mediaTaxaReparacao: sql<number>`AVG(${resultadosMensais.taxaReparacao})`,
+      somaReparacoes: sql<number>`SUM(${resultadosMensais.qtdReparacoes})`,
+      lojasAcimaObjetivo: sql<number>`SUM(CASE WHEN ${resultadosMensais.desvioPercentualMes} >= 0 THEN 1 ELSE 0 END)`,
+      totalRegistos: sql<number>`COUNT(*)`,
+    })
+    .from(resultadosMensais)
+    .where(and(...conditions));
+
+  const result = stats[0];
+  if (!result) return null;
+  
+  return {
+    ...result,
+    mediaDesvioPercentual: result.mediaDesvioPercentual ? parseFloat(result.mediaDesvioPercentual.toString()) : null,
+    mediaTaxaReparacao: result.mediaTaxaReparacao ? parseFloat(result.mediaTaxaReparacao.toString()) : null,
+    periodosCount: periodos.length,
+  };
+}
+
+/**
+ * Obtém ranking de lojas para múltiplos períodos (meses)
+ * Agrega dados de todos os meses selecionados
+ */
+export async function getRankingLojasMultiplosMeses(
+  metrica: 'totalServicos' | 'taxaReparacao' | 'desvioPercentualMes' | 'servicosPorColaborador',
+  periodos: Array<{ mes: number; ano: number }>,
+  limit: number = 10,
+  lojasIds?: number[]
+) {
+  const db = await getDb();
+  if (!db) return [];
+  if (periodos.length === 0) return [];
+  
+  // Construir condições OR para múltiplos períodos
+  const periodosConditions = periodos.map(p => 
+    and(
+      eq(resultadosMensais.mes, p.mes),
+      eq(resultadosMensais.ano, p.ano)
+    )
+  );
+  
+  const conditions: any[] = [or(...periodosConditions)];
+  
+  // Se lojasIds fornecido, filtrar apenas por essas lojas
+  if (lojasIds && lojasIds.length > 0) {
+    conditions.push(inArray(resultadosMensais.lojaId, lojasIds));
+  }
+  
+  // Para múltiplos meses, agregar por loja
+  const ranking = await db
+    .select({
+      lojaId: resultadosMensais.lojaId,
+      lojaNome: lojas.nome,
+      zona: sql<string>`MAX(${resultadosMensais.zona})`,
+      totalServicos: sql<number>`SUM(${resultadosMensais.totalServicos})`,
+      objetivoMensal: sql<number>`SUM(${resultadosMensais.objetivoMensal})`,
+      desvioPercentualMes: sql<number>`AVG(${resultadosMensais.desvioPercentualMes})`,
+      taxaReparacao: sql<number>`AVG(${resultadosMensais.taxaReparacao})`,
+      servicosPorColaborador: sql<number>`AVG(${resultadosMensais.servicosPorColaborador})`,
+      mesesCount: sql<number>`COUNT(DISTINCT CONCAT(${resultadosMensais.mes}, '-', ${resultadosMensais.ano}))`,
+    })
+    .from(resultadosMensais)
+    .innerJoin(lojas, eq(resultadosMensais.lojaId, lojas.id))
+    .where(and(...conditions))
+    .groupBy(resultadosMensais.lojaId, lojas.nome)
+    .orderBy(desc(sql`SUM(${resultadosMensais[metrica === 'totalServicos' ? 'totalServicos' : metrica === 'taxaReparacao' ? 'taxaReparacao' : metrica === 'desvioPercentualMes' ? 'desvioPercentualMes' : 'servicosPorColaborador']})`))
+    .limit(limit);
+
+  return ranking.map((r, index) => ({
+    ...r,
+    posicao: index + 1,
+    valor: metrica === 'totalServicos' ? r.totalServicos :
+           metrica === 'taxaReparacao' ? (r.taxaReparacao ? parseFloat(r.taxaReparacao.toString()) : null) :
+           metrica === 'desvioPercentualMes' ? (r.desvioPercentualMes ? parseFloat(r.desvioPercentualMes.toString()) : null) :
+           (r.servicosPorColaborador ? parseFloat(r.servicosPorColaborador.toString()) : null),
+    desvioPercentualMes: r.desvioPercentualMes ? parseFloat(r.desvioPercentualMes.toString()) : null,
+    taxaReparacao: r.taxaReparacao ? parseFloat(r.taxaReparacao.toString()) : null,
+    servicosPorColaborador: r.servicosPorColaborador ? parseFloat(r.servicosPorColaborador.toString()) : null,
+  }));
+}
+
+/**
+ * Obtém totais globais para múltiplos períodos (incluindo PROMOTOR)
+ */
+export async function getTotaisMensaisMultiplosMeses(periodos: Array<{ mes: number; ano: number }>) {
+  const db = await getDb();
+  if (!db) return null;
+  if (periodos.length === 0) return null;
+  
+  // Construir condições OR para múltiplos períodos
+  const periodosConditions = periodos.map(p => 
+    and(
+      eq(resultadosMensais.mes, p.mes),
+      eq(resultadosMensais.ano, p.ano)
+    )
+  );
+  
+  const result = await db
+    .select({
+      totalServicos: sql<number>`SUM(${resultadosMensais.totalServicos})`,
+      totalObjetivo: sql<number>`SUM(${resultadosMensais.objetivoMensal})`,
+      totalLojas: sql<number>`COUNT(DISTINCT ${resultadosMensais.lojaId})`,
+    })
+    .from(resultadosMensais)
+    .where(or(...periodosConditions));
+  
+  return result[0] || null;
+}
+
+/**
  * Obtém evolução mensal agregada de todas as lojas de um gestor
  */
 export async function getEvolucaoAgregadaPorGestor(gestorId: number, mesesAtras: number = 6) {
