@@ -218,25 +218,30 @@ export function ExportarRelatorioIAPDF({ analiseIA, periodo }: Props) {
       const pageHeight = doc.internal.pageSize.getHeight();
       let yPos = 15;
 
-      // ==================== CAPA ====================
-      // Fundo gradiente simulado
-      doc.setFillColor(147, 51, 234);
-      doc.rect(0, 0, pageWidth, 50, 'F');
+      // ==================== CABEÇALHO ====================
+      // Linha fina decorativa no topo
+      doc.setFillColor(59, 130, 246);
+      doc.rect(0, 0, pageWidth, 3, 'F');
       
       // Título principal
-      doc.setTextColor(255, 255, 255);
-      doc.setFontSize(24);
+      doc.setTextColor(30, 41, 59);
+      doc.setFontSize(22);
       doc.setFont('helvetica', 'bold');
-      doc.text('Relatório IA de Resultados', pageWidth / 2, 25, { align: 'center' });
+      doc.text('Relatório IA de Resultados', pageWidth / 2, 20, { align: 'center' });
       
       // Subtítulo
-      doc.setFontSize(14);
+      doc.setFontSize(11);
+      doc.setTextColor(100, 116, 139);
       doc.setFont('helvetica', 'normal');
-      doc.text(`Período: ${periodoLabels[periodo] || periodo}`, pageWidth / 2, 35, { align: 'center' });
-      doc.text(`Gerado em: ${new Date().toLocaleString('pt-PT')}`, pageWidth / 2, 43, { align: 'center' });
+      doc.text(`Período: ${periodoLabels[periodo] || periodo}  |  Gerado em: ${new Date().toLocaleString('pt-PT')}`, pageWidth / 2, 28, { align: 'center' });
+      
+      // Linha separadora
+      doc.setDrawColor(200, 200, 200);
+      doc.setLineWidth(0.5);
+      doc.line(14, 34, pageWidth - 14, 34);
       
       doc.setTextColor(0, 0, 0);
-      yPos = 60;
+      yPos = 42;
 
       // ==================== RESUMO EXECUTIVO ====================
       yPos = drawSectionHeader(doc, yPos, 'Resumo Executivo', COLORS.primary, pageWidth);
