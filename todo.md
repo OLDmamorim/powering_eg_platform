@@ -2107,3 +2107,5 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Remover emojis dos títulos das secções ou substituir por texto
 - [x] Testar geração do PDF sem caracteres estranhos
 
+
+- [x] Adicionar % Serviços de escovas ao Dashboard de Resultados (importante para prémio trimestral)

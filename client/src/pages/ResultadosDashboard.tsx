@@ -841,6 +841,31 @@ export function ResultadosDashboard() {
                 </div>
               ) : estatisticasComplementares ? (
                 <div className="space-y-6">
+                  {/* Card de Destaque - % Serviços de Escovas (Prémio Trimestral) */}
+                  <div className="bg-gradient-to-r from-amber-100 to-yellow-100 dark:from-amber-950 dark:to-yellow-950 border-2 border-amber-400 dark:border-amber-600 rounded-lg p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <Award className="h-5 w-5 text-amber-600" />
+                          <span className="text-sm font-semibold text-amber-800 dark:text-amber-200">% Serviços de Escovas</span>
+                          <Badge variant="outline" className="text-xs border-amber-500 text-amber-700 dark:text-amber-300">Prémio Trimestral</Badge>
+                        </div>
+                        <div className="text-3xl font-bold text-amber-700 dark:text-amber-300 mt-1">
+                          {(estatisticasComplementares.mediaEscovasPercent * 100)?.toFixed(1) || '0.0'}%
+                        </div>
+                        <div className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                          Objetivo: 30% Lojas / 5% Serviços Móveis
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm text-muted-foreground">Lojas acima do objetivo</div>
+                        <div className="text-2xl font-bold text-amber-700 dark:text-amber-300">
+                          {estatisticasComplementares.lojasComEscovas || 0}/{estatisticasComplementares.totalLojas || 0}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
                   {/* Resumo Geral */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div className="bg-green-50 dark:bg-green-950 rounded-lg p-4">
@@ -924,7 +949,15 @@ export function ResultadosDashboard() {
                               {idx + 1}
                             </div>
                             <div className="flex-1 text-sm">{item.lojaNome}</div>
-                            <div className="text-right">
+                            <div className="w-20 text-center">
+                              <Badge 
+                                variant={item.escovasPercent >= 0.30 ? "default" : item.escovasPercent >= 0.05 ? "secondary" : "outline"}
+                                className={item.escovasPercent >= 0.30 ? "bg-green-500" : item.escovasPercent >= 0.05 ? "bg-amber-500" : ""}
+                              >
+                                {(item.escovasPercent * 100)?.toFixed(1) || '0.0'}%
+                              </Badge>
+                            </div>
+                            <div className="text-right w-28">
                               <div className="font-medium">€{item.totalVendas?.toLocaleString('pt-PT', { minimumFractionDigits: 2 })}</div>
                               <div className="text-xs text-muted-foreground">{item.escovasQtd || 0} escovas</div>
                             </div>
