@@ -1750,6 +1750,26 @@ export const appRouter = router({
         const result = await generateLojaHistory(input.lojaId, input.periodo);
         return result;
       }),
+    
+    // Comparação entre períodos (ex: Q4 2024 vs Q4 2025)
+    comparar: protectedProcedure
+      .input(z.object({
+        lojaId: z.number(),
+        tipoComparacao: z.enum([
+          'q1_ano_anterior_vs_atual',
+          'q2_ano_anterior_vs_atual', 
+          'q3_ano_anterior_vs_atual',
+          'q4_ano_anterior_vs_atual',
+          's1_ano_anterior_vs_atual',
+          's2_ano_anterior_vs_atual',
+          'ano_completo'
+        ]),
+      }))
+      .query(async ({ input }) => {
+        const { compararPeriodos } = await import('./lojaHistory');
+        const result = await compararPeriodos(input.lojaId, input.tipoComparacao);
+        return result;
+      }),
   }),
 
   // ==================== RESUMO GLOBAL (ANTIGO - DEPRECATED) ====================

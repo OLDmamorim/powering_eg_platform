@@ -472,3 +472,356 @@ Gera uma análise completa incluindo evolução, problemas, pontos fortes, alert
     throw new Error("Falha ao gerar histórico da loja. Tente novamente.");
   }
 }
+
+
+type TipoComparacao = 
+  | 'q1_ano_anterior_vs_atual'
+  | 'q2_ano_anterior_vs_atual'
+  | 'q3_ano_anterior_vs_atual'
+  | 'q4_ano_anterior_vs_atual'
+  | 's1_ano_anterior_vs_atual'
+  | 's2_ano_anterior_vs_atual'
+  | 'ano_completo';
+
+interface PeriodoComparacao {
+  dataInicio: Date;
+  dataFim: Date;
+  label: string;
+}
+
+function calcularPeriodosComparacao(tipo: TipoComparacao): { periodo1: PeriodoComparacao; periodo2: PeriodoComparacao } {
+  const agora = new Date();
+  const anoAtual = agora.getFullYear();
+  const anoAnterior = anoAtual - 1;
+
+  switch (tipo) {
+    case 'q1_ano_anterior_vs_atual':
+      return {
+        periodo1: {
+          dataInicio: new Date(anoAnterior, 0, 1),
+          dataFim: new Date(anoAnterior, 2, 31, 23, 59, 59),
+          label: `Q1 ${anoAnterior} (Jan-Mar)`
+        },
+        periodo2: {
+          dataInicio: new Date(anoAtual, 0, 1),
+          dataFim: new Date(anoAtual, 2, 31, 23, 59, 59),
+          label: `Q1 ${anoAtual} (Jan-Mar)`
+        }
+      };
+    case 'q2_ano_anterior_vs_atual':
+      return {
+        periodo1: {
+          dataInicio: new Date(anoAnterior, 3, 1),
+          dataFim: new Date(anoAnterior, 5, 30, 23, 59, 59),
+          label: `Q2 ${anoAnterior} (Abr-Jun)`
+        },
+        periodo2: {
+          dataInicio: new Date(anoAtual, 3, 1),
+          dataFim: new Date(anoAtual, 5, 30, 23, 59, 59),
+          label: `Q2 ${anoAtual} (Abr-Jun)`
+        }
+      };
+    case 'q3_ano_anterior_vs_atual':
+      return {
+        periodo1: {
+          dataInicio: new Date(anoAnterior, 6, 1),
+          dataFim: new Date(anoAnterior, 8, 30, 23, 59, 59),
+          label: `Q3 ${anoAnterior} (Jul-Set)`
+        },
+        periodo2: {
+          dataInicio: new Date(anoAtual, 6, 1),
+          dataFim: new Date(anoAtual, 8, 30, 23, 59, 59),
+          label: `Q3 ${anoAtual} (Jul-Set)`
+        }
+      };
+    case 'q4_ano_anterior_vs_atual':
+      return {
+        periodo1: {
+          dataInicio: new Date(anoAnterior, 9, 1),
+          dataFim: new Date(anoAnterior, 11, 31, 23, 59, 59),
+          label: `Q4 ${anoAnterior} (Out-Dez)`
+        },
+        periodo2: {
+          dataInicio: new Date(anoAtual, 9, 1),
+          dataFim: new Date(anoAtual, 11, 31, 23, 59, 59),
+          label: `Q4 ${anoAtual} (Out-Dez)`
+        }
+      };
+    case 's1_ano_anterior_vs_atual':
+      return {
+        periodo1: {
+          dataInicio: new Date(anoAnterior, 0, 1),
+          dataFim: new Date(anoAnterior, 5, 30, 23, 59, 59),
+          label: `1º Semestre ${anoAnterior}`
+        },
+        periodo2: {
+          dataInicio: new Date(anoAtual, 0, 1),
+          dataFim: new Date(anoAtual, 5, 30, 23, 59, 59),
+          label: `1º Semestre ${anoAtual}`
+        }
+      };
+    case 's2_ano_anterior_vs_atual':
+      return {
+        periodo1: {
+          dataInicio: new Date(anoAnterior, 6, 1),
+          dataFim: new Date(anoAnterior, 11, 31, 23, 59, 59),
+          label: `2º Semestre ${anoAnterior}`
+        },
+        periodo2: {
+          dataInicio: new Date(anoAtual, 6, 1),
+          dataFim: new Date(anoAtual, 11, 31, 23, 59, 59),
+          label: `2º Semestre ${anoAtual}`
+        }
+      };
+    case 'ano_completo':
+    default:
+      return {
+        periodo1: {
+          dataInicio: new Date(anoAnterior, 0, 1),
+          dataFim: new Date(anoAnterior, 11, 31, 23, 59, 59),
+          label: `Ano ${anoAnterior}`
+        },
+        periodo2: {
+          dataInicio: new Date(anoAtual, 0, 1),
+          dataFim: agora,
+          label: `Ano ${anoAtual} (até agora)`
+        }
+      };
+  }
+}
+
+async function buscarDadosPeriodo(lojaId: number, dataInicio: Date, dataFim: Date) {
+  // Buscar relatórios livres
+  const allRelatoriosLivres = await db.getAllRelatoriosLivres();
+  const relatoriosLivres = allRelatoriosLivres.filter(r => {
+    const dataVisita = new Date(r.dataVisita);
+    return r.lojaId === lojaId && dataVisita >= dataInicio && dataVisita <= dataFim;
+  });
+
+  // Buscar relatórios completos
+  const allRelatoriosCompletos = await db.getAllRelatoriosCompletos();
+  const relatoriosCompletos = allRelatoriosCompletos.filter(r => {
+    const dataVisita = new Date(r.dataVisita);
+    return r.lojaId === lojaId && dataVisita >= dataInicio && dataVisita <= dataFim;
+  });
+
+  // Buscar pendentes
+  const todosPendentes = await db.getPendentesByLojaId(lojaId);
+  const pendentes = todosPendentes.filter(p => {
+    const dataCriacao = new Date(p.createdAt);
+    return dataCriacao >= dataInicio && dataCriacao <= dataFim;
+  });
+
+  // Buscar resultados mensais
+  let resultadosMensais: any[] = [];
+  try {
+    const evolucao = await db.getEvolucaoMensal(lojaId, 24);
+    resultadosMensais = evolucao.filter((r: any) => {
+      const dataResultado = new Date(r.ano, r.mes - 1, 1);
+      return dataResultado >= dataInicio && dataResultado <= dataFim;
+    });
+  } catch (e) {
+    console.log('[Comparacao] Sem dados de resultados mensais');
+  }
+
+  // Buscar vendas complementares
+  let vendasComplementares: any[] = [];
+  try {
+    const mesInicio = dataInicio.getMonth() + 1;
+    const anoInicio = dataInicio.getFullYear();
+    const mesFim = dataFim.getMonth() + 1;
+    const anoFim = dataFim.getFullYear();
+    
+    let mesAtual = mesInicio;
+    let anoAtual = anoInicio;
+    
+    while (anoAtual < anoFim || (anoAtual === anoFim && mesAtual <= mesFim)) {
+      try {
+        const vendasMes = await db.getVendasComplementares(mesAtual, anoAtual, lojaId);
+        if (vendasMes && vendasMes.length > 0) {
+          vendasComplementares.push(...vendasMes);
+        }
+      } catch (e) {
+        // Continuar
+      }
+      
+      mesAtual++;
+      if (mesAtual > 12) {
+        mesAtual = 1;
+        anoAtual++;
+      }
+    }
+  } catch (e) {
+    console.log('[Comparacao] Sem dados de vendas complementares');
+  }
+
+  // Calcular métricas
+  const totalPendentes = pendentes.length;
+  const pendentesResolvidos = pendentes.filter((p: any) => p.resolvido).length;
+  const taxaResolucao = totalPendentes > 0 ? (pendentesResolvidos / totalPendentes) * 100 : 0;
+
+  const totalServicos = resultadosMensais.reduce((sum, r) => sum + (r.totalServicos || 0), 0);
+  const objetivoTotal = resultadosMensais.reduce((sum, r) => sum + (r.objetivoMensal || 0), 0);
+  const desvioMedio = resultadosMensais.length > 0 
+    ? resultadosMensais.reduce((sum, r) => sum + (r.desvioPercentualMes || 0), 0) / resultadosMensais.length 
+    : 0;
+  const taxaReparacaoMedia = resultadosMensais.length > 0
+    ? resultadosMensais.reduce((sum, r) => sum + (r.taxaReparacao || 0), 0) / resultadosMensais.length
+    : 0;
+
+  const totalVendasComplementares = vendasComplementares.reduce((sum, v) => sum + (parseFloat(v.totalVendas) || 0), 0);
+  const escovasTotal = vendasComplementares.reduce((sum, v) => sum + (parseFloat(v.escovasVendas) || 0), 0);
+  const polimentoTotal = vendasComplementares.reduce((sum, v) => sum + (parseFloat(v.polimentoVendas) || 0), 0);
+
+  return {
+    relatoriosLivres: relatoriosLivres.length,
+    relatoriosCompletos: relatoriosCompletos.length,
+    totalVisitas: relatoriosLivres.length + relatoriosCompletos.length,
+    totalPendentes,
+    pendentesResolvidos,
+    taxaResolucao: parseFloat(taxaResolucao.toFixed(1)),
+    totalServicos,
+    objetivoTotal,
+    desvioMedio: parseFloat((desvioMedio * 100).toFixed(2)),
+    taxaReparacaoMedia: parseFloat((taxaReparacaoMedia * 100).toFixed(2)),
+    totalVendasComplementares: parseFloat(totalVendasComplementares.toFixed(2)),
+    escovasTotal: parseFloat(escovasTotal.toFixed(2)),
+    polimentoTotal: parseFloat(polimentoTotal.toFixed(2)),
+  };
+}
+
+function calcularVariacao(atual: number, anterior: number): { valor: number; percentual: number; tipo: 'subida' | 'descida' | 'igual' } {
+  const diferenca = atual - anterior;
+  const percentual = anterior !== 0 ? ((atual - anterior) / anterior) * 100 : (atual > 0 ? 100 : 0);
+  
+  return {
+    valor: diferenca,
+    percentual: parseFloat(percentual.toFixed(1)),
+    tipo: percentual > 1 ? 'subida' : percentual < -1 ? 'descida' : 'igual'
+  };
+}
+
+export interface ComparacaoResult {
+  lojaNome: string;
+  tipoComparacao: string;
+  periodo1: {
+    label: string;
+    dados: ReturnType<typeof buscarDadosPeriodo> extends Promise<infer T> ? T : never;
+  };
+  periodo2: {
+    label: string;
+    dados: ReturnType<typeof buscarDadosPeriodo> extends Promise<infer T> ? T : never;
+  };
+  variacoes: {
+    visitas: { valor: number; percentual: number; tipo: 'subida' | 'descida' | 'igual' };
+    servicos: { valor: number; percentual: number; tipo: 'subida' | 'descida' | 'igual' };
+    pendentes: { valor: number; percentual: number; tipo: 'subida' | 'descida' | 'igual' };
+    taxaResolucao: { valor: number; percentual: number; tipo: 'subida' | 'descida' | 'igual' };
+    desvioMedio: { valor: number; percentual: number; tipo: 'subida' | 'descida' | 'igual' };
+    taxaReparacao: { valor: number; percentual: number; tipo: 'subida' | 'descida' | 'igual' };
+    vendasComplementares: { valor: number; percentual: number; tipo: 'subida' | 'descida' | 'igual' };
+  };
+  analiseIA: string;
+}
+
+/**
+ * Compara dois períodos equivalentes de anos diferentes para uma loja
+ */
+export async function compararPeriodos(
+  lojaId: number,
+  tipoComparacao: TipoComparacao
+): Promise<ComparacaoResult> {
+  try {
+    const loja = await db.getLojaById(lojaId);
+    if (!loja) {
+      throw new Error("Loja não encontrada");
+    }
+
+    const { periodo1, periodo2 } = calcularPeriodosComparacao(tipoComparacao);
+
+    // Buscar dados de ambos os períodos
+    const [dados1, dados2] = await Promise.all([
+      buscarDadosPeriodo(lojaId, periodo1.dataInicio, periodo1.dataFim),
+      buscarDadosPeriodo(lojaId, periodo2.dataInicio, periodo2.dataFim)
+    ]);
+
+    // Calcular variações
+    const variacoes = {
+      visitas: calcularVariacao(dados2.totalVisitas, dados1.totalVisitas),
+      servicos: calcularVariacao(dados2.totalServicos, dados1.totalServicos),
+      pendentes: calcularVariacao(dados2.totalPendentes, dados1.totalPendentes),
+      taxaResolucao: calcularVariacao(dados2.taxaResolucao, dados1.taxaResolucao),
+      desvioMedio: calcularVariacao(dados2.desvioMedio, dados1.desvioMedio),
+      taxaReparacao: calcularVariacao(dados2.taxaReparacaoMedia, dados1.taxaReparacaoMedia),
+      vendasComplementares: calcularVariacao(dados2.totalVendasComplementares, dados1.totalVendasComplementares),
+    };
+
+    // Gerar análise com IA
+    const response = await invokeLLM({
+      messages: [
+        {
+          role: "system",
+          content: `És um analista especializado em comparação de performance de lojas Express Glass.
+Analisa a evolução entre dois períodos equivalentes e fornece insights estratégicos.
+Sê conciso mas informativo. Usa linguagem profissional em português de Portugal.`
+        },
+        {
+          role: "user",
+          content: `Compara a performance da loja "${loja.nome}" entre ${periodo1.label} e ${periodo2.label}:
+
+PERÍODO 1 (${periodo1.label}):
+- Visitas: ${dados1.totalVisitas}
+- Serviços: ${dados1.totalServicos}
+- Objetivo: ${dados1.objetivoTotal}
+- Desvio Médio: ${dados1.desvioMedio}%
+- Taxa Reparação: ${dados1.taxaReparacaoMedia}%
+- Pendentes: ${dados1.totalPendentes} (${dados1.taxaResolucao}% resolvidos)
+- Vendas Complementares: €${dados1.totalVendasComplementares}
+
+PERÍODO 2 (${periodo2.label}):
+- Visitas: ${dados2.totalVisitas}
+- Serviços: ${dados2.totalServicos}
+- Objetivo: ${dados2.objetivoTotal}
+- Desvio Médio: ${dados2.desvioMedio}%
+- Taxa Reparação: ${dados2.taxaReparacaoMedia}%
+- Pendentes: ${dados2.totalPendentes} (${dados2.taxaResolucao}% resolvidos)
+- Vendas Complementares: €${dados2.totalVendasComplementares}
+
+VARIAÇÕES:
+- Visitas: ${variacoes.visitas.percentual > 0 ? '+' : ''}${variacoes.visitas.percentual}%
+- Serviços: ${variacoes.servicos.percentual > 0 ? '+' : ''}${variacoes.servicos.percentual}%
+- Desvio: ${variacoes.desvioMedio.percentual > 0 ? '+' : ''}${variacoes.desvioMedio.percentual}%
+- Taxa Reparação: ${variacoes.taxaReparacao.percentual > 0 ? '+' : ''}${variacoes.taxaReparacao.percentual}%
+- Vendas Complementares: ${variacoes.vendasComplementares.percentual > 0 ? '+' : ''}${variacoes.vendasComplementares.percentual}%
+
+Fornece uma análise comparativa em 3-4 parágrafos destacando:
+1. Evolução geral da performance
+2. Pontos de melhoria e pontos de atenção
+3. Recomendações estratégicas`
+        }
+      ]
+    });
+
+    const analiseIA = response.choices[0]?.message?.content || 
+      "Não foi possível gerar análise comparativa. Verifique os dados disponíveis.";
+
+    return {
+      lojaNome: loja.nome,
+      tipoComparacao,
+      periodo1: {
+        label: periodo1.label,
+        dados: dados1
+      },
+      periodo2: {
+        label: periodo2.label,
+        dados: dados2
+      },
+      variacoes,
+      analiseIA: typeof analiseIA === 'string' ? analiseIA : JSON.stringify(analiseIA)
+    };
+
+  } catch (error) {
+    console.error("Erro ao comparar períodos:", error);
+    throw new Error("Falha ao comparar períodos. Tente novamente.");
+  }
+}

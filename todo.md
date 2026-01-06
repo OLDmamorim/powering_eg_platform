@@ -2086,3 +2086,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Bug: Filtros temporais (Trimestre, Semestre, Ano) no Relatório IA Resultados não retornam dados
 - [x] Histórico da Loja: Adicionar filtro temporal (Mês, Trimestre, Semestre, Ano)
 - [x] Histórico da Loja: Análise IA completa com dados operacionais, resultados, comerciais, pendentes e problemas
+
+## Melhorias Histórico da Loja v6.6
+- [x] Exportar PDF do Histórico da Loja com análise IA completa
+- [x] Comparação entre períodos no Histórico da Loja (ex: Q4 2024 vs Q4 2025)

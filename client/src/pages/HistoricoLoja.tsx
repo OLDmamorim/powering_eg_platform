@@ -14,13 +14,17 @@ import { trpc } from "@/lib/trpc";
 import { 
   Loader2, TrendingUp, TrendingDown, AlertTriangle, CheckCircle2, 
   Lightbulb, History, BarChart3, ShoppingCart, Clock, Target,
-  AlertCircle, ArrowUp, ArrowDown, Minus, Calendar
+  AlertCircle, ArrowUp, ArrowDown, Minus, Calendar, Download, GitCompare
 } from "lucide-react";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
 
 type PeriodoFiltro = 'mes_atual' | 'mes_anterior' | 'trimestre_anterior' | 'semestre_anterior' | 'ano_anterior';
+
+type PeriodoComparacao = 'q1_ano_anterior_vs_atual' | 'q2_ano_anterior_vs_atual' | 'q3_ano_anterior_vs_atual' | 'q4_ano_anterior_vs_atual' | 's1_ano_anterior_vs_atual' | 's2_ano_anterior_vs_atual' | 'ano_completo';
 
 export default function HistoricoLoja() {
   const { user } = useAuth();
@@ -28,6 +32,10 @@ export default function HistoricoLoja() {
   const [lojaId, setLojaId] = useState("");
   const [periodo, setPeriodo] = useState<PeriodoFiltro>('mes_anterior');
   const [historyData, setHistoryData] = useState<any>(null);
+  const [exportando, setExportando] = useState(false);
+  const [modoComparacao, setModoComparacao] = useState(false);
+  const [periodoComparacao, setPeriodoComparacao] = useState<PeriodoComparacao>('q4_ano_anterior_vs_atual');
+  const [comparacaoData, setComparacaoData] = useState<any>(null);
 
   const { data: lojasGestor } = trpc.lojas.getByGestor.useQuery(undefined, { enabled: user?.role === 'gestor' });
   const { data: lojasAdmin } = trpc.lojas.list.useQuery(undefined, { enabled: user?.role === 'admin' });
@@ -37,6 +45,8 @@ export default function HistoricoLoja() {
     { lojaId: parseInt(lojaId), periodo },
     { enabled: false }
   );
+
+  
 
   if (!user || (user.role !== "gestor" && user.role !== "admin")) {
     setLocation("/dashboard");
@@ -96,6 +106,337 @@ export default function HistoricoLoja() {
     ano_anterior: 'Ano Anterior',
   };
 
+  const comparacaoLabels: Record<PeriodoComparacao, string> = {
+    'q1_ano_anterior_vs_atual': 'Q1 (Jan-Mar) Ano Anterior vs Atual',
+    'q2_ano_anterior_vs_atual': 'Q2 (Abr-Jun) Ano Anterior vs Atual',
+    'q3_ano_anterior_vs_atual': 'Q3 (Jul-Set) Ano Anterior vs Atual',
+    'q4_ano_anterior_vs_atual': 'Q4 (Out-Dez) Ano Anterior vs Atual',
+    's1_ano_anterior_vs_atual': '1º Semestre Ano Anterior vs Atual',
+    's2_ano_anterior_vs_atual': '2º Semestre Ano Anterior vs Atual',
+    'ano_completo': 'Ano Completo Anterior vs Atual',
+  };
+
+  // Query para comparação
+  const comparacaoQuery = trpc.lojaHistory.comparar.useQuery(
+    { lojaId: parseInt(lojaId), tipoComparacao: periodoComparacao },
+    { enabled: false }
+  );
+
+  // Função para gerar comparação
+  const handleGerarComparacao = async () => {
+    if (!lojaId) {
+      toast.error("Por favor selecione uma loja");
+      return;
+    }
+
+    try {
+      toast.info("🤖 A gerar comparação entre períodos...");
+      const result = await comparacaoQuery.refetch();
+      if (result.data) {
+        setComparacaoData(result.data as any);
+        toast.success("Comparação gerada com sucesso!");
+      }
+    } catch (error) {
+      console.error("Erro ao gerar comparação:", error);
+      toast.error("Erro ao gerar comparação. Tente novamente.");
+    }
+  };
+
+  // Função para exportar PDF
+  const exportarPDF = async () => {
+    if (!historyData) {
+      toast.error("Gere primeiro a análise para exportar");
+      return;
+    }
+
+    setExportando(true);
+    try {
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      let yPos = 15;
+
+      const lojaNome = lojas?.find((l: any) => l.id.toString() === lojaId)?.nome || 'Loja';
+
+      // Cores
+      const COLORS = {
+        primary: [59, 130, 246] as [number, number, number],
+        success: [34, 197, 94] as [number, number, number],
+        danger: [239, 68, 68] as [number, number, number],
+        warning: [245, 158, 11] as [number, number, number],
+        purple: [139, 92, 246] as [number, number, number],
+        indigo: [99, 102, 241] as [number, number, number],
+        emerald: [16, 185, 129] as [number, number, number],
+      };
+
+      // Função auxiliar para desenhar cabeçalho de secção
+      const drawSectionHeader = (title: string, color: [number, number, number]) => {
+        if (yPos > pageHeight - 30) {
+          doc.addPage();
+          yPos = 20;
+        }
+        doc.setFillColor(color[0], color[1], color[2]);
+        doc.roundedRect(14, yPos, pageWidth - 28, 10, 2, 2, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'bold');
+        doc.text(title, 18, yPos + 7);
+        doc.setTextColor(0, 0, 0);
+        doc.setFont('helvetica', 'normal');
+        yPos += 15;
+      };
+
+      // Cabeçalho
+      doc.setFillColor(59, 130, 246);
+      doc.rect(0, 0, pageWidth, 3, 'F');
+      
+      doc.setTextColor(30, 41, 59);
+      doc.setFontSize(20);
+      doc.setFont('helvetica', 'bold');
+      doc.text(`Histórico da Loja: ${lojaNome}`, pageWidth / 2, 18, { align: 'center' });
+      
+      doc.setFontSize(10);
+      doc.setTextColor(100, 116, 139);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Período: ${historyData.periodoAnalisado}  |  Gerado em: ${new Date().toLocaleString('pt-PT')}`, pageWidth / 2, 26, { align: 'center' });
+      
+      doc.setDrawColor(200, 200, 200);
+      doc.setLineWidth(0.5);
+      doc.line(14, 32, pageWidth - 14, 32);
+      yPos = 40;
+
+      // Métricas Resumidas
+      drawSectionHeader('Métricas Gerais', COLORS.primary);
+      
+      const metricsData = [
+        ['Relatórios Livres', historyData.metricas?.totalRelatoriosLivres?.toString() || '0'],
+        ['Relatórios Completos', historyData.metricas?.totalRelatoriosCompletos?.toString() || '0'],
+        ['Total Pendentes', historyData.metricas?.totalPendentes?.toString() || '0'],
+        ['Taxa Resolução', `${historyData.metricas?.taxaResolucao?.toFixed(0) || 0}%`],
+        ['Ocorrências', historyData.metricas?.totalOcorrencias?.toString() || '0'],
+      ];
+
+      autoTable(doc, {
+        startY: yPos,
+        head: [['Métrica', 'Valor']],
+        body: metricsData,
+        theme: 'grid',
+        headStyles: { fillColor: COLORS.primary, textColor: [255, 255, 255] },
+        styles: { fontSize: 10 },
+        columnStyles: { 0: { fontStyle: 'bold' } },
+      });
+      yPos = (doc as any).lastAutoTable.finalY + 10;
+
+      // Análise de Resultados
+      if (historyData.analiseResultados) {
+        drawSectionHeader('Análise de Resultados', COLORS.indigo);
+        
+        const resultadosData = [
+          ['Total Serviços', historyData.analiseResultados.totalServicos?.toString() || '0'],
+          ['Objetivo Total', historyData.analiseResultados.objetivoTotal?.toString() || '0'],
+          ['Desvio Médio', `${historyData.analiseResultados.desvioMedio >= 0 ? '+' : ''}${historyData.analiseResultados.desvioMedio}%`],
+          ['Taxa Reparação Média', `${historyData.analiseResultados.taxaReparacaoMedia}%`],
+          ['Tendência', historyData.analiseResultados.tendenciaServicos],
+          ['Melhor Mês', historyData.analiseResultados.melhorMes],
+          ['Pior Mês', historyData.analiseResultados.piorMes],
+        ];
+
+        autoTable(doc, {
+          startY: yPos,
+          head: [['Indicador', 'Valor']],
+          body: resultadosData,
+          theme: 'grid',
+          headStyles: { fillColor: COLORS.indigo, textColor: [255, 255, 255] },
+          styles: { fontSize: 10 },
+          columnStyles: { 0: { fontStyle: 'bold' } },
+        });
+        yPos = (doc as any).lastAutoTable.finalY + 10;
+      }
+
+      // Análise Comercial
+      if (historyData.analiseComercial) {
+        drawSectionHeader('Análise Comercial', COLORS.emerald);
+        
+        const comercialData = [
+          ['Total Vendas Complementares', `€${historyData.analiseComercial.totalVendasComplementares}`],
+          ['Média Mensal', `€${historyData.analiseComercial.mediaVendasMensal}`],
+          ['Escovas', `€${historyData.analiseComercial.escovasTotal}`],
+          ['Polimento', `€${historyData.analiseComercial.polimentoTotal}`],
+          ['Tendência', historyData.analiseComercial.tendenciaVendas],
+        ];
+
+        autoTable(doc, {
+          startY: yPos,
+          head: [['Indicador', 'Valor']],
+          body: comercialData,
+          theme: 'grid',
+          headStyles: { fillColor: COLORS.emerald, textColor: [255, 255, 255] },
+          styles: { fontSize: 10 },
+          columnStyles: { 0: { fontStyle: 'bold' } },
+        });
+        yPos = (doc as any).lastAutoTable.finalY + 10;
+      }
+
+      // Resumo Executivo
+      if (historyData.resumoGeral) {
+        drawSectionHeader('Resumo Executivo', COLORS.primary);
+        
+        doc.setFontSize(10);
+        const resumoLines = doc.splitTextToSize(historyData.resumoGeral, pageWidth - 28);
+        if (yPos + resumoLines.length * 5 > pageHeight - 20) {
+          doc.addPage();
+          yPos = 20;
+        }
+        doc.text(resumoLines, 14, yPos);
+        yPos += resumoLines.length * 5 + 10;
+      }
+
+      // Alertas Operacionais
+      if (historyData.alertasOperacionais && historyData.alertasOperacionais.length > 0) {
+        drawSectionHeader('Alertas Operacionais', COLORS.danger);
+        
+        const alertasData = historyData.alertasOperacionais.map((a: any) => [
+          a.tipo,
+          a.descricao,
+          a.urgencia.toUpperCase()
+        ]);
+
+        autoTable(doc, {
+          startY: yPos,
+          head: [['Tipo', 'Descrição', 'Urgência']],
+          body: alertasData,
+          theme: 'grid',
+          headStyles: { fillColor: COLORS.danger, textColor: [255, 255, 255] },
+          styles: { fontSize: 9 },
+          columnStyles: { 
+            0: { cellWidth: 35 },
+            1: { cellWidth: 'auto' },
+            2: { cellWidth: 25 }
+          },
+        });
+        yPos = (doc as any).lastAutoTable.finalY + 10;
+      }
+
+      // Problemas Identificados
+      if (historyData.problemasRecorrentes && historyData.problemasRecorrentes.length > 0) {
+        drawSectionHeader('Problemas Identificados', COLORS.warning);
+        
+        const problemasData = historyData.problemasRecorrentes.map((p: any) => [
+          p.problema,
+          p.categoria,
+          p.frequencia,
+          p.gravidade.toUpperCase()
+        ]);
+
+        autoTable(doc, {
+          startY: yPos,
+          head: [['Problema', 'Categoria', 'Frequência', 'Gravidade']],
+          body: problemasData,
+          theme: 'grid',
+          headStyles: { fillColor: COLORS.warning, textColor: [255, 255, 255] },
+          styles: { fontSize: 9 },
+        });
+        yPos = (doc as any).lastAutoTable.finalY + 10;
+      }
+
+      // Pontos Fortes
+      if (historyData.pontosFortes && historyData.pontosFortes.length > 0) {
+        drawSectionHeader('Pontos Fortes', COLORS.success);
+        
+        doc.setFontSize(10);
+        historyData.pontosFortes.forEach((ponto: string, index: number) => {
+          if (yPos > pageHeight - 15) {
+            doc.addPage();
+            yPos = 20;
+          }
+          const lines = doc.splitTextToSize(`• ${ponto}`, pageWidth - 28);
+          doc.text(lines, 14, yPos);
+          yPos += lines.length * 5 + 2;
+        });
+        yPos += 8;
+      }
+
+      // Tendências
+      if (historyData.tendencias && historyData.tendencias.length > 0) {
+        drawSectionHeader('Tendências Identificadas', COLORS.primary);
+        
+        doc.setFontSize(10);
+        historyData.tendencias.forEach((tendencia: string) => {
+          if (yPos > pageHeight - 15) {
+            doc.addPage();
+            yPos = 20;
+          }
+          const lines = doc.splitTextToSize(`→ ${tendencia}`, pageWidth - 28);
+          doc.text(lines, 14, yPos);
+          yPos += lines.length * 5 + 2;
+        });
+        yPos += 8;
+      }
+
+      // Recomendações
+      if (historyData.recomendacoes && historyData.recomendacoes.length > 0) {
+        drawSectionHeader('Recomendações Prioritárias', COLORS.purple);
+        
+        const recomendacoesData = historyData.recomendacoes
+          .sort((a: any, b: any) => {
+            const prioOrder = { alta: 0, média: 1, baixa: 2 };
+            return (prioOrder[a.prioridade as keyof typeof prioOrder] || 2) - (prioOrder[b.prioridade as keyof typeof prioOrder] || 2);
+          })
+          .map((r: any) => [
+            r.prioridade.toUpperCase(),
+            r.recomendacao,
+            r.categoria,
+            r.justificativa
+          ]);
+
+        autoTable(doc, {
+          startY: yPos,
+          head: [['Prioridade', 'Recomendação', 'Categoria', 'Justificativa']],
+          body: recomendacoesData,
+          theme: 'grid',
+          headStyles: { fillColor: COLORS.purple, textColor: [255, 255, 255] },
+          styles: { fontSize: 8 },
+          columnStyles: { 
+            0: { cellWidth: 20 },
+            1: { cellWidth: 50 },
+            2: { cellWidth: 25 },
+            3: { cellWidth: 'auto' }
+          },
+        });
+      }
+
+      // Rodapé em todas as páginas
+      const totalPages = doc.getNumberOfPages();
+      for (let i = 1; i <= totalPages; i++) {
+        doc.setPage(i);
+        doc.setFontSize(8);
+        doc.setTextColor(150, 150, 150);
+        doc.text(`PoweringEG Platform - Histórico da Loja`, 14, pageHeight - 10);
+        doc.text(`Página ${i} de ${totalPages}`, pageWidth - 14, pageHeight - 10, { align: 'right' });
+      }
+
+      // Guardar
+      const fileName = `Historico_${lojaNome.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+      doc.save(fileName);
+      toast.success("PDF exportado com sucesso!");
+    } catch (error) {
+      console.error("Erro ao exportar PDF:", error);
+      toast.error("Erro ao exportar PDF");
+    } finally {
+      setExportando(false);
+    }
+  };
+
+  // Função para calcular variação percentual
+  const calcVariacao = (atual: number, anterior: number): { valor: number; tipo: 'subida' | 'descida' | 'igual' } => {
+    if (anterior === 0) return { valor: 0, tipo: 'igual' };
+    const variacao = ((atual - anterior) / anterior) * 100;
+    return {
+      valor: Math.abs(variacao),
+      tipo: variacao > 0 ? 'subida' : variacao < 0 ? 'descida' : 'igual'
+    };
+  };
+
   return (
     <DashboardLayout>
       <div className="max-w-6xl mx-auto space-y-6">
@@ -153,7 +494,7 @@ export default function HistoricoLoja() {
               </div>
 
               {/* Botão */}
-              <div className="flex items-end">
+              <div className="flex items-end gap-2">
                 <Button 
                   onClick={handleGenerate} 
                   disabled={!lojaId || generateHistoryMutation.isFetching}
@@ -171,10 +512,228 @@ export default function HistoricoLoja() {
                     </>
                   )}
                 </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setModoComparacao(!modoComparacao)}
+                  className={modoComparacao ? 'bg-blue-50 border-blue-300' : ''}
+                >
+                  <GitCompare className="h-4 w-4 mr-2" />
+                  Comparar Períodos
+                </Button>
               </div>
             </div>
           </CardContent>
         </Card>
+
+        {/* Painel de Comparação */}
+        {modoComparacao && (
+          <Card className="border-blue-200 bg-blue-50/30">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-blue-900">
+                <GitCompare className="h-5 w-5" />
+                Comparação Entre Períodos
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex flex-wrap gap-4 items-end">
+                <div className="flex-1 min-w-[200px] space-y-2">
+                  <Label>Tipo de Comparação</Label>
+                  <Select value={periodoComparacao} onValueChange={(v) => setPeriodoComparacao(v as PeriodoComparacao)}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="q1_ano_anterior_vs_atual">Q1 (Jan-Mar) Ano Anterior vs Atual</SelectItem>
+                      <SelectItem value="q2_ano_anterior_vs_atual">Q2 (Abr-Jun) Ano Anterior vs Atual</SelectItem>
+                      <SelectItem value="q3_ano_anterior_vs_atual">Q3 (Jul-Set) Ano Anterior vs Atual</SelectItem>
+                      <SelectItem value="q4_ano_anterior_vs_atual">Q4 (Out-Dez) Ano Anterior vs Atual</SelectItem>
+                      <SelectItem value="s1_ano_anterior_vs_atual">1º Semestre Ano Anterior vs Atual</SelectItem>
+                      <SelectItem value="s2_ano_anterior_vs_atual">2º Semestre Ano Anterior vs Atual</SelectItem>
+                      <SelectItem value="ano_completo">Ano Completo Anterior vs Atual</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button 
+                  onClick={handleGerarComparacao}
+                  disabled={!lojaId || comparacaoQuery.isFetching}
+                >
+                  {comparacaoQuery.isFetching ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      A comparar...
+                    </>
+                  ) : (
+                    <>
+                      <GitCompare className="h-4 w-4 mr-2" />
+                      Gerar Comparação
+                    </>
+                  )}
+                </Button>
+              </div>
+
+              <p className="text-sm text-muted-foreground">
+                💡 A comparação permite analisar a evolução da loja entre períodos equivalentes de anos diferentes.
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Resultados da Comparação */}
+        {comparacaoData && modoComparacao && (
+          <Card className="border-indigo-200 bg-gradient-to-br from-indigo-50 to-purple-50">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2 text-indigo-900">
+                  <GitCompare className="h-5 w-5" />
+                  Comparação: {comparacaoData.periodo1?.label} vs {comparacaoData.periodo2?.label}
+                </CardTitle>
+                <p className="text-sm text-muted-foreground">{comparacaoData.lojaNome}</p>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Tabela Comparativa */}
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-indigo-200">
+                      <th className="text-left py-2 px-3 font-semibold text-indigo-900">Indicador</th>
+                      <th className="text-center py-2 px-3 font-semibold text-indigo-700">{comparacaoData.periodo1?.label}</th>
+                      <th className="text-center py-2 px-3 font-semibold text-indigo-700">{comparacaoData.periodo2?.label}</th>
+                      <th className="text-center py-2 px-3 font-semibold text-indigo-900">Variação</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr className="border-b border-indigo-100 hover:bg-indigo-50/50">
+                      <td className="py-2 px-3 font-medium">Total Visitas</td>
+                      <td className="text-center py-2 px-3">{comparacaoData.periodo1?.dados?.totalVisitas || 0}</td>
+                      <td className="text-center py-2 px-3">{comparacaoData.periodo2?.dados?.totalVisitas || 0}</td>
+                      <td className="text-center py-2 px-3">
+                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium ${
+                          comparacaoData.variacoes?.visitas?.tipo === 'subida' ? 'bg-green-100 text-green-700' :
+                          comparacaoData.variacoes?.visitas?.tipo === 'descida' ? 'bg-red-100 text-red-700' :
+                          'bg-gray-100 text-gray-700'
+                        }`}>
+                          {comparacaoData.variacoes?.visitas?.tipo === 'subida' && <ArrowUp className="h-3 w-3" />}
+                          {comparacaoData.variacoes?.visitas?.tipo === 'descida' && <ArrowDown className="h-3 w-3" />}
+                          {comparacaoData.variacoes?.visitas?.percentual > 0 ? '+' : ''}{comparacaoData.variacoes?.visitas?.percentual || 0}%
+                        </span>
+                      </td>
+                    </tr>
+                    <tr className="border-b border-indigo-100 hover:bg-indigo-50/50">
+                      <td className="py-2 px-3 font-medium">Total Serviços</td>
+                      <td className="text-center py-2 px-3">{comparacaoData.periodo1?.dados?.totalServicos || 0}</td>
+                      <td className="text-center py-2 px-3">{comparacaoData.periodo2?.dados?.totalServicos || 0}</td>
+                      <td className="text-center py-2 px-3">
+                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium ${
+                          comparacaoData.variacoes?.servicos?.tipo === 'subida' ? 'bg-green-100 text-green-700' :
+                          comparacaoData.variacoes?.servicos?.tipo === 'descida' ? 'bg-red-100 text-red-700' :
+                          'bg-gray-100 text-gray-700'
+                        }`}>
+                          {comparacaoData.variacoes?.servicos?.tipo === 'subida' && <ArrowUp className="h-3 w-3" />}
+                          {comparacaoData.variacoes?.servicos?.tipo === 'descida' && <ArrowDown className="h-3 w-3" />}
+                          {comparacaoData.variacoes?.servicos?.percentual > 0 ? '+' : ''}{comparacaoData.variacoes?.servicos?.percentual || 0}%
+                        </span>
+                      </td>
+                    </tr>
+                    <tr className="border-b border-indigo-100 hover:bg-indigo-50/50">
+                      <td className="py-2 px-3 font-medium">Desvio Médio</td>
+                      <td className="text-center py-2 px-3">{comparacaoData.periodo1?.dados?.desvioMedio || 0}%</td>
+                      <td className="text-center py-2 px-3">{comparacaoData.periodo2?.dados?.desvioMedio || 0}%</td>
+                      <td className="text-center py-2 px-3">
+                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium ${
+                          comparacaoData.variacoes?.desvioMedio?.tipo === 'subida' ? 'bg-green-100 text-green-700' :
+                          comparacaoData.variacoes?.desvioMedio?.tipo === 'descida' ? 'bg-red-100 text-red-700' :
+                          'bg-gray-100 text-gray-700'
+                        }`}>
+                          {comparacaoData.variacoes?.desvioMedio?.tipo === 'subida' && <ArrowUp className="h-3 w-3" />}
+                          {comparacaoData.variacoes?.desvioMedio?.tipo === 'descida' && <ArrowDown className="h-3 w-3" />}
+                          {comparacaoData.variacoes?.desvioMedio?.percentual > 0 ? '+' : ''}{comparacaoData.variacoes?.desvioMedio?.percentual || 0}%
+                        </span>
+                      </td>
+                    </tr>
+                    <tr className="border-b border-indigo-100 hover:bg-indigo-50/50">
+                      <td className="py-2 px-3 font-medium">Taxa Reparação</td>
+                      <td className="text-center py-2 px-3">{comparacaoData.periodo1?.dados?.taxaReparacaoMedia || 0}%</td>
+                      <td className="text-center py-2 px-3">{comparacaoData.periodo2?.dados?.taxaReparacaoMedia || 0}%</td>
+                      <td className="text-center py-2 px-3">
+                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium ${
+                          comparacaoData.variacoes?.taxaReparacao?.tipo === 'subida' ? 'bg-green-100 text-green-700' :
+                          comparacaoData.variacoes?.taxaReparacao?.tipo === 'descida' ? 'bg-red-100 text-red-700' :
+                          'bg-gray-100 text-gray-700'
+                        }`}>
+                          {comparacaoData.variacoes?.taxaReparacao?.tipo === 'subida' && <ArrowUp className="h-3 w-3" />}
+                          {comparacaoData.variacoes?.taxaReparacao?.tipo === 'descida' && <ArrowDown className="h-3 w-3" />}
+                          {comparacaoData.variacoes?.taxaReparacao?.percentual > 0 ? '+' : ''}{comparacaoData.variacoes?.taxaReparacao?.percentual || 0}%
+                        </span>
+                      </td>
+                    </tr>
+                    <tr className="border-b border-indigo-100 hover:bg-indigo-50/50">
+                      <td className="py-2 px-3 font-medium">Pendentes</td>
+                      <td className="text-center py-2 px-3">{comparacaoData.periodo1?.dados?.totalPendentes || 0}</td>
+                      <td className="text-center py-2 px-3">{comparacaoData.periodo2?.dados?.totalPendentes || 0}</td>
+                      <td className="text-center py-2 px-3">
+                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium ${
+                          comparacaoData.variacoes?.pendentes?.tipo === 'descida' ? 'bg-green-100 text-green-700' :
+                          comparacaoData.variacoes?.pendentes?.tipo === 'subida' ? 'bg-red-100 text-red-700' :
+                          'bg-gray-100 text-gray-700'
+                        }`}>
+                          {comparacaoData.variacoes?.pendentes?.tipo === 'subida' && <ArrowUp className="h-3 w-3" />}
+                          {comparacaoData.variacoes?.pendentes?.tipo === 'descida' && <ArrowDown className="h-3 w-3" />}
+                          {comparacaoData.variacoes?.pendentes?.percentual > 0 ? '+' : ''}{comparacaoData.variacoes?.pendentes?.percentual || 0}%
+                        </span>
+                      </td>
+                    </tr>
+                    <tr className="border-b border-indigo-100 hover:bg-indigo-50/50">
+                      <td className="py-2 px-3 font-medium">Taxa Resolução</td>
+                      <td className="text-center py-2 px-3">{comparacaoData.periodo1?.dados?.taxaResolucao || 0}%</td>
+                      <td className="text-center py-2 px-3">{comparacaoData.periodo2?.dados?.taxaResolucao || 0}%</td>
+                      <td className="text-center py-2 px-3">
+                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium ${
+                          comparacaoData.variacoes?.taxaResolucao?.tipo === 'subida' ? 'bg-green-100 text-green-700' :
+                          comparacaoData.variacoes?.taxaResolucao?.tipo === 'descida' ? 'bg-red-100 text-red-700' :
+                          'bg-gray-100 text-gray-700'
+                        }`}>
+                          {comparacaoData.variacoes?.taxaResolucao?.tipo === 'subida' && <ArrowUp className="h-3 w-3" />}
+                          {comparacaoData.variacoes?.taxaResolucao?.tipo === 'descida' && <ArrowDown className="h-3 w-3" />}
+                          {comparacaoData.variacoes?.taxaResolucao?.percentual > 0 ? '+' : ''}{comparacaoData.variacoes?.taxaResolucao?.percentual || 0}%
+                        </span>
+                      </td>
+                    </tr>
+                    <tr className="hover:bg-indigo-50/50">
+                      <td className="py-2 px-3 font-medium">Vendas Complementares</td>
+                      <td className="text-center py-2 px-3">€{comparacaoData.periodo1?.dados?.totalVendasComplementares || 0}</td>
+                      <td className="text-center py-2 px-3">€{comparacaoData.periodo2?.dados?.totalVendasComplementares || 0}</td>
+                      <td className="text-center py-2 px-3">
+                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium ${
+                          comparacaoData.variacoes?.vendasComplementares?.tipo === 'subida' ? 'bg-green-100 text-green-700' :
+                          comparacaoData.variacoes?.vendasComplementares?.tipo === 'descida' ? 'bg-red-100 text-red-700' :
+                          'bg-gray-100 text-gray-700'
+                        }`}>
+                          {comparacaoData.variacoes?.vendasComplementares?.tipo === 'subida' && <ArrowUp className="h-3 w-3" />}
+                          {comparacaoData.variacoes?.vendasComplementares?.tipo === 'descida' && <ArrowDown className="h-3 w-3" />}
+                          {comparacaoData.variacoes?.vendasComplementares?.percentual > 0 ? '+' : ''}{comparacaoData.variacoes?.vendasComplementares?.percentual || 0}%
+                        </span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Análise IA */}
+              {comparacaoData.analiseIA && (
+                <div className="mt-6 p-4 bg-white rounded-lg border border-indigo-200">
+                  <h4 className="font-semibold text-indigo-900 mb-3 flex items-center gap-2">
+                    <Lightbulb className="h-4 w-4" />
+                    Análise Comparativa IA
+                  </h4>
+                  <div className="prose prose-sm max-w-none text-gray-700 whitespace-pre-wrap">
+                    {comparacaoData.analiseIA}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         {historyData && (
           <div className="space-y-6">
@@ -188,6 +747,24 @@ export default function HistoricoLoja() {
                   Período: {historyData.periodoAnalisado}
                 </p>
               </div>
+              <Button
+                onClick={exportarPDF}
+                disabled={exportando}
+                variant="outline"
+                className="gap-2"
+              >
+                {exportando ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    A exportar...
+                  </>
+                ) : (
+                  <>
+                    <Download className="h-4 w-4" />
+                    Exportar PDF
+                  </>
+                )}
+              </Button>
             </div>
 
             {/* Métricas Resumidas */}
