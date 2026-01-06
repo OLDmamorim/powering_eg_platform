@@ -272,7 +272,7 @@ export default function HistoricoLoja() {
       yPos = 48;
 
       // ========== MÉTRICAS GERAIS (6 cards coloridos) ==========
-      drawSectionHeader('📊 Métricas Gerais', COLORS.primary);
+      drawSectionHeader('Métricas Gerais', COLORS.primary);
       
       const cardWidth = (pageWidth - 28 - 10) / 3; // 3 cards por linha
       const cardHeight = 22;
@@ -306,7 +306,7 @@ export default function HistoricoLoja() {
 
       // ========== ANÁLISE DE RESULTADOS ==========
       if (historyData.analiseResultados) {
-        drawColoredSection('🎯 Análise de Resultados', COLORS.indigoLight, COLORS.indigo, 50);
+        drawColoredSection('Análise de Resultados', COLORS.indigoLight, COLORS.indigo, 50);
         
         const resultCardWidth = (pageWidth - 48) / 4;
         const resultCardHeight = 20;
@@ -353,7 +353,7 @@ export default function HistoricoLoja() {
 
       // ========== ANÁLISE COMERCIAL ==========
       if (historyData.analiseComercial) {
-        drawColoredSection('🛒 Análise Comercial (Vendas Complementares)', COLORS.emeraldLight, COLORS.emerald, 45);
+        drawColoredSection('Análise Comercial (Vendas Complementares)', COLORS.emeraldLight, COLORS.emerald, 45);
         
         const comercialCardWidth = (pageWidth - 48) / 4;
         const comercialCardHeight = 20;
@@ -392,7 +392,7 @@ export default function HistoricoLoja() {
       // ========== RESUMO EXECUTIVO ==========
       if (historyData.resumoGeral) {
         checkPageSpace(50);
-        drawColoredSection('📋 Resumo Executivo', COLORS.skyLight, COLORS.sky, 35);
+        drawColoredSection('Resumo Executivo', COLORS.skyLight, COLORS.sky, 35);
         
         doc.setFontSize(10);
         doc.setTextColor(30, 41, 59);
@@ -410,7 +410,7 @@ export default function HistoricoLoja() {
       // ========== ALERTAS OPERACIONAIS ==========
       if (historyData.alertasOperacionais && historyData.alertasOperacionais.length > 0) {
         checkPageSpace(40);
-        drawSectionHeader('⚠️ Alertas Operacionais', COLORS.danger);
+        drawSectionHeader('Alertas Operacionais', COLORS.danger);
         
         historyData.alertasOperacionais.forEach((alerta: any) => {
           checkPageSpace(25);
@@ -454,7 +454,7 @@ export default function HistoricoLoja() {
       // ========== PROBLEMAS IDENTIFICADOS ==========
       if (historyData.problemasRecorrentes && historyData.problemasRecorrentes.length > 0) {
         checkPageSpace(40);
-        drawSectionHeader('🔍 Problemas Identificados', COLORS.warning);
+        drawSectionHeader('Problemas Identificados', COLORS.warning);
         
         historyData.problemasRecorrentes.forEach((problema: any) => {
           checkPageSpace(25);
@@ -497,14 +497,14 @@ export default function HistoricoLoja() {
       // ========== PONTOS FORTES ==========
       if (historyData.pontosFortes && historyData.pontosFortes.length > 0) {
         checkPageSpace(40);
-        drawColoredSection('✅ Pontos Fortes', COLORS.successLight, COLORS.success, Math.min(historyData.pontosFortes.length * 8 + 5, 60));
+        drawColoredSection('Pontos Fortes', COLORS.successLight, COLORS.success, Math.min(historyData.pontosFortes.length * 8 + 5, 60));
         
         doc.setFontSize(9);
         doc.setTextColor(COLORS.success[0] * 0.7, COLORS.success[1] * 0.7, COLORS.success[2] * 0.7);
         
         historyData.pontosFortes.slice(0, 8).forEach((ponto: string) => {
           checkPageSpace(10);
-          const lines = doc.splitTextToSize(`✓ ${ponto}`, pageWidth - 48);
+          const lines = doc.splitTextToSize(`• ${ponto}`, pageWidth - 48);
           doc.text(lines[0], 20, yPos);
           yPos += 7;
         });
@@ -519,14 +519,14 @@ export default function HistoricoLoja() {
       // ========== TENDÊNCIAS ==========
       if (historyData.tendencias && historyData.tendencias.length > 0) {
         checkPageSpace(40);
-        drawSectionHeader('📈 Tendências Identificadas', COLORS.primary);
+        drawSectionHeader('Tendências Identificadas', COLORS.primary);
         
         doc.setFontSize(9);
         doc.setTextColor(60, 60, 60);
         
         historyData.tendencias.slice(0, 6).forEach((tendencia: string) => {
           checkPageSpace(10);
-          const lines = doc.splitTextToSize(`→ ${tendencia}`, pageWidth - 38);
+          const lines = doc.splitTextToSize(`- ${tendencia}`, pageWidth - 38);
           doc.text(lines[0], 18, yPos);
           yPos += 7;
         });
@@ -541,7 +541,7 @@ export default function HistoricoLoja() {
       // ========== RECOMENDAÇÕES PRIORITÁRIAS ==========
       if (historyData.recomendacoes && historyData.recomendacoes.length > 0) {
         checkPageSpace(50);
-        drawColoredSection('💡 Recomendações Prioritárias', COLORS.purpleLight, COLORS.purple, Math.min(historyData.recomendacoes.length * 25 + 10, 100));
+        drawColoredSection('Recomendações Prioritárias', COLORS.purpleLight, COLORS.purple, Math.min(historyData.recomendacoes.length * 25 + 10, 100));
         
         const sortedRecs = [...historyData.recomendacoes].sort((a: any, b: any) => {
           const prioOrder: Record<string, number> = { alta: 0, média: 1, baixa: 2 };

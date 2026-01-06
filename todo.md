@@ -2101,3 +2101,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Identificar campos em falta (avaliações, resumo, pontos positivos/negativos)
 - [x] Corrigir função de geração de HTML do email
 - [x] Testar envio de email completo
+
+## Bug Fix: Caracteres estranhos no PDF do Histórico da Loja
+- [x] Identificar função de geração do PDF do Histórico da Loja
+- [x] Remover emojis dos títulos das secções ou substituir por texto
+- [x] Testar geração do PDF sem caracteres estranhos
+
