@@ -2060,3 +2060,6 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Guardar relatórios gerados no histórico (como na página Categorias)
 - [x] Incluir categorias com status "A Acompanhar" no relatório para discussão no board
 - [x] Excluir categorias "Em Tratamento" ou "Tratado" do relatório
+
+- [x] Corrigir Taxa de Reparação Média no Relatório Board (mostrar 20% em vez de 0.2%)
+- [x] Adicionar botão de exportação para PDF no Relatório Board

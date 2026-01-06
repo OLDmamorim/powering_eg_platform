@@ -1,0 +1,15 @@
+{
+  "query": "SELECT AVG(taxaReparacao) as media_taxa, MIN(taxaReparacao) as min_taxa, MAX(taxaReparacao) as max_taxa FROM resultados_mensais WHERE mes = 12 AND ano = 2025",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT AVG(taxaReparacao) as media_taxa, MIN(taxaReparacao) as min_taxa, MAX(taxaReparacao) as max_taxa FROM resultados_mensais WHERE mes = 12 AND ano = 2025",
+  "rows": [
+    {
+      "media_taxa": "0.20948143",
+      "min_taxa": "0.0000",
+      "max_taxa": "0.6848"
+    }
+  ],
+  "messages": [],
+  "stdout": "media_taxa\tmin_taxa\tmax_taxa\n0.20948143\t0.0000\t0.6848\n",
+  "stderr": "",
+  "execution_time_ms": 48
+}

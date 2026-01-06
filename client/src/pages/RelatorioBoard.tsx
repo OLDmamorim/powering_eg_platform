@@ -52,6 +52,8 @@ import {
   Filler,
 } from "chart.js";
 import { Streamdown } from "streamdown";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 // Registrar componentes do Chart.js
 ChartJS.register(
@@ -120,6 +122,296 @@ export default function RelatorioBoard() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
     toast.success("Relatório descarregado!");
+  };
+
+  const handleExportPDF = () => {
+    if (!dadosRelatorio) return;
+    
+    try {
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.getWidth();
+      let yPos = 20;
+
+      // Título
+      doc.setFontSize(20);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Relatório Board - PoweringEG', pageWidth / 2, yPos, { align: 'center' });
+      yPos += 10;
+
+      // Período
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Período: ${dadosRelatorio.periodo.label}`, pageWidth / 2, yPos, { align: 'center' });
+      yPos += 5;
+      doc.text(`${new Date(dadosRelatorio.periodo.dataInicio).toLocaleDateString('pt-PT')} - ${new Date(dadosRelatorio.periodo.dataFim).toLocaleDateString('pt-PT')}`, pageWidth / 2, yPos, { align: 'center' });
+      yPos += 5;
+      doc.text(`Gerado em: ${new Date().toLocaleString('pt-PT')}`, pageWidth / 2, yPos, { align: 'center' });
+      yPos += 15;
+
+      // KPIs Principais
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Indicadores Principais (KPIs)', 14, yPos);
+      yPos += 8;
+
+      const kpisData = [
+        ['Lojas', kpis.totalLojas.toString()],
+        ['Gestores', kpis.totalGestores.toString()],
+        ['Relatórios', `${kpis.totalRelatoriosLivres + kpis.totalRelatoriosCompletos} (${kpis.totalRelatoriosLivres} livres + ${kpis.totalRelatoriosCompletos} completos)`],
+        ['Pendentes', `${kpis.totalPendentes} (${kpis.pendentesResolvidos} resolvidos)`],
+        ['Taxa de Resolução', `${kpis.taxaResolucaoPendentes}%`],
+        ['Ocorrências', `${kpis.totalOcorrencias} (${kpis.ocorrenciasCriticas} críticas)`],
+        ['Total Serviços', kpis.totalServicos.toString()],
+        ['Média Cumprimento Objetivo', `${(kpis.mediaObjetivo * 100).toFixed(1)}%`],
+        ['Taxa de Reparação Média', `${((kpis.mediaTaxaReparacao || 0) * 100).toFixed(1)}%`],
+      ];
+
+      autoTable(doc, {
+        startY: yPos,
+        head: [['Indicador', 'Valor']],
+        body: kpisData,
+        theme: 'striped',
+        headStyles: { fillColor: [37, 99, 235] },
+        margin: { left: 14, right: 14 },
+      });
+
+      yPos = (doc as any).lastAutoTable.finalY + 15;
+
+      // Análise por Gestor
+      if (yPos > 200) {
+        doc.addPage();
+        yPos = 20;
+      }
+
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Análise por Gestor', 14, yPos);
+      yPos += 8;
+
+      const gestoresData = analiseGestores.slice(0, 10).map(g => [
+        g.gestorNome || 'Desconhecido',
+        g.totalLojas.toString(),
+        (g.relatoriosLivres + g.relatoriosCompletos).toString(),
+        g.pendentesAtivos.toString(),
+        `${g.pontuacao}/100`,
+      ]);
+
+      autoTable(doc, {
+        startY: yPos,
+        head: [['Gestor', 'Lojas', 'Relatórios', 'Pendentes', 'Score']],
+        body: gestoresData,
+        theme: 'striped',
+        headStyles: { fillColor: [147, 51, 234] },
+        margin: { left: 14, right: 14 },
+      });
+
+      yPos = (doc as any).lastAutoTable.finalY + 15;
+
+      // Análise de Resultados
+      if (yPos > 200) {
+        doc.addPage();
+        yPos = 20;
+      }
+
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Análise de Resultados', 14, yPos);
+      yPos += 8;
+
+      const resultadosData = [
+        ['Total Serviços', analiseResultados.totalServicos.toString()],
+        ['Objetivo Total', analiseResultados.objetivoTotal.toString()],
+        ['Desvio Médio', `${(analiseResultados.desvioMedio * 100).toFixed(1)}%`],
+        ['Lojas Acima do Objetivo', analiseResultados.lojasAcimaObjetivo.toString()],
+        ['Lojas Abaixo do Objetivo', analiseResultados.lojasAbaixoObjetivo.toString()],
+        ['Taxa Reparação Média', `${((analiseResultados.mediaTaxaReparacao || 0) * 100).toFixed(1)}%`],
+        ['Vendas Complementares', `€${(analiseResultados.vendasComplementaresTotal || 0).toFixed(2)}`],
+      ];
+
+      autoTable(doc, {
+        startY: yPos,
+        head: [['Métrica', 'Valor']],
+        body: resultadosData,
+        theme: 'striped',
+        headStyles: { fillColor: [34, 197, 94] },
+        margin: { left: 14, right: 14 },
+      });
+
+      yPos = (doc as any).lastAutoTable.finalY + 15;
+
+      // Top 5 Lojas
+      if (analiseResultados.top5Lojas && analiseResultados.top5Lojas.length > 0) {
+        if (yPos > 220) {
+          doc.addPage();
+          yPos = 20;
+        }
+
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(34, 197, 94);
+        doc.text('Top 5 Lojas (Melhor Performance)', 14, yPos);
+        yPos += 6;
+        doc.setTextColor(0, 0, 0);
+
+        const top5Data = analiseResultados.top5Lojas.map((l, idx) => [
+          (idx + 1).toString(),
+          l.lojaNome,
+          l.valor.toString(),
+        ]);
+
+        autoTable(doc, {
+          startY: yPos,
+          head: [['Pos.', 'Loja', 'Serviços']],
+          body: top5Data,
+          theme: 'striped',
+          headStyles: { fillColor: [34, 197, 94] },
+          margin: { left: 14, right: 14 },
+        });
+
+        yPos = (doc as any).lastAutoTable.finalY + 10;
+      }
+
+      // Bottom 5 Lojas
+      if (analiseResultados.bottom5Lojas && analiseResultados.bottom5Lojas.length > 0) {
+        if (yPos > 220) {
+          doc.addPage();
+          yPos = 20;
+        }
+
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(239, 68, 68);
+        doc.text('Bottom 5 Lojas (Precisam Atenção)', 14, yPos);
+        yPos += 6;
+        doc.setTextColor(0, 0, 0);
+
+        const bottom5Data = analiseResultados.bottom5Lojas.map((l, idx) => [
+          (idx + 1).toString(),
+          l.lojaNome,
+          l.valor.toString(),
+        ]);
+
+        autoTable(doc, {
+          startY: yPos,
+          head: [['Pos.', 'Loja', 'Serviços']],
+          body: bottom5Data,
+          theme: 'striped',
+          headStyles: { fillColor: [239, 68, 68] },
+          margin: { left: 14, right: 14 },
+        });
+
+        yPos = (doc as any).lastAutoTable.finalY + 10;
+      }
+
+      // Análise de Pendentes
+      if (yPos > 200) {
+        doc.addPage();
+        yPos = 20;
+      }
+
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(0, 0, 0);
+      doc.text('Análise de Pendentes', 14, yPos);
+      yPos += 8;
+
+      const pendentesData = [
+        ['Pendentes Ativos', analisePendentes.totalAtivos.toString()],
+        ['Pendentes Resolvidos', analisePendentes.totalResolvidos.toString()],
+        ['Taxa de Resolução', `${analisePendentes.taxaResolucao}%`],
+        ['Pendentes Antigos (>7 dias)', analisePendentes.pendentesAntigos.toString()],
+      ];
+
+      autoTable(doc, {
+        startY: yPos,
+        head: [['Métrica', 'Valor']],
+        body: pendentesData,
+        theme: 'striped',
+        headStyles: { fillColor: [245, 158, 11] },
+        margin: { left: 14, right: 14 },
+      });
+
+      yPos = (doc as any).lastAutoTable.finalY + 15;
+
+      // Pendentes por Loja (Top 10)
+      if (analisePendentes.porLoja && analisePendentes.porLoja.length > 0) {
+        if (yPos > 200) {
+          doc.addPage();
+          yPos = 20;
+        }
+
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Pendentes por Loja (Top 10)', 14, yPos);
+        yPos += 6;
+
+        const pendentesLojaData = analisePendentes.porLoja.slice(0, 10).map(l => [
+          l.lojaNome,
+          l.count.toString(),
+        ]);
+
+        autoTable(doc, {
+          startY: yPos,
+          head: [['Loja', 'Pendentes']],
+          body: pendentesLojaData,
+          theme: 'striped',
+          headStyles: { fillColor: [245, 158, 11] },
+          margin: { left: 14, right: 14 },
+        });
+
+        yPos = (doc as any).lastAutoTable.finalY + 10;
+      }
+
+      // Análise de Ocorrências
+      if (yPos > 200) {
+        doc.addPage();
+        yPos = 20;
+      }
+
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Análise de Ocorrências', 14, yPos);
+      yPos += 8;
+
+      const ocorrenciasData = [
+        ['Total', analiseOcorrencias.totalOcorrencias.toString()],
+        ['Críticas', analiseOcorrencias.porImpacto.critico.toString()],
+        ['Alto Impacto', analiseOcorrencias.porImpacto.alto.toString()],
+        ['Médio Impacto', analiseOcorrencias.porImpacto.medio.toString()],
+        ['Baixo Impacto', analiseOcorrencias.porImpacto.baixo.toString()],
+      ];
+
+      autoTable(doc, {
+        startY: yPos,
+        head: [['Tipo', 'Quantidade']],
+        body: ocorrenciasData,
+        theme: 'striped',
+        headStyles: { fillColor: [239, 68, 68] },
+        margin: { left: 14, right: 14 },
+      });
+
+      // Rodapé em todas as páginas
+      const pageCount = doc.getNumberOfPages();
+      for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFontSize(8);
+        doc.setTextColor(128, 128, 128);
+        doc.text(
+          `PoweringEG Platform - Relatório Board - Página ${i} de ${pageCount}`,
+          pageWidth / 2,
+          doc.internal.pageSize.getHeight() - 10,
+          { align: 'center' }
+        );
+      }
+
+      // Download
+      const fileName = `RelatorioBoard_${periodoLabels[periodo]}_${new Date().toISOString().split('T')[0]}.pdf`;
+      doc.save(fileName);
+      toast.success('PDF exportado com sucesso!');
+    } catch (error) {
+      console.error('Erro ao exportar PDF:', error);
+      toast.error('Erro ao exportar PDF');
+    }
   };
 
   if (isLoading) {
@@ -295,6 +587,10 @@ export default function RelatorioBoard() {
             <Button variant="outline" onClick={() => refetch()} disabled={isLoading}>
               <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
               Atualizar
+            </Button>
+            <Button variant="outline" onClick={handleExportPDF} className="gap-2">
+              <Download className="h-4 w-4" />
+              Exportar PDF
             </Button>
             <Button
               onClick={() => setShowRelatorioIA(true)}
@@ -481,7 +777,7 @@ export default function RelatorioBoard() {
                 <CardContent>
                   <div className="flex items-center gap-2">
                     <span className="text-2xl font-bold text-amber-600">
-                      {(kpis.mediaTaxaReparacao || 0).toFixed(1)}%
+                      {((kpis.mediaTaxaReparacao || 0) * 100).toFixed(1)}%
                     </span>
                   </div>
                 </CardContent>
