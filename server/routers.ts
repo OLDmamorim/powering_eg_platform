@@ -1539,11 +1539,96 @@ export const appRouter = router({
         return resultado;
       }),
     
-    // Listar histórico de relatórios IA gerados
+    // Listar histórico de relatórios IA gerados com filtros
     getHistoricoRelatoriosIA: adminProcedure
-      .query(async () => {
+      .input(z.object({
+        categoria: z.string().optional(),
+        dataInicio: z.string().optional(),
+        dataFim: z.string().optional(),
+      }).optional())
+      .query(async ({ input }) => {
         const historico = await db.getHistoricoRelatoriosIA();
-        return historico;
+        
+        // Aplicar filtros se fornecidos
+        let resultado = historico;
+        
+        if (input?.categoria) {
+          const termo = input.categoria.toLowerCase();
+          resultado = resultado.filter(r => 
+            r.conteudo.toLowerCase().includes(termo)
+          );
+        }
+        
+        if (input?.dataInicio) {
+          const dataInicio = new Date(input.dataInicio);
+          resultado = resultado.filter(r => new Date(r.createdAt) >= dataInicio);
+        }
+        
+        if (input?.dataFim) {
+          const dataFim = new Date(input.dataFim);
+          dataFim.setHours(23, 59, 59, 999);
+          resultado = resultado.filter(r => new Date(r.createdAt) <= dataFim);
+        }
+        
+        return resultado;
+      }),
+    
+    // Enviar relatório IA por email com PDF anexado
+    enviarEmailRelatorioIA: adminProcedure
+      .input(z.object({
+        relatorioId: z.number(),
+        emailDestino: z.string().email(),
+        assuntoPersonalizado: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        // Obter o relatório
+        const relatorio = await db.getRelatorioIACategoriaById(input.relatorioId);
+        
+        if (!relatorio) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'Relatório não encontrado',
+          });
+        }
+        
+        // Gerar PDF do relatório
+        const { gerarPDFRelatorioIA } = await import('./pdfRelatorioIA');
+        const pdfBase64 = await gerarPDFRelatorioIA(relatorio.conteudo, relatorio.createdAt);
+        
+        // Enviar email com PDF anexado
+        const { sendEmail } = await import('./emailService');
+        
+        const dataRelatorio = new Date(relatorio.createdAt).toLocaleDateString('pt-PT', {
+          day: '2-digit',
+          month: 'long',
+          year: 'numeric',
+        });
+        
+        const assunto = input.assuntoPersonalizado || `Relatório IA - ${dataRelatorio}`;
+        
+        await sendEmail({
+          to: input.emailDestino,
+          subject: assunto,
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <h2 style="color: #333;">Relatório IA - Análise Executiva</h2>
+              <p>Segue em anexo o relatório IA gerado em <strong>${dataRelatorio}</strong>.</p>
+              <p>Este relatório contém uma análise executiva dos dados da plataforma PoweringEG.</p>
+              <hr style="border: 1px solid #eee; margin: 20px 0;" />
+              <p style="color: #666; font-size: 12px;">PoweringEG Platform</p>
+            </div>
+          `,
+          attachments: [{
+            filename: `relatorio-ia-${new Date(relatorio.createdAt).toISOString().split('T')[0]}.pdf`,
+            content: pdfBase64,
+            contentType: 'application/pdf',
+          }],
+        });
+        
+        return {
+          success: true,
+          emailEnviadoPara: input.emailDestino,
+        };
       }),
   }),
   
