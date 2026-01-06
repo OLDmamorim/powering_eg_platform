@@ -33,17 +33,22 @@ const NOMES_MESES_CURTOS = [
 
 /**
  * Gera os últimos N meses a partir da data atual
+ * Filtra apenas meses de 2025 em diante
  */
 function gerarUltimosMeses(quantidade: number = 24): MesSelecionado[] {
   const meses: MesSelecionado[] = [];
   const hoje = new Date();
+  const ANO_MINIMO = 2025;
   
   for (let i = 0; i < quantidade; i++) {
     const data = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
-    meses.push({
-      mes: data.getMonth() + 1,
-      ano: data.getFullYear()
-    });
+    // Filtrar apenas meses de 2025 em diante
+    if (data.getFullYear() >= ANO_MINIMO) {
+      meses.push({
+        mes: data.getMonth() + 1,
+        ano: data.getFullYear()
+      });
+    }
   }
   
   return meses;

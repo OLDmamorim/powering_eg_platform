@@ -2123,3 +2123,6 @@ NOTA: Sistema de email requer configuração externa no deployment
 
 ## Filtros Temporais - Relatório Board
 - [x] Substituir filtros predefinidos por seleção múltipla de meses no Relatório Board
+
+## Filtros Temporais - Apenas 2025
+- [x] Filtrar meses disponíveis para mostrar apenas 2025 em diante (remover 2024)
