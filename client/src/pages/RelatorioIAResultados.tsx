@@ -3,6 +3,7 @@ import { trpc } from '../lib/trpc';
 import DashboardLayout from '../components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
+import FiltroMesesCheckbox, { type MesSelecionado, mesesParaDatas, gerarLabelMeses } from '../components/FiltroMesesCheckbox';
 import { Button } from '../components/ui/button';
 import { Loader2, TrendingUp, TrendingDown, Target, Award, BarChart3, Sparkles, FileText, Trophy, Store, ArrowUpRight, ArrowDownRight, Globe, MapPin, User, Filter, AlertTriangle, CheckCircle2, XCircle, Percent, Activity, PieChart, X, Wrench, ShoppingBag, Zap, AlertCircle, ChevronDown, ChevronUp, Building2, Lightbulb, TrendingUpIcon, Calendar } from 'lucide-react';
 import { useAuth } from '../_core/hooks/useAuth';
@@ -25,8 +26,14 @@ export function RelatorioIAResultados() {
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
   
-  // Estado para Relatório IA de Resultados
-  const [periodoRelatorioIA, setPeriodoRelatorioIA] = useState<'mes_anterior' | 'mes_atual' | 'trimestre_anterior' | 'semestre_anterior' | 'ano_anterior'>('mes_anterior');
+  // Estado para Relatório IA de Resultados - Novo sistema de múltiplos meses
+  const [mesesSelecionados, setMesesSelecionados] = useState<MesSelecionado[]>(() => {
+    // Por defeito, mês anterior
+    const hoje = new Date();
+    const mesAnterior = hoje.getMonth() === 0 ? 12 : hoje.getMonth();
+    const anoMesAnterior = hoje.getMonth() === 0 ? hoje.getFullYear() - 1 : hoje.getFullYear();
+    return [{ mes: mesAnterior, ano: anoMesAnterior }];
+  });
   const [mostrarRelatorioIA, setMostrarRelatorioIA] = useState(false);
   
   // Estados para filtros (apenas admin)
@@ -91,13 +98,20 @@ export function RelatorioIAResultados() {
   
   // Construir parâmetros da query baseado nos filtros
   const queryParams = useMemo(() => {
+    // Calcular datas baseadas nos meses selecionados
+    const datas = mesesParaDatas(mesesSelecionados);
+    
     const params: {
-      periodo: typeof periodoRelatorioIA;
+      periodo: string;
       filtro?: 'pais' | 'zona' | 'gestor';
       zonasIds?: string[];
       gestorIdFiltro?: number;
+      dataInicio?: Date;
+      dataFim?: Date;
     } = {
-      periodo: periodoRelatorioIA,
+      periodo: `meses_${mesesSelecionados.map(m => `${m.mes}/${m.ano}`).join(', ')}`,
+      dataInicio: datas?.dataInicio,
+      dataFim: datas?.dataFim,
     };
     
     if (isAdmin) {
@@ -110,7 +124,7 @@ export function RelatorioIAResultados() {
     }
     
     return params;
-  }, [periodoRelatorioIA, tipoFiltro, zonasSeleccionadas, gestorSeleccionado, isAdmin]);
+  }, [mesesSelecionados, tipoFiltro, zonasSeleccionadas, gestorSeleccionado, isAdmin]);
   
   // Query para Relatório IA
   const { data: analiseIA, isLoading: loadingAnaliseIA, refetch: refetchAnaliseIA } = trpc.relatoriosIA.gerar.useQuery(
@@ -228,19 +242,12 @@ export function RelatorioIAResultados() {
               <div className="flex flex-wrap items-end gap-3">
                 {/* Período */}
                 <div className="space-y-1">
-                  <label className="text-xs font-medium text-muted-foreground">Período</label>
-                  <Select value={periodoRelatorioIA} onValueChange={(v) => setPeriodoRelatorioIA(v as typeof periodoRelatorioIA)}>
-                    <SelectTrigger className="w-[180px]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="mes_anterior">Mês Anterior</SelectItem>
-                      <SelectItem value="trimestre_anterior">Trimestre Anterior</SelectItem>
-                      <SelectItem value="semestre_anterior">Semestre Anterior</SelectItem>
-                      <SelectItem value="ano_anterior">Ano Anterior</SelectItem>
-                      <SelectItem value="mes_atual">Mês Atual (em curso)</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <label className="text-xs font-medium text-muted-foreground">Período (selecione meses)</label>
+                  <FiltroMesesCheckbox
+                    mesesSelecionados={mesesSelecionados}
+                    onMesesChange={setMesesSelecionados}
+                    placeholder="Selecionar meses"
+                  />
                 </div>
                 
                 {/* Filtros de Admin */}
@@ -385,7 +392,7 @@ export function RelatorioIAResultados() {
                 
                 {/* Botão Exportar PDF */}
                 {mostrarRelatorioIA && analiseIA && (
-                  <ExportarRelatorioIAPDF analiseIA={analiseIA} periodo={periodoRelatorioIA} />
+                  <ExportarRelatorioIAPDF analiseIA={analiseIA} periodo={gerarLabelMeses(mesesSelecionados)} />
                 )}
               </div>
               

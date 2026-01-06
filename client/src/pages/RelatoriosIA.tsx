@@ -1,13 +1,6 @@
 import DashboardLayout from "@/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { trpc } from "@/lib/trpc";
 import {
   BarChart3,
@@ -30,30 +23,53 @@ import {
   ArrowDownRight,
   Store,
 } from "lucide-react";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
 import { ExportarRelatorioIAPDF } from "@/components/ExportarRelatorioIAPDF";
+import FiltroMesesCheckbox, { type MesSelecionado, gerarLabelMeses } from "@/components/FiltroMesesCheckbox";
 
 // Registar componentes do Chart.js
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 import { toast } from "sonner";
 
 export default function RelatoriosIA() {
-  const [periodo, setPeriodo] = useState<
-    "mes_atual" | "mes_anterior" | "trimestre_anterior" | "semestre_anterior" | "ano_anterior"
-  >("mes_atual");
+  // Novo estado para múltiplos meses - por defeito o mês atual
+  const [mesesSelecionados, setMesesSelecionados] = useState<MesSelecionado[]>(() => {
+    const hoje = new Date();
+    return [{ mes: hoje.getMonth() + 1, ano: hoje.getFullYear() }];
+  });
   const relatorioRef = useRef<HTMLDivElement>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [analise, setAnalise] = useState<any>(null);
 
-  const { data: analise, isLoading, refetch } = trpc.relatoriosIA.gerar.useQuery(
-    { periodo },
+  // Nova query para múltiplos meses
+  const gerarMultiplosMesesQuery = trpc.relatoriosIA.gerarMultiplosMeses.useQuery(
+    { mesesSelecionados },
     { enabled: false }
   );
 
-  const handleGerar = () => {
+  const handleGerar = async () => {
+    if (mesesSelecionados.length === 0) {
+      toast.error("Por favor selecione pelo menos um mês");
+      return;
+    }
+    setIsGenerating(true);
     toast.info("A gerar relatório com IA...");
-    refetch();
+    try {
+      const result = await gerarMultiplosMesesQuery.refetch();
+      if (result.data) {
+        setAnalise(result.data);
+        toast.success("Relatório gerado com sucesso!");
+      }
+    } catch (error) {
+      toast.error("Erro ao gerar relatório");
+    } finally {
+      setIsGenerating(false);
+    }
   };
+  
+  const isLoading = isGenerating || gerarMultiplosMesesQuery.isFetching;
 
   return (
     <DashboardLayout>
@@ -73,30 +89,20 @@ export default function RelatoriosIA() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex gap-4 items-end">
-              <div className="flex-1 space-y-2">
-                <label className="text-sm font-medium">Período</label>
-                <Select
-                  value={periodo}
-                  onValueChange={(value: any) => setPeriodo(value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="mes_atual">Mês Atual</SelectItem>
-                    <SelectItem value="mes_anterior">Mês Anterior</SelectItem>
-                    <SelectItem value="trimestre_anterior">Trimestre Anterior</SelectItem>
-                    <SelectItem value="semestre_anterior">Semestre Anterior</SelectItem>
-                    <SelectItem value="ano_anterior">Ano Anterior</SelectItem>
-                  </SelectContent>
-                </Select>
+              <div className="flex-1 space-y-2 max-w-xs">
+                <label className="text-sm font-medium">Período (selecione meses)</label>
+                <FiltroMesesCheckbox
+                  mesesSelecionados={mesesSelecionados}
+                  onMesesChange={setMesesSelecionados}
+                  placeholder="Selecionar meses"
+                />
               </div>
               <div className="flex gap-2">
-                <Button onClick={handleGerar} disabled={isLoading}>
+                <Button onClick={handleGerar} disabled={isLoading || mesesSelecionados.length === 0}>
                   {isLoading ? "A gerar..." : "Gerar Relatório"}
                 </Button>
                 {analise && (
-                  <ExportarRelatorioIAPDF analiseIA={analise} periodo={periodo} />
+                  <ExportarRelatorioIAPDF analiseIA={analise} periodo={gerarLabelMeses(mesesSelecionados)} />
                 )}
               </div>
             </div>
@@ -189,7 +195,7 @@ export default function RelatoriosIA() {
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2">
-                  {analise.pontosPositivos.map((ponto, index) => (
+                  {(analise.pontosPositivos as string[]).map((ponto: string, index: number) => (
                     <li key={index} className="flex items-start gap-2">
                       <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 shrink-0" />
                       <span>{ponto}</span>
@@ -208,7 +214,7 @@ export default function RelatoriosIA() {
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2">
-                  {analise.pontosNegativos.map((ponto, index) => (
+                  {(analise.pontosNegativos as string[]).map((ponto: string, index: number) => (
                     <li key={index} className="flex items-start gap-2">
                       <XCircle className="h-5 w-5 text-red-500 mt-0.5 shrink-0" />
                       <span>{ponto}</span>
@@ -247,7 +253,7 @@ export default function RelatoriosIA() {
                     </h4>
                     <ul className="space-y-2">
                       {analise.analisePontosDestacados?.positivos?.length > 0 ? (
-                        analise.analisePontosDestacados.positivos.map((ponto, index) => (
+                        (analise.analisePontosDestacados.positivos as string[]).map((ponto: string, index: number) => (
                           <li key={index} className="flex items-start gap-2 text-sm">
                             <ThumbsUp className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
                             <span>{ponto}</span>
@@ -269,7 +275,7 @@ export default function RelatoriosIA() {
                     </h4>
                     <ul className="space-y-2">
                       {analise.analisePontosDestacados?.negativos?.length > 0 ? (
-                        analise.analisePontosDestacados.negativos.map((ponto, index) => (
+                        (analise.analisePontosDestacados.negativos as string[]).map((ponto: string, index: number) => (
                           <li key={index} className="flex items-start gap-2 text-sm">
                             <ThumbsDown className="h-4 w-4 text-red-500 mt-0.5 shrink-0" />
                             <span>{ponto}</span>
@@ -327,7 +333,7 @@ export default function RelatoriosIA() {
                       </h4>
                       <ul className="space-y-2">
                         {analise.analiseResultados.lojasDestaque?.length > 0 ? (
-                          analise.analiseResultados.lojasDestaque.map((loja, index) => (
+                          (analise.analiseResultados.lojasDestaque as string[]).map((loja: string, index: number) => (
                             <li key={index} className="flex items-start gap-2 text-sm">
                               <Star className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
                               <span>{loja}</span>
@@ -349,7 +355,7 @@ export default function RelatoriosIA() {
                       </h4>
                       <ul className="space-y-2">
                         {analise.analiseResultados.lojasAtencao?.length > 0 ? (
-                          analise.analiseResultados.lojasAtencao.map((loja, index) => (
+                          (analise.analiseResultados.lojasAtencao as string[]).map((loja: string, index: number) => (
                             <li key={index} className="flex items-start gap-2 text-sm">
                               <AlertTriangle className="h-4 w-4 text-amber-500 mt-0.5 shrink-0" />
                               <span>{loja}</span>
@@ -372,7 +378,7 @@ export default function RelatoriosIA() {
                         Recomendações de Performance
                       </h4>
                       <ul className="space-y-2">
-                        {analise.analiseResultados.recomendacoes.map((rec, index) => (
+                        {(analise.analiseResultados.recomendacoes as string[]).map((rec: string, index: number) => (
                           <li key={index} className="flex items-start gap-2 text-sm">
                             <Target className="h-4 w-4 text-primary mt-0.5 shrink-0" />
                             <span>{rec}</span>
@@ -486,14 +492,14 @@ export default function RelatoriosIA() {
                       <div style={{ height: '300px' }}>
                         <Bar
                           data={{
-                            labels: analise.dadosGraficos.rankingServicos.map(l => l.loja.length > 15 ? l.loja.substring(0, 15) + '...' : l.loja),
+                            labels: analise.dadosGraficos.rankingServicos.map((l: any) => l.loja.length > 15 ? l.loja.substring(0, 15) + '...' : l.loja),
                             datasets: [{
                               label: 'Serviços',
-                              data: analise.dadosGraficos.rankingServicos.map(l => l.servicos),
-                              backgroundColor: analise.dadosGraficos.rankingServicos.map(l => 
+                              data: analise.dadosGraficos.rankingServicos.map((l: any) => l.servicos),
+                              backgroundColor: analise.dadosGraficos.rankingServicos.map((l: any) => 
                                 l.desvio >= 0 ? 'rgba(34, 197, 94, 0.7)' : 'rgba(239, 68, 68, 0.7)'
                               ),
-                              borderColor: analise.dadosGraficos.rankingServicos.map(l => 
+                              borderColor: analise.dadosGraficos.rankingServicos.map((l: any) => 
                                 l.desvio >= 0 ? 'rgb(34, 197, 94)' : 'rgb(239, 68, 68)'
                               ),
                               borderWidth: 1,
@@ -539,7 +545,7 @@ export default function RelatoriosIA() {
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2">
-                  {analise.sugestoes.map((sugestao, index) => (
+                  {(analise.sugestoes as string[]).map((sugestao: string, index: number) => (
                     <li key={index} className="flex items-start gap-2">
                       <Lightbulb className="h-5 w-5 text-yellow-500 mt-0.5 shrink-0" />
                       <span>{sugestao}</span>
@@ -555,26 +561,30 @@ export default function RelatoriosIA() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {Object.entries(analise.frequenciaVisitas)
-                    .sort((a, b) => b[1] - a[1])
-                    .map(([loja, visitas]) => (
-                      <div key={loja} className="flex items-center justify-between">
-                        <span className="font-medium">{loja}</span>
-                        <div className="flex items-center gap-2">
-                          <div className="w-32 bg-muted rounded-full h-2">
-                            <div
-                              className="bg-primary h-2 rounded-full"
-                              style={{
-                                width: `${(visitas / Math.max(...Object.values(analise.frequenciaVisitas))) * 100}%`,
-                              }}
-                            />
+                  {Object.entries(analise.frequenciaVisitas as Record<string, number>)
+                    .sort((a, b) => (b[1] as number) - (a[1] as number))
+                    .map(([loja, visitas]) => {
+                      const numVisitas = visitas as number;
+                      const maxVisitas = Math.max(...Object.values(analise.frequenciaVisitas as Record<string, number>));
+                      return (
+                        <div key={loja} className="flex items-center justify-between">
+                          <span className="font-medium">{loja}</span>
+                          <div className="flex items-center gap-2">
+                            <div className="w-32 bg-muted rounded-full h-2">
+                              <div
+                                className="bg-primary h-2 rounded-full"
+                                style={{
+                                  width: `${(numVisitas / maxVisitas) * 100}%`,
+                                }}
+                              />
+                            </div>
+                            <span className="text-sm text-muted-foreground w-12 text-right">
+                              {numVisitas}x
+                            </span>
                           </div>
-                          <span className="text-sm text-muted-foreground w-12 text-right">
-                            {visitas}x
-                          </span>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                 </div>
               </CardContent>
             </Card>

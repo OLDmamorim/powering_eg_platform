@@ -8,12 +8,15 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { trpc } from "@/lib/trpc";
 import { TrendingUp, TrendingDown, Calendar, User, Store, AlertTriangle, CheckCircle, XCircle, GitCompare, Filter } from "lucide-react";
-
-type PeriodoFiltro = "mes_atual" | "mes_anterior" | "trimestre_anterior" | "semestre_anterior" | "ano_anterior";
+import FiltroMesesCheckbox, { type MesSelecionado, mesesParaDatas } from "@/components/FiltroMesesCheckbox";
 
 export default function HistoricoPontos() {
   const [selectedLojaId, setSelectedLojaId] = useState<string>("all");
-  const [periodoFiltro, setPeriodoFiltro] = useState<PeriodoFiltro>("mes_atual");
+  // Novo estado para múltiplos meses - por defeito o mês atual
+  const [mesesSelecionados, setMesesSelecionados] = useState<MesSelecionado[]>(() => {
+    const hoje = new Date();
+    return [{ mes: hoje.getMonth() + 1, ano: hoje.getFullYear() }];
+  });
   const [compareLoja1, setCompareLoja1] = useState<string>("");
   const [compareLoja2, setCompareLoja2] = useState<string>("");
   const [activeTab, setActiveTab] = useState<string>("historico");
@@ -22,47 +25,19 @@ export default function HistoricoPontos() {
   const { data: historico, isLoading: historicoLoading } = trpc.historicoPontos.all.useQuery();
   const { data: alertas, isLoading: alertasLoading } = trpc.alertas.lojasComAlertas.useQuery({});
   
-  // Calcular datas de início e fim baseadas no período
+  // Calcular datas de início e fim baseadas nos meses selecionados
   const { dataInicio, dataFim } = useMemo(() => {
-    const hoje = new Date();
-    let inicio: Date;
-    let fim: Date;
-    
-    switch (periodoFiltro) {
-      case "mes_atual":
-        inicio = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
-        fim = hoje;
-        break;
-      case "mes_anterior":
-        inicio = new Date(hoje.getFullYear(), hoje.getMonth() - 1, 1);
-        fim = new Date(hoje.getFullYear(), hoje.getMonth(), 0, 23, 59, 59);
-        break;
-      case "trimestre_anterior":
-        const trimestreAtual = Math.floor(hoje.getMonth() / 3);
-        inicio = new Date(hoje.getFullYear(), (trimestreAtual - 1) * 3, 1);
-        fim = new Date(hoje.getFullYear(), trimestreAtual * 3, 0, 23, 59, 59);
-        break;
-      case "semestre_anterior":
-        const semestreAtual = hoje.getMonth() < 6 ? 0 : 1;
-        if (semestreAtual === 0) {
-          inicio = new Date(hoje.getFullYear() - 1, 6, 1);
-          fim = new Date(hoje.getFullYear() - 1, 11, 31, 23, 59, 59);
-        } else {
-          inicio = new Date(hoje.getFullYear(), 0, 1);
-          fim = new Date(hoje.getFullYear(), 5, 30, 23, 59, 59);
-        }
-        break;
-      case "ano_anterior":
-        inicio = new Date(hoje.getFullYear() - 1, 0, 1);
-        fim = new Date(hoje.getFullYear() - 1, 11, 31, 23, 59, 59);
-        break;
-      default:
-        inicio = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
-        fim = hoje;
+    const datas = mesesParaDatas(mesesSelecionados);
+    if (datas) {
+      return datas;
     }
-    
-    return { dataInicio: inicio, dataFim: fim };
-  }, [periodoFiltro]);
+    // Fallback para mês atual
+    const hoje = new Date();
+    return {
+      dataInicio: new Date(hoje.getFullYear(), hoje.getMonth(), 1),
+      dataFim: hoje
+    };
+  }, [mesesSelecionados]);
   
   // Filtrar histórico por loja e período
   const historicoFiltrado = useMemo(() => {
@@ -257,18 +232,11 @@ export default function HistoricoPontos() {
                   </div>
                   <div className="w-64">
                     <label className="text-sm font-medium mb-2 block">Período</label>
-                    <Select value={periodoFiltro} onValueChange={(v) => setPeriodoFiltro(v as PeriodoFiltro)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecionar período" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="mes_atual">Mês Atual</SelectItem>
-                        <SelectItem value="mes_anterior">Mês Anterior</SelectItem>
-                        <SelectItem value="trimestre_anterior">Trimestre Anterior</SelectItem>
-                        <SelectItem value="semestre_anterior">Semestre Anterior</SelectItem>
-                        <SelectItem value="ano_anterior">Ano Anterior</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <FiltroMesesCheckbox
+                      mesesSelecionados={mesesSelecionados}
+                      onMesesChange={setMesesSelecionados}
+                      placeholder="Selecionar meses"
+                    />
                   </div>
                 </div>
               </CardContent>
@@ -348,7 +316,7 @@ export default function HistoricoPontos() {
                 </CardTitle>
                 <CardDescription>
                   {selectedLojaId === "all" 
-                    ? `Todas as visitas (${periodoFiltro === "mes_atual" ? "mês atual" : periodoFiltro === "mes_anterior" ? "mês anterior" : periodoFiltro === "trimestre_anterior" ? "trimestre anterior" : periodoFiltro === "semestre_anterior" ? "semestre anterior" : "ano anterior"})` 
+                    ? `Todas as visitas (${mesesSelecionados.length > 0 ? mesesSelecionados.length === 1 ? `${mesesSelecionados[0].mes}/${mesesSelecionados[0].ano}` : `${mesesSelecionados.length} meses` : "nenhum período"})` 
                     : `Visitas da loja selecionada`}
                 </CardDescription>
               </CardHeader>
@@ -481,20 +449,13 @@ export default function HistoricoPontos() {
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="w-48">
+                  <div className="w-56">
                     <label className="text-sm font-medium mb-2 block">Período</label>
-                    <Select value={periodoFiltro} onValueChange={(v) => setPeriodoFiltro(v as PeriodoFiltro)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Período" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="mes_atual">Mês Atual</SelectItem>
-                        <SelectItem value="mes_anterior">Mês Anterior</SelectItem>
-                        <SelectItem value="trimestre_anterior">Trimestre Anterior</SelectItem>
-                        <SelectItem value="semestre_anterior">Semestre Anterior</SelectItem>
-                        <SelectItem value="ano_anterior">Ano Anterior</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <FiltroMesesCheckbox
+                      mesesSelecionados={mesesSelecionados}
+                      onMesesChange={setMesesSelecionados}
+                      placeholder="Selecionar meses"
+                    />
                   </div>
                 </div>
               </CardContent>

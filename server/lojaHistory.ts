@@ -55,6 +55,73 @@ export interface LojaHistoryResult {
 
 type PeriodoFiltro = 'mes_atual' | 'mes_anterior' | 'trimestre_anterior' | 'semestre_anterior' | 'ano_anterior';
 
+export interface MesSelecionado {
+  mes: number; // 1-12
+  ano: number;
+}
+
+const NOMES_MESES = [
+  "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+  "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+];
+
+/**
+ * Calcula período a partir de array de meses selecionados
+ */
+export function calcularPeriodoMultiplosMeses(meses: MesSelecionado[]): { dataInicio: Date; dataFim: Date; label: string } {
+  if (!meses || meses.length === 0) {
+    // Fallback para mês anterior
+    const agora = new Date();
+    return {
+      dataInicio: new Date(agora.getFullYear(), agora.getMonth() - 1, 1),
+      dataFim: new Date(agora.getFullYear(), agora.getMonth(), 0, 23, 59, 59),
+      label: 'Mês Anterior'
+    };
+  }
+  
+  // Ordenar meses
+  const ordenados = [...meses].sort((a, b) => {
+    if (a.ano !== b.ano) return a.ano - b.ano;
+    return a.mes - b.mes;
+  });
+  
+  const primeiro = ordenados[0];
+  const ultimo = ordenados[ordenados.length - 1];
+  
+  const dataInicio = new Date(primeiro.ano, primeiro.mes - 1, 1);
+  const dataFim = new Date(ultimo.ano, ultimo.mes, 0, 23, 59, 59); // Último dia do mês
+  
+  // Gerar label
+  let label: string;
+  if (meses.length === 1) {
+    label = `${NOMES_MESES[primeiro.mes - 1]} ${primeiro.ano}`;
+  } else if (meses.length <= 3) {
+    label = ordenados.map(m => `${NOMES_MESES[m.mes - 1].substring(0, 3)} ${m.ano}`).join(", ");
+  } else {
+    // Verificar se são consecutivos
+    let consecutivos = true;
+    for (let i = 1; i < ordenados.length; i++) {
+      const prev = ordenados[i - 1];
+      const curr = ordenados[i];
+      const prevDate = new Date(prev.ano, prev.mes - 1);
+      const currDate = new Date(curr.ano, curr.mes - 1);
+      const diffMeses = (currDate.getFullYear() - prevDate.getFullYear()) * 12 + (currDate.getMonth() - prevDate.getMonth());
+      if (diffMeses !== 1) {
+        consecutivos = false;
+        break;
+      }
+    }
+    
+    if (consecutivos) {
+      label = `${NOMES_MESES[primeiro.mes - 1].substring(0, 3)} ${primeiro.ano} a ${NOMES_MESES[ultimo.mes - 1].substring(0, 3)} ${ultimo.ano}`;
+    } else {
+      label = `${meses.length} meses selecionados`;
+    }
+  }
+  
+  return { dataInicio, dataFim, label };
+}
+
 function calcularPeriodo(filtro: PeriodoFiltro): { dataInicio: Date; dataFim: Date; label: string } {
   const agora = new Date();
   let dataInicio: Date;
@@ -108,14 +175,37 @@ function calcularPeriodo(filtro: PeriodoFiltro): { dataInicio: Date; dataFim: Da
 }
 
 /**
+ * Gera histórico inteligente da loja baseado em múltiplos meses selecionados
+ */
+export async function generateLojaHistoryMultiplosMeses(
+  lojaId: number,
+  mesesSelecionados: MesSelecionado[]
+): Promise<LojaHistoryResult> {
+  const { dataInicio, dataFim, label } = calcularPeriodoMultiplosMeses(mesesSelecionados);
+  return generateLojaHistoryInterno(lojaId, dataInicio, dataFim, label);
+}
+
+/**
  * Gera histórico inteligente da loja baseado em todos os dados operacionais
  */
 export async function generateLojaHistory(
   lojaId: number,
   periodo: PeriodoFiltro = 'mes_anterior'
 ): Promise<LojaHistoryResult> {
+  const { dataInicio, dataFim, label } = calcularPeriodo(periodo);
+  return generateLojaHistoryInterno(lojaId, dataInicio, dataFim, label);
+}
+
+/**
+ * Função interna que gera o histórico
+ */
+async function generateLojaHistoryInterno(
+  lojaId: number,
+  dataInicio: Date,
+  dataFim: Date,
+  label: string
+): Promise<LojaHistoryResult> {
   try {
-    const { dataInicio, dataFim, label } = calcularPeriodo(periodo);
     
     // Buscar nome da loja
     const loja = await db.getLojaById(lojaId);

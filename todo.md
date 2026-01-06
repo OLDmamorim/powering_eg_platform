@@ -1659,6 +1659,16 @@ NOTA: Sistema de email requer configuração externa no deployment
 
 
 ## Atalho Relatório Board no Dashboard Admin
+
+## Filtros Temporais - Seleção Múltipla de Meses v3.7
+- [x] Criar componente reutilizável FiltroMesesCheckbox
+- [x] Atualizar backend para suportar múltiplos meses (array de mês/ano)
+- [x] Substituir filtros em RelatoriosIA.tsx
+- [x] Substituir filtros em ResumosGlobais.tsx
+- [x] Substituir filtros em HistoricoLoja.tsx
+- [x] Substituir filtros em HistoricoPontos.tsx
+- [x] Substituir filtros em RelatorioIAResultados.tsx
+- [x] Testar todas as páginas com novo sistema de filtros
 - [x] Substituir botão "Relatório Mensal" por "Relatório Board" no Dashboard do Admin
 - [x] Replicar funcionalidade do botão existente na página Categorias
 

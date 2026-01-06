@@ -18,11 +18,10 @@ import {
 } from "lucide-react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
-
-type PeriodoFiltro = 'mes_atual' | 'mes_anterior' | 'trimestre_anterior' | 'semestre_anterior' | 'ano_anterior';
+import FiltroMesesCheckbox, { type MesSelecionado } from "@/components/FiltroMesesCheckbox";
 
 type PeriodoComparacao = 'q1_ano_anterior_vs_atual' | 'q2_ano_anterior_vs_atual' | 'q3_ano_anterior_vs_atual' | 'q4_ano_anterior_vs_atual' | 's1_ano_anterior_vs_atual' | 's2_ano_anterior_vs_atual' | 'ano_completo';
 
@@ -30,19 +29,26 @@ export default function HistoricoLoja() {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
   const [lojaId, setLojaId] = useState("");
-  const [periodo, setPeriodo] = useState<PeriodoFiltro>('mes_anterior');
+  // Novo estado para múltiplos meses - por defeito o mês anterior
+  const [mesesSelecionados, setMesesSelecionados] = useState<MesSelecionado[]>(() => {
+    const hoje = new Date();
+    const mesAnterior = new Date(hoje.getFullYear(), hoje.getMonth() - 1, 1);
+    return [{ mes: mesAnterior.getMonth() + 1, ano: mesAnterior.getFullYear() }];
+  });
   const [historyData, setHistoryData] = useState<any>(null);
   const [exportando, setExportando] = useState(false);
   const [modoComparacao, setModoComparacao] = useState(false);
   const [periodoComparacao, setPeriodoComparacao] = useState<PeriodoComparacao>('q4_ano_anterior_vs_atual');
   const [comparacaoData, setComparacaoData] = useState<any>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const { data: lojasGestor } = trpc.lojas.getByGestor.useQuery(undefined, { enabled: user?.role === 'gestor' });
   const { data: lojasAdmin } = trpc.lojas.list.useQuery(undefined, { enabled: user?.role === 'admin' });
   const lojas = user?.role === 'admin' ? lojasAdmin : lojasGestor;
   
-  const generateHistoryMutation = trpc.lojaHistory.generate.useQuery(
-    { lojaId: parseInt(lojaId), periodo },
+  // Nova query para múltiplos meses
+  const generateHistoryMultiplosMesesQuery = trpc.lojaHistory.generateMultiplosMeses.useQuery(
+    { lojaId: parseInt(lojaId), mesesSelecionados },
     { enabled: false }
   );
 
@@ -58,10 +64,15 @@ export default function HistoricoLoja() {
       toast.error("Por favor selecione uma loja");
       return;
     }
+    if (mesesSelecionados.length === 0) {
+      toast.error("Por favor selecione pelo menos um mês");
+      return;
+    }
 
     try {
+      setIsGenerating(true);
       toast.info("🤖 A analisar histórico da loja com IA...");
-      const result = await generateHistoryMutation.refetch();
+      const result = await generateHistoryMultiplosMesesQuery.refetch();
       if (result.data) {
         setHistoryData(result.data);
         toast.success("Histórico gerado com sucesso!");
@@ -69,6 +80,8 @@ export default function HistoricoLoja() {
     } catch (error) {
       console.error("Erro ao gerar histórico:", error);
       toast.error("Erro ao gerar histórico. Tente novamente.");
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -98,13 +111,7 @@ export default function HistoricoLoja() {
     }
   };
 
-  const periodoLabels: Record<PeriodoFiltro, string> = {
-    mes_atual: 'Mês Atual',
-    mes_anterior: 'Mês Anterior',
-    trimestre_anterior: 'Trimestre Anterior',
-    semestre_anterior: 'Semestre Anterior',
-    ano_anterior: 'Ano Anterior',
-  };
+
 
   const comparacaoLabels: Record<PeriodoComparacao, string> = {
     'q1_ano_anterior_vs_atual': 'Q1 (Jan-Mar) Ano Anterior vs Atual',
@@ -656,24 +663,17 @@ export default function HistoricoLoja() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex flex-wrap gap-4">
-              {/* Período */}
-              <div className="flex-1 min-w-[180px] space-y-2">
-                <Label htmlFor="periodo">
+              {/* Período - Novo filtro de meses com checkboxes */}
+              <div className="flex-1 min-w-[220px] space-y-2">
+                <Label>
                   <Calendar className="h-4 w-4 inline mr-1" />
-                  Período
+                  Período (selecione meses)
                 </Label>
-                <Select value={periodo} onValueChange={(v) => setPeriodo(v as PeriodoFiltro)}>
-                  <SelectTrigger id="periodo">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="mes_anterior">Mês Anterior</SelectItem>
-                    <SelectItem value="trimestre_anterior">Trimestre Anterior</SelectItem>
-                    <SelectItem value="semestre_anterior">Semestre Anterior</SelectItem>
-                    <SelectItem value="ano_anterior">Ano Anterior</SelectItem>
-                    <SelectItem value="mes_atual">Mês Atual (em curso)</SelectItem>
-                  </SelectContent>
-                </Select>
+                <FiltroMesesCheckbox
+                  mesesSelecionados={mesesSelecionados}
+                  onMesesChange={setMesesSelecionados}
+                  placeholder="Selecionar meses"
+                />
               </div>
 
               {/* Loja */}
@@ -697,10 +697,10 @@ export default function HistoricoLoja() {
               <div className="flex items-end gap-2">
                 <Button 
                   onClick={handleGenerate} 
-                  disabled={!lojaId || generateHistoryMutation.isFetching}
+                  disabled={!lojaId || mesesSelecionados.length === 0 || isGenerating}
                   size="lg"
                 >
-                  {generateHistoryMutation.isFetching ? (
+                  {isGenerating ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                       A analisar...

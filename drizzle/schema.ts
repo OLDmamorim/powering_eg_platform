@@ -305,7 +305,7 @@ export type InsertRelatorioIACategoria = typeof relatoriosIACategorias.$inferIns
  */
 export const relatoriosIA = mysqlTable("relatorios_ia", {
   id: int("id").autoincrement().primaryKey(),
-  periodo: mysqlEnum("periodo", ["diario", "semanal", "mensal", "mes_anterior", "mes_atual", "trimestre_anterior", "semestre_anterior", "ano_anterior", "trimestral", "semestral", "anual"]).notNull(),
+  periodo: varchar("periodo", { length: 255 }).notNull(), // Agora aceita períodos personalizados como "meses_10/2025, 11/2025"
   conteudo: text("conteudo").notNull(), // JSON stringificado da análise IA
   geradoPor: int("geradoPor").notNull(), // FK para users.id (quem gerou)
   createdAt: timestamp("createdAt").defaultNow().notNull(),

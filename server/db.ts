@@ -2499,7 +2499,7 @@ export async function getPendentesByGestorId(gestorId: number): Promise<Array<Pe
  * Criar relatório IA (diário/semanal/mensal/trimestral)
  */
 export async function createRelatorioIA(data: {
-  periodo: "diario" | "semanal" | "mensal" | "mes_anterior" | "mes_atual" | "trimestre_anterior" | "semestre_anterior" | "ano_anterior" | "trimestral" | "semestral" | "anual";
+  periodo: string; // Agora aceita períodos personalizados como "meses_10/2025, 11/2025"
   conteudo: string; // JSON stringificado da análise
   geradoPor: number;
 }): Promise<RelatorioIA> {

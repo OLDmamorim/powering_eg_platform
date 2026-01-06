@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react';
 import { trpc } from '@/lib/trpc';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2, FileText, Calendar, Download, Home, ChevronRight, TrendingUp, TrendingDown, Target, BarChart3 } from 'lucide-react';
 import { Link } from 'wouter';
 import { toast } from 'sonner';
@@ -10,11 +9,10 @@ import jsPDF from 'jspdf';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler, BarElement } from 'chart.js';
 import { Line, Bar } from 'react-chartjs-2';
+import FiltroMesesCheckbox, { type MesSelecionado, mesesParaDatas, gerarLabelMeses } from '@/components/FiltroMesesCheckbox';
 
 // Registar componentes do Chart.js
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend, Filler);
-
-type Periodo = 'mes_atual' | 'mes_anterior' | 'trimestre_anterior' | 'semestre_anterior' | 'ano_anterior';
 
 interface ResumoData {
   titulo: string;
@@ -30,7 +28,11 @@ interface ResumoData {
 }
 
 export default function ResumosGlobais() {
-  const [periodo, setPeriodo] = useState<Periodo>('mes_atual');
+  // Novo estado para múltiplos meses - por defeito o mês atual
+  const [mesesSelecionados, setMesesSelecionados] = useState<MesSelecionado[]>(() => {
+    const hoje = new Date();
+    return [{ mes: hoje.getMonth() + 1, ano: hoje.getFullYear() }];
+  });
   const [resumoGerado, setResumoGerado] = useState<ResumoData | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -53,47 +55,28 @@ export default function ResumosGlobais() {
   });
 
   const handleGerar = () => {
+    if (mesesSelecionados.length === 0) {
+      toast.error('Por favor selecione pelo menos um mês');
+      return;
+    }
+    
     setIsGenerating(true);
     setResumoGerado(null);
 
-    const agora = new Date();
-    let dataInicio: Date;
-    let dataFim: Date = agora;
-
-    switch (periodo) {
-      case 'mes_atual':
-        dataInicio = new Date(agora.getFullYear(), agora.getMonth(), 1);
-        dataFim = agora;
-        break;
-      case 'mes_anterior':
-        dataInicio = new Date(agora.getFullYear(), agora.getMonth() - 1, 1);
-        dataFim = new Date(agora.getFullYear(), agora.getMonth(), 0, 23, 59, 59);
-        break;
-      case 'trimestre_anterior':
-        const trimestreAtual = Math.floor(agora.getMonth() / 3);
-        dataInicio = new Date(agora.getFullYear(), (trimestreAtual - 1) * 3, 1);
-        dataFim = new Date(agora.getFullYear(), trimestreAtual * 3, 0, 23, 59, 59);
-        break;
-      case 'semestre_anterior':
-        const semestreAtual = agora.getMonth() < 6 ? 0 : 1;
-        if (semestreAtual === 0) {
-          dataInicio = new Date(agora.getFullYear() - 1, 6, 1);
-          dataFim = new Date(agora.getFullYear() - 1, 11, 31, 23, 59, 59);
-        } else {
-          dataInicio = new Date(agora.getFullYear(), 0, 1);
-          dataFim = new Date(agora.getFullYear(), 5, 30, 23, 59, 59);
-        }
-        break;
-      case 'ano_anterior':
-        dataInicio = new Date(agora.getFullYear() - 1, 0, 1);
-        dataFim = new Date(agora.getFullYear() - 1, 11, 31, 23, 59, 59);
-        break;
+    const datas = mesesParaDatas(mesesSelecionados);
+    if (!datas) {
+      toast.error('Erro ao calcular período');
+      setIsGenerating(false);
+      return;
     }
+    
+    // Gerar label do período para o backend
+    const periodoLabel = gerarLabelMeses(mesesSelecionados);
 
     gerarResumoMutation.mutate({
-      periodo,
-      dataInicio,
-      dataFim,
+      periodo: 'mes_atual', // Manter compatibilidade - o período real é definido pelas datas
+      dataInicio: datas.dataInicio,
+      dataFim: datas.dataFim,
     });
   };
 
@@ -160,7 +143,7 @@ export default function ResumosGlobais() {
     doc.setFont('helvetica', 'bold');
     doc.text('Período:', margin, yPosition);
     doc.setFont('helvetica', 'normal');
-    doc.text(periodo.charAt(0).toUpperCase() + periodo.slice(1), margin + 25, yPosition);
+    doc.text(gerarLabelMeses(mesesSelecionados), margin + 25, yPosition);
     
     doc.setFont('helvetica', 'bold');
     doc.text('Data de Geração:', margin + 80, yPosition);
@@ -317,10 +300,11 @@ export default function ResumosGlobais() {
     yPosition += 15;
     
     // Gerar dados simulados de evolução baseados no período
-    const meses = periodo === 'mes_atual' || periodo === 'mes_anterior' ? ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4'] :
-                  periodo === 'trimestre_anterior' ? ['Mês 1', 'Mês 2', 'Mês 3'] :
-                  periodo === 'semestre_anterior' ? ['Mês 1', 'Mês 2', 'Mês 3', 'Mês 4', 'Mês 5', 'Mês 6'] :
-                  ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+    const numMeses = mesesSelecionados.length;
+    const meses = numMeses <= 1 ? ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4'] :
+                  numMeses <= 3 ? mesesSelecionados.map(m => `${m.mes}/${m.ano}`) :
+                  numMeses <= 6 ? mesesSelecionados.map(m => `${m.mes}/${m.ano}`) :
+                  mesesSelecionados.map(m => `${m.mes}/${m.ano}`);
     
     // Desenhar gráfico de barras simples para Taxa de Resolução
     doc.setFontSize(11);
@@ -440,8 +424,9 @@ export default function ResumosGlobais() {
       // Texto do rodapé com referência ExpressGlass
       doc.setFontSize(8);
       doc.setTextColor(128, 128, 128);
+      const labelPeriodo = gerarLabelMeses(mesesSelecionados);
       doc.text(
-        `PoweringEG Platform 2.0 | ExpressGlass | Resumo Global ${periodo.charAt(0).toUpperCase() + periodo.slice(1)}`,
+        `PoweringEG Platform 2.0 | ExpressGlass | Resumo Global ${labelPeriodo}`,
         margin,
         pageHeight - 8
       );
@@ -453,20 +438,11 @@ export default function ResumosGlobais() {
       );
     }
 
-    doc.save(`resumo-global-${periodo}-${new Date().toISOString().split('T')[0]}.pdf`);
+    doc.save(`resumo-global-${mesesSelecionados.map(m => `${m.mes}-${m.ano}`).join('_')}-${new Date().toISOString().split('T')[0]}.pdf`);
     toast.success('PDF descarregado com sucesso!');
   };
 
-  const getPeriodoLabel = (p: Periodo) => {
-    const labels: Record<Periodo, string> = {
-      mes_atual: 'Mês Atual',
-      mes_anterior: 'Mês Anterior',
-      trimestre_anterior: 'Trimestre Anterior',
-      semestre_anterior: 'Semestre Anterior',
-      ano_anterior: 'Ano Anterior',
-    };
-    return labels[p];
-  };
+  // Função removida - agora usamos gerarLabelMeses do componente
 
   return (
     <DashboardLayout>
@@ -500,22 +476,15 @@ export default function ResumosGlobais() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex gap-4 items-end">
-              <div className="flex-1">
-                <label className="text-sm font-medium mb-2 block">Período</label>
-                <Select value={periodo} onValueChange={(v) => setPeriodo(v as Periodo)}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="mes_atual">Mês Atual</SelectItem>
-                    <SelectItem value="mes_anterior">Mês Anterior</SelectItem>
-                    <SelectItem value="trimestre_anterior">Trimestre Anterior</SelectItem>
-                    <SelectItem value="semestre_anterior">Semestre Anterior</SelectItem>
-                    <SelectItem value="ano_anterior">Ano Anterior</SelectItem>
-                  </SelectContent>
-                </Select>
+              <div className="flex-1 max-w-xs">
+                <label className="text-sm font-medium mb-2 block">Período (selecione meses)</label>
+                <FiltroMesesCheckbox
+                  mesesSelecionados={mesesSelecionados}
+                  onMesesChange={setMesesSelecionados}
+                  placeholder="Selecionar meses"
+                />
               </div>
-              <Button onClick={handleGerar} disabled={isGenerating}>
+              <Button onClick={handleGerar} disabled={isGenerating || mesesSelecionados.length === 0}>
                 {isGenerating ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />

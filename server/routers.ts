@@ -940,11 +940,13 @@ export const appRouter = router({
   relatoriosIA: router({    
     gerar: gestorProcedure
       .input(z.object({
-        periodo: z.enum(["diario", "semanal", "mensal", "mes_anterior", "mes_atual", "trimestre_anterior", "semestre_anterior", "ano_anterior", "trimestral", "semestral", "anual"]),
+        periodo: z.string(), // Agora aceita períodos personalizados como "meses_10/2025, 11/2025"
         filtro: z.enum(["pais", "zona", "gestor"]).optional().default("pais"),
         zonaId: z.string().optional(),
         zonasIds: z.array(z.string()).optional(), // Novo: múltiplas zonas
         gestorIdFiltro: z.number().optional(),
+        dataInicio: z.date().optional(), // Novo: data de início do período
+        dataFim: z.date().optional(), // Novo: data de fim do período
       }))
       .query(async ({ input, ctx }) => {
         // Determinar gestorId baseado no filtro
@@ -1000,7 +1002,7 @@ export const appRouter = router({
           // filtro === "pais" → sem filtro, todas as lojas
         }
         
-        const analise = await gerarRelatorioComIA(input.periodo, gestorId, lojasIds);
+        const analise = await gerarRelatorioComIA(input.periodo, gestorId, lojasIds, input.dataInicio, input.dataFim);
         
         // Adicionar informação do filtro ao resultado
         const analiseComFiltro = {
@@ -1016,6 +1018,67 @@ export const appRouter = router({
             geradoPor: ctx.user.id,
           });
           console.log('[RelatoriosIA] Relatório salvo com sucesso na BD');
+        } catch (error) {
+          console.error('[RelatoriosIA] Erro ao salvar relatório:', error);
+        }
+        
+        return analiseComFiltro;
+      }),
+    
+    // Gerar relatório IA com múltiplos meses selecionados
+    gerarMultiplosMeses: gestorProcedure
+      .input(z.object({
+        mesesSelecionados: z.array(z.object({
+          mes: z.number().min(1).max(12),
+          ano: z.number().min(2020).max(2030),
+        })).min(1),
+        filtro: z.enum(["pais", "zona", "gestor"]).optional().default("pais"),
+        zonaId: z.string().optional(),
+        zonasIds: z.array(z.string()).optional(),
+        gestorIdFiltro: z.number().optional(),
+      }))
+      .query(async ({ input, ctx }) => {
+        let gestorId: number | undefined;
+        let lojasIds: number[] | undefined;
+        let filtroDescricao = "Todo o País";
+        
+        if (ctx.user.role !== "admin") {
+          gestorId = ctx.gestor?.id;
+          filtroDescricao = "Minhas Lojas";
+          if (gestorId) {
+            const lojasDoGestor = await db.getLojasByGestorId(gestorId);
+            lojasIds = lojasDoGestor.map(l => l.id);
+          }
+        } else {
+          if (input.filtro === "gestor" && input.gestorIdFiltro) {
+            const lojasDoGestor = await db.getLojasByGestorId(input.gestorIdFiltro);
+            lojasIds = lojasDoGestor.map(l => l.id);
+            const gestorInfo = await db.getGestorById(input.gestorIdFiltro);
+            filtroDescricao = `Gestor: ${gestorInfo?.nome || 'N/A'}`;
+          } else if (input.filtro === "zona" && input.zonasIds && input.zonasIds.length > 0) {
+            const primeiroMes = input.mesesSelecionados[0];
+            lojasIds = await db.getLojaIdsPorZonas(input.zonasIds, primeiroMes.mes, primeiroMes.ano);
+            filtroDescricao = input.zonasIds.length === 1 ? `Zona: ${input.zonasIds[0]}` : `Zonas: ${input.zonasIds.join(', ')}`;
+          }
+        }
+        
+        // Importar função de gerar relatório com múltiplos meses
+        const { gerarRelatorioComIAMultiplosMeses } = await import('./aiService');
+        const analise = await gerarRelatorioComIAMultiplosMeses(input.mesesSelecionados, gestorId, lojasIds);
+        
+        const analiseComFiltro = {
+          ...analise,
+          filtroAplicado: filtroDescricao,
+        };
+        
+        // Salvar relatório IA na base de dados
+        try {
+          const labelMeses = input.mesesSelecionados.map(m => `${m.mes}/${m.ano}`).join(', ');
+          await db.createRelatorioIA({
+            periodo: `meses_${labelMeses}`,
+            conteudo: JSON.stringify(analiseComFiltro),
+            geradoPor: ctx.user.id,
+          });
         } catch (error) {
           console.error('[RelatoriosIA] Erro ao salvar relatório:', error);
         }
@@ -1779,6 +1842,21 @@ export const appRouter = router({
       .query(async ({ input }) => {
         const { compararPeriodos } = await import('./lojaHistory');
         const result = await compararPeriodos(input.lojaId, input.tipoComparacao);
+        return result;
+      }),
+    
+    // Gerar histórico com múltiplos meses selecionados
+    generateMultiplosMeses: protectedProcedure
+      .input(z.object({
+        lojaId: z.number(),
+        mesesSelecionados: z.array(z.object({
+          mes: z.number().min(1).max(12),
+          ano: z.number().min(2020).max(2030),
+        })).min(1),
+      }))
+      .query(async ({ input }) => {
+        const { generateLojaHistoryMultiplosMeses } = await import('./lojaHistory');
+        const result = await generateLojaHistoryMultiplosMeses(input.lojaId, input.mesesSelecionados);
         return result;
       }),
   }),

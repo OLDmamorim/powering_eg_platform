@@ -1,0 +1,1 @@
+ALTER TABLE `relatorios_ia` MODIFY COLUMN `periodo` varchar(255) NOT NULL;
