@@ -229,16 +229,52 @@ export async function gerarRelatorioComIA(
 
   // ========== BUSCAR DADOS AVANÇADOS v6.5 ==========
   const agora = new Date();
-  let mesParaBuscar = agora.getMonth() + 1;
-  let anoParaBuscar = agora.getFullYear();
+  
+  // Calcular lista de meses a buscar baseado no período
+  const mesesParaBuscar: Array<{ mes: number; ano: number }> = [];
   
   if (periodo === 'mes_anterior') {
-    mesParaBuscar = agora.getMonth();
-    if (mesParaBuscar === 0) {
-      mesParaBuscar = 12;
-      anoParaBuscar = agora.getFullYear() - 1;
+    let mesAnterior = agora.getMonth();
+    let anoAnterior = agora.getFullYear();
+    if (mesAnterior === 0) {
+      mesAnterior = 12;
+      anoAnterior = agora.getFullYear() - 1;
     }
+    mesesParaBuscar.push({ mes: mesAnterior, ano: anoAnterior });
+  } else if (periodo === 'mes_atual') {
+    mesesParaBuscar.push({ mes: agora.getMonth() + 1, ano: agora.getFullYear() });
+  } else if (periodo === 'trimestre_anterior') {
+    // Trimestre anterior completo (Q1=Jan-Mar, Q2=Abr-Jun, Q3=Jul-Set, Q4=Out-Dez)
+    const mesAtual = agora.getMonth();
+    const trimestreAtual = Math.floor(mesAtual / 3);
+    const trimestreAnterior = trimestreAtual === 0 ? 3 : trimestreAtual - 1;
+    const anoTrimestre = trimestreAtual === 0 ? agora.getFullYear() - 1 : agora.getFullYear();
+    const mesInicioTrimestre = trimestreAnterior * 3 + 1;
+    for (let i = 0; i < 3; i++) {
+      mesesParaBuscar.push({ mes: mesInicioTrimestre + i, ano: anoTrimestre });
+    }
+  } else if (periodo === 'semestre_anterior') {
+    // Semestre anterior completo (S1=Jan-Jun, S2=Jul-Dez)
+    const mesAtual = agora.getMonth();
+    const semestreAtual = mesAtual < 6 ? 0 : 1;
+    const semestreAnterior = semestreAtual === 0 ? 1 : 0;
+    const anoSemestre = semestreAtual === 0 ? agora.getFullYear() - 1 : agora.getFullYear();
+    const mesInicioSemestre = semestreAnterior * 6 + 1;
+    for (let i = 0; i < 6; i++) {
+      mesesParaBuscar.push({ mes: mesInicioSemestre + i, ano: anoSemestre });
+    }
+  } else if (periodo === 'ano_anterior') {
+    // Ano anterior completo (Jan-Dez)
+    const anoAnterior = agora.getFullYear() - 1;
+    for (let i = 1; i <= 12; i++) {
+      mesesParaBuscar.push({ mes: i, ano: anoAnterior });
+    }
+  } else {
+    // Fallback para mês atual
+    mesesParaBuscar.push({ mes: agora.getMonth() + 1, ano: agora.getFullYear() });
   }
+  
+  console.log(`[RelatoriosIA] Período: ${periodo}, Meses a buscar:`, mesesParaBuscar);
   
   // Buscar dados analíticos avançados
   let dadosAvancados: any = null;
@@ -247,12 +283,103 @@ export async function gerarRelatorioComIA(
   let statsResultados: any = null;
   
   try {
-    // Buscar dados avançados com todos os rankings
-    dadosAvancados = await db.getDadosAnaliseAvancada(mesParaBuscar, anoParaBuscar, lojasIds);
-    statsResultados = dadosAvancados?.estatisticas;
+    // Buscar e agregar dados de todos os meses do período
+    const todosRankings: any[] = [];
+    let somaServicos = 0;
+    let somaObjetivos = 0;
+    let somaReparacoes = 0;
+    let contLojas = 0;
+    let somaDesvio = 0;
+    let somaTaxaReparacao = 0;
+    let lojasAcimaObjetivo = 0;
     
-    // Buscar ranking completo para gráficos
-    rankingLojas = await db.getRankingLojas('totalServicos', mesParaBuscar, anoParaBuscar, 100, lojasIds) || [];
+    // Mapa para agregar dados por loja
+    const lojaAgregado = new Map<number, {
+      lojaId: number;
+      lojaNome: string;
+      zona: string | null;
+      totalServicos: number;
+      objetivoMensal: number;
+      qtdReparacoes: number;
+      qtdParaBrisas: number;
+      mesesContados: number;
+    }>();
+    
+    for (const { mes, ano } of mesesParaBuscar) {
+      const dadosMes = await db.getDadosAnaliseAvancada(mes, ano, lojasIds);
+      const rankingMes = await db.getRankingLojas('totalServicos', mes, ano, 100, lojasIds) || [];
+      
+      // Agregar estatísticas
+      if (dadosMes?.estatisticas) {
+        const stats = dadosMes.estatisticas;
+        somaServicos += stats.somaServicos || 0;
+        somaObjetivos += stats.somaObjetivos || 0;
+        somaReparacoes += stats.somaReparacoes || 0;
+        if (stats.totalLojas > 0) {
+          contLojas += stats.totalLojas;
+          somaDesvio += (stats.mediaDesvioPercentual || 0) * stats.totalLojas;
+          somaTaxaReparacao += (stats.mediaTaxaReparacao || 0) * stats.totalLojas;
+          lojasAcimaObjetivo += stats.lojasAcimaObjetivo || 0;
+        }
+      }
+      
+      // Agregar dados por loja
+      for (const loja of rankingMes) {
+        const existing = lojaAgregado.get(loja.lojaId);
+        if (existing) {
+          existing.totalServicos += loja.totalServicos || 0;
+          existing.objetivoMensal += loja.objetivoMensal || 0;
+          existing.mesesContados++;
+        } else {
+          lojaAgregado.set(loja.lojaId, {
+            lojaId: loja.lojaId,
+            lojaNome: loja.lojaNome,
+            zona: loja.zona,
+            totalServicos: loja.totalServicos || 0,
+            objetivoMensal: loja.objetivoMensal || 0,
+            qtdReparacoes: 0,
+            qtdParaBrisas: 0,
+            mesesContados: 1,
+          });
+        }
+      }
+    }
+    
+    // Calcular estatísticas agregadas
+    const totalLojasUnicas = lojaAgregado.size;
+    statsResultados = {
+      totalLojas: totalLojasUnicas,
+      somaServicos,
+      somaObjetivos,
+      mediaDesvioPercentual: contLojas > 0 ? somaDesvio / contLojas : 0,
+      mediaTaxaReparacao: contLojas > 0 ? somaTaxaReparacao / contLojas : 0,
+      somaReparacoes,
+      lojasAcimaObjetivo: Math.round(lojasAcimaObjetivo / mesesParaBuscar.length),
+    };
+    
+    // Converter mapa para array e calcular desvio agregado
+    rankingLojas = Array.from(lojaAgregado.values()).map(loja => {
+      const desvio = loja.objetivoMensal > 0 
+        ? (loja.totalServicos - loja.objetivoMensal) / loja.objetivoMensal 
+        : 0;
+      return {
+        lojaId: loja.lojaId,
+        lojaNome: loja.lojaNome,
+        zona: loja.zona,
+        totalServicos: loja.totalServicos,
+        objetivoMensal: loja.objetivoMensal,
+        desvioPercentualMes: desvio,
+        valor: loja.totalServicos,
+      };
+    }).sort((a, b) => b.totalServicos - a.totalServicos);
+    
+    // Usar o primeiro mês para buscar rankings detalhados (para manter compatibilidade)
+    const primeiroMes = mesesParaBuscar[0];
+    dadosAvancados = await db.getDadosAnaliseAvancada(primeiroMes.mes, primeiroMes.ano, lojasIds);
+    // Sobrescrever estatísticas com as agregadas
+    if (dadosAvancados) {
+      dadosAvancados.estatisticas = statsResultados;
+    }
     
     // Calcular evolução para comparação
     if (rankingLojas.length > 0) {

@@ -1743,10 +1743,11 @@ export const appRouter = router({
     generate: protectedProcedure
       .input(z.object({
         lojaId: z.number(),
+        periodo: z.enum(['mes_atual', 'mes_anterior', 'trimestre_anterior', 'semestre_anterior', 'ano_anterior']).optional().default('mes_anterior'),
       }))
       .query(async ({ input }) => {
         const { generateLojaHistory } = await import('./lojaHistory');
-        const result = await generateLojaHistory(input.lojaId);
+        const result = await generateLojaHistory(input.lojaId, input.periodo);
         return result;
       }),
   }),

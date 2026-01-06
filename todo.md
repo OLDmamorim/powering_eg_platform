@@ -2083,3 +2083,6 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Remover cabeçalho roxo exagerado do PDF do Relatório IA de Resultados - design mais sóbrio
 - [x] Consolidar layout do Relatório IA de Resultados para gestores (mesmo design profissional do PDF)
 - [x] Corrigir PDF do Relatório IA de Resultados para gestores - aplicar mesmo layout profissional que admins
+- [x] Bug: Filtros temporais (Trimestre, Semestre, Ano) no Relatório IA Resultados não retornam dados
+- [x] Histórico da Loja: Adicionar filtro temporal (Mês, Trimestre, Semestre, Ano)
+- [x] Histórico da Loja: Análise IA completa com dados operacionais, resultados, comerciais, pendentes e problemas
