@@ -3661,7 +3661,7 @@ export async function getEstatisticasComplementares(
       totalTratamentoQtd: sql<number>`SUM(${vendasComplementares.tratamentoQtd})`,
       totalLavagensQtd: sql<number>`SUM(${vendasComplementares.lavagensTotal})`,
       mediaEscovasPercent: sql<number>`AVG(${vendasComplementares.escovasPercent})`,
-      lojasComEscovas: sql<number>`SUM(CASE WHEN ${vendasComplementares.escovasQtd} > 0 THEN 1 ELSE 0 END)`,
+      lojasComEscovas: sql<number>`SUM(CASE WHEN ${vendasComplementares.escovasPercent} >= 0.075 THEN 1 ELSE 0 END)`,
     })
     .from(vendasComplementares)
     .where(and(...conditions));
