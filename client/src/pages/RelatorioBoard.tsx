@@ -588,10 +588,6 @@ export default function RelatorioBoard() {
               <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
               Atualizar
             </Button>
-            <Button variant="outline" onClick={handleExportPDF} className="gap-2">
-              <Download className="h-4 w-4" />
-              Exportar PDF
-            </Button>
             <Button
               onClick={() => setShowRelatorioIA(true)}
               className="gap-2"

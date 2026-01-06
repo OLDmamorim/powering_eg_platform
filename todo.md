@@ -2063,3 +2063,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 
 - [x] Corrigir Taxa de Reparação Média no Relatório Board (mostrar 20% em vez de 0.2%)
 - [x] Adicionar botão de exportação para PDF no Relatório Board
+
+## Melhorias Visualização Relatórios Históricos v6.6
+- [x] Remover botão Exportar PDF do header do Relatório Board
+- [x] Melhorar modal de visualização de relatórios históricos (janela completa)
+- [x] Adicionar botão de download PDF no modal de visualização
