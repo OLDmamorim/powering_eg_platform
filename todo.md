@@ -2079,3 +2079,4 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [ ] Corrigir texto '[Seu Nome/Consultoria]' no Relatório Executivo para Board
 - [ ] Corrigir texto '[Seu Nome/Consultoria]' no Relatório Board para mostrar nome do utilizador
 - [x] Verificar e corrigir formatação do PDF descarregado do Relatório Board
+- [x] Melhorar PDF do Relatório IA de Resultados para incluir gráficos, cores e layout visual igual à interface web
