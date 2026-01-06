@@ -111,11 +111,43 @@ ${JSON.stringify(dadosOcorrencias, null, 2)}
   - Resolvido: ${estatOcorrencias.porEstado.resolvido}
 - Temas Mais Frequentes: ${estatOcorrencias.temasMaisFrequentes.map(t => `${t.tema} (${t.count})`).join(', ') || 'Nenhum'}
 
+**CATEGORIAS COM STATUS "A ACOMPANHAR" (PRIORITÁRIAS PARA DISCUSSÃO NO BOARD):**
+${JSON.stringify(
+  dadosParaIA
+    .filter(cat => cat.contadores.acompanhar > 0)
+    .map(cat => ({
+      categoria: cat.categoria,
+      totalAAcompanhar: cat.contadores.acompanhar,
+      relatoriosAAcompanhar: cat.relatorios
+        .filter(r => r.estado === 'acompanhar')
+        .map(r => ({
+          loja: r.loja,
+          gestor: r.gestor,
+          data: r.data,
+          descricao: r.descricao
+        }))
+    })),
+  null, 2
+)}
+
 **INSTRUÇÕES:**
 Gere um relatório executivo em Markdown com a seguinte estrutura:
 
 # Relatório Executivo por Categorias e Ocorrências Estruturais
 *Gerado em: [data atual]*
+
+## 🚨 ASSUNTOS PRIORITÁRIOS PARA DISCUSSÃO NO BOARD
+**IMPORTANTE: Esta secção deve ser a primeira e mais destacada do relatório.**
+
+Liste aqui TODAS as categorias que têm relatórios com status "A Acompanhar" (não resolvidos).
+Para cada categoria:
+- **Nome da Categoria**
+- Número de relatórios a acompanhar
+- Lista dos assuntos/problemas específicos que precisam de discussão
+- Lojas afetadas
+- Recomendação de ação urgente
+
+**NOTA:** Categorias com status "Em Tratamento" ou "Tratado" NÃO devem aparecer nesta secção prioritária.
 
 ## 📊 Resumo Executivo
 - Visão geral da situação atual (relatórios + ocorrências)

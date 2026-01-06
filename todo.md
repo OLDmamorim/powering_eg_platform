@@ -2054,3 +2054,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Bug: Nomes dos gestores apareciam como "Desconhecido" - corrigido para usar gestor.user.name
 - [x] Bug: Análise IA usava "Gestor A" em vez do nome real - adicionada instrução explícita no prompt
 - [x] Bug: Taxa de reparação - verificado, mostra valores corretos (0% quando não há dados de resultados)
+
+## Melhorias Relatório Board v6.5
+- [x] Usar mesmo relatório IA da página Categorias no Relatório Board
+- [x] Guardar relatórios gerados no histórico (como na página Categorias)
+- [x] Incluir categorias com status "A Acompanhar" no relatório para discussão no board
+- [x] Excluir categorias "Em Tratamento" ou "Tratado" do relatório
