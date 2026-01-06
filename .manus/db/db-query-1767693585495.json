@@ -1,0 +1,60 @@
+{
+  "query": "SELECT lojaId, taxaReparacao, totalServicos FROM resultados_mensais WHERE mes = 12 AND ano = 2025 LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT lojaId, taxaReparacao, totalServicos FROM resultados_mensais WHERE mes = 12 AND ano = 2025 LIMIT 10;",
+  "rows": [
+    {
+      "lojaId": "180001",
+      "taxaReparacao": "0.2973",
+      "totalServicos": "47"
+    },
+    {
+      "lojaId": "180002",
+      "taxaReparacao": "0.3158",
+      "totalServicos": "138"
+    },
+    {
+      "lojaId": "180003",
+      "taxaReparacao": "0.4043",
+      "totalServicos": "63"
+    },
+    {
+      "lojaId": "180004",
+      "taxaReparacao": "0.3158",
+      "totalServicos": "36"
+    },
+    {
+      "lojaId": "180005",
+      "taxaReparacao": "0.2459",
+      "totalServicos": "120"
+    },
+    {
+      "lojaId": "180006",
+      "taxaReparacao": "0.3600",
+      "totalServicos": "77"
+    },
+    {
+      "lojaId": "180007",
+      "taxaReparacao": "0.4524",
+      "totalServicos": "78"
+    },
+    {
+      "lojaId": "180008",
+      "taxaReparacao": "0.3208",
+      "totalServicos": "73"
+    },
+    {
+      "lojaId": "60002",
+      "taxaReparacao": "0.2857",
+      "totalServicos": "33"
+    },
+    {
+      "lojaId": "180009",
+      "taxaReparacao": "0.4737",
+      "totalServicos": "40"
+    }
+  ],
+  "messages": [],
+  "stdout": "lojaId\ttaxaReparacao\ttotalServicos\n180001\t0.2973\t47\n180002\t0.3158\t138\n180003\t0.4043\t63\n180004\t0.3158\t36\n180005\t0.2459\t120\n180006\t0.3600\t77\n180007\t0.4524\t78\n180008\t0.3208\t73\n60002\t0.2857\t33\n180009\t0.4737\t40\n",
+  "stderr": "",
+  "execution_time_ms": 51
+}

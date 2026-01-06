@@ -1,0 +1,45 @@
+{
+  "query": "SELECT oe.id, t.nome as tema, oe.descricao FROM ocorrencias_estruturais oe LEFT JOIN temas_ocorrencias t ON oe.temaId = t.id WHERE t.nome LIKE '%Teste%SMTP%' OR oe.descricao LIKE '%Teste%SMTP%' OR t.nome LIKE '%Teste email%' OR oe.descricao LIKE '%Teste email%';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT oe.id, t.nome as tema, oe.descricao FROM ocorrencias_estruturais oe LEFT JOIN temas_ocorrencias t ON oe.temaId = t.id WHERE t.nome LIKE '%Teste%SMTP%' OR oe.descricao LIKE '%Teste%SMTP%' OR t.nome LIKE '%Teste email%' OR oe.descricao LIKE '%Teste email%';",
+  "rows": [
+    {
+      "id": "120001",
+      "tema": "Teste Email SMTP",
+      "descricao": "Descrição de teste para verificar envio de email via SMTP Gmail"
+    },
+    {
+      "id": "120002",
+      "tema": "Teste Email SMTP",
+      "descricao": "Descrição de teste para verificar envio de email via SMTP Gmail"
+    },
+    {
+      "id": "120003",
+      "tema": "Teste Email SMTP",
+      "descricao": "Descrição de teste para verificar envio de email via SMTP Gmail"
+    },
+    {
+      "id": "120004",
+      "tema": "Teste Email SMTP",
+      "descricao": "Descrição de teste para verificar envio de email via SMTP Gmail"
+    },
+    {
+      "id": "150001",
+      "tema": "Teste Email SMTP",
+      "descricao": "Descrição de teste para verificar envio de email via SMTP Gmail"
+    },
+    {
+      "id": "150002",
+      "tema": "Teste Email SMTP",
+      "descricao": "Descrição de teste para verificar envio de email via SMTP Gmail"
+    },
+    {
+      "id": "150003",
+      "tema": "Teste Email SMTP",
+      "descricao": "Descrição de teste para verificar envio de email via SMTP Gmail"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttema\tdescricao\n120001\tTeste Email SMTP\tDescrição de teste para verificar envio de email via SMTP Gmail\n120002\tTeste Email SMTP\tDescrição de teste para verificar envio de email via SMTP Gmail\n120003\tTeste Email SMTP\tDescrição de teste para verificar envio de email via SMTP Gmail\n120004\tTeste Email SMTP\tDescrição de teste para verificar envio de email via SMTP Gmail\n150001\tTeste Email SMTP\tDescrição de teste para verificar envio de email via SMTP Gmail\n150002\tTeste Email SMTP\tDescrição de teste para verificar envio de email via SMTP Gmail\n150003\tTeste Email SMTP\tDescrição de teste para verificar envio de email via SMTP Gmail\n",
+  "stderr": "",
+  "execution_time_ms": 51
+}

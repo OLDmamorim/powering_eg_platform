@@ -500,7 +500,7 @@ export async function gerarAnaliseIARelatorioBoard(dados: DadosRelatorioBoard): 
 - Ocorrências Críticas: ${dados.kpis.ocorrenciasCriticas}
 - Total de Serviços: ${dados.kpis.totalServicos}
 - Média de Cumprimento de Objetivo: ${dados.kpis.mediaObjetivo?.toFixed(1) || 0}%
-- Média Taxa de Reparação: ${dados.kpis.mediaTaxaReparacao?.toFixed(1) || 0}%
+- Média Taxa de Reparação: ${((dados.kpis.mediaTaxaReparacao || 0) * 100).toFixed(1)}%
 
 **ANÁLISE POR GESTOR (Top 5):**
 ${dados.analiseGestores.slice(0, 5).map(g => `
@@ -521,7 +521,7 @@ ${dados.analiseCategorias.slice(0, 5).map(c => `
 - Desvio Médio: ${dados.analiseResultados.desvioMedio?.toFixed(1) || 0}%
 - Lojas Acima do Objetivo: ${dados.analiseResultados.lojasAcimaObjetivo}
 - Lojas Abaixo do Objetivo: ${dados.analiseResultados.lojasAbaixoObjetivo}
-- Taxa Reparação Média: ${dados.analiseResultados.mediaTaxaReparacao?.toFixed(1) || 0}%
+- Taxa Reparação Média: ${((dados.analiseResultados.mediaTaxaReparacao || 0) * 100).toFixed(1)}%
 - Vendas Complementares: €${dados.analiseResultados.vendasComplementaresTotal?.toFixed(2) || 0}
 
 **ANÁLISE DE PENDENTES:**

@@ -2073,3 +2073,4 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Substituir botão "Descarregar Markdown" por "Descarregar PDF" na tab Análise IA
 - [x] Implementar função handleDownloadAnaliseIAPDF para exportar análise IA em PDF formatado
 - [x] Remover botão "Gerar Relatório IA para Board" da página Categorias
+- [x] Corrigir Taxa de Reparação Média no Relatório Board (multiplicar por 100 para mostrar percentagem correta)

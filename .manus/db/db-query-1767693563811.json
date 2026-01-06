@@ -1,0 +1,30 @@
+{
+  "query": "SELECT lojaId, taxaReparacao FROM resultados_mensais LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT lojaId, taxaReparacao FROM resultados_mensais LIMIT 5;",
+  "rows": [
+    {
+      "lojaId": "180001",
+      "taxaReparacao": "0.2973"
+    },
+    {
+      "lojaId": "180002",
+      "taxaReparacao": "0.3158"
+    },
+    {
+      "lojaId": "180003",
+      "taxaReparacao": "0.4043"
+    },
+    {
+      "lojaId": "180004",
+      "taxaReparacao": "0.3158"
+    },
+    {
+      "lojaId": "180005",
+      "taxaReparacao": "0.2459"
+    }
+  ],
+  "messages": [],
+  "stdout": "lojaId\ttaxaReparacao\n180001\t0.2973\n180002\t0.3158\n180003\t0.4043\n180004\t0.3158\n180005\t0.2459\n",
+  "stderr": "",
+  "execution_time_ms": 54
+}

@@ -1,0 +1,25 @@
+{
+  "query": "SELECT oe.id, t.nome as tema, LEFT(oe.descricao, 50) as descricao_preview FROM ocorrencias_estruturais oe LEFT JOIN temas_ocorrencias t ON oe.temaId = t.id;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT oe.id, t.nome as tema, LEFT(oe.descricao, 50) as descricao_preview FROM ocorrencias_estruturais oe LEFT JOIN temas_ocorrencias t ON oe.temaId = t.id;",
+  "rows": [
+    {
+      "id": "1",
+      "tema": "Fornecedor Atrasado",
+      "descricao_preview": "Atrasos frequentes na entrega de vidros laminados "
+    },
+    {
+      "id": "30001",
+      "tema": "Reelmbolso",
+      "descricao_preview": "No seguimento de uma comunicação da Carla Correia "
+    },
+    {
+      "id": "30002",
+      "tema": "Reelmbolso",
+      "descricao_preview": "O ex-colega Emerson Soares, saiu da empresa em set"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttema\tdescricao_preview\n1\tFornecedor Atrasado\tAtrasos frequentes na entrega de vidros laminados \n30001\tReelmbolso\tNo seguimento de uma comunicação da Carla Correia \n30002\tReelmbolso\tO ex-colega Emerson Soares, saiu da empresa em set\n",
+  "stderr": "",
+  "execution_time_ms": 54
+}
