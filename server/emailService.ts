@@ -161,18 +161,24 @@ export function gerarHTMLRelatorioLivre(relatorio: {
 
 /**
  * Gera HTML do relatório completo para PDF/email
+ * Inclui todas as secções do formulário Zoho
  */
 export function gerarHTMLRelatorioCompleto(relatorio: {
   lojaNome: string;
   gestorNome: string;
   dataVisita: Date;
-  // Campos do relatório completo
-  atendimentoCliente?: number;
-  organizacaoLoja?: number;
-  limpezaGeral?: number;
-  stockProdutos?: number;
-  apresentacaoEquipa?: number;
-  observacoesGerais?: string;
+  // Campos do relatório completo (secções do formulário Zoho)
+  episFardamento?: string;
+  kitPrimeirosSocorros?: string;
+  consumiveis?: string;
+  espacoFisico?: string;
+  reclamacoes?: string;
+  vendasComplementares?: string;
+  fichasServico?: string;
+  documentacaoObrigatoria?: string;
+  reuniaoQuinzenal?: boolean;
+  resumoSupervisao?: string;
+  colaboradoresPresentes?: string;
   pontosPositivos?: string;
   pontosNegativos?: string;
   pendentes?: Array<{ descricao: string; resolvido: boolean }>;
@@ -180,8 +186,10 @@ export function gerarHTMLRelatorioCompleto(relatorio: {
 }): string {
   const { 
     lojaNome, gestorNome, dataVisita,
-    atendimentoCliente, organizacaoLoja, limpezaGeral, stockProdutos, apresentacaoEquipa,
-    observacoesGerais, pontosPositivos, pontosNegativos, pendentes, fotos
+    episFardamento, kitPrimeirosSocorros, consumiveis, espacoFisico,
+    reclamacoes, vendasComplementares, fichasServico, documentacaoObrigatoria,
+    reuniaoQuinzenal, resumoSupervisao, colaboradoresPresentes,
+    pontosPositivos, pontosNegativos, pendentes, fotos
   } = relatorio;
   
   const dataFormatada = new Date(dataVisita).toLocaleDateString('pt-PT', {
@@ -190,10 +198,15 @@ export function gerarHTMLRelatorioCompleto(relatorio: {
     year: 'numeric'
   });
 
-  const renderScore = (score?: number) => {
-    if (!score) return '<span style="color: #9ca3af;">N/A</span>';
-    const color = score >= 4 ? '#10b981' : score >= 3 ? '#f59e0b' : '#ef4444';
-    return `<span style="color: ${color}; font-weight: bold;">${score}/5</span>`;
+  // Função para renderizar uma secção de texto
+  const renderSection = (title: string, content?: string) => {
+    if (!content || content.trim() === '') return '';
+    return `
+    <div class="section">
+      <div class="section-title">${title}</div>
+      <div class="text-box">${content}</div>
+    </div>
+    `;
   };
 
   return `
@@ -202,19 +215,15 @@ export function gerarHTMLRelatorioCompleto(relatorio: {
 <head>
   <meta charset="UTF-8">
   <style>
-    body { font-family: Arial, sans-serif; margin: 40px; color: #333; }
+    body { font-family: Arial, sans-serif; margin: 40px; color: #333; line-height: 1.5; }
     .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #10b981; padding-bottom: 20px; }
     .logo { font-size: 24px; font-weight: bold; color: #10b981; }
     .title { font-size: 20px; margin-top: 10px; }
-    .info-box { background: #f3f4f6; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+    .info-box { background: #f3f4f6; padding: 15px; border-radius: 8px; margin-bottom: 25px; }
     .info-row { display: flex; margin-bottom: 8px; }
-    .info-label { font-weight: bold; width: 120px; }
-    .section { margin-bottom: 25px; }
+    .info-label { font-weight: bold; width: 150px; }
+    .section { margin-bottom: 25px; page-break-inside: avoid; }
     .section-title { font-size: 16px; font-weight: bold; color: #10b981; margin-bottom: 10px; border-bottom: 1px solid #e5e7eb; padding-bottom: 5px; }
-    .scores-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .score-item { background: #fff; border: 1px solid #e5e7eb; padding: 12px; border-radius: 6px; }
-    .score-label { font-size: 14px; color: #6b7280; }
-    .score-value { font-size: 18px; margin-top: 4px; }
     .text-box { background: #fff; border: 1px solid #e5e7eb; padding: 15px; border-radius: 8px; white-space: pre-wrap; }
     .positive { background: #d1fae5; border-left: 4px solid #10b981; }
     .negative { background: #fee2e2; border-left: 4px solid #ef4444; }
@@ -224,7 +233,11 @@ export function gerarHTMLRelatorioCompleto(relatorio: {
     .fotos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
     .foto-item { border-radius: 8px; overflow: hidden; border: 1px solid #e5e7eb; }
     .foto-item img { width: 100%; height: auto; display: block; }
-    .footer { margin-top: 40px; text-align: center; font-size: 12px; color: #9ca3af; }
+    .footer { margin-top: 40px; text-align: center; font-size: 12px; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 20px; }
+    .reuniao-badge { display: inline-block; padding: 6px 12px; border-radius: 20px; font-weight: bold; font-size: 14px; }
+    .reuniao-sim { background: #d1fae5; color: #059669; }
+    .reuniao-nao { background: #fee2e2; color: #dc2626; }
+    .divider { border: 0; border-top: 1px dashed #e5e7eb; margin: 30px 0; }
   </style>
 </head>
 <body>
@@ -238,69 +251,71 @@ export function gerarHTMLRelatorioCompleto(relatorio: {
     <div class="info-row"><span class="info-label">Loja:</span> ${lojaNome}</div>
     <div class="info-row"><span class="info-label">Gestor:</span> ${gestorNome}</div>
     <div class="info-row"><span class="info-label">Data da Visita:</span> ${dataFormatada}</div>
+    ${colaboradoresPresentes ? `<div class="info-row"><span class="info-label">Colaboradores:</span> ${colaboradoresPresentes}</div>` : ''}
   </div>
-  
+
+  <!-- Resumo da Supervisão -->
+  ${resumoSupervisao ? `
   <div class="section">
-    <div class="section-title">Avaliações</div>
-    <div class="scores-grid">
-      <div class="score-item">
-        <div class="score-label">Atendimento ao Cliente</div>
-        <div class="score-value">${renderScore(atendimentoCliente)}</div>
-      </div>
-      <div class="score-item">
-        <div class="score-label">Organização da Loja</div>
-        <div class="score-value">${renderScore(organizacaoLoja)}</div>
-      </div>
-      <div class="score-item">
-        <div class="score-label">Limpeza Geral</div>
-        <div class="score-value">${renderScore(limpezaGeral)}</div>
-      </div>
-      <div class="score-item">
-        <div class="score-label">Stock de Produtos</div>
-        <div class="score-value">${renderScore(stockProdutos)}</div>
-      </div>
-      <div class="score-item">
-        <div class="score-label">Apresentação da Equipa</div>
-        <div class="score-value">${renderScore(apresentacaoEquipa)}</div>
-      </div>
-    </div>
-  </div>
-  
-  ${observacoesGerais ? `
-  <div class="section">
-    <div class="section-title">Observações Gerais</div>
-    <div class="text-box">${observacoesGerais}</div>
+    <div class="section-title">📋 Resumo da Supervisão</div>
+    <div class="text-box">${resumoSupervisao}</div>
   </div>
   ` : ''}
-  
+
+  <!-- Pontos Positivos -->
   ${pontosPositivos ? `
   <div class="section">
-    <div class="section-title">Pontos Positivos a Destacar</div>
+    <div class="section-title">✅ Pontos Positivos a Destacar</div>
     <div class="text-box positive">${pontosPositivos}</div>
   </div>
   ` : ''}
   
+  <!-- Pontos Negativos -->
   ${pontosNegativos ? `
   <div class="section">
-    <div class="section-title">Pontos Negativos a Destacar</div>
+    <div class="section-title">⚠️ Pontos Negativos a Destacar</div>
     <div class="text-box negative">${pontosNegativos}</div>
   </div>
   ` : ''}
+
+  <hr class="divider" />
+
+  <!-- Secções do Formulário Zoho -->
+  ${renderSection('👔 EPIs e Fardamento', episFardamento)}
+  ${renderSection('🏥 Kit de Primeiros Socorros', kitPrimeirosSocorros)}
+  ${renderSection('📦 Consumíveis', consumiveis)}
+  ${renderSection('🏢 Espaço Físico', espacoFisico)}
+  ${renderSection('📝 Reclamações', reclamacoes)}
+  ${renderSection('💰 Vendas Complementares', vendasComplementares)}
+  ${renderSection('📄 Fichas de Serviço', fichasServico)}
+  ${renderSection('📚 Documentação Obrigatória', documentacaoObrigatoria)}
+
+  <!-- Reunião Quinzenal -->
+  ${reuniaoQuinzenal !== undefined ? `
+  <div class="section">
+    <div class="section-title">📅 Reunião Quinzenal</div>
+    <span class="reuniao-badge ${reuniaoQuinzenal ? 'reuniao-sim' : 'reuniao-nao'}">
+      ${reuniaoQuinzenal ? '✓ Realizada' : '✗ Não Realizada'}
+    </span>
+  </div>
+  ` : ''}
   
+  <!-- Pendentes -->
   ${pendentes && pendentes.length > 0 ? `
   <div class="section">
-    <div class="section-title">Pendentes</div>
+    <div class="section-title">⏳ Pendentes</div>
     ${pendentes.map(p => `
       <div class="pendente ${p.resolvido ? 'pendente-resolvido' : 'pendente-ativo'}">
-        ${p.descricao}
+        ${p.resolvido ? '✓' : '○'} ${p.descricao}
       </div>
     `).join('')}
   </div>
   ` : ''}
   
+  <!-- Fotos -->
   ${fotos && fotos.length > 0 ? `
   <div class="section">
-    <div class="section-title">Fotos da Visita</div>
+    <div class="section-title">📷 Fotos da Visita</div>
     <div class="fotos-grid">
       ${fotos.map(foto => `
         <div class="foto-item">

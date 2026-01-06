@@ -2095,3 +2095,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Reescrever exportação PDF para ficar igual à visualização do portal
 - [x] Incluir todas as secções: métricas, resultados, análise comercial, alertas, problemas, pontos fortes, tendências, recomendações
 - [x] Layout profissional com cores e organização clara
+
+## Bug Fix v6.8 - Email Relatório Completo Incompleto
+- [x] Analisar template de email do Relatório Completo
+- [x] Identificar campos em falta (avaliações, resumo, pontos positivos/negativos)
+- [x] Corrigir função de geração de HTML do email
+- [x] Testar envio de email completo

@@ -893,14 +893,25 @@ export const appRouter = router({
         // Filtrar anexos que falharam
         const validAttachments = fotoAttachments.filter(a => a !== null) as Array<{filename: string; content: string; contentType: string}>;
         
-        // Gerar HTML do relatório (sem fotos inline, pois serão anexos)
+        // Gerar HTML do relatório completo com todos os campos
         const html = gerarHTMLRelatorioCompleto({
           lojaNome: loja.nome,
           gestorNome: gestor?.nome || 'Desconhecido',
           dataVisita: relatorio.dataVisita,
-          observacoesGerais: relatorio.resumoSupervisao || '',
-          pontosPositivos: relatorio.pontosPositivos || '',
-          pontosNegativos: relatorio.pontosNegativos || '',
+          // Campos do formulário Zoho
+          episFardamento: relatorio.episFardamento || undefined,
+          kitPrimeirosSocorros: relatorio.kitPrimeirosSocorros || undefined,
+          consumiveis: relatorio.consumiveis || undefined,
+          espacoFisico: relatorio.espacoFisico || undefined,
+          reclamacoes: relatorio.reclamacoes || undefined,
+          vendasComplementares: relatorio.vendasComplementares || undefined,
+          fichasServico: relatorio.fichasServico || undefined,
+          documentacaoObrigatoria: relatorio.documentacaoObrigatoria || undefined,
+          reuniaoQuinzenal: relatorio.reuniaoQuinzenal ?? undefined,
+          resumoSupervisao: relatorio.resumoSupervisao || undefined,
+          colaboradoresPresentes: relatorio.colaboradoresPresentes || undefined,
+          pontosPositivos: relatorio.pontosPositivos || undefined,
+          pontosNegativos: relatorio.pontosNegativos || undefined,
           pendentes: pendentes.map(p => ({ descricao: p.descricao, resolvido: p.resolvido })),
           fotos: undefined, // Não incluir fotos inline, serão anexos
         });
