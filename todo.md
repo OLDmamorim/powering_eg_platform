@@ -2068,3 +2068,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Remover botão Exportar PDF do header do Relatório Board
 - [x] Melhorar modal de visualização de relatórios históricos (janela completa)
 - [x] Adicionar botão de download PDF no modal de visualização
+
+## Correções v6.2 - Botões Relatório Board e Categorias
+- [x] Substituir botão "Descarregar Markdown" por "Descarregar PDF" na tab Análise IA
+- [x] Implementar função handleDownloadAnaliseIAPDF para exportar análise IA em PDF formatado
+- [x] Remover botão "Gerar Relatório IA para Board" da página Categorias

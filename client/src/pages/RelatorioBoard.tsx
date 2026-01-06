@@ -110,18 +110,130 @@ export default function RelatorioBoard() {
     gerarAnaliseIAMutation.mutate({ periodo });
   };
 
-  const handleDownloadMarkdown = () => {
+  const handleDownloadAnaliseIAPDF = () => {
     if (!analiseIA) return;
-    const blob = new Blob([analiseIA], { type: "text/markdown" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `relatorio-board-${periodo}-${new Date().toISOString().split("T")[0]}.md`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    toast.success("Relatório descarregado!");
+    
+    try {
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const margin = 20;
+      const maxWidth = pageWidth - margin * 2;
+      let yPos = 25;
+
+      // Título
+      doc.setFontSize(18);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Relatório Executivo para Board', pageWidth / 2, yPos, { align: 'center' });
+      yPos += 8;
+
+      // Período
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Período: ${periodoLabels[periodo]}`, pageWidth / 2, yPos, { align: 'center' });
+      yPos += 6;
+      doc.setFontSize(9);
+      doc.text(`Gerado em: ${new Date().toLocaleString('pt-PT')}`, pageWidth / 2, yPos, { align: 'center' });
+      yPos += 15;
+
+      // Linha separadora
+      doc.setDrawColor(200, 200, 200);
+      doc.line(margin, yPos, pageWidth - margin, yPos);
+      yPos += 10;
+
+      // Processar o conteúdo markdown
+      const lines = analiseIA.split('\n');
+      doc.setFontSize(10);
+      
+      for (const line of lines) {
+        // Verificar se precisa de nova página
+        if (yPos > pageHeight - 30) {
+          doc.addPage();
+          yPos = 25;
+        }
+
+        // Títulos principais (##)
+        if (line.startsWith('## ')) {
+          yPos += 5;
+          doc.setFontSize(14);
+          doc.setFont('helvetica', 'bold');
+          const text = line.replace(/^## /, '').replace(/[📊🎯📈💡⚠️🔍📋✅❌🏆📉🔔]/g, '').trim();
+          doc.text(text, margin, yPos);
+          yPos += 8;
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'normal');
+        }
+        // Subtítulos (###)
+        else if (line.startsWith('### ')) {
+          yPos += 3;
+          doc.setFontSize(12);
+          doc.setFont('helvetica', 'bold');
+          const text = line.replace(/^### /, '').replace(/[📊🎯📈💡⚠️🔍📋✅❌🏆📉🔔]/g, '').trim();
+          doc.text(text, margin, yPos);
+          yPos += 6;
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'normal');
+        }
+        // Título principal (#)
+        else if (line.startsWith('# ')) {
+          // Já tratado no cabeçalho
+          continue;
+        }
+        // Linhas em branco
+        else if (line.trim() === '') {
+          yPos += 3;
+        }
+        // Bullet points
+        else if (line.trim().startsWith('- ') || line.trim().startsWith('* ')) {
+          const text = line.replace(/^\s*[-*]\s*/, '').replace(/\*\*/g, '').trim();
+          const splitText = doc.splitTextToSize(`• ${text}`, maxWidth - 10);
+          for (const splitLine of splitText) {
+            if (yPos > pageHeight - 30) {
+              doc.addPage();
+              yPos = 25;
+            }
+            doc.text(splitLine, margin + 5, yPos);
+            yPos += 5;
+          }
+        }
+        // Texto normal
+        else if (line.trim()) {
+          const text = line.replace(/\*\*/g, '').replace(/[📊🎯📈💡⚠️🔍📋✅❌🏆📉🔔]/g, '').trim();
+          const splitText = doc.splitTextToSize(text, maxWidth);
+          for (const splitLine of splitText) {
+            if (yPos > pageHeight - 30) {
+              doc.addPage();
+              yPos = 25;
+            }
+            doc.text(splitLine, margin, yPos);
+            yPos += 5;
+          }
+        }
+      }
+
+      // Rodapé em todas as páginas
+      const pageCount = doc.getNumberOfPages();
+      for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFontSize(8);
+        doc.setTextColor(128, 128, 128);
+        doc.text(
+          `PoweringEG Platform - Análise IA - Página ${i} de ${pageCount}`,
+          pageWidth / 2,
+          pageHeight - 10,
+          { align: 'center' }
+        );
+        doc.setTextColor(0, 0, 0);
+      }
+
+      // Download
+      const fileName = `AnaliseIA_Board_${periodoLabels[periodo]}_${new Date().toISOString().split('T')[0]}.pdf`;
+      doc.save(fileName);
+      toast.success('PDF exportado com sucesso!');
+    } catch (error) {
+      console.error('Erro ao exportar PDF:', error);
+      toast.error('Erro ao exportar PDF');
+    }
   };
 
   const handleExportPDF = () => {
@@ -1243,9 +1355,9 @@ export default function RelatorioBoard() {
                 {analiseIA && !isGeneratingIA && (
                   <div className="space-y-4">
                     <div className="flex justify-end gap-2">
-                      <Button onClick={handleDownloadMarkdown} variant="outline" className="gap-2">
+                      <Button onClick={handleDownloadAnaliseIAPDF} variant="outline" className="gap-2">
                         <Download className="h-4 w-4" />
-                        Descarregar Markdown
+                        Descarregar PDF
                       </Button>
                       <Button onClick={handleGerarAnaliseIA} variant="outline" className="gap-2">
                         <RefreshCw className="h-4 w-4" />

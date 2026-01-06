@@ -261,14 +261,7 @@ export default function Categorias() {
               Gerir e acompanhar relatórios organizados por categoria
             </p>
           </div>
-          <Button
-            onClick={() => setShowRelatorioIA(true)}
-            className="gap-2"
-            size="lg"
-          >
-            <BarChart3 className="h-5 w-5" />
-            Gerar Relatório IA para Board
-          </Button>
+
         </div>
 
         {/* Histórico de Relatórios IA */}
