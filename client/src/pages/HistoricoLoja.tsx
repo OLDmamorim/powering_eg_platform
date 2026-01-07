@@ -468,9 +468,39 @@ export default function HistoricoLoja() {
         yPos += 18;
         
         // ========== GRÁFICO DE EVOLUÇÃO DE VENDAS ==========
-        if (historyData.dadosMensais?.vendas && historyData.dadosMensais.vendas.length > 1) {
-          checkPageSpace(90);
+        if (historyData.dadosMensais?.vendas && historyData.dadosMensais.vendas.length > 0) {
+          // Verificar se há algum mês com escovas abaixo de 7.5%
+          const mesesComAlerta = historyData.dadosMensais.vendas.filter(
+            (d: { escovasPercent?: number }) => d.escovasPercent !== undefined && d.escovasPercent < 7.5
+          );
+          const temAlerta = mesesComAlerta.length > 0;
+          
+          checkPageSpace(temAlerta ? 115 : 95);
           drawSectionHeader('Evolução Mensal de Vendas Complementares', COLORS.emerald);
+          
+          // Se há alerta, mostrar caixa de aviso primeiro
+          if (temAlerta) {
+            // Caixa de alerta vermelha
+            doc.setFillColor(254, 226, 226);
+            doc.roundedRect(14, yPos, pageWidth - 28, 18, 2, 2, 'F');
+            doc.setDrawColor(239, 68, 68);
+            doc.setLineWidth(0.5);
+            doc.roundedRect(14, yPos, pageWidth - 28, 18, 2, 2, 'S');
+            
+            // Texto do alerta
+            doc.setTextColor(185, 28, 28);
+            doc.setFontSize(8);
+            doc.setFont('helvetica', 'bold');
+            doc.text('ALERTA: % Escovas abaixo de 7.5% - Retira totalidade do premio do mes!', 20, yPos + 7);
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(7);
+            const mesesAlerta = mesesComAlerta.map((d: { mes: string; escovasPercent?: number }) => 
+              `${d.mes}: ${d.escovasPercent?.toFixed(2) || 0}%`
+            ).join(' | ');
+            doc.text(`Meses afetados: ${mesesAlerta}`, 20, yPos + 14);
+            
+            yPos += 22;
+          }
           
           const chartX = 20;
           const chartY = yPos;
@@ -480,10 +510,10 @@ export default function HistoricoLoja() {
           
           // Fundo do gráfico
           doc.setFillColor(245, 255, 250);
-          doc.roundedRect(chartX - 5, chartY - 5, chartWidth + 10, chartHeight + 25, 3, 3, 'F');
+          doc.roundedRect(chartX - 5, chartY - 5, chartWidth + 10, chartHeight + 35, 3, 3, 'F');
           doc.setDrawColor(200, 230, 210);
           doc.setLineWidth(0.3);
-          doc.roundedRect(chartX - 5, chartY - 5, chartWidth + 10, chartHeight + 25, 3, 3, 'S');
+          doc.roundedRect(chartX - 5, chartY - 5, chartWidth + 10, chartHeight + 35, 3, 3, 'S');
           
           // Calcular escalas
           const maxVendas = Math.max(...data.map((d: { total: number }) => d.total));
@@ -499,20 +529,26 @@ export default function HistoricoLoja() {
             const value = Math.round(minVendas + (i / 4) * range);
             doc.setFontSize(6);
             doc.setTextColor(100, 140, 110);
-            doc.text(`€${value}`, chartX - 3, y + 1, { align: 'right' });
+            doc.text(`EUR ${value}`, chartX - 3, y + 1, { align: 'right' });
           }
           
           // Desenhar barras empilhadas
           const barWidth = (chartWidth - 20) / data.length;
           const barGap = 6;
           
-          data.forEach((d: { mes: string; total: number; escovas: number; polimento: number }, i: number) => {
+          data.forEach((d: { mes: string; total: number; escovas: number; polimento: number; escovasPercent?: number }, i: number) => {
             const x = chartX + 10 + i * barWidth;
             const escovasHeight = ((d.escovas - minVendas) / range) * chartHeight;
             const polimentoHeight = ((d.polimento - minVendas) / range) * chartHeight;
+            const escovasPercentValue = d.escovasPercent || 0;
+            const isAbaixoLimite = escovasPercentValue < 7.5;
             
-            // Barra de escovas (verde escuro)
-            doc.setFillColor(COLORS.emerald[0], COLORS.emerald[1], COLORS.emerald[2]);
+            // Barra de escovas (verde escuro, ou vermelho se abaixo do limite)
+            if (isAbaixoLimite) {
+              doc.setFillColor(COLORS.danger[0], COLORS.danger[1], COLORS.danger[2]);
+            } else {
+              doc.setFillColor(COLORS.emerald[0], COLORS.emerald[1], COLORS.emerald[2]);
+            }
             doc.rect(x + barGap/2, chartY + chartHeight - escovasHeight - polimentoHeight, barWidth - barGap, escovasHeight, 'F');
             
             // Barra de polimento (verde claro)
@@ -523,91 +559,105 @@ export default function HistoricoLoja() {
             doc.setFontSize(6);
             doc.setTextColor(60, 100, 70);
             doc.text(d.mes, x + barWidth/2, chartY + chartHeight + 8, { align: 'center' });
+            
+            // Mostrar % escovas abaixo da barra com destaque se abaixo de 7.5%
+            doc.setFontSize(5);
+            if (isAbaixoLimite) {
+              doc.setTextColor(185, 28, 28);
+              doc.setFont('helvetica', 'bold');
+            } else {
+              doc.setTextColor(40, 80, 50);
+              doc.setFont('helvetica', 'normal');
+            }
+            doc.text(`${escovasPercentValue.toFixed(1)}%`, x + barWidth/2, chartY + chartHeight + 14, { align: 'center' });
+            doc.setFont('helvetica', 'normal');
           });
           
           // Legenda
           doc.setFillColor(COLORS.emerald[0], COLORS.emerald[1], COLORS.emerald[2]);
-          doc.rect(chartX + chartWidth - 65, chartY + chartHeight + 12, 8, 4, 'F');
+          doc.rect(chartX + chartWidth - 90, chartY + chartHeight + 20, 8, 4, 'F');
           doc.setFontSize(6);
           doc.setTextColor(40, 80, 50);
-          doc.text('Escovas', chartX + chartWidth - 55, chartY + chartHeight + 15);
+          doc.text('Escovas', chartX + chartWidth - 80, chartY + chartHeight + 23);
           
           doc.setFillColor(134, 239, 172);
-          doc.rect(chartX + chartWidth - 30, chartY + chartHeight + 12, 8, 4, 'F');
-          doc.text('Polimento', chartX + chartWidth - 20, chartY + chartHeight + 15);
+          doc.rect(chartX + chartWidth - 55, chartY + chartHeight + 20, 8, 4, 'F');
+          doc.text('Polimento', chartX + chartWidth - 45, chartY + chartHeight + 23);
           
-          yPos = chartY + chartHeight + 28;
+          // Linha de referência 7.5%
+          doc.setFillColor(COLORS.danger[0], COLORS.danger[1], COLORS.danger[2]);
+          doc.rect(chartX + chartWidth - 20, chartY + chartHeight + 20, 8, 4, 'F');
+          doc.setTextColor(185, 28, 28);
+          doc.text('<7.5%', chartX + chartWidth - 10, chartY + chartHeight + 23);
+          
+          yPos = chartY + chartHeight + 38;
         }
       }
 
-      // ========== GRÁFICO DE EVOLUÇÃO DE PENDENTES ==========
-      if (historyData.dadosMensais?.pendentes && historyData.dadosMensais.pendentes.length > 0) {
+      // ========== GRÁFICO DE EVOLUÇÃO DE TAXA DE REPARAÇÃO ==========
+      if (historyData.dadosMensais?.resultados && historyData.dadosMensais.resultados.length > 1) {
         checkPageSpace(90);
-        drawSectionHeader('Evolução Mensal de Pendentes', COLORS.orange);
+        drawSectionHeader('Evolução Mensal de Taxa de Reparação', COLORS.purple);
         
         const chartX = 20;
         const chartY = yPos;
         const chartWidth = pageWidth - 40;
         const chartHeight = 55;
-        const data = historyData.dadosMensais.pendentes;
+        const data = historyData.dadosMensais.resultados;
         
         // Fundo do gráfico
-        doc.setFillColor(255, 252, 245);
+        doc.setFillColor(250, 245, 255);
         doc.roundedRect(chartX - 5, chartY - 5, chartWidth + 10, chartHeight + 25, 3, 3, 'F');
-        doc.setDrawColor(240, 220, 180);
+        doc.setDrawColor(200, 180, 220);
         doc.setLineWidth(0.3);
         doc.roundedRect(chartX - 5, chartY - 5, chartWidth + 10, chartHeight + 25, 3, 3, 'S');
         
         // Calcular escalas
-        const maxPendentes = Math.max(...data.map((d: { criados: number; resolvidos: number }) => Math.max(d.criados, d.resolvidos)));
-        const minPendentes = 0;
-        const range = maxPendentes - minPendentes || 1;
+        const maxTaxa = Math.max(...data.map((d: { taxaReparacao: number }) => d.taxaReparacao), 100);
+        const minTaxa = 0;
+        const range = maxTaxa - minTaxa || 1;
         
         // Desenhar linhas de grade horizontais
-        doc.setDrawColor(245, 230, 200);
+        doc.setDrawColor(230, 220, 240);
         doc.setLineWidth(0.2);
         for (let i = 0; i <= 4; i++) {
           const y = chartY + chartHeight - (i / 4) * chartHeight;
           doc.line(chartX, y, chartX + chartWidth, y);
-          const value = Math.round(minPendentes + (i / 4) * range);
+          const value = Math.round(minTaxa + (i / 4) * range);
           doc.setFontSize(6);
-          doc.setTextColor(160, 130, 80);
-          doc.text(value.toString(), chartX - 3, y + 1, { align: 'right' });
+          doc.setTextColor(120, 100, 140);
+          doc.text(`${value}%`, chartX - 3, y + 1, { align: 'right' });
         }
         
-        // Desenhar barras lado a lado
+        // Desenhar barras
         const barWidth = (chartWidth - 20) / data.length;
         const barGap = 4;
         
-        data.forEach((d: { mes: string; criados: number; resolvidos: number }, i: number) => {
+        data.forEach((d: { mes: string; taxaReparacao: number }, i: number) => {
           const x = chartX + 10 + i * barWidth;
-          const criadosHeight = ((d.criados - minPendentes) / range) * chartHeight;
-          const resolvidosHeight = ((d.resolvidos - minPendentes) / range) * chartHeight;
+          const taxaHeight = ((d.taxaReparacao - minTaxa) / range) * chartHeight;
           
-          // Barra de criados (laranja)
-          doc.setFillColor(COLORS.orange[0], COLORS.orange[1], COLORS.orange[2]);
-          doc.rect(x + barGap/2, chartY + chartHeight - criadosHeight, (barWidth - barGap) * 0.45, criadosHeight, 'F');
-          
-          // Barra de resolvidos (verde)
-          doc.setFillColor(COLORS.success[0], COLORS.success[1], COLORS.success[2]);
-          doc.rect(x + barGap/2 + (barWidth - barGap) * 0.5, chartY + chartHeight - resolvidosHeight, (barWidth - barGap) * 0.45, resolvidosHeight, 'F');
+          // Barra de taxa de reparação (roxo)
+          doc.setFillColor(COLORS.purple[0], COLORS.purple[1], COLORS.purple[2]);
+          doc.rect(x + barGap/2, chartY + chartHeight - taxaHeight, barWidth - barGap, taxaHeight, 'F');
           
           // Label do mês
           doc.setFontSize(6);
-          doc.setTextColor(120, 100, 60);
+          doc.setTextColor(80, 60, 100);
           doc.text(d.mes, x + barWidth/2, chartY + chartHeight + 8, { align: 'center' });
+          
+          // Valor da taxa acima da barra
+          doc.setFontSize(5);
+          doc.setTextColor(COLORS.purple[0], COLORS.purple[1], COLORS.purple[2]);
+          doc.text(`${d.taxaReparacao}%`, x + barWidth/2, chartY + chartHeight - taxaHeight - 2, { align: 'center' });
         });
         
         // Legenda
-        doc.setFillColor(COLORS.orange[0], COLORS.orange[1], COLORS.orange[2]);
-        doc.rect(chartX + chartWidth - 70, chartY + chartHeight + 12, 8, 4, 'F');
+        doc.setFillColor(COLORS.purple[0], COLORS.purple[1], COLORS.purple[2]);
+        doc.rect(chartX + chartWidth - 55, chartY + chartHeight + 12, 8, 4, 'F');
         doc.setFontSize(6);
-        doc.setTextColor(100, 80, 40);
-        doc.text('Criados', chartX + chartWidth - 60, chartY + chartHeight + 15);
-        
-        doc.setFillColor(COLORS.success[0], COLORS.success[1], COLORS.success[2]);
-        doc.rect(chartX + chartWidth - 35, chartY + chartHeight + 12, 8, 4, 'F');
-        doc.text('Resolvidos', chartX + chartWidth - 25, chartY + chartHeight + 15);
+        doc.setTextColor(80, 60, 100);
+        doc.text('Taxa Reparacao', chartX + chartWidth - 45, chartY + chartHeight + 15);
         
         yPos = chartY + chartHeight + 28;
       }

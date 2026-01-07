@@ -2162,3 +2162,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 
 ## Gráficos de Evolução no PDF do Histórico da Loja
 - [x] Adicionar gráficos de evolução mensal ao PDF do Histórico da Loja
+
+## Melhorias Gráficos PDF Histórico da Loja v6.3
+- [x] Remover gráfico de pendentes do PDF
+- [x] Adicionar gráfico de taxa de reparação mensal
+- [x] Destacar % escovas com alerta quando abaixo de 7.5% (retira prémio)

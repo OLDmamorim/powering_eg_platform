@@ -31,7 +31,7 @@ export interface LojaHistoryResult {
   // Dados para gráficos de evolução mensal
   dadosMensais?: {
     resultados: Array<{ mes: string; servicos: number; objetivo: number; taxaReparacao: number }>;
-    vendas: Array<{ mes: string; total: number; escovas: number; polimento: number }>;
+    vendas: Array<{ mes: string; total: number; escovas: number; polimento: number; escovasPercent: number }>;
     pendentes: Array<{ mes: string; criados: number; resolvidos: number }>;
   };
   evolucao: {
@@ -571,6 +571,7 @@ Gera uma análise completa incluindo evolução, problemas, pontos fortes, alert
         total: parseFloat(v.totalVendas) || 0,
         escovas: parseFloat(v.escovasVendas) || 0,
         polimento: parseFloat(v.polimentoVendas) || 0,
+        escovasPercent: v.escovasPercent ? parseFloat((v.escovasPercent * 100).toFixed(2)) : 0,
       })),
       pendentes: (() => {
         // Agrupar pendentes por mês
