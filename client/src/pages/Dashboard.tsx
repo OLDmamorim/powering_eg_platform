@@ -435,10 +435,39 @@ export default function Dashboard() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        {/* Botões de ação - mobile: lado a lado no topo, desktop: à direita */}
+        <div className="flex md:hidden gap-2 justify-end">
+          {isAdmin ? (
+            <Button onClick={() => setLocation('/relatorio-board')} variant="outline" size="sm" className="gap-1.5 flex-1">
+              <BarChart3 className="h-4 w-4" />
+              <span className="text-xs">Relatório</span>
+            </Button>
+          ) : (
+            <Button onClick={gerarRelatorioMensal} variant="outline" size="sm" className="gap-1.5 flex-1">
+              <Download className="h-4 w-4" />
+              <span className="text-xs">Relatório</span>
+            </Button>
+          )}
+          <Button 
+            onClick={() => setLocation('/todos?filtro=atribuidas')} 
+            variant="outline" 
+            size="sm"
+            className={`gap-1.5 flex-1 relative ${tarefasPendentesAMim > 0 ? 'animate-pulse border-amber-500 bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/30 dark:hover:bg-amber-950/50' : ''}`}
+          >
+            <CheckSquare className="h-4 w-4" />
+            <span className="text-xs">Tarefas</span>
+            {tarefasPendentesAMim > 0 && (
+              <span className="absolute -top-2 -right-2 bg-amber-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                {tarefasPendentesAMim}
+              </span>
+            )}
+          </Button>
+        </div>
+
+        <div className="flex items-start justify-between">
           <div className="flex items-start gap-4">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
+              <h1 className="text-2xl md:text-3xl font-bold tracking-tight flex items-center gap-3">
                 Olá, {user?.name || 'Utilizador'}
                 <img 
                   src="/eglass-logo.png" 
@@ -446,10 +475,10 @@ export default function Dashboard() {
                   className="hidden md:block h-14 w-auto object-contain"
                 />
               </h1>
-              <p className="text-muted-foreground">Bem-vindo ao PoweringEG Platform 2.0</p>
-              <div className="flex items-center gap-2 mt-2">
-                <Sparkles className="h-4 w-4 text-amber-500" />
-                <p className="text-sm text-muted-foreground italic">
+              <p className="text-sm md:text-base text-muted-foreground">Bem-vindo ao PoweringEG Platform 2.0</p>
+              <div className="flex items-start gap-2 mt-2 max-w-full">
+                <Sparkles className="h-4 w-4 text-amber-500 flex-shrink-0 mt-0.5" />
+                <p className="text-xs md:text-sm text-muted-foreground italic break-words">
                   {dicaLoading ? (
                     <span className="animate-pulse">A gerar dica...</span>
                   ) : (
@@ -459,7 +488,7 @@ export default function Dashboard() {
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  className="h-6 w-6 text-muted-foreground hover:text-foreground"
+                  className="h-6 w-6 text-muted-foreground hover:text-foreground flex-shrink-0"
                   onClick={() => refetchDica()}
                   disabled={dicaLoading}
                 >
@@ -468,7 +497,8 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
-          <div className="flex flex-col gap-2">
+          {/* Botões desktop - escondidos em mobile */}
+          <div className="hidden md:flex flex-col gap-2">
             {isAdmin ? (
               <Button onClick={() => setLocation('/relatorio-board')} variant="outline" className="gap-2">
                 <BarChart3 className="h-4 w-4" />Relatório Board
