@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { trpc } from "@/lib/trpc";
-import { Building2, Calendar, ChevronDown, ChevronUp, FileText, ClipboardList, Search, ArrowUpDown, SortAsc, Pencil, Mail, Loader2 } from "lucide-react";
+import { Building2, Calendar, ChevronDown, ChevronUp, FileText, ClipboardList, Search, ArrowUpDown, SortAsc, Pencil, Mail, Loader2, Trash2 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -30,6 +30,9 @@ export default function MeusRelatorios() {
   const [editingCompleto, setEditingCompleto] = useState<any>(null);
   const [editDescricao, setEditDescricao] = useState("");
   const [editDataVisita, setEditDataVisita] = useState("");
+  
+  // Estado para confirmação de eliminação
+  const [deleteConfirm, setDeleteConfirm] = useState<{ id: number; tipo: 'livre' | 'completo' } | null>(null);
   
   const utils = trpc.useUtils();
 
@@ -58,6 +61,29 @@ export default function MeusRelatorios() {
     },
     onError: (error) => {
       toast.error(error.message || "Erro ao atualizar relatório");
+    }
+  });
+
+  // Mutations para eliminar
+  const deleteLivreMutation = trpc.relatoriosLivres.delete.useMutation({
+    onSuccess: () => {
+      toast.success("Relatório eliminado com sucesso");
+      utils.relatoriosLivres.list.invalidate();
+      setDeleteConfirm(null);
+    },
+    onError: (error) => {
+      toast.error(error.message || "Erro ao eliminar relatório");
+    }
+  });
+
+  const deleteCompletoMutation = trpc.relatoriosCompletos.delete.useMutation({
+    onSuccess: () => {
+      toast.success("Relatório eliminado com sucesso");
+      utils.relatoriosCompletos.list.invalidate();
+      setDeleteConfirm(null);
+    },
+    onError: (error) => {
+      toast.error(error.message || "Erro ao eliminar relatório");
     }
   });
 
@@ -128,6 +154,17 @@ export default function MeusRelatorios() {
   
   const relatoriosLivresFiltrados = filtrarEOrdenar(relatoriosLivres || []);
   const relatoriosCompletosFiltrados = filtrarEOrdenar(relatoriosCompletos || []);
+
+  // Handler para eliminar
+  const handleDelete = () => {
+    if (!deleteConfirm) return;
+    
+    if (deleteConfirm.tipo === 'livre') {
+      deleteLivreMutation.mutate({ id: deleteConfirm.id });
+    } else {
+      deleteCompletoMutation.mutate({ id: deleteConfirm.id });
+    }
+  };
 
   return (
     <DashboardLayout>
@@ -310,6 +347,18 @@ export default function MeusRelatorios() {
                                 )}
                                 Enviar
                               </Button>
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setDeleteConfirm({ id: relatorio.id, tipo: 'livre' });
+                                }}
+                                className="gap-1 text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30"
+                              >
+                                <Trash2 className="h-3 w-3" />
+                                Eliminar
+                              </Button>
                             </div>
                           </div>
                         </CardContent>
@@ -463,8 +512,36 @@ export default function MeusRelatorios() {
                             </div>
                           )}
                           
-                          <div className="mt-3 text-xs text-muted-foreground">
-                            Criado em: {new Date(relatorio.createdAt).toLocaleString("pt-PT")}
+                          <div className="mt-4 flex items-center justify-between">
+                            <div className="text-xs text-muted-foreground">
+                              Criado em: {new Date(relatorio.createdAt).toLocaleString("pt-PT")}
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setEditingCompleto(relatorio);
+                                }}
+                                className="gap-1"
+                              >
+                                <Pencil className="h-3 w-3" />
+                                Editar
+                              </Button>
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setDeleteConfirm({ id: relatorio.id, tipo: 'completo' });
+                                }}
+                                className="gap-1 text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30"
+                              >
+                                <Trash2 className="h-3 w-3" />
+                                Eliminar
+                              </Button>
+                            </div>
                           </div>
                         </CardContent>
                       </CollapsibleContent>
@@ -555,6 +632,30 @@ export default function MeusRelatorios() {
               disabled={updateLivreMutation.isPending}
             >
               {updateLivreMutation.isPending ? "A guardar..." : "Guardar Alterações"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal de Confirmação de Eliminação */}
+      <Dialog open={!!deleteConfirm} onOpenChange={(open) => !open && setDeleteConfirm(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-red-600 dark:text-red-400">Eliminar Relatório</DialogTitle>
+            <DialogDescription>
+              Tem a certeza que deseja eliminar este relatório? Esta ação não pode ser revertida.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setDeleteConfirm(null)}>
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={deleteLivreMutation.isPending || deleteCompletoMutation.isPending}
+            >
+              {(deleteLivreMutation.isPending || deleteCompletoMutation.isPending) ? "A eliminar..." : "Eliminar"}
             </Button>
           </DialogFooter>
         </DialogContent>

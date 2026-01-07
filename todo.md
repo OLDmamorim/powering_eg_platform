@@ -2136,3 +2136,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Criar endpoints para totais globais com múltiplos meses (totaisGlobaisMultiplosMeses)
 - [x] Atualizar frontend para usar FiltroMesesCheckbox
 - [x] Testar agregação de dados com múltiplos meses selecionados
+
+## Funcionalidade v6.3 - Apagar Relatórios para Gestores
+- [x] Adicionar botão de apagar relatórios na página Meus Relatórios
+- [x] Implementar diálogo de confirmação antes de eliminar
+- [x] Gestor só pode apagar os seus próprios relatórios
+- [x] Testar funcionalidade
