@@ -1075,18 +1075,29 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {relatoriosLivres?.slice(0, 5).map((relatorio: any) => (
-                  <div key={relatorio.id} className="flex items-center justify-between border-b pb-2 last:border-0">
-                    <div>
-                      <p className="text-sm font-medium">{relatorio.loja?.nome || "Loja"}</p>
-                      <p className="text-xs text-muted-foreground">{new Date(relatorio.dataVisita).toLocaleDateString("pt-PT")}</p>
+                {(() => {
+                  // Combinar relatórios livres e completos, ordenar por data
+                  const todosRelatorios = [
+                    ...(relatoriosLivres?.map((r: any) => ({ ...r, tipo: 'livre' })) || []),
+                    ...(relatoriosCompletos?.map((r: any) => ({ ...r, tipo: 'completo' })) || [])
+                  ].sort((a, b) => new Date(b.dataVisita).getTime() - new Date(a.dataVisita).getTime());
+                  
+                  if (todosRelatorios.length === 0) {
+                    return <p className="text-sm text-muted-foreground text-center py-4">Nenhum relatório recente</p>;
+                  }
+                  
+                  return todosRelatorios.slice(0, 5).map((relatorio: any) => (
+                    <div key={`${relatorio.tipo}-${relatorio.id}`} className="flex items-center justify-between border-b pb-2 last:border-0">
+                      <div>
+                        <p className="text-sm font-medium">{relatorio.loja?.nome || "Loja"}</p>
+                        <p className="text-xs text-muted-foreground">{new Date(relatorio.dataVisita).toLocaleDateString("pt-PT")}</p>
+                      </div>
+                      <span className={`text-xs px-2 py-1 rounded ${relatorio.tipo === 'completo' ? 'bg-teal-100 text-teal-700 dark:bg-teal-900 dark:text-teal-300' : 'bg-primary/10 text-primary'}`}>
+                        {relatorio.tipo === 'completo' ? 'Relatório Completo' : 'Relatório Livre'}
+                      </span>
                     </div>
-                    <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">Relatório Livre</span>
-                  </div>
-                ))}
-                {(!relatoriosLivres || relatoriosLivres.length === 0) && (
-                  <p className="text-sm text-muted-foreground text-center py-4">Nenhum relatório recente</p>
-                )}
+                  ));
+                })()}
               </div>
             </CardContent>
           </Card>

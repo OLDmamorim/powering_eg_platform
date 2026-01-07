@@ -2183,3 +2183,4 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Corrigir layout do email de ocorrências - adicionar título visível
 - [x] Reorganizar layout mobile do Dashboard - botões Tarefas e Relatório lado a lado
 - [x] Alterar botão do topo do Dashboard de Relatório Board para Relatórios IA
+- [x] Corrigir Atividade Recente no Dashboard para incluir relatórios completos (atualmente só mostra relatórios livres)
