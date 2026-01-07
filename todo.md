@@ -2148,3 +2148,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Implementar modal de edição com campos editáveis
 - [x] Adicionar botão de reenviar email após edição
 - [x] Testar funcionalidade completa
+
+
+## Correção Legendas PDF Histórico da Loja v6.5
+- [x] Identificar código de geração do PDF
+- [x] Remover emojis/setas que não são suportados pela fonte
+- [x] Substituir por texto legível (ex: "estável", "subida", "descida")
+- [x] Testar exportação do PDF

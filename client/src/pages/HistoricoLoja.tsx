@@ -351,9 +351,9 @@ export default function HistoricoLoja() {
         // Tendência e meses
         doc.setFontSize(8);
         doc.setTextColor(80, 80, 80);
-        const trendSymbol = historyData.analiseResultados.tendenciaServicos === 'subida' ? '↑' : 
-                           historyData.analiseResultados.tendenciaServicos === 'descida' ? '↓' : '→';
-        doc.text(`Tendência: ${trendSymbol} ${historyData.analiseResultados.tendenciaServicos}   |   Melhor: ${historyData.analiseResultados.melhorMes}   |   Pior: ${historyData.analiseResultados.piorMes}`, 20, yPos);
+        const trendText = historyData.analiseResultados.tendenciaServicos === 'subida' ? 'em subida' : 
+                           historyData.analiseResultados.tendenciaServicos === 'descida' ? 'em descida' : 'estavel';
+        doc.text(`Tendencia: ${trendText}   |   Melhor: ${historyData.analiseResultados.melhorMes}   |   Pior: ${historyData.analiseResultados.piorMes}`, 20, yPos);
         
         yPos += 18;
       }
@@ -387,11 +387,11 @@ export default function HistoricoLoja() {
         
         yPos += comercialCardHeight + 6;
         
-        const trendSymbol = historyData.analiseComercial.tendenciaVendas === 'subida' ? '↑' : 
-                           historyData.analiseComercial.tendenciaVendas === 'descida' ? '↓' : '→';
+        const trendTextComercial = historyData.analiseComercial.tendenciaVendas === 'subida' ? 'em subida' : 
+                           historyData.analiseComercial.tendenciaVendas === 'descida' ? 'em descida' : 'estavel';
         doc.setFontSize(8);
         doc.setTextColor(80, 80, 80);
-        doc.text(`Tendência: ${trendSymbol} ${historyData.analiseComercial.tendenciaVendas}`, 20, yPos);
+        doc.text(`Tendencia: ${trendTextComercial}`, 20, yPos);
         
         yPos += 18;
       }
