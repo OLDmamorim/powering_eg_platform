@@ -420,32 +420,30 @@ export default function HistoricoLoja() {
         drawSectionHeader('Alertas Operacionais', COLORS.danger);
         
         historyData.alertasOperacionais.forEach((alerta: any) => {
-          checkPageSpace(25);
+          // Calcular altura necessária para o texto
+          doc.setFontSize(8);
+          const descLines = doc.splitTextToSize(alerta.descricao, pageWidth - 50);
+          const cardHeight = Math.max(24, 14 + descLines.length * 5);
+          
+          checkPageSpace(cardHeight + 5);
           const alertBgColor = alerta.urgencia === 'alta' ? COLORS.dangerLight : 
                               alerta.urgencia === 'média' ? COLORS.orangeLight : COLORS.warningLight;
           const alertBorderColor = alerta.urgencia === 'alta' ? COLORS.danger : 
                                    alerta.urgencia === 'média' ? COLORS.orange : COLORS.warning;
           
           doc.setFillColor(alertBgColor[0], alertBgColor[1], alertBgColor[2]);
-          doc.roundedRect(14, yPos, pageWidth - 28, 18, 2, 2, 'F');
+          doc.roundedRect(14, yPos, pageWidth - 28, cardHeight, 2, 2, 'F');
           doc.setDrawColor(alertBorderColor[0], alertBorderColor[1], alertBorderColor[2]);
           doc.setLineWidth(0.5);
-          doc.roundedRect(14, yPos, pageWidth - 28, 18, 2, 2, 'S');
+          doc.roundedRect(14, yPos, pageWidth - 28, cardHeight, 2, 2, 'S');
           
           // Tipo
           doc.setTextColor(alertBorderColor[0], alertBorderColor[1], alertBorderColor[2]);
           doc.setFontSize(9);
           doc.setFont('helvetica', 'bold');
-          doc.text(alerta.tipo, 18, yPos + 6);
+          doc.text(alerta.tipo, 18, yPos + 7);
           
-          // Descrição
-          doc.setFont('helvetica', 'normal');
-          doc.setTextColor(60, 60, 60);
-          doc.setFontSize(8);
-          const descLines = doc.splitTextToSize(alerta.descricao, pageWidth - 80);
-          doc.text(descLines[0], 18, yPos + 13);
-          
-          // Badge de urgência
+          // Badge de urgência (ao lado do título)
           doc.setFillColor(alertBorderColor[0], alertBorderColor[1], alertBorderColor[2]);
           doc.roundedRect(pageWidth - 40, yPos + 3, 22, 8, 1, 1, 'F');
           doc.setTextColor(255, 255, 255);
@@ -453,7 +451,15 @@ export default function HistoricoLoja() {
           doc.setFont('helvetica', 'bold');
           doc.text(alerta.urgencia.toUpperCase(), pageWidth - 29, yPos + 8, { align: 'center' });
           
-          yPos += 22;
+          // Descrição (texto completo com word wrap)
+          doc.setFont('helvetica', 'normal');
+          doc.setTextColor(60, 60, 60);
+          doc.setFontSize(8);
+          descLines.forEach((line: string, idx: number) => {
+            doc.text(line, 18, yPos + 14 + idx * 5);
+          });
+          
+          yPos += cardHeight + 4;
         });
         yPos += 5;
       }
@@ -464,29 +470,37 @@ export default function HistoricoLoja() {
         drawSectionHeader('Problemas Identificados', COLORS.warning);
         
         historyData.problemasRecorrentes.forEach((problema: any) => {
-          checkPageSpace(25);
+          // Calcular altura necessária para o texto do problema
+          doc.setFontSize(9);
+          const probLines = doc.splitTextToSize(problema.problema, pageWidth - 70);
+          const cardHeight = Math.max(22, 10 + probLines.length * 5 + 8);
+          
+          checkPageSpace(cardHeight + 5);
           const probBgColor = problema.gravidade === 'alta' ? COLORS.dangerLight : 
                              problema.gravidade === 'média' ? COLORS.orangeLight : COLORS.warningLight;
           const probBorderColor = problema.gravidade === 'alta' ? COLORS.danger : 
                                   problema.gravidade === 'média' ? COLORS.orange : COLORS.warning;
           
           doc.setFillColor(probBgColor[0], probBgColor[1], probBgColor[2]);
-          doc.roundedRect(14, yPos, pageWidth - 28, 20, 2, 2, 'F');
+          doc.roundedRect(14, yPos, pageWidth - 28, cardHeight, 2, 2, 'F');
           doc.setDrawColor(probBorderColor[0], probBorderColor[1], probBorderColor[2]);
           doc.setLineWidth(0.5);
-          doc.roundedRect(14, yPos, pageWidth - 28, 20, 2, 2, 'S');
+          doc.roundedRect(14, yPos, pageWidth - 28, cardHeight, 2, 2, 'S');
           
-          // Problema
+          // Problema (texto completo com word wrap)
           doc.setTextColor(probBorderColor[0], probBorderColor[1], probBorderColor[2]);
           doc.setFontSize(9);
           doc.setFont('helvetica', 'bold');
-          doc.text(problema.problema, 18, yPos + 7);
+          probLines.forEach((line: string, idx: number) => {
+            doc.text(line, 18, yPos + 7 + idx * 5);
+          });
           
           // Categoria e frequência
+          const infoYPos = yPos + 7 + probLines.length * 5 + 2;
           doc.setFont('helvetica', 'normal');
           doc.setTextColor(80, 80, 80);
           doc.setFontSize(7);
-          doc.text(`Categoria: ${problema.categoria}  |  ${problema.frequencia}`, 18, yPos + 14);
+          doc.text(`Categoria: ${problema.categoria}  |  ${problema.frequencia}`, 18, infoYPos);
           
           // Badge de gravidade
           doc.setFillColor(probBorderColor[0], probBorderColor[1], probBorderColor[2]);
@@ -496,7 +510,7 @@ export default function HistoricoLoja() {
           doc.setFont('helvetica', 'bold');
           doc.text(problema.gravidade.toUpperCase(), pageWidth - 29, yPos + 10, { align: 'center' });
           
-          yPos += 24;
+          yPos += cardHeight + 4;
         });
         yPos += 5;
       }
@@ -504,23 +518,27 @@ export default function HistoricoLoja() {
       // ========== PONTOS FORTES ==========
       if (historyData.pontosFortes && historyData.pontosFortes.length > 0) {
         checkPageSpace(40);
-        drawColoredSection('Pontos Fortes', COLORS.successLight, COLORS.success, Math.min(historyData.pontosFortes.length * 8 + 5, 60));
+        drawSectionHeader('Pontos Fortes', COLORS.success);
         
         doc.setFontSize(9);
         doc.setTextColor(COLORS.success[0] * 0.7, COLORS.success[1] * 0.7, COLORS.success[2] * 0.7);
         
         historyData.pontosFortes.slice(0, 8).forEach((ponto: string) => {
-          checkPageSpace(10);
-          const lines = doc.splitTextToSize(`• ${ponto}`, pageWidth - 48);
-          doc.text(lines[0], 20, yPos);
-          yPos += 7;
+          const lines = doc.splitTextToSize(`• ${ponto}`, pageWidth - 40);
+          const neededSpace = lines.length * 5 + 3;
+          checkPageSpace(neededSpace);
+          lines.forEach((line: string) => {
+            doc.text(line, 18, yPos);
+            yPos += 5;
+          });
+          yPos += 2;
         });
         
         if (historyData.pontosFortes.length > 8) {
-          doc.text(`... e mais ${historyData.pontosFortes.length - 8} pontos`, 20, yPos);
+          doc.text(`... e mais ${historyData.pontosFortes.length - 8} pontos`, 18, yPos);
           yPos += 7;
         }
-        yPos += 10;
+        yPos += 8;
       }
 
       // ========== TENDÊNCIAS ==========
@@ -532,23 +550,27 @@ export default function HistoricoLoja() {
         doc.setTextColor(60, 60, 60);
         
         historyData.tendencias.slice(0, 6).forEach((tendencia: string) => {
-          checkPageSpace(10);
-          const lines = doc.splitTextToSize(`- ${tendencia}`, pageWidth - 38);
-          doc.text(lines[0], 18, yPos);
-          yPos += 7;
+          const lines = doc.splitTextToSize(`- ${tendencia}`, pageWidth - 40);
+          const neededSpace = lines.length * 5 + 3;
+          checkPageSpace(neededSpace);
+          lines.forEach((line: string) => {
+            doc.text(line, 18, yPos);
+            yPos += 5;
+          });
+          yPos += 2;
         });
         
         if (historyData.tendencias.length > 6) {
           doc.text(`... e mais ${historyData.tendencias.length - 6} tendências`, 18, yPos);
           yPos += 7;
         }
-        yPos += 10;
+        yPos += 8;
       }
 
       // ========== RECOMENDAÇÕES PRIORITÁRIAS ==========
       if (historyData.recomendacoes && historyData.recomendacoes.length > 0) {
         checkPageSpace(50);
-        drawColoredSection('Recomendações Prioritárias', COLORS.purpleLight, COLORS.purple, Math.min(historyData.recomendacoes.length * 25 + 10, 100));
+        drawSectionHeader('Recomendações Prioritárias', COLORS.purple);
         
         const sortedRecs = [...historyData.recomendacoes].sort((a: any, b: any) => {
           const prioOrder: Record<string, number> = { alta: 0, média: 1, baixa: 2 };
@@ -556,53 +578,67 @@ export default function HistoricoLoja() {
         });
         
         sortedRecs.slice(0, 5).forEach((rec: any) => {
-          checkPageSpace(28);
+          // Calcular altura necessária para recomendação e justificativa
+          doc.setFontSize(8);
+          const recLines = doc.splitTextToSize(rec.recomendacao, pageWidth - 60);
+          doc.setFontSize(7);
+          const justLines = doc.splitTextToSize(rec.justificativa, pageWidth - 50);
+          const cardHeight = Math.max(28, 12 + recLines.length * 5 + justLines.length * 4 + 4);
           
-          // Card branco
-          doc.setFillColor(255, 255, 255);
-          doc.roundedRect(20, yPos, pageWidth - 48, 22, 2, 2, 'F');
+          checkPageSpace(cardHeight + 5);
+          
+          // Card com fundo roxo claro
+          doc.setFillColor(COLORS.purpleLight[0], COLORS.purpleLight[1], COLORS.purpleLight[2]);
+          doc.roundedRect(14, yPos, pageWidth - 28, cardHeight, 2, 2, 'F');
           doc.setDrawColor(COLORS.purple[0], COLORS.purple[1], COLORS.purple[2]);
           doc.setLineWidth(0.3);
-          doc.roundedRect(20, yPos, pageWidth - 48, 22, 2, 2, 'S');
+          doc.roundedRect(14, yPos, pageWidth - 28, cardHeight, 2, 2, 'S');
           
-          // Badge de prioridade
+          // Badge de prioridade (canto superior esquerdo)
           const prioBgColor = rec.prioridade === 'alta' ? COLORS.danger : 
                              rec.prioridade === 'média' ? COLORS.orange : COLORS.primary;
           doc.setFillColor(prioBgColor[0], prioBgColor[1], prioBgColor[2]);
-          doc.roundedRect(24, yPos + 3, 18, 6, 1, 1, 'F');
+          doc.roundedRect(18, yPos + 4, 20, 7, 1, 1, 'F');
           doc.setTextColor(255, 255, 255);
-          doc.setFontSize(5);
+          doc.setFontSize(6);
           doc.setFont('helvetica', 'bold');
-          doc.text(rec.prioridade.toUpperCase(), 33, yPos + 7, { align: 'center' });
+          doc.text(rec.prioridade.toUpperCase(), 28, yPos + 9, { align: 'center' });
           
-          // Recomendação
+          // Categoria badge (canto superior direito)
+          doc.setFillColor(255, 255, 255);
+          doc.roundedRect(pageWidth - 55, yPos + 4, 35, 7, 1, 1, 'F');
+          doc.setTextColor(COLORS.purple[0], COLORS.purple[1], COLORS.purple[2]);
+          doc.setFontSize(6);
+          doc.setFont('helvetica', 'normal');
+          doc.text(rec.categoria, pageWidth - 37.5, yPos + 9, { align: 'center' });
+          
+          // Recomendação (texto completo com word wrap)
           doc.setTextColor(COLORS.purple[0] * 0.7, COLORS.purple[1] * 0.7, COLORS.purple[2] * 0.7);
           doc.setFontSize(8);
           doc.setFont('helvetica', 'bold');
-          const recLines = doc.splitTextToSize(rec.recomendacao, pageWidth - 100);
-          doc.text(recLines[0], 46, yPos + 7);
+          let textYPos = yPos + 16;
+          recLines.forEach((line: string) => {
+            doc.text(line, 18, textYPos);
+            textYPos += 5;
+          });
           
-          // Categoria badge
-          doc.setFillColor(COLORS.purpleLight[0], COLORS.purpleLight[1], COLORS.purpleLight[2]);
-          doc.roundedRect(pageWidth - 65, yPos + 2, 30, 6, 1, 1, 'F');
-          doc.setTextColor(COLORS.purple[0], COLORS.purple[1], COLORS.purple[2]);
-          doc.setFontSize(5);
-          doc.setFont('helvetica', 'normal');
-          doc.text(rec.categoria, pageWidth - 50, yPos + 6, { align: 'center' });
-          
-          // Justificativa
-          doc.setTextColor(100, 100, 100);
+          // Justificativa (texto completo com word wrap)
+          doc.setTextColor(80, 80, 80);
           doc.setFontSize(7);
-          const justLines = doc.splitTextToSize(rec.justificativa, pageWidth - 58);
-          doc.text(justLines[0], 24, yPos + 16);
+          doc.setFont('helvetica', 'normal');
+          textYPos += 2;
+          justLines.forEach((line: string) => {
+            doc.text(line, 18, textYPos);
+            textYPos += 4;
+          });
           
-          yPos += 26;
+          yPos += cardHeight + 4;
         });
         
         if (sortedRecs.length > 5) {
           doc.setFontSize(8);
           doc.setTextColor(COLORS.purple[0], COLORS.purple[1], COLORS.purple[2]);
-          doc.text(`... e mais ${sortedRecs.length - 5} recomendações`, 24, yPos);
+          doc.text(`... e mais ${sortedRecs.length - 5} recomendações`, 18, yPos);
           yPos += 10;
         }
       }

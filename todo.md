@@ -2155,3 +2155,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Remover emojis/setas que não são suportados pela fonte
 - [x] Substituir por texto legível (ex: "estável", "subida", "descida")
 - [x] Testar exportação do PDF
+
+- [x] Corrigir textos cortados no PDF do Histórico da Loja
+- [x] Corrigir sobreposição de títulos com badges no PDF
+- [x] Implementar word wrap adequado nas descrições
