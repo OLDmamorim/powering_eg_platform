@@ -2178,3 +2178,4 @@ NOTA: Sistema de email requer configuração externa no deployment
 
 - [x] Adicionar quantidade de escovas vendidas ao gráfico de Vendas Complementares
 - [x] Mostrar valores absolutos além das percentagens
+- [x] Enviar emails automaticamente ao criar ocorrência estrutural (admin + cópia gestor)

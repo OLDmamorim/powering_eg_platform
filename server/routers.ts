@@ -4033,6 +4033,113 @@ export const appRouter = router({
           });
         }
         
+        // ===== ENVIAR EMAILS AUTOMATICAMENTE =====
+        const gestorNome = ctx.user.name || 'Gestor';
+        const temaNome = input.tema;
+        
+        // Obter email do admin real (excluir admins de teste)
+        const admins = await db.getAllUsers();
+        const adminReal = admins.find(u => 
+          u.role === 'admin' && 
+          u.email && 
+          !u.email.includes('test') &&
+          u.name?.toLowerCase() !== 'marco amorim'
+        );
+        
+        if (adminReal && adminReal.email) {
+          // Parsear fotos
+          const fotos = input.fotos || [];
+          
+          // Preparar anexos de fotos (fazer download do S3 e converter para base64)
+          const fotoAttachments = await Promise.all(
+            fotos.map(async (fotoUrl, index) => {
+              try {
+                const response = await fetch(fotoUrl);
+                const buffer = await response.arrayBuffer();
+                const base64 = Buffer.from(buffer).toString('base64');
+                const ext = fotoUrl.toLowerCase().includes('.png') ? 'png' : 'jpg';
+                const contentType = ext === 'png' ? 'image/png' : 'image/jpeg';
+                return {
+                  filename: `foto_ocorrencia_${index + 1}.${ext}`,
+                  content: base64,
+                  contentType,
+                };
+              } catch (error) {
+                console.error(`Erro ao fazer download da foto ${index + 1}:`, error);
+                return null;
+              }
+            })
+          );
+          
+          const validAttachments = fotoAttachments.filter(a => a !== null) as Array<{filename: string; content: string; contentType: string}>;
+          
+          // Gerar HTML do email
+          const htmlContent = gerarHTMLOcorrenciaEstrutural({
+            gestorNome,
+            temaNome,
+            descricao: input.descricao,
+            abrangencia: input.abrangencia,
+            zonaAfetada: input.zonaAfetada || null,
+            impacto: input.impacto,
+            sugestaoAcao: input.sugestaoAcao || null,
+            fotos: [],
+            criadoEm: new Date(),
+          });
+          
+          // Adicionar nota sobre anexos no HTML
+          const htmlComNota = validAttachments.length > 0 
+            ? htmlContent.replace(
+                '</body>',
+                `<div style="text-align: center; padding: 20px; background: #f0fdf4; margin: 20px 30px; border-radius: 8px; border: 1px solid #22c55e;">
+                  <p style="margin: 0; color: #166534; font-weight: 600;">📎 ${validAttachments.length} foto(s) anexada(s) a este email</p>
+                  <p style="margin: 5px 0 0; color: #15803d; font-size: 12px;">Verifique os anexos para visualizar as imagens.</p>
+                </div>
+                </body>`
+              )
+            : htmlContent;
+          
+          const assunto = `Ocorrência: ${temaNome} - Reportado por ${gestorNome}`;
+          
+          // Enviar para o admin
+          try {
+            await sendEmail({
+              to: adminReal.email,
+              subject: assunto,
+              html: htmlComNota,
+              attachments: validAttachments,
+            });
+            console.log(`Email de ocorrência enviado para admin: ${adminReal.email}`);
+          } catch (e) {
+            console.error('Erro ao enviar email para admin:', e);
+          }
+          
+          // Enviar cópia para o gestor que reportou
+          const gestorEmail = ctx.user.email;
+          if (gestorEmail) {
+            const htmlCopia = htmlComNota.replace(
+              '</body>',
+              `<div style="text-align: center; padding: 15px; background: #eff6ff; margin: 20px 30px; border-radius: 8px; border: 1px solid #3b82f6;">
+                <p style="margin: 0; color: #1d4ed8; font-size: 13px;">📋 Esta é uma cópia da ocorrência que reportou. O email original foi enviado para ${adminReal.name || 'o administrador'}.</p>
+              </div>
+              </body>`
+            );
+            
+            try {
+              await sendEmail({
+                to: gestorEmail,
+                subject: `[Cópia] ${assunto}`,
+                html: htmlCopia,
+                attachments: validAttachments,
+              });
+              console.log(`Cópia de ocorrência enviada para gestor: ${gestorEmail}`);
+            } catch (e) {
+              console.error('Erro ao enviar cópia para gestor:', e);
+            }
+          }
+        } else {
+          console.warn('Admin real não encontrado para envio de email de ocorrência');
+        }
+        
         return ocorrencia;
       }),
     
