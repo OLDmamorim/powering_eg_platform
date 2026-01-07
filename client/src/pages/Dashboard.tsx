@@ -438,9 +438,9 @@ export default function Dashboard() {
         {/* Botões de ação - mobile: lado a lado no topo, desktop: à direita */}
         <div className="flex md:hidden gap-2 justify-end">
           {isAdmin ? (
-            <Button onClick={() => setLocation('/relatorio-board')} variant="outline" size="sm" className="gap-1.5 flex-1">
-              <BarChart3 className="h-4 w-4" />
-              <span className="text-xs">Relatório</span>
+            <Button onClick={() => setLocation('/relatorios-ia')} variant="outline" size="sm" className="gap-1.5 flex-1">
+              <Sparkles className="h-4 w-4" />
+              <span className="text-xs">Relatórios IA</span>
             </Button>
           ) : (
             <Button onClick={gerarRelatorioMensal} variant="outline" size="sm" className="gap-1.5 flex-1">
@@ -500,8 +500,8 @@ export default function Dashboard() {
           {/* Botões desktop - escondidos em mobile */}
           <div className="hidden md:flex flex-col gap-2">
             {isAdmin ? (
-              <Button onClick={() => setLocation('/relatorio-board')} variant="outline" className="gap-2">
-                <BarChart3 className="h-4 w-4" />Relatório Board
+              <Button onClick={() => setLocation('/relatorios-ia')} variant="outline" className="gap-2">
+                <Sparkles className="h-4 w-4" />Relatórios IA
               </Button>
             ) : (
               <Button onClick={gerarRelatorioMensal} variant="outline" className="gap-2">
