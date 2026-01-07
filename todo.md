@@ -375,6 +375,12 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Remover página PlanoVisitas.tsx
 - [x] Manter tabelas e serviços no backend (podem ser úteis futuramente)
 
+## Gráficos no Portal - Histórico da Loja v3.6
+
+- [x] Adicionar gráfico de Taxa de Reparação na página Histórico da Loja
+- [x] Adicionar gráfico de Vendas Complementares na página Histórico da Loja
+- [x] Adicionar alerta visual para % escovas abaixo de 7.5% nos gráficos
+
 ## Modal de Sugestões Pós-Relatório v3.6
 
 - [x] Criar endpoint para obter sugestões por relatório

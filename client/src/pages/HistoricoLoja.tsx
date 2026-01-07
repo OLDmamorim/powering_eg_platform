@@ -22,6 +22,20 @@ import { useState, useMemo } from "react";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
 import FiltroMesesCheckbox, { type MesSelecionado } from "@/components/FiltroMesesCheckbox";
+import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  ReferenceLine,
+  Cell,
+} from "recharts";
 
 type PeriodoComparacao = 'q1_ano_anterior_vs_atual' | 'q2_ano_anterior_vs_atual' | 'q3_ano_anterior_vs_atual' | 'q4_ano_anterior_vs_atual' | 's1_ano_anterior_vs_atual' | 's2_ano_anterior_vs_atual' | 'ano_completo';
 
@@ -1355,6 +1369,61 @@ export default function HistoricoLoja() {
               </Card>
             )}
 
+            {/* Gráfico de Taxa de Reparação */}
+            {historyData.dadosMensais?.resultados && historyData.dadosMensais.resultados.length > 0 && (
+              <Card className="border-indigo-200">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-indigo-900">
+                    <BarChart3 className="h-5 w-5" />
+                    Evolução da Taxa de Reparação
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-[300px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={historyData.dadosMensais.resultados}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+                        <XAxis 
+                          dataKey="mes" 
+                          tick={{ fontSize: 12 }}
+                          stroke="#6366f1"
+                        />
+                        <YAxis 
+                          tick={{ fontSize: 12 }}
+                          stroke="#6366f1"
+                          domain={[0, 'auto']}
+                          tickFormatter={(value) => `${value}%`}
+                        />
+                        <Tooltip 
+                          formatter={(value: number) => [`${value}%`, 'Taxa Reparação']}
+                          contentStyle={{ backgroundColor: '#f8fafc', borderColor: '#6366f1' }}
+                        />
+                        <Legend />
+                        <Line 
+                          type="monotone" 
+                          dataKey="taxaReparacao" 
+                          name="Taxa Reparação (%)"
+                          stroke="#6366f1" 
+                          strokeWidth={3}
+                          dot={{ fill: '#6366f1', strokeWidth: 2, r: 5 }}
+                          activeDot={{ r: 8 }}
+                        />
+                        <ReferenceLine 
+                          y={22} 
+                          stroke="#10b981" 
+                          strokeDasharray="5 5" 
+                          label={{ value: 'Objetivo 22%', position: 'right', fill: '#10b981', fontSize: 11 }}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-2 text-center">
+                    A linha verde tracejada indica o objetivo de 22% de taxa de reparação
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Análise Comercial */}
             {historyData.analiseComercial && (
               <Card className="border-emerald-200 bg-emerald-50/30">
@@ -1387,6 +1456,118 @@ export default function HistoricoLoja() {
                     <span className="text-muted-foreground">Tendência:</span>
                     {getTrendIcon(historyData.analiseComercial.tendenciaVendas)}
                     <span className="capitalize">{historyData.analiseComercial.tendenciaVendas}</span>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Gráfico de Vendas Complementares */}
+            {historyData.dadosMensais?.vendas && historyData.dadosMensais.vendas.length > 0 && (
+              <Card className="border-emerald-200">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-emerald-900">
+                    <ShoppingCart className="h-5 w-5" />
+                    Evolução das Vendas Complementares
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {/* Alerta de Escovas abaixo de 7.5% */}
+                  {historyData.dadosMensais.vendas.some((v: any) => v.escovasPercent < 7.5) && (
+                    <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2">
+                      <AlertTriangle className="h-5 w-5 text-red-600" />
+                      <div>
+                        <p className="text-sm font-semibold text-red-800">Alerta: % Escovas abaixo do objetivo</p>
+                        <p className="text-xs text-red-600">
+                          {historyData.dadosMensais.vendas.filter((v: any) => v.escovasPercent < 7.5).length} mês(es) com percentagem de escovas inferior a 7.5%
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  <div className="h-[350px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={historyData.dadosMensais.vendas}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+                        <XAxis 
+                          dataKey="mes" 
+                          tick={{ fontSize: 12 }}
+                          stroke="#10b981"
+                        />
+                        <YAxis 
+                          yAxisId="left"
+                          tick={{ fontSize: 12 }}
+                          stroke="#10b981"
+                          tickFormatter={(value) => `€${value}`}
+                        />
+                        <YAxis 
+                          yAxisId="right"
+                          orientation="right"
+                          tick={{ fontSize: 12 }}
+                          stroke="#ef4444"
+                          tickFormatter={(value) => `${value}%`}
+                          domain={[0, 15]}
+                        />
+                        <Tooltip 
+                          formatter={(value: number, name: string) => {
+                            if (name === '% Escovas') return [`${value}%`, name];
+                            return [`€${value.toFixed(2)}`, name];
+                          }}
+                          contentStyle={{ backgroundColor: '#f8fafc', borderColor: '#10b981' }}
+                        />
+                        <Legend />
+                        <Bar 
+                          yAxisId="left"
+                          dataKey="escovas" 
+                          name="Escovas (€)"
+                          fill="#10b981"
+                          radius={[4, 4, 0, 0]}
+                        />
+                        <Bar 
+                          yAxisId="left"
+                          dataKey="polimento" 
+                          name="Polimento (€)"
+                          fill="#6366f1"
+                          radius={[4, 4, 0, 0]}
+                        />
+                        <Line 
+                          yAxisId="right"
+                          type="monotone" 
+                          dataKey="escovasPercent" 
+                          name="% Escovas"
+                          stroke="#ef4444" 
+                          strokeWidth={3}
+                          dot={({ cx, cy, payload }: any) => {
+                            const isBelow = payload.escovasPercent < 7.5;
+                            return (
+                              <circle 
+                                cx={cx} 
+                                cy={cy} 
+                                r={isBelow ? 8 : 5} 
+                                fill={isBelow ? '#ef4444' : '#f97316'}
+                                stroke={isBelow ? '#dc2626' : '#ea580c'}
+                                strokeWidth={2}
+                              />
+                            );
+                          }}
+                        />
+                        <ReferenceLine 
+                          yAxisId="right"
+                          y={7.5} 
+                          stroke="#ef4444" 
+                          strokeDasharray="5 5" 
+                          label={{ value: 'Objetivo 7.5%', position: 'right', fill: '#ef4444', fontSize: 11 }}
+                        />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <div className="mt-3 flex items-center justify-center gap-4 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                      <span>Abaixo de 7.5% (alerta)</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <div className="w-3 h-3 rounded-full bg-orange-500"></div>
+                      <span>Acima de 7.5% (OK)</span>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
