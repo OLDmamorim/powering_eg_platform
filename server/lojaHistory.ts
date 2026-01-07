@@ -25,13 +25,15 @@ export interface LojaHistoryResult {
     totalVendasComplementares: number;
     mediaVendasMensal: number;
     escovasTotal: number;
+    escovasQtdTotal: number;
     polimentoTotal: number;
+    polimentoQtdTotal: number;
     tendenciaVendas: 'subida' | 'descida' | 'estavel';
   };
   // Dados para gráficos de evolução mensal
   dadosMensais?: {
     resultados: Array<{ mes: string; servicos: number; objetivo: number; taxaReparacao: number }>;
-    vendas: Array<{ mes: string; total: number; escovas: number; polimento: number; escovasPercent: number }>;
+    vendas: Array<{ mes: string; total: number; escovas: number; escovasQtd: number; polimento: number; polimentoQtd: number; escovasPercent: number }>;
     pendentes: Array<{ mes: string; criados: number; resolvidos: number }>;
   };
   evolucao: {
@@ -338,7 +340,9 @@ async function generateLojaHistoryInterno(
     if (vendasComplementares.length > 0) {
       const totalVendasComplementares = vendasComplementares.reduce((sum, v) => sum + (parseFloat(v.totalVendas) || 0), 0);
       const escovasTotal = vendasComplementares.reduce((sum, v) => sum + (parseFloat(v.escovasVendas) || 0), 0);
+      const escovasQtdTotal = vendasComplementares.reduce((sum, v) => sum + (v.escovasQtd || 0), 0);
       const polimentoTotal = vendasComplementares.reduce((sum, v) => sum + (parseFloat(v.polimentoVendas) || 0), 0);
+      const polimentoQtdTotal = vendasComplementares.reduce((sum, v) => sum + (v.polimentoQtd || 0), 0);
       
       // Calcular tendência
       let tendenciaVendas: 'subida' | 'descida' | 'estavel' = 'estavel';
@@ -353,7 +357,9 @@ async function generateLojaHistoryInterno(
         totalVendasComplementares: parseFloat(totalVendasComplementares.toFixed(2)),
         mediaVendasMensal: parseFloat((totalVendasComplementares / vendasComplementares.length).toFixed(2)),
         escovasTotal: parseFloat(escovasTotal.toFixed(2)),
+        escovasQtdTotal,
         polimentoTotal: parseFloat(polimentoTotal.toFixed(2)),
+        polimentoQtdTotal,
         tendenciaVendas,
       };
     }
@@ -570,7 +576,9 @@ Gera uma análise completa incluindo evolução, problemas, pontos fortes, alert
         mes: `${NOMES_MESES_CURTOS[v.mes - 1]} ${v.ano}`,
         total: parseFloat(v.totalVendas) || 0,
         escovas: parseFloat(v.escovasVendas) || 0,
+        escovasQtd: v.escovasQtd || 0,
         polimento: parseFloat(v.polimentoVendas) || 0,
+        polimentoQtd: v.polimentoQtd || 0,
         escovasPercent: v.escovasPercent ? parseFloat((v.escovasPercent * 100).toFixed(2)) : 0,
       })),
       pendentes: (() => {

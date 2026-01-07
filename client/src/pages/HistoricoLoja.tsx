@@ -454,8 +454,8 @@ export default function HistoricoLoja() {
         const comercialMetrics = [
           { value: `€${historyData.analiseComercial.totalVendasComplementares}`, label: 'Total Vendas' },
           { value: `€${historyData.analiseComercial.mediaVendasMensal}`, label: 'Média Mensal' },
-          { value: `€${historyData.analiseComercial.escovasTotal}`, label: 'Escovas' },
-          { value: `€${historyData.analiseComercial.polimentoTotal}`, label: 'Polimento' },
+          { value: `€${historyData.analiseComercial.escovasTotal}`, label: `Escovas (${historyData.analiseComercial.escovasQtdTotal || 0} un.)` },
+          { value: `€${historyData.analiseComercial.polimentoTotal}`, label: `Polimento (${historyData.analiseComercial.polimentoQtdTotal || 0} un.)` },
         ];
         
         comercialMetrics.forEach((metric, i) => {
@@ -550,11 +550,12 @@ export default function HistoricoLoja() {
           const barWidth = (chartWidth - 20) / data.length;
           const barGap = 6;
           
-          data.forEach((d: { mes: string; total: number; escovas: number; polimento: number; escovasPercent?: number }, i: number) => {
+          data.forEach((d: { mes: string; total: number; escovas: number; escovasQtd?: number; polimento: number; polimentoQtd?: number; escovasPercent?: number }, i: number) => {
             const x = chartX + 10 + i * barWidth;
             const escovasHeight = ((d.escovas - minVendas) / range) * chartHeight;
             const polimentoHeight = ((d.polimento - minVendas) / range) * chartHeight;
             const escovasPercentValue = d.escovasPercent || 0;
+            const escovasQtdValue = d.escovasQtd || 0;
             const isAbaixoLimite = escovasPercentValue < 7.5;
             
             // Barra de escovas (verde escuro, ou vermelho se abaixo do limite)
@@ -574,7 +575,7 @@ export default function HistoricoLoja() {
             doc.setTextColor(60, 100, 70);
             doc.text(d.mes, x + barWidth/2, chartY + chartHeight + 8, { align: 'center' });
             
-            // Mostrar % escovas abaixo da barra com destaque se abaixo de 7.5%
+            // Mostrar % escovas e quantidade abaixo da barra com destaque se abaixo de 7.5%
             doc.setFontSize(5);
             if (isAbaixoLimite) {
               doc.setTextColor(185, 28, 28);
@@ -584,27 +585,30 @@ export default function HistoricoLoja() {
               doc.setFont('helvetica', 'normal');
             }
             doc.text(`${escovasPercentValue.toFixed(1)}%`, x + barWidth/2, chartY + chartHeight + 14, { align: 'center' });
+            // Mostrar quantidade de escovas
+            doc.setTextColor(60, 100, 70);
             doc.setFont('helvetica', 'normal');
+            doc.text(`(${escovasQtdValue} un.)`, x + barWidth/2, chartY + chartHeight + 19, { align: 'center' });
           });
           
           // Legenda
           doc.setFillColor(COLORS.emerald[0], COLORS.emerald[1], COLORS.emerald[2]);
-          doc.rect(chartX + chartWidth - 90, chartY + chartHeight + 20, 8, 4, 'F');
+          doc.rect(chartX + chartWidth - 90, chartY + chartHeight + 26, 8, 4, 'F');
           doc.setFontSize(6);
           doc.setTextColor(40, 80, 50);
-          doc.text('Escovas', chartX + chartWidth - 80, chartY + chartHeight + 23);
+          doc.text('Escovas', chartX + chartWidth - 80, chartY + chartHeight + 29);
           
           doc.setFillColor(134, 239, 172);
-          doc.rect(chartX + chartWidth - 55, chartY + chartHeight + 20, 8, 4, 'F');
-          doc.text('Polimento', chartX + chartWidth - 45, chartY + chartHeight + 23);
+          doc.rect(chartX + chartWidth - 55, chartY + chartHeight + 26, 8, 4, 'F');
+          doc.text('Polimento', chartX + chartWidth - 45, chartY + chartHeight + 29);
           
           // Linha de referência 7.5%
           doc.setFillColor(COLORS.danger[0], COLORS.danger[1], COLORS.danger[2]);
-          doc.rect(chartX + chartWidth - 20, chartY + chartHeight + 20, 8, 4, 'F');
+          doc.rect(chartX + chartWidth - 20, chartY + chartHeight + 26, 8, 4, 'F');
           doc.setTextColor(185, 28, 28);
-          doc.text('<7.5%', chartX + chartWidth - 10, chartY + chartHeight + 23);
+          doc.text('<7.5%', chartX + chartWidth - 10, chartY + chartHeight + 29);
           
-          yPos = chartY + chartHeight + 38;
+          yPos = chartY + chartHeight + 44;
         }
       }
 
@@ -1445,11 +1449,11 @@ export default function HistoricoLoja() {
                     </div>
                     <div className="text-center p-3 bg-white rounded-lg">
                       <p className="text-2xl font-bold text-emerald-700">€{historyData.analiseComercial.escovasTotal}</p>
-                      <p className="text-xs text-emerald-600">Escovas</p>
+                      <p className="text-xs text-emerald-600 font-semibold">Escovas ({historyData.analiseComercial.escovasQtdTotal || 0} un.)</p>
                     </div>
                     <div className="text-center p-3 bg-white rounded-lg">
                       <p className="text-2xl font-bold text-emerald-700">€{historyData.analiseComercial.polimentoTotal}</p>
-                      <p className="text-xs text-emerald-600">Polimento</p>
+                      <p className="text-xs text-emerald-600">Polimento ({historyData.analiseComercial.polimentoQtdTotal || 0} un.)</p>
                     </div>
                   </div>
                   <div className="mt-4 flex items-center gap-2 text-sm">
@@ -1507,8 +1511,16 @@ export default function HistoricoLoja() {
                           domain={[0, 15]}
                         />
                         <Tooltip 
-                          formatter={(value: number, name: string) => {
+                          formatter={(value: number, name: string, props: any) => {
                             if (name === '% Escovas') return [`${value}%`, name];
+                            if (name === 'Escovas (€)') {
+                              const qtd = props.payload?.escovasQtd || 0;
+                              return [`€${value.toFixed(2)} (${qtd} un.)`, name];
+                            }
+                            if (name === 'Polimento (€)') {
+                              const qtd = props.payload?.polimentoQtd || 0;
+                              return [`€${value.toFixed(2)} (${qtd} un.)`, name];
+                            }
                             return [`€${value.toFixed(2)}`, name];
                           }}
                           contentStyle={{ backgroundColor: '#f8fafc', borderColor: '#10b981' }}

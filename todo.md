@@ -2173,3 +2173,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Remover gráfico de pendentes do PDF
 - [x] Adicionar gráfico de taxa de reparação mensal
 - [x] Destacar % escovas com alerta quando abaixo de 7.5% (retira prémio)
+
+## Gráficos Histórico da Loja - Quantidades v6.7
+
+- [x] Adicionar quantidade de escovas vendidas ao gráfico de Vendas Complementares
+- [x] Mostrar valores absolutos além das percentagens
