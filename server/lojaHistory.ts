@@ -28,6 +28,12 @@ export interface LojaHistoryResult {
     polimentoTotal: number;
     tendenciaVendas: 'subida' | 'descida' | 'estavel';
   };
+  // Dados para gráficos de evolução mensal
+  dadosMensais?: {
+    resultados: Array<{ mes: string; servicos: number; objetivo: number; taxaReparacao: number }>;
+    vendas: Array<{ mes: string; total: number; escovas: number; polimento: number }>;
+    pendentes: Array<{ mes: string; criados: number; resolvidos: number }>;
+  };
   evolucao: {
     periodo: string;
     descricao: string;
@@ -419,6 +425,7 @@ async function generateLojaHistoryInterno(
         metricas: dadosCompletos.metricas,
         analiseResultados: analiseResultados || undefined,
         analiseComercial: analiseComercial || undefined,
+        dadosMensais: { resultados: [], vendas: [], pendentes: [] },
         evolucao: [],
         problemasRecorrentes: [],
         pontosFortes: [],
@@ -549,12 +556,48 @@ Gera uma análise completa incluindo evolução, problemas, pontos fortes, alert
     const contentStr = typeof content === 'string' ? content : JSON.stringify(content);
     const iaResult = JSON.parse(contentStr);
     
+    // Preparar dados mensais para gráficos
+    const NOMES_MESES_CURTOS = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+    
+    const dadosMensais = {
+      resultados: resultadosMensais.map((r: any) => ({
+        mes: `${NOMES_MESES_CURTOS[r.mes - 1]} ${r.ano}`,
+        servicos: r.totalServicos || 0,
+        objetivo: r.objetivoMensal || 0,
+        taxaReparacao: parseFloat(((r.taxaReparacao || 0) * 100).toFixed(1)),
+      })),
+      vendas: vendasComplementares.map((v: any) => ({
+        mes: `${NOMES_MESES_CURTOS[v.mes - 1]} ${v.ano}`,
+        total: parseFloat(v.totalVendas) || 0,
+        escovas: parseFloat(v.escovasVendas) || 0,
+        polimento: parseFloat(v.polimentoVendas) || 0,
+      })),
+      pendentes: (() => {
+        // Agrupar pendentes por mês
+        const porMes = new Map<string, { criados: number; resolvidos: number }>();
+        pendentes.forEach((p: any) => {
+          const data = new Date(p.createdAt);
+          const chave = `${NOMES_MESES_CURTOS[data.getMonth()]} ${data.getFullYear()}`;
+          const atual = porMes.get(chave) || { criados: 0, resolvidos: 0 };
+          atual.criados++;
+          if (p.resolvido) atual.resolvidos++;
+          porMes.set(chave, atual);
+        });
+        return Array.from(porMes.entries()).map(([mes, dados]) => ({
+          mes,
+          criados: dados.criados,
+          resolvidos: dados.resolvidos,
+        }));
+      })(),
+    };
+    
     return {
       ...iaResult,
       periodoAnalisado: label,
       metricas: dadosCompletos.metricas,
       analiseResultados: analiseResultados || undefined,
       analiseComercial: analiseComercial || undefined,
+      dadosMensais,
     };
 
   } catch (error) {

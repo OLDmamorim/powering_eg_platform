@@ -356,6 +356,78 @@ export default function HistoricoLoja() {
         doc.text(`Tendencia: ${trendText}   |   Melhor: ${historyData.analiseResultados.melhorMes}   |   Pior: ${historyData.analiseResultados.piorMes}`, 20, yPos);
         
         yPos += 18;
+        
+        // ========== GRÁFICO DE EVOLUÇÃO DE SERVIÇOS ==========
+        if (historyData.dadosMensais?.resultados && historyData.dadosMensais.resultados.length > 1) {
+          checkPageSpace(90);
+          drawSectionHeader('Evolução Mensal de Serviços', COLORS.indigo);
+          
+          const chartX = 20;
+          const chartY = yPos;
+          const chartWidth = pageWidth - 40;
+          const chartHeight = 60;
+          const data = historyData.dadosMensais.resultados;
+          
+          // Fundo do gráfico
+          doc.setFillColor(250, 250, 255);
+          doc.roundedRect(chartX - 5, chartY - 5, chartWidth + 10, chartHeight + 25, 3, 3, 'F');
+          doc.setDrawColor(200, 200, 220);
+          doc.setLineWidth(0.3);
+          doc.roundedRect(chartX - 5, chartY - 5, chartWidth + 10, chartHeight + 25, 3, 3, 'S');
+          
+          // Calcular escalas
+          const maxServicos = Math.max(...data.map((d: { servicos: number; objetivo: number }) => Math.max(d.servicos, d.objetivo)));
+          const minServicos = 0;
+          const range = maxServicos - minServicos || 1;
+          
+          // Desenhar linhas de grade horizontais
+          doc.setDrawColor(230, 230, 240);
+          doc.setLineWidth(0.2);
+          for (let i = 0; i <= 4; i++) {
+            const y = chartY + chartHeight - (i / 4) * chartHeight;
+            doc.line(chartX, y, chartX + chartWidth, y);
+            const value = Math.round(minServicos + (i / 4) * range);
+            doc.setFontSize(6);
+            doc.setTextColor(120, 120, 140);
+            doc.text(value.toString(), chartX - 3, y + 1, { align: 'right' });
+          }
+          
+          // Desenhar barras e linha
+          const barWidth = (chartWidth - 20) / data.length;
+          const barGap = 4;
+          
+          data.forEach((d: { mes: string; servicos: number; objetivo: number; taxaReparacao: number }, i: number) => {
+            const x = chartX + 10 + i * barWidth;
+            const servicosHeight = ((d.servicos - minServicos) / range) * chartHeight;
+            const objetivoHeight = ((d.objetivo - minServicos) / range) * chartHeight;
+            
+            // Barra de serviços (azul)
+            doc.setFillColor(COLORS.primary[0], COLORS.primary[1], COLORS.primary[2]);
+            doc.rect(x + barGap/2, chartY + chartHeight - servicosHeight, (barWidth - barGap) * 0.45, servicosHeight, 'F');
+            
+            // Barra de objetivo (cinza)
+            doc.setFillColor(180, 180, 200);
+            doc.rect(x + barGap/2 + (barWidth - barGap) * 0.5, chartY + chartHeight - objetivoHeight, (barWidth - barGap) * 0.45, objetivoHeight, 'F');
+            
+            // Label do mês
+            doc.setFontSize(6);
+            doc.setTextColor(80, 80, 100);
+            doc.text(d.mes, x + barWidth/2, chartY + chartHeight + 8, { align: 'center' });
+          });
+          
+          // Legenda
+          doc.setFillColor(COLORS.primary[0], COLORS.primary[1], COLORS.primary[2]);
+          doc.rect(chartX + chartWidth - 70, chartY + chartHeight + 12, 8, 4, 'F');
+          doc.setFontSize(6);
+          doc.setTextColor(60, 60, 80);
+          doc.text('Serviços', chartX + chartWidth - 60, chartY + chartHeight + 15);
+          
+          doc.setFillColor(180, 180, 200);
+          doc.rect(chartX + chartWidth - 35, chartY + chartHeight + 12, 8, 4, 'F');
+          doc.text('Objetivo', chartX + chartWidth - 25, chartY + chartHeight + 15);
+          
+          yPos = chartY + chartHeight + 28;
+        }
       }
 
       // ========== ANÁLISE COMERCIAL ==========
@@ -394,6 +466,150 @@ export default function HistoricoLoja() {
         doc.text(`Tendencia: ${trendTextComercial}`, 20, yPos);
         
         yPos += 18;
+        
+        // ========== GRÁFICO DE EVOLUÇÃO DE VENDAS ==========
+        if (historyData.dadosMensais?.vendas && historyData.dadosMensais.vendas.length > 1) {
+          checkPageSpace(90);
+          drawSectionHeader('Evolução Mensal de Vendas Complementares', COLORS.emerald);
+          
+          const chartX = 20;
+          const chartY = yPos;
+          const chartWidth = pageWidth - 40;
+          const chartHeight = 55;
+          const data = historyData.dadosMensais.vendas;
+          
+          // Fundo do gráfico
+          doc.setFillColor(245, 255, 250);
+          doc.roundedRect(chartX - 5, chartY - 5, chartWidth + 10, chartHeight + 25, 3, 3, 'F');
+          doc.setDrawColor(200, 230, 210);
+          doc.setLineWidth(0.3);
+          doc.roundedRect(chartX - 5, chartY - 5, chartWidth + 10, chartHeight + 25, 3, 3, 'S');
+          
+          // Calcular escalas
+          const maxVendas = Math.max(...data.map((d: { total: number }) => d.total));
+          const minVendas = 0;
+          const range = maxVendas - minVendas || 1;
+          
+          // Desenhar linhas de grade horizontais
+          doc.setDrawColor(220, 240, 225);
+          doc.setLineWidth(0.2);
+          for (let i = 0; i <= 4; i++) {
+            const y = chartY + chartHeight - (i / 4) * chartHeight;
+            doc.line(chartX, y, chartX + chartWidth, y);
+            const value = Math.round(minVendas + (i / 4) * range);
+            doc.setFontSize(6);
+            doc.setTextColor(100, 140, 110);
+            doc.text(`€${value}`, chartX - 3, y + 1, { align: 'right' });
+          }
+          
+          // Desenhar barras empilhadas
+          const barWidth = (chartWidth - 20) / data.length;
+          const barGap = 6;
+          
+          data.forEach((d: { mes: string; total: number; escovas: number; polimento: number }, i: number) => {
+            const x = chartX + 10 + i * barWidth;
+            const escovasHeight = ((d.escovas - minVendas) / range) * chartHeight;
+            const polimentoHeight = ((d.polimento - minVendas) / range) * chartHeight;
+            
+            // Barra de escovas (verde escuro)
+            doc.setFillColor(COLORS.emerald[0], COLORS.emerald[1], COLORS.emerald[2]);
+            doc.rect(x + barGap/2, chartY + chartHeight - escovasHeight - polimentoHeight, barWidth - barGap, escovasHeight, 'F');
+            
+            // Barra de polimento (verde claro)
+            doc.setFillColor(134, 239, 172);
+            doc.rect(x + barGap/2, chartY + chartHeight - polimentoHeight, barWidth - barGap, polimentoHeight, 'F');
+            
+            // Label do mês
+            doc.setFontSize(6);
+            doc.setTextColor(60, 100, 70);
+            doc.text(d.mes, x + barWidth/2, chartY + chartHeight + 8, { align: 'center' });
+          });
+          
+          // Legenda
+          doc.setFillColor(COLORS.emerald[0], COLORS.emerald[1], COLORS.emerald[2]);
+          doc.rect(chartX + chartWidth - 65, chartY + chartHeight + 12, 8, 4, 'F');
+          doc.setFontSize(6);
+          doc.setTextColor(40, 80, 50);
+          doc.text('Escovas', chartX + chartWidth - 55, chartY + chartHeight + 15);
+          
+          doc.setFillColor(134, 239, 172);
+          doc.rect(chartX + chartWidth - 30, chartY + chartHeight + 12, 8, 4, 'F');
+          doc.text('Polimento', chartX + chartWidth - 20, chartY + chartHeight + 15);
+          
+          yPos = chartY + chartHeight + 28;
+        }
+      }
+
+      // ========== GRÁFICO DE EVOLUÇÃO DE PENDENTES ==========
+      if (historyData.dadosMensais?.pendentes && historyData.dadosMensais.pendentes.length > 0) {
+        checkPageSpace(90);
+        drawSectionHeader('Evolução Mensal de Pendentes', COLORS.orange);
+        
+        const chartX = 20;
+        const chartY = yPos;
+        const chartWidth = pageWidth - 40;
+        const chartHeight = 55;
+        const data = historyData.dadosMensais.pendentes;
+        
+        // Fundo do gráfico
+        doc.setFillColor(255, 252, 245);
+        doc.roundedRect(chartX - 5, chartY - 5, chartWidth + 10, chartHeight + 25, 3, 3, 'F');
+        doc.setDrawColor(240, 220, 180);
+        doc.setLineWidth(0.3);
+        doc.roundedRect(chartX - 5, chartY - 5, chartWidth + 10, chartHeight + 25, 3, 3, 'S');
+        
+        // Calcular escalas
+        const maxPendentes = Math.max(...data.map((d: { criados: number; resolvidos: number }) => Math.max(d.criados, d.resolvidos)));
+        const minPendentes = 0;
+        const range = maxPendentes - minPendentes || 1;
+        
+        // Desenhar linhas de grade horizontais
+        doc.setDrawColor(245, 230, 200);
+        doc.setLineWidth(0.2);
+        for (let i = 0; i <= 4; i++) {
+          const y = chartY + chartHeight - (i / 4) * chartHeight;
+          doc.line(chartX, y, chartX + chartWidth, y);
+          const value = Math.round(minPendentes + (i / 4) * range);
+          doc.setFontSize(6);
+          doc.setTextColor(160, 130, 80);
+          doc.text(value.toString(), chartX - 3, y + 1, { align: 'right' });
+        }
+        
+        // Desenhar barras lado a lado
+        const barWidth = (chartWidth - 20) / data.length;
+        const barGap = 4;
+        
+        data.forEach((d: { mes: string; criados: number; resolvidos: number }, i: number) => {
+          const x = chartX + 10 + i * barWidth;
+          const criadosHeight = ((d.criados - minPendentes) / range) * chartHeight;
+          const resolvidosHeight = ((d.resolvidos - minPendentes) / range) * chartHeight;
+          
+          // Barra de criados (laranja)
+          doc.setFillColor(COLORS.orange[0], COLORS.orange[1], COLORS.orange[2]);
+          doc.rect(x + barGap/2, chartY + chartHeight - criadosHeight, (barWidth - barGap) * 0.45, criadosHeight, 'F');
+          
+          // Barra de resolvidos (verde)
+          doc.setFillColor(COLORS.success[0], COLORS.success[1], COLORS.success[2]);
+          doc.rect(x + barGap/2 + (barWidth - barGap) * 0.5, chartY + chartHeight - resolvidosHeight, (barWidth - barGap) * 0.45, resolvidosHeight, 'F');
+          
+          // Label do mês
+          doc.setFontSize(6);
+          doc.setTextColor(120, 100, 60);
+          doc.text(d.mes, x + barWidth/2, chartY + chartHeight + 8, { align: 'center' });
+        });
+        
+        // Legenda
+        doc.setFillColor(COLORS.orange[0], COLORS.orange[1], COLORS.orange[2]);
+        doc.rect(chartX + chartWidth - 70, chartY + chartHeight + 12, 8, 4, 'F');
+        doc.setFontSize(6);
+        doc.setTextColor(100, 80, 40);
+        doc.text('Criados', chartX + chartWidth - 60, chartY + chartHeight + 15);
+        
+        doc.setFillColor(COLORS.success[0], COLORS.success[1], COLORS.success[2]);
+        doc.rect(chartX + chartWidth - 35, chartY + chartHeight + 12, 8, 4, 'F');
+        doc.text('Resolvidos', chartX + chartWidth - 25, chartY + chartHeight + 15);
+        
+        yPos = chartY + chartHeight + 28;
       }
 
       // ========== RESUMO EXECUTIVO ==========
