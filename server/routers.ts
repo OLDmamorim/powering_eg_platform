@@ -4726,9 +4726,11 @@ function gerarHTMLOcorrenciaEstrutural(dados: {
           <!-- Header com Logo -->
           <tr>
             <td style="background: linear-gradient(135deg, #dc2626, #b91c1c); padding: 30px; text-align: center;">
-              <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663088836799/YrkmGCRDVqYgFnZO.png" alt="ExpressGlass" style="max-width: 180px; height: auto; margin-bottom: 15px;" />
-              <h1 style="margin: 0; font-size: 24px; color: #ffffff; font-weight: 700;">⚠️ Ocorrência</h1>
-              <p style="margin: 10px 0 0; font-size: 18px; color: rgba(255,255,255,0.9);">${dados.temaNome}</p>
+              <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663088836799/YrkmGCRDVqYgFnZO.png" alt="ExpressGlass" style="max-width: 180px; height: auto; margin-bottom: 20px;" />
+              <div style="background: rgba(255,255,255,0.15); padding: 15px 25px; border-radius: 8px; display: inline-block;">
+                <h1 style="margin: 0; font-size: 28px; color: #ffffff; font-weight: 700; letter-spacing: 1px;">⚠️ OCORRÊNCIA ESTRUTURAL</h1>
+              </div>
+              <p style="margin: 15px 0 0; font-size: 20px; color: #ffffff; font-weight: 600;">${dados.temaNome}</p>
             </td>
           </tr>
           
