@@ -31,6 +31,21 @@ export default function MeusRelatorios() {
   const [editDescricao, setEditDescricao] = useState("");
   const [editDataVisita, setEditDataVisita] = useState("");
   
+  // Estados para edição de relatório completo
+  const [editEpisFardamento, setEditEpisFardamento] = useState("");
+  const [editKitPrimeirosSocorros, setEditKitPrimeirosSocorros] = useState("");
+  const [editConsumiveis, setEditConsumiveis] = useState("");
+  const [editEspacoFisico, setEditEspacoFisico] = useState("");
+  const [editReclamacoes, setEditReclamacoes] = useState("");
+  const [editVendasComplementares, setEditVendasComplementares] = useState("");
+  const [editFichasServico, setEditFichasServico] = useState("");
+  const [editDocumentacaoObrigatoria, setEditDocumentacaoObrigatoria] = useState("");
+  const [editReuniaoQuinzenal, setEditReuniaoQuinzenal] = useState(false);
+  const [editResumoSupervisao, setEditResumoSupervisao] = useState("");
+  const [editColaboradoresPresentes, setEditColaboradoresPresentes] = useState("");
+  const [editPontosPositivos, setEditPontosPositivos] = useState("");
+  const [editPontosNegativos, setEditPontosNegativos] = useState("");
+  
   // Estado para confirmação de eliminação
   const [deleteConfirm, setDeleteConfirm] = useState<{ id: number; tipo: 'livre' | 'completo' } | null>(null);
   
@@ -95,6 +110,34 @@ export default function MeusRelatorios() {
       toast.error(error.message || "Erro ao enviar email");
     }
   });
+
+  const enviarEmailCompletoMutation = trpc.relatoriosCompletos.enviarEmail.useMutation({
+    onSuccess: (data) => {
+      toast.success(`Relatório enviado para ${data.email}`);
+    },
+    onError: (error) => {
+      toast.error(error.message || "Erro ao enviar email");
+    }
+  });
+
+  // Função para inicializar os estados de edição de relatório completo
+  const iniciarEdicaoCompleto = (relatorio: any) => {
+    setEditingCompleto(relatorio);
+    setEditDataVisita(new Date(relatorio.dataVisita).toISOString().split('T')[0]);
+    setEditEpisFardamento(relatorio.episFardamento || "");
+    setEditKitPrimeirosSocorros(relatorio.kitPrimeirosSocorros || "");
+    setEditConsumiveis(relatorio.consumiveis || "");
+    setEditEspacoFisico(relatorio.espacoFisico || "");
+    setEditReclamacoes(relatorio.reclamacoes || "");
+    setEditVendasComplementares(relatorio.vendasComplementares || "");
+    setEditFichasServico(relatorio.fichasServico || "");
+    setEditDocumentacaoObrigatoria(relatorio.documentacaoObrigatoria || "");
+    setEditReuniaoQuinzenal(relatorio.reuniaoQuinzenal || false);
+    setEditResumoSupervisao(relatorio.resumoSupervisao || "");
+    setEditColaboradoresPresentes(relatorio.colaboradoresPresentes || "");
+    setEditPontosPositivos(relatorio.pontosPositivos || "");
+    setEditPontosNegativos(relatorio.pontosNegativos || "");
+  };
 
   if (user?.role !== "gestor") {
     setLocation("/dashboard");
@@ -522,12 +565,29 @@ export default function MeusRelatorios() {
                                 size="sm" 
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  setEditingCompleto(relatorio);
+                                  iniciarEdicaoCompleto(relatorio);
                                 }}
                                 className="gap-1"
                               >
                                 <Pencil className="h-3 w-3" />
                                 Editar
+                              </Button>
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  enviarEmailCompletoMutation.mutate({ id: relatorio.id });
+                                }}
+                                disabled={enviarEmailCompletoMutation.isPending}
+                                className="gap-1 text-blue-600 hover:text-blue-700 dark:text-blue-400"
+                              >
+                                {enviarEmailCompletoMutation.isPending ? (
+                                  <Loader2 className="h-3 w-3 animate-spin" />
+                                ) : (
+                                  <Mail className="h-3 w-3" />
+                                )}
+                                Enviar
                               </Button>
                               <Button 
                                 variant="outline" 
@@ -632,6 +692,261 @@ export default function MeusRelatorios() {
               disabled={updateLivreMutation.isPending}
             >
               {updateLivreMutation.isPending ? "A guardar..." : "Guardar Alterações"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal de Edição de Relatório Completo */}
+      <Dialog open={!!editingCompleto} onOpenChange={(open) => !open && setEditingCompleto(null)}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Editar Relatório Completo</DialogTitle>
+            <DialogDescription>
+              {editingCompleto?.loja?.nome} - {editingCompleto && new Date(editingCompleto.dataVisita).toLocaleDateString("pt-PT")}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Data da Visita</Label>
+              <Input
+                type="date"
+                value={editDataVisita}
+                onChange={(e) => setEditDataVisita(e.target.value)}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label>EPIs e Fardamento</Label>
+              <Textarea
+                value={editEpisFardamento}
+                onChange={(e) => setEditEpisFardamento(e.target.value)}
+                rows={3}
+                className="resize-none"
+                placeholder="Observações sobre EPIs e fardamento..."
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label>Kit de Primeiros Socorros</Label>
+              <Textarea
+                value={editKitPrimeirosSocorros}
+                onChange={(e) => setEditKitPrimeirosSocorros(e.target.value)}
+                rows={3}
+                className="resize-none"
+                placeholder="Estado do kit de primeiros socorros..."
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label>Consumíveis</Label>
+              <Textarea
+                value={editConsumiveis}
+                onChange={(e) => setEditConsumiveis(e.target.value)}
+                rows={3}
+                className="resize-none"
+                placeholder="Observações sobre consumíveis..."
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label>Espaço Físico</Label>
+              <Textarea
+                value={editEspacoFisico}
+                onChange={(e) => setEditEspacoFisico(e.target.value)}
+                rows={3}
+                className="resize-none"
+                placeholder="Estado do espaço físico..."
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label>Reclamações</Label>
+              <Textarea
+                value={editReclamacoes}
+                onChange={(e) => setEditReclamacoes(e.target.value)}
+                rows={3}
+                className="resize-none"
+                placeholder="Reclamações registadas..."
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label>Vendas Complementares</Label>
+              <Textarea
+                value={editVendasComplementares}
+                onChange={(e) => setEditVendasComplementares(e.target.value)}
+                rows={3}
+                className="resize-none"
+                placeholder="Vendas complementares..."
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label>Fichas de Serviço</Label>
+              <Textarea
+                value={editFichasServico}
+                onChange={(e) => setEditFichasServico(e.target.value)}
+                rows={3}
+                className="resize-none"
+                placeholder="Fichas de serviço..."
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label>Documentação Obrigatória</Label>
+              <Textarea
+                value={editDocumentacaoObrigatoria}
+                onChange={(e) => setEditDocumentacaoObrigatoria(e.target.value)}
+                rows={3}
+                className="resize-none"
+                placeholder="Estado da documentação obrigatória..."
+              />
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="reuniaoQuinzenal"
+                checked={editReuniaoQuinzenal}
+                onChange={(e) => setEditReuniaoQuinzenal(e.target.checked)}
+                className="h-4 w-4 rounded border-gray-300"
+              />
+              <Label htmlFor="reuniaoQuinzenal">Reunião Quinzenal Realizada</Label>
+            </div>
+            
+            <div className="space-y-2">
+              <Label>Resumo da Supervisão</Label>
+              <Textarea
+                value={editResumoSupervisao}
+                onChange={(e) => setEditResumoSupervisao(e.target.value)}
+                rows={4}
+                className="resize-none"
+                placeholder="Resumo geral da supervisão..."
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label>Colaboradores Presentes</Label>
+              <Textarea
+                value={editColaboradoresPresentes}
+                onChange={(e) => setEditColaboradoresPresentes(e.target.value)}
+                rows={2}
+                className="resize-none"
+                placeholder="Nomes dos colaboradores presentes..."
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label className="text-green-700 dark:text-green-400">Pontos Positivos a Destacar</Label>
+              <Textarea
+                value={editPontosPositivos}
+                onChange={(e) => setEditPontosPositivos(e.target.value)}
+                rows={3}
+                className="resize-none border-green-200 dark:border-green-800"
+                placeholder="Pontos positivos observados..."
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label className="text-red-700 dark:text-red-400">Pontos Negativos a Destacar</Label>
+              <Textarea
+                value={editPontosNegativos}
+                onChange={(e) => setEditPontosNegativos(e.target.value)}
+                rows={3}
+                className="resize-none border-red-200 dark:border-red-800"
+                placeholder="Pontos negativos observados..."
+              />
+            </div>
+            
+            {/* Fotos */}
+            {editingCompleto?.fotos && (() => {
+              try {
+                const fotos = JSON.parse(editingCompleto.fotos);
+                if (fotos.length > 0) {
+                  return (
+                    <div className="space-y-2">
+                      <Label>Fotos ({fotos.length})</Label>
+                      <div className="grid grid-cols-4 gap-2">
+                        {fotos.map((foto: string, idx: number) => (
+                          <div key={idx} className="relative aspect-square rounded-lg overflow-hidden border">
+                            <img src={foto} alt={`Foto ${idx + 1}`} className="w-full h-full object-cover" />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                }
+              } catch (e) {
+                return null;
+              }
+              return null;
+            })()}
+          </div>
+          
+          <DialogFooter className="gap-2 flex-col sm:flex-row">
+            <Button variant="outline" onClick={() => setEditingCompleto(null)}>
+              Cancelar
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => {
+                updateCompletoMutation.mutate({
+                  id: editingCompleto.id,
+                  dataVisita: editDataVisita ? new Date(editDataVisita) : undefined,
+                  episFardamento: editEpisFardamento || undefined,
+                  kitPrimeirosSocorros: editKitPrimeirosSocorros || undefined,
+                  consumiveis: editConsumiveis || undefined,
+                  espacoFisico: editEspacoFisico || undefined,
+                  reclamacoes: editReclamacoes || undefined,
+                  vendasComplementares: editVendasComplementares || undefined,
+                  fichasServico: editFichasServico || undefined,
+                  documentacaoObrigatoria: editDocumentacaoObrigatoria || undefined,
+                  reuniaoQuinzenal: editReuniaoQuinzenal,
+                  resumoSupervisao: editResumoSupervisao || undefined,
+                  colaboradoresPresentes: editColaboradoresPresentes || undefined,
+                  pontosPositivos: editPontosPositivos || undefined,
+                  pontosNegativos: editPontosNegativos || undefined,
+                }, {
+                  onSuccess: () => {
+                    // Após guardar, enviar email automaticamente
+                    enviarEmailCompletoMutation.mutate({ id: editingCompleto.id });
+                  }
+                });
+              }}
+              disabled={updateCompletoMutation.isPending || enviarEmailCompletoMutation.isPending}
+              className="gap-1 text-blue-600 hover:text-blue-700 dark:text-blue-400"
+            >
+              {(updateCompletoMutation.isPending || enviarEmailCompletoMutation.isPending) ? (
+                <><Loader2 className="h-4 w-4 animate-spin" /> A processar...</>
+              ) : (
+                <><Mail className="h-4 w-4" /> Guardar e Enviar Email</>
+              )}
+            </Button>
+            <Button
+              onClick={() => {
+                updateCompletoMutation.mutate({
+                  id: editingCompleto.id,
+                  dataVisita: editDataVisita ? new Date(editDataVisita) : undefined,
+                  episFardamento: editEpisFardamento || undefined,
+                  kitPrimeirosSocorros: editKitPrimeirosSocorros || undefined,
+                  consumiveis: editConsumiveis || undefined,
+                  espacoFisico: editEspacoFisico || undefined,
+                  reclamacoes: editReclamacoes || undefined,
+                  vendasComplementares: editVendasComplementares || undefined,
+                  fichasServico: editFichasServico || undefined,
+                  documentacaoObrigatoria: editDocumentacaoObrigatoria || undefined,
+                  reuniaoQuinzenal: editReuniaoQuinzenal,
+                  resumoSupervisao: editResumoSupervisao || undefined,
+                  colaboradoresPresentes: editColaboradoresPresentes || undefined,
+                  pontosPositivos: editPontosPositivos || undefined,
+                  pontosNegativos: editPontosNegativos || undefined,
+                });
+              }}
+              disabled={updateCompletoMutation.isPending}
+            >
+              {updateCompletoMutation.isPending ? "A guardar..." : "Guardar Alterações"}
             </Button>
           </DialogFooter>
         </DialogContent>

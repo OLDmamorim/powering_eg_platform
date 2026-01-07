@@ -2142,3 +2142,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Implementar diálogo de confirmação antes de eliminar
 - [x] Gestor só pode apagar os seus próprios relatórios
 - [x] Testar funcionalidade
+
+## Edição de Relatórios Completos (Gestor) v6.4
+- [x] Adicionar botão de editar relatórios completos na página Meus Relatórios
+- [x] Implementar modal de edição com campos editáveis
+- [x] Adicionar botão de reenviar email após edição
+- [x] Testar funcionalidade completa
