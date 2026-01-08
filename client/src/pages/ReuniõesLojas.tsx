@@ -10,7 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, CalendarIcon, Plus, X, Save, Store, FileText, Tag, Info, Download, Mail, UserPlus, Image as ImageIcon } from "lucide-react";
+import { Loader2, CalendarIcon, Plus, X, Save, Store, FileText, Tag, Info, Download, Mail, UserPlus, Image as ImageIcon, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -39,6 +39,7 @@ export default function ReuniõesLojas() {
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [miniResumo, setMiniResumo] = useState<string | null>(null);
   const [reuniaoSelecionada, setReuniaoSelecionada] = useState<number | null>(null);
+  const [reuniaoExpandida, setReuniaoExpandida] = useState<number | null>(null);
   const [modalAtribuir, setModalAtribuir] = useState(false);
   const [modalEmail, setModalEmail] = useState(false);
   const [filtros, setFiltros] = useState<any>({});
@@ -123,6 +124,10 @@ export default function ReuniõesLojas() {
 
   const removerTag = (tag: string) => {
     setTags(tags.filter(t => t !== tag));
+  };
+
+  const toggleReuniao = (reuniaoId: number) => {
+    setReuniaoExpandida(reuniaoExpandida === reuniaoId ? null : reuniaoId);
   };
 
   return (
@@ -288,7 +293,7 @@ export default function ReuniõesLojas() {
         </Card>
       )}
 
-      {/* Histórico */}
+      {/* Histórico - Lista Compacta */}
       <Card>
         <CardHeader>
           <CardTitle>Histórico de Reuniões</CardTitle>
@@ -304,168 +309,193 @@ export default function ReuniõesLojas() {
           ) : historico.length === 0 ? (
             <p className="text-center text-muted-foreground py-8">Nenhuma reunião registada</p>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-2">
               {historico.map((reuniao: any) => {
                 const resumoIA = reuniao.resumoIA ? JSON.parse(reuniao.resumoIA) : null;
                 const tagsReuniao = reuniao.tags ? (JSON.parse(reuniao.tags) as string[]) : [];
                 const anexosReuniao = reuniao.anexos ? (JSON.parse(reuniao.anexos) as Array<{ nome: string; url: string; tipo: string }>) : [];
+                const isExpanded = reuniaoExpandida === reuniao.id;
 
                 return (
-                  <Card key={reuniao.id}>
-                    <CardHeader>
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <CardTitle className="text-lg">
-                            Reunião de {format(new Date(reuniao.data), "dd/MM/yyyy")}
-                          </CardTitle>
-                          <CardDescription>
-                            {reuniao.lojasNomes.join(", ")} • Criado por {reuniao.criadoPorNome}
-                          </CardDescription>
+                  <div key={reuniao.id} className="border rounded-lg overflow-hidden">
+                    {/* Linha Compacta - Clicável */}
+                    <div
+                      className="flex items-center justify-between p-4 cursor-pointer hover:bg-accent/50 transition-colors"
+                      onClick={() => toggleReuniao(reuniao.id)}
+                    >
+                      <div className="flex items-center gap-4 flex-1 min-w-0">
+                        <ChevronRight className={cn(
+                          "h-5 w-5 text-muted-foreground transition-transform flex-shrink-0",
+                          isExpanded && "rotate-90"
+                        )} />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-medium">
+                              Reunião de {format(new Date(reuniao.data), "dd/MM/yyyy")}
+                            </span>
+                            <span className="text-muted-foreground text-sm">
+                              {reuniao.lojasNomes.join(", ")}
+                            </span>
+                          </div>
+                          <p className="text-sm text-muted-foreground truncate">
+                            Criado por {reuniao.criadoPorNome}
+                          </p>
                         </div>
-                        <div className="flex gap-2">
-                          {tagsReuniao.length > 0 && (
-                            <div className="flex flex-wrap gap-1">
-                              {tagsReuniao.map((tag: string) => (
-                                <Badge key={tag} variant="outline">
-                                  <Tag className="h-3 w-3 mr-1" />
-                                  {tag}
-                                </Badge>
+                      </div>
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        {tagsReuniao.length > 0 && (
+                          <div className="hidden sm:flex flex-wrap gap-1">
+                            {tagsReuniao.slice(0, 3).map((tag: string) => (
+                              <Badge key={tag} variant="outline" className="text-xs">
+                                {tag}
+                              </Badge>
+                            ))}
+                            {tagsReuniao.length > 3 && (
+                              <Badge variant="outline" className="text-xs">
+                                +{tagsReuniao.length - 3}
+                              </Badge>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Conteúdo Expandido */}
+                    {isExpanded && (
+                      <div className="border-t bg-muted/20 p-4 space-y-4">
+                        {/* Presenças */}
+                        <div>
+                          <h4 className="font-semibold text-sm mb-2">Presenças</h4>
+                          <p className="text-sm text-muted-foreground">{reuniao.presencas}</p>
+                        </div>
+
+                        {/* Resumo IA */}
+                        {resumoIA && (
+                          <div className="border-l-4 border-primary pl-4 space-y-2">
+                            <h4 className="font-semibold text-sm">Resumo Automático</h4>
+                            <p className="text-sm text-muted-foreground">{resumoIA.resumo}</p>
+                            
+                            {resumoIA.topicos.length > 0 && (
+                              <div>
+                                <p className="text-xs font-medium mb-1">Tópicos Principais:</p>
+                                <ul className="text-sm space-y-1">
+                                  {resumoIA.topicos.map((topico: string, i: number) => (
+                                    <li key={i} className="flex items-start gap-2">
+                                      <span className="text-primary">•</span>
+                                      <span>{topico}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+
+                            {resumoIA.acoes.length > 0 && (
+                              <div>
+                                <p className="text-xs font-medium mb-1">Ações Identificadas:</p>
+                                <ul className="text-sm space-y-1">
+                                  {resumoIA.acoes.map((acao: any, i: number) => (
+                                    <li key={i} className="flex items-start gap-2">
+                                      <Badge variant={acao.prioridade === "alta" ? "destructive" : "secondary"} className="text-xs">
+                                        {acao.prioridade}
+                                      </Badge>
+                                      <span>{acao.descricao}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Conteúdo Completo */}
+                        <details className="border rounded-md p-3">
+                          <summary className="cursor-pointer font-semibold text-sm flex items-center gap-2">
+                            <FileText className="h-4 w-4" />
+                            Ver Conteúdo Completo
+                          </summary>
+                          <div className="mt-3 text-sm whitespace-pre-wrap text-muted-foreground">
+                            {reuniao.conteudo}
+                          </div>
+                        </details>
+
+                        {/* Anexos */}
+                        {anexosReuniao.length > 0 && (
+                          <div>
+                            <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
+                              <FileText className="h-4 w-4" />
+                              Anexos ({anexosReuniao.length})
+                            </h4>
+                            <div className="flex flex-wrap gap-2">
+                              {anexosReuniao.map((anexo, idx) => (
+                                <a
+                                  key={idx}
+                                  href={anexo.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="flex items-center gap-2 px-3 py-2 border rounded-md hover:bg-accent transition-colors"
+                                >
+                                  {anexo.tipo === "imagem" ? (
+                                    <ImageIcon className="h-4 w-4" />
+                                  ) : (
+                                    <FileText className="h-4 w-4" />
+                                  )}
+                                  <span className="text-sm truncate max-w-[200px]">{anexo.nome}</span>
+                                  <Download className="h-3 w-3 ml-1" />
+                                </a>
                               ))}
                             </div>
-                          )}
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      {/* Presenças */}
-                      <div>
-                        <h4 className="font-semibold text-sm mb-2">Presenças</h4>
-                        <p className="text-sm text-muted-foreground">{reuniao.presencas}</p>
-                      </div>
-
-                      {/* Resumo IA */}
-                      {resumoIA && (
-                        <div className="border-l-4 border-primary pl-4 space-y-2">
-                          <h4 className="font-semibold text-sm">Resumo Automático</h4>
-                          <p className="text-sm text-muted-foreground">{resumoIA.resumo}</p>
-                          
-                          {resumoIA.topicos.length > 0 && (
-                            <div>
-                              <p className="text-xs font-medium mb-1">Tópicos Principais:</p>
-                              <ul className="text-sm space-y-1">
-                                {resumoIA.topicos.map((topico: string, i: number) => (
-                                  <li key={i} className="flex items-start gap-2">
-                                    <span className="text-primary">•</span>
-                                    <span>{topico}</span>
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
-
-                          {resumoIA.acoes.length > 0 && (
-                            <div>
-                              <p className="text-xs font-medium mb-1">Ações Identificadas:</p>
-                              <ul className="text-sm space-y-1">
-                                {resumoIA.acoes.map((acao: any, i: number) => (
-                                  <li key={i} className="flex items-start gap-2">
-                                    <Badge variant={acao.prioridade === "alta" ? "destructive" : "secondary"} className="text-xs">
-                                      {acao.prioridade}
-                                    </Badge>
-                                    <span>{acao.descricao}</span>
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
-                        </div>
-                      )}
-
-                      {/* Conteúdo Completo */}
-                      <details className="border rounded-md p-3">
-                        <summary className="cursor-pointer font-semibold text-sm flex items-center gap-2">
-                          <FileText className="h-4 w-4" />
-                          Ver Conteúdo Completo
-                        </summary>
-                        <div className="mt-3 text-sm whitespace-pre-wrap text-muted-foreground">
-                          {reuniao.conteudo}
-                        </div>
-                      </details>
-
-                      {/* Anexos */}
-                      {anexosReuniao.length > 0 && (
-                        <div>
-                          <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
-                            <FileText className="h-4 w-4" />
-                            Anexos ({anexosReuniao.length})
-                          </h4>
-                          <div className="flex flex-wrap gap-2">
-                            {anexosReuniao.map((anexo, idx) => (
-                              <a
-                                key={idx}
-                                href={anexo.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center gap-2 px-3 py-2 border rounded-md hover:bg-accent transition-colors"
-                              >
-                                {anexo.tipo === "imagem" ? (
-                                  <ImageIcon className="h-4 w-4" />
-                                ) : (
-                                  <FileText className="h-4 w-4" />
-                                )}
-                                <span className="text-sm truncate max-w-[200px]">{anexo.nome}</span>
-                                <Download className="h-3 w-3 ml-1" />
-                              </a>
-                            ))}
                           </div>
-                        </div>
-                      )}
+                        )}
 
-                      {/* Ações */}
-                      <div className="flex gap-2 pt-2">
-                        {resumoIA && resumoIA.acoes.length > 0 && (
+                        {/* Ações */}
+                        <div className="flex gap-2 pt-2">
+                          {resumoIA && resumoIA.acoes.length > 0 && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setReuniaoSelecionada(reuniao.id);
+                                setModalAtribuir(true);
+                              }}
+                            >
+                              <UserPlus className="h-4 w-4 mr-2" />
+                              Atribuir Ações
+                            </Button>
+                          )}
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.stopPropagation();
                               setReuniaoSelecionada(reuniao.id);
-                              setModalAtribuir(true);
+                              setModalEmail(true);
                             }}
                           >
-                            <UserPlus className="h-4 w-4 mr-2" />
-                            Atribuir Ações
+                            <Mail className="h-4 w-4 mr-2" />
+                            Enviar Email
                           </Button>
-                        )}
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            setReuniaoSelecionada(reuniao.id);
-                            setModalEmail(true);
-                          }}
-                        >
-                          <Mail className="h-4 w-4 mr-2" />
-                          Enviar Email
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={async () => {
-                            try {
-                              const result = await utils.client.reunioesLojas.gerarPDF.query({ reuniaoId: reuniao.id });
-                              window.open(result.url, '_blank');
-                              toast.success('PDF gerado com sucesso!');
-                            } catch (error: any) {
-                              toast.error(error.message || 'Erro ao gerar PDF');
-                            }
-                          }}
-                        >
-                          <Download className="h-4 w-4 mr-2" />
-                          Download PDF
-                        </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              try {
+                                const result = await utils.client.reunioesLojas.gerarPDF.query({ reuniaoId: reuniao.id });
+                                window.open(result.url, '_blank');
+                                toast.success('PDF gerado com sucesso!');
+                              } catch (error: any) {
+                                toast.error(error.message || 'Erro ao gerar PDF');
+                              }
+                            }}
+                          >
+                            <Download className="h-4 w-4 mr-2" />
+                            Download PDF
+                          </Button>
+                        </div>
                       </div>
-                    </CardContent>
-                  </Card>
+                    )}
+                  </div>
                 );
               })}
             </div>

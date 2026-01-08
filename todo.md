@@ -2247,3 +2247,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## Bug Fix - Nome do Gestor "undefined" no Assistente IA
 - [x] Corrigir bug onde o nome do gestor aparece como "undefined" no chatbot
 - [ ] Testar com perguntas sobre gestores
+
+## Reuniões de Lojas - Lista Compacta
+- [x] Mostrar reuniões em lista compacta (apenas nome/data)
+- [x] Expandir conteúdo completo apenas ao clicar na reunião
