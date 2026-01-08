@@ -651,6 +651,18 @@ export function ResultadosDashboard() {
                     : estatisticas.somaObjetivos?.toLocaleString() || 0
                   }
                 </p>
+                {/* Média mensal quando múltiplos meses selecionados */}
+                {modoMultiplosMeses && (
+                  <p className="text-xs text-blue-600 dark:text-blue-400 mt-1 font-medium">
+                    Média mensal: {(() => {
+                      const total = (lojaSelecionada === 'todas' || lojaSelecionada === null) && totaisGlobais?.totalServicos
+                        ? totaisGlobais.totalServicos
+                        : estatisticas.somaServicos || 0;
+                      const media = Math.round(total / mesesSelecionados.length);
+                      return media.toLocaleString();
+                    })()}
+                  </p>
+                )}
               </CardContent>
             </Card>
             

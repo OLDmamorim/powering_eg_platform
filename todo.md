@@ -1666,6 +1666,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 
 ## Atalho Relatório Board no Dashboard Admin
 
+## Dashboard de Resultados - Média Mensal
+- [x] Adicionar média mensal de serviços quando múltiplos meses selecionados
+
 ## Filtros Temporais - Seleção Múltipla de Meses v3.7
 - [x] Criar componente reutilizável FiltroMesesCheckbox
 - [x] Atualizar backend para suportar múltiplos meses (array de mês/ano)
