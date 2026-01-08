@@ -33,7 +33,7 @@ import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { KeyboardShortcutsHelp } from "@/components/KeyboardShortcutsHelp";
 import { Button } from "./ui/button";
 
-import { Building2, ClipboardList, FileText, ListTodo, Sparkles, History, Bell, Settings, Tag, BarChart3, UserCog, CalendarDays, Store, TrendingUp, GitCompare, Users2, AlertTriangle } from "lucide-react";
+import { Building2, ClipboardList, FileText, ListTodo, Sparkles, History, Bell, Settings, Tag, BarChart3, UserCog, CalendarDays, Store, TrendingUp, GitCompare, Users2, AlertTriangle, Bot } from "lucide-react";
 
 // Grupos de menu com cores
 type MenuGroup = {
@@ -56,6 +56,14 @@ const getMenuGroups = (userRole?: string): MenuGroup[] => {
   const isGestor = userRole === "gestor";
   
   const groups: MenuGroup[] = [
+    {
+      id: 'ai',
+      label: 'Inteligência Artificial',
+      color: 'bg-violet-100/80 dark:bg-violet-900/30',
+      items: [
+        { icon: Bot, label: "Assistente IA", path: "/assistente-ia", show: true, showBadge: false },
+      ]
+    },
     {
       id: 'main',
       label: 'Principal',

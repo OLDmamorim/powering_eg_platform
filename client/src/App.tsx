@@ -40,6 +40,7 @@ import OcorrenciaEstrutural from "./pages/OcorrenciaEstrutural";
 import HistoricoOcorrencias from "./pages/HistoricoOcorrencias";
 import { RelatorioIAResultados } from "./pages/RelatorioIAResultados";
 import RelatorioBoard from "./pages/RelatorioBoard";
+import AssistenteIA from "./pages/AssistenteIA";
 
 
 function Router() {
@@ -49,6 +50,7 @@ function Router() {
         <Redirect to="/dashboard" />
       </Route>
       <Route path={"/dashboard"} component={Dashboard} />
+      <Route path={"/assistente-ia"} component={AssistenteIA} />
       
       {/* Admin routes */}
       <Route path={"/lojas"} component={Lojas} />

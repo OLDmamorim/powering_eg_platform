@@ -2199,7 +2199,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [ ] Implementar lógica de busca de dados baseada na pergunta
 - [ ] Integrar com LLM para interpretar perguntas e formatar respostas
 - [ ] Criar interface de chat no Dashboard de Resultados
-- [ ] Testar com diferentes tipos de perguntas
+- [x] Testar com diferentes tipos de perguntas
 
 
 ## Funcionalidades v6.2 - Chatbot IA para Consultas de Dados
@@ -2214,3 +2214,14 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Sugestões de perguntas pré-definidas
 - [x] Testes unitários para chatbotService
 - [x] Testar com perguntas reais (Viana, ranking, etc.)
+
+## Funcionalidades v6.3 - Chatbot IA Abrangente
+- [x] Expandir chatbotService para consultar todos os dados (relatórios, pendentes, lojas, gestores, ocorrências, reuniões, tarefas)
+- [x] Criar página dedicada para o chatbot (/assistente-ia)
+- [x] Adicionar item "Assistente IA" no topo do menu lateral (primeira opção)
+- [x] Suporte para perguntas sobre relatórios livres e completos
+- [x] Suporte para perguntas sobre pendentes
+- [x] Suporte para perguntas sobre lojas e gestores
+- [x] Suporte para perguntas sobre ocorrências estruturais
+- [x] Suporte para perguntas sobre tarefas To-Do
+- [x] Testar com diferentes tipos de perguntas

@@ -4428,6 +4428,34 @@ export const appRouter = router({
         return { success: true, message: mensagemSucesso };
       }),
   }),
+  
+  // ==================== CHATBOT IA ====================
+  chatbot: router({
+    // Processar pergunta do utilizador
+    pergunta: protectedProcedure
+      .input(z.object({
+        pergunta: z.string().min(1),
+        historico: z.array(z.object({
+          role: z.enum(["user", "assistant"]),
+          content: z.string(),
+        })).optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const resultado = await processarPergunta(
+          input.pergunta,
+          input.historico || [],
+          ctx.user.id,
+          ctx.user.role
+        );
+        return resultado;
+      }),
+    
+    // Sugestões de perguntas para o chatbot
+    sugestoes: protectedProcedure
+      .query(async () => {
+        return await getSugestoesPergunta();
+      }),
+  }),
 });
 
 // Função auxiliar para gerar HTML do email de reunião quinzenal
