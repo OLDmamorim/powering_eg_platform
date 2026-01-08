@@ -9,6 +9,7 @@ interface ChatMessage {
 interface ContextoPlataforma {
   lojas: any[];
   gestores: any[];
+  gestorLojas: any[]; // Associação gestor-loja
   pendentes: any[];
   relatoriosLivres: any[];
   relatoriosCompletos: any[];
@@ -18,6 +19,7 @@ interface ContextoPlataforma {
   reunioesGestores: any[];
   reunioesLojas: any[];
   resultadosMensais: any[];
+  vendasComplementares: any[]; // Vendas complementares por período
   estatisticasGerais: any;
 }
 
@@ -30,6 +32,17 @@ async function obterContextoPlataforma(userId: number, userRole: string): Promis
   // Obter dados base
   const lojas = await db.getAllLojas();
   const gestores = await db.getAllGestores();
+  
+  // Obter associação gestor-loja para cada gestor
+  const gestorLojas: any[] = [];
+  for (const gestor of gestores) {
+    const lojasDoGestor = await db.getLojasByGestorId(gestor.id);
+    gestorLojas.push({
+      gestorId: gestor.id,
+      gestorNome: gestor.nome || gestor.userName,
+      lojas: lojasDoGestor.map(l => ({ id: l.id, nome: l.nome }))
+    });
+  }
   
   // Pendentes
   const pendentes = await db.getAllPendentes();
@@ -74,12 +87,24 @@ async function obterContextoPlataforma(userId: number, userRole: string): Promis
     resultadosMensais.push(...resultadosPeriodo);
   }
   
+  // Vendas complementares - carregar todos os períodos disponíveis
+  const vendasComplementares: any[] = [];
+  for (const periodo of periodosParaCarregar) {
+    try {
+      const vendasPeriodo = await db.getVendasComplementares(periodo.mes, periodo.ano);
+      vendasComplementares.push(...vendasPeriodo);
+    } catch (e) {
+      // Ignorar erros de períodos sem dados
+    }
+  }
+  
   // Estatísticas gerais
   const estatisticasGerais = await db.getEstatisticasPeriodo(mesAtual, anoAtual);
   
   return {
     lojas,
     gestores,
+    gestorLojas,
     pendentes,
     relatoriosLivres,
     relatoriosCompletos,
@@ -89,6 +114,7 @@ async function obterContextoPlataforma(userId: number, userRole: string): Promis
     reunioesGestores,
     reunioesLojas,
     resultadosMensais,
+    vendasComplementares,
     estatisticasGerais
   };
 }
@@ -114,6 +140,18 @@ function formatarContextoParaPrompt(contexto: ContextoPlataforma): string {
   texto += `👥 GESTORES (${contexto.gestores.length} total):\n`;
   contexto.gestores.forEach(g => {
     texto += `- ${g.nome || g.userName} (${g.email || g.userEmail})${g.role === 'admin' ? ' [Admin]' : ''}\n`;
+  });
+  texto += '\n';
+  
+  // Associação Gestor-Loja
+  texto += `🔗 ASSOCIAÇÃO GESTOR-LOJA:\n`;
+  contexto.gestorLojas.forEach(gl => {
+    if (gl.lojas && gl.lojas.length > 0) {
+      const nomesLojas = gl.lojas.map((l: any) => l.nome).join(', ');
+      texto += `- ${gl.gestorNome}: ${gl.lojas.length} lojas (${nomesLojas})\n`;
+    } else {
+      texto += `- ${gl.gestorNome}: sem lojas atribuídas\n`;
+    }
   });
   texto += '\n';
   
@@ -227,6 +265,56 @@ function formatarContextoParaPrompt(contexto: ContextoPlataforma): string {
           ? (typeof r.taxaReparacao === 'number' ? r.taxaReparacao * 100 : parseFloat(r.taxaReparacao) * 100).toFixed(1) + '%'
           : 'N/A';
         texto += `- ${r.lojaNome}: ${r.totalServicos || 0} serviços, objetivo: ${r.objetivoMensal || 'N/A'}, desvio: ${desvio}, taxa reparação: ${taxaRep}\n`;
+      });
+      texto += '\n';
+    });
+  }
+  
+  // Vendas Complementares - Agrupadas por período
+  if (contexto.vendasComplementares && contexto.vendasComplementares.length > 0) {
+    const mesesNomes = [
+      'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+      'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+    ];
+    
+    // Agrupar vendas por período (mês/ano)
+    const vendasPorPeriodo: Record<string, any[]> = {};
+    contexto.vendasComplementares.forEach(v => {
+      const chave = `${v.mes}-${v.ano}`;
+      if (!vendasPorPeriodo[chave]) {
+        vendasPorPeriodo[chave] = [];
+      }
+      vendasPorPeriodo[chave].push(v);
+    });
+    
+    // Ordenar períodos do mais recente para o mais antigo
+    const periodosOrdenados = Object.keys(vendasPorPeriodo).sort((a, b) => {
+      const [mesA, anoA] = a.split('-').map(Number);
+      const [mesB, anoB] = b.split('-').map(Number);
+      if (anoB !== anoA) return anoB - anoA;
+      return mesB - mesA;
+    });
+    
+    texto += `💰 VENDAS COMPLEMENTARES (${periodosOrdenados.length} períodos, ${contexto.vendasComplementares.length} registos):\n\n`;
+    
+    // Mostrar cada período com suas lojas
+    periodosOrdenados.slice(0, 6).forEach(periodo => { // Limitar a 6 períodos para não sobrecarregar
+      const [mes, ano] = periodo.split('-').map(Number);
+      const vendas = vendasPorPeriodo[periodo];
+      const mesNome = mesesNomes[mes - 1];
+      
+      texto += `=== ${mesNome} ${ano} (${vendas.length} lojas) ===\n`;
+      vendas.forEach(v => {
+        const totalVendas = v.totalVendas ? parseFloat(v.totalVendas).toFixed(2) : '0.00';
+        const escovasVendas = v.escovasVendas ? parseFloat(v.escovasVendas).toFixed(2) : '0.00';
+        const escovasQtd = v.escovasQtd || 0;
+        const escovasPercent = v.escovasPercent ? (parseFloat(v.escovasPercent) * 100).toFixed(1) : '0.0';
+        const polimentoVendas = v.polimentoVendas ? parseFloat(v.polimentoVendas).toFixed(2) : '0.00';
+        const polimentoQtd = v.polimentoQtd || 0;
+        const peliculaVendas = v.peliculaVendas ? parseFloat(v.peliculaVendas).toFixed(2) : '0.00';
+        const lavagensTotal = v.lavagensTotal || 0;
+        
+        texto += `- ${v.lojaNome}: Total €${totalVendas} | Escovas: ${escovasQtd} (€${escovasVendas}, ${escovasPercent}%) | Polimento: ${polimentoQtd} (€${polimentoVendas}) | Películas: €${peliculaVendas} | Lavagens: ${lavagensTotal}\n`;
       });
       texto += '\n';
     });

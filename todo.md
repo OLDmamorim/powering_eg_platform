@@ -2231,3 +2231,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Corrigir função de consulta de dados de resultados no chatbotService
 - [x] Testar com pergunta sobre resultados de Viana do Castelo em Outubro 2025
 - [x] Corrigir Assistente IA para consultar TODAS as lojas da rede (não apenas as do gestor logado)
+
+## Melhorias no Assistente IA - Dados Adicionais
+- [x] Adicionar vendas complementares ao contexto do chatbot
+- [x] Adicionar associação gestor-loja ao contexto do chatbot
+- [x] Testar com perguntas sobre vendas e gestores
