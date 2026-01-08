@@ -63,10 +63,13 @@ async function obterContextoPlataforma(userId: number, userRole: string): Promis
   const resultadosMensais: any[] = [];
   const periodosParaCarregar = periodosDisponiveis.slice(0, 12); // Últimos 12 meses
   
+  // IMPORTANTE: O chatbot precisa de acesso a TODAS as lojas da rede para responder
+  // a perguntas sobre qualquer loja, independentemente do gestor logado.
+  // Por isso, usamos role 'admin' para carregar todos os resultados.
   for (const periodo of periodosParaCarregar) {
     const resultadosPeriodo = await db.getResultadosMensais(
       { mes: periodo.mes, ano: periodo.ano }, 
-      { id: userId, role: userRole } as any
+      { id: userId, role: 'admin' } as any
     );
     resultadosMensais.push(...resultadosPeriodo);
   }

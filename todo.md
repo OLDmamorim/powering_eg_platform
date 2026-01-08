@@ -2230,3 +2230,4 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Investigar porque o chatbot não consegue consultar resultados mensais por loja
 - [x] Corrigir função de consulta de dados de resultados no chatbotService
 - [x] Testar com pergunta sobre resultados de Viana do Castelo em Outubro 2025
+- [x] Corrigir Assistente IA para consultar TODAS as lojas da rede (não apenas as do gestor logado)
