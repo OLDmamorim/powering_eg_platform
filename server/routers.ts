@@ -3470,7 +3470,13 @@ export const appRouter = router({
     }),
     
     // Contar tarefas pendentes atribuídas ao utilizador
+    // Para admin: conta TODAS as tarefas criadas por lojas (pendentes)
+    // Para gestor: conta apenas as tarefas atribuídas a ele
     countPendentesAtribuidosAMim: gestorProcedure.query(async ({ ctx }) => {
+      if (ctx.user.role === 'admin') {
+        // Admin vê todas as tarefas criadas por lojas
+        return await db.countTodosCriadosPorLojas();
+      }
       return await db.countTodosPendentesAtribuidosAMim(ctx.user.id);
     }),
     

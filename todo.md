@@ -2184,3 +2184,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Reorganizar layout mobile do Dashboard - botões Tarefas e Relatório lado a lado
 - [x] Alterar botão do topo do Dashboard de Relatório Board para Relatórios IA
 - [x] Corrigir Atividade Recente no Dashboard para incluir relatórios completos (atualmente só mostra relatórios livres)
+
+## Bug v6.1.1 - Notificação de Tarefas no Dashboard
+- [x] Adicionar contador de tarefas pendentes no botão "Tarefas" do Dashboard
+- [x] Adicionar animação de piscar quando há tarefas pendentes (animate-pulse já existia)
+- [x] Testar funcionalidade

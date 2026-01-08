@@ -1,0 +1,8 @@
+{
+  "query": "SELECT \n  t.id,\n  t.titulo,\n  t.estado,\n  t.vistoGestor,\n  t.atribuidoUserId,\n  t.criadoPorId,\n  u.name as atribuidoNome,\n  creator.name as criadoPorNome,\n  l.nome as lojaNome\nFROM todos t\nLEFT JOIN users u ON t.atribuidoUserId = u.id\nLEFT JOIN users creator ON t.criadoPorId = creator.id\nLEFT JOIN lojas l ON t.lojaId = l.id\nWHERE t.estado IN ('pendente', 'em_progresso')\nORDER BY t.createdAt DESC\nLIMIT 15",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT \n  t.id,\n  t.titulo,\n  t.estado,\n  t.vistoGestor,\n  t.atribuidoUserId,\n  t.criadoPorId,\n  u.name as atribuidoNome,\n  creator.name as criadoPorNome,\n  l.nome as lojaNome\nFROM todos t\nLEFT JOIN users u ON t.atribuidoUserId = u.id\nLEFT JOIN users creator ON t.criadoPorId = creator.id\nLEFT JOIN lojas l ON t.lojaId = l.id\nWHERE t.estado IN ('pendente', 'em_progresso')\nORDER BY t.createdAt DESC\nLIMIT 15",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 't.lojaid' in 'on clause'"
+  ]
+}

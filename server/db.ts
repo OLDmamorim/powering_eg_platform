@@ -5162,11 +5162,11 @@ export async function countTodosNaoVistos(
 
 
 /**
- * Conta tarefas NÃO VISTAS atribuídas diretamente ao utilizador
- * Só conta tarefas que o gestor ainda não viu (visto = false ou vistoGestor = false)
- * Não conta tarefas que o próprio gestor criou
+ * Conta tarefas pendentes criadas por LOJAS atribuídas ao utilizador
+ * Conta tarefas que foram criadas pelas lojas (criadoPorLojaId IS NOT NULL)
+ * Inclui tarefas pendentes e em progresso
  * @param userId - ID do utilizador
- * @returns Número de tarefas não vistas atribuídas ao utilizador
+ * @returns Número de tarefas criadas por lojas atribuídas ao utilizador
  */
 export async function countTodosPendentesAtribuidosAMim(userId: number): Promise<number> {
   const db = await getDb();
@@ -5177,13 +5177,33 @@ export async function countTodosPendentesAtribuidosAMim(userId: number): Promise
     .from(todos)
     .where(and(
       eq(todos.atribuidoUserId, userId),
-      // Não conta tarefas criadas pelo próprio utilizador
-      sql`${todos.criadoPorId} != ${userId}`,
-      // Só conta tarefas não vistas pelo gestor
+      // Só conta tarefas criadas por lojas (não pelo próprio gestor)
+      sql`${todos.criadoPorLojaId} IS NOT NULL`,
+      // Apenas tarefas pendentes ou em progresso
       or(
-        eq(todos.vistoGestor, false),
-        sql`${todos.vistoGestor} IS NULL`
-      ),
+        eq(todos.estado, 'pendente'),
+        eq(todos.estado, 'em_progresso')
+      )
+    ));
+  
+  return result[0]?.count || 0;
+}
+
+
+/**
+ * Conta TODAS as tarefas pendentes criadas por lojas (para admin)
+ * @returns Número total de tarefas criadas por lojas que estão pendentes ou em progresso
+ */
+export async function countTodosCriadosPorLojas(): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  
+  const result = await db
+    .select({ count: sql<number>`COUNT(*)` })
+    .from(todos)
+    .where(and(
+      // Só conta tarefas criadas por lojas
+      sql`${todos.criadoPorLojaId} IS NOT NULL`,
       // Apenas tarefas pendentes ou em progresso
       or(
         eq(todos.estado, 'pendente'),

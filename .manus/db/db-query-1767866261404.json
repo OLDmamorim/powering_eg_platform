@@ -1,0 +1,50 @@
+{
+  "query": "SELECT \n  t.id,\n  t.titulo,\n  t.estado,\n  t.vistoGestor,\n  t.atribuidoUserId,\n  t.criadoPorId,\n  u.name as atribuidoNome,\n  creator.name as criadoPorNome\nFROM todos t\nLEFT JOIN users u ON t.atribuidoUserId = u.id\nLEFT JOIN users creator ON t.criadoPorId = creator.id\nWHERE t.estado IN ('pendente', 'em_progresso')\nORDER BY t.createdAt DESC\nLIMIT 15",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT \n  t.id,\n  t.titulo,\n  t.estado,\n  t.vistoGestor,\n  t.atribuidoUserId,\n  t.criadoPorId,\n  u.name as atribuidoNome,\n  creator.name as criadoPorNome\nFROM todos t\nLEFT JOIN users u ON t.atribuidoUserId = u.id\nLEFT JOIN users creator ON t.criadoPorId = creator.id\nWHERE t.estado IN ('pendente', 'em_progresso')\nORDER BY t.createdAt DESC\nLIMIT 15",
+  "rows": [
+    {
+      "id": "180002",
+      "titulo": "Fechar fs18/1 (2026)",
+      "estado": "pendente",
+      "vistoGestor": "1",
+      "atribuidoUserId": "420030",
+      "criadoPorId": "420030",
+      "atribuidoNome": "Marco Amorim",
+      "criadoPorNome": "Marco Amorim"
+    },
+    {
+      "id": "180001",
+      "titulo": "Fechar fs18/1059",
+      "estado": "pendente",
+      "vistoGestor": "1",
+      "atribuidoUserId": "420030",
+      "criadoPorId": "420030",
+      "atribuidoNome": "Marco Amorim",
+      "criadoPorNome": "Marco Amorim"
+    },
+    {
+      "id": "120002",
+      "titulo": "Entrada de água",
+      "estado": "em_progresso",
+      "vistoGestor": "1",
+      "atribuidoUserId": "420030",
+      "criadoPorId": "420030",
+      "atribuidoNome": "Marco Amorim",
+      "criadoPorNome": "Marco Amorim"
+    },
+    {
+      "id": "120001",
+      "titulo": "Estrutura para oficina (frio)",
+      "estado": "em_progresso",
+      "vistoGestor": "1",
+      "atribuidoUserId": "420030",
+      "criadoPorId": "420030",
+      "atribuidoNome": "Marco Amorim",
+      "criadoPorNome": "Marco Amorim"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitulo\testado\tvistoGestor\tatribuidoUserId\tcriadoPorId\tatribuidoNome\tcriadoPorNome\n180002\tFechar fs18/1 (2026)\tpendente\t1\t420030\t420030\tMarco Amorim\tMarco Amorim\n180001\tFechar fs18/1059\tpendente\t1\t420030\t420030\tMarco Amorim\tMarco Amorim\n120002\tEntrada de água\tem_progresso\t1\t420030\t420030\tMarco Amorim\tMarco Amorim\n120001\tEstrutura para oficina (frio)\tem_progresso\t1\t420030\t420030\tMarco Amorim\tMarco Amorim\n",
+  "stderr": "",
+  "execution_time_ms": 371
+}
