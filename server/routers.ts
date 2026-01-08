@@ -3480,6 +3480,15 @@ export const appRouter = router({
       return await db.countTodosPendentesAtribuidosAMim(ctx.user.id);
     }),
     
+    // Contar tarefas NÃO VISTAS pelo gestor (para animação pulse)
+    countNaoVistosGestor: gestorProcedure.query(async ({ ctx }) => {
+      if (ctx.user.role === 'admin') {
+        // Admin vê todas as tarefas não vistas criadas por lojas
+        return await db.countTodosNaoVistosCriadosPorLojas();
+      }
+      return await db.countTodosNaoVistosGestor(ctx.user.id);
+    }),
+    
     // Mudar status com resposta (notifica a loja)
     mudarStatusComResposta: gestorProcedure
       .input(z.object({

@@ -286,6 +286,9 @@ export default function Dashboard() {
   // Contagem de tarefas pendentes atribuídas ao utilizador
   const { data: tarefasPendentesAMim = 0 } = trpc.todos.countPendentesAtribuidosAMim.useQuery();
   
+  // Contagem de tarefas NÃO VISTAS pelo gestor (para animação pulse)
+  const { data: tarefasNaoVistas = 0 } = trpc.todos.countNaoVistosGestor.useQuery();
+  
   // Previsões e Feed de Atividades (apenas admin)
   const { data: previsoes, isLoading: previsoesLoading, refetch: refetchPrevisoes } = trpc.previsoes.list.useQuery(undefined, { enabled: isAdmin });
   const { data: atividades, isLoading: atividadesLoading } = trpc.atividades.list.useQuery({ limite: 20 }, { enabled: isAdmin });
@@ -452,7 +455,7 @@ export default function Dashboard() {
             onClick={() => setLocation('/todos?filtro=atribuidas')} 
             variant="outline" 
             size="sm"
-            className={`gap-1.5 flex-1 relative ${tarefasPendentesAMim > 0 ? 'animate-pulse border-amber-500 bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/30 dark:hover:bg-amber-950/50' : ''}`}
+            className={`gap-1.5 flex-1 relative ${tarefasNaoVistas > 0 ? 'animate-pulse border-amber-500 bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/30 dark:hover:bg-amber-950/50' : ''}`}
           >
             <CheckSquare className="h-4 w-4" />
             <span className="text-xs">Tarefas</span>
@@ -511,7 +514,7 @@ export default function Dashboard() {
             <Button 
               onClick={() => setLocation('/todos?filtro=atribuidas')} 
               variant="outline" 
-              className={`gap-2 relative ${tarefasPendentesAMim > 0 ? 'animate-pulse border-amber-500 bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/30 dark:hover:bg-amber-950/50' : ''}`}
+              className={`gap-2 relative ${tarefasNaoVistas > 0 ? 'animate-pulse border-amber-500 bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/30 dark:hover:bg-amber-950/50' : ''}`}
             >
               <CheckSquare className="h-4 w-4" />
               Minhas Tarefas

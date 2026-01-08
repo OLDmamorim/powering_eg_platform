@@ -5216,6 +5216,60 @@ export async function countTodosCriadosPorLojas(): Promise<number> {
 
 
 /**
+ * Conta tarefas NÃO VISTAS pelo gestor (para animação pulse)
+ * @param userId - ID do utilizador
+ * @returns Número de tarefas não vistas pelo gestor
+ */
+export async function countTodosNaoVistosGestor(userId: number): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  
+  const result = await db
+    .select({ count: sql<number>`COUNT(*)` })
+    .from(todos)
+    .where(and(
+      eq(todos.atribuidoUserId, userId),
+      // Só conta tarefas criadas por lojas (não pelo próprio gestor)
+      sql`${todos.criadoPorLojaId} IS NOT NULL`,
+      // Apenas tarefas pendentes ou em progresso
+      or(
+        eq(todos.estado, 'pendente'),
+        eq(todos.estado, 'em_progresso')
+      ),
+      // Apenas tarefas NÃO vistas pelo gestor
+      eq(todos.vistoGestor, false)
+    ));
+  
+  return result[0]?.count || 0;
+}
+
+/**
+ * Conta TODAS as tarefas NÃO VISTAS criadas por lojas (para admin)
+ * @returns Número total de tarefas criadas por lojas que não foram vistas
+ */
+export async function countTodosNaoVistosCriadosPorLojas(): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  
+  const result = await db
+    .select({ count: sql<number>`COUNT(*)` })
+    .from(todos)
+    .where(and(
+      // Só conta tarefas criadas por lojas
+      sql`${todos.criadoPorLojaId} IS NOT NULL`,
+      // Apenas tarefas pendentes ou em progresso
+      or(
+        eq(todos.estado, 'pendente'),
+        eq(todos.estado, 'em_progresso')
+      ),
+      // Apenas tarefas NÃO vistas
+      eq(todos.vistoGestor, false)
+    ));
+  
+  return result[0]?.count || 0;
+}
+
+/**
  * Listar tarefas enviadas pela loja ao gestor (histórico)
  */
 export async function getTodosEnviadosPelaLoja(lojaId: number): Promise<Array<Todo & {

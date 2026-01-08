@@ -2189,3 +2189,4 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar contador de tarefas pendentes no botão "Tarefas" do Dashboard
 - [x] Adicionar animação de piscar quando há tarefas pendentes (animate-pulse já existia)
 - [x] Testar funcionalidade
+- [x] Corrigir animação pulse do botão Minhas Tarefas para só piscar quando há tarefas não vistas
