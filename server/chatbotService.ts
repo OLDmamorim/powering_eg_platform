@@ -1,6 +1,125 @@
 import { invokeLLM } from "./_core/llm";
 import * as db from "./db";
 
+/**
+ * Calcula comparação de vendas complementares entre períodos
+ */
+function calcularComparacaoVendas(vendasComplementares: any[]): any {
+  if (!vendasComplementares || vendasComplementares.length === 0) {
+    return null;
+  }
+  
+  // Agrupar por período
+  const vendasPorPeriodo: Record<string, any[]> = {};
+  vendasComplementares.forEach(v => {
+    const chave = `${v.mes}-${v.ano}`;
+    if (!vendasPorPeriodo[chave]) {
+      vendasPorPeriodo[chave] = [];
+    }
+    vendasPorPeriodo[chave].push(v);
+  });
+  
+  // Ordenar períodos
+  const periodosOrdenados = Object.keys(vendasPorPeriodo).sort((a, b) => {
+    const [mesA, anoA] = a.split('-').map(Number);
+    const [mesB, anoB] = b.split('-').map(Number);
+    if (anoB !== anoA) return anoB - anoA;
+    return mesB - mesA;
+  });
+  
+  if (periodosOrdenados.length < 2) {
+    return { periodos: periodosOrdenados.length, comparacoes: [] };
+  }
+  
+  // Calcular totais por período
+  const totaisPorPeriodo: Record<string, {
+    totalVendas: number;
+    totalEscovas: number;
+    totalPolimento: number;
+    totalPeliculas: number;
+    totalLavagens: number;
+  }> = {};
+  
+  periodosOrdenados.forEach(periodo => {
+    const vendas = vendasPorPeriodo[periodo];
+    totaisPorPeriodo[periodo] = {
+      totalVendas: vendas.reduce((acc, v) => acc + (parseFloat(v.totalVendas) || 0), 0),
+      totalEscovas: vendas.reduce((acc, v) => acc + (parseInt(v.escovasQtd) || 0), 0),
+      totalPolimento: vendas.reduce((acc, v) => acc + (parseInt(v.polimentoQtd) || 0), 0),
+      totalPeliculas: vendas.reduce((acc, v) => acc + (parseFloat(v.peliculaVendas) || 0), 0),
+      totalLavagens: vendas.reduce((acc, v) => acc + (parseInt(v.lavagensTotal) || 0), 0)
+    };
+  });
+  
+  // Calcular variações entre períodos consecutivos
+  const comparacoes: any[] = [];
+  for (let i = 0; i < periodosOrdenados.length - 1; i++) {
+    const periodoAtual = periodosOrdenados[i];
+    const periodoAnterior = periodosOrdenados[i + 1];
+    const atual = totaisPorPeriodo[periodoAtual];
+    const anterior = totaisPorPeriodo[periodoAnterior];
+    
+    const calcVariacao = (atual: number, anterior: number) => {
+      if (anterior === 0) return atual > 0 ? 100 : 0;
+      return ((atual - anterior) / anterior) * 100;
+    };
+    
+    comparacoes.push({
+      periodoAtual,
+      periodoAnterior,
+      variacaoVendas: calcVariacao(atual.totalVendas, anterior.totalVendas).toFixed(1),
+      variacaoEscovas: calcVariacao(atual.totalEscovas, anterior.totalEscovas).toFixed(1),
+      variacaoPolimento: calcVariacao(atual.totalPolimento, anterior.totalPolimento).toFixed(1),
+      variacaoPeliculas: calcVariacao(atual.totalPeliculas, anterior.totalPeliculas).toFixed(1),
+      variacaoLavagens: calcVariacao(atual.totalLavagens, anterior.totalLavagens).toFixed(1),
+      totaisAtual: atual,
+      totaisAnterior: anterior
+    });
+  }
+  
+  // Calcular comparação por loja entre períodos
+  const comparacoesPorLoja: any[] = [];
+  if (periodosOrdenados.length >= 2) {
+    const periodoAtual = periodosOrdenados[0];
+    const periodoAnterior = periodosOrdenados[1];
+    const vendasAtual = vendasPorPeriodo[periodoAtual];
+    const vendasAnterior = vendasPorPeriodo[periodoAnterior];
+    
+    // Criar mapa de vendas anteriores por loja
+    const vendasAnteriorPorLoja: Record<string, any> = {};
+    vendasAnterior.forEach(v => {
+      vendasAnteriorPorLoja[v.lojaNome] = v;
+    });
+    
+    vendasAtual.forEach(vAtual => {
+      const vAnterior = vendasAnteriorPorLoja[vAtual.lojaNome];
+      if (vAnterior) {
+        const totalAtual = parseFloat(vAtual.totalVendas) || 0;
+        const totalAnterior = parseFloat(vAnterior.totalVendas) || 0;
+        const variacao = totalAnterior > 0 ? ((totalAtual - totalAnterior) / totalAnterior * 100) : (totalAtual > 0 ? 100 : 0);
+        
+        comparacoesPorLoja.push({
+          lojaNome: vAtual.lojaNome,
+          totalAtual,
+          totalAnterior,
+          variacao: variacao.toFixed(1),
+          tendencia: variacao > 0 ? 'subida' : variacao < 0 ? 'descida' : 'estavel'
+        });
+      }
+    });
+    
+    // Ordenar por variação (maior primeiro)
+    comparacoesPorLoja.sort((a, b) => parseFloat(b.variacao) - parseFloat(a.variacao));
+  }
+  
+  return {
+    periodos: periodosOrdenados.length,
+    totaisPorPeriodo,
+    comparacoes,
+    comparacoesPorLoja
+  };
+}
+
 interface ChatMessage {
   role: "user" | "assistant";
   content: string;
@@ -20,6 +139,8 @@ interface ContextoPlataforma {
   reunioesLojas: any[];
   resultadosMensais: any[];
   vendasComplementares: any[]; // Vendas complementares por período
+  historicoVisitasPorGestor: any[]; // Histórico de visitas por gestor
+  comparacaoVendas: any; // Comparação de vendas entre períodos
   estatisticasGerais: any;
 }
 
@@ -101,6 +222,62 @@ async function obterContextoPlataforma(userId: number, userRole: string): Promis
   // Estatísticas gerais
   const estatisticasGerais = await db.getEstatisticasPeriodo(mesAtual, anoAtual);
   
+  // Histórico de visitas por gestor - agrupa relatórios por gestor e loja
+  const historicoVisitasPorGestor: any[] = [];
+  for (const gestor of gestores) {
+    const visitasGestor: any = {
+      gestorId: gestor.id,
+      gestorNome: gestor.nome || gestor.userName,
+      visitasPorLoja: [] as any[]
+    };
+    
+    // Agrupar relatórios livres por loja
+    const relatoriosLivresGestor = relatoriosLivres.filter(r => r.gestorId === gestor.id);
+    const relatoriosCompletosGestor = relatoriosCompletos.filter(r => r.gestorId === gestor.id);
+    
+    // Criar mapa de visitas por loja
+    const visitasPorLoja: Record<number, { lojaNome: string; visitas: any[] }> = {};
+    
+    relatoriosLivresGestor.forEach(r => {
+      if (!visitasPorLoja[r.lojaId]) {
+        visitasPorLoja[r.lojaId] = { lojaNome: r.loja?.nome || 'Desconhecida', visitas: [] };
+      }
+      visitasPorLoja[r.lojaId].visitas.push({
+        tipo: 'livre',
+        data: r.dataVisita,
+        descricao: r.descricao?.substring(0, 100)
+      });
+    });
+    
+    relatoriosCompletosGestor.forEach(r => {
+      if (!visitasPorLoja[r.lojaId]) {
+        visitasPorLoja[r.lojaId] = { lojaNome: r.loja?.nome || 'Desconhecida', visitas: [] };
+      }
+      visitasPorLoja[r.lojaId].visitas.push({
+        tipo: 'completo',
+        data: r.dataVisita,
+        descricao: r.pontosPositivos?.substring(0, 100) || r.pontosNegativos?.substring(0, 100) || 'Relatório completo'
+      });
+    });
+    
+    // Ordenar visitas por data (mais recente primeiro)
+    Object.entries(visitasPorLoja).forEach(([lojaId, dados]) => {
+      dados.visitas.sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime());
+      visitasGestor.visitasPorLoja.push({
+        lojaId: parseInt(lojaId),
+        lojaNome: dados.lojaNome,
+        ultimaVisita: dados.visitas[0]?.data,
+        totalVisitas: dados.visitas.length,
+        visitas: dados.visitas.slice(0, 5) // Últimas 5 visitas
+      });
+    });
+    
+    historicoVisitasPorGestor.push(visitasGestor);
+  }
+  
+  // Comparação de vendas entre períodos
+  const comparacaoVendas = calcularComparacaoVendas(vendasComplementares);
+  
   return {
     lojas,
     gestores,
@@ -115,6 +292,8 @@ async function obterContextoPlataforma(userId: number, userRole: string): Promis
     reunioesLojas,
     resultadosMensais,
     vendasComplementares,
+    historicoVisitasPorGestor,
+    comparacaoVendas,
     estatisticasGerais
   };
 }
@@ -332,6 +511,67 @@ function formatarContextoParaPrompt(contexto: ContextoPlataforma): string {
     texto += '\n';
   }
   
+  // Histórico de Visitas por Gestor
+  if (contexto.historicoVisitasPorGestor && contexto.historicoVisitasPorGestor.length > 0) {
+    texto += `📅 HISTÓRICO DE VISITAS POR GESTOR:\n\n`;
+    contexto.historicoVisitasPorGestor.forEach(gestor => {
+      if (gestor.visitasPorLoja && gestor.visitasPorLoja.length > 0) {
+        texto += `=== ${gestor.gestorNome} ===\n`;
+        gestor.visitasPorLoja.forEach((loja: any) => {
+          const ultimaVisita = loja.ultimaVisita ? new Date(loja.ultimaVisita).toLocaleDateString('pt-PT') : 'Nunca';
+          texto += `- ${loja.lojaNome}: Última visita em ${ultimaVisita} (${loja.totalVisitas} visitas total)\n`;
+        });
+        texto += '\n';
+      }
+    });
+  }
+  
+  // Comparação de Vendas Complementares entre Períodos
+  if (contexto.comparacaoVendas && contexto.comparacaoVendas.comparacoes && contexto.comparacaoVendas.comparacoes.length > 0) {
+    const mesesNomes = [
+      'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+      'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+    ];
+    
+    texto += `📊 COMPARAÇÃO DE VENDAS COMPLEMENTARES ENTRE PERÍODOS:\n\n`;
+    
+    contexto.comparacaoVendas.comparacoes.forEach((comp: any) => {
+      const [mesAtual, anoAtual] = comp.periodoAtual.split('-').map(Number);
+      const [mesAnterior, anoAnterior] = comp.periodoAnterior.split('-').map(Number);
+      const nomeAtual = `${mesesNomes[mesAtual - 1]} ${anoAtual}`;
+      const nomeAnterior = `${mesesNomes[mesAnterior - 1]} ${anoAnterior}`;
+      
+      texto += `=== ${nomeAtual} vs ${nomeAnterior} ===\n`;
+      texto += `- Vendas Totais: €${comp.totaisAtual.totalVendas.toFixed(2)} vs €${comp.totaisAnterior.totalVendas.toFixed(2)} (${comp.variacaoVendas}%)\n`;
+      texto += `- Escovas: ${comp.totaisAtual.totalEscovas} vs ${comp.totaisAnterior.totalEscovas} (${comp.variacaoEscovas}%)\n`;
+      texto += `- Polimento: ${comp.totaisAtual.totalPolimento} vs ${comp.totaisAnterior.totalPolimento} (${comp.variacaoPolimento}%)\n`;
+      texto += `- Películas: €${comp.totaisAtual.totalPeliculas.toFixed(2)} vs €${comp.totaisAnterior.totalPeliculas.toFixed(2)} (${comp.variacaoPeliculas}%)\n`;
+      texto += `- Lavagens: ${comp.totaisAtual.totalLavagens} vs ${comp.totaisAnterior.totalLavagens} (${comp.variacaoLavagens}%)\n`;
+      texto += '\n';
+    });
+    
+    // Comparação por loja (top 5 melhores e piores)
+    if (contexto.comparacaoVendas.comparacoesPorLoja && contexto.comparacaoVendas.comparacoesPorLoja.length > 0) {
+      const lojas = contexto.comparacaoVendas.comparacoesPorLoja;
+      
+      texto += `TOP 5 LOJAS COM MAIOR CRESCIMENTO:\n`;
+      lojas.slice(0, 5).forEach((l: any) => {
+        const seta = parseFloat(l.variacao) > 0 ? '↑' : parseFloat(l.variacao) < 0 ? '↓' : '→';
+        texto += `- ${l.lojaNome}: ${seta} ${l.variacao}% (€${l.totalAnterior.toFixed(2)} → €${l.totalAtual.toFixed(2)})\n`;
+      });
+      texto += '\n';
+      
+      const lojasNegativas = lojas.filter((l: any) => parseFloat(l.variacao) < 0);
+      if (lojasNegativas.length > 0) {
+        texto += `LOJAS COM MAIOR QUEDA:\n`;
+        lojasNegativas.slice(-5).reverse().forEach((l: any) => {
+          texto += `- ${l.lojaNome}: ↓ ${l.variacao}% (€${l.totalAnterior.toFixed(2)} → €${l.totalAtual.toFixed(2)})\n`;
+        });
+        texto += '\n';
+      }
+    }
+  }
+  
   return texto;
 }
 
@@ -362,6 +602,8 @@ Tens acesso a todos os dados da plataforma e podes responder a perguntas sobre:
 - Reuniões (de gestores e de lojas)
 - Resultados mensais e estatísticas de performance
 - Vendas complementares
+- HISTÓRICO DE VISITAS POR GESTOR: Podes responder a perguntas como "Quando foi a última visita do gestor X à loja Y?" ou "Quantas visitas fez o gestor X este mês?"
+- COMPARAÇÃO DE VENDAS ENTRE PERÍODOS: Podes analisar a evolução das vendas complementares entre meses, identificar tendências de crescimento ou queda, e comparar performance entre lojas
 
 Instruções:
 1. Responde sempre em português europeu
@@ -372,6 +614,8 @@ Instruções:
 6. Mantém um tom profissional mas amigável
 7. Se a pergunta for ambígua, pede esclarecimento
 8. Não inventes dados - usa apenas o que está disponível
+9. Para perguntas sobre histórico de visitas, consulta a secção "HISTÓRICO DE VISITAS POR GESTOR"
+10. Para perguntas sobre evolução de vendas, consulta a secção "COMPARAÇÃO DE VENDAS COMPLEMENTARES ENTRE PERÍODOS"
 
 ${contextoFormatado}`;
 
@@ -432,6 +676,10 @@ export async function getSugestoesPergunta(): Promise<string[]> {
       "Quais tarefas To-Do estão pendentes?",
       "Quando foi a última reunião de gestores?",
       "Quais lojas não foram visitadas recentemente?",
+      "Quando foi a última visita de cada gestor a cada loja?",
+      "Como evoluíram as vendas complementares este mês vs o anterior?",
+      "Quais lojas tiveram maior crescimento nas vendas?",
+      "Qual gestor visitou mais lojas este mês?",
     ];
   } catch (error) {
     return [

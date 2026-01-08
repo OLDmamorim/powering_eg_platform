@@ -2236,3 +2236,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar vendas complementares ao contexto do chatbot
 - [x] Adicionar associação gestor-loja ao contexto do chatbot
 - [x] Testar com perguntas sobre vendas e gestores
+
+
+## Melhorias no Assistente IA - Histórico de Visitas e Comparação de Vendas
+- [x] Adicionar histórico de visitas por gestor ao contexto do chatbot
+- [x] Adicionar comparação entre períodos de vendas complementares
+- [x] Testar com perguntas sobre visitas e evolução de vendas
