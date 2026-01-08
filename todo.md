@@ -2242,3 +2242,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar histórico de visitas por gestor ao contexto do chatbot
 - [x] Adicionar comparação entre períodos de vendas complementares
 - [x] Testar com perguntas sobre visitas e evolução de vendas
+
+
+## Bug Fix - Nome do Gestor "undefined" no Assistente IA
+- [x] Corrigir bug onde o nome do gestor aparece como "undefined" no chatbot
+- [ ] Testar com perguntas sobre gestores

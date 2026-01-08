@@ -160,7 +160,7 @@ async function obterContextoPlataforma(userId: number, userRole: string): Promis
     const lojasDoGestor = await db.getLojasByGestorId(gestor.id);
     gestorLojas.push({
       gestorId: gestor.id,
-      gestorNome: gestor.nome || gestor.userName,
+      gestorNome: gestor.user?.name || 'Desconhecido',
       lojas: lojasDoGestor.map(l => ({ id: l.id, nome: l.nome }))
     });
   }
@@ -227,7 +227,7 @@ async function obterContextoPlataforma(userId: number, userRole: string): Promis
   for (const gestor of gestores) {
     const visitasGestor: any = {
       gestorId: gestor.id,
-      gestorNome: gestor.nome || gestor.userName,
+      gestorNome: gestor.user?.name || 'Desconhecido',
       visitasPorLoja: [] as any[]
     };
     
@@ -318,7 +318,7 @@ function formatarContextoParaPrompt(contexto: ContextoPlataforma): string {
   // Gestores
   texto += `👥 GESTORES (${contexto.gestores.length} total):\n`;
   contexto.gestores.forEach(g => {
-    texto += `- ${g.nome || g.userName} (${g.email || g.userEmail})${g.role === 'admin' ? ' [Admin]' : ''}\n`;
+    texto += `- ${g.user?.name || 'Desconhecido'} (${g.user?.email || 'N/A'})${g.user?.role === 'admin' ? ' [Admin]' : ''}\n`;
   });
   texto += '\n';
   
