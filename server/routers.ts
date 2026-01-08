@@ -13,6 +13,7 @@ import { gerarSugestoesMelhoria, formatarRelatorioLivre, formatarRelatorioComple
 import { gerarPlanoVisitasSemanal, gerarPlanosSemanaisParaTodosGestores, verificarEGerarPlanosSexta } from "./planoVisitasService";
 import { notificarGestorRelatorioAdmin } from "./notificacaoGestor";
 import { notifyOwner } from "./_core/notification";
+import { processarPergunta, getSugestoesPergunta } from "./chatbotService";
 
 // Middleware para verificar se o utilizador é admin
 const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
@@ -2612,6 +2613,31 @@ export const appRouter = router({
           fileName: `Minhas_Lojas_${input.mes}_${input.ano}.xlsx`,
           fileData: buffer.toString('base64'),
         };
+      }),
+    
+    // Chatbot IA para consultas sobre dados
+    chatbot: protectedProcedure
+      .input(z.object({
+        pergunta: z.string().min(1),
+        historico: z.array(z.object({
+          role: z.enum(["user", "assistant"]),
+          content: z.string(),
+        })).optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const resultado = await processarPergunta(
+          input.pergunta,
+          input.historico || [],
+          ctx.user.id,
+          ctx.user.role
+        );
+        return resultado;
+      }),
+    
+    // Sugestões de perguntas para o chatbot
+    sugestoesChatbot: protectedProcedure
+      .query(async () => {
+        return await getSugestoesPergunta();
       }),
   }),
 

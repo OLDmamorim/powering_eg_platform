@@ -2193,3 +2193,24 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar animação de piscar quando há tarefas pendentes (animate-pulse já existia)
 - [x] Testar funcionalidade
 - [x] Corrigir animação pulse do botão Minhas Tarefas para só piscar quando há tarefas não vistas
+
+## Chatbot IA para Consultas de Dados
+- [ ] Criar endpoint backend para processar perguntas em linguagem natural
+- [ ] Implementar lógica de busca de dados baseada na pergunta
+- [ ] Integrar com LLM para interpretar perguntas e formatar respostas
+- [ ] Criar interface de chat no Dashboard de Resultados
+- [ ] Testar com diferentes tipos de perguntas
+
+
+## Funcionalidades v6.2 - Chatbot IA para Consultas de Dados
+- [x] Criar serviço de chatbot (chatbotService.ts) com processamento de linguagem natural
+- [x] Implementar interpretação de perguntas com IA (identificar loja, mês, ano, tipo de consulta)
+- [x] Criar endpoint tRPC para processar perguntas (resultados.perguntarChatbot)
+- [x] Criar endpoint para sugestões de perguntas (resultados.getSugestoesChatbot)
+- [x] Criar componente ResultadosChatbot.tsx com interface de chat
+- [x] Integrar chatbot no Dashboard de Resultados (botão flutuante)
+- [x] Suporte para perguntas sobre serviços, rankings, taxas de reparação
+- [x] Histórico de conversação no chat
+- [x] Sugestões de perguntas pré-definidas
+- [x] Testes unitários para chatbotService
+- [x] Testar com perguntas reais (Viana, ranking, etc.)

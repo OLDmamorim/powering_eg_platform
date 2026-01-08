@@ -13,6 +13,7 @@ import { Bar } from 'react-chartjs-2';
 
 import { AlertasPerformance } from '../components/AlertasPerformance';
 import { GraficoEvolucaoHistorica } from '../components/GraficoEvolucaoHistorica';
+import { ResultadosChatbot } from '../components/ResultadosChatbot';
 import FiltroMesesCheckbox, { type MesSelecionado, gerarLabelMeses } from '../components/FiltroMesesCheckbox';
 
 // Registar componentes do Chart.js
@@ -1047,6 +1048,9 @@ export function ResultadosDashboard() {
           <AlertasPerformance periodos={periodos} />
         )}
       </div>
+      
+      {/* Chatbot de IA para consultas */}
+      <ResultadosChatbot />
     </DashboardLayout>
   );
 }
