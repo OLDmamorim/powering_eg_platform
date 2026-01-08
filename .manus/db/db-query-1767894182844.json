@@ -1,0 +1,170 @@
+{
+  "query": "SELECT rm.id, rm.mes, rm.ano, l.nome as loja_nome, rm.totalServicos, rm.objetivoMensal \nFROM resultados_mensais rm \nJOIN lojas l ON rm.lojaId = l.id \nWHERE rm.mes = 10 AND rm.ano = 2025 \nORDER BY l.nome \nLIMIT 20",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT rm.id, rm.mes, rm.ano, l.nome as loja_nome, rm.totalServicos, rm.objetivoMensal \nFROM resultados_mensais rm \nJOIN lojas l ON rm.lojaId = l.id \nWHERE rm.mes = 10 AND rm.ano = 2025 \nORDER BY l.nome \nLIMIT 20",
+  "rows": [
+    {
+      "id": "60001",
+      "mes": "10",
+      "ano": "2025",
+      "loja_nome": "Abrantes",
+      "totalServicos": "54",
+      "objetivoMensal": "65"
+    },
+    {
+      "id": "60002",
+      "mes": "10",
+      "ano": "2025",
+      "loja_nome": "Aeroporto porto",
+      "totalServicos": "176",
+      "objetivoMensal": "158"
+    },
+    {
+      "id": "60003",
+      "mes": "10",
+      "ano": "2025",
+      "loja_nome": "Águeda",
+      "totalServicos": "63",
+      "objetivoMensal": "68"
+    },
+    {
+      "id": "60004",
+      "mes": "10",
+      "ano": "2025",
+      "loja_nome": "Algés",
+      "totalServicos": "45",
+      "objetivoMensal": "48"
+    },
+    {
+      "id": "60005",
+      "mes": "10",
+      "ano": "2025",
+      "loja_nome": "Almada",
+      "totalServicos": "144",
+      "objetivoMensal": "131"
+    },
+    {
+      "id": "60006",
+      "mes": "10",
+      "ano": "2025",
+      "loja_nome": "Amadora",
+      "totalServicos": "79",
+      "objetivoMensal": "78"
+    },
+    {
+      "id": "60007",
+      "mes": "10",
+      "ano": "2025",
+      "loja_nome": "Amoreiras",
+      "totalServicos": "63",
+      "objetivoMensal": "66"
+    },
+    {
+      "id": "60008",
+      "mes": "10",
+      "ano": "2025",
+      "loja_nome": "Aveiro",
+      "totalServicos": "61",
+      "objetivoMensal": "90"
+    },
+    {
+      "id": "60009",
+      "mes": "10",
+      "ano": "2025",
+      "loja_nome": "Barcelos",
+      "totalServicos": "64",
+      "objetivoMensal": "63"
+    },
+    {
+      "id": "60010",
+      "mes": "10",
+      "ano": "2025",
+      "loja_nome": "Beira baixa sm",
+      "totalServicos": "44",
+      "objetivoMensal": "41"
+    },
+    {
+      "id": "60011",
+      "mes": "10",
+      "ano": "2025",
+      "loja_nome": "Braga - minho center",
+      "totalServicos": "78",
+      "objetivoMensal": "65"
+    },
+    {
+      "id": "60012",
+      "mes": "10",
+      "ano": "2025",
+      "loja_nome": "Braga sm",
+      "totalServicos": "13",
+      "objetivoMensal": "63"
+    },
+    {
+      "id": "60013",
+      "mes": "10",
+      "ano": "2025",
+      "loja_nome": "Caldas da rainha",
+      "totalServicos": "114",
+      "objetivoMensal": "130"
+    },
+    {
+      "id": "60014",
+      "mes": "10",
+      "ano": "2025",
+      "loja_nome": "Castanheira do ribatejo",
+      "totalServicos": "64",
+      "objetivoMensal": "79"
+    },
+    {
+      "id": "60015",
+      "mes": "10",
+      "ano": "2025",
+      "loja_nome": "Coimbra",
+      "totalServicos": "67",
+      "objetivoMensal": "82"
+    },
+    {
+      "id": "60016",
+      "mes": "10",
+      "ano": "2025",
+      "loja_nome": "Coimbra sm",
+      "totalServicos": "0",
+      "objetivoMensal": "68"
+    },
+    {
+      "id": "60017",
+      "mes": "10",
+      "ano": "2025",
+      "loja_nome": "Coimbra sul",
+      "totalServicos": "130",
+      "objetivoMensal": "80"
+    },
+    {
+      "id": "60018",
+      "mes": "10",
+      "ano": "2025",
+      "loja_nome": "Costa de prata sm",
+      "totalServicos": "52",
+      "objetivoMensal": "68"
+    },
+    {
+      "id": "60019",
+      "mes": "10",
+      "ano": "2025",
+      "loja_nome": "Entroncamento",
+      "totalServicos": "43",
+      "objetivoMensal": "59"
+    },
+    {
+      "id": "60020",
+      "mes": "10",
+      "ano": "2025",
+      "loja_nome": "Famalicão",
+      "totalServicos": "135",
+      "objetivoMensal": "133"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tmes\tano\tloja_nome\ttotalServicos\tobjetivoMensal\n60001\t10\t2025\tAbrantes\t54\t65\n60002\t10\t2025\tAeroporto porto\t176\t158\n60003\t10\t2025\tÁgueda\t63\t68\n60004\t10\t2025\tAlgés\t45\t48\n60005\t10\t2025\tAlmada\t144\t131\n60006\t10\t2025\tAmadora\t79\t78\n60007\t10\t2025\tAmoreiras\t63\t66\n60008\t10\t2025\tAveiro\t61\t90\n60009\t10\t2025\tBarcelos\t64\t63\n60010\t10\t2025\tBeira baixa sm\t44\t41\n60011\t10\t2025\tBraga - minho center\t78\t65\n60012\t10\t2025\tBraga sm\t13\t63\n60013\t10\t2025\tCaldas da rainha\t114\t130\n60014\t10\t2025\tCastanheira do ribatejo\t64\t79\n60015\t10\t2025\tCoimbra\t67\t82\n60016\t10\t2025\tCoimbra sm\t0\t68\n60017\t10\t2025\tCoimbra sul\t130\t80\n60018\t10\t2025\tCosta de prata sm\t52\t68\n60019\t10\t2025\tEntroncamento\t43\t59\n60020\t10\t2025\tFamalicão\t135\t133\n",
+  "stderr": "",
+  "execution_time_ms": 637
+}

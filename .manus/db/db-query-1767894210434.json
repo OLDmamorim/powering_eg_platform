@@ -1,0 +1,50 @@
+{
+  "query": "SELECT DISTINCT mes, ano, COUNT(*) as num_lojas \nFROM resultados_mensais \nGROUP BY mes, ano \nORDER BY ano DESC, mes DESC",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT DISTINCT mes, ano, COUNT(*) as num_lojas \nFROM resultados_mensais \nGROUP BY mes, ano \nORDER BY ano DESC, mes DESC",
+  "rows": [
+    {
+      "mes": "12",
+      "ano": "2025",
+      "num_lojas": "70"
+    },
+    {
+      "mes": "11",
+      "ano": "2025",
+      "num_lojas": "70"
+    },
+    {
+      "mes": "10",
+      "ano": "2025",
+      "num_lojas": "70"
+    },
+    {
+      "mes": "9",
+      "ano": "2025",
+      "num_lojas": "70"
+    },
+    {
+      "mes": "8",
+      "ano": "2025",
+      "num_lojas": "70"
+    },
+    {
+      "mes": "7",
+      "ano": "2025",
+      "num_lojas": "70"
+    },
+    {
+      "mes": "6",
+      "ano": "2025",
+      "num_lojas": "69"
+    },
+    {
+      "mes": "5",
+      "ano": "2025",
+      "num_lojas": "68"
+    }
+  ],
+  "messages": [],
+  "stdout": "mes\tano\tnum_lojas\n12\t2025\t70\n11\t2025\t70\n10\t2025\t70\n9\t2025\t70\n8\t2025\t70\n7\t2025\t70\n6\t2025\t69\n5\t2025\t68\n",
+  "stderr": "",
+  "execution_time_ms": 55
+}

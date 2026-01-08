@@ -51,11 +51,25 @@ async function obterContextoPlataforma(userId: number, userRole: string): Promis
   const reunioesGestores = await db.getHistoricoReuniõesGestores();
   const reunioesLojas = await db.getHistoricoReuniõesLojas();
   
-  // Resultados mensais (últimos 3 meses)
+  // Resultados mensais - carregar TODOS os períodos disponíveis para permitir consultas históricas
   const agora = new Date();
   const mesAtual = agora.getMonth() + 1;
   const anoAtual = agora.getFullYear();
-  const resultadosMensais = await db.getResultadosMensais({ mes: mesAtual, ano: anoAtual }, { id: userId, role: userRole } as any);
+  
+  // Obter todos os períodos disponíveis
+  const periodosDisponiveis = await db.getPeriodosDisponiveis();
+  
+  // Carregar resultados de todos os períodos (até 12 meses de histórico)
+  const resultadosMensais: any[] = [];
+  const periodosParaCarregar = periodosDisponiveis.slice(0, 12); // Últimos 12 meses
+  
+  for (const periodo of periodosParaCarregar) {
+    const resultadosPeriodo = await db.getResultadosMensais(
+      { mes: periodo.mes, ano: periodo.ano }, 
+      { id: userId, role: userRole } as any
+    );
+    resultadosMensais.push(...resultadosPeriodo);
+  }
   
   // Estatísticas gerais
   const estatisticasGerais = await db.getEstatisticasPeriodo(mesAtual, anoAtual);
@@ -168,14 +182,51 @@ function formatarContextoParaPrompt(contexto: ContextoPlataforma): string {
   });
   texto += '\n';
   
-  // Resultados Mensais
+  // Resultados Mensais - Agrupados por período
   if (contexto.resultadosMensais && contexto.resultadosMensais.length > 0) {
-    texto += `📊 RESULTADOS MENSAIS (mês atual, ${contexto.resultadosMensais.length} lojas):\n`;
-    contexto.resultadosMensais.slice(0, 10).forEach(r => {
-      const desvio = r.desvioPercentualMes ? (parseFloat(r.desvioPercentualMes) * 100).toFixed(1) + '%' : 'N/A';
-      texto += `- ${r.lojaNome}: ${r.totalServicos || 0} serviços (objetivo: ${r.objetivoMensal || 'N/A'}, desvio: ${desvio})\n`;
+    const meses = [
+      'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+      'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+    ];
+    
+    // Agrupar resultados por período (mês/ano)
+    const resultadosPorPeriodo: Record<string, any[]> = {};
+    contexto.resultadosMensais.forEach(r => {
+      const chave = `${r.mes}-${r.ano}`;
+      if (!resultadosPorPeriodo[chave]) {
+        resultadosPorPeriodo[chave] = [];
+      }
+      resultadosPorPeriodo[chave].push(r);
     });
-    texto += '\n';
+    
+    // Ordenar períodos do mais recente para o mais antigo
+    const periodosOrdenados = Object.keys(resultadosPorPeriodo).sort((a, b) => {
+      const [mesA, anoA] = a.split('-').map(Number);
+      const [mesB, anoB] = b.split('-').map(Number);
+      if (anoB !== anoA) return anoB - anoA;
+      return mesB - mesA;
+    });
+    
+    texto += `📊 RESULTADOS MENSAIS (${periodosOrdenados.length} períodos disponíveis, ${contexto.resultadosMensais.length} registos):\n\n`;
+    
+    // Mostrar cada período com suas lojas
+    periodosOrdenados.forEach(periodo => {
+      const [mes, ano] = periodo.split('-').map(Number);
+      const resultados = resultadosPorPeriodo[periodo];
+      const mesNome = meses[mes - 1];
+      
+      texto += `=== ${mesNome} ${ano} (${resultados.length} lojas) ===\n`;
+      resultados.forEach(r => {
+        const desvio = r.desvioPercentualMes != null 
+          ? (typeof r.desvioPercentualMes === 'number' ? r.desvioPercentualMes * 100 : parseFloat(r.desvioPercentualMes) * 100).toFixed(1) + '%' 
+          : 'N/A';
+        const taxaRep = r.taxaReparacao != null
+          ? (typeof r.taxaReparacao === 'number' ? r.taxaReparacao * 100 : parseFloat(r.taxaReparacao) * 100).toFixed(1) + '%'
+          : 'N/A';
+        texto += `- ${r.lojaNome}: ${r.totalServicos || 0} serviços, objetivo: ${r.objetivoMensal || 'N/A'}, desvio: ${desvio}, taxa reparação: ${taxaRep}\n`;
+      });
+      texto += '\n';
+    });
   }
   
   // Estatísticas Gerais

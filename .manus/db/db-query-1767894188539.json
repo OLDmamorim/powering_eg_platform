@@ -1,0 +1,28 @@
+{
+  "query": "SELECT rm.id, rm.mes, rm.ano, l.nome as loja_nome, rm.totalServicos, rm.objetivoMensal, rm.desvioPercentualMes\nFROM resultados_mensais rm \nJOIN lojas l ON rm.lojaId = l.id \nWHERE rm.mes = 10 AND rm.ano = 2025 \nAND l.nome LIKE '%Viana%'",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT rm.id, rm.mes, rm.ano, l.nome as loja_nome, rm.totalServicos, rm.objetivoMensal, rm.desvioPercentualMes\nFROM resultados_mensais rm \nJOIN lojas l ON rm.lojaId = l.id \nWHERE rm.mes = 10 AND rm.ano = 2025 \nAND l.nome LIKE '%Viana%'",
+  "rows": [
+    {
+      "id": "60062",
+      "mes": "10",
+      "ano": "2025",
+      "loja_nome": "Viana do Castelo ",
+      "totalServicos": "21",
+      "objetivoMensal": "32",
+      "desvioPercentualMes": "-0.3438"
+    },
+    {
+      "id": "60063",
+      "mes": "10",
+      "ano": "2025",
+      "loja_nome": "Viana do castelo sm",
+      "totalServicos": "88",
+      "objetivoMensal": "79",
+      "desvioPercentualMes": "0.1139"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tmes\tano\tloja_nome\ttotalServicos\tobjetivoMensal\tdesvioPercentualMes\n60062\t10\t2025\tViana do Castelo \t21\t32\t-0.3438\n60063\t10\t2025\tViana do castelo sm\t88\t79\t0.1139\n",
+  "stderr": "",
+  "execution_time_ms": 55
+}

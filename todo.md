@@ -2225,3 +2225,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Suporte para perguntas sobre ocorrências estruturais
 - [x] Suporte para perguntas sobre tarefas To-Do
 - [x] Testar com diferentes tipos de perguntas
+
+## Bug Fix - Assistente IA não acede a resultados por loja
+- [x] Investigar porque o chatbot não consegue consultar resultados mensais por loja
+- [x] Corrigir função de consulta de dados de resultados no chatbotService
+- [x] Testar com pergunta sobre resultados de Viana do Castelo em Outubro 2025
