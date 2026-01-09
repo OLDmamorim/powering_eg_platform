@@ -375,6 +375,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Remover página PlanoVisitas.tsx
 - [x] Manter tabelas e serviços no backend (podem ser úteis futuramente)
 
+## Bug - Erro React hooks na página ReuniõesGestores
+- [x] Corrigir early return antes dos hooks (linha 30)
+- [x] Mover verificação de user para depois de todos os hooks
+
 ## Bug v3.7.1 - Erro map undefined em Relatórios IA
 - [x] Corrigir erro "Cannot read properties of undefined (reading 'map')" na página Relatórios IA
 - [x] Adicionar verificações de null/undefined antes de usar .map()

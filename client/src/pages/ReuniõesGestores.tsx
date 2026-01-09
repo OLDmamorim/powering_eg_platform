@@ -27,8 +27,7 @@ export default function ReuniõesGestores() {
   const { user } = useAuth();
   const isAdmin = user?.role === "admin";
   
-  if (!user) return null;
-  
+  // Todos os useState devem vir antes de qualquer return condicional
   const [data, setData] = useState<Date>(new Date());
   const [gestoresSelecionados, setGestoresSelecionados] = useState<number[]>([]);
   const [outrosPresentes, setOutrosPresentes] = useState("");
@@ -52,6 +51,7 @@ export default function ReuniõesGestores() {
   const [gerandoRelatorio, setGerandoRelatorio] = useState(false);
   const [modalEnviarRelatorio, setModalEnviarRelatorio] = useState(false);
 
+  // Todas as queries e mutations devem vir antes de qualquer return condicional
   const { data: gestores } = trpc.gestores.list.useQuery();
   const { data: historico, refetch } = trpc.reunioesGestores.listar.useQuery(filtros);
   const { data: topicosPendentes, refetch: refetchTopicos } = trpc.reunioesGestores.listarTopicosPendentes.useQuery();
@@ -67,12 +67,25 @@ export default function ReuniõesGestores() {
   const enviarRelatorioEmailMutation = trpc.reunioesGestores.enviarRelatorioEmail.useMutation();
   const utils = trpc.useUtils();
 
+  const { data: relatorioReuniao } = trpc.reunioesGestores.getRelatorioReuniao.useQuery(
+    { reuniaoId: reuniaoRelatorio! },
+    { enabled: !!reuniaoRelatorio && modalRelatorio }
+  );
+
+  const { data: topicosReuniao } = trpc.reunioesGestores.getTopicosReuniao.useQuery(
+    { reuniaoId: reuniaoRelatorio! },
+    { enabled: !!reuniaoRelatorio && modalRelatorio }
+  );
+
   // Pré-selecionar todos os gestores
   useEffect(() => {
     if (gestores && gestoresSelecionados.length === 0) {
       setGestoresSelecionados(gestores.map((g: any) => g.id));
     }
   }, [gestores]);
+
+  // Verificação de user após todos os hooks
+  if (!user) return null;
 
   const handleSubmit = async () => {
     if (!conteudo.trim()) {
@@ -195,16 +208,6 @@ export default function ReuniõesGestores() {
       setGerandoRelatorio(false);
     }
   };
-
-  const { data: relatorioReuniao } = trpc.reunioesGestores.getRelatorioReuniao.useQuery(
-    { reuniaoId: reuniaoRelatorio! },
-    { enabled: !!reuniaoRelatorio && modalRelatorio }
-  );
-
-  const { data: topicosReuniao } = trpc.reunioesGestores.getTopicosReuniao.useQuery(
-    { reuniaoId: reuniaoRelatorio! },
-    { enabled: !!reuniaoRelatorio && modalRelatorio }
-  );
 
   const handleDownloadPDF = async (reuniaoId: number) => {
     try {
