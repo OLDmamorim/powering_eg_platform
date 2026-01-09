@@ -23,11 +23,19 @@ import {
 } from "@/components/ui/sidebar";
 import { getLoginUrl } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
-import { LayoutDashboard, LogOut, PanelLeft, Users, Moon, Sun } from "lucide-react";
+import { LayoutDashboard, LogOut, PanelLeft, Users, Moon, Sun, Globe } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
 import { useTheme } from "@/contexts/ThemeContext";
+import { useLanguage } from "@/contexts/LanguageContext";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { KeyboardShortcutsHelp } from "@/components/KeyboardShortcutsHelp";
@@ -51,105 +59,108 @@ type MenuItem = {
   showBadge: boolean;
 };
 
-const getMenuGroups = (userRole?: string): MenuGroup[] => {
+const getMenuGroups = (userRole?: string, t?: (key: string) => string): MenuGroup[] => {
   const isAdmin = userRole === "admin";
   const isGestor = userRole === "gestor";
+  
+  // Função auxiliar para tradução com fallback
+  const tr = (key: string, fallback: string) => t ? t(key) : fallback;
   
   const groups: MenuGroup[] = [
     {
       id: 'ai',
-      label: 'Inteligência Artificial',
+      label: tr('menu.groups.ai', 'Inteligência Artificial'),
       color: 'bg-violet-100/80 dark:bg-violet-900/30',
       items: [
-        { icon: Bot, label: "Assistente IA", path: "/assistente-ia", show: true, showBadge: false },
+        { icon: Bot, label: tr('menu.items.assistenteIA', 'Assistente IA'), path: "/assistente-ia", show: true, showBadge: false },
       ]
     },
     {
       id: 'main',
-      label: 'Principal',
+      label: tr('menu.groups.main', 'Principal'),
       color: '',
       items: [
-        { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard", show: true, showBadge: false },
+        { icon: LayoutDashboard, label: tr('menu.items.dashboard', 'Dashboard'), path: "/dashboard", show: true, showBadge: false },
       ]
     },
     {
       id: 'management',
-      label: 'Gestão',
+      label: tr('menu.groups.management', 'Gestão'),
       color: 'bg-blue-100/80 dark:bg-blue-900/30',
       items: [
-        { icon: Building2, label: "Lojas", path: "/lojas", show: isAdmin, showBadge: false },
-        { icon: Users, label: "Gestores", path: "/gestores", show: isAdmin, showBadge: false },
-        { icon: UserCog, label: "Utilizadores", path: "/utilizadores", show: isAdmin, showBadge: false },
-        { icon: Building2, label: "Minhas Lojas", path: "/minhas-lojas", show: isGestor, showBadge: false },
+        { icon: Building2, label: tr('menu.items.lojas', 'Lojas'), path: "/lojas", show: isAdmin, showBadge: false },
+        { icon: Users, label: tr('menu.items.gestores', 'Gestores'), path: "/gestores", show: isAdmin, showBadge: false },
+        { icon: UserCog, label: tr('menu.items.utilizadores', 'Utilizadores'), path: "/utilizadores", show: isAdmin, showBadge: false },
+        { icon: Building2, label: tr('menu.items.minhasLojas', 'Minhas Lojas'), path: "/minhas-lojas", show: isGestor, showBadge: false },
       ]
     },
     {
       id: 'reports',
-      label: 'Relatórios',
+      label: tr('menu.groups.reports', 'Relatórios'),
       color: 'bg-emerald-100/80 dark:bg-emerald-900/30',
       items: [
-        { icon: FileText, label: "Relatórios Gestores", path: "/relatorios", show: isAdmin, showBadge: false },
-        { icon: ClipboardList, label: "Relatório Livre", path: "/relatorio-livre", show: true, showBadge: false },
-        { icon: FileText, label: "Relatório Completo", path: "/relatorio-completo", show: true, showBadge: false },
-        { icon: ClipboardList, label: "Meus Relatórios", path: "/meus-relatorios", show: isGestor, showBadge: false },
-        { icon: Sparkles, label: "Relatórios IA", path: "/relatorios-ia", show: true, showBadge: false },
-        { icon: History, label: "Histórico IA", path: "/historico-relatorios-ia", show: isGestor, showBadge: false },
-        { icon: BarChart3, label: "Resumos Globais", path: "/resumos-globais", show: true, showBadge: false },
-        { icon: AlertTriangle, label: "Nova Ocorrência", path: "/ocorrencias-estruturais/nova", show: isGestor || isAdmin, showBadge: false },
-        { icon: History, label: "Histórico Ocorrências", path: "/ocorrencias-estruturais/historico", show: true, showBadge: false },
+        { icon: FileText, label: tr('menu.items.relatoriosGestores', 'Relatórios Gestores'), path: "/relatorios", show: isAdmin, showBadge: false },
+        { icon: ClipboardList, label: tr('menu.items.relatorioLivre', 'Relatório Livre'), path: "/relatorio-livre", show: true, showBadge: false },
+        { icon: FileText, label: tr('menu.items.relatorioCompleto', 'Relatório Completo'), path: "/relatorio-completo", show: true, showBadge: false },
+        { icon: ClipboardList, label: tr('menu.items.meusRelatorios', 'Meus Relatórios'), path: "/meus-relatorios", show: isGestor, showBadge: false },
+        { icon: Sparkles, label: tr('menu.items.relatoriosIA', 'Relatórios IA'), path: "/relatorios-ia", show: true, showBadge: false },
+        { icon: History, label: tr('menu.items.historicoIA', 'Histórico IA'), path: "/historico-relatorios-ia", show: isGestor, showBadge: false },
+        { icon: BarChart3, label: tr('menu.items.resumosGlobais', 'Resumos Globais'), path: "/resumos-globais", show: true, showBadge: false },
+        { icon: AlertTriangle, label: tr('menu.items.novaOcorrencia', 'Nova Ocorrência'), path: "/ocorrencias-estruturais/nova", show: isGestor || isAdmin, showBadge: false },
+        { icon: History, label: tr('menu.items.historicoOcorrencias', 'Histórico Ocorrências'), path: "/ocorrencias-estruturais/historico", show: true, showBadge: false },
       ]
     },
     {
       id: 'history',
-      label: 'Histórico',
+      label: tr('menu.groups.history', 'Histórico'),
       color: 'bg-amber-100/80 dark:bg-amber-900/30',
       items: [
-        { icon: History, label: "Histórico Pontos", path: "/historico-pontos", show: isAdmin, showBadge: false },
+        { icon: History, label: tr('menu.items.historicoPontos', 'Histórico Pontos'), path: "/historico-pontos", show: isAdmin, showBadge: false },
       ]
     },
     {
       id: 'alerts',
-      label: 'Alertas',
+      label: tr('menu.groups.alerts', 'Alertas'),
       color: 'bg-red-100/80 dark:bg-red-900/30',
       items: [
-        { icon: Bell, label: "Alertas", path: "/alertas", show: isAdmin, showBadge: true },
-        { icon: Settings, label: "Config. Alertas", path: "/configuracoes-alertas", show: isAdmin, showBadge: false },
-        { icon: Tag, label: "Categorias", path: "/categorias", show: isAdmin, showBadge: false },
+        { icon: Bell, label: tr('menu.items.alertas', 'Alertas'), path: "/alertas", show: isAdmin, showBadge: true },
+        { icon: Settings, label: tr('menu.items.configAlertas', 'Config. Alertas'), path: "/configuracoes-alertas", show: isAdmin, showBadge: false },
+        { icon: Tag, label: tr('menu.items.categorias', 'Categorias'), path: "/categorias", show: isAdmin, showBadge: false },
       ]
     },
 
     {
       id: 'meetings',
-      label: 'Reuniões',
+      label: tr('menu.groups.meetings', 'Reuniões'),
       color: 'bg-cyan-100/80 dark:bg-cyan-900/30',
       items: [
-        { icon: CalendarDays, label: "Reuniões Gestores", path: "/reunioes-gestores", show: true, showBadge: false },
-        { icon: MessageSquarePlus, label: "Tópicos Reunião", path: "/topicos-reuniao", show: true, showBadge: false },
-        { icon: Store, label: "Reuniões Lojas", path: "/reunioes-lojas", show: true, showBadge: false },
-        { icon: Users2, label: "Reuniões Quinzenais", path: "/reunioes-quinzenais", show: true, showBadge: false },
+        { icon: CalendarDays, label: tr('menu.items.reunioesGestores', 'Reuniões Gestores'), path: "/reunioes-gestores", show: true, showBadge: false },
+        { icon: MessageSquarePlus, label: tr('menu.items.topicosReuniao', 'Tópicos Reunião'), path: "/topicos-reuniao", show: true, showBadge: false },
+        { icon: Store, label: tr('menu.items.reunioesLojas', 'Reuniões Lojas'), path: "/reunioes-lojas", show: true, showBadge: false },
+        { icon: Users2, label: tr('menu.items.reunioesQuinzenais', 'Reuniões Quinzenais'), path: "/reunioes-quinzenais", show: true, showBadge: false },
       ]
     },
     {
       id: 'results',
-      label: 'Resultados',
+      label: tr('menu.groups.results', 'Resultados'),
       color: 'bg-orange-100/80 dark:bg-orange-900/30',
       items: [
-        { icon: TrendingUp, label: "Upload Resultados", path: "/resultados-upload", show: isAdmin, showBadge: false },
-        { icon: BarChart3, label: "Dashboard Resultados", path: "/resultados-dashboard", show: true, showBadge: false },
-        { icon: Sparkles, label: "Relatório IA Resultados", path: "/relatorio-ia-resultados", show: true, showBadge: false },
-        { icon: GitCompare, label: "Comparação Lojas", path: "/comparacao-lojas", show: true, showBadge: false },
-        { icon: History, label: "Histórico da Loja", path: "/historico-loja", show: true, showBadge: false },
-        { icon: BarChart3, label: "Relatório Board", path: "/relatorio-board", show: isAdmin, showBadge: false },
+        { icon: TrendingUp, label: tr('menu.items.uploadResultados', 'Upload Resultados'), path: "/resultados-upload", show: isAdmin, showBadge: false },
+        { icon: BarChart3, label: tr('menu.items.dashboardResultados', 'Dashboard Resultados'), path: "/resultados-dashboard", show: true, showBadge: false },
+        { icon: Sparkles, label: tr('menu.items.relatorioIAResultados', 'Relatório IA Resultados'), path: "/relatorio-ia-resultados", show: true, showBadge: false },
+        { icon: GitCompare, label: tr('menu.items.comparacaoLojas', 'Comparação Lojas'), path: "/comparacao-lojas", show: true, showBadge: false },
+        { icon: History, label: tr('menu.items.historicoLoja', 'Histórico da Loja'), path: "/historico-loja", show: true, showBadge: false },
+        { icon: BarChart3, label: tr('menu.items.relatorioBoard', 'Relatório Board'), path: "/relatorio-board", show: isAdmin, showBadge: false },
       ]
     },
 
     {
       id: 'pending',
-      label: 'Tarefas',
+      label: tr('menu.groups.pending', 'Tarefas'),
       color: 'bg-rose-100/80 dark:bg-rose-900/30',
       items: [
-        { icon: ListTodo, label: "To-Do", path: "/todos", show: true, showBadge: false },
-        { icon: ListTodo, label: "Pendentes", path: isAdmin ? "/pendentes-admin" : "/pendentes", show: true, showBadge: false },
+        { icon: ListTodo, label: tr('menu.items.todo', 'To-Do'), path: "/todos", show: true, showBadge: false },
+        { icon: ListTodo, label: tr('menu.items.pendentes', 'Pendentes'), path: isAdmin ? "/pendentes-admin" : "/pendentes", show: true, showBadge: false },
       ]
     },
   ];
@@ -164,8 +175,8 @@ const getMenuGroups = (userRole?: string): MenuGroup[] => {
 };
 
 // Manter função antiga para compatibilidade
-const getMenuItems = (userRole?: string) => {
-  const groups = getMenuGroups(userRole);
+const getMenuItems = (userRole?: string, t?: (key: string) => string) => {
+  const groups = getMenuGroups(userRole, t);
   return groups.flatMap(group => group.items);
 };
 
@@ -246,13 +257,14 @@ function DashboardLayoutContent({
 }: DashboardLayoutContentProps) {
   const { user, logout } = useAuth();
   const { theme, toggleTheme, switchable } = useTheme();
+  const { language, setLanguage, t } = useLanguage();
   const [location, setLocation] = useLocation();
   const { state, toggleSidebar } = useSidebar();
   const isCollapsed = state === "collapsed";
   const [isResizing, setIsResizing] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
-  const menuItems = getMenuItems(user?.role);
-  const menuGroups = getMenuGroups(user?.role);
+  const menuItems = getMenuItems(user?.role, t);
+  const menuGroups = getMenuGroups(user?.role, t);
   const activeMenuItem = menuItems.find(item => item.path === location);
   const isMobile = useIsMobile();
   
@@ -387,15 +399,23 @@ function DashboardLayoutContent({
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" side="top" className="w-48">
+                {/* Seletor de Idioma */}
+                <DropdownMenuItem
+                  onClick={() => setLanguage(language === 'pt' ? 'en' : 'pt')}
+                  className="cursor-pointer"
+                >
+                  <Globe className="mr-2 h-4 w-4" />
+                  <span>{language === 'pt' ? 'English' : 'Português'}</span>
+                </DropdownMenuItem>
                 {switchable && (
                   <DropdownMenuItem
                     onClick={toggleTheme}
                     className="cursor-pointer"
                   >
                     {theme === 'light' ? (
-                      <><Moon className="mr-2 h-4 w-4" /><span>Modo Escuro</span></>
+                      <><Moon className="mr-2 h-4 w-4" /><span>{t('theme.dark')}</span></>
                     ) : (
-                      <><Sun className="mr-2 h-4 w-4" /><span>Modo Claro</span></>
+                      <><Sun className="mr-2 h-4 w-4" /><span>{t('theme.light')}</span></>
                     )}
                   </DropdownMenuItem>
                 )}
@@ -404,7 +424,7 @@ function DashboardLayoutContent({
                   className="cursor-pointer text-destructive focus:text-destructive"
                 >
                   <LogOut className="mr-2 h-4 w-4" />
-                  <span>Sign out</span>
+                  <span>{t('auth.signOut')}</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

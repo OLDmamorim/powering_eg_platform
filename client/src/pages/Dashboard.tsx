@@ -7,6 +7,7 @@ import { trpc } from "@/lib/trpc";
 import { Building2, ClipboardList, FileText, ListTodo, AlertTriangle, TrendingUp, TrendingDown, Calendar, Download, Minus, Sparkles, RefreshCw, Activity, Eye, Zap, MapPin, Clock, CheckCircle, XCircle, CheckSquare, BarChart3 } from "lucide-react";
 import { useMemo, useState, useEffect } from "react";
 import { useLocation } from "wouter";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { ReminderDialog } from "@/components/ReminderDialog";
 import { RelatorioIACategorias } from "@/components/RelatorioIACategorias";
 
@@ -217,6 +218,7 @@ function LembretesResumosGlobais({ isAdmin, isGestor, setLocation }: { isAdmin: 
 export default function Dashboard() {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
+  const { language, t } = useLanguage();
   const isAdmin = user?.role === "admin";
   const isGestor = user?.role === "gestor";
   const [showReminder, setShowReminder] = useState(false);
@@ -471,14 +473,14 @@ export default function Dashboard() {
           <div className="flex items-start gap-4">
             <div>
               <h1 className="text-2xl md:text-3xl font-bold tracking-tight flex items-center gap-3">
-                Olá, {user?.name || 'Utilizador'}
+                {t('dashboard.welcome')}, {user?.name || (language === 'pt' ? 'Utilizador' : 'User')}
                 <img 
                   src="/eglass-logo.png" 
                   alt="ExpressGlass Logo" 
                   className="hidden md:block h-14 w-auto object-contain"
                 />
               </h1>
-              <p className="text-sm md:text-base text-muted-foreground">Bem-vindo ao PoweringEG Platform 2.0</p>
+              <p className="text-sm md:text-base text-muted-foreground">{t('dashboard.welcomeSubtitle')}</p>
               <div className="flex items-start gap-2 mt-2 max-w-full">
                 <Sparkles className="h-4 w-4 text-amber-500 flex-shrink-0 mt-0.5" />
                 <p className="text-xs md:text-sm text-muted-foreground italic break-words">
@@ -530,10 +532,10 @@ export default function Dashboard() {
         {pendentesAntigos.length > 0 && (
           <Alert variant="destructive" className="border-orange-500 bg-orange-50 text-orange-900 dark:bg-orange-950/30 dark:text-orange-200">
             <AlertTriangle className="h-4 w-4" />
-            <AlertTitle>Atenção: Pendentes por resolver</AlertTitle>
+            <AlertTitle>{t('dashboard.atencaoPendentes')}</AlertTitle>
             <AlertDescription className="flex items-center justify-between">
-              <span>Existem <strong>{pendentesAntigos.length}</strong> pendente(s) há mais de 7 dias sem resolução.</span>
-              <Button variant="outline" size="sm" onClick={() => setLocation('/pendentes')} className="border-orange-500 text-orange-700 hover:bg-orange-100 dark:text-orange-200 dark:hover:bg-orange-950">Ver Pendentes</Button>
+              <span>{t('dashboard.existem')} <strong>{pendentesAntigos.length}</strong> {t('dashboard.pendentesHaMais')}</span>
+              <Button variant="outline" size="sm" onClick={() => setLocation('/pendentes')} className="border-orange-500 text-orange-700 hover:bg-orange-100 dark:text-orange-200 dark:hover:bg-orange-950">{t('dashboard.verPendentes')}</Button>
             </AlertDescription>
           </Alert>
         )}
@@ -584,12 +586,12 @@ export default function Dashboard() {
                 onClick={() => setLocation('/lojas')}
               >
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total de Lojas</CardTitle>
+                  <CardTitle className="text-sm font-medium">{t('dashboard.totalLojas')}</CardTitle>
                   <Building2 className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold text-blue-700 dark:text-blue-300">{lojas?.length || 0}</div>
-                  <p className="text-xs text-muted-foreground">Lojas ativas na rede</p>
+                  <p className="text-xs text-muted-foreground">{t('dashboard.lojasAtivas')}</p>
                 </CardContent>
               </Card>
 
@@ -598,12 +600,12 @@ export default function Dashboard() {
                 onClick={() => setLocation('/gestores')}
               >
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Gestores</CardTitle>
+                  <CardTitle className="text-sm font-medium">{t('dashboard.gestores')}</CardTitle>
                   <FileText className="h-4 w-4 text-purple-600 dark:text-purple-400" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold text-purple-700 dark:text-purple-300">{gestores?.length || 0}</div>
-                  <p className="text-xs text-muted-foreground">Gestores registados</p>
+                  <p className="text-xs text-muted-foreground">{t('dashboard.gestoresAtivos')}</p>
                 </CardContent>
               </Card>
             </>
@@ -615,12 +617,12 @@ export default function Dashboard() {
               onClick={() => setLocation('/minhas-lojas')}
             >
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Minhas Lojas</CardTitle>
+                <CardTitle className="text-sm font-medium">{language === 'pt' ? 'Minhas Lojas' : 'My Stores'}</CardTitle>
                 <Building2 className="h-4 w-4 text-blue-600 dark:text-blue-400" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-blue-700 dark:text-blue-300">{minhasLojas?.length || 0}</div>
-                <p className="text-xs text-muted-foreground">Lojas sob sua gestão</p>
+                <p className="text-xs text-muted-foreground">{language === 'pt' ? 'Lojas sob sua gestão' : 'Stores under your management'}</p>
               </CardContent>
             </Card>
           )}
@@ -631,7 +633,7 @@ export default function Dashboard() {
           >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
-                Relatórios Livres
+                {language === 'pt' ? 'Relatórios Livres' : 'Free Reports'}
                 {isAdmin && (relLivresNaoVistos || 0) > 0 && (
                   <span className="bg-emerald-600 text-white text-xs px-2 py-0.5 rounded-full font-bold">
                     {relLivresNaoVistos} novo{relLivresNaoVistos !== 1 ? 's' : ''}
@@ -655,7 +657,7 @@ export default function Dashboard() {
           >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
-                Relatórios Completos
+                {language === 'pt' ? 'Relatórios Completos' : 'Complete Reports'}
                 {isAdmin && (relCompletosNaoVistos || 0) > 0 && (
                   <span className="bg-teal-600 text-white text-xs px-2 py-0.5 rounded-full font-bold">
                     {relCompletosNaoVistos} novo{relCompletosNaoVistos !== 1 ? 's' : ''}
@@ -679,7 +681,7 @@ export default function Dashboard() {
           >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
-                Pendentes
+                {t('dashboard.pendentes')}
                 {isAdmin && (pendentesNaoVistos || 0) > 0 && (
                   <span className="bg-amber-600 text-white text-xs px-2 py-0.5 rounded-full font-bold">
                     {pendentesNaoVistos} novo{pendentesNaoVistos !== 1 ? 's' : ''}

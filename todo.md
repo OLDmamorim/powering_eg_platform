@@ -2363,3 +2363,12 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar seletor de idioma no header do Portal
 - [x] Traduzir todos os textos do Portal para inglés (tabs e header)
 - [x] Testar alternância entre idiomas (testes unitários passaram)
+
+
+## Idioma Inglês em Toda a Aplicação
+- [x] Expandir ficheiros de tradução (PT e EN) para toda a aplicação
+- [x] Adicionar seletor de idioma ao DashboardLayout (header)
+- [x] Traduzir menu lateral (todos os itens)
+- [x] Traduzir Dashboard principal
+- [ ] Traduzir páginas de gestão (Lojas, Gestores, Relatórios, etc.)
+- [ ] Testar alternância entre idiomas em toda a aplicação
