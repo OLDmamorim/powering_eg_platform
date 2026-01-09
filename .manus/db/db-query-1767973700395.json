@@ -1,0 +1,189 @@
+{
+  "query": "-- Dados do gestor Marco Amorim\nSELECT u.id as userId, u.name, u.email, g.id as gestorId \nFROM users u \nJOIN gestores g ON g.userId = u.id \nWHERE u.email = 'mamorim@expressglass.pt';\n\n-- Lojas atribuídas ao gestor\nSELECT l.id, l.nome, l.email \nFROM lojas l \nJOIN gestor_lojas gl ON gl.lojaId = l.id \nJOIN gestores g ON g.id = gl.gestorId \nJOIN users u ON u.id = g.userId \nWHERE u.email = 'mamorim@expressglass.pt';\n\n-- Relatórios livres do gestor (últimos 3 meses)\nSELECT rl.id, l.nome as loja, rl.dataVisita, rl.descricao\nFROM relatorios_livres rl\nJOIN lojas l ON l.id = rl.lojaId\nWHERE rl.gestorId = 30001\nORDER BY rl.dataVisita DESC\nLIMIT 20;\n\n-- Relatórios completos do gestor (últimos 3 meses)\nSELECT rc.id, l.nome as loja, rc.dataVisita, rc.resumoSupervisao\nFROM relatorios_completos rc\nJOIN lojas l ON l.id = rc.lojaId\nWHERE rc.gestorId = 30001\nORDER BY rc.dataVisita DESC\nLIMIT 20;\n\n-- Pendentes das lojas do gestor\nSELECT p.id, l.nome as loja, p.descricao, p.resolvido, p.createdAt\nFROM pendentes p\nJOIN lojas l ON l.id = p.lojaId\nWHERE p.lojaId IN (\n  SELECT gl.lojaId FROM gestor_lojas gl \n  JOIN gestores g ON g.id = gl.gestorId \n  JOIN users u ON u.id = g.userId \n  WHERE u.email = 'mamorim@expressglass.pt'\n)\nORDER BY p.createdAt DESC\nLIMIT 30;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute -- Dados do gestor Marco Amorim\nSELECT u.id as userId, u.name, u.email, g.id as gestorId \nFROM users u \nJOIN gestores g ON g.userId = u.id \nWHERE u.email = 'mamorim@expressglass.pt';\n\n-- Lojas atribuídas ao gestor\nSELECT l.id, l.nome, l.email \nFROM lojas l \nJOIN gestor_lojas gl ON gl.lojaId = l.id \nJOIN gestores g ON g.id = gl.gestorId \nJOIN users u ON u.id = g.userId \nWHERE u.email = 'mamorim@expressglass.pt';\n\n-- Relatórios livres do gestor (últimos 3 meses)\nSELECT rl.id, l.nome as loja, rl.dataVisita, rl.descricao\nFROM relatorios_livres rl\nJOIN lojas l ON l.id = rl.lojaId\nWHERE rl.gestorId = 30001\nORDER BY rl.dataVisita DESC\nLIMIT 20;\n\n-- Relatórios completos do gestor (últimos 3 meses)\nSELECT rc.id, l.nome as loja, rc.dataVisita, rc.resumoSupervisao\nFROM relatorios_completos rc\nJOIN lojas l ON l.id = rc.lojaId\nWHERE rc.gestorId = 30001\nORDER BY rc.dataVisita DESC\nLIMIT 20;\n\n-- Pendentes das lojas do gestor\nSELECT p.id, l.nome as loja, p.descricao, p.resolvido, p.createdAt\nFROM pendentes p\nJOIN lojas l ON l.id = p.lojaId\nWHERE p.lojaId IN (\n  SELECT gl.lojaId FROM gestor_lojas gl \n  JOIN gestores g ON g.id = gl.gestorId \n  JOIN users u ON u.id = g.userId \n  WHERE u.email = 'mamorim@expressglass.pt'\n)\nORDER BY p.createdAt DESC\nLIMIT 30;",
+  "rows": [
+    {
+      "userId": "420030",
+      "name": "Marco Amorim",
+      "email": "mamorim@expressglass.pt",
+      "gestorId": "30001"
+    },
+    {
+      "userId": "id",
+      "name": "loja",
+      "email": "dataVisita",
+      "gestorId": "descricao"
+    },
+    {
+      "userId": "1080001",
+      "name": "Braga - minho center",
+      "email": "2026-01-09 11:12:07",
+      "gestorId": "hoje faltou caneta de impacto, mas fui informado que estao esgotadas."
+    },
+    {
+      "userId": "1080002",
+      "name": "Braga sm",
+      "email": "2026-01-09 11:12:07",
+      "gestorId": "hoje faltou caneta de impacto, mas fui informado que estao esgotadas."
+    },
+    {
+      "userId": "870001",
+      "name": "Braga - minho center",
+      "email": "2026-01-05 00:00:00",
+      "gestorId": "Foram feitas as trocas de PC´s da loja de Braga como agendado. Aguardo visita do eletricista para dar orçamento para troca da iluminação. Não tive ainda qualquer resposta ao ticket para a colocação de uma divisória de proteção para o frio que vem da principal entrada."
+    },
+    {
+      "userId": "600001",
+      "name": "Famalicão",
+      "email": "2025-12-29 00:00:00",
+      "gestorId": "a loja ja esta muito mais agradável no que toca a organização. Refeitório \"livre\", recepção mais disponível, etc... Mas continuam a haver alguns pequenos pormenores que deveriam ser vistos pela equipa. Por favor chamar a atenção a empresa de limpezas para as teias de aranhas junto ao vidro, e esta ai uma fatura encostada ha semanas, sem ninguém lhe mexer. Importante avançar o mais rapidamente possível com a emissão das devoluções! Não peço recolha dos vidros enquanto não forem feitas as ND. A recolha de resíduos tem que ser feita mais cedo, não é aceitável acumular o lixo ate a essa altura "
+    },
+    {
+      "userId": "570001",
+      "name": "Braga - minho center",
+      "email": "2025-12-22 18:47:10",
+      "gestorId": "A visita identificou falhas logísticas graves, especificamente a ausência de entregas programadas nas lojas de Braga, Paredes e Passos Ferreira. Esta falha foi comunicada tardiamente por e-mail, resultando no adiamento de serviços essenciais, como os serviços móveis. É crucial resolver o problema da cadeia de suprimentos para evitar futuras interrupções operacionais."
+    },
+    {
+      "userId": "510001",
+      "name": "Guimarães shopping",
+      "email": "2025-12-19 15:08:00",
+      "gestorId": "A loja de Guimarães apresenta graves problemas de armazenamento de vidros e falta de condições mínimas para suportar o crescimento projetado. É urgente encontrar uma alternativa de localização que reúna melhores condições operacionais."
+    },
+    {
+      "userId": "390001",
+      "name": "Paredes",
+      "email": "2025-12-18 12:50:46",
+      "gestorId": "Estamos com graves problemas com a armazenamento de vidros de camião. Temos atualmente 24 vidros em stock. Continuamos a aguardar a recolha de vidros com danos. O escritório estava uma vez mais desorganizado, coloquei da melhor forma possível, espero que se mantenha assim. Atentos aos processos da mycar, é preciso pressionar para faturar tudo o que for possível. Apesar do impacto da logística dos trucks, mantenham o foco na organização da loja. "
+    },
+    {
+      "userId": "330001",
+      "name": "Braga sm",
+      "email": "2025-12-18 00:00:00",
+      "gestorId": "A atividade da loja SM encontra-se paralisada devido à falta de equipa. O foco atual é a tentativa de recrutamento de novos elementos para reiniciar as operações em 2026."
+    },
+    {
+      "userId": "300001",
+      "name": "Braga - minho center",
+      "email": "2025-12-17 23:38:53",
+      "gestorId": "Teste"
+    },
+    {
+      "userId": "270003",
+      "name": "Barcelos",
+      "email": "2025-12-17 20:48:32",
+      "gestorId": "Estive na loja de Barcelos para entregar o cabaz natal. Tiago queixa-se que nao entra serviço na loja, tendo imenso tempo parado. Loja estava como sempre limpa e organizada, mas carregada de vidros partidos, e continua a não haver uma solução para recolha"
+    },
+    {
+      "userId": "270001",
+      "name": "Vila Verde",
+      "email": "2025-12-17 20:02:16",
+      "gestorId": "A visita à loja de Vila Verde foi realizada para a entrega dos cabazes de Natal, destacando-se a excelente organização, limpeza e gestão do sistema PHC. A equipa demonstrou um desempenho positivo na manutenção e arrumação da loja. No entanto, foram identificados problemas persistentes relacionados com a recolha de devoluções, de vidros partidos e a baixa de serviços."
+    },
+    {
+      "userId": "150001",
+      "name": "Viana do Castelo ",
+      "email": "2025-12-16 14:33:07",
+      "gestorId": "Colocação de um novo PC, e levantamento de necessidades para completar a loja. Enviado para Suporte ao Negocio."
+    },
+    {
+      "userId": "120001",
+      "name": "Famalicão",
+      "email": "2025-12-16 08:03:15",
+      "gestorId": "Realização da reunião mensal com equipa de loja e SM: foco no fraco resultado de Novembro, e na apresentação pouco organizada da loja.  REalização do inventário "
+    },
+    {
+      "userId": "id",
+      "name": "loja",
+      "email": "dataVisita",
+      "gestorId": "resumoSupervisao"
+    },
+    {
+      "userId": "810001",
+      "name": "Viana do castelo sm",
+      "email": "2026-01-08 14:45:15",
+      "gestorId": "Positivo"
+    },
+    {
+      "userId": "780001",
+      "name": "Viana do Castelo ",
+      "email": "2026-01-08 00:00:00",
+      "gestorId": "De um modo geral, tendo em conta que se trata de uma loja nova, estamos ainda a instalar, mas já estamos a facilitar na arrumação. Serviços estão a aumentar, o que nos dá um tônico extra. PHC organizado"
+    },
+    {
+      "userId": "690001",
+      "name": "Vila Verde",
+      "email": "2026-01-07 16:36:51",
+      "gestorId": "Loja lima, airosa e organizada. Equipa tranquila e bem orientada.  A recolha de vidros velhos continua a ser um problema."
+    },
+    {
+      "userId": "660001",
+      "name": "Póvoa de Varzim",
+      "email": "2026-01-06 00:00:00",
+      "gestorId": "A povoa sempre no seu melhor. Loja organizada, limpa, resultados fantásticos. Nada a apontar de negativo no que toca a responsabilidade do Simão."
+    },
+    {
+      "userId": "180001",
+      "name": "Braga - minho center",
+      "email": "2025-12-19 10:55:24",
+      "gestorId": "loja no bom caminho"
+    },
+    {
+      "userId": "150001",
+      "name": "Barcelos",
+      "email": "2025-12-19 09:05:57",
+      "gestorId": "Barcelos continua a cumprir praticamente com tudo o que lhe é exigido. Bom trabalho "
+    }
+  ],
+  "messages": [
+    "id\tnome\temail",
+    "60001\tFamalicão\tfamalicao@expressglass.pt",
+    "60002\tBarcelos\tbarcelos@expressglass.pt",
+    "60003\tVila Verde\tvilaverde@expressglass.pt",
+    "60004\tViana do Castelo \tvianacastelo@expressglass.pt",
+    "60005\tPóvoa de Varzim\tpovoa@expressglass.pt",
+    "60006\tParedes\tparedes@expressglass.pt",
+    "60007\tPaços de Ferreira \tpferreira@expressglass.pt",
+    "180010\tBraga - minho center\tbraga@expressglass.pt",
+    "180011\tBraga sm\tvaniaraquel1991@gmail.com",
+    "180019\tFamalicão sm\tfamalicao@expressglass.pt",
+    "180024\tGuimarães shopping\tpagamentosmaster@protonmail.com",
+    "180036\tMycarcenter\tparedes@expressglass.pt",
+    "180038\tParedes sm\tparedes@expressglass.pt",
+    "180057\tViana do castelo sm\tvianacastelo@expressglass.pt",
+    "id\tloja\tdescricao\tresolvido\tcreatedAt",
+    "540001\tBraga - minho center\tOrganizar a bancada de trabalho, guardando produtos e ferramentas em seus devidos lugares\t0\t2026-01-09 11:12:07",
+    "540002\tBraga sm\tOrganizar a bancada de trabalho, guardando produtos e ferramentas em seus devidos lugares\t0\t2026-01-09 11:12:07",
+    "510002\tViana do castelo sm\tOrganização PHC\t0\t2026-01-08 14:45:16",
+    "510001\tViana do castelo sm\tResultador\t0\t2026-01-08 14:45:16",
+    "480001\tViana do Castelo \tEsvaziar e limpar a lixeira imediatamente\t0\t2026-01-08 12:41:06",
+    "480007\tViana do Castelo \tOrganizar e arrumar o balcão de atendimento, removendo itens desnecessários e papéis acumulados\t0\t2026-01-08 12:41:06",
+    "480006\tViana do Castelo \tEstabelecer rotinas de limpeza e organização para manter o espaço funcional e seguro.\t0\t2026-01-08 12:41:06",
+    "480003\tViana do Castelo \tOrganizar e arrumar as ferramentas e produtos na bancada de trabalho\t0\t2026-01-08 12:41:06",
+    "480004\tViana do Castelo \tRemover o pneu da área de trabalho e armazená-lo adequadamente\t0\t2026-01-08 12:41:06",
+    "480009\tViana do Castelo \tImplementar rotinas diárias de organização e limpeza do balcão\t0\t2026-01-08 12:41:06",
+    "480008\tViana do Castelo \tVerificar e reposicionar a sinalética de avaliação Google para garantir visibilidade e impacto\t0\t2026-01-08 12:41:06",
+    "480010\tViana do Castelo \tOrganizar e limpar o balcão de atendimento, removendo papéis e objetos desnecessários\t0\t2026-01-08 12:41:06",
+    "480005\tViana do Castelo \tRealizar limpeza e organização imediata da área, descartando resíduos acumulados.\t0\t2026-01-08 12:41:06",
+    "480002\tViana do Castelo \tOrganizar a bancada e guardar os materiais de limpeza/ferramentas\t0\t2026-01-08 12:41:06",
+    "450001\tVila Verde\tRemover e descartar adequadamente os vidros danificados\t0\t2026-01-07 16:36:51",
+    "450002\tVila Verde\tRemover e descartar todas as caixas de cartão vazias\t0\t2026-01-07 16:36:51",
+    "420001\tPóvoa de Varzim\tSolicitar a recolha imediata do contentor de vidros cheios.\t0\t2026-01-06 15:03:01",
+    "390001\tBraga - minho center\tDivisória para proteção do frio\t0\t2026-01-05 14:15:50",
+    "360004\tFamalicão\tRealizar limpeza profunda do parapeito e da janela para remover sujidade e manchas\t0\t2025-12-29 17:08:36",
+    "360003\tFamalicão\tVerificar e limpar todas as outras áreas da loja que possam estar a acumular sujidade de forma similar.\t0\t2025-12-29 17:08:36",
+    "360005\tFamalicão\tEmitir as ND o mais rápido possível\t0\t2025-12-29 17:08:36",
+    "360001\tFamalicão\tLimpar e organizar imediatamente a área de armazenamento de resíduos.\t0\t2025-12-29 17:08:36",
+    "360002\tFamalicão\tGarantir que os contentores de resíduos não transbordem e que os materiais sejam segregados corretamente.\t0\t2025-12-29 17:08:36",
+    "300002\tGuimarães shopping\tAvaliar alternativas de localização para a loja de Guimarães\t0\t2025-12-20 13:10:18",
+    "300001\tGuimarães shopping\tResolver problemas de armazenamento de vidros (devoluções e caixas)\t0\t2025-12-20 13:10:18",
+    "270002\tBraga - minho center\ttratar entrada de agua\t0\t2025-12-19 10:55:24",
+    "270001\tBraga - minho center\tluz a trocar\t0\t2025-12-19 10:55:24",
+    "240001\tBarcelos\tMudar o luminoso \t0\t2025-12-19 09:05:58",
+    "210003\tParedes\tLimpar e organizar a área de trabalho, removendo caixas, embalagens e lixo do chão e dos cantos.\t0\t2025-12-18 12:50:46",
+    "210001\tParedes\tRemover os vidros da caixa de madeira e descartar o cartão excedente.\t0\t2025-12-18 12:50:46"
+  ],
+  "stdout": "userId\tname\temail\tgestorId\n420030\tMarco Amorim\tmamorim@expressglass.pt\t30001\nid\tnome\temail\n60001\tFamalicão\tfamalicao@expressglass.pt\n60002\tBarcelos\tbarcelos@expressglass.pt\n60003\tVila Verde\tvilaverde@expressglass.pt\n60004\tViana do Castelo \tvianacastelo@expressglass.pt\n60005\tPóvoa de Varzim\tpovoa@expressglass.pt\n60006\tParedes\tparedes@expressglass.pt\n60007\tPaços de Ferreira \tpferreira@expressglass.pt\n180010\tBraga - minho center\tbraga@expressglass.pt\n180011\tBraga sm\tvaniaraquel1991@gmail.com\n180019\tFamalicão sm\tfamalicao@expressglass.pt\n180024\tGuimarães shopping\tpagamentosmaster@protonmail.com\n180036\tMycarcenter\tparedes@expressglass.pt\n180038\tParedes sm\tparedes@expressglass.pt\n180057\tViana do castelo sm\tvianacastelo@expressglass.pt\nid\tloja\tdataVisita\tdescricao\n1080001\tBraga - minho center\t2026-01-09 11:12:07\thoje faltou caneta de impacto, mas fui informado que estao esgotadas.\n1080002\tBraga sm\t2026-01-09 11:12:07\thoje faltou caneta de impacto, mas fui informado que estao esgotadas.\n870001\tBraga - minho center\t2026-01-05 00:00:00\tForam feitas as trocas de PC´s da loja de Braga como agendado. Aguardo visita do eletricista para dar orçamento para troca da iluminação. Não tive ainda qualquer resposta ao ticket para a colocação de uma divisória de proteção para o frio que vem da principal entrada.\n600001\tFamalicão\t2025-12-29 00:00:00\ta loja ja esta muito mais agradável no que toca a organização. Refeitório \"livre\", recepção mais disponível, etc... Mas continuam a haver alguns pequenos pormenores que deveriam ser vistos pela equipa. Por favor chamar a atenção a empresa de limpezas para as teias de aranhas junto ao vidro, e esta ai uma fatura encostada ha semanas, sem ninguém lhe mexer. Importante avançar o mais rapidamente possível com a emissão das devoluções! Não peço recolha dos vidros enquanto não forem feitas as ND. A recolha de resíduos tem que ser feita mais cedo, não é aceitável acumular o lixo ate a essa altura \n570001\tBraga - minho center\t2025-12-22 18:47:10\tA visita identificou falhas logísticas graves, especificamente a ausência de entregas programadas nas lojas de Braga, Paredes e Passos Ferreira. Esta falha foi comunicada tardiamente por e-mail, resultando no adiamento de serviços essenciais, como os serviços móveis. É crucial resolver o problema da cadeia de suprimentos para evitar futuras interrupções operacionais.\n510001\tGuimarães shopping\t2025-12-19 15:08:00\tA loja de Guimarães apresenta graves problemas de armazenamento de vidros e falta de condições mínimas para suportar o crescimento projetado. É urgente encontrar uma alternativa de localização que reúna melhores condições operacionais.\n390001\tParedes\t2025-12-18 12:50:46\tEstamos com graves problemas com a armazenamento de vidros de camião. Temos atualmente 24 vidros em stock. Continuamos a aguardar a recolha de vidros com danos. O escritório estava uma vez mais desorganizado, coloquei da melhor forma possível, espero que se mantenha assim. Atentos aos processos da mycar, é preciso pressionar para faturar tudo o que for possível. Apesar do impacto da logística dos trucks, mantenham o foco na organização da loja. \n330001\tBraga sm\t2025-12-18 00:00:00\tA atividade da loja SM encontra-se paralisada devido à falta de equipa. O foco atual é a tentativa de recrutamento de novos elementos para reiniciar as operações em 2026.\n300001\tBraga - minho center\t2025-12-17 23:38:53\tTeste\n270003\tBarcelos\t2025-12-17 20:48:32\tEstive na loja de Barcelos para entregar o cabaz natal. Tiago queixa-se que nao entra serviço na loja, tendo imenso tempo parado. Loja estava como sempre limpa e organizada, mas carregada de vidros partidos, e continua a não haver uma solução para recolha\n270001\tVila Verde\t2025-12-17 20:02:16\tA visita à loja de Vila Verde foi realizada para a entrega dos cabazes de Natal, destacando-se a excelente organização, limpeza e gestão do sistema PHC. A equipa demonstrou um desempenho positivo na manutenção e arrumação da loja. No entanto, foram identificados problemas persistentes relacionados com a recolha de devoluções, de vidros partidos e a baixa de serviços.\n150001\tViana do Castelo \t2025-12-16 14:33:07\tColocação de um novo PC, e levantamento de necessidades para completar a loja. Enviado para Suporte ao Negocio.\n120001\tFamalicão\t2025-12-16 08:03:15\tRealização da reunião mensal com equipa de loja e SM: foco no fraco resultado de Novembro, e na apresentação pouco organizada da loja.  REalização do inventário \nid\tloja\tdataVisita\tresumoSupervisao\n810001\tViana do castelo sm\t2026-01-08 14:45:15\tPositivo\n780001\tViana do Castelo \t2026-01-08 00:00:00\tDe um modo geral, tendo em conta que se trata de uma loja nova, estamos ainda a instalar, mas já estamos a facilitar na arrumação. Serviços estão a aumentar, o que nos dá um tônico extra. PHC organizado\n690001\tVila Verde\t2026-01-07 16:36:51\tLoja lima, airosa e organizada. Equipa tranquila e bem orientada.  A recolha de vidros velhos continua a ser um problema.\n660001\tPóvoa de Varzim\t2026-01-06 00:00:00\tA povoa sempre no seu melhor. Loja organizada, limpa, resultados fantásticos. Nada a apontar de negativo no que toca a responsabilidade do Simão.\n180001\tBraga - minho center\t2025-12-19 10:55:24\tloja no bom caminho\n150001\tBarcelos\t2025-12-19 09:05:57\tBarcelos continua a cumprir praticamente com tudo o que lhe é exigido. Bom trabalho \nid\tloja\tdescricao\tresolvido\tcreatedAt\n540001\tBraga - minho center\tOrganizar a bancada de trabalho, guardando produtos e ferramentas em seus devidos lugares\t0\t2026-01-09 11:12:07\n540002\tBraga sm\tOrganizar a bancada de trabalho, guardando produtos e ferramentas em seus devidos lugares\t0\t2026-01-09 11:12:07\n510002\tViana do castelo sm\tOrganização PHC\t0\t2026-01-08 14:45:16\n510001\tViana do castelo sm\tResultador\t0\t2026-01-08 14:45:16\n480001\tViana do Castelo \tEsvaziar e limpar a lixeira imediatamente\t0\t2026-01-08 12:41:06\n480007\tViana do Castelo \tOrganizar e arrumar o balcão de atendimento, removendo itens desnecessários e papéis acumulados\t0\t2026-01-08 12:41:06\n480006\tViana do Castelo \tEstabelecer rotinas de limpeza e organização para manter o espaço funcional e seguro.\t0\t2026-01-08 12:41:06\n480003\tViana do Castelo \tOrganizar e arrumar as ferramentas e produtos na bancada de trabalho\t0\t2026-01-08 12:41:06\n480004\tViana do Castelo \tRemover o pneu da área de trabalho e armazená-lo adequadamente\t0\t2026-01-08 12:41:06\n480009\tViana do Castelo \tImplementar rotinas diárias de organização e limpeza do balcão\t0\t2026-01-08 12:41:06\n480008\tViana do Castelo \tVerificar e reposicionar a sinalética de avaliação Google para garantir visibilidade e impacto\t0\t2026-01-08 12:41:06\n480010\tViana do Castelo \tOrganizar e limpar o balcão de atendimento, removendo papéis e objetos desnecessários\t0\t2026-01-08 12:41:06\n480005\tViana do Castelo \tRealizar limpeza e organização imediata da área, descartando resíduos acumulados.\t0\t2026-01-08 12:41:06\n480002\tViana do Castelo \tOrganizar a bancada e guardar os materiais de limpeza/ferramentas\t0\t2026-01-08 12:41:06\n450001\tVila Verde\tRemover e descartar adequadamente os vidros danificados\t0\t2026-01-07 16:36:51\n450002\tVila Verde\tRemover e descartar todas as caixas de cartão vazias\t0\t2026-01-07 16:36:51\n420001\tPóvoa de Varzim\tSolicitar a recolha imediata do contentor de vidros cheios.\t0\t2026-01-06 15:03:01\n390001\tBraga - minho center\tDivisória para proteção do frio\t0\t2026-01-05 14:15:50\n360004\tFamalicão\tRealizar limpeza profunda do parapeito e da janela para remover sujidade e manchas\t0\t2025-12-29 17:08:36\n360003\tFamalicão\tVerificar e limpar todas as outras áreas da loja que possam estar a acumular sujidade de forma similar.\t0\t2025-12-29 17:08:36\n360005\tFamalicão\tEmitir as ND o mais rápido possível\t0\t2025-12-29 17:08:36\n360001\tFamalicão\tLimpar e organizar imediatamente a área de armazenamento de resíduos.\t0\t2025-12-29 17:08:36\n360002\tFamalicão\tGarantir que os contentores de resíduos não transbordem e que os materiais sejam segregados corretamente.\t0\t2025-12-29 17:08:36\n300002\tGuimarães shopping\tAvaliar alternativas de localização para a loja de Guimarães\t0\t2025-12-20 13:10:18\n300001\tGuimarães shopping\tResolver problemas de armazenamento de vidros (devoluções e caixas)\t0\t2025-12-20 13:10:18\n270002\tBraga - minho center\ttratar entrada de agua\t0\t2025-12-19 10:55:24\n270001\tBraga - minho center\tluz a trocar\t0\t2025-12-19 10:55:24\n240001\tBarcelos\tMudar o luminoso \t0\t2025-12-19 09:05:58\n210003\tParedes\tLimpar e organizar a área de trabalho, removendo caixas, embalagens e lixo do chão e dos cantos.\t0\t2025-12-18 12:50:46\n210001\tParedes\tRemover os vidros da caixa de madeira e descartar o cartão excedente.\t0\t2025-12-18 12:50:46\n",
+  "stderr": "",
+  "execution_time_ms": 673
+}

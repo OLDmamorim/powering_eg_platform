@@ -1,0 +1,200 @@
+{
+  "query": "-- Contagem de relatórios por loja (livres + completos)\nSELECT \n  l.nome as loja,\n  COUNT(DISTINCT rl.id) as relatorios_livres,\n  COUNT(DISTINCT rc.id) as relatorios_completos,\n  COUNT(DISTINCT rl.id) + COUNT(DISTINCT rc.id) as total_visitas\nFROM lojas l\nJOIN gestor_lojas gl ON gl.lojaId = l.id\nJOIN gestores g ON g.id = gl.gestorId\nLEFT JOIN relatorios_livres rl ON rl.lojaId = l.id AND rl.gestorId = g.id\nLEFT JOIN relatorios_completos rc ON rc.lojaId = l.id AND rc.gestorId = g.id\nWHERE g.id = 30001\nGROUP BY l.id, l.nome\nORDER BY total_visitas DESC;\n\n-- Pendentes resolvidos vs por resolver por loja\nSELECT \n  l.nome as loja,\n  SUM(CASE WHEN p.resolvido = 1 THEN 1 ELSE 0 END) as resolvidos,\n  SUM(CASE WHEN p.resolvido = 0 THEN 1 ELSE 0 END) as por_resolver,\n  COUNT(*) as total_pendentes\nFROM lojas l\nJOIN gestor_lojas gl ON gl.lojaId = l.id\nJOIN gestores g ON g.id = gl.gestorId\nLEFT JOIN pendentes p ON p.lojaId = l.id\nWHERE g.id = 30001\nGROUP BY l.id, l.nome\nORDER BY por_resolver DESC;\n\n-- Última visita por loja\nSELECT \n  l.nome as loja,\n  MAX(COALESCE(rl.dataVisita, rc.dataVisita)) as ultima_visita\nFROM lojas l\nJOIN gestor_lojas gl ON gl.lojaId = l.id\nJOIN gestores g ON g.id = gl.gestorId\nLEFT JOIN relatorios_livres rl ON rl.lojaId = l.id AND rl.gestorId = g.id\nLEFT JOIN relatorios_completos rc ON rc.lojaId = l.id AND rc.gestorId = g.id\nWHERE g.id = 30001\nGROUP BY l.id, l.nome\nORDER BY ultima_visita DESC;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute -- Contagem de relatórios por loja (livres + completos)\nSELECT \n  l.nome as loja,\n  COUNT(DISTINCT rl.id) as relatorios_livres,\n  COUNT(DISTINCT rc.id) as relatorios_completos,\n  COUNT(DISTINCT rl.id) + COUNT(DISTINCT rc.id) as total_visitas\nFROM lojas l\nJOIN gestor_lojas gl ON gl.lojaId = l.id\nJOIN gestores g ON g.id = gl.gestorId\nLEFT JOIN relatorios_livres rl ON rl.lojaId = l.id AND rl.gestorId = g.id\nLEFT JOIN relatorios_completos rc ON rc.lojaId = l.id AND rc.gestorId = g.id\nWHERE g.id = 30001\nGROUP BY l.id, l.nome\nORDER BY total_visitas DESC;\n\n-- Pendentes resolvidos vs por resolver por loja\nSELECT \n  l.nome as loja,\n  SUM(CASE WHEN p.resolvido = 1 THEN 1 ELSE 0 END) as resolvidos,\n  SUM(CASE WHEN p.resolvido = 0 THEN 1 ELSE 0 END) as por_resolver,\n  COUNT(*) as total_pendentes\nFROM lojas l\nJOIN gestor_lojas gl ON gl.lojaId = l.id\nJOIN gestores g ON g.id = gl.gestorId\nLEFT JOIN pendentes p ON p.lojaId = l.id\nWHERE g.id = 30001\nGROUP BY l.id, l.nome\nORDER BY por_resolver DESC;\n\n-- Última visita por loja\nSELECT \n  l.nome as loja,\n  MAX(COALESCE(rl.dataVisita, rc.dataVisita)) as ultima_visita\nFROM lojas l\nJOIN gestor_lojas gl ON gl.lojaId = l.id\nJOIN gestores g ON g.id = gl.gestorId\nLEFT JOIN relatorios_livres rl ON rl.lojaId = l.id AND rl.gestorId = g.id\nLEFT JOIN relatorios_completos rc ON rc.lojaId = l.id AND rc.gestorId = g.id\nWHERE g.id = 30001\nGROUP BY l.id, l.nome\nORDER BY ultima_visita DESC;",
+  "rows": [
+    {
+      "loja": "Braga - minho center",
+      "relatorios_livres": "4",
+      "relatorios_completos": "1",
+      "total_visitas": "5"
+    },
+    {
+      "loja": "Braga sm",
+      "relatorios_livres": "2",
+      "relatorios_completos": "0",
+      "total_visitas": "2"
+    },
+    {
+      "loja": "Viana do Castelo ",
+      "relatorios_livres": "1",
+      "relatorios_completos": "1",
+      "total_visitas": "2"
+    },
+    {
+      "loja": "Vila Verde",
+      "relatorios_livres": "1",
+      "relatorios_completos": "1",
+      "total_visitas": "2"
+    },
+    {
+      "loja": "Barcelos",
+      "relatorios_livres": "1",
+      "relatorios_completos": "1",
+      "total_visitas": "2"
+    },
+    {
+      "loja": "Famalicão",
+      "relatorios_livres": "2",
+      "relatorios_completos": "0",
+      "total_visitas": "2"
+    },
+    {
+      "loja": "Guimarães shopping",
+      "relatorios_livres": "1",
+      "relatorios_completos": "0",
+      "total_visitas": "1"
+    },
+    {
+      "loja": "Póvoa de Varzim",
+      "relatorios_livres": "0",
+      "relatorios_completos": "1",
+      "total_visitas": "1"
+    },
+    {
+      "loja": "Viana do castelo sm",
+      "relatorios_livres": "0",
+      "relatorios_completos": "1",
+      "total_visitas": "1"
+    },
+    {
+      "loja": "Paredes",
+      "relatorios_livres": "1",
+      "relatorios_completos": "0",
+      "total_visitas": "1"
+    },
+    {
+      "loja": "Paços de Ferreira ",
+      "relatorios_livres": "0",
+      "relatorios_completos": "0",
+      "total_visitas": "0"
+    },
+    {
+      "loja": "Famalicão sm",
+      "relatorios_livres": "0",
+      "relatorios_completos": "0",
+      "total_visitas": "0"
+    },
+    {
+      "loja": "Mycarcenter",
+      "relatorios_livres": "0",
+      "relatorios_completos": "0",
+      "total_visitas": "0"
+    },
+    {
+      "loja": "Paredes sm",
+      "relatorios_livres": "0",
+      "relatorios_completos": "0",
+      "total_visitas": "0"
+    },
+    {
+      "loja": "loja",
+      "relatorios_livres": "resolvidos",
+      "relatorios_completos": "por_resolver",
+      "total_visitas": "total_pendentes"
+    },
+    {
+      "loja": "Viana do Castelo ",
+      "relatorios_livres": "0",
+      "relatorios_completos": "10",
+      "total_visitas": "10"
+    },
+    {
+      "loja": "Famalicão",
+      "relatorios_livres": "0",
+      "relatorios_completos": "5",
+      "total_visitas": "5"
+    },
+    {
+      "loja": "Braga - minho center",
+      "relatorios_livres": "0",
+      "relatorios_completos": "4",
+      "total_visitas": "4"
+    },
+    {
+      "loja": "Vila Verde",
+      "relatorios_livres": "0",
+      "relatorios_completos": "2",
+      "total_visitas": "2"
+    },
+    {
+      "loja": "Guimarães shopping",
+      "relatorios_livres": "0",
+      "relatorios_completos": "2",
+      "total_visitas": "2"
+    },
+    {
+      "loja": "Paredes",
+      "relatorios_livres": "1",
+      "relatorios_completos": "2",
+      "total_visitas": "3"
+    },
+    {
+      "loja": "Braga sm",
+      "relatorios_livres": "0",
+      "relatorios_completos": "2",
+      "total_visitas": "2"
+    },
+    {
+      "loja": "Viana do castelo sm",
+      "relatorios_livres": "0",
+      "relatorios_completos": "2",
+      "total_visitas": "2"
+    },
+    {
+      "loja": "Barcelos",
+      "relatorios_livres": "0",
+      "relatorios_completos": "1",
+      "total_visitas": "1"
+    },
+    {
+      "loja": "Póvoa de Varzim",
+      "relatorios_livres": "0",
+      "relatorios_completos": "1",
+      "total_visitas": "1"
+    },
+    {
+      "loja": "Paredes sm",
+      "relatorios_livres": "0",
+      "relatorios_completos": "0",
+      "total_visitas": "1"
+    },
+    {
+      "loja": "Famalicão sm",
+      "relatorios_livres": "0",
+      "relatorios_completos": "0",
+      "total_visitas": "1"
+    },
+    {
+      "loja": "Paços de Ferreira ",
+      "relatorios_livres": "0",
+      "relatorios_completos": "0",
+      "total_visitas": "1"
+    },
+    {
+      "loja": "Mycarcenter",
+      "relatorios_livres": "0",
+      "relatorios_completos": "0",
+      "total_visitas": "1"
+    }
+  ],
+  "messages": [
+    "loja\tultima_visita",
+    "Braga sm\t2026-01-09 11:12:07",
+    "Braga - minho center\t2026-01-09 11:12:07",
+    "Viana do castelo sm\t2026-01-08 14:45:15",
+    "Póvoa de Varzim\t2026-01-06 00:00:00",
+    "Famalicão\t2025-12-29 00:00:00",
+    "Guimarães shopping\t2025-12-19 15:08:00",
+    "Paredes\t2025-12-18 12:50:46",
+    "Barcelos\t2025-12-17 20:48:32",
+    "Vila Verde\t2025-12-17 20:02:16",
+    "Viana do Castelo \t2025-12-16 14:33:07",
+    "Paredes sm\tNULL",
+    "Famalicão sm\tNULL",
+    "Paços de Ferreira \tNULL",
+    "Mycarcenter\tNULL"
+  ],
+  "stdout": "loja\trelatorios_livres\trelatorios_completos\ttotal_visitas\nBraga - minho center\t4\t1\t5\nBraga sm\t2\t0\t2\nViana do Castelo \t1\t1\t2\nVila Verde\t1\t1\t2\nBarcelos\t1\t1\t2\nFamalicão\t2\t0\t2\nGuimarães shopping\t1\t0\t1\nPóvoa de Varzim\t0\t1\t1\nViana do castelo sm\t0\t1\t1\nParedes\t1\t0\t1\nPaços de Ferreira \t0\t0\t0\nFamalicão sm\t0\t0\t0\nMycarcenter\t0\t0\t0\nParedes sm\t0\t0\t0\nloja\tresolvidos\tpor_resolver\ttotal_pendentes\nViana do Castelo \t0\t10\t10\nFamalicão\t0\t5\t5\nBraga - minho center\t0\t4\t4\nVila Verde\t0\t2\t2\nGuimarães shopping\t0\t2\t2\nParedes\t1\t2\t3\nBraga sm\t0\t2\t2\nViana do castelo sm\t0\t2\t2\nBarcelos\t0\t1\t1\nPóvoa de Varzim\t0\t1\t1\nParedes sm\t0\t0\t1\nFamalicão sm\t0\t0\t1\nPaços de Ferreira \t0\t0\t1\nMycarcenter\t0\t0\t1\nloja\tultima_visita\nBraga sm\t2026-01-09 11:12:07\nBraga - minho center\t2026-01-09 11:12:07\nViana do castelo sm\t2026-01-08 14:45:15\nPóvoa de Varzim\t2026-01-06 00:00:00\nFamalicão\t2025-12-29 00:00:00\nGuimarães shopping\t2025-12-19 15:08:00\nParedes\t2025-12-18 12:50:46\nBarcelos\t2025-12-17 20:48:32\nVila Verde\t2025-12-17 20:02:16\nViana do Castelo \t2025-12-16 14:33:07\nParedes sm\tNULL\nFamalicão sm\tNULL\nPaços de Ferreira \tNULL\nMycarcenter\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 517
+}

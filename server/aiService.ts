@@ -1665,12 +1665,20 @@ interface RelatorioIAGestorResult {
     resolvidos: Array<{ loja: string; descricao: string; dataResolucao: string }>;
     ativos: number;
     analise: string;
+    // NOVOS CAMPOS v6.3.1
+    totalResolvidos: number;
+    totalPorResolver: number;
+    porLoja: Array<{ loja: string; resolvidos: number; porResolver: number }>;
+    maisAntigos: Array<{ loja: string; descricao: string; diasPendente: number; data: string }>;
   };
   relatorios: {
     totalLivres: number;
     totalCompletos: number;
     lojasVisitadas: string[];
     resumoConteudo: string;
+    // NOVOS CAMPOS v6.3.1
+    visitasPorLoja: Array<{ loja: string; visitas: number; ultimaVisita: string | null }>;
+    lojasNaoVisitadas: string[];
   };
   sugestoesGestor: string[];
   mensagemMotivacional: string;
@@ -1723,7 +1731,40 @@ export async function gerarRelatorioIAGestor(
   });
   
   // Pendentes ativos (não resolvidos)
-  const pendentesAtivos = todosPendentes.filter((p: any) => !p.resolvido).length;
+  const pendentesAtivos = todosPendentes.filter((p: any) => !p.resolvido);
+  const totalPendentesAtivos = pendentesAtivos.length;
+  const totalPendentesResolvidos = todosPendentes.filter((p: any) => p.resolvido).length;
+  
+  // NOVO v6.3.1: Pendentes por loja
+  const pendentesPorLoja = new Map<string, { resolvidos: number; porResolver: number }>();
+  todosPendentes.forEach((p: any) => {
+    const lojaNome = p.loja?.nome || 'Desconhecida';
+    if (!pendentesPorLoja.has(lojaNome)) {
+      pendentesPorLoja.set(lojaNome, { resolvidos: 0, porResolver: 0 });
+    }
+    const stats = pendentesPorLoja.get(lojaNome)!;
+    if (p.resolvido) {
+      stats.resolvidos++;
+    } else {
+      stats.porResolver++;
+    }
+  });
+  
+  // NOVO v6.3.1: Pendentes mais antigos (top 5)
+  const hoje = new Date();
+  const pendentesMaisAntigos = pendentesAtivos
+    .map((p: any) => {
+      const dataCriacao = new Date(p.createdAt);
+      const diasPendente = Math.floor((hoje.getTime() - dataCriacao.getTime()) / (1000 * 60 * 60 * 24));
+      return {
+        loja: p.loja?.nome || 'Desconhecida',
+        descricao: p.descricao || '',
+        diasPendente,
+        data: dataCriacao.toLocaleDateString('pt-PT')
+      };
+    })
+    .sort((a: any, b: any) => b.diasPendente - a.diasPendente)
+    .slice(0, 5);
   
   // Extrair pontos destacados dos relatórios
   const pontosPositivos: Array<{ loja: string; descricao: string; data: string }> = [];
@@ -1762,6 +1803,52 @@ export async function gerarRelatorioIAGestor(
   const lojasVisitadas = new Set<string>();
   livresFiltrados.forEach((r: any) => lojasVisitadas.add(r.loja?.nome || 'Desconhecida'));
   completosFiltrados.forEach((r: any) => lojasVisitadas.add(r.loja?.nome || 'Desconhecida'));
+  
+  // NOVO v6.3.1: Visitas por loja com contagem e última visita
+  const visitasPorLojaMap = new Map<string, { visitas: number; ultimaVisita: Date | null }>();
+  
+  // Contar relatórios livres
+  livresFiltrados.forEach((r: any) => {
+    const lojaNome = r.loja?.nome || 'Desconhecida';
+    const dataVisita = new Date(r.dataVisita);
+    if (!visitasPorLojaMap.has(lojaNome)) {
+      visitasPorLojaMap.set(lojaNome, { visitas: 0, ultimaVisita: null });
+    }
+    const stats = visitasPorLojaMap.get(lojaNome)!;
+    stats.visitas++;
+    if (!stats.ultimaVisita || dataVisita > stats.ultimaVisita) {
+      stats.ultimaVisita = dataVisita;
+    }
+  });
+  
+  // Contar relatórios completos
+  completosFiltrados.forEach((r: any) => {
+    const lojaNome = r.loja?.nome || 'Desconhecida';
+    const dataVisita = new Date(r.dataVisita);
+    if (!visitasPorLojaMap.has(lojaNome)) {
+      visitasPorLojaMap.set(lojaNome, { visitas: 0, ultimaVisita: null });
+    }
+    const stats = visitasPorLojaMap.get(lojaNome)!;
+    stats.visitas++;
+    if (!stats.ultimaVisita || dataVisita > stats.ultimaVisita) {
+      stats.ultimaVisita = dataVisita;
+    }
+  });
+  
+  // Converter para array ordenado por visitas
+  const visitasPorLoja = Array.from(visitasPorLojaMap.entries())
+    .map(([loja, stats]) => ({
+      loja,
+      visitas: stats.visitas,
+      ultimaVisita: stats.ultimaVisita ? stats.ultimaVisita.toLocaleDateString('pt-PT') : null
+    }))
+    .sort((a, b) => b.visitas - a.visitas);
+  
+  // NOVO v6.3.1: Buscar lojas do gestor para identificar não visitadas
+  const lojasDoGestor = await db.getLojasByGestorId(gestorId);
+  const lojasNaoVisitadas = lojasDoGestor
+    .filter((l: any) => !lojasVisitadas.has(l.nome))
+    .map((l: any) => l.nome);
   
   // Preparar dados para análise IA
   const dadosParaIA = {
@@ -1888,6 +1975,15 @@ Fornece uma análise em formato JSON com:
     dataResolucao: new Date(p.dataResolucao).toLocaleDateString('pt-PT')
   }));
   
+  // Converter pendentes por loja para array
+  const pendentesPorLojaArray = Array.from(pendentesPorLoja.entries())
+    .map(([loja, stats]) => ({
+      loja,
+      resolvidos: stats.resolvidos,
+      porResolver: stats.porResolver
+    }))
+    .sort((a, b) => b.porResolver - a.porResolver);
+  
   return {
     filtroAplicado: 'Minhas Lojas',
     tipoRelatorio: 'gestor',
@@ -1900,14 +1996,22 @@ Fornece uma análise em formato JSON com:
     pendentes: {
       criados: pendentesCriadosFormatados,
       resolvidos: pendentesResolvidosFormatados,
-      ativos: pendentesAtivos,
-      analise: analiseIA.analisePendentes
+      ativos: totalPendentesAtivos,
+      analise: analiseIA.analisePendentes,
+      // NOVOS CAMPOS v6.3.1
+      totalResolvidos: totalPendentesResolvidos,
+      totalPorResolver: totalPendentesAtivos,
+      porLoja: pendentesPorLojaArray,
+      maisAntigos: pendentesMaisAntigos
     },
     relatorios: {
       totalLivres: livresFiltrados.length,
       totalCompletos: completosFiltrados.length,
       lojasVisitadas: Array.from(lojasVisitadas),
-      resumoConteudo: `${livresFiltrados.length + completosFiltrados.length} relatórios submetidos no período`
+      resumoConteudo: `${livresFiltrados.length + completosFiltrados.length} relatórios submetidos no período`,
+      // NOVOS CAMPOS v6.3.1
+      visitasPorLoja,
+      lojasNaoVisitadas
     },
     sugestoesGestor: analiseIA.sugestoesGestor,
     mensagemMotivacional: analiseIA.mensagemMotivacional

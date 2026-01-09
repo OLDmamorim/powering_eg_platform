@@ -204,48 +204,140 @@ export default function RelatoriosIA() {
                   </Card>
                 )}
 
-                {/* Pendentes */}
+                {/* Resumo de Pendentes - Quantidades */}
                 {analise.pendentes && (
+                  <div className="grid gap-4 md:grid-cols-3">
+                    <Card className="border-orange-200 dark:border-orange-800">
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm font-medium flex items-center gap-2">
+                          <AlertTriangle className="h-4 w-4 text-orange-500" />
+                          Por Resolver
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-2xl font-bold text-orange-600">{analise.pendentes.totalPorResolver || analise.pendentes.ativos || 0}</p>
+                        <p className="text-xs text-muted-foreground">pendentes ativos</p>
+                      </CardContent>
+                    </Card>
+                    <Card className="border-green-200 dark:border-green-800">
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm font-medium flex items-center gap-2">
+                          <CheckCircle2 className="h-4 w-4 text-green-500" />
+                          Resolvidos
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-2xl font-bold text-green-600">{analise.pendentes.totalResolvidos || 0}</p>
+                        <p className="text-xs text-muted-foreground">pendentes resolvidos</p>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm font-medium flex items-center gap-2">
+                          <BarChart3 className="h-4 w-4 text-blue-500" />
+                          Criados no Período
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-2xl font-bold">{analise.pendentes.criados?.length || 0}</p>
+                        <p className="text-xs text-muted-foreground">novos pendentes</p>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Análise de Pendentes */}
+                {analise.pendentes?.analise && (
                   <Card>
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
-                        <AlertTriangle className="h-5 w-5 text-orange-500" />
-                        Pendentes ({analise.pendentes.ativos} ativos)
+                        <Activity className="h-5 w-5 text-primary" />
+                        Análise de Pendentes
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-4">
-                      {analise.pendentes.analise && (
-                        <p className="text-muted-foreground">{analise.pendentes.analise}</p>
-                      )}
-                      <div className="grid gap-4 md:grid-cols-2">
-                        <div>
-                          <h4 className="font-medium text-sm mb-2">Criados no Período</h4>
-                          <ul className="space-y-1">
-                            {analise.pendentes.criados?.length > 0 ? (
-                              analise.pendentes.criados.map((p: any, i: number) => (
-                                <li key={i} className="text-sm text-muted-foreground">
-                                  <span className="font-medium">{p.loja}:</span> {p.descricao}
-                                </li>
-                              ))
-                            ) : (
-                              <li className="text-sm text-muted-foreground">Nenhum pendente criado</li>
-                            )}
-                          </ul>
-                        </div>
-                        <div>
-                          <h4 className="font-medium text-sm mb-2">Resolvidos no Período</h4>
-                          <ul className="space-y-1">
-                            {analise.pendentes.resolvidos?.length > 0 ? (
-                              analise.pendentes.resolvidos.map((p: any, i: number) => (
-                                <li key={i} className="text-sm text-muted-foreground">
-                                  <span className="font-medium">{p.loja}:</span> {p.descricao}
-                                </li>
-                              ))
-                            ) : (
-                              <li className="text-sm text-muted-foreground">Nenhum pendente resolvido</li>
-                            )}
-                          </ul>
-                        </div>
+                    <CardContent>
+                      <p className="text-muted-foreground">{analise.pendentes.analise}</p>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Gráfico de Pendentes por Loja */}
+                {analise.pendentes?.porLoja && analise.pendentes.porLoja.length > 0 && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <BarChart3 className="h-5 w-5 text-primary" />
+                        Pendentes por Loja
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div style={{ height: '300px' }}>
+                        <Bar
+                          data={{
+                            labels: analise.pendentes.porLoja.map((p: any) => p.loja),
+                            datasets: [
+                              {
+                                label: 'Por Resolver',
+                                data: analise.pendentes.porLoja.map((p: any) => p.porResolver),
+                                backgroundColor: 'rgba(249, 115, 22, 0.7)',
+                                borderColor: 'rgb(249, 115, 22)',
+                                borderWidth: 1,
+                              },
+                              {
+                                label: 'Resolvidos',
+                                data: analise.pendentes.porLoja.map((p: any) => p.resolvidos),
+                                backgroundColor: 'rgba(34, 197, 94, 0.7)',
+                                borderColor: 'rgb(34, 197, 94)',
+                                borderWidth: 1,
+                              },
+                            ],
+                          }}
+                          options={{
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                              legend: { position: 'top' as const },
+                            },
+                            scales: {
+                              x: { stacked: true },
+                              y: { stacked: true, beginAtZero: true },
+                            },
+                          }}
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Pendentes Mais Antigos - Atenção Urgente */}
+                {analise.pendentes?.maisAntigos && analise.pendentes.maisAntigos.length > 0 && (
+                  <Card className="border-red-200 dark:border-red-800 bg-red-50/50 dark:bg-red-900/10">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2 text-red-600 dark:text-red-400">
+                        <AlertTriangle className="h-5 w-5" />
+                        Pendentes Mais Antigos - Atenção Urgente
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        {analise.pendentes.maisAntigos.map((p: any, i: number) => (
+                          <div key={i} className="flex items-start justify-between p-3 bg-white dark:bg-gray-800 rounded-lg border">
+                            <div className="flex-1">
+                              <p className="font-medium text-sm">{p.loja}</p>
+                              <p className="text-sm text-muted-foreground">{p.descricao}</p>
+                              <p className="text-xs text-muted-foreground mt-1">Criado em: {p.data}</p>
+                            </div>
+                            <div className="text-right">
+                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                p.diasPendente > 30 ? 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300' :
+                                p.diasPendente > 14 ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300' :
+                                'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-300'
+                              }`}>
+                                {p.diasPendente} dias
+                              </span>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </CardContent>
                   </Card>
@@ -285,19 +377,84 @@ export default function RelatoriosIA() {
                   </Card>
                 )}
 
-                {/* Lista de Lojas Visitadas */}
-                {analise.relatorios?.lojasVisitadas && analise.relatorios.lojasVisitadas.length > 0 && (
+                {/* Gráfico de Visitas por Loja */}
+                {analise.relatorios?.visitasPorLoja && analise.relatorios.visitasPorLoja.length > 0 && (
                   <Card>
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
                         <Store className="h-5 w-5 text-primary" />
-                        Lojas Visitadas no Período
+                        Visitas por Loja
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div style={{ height: '300px' }}>
+                        <Bar
+                          data={{
+                            labels: analise.relatorios.visitasPorLoja.map((v: any) => v.loja),
+                            datasets: [
+                              {
+                                label: 'Nº de Visitas',
+                                data: analise.relatorios.visitasPorLoja.map((v: any) => v.visitas),
+                                backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                                borderColor: 'rgb(59, 130, 246)',
+                                borderWidth: 1,
+                              },
+                            ],
+                          }}
+                          options={{
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                              legend: { display: false },
+                            },
+                            scales: {
+                              y: { beginAtZero: true, ticks: { stepSize: 1 } },
+                            },
+                          }}
+                        />
+                      </div>
+                      {/* Tabela com detalhes */}
+                      <div className="mt-4 overflow-x-auto">
+                        <table className="w-full text-sm">
+                          <thead>
+                            <tr className="border-b">
+                              <th className="text-left py-2 font-medium">Loja</th>
+                              <th className="text-center py-2 font-medium">Visitas</th>
+                              <th className="text-right py-2 font-medium">Última Visita</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {analise.relatorios.visitasPorLoja.map((v: any, i: number) => (
+                              <tr key={i} className="border-b last:border-0">
+                                <td className="py-2">{v.loja}</td>
+                                <td className="text-center py-2">
+                                  <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-xs font-medium">
+                                    {v.visitas}
+                                  </span>
+                                </td>
+                                <td className="text-right py-2 text-muted-foreground">{v.ultimaVisita || '-'}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Lojas Não Visitadas */}
+                {analise.relatorios?.lojasNaoVisitadas && analise.relatorios.lojasNaoVisitadas.length > 0 && (
+                  <Card className="border-yellow-200 dark:border-yellow-800 bg-yellow-50/50 dark:bg-yellow-900/10">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2 text-yellow-600 dark:text-yellow-400">
+                        <AlertTriangle className="h-5 w-5" />
+                        Lojas Não Visitadas no Período
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="flex flex-wrap gap-2">
-                        {analise.relatorios.lojasVisitadas.map((loja: string, index: number) => (
-                          <span key={index} className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm">
+                        {analise.relatorios.lojasNaoVisitadas.map((loja: string, index: number) => (
+                          <span key={index} className="px-3 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 rounded-full text-sm">
                             {loja}
                           </span>
                         ))}

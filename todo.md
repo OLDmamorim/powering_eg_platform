@@ -2302,3 +2302,18 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar logs de debug no router gerarMultiplosMeses
 - [x] Adicionar logs de debug no frontend RelatoriosIA.tsx
 - [ ] Testar com conta de gestor após publicação
+
+
+## Melhorias Relatórios IA para Gestores v6.3
+- [ ] Adicionar lista de lojas visitadas com frequência de visitas
+- [ ] Adicionar contagem de pendentes resolvidos vs por resolver
+- [ ] Adicionar estatísticas mais detalhadas (relatórios por loja, etc.)
+- [ ] Testar com conta de gestor
+
+## Correção Relatórios IA Gestor v6.3.1
+- [x] Mostrar quantidades resumidas de pendentes (resolvidos vs por resolver) - sem listar todos
+- [x] Adicionar gráficos de visitas por loja
+- [x] Adicionar gráficos de pendentes por loja
+- [x] Destacar pendentes mais antigos (atenção urgente)
+- [x] Mostrar pontos positivos e negativos destacados
+- [x] Atualizar PDF para incluir todos estes dados

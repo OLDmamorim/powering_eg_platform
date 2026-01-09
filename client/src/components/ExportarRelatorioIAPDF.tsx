@@ -11,10 +11,39 @@ import { Bar, Doughnut } from 'react-chartjs-2';
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
 
 interface AnaliseIA {
-  resumo: string;
-  pontosPositivos: string[];
-  pontosNegativos: string[];
-  sugestoes: string[];
+  resumo?: string;
+  resumoGeral?: string;
+  pontosPositivos?: string[];
+  pontosNegativos?: string[];
+  sugestoes?: string[];
+  // Campos específicos para gestores
+  tipoRelatorio?: 'gestor' | 'admin';
+  filtroAplicado?: string;
+  pontosDestacados?: {
+    positivos: Array<{ loja: string; descricao: string; data: string }>;
+    negativos: Array<{ loja: string; descricao: string; data: string }>;
+    analise: string;
+  };
+  pendentes?: {
+    criados: Array<{ loja: string; descricao: string; data: string }>;
+    resolvidos: Array<{ loja: string; descricao: string; dataResolucao: string }>;
+    ativos: number;
+    analise: string;
+    totalResolvidos?: number;
+    totalPorResolver?: number;
+    porLoja?: Array<{ loja: string; resolvidos: number; porResolver: number }>;
+    maisAntigos?: Array<{ loja: string; descricao: string; diasPendente: number; data: string }>;
+  };
+  relatorios?: {
+    totalLivres: number;
+    totalCompletos: number;
+    lojasVisitadas: string[];
+    resumoConteudo: string;
+    visitasPorLoja?: Array<{ loja: string; visitas: number; ultimaVisita: string | null }>;
+    lojasNaoVisitadas?: string[];
+  };
+  sugestoesGestor?: string[];
+  mensagemMotivacional?: string;
   analisePontosDestacados?: {
     positivos: string[];
     negativos: string[];
@@ -243,12 +272,274 @@ export function ExportarRelatorioIAPDF({ analiseIA, periodo }: Props) {
       doc.setTextColor(0, 0, 0);
       yPos = 42;
 
+      // ==================== VERIFICAR TIPO DE RELATÓRIO ====================
+      const isGestor = analiseIA.tipoRelatorio === 'gestor';
+      
+      if (isGestor) {
+        // ==================== PDF PARA GESTORES ====================
+        
+        // Título específico
+        doc.setTextColor(30, 41, 59);
+        doc.setFontSize(22);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Relatório IA - Minhas Lojas', pageWidth / 2, 20, { align: 'center' });
+        
+        // Resumo Geral
+        yPos = drawSectionHeader(doc, yPos, 'Resumo Geral', COLORS.primary, pageWidth);
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        const resumoGestorLines = doc.splitTextToSize(analiseIA.resumoGeral || 'Sem resumo disponível', pageWidth - 28);
+        doc.text(resumoGestorLines, 14, yPos);
+        yPos += resumoGestorLines.length * 5 + 8;
+        
+        // KPIs de Relatórios
+        if (analiseIA.relatorios) {
+          yPos = drawSectionHeader(doc, yPos, 'Estatísticas de Relatórios', COLORS.secondary, pageWidth);
+          
+          const boxWidth = (pageWidth - 38) / 3;
+          const boxHeight = 24;
+          
+          drawColoredBox(doc, 14, yPos, boxWidth, boxHeight, COLORS.secondary, 
+            'Lojas Visitadas', 
+            (analiseIA.relatorios.lojasVisitadas?.length || 0).toString()
+          );
+          drawColoredBox(doc, 14 + boxWidth + 5, yPos, boxWidth, boxHeight, COLORS.info, 
+            'Relatórios Livres', 
+            (analiseIA.relatorios.totalLivres || 0).toString()
+          );
+          drawColoredBox(doc, 14 + (boxWidth + 5) * 2, yPos, boxWidth, boxHeight, COLORS.success, 
+            'Relatórios Completos', 
+            (analiseIA.relatorios.totalCompletos || 0).toString()
+          );
+          yPos += boxHeight + 10;
+        }
+        
+        // KPIs de Pendentes
+        if (analiseIA.pendentes) {
+          yPos = drawSectionHeader(doc, yPos, 'Estatísticas de Pendentes', COLORS.warning, pageWidth);
+          
+          const boxWidth = (pageWidth - 38) / 3;
+          const boxHeight = 24;
+          
+          drawColoredBox(doc, 14, yPos, boxWidth, boxHeight, COLORS.warning, 
+            'Por Resolver', 
+            (analiseIA.pendentes.totalPorResolver || analiseIA.pendentes.ativos || 0).toString()
+          );
+          drawColoredBox(doc, 14 + boxWidth + 5, yPos, boxWidth, boxHeight, COLORS.success, 
+            'Resolvidos', 
+            (analiseIA.pendentes.totalResolvidos || 0).toString()
+          );
+          drawColoredBox(doc, 14 + (boxWidth + 5) * 2, yPos, boxWidth, boxHeight, COLORS.muted, 
+            'Criados no Período', 
+            (analiseIA.pendentes.criados?.length || 0).toString()
+          );
+          yPos += boxHeight + 10;
+          
+          // Análise de Pendentes
+          if (analiseIA.pendentes.analise) {
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'normal');
+            const analiseLines = doc.splitTextToSize(analiseIA.pendentes.analise, pageWidth - 28);
+            doc.text(analiseLines, 14, yPos);
+            yPos += analiseLines.length * 5 + 8;
+          }
+        }
+        
+        // Tabela de Visitas por Loja
+        if (analiseIA.relatorios?.visitasPorLoja && analiseIA.relatorios.visitasPorLoja.length > 0) {
+          if (yPos > 200) {
+            doc.addPage();
+            yPos = 20;
+          }
+          
+          yPos = drawSectionHeader(doc, yPos, 'Visitas por Loja', COLORS.secondary, pageWidth);
+          
+          autoTable(doc, {
+            startY: yPos,
+            head: [['Loja', 'Visitas', 'Última Visita']],
+            body: analiseIA.relatorios.visitasPorLoja.map(v => [
+              v.loja,
+              v.visitas.toString(),
+              v.ultimaVisita || '-'
+            ]),
+            theme: 'striped',
+            headStyles: { fillColor: [59, 130, 246] },
+            styles: { fontSize: 9 },
+          });
+          yPos = (doc as any).lastAutoTable.finalY + 10;
+        }
+        
+        // Tabela de Pendentes por Loja
+        if (analiseIA.pendentes?.porLoja && analiseIA.pendentes.porLoja.length > 0) {
+          if (yPos > 200) {
+            doc.addPage();
+            yPos = 20;
+          }
+          
+          yPos = drawSectionHeader(doc, yPos, 'Pendentes por Loja', COLORS.warning, pageWidth);
+          
+          autoTable(doc, {
+            startY: yPos,
+            head: [['Loja', 'Por Resolver', 'Resolvidos']],
+            body: analiseIA.pendentes.porLoja.map(p => [
+              p.loja,
+              p.porResolver.toString(),
+              p.resolvidos.toString()
+            ]),
+            theme: 'striped',
+            headStyles: { fillColor: [245, 158, 11] },
+            styles: { fontSize: 9 },
+          });
+          yPos = (doc as any).lastAutoTable.finalY + 10;
+        }
+        
+        // Pendentes Mais Antigos
+        if (analiseIA.pendentes?.maisAntigos && analiseIA.pendentes.maisAntigos.length > 0) {
+          if (yPos > 200) {
+            doc.addPage();
+            yPos = 20;
+          }
+          
+          yPos = drawSectionHeader(doc, yPos, 'Pendentes Mais Antigos - Atenção Urgente', COLORS.danger, pageWidth);
+          
+          autoTable(doc, {
+            startY: yPos,
+            head: [['Loja', 'Descrição', 'Dias', 'Data']],
+            body: analiseIA.pendentes.maisAntigos.map(p => [
+              p.loja,
+              p.descricao.length > 50 ? p.descricao.substring(0, 47) + '...' : p.descricao,
+              p.diasPendente.toString(),
+              p.data
+            ]),
+            theme: 'striped',
+            headStyles: { fillColor: [239, 68, 68] },
+            styles: { fontSize: 9 },
+            columnStyles: {
+              1: { cellWidth: 80 }
+            }
+          });
+          yPos = (doc as any).lastAutoTable.finalY + 10;
+        }
+        
+        // Pontos Positivos Destacados
+        if (analiseIA.pontosDestacados?.positivos && analiseIA.pontosDestacados.positivos.length > 0) {
+          if (yPos > 200) {
+            doc.addPage();
+            yPos = 20;
+          }
+          
+          yPos = drawSectionHeader(doc, yPos, 'Pontos Positivos Destacados', COLORS.success, pageWidth);
+          
+          autoTable(doc, {
+            startY: yPos,
+            head: [['Loja', 'Descrição', 'Data']],
+            body: analiseIA.pontosDestacados.positivos.slice(0, 10).map(p => [
+              p.loja,
+              p.descricao.length > 60 ? p.descricao.substring(0, 57) + '...' : p.descricao,
+              p.data
+            ]),
+            theme: 'striped',
+            headStyles: { fillColor: [34, 197, 94] },
+            styles: { fontSize: 9 },
+            columnStyles: {
+              1: { cellWidth: 100 }
+            }
+          });
+          yPos = (doc as any).lastAutoTable.finalY + 10;
+        }
+        
+        // Pontos Negativos Destacados
+        if (analiseIA.pontosDestacados?.negativos && analiseIA.pontosDestacados.negativos.length > 0) {
+          if (yPos > 200) {
+            doc.addPage();
+            yPos = 20;
+          }
+          
+          yPos = drawSectionHeader(doc, yPos, 'Pontos Negativos Destacados', COLORS.danger, pageWidth);
+          
+          autoTable(doc, {
+            startY: yPos,
+            head: [['Loja', 'Descrição', 'Data']],
+            body: analiseIA.pontosDestacados.negativos.slice(0, 10).map(p => [
+              p.loja,
+              p.descricao.length > 60 ? p.descricao.substring(0, 57) + '...' : p.descricao,
+              p.data
+            ]),
+            theme: 'striped',
+            headStyles: { fillColor: [239, 68, 68] },
+            styles: { fontSize: 9 },
+            columnStyles: {
+              1: { cellWidth: 100 }
+            }
+          });
+          yPos = (doc as any).lastAutoTable.finalY + 10;
+        }
+        
+        // Lojas Não Visitadas
+        if (analiseIA.relatorios?.lojasNaoVisitadas && analiseIA.relatorios.lojasNaoVisitadas.length > 0) {
+          if (yPos > 220) {
+            doc.addPage();
+            yPos = 20;
+          }
+          
+          yPos = drawSectionHeader(doc, yPos, 'Lojas Não Visitadas no Período', COLORS.warning, pageWidth);
+          
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'normal');
+          const lojasText = analiseIA.relatorios.lojasNaoVisitadas.join(', ');
+          const lojasLines = doc.splitTextToSize(lojasText, pageWidth - 28);
+          doc.text(lojasLines, 14, yPos);
+          yPos += lojasLines.length * 5 + 8;
+        }
+        
+        // Sugestões para o Gestor
+        if (analiseIA.sugestoesGestor && analiseIA.sugestoesGestor.length > 0) {
+          if (yPos > 220) {
+            doc.addPage();
+            yPos = 20;
+          }
+          
+          yPos = drawSectionHeader(doc, yPos, 'Sugestões para Si', COLORS.info, pageWidth);
+          
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'normal');
+          analiseIA.sugestoesGestor.forEach((sugestao, idx) => {
+            const sugestaoLines = doc.splitTextToSize(`${idx + 1}. ${sugestao}`, pageWidth - 28);
+            doc.text(sugestaoLines, 14, yPos);
+            yPos += sugestaoLines.length * 5 + 3;
+          });
+          yPos += 5;
+        }
+        
+        // Mensagem Motivacional
+        if (analiseIA.mensagemMotivacional) {
+          if (yPos > 240) {
+            doc.addPage();
+            yPos = 20;
+          }
+          
+          // Caixa com fundo colorido
+          doc.setFillColor(240, 253, 244); // Verde claro
+          doc.roundedRect(14, yPos, pageWidth - 28, 25, 3, 3, 'F');
+          
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'italic');
+          doc.setTextColor(34, 197, 94);
+          const msgLines = doc.splitTextToSize(`"✨ ${analiseIA.mensagemMotivacional}"`, pageWidth - 36);
+          doc.text(msgLines, 18, yPos + 10);
+          doc.setTextColor(0, 0, 0);
+          yPos += 30;
+        }
+        
+      } else {
+        // ==================== PDF PARA ADMIN (código original) ====================
+      
       // ==================== RESUMO EXECUTIVO ====================
       yPos = drawSectionHeader(doc, yPos, 'Resumo Executivo', COLORS.primary, pageWidth);
       
       doc.setFontSize(10);
       doc.setFont('helvetica', 'normal');
-      const resumoLines = doc.splitTextToSize(analiseIA.resumo, pageWidth - 28);
+      const resumoLines = doc.splitTextToSize(analiseIA.resumo || analiseIA.resumoGeral || 'Sem resumo', pageWidth - 28);
       doc.text(resumoLines, 14, yPos);
       yPos += resumoLines.length * 5 + 8;
 
@@ -688,6 +979,8 @@ export function ExportarRelatorioIAPDF({ analiseIA, periodo }: Props) {
           yPos += lines.length * 4.5 + 2;
         });
       }
+      
+      } // Fechar o else do isGestor
 
       // ==================== RODAPÉ EM TODAS AS PÁGINAS ====================
       const pageCount = doc.getNumberOfPages();
