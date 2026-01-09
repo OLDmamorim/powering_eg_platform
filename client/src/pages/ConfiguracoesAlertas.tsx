@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
 import { trpc } from "@/lib/trpc";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Settings, AlertTriangle, Clock, Calendar, Save, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 
@@ -40,6 +41,7 @@ const configLabels: Record<ConfigKey, { label: string; descricao: string; icon: 
 };
 
 export default function ConfiguracoesAlertas() {
+  const { t } = useLanguage();
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [hasChanges, setHasChanges] = useState(false);
   

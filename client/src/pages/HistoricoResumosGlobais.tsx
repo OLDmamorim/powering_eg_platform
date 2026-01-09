@@ -5,11 +5,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Eye, Download, Calendar, FileText } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useLanguage } from "@/contexts/LanguageContext";
 import { toast } from 'sonner';
 import { Streamdown } from 'streamdown';
 import jsPDF from 'jspdf';
 
 export default function HistoricoResumosGlobais() {
+  const { t } = useLanguage();
   const [resumoSelecionado, setResumoSelecionado] = useState<any>(null);
   const [dialogAberto, setDialogAberto] = useState(false);
 

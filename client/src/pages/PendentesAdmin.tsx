@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { trpc } from "@/lib/trpc";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useLocation } from "wouter";
 import { useState, useMemo } from "react";
@@ -38,6 +39,7 @@ import {
 } from "@/components/ui/dialog";
 
 export default function PendentesAdmin() {
+  const { t } = useLanguage();
   const { user } = useAuth();
   const [, setLocation] = useLocation();
   const [filtroEstado, setFiltroEstado] = useState<string>("all");

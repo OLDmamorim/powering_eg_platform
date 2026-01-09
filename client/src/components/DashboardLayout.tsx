@@ -453,11 +453,22 @@ function DashboardLayoutContent({
                 </div>
               </div>
             </div>
-            <img 
-              src="/eglass-logo.png" 
-              alt="ExpressGlass Logo" 
-              className="h-8 w-auto object-contain"
-            />
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setLanguage(language === 'pt' ? 'en' : 'pt')}
+                className="h-8 px-2 text-xs font-medium"
+              >
+                <Globe className="h-4 w-4 mr-1" />
+                {language.toUpperCase()}
+              </Button>
+              <img 
+                src="/eglass-logo.png" 
+                alt="ExpressGlass Logo" 
+                className="h-8 w-auto object-contain"
+              />
+            </div>
           </div>
         )}
         <main className="flex-1 p-4 relative">

@@ -11,6 +11,7 @@ import { Streamdown } from "streamdown";
 import jsPDF from "jspdf";
 import { toast } from "sonner";
 import DashboardLayout from "@/components/DashboardLayout";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 // Função helper para converter JSON de análise IA para markdown
 function analiseToMarkdown(conteudoJSON: string): string {
@@ -79,6 +80,7 @@ function analiseToMarkdown(conteudoJSON: string): string {
 }
 
 export default function HistoricoRelatoriosIA() {
+  const { t } = useLanguage();
   const [, navigate] = useLocation();
   const [dataInicio, setDataInicio] = useState("");
   const [dataFim, setDataFim] = useState("");

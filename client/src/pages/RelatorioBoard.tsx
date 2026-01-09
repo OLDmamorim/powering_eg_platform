@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { trpc } from "@/lib/trpc";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { toast } from "sonner";
 import { 
   BarChart3, 
@@ -69,6 +70,7 @@ ChartJS.register(
 );
 
 export default function RelatorioBoard() {
+  const { t } = useLanguage();
   // Estado para meses selecionados - inicializa com mês atual
   const [mesesSelecionados, setMesesSelecionados] = useState<MesSelecionado[]>(() => {
     const hoje = new Date();

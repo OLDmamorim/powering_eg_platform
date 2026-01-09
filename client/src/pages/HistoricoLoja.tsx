@@ -21,6 +21,7 @@ import autoTable from "jspdf-autotable";
 import { useState, useMemo } from "react";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
+import { useLanguage } from "@/contexts/LanguageContext";
 import FiltroMesesCheckbox, { type MesSelecionado } from "@/components/FiltroMesesCheckbox";
 import {
   LineChart,
@@ -40,6 +41,7 @@ import {
 type PeriodoComparacao = 'q1_ano_anterior_vs_atual' | 'q2_ano_anterior_vs_atual' | 'q3_ano_anterior_vs_atual' | 'q4_ano_anterior_vs_atual' | 's1_ano_anterior_vs_atual' | 's2_ano_anterior_vs_atual' | 'ano_completo';
 
 export default function HistoricoLoja() {
+  const { t } = useLanguage();
   const { user } = useAuth();
   const [, setLocation] = useLocation();
   const [lojaId, setLojaId] = useState("");
@@ -75,25 +77,25 @@ export default function HistoricoLoja() {
 
   const handleGenerate = async () => {
     if (!lojaId) {
-      toast.error("Por favor selecione uma loja");
+      toast.error(t('historicoLoja.selecionarLoja'));
       return;
     }
     if (mesesSelecionados.length === 0) {
-      toast.error("Por favor selecione pelo menos um mês");
+      toast.error(t('selecionarPeloMenosUmMes'));
       return;
     }
 
     try {
       setIsGenerating(true);
-      toast.info("🤖 A analisar histórico da loja com IA...");
+      toast.info(t('historicoLoja.analisandoIA'));
       const result = await generateHistoryMultiplosMesesQuery.refetch();
       if (result.data) {
         setHistoryData(result.data);
-        toast.success("Histórico gerado com sucesso!");
+        toast.success(t('historicoLoja.historicoGerado'));
       }
     } catch (error) {
       console.error("Erro ao gerar histórico:", error);
-      toast.error("Erro ao gerar histórico. Tente novamente.");
+      toast.error(t('historicoLoja.erroGerar'));
     } finally {
       setIsGenerating(false);
     }
@@ -146,27 +148,27 @@ export default function HistoricoLoja() {
   // Função para gerar comparação
   const handleGerarComparacao = async () => {
     if (!lojaId) {
-      toast.error("Por favor selecione uma loja");
+      toast.error(t('historicoLoja.selecionarLoja'));
       return;
     }
 
     try {
-      toast.info("🤖 A gerar comparação entre períodos...");
+      toast.info(t('historicoLoja.gerandoComparacao'));
       const result = await comparacaoQuery.refetch();
       if (result.data) {
         setComparacaoData(result.data as any);
-        toast.success("Comparação gerada com sucesso!");
+        toast.success(t('comparacaoRelatoriosIA.comparacaoSucesso'));
       }
     } catch (error) {
       console.error("Erro ao gerar comparação:", error);
-      toast.error("Erro ao gerar comparação. Tente novamente.");
+      toast.error(t('comparacaoRelatoriosIA.erroComparacao'));
     }
   };
 
   // Função para exportar PDF - Layout profissional igual ao portal
   const exportarPDF = async () => {
     if (!historyData) {
-      toast.error("Gere primeiro a análise para exportar");
+      toast.error(t('relatoriosIA.gerarPrimeiroAnalise'));
       return;
     }
 

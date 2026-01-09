@@ -42,8 +42,10 @@ import { EstadoAcompanhamentoSelect, EstadoAcompanhamentoBadge } from "@/compone
 import { RelatorioDetalheModal } from "@/components/RelatorioDetalheModal";
 import { RelatorioIACategorias } from "@/components/RelatorioIACategorias";
 import { HistoricoRelatoriosIA } from "@/components/HistoricoRelatoriosIA";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function Categorias() {
+  const { t } = useLanguage();
   const { user } = useAuth();
   const [, setLocation] = useLocation();
   const [expandedCategorias, setExpandedCategorias] = useState<string[]>([]);

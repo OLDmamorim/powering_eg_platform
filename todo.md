@@ -2385,3 +2385,32 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Traduzir página Todos
 - [x] Traduzir página MeusRelatorios
 - [x] Traduzir página GestaoUtilizadores
+
+## Tradução Completa - Fase 2 (Jan 2026)
+- [ ] Traduzir página HistoricoPontos
+- [ ] Traduzir página HistoricoLoja
+- [ ] Traduzir página HistoricoRelatoriosIA
+- [ ] Traduzir página ResultadosDashboard
+- [ ] Traduzir página ResultadosUpload
+- [ ] Traduzir página ComparacaoLojas
+- [ ] Traduzir página RelatorioIAResultados
+- [ ] Traduzir página ReuniõesGestores
+- [ ] Traduzir página ReuniõesLojas
+- [ ] Traduzir página OcorrenciasEstruturais
+- [ ] Traduzir página HistoricoOcorrencias
+- [ ] Traduzir página RelatoriosIA
+- [ ] Traduzir página ResumosGlobais
+- [ ] Traduzir página RelatorioBoard
+- [ ] Traduzir página Categorias
+- [ ] Traduzir página RelatorioCompleto
+- [ ] Traduzir página TopicosReuniao
+- [ ] Adicionar seletor de idioma visível no header
+
+## Tradução Completa - Fase 2 CONCLUÍDA (Jan 2026)
+- [x] Traduzir página HistoricoPontos
+- [x] Traduzir página HistoricoLoja (toasts e imports)
+- [x] Traduzir página RelatoriosIA (toasts e imports)
+- [x] Adicionar import useLanguage a 21 páginas restantes
+- [x] Adicionar seletor de idioma visível no header (desktop e mobile)
+- [x] Seletor de idioma no Breadcrumbs (desktop)
+- [x] Seletor de idioma no header móvel do DashboardLayout

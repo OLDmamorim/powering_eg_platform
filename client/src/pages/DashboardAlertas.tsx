@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { trpc } from "@/lib/trpc";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { AlertTriangle, CheckCircle, Clock, Store, Calendar, FileText, Trash2, Eye } from "lucide-react";
 import { toast } from "sonner";
 
@@ -32,6 +33,7 @@ const tipoLabels: Record<AlertaTipo, { label: string; icon: React.ReactNode; col
 };
 
 export default function DashboardAlertas() {
+  const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState<string>("pendentes");
   const [selectedAlerta, setSelectedAlerta] = useState<any>(null);
   const [dialogOpen, setDialogOpen] = useState(false);

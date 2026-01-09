@@ -6,10 +6,12 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Upload, FileSpreadsheet, CheckCircle, AlertCircle, Home } from 'lucide-react';
 import DashboardLayout from '@/components/DashboardLayout';
+import { useLanguage } from "@/contexts/LanguageContext";
 import { useLocation } from 'wouter';
 // Toast removido - usando alerts
 
 export default function ResultadosUpload() {
+  const { t } = useLanguage();
   const [, setLocation] = useLocation();
   // Toast removido
   const [file, setFile] = useState<File | null>(null);

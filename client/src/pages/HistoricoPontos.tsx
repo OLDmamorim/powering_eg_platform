@@ -4,13 +4,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { trpc } from "@/lib/trpc";
 import { TrendingUp, TrendingDown, Calendar, User, Store, AlertTriangle, CheckCircle, XCircle, GitCompare, Filter } from "lucide-react";
 import FiltroMesesCheckbox, { type MesSelecionado, mesesParaDatas } from "@/components/FiltroMesesCheckbox";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function HistoricoPontos() {
+  const { t } = useLanguage();
   const [selectedLojaId, setSelectedLojaId] = useState<string>("all");
   // Novo estado para múltiplos meses - por defeito o mês atual
   const [mesesSelecionados, setMesesSelecionados] = useState<MesSelecionado[]>(() => {
@@ -147,9 +148,9 @@ export default function HistoricoPontos() {
       <div className="space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Histórico de Pontos</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t('historicoPontos.title')}</h1>
           <p className="text-muted-foreground">
-            Evolução dos pontos positivos e negativos por loja ao longo do tempo
+            {t('historicoPontos.subtitle')}
           </p>
         </div>
         
@@ -159,10 +160,10 @@ export default function HistoricoPontos() {
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-destructive">
                 <AlertTriangle className="h-5 w-5" />
-                Alertas Ativos
+                {t('historicoPontos.alertasAtivos')}
               </CardTitle>
               <CardDescription>
-                Lojas com 3 ou mais relatórios consecutivos com pontos negativos
+                {t('historicoPontos.alertasDesc')}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -173,7 +174,7 @@ export default function HistoricoPontos() {
                     <div className="flex-1">
                       <p className="font-medium">{alerta.lojaNome}</p>
                       <p className="text-sm text-muted-foreground">
-                        {alerta.ultimosNegativos.length} relatórios consecutivos com pontos negativos
+                        {alerta.ultimosNegativos.length} {t('historicoPontos.relatoriosConsecutivos')}
                       </p>
                       <div className="mt-2 space-y-1">
                         {alerta.ultimosNegativos.slice(0, 3).map((neg, idx) => (
@@ -195,11 +196,11 @@ export default function HistoricoPontos() {
           <TabsList className="grid w-full grid-cols-2 max-w-md">
             <TabsTrigger value="historico" className="flex items-center gap-2">
               <Calendar className="h-4 w-4" />
-              Histórico
+              {t('historicoPontos.historico')}
             </TabsTrigger>
             <TabsTrigger value="comparacao" className="flex items-center gap-2">
               <GitCompare className="h-4 w-4" />
-              Comparar Lojas
+              {t('historicoPontos.compararLojas')}
             </TabsTrigger>
           </TabsList>
           
@@ -209,19 +210,19 @@ export default function HistoricoPontos() {
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <Filter className="h-4 w-4" />
-                  Filtros
+                  {t('historicoPontos.filtros')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-4">
                   <div className="w-64">
-                    <label className="text-sm font-medium mb-2 block">Loja</label>
+                    <label className="text-sm font-medium mb-2 block">{t('historicoPontos.loja')}</label>
                     <Select value={selectedLojaId} onValueChange={setSelectedLojaId}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Selecionar loja" />
+                        <SelectValue placeholder={t('lojas.novaLoja')} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">Todas as lojas</SelectItem>
+                        <SelectItem value="all">{t('historicoPontos.todasLojas')}</SelectItem>
                         {lojas?.map(loja => (
                           <SelectItem key={loja.id} value={loja.id.toString()}>
                             {loja.nome}
@@ -231,11 +232,11 @@ export default function HistoricoPontos() {
                     </Select>
                   </div>
                   <div className="w-64">
-                    <label className="text-sm font-medium mb-2 block">Período</label>
+                    <label className="text-sm font-medium mb-2 block">{t('historicoPontos.periodo')}</label>
                     <FiltroMesesCheckbox
                       mesesSelecionados={mesesSelecionados}
                       onMesesChange={setMesesSelecionados}
-                      placeholder="Selecionar meses"
+                      placeholder={t('historicoPontos.selecionarMeses')}
                     />
                   </div>
                 </div>
@@ -274,7 +275,7 @@ export default function HistoricoPontos() {
                             {temAlerta && (
                               <Badge variant="destructive" className="text-xs">
                                 <AlertTriangle className="h-3 w-3 mr-1" />
-                                Alerta
+                                {t('alertas.title')}
                               </Badge>
                             )}
                           </CardTitle>
@@ -283,20 +284,20 @@ export default function HistoricoPontos() {
                           <div className="grid grid-cols-3 gap-2 text-center">
                             <div>
                               <p className="text-2xl font-bold">{stats.totalRelatorios}</p>
-                              <p className="text-xs text-muted-foreground">Relatórios</p>
+                              <p className="text-xs text-muted-foreground">{t('dashboard.relatorios')}</p>
                             </div>
                             <div>
                               <p className="text-2xl font-bold text-green-600">{stats.comPositivos}</p>
-                              <p className="text-xs text-muted-foreground">Positivos</p>
+                              <p className="text-xs text-muted-foreground">{t('historicoPontos.comPositivos')}</p>
                             </div>
                             <div>
                               <p className="text-2xl font-bold text-red-600">{stats.comNegativos}</p>
-                              <p className="text-xs text-muted-foreground">Negativos</p>
+                              <p className="text-xs text-muted-foreground">{t('historicoPontos.comNegativos')}</p>
                             </div>
                           </div>
                           {stats.ultimaVisita && (
                             <p className="text-xs text-muted-foreground mt-3 text-center">
-                              Última visita: {formatDate(stats.ultimaVisita)}
+                              {t('historicoPontos.ultimaVisita')}: {formatDate(stats.ultimaVisita)}
                             </p>
                           )}
                         </CardContent>
@@ -312,12 +313,12 @@ export default function HistoricoPontos() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Calendar className="h-5 w-5" />
-                  Histórico de Visitas
+                  {t('historicoLoja.ultimasVisitas')}
                 </CardTitle>
                 <CardDescription>
                   {selectedLojaId === "all" 
-                    ? `Todas as visitas (${mesesSelecionados.length > 0 ? mesesSelecionados.length === 1 ? `${mesesSelecionados[0].mes}/${mesesSelecionados[0].ano}` : `${mesesSelecionados.length} meses` : "nenhum período"})` 
-                    : `Visitas da loja selecionada`}
+                    ? `${t('historicoPontos.todasLojas')} (${mesesSelecionados.length > 0 ? mesesSelecionados.length === 1 ? `${mesesSelecionados[0].mes}/${mesesSelecionados[0].ano}` : `${mesesSelecionados.length} ${t('common.data')}` : t('nenhumPeriodo')})` 
+                    : t('historicoLoja.subtitle')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -330,8 +331,7 @@ export default function HistoricoPontos() {
                 ) : historicoFiltrado.length === 0 ? (
                   <div className="text-center py-8 text-muted-foreground">
                     <Calendar className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                    <p>Nenhum relatório completo encontrado</p>
-                    <p className="text-sm">Os pontos são registados nos relatórios completos</p>
+                    <p>{t('historicoPontos.semDados')}</p>
                   </div>
                 ) : (
                   <div className="space-y-4">
@@ -374,10 +374,10 @@ export default function HistoricoPontos() {
                                 ) : (
                                   <TrendingUp className="h-4 w-4 text-muted-foreground" />
                                 )}
-                                <span className="font-medium text-sm">Pontos Positivos</span>
+                                <span className="font-medium text-sm">{t('historicoPontos.pontosPositivos')}</span>
                               </div>
                               <p className="text-sm">
-                                {item.pontosPositivos || <span className="text-muted-foreground italic">Não registado</span>}
+                                {item.pontosPositivos || <span className="text-muted-foreground italic">{t('common.semResultados')}</span>}
                               </p>
                             </div>
                             
@@ -389,10 +389,10 @@ export default function HistoricoPontos() {
                                 ) : (
                                   <TrendingDown className="h-4 w-4 text-muted-foreground" />
                                 )}
-                                <span className="font-medium text-sm">Pontos Negativos</span>
+                                <span className="font-medium text-sm">{t('historicoPontos.pontosNegativos')}</span>
                               </div>
                               <p className="text-sm">
-                                {item.pontosNegativos || <span className="text-muted-foreground italic">Não registado</span>}
+                                {item.pontosNegativos || <span className="text-muted-foreground italic">{t('common.semResultados')}</span>}
                               </p>
                             </div>
                           </div>
@@ -411,19 +411,19 @@ export default function HistoricoPontos() {
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <GitCompare className="h-4 w-4" />
-                  Comparar Lojas
+                  {t('historicoPontos.compararLojas')}
                 </CardTitle>
                 <CardDescription>
-                  Selecione duas lojas para comparar a evolução dos pontos
+                  {t('comparacaoLojas.semDados')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-4 items-end">
                   <div className="w-64">
-                    <label className="text-sm font-medium mb-2 block">Loja 1</label>
+                    <label className="text-sm font-medium mb-2 block">{t('comparacaoLojas.loja1')}</label>
                     <Select value={compareLoja1} onValueChange={setCompareLoja1}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Selecionar loja" />
+                        <SelectValue placeholder={t('historicoPontos.selecionarLoja1')} />
                       </SelectTrigger>
                       <SelectContent>
                         {lojas?.map(loja => (
@@ -435,10 +435,10 @@ export default function HistoricoPontos() {
                     </Select>
                   </div>
                   <div className="w-64">
-                    <label className="text-sm font-medium mb-2 block">Loja 2</label>
+                    <label className="text-sm font-medium mb-2 block">{t('comparacaoLojas.loja2')}</label>
                     <Select value={compareLoja2} onValueChange={setCompareLoja2}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Selecionar loja" />
+                        <SelectValue placeholder={t('historicoPontos.selecionarLoja2')} />
                       </SelectTrigger>
                       <SelectContent>
                         {lojas?.map(loja => (
@@ -450,11 +450,11 @@ export default function HistoricoPontos() {
                     </Select>
                   </div>
                   <div className="w-56">
-                    <label className="text-sm font-medium mb-2 block">Período</label>
+                    <label className="text-sm font-medium mb-2 block">{t('historicoPontos.periodo')}</label>
                     <FiltroMesesCheckbox
                       mesesSelecionados={mesesSelecionados}
                       onMesesChange={setMesesSelecionados}
-                      placeholder="Selecionar meses"
+                      placeholder={t('historicoPontos.selecionarMeses')}
                     />
                   </div>
                 </div>
@@ -476,15 +476,15 @@ export default function HistoricoPontos() {
                     <div className="grid grid-cols-3 gap-2 text-center">
                       <div className="p-3 bg-muted/50 rounded-lg">
                         <p className="text-2xl font-bold">{dadosComparacao.loja1.totalRelatorios}</p>
-                        <p className="text-xs text-muted-foreground">Relatórios</p>
+                        <p className="text-xs text-muted-foreground">{t('dashboard.relatorios')}</p>
                       </div>
                       <div className="p-3 bg-green-50 dark:bg-green-950/30 rounded-lg">
                         <p className="text-2xl font-bold text-green-600">{dadosComparacao.loja1.comPositivos}</p>
-                        <p className="text-xs text-muted-foreground">Positivos</p>
+                        <p className="text-xs text-muted-foreground">{t('historicoPontos.comPositivos')}</p>
                       </div>
                       <div className="p-3 bg-red-50 dark:bg-red-950/30 rounded-lg">
                         <p className="text-2xl font-bold text-red-600">{dadosComparacao.loja1.comNegativos}</p>
-                        <p className="text-xs text-muted-foreground">Negativos</p>
+                        <p className="text-xs text-muted-foreground">{t('historicoPontos.comNegativos')}</p>
                       </div>
                     </div>
                     
@@ -492,7 +492,7 @@ export default function HistoricoPontos() {
                       <div>
                         <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
                           <CheckCircle className="h-4 w-4 text-green-600" />
-                          Últimos Positivos
+                          {t('historicoPontos.ultimosPositivos')}
                         </h4>
                         <ul className="space-y-1">
                           {dadosComparacao.loja1.ultimosPositivos.map((p, i) => (
@@ -506,7 +506,7 @@ export default function HistoricoPontos() {
                       <div>
                         <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
                           <XCircle className="h-4 w-4 text-red-600" />
-                          Últimos Negativos
+                          {t('historicoPontos.ultimosNegativos')}
                         </h4>
                         <ul className="space-y-1">
                           {dadosComparacao.loja1.ultimosNegativos.map((p, i) => (
@@ -530,15 +530,15 @@ export default function HistoricoPontos() {
                     <div className="grid grid-cols-3 gap-2 text-center">
                       <div className="p-3 bg-muted/50 rounded-lg">
                         <p className="text-2xl font-bold">{dadosComparacao.loja2.totalRelatorios}</p>
-                        <p className="text-xs text-muted-foreground">Relatórios</p>
+                        <p className="text-xs text-muted-foreground">{t('dashboard.relatorios')}</p>
                       </div>
                       <div className="p-3 bg-green-50 dark:bg-green-950/30 rounded-lg">
                         <p className="text-2xl font-bold text-green-600">{dadosComparacao.loja2.comPositivos}</p>
-                        <p className="text-xs text-muted-foreground">Positivos</p>
+                        <p className="text-xs text-muted-foreground">{t('historicoPontos.comPositivos')}</p>
                       </div>
                       <div className="p-3 bg-red-50 dark:bg-red-950/30 rounded-lg">
                         <p className="text-2xl font-bold text-red-600">{dadosComparacao.loja2.comNegativos}</p>
-                        <p className="text-xs text-muted-foreground">Negativos</p>
+                        <p className="text-xs text-muted-foreground">{t('historicoPontos.comNegativos')}</p>
                       </div>
                     </div>
                     
@@ -546,7 +546,7 @@ export default function HistoricoPontos() {
                       <div>
                         <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
                           <CheckCircle className="h-4 w-4 text-green-600" />
-                          Últimos Positivos
+                          {t('historicoPontos.ultimosPositivos')}
                         </h4>
                         <ul className="space-y-1">
                           {dadosComparacao.loja2.ultimosPositivos.map((p, i) => (
@@ -560,7 +560,7 @@ export default function HistoricoPontos() {
                       <div>
                         <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
                           <XCircle className="h-4 w-4 text-red-600" />
-                          Últimos Negativos
+                          {t('historicoPontos.ultimosNegativos')}
                         </h4>
                         <ul className="space-y-1">
                           {dadosComparacao.loja2.ultimosNegativos.map((p, i) => (
@@ -577,8 +577,7 @@ export default function HistoricoPontos() {
                 <CardContent className="py-12">
                   <div className="text-center text-muted-foreground">
                     <GitCompare className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                    <p>Selecione duas lojas para comparar</p>
-                    <p className="text-sm">A comparação mostrará estatísticas lado a lado</p>
+                    <p>{t('comparacaoLojas.semDados')}</p>
                   </div>
                 </CardContent>
               </Card>

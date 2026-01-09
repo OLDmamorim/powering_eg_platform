@@ -15,6 +15,7 @@ import { AlertasPerformance } from '../components/AlertasPerformance';
 import { GraficoEvolucaoHistorica } from '../components/GraficoEvolucaoHistorica';
 import { ResultadosChatbot } from '../components/ResultadosChatbot';
 import FiltroMesesCheckbox, { type MesSelecionado, gerarLabelMeses } from '../components/FiltroMesesCheckbox';
+import { useLanguage } from "@/contexts/LanguageContext";
 
 // Registar componentes do Chart.js
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);

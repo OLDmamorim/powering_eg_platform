@@ -2,11 +2,13 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { trpc } from "@/lib/trpc";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { TrendingUp, TrendingDown, AlertCircle, CheckCircle, Loader2, BarChart3 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useMemo } from "react";
 
 export default function ResumoGlobal() {
+  const { t } = useLanguage();
   const { user } = useAuth();
   const [, setLocation] = useLocation();
 

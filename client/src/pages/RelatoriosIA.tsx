@@ -32,8 +32,10 @@ import FiltroMesesCheckbox, { type MesSelecionado, gerarLabelMeses } from "@/com
 // Registar componentes do Chart.js
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 import { toast } from "sonner";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function RelatoriosIA() {
+  const { t } = useLanguage();
   // Novo estado para múltiplos meses - por defeito o mês atual
   const [mesesSelecionados, setMesesSelecionados] = useState<MesSelecionado[]>(() => {
     const hoje = new Date();
@@ -51,21 +53,21 @@ export default function RelatoriosIA() {
 
   const handleGerar = async () => {
     if (mesesSelecionados.length === 0) {
-      toast.error("Por favor selecione pelo menos um mês");
+      toast.error(t('selecionarPeloMenosUmMes'));
       return;
     }
     setIsGenerating(true);
-    toast.info("A gerar relatório com IA...");
+    toast.info(t('relatoriosIA.gerando'));
     try {
       const result = await gerarMultiplosMesesQuery.refetch();
       if (result.data) {
         console.log('[RelatoriosIA Frontend] Dados recebidos:', result.data);
         console.log('[RelatoriosIA Frontend] tipoRelatorio:', (result.data as any).tipoRelatorio);
         setAnalise(result.data);
-        toast.success("Relatório gerado com sucesso!");
+        toast.success(t('relatoriosIA.exportadoSucesso'));
       }
     } catch (error) {
-      toast.error("Erro ao gerar relatório");
+      toast.error(t('relatoriosIA.erroGerar'));
     } finally {
       setIsGenerating(false);
     }

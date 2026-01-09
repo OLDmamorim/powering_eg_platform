@@ -15,6 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { trpc } from "@/lib/trpc";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Save, Loader2, Image, Upload, X, AlertTriangle, Building2, Globe, MapPin } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { toast } from "sonner";
@@ -22,6 +23,7 @@ import { useLocation } from "wouter";
 import imageCompression from 'browser-image-compression';
 
 export default function OcorrenciaEstrutural() {
+  const { t } = useLanguage();
   const { user } = useAuth();
   const [, setLocation] = useLocation();
   

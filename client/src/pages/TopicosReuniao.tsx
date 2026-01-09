@@ -13,8 +13,10 @@ import { pt } from "date-fns/locale";
 import { toast } from "sonner";
 import { useAuth } from "@/_core/hooks/useAuth";
 import DashboardLayout from "@/components/DashboardLayout";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function TopicosReuniao() {
+  const { t } = useLanguage();
   const { user } = useAuth();
   const isAdmin = user?.role === "admin";
   

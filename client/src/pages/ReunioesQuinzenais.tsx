@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { useLanguage } from "@/contexts/LanguageContext";
 import {
   Select,
   SelectContent,
@@ -58,6 +59,7 @@ import {
 } from "lucide-react";
 
 export default function ReunioesQuinzenais() {
+  const { t } = useLanguage();
   const { user } = useAuth();
   const isAdmin = user?.role === "admin";
   const [filtroEstado, setFiltroEstado] = useState<string>("todas");

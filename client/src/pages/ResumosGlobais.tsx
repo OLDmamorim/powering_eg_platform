@@ -10,6 +10,7 @@ import DashboardLayout from '@/components/DashboardLayout';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler, BarElement } from 'chart.js';
 import { Line, Bar } from 'react-chartjs-2';
 import FiltroMesesCheckbox, { type MesSelecionado, mesesParaDatas, gerarLabelMeses } from '@/components/FiltroMesesCheckbox';
+import { useLanguage } from "@/contexts/LanguageContext";
 
 // Registar componentes do Chart.js
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend, Filler);
@@ -28,6 +29,7 @@ interface ResumoData {
 }
 
 export default function ResumosGlobais() {
+  const { t } = useLanguage();
   // Novo estado para múltiplos meses - por defeito o mês atual
   const [mesesSelecionados, setMesesSelecionados] = useState<MesSelecionado[]>(() => {
     const hoje = new Date();

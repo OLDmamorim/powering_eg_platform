@@ -11,6 +11,7 @@ import { Streamdown } from "streamdown";
 import jsPDF from "jspdf";
 import { toast } from "sonner";
 import DashboardLayout from "@/components/DashboardLayout";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Marcador {
   id: string;
@@ -21,6 +22,7 @@ interface Marcador {
 }
 
 export default function ComparacaoRelatoriosIA() {
+  const { t } = useLanguage();
   const [relatorio1Id, setRelatorio1Id] = useState<string>("");
   const [relatorio2Id, setRelatorio2Id] = useState<string>("");
   const [marcadores1, setMarcadores1] = useState<Marcador[]>([]);

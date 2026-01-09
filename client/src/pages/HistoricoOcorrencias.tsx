@@ -22,6 +22,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { trpc } from "@/lib/trpc";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { 
   Plus, 
   AlertTriangle, 
@@ -44,6 +45,7 @@ import { toast } from "sonner";
 import { useLocation } from "wouter";
 
 export default function HistoricoOcorrencias() {
+  const { t } = useLanguage();
   const { user } = useAuth();
   const [, setLocation] = useLocation();
   

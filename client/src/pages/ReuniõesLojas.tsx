@@ -22,8 +22,10 @@ import { EnviarEmailModal } from "@/components/EnviarEmailModal";
 import DashboardLayout from "@/components/DashboardLayout";
 import { FiltrosReunioes } from "@/components/FiltrosReunioes";
 import { AnexosUpload } from "@/components/AnexosUpload";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function ReuniõesLojas() {
+  const { t } = useLanguage();
   const { user } = useAuth();
   const isAdmin = user?.role === "admin";
   

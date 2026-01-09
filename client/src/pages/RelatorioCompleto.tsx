@@ -22,9 +22,11 @@ import { SugestoesModal } from "@/components/SugestoesModal";
 import { PendentesLoja } from "@/components/PendentesLoja";
 import { EmailConfirmDialog } from "@/components/EmailConfirmDialog";
 import { VoiceRecorder } from "@/components/VoiceRecorder";
+import { useLanguage } from "@/contexts/LanguageContext";
 import imageCompression from 'browser-image-compression';
 
 export default function RelatorioCompleto() {
+  const { t } = useLanguage();
   const uploadPhotoMutation = trpc.photoAnalysis.uploadPhoto.useMutation();
   const { user } = useAuth();
   const [, setLocation] = useLocation();

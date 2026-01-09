@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Button } from '../components/ui/button';
 import { Loader2, ArrowRight, TrendingUp, TrendingDown, Minus, BarChart3, Target, Award, Users } from 'lucide-react';
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export function ComparacaoLojas() {
   // Estado dos filtros
