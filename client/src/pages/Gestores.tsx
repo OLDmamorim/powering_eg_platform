@@ -22,6 +22,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { trpc } from "@/lib/trpc";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Building2, Edit, Plus, Trash2, User, ShieldCheck, Search } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -29,6 +30,7 @@ import { useLocation } from "wouter";
 
 export default function Gestores() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [, setLocation] = useLocation();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -52,9 +54,9 @@ export default function Gestores() {
 
   const associateMutation = trpc.gestores.associateLoja.useMutation({
     onSuccess: () => {
-      toast.success("Loja associada com sucesso");
+      toast.success(t('gestores.lojaAssociada'));
       utils.gestores.getLojas.invalidate();
-      utils.lojas.list.invalidate(); // Atualizar lista de lojas para mostrar novo gestor
+      utils.lojas.list.invalidate();
     },
     onError: (error) => {
       toast.error(error.message);
@@ -63,9 +65,9 @@ export default function Gestores() {
 
   const removeMutation = trpc.gestores.removeLoja.useMutation({
     onSuccess: () => {
-      toast.success("Loja removida com sucesso");
+      toast.success(t('gestores.lojaRemovida'));
       utils.gestores.getLojas.invalidate();
-      utils.lojas.list.invalidate(); // Atualizar lista de lojas para remover gestor
+      utils.lojas.list.invalidate();
     },
     onError: (error) => {
       toast.error(error.message);
@@ -74,7 +76,7 @@ export default function Gestores() {
 
   const createMutation = trpc.gestores.create.useMutation({
     onSuccess: () => {
-      toast.success("Gestor criado com sucesso");
+      toast.success(t('gestores.gestorCriado'));
       utils.gestores.list.invalidate();
       setCreateDialogOpen(false);
       setFormData({ nome: "", email: "" });
@@ -86,7 +88,7 @@ export default function Gestores() {
 
   const deleteMutation = trpc.gestores.delete.useMutation({
     onSuccess: () => {
-      toast.success("Gestor eliminado com sucesso");
+      toast.success(t('gestores.gestorEliminado'));
       utils.gestores.list.invalidate();
     },
     onError: (error) => {
@@ -96,7 +98,7 @@ export default function Gestores() {
 
   const deleteManyMutation = trpc.gestores.deleteMany.useMutation({
     onSuccess: (result) => {
-      toast.success(`${result.deleted} gestor(es) eliminado(s) com sucesso`);
+      toast.success(`${result.deleted} ${t('gestores.gestoresEliminados')}`);
       utils.gestores.list.invalidate();
       setSelectedIds([]);
       setDeleteConfirmOpen(false);
@@ -108,7 +110,7 @@ export default function Gestores() {
 
   const promoteMutation = trpc.gestores.promoteToAdmin.useMutation({
     onSuccess: () => {
-      toast.success("Gestor promovido a Admin com sucesso");
+      toast.success(t('gestores.gestorPromovido'));
       utils.gestores.list.invalidate();
     },
     onError: (error) => {
@@ -118,7 +120,7 @@ export default function Gestores() {
 
   const updateMutation = trpc.gestores.update.useMutation({
     onSuccess: () => {
-      toast.success("Gestor atualizado com sucesso");
+      toast.success(t('gestores.gestorAtualizado'));
       utils.gestores.list.invalidate();
       setEditDialogOpen(false);
       setEditFormData({ id: 0, nome: "", email: "" });
@@ -149,18 +151,14 @@ export default function Gestores() {
   };
 
   const handleDelete = (id: number) => {
-    if (
-      confirm(
-        "Tem a certeza que deseja eliminar este gestor? Todas as associações com lojas serão removidas."
-      )
-    ) {
+    if (confirm(t('gestores.confirmarEliminar'))) {
       deleteMutation.mutate({ id });
     }
   };
 
   const handleDeleteSelected = () => {
     if (selectedIds.length === 0) {
-      toast.error("Selecione pelo menos um gestor para eliminar");
+      toast.error(t('common.selecionarTodos'));
       return;
     }
     setDeleteConfirmOpen(true);
@@ -190,11 +188,7 @@ export default function Gestores() {
   const isSomeSelected = selectedIds.length > 0 && selectedIds.length < (gestores?.length || 0);
 
   const handlePromote = (gestorId: number, gestorName: string) => {
-    if (
-      confirm(
-        `Tem a certeza que deseja promover ${gestorName} a Admin? Esta ação dará acesso total ao sistema.`
-      )
-    ) {
+    if (confirm(t('gestores.confirmarPromocao'))) {
       promoteMutation.mutate({ gestorId });
     }
   };
@@ -213,21 +207,21 @@ export default function Gestores() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Gestores</h1>
+            <h1 className="text-3xl font-bold tracking-tight">{t('gestores.title')}</h1>
             <p className="text-muted-foreground">
-              Gerir gestores e associações com lojas
+              {t('gestores.subtitle')}
             </p>
           </div>
           <div className="flex gap-2">
             {selectedIds.length > 0 && (
               <Button variant="destructive" onClick={handleDeleteSelected}>
                 <Trash2 className="mr-2 h-4 w-4" />
-                Eliminar ({selectedIds.length})
+                {t('gestores.eliminarSelecionados')} ({selectedIds.length})
               </Button>
             )}
             <Button onClick={() => setCreateDialogOpen(true)}>
               <Plus className="mr-2 h-4 w-4" />
-              Novo Gestor
+              {t('gestores.novoGestor')}
             </Button>
           </div>
         </div>
@@ -245,14 +239,14 @@ export default function Gestores() {
                     <Checkbox
                       checked={isAllSelected}
                       onCheckedChange={handleSelectAll}
-                      aria-label="Selecionar todos"
+                      aria-label={t('gestores.selecionarTodos')}
                       className={isSomeSelected ? "data-[state=checked]:bg-primary/50" : ""}
                     />
                   </TableHead>
-                  <TableHead>Nome</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead className="text-right">Ações</TableHead>
+                  <TableHead>{t('gestores.nome')}</TableHead>
+                  <TableHead>{t('gestores.email')}</TableHead>
+                  <TableHead>{t('gestores.role')}</TableHead>
+                  <TableHead className="text-right">{t('gestores.acoes')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -263,7 +257,7 @@ export default function Gestores() {
                         <Checkbox
                           checked={selectedIds.includes(gestor.id)}
                           onCheckedChange={(checked) => handleSelectOne(gestor.id, !!checked)}
-                          aria-label={`Selecionar ${gestor.user.name}`}
+                          aria-label={`${t('common.selecionarTodos')} ${gestor.user.name}`}
                         />
                       </TableCell>
                       <TableCell className="font-medium">
@@ -274,7 +268,9 @@ export default function Gestores() {
                       </TableCell>
                       <TableCell>{gestor.user.email}</TableCell>
                       <TableCell>
-                        <Badge variant="outline">{gestor.user.role}</Badge>
+                        <Badge variant="outline">
+                          {gestor.user.role === 'admin' ? t('gestores.admin') : t('gestores.gestor')}
+                        </Badge>
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
@@ -282,7 +278,7 @@ export default function Gestores() {
                             variant="ghost"
                             size="icon"
                             onClick={() => handleEdit(gestor)}
-                            title="Editar gestor"
+                            title={t('gestores.editarGestor')}
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
@@ -290,7 +286,7 @@ export default function Gestores() {
                             variant="ghost"
                             size="icon"
                             onClick={() => handleOpenDialog(gestor)}
-                            title="Gerir lojas"
+                            title={t('gestores.associarLojas')}
                           >
                             <Building2 className="h-4 w-4" />
                           </Button>
@@ -299,7 +295,7 @@ export default function Gestores() {
                               variant="ghost"
                               size="icon"
                               onClick={() => handlePromote(gestor.id, gestor.user.name)}
-                              title="Promover a Admin"
+                              title={t('gestores.promoverAdmin')}
                             >
                               <ShieldCheck className="h-4 w-4 text-green-600" />
                             </Button>
@@ -319,7 +315,7 @@ export default function Gestores() {
                   <TableRow>
                     <TableCell colSpan={5} className="text-center py-8">
                       <p className="text-muted-foreground">
-                        Nenhum gestor registado
+                        {t('gestores.semGestores')}
                       </p>
                     </TableCell>
                   </TableRow>
@@ -333,9 +329,9 @@ export default function Gestores() {
       <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Novo Gestor</DialogTitle>
+            <DialogTitle>{t('gestores.novoGestor')}</DialogTitle>
             <DialogDescription>
-              Criar um novo gestor. Após a criação, poderá associar lojas.
+              {t('gestores.subtitle')}
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={(e) => {
@@ -344,7 +340,7 @@ export default function Gestores() {
           }}>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
-                <Label htmlFor="nome">Nome *</Label>
+                <Label htmlFor="nome">{t('gestores.nome')} *</Label>
                 <Input
                   id="nome"
                   value={formData.nome}
@@ -353,7 +349,7 @@ export default function Gestores() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email">Email *</Label>
+                <Label htmlFor="email">{t('gestores.email')} *</Label>
                 <Input
                   id="email"
                   type="email"
@@ -369,10 +365,10 @@ export default function Gestores() {
                 variant="outline"
                 onClick={() => setCreateDialogOpen(false)}
               >
-                Cancelar
+                {t('common.cancelar')}
               </Button>
               <Button type="submit" disabled={createMutation.isPending}>
-                Criar
+                {t('common.criar')}
               </Button>
             </DialogFooter>
           </form>
@@ -381,25 +377,25 @@ export default function Gestores() {
 
       <Dialog open={dialogOpen} onOpenChange={(open) => {
           setDialogOpen(open);
-          if (!open) setSearchLoja(""); // Limpar pesquisa ao fechar
+          if (!open) setSearchLoja("");
         }}>
         <DialogContent className="max-w-2xl w-[95vw] sm:w-full">
           <DialogHeader>
             <DialogTitle className="flex items-center justify-between">
-              <span>Gerir Lojas - {selectedGestor?.user.name}</span>
+              <span>{t('gestores.associarLojas')} - {selectedGestor?.user.name}</span>
               <Badge variant="secondary" className="ml-2">
-                {gestorLojas?.length || 0} atribuída(s)
+                {gestorLojas?.length || 0} {t('gestores.lojasAssociadas').toLowerCase()}
               </Badge>
             </DialogTitle>
             <DialogDescription>
-              Selecione as lojas que este gestor irá supervisionar
+              {t('gestores.subtitle')}
             </DialogDescription>
           </DialogHeader>
           {/* Campo de pesquisa */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Pesquisar loja..."
+              placeholder={t('gestores.pesquisarLojas')}
               value={searchLoja}
               onChange={(e) => setSearchLoja(e.target.value)}
               className="pl-10"
@@ -419,12 +415,7 @@ export default function Gestores() {
                 const isAssociated = gestorLojas?.some(
                   (gl: any) => gl.id === loja.id
                 );
-                // Verificar se tem outro gestor: usa gestorNome da lista de lojas OU verifica se não é o gestor atual
                 const hasOtherGestor = loja.gestorNome && !isAssociated;
-                // Mostrar nome do gestor:
-                // - Se está associada ao gestor atual -> mostrar nome do gestor selecionado
-                // - Se tem outro gestor (gestorNome preenchido e não é associada) -> mostrar gestorNome
-                // - Se não tem gestor -> null
                 const gestorAtribuido = isAssociated 
                   ? selectedGestor?.user?.name 
                   : (loja.gestorNome || null);
@@ -450,7 +441,7 @@ export default function Gestores() {
                       <div>
                         <p className="font-medium text-sm sm:text-base">{loja.nome}</p>
                         {gestorAtribuido && (
-                          <p className="text-xs text-muted-foreground">Atribuída a: {gestorAtribuido}</p>
+                          <p className="text-xs text-muted-foreground">{t('gestores.lojasAssociadas')}: {gestorAtribuido}</p>
                         )}
                       </div>
                     </Label>
@@ -459,7 +450,7 @@ export default function Gestores() {
               })
             ) : (
               <p className="text-center text-muted-foreground py-4">
-                Nenhuma loja disponível
+                {t('gestores.lojasDisponiveis')}
               </p>
             )}
           </div>
@@ -470,9 +461,9 @@ export default function Gestores() {
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Editar Gestor</DialogTitle>
+            <DialogTitle>{t('gestores.editarGestor')}</DialogTitle>
             <DialogDescription>
-              Atualizar os dados do gestor
+              {t('gestores.subtitle')}
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={(e) => {
@@ -481,7 +472,7 @@ export default function Gestores() {
           }}>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
-                <Label htmlFor="edit-nome">Nome *</Label>
+                <Label htmlFor="edit-nome">{t('gestores.nome')} *</Label>
                 <Input
                   id="edit-nome"
                   value={editFormData.nome}
@@ -490,7 +481,7 @@ export default function Gestores() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="edit-email">Email *</Label>
+                <Label htmlFor="edit-email">{t('gestores.email')} *</Label>
                 <Input
                   id="edit-email"
                   type="email"
@@ -506,10 +497,10 @@ export default function Gestores() {
                 variant="outline"
                 onClick={() => setEditDialogOpen(false)}
               >
-                Cancelar
+                {t('common.cancelar')}
               </Button>
               <Button type="submit" disabled={updateMutation.isPending}>
-                {updateMutation.isPending ? "A guardar..." : "Guardar"}
+                {updateMutation.isPending ? t('common.carregando') : t('common.guardar')}
               </Button>
             </DialogFooter>
           </form>
@@ -520,10 +511,9 @@ export default function Gestores() {
       <Dialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Confirmar Eliminação</DialogTitle>
+            <DialogTitle>{t('common.confirmar')}</DialogTitle>
             <DialogDescription>
-              Tem a certeza que deseja eliminar {selectedIds.length} gestor(es) selecionado(s)?
-              Todas as associações com lojas serão removidas. Esta ação não pode ser revertida.
+              {t('gestores.confirmarEliminarMultiplos')}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -532,7 +522,7 @@ export default function Gestores() {
               variant="outline"
               onClick={() => setDeleteConfirmOpen(false)}
             >
-              Cancelar
+              {t('common.cancelar')}
             </Button>
             <Button
               type="button"
@@ -540,7 +530,7 @@ export default function Gestores() {
               onClick={confirmDeleteSelected}
               disabled={deleteManyMutation.isPending}
             >
-              {deleteManyMutation.isPending ? 'A eliminar...' : `Eliminar ${selectedIds.length} gestor(es)`}
+              {deleteManyMutation.isPending ? t('common.carregando') : `${t('common.eliminar')} ${selectedIds.length}`}
             </Button>
           </DialogFooter>
         </DialogContent>

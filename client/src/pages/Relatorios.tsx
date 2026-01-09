@@ -1,5 +1,6 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import DashboardLayout from "@/components/DashboardLayout";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,6 +21,7 @@ import { EstadoAcompanhamentoSelect, EstadoAcompanhamentoBadge } from "@/compone
 
 export default function Relatorios() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [location, setLocation] = useLocation();
   const [expandedLivres, setExpandedLivres] = useState<number[]>([]);
   const [expandedCompletos, setExpandedCompletos] = useState<number[]>([]);
@@ -64,80 +66,80 @@ export default function Relatorios() {
   // Mutations
   const updateLivreMutation = trpc.relatoriosLivres.update.useMutation({
     onSuccess: () => {
-      toast.success("Relatório atualizado com sucesso");
+      toast.success(t('relatorios.relatorioAtualizado'));
       utils.relatoriosLivres.list.invalidate();
       setEditingLivre(null);
     },
     onError: (error) => {
-      toast.error(error.message || "Erro ao atualizar relatório");
+      toast.error(error.message || t('common.erro'));
     }
   });
 
   const deleteLivreMutation = trpc.relatoriosLivres.delete.useMutation({
     onSuccess: () => {
-      toast.success("Relatório eliminado com sucesso");
+      toast.success(t('relatorios.relatorioEliminado'));
       utils.relatoriosLivres.list.invalidate();
       utils.relatoriosLivres.countNaoVistos.invalidate();
       setDeleteConfirm(null);
     },
     onError: (error) => {
-      toast.error(error.message || "Erro ao eliminar relatório");
+      toast.error(error.message || t('common.erro'));
     }
   });
 
   const updateCompletoMutation = trpc.relatoriosCompletos.update.useMutation({
     onSuccess: () => {
-      toast.success("Relatório atualizado com sucesso");
+      toast.success(t('relatorios.relatorioAtualizado'));
       utils.relatoriosCompletos.list.invalidate();
       setEditingCompleto(null);
     },
     onError: (error) => {
-      toast.error(error.message || "Erro ao atualizar relatório");
+      toast.error(error.message || t('common.erro'));
     }
   });
 
   const deleteCompletoMutation = trpc.relatoriosCompletos.delete.useMutation({
     onSuccess: () => {
-      toast.success("Relatório eliminado com sucesso");
+      toast.success(t('relatorios.relatorioEliminado'));
       utils.relatoriosCompletos.list.invalidate();
       utils.relatoriosCompletos.countNaoVistos.invalidate();
       setDeleteConfirm(null);
     },
     onError: (error) => {
-      toast.error(error.message || "Erro ao eliminar relatório");
+      toast.error(error.message || t('common.erro'));
     }
   });
 
   const enviarEmailLivreMutation = trpc.relatoriosLivres.enviarEmail.useMutation({
     onSuccess: (data) => {
-      toast.success(`Relatório enviado para ${data.email}`);
+      toast.success(`${t('relatorios.emailEnviado')} - ${data.email}`);
     },
     onError: (error) => {
-      toast.error(error.message || "Erro ao enviar email");
+      toast.error(error.message || t('relatorios.erroEnviarEmail'));
     }
   });
 
   // Mutations para categorização
   const updateCategoriaMutation = trpc.categorizacao.updateCategoria.useMutation({
     onSuccess: () => {
-      toast.success("Categoria atualizada");
+      toast.success(t('common.sucesso'));
       utils.relatoriosLivres.list.invalidate();
       utils.relatoriosCompletos.list.invalidate();
       utils.categorizacao.getCategorias.invalidate();
     },
     onError: (error) => {
-      toast.error(error.message || "Erro ao atualizar categoria");
+      toast.error(error.message || t('common.erro'));
     }
   });
 
   const updateEstadoMutation = trpc.categorizacao.updateEstado.useMutation({
     onSuccess: () => {
-      toast.success("Estado atualizado");
+      toast.success(t('common.sucesso'));
       utils.relatoriosLivres.list.invalidate();
       utils.relatoriosCompletos.list.invalidate();
     },
     onError: (error) => {
-      toast.error(error.message || "Erro ao atualizar estado");
+      toast.error(error.message || t('common.erro'));
     }
   });
 
@@ -412,9 +414,9 @@ export default function Relatorios() {
       <div className="space-y-6">
         <div className="flex items-start justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Relatórios</h1>
+            <h1 className="text-3xl font-bold tracking-tight">{t('relatorios.title')}</h1>
             <p className="text-muted-foreground">
-              {isAdmin ? "Visualizar e gerir todos os relatórios de supervisão" : "Os seus relatórios de supervisão"}
+              {t('relatorios.subtitle')}
             </p>
           </div>
           <Button 
@@ -423,9 +425,9 @@ export default function Relatorios() {
             className="gap-2"
           >
             <Filter className="h-4 w-4" />
-            Filtros
+            {t('common.filtrar')}
             {temFiltrosAtivos && (
-              <Badge variant="secondary" className="ml-1">Ativos</Badge>
+              <Badge variant="secondary" className="ml-1">{t('common.ativo')}</Badge>
             )}
           </Button>
         </div>
@@ -444,24 +446,24 @@ export default function Relatorios() {
                         : 'bg-muted hover:bg-muted/80'
                     }`}
                   >
-                    {apenasNaoVistos ? '✓ Apenas Não Vistos' : 'Mostrar Apenas Não Vistos'}
+                    {apenasNaoVistos ? `✓ ${t('relatorios.apenasNaoVistos')}` : t('relatorios.apenasNaoVistos')}
                   </button>
                   {isAdmin && (countLivresNaoVistos || 0) + (countCompletosNaoVistos || 0) > 0 && (
                     <Badge variant="destructive">
-                      {(countLivresNaoVistos || 0) + (countCompletosNaoVistos || 0)} por ver
+                      {(countLivresNaoVistos || 0) + (countCompletosNaoVistos || 0)} {t('common.pendente')}
                     </Badge>
                   )}
                 </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="space-y-2">
-                  <Label>Loja</Label>
+                  <Label>{t('relatorios.loja')}</Label>
                   <Select value={filtroLoja} onValueChange={setFiltroLoja}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Todas as lojas" />
+                      <SelectValue placeholder={t('relatorios.filtrarPorLoja')} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">Todas as lojas</SelectItem>
+                      <SelectItem value="all">{t('common.todos')}</SelectItem>
                       {lojas?.map((loja: any) => (
                         <SelectItem key={loja.id} value={loja.id.toString()}>
                           {loja.nome}
@@ -473,13 +475,13 @@ export default function Relatorios() {
 
                 {isAdmin && (
                   <div className="space-y-2">
-                    <Label>Gestor</Label>
+                    <Label>{t('relatorios.gestor')}</Label>
                     <Select value={filtroGestor} onValueChange={setFiltroGestor}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Todos os gestores" />
+                        <SelectValue placeholder={t('relatorios.filtrarPorGestor')} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">Todos os gestores</SelectItem>
+                        <SelectItem value="all">{t('common.todos')}</SelectItem>
                         {gestores?.filter((g: any) => g.id).map((gestor: any) => (
                           <SelectItem key={gestor.id} value={gestor.id.toString()}>
                             {gestor.user?.name || "Gestor"}
@@ -491,7 +493,7 @@ export default function Relatorios() {
                 )}
 
                 <div className="space-y-2">
-                  <Label>Data Início</Label>
+                  <Label>{t('relatorios.de')}</Label>
                   <Input 
                     type="date" 
                     value={filtroDataInicio}
@@ -500,7 +502,7 @@ export default function Relatorios() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Data Fim</Label>
+                  <Label>{t('relatorios.ate')}</Label>
                   <Input 
                     type="date" 
                     value={filtroDataFim}
@@ -513,7 +515,7 @@ export default function Relatorios() {
                 <div className="mt-4 flex justify-end">
                   <Button variant="ghost" size="sm" onClick={limparFiltros} className="gap-2">
                     <X className="h-4 w-4" />
-                    Limpar filtros
+                    {t('relatorios.limparFiltros')}
                   </Button>
                 </div>
               )}
@@ -525,11 +527,11 @@ export default function Relatorios() {
           <TabsList>
             <TabsTrigger value="livres">
               <FileText className="h-4 w-4 mr-2" />
-              Relatórios Livres ({relatoriosLivresFiltrados.length})
+              {t('relatorios.livres')} ({relatoriosLivresFiltrados.length})
             </TabsTrigger>
             <TabsTrigger value="completos">
               <ClipboardList className="h-4 w-4 mr-2" />
-              Relatórios Completos ({relatoriosCompletosFiltrados.length})
+              {t('relatorios.completos')} ({relatoriosCompletosFiltrados.length})
             </TabsTrigger>
           </TabsList>
 
@@ -564,7 +566,7 @@ export default function Relatorios() {
                               )}
                             </div>
                             <div className="flex items-center gap-2">
-                              <Badge variant="outline" className="text-xs">Livre</Badge>
+                              <Badge variant="outline" className="text-xs">{t('relatorios.livres')}</Badge>
                               {expandedLivres.includes(relatorio.id) ? (
                                 <ChevronUp className="h-4 w-4 text-muted-foreground" />
                               ) : (
@@ -577,7 +579,7 @@ export default function Relatorios() {
                       <CollapsibleContent>
                         <CardContent className="pt-0 pb-4 px-4 border-t">
                           <div className="mt-3 p-3 bg-muted rounded-lg">
-                            <p className="text-sm font-medium mb-2">Descrição da Visita</p>
+                            <p className="text-sm font-medium mb-2">{t('relatorioLivre.descricao')}</p>
                             <p className="text-sm whitespace-pre-wrap text-muted-foreground">
                               {relatorio.descricao}
                             </p>
@@ -659,7 +661,7 @@ export default function Relatorios() {
                                 className="gap-1"
                               >
                                 <Pencil className="h-3 w-3" />
-                                Editar
+                                {t('common.editar')}
                               </Button>
                               <Button 
                                 variant="outline" 
@@ -671,7 +673,7 @@ export default function Relatorios() {
                                 className="gap-1 text-destructive hover:text-destructive"
                               >
                                 <Trash2 className="h-3 w-3" />
-                                Apagar
+                                {t('common.eliminar')}
                               </Button>
                               <Button 
                                 variant="outline" 
@@ -683,7 +685,7 @@ export default function Relatorios() {
                                 className="gap-1"
                               >
                                 <Download className="h-3 w-3" />
-                                PDF
+                                {t('relatorios.exportarPDF')}
                               </Button>
                               <Button 
                                 variant="outline" 
@@ -700,7 +702,7 @@ export default function Relatorios() {
                                 ) : (
                                   <Mail className="h-3 w-3" />
                                 )}
-                                Enviar
+                                {t('common.enviar')}
                               </Button>
                             </div>
                           </div>
@@ -715,8 +717,8 @@ export default function Relatorios() {
                 <CardContent className="py-8">
                   <p className="text-center text-muted-foreground">
                     {temFiltrosAtivos 
-                      ? "Nenhum relatório livre encontrado com os filtros aplicados"
-                      : "Nenhum relatório livre registado"}
+                      ? t('relatorios.semRelatorios')
+                      : t('relatorios.semRelatorios')}
                   </p>
                 </CardContent>
               </Card>
@@ -754,7 +756,7 @@ export default function Relatorios() {
                               )}
                             </div>
                             <div className="flex items-center gap-2">
-                              <Badge variant="secondary" className="text-xs">Completo</Badge>
+                              <Badge variant="secondary" className="text-xs">{t('relatorios.completos')}</Badge>
                               {expandedCompletos.includes(relatorio.id) ? (
                                 <ChevronUp className="h-4 w-4 text-muted-foreground" />
                               ) : (
@@ -914,7 +916,7 @@ export default function Relatorios() {
                                 className="gap-1"
                               >
                                 <Pencil className="h-3 w-3" />
-                                Editar
+                                {t('common.editar')}
                               </Button>
                               <Button 
                                 variant="outline" 
@@ -926,7 +928,7 @@ export default function Relatorios() {
                                 className="gap-1 text-destructive hover:text-destructive"
                               >
                                 <Trash2 className="h-3 w-3" />
-                                Apagar
+                                {t('common.eliminar')}
                               </Button>
                               <Button 
                                 variant="outline" 
@@ -938,7 +940,7 @@ export default function Relatorios() {
                                 className="gap-1"
                               >
                                 <Download className="h-3 w-3" />
-                                PDF
+                                {t('relatorios.exportarPDF')}
                               </Button>
                             </div>
                           </div>
@@ -953,8 +955,8 @@ export default function Relatorios() {
                 <CardContent className="py-8">
                   <p className="text-center text-muted-foreground">
                     {temFiltrosAtivos 
-                      ? "Nenhum relatório completo encontrado com os filtros aplicados"
-                      : "Nenhum relatório completo registado"}
+                      ? t('relatorios.semRelatorios')
+                      : t('relatorios.semRelatorios')}
                   </p>
                 </CardContent>
               </Card>
@@ -967,9 +969,9 @@ export default function Relatorios() {
       <Dialog open={!!editingLivre} onOpenChange={(open) => !open && setEditingLivre(null)}>
         <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Editar Relatório Livre</DialogTitle>
+            <DialogTitle>{t('relatorios.editarRelatorio')}</DialogTitle>
             <DialogDescription>
-              Visualize e edite os detalhes do relatório antes de enviar
+              {t('relatorios.verDetalhes')}
             </DialogDescription>
           </DialogHeader>
           {editingLivre && (
@@ -1065,9 +1067,9 @@ export default function Relatorios() {
       <Dialog open={!!editingCompleto} onOpenChange={(open) => !open && setEditingCompleto(null)}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Editar Relatório Completo</DialogTitle>
+            <DialogTitle>{t('relatorios.editarRelatorio')}</DialogTitle>
             <DialogDescription>
-              Altere os campos do relatório
+              {t('relatorios.verDetalhes')}
             </DialogDescription>
           </DialogHeader>
           {editingCompleto && (
@@ -1088,22 +1090,21 @@ export default function Relatorios() {
       <Dialog open={!!deleteConfirm} onOpenChange={(open) => !open && setDeleteConfirm(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Confirmar Eliminação</DialogTitle>
+            <DialogTitle>{t('common.confirmar')}</DialogTitle>
             <DialogDescription>
-              Tem a certeza que deseja eliminar este relatório? Esta ação não pode ser revertida.
-              Os pendentes associados também serão eliminados.
+              {t('relatorios.confirmarEliminar')}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeleteConfirm(null)}>
-              Cancelar
+              {t('common.cancelar')}
             </Button>
             <Button 
               variant="destructive" 
               onClick={handleDelete}
               disabled={deleteLivreMutation.isPending || deleteCompletoMutation.isPending}
             >
-              {(deleteLivreMutation.isPending || deleteCompletoMutation.isPending) ? "A eliminar..." : "Eliminar"}
+              {(deleteLivreMutation.isPending || deleteCompletoMutation.isPending) ? t('common.carregando') : t('common.eliminar')}
             </Button>
           </DialogFooter>
         </DialogContent>

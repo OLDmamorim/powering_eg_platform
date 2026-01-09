@@ -1,5 +1,6 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import DashboardLayout from "@/components/DashboardLayout";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -40,6 +41,7 @@ function BadgeCumprimento({ lojaId, minimo, tipo }: { lojaId: number; minimo: nu
 
 export default function MinhasLojas() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [, setLocation] = useLocation();
   const [editingLoja, setEditingLoja] = useState<any>(null);
   const [formData, setFormData] = useState({
@@ -52,12 +54,12 @@ export default function MinhasLojas() {
   const { data: lojas, isLoading } = trpc.lojas.getByGestor.useQuery();
   const updateMutation = trpc.lojas.update.useMutation({
     onSuccess: () => {
-      toast.success("Loja atualizada com sucesso!");
+      toast.success(t('lojas.lojaAtualizada'));
       setEditingLoja(null);
       utils.lojas.getByGestor.invalidate();
     },
     onError: (error) => {
-      toast.error(`Erro ao atualizar loja: ${error.message}`);
+      toast.error(error.message || t('common.erro'));
     },
   });
 
@@ -93,9 +95,9 @@ export default function MinhasLojas() {
     <DashboardLayout>
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Minhas Lojas</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t('minhasLojas.title')}</h1>
           <p className="text-muted-foreground">
-            Lojas sob sua supervisão
+            {t('minhasLojas.subtitle')}
           </p>
         </div>
 
@@ -125,11 +127,11 @@ export default function MinhasLojas() {
                       </DialogTrigger>
                       <DialogContent>
                         <DialogHeader>
-                          <DialogTitle>Editar Loja</DialogTitle>
+                          <DialogTitle>{t('lojas.editarLoja')}</DialogTitle>
                         </DialogHeader>
                         <div className="space-y-4">
                           <div>
-                            <Label htmlFor="nome">Nome da Loja</Label>
+                            <Label htmlFor="nome">{t('lojas.nome')}</Label>
                             <Input
                               id="nome"
                               value={formData.nome}
@@ -137,7 +139,7 @@ export default function MinhasLojas() {
                             />
                           </div>
                           <div>
-                            <Label htmlFor="morada">Morada</Label>
+                            <Label htmlFor="morada">{t('common.descricao')}</Label>
                             <Input
                               id="morada"
                               value={formData.morada}
@@ -145,7 +147,7 @@ export default function MinhasLojas() {
                             />
                           </div>
                           <div>
-                            <Label htmlFor="contacto">Contacto</Label>
+                            <Label htmlFor="contacto">{t('common.nome')}</Label>
                             <Input
                               id="contacto"
                               value={formData.contacto}
@@ -153,7 +155,7 @@ export default function MinhasLojas() {
                             />
                           </div>
                           <div>
-                            <Label htmlFor="email">Email</Label>
+                            <Label htmlFor="email">{t('common.email')}</Label>
                             <Input
                               id="email"
                               type="email"
@@ -162,7 +164,7 @@ export default function MinhasLojas() {
                             />
                           </div>
                           <Button onClick={handleSave} className="w-full">
-                            Guardar Alterações
+                            {t('common.guardar')}
                           </Button>
                         </div>
                       </DialogContent>
@@ -198,11 +200,11 @@ export default function MinhasLojas() {
                   {/* Relatórios Mínimos com Badges de Cumprimento */}
                   <div className="pt-3 border-t space-y-3">
                     <div className="text-sm font-medium text-muted-foreground">
-                      Relatórios Mínimos Mensais:
+                      {t('lojas.minimoRelatoriosLivres')}:
                     </div>
                     
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">Livres:</span>
+                      <span className="text-muted-foreground">{t('relatorios.livres')}:</span>
                       <div className="flex items-center gap-2">
                         <span className="text-muted-foreground">
                           {loja.minimoRelatoriosLivres || 0} mínimo
@@ -216,7 +218,7 @@ export default function MinhasLojas() {
                     </div>
                     
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">Completos:</span>
+                      <span className="text-muted-foreground">{t('relatorios.completos')}:</span>
                       <div className="flex items-center gap-2">
                         <span className="text-muted-foreground">
                           {loja.minimoRelatoriosCompletos || 0} mínimo
@@ -241,7 +243,7 @@ export default function MinhasLojas() {
           <Card>
             <CardContent className="py-8">
               <p className="text-center text-muted-foreground">
-                Nenhuma loja associada ao seu perfil
+                {t('minhasLojas.semLojas')}
               </p>
             </CardContent>
           </Card>

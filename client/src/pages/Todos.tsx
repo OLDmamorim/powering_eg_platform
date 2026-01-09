@@ -2,6 +2,7 @@ import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import DashboardLayout from "@/components/DashboardLayout";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -58,6 +59,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function Todos() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [filtroLoja, setFiltroLoja] = useState<string>("todas");
   const [filtroEstado, setFiltroEstado] = useState<string>("todos");
   const [filtroCategoria, setFiltroCategoria] = useState<string>("todas");
@@ -110,7 +112,7 @@ export default function Todos() {
   // Mutations
   const criarTodoMutation = trpc.todos.criar.useMutation({
     onSuccess: () => {
-      toast.success("Tarefa criada com sucesso!");
+      toast.success(t('todos.tarefaCriada'));
       setNovoTodoOpen(false);
       resetForm();
       refetchTodos();
@@ -122,7 +124,7 @@ export default function Todos() {
   
   const atualizarTodoMutation = trpc.todos.atualizar.useMutation({
     onSuccess: () => {
-      toast.success("Tarefa atualizada!");
+      toast.success(t('todos.tarefaAtualizada'));
       setEditarTodoOpen(false);
       setTodoSelecionado(null);
       resetForm();
@@ -133,7 +135,7 @@ export default function Todos() {
   
   const concluirTodoMutation = trpc.todos.concluir.useMutation({
     onSuccess: () => {
-      toast.success("Tarefa concluída!");
+      toast.success(t('common.sucesso'));
       refetchTodos();
       refetchEstatisticas(); // Atualizar totalizadores
     },
@@ -142,7 +144,7 @@ export default function Todos() {
   
   const eliminarTodoMutation = trpc.todos.eliminar.useMutation({
     onSuccess: () => {
-      toast.success("Tarefa eliminada!");
+      toast.success(t('todos.tarefaEliminada'));
       refetchTodos();
       refetchEstatisticas(); // Atualizar totalizadores
     },
@@ -284,9 +286,9 @@ export default function Todos() {
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
               <ListTodo className="h-6 w-6" />
-              To-Do
+              {t('todos.title')}
             </h1>
-            <p className="text-muted-foreground">Gestão de tarefas e atribuições</p>
+            <p className="text-muted-foreground">{t('todos.subtitle')}</p>
           </div>
           <div className="flex gap-2 flex-wrap">
             <Button 
@@ -295,17 +297,17 @@ export default function Todos() {
               className="bg-blue-50 hover:bg-blue-100 border-blue-200"
             >
               <Smartphone className="h-4 w-4 mr-2" />
-              Instalar App
+              {t('common.download')}
             </Button>
             {user?.role === "admin" && (
               <Button variant="outline" onClick={() => setCategoriasOpen(true)}>
                 <Settings className="h-4 w-4 mr-2" />
-                Categorias
+                {t('categorias.title')}
               </Button>
             )}
             <Button onClick={() => { resetForm(); setNovoTodoOpen(true); }}>
               <Plus className="h-4 w-4 mr-2" />
-              Nova Tarefa
+              {t('todos.novaTarefa')}
             </Button>
           </div>
         </div>

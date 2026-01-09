@@ -1,5 +1,6 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import DashboardLayout from "@/components/DashboardLayout";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -26,6 +27,7 @@ import imageCompression from 'browser-image-compression';
 
 export default function RelatorioLivre() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [, setLocation] = useLocation();
   const [lojasIds, setLojasIds] = useState<string[]>([]);
   const [descricao, setDescricao] = useState("");
@@ -51,7 +53,7 @@ export default function RelatorioLivre() {
 
   const createMutation = trpc.relatoriosLivres.create.useMutation({
     onSuccess: (data) => {
-      toast.success("Relatório criado com sucesso");
+      toast.success(t('relatorioLivre.relatorioCriado'));
       utils.relatoriosLivres.list.invalidate();
       // Guardar dados para os diálogos
       setRelatorioIdCriado(data.id);
@@ -281,21 +283,21 @@ export default function RelatorioLivre() {
       <div className="max-w-3xl mx-auto space-y-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">
-            Relatório Livre
+            {t('relatorioLivre.title')}
           </h1>
           <p className="text-muted-foreground">
-            Criar um relatório rápido de visita
+            {t('relatorioLivre.subtitle')}
           </p>
         </div>
 
         <form onSubmit={handleSubmit}>
           <Card>
             <CardHeader>
-              <CardTitle>Informações da Visita</CardTitle>
+              <CardTitle>{t('relatorioLivre.dataVisita')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="loja">Lojas * (pode selecionar várias)</Label>
+                <Label htmlFor="loja">{t('relatorioLivre.selecionarLoja')} *</Label>
                 <div className="border rounded-md p-3 space-y-2 max-h-48 overflow-y-auto">
                   {lojas?.sort((a: any, b: any) => a.nome.localeCompare(b.nome)).map((loja: any) => (
                     <label key={loja.id} className="flex items-center space-x-2 cursor-pointer hover:bg-accent p-2 rounded">
@@ -331,7 +333,7 @@ export default function RelatorioLivre() {
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="dataHora">Data e Hora da Visita (opcional)</Label>
+                <Label htmlFor="dataHora">{t('relatorioLivre.dataVisita')}</Label>
                 <Input
                   id="dataHora"
                   type="datetime-local"
@@ -368,12 +370,12 @@ export default function RelatorioLivre() {
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="descricao">Descrição *</Label>
+                <Label htmlFor="descricao">{t('relatorioLivre.descricao')} *</Label>
                 <Textarea
                   id="descricao"
                   value={descricao}
                   onChange={(e) => setDescricao(e.target.value)}
-                  placeholder="Descreva os pontos importantes desta visita..."
+                  placeholder={t('relatorioLivre.descricaoPlaceholder')}
                   rows={6}
                   required
                 />
@@ -400,7 +402,7 @@ export default function RelatorioLivre() {
               {/* Upload de Fotos */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <Label>Fotos</Label>
+                  <Label>{t('relatorioLivre.fotos')}</Label>
                   <div className="flex items-center gap-2">
                   <Image className="h-5 w-5 text-muted-foreground" />
                   <Button
@@ -415,7 +417,7 @@ export default function RelatorioLivre() {
                     ) : (
                       <Image className="h-4 w-4 mr-1" />
                     )}
-                    {uploading ? 'A enviar...' : 'Tirar Foto'}
+                    {uploading ? t('common.carregando') : t('relatorioLivre.adicionarFotos')}
                   </Button>
                   <Button
                     type="button"
@@ -425,7 +427,7 @@ export default function RelatorioLivre() {
                     disabled={uploading}
                   >
                     <Upload className="h-4 w-4 mr-1" />
-                    Carregar Ficheiro
+                    {t('common.upload')}
                   </Button>
                   <input
                     ref={cameraInputRef}
@@ -472,7 +474,7 @@ export default function RelatorioLivre() {
 
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <Label>Pendentes</Label>
+                  <Label>{t('relatorioLivre.pendentes')}</Label>
                   <Button
                     type="button"
                     variant="outline"
@@ -480,7 +482,7 @@ export default function RelatorioLivre() {
                     onClick={handleAddPendente}
                   >
                     <Plus className="h-4 w-4 mr-1" />
-                    Adicionar
+                    {t('relatorioLivre.adicionarPendente')}
                   </Button>
                 </div>
                 <p className="text-sm text-muted-foreground">
@@ -529,11 +531,11 @@ export default function RelatorioLivre() {
                   variant="outline"
                   onClick={() => setLocation("/dashboard")}
                 >
-                  Cancelar
+                  {t('relatorioLivre.cancelar')}
                 </Button>
                 <Button type="submit" disabled={createMutation.isPending || uploading}>
                   <Save className="h-4 w-4 mr-2" />
-                  Guardar Relatório
+                  {t('relatorioLivre.submeter')}
                 </Button>
               </div>
             </CardContent>

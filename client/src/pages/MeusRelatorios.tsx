@@ -1,5 +1,6 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import DashboardLayout from "@/components/DashboardLayout";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -18,6 +19,7 @@ import { toast } from "sonner";
 
 export default function MeusRelatorios() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [, setLocation] = useLocation();
   const [expandedLivres, setExpandedLivres] = useState<number[]>([]);
   const [expandedCompletos, setExpandedCompletos] = useState<number[]>([]);
@@ -59,64 +61,64 @@ export default function MeusRelatorios() {
   // Mutations para edição
   const updateLivreMutation = trpc.relatoriosLivres.update.useMutation({
     onSuccess: () => {
-      toast.success("Relatório atualizado com sucesso");
+      toast.success(t('relatorios.relatorioAtualizado'));
       utils.relatoriosLivres.list.invalidate();
       setEditingLivre(null);
     },
     onError: (error) => {
-      toast.error(error.message || "Erro ao atualizar relatório");
+      toast.error(error.message || t('common.erro'));
     }
   });
 
   const updateCompletoMutation = trpc.relatoriosCompletos.update.useMutation({
     onSuccess: () => {
-      toast.success("Relatório atualizado com sucesso");
+      toast.success(t('relatorios.relatorioAtualizado'));
       utils.relatoriosCompletos.list.invalidate();
       setEditingCompleto(null);
     },
     onError: (error) => {
-      toast.error(error.message || "Erro ao atualizar relatório");
+      toast.error(error.message || t('common.erro'));
     }
   });
 
   // Mutations para eliminar
   const deleteLivreMutation = trpc.relatoriosLivres.delete.useMutation({
     onSuccess: () => {
-      toast.success("Relatório eliminado com sucesso");
+      toast.success(t('relatorios.relatorioEliminado'));
       utils.relatoriosLivres.list.invalidate();
       setDeleteConfirm(null);
     },
     onError: (error) => {
-      toast.error(error.message || "Erro ao eliminar relatório");
+      toast.error(error.message || t('common.erro'));
     }
   });
 
   const deleteCompletoMutation = trpc.relatoriosCompletos.delete.useMutation({
     onSuccess: () => {
-      toast.success("Relatório eliminado com sucesso");
+      toast.success(t('relatorios.relatorioEliminado'));
       utils.relatoriosCompletos.list.invalidate();
       setDeleteConfirm(null);
     },
     onError: (error) => {
-      toast.error(error.message || "Erro ao eliminar relatório");
+      toast.error(error.message || t('common.erro'));
     }
   });
 
   const enviarEmailLivreMutation = trpc.relatoriosLivres.enviarEmail.useMutation({
     onSuccess: (data) => {
-      toast.success(`Relatório enviado para ${data.email}`);
+      toast.success(`${t('relatorios.emailEnviado')} - ${data.email}`);
     },
     onError: (error) => {
-      toast.error(error.message || "Erro ao enviar email");
+      toast.error(error.message || t('relatorios.erroEnviarEmail'));
     }
   });
 
   const enviarEmailCompletoMutation = trpc.relatoriosCompletos.enviarEmail.useMutation({
     onSuccess: (data) => {
-      toast.success(`Relatório enviado para ${data.email}`);
+      toast.success(`${t('relatorios.emailEnviado')} - ${data.email}`);
     },
     onError: (error) => {
-      toast.error(error.message || "Erro ao enviar email");
+      toast.error(error.message || t('relatorios.erroEnviarEmail'));
     }
   });
 

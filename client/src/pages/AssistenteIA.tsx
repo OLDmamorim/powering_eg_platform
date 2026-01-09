@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -25,6 +26,7 @@ interface Message {
 }
 
 export default function AssistenteIA() {
+  const { t } = useLanguage();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -74,7 +76,7 @@ export default function AssistenteIA() {
     } catch (error) {
       const mensagemErro: Message = {
         role: 'assistant',
-        content: 'Desculpe, ocorreu um erro ao processar a sua pergunta. Por favor, tente novamente.',
+        content: t('assistenteIA.erro'),
         timestamp: new Date()
       };
       setMessages(prev => [...prev, mensagemErro]);
@@ -102,9 +104,9 @@ export default function AssistenteIA() {
               <Bot className="h-6 w-6 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold">Assistente IA</h1>
+              <h1 className="text-2xl font-bold">{t('assistenteIA.title')}</h1>
               <p className="text-sm text-muted-foreground">
-                Pergunte-me qualquer coisa sobre a plataforma
+                {t('assistenteIA.subtitle')}
               </p>
             </div>
           </div>
@@ -115,7 +117,7 @@ export default function AssistenteIA() {
               onClick={() => refetchSugestoes()}
             >
               <RefreshCw className="h-4 w-4 mr-2" />
-              Novas sugestões
+              {t('common.atualizar')}
             </Button>
             {messages.length > 0 && (
               <Button 
@@ -124,7 +126,7 @@ export default function AssistenteIA() {
                 onClick={limparConversa}
               >
                 <MessageSquare className="h-4 w-4 mr-2" />
-                Nova conversa
+                {t('assistenteIA.limparConversa')}
               </Button>
             )}
           </div>
@@ -142,7 +144,7 @@ export default function AssistenteIA() {
                       <Sparkles className="h-12 w-12 text-primary" />
                     </div>
                     <h2 className="text-xl font-semibold mb-2">
-                      Olá! Sou o Assistente IA da PoweringEG
+                      {t('assistenteIA.title')}
                     </h2>
                     <p className="text-muted-foreground max-w-md mb-6">
                       Posso ajudá-lo com informações sobre lojas, gestores, relatórios, 
@@ -240,7 +242,7 @@ export default function AssistenteIA() {
                 <Input
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder="Escreva a sua pergunta..."
+                  placeholder={t('assistenteIA.placeholder')}
                   disabled={isLoading}
                   className="flex-1"
                 />
@@ -256,7 +258,7 @@ export default function AssistenteIA() {
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
                 <Lightbulb className="h-4 w-4 text-yellow-500" />
-                Sugestões de Perguntas
+                {t('common.notas')}
               </CardTitle>
             </CardHeader>
             <CardContent className="flex-1">

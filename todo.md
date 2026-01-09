@@ -2372,3 +2372,16 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Traduzir Dashboard principal
 - [ ] Traduzir páginas de gestão (Lojas, Gestores, Relatórios, etc.)
 - [ ] Testar alternância entre idiomas em toda a aplicação
+
+## Tradução Completa para Inglês v6.0 (Jan 2026)
+- [x] Expandir ficheiros de tradução PT e EN
+- [x] Traduzir página Lojas
+- [x] Traduzir página Gestores
+- [x] Traduzir página Relatorios
+- [x] Traduzir página RelatorioLivre
+- [x] Traduzir página Pendentes
+- [x] Traduzir página MinhasLojas
+- [x] Traduzir página AssistenteIA
+- [x] Traduzir página Todos
+- [x] Traduzir página MeusRelatorios
+- [x] Traduzir página GestaoUtilizadores

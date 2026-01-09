@@ -21,6 +21,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { trpc } from "@/lib/trpc";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Building2, Edit, Plus, Trash2, Upload, Download } from "lucide-react";
 import { useState, useRef } from "react";
 import { toast } from "sonner";
@@ -29,6 +30,7 @@ import * as XLSX from 'xlsx';
 
 export default function Lojas() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [, setLocation] = useLocation();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
@@ -52,7 +54,7 @@ export default function Lojas() {
 
   const createMutation = trpc.lojas.create.useMutation({
     onSuccess: () => {
-      toast.success("Loja criada com sucesso");
+      toast.success(t('lojas.lojaCriada'));
       utils.lojas.list.invalidate();
       setDialogOpen(false);
       resetForm();
@@ -64,7 +66,7 @@ export default function Lojas() {
 
   const updateMutation = trpc.lojas.update.useMutation({
     onSuccess: () => {
-      toast.success("Loja atualizada com sucesso");
+      toast.success(t('lojas.lojaAtualizada'));
       utils.lojas.list.invalidate();
       setDialogOpen(false);
       resetForm();
@@ -76,7 +78,7 @@ export default function Lojas() {
 
   const deleteMutation = trpc.lojas.delete.useMutation({
     onSuccess: () => {
-      toast.success("Loja eliminada com sucesso");
+      toast.success(t('lojas.lojaEliminada'));
       utils.lojas.list.invalidate();
     },
     onError: (error) => {
@@ -86,7 +88,7 @@ export default function Lojas() {
 
   const deleteManyMutation = trpc.lojas.deleteMany.useMutation({
     onSuccess: (result) => {
-      toast.success(`${result.deleted} loja(s) eliminada(s) com sucesso`);
+      toast.success(`${result.deleted} ${t('lojas.lojasEliminadas')}`);
       utils.lojas.list.invalidate();
       setSelectedIds([]);
       setDeleteConfirmOpen(false);
@@ -100,20 +102,20 @@ export default function Lojas() {
     onSuccess: (result) => {
       const mensagens = [];
       if (result.importadas > 0) {
-        mensagens.push(`${result.importadas} loja(s) importada(s)`);
+        mensagens.push(`${result.importadas} ${t('lojas.lojasImportadas')}`);
       }
       if (result.ignoradas > 0) {
-        mensagens.push(`${result.ignoradas} loja(s) ignorada(s) (já existem)`);
+        mensagens.push(`${result.ignoradas} ${t('lojas.lojasIgnoradas')}`);
       }
       if (result.erros.length > 0) {
-        mensagens.push(`${result.erros.length} erro(s)`);
+        mensagens.push(`${result.erros.length} ${t('lojas.errosEncontrados')}`);
       }
       
       if (result.importadas > 0 || result.ignoradas > 0) {
         toast.success(mensagens.join(', '));
       }
       if (result.erros.length > 0) {
-        toast.error(`${result.erros.length} erro(s) encontrado(s)`);
+        toast.error(`${result.erros.length} ${t('lojas.errosEncontrados')}`);
       }
       
       utils.lojas.list.invalidate();
@@ -166,14 +168,14 @@ export default function Lojas() {
   };
 
   const handleDelete = (id: number) => {
-    if (confirm("Tem a certeza que deseja eliminar esta loja?")) {
+    if (confirm(t('lojas.confirmarEliminar'))) {
       deleteMutation.mutate({ id });
     }
   };
 
   const handleDeleteSelected = () => {
     if (selectedIds.length === 0) {
-      toast.error("Selecione pelo menos uma loja para eliminar");
+      toast.error(t('common.selecionarTodos'));
       return;
     }
     setDeleteConfirmOpen(true);
@@ -213,7 +215,7 @@ export default function Lojas() {
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Lojas');
     XLSX.writeFile(wb, 'template_lojas.xlsx');
-    toast.success('Template descarregado com sucesso');
+    toast.success(t('lojas.templateDescarregado'));
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -239,7 +241,7 @@ export default function Lojas() {
 
   const handleImport = async () => {
     if (!importFile) {
-      toast.error('Selecione um ficheiro Excel');
+      toast.error(t('lojas.selecionarFicheiro'));
       return;
     }
 
@@ -259,25 +261,25 @@ export default function Lojas() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Lojas</h1>
+            <h1 className="text-3xl font-bold tracking-tight">{t('lojas.title')}</h1>
             <p className="text-muted-foreground">
-              Gerir lojas da rede Express Glass
+              {t('lojas.subtitle')}
             </p>
           </div>
           <div className="flex gap-2">
             {selectedIds.length > 0 && (
               <Button variant="destructive" onClick={handleDeleteSelected}>
                 <Trash2 className="mr-2 h-4 w-4" />
-                Eliminar ({selectedIds.length})
+                {t('lojas.eliminarSelecionadas')} ({selectedIds.length})
               </Button>
             )}
             <Button variant="outline" onClick={() => setImportDialogOpen(true)}>
               <Upload className="mr-2 h-4 w-4" />
-              Importar Excel
+              {t('lojas.importarExcel')}
             </Button>
             <Button onClick={() => handleOpenDialog()}>
               <Plus className="mr-2 h-4 w-4" />
-              Nova Loja
+              {t('lojas.novaLoja')}
             </Button>
           </div>
         </div>
@@ -295,14 +297,14 @@ export default function Lojas() {
                     <Checkbox
                       checked={isAllSelected}
                       onCheckedChange={handleSelectAll}
-                      aria-label="Selecionar todas"
+                      aria-label={t('lojas.selecionarTodas')}
                       className={isSomeSelected ? "data-[state=checked]:bg-primary/50" : ""}
                     />
                   </TableHead>
-                  <TableHead>Nome</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Gestor</TableHead>
-                  <TableHead className="text-right">Ações</TableHead>
+                  <TableHead>{t('lojas.nome')}</TableHead>
+                  <TableHead>{t('lojas.email')}</TableHead>
+                  <TableHead>{t('lojas.gestor')}</TableHead>
+                  <TableHead className="text-right">{t('lojas.acoes')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -313,7 +315,7 @@ export default function Lojas() {
                         <Checkbox
                           checked={selectedIds.includes(loja.id)}
                           onCheckedChange={(checked) => handleSelectOne(loja.id, !!checked)}
-                          aria-label={`Selecionar ${loja.nome}`}
+                          aria-label={`${t('common.selecionarTodos')} ${loja.nome}`}
                         />
                       </TableCell>
                       <TableCell className="font-medium">
@@ -348,7 +350,7 @@ export default function Lojas() {
                   <TableRow>
                     <TableCell colSpan={5} className="text-center py-8">
                       <p className="text-muted-foreground">
-                        Nenhuma loja registada
+                        {t('lojas.semLojas')}
                       </p>
                     </TableCell>
                   </TableRow>
@@ -364,18 +366,18 @@ export default function Lojas() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {editingLoja ? "Editar Loja" : "Nova Loja"}
+              {editingLoja ? t('lojas.editarLoja') : t('lojas.novaLoja')}
             </DialogTitle>
             <DialogDescription>
               {editingLoja
-                ? "Atualize as informações da loja"
-                : "Preencha os dados da nova loja"}
+                ? t('lojas.subtitle')
+                : t('lojas.subtitle')}
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit}>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
-                <Label htmlFor="nome">Nome *</Label>
+                <Label htmlFor="nome">{t('lojas.nome')} *</Label>
                 <Input
                   id="nome"
                   value={formData.nome}
@@ -387,7 +389,7 @@ export default function Lojas() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t('lojas.email')}</Label>
                 <Input
                   id="email"
                   type="email"
@@ -399,7 +401,7 @@ export default function Lojas() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="minimoLivres">Mínimo Mensal de Relatórios Livres</Label>
+                <Label htmlFor="minimoLivres">{t('lojas.minimoRelatoriosLivres')}</Label>
                 <Input
                   id="minimoLivres"
                   type="number"
@@ -409,11 +411,11 @@ export default function Lojas() {
                     setFormData({ ...formData, minimoRelatoriosLivres: parseInt(e.target.value) || 0 })
                   }
                 />
-                <p className="text-xs text-muted-foreground">0 = sem mínimo obrigatório</p>
+                <p className="text-xs text-muted-foreground">0 = {t('common.nenhum')}</p>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="minimoCompletos">Mínimo Mensal de Relatórios Completos</Label>
+                <Label htmlFor="minimoCompletos">{t('lojas.minimoRelatoriosCompletos')}</Label>
                 <Input
                   id="minimoCompletos"
                   type="number"
@@ -423,7 +425,7 @@ export default function Lojas() {
                     setFormData({ ...formData, minimoRelatoriosCompletos: parseInt(e.target.value) || 0 })
                   }
                 />
-                <p className="text-xs text-muted-foreground">0 = sem mínimo obrigatório</p>
+                <p className="text-xs text-muted-foreground">0 = {t('common.nenhum')}</p>
               </div>
             </div>
             <DialogFooter>
@@ -432,7 +434,7 @@ export default function Lojas() {
                 variant="outline"
                 onClick={() => setDialogOpen(false)}
               >
-                Cancelar
+                {t('common.cancelar')}
               </Button>
               <Button
                 type="submit"
@@ -440,7 +442,7 @@ export default function Lojas() {
                   createMutation.isPending || updateMutation.isPending
                 }
               >
-                {editingLoja ? "Atualizar" : "Criar"}
+                {editingLoja ? t('common.atualizar') : t('common.criar')}
               </Button>
             </DialogFooter>
           </form>
@@ -451,9 +453,9 @@ export default function Lojas() {
       <Dialog open={importDialogOpen} onOpenChange={setImportDialogOpen}>
         <DialogContent className="max-w-3xl">
           <DialogHeader>
-            <DialogTitle>Importar Lojas por Excel</DialogTitle>
+            <DialogTitle>{t('lojas.importarExcel')}</DialogTitle>
             <DialogDescription>
-              Carregue um ficheiro Excel (.xlsx) com as colunas: Nome (coluna A), Email (coluna B)
+              {t('lojas.selecionarFicheiro')}
             </DialogDescription>
           </DialogHeader>
           
@@ -466,7 +468,7 @@ export default function Lojas() {
                 className="flex-1"
               >
                 <Download className="mr-2 h-4 w-4" />
-                Descarregar Template
+                {t('lojas.descarregarTemplate')}
               </Button>
               <Button
                 type="button"
@@ -475,7 +477,7 @@ export default function Lojas() {
                 className="flex-1"
               >
                 <Upload className="mr-2 h-4 w-4" />
-                Selecionar Ficheiro
+                {t('lojas.selecionarFicheiro')}
               </Button>
               <input
                 ref={fileInputRef}
@@ -488,19 +490,19 @@ export default function Lojas() {
 
             {importFile && (
               <div className="text-sm text-muted-foreground">
-                Ficheiro selecionado: <strong>{importFile.name}</strong>
+                {t('common.ficheiros')}: <strong>{importFile.name}</strong>
               </div>
             )}
 
             {importPreview.length > 0 && (
               <div className="space-y-2">
-                <Label>Preview (primeiras 10 linhas)</Label>
+                <Label>{t('lojas.previewImportacao')}</Label>
                 <div className="border rounded-lg max-h-64 overflow-auto">
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Nome</TableHead>
-                        <TableHead>Email</TableHead>
+                        <TableHead>{t('lojas.nome')}</TableHead>
+                        <TableHead>{t('lojas.email')}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -527,14 +529,14 @@ export default function Lojas() {
                 setImportPreview([]);
               }}
             >
-              Cancelar
+              {t('common.cancelar')}
             </Button>
             <Button
               type="button"
               onClick={handleImport}
               disabled={!importFile || importMutation.isPending}
             >
-              {importMutation.isPending ? 'A importar...' : 'Importar'}
+              {importMutation.isPending ? t('common.carregando') : t('lojas.importar')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -544,10 +546,9 @@ export default function Lojas() {
       <Dialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Confirmar Eliminação</DialogTitle>
+            <DialogTitle>{t('common.confirmar')}</DialogTitle>
             <DialogDescription>
-              Tem a certeza que deseja eliminar {selectedIds.length} loja(s) selecionada(s)?
-              Esta ação não pode ser revertida.
+              {t('lojas.confirmarEliminarMultiplas')}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -556,7 +557,7 @@ export default function Lojas() {
               variant="outline"
               onClick={() => setDeleteConfirmOpen(false)}
             >
-              Cancelar
+              {t('common.cancelar')}
             </Button>
             <Button
               type="button"
@@ -564,7 +565,7 @@ export default function Lojas() {
               onClick={confirmDeleteSelected}
               disabled={deleteManyMutation.isPending}
             >
-              {deleteManyMutation.isPending ? 'A eliminar...' : `Eliminar ${selectedIds.length} loja(s)`}
+              {deleteManyMutation.isPending ? t('common.carregando') : `${t('common.eliminar')} ${selectedIds.length}`}
             </Button>
           </DialogFooter>
         </DialogContent>

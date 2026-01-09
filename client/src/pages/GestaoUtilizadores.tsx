@@ -1,5 +1,6 @@
 import { useState } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,7 @@ import { Users, Edit, Shield, UserCog, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 export default function GestaoUtilizadores() {
+  const { t } = useLanguage();
   const [editandoUser, setEditandoUser] = useState<any | null>(null);
   const [eliminandoUser, setEliminandoUser] = useState<any | null>(null);
   const [formData, setFormData] = useState({ name: "", email: "", role: "" });
@@ -18,23 +20,23 @@ export default function GestaoUtilizadores() {
   const { data: utilizadores, isLoading, refetch } = trpc.utilizadores.getAll.useQuery();
   const updateMutation = trpc.utilizadores.update.useMutation({
     onSuccess: () => {
-      toast.success("Utilizador atualizado com sucesso!");
+      toast.success(t('common.sucesso'));
       setEditandoUser(null);
       refetch();
     },
     onError: (error) => {
-      toast.error(`Erro ao atualizar: ${error.message}`);
+      toast.error(error.message || t('common.erro'));
     },
   });
 
   const deleteMutation = trpc.utilizadores.delete.useMutation({
     onSuccess: () => {
-      toast.success("Utilizador eliminado com sucesso!");
+      toast.success(t('common.sucesso'));
       setEliminandoUser(null);
       refetch();
     },
     onError: (error) => {
-      toast.error(`Erro ao eliminar: ${error.message}`);
+      toast.error(error.message || t('common.erro'));
     },
   });
 
@@ -87,10 +89,10 @@ export default function GestaoUtilizadores() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
             <Users className="h-8 w-8" />
-            Gestão de Utilizadores
+            {t('utilizadores.title')}
           </h1>
           <p className="text-muted-foreground mt-2">
-            Gerir utilizadores, roles e permissões da plataforma
+            {t('utilizadores.subtitle')}
           </p>
         </div>
 
@@ -98,7 +100,7 @@ export default function GestaoUtilizadores() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Shield className="h-5 w-5" />
-              Todos os Utilizadores
+              {t('utilizadores.title')}
             </CardTitle>
             <CardDescription>
               {utilizadores?.length || 0} utilizadores registados na plataforma
@@ -106,21 +108,21 @@ export default function GestaoUtilizadores() {
           </CardHeader>
           <CardContent>
             {isLoading ? (
-              <p className="text-muted-foreground">A carregar utilizadores...</p>
+              <p className="text-muted-foreground">{t('common.carregando')}</p>
             ) : !utilizadores || utilizadores.length === 0 ? (
-              <p className="text-muted-foreground">Nenhum utilizador encontrado.</p>
+              <p className="text-muted-foreground">{t('utilizadores.semUtilizadores')}</p>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
                     <tr className="border-b">
                       <th className="text-left p-3 font-medium">ID</th>
-                      <th className="text-left p-3 font-medium">Nome</th>
-                      <th className="text-left p-3 font-medium">Email</th>
-                      <th className="text-left p-3 font-medium">Role</th>
+                      <th className="text-left p-3 font-medium">{t('utilizadores.nome')}</th>
+                      <th className="text-left p-3 font-medium">{t('utilizadores.email')}</th>
+                      <th className="text-left p-3 font-medium">{t('utilizadores.role')}</th>
                       <th className="text-left p-3 font-medium">Criado em</th>
                       <th className="text-left p-3 font-medium">Último Login</th>
-                      <th className="text-right p-3 font-medium">Ações</th>
+                      <th className="text-right p-3 font-medium">{t('common.acoes')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -144,7 +146,7 @@ export default function GestaoUtilizadores() {
                               onClick={() => handleEdit(user)}
                             >
                               <Edit className="h-4 w-4 mr-1" />
-                              Editar
+                              {t('common.editar')}
                             </Button>
                             <Button
                               variant="outline"

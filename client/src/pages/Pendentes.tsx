@@ -1,5 +1,6 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import DashboardLayout from "@/components/DashboardLayout";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -11,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 
 export default function Pendentes() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const utils = trpc.useUtils();
   const [apenasNaoVistos, setApenasNaoVistos] = useState(false);
   const isAdmin = user?.role === 'admin';
@@ -20,7 +22,7 @@ export default function Pendentes() {
 
   const resolveMutation = trpc.pendentes.resolve.useMutation({
     onSuccess: () => {
-      toast.success("Pendente marcado como resolvido");
+      toast.success(t('pendentesPage.marcarResolvido'));
       utils.pendentes.list.invalidate();
     },
     onError: (error) => {
@@ -30,7 +32,7 @@ export default function Pendentes() {
 
   const unresolveMutation = trpc.pendentes.unresolve.useMutation({
     onSuccess: () => {
-      toast.success("Pendente desmarcado como não resolvido");
+      toast.success(t('pendentesPage.marcarPendente'));
       utils.pendentes.list.invalidate();
     },
     onError: (error: any) => {
@@ -40,7 +42,7 @@ export default function Pendentes() {
 
   const deleteMutation = trpc.pendentes.delete.useMutation({
     onSuccess: () => {
-      toast.success("Pendente eliminado");
+      toast.success(t('common.sucesso'));
       utils.pendentes.list.invalidate();
     },
     onError: (error) => {
@@ -57,7 +59,7 @@ export default function Pendentes() {
   };
 
   const handleDelete = (id: number) => {
-    if (confirm("Tem a certeza que deseja eliminar este pendente?")) {
+    if (confirm(t('pendentes.confirmarRemocao'))) {
       deleteMutation.mutate({ id });
     }
   };
@@ -92,9 +94,9 @@ export default function Pendentes() {
       <div className="space-y-6">
         <div className="flex items-start justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Pendentes</h1>
+            <h1 className="text-3xl font-bold tracking-tight">{t('pendentesPage.title')}</h1>
             <p className="text-muted-foreground">
-              Items a serem revistos nas próximas visitas
+              {t('pendentesPage.subtitle')}
             </p>
           </div>
           {isAdmin && (
@@ -108,11 +110,11 @@ export default function Pendentes() {
                 }`}
               >
                 <Filter className="h-4 w-4" />
-                {apenasNaoVistos ? '✓ Apenas Não Vistos' : 'Mostrar Apenas Não Vistos'}
+                {apenasNaoVistos ? `✓ ${t('pendentesPage.apenasNaoVistos')}` : t('pendentesPage.apenasNaoVistos')}
               </button>
               {(countNaoVistos || 0) > 0 && (
                 <Badge variant="destructive">
-                  {countNaoVistos} por ver
+                  {countNaoVistos} {t('common.pendente')}
                 </Badge>
               )}
             </div>
@@ -173,8 +175,8 @@ export default function Pendentes() {
                             {pendente.tipoRelatorio && (
                               <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">
                                 {pendente.tipoRelatorio === "livre"
-                                  ? "Relatório Livre"
-                                  : "Relatório Completo"}
+                                  ? t('relatorios.livres')
+                                  : t('relatorios.completos')}
                               </span>
                             )}
                             {!pendente.resolvido && pendente.dataLimite && (
@@ -186,9 +188,9 @@ export default function Pendentes() {
                                     : 'bg-blue-500/10 text-blue-600'
                               }`}>
                                 {getStatusPrazo(pendente.dataLimite) === 'vencido' ? (
-                                  <><AlertCircle className="h-3 w-3" /> Vencido</>
+                                  <><AlertCircle className="h-3 w-3" /> {t('common.atrasado')}</>
                                 ) : getStatusPrazo(pendente.dataLimite) === 'proximo' ? (
-                                  <><CalendarClock className="h-3 w-3" /> Vence em breve</>
+                                  <><CalendarClock className="h-3 w-3" /> {t('common.pendente')}</>
                                 ) : (
                                   <><Calendar className="h-3 w-3" /> Prazo: {new Date(pendente.dataLimite).toLocaleDateString('pt-PT')}</>
                                 )}
@@ -217,7 +219,7 @@ export default function Pendentes() {
               <div className="text-center space-y-2">
                 <Check className="h-12 w-12 text-muted-foreground mx-auto" />
                 <p className="text-muted-foreground">
-                  Não existem pendentes no momento
+                  {t('pendentesPage.semPendentes')}
                 </p>
               </div>
             </CardContent>
