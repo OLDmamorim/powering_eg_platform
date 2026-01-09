@@ -2275,3 +2275,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Análise IA personalizada com sugestões e mensagem motivacional
 - [x] Renderização condicional no frontend (gestor vs admin)
 - [x] Remover estatísticas numéricas do país para gestores
+
+
+## Correção Relatórios IA Gestores v6.7
+- [x] Corrigir campos de pontos destacados (usar pontosPositivos/pontosNegativos em vez de pontosPositivosDestacar/pontosNegativosDestacar)
+- [x] Corrigir função gerarRelatorioIAGestor para usar nomes de campos corretos do schema

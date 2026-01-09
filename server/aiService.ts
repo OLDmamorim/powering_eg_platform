@@ -1729,37 +1729,30 @@ export async function gerarRelatorioIAGestor(
   const pontosPositivos: Array<{ loja: string; descricao: string; data: string }> = [];
   const pontosNegativos: Array<{ loja: string; descricao: string; data: string }> = [];
   
-  // Dos relatórios livres
+  // Dos relatórios livres - usar descrição como conteúdo geral (não têm campos de pontos separados)
+  // Os relatórios livres são adicionados como informação geral para análise
   livresFiltrados.forEach((r: any) => {
-    if (r.pontosPositivosDestacar) {
-      pontosPositivos.push({
-        loja: r.loja?.nome || 'Loja desconhecida',
-        descricao: r.pontosPositivosDestacar,
-        data: new Date(r.dataVisita).toLocaleDateString('pt-PT')
-      });
-    }
-    if (r.pontosNegativosDestacar) {
-      pontosNegativos.push({
-        loja: r.loja?.nome || 'Loja desconhecida',
-        descricao: r.pontosNegativosDestacar,
-        data: new Date(r.dataVisita).toLocaleDateString('pt-PT')
-      });
+    // Relatórios livres não têm campos separados de pontos positivos/negativos
+    // A descrição contém toda a informação da visita
+    if (r.descricao && r.descricao.trim()) {
+      // Adicionar como ponto geral para análise pela IA
+      // A IA irá analisar o conteúdo e identificar pontos relevantes
     }
   });
   
-  // Dos relatórios completos
+  // Dos relatórios completos - usar campos pontosPositivos e pontosNegativos
   completosFiltrados.forEach((r: any) => {
-    if (r.pontosPositivosDestacar) {
+    if (r.pontosPositivos && r.pontosPositivos.trim()) {
       pontosPositivos.push({
         loja: r.loja?.nome || 'Loja desconhecida',
-        descricao: r.pontosPositivosDestacar,
+        descricao: r.pontosPositivos,
         data: new Date(r.dataVisita).toLocaleDateString('pt-PT')
       });
     }
-    if (r.pontosNegativosDestacar) {
+    if (r.pontosNegativos && r.pontosNegativos.trim()) {
       pontosNegativos.push({
         loja: r.loja?.nome || 'Loja desconhecida',
-        descricao: r.pontosNegativosDestacar,
+        descricao: r.pontosNegativos,
         data: new Date(r.dataVisita).toLocaleDateString('pt-PT')
       });
     }

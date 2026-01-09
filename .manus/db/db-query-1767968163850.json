@@ -1,0 +1,18 @@
+{
+  "query": "SELECT \n  'Relatórios Livres' as tipo,\n  COUNT(*) as total\nFROM relatorios_livres \nWHERE YEAR(dataVisita) = 2025 AND MONTH(dataVisita) = 12\nUNION ALL\nSELECT \n  'Relatórios Completos' as tipo,\n  COUNT(*) as total\nFROM relatorios_completos \nWHERE YEAR(dataVisita) = 2025 AND MONTH(dataVisita) = 12;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT \n  'Relatórios Livres' as tipo,\n  COUNT(*) as total\nFROM relatorios_livres \nWHERE YEAR(dataVisita) = 2025 AND MONTH(dataVisita) = 12\nUNION ALL\nSELECT \n  'Relatórios Completos' as tipo,\n  COUNT(*) as total\nFROM relatorios_completos \nWHERE YEAR(dataVisita) = 2025 AND MONTH(dataVisita) = 12;",
+  "rows": [
+    {
+      "tipo": "Relatórios Livres",
+      "total": "193"
+    },
+    {
+      "tipo": "Relatórios Completos",
+      "total": "58"
+    }
+  ],
+  "messages": [],
+  "stdout": "tipo\ttotal\nRelatórios Livres\t193\nRelatórios Completos\t58\n",
+  "stderr": "",
+  "execution_time_ms": 392
+}
