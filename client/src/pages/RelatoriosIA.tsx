@@ -59,6 +59,8 @@ export default function RelatoriosIA() {
     try {
       const result = await gerarMultiplosMesesQuery.refetch();
       if (result.data) {
+        console.log('[RelatoriosIA Frontend] Dados recebidos:', result.data);
+        console.log('[RelatoriosIA Frontend] tipoRelatorio:', (result.data as any).tipoRelatorio);
         setAnalise(result.data);
         toast.success("Relatório gerado com sucesso!");
       }
@@ -122,6 +124,16 @@ export default function RelatoriosIA() {
 
         {analise && !isLoading && (
           <div className="space-y-4" ref={relatorioRef}>
+            {/* Indicador de tipo de relatório */}
+            {analise.tipoRelatorio === 'gestor' && (
+              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
+                <p className="text-sm text-blue-700 dark:text-blue-300 flex items-center gap-2">
+                  <Store className="h-4 w-4" />
+                  Relatório personalizado para as suas lojas
+                </p>
+              </div>
+            )}
+
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -130,10 +142,175 @@ export default function RelatoriosIA() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground">{analise.resumo}</p>
+                <p className="text-muted-foreground">{analise.resumo || analise.resumoGeral || 'Sem resumo disponível'}</p>
               </CardContent>
             </Card>
 
+            {/* Secções específicas para gestores */}
+            {analise.tipoRelatorio === 'gestor' && (
+              <>
+                {/* Estatísticas de Relatórios */}
+                <div className="grid gap-4 md:grid-cols-3">
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-medium flex items-center gap-2">
+                        <Store className="h-4 w-4 text-primary" />
+                        Lojas Visitadas
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-2xl font-bold">{analise.relatorios?.lojasVisitadas?.length || 0}</p>
+                      <p className="text-xs text-muted-foreground">lojas no período</p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-medium flex items-center gap-2">
+                        <BarChart3 className="h-4 w-4 text-blue-500" />
+                        Relatórios Livres
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-2xl font-bold">{analise.relatorios?.totalLivres || 0}</p>
+                      <p className="text-xs text-muted-foreground">relatórios criados</p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-medium flex items-center gap-2">
+                        <Target className="h-4 w-4 text-green-500" />
+                        Relatórios Completos
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-2xl font-bold">{analise.relatorios?.totalCompletos || 0}</p>
+                      <p className="text-xs text-muted-foreground">relatórios completos</p>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Resumo de Conteúdo */}
+                {analise.relatorios?.resumoConteudo && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Activity className="h-5 w-5 text-primary" />
+                        Resumo das Atividades
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-muted-foreground">{analise.relatorios.resumoConteudo}</p>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Pendentes */}
+                {analise.pendentes && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <AlertTriangle className="h-5 w-5 text-orange-500" />
+                        Pendentes ({analise.pendentes.ativos} ativos)
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {analise.pendentes.analise && (
+                        <p className="text-muted-foreground">{analise.pendentes.analise}</p>
+                      )}
+                      <div className="grid gap-4 md:grid-cols-2">
+                        <div>
+                          <h4 className="font-medium text-sm mb-2">Criados no Período</h4>
+                          <ul className="space-y-1">
+                            {analise.pendentes.criados?.length > 0 ? (
+                              analise.pendentes.criados.map((p: any, i: number) => (
+                                <li key={i} className="text-sm text-muted-foreground">
+                                  <span className="font-medium">{p.loja}:</span> {p.descricao}
+                                </li>
+                              ))
+                            ) : (
+                              <li className="text-sm text-muted-foreground">Nenhum pendente criado</li>
+                            )}
+                          </ul>
+                        </div>
+                        <div>
+                          <h4 className="font-medium text-sm mb-2">Resolvidos no Período</h4>
+                          <ul className="space-y-1">
+                            {analise.pendentes.resolvidos?.length > 0 ? (
+                              analise.pendentes.resolvidos.map((p: any, i: number) => (
+                                <li key={i} className="text-sm text-muted-foreground">
+                                  <span className="font-medium">{p.loja}:</span> {p.descricao}
+                                </li>
+                              ))
+                            ) : (
+                              <li className="text-sm text-muted-foreground">Nenhum pendente resolvido</li>
+                            )}
+                          </ul>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Sugestões para o Gestor */}
+                {analise.sugestoesGestor && analise.sugestoesGestor.length > 0 && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Lightbulb className="h-5 w-5 text-yellow-500" />
+                        Sugestões para Si
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ul className="space-y-2">
+                        {analise.sugestoesGestor.map((sugestao: string, index: number) => (
+                          <li key={index} className="flex items-start gap-2">
+                            <Lightbulb className="h-4 w-4 text-yellow-500 mt-0.5 shrink-0" />
+                            <span className="text-muted-foreground">{sugestao}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Mensagem Motivacional */}
+                {analise.mensagemMotivacional && (
+                  <Card className="bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 border-green-200 dark:border-green-800">
+                    <CardContent className="pt-6">
+                      <div className="flex items-start gap-3">
+                        <Trophy className="h-6 w-6 text-yellow-500 shrink-0" />
+                        <p className="text-muted-foreground italic">{analise.mensagemMotivacional}</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Lista de Lojas Visitadas */}
+                {analise.relatorios?.lojasVisitadas && analise.relatorios.lojasVisitadas.length > 0 && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Store className="h-5 w-5 text-primary" />
+                        Lojas Visitadas no Período
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex flex-wrap gap-2">
+                        {analise.relatorios.lojasVisitadas.map((loja: string, index: number) => (
+                          <span key={index} className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm">
+                            {loja}
+                          </span>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </>
+            )}
+
+            {/* Secções de Admin (esconder para gestores) */}
+            {analise.tipoRelatorio !== 'gestor' && (
+              <>
             <div className="grid gap-4 md:grid-cols-2">
               <Card>
                 <CardHeader>
@@ -150,6 +327,15 @@ export default function RelatoriosIA() {
                       </p>
                       <p className="text-sm text-muted-foreground">
                         {analise.lojaMaisVisitada.visitas} visitas
+                      </p>
+                    </div>
+                  ) : analise.relatorios?.lojasVisitadas?.length > 0 ? (
+                    <div>
+                      <p className="text-2xl font-bold">
+                        {analise.relatorios.lojasVisitadas[0]}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {analise.relatorios.lojasVisitadas.length} lojas visitadas no total
                       </p>
                     </div>
                   ) : (
@@ -177,6 +363,15 @@ export default function RelatoriosIA() {
                         {analise.lojaMenosVisitada.visitas} visitas
                       </p>
                     </div>
+                  ) : analise.relatorios?.totalLivres !== undefined ? (
+                    <div>
+                      <p className="text-2xl font-bold">
+                        {analise.relatorios.totalLivres + analise.relatorios.totalCompletos}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        Relatórios ({analise.relatorios.totalLivres} livres, {analise.relatorios.totalCompletos} completos)
+                      </p>
+                    </div>
                   ) : (
                     <p className="text-muted-foreground">
                       Sem dados suficientes
@@ -195,16 +390,19 @@ export default function RelatoriosIA() {
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2">
-                  {(analise.pontosPositivos && Array.isArray(analise.pontosPositivos) && analise.pontosPositivos.length > 0) ? (
-                    analise.pontosPositivos.map((ponto: string, index: number) => (
-                      <li key={index} className="flex items-start gap-2">
-                        <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 shrink-0" />
-                        <span>{ponto}</span>
-                      </li>
-                    ))
-                  ) : (
-                    <li className="text-muted-foreground">Sem pontos positivos identificados.</li>
-                  )}
+                  {(() => {
+                    // Suportar ambos os formatos: admin (pontosPositivos) e gestor (pontosDestacados.positivos)
+                    const pontos = analise.pontosPositivos || analise.pontosDestacados?.positivos;
+                    if (pontos && Array.isArray(pontos) && pontos.length > 0) {
+                      return pontos.map((ponto: any, index: number) => (
+                        <li key={index} className="flex items-start gap-2">
+                          <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 shrink-0" />
+                          <span>{typeof ponto === 'string' ? ponto : `${ponto.loja}: ${ponto.descricao}`}</span>
+                        </li>
+                      ));
+                    }
+                    return <li className="text-muted-foreground">Sem pontos positivos identificados.</li>;
+                  })()}
                 </ul>
               </CardContent>
             </Card>
@@ -218,16 +416,19 @@ export default function RelatoriosIA() {
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2">
-                  {(analise.pontosNegativos && Array.isArray(analise.pontosNegativos) && analise.pontosNegativos.length > 0) ? (
-                    analise.pontosNegativos.map((ponto: string, index: number) => (
-                      <li key={index} className="flex items-start gap-2">
-                        <XCircle className="h-5 w-5 text-red-500 mt-0.5 shrink-0" />
-                        <span>{ponto}</span>
-                      </li>
-                    ))
-                  ) : (
-                    <li className="text-muted-foreground">Sem pontos negativos identificados.</li>
-                  )}
+                  {(() => {
+                    // Suportar ambos os formatos: admin (pontosNegativos) e gestor (pontosDestacados.negativos)
+                    const pontos = analise.pontosNegativos || analise.pontosDestacados?.negativos;
+                    if (pontos && Array.isArray(pontos) && pontos.length > 0) {
+                      return pontos.map((ponto: any, index: number) => (
+                        <li key={index} className="flex items-start gap-2">
+                          <XCircle className="h-5 w-5 text-red-500 mt-0.5 shrink-0" />
+                          <span>{typeof ponto === 'string' ? ponto : `${ponto.loja}: ${ponto.descricao}`}</span>
+                        </li>
+                      ));
+                    }
+                    return <li className="text-muted-foreground">Sem pontos negativos identificados.</li>;
+                  })()}
                 </ul>
               </CardContent>
             </Card>
@@ -248,7 +449,7 @@ export default function RelatoriosIA() {
                     Tendências Observadas
                   </h4>
                   <p className="text-muted-foreground">
-                    {analise.analisePontosDestacados?.tendencias || "Sem dados suficientes para identificar tendências."}
+                    {analise.analisePontosDestacados?.tendencias || analise.pontosDestacados?.analise || "Sem dados suficientes para identificar tendências."}
                   </p>
                 </div>
 
@@ -260,18 +461,18 @@ export default function RelatoriosIA() {
                       Pontos Positivos Destacados
                     </h4>
                     <ul className="space-y-2">
-                      {analise.analisePontosDestacados?.positivos?.length > 0 ? (
-                        (analise.analisePontosDestacados.positivos as string[]).map((ponto: string, index: number) => (
-                          <li key={index} className="flex items-start gap-2 text-sm">
-                            <ThumbsUp className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
-                            <span>{ponto}</span>
-                          </li>
-                        ))
-                      ) : (
-                        <li className="text-sm text-muted-foreground">
-                          Nenhum ponto positivo destacado neste período.
-                        </li>
-                      )}
+                      {(() => {
+                        const pontos = analise.analisePontosDestacados?.positivos || analise.pontosDestacados?.positivos;
+                        if (pontos && pontos.length > 0) {
+                          return pontos.map((ponto: any, index: number) => (
+                            <li key={index} className="flex items-start gap-2 text-sm">
+                              <ThumbsUp className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
+                              <span>{typeof ponto === 'string' ? ponto : `${ponto.loja}: ${ponto.descricao}`}</span>
+                            </li>
+                          ));
+                        }
+                        return <li className="text-sm text-muted-foreground">Nenhum ponto positivo destacado neste período.</li>;
+                      })()}
                     </ul>
                   </div>
 
@@ -282,18 +483,18 @@ export default function RelatoriosIA() {
                       Pontos Negativos Destacados
                     </h4>
                     <ul className="space-y-2">
-                      {analise.analisePontosDestacados?.negativos?.length > 0 ? (
-                        (analise.analisePontosDestacados.negativos as string[]).map((ponto: string, index: number) => (
-                          <li key={index} className="flex items-start gap-2 text-sm">
-                            <ThumbsDown className="h-4 w-4 text-red-500 mt-0.5 shrink-0" />
-                            <span>{ponto}</span>
-                          </li>
-                        ))
-                      ) : (
-                        <li className="text-sm text-muted-foreground">
-                          Nenhum ponto negativo destacado neste período.
-                        </li>
-                      )}
+                      {(() => {
+                        const pontos = analise.analisePontosDestacados?.negativos || analise.pontosDestacados?.negativos;
+                        if (pontos && pontos.length > 0) {
+                          return pontos.map((ponto: any, index: number) => (
+                            <li key={index} className="flex items-start gap-2 text-sm">
+                              <ThumbsDown className="h-4 w-4 text-red-500 mt-0.5 shrink-0" />
+                              <span>{typeof ponto === 'string' ? ponto : `${ponto.loja}: ${ponto.descricao}`}</span>
+                            </li>
+                          ));
+                        }
+                        return <li className="text-sm text-muted-foreground">Nenhum ponto negativo destacado neste período.</li>;
+                      })()}
                     </ul>
                   </div>
                 </div>
@@ -604,6 +805,8 @@ export default function RelatoriosIA() {
                 </div>
               </CardContent>
             </Card>
+              </>
+            )}
           </div>
         )}
       </div>

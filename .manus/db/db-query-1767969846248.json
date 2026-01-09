@@ -1,0 +1,40 @@
+{
+  "query": "SELECT id, lojaId, gestorId, dataVisita FROM relatorios_livres LIMIT 5",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT id, lojaId, gestorId, dataVisita FROM relatorios_livres LIMIT 5",
+  "rows": [
+    {
+      "id": "120001",
+      "lojaId": "60001",
+      "gestorId": "30001",
+      "dataVisita": "2025-12-16 08:03:15"
+    },
+    {
+      "id": "150001",
+      "lojaId": "60004",
+      "gestorId": "30001",
+      "dataVisita": "2025-12-16 14:33:07"
+    },
+    {
+      "id": "180001",
+      "lojaId": "90005",
+      "gestorId": "60001",
+      "dataVisita": "2025-12-16 19:09:49"
+    },
+    {
+      "id": "180002",
+      "lojaId": "90005",
+      "gestorId": "60001",
+      "dataVisita": "2024-12-10 19:30:00"
+    },
+    {
+      "id": "180003",
+      "lojaId": "90005",
+      "gestorId": "60001",
+      "dataVisita": "2024-12-05 19:00:00"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tlojaId\tgestorId\tdataVisita\n120001\t60001\t30001\t2025-12-16 08:03:15\n150001\t60004\t30001\t2025-12-16 14:33:07\n180001\t90005\t60001\t2025-12-16 19:09:49\n180002\t90005\t60001\t2024-12-10 19:30:00\n180003\t90005\t60001\t2024-12-05 19:00:00\n",
+  "stderr": "",
+  "execution_time_ms": 380
+}

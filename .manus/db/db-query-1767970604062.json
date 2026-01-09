@@ -1,0 +1,45 @@
+{
+  "query": "SELECT u.id, u.name, u.email, u.role, g.id as gestor_id FROM users u LEFT JOIN gestores g ON g.userId = u.id WHERE u.role = 'gestor' LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT u.id, u.name, u.email, u.role, g.id as gestor_id FROM users u LEFT JOIN gestores g ON g.userId = u.id WHERE u.role = 'gestor' LIMIT 5;",
+  "rows": [
+    {
+      "id": "420030",
+      "name": "Marco Amorim",
+      "email": "mamorim@expressglass.pt",
+      "role": "gestor",
+      "gestor_id": "30001"
+    },
+    {
+      "id": "2160121",
+      "name": "Marco Vilar",
+      "email": "mvilar@expressglass.pt",
+      "role": "gestor",
+      "gestor_id": "120001"
+    },
+    {
+      "id": "2160125",
+      "name": "Mónica Correira",
+      "email": "mcorreia@expressglass.pt",
+      "role": "gestor",
+      "gestor_id": "120002"
+    },
+    {
+      "id": "6600028",
+      "name": "Rui Adriao ",
+      "email": "rui.adriao@expressglass.pt",
+      "role": "gestor",
+      "gestor_id": "570003"
+    },
+    {
+      "id": "7290151",
+      "name": "Gestor Reunioes Filtro",
+      "email": "gestor-reunioes-filtro@test.com",
+      "role": "gestor",
+      "gestor_id": "1080018"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\temail\trole\tgestor_id\n420030\tMarco Amorim\tmamorim@expressglass.pt\tgestor\t30001\n2160121\tMarco Vilar\tmvilar@expressglass.pt\tgestor\t120001\n2160125\tMónica Correira\tmcorreia@expressglass.pt\tgestor\t120002\n6600028\tRui Adriao \trui.adriao@expressglass.pt\tgestor\t570003\n7290151\tGestor Reunioes Filtro\tgestor-reunioes-filtro@test.com\tgestor\t1080018\n",
+  "stderr": "",
+  "execution_time_ms": 394
+}

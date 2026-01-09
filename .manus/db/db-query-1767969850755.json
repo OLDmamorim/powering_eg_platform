@@ -1,0 +1,60 @@
+{
+  "query": "SELECT id, gestorId, dataVisita FROM relatorios_livres ORDER BY dataVisita DESC LIMIT 10",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT id, gestorId, dataVisita FROM relatorios_livres ORDER BY dataVisita DESC LIMIT 10",
+  "rows": [
+    {
+      "id": "1110018",
+      "gestorId": "1080019",
+      "dataVisita": "2026-01-09 13:52:35"
+    },
+    {
+      "id": "1110017",
+      "gestorId": "1080019",
+      "dataVisita": "2026-01-09 13:52:35"
+    },
+    {
+      "id": "1110016",
+      "gestorId": "750015",
+      "dataVisita": "2026-01-09 13:52:31"
+    },
+    {
+      "id": "1110014",
+      "gestorId": "1080011",
+      "dataVisita": "2026-01-09 13:52:28"
+    },
+    {
+      "id": "1110015",
+      "gestorId": "1080011",
+      "dataVisita": "2026-01-09 13:52:28"
+    },
+    {
+      "id": "1110013",
+      "gestorId": "1080011",
+      "dataVisita": "2026-01-09 13:52:27"
+    },
+    {
+      "id": "1110008",
+      "gestorId": "1050007",
+      "dataVisita": "2026-01-09 13:52:26"
+    },
+    {
+      "id": "1110009",
+      "gestorId": "1050006",
+      "dataVisita": "2026-01-09 13:52:26"
+    },
+    {
+      "id": "1110007",
+      "gestorId": "1080011",
+      "dataVisita": "2026-01-09 13:52:26"
+    },
+    {
+      "id": "1110012",
+      "gestorId": "1080011",
+      "dataVisita": "2026-01-09 13:52:26"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tgestorId\tdataVisita\n1110018\t1080019\t2026-01-09 13:52:35\n1110017\t1080019\t2026-01-09 13:52:35\n1110016\t750015\t2026-01-09 13:52:31\n1110014\t1080011\t2026-01-09 13:52:28\n1110015\t1080011\t2026-01-09 13:52:28\n1110013\t1080011\t2026-01-09 13:52:27\n1110008\t1050007\t2026-01-09 13:52:26\n1110009\t1050006\t2026-01-09 13:52:26\n1110007\t1080011\t2026-01-09 13:52:26\n1110012\t1080011\t2026-01-09 13:52:26\n",
+  "stderr": "",
+  "execution_time_ms": 391
+}

@@ -1,0 +1,19 @@
+{
+  "query": "SELECT COUNT(*) as total_livres FROM relatorios_livres;\nSELECT COUNT(*) as total_completos FROM relatorios_completos;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT COUNT(*) as total_livres FROM relatorios_livres;\nSELECT COUNT(*) as total_completos FROM relatorios_completos;",
+  "rows": [
+    {
+      "total_livres": "526"
+    },
+    {
+      "total_livres": "total_completos"
+    },
+    {
+      "total_livres": "172"
+    }
+  ],
+  "messages": [],
+  "stdout": "total_livres\n526\ntotal_completos\n172\n",
+  "stderr": "",
+  "execution_time_ms": 602
+}

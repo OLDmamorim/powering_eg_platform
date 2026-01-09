@@ -1,0 +1,21 @@
+{
+  "query": "SELECT * FROM users WHERE email = 'mamorim@expressglass.pt';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT * FROM users WHERE email = 'mamorim@expressglass.pt';",
+  "rows": [
+    {
+      "id": "420030",
+      "openId": "M6W777U2ZPR3y5QVg75RaS",
+      "name": "Marco Amorim",
+      "email": "mamorim@expressglass.pt",
+      "loginMethod": "google",
+      "role": "gestor",
+      "createdAt": "2025-12-15 12:34:33",
+      "updatedAt": "2026-01-09 14:59:36",
+      "lastSignedIn": "2026-01-09 14:59:36"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\topenId\tname\temail\tloginMethod\trole\tcreatedAt\tupdatedAt\tlastSignedIn\n420030\tM6W777U2ZPR3y5QVg75RaS\tMarco Amorim\tmamorim@expressglass.pt\tgoogle\tgestor\t2025-12-15 12:34:33\t2026-01-09 14:59:36\t2026-01-09 14:59:36\n",
+  "stderr": "",
+  "execution_time_ms": 399
+}

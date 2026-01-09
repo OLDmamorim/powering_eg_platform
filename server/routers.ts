@@ -1054,11 +1054,27 @@ export const appRouter = router({
         let lojasIds: number[] | undefined;
         let filtroDescricao = "Todo o País";
         
+        // DEBUG: Log para identificar problema com gestores
+        console.log('[RelatoriosIA DEBUG] User:', ctx.user.id, ctx.user.email, 'Role:', ctx.user.role);
+        console.log('[RelatoriosIA DEBUG] Gestor context:', ctx.gestor?.id);
+        
         if (ctx.user.role !== "admin") {
           // Gestores usam função específica com análise qualitativa
           gestorId = ctx.gestor?.id;
+          
+          // Fallback: buscar gestor diretamente se não estiver no contexto
+          if (!gestorId) {
+            console.log('[RelatoriosIA DEBUG] Gestor não no contexto, a buscar diretamente...');
+            const gestorDireto = await db.getGestorByUserId(ctx.user.id);
+            gestorId = gestorDireto?.id;
+            console.log('[RelatoriosIA DEBUG] Gestor encontrado diretamente:', gestorId);
+          }
+          
+          console.log('[RelatoriosIA DEBUG] Gestor ID final:', gestorId);
           if (gestorId) {
+            console.log('[RelatoriosIA DEBUG] A chamar gerarRelatorioIAGestorMultiplosMeses...');
             const analiseGestor = await gerarRelatorioIAGestorMultiplosMeses(input.mesesSelecionados, gestorId);
+            console.log('[RelatoriosIA DEBUG] Resultado tipoRelatorio:', analiseGestor?.tipoRelatorio);
             
             // Salvar relatório IA na base de dados
             try {

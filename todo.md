@@ -2280,3 +2280,25 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## Correção Relatórios IA Gestores v6.7
 - [x] Corrigir campos de pontos destacados (usar pontosPositivos/pontosNegativos em vez de pontosPositivosDestacar/pontosNegativosDestacar)
 - [x] Corrigir função gerarRelatorioIAGestor para usar nomes de campos corretos do schema
+
+
+## Bug - Relatórios IA sem conteúdo
+- [ ] Investigar porque Relatórios IA mostram "Sem dados suficientes"
+- [ ] Verificar se há dados de supervisões/relatórios na base de dados
+- [ ] Corrigir lógica de geração de conteúdo nos Relatórios IA
+- [ ] Testar que os dados aparecem corretamente após correção
+
+
+## Bug - Relatórios IA para Gestores não mostram dados
+- [ ] Página RelatoriosIA.tsx não suporta formato de resposta de gestor (tipoRelatorio: 'gestor')
+- [ ] Campos esperados pela UI: resumo, lojaMaisVisitada, lojaMenosVisitada, pontosPositivos, pontosNegativos
+- [ ] Campos recebidos de gestor: resumoGeral, pontosDestacados.positivos/negativos, relatorios.lojasVisitadas
+- [ ] Solução: Adaptar UI para detectar tipoRelatorio e mostrar dados corretos
+
+
+## Bug - Relatórios IA para Gestores v6.2
+- [x] Identificar problema: página mostra secções de admin em vez de gestor
+- [x] Adicionar fallback para buscar gestor diretamente quando ctx.gestor não existe
+- [x] Adicionar logs de debug no router gerarMultiplosMeses
+- [x] Adicionar logs de debug no frontend RelatoriosIA.tsx
+- [ ] Testar com conta de gestor após publicação

@@ -1,0 +1,1792 @@
+{
+  "query": "SELECT g.id, g.userId, u.name, u.email, u.role,\n       (SELECT COUNT(*) FROM relatorios_livres WHERE gestorId = g.id) as rel_livres,\n       (SELECT COUNT(*) FROM relatorios_completos WHERE gestorId = g.id) as rel_completos\nFROM gestores g\nLEFT JOIN users u ON g.userId = u.id",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT g.id, g.userId, u.name, u.email, u.role,\n       (SELECT COUNT(*) FROM relatorios_livres WHERE gestorId = g.id) as rel_livres,\n       (SELECT COUNT(*) FROM relatorios_completos WHERE gestorId = g.id) as rel_completos\nFROM gestores g\nLEFT JOIN users u ON g.userId = u.id",
+  "rows": [
+    {
+      "id": "240001",
+      "userId": "4020003",
+      "name": "NULL",
+      "email": "NULL",
+      "role": "NULL",
+      "rel_livres": "28",
+      "rel_completos": "10"
+    },
+    {
+      "id": "240003",
+      "userId": "4020003",
+      "name": "NULL",
+      "email": "NULL",
+      "role": "NULL",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "240005",
+      "userId": "4020003",
+      "name": "NULL",
+      "email": "NULL",
+      "role": "NULL",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "270001",
+      "userId": "4050001",
+      "name": "NULL",
+      "email": "NULL",
+      "role": "NULL",
+      "rel_livres": "9",
+      "rel_completos": "8"
+    },
+    {
+      "id": "270003",
+      "userId": "4050001",
+      "name": "NULL",
+      "email": "NULL",
+      "role": "NULL",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "300001",
+      "userId": "4080004",
+      "name": "NULL",
+      "email": "NULL",
+      "role": "NULL",
+      "rel_livres": "25",
+      "rel_completos": "17"
+    },
+    {
+      "id": "300003",
+      "userId": "4080004",
+      "name": "NULL",
+      "email": "NULL",
+      "role": "NULL",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "300005",
+      "userId": "4080052",
+      "name": "NULL",
+      "email": "NULL",
+      "role": "NULL",
+      "rel_livres": "6",
+      "rel_completos": "0"
+    },
+    {
+      "id": "330001",
+      "userId": "4080052",
+      "name": "NULL",
+      "email": "NULL",
+      "role": "NULL",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "390002",
+      "userId": "4500005",
+      "name": "NULL",
+      "email": "NULL",
+      "role": "NULL",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "390004",
+      "userId": "4500007",
+      "name": "NULL",
+      "email": "NULL",
+      "role": "NULL",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "390006",
+      "userId": "4500009",
+      "name": "NULL",
+      "email": "NULL",
+      "role": "NULL",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "420001",
+      "userId": "6030026",
+      "name": "NULL",
+      "email": "NULL",
+      "role": "NULL",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "420002",
+      "userId": "6030026",
+      "name": "NULL",
+      "email": "NULL",
+      "role": "NULL",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "420004",
+      "userId": "6030026",
+      "name": "NULL",
+      "email": "NULL",
+      "role": "NULL",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "420006",
+      "userId": "6030026",
+      "name": "NULL",
+      "email": "NULL",
+      "role": "NULL",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "450001",
+      "userId": "4080004",
+      "name": "NULL",
+      "email": "NULL",
+      "role": "NULL",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "450002",
+      "userId": "4050001",
+      "name": "NULL",
+      "email": "NULL",
+      "role": "NULL",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "450003",
+      "userId": "4020003",
+      "name": "NULL",
+      "email": "NULL",
+      "role": "NULL",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "450010",
+      "userId": "4020003",
+      "name": "NULL",
+      "email": "NULL",
+      "role": "NULL",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "450011",
+      "userId": "4080004",
+      "name": "NULL",
+      "email": "NULL",
+      "role": "NULL",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "450015",
+      "userId": "4050001",
+      "name": "NULL",
+      "email": "NULL",
+      "role": "NULL",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "450017",
+      "userId": "4080004",
+      "name": "NULL",
+      "email": "NULL",
+      "role": "NULL",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "450018",
+      "userId": "4020003",
+      "name": "NULL",
+      "email": "NULL",
+      "role": "NULL",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "450023",
+      "userId": "4050001",
+      "name": "NULL",
+      "email": "NULL",
+      "role": "NULL",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "450026",
+      "userId": "6300015",
+      "name": "NULL",
+      "email": "NULL",
+      "role": "NULL",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "450027",
+      "userId": "4080052",
+      "name": "NULL",
+      "email": "NULL",
+      "role": "NULL",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "450028",
+      "userId": "6030026",
+      "name": "NULL",
+      "email": "NULL",
+      "role": "NULL",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "450032",
+      "userId": "4020003",
+      "name": "NULL",
+      "email": "NULL",
+      "role": "NULL",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "450033",
+      "userId": "4080004",
+      "name": "NULL",
+      "email": "NULL",
+      "role": "NULL",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "450034",
+      "userId": "4050001",
+      "name": "NULL",
+      "email": "NULL",
+      "role": "NULL",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "450040",
+      "userId": "6300019",
+      "name": "NULL",
+      "email": "NULL",
+      "role": "NULL",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "450041",
+      "userId": "4080052",
+      "name": "NULL",
+      "email": "NULL",
+      "role": "NULL",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "450043",
+      "userId": "6030026",
+      "name": "NULL",
+      "email": "NULL",
+      "role": "NULL",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "480003",
+      "userId": "4050001",
+      "name": "NULL",
+      "email": "NULL",
+      "role": "NULL",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "480004",
+      "userId": "4020003",
+      "name": "NULL",
+      "email": "NULL",
+      "role": "NULL",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "480006",
+      "userId": "4080004",
+      "name": "NULL",
+      "email": "NULL",
+      "role": "NULL",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "480011",
+      "userId": "6360261",
+      "name": "NULL",
+      "email": "NULL",
+      "role": "NULL",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "480012",
+      "userId": "4080052",
+      "name": "NULL",
+      "email": "NULL",
+      "role": "NULL",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "480014",
+      "userId": "6030026",
+      "name": "NULL",
+      "email": "NULL",
+      "role": "NULL",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "480018",
+      "userId": "4080004",
+      "name": "NULL",
+      "email": "NULL",
+      "role": "NULL",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "480019",
+      "userId": "4050001",
+      "name": "NULL",
+      "email": "NULL",
+      "role": "NULL",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "480020",
+      "userId": "4020003",
+      "name": "NULL",
+      "email": "NULL",
+      "role": "NULL",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "480026",
+      "userId": "6360268",
+      "name": "NULL",
+      "email": "NULL",
+      "role": "NULL",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "480027",
+      "userId": "4080052",
+      "name": "NULL",
+      "email": "NULL",
+      "role": "NULL",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "480029",
+      "userId": "6030026",
+      "name": "NULL",
+      "email": "NULL",
+      "role": "NULL",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "480033",
+      "userId": "4080004",
+      "name": "NULL",
+      "email": "NULL",
+      "role": "NULL",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "480034",
+      "userId": "4050001",
+      "name": "NULL",
+      "email": "NULL",
+      "role": "NULL",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "480035",
+      "userId": "4020003",
+      "name": "NULL",
+      "email": "NULL",
+      "role": "NULL",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "480041",
+      "userId": "6360278",
+      "name": "NULL",
+      "email": "NULL",
+      "role": "NULL",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "480042",
+      "userId": "4080052",
+      "name": "NULL",
+      "email": "NULL",
+      "role": "NULL",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "480044",
+      "userId": "6030026",
+      "name": "NULL",
+      "email": "NULL",
+      "role": "NULL",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "480050",
+      "userId": "4050001",
+      "name": "NULL",
+      "email": "NULL",
+      "role": "NULL",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "480052",
+      "userId": "4080004",
+      "name": "NULL",
+      "email": "NULL",
+      "role": "NULL",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "480053",
+      "userId": "4020003",
+      "name": "NULL",
+      "email": "NULL",
+      "role": "NULL",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "480057",
+      "userId": "4080004",
+      "name": "NULL",
+      "email": "NULL",
+      "role": "NULL",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "480058",
+      "userId": "4050001",
+      "name": "NULL",
+      "email": "NULL",
+      "role": "NULL",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "480061",
+      "userId": "4020003",
+      "name": "NULL",
+      "email": "NULL",
+      "role": "NULL",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "480066",
+      "userId": "6361034",
+      "name": "NULL",
+      "email": "NULL",
+      "role": "NULL",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "480067",
+      "userId": "4080052",
+      "name": "NULL",
+      "email": "NULL",
+      "role": "NULL",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "210001",
+      "userId": "240006",
+      "name": "Mauro Furtado",
+      "email": "mfurtado@expressglass.pt",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "2",
+      "userId": "240006",
+      "name": "Mauro Furtado",
+      "email": "mfurtado@expressglass.pt",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "30001",
+      "userId": "420030",
+      "name": "Marco Amorim",
+      "email": "mamorim@expressglass.pt",
+      "role": "gestor",
+      "rel_livres": "15",
+      "rel_completos": "6"
+    },
+    {
+      "id": "120001",
+      "userId": "2160121",
+      "name": "Marco Vilar",
+      "email": "mvilar@expressglass.pt",
+      "role": "gestor",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "120002",
+      "userId": "2160125",
+      "name": "Mónica Correira",
+      "email": "mcorreia@expressglass.pt",
+      "role": "gestor",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "570001",
+      "userId": "6600014",
+      "name": "List Test Name 1767372508573",
+      "email": "list.test.1767372508573@expressglass.pt",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "570003",
+      "userId": "6600028",
+      "name": "Rui Adriao ",
+      "email": "rui.adriao@expressglass.pt",
+      "role": "gestor",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "780002",
+      "userId": "6960011",
+      "name": "List Test Name 1767866791435",
+      "email": "list.test.1767866791435@expressglass.pt",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "1080017",
+      "userId": "7290150",
+      "name": "Admin Reunioes Filtro",
+      "email": "admin-reunioes-filtro@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "990036",
+      "userId": "7290150",
+      "name": "Admin Reunioes Filtro",
+      "email": "admin-reunioes-filtro@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "990017",
+      "userId": "7290150",
+      "name": "Admin Reunioes Filtro",
+      "email": "admin-reunioes-filtro@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "960017",
+      "userId": "7290150",
+      "name": "Admin Reunioes Filtro",
+      "email": "admin-reunioes-filtro@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "930104",
+      "userId": "7290150",
+      "name": "Admin Reunioes Filtro",
+      "email": "admin-reunioes-filtro@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "930085",
+      "userId": "7290150",
+      "name": "Admin Reunioes Filtro",
+      "email": "admin-reunioes-filtro@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "930066",
+      "userId": "7290150",
+      "name": "Admin Reunioes Filtro",
+      "email": "admin-reunioes-filtro@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "930047",
+      "userId": "7290150",
+      "name": "Admin Reunioes Filtro",
+      "email": "admin-reunioes-filtro@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "930028",
+      "userId": "7290150",
+      "name": "Admin Reunioes Filtro",
+      "email": "admin-reunioes-filtro@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "870017",
+      "userId": "7290150",
+      "name": "Admin Reunioes Filtro",
+      "email": "admin-reunioes-filtro@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "840021",
+      "userId": "7290150",
+      "name": "Admin Reunioes Filtro",
+      "email": "admin-reunioes-filtro@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "810017",
+      "userId": "7290150",
+      "name": "Admin Reunioes Filtro",
+      "email": "admin-reunioes-filtro@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "750017",
+      "userId": "7290150",
+      "name": "Admin Reunioes Filtro",
+      "email": "admin-reunioes-filtro@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "720086",
+      "userId": "7290150",
+      "name": "Admin Reunioes Filtro",
+      "email": "admin-reunioes-filtro@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "720053",
+      "userId": "7290150",
+      "name": "Admin Reunioes Filtro",
+      "email": "admin-reunioes-filtro@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "720030",
+      "userId": "7290150",
+      "name": "Admin Reunioes Filtro",
+      "email": "admin-reunioes-filtro@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "660013",
+      "userId": "7290150",
+      "name": "Admin Reunioes Filtro",
+      "email": "admin-reunioes-filtro@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "1080018",
+      "userId": "7290151",
+      "name": "Gestor Reunioes Filtro",
+      "email": "gestor-reunioes-filtro@test.com",
+      "role": "gestor",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "1080001",
+      "userId": "7410262",
+      "name": "Admin Email Test",
+      "email": "admin.email@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "1050002",
+      "userId": "7410262",
+      "name": "Admin Email Test",
+      "email": "admin.email@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "990021",
+      "userId": "7410262",
+      "name": "Admin Email Test",
+      "email": "admin.email@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "990003",
+      "userId": "7410262",
+      "name": "Admin Email Test",
+      "email": "admin.email@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "960003",
+      "userId": "7410262",
+      "name": "Admin Email Test",
+      "email": "admin.email@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "930119",
+      "userId": "7410262",
+      "name": "Admin Email Test",
+      "email": "admin.email@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "930108",
+      "userId": "7410262",
+      "name": "Admin Email Test",
+      "email": "admin.email@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "930091",
+      "userId": "7410262",
+      "name": "Admin Email Test",
+      "email": "admin.email@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "930070",
+      "userId": "7410262",
+      "name": "Admin Email Test",
+      "email": "admin.email@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "930050",
+      "userId": "7410262",
+      "name": "Admin Email Test",
+      "email": "admin.email@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "930031",
+      "userId": "7410262",
+      "name": "Admin Email Test",
+      "email": "admin.email@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "930014",
+      "userId": "7410262",
+      "name": "Admin Email Test",
+      "email": "admin.email@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "930007",
+      "userId": "7410262",
+      "name": "Admin Email Test",
+      "email": "admin.email@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "870005",
+      "userId": "7410262",
+      "name": "Admin Email Test",
+      "email": "admin.email@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "840004",
+      "userId": "7410262",
+      "name": "Admin Email Test",
+      "email": "admin.email@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "810004",
+      "userId": "7410262",
+      "name": "Admin Email Test",
+      "email": "admin.email@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "750001",
+      "userId": "7410262",
+      "name": "Admin Email Test",
+      "email": "admin.email@test.com",
+      "role": "admin",
+      "rel_livres": "17",
+      "rel_completos": "16"
+    },
+    {
+      "id": "1080003",
+      "userId": "7410263",
+      "name": "Admin Comentarios Test",
+      "email": "admin.comentarios@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "1050003",
+      "userId": "7410263",
+      "name": "Admin Comentarios Test",
+      "email": "admin.comentarios@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "990022",
+      "userId": "7410263",
+      "name": "Admin Comentarios Test",
+      "email": "admin.comentarios@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "990005",
+      "userId": "7410263",
+      "name": "Admin Comentarios Test",
+      "email": "admin.comentarios@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "960001",
+      "userId": "7410263",
+      "name": "Admin Comentarios Test",
+      "email": "admin.comentarios@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "930120",
+      "userId": "7410263",
+      "name": "Admin Comentarios Test",
+      "email": "admin.comentarios@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "930107",
+      "userId": "7410263",
+      "name": "Admin Comentarios Test",
+      "email": "admin.comentarios@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "930088",
+      "userId": "7410263",
+      "name": "Admin Comentarios Test",
+      "email": "admin.comentarios@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "930069",
+      "userId": "7410263",
+      "name": "Admin Comentarios Test",
+      "email": "admin.comentarios@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "930051",
+      "userId": "7410263",
+      "name": "Admin Comentarios Test",
+      "email": "admin.comentarios@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "930034",
+      "userId": "7410263",
+      "name": "Admin Comentarios Test",
+      "email": "admin.comentarios@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "930013",
+      "userId": "7410263",
+      "name": "Admin Comentarios Test",
+      "email": "admin.comentarios@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "930002",
+      "userId": "7410263",
+      "name": "Admin Comentarios Test",
+      "email": "admin.comentarios@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "870006",
+      "userId": "7410263",
+      "name": "Admin Comentarios Test",
+      "email": "admin.comentarios@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "840010",
+      "userId": "7410263",
+      "name": "Admin Comentarios Test",
+      "email": "admin.comentarios@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "840003",
+      "userId": "7410263",
+      "name": "Admin Comentarios Test",
+      "email": "admin.comentarios@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "810003",
+      "userId": "7410263",
+      "name": "Admin Comentarios Test",
+      "email": "admin.comentarios@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "750002",
+      "userId": "7410263",
+      "name": "Admin Comentarios Test",
+      "email": "admin.comentarios@test.com",
+      "role": "admin",
+      "rel_livres": "50",
+      "rel_completos": "33"
+    },
+    {
+      "id": "1080004",
+      "userId": "7410264",
+      "name": "Admin Teste",
+      "email": "admin@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "1050001",
+      "userId": "7410264",
+      "name": "Admin Teste",
+      "email": "admin@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "990024",
+      "userId": "7410264",
+      "name": "Admin Teste",
+      "email": "admin@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "990002",
+      "userId": "7410264",
+      "name": "Admin Teste",
+      "email": "admin@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "960005",
+      "userId": "7410264",
+      "name": "Admin Teste",
+      "email": "admin@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "930122",
+      "userId": "7410264",
+      "name": "Admin Teste",
+      "email": "admin@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "930109",
+      "userId": "7410264",
+      "name": "Admin Teste",
+      "email": "admin@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "930089",
+      "userId": "7410264",
+      "name": "Admin Teste",
+      "email": "admin@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "930072",
+      "userId": "7410264",
+      "name": "Admin Teste",
+      "email": "admin@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "930052",
+      "userId": "7410264",
+      "name": "Admin Teste",
+      "email": "admin@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "930033",
+      "userId": "7410264",
+      "name": "Admin Teste",
+      "email": "admin@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "930017",
+      "userId": "7410264",
+      "name": "Admin Teste",
+      "email": "admin@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "930003",
+      "userId": "7410264",
+      "name": "Admin Teste",
+      "email": "admin@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "870001",
+      "userId": "7410264",
+      "name": "Admin Teste",
+      "email": "admin@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "840001",
+      "userId": "7410264",
+      "name": "Admin Teste",
+      "email": "admin@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "810002",
+      "userId": "7410264",
+      "name": "Admin Teste",
+      "email": "admin@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "750003",
+      "userId": "7410264",
+      "name": "Admin Teste",
+      "email": "admin@test.com",
+      "role": "admin",
+      "rel_livres": "48",
+      "rel_completos": "16"
+    },
+    {
+      "id": "1080005",
+      "userId": "7410265",
+      "name": "Gestor Teste Data/Hora",
+      "email": "gestor.datahora@test.com",
+      "role": "gestor",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "1050004",
+      "userId": "7410265",
+      "name": "Gestor Teste Data/Hora",
+      "email": "gestor.datahora@test.com",
+      "role": "gestor",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "1080008",
+      "userId": "7410266",
+      "name": "Gestor Teste",
+      "email": "gestor@test.com",
+      "role": "gestor",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "1050006",
+      "userId": "7410266",
+      "name": "Gestor Teste",
+      "email": "gestor@test.com",
+      "role": "gestor",
+      "rel_livres": "1",
+      "rel_completos": "0"
+    },
+    {
+      "id": "1080007",
+      "userId": "7410267",
+      "name": "Gestor Comentarios Test",
+      "email": "gestor.comentarios@test.com",
+      "role": "gestor",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "1050008",
+      "userId": "7410267",
+      "name": "Gestor Comentarios Test",
+      "email": "gestor.comentarios@test.com",
+      "role": "gestor",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "990026",
+      "userId": "7410267",
+      "name": "Gestor Comentarios Test",
+      "email": "gestor.comentarios@test.com",
+      "role": "gestor",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "990008",
+      "userId": "7410267",
+      "name": "Gestor Comentarios Test",
+      "email": "gestor.comentarios@test.com",
+      "role": "gestor",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "960006",
+      "userId": "7410267",
+      "name": "Gestor Comentarios Test",
+      "email": "gestor.comentarios@test.com",
+      "role": "gestor",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "930125",
+      "userId": "7410267",
+      "name": "Gestor Comentarios Test",
+      "email": "gestor.comentarios@test.com",
+      "role": "gestor",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "930113",
+      "userId": "7410267",
+      "name": "Gestor Comentarios Test",
+      "email": "gestor.comentarios@test.com",
+      "role": "gestor",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "930093",
+      "userId": "7410267",
+      "name": "Gestor Comentarios Test",
+      "email": "gestor.comentarios@test.com",
+      "role": "gestor",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "930074",
+      "userId": "7410267",
+      "name": "Gestor Comentarios Test",
+      "email": "gestor.comentarios@test.com",
+      "role": "gestor",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "930055",
+      "userId": "7410267",
+      "name": "Gestor Comentarios Test",
+      "email": "gestor.comentarios@test.com",
+      "role": "gestor",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "930038",
+      "userId": "7410267",
+      "name": "Gestor Comentarios Test",
+      "email": "gestor.comentarios@test.com",
+      "role": "gestor",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "930015",
+      "userId": "7410267",
+      "name": "Gestor Comentarios Test",
+      "email": "gestor.comentarios@test.com",
+      "role": "gestor",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "930004",
+      "userId": "7410267",
+      "name": "Gestor Comentarios Test",
+      "email": "gestor.comentarios@test.com",
+      "role": "gestor",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "1080006",
+      "userId": "7410268",
+      "name": "Gestor Email Test",
+      "email": "gestor.email@test.com",
+      "role": "gestor",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "1050007",
+      "userId": "7410268",
+      "name": "Gestor Email Test",
+      "email": "gestor.email@test.com",
+      "role": "gestor",
+      "rel_livres": "1",
+      "rel_completos": "0"
+    },
+    {
+      "id": "1080012",
+      "userId": "7410269",
+      "name": "Gestor Ocorrencias Test",
+      "email": "gestor.ocorrencias@test.com",
+      "role": "gestor",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "1080009",
+      "userId": "7410269",
+      "name": "Gestor Ocorrencias Test",
+      "email": "gestor.ocorrencias@test.com",
+      "role": "gestor",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "1080002",
+      "userId": "7410269",
+      "name": "Gestor Ocorrencias Test",
+      "email": "gestor.ocorrencias@test.com",
+      "role": "gestor",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "1050009",
+      "userId": "7410269",
+      "name": "Gestor Ocorrencias Test",
+      "email": "gestor.ocorrencias@test.com",
+      "role": "gestor",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "1050005",
+      "userId": "7410269",
+      "name": "Gestor Ocorrencias Test",
+      "email": "gestor.ocorrencias@test.com",
+      "role": "gestor",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "1080010",
+      "userId": "7410270",
+      "name": "Outro Gestor Test",
+      "email": "outro.gestor@test.com",
+      "role": "gestor",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "1050010",
+      "userId": "7410270",
+      "name": "Outro Gestor Test",
+      "email": "outro.gestor@test.com",
+      "role": "gestor",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "1080011",
+      "userId": "7410271",
+      "name": "Gestor Multi-Lojas Test",
+      "email": "gestor.multilojas@test.com",
+      "role": "gestor",
+      "rel_livres": "6",
+      "rel_completos": "1"
+    },
+    {
+      "id": "750014",
+      "userId": "7410273",
+      "name": "Admin Teste",
+      "email": "admin-ia-test-1767372482915@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "1080015",
+      "userId": "7410274",
+      "name": "Admin Lojas Test",
+      "email": "admin.lojas@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "990034",
+      "userId": "7410274",
+      "name": "Admin Lojas Test",
+      "email": "admin.lojas@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "990015",
+      "userId": "7410274",
+      "name": "Admin Lojas Test",
+      "email": "admin.lojas@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "960015",
+      "userId": "7410274",
+      "name": "Admin Lojas Test",
+      "email": "admin.lojas@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "930102",
+      "userId": "7410274",
+      "name": "Admin Lojas Test",
+      "email": "admin.lojas@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "930083",
+      "userId": "7410274",
+      "name": "Admin Lojas Test",
+      "email": "admin.lojas@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "930064",
+      "userId": "7410274",
+      "name": "Admin Lojas Test",
+      "email": "admin.lojas@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "930045",
+      "userId": "7410274",
+      "name": "Admin Lojas Test",
+      "email": "admin.lojas@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "930026",
+      "userId": "7410274",
+      "name": "Admin Lojas Test",
+      "email": "admin.lojas@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "870015",
+      "userId": "7410274",
+      "name": "Admin Lojas Test",
+      "email": "admin.lojas@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "840019",
+      "userId": "7410274",
+      "name": "Admin Lojas Test",
+      "email": "admin.lojas@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "810015",
+      "userId": "7410274",
+      "name": "Admin Lojas Test",
+      "email": "admin.lojas@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "750015",
+      "userId": "7410274",
+      "name": "Admin Lojas Test",
+      "email": "admin.lojas@test.com",
+      "role": "admin",
+      "rel_livres": "13",
+      "rel_completos": "0"
+    },
+    {
+      "id": "1080016",
+      "userId": "7410275",
+      "name": "Gestor Lojas Test",
+      "email": "gestor.lojas@test.com",
+      "role": "gestor",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "780001",
+      "userId": "7470026",
+      "name": "List Test Name 1767688768007",
+      "email": "list.test.1767688768008@expressglass.pt",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "810014",
+      "userId": "7890173",
+      "name": "Admin Teste",
+      "email": "admin-ia-test-1767637722740@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "840018",
+      "userId": "7920133",
+      "name": "Admin Teste",
+      "email": "admin-ia-test-1767688509911@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "870014",
+      "userId": "7950039",
+      "name": "Admin Teste",
+      "email": "admin-ia-test-1767691167951@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "1020001",
+      "userId": "7980023",
+      "name": "Fabio Dias",
+      "email": "fdias@expressglass.pt",
+      "role": "gestor",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "930025",
+      "userId": "8370016",
+      "name": "Admin Teste",
+      "email": "admin-ia-test-1767864173556@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "930030",
+      "userId": "8370017",
+      "name": "Gestor Cumprimento 1767865190158",
+      "email": "cumprimento-1767865190159@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "930044",
+      "userId": "8370025",
+      "name": "Admin Teste",
+      "email": "admin-ia-test-1767866763626@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "930063",
+      "userId": "8370044",
+      "name": "Admin Teste",
+      "email": "admin-ia-test-1767868046299@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "930082",
+      "userId": "8370048",
+      "name": "Admin Teste",
+      "email": "admin-ia-test-1767868172931@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "930101",
+      "userId": "8370052",
+      "name": "Admin Teste",
+      "email": "admin-ia-test-1767868215574@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "960014",
+      "userId": "8400019",
+      "name": "Admin Teste",
+      "email": "admin-ia-test-1767869573446@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "990014",
+      "userId": "8640005",
+      "name": "Admin Teste",
+      "email": "admin-ia-test-1767891581195@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "990033",
+      "userId": "8640330",
+      "name": "Admin Teste",
+      "email": "admin-ia-test-1767898823223@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "1020002",
+      "userId": "8700033",
+      "name": "List Test Name 1767966755193",
+      "email": "list.test.1767966755193@expressglass.pt",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "1080013",
+      "userId": "8940004",
+      "name": "Gestor Teste IA",
+      "email": "gestor-ia-test-1767966747081@test.com",
+      "role": "gestor",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "1080014",
+      "userId": "8940005",
+      "name": "Admin Teste",
+      "email": "admin-ia-test-1767966748416@test.com",
+      "role": "admin",
+      "rel_livres": "0",
+      "rel_completos": "0"
+    },
+    {
+      "id": "1080019",
+      "userId": "8940007",
+      "name": "Gestor Cumprimento 1767966754079",
+      "email": "cumprimento-1767966754079@test.com",
+      "role": "gestor",
+      "rel_livres": "2",
+      "rel_completos": "1"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tuserId\tname\temail\trole\trel_livres\trel_completos\n240001\t4020003\tNULL\tNULL\tNULL\t28\t10\n240003\t4020003\tNULL\tNULL\tNULL\t0\t0\n240005\t4020003\tNULL\tNULL\tNULL\t0\t0\n270001\t4050001\tNULL\tNULL\tNULL\t9\t8\n270003\t4050001\tNULL\tNULL\tNULL\t0\t0\n300001\t4080004\tNULL\tNULL\tNULL\t25\t17\n300003\t4080004\tNULL\tNULL\tNULL\t0\t0\n300005\t4080052\tNULL\tNULL\tNULL\t6\t0\n330001\t4080052\tNULL\tNULL\tNULL\t0\t0\n390002\t4500005\tNULL\tNULL\tNULL\t0\t0\n390004\t4500007\tNULL\tNULL\tNULL\t0\t0\n390006\t4500009\tNULL\tNULL\tNULL\t0\t0\n420001\t6030026\tNULL\tNULL\tNULL\t0\t0\n420002\t6030026\tNULL\tNULL\tNULL\t0\t0\n420004\t6030026\tNULL\tNULL\tNULL\t0\t0\n420006\t6030026\tNULL\tNULL\tNULL\t0\t0\n450001\t4080004\tNULL\tNULL\tNULL\t0\t0\n450002\t4050001\tNULL\tNULL\tNULL\t0\t0\n450003\t4020003\tNULL\tNULL\tNULL\t0\t0\n450010\t4020003\tNULL\tNULL\tNULL\t0\t0\n450011\t4080004\tNULL\tNULL\tNULL\t0\t0\n450015\t4050001\tNULL\tNULL\tNULL\t0\t0\n450017\t4080004\tNULL\tNULL\tNULL\t0\t0\n450018\t4020003\tNULL\tNULL\tNULL\t0\t0\n450023\t4050001\tNULL\tNULL\tNULL\t0\t0\n450026\t6300015\tNULL\tNULL\tNULL\t0\t0\n450027\t4080052\tNULL\tNULL\tNULL\t0\t0\n450028\t6030026\tNULL\tNULL\tNULL\t0\t0\n450032\t4020003\tNULL\tNULL\tNULL\t0\t0\n450033\t4080004\tNULL\tNULL\tNULL\t0\t0\n450034\t4050001\tNULL\tNULL\tNULL\t0\t0\n450040\t6300019\tNULL\tNULL\tNULL\t0\t0\n450041\t4080052\tNULL\tNULL\tNULL\t0\t0\n450043\t6030026\tNULL\tNULL\tNULL\t0\t0\n480003\t4050001\tNULL\tNULL\tNULL\t0\t0\n480004\t4020003\tNULL\tNULL\tNULL\t0\t0\n480006\t4080004\tNULL\tNULL\tNULL\t0\t0\n480011\t6360261\tNULL\tNULL\tNULL\t0\t0\n480012\t4080052\tNULL\tNULL\tNULL\t0\t0\n480014\t6030026\tNULL\tNULL\tNULL\t0\t0\n480018\t4080004\tNULL\tNULL\tNULL\t0\t0\n480019\t4050001\tNULL\tNULL\tNULL\t0\t0\n480020\t4020003\tNULL\tNULL\tNULL\t0\t0\n480026\t6360268\tNULL\tNULL\tNULL\t0\t0\n480027\t4080052\tNULL\tNULL\tNULL\t0\t0\n480029\t6030026\tNULL\tNULL\tNULL\t0\t0\n480033\t4080004\tNULL\tNULL\tNULL\t0\t0\n480034\t4050001\tNULL\tNULL\tNULL\t0\t0\n480035\t4020003\tNULL\tNULL\tNULL\t0\t0\n480041\t6360278\tNULL\tNULL\tNULL\t0\t0\n480042\t4080052\tNULL\tNULL\tNULL\t0\t0\n480044\t6030026\tNULL\tNULL\tNULL\t0\t0\n480050\t4050001\tNULL\tNULL\tNULL\t0\t0\n480052\t4080004\tNULL\tNULL\tNULL\t0\t0\n480053\t4020003\tNULL\tNULL\tNULL\t0\t0\n480057\t4080004\tNULL\tNULL\tNULL\t0\t0\n480058\t4050001\tNULL\tNULL\tNULL\t0\t0\n480061\t4020003\tNULL\tNULL\tNULL\t0\t0\n480066\t6361034\tNULL\tNULL\tNULL\t0\t0\n480067\t4080052\tNULL\tNULL\tNULL\t0\t0\n210001\t240006\tMauro Furtado\tmfurtado@expressglass.pt\tadmin\t0\t0\n2\t240006\tMauro Furtado\tmfurtado@expressglass.pt\tadmin\t0\t0\n30001\t420030\tMarco Amorim\tmamorim@expressglass.pt\tgestor\t15\t6\n120001\t2160121\tMarco Vilar\tmvilar@expressglass.pt\tgestor\t0\t0\n120002\t2160125\tMónica Correira\tmcorreia@expressglass.pt\tgestor\t0\t0\n570001\t6600014\tList Test Name 1767372508573\tlist.test.1767372508573@expressglass.pt\tadmin\t0\t0\n570003\t6600028\tRui Adriao \trui.adriao@expressglass.pt\tgestor\t0\t0\n780002\t6960011\tList Test Name 1767866791435\tlist.test.1767866791435@expressglass.pt\tadmin\t0\t0\n1080017\t7290150\tAdmin Reunioes Filtro\tadmin-reunioes-filtro@test.com\tadmin\t0\t0\n990036\t7290150\tAdmin Reunioes Filtro\tadmin-reunioes-filtro@test.com\tadmin\t0\t0\n990017\t7290150\tAdmin Reunioes Filtro\tadmin-reunioes-filtro@test.com\tadmin\t0\t0\n960017\t7290150\tAdmin Reunioes Filtro\tadmin-reunioes-filtro@test.com\tadmin\t0\t0\n930104\t7290150\tAdmin Reunioes Filtro\tadmin-reunioes-filtro@test.com\tadmin\t0\t0\n930085\t7290150\tAdmin Reunioes Filtro\tadmin-reunioes-filtro@test.com\tadmin\t0\t0\n930066\t7290150\tAdmin Reunioes Filtro\tadmin-reunioes-filtro@test.com\tadmin\t0\t0\n930047\t7290150\tAdmin Reunioes Filtro\tadmin-reunioes-filtro@test.com\tadmin\t0\t0\n930028\t7290150\tAdmin Reunioes Filtro\tadmin-reunioes-filtro@test.com\tadmin\t0\t0\n870017\t7290150\tAdmin Reunioes Filtro\tadmin-reunioes-filtro@test.com\tadmin\t0\t0\n840021\t7290150\tAdmin Reunioes Filtro\tadmin-reunioes-filtro@test.com\tadmin\t0\t0\n810017\t7290150\tAdmin Reunioes Filtro\tadmin-reunioes-filtro@test.com\tadmin\t0\t0\n750017\t7290150\tAdmin Reunioes Filtro\tadmin-reunioes-filtro@test.com\tadmin\t0\t0\n720086\t7290150\tAdmin Reunioes Filtro\tadmin-reunioes-filtro@test.com\tadmin\t0\t0\n720053\t7290150\tAdmin Reunioes Filtro\tadmin-reunioes-filtro@test.com\tadmin\t0\t0\n720030\t7290150\tAdmin Reunioes Filtro\tadmin-reunioes-filtro@test.com\tadmin\t0\t0\n660013\t7290150\tAdmin Reunioes Filtro\tadmin-reunioes-filtro@test.com\tadmin\t0\t0\n1080018\t7290151\tGestor Reunioes Filtro\tgestor-reunioes-filtro@test.com\tgestor\t0\t0\n1080001\t7410262\tAdmin Email Test\tadmin.email@test.com\tadmin\t0\t0\n1050002\t7410262\tAdmin Email Test\tadmin.email@test.com\tadmin\t0\t0\n990021\t7410262\tAdmin Email Test\tadmin.email@test.com\tadmin\t0\t0\n990003\t7410262\tAdmin Email Test\tadmin.email@test.com\tadmin\t0\t0\n960003\t7410262\tAdmin Email Test\tadmin.email@test.com\tadmin\t0\t0\n930119\t7410262\tAdmin Email Test\tadmin.email@test.com\tadmin\t0\t0\n930108\t7410262\tAdmin Email Test\tadmin.email@test.com\tadmin\t0\t0\n930091\t7410262\tAdmin Email Test\tadmin.email@test.com\tadmin\t0\t0\n930070\t7410262\tAdmin Email Test\tadmin.email@test.com\tadmin\t0\t0\n930050\t7410262\tAdmin Email Test\tadmin.email@test.com\tadmin\t0\t0\n930031\t7410262\tAdmin Email Test\tadmin.email@test.com\tadmin\t0\t0\n930014\t7410262\tAdmin Email Test\tadmin.email@test.com\tadmin\t0\t0\n930007\t7410262\tAdmin Email Test\tadmin.email@test.com\tadmin\t0\t0\n870005\t7410262\tAdmin Email Test\tadmin.email@test.com\tadmin\t0\t0\n840004\t7410262\tAdmin Email Test\tadmin.email@test.com\tadmin\t0\t0\n810004\t7410262\tAdmin Email Test\tadmin.email@test.com\tadmin\t0\t0\n750001\t7410262\tAdmin Email Test\tadmin.email@test.com\tadmin\t17\t16\n1080003\t7410263\tAdmin Comentarios Test\tadmin.comentarios@test.com\tadmin\t0\t0\n1050003\t7410263\tAdmin Comentarios Test\tadmin.comentarios@test.com\tadmin\t0\t0\n990022\t7410263\tAdmin Comentarios Test\tadmin.comentarios@test.com\tadmin\t0\t0\n990005\t7410263\tAdmin Comentarios Test\tadmin.comentarios@test.com\tadmin\t0\t0\n960001\t7410263\tAdmin Comentarios Test\tadmin.comentarios@test.com\tadmin\t0\t0\n930120\t7410263\tAdmin Comentarios Test\tadmin.comentarios@test.com\tadmin\t0\t0\n930107\t7410263\tAdmin Comentarios Test\tadmin.comentarios@test.com\tadmin\t0\t0\n930088\t7410263\tAdmin Comentarios Test\tadmin.comentarios@test.com\tadmin\t0\t0\n930069\t7410263\tAdmin Comentarios Test\tadmin.comentarios@test.com\tadmin\t0\t0\n930051\t7410263\tAdmin Comentarios Test\tadmin.comentarios@test.com\tadmin\t0\t0\n930034\t7410263\tAdmin Comentarios Test\tadmin.comentarios@test.com\tadmin\t0\t0\n930013\t7410263\tAdmin Comentarios Test\tadmin.comentarios@test.com\tadmin\t0\t0\n930002\t7410263\tAdmin Comentarios Test\tadmin.comentarios@test.com\tadmin\t0\t0\n870006\t7410263\tAdmin Comentarios Test\tadmin.comentarios@test.com\tadmin\t0\t0\n840010\t7410263\tAdmin Comentarios Test\tadmin.comentarios@test.com\tadmin\t0\t0\n840003\t7410263\tAdmin Comentarios Test\tadmin.comentarios@test.com\tadmin\t0\t0\n810003\t7410263\tAdmin Comentarios Test\tadmin.comentarios@test.com\tadmin\t0\t0\n750002\t7410263\tAdmin Comentarios Test\tadmin.comentarios@test.com\tadmin\t50\t33\n1080004\t7410264\tAdmin Teste\tadmin@test.com\tadmin\t0\t0\n1050001\t7410264\tAdmin Teste\tadmin@test.com\tadmin\t0\t0\n990024\t7410264\tAdmin Teste\tadmin@test.com\tadmin\t0\t0\n990002\t7410264\tAdmin Teste\tadmin@test.com\tadmin\t0\t0\n960005\t7410264\tAdmin Teste\tadmin@test.com\tadmin\t0\t0\n930122\t7410264\tAdmin Teste\tadmin@test.com\tadmin\t0\t0\n930109\t7410264\tAdmin Teste\tadmin@test.com\tadmin\t0\t0\n930089\t7410264\tAdmin Teste\tadmin@test.com\tadmin\t0\t0\n930072\t7410264\tAdmin Teste\tadmin@test.com\tadmin\t0\t0\n930052\t7410264\tAdmin Teste\tadmin@test.com\tadmin\t0\t0\n930033\t7410264\tAdmin Teste\tadmin@test.com\tadmin\t0\t0\n930017\t7410264\tAdmin Teste\tadmin@test.com\tadmin\t0\t0\n930003\t7410264\tAdmin Teste\tadmin@test.com\tadmin\t0\t0\n870001\t7410264\tAdmin Teste\tadmin@test.com\tadmin\t0\t0\n840001\t7410264\tAdmin Teste\tadmin@test.com\tadmin\t0\t0\n810002\t7410264\tAdmin Teste\tadmin@test.com\tadmin\t0\t0\n750003\t7410264\tAdmin Teste\tadmin@test.com\tadmin\t48\t16\n1080005\t7410265\tGestor Teste Data/Hora\tgestor.datahora@test.com\tgestor\t0\t0\n1050004\t7410265\tGestor Teste Data/Hora\tgestor.datahora@test.com\tgestor\t0\t0\n1080008\t7410266\tGestor Teste\tgestor@test.com\tgestor\t0\t0\n1050006\t7410266\tGestor Teste\tgestor@test.com\tgestor\t1\t0\n1080007\t7410267\tGestor Comentarios Test\tgestor.comentarios@test.com\tgestor\t0\t0\n1050008\t7410267\tGestor Comentarios Test\tgestor.comentarios@test.com\tgestor\t0\t0\n990026\t7410267\tGestor Comentarios Test\tgestor.comentarios@test.com\tgestor\t0\t0\n990008\t7410267\tGestor Comentarios Test\tgestor.comentarios@test.com\tgestor\t0\t0\n960006\t7410267\tGestor Comentarios Test\tgestor.comentarios@test.com\tgestor\t0\t0\n930125\t7410267\tGestor Comentarios Test\tgestor.comentarios@test.com\tgestor\t0\t0\n930113\t7410267\tGestor Comentarios Test\tgestor.comentarios@test.com\tgestor\t0\t0\n930093\t7410267\tGestor Comentarios Test\tgestor.comentarios@test.com\tgestor\t0\t0\n930074\t7410267\tGestor Comentarios Test\tgestor.comentarios@test.com\tgestor\t0\t0\n930055\t7410267\tGestor Comentarios Test\tgestor.comentarios@test.com\tgestor\t0\t0\n930038\t7410267\tGestor Comentarios Test\tgestor.comentarios@test.com\tgestor\t0\t0\n930015\t7410267\tGestor Comentarios Test\tgestor.comentarios@test.com\tgestor\t0\t0\n930004\t7410267\tGestor Comentarios Test\tgestor.comentarios@test.com\tgestor\t0\t0\n1080006\t7410268\tGestor Email Test\tgestor.email@test.com\tgestor\t0\t0\n1050007\t7410268\tGestor Email Test\tgestor.email@test.com\tgestor\t1\t0\n1080012\t7410269\tGestor Ocorrencias Test\tgestor.ocorrencias@test.com\tgestor\t0\t0\n1080009\t7410269\tGestor Ocorrencias Test\tgestor.ocorrencias@test.com\tgestor\t0\t0\n1080002\t7410269\tGestor Ocorrencias Test\tgestor.ocorrencias@test.com\tgestor\t0\t0\n1050009\t7410269\tGestor Ocorrencias Test\tgestor.ocorrencias@test.com\tgestor\t0\t0\n1050005\t7410269\tGestor Ocorrencias Test\tgestor.ocorrencias@test.com\tgestor\t0\t0\n1080010\t7410270\tOutro Gestor Test\toutro.gestor@test.com\tgestor\t0\t0\n1050010\t7410270\tOutro Gestor Test\toutro.gestor@test.com\tgestor\t0\t0\n1080011\t7410271\tGestor Multi-Lojas Test\tgestor.multilojas@test.com\tgestor\t6\t1\n750014\t7410273\tAdmin Teste\tadmin-ia-test-1767372482915@test.com\tadmin\t0\t0\n1080015\t7410274\tAdmin Lojas Test\tadmin.lojas@test.com\tadmin\t0\t0\n990034\t7410274\tAdmin Lojas Test\tadmin.lojas@test.com\tadmin\t0\t0\n990015\t7410274\tAdmin Lojas Test\tadmin.lojas@test.com\tadmin\t0\t0\n960015\t7410274\tAdmin Lojas Test\tadmin.lojas@test.com\tadmin\t0\t0\n930102\t7410274\tAdmin Lojas Test\tadmin.lojas@test.com\tadmin\t0\t0\n930083\t7410274\tAdmin Lojas Test\tadmin.lojas@test.com\tadmin\t0\t0\n930064\t7410274\tAdmin Lojas Test\tadmin.lojas@test.com\tadmin\t0\t0\n930045\t7410274\tAdmin Lojas Test\tadmin.lojas@test.com\tadmin\t0\t0\n930026\t7410274\tAdmin Lojas Test\tadmin.lojas@test.com\tadmin\t0\t0\n870015\t7410274\tAdmin Lojas Test\tadmin.lojas@test.com\tadmin\t0\t0\n840019\t7410274\tAdmin Lojas Test\tadmin.lojas@test.com\tadmin\t0\t0\n810015\t7410274\tAdmin Lojas Test\tadmin.lojas@test.com\tadmin\t0\t0\n750015\t7410274\tAdmin Lojas Test\tadmin.lojas@test.com\tadmin\t13\t0\n1080016\t7410275\tGestor Lojas Test\tgestor.lojas@test.com\tgestor\t0\t0\n780001\t7470026\tList Test Name 1767688768007\tlist.test.1767688768008@expressglass.pt\tadmin\t0\t0\n810014\t7890173\tAdmin Teste\tadmin-ia-test-1767637722740@test.com\tadmin\t0\t0\n840018\t7920133\tAdmin Teste\tadmin-ia-test-1767688509911@test.com\tadmin\t0\t0\n870014\t7950039\tAdmin Teste\tadmin-ia-test-1767691167951@test.com\tadmin\t0\t0\n1020001\t7980023\tFabio Dias\tfdias@expressglass.pt\tgestor\t0\t0\n930025\t8370016\tAdmin Teste\tadmin-ia-test-1767864173556@test.com\tadmin\t0\t0\n930030\t8370017\tGestor Cumprimento 1767865190158\tcumprimento-1767865190159@test.com\tadmin\t0\t0\n930044\t8370025\tAdmin Teste\tadmin-ia-test-1767866763626@test.com\tadmin\t0\t0\n930063\t8370044\tAdmin Teste\tadmin-ia-test-1767868046299@test.com\tadmin\t0\t0\n930082\t8370048\tAdmin Teste\tadmin-ia-test-1767868172931@test.com\tadmin\t0\t0\n930101\t8370052\tAdmin Teste\tadmin-ia-test-1767868215574@test.com\tadmin\t0\t0\n960014\t8400019\tAdmin Teste\tadmin-ia-test-1767869573446@test.com\tadmin\t0\t0\n990014\t8640005\tAdmin Teste\tadmin-ia-test-1767891581195@test.com\tadmin\t0\t0\n990033\t8640330\tAdmin Teste\tadmin-ia-test-1767898823223@test.com\tadmin\t0\t0\n1020002\t8700033\tList Test Name 1767966755193\tlist.test.1767966755193@expressglass.pt\tadmin\t0\t0\n1080013\t8940004\tGestor Teste IA\tgestor-ia-test-1767966747081@test.com\tgestor\t0\t0\n1080014\t8940005\tAdmin Teste\tadmin-ia-test-1767966748416@test.com\tadmin\t0\t0\n1080019\t8940007\tGestor Cumprimento 1767966754079\tcumprimento-1767966754079@test.com\tgestor\t2\t1\n",
+  "stderr": "",
+  "execution_time_ms": 404
+}
