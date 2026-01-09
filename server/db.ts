@@ -432,6 +432,8 @@ export async function getAllGestores(): Promise<any[]> {
   return gestoresResults.map(r => ({
     id: r.id,
     userId: r.userId,
+    nome: r.userName,
+    email: r.userEmail, // Email no nível raiz para compatibilidade com envio de emails
     user: {
       name: r.userName,
       email: r.userEmail,

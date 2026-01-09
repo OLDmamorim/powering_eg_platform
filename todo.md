@@ -375,6 +375,11 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Remover página PlanoVisitas.tsx
 - [x] Manter tabelas e serviços no backend (podem ser úteis futuramente)
 
+## Bug v4.2 - Envio de Email de Relatório mostra "0 gestores"
+- [x] Corrigir getAllGestores() para retornar email no campo correto
+- [x] O backend procura gestor.email mas getAllGestores retorna user.email
+- [ ] Testar envio de email após correção
+
 ## Bug - Erro React hooks na página ReuniõesGestores
 - [x] Corrigir early return antes dos hooks (linha 30)
 - [x] Mover verificação de user para depois de todos os hooks
