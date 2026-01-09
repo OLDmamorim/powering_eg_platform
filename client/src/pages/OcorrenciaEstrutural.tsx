@@ -55,7 +55,7 @@ export default function OcorrenciaEstrutural() {
   // Mutation
   const createMutation = trpc.ocorrenciasEstruturais.criar.useMutation({
     onSuccess: () => {
-      toast.success("Ocorrência estrutural reportada com sucesso");
+      toast.success(t('ocorrencias.reportadaSucesso') || "Ocorrência estrutural reportada com sucesso");
       utils.ocorrenciasEstruturais.listMinhas.invalidate();
       utils.ocorrenciasEstruturais.getTemas.invalidate();
       setLocation("/ocorrencias-estruturais/historico");
@@ -127,9 +127,9 @@ export default function OcorrenciaEstrutural() {
       }
       
       setFotos(prev => [...prev, ...newFotos]);
-      toast.success(`${newFotos.length} foto(s) adicionada(s)`);
+      toast.success(`${newFotos.length} ${t('ocorrencias.fotosAdicionadas') || 'foto(s) adicionada(s)'}`);
     } catch (error) {
-      toast.error("Erro ao processar imagens");
+      toast.error(t('ocorrencias.erroProcessarImagens') || "Erro ao processar imagens");
     } finally {
       setUploading(false);
       if (event.target) {
@@ -144,15 +144,15 @@ export default function OcorrenciaEstrutural() {
 
   const handleSubmit = () => {
     if (!tema.trim()) {
-      toast.error("Por favor, indique o tema/tag da ocorrência");
+      toast.error(t('ocorrencias.erroTema') || "Por favor, indique o tema/tag da ocorrência");
       return;
     }
     if (!descricao.trim() || descricao.length < 10) {
-      toast.error("A descrição deve ter pelo menos 10 caracteres");
+      toast.error(t('ocorrencias.erroDescricaoMinima') || "A descrição deve ter pelo menos 10 caracteres");
       return;
     }
     if ((abrangencia === "regional" || abrangencia === "zona") && !zonaAfetada.trim()) {
-      toast.error("Por favor, indique a zona afetada");
+      toast.error(t('ocorrencias.erroZona') || "Por favor, indique a zona afetada");
       return;
     }
 
@@ -179,9 +179,9 @@ export default function OcorrenciaEstrutural() {
     <DashboardLayout>
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-bold">Nova Ocorrência Estrutural</h1>
+          <h1 className="text-2xl font-bold">{t('ocorrencias.novaOcorrenciaEstrutural') || "Nova Ocorrência Estrutural"}</h1>
           <p className="text-muted-foreground">
-            Reporte situações que não estão ligadas a uma loja específica
+            {t('ocorrencias.reporteSituacoes') || "Reporte situações que não estão ligadas a uma loja específica"}
           </p>
         </div>
 
@@ -193,10 +193,10 @@ export default function OcorrenciaEstrutural() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <AlertTriangle className="h-5 w-5" />
-                  Tema da Ocorrência
+                  {t('ocorrencias.temaOcorrencia') || "Tema da Ocorrência"}
                 </CardTitle>
                 <CardDescription>
-                  Comece a escrever para ver sugestões ou crie um novo tema
+                  {t('ocorrencias.comeceEscrever') || "Comece a escrever para ver sugestões ou crie um novo tema"}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -206,23 +206,23 @@ export default function OcorrenciaEstrutural() {
                     value={tema}
                     onChange={(e) => setTema(e.target.value)}
                     onFocus={() => setShowSuggestions(true)}
-                    placeholder="Ex: Fornecedor, Logística, Formação, Equipamento..."
+                    placeholder={t('ocorrencias.temaPlaceholder') || "Ex: Fornecedor, Logística, Formação, Equipamento..."}
                     className="text-lg"
                   />
                   
                   {/* Dropdown de sugestões */}
                   {showSuggestions && filteredTemas.length > 0 && (
                     <div className="absolute z-50 w-full mt-1 bg-background border rounded-md shadow-lg max-h-60 overflow-auto">
-                      {filteredTemas.map((t) => (
+                      {filteredTemas.map((temaItem) => (
                         <button
-                          key={t.id}
+                          key={temaItem.id}
                           type="button"
                           className="w-full px-4 py-2 text-left hover:bg-accent flex items-center justify-between"
-                          onClick={() => handleTemaSelect(t.nome)}
+                          onClick={() => handleTemaSelect(temaItem.nome)}
                         >
-                          <span>{t.nome}</span>
+                          <span>{temaItem.nome}</span>
                           <Badge variant="secondary" className="text-xs">
-                            {t.usageCount}x usado
+                            {temaItem.usageCount}x {t('ocorrencias.usado') || "usado"}
                           </Badge>
                         </button>
                       ))}
@@ -232,7 +232,7 @@ export default function OcorrenciaEstrutural() {
                 
                 {tema && !temas?.some(t => t.nome.toLowerCase() === tema.toLowerCase()) && (
                   <p className="text-sm text-muted-foreground mt-2">
-                    Novo tema: <Badge variant="outline">{tema}</Badge> será criado
+                    {t('ocorrencias.novoTema') || "Novo tema"}: <Badge variant="outline">{tema}</Badge> {t('ocorrencias.seraCriado') || "será criado"}
                   </p>
                 )}
               </CardContent>
@@ -241,17 +241,17 @@ export default function OcorrenciaEstrutural() {
             {/* Descrição */}
             <Card>
               <CardHeader>
-                <CardTitle>Descrição da Ocorrência</CardTitle>
+                <CardTitle>{t('ocorrencias.descricaoOcorrencia') || "Descrição da Ocorrência"}</CardTitle>
               </CardHeader>
               <CardContent>
                 <Textarea
                   value={descricao}
                   onChange={(e) => setDescricao(e.target.value)}
-                  placeholder="Descreva detalhadamente a situação estrutural que pretende reportar..."
+                  placeholder={t('ocorrencias.descricaoPlaceholder') || "Descreva detalhadamente a situação estrutural que pretende reportar..."}
                   rows={6}
                 />
                 <p className="text-sm text-muted-foreground mt-2">
-                  {descricao.length} caracteres (mínimo 10)
+                  {descricao.length} {t('ocorrencias.caracteres') || "caracteres"} ({t('ocorrencias.minimo') || "mínimo"} 10)
                 </p>
               </CardContent>
             </Card>
@@ -259,16 +259,16 @@ export default function OcorrenciaEstrutural() {
             {/* Sugestão de Ação */}
             <Card>
               <CardHeader>
-                <CardTitle>Sugestão de Ação (Opcional)</CardTitle>
+                <CardTitle>{t('ocorrencias.sugestaoAcao') || "Sugestão de Ação"} ({t('common.opcional') || "Opcional"})</CardTitle>
                 <CardDescription>
-                  Proponha uma solução ou ação para resolver esta situação
+                  {t('ocorrencias.proponhaSolucao') || "Proponha uma solução ou ação para resolver esta situação"}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <Textarea
                   value={sugestaoAcao}
                   onChange={(e) => setSugestaoAcao(e.target.value)}
-                  placeholder="O que sugere para resolver esta situação?"
+                  placeholder={t('ocorrencias.sugestaoPlaceholder') || "O que sugere para resolver esta situação?"}
                   rows={3}
                 />
               </CardContent>
@@ -280,12 +280,12 @@ export default function OcorrenciaEstrutural() {
             {/* Abrangência e Impacto */}
             <Card>
               <CardHeader>
-                <CardTitle>Classificação</CardTitle>
+                <CardTitle>{t('ocorrencias.classificacao') || "Classificação"}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {/* Abrangência */}
                 <div className="space-y-2">
-                  <Label>Abrangência Geográfica</Label>
+                  <Label>{t('ocorrencias.abrangenciaGeografica') || "Abrangência Geográfica"}</Label>
                   <div className="grid grid-cols-3 gap-2">
                     <Button
                       type="button"
@@ -294,7 +294,7 @@ export default function OcorrenciaEstrutural() {
                       onClick={() => setAbrangencia("nacional")}
                     >
                       <Globe className="h-4 w-4" />
-                      Nacional
+                      {t('ocorrencias.nacional') || "Nacional"}
                     </Button>
                     <Button
                       type="button"
@@ -303,7 +303,7 @@ export default function OcorrenciaEstrutural() {
                       onClick={() => setAbrangencia("regional")}
                     >
                       <MapPin className="h-4 w-4" />
-                      Regional
+                      {t('ocorrencias.regional') || "Regional"}
                     </Button>
                     <Button
                       type="button"
@@ -312,7 +312,7 @@ export default function OcorrenciaEstrutural() {
                       onClick={() => setAbrangencia("zona")}
                     >
                       <Building2 className="h-4 w-4" />
-                      Zona
+                      {t('ocorrencias.zona') || "Zona"}
                     </Button>
                   </div>
                 </div>
@@ -320,18 +320,18 @@ export default function OcorrenciaEstrutural() {
                 {/* Zona Afetada (se não for nacional) */}
                 {(abrangencia === "regional" || abrangencia === "zona") && (
                   <div className="space-y-2">
-                    <Label>Zona Afetada</Label>
+                    <Label>{t('ocorrencias.zonaAfetada') || "Zona Afetada"}</Label>
                     <Input
                       value={zonaAfetada}
                       onChange={(e) => setZonaAfetada(e.target.value)}
-                      placeholder="Ex: Norte, Centro, Lisboa..."
+                      placeholder={t('ocorrencias.zonaPlaceholder') || "Ex: Norte, Centro, Lisboa..."}
                     />
                   </div>
                 )}
 
                 {/* Impacto */}
                 <div className="space-y-2">
-                  <Label>Nível de Impacto</Label>
+                  <Label>{t('ocorrencias.nivelImpacto') || "Nível de Impacto"}</Label>
                   <Select value={impacto} onValueChange={(v) => setImpacto(v as typeof impacto)}>
                     <SelectTrigger>
                       <SelectValue />
@@ -339,26 +339,26 @@ export default function OcorrenciaEstrutural() {
                     <SelectContent>
                       <SelectItem value="baixo">
                         <div className="flex items-center gap-2">
-                          <Badge className={impactoColors.baixo}>Baixo</Badge>
-                          <span className="text-muted-foreground">- Situação menor</span>
+                          <Badge className={impactoColors.baixo}>{t('ocorrencias.baixo') || "Baixo"}</Badge>
+                          <span className="text-muted-foreground">- {t('ocorrencias.situacaoMenor') || "Situação menor"}</span>
                         </div>
                       </SelectItem>
                       <SelectItem value="medio">
                         <div className="flex items-center gap-2">
-                          <Badge className={impactoColors.medio}>Médio</Badge>
-                          <span className="text-muted-foreground">- Requer atenção</span>
+                          <Badge className={impactoColors.medio}>{t('ocorrencias.medio') || "Médio"}</Badge>
+                          <span className="text-muted-foreground">- {t('ocorrencias.requerAtencao') || "Requer atenção"}</span>
                         </div>
                       </SelectItem>
                       <SelectItem value="alto">
                         <div className="flex items-center gap-2">
-                          <Badge className={impactoColors.alto}>Alto</Badge>
-                          <span className="text-muted-foreground">- Urgente</span>
+                          <Badge className={impactoColors.alto}>{t('ocorrencias.alto') || "Alto"}</Badge>
+                          <span className="text-muted-foreground">- {t('ocorrencias.urgente') || "Urgente"}</span>
                         </div>
                       </SelectItem>
                       <SelectItem value="critico">
                         <div className="flex items-center gap-2">
-                          <Badge className={impactoColors.critico}>Crítico</Badge>
-                          <span className="text-muted-foreground">- Ação imediata</span>
+                          <Badge className={impactoColors.critico}>{t('ocorrencias.critico') || "Crítico"}</Badge>
+                          <span className="text-muted-foreground">- {t('ocorrencias.acaoImediata') || "Ação imediata"}</span>
                         </div>
                       </SelectItem>
                     </SelectContent>
@@ -370,9 +370,9 @@ export default function OcorrenciaEstrutural() {
             {/* Lojas Afetadas (Opcional) */}
             <Card>
               <CardHeader>
-                <CardTitle>Lojas Afetadas (Opcional)</CardTitle>
+                <CardTitle>{t('ocorrencias.lojasAfetadas') || "Lojas Afetadas"} ({t('common.opcional') || "Opcional"})</CardTitle>
                 <CardDescription>
-                  Selecione se há lojas específicas envolvidas
+                  {t('ocorrencias.selecioneLojasEnvolvidas') || "Selecione se há lojas específicas envolvidas"}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -395,7 +395,7 @@ export default function OcorrenciaEstrutural() {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-sm text-muted-foreground">Nenhuma loja disponível</p>
+                  <p className="text-sm text-muted-foreground">{t('ocorrencias.nenhumaLojaDisponivel') || "Nenhuma loja disponível"}</p>
                 )}
                 
                 {lojasAfetadas.length > 0 && (
@@ -418,7 +418,7 @@ export default function OcorrenciaEstrutural() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Image className="h-5 w-5" />
-                  Evidências (Opcional)
+                  {t('ocorrencias.evidencias') || "Evidências"} ({t('common.opcional') || "Opcional"})
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -450,7 +450,7 @@ export default function OcorrenciaEstrutural() {
                     ) : (
                       <Upload className="h-4 w-4 mr-2" />
                     )}
-                    Galeria
+                    {t('ocorrencias.galeria') || "Galeria"}
                   </Button>
                   <Button
                     type="button"
@@ -459,7 +459,7 @@ export default function OcorrenciaEstrutural() {
                     disabled={uploading}
                   >
                     <Image className="h-4 w-4 mr-2" />
-                    Câmara
+                    {t('ocorrencias.camara') || "Câmara"}
                   </Button>
                 </div>
 
@@ -469,7 +469,7 @@ export default function OcorrenciaEstrutural() {
                       <div key={index} className="relative group">
                         <img
                           src={foto}
-                          alt={`Foto ${index + 1}`}
+                          alt={`${t('ocorrencias.foto') || "Foto"} ${index + 1}`}
                           className="w-full h-24 object-cover rounded-md"
                         />
                         <button
@@ -494,7 +494,7 @@ export default function OcorrenciaEstrutural() {
             variant="outline"
             onClick={() => setLocation("/dashboard")}
           >
-            Cancelar
+            {t('common.cancelar')}
           </Button>
           <Button
             onClick={handleSubmit}
@@ -503,12 +503,12 @@ export default function OcorrenciaEstrutural() {
             {createMutation.isPending ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                A guardar...
+                {t('common.aGuardar') || "A guardar..."}
               </>
             ) : (
               <>
                 <Save className="h-4 w-4 mr-2" />
-                Reportar Ocorrência
+                {t('ocorrencias.reportarOcorrencia') || "Reportar Ocorrência"}
               </>
             )}
           </Button>

@@ -33,7 +33,7 @@ export default function TopicosReuniao() {
 
   const handleSubmit = async () => {
     if (!titulo.trim()) {
-      toast.error("Por favor, insira um título para o tópico");
+      toast.error(t('topicos.insiraTitulo') || "Por favor, insira um título para o tópico");
       return;
     }
 
@@ -44,13 +44,13 @@ export default function TopicosReuniao() {
           titulo: titulo.trim(),
           descricao: descricao.trim() || undefined,
         });
-        toast.success("Tópico atualizado com sucesso!");
+        toast.success(t('topicos.atualizadoSucesso') || "Tópico atualizado com sucesso!");
       } else {
         await criarMutation.mutateAsync({
           titulo: titulo.trim(),
           descricao: descricao.trim() || undefined,
         });
-        toast.success("Tópico submetido com sucesso!");
+        toast.success(t('topicos.submetidoSucesso') || "Tópico submetido com sucesso!");
       }
       
       setModalAberto(false);
@@ -59,7 +59,7 @@ export default function TopicosReuniao() {
       setDescricao("");
       refetch();
     } catch (error: any) {
-      toast.error(error.message || "Erro ao guardar tópico");
+      toast.error(error.message || t('topicos.erroGuardar') || "Erro ao guardar tópico");
     }
   };
 
@@ -73,11 +73,11 @@ export default function TopicosReuniao() {
   const handleEliminar = async (id: number) => {
     try {
       await eliminarMutation.mutateAsync({ id });
-      toast.success("Tópico eliminado com sucesso!");
+      toast.success(t('topicos.eliminadoSucesso') || "Tópico eliminado com sucesso!");
       setConfirmDelete(null);
       refetch();
     } catch (error: any) {
-      toast.error(error.message || "Erro ao eliminar tópico");
+      toast.error(error.message || t('topicos.erroEliminar') || "Erro ao eliminar tópico");
     }
   };
 
@@ -103,11 +103,11 @@ export default function TopicosReuniao() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">Tópicos para Reunião</h1>
+            <h1 className="text-3xl font-bold">{t('topicos.titulo') || 'Tópicos para Reunião'}</h1>
             <p className="text-muted-foreground">
               {isAdmin 
-                ? "Tópicos submetidos pelos gestores para discussão" 
-                : "Submeta tópicos para serem discutidos na próxima reunião de gestores"}
+                ? t('topicos.descricaoAdmin') || "Tópicos submetidos pelos gestores para discussão" 
+                : t('topicos.descricaoGestor') || "Submeta tópicos para serem discutidos na próxima reunião de gestores"}
             </p>
           </div>
           {!isAdmin && (
@@ -130,7 +130,7 @@ export default function TopicosReuniao() {
               <div className="flex items-start gap-3">
                 <MessageSquare className="h-5 w-5 text-blue-600 mt-0.5" />
                 <div>
-                  <h3 className="font-semibold text-blue-900">Como funciona?</h3>
+                  <h3 className="font-semibold text-blue-900">{t('topicos.comoFunciona') || 'Como funciona?'}</h3>
                   <p className="text-sm text-blue-700 mt-1">
                     Submeta tópicos que gostaria de ver discutidos na próxima reunião de gestores. 
                     O administrador irá analisar os tópicos e incluí-los na agenda da reunião. 

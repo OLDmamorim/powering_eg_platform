@@ -2414,3 +2414,21 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar seletor de idioma visível no header (desktop e mobile)
 - [x] Seletor de idioma no Breadcrumbs (desktop)
 - [x] Seletor de idioma no header móvel do DashboardLayout
+
+## Tradução Completa - Fase 3 (Jan 2026)
+- [x] Traduzir página ReuniõesGestores
+- [x] Traduzir página ReuniõesLojas
+- [x] Traduzir página OcorrenciasEstruturais
+- [x] Traduzir página HistoricoOcorrencias
+- [x] Traduzir página ResultadosDashboard
+- [x] Traduzir página ResultadosUpload
+- [ ] Traduzir página ComparacaoLojas
+- [x] Traduzir página RelatorioIAResultados (parcial)
+- [x] Traduzir página Categorias
+- [ ] Traduzir página RelatorioCompleto
+- [x] Traduzir página TopicosReuniao
+- [ ] Traduzir página ResumosGlobais
+- [ ] Traduzir página RelatorioBoard
+- [ ] Traduzir página HistoricoRelatoriosIA
+- [ ] Traduzir página ComparacaoRelatoriosIA
+

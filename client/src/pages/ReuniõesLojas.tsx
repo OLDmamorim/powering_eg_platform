@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, CalendarIcon, Plus, X, Save, Store, FileText, Tag, Info, Download, Mail, UserPlus, Image as ImageIcon, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
-import { pt } from "date-fns/locale";
+import { pt, enUS } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { Streamdown } from "streamdown";
@@ -25,7 +25,8 @@ import { AnexosUpload } from "@/components/AnexosUpload";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function ReuniõesLojas() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const dateLocale = language === 'pt' ? pt : enUS;
   const { user } = useAuth();
   const isAdmin = user?.role === "admin";
   
@@ -77,15 +78,15 @@ export default function ReuniõesLojas() {
 
   const handleSubmit = async () => {
     if (lojasSelecionadas.length === 0) {
-      toast.error("Por favor, selecione pelo menos uma loja");
+      toast.error(t('reunioesLojas.erroSelecionarLoja') || "Por favor, selecione pelo menos uma loja");
       return;
     }
     if (!presencas.trim()) {
-      toast.error("Por favor, indique os presentes na reunião");
+      toast.error(t('reunioesLojas.erroPresencas') || "Por favor, indique os presentes na reunião");
       return;
     }
     if (!conteudo.trim()) {
-      toast.error("Por favor, descreva o conteúdo da reunião");
+      toast.error(t('reunioesLojas.erroConteudo') || "Por favor, descreva o conteúdo da reunião");
       return;
     }
 
@@ -99,7 +100,7 @@ export default function ReuniõesLojas() {
         anexos: anexos.length > 0 ? anexos : undefined,
       });
 
-      toast.success("Reunião criada com sucesso!");
+      toast.success(t('reunioesGestores.reuniaoCriada'));
       
       // Limpar formulário
       setData(new Date());
@@ -113,7 +114,7 @@ export default function ReuniõesLojas() {
       
       refetch();
     } catch (error: any) {
-      toast.error(error.message || "Erro ao criar reunião");
+      toast.error(error.message || t('reunioesGestores.erroCrear'));
     }
   };
 
@@ -146,14 +147,14 @@ export default function ReuniõesLojas() {
       
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Reuniões de Lojas</h1>
+          <h1 className="text-3xl font-bold">{t('reunioesLojas.title')}</h1>
           <p className="text-muted-foreground">
-            Criar e gerir reuniões operacionais com lojas
+            {t('reunioesLojas.criarGerirReunioes')}
           </p>
         </div>
         <Button onClick={() => setMostrarFormulario(!mostrarFormulario)}>
           {mostrarFormulario ? <X className="h-4 w-4 mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
-          {mostrarFormulario ? "Cancelar" : "Nova Reunião"}
+          {mostrarFormulario ? t('common.cancelar') : t('reunioesLojas.novaReuniao')}
         </Button>
       </div>
 
@@ -161,13 +162,13 @@ export default function ReuniõesLojas() {
       {mostrarFormulario && (
         <Card>
           <CardHeader>
-            <CardTitle>Nova Reunião de Loja</CardTitle>
-            <CardDescription>Preencha os detalhes da reunião operacional</CardDescription>
+            <CardTitle>{t('reunioesLojas.novaReuniaoLoja') || "Nova Reunião de Loja"}</CardTitle>
+            <CardDescription>{t('reunioesLojas.preencherDetalhes') || "Preencha os detalhes da reunião operacional"}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {/* Data */}
             <div className="space-y-2">
-              <Label>Data da Reunião</Label>
+              <Label>{t('reunioesGestores.data')}</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
@@ -178,18 +179,18 @@ export default function ReuniõesLojas() {
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {data ? format(data, "PPP", { locale: pt }) : "Selecione a data"}
+                    {data ? format(data, "PPP", { locale: dateLocale }) : t('reuniao.dataReuniaoPlaceholder')}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0">
-                  <Calendar mode="single" selected={data} onSelect={(d) => d && setData(d)} locale={pt} />
+                  <Calendar mode="single" selected={data} onSelect={(d) => d && setData(d)} locale={dateLocale} />
                 </PopoverContent>
               </Popover>
             </div>
 
             {/* Seleção de Lojas */}
             <div className="space-y-2">
-              <Label>Loja(s)</Label>
+              <Label>{t('reunioesLojas.lojas') || "Loja(s)"}</Label>
               <div className="border rounded-md p-4 space-y-2 max-h-48 overflow-y-auto">
                 {lojasDisponiveis?.map((loja: any) => (
                   <div key={loja.id} className="flex items-center space-x-2">
@@ -223,10 +224,10 @@ export default function ReuniõesLojas() {
 
             {/* Presenças */}
             <div className="space-y-2">
-              <Label htmlFor="presencas">Presenças</Label>
+              <Label htmlFor="presencas">{t('reunioesGestores.presencas') || "Presenças"}</Label>
               <Input
                 id="presencas"
-                placeholder="Ex: João Silva, Maria Costa, Pedro Alves..."
+                placeholder={t('reunioesLojas.presencasPlaceholder') || "Ex: João Silva, Maria Costa, Pedro Alves..."}
                 value={presencas}
                 onChange={(e) => setPresencas(e.target.value)}
               />
@@ -234,10 +235,10 @@ export default function ReuniõesLojas() {
 
             {/* Conteúdo */}
             <div className="space-y-2">
-              <Label htmlFor="conteudo">Conteúdo da Reunião</Label>
+              <Label htmlFor="conteudo">{t('reunioesGestores.conteudoReuniao') || "Conteúdo da Reunião"}</Label>
               <Textarea
                 id="conteudo"
-                placeholder="Descreva os tópicos discutidos, decisões tomadas, etc..."
+                placeholder={t('reunioesGestores.conteudoPlaceholder') || "Descreva os tópicos discutidos, decisões tomadas, etc..."}
                 value={conteudo}
                 onChange={(e) => setConteudo(e.target.value)}
                 rows={15}
@@ -247,10 +248,10 @@ export default function ReuniõesLojas() {
 
             {/* Tags */}
             <div className="space-y-2">
-              <Label>Tags (opcional)</Label>
+              <Label>{t('reunioesGestores.tagsOpcional') || "Tags (opcional)"}</Label>
               <div className="flex gap-2">
                 <Input
-                  placeholder="Ex: Vendas, Operações..."
+                  placeholder={t('reunioesLojas.tagsPlaceholder') || "Ex: Vendas, Operações..."}
                   value={novaTag}
                   onChange={(e) => setNovaTag(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), adicionarTag())}
@@ -282,12 +283,12 @@ export default function ReuniõesLojas() {
               {criarMutation.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  A gerar resumo com IA...
+                  {t('reunioesGestores.aGerarResumo') || "A gerar resumo com IA..."}
                 </>
               ) : (
                 <>
                   <Save className="mr-2 h-4 w-4" />
-                  Criar Reunião
+                  {t('reunioesGestores.criarReuniao') || "Criar Reunião"}
                 </>
               )}
             </Button>
@@ -298,9 +299,9 @@ export default function ReuniõesLojas() {
       {/* Histórico - Lista Compacta */}
       <Card>
         <CardHeader>
-          <CardTitle>Histórico de Reuniões</CardTitle>
+          <CardTitle>{t('reunioesGestores.historicoReunioes') || "Histórico de Reuniões"}</CardTitle>
           <CardDescription>
-            {isAdmin ? "Todas as reuniões de lojas" : "Reuniões das suas lojas"}
+            {isAdmin ? t('reunioesLojas.todasReunioes') : t('reunioesLojas.reunioesSuasLojas')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -309,7 +310,7 @@ export default function ReuniõesLojas() {
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
           ) : historico.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8">Nenhuma reunião registada</p>
+            <p className="text-center text-muted-foreground py-8">{t('reunioesLojas.semReunioes')}</p>
           ) : (
             <div className="space-y-2">
               {historico.map((reuniao: any) => {
@@ -333,14 +334,14 @@ export default function ReuniõesLojas() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
                             <span className="font-medium">
-                              Reunião de {format(new Date(reuniao.data), "dd/MM/yyyy")}
+                              {t('reunioesGestores.reuniaoDe') || "Reunião de"} {format(new Date(reuniao.data), "dd/MM/yyyy")}
                             </span>
                             <span className="text-muted-foreground text-sm">
                               {reuniao.lojasNomes.join(", ")}
                             </span>
                           </div>
                           <p className="text-sm text-muted-foreground truncate">
-                            Criado por {reuniao.criadoPorNome}
+                            {t('reunioesGestores.criadoPor') || "Criado por"} {reuniao.criadoPorNome}
                           </p>
                         </div>
                       </div>
@@ -367,19 +368,19 @@ export default function ReuniõesLojas() {
                       <div className="border-t bg-muted/20 p-4 space-y-4">
                         {/* Presenças */}
                         <div>
-                          <h4 className="font-semibold text-sm mb-2">Presenças</h4>
+                          <h4 className="font-semibold text-sm mb-2">{t('reunioesGestores.presencas') || "Presenças"}</h4>
                           <p className="text-sm text-muted-foreground">{reuniao.presencas}</p>
                         </div>
 
                         {/* Resumo IA */}
                         {resumoIA && (
                           <div className="border-l-4 border-primary pl-4 space-y-2">
-                            <h4 className="font-semibold text-sm">Resumo Automático</h4>
+                            <h4 className="font-semibold text-sm">{t('reunioesGestores.resumoAutomatico') || "Resumo Automático"}</h4>
                             <p className="text-sm text-muted-foreground">{resumoIA.resumo}</p>
                             
                             {resumoIA.topicos.length > 0 && (
                               <div>
-                                <p className="text-xs font-medium mb-1">Tópicos Principais:</p>
+                                <p className="text-xs font-medium mb-1">{t('reunioesGestores.topicosPrincipais') || "Tópicos Principais"}:</p>
                                 <ul className="text-sm space-y-1">
                                   {resumoIA.topicos.map((topico: string, i: number) => (
                                     <li key={i} className="flex items-start gap-2">
@@ -393,7 +394,7 @@ export default function ReuniõesLojas() {
 
                             {resumoIA.acoes.length > 0 && (
                               <div>
-                                <p className="text-xs font-medium mb-1">Ações Identificadas:</p>
+                                <p className="text-xs font-medium mb-1">{t('reunioesGestores.acoesIdentificadas') || "Ações Identificadas"}:</p>
                                 <ul className="text-sm space-y-1">
                                   {resumoIA.acoes.map((acao: any, i: number) => (
                                     <li key={i} className="flex items-start gap-2">
@@ -413,7 +414,7 @@ export default function ReuniõesLojas() {
                         <details className="border rounded-md p-3">
                           <summary className="cursor-pointer font-semibold text-sm flex items-center gap-2">
                             <FileText className="h-4 w-4" />
-                            Ver Conteúdo Completo
+                            {t('reunioesGestores.verConteudoCompleto') || "Ver Conteúdo Completo"}
                           </summary>
                           <div className="mt-3 text-sm whitespace-pre-wrap text-muted-foreground">
                             {reuniao.conteudo}
@@ -425,7 +426,7 @@ export default function ReuniõesLojas() {
                           <div>
                             <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
                               <FileText className="h-4 w-4" />
-                              Anexos ({anexosReuniao.length})
+                              {t('common.anexos')} ({anexosReuniao.length})
                             </h4>
                             <div className="flex flex-wrap gap-2">
                               {anexosReuniao.map((anexo, idx) => (
@@ -462,7 +463,7 @@ export default function ReuniõesLojas() {
                               }}
                             >
                               <UserPlus className="h-4 w-4 mr-2" />
-                              Atribuir Ações
+                              {t('reunioesGestores.atribuirAcoes') || "Atribuir Ações"}
                             </Button>
                           )}
                           <Button
@@ -475,7 +476,7 @@ export default function ReuniõesLojas() {
                             }}
                           >
                             <Mail className="h-4 w-4 mr-2" />
-                            Enviar Email
+                            {t('reunioesGestores.enviarEmail')}
                           </Button>
                           <Button
                             variant="outline"
@@ -485,14 +486,14 @@ export default function ReuniõesLojas() {
                               try {
                                 const result = await utils.client.reunioesLojas.gerarPDF.query({ reuniaoId: reuniao.id });
                                 window.open(result.url, '_blank');
-                                toast.success('PDF gerado com sucesso!');
+                                toast.success(t('common.sucesso'));
                               } catch (error: any) {
-                                toast.error(error.message || 'Erro ao gerar PDF');
+                                toast.error(error.message || t('common.erro'));
                               }
                             }}
                           >
                             <Download className="h-4 w-4 mr-2" />
-                            Download PDF
+                            {t('reunioesGestores.downloadPDF') || "Download PDF"}
                           </Button>
                         </div>
                       </div>

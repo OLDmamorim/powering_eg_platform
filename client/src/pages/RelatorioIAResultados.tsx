@@ -149,16 +149,16 @@ export function RelatorioIAResultados() {
     // Validar filtros
     if (isAdmin) {
       if (tipoFiltro === 'zona' && zonasSeleccionadas.length === 0) {
-        toast.error('Selecione pelo menos uma zona');
+        toast.error(t('relatorioIA.selecionePeloMenosUmaZona') || 'Selecione pelo menos uma zona');
         return;
       }
       if (tipoFiltro === 'gestor' && !gestorSeleccionado) {
-        toast.error('Selecione um gestor');
+        toast.error(t('relatorioIA.selecioneUmGestor') || 'Selecione um gestor');
         return;
       }
     }
     
-    toast.info('A gerar relatório IA de resultados avançado...');
+    toast.info(t('relatorioIA.aGerarRelatorio') || 'A gerar relatório IA de resultados avançado...');
     await refetchAnaliseIA();
     setMostrarRelatorioIA(true);
   };
@@ -187,18 +187,20 @@ export function RelatorioIAResultados() {
     setSeccoesAbertas(prev => ({ ...prev, [seccao]: !prev[seccao] }));
   };
   
+  const { t, language } = useLanguage();
+  
   // Obter label do filtro actual
   const getFiltroLabel = () => {
-    if (!isAdmin) return 'Minhas Lojas';
-    if (tipoFiltro === 'pais') return 'Todo o País';
+    if (!isAdmin) return t('relatorioIA.minhasLojas') || 'Minhas Lojas';
+    if (tipoFiltro === 'pais') return t('relatorioIA.todoOPais') || 'Todo o País';
     if (tipoFiltro === 'zona') {
-      if (zonasSeleccionadas.length === 0) return 'Selecione zona(s)';
-      if (zonasSeleccionadas.length === 1) return `Zona: ${zonasSeleccionadas[0]}`;
-      return `${zonasSeleccionadas.length} zonas selecionadas`;
+      if (zonasSeleccionadas.length === 0) return t('relatorioIA.selecioneZonas') || 'Selecione zona(s)';
+      if (zonasSeleccionadas.length === 1) return `${t('relatorioIA.zona') || 'Zona'}: ${zonasSeleccionadas[0]}`;
+      return `${zonasSeleccionadas.length} ${t('relatorioIA.zonasSelecionadas') || 'zonas selecionadas'}`;
     }
     if (tipoFiltro === 'gestor') {
       const gestor = gestores?.find(g => g.id === gestorSeleccionado);
-      return gestor ? `Gestor: ${gestor.nome}` : 'Selecione gestor';
+      return gestor ? `${t('relatorioIA.gestor') || 'Gestor'}: ${gestor.nome}` : t('relatorioIA.selecioneGestor') || 'Selecione gestor';
     }
     return '';
   };
@@ -228,10 +230,10 @@ export function RelatorioIAResultados() {
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <Sparkles className="h-6 w-6 text-purple-500" />
-            Relatório IA de Resultados
+            {t('relatorioIA.titulo') || 'Relatório IA de Resultados'}
           </h1>
           <p className="text-muted-foreground">
-            Análise quantitativa profunda dos resultados de serviços com métricas detalhadas e rankings completos
+            {t('relatorioIA.descricao') || 'Análise quantitativa profunda dos resultados de serviços com métricas detalhadas e rankings completos'}
           </p>
         </div>
 
@@ -243,10 +245,10 @@ export function RelatorioIAResultados() {
                 <div>
                   <CardTitle className="flex items-center gap-2">
                     <Sparkles className="h-5 w-5 text-purple-500" />
-                    Gerar Análise Quantitativa
+                    {t('relatorioIA.gerarAnalise') || 'Gerar Análise Quantitativa'}
                   </CardTitle>
                   <CardDescription>
-                    Análise baseada em dados numéricos: serviços, objetivos, taxas e tendências
+                    {t('relatorioIA.analiseBaseada') || 'Análise baseada em dados numéricos: serviços, objetivos, taxas e tendências'}
                   </CardDescription>
                 </div>
               </div>

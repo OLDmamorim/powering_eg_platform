@@ -214,18 +214,19 @@ export function ResultadosDashboard() {
   const loadingEvolucao = lojaSelecionada === 'minhas' ? loadingEvolucaoAgregada : loadingEvolucaoIndividual;
   
   // Labels de métricas
+  const { t, language } = useLanguage();
+  
   const metricaLabels = {
-    totalServicos: 'Total de Serviços',
-    taxaReparacao: 'Taxa de Reparação',
-    desvioPercentualMes: 'Desvio vs Objetivo (%)',
-    servicosPorColaborador: 'Serviços por Colaborador',
+    totalServicos: t('resultados.totalServicos') || 'Total de Serviços',
+    taxaReparacao: t('resultados.taxaReparacao') || 'Taxa de Reparação',
+    desvioPercentualMes: t('resultados.desvioVsObjetivo') || 'Desvio vs Objetivo (%)',
+    servicosPorColaborador: t('resultados.servicosPorColaborador') || 'Serviços por Colaborador',
   };
   
   // Nomes dos meses
-  const meses = [
-    'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
-    'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'
-  ];
+  const meses = language === 'pt' 
+    ? ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
+    : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   
   if (loadingPeriodos || loadingLojas) {
     return (
@@ -243,9 +244,9 @@ export function ResultadosDashboard() {
         <div className="container mx-auto py-8">
           <Card>
             <CardHeader>
-              <CardTitle>Sem Dados Disponíveis</CardTitle>
+              <CardTitle>{t('resultados.semDadosDisponiveis') || 'Sem Dados Disponíveis'}</CardTitle>
               <CardDescription>
-                Nenhum ficheiro Excel foi carregado ainda. O administrador precisa fazer upload dos resultados mensais.
+                {t('resultados.nenhumFicheiroCarregado') || 'Nenhum ficheiro Excel foi carregado ainda. O administrador precisa fazer upload dos resultados mensais.'}
               </CardDescription>
             </CardHeader>
           </Card>
@@ -260,37 +261,37 @@ export function ResultadosDashboard() {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold">Dashboard de Resultados</h1>
-            <p className="text-muted-foreground">Análise de performance e métricas das lojas</p>
+            <h1 className="text-3xl font-bold">{t('resultados.dashboardResultados') || 'Dashboard de Resultados'}</h1>
+            <p className="text-muted-foreground">{t('resultados.analisePerformance') || 'Análise de performance e métricas das lojas'}</p>
           </div>
         </div>
         
         {/* Filtros */}
         <Card>
           <CardHeader>
-            <CardTitle>Filtros</CardTitle>
+            <CardTitle>{t('common.filtros') || 'Filtros'}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* Período Principal - Seleção Múltipla de Meses */}
               <div className="space-y-2">
-                <label className="text-sm font-medium">Período Principal</label>
+                <label className="text-sm font-medium">{t('resultados.periodoPrincipal') || 'Período Principal'}</label>
                 <FiltroMesesCheckbox
                   mesesDisponiveis={periodos.map(p => ({ mes: p.mes, ano: p.ano }))}
                   mesesSelecionados={mesesSelecionados}
                   onMesesChange={setMesesSelecionados}
-                  placeholder="Selecionar meses"
+                  placeholder={t('resultados.selecionarMeses') || 'Selecionar meses'}
                 />
                 {modoMultiplosMeses && (
                   <p className="text-xs text-muted-foreground">
-                    Dados agregados de {mesesSelecionados.length} meses
+                    {`${t('resultados.dadosAgregados') || 'Dados agregados de'} ${mesesSelecionados.length} ${t('resultados.meses') || 'meses'}`}
                   </p>
                 )}
               </div>
               
               {/* Período de Comparação 1 */}
               <div className="space-y-2">
-                <label className="text-sm font-medium">Comparar com (opcional)</label>
+                <label className="text-sm font-medium">{t('resultados.compararCom') || 'Comparar com (opcional)'}</label>
                 <Select
                   value={periodoComparacao1 ? `${periodoComparacao1.mes}-${periodoComparacao1.ano}` : "nenhum"}
                   onValueChange={(value) => {
@@ -306,7 +307,7 @@ export function ResultadosDashboard() {
                     <SelectValue placeholder="Nenhum" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="nenhum">Nenhum</SelectItem>
+                    <SelectItem value="nenhum">{t('common.nenhum') || 'Nenhum'}</SelectItem>
                     {periodos.map((p) => (
                       <SelectItem key={`comp1-${p.mes}-${p.ano}`} value={`${p.mes}-${p.ano}`}>
                         {p.label}
@@ -318,7 +319,7 @@ export function ResultadosDashboard() {
               
               {/* Período de Comparação 2 */}
               <div className="space-y-2">
-                <label className="text-sm font-medium">Comparar com 2 (opcional)</label>
+                <label className="text-sm font-medium">{t('resultados.compararCom2') || 'Comparar com 2 (opcional)'}</label>
                 <Select
                   value={periodoComparacao2 ? `${periodoComparacao2.mes}-${periodoComparacao2.ano}` : "nenhum"}
                   onValueChange={(value) => {
@@ -334,7 +335,7 @@ export function ResultadosDashboard() {
                     <SelectValue placeholder="Nenhum" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="nenhum">Nenhum</SelectItem>
+                    <SelectItem value="nenhum">{t('common.nenhum') || 'Nenhum'}</SelectItem>
                     {periodos.map((p) => (
                       <SelectItem key={`comp2-${p.mes}-${p.ano}`} value={`${p.mes}-${p.ano}`}>
                         {p.label}
@@ -349,7 +350,7 @@ export function ResultadosDashboard() {
             
             {/* Loja (para gráfico de evolução) */}
             <div className="space-y-2">
-              <label className="text-sm font-medium">Loja (Evolução)</label>
+              <label className="text-sm font-medium">{t('resultados.lojaEvolucao') || 'Loja (Evolução)'}</label>
               <Select
                 value={lojaSelecionada?.toString() || 'todas'}
                 onValueChange={(value) => {
@@ -359,14 +360,14 @@ export function ResultadosDashboard() {
                 }}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Selecione uma loja" />
+                  <SelectValue placeholder={t('resultados.selecioneLoja') || 'Selecione uma loja'} />
                 </SelectTrigger>
                 <SelectContent>
                   {/* Minhas Lojas - aparece SEMPRE para gestores */}
                   {user?.role === 'gestor' && (
                     <SelectItem value="minhas">
                       <div className="flex items-center gap-2">
-                        <span>Minhas Lojas</span>
+                        <span>{t('resultados.minhasLojas') || 'Minhas Lojas'}</span>
                         <Badge variant="secondary" className="text-xs">
                           {lojas?.length || 0}
                         </Badge>
@@ -375,7 +376,7 @@ export function ResultadosDashboard() {
                   )}
                   <SelectItem value="todas">
                     <div className="flex items-center gap-2">
-                      <span>Todas as Lojas</span>
+                      <span>{t('resultados.todasLojas') || 'Todas as Lojas'}</span>
                       <Badge variant="secondary" className="text-xs">
                         {todasLojas?.length || estatisticas?.totalLojas || 0}
                       </Badge>
@@ -392,7 +393,7 @@ export function ResultadosDashboard() {
             
             {/* Métrica para ranking */}
             <div className="space-y-2">
-              <label className="text-sm font-medium">Métrica (Ranking)</label>
+              <label className="text-sm font-medium">{t('resultados.metricaRanking') || 'Métrica (Ranking)'}</label>
               <Select
                 value={metricaRanking}
                 onValueChange={(value: any) => setMetricaRanking(value)}
@@ -456,12 +457,12 @@ export function ResultadosDashboard() {
               {exportando ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  A gerar relatório...
+                  {t('resultados.aGerarRelatorio') || 'A gerar relatório...'}
                 </>
               ) : (
                 <>
                   <Download className="h-4 w-4" />
-                  Exportar Relatório Excel
+                  {t('resultados.exportarRelatorioExcel') || 'Exportar Relatório Excel'}
                 </>
               )}
             </Button>
@@ -472,8 +473,8 @@ export function ResultadosDashboard() {
         {(periodoComparacao1 || periodoComparacao2) && (
           <Card>
             <CardHeader>
-              <CardTitle>Comparação Temporal</CardTitle>
-              <CardDescription>Compare estatísticas entre diferentes períodos</CardDescription>
+              <CardTitle>{t('resultados.comparacaoTemporal') || 'Comparação Temporal'}</CardTitle>
+              <CardDescription>{t('resultados.compareEstatisticas') || 'Compare estatísticas entre diferentes períodos'}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -485,19 +486,19 @@ export function ResultadosDashboard() {
                     </h3>
                     <div className="space-y-3">
                       <div className="bg-muted/50 p-3 rounded-lg h-[96px]">
-                        <p className="text-xs text-muted-foreground">Total de Lojas</p>
+                        <p className="text-xs text-muted-foreground">{t('resultados.totalLojas') || 'Total de Lojas'}</p>
                         <p className="text-2xl font-bold">{estatisticas.totalLojas}</p>
                       </div>
                       <div className="bg-muted/50 p-3 rounded-lg h-[96px]">
-                        <p className="text-xs text-muted-foreground">Total de Serviços</p>
+                        <p className="text-xs text-muted-foreground">{t('resultados.totalServicos') || 'Total de Serviços'}</p>
                         <p className="text-2xl font-bold">{estatisticas.somaServicos?.toLocaleString() || 0}</p>
                       </div>
                       <div className="bg-muted/50 p-3 rounded-lg">
-                        <p className="text-xs text-muted-foreground">Acima do Objetivo</p>
+                        <p className="text-xs text-muted-foreground">{t('resultados.acimaDoObjetivo') || 'Acima do Objetivo'}</p>
                         <p className="text-2xl font-bold">{estatisticas.lojasAcimaObjetivo} / {estatisticas.totalLojas}</p>
                       </div>
                       <div className="bg-muted/50 p-3 rounded-lg">
-                        <p className="text-xs text-muted-foreground">Taxa Média Reparação</p>
+                        <p className="text-xs text-muted-foreground">{t('resultados.taxaMediaReparacao') || 'Taxa Média Reparação'}</p>
                         <p className="text-2xl font-bold">
                           {estatisticas.mediaTaxaReparacao ? `${(estatisticas.mediaTaxaReparacao * 100).toFixed(1)}%` : 'N/A'}
                         </p>
@@ -514,7 +515,7 @@ export function ResultadosDashboard() {
                     </h3>
                     <div className="space-y-3">
                       <div className="bg-muted/50 p-3 rounded-lg h-[96px]">
-                        <p className="text-xs text-muted-foreground">Total de Lojas</p>
+                        <p className="text-xs text-muted-foreground">{t('resultados.totalLojas') || 'Total de Lojas'}</p>
                         <p className="text-2xl font-bold">{estatisticasComp1.totalLojas}</p>
                         {estatisticas && (
                           <p className="text-xs text-muted-foreground mt-1">
@@ -523,13 +524,13 @@ export function ResultadosDashboard() {
                             ) : estatisticasComp1.totalLojas < estatisticas.totalLojas ? (
                               <span className="text-red-600">{estatisticasComp1.totalLojas - estatisticas.totalLojas}</span>
                             ) : (
-                              <span className="text-muted-foreground">Igual</span>
+                              <span className="text-muted-foreground">{t('resultados.igual') || 'Igual'}</span>
                             )}
                           </p>
                         )}
                       </div>
                       <div className="bg-muted/50 p-3 rounded-lg h-[96px]">
-                        <p className="text-xs text-muted-foreground">Total de Serviços</p>
+                        <p className="text-xs text-muted-foreground">{t('resultados.totalServicos') || 'Total de Serviços'}</p>
                         <p className="text-2xl font-bold">{estatisticasComp1.somaServicos?.toLocaleString() || 0}</p>
                         {estatisticas && estatisticas.somaServicos && estatisticasComp1.somaServicos && (
                           <p className="text-xs text-muted-foreground mt-1">
@@ -538,17 +539,17 @@ export function ResultadosDashboard() {
                             ) : estatisticasComp1.somaServicos < estatisticas.somaServicos ? (
                               <span className="text-red-600">{(estatisticasComp1.somaServicos - estatisticas.somaServicos).toLocaleString()}</span>
                             ) : (
-                              <span className="text-muted-foreground">Igual</span>
+                              <span className="text-muted-foreground">{t('resultados.igual') || 'Igual'}</span>
                             )}
                           </p>
                         )}
                       </div>
                       <div className="bg-muted/50 p-3 rounded-lg">
-                        <p className="text-xs text-muted-foreground">Acima do Objetivo</p>
+                        <p className="text-xs text-muted-foreground">{t('resultados.acimaDoObjetivo') || 'Acima do Objetivo'}</p>
                         <p className="text-2xl font-bold">{estatisticasComp1.lojasAcimaObjetivo} / {estatisticasComp1.totalLojas}</p>
                       </div>
                       <div className="bg-muted/50 p-3 rounded-lg">
-                        <p className="text-xs text-muted-foreground">Taxa Média Reparação</p>
+                        <p className="text-xs text-muted-foreground">{t('resultados.taxaMediaReparacao') || 'Taxa Média Reparação'}</p>
                         <p className="text-2xl font-bold">
                           {estatisticasComp1.mediaTaxaReparacao ? `${(estatisticasComp1.mediaTaxaReparacao * 100).toFixed(1)}%` : 'N/A'}
                         </p>
@@ -565,7 +566,7 @@ export function ResultadosDashboard() {
                     </h3>
                     <div className="space-y-3">
                       <div className="bg-muted/50 p-3 rounded-lg h-[96px]">
-                        <p className="text-xs text-muted-foreground">Total de Lojas</p>
+                        <p className="text-xs text-muted-foreground">{t('resultados.totalLojas') || 'Total de Lojas'}</p>
                         <p className="text-2xl font-bold">{estatisticasComp2.totalLojas}</p>
                         {estatisticas && (
                           <p className="text-xs text-muted-foreground mt-1">
@@ -574,13 +575,13 @@ export function ResultadosDashboard() {
                             ) : estatisticasComp2.totalLojas < estatisticas.totalLojas ? (
                               <span className="text-red-600">{estatisticasComp2.totalLojas - estatisticas.totalLojas}</span>
                             ) : (
-                              <span className="text-muted-foreground">Igual</span>
+                              <span className="text-muted-foreground">{t('resultados.igual') || 'Igual'}</span>
                             )}
                           </p>
                         )}
                       </div>
                       <div className="bg-muted/50 p-3 rounded-lg h-[96px]">
-                        <p className="text-xs text-muted-foreground">Total de Serviços</p>
+                        <p className="text-xs text-muted-foreground">{t('resultados.totalServicos') || 'Total de Serviços'}</p>
                         <p className="text-2xl font-bold">{estatisticasComp2.somaServicos?.toLocaleString() || 0}</p>
                         {estatisticas && estatisticas.somaServicos && estatisticasComp2.somaServicos && (
                           <p className="text-xs text-muted-foreground mt-1">
@@ -589,17 +590,17 @@ export function ResultadosDashboard() {
                             ) : estatisticasComp2.somaServicos < estatisticas.somaServicos ? (
                               <span className="text-red-600">{(estatisticasComp2.somaServicos - estatisticas.somaServicos).toLocaleString()}</span>
                             ) : (
-                              <span className="text-muted-foreground">Igual</span>
+                              <span className="text-muted-foreground">{t('resultados.igual') || 'Igual'}</span>
                             )}
                           </p>
                         )}
                       </div>
                       <div className="bg-muted/50 p-3 rounded-lg">
-                        <p className="text-xs text-muted-foreground">Acima do Objetivo</p>
+                        <p className="text-xs text-muted-foreground">{t('resultados.acimaDoObjetivo') || 'Acima do Objetivo'}</p>
                         <p className="text-2xl font-bold">{estatisticasComp2.lojasAcimaObjetivo} / {estatisticasComp2.totalLojas}</p>
                       </div>
                       <div className="bg-muted/50 p-3 rounded-lg">
-                        <p className="text-xs text-muted-foreground">Taxa Média Reparação</p>
+                        <p className="text-xs text-muted-foreground">{t('resultados.taxaMediaReparacao') || 'Taxa Média Reparação'}</p>
                         <p className="text-2xl font-bold">
                           {estatisticasComp2.mediaTaxaReparacao ? `${(estatisticasComp2.mediaTaxaReparacao * 100).toFixed(1)}%` : 'N/A'}
                         </p>
@@ -622,13 +623,13 @@ export function ResultadosDashboard() {
             {/* Total de Lojas */}
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total de Lojas</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('resultados.totalLojas') || 'Total de Lojas'}</CardTitle>
                 <MapPin className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{estatisticas.totalLojas}</div>
                 <p className="text-xs text-muted-foreground">
-                  Com dados no período
+                  {t('resultados.comDadosNoPeriodo') || 'Com dados no período'}
                 </p>
               </CardContent>
             </Card>
@@ -636,7 +637,7 @@ export function ResultadosDashboard() {
             {/* Total de Serviços */}
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total de Serviços</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('resultados.totalServicos') || 'Total de Serviços'}</CardTitle>
                 <BarChart3 className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
@@ -656,7 +657,7 @@ export function ResultadosDashboard() {
                 {/* Média mensal quando múltiplos meses selecionados */}
                 {modoMultiplosMeses && (
                   <p className="text-xs text-blue-600 dark:text-blue-400 mt-1 font-medium">
-                    Média mensal: {(() => {
+                    {t('resultados.mediaMensal') || 'Média mensal'}: {(() => {
                       const total = (lojaSelecionada === 'todas' || lojaSelecionada === null) && totaisGlobais?.totalServicos
                         ? totaisGlobais.totalServicos
                         : estatisticas.somaServicos || 0;
@@ -671,7 +672,7 @@ export function ResultadosDashboard() {
             {/* Lojas Acima do Objetivo */}
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Acima do Objetivo</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('resultados.acimaDoObjetivo') || 'Acima do Objetivo'}</CardTitle>
                 <Target className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
@@ -682,7 +683,7 @@ export function ResultadosDashboard() {
                   {estatisticas.totalLojas > 0 
                     ? `${Math.round((estatisticas.lojasAcimaObjetivo / estatisticas.totalLojas) * 100)}%`
                     : '0%'
-                  } das lojas
+                  } {t('resultados.dasLojas') || 'das lojas'}
                 </p>
               </CardContent>
             </Card>
@@ -690,7 +691,7 @@ export function ResultadosDashboard() {
             {/* Taxa Média de Reparação */}
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Taxa Média Reparação</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('resultados.taxaMediaReparacao') || 'Taxa Média Reparação'}</CardTitle>
                 <Award className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
@@ -715,9 +716,9 @@ export function ResultadosDashboard() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <LineChart className="h-5 w-5" />
-                Evolução Mensal - {lojaSelecionada === 'minhas' ? 'Minhas Lojas (Agregado)' : lojas?.find(l => l.id === lojaSelecionada)?.nome}
+                {t('resultados.evolucaoMensal') || 'Evolução Mensal'} - {lojaSelecionada === 'minhas' ? t('resultados.minhasLojasAgregado') || 'Minhas Lojas (Agregado)' : lojas?.find(l => l.id === lojaSelecionada)?.nome}
               </CardTitle>
-              <CardDescription>Últimos 6 meses</CardDescription>
+              <CardDescription>{t('resultados.ultimos6Meses') || 'Últimos 6 meses'}</CardDescription>
             </CardHeader>
             <CardContent>
               {loadingEvolucao ? (
@@ -737,7 +738,7 @@ export function ResultadosDashboard() {
                           <div className="flex items-center justify-between text-sm">
                             <span className="font-medium">{meses[item.mes - 1]} {item.ano}</span>
                             <span className={isPositivo ? 'text-green-600' : 'text-red-600'}>
-                              {item.totalServicos || 0} serviços ({percentual >= 0 ? '+' : ''}{(percentual * 100).toFixed(1)}%)
+                              {item.totalServicos || 0} {t('resultados.servicos') || 'serviços'} ({percentual >= 0 ? '+' : ''}{(percentual * 100).toFixed(1)}%)
                             </span>
                           </div>
                           <div className="w-full bg-secondary rounded-full h-2">
@@ -755,7 +756,7 @@ export function ResultadosDashboard() {
                 </div>
               ) : (
                 <p className="text-center text-muted-foreground py-8">
-                  Sem dados de evolução para esta loja
+                  {t('resultados.semDadosEvolucao') || 'Sem dados de evolução para esta loja'}
                 </p>
               )}
             </CardContent>
@@ -824,7 +825,7 @@ export function ResultadosDashboard() {
               </div>
             ) : (
               <p className="text-center text-muted-foreground py-8">
-                Sem dados de ranking para este período
+                {t('resultados.semDadosRanking') || 'Sem dados de ranking para este período'}
               </p>
             )}
           </CardContent>
@@ -836,7 +837,7 @@ export function ResultadosDashboard() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <ShoppingBag className="h-5 w-5" />
-                Vendas Complementares
+                {t('resultados.vendasComplementares') || 'Vendas Complementares'}
               </CardTitle>
               <CardDescription>
                 {periodoSelecionado && periodos.find(p => p.mes === periodoSelecionado.mes && p.ano === periodoSelecionado.ano)?.label}
@@ -849,14 +850,14 @@ export function ResultadosDashboard() {
                 </div>
               ) : estatisticasComplementares ? (
                 <div className="space-y-6">
-                  {/* Card de Destaque - % Serviços de Escovas (Prémio Trimestral) */}
+                  {/* Card de Destaque - {t('resultados.servicosEscovas') || '% Serviços de Escovas'} ({t('resultados.premioTrimestral') || 'Prémio Trimestral'}) */}
                   <div className="bg-gradient-to-r from-amber-100 to-yellow-100 dark:from-amber-950 dark:to-yellow-950 border-2 border-amber-400 dark:border-amber-600 rounded-lg p-4">
                     <div className="flex items-center justify-between">
                       <div>
                         <div className="flex items-center gap-2">
                           <Award className="h-5 w-5 text-amber-600" />
-                          <span className="text-sm font-semibold text-amber-800 dark:text-amber-200">% Serviços de Escovas</span>
-                          <Badge variant="outline" className="text-xs border-amber-500 text-amber-700 dark:text-amber-300">Prémio Trimestral</Badge>
+                          <span className="text-sm font-semibold text-amber-800 dark:text-amber-200">{t('resultados.servicosEscovas') || '% Serviços de Escovas'}</span>
+                          <Badge variant="outline" className="text-xs border-amber-500 text-amber-700 dark:text-amber-300">{t('resultados.premioTrimestral') || 'Prémio Trimestral'}</Badge>
                         </div>
                         <div className="text-3xl font-bold text-amber-700 dark:text-amber-300 mt-1">
                           {(estatisticasComplementares.mediaEscovasPercent * 100)?.toFixed(1) || '0.0'}%
@@ -866,7 +867,7 @@ export function ResultadosDashboard() {
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="text-sm text-muted-foreground">Lojas acima do objetivo</div>
+                        <div className="text-sm text-muted-foreground">{t('resultados.lojasAcimaObjetivo') || 'Lojas acima do objetivo'}</div>
                         <div className="text-2xl font-bold text-amber-700 dark:text-amber-300">
                           {estatisticasComplementares.lojasComEscovas || 0}/{estatisticasComplementares.totalLojas || 0}
                         </div>
@@ -877,39 +878,39 @@ export function ResultadosDashboard() {
                   {/* Resumo Geral */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div className="bg-green-50 dark:bg-green-950 rounded-lg p-4">
-                      <div className="text-sm text-muted-foreground">Total Vendas</div>
+                      <div className="text-sm text-muted-foreground">{t('resultados.totalVendas') || 'Total Vendas'}</div>
                       <div className="text-2xl font-bold text-green-600">
                         €{estatisticasComplementares.somaVendas?.toLocaleString('pt-PT', { minimumFractionDigits: 2 }) || '0,00'}
                       </div>
-                      <div className="text-xs text-muted-foreground">excl. películas</div>
+                      <div className="text-xs text-muted-foreground">{t('resultados.exclPeliculas') || 'excl. películas'}</div>
                     </div>
                     <div className="bg-blue-50 dark:bg-blue-950 rounded-lg p-4">
-                      <div className="text-sm text-muted-foreground">Escovas</div>
+                      <div className="text-sm text-muted-foreground">{t('resultados.escovas') || 'Escovas'}</div>
                       <div className="text-2xl font-bold text-blue-600">
                         €{estatisticasComplementares.somaEscovas?.toLocaleString('pt-PT', { minimumFractionDigits: 2 }) || '0,00'}
                       </div>
                       <div className="text-xs text-muted-foreground">{estatisticasComplementares.totalEscovasQtd || 0} unidades</div>
                     </div>
                     <div className="bg-purple-50 dark:bg-purple-950 rounded-lg p-4">
-                      <div className="text-sm text-muted-foreground">Películas</div>
+                      <div className="text-sm text-muted-foreground">{t('resultados.peliculas') || 'Películas'}</div>
                       <div className="text-2xl font-bold text-purple-600">
                         €{estatisticasComplementares.somaPeliculas?.toLocaleString('pt-PT', { minimumFractionDigits: 2 }) || '0,00'}
                       </div>
                     </div>
                     <div className="bg-orange-50 dark:bg-orange-950 rounded-lg p-4">
-                      <div className="text-sm text-muted-foreground">Lojas com Vendas</div>
+                      <div className="text-sm text-muted-foreground">{t('resultados.lojasComVendas') || 'Lojas com Vendas'}</div>
                       <div className="text-2xl font-bold text-orange-600">
                         {estatisticasComplementares.lojasComVendas || 0}/{estatisticasComplementares.totalLojas || 0}
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        {estatisticasComplementares.percentLojasComEscovas?.toFixed(0) || 0}% venderam escovas
+                        {estatisticasComplementares.percentLojasComEscovas?.toFixed(0) || 0}% {t('resultados.venderamEscovas') || 'venderam escovas'}
                       </div>
                     </div>
                   </div>
                   
                   {/* Breakdown por Categoria */}
                   <div>
-                    <h4 className="font-medium mb-3">Breakdown por Categoria</h4>
+                    <h4 className="font-medium mb-3">{t('resultados.breakdownCategoria') || 'Breakdown por Categoria'}</h4>
                     <div className="space-y-2">
                       {[
                         { label: 'Escovas', valor: estatisticasComplementares.somaEscovas, total: estatisticasComplementares.somaVendas, cor: 'bg-blue-500' },
@@ -943,7 +944,7 @@ export function ResultadosDashboard() {
                   {/* Top 5 Lojas */}
                   {rankingComplementares && rankingComplementares.length > 0 && (
                     <div>
-                      <h4 className="font-medium mb-3">Top 5 Lojas - Vendas Complementares</h4>
+                      <h4 className="font-medium mb-3">{t('resultados.top5LojasVendas') || 'Top 5 Lojas - Vendas Complementares'}</h4>
                       <div className="space-y-2">
                         {rankingComplementares.slice(0, 5).map((item, idx) => (
                           <div key={idx} className="flex items-center gap-3">
@@ -977,7 +978,7 @@ export function ResultadosDashboard() {
                 </div>
               ) : (
                 <p className="text-center text-muted-foreground py-8">
-                  Sem dados de vendas complementares para este período
+                  {t('resultados.semDadosVendasComplementares') || 'Sem dados de vendas complementares para este período'}
                 </p>
               )}
             </CardContent>
@@ -989,7 +990,7 @@ export function ResultadosDashboard() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <MapPin className="h-5 w-5" />
-              Resultados por Zona Geográfica
+              {t('resultados.resultadosPorZona') || 'Resultados por Zona Geográfica'}
             </CardTitle>
             <CardDescription>
               {periodoSelecionado && periodos.find(p => p.mes === periodoSelecionado.mes && p.ano === periodoSelecionado.ano)?.label}
@@ -1006,27 +1007,27 @@ export function ResultadosDashboard() {
                   <div key={idx} className="border rounded-lg p-4 space-y-2">
                     <div className="flex items-center justify-between">
                       <h3 className="font-semibold text-lg">{zona.zona || 'Sem Zona'}</h3>
-                      <span className="text-sm text-muted-foreground">{zona.totalLojas} lojas</span>
+                      <span className="text-sm text-muted-foreground">{zona.totalLojas} {t('resultados.lojas') || 'lojas'}</span>
                     </div>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                       <div>
-                        <div className="text-muted-foreground">Total Serviços</div>
+                        <div className="text-muted-foreground">{t('resultados.totalServicos') || 'Total Serviços'}</div>
                         <div className="font-medium">{zona.somaServicos?.toLocaleString() || 0}</div>
                       </div>
                       <div>
-                        <div className="text-muted-foreground">Desvio Médio</div>
+                        <div className="text-muted-foreground">{t('resultados.desvioMedio') || 'Desvio Médio'}</div>
                         <div className={`font-medium ${zona.mediaDesvioPercentual && zona.mediaDesvioPercentual >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                           {zona.mediaDesvioPercentual ? `${(zona.mediaDesvioPercentual * 100).toFixed(1)}%` : 'N/A'}
                         </div>
                       </div>
                       <div>
-                        <div className="text-muted-foreground">Taxa Reparação</div>
+                        <div className="text-muted-foreground">{t('resultados.taxaReparacao') || 'Taxa Reparação'}</div>
                         <div className="font-medium">
                           {zona.mediaTaxaReparacao ? `${(zona.mediaTaxaReparacao * 100).toFixed(1)}%` : 'N/A'}
                         </div>
                       </div>
                       <div>
-                        <div className="text-muted-foreground">Total Reparações</div>
+                        <div className="text-muted-foreground">{t('resultados.totalReparacoes') || 'Total Reparações'}</div>
                         <div className="font-medium">{zona.somaReparacoes || 0}</div>
                       </div>
                     </div>
@@ -1035,7 +1036,7 @@ export function ResultadosDashboard() {
               </div>
             ) : (
               <p className="text-center text-muted-foreground py-8">
-                Sem dados por zona para este período
+                {t('resultados.semDadosPorZona') || 'Sem dados por zona para este período'}
               </p>
             )}
           </CardContent>

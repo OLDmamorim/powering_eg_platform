@@ -68,7 +68,7 @@ export default function Categorias() {
     try {
       const cat = relatoriosPorCategoria?.find(c => c.categoria === categoria);
       if (!cat) {
-        toast.error("Categoria não encontrada");
+        toast.error(t('categorias.naoEncontrada') || "Categoria não encontrada");
         return;
       }
       
@@ -155,9 +155,9 @@ export default function Categorias() {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
       
-      toast.success(`Categoria "${categoria}" exportada com sucesso`);
+      toast.success(`${t('categorias.exportadaSucesso') || 'Categoria exportada com sucesso'}: "${categoria}"`);
     } catch (error) {
-      toast.error("Erro ao exportar categoria");
+      toast.error(t('categorias.erroExportar') || "Erro ao exportar categoria");
     } finally {
       setExportingCategoria(null);
     }
@@ -171,12 +171,12 @@ export default function Categorias() {
   // Mutation para atualizar estado
   const updateEstadoMutation = trpc.categorizacao.updateEstado.useMutation({
     onSuccess: () => {
-      toast.success("Estado atualizado");
+      toast.success(t('categorias.estadoAtualizado') || "Estado atualizado");
       utils.categorizacao.getRelatoriosPorCategoria.invalidate();
       utils.categorizacao.getEstatisticas.invalidate();
     },
     onError: (error) => {
-      toast.error(error.message || "Erro ao atualizar estado");
+      toast.error(error.message || t('categorias.erroAtualizarEstado') || "Erro ao atualizar estado");
     },
   });
 
@@ -257,10 +257,10 @@ export default function Categorias() {
           <div>
             <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
               <Tag className="h-8 w-8 text-primary" />
-              Categorias
+              {t('categorias.titulo') || 'Categorias'}
             </h1>
             <p className="text-muted-foreground">
-              Gerir e acompanhar relatórios organizados por categoria
+              {t('categorias.descricao') || 'Gerir e acompanhar relatórios organizados por categoria'}
             </p>
           </div>
 

@@ -13,7 +13,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, CalendarIcon, Plus, X, Save, Users, FileText, Tag, Download, Mail, UserPlus, Image as ImageIcon, MessageSquare, CheckCircle2, XCircle, Clock, AlertCircle, FileDown, Send, ListChecks } from "lucide-react";
 import { format } from "date-fns";
-import { pt } from "date-fns/locale";
+import { pt, enUS } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -25,7 +25,8 @@ import { AnexosUpload } from "@/components/AnexosUpload";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function ReuniõesGestores() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const dateLocale = language === 'pt' ? pt : enUS;
   const { user } = useAuth();
   const isAdmin = user?.role === "admin";
   
@@ -91,7 +92,7 @@ export default function ReuniõesGestores() {
 
   const handleSubmit = async () => {
     if (!conteudo.trim()) {
-      toast.error("Por favor, descreva o conteúdo da reunião");
+      toast.error(t('reunioesGestores.erroConteudo') || "Por favor, descreva o conteúdo da reunião");
       return;
     }
 
@@ -115,7 +116,7 @@ export default function ReuniõesGestores() {
         }
       }
 
-      toast.success("Reunião criada com sucesso!");
+      toast.success(t('reunioesGestores.reuniaoCriada'));
       
       // Limpar formulário
       setData(new Date());
@@ -130,7 +131,7 @@ export default function ReuniõesGestores() {
       refetch();
       refetchTopicos();
     } catch (error: any) {
-      toast.error(error.message || "Erro ao criar reunião");
+      toast.error(error.message || t('reunioesGestores.erroCrear'));
     }
   };
 
@@ -176,23 +177,23 @@ export default function ReuniõesGestores() {
         topicos: topicosFinalizacao,
       });
       
-      toast.success("Tópicos finalizados com sucesso!");
+      toast.success(t('reunioesGestores.topicosFinalizados'));
       setModalFinalizarTopicos(false);
       setReuniaoParaFinalizar(null);
       refetch();
       refetchTopicos();
     } catch (error: any) {
-      toast.error(error.message || "Erro ao finalizar tópicos");
+      toast.error(error.message || t('reunioesGestores.erroFinalizar'));
     }
   };
 
   const handleLibertarTopicos = async (reuniaoId: number) => {
     try {
       await libertarTopicosMutation.mutateAsync({ reuniaoId });
-      toast.success("Tópicos não discutidos libertados para próxima reunião!");
+      toast.success(t('reunioesGestores.topicosLibertados'));
       refetchTopicos();
     } catch (error: any) {
-      toast.error(error.message || "Erro ao libertar tópicos");
+      toast.error(error.message || t('reunioesGestores.erroLibertar'));
     }
   };
 
@@ -202,10 +203,10 @@ export default function ReuniõesGestores() {
     
     try {
       const relatorio = await gerarRelatorioMutation.mutateAsync({ reuniaoId });
-      toast.success("Relatório gerado com sucesso!");
+      toast.success(t('reunioesGestores.analiseSucesso'));
       setModalRelatorio(true);
     } catch (error: any) {
-      toast.error(error.message || "Erro ao gerar relatório");
+      toast.error(error.message || t('reunioesGestores.erroAnalise'));
     } finally {
       setGerandoRelatorio(false);
     }
@@ -215,9 +216,9 @@ export default function ReuniõesGestores() {
     try {
       const result = await utils.client.reunioesGestores.gerarPDFRelatorio.query({ reuniaoId });
       window.open(result.url, '_blank');
-      toast.success('PDF gerado com sucesso!');
+      toast.success(t('common.sucesso'));
     } catch (error: any) {
-      toast.error(error.message || 'Erro ao gerar PDF');
+      toast.error(error.message || t('common.erro'));
     }
   };
 
@@ -227,16 +228,16 @@ export default function ReuniõesGestores() {
         reuniaoId,
         gestorIds,
       });
-      toast.success(`Relatório enviado para ${result.enviados} gestor(es)!`);
+      toast.success(t('reunioesGestores.emailEnviado'));
       setModalEnviarRelatorio(false);
     } catch (error: any) {
-      toast.error(error.message || 'Erro ao enviar relatório');
+      toast.error(error.message || t('reunioesGestores.erroEmail'));
     }
   };
 
   const handleCriarPendentes = async (reuniaoId: number) => {
     if (!relatorioReuniao?.acoesDefinidas) {
-      toast.error("Nenhuma ação definida no relatório");
+      toast.error(t('alertas.nenhumaAcao'));
       return;
     }
 
@@ -256,9 +257,9 @@ export default function ReuniõesGestores() {
         reuniaoId,
         acoes: acoesParaPendentes,
       });
-      toast.success("Pendentes criados com sucesso!");
+      toast.success(t('reunioesGestores.pendentesCriados') || "Pendentes criados com sucesso!");
     } catch (error: any) {
-      toast.error(error.message || "Erro ao criar pendentes");
+      toast.error(error.message || t('common.erro'));
     }
   };
 
@@ -276,15 +277,15 @@ export default function ReuniõesGestores() {
       
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Reuniões de Gestores</h1>
+          <h1 className="text-3xl font-bold">{t('reunioesGestores.title')}</h1>
           <p className="text-muted-foreground">
-            {isAdmin ? "Criar e gerir reuniões operacionais" : "Consultar reuniões operacionais"}
+            {isAdmin ? t('reunioesLojas.criarGerirReunioes') : t('reunioesLojas.consultarReunioes')}
           </p>
         </div>
         {isAdmin && (
           <Button onClick={() => setMostrarFormulario(!mostrarFormulario)}>
             {mostrarFormulario ? <X className="h-4 w-4 mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
-            {mostrarFormulario ? "Cancelar" : "Nova Reunião"}
+            {mostrarFormulario ? t('common.cancelar') : t('reunioesGestores.novaReuniao')}
           </Button>
         )}
       </div>
@@ -293,15 +294,15 @@ export default function ReuniõesGestores() {
       {isAdmin && mostrarFormulario && (
         <Card>
           <CardHeader>
-            <CardTitle>Nova Reunião de Gestores</CardTitle>
-            <CardDescription>Preencha os detalhes da reunião operacional</CardDescription>
+            <CardTitle>{t('reunioesGestores.novaReuniao')}</CardTitle>
+            <CardDescription>{t('reunioesGestores.subtitle')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <Tabs defaultValue="detalhes" className="w-full">
               <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="detalhes">Detalhes da Reunião</TabsTrigger>
+                <TabsTrigger value="detalhes">{t('reunioesGestores.detalhesReuniao') || "Detalhes da Reunião"}</TabsTrigger>
                 <TabsTrigger value="topicos">
-                  Tópicos Pendentes
+                  {t('reunioesGestores.topicosPendentes')}
                   {topicosPendentes && topicosPendentes.length > 0 && (
                     <Badge variant="secondary" className="ml-2">{topicosPendentes.length}</Badge>
                   )}
@@ -311,7 +312,7 @@ export default function ReuniõesGestores() {
               <TabsContent value="detalhes" className="space-y-4 mt-4">
                 {/* Data */}
                 <div className="space-y-2">
-                  <Label>Data da Reunião</Label>
+                  <Label>{t('reunioesGestores.data')}</Label>
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button
@@ -322,18 +323,18 @@ export default function ReuniõesGestores() {
                         )}
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
-                        {data ? format(data, "PPP", { locale: pt }) : "Selecione a data"}
+                        {data ? format(data, "PPP", { locale: dateLocale }) : t('reuniao.dataReuniaoPlaceholder')}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
-                      <Calendar mode="single" selected={data} onSelect={(d) => d && setData(d)} locale={pt} />
+                      <Calendar mode="single" selected={data} onSelect={(d) => d && setData(d)} locale={dateLocale} />
                     </PopoverContent>
                   </Popover>
                 </div>
 
                 {/* Presenças */}
                 <div className="space-y-2">
-                  <Label>Presenças (Gestores)</Label>
+                  <Label>{t('reunioesGestores.presencasGestores') || "Presenças (Gestores)"}</Label>
                   <div className="border rounded-md p-4 space-y-2 max-h-48 overflow-y-auto">
                     {gestores?.map((gestor: any) => (
                       <div key={gestor.id} className="flex items-center space-x-2">
@@ -347,7 +348,7 @@ export default function ReuniõesGestores() {
                             }
                           }}
                         />
-                        <label className="text-sm cursor-pointer">{gestor.user?.name || gestor.nome || 'Sem nome'}</label>
+                        <label className="text-sm cursor-pointer">{gestor.user?.name || gestor.nome || t('common.semNome') || 'Sem nome'}</label>
                       </div>
                     ))}
                   </div>
@@ -355,10 +356,10 @@ export default function ReuniõesGestores() {
 
                 {/* Outros Presentes */}
                 <div className="space-y-2">
-                  <Label htmlFor="outros">Outros Presentes (opcional)</Label>
+                  <Label htmlFor="outros">{t('reunioesGestores.outrosPresentes') || "Outros Presentes (opcional)"}</Label>
                   <Input
                     id="outros"
-                    placeholder="Ex: João Silva, Maria Costa..."
+                    placeholder={t('reunioesGestores.outrosPresentesPlaceholder') || "Ex: João Silva, Maria Costa..."}
                     value={outrosPresentes}
                     onChange={(e) => setOutrosPresentes(e.target.value)}
                   />
@@ -366,10 +367,10 @@ export default function ReuniõesGestores() {
 
                 {/* Conteúdo */}
                 <div className="space-y-2">
-                  <Label htmlFor="conteudo">Conteúdo da Reunião</Label>
+                  <Label htmlFor="conteudo">{t('reunioesGestores.conteudoReuniao') || "Conteúdo da Reunião"}</Label>
                   <Textarea
                     id="conteudo"
-                    placeholder="Descreva os tópicos discutidos, decisões tomadas, etc..."
+                    placeholder={t('reunioesGestores.conteudoPlaceholder') || "Descreva os tópicos discutidos, decisões tomadas, etc..."}
                     value={conteudo}
                     onChange={(e) => setConteudo(e.target.value)}
                     rows={15}
@@ -379,10 +380,10 @@ export default function ReuniõesGestores() {
 
                 {/* Tags */}
                 <div className="space-y-2">
-                  <Label>Tags (opcional)</Label>
+                  <Label>{t('reunioesGestores.tagsOpcional') || "Tags (opcional)"}</Label>
                   <div className="flex gap-2">
                     <Input
-                      placeholder="Ex: Vendas, Estratégia..."
+                      placeholder={t('reunioesGestores.tagsPlaceholder') || "Ex: Vendas, Estratégia..."}
                       value={novaTag}
                       onChange={(e) => setNovaTag(e.target.value)}
                       onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), adicionarTag())}
@@ -417,18 +418,18 @@ export default function ReuniõesGestores() {
                   <div className="flex items-center justify-between">
                     <Label className="flex items-center gap-2">
                       <MessageSquare className="h-4 w-4" />
-                      Tópicos Submetidos pelos Gestores
+                      {t('reunioesGestores.topicosSubmetidos')}
                     </Label>
                     {topicosIncluidos.length > 0 && (
-                      <Badge variant="default">{topicosIncluidos.length} selecionado(s)</Badge>
+                      <Badge variant="default">{topicosIncluidos.length} {t('reunioesGestores.selecionados') || "selecionado(s)"}</Badge>
                     )}
                   </div>
                   
                   {!topicosPendentes || topicosPendentes.length === 0 ? (
                     <div className="border rounded-md p-8 text-center text-muted-foreground">
                       <MessageSquare className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                      <p>Nenhum tópico pendente de análise</p>
-                      <p className="text-sm">Os gestores podem submeter tópicos na página "Tópicos Reunião"</p>
+                      <p>{t('reunioesGestores.nenhumTopicoPendente')}</p>
+                      <p className="text-sm">{t('reunioesGestores.gestoresPodemSubmeter')}</p>
                     </div>
                   ) : (
                     <div className="border rounded-md divide-y max-h-[400px] overflow-y-auto">
@@ -454,9 +455,9 @@ export default function ReuniõesGestores() {
                                 <p className="text-sm text-muted-foreground mt-1">{topico.descricao}</p>
                               )}
                               <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
-                                <span>Submetido por: <strong>{topico.gestorNome}</strong></span>
+                                <span>{t('reunioesGestores.submetidoPor') || "Submetido por"}: <strong>{topico.gestorNome}</strong></span>
                                 <span>•</span>
-                                <span>{format(new Date(topico.createdAt), "dd/MM/yyyy", { locale: pt })}</span>
+                                <span>{format(new Date(topico.createdAt), "dd/MM/yyyy", { locale: dateLocale })}</span>
                               </div>
                             </div>
                           </div>
@@ -468,8 +469,7 @@ export default function ReuniõesGestores() {
                   {topicosIncluidos.length > 0 && (
                     <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md p-3">
                       <p className="text-sm text-blue-700 dark:text-blue-300">
-                        <strong>{topicosIncluidos.length}</strong> tópico(s) serão incluídos nesta reunião. 
-                        Após criar a reunião, poderá marcar quais foram efetivamente discutidos.
+                        <strong>{topicosIncluidos.length}</strong> {t('reunioesGestores.topicosSeraoIncluidos') || "tópico(s) serão incluídos nesta reunião. Após criar a reunião, poderá marcar quais foram efetivamente discutidos."}
                       </p>
                     </div>
                   )}
@@ -481,13 +481,13 @@ export default function ReuniõesGestores() {
               {criarMutation.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  A gerar resumo com IA...
+                  {t('reunioesGestores.aGerarResumo') || "A gerar resumo com IA..."}
                 </>
               ) : (
                 <>
                   <Save className="mr-2 h-4 w-4" />
-                  Criar Reunião
-                  {topicosIncluidos.length > 0 && ` (com ${topicosIncluidos.length} tópico(s))`}
+                  {t('reunioesGestores.criarReuniao') || "Criar Reunião"}
+                  {topicosIncluidos.length > 0 && ` (${t('reunioesGestores.comTopicos') || "com"} ${topicosIncluidos.length} ${t('reunioesGestores.topicos') || "tópico(s)"})`}
                 </>
               )}
             </Button>
@@ -498,8 +498,8 @@ export default function ReuniõesGestores() {
       {/* Histórico */}
       <Card>
         <CardHeader>
-          <CardTitle>Histórico de Reuniões</CardTitle>
-          <CardDescription>Reuniões operacionais realizadas</CardDescription>
+          <CardTitle>{t('reunioesGestores.historicoReunioes') || "Histórico de Reuniões"}</CardTitle>
+          <CardDescription>{t('reunioesGestores.reunioesRealizadas') || "Reuniões operacionais realizadas"}</CardDescription>
         </CardHeader>
         <CardContent>
           {!historico ? (
@@ -507,7 +507,7 @@ export default function ReuniõesGestores() {
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
           ) : historico.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8">Nenhuma reunião registada</p>
+            <p className="text-center text-muted-foreground py-8">{t('reunioesGestores.semReunioes')}</p>
           ) : (
             <div className="space-y-4">
               {historico.map((reuniao) => {
@@ -523,10 +523,10 @@ export default function ReuniõesGestores() {
                       <div className="flex items-start justify-between">
                         <div>
                           <CardTitle className="text-lg">
-                            Reunião de {format(new Date(reuniao.data), "dd/MM/yyyy")}
+                            {t('reunioesGestores.reuniaoDe') || "Reunião de"} {format(new Date(reuniao.data), "dd/MM/yyyy")}
                           </CardTitle>
                           <CardDescription>
-                            Criado por {reuniao.criadoPorNome} em{" "}
+                            {t('reunioesGestores.criadoPor') || "Criado por"} {reuniao.criadoPorNome} {t('reunioesGestores.em') || "em"}{" "}
                             {format(new Date(reuniao.createdAt), "dd/MM/yyyy HH:mm")}
                           </CardDescription>
                         </div>
@@ -547,7 +547,7 @@ export default function ReuniõesGestores() {
                       <div>
                         <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
                           <Users className="h-4 w-4" />
-                          Presenças
+                          {t('reunioesGestores.presencas') || "Presenças"}
                         </h4>
                         <div className="flex flex-wrap gap-2">
                           {gestoresPresentes.map((g: any) => (
@@ -564,12 +564,12 @@ export default function ReuniõesGestores() {
                       {/* Resumo IA */}
                       {resumoIA && (
                         <div className="border-l-4 border-primary pl-4 space-y-2">
-                          <h4 className="font-semibold text-sm">Resumo Automático</h4>
+                          <h4 className="font-semibold text-sm">{t('reunioesGestores.resumoAutomatico') || "Resumo Automático"}</h4>
                           <p className="text-sm text-muted-foreground">{resumoIA.resumo}</p>
                           
                           {resumoIA.topicos.length > 0 && (
                             <div>
-                              <p className="text-xs font-medium mb-1">Tópicos Principais:</p>
+                              <p className="text-xs font-medium mb-1">{t('reunioesGestores.topicosPrincipais') || "Tópicos Principais"}:</p>
                               <ul className="text-sm space-y-1">
                                 {resumoIA.topicos.map((topico: string, i: number) => (
                                   <li key={i} className="flex items-start gap-2">
@@ -583,7 +583,7 @@ export default function ReuniõesGestores() {
 
                           {resumoIA.acoes.length > 0 && (
                             <div>
-                              <p className="text-xs font-medium mb-1">Ações Identificadas:</p>
+                              <p className="text-xs font-medium mb-1">{t('reunioesGestores.acoesIdentificadas') || "Ações Identificadas"}:</p>
                               <ul className="text-sm space-y-1">
                                 {resumoIA.acoes.map((acao: any, i: number) => (
                                   <li key={i} className="flex items-start gap-2">
@@ -603,7 +603,7 @@ export default function ReuniõesGestores() {
                       <details className="border rounded-md p-3">
                         <summary className="cursor-pointer font-semibold text-sm flex items-center gap-2">
                           <FileText className="h-4 w-4" />
-                          Ver Conteúdo Completo
+                          {t('reunioesGestores.verConteudoCompleto') || "Ver Conteúdo Completo"}
                         </summary>
                         <div className="mt-3 text-sm whitespace-pre-wrap text-muted-foreground">
                           {reuniao.conteudo}
@@ -615,7 +615,7 @@ export default function ReuniõesGestores() {
                         <div>
                           <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
                             <FileText className="h-4 w-4" />
-                            Anexos ({anexosReuniao.length})
+                            {t('common.anexos')} ({anexosReuniao.length})
                           </h4>
                           <div className="flex flex-wrap gap-2">
                             {anexosReuniao.map((anexo, idx) => (
@@ -648,7 +648,7 @@ export default function ReuniõesGestores() {
                             onClick={() => handleAbrirFinalizacao(reuniao.id)}
                           >
                             <ListChecks className="h-4 w-4 mr-2" />
-                            Finalizar Tópicos
+                            {t('reunioesGestores.finalizarTopicos')}
                           </Button>
                           <Button
                             variant="outline"
@@ -661,7 +661,7 @@ export default function ReuniõesGestores() {
                             ) : (
                               <FileText className="h-4 w-4 mr-2" />
                             )}
-                            Gerar Relatório
+                            {t('reunioesGestores.gerarRelatorio') || "Gerar Relatório"}
                           </Button>
                           <Button
                             variant="outline"
@@ -669,7 +669,7 @@ export default function ReuniõesGestores() {
                             onClick={() => handleDownloadPDF(reuniao.id)}
                           >
                             <FileDown className="h-4 w-4 mr-2" />
-                            Download PDF
+                            {t('reunioesGestores.downloadPDF') || "Download PDF"}
                           </Button>
                           <Button
                             variant="outline"
@@ -680,7 +680,7 @@ export default function ReuniõesGestores() {
                             }}
                           >
                             <Send className="h-4 w-4 mr-2" />
-                            Enviar por Email
+                            {t('reunioesGestores.enviarEmail')}
                           </Button>
                           {resumoIA && resumoIA.acoes.length > 0 && (
                             <Button
@@ -692,7 +692,7 @@ export default function ReuniõesGestores() {
                               }}
                             >
                               <UserPlus className="h-4 w-4 mr-2" />
-                              Atribuir Ações
+                              {t('reunioesGestores.atribuirAcoes') || "Atribuir Ações"}
                             </Button>
                           )}
                         </div>
@@ -710,17 +710,16 @@ export default function ReuniõesGestores() {
       <Dialog open={modalFinalizarTopicos} onOpenChange={setModalFinalizarTopicos}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Finalizar Tópicos da Reunião</DialogTitle>
+            <DialogTitle>{t('reunioesGestores.finalizarTopicosTitle') || "Finalizar Tópicos da Reunião"}</DialogTitle>
             <DialogDescription>
-              Marque quais tópicos foram efetivamente discutidos e adicione o resultado da discussão.
-              Tópicos não discutidos serão libertados para a próxima reunião.
+              {t('reunioesGestores.finalizarTopicosDesc') || "Marque quais tópicos foram efetivamente discutidos e adicione o resultado da discussão. Tópicos não discutidos serão libertados para a próxima reunião."}
             </DialogDescription>
           </DialogHeader>
           
           <div className="space-y-4 py-4">
             {topicosFinalizacao.length === 0 ? (
               <p className="text-center text-muted-foreground py-4">
-                Nenhum tópico associado a esta reunião
+                {t('reunioesGestores.nenhumTopicoAssociado') || "Nenhum tópico associado a esta reunião"}
               </p>
             ) : (
               topicosFinalizacao.map((topico, index) => (
@@ -739,37 +738,33 @@ export default function ReuniõesGestores() {
                         }}
                       />
                       <div className="flex-1">
-                        <p className="font-medium">Tópico #{topico.id}</p>
+                        <p className="font-medium">{t('reunioesGestores.topico') || "Tópico"} #{topico.id}</p>
                       </div>
                       {topico.discutido ? (
                         <Badge variant="outline" className="bg-green-100 text-green-700">
                           <CheckCircle2 className="h-3 w-3 mr-1" />
-                          Discutido
+                          {t('reunioesGestores.topicosDiscutidos')}
                         </Badge>
                       ) : (
                         <Badge variant="outline" className="bg-gray-100 text-gray-700">
                           <XCircle className="h-3 w-3 mr-1" />
-                          Não Discutido
+                          {t('reunioesGestores.topicosNaoDiscutidos')}
                         </Badge>
                       )}
                     </div>
                     
                     {topico.discutido && (
-                      <div className="pl-7">
-                        <Label htmlFor={`resultado-${topico.id}`} className="text-sm">
-                          Resultado da Discussão
-                        </Label>
+                      <div className="space-y-2">
+                        <Label>{t('reunioesGestores.resultadoDiscussao') || "Resultado da Discussão"}</Label>
                         <Textarea
-                          id={`resultado-${topico.id}`}
-                          placeholder="Descreva o que foi decidido ou concluído..."
+                          placeholder={t('reunioesGestores.resultadoPlaceholder') || "Descreva o que foi decidido ou concluído..."}
                           value={topico.resultadoDiscussao}
                           onChange={(e) => {
                             const updated = [...topicosFinalizacao];
                             updated[index].resultadoDiscussao = e.target.value;
                             setTopicosFinalizacao(updated);
                           }}
-                          rows={2}
-                          className="mt-1"
+                          rows={3}
                         />
                       </div>
                     )}
@@ -781,16 +776,13 @@ export default function ReuniõesGestores() {
           
           <DialogFooter>
             <Button variant="outline" onClick={() => setModalFinalizarTopicos(false)}>
-              Cancelar
+              {t('common.cancelar')}
             </Button>
-            <Button 
-              onClick={handleFinalizarTopicos}
-              disabled={finalizarTopicosMutation.isPending}
-            >
+            <Button onClick={handleFinalizarTopicos} disabled={finalizarTopicosMutation.isPending}>
               {finalizarTopicosMutation.isPending && (
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
               )}
-              Guardar e Finalizar
+              {t('reunioesGestores.finalizarTopicos')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -800,9 +792,9 @@ export default function ReuniõesGestores() {
       <Dialog open={modalRelatorio} onOpenChange={setModalRelatorio}>
         <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Relatório da Reunião</DialogTitle>
+            <DialogTitle>{t('reunioesGestores.relatorioReuniao') || "Relatório da Reunião"}</DialogTitle>
             <DialogDescription>
-              Relatório gerado automaticamente com base no conteúdo da reunião e tópicos discutidos.
+              {t('reunioesGestores.relatorioGeradoDesc') || "Relatório gerado automaticamente com base no conteúdo da reunião e tópicos discutidos."}
             </DialogDescription>
           </DialogHeader>
           
@@ -810,20 +802,20 @@ export default function ReuniõesGestores() {
             <div className="space-y-6 py-4">
               {/* Resumo Executivo */}
               <div>
-                <h3 className="font-semibold text-lg mb-2">Resumo Executivo</h3>
+                <h3 className="font-semibold text-lg mb-2">{t('reunioesGestores.resumoExecutivo') || "Resumo Executivo"}</h3>
                 <p className="text-muted-foreground">{relatorioReuniao.resumoExecutivo}</p>
               </div>
               
               {/* Tópicos Discutidos */}
               {topicosReuniao && topicosReuniao.filter((t: any) => t.estado === 'discutido').length > 0 && (
                 <div>
-                  <h3 className="font-semibold text-lg mb-2">Tópicos Discutidos</h3>
+                  <h3 className="font-semibold text-lg mb-2">{t('reunioesGestores.topicosDiscutidos')}</h3>
                   <div className="space-y-2">
                     {topicosReuniao.filter((t: any) => t.estado === 'discutido').map((topico: any) => (
                       <div key={topico.id} className="border-l-4 border-green-500 pl-3 py-2">
                         <p className="font-medium">{topico.titulo}</p>
                         <p className="text-sm text-muted-foreground">
-                          Proposto por: {topico.gestorNome}
+                          {t('reunioesGestores.propostoPor') || "Proposto por"}: {topico.gestorNome}
                         </p>
                         {topico.resultadoDiscussao && (
                           <p className="text-sm mt-1">{topico.resultadoDiscussao}</p>
@@ -837,7 +829,7 @@ export default function ReuniõesGestores() {
               {/* Decisões Tomadas */}
               {relatorioReuniao.decisoesTomadas && (
                 <div>
-                  <h3 className="font-semibold text-lg mb-2">Decisões Tomadas</h3>
+                  <h3 className="font-semibold text-lg mb-2">{t('reunioesGestores.decisoesTomadas')}</h3>
                   <p className="text-muted-foreground">{relatorioReuniao.decisoesTomadas}</p>
                 </div>
               )}
@@ -845,7 +837,7 @@ export default function ReuniõesGestores() {
               {/* Ações Definidas */}
               {relatorioReuniao.acoesDefinidas && (
                 <div>
-                  <h3 className="font-semibold text-lg mb-2">Ações Definidas</h3>
+                  <h3 className="font-semibold text-lg mb-2">{t('reunioesGestores.acoesDefinidas') || "Ações Definidas"}</h3>
                   <div className="space-y-2">
                     {(typeof relatorioReuniao.acoesDefinidas === 'string' 
                       ? JSON.parse(relatorioReuniao.acoesDefinidas) 
@@ -855,8 +847,8 @@ export default function ReuniõesGestores() {
                         <div className="flex-1">
                           <p className="font-medium">{acao.descricao}</p>
                           <div className="flex gap-4 text-sm text-muted-foreground mt-1">
-                            <span>Responsável: {acao.responsavel}</span>
-                            <span>Prazo: {acao.prazo}</span>
+                            <span>{t('reunioesGestores.responsavel') || "Responsável"}: {acao.responsavel}</span>
+                            <span>{t('reunioesGestores.prazo') || "Prazo"}: {acao.prazo}</span>
                           </div>
                         </div>
                       </div>
@@ -872,7 +864,7 @@ export default function ReuniõesGestores() {
                     {criarPendentesMutation.isPending && (
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                     )}
-                    Criar Pendentes a partir das Ações
+                    {t('reunioesGestores.criarPendentesAcoes') || "Criar Pendentes a partir das Ações"}
                   </Button>
                 </div>
               )}
@@ -880,13 +872,13 @@ export default function ReuniõesGestores() {
               {/* Tópicos Não Discutidos */}
               {topicosReuniao && topicosReuniao.filter((t: any) => t.estado === 'nao_discutido').length > 0 && (
                 <div>
-                  <h3 className="font-semibold text-lg mb-2">Adiados para Próxima Reunião</h3>
+                  <h3 className="font-semibold text-lg mb-2">{t('reunioesGestores.adiadosProximaReuniao') || "Adiados para Próxima Reunião"}</h3>
                   <div className="space-y-2">
                     {topicosReuniao.filter((t: any) => t.estado === 'nao_discutido').map((topico: any) => (
                       <div key={topico.id} className="border-l-4 border-gray-300 pl-3 py-2">
                         <p className="font-medium">{topico.titulo}</p>
                         <p className="text-sm text-muted-foreground">
-                          Proposto por: {topico.gestorNome}
+                          {t('reunioesGestores.propostoPor') || "Proposto por"}: {topico.gestorNome}
                         </p>
                       </div>
                     ))}
@@ -901,7 +893,7 @@ export default function ReuniõesGestores() {
                     {libertarTopicosMutation.isPending && (
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                     )}
-                    Libertar para Próxima Reunião
+                    {t('reunioesGestores.libertarProximaReuniao') || "Libertar para Próxima Reunião"}
                   </Button>
                 </div>
               )}
@@ -914,20 +906,20 @@ export default function ReuniõesGestores() {
           
           <DialogFooter>
             <Button variant="outline" onClick={() => setModalRelatorio(false)}>
-              Fechar
+              {t('common.fechar')}
             </Button>
             {reuniaoRelatorio && (
               <>
                 <Button variant="outline" onClick={() => handleDownloadPDF(reuniaoRelatorio)}>
                   <FileDown className="h-4 w-4 mr-2" />
-                  Download PDF
+                  {t('reunioesGestores.downloadPDF') || "Download PDF"}
                 </Button>
                 <Button onClick={() => {
                   setModalRelatorio(false);
                   setModalEnviarRelatorio(true);
                 }}>
                   <Send className="h-4 w-4 mr-2" />
-                  Enviar por Email
+                  {t('reunioesGestores.enviarEmail')}
                 </Button>
               </>
             )}
@@ -939,9 +931,9 @@ export default function ReuniõesGestores() {
       <Dialog open={modalEnviarRelatorio} onOpenChange={setModalEnviarRelatorio}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Enviar Relatório por Email</DialogTitle>
+            <DialogTitle>{t('reunioesGestores.enviarRelatorioEmail') || "Enviar Relatório por Email"}</DialogTitle>
             <DialogDescription>
-              Selecione os gestores que devem receber o relatório da reunião por email.
+              {t('reunioesGestores.selecioneGestoresEmail') || "Selecione os gestores que devem receber o relatório da reunião por email."}
             </DialogDescription>
           </DialogHeader>
           
@@ -954,7 +946,7 @@ export default function ReuniõesGestores() {
                     defaultChecked
                   />
                   <label htmlFor={`email-gestor-${gestor.id}`} className="text-sm cursor-pointer flex-1">
-                    {gestor.nome || gestor.user?.name || 'Sem nome'}
+                    {gestor.nome || gestor.user?.name || t('common.semNome') || 'Sem nome'}
                     {gestor.email && (
                       <span className="text-muted-foreground ml-2">({gestor.email})</span>
                     )}
@@ -966,7 +958,7 @@ export default function ReuniõesGestores() {
           
           <DialogFooter>
             <Button variant="outline" onClick={() => setModalEnviarRelatorio(false)}>
-              Cancelar
+              {t('common.cancelar')}
             </Button>
             <Button 
               onClick={() => {
@@ -979,7 +971,7 @@ export default function ReuniõesGestores() {
               {enviarRelatorioEmailMutation.isPending && (
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
               )}
-              Enviar Relatório
+              {t('reunioesGestores.enviarRelatorio') || "Enviar Relatório"}
             </Button>
           </DialogFooter>
         </DialogContent>

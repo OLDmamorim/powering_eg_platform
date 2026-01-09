@@ -45,7 +45,7 @@ import { toast } from "sonner";
 import { useLocation } from "wouter";
 
 export default function HistoricoOcorrencias() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { user } = useAuth();
   const [, setLocation] = useLocation();
   
@@ -99,7 +99,7 @@ export default function HistoricoOcorrencias() {
   // Mutations
   const editarMutation = trpc.ocorrenciasEstruturais.editar.useMutation({
     onSuccess: () => {
-      toast.success("Ocorrência atualizada com sucesso");
+      toast.success(t('ocorrencias.atualizadaSucesso') || "Ocorrência atualizada com sucesso");
       utils.ocorrenciasEstruturais.listAll.invalidate();
       utils.ocorrenciasEstruturais.listMinhas.invalidate();
       utils.ocorrenciasEstruturais.countPorEstado.invalidate();
@@ -114,7 +114,7 @@ export default function HistoricoOcorrencias() {
   
   const enviarEmailMutation = trpc.ocorrenciasEstruturais.enviarEmail.useMutation({
     onSuccess: () => {
-      toast.success("Email enviado com sucesso para o administrador");
+      toast.success(t('ocorrencias.emailEnviadoAdmin') || "Email enviado com sucesso para o administrador");
     },
     onError: (error) => {
       toast.error(error.message);
@@ -195,17 +195,17 @@ export default function HistoricoOcorrencias() {
 
   // Cores e labels
   const estadoConfig = {
-    reportado: { label: "Reportado", color: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200" },
-    em_analise: { label: "Em Análise", color: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200" },
-    em_resolucao: { label: "Em Resolução", color: "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200" },
-    resolvido: { label: "Resolvido", color: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" },
+    reportado: { label: t('ocorrencias.estadoReportado') || "Reportado", color: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200" },
+    em_analise: { label: t('ocorrencias.estadoEmAnalise') || "Em Análise", color: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200" },
+    em_resolucao: { label: t('ocorrencias.estadoEmResolucao') || "Em Resolução", color: "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200" },
+    resolvido: { label: t('ocorrencias.estadoResolvido') || "Resolvido", color: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" },
   };
 
   const impactoConfig = {
-    baixo: { label: "Baixo", color: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" },
-    medio: { label: "Médio", color: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200" },
-    alto: { label: "Alto", color: "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200" },
-    critico: { label: "Crítico", color: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200" },
+    baixo: { label: t('ocorrencias.baixo') || "Baixo", color: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" },
+    medio: { label: t('ocorrencias.medio') || "Médio", color: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200" },
+    alto: { label: t('ocorrencias.alto') || "Alto", color: "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200" },
+    critico: { label: t('ocorrencias.critico') || "Crítico", color: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200" },
   };
 
   const abrangenciaIcon = {
@@ -223,14 +223,16 @@ export default function HistoricoOcorrencias() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-2xl font-bold">Ocorrências Estruturais</h1>
+            <h1 className="text-2xl font-bold">{t('ocorrencias.ocorrenciasEstruturais') || "Ocorrências Estruturais"}</h1>
             <p className="text-muted-foreground">
-              {isAdmin ? "Todas as ocorrências reportadas" : "As suas ocorrências reportadas"}
+              {isAdmin 
+                ? t('ocorrencias.todasOcorrencias') || "Todas as ocorrências reportadas" 
+                : t('ocorrencias.suasOcorrencias') || "As suas ocorrências reportadas"}
             </p>
           </div>
           <Button onClick={() => setLocation("/ocorrencias-estruturais/nova")}>
             <Plus className="h-4 w-4 mr-2" />
-            Nova Ocorrência
+            {t('ocorrencias.novaOcorrencia') || "Nova Ocorrência"}
           </Button>
         </div>
 
@@ -240,31 +242,31 @@ export default function HistoricoOcorrencias() {
             <Card className="cursor-pointer hover:bg-accent/50 transition-colors" onClick={() => setFiltroEstado("todos")}>
               <CardContent className="pt-4">
                 <div className="text-2xl font-bold">{contagem.total}</div>
-                <p className="text-sm text-muted-foreground">Total</p>
+                <p className="text-sm text-muted-foreground">{t('common.total') || "Total"}</p>
               </CardContent>
             </Card>
             <Card className="cursor-pointer hover:bg-accent/50 transition-colors" onClick={() => setFiltroEstado("reportado")}>
               <CardContent className="pt-4">
                 <div className="text-2xl font-bold text-blue-600">{contagem.reportado}</div>
-                <p className="text-sm text-muted-foreground">Reportadas</p>
+                <p className="text-sm text-muted-foreground">{t('ocorrencias.reportadas') || "Reportadas"}</p>
               </CardContent>
             </Card>
             <Card className="cursor-pointer hover:bg-accent/50 transition-colors" onClick={() => setFiltroEstado("em_analise")}>
               <CardContent className="pt-4">
                 <div className="text-2xl font-bold text-yellow-600">{contagem.emAnalise}</div>
-                <p className="text-sm text-muted-foreground">Em Análise</p>
+                <p className="text-sm text-muted-foreground">{t('ocorrencias.estadoEmAnalise') || "Em Análise"}</p>
               </CardContent>
             </Card>
             <Card className="cursor-pointer hover:bg-accent/50 transition-colors" onClick={() => setFiltroEstado("em_resolucao")}>
               <CardContent className="pt-4">
                 <div className="text-2xl font-bold text-orange-600">{contagem.emResolucao}</div>
-                <p className="text-sm text-muted-foreground">Em Resolução</p>
+                <p className="text-sm text-muted-foreground">{t('ocorrencias.estadoEmResolucao') || "Em Resolução"}</p>
               </CardContent>
             </Card>
             <Card className="cursor-pointer hover:bg-accent/50 transition-colors" onClick={() => setFiltroEstado("resolvido")}>
               <CardContent className="pt-4">
                 <div className="text-2xl font-bold text-green-600">{contagem.resolvido}</div>
-                <p className="text-sm text-muted-foreground">Resolvidas</p>
+                <p className="text-sm text-muted-foreground">{t('ocorrencias.resolvidas') || "Resolvidas"}</p>
               </CardContent>
             </Card>
           </div>
@@ -275,43 +277,43 @@ export default function HistoricoOcorrencias() {
           <CardContent className="pt-4">
             <div className="flex flex-wrap gap-4">
               <div className="flex-1 min-w-[150px]">
-                <Label className="text-sm mb-1 block">Estado</Label>
+                <Label className="text-sm mb-1 block">{t('ocorrencias.estado') || "Estado"}</Label>
                 <Select value={filtroEstado} onValueChange={setFiltroEstado}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Todos" />
+                    <SelectValue placeholder={t('common.todos') || "Todos"} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="todos">Todos</SelectItem>
-                    <SelectItem value="reportado">Reportado</SelectItem>
-                    <SelectItem value="em_analise">Em Análise</SelectItem>
-                    <SelectItem value="em_resolucao">Em Resolução</SelectItem>
-                    <SelectItem value="resolvido">Resolvido</SelectItem>
+                    <SelectItem value="todos">{t('common.todos') || "Todos"}</SelectItem>
+                    <SelectItem value="reportado">{t('ocorrencias.estadoReportado') || "Reportado"}</SelectItem>
+                    <SelectItem value="em_analise">{t('ocorrencias.estadoEmAnalise') || "Em Análise"}</SelectItem>
+                    <SelectItem value="em_resolucao">{t('ocorrencias.estadoEmResolucao') || "Em Resolução"}</SelectItem>
+                    <SelectItem value="resolvido">{t('ocorrencias.estadoResolvido') || "Resolvido"}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="flex-1 min-w-[150px]">
-                <Label className="text-sm mb-1 block">Impacto</Label>
+                <Label className="text-sm mb-1 block">{t('ocorrencias.impacto') || "Impacto"}</Label>
                 <Select value={filtroImpacto} onValueChange={setFiltroImpacto}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Todos" />
+                    <SelectValue placeholder={t('common.todos') || "Todos"} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="todos">Todos</SelectItem>
-                    <SelectItem value="baixo">Baixo</SelectItem>
-                    <SelectItem value="medio">Médio</SelectItem>
-                    <SelectItem value="alto">Alto</SelectItem>
-                    <SelectItem value="critico">Crítico</SelectItem>
+                    <SelectItem value="todos">{t('common.todos') || "Todos"}</SelectItem>
+                    <SelectItem value="baixo">{t('ocorrencias.baixo') || "Baixo"}</SelectItem>
+                    <SelectItem value="medio">{t('ocorrencias.medio') || "Médio"}</SelectItem>
+                    <SelectItem value="alto">{t('ocorrencias.alto') || "Alto"}</SelectItem>
+                    <SelectItem value="critico">{t('ocorrencias.critico') || "Crítico"}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="flex-1 min-w-[150px]">
-                <Label className="text-sm mb-1 block">Tema</Label>
+                <Label className="text-sm mb-1 block">{t('ocorrencias.tema') || "Tema"}</Label>
                 <Select value={filtroTema} onValueChange={setFiltroTema}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Todos" />
+                    <SelectValue placeholder={t('common.todos') || "Todos"} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="todos">Todos</SelectItem>
+                    <SelectItem value="todos">{t('common.todos') || "Todos"}</SelectItem>
                     {temasUnicos.map((tema) => (
                       <SelectItem key={tema} value={tema}>{tema}</SelectItem>
                     ))}
@@ -331,18 +333,18 @@ export default function HistoricoOcorrencias() {
           <Card>
             <CardContent className="py-12 text-center">
               <AlertTriangle className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-lg font-medium">Nenhuma ocorrência encontrada</h3>
+              <h3 className="text-lg font-medium">{t('ocorrencias.nenhumaEncontrada') || "Nenhuma ocorrência encontrada"}</h3>
               <p className="text-muted-foreground mt-2">
                 {ocorrencias?.length === 0 
-                  ? "Ainda não foram reportadas ocorrências estruturais."
-                  : "Nenhuma ocorrência corresponde aos filtros selecionados."}
+                  ? t('ocorrencias.aindaNaoReportadas') || "Ainda não foram reportadas ocorrências estruturais."
+                  : t('ocorrencias.nenhumaCorrespondeFiltros') || "Nenhuma ocorrência corresponde aos filtros selecionados."}
               </p>
               <Button 
                 className="mt-4" 
                 onClick={() => setLocation("/ocorrencias-estruturais/nova")}
               >
                 <Plus className="h-4 w-4 mr-2" />
-                Reportar Ocorrência
+                {t('ocorrencias.reportarOcorrencia') || "Reportar Ocorrência"}
               </Button>
             </CardContent>
           </Card>
@@ -377,7 +379,9 @@ export default function HistoricoOcorrencias() {
                         <div className="flex items-center gap-4 text-xs text-muted-foreground">
                           <span className="flex items-center gap-1">
                             {abrangenciaIcon[ocorrencia.abrangencia as keyof typeof abrangenciaIcon]}
-                            {ocorrencia.abrangencia === 'nacional' ? 'Nacional' : ocorrencia.zonaAfetada || ocorrencia.abrangencia}
+                            {ocorrencia.abrangencia === 'nacional' 
+                              ? t('ocorrencias.nacional') || 'Nacional' 
+                              : ocorrencia.zonaAfetada || ocorrencia.abrangencia}
                           </span>
                           <span className="flex items-center gap-1">
                             <User className="h-3 w-3" />
@@ -385,12 +389,12 @@ export default function HistoricoOcorrencias() {
                           </span>
                           <span className="flex items-center gap-1">
                             <Clock className="h-3 w-3" />
-                            {new Date(ocorrencia.createdAt).toLocaleDateString('pt-PT')}
+                            {new Date(ocorrencia.createdAt).toLocaleDateString(language === 'pt' ? 'pt-PT' : 'en-US')}
                           </span>
                           {fotos.length > 0 && (
                             <span className="flex items-center gap-1">
                               <ImageIcon className="h-3 w-3" />
-                              {fotos.length} foto(s)
+                              {fotos.length} {t('ocorrencias.fotos') || "foto(s)"}
                             </span>
                           )}
                         </div>
@@ -410,7 +414,7 @@ export default function HistoricoOcorrencias() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-orange-500" />
-              Detalhes da Ocorrência
+              {t('ocorrencias.detalhesOcorrencia') || "Detalhes da Ocorrência"}
             </DialogTitle>
             <DialogDescription>
               {selectedOcorrencia?.temaNome}
@@ -432,26 +436,28 @@ export default function HistoricoOcorrencias() {
               {/* Info Grid */}
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <Label className="text-muted-foreground">Reportado por</Label>
+                  <Label className="text-muted-foreground">{t('ocorrencias.reportadoPor') || "Reportado por"}</Label>
                   <p className="font-medium">{selectedOcorrencia.gestorNome}</p>
                 </div>
                 <div>
-                  <Label className="text-muted-foreground">Data</Label>
-                  <p className="font-medium">{new Date(selectedOcorrencia.createdAt).toLocaleDateString('pt-PT', { dateStyle: 'long' })}</p>
+                  <Label className="text-muted-foreground">{t('common.data') || "Data"}</Label>
+                  <p className="font-medium">{new Date(selectedOcorrencia.createdAt).toLocaleDateString(language === 'pt' ? 'pt-PT' : 'en-US', { dateStyle: 'long' })}</p>
                 </div>
                 <div>
-                  <Label className="text-muted-foreground">Abrangência</Label>
+                  <Label className="text-muted-foreground">{t('ocorrencias.abrangencia') || "Abrangência"}</Label>
                   <p className="font-medium flex items-center gap-1">
                     {abrangenciaIcon[selectedOcorrencia.abrangencia as keyof typeof abrangenciaIcon]}
-                    {selectedOcorrencia.abrangencia === 'nacional' ? 'Nacional' : selectedOcorrencia.zonaAfetada || selectedOcorrencia.abrangencia}
+                    {selectedOcorrencia.abrangencia === 'nacional' 
+                      ? t('ocorrencias.nacional') || 'Nacional' 
+                      : selectedOcorrencia.zonaAfetada || selectedOcorrencia.abrangencia}
                   </p>
                 </div>
                 {selectedOcorrencia.resolvidoEm && (
                   <div>
-                    <Label className="text-muted-foreground">Resolvido em</Label>
+                    <Label className="text-muted-foreground">{t('ocorrencias.resolvidoEm') || "Resolvido em"}</Label>
                     <p className="font-medium text-green-600 flex items-center gap-1">
                       <CheckCircle2 className="h-4 w-4" />
-                      {new Date(selectedOcorrencia.resolvidoEm).toLocaleDateString('pt-PT')}
+                      {new Date(selectedOcorrencia.resolvidoEm).toLocaleDateString(language === 'pt' ? 'pt-PT' : 'en-US')}
                     </p>
                   </div>
                 )}
@@ -459,7 +465,7 @@ export default function HistoricoOcorrencias() {
               
               {/* Descrição */}
               <div>
-                <Label className="text-muted-foreground">Descrição</Label>
+                <Label className="text-muted-foreground">{t('ocorrencias.descricao') || "Descrição"}</Label>
                 <p className="mt-1 text-sm whitespace-pre-wrap bg-muted/50 p-3 rounded-md">
                   {selectedOcorrencia.descricao}
                 </p>
@@ -468,7 +474,7 @@ export default function HistoricoOcorrencias() {
               {/* Sugestão de Ação */}
               {selectedOcorrencia.sugestaoAcao && (
                 <div>
-                  <Label className="text-muted-foreground">Sugestão de Ação</Label>
+                  <Label className="text-muted-foreground">{t('ocorrencias.sugestaoAcao') || "Sugestão de Ação"}</Label>
                   <p className="mt-1 text-sm whitespace-pre-wrap bg-blue-50 dark:bg-blue-950 p-3 rounded-md">
                     {selectedOcorrencia.sugestaoAcao}
                   </p>
@@ -478,7 +484,7 @@ export default function HistoricoOcorrencias() {
               {/* Notas do Admin */}
               {selectedOcorrencia.notasAdmin && (
                 <div>
-                  <Label className="text-muted-foreground">Notas do Administrador</Label>
+                  <Label className="text-muted-foreground">{t('ocorrencias.notasAdmin') || "Notas do Administrador"}</Label>
                   <p className="mt-1 text-sm whitespace-pre-wrap bg-yellow-50 dark:bg-yellow-950 p-3 rounded-md">
                     {selectedOcorrencia.notasAdmin}
                   </p>
@@ -492,7 +498,7 @@ export default function HistoricoOcorrencias() {
                 
                 return (
                   <div>
-                    <Label className="text-muted-foreground">Evidências ({fotos.length} foto(s))</Label>
+                    <Label className="text-muted-foreground">{t('ocorrencias.evidencias') || "Evidências"} ({fotos.length} {t('ocorrencias.fotos') || "foto(s)"})</Label>
                     <div className="mt-2 grid grid-cols-3 sm:grid-cols-4 gap-2">
                       {fotos.map((foto: string, index: number) => (
                         <div
@@ -505,7 +511,7 @@ export default function HistoricoOcorrencias() {
                         >
                           <img
                             src={foto}
-                            alt={`Evidência ${index + 1}`}
+                            alt={`${t('ocorrencias.evidencia') || "Evidência"} ${index + 1}`}
                             className="w-full h-20 object-cover"
                           />
                         </div>
@@ -528,7 +534,7 @@ export default function HistoricoOcorrencias() {
                     ) : (
                       <Mail className="h-4 w-4 mr-2" />
                     )}
-                    Enviar por Email
+                    {t('reunioesGestores.enviarEmail')}
                   </Button>
                 )}
                 <Button
@@ -539,10 +545,10 @@ export default function HistoricoOcorrencias() {
                   }}
                 >
                   <Pencil className="h-4 w-4 mr-2" />
-                  Editar
+                  {t('common.editar') || "Editar"}
                 </Button>
                 <Button variant="secondary" onClick={() => setShowDetailModal(false)}>
-                  Fechar
+                  {t('common.fechar')}
                 </Button>
               </DialogFooter>
             </div>
@@ -554,7 +560,7 @@ export default function HistoricoOcorrencias() {
       <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Editar Ocorrência</DialogTitle>
+            <DialogTitle>{t('ocorrencias.editarOcorrencia') || "Editar Ocorrência"}</DialogTitle>
             <DialogDescription>
               {selectedOcorrencia?.temaNome}
             </DialogDescription>
@@ -563,7 +569,7 @@ export default function HistoricoOcorrencias() {
           {selectedOcorrencia && (
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label>Descrição</Label>
+                <Label>{t('ocorrencias.descricao') || "Descrição"}</Label>
                 <Textarea
                   value={editData.descricao}
                   onChange={(e) => setEditData({ ...editData, descricao: e.target.value })}
@@ -573,7 +579,7 @@ export default function HistoricoOcorrencias() {
               
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Abrangência</Label>
+                  <Label>{t('ocorrencias.abrangencia') || "Abrangência"}</Label>
                   <Select 
                     value={editData.abrangencia} 
                     onValueChange={(v) => setEditData({ ...editData, abrangencia: v as any })}
@@ -582,15 +588,15 @@ export default function HistoricoOcorrencias() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="nacional">Nacional</SelectItem>
-                      <SelectItem value="regional">Regional</SelectItem>
-                      <SelectItem value="zona">Zona</SelectItem>
+                      <SelectItem value="nacional">{t('ocorrencias.nacional') || "Nacional"}</SelectItem>
+                      <SelectItem value="regional">{t('ocorrencias.regional') || "Regional"}</SelectItem>
+                      <SelectItem value="zona">{t('ocorrencias.zona') || "Zona"}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 
                 <div className="space-y-2">
-                  <Label>Impacto</Label>
+                  <Label>{t('ocorrencias.impacto') || "Impacto"}</Label>
                   <Select 
                     value={editData.impacto} 
                     onValueChange={(v) => setEditData({ ...editData, impacto: v as any })}
@@ -599,10 +605,10 @@ export default function HistoricoOcorrencias() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="baixo">Baixo</SelectItem>
-                      <SelectItem value="medio">Médio</SelectItem>
-                      <SelectItem value="alto">Alto</SelectItem>
-                      <SelectItem value="critico">Crítico</SelectItem>
+                      <SelectItem value="baixo">{t('ocorrencias.baixo') || "Baixo"}</SelectItem>
+                      <SelectItem value="medio">{t('ocorrencias.medio') || "Médio"}</SelectItem>
+                      <SelectItem value="alto">{t('ocorrencias.alto') || "Alto"}</SelectItem>
+                      <SelectItem value="critico">{t('ocorrencias.critico') || "Crítico"}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -610,22 +616,22 @@ export default function HistoricoOcorrencias() {
               
               {editData.abrangencia !== 'nacional' && (
                 <div className="space-y-2">
-                  <Label>Zona Afetada</Label>
+                  <Label>{t('ocorrencias.zonaAfetada') || "Zona Afetada"}</Label>
                   <Input
                     value={editData.zonaAfetada}
                     onChange={(e) => setEditData({ ...editData, zonaAfetada: e.target.value })}
-                    placeholder="Ex: Norte, Sul, Lisboa..."
+                    placeholder={t('ocorrencias.zonaPlaceholder') || "Ex: Norte, Sul, Lisboa..."}
                   />
                 </div>
               )}
               
               <div className="space-y-2">
-                <Label>Sugestão de Ação</Label>
+                <Label>{t('ocorrencias.sugestaoAcao') || "Sugestão de Ação"}</Label>
                 <Textarea
                   value={editData.sugestaoAcao}
                   onChange={(e) => setEditData({ ...editData, sugestaoAcao: e.target.value })}
                   rows={3}
-                  placeholder="Sugestões para resolver esta ocorrência..."
+                  placeholder={t('ocorrencias.sugestoesPlaceholder') || "Sugestões para resolver esta ocorrência..."}
                 />
               </div>
               
@@ -633,7 +639,7 @@ export default function HistoricoOcorrencias() {
               {isAdmin && (
                 <>
                   <div className="space-y-2">
-                    <Label>Estado</Label>
+                    <Label>{t('ocorrencias.estado') || "Estado"}</Label>
                     <Select 
                       value={editData.estado} 
                       onValueChange={(v) => setEditData({ ...editData, estado: v as any })}
@@ -642,21 +648,21 @@ export default function HistoricoOcorrencias() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="reportado">Reportado</SelectItem>
-                        <SelectItem value="em_analise">Em Análise</SelectItem>
-                        <SelectItem value="em_resolucao">Em Resolução</SelectItem>
-                        <SelectItem value="resolvido">Resolvido</SelectItem>
+                        <SelectItem value="reportado">{t('ocorrencias.estadoReportado') || "Reportado"}</SelectItem>
+                        <SelectItem value="em_analise">{t('ocorrencias.estadoEmAnalise') || "Em Análise"}</SelectItem>
+                        <SelectItem value="em_resolucao">{t('ocorrencias.estadoEmResolucao') || "Em Resolução"}</SelectItem>
+                        <SelectItem value="resolvido">{t('ocorrencias.estadoResolvido') || "Resolvido"}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   
                   <div className="space-y-2">
-                    <Label>Notas do Administrador</Label>
+                    <Label>{t('ocorrencias.notasAdmin') || "Notas do Administrador"}</Label>
                     <Textarea
                       value={editData.notasAdmin}
                       onChange={(e) => setEditData({ ...editData, notasAdmin: e.target.value })}
                       rows={3}
-                      placeholder="Notas internas sobre esta ocorrência..."
+                      placeholder={t('ocorrencias.notasPlaceholder') || "Notas internas sobre esta ocorrência..."}
                     />
                   </div>
                 </>
@@ -664,7 +670,7 @@ export default function HistoricoOcorrencias() {
               
               <DialogFooter>
                 <Button variant="outline" onClick={() => setShowEditModal(false)}>
-                  Cancelar
+                  {t('common.cancelar')}
                 </Button>
                 <Button 
                   onClick={handleSaveEdit}
@@ -673,10 +679,10 @@ export default function HistoricoOcorrencias() {
                   {editarMutation.isPending ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                      A guardar...
+                      {t('common.aGuardar') || "A guardar..."}
                     </>
                   ) : (
-                    "Guardar Alterações"
+                    t('common.guardarAlteracoes') || "Guardar Alterações"
                   )}
                 </Button>
               </DialogFooter>
@@ -725,7 +731,7 @@ export default function HistoricoOcorrencias() {
             <div className="flex items-center justify-center min-h-[400px] max-h-[80vh]">
               <img
                 src={selectedImage}
-                alt="Evidência"
+                alt={t('ocorrencias.evidencia') || "Evidência"}
                 className="max-w-full max-h-[80vh] object-contain"
               />
             </div>
