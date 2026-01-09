@@ -5039,6 +5039,47 @@ export async function contarTodosLojaAtivos(lojaId: number): Promise<number> {
 }
 
 /**
+ * Contar To-Dos NÃO VISTOS pela loja (para alerta/badge)
+ * Conta tarefas atribuídas à loja que ainda não foram vistas
+ */
+export async function contarTodosLojaNaoVistos(lojaId: number): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  
+  const result = await db
+    .select({ count: sql<number>`COUNT(*)` })
+    .from(todos)
+    .where(and(
+      eq(todos.atribuidoLojaId, lojaId),
+      eq(todos.visto, false),
+      or(
+        eq(todos.estado, 'pendente'),
+        eq(todos.estado, 'em_progresso')
+      )
+    ));
+  
+  return result[0]?.count || 0;
+}
+
+/**
+ * Marcar múltiplos To-Dos como vistos pela loja
+ */
+export async function marcarMultiplosTodosComoVistoLoja(ids: number[]): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  
+  for (const id of ids) {
+    await db
+      .update(todos)
+      .set({
+        visto: true,
+        vistoEm: new Date(),
+      })
+      .where(eq(todos.id, id));
+  }
+}
+
+/**
  * Contar To-Dos por estado (para estatísticas)
  */
 export async function contarTodosPorEstado(): Promise<{

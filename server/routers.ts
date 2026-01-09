@@ -3959,6 +3959,59 @@ export const appRouter = router({
         return await db.contarTodosLojaAtivos(auth.loja.id);
       }),
     
+    // Contar To-Dos NÃO VISTOS pela loja (para alerta/badge)
+    contarNaoVistos: publicProcedure
+      .input(z.object({ token: z.string() }))
+      .query(async ({ input }) => {
+        const auth = await db.validarTokenLoja(input.token);
+        if (!auth) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        return await db.contarTodosLojaNaoVistos(auth.loja.id);
+      }),
+    
+    // Marcar To-Do como visto pela loja
+    marcarVisto: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        todoId: z.number(),
+      }))
+      .mutation(async ({ input }) => {
+        const auth = await db.validarTokenLoja(input.token);
+        if (!auth) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        // Verificar se o To-Do pertence a esta loja
+        const todo = await db.getTodoById(input.todoId);
+        if (!todo || todo.atribuidoLojaId !== auth.loja.id) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Não tem permissão para marcar esta tarefa' });
+        }
+        await db.marcarTodoComoVisto(input.todoId);
+        return { success: true };
+      }),
+    
+    // Marcar múltiplos To-Dos como vistos pela loja
+    marcarMultiplosVistos: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        todoIds: z.array(z.number()),
+      }))
+      .mutation(async ({ input }) => {
+        const auth = await db.validarTokenLoja(input.token);
+        if (!auth) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        // Verificar se todos os To-Dos pertencem a esta loja
+        for (const todoId of input.todoIds) {
+          const todo = await db.getTodoById(todoId);
+          if (!todo || todo.atribuidoLojaId !== auth.loja.id) {
+            throw new TRPCError({ code: 'FORBIDDEN', message: 'Não tem permissão para marcar esta tarefa' });
+          }
+        }
+        await db.marcarMultiplosTodosComoVistoLoja(input.todoIds);
+        return { success: true };
+      }),
+    
     // Atualizar estado do To-Do (pela loja)
     atualizarEstado: publicProcedure
       .input(z.object({

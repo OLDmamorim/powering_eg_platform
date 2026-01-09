@@ -187,6 +187,15 @@ export default function PortalLoja() {
     { enabled: !!token && !!lojaAuth }
   );
 
+  // Contar tarefas NÃO VISTAS (para alerta/badge pulsante)
+  const { data: todosNaoVistos, refetch: refetchTodosNaoVistos } = trpc.todosPortalLoja.contarNaoVistos.useQuery(
+    { token },
+    { 
+      enabled: !!token && !!lojaAuth,
+      refetchInterval: 30000, // Atualizar a cada 30 segundos
+    }
+  );
+
   // Histórico de tarefas enviadas ao gestor
   const { data: historicoTarefas, refetch: refetchHistoricoTarefas } = trpc.todosPortalLoja.historicoEnviadas.useQuery(
     { token },
@@ -285,6 +294,13 @@ export default function PortalLoja() {
       refetchTodos();
     },
     onError: (error) => toast.error(error.message),
+  });
+
+  // Mutation para marcar tarefas como vistas
+  const marcarVistosLojaMutation = trpc.todosPortalLoja.marcarMultiplosVistos.useMutation({
+    onSuccess: () => {
+      refetchTodosNaoVistos();
+    },
   });
 
   // Mutation para upload de anexos
@@ -442,18 +458,35 @@ export default function PortalLoja() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            {/* Botão Minhas Tarefas em destaque */}
+            {/* Botão Minhas Tarefas em destaque - Pulsa quando há NOVAS */}
             <Button 
               variant="default" 
               size="sm" 
-              onClick={() => setActiveTab('tarefas')}
-              className="bg-blue-600 hover:bg-blue-700 text-white relative"
+              onClick={() => {
+                setActiveTab('tarefas');
+                // Marcar tarefas como vistas
+                if (todosList && todosList.length > 0) {
+                  const idsNaoVistos = todosList.filter((t: any) => !t.visto).map((t: any) => t.id);
+                  if (idsNaoVistos.length > 0) {
+                    marcarVistosLojaMutation.mutate({ token, todoIds: idsNaoVistos });
+                  }
+                }
+              }}
+              className={`relative ${
+                (todosNaoVistos || 0) > 0 
+                  ? 'bg-red-500 hover:bg-red-600 animate-pulse ring-2 ring-red-300' 
+                  : 'bg-blue-600 hover:bg-blue-700'
+              } text-white`}
             >
-              <ListTodo className="h-4 w-4 mr-2" />
-              <span className="hidden sm:inline">Minhas Tarefas</span>
+              <ListTodo className={`h-4 w-4 mr-2 ${(todosNaoVistos || 0) > 0 ? 'animate-bounce' : ''}`} />
+              <span className="hidden sm:inline">{(todosNaoVistos || 0) > 0 ? 'Novas Tarefas!' : 'Minhas Tarefas'}</span>
               <span className="sm:hidden">Tarefas</span>
-              {(todosCount || 0) > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold animate-pulse">
+              {(todosNaoVistos || 0) > 0 ? (
+                <span className="absolute -top-2 -right-2 bg-yellow-400 text-red-800 text-xs rounded-full h-6 w-6 flex items-center justify-center font-bold animate-bounce border-2 border-white">
+                  {todosNaoVistos}
+                </span>
+              ) : (todosCount || 0) > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
                   {todosCount}
                 </span>
               )}
@@ -574,18 +607,32 @@ export default function PortalLoja() {
             </CardContent>
           </Card>
           
-          {/* Card Tarefas - Clicável com pulse */}
+          {/* Card Tarefas - Clicável com pulse quando há tarefas NÃO VISTAS */}
           <Card 
-            className={`cursor-pointer transition-all hover:scale-105 hover:shadow-md ${activeTab === 'tarefas' ? 'ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-900/30' : ''} ${((todosCount || 0) + (tarefasInternas?.length || 0)) > 0 ? 'animate-soft-pulse-blue' : ''}`}
-            onClick={() => setActiveTab('tarefas')}
+            className={`cursor-pointer transition-all hover:scale-105 hover:shadow-md ${activeTab === 'tarefas' ? 'ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-900/30' : ''} ${(todosNaoVistos || 0) > 0 ? 'animate-soft-pulse-blue ring-2 ring-red-400' : ''}`}
+            onClick={() => {
+              setActiveTab('tarefas');
+              // Marcar tarefas como vistas quando clica no card
+              if (todosList && todosList.length > 0) {
+                const idsNaoVistos = todosList.filter((t: any) => !t.visto).map((t: any) => t.id);
+                if (idsNaoVistos.length > 0) {
+                  marcarVistosLojaMutation.mutate({ token, todoIds: idsNaoVistos });
+                }
+              }
+            }}
           >
             <CardContent className="pt-4">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
-                  <ListTodo className="h-5 w-5 text-blue-500" />
+                  <ListTodo className={`h-5 w-5 ${(todosNaoVistos || 0) > 0 ? 'text-red-500 animate-bounce' : 'text-blue-500'}`} />
                   <div>
                     <p className="text-2xl font-bold">{todosCount || 0}</p>
                     <p className="text-xs text-muted-foreground">Tarefas To-Do</p>
+                    {(todosNaoVistos || 0) > 0 && (
+                      <p className="text-xs text-red-500 font-bold animate-pulse">
+                        {todosNaoVistos} nova{todosNaoVistos !== 1 ? 's' : ''}!
+                      </p>
+                    )}
                   </div>
                 </div>
                 {/* Botão de ação rápida - Iniciar tarefa mais urgente */}
@@ -1795,23 +1842,40 @@ export default function PortalLoja() {
         </Dialog>
       </div>
 
-      {/* Botão Flutuante de Acesso Rápido às Tarefas */}
+      {/* Botão Flutuante de Acesso Rápido às Tarefas - Pulsa quando há NOVAS */}
       {activeTab !== 'tarefas' && (
         <button
-          onClick={() => setActiveTab('tarefas')}
-          className="fixed bottom-6 right-6 z-50 bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-2xl transition-all hover:scale-110 group"
+          onClick={() => {
+            setActiveTab('tarefas');
+            // Marcar tarefas como vistas quando clica no botão flutuante
+            if (todosList && todosList.length > 0) {
+              const idsNaoVistos = todosList.filter((t: any) => !t.visto).map((t: any) => t.id);
+              if (idsNaoVistos.length > 0) {
+                marcarVistosLojaMutation.mutate({ token, todoIds: idsNaoVistos });
+              }
+            }
+          }}
+          className={`fixed bottom-6 right-6 z-50 text-white rounded-full p-4 shadow-2xl transition-all hover:scale-110 group ${
+            (todosNaoVistos || 0) > 0 
+              ? 'bg-red-500 hover:bg-red-600 animate-pulse ring-4 ring-red-300' 
+              : 'bg-blue-600 hover:bg-blue-700'
+          }`}
           title="Minhas Tarefas"
         >
-          <ListTodo className="h-6 w-6" />
-          {/* Badge de contagem */}
-          {(todosCount || 0) > 0 && (
-            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-6 w-6 flex items-center justify-center font-bold animate-bounce">
+          <ListTodo className={`h-6 w-6 ${(todosNaoVistos || 0) > 0 ? 'animate-bounce' : ''}`} />
+          {/* Badge de contagem - destaca NOVAS */}
+          {(todosNaoVistos || 0) > 0 ? (
+            <span className="absolute -top-2 -right-2 bg-yellow-400 text-red-800 text-xs rounded-full h-7 w-7 flex items-center justify-center font-bold animate-bounce border-2 border-white">
+              {todosNaoVistos}
+            </span>
+          ) : (todosCount || 0) > 0 && (
+            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-6 w-6 flex items-center justify-center font-bold">
               {todosCount}
             </span>
           )}
           {/* Tooltip */}
           <span className="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-gray-900 text-white text-sm px-3 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-            Minhas Tarefas
+            {(todosNaoVistos || 0) > 0 ? `${todosNaoVistos} Tarefa${todosNaoVistos !== 1 ? 's' : ''} Nova${todosNaoVistos !== 1 ? 's' : ''}!` : 'Minhas Tarefas'}
           </span>
         </button>
       )}

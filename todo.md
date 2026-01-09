@@ -2344,3 +2344,14 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## Melhoria - Enviar email de reunião também ao admin
 - [x] Adicionar admin que criou a reunião como destinatário automático do email
 - [x] Buscar email do admin a partir do criadoPorId da reunião
+
+## Relatórios Admin visíveis para Gestor
+- [x] Verificar que relatórios criados pelo admin aparecem no histórico do gestor da loja (já implementado - filtra por lojaId)
+- [x] Verificar que pendentes criados pelo admin ficam visíveis para o gestor responsável pela loja (já implementado - filtra por gestorLojas)
+
+## Alertas de Tarefas no Portal da Loja
+- [x] Adicionar campo vistoLoja ao schema de tarefas (já existia)
+- [x] Criar endpoint para contar tarefas não vistas pela loja
+- [x] Adicionar alerta visual (badge, animação pulse) no Portal da Loja
+- [x] Marcar tarefas como vistas quando a loja as visualiza
+
