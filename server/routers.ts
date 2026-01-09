@@ -2453,7 +2453,7 @@ export const appRouter = router({
         const { gerarHTMLRelatorioReuniao } = await import('./reuniaoService');
         const htmlContent = gerarHTMLRelatorioReuniao(reuniao, relatorio, topicos);
         
-        // Enviar para cada gestor
+        // Enviar para cada gestor selecionado
         for (const gestor of gestoresSelecionados) {
           if (gestor.email) {
             try {
@@ -2465,6 +2465,24 @@ export const appRouter = router({
               emailsEnviados.push(gestor.email);
             } catch (error) {
               console.error(`Erro ao enviar email para ${gestor.email}:`, error);
+            }
+          }
+        }
+        
+        // Enviar também para o admin que criou a reunião
+        if (reuniao.criadoPor) {
+          const adminCriador = await db.getUserById(reuniao.criadoPor);
+          if (adminCriador?.email && !emailsEnviados.includes(adminCriador.email)) {
+            try {
+              await sendEmail({
+                to: adminCriador.email,
+                subject: `Relatório Reunião de Gestores - ${new Date(reuniao.data).toLocaleDateString('pt-PT')}`,
+                html: htmlContent,
+              });
+              emailsEnviados.push(adminCriador.email);
+              console.log(`Email enviado ao admin criador: ${adminCriador.email}`);
+            } catch (error) {
+              console.error(`Erro ao enviar email para admin ${adminCriador.email}:`, error);
             }
           }
         }

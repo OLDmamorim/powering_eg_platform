@@ -2340,3 +2340,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Implementar libertação de tópicos para próxima reunião
 - [x] Implementar exportação PDF do relatório
 - [x] Implementar envio de relatório por email aos gestores
+
+## Melhoria - Enviar email de reunião também ao admin
+- [x] Adicionar admin que criou a reunião como destinatário automático do email
+- [x] Buscar email do admin a partir do criadoPorId da reunião
