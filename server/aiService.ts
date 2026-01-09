@@ -132,6 +132,15 @@ interface AnaliseIA {
     recomendacoesEstrategicas: string[];
     alertasCriticos: string[];
   };
+  // Novos campos para relatórios detalhados
+  relatoriosPorLoja?: Array<{
+    lojaId: number;
+    lojaNome: string;
+    totalRelatorios: number;
+    relatoriosLivres: number;
+    relatoriosCompletos: number;
+  }>;
+  resumoConteudoRelatorios?: string;
 }
 
 /**
@@ -148,55 +157,55 @@ export async function gerarRelatorioComIA(
   dataFimParam?: Date
 ): Promise<AnaliseIA> {
   // Buscar relatórios do período
-  // Se datas foram passadas como parâmetro, usar essas; caso contrário, calcular baseado no período
   const dataInicio = dataInicioParam || calcularDataInicio(periodo);
   const dataFim = dataFimParam || calcularDataFim(periodo);
-  
-  let relatoriosLivres: any[];
-  let relatoriosCompletos: any[];
+
+  let relatoriosLivresFiltrados: any[];
+  let relatoriosCompletosFiltrados: any[];
   
   if (gestorId) {
-    relatoriosLivres = await db.getRelatoriosLivresByGestorId(gestorId);
-    relatoriosCompletos = await db.getRelatoriosCompletosByGestorId(gestorId);
+    relatoriosLivresFiltrados = await db.getRelatoriosLivresByGestorId(gestorId);
+    relatoriosCompletosFiltrados = await db.getRelatoriosCompletosByGestorId(gestorId);
   } else {
-    relatoriosLivres = await db.getAllRelatoriosLivres();
-    relatoriosCompletos = await db.getAllRelatoriosCompletos();
+    relatoriosLivresFiltrados = await db.getAllRelatoriosLivres();
+    relatoriosCompletosFiltrados = await db.getAllRelatoriosCompletos();
   }
   
+  // Filtrar por lojas específicas se fornecidas
   if (lojasIds && lojasIds.length > 0) {
-    relatoriosLivres = relatoriosLivres.filter(r => lojasIds.includes(r.lojaId));
-    relatoriosCompletos = relatoriosCompletos.filter(r => lojasIds.includes(r.lojaId));
+    relatoriosLivresFiltrados = relatoriosLivresFiltrados.filter((r: any) => lojasIds.includes(r.lojaId));
+    relatoriosCompletosFiltrados = relatoriosCompletosFiltrados.filter((r: any) => lojasIds.includes(r.lojaId));
   }
-
-  const relatoriosLivresFiltrados = relatoriosLivres.filter(
-    (r) => {
-      const data = new Date(r.dataVisita);
-      return data >= dataInicio && data <= dataFim;
-    }
-  );
-  const relatoriosCompletosFiltrados = relatoriosCompletos.filter(
-    (r) => {
-      const data = new Date(r.dataVisita);
-      return data >= dataInicio && data <= dataFim;
-    }
-  );
+  
+  // Filtrar por período
+  relatoriosLivresFiltrados = relatoriosLivresFiltrados.filter((r: any) => {
+    const dataVisita = new Date(r.dataVisita);
+    return dataVisita >= dataInicio && dataVisita <= dataFim;
+  });
+  
+  relatoriosCompletosFiltrados = relatoriosCompletosFiltrados.filter((r: any) => {
+    const dataVisita = new Date(r.dataVisita);
+    return dataVisita >= dataInicio && dataVisita <= dataFim;
+  });
 
   const todosRelatorios: RelatorioAnalise[] = [
     ...relatoriosLivresFiltrados.map((r: any) => ({
       lojaId: r.lojaId,
-      lojaNome: r.loja?.nome || "Loja",
+      lojaNome: r.loja?.nome || "Loja desconhecida",
       dataVisita: new Date(r.dataVisita),
       tipo: "livre" as const,
-      conteudo: r.descricao,
+      conteudo: r.descricao || "",
+      pontosPositivosRelatorio: r.pontosPositivosDestacar,
+      pontosNegativosRelatorio: r.pontosNegativosDestacar,
     })),
     ...relatoriosCompletosFiltrados.map((r: any) => ({
       lojaId: r.lojaId,
-      lojaNome: r.loja?.nome || "Loja",
+      lojaNome: r.loja?.nome || "Loja desconhecida",
       dataVisita: new Date(r.dataVisita),
       tipo: "completo" as const,
-      conteudo: `EPIs: ${r.episFardamento || "N/A"}\nKit 1ºs Socorros: ${r.kitPrimeirosSocorros || "N/A"}\nResumo: ${r.resumoSupervisao || "N/A"}`,
-      pontosPositivosRelatorio: r.pontosPositivos || undefined,
-      pontosNegativosRelatorio: r.pontosNegativos || undefined,
+      conteudo: `EPIs: ${r.episFardamento || "N/A"}, Kit 1ºs Socorros: ${r.kitPrimeirosSocorros || "N/A"}, Consumíveis: ${r.consumiveis || "N/A"}, Espaço Físico: ${r.espacoFisico || "N/A"}, Reclamações: ${r.reclamacoes || "N/A"}, Vendas Complementares: ${r.vendasComplementares || "N/A"}, Fichas de Serviço: ${r.fichasServico || "N/A"}, Documentação: ${r.documentacaoObrigatoria || "N/A"}, Reunião Quinzenal: ${r.reuniaoQuinzenal || "N/A"}, Resumo: ${r.resumoColaboradores || "N/A"}`,
+      pontosPositivosRelatorio: r.pontosPositivosDestacar,
+      pontosNegativosRelatorio: r.pontosNegativosDestacar,
     })),
   ];
 
@@ -998,35 +1007,31 @@ Responde apenas com a dica, sem aspas nem formatação adicional.`
 A dica deve ser:
 - Motivacional mas prática
 - Focada em boas práticas de gestão de lojas
-- Variada (não repetir sempre o mesmo tema)
+- Variada (não repetir sempre os mesmos temas)
 - Em português europeu
 
-Temas possíveis:
-- Comunicação com equipas
-- Acompanhamento de pendentes
-- Visitas regulares às lojas
-- Documentação e relatórios
-- Motivação de equipas
-- Resolução de problemas
-- Organização do trabalho
+Exemplos de boas dicas:
+- "Uma visita bem documentada hoje pode prevenir problemas amanhã. Dedique tempo a registar observações detalhadas."
+- "Pequenos gestos de reconhecimento às equipas das lojas fazem grande diferença na motivação e resultados."
+- "Aproveite as visitas para identificar oportunidades de melhoria nos processos de atendimento."
 
 Responde apenas com a dica, sem aspas nem formatação adicional.`;
 
   try {
     const response = await invokeLLM({
       messages: [
-        {
-          role: "system",
-          content: "És um assistente especializado em gestão de redes de retalho. Geras dicas curtas, úteis e acionáveis.",
-        },
-        { role: "user", content: prompt },
+        { role: "system", content: "És um assistente especializado em gestão de redes de retalho automóvel. Geras dicas curtas, práticas e motivacionais." },
+        { role: "user", content: prompt }
       ],
     });
 
-    const dica = response.choices[0].message.content;
-    return typeof dica === 'string' ? dica.trim() : 'Mantenha o foco nas prioridades do dia.';
+    const content = response.choices[0].message.content;
+    const dica = (typeof content === 'string' ? content.trim() : '') || '';
+    return dica || (isAdmin 
+      ? 'Verifique os pendentes ativos e priorize os mais urgentes.'
+      : 'Mantenha contacto regular com as suas equipas de loja.');
   } catch (error) {
-    console.error("Erro ao gerar dica:", error);
+    console.error('Erro ao gerar dica:', error);
     return isAdmin 
       ? 'Verifique os pendentes ativos e priorize os mais urgentes.'
       : 'Mantenha contacto regular com as suas equipas de loja.';
@@ -1067,6 +1072,7 @@ function calcularPeriodoMultiplosMeses(meses: MesSelecionado[]): { dataInicio: D
 
 /**
  * Gera relatório automático com análise de IA para múltiplos meses selecionados
+ * VERSÃO COMPLETA - usa a mesma lógica avançada da função gerarRelatorioComIA
  */
 export async function gerarRelatorioComIAMultiplosMeses(
   mesesSelecionados: MesSelecionado[],
@@ -1075,6 +1081,12 @@ export async function gerarRelatorioComIAMultiplosMeses(
 ): Promise<AnaliseIA> {
   const { dataInicio, dataFim } = calcularPeriodoMultiplosMeses(mesesSelecionados);
   
+  // Gerar label para o período
+  const NOMES_MESES = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+  const labelMeses = mesesSelecionados.map(m => `${NOMES_MESES[m.mes - 1]} ${m.ano}`).join(", ");
+  const periodoLabel = `meses_${mesesSelecionados.map(m => `${m.mes}/${m.ano}`).join('_')}`;
+  
+  // Buscar relatórios
   let relatoriosLivres: any[];
   let relatoriosCompletos: any[];
   
@@ -1086,6 +1098,7 @@ export async function gerarRelatorioComIAMultiplosMeses(
     relatoriosCompletos = await db.getAllRelatoriosCompletos();
   }
   
+  // Filtrar por lojas específicas
   if (lojasIds && lojasIds.length > 0) {
     relatoriosLivres = relatoriosLivres.filter((r: any) => lojasIds.includes(r.lojaId));
     relatoriosCompletos = relatoriosCompletos.filter((r: any) => lojasIds.includes(r.lojaId));
@@ -1102,107 +1115,532 @@ export async function gerarRelatorioComIAMultiplosMeses(
     return dataVisita >= dataInicio && dataVisita <= dataFim;
   });
 
-  // Usar a mesma lógica da função original para gerar análise
-  // Por simplicidade, chamamos a função original com período "mes_anterior" e filtramos manualmente
-  // Isto é uma simplificação - idealmente refatoraríamos para partilhar código
-  
-  const todasLojas = await db.getAllLojas();
-  
-  // Contar visitas por loja
-  const visitasPorLoja: { [lojaId: number]: number } = {};
-  const nomesLojas: { [lojaId: number]: string } = {};
-  
-  todasLojas.forEach((loja: any) => {
-    visitasPorLoja[loja.id] = 0;
-    nomesLojas[loja.id] = loja.nome;
+  // Preparar dados dos relatórios para análise
+  const todosRelatorios: RelatorioAnalise[] = [
+    ...relatoriosLivres.map((r: any) => ({
+      lojaId: r.lojaId,
+      lojaNome: r.loja?.nome || "Loja desconhecida",
+      dataVisita: new Date(r.dataVisita),
+      tipo: "livre" as const,
+      conteudo: r.descricao || "",
+      pontosPositivosRelatorio: r.pontosPositivosDestacar,
+      pontosNegativosRelatorio: r.pontosNegativosDestacar,
+    })),
+    ...relatoriosCompletos.map((r: any) => ({
+      lojaId: r.lojaId,
+      lojaNome: r.loja?.nome || "Loja desconhecida",
+      dataVisita: new Date(r.dataVisita),
+      tipo: "completo" as const,
+      conteudo: `EPIs: ${r.episFardamento || "N/A"}, Kit 1ºs Socorros: ${r.kitPrimeirosSocorros || "N/A"}, Consumíveis: ${r.consumiveis || "N/A"}, Espaço Físico: ${r.espacoFisico || "N/A"}, Reclamações: ${r.reclamacoes || "N/A"}, Vendas Complementares: ${r.vendasComplementares || "N/A"}, Fichas de Serviço: ${r.fichasServico || "N/A"}, Documentação: ${r.documentacaoObrigatoria || "N/A"}, Reunião Quinzenal: ${r.reuniaoQuinzenal || "N/A"}, Resumo: ${r.resumoColaboradores || "N/A"}`,
+      pontosPositivosRelatorio: r.pontosPositivosDestacar,
+      pontosNegativosRelatorio: r.pontosNegativosDestacar,
+    })),
+  ];
+
+  // Calcular frequência de visitas
+  const frequenciaVisitas: { [loja: string]: number } = {};
+  todosRelatorios.forEach((r) => {
+    frequenciaVisitas[r.lojaNome] = (frequenciaVisitas[r.lojaNome] || 0) + 1;
   });
+
+  const lojasOrdenadas = Object.entries(frequenciaVisitas).sort((a, b) => b[1] - a[1]);
+  const lojaMaisVisitada = lojasOrdenadas.length > 0
+    ? { nome: lojasOrdenadas[0][0], visitas: lojasOrdenadas[0][1] }
+    : null;
+  const lojaMenosVisitada = lojasOrdenadas.length > 0
+    ? { nome: lojasOrdenadas[lojasOrdenadas.length - 1][0], visitas: lojasOrdenadas[lojasOrdenadas.length - 1][1] }
+    : null;
+
+  // Extrair pontos positivos e negativos
+  const pontosPositivosRelatados: string[] = [];
+  const pontosNegativosRelatados: string[] = [];
+  
+  relatoriosCompletos.forEach((r: any) => {
+    if (r.pontosPositivosDestacar && r.pontosPositivosDestacar.trim()) {
+      pontosPositivosRelatados.push(`[${r.loja?.nome || 'Loja'}] ${r.pontosPositivosDestacar}`);
+    }
+    if (r.pontosNegativosDestacar && r.pontosNegativosDestacar.trim()) {
+      pontosNegativosRelatados.push(`[${r.loja?.nome || 'Loja'}] ${r.pontosNegativosDestacar}`);
+    }
+  });
+
+  // Calcular relatórios por loja
+  const relatoriosPorLojaMap = new Map<number, { lojaId: number; lojaNome: string; livres: number; completos: number }>();
   
   relatoriosLivres.forEach((r: any) => {
-    if (visitasPorLoja[r.lojaId] !== undefined) {
-      visitasPorLoja[r.lojaId]++;
+    const existing = relatoriosPorLojaMap.get(r.lojaId);
+    if (existing) {
+      existing.livres++;
+    } else {
+      relatoriosPorLojaMap.set(r.lojaId, {
+        lojaId: r.lojaId,
+        lojaNome: r.loja?.nome || 'Loja desconhecida',
+        livres: 1,
+        completos: 0
+      });
     }
   });
   
   relatoriosCompletos.forEach((r: any) => {
-    if (visitasPorLoja[r.lojaId] !== undefined) {
-      visitasPorLoja[r.lojaId]++;
+    const existing = relatoriosPorLojaMap.get(r.lojaId);
+    if (existing) {
+      existing.completos++;
+    } else {
+      relatoriosPorLojaMap.set(r.lojaId, {
+        lojaId: r.lojaId,
+        lojaNome: r.loja?.nome || 'Loja desconhecida',
+        livres: 0,
+        completos: 1
+      });
     }
   });
+
+  const relatoriosPorLoja = Array.from(relatoriosPorLojaMap.values())
+    .map(l => ({
+      lojaId: l.lojaId,
+      lojaNome: l.lojaNome,
+      totalRelatorios: l.livres + l.completos,
+      relatoriosLivres: l.livres,
+      relatoriosCompletos: l.completos
+    }))
+    .sort((a, b) => b.totalRelatorios - a.totalRelatorios);
+
+  // ========== BUSCAR DADOS AVANÇADOS ==========
+  let dadosAvancados: any = null;
+  let rankingLojas: any[] = [];
+  let comparacaoLojas: any = null;
+  let statsResultados: any = null;
   
-  // Encontrar loja mais e menos visitada
-  let lojaMaisVisitadaTemp: { nome: string; visitas: number } | null = null;
-  let lojaMenosVisitadaTemp: { nome: string; visitas: number } | null = null;
-  
-  Object.entries(visitasPorLoja).forEach(([lojaId, visitas]) => {
-    const nome = nomesLojas[parseInt(lojaId)];
-    if (!lojaMaisVisitadaTemp || visitas > lojaMaisVisitadaTemp.visitas) {
-      lojaMaisVisitadaTemp = { nome, visitas };
+  try {
+    // Buscar e agregar dados de todos os meses selecionados
+    let somaServicos = 0;
+    let somaObjetivos = 0;
+    let somaReparacoes = 0;
+    let contLojas = 0;
+    let somaDesvio = 0;
+    let somaTaxaReparacao = 0;
+    let lojasAcimaObjetivo = 0;
+    
+    const lojaAgregado = new Map<number, {
+      lojaId: number;
+      lojaNome: string;
+      zona: string | null;
+      totalServicos: number;
+      objetivoMensal: number;
+      taxaReparacao: number;
+      mesesContados: number;
+    }>();
+    
+    for (const { mes, ano } of mesesSelecionados) {
+      const dadosMes = await db.getDadosAnaliseAvancada(mes, ano, lojasIds);
+      const rankingMes = await db.getRankingLojas('totalServicos', mes, ano, 100, lojasIds) || [];
+      
+      if (dadosMes?.estatisticas) {
+        const stats = dadosMes.estatisticas;
+        somaServicos += stats.somaServicos || 0;
+        somaObjetivos += stats.somaObjetivos || 0;
+        somaReparacoes += stats.somaReparacoes || 0;
+        if (stats.totalLojas > 0) {
+          contLojas += stats.totalLojas;
+          somaDesvio += (stats.mediaDesvioPercentual || 0) * stats.totalLojas;
+          somaTaxaReparacao += (stats.mediaTaxaReparacao || 0) * stats.totalLojas;
+          lojasAcimaObjetivo += stats.lojasAcimaObjetivo || 0;
+        }
+      }
+      
+      for (const loja of rankingMes) {
+        const existing = lojaAgregado.get(loja.lojaId);
+        if (existing) {
+          existing.totalServicos += loja.totalServicos || 0;
+          existing.objetivoMensal += loja.objetivoMensal || 0;
+          existing.mesesContados++;
+        } else {
+          lojaAgregado.set(loja.lojaId, {
+            lojaId: loja.lojaId,
+            lojaNome: loja.lojaNome,
+            zona: loja.zona,
+            totalServicos: loja.totalServicos || 0,
+            objetivoMensal: loja.objetivoMensal || 0,
+            taxaReparacao: loja.taxaReparacao || 0,
+            mesesContados: 1,
+          });
+        }
+      }
     }
-    if (!lojaMenosVisitadaTemp || visitas < lojaMenosVisitadaTemp.visitas) {
-      lojaMenosVisitadaTemp = { nome, visitas };
+    
+    const totalLojasUnicas = lojaAgregado.size;
+    statsResultados = {
+      totalLojas: totalLojasUnicas,
+      somaServicos,
+      somaObjetivos,
+      mediaDesvioPercentual: contLojas > 0 ? somaDesvio / contLojas : 0,
+      mediaTaxaReparacao: contLojas > 0 ? somaTaxaReparacao / contLojas : 0,
+      somaReparacoes,
+      lojasAcimaObjetivo: Math.round(lojasAcimaObjetivo / mesesSelecionados.length),
+    };
+    
+    rankingLojas = Array.from(lojaAgregado.values()).map(loja => {
+      const desvio = loja.objetivoMensal > 0 
+        ? (loja.totalServicos - loja.objetivoMensal) / loja.objetivoMensal 
+        : 0;
+      return {
+        lojaId: loja.lojaId,
+        lojaNome: loja.lojaNome,
+        zona: loja.zona,
+        totalServicos: loja.totalServicos,
+        objetivoMensal: loja.objetivoMensal,
+        desvioPercentualMes: desvio,
+        taxaReparacao: loja.taxaReparacao,
+        valor: loja.totalServicos,
+      };
+    }).sort((a, b) => b.totalServicos - a.totalServicos);
+    
+    // Buscar dados avançados do primeiro mês
+    const primeiroMes = mesesSelecionados[0];
+    dadosAvancados = await db.getDadosAnaliseAvancada(primeiroMes.mes, primeiroMes.ano, lojasIds);
+    if (dadosAvancados) {
+      dadosAvancados.estatisticas = statsResultados;
     }
-  });
-  
-  const lojaMaisVisitada = lojaMaisVisitadaTemp;
-  const lojaMenosVisitada = lojaMenosVisitadaTemp;
-  
-  // Frequência de visitas
-  const frequenciaVisitas: { [loja: string]: number } = {};
-  Object.entries(visitasPorLoja).forEach(([lojaId, visitas]) => {
-    frequenciaVisitas[nomesLojas[parseInt(lojaId)]] = visitas;
-  });
-  
-  // Extrair pontos positivos e negativos dos relatórios completos
-  const pontosPositivos: string[] = [];
-  const pontosNegativos: string[] = [];
-  
-  relatoriosCompletos.forEach((r: any) => {
-    if (r.pontosPositivosDestacar) {
-      pontosPositivos.push(`${nomesLojas[r.lojaId]}: ${r.pontosPositivosDestacar}`);
+    
+    // Calcular comparação de lojas
+    if (rankingLojas.length > 0) {
+      comparacaoLojas = {
+        melhorLoja: rankingLojas[0],
+        piorLoja: rankingLojas[rankingLojas.length - 1],
+        maiorEvolucao: null,
+        menorEvolucao: null,
+        totalLojas: rankingLojas.length,
+        lojasAcimaMedia: rankingLojas.filter((l: any) => (l.desvioPercentualMes || 0) >= 0).length,
+      };
     }
-    if (r.pontosNegativosDestacar) {
-      pontosNegativos.push(`${nomesLojas[r.lojaId]}: ${r.pontosNegativosDestacar}`);
-    }
-  });
-  
-  // Gerar resumo com IA
-  const NOMES_MESES = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
-  const labelMeses = mesesSelecionados.map(m => `${NOMES_MESES[m.mes - 1]} ${m.ano}`).join(", ");
-  
-  const totalRelatorios = relatoriosLivres.length + relatoriosCompletos.length;
-  
-  let resumo = `Análise do período: ${labelMeses}. `;
-  resumo += `Total de ${totalRelatorios} relatórios analisados (${relatoriosLivres.length} livres, ${relatoriosCompletos.length} completos). `;
-  
-  if (lojaMaisVisitada) {
-    const mais = lojaMaisVisitada as { nome: string; visitas: number };
-    resumo += `A loja mais visitada foi ${mais.nome} com ${mais.visitas} visitas. `;
+  } catch (error) {
+    console.log('[RelatoriosIA] Erro ao buscar dados avançados:', error);
   }
-  if (lojaMenosVisitada) {
-    const menos = lojaMenosVisitada as { nome: string; visitas: number };
-    if (menos.visitas === 0) {
-      resumo += `Atenção: ${menos.nome} não teve visitas neste período.`;
+
+  // ========== PREPARAR TEXTO PARA IA ==========
+  const relatoriosTexto = todosRelatorios
+    .slice(0, 30) // Limitar para não exceder contexto
+    .map((r) => `[${r.dataVisita.toLocaleDateString("pt-PT")}] ${r.lojaNome} (${r.tipo}):\n${r.conteudo}`)
+    .join("\n\n");
+
+  const pontosDestacadosTexto = `
+PONTOS POSITIVOS DESTACADOS PELOS GESTORES:
+${pontosPositivosRelatados.length > 0 ? pontosPositivosRelatados.join('\n') : 'Nenhum ponto positivo registado neste período.'}
+
+PONTOS NEGATIVOS DESTACADOS PELOS GESTORES:
+${pontosNegativosRelatados.length > 0 ? pontosNegativosRelatados.join('\n') : 'Nenhum ponto negativo registado neste período.'}
+`;
+
+  // Preparar resumo de relatórios por loja
+  const resumoRelatoriosPorLoja = relatoriosPorLoja.length > 0
+    ? `\n═══ RELATÓRIOS POR LOJA ═══\n${relatoriosPorLoja.slice(0, 20).map(l => 
+        `• ${l.lojaNome}: ${l.totalRelatorios} total (${l.relatoriosLivres} livres, ${l.relatoriosCompletos} completos)`
+      ).join('\n')}`
+    : '';
+
+  // Preparar dados avançados
+  let dadosAvancadosTexto = '';
+  
+  if (statsResultados) {
+    const { somaServicos, somaObjetivos, mediaDesvioPercentual, mediaTaxaReparacao, lojasAcimaObjetivo, totalLojas } = statsResultados;
+    const taxaCumprimento = totalLojas > 0 ? ((lojasAcimaObjetivo || 0) / totalLojas * 100).toFixed(1) : '0';
+    const lojasAbaixoObjetivo = (totalLojas || 0) - (lojasAcimaObjetivo || 0);
+    
+    dadosAvancadosTexto = `
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    ANÁLISE DO PERÍODO: ${labelMeses.toUpperCase()}                    ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+═══ RESUMO DE RELATÓRIOS ═══
+• Total de Relatórios: ${todosRelatorios.length}
+• Relatórios Livres: ${relatoriosLivres.length}
+• Relatórios Completos: ${relatoriosCompletos.length}
+• Lojas com Relatórios: ${relatoriosPorLoja.length}
+${resumoRelatoriosPorLoja}
+
+═══ MÉTRICAS DE SERVIÇOS (se disponíveis) ═══
+• Total de Serviços: ${somaServicos || 'N/A'}
+• Objetivo Total: ${somaObjetivos || 'N/A'}
+• Desvio Médio: ${mediaDesvioPercentual ? `${(mediaDesvioPercentual * 100).toFixed(2)}%` : 'N/A'}
+• Taxa de Reparação Média: ${mediaTaxaReparacao ? `${(mediaTaxaReparacao * 100).toFixed(2)}%` : 'N/A'}
+• Lojas Acima do Objetivo: ${lojasAcimaObjetivo || 0} (${taxaCumprimento}%)
+• Lojas Abaixo do Objetivo: ${lojasAbaixoObjetivo}
+`;
+
+    // Rankings se disponíveis
+    if (dadosAvancados?.rankings?.cumprimentoObjetivo) {
+      dadosAvancadosTexto += `
+═══ TOP 5 - MELHOR CUMPRIMENTO DE OBJETIVO ═══
+`;
+      dadosAvancados.rankings.cumprimentoObjetivo.top5.forEach((l: any, i: number) => {
+        dadosAvancadosTexto += `${i + 1}. ${l.lojaNome} - Desvio: ${l.desvioPercentualMes >= 0 ? '+' : ''}${(l.desvioPercentualMes * 100).toFixed(2)}% | Serviços: ${l.totalServicos}/${l.objetivoMensal}\n`;
+      });
+      
+      dadosAvancadosTexto += `
+═══ BOTTOM 5 - PIOR CUMPRIMENTO DE OBJETIVO ═══
+`;
+      dadosAvancados.rankings.cumprimentoObjetivo.bottom5.forEach((l: any, i: number) => {
+        dadosAvancadosTexto += `${i + 1}. ${l.lojaNome} - Desvio: ${l.desvioPercentualMes >= 0 ? '+' : ''}${(l.desvioPercentualMes * 100).toFixed(2)}% | Serviços: ${l.totalServicos}/${l.objetivoMensal}\n`;
+      });
+    }
+
+    // Análise por zona
+    if (dadosAvancados?.analiseZonas && dadosAvancados.analiseZonas.length > 0) {
+      dadosAvancadosTexto += `
+═══ ANÁLISE POR ZONA ═══
+`;
+      dadosAvancados.analiseZonas.forEach((z: any) => {
+        dadosAvancadosTexto += `
+▸ ${z.zona}
+  • Lojas: ${z.totalLojas} | Acima Obj: ${z.lojasAcimaObjetivo} (${z.taxaCumprimento.toFixed(1)}%)
+  • Serviços: ${z.somaServicos}/${z.somaObjetivos}
+  • Melhor: ${z.melhorLoja} | Pior: ${z.piorLoja}
+`;
+      });
     }
   }
-  
-  return {
-    lojaMaisVisitada,
-    lojaMenosVisitada,
-    frequenciaVisitas,
-    pontosPositivos: pontosPositivos.slice(0, 10),
-    pontosNegativos: pontosNegativos.slice(0, 10),
-    sugestoes: [
-      "Analise os pontos negativos recorrentes para identificar padrões",
-      "Priorize visitas às lojas com menos acompanhamento",
-      "Documente as boas práticas das lojas com melhor desempenho"
-    ],
-    resumo,
-    analisePontosDestacados: {
-      positivos: pontosPositivos.slice(0, 5),
-      negativos: pontosNegativos.slice(0, 5),
-      tendencias: pontosNegativos.length > pontosPositivos.length 
-        ? "Tendência negativa - mais pontos negativos que positivos no período"
-        : "Tendência positiva - mais pontos positivos que negativos no período"
+
+  // ========== PROMPT PARA IA ==========
+  const prompt = `És um ANALISTA DE DADOS SÉNIOR especializado em supervisão de redes de retalho automóvel.
+Analisa os dados de supervisão da rede Express Glass para o período: ${labelMeses}.
+
+${dadosAvancadosTexto}
+
+CONTEÚDO DOS RELATÓRIOS DE SUPERVISÃO:
+${relatoriosTexto || 'Sem relatórios de supervisão disponíveis neste período.'}
+
+${pontosDestacadosTexto}
+
+═══════════════════════════════════════════════════════════════════════════════
+                           INSTRUÇÕES DE ANÁLISE
+═══════════════════════════════════════════════════════════════════════════════
+
+Produz uma ANÁLISE EXECUTIVA PROFISSIONAL baseada nos relatórios de supervisão:
+
+1. RESUMO EXECUTIVO: Parágrafo de 3-4 frases com visão geral do período analisado
+2. PONTOS POSITIVOS: Aspetos positivos identificados nos relatórios (mínimo 3)
+3. PONTOS NEGATIVOS: Problemas ou áreas de melhoria identificados (mínimo 3)
+4. ANÁLISE DOS PONTOS DESTACADOS: Análise dos pontos positivos e negativos reportados pelos gestores
+5. TENDÊNCIAS: Padrões observados nos relatórios
+6. SUGESTÕES: Recomendações práticas baseadas na análise (mínimo 5)
+7. LOJAS EM DESTAQUE: Lojas com bom desempenho
+8. LOJAS QUE PRECISAM ATENÇÃO: Lojas que necessitam de acompanhamento
+
+Responde em formato JSON válido.`;
+
+  try {
+    const response = await invokeLLM({
+      messages: [
+        {
+          role: "system",
+          content: `És um analista de dados sénior especializado em redes de retalho automóvel.
+A tua análise deve ser:
+- BASEADA NOS RELATÓRIOS: usar informação concreta dos relatórios de supervisão
+- PROFISSIONAL: tom executivo e orientado para ação
+- ESPECÍFICA: evitar generalizações, citar exemplos concretos
+- ACIONÁVEL: cada insight deve ter uma ação associada
+
+Respondes sempre em português europeu e em formato JSON válido.`,
+        },
+        { role: "user", content: prompt },
+      ],
+      response_format: {
+        type: "json_schema",
+        json_schema: {
+          name: "analise_relatorios",
+          strict: true,
+          schema: {
+            type: "object",
+            properties: {
+              pontosPositivos: { type: "array", items: { type: "string" } },
+              pontosNegativos: { type: "array", items: { type: "string" } },
+              sugestoes: { type: "array", items: { type: "string" } },
+              resumo: { type: "string" },
+              analisePontosDestacados: {
+                type: "object",
+                properties: {
+                  positivos: { type: "array", items: { type: "string" } },
+                  negativos: { type: "array", items: { type: "string" } },
+                  tendencias: { type: "string" },
+                },
+                required: ["positivos", "negativos", "tendencias"],
+                additionalProperties: false,
+              },
+              analiseResultados: {
+                type: "object",
+                properties: {
+                  resumoPerformance: { type: "string" },
+                  lojasDestaque: { type: "array", items: { type: "string" } },
+                  lojasAtencao: { type: "array", items: { type: "string" } },
+                  tendenciasServicos: { type: "string" },
+                  recomendacoes: { type: "array", items: { type: "string" } },
+                },
+                required: ["resumoPerformance", "lojasDestaque", "lojasAtencao", "tendenciasServicos", "recomendacoes"],
+                additionalProperties: false,
+              },
+              insightsIA: {
+                type: "object",
+                properties: {
+                  resumoExecutivo: { type: "string" },
+                  analisePerformance: { type: "string" },
+                  analiseVendasComplementares: { type: "string" },
+                  analiseTendencias: { type: "string" },
+                  recomendacoesEstrategicas: { type: "array", items: { type: "string" } },
+                  alertasCriticos: { type: "array", items: { type: "string" } },
+                },
+                required: ["resumoExecutivo", "analisePerformance", "analiseVendasComplementares", "analiseTendencias", "recomendacoesEstrategicas", "alertasCriticos"],
+                additionalProperties: false,
+              },
+            },
+            required: ["pontosPositivos", "pontosNegativos", "sugestoes", "resumo", "analisePontosDestacados", "analiseResultados", "insightsIA"],
+            additionalProperties: false,
+          },
+        },
+      },
+    });
+
+    const content = response.choices[0].message.content;
+    const analise = JSON.parse(typeof content === 'string' ? content : JSON.stringify(content));
+
+    // Calcular dados para gráficos
+    const mediaServicos = rankingLojas.length > 0 
+      ? rankingLojas.reduce((sum: number, l: any) => sum + (l.totalServicos || 0), 0) / rankingLojas.length 
+      : 0;
+    const mediaTaxaReparacao = rankingLojas.length > 0 
+      ? rankingLojas.reduce((sum: number, l: any) => sum + (l.taxaReparacao || 0), 0) / rankingLojas.length 
+      : 0;
+    
+    const comparacaoLojasFormatada = comparacaoLojas ? {
+      melhorLoja: comparacaoLojas.melhorLoja ? {
+        nome: comparacaoLojas.melhorLoja.lojaNome,
+        servicos: comparacaoLojas.melhorLoja.totalServicos,
+        desvio: comparacaoLojas.melhorLoja.desvioPercentualMes || 0,
+        taxaReparacao: comparacaoLojas.melhorLoja.taxaReparacao || 0,
+        objetivo: comparacaoLojas.melhorLoja.objetivoMensal || 0,
+      } : null,
+      piorLoja: comparacaoLojas.piorLoja ? {
+        nome: comparacaoLojas.piorLoja.lojaNome,
+        servicos: comparacaoLojas.piorLoja.totalServicos,
+        desvio: comparacaoLojas.piorLoja.desvioPercentualMes || 0,
+        taxaReparacao: comparacaoLojas.piorLoja.taxaReparacao || 0,
+        objetivo: comparacaoLojas.piorLoja.objetivoMensal || 0,
+      } : null,
+      maiorEvolucao: null,
+      menorEvolucao: null,
+      totalLojas: comparacaoLojas.totalLojas || 0,
+      lojasAcimaMedia: comparacaoLojas.lojasAcimaMedia || 0,
+      lojasAbaixoMedia: (comparacaoLojas.totalLojas || 0) - (comparacaoLojas.lojasAcimaMedia || 0),
+      mediaServicos: Math.round(mediaServicos),
+      mediaTaxaReparacao: parseFloat(mediaTaxaReparacao.toFixed(4)),
+    } : undefined;
+
+    // Distribuição de desvios
+    const distribuicaoDesvios: Array<{ faixa: string; count: number }> = [];
+    if (rankingLojas.length > 0) {
+      const faixas = [
+        { min: -Infinity, max: -20, label: '< -20%' },
+        { min: -20, max: -10, label: '-20% a -10%' },
+        { min: -10, max: 0, label: '-10% a 0%' },
+        { min: 0, max: 10, label: '0% a +10%' },
+        { min: 10, max: 20, label: '+10% a +20%' },
+        { min: 20, max: Infinity, label: '> +20%' },
+      ];
+      faixas.forEach(faixa => {
+        const count = rankingLojas.filter((l: any) => {
+          const desvio = (l.desvioPercentualMes || 0) * 100;
+          return desvio > faixa.min && desvio <= faixa.max;
+        }).length;
+        distribuicaoDesvios.push({ faixa: faixa.label, count });
+      });
     }
-  };
+
+    const dadosGraficos = rankingLojas.length > 0 ? {
+      rankingServicos: rankingLojas.map((l: any) => ({
+        lojaId: l.lojaId,
+        loja: l.lojaNome,
+        zona: l.zona || null,
+        servicos: l.totalServicos,
+        desvio: l.desvioPercentualMes || 0,
+        objetivo: l.objetivoMensal || 0,
+        taxaReparacao: l.taxaReparacao || 0,
+      })),
+      evolucaoMensal: [] as Array<{ mes: string; servicos: number; objetivo: number }>,
+      distribuicaoDesvios: distribuicaoDesvios,
+    } : undefined;
+
+    // Formatar rankings detalhados
+    const rankingsDetalhados = dadosAvancados?.rankings ? {
+      taxaReparacao: {
+        top5: dadosAvancados.rankings.taxaReparacao?.top5?.map((l: any, i: number) => ({ posicao: i + 1, ...l })) || [],
+        bottom5: dadosAvancados.rankings.taxaReparacao?.bottom5?.map((l: any, i: number) => ({ posicao: i + 1, ...l })) || [],
+      },
+      cumprimentoObjetivo: {
+        top5: dadosAvancados.rankings.cumprimentoObjetivo?.top5?.map((l: any, i: number) => ({ posicao: i + 1, ...l })) || [],
+        bottom5: dadosAvancados.rankings.cumprimentoObjetivo?.bottom5?.map((l: any, i: number) => ({ posicao: i + 1, ...l })) || [],
+      },
+      vendasComplementares: {
+        top5: dadosAvancados.rankings.vendasComplementares?.top5?.map((l: any, i: number) => ({ posicao: i + 1, ...l })) || [],
+        bottom5: dadosAvancados.rankings.vendasComplementares?.bottom5?.map((l: any, i: number) => ({ posicao: i + 1, ...l })) || [],
+      },
+      crescimento: {
+        top5: dadosAvancados.rankings.crescimento?.top5?.map((l: any, i: number) => ({ posicao: i + 1, ...l })) || [],
+        bottom5: dadosAvancados.rankings.crescimento?.bottom5?.map((l: any, i: number) => ({ posicao: i + 1, ...l })) || [],
+      },
+    } : undefined;
+
+    return {
+      lojaMaisVisitada,
+      lojaMenosVisitada,
+      frequenciaVisitas,
+      pontosPositivos: analise.pontosPositivos,
+      pontosNegativos: analise.pontosNegativos,
+      sugestoes: analise.sugestoes,
+      resumo: analise.resumo,
+      analisePontosDestacados: analise.analisePontosDestacados,
+      analiseResultados: analise.analiseResultados,
+      comparacaoLojas: comparacaoLojasFormatada,
+      dadosGraficos,
+      rankingsDetalhados,
+      analiseZonasDetalhada: dadosAvancados?.analiseZonas || [],
+      estatisticasComplementares: dadosAvancados?.estatisticasComplementares || undefined,
+      insightsIA: analise.insightsIA,
+      relatoriosPorLoja,
+      resumoConteudoRelatorios: `Período: ${labelMeses}. Total de ${todosRelatorios.length} relatórios analisados (${relatoriosLivres.length} livres, ${relatoriosCompletos.length} completos) de ${relatoriosPorLoja.length} lojas.`,
+    };
+  } catch (error) {
+    console.error("Erro ao gerar análise com IA:", error);
+    
+    // Retornar dados básicos mesmo sem IA
+    return {
+      lojaMaisVisitada,
+      lojaMenosVisitada,
+      frequenciaVisitas,
+      pontosPositivos: pontosPositivosRelatados.slice(0, 5),
+      pontosNegativos: pontosNegativosRelatados.slice(0, 5),
+      sugestoes: [
+        "Analise os pontos negativos recorrentes para identificar padrões",
+        "Priorize visitas às lojas com menos acompanhamento",
+        "Documente as boas práticas das lojas com melhor desempenho",
+        "Verifique lojas sem relatórios no período",
+        "Compare a evolução entre meses"
+      ],
+      resumo: `Período: ${labelMeses}. Total de ${todosRelatorios.length} relatórios analisados (${relatoriosLivres.length} livres, ${relatoriosCompletos.length} completos).`,
+      analisePontosDestacados: {
+        positivos: pontosPositivosRelatados.slice(0, 5),
+        negativos: pontosNegativosRelatados.slice(0, 5),
+        tendencias: pontosNegativosRelatados.length > pontosPositivosRelatados.length 
+          ? "Tendência negativa - mais pontos negativos que positivos no período"
+          : "Tendência positiva - mais pontos positivos que negativos no período"
+      },
+      analiseResultados: {
+        resumoPerformance: `Foram realizados ${todosRelatorios.length} relatórios de supervisão no período selecionado.`,
+        lojasDestaque: relatoriosPorLoja.slice(0, 3).map(l => `${l.lojaNome} (${l.totalRelatorios} relatórios)`),
+        lojasAtencao: relatoriosPorLoja.filter(l => l.totalRelatorios === 0).slice(0, 3).map(l => l.lojaNome),
+        tendenciasServicos: "Análise de tendências requer mais dados.",
+        recomendacoes: ["Aumentar frequência de visitas às lojas com menos relatórios"],
+      },
+      relatoriosPorLoja,
+      resumoConteudoRelatorios: `Período: ${labelMeses}. Total de ${todosRelatorios.length} relatórios.`,
+    };
+  }
 }

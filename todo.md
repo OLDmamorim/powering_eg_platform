@@ -2251,3 +2251,13 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## Reuniões de Lojas - Lista Compacta
 - [x] Mostrar reuniões em lista compacta (apenas nome/data)
 - [x] Expandir conteúdo completo apenas ao clicar na reunião
+- [ ] Corrigir Relatórios IA que não funcionam para gestores e admin
+- [ ] Melhorar Relatórios IA com resumo detalhado, análise do conteúdo e quantidade por loja
+
+## Correção Relatórios IA v6.6
+- [x] Melhorar função gerarRelatorioComIAMultiplosMeses para usar análise completa
+- [x] Incluir resumo detalhado do conteúdo dos relatórios
+- [x] Incluir quantidade de relatórios por loja
+- [x] Incluir análise baseada nos dados reais dos relatórios
+- [x] Corrigir erro TypeScript na função gerarDicaDashboard
+- [x] Testar geração de relatórios IA
