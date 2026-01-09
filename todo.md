@@ -375,6 +375,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Remover página PlanoVisitas.tsx
 - [x] Manter tabelas e serviços no backend (podem ser úteis futuramente)
 
+## Bug v3.7.1 - Erro map undefined em Relatórios IA
+- [x] Corrigir erro "Cannot read properties of undefined (reading 'map')" na página Relatórios IA
+- [x] Adicionar verificações de null/undefined antes de usar .map()
+
 ## Gráficos no Portal - Histórico da Loja v3.6
 
 - [x] Adicionar gráfico de Taxa de Reparação na página Histórico da Loja

@@ -195,12 +195,16 @@ export default function RelatoriosIA() {
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2">
-                  {(analise.pontosPositivos as string[]).map((ponto: string, index: number) => (
-                    <li key={index} className="flex items-start gap-2">
-                      <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 shrink-0" />
-                      <span>{ponto}</span>
-                    </li>
-                  ))}
+                  {(analise.pontosPositivos && Array.isArray(analise.pontosPositivos) && analise.pontosPositivos.length > 0) ? (
+                    analise.pontosPositivos.map((ponto: string, index: number) => (
+                      <li key={index} className="flex items-start gap-2">
+                        <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 shrink-0" />
+                        <span>{ponto}</span>
+                      </li>
+                    ))
+                  ) : (
+                    <li className="text-muted-foreground">Sem pontos positivos identificados.</li>
+                  )}
                 </ul>
               </CardContent>
             </Card>
@@ -214,12 +218,16 @@ export default function RelatoriosIA() {
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2">
-                  {(analise.pontosNegativos as string[]).map((ponto: string, index: number) => (
-                    <li key={index} className="flex items-start gap-2">
-                      <XCircle className="h-5 w-5 text-red-500 mt-0.5 shrink-0" />
-                      <span>{ponto}</span>
-                    </li>
-                  ))}
+                  {(analise.pontosNegativos && Array.isArray(analise.pontosNegativos) && analise.pontosNegativos.length > 0) ? (
+                    analise.pontosNegativos.map((ponto: string, index: number) => (
+                      <li key={index} className="flex items-start gap-2">
+                        <XCircle className="h-5 w-5 text-red-500 mt-0.5 shrink-0" />
+                        <span>{ponto}</span>
+                      </li>
+                    ))
+                  ) : (
+                    <li className="text-muted-foreground">Sem pontos negativos identificados.</li>
+                  )}
                 </ul>
               </CardContent>
             </Card>
@@ -545,12 +553,16 @@ export default function RelatoriosIA() {
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2">
-                  {(analise.sugestoes as string[]).map((sugestao: string, index: number) => (
-                    <li key={index} className="flex items-start gap-2">
-                      <Lightbulb className="h-5 w-5 text-yellow-500 mt-0.5 shrink-0" />
-                      <span>{sugestao}</span>
-                    </li>
-                  ))}
+                  {(analise.sugestoes && Array.isArray(analise.sugestoes) && analise.sugestoes.length > 0) ? (
+                    analise.sugestoes.map((sugestao: string, index: number) => (
+                      <li key={index} className="flex items-start gap-2">
+                        <Lightbulb className="h-5 w-5 text-yellow-500 mt-0.5 shrink-0" />
+                        <span>{sugestao}</span>
+                      </li>
+                    ))
+                  ) : (
+                    <li className="text-muted-foreground">Sem sugestões disponíveis.</li>
+                  )}
                 </ul>
               </CardContent>
             </Card>
@@ -561,7 +573,8 @@ export default function RelatoriosIA() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {Object.entries(analise.frequenciaVisitas as Record<string, number>)
+                  {analise.frequenciaVisitas && Object.keys(analise.frequenciaVisitas).length > 0 ? (
+                    Object.entries(analise.frequenciaVisitas as Record<string, number>)
                     .sort((a, b) => (b[1] as number) - (a[1] as number))
                     .map(([loja, visitas]) => {
                       const numVisitas = visitas as number;
@@ -584,7 +597,10 @@ export default function RelatoriosIA() {
                           </div>
                         </div>
                       );
-                    })}
+                    })
+                  ) : (
+                    <p className="text-muted-foreground">Sem dados de frequência de visitas.</p>
+                  )}
                 </div>
               </CardContent>
             </Card>
