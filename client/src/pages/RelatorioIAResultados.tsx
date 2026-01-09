@@ -203,8 +203,8 @@ export function RelatorioIAResultados() {
   };
 
   // Calcular taxa de cumprimento
-  const taxaCumprimento = analiseIA?.comparacaoLojas 
-    ? ((analiseIA.comparacaoLojas.lojasAcimaMedia / analiseIA.comparacaoLojas.totalLojas) * 100).toFixed(1)
+  const taxaCumprimento = (analiseIA as any)?.comparacaoLojas 
+    ? (((analiseIA as any).comparacaoLojas.lojasAcimaMedia / (analiseIA as any).comparacaoLojas.totalLojas) * 100).toFixed(1)
     : '0';
 
   // Formatar percentagem
@@ -405,7 +405,7 @@ export function RelatorioIAResultados() {
                 
                 {/* Botão Exportar PDF */}
                 {mostrarRelatorioIA && analiseIA && (
-                  <ExportarRelatorioIAPDF analiseIA={analiseIA} periodo={gerarLabelMeses(mesesSelecionados)} />
+                  <ExportarRelatorioIAPDF analiseIA={analiseIA as any} periodo={gerarLabelMeses(mesesSelecionados)} />
                 )}
               </div>
               
@@ -427,6 +427,253 @@ export function RelatorioIAResultados() {
           {mostrarRelatorioIA && analiseIA && (
             <CardContent className="pt-6 space-y-6">
               
+              {/* ==================== RENDERIZAÇÃO PARA GESTORES (Análise Qualitativa) ==================== */}
+              {(analiseIA as any).tipoRelatorio === 'gestor' ? (
+                <div className="space-y-6">
+                  {/* Resumo Geral */}
+                  <Card className="border-2 border-purple-200 dark:border-purple-800">
+                    <CardHeader className="bg-purple-50 dark:bg-purple-900/20">
+                      <CardTitle className="flex items-center gap-2">
+                        <FileText className="h-5 w-5 text-purple-600" />
+                        Resumo do Período
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="pt-4">
+                      <p className="text-muted-foreground leading-relaxed">{(analiseIA as any).resumoGeral}</p>
+                    </CardContent>
+                  </Card>
+
+                  {/* Relatórios Submetidos */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <FileText className="h-5 w-5 text-blue-600" />
+                        Relatórios Submetidos
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid gap-4 md:grid-cols-3">
+                        <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center">
+                          <p className="text-2xl font-bold text-blue-600">{(analiseIA as any).relatorios?.totalLivres || 0}</p>
+                          <p className="text-sm text-muted-foreground">Relatórios Livres</p>
+                        </div>
+                        <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
+                          <p className="text-2xl font-bold text-green-600">{(analiseIA as any).relatorios?.totalCompletos || 0}</p>
+                          <p className="text-sm text-muted-foreground">Relatórios Completos</p>
+                        </div>
+                        <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg text-center">
+                          <p className="text-2xl font-bold text-purple-600">{(analiseIA as any).relatorios?.lojasVisitadas?.length || 0}</p>
+                          <p className="text-sm text-muted-foreground">Lojas Visitadas</p>
+                        </div>
+                      </div>
+                      {(analiseIA as any).relatorios?.lojasVisitadas && (analiseIA as any).relatorios.lojasVisitadas.length > 0 && (
+                        <div className="mt-4">
+                          <p className="text-sm font-medium mb-2">Lojas visitadas:</p>
+                          <div className="flex flex-wrap gap-2">
+                            {(analiseIA as any).relatorios.lojasVisitadas.map((loja: string, idx: number) => (
+                              <Badge key={idx} variant="secondary">{loja}</Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+
+                  {/* Pontos Destacados */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Award className="h-5 w-5 text-amber-600" />
+                        Pontos Destacados nos Relatórios
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {/* Análise da IA */}
+                      {(analiseIA as any).pontosDestacados?.analise && (
+                        <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border-l-4 border-purple-500">
+                          <h4 className="font-medium mb-2 flex items-center gap-2 text-purple-700 dark:text-purple-400">
+                            <Sparkles className="h-4 w-4" />
+                            Análise IA
+                          </h4>
+                          <p className="text-sm leading-relaxed">{(analiseIA as any).pontosDestacados.analise}</p>
+                        </div>
+                      )}
+                      
+                      <div className="grid gap-4 md:grid-cols-2">
+                        {/* Pontos Positivos */}
+                        <div className="space-y-2">
+                          <h4 className="font-medium flex items-center gap-2 text-green-700 dark:text-green-400">
+                            <CheckCircle2 className="h-4 w-4" />
+                            Pontos Positivos ({(analiseIA as any).pontosDestacados?.positivos?.length || 0})
+                          </h4>
+                          {(analiseIA as any).pontosDestacados?.positivos && (analiseIA as any).pontosDestacados.positivos.length > 0 ? (
+                            <ul className="space-y-2">
+                              {(analiseIA as any).pontosDestacados.positivos.map((ponto: any, idx: number) => (
+                                <li key={idx} className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg text-sm">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <Badge variant="outline" className="text-xs">{ponto.loja}</Badge>
+                                    <span className="text-xs text-muted-foreground">{ponto.data}</span>
+                                  </div>
+                                  <p>{ponto.descricao}</p>
+                                </li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <p className="text-sm text-muted-foreground p-3 bg-muted/30 rounded-lg">Nenhum ponto positivo registado no período.</p>
+                          )}
+                        </div>
+
+                        {/* Pontos Negativos */}
+                        <div className="space-y-2">
+                          <h4 className="font-medium flex items-center gap-2 text-red-700 dark:text-red-400">
+                            <XCircle className="h-4 w-4" />
+                            Pontos Negativos ({(analiseIA as any).pontosDestacados?.negativos?.length || 0})
+                          </h4>
+                          {(analiseIA as any).pontosDestacados?.negativos && (analiseIA as any).pontosDestacados.negativos.length > 0 ? (
+                            <ul className="space-y-2">
+                              {(analiseIA as any).pontosDestacados.negativos.map((ponto: any, idx: number) => (
+                                <li key={idx} className="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg text-sm">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <Badge variant="outline" className="text-xs">{ponto.loja}</Badge>
+                                    <span className="text-xs text-muted-foreground">{ponto.data}</span>
+                                  </div>
+                                  <p>{ponto.descricao}</p>
+                                </li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <p className="text-sm text-muted-foreground p-3 bg-muted/30 rounded-lg">Nenhum ponto negativo registado no período.</p>
+                          )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Pendentes */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Target className="h-5 w-5 text-orange-600" />
+                        Gestão de Pendentes
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {/* Análise da IA */}
+                      {(analiseIA as any).pendentes?.analise && (
+                        <div className="p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg border-l-4 border-orange-500">
+                          <h4 className="font-medium mb-2 flex items-center gap-2 text-orange-700 dark:text-orange-400">
+                            <Sparkles className="h-4 w-4" />
+                            Análise IA
+                          </h4>
+                          <p className="text-sm leading-relaxed">{(analiseIA as any).pendentes.analise}</p>
+                        </div>
+                      )}
+                      
+                      {/* KPIs de Pendentes */}
+                      <div className="grid gap-4 md:grid-cols-3">
+                        <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg text-center">
+                          <p className="text-2xl font-bold text-amber-600">{(analiseIA as any).pendentes?.criados?.length || 0}</p>
+                          <p className="text-sm text-muted-foreground">Criados no Período</p>
+                        </div>
+                        <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
+                          <p className="text-2xl font-bold text-green-600">{(analiseIA as any).pendentes?.resolvidos?.length || 0}</p>
+                          <p className="text-sm text-muted-foreground">Resolvidos no Período</p>
+                        </div>
+                        <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg text-center">
+                          <p className="text-2xl font-bold text-red-600">{(analiseIA as any).pendentes?.ativos || 0}</p>
+                          <p className="text-sm text-muted-foreground">Ativos (Total)</p>
+                        </div>
+                      </div>
+
+                      <div className="grid gap-4 md:grid-cols-2">
+                        {/* Pendentes Criados */}
+                        <div className="space-y-2">
+                          <h4 className="font-medium text-amber-700 dark:text-amber-400">Criados no Período</h4>
+                          {(analiseIA as any).pendentes?.criados && (analiseIA as any).pendentes.criados.length > 0 ? (
+                            <ul className="space-y-2 max-h-48 overflow-y-auto">
+                              {(analiseIA as any).pendentes.criados.map((p: any, idx: number) => (
+                                <li key={idx} className="p-2 bg-amber-50 dark:bg-amber-900/20 rounded text-sm">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <Badge variant="outline" className="text-xs">{p.loja}</Badge>
+                                    <span className="text-xs text-muted-foreground">{p.data}</span>
+                                  </div>
+                                  <p className="text-xs">{p.descricao}</p>
+                                </li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <p className="text-sm text-muted-foreground p-3 bg-muted/30 rounded-lg">Nenhum pendente criado no período.</p>
+                          )}
+                        </div>
+
+                        {/* Pendentes Resolvidos */}
+                        <div className="space-y-2">
+                          <h4 className="font-medium text-green-700 dark:text-green-400">Resolvidos no Período</h4>
+                          {(analiseIA as any).pendentes?.resolvidos && (analiseIA as any).pendentes.resolvidos.length > 0 ? (
+                            <ul className="space-y-2 max-h-48 overflow-y-auto">
+                              {(analiseIA as any).pendentes.resolvidos.map((p: any, idx: number) => (
+                                <li key={idx} className="p-2 bg-green-50 dark:bg-green-900/20 rounded text-sm">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <Badge variant="outline" className="text-xs">{p.loja}</Badge>
+                                    <span className="text-xs text-muted-foreground">Resolvido: {p.dataResolucao}</span>
+                                  </div>
+                                  <p className="text-xs">{p.descricao}</p>
+                                </li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <p className="text-sm text-muted-foreground p-3 bg-muted/30 rounded-lg">Nenhum pendente resolvido no período.</p>
+                          )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Sugestões e Motivação */}
+                  <div className="grid gap-4 md:grid-cols-2">
+                    {/* Sugestões */}
+                    <Card className="border-l-4 border-l-blue-500">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-blue-700 dark:text-blue-400">
+                          <Lightbulb className="h-5 w-5" />
+                          Sugestões para Melhorar
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        {(analiseIA as any).sugestoesGestor && (analiseIA as any).sugestoesGestor.length > 0 ? (
+                          <ul className="space-y-2">
+                            {(analiseIA as any).sugestoesGestor.map((sug: string, idx: number) => (
+                              <li key={idx} className="flex items-start gap-2 text-sm p-2 bg-blue-50 dark:bg-blue-900/20 rounded">
+                                <Zap className="h-4 w-4 text-blue-500 mt-0.5 shrink-0" />
+                                <span>{sug}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <p className="text-sm text-muted-foreground">Sem sugestões disponíveis.</p>
+                        )}
+                      </CardContent>
+                    </Card>
+
+                    {/* Mensagem Motivacional */}
+                    <Card className="border-l-4 border-l-green-500">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-green-700 dark:text-green-400">
+                          <Sparkles className="h-5 w-5" />
+                          Mensagem da IA
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-lg">
+                          <p className="text-sm leading-relaxed italic">"{(analiseIA as any).mensagemMotivacional || 'Continue o bom trabalho!'}"</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
+              ) : (
+              /* ==================== RENDERIZAÇÃO PARA ADMIN (Análise Quantitativa) ==================== */
+              <>
               {/* ==================== SECÇÃO 1: RESUMO EXECUTIVO ==================== */}
               <Collapsible open={seccoesAbertas.resumoExecutivo} onOpenChange={() => toggleSeccao('resumoExecutivo')}>
                 <CollapsibleTrigger asChild>
@@ -442,7 +689,7 @@ export function RelatorioIAResultados() {
                   <div className="space-y-4">
                     {/* Resumo Principal */}
                     <div className="p-4 bg-muted/30 rounded-lg">
-                      <p className="text-muted-foreground leading-relaxed">{analiseIA.resumo}</p>
+                      <p className="text-muted-foreground leading-relaxed">{(analiseIA as any).resumo}</p>
                     </div>
                     
                     {/* Insights IA - Resumo Executivo */}
@@ -460,7 +707,7 @@ export function RelatorioIAResultados() {
               </Collapsible>
 
               {/* ==================== SECÇÃO 2: KPIs PRINCIPAIS ==================== */}
-              {analiseIA.comparacaoLojas && (
+              {(analiseIA as any).comparacaoLojas && (
                 <Collapsible open={seccoesAbertas.kpis} onOpenChange={() => toggleSeccao('kpis')}>
                   <CollapsibleTrigger asChild>
                     <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-900/50 rounded-lg border cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-colors">
@@ -480,7 +727,7 @@ export function RelatorioIAResultados() {
                             <Store className="h-4 w-4 text-slate-600" />
                             <span className="text-xs text-muted-foreground">Lojas Analisadas</span>
                           </div>
-                          <p className="text-2xl font-bold">{analiseIA.comparacaoLojas.totalLojas}</p>
+                          <p className="text-2xl font-bold">{(analiseIA as any).comparacaoLojas.totalLojas}</p>
                         </CardContent>
                       </Card>
 
@@ -503,7 +750,7 @@ export function RelatorioIAResultados() {
                             <CheckCircle2 className="h-4 w-4 text-green-600" />
                             <span className="text-xs text-muted-foreground">Acima Objetivo</span>
                           </div>
-                          <p className="text-2xl font-bold text-green-600">{analiseIA.comparacaoLojas.lojasAcimaMedia}</p>
+                          <p className="text-2xl font-bold text-green-600">{(analiseIA as any).comparacaoLojas.lojasAcimaMedia}</p>
                         </CardContent>
                       </Card>
 
@@ -514,7 +761,7 @@ export function RelatorioIAResultados() {
                             <XCircle className="h-4 w-4 text-red-600" />
                             <span className="text-xs text-muted-foreground">Abaixo Objetivo</span>
                           </div>
-                          <p className="text-2xl font-bold text-red-600">{analiseIA.comparacaoLojas.lojasAbaixoMedia || (analiseIA.comparacaoLojas.totalLojas - analiseIA.comparacaoLojas.lojasAcimaMedia)}</p>
+                          <p className="text-2xl font-bold text-red-600">{(analiseIA as any).comparacaoLojas.lojasAbaixoMedia || ((analiseIA as any).comparacaoLojas.totalLojas - (analiseIA as any).comparacaoLojas.lojasAcimaMedia)}</p>
                         </CardContent>
                       </Card>
 
@@ -526,8 +773,8 @@ export function RelatorioIAResultados() {
                             <span className="text-xs text-muted-foreground">Taxa Rep. Média</span>
                           </div>
                           <p className="text-2xl font-bold text-purple-600">
-                            {analiseIA.comparacaoLojas.mediaTaxaReparacao 
-                              ? `${(analiseIA.comparacaoLojas.mediaTaxaReparacao * 100).toFixed(2)}%`
+                            {(analiseIA as any).comparacaoLojas.mediaTaxaReparacao 
+                              ? `${((analiseIA as any).comparacaoLojas.mediaTaxaReparacao * 100).toFixed(2)}%`
                               : 'N/A'
                             }
                           </p>
@@ -546,27 +793,27 @@ export function RelatorioIAResultados() {
                           </CardTitle>
                         </CardHeader>
                         <CardContent className="pt-4">
-                          <p className="text-xl font-bold mb-2">{analiseIA.comparacaoLojas.melhorLoja?.nome || 'N/A'}</p>
+                          <p className="text-xl font-bold mb-2">{(analiseIA as any).comparacaoLojas.melhorLoja?.nome || 'N/A'}</p>
                           <div className="grid grid-cols-2 gap-2 text-sm">
                             <div className="p-2 bg-muted/50 rounded">
                               <span className="text-muted-foreground">Serviços:</span>
-                              <span className="font-semibold ml-1">{analiseIA.comparacaoLojas.melhorLoja?.servicos || 0}</span>
+                              <span className="font-semibold ml-1">{(analiseIA as any).comparacaoLojas.melhorLoja?.servicos || 0}</span>
                             </div>
                             <div className="p-2 bg-muted/50 rounded">
                               <span className="text-muted-foreground">Objetivo:</span>
-                              <span className="font-semibold ml-1">{analiseIA.comparacaoLojas.melhorLoja?.objetivo || 'N/A'}</span>
+                              <span className="font-semibold ml-1">{(analiseIA as any).comparacaoLojas.melhorLoja?.objetivo || 'N/A'}</span>
                             </div>
                             <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded">
                               <span className="text-muted-foreground">Desvio:</span>
                               <span className="font-semibold ml-1 text-green-600">
-                                {formatPercent(analiseIA.comparacaoLojas.melhorLoja?.desvio, 100)}
+                                {formatPercent((analiseIA as any).comparacaoLojas.melhorLoja?.desvio, 100)}
                               </span>
                             </div>
                             <div className="p-2 bg-muted/50 rounded">
                               <span className="text-muted-foreground">Taxa Rep.:</span>
                               <span className="font-semibold ml-1">
-                                {analiseIA.comparacaoLojas.melhorLoja?.taxaReparacao 
-                                  ? `${(analiseIA.comparacaoLojas.melhorLoja.taxaReparacao * 100).toFixed(2)}%`
+                                {(analiseIA as any).comparacaoLojas.melhorLoja?.taxaReparacao 
+                                  ? `${((analiseIA as any).comparacaoLojas.melhorLoja.taxaReparacao * 100).toFixed(2)}%`
                                   : 'N/A'
                                 }
                               </span>
@@ -584,27 +831,27 @@ export function RelatorioIAResultados() {
                           </CardTitle>
                         </CardHeader>
                         <CardContent className="pt-4">
-                          <p className="text-xl font-bold mb-2">{analiseIA.comparacaoLojas.piorLoja?.nome || 'N/A'}</p>
+                          <p className="text-xl font-bold mb-2">{(analiseIA as any).comparacaoLojas.piorLoja?.nome || 'N/A'}</p>
                           <div className="grid grid-cols-2 gap-2 text-sm">
                             <div className="p-2 bg-muted/50 rounded">
                               <span className="text-muted-foreground">Serviços:</span>
-                              <span className="font-semibold ml-1">{analiseIA.comparacaoLojas.piorLoja?.servicos || 0}</span>
+                              <span className="font-semibold ml-1">{(analiseIA as any).comparacaoLojas.piorLoja?.servicos || 0}</span>
                             </div>
                             <div className="p-2 bg-muted/50 rounded">
                               <span className="text-muted-foreground">Objetivo:</span>
-                              <span className="font-semibold ml-1">{analiseIA.comparacaoLojas.piorLoja?.objetivo || 'N/A'}</span>
+                              <span className="font-semibold ml-1">{(analiseIA as any).comparacaoLojas.piorLoja?.objetivo || 'N/A'}</span>
                             </div>
                             <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded">
                               <span className="text-muted-foreground">Desvio:</span>
                               <span className="font-semibold ml-1 text-red-600">
-                                {formatPercent(analiseIA.comparacaoLojas.piorLoja?.desvio, 100)}
+                                {formatPercent((analiseIA as any).comparacaoLojas.piorLoja?.desvio, 100)}
                               </span>
                             </div>
                             <div className="p-2 bg-muted/50 rounded">
                               <span className="text-muted-foreground">Taxa Rep.:</span>
                               <span className="font-semibold ml-1">
-                                {analiseIA.comparacaoLojas.piorLoja?.taxaReparacao 
-                                  ? `${(analiseIA.comparacaoLojas.piorLoja.taxaReparacao * 100).toFixed(2)}%`
+                                {(analiseIA as any).comparacaoLojas.piorLoja?.taxaReparacao 
+                                  ? `${((analiseIA as any).comparacaoLojas.piorLoja.taxaReparacao * 100).toFixed(2)}%`
                                   : 'N/A'
                                 }
                               </span>
@@ -1009,7 +1256,7 @@ export function RelatorioIAResultados() {
               )}
 
               {/* ==================== SECÇÃO 5: ANÁLISE LOJA A LOJA ==================== */}
-              {analiseIA.dadosGraficos?.rankingServicos && analiseIA.dadosGraficos.rankingServicos.length > 0 && (
+              {(analiseIA as any).dadosGraficos?.rankingServicos && (analiseIA as any).dadosGraficos.rankingServicos.length > 0 && (
                 <Collapsible open={seccoesAbertas.analiseLojas} onOpenChange={() => toggleSeccao('analiseLojas')}>
                   <CollapsibleTrigger asChild>
                     <div className="flex items-center justify-between p-4 bg-slate-100 dark:bg-slate-800/50 rounded-lg border border-slate-300 dark:border-slate-700 cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700/50 transition-colors">
@@ -1017,7 +1264,7 @@ export function RelatorioIAResultados() {
                         <Store className="h-5 w-5 text-slate-600" />
                         <h3 className="font-semibold text-lg">Análise Loja a Loja</h3>
                         <Badge variant="outline" className="ml-2">
-                          {analiseIA.dadosGraficos.rankingServicos.length} lojas
+                          {(analiseIA as any).dadosGraficos.rankingServicos.length} lojas
                         </Badge>
                       </div>
                       {seccoesAbertas.analiseLojas ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
@@ -1171,7 +1418,7 @@ export function RelatorioIAResultados() {
                         <TableBody>
                           {(() => {
                             // Aplicar filtro
-                            let lojasFiltradas = [...analiseIA.dadosGraficos.rankingServicos];
+                            let lojasFiltradas = [...(analiseIA as any).dadosGraficos.rankingServicos];
                             
                             // Filtro para gestor: "minhas" = apenas lojas do gestor
                             if (!isAdmin && filtroAnaliseLojas === 'minhas' && minhasLojas) {
@@ -1245,7 +1492,7 @@ export function RelatorioIAResultados() {
                     {/* Resumo rápido - usa os mesmos filtros */}
                     {(() => {
                       // Aplicar os mesmos filtros para o resumo
-                      let lojasFiltradas = [...analiseIA.dadosGraficos.rankingServicos];
+                      let lojasFiltradas = [...(analiseIA as any).dadosGraficos.rankingServicos];
                       
                       if (!isAdmin && filtroAnaliseLojas === 'minhas' && minhasLojas) {
                         const minhasLojasIds = minhasLojas.map(l => l.id);
@@ -1378,7 +1625,7 @@ export function RelatorioIAResultados() {
                 <CollapsibleContent className="pt-4">
                   <div className="grid gap-4 lg:grid-cols-2">
                     {/* Gráfico de Ranking por Serviços */}
-                    {analiseIA.dadosGraficos?.rankingServicos && analiseIA.dadosGraficos.rankingServicos.length > 0 && (
+                    {(analiseIA as any).dadosGraficos?.rankingServicos && (analiseIA as any).dadosGraficos.rankingServicos.length > 0 && (
                       <Card>
                         <CardHeader className="pb-2">
                           <CardTitle className="text-base flex items-center gap-2">
@@ -1390,14 +1637,14 @@ export function RelatorioIAResultados() {
                           <div style={{ height: '300px' }}>
                             <Bar
                               data={{
-                                labels: analiseIA.dadosGraficos.rankingServicos.map(l => l.loja.length > 10 ? l.loja.substring(0, 10) + '...' : l.loja),
+                                labels: (analiseIA as any).dadosGraficos.rankingServicos.map((l: any) => l.loja.length > 10 ? l.loja.substring(0, 10) + '...' : l.loja),
                                 datasets: [{
                                   label: 'Serviços',
-                                  data: analiseIA.dadosGraficos.rankingServicos.map(l => l.servicos),
-                                  backgroundColor: analiseIA.dadosGraficos.rankingServicos.map(l => 
+                                  data: (analiseIA as any).dadosGraficos.rankingServicos.map((l: any) => l.servicos),
+                                  backgroundColor: (analiseIA as any).dadosGraficos.rankingServicos.map((l: any) => 
                                     l.desvio >= 0 ? 'rgba(34, 197, 94, 0.7)' : 'rgba(239, 68, 68, 0.7)'
                                   ),
-                                  borderColor: analiseIA.dadosGraficos.rankingServicos.map(l => 
+                                  borderColor: (analiseIA as any).dadosGraficos.rankingServicos.map((l: any) => 
                                     l.desvio >= 0 ? 'rgb(34, 197, 94)' : 'rgb(239, 68, 68)'
                                   ),
                                   borderWidth: 1,
@@ -1422,7 +1669,7 @@ export function RelatorioIAResultados() {
                     )}
 
                     {/* Gráfico de Distribuição de Desvios */}
-                    {analiseIA.dadosGraficos?.distribuicaoDesvios && analiseIA.dadosGraficos.distribuicaoDesvios.length > 0 && (
+                    {(analiseIA as any).dadosGraficos?.distribuicaoDesvios && (analiseIA as any).dadosGraficos.distribuicaoDesvios.length > 0 && (
                       <Card>
                         <CardHeader className="pb-2">
                           <CardTitle className="text-base flex items-center gap-2">
@@ -1434,9 +1681,9 @@ export function RelatorioIAResultados() {
                           <div style={{ height: '300px' }}>
                             <Doughnut
                               data={{
-                                labels: analiseIA.dadosGraficos.distribuicaoDesvios.map(d => d.faixa),
+                                labels: (analiseIA as any).dadosGraficos.distribuicaoDesvios.map((d: any) => d.faixa),
                                 datasets: [{
-                                  data: analiseIA.dadosGraficos.distribuicaoDesvios.map(d => d.count),
+                                  data: (analiseIA as any).dadosGraficos.distribuicaoDesvios.map((d: any) => d.count),
                                   backgroundColor: [
                                     'rgba(239, 68, 68, 0.8)',
                                     'rgba(249, 115, 22, 0.8)',
@@ -1481,7 +1728,7 @@ export function RelatorioIAResultados() {
                 <CollapsibleContent className="pt-4">
                   <div className="grid gap-4 md:grid-cols-2">
                     {/* Lojas em Destaque */}
-                    {analiseIA.analiseResultados?.lojasDestaque && analiseIA.analiseResultados.lojasDestaque.length > 0 && (
+                    {(analiseIA as any).analiseResultados?.lojasDestaque && (analiseIA as any).analiseResultados.lojasDestaque.length > 0 && (
                       <Card className="border-l-4 border-l-green-500">
                         <CardHeader className="pb-2">
                           <CardTitle className="text-base flex items-center gap-2 text-green-700 dark:text-green-400">
@@ -1491,7 +1738,7 @@ export function RelatorioIAResultados() {
                         </CardHeader>
                         <CardContent>
                           <ul className="space-y-2">
-                            {analiseIA.analiseResultados.lojasDestaque.slice(0, 5).map((loja, idx) => (
+                            {(analiseIA as any).analiseResultados.lojasDestaque.slice(0, 5).map((loja: string, idx: number) => (
                               <li key={idx} className="text-sm flex items-start gap-2 p-2 bg-green-50 dark:bg-green-900/20 rounded">
                                 <Award className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />
                                 <span>{loja}</span>
@@ -1503,7 +1750,7 @@ export function RelatorioIAResultados() {
                     )}
 
                     {/* Lojas que Precisam Atenção */}
-                    {analiseIA.analiseResultados?.lojasAtencao && analiseIA.analiseResultados.lojasAtencao.length > 0 && (
+                    {(analiseIA as any).analiseResultados?.lojasAtencao && (analiseIA as any).analiseResultados.lojasAtencao.length > 0 && (
                       <Card className="border-l-4 border-l-amber-500">
                         <CardHeader className="pb-2">
                           <CardTitle className="text-base flex items-center gap-2 text-amber-700 dark:text-amber-400">
@@ -1513,7 +1760,7 @@ export function RelatorioIAResultados() {
                         </CardHeader>
                         <CardContent>
                           <ul className="space-y-2">
-                            {analiseIA.analiseResultados.lojasAtencao.slice(0, 5).map((loja, idx) => (
+                            {(analiseIA as any).analiseResultados.lojasAtencao.slice(0, 5).map((loja: string, idx: number) => (
                               <li key={idx} className="text-sm flex items-start gap-2 p-2 bg-amber-50 dark:bg-amber-900/20 rounded">
                                 <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
                                 <span>{loja}</span>
@@ -1548,7 +1795,7 @@ export function RelatorioIAResultados() {
                   )}
 
                   {/* Recomendações Baseadas em Dados */}
-                  {analiseIA.analiseResultados?.recomendacoes && analiseIA.analiseResultados.recomendacoes.length > 0 && (
+                  {(analiseIA as any).analiseResultados?.recomendacoes && (analiseIA as any).analiseResultados.recomendacoes.length > 0 && (
                     <Card className="mt-4">
                       <CardHeader className="pb-2">
                         <CardTitle className="text-base flex items-center gap-2">
@@ -1558,7 +1805,7 @@ export function RelatorioIAResultados() {
                       </CardHeader>
                       <CardContent>
                         <ul className="space-y-2">
-                          {analiseIA.analiseResultados.recomendacoes.map((rec, idx) => (
+                          {(analiseIA as any).analiseResultados.recomendacoes.map((rec: string, idx: number) => (
                             <li key={idx} className="text-sm p-3 bg-muted/30 rounded flex items-start gap-2">
                               <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
                               <span>{rec}</span>
@@ -1570,6 +1817,8 @@ export function RelatorioIAResultados() {
                   )}
                 </CollapsibleContent>
               </Collapsible>
+              </>
+              )}
             </CardContent>
           )}
 

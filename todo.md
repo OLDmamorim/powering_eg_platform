@@ -2261,3 +2261,13 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Incluir análise baseada nos dados reais dos relatórios
 - [x] Corrigir erro TypeScript na função gerarDicaDashboard
 - [x] Testar geração de relatórios IA
+
+
+## Correção Relatórios IA Gestores v6.6
+- [x] Criar função gerarRelatorioIAGestor específica para gestores
+- [x] Análise qualitativa baseada nos relatórios do próprio gestor (não do país)
+- [x] Mostrar pontos positivos e negativos destacados nos relatórios
+- [x] Mostrar pendentes criados e resolvidos no período
+- [x] Análise IA personalizada com sugestões e mensagem motivacional
+- [x] Renderização condicional no frontend (gestor vs admin)
+- [x] Remover estatísticas numéricas do país para gestores

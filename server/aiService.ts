@@ -1644,3 +1644,295 @@ Respondes sempre em português europeu e em formato JSON válido.`,
     };
   }
 }
+
+
+// ============================================================================
+// FUNÇÕES ESPECÍFICAS PARA RELATÓRIOS IA DE GESTORES
+// Análise qualitativa baseada nos relatórios do próprio gestor
+// ============================================================================
+
+interface RelatorioIAGestorResult {
+  filtroAplicado: string;
+  tipoRelatorio: 'gestor';
+  resumoGeral: string;
+  pontosDestacados: {
+    positivos: Array<{ loja: string; descricao: string; data: string }>;
+    negativos: Array<{ loja: string; descricao: string; data: string }>;
+    analise: string;
+  };
+  pendentes: {
+    criados: Array<{ loja: string; descricao: string; data: string }>;
+    resolvidos: Array<{ loja: string; descricao: string; dataResolucao: string }>;
+    ativos: number;
+    analise: string;
+  };
+  relatorios: {
+    totalLivres: number;
+    totalCompletos: number;
+    lojasVisitadas: string[];
+    resumoConteudo: string;
+  };
+  sugestoesGestor: string[];
+  mensagemMotivacional: string;
+}
+
+/**
+ * Gera relatório IA específico para gestores
+ * Foca em análise qualitativa dos seus próprios relatórios, pontos destacados e pendentes
+ * NÃO inclui estatísticas numéricas do país
+ */
+export async function gerarRelatorioIAGestor(
+  periodo: string,
+  gestorId: number,
+  dataInicio?: Date,
+  dataFim?: Date
+): Promise<RelatorioIAGestorResult> {
+  // Calcular datas se não fornecidas
+  const inicio = dataInicio || calcularDataInicio(periodo);
+  const fim = dataFim || calcularDataFim(periodo);
+  
+  // Buscar relatórios do gestor
+  const relatoriosLivres = await db.getRelatoriosLivresByGestorId(gestorId);
+  const relatoriosCompletos = await db.getRelatoriosCompletosByGestorId(gestorId);
+  
+  // Filtrar por período
+  const livresFiltrados = relatoriosLivres.filter((r: any) => {
+    const dataVisita = new Date(r.dataVisita);
+    return dataVisita >= inicio && dataVisita <= fim;
+  });
+  
+  const completosFiltrados = relatoriosCompletos.filter((r: any) => {
+    const dataVisita = new Date(r.dataVisita);
+    return dataVisita >= inicio && dataVisita <= fim;
+  });
+  
+  // Buscar pendentes do gestor
+  const todosPendentes = await db.getPendentesByGestorId(gestorId);
+  
+  // Pendentes criados no período
+  const pendentesCriados = todosPendentes.filter((p: any) => {
+    const dataCriacao = new Date(p.createdAt);
+    return dataCriacao >= inicio && dataCriacao <= fim;
+  });
+  
+  // Pendentes resolvidos no período
+  const pendentesResolvidos = todosPendentes.filter((p: any) => {
+    if (!p.resolvido || !p.dataResolucao) return false;
+    const dataResolucao = new Date(p.dataResolucao);
+    return dataResolucao >= inicio && dataResolucao <= fim;
+  });
+  
+  // Pendentes ativos (não resolvidos)
+  const pendentesAtivos = todosPendentes.filter((p: any) => !p.resolvido).length;
+  
+  // Extrair pontos destacados dos relatórios
+  const pontosPositivos: Array<{ loja: string; descricao: string; data: string }> = [];
+  const pontosNegativos: Array<{ loja: string; descricao: string; data: string }> = [];
+  
+  // Dos relatórios livres
+  livresFiltrados.forEach((r: any) => {
+    if (r.pontosPositivosDestacar) {
+      pontosPositivos.push({
+        loja: r.loja?.nome || 'Loja desconhecida',
+        descricao: r.pontosPositivosDestacar,
+        data: new Date(r.dataVisita).toLocaleDateString('pt-PT')
+      });
+    }
+    if (r.pontosNegativosDestacar) {
+      pontosNegativos.push({
+        loja: r.loja?.nome || 'Loja desconhecida',
+        descricao: r.pontosNegativosDestacar,
+        data: new Date(r.dataVisita).toLocaleDateString('pt-PT')
+      });
+    }
+  });
+  
+  // Dos relatórios completos
+  completosFiltrados.forEach((r: any) => {
+    if (r.pontosPositivosDestacar) {
+      pontosPositivos.push({
+        loja: r.loja?.nome || 'Loja desconhecida',
+        descricao: r.pontosPositivosDestacar,
+        data: new Date(r.dataVisita).toLocaleDateString('pt-PT')
+      });
+    }
+    if (r.pontosNegativosDestacar) {
+      pontosNegativos.push({
+        loja: r.loja?.nome || 'Loja desconhecida',
+        descricao: r.pontosNegativosDestacar,
+        data: new Date(r.dataVisita).toLocaleDateString('pt-PT')
+      });
+    }
+  });
+  
+  // Lojas visitadas
+  const lojasVisitadas = new Set<string>();
+  livresFiltrados.forEach((r: any) => lojasVisitadas.add(r.loja?.nome || 'Desconhecida'));
+  completosFiltrados.forEach((r: any) => lojasVisitadas.add(r.loja?.nome || 'Desconhecida'));
+  
+  // Preparar dados para análise IA
+  const dadosParaIA = {
+    periodo,
+    totalRelatoriosLivres: livresFiltrados.length,
+    totalRelatoriosCompletos: completosFiltrados.length,
+    lojasVisitadas: Array.from(lojasVisitadas),
+    pontosPositivos: pontosPositivos.map(p => `${p.loja}: ${p.descricao}`),
+    pontosNegativos: pontosNegativos.map(p => `${p.loja}: ${p.descricao}`),
+    pendentesCriados: pendentesCriados.length,
+    pendentesResolvidos: pendentesResolvidos.length,
+    pendentesAtivos,
+    resumoRelatorios: livresFiltrados.slice(0, 5).map((r: any) => ({
+      loja: r.loja?.nome,
+      descricao: r.descricao?.substring(0, 200)
+    }))
+  };
+  
+  // Chamar IA para análise qualitativa
+  let analiseIA = {
+    resumoGeral: '',
+    analisePontosDestacados: '',
+    analisePendentes: '',
+    sugestoesGestor: [] as string[],
+    mensagemMotivacional: ''
+  };
+  
+  try {
+    const response = await invokeLLM({
+      messages: [
+        {
+          role: "system",
+          content: `És um assistente de gestão para supervisores de lojas Express Glass.
+Analisa os dados do gestor e fornece feedback qualitativo e construtivo.
+Responde SEMPRE em português europeu.
+Sê específico, menciona lojas e situações concretas quando possível.
+O tom deve ser profissional mas motivador.`
+        },
+        {
+          role: "user",
+          content: `Analisa os seguintes dados do gestor no período ${periodo}:
+
+RELATÓRIOS SUBMETIDOS:
+- Relatórios Livres: ${dadosParaIA.totalRelatoriosLivres}
+- Relatórios Completos: ${dadosParaIA.totalRelatoriosCompletos}
+- Lojas visitadas: ${dadosParaIA.lojasVisitadas.join(', ') || 'Nenhuma'}
+
+PONTOS POSITIVOS DESTACADOS:
+${dadosParaIA.pontosPositivos.length > 0 ? dadosParaIA.pontosPositivos.join('\n') : 'Nenhum ponto positivo registado'}
+
+PONTOS NEGATIVOS DESTACADOS:
+${dadosParaIA.pontosNegativos.length > 0 ? dadosParaIA.pontosNegativos.join('\n') : 'Nenhum ponto negativo registado'}
+
+PENDENTES:
+- Criados no período: ${dadosParaIA.pendentesCriados}
+- Resolvidos no período: ${dadosParaIA.pendentesResolvidos}
+- Ativos (total): ${dadosParaIA.pendentesAtivos}
+
+Fornece uma análise em formato JSON com:
+{
+  "resumoGeral": "Resumo geral do trabalho do gestor no período (2-3 frases)",
+  "analisePontosDestacados": "Análise dos pontos positivos e negativos registados (2-3 frases)",
+  "analisePendentes": "Análise da gestão de pendentes (2-3 frases)",
+  "sugestoesGestor": ["Sugestão 1", "Sugestão 2", "Sugestão 3"],
+  "mensagemMotivacional": "Mensagem motivacional personalizada (1-2 frases)"
+}`
+        }
+      ],
+      response_format: {
+        type: "json_schema",
+        json_schema: {
+          name: "analise_gestor",
+          strict: true,
+          schema: {
+            type: "object",
+            properties: {
+              resumoGeral: { type: "string" },
+              analisePontosDestacados: { type: "string" },
+              analisePendentes: { type: "string" },
+              sugestoesGestor: { type: "array", items: { type: "string" } },
+              mensagemMotivacional: { type: "string" }
+            },
+            required: ["resumoGeral", "analisePontosDestacados", "analisePendentes", "sugestoesGestor", "mensagemMotivacional"],
+            additionalProperties: false
+          }
+        }
+      }
+    });
+    
+    const content = response.choices?.[0]?.message?.content;
+    if (content && typeof content === 'string') {
+      analiseIA = JSON.parse(content);
+    }
+  } catch (error) {
+    console.error('Erro ao gerar análise IA para gestor:', error);
+    // Fallback com análise básica
+    analiseIA = {
+      resumoGeral: `No período selecionado, foram submetidos ${livresFiltrados.length} relatórios livres e ${completosFiltrados.length} relatórios completos, visitando ${lojasVisitadas.size} lojas.`,
+      analisePontosDestacados: pontosPositivos.length > pontosNegativos.length 
+        ? 'Foram registados mais pontos positivos que negativos, indicando uma tendência positiva.'
+        : 'Foram identificados alguns pontos de melhoria que merecem atenção.',
+      analisePendentes: pendentesResolvidos.length >= pendentesCriados.length
+        ? 'Boa gestão de pendentes - foram resolvidos tantos ou mais pendentes do que os criados.'
+        : 'Existem pendentes acumulados que devem ser priorizados.',
+      sugestoesGestor: [
+        'Continue a documentar os pontos positivos e negativos em cada visita',
+        'Priorize a resolução dos pendentes mais antigos',
+        'Mantenha uma frequência regular de visitas a todas as lojas'
+      ],
+      mensagemMotivacional: 'O seu trabalho de supervisão é fundamental para o sucesso da rede. Continue assim!'
+    };
+  }
+  
+  // Formatar pendentes para resposta
+  const pendentesCriadosFormatados = pendentesCriados.map((p: any) => ({
+    loja: p.loja?.nome || 'Desconhecida',
+    descricao: p.descricao || '',
+    data: new Date(p.createdAt).toLocaleDateString('pt-PT')
+  }));
+  
+  const pendentesResolvidosFormatados = pendentesResolvidos.map((p: any) => ({
+    loja: p.loja?.nome || 'Desconhecida',
+    descricao: p.descricao || '',
+    dataResolucao: new Date(p.dataResolucao).toLocaleDateString('pt-PT')
+  }));
+  
+  return {
+    filtroAplicado: 'Minhas Lojas',
+    tipoRelatorio: 'gestor',
+    resumoGeral: analiseIA.resumoGeral,
+    pontosDestacados: {
+      positivos: pontosPositivos,
+      negativos: pontosNegativos,
+      analise: analiseIA.analisePontosDestacados
+    },
+    pendentes: {
+      criados: pendentesCriadosFormatados,
+      resolvidos: pendentesResolvidosFormatados,
+      ativos: pendentesAtivos,
+      analise: analiseIA.analisePendentes
+    },
+    relatorios: {
+      totalLivres: livresFiltrados.length,
+      totalCompletos: completosFiltrados.length,
+      lojasVisitadas: Array.from(lojasVisitadas),
+      resumoConteudo: `${livresFiltrados.length + completosFiltrados.length} relatórios submetidos no período`
+    },
+    sugestoesGestor: analiseIA.sugestoesGestor,
+    mensagemMotivacional: analiseIA.mensagemMotivacional
+  };
+}
+
+/**
+ * Gera relatório IA para gestor com múltiplos meses selecionados
+ */
+export async function gerarRelatorioIAGestorMultiplosMeses(
+  mesesSelecionados: MesSelecionado[],
+  gestorId: number
+): Promise<RelatorioIAGestorResult> {
+  const { dataInicio, dataFim } = calcularPeriodoMultiplosMeses(mesesSelecionados);
+  
+  // Gerar label para o período
+  const NOMES_MESES = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+  const labelMeses = mesesSelecionados.map(m => `${NOMES_MESES[m.mes - 1]} ${m.ano}`).join(", ");
+  
+  return gerarRelatorioIAGestor(labelMeses, gestorId, dataInicio, dataFim);
+}

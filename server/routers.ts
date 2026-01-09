@@ -5,7 +5,7 @@ import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import * as db from "./db";
-import { gerarRelatorioComIA, gerarDicaDashboard } from "./aiService";
+import { gerarRelatorioComIA, gerarDicaDashboard, gerarRelatorioIAGestor, gerarRelatorioIAGestorMultiplosMeses } from "./aiService";
 import { sendEmail, gerarHTMLRelatorioLivre, gerarHTMLRelatorioCompleto } from "./emailService";
 import { enviarResumoSemanal, verificarENotificarAlertas } from "./weeklyReport";
 import { gerarPrevisoes, gerarEGuardarPrevisoes } from "./previsaoService";
@@ -956,15 +956,26 @@ export const appRouter = router({
         let filtroDescricao = "Todo o País";
         
         if (ctx.user.role !== "admin") {
-          // Gestores só vêem as suas lojas
+          // Gestores usam função específica com análise qualitativa
           gestorId = ctx.gestor?.id;
-          filtroDescricao = "Minhas Lojas";
-          
-          // IMPORTANTE: Buscar IDs das lojas do gestor para filtrar dados de ranking
           if (gestorId) {
-            const lojasDoGestor = await db.getLojasByGestorId(gestorId);
-            lojasIds = lojasDoGestor.map(l => l.id);
+            const analiseGestor = await gerarRelatorioIAGestor(input.periodo, gestorId, input.dataInicio, input.dataFim);
+            
+            // Salvar relatório IA na base de dados
+            try {
+              await db.createRelatorioIA({
+                periodo: input.periodo,
+                conteudo: JSON.stringify(analiseGestor),
+                geradoPor: ctx.user.id,
+              });
+              console.log('[RelatoriosIA] Relatório de gestor salvo com sucesso na BD');
+            } catch (error) {
+              console.error('[RelatoriosIA] Erro ao salvar relatório de gestor:', error);
+            }
+            
+            return analiseGestor;
           }
+          filtroDescricao = "Minhas Lojas";
         } else {
           // Admin pode filtrar
           if (input.filtro === "gestor" && input.gestorIdFiltro) {
@@ -1044,12 +1055,27 @@ export const appRouter = router({
         let filtroDescricao = "Todo o País";
         
         if (ctx.user.role !== "admin") {
+          // Gestores usam função específica com análise qualitativa
           gestorId = ctx.gestor?.id;
-          filtroDescricao = "Minhas Lojas";
           if (gestorId) {
-            const lojasDoGestor = await db.getLojasByGestorId(gestorId);
-            lojasIds = lojasDoGestor.map(l => l.id);
+            const analiseGestor = await gerarRelatorioIAGestorMultiplosMeses(input.mesesSelecionados, gestorId);
+            
+            // Salvar relatório IA na base de dados
+            try {
+              const labelMeses = input.mesesSelecionados.map(m => `${m.mes}/${m.ano}`).join(', ');
+              await db.createRelatorioIA({
+                periodo: `meses_${labelMeses}`,
+                conteudo: JSON.stringify(analiseGestor),
+                geradoPor: ctx.user.id,
+              });
+              console.log('[RelatoriosIA] Relatório de gestor (múltiplos meses) salvo com sucesso na BD');
+            } catch (error) {
+              console.error('[RelatoriosIA] Erro ao salvar relatório de gestor:', error);
+            }
+            
+            return analiseGestor;
           }
+          filtroDescricao = "Minhas Lojas";
         } else {
           if (input.filtro === "gestor" && input.gestorIdFiltro) {
             const lojasDoGestor = await db.getLojasByGestorId(input.gestorIdFiltro);
