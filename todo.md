@@ -2355,3 +2355,11 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar alerta visual (badge, animação pulse) no Portal da Loja
 - [x] Marcar tarefas como vistas quando a loja as visualiza
 
+
+
+## Idioma Inglés no Portal da Loja
+- [x] Criar ficheiros de tradução (PT e EN)
+- [x] Implementar contexto de idioma com persistência
+- [x] Adicionar seletor de idioma no header do Portal
+- [x] Traduzir todos os textos do Portal para inglés (tabs e header)
+- [x] Testar alternância entre idiomas (testes unitários passaram)

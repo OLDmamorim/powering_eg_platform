@@ -1,0 +1,64 @@
+{
+  "query": "SELECT rm.mes, rm.ano, rm.totalServicos, rm.objetivoMensal, rm.desvioPercentualMes, rm.taxaReparacao, l.nome as loja\nFROM resultados_mensais rm\nJOIN lojas l ON rm.lojaId = l.id\nWHERE LOWER(l.nome) LIKE '%viana%'\nAND rm.ano = 2025\nAND rm.mes IN (10, 11, 12)\nORDER BY rm.mes;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT rm.mes, rm.ano, rm.totalServicos, rm.objetivoMensal, rm.desvioPercentualMes, rm.taxaReparacao, l.nome as loja\nFROM resultados_mensais rm\nJOIN lojas l ON rm.lojaId = l.id\nWHERE LOWER(l.nome) LIKE '%viana%'\nAND rm.ano = 2025\nAND rm.mes IN (10, 11, 12)\nORDER BY rm.mes;",
+  "rows": [
+    {
+      "mes": "10",
+      "ano": "2025",
+      "totalServicos": "21",
+      "objetivoMensal": "32",
+      "desvioPercentualMes": "-0.3438",
+      "taxaReparacao": "0.1429",
+      "loja": "Viana do Castelo "
+    },
+    {
+      "mes": "10",
+      "ano": "2025",
+      "totalServicos": "88",
+      "objetivoMensal": "79",
+      "desvioPercentualMes": "0.1139",
+      "taxaReparacao": "0.1667",
+      "loja": "Viana do castelo sm"
+    },
+    {
+      "mes": "11",
+      "ano": "2025",
+      "totalServicos": "13",
+      "objetivoMensal": "29",
+      "desvioPercentualMes": "-0.5517",
+      "taxaReparacao": "0.0000",
+      "loja": "Viana do Castelo "
+    },
+    {
+      "mes": "11",
+      "ano": "2025",
+      "totalServicos": "40",
+      "objetivoMensal": "72",
+      "desvioPercentualMes": "-0.4444",
+      "taxaReparacao": "0.1000",
+      "loja": "Viana do castelo sm"
+    },
+    {
+      "mes": "12",
+      "ano": "2025",
+      "totalServicos": "25",
+      "objetivoMensal": "29",
+      "desvioPercentualMes": "-0.1379",
+      "taxaReparacao": "0.2308",
+      "loja": "Viana do Castelo "
+    },
+    {
+      "mes": "12",
+      "ano": "2025",
+      "totalServicos": "48",
+      "objetivoMensal": "72",
+      "desvioPercentualMes": "-0.3333",
+      "taxaReparacao": "0.0000",
+      "loja": "Viana do castelo sm"
+    }
+  ],
+  "messages": [],
+  "stdout": "mes\tano\ttotalServicos\tobjetivoMensal\tdesvioPercentualMes\ttaxaReparacao\tloja\n10\t2025\t21\t32\t-0.3438\t0.1429\tViana do Castelo \n10\t2025\t88\t79\t0.1139\t0.1667\tViana do castelo sm\n11\t2025\t13\t29\t-0.5517\t0.0000\tViana do Castelo \n11\t2025\t40\t72\t-0.4444\t0.1000\tViana do castelo sm\n12\t2025\t25\t29\t-0.1379\t0.2308\tViana do Castelo \n12\t2025\t48\t72\t-0.3333\t0.0000\tViana do castelo sm\n",
+  "stderr": "",
+  "execution_time_ms": 397
+}

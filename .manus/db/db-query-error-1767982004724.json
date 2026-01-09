@@ -1,0 +1,8 @@
+{
+  "query": "SELECT rm.mes, rm.ano, rm.totalServicosFaturados, rm.objetivoMensal, rm.vsObjMes, rm.taxaReparacaoQIV, l.nome as loja\nFROM resultados_mensais rm\nJOIN lojas l ON rm.lojaId = l.id\nWHERE LOWER(l.nome) LIKE '%viana%'\nAND rm.ano = 2025\nAND rm.mes IN (10, 11, 12)\nORDER BY rm.mes;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT rm.mes, rm.ano, rm.totalServicosFaturados, rm.objetivoMensal, rm.vsObjMes, rm.taxaReparacaoQIV, l.nome as loja\nFROM resultados_mensais rm\nJOIN lojas l ON rm.lojaId = l.id\nWHERE LOWER(l.nome) LIKE '%viana%'\nAND rm.ano = 2025\nAND rm.mes IN (10, 11, 12)\nORDER BY rm.mes;",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 'rm.totalservicosfaturados' in 'field list'"
+  ]
+}

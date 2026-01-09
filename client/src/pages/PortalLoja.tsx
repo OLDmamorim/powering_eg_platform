@@ -22,6 +22,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { useLanguage } from "@/contexts/LanguageContext";
 import {
   Store,
   Calendar,
@@ -54,6 +55,7 @@ interface LojaAuth {
 }
 
 export default function PortalLoja() {
+  const { language, setLanguage, t } = useLanguage();
   const [token, setToken] = useState<string>("");
   const [inputToken, setInputToken] = useState<string>("");
   const [lojaAuth, setLojaAuth] = useState<LojaAuth | null>(null);
@@ -401,9 +403,9 @@ export default function PortalLoja() {
             <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
               <Store className="h-8 w-8 text-primary" />
             </div>
-            <CardTitle className="text-2xl">Portal da Loja</CardTitle>
+            <CardTitle className="text-2xl">{t('portal.title')}</CardTitle>
             <CardDescription>
-              Aceda ao sistema de reuniões quinzenais
+              {language === 'pt' ? 'Aceda ao sistema de reuniões quinzenais' : 'Access the bi-weekly meeting system'}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -454,10 +456,20 @@ export default function PortalLoja() {
             </div>
             <div>
               <h1 className="font-semibold">{lojaAuth.lojaNome}</h1>
-              <p className="text-xs text-muted-foreground">Portal de Reuniões</p>
+              <p className="text-xs text-muted-foreground">{t('reuniao.title')}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
+            {/* Seletor de Idioma */}
+            <Select value={language} onValueChange={(value) => setLanguage(value as 'pt' | 'en')}>
+              <SelectTrigger className="w-24 h-9">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="pt">{t('portal.portuguese')}</SelectItem>
+                <SelectItem value="en">{t('portal.english')}</SelectItem>
+              </SelectContent>
+            </Select>
             {/* Botão Minhas Tarefas em destaque - Pulsa quando há NOVAS */}
             <Button 
               variant="default" 
@@ -502,7 +514,7 @@ export default function PortalLoja() {
             </Button>
             <Button variant="ghost" size="sm" onClick={handleLogout}>
               <LogOut className="h-4 w-4 mr-2" />
-              Sair
+              {t('portal.logout')}
             </Button>
           </div>
         </div>
@@ -679,7 +691,7 @@ export default function PortalLoja() {
                 <Users className="h-5 w-5 text-green-500" />
                 <div>
                   <p className="text-sm font-medium">{dadosLoja?.gestorNome || "N/A"}</p>
-                  <p className="text-xs text-muted-foreground">Gestor</p>
+                  <p className="text-xs text-muted-foreground">{language === 'pt' ? 'Gestor' : 'Manager'}</p>
                 </div>
               </div>
             </CardContent>
@@ -693,14 +705,14 @@ export default function PortalLoja() {
             onClick={() => setActiveTab("reuniao")}
           >
             <FileText className="h-4 w-4 mr-2" />
-            Reunião
+            {t('tabs.reuniao')}
           </Button>
           <Button
             variant={activeTab === "pendentes" ? "default" : "outline"}
             onClick={() => setActiveTab("pendentes")}
           >
             <AlertTriangle className="h-4 w-4 mr-2" />
-            Pendentes
+            {t('tabs.pendentes')}
             {pendentesAtivos.length > 0 && (
               <Badge variant="destructive" className="ml-2">{pendentesAtivos.length}</Badge>
             )}
@@ -710,14 +722,14 @@ export default function PortalLoja() {
             onClick={() => setActiveTab("historico")}
           >
             <History className="h-4 w-4 mr-2" />
-            Histórico
+            {t('tabs.historico')}
           </Button>
           <Button
             variant={activeTab === "tarefas" ? "default" : "outline"}
             onClick={() => setActiveTab("tarefas")}
           >
             <ListTodo className="h-4 w-4 mr-2" />
-            Tarefas
+            {t('tabs.tarefas')}
             {((todosCount || 0) + (tarefasInternas?.length || 0)) > 0 && (
               <Badge variant="secondary" className="ml-2">{(todosCount || 0) + (tarefasInternas?.length || 0)}</Badge>
             )}
