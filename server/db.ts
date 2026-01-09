@@ -6861,3 +6861,308 @@ export async function getMesesComDadosDisponiveis(): Promise<{ mes: number; ano:
   
   return meses;
 }
+
+
+// ==================== TÓPICOS DE REUNIÃO DE GESTORES ====================
+
+import { 
+  topicosReuniaoGestores,
+  TopicoReuniaoGestores,
+  InsertTopicoReuniaoGestores,
+  relatoriosReuniaoGestores,
+  RelatorioReuniaoGestores,
+  InsertRelatorioReuniaoGestores
+} from "../drizzle/schema";
+
+/**
+ * Criar tópico de reunião de gestores
+ */
+export async function createTopicoReuniao(data: InsertTopicoReuniaoGestores): Promise<TopicoReuniaoGestores> {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  
+  const [novoTopico] = await db
+    .insert(topicosReuniaoGestores)
+    .values(data)
+    .$returningId();
+  
+  const [topico] = await db
+    .select()
+    .from(topicosReuniaoGestores)
+    .where(eq(topicosReuniaoGestores.id, novoTopico.id))
+    .limit(1);
+  
+  return topico!;
+}
+
+/**
+ * Obter tópicos pendentes (ainda não associados a nenhuma reunião)
+ */
+export async function getTopicosPendentes(): Promise<TopicoReuniaoGestores[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db
+    .select()
+    .from(topicosReuniaoGestores)
+    .where(eq(topicosReuniaoGestores.estado, "pendente"))
+    .orderBy(desc(topicosReuniaoGestores.createdAt));
+}
+
+/**
+ * Obter tópicos por gestor
+ */
+export async function getTopicosByGestorId(gestorId: number): Promise<TopicoReuniaoGestores[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db
+    .select()
+    .from(topicosReuniaoGestores)
+    .where(eq(topicosReuniaoGestores.gestorId, gestorId))
+    .orderBy(desc(topicosReuniaoGestores.createdAt));
+}
+
+/**
+ * Obter tópicos analisados para uma reunião
+ */
+export async function getTopicosAnalisadosByReuniaoId(reuniaoId: number): Promise<TopicoReuniaoGestores[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db
+    .select()
+    .from(topicosReuniaoGestores)
+    .where(
+      and(
+        eq(topicosReuniaoGestores.reuniaoId, reuniaoId),
+        inArray(topicosReuniaoGestores.estado, ["analisado", "discutido", "nao_discutido"])
+      )
+    )
+    .orderBy(desc(topicosReuniaoGestores.createdAt));
+}
+
+/**
+ * Marcar tópico como analisado (incluir na reunião)
+ */
+export async function marcarTopicoAnalisado(topicoId: number, reuniaoId: number, notasAdmin?: string): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  
+  await db
+    .update(topicosReuniaoGestores)
+    .set({
+      estado: "analisado",
+      reuniaoId,
+      notasAdmin
+    })
+    .where(eq(topicosReuniaoGestores.id, topicoId));
+}
+
+/**
+ * Marcar tópico como discutido
+ */
+export async function marcarTopicoDiscutido(topicoId: number, resultadoDiscussao?: string): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  
+  await db
+    .update(topicosReuniaoGestores)
+    .set({
+      estado: "discutido",
+      resultadoDiscussao
+    })
+    .where(eq(topicosReuniaoGestores.id, topicoId));
+}
+
+/**
+ * Marcar tópico como não discutido (volta a pendente para próxima reunião)
+ */
+export async function marcarTopicoNaoDiscutido(topicoId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  
+  await db
+    .update(topicosReuniaoGestores)
+    .set({
+      estado: "nao_discutido"
+    })
+    .where(eq(topicosReuniaoGestores.id, topicoId));
+}
+
+/**
+ * Libertar tópicos não discutidos (voltam a pendente para próxima reunião)
+ */
+export async function libertarTopicosNaoDiscutidos(reuniaoId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  
+  await db
+    .update(topicosReuniaoGestores)
+    .set({
+      estado: "pendente",
+      reuniaoId: null,
+      notasAdmin: null
+    })
+    .where(
+      and(
+        eq(topicosReuniaoGestores.reuniaoId, reuniaoId),
+        eq(topicosReuniaoGestores.estado, "nao_discutido")
+      )
+    );
+}
+
+/**
+ * Obter tópico por ID
+ */
+export async function getTopicoById(id: number): Promise<TopicoReuniaoGestores | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const [topico] = await db
+    .select()
+    .from(topicosReuniaoGestores)
+    .where(eq(topicosReuniaoGestores.id, id))
+    .limit(1);
+  
+  return topico || null;
+}
+
+/**
+ * Atualizar tópico
+ */
+export async function updateTopico(id: number, data: Partial<InsertTopicoReuniaoGestores>): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  
+  await db
+    .update(topicosReuniaoGestores)
+    .set(data)
+    .where(eq(topicosReuniaoGestores.id, id));
+}
+
+/**
+ * Eliminar tópico
+ */
+export async function deleteTopico(id: number): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  
+  await db
+    .delete(topicosReuniaoGestores)
+    .where(eq(topicosReuniaoGestores.id, id));
+}
+
+// ==================== RELATÓRIOS DE REUNIÃO DE GESTORES ====================
+
+/**
+ * Criar relatório de reunião
+ */
+export async function createRelatorioReuniao(data: InsertRelatorioReuniaoGestores): Promise<RelatorioReuniaoGestores> {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  
+  const [novoRelatorio] = await db
+    .insert(relatoriosReuniaoGestores)
+    .values(data)
+    .$returningId();
+  
+  const [relatorio] = await db
+    .select()
+    .from(relatoriosReuniaoGestores)
+    .where(eq(relatoriosReuniaoGestores.id, novoRelatorio.id))
+    .limit(1);
+  
+  return relatorio!;
+}
+
+/**
+ * Obter relatório de reunião por reunião ID
+ */
+export async function getRelatorioByReuniaoId(reuniaoId: number): Promise<RelatorioReuniaoGestores | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const [relatorio] = await db
+    .select()
+    .from(relatoriosReuniaoGestores)
+    .where(eq(relatoriosReuniaoGestores.reuniaoId, reuniaoId))
+    .limit(1);
+  
+  return relatorio || null;
+}
+
+/**
+ * Atualizar relatório de reunião
+ */
+export async function updateRelatorioReuniao(id: number, data: Partial<InsertRelatorioReuniaoGestores>): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  
+  await db
+    .update(relatoriosReuniaoGestores)
+    .set(data)
+    .where(eq(relatoriosReuniaoGestores.id, id));
+}
+
+/**
+ * Obter tópicos pendentes com informação do gestor
+ */
+export async function getTopicosPendentesComGestor(): Promise<Array<TopicoReuniaoGestores & { gestorNome: string | null; gestorEmail: string | null }>> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const topicos = await db
+    .select({
+      id: topicosReuniaoGestores.id,
+      gestorId: topicosReuniaoGestores.gestorId,
+      titulo: topicosReuniaoGestores.titulo,
+      descricao: topicosReuniaoGestores.descricao,
+      estado: topicosReuniaoGestores.estado,
+      reuniaoId: topicosReuniaoGestores.reuniaoId,
+      notasAdmin: topicosReuniaoGestores.notasAdmin,
+      resultadoDiscussao: topicosReuniaoGestores.resultadoDiscussao,
+      createdAt: topicosReuniaoGestores.createdAt,
+      updatedAt: topicosReuniaoGestores.updatedAt,
+      gestorNome: users.name,
+      gestorEmail: users.email,
+    })
+    .from(topicosReuniaoGestores)
+    .innerJoin(gestores, eq(topicosReuniaoGestores.gestorId, gestores.id))
+    .innerJoin(users, eq(gestores.userId, users.id))
+    .where(eq(topicosReuniaoGestores.estado, "pendente"))
+    .orderBy(desc(topicosReuniaoGestores.createdAt));
+  
+  return topicos;
+}
+
+/**
+ * Obter todos os tópicos de uma reunião com informação do gestor
+ */
+export async function getTopicosReuniaoComGestor(reuniaoId: number): Promise<Array<TopicoReuniaoGestores & { gestorNome: string | null; gestorEmail: string | null }>> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const topicos = await db
+    .select({
+      id: topicosReuniaoGestores.id,
+      gestorId: topicosReuniaoGestores.gestorId,
+      titulo: topicosReuniaoGestores.titulo,
+      descricao: topicosReuniaoGestores.descricao,
+      estado: topicosReuniaoGestores.estado,
+      reuniaoId: topicosReuniaoGestores.reuniaoId,
+      notasAdmin: topicosReuniaoGestores.notasAdmin,
+      resultadoDiscussao: topicosReuniaoGestores.resultadoDiscussao,
+      createdAt: topicosReuniaoGestores.createdAt,
+      updatedAt: topicosReuniaoGestores.updatedAt,
+      gestorNome: users.name,
+      gestorEmail: users.email,
+    })
+    .from(topicosReuniaoGestores)
+    .innerJoin(gestores, eq(topicosReuniaoGestores.gestorId, gestores.id))
+    .innerJoin(users, eq(gestores.userId, users.id))
+    .where(eq(topicosReuniaoGestores.reuniaoId, reuniaoId))
+    .orderBy(desc(topicosReuniaoGestores.createdAt));
+  
+  return topicos;
+}

@@ -2317,3 +2317,17 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Destacar pendentes mais antigos (atenção urgente)
 - [x] Mostrar pontos positivos e negativos destacados
 - [x] Atualizar PDF para incluir todos estes dados
+
+## Reuniões de Gestores - Sistema de Tópicos Colaborativos v6.4
+
+- [x] Criar tabela topicosReuniaoGestores no schema (gestorId, titulo, descricao, estado, reuniaoId)
+- [x] Criar endpoints para gestores submeterem tópicos
+- [x] Criar página para gestores verem e submeterem tópicos pendentes
+- [x] Modificar página de Reuniões Gestores para admin ver tópicos pendentes
+- [x] Implementar marcação de tópicos como "analisado" pelo admin
+- [x] Implementar geração de relatório com IA após reunião
+- [x] Implementar criação automática de pendentes para gestores
+- [x] Implementar confirmação de tópicos discutidos/não discutidos
+- [x] Implementar libertação de tópicos para próxima reunião
+- [x] Implementar exportação PDF do relatório
+- [x] Implementar envio de relatório por email aos gestores

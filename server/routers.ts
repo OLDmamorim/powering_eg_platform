@@ -2184,6 +2184,301 @@ export const appRouter = router({
         
         return { url };
       }),
+    
+    // ==================== TÓPICOS DE REUNIÃO ====================
+    
+    // Listar tópicos pendentes (admin vê todos, gestor vê os seus)
+    listarTopicosPendentes: protectedProcedure
+      .query(async ({ ctx }) => {
+        if (ctx.user.role === 'admin') {
+          return await db.getTopicosPendentesComGestor();
+        } else {
+          const gestor = await db.getGestorByUserId(ctx.user.id);
+          if (!gestor) return [];
+          return await db.getTopicosByGestorId(gestor.id);
+        }
+      }),
+    
+    // Criar tópico (gestor submete para discussão)
+    criarTopico: gestorProcedure
+      .input(z.object({
+        titulo: z.string().min(1),
+        descricao: z.string().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const gestor = await db.getGestorByUserId(ctx.user.id);
+        if (!gestor) throw new TRPCError({ code: 'NOT_FOUND', message: 'Gestor não encontrado' });
+        
+        return await db.createTopicoReuniao({
+          gestorId: gestor.id,
+          titulo: input.titulo,
+          descricao: input.descricao || null,
+          estado: 'pendente',
+        });
+      }),
+    
+    // Atualizar tópico (gestor pode editar os seus enquanto pendentes)
+    atualizarTopico: gestorProcedure
+      .input(z.object({
+        id: z.number(),
+        titulo: z.string().min(1).optional(),
+        descricao: z.string().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const topico = await db.getTopicoById(input.id);
+        if (!topico) throw new TRPCError({ code: 'NOT_FOUND', message: 'Tópico não encontrado' });
+        
+        // Verificar permissão (apenas o próprio gestor ou admin)
+        if (ctx.user.role !== 'admin') {
+          const gestor = await db.getGestorByUserId(ctx.user.id);
+          if (!gestor || topico.gestorId !== gestor.id) {
+            throw new TRPCError({ code: 'FORBIDDEN', message: 'Sem permissão para editar este tópico' });
+          }
+        }
+        
+        // Só pode editar se ainda estiver pendente
+        if (topico.estado !== 'pendente') {
+          throw new TRPCError({ code: 'BAD_REQUEST', message: 'Só pode editar tópicos pendentes' });
+        }
+        
+        await db.updateTopico(input.id, {
+          titulo: input.titulo,
+          descricao: input.descricao,
+        });
+        
+        const topicoAtualizado = await db.getTopicoById(input.id);
+        return topicoAtualizado;
+      }),
+    
+    // Eliminar tópico (gestor pode eliminar os seus enquanto pendentes)
+    eliminarTopico: gestorProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input, ctx }) => {
+        const topico = await db.getTopicoById(input.id);
+        if (!topico) throw new TRPCError({ code: 'NOT_FOUND', message: 'Tópico não encontrado' });
+        
+        // Verificar permissão (apenas o próprio gestor ou admin)
+        if (ctx.user.role !== 'admin') {
+          const gestor = await db.getGestorByUserId(ctx.user.id);
+          if (!gestor || topico.gestorId !== gestor.id) {
+            throw new TRPCError({ code: 'FORBIDDEN', message: 'Sem permissão para eliminar este tópico' });
+          }
+        }
+        
+        // Só pode eliminar se ainda estiver pendente
+        if (topico.estado !== 'pendente') {
+          throw new TRPCError({ code: 'BAD_REQUEST', message: 'Só pode eliminar tópicos pendentes' });
+        }
+        
+        await db.deleteTopico(input.id);
+        return { success: true };
+      }),
+    
+    // Marcar tópico como analisado (admin inclui na reunião)
+    marcarAnalisado: adminProcedure
+      .input(z.object({
+        topicoId: z.number(),
+        reuniaoId: z.number(),
+        notasAdmin: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        await db.marcarTopicoAnalisado(input.topicoId, input.reuniaoId, input.notasAdmin);
+        return { success: true };
+      }),
+    
+    // Desmarcar tópico (admin remove da reunião, volta a pendente)
+    desmarcarAnalisado: adminProcedure
+      .input(z.object({ topicoId: z.number() }))
+      .mutation(async ({ input }) => {
+        await db.updateTopico(input.topicoId, {
+          estado: 'pendente',
+          reuniaoId: null,
+          notasAdmin: null,
+        });
+        return { success: true };
+      }),
+    
+    // Obter tópicos de uma reunião
+    getTopicosReuniao: protectedProcedure
+      .input(z.object({ reuniaoId: z.number() }))
+      .query(async ({ input }) => {
+        return await db.getTopicosReuniaoComGestor(input.reuniaoId);
+      }),
+    
+    // Finalizar reunião: marcar tópicos como discutidos/não discutidos
+    finalizarTopicos: adminProcedure
+      .input(z.object({
+        reuniaoId: z.number(),
+        topicos: z.array(z.object({
+          id: z.number(),
+          discutido: z.boolean(),
+          resultadoDiscussao: z.string().optional(),
+        })),
+      }))
+      .mutation(async ({ input }) => {
+        for (const topico of input.topicos) {
+          if (topico.discutido) {
+            await db.marcarTopicoDiscutido(topico.id, topico.resultadoDiscussao);
+          } else {
+            await db.marcarTopicoNaoDiscutido(topico.id);
+          }
+        }
+        return { success: true };
+      }),
+    
+    // Libertar tópicos não discutidos (voltam a pendente)
+    libertarTopicosNaoDiscutidos: adminProcedure
+      .input(z.object({ reuniaoId: z.number() }))
+      .mutation(async ({ input }) => {
+        await db.libertarTopicosNaoDiscutidos(input.reuniaoId);
+        return { success: true };
+      }),
+    
+    // Gerar relatório da reunião com IA
+    gerarRelatorioReuniao: adminProcedure
+      .input(z.object({ reuniaoId: z.number() }))
+      .mutation(async ({ input }) => {
+        const reuniao = await db.getReuniaoGestoresById(input.reuniaoId);
+        if (!reuniao) throw new TRPCError({ code: 'NOT_FOUND', message: 'Reunião não encontrada' });
+        
+        const topicos = await db.getTopicosReuniaoComGestor(input.reuniaoId);
+        const topicosDiscutidos = topicos.filter(t => t.estado === 'discutido');
+        
+        // Gerar relatório com IA
+        const { gerarRelatorioReuniaoComIA } = await import('./reuniaoService');
+        const relatorio = await gerarRelatorioReuniaoComIA(reuniao, topicosDiscutidos);
+        
+        // Verificar se já existe relatório
+        const existente = await db.getRelatorioByReuniaoId(input.reuniaoId);
+        
+        if (existente) {
+          await db.updateRelatorioReuniao(existente.id, {
+            resumoExecutivo: relatorio.resumoExecutivo,
+            topicosDiscutidos: JSON.stringify(relatorio.topicosDiscutidos),
+            decisoesTomadas: relatorio.decisoesTomadas,
+            acoesDefinidas: JSON.stringify(relatorio.acoesDefinidas),
+          });
+        } else {
+          await db.createRelatorioReuniao({
+            reuniaoId: input.reuniaoId,
+            resumoExecutivo: relatorio.resumoExecutivo,
+            topicosDiscutidos: JSON.stringify(relatorio.topicosDiscutidos),
+            decisoesTomadas: relatorio.decisoesTomadas,
+            acoesDefinidas: JSON.stringify(relatorio.acoesDefinidas),
+          });
+        }
+        
+        return relatorio;
+      }),
+    
+    // Obter relatório da reunião
+    getRelatorioReuniao: protectedProcedure
+      .input(z.object({ reuniaoId: z.number() }))
+      .query(async ({ input }) => {
+        return await db.getRelatorioByReuniaoId(input.reuniaoId);
+      }),
+    
+    // Criar pendentes a partir das ações do relatório
+    criarPendentesDeAcoes: adminProcedure
+      .input(z.object({
+        reuniaoId: z.number(),
+        acoes: z.array(z.object({
+          descricao: z.string(),
+          gestorId: z.number(),
+          prazo: z.date().optional(),
+        })),
+      }))
+      .mutation(async ({ input }) => {
+        // Buscar lojas de cada gestor para criar pendentes
+        for (const acao of input.acoes) {
+          const lojasGestor = await db.getLojasByGestorId(acao.gestorId);
+          
+          // Criar pendente para a primeira loja do gestor (ou criar um pendente geral)
+          if (lojasGestor.length > 0) {
+            await db.createPendente({
+              lojaId: lojasGestor[0].id,
+              descricao: `[Reunião Gestores] ${acao.descricao}`,
+              dataLimite: acao.prazo || null,
+            });
+          }
+        }
+        
+        return { success: true };
+      }),
+    
+    // Gerar PDF do relatório da reunião
+    gerarPDFRelatorio: protectedProcedure
+      .input(z.object({ reuniaoId: z.number() }))
+      .query(async ({ input }) => {
+        const reuniao = await db.getReuniaoGestoresById(input.reuniaoId);
+        if (!reuniao) throw new TRPCError({ code: 'NOT_FOUND', message: 'Reunião não encontrada' });
+        
+        const relatorio = await db.getRelatorioByReuniaoId(input.reuniaoId);
+        const topicos = await db.getTopicosReuniaoComGestor(input.reuniaoId);
+        
+        const { gerarPDFRelatorioReuniao } = await import('./reuniaoService');
+        const pdfBuffer = await gerarPDFRelatorioReuniao(reuniao, relatorio, topicos);
+        
+        // Upload para S3
+        const { storagePut } = await import('./storage');
+        const fileName = `relatorio-reuniao-gestores-${reuniao.id}-${Date.now()}.pdf`;
+        const { url } = await storagePut(fileName, pdfBuffer, 'application/pdf');
+        
+        // Atualizar URL do PDF no relatório
+        if (relatorio) {
+          await db.updateRelatorioReuniao(relatorio.id, { pdfUrl: url });
+        }
+        
+        return { url };
+      }),
+    
+    // Enviar relatório por email aos gestores
+    enviarRelatorioEmail: adminProcedure
+      .input(z.object({
+        reuniaoId: z.number(),
+        gestorIds: z.array(z.number()),
+      }))
+      .mutation(async ({ input }) => {
+        const reuniao = await db.getReuniaoGestoresById(input.reuniaoId);
+        if (!reuniao) throw new TRPCError({ code: 'NOT_FOUND', message: 'Reunião não encontrada' });
+        
+        const relatorio = await db.getRelatorioByReuniaoId(input.reuniaoId);
+        const topicos = await db.getTopicosReuniaoComGestor(input.reuniaoId);
+        
+        const gestores = await db.getAllGestores();
+        const gestoresSelecionados = gestores.filter(g => input.gestorIds.includes(g.id));
+        const emailsEnviados: string[] = [];
+        
+        // Gerar HTML do email
+        const { gerarHTMLRelatorioReuniao } = await import('./reuniaoService');
+        const htmlContent = gerarHTMLRelatorioReuniao(reuniao, relatorio, topicos);
+        
+        // Enviar para cada gestor
+        for (const gestor of gestoresSelecionados) {
+          if (gestor.email) {
+            try {
+              await sendEmail({
+                to: gestor.email,
+                subject: `Relatório Reunião de Gestores - ${new Date(reuniao.data).toLocaleDateString('pt-PT')}`,
+                html: htmlContent,
+              });
+              emailsEnviados.push(gestor.email);
+            } catch (error) {
+              console.error(`Erro ao enviar email para ${gestor.email}:`, error);
+            }
+          }
+        }
+        
+        // Atualizar relatório com info de envio
+        if (relatorio && emailsEnviados.length > 0) {
+          await db.updateRelatorioReuniao(relatorio.id, {
+            emailEnviadoEm: new Date(),
+            destinatariosEmail: JSON.stringify(emailsEnviados),
+          });
+        }
+        
+        return { success: true, enviados: emailsEnviados.length, emails: emailsEnviados };
+      }),
   }),
 
   reunioesLojas: router({

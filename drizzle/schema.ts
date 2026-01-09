@@ -735,3 +735,70 @@ export const ocorrenciasEstruturais = mysqlTable("ocorrencias_estruturais", {
 
 export type OcorrenciaEstrutural = typeof ocorrenciasEstruturais.$inferSelect;
 export type InsertOcorrenciaEstrutural = typeof ocorrenciasEstruturais.$inferInsert;
+
+
+/**
+ * Tópicos de Reunião de Gestores - Tópicos submetidos pelos gestores para discussão
+ * Fluxo: gestor submete → admin analisa → reunião acontece → relatório gerado → tópicos libertados
+ */
+export const topicosReuniaoGestores = mysqlTable("topicos_reuniao_gestores", {
+  id: int("id").autoincrement().primaryKey(),
+  
+  // Quem submeteu o tópico
+  gestorId: int("gestorId").notNull(), // FK para gestores.id
+  
+  // Conteúdo do tópico
+  titulo: varchar("titulo", { length: 255 }).notNull(),
+  descricao: text("descricao"), // Descrição detalhada opcional
+  
+  // Estado do tópico no fluxo
+  estado: mysqlEnum("estado", [
+    "pendente",      // Submetido pelo gestor, aguarda reunião
+    "analisado",     // Admin marcou para incluir na reunião atual
+    "discutido",     // Foi discutido na reunião
+    "nao_discutido", // Não foi discutido (volta a pendente para próxima)
+    "arquivado"      // Arquivado sem discussão
+  ]).default("pendente").notNull(),
+  
+  // Reunião associada (quando analisado/discutido)
+  reuniaoId: int("reuniaoId"), // FK para reunioes_gestores.id
+  
+  // Notas do admin sobre o tópico
+  notasAdmin: text("notasAdmin"),
+  
+  // Resultado da discussão (preenchido após reunião)
+  resultadoDiscussao: text("resultadoDiscussao"),
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type TopicoReuniaoGestores = typeof topicosReuniaoGestores.$inferSelect;
+export type InsertTopicoReuniaoGestores = typeof topicosReuniaoGestores.$inferInsert;
+
+/**
+ * Relatórios de Reunião de Gestores - Relatórios gerados após cada reunião
+ */
+export const relatoriosReuniaoGestores = mysqlTable("relatorios_reuniao_gestores", {
+  id: int("id").autoincrement().primaryKey(),
+  
+  // Reunião associada
+  reuniaoId: int("reuniaoId").notNull().unique(), // FK para reunioes_gestores.id
+  
+  // Conteúdo do relatório
+  resumoExecutivo: text("resumoExecutivo"), // Resumo gerado pela IA
+  topicosDiscutidos: text("topicosDiscutidos"), // JSON array de {topicoId, titulo, resultado}
+  decisoesTomadas: text("decisoesTomadas"), // Texto livre ou JSON
+  acoesDefinidas: text("acoesDefinidas"), // JSON array de {descricao, responsavelId, prazo}
+  
+  // Controlo de envio
+  pdfUrl: text("pdfUrl"), // URL do PDF gerado
+  emailEnviadoEm: timestamp("emailEnviadoEm"), // Quando foi enviado por email
+  destinatariosEmail: text("destinatariosEmail"), // JSON array de emails
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type RelatorioReuniaoGestores = typeof relatoriosReuniaoGestores.$inferSelect;
+export type InsertRelatorioReuniaoGestores = typeof relatoriosReuniaoGestores.$inferInsert;

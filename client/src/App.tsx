@@ -41,6 +41,7 @@ import HistoricoOcorrencias from "./pages/HistoricoOcorrencias";
 import { RelatorioIAResultados } from "./pages/RelatorioIAResultados";
 import RelatorioBoard from "./pages/RelatorioBoard";
 import AssistenteIA from "./pages/AssistenteIA";
+import TopicosReuniao from "./pages/TopicosReuniao";
 
 
 function Router() {
@@ -76,6 +77,7 @@ function Router() {
       <Route path={"/configuracoes-alertas"} component={ConfiguracoesAlertas} />
       <Route path={"/categorias"} component={Categorias} />
       <Route path={"/reunioes-gestores"} component={ReuniõesGestores} />
+      <Route path={"/topicos-reuniao"} component={TopicosReuniao} />
       <Route path={"/reunioes-lojas"} component={ReuniõesLojas} />
       <Route path={"/resultados-upload"} component={ResultadosUpload} />
       <Route path={"/resultados-dashboard"} component={ResultadosDashboard} />
