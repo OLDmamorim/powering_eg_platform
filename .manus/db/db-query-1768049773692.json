@@ -1,0 +1,40 @@
+{
+  "query": "SHOW CREATE TABLE todos;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SHOW CREATE TABLE todos;",
+  "rows": [
+    {
+      "Table": "todos",
+      "Create Table": "CREATE TABLE `todos` ("
+    }
+  ],
+  "messages": [
+    "  `id` int(11) NOT NULL AUTO_INCREMENT,",
+    "  `titulo` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,",
+    "  `descricao` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,",
+    "  `categoriaId` int(11) DEFAULT NULL,",
+    "  `prioridade` enum('baixa','media','alta','urgente') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'media',",
+    "  `atribuidoLojaId` int(11) DEFAULT NULL,",
+    "  `atribuidoUserId` int(11) DEFAULT NULL,",
+    "  `criadoPorId` int(11) NOT NULL,",
+    "  `estado` enum('pendente','em_progresso','concluida','devolvida') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pendente',",
+    "  `comentario` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,",
+    "  `historicoAtribuicoes` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,",
+    "  `dataLimite` timestamp NULL DEFAULT NULL,",
+    "  `dataConclusao` timestamp NULL DEFAULT NULL,",
+    "  `createdAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,",
+    "  `updatedAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,",
+    "  `criadoPorLojaId` int(11) DEFAULT NULL,",
+    "  `visto` tinyint(1) NOT NULL DEFAULT '0',",
+    "  `vistoEm` timestamp NULL DEFAULT NULL,",
+    "  `isInterna` tinyint(1) NOT NULL DEFAULT '0',",
+    "  `respostaLoja` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,",
+    "  `anexos` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,",
+    "  `vistoGestor` tinyint(1) NOT NULL DEFAULT '1',",
+    "  `vistoGestorEm` timestamp NULL DEFAULT NULL,",
+    "  PRIMARY KEY (`id`) /*T![clustered_index] CLUSTERED */",
+    ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=300001"
+  ],
+  "stdout": "Table\tCreate Table\ntodos\tCREATE TABLE `todos` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `titulo` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,\n  `descricao` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,\n  `categoriaId` int(11) DEFAULT NULL,\n  `prioridade` enum('baixa','media','alta','urgente') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'media',\n  `atribuidoLojaId` int(11) DEFAULT NULL,\n  `atribuidoUserId` int(11) DEFAULT NULL,\n  `criadoPorId` int(11) NOT NULL,\n  `estado` enum('pendente','em_progresso','concluida','devolvida') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pendente',\n  `comentario` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,\n  `historicoAtribuicoes` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,\n  `dataLimite` timestamp NULL DEFAULT NULL,\n  `dataConclusao` timestamp NULL DEFAULT NULL,\n  `createdAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `updatedAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  `criadoPorLojaId` int(11) DEFAULT NULL,\n  `visto` tinyint(1) NOT NULL DEFAULT '0',\n  `vistoEm` timestamp NULL DEFAULT NULL,\n  `isInterna` tinyint(1) NOT NULL DEFAULT '0',\n  `respostaLoja` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,\n  `anexos` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,\n  `vistoGestor` tinyint(1) NOT NULL DEFAULT '1',\n  `vistoGestorEm` timestamp NULL DEFAULT NULL,\n  PRIMARY KEY (`id`) /*T![clustered_index] CLUSTERED */\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=300001\n",
+  "stderr": "",
+  "execution_time_ms": 401
+}

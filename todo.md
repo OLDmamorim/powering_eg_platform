@@ -2554,3 +2554,4 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Testar funcionalidade
 - [x] Bug: Layout mobile do Assistente IA desconfigurado - header cortado, input cortado
 - [x] Melhoria: Skeleton loading nas sugestões do Assistente IA
+- [x] Bug: Botão "Minhas Tarefas" no Dashboard não pisca quando há tarefas novas não vistas (corrigido default da coluna vistoGestor na BD)
