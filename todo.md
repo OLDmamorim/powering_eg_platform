@@ -375,6 +375,14 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Remover página PlanoVisitas.tsx
 - [x] Manter tabelas e serviços no backend (podem ser úteis futuramente)
 
+## Bug v6.4.2 - Botão de instalação PWA não funciona
+- [x] Melhorar lógica de deteção do evento beforeinstallprompt
+- [x] Adicionar fallback mais robusto quando evento não é capturado
+- [x] Criar service worker dedicado para o Assistente IA
+- [x] Corrigir start_url no manifest
+- [x] Adicionar modo debug para diagnóstico
+- [x] Testar em diferentes browsers
+
 ## Bug v6.4.1 - Manifest PWA do Assistente IA
 - [x] Corrigir manifest PWA para mostrar "Assistente IA" durante instalação (atualmente mostra "Tarefas")
 

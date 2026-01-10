@@ -3,7 +3,7 @@
   "name": "PoweringEG - Assistente IA",
   "short_name": "Assistente IA",
   "description": "Assistente de IA para gestores Express Glass",
-  "start_url": "/assistente-pwa.html",
+  "start_url": "/assistente-widget",
   "scope": "/",
   "display": "standalone",
   "background_color": "#f5f3ff",

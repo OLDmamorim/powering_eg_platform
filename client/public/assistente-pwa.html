@@ -11,6 +11,7 @@
     <!-- PWA - Manifest específico do Assistente IA -->
     <link rel="manifest" href="/manifest-assistente.json" />
     <meta name="theme-color" content="#7c3aed" />
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Assistente IA" />
@@ -78,12 +79,19 @@
         margin-bottom: 16px;
         width: 100%;
         max-width: 280px;
+        transition: all 0.2s ease;
       }
       .install-btn:hover {
         background: #6d28d9;
+        transform: translateY(-1px);
       }
       .install-btn:active {
         transform: scale(0.98);
+      }
+      .install-btn:disabled {
+        background: #9ca3af;
+        cursor: not-allowed;
+        transform: none;
       }
       .skip-btn {
         display: none;
@@ -97,6 +105,7 @@
         cursor: pointer;
         width: 100%;
         max-width: 280px;
+        transition: all 0.2s ease;
       }
       .skip-btn:hover {
         background: rgba(124, 58, 237, 0.1);
@@ -123,6 +132,23 @@
       .ios-instructions li {
         margin-bottom: 8px;
       }
+      .status-msg {
+        font-size: 12px;
+        color: #9ca3af;
+        margin-top: 16px;
+        min-height: 20px;
+      }
+      .debug-info {
+        display: none;
+        font-size: 10px;
+        color: #9ca3af;
+        margin-top: 24px;
+        padding: 12px;
+        background: rgba(0,0,0,0.05);
+        border-radius: 8px;
+        text-align: left;
+        word-break: break-all;
+      }
     </style>
   </head>
 
@@ -139,11 +165,11 @@
         <p style="margin-top: 8px; font-size: 12px;">A preparar...</p>
       </div>
       
-      <button class="install-btn" id="installBtn" onclick="installApp()">
+      <button class="install-btn" id="installBtn">
         Instalar Assistente IA
       </button>
       
-      <button class="skip-btn" id="skipBtn" onclick="skipToApp()">
+      <button class="skip-btn" id="skipBtn">
         Continuar sem instalar
       </button>
       
@@ -155,76 +181,202 @@
           <li>Toque em <strong>"Adicionar"</strong> no canto superior direito</li>
         </ol>
       </div>
+      
+      <p class="status-msg" id="statusMsg"></p>
+      
+      <div class="debug-info" id="debugInfo"></div>
     </div>
 
     <script>
+      // Estado global
       let deferredPrompt = null;
-      let isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-      let isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+      let installAttempted = false;
+      
+      // Deteção de dispositivo/browser
+      const ua = navigator.userAgent;
+      const isIOS = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
+      const isSafari = /^((?!chrome|android).)*safari/i.test(ua);
+      const isChrome = /Chrome/.test(ua) && /Google Inc/.test(navigator.vendor);
+      const isFirefox = /Firefox/.test(ua);
+      const isEdge = /Edg/.test(ua);
+      const isAndroid = /Android/.test(ua);
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
+                           window.navigator.standalone === true;
+      
+      // Elementos DOM
+      const loadingEl = document.getElementById('loading');
+      const installBtn = document.getElementById('installBtn');
+      const skipBtn = document.getElementById('skipBtn');
+      const iosInstructions = document.getElementById('iosInstructions');
+      const statusMsg = document.getElementById('statusMsg');
+      const debugInfo = document.getElementById('debugInfo');
+      
+      // Funções de debug (ativar com ?debug=1 no URL)
+      const urlParams = new URLSearchParams(window.location.search);
+      const debugMode = urlParams.get('debug') === '1';
+      
+      function log(msg) {
+        console.log('[PWA]', msg);
+        if (debugMode) {
+          debugInfo.style.display = 'block';
+          debugInfo.innerHTML += msg + '<br>';
+        }
+      }
+      
+      function setStatus(msg) {
+        statusMsg.textContent = msg;
+        log('Status: ' + msg);
+      }
       
       // Se já está em modo standalone, ir direto para a app
       if (isStandalone) {
+        log('Já em modo standalone, redirecionando...');
         window.location.replace('/assistente-widget');
       }
       
-      // Capturar o evento de instalação
+      log('UA: ' + ua.substring(0, 50) + '...');
+      log('iOS: ' + isIOS + ', Safari: ' + isSafari + ', Chrome: ' + isChrome);
+      log('Android: ' + isAndroid + ', Standalone: ' + isStandalone);
+      
+      // Capturar o evento de instalação ANTES de qualquer outra coisa
       window.addEventListener('beforeinstallprompt', (e) => {
+        log('beforeinstallprompt capturado!');
         e.preventDefault();
         deferredPrompt = e;
         showInstallUI();
       });
       
+      // Listener para quando a app é instalada
+      window.addEventListener('appinstalled', () => {
+        log('App instalada com sucesso!');
+        setStatus('Instalado com sucesso!');
+        deferredPrompt = null;
+        setTimeout(() => {
+          window.location.replace('/assistente-widget');
+        }, 1000);
+      });
+      
       function showInstallUI() {
-        document.getElementById('loading').style.display = 'none';
-        document.getElementById('installBtn').style.display = 'block';
-        document.getElementById('skipBtn').style.display = 'block';
+        log('Mostrando UI de instalação');
+        loadingEl.style.display = 'none';
+        installBtn.style.display = 'block';
+        skipBtn.style.display = 'block';
+        installBtn.textContent = 'Instalar Assistente IA';
+        installBtn.disabled = false;
+        installBtn.onclick = installApp;
+        setStatus('');
       }
       
       function showIOSInstructions() {
-        document.getElementById('loading').style.display = 'none';
-        document.getElementById('iosInstructions').style.display = 'block';
-        document.getElementById('skipBtn').style.display = 'block';
+        log('Mostrando instruções iOS');
+        loadingEl.style.display = 'none';
+        iosInstructions.style.display = 'block';
+        skipBtn.style.display = 'block';
+        setStatus('');
+      }
+      
+      function showOpenAppUI() {
+        log('Mostrando UI de abrir app');
+        loadingEl.style.display = 'none';
+        installBtn.style.display = 'block';
+        skipBtn.style.display = 'block';
+        installBtn.textContent = 'Abrir Assistente IA';
+        installBtn.onclick = skipToApp;
+        setStatus('A instalação não está disponível neste browser');
       }
       
       async function installApp() {
-        if (deferredPrompt) {
-          deferredPrompt.prompt();
-          const { outcome } = await deferredPrompt.userChoice;
-          deferredPrompt = null;
-          if (outcome === 'accepted') {
-            // Instalação aceite, esperar um pouco e redirecionar
-            setTimeout(() => {
-              window.location.replace('/assistente-widget');
-            }, 1000);
-          }
+        log('Tentando instalar...');
+        
+        if (!deferredPrompt) {
+          log('Sem deferredPrompt disponível');
+          setStatus('Instalação não disponível. Use o menu do browser.');
+          return;
         }
+        
+        installBtn.disabled = true;
+        installBtn.textContent = 'A instalar...';
+        setStatus('A processar...');
+        
+        try {
+          // Mostrar o prompt de instalação
+          deferredPrompt.prompt();
+          log('Prompt mostrado');
+          
+          // Aguardar a escolha do utilizador
+          const { outcome } = await deferredPrompt.userChoice;
+          log('Escolha do utilizador: ' + outcome);
+          
+          if (outcome === 'accepted') {
+            setStatus('Instalação aceite!');
+            // O evento appinstalled irá tratar do redirecionamento
+          } else {
+            setStatus('Instalação cancelada');
+            installBtn.disabled = false;
+            installBtn.textContent = 'Instalar Assistente IA';
+          }
+        } catch (err) {
+          log('Erro na instalação: ' + err.message);
+          setStatus('Erro: ' + err.message);
+          installBtn.disabled = false;
+          installBtn.textContent = 'Tentar novamente';
+        }
+        
+        // Limpar o prompt (só pode ser usado uma vez)
+        deferredPrompt = null;
       }
       
       function skipToApp() {
+        log('Redirecionando para app...');
         window.location.replace('/assistente-widget');
       }
       
+      // Associar eventos aos botões
+      installBtn.onclick = installApp;
+      skipBtn.onclick = skipToApp;
+      
       // Verificar após um delay se podemos mostrar a UI de instalação
       setTimeout(() => {
+        log('Verificação após timeout...');
+        
         if (isIOS) {
+          // iOS não suporta beforeinstallprompt
           showIOSInstructions();
         } else if (deferredPrompt) {
+          // Temos o prompt, mostrar UI de instalação
           showInstallUI();
         } else {
-          // Se não temos o prompt após 2 segundos, mostrar botões mesmo assim
-          // O utilizador pode já ter instalado ou o browser não suporta
-          showInstallUI();
-          document.getElementById('installBtn').textContent = 'Abrir Assistente IA';
-          document.getElementById('installBtn').onclick = skipToApp;
+          // Não temos o prompt - verificar razões possíveis
+          log('Sem prompt disponível após timeout');
+          
+          // Verificar se o service worker está registado
+          if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistration().then(reg => {
+              if (reg) {
+                log('Service Worker registado: ' + reg.scope);
+              } else {
+                log('Nenhum Service Worker registado');
+              }
+            }).catch(err => {
+              log('Erro ao verificar SW: ' + err.message);
+            });
+          }
+          
+          // Mostrar UI alternativa
+          showOpenAppUI();
         }
-      }, 2000);
+      }, 2500);
       
-      // Listener para quando a app é instalada
-      window.addEventListener('appinstalled', () => {
-        setTimeout(() => {
-          window.location.replace('/assistente-widget');
-        }, 500);
-      });
+      // Tentar registar o service worker se ainda não estiver registado
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw-assistente.js', { scope: '/' })
+          .then(reg => {
+            log('SW registado: ' + reg.scope);
+          })
+          .catch(err => {
+            log('Erro ao registar SW: ' + err.message);
+          });
+      }
     </script>
   </body>
 
