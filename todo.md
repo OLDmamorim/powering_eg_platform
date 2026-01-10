@@ -2569,3 +2569,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## Ajuste Layout Assistente IA Mobile v6.5
 - [x] Ajustar layout do Assistente IA em mobile (tabelas cortadas, texto não visível completo)
 - [x] Widget PWA do Assistente IA para instalação no telemóvel
+
+
+## Correção Sobreposição Botão PWA v6.4.2
+- [x] Reorganizar botão de instalação PWA para não sobrepor categorias em mobile
+- [x] Mover botão para posição que não interfira com a interface (agora no topo direito)

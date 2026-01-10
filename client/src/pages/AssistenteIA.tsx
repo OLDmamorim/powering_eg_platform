@@ -326,9 +326,9 @@ export default function AssistenteIA() {
           </Card>
         </div>
         
-        {/* Botão Flutuante de Instalação PWA - Visível em mobile */}
+        {/* Botão de Instalação PWA - Posicionado no header em mobile */}
         {isInstallable && !isInstalled && (
-          <div className="fixed bottom-20 right-4 z-50">
+          <div className="fixed top-16 right-4 z-50 md:hidden">
             <Button 
               onClick={async () => {
                 const result = await install();
@@ -343,19 +343,18 @@ export default function AssistenteIA() {
                   toast.success(language === 'pt' ? 'App instalada com sucesso!' : 'App installed successfully!');
                 }
               }}
-              className="h-14 w-14 rounded-full bg-green-600 hover:bg-green-700 text-white shadow-lg flex items-center justify-center"
+              size="sm"
+              className="bg-green-600 hover:bg-green-700 text-white shadow-lg flex items-center gap-2 px-3 py-2"
             >
-              <Download className="h-6 w-6" />
+              <Download className="h-4 w-4" />
+              <span className="text-xs font-medium">{language === 'pt' ? 'Instalar' : 'Install'}</span>
             </Button>
-            <span className="absolute -top-8 right-0 bg-green-600 text-white text-xs px-2 py-1 rounded whitespace-nowrap shadow-md">
-              {language === 'pt' ? 'Instalar App' : 'Install App'}
-            </span>
           </div>
         )}
         
         {/* Badge de App Instalada */}
         {isInstalled && (
-          <div className="fixed bottom-20 right-4 z-50">
+          <div className="fixed top-16 right-4 z-50 md:hidden">
             <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 px-3 py-2 shadow-md">
               <Smartphone className="h-4 w-4 mr-1" />
               {language === 'pt' ? 'Instalada' : 'Installed'}
