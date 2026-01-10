@@ -204,6 +204,12 @@ export default function AssistenteWidget() {
                 variant="ghost"
                 className="text-white hover:bg-violet-700 h-8 px-2 text-xs bg-green-600/20"
                 onClick={async () => {
+                  toast.info(
+                    language === 'pt' 
+                      ? 'A preparar instalação...' 
+                      : 'Preparing installation...',
+                    { duration: 2000 }
+                  );
                   const result = await install();
                   if (result === 'ios') {
                     toast.info(
@@ -212,16 +218,18 @@ export default function AssistenteWidget() {
                         : 'On iOS: Tap "Share" then "Add to Home Screen"',
                       { duration: 6000 }
                     );
-                  } else if (result === 'redirect') {
-                    // A redirecionar para página de instalação
+                  } else if (result === 'manual') {
+                    // Mostrar instruções de instalação manual
                     toast.info(
                       language === 'pt' 
-                        ? 'A preparar instalação...' 
-                        : 'Preparing installation...',
-                      { duration: 2000 }
+                        ? 'Toque no menu ⋮ do Chrome e selecione "Instalar aplicação" ou "Adicionar ao ecrã inicial"' 
+                        : 'Tap Chrome menu ⋮ and select "Install app" or "Add to home screen"',
+                      { duration: 8000 }
                     );
                   } else if (result === true) {
                     toast.success(language === 'pt' ? 'App instalada com sucesso!' : 'App installed successfully!');
+                  } else if (result === false) {
+                    toast.info(language === 'pt' ? 'Instalação cancelada' : 'Installation cancelled');
                   }
                 }}
               >

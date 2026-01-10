@@ -2602,3 +2602,4 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar instruções para Chrome/Edge e iOS
 - [x] Melhorar hook usePWAInstallAssistente com fallback para página dedicada
 - [x] Nota: O problema é do rate limiting (429) no ambiente de preview, não do código
+- [x] BUG: Instalação PWA do Assistente IA no Android - mostrar instruções manuais quando prompt não disponível

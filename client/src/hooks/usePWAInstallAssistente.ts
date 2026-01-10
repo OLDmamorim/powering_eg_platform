@@ -175,7 +175,7 @@ export function usePWAInstallAssistente() {
     };
   }, [setupManifest, deferredPrompt]);
 
-  const install = async (): Promise<boolean | 'ios' | 'redirect'> => {
+  const install = async (): Promise<boolean | 'ios' | 'redirect' | 'manual'> => {
     console.log('[PWA Install] Função install chamada');
     console.log('[PWA Install] deferredPrompt:', deferredPrompt);
     console.log('[PWA Install] globalDeferredPrompt:', globalDeferredPrompt);
@@ -188,11 +188,11 @@ export function usePWAInstallAssistente() {
 
     const promptToUse = deferredPrompt || globalDeferredPrompt;
     
-    // Se não temos o prompt, redirecionar para a página dedicada do PWA
+    // Se não temos o prompt nativo, mostrar instruções de instalação manual
     if (!promptToUse) {
-      console.log('[PWA Install] Sem prompt disponível - redirecionando para página dedicada');
-      window.location.href = '/assistente-pwa.html';
-      return 'redirect';
+      console.log('[PWA Install] Sem prompt disponível - retornando manual');
+      // Retornar 'manual' para mostrar instruções de instalação manual
+      return 'manual';
     }
     
     // Garantir que o manifest está correto antes de mostrar o prompt
@@ -233,9 +233,8 @@ export function usePWAInstallAssistente() {
       globalDeferredPrompt = null;
       promptCaptured = false;
       
-      // Em caso de erro, redirecionar para página dedicada
-      window.location.href = '/assistente-pwa.html';
-      return 'redirect';
+      // Em caso de erro, retornar 'manual' para mostrar instruções
+      return 'manual';
     }
   };
 

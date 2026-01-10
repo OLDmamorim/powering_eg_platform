@@ -346,6 +346,14 @@ export default function AssistenteIA() {
                   } else if (result === 'redirect') {
                     // Já foi redirecionado para a página de instalação
                     console.log('[AssistenteIA] Redirecionado para página de instalação');
+                  } else if (result === 'manual') {
+                    // Mostrar instruções de instalação manual
+                    toast.info(
+                      language === 'pt' 
+                        ? 'Toque no menu ⋮ do Chrome e selecione "Instalar aplicação" ou "Adicionar ao ecrã inicial"' 
+                        : 'Tap Chrome menu ⋮ and select "Install app" or "Add to home screen"',
+                      { duration: 8000 }
+                    );
                   } else if (result === true) {
                     toast.success(language === 'pt' ? 'App instalada com sucesso!' : 'App installed successfully!');
                   } else if (result === false) {
@@ -353,7 +361,12 @@ export default function AssistenteIA() {
                   }
                 } catch (error) {
                   console.error('[AssistenteIA] Erro ao instalar:', error);
-                  toast.error(language === 'pt' ? 'Erro ao instalar. Tente pelo menu do browser.' : 'Installation error. Try from browser menu.');
+                  toast.info(
+                    language === 'pt' 
+                      ? 'Toque no menu ⋮ do Chrome e selecione "Instalar aplicação"' 
+                      : 'Tap Chrome menu ⋮ and select "Install app"',
+                    { duration: 8000 }
+                  );
                 }
               }}
               size="sm"
