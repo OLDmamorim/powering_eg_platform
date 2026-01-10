@@ -149,6 +149,23 @@ export function AIChatBox({
     }
   }, []);
 
+  // Auto-scroll to bottom when messages change or when loading state changes
+  useEffect(() => {
+    // Small delay to ensure DOM has updated
+    const timeoutId = setTimeout(() => {
+      scrollToBottom();
+    }, 50);
+    return () => clearTimeout(timeoutId);
+  }, [messages, isLoading]);
+
+  // Also scroll when content of last message changes (for streaming responses)
+  const lastMessageContent = displayMessages[displayMessages.length - 1]?.content;
+  useEffect(() => {
+    if (lastMessageContent) {
+      scrollToBottom();
+    }
+  }, [lastMessageContent]);
+
   // Scroll to bottom helper function with smooth animation
   const scrollToBottom = () => {
     const viewport = scrollAreaRef.current?.querySelector(

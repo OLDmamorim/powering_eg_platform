@@ -2627,3 +2627,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Perguntas gerais/nacionais continuam a mostrar dados agregados
 - [x] Passar informação do gestor logado para o contexto da IA
 - [x] Testar separação de contexto
+
+
+## Bug v6.6.1 - Scroll automático no chatbot PoweringEG
+- [x] Implementar scroll automático quando novas mensagens são adicionadas
+- [x] Scroll deve ir para o fundo automaticamente após cada resposta
+- [x] Manter scroll suave (smooth) para melhor UX
