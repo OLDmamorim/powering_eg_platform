@@ -2633,3 +2633,4 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Implementar scroll automático quando novas mensagens são adicionadas
 - [x] Scroll deve ir para o fundo automaticamente após cada resposta
 - [x] Manter scroll suave (smooth) para melhor UX
+- [x] Bug: Scroll automático não funciona no chatbot - utilizador tem que descer manualmente quando o texto é grande

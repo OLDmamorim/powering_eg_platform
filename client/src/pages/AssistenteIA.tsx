@@ -46,9 +46,35 @@ export default function AssistenteIA() {
   // Auto-scroll para a última mensagem
   useEffect(() => {
     if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      // O ScrollArea do Radix usa um viewport interno para o scroll
+      const viewport = scrollRef.current.querySelector('[data-slot="scroll-area-viewport"]') as HTMLDivElement;
+      if (viewport) {
+        // Usar requestAnimationFrame para garantir que o DOM foi atualizado
+        requestAnimationFrame(() => {
+          viewport.scrollTo({
+            top: viewport.scrollHeight,
+            behavior: 'smooth'
+          });
+        });
+      }
     }
-  }, [messages]);
+  }, [messages, isLoading]);
+
+  // Scroll adicional quando o conteúdo da última mensagem muda (para respostas longas)
+  const lastMessageContent = messages[messages.length - 1]?.content;
+  useEffect(() => {
+    if (lastMessageContent && scrollRef.current) {
+      const viewport = scrollRef.current.querySelector('[data-slot="scroll-area-viewport"]') as HTMLDivElement;
+      if (viewport) {
+        requestAnimationFrame(() => {
+          viewport.scrollTo({
+            top: viewport.scrollHeight,
+            behavior: 'smooth'
+          });
+        });
+      }
+    }
+  }, [lastMessageContent]);
   
   const enviarPergunta = async (pergunta: string) => {
     if (!pergunta.trim() || isLoading) return;
