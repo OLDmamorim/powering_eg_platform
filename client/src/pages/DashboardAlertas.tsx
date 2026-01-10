@@ -14,24 +14,6 @@ import { toast } from "sonner";
 
 type AlertaTipo = "pontos_negativos_consecutivos" | "pendentes_antigos" | "sem_visitas";
 
-const tipoLabels: Record<AlertaTipo, { label: string; icon: React.ReactNode; color: string }> = {
-  pontos_negativos_consecutivos: {
-    label: "Pontos Negativos Consecutivos",
-    icon: <AlertTriangle className="h-4 w-4" />,
-    color: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
-  },
-  pendentes_antigos: {
-    label: "Pendentes Antigos",
-    icon: <Clock className="h-4 w-4" />,
-    color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400"
-  },
-  sem_visitas: {
-    label: "Sem Visitas Recentes",
-    icon: <Calendar className="h-4 w-4" />,
-    color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"
-  }
-};
-
 export default function DashboardAlertas() {
   const { language, t } = useLanguage();
   const [activeTab, setActiveTab] = useState<string>("pendentes");
@@ -39,6 +21,24 @@ export default function DashboardAlertas() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [notasResolucao, setNotasResolucao] = useState("");
   const [isResolving, setIsResolving] = useState(false);
+  
+  const tipoLabels: Record<AlertaTipo, { label: string; icon: React.ReactNode; color: string }> = {
+    pontos_negativos_consecutivos: {
+      label: language === 'pt' ? "Pontos Negativos Consecutivos" : "Consecutive Negative Points",
+      icon: <AlertTriangle className="h-4 w-4" />,
+      color: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
+    },
+    pendentes_antigos: {
+      label: language === 'pt' ? "Pendentes Antigos" : "Old Pending Items",
+      icon: <Clock className="h-4 w-4" />,
+      color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400"
+    },
+    sem_visitas: {
+      label: language === 'pt' ? "Sem Visitas Recentes" : "No Recent Visits",
+      icon: <Calendar className="h-4 w-4" />,
+      color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"
+    }
+  };
   
   const utils = trpc.useUtils();
   
@@ -100,7 +100,7 @@ export default function DashboardAlertas() {
   
   const formatDate = (date: Date | string | null) => {
     if (!date) return "-";
-    return new Date(date).toLocaleDateString('pt-PT', {
+    return new Date(date).toLocaleDateString(language === 'pt' ? 'pt-PT' : 'en-US', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
@@ -131,9 +131,9 @@ export default function DashboardAlertas() {
             </div>
             <Badge variant={isPendente ? "outline" : "default"} className={isPendente ? "border-amber-500 text-amber-600" : "bg-green-600"}>
               {isPendente ? (
-                <><Clock className="h-3 w-3 mr-1" /> Pendente</>
+                <><Clock className="h-3 w-3 mr-1" /> {language === 'pt' ? "Pendente" : "Pending"}</>
               ) : (
-                <><CheckCircle className="h-3 w-3 mr-1" /> Resolvido</>
+                <><CheckCircle className="h-3 w-3 mr-1" /> {language === 'pt' ? "Resolvido" : "Resolved"}</>
               )}
             </Badge>
           </div>
@@ -144,19 +144,19 @@ export default function DashboardAlertas() {
           <div className="flex items-center gap-4 text-xs text-muted-foreground">
             <span className="flex items-center gap-1">
               <Calendar className="h-3 w-3" />
-              Criado: {formatDate(alerta.createdAt)}
+              {language === 'pt' ? "Criado:" : "Created:"} {formatDate(alerta.createdAt)}
             </span>
             {alerta.dataResolucao && (
               <span className="flex items-center gap-1">
                 <CheckCircle className="h-3 w-3" />
-                Resolvido: {formatDate(alerta.dataResolucao)}
+                {language === 'pt' ? "Resolvido:" : "Resolved:"} {formatDate(alerta.dataResolucao)}
               </span>
             )}
           </div>
           
           {alerta.notasResolucao && (
             <div className="p-2 bg-muted/50 rounded-md">
-              <p className="text-xs font-medium mb-1">Notas de Resolução:</p>
+              <p className="text-xs font-medium mb-1">{language === 'pt' ? "Notas de Resolução:" : "Resolution Notes:"}</p>
               <p className="text-xs text-muted-foreground">{alerta.notasResolucao}</p>
             </div>
           )}
@@ -166,12 +166,12 @@ export default function DashboardAlertas() {
               {isPendente ? (
                 <Button size="sm" onClick={() => handleResolver(alerta)} className="bg-green-600 hover:bg-green-700">
                   <CheckCircle className="h-4 w-4 mr-1" />
-                  Marcar como Resolvido
+                  {language === 'pt' ? "Marcar como Resolvido" : "Mark as Resolved"}
                 </Button>
               ) : (
                 <Button size="sm" variant="outline" onClick={() => handleReabrir(alerta)}>
                   <Clock className="h-4 w-4 mr-1" />
-                  Reabrir
+                  {language === 'pt' ? "Reabrir" : "Reopen"}
                 </Button>
               )}
               <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive" onClick={() => handleDelete(alerta.id)}>
@@ -189,9 +189,11 @@ export default function DashboardAlertas() {
       <div className="space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Dashboard de Alertas</h1>
+          <h1 className="text-3xl font-bold tracking-tight">
+            {language === 'pt' ? "Dashboard de Alertas" : "Alerts Dashboard"}
+          </h1>
           <p className="text-muted-foreground">
-            Gestão de alertas automáticos gerados pelo sistema
+            {language === 'pt' ? "Gestão de alertas automáticos gerados pelo sistema" : "Management of automatic alerts generated by the system"}
           </p>
         </div>
         
@@ -201,14 +203,16 @@ export default function DashboardAlertas() {
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
                 <Clock className="h-4 w-4 text-amber-600" />
-                Alertas Pendentes
+                {language === 'pt' ? "Alertas Pendentes" : "Pending Alerts"}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-amber-700 dark:text-amber-300">
                 {loadingPendentes ? <Skeleton className="h-8 w-12" /> : alertasPendentes?.length || 0}
               </div>
-              <p className="text-xs text-muted-foreground">A aguardar resolução</p>
+              <p className="text-xs text-muted-foreground">
+                {language === 'pt' ? "A aguardar resolução" : "Awaiting resolution"}
+              </p>
             </CardContent>
           </Card>
           
@@ -216,14 +220,16 @@ export default function DashboardAlertas() {
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
                 <CheckCircle className="h-4 w-4 text-green-600" />
-                Alertas Resolvidos
+                {language === 'pt' ? "Alertas Resolvidos" : "Resolved Alerts"}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-green-700 dark:text-green-300">
                 {loadingTodos ? <Skeleton className="h-8 w-12" /> : alertasResolvidos.length}
               </div>
-              <p className="text-xs text-muted-foreground">Total resolvidos</p>
+              <p className="text-xs text-muted-foreground">
+                {language === 'pt' ? "Total resolvidos" : "Total resolved"}
+              </p>
             </CardContent>
           </Card>
           
@@ -231,14 +237,16 @@ export default function DashboardAlertas() {
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
                 <FileText className="h-4 w-4 text-blue-600" />
-                Total de Alertas
+                {language === 'pt' ? "Total de Alertas" : "Total Alerts"}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-blue-700 dark:text-blue-300">
                 {loadingTodos ? <Skeleton className="h-8 w-12" /> : todosAlertas?.length || 0}
               </div>
-              <p className="text-xs text-muted-foreground">Histórico completo</p>
+              <p className="text-xs text-muted-foreground">
+                {language === 'pt' ? "Histórico completo" : "Complete history"}
+              </p>
             </CardContent>
           </Card>
         </div>
@@ -248,11 +256,11 @@ export default function DashboardAlertas() {
           <TabsList className="grid w-full grid-cols-2 max-w-md">
             <TabsTrigger value="pendentes" className="flex items-center gap-2">
               <Clock className="h-4 w-4" />
-              Pendentes ({alertasPendentes?.length || 0})
+              {language === 'pt' ? "Pendentes" : "Pending"} ({alertasPendentes?.length || 0})
             </TabsTrigger>
             <TabsTrigger value="todos" className="flex items-center gap-2">
               <FileText className="h-4 w-4" />
-              Todos
+              {language === 'pt' ? "Todos" : "All"}
             </TabsTrigger>
           </TabsList>
           
@@ -279,8 +287,8 @@ export default function DashboardAlertas() {
                 <CardContent className="py-12">
                   <div className="text-center text-muted-foreground">
                     <CheckCircle className="h-12 w-12 mx-auto mb-3 opacity-50 text-green-600" />
-                    <p className="font-medium">Nenhum alerta pendente</p>
-                    <p className="text-sm">Todas as situações estão resolvidas</p>
+                    <p className="font-medium">{language === 'pt' ? "Nenhum alerta pendente" : "No pending alerts"}</p>
+                    <p className="text-sm">{language === 'pt' ? "Todas as situações estão resolvidas" : "All situations are resolved"}</p>
                   </div>
                 </CardContent>
               </Card>
@@ -310,8 +318,8 @@ export default function DashboardAlertas() {
                 <CardContent className="py-12">
                   <div className="text-center text-muted-foreground">
                     <AlertTriangle className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                    <p className="font-medium">Nenhum alerta registado</p>
-                    <p className="text-sm">Os alertas são gerados automaticamente pelo sistema</p>
+                    <p className="font-medium">{language === 'pt' ? "Nenhum alerta registado" : "No alerts registered"}</p>
+                    <p className="text-sm">{language === 'pt' ? "Os alertas são gerados automaticamente pelo sistema" : "Alerts are automatically generated by the system"}</p>
                   </div>
                 </CardContent>
               </Card>
@@ -324,13 +332,14 @@ export default function DashboardAlertas() {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>
-                {isResolving ? "Marcar Alerta como Resolvido" : "Reabrir Alerta"}
+                {isResolving 
+                  ? (language === 'pt' ? "Marcar Alerta como Resolvido" : "Mark Alert as Resolved")
+                  : (language === 'pt' ? "Reabrir Alerta" : "Reopen Alert")}
               </DialogTitle>
               <DialogDescription>
                 {isResolving 
-                  ? "Adicione notas sobre como o problema foi resolvido (opcional)"
-                  : "O alerta será reaberto e ficará novamente pendente"
-                }
+                  ? (language === 'pt' ? "Adicione notas sobre como o problema foi resolvido (opcional)" : "Add notes about how the problem was resolved (optional)")
+                  : (language === 'pt' ? "O alerta será reaberto e ficará novamente pendente" : "The alert will be reopened and will be pending again")}
               </DialogDescription>
             </DialogHeader>
             
@@ -343,11 +352,11 @@ export default function DashboardAlertas() {
                 
                 {isResolving && (
                   <div>
-                    <label className="text-sm font-medium">Notas de Resolução</label>
+                    <label className="text-sm font-medium">{language === 'pt' ? "Notas de Resolução" : "Resolution Notes"}</label>
                     <Textarea
                       value={notasResolucao}
                       onChange={(e) => setNotasResolucao(e.target.value)}
-                      placeholder="Descreva como o problema foi resolvido..."
+                      placeholder={language === 'pt' ? "Descreva como o problema foi resolvido..." : "Describe how the problem was resolved..."}
                       className="mt-2"
                     />
                   </div>
@@ -357,14 +366,18 @@ export default function DashboardAlertas() {
             
             <DialogFooter>
               <Button variant="outline" onClick={() => setDialogOpen(false)}>
-                Cancelar
+                {language === 'pt' ? "Cancelar" : "Cancel"}
               </Button>
               <Button 
                 onClick={handleConfirm}
                 disabled={updateEstadoMutation.isPending}
                 className={isResolving ? "bg-green-600 hover:bg-green-700" : ""}
               >
-                {updateEstadoMutation.isPending ? "A processar..." : isResolving ? "Marcar como Resolvido" : "Reabrir Alerta"}
+                {updateEstadoMutation.isPending 
+                  ? (language === 'pt' ? "A processar..." : "Processing...")
+                  : isResolving 
+                    ? (language === 'pt' ? "Marcar como Resolvido" : "Mark as Resolved")
+                    : (language === 'pt' ? "Reabrir Alerta" : "Reopen Alert")}
               </Button>
             </DialogFooter>
           </DialogContent>

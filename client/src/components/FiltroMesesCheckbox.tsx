@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar, ChevronDown, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export interface MesSelecionado {
   mes: number; // 1-12
@@ -21,15 +22,29 @@ interface FiltroMesesCheckboxProps {
   disabled?: boolean;
 }
 
-const NOMES_MESES = [
+const NOMES_MESES_PT = [
   "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
   "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
 ];
 
-const NOMES_MESES_CURTOS = [
+const NOMES_MESES_EN = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December"
+];
+
+const NOMES_MESES_CURTOS_PT = [
   "Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
   "Jul", "Ago", "Set", "Out", "Nov", "Dez"
 ];
+
+const NOMES_MESES_CURTOS_EN = [
+  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+];
+
+// Exportar versões para compatibilidade
+const NOMES_MESES = NOMES_MESES_PT;
+const NOMES_MESES_CURTOS = NOMES_MESES_CURTOS_PT;
 
 /**
  * Gera os últimos N meses a partir da data atual
@@ -82,10 +97,16 @@ export default function FiltroMesesCheckbox({
   onMesesChange,
   maxMeses,
   className,
-  placeholder = "Selecionar meses",
+  placeholder,
   disabled = false
 }: FiltroMesesCheckboxProps) {
+  const { language } = useLanguage();
   const [open, setOpen] = useState(false);
+  
+  const NOMES_MESES_LOCAL = language === 'pt' ? NOMES_MESES_PT : NOMES_MESES_EN;
+  const NOMES_MESES_CURTOS_LOCAL = language === 'pt' ? NOMES_MESES_CURTOS_PT : NOMES_MESES_CURTOS_EN;
+  const defaultPlaceholder = language === 'pt' ? "Selecionar meses" : "Select months";
+  const actualPlaceholder = placeholder || defaultPlaceholder;
   
   // Usar meses disponíveis fornecidos ou gerar os últimos 24 meses
   const meses = useMemo(() => {
@@ -160,18 +181,25 @@ export default function FiltroMesesCheckbox({
   };
   
   // Texto do botão
+  const formatarMesLocal = (mesSelecionado: MesSelecionado, curto: boolean = false): string => {
+    const nomes = curto ? NOMES_MESES_CURTOS_LOCAL : NOMES_MESES_LOCAL;
+    return `${nomes[mesSelecionado.mes - 1]} ${mesSelecionado.ano}`;
+  };
+  
   const textoSelecionado = useMemo(() => {
     if (mesesSelecionados.length === 0) {
-      return placeholder;
+      return actualPlaceholder;
     }
     if (mesesSelecionados.length === 1) {
-      return formatarMes(mesesSelecionados[0]);
+      return formatarMesLocal(mesesSelecionados[0]);
     }
     if (mesesSelecionados.length <= 3) {
-      return mesesSelecionados.map(m => formatarMes(m, true)).join(", ");
+      return mesesSelecionados.map(m => formatarMesLocal(m, true)).join(", ");
     }
-    return `${mesesSelecionados.length} meses selecionados`;
-  }, [mesesSelecionados, placeholder]);
+    return language === 'pt' 
+      ? `${mesesSelecionados.length} meses selecionados`
+      : `${mesesSelecionados.length} months selected`;
+  }, [mesesSelecionados, actualPlaceholder, language, NOMES_MESES_LOCAL, NOMES_MESES_CURTOS_LOCAL]);
   
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -197,7 +225,7 @@ export default function FiltroMesesCheckbox({
       <PopoverContent className="w-[380px] p-0" align="start">
         <div className="p-3 border-b">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium">Selecionar Meses</span>
+            <span className="text-sm font-medium">{language === 'pt' ? "Selecionar Meses" : "Select Months"}</span>
             {mesesSelecionados.length > 0 && (
               <Button
                 variant="ghost"
@@ -206,13 +234,13 @@ export default function FiltroMesesCheckbox({
                 className="h-7 px-2 text-xs"
               >
                 <X className="h-3 w-3 mr-1" />
-                Limpar
+                {language === 'pt' ? "Limpar" : "Clear"}
               </Button>
             )}
           </div>
           {maxMeses && (
             <p className="text-xs text-muted-foreground mt-1">
-              Máximo de {maxMeses} meses
+              {language === 'pt' ? `Máximo de ${maxMeses} meses` : `Maximum ${maxMeses} months`}
             </p>
           )}
         </div>
@@ -281,7 +309,7 @@ export default function FiltroMesesCheckbox({
                         htmlFor={`mes-${mes.ano}-${mes.mes}`}
                         className="text-xs cursor-pointer"
                       >
-                        {NOMES_MESES_CURTOS[mes.mes - 1]}
+                        {NOMES_MESES_CURTOS_LOCAL[mes.mes - 1]}
                       </Label>
                     </div>
                   );
@@ -294,7 +322,9 @@ export default function FiltroMesesCheckbox({
         {mesesSelecionados.length > 0 && (
           <div className="p-3 border-t bg-muted/30">
             <p className="text-xs text-muted-foreground">
-              <strong>{mesesSelecionados.length}</strong> {mesesSelecionados.length === 1 ? "mês selecionado" : "meses selecionados"}
+              <strong>{mesesSelecionados.length}</strong> {language === 'pt' 
+                ? (mesesSelecionados.length === 1 ? "mês selecionado" : "meses selecionados")
+                : (mesesSelecionados.length === 1 ? "month selected" : "months selected")}
             </p>
           </div>
         )}

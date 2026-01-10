@@ -505,7 +505,7 @@ export default function RelatorioLivre() {
                           variant="ghost"
                           size="icon"
                           onClick={() => setPendenteVisualizando(index)}
-                          title="Visualizar pendente completo"
+                          title={language === 'pt' ? "Visualizar pendente completo" : "View complete pending item"}
                         >
                           <Eye className="h-4 w-4" />
                         </Button>

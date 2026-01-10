@@ -206,13 +206,13 @@ export default function ReunioesQuinzenais() {
                 </DialogHeader>
                 <div className="space-y-4 py-4">
                   <div>
-                    <label className="text-sm font-medium">Loja</label>
+                    <label className="text-sm font-medium">{language === 'pt' ? "Loja" : "Store"}</label>
                     <Select
                       value={novoPendenteLojaId?.toString() || ""}
                       onValueChange={(v) => setNovoPendenteLojaId(parseInt(v))}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Selecione a loja" />
+                        <SelectValue placeholder={language === 'pt' ? "Selecione a loja" : "Select the store"} />
                       </SelectTrigger>
                       <SelectContent>
                         {lojas?.map((loja) => (
@@ -224,7 +224,7 @@ export default function ReunioesQuinzenais() {
                     </Select>
                   </div>
                   <div>
-                    <label className="text-sm font-medium">Descrição</label>
+                    <label className="text-sm font-medium">{language === 'pt' ? "Descrição" : "Description"}</label>
                     <Textarea
                       placeholder="Descreva o pendente..."
                       value={novoPendenteDescricao}
@@ -232,7 +232,7 @@ export default function ReunioesQuinzenais() {
                     />
                   </div>
                   <div>
-                    <label className="text-sm font-medium">Prioridade</label>
+                    <label className="text-sm font-medium">{language === 'pt' ? "Prioridade" : "Priority"}</label>
                     <Select
                       value={novoPendentePrioridade}
                       onValueChange={(v) => setNovoPendentePrioridade(v as any)}
@@ -244,7 +244,7 @@ export default function ReunioesQuinzenais() {
                         <SelectItem value="baixa">Baixa</SelectItem>
                         <SelectItem value="media">Média</SelectItem>
                         <SelectItem value="alta">Alta</SelectItem>
-                        <SelectItem value="urgente">Urgente</SelectItem>
+                        <SelectItem value="urgente">{language === 'pt' ? "Urgente" : "Urgent"}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -365,7 +365,7 @@ export default function ReunioesQuinzenais() {
             <div className="flex items-center gap-4">
               <Select value={filtroEstado} onValueChange={setFiltroEstado}>
                 <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Filtrar por estado" />
+                  <SelectValue placeholder={language === 'pt' ? "Filtrar por estado" : "Filter by status"} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="todas">Todas</SelectItem>
@@ -394,9 +394,9 @@ export default function ReunioesQuinzenais() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Loja</TableHead>
+                      <TableHead>{language === 'pt' ? "Loja" : "Store"}</TableHead>
                       <TableHead>Data</TableHead>
-                      <TableHead>Estado</TableHead>
+                      <TableHead>{language === 'pt' ? "Estado" : "Status"}</TableHead>
                       <TableHead>Enviada para</TableHead>
                       <TableHead>Feedback</TableHead>
                       <TableHead className="text-right">Ações</TableHead>
@@ -591,10 +591,10 @@ export default function ReunioesQuinzenais() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Loja</TableHead>
-                      <TableHead>Descrição</TableHead>
-                      <TableHead>Prioridade</TableHead>
-                      <TableHead>Estado</TableHead>
+                      <TableHead>{language === 'pt' ? "Loja" : "Store"}</TableHead>
+                      <TableHead>{language === 'pt' ? "Descrição" : "Description"}</TableHead>
+                      <TableHead>{language === 'pt' ? "Prioridade" : "Priority"}</TableHead>
+                      <TableHead>{language === 'pt' ? "Estado" : "Status"}</TableHead>
                       <TableHead>Criado em</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -674,10 +674,10 @@ export default function ReunioesQuinzenais() {
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead>Loja</TableHead>
+                          <TableHead>{language === 'pt' ? "Loja" : "Store"}</TableHead>
                           <TableHead>Email</TableHead>
                           <TableHead>Token</TableHead>
-                          <TableHead>Estado</TableHead>
+                          <TableHead>{language === 'pt' ? "Estado" : "Status"}</TableHead>
                           <TableHead>Último Acesso</TableHead>
                           <TableHead className="text-right">Ações</TableHead>
                         </TableRow>
@@ -707,7 +707,7 @@ export default function ReunioesQuinzenais() {
                                       size="icon"
                                       className="h-6 w-6"
                                       onClick={() => copyToClipboard(getPortalUrl(tokenData.token))}
-                                      title="Copiar link"
+                                      title={language === 'pt' ? "Copiar link" : "Copy link"}
                                     >
                                       <Copy className="h-3 w-3" />
                                     </Button>
@@ -716,7 +716,7 @@ export default function ReunioesQuinzenais() {
                                       size="icon"
                                       className="h-6 w-6"
                                       onClick={() => window.open(getPortalUrl(tokenData.token), '_blank')}
-                                      title="Abrir portal"
+                                      title={language === 'pt' ? "Abrir portal" : "Open portal"}
                                     >
                                       <ExternalLink className="h-3 w-3" />
                                     </Button>
@@ -773,7 +773,7 @@ export default function ReunioesQuinzenais() {
                                       variant="outline"
                                       size="sm"
                                       onClick={() => regenerarTokenMutation.mutate({ lojaId: loja.id })}
-                                      title="Regenerar token"
+                                      title={language === 'pt' ? "Regenerar token" : "Regenerate token"}
                                     >
                                       <RefreshCw className="h-4 w-4" />
                                     </Button>
@@ -823,7 +823,7 @@ export default function ReunioesQuinzenais() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Loja</TableHead>
+                        <TableHead>{language === 'pt' ? "Loja" : "Store"}</TableHead>
                         <TableHead>Última Reunião</TableHead>
                         <TableHead>Dias sem Reunião</TableHead>
                       </TableRow>

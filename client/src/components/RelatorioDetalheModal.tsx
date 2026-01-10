@@ -190,14 +190,14 @@ export function RelatorioDetalheModal({
                 <div className="flex items-center gap-2">
                   <Building2 className="h-4 w-4 text-primary" />
                   <div>
-                    <p className="text-xs text-muted-foreground">Loja</p>
+                    <p className="text-xs text-muted-foreground">{language === 'pt' ? "Loja" : "Store"}</p>
                     <p className="font-medium">{relatorio.loja?.nome || "N/A"}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <User className="h-4 w-4 text-muted-foreground" />
                   <div>
-                    <p className="text-xs text-muted-foreground">Gestor</p>
+                    <p className="text-xs text-muted-foreground">{language === 'pt' ? "Gestor" : "Manager"}</p>
                     <p className="font-medium">{relatorio.gestor?.nome || "N/A"}</p>
                   </div>
                 </div>
@@ -219,7 +219,7 @@ export function RelatorioDetalheModal({
                   <div className="flex items-center gap-2 col-span-2">
                     <Tag className="h-4 w-4 text-primary" />
                     <div className="flex-1">
-                      <p className="text-xs text-muted-foreground mb-1">Categoria</p>
+                      <p className="text-xs text-muted-foreground mb-1">{language === 'pt' ? "Categoria" : "Category"}</p>
                       <CategoriaAutocomplete
                         value={categoria}
                         onChange={handleCategoriaChange}
@@ -265,7 +265,7 @@ export function RelatorioDetalheModal({
                   )}
                   {relatorioCompleteData.consumiveis && (
                     <div>
-                      <h4 className="font-medium mb-2">Consumíveis</h4>
+                      <h4 className="font-medium mb-2">{language === 'pt' ? "Consumíveis" : "Consumables"}</h4>
                       <p className="text-sm text-muted-foreground whitespace-pre-wrap bg-muted/50 p-3 rounded-lg">
                         {relatorioCompleteData.consumiveis}
                       </p>
@@ -281,7 +281,7 @@ export function RelatorioDetalheModal({
                   )}
                   {relatorioCompleteData.reclamacoes && (
                     <div>
-                      <h4 className="font-medium mb-2">Reclamações</h4>
+                      <h4 className="font-medium mb-2">{language === 'pt' ? "Reclamações" : "Complaints"}</h4>
                       <p className="text-sm text-muted-foreground whitespace-pre-wrap bg-muted/50 p-3 rounded-lg">
                         {relatorioCompleteData.reclamacoes}
                       </p>

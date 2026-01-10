@@ -228,10 +228,10 @@ export default function TodoWidget() {
         <Select value={filtroLoja} onValueChange={setFiltroLoja}>
           <SelectTrigger className="h-8 text-xs flex-1">
             <Store className="h-3 w-3 mr-1" />
-            <SelectValue placeholder="Loja" />
+            <SelectValue placeholder={language === 'pt' ? "Loja" : "Store"} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="todas">Todas as lojas</SelectItem>
+            <SelectItem value="todas">{language === 'pt' ? "Todas as lojas" : "All stores"}</SelectItem>
             {lojas?.map((loja: any) => (
               <SelectItem key={loja.id} value={loja.id.toString()}>
                 {loja.nome}
@@ -242,12 +242,12 @@ export default function TodoWidget() {
         <Select value={filtroEstado} onValueChange={setFiltroEstado}>
           <SelectTrigger className="h-8 text-xs w-32">
             <Filter className="h-3 w-3 mr-1" />
-            <SelectValue placeholder="Estado" />
+            <SelectValue placeholder={language === 'pt' ? "Estado" : "Status"} />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="ativos">Ativos</SelectItem>
-            <SelectItem value="todos">Todos</SelectItem>
-            <SelectItem value="pendente">Pendentes</SelectItem>
+            <SelectItem value="todos">{language === 'pt' ? "Todos" : "All"}</SelectItem>
+            <SelectItem value="pendente">{language === 'pt' ? "Pendentes" : "Pending Items"}</SelectItem>
             <SelectItem value="em_progresso">Em Progresso</SelectItem>
             <SelectItem value="devolvida">Devolvidas</SelectItem>
           </SelectContent>
@@ -259,7 +259,7 @@ export default function TodoWidget() {
         <div className="bg-white rounded-lg p-2 shadow-sm border-l-4 border-amber-500">
           <div className="flex items-center gap-1">
             <Clock className="h-3 w-3 text-amber-500" />
-            <span className="text-[10px] text-muted-foreground">Pendentes</span>
+            <span className="text-[10px] text-muted-foreground">{language === 'pt' ? "Pendentes" : "Pending Items"}</span>
           </div>
           <p className="text-xl font-bold text-amber-600">{pendentes.length}</p>
         </div>

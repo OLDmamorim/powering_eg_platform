@@ -304,7 +304,7 @@ export function ResultadosDashboard() {
                   }}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Nenhum" />
+                    <SelectValue placeholder={language === 'pt' ? "Nenhum" : "None"} />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="nenhum">{t('common.nenhum') || 'Nenhum'}</SelectItem>
@@ -332,7 +332,7 @@ export function ResultadosDashboard() {
                   }}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Nenhum" />
+                    <SelectValue placeholder={language === 'pt' ? "Nenhum" : "None"} />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="nenhum">{t('common.nenhum') || 'Nenhum'}</SelectItem>

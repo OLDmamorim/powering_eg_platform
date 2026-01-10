@@ -323,7 +323,7 @@ export default function Todos() {
                 <AlertTriangle className="h-5 w-5 text-gray-500" />
                 <div>
                   <p className="text-2xl font-bold">{estatisticas?.pendentes || 0}</p>
-                  <p className="text-xs text-muted-foreground">Pendentes</p>
+                  <p className="text-xs text-muted-foreground">{language === 'pt' ? "Pendentes" : "Pending Items"}</p>
                 </div>
               </div>
             </CardContent>
@@ -380,10 +380,10 @@ export default function Todos() {
               
               <Select value={filtroLoja} onValueChange={setFiltroLoja}>
                 <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Loja" />
+                  <SelectValue placeholder={language === 'pt' ? "Loja" : "Store"} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="todas">Todas as lojas</SelectItem>
+                  <SelectItem value="todas">{language === 'pt' ? "Todas as lojas" : "All stores"}</SelectItem>
                   {lojas?.map((loja: any) => (
                     <SelectItem key={loja.id} value={loja.id.toString()}>
                       {loja.nome}
@@ -394,11 +394,11 @@ export default function Todos() {
               
               <Select value={filtroEstado} onValueChange={setFiltroEstado}>
                 <SelectTrigger className="w-[150px]">
-                  <SelectValue placeholder="Estado" />
+                  <SelectValue placeholder={language === 'pt' ? "Estado" : "Status"} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="todos">Todos</SelectItem>
-                  <SelectItem value="pendente">Pendente</SelectItem>
+                  <SelectItem value="todos">{language === 'pt' ? "Todos" : "All"}</SelectItem>
+                  <SelectItem value="pendente">{language === 'pt' ? "Pendente" : "Pending"}</SelectItem>
                   <SelectItem value="em_progresso">Em Progresso</SelectItem>
                   <SelectItem value="concluida">Concluída</SelectItem>
                   <SelectItem value="devolvida">Devolvida</SelectItem>
@@ -407,7 +407,7 @@ export default function Todos() {
               
               <Select value={filtroCategoria} onValueChange={setFiltroCategoria}>
                 <SelectTrigger className="w-[150px]">
-                  <SelectValue placeholder="Categoria" />
+                  <SelectValue placeholder={language === 'pt' ? "Categoria" : "Category"} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="todas">Todas</SelectItem>
@@ -424,11 +424,11 @@ export default function Todos() {
               
               <Select value={filtroPrioridade} onValueChange={setFiltroPrioridade}>
                 <SelectTrigger className="w-[150px]">
-                  <SelectValue placeholder="Prioridade" />
+                  <SelectValue placeholder={language === 'pt' ? "Prioridade" : "Priority"} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="todas">Todas</SelectItem>
-                  <SelectItem value="urgente">Urgente</SelectItem>
+                  <SelectItem value="urgente">{language === 'pt' ? "Urgente" : "Urgent"}</SelectItem>
                   <SelectItem value="alta">Alta</SelectItem>
                   <SelectItem value="media">Média</SelectItem>
                   <SelectItem value="baixa">Baixa</SelectItem>
@@ -567,12 +567,12 @@ export default function Todos() {
                 <Input
                   value={titulo}
                   onChange={(e) => setTitulo(e.target.value)}
-                  placeholder="Título da tarefa"
+                  placeholder={language === 'pt' ? "Título da tarefa" : "Task title"}
                 />
               </div>
               
               <div>
-                <label className="text-sm font-medium">Descrição</label>
+                <label className="text-sm font-medium">{language === 'pt' ? "Descrição" : "Description"}</label>
                 <Textarea
                   value={descricao}
                   onChange={(e) => setDescricao(e.target.value)}
@@ -583,7 +583,7 @@ export default function Todos() {
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium">Categoria</label>
+                  <label className="text-sm font-medium">{language === 'pt' ? "Categoria" : "Category"}</label>
                   <Select value={categoriaId} onValueChange={setCategoriaId}>
                     <SelectTrigger>
                       <SelectValue placeholder="Selecionar..." />
@@ -602,7 +602,7 @@ export default function Todos() {
                 </div>
                 
                 <div>
-                  <label className="text-sm font-medium">Prioridade</label>
+                  <label className="text-sm font-medium">{language === 'pt' ? "Prioridade" : "Priority"}</label>
                   <Select value={prioridade} onValueChange={setPrioridade}>
                     <SelectTrigger>
                       <SelectValue />
@@ -611,7 +611,7 @@ export default function Todos() {
                       <SelectItem value="baixa">Baixa</SelectItem>
                       <SelectItem value="media">Média</SelectItem>
                       <SelectItem value="alta">Alta</SelectItem>
-                      <SelectItem value="urgente">Urgente</SelectItem>
+                      <SelectItem value="urgente">{language === 'pt' ? "Urgente" : "Urgent"}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -683,12 +683,12 @@ export default function Todos() {
                 <Input
                   value={titulo}
                   onChange={(e) => setTitulo(e.target.value)}
-                  placeholder="Título da tarefa"
+                  placeholder={language === 'pt' ? "Título da tarefa" : "Task title"}
                 />
               </div>
               
               <div>
-                <label className="text-sm font-medium">Descrição</label>
+                <label className="text-sm font-medium">{language === 'pt' ? "Descrição" : "Description"}</label>
                 <Textarea
                   value={descricao}
                   onChange={(e) => setDescricao(e.target.value)}
@@ -699,7 +699,7 @@ export default function Todos() {
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium">Categoria</label>
+                  <label className="text-sm font-medium">{language === 'pt' ? "Categoria" : "Category"}</label>
                   <Select value={categoriaId} onValueChange={setCategoriaId}>
                     <SelectTrigger>
                       <SelectValue placeholder="Selecionar..." />
@@ -718,7 +718,7 @@ export default function Todos() {
                 </div>
                 
                 <div>
-                  <label className="text-sm font-medium">Prioridade</label>
+                  <label className="text-sm font-medium">{language === 'pt' ? "Prioridade" : "Priority"}</label>
                   <Select value={prioridade} onValueChange={setPrioridade}>
                     <SelectTrigger>
                       <SelectValue />
@@ -727,7 +727,7 @@ export default function Todos() {
                       <SelectItem value="baixa">Baixa</SelectItem>
                       <SelectItem value="media">Média</SelectItem>
                       <SelectItem value="alta">Alta</SelectItem>
-                      <SelectItem value="urgente">Urgente</SelectItem>
+                      <SelectItem value="urgente">{language === 'pt' ? "Urgente" : "Urgent"}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -897,7 +897,7 @@ export default function Todos() {
                 <Input
                   value={novaCategoriaNome}
                   onChange={(e) => setNovaCategoriaNome(e.target.value)}
-                  placeholder="Nome da categoria"
+                  placeholder={language === 'pt' ? "Nome da categoria" : "Category name"}
                   className="flex-1"
                 />
                 <Input

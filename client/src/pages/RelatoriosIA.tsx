@@ -98,7 +98,7 @@ export default function RelatoriosIA() {
                 <FiltroMesesCheckbox
                   mesesSelecionados={mesesSelecionados}
                   onMesesChange={setMesesSelecionados}
-                  placeholder="Selecionar meses"
+                  placeholder={language === 'pt' ? "Selecionar meses" : "Select months"}
                 />
               </div>
               <div className="flex gap-2">
@@ -420,7 +420,7 @@ export default function RelatoriosIA() {
                         <table className="w-full text-sm">
                           <thead>
                             <tr className="border-b">
-                              <th className="text-left py-2 font-medium">Loja</th>
+                              <th className="text-left py-2 font-medium">{language === 'pt' ? "Loja" : "Store"}</th>
                               <th className="text-center py-2 font-medium">Visitas</th>
                               <th className="text-right py-2 font-medium">Última Visita</th>
                             </tr>

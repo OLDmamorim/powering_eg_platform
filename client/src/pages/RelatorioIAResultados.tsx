@@ -262,7 +262,7 @@ export function RelatorioIAResultados() {
                     mesesDisponiveis={mesesDisponiveis}
                     mesesSelecionados={mesesSelecionados}
                     onMesesChange={setMesesSelecionados}
-                    placeholder="Selecionar meses"
+                    placeholder={language === 'pt' ? "Selecionar meses" : "Select months"}
                   />
                 </div>
                 
@@ -372,7 +372,7 @@ export function RelatorioIAResultados() {
                     {/* Seleção de Gestor */}
                     {tipoFiltro === 'gestor' && (
                       <div className="space-y-1">
-                        <label className="text-xs font-medium text-muted-foreground">Gestor</label>
+                        <label className="text-xs font-medium text-muted-foreground">{language === 'pt' ? "Gestor" : "Manager"}</label>
                         <Select 
                           value={gestorSeleccionado?.toString() || ''} 
                           onValueChange={(v) => setGestorSeleccionado(v ? parseInt(v) : undefined)}
@@ -1214,7 +1214,7 @@ export function RelatorioIAResultados() {
                       <Table>
                         <TableHeader>
                           <TableRow>
-                            <TableHead>Zona</TableHead>
+                            <TableHead>{language === 'pt' ? "Zona" : "Zone"}</TableHead>
                             <TableHead className="text-center">Lojas</TableHead>
                             <TableHead className="text-right">Serviços</TableHead>
                             <TableHead className="text-right">Objetivo</TableHead>
@@ -1409,8 +1409,8 @@ export function RelatorioIAResultados() {
                         <TableHeader>
                           <TableRow>
                             <TableHead className="w-12">#</TableHead>
-                            <TableHead>Loja</TableHead>
-                            {isAdmin && <TableHead>Zona</TableHead>}
+                            <TableHead>{language === 'pt' ? "Loja" : "Store"}</TableHead>
+                            {isAdmin && <TableHead>{language === 'pt' ? "Zona" : "Zone"}</TableHead>}
                             <TableHead className="text-right">Serviços</TableHead>
                             <TableHead className="text-right">Objetivo</TableHead>
                             <TableHead className="text-right">Desvio</TableHead>

@@ -169,7 +169,7 @@ export default function PortalLojaWidget() {
         <div className="bg-white rounded-lg p-3 shadow-sm border-l-4 border-amber-500">
           <div className="flex items-center gap-2">
             <Clock className="h-4 w-4 text-amber-500" />
-            <span className="text-xs text-muted-foreground">Pendentes</span>
+            <span className="text-xs text-muted-foreground">{language === 'pt' ? "Pendentes" : "Pending Items"}</span>
           </div>
           <p className="text-2xl font-bold text-amber-600">{pendentes.length}</p>
         </div>

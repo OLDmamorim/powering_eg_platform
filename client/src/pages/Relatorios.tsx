@@ -253,9 +253,9 @@ export default function Relatorios() {
         if (fotosArray.length > 0) {
           fotosHtml = `
             <div class="section">
-              <h2>Fotos</h2>
+              <h2>{language === 'pt' ? "Fotos" : "Photos"}</h2>
               <div class="fotos">
-                ${fotosArray.map((foto: string) => `<img src="${foto}" alt="Foto" />`).join('')}
+                ${fotosArray.map((foto: string) => `<img src="${foto}" alt={language === 'pt' ? "Foto" : "Photo"} />`).join('')}
               </div>
             </div>
           `;
@@ -610,7 +610,7 @@ export default function Relatorios() {
                               </div>
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                  <Label className="text-xs">Categoria</Label>
+                                  <Label className="text-xs">{language === 'pt' ? "Categoria" : "Category"}</Label>
                                   <CategoriaAutocomplete
                                     value={relatorio.categoria || ""}
                                     onChange={(categoria) => {
@@ -625,7 +625,7 @@ export default function Relatorios() {
                                   />
                                 </div>
                                 <div className="space-y-2">
-                                  <Label className="text-xs">Estado</Label>
+                                  <Label className="text-xs">{language === 'pt' ? "Estado" : "Status"}</Label>
                                   <EstadoAcompanhamentoSelect
                                     value={relatorio.estadoAcompanhamento || null}
                                     onChange={(estado) => {
@@ -783,7 +783,7 @@ export default function Relatorios() {
                             )}
                             {relatorio.consumiveis && (
                               <div className="p-3 bg-muted rounded-lg">
-                                <p className="text-sm font-medium mb-1">Consumíveis</p>
+                                <p className="text-sm font-medium mb-1">{language === 'pt' ? "Consumíveis" : "Consumables"}</p>
                                 <p className="text-sm text-muted-foreground">{relatorio.consumiveis}</p>
                               </div>
                             )}
@@ -795,7 +795,7 @@ export default function Relatorios() {
                             )}
                             {relatorio.reclamacoes && (
                               <div className="p-3 bg-muted rounded-lg">
-                                <p className="text-sm font-medium mb-1">Reclamações</p>
+                                <p className="text-sm font-medium mb-1">{language === 'pt' ? "Reclamações" : "Complaints"}</p>
                                 <p className="text-sm text-muted-foreground">{relatorio.reclamacoes}</p>
                               </div>
                             )}
@@ -868,7 +868,7 @@ export default function Relatorios() {
                               </div>
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                  <Label className="text-xs">Categoria</Label>
+                                  <Label className="text-xs">{language === 'pt' ? "Categoria" : "Category"}</Label>
                                   <CategoriaAutocomplete
                                     value={relatorio.categoria || ""}
                                     onChange={(categoria) => {
@@ -883,7 +883,7 @@ export default function Relatorios() {
                                   />
                                 </div>
                                 <div className="space-y-2">
-                                  <Label className="text-xs">Estado</Label>
+                                  <Label className="text-xs">{language === 'pt' ? "Estado" : "Status"}</Label>
                                   <EstadoAcompanhamentoSelect
                                     value={relatorio.estadoAcompanhamento || null}
                                     onChange={(estado) => {
@@ -1127,6 +1127,7 @@ function EditarRelatorioCompletoForm({
   isPending: boolean;
   isAdmin: boolean;
 }) {
+  const { language } = useLanguage();
   const [formData, setFormData] = useState({
     dataVisita: new Date(relatorio.dataVisita).toISOString().split('T')[0],
     episFardamento: relatorio.episFardamento || "",
@@ -1202,7 +1203,7 @@ function EditarRelatorioCompletoForm({
           />
         </div>
         <div className="space-y-2">
-          <Label>Consumíveis</Label>
+          <Label>{language === 'pt' ? "Consumíveis" : "Consumables"}</Label>
           <Textarea
             value={formData.consumiveis}
             onChange={(e) => handleChange('consumiveis', e.target.value)}
@@ -1218,7 +1219,7 @@ function EditarRelatorioCompletoForm({
           />
         </div>
         <div className="space-y-2">
-          <Label>Reclamações</Label>
+          <Label>{language === 'pt' ? "Reclamações" : "Complaints"}</Label>
           <Textarea
             value={formData.reclamacoes}
             onChange={(e) => handleChange('reclamacoes', e.target.value)}

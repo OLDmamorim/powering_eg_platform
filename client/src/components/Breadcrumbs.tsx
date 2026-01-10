@@ -9,20 +9,20 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-// Mapeamento de rotas para nomes legíveis
-const routeNames: Record<string, string> = {
-  "": "Dashboard",
-  "dashboard": "Dashboard",
-  "lojas": "Lojas",
-  "gestores": "Gestores",
-  "relatorios": "Relatórios",
-  "relatorios-ia": "Relatórios IA",
-  "relatorio-livre": "Relatório Livre",
-  "relatorio-completo": "Relatório Completo",
-  "historico-pontos": "Histórico de Pontos",
-  "alertas": "Alertas",
-  "configuracoes-alertas": "Config. Alertas",
-  "pendentes": "Pendentes",
+// Mapeamento de rotas para nomes legíveis (PT e EN)
+const routeNames: Record<string, { pt: string; en: string }> = {
+  "": { pt: "Dashboard", en: "Dashboard" },
+  "dashboard": { pt: "Dashboard", en: "Dashboard" },
+  "lojas": { pt: "Lojas", en: "Stores" },
+  "gestores": { pt: "Gestores", en: "Managers" },
+  "relatorios": { pt: "Relatórios", en: "Reports" },
+  "relatorios-ia": { pt: "Relatórios IA", en: "AI Reports" },
+  "relatorio-livre": { pt: "Relatório Livre", en: "Free Report" },
+  "relatorio-completo": { pt: "Relatório Completo", en: "Complete Report" },
+  "historico-pontos": { pt: "Histórico de Pontos", en: "Points History" },
+  "alertas": { pt: "Alertas", en: "Alerts" },
+  "configuracoes-alertas": { pt: "Config. Alertas", en: "Alert Settings" },
+  "pendentes": { pt: "Pendentes", en: "Pending" },
 };
 
 export function Breadcrumbs() {
@@ -34,6 +34,14 @@ export function Breadcrumbs() {
   
   // Se estamos no dashboard, mostrar apenas o seletor de idioma
   const showBreadcrumbs = !(pathParts.length === 0 || (pathParts.length === 1 && pathParts[0] === "dashboard"));
+  
+  const getRouteName = (part: string) => {
+    const route = routeNames[part];
+    if (route) {
+      return language === 'pt' ? route.pt : route.en;
+    }
+    return part;
+  };
   
   return (
     <div className="flex items-center justify-between mb-4">
@@ -48,7 +56,7 @@ export function Breadcrumbs() {
           {pathParts.map((part, index) => {
             const path = "/" + pathParts.slice(0, index + 1).join("/");
             const isLast = index === pathParts.length - 1;
-            const name = routeNames[part] || part;
+            const name = getRouteName(part);
             
             return (
               <span key={path} className="flex items-center gap-1">

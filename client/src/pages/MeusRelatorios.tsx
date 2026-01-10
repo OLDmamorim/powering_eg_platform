@@ -238,10 +238,10 @@ export default function MeusRelatorios() {
               </div>
               <Select value={lojaFiltro || "todas"} onValueChange={setLojaFiltro}>
                 <SelectTrigger className="w-full md:w-[200px]">
-                  <SelectValue placeholder="Todas as lojas" />
+                  <SelectValue placeholder={language === 'pt' ? "Todas as lojas" : "All stores"} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="todas">Todas as lojas</SelectItem>
+                  <SelectItem value="todas">{language === 'pt' ? "Todas as lojas" : "All stores"}</SelectItem>
                   {lojasUnicas.map((loja) => (
                     <SelectItem key={loja} value={loja}>
                       {loja}
@@ -323,7 +323,7 @@ export default function MeusRelatorios() {
                               </div>
                             </div>
                             <div className="flex items-center gap-2">
-                              <Badge variant="outline" className="text-xs">Livre</Badge>
+                              <Badge variant="outline" className="text-xs">{language === 'pt' ? "Livre" : "Free"}</Badge>
                               {expandedLivres.includes(relatorio.id) ? (
                                 <ChevronUp className="h-4 w-4 text-muted-foreground" />
                               ) : (
@@ -456,7 +456,7 @@ export default function MeusRelatorios() {
                               </div>
                             </div>
                             <div className="flex items-center gap-2">
-                              <Badge variant="secondary" className="text-xs">Completo</Badge>
+                              <Badge variant="secondary" className="text-xs">{language === 'pt' ? "Completo" : "Complete"}</Badge>
                               {expandedCompletos.includes(relatorio.id) ? (
                                 <ChevronUp className="h-4 w-4 text-muted-foreground" />
                               ) : (
@@ -742,7 +742,7 @@ export default function MeusRelatorios() {
             </div>
             
             <div className="space-y-2">
-              <Label>Consumíveis</Label>
+              <Label>{language === 'pt' ? "Consumíveis" : "Consumables"}</Label>
               <Textarea
                 value={editConsumiveis}
                 onChange={(e) => setEditConsumiveis(e.target.value)}
@@ -764,7 +764,7 @@ export default function MeusRelatorios() {
             </div>
             
             <div className="space-y-2">
-              <Label>Reclamações</Label>
+              <Label>{language === 'pt' ? "Reclamações" : "Complaints"}</Label>
               <Textarea
                 value={editReclamacoes}
                 onChange={(e) => setEditReclamacoes(e.target.value)}

@@ -108,7 +108,7 @@ export default function Categorias() {
             <div class="stats-grid">
               <div class="stat-item">
                 <div class="stat-value">${cat.contadores.total}</div>
-                <div class="stat-label">Total</div>
+                <div class="stat-label">{language === 'pt' ? "Total" : "Total"}</div>
               </div>
               <div class="stat-item">
                 <div class="stat-value" style="color: #e65100;">${cat.contadores.acompanhar}</div>
@@ -338,7 +338,7 @@ export default function Categorias() {
               <CardContent className="pt-4">
                 <div className="flex items-center gap-2">
                   <BarChart3 className="h-5 w-5 text-gray-500" />
-                  <span className="text-sm text-muted-foreground">Total</span>
+                  <span className="text-sm text-muted-foreground">{language === 'pt' ? "Total" : "Total"}</span>
                 </div>
                 <p className="text-2xl font-bold mt-1">
                   {estatisticas.totalRelatoriosCategorizados}
@@ -364,32 +364,32 @@ export default function Categorias() {
               <Select value={filtroEstado} onValueChange={setFiltroEstado}>
                 <SelectTrigger className="w-[200px]">
                   <Filter className="h-4 w-4 mr-2" />
-                  <SelectValue placeholder="Filtrar por estado" />
+                  <SelectValue placeholder={language === 'pt' ? "Filtrar por estado" : "Filter by status"} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Todos os estados</SelectItem>
+                  <SelectItem value="all">{language === 'pt' ? "Todos os estados" : "All statuses"}</SelectItem>
                   <SelectItem value="acompanhar">
                     <div className="flex items-center gap-2">
                       <Eye className="h-4 w-4 text-blue-500" />
-                      Acompanhar
+                      {language === 'pt' ? "Acompanhar" : "Follow up"}
                     </div>
                   </SelectItem>
                   <SelectItem value="em_tratamento">
                     <div className="flex items-center gap-2">
                       <Clock className="h-4 w-4 text-amber-500" />
-                      Em Tratamento
+                      {language === 'pt' ? "Em Tratamento" : "In Treatment"}
                     </div>
                   </SelectItem>
                   <SelectItem value="tratado">
                     <div className="flex items-center gap-2">
                       <CheckCircle2 className="h-4 w-4 text-green-500" />
-                      Tratado
+                      {language === 'pt' ? "Tratado" : "Treated"}
                     </div>
                   </SelectItem>
                   <SelectItem value="sem_estado">
                     <div className="flex items-center gap-2">
                       <Tag className="h-4 w-4 text-gray-400" />
-                      Sem estado
+                      {language === 'pt' ? "Sem estado" : "No status"}
                     </div>
                   </SelectItem>
                 </SelectContent>
@@ -407,11 +407,11 @@ export default function Categorias() {
           <Card>
             <CardContent className="py-12 text-center">
               <Tag className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
-              <h3 className="text-lg font-medium">Nenhuma categoria encontrada</h3>
+              <h3 className="text-lg font-medium">{language === 'pt' ? "Nenhuma categoria encontrada" : "No categories found"}</h3>
               <p className="text-muted-foreground mt-1">
                 {pesquisa || filtroEstado !== "all"
                   ? "Tente ajustar os filtros de pesquisa"
-                  : "Comece por categorizar relatórios na página de Relatórios"}
+                  : (language === 'pt' ? "Comece por categorizar relatórios na página de Relatórios" : "Start by categorizing reports on the Reports page")}
               </p>
             </CardContent>
           </Card>
@@ -527,7 +527,7 @@ export default function Categorias() {
                                     ) : (
                                       <ClipboardList className="h-3 w-3 mr-1" />
                                     )}
-                                    {rel.tipo === "livre" ? "Livre" : "Completo"}
+                                    {rel.tipo === "livre" ? (language === 'pt' ? "Livre" : "Free") : (language === 'pt' ? "Completo" : "Complete")}
                                   </Badge>
                                   <div className="flex items-center gap-1 text-sm">
                                     <Building2 className="h-3 w-3 text-primary" />
@@ -542,7 +542,7 @@ export default function Categorias() {
                                   <div className="flex items-center gap-1 text-sm text-muted-foreground">
                                     <Calendar className="h-3 w-3" />
                                     {new Date(rel.dataVisita).toLocaleDateString(
-                                      "pt-PT"
+                                      language === 'pt' ? "pt-PT" : "en-US"
                                     )}
                                   </div>
                                 </div>

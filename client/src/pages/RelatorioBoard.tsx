@@ -783,7 +783,7 @@ export default function RelatorioBoard() {
             <FiltroMesesCheckbox
               mesesSelecionados={mesesSelecionados}
               onMesesChange={setMesesSelecionados}
-              placeholder="Selecionar meses"
+              placeholder={language === 'pt' ? "Selecionar meses" : "Select months"}
               className="w-[250px]"
             />
             <Button variant="outline" onClick={() => refetch()} disabled={isLoading}>
@@ -838,7 +838,7 @@ export default function RelatorioBoard() {
             </TabsTrigger>
             <TabsTrigger value="pendentes" className="gap-2">
               <Clock className="h-4 w-4" />
-              <span className="hidden sm:inline">Pendentes</span>
+              <span className="hidden sm:inline">{language === 'pt' ? "Pendentes" : "Pending Items"}</span>
             </TabsTrigger>
             <TabsTrigger value="ia" className="gap-2">
               <Sparkles className="h-4 w-4" />
@@ -893,7 +893,7 @@ export default function RelatorioBoard() {
                 <CardContent className="pt-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-amber-600 dark:text-amber-400">Pendentes</p>
+                      <p className="text-sm font-medium text-amber-600 dark:text-amber-400">{language === 'pt' ? "Pendentes" : "Pending Items"}</p>
                       <p className="text-3xl font-bold text-amber-900 dark:text-amber-100">{kpis.totalPendentes}</p>
                       <p className="text-xs text-amber-600/70">{kpis.pendentesResolvidos} resolvidos</p>
                     </div>
@@ -1072,7 +1072,7 @@ export default function RelatorioBoard() {
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b">
-                        <th className="text-left py-3 px-4 font-medium">Gestor</th>
+                        <th className="text-left py-3 px-4 font-medium">{language === 'pt' ? "Gestor" : "Manager"}</th>
                         <th className="text-center py-3 px-4 font-medium">Lojas</th>
                         <th className="text-center py-3 px-4 font-medium">Rel. Livres</th>
                         <th className="text-center py-3 px-4 font-medium">Rel. Completos</th>
@@ -1210,8 +1210,8 @@ export default function RelatorioBoard() {
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b">
-                        <th className="text-left py-3 px-4 font-medium">Categoria</th>
-                        <th className="text-center py-3 px-4 font-medium">Total</th>
+                        <th className="text-left py-3 px-4 font-medium">{language === 'pt' ? "Categoria" : "Category"}</th>
+                        <th className="text-center py-3 px-4 font-medium">{language === 'pt' ? "Total" : "Total"}</th>
                         <th className="text-center py-3 px-4 font-medium">A Acompanhar</th>
                         <th className="text-center py-3 px-4 font-medium">Em Tratamento</th>
                         <th className="text-center py-3 px-4 font-medium">Tratado</th>

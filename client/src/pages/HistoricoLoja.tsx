@@ -994,7 +994,7 @@ export default function HistoricoLoja() {
                 <FiltroMesesCheckbox
                   mesesSelecionados={mesesSelecionados}
                   onMesesChange={setMesesSelecionados}
-                  placeholder="Selecionar meses"
+                  placeholder={language === 'pt' ? "Selecionar meses" : "Select months"}
                 />
               </div>
 
@@ -1003,7 +1003,7 @@ export default function HistoricoLoja() {
                 <Label htmlFor="loja">Loja *</Label>
                 <Select value={lojaId} onValueChange={setLojaId}>
                   <SelectTrigger id="loja">
-                    <SelectValue placeholder="Selecione uma loja" />
+                    <SelectValue placeholder={language === 'pt' ? "Selecione uma loja" : "Select a store"} />
                   </SelectTrigger>
                   <SelectContent>
                     {lojas?.map((loja: any) => (
@@ -1190,7 +1190,7 @@ export default function HistoricoLoja() {
                       </td>
                     </tr>
                     <tr className="border-b border-indigo-100 hover:bg-indigo-50/50">
-                      <td className="py-2 px-3 font-medium">Pendentes</td>
+                      <td className="py-2 px-3 font-medium">{language === 'pt' ? "Pendentes" : "Pending Items"}</td>
                       <td className="text-center py-2 px-3">{comparacaoData.periodo1?.dados?.totalPendentes || 0}</td>
                       <td className="text-center py-2 px-3">{comparacaoData.periodo2?.dados?.totalPendentes || 0}</td>
                       <td className="text-center py-2 px-3">
@@ -1306,7 +1306,7 @@ export default function HistoricoLoja() {
               <Card className="bg-orange-50 border-orange-200">
                 <CardContent className="p-4 text-center">
                   <p className="text-2xl font-bold text-orange-700">{historyData.metricas?.totalPendentes || 0}</p>
-                  <p className="text-xs text-orange-600">Pendentes</p>
+                  <p className="text-xs text-orange-600">{language === 'pt' ? "Pendentes" : "Pending Items"}</p>
                 </CardContent>
               </Card>
               <Card className="bg-green-50 border-green-200">

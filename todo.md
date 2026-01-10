@@ -375,6 +375,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Remover página PlanoVisitas.tsx
 - [x] Manter tabelas e serviços no backend (podem ser úteis futuramente)
 
+## Tradução Completa v5.0
+- [ ] Traduzir TODOS os textos hardcoded em TODAS as páginas da aplicação
+- [ ] Atualizar ficheiros de tradução PT e EN
+
 ## Bug v4.2 - Envio de Email de Relatório mostra "0 gestores"
 - [x] Corrigir getAllGestores() para retornar email no campo correto
 - [x] O backend procura gestor.email mas getAllGestores retorna user.email
@@ -2468,3 +2472,14 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Traduzir toasts em RelatorioIACategorias
 - [x] Traduzir toasts em VoiceRecorder
 - [x] Corrigir erros TypeScript em HistoricoRelatoriosIA
+
+
+## Tradução Completa PT/EN v5.0 - CONCLUÍDA (Jan 2026)
+- [x] Traduzir 104 textos hardcoded em 39 ficheiros
+- [x] Atualizar Breadcrumbs.tsx com traduções dinâmicas
+- [x] Atualizar FiltroMesesCheckbox.tsx com nomes de meses PT/EN
+- [x] Atualizar EstadoAcompanhamento.tsx com labels PT/EN
+- [x] Adicionar useLanguage() a componentes sem acesso a language
+- [x] Corrigir erros TypeScript (6 → 0 erros)
+- [x] Testar alternância de idioma PT/EN
+- [x] Verificar que todos os textos estão traduzidos

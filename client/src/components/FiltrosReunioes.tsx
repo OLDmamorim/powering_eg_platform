@@ -10,6 +10,7 @@ import { CalendarIcon, X, Search, Filter } from "lucide-react";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface FiltrosReunioesProps {
   onFiltrar: (filtros: {
@@ -24,6 +25,7 @@ interface FiltrosReunioesProps {
 }
 
 export function FiltrosReunioes({ onFiltrar, todasTags, gestores }: FiltrosReunioesProps) {
+  const { language } = useLanguage();
   const [dataInicio, setDataInicio] = useState<Date | undefined>();
   const [dataFim, setDataFim] = useState<Date | undefined>();
   const [tagsSelecionadas, setTagsSelecionadas] = useState<string[]>([]);
@@ -153,10 +155,10 @@ export function FiltrosReunioes({ onFiltrar, todasTags, gestores }: FiltrosReuni
                   onValueChange={(value) => setCriadoPor(value === "todos" ? undefined : parseInt(value))}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Todos" />
+                    <SelectValue placeholder={language === 'pt' ? "Todos" : "All"} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="todos">Todos</SelectItem>
+                    <SelectItem value="todos">{language === 'pt' ? "Todos" : "All"}</SelectItem>
                     {gestores.map((gestor) => (
                       <SelectItem key={gestor.id} value={gestor.id.toString()}>
                         {gestor.nome}

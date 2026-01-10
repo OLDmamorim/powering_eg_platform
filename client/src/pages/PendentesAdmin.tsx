@@ -176,7 +176,7 @@ export default function PendentesAdmin() {
               </DialogHeader>
               <div className="space-y-4 pt-4">
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Loja</label>
+                  <label className="text-sm font-medium mb-2 block">{language === 'pt' ? "Loja" : "Store"}</label>
                   <Select
                     value={novoLojaId?.toString() || ""}
                     onValueChange={(v) => setNovoLojaId(parseInt(v))}
@@ -194,7 +194,7 @@ export default function PendentesAdmin() {
                   </Select>
                 </div>
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Descrição</label>
+                  <label className="text-sm font-medium mb-2 block">{language === 'pt' ? "Descrição" : "Description"}</label>
                   <Input
                     value={novaDescricao}
                     onChange={(e) => setNovaDescricao(e.target.value)}
@@ -247,7 +247,7 @@ export default function PendentesAdmin() {
             <CardContent className="pt-4">
               <div className="flex items-center gap-2">
                 <AlertTriangle className="h-5 w-5 text-primary" />
-                <span className="text-sm text-muted-foreground">Total</span>
+                <span className="text-sm text-muted-foreground">{language === 'pt' ? "Total" : "Total"}</span>
               </div>
               <p className="text-2xl font-bold mt-1">{stats.total}</p>
             </CardContent>
@@ -259,7 +259,7 @@ export default function PendentesAdmin() {
             <CardContent className="pt-4">
               <div className="flex items-center gap-2">
                 <Clock className="h-5 w-5 text-amber-500" />
-                <span className="text-sm text-muted-foreground">Pendentes</span>
+                <span className="text-sm text-muted-foreground">{language === 'pt' ? "Pendentes" : "Pending Items"}</span>
               </div>
               <p className="text-2xl font-bold mt-1 text-amber-600">{stats.pendentes}</p>
             </CardContent>
@@ -294,10 +294,10 @@ export default function PendentesAdmin() {
               <Select value={filtroLoja} onValueChange={setFiltroLoja}>
                 <SelectTrigger className="w-[200px]">
                   <Building2 className="h-4 w-4 mr-2" />
-                  <SelectValue placeholder="Filtrar por loja" />
+                  <SelectValue placeholder={language === 'pt' ? "Filtrar por loja" : "Filter by store"} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Todas as lojas</SelectItem>
+                  <SelectItem value="all">{language === 'pt' ? "Todas as lojas" : "All stores"}</SelectItem>
                   {lojasUnicas.map((loja: any) => (
                     <SelectItem key={loja.id} value={loja.id.toString()}>
                       {loja.nome}

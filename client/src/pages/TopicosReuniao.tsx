@@ -84,7 +84,7 @@ export default function TopicosReuniao() {
   const getEstadoBadge = (estado: string) => {
     switch (estado) {
       case "pendente":
-        return <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200"><Clock className="h-3 w-3 mr-1" />Pendente</Badge>;
+        return <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200"><Clock className="h-3 w-3 mr-1" />{language === 'pt' ? "Pendente" : "Pending"}</Badge>;
       case "analisado":
         return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200"><AlertCircle className="h-3 w-3 mr-1" />Em Análise</Badge>;
       case "discutido":

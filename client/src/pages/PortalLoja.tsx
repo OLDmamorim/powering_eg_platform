@@ -413,7 +413,7 @@ export default function PortalLoja() {
               <label className="text-sm font-medium">Token de Acesso</label>
               <Input
                 type="text"
-                placeholder="Introduza o token enviado por email"
+                placeholder={language === 'pt' ? "Introduza o token enviado por email" : "Enter the token sent by email"}
                 value={inputToken}
                 onChange={(e) => setInputToken(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleLogin()}
@@ -1527,7 +1527,7 @@ export default function PortalLoja() {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">Descrição</label>
+                <label className="text-sm font-medium">{language === 'pt' ? "Descrição" : "Description"}</label>
                 <Textarea
                   placeholder="Descreva a tarefa com mais detalhes..."
                   value={novaTarefaDescricao}
@@ -1537,7 +1537,7 @@ export default function PortalLoja() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Prioridade</label>
+                  <label className="text-sm font-medium">{language === 'pt' ? "Prioridade" : "Priority"}</label>
                   <Select
                     value={novaTarefaPrioridade}
                     onValueChange={(value) => setNovaTarefaPrioridade(value as typeof novaTarefaPrioridade)}
@@ -1549,12 +1549,12 @@ export default function PortalLoja() {
                       <SelectItem value="baixa">Baixa</SelectItem>
                       <SelectItem value="media">Média</SelectItem>
                       <SelectItem value="alta">Alta</SelectItem>
-                      <SelectItem value="urgente">Urgente</SelectItem>
+                      <SelectItem value="urgente">{language === 'pt' ? "Urgente" : "Urgent"}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Categoria</label>
+                  <label className="text-sm font-medium">{language === 'pt' ? "Categoria" : "Category"}</label>
                   <Select
                     value={novaTarefaCategoriaId?.toString() || "none"}
                     onValueChange={(value) => setNovaTarefaCategoriaId(value === "none" ? undefined : parseInt(value))}
@@ -1778,7 +1778,7 @@ export default function PortalLoja() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Descrição</label>
+                  <label className="text-sm font-medium">{language === 'pt' ? "Descrição" : "Description"}</label>
                   <Textarea
                     value={tarefaInternaEditando.descricao || ''}
                     onChange={(e) => setTarefaInternaEditando({...tarefaInternaEditando, descricao: e.target.value})}
@@ -1787,7 +1787,7 @@ export default function PortalLoja() {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">Prioridade</label>
+                    <label className="text-sm font-medium">{language === 'pt' ? "Prioridade" : "Priority"}</label>
                     <Select
                       value={tarefaInternaEditando.prioridade}
                       onValueChange={(value) => setTarefaInternaEditando({...tarefaInternaEditando, prioridade: value})}
@@ -1799,12 +1799,12 @@ export default function PortalLoja() {
                         <SelectItem value="baixa">Baixa</SelectItem>
                         <SelectItem value="media">Média</SelectItem>
                         <SelectItem value="alta">Alta</SelectItem>
-                        <SelectItem value="urgente">Urgente</SelectItem>
+                        <SelectItem value="urgente">{language === 'pt' ? "Urgente" : "Urgent"}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">Estado</label>
+                    <label className="text-sm font-medium">{language === 'pt' ? "Estado" : "Status"}</label>
                     <Select
                       value={tarefaInternaEditando.estado}
                       onValueChange={(value) => setTarefaInternaEditando({...tarefaInternaEditando, estado: value})}
@@ -1813,8 +1813,8 @@ export default function PortalLoja() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="pendente">Pendente</SelectItem>
-                        <SelectItem value="em_progresso">Em Progresso</SelectItem>
+                        <SelectItem value="pendente">{language === 'pt' ? "Pendente" : "Pending"}</SelectItem>
+                        <SelectItem value="em_progresso">{language === 'pt' ? "Em Progresso" : "In Progress"}</SelectItem>
                         <SelectItem value="concluida">Concluída</SelectItem>
                       </SelectContent>
                     </Select>
@@ -2108,6 +2108,7 @@ function PendenteCard({
   isUpdating?: boolean;
   compact?: boolean;
 }) {
+  const { language } = useLanguage();
   const [comentario, setComentario] = useState(pendente.comentarioLoja || "");
   const [showComentario, setShowComentario] = useState(false);
 
@@ -2166,9 +2167,9 @@ function PendenteCard({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="pendente">Pendente</SelectItem>
-                  <SelectItem value="em_progresso">Em Progresso</SelectItem>
-                  <SelectItem value="resolvido">Resolvido</SelectItem>
+                  <SelectItem value="pendente">{language === 'pt' ? "Pendente" : "Pending"}</SelectItem>
+                  <SelectItem value="em_progresso">{language === 'pt' ? "Em Progresso" : "In Progress"}</SelectItem>
+                  <SelectItem value="resolvido">{language === 'pt' ? "Resolvido" : "Resolved"}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
