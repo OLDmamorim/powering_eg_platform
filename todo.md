@@ -2533,3 +2533,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar suporte a idioma nas sugestões do chatbot (chatbotService.ts)
 - [x] Atualizar procedimento sugestoes para aceitar parâmetro de idioma
 - [x] Mesclar secções common duplicadas no en.json
+
+## Funcionalidade - Gravação de Voz no Assistente IA
+- [x] Adicionar botão de gravação de voz no chatbot
+- [x] Integrar com API Whisper para transcrição
+- [x] Enviar transcrição como pergunta ao chatbot
+
