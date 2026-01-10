@@ -445,7 +445,7 @@ export default function Dashboard() {
           {isAdmin ? (
             <Button onClick={() => setLocation('/relatorios-ia')} variant="outline" size="sm" className="gap-1.5 flex-1">
               <Sparkles className="h-4 w-4" />
-              <span className="text-xs">Relatórios IA</span>
+              <span className="text-xs">{language === 'pt' ? 'Relatórios IA' : 'AI Reports'}</span>
             </Button>
           ) : (
             <Button onClick={gerarRelatorioMensal} variant="outline" size="sm" className="gap-1.5 flex-1">
@@ -460,7 +460,7 @@ export default function Dashboard() {
             className={`gap-1.5 flex-1 relative ${tarefasNaoVistas > 0 ? 'animate-pulse border-amber-500 bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/30 dark:hover:bg-amber-950/50' : ''}`}
           >
             <CheckSquare className="h-4 w-4" />
-            <span className="text-xs">Tarefas</span>
+            <span className="text-xs">{language === 'pt' ? 'Tarefas' : 'Tasks'}</span>
             {tarefasPendentesAMim > 0 && (
               <span className="absolute -top-2 -right-2 bg-amber-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
                 {tarefasPendentesAMim}
