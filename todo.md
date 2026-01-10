@@ -376,6 +376,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Manter tabelas e serviços no backend (podem ser úteis futuramente)
 
 ## Botão de Instalação PWA v6.4
+- [x] Corrigir visibilidade do botão PWA em mobile (não está visível na interface)
 - [x] Adicionar botão de instalação PWA na página Assistente IA
 - [ ] Tornar botão de instalação PWA mais visível no AssistenteWidget
 

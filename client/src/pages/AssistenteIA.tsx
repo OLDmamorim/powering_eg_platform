@@ -125,37 +125,6 @@ export default function AssistenteIA() {
             </div>
           </div>
           <div className="flex gap-2 self-end sm:self-auto">
-            {/* Botão de Instalação PWA */}
-            {isInstallable && !isInstalled && (
-              <Button 
-                variant="default" 
-                size="sm"
-                onClick={async () => {
-                  const result = await install();
-                  if (result === 'ios') {
-                    toast.info(
-                      language === 'pt' 
-                        ? 'No iOS: Toque em "Partilhar" e depois "Adicionar ao Ecrã Principal"' 
-                        : 'On iOS: Tap "Share" then "Add to Home Screen"',
-                      { duration: 6000 }
-                    );
-                  } else if (result === true) {
-                    toast.success(language === 'pt' ? 'App instalada com sucesso!' : 'App installed successfully!');
-                  }
-                }}
-                className="text-xs md:text-sm bg-green-600 hover:bg-green-700 text-white"
-              >
-                <Download className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" />
-                <span className="hidden sm:inline">{language === 'pt' ? 'Instalar App' : 'Install App'}</span>
-                <Smartphone className="h-3 w-3 md:h-4 md:w-4 sm:hidden" />
-              </Button>
-            )}
-            {isInstalled && (
-              <Badge variant="secondary" className="text-xs bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
-                <Smartphone className="h-3 w-3 mr-1" />
-                {language === 'pt' ? 'Instalada' : 'Installed'}
-              </Badge>
-            )}
             <Button 
               variant="outline" 
               size="sm"
@@ -356,6 +325,43 @@ export default function AssistenteIA() {
             </CardContent>
           </Card>
         </div>
+        
+        {/* Botão Flutuante de Instalação PWA - Visível em mobile */}
+        {isInstallable && !isInstalled && (
+          <div className="fixed bottom-20 right-4 z-50">
+            <Button 
+              onClick={async () => {
+                const result = await install();
+                if (result === 'ios') {
+                  toast.info(
+                    language === 'pt' 
+                      ? 'No iOS: Toque em "Partilhar" e depois "Adicionar ao Ecrã Principal"' 
+                      : 'On iOS: Tap "Share" then "Add to Home Screen"',
+                    { duration: 6000 }
+                  );
+                } else if (result === true) {
+                  toast.success(language === 'pt' ? 'App instalada com sucesso!' : 'App installed successfully!');
+                }
+              }}
+              className="h-14 w-14 rounded-full bg-green-600 hover:bg-green-700 text-white shadow-lg flex items-center justify-center"
+            >
+              <Download className="h-6 w-6" />
+            </Button>
+            <span className="absolute -top-8 right-0 bg-green-600 text-white text-xs px-2 py-1 rounded whitespace-nowrap shadow-md">
+              {language === 'pt' ? 'Instalar App' : 'Install App'}
+            </span>
+          </div>
+        )}
+        
+        {/* Badge de App Instalada */}
+        {isInstalled && (
+          <div className="fixed bottom-20 right-4 z-50">
+            <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 px-3 py-2 shadow-md">
+              <Smartphone className="h-4 w-4 mr-1" />
+              {language === 'pt' ? 'Instalada' : 'Installed'}
+            </Badge>
+          </div>
+        )}
       </div>
     </DashboardLayout>
   );
