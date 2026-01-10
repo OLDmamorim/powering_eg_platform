@@ -1,7 +1,7 @@
 {
   "id": "poweringeg-assistente-ia",
-  "name": "PoweringEG - Assistente IA",
-  "short_name": "Assistente IA",
+  "name": "PoweringEG",
+  "short_name": "PoweringEG",
   "description": "Assistente de IA para gestores Express Glass",
   "start_url": "/assistente-widget",
   "scope": "/",
