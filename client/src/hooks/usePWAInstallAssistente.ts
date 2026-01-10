@@ -2,17 +2,19 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 
 // Variável global para capturar o evento beforeinstallprompt antes do React montar
 let globalDeferredPrompt: any = null;
+let promptCaptured = false;
 
 // Listener global que captura o evento mesmo antes do React
 if (typeof window !== 'undefined') {
   window.addEventListener('beforeinstallprompt', (e) => {
+    console.log('[PWA Hook] beforeinstallprompt capturado globalmente');
     e.preventDefault();
     globalDeferredPrompt = e;
+    promptCaptured = true;
   });
 }
 
 // Hook específico para instalação PWA do Assistente IA
-// Usa uma página HTML dedicada com o manifest correto para garantir instalação correta
 export function usePWAInstallAssistente() {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [isInstallable, setIsInstallable] = useState(false);
@@ -24,6 +26,8 @@ export function usePWAInstallAssistente() {
   const setupManifest = useCallback(() => {
     if (setupDone.current) return;
     setupDone.current = true;
+    
+    console.log('[PWA Hook] Configurando manifest do Assistente IA');
     
     // Remover o link do manifest atual
     const existingManifest = document.querySelector('link[rel="manifest"]');
@@ -73,6 +77,7 @@ export function usePWAInstallAssistente() {
     
     // Verificar se já está instalado como standalone
     if (window.matchMedia('(display-mode: standalone)').matches) {
+      console.log('[PWA Hook] Já está em modo standalone');
       setIsInstalled(true);
       return;
     }
@@ -81,19 +86,23 @@ export function usePWAInstallAssistente() {
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
     if (isIOS) {
       // No iOS, sempre mostrar opção de instalar (via instruções manuais)
+      console.log('[PWA Hook] iOS detectado - mostrando opção de instalar');
       setIsInstallable(true);
       return;
     }
 
     // Verificar se já temos o prompt capturado globalmente
     if (globalDeferredPrompt) {
+      console.log('[PWA Hook] Usando prompt capturado globalmente');
       setDeferredPrompt(globalDeferredPrompt);
       setIsInstallable(true);
     }
 
     const handler = (e: any) => {
+      console.log('[PWA Hook] beforeinstallprompt capturado no handler');
       e.preventDefault();
       globalDeferredPrompt = e;
+      promptCaptured = true;
       setDeferredPrompt(e);
       setIsInstallable(true);
     };
@@ -101,18 +110,26 @@ export function usePWAInstallAssistente() {
     window.addEventListener('beforeinstallprompt', handler);
     
     window.addEventListener('appinstalled', () => {
+      console.log('[PWA Hook] App instalada!');
       setIsInstalled(true);
       setIsInstallable(false);
       globalDeferredPrompt = null;
+      promptCaptured = false;
     });
 
     // Verificar novamente após um pequeno delay (para dar tempo ao browser)
     const checkTimer = setTimeout(() => {
       if (globalDeferredPrompt && !deferredPrompt) {
+        console.log('[PWA Hook] Usando prompt capturado após delay');
         setDeferredPrompt(globalDeferredPrompt);
         setIsInstallable(true);
+      } else if (!promptCaptured) {
+        // Se não temos o prompt, ainda assim mostrar o botão
+        // O utilizador pode instalar via menu do browser ou página dedicada
+        console.log('[PWA Hook] Sem prompt - mostrando botão para página dedicada');
+        setIsInstallable(true);
       }
-    }, 500);
+    }, 1000);
 
     return () => {
       clearTimeout(checkTimer);
@@ -165,10 +182,9 @@ export function usePWAInstallAssistente() {
     }
 
     // Se não temos o prompt, redirecionar para a página dedicada do PWA
-    // Esta página tem o manifest correto desde o início
     if (!deferredPrompt && !globalDeferredPrompt) {
+      console.log('[PWA Hook] Sem prompt - redirecionando para página dedicada');
       // Abrir a página dedicada do PWA
-      // Isso garante que o manifest correto é carregado desde o início
       window.location.href = '/assistente-pwa.html';
       return 'redirect';
     }
@@ -181,16 +197,28 @@ export function usePWAInstallAssistente() {
     // Pequeno delay para garantir que o browser processou a mudança
     await new Promise(resolve => setTimeout(resolve, 200));
     
-    promptToUse.prompt();
-    const { outcome } = await promptToUse.userChoice;
-    setDeferredPrompt(null);
-    globalDeferredPrompt = null;
-    setIsInstallable(false);
-    if (outcome === 'accepted') {
-      setIsInstalled(true);
-      return true;
+    try {
+      console.log('[PWA Hook] Mostrando prompt de instalação');
+      promptToUse.prompt();
+      const { outcome } = await promptToUse.userChoice;
+      console.log('[PWA Hook] Escolha do utilizador:', outcome);
+      
+      setDeferredPrompt(null);
+      globalDeferredPrompt = null;
+      promptCaptured = false;
+      setIsInstallable(false);
+      
+      if (outcome === 'accepted') {
+        setIsInstalled(true);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('[PWA Hook] Erro na instalação:', error);
+      // Em caso de erro, redirecionar para página dedicada
+      window.location.href = '/assistente-pwa.html';
+      return 'redirect';
     }
-    return false;
   };
 
   return { isInstallable, isInstalled, install, manifestReady };

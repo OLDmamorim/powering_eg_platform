@@ -110,7 +110,7 @@
       .skip-btn:hover {
         background: rgba(124, 58, 237, 0.1);
       }
-      .ios-instructions {
+      .instructions {
         display: none;
         background: white;
         padding: 20px;
@@ -118,25 +118,46 @@
         box-shadow: 0 4px 16px rgba(0,0,0,0.1);
         text-align: left;
         margin-top: 20px;
+        margin-bottom: 20px;
       }
-      .ios-instructions h3 {
+      .instructions h3 {
         color: #5b21b6;
         font-size: 16px;
         margin-bottom: 12px;
       }
-      .ios-instructions ol {
+      .instructions ol {
         color: #374151;
         font-size: 14px;
         padding-left: 20px;
       }
-      .ios-instructions li {
+      .instructions li {
         margin-bottom: 8px;
+      }
+      .instructions .highlight {
+        background: #f5f3ff;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-weight: 600;
+        color: #5b21b6;
       }
       .status-msg {
         font-size: 12px;
         color: #9ca3af;
         margin-top: 16px;
         min-height: 20px;
+      }
+      .info-box {
+        background: #fef3c7;
+        border: 1px solid #f59e0b;
+        border-radius: 12px;
+        padding: 12px 16px;
+        margin-bottom: 20px;
+        display: none;
+      }
+      .info-box p {
+        color: #92400e;
+        font-size: 13px;
+        margin: 0;
       }
       .debug-info {
         display: none;
@@ -162,7 +183,11 @@
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
         </svg>
-        <p style="margin-top: 8px; font-size: 12px;">A preparar...</p>
+        <p style="margin-top: 8px; font-size: 12px;">A verificar...</p>
+      </div>
+      
+      <div class="info-box" id="infoBox">
+        <p>💡 Se o botão de instalar não aparecer, use o menu do browser (⋮) e selecione "Instalar aplicação" ou "Adicionar ao ecrã inicial".</p>
       </div>
       
       <button class="install-btn" id="installBtn">
@@ -173,12 +198,21 @@
         Continuar sem instalar
       </button>
       
-      <div class="ios-instructions" id="iosInstructions">
-        <h3>Como instalar no iPhone/iPad:</h3>
+      <div class="instructions" id="iosInstructions">
+        <h3>📱 Como instalar no iPhone/iPad:</h3>
         <ol>
-          <li>Toque no botão <strong>Partilhar</strong> (ícone com seta para cima)</li>
-          <li>Deslize para baixo e toque em <strong>"Adicionar ao Ecrã Principal"</strong></li>
-          <li>Toque em <strong>"Adicionar"</strong> no canto superior direito</li>
+          <li>Toque no botão <span class="highlight">Partilhar</span> (ícone com seta para cima)</li>
+          <li>Deslize para baixo e toque em <span class="highlight">"Adicionar ao Ecrã Principal"</span></li>
+          <li>Toque em <span class="highlight">"Adicionar"</span> no canto superior direito</li>
+        </ol>
+      </div>
+      
+      <div class="instructions" id="chromeInstructions">
+        <h3>🌐 Como instalar no Chrome/Edge:</h3>
+        <ol>
+          <li>Clique no menu <span class="highlight">⋮</span> (três pontos) no canto superior direito</li>
+          <li>Selecione <span class="highlight">"Instalar Assistente IA..."</span> ou <span class="highlight">"Instalar aplicação"</span></li>
+          <li>Confirme clicando em <span class="highlight">"Instalar"</span></li>
         </ol>
       </div>
       
@@ -190,7 +224,7 @@
     <script>
       // Estado global
       let deferredPrompt = null;
-      let installAttempted = false;
+      let manifestLoaded = false;
       
       // Deteção de dispositivo/browser
       const ua = navigator.userAgent;
@@ -208,8 +242,10 @@
       const installBtn = document.getElementById('installBtn');
       const skipBtn = document.getElementById('skipBtn');
       const iosInstructions = document.getElementById('iosInstructions');
+      const chromeInstructions = document.getElementById('chromeInstructions');
       const statusMsg = document.getElementById('statusMsg');
       const debugInfo = document.getElementById('debugInfo');
+      const infoBox = document.getElementById('infoBox');
       
       // Funções de debug (ativar com ?debug=1 no URL)
       const urlParams = new URLSearchParams(window.location.search);
@@ -249,11 +285,11 @@
       // Listener para quando a app é instalada
       window.addEventListener('appinstalled', () => {
         log('App instalada com sucesso!');
-        setStatus('Instalado com sucesso!');
+        setStatus('Instalado com sucesso! A abrir...');
         deferredPrompt = null;
         setTimeout(() => {
           window.location.replace('/assistente-widget');
-        }, 1000);
+        }, 1500);
       });
       
       function showInstallUI() {
@@ -275,6 +311,15 @@
         setStatus('');
       }
       
+      function showChromeInstructions() {
+        log('Mostrando instruções Chrome/Edge');
+        loadingEl.style.display = 'none';
+        chromeInstructions.style.display = 'block';
+        infoBox.style.display = 'block';
+        skipBtn.style.display = 'block';
+        setStatus('Use o menu do browser para instalar');
+      }
+      
       function showOpenAppUI() {
         log('Mostrando UI de abrir app');
         loadingEl.style.display = 'none';
@@ -282,7 +327,14 @@
         skipBtn.style.display = 'block';
         installBtn.textContent = 'Abrir Assistente IA';
         installBtn.onclick = skipToApp;
-        setStatus('A instalação não está disponível neste browser');
+        
+        // Mostrar instruções de instalação manual
+        if (isChrome || isEdge) {
+          chromeInstructions.style.display = 'block';
+          infoBox.style.display = 'block';
+        }
+        
+        setStatus('');
       }
       
       async function installApp() {
@@ -290,7 +342,12 @@
         
         if (!deferredPrompt) {
           log('Sem deferredPrompt disponível');
-          setStatus('Instalação não disponível. Use o menu do browser.');
+          // Mostrar instruções manuais
+          if (isChrome || isEdge) {
+            showChromeInstructions();
+          } else {
+            setStatus('Use o menu do browser para instalar');
+          }
           return;
         }
         
@@ -335,9 +392,26 @@
       installBtn.onclick = installApp;
       skipBtn.onclick = skipToApp;
       
+      // Verificar se o manifest carregou corretamente
+      async function checkManifest() {
+        try {
+          const response = await fetch('/manifest-assistente.json');
+          if (response.ok) {
+            manifestLoaded = true;
+            log('Manifest carregado com sucesso');
+          } else {
+            log('Erro ao carregar manifest: ' + response.status);
+          }
+        } catch (err) {
+          log('Erro ao verificar manifest: ' + err.message);
+        }
+      }
+      
       // Verificar após um delay se podemos mostrar a UI de instalação
-      setTimeout(() => {
+      setTimeout(async () => {
         log('Verificação após timeout...');
+        
+        await checkManifest();
         
         if (isIOS) {
           // iOS não suporta beforeinstallprompt
@@ -346,26 +420,11 @@
           // Temos o prompt, mostrar UI de instalação
           showInstallUI();
         } else {
-          // Não temos o prompt - verificar razões possíveis
+          // Não temos o prompt - mostrar instruções alternativas
           log('Sem prompt disponível após timeout');
-          
-          // Verificar se o service worker está registado
-          if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.getRegistration().then(reg => {
-              if (reg) {
-                log('Service Worker registado: ' + reg.scope);
-              } else {
-                log('Nenhum Service Worker registado');
-              }
-            }).catch(err => {
-              log('Erro ao verificar SW: ' + err.message);
-            });
-          }
-          
-          // Mostrar UI alternativa
           showOpenAppUI();
         }
-      }, 2500);
+      }, 2000);
       
       // Tentar registar o service worker se ainda não estiver registado
       if ('serviceWorker' in navigator) {

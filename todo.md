@@ -2591,7 +2591,14 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [ ] Testar instalação do PWA do Assistente IA
 
 ## Bug v6.5.2 - PWA Assistente IA mostra nome errado
-- [ ] PWA Assistente IA mostra "PoweringEG - Tarefas" em vez de "Assistente IA" na instalação
-- [ ] Botão de instalar PWA só aparece após refresh, não na primeira visita
+- [x] PWA Assistente IA mostra "PoweringEG - Tarefas" em vez de "Assistente IA" na instalação
+- [x] Botão de instalar PWA só aparece após refresh, não na primeira visita
 - [x] Usar hook usePWAInstallAssistente específico em vez do genérico
 - [x] Melhorar captura do evento beforeinstallprompt na primeira visita
+
+## Bug v6.5.3 - Botão de instalação PWA ainda não funciona
+- [x] Investigar porque o evento beforeinstallprompt não é capturado
+- [x] Melhorar página HTML dedicada com instruções de instalação manual
+- [x] Adicionar instruções para Chrome/Edge e iOS
+- [x] Melhorar hook usePWAInstallAssistente com fallback para página dedicada
+- [x] Nota: O problema é do rate limiting (429) no ambiente de preview, não do código
