@@ -26,7 +26,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import imageCompression from 'browser-image-compression';
 
 export default function RelatorioCompleto() {
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   const uploadPhotoMutation = trpc.photoAnalysis.uploadPhoto.useMutation();
   const { user } = useAuth();
   const [, setLocation] = useLocation();
@@ -68,7 +68,7 @@ export default function RelatorioCompleto() {
 
   const createMutation = trpc.relatoriosCompletos.create.useMutation({
     onSuccess: (data) => {
-      toast.success("Relatório completo criado com sucesso");
+      toast.success(language === 'pt' ? "Relatório completo criado com sucesso" : "Complete report created successfully");
       utils.relatoriosCompletos.list.invalidate();
       // Guardar dados para os diálogos
       setRelatorioIdCriado(data.id);
@@ -89,20 +89,20 @@ export default function RelatorioCompleto() {
   }
 
   const pages = [
-    { title: "Seleção de Loja", fields: ["loja"] },
-    { title: "EPIs e Fardamento", fields: ["episFardamento"] },
-    { title: "Kit de 1ºs Socorros", fields: ["kitPrimeirosSocorros"] },
-    { title: "Consumíveis", fields: ["consumiveis"] },
-    { title: "Espaço Físico da Loja", fields: ["espacoFisico"] },
-    { title: "Reclamações", fields: ["reclamacoes"] },
-    { title: "Vendas Complementares", fields: ["vendasComplementares"] },
-    { title: "Fichas de Serviço", fields: ["fichasServico"] },
-    { title: "Documentação Obrigatória", fields: ["documentacaoObrigatoria"] },
-    { title: "Reunião Quinzenal", fields: ["reuniaoQuinzenal"] },
-    { title: "Resumo e Colaboradores", fields: ["resumoSupervisao", "colaboradoresPresentes"] },
-    { title: "Pontos a Destacar", fields: ["pontosPositivos", "pontosNegativos"] },
-    { title: "Fotos", fields: ["fotos"] },
-    { title: "Pendentes", fields: ["pendentes"] },
+    { title: language === 'pt' ? "Seleção de Loja" : "Store Selection", fields: ["loja"] },
+    { title: language === 'pt' ? "EPIs e Fardamento" : "PPE and Uniforms", fields: ["episFardamento"] },
+    { title: language === 'pt' ? "Kit de 1ºs Socorros" : "First Aid Kit", fields: ["kitPrimeirosSocorros"] },
+    { title: language === 'pt' ? "Consumíveis" : "Consumables", fields: ["consumiveis"] },
+    { title: language === 'pt' ? "Espaço Físico da Loja" : "Store Physical Space", fields: ["espacoFisico"] },
+    { title: language === 'pt' ? "Reclamações" : "Complaints", fields: ["reclamacoes"] },
+    { title: language === 'pt' ? "Vendas Complementares" : "Complementary Sales", fields: ["vendasComplementares"] },
+    { title: language === 'pt' ? "Fichas de Serviço" : "Service Sheets", fields: ["fichasServico"] },
+    { title: language === 'pt' ? "Documentação Obrigatória" : "Mandatory Documentation", fields: ["documentacaoObrigatoria"] },
+    { title: language === 'pt' ? "Reunião Quinzenal" : "Bi-weekly Meeting", fields: ["reuniaoQuinzenal"] },
+    { title: language === 'pt' ? "Resumo e Colaboradores" : "Summary and Employees", fields: ["resumoSupervisao", "colaboradoresPresentes"] },
+    { title: language === 'pt' ? "Pontos a Destacar" : "Key Points", fields: ["pontosPositivos", "pontosNegativos"] },
+    { title: language === 'pt' ? "Fotos" : "Photos", fields: ["fotos"] },
+    { title: language === 'pt' ? "Pendentes" : "Pending Items", fields: ["pendentes"] },
   ];
 
   const handleAddPendente = () => {
@@ -124,7 +124,7 @@ export default function RelatorioCompleto() {
 
   const handleVoiceTranscription = async (transcription: string) => {
     try {
-      toast.info("A processar transcrição...");
+      toast.info(language === 'pt' ? "A processar transcrição..." : "Processing transcription...");
       const processed = await processTranscriptionMutation.mutateAsync({ transcription });
       
       // Preencher campos automaticamente
@@ -140,10 +140,10 @@ export default function RelatorioCompleto() {
         setPendentes(processed.pendentes);
       }
       
-      toast.success("Relatório preenchido automaticamente!");
+      toast.success(language === 'pt' ? "Relatório preenchido automaticamente!" : "Report filled automatically!");
     } catch (error) {
       console.error("Erro ao processar transcrição:", error);
-      toast.error("Erro ao processar transcrição. Tente novamente.");
+      toast.error(language === 'pt' ? "Erro ao processar transcrição. Tente novamente." : "Error processing transcription. Please try again.");
     }
   };
 
@@ -206,7 +206,7 @@ export default function RelatorioCompleto() {
         toast.success(`${newFotos.length} foto(s) adicionada(s)`);
         
         // Analisar fotos automaticamente com IA
-        toast.info("⚡ A analisar fotos com IA...");
+        toast.info(language === 'pt' ? "⚡ A analisar fotos com IA..." : "⚡ Analyzing photos with AI...");
         try {
           const analyses = await analyzePhotosMutation.mutateAsync({ imageUrls: newFotos });
           
@@ -226,11 +226,11 @@ export default function RelatorioCompleto() {
             });
             toast.success(`🤖 IA identificou ${allSuggestedPendentes.length} pendente(s) nas fotos!`);
           } else {
-            toast.success("✅ IA não identificou problemas nas fotos");
+            toast.success(language === 'pt' ? "✅ IA não identificou problemas nas fotos" : "✅ AI found no issues in photos");
           }
         } catch (error) {
           console.error("Erro ao analisar fotos:", error);
-          toast.warning("Não foi possível analisar as fotos automaticamente");
+          toast.warning(language === 'pt' ? "Não foi possível analisar as fotos automaticamente" : "Could not analyze photos automatically");
         }
       }
     } catch (error) {
@@ -253,14 +253,14 @@ export default function RelatorioCompleto() {
 
   const handleNext = () => {
     if (currentPage === 0 && lojasIds.length === 0) {
-      toast.error("Por favor selecione pelo menos uma loja");
+      toast.error(language === 'pt' ? "Por favor selecione pelo menos uma loja" : "Please select at least one store");
       return;
     }
     // Verificar pendentes na página 0
     if (currentPage === 0 && pendentesExistentes.length > 0) {
       const pendentesSemEstado = pendentesExistentes.filter(p => p.status === null);
       if (pendentesSemEstado.length > 0) {
-        toast.error("Por favor indique o estado de todos os pendentes antes de avançar");
+        toast.error(language === 'pt' ? "Por favor indique o estado de todos os pendentes antes de avançar" : "Please indicate the status of all pending items before proceeding");
         return;
       }
     }
@@ -277,7 +277,7 @@ export default function RelatorioCompleto() {
 
   const handleSubmit = async () => {
     if (lojasIds.length === 0) {
-      toast.error("Por favor selecione pelo menos uma loja");
+      toast.error(language === 'pt' ? "Por favor selecione pelo menos uma loja" : "Please select at least one store");
       return;
     }
 
@@ -292,7 +292,7 @@ export default function RelatorioCompleto() {
           })),
         });
       } catch (error) {
-        toast.error("Erro ao atualizar pendentes");
+        toast.error(language === 'pt' ? "Erro ao atualizar pendentes" : "Error updating pending items");
         return;
       }
     }
@@ -362,7 +362,7 @@ export default function RelatorioCompleto() {
             )}
             
             <div className="space-y-2">
-              <Label htmlFor="dataHora">Data e Hora da Visita (opcional)</Label>
+              <Label htmlFor="dataHora">{language === 'pt' ? 'Data e Hora da Visita (opcional)' : 'Visit Date and Time (optional)'}</Label>
               <Input
                 id="dataHora"
                 type="datetime-local"
@@ -371,7 +371,7 @@ export default function RelatorioCompleto() {
                 max={new Date().toISOString().slice(0, 16)}
               />
               <p className="text-xs text-muted-foreground">
-                Se não especificar, será usada a data/hora atual
+                {language === 'pt' ? 'Se não especificar, será usada a data/hora atual' : 'If not specified, current date/time will be used'}
               </p>
             </div>
           </div>
@@ -380,14 +380,14 @@ export default function RelatorioCompleto() {
       case 1:
         return (
           <div className="space-y-2">
-            <Label htmlFor="episFardamento">EPIs e Fardamento</Label>
+            <Label htmlFor="episFardamento">{language === 'pt' ? 'EPIs e Fardamento' : 'PPE and Uniforms'}</Label>
             <Textarea
               id="episFardamento"
               value={formData.episFardamento}
               onChange={(e) =>
                 setFormData({ ...formData, episFardamento: e.target.value })
               }
-              placeholder="Verificar: Luvas de Corte, Luvas Nitrilo, Óculos de Proteção, Sapatos de Proteção. Mencionar colaboradores que não estão em conformidade."
+              placeholder={language === 'pt' ? 'Verificar: Luvas de Corte, Luvas Nitrilo, Óculos de Proteção, Sapatos de Proteção. Mencionar colaboradores que não estão em conformidade.' : 'Check: Cut Gloves, Nitrile Gloves, Safety Glasses, Safety Shoes. Mention non-compliant employees.'}
               rows={6}
             />
           </div>
@@ -396,7 +396,7 @@ export default function RelatorioCompleto() {
       case 2:
         return (
           <div className="space-y-2">
-            <Label htmlFor="kitPrimeirosSocorros">Kit de 1ºs Socorros / Quase Acidente</Label>
+            <Label htmlFor="kitPrimeirosSocorros">{language === 'pt' ? 'Kit de 1ºs Socorros / Quase Acidente' : 'First Aid Kit / Near Miss'}</Label>
             <Textarea
               id="kitPrimeirosSocorros"
               value={formData.kitPrimeirosSocorros}
@@ -406,7 +406,7 @@ export default function RelatorioCompleto() {
                   kitPrimeirosSocorros: e.target.value,
                 })
               }
-              placeholder="Verificar validade dos produtos no Kit de 1ºs Socorros."
+              placeholder={language === 'pt' ? 'Verificar validade dos produtos no Kit de 1ºs Socorros.' : 'Check product expiry dates in First Aid Kit.'}
               rows={6}
             />
           </div>
@@ -415,14 +415,14 @@ export default function RelatorioCompleto() {
       case 3:
         return (
           <div className="space-y-2">
-            <Label htmlFor="consumiveis">Consumíveis</Label>
+            <Label htmlFor="consumiveis">{language === 'pt' ? 'Consumíveis' : 'Consumables'}</Label>
             <Textarea
               id="consumiveis"
               value={formData.consumiveis}
               onChange={(e) =>
                 setFormData({ ...formData, consumiveis: e.target.value })
               }
-              placeholder="Verificar: Primários e Ativadores, Produto polimento faróis, Acrílico/Plexiglass, Película autocolante, Escovas."
+              placeholder={language === 'pt' ? 'Verificar: Primários e Ativadores, Produto polimento faróis, Acrílico/Plexiglass, Película autocolante, Escovas.' : 'Check: Primers and Activators, Headlight polish, Acrylic/Plexiglass, Adhesive film, Brushes.'}
               rows={6}
             />
           </div>
@@ -431,14 +431,14 @@ export default function RelatorioCompleto() {
       case 4:
         return (
           <div className="space-y-2">
-            <Label htmlFor="espacoFisico">Espaço Físico da Loja</Label>
+            <Label htmlFor="espacoFisico">{language === 'pt' ? 'Espaço Físico da Loja' : 'Store Physical Space'}</Label>
             <Textarea
               id="espacoFisico"
               value={formData.espacoFisico}
               onChange={(e) =>
                 setFormData({ ...formData, espacoFisico: e.target.value })
               }
-              placeholder="Verificar: WC, Área vedada do cliente, Cacifos, Espaço de alimentação, Resíduos, Balcão e Secretária, Single Cut, Easy Cut, Aspirador, LilBuddy, Compressor, Caixa de Ferramentas."
+              placeholder={language === 'pt' ? 'Verificar: WC, Área vedada do cliente, Cacifos, Espaço de alimentação, Resíduos, Balcão e Secretária, Single Cut, Easy Cut, Aspirador, LilBuddy, Compressor, Caixa de Ferramentas.' : 'Check: WC, Customer restricted area, Lockers, Eating area, Waste, Counter and Desk, Single Cut, Easy Cut, Vacuum, LilBuddy, Compressor, Toolbox.'}
               rows={6}
             />
           </div>
@@ -447,14 +447,14 @@ export default function RelatorioCompleto() {
       case 5:
         return (
           <div className="space-y-2">
-            <Label htmlFor="reclamacoes">Reclamações</Label>
+            <Label htmlFor="reclamacoes">{language === 'pt' ? 'Reclamações' : 'Complaints'}</Label>
             <Textarea
               id="reclamacoes"
               value={formData.reclamacoes}
               onChange={(e) =>
                 setFormData({ ...formData, reclamacoes: e.target.value })
               }
-              placeholder="Verificar existência de reclamações e respetivo ponto de situação."
+              placeholder={language === 'pt' ? 'Verificar existência de reclamações e respetivo ponto de situação.' : 'Check for complaints and their current status.'}
               rows={6}
             />
           </div>
@@ -463,7 +463,7 @@ export default function RelatorioCompleto() {
       case 6:
         return (
           <div className="space-y-2">
-            <Label htmlFor="vendasComplementares">Vendas Complementares</Label>
+            <Label htmlFor="vendasComplementares">{language === 'pt' ? 'Vendas Complementares' : 'Complementary Sales'}</Label>
             <Textarea
               id="vendasComplementares"
               value={formData.vendasComplementares}
@@ -473,7 +473,7 @@ export default function RelatorioCompleto() {
                   vendasComplementares: e.target.value,
                 })
               }
-              placeholder="Análise de vendas: Escovas, Polimentos, Tratamentos Ferrugem, Colagem Capotas."
+              placeholder={language === 'pt' ? 'Análise de vendas: Escovas, Polimentos, Tratamentos Ferrugem, Colagem Capotas.' : 'Sales analysis: Brushes, Polishes, Rust Treatments, Roof Bonding.'}
               rows={6}
             />
           </div>
@@ -482,14 +482,14 @@ export default function RelatorioCompleto() {
       case 7:
         return (
           <div className="space-y-2">
-            <Label htmlFor="fichasServico">10 Últimas Fichas de Serviço</Label>
+            <Label htmlFor="fichasServico">{language === 'pt' ? '10 Últimas Fichas de Serviço' : 'Last 10 Service Sheets'}</Label>
             <Textarea
               id="fichasServico"
               value={formData.fichasServico}
               onChange={(e) =>
                 setFormData({ ...formData, fichasServico: e.target.value })
               }
-              placeholder="Validar: Correto preenchimento do CL, Utilização de capas de proteção, Notas que esclareçam o ponto de situação, Utilização de envio de SMS."
+              placeholder={language === 'pt' ? 'Validar: Correto preenchimento do CL, Utilização de capas de proteção, Notas que esclareçam o ponto de situação, Utilização de envio de SMS.' : 'Validate: Correct CL completion, Use of protective covers, Notes clarifying status, SMS sending usage.'}
               rows={6}
             />
           </div>
@@ -498,7 +498,7 @@ export default function RelatorioCompleto() {
       case 8:
         return (
           <div className="space-y-2">
-            <Label htmlFor="documentacaoObrigatoria">Documentação Obrigatória Afixada</Label>
+            <Label htmlFor="documentacaoObrigatoria">{language === 'pt' ? 'Documentação Obrigatória Afixada' : 'Posted Mandatory Documentation'}</Label>
             <Textarea
               id="documentacaoObrigatoria"
               value={formData.documentacaoObrigatoria}
@@ -508,7 +508,7 @@ export default function RelatorioCompleto() {
                   documentacaoObrigatoria: e.target.value,
                 })
               }
-              placeholder="Verificar afixação: ASAE, Horário, Férias, Contactos Úteis, Seguro, Preços Escovas, Preço Mão Obra."
+              placeholder={language === 'pt' ? 'Verificar afixação: ASAE, Horário, Férias, Contactos Úteis, Seguro, Preços Escovas, Preço Mão Obra.' : 'Check posting: ASAE, Schedule, Holidays, Useful Contacts, Insurance, Brush Prices, Labor Price.'}
               rows={6}
             />
           </div>
@@ -517,7 +517,7 @@ export default function RelatorioCompleto() {
       case 9:
         return (
           <div className="space-y-4">
-            <Label>Reunião Quinzenal</Label>
+            <Label>{language === 'pt' ? 'Reunião Quinzenal' : 'Bi-weekly Meeting'}</Label>
             <RadioGroup
               value={formData.reuniaoQuinzenal?.toString()}
               onValueChange={(value) =>
@@ -530,13 +530,13 @@ export default function RelatorioCompleto() {
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="true" id="sim" />
                 <Label htmlFor="sim" className="cursor-pointer">
-                  Sim
+                  {language === 'pt' ? 'Sim' : 'Yes'}
                 </Label>
               </div>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="false" id="nao" />
                 <Label htmlFor="nao" className="cursor-pointer">
-                  Não
+                  {language === 'pt' ? 'Não' : 'No'}
                 </Label>
               </div>
             </RadioGroup>
@@ -547,7 +547,7 @@ export default function RelatorioCompleto() {
         return (
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="resumoSupervisao">Resumo da Supervisão</Label>
+              <Label htmlFor="resumoSupervisao">{language === 'pt' ? 'Resumo da Supervisão' : 'Supervision Summary'}</Label>
               <Textarea
                 id="resumoSupervisao"
                 value={formData.resumoSupervisao}
@@ -557,12 +557,12 @@ export default function RelatorioCompleto() {
                     resumoSupervisao: e.target.value,
                   })
                 }
-                placeholder="Escreva as instruções adequadas à supervisão realizada."
+                placeholder={language === 'pt' ? 'Escreva as instruções adequadas à supervisão realizada.' : 'Write appropriate instructions for the supervision performed.'}
                 rows={6}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="colaboradoresPresentes">Colaboradores Presentes</Label>
+              <Label htmlFor="colaboradoresPresentes">{language === 'pt' ? 'Colaboradores Presentes' : 'Employees Present'}</Label>
               <Textarea
                 id="colaboradoresPresentes"
                 value={formData.colaboradoresPresentes}
@@ -572,7 +572,7 @@ export default function RelatorioCompleto() {
                     colaboradoresPresentes: e.target.value,
                   })
                 }
-                placeholder="Nome dos colaboradores presentes durante a supervisão."
+                placeholder={language === 'pt' ? 'Nome dos colaboradores presentes durante a supervisão.' : 'Names of employees present during supervision.'}
                 rows={4}
               />
             </div>
@@ -583,7 +583,7 @@ export default function RelatorioCompleto() {
         return (
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="pontosPositivos">Pontos Positivos a Destacar</Label>
+              <Label htmlFor="pontosPositivos">{language === 'pt' ? 'Pontos Positivos a Destacar' : 'Positive Points to Highlight'}</Label>
               <Textarea
                 id="pontosPositivos"
                 value={formData.pontosPositivos}
@@ -593,12 +593,12 @@ export default function RelatorioCompleto() {
                     pontosPositivos: e.target.value,
                   })
                 }
-                placeholder="Descreva os pontos positivos observados durante a visita (ex: boa organização, equipa motivada, loja limpa, etc.)"
+                placeholder={language === 'pt' ? 'Descreva os pontos positivos observados durante a visita (ex: boa organização, equipa motivada, loja limpa, etc.)' : 'Describe positive points observed during the visit (e.g.: good organization, motivated team, clean store, etc.)'}
                 rows={5}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="pontosNegativos">Pontos Negativos a Destacar</Label>
+              <Label htmlFor="pontosNegativos">{language === 'pt' ? 'Pontos Negativos a Destacar' : 'Negative Points to Highlight'}</Label>
               <Textarea
                 id="pontosNegativos"
                 value={formData.pontosNegativos}
@@ -608,7 +608,7 @@ export default function RelatorioCompleto() {
                     pontosNegativos: e.target.value,
                   })
                 }
-                placeholder="Descreva os pontos negativos observados durante a visita (ex: falta de stock, problemas de organização, etc.)"
+                placeholder={language === 'pt' ? 'Descreva os pontos negativos observados durante a visita (ex: falta de stock, problemas de organização, etc.)' : 'Describe negative points observed during the visit (e.g.: stock shortage, organization issues, etc.)'}
                 rows={5}
               />
             </div>
@@ -616,7 +616,7 @@ export default function RelatorioCompleto() {
             {/* Campo de Comentários do Admin (apenas visível para admin) */}
             {user?.role === 'admin' && (
               <div className="space-y-2">
-                <Label htmlFor="comentarioAdmin">Notas do Admin (opcional)</Label>
+                <Label htmlFor="comentarioAdmin">{language === 'pt' ? 'Notas do Admin (opcional)' : 'Admin Notes (optional)'}</Label>
                 <Textarea
                   id="comentarioAdmin"
                   value={formData.comentarioAdmin}
@@ -626,12 +626,12 @@ export default function RelatorioCompleto() {
                       comentarioAdmin: e.target.value,
                     })
                   }
-                  placeholder="Adicione observações, instruções ou feedback para o gestor..."
+                  placeholder={language === 'pt' ? 'Adicione observações, instruções ou feedback para o gestor...' : 'Add observations, instructions or feedback for the manager...'}
                   rows={4}
                   className="border-purple-200 focus:border-purple-400 dark:border-purple-800 dark:focus:border-purple-600"
                 />
                 <p className="text-xs text-muted-foreground">
-                  Estas notas serão visíveis para o gestor responsável pela loja
+                  {language === 'pt' ? 'Estas notas serão visíveis para o gestor responsável pela loja' : 'These notes will be visible to the manager responsible for the store'}
                 </p>
               </div>
             )}
@@ -644,7 +644,7 @@ export default function RelatorioCompleto() {
             <div className="flex items-center justify-between">
               <Label className="flex items-center gap-2">
                 <Image className="h-4 w-4" />
-                Fotos
+                {language === 'pt' ? 'Fotos' : 'Photos'}
               </Label>
               <div className="flex gap-2">
                 <Button
@@ -659,7 +659,7 @@ export default function RelatorioCompleto() {
                   ) : (
                     <Image className="h-4 w-4 mr-1" />
                   )}
-                  {uploading ? 'A enviar...' : 'Tirar Foto'}
+                  {uploading ? (language === 'pt' ? 'A enviar...' : 'Uploading...') : (language === 'pt' ? 'Tirar Foto' : 'Take Photo')}
                 </Button>
                 <Button
                   type="button"
@@ -669,7 +669,7 @@ export default function RelatorioCompleto() {
                   disabled={uploading}
                 >
                   <Upload className="h-4 w-4 mr-1" />
-                  Carregar Ficheiro
+                  {language === 'pt' ? 'Carregar Ficheiro' : 'Upload File'}
                 </Button>
               </div>
               <input
@@ -690,7 +690,7 @@ export default function RelatorioCompleto() {
               />
             </div>
             <p className="text-sm text-muted-foreground">
-              Adicione fotos de evidências da visita (comprimidas automaticamente)
+              {language === 'pt' ? 'Adicione fotos de evidências da visita (comprimidas automaticamente)' : 'Add visit evidence photos (automatically compressed)'}
             </p>
             
             {fotos.length > 0 && (
@@ -720,7 +720,7 @@ export default function RelatorioCompleto() {
         return (
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <Label>Pendentes</Label>
+              <Label>{language === 'pt' ? 'Pendentes' : 'Pending Items'}</Label>
               <Button
                 type="button"
                 variant="outline"
@@ -728,11 +728,11 @@ export default function RelatorioCompleto() {
                 onClick={handleAddPendente}
               >
                 <Plus className="h-4 w-4 mr-1" />
-                Adicionar
+                {language === 'pt' ? 'Adicionar' : 'Add'}
               </Button>
             </div>
             <p className="text-sm text-muted-foreground">
-              Items a serem revistos na próxima visita
+              {language === 'pt' ? 'Items a serem revistos na próxima visita' : 'Items to be reviewed on next visit'}
             </p>
             <div className="space-y-2">
               {pendentes.map((pendente, index) => (
@@ -770,10 +770,10 @@ export default function RelatorioCompleto() {
       <div className="max-w-3xl mx-auto space-y-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">
-            Relatório Completo
+            {language === 'pt' ? 'Relatório Completo' : 'Complete Report'}
           </h1>
           <p className="text-muted-foreground">
-            Relatório detalhado de supervisão
+            {language === 'pt' ? 'Relatório detalhado de supervisão' : 'Detailed supervision report'}
           </p>
         </div>
 
@@ -782,7 +782,7 @@ export default function RelatorioCompleto() {
             <div className="flex items-center justify-between">
               <CardTitle>{pages[currentPage].title}</CardTitle>
               <span className="text-sm text-muted-foreground">
-                Página {currentPage + 1} de {pages.length}
+                {language === 'pt' ? 'Página' : 'Page'} {currentPage + 1} {language === 'pt' ? 'de' : 'of'} {pages.length}
               </span>
             </div>
           </CardHeader>
@@ -797,17 +797,17 @@ export default function RelatorioCompleto() {
                 disabled={currentPage === 0}
               >
                 <ChevronLeft className="h-4 w-4 mr-1" />
-                Anterior
+                {language === 'pt' ? 'Anterior' : 'Previous'}
               </Button>
 
               {currentPage === pages.length - 1 ? (
                 <Button onClick={handleSubmit} disabled={createMutation.isPending}>
                   <Save className="h-4 w-4 mr-2" />
-                  Guardar Relatório
+                  {language === 'pt' ? 'Guardar Relatório' : 'Save Report'}
                 </Button>
               ) : (
                 <Button type="button" onClick={handleNext}>
-                  Seguinte
+                  {language === 'pt' ? 'Seguinte' : 'Next'}
                   <ChevronRight className="h-4 w-4 ml-1" />
                 </Button>
               )}

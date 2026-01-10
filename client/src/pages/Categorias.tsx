@@ -45,7 +45,7 @@ import { HistoricoRelatoriosIA } from "@/components/HistoricoRelatoriosIA";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function Categorias() {
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   const { user } = useAuth();
   const [, setLocation] = useLocation();
   const [expandedCategorias, setExpandedCategorias] = useState<string[]>([]);

@@ -35,7 +35,7 @@ import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function RelatoriosIA() {
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   // Novo estado para múltiplos meses - por defeito o mês atual
   const [mesesSelecionados, setMesesSelecionados] = useState<MesSelecionado[]>(() => {
     const hoje = new Date();

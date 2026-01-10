@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 
 export default function Pendentes() {
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   const utils = trpc.useUtils();
   const [apenasNaoVistos, setApenasNaoVistos] = useState(false);
   const isAdmin = user?.role === 'admin';

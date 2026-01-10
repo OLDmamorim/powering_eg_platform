@@ -12,9 +12,9 @@ import { ReminderDialog } from "@/components/ReminderDialog";
 import { RelatorioIACategorias } from "@/components/RelatorioIACategorias";
 
 // Componente de indicador de variação
-function VariationIndicator({ current, previous, suffix = "" }: { current: number; previous: number; suffix?: string }) {
+function VariationIndicator({ current, previous, suffix = "", language = 'pt' }: { current: number; previous: number; suffix?: string; language?: string }) {
   if (previous === 0 && current === 0) {
-    return <span className="text-xs text-muted-foreground flex items-center gap-1"><Minus className="h-3 w-3" /> Sem variação</span>;
+    return <span className="text-xs text-muted-foreground flex items-center gap-1"><Minus className="h-3 w-3" /> {language === 'pt' ? 'Sem variação' : 'No change'}</span>;
   }
   
   const variation = previous === 0 ? 100 : ((current - previous) / previous) * 100;
@@ -22,7 +22,7 @@ function VariationIndicator({ current, previous, suffix = "" }: { current: numbe
   const isNeutral = variation === 0;
   
   if (isNeutral) {
-    return <span className="text-xs text-muted-foreground flex items-center gap-1"><Minus className="h-3 w-3" /> Sem variação</span>;
+    return <span className="text-xs text-muted-foreground flex items-center gap-1"><Minus className="h-3 w-3" /> {language === 'pt' ? 'Sem variação' : 'No change'}</span>;
   }
   
   return (
@@ -485,9 +485,9 @@ export default function Dashboard() {
                 <Sparkles className="h-4 w-4 text-amber-500 flex-shrink-0 mt-0.5" />
                 <p className="text-xs md:text-sm text-muted-foreground italic break-words">
                   {dicaLoading ? (
-                    <span className="animate-pulse">A gerar dica...</span>
+                    <span className="animate-pulse">{language === 'pt' ? 'A gerar dica...' : 'Generating tip...'}</span>
                   ) : (
-                    dicaData?.dica || "Tudo em ordem! Continua o bom trabalho."
+                    dicaData?.dica || (language === 'pt' ? "Tudo em ordem! Continua o bom trabalho." : "Everything in order! Keep up the good work.")
                   )}
                 </p>
                 <Button 
@@ -506,11 +506,11 @@ export default function Dashboard() {
           <div className="hidden md:flex flex-col gap-2">
             {isAdmin ? (
               <Button onClick={() => setLocation('/relatorios-ia')} variant="outline" className="gap-2">
-                <Sparkles className="h-4 w-4" />Relatórios IA
+                <Sparkles className="h-4 w-4" />{language === 'pt' ? 'Relatórios IA' : 'AI Reports'}
               </Button>
             ) : (
               <Button onClick={gerarRelatorioMensal} variant="outline" className="gap-2">
-                <Download className="h-4 w-4" />Relatório Mensal
+                <Download className="h-4 w-4" />{language === 'pt' ? 'Relatório Mensal' : 'Monthly Report'}
               </Button>
             )}
             <Button 
@@ -519,7 +519,7 @@ export default function Dashboard() {
               className={`gap-2 relative ${tarefasNaoVistas > 0 ? 'animate-pulse border-amber-500 bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/30 dark:hover:bg-amber-950/50' : ''}`}
             >
               <CheckSquare className="h-4 w-4" />
-              Minhas Tarefas
+              {language === 'pt' ? 'Minhas Tarefas' : 'My Tasks'}
               {tarefasPendentesAMim > 0 && (
                 <span className="absolute -top-2 -right-2 bg-amber-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
                   {tarefasPendentesAMim}
@@ -543,9 +543,9 @@ export default function Dashboard() {
         {isGestor && atrasosLojas && atrasosLojas.length > 0 && (
           <Alert className="border-red-500 bg-red-50 text-red-900 dark:bg-red-950/30 dark:text-red-200">
             <Clock className="h-4 w-4" />
-            <AlertTitle>Atenção: Lojas com relatórios em atraso</AlertTitle>
+            <AlertTitle>{language === 'pt' ? 'Atenção: Lojas com relatórios em atraso' : 'Attention: Stores with overdue reports'}</AlertTitle>
             <AlertDescription className="space-y-2">
-              <p className="mb-3">As seguintes lojas estão abaixo do mínimo mensal esperado:</p>
+              <p className="mb-3">{language === 'pt' ? 'As seguintes lojas estão abaixo do mínimo mensal esperado:' : 'The following stores are below the expected monthly minimum:'}</p>
               <div className="space-y-2">
                 {atrasosLojas.map((atraso) => (
                   <div key={atraso.lojaId} className="flex items-center justify-between bg-white dark:bg-red-950/50 p-2 rounded border border-red-200 dark:border-red-800">
@@ -645,8 +645,8 @@ export default function Dashboard() {
             <CardContent>
               <div className="text-2xl font-bold text-emerald-700 dark:text-emerald-300">{relatoriosLivres?.length || 0}</div>
               <div className="flex items-center justify-between">
-                <p className="text-xs text-muted-foreground">Este mês: {estatisticas.relLivres.atual}</p>
-                <VariationIndicator current={estatisticas.relLivres.atual} previous={estatisticas.relLivres.anterior} suffix=" vs mês ant." />
+                <p className="text-xs text-muted-foreground">{language === 'pt' ? 'Este mês' : 'This month'}: {estatisticas.relLivres.atual}</p>
+                <VariationIndicator current={estatisticas.relLivres.atual} previous={estatisticas.relLivres.anterior} suffix={language === 'pt' ? ' vs mês ant.' : ' vs prev month'} language={language} />
               </div>
             </CardContent>
           </Card>
@@ -669,8 +669,8 @@ export default function Dashboard() {
             <CardContent>
               <div className="text-2xl font-bold text-teal-700 dark:text-teal-300">{relatoriosCompletos?.length || 0}</div>
               <div className="flex items-center justify-between">
-                <p className="text-xs text-muted-foreground">Este mês: {estatisticas.relCompletos.atual}</p>
-                <VariationIndicator current={estatisticas.relCompletos.atual} previous={estatisticas.relCompletos.anterior} suffix=" vs mês ant." />
+                <p className="text-xs text-muted-foreground">{language === 'pt' ? 'Este mês' : 'This month'}: {estatisticas.relCompletos.atual}</p>
+                <VariationIndicator current={estatisticas.relCompletos.atual} previous={estatisticas.relCompletos.anterior} suffix={language === 'pt' ? ' vs mês ant.' : ' vs prev month'} language={language} />
               </div>
             </CardContent>
           </Card>
@@ -693,8 +693,8 @@ export default function Dashboard() {
             <CardContent>
               <div className="text-2xl font-bold text-amber-700 dark:text-amber-300">{pendentes?.filter((p: any) => !p.resolvido).length || 0}</div>
               <div className="flex items-center justify-between">
-                <p className="text-xs text-muted-foreground">Novos este mês: {estatisticas.pendentes.atual}</p>
-                <VariationIndicator current={estatisticas.pendentes.atual} previous={estatisticas.pendentes.anterior} suffix=" vs mês ant." />
+                <p className="text-xs text-muted-foreground">{language === 'pt' ? 'Novos este mês' : 'New this month'}: {estatisticas.pendentes.atual}</p>
+                <VariationIndicator current={estatisticas.pendentes.atual} previous={estatisticas.pendentes.anterior} suffix={language === 'pt' ? ' vs mês ant.' : ' vs prev month'} language={language} />
               </div>
             </CardContent>
           </Card>
@@ -772,22 +772,22 @@ export default function Dashboard() {
           
           <Card className={isAdmin ? '' : 'md:col-span-2'}>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2"><TrendingUp className="h-4 w-4" />Evolução de Visitas</CardTitle>
+              <CardTitle className="flex items-center gap-2"><TrendingUp className="h-4 w-4" />{language === 'pt' ? 'Evolução de Visitas' : 'Visit Evolution'}</CardTitle>
             </CardHeader>
             <CardContent>
-              <SimpleLineChart data={visitasPorMes} title="Visitas por mês (últimos 6 meses)" />
+              <SimpleLineChart data={visitasPorMes} title={language === 'pt' ? 'Visitas por mês (últimos 6 meses)' : 'Visits per month (last 6 months)'} />
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2"><ListTodo className="h-4 w-4" />Pendentes por Loja</CardTitle>
+              <CardTitle className="flex items-center gap-2"><ListTodo className="h-4 w-4" />{language === 'pt' ? 'Pendentes por Loja' : 'Pending by Store'}</CardTitle>
             </CardHeader>
             <CardContent>
               {pendentesPorLoja.length > 0 ? (
-                <SimpleBarChart data={pendentesPorLoja} title="Top 5 lojas com mais pendentes" />
+                <SimpleBarChart data={pendentesPorLoja} title={language === 'pt' ? 'Top 5 lojas com mais pendentes' : 'Top 5 stores with most pending items'} />
               ) : (
-                <p className="text-sm text-muted-foreground text-center py-8">Nenhum pendente ativo</p>
+                <p className="text-sm text-muted-foreground text-center py-8">{language === 'pt' ? 'Nenhum pendente ativo' : 'No active pending items'}</p>
               )}
             </CardContent>
           </Card>
@@ -795,17 +795,17 @@ export default function Dashboard() {
           {isGestor && progressoLojas && progressoLojas.length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2"><CheckCircle className="h-4 w-4" />Progresso de Relatórios</CardTitle>
+                <CardTitle className="flex items-center gap-2"><CheckCircle className="h-4 w-4" />{language === 'pt' ? 'Progresso de Relatórios' : 'Report Progress'}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <p className="text-sm text-muted-foreground mb-3">Mínimos mensais por loja</p>
+                  <p className="text-sm text-muted-foreground mb-3">{language === 'pt' ? 'Mínimos mensais por loja' : 'Monthly minimums per store'}</p>
                   {progressoLojas.map((progresso) => (
                     <div key={progresso.lojaId} className="space-y-2">
                       <div className="flex items-center justify-between">
                         <span className="text-sm font-medium">{progresso.lojaNome}</span>
                         <span className="text-xs text-muted-foreground">
-                          {progresso.minimoLivres === 0 && progresso.minimoCompletos === 0 ? 'Sem mínimo' : ''}
+                          {progresso.minimoLivres === 0 && progresso.minimoCompletos === 0 ? language === 'pt' ? 'Sem mínimo' : 'No minimum' : ''}
                         </span>
                       </div>
                       
@@ -926,7 +926,7 @@ export default function Dashboard() {
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
                   <Eye className="h-4 w-4 text-purple-600" />
-                  Previsões da Semana
+                  {language === 'pt' ? 'Previsões da Semana' : 'Weekly Predictions'}
                 </CardTitle>
                 <Button
                   variant="outline"
@@ -940,7 +940,7 @@ export default function Dashboard() {
                   ) : (
                     <Zap className="h-4 w-4" />
                   )}
-                  <span className="ml-1">Analisar</span>
+                  <span className="ml-1">{language === 'pt' ? 'Analisar' : 'Analyze'}</span>
                 </Button>
               </CardHeader>
               <CardContent>
@@ -991,8 +991,8 @@ export default function Dashboard() {
                 ) : (
                   <div className="text-center py-8">
                     <Eye className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                    <p className="text-sm text-muted-foreground">Nenhuma previsão ativa</p>
-                    <p className="text-xs text-muted-foreground mt-1">Clique em "Analisar" para gerar previsões</p>
+                    <p className="text-sm text-muted-foreground">{language === 'pt' ? 'Nenhuma previsão ativa' : 'No active predictions'}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{language === 'pt' ? 'Clique em "Analisar" para gerar previsões' : 'Click "Analyze" to generate predictions'}</p>
                   </div>
                 )}
               </CardContent>
@@ -1003,7 +1003,7 @@ export default function Dashboard() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Activity className="h-4 w-4 text-indigo-600" />
-                  Feed de Atividades
+                  {language === 'pt' ? 'Feed de Atividades' : 'Activity Feed'}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -1065,7 +1065,7 @@ export default function Dashboard() {
                 ) : (
                   <div className="text-center py-8">
                     <Activity className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                    <p className="text-sm text-muted-foreground">Nenhuma atividade registada</p>
+                    <p className="text-sm text-muted-foreground">{language === 'pt' ? 'Nenhuma atividade registada' : 'No activity recorded'}</p>
                   </div>
                 )}
               </CardContent>
@@ -1076,7 +1076,7 @@ export default function Dashboard() {
         <div className="grid gap-4 md:grid-cols-2">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2"><Calendar className="h-4 w-4" />Atividade Recente</CardTitle>
+              <CardTitle className="flex items-center gap-2"><Calendar className="h-4 w-4" />{language === 'pt' ? 'Atividade Recente' : 'Recent Activity'}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -1088,7 +1088,7 @@ export default function Dashboard() {
                   ].sort((a, b) => new Date(b.dataVisita).getTime() - new Date(a.dataVisita).getTime());
                   
                   if (todosRelatorios.length === 0) {
-                    return <p className="text-sm text-muted-foreground text-center py-4">Nenhum relatório recente</p>;
+                    return <p className="text-sm text-muted-foreground text-center py-4">{language === 'pt' ? 'Nenhum relatório recente' : 'No recent reports'}</p>;
                   }
                   
                   return todosRelatorios.slice(0, 5).map((relatorio: any) => (
@@ -1098,7 +1098,7 @@ export default function Dashboard() {
                         <p className="text-xs text-muted-foreground">{new Date(relatorio.dataVisita).toLocaleDateString("pt-PT")}</p>
                       </div>
                       <span className={`text-xs px-2 py-1 rounded ${relatorio.tipo === 'completo' ? 'bg-teal-100 text-teal-700 dark:bg-teal-900 dark:text-teal-300' : 'bg-primary/10 text-primary'}`}>
-                        {relatorio.tipo === 'completo' ? 'Relatório Completo' : 'Relatório Livre'}
+                        {relatorio.tipo === 'completo' ? (language === 'pt' ? 'Relatório Completo' : 'Complete Report') : (language === 'pt' ? 'Relatório Livre' : 'Quick Report')}
                       </span>
                     </div>
                   ));
@@ -1109,7 +1109,7 @@ export default function Dashboard() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Pendentes Recentes</CardTitle>
+              <CardTitle>{language === 'pt' ? 'Pendentes Recentes' : 'Recent Pending Items'}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -1121,7 +1121,7 @@ export default function Dashboard() {
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
                           <p className="text-sm font-medium">{pendente.loja?.nome || "Loja"}</p>
-                          {isAntigo && <span className="text-xs bg-orange-500 text-white px-1.5 py-0.5 rounded">{diasAtras} dias</span>}
+                          {isAntigo && <span className="text-xs bg-orange-500 text-white px-1.5 py-0.5 rounded">{diasAtras} {language === 'pt' ? 'dias' : 'days'}</span>}
                         </div>
                         <p className="text-xs text-muted-foreground line-clamp-2">{pendente.descricao}</p>
                       </div>
@@ -1129,7 +1129,7 @@ export default function Dashboard() {
                   );
                 })}
                 {(!pendentes || pendentes.filter((p: any) => !p.resolvido).length === 0) && (
-                  <p className="text-sm text-muted-foreground text-center py-4">Nenhum pendente</p>
+                  <p className="text-sm text-muted-foreground text-center py-4">{language === 'pt' ? 'Nenhum pendente' : 'No pending items'}</p>
                 )}
               </div>
             </CardContent>

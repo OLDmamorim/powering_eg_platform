@@ -8,6 +8,13 @@ import { Loader2, ArrowRight, TrendingUp, TrendingDown, Minus, BarChart3, Target
 import { useLanguage } from "@/contexts/LanguageContext";
 
 export function ComparacaoLojas() {
+  const { language, t } = useLanguage();
+  
+  // Nomes dos meses traduzidos
+  const mesesPT = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+  const mesesEN = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  const mesesTrad = language === 'pt' ? mesesPT : mesesEN;
+  
   // Estado dos filtros
   const [loja1Id, setLoja1Id] = useState<number | null>(null);
   const [loja2Id, setLoja2Id] = useState<number | null>(null);
@@ -35,11 +42,7 @@ export function ComparacaoLojas() {
     { enabled: !!loja1Id && !!loja2Id && !!periodoSelecionado }
   );
   
-  // Nomes dos meses
-  const meses = [
-    'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
-  ];
+  
   
   // Processar dados de comparação
   const dadosLoja1 = comparacao?.find(c => c.lojaId === loja1Id);
@@ -63,7 +66,7 @@ export function ComparacaoLojas() {
       return (
         <div className="flex items-center gap-1 text-muted-foreground">
           <Minus className="h-4 w-4" />
-          <span className="text-sm">Igual</span>
+          <span className="text-sm">{language === 'pt' ? 'Igual' : 'Equal'}</span>
         </div>
       );
     }
@@ -137,11 +140,11 @@ export function ComparacaoLojas() {
         <div className="container mx-auto py-8">
           <Card>
             <CardHeader>
-              <CardTitle>Comparação Indisponível</CardTitle>
+              <CardTitle>{language === 'pt' ? 'Comparação Indisponível' : 'Comparison Unavailable'}</CardTitle>
               <CardDescription>
                 {!periodos || periodos.length === 0 
-                  ? 'Nenhum período disponível. O administrador precisa fazer upload dos resultados mensais.'
-                  : 'São necessárias pelo menos 2 lojas para fazer comparação.'
+                  ? (language === 'pt' ? 'Nenhum período disponível. O administrador precisa fazer upload dos resultados mensais.' : 'No period available. The administrator needs to upload monthly results.')
+                  : (language === 'pt' ? 'São necessárias pelo menos 2 lojas para fazer comparação.' : 'At least 2 stores are required for comparison.')
                 }
               </CardDescription>
             </CardHeader>
@@ -156,25 +159,25 @@ export function ComparacaoLojas() {
       <div className="container mx-auto py-8 space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold">Comparação de Lojas</h1>
-          <p className="text-muted-foreground">Análise lado-a-lado de performance entre duas lojas</p>
+          <h1 className="text-3xl font-bold">{language === 'pt' ? 'Comparação de Lojas' : 'Store Comparison'}</h1>
+          <p className="text-muted-foreground">{language === 'pt' ? 'Análise lado-a-lado de performance entre duas lojas' : 'Side-by-side performance analysis between two stores'}</p>
         </div>
         
         {/* Filtros de Seleção */}
         <Card>
           <CardHeader>
-            <CardTitle>Selecione as Lojas e Período</CardTitle>
+            <CardTitle>{language === 'pt' ? 'Selecione as Lojas e Período' : 'Select Stores and Period'}</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Loja 1 */}
             <div className="space-y-2">
-              <label className="text-sm font-medium">Loja 1</label>
+              <label className="text-sm font-medium">{language === 'pt' ? 'Loja 1' : 'Store 1'}</label>
               <Select
                 value={loja1Id?.toString() || ''}
                 onValueChange={(value) => setLoja1Id(Number(value))}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Selecione a primeira loja" />
+                  <SelectValue placeholder={language === 'pt' ? 'Selecione a primeira loja' : 'Select the first store'} />
                 </SelectTrigger>
                 <SelectContent>
                   {lojas.filter(l => l.id !== loja2Id).map((loja) => (
@@ -188,13 +191,13 @@ export function ComparacaoLojas() {
             
             {/* Loja 2 */}
             <div className="space-y-2">
-              <label className="text-sm font-medium">Loja 2</label>
+              <label className="text-sm font-medium">{language === 'pt' ? 'Loja 2' : 'Store 2'}</label>
               <Select
                 value={loja2Id?.toString() || ''}
                 onValueChange={(value) => setLoja2Id(Number(value))}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Selecione a segunda loja" />
+                  <SelectValue placeholder={language === 'pt' ? 'Selecione a segunda loja' : 'Select the second store'} />
                 </SelectTrigger>
                 <SelectContent>
                   {lojas.filter(l => l.id !== loja1Id).map((loja) => (
@@ -208,7 +211,7 @@ export function ComparacaoLojas() {
             
             {/* Período */}
             <div className="space-y-2">
-              <label className="text-sm font-medium">Período</label>
+              <label className="text-sm font-medium">{language === 'pt' ? 'Período' : 'Period'}</label>
               <Select
                 value={periodoSelecionado ? `${periodoSelecionado.mes}-${periodoSelecionado.ano}` : ''}
                 onValueChange={(value) => {
@@ -217,7 +220,7 @@ export function ComparacaoLojas() {
                 }}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Selecione o período" />
+                  <SelectValue placeholder={language === 'pt' ? 'Selecione o período' : 'Select the period'} />
                 </SelectTrigger>
                 <SelectContent>
                   {periodos.map((p) => (
@@ -236,7 +239,7 @@ export function ComparacaoLojas() {
           <Card>
             <CardContent className="py-12 text-center text-muted-foreground">
               <BarChart3 className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>Selecione duas lojas para ver a comparação</p>
+              <p>{language === 'pt' ? 'Selecione duas lojas para ver a comparação' : 'Select two stores to see the comparison'}</p>
             </CardContent>
           </Card>
         ) : loadingComparacao ? (
@@ -246,7 +249,7 @@ export function ComparacaoLojas() {
         ) : !dadosLoja1 || !dadosLoja2 ? (
           <Card>
             <CardContent className="py-12 text-center text-muted-foreground">
-              <p>Sem dados disponíveis para estas lojas no período selecionado</p>
+              <p>{language === 'pt' ? 'Sem dados disponíveis para estas lojas no período selecionado' : 'No data available for these stores in the selected period'}</p>
             </CardContent>
           </Card>
         ) : (
@@ -257,7 +260,7 @@ export function ComparacaoLojas() {
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center gap-2">
                     <Target className="h-5 w-5" />
-                    Análise Comparativa
+                    {language === 'pt' ? 'Análise Comparativa' : 'Comparative Analysis'}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -286,7 +289,7 @@ export function ComparacaoLojas() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <BarChart3 className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm font-medium">Total de Serviços</span>
+                      <span className="text-sm font-medium">{language === 'pt' ? 'Total de Serviços' : 'Total Services'}</span>
                     </div>
                     <div className="text-right">
                       <div className="text-2xl font-bold">{dadosLoja1.totalServicos || 0}</div>
@@ -298,7 +301,7 @@ export function ComparacaoLojas() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Target className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm font-medium">Objetivo Mensal</span>
+                      <span className="text-sm font-medium">{language === 'pt' ? 'Objetivo Mensal' : 'Monthly Target'}</span>
                     </div>
                     <div className="text-right">
                       <div className="text-2xl font-bold">{dadosLoja1.objetivoMensal || 0}</div>
@@ -309,7 +312,7 @@ export function ComparacaoLojas() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Target className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm font-medium">Desvio vs Objetivo</span>
+                      <span className="text-sm font-medium">{language === 'pt' ? 'Desvio vs Objetivo' : 'Deviation vs Target'}</span>
                     </div>
                     <div className="text-right">
                       <div className={`text-2xl font-bold ${dadosLoja1.desvioPercentualMes && parseFloat(dadosLoja1.desvioPercentualMes.toString()) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
@@ -322,7 +325,7 @@ export function ComparacaoLojas() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Award className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm font-medium">Taxa de Reparação</span>
+                      <span className="text-sm font-medium">{language === 'pt' ? 'Taxa de Reparação' : 'Repair Rate'}</span>
                     </div>
                     <div className="text-right">
                       <div className="text-2xl font-bold">
@@ -340,7 +343,7 @@ export function ComparacaoLojas() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Users className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm font-medium">Colaboradores</span>
+                      <span className="text-sm font-medium">{language === 'pt' ? 'Colaboradores' : 'Employees'}</span>
                     </div>
                     <div className="text-right">
                       <div className="text-2xl font-bold">{dadosLoja1.numColaboradores || 0}</div>
@@ -351,7 +354,7 @@ export function ComparacaoLojas() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Users className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm font-medium">Serviços/Colaborador</span>
+                      <span className="text-sm font-medium">{language === 'pt' ? 'Serviços/Colaborador' : 'Services/Employee'}</span>
                     </div>
                     <div className="text-right">
                       <div className="text-2xl font-bold">
@@ -377,7 +380,7 @@ export function ComparacaoLojas() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <BarChart3 className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm font-medium">Total de Serviços</span>
+                      <span className="text-sm font-medium">{language === 'pt' ? 'Total de Serviços' : 'Total Services'}</span>
                     </div>
                     <div className="text-right">
                       <div className="text-2xl font-bold">{dadosLoja2.totalServicos || 0}</div>
@@ -389,7 +392,7 @@ export function ComparacaoLojas() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Target className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm font-medium">Objetivo Mensal</span>
+                      <span className="text-sm font-medium">{language === 'pt' ? 'Objetivo Mensal' : 'Monthly Target'}</span>
                     </div>
                     <div className="text-right">
                       <div className="text-2xl font-bold">{dadosLoja2.objetivoMensal || 0}</div>
@@ -400,7 +403,7 @@ export function ComparacaoLojas() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Target className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm font-medium">Desvio vs Objetivo</span>
+                      <span className="text-sm font-medium">{language === 'pt' ? 'Desvio vs Objetivo' : 'Deviation vs Target'}</span>
                     </div>
                     <div className="text-right">
                       <div className={`text-2xl font-bold ${dadosLoja2.desvioPercentualMes && parseFloat(dadosLoja2.desvioPercentualMes.toString()) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
@@ -413,7 +416,7 @@ export function ComparacaoLojas() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Award className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm font-medium">Taxa de Reparação</span>
+                      <span className="text-sm font-medium">{language === 'pt' ? 'Taxa de Reparação' : 'Repair Rate'}</span>
                     </div>
                     <div className="text-right">
                       <div className="text-2xl font-bold">
@@ -431,7 +434,7 @@ export function ComparacaoLojas() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Users className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm font-medium">Colaboradores</span>
+                      <span className="text-sm font-medium">{language === 'pt' ? 'Colaboradores' : 'Employees'}</span>
                     </div>
                     <div className="text-right">
                       <div className="text-2xl font-bold">{dadosLoja2.numColaboradores || 0}</div>
@@ -442,7 +445,7 @@ export function ComparacaoLojas() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Users className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm font-medium">Serviços/Colaborador</span>
+                      <span className="text-sm font-medium">{language === 'pt' ? 'Serviços/Colaborador' : 'Services/Employee'}</span>
                     </div>
                     <div className="text-right">
                       <div className="text-2xl font-bold">

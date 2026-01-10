@@ -41,7 +41,7 @@ import {
 type PeriodoComparacao = 'q1_ano_anterior_vs_atual' | 'q2_ano_anterior_vs_atual' | 'q3_ano_anterior_vs_atual' | 'q4_ano_anterior_vs_atual' | 's1_ano_anterior_vs_atual' | 's2_ano_anterior_vs_atual' | 'ano_completo';
 
 export default function HistoricoLoja() {
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   const { user } = useAuth();
   const [, setLocation] = useLocation();
   const [lojaId, setLojaId] = useState("");
@@ -947,10 +947,10 @@ export default function HistoricoLoja() {
       // ========== GUARDAR PDF ==========
       const fileName = `Historico_${lojaNome.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
       doc.save(fileName);
-      toast.success("PDF exportado com sucesso!");
+      toast.success(language === 'pt' ? "PDF exportado com sucesso!" : "PDF exported successfully!");
     } catch (error) {
       console.error("Erro ao exportar PDF:", error);
-      toast.error("Erro ao exportar PDF");
+      toast.error(language === 'pt' ? "Erro ao exportar PDF" : "Error exporting PDF");
     } finally {
       setExportando(false);
     }

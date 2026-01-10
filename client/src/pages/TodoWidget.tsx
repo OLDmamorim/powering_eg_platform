@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -83,6 +84,7 @@ function usePWAInstall() {
 
 export default function TodoWidget() {
   const { user, loading: authLoading } = useAuth();
+  const { language } = useLanguage();
   const { isInstallable, isInstalled, install } = usePWAInstall();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [filtroLoja, setFiltroLoja] = useState<string>("todas");
@@ -107,7 +109,7 @@ export default function TodoWidget() {
   // Mutations
   const concluirMutation = trpc.todos.concluir.useMutation({
     onSuccess: () => {
-      toast.success("Tarefa concluída!");
+      toast.success(language === 'pt' ? "Tarefa concluída!" : "Task completed!");
       refetchTodos();
     },
     onError: (error: any) => toast.error(error.message),
@@ -115,7 +117,7 @@ export default function TodoWidget() {
 
   const atualizarMutation = trpc.todos.atualizar.useMutation({
     onSuccess: () => {
-      toast.success("Estado atualizado!");
+      toast.success(language === 'pt' ? "Estado atualizado!" : "Status updated!");
       refetchTodos();
     },
     onError: (error: any) => toast.error(error.message),
@@ -125,7 +127,7 @@ export default function TodoWidget() {
     setIsRefreshing(true);
     await refetchTodos();
     setIsRefreshing(false);
-    toast.success("Atualizado!");
+    toast.success(language === 'pt' ? "Atualizado!" : "Updated!");
   };
 
   // Tela de login
@@ -192,7 +194,7 @@ export default function TodoWidget() {
                 onClick={async () => {
                   const success = await install();
                   if (success) {
-                    toast.success("App instalada com sucesso!");
+                    toast.success(language === 'pt' ? "App instalada com sucesso!" : "App installed successfully!");
                   }
                 }}
               >

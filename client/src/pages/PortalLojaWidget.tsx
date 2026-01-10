@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -24,6 +25,7 @@ interface LojaAuth {
 }
 
 export default function PortalLojaWidget() {
+  const { language } = useLanguage();
   const [token, setToken] = useState<string>("");
   const [lojaAuth, setLojaAuth] = useState<LojaAuth | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -78,7 +80,7 @@ export default function PortalLojaWidget() {
   // Mutations
   const atualizarEstadoMutation = trpc.todosPortalLoja.atualizarEstado.useMutation({
     onSuccess: () => {
-      toast.success("Tarefa iniciada!");
+      toast.success(language === 'pt' ? "Tarefa iniciada!" : "Task started!");
       refetchTodos();
     },
     onError: (error) => toast.error(error.message),
@@ -86,7 +88,7 @@ export default function PortalLojaWidget() {
 
   const concluirMutation = trpc.todosPortalLoja.concluir.useMutation({
     onSuccess: () => {
-      toast.success("Tarefa concluída!");
+      toast.success(language === 'pt' ? "Tarefa concluída!" : "Task completed!");
       refetchTodos();
     },
     onError: (error) => toast.error(error.message),
@@ -96,7 +98,7 @@ export default function PortalLojaWidget() {
     setIsRefreshing(true);
     await refetchTodos();
     setIsRefreshing(false);
-    toast.success("Atualizado!");
+    toast.success(language === 'pt' ? "Atualizado!" : "Updated!");
   };
 
   // Tela de login compacta

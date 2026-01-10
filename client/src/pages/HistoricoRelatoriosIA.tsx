@@ -80,7 +80,7 @@ function analiseToMarkdown(conteudoJSON: string): string {
 }
 
 export default function HistoricoRelatoriosIA() {
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   const [, navigate] = useLocation();
   const [dataInicio, setDataInicio] = useState("");
   const [dataFim, setDataFim] = useState("");
@@ -146,10 +146,10 @@ export default function HistoricoRelatoriosIA() {
       
       doc.save(`relatorio-ia-${relatorio.id}.pdf`);
       
-      toast.success("Relatório exportado com sucesso!");
+      toast.success(language === 'pt' ? "Relatório exportado com sucesso!" : "Report exported successfully!");
     } catch (error) {
       console.error("Erro ao gerar PDF:", error);
-      toast.error("Não foi possível gerar o PDF.");
+      toast.error(language === 'pt' ? "Não foi possível gerar o PDF." : "Could not generate PDF.");
     }
   };
 
@@ -232,7 +232,7 @@ export default function HistoricoRelatoriosIA() {
             <CardContent className="py-8 text-center text-muted-foreground">
               <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p>Nenhum relatório IA encontrado.</p>
-              <p className="text-sm mt-2">Gere relatórios na página "Relatórios IA".</p>
+              <p className="text-sm mt-2">{language === 'pt' ? 'Gere relatórios na página "Relatórios IA".' : 'Generate reports on the "AI Reports" page.'}</p>
             </CardContent>
           </Card>
         ) : (

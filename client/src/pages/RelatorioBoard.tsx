@@ -70,7 +70,7 @@ ChartJS.register(
 );
 
 export default function RelatorioBoard() {
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   // Estado para meses selecionados - inicializa com mês atual
   const [mesesSelecionados, setMesesSelecionados] = useState<MesSelecionado[]>(() => {
     const hoje = new Date();
@@ -96,10 +96,10 @@ export default function RelatorioBoard() {
     onSuccess: (data) => {
       setAnaliseIA(data.analise);
       setIsGeneratingIA(false);
-      toast.success("Análise IA gerada com sucesso!");
+      toast.success(language === 'pt' ? "Análise IA gerada com sucesso!" : "AI Analysis generated successfully!");
     },
     onError: (error) => {
-      toast.error(error.message || "Erro ao gerar análise IA");
+      toast.error(error.message || (language === 'pt' ? "Erro ao gerar análise IA" : "Error generating AI analysis"));
       setIsGeneratingIA(false);
     },
   });

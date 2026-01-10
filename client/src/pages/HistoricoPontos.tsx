@@ -11,7 +11,7 @@ import FiltroMesesCheckbox, { type MesSelecionado, mesesParaDatas } from "@/comp
 import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function HistoricoPontos() {
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   const [selectedLojaId, setSelectedLojaId] = useState<string>("all");
   // Novo estado para múltiplos meses - por defeito o mês atual
   const [mesesSelecionados, setMesesSelecionados] = useState<MesSelecionado[]>(() => {

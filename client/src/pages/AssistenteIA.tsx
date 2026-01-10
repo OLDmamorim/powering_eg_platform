@@ -26,7 +26,7 @@ interface Message {
 }
 
 export default function AssistenteIA() {
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);

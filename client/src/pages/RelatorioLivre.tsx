@@ -27,7 +27,7 @@ import imageCompression from 'browser-image-compression';
 
 export default function RelatorioLivre() {
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   const [, setLocation] = useLocation();
   const [lojasIds, setLojasIds] = useState<string[]>([]);
   const [descricao, setDescricao] = useState("");
@@ -92,7 +92,7 @@ export default function RelatorioLivre() {
 
   const handleVoiceTranscription = async (transcription: string) => {
     try {
-      toast.info("A processar transcrição...");
+      toast.info(language === 'pt' ? "A processar transcrição..." : "Processing transcription...");
       const processed = await processTranscriptionMutation.mutateAsync({ transcription });
       
       // Preencher campos automaticamente
@@ -112,10 +112,10 @@ export default function RelatorioLivre() {
         setPendentes(processed.pendentes);
       }
       
-      toast.success("Relatório preenchido automaticamente!");
+      toast.success(language === 'pt' ? "Relatório preenchido automaticamente!" : "Report filled automatically!");
     } catch (error) {
       console.error("Erro ao processar transcrição:", error);
-      toast.error("Erro ao processar transcrição. Tente novamente.");
+      toast.error(language === 'pt' ? "Erro ao processar transcrição. Tente novamente." : "Error processing transcription. Try again.");
     }
   };
 
@@ -181,7 +181,7 @@ export default function RelatorioLivre() {
         toast.success(`${newFotos.length} foto(s) adicionada(s)`);
         
         // Analisar fotos automaticamente com IA
-        toast.info("⚡ A analisar fotos com IA...");
+        toast.info(language === 'pt' ? "⚡ A analisar fotos com IA..." : "⚡ Analyzing photos with AI...");
         try {
           const analyses = await analyzePhotosMutation.mutateAsync({ imageUrls: newFotos });
           
@@ -201,7 +201,7 @@ export default function RelatorioLivre() {
             });
             toast.success(`🤖 IA identificou ${allSuggestedPendentes.length} pendente(s) nas fotos!`);
           } else {
-            toast.success("✅ IA não identificou problemas nas fotos");
+            toast.success(language === 'pt' ? "✅ IA não identificou problemas nas fotos" : "✅ AI found no issues in photos");
           }
         } catch (error) {
           console.error("Erro ao analisar fotos:", error);
@@ -229,7 +229,7 @@ export default function RelatorioLivre() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (lojasIds.length === 0) {
-      toast.error("Por favor selecione pelo menos uma loja");
+      toast.error(language === 'pt' ? "Por favor selecione pelo menos uma loja" : "Please select at least one store");
       return;
     }
 
@@ -257,7 +257,7 @@ export default function RelatorioLivre() {
           })),
         });
       } catch (error) {
-        toast.error("Erro ao atualizar pendentes");
+        toast.error(language === 'pt' ? "Erro ao atualizar pendentes" : "Error updating pending items");
         return;
       }
     }

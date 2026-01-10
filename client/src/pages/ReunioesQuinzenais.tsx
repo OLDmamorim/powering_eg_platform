@@ -59,7 +59,7 @@ import {
 } from "lucide-react";
 
 export default function ReunioesQuinzenais() {
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   const { user } = useAuth();
   const isAdmin = user?.role === "admin";
   const [filtroEstado, setFiltroEstado] = useState<string>("todas");
@@ -100,7 +100,7 @@ export default function ReunioesQuinzenais() {
   // Mutations
   const criarTokenMutation = trpc.tokensLoja.criarToken.useMutation({
     onSuccess: () => {
-      toast.success("Token criado com sucesso!");
+      toast.success(language === 'pt' ? "Token criado com sucesso!" : "Token created successfully!");
       refetchTokens();
     },
     onError: (error) => toast.error(error.message),
@@ -108,7 +108,7 @@ export default function ReunioesQuinzenais() {
 
   const toggleTokenMutation = trpc.tokensLoja.toggleAtivo.useMutation({
     onSuccess: () => {
-      toast.success("Token atualizado!");
+      toast.success(language === 'pt' ? "Token atualizado!" : "Token updated!");
       refetchTokens();
     },
     onError: (error) => toast.error(error.message),
@@ -116,7 +116,7 @@ export default function ReunioesQuinzenais() {
 
   const regenerarTokenMutation = trpc.tokensLoja.regenerar.useMutation({
     onSuccess: () => {
-      toast.success("Token regenerado!");
+      toast.success(language === 'pt' ? "Token regenerado!" : "Token regenerated!");
       refetchTokens();
     },
     onError: (error) => toast.error(error.message),
@@ -131,7 +131,7 @@ export default function ReunioesQuinzenais() {
 
   const adicionarFeedbackMutation = trpc.consultaReunioes.adicionarFeedback.useMutation({
     onSuccess: () => {
-      toast.success("Feedback adicionado!");
+      toast.success(language === 'pt' ? "Feedback adicionado!" : "Feedback added!");
       setFeedbackText("");
       refetchReunioes();
     },
@@ -140,7 +140,7 @@ export default function ReunioesQuinzenais() {
 
   const criarPendenteMutation = trpc.pendentesLoja.criar.useMutation({
     onSuccess: () => {
-      toast.success("Pendente criado!");
+      toast.success(language === 'pt' ? "Pendente criado!" : "Pending item created!");
       setNovoPendenteOpen(false);
       setNovoPendenteDescricao("");
       setNovoPendenteLojaId(null);
@@ -151,7 +151,7 @@ export default function ReunioesQuinzenais() {
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
-    toast.success("Copiado para a área de transferência!");
+    toast.success(language === 'pt' ? "Copiado para a área de transferência!" : "Copied to clipboard!");
   };
 
   const getPortalUrl = (token: string) => {
@@ -253,7 +253,7 @@ export default function ReunioesQuinzenais() {
                   <Button
                     onClick={() => {
                       if (!novoPendenteLojaId || !novoPendenteDescricao) {
-                        toast.error("Preencha todos os campos");
+                        toast.error(language === 'pt' ? "Preencha todos os campos" : "Fill in all fields");
                         return;
                       }
                       criarPendenteMutation.mutate({
@@ -542,7 +542,7 @@ export default function ReunioesQuinzenais() {
                                             size="sm"
                                             onClick={() => {
                                               if (!feedbackText.trim()) {
-                                                toast.error("Escreva o feedback");
+                                                toast.error(language === 'pt' ? "Escreva o feedback" : "Write the feedback");
                                                 return;
                                               }
                                               adicionarFeedbackMutation.mutate({

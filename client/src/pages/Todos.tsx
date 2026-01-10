@@ -59,7 +59,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function Todos() {
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   const [filtroLoja, setFiltroLoja] = useState<string>("todas");
   const [filtroEstado, setFiltroEstado] = useState<string>("todos");
   const [filtroCategoria, setFiltroCategoria] = useState<string>("todas");
@@ -153,7 +153,7 @@ export default function Todos() {
   
   const criarCategoriaMutation = trpc.todoCategories.criar.useMutation({
     onSuccess: () => {
-      toast.success("Categoria criada!");
+      toast.success(language === 'pt' ? "Categoria criada!" : "Category created!");
       setNovaCategoriaNome("");
       setNovaCategoriaCor("#3B82F6");
       refetchCategorias();
@@ -163,7 +163,7 @@ export default function Todos() {
   
   const eliminarCategoriaMutation = trpc.todoCategories.eliminar.useMutation({
     onSuccess: () => {
-      toast.success("Categoria eliminada!");
+      toast.success(language === 'pt' ? "Categoria eliminada!" : "Category deleted!");
       refetchCategorias();
     },
     onError: (error) => toast.error(error.message),
@@ -185,7 +185,7 @@ export default function Todos() {
   
   const mudarStatusMutation = trpc.todos.mudarStatusComResposta.useMutation({
     onSuccess: () => {
-      toast.success("Status atualizado e loja notificada!");
+      toast.success(language === 'pt' ? "Status atualizado e loja notificada!" : "Status updated and store notified!");
       setMudarStatusOpen(false);
       setTodoSelecionado(null);
       setNovoStatus("");
@@ -208,7 +208,7 @@ export default function Todos() {
   
   const handleCriarTodo = () => {
     if (!titulo.trim()) {
-      toast.error("O título é obrigatório");
+      toast.error(language === 'pt' ? "O título é obrigatório" : "Title is required");
       return;
     }
     
@@ -865,7 +865,7 @@ export default function Todos() {
               <Button 
                 onClick={() => {
                   if (!novoStatus) {
-                    toast.error("Selecione um status");
+                    toast.error(language === 'pt' ? "Selecione um status" : "Select a status");
                     return;
                   }
                   mudarStatusMutation.mutate({

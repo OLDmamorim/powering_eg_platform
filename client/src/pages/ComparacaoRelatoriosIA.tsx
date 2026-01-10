@@ -22,7 +22,7 @@ interface Marcador {
 }
 
 export default function ComparacaoRelatoriosIA() {
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   const [relatorio1Id, setRelatorio1Id] = useState<string>("");
   const [relatorio2Id, setRelatorio2Id] = useState<string>("");
   const [marcadores1, setMarcadores1] = useState<Marcador[]>([]);
@@ -66,7 +66,7 @@ export default function ComparacaoRelatoriosIA() {
   const adicionarMarcador = (lado: 1 | 2) => {
     const texto = lado === 1 ? novaMarca1 : novaMarca2;
     if (!texto.trim()) {
-      toast.error("Digite uma nota para o marcador");
+      toast.error(language === 'pt' ? "Digite uma nota para o marcador" : "Enter a note for the marker");
       return;
     }
 
@@ -86,7 +86,7 @@ export default function ComparacaoRelatoriosIA() {
       setNovaMarca2("");
     }
 
-    toast.success("Marcador adicionado!");
+    toast.success(language === 'pt' ? "Marcador adicionado!" : "Marker added!");
   };
 
   const removerMarcador = (lado: 1 | 2, id: string) => {
@@ -95,20 +95,20 @@ export default function ComparacaoRelatoriosIA() {
     } else {
       setMarcadores2(marcadores2.filter(m => m.id !== id));
     }
-    toast.success("Marcador removido");
+    toast.success(language === 'pt' ? "Marcador removido" : "Marker removed");
   };
 
   const limparMarcadores = () => {
     setMarcadores1([]);
     setMarcadores2([]);
-    toast.success("Todos os marcadores foram removidos");
+    toast.success(language === 'pt' ? "Todos os marcadores foram removidos" : "All markers have been removed");
   };
 
   const cores = [
-    { valor: "yellow", label: "Importante", classe: "bg-yellow-200 dark:bg-yellow-900" },
-    { valor: "red", label: "Aten\u00e7\u00e3o", classe: "bg-red-200 dark:bg-red-900" },
-    { valor: "green", label: "Positivo", classe: "bg-green-200 dark:bg-green-900" },
-    { valor: "blue", label: "Negativo", classe: "bg-blue-200 dark:bg-blue-900" },
+{ valor: "yellow", label: language === 'pt' ? "Importante" : "Important", classe: "bg-yellow-200 dark:bg-yellow-900" },
+    { valor: "red", label: language === 'pt' ? "Atenção" : "Attention", classe: "bg-red-200 dark:bg-red-900" },
+    { valor: "green", label: language === 'pt' ? "Positivo" : "Positive", classe: "bg-green-200 dark:bg-green-900" },
+    { valor: "blue", label: language === 'pt' ? "Negativo" : "Negative", classe: "bg-blue-200 dark:bg-blue-900" },
   ];
 
   const downloadComparacaoPDF = () => {
@@ -189,10 +189,10 @@ export default function ComparacaoRelatoriosIA() {
       });
 
       doc.save(`comparacao-relatorios-${relatorio1.id}-vs-${relatorio2.id}.pdf`);
-      toast.success("Comparação exportada com sucesso!");
+      toast.success(language === 'pt' ? "Comparação exportada com sucesso!" : "Comparison exported successfully!");
     } catch (error) {
       console.error("Erro ao gerar PDF:", error);
-      toast.error("Não foi possível gerar o PDF.");
+      toast.error(language === 'pt' ? "Não foi possível gerar o PDF." : "Could not generate PDF.");
     }
   };
 
@@ -229,7 +229,7 @@ export default function ComparacaoRelatoriosIA() {
               <Label htmlFor="relatorio1">Relatório 1 (Mais Antigo)</Label>
               <Select value={relatorio1Id} onValueChange={setRelatorio1Id}>
                 <SelectTrigger id="relatorio1">
-                  <SelectValue placeholder="Selecione o primeiro relatório" />
+                  <SelectValue placeholder={language === 'pt' ? "Selecione o primeiro relatório" : "Select first report"} />
                 </SelectTrigger>
                 <SelectContent>
                   {relatorios?.map((rel) => (
@@ -249,7 +249,7 @@ export default function ComparacaoRelatoriosIA() {
               <Label htmlFor="relatorio2">Relatório 2 (Mais Recente)</Label>
               <Select value={relatorio2Id} onValueChange={setRelatorio2Id}>
                 <SelectTrigger id="relatorio2">
-                  <SelectValue placeholder="Selecione o segundo relatório" />
+                  <SelectValue placeholder={language === 'pt' ? "Selecione o segundo relatório" : "Select second report"} />
                 </SelectTrigger>
                 <SelectContent>
                   {relatorios?.map((rel) => (
@@ -330,7 +330,7 @@ export default function ComparacaoRelatoriosIA() {
                 
                 <div className="flex gap-2">
                   <Textarea
-                    placeholder="Adicione uma nota ou comentário..."
+                    placeholder={language === 'pt' ? "Adicione uma nota ou comentário..." : "Add a note or comment..."}
                     value={novaMarca1}
                     onChange={(e) => setNovaMarca1(e.target.value)}
                     className="flex-1"
@@ -408,7 +408,7 @@ export default function ComparacaoRelatoriosIA() {
                 
                 <div className="flex gap-2">
                   <Textarea
-                    placeholder="Adicione uma nota ou comentário..."
+                    placeholder={language === 'pt' ? "Adicione uma nota ou comentário..." : "Add a note or comment..."}
                     value={novaMarca2}
                     onChange={(e) => setNovaMarca2(e.target.value)}
                     className="flex-1"

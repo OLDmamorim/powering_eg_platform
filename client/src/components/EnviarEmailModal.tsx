@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +25,7 @@ export function EnviarEmailModal({
   gestores,
   onEnviar,
 }: EnviarEmailModalProps) {
+  const { language } = useLanguage();
   const [gestoresSelecionados, setGestoresSelecionados] = useState<number[]>(
     gestores?.map(g => g.id) || []
   );
@@ -41,18 +43,18 @@ export function EnviarEmailModal({
   const handleSubmit = async () => {
     if (tipo === "gestores") {
       if (gestoresSelecionados.length === 0) {
-        toast.error("Selecione pelo menos um gestor");
+        toast.error(language === 'pt' ? "Selecione pelo menos um gestor" : "Select at least one manager");
         return;
       }
     } else {
       if (!emailLoja.trim()) {
-        toast.error("Indique o email da loja");
+        toast.error(language === 'pt' ? "Indique o email da loja" : "Enter the store email");
         return;
       }
       // Validar formato de email
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(emailLoja)) {
-        toast.error("Email inválido");
+        toast.error(language === 'pt' ? "Email inválido" : "Invalid email");
         return;
       }
     }

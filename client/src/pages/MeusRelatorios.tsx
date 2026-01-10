@@ -19,7 +19,7 @@ import { toast } from "sonner";
 
 export default function MeusRelatorios() {
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   const [, setLocation] = useLocation();
   const [expandedLivres, setExpandedLivres] = useState<number[]>([]);
   const [expandedCompletos, setExpandedCompletos] = useState<number[]>([]);

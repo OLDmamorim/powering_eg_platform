@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +20,7 @@ interface AnexosUploadProps {
 }
 
 export function AnexosUpload({ anexos, onChange, maxFiles = 10 }: AnexosUploadProps) {
+  const { language } = useLanguage();
   const [uploading, setUploading] = useState(false);
   const uploadMutation = trpc.uploadAnexo.useMutation();
 
@@ -27,7 +29,7 @@ export function AnexosUpload({ anexos, onChange, maxFiles = 10 }: AnexosUploadPr
     if (files.length === 0) return;
 
     if (anexos.length + files.length > maxFiles) {
-      toast.error(`Máximo de ${maxFiles} anexos permitidos`);
+      toast.error(language === 'pt' ? `Máximo de ${maxFiles} anexos permitidos` : `Maximum ${maxFiles} attachments allowed`);
       return;
     }
 
@@ -39,7 +41,7 @@ export function AnexosUpload({ anexos, onChange, maxFiles = 10 }: AnexosUploadPr
       for (const file of files) {
         // Validar tamanho (máx 10MB)
         if (file.size > 10 * 1024 * 1024) {
-          toast.error(`${file.name} é muito grande (máx 10MB)`);
+          toast.error(language === 'pt' ? `${file.name} é muito grande (máx 10MB)` : `${file.name} is too large (max 10MB)`);
           continue;
         }
 
@@ -71,10 +73,10 @@ export function AnexosUpload({ anexos, onChange, maxFiles = 10 }: AnexosUploadPr
       }
 
       onChange([...anexos, ...novosAnexos]);
-      toast.success(`${novosAnexos.length} arquivo(s) adicionado(s)`);
+      toast.success(language === 'pt' ? `${novosAnexos.length} arquivo(s) adicionado(s)` : `${novosAnexos.length} file(s) added`);
     } catch (error) {
       console.error("Erro ao fazer upload:", error);
-      toast.error("Erro ao fazer upload dos arquivos");
+      toast.error(language === 'pt' ? "Erro ao fazer upload dos arquivos" : "Error uploading files");
     } finally {
       setUploading(false);
       // Limpar input

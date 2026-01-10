@@ -21,7 +21,7 @@ import { EstadoAcompanhamentoSelect, EstadoAcompanhamentoBadge } from "@/compone
 
 export default function Relatorios() {
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   const [location, setLocation] = useLocation();
   const [expandedLivres, setExpandedLivres] = useState<number[]>([]);
   const [expandedCompletos, setExpandedCompletos] = useState<number[]>([]);

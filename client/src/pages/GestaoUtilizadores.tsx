@@ -12,7 +12,7 @@ import { Users, Edit, Shield, UserCog, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 export default function GestaoUtilizadores() {
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   const [editandoUser, setEditandoUser] = useState<any | null>(null);
   const [eliminandoUser, setEliminandoUser] = useState<any | null>(null);
   const [formData, setFormData] = useState({ name: "", email: "", role: "" });

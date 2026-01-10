@@ -23,7 +23,7 @@ import { useLocation } from "wouter";
 import imageCompression from 'browser-image-compression';
 
 export default function OcorrenciaEstrutural() {
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   const { user } = useAuth();
   const [, setLocation] = useLocation();
   

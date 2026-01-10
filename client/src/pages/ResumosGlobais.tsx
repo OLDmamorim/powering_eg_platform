@@ -29,7 +29,7 @@ interface ResumoData {
 }
 
 export default function ResumosGlobais() {
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   // Novo estado para múltiplos meses - por defeito o mês atual
   const [mesesSelecionados, setMesesSelecionados] = useState<MesSelecionado[]>(() => {
     const hoje = new Date();
@@ -43,22 +43,22 @@ export default function ResumosGlobais() {
       try {
         const parsed = JSON.parse(data.conteudo);
         setResumoGerado(parsed);
-        toast.success('Resumo global gerado com sucesso!');
+        toast.success(language === 'pt' ? 'Resumo global gerado com sucesso!' : 'Global summary generated successfully!');
       } catch (e) {
         console.error('Erro ao parsear resumo:', e);
-        toast.error('Erro ao processar resumo');
+        toast.error(language === 'pt' ? 'Erro ao processar resumo' : 'Error processing summary');
       }
       setIsGenerating(false);
     },
     onError: (error) => {
-      toast.error(`Erro ao gerar resumo: ${error.message}`);
+      toast.error(language === 'pt' ? `Erro ao gerar resumo: ${error.message}` : `Error generating summary: ${error.message}`);
       setIsGenerating(false);
     },
   });
 
   const handleGerar = () => {
     if (mesesSelecionados.length === 0) {
-      toast.error('Por favor selecione pelo menos um mês');
+      toast.error(language === 'pt' ? 'Por favor selecione pelo menos um mês' : 'Please select at least one month');
       return;
     }
     
@@ -67,7 +67,7 @@ export default function ResumosGlobais() {
 
     const datas = mesesParaDatas(mesesSelecionados);
     if (!datas) {
-      toast.error('Erro ao calcular período');
+      toast.error(language === 'pt' ? 'Erro ao calcular período' : 'Error calculating period');
       setIsGenerating(false);
       return;
     }
@@ -441,7 +441,7 @@ export default function ResumosGlobais() {
     }
 
     doc.save(`resumo-global-${mesesSelecionados.map(m => `${m.mes}-${m.ano}`).join('_')}-${new Date().toISOString().split('T')[0]}.pdf`);
-    toast.success('PDF descarregado com sucesso!');
+    toast.success(language === 'pt' ? 'PDF descarregado com sucesso!' : 'PDF downloaded successfully!');
   };
 
   // Função removida - agora usamos gerarLabelMeses do componente
@@ -453,16 +453,16 @@ export default function ResumosGlobais() {
         <nav className="flex items-center gap-2 text-sm text-muted-foreground">
           <Link href="/" className="flex items-center gap-1 hover:text-foreground transition-colors">
             <Home className="h-4 w-4" />
-            Dashboard
+            {language === 'pt' ? 'Painel' : 'Dashboard'}
           </Link>
           <ChevronRight className="h-4 w-4" />
-          <span className="text-foreground font-medium">Resumos Globais</span>
+          <span className="text-foreground font-medium">{language === 'pt' ? 'Resumos Globais' : 'Global Summaries'}</span>
         </nav>
 
         <div>
-          <h1 className="text-3xl font-bold">Resumos Globais</h1>
+          <h1 className="text-3xl font-bold">{language === 'pt' ? 'Resumos Globais' : 'Global Summaries'}</h1>
           <p className="text-muted-foreground mt-2">
-            Gere análises consolidadas da rede de lojas por período
+            {language === 'pt' ? 'Gere análises consolidadas da rede de lojas por período' : 'Generate consolidated store network analyses by period'}
           </p>
         </div>
 
@@ -470,32 +470,32 @@ export default function ResumosGlobais() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Calendar className="h-5 w-5" />
-              Gerar Novo Resumo
+              {language === 'pt' ? 'Gerar Novo Resumo' : 'Generate New Summary'}
             </CardTitle>
             <CardDescription>
-              Selecione o período e gere uma análise completa com IA
+              {language === 'pt' ? 'Selecione o período e gere uma análise completa com IA' : 'Select the period and generate a complete AI analysis'}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex gap-4 items-end">
               <div className="flex-1 max-w-xs">
-                <label className="text-sm font-medium mb-2 block">Período (selecione meses)</label>
+                <label className="text-sm font-medium mb-2 block">{language === 'pt' ? 'Período (selecione meses)' : 'Period (select months)'}</label>
                 <FiltroMesesCheckbox
                   mesesSelecionados={mesesSelecionados}
                   onMesesChange={setMesesSelecionados}
-                  placeholder="Selecionar meses"
+                  placeholder={language === 'pt' ? 'Selecionar meses' : 'Select months'}
                 />
               </div>
               <Button onClick={handleGerar} disabled={isGenerating || mesesSelecionados.length === 0}>
                 {isGenerating ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Gerando...
+                    {language === 'pt' ? 'Gerando...' : 'Generating...'}
                   </>
                 ) : (
                   <>
                     <FileText className="mr-2 h-4 w-4" />
-                    Gerar Resumo
+                    {language === 'pt' ? 'Gerar Resumo' : 'Generate Summary'}
                   </>
                 )}
               </Button>
@@ -517,7 +517,7 @@ export default function ResumosGlobais() {
                   </div>
                   <Button variant="outline" size="sm" onClick={handleDownloadPDF}>
                     <Download className="mr-2 h-4 w-4" />
-                    Descarregar PDF
+                    {language === 'pt' ? 'Descarregar PDF' : 'Download PDF'}
                   </Button>
                 </div>
               </CardHeader>
@@ -535,7 +535,7 @@ export default function ResumosGlobais() {
                       <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">
                         {resumoGerado.metricas.taxaResolucaoPendentes}
                       </p>
-                      <p className="text-sm text-blue-600 dark:text-blue-400">Taxa Resolução Pendentes</p>
+                      <p className="text-sm text-blue-600 dark:text-blue-400">{language === 'pt' ? 'Taxa Resolução Pendentes' : 'Pending Resolution Rate'}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -551,7 +551,7 @@ export default function ResumosGlobais() {
                       <p className="text-2xl font-bold text-green-700 dark:text-green-300">
                         {resumoGerado.metricas.taxaResolucaoAlertas}
                       </p>
-                      <p className="text-sm text-green-600 dark:text-green-400">Taxa Resolução Alertas</p>
+                      <p className="text-sm text-green-600 dark:text-green-400">{language === 'pt' ? 'Taxa Resolução Alertas' : 'Alert Resolution Rate'}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -567,7 +567,7 @@ export default function ResumosGlobais() {
                       <p className="text-2xl font-bold text-purple-700 dark:text-purple-300">
                         {resumoGerado.metricas.mediaRelatoriosPorLoja}
                       </p>
-                      <p className="text-sm text-purple-600 dark:text-purple-400">Média Relatórios/Loja</p>
+                      <p className="text-sm text-purple-600 dark:text-purple-400">{language === 'pt' ? 'Média Relatórios/Loja' : 'Avg Reports/Store'}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -579,7 +579,7 @@ export default function ResumosGlobais() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <FileText className="h-5 w-5" />
-                  Resumo Executivo
+                  {language === 'pt' ? 'Resumo Executivo' : 'Executive Summary'}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -595,7 +595,7 @@ export default function ResumosGlobais() {
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2 text-green-700 dark:text-green-400">
                     <TrendingUp className="h-5 w-5" />
-                    Destaques Positivos
+                    {language === 'pt' ? 'Destaques Positivos' : 'Positive Highlights'}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -616,7 +616,7 @@ export default function ResumosGlobais() {
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2 text-red-700 dark:text-red-400">
                     <TrendingDown className="h-5 w-5" />
-                    Pontos Críticos
+                    {language === 'pt' ? 'Pontos Críticos' : 'Critical Points'}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -639,7 +639,7 @@ export default function ResumosGlobais() {
               <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-2 text-blue-700 dark:text-blue-400">
                   <Target className="h-5 w-5" />
-                  Recomendações Estratégicas
+                  {language === 'pt' ? 'Recomendações Estratégicas' : 'Strategic Recommendations'}
                 </CardTitle>
               </CardHeader>
               <CardContent>

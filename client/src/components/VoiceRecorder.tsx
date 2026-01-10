@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Mic, Square, Loader2, CheckCircle, AlertCircle } from "lucide-react";
@@ -11,6 +12,7 @@ interface VoiceRecorderProps {
 }
 
 export function VoiceRecorder({ onTranscriptionComplete, disabled }: VoiceRecorderProps) {
+  const { language } = useLanguage();
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
@@ -85,10 +87,10 @@ export function VoiceRecorder({ onTranscriptionComplete, disabled }: VoiceRecord
         setRecordingTime(prev => prev + 1);
       }, 1000);
 
-      toast.success("Gravação iniciada");
+      toast.success(language === 'pt' ? "Gravação iniciada" : "Recording started");
     } catch (error) {
       console.error("Erro ao iniciar gravação:", error);
-      toast.error("Erro ao aceder ao microfone. Verifique as permissões.");
+      toast.error(language === 'pt' ? "Erro ao aceder ao microfone. Verifique as permissões." : "Error accessing microphone. Check permissions.");
     }
   };
 
@@ -100,19 +102,19 @@ export function VoiceRecorder({ onTranscriptionComplete, disabled }: VoiceRecord
         clearInterval(timerRef.current);
         timerRef.current = null;
       }
-      toast.success("Gravação concluída");
+      toast.success(language === 'pt' ? "Gravação concluída" : "Recording completed");
     }
   };
 
   const processAudio = async () => {
     if (!audioBlob) {
-      toast.error("Nenhum áudio gravado");
+      toast.error(language === 'pt' ? "Nenhum áudio gravado" : "No audio recorded");
       return;
     }
 
     // Verificar tamanho (limite 16MB)
     if (audioBlob.size > 16 * 1024 * 1024) {
-      toast.error("Áudio muito grande (máx 16MB). Grave um áudio mais curto.");
+      toast.error(language === 'pt' ? "Áudio muito grande (máx 16MB). Grave um áudio mais curto." : "Audio too large (max 16MB). Record a shorter audio.");
       return;
     }
     
@@ -122,7 +124,7 @@ export function VoiceRecorder({ onTranscriptionComplete, disabled }: VoiceRecord
     
     if (!apiUrl || !apiKey) {
       console.error('[VoiceRecorder] Variáveis de ambiente não configuradas:', { apiUrl, apiKey: apiKey ? 'presente' : 'ausente' });
-      toast.error("Erro de configuração: variáveis de ambiente não encontradas");
+      toast.error(language === 'pt' ? "Erro de configuração: variáveis de ambiente não encontradas" : "Configuration error: environment variables not found");
       return;
     }
 
@@ -131,7 +133,7 @@ export function VoiceRecorder({ onTranscriptionComplete, disabled }: VoiceRecord
     try {
       console.log('[VoiceRecorder] Iniciando processamento de áudio...');
       console.log('[VoiceRecorder] Tamanho do blob:', audioBlob.size, 'bytes');
-      toast.info('1/3: Iniciando upload do áudio...');
+      toast.info(language === 'pt' ? '1/3: Iniciando upload do áudio...' : '1/3: Starting audio upload...');
       
       // Converter blob para base64 usando FileReader (API do browser)
       console.log('[VoiceRecorder] Convertendo blob para base64...');
@@ -157,7 +159,7 @@ export function VoiceRecorder({ onTranscriptionComplete, disabled }: VoiceRecord
       
       const audioUrl = uploadResult.url;
       console.log('[VoiceRecorder] Upload bem-sucedido, URL:', audioUrl);
-      toast.success('2/3: Upload concluído! Iniciando transcrição...');
+      toast.success(language === 'pt' ? '2/3: Upload concluído! Iniciando transcrição...' : '2/3: Upload completed! Starting transcription...');
 
       // Chamar backend para transcrição usando tRPC
       console.log('[VoiceRecorder] Iniciando transcrição...');
@@ -177,7 +179,7 @@ export function VoiceRecorder({ onTranscriptionComplete, disabled }: VoiceRecord
       
       const transcription = transcriptionResult.text;
       console.log('[VoiceRecorder] Transcrição bem-sucedida, texto:', transcription.substring(0, 100));
-      toast.success('3/3: Transcrição concluída!');
+      toast.success(language === 'pt' ? '3/3: Transcrição concluída!' : '3/3: Transcription completed!');
 
       // toast.success já foi mostrado acima
       onTranscriptionComplete(transcription);

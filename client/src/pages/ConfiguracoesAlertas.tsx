@@ -41,7 +41,7 @@ const configLabels: Record<ConfigKey, { label: string; descricao: string; icon: 
 };
 
 export default function ConfiguracoesAlertas() {
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [hasChanges, setHasChanges] = useState(false);
   
@@ -52,11 +52,11 @@ export default function ConfiguracoesAlertas() {
   const updateMutation = trpc.configuracoes.updateMultiple.useMutation({
     onSuccess: () => {
       utils.configuracoes.list.invalidate();
-      toast.success("Configurações guardadas com sucesso");
+      toast.success(language === 'pt' ? "Configurações guardadas com sucesso" : "Settings saved successfully");
       setHasChanges(false);
     },
     onError: (error) => {
-      toast.error("Erro ao guardar configurações: " + error.message);
+      toast.error((language === 'pt' ? "Erro ao guardar configurações: " : "Error saving settings: ") + error.message);
     }
   });
   

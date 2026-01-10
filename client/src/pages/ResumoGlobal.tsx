@@ -8,7 +8,7 @@ import { useLocation } from "wouter";
 import { useMemo } from "react";
 
 export default function ResumoGlobal() {
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   const { user } = useAuth();
   const [, setLocation] = useLocation();
 

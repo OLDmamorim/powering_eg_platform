@@ -2,6 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc";
 import { useState, useEffect } from "react";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { toast } from "sonner";
 import { Loader2, Download, BarChart3 } from "lucide-react";
 import { Streamdown } from "streamdown";
@@ -14,6 +15,7 @@ interface RelatorioIACategoriasProps {
 }
 
 export function RelatorioIACategorias({ open, onOpenChange }: RelatorioIACategoriasProps) {
+  const { language } = useLanguage();
   const [relatorioIA, setRelatorioIA] = useState<string | null>(null);
   const [dadosGraficos, setDadosGraficos] = useState<any>(null);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -23,7 +25,7 @@ export function RelatorioIACategorias({ open, onOpenChange }: RelatorioIACategor
       setRelatorioIA(data.relatorio);
       setDadosGraficos(data.dadosGraficos);
       setIsGenerating(false);
-      toast.success("Relatório IA gerado com sucesso!");
+      toast.success(language === 'pt' ? "Relatório IA gerado com sucesso!" : "AI Report generated successfully!");
     },
     onError: (error) => {
       toast.error(error.message || "Erro ao gerar relatório IA");
@@ -51,7 +53,7 @@ export function RelatorioIACategorias({ open, onOpenChange }: RelatorioIACategor
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    toast.success("Relatório descarregado!");
+    toast.success(language === 'pt' ? "Relatório descarregado!" : "Report downloaded!");
   };
 
   const handleClose = () => {

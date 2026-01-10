@@ -39,7 +39,7 @@ import {
 } from "@/components/ui/dialog";
 
 export default function PendentesAdmin() {
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   const { user } = useAuth();
   const [, setLocation] = useLocation();
   const [filtroEstado, setFiltroEstado] = useState<string>("all");
@@ -59,30 +59,30 @@ export default function PendentesAdmin() {
   // Mutations
   const resolveMutation = trpc.pendentes.resolve.useMutation({
     onSuccess: () => {
-      toast.success("Pendente marcado como resolvido");
+      toast.success(language === 'pt' ? "Pendente marcado como resolvido" : "Pending item marked as resolved");
       utils.pendentes.list.invalidate();
     },
-    onError: () => toast.error("Erro ao resolver pendente"),
+    onError: () => toast.error(language === 'pt' ? "Erro ao resolver pendente" : "Error resolving pending item"),
   });
 
   const deleteMutation = trpc.pendentes.delete.useMutation({
     onSuccess: () => {
-      toast.success("Pendente eliminado");
+      toast.success(language === 'pt' ? "Pendente eliminado" : "Pending item deleted");
       utils.pendentes.list.invalidate();
     },
-    onError: () => toast.error("Erro ao eliminar pendente"),
+    onError: () => toast.error(language === 'pt' ? "Erro ao eliminar pendente" : "Error deleting pending item"),
   });
 
   const criarMutation = trpc.pendentes.criar.useMutation({
     onSuccess: () => {
-      toast.success("Pendente criado com sucesso. Gestor notificado.");
+      toast.success(language === 'pt' ? "Pendente criado com sucesso. Gestor notificado." : "Pending item created successfully. Manager notified.");
       setNovaDescricao("");
       setNovoLojaId(null);
       setNovaDataLimite("");
       setDialogOpen(false);
       utils.pendentes.list.invalidate();
     },
-    onError: () => toast.error("Erro ao criar pendente"),
+    onError: () => toast.error(language === 'pt' ? "Erro ao criar pendente" : "Error creating pending item"),
   });
   
   // Função para verificar se pendente está vencido ou próximo do vencimento
@@ -217,7 +217,7 @@ export default function PendentesAdmin() {
                   className="w-full"
                   onClick={() => {
                     if (!novoLojaId || !novaDescricao.trim()) {
-                      toast.error("Preencha a loja e descrição");
+                      toast.error(language === 'pt' ? "Preencha a loja e descrição" : "Fill in the store and description");
                       return;
                     }
                     criarMutation.mutate({

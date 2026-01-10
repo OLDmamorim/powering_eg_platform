@@ -26,6 +26,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { trpc } from "@/lib/trpc";
 import { useState, useEffect } from "react";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { CategoriaAutocomplete } from "@/components/CategoriaAutocomplete";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -46,6 +47,7 @@ export function RelatorioDetalheModal({
   tipoRelatorio,
 }: RelatorioDetalheModalProps) {
   const { user } = useAuth();
+  const { language } = useLanguage();
   const utils = trpc.useUtils();
   const [comentario, setComentario] = useState("");
   const [categoria, setCategoria] = useState("");
@@ -80,22 +82,22 @@ export function RelatorioDetalheModal({
   // Mutations para atualizar categoria e comentário
   const updateCategoriaMutation = trpc.categorizacao.updateCategoria.useMutation({
     onSuccess: () => {
-      toast.success("Categoria atualizada");
+      toast.success(language === 'pt' ? "Categoria atualizada" : "Category updated");
       utils.relatoriosLivres.getById.invalidate();
       utils.relatoriosCompletos.getById.invalidate();
       utils.categorizacao.getRelatoriosPorCategoria.invalidate();
     },
-    onError: () => toast.error("Erro ao atualizar categoria"),
+    onError: () => toast.error(language === 'pt' ? "Erro ao atualizar categoria" : "Error updating category"),
   });
   
   const updateComentarioMutation = trpc.categorizacao.updateComentario.useMutation({
     onSuccess: () => {
-      toast.success("Comentário guardado");
+      toast.success(language === 'pt' ? "Comentário guardado" : "Comment saved");
       setComentarioEditado(false);
       utils.relatoriosLivres.getById.invalidate();
       utils.relatoriosCompletos.getById.invalidate();
     },
-    onError: () => toast.error("Erro ao guardar comentário"),
+    onError: () => toast.error(language === 'pt' ? "Erro ao guardar comentário" : "Error saving comment"),
   });
   
   // Sincronizar estado local com dados do relatório
@@ -131,19 +133,19 @@ export function RelatorioDetalheModal({
   // Mutation para criar pendente
   const criarPendenteMutation = trpc.pendentes.criar.useMutation({
     onSuccess: () => {
-      toast.success("Pendente criado com sucesso");
+      toast.success(language === 'pt' ? "Pendente criado com sucesso" : "Pending item created successfully");
       setNovoPendente("");
       setMostrarFormPendente(false);
       utils.relatoriosLivres.getById.invalidate();
       utils.relatoriosCompletos.getById.invalidate();
       utils.pendentes.list.invalidate();
     },
-    onError: () => toast.error("Erro ao criar pendente"),
+    onError: () => toast.error(language === 'pt' ? "Erro ao criar pendente" : "Error creating pending item"),
   });
   
   const handleCriarPendente = () => {
     if (!novoPendente.trim() || !relatorio?.lojaId) {
-      toast.error("Preencha a descrição do pendente");
+      toast.error(language === 'pt' ? "Preencha a descrição do pendente" : "Fill in the pending item description");
       return;
     }
     criarPendenteMutation.mutate({

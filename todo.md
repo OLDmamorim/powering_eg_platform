@@ -2432,3 +2432,39 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [ ] Traduzir página HistoricoRelatoriosIA
 - [ ] Traduzir página ComparacaoRelatoriosIA
 
+
+## Tradução Completa - Fase 4 (Jan 2026) - TODAS AS PÁGINAS
+- [ ] Traduzir Dashboard completamente (todos os textos hardcoded)
+- [ ] Traduzir página ComparacaoLojas
+- [ ] Traduzir página RelatorioCompleto
+- [ ] Traduzir página ResumosGlobais
+- [ ] Traduzir página RelatorioBoard
+- [ ] Traduzir página HistoricoRelatoriosIA
+- [ ] Traduzir página ComparacaoRelatoriosIA
+- [ ] Traduzir página PortalLoja completamente
+- [ ] Traduzir componentes partilhados (modais, filtros, etc.)
+- [ ] Verificar e completar todas as páginas já traduzidas parcialmente
+- [ ] Atualizar ficheiros PT e EN com todas as chaves em falta
+
+## Tradução Completa PT/EN v4.x
+
+- [x] Traduzir todos os toasts hardcoded no Dashboard
+- [x] Traduzir toasts em ConfiguracoesAlertas
+- [x] Traduzir toasts em DashboardAlertas
+- [x] Traduzir toasts em HistoricoLoja
+- [x] Traduzir toasts em PendentesAdmin
+- [x] Traduzir toasts em PortalLoja
+- [x] Traduzir toasts em RelatorioLivre
+- [x] Traduzir toasts em RelatorioCompleto
+- [x] Traduzir toasts em ReunioesQuinzenais
+- [x] Traduzir toasts em Todos
+- [x] Traduzir toasts em TodoWidget
+- [x] Traduzir toasts em PortalLojaWidget
+- [x] Traduzir toasts em AnexosUpload
+- [x] Traduzir toasts em AtribuirAcoesModal
+- [x] Traduzir toasts em EnviarEmailModal
+- [x] Traduzir toasts em HistoricoRelatoriosIA (componente)
+- [x] Traduzir toasts em RelatorioDetalheModal
+- [x] Traduzir toasts em RelatorioIACategorias
+- [x] Traduzir toasts em VoiceRecorder
+- [x] Corrigir erros TypeScript em HistoricoRelatoriosIA

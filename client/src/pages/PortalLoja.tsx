@@ -213,7 +213,7 @@ export default function PortalLoja() {
   // Mutations
   const criarReuniaoMutation = trpc.reunioesQuinzenais.criarReuniao.useMutation({
     onSuccess: (data) => {
-      toast.success("Reunião criada com sucesso!");
+      toast.success(language === 'pt' ? "Reunião criada com sucesso!" : "Meeting created successfully!");
       setNovaReuniaoOpen(false);
       setReuniaoAtual(data?.id || null);
       refetchReunioes();
@@ -224,7 +224,7 @@ export default function PortalLoja() {
 
   const atualizarReuniaoMutation = trpc.reunioesQuinzenais.atualizarReuniao.useMutation({
     onSuccess: () => {
-      toast.success("Reunião guardada!");
+      toast.success(language === 'pt' ? "Reunião guardada!" : "Meeting saved!");
       refetchReunioes();
     },
     onError: (error) => toast.error(error.message),
@@ -242,7 +242,7 @@ export default function PortalLoja() {
 
   const atualizarPendenteMutation = trpc.reunioesQuinzenais.atualizarPendente.useMutation({
     onSuccess: () => {
-      toast.success("Pendente atualizado!");
+      toast.success(language === 'pt' ? "Pendente atualizado!" : "Pending item updated!");
       refetchPendentes();
     },
     onError: (error) => toast.error(error.message),
@@ -251,7 +251,7 @@ export default function PortalLoja() {
   // To-Do Mutations
   const atualizarEstadoTodoMutation = trpc.todosPortalLoja.atualizarEstado.useMutation({
     onSuccess: () => {
-      toast.success("Estado atualizado!");
+      toast.success(language === 'pt' ? "Estado atualizado!" : "Status updated!");
       refetchTodos();
     },
     onError: (error) => toast.error(error.message),
@@ -259,7 +259,7 @@ export default function PortalLoja() {
 
   const concluirTodoMutation = trpc.todosPortalLoja.concluir.useMutation({
     onSuccess: () => {
-      toast.success("Tarefa concluída!");
+      toast.success(language === 'pt' ? "Tarefa concluída!" : "Task completed!");
       refetchTodos();
     },
     onError: (error) => toast.error(error.message),
@@ -267,7 +267,7 @@ export default function PortalLoja() {
 
   const devolverTodoMutation = trpc.todosPortalLoja.devolver.useMutation({
     onSuccess: () => {
-      toast.success("Tarefa devolvida ao gestor!");
+      toast.success(language === 'pt' ? "Tarefa devolvida ao gestor!" : "Task returned to manager!");
       setDevolverTodoOpen(false);
       setTodoComentario("");
       setTodoSelecionado(null);
@@ -278,7 +278,7 @@ export default function PortalLoja() {
 
   const responderTodoMutation = trpc.todosPortalLoja.responder.useMutation({
     onSuccess: () => {
-      toast.success("Resposta enviada ao gestor!");
+      toast.success(language === 'pt' ? "Resposta enviada ao gestor!" : "Response sent to manager!");
       setResponderTodoOpen(false);
       setRespostaTodo("");
       setTodoSelecionado(null);
@@ -289,7 +289,7 @@ export default function PortalLoja() {
 
   const adicionarObservacaoMutation = trpc.todosPortalLoja.adicionarObservacao.useMutation({
     onSuccess: () => {
-      toast.success("Observação enviada ao gestor!");
+      toast.success(language === 'pt' ? "Observação enviada ao gestor!" : "Observation sent to manager!");
       setObservacaoTodoOpen(false);
       setObservacaoTodo("");
       setTodoSelecionado(null);
@@ -310,7 +310,7 @@ export default function PortalLoja() {
   
   const criarTarefaMutation = trpc.todosPortalLoja.criar.useMutation({
     onSuccess: () => {
-      toast.success("Tarefa criada e enviada ao gestor!");
+      toast.success(language === 'pt' ? "Tarefa criada e enviada ao gestor!" : "Task created and sent to manager!");
       setNovaTarefaOpen(false);
       setNovaTarefaTitulo("");
       setNovaTarefaDescricao("");
@@ -328,7 +328,7 @@ export default function PortalLoja() {
   // Mutations para tarefas internas
   const criarTarefaInternaMutation = trpc.todosPortalLoja.criarInterna.useMutation({
     onSuccess: () => {
-      toast.success("Tarefa interna criada!");
+      toast.success(language === 'pt' ? "Tarefa interna criada!" : "Internal task created!");
       setNovaTarefaOpen(false);
       setNovaTarefaTitulo("");
       setNovaTarefaDescricao("");
@@ -344,7 +344,7 @@ export default function PortalLoja() {
 
   const atualizarTarefaInternaMutation = trpc.todosPortalLoja.atualizarInterna.useMutation({
     onSuccess: () => {
-      toast.success("Tarefa atualizada!");
+      toast.success(language === 'pt' ? "Tarefa atualizada!" : "Task updated!");
       setEditarInternaOpen(false);
       setTarefaInternaEditando(null);
       refetchTarefasInternas();
@@ -354,7 +354,7 @@ export default function PortalLoja() {
 
   const eliminarTarefaInternaMutation = trpc.todosPortalLoja.eliminarInterna.useMutation({
     onSuccess: () => {
-      toast.success("Tarefa eliminada!");
+      toast.success(language === 'pt' ? "Tarefa eliminada!" : "Task deleted!");
       refetchTarefasInternas();
     },
     onError: (error) => toast.error(error.message),
@@ -368,7 +368,7 @@ export default function PortalLoja() {
 
   const handleLogin = () => {
     if (!inputToken.trim()) {
-      toast.error("Introduza o token de acesso");
+      toast.error(language === 'pt' ? "Introduza o token de acesso" : "Enter access token");
       return;
     }
     setToken(inputToken.trim());
@@ -384,7 +384,7 @@ export default function PortalLoja() {
   const handleCriarReuniao = () => {
     const participantesValidos = participantes.filter(p => p.trim());
     if (participantesValidos.length === 0) {
-      toast.error("Adicione pelo menos um participante");
+      toast.error(language === 'pt' ? "Adicione pelo menos um participante" : "Add at least one participant");
       return;
     }
     criarReuniaoMutation.mutate({
@@ -1378,7 +1378,7 @@ export default function PortalLoja() {
               <Button
                 onClick={() => {
                   if (!todoComentario.trim()) {
-                    toast.error("Deve indicar o motivo da devolução");
+                    toast.error(language === 'pt' ? "Deve indicar o motivo da devolução" : "Must indicate the reason for return");
                     return;
                   }
                   if (todoSelecionado) {
@@ -1425,7 +1425,7 @@ export default function PortalLoja() {
               <Button
                 onClick={() => {
                   if (!respostaTodo.trim()) {
-                    toast.error("Deve escrever uma resposta");
+                    toast.error(language === 'pt' ? "Deve escrever uma resposta" : "Must write a response");
                     return;
                   }
                   if (todoSelecionado) {
@@ -1473,7 +1473,7 @@ export default function PortalLoja() {
               <Button
                 onClick={() => {
                   if (!observacaoTodo.trim()) {
-                    toast.error("Deve escrever uma observação");
+                    toast.error(language === 'pt' ? "Deve escrever uma observação" : "Must write an observation");
                     return;
                   }
                   if (todoSelecionado) {
@@ -1614,7 +1614,7 @@ export default function PortalLoja() {
                       if (files.length === 0) return;
                       
                       if (novaTarefaAnexos.length + files.length > 5) {
-                        toast.error("Máximo de 5 anexos permitidos");
+                        toast.error(language === 'pt' ? "Máximo de 5 anexos permitidos" : "Maximum 5 attachments allowed");
                         return;
                       }
                       
@@ -1655,7 +1655,7 @@ export default function PortalLoja() {
                         }
                       } catch (error) {
                         console.error("Erro ao fazer upload:", error);
-                        toast.error("Erro ao fazer upload dos ficheiros");
+                        toast.error(language === 'pt' ? "Erro ao fazer upload dos ficheiros" : "Error uploading files");
                       } finally {
                         setUploadingAnexo(false);
                         e.target.value = "";
@@ -1712,7 +1712,7 @@ export default function PortalLoja() {
                 className={novaTarefaInterna ? "bg-purple-600 hover:bg-purple-700" : "bg-emerald-600 hover:bg-emerald-700"}
                 onClick={() => {
                   if (!novaTarefaTitulo.trim()) {
-                    toast.error("O título é obrigatório");
+                    toast.error(language === 'pt' ? "O título é obrigatório" : "Title is required");
                     return;
                   }
                   if (novaTarefaInterna) {
@@ -1833,7 +1833,7 @@ export default function PortalLoja() {
                 className="bg-purple-600 hover:bg-purple-700"
                 onClick={() => {
                   if (!tarefaInternaEditando?.titulo?.trim()) {
-                    toast.error("O título é obrigatório");
+                    toast.error(language === 'pt' ? "O título é obrigatório" : "Title is required");
                     return;
                   }
                   atualizarTarefaInternaMutation.mutate({

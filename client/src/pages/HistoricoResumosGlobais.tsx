@@ -11,7 +11,7 @@ import { Streamdown } from 'streamdown';
 import jsPDF from 'jspdf';
 
 export default function HistoricoResumosGlobais() {
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   const [resumoSelecionado, setResumoSelecionado] = useState<any>(null);
   const [dialogAberto, setDialogAberto] = useState(false);
 

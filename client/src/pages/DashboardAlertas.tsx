@@ -33,7 +33,7 @@ const tipoLabels: Record<AlertaTipo, { label: string; icon: React.ReactNode; col
 };
 
 export default function DashboardAlertas() {
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   const [activeTab, setActiveTab] = useState<string>("pendentes");
   const [selectedAlerta, setSelectedAlerta] = useState<any>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -49,13 +49,13 @@ export default function DashboardAlertas() {
     onSuccess: () => {
       utils.alertas.list.invalidate();
       utils.alertas.listPendentes.invalidate();
-      toast.success("Estado do alerta atualizado com sucesso");
+      toast.success(language === 'pt' ? "Estado do alerta atualizado com sucesso" : "Alert status updated successfully");
       setDialogOpen(false);
       setNotasResolucao("");
       setSelectedAlerta(null);
     },
     onError: (error) => {
-      toast.error("Erro ao atualizar alerta: " + error.message);
+      toast.error((language === 'pt' ? "Erro ao atualizar alerta: " : "Error updating alert: ") + error.message);
     }
   });
   
@@ -63,10 +63,10 @@ export default function DashboardAlertas() {
     onSuccess: () => {
       utils.alertas.list.invalidate();
       utils.alertas.listPendentes.invalidate();
-      toast.success("Alerta eliminado com sucesso");
+      toast.success(language === 'pt' ? "Alerta eliminado com sucesso" : "Alert deleted successfully");
     },
     onError: (error) => {
-      toast.error("Erro ao eliminar alerta: " + error.message);
+      toast.error((language === 'pt' ? "Erro ao eliminar alerta: " : "Error deleting alert: ") + error.message);
     }
   });
   
@@ -93,7 +93,7 @@ export default function DashboardAlertas() {
   };
   
   const handleDelete = (id: number) => {
-    if (confirm("Tem a certeza que deseja eliminar este alerta?")) {
+    if (confirm(language === 'pt' ? "Tem a certeza que deseja eliminar este alerta?" : "Are you sure you want to delete this alert?")) {
       deleteMutation.mutate({ id });
     }
   };

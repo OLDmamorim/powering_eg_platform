@@ -41,7 +41,7 @@ function BadgeCumprimento({ lojaId, minimo, tipo }: { lojaId: number; minimo: nu
 
 export default function MinhasLojas() {
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   const [, setLocation] = useLocation();
   const [editingLoja, setEditingLoja] = useState<any>(null);
   const [formData, setFormData] = useState({

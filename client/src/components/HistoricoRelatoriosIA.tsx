@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,6 +38,7 @@ interface RelatorioIA {
 }
 
 export function HistoricoRelatoriosIA() {
+  const { language } = useLanguage();
   const [expanded, setExpanded] = useState(false);
   const [selectedRelatorio, setSelectedRelatorio] = useState<RelatorioIA | null>(null);
   
@@ -244,10 +246,10 @@ export function HistoricoRelatoriosIA() {
       // Guardar ficheiro
       const dataFormatada = new Date(selectedRelatorio.createdAt).toISOString().split('T')[0];
       doc.save(`relatorio-ia-${dataFormatada}.pdf`);
-      toast.success("Relatório exportado com sucesso!");
+      toast.success(language === 'pt' ? "Relatório exportado com sucesso!" : "Report exported successfully!");
     } catch (error) {
       console.error('Erro ao exportar PDF:', error);
-      toast.error("Erro ao exportar relatório");
+      toast.error(language === 'pt' ? "Erro ao exportar relatório" : "Error exporting report");
     }
   };
   
@@ -276,7 +278,7 @@ export function HistoricoRelatoriosIA() {
     } else if (relatoriosSelecionados.length < 2) {
       setRelatoriosSelecionados(prev => [...prev, id]);
     } else {
-      toast.error("Só pode comparar 2 relatórios de cada vez");
+      toast.error(language === 'pt' ? "Só pode comparar 2 relatórios de cada vez" : "You can only compare 2 reports at a time");
     }
   };
   
@@ -399,7 +401,7 @@ export function HistoricoRelatoriosIA() {
                 <div className="space-y-2">
                   <Label>Categorias Frequentes</Label>
                   <div className="flex flex-wrap gap-2">
-                    {categoriasDisponiveis.slice(0, 10).map((cat, idx) => (
+                    {categoriasDisponiveis.slice(0, 10).map((cat: string, idx: number) => (
                       <Badge
                         key={idx}
                         variant={filtroCategoria === cat ? "default" : "outline"}
@@ -631,7 +633,7 @@ export function HistoricoRelatoriosIA() {
           </DialogHeader>
           
           <div className="flex-1 overflow-hidden grid grid-cols-2 divide-x">
-            {relatoriosParaComparar.map((rel, idx) => (
+            {relatoriosParaComparar.map((rel: RelatorioIA, idx: number) => (
               <div key={rel.id} className="flex flex-col h-full">
                 <div className="p-3 bg-muted/50 border-b">
                   <div className="flex items-center justify-between">

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,6 +33,7 @@ export function AtribuirAcoesModal({
   onSuccess,
   onAtribuir,
 }: AtribuirAcoesModalProps) {
+  const { language } = useLanguage();
   const [acoes, setAcoes] = useState<Acao[]>(
     acoesIA?.map(a => ({ descricao: a.descricao, gestorIds: [] })) || []
   );
@@ -40,7 +42,7 @@ export function AtribuirAcoesModal({
 
   const adicionarAcao = () => {
     if (!novaAcao.trim()) {
-      toast.error("Descrição da ação não pode estar vazia");
+      toast.error(language === 'pt' ? "Descrição da ação não pode estar vazia" : "Action description cannot be empty");
       return;
     }
     setAcoes([...acoes, { descricao: novaAcao.trim(), gestorIds: [] }]);
@@ -67,7 +69,7 @@ export function AtribuirAcoesModal({
     // Validar que todas as ações têm pelo menos um gestor
     const acoesInvalidas = acoes.filter(a => a.gestorIds.length === 0);
     if (acoesInvalidas.length > 0) {
-      toast.error("Todas as ações devem ter pelo menos um gestor atribuído");
+      toast.error(language === 'pt' ? "Todas as ações devem ter pelo menos um gestor atribuído" : "All actions must have at least one assigned manager");
       return;
     }
 
