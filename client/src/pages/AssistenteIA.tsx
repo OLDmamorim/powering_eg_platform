@@ -110,7 +110,7 @@ export default function AssistenteIA() {
   
   return (
     <DashboardLayout>
-      <div className="h-full flex flex-col gap-3 md:gap-4 overflow-hidden">
+      <div className="h-[calc(100vh-8rem)] md:h-[calc(100vh-6rem)] flex flex-col gap-3 md:gap-4 overflow-hidden">
         {/* Header - Mobile optimized */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-0 flex-shrink-0">
           <div className="flex items-center gap-3">
@@ -151,9 +151,9 @@ export default function AssistenteIA() {
         <div className="flex-1 flex gap-4 min-h-0 overflow-hidden">
           {/* Área de Chat */}
           <Card className="flex-1 flex flex-col min-h-0 overflow-hidden">
-            <CardContent className="flex-1 flex flex-col p-3 md:p-4 min-h-0 overflow-hidden">
+            <CardContent className="h-full flex flex-col p-3 md:p-4 overflow-hidden">
               {/* Mensagens */}
-              <ScrollArea className="flex-1 pr-2 md:pr-4" ref={scrollRef}>
+              <ScrollArea className="flex-1 min-h-0 pr-2 md:pr-4" ref={scrollRef}>
                 {messages.length === 0 ? (
                   <div className="h-full flex flex-col items-center justify-center text-center p-4 md:p-8">
                     <div className="p-3 md:p-4 bg-primary/10 rounded-full mb-3 md:mb-4">

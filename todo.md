@@ -2607,3 +2607,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Melhorar hook usePWAInstallAssistente com fallback para página dedicada
 - [x] Nota: O problema é do rate limiting (429) no ambiente de preview, não do código
 - [x] BUG: Instalação PWA do Assistente IA no Android - mostrar instruções manuais quando prompt não disponível
+
+
+## Bug v6.4.5 - Layout Assistente IA no desktop
+- [x] Caixa de texto não visível sem scroll no desktop
+- [x] Ajustar layout para input ficar sempre visível na parte inferior
+- [x] Implementar scroll automático para mensagens (já existia)
