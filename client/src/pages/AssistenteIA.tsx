@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { trpc } from '@/lib/trpc';
+import { Skeleton } from '@/components/ui/skeleton';
 import { VoiceChatInput } from '@/components/VoiceChatInput';
 import { 
   Send, 
@@ -35,7 +36,7 @@ export default function AssistenteIA() {
   const scrollRef = useRef<HTMLDivElement>(null);
   
   const chatMutation = trpc.chatbot.pergunta.useMutation();
-  const { data: sugestoes, refetch: refetchSugestoes } = trpc.chatbot.sugestoes.useQuery({ language });
+  const { data: sugestoes, isLoading: sugestoesLoading, refetch: refetchSugestoes } = trpc.chatbot.sugestoes.useQuery({ language });
   
   // Auto-scroll para a última mensagem
   useEffect(() => {
@@ -285,19 +286,36 @@ export default function AssistenteIA() {
             </CardHeader>
             <CardContent className="flex-1">
               <div className="space-y-2">
-                {sugestoes?.map((sugestao, index) => (
-                  <Button
-                    key={index}
-                    variant="ghost"
-                    size="sm"
-                    className="w-full justify-start text-left h-auto py-2 px-3 text-sm font-normal hover:bg-primary/10"
-                    onClick={() => enviarPergunta(sugestao)}
-                    disabled={isLoading}
-                  >
-                    <MessageSquare className="h-3 w-3 mr-2 flex-shrink-0 text-muted-foreground" />
-                    <span className="line-clamp-2">{sugestao}</span>
-                  </Button>
-                ))}
+                {sugestoesLoading ? (
+                  // Skeleton loading para sugestões
+                  Array.from({ length: 5 }).map((_, index) => (
+                    <div key={index} className="flex items-start gap-2 py-2 px-3">
+                      <Skeleton className="h-3 w-3 rounded-sm flex-shrink-0 mt-0.5" />
+                      <div className="flex-1 space-y-1.5">
+                        <Skeleton className="h-3 w-full" />
+                        <Skeleton className="h-3 w-3/4" />
+                      </div>
+                    </div>
+                  ))
+                ) : sugestoes?.length ? (
+                  sugestoes.map((sugestao, index) => (
+                    <Button
+                      key={index}
+                      variant="ghost"
+                      size="sm"
+                      className="w-full justify-start text-left h-auto py-2 px-3 text-sm font-normal hover:bg-primary/10"
+                      onClick={() => enviarPergunta(sugestao)}
+                      disabled={isLoading}
+                    >
+                      <MessageSquare className="h-3 w-3 mr-2 flex-shrink-0 text-muted-foreground" />
+                      <span className="line-clamp-2">{sugestao}</span>
+                    </Button>
+                  ))
+                ) : (
+                  <p className="text-sm text-muted-foreground text-center py-4">
+                    {t('assistenteIA.semSugestoes')}
+                  </p>
+                )}
               </div>
             </CardContent>
           </Card>

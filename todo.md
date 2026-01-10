@@ -2553,3 +2553,4 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Incluir instruções de exportação PDF e envio de email
 - [x] Testar funcionalidade
 - [x] Bug: Layout mobile do Assistente IA desconfigurado - header cortado, input cortado
+- [x] Melhoria: Skeleton loading nas sugestões do Assistente IA

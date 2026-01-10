@@ -877,7 +877,8 @@
     "ocorrencias": "Occurrences",
     "tarefasToDo": "To-Do Tasks",
     "resultados": "Results",
-    "sugestoes": "Suggestions"
+    "sugestoes": "Suggestions",
+    "semSugestoes": "No suggestions available"
   },
   "minhasLojas": {
     "title": "My Stores",
