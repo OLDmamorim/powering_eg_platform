@@ -322,6 +322,7 @@ export default function Dashboard() {
       }).length || 0,
       pendentesAtivos,
       alertasPendentes,
+      language,
     },
     { 
       enabled: !!user && totalLojas >= 0,

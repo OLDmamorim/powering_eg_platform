@@ -1179,12 +1179,14 @@ export const appRouter = router({
         relatoriosCompletosMes: z.number(),
         pendentesAtivos: z.number(),
         alertasPendentes: z.number(),
+        language: z.enum(['pt', 'en']).optional().default('pt'),
       }))
       .query(async ({ input, ctx }) => {
         const dica = await gerarDicaDashboard({
           ...input,
           userName: ctx.user.name || 'Utilizador',
           userRole: ctx.user.role || 'user',
+          language: input.language,
         });
         return { dica };
       }),

@@ -974,14 +974,38 @@ export async function gerarDicaDashboard(contexto: {
   alertasPendentes: number;
   userName: string;
   userRole: string;
+  language?: 'pt' | 'en';
 }): Promise<string> {
-  const { totalLojas, totalGestores, relatoriosLivresMes, relatoriosCompletosMes, pendentesAtivos, alertasPendentes, userName, userRole } = contexto;
+  const { totalLojas, totalGestores, relatoriosLivresMes, relatoriosCompletosMes, pendentesAtivos, alertasPendentes, userName, userRole, language = 'pt' } = contexto;
   
-  // Prompt diferente para admin vs gestor
+  // Prompt diferente para admin vs gestor e para idioma
   const isAdmin = userRole === 'admin';
+  const isEnglish = language === 'en';
   
   const prompt = isAdmin 
-    ? `Gera uma dica curta e útil (máximo 2 frases) para um administrador de uma rede de lojas Express Glass.
+    ? (isEnglish 
+      ? `Generate a short and useful tip (maximum 2 sentences) for an administrator of an Express Glass store network.
+
+Current data:
+- Total stores: ${totalLojas}
+- Total managers: ${totalGestores}
+- Free reports this month: ${relatoriosLivresMes}
+- Complete reports this month: ${relatoriosCompletosMes}
+- Active pending items: ${pendentesAtivos}
+- Pending alerts: ${alertasPendentes}
+
+The tip should be:
+- Based on the data above
+- Actionable and specific
+- Focused on improving network management
+- In English
+
+Examples of good tips:
+- "With ${pendentesAtivos} active pending items, consider prioritizing the resolution of the oldest ones to maintain operational efficiency."
+- "The ${relatoriosLivresMes} free reports this month indicate good activity. Check if all stores are being visited regularly."
+
+Respond only with the tip, without quotes or additional formatting.`
+      : `Gera uma dica curta e útil (máximo 2 frases) para um administrador de uma rede de lojas Express Glass.
 
 Dados atuais:
 - Total de lojas: ${totalLojas}
@@ -1001,8 +1025,23 @@ Exemplos de boas dicas:
 - "Com ${pendentesAtivos} pendentes ativos, considere priorizar a resolução dos mais antigos para manter a eficiência operacional."
 - "Os ${relatoriosLivresMes} relatórios livres este mês indicam boa atividade. Verifique se todas as lojas estão a ser visitadas regularmente."
 
-Responde apenas com a dica, sem aspas nem formatação adicional.`
-    : `Gera uma dica motivacional e prática (máximo 2 frases) para ${userName}, um gestor de lojas Express Glass.
+Responde apenas com a dica, sem aspas nem formatação adicional.`)
+    : (isEnglish
+      ? `Generate a motivational and practical tip (maximum 2 sentences) for ${userName}, an Express Glass store manager.
+
+The tip should be:
+- Motivational but practical
+- Focused on good store management practices
+- Varied (don't always repeat the same themes)
+- In English
+
+Examples of good tips:
+- "A well-documented visit today can prevent problems tomorrow. Take time to record detailed observations."
+- "Small gestures of recognition to store teams make a big difference in motivation and results."
+- "Take advantage of visits to identify opportunities for improvement in customer service processes."
+
+Respond only with the tip, without quotes or additional formatting.`
+      : `Gera uma dica motivacional e prática (máximo 2 frases) para ${userName}, um gestor de lojas Express Glass.
 
 A dica deve ser:
 - Motivacional mas prática
@@ -1015,26 +1054,34 @@ Exemplos de boas dicas:
 - "Pequenos gestos de reconhecimento às equipas das lojas fazem grande diferença na motivação e resultados."
 - "Aproveite as visitas para identificar oportunidades de melhoria nos processos de atendimento."
 
-Responde apenas com a dica, sem aspas nem formatação adicional.`;
+Responde apenas com a dica, sem aspas nem formatação adicional.`);
+
+  const systemContent = isEnglish 
+    ? "You are an assistant specialized in automotive retail network management. You generate short, practical and motivational tips."
+    : "És um assistente especializado em gestão de redes de retalho automóvel. Geras dicas curtas, práticas e motivacionais.";
+
+  const defaultTipAdmin = isEnglish 
+    ? 'Check active pending items and prioritize the most urgent ones.'
+    : 'Verifique os pendentes ativos e priorize os mais urgentes.';
+  
+  const defaultTipGestor = isEnglish 
+    ? 'Maintain regular contact with your store teams.'
+    : 'Mantenha contacto regular com as suas equipas de loja.';
 
   try {
     const response = await invokeLLM({
       messages: [
-        { role: "system", content: "És um assistente especializado em gestão de redes de retalho automóvel. Geras dicas curtas, práticas e motivacionais." },
+        { role: "system", content: systemContent },
         { role: "user", content: prompt }
       ],
     });
 
     const content = response.choices[0].message.content;
     const dica = (typeof content === 'string' ? content.trim() : '') || '';
-    return dica || (isAdmin 
-      ? 'Verifique os pendentes ativos e priorize os mais urgentes.'
-      : 'Mantenha contacto regular com as suas equipas de loja.');
+    return dica || (isAdmin ? defaultTipAdmin : defaultTipGestor);
   } catch (error) {
     console.error('Erro ao gerar dica:', error);
-    return isAdmin 
-      ? 'Verifique os pendentes ativos e priorize os mais urgentes.'
-      : 'Mantenha contacto regular com as suas equipas de loja.';
+    return isAdmin ? defaultTipAdmin : defaultTipGestor;
   }
 }
 
