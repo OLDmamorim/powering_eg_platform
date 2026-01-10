@@ -1,0 +1,19 @@
+{
+  "query": "SELECT id, titulo, createdAt, visto, vistoEm, vistoGestor, vistoGestorEm FROM todos WHERE id = 240001;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT id, titulo, createdAt, visto, vistoEm, vistoGestor, vistoGestorEm FROM todos WHERE id = 240001;",
+  "rows": [
+    {
+      "id": "240001",
+      "titulo": "FECHAR - Ficha Servico 18 nº 26",
+      "createdAt": "2026-01-09 15:47:59",
+      "visto": "0",
+      "vistoEm": "NULL",
+      "vistoGestor": "1",
+      "vistoGestorEm": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitulo\tcreatedAt\tvisto\tvistoEm\tvistoGestor\tvistoGestorEm\n240001\tFECHAR - Ficha Servico 18 nº 26\t2026-01-09 15:47:59\t0\tNULL\t1\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 388
+}

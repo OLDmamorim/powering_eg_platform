@@ -1,0 +1,40 @@
+{
+  "query": "SELECT t.id, t.titulo, t.estado, t.vistoGestor, t.criadoPorLojaId, t.atribuidoUserId, l.nome as loja_criadora, u.name as atribuido_a FROM todos t LEFT JOIN lojas l ON t.criadoPorLojaId = l.id LEFT JOIN users u ON t.atribuidoUserId = u.id WHERE t.titulo LIKE '%FECHAR%' OR t.titulo LIKE '%Ficha Servico%';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT t.id, t.titulo, t.estado, t.vistoGestor, t.criadoPorLojaId, t.atribuidoUserId, l.nome as loja_criadora, u.name as atribuido_a FROM todos t LEFT JOIN lojas l ON t.criadoPorLojaId = l.id LEFT JOIN users u ON t.atribuidoUserId = u.id WHERE t.titulo LIKE '%FECHAR%' OR t.titulo LIKE '%Ficha Servico%';",
+  "rows": [
+    {
+      "id": "240001",
+      "titulo": "FECHAR - Ficha Servico 18 nº 26",
+      "estado": "pendente",
+      "vistoGestor": "1",
+      "criadoPorLojaId": "180010",
+      "atribuidoUserId": "420030",
+      "loja_criadora": "Braga - minho center",
+      "atribuido_a": "Marco Amorim"
+    },
+    {
+      "id": "180002",
+      "titulo": "Fechar fs18/1 (2026)",
+      "estado": "concluida",
+      "vistoGestor": "1",
+      "criadoPorLojaId": "180010",
+      "atribuidoUserId": "420030",
+      "loja_criadora": "Braga - minho center",
+      "atribuido_a": "Marco Amorim"
+    },
+    {
+      "id": "180001",
+      "titulo": "Fechar fs18/1059",
+      "estado": "concluida",
+      "vistoGestor": "1",
+      "criadoPorLojaId": "180010",
+      "atribuidoUserId": "420030",
+      "loja_criadora": "Braga - minho center",
+      "atribuido_a": "Marco Amorim"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitulo\testado\tvistoGestor\tcriadoPorLojaId\tatribuidoUserId\tloja_criadora\tatribuido_a\n240001\tFECHAR - Ficha Servico 18 nº 26\tpendente\t1\t180010\t420030\tBraga - minho center\tMarco Amorim\n180002\tFechar fs18/1 (2026)\tconcluida\t1\t180010\t420030\tBraga - minho center\tMarco Amorim\n180001\tFechar fs18/1059\tconcluida\t1\t180010\t420030\tBraga - minho center\tMarco Amorim\n",
+  "stderr": "",
+  "execution_time_ms": 388
+}

@@ -1,0 +1,25 @@
+{
+  "query": "SELECT u.id, u.name, u.role FROM users u WHERE u.name LIKE '%Marco%';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT u.id, u.name, u.role FROM users u WHERE u.name LIKE '%Marco%';",
+  "rows": [
+    {
+      "id": "1",
+      "name": "Marco Amorim",
+      "role": "admin"
+    },
+    {
+      "id": "420030",
+      "name": "Marco Amorim",
+      "role": "gestor"
+    },
+    {
+      "id": "2160121",
+      "name": "Marco Vilar",
+      "role": "gestor"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\trole\n1\tMarco Amorim\tadmin\n420030\tMarco Amorim\tgestor\n2160121\tMarco Vilar\tgestor\n",
+  "stderr": "",
+  "execution_time_ms": 382
+}

@@ -2539,3 +2539,16 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Integrar com API Whisper para transcrição
 - [x] Enviar transcrição como pergunta ao chatbot
 
+- [ ] Bug: Botão de tarefas na página inicial (Dashboard) não mostra indicador de novas tarefas a piscar
+
+
+## Chatbot como Assistente de Ajuda v5.5
+- [x] Adicionar conhecimento de navegação da plataforma ao chatbot
+- [x] Incluir instruções de como criar relatórios livres
+- [x] Incluir instruções de como criar relatórios completos
+- [x] Incluir instruções de como adicionar lojas e gestores
+- [x] Incluir instruções de como resolver pendentes
+- [x] Incluir instruções de como usar relatórios IA
+- [x] Incluir instruções de atalhos de teclado
+- [x] Incluir instruções de exportação PDF e envio de email
+- [x] Testar funcionalidade
