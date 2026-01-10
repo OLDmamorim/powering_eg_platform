@@ -41,6 +41,7 @@ import HistoricoOcorrencias from "./pages/HistoricoOcorrencias";
 import { RelatorioIAResultados } from "./pages/RelatorioIAResultados";
 import RelatorioBoard from "./pages/RelatorioBoard";
 import AssistenteIA from "./pages/AssistenteIA";
+import AssistenteWidget from "./pages/AssistenteWidget";
 import TopicosReuniao from "./pages/TopicosReuniao";
 
 
@@ -98,6 +99,9 @@ function Router() {
       {/* To-Do */}
       <Route path={"/todos"} component={Todos} />
       <Route path={"/todo-widget"} component={TodoWidget} />
+      
+      {/* Assistente IA Widget */}
+      <Route path={"/assistente-widget"} component={AssistenteWidget} />
       
       {/* Portal da Loja (acesso público via token) */}
       <Route path={"/portal-loja"} component={PortalLoja} />
