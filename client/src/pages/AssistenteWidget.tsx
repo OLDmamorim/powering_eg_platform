@@ -43,6 +43,55 @@ export default function AssistenteWidget() {
   
   const chatMutation = trpc.chatbot.pergunta.useMutation();
   
+  // Trocar manifest para o do Assistente IA quando está nesta página
+  useEffect(() => {
+    // Guardar referência ao manifest original
+    const manifestLink = document.querySelector('link[rel="manifest"]') as HTMLLinkElement;
+    const originalManifest = manifestLink?.href;
+    
+    // Trocar para o manifest do assistente
+    if (manifestLink) {
+      manifestLink.href = '/manifest-assistente.json';
+    }
+    
+    // Atualizar theme-color para violeta
+    const themeColor = document.querySelector('meta[name="theme-color"]') as HTMLMetaElement;
+    const originalThemeColor = themeColor?.content;
+    if (themeColor) {
+      themeColor.content = '#7c3aed';
+    }
+    
+    // Atualizar apple-mobile-web-app-title
+    const appleTitle = document.querySelector('meta[name="apple-mobile-web-app-title"]') as HTMLMetaElement;
+    const originalAppleTitle = appleTitle?.content;
+    if (appleTitle) {
+      appleTitle.content = 'Assistente IA';
+    }
+    
+    // Atualizar apple-touch-icon
+    const appleIcon = document.querySelector('link[rel="apple-touch-icon"]') as HTMLLinkElement;
+    const originalAppleIcon = appleIcon?.href;
+    if (appleIcon) {
+      appleIcon.href = '/poweringeg-ai-icon-192.png';
+    }
+    
+    // Restaurar quando sair da página
+    return () => {
+      if (manifestLink && originalManifest) {
+        manifestLink.href = originalManifest;
+      }
+      if (themeColor && originalThemeColor) {
+        themeColor.content = originalThemeColor;
+      }
+      if (appleTitle && originalAppleTitle) {
+        appleTitle.content = originalAppleTitle;
+      }
+      if (appleIcon && originalAppleIcon) {
+        appleIcon.href = originalAppleIcon;
+      }
+    };
+  }, []);
+  
   // Auto-scroll para a última mensagem
   useEffect(() => {
     if (scrollRef.current) {
