@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { trpc } from "@/lib/trpc";
@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Users, Edit, Shield, UserCog, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -15,9 +16,12 @@ export default function GestaoUtilizadores() {
   const { language, t } = useLanguage();
   const [editandoUser, setEditandoUser] = useState<any | null>(null);
   const [eliminandoUser, setEliminandoUser] = useState<any | null>(null);
+  const [eliminandoEmLote, setEliminandoEmLote] = useState(false);
+  const [selecionados, setSelecionados] = useState<number[]>([]);
   const [formData, setFormData] = useState({ name: "", email: "", role: "" });
 
   const { data: utilizadores, isLoading, refetch } = trpc.utilizadores.getAll.useQuery();
+  
   const updateMutation = trpc.utilizadores.update.useMutation({
     onSuccess: () => {
       toast.success(t('common.sucesso'));
@@ -33,6 +37,22 @@ export default function GestaoUtilizadores() {
     onSuccess: () => {
       toast.success(t('common.sucesso'));
       setEliminandoUser(null);
+      refetch();
+    },
+    onError: (error) => {
+      toast.error(error.message || t('common.erro'));
+    },
+  });
+
+  const deleteBatchMutation = trpc.utilizadores.deleteInBatch.useMutation({
+    onSuccess: (data) => {
+      toast.success(
+        language === 'pt' 
+          ? `${data.deleted} utilizador(es) eliminado(s) com sucesso` 
+          : `${data.deleted} user(s) deleted successfully`
+      );
+      setEliminandoEmLote(false);
+      setSelecionados([]);
       refetch();
     },
     onError: (error) => {
@@ -64,6 +84,37 @@ export default function GestaoUtilizadores() {
     if (!eliminandoUser) return;
     deleteMutation.mutate({ userId: eliminandoUser.id });
   };
+
+  const handleDeleteBatch = () => {
+    if (selecionados.length === 0) return;
+    deleteBatchMutation.mutate({ userIds: selecionados });
+  };
+
+  const handleToggleSelect = (userId: number) => {
+    setSelecionados(prev => 
+      prev.includes(userId) 
+        ? prev.filter(id => id !== userId)
+        : [...prev, userId]
+    );
+  };
+
+  const handleSelectAll = () => {
+    if (!utilizadores) return;
+    
+    if (selecionados.length === utilizadores.length) {
+      setSelecionados([]);
+    } else {
+      setSelecionados(utilizadores.map(u => u.id));
+    }
+  };
+
+  const todosSeleccionados = useMemo(() => {
+    return utilizadores && utilizadores.length > 0 && selecionados.length === utilizadores.length;
+  }, [utilizadores, selecionados]);
+
+  const algunsSeleccionados = useMemo(() => {
+    return selecionados.length > 0 && (!utilizadores || selecionados.length < utilizadores.length);
+  }, [utilizadores, selecionados]);
 
   const getRoleBadge = (role: string) => {
     const styles = {
@@ -98,13 +149,29 @@ export default function GestaoUtilizadores() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Shield className="h-5 w-5" />
-              {t('utilizadores.title') || (language === 'pt' ? "Utilizadores" : "Users")}
-            </CardTitle>
-            <CardDescription>
-              {utilizadores?.length || 0} {language === 'pt' ? "utilizadores registados na plataforma" : "users registered on the platform"}
-            </CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <Shield className="h-5 w-5" />
+                  {t('utilizadores.title') || (language === 'pt' ? "Utilizadores" : "Users")}
+                </CardTitle>
+                <CardDescription>
+                  {utilizadores?.length || 0} {language === 'pt' ? "utilizadores registados na plataforma" : "users registered on the platform"}
+                </CardDescription>
+              </div>
+              {selecionados.length > 0 && (
+                <Button
+                  variant="destructive"
+                  onClick={() => setEliminandoEmLote(true)}
+                  className="flex items-center gap-2"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  {language === 'pt' 
+                    ? `Eliminar ${selecionados.length} selecionado(s)` 
+                    : `Delete ${selecionados.length} selected`}
+                </Button>
+              )}
+            </div>
           </CardHeader>
           <CardContent>
             {isLoading ? (
@@ -116,6 +183,14 @@ export default function GestaoUtilizadores() {
                 <table className="w-full">
                   <thead>
                     <tr className="border-b">
+                      <th className="text-left p-3 font-medium w-12">
+                        <Checkbox
+                          checked={todosSeleccionados}
+                          onCheckedChange={handleSelectAll}
+                          aria-label={language === 'pt' ? "Selecionar todos" : "Select all"}
+                          className={algunsSeleccionados ? "data-[state=checked]:bg-primary/50" : ""}
+                        />
+                      </th>
                       <th className="text-left p-3 font-medium">ID</th>
                       <th className="text-left p-3 font-medium">{t('utilizadores.nome') || (language === 'pt' ? "Nome" : "Name")}</th>
                       <th className="text-left p-3 font-medium">{t('utilizadores.email') || "Email"}</th>
@@ -127,7 +202,14 @@ export default function GestaoUtilizadores() {
                   </thead>
                   <tbody>
                     {utilizadores.map((user) => (
-                      <tr key={user.id} className="border-b hover:bg-muted/50">
+                      <tr key={user.id} className={`border-b hover:bg-muted/50 ${selecionados.includes(user.id) ? 'bg-muted/30' : ''}`}>
+                        <td className="p-3">
+                          <Checkbox
+                            checked={selecionados.includes(user.id)}
+                            onCheckedChange={() => handleToggleSelect(user.id)}
+                            aria-label={language === 'pt' ? `Selecionar ${user.name || user.email}` : `Select ${user.name || user.email}`}
+                          />
+                        </td>
                         <td className="p-3">{user.id}</td>
                         <td className="p-3 font-medium">{user.name || "—"}</td>
                         <td className="p-3 text-muted-foreground">{user.email || "—"}</td>
@@ -239,7 +321,7 @@ export default function GestaoUtilizadores() {
           </DialogContent>
         </Dialog>
 
-        {/* Dialog de Confirmação de Eliminação */}
+        {/* Dialog de Confirmação de Eliminação Individual */}
         <Dialog open={!!eliminandoUser} onOpenChange={(open) => !open && setEliminandoUser(null)}>
           <DialogContent>
             <DialogHeader>
@@ -266,6 +348,52 @@ export default function GestaoUtilizadores() {
                 {deleteMutation.isPending 
                   ? (language === 'pt' ? "A eliminar..." : "Deleting...") 
                   : (language === 'pt' ? "Eliminar Definitivamente" : "Delete Permanently")}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dialog de Confirmação de Eliminação em Lote */}
+        <Dialog open={eliminandoEmLote} onOpenChange={setEliminandoEmLote}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <Trash2 className="h-5 w-5" />
+                {language === 'pt' ? "Eliminar Utilizadores em Lote?" : "Delete Users in Batch?"}
+              </DialogTitle>
+              <DialogDescription>
+                {language === 'pt' 
+                  ? <>Tem a certeza que pretende eliminar permanentemente <strong>{selecionados.length} utilizador(es)</strong>?<br /><span className="text-red-600 font-medium">Esta ação não pode ser revertida.</span></>
+                  : <>Are you sure you want to permanently delete <strong>{selecionados.length} user(s)</strong>?<br /><span className="text-red-600 font-medium">This action cannot be undone.</span></>}
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="py-4">
+              <p className="text-sm text-muted-foreground mb-2">
+                {language === 'pt' ? "Utilizadores selecionados:" : "Selected users:"}
+              </p>
+              <div className="max-h-40 overflow-y-auto bg-muted/50 rounded-md p-2">
+                {utilizadores?.filter(u => selecionados.includes(u.id)).map(user => (
+                  <div key={user.id} className="text-sm py-1">
+                    <span className="font-medium">{user.name || user.email || `#${user.id}`}</span>
+                    {user.name && user.email && <span className="text-muted-foreground ml-2">({user.email})</span>}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setEliminandoEmLote(false)}>
+                {t('common.cancelar') || (language === 'pt' ? "Cancelar" : "Cancel")}
+              </Button>
+              <Button 
+                variant="destructive" 
+                onClick={handleDeleteBatch} 
+                disabled={deleteBatchMutation.isPending}
+              >
+                {deleteBatchMutation.isPending 
+                  ? (language === 'pt' ? "A eliminar..." : "Deleting...") 
+                  : (language === 'pt' ? `Eliminar ${selecionados.length} Utilizador(es)` : `Delete ${selecionados.length} User(s)`)}
               </Button>
             </DialogFooter>
           </DialogContent>

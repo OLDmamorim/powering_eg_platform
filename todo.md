@@ -1681,6 +1681,12 @@ NOTA: Sistema de email requer configuração externa no deployment
 
 
 
+## Eliminação em Lote de Utilizadores
+- [x] Adicionar checkboxes para seleção múltipla na tabela de utilizadores
+- [x] Adicionar botão de eliminação em lote
+- [x] Criar endpoint backend para eliminar múltiplos utilizadores
+- [x] Diálogo de confirmação para eliminação em lote
+
 ## Atalho Relatório Board no Dashboard Admin
 
 ## Dashboard de Resultados - Média Mensal

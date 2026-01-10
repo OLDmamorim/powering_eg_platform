@@ -1989,6 +1989,15 @@ export const appRouter = router({
         await db.deleteUser(input.userId);
         return { success: true };
       }),
+
+    deleteInBatch: adminProcedure
+      .input(z.object({
+        userIds: z.array(z.number()).min(1),
+      }))
+      .mutation(async ({ input }) => {
+        const result = await db.deleteUsersInBatch(input.userIds);
+        return { success: true, deleted: result.deleted };
+      }),
   }),
 
   // ==================== REUNIÕES OPERACIONAIS ====================

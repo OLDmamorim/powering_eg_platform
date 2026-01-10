@@ -2416,6 +2416,17 @@ export async function deleteUser(userId: number): Promise<void> {
   await db.delete(users).where(eq(users.id, userId));
 }
 
+// Eliminar múltiplos utilizadores em lote
+export async function deleteUsersInBatch(userIds: number[]): Promise<{ deleted: number }> {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  
+  if (userIds.length === 0) return { deleted: 0 };
+  
+  await db.delete(users).where(inArray(users.id, userIds));
+  return { deleted: userIds.length };
+}
+
 
 /**
  * Contar relatórios do mês atual por loja (para indicador de cumprimento de mínimos)
