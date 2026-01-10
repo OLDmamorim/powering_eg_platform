@@ -167,14 +167,14 @@ export default function HistoricoRelatoriosIA() {
       <div className="mb-8">
         <div className="flex items-start justify-between">
           <div>
-            <h1 className="text-3xl font-bold mb-2">Histórico de Relatórios IA</h1>
+            <h1 className="text-3xl font-bold mb-2">{t('historicoRelatoriosIA.title')}</h1>
             <p className="text-muted-foreground">
-              Consulte todos os relatórios IA gerados (semanais, mensais, trimestrais)
+              {t('historicoRelatoriosIA.subtitle')}
             </p>
           </div>
           <Button onClick={() => navigate("/comparacao-relatorios-ia")}>
             <ArrowLeftRight className="h-4 w-4 mr-2" />
-            Comparar Relatórios
+            {t('historicoRelatoriosIA.compararRelatorios')}
           </Button>
         </div>
       </div>
@@ -184,14 +184,14 @@ export default function HistoricoRelatoriosIA() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5" />
-            Filtros de Período
+            {t('historicoRelatoriosIA.filtrosPeriodo')}
           </CardTitle>
-          <CardDescription>Filtre relatórios por intervalo de datas</CardDescription>
+          <CardDescription>{t('historicoRelatoriosIA.filtreRelatoriosPorIntervalo')}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="dataInicio">Data Início</Label>
+              <Label htmlFor="dataInicio">{t('historicoRelatoriosIA.dataInicio')}</Label>
               <Input
                 id="dataInicio"
                 type="date"
@@ -200,7 +200,7 @@ export default function HistoricoRelatoriosIA() {
               />
             </div>
             <div>
-              <Label htmlFor="dataFim">Data Fim</Label>
+              <Label htmlFor="dataFim">{t('historicoRelatoriosIA.dataFim')}</Label>
               <Input
                 id="dataFim"
                 type="date"
@@ -219,7 +219,7 @@ export default function HistoricoRelatoriosIA() {
                 setDataFim("");
               }}
             >
-              Limpar Filtros
+              {t('historicoRelatoriosIA.limparFiltros')}
             </Button>
           )}
         </CardContent>
@@ -231,7 +231,7 @@ export default function HistoricoRelatoriosIA() {
           <Card>
             <CardContent className="py-8 text-center text-muted-foreground">
               <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>Nenhum relatório IA encontrado.</p>
+              <p>{t('historicoRelatoriosIA.nenhumRelatorioEncontrado')}</p>
               <p className="text-sm mt-2">{language === 'pt' ? 'Gere relatórios na página "Relatórios IA".' : 'Generate reports on the "AI Reports" page.'}</p>
             </CardContent>
           </Card>
@@ -249,7 +249,7 @@ export default function HistoricoRelatoriosIA() {
                       <div className="flex-1">
                         <CardTitle className="flex items-center gap-2 text-lg">
                           <FileText className="h-5 w-5" />
-                          Relatório IA #{relatorio.id}
+                          {language === 'pt' ? 'Relatório IA' : 'AI Report'} #{relatorio.id}
                         </CardTitle>
                         <CardDescription className="mt-2">
                           <div className="flex flex-col gap-1">
@@ -263,7 +263,7 @@ export default function HistoricoRelatoriosIA() {
                               })}
                             </span>
                             <span>👤 Gerado por: {relatorio.geradoPorNome}</span>
-                            <span className="text-xs">Período: {relatorio.periodo.charAt(0).toUpperCase() + relatorio.periodo.slice(1)}</span>
+                            <span className="text-xs">{language === 'pt' ? 'Período' : 'Period'}: {relatorio.periodo.charAt(0).toUpperCase() + relatorio.periodo.slice(1)}</span>
                           </div>
                         </CardDescription>
                       </div>

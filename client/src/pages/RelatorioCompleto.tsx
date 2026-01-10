@@ -318,7 +318,7 @@ export default function RelatorioCompleto() {
         return (
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="loja">Lojas * (pode selecionar várias)</Label>
+              <Label htmlFor="loja">{language === 'pt' ? 'Lojas * (pode selecionar várias)' : 'Stores * (can select multiple)'}</Label>
               <div className="border rounded-md p-3 space-y-2 max-h-48 overflow-y-auto">
                 {lojas?.sort((a: any, b: any) => a.nome.localeCompare(b.nome)).map((loja: any) => (
                   <label key={loja.id} className="flex items-center space-x-2 cursor-pointer hover:bg-accent p-2 rounded">

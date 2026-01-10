@@ -2489,3 +2489,47 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Corrigir erros TypeScript (6 → 0 erros)
 - [x] Testar alternância de idioma PT/EN
 - [x] Verificar que todos os textos estão traduzidos
+
+## Correção de Traduções i18n - Versão Inglesa
+- [ ] Traduzir "Relatório" → "Report" no botão do dashboard
+- [ ] Traduzir "Lojas e Gestores" → "Stores and Managers"
+- [ ] Traduzir "Relatórios" → "Reports"
+- [ ] Traduzir "Pendentes" → "Pending"
+- [ ] Traduzir "Ocorrências" → "Occurrences"
+- [ ] Traduzir "Tarefas To-Do" → "To-Do Tasks"
+- [ ] Traduzir "Resultados" → "Results"
+- [ ] Traduzir "Histórico da Loja" → "Store History"
+- [ ] Traduzir "Configurar Análise" → "Configure Analysis"
+- [ ] Traduzir "Período (selecione meses)" → "Period (select months)"
+- [ ] Traduzir "Loja" → "Store"
+- [ ] Traduzir "Gerar Análise IA" → "Generate AI Analysis"
+- [ ] Traduzir "Comparar Período" → "Compare Period"
+- [ ] Traduzir "Histórico de Relatórios IA" → "AI Reports History"
+- [ ] Traduzir "Comparar Relatórios" → "Compare Reports"
+- [ ] Traduzir "Filtros de Período" → "Period Filters"
+- [ ] Traduzir "Data Início" → "Start Date"
+- [ ] Traduzir "Data Fim" → "End Date"
+- [ ] Traduzir "Lojas * (pode selecionar várias)" → "Stores * (can select multiple)"
+- [ ] Traduzir "Gerar Relatório" → "Generate Report"
+- [ ] Traduzir "Nenhum relatório gerado" → "No report generated"
+- [ ] Traduzir textos do AI Assistant
+- [ ] Traduzir textos do Complete Report
+- [ ] Traduzir textos do AI Results Report
+- [ ] Verificar todos os componentes com texto hardcoded em português
+
+
+
+## Correção de Traduções i18n v6.3
+- [x] Corrigir ficheiro en.json - adicionar traduções em falta
+- [x] Corrigir página HistoricoLoja - textos hardcoded
+- [x] Corrigir página HistoricoRelatoriosIA - textos hardcoded
+- [x] Corrigir página RelatoriosIA - textos hardcoded
+- [x] Corrigir página AssistenteIA - textos hardcoded
+- [x] Corrigir página RelatorioIAResultados - textos hardcoded
+- [x] Corrigir página Dashboard - botão Relatório e textos de resultados
+- [x] Corrigir página RelatorioCompleto - label de lojas
+- [x] Corrigir componente DashboardLayout - tooltip do botão de tema
+- [x] Corrigir componente KeyboardShortcutsHelp - todos os textos
+- [x] Adicionar suporte a idioma nas sugestões do chatbot (chatbotService.ts)
+- [x] Atualizar procedimento sugestoes para aceitar parâmetro de idioma
+- [x] Mesclar secções common duplicadas no en.json

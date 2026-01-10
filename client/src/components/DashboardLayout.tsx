@@ -478,7 +478,7 @@ function DashboardLayoutContent({
             <button
               onClick={toggleTheme}
               className="fixed bottom-14 right-4 p-2 rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 transition-colors z-50"
-              title={theme === 'light' ? 'Mudar para Modo Escuro' : 'Mudar para Modo Claro'}
+              title={theme === 'light' ? (language === 'pt' ? 'Mudar para Modo Escuro' : 'Switch to Dark Mode') : (language === 'pt' ? 'Mudar para Modo Claro' : 'Switch to Light Mode')}
             >
               {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
             </button>

@@ -654,7 +654,7 @@ ${contextoFormatado}`;
 /**
  * Obtém sugestões de perguntas baseadas nos dados disponíveis
  */
-export async function getSugestoesPergunta(): Promise<string[]> {
+export async function getSugestoesPergunta(language: string = 'pt'): Promise<string[]> {
   try {
     const pendentes = await db.getAllPendentes();
     const pendentesAtivos = pendentes.filter(p => !p.resolvido).length;
@@ -665,6 +665,24 @@ export async function getSugestoesPergunta(): Promise<string[]> {
     const ocorrencias = await db.getAllOcorrenciasEstruturais();
     const ocorrenciasAbertas = ocorrencias.filter(o => o.estado !== 'resolvido').length;
     
+    if (language === 'en') {
+      return [
+        "How many stores do we have on the platform?",
+        `What are the ${pendentesAtivos} active pending items?`,
+        "Which store has the most reports this month?",
+        `There are ${alertasPendentes} pending alerts. What are they?`,
+        "Which managers made the most visits this week?",
+        `We have ${ocorrenciasAbertas} open structural occurrences. Can you list them?`,
+        "What is the overall performance summary this month?",
+        "Which To-Do tasks are pending?",
+        "When was the last managers meeting?",
+        "Which stores have not been visited recently?",
+        "When was the last visit of each manager to each store?",
+        "How did complementary sales evolve this month vs last month?",
+        "Which stores had the highest sales growth?",
+        "Which manager visited the most stores this month?",
+      ];
+    }
     return [
       "Quantas lojas temos na plataforma?",
       `Quais são os ${pendentesAtivos} pendentes ativos?`,
@@ -682,6 +700,15 @@ export async function getSugestoesPergunta(): Promise<string[]> {
       "Qual gestor visitou mais lojas este mês?",
     ];
   } catch (error) {
+    if (language === 'en') {
+      return [
+        "How many stores do we have on the platform?",
+        "What are the active pending items?",
+        "What is the overall performance summary?",
+        "Which alerts are pending?",
+        "Which To-Do tasks need attention?",
+      ];
+    }
     return [
       "Quantas lojas temos na plataforma?",
       "Quais são os pendentes ativos?",

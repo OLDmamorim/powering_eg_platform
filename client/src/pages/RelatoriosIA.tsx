@@ -80,21 +80,21 @@ export default function RelatoriosIA() {
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">
-            Relatórios com IA
+            {t('relatoriosIA.title')}
           </h1>
           <p className="text-muted-foreground">
-            Análise automática de supervisões com inteligência artificial
+            {t('relatoriosIA.subtitle')}
           </p>
         </div>
 
         <Card>
           <CardHeader>
-            <CardTitle>Configuração do Relatório</CardTitle>
+            <CardTitle>{t('relatoriosIA.configuracaoRelatorio')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex gap-4 items-end">
               <div className="flex-1 space-y-2 max-w-xs">
-                <label className="text-sm font-medium">Período (selecione meses)</label>
+                <label className="text-sm font-medium">{t('relatoriosIA.periodoSelecioneMeses')}</label>
                 <FiltroMesesCheckbox
                   mesesSelecionados={mesesSelecionados}
                   onMesesChange={setMesesSelecionados}
@@ -103,7 +103,7 @@ export default function RelatoriosIA() {
               </div>
               <div className="flex gap-2">
                 <Button onClick={handleGerar} disabled={isLoading || mesesSelecionados.length === 0}>
-                  {isLoading ? "A gerar..." : "Gerar Relatório"}
+                  {isLoading ? t('relatoriosIA.aGerar') : t('relatoriosIA.gerarRelatorio')}
                 </Button>
                 {analise && (
                   <ExportarRelatorioIAPDF analiseIA={analise} periodo={gerarLabelMeses(mesesSelecionados)} />
@@ -118,7 +118,7 @@ export default function RelatoriosIA() {
             <div className="text-center space-y-4">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
               <p className="text-muted-foreground">
-                A analisar relatórios com IA...
+                {t('relatoriosIA.aAnalisarRelatorios')}
               </p>
             </div>
           </div>
@@ -131,7 +131,7 @@ export default function RelatoriosIA() {
               <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
                 <p className="text-sm text-blue-700 dark:text-blue-300 flex items-center gap-2">
                   <Store className="h-4 w-4" />
-                  Relatório personalizado para as suas lojas
+                  {t('relatoriosIA.relatorioPersonalizado')}
                 </p>
               </div>
             )}
@@ -140,11 +140,11 @@ export default function RelatoriosIA() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <BarChart3 className="h-5 w-5 text-primary" />
-                  Resumo Geral
+                  {t('relatoriosIA.resumoGeral')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground">{analise.resumo || analise.resumoGeral || 'Sem resumo disponível'}</p>
+                <p className="text-muted-foreground">{analise.resumo || analise.resumoGeral || t('relatoriosIA.semResumoDisponivel')}</p>
               </CardContent>
             </Card>
 

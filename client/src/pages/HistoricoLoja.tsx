@@ -972,16 +972,16 @@ export default function HistoricoLoja() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
             <History className="h-8 w-8" />
-            Histórico da Loja
+            {t('historicoLoja.title')}
           </h1>
           <p className="text-muted-foreground">
-            Análise inteligente completa: operacional, resultados, comercial e pendentes
+            {t('historicoLoja.subtitle')}
           </p>
         </div>
 
         <Card>
           <CardHeader>
-            <CardTitle>Configurar Análise</CardTitle>
+            <CardTitle>{t('historicoLoja.configurarAnalise')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex flex-wrap gap-4">
@@ -989,7 +989,7 @@ export default function HistoricoLoja() {
               <div className="flex-1 min-w-[220px] space-y-2">
                 <Label>
                   <Calendar className="h-4 w-4 inline mr-1" />
-                  Período (selecione meses)
+                  {t('historicoLoja.periodoSelecioneMeses')}
                 </Label>
                 <FiltroMesesCheckbox
                   mesesSelecionados={mesesSelecionados}
@@ -1000,7 +1000,7 @@ export default function HistoricoLoja() {
 
               {/* Loja */}
               <div className="flex-1 min-w-[200px] space-y-2">
-                <Label htmlFor="loja">Loja *</Label>
+                <Label htmlFor="loja">{t('historicoLoja.loja')} *</Label>
                 <Select value={lojaId} onValueChange={setLojaId}>
                   <SelectTrigger id="loja">
                     <SelectValue placeholder={language === 'pt' ? "Selecione uma loja" : "Select a store"} />
@@ -1025,12 +1025,12 @@ export default function HistoricoLoja() {
                   {isGenerating ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      A analisar...
+                      {t('historicoLoja.aAnalisar')}
                     </>
                   ) : (
                     <>
                       <Lightbulb className="h-4 w-4 mr-2" />
-                      Gerar Análise IA
+                      {t('historicoLoja.gerarAnaliseIA')}
                     </>
                   )}
                 </Button>
@@ -1040,7 +1040,7 @@ export default function HistoricoLoja() {
                   className={modoComparacao ? 'bg-blue-50 border-blue-300' : ''}
                 >
                   <GitCompare className="h-4 w-4 mr-2" />
-                  Comparar Períodos
+                  {t('historicoLoja.compararPeriodos')}
                 </Button>
               </div>
             </div>
@@ -1053,25 +1053,25 @@ export default function HistoricoLoja() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-blue-900">
                 <GitCompare className="h-5 w-5" />
-                Comparação Entre Períodos
+                {t('historicoLoja.comparacaoEntrePeriodos')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex flex-wrap gap-4 items-end">
                 <div className="flex-1 min-w-[200px] space-y-2">
-                  <Label>Tipo de Comparação</Label>
+                  <Label>{t('historicoLoja.tipoComparacao')}</Label>
                   <Select value={periodoComparacao} onValueChange={(v) => setPeriodoComparacao(v as PeriodoComparacao)}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="q1_ano_anterior_vs_atual">Q1 (Jan-Mar) Ano Anterior vs Atual</SelectItem>
-                      <SelectItem value="q2_ano_anterior_vs_atual">Q2 (Abr-Jun) Ano Anterior vs Atual</SelectItem>
-                      <SelectItem value="q3_ano_anterior_vs_atual">Q3 (Jul-Set) Ano Anterior vs Atual</SelectItem>
-                      <SelectItem value="q4_ano_anterior_vs_atual">Q4 (Out-Dez) Ano Anterior vs Atual</SelectItem>
-                      <SelectItem value="s1_ano_anterior_vs_atual">1º Semestre Ano Anterior vs Atual</SelectItem>
-                      <SelectItem value="s2_ano_anterior_vs_atual">2º Semestre Ano Anterior vs Atual</SelectItem>
-                      <SelectItem value="ano_completo">Ano Completo Anterior vs Atual</SelectItem>
+                      <SelectItem value="q1_ano_anterior_vs_atual">{t('historicoLoja.q1AnoAnteriorVsAtual')}</SelectItem>
+                      <SelectItem value="q2_ano_anterior_vs_atual">{t('historicoLoja.q2AnoAnteriorVsAtual')}</SelectItem>
+                      <SelectItem value="q3_ano_anterior_vs_atual">{t('historicoLoja.q3AnoAnteriorVsAtual')}</SelectItem>
+                      <SelectItem value="q4_ano_anterior_vs_atual">{t('historicoLoja.q4AnoAnteriorVsAtual')}</SelectItem>
+                      <SelectItem value="s1_ano_anterior_vs_atual">{t('historicoLoja.s1AnoAnteriorVsAtual')}</SelectItem>
+                      <SelectItem value="s2_ano_anterior_vs_atual">{t('historicoLoja.s2AnoAnteriorVsAtual')}</SelectItem>
+                      <SelectItem value="ano_completo">{t('historicoLoja.anoCompleto')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -1082,19 +1082,19 @@ export default function HistoricoLoja() {
                   {comparacaoQuery.isFetching ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      A comparar...
+                      {t('historicoLoja.aComparar')}
                     </>
                   ) : (
                     <>
                       <GitCompare className="h-4 w-4 mr-2" />
-                      Gerar Comparação
+                      {t('historicoLoja.gerarComparacao')}
                     </>
                   )}
                 </Button>
               </div>
 
               <p className="text-sm text-muted-foreground">
-                💡 A comparação permite analisar a evolução da loja entre períodos equivalentes de anos diferentes.
+                💡 {t('historicoLoja.dicaComparacao')}
               </p>
             </CardContent>
           </Card>
@@ -1773,7 +1773,7 @@ export default function HistoricoLoja() {
           <Card className="border-dashed">
             <CardContent className="py-12 text-center text-muted-foreground">
               <History className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>Selecione o período e a loja, depois clique em "Gerar Análise IA" para ver o histórico completo</p>
+              <p>{t('historicoLoja.selecionePeriodoLoja')}</p>
             </CardContent>
           </Card>
         )}

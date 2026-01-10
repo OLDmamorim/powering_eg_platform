@@ -33,7 +33,7 @@ export default function AssistenteIA() {
   const scrollRef = useRef<HTMLDivElement>(null);
   
   const chatMutation = trpc.chatbot.pergunta.useMutation();
-  const { data: sugestoes, refetch: refetchSugestoes } = trpc.chatbot.sugestoes.useQuery();
+  const { data: sugestoes, refetch: refetchSugestoes } = trpc.chatbot.sugestoes.useQuery({ language });
   
   // Auto-scroll para a última mensagem
   useEffect(() => {
@@ -147,33 +147,32 @@ export default function AssistenteIA() {
                       {t('assistenteIA.title')}
                     </h2>
                     <p className="text-muted-foreground max-w-md mb-6">
-                      Posso ajudá-lo com informações sobre lojas, gestores, relatórios, 
-                      pendentes, alertas, ocorrências, tarefas, reuniões e muito mais.
+                      {t('assistenteIA.descricaoAjuda')}
                     </p>
                     <div className="flex flex-wrap gap-2 justify-center">
                       <Badge variant="secondary" className="flex items-center gap-1">
                         <HelpCircle className="h-3 w-3" />
-                        Lojas e Gestores
+                        {t('assistenteIA.lojasEGestores')}
                       </Badge>
                       <Badge variant="secondary" className="flex items-center gap-1">
                         <HelpCircle className="h-3 w-3" />
-                        Relatórios
+                        {t('assistenteIA.relatorios')}
                       </Badge>
                       <Badge variant="secondary" className="flex items-center gap-1">
                         <HelpCircle className="h-3 w-3" />
-                        Pendentes
+                        {t('assistenteIA.pendentes')}
                       </Badge>
                       <Badge variant="secondary" className="flex items-center gap-1">
                         <HelpCircle className="h-3 w-3" />
-                        Ocorrências
+                        {t('assistenteIA.ocorrencias')}
                       </Badge>
                       <Badge variant="secondary" className="flex items-center gap-1">
                         <HelpCircle className="h-3 w-3" />
-                        Tarefas To-Do
+                        {t('assistenteIA.tarefasToDo')}
                       </Badge>
                       <Badge variant="secondary" className="flex items-center gap-1">
                         <HelpCircle className="h-3 w-3" />
-                        Resultados
+                        {t('assistenteIA.resultados')}
                       </Badge>
                     </div>
                   </div>
@@ -258,7 +257,7 @@ export default function AssistenteIA() {
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
                 <Lightbulb className="h-4 w-4 text-yellow-500" />
-                {t('common.notas')}
+                {t('assistenteIA.sugestoes')}
               </CardTitle>
             </CardHeader>
             <CardContent className="flex-1">

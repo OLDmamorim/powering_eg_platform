@@ -257,7 +257,7 @@ export function RelatorioIAResultados() {
               <div className="flex flex-wrap items-end gap-3">
                 {/* Período */}
                 <div className="space-y-1">
-                  <label className="text-xs font-medium text-muted-foreground">Período (selecione meses)</label>
+                  <label className="text-xs font-medium text-muted-foreground">{t('common.periodo')} ({language === 'pt' ? 'selecione meses' : 'select months'})</label>
                   <FiltroMesesCheckbox
                     mesesDisponiveis={mesesDisponiveis}
                     mesesSelecionados={mesesSelecionados}
@@ -273,7 +273,7 @@ export function RelatorioIAResultados() {
                     <div className="space-y-1">
                       <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
                         <Filter className="h-3 w-3" />
-                        Filtrar por
+                        {t('common.filtrarPor')}
                       </label>
                       <Select value={tipoFiltro} onValueChange={(v) => {
                         setTipoFiltro(v as typeof tipoFiltro);
@@ -287,19 +287,19 @@ export function RelatorioIAResultados() {
                           <SelectItem value="pais">
                             <div className="flex items-center gap-2">
                               <Globe className="h-4 w-4" />
-                              Todo o País
+                              {t('common.todoOPais')}
                             </div>
                           </SelectItem>
                           <SelectItem value="zona">
                             <div className="flex items-center gap-2">
                               <MapPin className="h-4 w-4" />
-                              Por Zona
+                              {t('common.porZona')}
                             </div>
                           </SelectItem>
                           <SelectItem value="gestor">
                             <div className="flex items-center gap-2">
                               <User className="h-4 w-4" />
-                              Por Gestor
+                              {t('common.porGestor')}
                             </div>
                           </SelectItem>
                         </SelectContent>
@@ -309,13 +309,13 @@ export function RelatorioIAResultados() {
                     {/* Seleção de Zonas */}
                     {tipoFiltro === 'zona' && (
                       <div className="space-y-1">
-                        <label className="text-xs font-medium text-muted-foreground">Zonas</label>
+                        <label className="text-xs font-medium text-muted-foreground">{t('common.zonas')}</label>
                         <Popover>
                           <PopoverTrigger asChild>
                             <Button variant="outline" className="w-[200px] justify-between">
                               <span className="truncate">
                                 {zonasSeleccionadas.length === 0 
-                                  ? 'Selecione zona(s)...' 
+                                  ? t('common.selecioneZonas') 
                                   : zonasSeleccionadas.length === 1 
                                     ? zonasSeleccionadas[0]
                                     : `${zonasSeleccionadas.length} zonas`
@@ -327,10 +327,10 @@ export function RelatorioIAResultados() {
                           <PopoverContent className="w-[280px] p-0" align="start">
                             <div className="p-2 border-b flex gap-2">
                               <Button variant="ghost" size="sm" onClick={handleSelectAllZonas} className="text-xs">
-                                Selecionar Todas
+                                {language === 'pt' ? 'Selecionar Todas' : 'Select All'}
                               </Button>
                               <Button variant="ghost" size="sm" onClick={handleClearZonas} className="text-xs">
-                                Limpar
+                                {language === 'pt' ? 'Limpar' : 'Clear'}
                               </Button>
                             </div>
                             <div className="max-h-[200px] overflow-y-auto p-2">
@@ -378,7 +378,7 @@ export function RelatorioIAResultados() {
                           onValueChange={(v) => setGestorSeleccionado(v ? parseInt(v) : undefined)}
                         >
                           <SelectTrigger className="w-[200px]">
-                            <SelectValue placeholder="Selecione gestor..." />
+                            <SelectValue placeholder={t('common.selecioneGestor')} />
                           </SelectTrigger>
                           <SelectContent>
                             {gestores?.map((gestor) => (
@@ -400,9 +400,9 @@ export function RelatorioIAResultados() {
                   className="h-10"
                 >
                   {loadingAnaliseIA ? (
-                    <><Loader2 className="h-4 w-4 animate-spin mr-2" /> A gerar...</>
+                    <><Loader2 className="h-4 w-4 animate-spin mr-2" /> {t('relatoriosIA.aGerar')}</>
                   ) : (
-                    <><Sparkles className="h-4 w-4 mr-2" /> Gerar Relatório</>
+                    <><Sparkles className="h-4 w-4 mr-2" /> {t('relatoriosIA.gerarRelatorio')}</>
                   )}
                 </Button>
                 
@@ -415,7 +415,7 @@ export function RelatorioIAResultados() {
               {/* Badge do Filtro Aplicado */}
               {mostrarRelatorioIA && analiseIA && (
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground">Filtro aplicado:</span>
+                  <span className="text-xs text-muted-foreground">{language === 'pt' ? 'Filtro aplicado:' : 'Applied filter:'}</span>
                   <Badge variant="secondary" className="flex items-center gap-1">
                     {tipoFiltro === 'pais' && <Globe className="h-3 w-3" />}
                     {tipoFiltro === 'zona' && <MapPin className="h-3 w-3" />}
@@ -438,7 +438,7 @@ export function RelatorioIAResultados() {
                     <CardHeader className="bg-purple-50 dark:bg-purple-900/20">
                       <CardTitle className="flex items-center gap-2">
                         <FileText className="h-5 w-5 text-purple-600" />
-                        Resumo do Período
+                        {language === 'pt' ? 'Resumo do Período' : 'Period Summary'}
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="pt-4">
@@ -446,32 +446,32 @@ export function RelatorioIAResultados() {
                     </CardContent>
                   </Card>
 
-                  {/* Relatórios Submetidos */}
+                  {/* {language === 'pt' ? 'Relatórios Submetidos' : 'Submitted Reports'} */}
                   <Card>
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
                         <FileText className="h-5 w-5 text-blue-600" />
-                        Relatórios Submetidos
+                        {language === 'pt' ? 'Relatórios Submetidos' : 'Submitted Reports'}
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="grid gap-4 md:grid-cols-3">
                         <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center">
                           <p className="text-2xl font-bold text-blue-600">{(analiseIA as any).relatorios?.totalLivres || 0}</p>
-                          <p className="text-sm text-muted-foreground">Relatórios Livres</p>
+                          <p className="text-sm text-muted-foreground">{language === 'pt' ? 'Relatórios Livres' : 'Free Reports'}</p>
                         </div>
                         <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
                           <p className="text-2xl font-bold text-green-600">{(analiseIA as any).relatorios?.totalCompletos || 0}</p>
-                          <p className="text-sm text-muted-foreground">Relatórios Completos</p>
+                          <p className="text-sm text-muted-foreground">{language === 'pt' ? 'Relatórios Completos' : 'Complete Reports'}</p>
                         </div>
                         <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg text-center">
                           <p className="text-2xl font-bold text-purple-600">{(analiseIA as any).relatorios?.lojasVisitadas?.length || 0}</p>
-                          <p className="text-sm text-muted-foreground">Lojas Visitadas</p>
+                          <p className="text-sm text-muted-foreground">{language === 'pt' ? 'Lojas Visitadas' : 'Visited Stores'}</p>
                         </div>
                       </div>
                       {(analiseIA as any).relatorios?.lojasVisitadas && (analiseIA as any).relatorios.lojasVisitadas.length > 0 && (
                         <div className="mt-4">
-                          <p className="text-sm font-medium mb-2">Lojas visitadas:</p>
+                          <p className="text-sm font-medium mb-2">{language === 'pt' ? 'Lojas visitadas:' : 'Visited stores:'}</p>
                           <div className="flex flex-wrap gap-2">
                             {(analiseIA as any).relatorios.lojasVisitadas.map((loja: string, idx: number) => (
                               <Badge key={idx} variant="secondary">{loja}</Badge>
@@ -487,7 +487,7 @@ export function RelatorioIAResultados() {
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
                         <Award className="h-5 w-5 text-amber-600" />
-                        Pontos Destacados nos Relatórios
+                        {language === 'pt' ? 'Pontos Destacados nos Relatórios' : 'Highlighted Points in Reports'}
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
@@ -496,7 +496,7 @@ export function RelatorioIAResultados() {
                         <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border-l-4 border-purple-500">
                           <h4 className="font-medium mb-2 flex items-center gap-2 text-purple-700 dark:text-purple-400">
                             <Sparkles className="h-4 w-4" />
-                            Análise IA
+                            {language === 'pt' ? 'Análise IA' : 'AI Analysis'}
                           </h4>
                           <p className="text-sm leading-relaxed">{(analiseIA as any).pontosDestacados.analise}</p>
                         </div>
@@ -507,7 +507,7 @@ export function RelatorioIAResultados() {
                         <div className="space-y-2">
                           <h4 className="font-medium flex items-center gap-2 text-green-700 dark:text-green-400">
                             <CheckCircle2 className="h-4 w-4" />
-                            Pontos Positivos ({(analiseIA as any).pontosDestacados?.positivos?.length || 0})
+                            {language === 'pt' ? 'Pontos Positivos' : 'Positive Points'} ({(analiseIA as any).pontosDestacados?.positivos?.length || 0})
                           </h4>
                           {(analiseIA as any).pontosDestacados?.positivos && (analiseIA as any).pontosDestacados.positivos.length > 0 ? (
                             <ul className="space-y-2">
@@ -530,7 +530,7 @@ export function RelatorioIAResultados() {
                         <div className="space-y-2">
                           <h4 className="font-medium flex items-center gap-2 text-red-700 dark:text-red-400">
                             <XCircle className="h-4 w-4" />
-                            Pontos Negativos ({(analiseIA as any).pontosDestacados?.negativos?.length || 0})
+                            {language === 'pt' ? 'Pontos Negativos' : 'Negative Points'} ({(analiseIA as any).pontosDestacados?.negativos?.length || 0})
                           </h4>
                           {(analiseIA as any).pontosDestacados?.negativos && (analiseIA as any).pontosDestacados.negativos.length > 0 ? (
                             <ul className="space-y-2">
@@ -557,7 +557,7 @@ export function RelatorioIAResultados() {
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
                         <Target className="h-5 w-5 text-orange-600" />
-                        Gestão de Pendentes
+                        {language === 'pt' ? 'Gestão de Pendentes' : 'Pending Management'}
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
@@ -566,7 +566,7 @@ export function RelatorioIAResultados() {
                         <div className="p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg border-l-4 border-orange-500">
                           <h4 className="font-medium mb-2 flex items-center gap-2 text-orange-700 dark:text-orange-400">
                             <Sparkles className="h-4 w-4" />
-                            Análise IA
+                            {language === 'pt' ? 'Análise IA' : 'AI Analysis'}
                           </h4>
                           <p className="text-sm leading-relaxed">{(analiseIA as any).pendentes.analise}</p>
                         </div>
@@ -576,11 +576,11 @@ export function RelatorioIAResultados() {
                       <div className="grid gap-4 md:grid-cols-3">
                         <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg text-center">
                           <p className="text-2xl font-bold text-amber-600">{(analiseIA as any).pendentes?.criados?.length || 0}</p>
-                          <p className="text-sm text-muted-foreground">Criados no Período</p>
+                          <p className="text-sm text-muted-foreground">{t('common.criadosNoPeriodo')}</p>
                         </div>
                         <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
                           <p className="text-2xl font-bold text-green-600">{(analiseIA as any).pendentes?.resolvidos?.length || 0}</p>
-                          <p className="text-sm text-muted-foreground">Resolvidos no Período</p>
+                          <p className="text-sm text-muted-foreground">{t('common.resolvidosNoPeriodo')}</p>
                         </div>
                         <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg text-center">
                           <p className="text-2xl font-bold text-red-600">{(analiseIA as any).pendentes?.ativos || 0}</p>
@@ -591,7 +591,7 @@ export function RelatorioIAResultados() {
                       <div className="grid gap-4 md:grid-cols-2">
                         {/* Pendentes Criados */}
                         <div className="space-y-2">
-                          <h4 className="font-medium text-amber-700 dark:text-amber-400">Criados no Período</h4>
+                          <h4 className="font-medium text-amber-700 dark:text-amber-400">{t('common.criadosNoPeriodo')}</h4>
                           {(analiseIA as any).pendentes?.criados && (analiseIA as any).pendentes.criados.length > 0 ? (
                             <ul className="space-y-2 max-h-48 overflow-y-auto">
                               {(analiseIA as any).pendentes.criados.map((p: any, idx: number) => (
@@ -611,7 +611,7 @@ export function RelatorioIAResultados() {
 
                         {/* Pendentes Resolvidos */}
                         <div className="space-y-2">
-                          <h4 className="font-medium text-green-700 dark:text-green-400">Resolvidos no Período</h4>
+                          <h4 className="font-medium text-green-700 dark:text-green-400">{t('common.resolvidosNoPeriodo')}</h4>
                           {(analiseIA as any).pendentes?.resolvidos && (analiseIA as any).pendentes.resolvidos.length > 0 ? (
                             <ul className="space-y-2 max-h-48 overflow-y-auto">
                               {(analiseIA as any).pendentes.resolvidos.map((p: any, idx: number) => (
@@ -700,7 +700,7 @@ export function RelatorioIAResultados() {
                       <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border-l-4 border-purple-500">
                         <h4 className="font-medium mb-2 flex items-center gap-2 text-purple-700 dark:text-purple-400">
                           <Sparkles className="h-4 w-4" />
-                          Análise IA
+                          {language === 'pt' ? 'Análise IA' : 'AI Analysis'}
                         </h4>
                         <p className="text-sm leading-relaxed">{(analiseIA as any).insightsIA.resumoExecutivo}</p>
                       </div>
@@ -1265,7 +1265,7 @@ export function RelatorioIAResultados() {
                     <div className="flex items-center justify-between p-4 bg-slate-100 dark:bg-slate-800/50 rounded-lg border border-slate-300 dark:border-slate-700 cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700/50 transition-colors">
                       <div className="flex items-center gap-2">
                         <Store className="h-5 w-5 text-slate-600" />
-                        <h3 className="font-semibold text-lg">Análise Loja a Loja</h3>
+                        <h3 className="font-semibold text-lg">{language === 'pt' ? 'Análise Loja a Loja' : 'Store by Store Analysis'}</h3>
                         <Badge variant="outline" className="ml-2">
                           {(analiseIA as any).dadosGraficos.rankingServicos.length} lojas
                         </Badge>
@@ -1353,7 +1353,7 @@ export function RelatorioIAResultados() {
                           onValueChange={(v) => setGestorFiltroLojas(v ? parseInt(v) : undefined)}
                         >
                           <SelectTrigger className="w-[200px]">
-                            <SelectValue placeholder="Selecione gestor..." />
+                            <SelectValue placeholder={t('common.selecioneGestor')} />
                           </SelectTrigger>
                           <SelectContent>
                             {gestores.map((g) => (
@@ -1831,9 +1831,9 @@ export function RelatorioIAResultados() {
               <div className="text-center space-y-4">
                 <Sparkles className="h-12 w-12 text-purple-300 mx-auto" />
                 <div>
-                  <h3 className="font-semibold text-lg">Nenhum relatório gerado</h3>
+                  <h3 className="font-semibold text-lg">{t('common.nenhumRelatorioGerado')}</h3>
                   <p className="text-muted-foreground">
-                    Selecione um período{isAdmin ? ' e filtros' : ''} e clique em "Gerar Relatório" para obter uma análise quantitativa detalhada dos resultados.
+                    {t('common.selecionePeriodoFiltros')}
                   </p>
                 </div>
               </div>

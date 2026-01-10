@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Keyboard } from "lucide-react";
 import { shortcuts } from "@/hooks/useKeyboardShortcuts";
+import { useLanguage } from "@/contexts/LanguageContext";
 import {
   Dialog,
   DialogContent,
@@ -13,6 +14,7 @@ import { Button } from "@/components/ui/button";
 
 export function KeyboardShortcutsHelp() {
   const [open, setOpen] = useState(false);
+  const { language } = useLanguage();
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -21,7 +23,7 @@ export function KeyboardShortcutsHelp() {
           variant="ghost"
           size="icon"
           className="fixed bottom-24 right-4 h-10 w-10 rounded-full bg-muted/80 hover:bg-muted shadow-md z-50"
-          title="Atalhos de Teclado"
+          title={language === 'pt' ? 'Atalhos de Teclado' : 'Keyboard Shortcuts'}
         >
           <Keyboard className="h-5 w-5" />
         </Button>
@@ -30,10 +32,12 @@ export function KeyboardShortcutsHelp() {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Keyboard className="h-5 w-5" />
-            Atalhos de Teclado
+            {language === 'pt' ? 'Atalhos de Teclado' : 'Keyboard Shortcuts'}
           </DialogTitle>
           <DialogDescription>
-            Use estas teclas para navegar rapidamente pela aplicação.
+            {language === 'pt' 
+              ? 'Use estas teclas para navegar rapidamente pela aplicação.'
+              : 'Use these keys to quickly navigate through the application.'}
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-2 py-4">
@@ -50,7 +54,9 @@ export function KeyboardShortcutsHelp() {
           ))}
         </div>
         <p className="text-xs text-muted-foreground text-center">
-          Pressione a tecla correspondente para navegar
+          {language === 'pt' 
+            ? 'Pressione a tecla correspondente para navegar'
+            : 'Press the corresponding key to navigate'}
         </p>
       </DialogContent>
     </Dialog>

@@ -99,6 +99,7 @@
     "observacaoSalvaMsg": "Note saved successfully"
   },
   "common": {
+    "atualizar": "Refresh",
     "carregando": "Loading...",
     "erro": "Error",
     "sucesso": "Success",
@@ -152,7 +153,27 @@
     "pendente": "Pending",
     "concluido": "Completed",
     "emProgresso": "In Progress",
-    "atrasado": "Overdue"
+    "atrasado": "Overdue",
+    "filtros": "Filters",
+    "mes": "Month",
+    "ano": "Year",
+    "voltarDashboard": "Back to Dashboard",
+    "erroDesconhecido": "Unknown error",
+    "periodo": "Period",
+    "selecioneMeses": "Select months",
+    "filtrarPor": "Filter by",
+    "todoOPais": "Entire Country",
+    "porZona": "By Zone",
+    "porGestor": "By Manager",
+    "zonas": "Zones",
+    "selecioneZonas": "Select zone(s)...",
+    "selecioneGestor": "Select manager...",
+    "criadosNoPeriodo": "Created in Period",
+    "resolvidosNoPeriodo": "Resolved in Period",
+    "nenhumRelatorioGerado": "No report generated",
+    "selecionePeriodoFiltros": "Select a period and filters, then click Generate Report to get a detailed quantitative analysis of results.",
+    "resumoDoPeriodo": "Period Summary",
+    "notas": "Notes"
   },
   "menu": {
     "groups": {
@@ -473,6 +494,16 @@
   },
   "relatoriosIA": {
     "title": "AI Reports",
+    "subtitle": "Automatic supervision analysis with artificial intelligence",
+    "configuracaoRelatorio": "Report Configuration",
+    "periodoSelecioneMeses": "Period (select months)",
+    "aGerar": "Generating...",
+    "gerarRelatorio": "Generate Report",
+    "aAnalisarRelatorios": "Analyzing reports with AI...",
+    "relatorioPersonalizado": "Personalized report for your stores",
+    "resumoGeral": "General Summary",
+    "semResumoDisponivel": "No summary available",
+    "title": "AI Reports",
     "subtitle": "Generate automatic reports with artificial intelligence",
     "tipoRelatorio": "Report Type",
     "diario": "Daily",
@@ -562,7 +593,26 @@
     "erroGerar": "Error generating history. Please try again.",
     "analisarIA": "Analyze with AI",
     "analisandoIA": "Analyzing store history with AI...",
-    "gerandoComparacao": "Generating comparison between periods..."
+    "gerandoComparacao": "Generating comparison between periods...",
+    "configurarAnalise": "Configure Analysis",
+    "loja": "Store",
+    "gerarAnaliseIA": "Generate AI Analysis",
+    "aAnalisar": "Analyzing...",
+    "compararPeriodos": "Compare Periods",
+    "comparacaoEntrePeriodos": "Comparison Between Periods",
+    "tipoComparacao": "Comparison Type",
+    "q1AnoAnteriorVsAtual": "Q1 (Jan-Mar) Previous Year vs Current",
+    "q2AnoAnteriorVsAtual": "Q2 (Apr-Jun) Previous Year vs Current",
+    "q3AnoAnteriorVsAtual": "Q3 (Jul-Sep) Previous Year vs Current",
+    "q4AnoAnteriorVsAtual": "Q4 (Oct-Dec) Previous Year vs Current",
+    "s1AnoAnteriorVsAtual": "1st Semester Previous Year vs Current",
+    "s2AnoAnteriorVsAtual": "2nd Semester Previous Year vs Current",
+    "anoCompleto": "Full Year Previous vs Current",
+    "aComparar": "Comparing...",
+    "gerarComparacao": "Generate Comparison",
+    "dicaComparacao": "The comparison allows you to analyze the store evolution between equivalent periods of different years.",
+    "selecionePeriodoLoja": "Select the period and store, then click Generate AI Analysis to see the complete history",
+    "periodoSelecioneMeses": "Period (select months)"
   },
   "alertas": {
     "title": "Alerts",
@@ -782,7 +832,15 @@
     "enviar": "Send",
     "limparConversa": "Clear Conversation",
     "pensando": "Thinking...",
-    "erro": "An error occurred. Please try again."
+    "erro": "An error occurred. Please try again.",
+    "descricaoAjuda": "I can help you with information about stores, managers, reports, pending items, alerts, occurrences, tasks, meetings and much more.",
+    "lojasEGestores": "Stores and Managers",
+    "relatorios": "Reports",
+    "pendentes": "Pending",
+    "ocorrencias": "Occurrences",
+    "tarefasToDo": "To-Do Tasks",
+    "resultados": "Results",
+    "sugestoes": "Suggestions"
   },
   "minhasLojas": {
     "title": "My Stores",
@@ -817,7 +875,15 @@
   },
   "historicoRelatoriosIA": {
     "title": "AI Reports History",
-    "subtitle": "View previously generated AI reports",
+    "subtitle": "View all generated AI reports (weekly, monthly, quarterly)",
+    "compararRelatorios": "Compare Reports",
+    "filtrosPeriodo": "Period Filters",
+    "filtreRelatoriosPorIntervalo": "Filter reports by date range",
+    "dataInicio": "Start Date",
+    "dataFim": "End Date",
+    "limparFiltros": "Clear Filters",
+    "nenhumRelatorioEncontrado": "No AI reports found.",
+    "gereRelatoriosPagina": "Generate reports on the AI Reports page.",
     "tipo": "Type",
     "diario": "Daily",
     "semanal": "Weekly",
@@ -1132,13 +1198,5 @@
     "erroExportar": "Error exporting category",
     "estadoAtualizado": "Status updated",
     "erroAtualizarEstado": "Error updating status"
-  },
-  "common": {
-    "filtros": "Filters",
-    "nenhum": "None",
-    "mes": "Month",
-    "ano": "Year",
-    "voltarDashboard": "Back to Dashboard",
-    "erroDesconhecido": "Unknown error"
   }
 }

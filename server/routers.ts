@@ -4871,8 +4871,9 @@ export const appRouter = router({
     
     // Sugestões de perguntas para o chatbot
     sugestoes: protectedProcedure
-      .query(async () => {
-        return await getSugestoesPergunta();
+      .input(z.object({ language: z.string().optional() }).optional())
+      .query(async ({ input }) => {
+        return await getSugestoesPergunta(input?.language || 'pt');
       }),
   }),
 });

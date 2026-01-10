@@ -451,7 +451,7 @@ export default function Dashboard() {
           ) : (
             <Button onClick={gerarRelatorioMensal} variant="outline" size="sm" className="gap-1.5 flex-1">
               <Download className="h-4 w-4" />
-              <span className="text-xs">Relatório</span>
+              <span className="text-xs">{language === 'pt' ? 'Relatório' : 'Report'}</span>
             </Button>
           )}
           <Button 
@@ -708,7 +708,7 @@ export default function Dashboard() {
               <CardHeader className="pb-2">
                 <CardTitle className="flex items-center gap-2 text-indigo-700 dark:text-indigo-300">
                   <BarChart3 className="h-4 w-4" />
-                  Resultados {mesAnterior.mes === 12 ? 'Dezembro' : new Date(2024, mesAnterior.mes - 1).toLocaleDateString('pt-PT', { month: 'long' })} {mesAnterior.ano}
+                  {language === 'pt' ? 'Resultados' : 'Results'} {mesAnterior.mes === 12 ? (language === 'pt' ? 'Dezembro' : 'December') : new Date(2024, mesAnterior.mes - 1).toLocaleDateString(language === 'pt' ? 'pt-PT' : 'en-US', { month: 'long' })} {mesAnterior.ano}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -719,13 +719,13 @@ export default function Dashboard() {
                         <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
                           {totaisMesAnterior?.totalServicos?.toLocaleString('pt-PT') || resultadosMesAnterior?.somaServicos?.toLocaleString('pt-PT') || '—'}
                         </div>
-                        <div className="text-xs text-muted-foreground">Total Serviços</div>
+                        <div className="text-xs text-muted-foreground">{language === 'pt' ? 'Total Serviços' : 'Total Services'}</div>
                       </div>
                       <div className="bg-white/60 dark:bg-white/10 rounded-lg p-3">
                         <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
                           {totaisMesAnterior?.taxaReparacao ? `${(totaisMesAnterior.taxaReparacao * 100).toFixed(1)}%` : resultadosMesAnterior?.mediaTaxaReparacao ? `${(resultadosMesAnterior.mediaTaxaReparacao * 100).toFixed(1)}%` : '—'}
                         </div>
-                        <div className="text-xs text-muted-foreground">Taxa Reparação</div>
+                        <div className="text-xs text-muted-foreground">{language === 'pt' ? 'Taxa Reparação' : 'Repair Rate'}</div>
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-3">
@@ -735,13 +735,13 @@ export default function Dashboard() {
                             ? `${resultadosMesAnterior.mediaDesvioPercentual >= 0 ? '+' : ''}${resultadosMesAnterior.mediaDesvioPercentual.toFixed(1)}%`
                             : '—'}
                         </div>
-                        <div className="text-xs text-muted-foreground">Desvio vs Objetivo</div>
+                        <div className="text-xs text-muted-foreground">{language === 'pt' ? 'Desvio vs Objetivo' : 'Deviation vs Target'}</div>
                       </div>
                       <div className="bg-white/60 dark:bg-white/10 rounded-lg p-3">
                         <div className="text-xl font-bold text-emerald-600 dark:text-emerald-400">
                           {resultadosMesAnterior?.lojasAcimaObjetivo ?? '—'}/{resultadosMesAnterior?.totalLojas ?? '—'}
                         </div>
-                        <div className="text-xs text-muted-foreground">Lojas Acima Obj.</div>
+                        <div className="text-xs text-muted-foreground">{language === 'pt' ? 'Lojas Acima Obj.' : 'Stores Above Target'}</div>
                       </div>
                     </div>
                     <Button 
@@ -750,20 +750,20 @@ export default function Dashboard() {
                       className="w-full mt-2 border-indigo-300 text-indigo-700 hover:bg-indigo-100 dark:border-indigo-700 dark:text-indigo-300 dark:hover:bg-indigo-900/50"
                       onClick={() => setLocation('/resultados-dashboard')}
                     >
-                      Ver Dashboard Completo
+                      {language === 'pt' ? 'Ver Dashboard Completo' : 'View Full Dashboard'}
                     </Button>
                   </div>
                 ) : (
                   <div className="text-center py-6">
                     <BarChart3 className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                    <p className="text-sm text-muted-foreground">Sem dados do mês anterior</p>
+                    <p className="text-sm text-muted-foreground">{language === 'pt' ? 'Sem dados do mês anterior' : 'No data from previous month'}</p>
                     <Button 
                       variant="outline" 
                       size="sm" 
                       className="mt-3"
                       onClick={() => setLocation('/resultados-dashboard')}
                     >
-                      Importar Resultados
+                      {language === 'pt' ? 'Importar Resultados' : 'Import Results'}
                     </Button>
                   </div>
                 )}
@@ -862,7 +862,7 @@ export default function Dashboard() {
               <CardHeader className="pb-2">
                 <CardTitle className="flex items-center gap-2 text-indigo-700 dark:text-indigo-300">
                   <BarChart3 className="h-4 w-4" />
-                  Resultados {mesAnterior.mes === 12 ? 'Dezembro' : new Date(2024, mesAnterior.mes - 1).toLocaleDateString('pt-PT', { month: 'long' })} {mesAnterior.ano}
+                  {language === 'pt' ? 'Resultados' : 'Results'} {mesAnterior.mes === 12 ? (language === 'pt' ? 'Dezembro' : 'December') : new Date(2024, mesAnterior.mes - 1).toLocaleDateString(language === 'pt' ? 'pt-PT' : 'en-US', { month: 'long' })} {mesAnterior.ano}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -873,13 +873,13 @@ export default function Dashboard() {
                         <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
                           {resultadosMesAnteriorGestor.somaServicos?.toLocaleString('pt-PT') || '—'}
                         </div>
-                        <div className="text-xs text-muted-foreground">Total Serviços</div>
+                        <div className="text-xs text-muted-foreground">{language === 'pt' ? 'Total Serviços' : 'Total Services'}</div>
                       </div>
                       <div className="bg-white/60 dark:bg-white/10 rounded-lg p-3">
                         <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
                           {resultadosMesAnteriorGestor.mediaTaxaReparacao ? `${(resultadosMesAnteriorGestor.mediaTaxaReparacao * 100).toFixed(1)}%` : '—'}
                         </div>
-                        <div className="text-xs text-muted-foreground">Taxa Reparação</div>
+                        <div className="text-xs text-muted-foreground">{language === 'pt' ? 'Taxa Reparação' : 'Repair Rate'}</div>
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-3">
@@ -889,13 +889,13 @@ export default function Dashboard() {
                             ? `${resultadosMesAnteriorGestor.mediaDesvioPercentual >= 0 ? '+' : ''}${(resultadosMesAnteriorGestor.mediaDesvioPercentual * 100).toFixed(1)}%`
                             : '—'}
                         </div>
-                        <div className="text-xs text-muted-foreground">Desvio vs Objetivo</div>
+                        <div className="text-xs text-muted-foreground">{language === 'pt' ? 'Desvio vs Objetivo' : 'Deviation vs Target'}</div>
                       </div>
                       <div className="bg-white/60 dark:bg-white/10 rounded-lg p-3">
                         <div className="text-xl font-bold text-emerald-600 dark:text-emerald-400">
                           {resultadosMesAnteriorGestor.lojasAcimaObjetivo ?? '—'}/{resultadosMesAnteriorGestor.totalLojas ?? '—'}
                         </div>
-                        <div className="text-xs text-muted-foreground">Lojas Acima Obj.</div>
+                        <div className="text-xs text-muted-foreground">{language === 'pt' ? 'Lojas Acima Obj.' : 'Stores Above Target'}</div>
                       </div>
                     </div>
                     <Button 
@@ -904,14 +904,14 @@ export default function Dashboard() {
                       className="w-full mt-2 border-indigo-300 text-indigo-700 hover:bg-indigo-100 dark:border-indigo-700 dark:text-indigo-300 dark:hover:bg-indigo-900/50"
                       onClick={() => setLocation('/resultados-dashboard')}
                     >
-                      Ver Dashboard Completo
+                      {language === 'pt' ? 'Ver Dashboard Completo' : 'View Full Dashboard'}
                     </Button>
                   </div>
                 ) : (
                   <div className="text-center py-6">
                     <BarChart3 className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                    <p className="text-sm text-muted-foreground">Sem dados do mês anterior</p>
-                    <p className="text-xs text-muted-foreground mt-1">Aguarde importação de resultados</p>
+                    <p className="text-sm text-muted-foreground">{language === 'pt' ? 'Sem dados do mês anterior' : 'No data from previous month'}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{language === 'pt' ? 'Aguarde importação de resultados' : 'Awaiting results import'}</p>
                   </div>
                 )}
               </CardContent>
