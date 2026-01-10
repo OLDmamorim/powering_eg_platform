@@ -2577,3 +2577,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## Correção Sobreposição Botão PWA v6.4.2
 - [x] Reorganizar botão de instalação PWA para não sobrepor categorias em mobile
 - [x] Mover botão para posição que não interfira com a interface (agora no topo direito)
+## BUG CRÍTICO v6.5.1 - PWA Assistente IA instala como Widget Tarefas
+- [x] Investigar porque o manifest do Assistente não está a ser usado na instalação
+- [x] Criar solução definitiva para separar os dois PWAs
+- [ ] Testar instalação do PWA do Assistente IA

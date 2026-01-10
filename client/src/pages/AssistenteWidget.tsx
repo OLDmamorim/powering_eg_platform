@@ -212,6 +212,14 @@ export default function AssistenteWidget() {
                         : 'On iOS: Tap "Share" then "Add to Home Screen"',
                       { duration: 6000 }
                     );
+                  } else if (result === 'redirect') {
+                    // A redirecionar para página de instalação
+                    toast.info(
+                      language === 'pt' 
+                        ? 'A preparar instalação...' 
+                        : 'Preparing installation...',
+                      { duration: 2000 }
+                    );
                   } else if (result === true) {
                     toast.success(language === 'pt' ? 'App instalada com sucesso!' : 'App installed successfully!');
                   }

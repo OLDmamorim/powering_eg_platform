@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 
 // Hook específico para instalação PWA do Assistente IA
-// Este hook força a troca do manifest ANTES de capturar o evento beforeinstallprompt
+// Usa uma página HTML dedicada com o manifest correto para garantir instalação correta
 export function usePWAInstallAssistente() {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [isInstallable, setIsInstallable] = useState(false);
@@ -40,6 +40,15 @@ export function usePWAInstallAssistente() {
       appleIcon.href = '/poweringeg-ai-icon-192.png';
     }
     
+    // Atualizar título da página
+    document.title = 'Assistente IA - PoweringEG';
+    
+    // Atualizar favicon
+    const favicon = document.querySelector('link[rel="icon"]') as HTMLLinkElement;
+    if (favicon) {
+      favicon.href = '/poweringeg-ai-icon-192.png';
+    }
+    
     setManifestReady(true);
   }, []);
 
@@ -47,7 +56,7 @@ export function usePWAInstallAssistente() {
     // Primeiro, configurar o manifest correto
     setupManifest();
     
-    // Verificar se já está instalado
+    // Verificar se já está instalado como standalone
     if (window.matchMedia('(display-mode: standalone)').matches) {
       setIsInstalled(true);
       return;
@@ -56,6 +65,7 @@ export function usePWAInstallAssistente() {
     // Verificar se está no iOS
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
     if (isIOS) {
+      // No iOS, sempre mostrar opção de instalar (via instruções manuais)
       setIsInstallable(true);
       return;
     }
@@ -107,6 +117,15 @@ export function usePWAInstallAssistente() {
       if (appleIcon) {
         appleIcon.href = '/pwa-icon-192.png';
       }
+      
+      // Restaurar título
+      document.title = 'PoweringEG Platform';
+      
+      // Restaurar favicon
+      const favicon = document.querySelector('link[rel="icon"]') as HTMLLinkElement;
+      if (favicon) {
+        favicon.href = '/favicon.png';
+      }
     };
   }, [setupManifest]);
 
@@ -116,13 +135,19 @@ export function usePWAInstallAssistente() {
       return 'ios';
     }
 
-    if (!deferredPrompt) return false;
+    // Se não temos o prompt, redirecionar para a página dedicada do PWA
+    if (!deferredPrompt) {
+      // Abrir a página dedicada do PWA numa nova janela
+      // Isso garante que o manifest correto é carregado desde o início
+      window.location.href = '/assistente-pwa.html';
+      return 'redirect';
+    }
     
     // Garantir que o manifest está correto antes de mostrar o prompt
     setupManifest();
     
     // Pequeno delay para garantir que o browser processou a mudança
-    await new Promise(resolve => setTimeout(resolve, 50));
+    await new Promise(resolve => setTimeout(resolve, 100));
     
     deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
