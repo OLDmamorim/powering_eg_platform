@@ -152,7 +152,10 @@
     "pendente": "Pendente",
     "concluido": "Concluído",
     "emProgresso": "Em Progresso",
-    "atrasado": "Atrasado"
+    "atrasado": "Atrasado",
+    "filtros": "Filtros",
+    "voltarDashboard": "Voltar ao Dashboard",
+    "erroDesconhecido": "Erro desconhecido"
   },
   "menu": {
     "groups": {
@@ -1178,13 +1181,5 @@
     "erroExportar": "Erro ao exportar categoria",
     "estadoAtualizado": "Estado atualizado",
     "erroAtualizarEstado": "Erro ao atualizar estado"
-  },
-  "common": {
-    "filtros": "Filtros",
-    "nenhum": "Nenhum",
-    "mes": "Mês",
-    "ano": "Ano",
-    "voltarDashboard": "Voltar ao Dashboard",
-    "erroDesconhecido": "Erro desconhecido"
   }
 }

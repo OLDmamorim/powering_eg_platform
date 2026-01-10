@@ -375,6 +375,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Remover página PlanoVisitas.tsx
 - [x] Manter tabelas e serviços no backend (podem ser úteis futuramente)
 
+## Bug v6.4.4 - Traduções em falta no modal de edição de loja
+- [x] Corrigir labels common.descricao, common.nome, common.email, common.guardar
+- [x] Verificar se há outras traduções em falta (duplicação da chave 'common' no pt.json)
+
 ## Bug v6.4.2 - Botão de instalação PWA não funciona
 - [x] Melhorar lógica de deteção do evento beforeinstallprompt
 - [x] Adicionar fallback mais robusto quando evento não é capturado
