@@ -2581,3 +2581,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Investigar porque o manifest do Assistente não está a ser usado na instalação
 - [x] Criar solução definitiva para separar os dois PWAs
 - [ ] Testar instalação do PWA do Assistente IA
+
+## Bug v6.5.2 - PWA Assistente IA mostra nome errado
+- [ ] PWA Assistente IA mostra "PoweringEG - Tarefas" em vez de "Assistente IA" na instalação
+- [ ] Botão de instalar PWA só aparece após refresh, não na primeira visita
+- [x] Usar hook usePWAInstallAssistente específico em vez do genérico
+- [x] Melhorar captura do evento beforeinstallprompt na primeira visita

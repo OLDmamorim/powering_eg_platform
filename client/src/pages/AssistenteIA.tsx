@@ -22,7 +22,7 @@ import {
   Download,
   Smartphone
 } from 'lucide-react';
-import { usePWAInstall } from '@/hooks/usePWAInstall';
+import { usePWAInstallAssistente } from '@/hooks/usePWAInstallAssistente';
 import { toast } from 'sonner';
 import { Streamdown } from 'streamdown';
 
@@ -34,7 +34,7 @@ interface Message {
 
 export default function AssistenteIA() {
   const { language, t } = useLanguage();
-  const { isInstallable, isInstalled, install } = usePWAInstall();
+  const { isInstallable, isInstalled, install } = usePWAInstallAssistente();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);

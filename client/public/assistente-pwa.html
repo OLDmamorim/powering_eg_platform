@@ -16,42 +16,215 @@
     <meta name="apple-mobile-web-app-title" content="Assistente IA" />
     <link rel="apple-touch-icon" href="/poweringeg-ai-icon-192.png" />
     <style>
-      body {
+      * {
+        box-sizing: border-box;
         margin: 0;
         padding: 0;
+      }
+      body {
         background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
         min-height: 100vh;
         display: flex;
+        flex-direction: column;
         align-items: center;
         justify-content: center;
         font-family: system-ui, -apple-system, sans-serif;
+        padding: 20px;
+      }
+      .container {
+        text-align: center;
+        max-width: 400px;
+      }
+      .icon {
+        width: 96px;
+        height: 96px;
+        margin: 0 auto 24px;
+        border-radius: 24px;
+        box-shadow: 0 8px 32px rgba(124, 58, 237, 0.3);
+      }
+      h1 {
+        color: #5b21b6;
+        font-size: 24px;
+        margin-bottom: 8px;
+      }
+      p {
+        color: #6b7280;
+        font-size: 14px;
+        margin-bottom: 24px;
       }
       .loading {
-        text-align: center;
         color: #7c3aed;
+        margin-bottom: 24px;
       }
       .loading svg {
-        width: 48px;
-        height: 48px;
+        width: 32px;
+        height: 32px;
         animation: spin 1s linear infinite;
       }
       @keyframes spin {
         from { transform: rotate(0deg); }
         to { transform: rotate(360deg); }
       }
+      .install-btn {
+        display: none;
+        background: #7c3aed;
+        color: white;
+        border: none;
+        padding: 14px 28px;
+        font-size: 16px;
+        font-weight: 600;
+        border-radius: 12px;
+        cursor: pointer;
+        margin-bottom: 16px;
+        width: 100%;
+        max-width: 280px;
+      }
+      .install-btn:hover {
+        background: #6d28d9;
+      }
+      .install-btn:active {
+        transform: scale(0.98);
+      }
+      .skip-btn {
+        display: none;
+        background: transparent;
+        color: #7c3aed;
+        border: 2px solid #7c3aed;
+        padding: 12px 24px;
+        font-size: 14px;
+        font-weight: 500;
+        border-radius: 12px;
+        cursor: pointer;
+        width: 100%;
+        max-width: 280px;
+      }
+      .skip-btn:hover {
+        background: rgba(124, 58, 237, 0.1);
+      }
+      .ios-instructions {
+        display: none;
+        background: white;
+        padding: 20px;
+        border-radius: 16px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        text-align: left;
+        margin-top: 20px;
+      }
+      .ios-instructions h3 {
+        color: #5b21b6;
+        font-size: 16px;
+        margin-bottom: 12px;
+      }
+      .ios-instructions ol {
+        color: #374151;
+        font-size: 14px;
+        padding-left: 20px;
+      }
+      .ios-instructions li {
+        margin-bottom: 8px;
+      }
     </style>
   </head>
 
   <body>
-    <div class="loading">
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-      </svg>
-      <p>A carregar Assistente IA...</p>
+    <div class="container">
+      <img src="/poweringeg-ai-icon-192.png" alt="Assistente IA" class="icon" />
+      <h1>Assistente IA</h1>
+      <p>Assistente inteligente para gestores Express Glass</p>
+      
+      <div class="loading" id="loading">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+        </svg>
+        <p style="margin-top: 8px; font-size: 12px;">A preparar...</p>
+      </div>
+      
+      <button class="install-btn" id="installBtn" onclick="installApp()">
+        Instalar Assistente IA
+      </button>
+      
+      <button class="skip-btn" id="skipBtn" onclick="skipToApp()">
+        Continuar sem instalar
+      </button>
+      
+      <div class="ios-instructions" id="iosInstructions">
+        <h3>Como instalar no iPhone/iPad:</h3>
+        <ol>
+          <li>Toque no botão <strong>Partilhar</strong> (ícone com seta para cima)</li>
+          <li>Deslize para baixo e toque em <strong>"Adicionar ao Ecrã Principal"</strong></li>
+          <li>Toque em <strong>"Adicionar"</strong> no canto superior direito</li>
+        </ol>
+      </div>
     </div>
+
     <script>
-      // Redirecionar para a app principal após garantir que o manifest foi carregado
-      window.location.replace('/assistente-widget');
+      let deferredPrompt = null;
+      let isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      let isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+      
+      // Se já está em modo standalone, ir direto para a app
+      if (isStandalone) {
+        window.location.replace('/assistente-widget');
+      }
+      
+      // Capturar o evento de instalação
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        showInstallUI();
+      });
+      
+      function showInstallUI() {
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('installBtn').style.display = 'block';
+        document.getElementById('skipBtn').style.display = 'block';
+      }
+      
+      function showIOSInstructions() {
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('iosInstructions').style.display = 'block';
+        document.getElementById('skipBtn').style.display = 'block';
+      }
+      
+      async function installApp() {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          const { outcome } = await deferredPrompt.userChoice;
+          deferredPrompt = null;
+          if (outcome === 'accepted') {
+            // Instalação aceite, esperar um pouco e redirecionar
+            setTimeout(() => {
+              window.location.replace('/assistente-widget');
+            }, 1000);
+          }
+        }
+      }
+      
+      function skipToApp() {
+        window.location.replace('/assistente-widget');
+      }
+      
+      // Verificar após um delay se podemos mostrar a UI de instalação
+      setTimeout(() => {
+        if (isIOS) {
+          showIOSInstructions();
+        } else if (deferredPrompt) {
+          showInstallUI();
+        } else {
+          // Se não temos o prompt após 2 segundos, mostrar botões mesmo assim
+          // O utilizador pode já ter instalado ou o browser não suporta
+          showInstallUI();
+          document.getElementById('installBtn').textContent = 'Abrir Assistente IA';
+          document.getElementById('installBtn').onclick = skipToApp;
+        }
+      }, 2000);
+      
+      // Listener para quando a app é instalada
+      window.addEventListener('appinstalled', () => {
+        setTimeout(() => {
+          window.location.replace('/assistente-widget');
+        }, 500);
+      });
     </script>
   </body>
 

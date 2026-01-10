@@ -1,4 +1,15 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+
+// Variável global para capturar o evento beforeinstallprompt antes do React montar
+let globalDeferredPrompt: any = null;
+
+// Listener global que captura o evento mesmo antes do React
+if (typeof window !== 'undefined') {
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    globalDeferredPrompt = e;
+  });
+}
 
 // Hook específico para instalação PWA do Assistente IA
 // Usa uma página HTML dedicada com o manifest correto para garantir instalação correta
@@ -7,9 +18,13 @@ export function usePWAInstallAssistente() {
   const [isInstallable, setIsInstallable] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
   const [manifestReady, setManifestReady] = useState(false);
+  const setupDone = useRef(false);
 
   // Trocar manifest para o do Assistente IA
   const setupManifest = useCallback(() => {
+    if (setupDone.current) return;
+    setupDone.current = true;
+    
     // Remover o link do manifest atual
     const existingManifest = document.querySelector('link[rel="manifest"]');
     if (existingManifest) {
@@ -70,27 +85,41 @@ export function usePWAInstallAssistente() {
       return;
     }
 
+    // Verificar se já temos o prompt capturado globalmente
+    if (globalDeferredPrompt) {
+      setDeferredPrompt(globalDeferredPrompt);
+      setIsInstallable(true);
+    }
+
     const handler = (e: any) => {
       e.preventDefault();
+      globalDeferredPrompt = e;
       setDeferredPrompt(e);
       setIsInstallable(true);
     };
 
-    // Pequeno delay para garantir que o manifest foi carregado
-    const timer = setTimeout(() => {
-      window.addEventListener('beforeinstallprompt', handler);
-    }, 100);
+    window.addEventListener('beforeinstallprompt', handler);
     
     window.addEventListener('appinstalled', () => {
       setIsInstalled(true);
       setIsInstallable(false);
+      globalDeferredPrompt = null;
     });
 
+    // Verificar novamente após um pequeno delay (para dar tempo ao browser)
+    const checkTimer = setTimeout(() => {
+      if (globalDeferredPrompt && !deferredPrompt) {
+        setDeferredPrompt(globalDeferredPrompt);
+        setIsInstallable(true);
+      }
+    }, 500);
+
     return () => {
-      clearTimeout(timer);
+      clearTimeout(checkTimer);
       window.removeEventListener('beforeinstallprompt', handler);
       
       // Restaurar manifest original ao sair
+      setupDone.current = false;
       const assistenteManifest = document.querySelector('link[rel="manifest"][href="/manifest-assistente.json"]');
       if (assistenteManifest) {
         assistenteManifest.remove();
@@ -127,7 +156,7 @@ export function usePWAInstallAssistente() {
         favicon.href = '/favicon.png';
       }
     };
-  }, [setupManifest]);
+  }, [setupManifest, deferredPrompt]);
 
   const install = async () => {
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
@@ -136,22 +165,26 @@ export function usePWAInstallAssistente() {
     }
 
     // Se não temos o prompt, redirecionar para a página dedicada do PWA
-    if (!deferredPrompt) {
-      // Abrir a página dedicada do PWA numa nova janela
+    // Esta página tem o manifest correto desde o início
+    if (!deferredPrompt && !globalDeferredPrompt) {
+      // Abrir a página dedicada do PWA
       // Isso garante que o manifest correto é carregado desde o início
       window.location.href = '/assistente-pwa.html';
       return 'redirect';
     }
     
+    const promptToUse = deferredPrompt || globalDeferredPrompt;
+    
     // Garantir que o manifest está correto antes de mostrar o prompt
     setupManifest();
     
     // Pequeno delay para garantir que o browser processou a mudança
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise(resolve => setTimeout(resolve, 200));
     
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
+    promptToUse.prompt();
+    const { outcome } = await promptToUse.userChoice;
     setDeferredPrompt(null);
+    globalDeferredPrompt = null;
     setIsInstallable(false);
     if (outcome === 'accepted') {
       setIsInstalled(true);
