@@ -2560,3 +2560,6 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Investigar porque tarefas 120001 e 120002 têm vistoGestor=0 na BD mas na UI aparecem como vistas
 - [x] Corrigir lógica de marcação como visto ou corrigir dados na BD
 
+
+## Ajuste Layout Assistente IA Mobile v6.5
+- [x] Ajustar layout do Assistente IA em mobile (tabelas cortadas, texto não visível completo)
