@@ -471,7 +471,7 @@ function DashboardLayoutContent({
             </div>
           </div>
         )}
-        <main className="flex-1 p-4 relative">
+        <main className="flex-1 p-3 md:p-4 relative overflow-hidden">
           <Breadcrumbs />
           {children}
           {switchable && (
