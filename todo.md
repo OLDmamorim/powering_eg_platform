@@ -2620,3 +2620,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 
 ## Bug v6.5.4 - Nome do ícone PWA no telemóvel
 - [x] Corrigir nome do ícone PWA que mostra "Assistente IA" em vez de "PoweringEG"
+
+## Funcionalidade v6.6 - Assistente IA com Contexto Personalizado
+- [x] Modificar assistente IA para distinguir perguntas pessoais vs nacionais
+- [x] Perguntas sobre "meus pendentes", "meus relatórios" devem filtrar pelo gestor logado
+- [x] Perguntas gerais/nacionais continuam a mostrar dados agregados
+- [x] Passar informação do gestor logado para o contexto da IA
+- [x] Testar separação de contexto

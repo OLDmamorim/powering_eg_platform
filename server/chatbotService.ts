@@ -142,15 +142,76 @@ interface ContextoPlataforma {
   historicoVisitasPorGestor: any[]; // Histórico de visitas por gestor
   comparacaoVendas: any; // Comparação de vendas entre períodos
   estatisticasGerais: any;
+  // Novos campos para contexto pessoal
+  gestorAtual?: {
+    id: number;
+    nome: string;
+    userId: number;
+    lojasAssociadas: any[];
+  };
+  contextoPessoal?: {
+    meusPendentes: any[];
+    meusRelatoriosLivres: any[];
+    meusRelatoriosCompletos: any[];
+    minhasLojas: any[];
+    meusAlertas: any[];
+    minhasOcorrencias: any[];
+    meusTodos: any[];
+    minhasVendasComplementares: any[];
+    meusResultadosMensais: any[];
+  };
+}
+
+/**
+ * Deteta se a pergunta é pessoal (sobre os dados do próprio utilizador)
+ */
+function isPerguntaPessoal(pergunta: string): boolean {
+  const perguntaLower = pergunta.toLowerCase();
+  
+  // Padrões que indicam pergunta pessoal
+  const padroesPessoais = [
+    // Pronomes possessivos
+    'meu', 'meus', 'minha', 'minhas',
+    // Verbos na primeira pessoa
+    'tenho', 'fiz', 'criei', 'visitei', 'resolvi', 'fui',
+    // Expressões pessoais
+    'eu tenho', 'eu fiz', 'quantos tenho', 'quantas tenho',
+    'os meus', 'as minhas', 'das minhas', 'dos meus',
+    'para mim', 'sobre mim', 'de mim',
+    // Perguntas diretas pessoais
+    'quantos pendentes tenho',
+    'quantos relatórios fiz',
+    'quais são os meus',
+    'quais as minhas',
+    'minhas lojas',
+    'meus pendentes',
+    'meus relatórios',
+    'meus alertas',
+    'minhas visitas',
+    'minhas tarefas',
+    'meu desempenho',
+    'minha performance',
+    // Expressões de posse
+    'que me pertencem',
+    'que são meus',
+    'que são minhas',
+    'atribuídos a mim',
+    'atribuídas a mim',
+    'associados a mim',
+    'associadas a mim',
+  ];
+  
+  return padroesPessoais.some(padrao => perguntaLower.includes(padrao));
 }
 
 /**
  * Obtém todo o contexto da plataforma para o chatbot
+ * Agora inclui contexto pessoal filtrado para o gestor logado
  */
 async function obterContextoPlataforma(userId: number, userRole: string): Promise<ContextoPlataforma> {
   const isAdmin = userRole === 'admin';
   
-  // Obter dados base
+  // Obter dados base - sempre carrega todos para perguntas gerais
   const lojas = await db.getAllLojas();
   const gestores = await db.getAllGestores();
   
@@ -278,6 +339,61 @@ async function obterContextoPlataforma(userId: number, userRole: string): Promis
   // Comparação de vendas entre períodos
   const comparacaoVendas = calcularComparacaoVendas(vendasComplementares);
   
+  // ========== NOVO: Contexto pessoal para gestores ==========
+  let gestorAtual: ContextoPlataforma['gestorAtual'] = undefined;
+  let contextoPessoal: ContextoPlataforma['contextoPessoal'] = undefined;
+  
+  if (!isAdmin) {
+    // Obter o gestor associado ao user logado
+    const gestor = await db.getGestorByUserId(userId);
+    
+    if (gestor) {
+      // Obter lojas associadas ao gestor
+      const lojasDoGestor = await db.getLojasByGestorId(gestor.id);
+      const lojaIdsDoGestor = lojasDoGestor.map(l => l.id);
+      
+      // Obter nome do gestor
+      const gestorCompleto = gestores.find(g => g.id === gestor.id);
+      const nomeGestor = gestorCompleto?.user?.name || 'Gestor';
+      
+      gestorAtual = {
+        id: gestor.id,
+        nome: nomeGestor,
+        userId: userId,
+        lojasAssociadas: lojasDoGestor
+      };
+      
+      // Filtrar dados pessoais
+      contextoPessoal = {
+        meusPendentes: pendentes.filter(p => lojaIdsDoGestor.includes(p.lojaId)),
+        meusRelatoriosLivres: relatoriosLivres.filter(r => r.gestorId === gestor.id),
+        meusRelatoriosCompletos: relatoriosCompletos.filter(r => r.gestorId === gestor.id),
+        minhasLojas: lojasDoGestor,
+        meusAlertas: alertas.filter(a => lojaIdsDoGestor.includes(a.lojaId)),
+        // Ocorrências estruturais podem ter lojasAfetadas como JSON string
+        minhasOcorrencias: ocorrencias.filter(o => {
+          if (o.gestorId === gestor.id) return true;
+          // Verificar se alguma das lojas afetadas pertence ao gestor
+          if (o.lojasAfetadas) {
+            try {
+              const lojasAfetadas = typeof o.lojasAfetadas === 'string' ? JSON.parse(o.lojasAfetadas) : o.lojasAfetadas;
+              if (Array.isArray(lojasAfetadas)) {
+                return lojasAfetadas.some((lojaId: number) => lojaIdsDoGestor.includes(lojaId));
+              }
+            } catch (e) {
+              // Ignorar erro de parse
+            }
+          }
+          return false;
+        }),
+        // Todos: filtrar por quem criou ou por loja atribuída
+        meusTodos: todos.filter(t => t.criadoPorId === userId || lojaIdsDoGestor.includes(t.atribuidoLojaId || 0)),
+        minhasVendasComplementares: vendasComplementares.filter(v => lojaIdsDoGestor.includes(v.lojaId)),
+        meusResultadosMensais: resultadosMensais.filter(r => lojaIdsDoGestor.includes(r.lojaId))
+      };
+    }
+  }
+  
   return {
     lojas,
     gestores,
@@ -294,70 +410,187 @@ async function obterContextoPlataforma(userId: number, userRole: string): Promis
     vendasComplementares,
     historicoVisitasPorGestor,
     comparacaoVendas,
-    estatisticasGerais
+    estatisticasGerais,
+    gestorAtual,
+    contextoPessoal
   };
 }
 
 /**
- * Formata o contexto para o prompt da IA
+ * Formata o contexto pessoal do gestor para o prompt
+ */
+function formatarContextoPessoal(contexto: ContextoPlataforma): string {
+  if (!contexto.gestorAtual || !contexto.contextoPessoal) {
+    return '';
+  }
+  
+  const cp = contexto.contextoPessoal;
+  const gestor = contexto.gestorAtual;
+  
+  let texto = `\n\n========================================\n`;
+  texto += `👤 DADOS PESSOAIS DO GESTOR LOGADO: ${gestor.nome}\n`;
+  texto += `========================================\n\n`;
+  
+  // Lojas associadas
+  texto += `🏪 MINHAS LOJAS (${gestor.lojasAssociadas.length}):\n`;
+  gestor.lojasAssociadas.forEach(l => {
+    texto += `- ${l.nome} (ID: ${l.id})\n`;
+  });
+  texto += '\n';
+  
+  // Meus pendentes
+  const pendentesAtivos = cp.meusPendentes.filter(p => !p.resolvido);
+  const pendentesResolvidos = cp.meusPendentes.filter(p => p.resolvido);
+  texto += `📋 MEUS PENDENTES:\n`;
+  texto += `- Total: ${cp.meusPendentes.length} (${pendentesAtivos.length} ativos, ${pendentesResolvidos.length} resolvidos)\n`;
+  if (pendentesAtivos.length > 0) {
+    texto += `\nPendentes ativos:\n`;
+    pendentesAtivos.slice(0, 10).forEach(p => {
+      const loja = gestor.lojasAssociadas.find(l => l.id === p.lojaId);
+      const data = p.dataCriacao ? new Date(p.dataCriacao).toLocaleDateString('pt-PT') : 'N/A';
+      texto += `  - [${loja?.nome || 'N/A'}] ${p.descricao?.substring(0, 60) || 'Sem descrição'}... (${data})\n`;
+    });
+    if (pendentesAtivos.length > 10) {
+      texto += `  ... e mais ${pendentesAtivos.length - 10} pendentes\n`;
+    }
+  }
+  texto += '\n';
+  
+  // Meus relatórios
+  texto += `📝 MEUS RELATÓRIOS:\n`;
+  texto += `- Relatórios Livres: ${cp.meusRelatoriosLivres.length}\n`;
+  texto += `- Relatórios Completos: ${cp.meusRelatoriosCompletos.length}\n`;
+  texto += `- Total: ${cp.meusRelatoriosLivres.length + cp.meusRelatoriosCompletos.length}\n`;
+  
+  // Últimos relatórios
+  const todosRelatorios = [
+    ...cp.meusRelatoriosLivres.map(r => ({ ...r, tipo: 'livre' })),
+    ...cp.meusRelatoriosCompletos.map(r => ({ ...r, tipo: 'completo' }))
+  ].sort((a, b) => new Date(b.dataVisita).getTime() - new Date(a.dataVisita).getTime());
+  
+  if (todosRelatorios.length > 0) {
+    texto += `\nÚltimos 5 relatórios:\n`;
+    todosRelatorios.slice(0, 5).forEach(r => {
+      const data = new Date(r.dataVisita).toLocaleDateString('pt-PT');
+      const lojaNome = r.loja?.nome || 'N/A';
+      texto += `  - [${data}] ${lojaNome} - ${r.tipo}\n`;
+    });
+  }
+  texto += '\n';
+  
+  // Meus alertas
+  const alertasPendentes = cp.meusAlertas.filter(a => a.estado === 'pendente');
+  texto += `🚨 MEUS ALERTAS:\n`;
+  texto += `- Total: ${cp.meusAlertas.length} (${alertasPendentes.length} pendentes)\n`;
+  if (alertasPendentes.length > 0) {
+    texto += `\nAlertas pendentes:\n`;
+    alertasPendentes.slice(0, 5).forEach(a => {
+      const loja = gestor.lojasAssociadas.find(l => l.id === a.lojaId);
+      texto += `  - [${loja?.nome || 'N/A'}] ${a.tipo}: ${a.descricao?.substring(0, 50) || 'Sem descrição'}...\n`;
+    });
+  }
+  texto += '\n';
+  
+  // Minhas ocorrências
+  const ocorrenciasAbertas = cp.minhasOcorrencias.filter(o => o.estado !== 'resolvido');
+  texto += `🔧 MINHAS OCORRÊNCIAS ESTRUTURAIS:\n`;
+  texto += `- Total: ${cp.minhasOcorrencias.length} (${ocorrenciasAbertas.length} abertas)\n`;
+  if (ocorrenciasAbertas.length > 0) {
+    texto += `\nOcorrências abertas:\n`;
+    ocorrenciasAbertas.slice(0, 5).forEach(o => {
+      const loja = gestor.lojasAssociadas.find(l => l.id === o.lojaId);
+      texto += `  - [${loja?.nome || 'N/A'}] ${o.descricao?.substring(0, 50) || 'Sem descrição'}...\n`;
+    });
+  }
+  texto += '\n';
+  
+  // Minhas tarefas To-Do
+  const todosPendentes = cp.meusTodos.filter(t => !t.concluido);
+  texto += `✅ MINHAS TAREFAS TO-DO:\n`;
+  texto += `- Total: ${cp.meusTodos.length} (${todosPendentes.length} pendentes)\n`;
+  if (todosPendentes.length > 0) {
+    texto += `\nTarefas pendentes:\n`;
+    todosPendentes.slice(0, 5).forEach(t => {
+      texto += `  - ${t.titulo || 'Sem título'}\n`;
+    });
+  }
+  texto += '\n';
+  
+  // Resumo de performance das minhas lojas
+  if (cp.meusResultadosMensais.length > 0) {
+    texto += `📊 PERFORMANCE DAS MINHAS LOJAS (último mês disponível):\n`;
+    // Agrupar por loja e pegar o mais recente
+    const resultadosPorLoja: Record<number, any> = {};
+    cp.meusResultadosMensais.forEach(r => {
+      if (!resultadosPorLoja[r.lojaId] || 
+          (r.ano > resultadosPorLoja[r.lojaId].ano) ||
+          (r.ano === resultadosPorLoja[r.lojaId].ano && r.mes > resultadosPorLoja[r.lojaId].mes)) {
+        resultadosPorLoja[r.lojaId] = r;
+      }
+    });
+    
+    Object.values(resultadosPorLoja).forEach(r => {
+      const desvio = r.desvioPercentualMes != null 
+        ? (typeof r.desvioPercentualMes === 'number' ? r.desvioPercentualMes * 100 : parseFloat(r.desvioPercentualMes) * 100).toFixed(1) + '%' 
+        : 'N/A';
+      texto += `- ${r.lojaNome}: ${r.totalServicos || 0} serviços, objetivo: ${r.objetivoMensal || 'N/A'}, desvio: ${desvio}\n`;
+    });
+    texto += '\n';
+  }
+  
+  return texto;
+}
+
+/**
+ * Formata todo o contexto da plataforma para incluir no prompt
  */
 function formatarContextoParaPrompt(contexto: ContextoPlataforma): string {
-  const agora = new Date();
-  const dataAtual = agora.toLocaleDateString('pt-PT');
-  
-  let texto = `=== DADOS DA PLATAFORMA POWERINGEG (${dataAtual}) ===\n\n`;
+  let texto = `\n\n========================================\n`;
+  texto += `📊 DADOS DA PLATAFORMA (VISÃO NACIONAL/GERAL)\n`;
+  texto += `========================================\n\n`;
   
   // Lojas
-  texto += `📍 LOJAS (${contexto.lojas.length} total):\n`;
-  contexto.lojas.slice(0, 30).forEach(l => {
-    texto += `- ${l.nome}${l.email ? ` (${l.email})` : ''}\n`;
-  });
-  if (contexto.lojas.length > 30) texto += `... e mais ${contexto.lojas.length - 30} lojas\n`;
-  texto += '\n';
-  
-  // Gestores
-  texto += `👥 GESTORES (${contexto.gestores.length} total):\n`;
-  contexto.gestores.forEach(g => {
-    texto += `- ${g.user?.name || 'Desconhecido'} (${g.user?.email || 'N/A'})${g.user?.role === 'admin' ? ' [Admin]' : ''}\n`;
+  texto += `🏪 LOJAS (${contexto.lojas.length}):\n`;
+  contexto.lojas.forEach(l => {
+    texto += `- ${l.nome} (ID: ${l.id})${l.email ? ` - Email: ${l.email}` : ''}\n`;
   });
   texto += '\n';
   
-  // Associação Gestor-Loja
-  texto += `🔗 ASSOCIAÇÃO GESTOR-LOJA:\n`;
-  contexto.gestorLojas.forEach(gl => {
-    if (gl.lojas && gl.lojas.length > 0) {
-      const nomesLojas = gl.lojas.map((l: any) => l.nome).join(', ');
-      texto += `- ${gl.gestorNome}: ${gl.lojas.length} lojas (${nomesLojas})\n`;
-    } else {
-      texto += `- ${gl.gestorNome}: sem lojas atribuídas\n`;
-    }
+  // Gestores e suas lojas
+  texto += `👥 GESTORES E SUAS LOJAS:\n`;
+  contexto.gestorLojas.forEach(g => {
+    const lojas = g.lojas.map((l: any) => l.nome).join(', ') || 'Nenhuma';
+    texto += `- ${g.gestorNome}: ${lojas}\n`;
   });
   texto += '\n';
   
   // Pendentes
   const pendentesAtivos = contexto.pendentes.filter(p => !p.resolvido);
-  texto += `⏳ PENDENTES (${pendentesAtivos.length} ativos de ${contexto.pendentes.length} total):\n`;
+  texto += `📋 PENDENTES (${pendentesAtivos.length} ativos de ${contexto.pendentes.length} total):\n`;
   pendentesAtivos.slice(0, 15).forEach(p => {
-    texto += `- [${p.loja?.nome || 'Loja desconhecida'}] ${p.descricao?.substring(0, 80)}${p.descricao?.length > 80 ? '...' : ''}\n`;
+    const data = p.dataCriacao ? new Date(p.dataCriacao).toLocaleDateString('pt-PT') : 'N/A';
+    texto += `- [${p.lojaNome || 'N/A'}] ${p.descricao?.substring(0, 60) || 'Sem descrição'}... (${data})\n`;
   });
-  if (pendentesAtivos.length > 15) texto += `... e mais ${pendentesAtivos.length - 15} pendentes\n`;
+  if (pendentesAtivos.length > 15) {
+    texto += `... e mais ${pendentesAtivos.length - 15} pendentes\n`;
+  }
   texto += '\n';
   
-  // Relatórios Livres (últimos 10)
-  texto += `📝 RELATÓRIOS LIVRES (${contexto.relatoriosLivres.length} total, últimos 10):\n`;
-  contexto.relatoriosLivres.slice(0, 10).forEach(r => {
-    const data = r.dataVisita ? new Date(r.dataVisita).toLocaleDateString('pt-PT') : 'N/A';
-    texto += `- [${data}] ${r.loja?.nome || 'N/A'} por ${r.gestor?.nome || 'N/A'}: ${r.descricao?.substring(0, 60)}${r.descricao?.length > 60 ? '...' : ''}\n`;
+  // Relatórios Livres (últimos 20)
+  texto += `📝 RELATÓRIOS LIVRES (últimos 20 de ${contexto.relatoriosLivres.length}):\n`;
+  contexto.relatoriosLivres.slice(0, 20).forEach(r => {
+    const data = new Date(r.dataVisita).toLocaleDateString('pt-PT');
+    const gestorNome = r.gestor?.user?.name || 'N/A';
+    texto += `- [${data}] ${gestorNome} → ${r.loja?.nome || 'N/A'}: ${r.descricao?.substring(0, 50) || 'Sem descrição'}...\n`;
   });
   texto += '\n';
   
-  // Relatórios Completos (últimos 10)
-  texto += `📋 RELATÓRIOS COMPLETOS (${contexto.relatoriosCompletos.length} total, últimos 10):\n`;
-  contexto.relatoriosCompletos.slice(0, 10).forEach(r => {
-    const data = r.dataVisita ? new Date(r.dataVisita).toLocaleDateString('pt-PT') : 'N/A';
-    const positivos = r.pontosPositivos ? 'com pontos positivos' : '';
-    const negativos = r.pontosNegativos ? 'com pontos negativos' : '';
-    texto += `- [${data}] ${r.loja?.nome || 'N/A'} por ${r.gestor?.nome || 'N/A'} ${positivos} ${negativos}\n`;
+  // Relatórios Completos (últimos 20)
+  texto += `📋 RELATÓRIOS COMPLETOS (últimos 20 de ${contexto.relatoriosCompletos.length}):\n`;
+  contexto.relatoriosCompletos.slice(0, 20).forEach(r => {
+    const data = new Date(r.dataVisita).toLocaleDateString('pt-PT');
+    const gestorNome = r.gestor?.user?.name || 'N/A';
+    texto += `- [${data}] ${gestorNome} → ${r.loja?.nome || 'N/A'}: ${r.resumo?.substring(0, 50) || 'Sem resumo'}...\n`;
   });
   texto += '\n';
   
@@ -365,7 +598,7 @@ function formatarContextoParaPrompt(contexto: ContextoPlataforma): string {
   const alertasPendentes = contexto.alertas.filter(a => a.estado === 'pendente');
   texto += `🚨 ALERTAS (${alertasPendentes.length} pendentes de ${contexto.alertas.length} total):\n`;
   alertasPendentes.slice(0, 10).forEach(a => {
-    texto += `- [${a.tipo}] ${a.lojaNome}: ${a.descricao?.substring(0, 60)}${a.descricao?.length > 60 ? '...' : ''}\n`;
+    texto += `- [${a.lojaNome || 'N/A'}] ${a.tipo}: ${a.descricao?.substring(0, 50) || 'Sem descrição'}...\n`;
   });
   texto += '\n';
   
@@ -373,31 +606,30 @@ function formatarContextoParaPrompt(contexto: ContextoPlataforma): string {
   const ocorrenciasAbertas = contexto.ocorrencias.filter(o => o.estado !== 'resolvido');
   texto += `🔧 OCORRÊNCIAS ESTRUTURAIS (${ocorrenciasAbertas.length} abertas de ${contexto.ocorrencias.length} total):\n`;
   ocorrenciasAbertas.slice(0, 10).forEach(o => {
-    texto += `- [${o.estado}] ${o.lojaNome || 'N/A'} - ${o.temaNome || 'Sem tema'}: ${o.descricao?.substring(0, 50)}${o.descricao?.length > 50 ? '...' : ''}\n`;
+    texto += `- [${o.lojaNome || 'N/A'}] ${o.descricao?.substring(0, 50) || 'Sem descrição'}... - Estado: ${o.estado}\n`;
   });
   texto += '\n';
   
   // Tarefas To-Do
-  const todosPendentes = contexto.todos.filter(t => t.estado === 'pendente' || t.estado === 'em_progresso');
+  const todosPendentes = contexto.todos.filter(t => !t.concluido);
   texto += `✅ TAREFAS TO-DO (${todosPendentes.length} pendentes de ${contexto.todos.length} total):\n`;
   todosPendentes.slice(0, 10).forEach(t => {
-    const prioridade = t.prioridade === 'alta' ? '🔴' : t.prioridade === 'media' ? '🟡' : '🟢';
-    texto += `- ${prioridade} [${t.estado}] ${t.titulo} - ${t.lojaNome || 'N/A'}\n`;
+    texto += `- ${t.titulo || 'Sem título'} - Prioridade: ${t.prioridade || 'normal'}\n`;
   });
   texto += '\n';
   
   // Reuniões de Gestores (últimas 5)
-  texto += `🤝 REUNIÕES DE GESTORES (últimas 5 de ${contexto.reunioesGestores.length} total):\n`;
+  texto += `📅 REUNIÕES DE GESTORES (últimas 5 de ${contexto.reunioesGestores.length}):\n`;
   contexto.reunioesGestores.slice(0, 5).forEach(r => {
-    const data = r.dataReuniao ? new Date(r.dataReuniao).toLocaleDateString('pt-PT') : 'N/A';
-    texto += `- [${data}] ${r.titulo || 'Sem título'} - ${r.participantes?.length || 0} participantes\n`;
+    const data = new Date(r.dataReuniao).toLocaleDateString('pt-PT');
+    texto += `- [${data}] ${r.resumo?.substring(0, 50) || 'Sem resumo'}${r.resumo?.length > 50 ? '...' : ''}\n`;
   });
   texto += '\n';
   
-  // Reuniões de Lojas (últimas 5)
-  texto += `🏪 REUNIÕES DE LOJAS (últimas 5 de ${contexto.reunioesLojas.length} total):\n`;
-  contexto.reunioesLojas.slice(0, 5).forEach(r => {
-    const data = r.dataReuniao ? new Date(r.dataReuniao).toLocaleDateString('pt-PT') : 'N/A';
+  // Reuniões de Lojas (últimas 10)
+  texto += `🏪 REUNIÕES DE LOJAS (últimas 10 de ${contexto.reunioesLojas.length}):\n`;
+  contexto.reunioesLojas.slice(0, 10).forEach(r => {
+    const data = new Date(r.dataReuniao).toLocaleDateString('pt-PT');
     texto += `- [${data}] ${r.lojaNome || 'N/A'}: ${r.resumo?.substring(0, 50) || 'Sem resumo'}${r.resumo?.length > 50 ? '...' : ''}\n`;
   });
   texto += '\n';
@@ -577,6 +809,7 @@ function formatarContextoParaPrompt(contexto: ContextoPlataforma): string {
 
 /**
  * Processa uma pergunta do utilizador sobre qualquer dado da plataforma
+ * Agora com suporte a contexto pessoal vs nacional
  */
 export async function processarPergunta(
   pergunta: string,
@@ -585,11 +818,26 @@ export async function processarPergunta(
   userRole: string
 ): Promise<{ resposta: string; dados?: any }> {
   try {
-    // 1. Obter todo o contexto da plataforma
+    // 1. Obter todo o contexto da plataforma (incluindo contexto pessoal se for gestor)
     const contexto = await obterContextoPlataforma(userId, userRole);
-    const contextoFormatado = formatarContextoParaPrompt(contexto);
     
-    // 2. Construir o prompt do sistema
+    // 2. Detetar se é uma pergunta pessoal
+    const perguntaPessoal = isPerguntaPessoal(pergunta);
+    
+    // 3. Formatar contexto apropriado
+    const contextoNacional = formatarContextoParaPrompt(contexto);
+    const contextoPessoalFormatado = formatarContextoPessoal(contexto);
+    
+    // 4. Construir informação sobre o utilizador atual
+    let infoUtilizador = '';
+    if (contexto.gestorAtual) {
+      infoUtilizador = `\n\n🔐 UTILIZADOR ATUAL: ${contexto.gestorAtual.nome} (Gestor)
+Lojas associadas: ${contexto.gestorAtual.lojasAssociadas.map(l => l.nome).join(', ')}`;
+    } else if (userRole === 'admin') {
+      infoUtilizador = `\n\n🔐 UTILIZADOR ATUAL: Administrador (acesso total)`;
+    }
+    
+    // 5. Construir o prompt do sistema com instruções claras sobre contexto pessoal vs nacional
     const systemPrompt = `És o Assistente IA da plataforma PoweringEG, uma plataforma de gestão de lojas e equipas.
 Tens DUAS funções principais:
 
@@ -607,6 +855,23 @@ Tens acesso a todos os dados da plataforma e podes responder a perguntas sobre:
 - Vendas complementares
 - HISTÓRICO DE VISITAS POR GESTOR: Podes responder a perguntas como "Quando foi a última visita do gestor X à loja Y?" ou "Quantas visitas fez o gestor X este mês?"
 - COMPARAÇÃO DE VENDAS ENTRE PERÍODOS: Podes analisar a evolução das vendas complementares entre meses, identificar tendências de crescimento ou queda, e comparar performance entre lojas
+
+=== IMPORTANTE: CONTEXTO PESSOAL VS NACIONAL ===
+${infoUtilizador}
+
+**REGRA CRÍTICA DE CONTEXTO:**
+- Quando o utilizador usa termos como "meus", "minhas", "tenho", "fiz", "quantos tenho", etc., DEVES responder APENAS com os dados pessoais do utilizador (secção "DADOS PESSOAIS DO GESTOR LOGADO")
+- Quando a pergunta é geral (ex: "quantas lojas existem", "total de pendentes", "qual a loja com mais..."), usa os dados nacionais (secção "DADOS DA PLATAFORMA")
+
+**Exemplos:**
+- "Quantos pendentes tenho?" → Responder com os pendentes das lojas do gestor logado
+- "Quantos pendentes existem na plataforma?" → Responder com o total nacional
+- "Quais são os meus relatórios?" → Responder com os relatórios criados pelo gestor logado
+- "Quantos relatórios foram criados este mês?" → Responder com o total nacional
+- "Como está a performance das minhas lojas?" → Responder apenas com as lojas do gestor
+- "Qual a loja com melhor performance?" → Responder considerando todas as lojas
+
+A pergunta atual é considerada ${perguntaPessoal ? 'PESSOAL - usa os dados pessoais do gestor' : 'GERAL/NACIONAL - usa os dados de toda a plataforma'}.
 
 === FUNÇÃO 2: ASSISTENTE DE NAVEGAÇÃO E AJUDA ===
 Ajudas os utilizadores a usar a plataforma, explicando onde encontrar funcionalidades e como realizar tarefas.
@@ -750,10 +1015,12 @@ Ajudas os utilizadores a usar a plataforma, explicando onde encontrar funcionali
 10. Para perguntas sobre evolução de vendas, consulta a secção "COMPARAÇÃO DE VENDAS COMPLEMENTARES ENTRE PERÍODOS"
 11. Quando o utilizador perguntar COMO fazer algo ou ONDE encontrar algo, usa a secção "ASSISTENTE DE NAVEGAÇÃO E AJUDA" para guiá-lo passo a passo
 12. Sê proativo em sugerir funcionalidades relacionadas que possam ser úteis
+13. **MUITO IMPORTANTE**: Respeita sempre a distinção entre perguntas pessoais e gerais. Se a pergunta for pessoal, usa APENAS os dados pessoais do gestor.
 
-${contextoFormatado}`;
+${contextoPessoalFormatado}
+${contextoNacional}`;
 
-    // 3. Gerar resposta com IA
+    // 6. Gerar resposta com IA
     const messages = [
       { role: "system" as const, content: systemPrompt },
       ...historico.map(m => ({ role: m.role as "user" | "assistant", content: m.content })),
@@ -773,7 +1040,12 @@ ${contextoFormatado}`;
         totalRelatorios: contexto.relatoriosLivres.length + contexto.relatoriosCompletos.length,
         totalAlertas: contexto.alertas.length,
         totalOcorrencias: contexto.ocorrencias.length,
-        totalTodos: contexto.todos.length
+        totalTodos: contexto.todos.length,
+        perguntaPessoal,
+        gestorAtual: contexto.gestorAtual ? {
+          nome: contexto.gestorAtual.nome,
+          numLojas: contexto.gestorAtual.lojasAssociadas.length
+        } : null
       }
     };
 
@@ -815,9 +1087,14 @@ export async function getSugestoesPergunta(language: string = 'pt'): Promise<str
         "How did complementary sales evolve this month vs last month?",
         "Which stores had the highest sales growth?",
         "Which manager visited the most stores this month?",
+        // Personal questions
+        "How many pending items do I have?",
+        "What are my reports this month?",
+        "How is the performance of my stores?",
       ];
     }
     return [
+      // Perguntas gerais/nacionais
       "Quantas lojas temos na plataforma?",
       `Quais são os ${pendentesAtivos} pendentes ativos?`,
       "Qual a loja com mais relatórios este mês?",
@@ -832,6 +1109,11 @@ export async function getSugestoesPergunta(language: string = 'pt'): Promise<str
       "Como evoluíram as vendas complementares este mês vs o anterior?",
       "Quais lojas tiveram maior crescimento nas vendas?",
       "Qual gestor visitou mais lojas este mês?",
+      // Perguntas pessoais
+      "Quantos pendentes tenho?",
+      "Quais são os meus relatórios este mês?",
+      "Como está a performance das minhas lojas?",
+      "Quantas visitas fiz esta semana?",
     ];
   } catch (error) {
     if (language === 'en') {
@@ -841,6 +1123,7 @@ export async function getSugestoesPergunta(language: string = 'pt'): Promise<str
         "What is the overall performance summary?",
         "Which alerts are pending?",
         "Which To-Do tasks need attention?",
+        "How many pending items do I have?",
       ];
     }
     return [
@@ -849,6 +1132,7 @@ export async function getSugestoesPergunta(language: string = 'pt'): Promise<str
       "Qual o resumo geral da performance?",
       "Quais alertas estão pendentes?",
       "Quais tarefas To-Do precisam de atenção?",
+      "Quantos pendentes tenho?",
     ];
   }
 }
