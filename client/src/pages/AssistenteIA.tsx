@@ -326,54 +326,19 @@ export default function AssistenteIA() {
           </Card>
         </div>
         
-        {/* Botão de Instalação PWA - Posicionado no header em mobile */}
-        {isInstallable && !isInstalled && (
+        {/* Botão de Instalação PWA - Redireciona para página dedicada */}
+        {!isInstalled && (
           <div className="fixed top-16 right-4 z-50 md:hidden">
             <Button 
-              onClick={async () => {
-                console.log('[AssistenteIA] Botão Instalar clicado');
-                toast.info(language === 'pt' ? 'A preparar instalação...' : 'Preparing installation...', { duration: 2000 });
-                try {
-                  const result = await install();
-                  console.log('[AssistenteIA] Resultado da instalação:', result);
-                  if (result === 'ios') {
-                    toast.info(
-                      language === 'pt' 
-                        ? 'No iOS: Toque em "Partilhar" e depois "Adicionar ao Ecrã Principal"' 
-                        : 'On iOS: Tap "Share" then "Add to Home Screen"',
-                      { duration: 6000 }
-                    );
-                  } else if (result === 'redirect') {
-                    // Já foi redirecionado para a página de instalação
-                    console.log('[AssistenteIA] Redirecionado para página de instalação');
-                  } else if (result === 'manual') {
-                    // Mostrar instruções de instalação manual
-                    toast.info(
-                      language === 'pt' 
-                        ? 'Toque no menu ⋮ do Chrome e selecione "Instalar aplicação" ou "Adicionar ao ecrã inicial"' 
-                        : 'Tap Chrome menu ⋮ and select "Install app" or "Add to home screen"',
-                      { duration: 8000 }
-                    );
-                  } else if (result === true) {
-                    toast.success(language === 'pt' ? 'App instalada com sucesso!' : 'App installed successfully!');
-                  } else if (result === false) {
-                    toast.info(language === 'pt' ? 'Instalação cancelada' : 'Installation cancelled');
-                  }
-                } catch (error) {
-                  console.error('[AssistenteIA] Erro ao instalar:', error);
-                  toast.info(
-                    language === 'pt' 
-                      ? 'Toque no menu ⋮ do Chrome e selecione "Instalar aplicação"' 
-                      : 'Tap Chrome menu ⋮ and select "Install app"',
-                    { duration: 8000 }
-                  );
-                }
+              onClick={() => {
+                // Redirecionar diretamente para a página de instalação dedicada
+                window.location.href = '/assistente-pwa.html';
               }}
               size="sm"
-              className="bg-green-600 hover:bg-green-700 text-white shadow-lg flex items-center gap-2 px-3 py-2"
+              className="bg-green-600 hover:bg-green-700 text-white shadow-lg flex items-center gap-2 px-3 py-2 animate-pulse"
             >
               <Download className="h-4 w-4" />
-              <span className="text-xs font-medium">{language === 'pt' ? 'Instalar' : 'Install'}</span>
+              <span className="text-xs font-medium">{language === 'pt' ? 'Instalar App' : 'Install App'}</span>
             </Button>
           </div>
         )}
