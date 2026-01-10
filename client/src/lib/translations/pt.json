@@ -170,7 +170,7 @@
       "pending": "Tarefas"
     },
     "items": {
-      "assistenteIA": "Assistente IA",
+      "assistenteIA": "PoweringEG",
       "dashboard": "Dashboard",
       "lojas": "Lojas",
       "gestores": "Gestores",
@@ -805,7 +805,7 @@
     "categoriaNaoEncontrada": "Categoria não encontrada"
   },
   "assistenteIA": {
-    "title": "Assistente IA",
+    "title": "PoweringEG",
     "subtitle": "Conversar com o assistente inteligente",
     "placeholder": "Escreva a sua mensagem...",
     "enviar": "Enviar",

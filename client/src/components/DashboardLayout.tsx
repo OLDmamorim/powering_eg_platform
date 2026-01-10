@@ -72,7 +72,7 @@ const getMenuGroups = (userRole?: string, t?: (key: string) => string): MenuGrou
       label: tr('menu.groups.ai', 'Inteligência Artificial'),
       color: 'bg-violet-100/80 dark:bg-violet-900/30',
       items: [
-        { icon: Bot, label: tr('menu.items.assistenteIA', 'Assistente IA'), path: "/assistente-ia", show: true, showBadge: false },
+        { icon: Bot, label: tr('menu.items.assistenteIA', 'PoweringEG'), path: "/assistente-ia", show: true, showBadge: false },
       ]
     },
     {

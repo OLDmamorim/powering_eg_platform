@@ -6,7 +6,7 @@
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1" />
-    <title>Assistente IA - PoweringEG</title>
+    <title>PoweringEG</title>
     <link rel="icon" type="image/png" href="/poweringeg-ai-icon-192.png" />
     <!-- PWA - Manifest específico do Assistente IA -->
     <link rel="manifest" href="/manifest-assistente.json" />
@@ -14,7 +14,7 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="apple-mobile-web-app-title" content="Assistente IA" />
+    <meta name="apple-mobile-web-app-title" content="PoweringEG" />
     <link rel="apple-touch-icon" href="/poweringeg-ai-icon-192.png" />
     <style>
       * {
@@ -175,8 +175,8 @@
 
   <body>
     <div class="container">
-      <img src="/poweringeg-ai-icon-192.png" alt="Assistente IA" class="icon" />
-      <h1>Assistente IA</h1>
+      <img src="/poweringeg-ai-icon-192.png" alt="PoweringEG" class="icon" />
+      <h1>PoweringEG</h1>
       <p>Assistente inteligente para gestores Express Glass</p>
       
       <div class="loading" id="loading">
@@ -191,7 +191,7 @@
       </div>
       
       <button class="install-btn" id="installBtn">
-        Instalar Assistente IA
+        Instalar PoweringEG
       </button>
       
       <button class="skip-btn" id="skipBtn">
@@ -297,7 +297,7 @@
         loadingEl.style.display = 'none';
         installBtn.style.display = 'block';
         skipBtn.style.display = 'block';
-        installBtn.textContent = 'Instalar Assistente IA';
+        installBtn.textContent = 'Instalar PoweringEG';
         installBtn.disabled = false;
         installBtn.onclick = installApp;
         setStatus('');
@@ -325,7 +325,7 @@
         loadingEl.style.display = 'none';
         installBtn.style.display = 'block';
         skipBtn.style.display = 'block';
-        installBtn.textContent = 'Abrir Assistente IA';
+        installBtn.textContent = 'Abrir PoweringEG';
         installBtn.onclick = skipToApp;
         
         // Mostrar instruções de instalação manual
@@ -370,7 +370,7 @@
           } else {
             setStatus('Instalação cancelada');
             installBtn.disabled = false;
-            installBtn.textContent = 'Instalar Assistente IA';
+            installBtn.textContent = 'Instalar PoweringEG';
           }
         } catch (err) {
           log('Erro na instalação: ' + err.message);

@@ -188,7 +188,7 @@
       "pending": "Tasks"
     },
     "items": {
-      "assistenteIA": "AI Assistant",
+      "assistenteIA": "PoweringEG",
       "dashboard": "Dashboard",
       "lojas": "Stores",
       "gestores": "Managers",
@@ -852,7 +852,7 @@
     "categoriaNaoEncontrada": "Category not found"
   },
   "assistenteIA": {
-    "title": "AI Assistant",
+    "title": "PoweringEG",
     "subtitle": "Chat with the intelligent assistant",
     "placeholder": "Type your message...",
     "enviar": "Send",

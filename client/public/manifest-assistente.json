@@ -39,7 +39,7 @@
   "shortcuts": [
     {
       "name": "Perguntar à IA",
-      "short_name": "Assistente",
+      "short_name": "PoweringEG",
       "description": "Fazer perguntas ao assistente de IA",
       "url": "/assistente-widget",
       "icons": [{ "src": "/poweringeg-ai-icon-192.png", "sizes": "192x192" }]

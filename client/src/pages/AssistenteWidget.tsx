@@ -132,7 +132,7 @@ export default function AssistenteWidget() {
         <Card className="w-full max-w-sm">
           <CardContent className="pt-6 text-center">
             <Bot className="h-12 w-12 mx-auto text-violet-600 mb-4" />
-            <h1 className="text-xl font-bold mb-2">Assistente IA</h1>
+            <h1 className="text-xl font-bold mb-2">PoweringEG</h1>
             <p className="text-sm text-muted-foreground mb-4">
               {language === 'pt' ? 'Faça login para usar o assistente' : 'Login to use the assistant'}
             </p>
@@ -161,7 +161,7 @@ export default function AssistenteWidget() {
             <h1 className="text-xl font-bold mb-2">{language === 'pt' ? 'Acesso Restrito' : 'Restricted Access'}</h1>
             <p className="text-sm text-muted-foreground mb-4">
               {language === 'pt' 
-                ? 'O Assistente IA está disponível apenas para gestores e administradores.' 
+                ? 'O PoweringEG está disponível apenas para gestores e administradores.' 
                 : 'The AI Assistant is only available for managers and administrators.'}
             </p>
           </CardContent>
@@ -191,7 +191,7 @@ export default function AssistenteWidget() {
           <div className="flex items-center gap-2">
             <Bot className="h-5 w-5" />
             <div>
-              <h1 className="font-semibold text-sm leading-tight">Assistente IA</h1>
+              <h1 className="font-semibold text-sm leading-tight">PoweringEG</h1>
               <p className="text-xs text-violet-200">
                 {user?.name || user?.email}
               </p>
