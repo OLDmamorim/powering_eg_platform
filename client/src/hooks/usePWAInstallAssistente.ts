@@ -175,46 +175,64 @@ export function usePWAInstallAssistente() {
     };
   }, [setupManifest, deferredPrompt]);
 
-  const install = async () => {
+  const install = async (): Promise<boolean | 'ios' | 'redirect'> => {
+    console.log('[PWA Install] Função install chamada');
+    console.log('[PWA Install] deferredPrompt:', deferredPrompt);
+    console.log('[PWA Install] globalDeferredPrompt:', globalDeferredPrompt);
+    
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
     if (isIOS) {
+      console.log('[PWA Install] iOS detectado - retornando ios');
       return 'ios';
     }
 
+    const promptToUse = deferredPrompt || globalDeferredPrompt;
+    
     // Se não temos o prompt, redirecionar para a página dedicada do PWA
-    if (!deferredPrompt && !globalDeferredPrompt) {
-      console.log('[PWA Hook] Sem prompt - redirecionando para página dedicada');
-      // Abrir a página dedicada do PWA
+    if (!promptToUse) {
+      console.log('[PWA Install] Sem prompt disponível - redirecionando para página dedicada');
       window.location.href = '/assistente-pwa.html';
       return 'redirect';
     }
-    
-    const promptToUse = deferredPrompt || globalDeferredPrompt;
     
     // Garantir que o manifest está correto antes de mostrar o prompt
     setupManifest();
     
     // Pequeno delay para garantir que o browser processou a mudança
-    await new Promise(resolve => setTimeout(resolve, 200));
+    await new Promise(resolve => setTimeout(resolve, 100));
     
     try {
-      console.log('[PWA Hook] Mostrando prompt de instalação');
-      promptToUse.prompt();
-      const { outcome } = await promptToUse.userChoice;
-      console.log('[PWA Hook] Escolha do utilizador:', outcome);
+      console.log('[PWA Install] Chamando prompt()...');
+      await promptToUse.prompt();
+      console.log('[PWA Install] prompt() chamado com sucesso, aguardando userChoice...');
       
+      const choiceResult = await promptToUse.userChoice;
+      console.log('[PWA Install] userChoice resultado:', choiceResult);
+      
+      // Limpar o prompt (só pode ser usado uma vez)
       setDeferredPrompt(null);
       globalDeferredPrompt = null;
       promptCaptured = false;
       setIsInstallable(false);
       
-      if (outcome === 'accepted') {
+      if (choiceResult.outcome === 'accepted') {
+        console.log('[PWA Install] Instalação aceite!');
         setIsInstalled(true);
         return true;
       }
+      
+      console.log('[PWA Install] Instalação recusada pelo utilizador');
       return false;
-    } catch (error) {
-      console.error('[PWA Hook] Erro na instalação:', error);
+    } catch (error: any) {
+      console.error('[PWA Install] Erro na instalação:', error);
+      console.error('[PWA Install] Erro mensagem:', error?.message);
+      console.error('[PWA Install] Erro stack:', error?.stack);
+      
+      // Limpar o prompt em caso de erro
+      setDeferredPrompt(null);
+      globalDeferredPrompt = null;
+      promptCaptured = false;
+      
       // Em caso de erro, redirecionar para página dedicada
       window.location.href = '/assistente-pwa.html';
       return 'redirect';

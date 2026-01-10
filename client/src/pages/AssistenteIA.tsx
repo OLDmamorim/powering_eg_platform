@@ -331,16 +331,29 @@ export default function AssistenteIA() {
           <div className="fixed top-16 right-4 z-50 md:hidden">
             <Button 
               onClick={async () => {
-                const result = await install();
-                if (result === 'ios') {
-                  toast.info(
-                    language === 'pt' 
-                      ? 'No iOS: Toque em "Partilhar" e depois "Adicionar ao Ecrã Principal"' 
-                      : 'On iOS: Tap "Share" then "Add to Home Screen"',
-                    { duration: 6000 }
-                  );
-                } else if (result === true) {
-                  toast.success(language === 'pt' ? 'App instalada com sucesso!' : 'App installed successfully!');
+                console.log('[AssistenteIA] Botão Instalar clicado');
+                toast.info(language === 'pt' ? 'A preparar instalação...' : 'Preparing installation...', { duration: 2000 });
+                try {
+                  const result = await install();
+                  console.log('[AssistenteIA] Resultado da instalação:', result);
+                  if (result === 'ios') {
+                    toast.info(
+                      language === 'pt' 
+                        ? 'No iOS: Toque em "Partilhar" e depois "Adicionar ao Ecrã Principal"' 
+                        : 'On iOS: Tap "Share" then "Add to Home Screen"',
+                      { duration: 6000 }
+                    );
+                  } else if (result === 'redirect') {
+                    // Já foi redirecionado para a página de instalação
+                    console.log('[AssistenteIA] Redirecionado para página de instalação');
+                  } else if (result === true) {
+                    toast.success(language === 'pt' ? 'App instalada com sucesso!' : 'App installed successfully!');
+                  } else if (result === false) {
+                    toast.info(language === 'pt' ? 'Instalação cancelada' : 'Installation cancelled');
+                  }
+                } catch (error) {
+                  console.error('[AssistenteIA] Erro ao instalar:', error);
+                  toast.error(language === 'pt' ? 'Erro ao instalar. Tente pelo menu do browser.' : 'Installation error. Try from browser menu.');
                 }
               }}
               size="sm"
