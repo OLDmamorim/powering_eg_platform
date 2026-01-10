@@ -50,7 +50,7 @@ export function usePWAInstallAssistente() {
     // Atualizar apple-mobile-web-app-title
     const appleTitle = document.querySelector('meta[name="apple-mobile-web-app-title"]') as HTMLMetaElement;
     if (appleTitle) {
-      appleTitle.content = 'Assistente IA';
+      appleTitle.content = 'PoweringEG';
     }
     
     // Atualizar apple-touch-icon
@@ -60,7 +60,7 @@ export function usePWAInstallAssistente() {
     }
     
     // Atualizar título da página
-    document.title = 'Assistente IA - PoweringEG';
+    document.title = 'PoweringEG';
     
     // Atualizar favicon
     const favicon = document.querySelector('link[rel="icon"]') as HTMLLinkElement;

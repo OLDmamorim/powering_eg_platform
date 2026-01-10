@@ -2617,3 +2617,6 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Caixa de texto não visível sem scroll no desktop
 - [x] Ajustar layout para input ficar sempre visível na parte inferior
 - [x] Implementar scroll automático para mensagens (já existia)
+
+## Bug v6.5.4 - Nome do ícone PWA no telemóvel
+- [x] Corrigir nome do ícone PWA que mostra "Assistente IA" em vez de "PoweringEG"

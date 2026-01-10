@@ -1,4 +1,4 @@
-const CACHE_NAME = 'poweringeg-assistente-ia-v1';
+const CACHE_NAME = 'poweringeg-assistente-ia-v2';
 const urlsToCache = [
   '/assistente-widget',
   '/assistente-pwa.html',
