@@ -1,0 +1,65 @@
+{
+  "query": "SELECT t.id, t.titulo, t.estado, t.vistoGestor, t.criadoPorLojaId, l.nome as lojaNome, t.atribuidoUserId, u.name as atribuidoNome, t.createdAt\nFROM todos t\nLEFT JOIN lojas l ON t.criadoPorLojaId = l.id\nLEFT JOIN users u ON t.atribuidoUserId = u.id\nWHERE t.criadoPorLojaId IS NOT NULL\nORDER BY t.createdAt DESC\nLIMIT 20;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT t.id, t.titulo, t.estado, t.vistoGestor, t.criadoPorLojaId, l.nome as lojaNome, t.atribuidoUserId, u.name as atribuidoNome, t.createdAt\nFROM todos t\nLEFT JOIN lojas l ON t.criadoPorLojaId = l.id\nLEFT JOIN users u ON t.atribuidoUserId = u.id\nWHERE t.criadoPorLojaId IS NOT NULL\nORDER BY t.createdAt DESC\nLIMIT 20;",
+  "rows": [
+    {
+      "id": "240001",
+      "titulo": "FECHAR - Ficha Servico 18 nº 26",
+      "estado": "pendente",
+      "vistoGestor": "1",
+      "criadoPorLojaId": "180010",
+      "lojaNome": "Braga - minho center",
+      "atribuidoUserId": "420030",
+      "atribuidoNome": "Marco Amorim",
+      "createdAt": "2026-01-09 15:47:59"
+    },
+    {
+      "id": "180002",
+      "titulo": "Fechar fs18/1 (2026)",
+      "estado": "concluida",
+      "vistoGestor": "1",
+      "criadoPorLojaId": "180010",
+      "lojaNome": "Braga - minho center",
+      "atribuidoUserId": "420030",
+      "atribuidoNome": "Marco Amorim",
+      "createdAt": "2026-01-07 18:10:28"
+    },
+    {
+      "id": "180001",
+      "titulo": "Fechar fs18/1059",
+      "estado": "concluida",
+      "vistoGestor": "1",
+      "criadoPorLojaId": "180010",
+      "lojaNome": "Braga - minho center",
+      "atribuidoUserId": "420030",
+      "atribuidoNome": "Marco Amorim",
+      "createdAt": "2026-01-07 18:09:45"
+    },
+    {
+      "id": "120002",
+      "titulo": "Entrada de água",
+      "estado": "em_progresso",
+      "vistoGestor": "0",
+      "criadoPorLojaId": "180010",
+      "lojaNome": "Braga - minho center",
+      "atribuidoUserId": "420030",
+      "atribuidoNome": "Marco Amorim",
+      "createdAt": "2026-01-02 12:53:50"
+    },
+    {
+      "id": "120001",
+      "titulo": "Estrutura para oficina (frio)",
+      "estado": "em_progresso",
+      "vistoGestor": "0",
+      "criadoPorLojaId": "180010",
+      "lojaNome": "Braga - minho center",
+      "atribuidoUserId": "420030",
+      "atribuidoNome": "Marco Amorim",
+      "createdAt": "2026-01-02 12:45:39"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitulo\testado\tvistoGestor\tcriadoPorLojaId\tlojaNome\tatribuidoUserId\tatribuidoNome\tcreatedAt\n240001\tFECHAR - Ficha Servico 18 nº 26\tpendente\t1\t180010\tBraga - minho center\t420030\tMarco Amorim\t2026-01-09 15:47:59\n180002\tFechar fs18/1 (2026)\tconcluida\t1\t180010\tBraga - minho center\t420030\tMarco Amorim\t2026-01-07 18:10:28\n180001\tFechar fs18/1059\tconcluida\t1\t180010\tBraga - minho center\t420030\tMarco Amorim\t2026-01-07 18:09:45\n120002\tEntrada de água\tem_progresso\t0\t180010\tBraga - minho center\t420030\tMarco Amorim\t2026-01-02 12:53:50\n120001\tEstrutura para oficina (frio)\tem_progresso\t0\t180010\tBraga - minho center\t420030\tMarco Amorim\t2026-01-02 12:45:39\n",
+  "stderr": "",
+  "execution_time_ms": 399
+}

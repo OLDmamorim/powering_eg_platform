@@ -5125,6 +5125,7 @@ export async function contarTodosPorEstado(): Promise<{
 
 /**
  * Marcar To-Do como visto (pela loja)
+ * Também marca vistoGestor como true para garantir consistência
  */
 export async function marcarTodoComoVisto(id: number): Promise<void> {
   const db = await getDb();
@@ -5135,6 +5136,8 @@ export async function marcarTodoComoVisto(id: number): Promise<void> {
     .set({
       visto: true,
       vistoEm: new Date(),
+      vistoGestor: true,
+      vistoGestorEm: new Date(),
     })
     .where(eq(todos.id, id));
 }

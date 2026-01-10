@@ -1,65 +1,27 @@
 import mysql from 'mysql2/promise';
 
-const dbUrl = process.env.DATABASE_URL;
-if (!dbUrl) {
-  console.error('DATABASE_URL not set');
-  process.exit(1);
-}
+const connection = await mysql.createConnection(process.env.DATABASE_URL);
 
-const connection = await mysql.createConnection({
-  uri: dbUrl,
-  ssl: { rejectUnauthorized: false }
-});
-
-// Verificar tarefas pendentes
-const [tasks] = await connection.execute(`
-  SELECT 
-    t.id,
-    t.titulo,
-    t.estado,
-    t.vistoGestor,
-    t.atribuidoUserId,
-    t.criadoPorId,
-    u.name as atribuidoNome,
-    creator.name as criadoPorNome
-  FROM todos t
-  LEFT JOIN users u ON t.atribuidoUserId = u.id
-  LEFT JOIN users creator ON t.criadoPorId = creator.id
-  WHERE t.estado IN ('pendente', 'em_progresso')
-  ORDER BY t.createdAt DESC
-  LIMIT 15
+const [rows] = await connection.execute(`
+SELECT t.id, t.titulo, t.estado, t.vistoGestor, t.criadoPorLojaId, l.nome as lojaNome, t.atribuidoUserId, u.name as atribuidoNome
+FROM todos t
+LEFT JOIN lojas l ON t.criadoPorLojaId = l.id
+LEFT JOIN users u ON t.atribuidoUserId = u.id
+WHERE t.criadoPorLojaId IS NOT NULL
+ORDER BY t.createdAt DESC
+LIMIT 20
 `);
 
-console.log('Tarefas pendentes:');
-console.table(tasks);
+console.log('Tarefas criadas por lojas:');
+console.table(rows);
 
-// Verificar utilizador Marco Amorim
-const [marcoUser] = await connection.execute(`
-  SELECT id, name, role FROM users WHERE name LIKE '%Marco%'
+// Verificar quantas estão com vistoGestor = 0
+const [naoVistas] = await connection.execute(`
+SELECT COUNT(*) as count FROM todos 
+WHERE criadoPorLojaId IS NOT NULL 
+AND vistoGestor = 0 
+AND (estado = 'pendente' OR estado = 'em_progresso')
 `);
-console.log('\nUtilizador Marco:', marcoUser);
-
-if (marcoUser.length > 0) {
-  const userId = marcoUser[0].id;
-  const [count] = await connection.execute(`
-    SELECT COUNT(*) as count
-    FROM todos
-    WHERE atribuidoUserId = ?
-      AND criadoPorId != ?
-      AND (vistoGestor = false OR vistoGestor IS NULL)
-      AND estado IN ('pendente', 'em_progresso')
-  `, [userId, userId]);
-  console.log('\nContagem de tarefas para Marco:', count[0].count);
-  
-  // Ver tarefas específicas
-  const [marcoTasks] = await connection.execute(`
-    SELECT id, titulo, estado, vistoGestor, criadoPorId
-    FROM todos
-    WHERE atribuidoUserId = ?
-      AND estado IN ('pendente', 'em_progresso')
-  `, [userId]);
-  console.log('\nTarefas atribuídas ao Marco:');
-  console.table(marcoTasks);
-}
+console.log('\nTarefas NÃO vistas (vistoGestor=0):', naoVistas[0].count);
 
 await connection.end();

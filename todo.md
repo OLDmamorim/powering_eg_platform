@@ -2555,3 +2555,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Bug: Layout mobile do Assistente IA desconfigurado - header cortado, input cortado
 - [x] Melhoria: Skeleton loading nas sugestões do Assistente IA
 - [x] Bug: Botão "Minhas Tarefas" no Dashboard não pisca quando há tarefas novas não vistas (corrigido default da coluna vistoGestor na BD)
+
+## Bug v6.4 - Botão Tarefas pisca amarelo incorretamente
+- [x] Investigar porque tarefas 120001 e 120002 têm vistoGestor=0 na BD mas na UI aparecem como vistas
+- [x] Corrigir lógica de marcação como visto ou corrigir dados na BD
+

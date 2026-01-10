@@ -1,0 +1,30 @@
+{
+  "query": "SELECT t.id, t.titulo, t.estado, t.vistoGestor, t.criadoPorLojaId, l.nome as lojaNome, t.atribuidoUserId, u.name as atribuidoNome\nFROM todos t\nLEFT JOIN lojas l ON t.criadoPorLojaId = l.id\nLEFT JOIN users u ON t.atribuidoUserId = u.id\nWHERE t.vistoGestor = 0 \nAND t.criadoPorLojaId IS NOT NULL\nAND (t.estado = 'pendente' OR t.estado = 'em_progresso');",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT t.id, t.titulo, t.estado, t.vistoGestor, t.criadoPorLojaId, l.nome as lojaNome, t.atribuidoUserId, u.name as atribuidoNome\nFROM todos t\nLEFT JOIN lojas l ON t.criadoPorLojaId = l.id\nLEFT JOIN users u ON t.atribuidoUserId = u.id\nWHERE t.vistoGestor = 0 \nAND t.criadoPorLojaId IS NOT NULL\nAND (t.estado = 'pendente' OR t.estado = 'em_progresso');",
+  "rows": [
+    {
+      "id": "120002",
+      "titulo": "Entrada de água",
+      "estado": "em_progresso",
+      "vistoGestor": "0",
+      "criadoPorLojaId": "180010",
+      "lojaNome": "Braga - minho center",
+      "atribuidoUserId": "420030",
+      "atribuidoNome": "Marco Amorim"
+    },
+    {
+      "id": "120001",
+      "titulo": "Estrutura para oficina (frio)",
+      "estado": "em_progresso",
+      "vistoGestor": "0",
+      "criadoPorLojaId": "180010",
+      "lojaNome": "Braga - minho center",
+      "atribuidoUserId": "420030",
+      "atribuidoNome": "Marco Amorim"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitulo\testado\tvistoGestor\tcriadoPorLojaId\tlojaNome\tatribuidoUserId\tatribuidoNome\n120002\tEntrada de água\tem_progresso\t0\t180010\tBraga - minho center\t420030\tMarco Amorim\n120001\tEstrutura para oficina (frio)\tem_progresso\t0\t180010\tBraga - minho center\t420030\tMarco Amorim\n",
+  "stderr": "",
+  "execution_time_ms": 393
+}
