@@ -18,8 +18,12 @@ import {
   MessageSquare,
   Lightbulb,
   HelpCircle,
-  Mic
+  Mic,
+  Download,
+  Smartphone
 } from 'lucide-react';
+import { usePWAInstall } from '@/hooks/usePWAInstall';
+import { toast } from 'sonner';
 import { Streamdown } from 'streamdown';
 
 interface Message {
@@ -30,6 +34,7 @@ interface Message {
 
 export default function AssistenteIA() {
   const { language, t } = useLanguage();
+  const { isInstallable, isInstalled, install } = usePWAInstall();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -120,6 +125,37 @@ export default function AssistenteIA() {
             </div>
           </div>
           <div className="flex gap-2 self-end sm:self-auto">
+            {/* Botão de Instalação PWA */}
+            {isInstallable && !isInstalled && (
+              <Button 
+                variant="default" 
+                size="sm"
+                onClick={async () => {
+                  const result = await install();
+                  if (result === 'ios') {
+                    toast.info(
+                      language === 'pt' 
+                        ? 'No iOS: Toque em "Partilhar" e depois "Adicionar ao Ecrã Principal"' 
+                        : 'On iOS: Tap "Share" then "Add to Home Screen"',
+                      { duration: 6000 }
+                    );
+                  } else if (result === true) {
+                    toast.success(language === 'pt' ? 'App instalada com sucesso!' : 'App installed successfully!');
+                  }
+                }}
+                className="text-xs md:text-sm bg-green-600 hover:bg-green-700 text-white"
+              >
+                <Download className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" />
+                <span className="hidden sm:inline">{language === 'pt' ? 'Instalar App' : 'Install App'}</span>
+                <Smartphone className="h-3 w-3 md:h-4 md:w-4 sm:hidden" />
+              </Button>
+            )}
+            {isInstalled && (
+              <Badge variant="secondary" className="text-xs bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                <Smartphone className="h-3 w-3 mr-1" />
+                {language === 'pt' ? 'Instalada' : 'Installed'}
+              </Badge>
+            )}
             <Button 
               variant="outline" 
               size="sm"

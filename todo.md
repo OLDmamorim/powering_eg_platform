@@ -375,6 +375,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Remover página PlanoVisitas.tsx
 - [x] Manter tabelas e serviços no backend (podem ser úteis futuramente)
 
+## Botão de Instalação PWA v6.4
+- [x] Adicionar botão de instalação PWA na página Assistente IA
+- [ ] Tornar botão de instalação PWA mais visível no AssistenteWidget
+
 ## Tradução Completa v5.0
 - [ ] Traduzir TODOS os textos hardcoded em TODAS as páginas da aplicação
 - [ ] Atualizar ficheiros de tradução PT e EN

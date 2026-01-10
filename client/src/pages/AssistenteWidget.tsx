@@ -23,61 +23,12 @@ import {
 import { Streamdown } from 'streamdown';
 import { getLoginUrl } from '@/const';
 import { toast } from 'sonner';
+import { usePWAInstall } from '@/hooks/usePWAInstall';
 
 interface Message {
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
-}
-
-// Hook para instalação PWA
-function usePWAInstall() {
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
-  const [isInstallable, setIsInstallable] = useState(false);
-  const [isInstalled, setIsInstalled] = useState(false);
-
-  useEffect(() => {
-    // Verificar se já está instalado
-    if (window.matchMedia('(display-mode: standalone)').matches) {
-      setIsInstalled(true);
-      return;
-    }
-
-    // Adicionar manifest específico do assistente
-    const existingManifest = document.querySelector('link[rel="manifest"]');
-    if (existingManifest) {
-      existingManifest.setAttribute('href', '/manifest-assistente.json');
-    } else {
-      const link = document.createElement('link');
-      link.rel = 'manifest';
-      link.href = '/manifest-assistente.json';
-      document.head.appendChild(link);
-    }
-
-    const handler = (e: any) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-      setIsInstallable(true);
-    };
-
-    window.addEventListener('beforeinstallprompt', handler);
-    return () => window.removeEventListener('beforeinstallprompt', handler);
-  }, []);
-
-  const install = async () => {
-    if (!deferredPrompt) return false;
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    setDeferredPrompt(null);
-    setIsInstallable(false);
-    if (outcome === 'accepted') {
-      setIsInstalled(true);
-      return true;
-    }
-    return false;
-  };
-
-  return { isInstallable, isInstalled, install };
 }
 
 export default function AssistenteWidget() {
@@ -249,10 +200,17 @@ export default function AssistenteWidget() {
               <Button
                 size="sm"
                 variant="ghost"
-                className="text-white hover:bg-violet-700 h-8 px-2 text-xs"
+                className="text-white hover:bg-violet-700 h-8 px-2 text-xs bg-green-600/20"
                 onClick={async () => {
-                  const success = await install();
-                  if (success) {
+                  const result = await install();
+                  if (result === 'ios') {
+                    toast.info(
+                      language === 'pt' 
+                        ? 'No iOS: Toque em "Partilhar" e depois "Adicionar ao Ecrã Principal"' 
+                        : 'On iOS: Tap "Share" then "Add to Home Screen"',
+                      { duration: 6000 }
+                    );
+                  } else if (result === true) {
                     toast.success(language === 'pt' ? 'App instalada com sucesso!' : 'App installed successfully!');
                   }
                 }}
