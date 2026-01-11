@@ -2640,3 +2640,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar scroll horizontal para tabelas
 - [x] Melhorar word-wrap para textos grandes
 - [x] Testar em dispositivos móveis
+
+## Bug v6.6.3 - Layout Mobile do Chatbot (Correção Definitiva)
+- [x] Corrigir texto cortado na margem direita em respostas longas
+- [x] Implementar scroll horizontal funcional para tabelas
+- [x] Garantir word-wrap correto para títulos e parágrafos
+- [ ] Testar em dispositivos móveis reais
