@@ -2658,3 +2658,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar classes CSS específicas para o widget
 - [x] Implementar estilos para forçar quebra de linha e overflow
 - [ ] Testar em dispositivo móvel real
+
+## UI v6.7 - Mover botão de tema
+- [x] Mover botão de modo escuro/claro para o header junto ao seletor de idioma
+- [x] Remover botão flutuante do canto inferior direito

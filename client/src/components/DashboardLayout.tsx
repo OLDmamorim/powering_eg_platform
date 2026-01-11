@@ -454,6 +454,17 @@ function DashboardLayoutContent({
               </div>
             </div>
             <div className="flex items-center gap-2">
+              {switchable && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={toggleTheme}
+                  className="h-8 w-8 p-0"
+                  title={theme === 'light' ? (language === 'pt' ? 'Modo Escuro' : 'Dark Mode') : (language === 'pt' ? 'Modo Claro' : 'Light Mode')}
+                >
+                  {theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+                </Button>
+              )}
               <Button
                 variant="ghost"
                 size="sm"
@@ -474,15 +485,7 @@ function DashboardLayoutContent({
         <main className="flex-1 p-3 md:p-4 relative overflow-hidden">
           <Breadcrumbs />
           {children}
-          {switchable && (
-            <button
-              onClick={toggleTheme}
-              className="fixed bottom-14 right-4 p-2 rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 transition-colors z-50"
-              title={theme === 'light' ? (language === 'pt' ? 'Mudar para Modo Escuro' : 'Switch to Dark Mode') : (language === 'pt' ? 'Mudar para Modo Claro' : 'Switch to Light Mode')}
-            >
-              {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
-            </button>
-          )}
+
           <KeyboardShortcutsHelp />
           <div className="fixed bottom-4 right-4 text-xs text-foreground/60 select-none pointer-events-none">
             v6.5

@@ -1,0 +1,130 @@
+{
+  "query": "DESCRIBE ocorrencias_estruturais;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute DESCRIBE ocorrencias_estruturais;",
+  "rows": [
+    {
+      "Field": "id",
+      "Type": "int(11)",
+      "Null": "NO",
+      "Key": "PRI",
+      "Default": "NULL",
+      "Extra": "auto_increment"
+    },
+    {
+      "Field": "gestorId",
+      "Type": "int(11)",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "temaId",
+      "Type": "int(11)",
+      "Null": "NO",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "descricao",
+      "Type": "text",
+      "Null": "NO",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "abrangencia",
+      "Type": "enum('nacional','regional','zona')",
+      "Null": "NO",
+      "Key": "",
+      "Default": "nacional",
+      "Extra": ""
+    },
+    {
+      "Field": "zonaAfetada",
+      "Type": "varchar(100)",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "lojasAfetadas",
+      "Type": "text",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "impacto",
+      "Type": "enum('baixo','medio','alto','critico')",
+      "Null": "NO",
+      "Key": "",
+      "Default": "medio",
+      "Extra": ""
+    },
+    {
+      "Field": "fotos",
+      "Type": "text",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "sugestaoAcao",
+      "Type": "text",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "estado",
+      "Type": "enum('reportado','em_analise','em_resolucao','resolvido')",
+      "Null": "NO",
+      "Key": "",
+      "Default": "reportado",
+      "Extra": ""
+    },
+    {
+      "Field": "notasAdmin",
+      "Type": "text",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "resolvidoEm",
+      "Type": "timestamp",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "createdAt",
+      "Type": "timestamp",
+      "Null": "NO",
+      "Key": "",
+      "Default": "CURRENT_TIMESTAMP",
+      "Extra": ""
+    },
+    {
+      "Field": "updatedAt",
+      "Type": "timestamp",
+      "Null": "NO",
+      "Key": "",
+      "Default": "CURRENT_TIMESTAMP",
+      "Extra": "DEFAULT_GENERATED on update CURRENT_TIMESTAMP"
+    }
+  ],
+  "messages": [],
+  "stdout": "Field\tType\tNull\tKey\tDefault\tExtra\nid\tint(11)\tNO\tPRI\tNULL\tauto_increment\ngestorId\tint(11)\tYES\t\tNULL\t\ntemaId\tint(11)\tNO\t\tNULL\t\ndescricao\ttext\tNO\t\tNULL\t\nabrangencia\tenum('nacional','regional','zona')\tNO\t\tnacional\t\nzonaAfetada\tvarchar(100)\tYES\t\tNULL\t\nlojasAfetadas\ttext\tYES\t\tNULL\t\nimpacto\tenum('baixo','medio','alto','critico')\tNO\t\tmedio\t\nfotos\ttext\tYES\t\tNULL\t\nsugestaoAcao\ttext\tYES\t\tNULL\t\nestado\tenum('reportado','em_analise','em_resolucao','resolvido')\tNO\t\treportado\t\nnotasAdmin\ttext\tYES\t\tNULL\t\nresolvidoEm\ttimestamp\tYES\t\tNULL\t\ncreatedAt\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\t\nupdatedAt\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED on update CURRENT_TIMESTAMP\n",
+  "stderr": "",
+  "execution_time_ms": 395
+}

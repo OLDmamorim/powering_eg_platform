@@ -1,0 +1,328 @@
+{
+  "query": "SELECT id, temaId, descricao, gestorId FROM ocorrencias_estruturais WHERE descricao LIKE '%SMTP%' OR descricao LIKE '%teste%' OR descricao LIKE '%Teste%' OR descricao LIKE '%TEST%';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT id, temaId, descricao, gestorId FROM ocorrencias_estruturais WHERE descricao LIKE '%SMTP%' OR descricao LIKE '%teste%' OR descricao LIKE '%Teste%' OR descricao LIKE '%TEST%';",
+  "rows": [
+    {
+      "id": "210001",
+      "temaId": "120001",
+      "descricao": "Descrição de teste para verificar envio de email via SMTP Gmail",
+      "gestorId": "930001"
+    },
+    {
+      "id": "210002",
+      "temaId": "120001",
+      "descricao": "Descrição de teste para verificar envio de email via SMTP Gmail",
+      "gestorId": "930001"
+    },
+    {
+      "id": "210003",
+      "temaId": "120001",
+      "descricao": "Descrição de teste para verificar envio de email via SMTP Gmail",
+      "gestorId": "930001"
+    },
+    {
+      "id": "210004",
+      "temaId": "120001",
+      "descricao": "Descrição de teste para verificar envio de email via SMTP Gmail",
+      "gestorId": "930001"
+    },
+    {
+      "id": "210005",
+      "temaId": "120001",
+      "descricao": "Descrição de teste para verificar envio de email via SMTP Gmail",
+      "gestorId": "930001"
+    },
+    {
+      "id": "210006",
+      "temaId": "120001",
+      "descricao": "Descrição de teste para verificar envio de email via SMTP Gmail",
+      "gestorId": "930001"
+    },
+    {
+      "id": "210007",
+      "temaId": "120001",
+      "descricao": "Descrição de teste para verificar envio de email via SMTP Gmail",
+      "gestorId": "930001"
+    },
+    {
+      "id": "210008",
+      "temaId": "120001",
+      "descricao": "Descrição de teste para verificar envio de email via SMTP Gmail",
+      "gestorId": "930001"
+    },
+    {
+      "id": "210009",
+      "temaId": "120001",
+      "descricao": "Descrição de teste para verificar envio de email via SMTP Gmail",
+      "gestorId": "930001"
+    },
+    {
+      "id": "210010",
+      "temaId": "120001",
+      "descricao": "Descrição de teste para verificar envio de email via SMTP Gmail",
+      "gestorId": "930001"
+    },
+    {
+      "id": "210011",
+      "temaId": "120001",
+      "descricao": "Descrição de teste para verificar envio de email via SMTP Gmail",
+      "gestorId": "930001"
+    },
+    {
+      "id": "210012",
+      "temaId": "120001",
+      "descricao": "Descrição de teste para verificar envio de email via SMTP Gmail",
+      "gestorId": "930001"
+    },
+    {
+      "id": "210013",
+      "temaId": "120001",
+      "descricao": "Descrição de teste para verificar envio de email via SMTP Gmail",
+      "gestorId": "930001"
+    },
+    {
+      "id": "210014",
+      "temaId": "120001",
+      "descricao": "Descrição de teste para verificar envio de email via SMTP Gmail",
+      "gestorId": "930001"
+    },
+    {
+      "id": "210015",
+      "temaId": "120001",
+      "descricao": "Descrição de teste para verificar envio de email via SMTP Gmail",
+      "gestorId": "930001"
+    },
+    {
+      "id": "210016",
+      "temaId": "120001",
+      "descricao": "Descrição de teste para verificar envio de email via SMTP Gmail",
+      "gestorId": "930001"
+    },
+    {
+      "id": "210017",
+      "temaId": "120001",
+      "descricao": "Descrição de teste para verificar envio de email via SMTP Gmail",
+      "gestorId": "930001"
+    },
+    {
+      "id": "210018",
+      "temaId": "120001",
+      "descricao": "Descrição de teste para verificar envio de email via SMTP Gmail",
+      "gestorId": "930001"
+    },
+    {
+      "id": "210019",
+      "temaId": "120001",
+      "descricao": "Descrição de teste para verificar envio de email via SMTP Gmail",
+      "gestorId": "930001"
+    },
+    {
+      "id": "210020",
+      "temaId": "120001",
+      "descricao": "Descrição de teste para verificar envio de email via SMTP Gmail",
+      "gestorId": "930001"
+    },
+    {
+      "id": "210021",
+      "temaId": "120001",
+      "descricao": "Descrição de teste para verificar envio de email via SMTP Gmail",
+      "gestorId": "930001"
+    },
+    {
+      "id": "210022",
+      "temaId": "120001",
+      "descricao": "Descrição de teste para verificar envio de email via SMTP Gmail",
+      "gestorId": "930001"
+    },
+    {
+      "id": "210023",
+      "temaId": "120001",
+      "descricao": "Descrição de teste para verificar envio de email via SMTP Gmail",
+      "gestorId": "930001"
+    },
+    {
+      "id": "210024",
+      "temaId": "120001",
+      "descricao": "Descrição de teste para verificar envio de email via SMTP Gmail",
+      "gestorId": "930001"
+    },
+    {
+      "id": "240001",
+      "temaId": "120001",
+      "descricao": "Descrição de teste para verificar envio de email via SMTP Gmail",
+      "gestorId": "930001"
+    },
+    {
+      "id": "240002",
+      "temaId": "120001",
+      "descricao": "Descrição de teste para verificar envio de email via SMTP Gmail",
+      "gestorId": "930001"
+    },
+    {
+      "id": "240003",
+      "temaId": "120001",
+      "descricao": "Descrição de teste para verificar envio de email via SMTP Gmail",
+      "gestorId": "930001"
+    },
+    {
+      "id": "270001",
+      "temaId": "120001",
+      "descricao": "Descrição de teste para verificar envio de email via SMTP Gmail",
+      "gestorId": "930001"
+    },
+    {
+      "id": "270002",
+      "temaId": "120001",
+      "descricao": "Descrição de teste para verificar envio de email via SMTP Gmail",
+      "gestorId": "930001"
+    },
+    {
+      "id": "270003",
+      "temaId": "120001",
+      "descricao": "Descrição de teste para verificar envio de email via SMTP Gmail",
+      "gestorId": "930001"
+    },
+    {
+      "id": "270004",
+      "temaId": "120001",
+      "descricao": "Descrição de teste para verificar envio de email via SMTP Gmail",
+      "gestorId": "930001"
+    },
+    {
+      "id": "270005",
+      "temaId": "120001",
+      "descricao": "Descrição de teste para verificar envio de email via SMTP Gmail",
+      "gestorId": "930001"
+    },
+    {
+      "id": "270006",
+      "temaId": "120001",
+      "descricao": "Descrição de teste para verificar envio de email via SMTP Gmail",
+      "gestorId": "930001"
+    },
+    {
+      "id": "300001",
+      "temaId": "120001",
+      "descricao": "Descrição de teste para verificar envio de email via SMTP Gmail",
+      "gestorId": "1050005"
+    },
+    {
+      "id": "300002",
+      "temaId": "120001",
+      "descricao": "Descrição de teste para verificar envio de email via SMTP Gmail",
+      "gestorId": "1050005"
+    },
+    {
+      "id": "330001",
+      "temaId": "120001",
+      "descricao": "Descrição de teste para verificar envio de email via SMTP Gmail",
+      "gestorId": "1050005"
+    },
+    {
+      "id": "330002",
+      "temaId": "120001",
+      "descricao": "Descrição de teste para verificar envio de email via SMTP Gmail",
+      "gestorId": "1050005"
+    },
+    {
+      "id": "330003",
+      "temaId": "120001",
+      "descricao": "Descrição de teste para verificar envio de email via SMTP Gmail",
+      "gestorId": "1050005"
+    },
+    {
+      "id": "330004",
+      "temaId": "120001",
+      "descricao": "Descrição de teste para verificar envio de email via SMTP Gmail",
+      "gestorId": "1080021"
+    },
+    {
+      "id": "330005",
+      "temaId": "120001",
+      "descricao": "Descrição de teste para verificar envio de email via SMTP Gmail",
+      "gestorId": "1080021"
+    },
+    {
+      "id": "330006",
+      "temaId": "120001",
+      "descricao": "Descrição de teste para verificar envio de email via SMTP Gmail",
+      "gestorId": "1080021"
+    },
+    {
+      "id": "330007",
+      "temaId": "120001",
+      "descricao": "Descrição de teste para verificar envio de email via SMTP Gmail",
+      "gestorId": "1080047"
+    },
+    {
+      "id": "330008",
+      "temaId": "120001",
+      "descricao": "Descrição de teste para verificar envio de email via SMTP Gmail",
+      "gestorId": "1080047"
+    },
+    {
+      "id": "330009",
+      "temaId": "120001",
+      "descricao": "Descrição de teste para verificar envio de email via SMTP Gmail",
+      "gestorId": "1080047"
+    },
+    {
+      "id": "360001",
+      "temaId": "120001",
+      "descricao": "Descrição de teste para verificar envio de email via SMTP Gmail",
+      "gestorId": "1110001"
+    },
+    {
+      "id": "360002",
+      "temaId": "120001",
+      "descricao": "Descrição de teste para verificar envio de email via SMTP Gmail",
+      "gestorId": "1110001"
+    },
+    {
+      "id": "360003",
+      "temaId": "120001",
+      "descricao": "Descrição de teste para verificar envio de email via SMTP Gmail",
+      "gestorId": "1110001"
+    },
+    {
+      "id": "390001",
+      "temaId": "120001",
+      "descricao": "Descrição de teste para verificar envio de email via SMTP Gmail",
+      "gestorId": "1170002"
+    },
+    {
+      "id": "390002",
+      "temaId": "120001",
+      "descricao": "Descrição de teste para verificar envio de email via SMTP Gmail",
+      "gestorId": "1170002"
+    },
+    {
+      "id": "390003",
+      "temaId": "120001",
+      "descricao": "Descrição de teste para verificar envio de email via SMTP Gmail",
+      "gestorId": "1170002"
+    },
+    {
+      "id": "420001",
+      "temaId": "120001",
+      "descricao": "Descrição de teste para verificar envio de email via SMTP Gmail",
+      "gestorId": "1230002"
+    },
+    {
+      "id": "420002",
+      "temaId": "120001",
+      "descricao": "Descrição de teste para verificar envio de email via SMTP Gmail",
+      "gestorId": "1230002"
+    },
+    {
+      "id": "420003",
+      "temaId": "120001",
+      "descricao": "Descrição de teste para verificar envio de email via SMTP Gmail",
+      "gestorId": "1230002"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttemaId\tdescricao\tgestorId\n210001\t120001\tDescrição de teste para verificar envio de email via SMTP Gmail\t930001\n210002\t120001\tDescrição de teste para verificar envio de email via SMTP Gmail\t930001\n210003\t120001\tDescrição de teste para verificar envio de email via SMTP Gmail\t930001\n210004\t120001\tDescrição de teste para verificar envio de email via SMTP Gmail\t930001\n210005\t120001\tDescrição de teste para verificar envio de email via SMTP Gmail\t930001\n210006\t120001\tDescrição de teste para verificar envio de email via SMTP Gmail\t930001\n210007\t120001\tDescrição de teste para verificar envio de email via SMTP Gmail\t930001\n210008\t120001\tDescrição de teste para verificar envio de email via SMTP Gmail\t930001\n210009\t120001\tDescrição de teste para verificar envio de email via SMTP Gmail\t930001\n210010\t120001\tDescrição de teste para verificar envio de email via SMTP Gmail\t930001\n210011\t120001\tDescrição de teste para verificar envio de email via SMTP Gmail\t930001\n210012\t120001\tDescrição de teste para verificar envio de email via SMTP Gmail\t930001\n210013\t120001\tDescrição de teste para verificar envio de email via SMTP Gmail\t930001\n210014\t120001\tDescrição de teste para verificar envio de email via SMTP Gmail\t930001\n210015\t120001\tDescrição de teste para verificar envio de email via SMTP Gmail\t930001\n210016\t120001\tDescrição de teste para verificar envio de email via SMTP Gmail\t930001\n210017\t120001\tDescrição de teste para verificar envio de email via SMTP Gmail\t930001\n210018\t120001\tDescrição de teste para verificar envio de email via SMTP Gmail\t930001\n210019\t120001\tDescrição de teste para verificar envio de email via SMTP Gmail\t930001\n210020\t120001\tDescrição de teste para verificar envio de email via SMTP Gmail\t930001\n210021\t120001\tDescrição de teste para verificar envio de email via SMTP Gmail\t930001\n210022\t120001\tDescrição de teste para verificar envio de email via SMTP Gmail\t930001\n210023\t120001\tDescrição de teste para verificar envio de email via SMTP Gmail\t930001\n210024\t120001\tDescrição de teste para verificar envio de email via SMTP Gmail\t930001\n240001\t120001\tDescrição de teste para verificar envio de email via SMTP Gmail\t930001\n240002\t120001\tDescrição de teste para verificar envio de email via SMTP Gmail\t930001\n240003\t120001\tDescrição de teste para verificar envio de email via SMTP Gmail\t930001\n270001\t120001\tDescrição de teste para verificar envio de email via SMTP Gmail\t930001\n270002\t120001\tDescrição de teste para verificar envio de email via SMTP Gmail\t930001\n270003\t120001\tDescrição de teste para verificar envio de email via SMTP Gmail\t930001\n270004\t120001\tDescrição de teste para verificar envio de email via SMTP Gmail\t930001\n270005\t120001\tDescrição de teste para verificar envio de email via SMTP Gmail\t930001\n270006\t120001\tDescrição de teste para verificar envio de email via SMTP Gmail\t930001\n300001\t120001\tDescrição de teste para verificar envio de email via SMTP Gmail\t1050005\n300002\t120001\tDescrição de teste para verificar envio de email via SMTP Gmail\t1050005\n330001\t120001\tDescrição de teste para verificar envio de email via SMTP Gmail\t1050005\n330002\t120001\tDescrição de teste para verificar envio de email via SMTP Gmail\t1050005\n330003\t120001\tDescrição de teste para verificar envio de email via SMTP Gmail\t1050005\n330004\t120001\tDescrição de teste para verificar envio de email via SMTP Gmail\t1080021\n330005\t120001\tDescrição de teste para verificar envio de email via SMTP Gmail\t1080021\n330006\t120001\tDescrição de teste para verificar envio de email via SMTP Gmail\t1080021\n330007\t120001\tDescrição de teste para verificar envio de email via SMTP Gmail\t1080047\n330008\t120001\tDescrição de teste para verificar envio de email via SMTP Gmail\t1080047\n330009\t120001\tDescrição de teste para verificar envio de email via SMTP Gmail\t1080047\n360001\t120001\tDescrição de teste para verificar envio de email via SMTP Gmail\t1110001\n360002\t120001\tDescrição de teste para verificar envio de email via SMTP Gmail\t1110001\n360003\t120001\tDescrição de teste para verificar envio de email via SMTP Gmail\t1110001\n390001\t120001\tDescrição de teste para verificar envio de email via SMTP Gmail\t1170002\n390002\t120001\tDescrição de teste para verificar envio de email via SMTP Gmail\t1170002\n390003\t120001\tDescrição de teste para verificar envio de email via SMTP Gmail\t1170002\n420001\t120001\tDescrição de teste para verificar envio de email via SMTP Gmail\t1230002\n420002\t120001\tDescrição de teste para verificar envio de email via SMTP Gmail\t1230002\n420003\t120001\tDescrição de teste para verificar envio de email via SMTP Gmail\t1230002\n",
+  "stderr": "",
+  "execution_time_ms": 395
+}
