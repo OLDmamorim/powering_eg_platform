@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/_core/hooks/useAuth';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -12,13 +13,14 @@ import {
   Bot, 
   User, 
   Sparkles, 
-  RefreshCw,
   MessageSquare,
   ExternalLink,
   Loader2,
   LogIn,
   Download,
-  Trash2
+  Trash2,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { Streamdown } from 'streamdown';
 import { getLoginUrl } from '@/const';
@@ -34,6 +36,7 @@ interface Message {
 export default function AssistenteWidget() {
   const { user, loading: authLoading } = useAuth();
   const { language, t } = useLanguage();
+  const { theme, toggleTheme } = useTheme();
   const { isInstallable, isInstalled, install } = usePWAInstallAssistente();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -42,8 +45,6 @@ export default function AssistenteWidget() {
   const inputRef = useRef<HTMLInputElement>(null);
   
   const chatMutation = trpc.chatbot.pergunta.useMutation();
-  
-  // O hook usePWAInstallAssistente já trata da troca de manifest automaticamente
   
   // Auto-scroll para a última mensagem
   useEffect(() => {
@@ -119,8 +120,12 @@ export default function AssistenteWidget() {
   // Tela de loading
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-violet-50 to-purple-100 flex items-center justify-center p-4">
-        <Loader2 className="h-8 w-8 animate-spin text-violet-600" />
+      <div className={`min-h-screen flex items-center justify-center p-4 ${
+        theme === 'dark' 
+          ? 'bg-gradient-to-br from-slate-900 to-violet-950' 
+          : 'bg-gradient-to-br from-violet-50 to-purple-100'
+      }`}>
+        <Loader2 className={`h-8 w-8 animate-spin ${theme === 'dark' ? 'text-violet-400' : 'text-violet-600'}`} />
       </div>
     );
   }
@@ -128,12 +133,16 @@ export default function AssistenteWidget() {
   // Tela de login
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-violet-50 to-purple-100 flex items-center justify-center p-4">
-        <Card className="w-full max-w-sm">
+      <div className={`min-h-screen flex items-center justify-center p-4 ${
+        theme === 'dark' 
+          ? 'bg-gradient-to-br from-slate-900 to-violet-950' 
+          : 'bg-gradient-to-br from-violet-50 to-purple-100'
+      }`}>
+        <Card className={`w-full max-w-sm ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : ''}`}>
           <CardContent className="pt-6 text-center">
-            <Bot className="h-12 w-12 mx-auto text-violet-600 mb-4" />
-            <h1 className="text-xl font-bold mb-2">PoweringEG</h1>
-            <p className="text-sm text-muted-foreground mb-4">
+            <Bot className={`h-12 w-12 mx-auto mb-4 ${theme === 'dark' ? 'text-violet-400' : 'text-violet-600'}`} />
+            <h1 className={`text-xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : ''}`}>PoweringEG</h1>
+            <p className={`text-sm mb-4 ${theme === 'dark' ? 'text-slate-400' : 'text-muted-foreground'}`}>
               {language === 'pt' ? 'Faça login para usar o assistente' : 'Login to use the assistant'}
             </p>
             <Button
@@ -142,6 +151,19 @@ export default function AssistenteWidget() {
             >
               <LogIn className="h-4 w-4 mr-2" />
               {language === 'pt' ? 'Fazer Login' : 'Login'}
+            </Button>
+            {/* Botão de tema na tela de login */}
+            <Button
+              size="sm"
+              variant="ghost"
+              className={`mt-4 ${theme === 'dark' ? 'text-slate-400 hover:text-white hover:bg-slate-700' : 'text-slate-600 hover:bg-slate-100'}`}
+              onClick={toggleTheme}
+            >
+              {theme === 'dark' ? <Sun className="h-4 w-4 mr-2" /> : <Moon className="h-4 w-4 mr-2" />}
+              {theme === 'dark' 
+                ? (language === 'pt' ? 'Modo Claro' : 'Light Mode')
+                : (language === 'pt' ? 'Modo Escuro' : 'Dark Mode')
+              }
             </Button>
           </CardContent>
         </Card>
@@ -154,12 +176,18 @@ export default function AssistenteWidget() {
   
   if (!isAuthorized) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-violet-50 to-purple-100 flex items-center justify-center p-4">
-        <Card className="w-full max-w-sm">
+      <div className={`min-h-screen flex items-center justify-center p-4 ${
+        theme === 'dark' 
+          ? 'bg-gradient-to-br from-slate-900 to-violet-950' 
+          : 'bg-gradient-to-br from-violet-50 to-purple-100'
+      }`}>
+        <Card className={`w-full max-w-sm ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : ''}`}>
           <CardContent className="pt-6 text-center">
             <Bot className="h-12 w-12 mx-auto text-red-500 mb-4" />
-            <h1 className="text-xl font-bold mb-2">{language === 'pt' ? 'Acesso Restrito' : 'Restricted Access'}</h1>
-            <p className="text-sm text-muted-foreground mb-4">
+            <h1 className={`text-xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : ''}`}>
+              {language === 'pt' ? 'Acesso Restrito' : 'Restricted Access'}
+            </h1>
+            <p className={`text-sm mb-4 ${theme === 'dark' ? 'text-slate-400' : 'text-muted-foreground'}`}>
               {language === 'pt' 
                 ? 'O PoweringEG está disponível apenas para gestores e administradores.' 
                 : 'The AI Assistant is only available for managers and administrators.'}
@@ -184,25 +212,54 @@ export default function AssistenteWidget() {
       ];
 
   return (
-    <div className="widget-chat-container min-h-screen bg-gradient-to-br from-violet-50 to-purple-100 flex flex-col">
+    <div className={`widget-chat-container min-h-screen flex flex-col ${
+      theme === 'dark' 
+        ? 'bg-gradient-to-br from-slate-900 to-violet-950' 
+        : 'bg-gradient-to-br from-violet-50 to-purple-100'
+    }`}>
       {/* Header Compacto */}
-      <header className="bg-violet-600 text-white p-3 sticky top-0 z-10 shadow-md">
+      <header className={`p-3 sticky top-0 z-10 shadow-md ${
+        theme === 'dark' 
+          ? 'bg-violet-900' 
+          : 'bg-violet-600'
+      } text-white`}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Bot className="h-5 w-5" />
             <div>
               <h1 className="font-semibold text-sm leading-tight">PoweringEG</h1>
-              <p className="text-xs text-violet-200">
+              <p className={`text-xs ${theme === 'dark' ? 'text-violet-300' : 'text-violet-200'}`}>
                 {user?.name || user?.email}
               </p>
             </div>
           </div>
           <div className="flex gap-1">
+            {/* Botão de toggle de tema */}
+            <Button
+              size="sm"
+              variant="ghost"
+              className={`h-8 w-8 p-0 ${
+                theme === 'dark' 
+                  ? 'text-white hover:bg-violet-800' 
+                  : 'text-white hover:bg-violet-700'
+              }`}
+              onClick={toggleTheme}
+              title={theme === 'dark' 
+                ? (language === 'pt' ? 'Modo Claro' : 'Light Mode')
+                : (language === 'pt' ? 'Modo Escuro' : 'Dark Mode')
+              }
+            >
+              {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </Button>
             {isInstallable && !isInstalled && (
               <Button
                 size="sm"
                 variant="ghost"
-                className="text-white hover:bg-violet-700 h-8 px-2 text-xs bg-green-600/20"
+                className={`h-8 px-2 text-xs ${
+                  theme === 'dark' 
+                    ? 'text-white hover:bg-violet-800 bg-green-700/30' 
+                    : 'text-white hover:bg-violet-700 bg-green-600/20'
+                }`}
                 onClick={async () => {
                   toast.info(
                     language === 'pt' 
@@ -219,7 +276,6 @@ export default function AssistenteWidget() {
                       { duration: 6000 }
                     );
                   } else if (result === 'manual') {
-                    // Mostrar instruções de instalação manual
                     toast.info(
                       language === 'pt' 
                         ? 'Toque no menu ⋮ do Chrome e selecione "Instalar aplicação" ou "Adicionar ao ecrã inicial"' 
@@ -241,7 +297,11 @@ export default function AssistenteWidget() {
               <Button
                 size="sm"
                 variant="ghost"
-                className="text-white hover:bg-violet-700 h-8 w-8 p-0"
+                className={`h-8 w-8 p-0 ${
+                  theme === 'dark' 
+                    ? 'text-white hover:bg-violet-800' 
+                    : 'text-white hover:bg-violet-700'
+                }`}
                 onClick={limparConversa}
                 title={language === 'pt' ? 'Limpar conversa' : 'Clear conversation'}
               >
@@ -251,7 +311,11 @@ export default function AssistenteWidget() {
             <Button
               size="sm"
               variant="ghost"
-              className="text-white hover:bg-violet-700 h-8 w-8 p-0"
+              className={`h-8 w-8 p-0 ${
+                theme === 'dark' 
+                  ? 'text-white hover:bg-violet-800' 
+                  : 'text-white hover:bg-violet-700'
+              }`}
               onClick={() => window.location.href = '/assistente-ia'}
               title={language === 'pt' ? 'Abrir versão completa' : 'Open full version'}
             >
@@ -266,13 +330,15 @@ export default function AssistenteWidget() {
         <ScrollArea className="flex-1 p-3" ref={scrollRef}>
           {messages.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-center py-8">
-              <div className="p-3 bg-violet-100 rounded-full mb-3">
-                <Sparkles className="h-8 w-8 text-violet-600" />
+              <div className={`p-3 rounded-full mb-3 ${
+                theme === 'dark' ? 'bg-violet-900/50' : 'bg-violet-100'
+              }`}>
+                <Sparkles className={`h-8 w-8 ${theme === 'dark' ? 'text-violet-400' : 'text-violet-600'}`} />
               </div>
-              <h2 className="text-lg font-semibold mb-2">
+              <h2 className={`text-lg font-semibold mb-2 ${theme === 'dark' ? 'text-white' : ''}`}>
                 {language === 'pt' ? 'Olá! Como posso ajudar?' : 'Hello! How can I help?'}
               </h2>
-              <p className="text-sm text-muted-foreground max-w-xs mb-4">
+              <p className={`text-sm max-w-xs mb-4 ${theme === 'dark' ? 'text-slate-400' : 'text-muted-foreground'}`}>
                 {language === 'pt' 
                   ? 'Pergunte sobre lojas, pendentes, relatórios, alertas ou qualquer informação da plataforma.'
                   : 'Ask about stores, pending items, reports, alerts or any platform information.'}
@@ -285,7 +351,11 @@ export default function AssistenteWidget() {
                     key={index}
                     variant="outline"
                     size="sm"
-                    className="text-xs bg-white/80 hover:bg-violet-100 border-violet-200"
+                    className={`text-xs ${
+                      theme === 'dark' 
+                        ? 'bg-slate-800/80 hover:bg-violet-900/50 border-violet-700 text-slate-200' 
+                        : 'bg-white/80 hover:bg-violet-100 border-violet-200'
+                    }`}
                     onClick={() => enviarPergunta(sugestao)}
                     disabled={isLoading}
                   >
@@ -304,15 +374,19 @@ export default function AssistenteWidget() {
                   }`}
                 >
                   {msg.role === 'assistant' && (
-                    <div className="flex-shrink-0 w-7 h-7 rounded-full bg-violet-100 flex items-center justify-center">
-                      <Bot className="h-4 w-4 text-violet-600" />
+                    <div className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center ${
+                      theme === 'dark' ? 'bg-violet-900/50' : 'bg-violet-100'
+                    }`}>
+                      <Bot className={`h-4 w-4 ${theme === 'dark' ? 'text-violet-400' : 'text-violet-600'}`} />
                     </div>
                   )}
                   <div
                     className={`widget-message rounded-lg px-3 py-2 ${
                       msg.role === 'user'
                         ? 'bg-violet-600 text-white'
-                        : 'bg-white shadow-sm'
+                        : theme === 'dark' 
+                          ? 'bg-slate-800 shadow-sm text-slate-200' 
+                          : 'bg-white shadow-sm'
                     }`}
                   >
                     {msg.role === 'assistant' ? (
@@ -322,7 +396,11 @@ export default function AssistenteWidget() {
                     ) : (
                       <p className="text-sm whitespace-pre-wrap" style={{ wordBreak: 'break-word' }}>{msg.content}</p>
                     )}
-                    <p className={`text-[10px] mt-1 ${msg.role === 'user' ? 'text-violet-200' : 'text-muted-foreground'}`}>
+                    <p className={`text-[10px] mt-1 ${
+                      msg.role === 'user' 
+                        ? 'text-violet-200' 
+                        : theme === 'dark' ? 'text-slate-500' : 'text-muted-foreground'
+                    }`}>
                       {msg.timestamp.toLocaleTimeString('pt-PT', { 
                         hour: '2-digit', 
                         minute: '2-digit' 
@@ -338,10 +416,14 @@ export default function AssistenteWidget() {
               ))}
               {isLoading && (
                 <div className="flex gap-2 justify-start">
-                  <div className="flex-shrink-0 w-7 h-7 rounded-full bg-violet-100 flex items-center justify-center">
-                    <Bot className="h-4 w-4 text-violet-600" />
+                  <div className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center ${
+                    theme === 'dark' ? 'bg-violet-900/50' : 'bg-violet-100'
+                  }`}>
+                    <Bot className={`h-4 w-4 ${theme === 'dark' ? 'text-violet-400' : 'text-violet-600'}`} />
                   </div>
-                  <div className="bg-white shadow-sm rounded-lg px-3 py-2">
+                  <div className={`rounded-lg px-3 py-2 ${
+                    theme === 'dark' ? 'bg-slate-800 shadow-sm' : 'bg-white shadow-sm'
+                  }`}>
                     <div className="flex items-center gap-1.5">
                       <div className="w-2 h-2 bg-violet-600 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
                       <div className="w-2 h-2 bg-violet-600 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
@@ -355,16 +437,28 @@ export default function AssistenteWidget() {
         </ScrollArea>
 
         {/* Input Area - Fixed at bottom */}
-        <div className="p-3 bg-white/80 backdrop-blur-sm border-t">
+        <div className={`p-3 border-t ${
+          theme === 'dark' 
+            ? 'bg-slate-900/80 backdrop-blur-sm border-slate-700' 
+            : 'bg-white/80 backdrop-blur-sm'
+        }`}>
           <form onSubmit={handleSubmit} className="flex gap-2 items-center">
-            <div className="flex-1 flex gap-2 items-center bg-white border rounded-lg px-2 shadow-sm">
+            <div className={`flex-1 flex gap-2 items-center border rounded-lg px-2 shadow-sm ${
+              theme === 'dark' 
+                ? 'bg-slate-800 border-slate-600' 
+                : 'bg-white'
+            }`}>
               <Input
                 ref={inputRef}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder={language === 'pt' ? 'Escreva a sua pergunta...' : 'Type your question...'}
                 disabled={isLoading}
-                className="flex-1 border-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-sm"
+                className={`flex-1 border-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-sm ${
+                  theme === 'dark' 
+                    ? 'bg-transparent text-white placeholder:text-slate-400' 
+                    : ''
+                }`}
               />
               <VoiceChatInput
                 onTranscriptionComplete={handleVoiceTranscription}

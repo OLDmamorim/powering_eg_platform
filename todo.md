@@ -2667,3 +2667,6 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Remover componente KeyboardShortcutsHelp
 - [x] Remover importação e uso do componente no DashboardLayout
 - [x] Testar que a aplicação funciona sem erros
+
+## Widget Chatbot v6.5
+- [x] Adicionar suporte para modo claro/escuro ao widget do chatbot PoweringEG
