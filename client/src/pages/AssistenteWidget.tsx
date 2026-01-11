@@ -309,18 +309,21 @@ export default function AssistenteWidget() {
                     </div>
                   )}
                   <div
-                    className={`max-w-[85%] rounded-lg px-3 py-2 ${
+                    className={`max-w-[calc(100%-2.5rem)] rounded-lg px-3 py-2 ${
                       msg.role === 'user'
                         ? 'bg-violet-600 text-white'
                         : 'bg-white shadow-sm'
                     }`}
+                    style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}
                   >
                     {msg.role === 'assistant' ? (
-                      <div className="prose prose-sm dark:prose-invert max-w-none text-sm overflow-x-auto [&_table]:min-w-[300px] [&_table]:text-xs [&_table]:w-max [&_th]:px-2 [&_th]:py-1 [&_td]:px-2 [&_td]:py-1">
-                        <Streamdown>{msg.content}</Streamdown>
+                      <div className="prose prose-sm dark:prose-invert max-w-none text-sm [&_p]:break-words [&_li]:break-words [&_h1]:break-words [&_h2]:break-words [&_h3]:break-words [&_strong]:break-words">
+                        <div className="overflow-x-auto [&_table]:min-w-0 [&_table]:text-xs [&_table]:w-full [&_th]:px-2 [&_th]:py-1 [&_th]:whitespace-nowrap [&_td]:px-2 [&_td]:py-1 [&_td]:whitespace-normal">
+                          <Streamdown>{msg.content}</Streamdown>
+                        </div>
                       </div>
                     ) : (
-                      <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                      <p className="text-sm whitespace-pre-wrap break-words">{msg.content}</p>
                     )}
                     <p className={`text-[10px] mt-1 ${msg.role === 'user' ? 'text-violet-200' : 'text-muted-foreground'}`}>
                       {msg.timestamp.toLocaleTimeString('pt-PT', { 

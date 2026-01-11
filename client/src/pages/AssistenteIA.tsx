@@ -240,18 +240,21 @@ export default function AssistenteIA() {
                           </div>
                         )}
                         <div
-                          className={`max-w-[95%] sm:max-w-[85%] md:max-w-[80%] rounded-lg px-3 py-2 md:px-4 md:py-3 ${
+                          className={`max-w-[calc(100%-2.5rem)] sm:max-w-[85%] md:max-w-[80%] rounded-lg px-3 py-2 md:px-4 md:py-3 ${
                             msg.role === 'user'
                               ? 'bg-primary text-primary-foreground'
                               : 'bg-muted'
                           }`}
+                          style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}
                         >
                           {msg.role === 'assistant' ? (
-                            <div className="prose prose-sm dark:prose-invert max-w-none text-sm overflow-x-auto [&_table]:min-w-[400px] [&_table]:text-xs [&_table]:w-max [&_th]:px-2 [&_th]:py-1 [&_td]:px-2 [&_td]:py-1">
-                              <Streamdown>{msg.content}</Streamdown>
+                            <div className="prose prose-sm dark:prose-invert max-w-none text-sm [&_p]:break-words [&_li]:break-words [&_h1]:break-words [&_h2]:break-words [&_h3]:break-words [&_strong]:break-words">
+                              <div className="overflow-x-auto [&_table]:min-w-0 [&_table]:text-xs [&_table]:w-full [&_th]:px-2 [&_th]:py-1 [&_th]:whitespace-nowrap [&_td]:px-2 [&_td]:py-1 [&_td]:whitespace-normal">
+                                <Streamdown>{msg.content}</Streamdown>
+                              </div>
                             </div>
                           ) : (
-                            <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                            <p className="text-sm whitespace-pre-wrap break-words">{msg.content}</p>
                           )}
                           <p className="text-xs opacity-60 mt-1 md:mt-2">
                             {msg.timestamp.toLocaleTimeString('pt-PT', { 

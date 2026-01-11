@@ -2634,3 +2634,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Scroll deve ir para o fundo automaticamente após cada resposta
 - [x] Manter scroll suave (smooth) para melhor UX
 - [x] Bug: Scroll automático não funciona no chatbot - utilizador tem que descer manualmente quando o texto é grande
+
+## Bug v6.6.2 - Layout Mobile do Chatbot (Texto Cortado)
+- [x] Corrigir texto cortado na margem direita em respostas longas
+- [x] Adicionar scroll horizontal para tabelas
+- [x] Melhorar word-wrap para textos grandes
+- [ ] Testar em dispositivos móveis
