@@ -2646,3 +2646,15 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Implementar scroll horizontal funcional para tabelas
 - [x] Garantir word-wrap correto para títulos e parágrafos
 - [ ] Testar em dispositivos móveis reais
+
+## Bug v6.6.4 - Layout Mobile do Widget PWA (Correção Final)
+- [x] Identificar que o problema está no AssistenteWidget.tsx (widget PWA) e não na página normal
+- [x] Adicionar classes CSS específicas para o widget (.widget-chat-container, .widget-message, .widget-message-content)
+- [ ] Testar em dispositivo móvel real
+
+
+## Bug v6.6.4 - Layout Mobile do Widget PWA (Correção Final)
+- [x] Identificar que o problema está no AssistenteWidget.tsx (widget PWA) e não na página normal
+- [x] Adicionar classes CSS específicas para o widget
+- [x] Implementar estilos para forçar quebra de linha e overflow
+- [ ] Testar em dispositivo móvel real

@@ -184,7 +184,7 @@ export default function AssistenteWidget() {
       ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-violet-50 to-purple-100 flex flex-col">
+    <div className="widget-chat-container min-h-screen bg-gradient-to-br from-violet-50 to-purple-100 flex flex-col">
       {/* Header Compacto */}
       <header className="bg-violet-600 text-white p-3 sticky top-0 z-10 shadow-md">
         <div className="flex items-center justify-between">
@@ -309,21 +309,18 @@ export default function AssistenteWidget() {
                     </div>
                   )}
                   <div
-                    className={`max-w-[calc(100%-2.5rem)] rounded-lg px-3 py-2 ${
+                    className={`widget-message rounded-lg px-3 py-2 ${
                       msg.role === 'user'
                         ? 'bg-violet-600 text-white'
                         : 'bg-white shadow-sm'
                     }`}
-                    style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}
                   >
                     {msg.role === 'assistant' ? (
-                      <div className="prose prose-sm dark:prose-invert max-w-none text-sm [&_p]:break-words [&_li]:break-words [&_h1]:break-words [&_h2]:break-words [&_h3]:break-words [&_strong]:break-words">
-                        <div className="overflow-x-auto [&_table]:min-w-0 [&_table]:text-xs [&_table]:w-full [&_th]:px-2 [&_th]:py-1 [&_th]:whitespace-nowrap [&_td]:px-2 [&_td]:py-1 [&_td]:whitespace-normal">
-                          <Streamdown>{msg.content}</Streamdown>
-                        </div>
+                      <div className="widget-message-content text-sm">
+                        <Streamdown>{msg.content}</Streamdown>
                       </div>
                     ) : (
-                      <p className="text-sm whitespace-pre-wrap break-words">{msg.content}</p>
+                      <p className="text-sm whitespace-pre-wrap" style={{ wordBreak: 'break-word' }}>{msg.content}</p>
                     )}
                     <p className={`text-[10px] mt-1 ${msg.role === 'user' ? 'text-violet-200' : 'text-muted-foreground'}`}>
                       {msg.timestamp.toLocaleTimeString('pt-PT', { 
