@@ -2662,3 +2662,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## UI v6.7 - Mover botão de tema
 - [x] Mover botão de modo escuro/claro para o header junto ao seletor de idioma
 - [x] Remover botão flutuante do canto inferior direito
+
+## Remoção v6.8 - Sistema de Atalhos de Teclado
+- [x] Remover componente KeyboardShortcutsHelp
+- [x] Remover importação e uso do componente no DashboardLayout
+- [x] Testar que a aplicação funciona sem erros

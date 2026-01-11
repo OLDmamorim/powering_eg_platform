@@ -37,8 +37,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
-import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
-import { KeyboardShortcutsHelp } from "@/components/KeyboardShortcutsHelp";
 import { Button } from "./ui/button";
 
 import { Building2, ClipboardList, FileText, ListTodo, Sparkles, History, Bell, Settings, Tag, BarChart3, UserCog, CalendarDays, Store, TrendingUp, GitCompare, Users2, AlertTriangle, Bot, MessageSquarePlus } from "lucide-react";
@@ -275,8 +273,6 @@ function DashboardLayoutContent({
   });
   const alertasCount = alertasPendentes?.length || 0;
   
-  // Atalhos de teclado
-  useKeyboardShortcuts();
 
   useEffect(() => {
     if (isCollapsed) {
@@ -486,7 +482,6 @@ function DashboardLayoutContent({
           <Breadcrumbs />
           {children}
 
-          <KeyboardShortcutsHelp />
           <div className="fixed bottom-4 right-4 text-xs text-foreground/60 select-none pointer-events-none">
             v6.5
           </div>
