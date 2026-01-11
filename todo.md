@@ -2639,4 +2639,4 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Corrigir texto cortado na margem direita em respostas longas
 - [x] Adicionar scroll horizontal para tabelas
 - [x] Melhorar word-wrap para textos grandes
-- [ ] Testar em dispositivos móveis
+- [x] Testar em dispositivos móveis
