@@ -18,10 +18,13 @@ import { useState, useMemo } from "react";
 import { toast } from "sonner";
 import { CategoriaAutocomplete } from "@/components/CategoriaAutocomplete";
 import { EstadoAcompanhamentoSelect, EstadoAcompanhamentoBadge } from "@/components/EstadoAcompanhamento";
+import { useDemo } from "@/contexts/DemoContext";
+import { demoRelatoriosLivres, demoRelatoriosCompletos, demoLojas, demoGestores } from "@/lib/demoData";
 
 export default function Relatorios() {
   const { user } = useAuth();
   const { language, t } = useLanguage();
+  const { isDemo } = useDemo();
   const [location, setLocation] = useLocation();
   const [expandedLivres, setExpandedLivres] = useState<number[]>([]);
   const [expandedCompletos, setExpandedCompletos] = useState<number[]>([]);
@@ -49,14 +52,20 @@ export default function Relatorios() {
 
   const utils = trpc.useUtils();
 
-  const { data: relatoriosLivres, isLoading: loadingLivres } =
-    trpc.relatoriosLivres.list.useQuery({ apenasNaoVistos });
-  const { data: relatoriosCompletos, isLoading: loadingCompletos } =
-    trpc.relatoriosCompletos.list.useQuery({ apenasNaoVistos });
-  const { data: countLivresNaoVistos } = trpc.relatoriosLivres.countNaoVistos.useQuery();
-  const { data: countCompletosNaoVistos } = trpc.relatoriosCompletos.countNaoVistos.useQuery();
-  const { data: lojas } = trpc.lojas.list.useQuery();
-  const { data: gestores } = trpc.gestores.list.useQuery();
+  const { data: relatoriosLivresReais, isLoading: loadingLivres } =
+    trpc.relatoriosLivres.list.useQuery({ apenasNaoVistos }, { enabled: !isDemo });
+  const { data: relatoriosCompletosReais, isLoading: loadingCompletos } =
+    trpc.relatoriosCompletos.list.useQuery({ apenasNaoVistos }, { enabled: !isDemo });
+  const { data: countLivresNaoVistos } = trpc.relatoriosLivres.countNaoVistos.useQuery(undefined, { enabled: !isDemo });
+  const { data: countCompletosNaoVistos } = trpc.relatoriosCompletos.countNaoVistos.useQuery(undefined, { enabled: !isDemo });
+  const { data: lojasReais } = trpc.lojas.list.useQuery(undefined, { enabled: !isDemo });
+  const { data: gestoresReais } = trpc.gestores.list.useQuery(undefined, { enabled: !isDemo });
+  
+  // Usar dados demo ou reais
+  const relatoriosLivres = isDemo ? demoRelatoriosLivres : relatoriosLivresReais;
+  const relatoriosCompletos = isDemo ? demoRelatoriosCompletos : relatoriosCompletosReais;
+  const lojas = isDemo ? demoLojas : lojasReais;
+  const gestores = isDemo ? demoGestores : gestoresReais;
   
   // Query para categorias (apenas admin)
   const { data: categorias } = trpc.categorizacao.getCategorias.useQuery(undefined, {

@@ -27,10 +27,13 @@ import { useState, useRef } from "react";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
 import * as XLSX from 'xlsx';
+import { useDemo } from "@/contexts/DemoContext";
+import { demoLojas } from "@/lib/demoData";
 
 export default function Lojas() {
   const { user } = useAuth();
   const { language, t } = useLanguage();
+  const { isDemo } = useDemo();
   const [, setLocation] = useLocation();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
@@ -50,7 +53,10 @@ export default function Lojas() {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 
   const utils = trpc.useUtils();
-  const { data: lojas, isLoading } = trpc.lojas.list.useQuery();
+  const { data: lojasReais, isLoading } = trpc.lojas.list.useQuery(undefined, { enabled: !isDemo });
+  
+  // Usar dados demo ou reais
+  const lojas = isDemo ? demoLojas : lojasReais;
 
   const createMutation = trpc.lojas.create.useMutation({
     onSuccess: () => {

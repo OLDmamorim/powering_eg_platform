@@ -27,10 +27,13 @@ import { Building2, Edit, Plus, Trash2, User, ShieldCheck, Search } from "lucide
 import { useState } from "react";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
+import { useDemo } from "@/contexts/DemoContext";
+import { demoGestores, demoLojas } from "@/lib/demoData";
 
 export default function Gestores() {
   const { user } = useAuth();
   const { language, t } = useLanguage();
+  const { isDemo } = useDemo();
   const [, setLocation] = useLocation();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -45,8 +48,12 @@ export default function Gestores() {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 
   const utils = trpc.useUtils();
-  const { data: gestores, isLoading } = trpc.gestores.list.useQuery();
-  const { data: lojas, isLoading: isLoadingLojas } = trpc.lojas.list.useQuery();
+  const { data: gestoresReais, isLoading } = trpc.gestores.list.useQuery(undefined, { enabled: !isDemo });
+  const { data: lojasReais, isLoading: isLoadingLojas } = trpc.lojas.list.useQuery(undefined, { enabled: !isDemo });
+  
+  // Usar dados demo ou reais
+  const gestores = isDemo ? demoGestores : gestoresReais;
+  const lojas = isDemo ? demoLojas : lojasReais;
   const { data: gestorLojas } = trpc.gestores.getLojas.useQuery(
     { gestorId: selectedGestor?.id },
     { enabled: !!selectedGestor }

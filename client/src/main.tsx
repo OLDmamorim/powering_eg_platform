@@ -8,6 +8,7 @@ import App from "./App";
 import { getLoginUrl } from "./const";
 import "./index.css";
 import { LanguageProvider } from "./contexts/LanguageContext";
+import { DemoProvider } from "./contexts/DemoContext";
 
 const queryClient = new QueryClient();
 
@@ -57,7 +58,9 @@ createRoot(document.getElementById("root")!).render(
   <trpc.Provider client={trpcClient} queryClient={queryClient}>
     <QueryClientProvider client={queryClient}>
       <LanguageProvider>
-        <App />
+        <DemoProvider>
+          <App />
+        </DemoProvider>
       </LanguageProvider>
     </QueryClientProvider>
   </trpc.Provider>

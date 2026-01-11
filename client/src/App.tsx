@@ -43,6 +43,7 @@ import RelatorioBoard from "./pages/RelatorioBoard";
 import AssistenteIA from "./pages/AssistenteIA";
 import AssistenteWidget from "./pages/AssistenteWidget";
 import TopicosReuniao from "./pages/TopicosReuniao";
+import { DemoBanner } from "./components/DemoBanner";
 
 
 function Router() {
@@ -120,6 +121,7 @@ function App() {
       <ThemeProvider defaultTheme="light" switchable>
         <TooltipProvider>
           <Toaster />
+          <DemoBanner />
           <Router />
         </TooltipProvider>
       </ThemeProvider>

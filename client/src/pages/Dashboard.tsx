@@ -10,6 +10,8 @@ import { useLocation } from "wouter";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { ReminderDialog } from "@/components/ReminderDialog";
 import { RelatorioIACategorias } from "@/components/RelatorioIACategorias";
+import { useDemo } from "@/contexts/DemoContext";
+import { demoLojas, demoGestores, demoRelatoriosLivres, demoRelatoriosCompletos, demoPendentes, demoAlertas, demoEstatisticas, demoAtividadeRecente, demoUser } from "@/lib/demoData";
 
 // Componente de indicador de variação
 function VariationIndicator({ current, previous, suffix = "", language = 'pt' }: { current: number; previous: number; suffix?: string; language?: string }) {
@@ -216,20 +218,33 @@ function LembretesResumosGlobais({ isAdmin, isGestor, setLocation }: { isAdmin: 
 }
 
 export default function Dashboard() {
-  const { user } = useAuth();
+  const { user: realUser } = useAuth();
+  const { isDemo } = useDemo();
   const [, setLocation] = useLocation();
   const { language, t } = useLanguage();
+  
+  // Em modo demo, usar utilizador demo
+  const user = isDemo ? demoUser : realUser;
   const isAdmin = user?.role === "admin";
   const isGestor = user?.role === "gestor";
   const [showReminder, setShowReminder] = useState(false);
   const [showRelatorioBoard, setShowRelatorioBoard] = useState(false);
 
-  const { data: lojas } = trpc.lojas.list.useQuery(undefined, { enabled: isAdmin });
-  const { data: gestores } = trpc.gestores.list.useQuery(undefined, { enabled: isAdmin });
-  const { data: minhasLojas } = trpc.lojas.getByGestor.useQuery(undefined, { enabled: isGestor });
-  const { data: relatoriosLivres } = trpc.relatoriosLivres.list.useQuery();
-  const { data: relatoriosCompletos } = trpc.relatoriosCompletos.list.useQuery();
-  const { data: pendentes } = trpc.pendentes.list.useQuery();
+  // Queries reais (desativadas em modo demo)
+  const { data: lojasReais } = trpc.lojas.list.useQuery(undefined, { enabled: isAdmin && !isDemo });
+  const { data: gestoresReais } = trpc.gestores.list.useQuery(undefined, { enabled: isAdmin && !isDemo });
+  const { data: minhasLojasReais } = trpc.lojas.getByGestor.useQuery(undefined, { enabled: isGestor && !isDemo });
+  const { data: relatoriosLivresReais } = trpc.relatoriosLivres.list.useQuery(undefined, { enabled: !isDemo });
+  const { data: relatoriosCompletosReais } = trpc.relatoriosCompletos.list.useQuery(undefined, { enabled: !isDemo });
+  const { data: pendentesReais } = trpc.pendentes.list.useQuery(undefined, { enabled: !isDemo });
+  
+  // Usar dados demo ou reais
+  const lojas = isDemo ? demoLojas : lojasReais;
+  const gestores = isDemo ? demoGestores : gestoresReais;
+  const minhasLojas = isDemo ? demoLojas.slice(0, 3) : minhasLojasReais;
+  const relatoriosLivres = isDemo ? demoRelatoriosLivres : relatoriosLivresReais;
+  const relatoriosCompletos = isDemo ? demoRelatoriosCompletos : relatoriosCompletosReais;
+  const pendentes = isDemo ? demoPendentes : pendentesReais;
   
   // Progresso e atrasos de relatórios (apenas para gestor)
   const { data: progressoLojas } = trpc.lojas.getProgressoGestor.useQuery(undefined, { enabled: isGestor });
@@ -256,7 +271,8 @@ export default function Dashboard() {
   const { data: pendentesNaoVistos } = trpc.pendentes.countNaoVistos.useQuery(undefined, { enabled: isAdmin });
   
   // Contagem de alertas pendentes
-  const { data: alertas } = trpc.alertas.list.useQuery();
+  const { data: alertasReais } = trpc.alertas.list.useQuery(undefined, { enabled: !isDemo });
+  const alertas = isDemo ? demoAlertas : alertasReais;
   
   // Resultados do mês anterior (para quadro de resumo)
   const mesAnterior = useMemo(() => {
@@ -292,8 +308,9 @@ export default function Dashboard() {
   const { data: tarefasNaoVistas = 0 } = trpc.todos.countNaoVistosGestor.useQuery();
   
   // Previsões e Feed de Atividades (apenas admin)
-  const { data: previsoes, isLoading: previsoesLoading, refetch: refetchPrevisoes } = trpc.previsoes.list.useQuery(undefined, { enabled: isAdmin });
-  const { data: atividades, isLoading: atividadesLoading } = trpc.atividades.list.useQuery({ limite: 20 }, { enabled: isAdmin });
+  const { data: previsoes, isLoading: previsoesLoading, refetch: refetchPrevisoes } = trpc.previsoes.list.useQuery(undefined, { enabled: isAdmin && !isDemo });
+  const { data: atividadesReais, isLoading: atividadesLoading } = trpc.atividades.list.useQuery({ limite: 20 }, { enabled: isAdmin && !isDemo });
+  const atividades = isDemo ? demoAtividadeRecente : atividadesReais;
   const gerarPrevisoesMutation = trpc.previsoes.gerarEGuardar.useMutation({
     onSuccess: () => refetchPrevisoes(),
   });

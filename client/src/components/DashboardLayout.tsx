@@ -29,6 +29,8 @@ import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
 import { useTheme } from "@/contexts/ThemeContext";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useDemo } from "@/contexts/DemoContext";
+import { demoUser } from "@/lib/demoData";
 import {
   Select,
   SelectContent,
@@ -192,14 +194,19 @@ export default function DashboardLayout({
     const saved = localStorage.getItem(SIDEBAR_WIDTH_KEY);
     return saved ? parseInt(saved, 10) : DEFAULT_WIDTH;
   });
-  const { loading, user } = useAuth();
+  const { loading, user: realUser } = useAuth();
+  const { isDemo } = useDemo();
+  
+  // Em modo demo, usar utilizador demo
+  const user = isDemo ? demoUser : realUser;
+  const effectiveLoading = isDemo ? false : loading;
   const { theme, toggleTheme, switchable } = useTheme();
 
   useEffect(() => {
     localStorage.setItem(SIDEBAR_WIDTH_KEY, sidebarWidth.toString());
   }, [sidebarWidth]);
 
-  if (loading) {
+  if (effectiveLoading) {
     return <DashboardLayoutSkeleton />
   }
 

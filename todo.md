@@ -2670,3 +2670,16 @@ NOTA: Sistema de email requer configuração externa no deployment
 
 ## Widget Chatbot v6.5
 - [x] Adicionar suporte para modo claro/escuro ao widget do chatbot PoweringEG
+
+## Modo Demo v6.7 - Portal de Demonstração
+- [x] Criar contexto DemoContext para controlar modo demo
+- [x] Criar ficheiro de dados fictícios (lojas, gestores, resultados, relatórios)
+- [x] Implementar hook useDemoMode para verificar se está em modo demo
+- [x] Criar provider que substitui dados reais por fictícios quando em modo demo
+- [x] Ativar modo demo via URL (?demo=true) ou utilizador específico
+- [x] Integrar modo demo no Dashboard
+- [x] Integrar modo demo nas páginas de Lojas e Gestores
+- [x] Integrar modo demo nos Resultados
+- [x] Integrar modo demo nos Relatórios
+- [x] Testar modo demo completo
+- [x] Documentar como ativar/desativar modo demo

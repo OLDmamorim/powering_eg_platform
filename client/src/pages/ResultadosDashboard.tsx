@@ -16,6 +16,8 @@ import { GraficoEvolucaoHistorica } from '../components/GraficoEvolucaoHistorica
 import { ResultadosChatbot } from '../components/ResultadosChatbot';
 import FiltroMesesCheckbox, { type MesSelecionado, gerarLabelMeses } from '../components/FiltroMesesCheckbox';
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useDemo } from "@/contexts/DemoContext";
+import { demoResultadosMensais, demoLojas, demoTotaisGlobais } from "@/lib/demoData";
 
 // Registar componentes do Chart.js
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
@@ -24,6 +26,7 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 export function ResultadosDashboard() {
   
   const { user } = useAuth();
+  const { isDemo } = useDemo();
   
   // Buscar dados do gestor se usuário for gestor
   const { data: gestorData, isLoading: loadingGestorData } = trpc.gestores.me.useQuery(
