@@ -2683,3 +2683,4 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Integrar modo demo nos Relatórios
 - [x] Testar modo demo completo
 - [x] Documentar como ativar/desativar modo demo
+- [x] Corrigir traduções em falta na página Histórico da Loja (chaves como configurarAnalise, periodoSelecioneMeses, etc.)
