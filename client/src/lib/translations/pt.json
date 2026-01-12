@@ -990,7 +990,15 @@
     "verCompleto": "Ver Completo",
     "exportarPDF": "Exportar PDF",
     "semRelatorios": "Nenhum relatório IA gerado",
-    "gerarNovo": "Gerar Novo Relatório"
+    "gerarNovo": "Gerar Novo Relatório",
+    "filtrosPeriodo": "Filtros de Período",
+    "filtreRelatoriosPorIntervalo": "Filtre relatórios por intervalo de datas",
+    "dataInicio": "Data Início",
+    "dataFim": "Data Fim",
+    "compararRelatorios": "Comparar Relatórios",
+    "limparFiltros": "Limpar Filtros",
+    "nenhumRelatorioEncontrado": "Nenhum relatório IA encontrado.",
+    "gereRelatoriosPagina": "Gere relatórios na página Relatórios IA."
   },
   "resultadosDashboard": {
     "title": "Dashboard de Resultados",

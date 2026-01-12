@@ -2719,3 +2719,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Investigar erro "insertBefore" ao adicionar fotos
 - [x] Corrigir componente de upload de imagens (useCallback, melhor tratamento de erros)
 - [x] Testar funcionalidade de upload de fotos (testado com 4 imagens)
+
+## Bug v6.6 - Traduções em falta na página Histórico de Relatórios IA
+- [x] Adicionar tradução: historicoRelatoriosIA.filtrosPeriodo
+- [x] Adicionar tradução: historicoRelatoriosIA.filtreRelatoriosPorIntervalo
+- [x] Adicionar tradução: historicoRelatoriosIA.dataInicio
+- [x] Adicionar tradução: historicoRelatoriosIA.dataFim
+- [x] Adicionar tradução: historicoRelatoriosIA.compararRelatorios
