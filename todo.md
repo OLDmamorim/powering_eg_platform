@@ -2689,3 +2689,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 
 ## Bug v6.4.6 - Botão de Tema Desktop
 - [x] Corrigir botão de alternância de tema (claro/escuro) em falta na versão desktop
+
+
+## Bug v6.5.2 - Ordenação de Pendentes
+- [x] Corrigir ordenação dos pendentes para aparecerem por ordem alfabética de loja

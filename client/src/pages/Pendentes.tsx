@@ -127,7 +127,13 @@ export default function Pendentes() {
           </div>
         ) : pendentesPorLoja && Object.keys(pendentesPorLoja).length > 0 ? (
           <div className="space-y-4">
-            {Object.values(pendentesPorLoja).map((grupo: any) => (
+            {Object.values(pendentesPorLoja)
+              .sort((a: any, b: any) => {
+                const nomeA = (a.loja?.nome || '').toLowerCase();
+                const nomeB = (b.loja?.nome || '').toLowerCase();
+                return nomeA.localeCompare(nomeB, 'pt');
+              })
+              .map((grupo: any) => (
               <Card key={grupo.loja?.id}>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
