@@ -444,6 +444,7 @@ function DashboardLayoutContent({
       </div>
 
       <SidebarInset>
+        {/* Header Mobile */}
         {isMobile && (
           <div className="flex border-b h-14 items-center justify-between bg-background/95 px-2 backdrop-blur supports-[backdrop-filter]:backdrop-blur sticky top-0 z-40">
             <div className="flex items-center gap-2">
@@ -456,6 +457,38 @@ function DashboardLayoutContent({
                 </div>
               </div>
             </div>
+            <div className="flex items-center gap-2">
+              {switchable && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={toggleTheme}
+                  className="h-8 w-8 p-0"
+                  title={theme === 'light' ? (language === 'pt' ? 'Modo Escuro' : 'Dark Mode') : (language === 'pt' ? 'Modo Claro' : 'Light Mode')}
+                >
+                  {theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+                </Button>
+              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setLanguage(language === 'pt' ? 'en' : 'pt')}
+                className="h-8 px-2 text-xs font-medium"
+              >
+                <Globe className="h-4 w-4 mr-1" />
+                {language.toUpperCase()}
+              </Button>
+              <img 
+                src="/eglass-logo.png" 
+                alt="ExpressGlass Logo" 
+                className="h-8 w-auto object-contain"
+              />
+            </div>
+          </div>
+        )}
+        {/* Header Desktop */}
+        {!isMobile && (
+          <div className="flex h-12 items-center justify-end bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:backdrop-blur sticky top-0 z-40 border-b">
             <div className="flex items-center gap-2">
               {switchable && (
                 <Button

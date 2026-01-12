@@ -2686,3 +2686,6 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Corrigir traduções em falta na página Histórico da Loja (chaves como configurarAnalise, periodoSelecioneMeses, etc.)
 - [x] Adicionar secção de recomendações IA em texto no final do Histórico da Loja
 - [x] Adicionar traduções em falta na página Nova Ocorrência Estrutural (pt.json e en.json)
+
+## Bug v6.4.6 - Botão de Tema Desktop
+- [x] Corrigir botão de alternância de tema (claro/escuro) em falta na versão desktop
