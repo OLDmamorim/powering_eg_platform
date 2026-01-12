@@ -2726,3 +2726,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar tradução: historicoRelatoriosIA.dataInicio
 - [x] Adicionar tradução: historicoRelatoriosIA.dataFim
 - [x] Adicionar tradução: historicoRelatoriosIA.compararRelatorios
+
+## Bug v6.6.2 - Traduções em falta na página Tópicos Reunião
+- [x] Adicionar tradução: topicos.titulo
+- [x] Adicionar tradução: topicos.descricaoGestor
+- [x] Adicionar tradução: topicos.comoFunciona

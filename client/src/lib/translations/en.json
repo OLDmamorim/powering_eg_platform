@@ -1324,5 +1324,17 @@
     "erroExportar": "Error exporting category",
     "estadoAtualizado": "Status updated",
     "erroAtualizarEstado": "Error updating status"
+  },
+  "topicos": {
+    "titulo": "Meeting Topics",
+    "descricaoGestor": "Submit topics to be discussed in the next managers meeting",
+    "descricaoAdmin": "Topics submitted by managers for discussion",
+    "comoFunciona": "How does it work?",
+    "insiraTitulo": "Please enter a title for the topic",
+    "atualizadoSucesso": "Topic updated successfully!",
+    "submetidoSucesso": "Topic submitted successfully!",
+    "erroGuardar": "Error saving topic",
+    "eliminadoSucesso": "Topic deleted successfully!",
+    "erroEliminar": "Error deleting topic"
   }
 }

@@ -1302,5 +1302,17 @@
     "erroExportar": "Erro ao exportar categoria",
     "estadoAtualizado": "Estado atualizado",
     "erroAtualizarEstado": "Erro ao atualizar estado"
+  },
+  "topicos": {
+    "titulo": "Tópicos para Reunião",
+    "descricaoGestor": "Submeta tópicos para serem discutidos na próxima reunião de gestores",
+    "descricaoAdmin": "Tópicos submetidos pelos gestores para discussão",
+    "comoFunciona": "Como funciona?",
+    "insiraTitulo": "Por favor, insira um título para o tópico",
+    "atualizadoSucesso": "Tópico atualizado com sucesso!",
+    "submetidoSucesso": "Tópico submetido com sucesso!",
+    "erroGuardar": "Erro ao guardar tópico",
+    "eliminadoSucesso": "Tópico eliminado com sucesso!",
+    "erroEliminar": "Erro ao eliminar tópico"
   }
 }
