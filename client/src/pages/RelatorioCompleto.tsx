@@ -15,7 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { trpc } from "@/lib/trpc";
 import { ChevronLeft, ChevronRight, Plus, Save, X, Image, Upload, Loader2 } from "lucide-react";
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback } from "react";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
 import { SugestoesModal } from "@/components/SugestoesModal";
@@ -147,7 +147,7 @@ export default function RelatorioCompleto() {
     }
   };
 
-  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
@@ -162,91 +162,115 @@ export default function RelatorioCompleto() {
           continue;
         }
 
-        // Comprimir imagem antes de fazer upload
-        const options = {
-          maxSizeMB: 1,
-          maxWidthOrHeight: 1920,
-          useWebWorker: true,
-          fileType: 'image/jpeg' as const,
-          initialQuality: 0.8, // Qualidade 80%
-        };
-        
-        console.log('Comprimindo ficheiro:', file.name, 'tamanho original:', file.size);
-        const compressedFile = await imageCompression(file, options);
-        console.log('Ficheiro comprimido:', compressedFile.name, 'novo tamanho:', compressedFile.size);
-
-        // Converter para base64
-        const reader = new FileReader();
-        const base64Promise = new Promise<string>((resolve, reject) => {
-          reader.onload = () => {
-            const base64 = (reader.result as string).split(',')[1];
-            resolve(base64);
+        try {
+          // Comprimir imagem antes de fazer upload
+          const options = {
+            maxSizeMB: 1,
+            maxWidthOrHeight: 1920,
+            useWebWorker: true,
+            fileType: 'image/jpeg' as const,
+            initialQuality: 0.8,
           };
-          reader.onerror = reject;
-          reader.readAsDataURL(compressedFile);
-        });
-        
-        const photoBase64 = await base64Promise;
-        
-        // Upload via backend tRPC
-        console.log('Enviando para backend via tRPC');
-        const result = await uploadPhotoMutation.mutateAsync({
-          photoBase64,
-          mimeType: compressedFile.type,
-        });
-        
-        console.log('Resultado do upload:', result);
-        if (result.url) {
-          newFotos.push(result.url);
+          
+          console.log('Comprimindo ficheiro:', file.name, 'tamanho original:', file.size);
+          let compressedFile: File | Blob;
+          try {
+            compressedFile = await imageCompression(file, options);
+            console.log('Ficheiro comprimido:', (compressedFile as File).name || 'blob', 'novo tamanho:', compressedFile.size);
+          } catch (compressionError) {
+            console.warn('Erro na compressão, usando ficheiro original:', compressionError);
+            compressedFile = file;
+          }
+
+          // Converter para base64
+          const base64Promise = new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+              try {
+                const result = reader.result as string;
+                const base64 = result.split(',')[1];
+                if (!base64) {
+                  reject(new Error('Falha ao extrair base64'));
+                  return;
+                }
+                resolve(base64);
+              } catch (err) {
+                reject(err);
+              }
+            };
+            reader.onerror = () => reject(new Error('Erro ao ler ficheiro'));
+            reader.readAsDataURL(compressedFile);
+          });
+          
+          const photoBase64 = await base64Promise;
+          
+          // Upload via backend tRPC
+          console.log('Enviando para backend via tRPC');
+          const result = await uploadPhotoMutation.mutateAsync({
+            photoBase64,
+            mimeType: compressedFile.type || 'image/jpeg',
+          });
+          
+          console.log('Resultado do upload:', result);
+          if (result.url) {
+            newFotos.push(result.url);
+          }
+        } catch (fileError) {
+          console.error('Erro ao processar ficheiro:', file.name, fileError);
+          toast.error(`Erro ao processar ${file.name}`);
         }
       }
 
-      setFotos([...fotos, ...newFotos]);
       if (newFotos.length > 0) {
+        setFotos(prev => [...prev, ...newFotos]);
         toast.success(`${newFotos.length} foto(s) adicionada(s)`);
         
-        // Analisar fotos automaticamente com IA
+        // Analisar fotos automaticamente com IA (em background, sem bloquear)
         toast.info(language === 'pt' ? "⚡ A analisar fotos com IA..." : "⚡ Analyzing photos with AI...");
-        try {
-          const analyses = await analyzePhotosMutation.mutateAsync({ imageUrls: newFotos });
-          
-          // Coletar pendentes sugeridos
-          const allSuggestedPendentes: string[] = [];
-          analyses.forEach((analysis: any) => {
-            if (analysis.suggestedPendentes.length > 0) {
-              allSuggestedPendentes.push(...analysis.suggestedPendentes);
-            }
-          });
-          
-          // Adicionar pendentes sugeridos aos existentes
-          if (allSuggestedPendentes.length > 0) {
-            setPendentes(prev => {
-              const filtered = prev.filter(p => p.trim() !== "");
-              return [...filtered, ...allSuggestedPendentes];
+        analyzePhotosMutation.mutateAsync({ imageUrls: newFotos })
+          .then((analyses) => {
+            const allSuggestedPendentes: string[] = [];
+            analyses.forEach((analysis: any) => {
+              if (analysis.suggestedPendentes && analysis.suggestedPendentes.length > 0) {
+                allSuggestedPendentes.push(...analysis.suggestedPendentes);
+              }
             });
-            toast.success(`🤖 IA identificou ${allSuggestedPendentes.length} pendente(s) nas fotos!`);
-          } else {
-            toast.success(language === 'pt' ? "✅ IA não identificou problemas nas fotos" : "✅ AI found no issues in photos");
-          }
-        } catch (error) {
-          console.error("Erro ao analisar fotos:", error);
-          toast.warning(language === 'pt' ? "Não foi possível analisar as fotos automaticamente" : "Could not analyze photos automatically");
-        }
+            
+            if (allSuggestedPendentes.length > 0) {
+              setPendentes(prev => {
+                const filtered = prev.filter(p => p.trim() !== "");
+                return [...filtered, ...allSuggestedPendentes];
+              });
+              toast.success(`🤖 IA identificou ${allSuggestedPendentes.length} pendente(s) nas fotos!`);
+            } else {
+              toast.success(language === 'pt' ? "✅ IA não identificou problemas nas fotos" : "✅ AI found no issues in photos");
+            }
+          })
+          .catch((error) => {
+            console.error("Erro ao analisar fotos:", error);
+            toast.warning(language === 'pt' ? "Não foi possível analisar as fotos automaticamente" : "Could not analyze photos automatically");
+          });
       }
     } catch (error) {
       console.error('Erro no upload:', error);
-      toast.error('Erro ao fazer upload das fotos');
+      toast.error(language === 'pt' ? 'Erro ao fazer upload das fotos' : 'Error uploading photos');
     } finally {
       setUploading(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
+      // Limpar inputs de forma segura
+      requestAnimationFrame(() => {
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+        if (cameraInputRef.current) {
+          cameraInputRef.current.value = '';
+        }
+      });
     }
-  };
+  }, [language, uploadPhotoMutation, analyzePhotosMutation]);
 
-  const handleRemoveFoto = (index: number) => {
-    setFotos(fotos.filter((_, i) => i !== index));
-  };
+  const handleRemoveFoto = useCallback((index: number) => {
+    setFotos(prev => prev.filter((_, i) => i !== index));
+  }, []);
 
   // Mutation para atualizar pendentes existentes
   const updatePendentesMutation = trpc.pendentes.updateBatch.useMutation();
@@ -696,11 +720,12 @@ export default function RelatorioCompleto() {
             {fotos.length > 0 && (
               <div className="flex flex-wrap gap-2 mt-2">
                 {fotos.map((foto, index) => (
-                  <div key={index} className="relative group">
+                  <div key={`foto-${foto.slice(-20)}-${index}`} className="relative group">
                     <img
                       src={foto}
                       alt={`Foto ${index + 1}`}
                       className="w-24 h-24 object-cover rounded-lg border"
+                      loading="lazy"
                     />
                     <button
                       type="button"

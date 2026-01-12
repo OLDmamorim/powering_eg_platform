@@ -2714,3 +2714,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar reuniões de lojas à secção "Atividade Recente" do Dashboard
 - [x] Mostrar reuniões junto com relatórios livres e completos
 - [x] Identificar tipo de atividade (Reunião Loja, Relatório Livre, Relatório Completo)
+
+## Bug v3.6 - NotFoundError ao adicionar fotos no Relatório Completo
+- [x] Investigar erro "insertBefore" ao adicionar fotos
+- [x] Corrigir componente de upload de imagens (useCallback, melhor tratamento de erros)
+- [x] Testar funcionalidade de upload de fotos (testado com 4 imagens)
