@@ -59,6 +59,7 @@ export interface LojaHistoryResult {
     justificativa: string;
     categoria: string;
   }[];
+  recomendacoesTexto?: string;
 }
 
 type PeriodoFiltro = 'mes_atual' | 'mes_anterior' | 'trimestre_anterior' | 'semestre_anterior' | 'ano_anterior';
@@ -456,7 +457,15 @@ Analisa o histórico completo de uma loja para o período especificado e gera in
 - Alertas operacionais que requerem atenção
 - Recomendações prioritárias baseadas nos dados
 
-Sê específico, objetivo e baseado em dados concretos. Categoriza os problemas e recomendações.`
+Sê específico, objetivo e baseado em dados concretos. Categoriza os problemas e recomendações.
+
+ALÉM DAS RECOMENDAÇÕES POR TÓPICOS, gera também um texto de recomendações em prosa (3-5 parágrafos) dirigido diretamente aos colegas da loja. Este texto deve:
+- Ser escrito de forma motivadora e prática
+- Usar linguagem direta e acessível (tutear os colegas)
+- Explicar onde se devem focar nos próximos tempos
+- Basear-se nos dados analisados
+- Dar prioridade às áreas mais críticas
+- Terminar com uma nota de encorajamento`
         },
         {
           role: "user",
@@ -545,9 +554,13 @@ Gera uma análise completa incluindo evolução, problemas, pontos fortes, alert
                   required: ["prioridade", "recomendacao", "justificativa", "categoria"],
                   additionalProperties: false
                 }
+              },
+              recomendacoesTexto: {
+                type: "string",
+                description: "Texto de recomendações em prosa (3-5 parágrafos) dirigido aos colegas da loja, explicando onde se devem focar nos próximos tempos com base na análise. Deve ser escrito de forma motivadora e prática, com linguagem direta e acessível."
               }
             },
-            required: ["resumoGeral", "evolucao", "problemasRecorrentes", "pontosFortes", "tendencias", "alertasOperacionais", "recomendacoes"],
+            required: ["resumoGeral", "evolucao", "problemasRecorrentes", "pontosFortes", "tendencias", "alertasOperacionais", "recomendacoes", "recomendacoesTexto"],
             additionalProperties: false
           }
         }

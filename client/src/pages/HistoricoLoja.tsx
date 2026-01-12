@@ -929,6 +929,61 @@ export default function HistoricoLoja() {
         }
       }
 
+      // ========== RECOMENDAÇÕES IA PARA A EQUIPA (TEXTO) ==========
+      if (historyData.recomendacoesTexto) {
+        checkPageSpace(80);
+        drawSectionHeader('Recomendações IA para a Equipa', COLORS.indigo);
+        
+        // Fundo do card
+        const paragrafos = historyData.recomendacoesTexto.split('\n').filter((p: string) => p.trim());
+        
+        // Calcular altura total necessária
+        doc.setFontSize(9);
+        let totalHeight = 20; // padding inicial
+        const allLines: string[][] = [];
+        paragrafos.forEach((paragrafo: string) => {
+          const lines = doc.splitTextToSize(paragrafo, pageWidth - 50);
+          allLines.push(lines);
+          totalHeight += lines.length * 5 + 8; // altura das linhas + espaço entre parágrafos
+        });
+        
+        // Card com fundo gradiente
+        doc.setFillColor(COLORS.indigoLight[0], COLORS.indigoLight[1], COLORS.indigoLight[2]);
+        doc.roundedRect(14, yPos, pageWidth - 28, totalHeight, 4, 4, 'F');
+        doc.setDrawColor(COLORS.indigo[0], COLORS.indigo[1], COLORS.indigo[2]);
+        doc.setLineWidth(0.5);
+        doc.roundedRect(14, yPos, pageWidth - 28, totalHeight, 4, 4, 'S');
+        
+        // Título dentro do card
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(COLORS.indigo[0], COLORS.indigo[1], COLORS.indigo[2]);
+        doc.text('Sugestões personalizadas para a equipa:', 20, yPos + 10);
+        
+        // Texto dos parágrafos
+        let textY = yPos + 20;
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(60, 60, 80);
+        
+        allLines.forEach((lines: string[]) => {
+          lines.forEach((line: string) => {
+            if (textY > pageHeight - 30) {
+              doc.addPage();
+              textY = 30;
+              // Redesenhar fundo na nova página
+              doc.setFillColor(COLORS.indigoLight[0], COLORS.indigoLight[1], COLORS.indigoLight[2]);
+              doc.roundedRect(14, 20, pageWidth - 28, pageHeight - 50, 4, 4, 'F');
+            }
+            doc.text(line, 20, textY);
+            textY += 5;
+          });
+          textY += 4; // espaço entre parágrafos
+        });
+        
+        yPos += totalHeight + 10;
+      }
+
       // ========== RODAPÉ EM TODAS AS PÁGINAS ==========
       const totalPages = doc.getNumberOfPages();
       for (let i = 1; i <= totalPages; i++) {
@@ -1762,6 +1817,34 @@ export default function HistoricoLoja() {
                           </div>
                         </div>
                       ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Recomendações IA - Texto para a Equipa */}
+            {historyData.recomendacoesTexto && (
+              <Card className="border-indigo-300 bg-gradient-to-br from-indigo-50 to-purple-50">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-indigo-900">
+                    <Target className="h-5 w-5" />
+                    Recomendações IA para a Equipa
+                  </CardTitle>
+                  <p className="text-sm text-indigo-600 mt-1">
+                    Sugestões personalizadas sobre onde a equipa se deve focar nos próximos tempos
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <div className="prose prose-indigo max-w-none">
+                    <div className="bg-white/80 rounded-xl p-6 border border-indigo-200 shadow-sm">
+                      {historyData.recomendacoesTexto.split('\n').map((paragrafo: string, index: number) => (
+                        paragrafo.trim() && (
+                          <p key={index} className="text-gray-700 leading-relaxed mb-4 last:mb-0">
+                            {paragrafo}
+                          </p>
+                        )
+                      ))}
+                    </div>
                   </div>
                 </CardContent>
               </Card>
