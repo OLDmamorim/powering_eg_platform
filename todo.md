@@ -2693,3 +2693,14 @@ NOTA: Sistema de email requer configuração externa no deployment
 
 ## Bug v6.5.2 - Ordenação de Pendentes
 - [x] Corrigir ordenação dos pendentes para aparecerem por ordem alfabética de loja
+
+
+## Bug v6.5.3 - Fábio Dias com nome errado e sem lojas
+- [x] Corrigir nome do Fábio Dias que aparece como "fdias" em vez do nome completo
+- [x] Verificar e corrigir associação de lojas ao gestor Fábio Dias
+
+## Bug v6.5.4 - Email de reunião de loja não enviado
+- [x] Investigar porque o email da reunião de Braga não foi enviado
+- [x] Verificar se há sugestão de envio automático após gravar reunião
+- [x] Corrigir problema de envio - usar sendEmail em vez de notifyOwner
+- [x] Adicionar sugestão automática de envio após gravar reunião de loja

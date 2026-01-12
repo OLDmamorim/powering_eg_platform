@@ -10,6 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Loader2, CalendarIcon, Plus, X, Save, Store, FileText, Tag, Info, Download, Mail, UserPlus, Image as ImageIcon, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
 import { pt, enUS } from "date-fns/locale";
@@ -46,6 +47,8 @@ export default function ReuniõesLojas() {
   const [modalAtribuir, setModalAtribuir] = useState(false);
   const [modalEmail, setModalEmail] = useState(false);
   const [filtros, setFiltros] = useState<any>({});
+  const [reuniaoRecenteCriada, setReuniaoRecenteCriada] = useState<{ id: number; lojaIds: number[] } | null>(null);
+  const [mostrarSugestaoEmail, setMostrarSugestaoEmail] = useState(false);
 
   // Admin vê todas as lojas, gestor vê apenas as suas
   const { data: todasLojas } = trpc.lojas.list.useQuery(undefined, {
@@ -102,6 +105,9 @@ export default function ReuniõesLojas() {
 
       toast.success(t('reunioesGestores.reuniaoCriada'));
       
+      // Guardar informação da reunião criada para sugestão de email
+      const lojaIdsCriados = [...lojasSelecionadas];
+      
       // Limpar formulário
       setData(new Date());
       setLojasSelecionadas([]);
@@ -112,7 +118,13 @@ export default function ReuniõesLojas() {
       setMiniResumo(null);
       setMostrarFormulario(false);
       
-      refetch();
+      await refetch();
+      
+      // Mostrar sugestão de envio de email após gravar
+      if (result?.reuniao?.id) {
+        setReuniaoRecenteCriada({ id: result.reuniao.id, lojaIds: lojaIdsCriados });
+        setMostrarSugestaoEmail(true);
+      }
     } catch (error: any) {
       toast.error(error.message || t('reunioesGestores.erroCrear'));
     }
@@ -505,6 +517,41 @@ export default function ReuniõesLojas() {
           )}
         </CardContent>
       </Card>
+
+      {/* Modal de Sugestão de Envio de Email */}
+      <AlertDialog open={mostrarSugestaoEmail} onOpenChange={setMostrarSugestaoEmail}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <Mail className="h-5 w-5 text-primary" />
+              {language === 'pt' ? 'Enviar Resumo para a Loja?' : 'Send Summary to Store?'}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {language === 'pt' 
+                ? 'A reunião foi gravada com sucesso! Deseja enviar o resumo por email para a loja?'
+                : 'Meeting saved successfully! Would you like to send the summary by email to the store?'}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => {
+              setMostrarSugestaoEmail(false);
+              setReuniaoRecenteCriada(null);
+            }}>
+              {language === 'pt' ? 'Mais Tarde' : 'Later'}
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={() => {
+              if (reuniaoRecenteCriada) {
+                setReuniaoSelecionada(reuniaoRecenteCriada.id);
+                setMostrarSugestaoEmail(false);
+                setModalEmail(true);
+              }
+            }}>
+              <Mail className="h-4 w-4 mr-2" />
+              {language === 'pt' ? 'Enviar Agora' : 'Send Now'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Modais */}
       {reuniaoSelecionada && (

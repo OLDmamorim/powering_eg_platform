@@ -1,0 +1,28 @@
+{
+  "query": "SELECT u.id, u.name, u.email, u.openId, u.role, g.id as gestor_id, g.userId \nFROM users u \nLEFT JOIN gestores g ON g.userId = u.id \nWHERE u.name LIKE '%dias%' OR u.name LIKE '%fabio%' OR u.name LIKE '%fdias%' OR u.email LIKE '%dias%' OR u.email LIKE '%fabio%'",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT u.id, u.name, u.email, u.openId, u.role, g.id as gestor_id, g.userId \nFROM users u \nLEFT JOIN gestores g ON g.userId = u.id \nWHERE u.name LIKE '%dias%' OR u.name LIKE '%fabio%' OR u.name LIKE '%fdias%' OR u.email LIKE '%dias%' OR u.email LIKE '%fabio%'",
+  "rows": [
+    {
+      "id": "7980023",
+      "name": "Fabio Dias",
+      "email": "fdias@expressglass.pt",
+      "openId": "pending-fdias@expressglass.pt-1767693066310",
+      "role": "gestor",
+      "gestor_id": "1020001",
+      "userId": "7980023"
+    },
+    {
+      "id": "9990605",
+      "name": "fdias",
+      "email": "fdias@expressglass.pt",
+      "openId": "YnuQiuMPy6oY4G5M59XGtS",
+      "role": "gestor",
+      "gestor_id": "NULL",
+      "userId": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\temail\topenId\trole\tgestor_id\tuserId\n7980023\tFabio Dias\tfdias@expressglass.pt\tpending-fdias@expressglass.pt-1767693066310\tgestor\t1020001\t7980023\n9990605\tfdias\tfdias@expressglass.pt\tYnuQiuMPy6oY4G5M59XGtS\tgestor\tNULL\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 708
+}

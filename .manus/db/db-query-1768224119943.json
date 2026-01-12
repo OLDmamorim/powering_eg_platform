@@ -1,0 +1,32 @@
+{
+  "query": "SELECT * FROM users WHERE name LIKE '%dias%' OR email LIKE '%dias%' OR email LIKE '%fabio%'",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT * FROM users WHERE name LIKE '%dias%' OR email LIKE '%dias%' OR email LIKE '%fabio%'",
+  "rows": [
+    {
+      "id": "7980023",
+      "openId": "pending-fdias@expressglass.pt-1767693066310",
+      "name": "Fabio Dias",
+      "email": "fdias@expressglass.pt",
+      "loginMethod": "pending",
+      "role": "gestor",
+      "createdAt": "2026-01-06 09:51:06",
+      "updatedAt": "2026-01-11 11:05:21",
+      "lastSignedIn": "2026-01-06 09:51:06"
+    },
+    {
+      "id": "9990605",
+      "openId": "YnuQiuMPy6oY4G5M59XGtS",
+      "name": "fdias",
+      "email": "fdias@expressglass.pt",
+      "loginMethod": "email",
+      "role": "gestor",
+      "createdAt": "2026-01-12 13:16:24",
+      "updatedAt": "2026-01-12 13:16:40",
+      "lastSignedIn": "2026-01-12 13:16:40"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\topenId\tname\temail\tloginMethod\trole\tcreatedAt\tupdatedAt\tlastSignedIn\n7980023\tpending-fdias@expressglass.pt-1767693066310\tFabio Dias\tfdias@expressglass.pt\tpending\tgestor\t2026-01-06 09:51:06\t2026-01-11 11:05:21\t2026-01-06 09:51:06\n9990605\tYnuQiuMPy6oY4G5M59XGtS\tfdias\tfdias@expressglass.pt\temail\tgestor\t2026-01-12 13:16:24\t2026-01-12 13:16:40\t2026-01-12 13:16:40\n",
+  "stderr": "",
+  "execution_time_ms": 401
+}

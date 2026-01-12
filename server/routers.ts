@@ -2741,12 +2741,64 @@ export const appRouter = router({
           }
         }
         
-        // Enviar email
-        const { notifyOwner } = await import('./_core/notification');
-        await notifyOwner({
-          title: `Reunião de Loja - ${new Date(reuniao.data).toLocaleDateString('pt-PT')}`,
-          content: `Email enviado para ${input.emailDestino}: ${emailContent.substring(0, 200)}...`,
+        // Enviar email real para o destinatário
+        const { sendEmail } = await import('./emailService');
+        
+        // Construir HTML completo do email
+        const htmlEmail = `
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
+    .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; }
+    .header img { max-width: 150px; margin-bottom: 15px; }
+    .header h1 { color: white; margin: 0; font-size: 24px; }
+    .header p { color: rgba(255,255,255,0.9); margin: 10px 0 0 0; }
+    .content { padding: 30px; }
+    .info-box { background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+    .info-row { margin-bottom: 8px; }
+    .info-label { font-weight: bold; color: #666; }
+    h3 { color: #667eea; border-bottom: 2px solid #667eea; padding-bottom: 8px; margin-top: 25px; }
+    ul { padding-left: 20px; }
+    li { margin-bottom: 8px; line-height: 1.5; }
+    pre { background: #f8f9fa; padding: 15px; border-radius: 8px; white-space: pre-wrap; word-wrap: break-word; font-size: 14px; }
+    .footer { background: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #666; }
+    .priority-alta { color: #dc2626; font-weight: bold; }
+    .priority-media { color: #f59e0b; font-weight: bold; }
+    .priority-baixa { color: #10b981; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663088836799/YrkmGCRDVqYgFnZO.png" alt="ExpressGlass" />
+      <h1>Reunião de Loja</h1>
+      <p>${new Date(reuniao.data).toLocaleDateString('pt-PT', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+    </div>
+    <div class="content">
+      ${emailContent}
+    </div>
+    <div class="footer">
+      <p>Email enviado automaticamente pela PoweringEG Platform 2.0</p>
+      <p>${new Date().toLocaleDateString('pt-PT')} às ${new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })}</p>
+    </div>
+  </div>
+</body>
+</html>
+        `;
+        
+        const emailEnviado = await sendEmail({
+          to: input.emailDestino,
+          subject: `Reunião de Loja - ${lojasNomes.join(', ')} - ${new Date(reuniao.data).toLocaleDateString('pt-PT')}`,
+          html: htmlEmail,
         });
+        
+        if (!emailEnviado) {
+          throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Erro ao enviar email' });
+        }
         
         return { success: true };
       }),
