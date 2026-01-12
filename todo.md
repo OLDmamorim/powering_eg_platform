@@ -2731,3 +2731,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar tradução: topicos.titulo
 - [x] Adicionar tradução: topicos.descricaoGestor
 - [x] Adicionar tradução: topicos.comoFunciona
+
+## Bug v6.5.1 - Comparação de Períodos Mostra Dados Futuros
+- [x] Bug: Comparação Q3 2025 vs Q3 2026 mostra período futuro sem dados
+- [x] Investigar lógica de comparação de períodos no HistoricoLoja.tsx
+- [x] Corrigir para não mostrar períodos futuros ou indicar claramente que não há dados
+- [x] Testar funcionalidade corrigida

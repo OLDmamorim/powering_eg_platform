@@ -1166,6 +1166,16 @@ export default function HistoricoLoja() {
                 </CardTitle>
                 <p className="text-sm text-muted-foreground">{comparacaoData.lojaNome}</p>
               </div>
+              {comparacaoData.periodoFuturo && (
+                <div className="mt-2 p-2 bg-amber-100 border border-amber-300 rounded-lg text-amber-800 text-sm flex items-center gap-2">
+                  <AlertTriangle className="h-4 w-4" />
+                  <span>
+                    {language === 'pt' 
+                      ? 'O período selecionado ainda não decorreu. A comparação foi ajustada para os dois últimos períodos completos disponíveis.'
+                      : 'The selected period has not occurred yet. The comparison was adjusted to the last two complete available periods.'}
+                  </span>
+                </div>
+              )}
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Tabela Comparativa */}

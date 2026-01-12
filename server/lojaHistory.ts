@@ -644,103 +644,150 @@ interface PeriodoComparacao {
   label: string;
 }
 
-function calcularPeriodosComparacao(tipo: TipoComparacao): { periodo1: PeriodoComparacao; periodo2: PeriodoComparacao } {
+/**
+ * Verifica se um período já começou (não é futuro)
+ */
+function periodoJaComecou(dataInicio: Date): boolean {
+  const agora = new Date();
+  return dataInicio <= agora;
+}
+
+/**
+ * Calcula os períodos de comparação, ajustando para não mostrar períodos futuros.
+ * Se o período atual for futuro, compara os dois últimos períodos completos.
+ */
+function calcularPeriodosComparacao(tipo: TipoComparacao): { periodo1: PeriodoComparacao; periodo2: PeriodoComparacao; periodoFuturo: boolean } {
   const agora = new Date();
   const anoAtual = agora.getFullYear();
   const anoAnterior = anoAtual - 1;
+  const anoMaisAnterior = anoAtual - 2;
+
+  // Função auxiliar para criar período
+  const criarPeriodo = (ano: number, mesInicio: number, mesFim: number, label: string): PeriodoComparacao => {
+    // Ajustar último dia do mês corretamente
+    const ultimoDia = new Date(ano, mesFim + 1, 0).getDate();
+    return {
+      dataInicio: new Date(ano, mesInicio, 1),
+      dataFim: new Date(ano, mesFim, ultimoDia, 23, 59, 59),
+      label
+    };
+  };
 
   switch (tipo) {
-    case 'q1_ano_anterior_vs_atual':
+    case 'q1_ano_anterior_vs_atual': {
+      const periodo2Inicio = new Date(anoAtual, 0, 1);
+      const periodoFuturo = !periodoJaComecou(periodo2Inicio);
+      
+      if (periodoFuturo) {
+        // Se Q1 atual é futuro, comparar Q1 de 2 anos atrás vs ano anterior
+        return {
+          periodo1: criarPeriodo(anoMaisAnterior, 0, 2, `Q1 ${anoMaisAnterior} (Jan-Mar)`),
+          periodo2: criarPeriodo(anoAnterior, 0, 2, `Q1 ${anoAnterior} (Jan-Mar)`),
+          periodoFuturo: true
+        };
+      }
       return {
-        periodo1: {
-          dataInicio: new Date(anoAnterior, 0, 1),
-          dataFim: new Date(anoAnterior, 2, 31, 23, 59, 59),
-          label: `Q1 ${anoAnterior} (Jan-Mar)`
-        },
-        periodo2: {
-          dataInicio: new Date(anoAtual, 0, 1),
-          dataFim: new Date(anoAtual, 2, 31, 23, 59, 59),
-          label: `Q1 ${anoAtual} (Jan-Mar)`
-        }
+        periodo1: criarPeriodo(anoAnterior, 0, 2, `Q1 ${anoAnterior} (Jan-Mar)`),
+        periodo2: criarPeriodo(anoAtual, 0, 2, `Q1 ${anoAtual} (Jan-Mar)`),
+        periodoFuturo: false
       };
-    case 'q2_ano_anterior_vs_atual':
+    }
+    case 'q2_ano_anterior_vs_atual': {
+      const periodo2Inicio = new Date(anoAtual, 3, 1);
+      const periodoFuturo = !periodoJaComecou(periodo2Inicio);
+      
+      if (periodoFuturo) {
+        return {
+          periodo1: criarPeriodo(anoMaisAnterior, 3, 5, `Q2 ${anoMaisAnterior} (Abr-Jun)`),
+          periodo2: criarPeriodo(anoAnterior, 3, 5, `Q2 ${anoAnterior} (Abr-Jun)`),
+          periodoFuturo: true
+        };
+      }
       return {
-        periodo1: {
-          dataInicio: new Date(anoAnterior, 3, 1),
-          dataFim: new Date(anoAnterior, 5, 30, 23, 59, 59),
-          label: `Q2 ${anoAnterior} (Abr-Jun)`
-        },
-        periodo2: {
-          dataInicio: new Date(anoAtual, 3, 1),
-          dataFim: new Date(anoAtual, 5, 30, 23, 59, 59),
-          label: `Q2 ${anoAtual} (Abr-Jun)`
-        }
+        periodo1: criarPeriodo(anoAnterior, 3, 5, `Q2 ${anoAnterior} (Abr-Jun)`),
+        periodo2: criarPeriodo(anoAtual, 3, 5, `Q2 ${anoAtual} (Abr-Jun)`),
+        periodoFuturo: false
       };
-    case 'q3_ano_anterior_vs_atual':
+    }
+    case 'q3_ano_anterior_vs_atual': {
+      const periodo2Inicio = new Date(anoAtual, 6, 1);
+      const periodoFuturo = !periodoJaComecou(periodo2Inicio);
+      
+      if (periodoFuturo) {
+        return {
+          periodo1: criarPeriodo(anoMaisAnterior, 6, 8, `Q3 ${anoMaisAnterior} (Jul-Set)`),
+          periodo2: criarPeriodo(anoAnterior, 6, 8, `Q3 ${anoAnterior} (Jul-Set)`),
+          periodoFuturo: true
+        };
+      }
       return {
-        periodo1: {
-          dataInicio: new Date(anoAnterior, 6, 1),
-          dataFim: new Date(anoAnterior, 8, 30, 23, 59, 59),
-          label: `Q3 ${anoAnterior} (Jul-Set)`
-        },
-        periodo2: {
-          dataInicio: new Date(anoAtual, 6, 1),
-          dataFim: new Date(anoAtual, 8, 30, 23, 59, 59),
-          label: `Q3 ${anoAtual} (Jul-Set)`
-        }
+        periodo1: criarPeriodo(anoAnterior, 6, 8, `Q3 ${anoAnterior} (Jul-Set)`),
+        periodo2: criarPeriodo(anoAtual, 6, 8, `Q3 ${anoAtual} (Jul-Set)`),
+        periodoFuturo: false
       };
-    case 'q4_ano_anterior_vs_atual':
+    }
+    case 'q4_ano_anterior_vs_atual': {
+      const periodo2Inicio = new Date(anoAtual, 9, 1);
+      const periodoFuturo = !periodoJaComecou(periodo2Inicio);
+      
+      if (periodoFuturo) {
+        return {
+          periodo1: criarPeriodo(anoMaisAnterior, 9, 11, `Q4 ${anoMaisAnterior} (Out-Dez)`),
+          periodo2: criarPeriodo(anoAnterior, 9, 11, `Q4 ${anoAnterior} (Out-Dez)`),
+          periodoFuturo: true
+        };
+      }
       return {
-        periodo1: {
-          dataInicio: new Date(anoAnterior, 9, 1),
-          dataFim: new Date(anoAnterior, 11, 31, 23, 59, 59),
-          label: `Q4 ${anoAnterior} (Out-Dez)`
-        },
-        periodo2: {
-          dataInicio: new Date(anoAtual, 9, 1),
-          dataFim: new Date(anoAtual, 11, 31, 23, 59, 59),
-          label: `Q4 ${anoAtual} (Out-Dez)`
-        }
+        periodo1: criarPeriodo(anoAnterior, 9, 11, `Q4 ${anoAnterior} (Out-Dez)`),
+        periodo2: criarPeriodo(anoAtual, 9, 11, `Q4 ${anoAtual} (Out-Dez)`),
+        periodoFuturo: false
       };
-    case 's1_ano_anterior_vs_atual':
+    }
+    case 's1_ano_anterior_vs_atual': {
+      const periodo2Inicio = new Date(anoAtual, 0, 1);
+      const periodoFuturo = !periodoJaComecou(periodo2Inicio);
+      
+      if (periodoFuturo) {
+        return {
+          periodo1: criarPeriodo(anoMaisAnterior, 0, 5, `1º Semestre ${anoMaisAnterior}`),
+          periodo2: criarPeriodo(anoAnterior, 0, 5, `1º Semestre ${anoAnterior}`),
+          periodoFuturo: true
+        };
+      }
       return {
-        periodo1: {
-          dataInicio: new Date(anoAnterior, 0, 1),
-          dataFim: new Date(anoAnterior, 5, 30, 23, 59, 59),
-          label: `1º Semestre ${anoAnterior}`
-        },
-        periodo2: {
-          dataInicio: new Date(anoAtual, 0, 1),
-          dataFim: new Date(anoAtual, 5, 30, 23, 59, 59),
-          label: `1º Semestre ${anoAtual}`
-        }
+        periodo1: criarPeriodo(anoAnterior, 0, 5, `1º Semestre ${anoAnterior}`),
+        periodo2: criarPeriodo(anoAtual, 0, 5, `1º Semestre ${anoAtual}`),
+        periodoFuturo: false
       };
-    case 's2_ano_anterior_vs_atual':
+    }
+    case 's2_ano_anterior_vs_atual': {
+      const periodo2Inicio = new Date(anoAtual, 6, 1);
+      const periodoFuturo = !periodoJaComecou(periodo2Inicio);
+      
+      if (periodoFuturo) {
+        return {
+          periodo1: criarPeriodo(anoMaisAnterior, 6, 11, `2º Semestre ${anoMaisAnterior}`),
+          periodo2: criarPeriodo(anoAnterior, 6, 11, `2º Semestre ${anoAnterior}`),
+          periodoFuturo: true
+        };
+      }
       return {
-        periodo1: {
-          dataInicio: new Date(anoAnterior, 6, 1),
-          dataFim: new Date(anoAnterior, 11, 31, 23, 59, 59),
-          label: `2º Semestre ${anoAnterior}`
-        },
-        periodo2: {
-          dataInicio: new Date(anoAtual, 6, 1),
-          dataFim: new Date(anoAtual, 11, 31, 23, 59, 59),
-          label: `2º Semestre ${anoAtual}`
-        }
+        periodo1: criarPeriodo(anoAnterior, 6, 11, `2º Semestre ${anoAnterior}`),
+        periodo2: criarPeriodo(anoAtual, 6, 11, `2º Semestre ${anoAtual}`),
+        periodoFuturo: false
       };
+    }
     case 'ano_completo':
     default:
+      // Ano completo nunca é "futuro" porque compara ano anterior completo vs ano atual até agora
       return {
-        periodo1: {
-          dataInicio: new Date(anoAnterior, 0, 1),
-          dataFim: new Date(anoAnterior, 11, 31, 23, 59, 59),
-          label: `Ano ${anoAnterior}`
-        },
+        periodo1: criarPeriodo(anoAnterior, 0, 11, `Ano ${anoAnterior}`),
         periodo2: {
           dataInicio: new Date(anoAtual, 0, 1),
           dataFim: agora,
           label: `Ano ${anoAtual} (até agora)`
-        }
+        },
+        periodoFuturo: false
       };
   }
 }
@@ -859,6 +906,7 @@ function calcularVariacao(atual: number, anterior: number): { valor: number; per
 export interface ComparacaoResult {
   lojaNome: string;
   tipoComparacao: string;
+  periodoFuturo: boolean; // Indica se o período atual é futuro e foi ajustado
   periodo1: {
     label: string;
     dados: ReturnType<typeof buscarDadosPeriodo> extends Promise<infer T> ? T : never;
@@ -892,7 +940,7 @@ export async function compararPeriodos(
       throw new Error("Loja não encontrada");
     }
 
-    const { periodo1, periodo2 } = calcularPeriodosComparacao(tipoComparacao);
+    const { periodo1, periodo2, periodoFuturo } = calcularPeriodosComparacao(tipoComparacao);
 
     // Buscar dados de ambos os períodos
     const [dados1, dados2] = await Promise.all([
@@ -963,6 +1011,7 @@ Fornece uma análise comparativa em 3-4 parágrafos destacando:
     return {
       lojaNome: loja.nome,
       tipoComparacao,
+      periodoFuturo,
       periodo1: {
         label: periodo1.label,
         dados: dados1
