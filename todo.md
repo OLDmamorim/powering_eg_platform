@@ -2704,3 +2704,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Verificar se há sugestão de envio automático após gravar reunião
 - [x] Corrigir problema de envio - usar sendEmail em vez de notifyOwner
 - [x] Adicionar sugestão automática de envio após gravar reunião de loja
+
+## Bug v6.5.6 - Ícone de modo claro/escuro e traduções
+- [x] Ícone de modo claro/escuro já estava funcional (confirmado pelo utilizador)
+- [x] Adicionar traduções em falta: relatoriosIA.configuracaoRelatorio
+- [x] Adicionar traduções em falta: relatoriosIA.periodoSelecioneMeses

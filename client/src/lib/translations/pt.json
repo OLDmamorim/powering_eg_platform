@@ -506,7 +506,13 @@
     "pontosNegativos": "Pontos Negativos",
     "sugestoes": "Sugestões",
     "gerarRelatoriosNaPagina": "Gere relatórios na página",
-    "comeceCategorizarRelatorios": "Comece por categorizar relatórios na página de Relatórios"
+    "comeceCategorizarRelatorios": "Comece por categorizar relatórios na página de Relatórios",
+    "configuracaoRelatorio": "Configuração do Relatório",
+    "periodoSelecioneMeses": "Período - Selecione os meses",
+    "aAnalisarRelatorios": "A analisar relatórios...",
+    "relatorioPersonalizado": "Este relatório foi gerado com base nas suas lojas atribuídas",
+    "resumoGeral": "Resumo Geral",
+    "semResumoDisponivel": "Sem resumo disponível"
   },
   "historicoIA": {
     "title": "Histórico IA",
