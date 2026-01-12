@@ -237,6 +237,7 @@ export default function Dashboard() {
   const { data: relatoriosLivresReais } = trpc.relatoriosLivres.list.useQuery(undefined, { enabled: !isDemo });
   const { data: relatoriosCompletosReais } = trpc.relatoriosCompletos.list.useQuery(undefined, { enabled: !isDemo });
   const { data: pendentesReais } = trpc.pendentes.list.useQuery(undefined, { enabled: !isDemo });
+  const { data: reunioesLojasReais } = trpc.reunioesLojas.listar.useQuery(undefined, { enabled: !isDemo });
   
   // Usar dados demo ou reais
   const lojas = isDemo ? demoLojas : lojasReais;
@@ -245,6 +246,7 @@ export default function Dashboard() {
   const relatoriosLivres = isDemo ? demoRelatoriosLivres : relatoriosLivresReais;
   const relatoriosCompletos = isDemo ? demoRelatoriosCompletos : relatoriosCompletosReais;
   const pendentes = isDemo ? demoPendentes : pendentesReais;
+  const reunioesLojas = isDemo ? [] : reunioesLojasReais;
   
   // Progresso e atrasos de relatórios (apenas para gestor)
   const { data: progressoLojas } = trpc.lojas.getProgressoGestor.useQuery(undefined, { enabled: isGestor });
@@ -1099,24 +1101,40 @@ export default function Dashboard() {
             <CardContent>
               <div className="space-y-4">
                 {(() => {
-                  // Combinar relatórios livres e completos, ordenar por data
-                  const todosRelatorios = [
-                    ...(relatoriosLivres?.map((r: any) => ({ ...r, tipo: 'livre' })) || []),
-                    ...(relatoriosCompletos?.map((r: any) => ({ ...r, tipo: 'completo' })) || [])
-                  ].sort((a, b) => new Date(b.dataVisita).getTime() - new Date(a.dataVisita).getTime());
+                  // Combinar relatórios livres, completos e reuniões de lojas, ordenar por data
+                  const todasAtividades = [
+                    ...(relatoriosLivres?.map((r: any) => ({ ...r, tipo: 'livre', dataAtividade: r.dataVisita })) || []),
+                    ...(relatoriosCompletos?.map((r: any) => ({ ...r, tipo: 'completo', dataAtividade: r.dataVisita })) || []),
+                    ...(reunioesLojas?.map((r: any) => ({ 
+                      ...r, 
+                      tipo: 'reuniao', 
+                      dataAtividade: r.data,
+                      lojaNome: r.lojasNomes?.join(', ') || 'Loja'
+                    })) || [])
+                  ].sort((a, b) => new Date(b.dataAtividade).getTime() - new Date(a.dataAtividade).getTime());
                   
-                  if (todosRelatorios.length === 0) {
-                    return <p className="text-sm text-muted-foreground text-center py-4">{language === 'pt' ? 'Nenhum relatório recente' : 'No recent reports'}</p>;
+                  if (todasAtividades.length === 0) {
+                    return <p className="text-sm text-muted-foreground text-center py-4">{language === 'pt' ? 'Nenhuma atividade recente' : 'No recent activity'}</p>;
                   }
                   
-                  return todosRelatorios.slice(0, 5).map((relatorio: any) => (
-                    <div key={`${relatorio.tipo}-${relatorio.id}`} className="flex items-center justify-between border-b pb-2 last:border-0">
+                  return todasAtividades.slice(0, 5).map((atividade: any) => (
+                    <div key={`${atividade.tipo}-${atividade.id}`} className="flex items-center justify-between border-b pb-2 last:border-0">
                       <div>
-                        <p className="text-sm font-medium">{relatorio.loja?.nome || "Loja"}</p>
-                        <p className="text-xs text-muted-foreground">{new Date(relatorio.dataVisita).toLocaleDateString("pt-PT")}</p>
+                        <p className="text-sm font-medium">{atividade.tipo === 'reuniao' ? atividade.lojaNome : (atividade.loja?.nome || "Loja")}</p>
+                        <p className="text-xs text-muted-foreground">{new Date(atividade.dataAtividade).toLocaleDateString("pt-PT")}</p>
                       </div>
-                      <span className={`text-xs px-2 py-1 rounded ${relatorio.tipo === 'completo' ? 'bg-teal-100 text-teal-700 dark:bg-teal-900 dark:text-teal-300' : 'bg-primary/10 text-primary'}`}>
-                        {relatorio.tipo === 'completo' ? (language === 'pt' ? 'Relatório Completo' : 'Complete Report') : (language === 'pt' ? 'Relatório Livre' : 'Quick Report')}
+                      <span className={`text-xs px-2 py-1 rounded ${
+                        atividade.tipo === 'completo' 
+                          ? 'bg-teal-100 text-teal-700 dark:bg-teal-900 dark:text-teal-300' 
+                          : atividade.tipo === 'reuniao'
+                            ? 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900 dark:text-cyan-300'
+                            : 'bg-primary/10 text-primary'
+                      }`}>
+                        {atividade.tipo === 'completo' 
+                          ? (language === 'pt' ? 'Relatório Completo' : 'Complete Report') 
+                          : atividade.tipo === 'reuniao'
+                            ? (language === 'pt' ? 'Reunião Loja' : 'Store Meeting')
+                            : (language === 'pt' ? 'Relatório Livre' : 'Quick Report')}
                       </span>
                     </div>
                   ));

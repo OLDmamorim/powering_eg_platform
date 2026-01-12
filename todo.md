@@ -2709,3 +2709,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Ícone de modo claro/escuro já estava funcional (confirmado pelo utilizador)
 - [x] Adicionar traduções em falta: relatoriosIA.configuracaoRelatorio
 - [x] Adicionar traduções em falta: relatoriosIA.periodoSelecioneMeses
+
+## Funcionalidade v6.6 - Reuniões Lojas na Atividade Recente
+- [x] Adicionar reuniões de lojas à secção "Atividade Recente" do Dashboard
+- [x] Mostrar reuniões junto com relatórios livres e completos
+- [x] Identificar tipo de atividade (Reunião Loja, Relatório Livre, Relatório Completo)

@@ -44,6 +44,7 @@ import AssistenteIA from "./pages/AssistenteIA";
 import AssistenteWidget from "./pages/AssistenteWidget";
 import TopicosReuniao from "./pages/TopicosReuniao";
 import { DemoBanner } from "./components/DemoBanner";
+import { LanguageProvider } from "./contexts/LanguageContext";
 
 
 function Router() {
@@ -119,11 +120,13 @@ function App() {
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="light" switchable>
-        <TooltipProvider>
-          <Toaster />
-          <DemoBanner />
-          <Router />
-        </TooltipProvider>
+        <LanguageProvider>
+          <TooltipProvider>
+            <Toaster />
+            <DemoBanner />
+            <Router />
+          </TooltipProvider>
+        </LanguageProvider>
       </ThemeProvider>
     </ErrorBoundary>
   );
