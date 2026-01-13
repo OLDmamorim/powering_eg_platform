@@ -14,8 +14,8 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { trpc } from "@/lib/trpc";
-import { ChevronLeft, ChevronRight, Plus, Save, X, Image, Upload, Loader2 } from "lucide-react";
-import { useState, useRef, useCallback } from "react";
+import { ChevronLeft, ChevronRight, Plus, Save, X, Image, Upload, Loader2, RotateCcw } from "lucide-react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
 import { SugestoesModal } from "@/components/SugestoesModal";
@@ -45,6 +45,9 @@ export default function RelatorioCompleto() {
   const [lojaEmailSelecionada, setLojaEmailSelecionada] = useState<string>("");
   const [pendentesExistentes, setPendentesExistentes] = useState<{id: number; status: "resolvido" | "continua" | null}[]>([]);
   const [dataHoraPersonalizada, setDataHoraPersonalizada] = useState<string>("");
+  const [hasRecoveredDraft, setHasRecoveredDraft] = useState(false);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const STORAGE_KEY = 'relatorio_completo_draft';
 
   const [formData, setFormData] = useState({
     episFardamento: "",
@@ -66,10 +69,116 @@ export default function RelatorioCompleto() {
   const utils = trpc.useUtils();
   const { data: lojas } = trpc.lojas.getByGestor.useQuery();
 
+  // Carregar rascunho guardado ao iniciar
+  useEffect(() => {
+    try {
+      const savedDraft = localStorage.getItem(STORAGE_KEY);
+      if (savedDraft) {
+        const draft = JSON.parse(savedDraft);
+        // Verificar se o rascunho tem menos de 24 horas
+        const savedTime = new Date(draft.savedAt);
+        const now = new Date();
+        const hoursDiff = (now.getTime() - savedTime.getTime()) / (1000 * 60 * 60);
+        
+        if (hoursDiff < 24) {
+          // Recuperar dados do rascunho
+          if (draft.formData) setFormData(draft.formData);
+          if (draft.lojaId) setLojaId(draft.lojaId);
+          if (draft.lojasIds) setLojasIds(draft.lojasIds);
+          if (draft.pendentes) setPendentes(draft.pendentes);
+          if (draft.fotos) setFotos(draft.fotos);
+          if (draft.currentPage) setCurrentPage(draft.currentPage);
+          if (draft.pendentesExistentes) setPendentesExistentes(draft.pendentesExistentes);
+          if (draft.dataHoraPersonalizada) setDataHoraPersonalizada(draft.dataHoraPersonalizada);
+          setHasRecoveredDraft(true);
+          setLastSaved(savedTime);
+          toast.info(
+            language === 'pt' 
+              ? `Rascunho recuperado! (guardado ${savedTime.toLocaleString('pt-PT')})` 
+              : `Draft recovered! (saved ${savedTime.toLocaleString('en-US')})`,
+            { duration: 5000 }
+          );
+        } else {
+          // Rascunho expirado, limpar
+          localStorage.removeItem(STORAGE_KEY);
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao carregar rascunho:', error);
+    }
+  }, []);
+
+  // Auto-save a cada alteração (com debounce)
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      // Só guardar se houver algum dado preenchido
+      const hasData = lojaId || lojasIds.length > 0 || 
+        Object.values(formData).some(v => v !== '' && v !== undefined) ||
+        pendentes.some(p => p !== '') || fotos.length > 0;
+      
+      if (hasData) {
+        try {
+          const draft = {
+            formData,
+            lojaId,
+            lojasIds,
+            pendentes,
+            fotos,
+            currentPage,
+            pendentesExistentes,
+            dataHoraPersonalizada,
+            savedAt: new Date().toISOString(),
+          };
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
+          setLastSaved(new Date());
+        } catch (error) {
+          console.error('Erro ao guardar rascunho:', error);
+        }
+      }
+    }, 1000); // Debounce de 1 segundo
+
+    return () => clearTimeout(timeoutId);
+  }, [formData, lojaId, lojasIds, pendentes, fotos, currentPage, pendentesExistentes, dataHoraPersonalizada]);
+
+  // Função para limpar rascunho
+  const clearDraft = () => {
+    localStorage.removeItem(STORAGE_KEY);
+    setHasRecoveredDraft(false);
+    setLastSaved(null);
+    // Reset form
+    setFormData({
+      episFardamento: "",
+      kitPrimeirosSocorros: "",
+      consumiveis: "",
+      espacoFisico: "",
+      reclamacoes: "",
+      vendasComplementares: "",
+      fichasServico: "",
+      documentacaoObrigatoria: "",
+      reuniaoQuinzenal: undefined,
+      resumoSupervisao: "",
+      colaboradoresPresentes: "",
+      pontosPositivos: "",
+      pontosNegativos: "",
+      comentarioAdmin: "",
+    });
+    setLojaId("");
+    setLojasIds([]);
+    setPendentes([""]);
+    setFotos([]);
+    setCurrentPage(0);
+    setPendentesExistentes([]);
+    setDataHoraPersonalizada("");
+    toast.success(language === 'pt' ? 'Rascunho limpo!' : 'Draft cleared!');
+  };
+
   const createMutation = trpc.relatoriosCompletos.create.useMutation({
     onSuccess: (data) => {
       toast.success(language === 'pt' ? "Relatório completo criado com sucesso" : "Complete report created successfully");
       utils.relatoriosCompletos.list.invalidate();
+      // Limpar rascunho após submissão bem-sucedida
+      localStorage.removeItem(STORAGE_KEY);
+      setLastSaved(null);
       // Guardar dados para os diálogos
       setRelatorioIdCriado(data.id);
       const primeiraLoja = lojas?.find(l => l.id === parseInt(lojasIds[0]));
@@ -806,9 +915,29 @@ export default function RelatorioCompleto() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle>{pages[currentPage].title}</CardTitle>
-              <span className="text-sm text-muted-foreground">
-                {language === 'pt' ? 'Página' : 'Page'} {currentPage + 1} {language === 'pt' ? 'de' : 'of'} {pages.length}
-              </span>
+              <div className="flex items-center gap-4">
+                {lastSaved && (
+                  <span className="text-xs text-green-600 dark:text-green-400 flex items-center gap-1">
+                    <Save className="h-3 w-3" />
+                    {language === 'pt' ? 'Guardado automaticamente' : 'Auto-saved'} {lastSaved.toLocaleTimeString(language === 'pt' ? 'pt-PT' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                )}
+                {(hasRecoveredDraft || lastSaved) && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={clearDraft}
+                    className="text-xs text-muted-foreground hover:text-destructive"
+                  >
+                    <RotateCcw className="h-3 w-3 mr-1" />
+                    {language === 'pt' ? 'Limpar rascunho' : 'Clear draft'}
+                  </Button>
+                )}
+                <span className="text-sm text-muted-foreground">
+                  {language === 'pt' ? 'Página' : 'Page'} {currentPage + 1} {language === 'pt' ? 'de' : 'of'} {pages.length}
+                </span>
+              </div>
             </div>
           </CardHeader>
           <CardContent className="space-y-6">
