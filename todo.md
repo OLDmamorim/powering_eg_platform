@@ -2751,3 +2751,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Usar bgcolor em vez de background-color para fundos
 - [x] Substituir emojis por imagens ou HTML entities
 - [x] Testar template
+
+## Bug v6.7 - Labels de tradução na página Upload de Resultados
+- [x] Corrigir "common.mes" para mostrar "Mês"
+- [x] Corrigir "common.ano" para mostrar "Ano"

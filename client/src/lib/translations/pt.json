@@ -157,7 +157,9 @@
     "voltarDashboard": "Voltar ao Dashboard",
     "erroDesconhecido": "Erro desconhecido",
     "opcional": "Opcional",
-    "aGuardar": "A guardar..."
+    "aGuardar": "A guardar...",
+    "mes": "Mês",
+    "ano": "Ano"
   },
   "menu": {
     "groups": {
