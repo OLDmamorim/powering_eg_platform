@@ -2742,3 +2742,12 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Bug: Dashboard mostra mês fixo (Dezembro) em vez do último mês carregado
 - [x] Feature: Mostrar data de última atualização no card de Resultados do dashboard
 - [x] Feature: Auto-save no formulário de Relatório Completo para evitar perda de dados
+
+## Correção v6.6 - Email Outlook Compatibilidade
+- [x] Reescrever template de email de ocorrências estruturais para compatibilidade Outlook
+- [x] Usar XHTML Transitional DOCTYPE
+- [x] Adicionar comentários condicionais para MSO (Microsoft Office)
+- [x] Substituir CSS inline complexo por tabelas aninhadas
+- [x] Usar bgcolor em vez de background-color para fundos
+- [x] Substituir emojis por imagens ou HTML entities
+- [x] Testar template

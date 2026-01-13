@@ -5251,62 +5251,131 @@ function gerarHTMLOcorrenciaEstrutural(dados: {
     : '';
   
   return `
-<!DOCTYPE html>
-<html lang="pt">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <title>Ocorrência - ${dados.temaNome}</title>
+  <!--[if mso]>
+  <xml>
+    <o:OfficeDocumentSettings>
+      <o:AllowPNG/>
+      <o:PixelsPerInch>96</o:PixelsPerInch>
+    </o:OfficeDocumentSettings>
+  </xml>
+  <style type="text/css">
+    table { border-collapse: collapse; }
+    td { font-family: Arial, sans-serif; }
+  </style>
+  <![endif]-->
 </head>
-<body style="margin: 0; padding: 0; font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif; background-color: #f3f4f6;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f3f4f6; padding: 20px 0;">
+<body style="margin: 0; padding: 0; font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif; background-color: #f3f4f6; width: 100%;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f3f4f6;">
     <tr>
-      <td align="center">
-        <table width="600" cellpadding="0" cellspacing="0" style="max-width: 600px; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+      <td align="center" style="padding: 20px 0;">
+        <!--[if mso]>
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" align="center">
+        <tr>
+        <td>
+        <![endif]-->
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; background-color: #ffffff;">
           
-          <!-- Header com Logo -->
+          <!-- Header com Logo - Compatível com Outlook -->
           <tr>
-            <td style="background: linear-gradient(135deg, #dc2626, #b91c1c); padding: 30px; text-align: center;">
-              <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663088836799/YrkmGCRDVqYgFnZO.png" alt="ExpressGlass" style="max-width: 180px; height: auto; margin-bottom: 20px;" />
-              <div style="background: rgba(255,255,255,0.15); padding: 15px 25px; border-radius: 8px; display: inline-block;">
-                <h1 style="margin: 0; font-size: 28px; color: #ffffff; font-weight: 700; letter-spacing: 1px;">⚠️ OCORRÊNCIA ESTRUTURAL</h1>
-              </div>
-              <p style="margin: 15px 0 0; font-size: 20px; color: #ffffff; font-weight: 600;">${dados.temaNome}</p>
+            <td align="center" bgcolor="#dc2626" style="background-color: #dc2626; padding: 40px 30px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td align="center" style="padding-bottom: 25px;">
+                    <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663088836799/YrkmGCRDVqYgFnZO.png" alt="ExpressGlass" width="220" style="display: block; width: 220px; max-width: 220px; height: auto;" />
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" style="padding-bottom: 20px;">
+                    <img src="https://cdn-icons-png.flaticon.com/512/564/564619.png" alt="Alerta" width="50" height="50" style="display: block; width: 50px; height: 50px;" />
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center">
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" bgcolor="#b91c1c" style="background-color: #b91c1c;">
+                      <tr>
+                        <td style="padding: 15px 30px;">
+                          <h1 style="margin: 0; font-size: 24px; color: #ffffff; font-weight: bold; letter-spacing: 1px; font-family: Arial, sans-serif;">OCORRÊNCIA ESTRUTURAL</h1>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" style="padding-top: 15px;">
+                    <p style="margin: 0; font-size: 20px; color: #ffffff; font-weight: bold; font-family: Arial, sans-serif;">${dados.temaNome}</p>
+                  </td>
+                </tr>
+              </table>
             </td>
           </tr>
           
           <!-- Informações Gerais -->
           <tr>
             <td style="padding: 30px;">
-              <table width="100%" cellpadding="0" cellspacing="0" style="background: #ffffff; border-radius: 8px; border: 1px solid #e5e7eb;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border: 1px solid #e5e7eb;">
                 <tr>
                   <td style="padding: 15px 20px; border-bottom: 2px solid #dc2626;">
-                    <span style="font-size: 16px; font-weight: 600; color: #dc2626;">📝 Informações Gerais</span>
+                    <span style="font-size: 16px; font-weight: bold; color: #dc2626; font-family: Arial, sans-serif;">&#128221; Informações Gerais</span>
                   </td>
                 </tr>
                 <tr>
                   <td style="padding: 20px;">
-                    <table width="100%" cellpadding="0" cellspacing="10">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
                       <tr>
-                        <td width="50%" style="background: #f9fafb; padding: 15px; border-radius: 8px; vertical-align: top;">
-                          <div style="font-size: 12px; color: #6b7280; margin-bottom: 5px;">Reportado por</div>
-                          <div style="font-size: 16px; font-weight: 600; color: #1f2937;">${dados.gestorNome}</div>
+                        <td width="50%" valign="top" style="padding: 10px;">
+                          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#f9fafb" style="background-color: #f9fafb;">
+                            <tr>
+                              <td style="padding: 15px;">
+                                <p style="font-size: 12px; color: #6b7280; margin: 0 0 5px 0; font-family: Arial, sans-serif;">Reportado por</p>
+                                <p style="font-size: 16px; font-weight: bold; color: #1f2937; margin: 0; font-family: Arial, sans-serif;">${dados.gestorNome}</p>
+                              </td>
+                            </tr>
+                          </table>
                         </td>
-                        <td width="50%" style="background: #f9fafb; padding: 15px; border-radius: 8px; vertical-align: top;">
-                          <div style="font-size: 12px; color: #6b7280; margin-bottom: 5px;">Data</div>
-                          <div style="font-size: 14px; font-weight: 600; color: #1f2937;">${dataFormatada}</div>
+                        <td width="50%" valign="top" style="padding: 10px;">
+                          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#f9fafb" style="background-color: #f9fafb;">
+                            <tr>
+                              <td style="padding: 15px;">
+                                <p style="font-size: 12px; color: #6b7280; margin: 0 0 5px 0; font-family: Arial, sans-serif;">Data</p>
+                                <p style="font-size: 14px; font-weight: bold; color: #1f2937; margin: 0; font-family: Arial, sans-serif;">${dataFormatada}</p>
+                              </td>
+                            </tr>
+                          </table>
                         </td>
                       </tr>
                       <tr>
-                        <td width="50%" style="background: #f9fafb; padding: 15px; border-radius: 8px; vertical-align: top;">
-                          <div style="font-size: 12px; color: #6b7280; margin-bottom: 5px;">Abrangência</div>
-                          <div style="font-size: 16px; font-weight: 600; color: #1f2937;">${abrangenciaLabels[dados.abrangencia] || dados.abrangencia}${dados.zonaAfetada ? ` - ${dados.zonaAfetada}` : ''}</div>
+                        <td width="50%" valign="top" style="padding: 10px;">
+                          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#f9fafb" style="background-color: #f9fafb;">
+                            <tr>
+                              <td style="padding: 15px;">
+                                <p style="font-size: 12px; color: #6b7280; margin: 0 0 5px 0; font-family: Arial, sans-serif;">Abrangência</p>
+                                <p style="font-size: 16px; font-weight: bold; color: #1f2937; margin: 0; font-family: Arial, sans-serif;">${abrangenciaLabels[dados.abrangencia] || dados.abrangencia}${dados.zonaAfetada ? ` - ${dados.zonaAfetada}` : ''}</p>
+                              </td>
+                            </tr>
+                          </table>
                         </td>
-                        <td width="50%" style="background: #f9fafb; padding: 15px; border-radius: 8px; vertical-align: top;">
-                          <div style="font-size: 12px; color: #6b7280; margin-bottom: 5px;">Impacto</div>
-                          <div style="font-size: 16px; font-weight: 600;">
-                            <span style="display: inline-block; padding: 6px 16px; border-radius: 20px; font-size: 14px; font-weight: 600; background: ${impactoStyle.bg}; color: ${impactoStyle.text};">${impactoStyle.label}</span>
-                          </div>
+                        <td width="50%" valign="top" style="padding: 10px;">
+                          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#f9fafb" style="background-color: #f9fafb;">
+                            <tr>
+                              <td style="padding: 15px;">
+                                <p style="font-size: 12px; color: #6b7280; margin: 0 0 5px 0; font-family: Arial, sans-serif;">Impacto</p>
+                                <table role="presentation" cellpadding="0" cellspacing="0" border="0" bgcolor="${impactoStyle.bg}" style="background-color: ${impactoStyle.bg};">
+                                  <tr>
+                                    <td style="padding: 6px 16px;">
+                                      <span style="font-size: 14px; font-weight: bold; color: ${impactoStyle.text}; font-family: Arial, sans-serif;">${impactoStyle.label}</span>
+                                    </td>
+                                  </tr>
+                                </table>
+                              </td>
+                            </tr>
+                          </table>
                         </td>
                       </tr>
                     </table>
@@ -5319,15 +5388,15 @@ function gerarHTMLOcorrenciaEstrutural(dados: {
           <!-- Descrição -->
           <tr>
             <td style="padding: 0 30px 20px;">
-              <table width="100%" cellpadding="0" cellspacing="0" style="background: #ffffff; border-radius: 8px; border: 1px solid #e5e7eb;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border: 1px solid #e5e7eb;">
                 <tr>
                   <td style="padding: 15px 20px; border-bottom: 2px solid #dc2626;">
-                    <span style="font-size: 16px; font-weight: 600; color: #dc2626;">📄 Descrição</span>
+                    <span style="font-size: 16px; font-weight: bold; color: #dc2626; font-family: Arial, sans-serif;">&#128196; Descrição</span>
                   </td>
                 </tr>
                 <tr>
                   <td style="padding: 20px;">
-                    <div style="font-size: 14px; line-height: 1.6; color: #374151; white-space: pre-wrap;">${dados.descricao}</div>
+                    <p style="font-size: 14px; line-height: 1.6; color: #374151; margin: 0; font-family: Arial, sans-serif;">${dados.descricao.replace(/\n/g, '<br/>')}</p>
                   </td>
                 </tr>
               </table>
@@ -5338,15 +5407,15 @@ function gerarHTMLOcorrenciaEstrutural(dados: {
           <!-- Sugestão de Ação -->
           <tr>
             <td style="padding: 0 30px 20px;">
-              <table width="100%" cellpadding="0" cellspacing="0" style="background: #ffffff; border-radius: 8px; border: 1px solid #e5e7eb;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border: 1px solid #e5e7eb;">
                 <tr>
                   <td style="padding: 15px 20px; border-bottom: 2px solid #10b981;">
-                    <span style="font-size: 16px; font-weight: 600; color: #10b981;">💡 Sugestão de Ação</span>
+                    <span style="font-size: 16px; font-weight: bold; color: #10b981; font-family: Arial, sans-serif;">&#128161; Sugestão de Ação</span>
                   </td>
                 </tr>
                 <tr>
-                  <td style="padding: 20px; background: #f0fdf4;">
-                    <div style="font-size: 14px; line-height: 1.6; color: #166534; white-space: pre-wrap;">${dados.sugestaoAcao}</div>
+                  <td bgcolor="#f0fdf4" style="padding: 20px; background-color: #f0fdf4;">
+                    <p style="font-size: 14px; line-height: 1.6; color: #166534; margin: 0; font-family: Arial, sans-serif;">${dados.sugestaoAcao.replace(/\n/g, '<br/>')}</p>
                   </td>
                 </tr>
               </table>
@@ -5358,14 +5427,19 @@ function gerarHTMLOcorrenciaEstrutural(dados: {
           
           <!-- Footer -->
           <tr>
-            <td style="background: #1f2937; padding: 25px; text-align: center;">
-              <p style="margin: 0 0 5px; font-size: 14px; color: #ffffff; font-weight: 600;">PoweringEG Platform 2.0</p>
-              <p style="margin: 0; font-size: 12px; color: #9ca3af;">Ocorrências Estruturais</p>
-              <p style="margin: 10px 0 0; font-size: 11px; color: #6b7280;">Este email foi enviado automaticamente. Por favor não responda.</p>
+            <td bgcolor="#1f2937" style="background-color: #1f2937; padding: 25px; text-align: center;">
+              <p style="margin: 0 0 5px; font-size: 14px; color: #ffffff; font-weight: bold; font-family: Arial, sans-serif;">PoweringEG Platform 2.0</p>
+              <p style="margin: 0; font-size: 12px; color: #9ca3af; font-family: Arial, sans-serif;">Ocorrências Estruturais</p>
+              <p style="margin: 10px 0 0; font-size: 11px; color: #6b7280; font-family: Arial, sans-serif;">Este email foi enviado automaticamente. Por favor não responda.</p>
             </td>
           </tr>
           
         </table>
+        <!--[if mso]>
+        </td>
+        </tr>
+        </table>
+        <![endif]-->
       </td>
     </tr>
   </table>
