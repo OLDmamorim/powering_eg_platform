@@ -736,7 +736,8 @@
     "criarGerirReunioes": "Criar e gerir reuniões operacionais",
     "erroSelecionarLoja": "Por favor, selecione pelo menos uma loja",
     "erroPresencas": "Por favor, indique os presentes na reunião",
-    "erroConteudo": "Por favor, descreva o conteúdo da reunião"
+    "erroConteudo": "Por favor, descreva o conteúdo da reunião",
+    "tagsPlaceholder": "Ex: Vendas, Operações..."
   },
   "resultados": {
     "title": "Resultados",

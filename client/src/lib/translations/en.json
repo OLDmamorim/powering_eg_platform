@@ -758,7 +758,8 @@
     "criarGerirReunioes": "Create and manage operational meetings",
     "erroSelecionarLoja": "Please select at least one store",
     "erroPresencas": "Please indicate who attended the meeting",
-    "erroConteudo": "Please describe the meeting content"
+    "erroConteudo": "Please describe the meeting content",
+    "tagsPlaceholder": "E.g.: Sales, Operations..."
   },
   "resultados": {
     "title": "Results",

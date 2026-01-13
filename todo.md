@@ -2738,3 +2738,4 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Corrigir para não mostrar períodos futuros ou indicar claramente que não há dados
 - [x] Testar funcionalidade corrigida
 - [x] Fix missing translations in Reuniões de Lojas page (novaReuniaoLoja, preencherDetalhes, lojas, presencasPlaceholder)
+- [x] Bug: Corrigir placeholder de tags em Reuniões de Lojas mostrando chave de tradução
