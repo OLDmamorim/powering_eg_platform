@@ -725,11 +725,18 @@
     "title": "Reuniões de Lojas",
     "subtitle": "Gerir reuniões quinzenais das lojas",
     "novaReuniao": "Nova Reunião",
+    "novaReuniaoLoja": "Nova Reunião de Loja",
+    "preencherDetalhes": "Preencha os detalhes da reunião operacional",
+    "lojas": "Loja(s)",
+    "presencasPlaceholder": "Ex: João Silva, Maria Costa, Pedro Alves...",
     "semReunioes": "Nenhuma reunião registada",
     "todasReunioes": "Todas as reuniões de lojas",
     "reunioesSuasLojas": "Reuniões das suas lojas",
     "consultarReunioes": "Consultar reuniões operacionais",
-    "criarGerirReunioes": "Criar e gerir reuniões operacionais"
+    "criarGerirReunioes": "Criar e gerir reuniões operacionais",
+    "erroSelecionarLoja": "Por favor, selecione pelo menos uma loja",
+    "erroPresencas": "Por favor, indique os presentes na reunião",
+    "erroConteudo": "Por favor, descreva o conteúdo da reunião"
   },
   "resultados": {
     "title": "Resultados",

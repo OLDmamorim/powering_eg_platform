@@ -2737,3 +2737,4 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Investigar lógica de comparação de períodos no HistoricoLoja.tsx
 - [x] Corrigir para não mostrar períodos futuros ou indicar claramente que não há dados
 - [x] Testar funcionalidade corrigida
+- [x] Fix missing translations in Reuniões de Lojas page (novaReuniaoLoja, preencherDetalhes, lojas, presencasPlaceholder)

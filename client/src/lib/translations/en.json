@@ -747,11 +747,18 @@
     "title": "Store Meetings",
     "subtitle": "Manage bi-weekly store meetings",
     "novaReuniao": "New Meeting",
+    "novaReuniaoLoja": "New Store Meeting",
+    "preencherDetalhes": "Fill in the operational meeting details",
+    "lojas": "Store(s)",
+    "presencasPlaceholder": "E.g.: John Smith, Mary Jones, Peter Brown...",
     "semReunioes": "No meetings registered",
     "todasReunioes": "All store meetings",
     "reunioesSuasLojas": "Meetings from your stores",
     "consultarReunioes": "View operational meetings",
-    "criarGerirReunioes": "Create and manage operational meetings"
+    "criarGerirReunioes": "Create and manage operational meetings",
+    "erroSelecionarLoja": "Please select at least one store",
+    "erroPresencas": "Please indicate who attended the meeting",
+    "erroConteudo": "Please describe the meeting content"
   },
   "resultados": {
     "title": "Results",
