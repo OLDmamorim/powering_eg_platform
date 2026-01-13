@@ -2755,3 +2755,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## Bug v6.7 - Labels de tradução na página Upload de Resultados
 - [x] Corrigir "common.mes" para mostrar "Mês"
 - [x] Corrigir "common.ano" para mostrar "Ano"
+
+## Ajuste v6.8 - Histórico da Loja sem Relatórios
+- [x] Remover secção de relatórios do Histórico da Loja
+- [x] Manter apenas dados de performance/resultados da loja

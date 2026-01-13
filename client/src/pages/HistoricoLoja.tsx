@@ -294,36 +294,23 @@ export default function HistoricoLoja() {
       doc.line(14, 40, pageWidth - 14, 40);
       yPos = 48;
 
-      // ========== MÉTRICAS GERAIS (6 cards coloridos) ==========
-      drawSectionHeader('Métricas Gerais', COLORS.primary);
+      // ========== MÉTRICAS DE PERFORMANCE ==========
+      drawSectionHeader('Métricas de Performance', COLORS.primary);
       
       const cardWidth = (pageWidth - 28 - 10) / 3; // 3 cards por linha
       const cardHeight = 22;
       const cardGap = 5;
       
-      // Linha 1: 3 cards
+      // Linha única: 3 cards de performance
       drawMetricCard(14, yPos, cardWidth, cardHeight, 
-        (historyData.metricas?.totalRelatoriosLivres || 0).toString(), 
-        'Relatórios Livres', COLORS.primaryLight, COLORS.primary);
-      drawMetricCard(14 + cardWidth + cardGap, yPos, cardWidth, cardHeight, 
-        (historyData.metricas?.totalRelatoriosCompletos || 0).toString(), 
-        'Relatórios Completos', COLORS.purpleLight, COLORS.purple);
-      drawMetricCard(14 + (cardWidth + cardGap) * 2, yPos, cardWidth, cardHeight, 
         (historyData.metricas?.totalPendentes || 0).toString(), 
         'Pendentes', COLORS.orangeLight, COLORS.orange);
-      
-      yPos += cardHeight + cardGap;
-      
-      // Linha 2: 3 cards
-      drawMetricCard(14, yPos, cardWidth, cardHeight, 
+      drawMetricCard(14 + cardWidth + cardGap, yPos, cardWidth, cardHeight, 
         `${historyData.metricas?.taxaResolucao?.toFixed(0) || 0}%`, 
         'Taxa Resolução', COLORS.successLight, COLORS.success);
-      drawMetricCard(14 + cardWidth + cardGap, yPos, cardWidth, cardHeight, 
+      drawMetricCard(14 + (cardWidth + cardGap) * 2, yPos, cardWidth, cardHeight, 
         (historyData.metricas?.totalOcorrencias || 0).toString(), 
         'Ocorrências', COLORS.dangerLight, COLORS.danger);
-      drawMetricCard(14 + (cardWidth + cardGap) * 2, yPos, cardWidth, cardHeight, 
-        ((historyData.metricas?.totalRelatoriosLivres || 0) + (historyData.metricas?.totalRelatoriosCompletos || 0)).toString(), 
-        'Total Visitas', COLORS.grayLight, COLORS.gray);
       
       yPos += cardHeight + 12;
 
@@ -1354,20 +1341,8 @@ export default function HistoricoLoja() {
               </Button>
             </div>
 
-            {/* Métricas Resumidas */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-              <Card className="bg-blue-50 border-blue-200">
-                <CardContent className="p-4 text-center">
-                  <p className="text-2xl font-bold text-blue-700">{historyData.metricas?.totalRelatoriosLivres || 0}</p>
-                  <p className="text-xs text-blue-600">Rel. Livres</p>
-                </CardContent>
-              </Card>
-              <Card className="bg-purple-50 border-purple-200">
-                <CardContent className="p-4 text-center">
-                  <p className="text-2xl font-bold text-purple-700">{historyData.metricas?.totalRelatoriosCompletos || 0}</p>
-                  <p className="text-xs text-purple-600">Rel. Completos</p>
-                </CardContent>
-              </Card>
+            {/* Métricas Resumidas - Apenas Performance */}
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               <Card className="bg-orange-50 border-orange-200">
                 <CardContent className="p-4 text-center">
                   <p className="text-2xl font-bold text-orange-700">{historyData.metricas?.totalPendentes || 0}</p>
@@ -1384,14 +1359,6 @@ export default function HistoricoLoja() {
                 <CardContent className="p-4 text-center">
                   <p className="text-2xl font-bold text-red-700">{historyData.metricas?.totalOcorrencias || 0}</p>
                   <p className="text-xs text-red-600">Ocorrências</p>
-                </CardContent>
-              </Card>
-              <Card className="bg-gray-50 border-gray-200">
-                <CardContent className="p-4 text-center">
-                  <p className="text-2xl font-bold text-gray-700">
-                    {(historyData.metricas?.totalRelatoriosLivres || 0) + (historyData.metricas?.totalRelatoriosCompletos || 0)}
-                  </p>
-                  <p className="text-xs text-gray-600">Total Visitas</p>
                 </CardContent>
               </Card>
             </div>
