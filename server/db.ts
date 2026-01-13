@@ -3161,18 +3161,21 @@ export async function getResultadosMensais(
 }
 
 /**
- * Obter períodos disponíveis (mês/ano únicos)
+ * Obter períodos disponíveis (mês/ano únicos) com data de última atualização
  */
-export async function getPeriodosDisponiveis(): Promise<Array<{ mes: number; ano: number; label: string }>> {
+export async function getPeriodosDisponiveis(): Promise<Array<{ mes: number; ano: number; label: string; ultimaAtualizacao: Date | null }>> {
   const db = await getDb();
   if (!db) return [];
   
+  // Buscar períodos distintos com a data mais recente de cada período
   const periodos = await db
-    .selectDistinct({
+    .select({
       mes: resultadosMensais.mes,
       ano: resultadosMensais.ano,
+      ultimaAtualizacao: sql<Date>`MAX(${resultadosMensais.updatedAt})`,
     })
     .from(resultadosMensais)
+    .groupBy(resultadosMensais.mes, resultadosMensais.ano)
     .orderBy(desc(resultadosMensais.ano), desc(resultadosMensais.mes));
   
   const meses = [
@@ -3184,6 +3187,7 @@ export async function getPeriodosDisponiveis(): Promise<Array<{ mes: number; ano
     mes: p.mes,
     ano: p.ano,
     label: `${meses[p.mes - 1]} ${p.ano}`,
+    ultimaAtualizacao: p.ultimaAtualizacao,
   }));
 }
 

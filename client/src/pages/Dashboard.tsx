@@ -282,13 +282,17 @@ export default function Dashboard() {
   // Usar o último mês com dados carregados (primeiro da lista ordenada desc)
   const ultimoMesComDados = useMemo(() => {
     if (periodosDisponiveis && periodosDisponiveis.length > 0) {
-      return { mes: periodosDisponiveis[0].mes, ano: periodosDisponiveis[0].ano };
+      return { 
+        mes: periodosDisponiveis[0].mes, 
+        ano: periodosDisponiveis[0].ano,
+        ultimaAtualizacao: periodosDisponiveis[0].ultimaAtualizacao 
+      };
     }
     // Fallback para mês anterior se não houver dados
     const hoje = new Date();
     const mes = hoje.getMonth() === 0 ? 12 : hoje.getMonth();
     const ano = hoje.getMonth() === 0 ? hoje.getFullYear() - 1 : hoje.getFullYear();
-    return { mes, ano };
+    return { mes, ano, ultimaAtualizacao: null };
   }, [periodosDisponiveis]);
   
   const { data: resultadosMesAnterior } = trpc.resultados.estatisticas.useQuery({
@@ -734,7 +738,15 @@ export default function Dashboard() {
               <CardHeader className="pb-2">
                 <CardTitle className="flex items-center gap-2 text-indigo-700 dark:text-indigo-300">
                   <BarChart3 className="h-4 w-4" />
-                  {language === 'pt' ? 'Resultados' : 'Results'} {new Date(ultimoMesComDados.ano, ultimoMesComDados.mes - 1).toLocaleDateString(language === 'pt' ? 'pt-PT' : 'en-US', { month: 'long' })} {ultimoMesComDados.ano}
+                  <div className="flex flex-col">
+                    <span>{language === 'pt' ? 'Resultados' : 'Results'} {new Date(ultimoMesComDados.ano, ultimoMesComDados.mes - 1).toLocaleDateString(language === 'pt' ? 'pt-PT' : 'en-US', { month: 'long' })} {ultimoMesComDados.ano}</span>
+                    {ultimoMesComDados.ultimaAtualizacao && (
+                      <span className="text-xs font-normal text-muted-foreground flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        {language === 'pt' ? 'Atualizado:' : 'Updated:'} {new Date(ultimoMesComDados.ultimaAtualizacao).toLocaleDateString(language === 'pt' ? 'pt-PT' : 'en-US', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    )}
+                  </div>
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -888,7 +900,15 @@ export default function Dashboard() {
               <CardHeader className="pb-2">
                 <CardTitle className="flex items-center gap-2 text-indigo-700 dark:text-indigo-300">
                   <BarChart3 className="h-4 w-4" />
-                  {language === 'pt' ? 'Resultados' : 'Results'} {new Date(ultimoMesComDados.ano, ultimoMesComDados.mes - 1).toLocaleDateString(language === 'pt' ? 'pt-PT' : 'en-US', { month: 'long' })} {ultimoMesComDados.ano}
+                  <div className="flex flex-col">
+                    <span>{language === 'pt' ? 'Resultados' : 'Results'} {new Date(ultimoMesComDados.ano, ultimoMesComDados.mes - 1).toLocaleDateString(language === 'pt' ? 'pt-PT' : 'en-US', { month: 'long' })} {ultimoMesComDados.ano}</span>
+                    {ultimoMesComDados.ultimaAtualizacao && (
+                      <span className="text-xs font-normal text-muted-foreground flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        {language === 'pt' ? 'Atualizado:' : 'Updated:'} {new Date(ultimoMesComDados.ultimaAtualizacao).toLocaleDateString(language === 'pt' ? 'pt-PT' : 'en-US', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    )}
+                  </div>
                 </CardTitle>
               </CardHeader>
               <CardContent>
