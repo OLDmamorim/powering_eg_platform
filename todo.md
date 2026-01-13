@@ -2759,3 +2759,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## Ajuste v6.8 - Histórico da Loja sem Relatórios
 - [x] Remover secção de relatórios do Histórico da Loja
 - [x] Manter apenas dados de performance/resultados da loja
+
+## Ajuste v6.8b - Prompt IA Histórico da Loja
+- [x] Ajustar prompt da IA para não mencionar relatórios ou responsabilidades do gestor
+- [x] Focar análise apenas na performance da loja (resultados, vendas, pendentes)
