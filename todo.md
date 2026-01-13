@@ -2739,3 +2739,4 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Testar funcionalidade corrigida
 - [x] Fix missing translations in Reuniões de Lojas page (novaReuniaoLoja, preencherDetalhes, lojas, presencasPlaceholder)
 - [x] Bug: Corrigir placeholder de tags em Reuniões de Lojas mostrando chave de tradução
+- [x] Bug: Dashboard mostra mês fixo (Dezembro) em vez do último mês carregado

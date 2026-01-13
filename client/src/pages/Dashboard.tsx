@@ -276,32 +276,39 @@ export default function Dashboard() {
   const { data: alertasReais } = trpc.alertas.list.useQuery(undefined, { enabled: !isDemo });
   const alertas = isDemo ? demoAlertas : alertasReais;
   
-  // Resultados do mês anterior (para quadro de resumo)
-  const mesAnterior = useMemo(() => {
+  // Obter períodos disponíveis para mostrar o último mês com dados
+  const { data: periodosDisponiveis } = trpc.resultados.periodos.useQuery();
+  
+  // Usar o último mês com dados carregados (primeiro da lista ordenada desc)
+  const ultimoMesComDados = useMemo(() => {
+    if (periodosDisponiveis && periodosDisponiveis.length > 0) {
+      return { mes: periodosDisponiveis[0].mes, ano: periodosDisponiveis[0].ano };
+    }
+    // Fallback para mês anterior se não houver dados
     const hoje = new Date();
     const mes = hoje.getMonth() === 0 ? 12 : hoje.getMonth();
     const ano = hoje.getMonth() === 0 ? hoje.getFullYear() - 1 : hoje.getFullYear();
     return { mes, ano };
-  }, []);
+  }, [periodosDisponiveis]);
   
   const { data: resultadosMesAnterior } = trpc.resultados.estatisticas.useQuery({
-    mes: mesAnterior.mes,
-    ano: mesAnterior.ano,
-  }, { enabled: isAdmin });
+    mes: ultimoMesComDados.mes,
+    ano: ultimoMesComDados.ano,
+  }, { enabled: isAdmin && !!ultimoMesComDados });
   
   const { data: totaisMesAnterior } = trpc.resultados.totaisGlobais.useQuery({
-    mes: mesAnterior.mes,
-    ano: mesAnterior.ano,
-  }, { enabled: isAdmin });
+    mes: ultimoMesComDados.mes,
+    ano: ultimoMesComDados.ano,
+  }, { enabled: isAdmin && !!ultimoMesComDados });
   
   // Resultados do mês anterior para gestor (baseado nas suas lojas)
   const minhasLojasIds = useMemo(() => minhasLojas?.map((l: any) => l.id) || [], [minhasLojas]);
   
   const { data: resultadosMesAnteriorGestor } = trpc.resultados.estatisticas.useQuery({
-    mes: mesAnterior.mes,
-    ano: mesAnterior.ano,
+    mes: ultimoMesComDados.mes,
+    ano: ultimoMesComDados.ano,
     lojasIds: minhasLojasIds,
-  }, { enabled: isGestor && minhasLojasIds.length > 0 });
+  }, { enabled: isGestor && minhasLojasIds.length > 0 && !!ultimoMesComDados });
   
   // Contagem de tarefas pendentes atribuídas ao utilizador
   const { data: tarefasPendentesAMim = 0 } = trpc.todos.countPendentesAtribuidosAMim.useQuery();
@@ -727,7 +734,7 @@ export default function Dashboard() {
               <CardHeader className="pb-2">
                 <CardTitle className="flex items-center gap-2 text-indigo-700 dark:text-indigo-300">
                   <BarChart3 className="h-4 w-4" />
-                  {language === 'pt' ? 'Resultados' : 'Results'} {mesAnterior.mes === 12 ? (language === 'pt' ? 'Dezembro' : 'December') : new Date(2024, mesAnterior.mes - 1).toLocaleDateString(language === 'pt' ? 'pt-PT' : 'en-US', { month: 'long' })} {mesAnterior.ano}
+                  {language === 'pt' ? 'Resultados' : 'Results'} {new Date(ultimoMesComDados.ano, ultimoMesComDados.mes - 1).toLocaleDateString(language === 'pt' ? 'pt-PT' : 'en-US', { month: 'long' })} {ultimoMesComDados.ano}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -881,7 +888,7 @@ export default function Dashboard() {
               <CardHeader className="pb-2">
                 <CardTitle className="flex items-center gap-2 text-indigo-700 dark:text-indigo-300">
                   <BarChart3 className="h-4 w-4" />
-                  {language === 'pt' ? 'Resultados' : 'Results'} {mesAnterior.mes === 12 ? (language === 'pt' ? 'Dezembro' : 'December') : new Date(2024, mesAnterior.mes - 1).toLocaleDateString(language === 'pt' ? 'pt-PT' : 'en-US', { month: 'long' })} {mesAnterior.ano}
+                  {language === 'pt' ? 'Resultados' : 'Results'} {new Date(ultimoMesComDados.ano, ultimoMesComDados.mes - 1).toLocaleDateString(language === 'pt' ? 'pt-PT' : 'en-US', { month: 'long' })} {ultimoMesComDados.ano}
                 </CardTitle>
               </CardHeader>
               <CardContent>
