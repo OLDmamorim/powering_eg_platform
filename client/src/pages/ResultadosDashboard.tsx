@@ -741,22 +741,49 @@ export function ResultadosDashboard() {
                       // Se desvio for +10%, progresso = 100% (objetivo atingido)
                       const progresso = isPositivo ? 100 : Math.max(0, 100 + (percentual * 100));
                       
-                      // Cor baseada no progresso: verde se atingiu objetivo, vermelho se não
-                      const corBarra = isPositivo ? 'bg-green-500' : 'bg-red-500';
+                      // Função para calcular cor em gradiente: vermelho → amarelo → verde
+                      const getGradientColor = (progress: number): string => {
+                        // progress: 0-100
+                        // 0-50: vermelho → amarelo
+                        // 50-100: amarelo → verde
+                        if (progress <= 50) {
+                          // Vermelho (239, 68, 68) → Amarelo (234, 179, 8)
+                          const ratio = progress / 50;
+                          const r = Math.round(239 + (234 - 239) * ratio);
+                          const g = Math.round(68 + (179 - 68) * ratio);
+                          const b = Math.round(68 + (8 - 68) * ratio);
+                          return `rgb(${r}, ${g}, ${b})`;
+                        } else {
+                          // Amarelo (234, 179, 8) → Verde (34, 197, 94)
+                          const ratio = (progress - 50) / 50;
+                          const r = Math.round(234 + (34 - 234) * ratio);
+                          const g = Math.round(179 + (197 - 179) * ratio);
+                          const b = Math.round(8 + (94 - 8) * ratio);
+                          return `rgb(${r}, ${g}, ${b})`;
+                        }
+                      };
+                      
+                      // Cor do texto baseada no progresso
+                      const getTextColor = (progress: number): string => {
+                        if (progress >= 100) return 'text-green-600';
+                        if (progress >= 70) return 'text-yellow-600';
+                        return 'text-red-600';
+                      };
                       
                       return (
                         <div key={idx} className="space-y-1">
                           <div className="flex items-center justify-between text-sm">
                             <span className="font-medium">{meses[item.mes - 1]} {item.ano}</span>
-                            <span className={isPositivo ? 'text-green-600' : 'text-red-600'}>
+                            <span className={getTextColor(progresso)}>
                               {item.totalServicos || 0} {t('resultados.servicos') || 'serviços'} ({percentual >= 0 ? '+' : ''}{(percentual * 100).toFixed(1)}%)
                             </span>
                           </div>
                           <div className="w-full bg-secondary rounded-full h-2">
                             <div
-                              className={`h-2 rounded-full ${corBarra}`}
+                              className="h-2 rounded-full transition-all duration-300"
                               style={{ 
-                                width: `${progresso}%` 
+                                width: `${progresso}%`,
+                                backgroundColor: getGradientColor(progresso)
                               }}
                             />
                           </div>

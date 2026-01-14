@@ -2767,3 +2767,6 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## Bug v6.9 - Gráfico Evolução Mensal
 - [x] Corrigir lógica da barra: pequena/vermelha = longe do objetivo, grande/verde = objetivo atingido
 - [x] Barra deve representar progresso em direção ao objetivo, não o desvio
+
+## Feature v6.10 - Gradiente de cores no gráfico Evolução Mensal
+- [x] Implementar gradiente vermelho → amarelo → verde conforme progresso aumenta
