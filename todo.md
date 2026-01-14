@@ -2770,3 +2770,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 
 ## Feature v6.10 - Gradiente de cores no gráfico Evolução Mensal
 - [x] Implementar gradiente vermelho → amarelo → verde conforme progresso aumenta
+
+## Bug v6.10b - Gradiente incorreto no gráfico Evolução Mensal
+- [x] Corrigir: verde apenas quando desvio ≥ 0% (objetivo atingido)
+- [x] Corrigir: barra deve ser proporcional ao progresso, não 100% para todos
+- [x] Gradiente: vermelho (longe) → laranja → amarelo (perto) → verde (atingido)
