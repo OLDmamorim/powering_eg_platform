@@ -2763,3 +2763,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## Ajuste v6.8b - Prompt IA Histórico da Loja
 - [x] Ajustar prompt da IA para não mencionar relatórios ou responsabilidades do gestor
 - [x] Focar análise apenas na performance da loja (resultados, vendas, pendentes)
+
+## Bug v6.9 - Gráfico Evolução Mensal
+- [x] Corrigir lógica da barra: pequena/vermelha = longe do objetivo, grande/verde = objetivo atingido
+- [x] Barra deve representar progresso em direção ao objetivo, não o desvio

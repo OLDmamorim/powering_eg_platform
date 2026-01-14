@@ -730,11 +730,19 @@ export function ResultadosDashboard() {
                 </div>
               ) : evolucao && evolucao.length > 0 ? (
                 <div className="space-y-4">
-                  {/* Gráfico simples com barras */}
+                  {/* Gráfico de progresso em direção ao objetivo */}
                   <div className="grid grid-cols-1 gap-2">
                     {evolucao.map((item, idx) => {
                       const percentual = item.desvioPercentualMes || 0;
                       const isPositivo = percentual >= 0;
+                      
+                      // Calcular progresso: 100% = objetivo atingido (desvio 0% ou positivo)
+                      // Se desvio for -50%, progresso = 50%
+                      // Se desvio for +10%, progresso = 100% (objetivo atingido)
+                      const progresso = isPositivo ? 100 : Math.max(0, 100 + (percentual * 100));
+                      
+                      // Cor baseada no progresso: verde se atingiu objetivo, vermelho se não
+                      const corBarra = isPositivo ? 'bg-green-500' : 'bg-red-500';
                       
                       return (
                         <div key={idx} className="space-y-1">
@@ -746,9 +754,9 @@ export function ResultadosDashboard() {
                           </div>
                           <div className="w-full bg-secondary rounded-full h-2">
                             <div
-                              className={`h-2 rounded-full ${isPositivo ? 'bg-green-500' : 'bg-red-500'}`}
+                              className={`h-2 rounded-full ${corBarra}`}
                               style={{ 
-                                width: `${Math.min(Math.abs(percentual * 100), 100)}%` 
+                                width: `${progresso}%` 
                               }}
                             />
                           </div>
