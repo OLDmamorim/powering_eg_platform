@@ -2775,3 +2775,6 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Corrigir: verde apenas quando desvio ≥ 0% (objetivo atingido)
 - [x] Corrigir: barra deve ser proporcional ao progresso, não 100% para todos
 - [x] Gradiente: vermelho (longe) → laranja → amarelo (perto) → verde (atingido)
+
+## Feature v6.11 - Data de atualização no Resultados Dashboard (gestor)
+- [x] Adicionar data de última atualização dos dados na página de Resultados Dashboard

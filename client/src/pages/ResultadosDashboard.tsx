@@ -417,6 +417,29 @@ export function ResultadosDashboard() {
           </CardContent>
         </Card>
         
+        {/* Data de última atualização dos dados */}
+        {periodoSelecionado && periodos && (() => {
+          const periodoAtual = periodos.find(p => p.mes === periodoSelecionado.mes && p.ano === periodoSelecionado.ano);
+          if (periodoAtual?.ultimaAtualizacao) {
+            const dataAtualizacao = new Date(periodoAtual.ultimaAtualizacao);
+            return (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <span>{t('resultados.dadosAtualizadosEm') || 'Dados atualizados em'}:</span>
+                <span className="font-medium">
+                  {dataAtualizacao.toLocaleDateString('pt-PT', { 
+                    day: '2-digit', 
+                    month: '2-digit', 
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                </span>
+              </div>
+            );
+          }
+          return null;
+        })()}
+        
         {/* Botão de Exportar (apenas quando "Apenas minhas lojas" selecionado) */}
         {lojaSelecionada === 'minhas' && gestorData && periodoSelecionado && (
           <div className="flex justify-end">
