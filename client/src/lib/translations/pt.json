@@ -1286,7 +1286,8 @@
     "selecioneFicheiroExcel": "Por favor, selecione um ficheiro Excel (.xlsx ou .xls)",
     "selecioneFicheiroMesAno": "Por favor, selecione o ficheiro, mês e ano",
     "erroProcessarFicheiro": "Erro ao processar ficheiro",
-    "erroUpload": "Erro ao fazer upload"
+    "erroUpload": "Erro ao fazer upload",
+    "dadosAtualizadosEm": "Dados atualizados em"
   },
   "relatorioIA": {
     "titulo": "Relatório IA de Resultados",

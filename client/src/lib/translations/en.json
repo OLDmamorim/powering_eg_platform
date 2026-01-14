@@ -1306,7 +1306,8 @@
     "selecioneFicheiroExcel": "Please select an Excel file (.xlsx or .xls)",
     "selecioneFicheiroMesAno": "Please select the file, month and year",
     "erroProcessarFicheiro": "Error processing file",
-    "erroUpload": "Error uploading"
+    "erroUpload": "Error uploading",
+    "dadosAtualizadosEm": "Data updated on"
   },
   "relatorioIA": {
     "titulo": "AI Results Report",

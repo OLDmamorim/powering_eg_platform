@@ -2778,3 +2778,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 
 ## Feature v6.11 - Data de atualização no Resultados Dashboard (gestor)
 - [x] Adicionar data de última atualização dos dados na página de Resultados Dashboard
+
+## Bug v6.11b - Tradução em falta para dadosAtualizadosEm
+- [x] Adicionar chave resultados.dadosAtualizadosEm ao ficheiro PT
+- [x] Adicionar chave resultados.dadosAtualizadosEm ao ficheiro EN
