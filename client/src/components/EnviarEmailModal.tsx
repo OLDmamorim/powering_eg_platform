@@ -2,10 +2,9 @@ import { useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Loader2, Mail } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { Loader2, Mail, CheckCircle, Store } from "lucide-react";
 import { toast } from "sonner";
 
 interface EnviarEmailModalProps {
@@ -14,7 +13,9 @@ interface EnviarEmailModalProps {
   reuniaoId: number;
   tipo: "gestores" | "lojas";
   gestores?: Array<{ id: number; nome: string; email?: string }>;
-  onEnviar: (reuniaoId: number, destinatarios: number[] | string) => Promise<void>;
+  lojaEmail?: string; // Email da loja (opcional, para mostrar confirmação)
+  lojaNome?: string; // Nome da loja (opcional, para mostrar confirmação)
+  onEnviar: (reuniaoId: number, destinatarios: number[] | string | undefined) => Promise<void>;
 }
 
 export function EnviarEmailModal({
@@ -23,13 +24,14 @@ export function EnviarEmailModal({
   reuniaoId,
   tipo,
   gestores,
+  lojaEmail,
+  lojaNome,
   onEnviar,
 }: EnviarEmailModalProps) {
   const { language } = useLanguage();
   const [gestoresSelecionados, setGestoresSelecionados] = useState<number[]>(
     gestores?.map(g => g.id) || []
   );
-  const [emailLoja, setEmailLoja] = useState("");
   const [loading, setLoading] = useState(false);
 
   const toggleGestor = (gestorId: number) => {
@@ -46,33 +48,24 @@ export function EnviarEmailModal({
         toast.error(language === 'pt' ? "Selecione pelo menos um gestor" : "Select at least one manager");
         return;
       }
-    } else {
-      if (!emailLoja.trim()) {
-        toast.error(language === 'pt' ? "Indique o email da loja" : "Enter the store email");
-        return;
-      }
-      // Validar formato de email
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(emailLoja)) {
-        toast.error(language === 'pt' ? "Email inválido" : "Invalid email");
-        return;
-      }
     }
 
     setLoading(true);
     try {
       await onEnviar(
         reuniaoId,
-        tipo === "gestores" ? gestoresSelecionados : emailLoja
+        tipo === "gestores" ? gestoresSelecionados : undefined // undefined = usar email da loja
       );
       
       const destinatarios = tipo === "gestores" 
         ? `${gestoresSelecionados.length} gestor(es)`
-        : emailLoja;
-      toast.success(`Email enviado para ${destinatarios}!`);
+        : lojaEmail || (language === 'pt' ? 'email da loja' : 'store email');
+      toast.success(language === 'pt' 
+        ? `Email enviado para ${destinatarios}!` 
+        : `Email sent to ${destinatarios}!`);
       onOpenChange(false);
     } catch (error: any) {
-      toast.error(error.message || "Erro ao enviar email");
+      toast.error(error.message || (language === 'pt' ? "Erro ao enviar email" : "Error sending email"));
     } finally {
       setLoading(false);
     }
@@ -82,18 +75,24 @@ export function EnviarEmailModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Enviar Relatório por Email</DialogTitle>
+          <DialogTitle>
+            {language === 'pt' ? 'Enviar Relatório por Email' : 'Send Report by Email'}
+          </DialogTitle>
           <DialogDescription>
             {tipo === "gestores"
-              ? "Selecione os gestores que devem receber o relatório"
-              : "Indique o email da loja para enviar o relatório"}
+              ? (language === 'pt' 
+                  ? "Selecione os gestores que devem receber o relatório"
+                  : "Select the managers who should receive the report")
+              : (language === 'pt'
+                  ? "O relatório será enviado para o email configurado no perfil da loja"
+                  : "The report will be sent to the email configured in the store profile")}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
           {tipo === "gestores" ? (
             <div className="space-y-2">
-              <Label>Destinatários</Label>
+              <Label>{language === 'pt' ? 'Destinatários' : 'Recipients'}</Label>
               <div className="border rounded-md p-4 space-y-2 max-h-64 overflow-y-auto">
                 {gestores && gestores.length > 0 ? (
                   gestores.map((gestor) => (
@@ -113,43 +112,60 @@ export function EnviarEmailModal({
                     </div>
                   ))
                 ) : (
-                  <p className="text-sm text-muted-foreground">Nenhum gestor disponível</p>
+                  <p className="text-sm text-muted-foreground">
+                    {language === 'pt' ? 'Nenhum gestor disponível' : 'No managers available'}
+                  </p>
                 )}
               </div>
               {gestoresSelecionados.length > 0 && (
                 <p className="text-xs text-muted-foreground">
-                  {gestoresSelecionados.length} gestor(es) selecionado(s)
+                  {gestoresSelecionados.length} {language === 'pt' ? 'gestor(es) selecionado(s)' : 'manager(s) selected'}
                 </p>
               )}
             </div>
           ) : (
-            <div className="space-y-2">
-              <Label htmlFor="email-loja">Email da Loja</Label>
-              <Input
-                id="email-loja"
-                type="email"
-                placeholder="loja@exemplo.com"
-                value={emailLoja}
-                onChange={(e) => setEmailLoja(e.target.value)}
-              />
+            <div className="bg-muted/50 rounded-lg p-4 space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Store className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <p className="font-medium">{lojaNome || (language === 'pt' ? 'Loja da Reunião' : 'Meeting Store')}</p>
+                  {lojaEmail ? (
+                    <p className="text-sm text-muted-foreground">{lojaEmail}</p>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      {language === 'pt' ? 'Email configurado no perfil' : 'Email configured in profile'}
+                    </p>
+                  )}
+                </div>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
+                <CheckCircle className="h-4 w-4" />
+                <span>
+                  {language === 'pt' 
+                    ? 'O email será enviado automaticamente para o endereço da loja'
+                    : 'Email will be sent automatically to the store address'}
+                </span>
+              </div>
             </div>
           )}
         </div>
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
-            Cancelar
+            {language === 'pt' ? 'Cancelar' : 'Cancel'}
           </Button>
           <Button onClick={handleSubmit} disabled={loading}>
             {loading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                A enviar...
+                {language === 'pt' ? 'A enviar...' : 'Sending...'}
               </>
             ) : (
               <>
                 <Mail className="mr-2 h-4 w-4" />
-                Enviar Email
+                {language === 'pt' ? 'Enviar Email' : 'Send Email'}
               </>
             )}
           </Button>

@@ -2688,7 +2688,7 @@ export const appRouter = router({
     enviarEmail: protectedProcedure
       .input(z.object({
         reuniaoId: z.number(),
-        emailDestino: z.string().email(),
+        emailDestino: z.string().email().optional(), // Agora opcional - usa email da loja se não fornecido
       }))
       .mutation(async ({ input }) => {
         const reuniao = await db.getReuniaoLojasById(input.reuniaoId);
@@ -2697,7 +2697,22 @@ export const appRouter = router({
         // Buscar nomes das lojas
         const lojaIds = JSON.parse(reuniao.lojaIds) as number[];
         const lojas = await db.getAllLojas();
-        const lojasNomes = lojas.filter(l => lojaIds.includes(l.id)).map(l => l.nome);
+        const lojasReuniao = lojas.filter(l => lojaIds.includes(l.id));
+        const lojasNomes = lojasReuniao.map(l => l.nome);
+        
+        // Determinar email de destino - usar da loja se não fornecido
+        let emailDestino: string = input.emailDestino || '';
+        if (!emailDestino) {
+          // Usar email da primeira loja que tenha email configurado
+          const lojaComEmail = lojasReuniao.find(l => l.email);
+          if (!lojaComEmail || !lojaComEmail.email) {
+            throw new TRPCError({ 
+              code: 'BAD_REQUEST', 
+              message: 'Nenhuma loja desta reunião tem email configurado. Configure o email no perfil da loja.' 
+            });
+          }
+          emailDestino = lojaComEmail.email;
+        }
         
         const resumoIA = reuniao.resumoIA ? JSON.parse(reuniao.resumoIA) : null;
         
@@ -2791,7 +2806,7 @@ export const appRouter = router({
         `;
         
         const emailEnviado = await sendEmail({
-          to: input.emailDestino,
+          to: emailDestino,
           subject: `Reunião de Loja - ${lojasNomes.join(', ')} - ${new Date(reuniao.data).toLocaleDateString('pt-PT')}`,
           html: htmlEmail,
         });

@@ -2782,3 +2782,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## Bug v6.11b - Tradução em falta para dadosAtualizadosEm
 - [x] Adicionar chave resultados.dadosAtualizadosEm ao ficheiro PT
 - [x] Adicionar chave resultados.dadosAtualizadosEm ao ficheiro EN
+
+## Feature v6.12 - Usar email da loja automaticamente no envio de relatório de reunião
+- [x] Remover modal que pede email manualmente
+- [x] Usar email da loja do perfil automaticamente
+- [x] Se loja não tiver email, mostrar mensagem de erro apropriada

@@ -574,10 +574,29 @@ export default function ReuniõesLojas() {
             onOpenChange={setModalEmail}
             reuniaoId={reuniaoSelecionada}
             tipo="lojas"
-            onEnviar={async (reuniaoId, emailDestino) => {
+            lojaNome={(() => {
+              const reuniao = historico?.find(r => r.id === reuniaoSelecionada);
+              if (reuniao?.lojaIds && lojasDisponiveis) {
+                const lojaIds = JSON.parse(reuniao.lojaIds) as number[];
+                const lojasReuniao = lojasDisponiveis.filter(l => lojaIds.includes(l.id));
+                return lojasReuniao.map(l => l.nome).join(', ');
+              }
+              return undefined;
+            })()}
+            lojaEmail={(() => {
+              const reuniao = historico?.find(r => r.id === reuniaoSelecionada);
+              if (reuniao?.lojaIds && lojasDisponiveis) {
+                const lojaIds = JSON.parse(reuniao.lojaIds) as number[];
+                const lojasReuniao = lojasDisponiveis.filter(l => lojaIds.includes(l.id));
+                const lojaComEmail = lojasReuniao.find(l => l.email);
+                return lojaComEmail?.email || undefined;
+              }
+              return undefined;
+            })()}
+            onEnviar={async (reuniaoId) => {
+              // Não passa email - o backend usa o email da loja automaticamente
               await enviarEmailMutation.mutateAsync({
                 reuniaoId,
-                emailDestino: emailDestino as string,
               });
             }}
           />
