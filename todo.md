@@ -2794,3 +2794,6 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Implementar endpoint de update de tarefa no backend (já existia, adicionada verificação)
 - [x] Verificar se tarefa foi lida antes de permitir edição
 - [x] Esconder botão de editar após tarefa ser lida
+
+## Feature v6.14 - Indicador visual de tarefa editável
+- [x] Adicionar badge "Pode editar" com ícone de lápis nas tarefas que o utilizador criou e ainda não foram lidas

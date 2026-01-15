@@ -1037,6 +1037,14 @@ function TodoCard({
                 </Badge>
               )}
               
+              {/* Badge "Pode editar" se o utilizador é o criador e a tarefa não foi vista */}
+              {currentUserId === todo.criadoPorId && !todo.visto && (
+                <Badge variant="outline" className="text-amber-600 border-amber-400 bg-amber-50">
+                  <Edit className="h-3 w-3 mr-1" />
+                  Pode editar
+                </Badge>
+              )}
+              
               <Badge className={corPrioridade(todo.prioridade)}>
                 {todo.prioridade}
               </Badge>
