@@ -2797,3 +2797,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 
 ## Feature v6.14 - Indicador visual de tarefa editável
 - [x] Adicionar badge "Pode editar" com ícone de lápis nas tarefas que o utilizador criou e ainda não foram lidas
+
+## Feature v6.14 - Indicador visual de tarefa editável
+- [x] Adicionar badge "Pode editar" com ícone de lápis nas tarefas que o utilizador criou e ainda não foram lidas (Todos.tsx)
+- [x] Adicionar badge "Pode editar" no Portal da Loja para tarefas enviadas não vistas pelo gestor (PortalLoja.tsx)

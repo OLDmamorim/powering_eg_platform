@@ -46,6 +46,7 @@ import {
   X,
   Image as ImageIcon,
   Paperclip,
+  Edit,
 } from "lucide-react";
 
 interface LojaAuth {
@@ -1125,6 +1126,14 @@ export default function PortalLoja() {
                           {todo.tipo === 'enviada' && todo.visto && (
                             <Badge variant="outline" className="bg-blue-50 text-blue-600">
                               Vista pelo Gestor
+                            </Badge>
+                          )}
+                          
+                          {/* Badge "Pode editar" - para tarefas enviadas que ainda não foram vistas pelo gestor */}
+                          {todo.tipo === 'enviada' && !todo.visto && (
+                            <Badge variant="outline" className="text-amber-600 border-amber-400 bg-amber-50">
+                              <Edit className="h-3 w-3 mr-1" />
+                              Pode editar
                             </Badge>
                           )}
                           
