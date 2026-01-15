@@ -87,6 +87,10 @@ export default function Todos() {
   const [novoStatus, setNovoStatus] = useState<string>("");
   const [respostaStatus, setRespostaStatus] = useState<string>("");
   
+  // Estado para resposta rápida
+  const [responderOpen, setResponderOpen] = useState(false);
+  const [respostaRapida, setRespostaRapida] = useState<string>("");
+  
   // Categoria form
   const [novaCategoriaNome, setNovaCategoriaNome] = useState("");
   const [novaCategoriaCor, setNovaCategoriaCor] = useState("#3B82F6");
@@ -192,6 +196,17 @@ export default function Todos() {
       setRespostaStatus("");
       refetchTodos();
       refetchEstatisticas();
+    },
+    onError: (error: any) => toast.error(error.message),
+  });
+  
+  const responderMutation = trpc.todos.responder.useMutation({
+    onSuccess: () => {
+      toast.success(language === 'pt' ? "Resposta enviada e loja notificada!" : "Reply sent and store notified!");
+      setResponderOpen(false);
+      setTodoSelecionado(null);
+      setRespostaRapida("");
+      refetchTodos();
     },
     onError: (error: any) => toast.error(error.message),
   });
@@ -499,6 +514,11 @@ export default function Todos() {
                     setRespostaStatus("");
                     setMudarStatusOpen(true);
                   }}
+                  onResponder={(todo) => {
+                    setTodoSelecionado(todo);
+                    setRespostaRapida("");
+                    setResponderOpen(true);
+                  }}
                   corPrioridade={corPrioridade}
                   corEstado={corEstado}
                   iconeEstado={iconeEstado}
@@ -542,6 +562,11 @@ export default function Todos() {
                     setNovoStatus(todo.estado);
                     setRespostaStatus("");
                     setMudarStatusOpen(true);
+                  }}
+                  onResponder={(todo) => {
+                    setTodoSelecionado(todo);
+                    setRespostaRapida("");
+                    setResponderOpen(true);
                   }}
                   corPrioridade={corPrioridade}
                   corEstado={corEstado}
@@ -884,6 +909,71 @@ export default function Todos() {
           </DialogContent>
         </Dialog>
         
+        {/* Dialog Responder */}
+        <Dialog open={responderOpen} onOpenChange={setResponderOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Send className="h-5 w-5 text-purple-600" />
+                Responder à Tarefa
+              </DialogTitle>
+              <DialogDescription>
+                Escreva uma resposta para a loja. A loja será notificada por email.
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              {todoSelecionado && (
+                <div className="p-3 bg-muted rounded-lg">
+                  <p className="font-medium">{todoSelecionado.titulo}</p>
+                  {todoSelecionado.lojaNome && (
+                    <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
+                      <Store className="h-3 w-3" />
+                      {todoSelecionado.lojaNome}
+                    </p>
+                  )}
+                  {todoSelecionado.descricao && (
+                    <p className="text-sm text-muted-foreground mt-2">{todoSelecionado.descricao}</p>
+                  )}
+                </div>
+              )}
+              
+              <div>
+                <label className="text-sm font-medium">Sua Resposta *</label>
+                <Textarea
+                  value={respostaRapida}
+                  onChange={(e) => setRespostaRapida(e.target.value)}
+                  placeholder="Escreva a sua resposta para a loja..."
+                  rows={4}
+                />
+              </div>
+            </div>
+            
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setResponderOpen(false)}>
+                Cancelar
+              </Button>
+              <Button 
+                className="bg-purple-600 hover:bg-purple-700"
+                onClick={() => {
+                  if (!respostaRapida.trim()) {
+                    toast.error(language === 'pt' ? "Escreva uma resposta" : "Write a reply");
+                    return;
+                  }
+                  responderMutation.mutate({
+                    id: todoSelecionado.id,
+                    resposta: respostaRapida.trim(),
+                  });
+                }} 
+                disabled={responderMutation.isPending}
+              >
+                <Send className="h-4 w-4 mr-2" />
+                {responderMutation.isPending ? "A enviar..." : "Enviar Resposta"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+        
         {/* Dialog Categorias */}
         <Dialog open={categoriasOpen} onOpenChange={setCategoriasOpen}>
           <DialogContent>
@@ -971,6 +1061,7 @@ function TodoCard({
   onMarcarVisto,
   onMarcarVistoGestor,
   onMudarStatus,
+  onResponder,
   corPrioridade,
   corEstado,
   iconeEstado,
@@ -984,6 +1075,7 @@ function TodoCard({
   onMarcarVisto: (id: number) => void;
   onMarcarVistoGestor: (id: number) => void;
   onMudarStatus: (todo: any) => void;
+  onResponder: (todo: any) => void;
   corPrioridade: (p: string) => string;
   corEstado: (e: string) => string;
   iconeEstado: (e: string) => React.ReactNode;
@@ -1117,6 +1209,10 @@ function TodoCard({
                   Editar
                 </DropdownMenuItem>
               )}
+              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onResponder(todo); }}>
+                <Send className="h-4 w-4 mr-2" />
+                Responder
+              </DropdownMenuItem>
               <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onMudarStatus(todo); }}>
                 <RotateCcw className="h-4 w-4 mr-2" />
                 Mudar Status

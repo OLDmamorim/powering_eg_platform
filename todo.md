@@ -2806,3 +2806,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Implementar botão de editar nas tarefas enviadas não vistas
 - [x] Criar modal de edição com campos editáveis
 - [x] Implementar mutation para atualizar tarefa via backend
+
+## Feature v6.15 - Responder às tarefas das lojas
+- [x] Adicionar opção "Responder" no menu de ações das tarefas criadas por lojas
+- [x] Criar modal para escrever resposta/comentário
+- [x] Guardar comentário no campo apropriado e notificar a loja

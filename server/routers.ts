@@ -4030,6 +4030,79 @@ export const appRouter = router({
         
         return { success: true };
       }),
+    
+    // Responder a tarefa da loja (apenas adiciona comentário sem mudar status)
+    responder: gestorProcedure
+      .input(z.object({
+        id: z.number(),
+        resposta: z.string().min(1, 'A resposta não pode estar vazia'),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const todo = await db.getTodoById(input.id);
+        if (!todo) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Tarefa não encontrada' });
+        }
+        
+        // Adicionar resposta ao comentário
+        const comentarioAtualizado = `[${new Date().toLocaleDateString('pt-PT')} - ${ctx.user.name}] ${input.resposta}${todo.comentario ? '\n\n--- Histórico ---\n' + todo.comentario : ''}`;
+        
+        await db.updateTodo(input.id, {
+          comentario: comentarioAtualizado,
+          // Marcar como não visto para a loja ver a resposta
+          visto: false,
+          vistoEm: null,
+        });
+        
+        // Notificar a loja por email se a tarefa foi criada por uma loja
+        if (todo.criadoPorLojaId) {
+          const loja = await db.getLojaById(todo.criadoPorLojaId);
+          if (loja?.email) {
+            try {
+              await sendEmail({
+                to: loja.email,
+                subject: `Resposta do Gestor: ${todo.titulo}`,
+                html: gerarHTMLNotificacaoTodo({
+                  tipo: 'resposta_gestor',
+                  titulo: todo.titulo,
+                  descricao: todo.descricao || '',
+                  prioridade: todo.prioridade,
+                  criadoPor: ctx.user.name || 'Gestor',
+                  lojaNome: loja.nome,
+                  comentario: input.resposta,
+                }),
+              });
+            } catch (e) {
+              console.error('Erro ao enviar email de notificação:', e);
+            }
+          }
+        }
+        
+        // Notificar também se a tarefa está atribuída a uma loja
+        if (todo.atribuidoLojaId && todo.atribuidoLojaId !== todo.criadoPorLojaId) {
+          const loja = await db.getLojaById(todo.atribuidoLojaId);
+          if (loja?.email) {
+            try {
+              await sendEmail({
+                to: loja.email,
+                subject: `Resposta do Gestor: ${todo.titulo}`,
+                html: gerarHTMLNotificacaoTodo({
+                  tipo: 'resposta_gestor',
+                  titulo: todo.titulo,
+                  descricao: todo.descricao || '',
+                  prioridade: todo.prioridade,
+                  criadoPor: ctx.user.name || 'Gestor',
+                  lojaNome: loja.nome,
+                  comentario: input.resposta,
+                }),
+              });
+            } catch (e) {
+              console.error('Erro ao enviar email de notificação:', e);
+            }
+          }
+        }
+        
+        return { success: true };
+      }),
   }),
   
   // ==================== TO-DO PORTAL LOJA ====================
@@ -5138,7 +5211,7 @@ function gerarHTMLReuniaoQuinzenal(dados: {
 
 // Função auxiliar para gerar HTML do email de notificação de To-Do
 function gerarHTMLNotificacaoTodo(dados: {
-  tipo: 'nova' | 'reatribuida' | 'devolvida' | 'concluida' | 'nova_da_loja' | 'status_atualizado' | 'resposta_loja' | 'observacao_loja';
+  tipo: 'nova' | 'reatribuida' | 'devolvida' | 'concluida' | 'nova_da_loja' | 'status_atualizado' | 'resposta_loja' | 'observacao_loja' | 'resposta_gestor';
   titulo: string;
   descricao: string;
   prioridade: string;
@@ -5164,6 +5237,7 @@ function gerarHTMLNotificacaoTodo(dados: {
     status_atualizado: `Atualização de Tarefa: ${dados.novoEstado || 'Atualizado'}`,
     resposta_loja: 'Resposta da Loja',
     observacao_loja: 'Observação da Loja',
+    resposta_gestor: 'Resposta do Gestor',
   }[dados.tipo];
   
   const corTipo = {
@@ -5175,6 +5249,7 @@ function gerarHTMLNotificacaoTodo(dados: {
     status_atualizado: '#6366f1',
     resposta_loja: '#06b6d4',
     observacao_loja: '#14b8a6',
+    resposta_gestor: '#8b5cf6',
   }[dados.tipo];
   
   return `
