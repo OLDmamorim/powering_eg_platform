@@ -81,6 +81,11 @@ export default function PortalLoja() {
   const [uploadingAnexo, setUploadingAnexo] = useState(false);
   const [editarInternaOpen, setEditarInternaOpen] = useState(false);
   const [tarefaInternaEditando, setTarefaInternaEditando] = useState<any>(null);
+  const [editarEnviadaOpen, setEditarEnviadaOpen] = useState(false);
+  const [tarefaEnviadaEditando, setTarefaEnviadaEditando] = useState<any>(null);
+  const [editarEnviadaTitulo, setEditarEnviadaTitulo] = useState("");
+  const [editarEnviadaDescricao, setEditarEnviadaDescricao] = useState("");
+  const [editarEnviadaPrioridade, setEditarEnviadaPrioridade] = useState<"baixa" | "media" | "alta" | "urgente">("media");
   const [participantes, setParticipantes] = useState<string[]>([""]);
   const [reuniaoAtual, setReuniaoAtual] = useState<number | null>(null);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
@@ -357,6 +362,16 @@ export default function PortalLoja() {
     onSuccess: () => {
       toast.success(language === 'pt' ? "Tarefa eliminada!" : "Task deleted!");
       refetchTarefasInternas();
+    },
+    onError: (error) => toast.error(error.message),
+  });
+
+  const editarEnviadaMutation = trpc.todosPortalLoja.editarEnviada.useMutation({
+    onSuccess: () => {
+      toast.success(language === 'pt' ? "Tarefa atualizada!" : "Task updated!");
+      setEditarEnviadaOpen(false);
+      setTarefaEnviadaEditando(null);
+      refetchHistoricoTarefas();
     },
     onError: (error) => toast.error(error.message),
   });
@@ -1290,6 +1305,25 @@ export default function PortalLoja() {
                         )}
                         
                         {/* Ações para tarefas ENVIADAS (ao gestor) */}
+                        {/* Botão Editar - apenas se não foi vista pelo gestor */}
+                        {todo.tipo === 'enviada' && !todo.visto && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-amber-600 border-amber-300 hover:bg-amber-50"
+                            onClick={() => {
+                              setTarefaEnviadaEditando(todo);
+                              setEditarEnviadaTitulo(todo.titulo);
+                              setEditarEnviadaDescricao(todo.descricao || '');
+                              setEditarEnviadaPrioridade(todo.prioridade || 'media');
+                              setEditarEnviadaOpen(true);
+                            }}
+                          >
+                            <Edit className="h-4 w-4 mr-1" />
+                            Editar
+                          </Button>
+                        )}
+                        {/* Botão Responder - apenas se o gestor já respondeu */}
                         {todo.tipo === 'enviada' && todo.comentario && !todo.respostaLoja && (
                           <Button
                             size="sm"
@@ -1857,6 +1891,84 @@ export default function PortalLoja() {
                 disabled={atualizarTarefaInternaMutation.isPending}
               >
                 {atualizarTarefaInternaMutation.isPending ? "A guardar..." : "Guardar"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dialog para editar tarefa enviada */}
+        <Dialog open={editarEnviadaOpen} onOpenChange={setEditarEnviadaOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Edit className="h-5 w-5 text-amber-600" />
+                {language === 'pt' ? 'Editar Tarefa Enviada' : 'Edit Sent Task'}
+              </DialogTitle>
+              <DialogDescription>
+                {language === 'pt' ? 'Pode editar esta tarefa porque o gestor ainda não a visualizou.' : 'You can edit this task because the manager has not viewed it yet.'}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">{language === 'pt' ? 'Título' : 'Title'}</label>
+                <Input
+                  value={editarEnviadaTitulo}
+                  onChange={(e) => setEditarEnviadaTitulo(e.target.value)}
+                  placeholder={language === 'pt' ? 'Título da tarefa' : 'Task title'}
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">{language === 'pt' ? 'Descrição' : 'Description'}</label>
+                <Textarea
+                  value={editarEnviadaDescricao}
+                  onChange={(e) => setEditarEnviadaDescricao(e.target.value)}
+                  placeholder={language === 'pt' ? 'Descrição da tarefa (opcional)' : 'Task description (optional)'}
+                  rows={3}
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">{language === 'pt' ? 'Prioridade' : 'Priority'}</label>
+                <Select
+                  value={editarEnviadaPrioridade}
+                  onValueChange={(value: "baixa" | "media" | "alta" | "urgente") => setEditarEnviadaPrioridade(value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="baixa">{language === 'pt' ? 'Baixa' : 'Low'}</SelectItem>
+                    <SelectItem value="media">{language === 'pt' ? 'Média' : 'Medium'}</SelectItem>
+                    <SelectItem value="alta">{language === 'pt' ? 'Alta' : 'High'}</SelectItem>
+                    <SelectItem value="urgente">{language === 'pt' ? 'Urgente' : 'Urgent'}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => {
+                setEditarEnviadaOpen(false);
+                setTarefaEnviadaEditando(null);
+              }}>
+                {language === 'pt' ? 'Cancelar' : 'Cancel'}
+              </Button>
+              <Button
+                className="bg-amber-600 hover:bg-amber-700"
+                onClick={() => {
+                  if (!editarEnviadaTitulo.trim()) {
+                    toast.error(language === 'pt' ? 'O título é obrigatório' : 'Title is required');
+                    return;
+                  }
+                  editarEnviadaMutation.mutate({
+                    token,
+                    todoId: tarefaEnviadaEditando.id,
+                    titulo: editarEnviadaTitulo.trim(),
+                    descricao: editarEnviadaDescricao.trim() || undefined,
+                    prioridade: editarEnviadaPrioridade,
+                  });
+                }}
+                disabled={editarEnviadaMutation.isPending}
+              >
+                {editarEnviadaMutation.isPending ? (language === 'pt' ? 'A guardar...' : 'Saving...') : (language === 'pt' ? 'Guardar' : 'Save')}
               </Button>
             </DialogFooter>
           </DialogContent>

@@ -4445,6 +4445,40 @@ export const appRouter = router({
         return { success: true };
       }),
     
+    // Editar tarefa enviada (apenas se não foi vista pelo gestor)
+    editarEnviada: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        todoId: z.number(),
+        titulo: z.string().min(1, 'Título é obrigatório').optional(),
+        descricao: z.string().optional(),
+        prioridade: z.enum(['baixa', 'media', 'alta', 'urgente']).optional(),
+        categoriaId: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const auth = await db.validarTokenLoja(input.token);
+        if (!auth) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        
+        // Verificar se a tarefa foi criada pela loja
+        const todo = await db.getTodoById(input.todoId);
+        if (!todo || todo.criadoPorLojaId !== auth.loja.id) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Não tem permissão para editar esta tarefa' });
+        }
+        
+        // Verificar se o gestor já viu a tarefa
+        if (todo.visto) {
+          throw new TRPCError({ code: 'BAD_REQUEST', message: 'Não pode editar uma tarefa que já foi vista pelo gestor' });
+        }
+        
+        // Atualizar a tarefa
+        const { token, todoId, ...data } = input;
+        await db.updateTodo(todoId, data);
+        
+        return { success: true };
+      }),
+    
     // Adicionar observação a tarefa RECEBIDA (do gestor)
     adicionarObservacao: publicProcedure
       .input(z.object({
