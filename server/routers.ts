@@ -3466,8 +3466,8 @@ export const appRouter = router({
         const token = await db.getOrCreateTokenLoja(input.lojaId);
         if (!token) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Erro ao criar token' });
         
-        // Construir URL do portal
-        const baseUrl = process.env.VITE_APP_URL || 'https://poweringeg.manus.space';
+        // Construir URL do portal - usar o domínio publicado correto
+        const baseUrl = process.env.VITE_APP_URL || 'https://poweringeg-3c9mozlh.manus.space';
         const portalUrl = `${baseUrl}/portal-loja?token=${token.token}`;
         
         // Enviar email

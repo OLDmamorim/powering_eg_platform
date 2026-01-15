@@ -2811,3 +2811,6 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar opção "Responder" no menu de ações das tarefas criadas por lojas
 - [x] Criar modal para escrever resposta/comentário
 - [x] Guardar comentário no campo apropriado e notificar a loja
+
+## Bug Fix - Link do Portal de Lojas nos emails
+- [x] Corrigir URL do portal de lojas nos emails (estava a usar domínio incorreto poweringeg.manus.space em vez de poweringeg-3c9mozlh.manus.space)
