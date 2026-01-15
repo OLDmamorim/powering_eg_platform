@@ -2787,3 +2787,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Remover modal que pede email manualmente
 - [x] Usar email da loja do perfil automaticamente
 - [x] Se loja não tiver email, mostrar mensagem de erro apropriada
+
+## Feature v6.13 - Edição de Tarefas Não Lidas
+- [x] Adicionar botão de editar em tarefas não lidas pelo destinatário
+- [x] Criar modal de edição de tarefa (já existia)
+- [x] Implementar endpoint de update de tarefa no backend (já existia, adicionada verificação)
+- [x] Verificar se tarefa foi lida antes de permitir edição
+- [x] Esconder botão de editar após tarefa ser lida

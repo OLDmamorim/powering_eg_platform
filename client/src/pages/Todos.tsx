@@ -502,6 +502,7 @@ export default function Todos() {
                   corPrioridade={corPrioridade}
                   corEstado={corEstado}
                   iconeEstado={iconeEstado}
+                  currentUserId={user?.id}
                 />
               ))}
             </div>
@@ -545,6 +546,7 @@ export default function Todos() {
                   corPrioridade={corPrioridade}
                   corEstado={corEstado}
                   iconeEstado={iconeEstado}
+                  currentUserId={user?.id}
                 />
               ))}
             </div>
@@ -972,6 +974,7 @@ function TodoCard({
   corPrioridade,
   corEstado,
   iconeEstado,
+  currentUserId,
 }: {
   todo: any;
   isParaMim: boolean;
@@ -984,6 +987,7 @@ function TodoCard({
   corPrioridade: (p: string) => string;
   corEstado: (e: string) => string;
   iconeEstado: (e: string) => React.ReactNode;
+  currentUserId?: number;
 }) {
   // Marcar como visto ao clicar no card (se não visto e é para mim)
   const handleClick = () => {
@@ -1098,10 +1102,13 @@ function TodoCard({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onEditar(todo); }}>
-                <Edit className="h-4 w-4 mr-2" />
-                Editar
-              </DropdownMenuItem>
+              {/* Botão de editar: apenas visível se o utilizador é o criador E a tarefa não foi vista pelo destinatário */}
+              {currentUserId === todo.criadoPorId && !todo.visto && (
+                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onEditar(todo); }}>
+                  <Edit className="h-4 w-4 mr-2" />
+                  Editar
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onMudarStatus(todo); }}>
                 <RotateCcw className="h-4 w-4 mr-2" />
                 Mudar Status

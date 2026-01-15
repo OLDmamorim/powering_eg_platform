@@ -3780,7 +3780,7 @@ export const appRouter = router({
         return todo;
       }),
     
-    // Atualizar To-Do
+    // Atualizar To-Do (apenas se não foi visto pelo destinatário)
     atualizar: gestorProcedure
       .input(z.object({
         id: z.number(),
@@ -3793,9 +3793,31 @@ export const appRouter = router({
         atribuidoUserId: z.number().nullable().optional(),
         dataLimite: z.string().nullable().optional(),
         comentario: z.string().optional(),
+        forcarEdicao: z.boolean().optional(), // Para permitir edição de estado mesmo após visto
       }))
-      .mutation(async ({ input }) => {
-        const { id, ...data } = input;
+      .mutation(async ({ ctx, input }) => {
+        const { id, forcarEdicao, ...data } = input;
+        
+        // Verificar se a tarefa já foi vista pelo destinatário
+        const todo = await db.getTodoById(id);
+        if (!todo) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Tarefa não encontrada' });
+        }
+        
+        // Se não é forçar edição (edição de conteúdo), verificar se foi visto
+        // Apenas o criador pode editar, e apenas se não foi visto
+        if (!forcarEdicao && (data.titulo !== undefined || data.descricao !== undefined)) {
+          // Verificar se o utilizador é o criador
+          if (todo.criadoPorId !== ctx.user.id) {
+            throw new TRPCError({ code: 'FORBIDDEN', message: 'Apenas o criador pode editar a tarefa' });
+          }
+          
+          // Verificar se já foi visto pelo destinatário
+          if (todo.visto) {
+            throw new TRPCError({ code: 'FORBIDDEN', message: 'Não é possível editar uma tarefa já lida pelo destinatário' });
+          }
+        }
+        
         await db.updateTodo(id, {
           ...data,
           dataLimite: data.dataLimite ? new Date(data.dataLimite) : null,
