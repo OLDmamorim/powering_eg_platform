@@ -2934,3 +2934,6 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Usar logo PoweringEG (512x512) como imagem de preview
 - [x] Adicionar descrição da plataforma nas meta tags
 - [x] Configurar Twitter Card para partilha
+
+## v6.25 - Corrigir URL Imagem Open Graph
+- [x] Usar URL absoluto com domínio publicado (https://poweringeg-3c9mozlh.manus.space/) para imagem OG
