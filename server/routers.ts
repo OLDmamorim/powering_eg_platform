@@ -4605,9 +4605,7 @@ export const appRouter = router({
     dashboardCompleto: publicProcedure
       .input(z.object({
         token: z.string(),
-        periodo: z.enum(['mes_anterior', 'q1', 'q2', 'q3', 'q4', 'semestre1', 'semestre2', 'ano', 'mes_atual']).optional(),
-        mes: z.number().min(1).max(12).optional(),
-        ano: z.number().optional(),
+        meses: z.array(z.object({ mes: z.number().min(1).max(12), ano: z.number() })).optional(),
       }))
       .query(async ({ input }) => {
         const auth = await db.validarTokenLoja(input.token);
@@ -4615,67 +4613,34 @@ export const appRouter = router({
           throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
         }
         
-        const periodos = await db.getPeriodosDisponiveis();
         const now = new Date();
         const anoAtual = now.getFullYear();
         const mesAtual = now.getMonth() + 1;
         
-        // Determinar meses a consultar baseado no período
+        // Usar meses fornecidos ou mês anterior por defeito
         let mesesConsulta: { mes: number; ano: number }[] = [];
         let periodoLabel = '';
         
-        const periodo = input.periodo || 'mes_anterior';
-        
-        switch (periodo) {
-          case 'mes_atual':
-            mesesConsulta = [{ mes: mesAtual, ano: anoAtual }];
-            periodoLabel = new Date(anoAtual, mesAtual - 1).toLocaleDateString('pt-PT', { month: 'long', year: 'numeric' });
-            break;
-          case 'mes_anterior':
-            const mesAnt = mesAtual === 1 ? 12 : mesAtual - 1;
-            const anoAnt = mesAtual === 1 ? anoAtual - 1 : anoAtual;
-            mesesConsulta = [{ mes: mesAnt, ano: anoAnt }];
-            periodoLabel = new Date(anoAnt, mesAnt - 1).toLocaleDateString('pt-PT', { month: 'long', year: 'numeric' });
-            break;
-          case 'q1':
-            mesesConsulta = [1, 2, 3].map(m => ({ mes: m, ano: anoAtual }));
-            periodoLabel = `Q1 ${anoAtual} (Jan-Mar)`;
-            break;
-          case 'q2':
-            mesesConsulta = [4, 5, 6].map(m => ({ mes: m, ano: anoAtual }));
-            periodoLabel = `Q2 ${anoAtual} (Abr-Jun)`;
-            break;
-          case 'q3':
-            mesesConsulta = [7, 8, 9].map(m => ({ mes: m, ano: anoAtual }));
-            periodoLabel = `Q3 ${anoAtual} (Jul-Set)`;
-            break;
-          case 'q4':
-            mesesConsulta = [10, 11, 12].map(m => ({ mes: m, ano: anoAtual }));
-            periodoLabel = `Q4 ${anoAtual} (Out-Dez)`;
-            break;
-          case 'semestre1':
-            mesesConsulta = [1, 2, 3, 4, 5, 6].map(m => ({ mes: m, ano: anoAtual }));
-            periodoLabel = `1º Semestre ${anoAtual}`;
-            break;
-          case 'semestre2':
-            mesesConsulta = [7, 8, 9, 10, 11, 12].map(m => ({ mes: m, ano: anoAtual }));
-            periodoLabel = `2º Semestre ${anoAtual}`;
-            break;
-          case 'ano':
-            mesesConsulta = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(m => ({ mes: m, ano: anoAtual }));
-            periodoLabel = `Ano ${anoAtual}`;
-            break;
-          default:
-            if (input.mes && input.ano) {
-              mesesConsulta = [{ mes: input.mes, ano: input.ano }];
-              periodoLabel = new Date(input.ano, input.mes - 1).toLocaleDateString('pt-PT', { month: 'long', year: 'numeric' });
-            } else if (periodos.length > 0) {
-              mesesConsulta = [{ mes: periodos[0].mes, ano: periodos[0].ano }];
-              periodoLabel = new Date(periodos[0].ano, periodos[0].mes - 1).toLocaleDateString('pt-PT', { month: 'long', year: 'numeric' });
-            } else {
-              mesesConsulta = [{ mes: mesAtual, ano: anoAtual }];
-              periodoLabel = new Date(anoAtual, mesAtual - 1).toLocaleDateString('pt-PT', { month: 'long', year: 'numeric' });
-            }
+        if (input.meses && input.meses.length > 0) {
+          mesesConsulta = input.meses;
+          // Gerar label baseado nos meses selecionados
+          if (mesesConsulta.length === 1) {
+            periodoLabel = new Date(mesesConsulta[0].ano, mesesConsulta[0].mes - 1).toLocaleDateString('pt-PT', { month: 'long', year: 'numeric' });
+          } else {
+            const mesesOrdenados = [...mesesConsulta].sort((a, b) => {
+              if (a.ano !== b.ano) return a.ano - b.ano;
+              return a.mes - b.mes;
+            });
+            const primeiro = mesesOrdenados[0];
+            const ultimo = mesesOrdenados[mesesOrdenados.length - 1];
+            periodoLabel = `${new Date(primeiro.ano, primeiro.mes - 1).toLocaleDateString('pt-PT', { month: 'short', year: 'numeric' })} - ${new Date(ultimo.ano, ultimo.mes - 1).toLocaleDateString('pt-PT', { month: 'short', year: 'numeric' })} (${mesesConsulta.length} meses)`;
+          }
+        } else {
+          // Por defeito, mês anterior
+          const mesAnt = mesAtual === 1 ? 12 : mesAtual - 1;
+          const anoAnt = mesAtual === 1 ? anoAtual - 1 : anoAtual;
+          mesesConsulta = [{ mes: mesAnt, ano: anoAnt }];
+          periodoLabel = new Date(anoAnt, mesAnt - 1).toLocaleDateString('pt-PT', { month: 'long', year: 'numeric' });
         }
         
         // Buscar dados agregados para todos os meses do período
@@ -4833,10 +4798,9 @@ export const appRouter = router({
           complementares,
           evolucao,
           alertas,
-          periodosDisponiveis: periodos,
+          mesesSelecionados: mesesConsulta,
           periodoAtual: mesesConsulta[0],
           periodoLabel,
-          periodoSelecionado: periodo,
           dataAtualizacao: dataUltimaAtualizacao?.toISOString() || null,
           comparativoMesAnterior,
         };

@@ -2868,3 +2868,23 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [ ] Implementar filtros avançados de período (Mês Anterior, Q1, Q2, Q3, Q4, Semestre, Ano)
 - [ ] Adicionar gráficos de evolução com Chart.js
 - [ ] Implementar comparativos com mês anterior (variação percentual com setas)
+
+
+## Feature v6.20 - Filtro de Meses Avançado no Portal da Loja
+- [ ] Implementar seletor de meses múltiplos igual ao Dashboard Resultados principal
+- [ ] Adicionar checkboxes para selecionar vários meses
+- [ ] Adicionar botões Q1-Q4 para seleção rápida de trimestres
+- [ ] Organizar por ano com scroll
+- [ ] Adicionar gráficos interativos com Chart.js
+- [ ] Implementar exportação PDF do dashboard de resultados
+
+## Portal da Loja v6.16 - Gráficos Chart.js e Exportação PDF
+- [x] Substituir gráficos simples por gráficos interativos Chart.js
+- [x] Gráfico de linha: Evolução de Serviços vs Objetivo
+- [x] Gráfico de barras: Desvio Percentual vs Objetivo
+- [x] Gráfico de linha: Evolução da Taxa de Reparação com linha de objetivo (22%)
+- [x] Tabela detalhada de evolução com coluna de taxa de reparação
+- [x] Botão de exportação PDF no dashboard de resultados
+- [x] PDF com título, período, data de geração e rodapé
+- [x] PDF com captura de alta qualidade dos gráficos
+- [x] PDF multi-página quando conteúdo excede uma página

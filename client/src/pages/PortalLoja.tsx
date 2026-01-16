@@ -1,5 +1,36 @@
-import { useState, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { trpc } from "@/lib/trpc";
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler,
+  ArcElement,
+} from 'chart.js';
+import { Line, Bar, Doughnut } from 'react-chartjs-2';
+
+// Registar componentes do Chart.js
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler,
+  ArcElement
+);
+import FiltroMesesCheckbox, { MesSelecionado } from "@/components/FiltroMesesCheckbox";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -69,7 +100,13 @@ export default function PortalLoja() {
   const [lojaAuth, setLojaAuth] = useState<LojaAuth | null>(null);
   const [activeTab, setActiveTab] = useState<"home" | "reuniao" | "pendentes" | "historico" | "tarefas" | "resultados">("home");
   const [filtroTarefas, setFiltroTarefas] = useState<"todas" | "recebidas" | "enviadas" | "internas">("todas");
-  const [dashboardPeriodo, setDashboardPeriodo] = useState<'mes_anterior' | 'q1' | 'q2' | 'q3' | 'q4' | 'semestre1' | 'semestre2' | 'ano' | 'mes_atual'>('mes_anterior');
+  // Estado para o filtro de meses do dashboard
+  const [mesesSelecionadosDashboard, setMesesSelecionadosDashboard] = useState<MesSelecionado[]>(() => {
+    // Por defeito, selecionar o mês anterior
+    const hoje = new Date();
+    const mesAnterior = new Date(hoje.getFullYear(), hoje.getMonth() - 1, 1);
+    return [{ mes: mesAnterior.getMonth() + 1, ano: mesAnterior.getFullYear() }];
+  });
   const [responderTodoOpen, setResponderTodoOpen] = useState(false);
   const [respostaTodo, setRespostaTodo] = useState("");
   const [observacaoTodoOpen, setObservacaoTodoOpen] = useState(false);
@@ -98,6 +135,8 @@ export default function PortalLoja() {
   const [reuniaoAtual, setReuniaoAtual] = useState<number | null>(null);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [showInstallBanner, setShowInstallBanner] = useState(false);
+  const [exportandoPDF, setExportandoPDF] = useState(false);
+  const dashboardRef = useRef<HTMLDivElement>(null);
 
   // PWA: Capturar evento de instalação
   useEffect(() => {
@@ -226,8 +265,8 @@ export default function PortalLoja() {
 
   // Dashboard de Resultados
   const { data: dashboardData, isLoading: dashboardLoading } = trpc.todosPortalLoja.dashboardCompleto.useQuery(
-    { token, periodo: dashboardPeriodo },
-    { enabled: !!token && !!lojaAuth && activeTab === 'resultados' }
+    { token, meses: mesesSelecionadosDashboard },
+    { enabled: !!token && !!lojaAuth && activeTab === 'resultados' && mesesSelecionadosDashboard.length > 0 }
   );
 
   // Mutations
@@ -423,6 +462,92 @@ export default function PortalLoja() {
       participantes: participantesValidos,
     });
   };
+
+  // Função para exportar o dashboard para PDF
+  const handleExportarPDF = useCallback(async () => {
+    if (!dashboardRef.current || !dashboardData) {
+      toast.error(language === 'pt' ? 'Sem dados para exportar' : 'No data to export');
+      return;
+    }
+
+    setExportandoPDF(true);
+    toast.info(language === 'pt' ? 'A gerar PDF...' : 'Generating PDF...');
+
+    try {
+      // Aguardar um momento para os gráficos renderizarem completamente
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      const element = dashboardRef.current;
+      
+      // Configurações para captura de alta qualidade
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff',
+        windowWidth: element.scrollWidth,
+        windowHeight: element.scrollHeight,
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      const imgWidth = 210; // A4 width in mm
+      const pageHeight = 297; // A4 height in mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+      let position = 0;
+
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      
+      // Adicionar título
+      pdf.setFontSize(16);
+      pdf.setTextColor(40, 40, 40);
+      pdf.text(`${language === 'pt' ? 'Relatório de Resultados' : 'Results Report'} - ${lojaAuth?.lojaNome || ''}`, 10, 15);
+      
+      pdf.setFontSize(10);
+      pdf.setTextColor(100, 100, 100);
+      pdf.text(`${language === 'pt' ? 'Período' : 'Period'}: ${dashboardData.periodoLabel || ''}`, 10, 22);
+      pdf.text(`${language === 'pt' ? 'Gerado em' : 'Generated on'}: ${new Date().toLocaleDateString('pt-PT', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}`, 10, 28);
+
+      // Adicionar imagem do dashboard
+      position = 35;
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= (pageHeight - position);
+
+      // Adicionar páginas adicionais se necessário
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      // Adicionar rodapé em todas as páginas
+      const pageCount = pdf.getNumberOfPages();
+      for (let i = 1; i <= pageCount; i++) {
+        pdf.setPage(i);
+        pdf.setFontSize(8);
+        pdf.setTextColor(150, 150, 150);
+        pdf.text(
+          `PoweringEG Platform - ${language === 'pt' ? 'Página' : 'Page'} ${i} ${language === 'pt' ? 'de' : 'of'} ${pageCount}`,
+          105,
+          292,
+          { align: 'center' }
+        );
+      }
+
+      // Gerar nome do ficheiro
+      const dataAtual = new Date().toISOString().split('T')[0];
+      const nomeArquivo = `resultados_${lojaAuth?.lojaNome?.replace(/\s+/g, '_').toLowerCase() || 'loja'}_${dataAtual}.pdf`;
+      
+      pdf.save(nomeArquivo);
+      toast.success(language === 'pt' ? 'PDF exportado com sucesso!' : 'PDF exported successfully!');
+    } catch (error) {
+      console.error('Erro ao exportar PDF:', error);
+      toast.error(language === 'pt' ? 'Erro ao gerar PDF' : 'Error generating PDF');
+    } finally {
+      setExportandoPDF(false);
+    }
+  }, [dashboardData, lojaAuth, language]);
 
   // Tela de login
   if (!lojaAuth) {
@@ -1246,7 +1371,7 @@ export default function PortalLoja() {
         {/* Tab Resultados - Dashboard */}
         {activeTab === "resultados" && (
           <div className="space-y-6">
-            {/* Cabeçalho com Data de Atualização e Filtro de Período */}
+            {/* Cabeçalho com Data de Atualização, Filtro de Período e Botão Exportar */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               {/* Data de Atualização */}
               {dashboardData?.dataAtualizacao && (
@@ -1261,28 +1386,29 @@ export default function PortalLoja() {
                 </div>
               )}
               
-              {/* Filtro de Período Avançado */}
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-                <Select
-                  value={dashboardPeriodo}
-                  onValueChange={(value: any) => setDashboardPeriodo(value)}
+              <div className="flex items-center gap-3">
+                {/* Botão Exportar PDF */}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleExportarPDF}
+                  disabled={exportandoPDF || !dashboardData?.resultados}
+                  className="flex items-center gap-2"
                 >
-                  <SelectTrigger className="w-[200px]">
-                    <SelectValue placeholder={language === 'pt' ? 'Selecionar período' : 'Select period'} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="mes_anterior">{language === 'pt' ? 'Mês Anterior' : 'Previous Month'}</SelectItem>
-                    <SelectItem value="mes_atual">{language === 'pt' ? 'Mês Atual' : 'Current Month'}</SelectItem>
-                    <SelectItem value="q1">Q1 (Jan-Mar)</SelectItem>
-                    <SelectItem value="q2">Q2 (Abr-Jun)</SelectItem>
-                    <SelectItem value="q3">Q3 (Jul-Set)</SelectItem>
-                    <SelectItem value="q4">Q4 (Out-Dez)</SelectItem>
-                    <SelectItem value="semestre1">{language === 'pt' ? '1º Semestre' : '1st Semester'}</SelectItem>
-                    <SelectItem value="semestre2">{language === 'pt' ? '2º Semestre' : '2nd Semester'}</SelectItem>
-                    <SelectItem value="ano">{language === 'pt' ? 'Ano Completo' : 'Full Year'}</SelectItem>
-                  </SelectContent>
-                </Select>
+                  {exportandoPDF ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Download className="h-4 w-4" />
+                  )}
+                  {language === 'pt' ? 'Exportar PDF' : 'Export PDF'}
+                </Button>
+                
+                {/* Filtro de Meses com Checkboxes */}
+                <FiltroMesesCheckbox
+                  mesesSelecionados={mesesSelecionadosDashboard}
+                  onMesesChange={setMesesSelecionadosDashboard}
+                  placeholder={language === 'pt' ? 'Selecionar meses' : 'Select months'}
+                />
               </div>
             </div>
             
@@ -1314,7 +1440,7 @@ export default function PortalLoja() {
                 </CardContent>
               </Card>
             ) : (
-              <>
+              <div ref={dashboardRef} className="space-y-6 bg-white p-4 rounded-lg">
                 {/* Alertas */}
                 {dashboardData.alertas && dashboardData.alertas.length > 0 && (
                   <div className="space-y-2">
@@ -1575,121 +1701,277 @@ export default function PortalLoja() {
                   </Card>
                 )}
 
-                {/* Gráfico de Evolução Mensal */}
-                {dashboardData.evolucao && dashboardData.evolucao.length > 0 && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-lg flex items-center gap-2">
-                        <BarChart3 className="h-5 w-5" />
-                        {language === 'pt' ? 'Evolução Mensal' : 'Monthly Evolution'}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      {/* Gráfico de Barras Simples */}
-                      <div className="space-y-3">
-                        {dashboardData.evolucao.slice(-6).map((e: any, idx: number) => {
-                          const maxServicos = Math.max(...dashboardData.evolucao.slice(-6).map((ev: any) => Number(ev.totalServicos) || 0));
-                          const percentWidth = maxServicos > 0 ? ((Number(e.totalServicos) || 0) / maxServicos) * 100 : 0;
-                          const desvio = parseFloat(String(e.desvioPercentualMes || 0));
-                          return (
-                            <div key={idx} className="space-y-1">
-                              <div className="flex justify-between text-sm">
-                                <span className="font-medium">
-                                  {new Date(e.ano, e.mes - 1).toLocaleDateString('pt-PT', { month: 'short', year: '2-digit' })}
-                                </span>
-                                <span className="flex items-center gap-2">
-                                  <span>{e.totalServicos || 0} / {e.objetivoMes || 0}</span>
-                                  <span className={`text-xs font-medium ${desvio >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                    {desvio >= 0 ? '+' : ''}{(desvio * 100).toFixed(0)}%
-                                  </span>
-                                </span>
-                              </div>
-                              <div className="relative h-6 bg-gray-100 rounded overflow-hidden">
-                                <div 
-                                  className={`absolute left-0 top-0 h-full rounded transition-all ${
-                                    desvio >= 0 ? 'bg-green-500' : desvio >= -0.1 ? 'bg-amber-500' : 'bg-red-500'
-                                  }`}
-                                  style={{ width: `${percentWidth}%` }}
-                                />
-                                {e.objetivoMes && maxServicos > 0 && (
-                                  <div 
-                                    className="absolute top-0 h-full w-0.5 bg-gray-800"
-                                    style={{ left: `${(Number(e.objetivoMes) / maxServicos) * 100}%` }}
-                                    title={`Objetivo: ${e.objetivoMes}`}
-                                  />
-                                )}
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                      
-                      {/* Legenda */}
-                      <div className="flex flex-wrap gap-4 mt-4 text-xs text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                          <div className="w-3 h-3 bg-green-500 rounded" />
-                          <span>{language === 'pt' ? 'Acima do objetivo' : 'Above goal'}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <div className="w-3 h-3 bg-amber-500 rounded" />
-                          <span>{language === 'pt' ? 'Próximo do objetivo' : 'Near goal'}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <div className="w-3 h-3 bg-red-500 rounded" />
-                          <span>{language === 'pt' ? 'Abaixo do objetivo' : 'Below goal'}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <div className="w-3 h-0.5 bg-gray-800" />
-                          <span>{language === 'pt' ? 'Linha do objetivo' : 'Goal line'}</span>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
+                {/* Gráfico de Evolução Mensal - Chart.js */}
+                {dashboardData.evolucao && dashboardData.evolucao.length > 0 && (() => {
+                  const mesesNomes = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+                  const evolucaoData = dashboardData.evolucao.slice(-12);
+                  const labels = evolucaoData.map((e: any) => `${mesesNomes[e.mes - 1]} ${String(e.ano).slice(-2)}`);
+                  const servicos = evolucaoData.map((e: any) => Number(e.totalServicos) || 0);
+                  const objetivos = evolucaoData.map((e: any) => Number(e.objetivoMes) || 0);
+                  const desvios = evolucaoData.map((e: any) => parseFloat(String(e.desvioPercentualMes || 0)) * 100);
+                  const taxasReparacao = evolucaoData.map((e: any) => parseFloat(String(e.taxaReparacao || 0)) * 100);
+                  
+                  return (
+                    <>
+                      {/* Gráfico de Linha - Serviços vs Objetivos */}
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="text-lg flex items-center gap-2">
+                            <TrendingUp className="h-5 w-5" />
+                            {language === 'pt' ? 'Evolução de Serviços vs Objetivo' : 'Services Evolution vs Goal'}
+                          </CardTitle>
+                          <CardDescription>
+                            {language === 'pt' 
+                              ? 'Comparação entre serviços realizados e objetivo mensal'
+                              : 'Comparison between services performed and monthly goal'}
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <div style={{ height: '300px' }}>
+                            <Line
+                              data={{
+                                labels,
+                                datasets: [
+                                  {
+                                    label: language === 'pt' ? 'Serviços Realizados' : 'Services Performed',
+                                    data: servicos,
+                                    borderColor: 'rgb(59, 130, 246)',
+                                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                                    fill: true,
+                                    tension: 0.3,
+                                    pointRadius: 4,
+                                    pointHoverRadius: 6,
+                                  },
+                                  {
+                                    label: language === 'pt' ? 'Objetivo Mensal' : 'Monthly Goal',
+                                    data: objetivos,
+                                    borderColor: 'rgb(34, 197, 94)',
+                                    backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                                    borderDash: [5, 5],
+                                    fill: false,
+                                    tension: 0.3,
+                                    pointRadius: 4,
+                                    pointHoverRadius: 6,
+                                  },
+                                ],
+                              }}
+                              options={{
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                  legend: {
+                                    position: 'top',
+                                  },
+                                  tooltip: {
+                                    callbacks: {
+                                      label: (context) => {
+                                        return `${context.dataset.label}: ${(context.parsed.y ?? 0).toLocaleString()}`;
+                                      },
+                                    },
+                                  },
+                                },
+                                scales: {
+                                  y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                      callback: (value) => value.toLocaleString(),
+                                    },
+                                  },
+                                },
+                              }}
+                            />
+                          </div>
+                        </CardContent>
+                      </Card>
 
-                {/* Tabela de Evolução Mensal */}
-                {dashboardData.evolucao && dashboardData.evolucao.length > 0 && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-lg">
-                        {language === 'pt' ? 'Detalhes da Evolução' : 'Evolution Details'}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="overflow-x-auto">
-                        <table className="w-full text-sm">
-                          <thead>
-                            <tr className="border-b">
-                              <th className="text-left py-2">{language === 'pt' ? 'Mês' : 'Month'}</th>
-                              <th className="text-right py-2">{language === 'pt' ? 'Serviços' : 'Services'}</th>
-                              <th className="text-right py-2">{language === 'pt' ? 'Objetivo' : 'Goal'}</th>
-                              <th className="text-right py-2">{language === 'pt' ? 'Desvio' : 'Deviation'}</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {dashboardData.evolucao.map((e: any, idx: number) => (
-                              <tr key={idx} className="border-b">
-                                <td className="py-2">
-                                  {new Date(e.ano, e.mes - 1).toLocaleDateString('pt-PT', { month: 'short', year: '2-digit' })}
-                                </td>
-                                <td className="text-right py-2">{e.totalServicos || 0}</td>
-                                <td className="text-right py-2">{e.objetivoMes || 0}</td>
-                                <td className={`text-right py-2 font-medium ${
-                                  parseFloat(String(e.desvioPercentualMes || 0)) >= 0 ? 'text-green-600' : 'text-red-600'
-                                }`}>
-                                  {e.desvioPercentualMes !== null 
-                                    ? `${(parseFloat(String(e.desvioPercentualMes)) * 100).toFixed(1)}%`
-                                    : '-'}
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
-              </>
+                      {/* Gráfico de Barras - Desvio Percentual */}
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="text-lg flex items-center gap-2">
+                            <BarChart3 className="h-5 w-5" />
+                            {language === 'pt' ? 'Desvio vs Objetivo (%)' : 'Deviation vs Goal (%)'}
+                          </CardTitle>
+                          <CardDescription>
+                            {language === 'pt' 
+                              ? 'Percentagem acima ou abaixo do objetivo mensal'
+                              : 'Percentage above or below monthly goal'}
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <div style={{ height: '250px' }}>
+                            <Bar
+                              data={{
+                                labels,
+                                datasets: [
+                                  {
+                                    label: language === 'pt' ? 'Desvio %' : 'Deviation %',
+                                    data: desvios,
+                                    backgroundColor: desvios.map((d: number) =>
+                                      d >= 0 ? 'rgba(34, 197, 94, 0.7)' : 'rgba(239, 68, 68, 0.7)'
+                                    ),
+                                    borderColor: desvios.map((d: number) =>
+                                      d >= 0 ? 'rgb(34, 197, 94)' : 'rgb(239, 68, 68)'
+                                    ),
+                                    borderWidth: 1,
+                                  },
+                                ],
+                              }}
+                              options={{
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                  legend: {
+                                    display: false,
+                                  },
+                                  tooltip: {
+                                    callbacks: {
+                                      label: (context) => {
+                                        const value = context.parsed.y ?? 0;
+                                        return `${language === 'pt' ? 'Desvio' : 'Deviation'}: ${value >= 0 ? '+' : ''}${value.toFixed(1)}%`;
+                                      },
+                                    },
+                                  },
+                                },
+                                scales: {
+                                  y: {
+                                    ticks: {
+                                      callback: (value) => `${value ?? 0}%`,
+                                    },
+                                  },
+                                },
+                              }}
+                            />
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-2 text-center">
+                            {language === 'pt' 
+                              ? 'Verde = Acima do objetivo | Vermelho = Abaixo do objetivo'
+                              : 'Green = Above goal | Red = Below goal'}
+                          </p>
+                        </CardContent>
+                      </Card>
+
+                      {/* Gráfico de Linha - Taxa de Reparação */}
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="text-lg flex items-center gap-2">
+                            <Award className="h-5 w-5" />
+                            {language === 'pt' ? 'Evolução da Taxa de Reparação' : 'Repair Rate Evolution'}
+                          </CardTitle>
+                          <CardDescription>
+                            {language === 'pt' 
+                              ? 'Objetivo mínimo: 22%'
+                              : 'Minimum goal: 22%'}
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <div style={{ height: '250px' }}>
+                            <Line
+                              data={{
+                                labels,
+                                datasets: [
+                                  {
+                                    label: language === 'pt' ? 'Taxa de Reparação' : 'Repair Rate',
+                                    data: taxasReparacao,
+                                    borderColor: 'rgb(168, 85, 247)',
+                                    backgroundColor: 'rgba(168, 85, 247, 0.1)',
+                                    fill: true,
+                                    tension: 0.3,
+                                    pointRadius: 4,
+                                    pointHoverRadius: 6,
+                                  },
+                                  {
+                                    label: language === 'pt' ? 'Objetivo (22%)' : 'Goal (22%)',
+                                    data: Array(labels.length).fill(22),
+                                    borderColor: 'rgb(239, 68, 68)',
+                                    borderDash: [5, 5],
+                                    fill: false,
+                                    pointRadius: 0,
+                                  },
+                                ],
+                              }}
+                              options={{
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                  legend: {
+                                    position: 'top',
+                                  },
+                                  tooltip: {
+                                    callbacks: {
+                                      label: (context) => {
+                                        const value = context.parsed.y ?? 0;
+                                        return `${context.dataset.label}: ${value.toFixed(1)}%`;
+                                      },
+                                    },
+                                  },
+                                },
+                                scales: {
+                                  y: {
+                                    min: 0,
+                                    max: Math.max(40, ...taxasReparacao) + 5,
+                                    ticks: {
+                                      callback: (value) => `${value ?? 0}%`,
+                                    },
+                                  },
+                                },
+                              }}
+                            />
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      {/* Tabela de Evolução Mensal */}
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="text-lg">
+                            {language === 'pt' ? 'Detalhes da Evolução' : 'Evolution Details'}
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-sm">
+                              <thead>
+                                <tr className="border-b">
+                                  <th className="text-left py-2">{language === 'pt' ? 'Mês' : 'Month'}</th>
+                                  <th className="text-right py-2">{language === 'pt' ? 'Serviços' : 'Services'}</th>
+                                  <th className="text-right py-2">{language === 'pt' ? 'Objetivo' : 'Goal'}</th>
+                                  <th className="text-right py-2">{language === 'pt' ? 'Desvio' : 'Deviation'}</th>
+                                  <th className="text-right py-2">{language === 'pt' ? 'Taxa Rep.' : 'Repair Rate'}</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {evolucaoData.map((e: any, idx: number) => (
+                                  <tr key={idx} className="border-b">
+                                    <td className="py-2">
+                                      {new Date(e.ano, e.mes - 1).toLocaleDateString('pt-PT', { month: 'short', year: '2-digit' })}
+                                    </td>
+                                    <td className="text-right py-2">{e.totalServicos || 0}</td>
+                                    <td className="text-right py-2">{e.objetivoMes || 0}</td>
+                                    <td className={`text-right py-2 font-medium ${
+                                      parseFloat(String(e.desvioPercentualMes || 0)) >= 0 ? 'text-green-600' : 'text-red-600'
+                                    }`}>
+                                      {e.desvioPercentualMes !== null 
+                                        ? `${(parseFloat(String(e.desvioPercentualMes)) * 100).toFixed(1)}%`
+                                        : '-'}
+                                    </td>
+                                    <td className={`text-right py-2 font-medium ${
+                                      parseFloat(String(e.taxaReparacao || 0)) >= 0.22 ? 'text-green-600' : 'text-amber-600'
+                                    }`}>
+                                      {e.taxaReparacao !== null 
+                                        ? `${(parseFloat(String(e.taxaReparacao)) * 100).toFixed(1)}%`
+                                        : '-'}
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </>
+                  );
+                })()}
+              </div>
             )}
           </div>
         )}
