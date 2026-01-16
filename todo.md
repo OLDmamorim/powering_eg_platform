@@ -2888,3 +2888,11 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] PDF com título, período, data de geração e rodapé
 - [x] PDF com captura de alta qualidade dos gráficos
 - [x] PDF multi-página quando conteúdo excede uma página
+
+## Portal da Loja v6.17 - Gráfico de Vendas Complementares
+- [x] Adicionar gráfico de barras horizontal para vendas complementares
+- [x] Adicionar gráfico doughnut para distribuição percentual
+- [x] Incluir escovas, polimento, tratamento, lavagens e outros
+- [x] Mostrar comparação visual entre categorias com cores distintas
+- [x] Barra de progresso de escovas com marcadores de objetivo (10%) e mínimo (7.5%)
+- [x] Cards coloridos com valores por categoria

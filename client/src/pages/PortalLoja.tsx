@@ -1546,64 +1546,223 @@ export default function PortalLoja() {
                   </Card>
                 </div>
 
-                {/* Vendas Complementares */}
-                {dashboardData.complementares && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-lg">
-                        {language === 'pt' ? 'Vendas Complementares' : 'Complementary Sales'}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      {/* Escovas com barra de progresso */}
-                      <div>
-                        <div className="flex justify-between mb-1">
-                          <span className="text-sm font-medium">Escovas</span>
-                          <span className="text-sm">
-                            {dashboardData.complementares.escovasQtd || 0} ({dashboardData.complementares.escovasPercent !== null 
-                              ? `${(parseFloat(String(dashboardData.complementares.escovasPercent)) * 100).toFixed(1)}%`
-                              : '0%'})
-                          </span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-3">
-                          <div 
-                            className={`h-3 rounded-full transition-all ${
-                              parseFloat(String(dashboardData.complementares.escovasPercent || 0)) >= 0.10 
-                                ? 'bg-green-500' 
-                                : parseFloat(String(dashboardData.complementares.escovasPercent || 0)) >= 0.075
-                                  ? 'bg-amber-500'
-                                  : 'bg-red-500'
-                            }`}
-                            style={{ width: `${Math.min(parseFloat(String(dashboardData.complementares.escovasPercent || 0)) * 1000, 100)}%` }}
-                          />
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {language === 'pt' ? 'Objetivo: 10% | Mínimo: 7.5%' : 'Goal: 10% | Minimum: 7.5%'}
-                        </p>
-                      </div>
+                {/* Vendas Complementares com Gráfico */}
+                {dashboardData.complementares && (() => {
+                  const complementaresLabels = ['Escovas', 'Polimento', 'Tratamento', 'Lavagens', 'Outros'];
+                  const complementaresData = [
+                    Number(dashboardData.complementares.escovasQtd) || 0,
+                    Number(dashboardData.complementares.polimentoQtd) || 0,
+                    Number(dashboardData.complementares.tratamentoQtd) || 0,
+                    Number(dashboardData.complementares.lavagensTotal) || 0,
+                    Number(dashboardData.complementares.outrosQtd) || 0,
+                  ];
+                  const totalComplementares = complementaresData.reduce((a, b) => a + b, 0);
+                  const complementaresColors = [
+                    'rgba(59, 130, 246, 0.8)',   // Azul - Escovas
+                    'rgba(168, 85, 247, 0.8)',   // Roxo - Polimento
+                    'rgba(34, 197, 94, 0.8)',    // Verde - Tratamento
+                    'rgba(251, 191, 36, 0.8)',   // Amarelo - Lavagens
+                    'rgba(156, 163, 175, 0.8)',  // Cinza - Outros
+                  ];
+                  const complementaresBorders = [
+                    'rgb(59, 130, 246)',
+                    'rgb(168, 85, 247)',
+                    'rgb(34, 197, 94)',
+                    'rgb(251, 191, 36)',
+                    'rgb(156, 163, 175)',
+                  ];
 
-                      {/* Outros complementares */}
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="p-3 bg-secondary rounded-lg">
-                          <p className="text-sm text-muted-foreground">Polimento</p>
-                          <p className="text-xl font-bold">{dashboardData.complementares.polimentoQtd || 0}</p>
+                  return (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-lg flex items-center gap-2">
+                          <BarChart3 className="h-5 w-5" />
+                          {language === 'pt' ? 'Vendas Complementares' : 'Complementary Sales'}
+                        </CardTitle>
+                        <CardDescription>
+                          {language === 'pt' 
+                            ? `Total: ${totalComplementares} vendas complementares`
+                            : `Total: ${totalComplementares} complementary sales`}
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        {/* Gráfico de Barras Horizontal */}
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                          {/* Gráfico de Barras */}
+                          <div style={{ height: '250px' }}>
+                            <Bar
+                              data={{
+                                labels: complementaresLabels,
+                                datasets: [
+                                  {
+                                    label: language === 'pt' ? 'Quantidade' : 'Quantity',
+                                    data: complementaresData,
+                                    backgroundColor: complementaresColors,
+                                    borderColor: complementaresBorders,
+                                    borderWidth: 1,
+                                  },
+                                ],
+                              }}
+                              options={{
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                indexAxis: 'y',
+                                plugins: {
+                                  legend: {
+                                    display: false,
+                                  },
+                                  tooltip: {
+                                    callbacks: {
+                                      label: (context) => {
+                                        const value = context.parsed.x ?? 0;
+                                        const percent = totalComplementares > 0 ? ((value / totalComplementares) * 100).toFixed(1) : '0';
+                                        return `${value} (${percent}%)`;
+                                      },
+                                    },
+                                  },
+                                },
+                                scales: {
+                                  x: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                      stepSize: 1,
+                                    },
+                                  },
+                                },
+                              }}
+                            />
+                          </div>
+
+                          {/* Gráfico Doughnut */}
+                          <div style={{ height: '250px' }} className="flex items-center justify-center">
+                            <Doughnut
+                              data={{
+                                labels: complementaresLabels,
+                                datasets: [
+                                  {
+                                    data: complementaresData,
+                                    backgroundColor: complementaresColors,
+                                    borderColor: complementaresBorders,
+                                    borderWidth: 2,
+                                  },
+                                ],
+                              }}
+                              options={{
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                  legend: {
+                                    position: 'right',
+                                    labels: {
+                                      boxWidth: 12,
+                                      padding: 8,
+                                    },
+                                  },
+                                  tooltip: {
+                                    callbacks: {
+                                      label: (context) => {
+                                        const value = context.parsed ?? 0;
+                                        const percent = totalComplementares > 0 ? ((value / totalComplementares) * 100).toFixed(1) : '0';
+                                        return `${context.label}: ${value} (${percent}%)`;
+                                      },
+                                    },
+                                  },
+                                },
+                              }}
+                            />
+                          </div>
                         </div>
-                        <div className="p-3 bg-secondary rounded-lg">
-                          <p className="text-sm text-muted-foreground">Tratamento</p>
-                          <p className="text-xl font-bold">{dashboardData.complementares.tratamentoQtd || 0}</p>
+
+                        {/* Escovas com barra de progresso e objetivo */}
+                        <div className="border-t pt-4">
+                          <div className="flex justify-between mb-2">
+                            <span className="text-sm font-medium flex items-center gap-2">
+                              <div className="w-3 h-3 rounded-full bg-blue-500" />
+                              Escovas
+                            </span>
+                            <span className="text-sm font-medium">
+                              {dashboardData.complementares.escovasQtd || 0} 
+                              <span className={`ml-2 ${
+                                parseFloat(String(dashboardData.complementares.escovasPercent || 0)) >= 0.10 
+                                  ? 'text-green-600' 
+                                  : parseFloat(String(dashboardData.complementares.escovasPercent || 0)) >= 0.075
+                                    ? 'text-amber-600'
+                                    : 'text-red-600'
+                              }`}>
+                                ({dashboardData.complementares.escovasPercent !== null 
+                                  ? `${(parseFloat(String(dashboardData.complementares.escovasPercent)) * 100).toFixed(1)}%`
+                                  : '0%'})
+                              </span>
+                            </span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-4 relative">
+                            <div 
+                              className={`h-4 rounded-full transition-all ${
+                                parseFloat(String(dashboardData.complementares.escovasPercent || 0)) >= 0.10 
+                                  ? 'bg-green-500' 
+                                  : parseFloat(String(dashboardData.complementares.escovasPercent || 0)) >= 0.075
+                                    ? 'bg-amber-500'
+                                    : 'bg-red-500'
+                              }`}
+                              style={{ width: `${Math.min(parseFloat(String(dashboardData.complementares.escovasPercent || 0)) * 1000, 100)}%` }}
+                            />
+                            {/* Marcador de objetivo 10% */}
+                            <div 
+                              className="absolute top-0 h-4 w-0.5 bg-gray-800"
+                              style={{ left: '100%' }}
+                              title="Objetivo: 10%"
+                            />
+                            {/* Marcador de mínimo 7.5% */}
+                            <div 
+                              className="absolute top-0 h-4 w-0.5 bg-amber-600"
+                              style={{ left: '75%' }}
+                              title="Mínimo: 7.5%"
+                            />
+                          </div>
+                          <div className="flex justify-between mt-1">
+                            <p className="text-xs text-muted-foreground">
+                              {language === 'pt' ? 'Objetivo: 10% | Mínimo: 7.5%' : 'Goal: 10% | Minimum: 7.5%'}
+                            </p>
+                            <div className="flex gap-3 text-xs text-muted-foreground">
+                              <span className="flex items-center gap-1">
+                                <div className="w-2 h-2 bg-amber-600" />
+                                {language === 'pt' ? 'Mínimo' : 'Minimum'}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <div className="w-2 h-2 bg-gray-800" />
+                                {language === 'pt' ? 'Objetivo' : 'Goal'}
+                              </span>
+                            </div>
+                          </div>
                         </div>
-                        <div className="p-3 bg-secondary rounded-lg">
-                          <p className="text-sm text-muted-foreground">Lavagens</p>
-                          <p className="text-xl font-bold">{dashboardData.complementares.lavagensTotal || 0}</p>
+
+                        {/* Cards com valores */}
+                        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                          <div className="p-3 bg-blue-50 rounded-lg text-center">
+                            <p className="text-xs text-blue-600 font-medium">Escovas</p>
+                            <p className="text-xl font-bold text-blue-700">{dashboardData.complementares.escovasQtd || 0}</p>
+                          </div>
+                          <div className="p-3 bg-purple-50 rounded-lg text-center">
+                            <p className="text-xs text-purple-600 font-medium">Polimento</p>
+                            <p className="text-xl font-bold text-purple-700">{dashboardData.complementares.polimentoQtd || 0}</p>
+                          </div>
+                          <div className="p-3 bg-green-50 rounded-lg text-center">
+                            <p className="text-xs text-green-600 font-medium">Tratamento</p>
+                            <p className="text-xl font-bold text-green-700">{dashboardData.complementares.tratamentoQtd || 0}</p>
+                          </div>
+                          <div className="p-3 bg-yellow-50 rounded-lg text-center">
+                            <p className="text-xs text-yellow-600 font-medium">Lavagens</p>
+                            <p className="text-xl font-bold text-yellow-700">{dashboardData.complementares.lavagensTotal || 0}</p>
+                          </div>
+                          <div className="p-3 bg-gray-100 rounded-lg text-center">
+                            <p className="text-xs text-gray-600 font-medium">Outros</p>
+                            <p className="text-xl font-bold text-gray-700">{dashboardData.complementares.outrosQtd || 0}</p>
+                          </div>
                         </div>
-                        <div className="p-3 bg-secondary rounded-lg">
-                          <p className="text-sm text-muted-foreground">Outros</p>
-                          <p className="text-xl font-bold">{dashboardData.complementares.outrosQtd || 0}</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
+                      </CardContent>
+                    </Card>
+                  );
+                })()}
 
                 {/* Comparativo com Mês Anterior */}
                 {dashboardData.comparativoMesAnterior && (
