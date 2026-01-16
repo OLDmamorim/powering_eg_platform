@@ -478,257 +478,43 @@ export default function PortalLoja() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-              <Store className="h-5 w-5 text-primary" />
+      {/* Header Simplificado */}
+      <header className="bg-emerald-600 text-white sticky top-0 z-10">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                <Store className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold">{lojaAuth.lojaNome}</h1>
+                <p className="text-sm text-emerald-100 flex items-center gap-1">
+                  <Users className="h-4 w-4" />
+                  {language === 'pt' ? 'Gestor:' : 'Manager:'} {dadosLoja?.gestorNome || 'N/A'}
+                </p>
+              </div>
             </div>
-            <div>
-              <h1 className="font-semibold">{lojaAuth.lojaNome}</h1>
-              <p className="text-xs text-muted-foreground">{t('reuniao.title')}</p>
+            <div className="flex items-center gap-2">
+              {/* Seletor de Idioma */}
+              <Select value={language} onValueChange={(value) => setLanguage(value as 'pt' | 'en')}>
+                <SelectTrigger className="w-20 h-8 bg-white/20 border-white/30 text-white text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pt">PT</SelectItem>
+                  <SelectItem value="en">EN</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button variant="ghost" size="sm" onClick={handleLogout} className="text-white hover:bg-white/20">
+                <LogOut className="h-4 w-4" />
+              </Button>
             </div>
-          </div>
-          <div className="flex items-center gap-2">
-            {/* Seletor de Idioma */}
-            <Select value={language} onValueChange={(value) => setLanguage(value as 'pt' | 'en')}>
-              <SelectTrigger className="w-24 h-9">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="pt">{t('portal.portuguese')}</SelectItem>
-                <SelectItem value="en">{t('portal.english')}</SelectItem>
-              </SelectContent>
-            </Select>
-            {/* Botão Minhas Tarefas em destaque - Pulsa quando há NOVAS */}
-            <Button 
-              variant="default" 
-              size="sm" 
-              onClick={() => {
-                setActiveTab('tarefas');
-                // Marcar tarefas como vistas
-                if (todosList && todosList.length > 0) {
-                  const idsNaoVistos = todosList.filter((t: any) => !t.visto).map((t: any) => t.id);
-                  if (idsNaoVistos.length > 0) {
-                    marcarVistosLojaMutation.mutate({ token, todoIds: idsNaoVistos });
-                  }
-                }
-              }}
-              className={`relative ${
-                (todosNaoVistos || 0) > 0 
-                  ? 'bg-red-500 hover:bg-red-600 animate-pulse ring-2 ring-red-300' 
-                  : 'bg-blue-600 hover:bg-blue-700'
-              } text-white`}
-            >
-              <ListTodo className={`h-4 w-4 mr-2 ${(todosNaoVistos || 0) > 0 ? 'animate-bounce' : ''}`} />
-              <span className="hidden sm:inline">{(todosNaoVistos || 0) > 0 ? 'Novas Tarefas!' : 'Minhas Tarefas'}</span>
-              <span className="sm:hidden">Tarefas</span>
-              {(todosNaoVistos || 0) > 0 ? (
-                <span className="absolute -top-2 -right-2 bg-yellow-400 text-red-800 text-xs rounded-full h-6 w-6 flex items-center justify-center font-bold animate-bounce border-2 border-white">
-                  {todosNaoVistos}
-                </span>
-              ) : (todosCount || 0) > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
-                  {todosCount}
-                </span>
-              )}
-            </Button>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={handleInstallPWA}
-              className="text-emerald-600 border-emerald-300 hover:bg-emerald-50"
-            >
-              <Smartphone className="h-4 w-4 mr-2" />
-              <span className="hidden sm:inline">Instalar App</span>
-            </Button>
-            <Button variant="ghost" size="sm" onClick={handleLogout}>
-              <LogOut className="h-4 w-4 mr-2" />
-              {t('portal.logout')}
-            </Button>
           </div>
         </div>
       </header>
 
-      {/* Banner de Instalação PWA */}
-      {showInstallBanner && (
-        <div className="bg-emerald-600 text-white px-4 py-3">
-          <div className="container mx-auto flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Download className="h-5 w-5" />
-              <div>
-                <p className="font-medium text-sm">Instale o Widget de Tarefas</p>
-                <p className="text-xs text-emerald-100">Acesso rápido às suas tarefas no ecrã inicial</p>
-              </div>
-            </div>
-            <div className="flex gap-2">
-              <Button 
-                size="sm" 
-                variant="secondary"
-                onClick={handleInstallPWA}
-              >
-                Instalar
-              </Button>
-              <Button 
-                size="sm" 
-                variant="ghost"
-                className="text-white hover:bg-emerald-700"
-                onClick={() => setShowInstallBanner(false)}
-              >
-                Depois
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Banner de Alerta - Tarefas Urgentes */}
-      {todosList && todosList.some((t: any) => t.prioridade === 'urgente' || t.prioridade === 'alta') && (
-        <div className="bg-gradient-to-r from-red-600 to-orange-500 text-white px-4 py-3 animate-pulse">
-          <div className="container mx-auto flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="bg-white/20 rounded-full p-2">
-                <AlertTriangle className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="font-bold text-sm">
-                  {todosList.filter((t: any) => t.prioridade === 'urgente').length > 0 
-                    ? `⚠️ ${todosList.filter((t: any) => t.prioridade === 'urgente').length} Tarefa(s) URGENTE(S)!`
-                    : `❗ ${todosList.filter((t: any) => t.prioridade === 'alta').length} Tarefa(s) de Alta Prioridade`
-                  }
-                </p>
-                <p className="text-xs text-white/80">
-                  {todosList.filter((t: any) => t.prioridade === 'urgente' || t.prioridade === 'alta')[0]?.titulo?.substring(0, 50) || 'Verifique as suas tarefas'}...
-                </p>
-              </div>
-            </div>
-            <Button 
-              size="sm" 
-              variant="secondary"
-              className="bg-white text-red-600 hover:bg-gray-100 font-semibold"
-              onClick={() => setActiveTab('tarefas')}
-            >
-              Ver Agora
-            </Button>
-          </div>
-        </div>
-      )}
-
-      {/* Stats Cards */}
+      {/* Conteúdo Principal */}
       <div className="container mx-auto px-4 py-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          {/* Card Pendentes - Clicável com pulse */}
-          <Card 
-            className={`cursor-pointer transition-all hover:scale-105 hover:shadow-md ${activeTab === 'pendentes' ? 'ring-2 ring-amber-500 bg-amber-50 dark:bg-amber-900/30' : ''} ${(dadosLoja?.pendentesAtivos || 0) > 0 ? 'animate-soft-pulse-amber' : ''}`}
-            onClick={() => setActiveTab('pendentes')}
-          >
-            <CardContent className="pt-4">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <AlertTriangle className="h-5 w-5 text-amber-500" />
-                  <div>
-                    <p className="text-2xl font-bold">{dadosLoja?.pendentesAtivos || 0}</p>
-                    <p className="text-xs text-muted-foreground">Pendentes Ativos</p>
-                  </div>
-                </div>
-              </div>
-              {/* Mini-lista de pendentes urgentes */}
-              {pendentesAtivos.length > 0 && (
-                <div className="border-t pt-2 mt-2 space-y-1">
-                  {pendentesAtivos.slice(0, 3).map((p: any) => (
-                    <p key={p.id} className="text-xs text-muted-foreground truncate flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-amber-500 flex-shrink-0"></span>
-                      {p.descricao?.substring(0, 40) || 'Pendente'}...
-                    </p>
-                  ))}
-                  {pendentesAtivos.length > 3 && (
-                    <p className="text-xs text-amber-600 font-medium">+{pendentesAtivos.length - 3} mais</p>
-                  )}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-          
-          {/* Card Tarefas - Clicável com pulse quando há tarefas NÃO VISTAS */}
-          <Card 
-            className={`cursor-pointer transition-all hover:scale-105 hover:shadow-md ${activeTab === 'tarefas' ? 'ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-900/30' : ''} ${(todosNaoVistos || 0) > 0 ? 'animate-soft-pulse-blue ring-2 ring-red-400' : ''}`}
-            onClick={() => {
-              setActiveTab('tarefas');
-              // Marcar tarefas como vistas quando clica no card
-              if (todosList && todosList.length > 0) {
-                const idsNaoVistos = todosList.filter((t: any) => !t.visto).map((t: any) => t.id);
-                if (idsNaoVistos.length > 0) {
-                  marcarVistosLojaMutation.mutate({ token, todoIds: idsNaoVistos });
-                }
-              }
-            }}
-          >
-            <CardContent className="pt-4">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <ListTodo className={`h-5 w-5 ${(todosNaoVistos || 0) > 0 ? 'text-red-500 animate-bounce' : 'text-blue-500'}`} />
-                  <div>
-                    <p className="text-2xl font-bold">{todosCount || 0}</p>
-                    <p className="text-xs text-muted-foreground">Tarefas To-Do</p>
-                    {(todosNaoVistos || 0) > 0 && (
-                      <p className="text-xs text-red-500 font-bold animate-pulse">
-                        {todosNaoVistos} nova{todosNaoVistos !== 1 ? 's' : ''}!
-                      </p>
-                    )}
-                  </div>
-                </div>
-                {/* Botão de ação rápida - Iniciar tarefa mais urgente */}
-                {todosList && todosList.length > 0 && todosList[0]?.estado === 'pendente' && (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="h-7 text-xs border-blue-300 text-blue-600 hover:bg-blue-50"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      atualizarEstadoTodoMutation.mutate({
-                        token,
-                        todoId: todosList[0].id,
-                        estado: 'em_progresso'
-                      });
-                    }}
-                  >
-                    <Clock className="h-3 w-3 mr-1" />
-                    Iniciar
-                  </Button>
-                )}
-              </div>
-              {/* Mini-lista de tarefas urgentes */}
-              {todosList && todosList.length > 0 && (
-                <div className="border-t pt-2 mt-2 space-y-1">
-                  {todosList.slice(0, 3).map((t: any) => (
-                    <p key={t.id} className="text-xs text-muted-foreground truncate flex items-center gap-1">
-                      <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${t.prioridade === 'urgente' ? 'bg-red-500' : t.prioridade === 'alta' ? 'bg-orange-500' : 'bg-blue-500'}`}></span>
-                      {t.titulo?.substring(0, 40) || 'Tarefa'}...
-                    </p>
-                  ))}
-                  {todosList.length > 3 && (
-                    <p className="text-xs text-blue-600 font-medium">+{todosList.length - 3} mais</p>
-                  )}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-          
-          {/* Card Gestor - Informativo */}
-          <Card>
-            <CardContent className="pt-4">
-              <div className="flex items-center gap-2">
-                <Users className="h-5 w-5 text-green-500" />
-                <div>
-                  <p className="text-sm font-medium">{dadosLoja?.gestorNome || "N/A"}</p>
-                  <p className="text-xs text-muted-foreground">{language === 'pt' ? 'Gestor' : 'Manager'}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
         {/* Página Inicial com Cards */}
         {activeTab === "home" && (
           <div className="grid grid-cols-2 gap-4">

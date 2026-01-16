@@ -2848,3 +2848,16 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Implementar alertas sobre mínimos/máximos (escovas, reparações)
 - [x] Adicionar filtros por período
 - [x] Incluir evolução mensal e vendas complementares
+
+
+## Feature v6.18 - Simplificar Portal da Loja
+- [ ] Remover cards de estatísticas (Pendentes Ativos, Tarefas To-Do, Gestor)
+- [ ] Simplificar cabeçalho com nome da loja e gestor
+- [ ] Manter apenas os 4 cards grandes na entrada
+
+
+## Feature v6.18 - Simplificar Portal da Loja
+- [x] Remover cards de estatísticas da página inicial
+- [x] Simplificar cabeçalho com loja e gestor
+- [x] Manter apenas os 4 cards grandes na entrada
+- [x] Botão de voltar funcional em todas as secções
