@@ -2817,3 +2817,6 @@ NOTA: Sistema de email requer configuração externa no deployment
 
 ## Melhoria - Email do Portal de Lojas
 - [x] Adicionar referência às Tarefas na lista de funcionalidades do email
+
+## Melhoria - Renomear Portal no Email
+- [x] Alterar "Portal de Reuniões Quinzenais" para "Portal da Loja" no email

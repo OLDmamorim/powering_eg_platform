@@ -3479,7 +3479,7 @@ export const appRouter = router({
             <div style="padding: 30px; background: #f9fafb;">
               <h2 style="color: #1e3a5f;">Olá ${loja.nome}!</h2>
               <p style="color: #374151; line-height: 1.6;">
-                Foi-lhe enviado um link de acesso ao Portal de Reuniões Quinzenais.
+                Foi-lhe enviado um link de acesso ao Portal da Loja.
               </p>
               <p style="color: #374151; line-height: 1.6;">
                 Através deste portal poderá:
@@ -3514,7 +3514,7 @@ export const appRouter = router({
         
         const enviado = await sendEmail({
           to: loja.email,
-          subject: `Acesso ao Portal de Reuniões Quinzenais - ${loja.nome}`,
+          subject: `Acesso ao Portal da Loja - ${loja.nome}`,
           html,
         });
         
