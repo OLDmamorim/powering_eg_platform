@@ -5251,6 +5251,214 @@ export const appRouter = router({
       }),
   }),
   
+  // ==================== ANÁLISE IA DASHBOARD LOJA ====================
+  analiseIALoja: router({
+    // Gerar análise IA dos resultados da loja
+    gerar: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        meses: z.array(z.object({
+          mes: z.number().min(1).max(12),
+          ano: z.number().min(2020).max(2100)
+        })).optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { invokeLLM } = await import('./_core/llm');
+        
+        // Validar token
+        const auth = await db.validarTokenLoja(input.token);
+        if (!auth) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        
+        // Determinar período
+        const hoje = new Date();
+        const mesesConsulta = input.meses && input.meses.length > 0 
+          ? input.meses 
+          : [{ mes: hoje.getMonth() + 1, ano: hoje.getFullYear() }];
+        
+        // Buscar dados da loja
+        let totalServicos = 0;
+        let totalObjetivo = 0;
+        let totalReparacoes = 0;
+        let totalEscovas = 0;
+        let totalPolimento = 0;
+        let totalTratamento = 0;
+        let totalLavagens = 0;
+        
+        for (const p of mesesConsulta) {
+          const resultados = await db.getResultadosMensaisPorLoja(auth.loja.id, p.mes, p.ano);
+          if (resultados) {
+            totalServicos += Number(resultados.totalServicos) || 0;
+            totalObjetivo += Number(resultados.objetivoMensal) || 0;
+            totalReparacoes += Number(resultados.qtdReparacoes) || 0;
+          }
+          
+          const complementares = await db.getVendasComplementares(p.mes, p.ano, auth.loja.id);
+          if (complementares && complementares.length > 0) {
+            const c = complementares[0];
+            totalEscovas += Number(c.escovasQtd) || 0;
+            totalPolimento += Number(c.polimentoQtd) || 0;
+            totalTratamento += Number(c.tratamentoQtd) || 0;
+            totalLavagens += Number(c.lavagensTotal) || 0;
+          }
+        }
+        
+        // Calcular métricas
+        const desvioPercentual = totalObjetivo > 0 ? ((totalServicos - totalObjetivo) / totalObjetivo) * 100 : 0;
+        const taxaReparacao = totalServicos > 0 ? (totalReparacoes / totalServicos) * 100 : 0;
+        const escovasPercent = totalServicos > 0 ? (totalEscovas / totalServicos) * 100 : 0;
+        const servicosFaltam = Math.max(0, totalObjetivo - totalServicos);
+        const reparacoesFaltam = Math.max(0, Math.ceil(totalServicos * 0.22) - totalReparacoes);
+        
+        // Buscar dados do mês anterior para comparativo
+        const mesAnterior = mesesConsulta[0].mes === 1 ? 12 : mesesConsulta[0].mes - 1;
+        const anoAnterior = mesesConsulta[0].mes === 1 ? mesesConsulta[0].ano - 1 : mesesConsulta[0].ano;
+        const resultadosAnt = await db.getResultadosMensaisPorLoja(auth.loja.id, mesAnterior, anoAnterior);
+        const servicosAnteriores = resultadosAnt ? Number(resultadosAnt.totalServicos) || 0 : 0;
+        const variacaoServicos = servicosAnteriores > 0 ? ((totalServicos - servicosAnteriores) / servicosAnteriores) * 100 : 0;
+        
+        // Calcular dias úteis restantes
+        const mesAtual = mesesConsulta[0];
+        const ultimoDia = new Date(mesAtual.ano, mesAtual.mes, 0).getDate();
+        const diaAtual = hoje.getDate();
+        let diasUteisRestantes = 0;
+        for (let d = diaAtual + 1; d <= ultimoDia; d++) {
+          const data = new Date(mesAtual.ano, mesAtual.mes - 1, d);
+          const diaSemana = data.getDay();
+          if (diaSemana !== 0 && diaSemana !== 6) diasUteisRestantes++;
+        }
+        
+        // Calcular ritmo necessário
+        const servicosPorDia = diasUteisRestantes > 0 ? Math.ceil(servicosFaltam / diasUteisRestantes) : 0;
+        
+        // Gerar análise com IA
+        const prompt = `
+Analisa os resultados da loja ${auth.loja.nome} e gera uma análise motivacional e estratégica.
+
+DADOS DO MÊS:
+- Serviços realizados: ${totalServicos}
+- Objetivo mensal: ${totalObjetivo}
+- Desvio: ${desvioPercentual.toFixed(1)}%
+- Serviços em falta: ${servicosFaltam}
+- Taxa de reparação: ${taxaReparacao.toFixed(1)}% (objetivo: 22%)
+- Reparações em falta para 22%: ${reparacoesFaltam}
+- Escovas: ${escovasPercent.toFixed(1)}% (objetivo: 10%, mínimo: 7.5%)
+- Polimento: ${totalPolimento} unidades
+- Tratamento: ${totalTratamento} unidades
+- Lavagens: ${totalLavagens}
+
+COMPARATIVO MÊS ANTERIOR:
+- Serviços mês anterior: ${servicosAnteriores}
+- Variação: ${variacaoServicos.toFixed(1)}%
+
+TEMPO RESTANTE:
+- Dias úteis restantes no mês: ${diasUteisRestantes}
+- Ritmo necessário: ${servicosPorDia} serviços/dia
+
+Gera uma resposta em JSON com esta estrutura exata:
+{
+  "urgencias": ["lista de 2-3 pontos de foco urgente"],
+  "alertas": ["lista de 1-2 alertas importantes"],
+  "pontosForca": ["lista de 1-2 pontos positivos"],
+  "comparativo": "breve análise comparativa com mês anterior (1 frase)",
+  "projecao": "previsão realista para fechar o mês (1 frase)",
+  "mensagemMotivacional": "mensagem de força e ânimo personalizada (2-3 frases, tom positivo e encorajador)"
+}
+
+IMPORTANTE:
+- Sê direto e prático nas urgências
+- A mensagem motivacional deve ser genuina, positiva e dar força para os dias que faltam
+- Se o objetivo já foi atingido, celebra e incentiva a superar ainda mais
+- Usa linguagem portuguesa de Portugal (não brasileiro)
+- Responde APENAS com o JSON, sem texto adicional`;
+        
+        try {
+          const response = await invokeLLM({
+            messages: [
+              { role: 'system', content: 'És um analista de performance de lojas ExpressGlass. Geras análises estratégicas e motivacionais em português de Portugal. Respondes sempre em JSON válido.' },
+              { role: 'user', content: prompt }
+            ],
+            response_format: {
+              type: 'json_schema',
+              json_schema: {
+                name: 'analise_loja',
+                strict: true,
+                schema: {
+                  type: 'object',
+                  properties: {
+                    urgencias: { type: 'array', items: { type: 'string' } },
+                    alertas: { type: 'array', items: { type: 'string' } },
+                    pontosForca: { type: 'array', items: { type: 'string' } },
+                    comparativo: { type: 'string' },
+                    projecao: { type: 'string' },
+                    mensagemMotivacional: { type: 'string' }
+                  },
+                  required: ['urgencias', 'alertas', 'pontosForca', 'comparativo', 'projecao', 'mensagemMotivacional'],
+                  additionalProperties: false
+                }
+              }
+            }
+          });
+          
+          const messageContent = response.choices?.[0]?.message?.content;
+          const content = typeof messageContent === 'string' ? messageContent : '{}';
+          const analise = JSON.parse(content);
+          
+          return {
+            ...analise,
+            metricas: {
+              totalServicos,
+              totalObjetivo,
+              desvioPercentual,
+              taxaReparacao,
+              escovasPercent,
+              servicosFaltam,
+              reparacoesFaltam,
+              diasUteisRestantes,
+              servicosPorDia,
+              variacaoServicos
+            }
+          };
+        } catch (error) {
+          console.error('Erro ao gerar análise IA:', error);
+          // Retornar análise básica em caso de erro
+          return {
+            urgencias: servicosFaltam > 0 
+              ? [`Faltam ${servicosFaltam} serviços para atingir o objetivo`]
+              : ['Manter o ritmo atual para superar o objetivo'],
+            alertas: taxaReparacao < 22 
+              ? [`Taxa de reparação (${taxaReparacao.toFixed(1)}%) abaixo do objetivo de 22%`]
+              : [],
+            pontosForca: desvioPercentual >= 0 
+              ? ['Objetivo mensal atingido!']
+              : [],
+            comparativo: variacaoServicos >= 0 
+              ? `Evolução positiva de ${variacaoServicos.toFixed(1)}% face ao mês anterior.`
+              : `Redução de ${Math.abs(variacaoServicos).toFixed(1)}% face ao mês anterior.`,
+            projecao: diasUteisRestantes > 0 
+              ? `Com ${diasUteisRestantes} dias úteis restantes, são necessários ${servicosPorDia} serviços/dia.`
+              : 'Mês encerrado.',
+            mensagemMotivacional: desvioPercentual >= 0
+              ? 'Parabéns pelo excelente trabalho! Continuem assim e superem ainda mais os objetivos!'
+              : `Faltam apenas ${servicosFaltam} serviços! Com foco e determinação, vão conseguir! Força equipa!`,
+            metricas: {
+              totalServicos,
+              totalObjetivo,
+              desvioPercentual,
+              taxaReparacao,
+              escovasPercent,
+              servicosFaltam,
+              reparacoesFaltam,
+              diasUteisRestantes,
+              servicosPorDia,
+              variacaoServicos
+            }
+          };
+        }
+      }),
+  }),
+  
   // ==================== CHATBOT IA ====================
   chatbot: router({
     // Processar pergunta do utilizador

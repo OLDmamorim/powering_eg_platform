@@ -85,6 +85,13 @@ import {
   Award,
   Wrench,
   ArrowLeft,
+  Sparkles,
+  Brain,
+  Zap,
+  AlertCircle,
+  ThumbsUp,
+  Rocket,
+  RefreshCw,
 } from "lucide-react";
 
 interface LojaAuth {
@@ -135,6 +142,8 @@ export default function PortalLoja() {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [showInstallBanner, setShowInstallBanner] = useState(false);
   const [exportandoPDF, setExportandoPDF] = useState(false);
+  const [analiseIA, setAnaliseIA] = useState<any>(null);
+  const [gerandoAnaliseIA, setGerandoAnaliseIA] = useState(false);
   const dashboardRef = useRef<HTMLDivElement>(null);
 
   // PWA: Capturar evento de instalação
@@ -294,6 +303,17 @@ export default function PortalLoja() {
     { token, meses: mesesSelecionadosDashboard },
     { enabled: !!token && !!lojaAuth && activeTab === 'resultados' && mesesSelecionadosDashboard.length > 0 }
   );
+
+  // Mutation para Análise IA
+  const analiseIAMutation = trpc.analiseIALoja.gerar.useMutation({
+    onSuccess: (data) => {
+      setAnaliseIA(data);
+    },
+    onError: (error) => {
+      console.error('Erro ao gerar análise IA:', error);
+      toast.error(language === 'pt' ? 'Erro ao gerar análise' : 'Error generating analysis');
+    },
+  });
 
   // Mutations
   const criarReuniaoMutation = trpc.reunioesQuinzenais.criarReuniao.useMutation({
@@ -2339,6 +2359,162 @@ export default function PortalLoja() {
                     </>
                   );
                 })()}
+
+                {/* Secção de Análise IA */}
+                <Card className="border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-indigo-50">
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2 text-purple-800">
+                      <Brain className="h-5 w-5" />
+                      {language === 'pt' ? 'Análise IA dos Resultados' : 'AI Results Analysis'}
+                    </CardTitle>
+                    <CardDescription>
+                      {language === 'pt' 
+                        ? 'Análise inteligente com recomendações personalizadas para a sua loja'
+                        : 'Smart analysis with personalized recommendations for your store'}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {!analiseIA ? (
+                      <div className="text-center py-6">
+                        <Sparkles className="h-12 w-12 mx-auto text-purple-400 mb-4" />
+                        <p className="text-muted-foreground mb-4">
+                          {language === 'pt' 
+                            ? 'Clique para gerar uma análise inteligente dos seus resultados'
+                            : 'Click to generate an intelligent analysis of your results'}
+                        </p>
+                        <Button
+                          onClick={() => {
+                            analiseIAMutation.mutate({
+                              token,
+                              meses: mesesSelecionadosDashboard.map((m: MesSelecionado) => ({ mes: m.mes, ano: m.ano }))
+                            });
+                          }}
+                          disabled={analiseIAMutation.isPending}
+                          className="bg-purple-600 hover:bg-purple-700"
+                        >
+                          {analiseIAMutation.isPending ? (
+                            <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> {language === 'pt' ? 'A gerar...' : 'Generating...'}</>
+                          ) : (
+                            <><Sparkles className="h-4 w-4 mr-2" /> {language === 'pt' ? 'Gerar Análise IA' : 'Generate AI Analysis'}</>
+                          )}
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {/* Urgências */}
+                        {analiseIA.urgencias && analiseIA.urgencias.length > 0 && (
+                          <div className="p-4 bg-red-50 rounded-lg border border-red-200">
+                            <h4 className="font-semibold text-red-800 flex items-center gap-2 mb-2">
+                              <Zap className="h-4 w-4" />
+                              {language === 'pt' ? 'Foco Urgente' : 'Urgent Focus'}
+                            </h4>
+                            <ul className="space-y-1">
+                              {analiseIA.urgencias.map((u: string, i: number) => (
+                                <li key={i} className="text-red-700 text-sm flex items-start gap-2">
+                                  <span className="text-red-500 mt-1">•</span>
+                                  {u}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        {/* Alertas */}
+                        {analiseIA.alertas && analiseIA.alertas.length > 0 && (
+                          <div className="p-4 bg-amber-50 rounded-lg border border-amber-200">
+                            <h4 className="font-semibold text-amber-800 flex items-center gap-2 mb-2">
+                              <AlertCircle className="h-4 w-4" />
+                              {language === 'pt' ? 'Alertas' : 'Alerts'}
+                            </h4>
+                            <ul className="space-y-1">
+                              {analiseIA.alertas.map((a: string, i: number) => (
+                                <li key={i} className="text-amber-700 text-sm flex items-start gap-2">
+                                  <span className="text-amber-500 mt-1">•</span>
+                                  {a}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        {/* Pontos Fortes */}
+                        {analiseIA.pontosForca && analiseIA.pontosForca.length > 0 && (
+                          <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                            <h4 className="font-semibold text-green-800 flex items-center gap-2 mb-2">
+                              <ThumbsUp className="h-4 w-4" />
+                              {language === 'pt' ? 'Pontos Fortes' : 'Strengths'}
+                            </h4>
+                            <ul className="space-y-1">
+                              {analiseIA.pontosForca.map((p: string, i: number) => (
+                                <li key={i} className="text-green-700 text-sm flex items-start gap-2">
+                                  <span className="text-green-500 mt-1">✓</span>
+                                  {p}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        {/* Comparativo e Projeção */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          {analiseIA.comparativo && (
+                            <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                              <h4 className="font-semibold text-blue-800 flex items-center gap-2 mb-2">
+                                <TrendingUp className="h-4 w-4" />
+                                {language === 'pt' ? 'Comparativo' : 'Comparison'}
+                              </h4>
+                              <p className="text-blue-700 text-sm">{analiseIA.comparativo}</p>
+                            </div>
+                          )}
+                          {analiseIA.projecao && (
+                            <div className="p-4 bg-indigo-50 rounded-lg border border-indigo-200">
+                              <h4 className="font-semibold text-indigo-800 flex items-center gap-2 mb-2">
+                                <Target className="h-4 w-4" />
+                                {language === 'pt' ? 'Projeção' : 'Projection'}
+                              </h4>
+                              <p className="text-indigo-700 text-sm">{analiseIA.projecao}</p>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Mensagem Motivacional */}
+                        {analiseIA.mensagemMotivacional && (
+                          <div className="p-5 bg-gradient-to-r from-purple-100 to-pink-100 rounded-lg border border-purple-200">
+                            <h4 className="font-semibold text-purple-800 flex items-center gap-2 mb-3">
+                              <Rocket className="h-5 w-5" />
+                              {language === 'pt' ? 'Mensagem de Força' : 'Motivational Message'}
+                            </h4>
+                            <p className="text-purple-700 text-base italic leading-relaxed">
+                              "{analiseIA.mensagemMotivacional}"
+                            </p>
+                          </div>
+                        )}
+
+                        {/* Botão para regenerar */}
+                        <div className="text-center pt-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              analiseIAMutation.mutate({
+                                token,
+                                meses: mesesSelecionadosDashboard.map((m: MesSelecionado) => ({ mes: m.mes, ano: m.ano }))
+                              });
+                            }}
+                            disabled={analiseIAMutation.isPending}
+                            className="text-purple-600 border-purple-300 hover:bg-purple-50"
+                          >
+                            {analiseIAMutation.isPending ? (
+                              <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> {language === 'pt' ? 'A atualizar...' : 'Updating...'}</>
+                            ) : (
+                              <><RefreshCw className="h-4 w-4 mr-2" /> {language === 'pt' ? 'Atualizar Análise' : 'Update Analysis'}</>
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
               </div>
             )}
           </div>

@@ -2947,3 +2947,21 @@ NOTA: Sistema de email requer configuração externa no deployment
 
 ## v6.27 - Atualizar Descrição OG
 - [x] Atualizar descrição para: "Plataforma de gestão da rede ExpressGlass - Dashboard de resultados, reuniões quinzenais, tarefas e relatórios com IA"
+
+## v6.28 - Análise IA no Dashboard da Loja
+- [ ] Criar procedimento backend para análise IA dos resultados da loja
+- [ ] Análise de urgências - onde focar para atingir objetivos
+- [ ] Comparativo com mês anterior - evolução e tendências
+- [ ] Alertas e recomendações personalizadas
+- [ ] Médias e projeções - ritmo necessário
+- [ ] Mensagem motivacional - reforço anímico com base nos dias restantes
+- [ ] Adicionar secção visual no Portal da Loja
+
+## v6.28 - Análise IA no Dashboard da Loja
+- [x] Criar procedimento backend para gerar análise IA dos resultados
+- [x] Adicionar secção de Análise IA no Dashboard de Resultados
+- [x] Incluir urgências, alertas, pontos fortes
+- [x] Comparativo com mês anterior
+- [x] Projeção para fechar o mês
+- [x] Mensagem motivacional personalizada
+- [x] Botão para regenerar análise
