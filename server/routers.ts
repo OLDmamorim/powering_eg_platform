@@ -4600,6 +4600,104 @@ export const appRouter = router({
         
         return { success: true };
       }),
+    
+    // Dashboard completo da loja (KPIs, alertas, objetivos)
+    dashboardCompleto: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        mes: z.number().min(1).max(12).optional(),
+        ano: z.number().optional(),
+      }))
+      .query(async ({ input }) => {
+        const auth = await db.validarTokenLoja(input.token);
+        if (!auth) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        
+        // Determinar período
+        let mes = input.mes;
+        let ano = input.ano;
+        
+        const periodos = await db.getPeriodosDisponiveis();
+        if (!mes || !ano) {
+          if (periodos.length > 0) {
+            mes = periodos[0].mes;
+            ano = periodos[0].ano;
+          } else {
+            const now = new Date();
+            mes = now.getMonth() + 1;
+            ano = now.getFullYear();
+          }
+        }
+        
+        // Buscar dados da loja - usar funções simples com filtro por lojaId
+        const resultadosArr = await db.getResultadosMensaisPorLoja(auth.loja.id, mes!, ano!);
+        const resultados = resultadosArr;
+        const complementaresArr = await db.getVendasComplementares(mes!, ano!, auth.loja.id);
+        const complementares = complementaresArr && complementaresArr.length > 0 ? complementaresArr[0] : null;
+        const evolucao = await db.getEvolucaoMensal(auth.loja.id, 6);
+        
+        // Gerar alertas
+        const alertas: { tipo: 'warning' | 'danger' | 'success'; mensagem: string }[] = [];
+        
+        if (resultados) {
+          // Alerta taxa de reparação
+          const taxaRep = resultados.taxaReparacao !== null ? parseFloat(String(resultados.taxaReparacao)) : null;
+          if (taxaRep !== null && taxaRep < 0.22) {
+            alertas.push({
+              tipo: 'warning',
+              mensagem: `Taxa de reparação (${(taxaRep * 100).toFixed(1)}%) abaixo do objetivo de 22%`
+            });
+          }
+          
+          // Alerta desvio objetivo
+          const desvio = resultados.desvioPercentualMes !== null ? parseFloat(String(resultados.desvioPercentualMes)) : null;
+          if (desvio !== null && desvio < -0.1) {
+            alertas.push({
+              tipo: 'danger',
+              mensagem: `Desvio de ${(desvio * 100).toFixed(1)}% abaixo do objetivo mensal`
+            });
+          } else if (desvio !== null && desvio >= 0) {
+            alertas.push({
+              tipo: 'success',
+              mensagem: `Parabéns! Objetivo mensal atingido (+${(desvio * 100).toFixed(1)}%)`
+            });
+          }
+          
+          // Alerta gap reparações
+          if (resultados.gapReparacoes22 !== null && resultados.gapReparacoes22 > 0) {
+            alertas.push({
+              tipo: 'warning',
+              mensagem: `Faltam ${resultados.gapReparacoes22} reparações para atingir 22%`
+            });
+          }
+        }
+        
+        if (complementares) {
+          // Alerta escovas
+          const escovasPerc = complementares.escovasPercent !== null ? parseFloat(String(complementares.escovasPercent)) : null;
+          if (escovasPerc !== null && escovasPerc < 0.075) {
+            alertas.push({
+              tipo: 'warning',
+              mensagem: `Escovas (${(escovasPerc * 100).toFixed(1)}%) abaixo do objetivo de 7.5%`
+            });
+          } else if (escovasPerc !== null && escovasPerc >= 0.10) {
+            alertas.push({
+              tipo: 'success',
+              mensagem: `Excelente! Escovas acima de 10% (${(escovasPerc * 100).toFixed(1)}%)`
+            });
+          }
+        }
+        
+        return {
+          resultados,
+          complementares,
+          evolucao,
+          alertas,
+          periodosDisponiveis: periodos,
+          periodoAtual: { mes, ano },
+        };
+      }),
   }),
   
   // ==================== RELATÓRIO BOARD (ADMINISTRAÇÃO) ====================

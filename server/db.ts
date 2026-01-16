@@ -7227,3 +7227,28 @@ export async function getTopicosReuniaoComGestor(reuniaoId: number): Promise<Arr
   
   return topicos;
 }
+
+
+// ==================== FUNÇÕES PARA PORTAL DA LOJA ====================
+
+/**
+ * Obter resultados mensais de uma loja específica
+ */
+export async function getResultadosMensaisPorLoja(lojaId: number, mes: number, ano: number) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const [resultado] = await db
+    .select()
+    .from(resultadosMensais)
+    .where(
+      and(
+        eq(resultadosMensais.lojaId, lojaId),
+        eq(resultadosMensais.mes, mes),
+        eq(resultadosMensais.ano, ano)
+      )
+    )
+    .limit(1);
+  
+  return resultado || null;
+}

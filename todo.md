@@ -2830,3 +2830,20 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar filtros por período
 - [x] Incluir evolução mensal e vendas complementares
 - [x] Adicionar barra de progresso para escovas (vermelho→verde conforme objetivo)
+
+
+## Feature v6.17 - Reestruturação do Portal da Loja com Cards
+- [ ] Criar página inicial com 4 cards grandes (Resultados, To-Do, Pendentes, Reuniões)
+- [ ] Implementar navegação: ao clicar num card, abre o conteúdo correspondente
+- [ ] Adicionar botão de voltar em cada secção para regressar aos cards
+- [ ] Otimizar layout para mobile
+- [ ] Remover navegação por tabs antiga
+
+
+## Feature v6.16 - Dashboard de Resultados no Portal da Loja
+- [x] Criar endpoint backend para resultados da loja com filtros
+- [x] Implementar componente Dashboard no Portal da Loja
+- [x] Adicionar KPIs visuais (serviços, objetivo, desvio, taxa reparação)
+- [x] Implementar alertas sobre mínimos/máximos (escovas, reparações)
+- [x] Adicionar filtros por período
+- [x] Incluir evolução mensal e vendas complementares

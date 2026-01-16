@@ -47,6 +47,13 @@ import {
   Image as ImageIcon,
   Paperclip,
   Edit,
+  BarChart3,
+  TrendingUp,
+  TrendingDown,
+  Target,
+  Award,
+  Wrench,
+  ArrowLeft,
 } from "lucide-react";
 
 interface LojaAuth {
@@ -60,8 +67,10 @@ export default function PortalLoja() {
   const [token, setToken] = useState<string>("");
   const [inputToken, setInputToken] = useState<string>("");
   const [lojaAuth, setLojaAuth] = useState<LojaAuth | null>(null);
-  const [activeTab, setActiveTab] = useState<"reuniao" | "pendentes" | "historico" | "tarefas">("reuniao");
+  const [activeTab, setActiveTab] = useState<"home" | "reuniao" | "pendentes" | "historico" | "tarefas" | "resultados">("home");
   const [filtroTarefas, setFiltroTarefas] = useState<"todas" | "recebidas" | "enviadas" | "internas">("todas");
+  const [dashboardMes, setDashboardMes] = useState<number | undefined>(undefined);
+  const [dashboardAno, setDashboardAno] = useState<number | undefined>(undefined);
   const [responderTodoOpen, setResponderTodoOpen] = useState(false);
   const [respostaTodo, setRespostaTodo] = useState("");
   const [observacaoTodoOpen, setObservacaoTodoOpen] = useState(false);
@@ -214,6 +223,12 @@ export default function PortalLoja() {
   const { data: tarefasInternas, refetch: refetchTarefasInternas } = trpc.todosPortalLoja.listarInternas.useQuery(
     { token, apenasAtivas: true },
     { enabled: !!token && !!lojaAuth }
+  );
+
+  // Dashboard de Resultados
+  const { data: dashboardData, isLoading: dashboardLoading } = trpc.todosPortalLoja.dashboardCompleto.useQuery(
+    { token, mes: dashboardMes, ano: dashboardAno },
+    { enabled: !!token && !!lojaAuth && activeTab === 'resultados' }
   );
 
   // Mutations
@@ -714,43 +729,94 @@ export default function PortalLoja() {
           </Card>
         </div>
 
-        {/* Tabs */}
-        <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
+        {/* Página Inicial com Cards */}
+        {activeTab === "home" && (
+          <div className="grid grid-cols-2 gap-4">
+            {/* Card Resultados */}
+            <Card 
+              className="cursor-pointer hover:shadow-lg transition-all hover:scale-[1.02] bg-gradient-to-br from-blue-500 to-blue-600 text-white border-0"
+              onClick={() => setActiveTab("resultados")}
+            >
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <BarChart3 className="h-10 w-10 opacity-80" />
+                  <TrendingUp className="h-6 w-6 opacity-60" />
+                </div>
+                <h3 className="text-xl font-bold mb-2">{language === 'pt' ? 'Resultados' : 'Results'}</h3>
+                <p className="text-sm opacity-80">{language === 'pt' ? 'Ver KPIs, objetivos e performance' : 'View KPIs, goals and performance'}</p>
+              </CardContent>
+            </Card>
+
+            {/* Card To-Do */}
+            <Card 
+              className="cursor-pointer hover:shadow-lg transition-all hover:scale-[1.02] bg-gradient-to-br from-purple-500 to-purple-600 text-white border-0"
+              onClick={() => setActiveTab("tarefas")}
+            >
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <ListTodo className="h-10 w-10 opacity-80" />
+                  {((todosCount || 0) + (tarefasInternas?.length || 0)) > 0 && (
+                    <Badge className="bg-white/20 text-white border-0 text-lg px-3">
+                      {(todosCount || 0) + (tarefasInternas?.length || 0)}
+                    </Badge>
+                  )}
+                </div>
+                <h3 className="text-xl font-bold mb-2">{t('tabs.tarefas')}</h3>
+                <p className="text-sm opacity-80">{language === 'pt' ? 'Gerir tarefas e comunicações' : 'Manage tasks and communications'}</p>
+              </CardContent>
+            </Card>
+
+            {/* Card Pendentes */}
+            <Card 
+              className="cursor-pointer hover:shadow-lg transition-all hover:scale-[1.02] bg-gradient-to-br from-amber-500 to-orange-500 text-white border-0"
+              onClick={() => setActiveTab("pendentes")}
+            >
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <AlertTriangle className="h-10 w-10 opacity-80" />
+                  {pendentesAtivos.length > 0 && (
+                    <Badge className="bg-white/20 text-white border-0 text-lg px-3">
+                      {pendentesAtivos.length}
+                    </Badge>
+                  )}
+                </div>
+                <h3 className="text-xl font-bold mb-2">{t('tabs.pendentes')}</h3>
+                <p className="text-sm opacity-80">{language === 'pt' ? 'Pendentes atribuídos à loja' : 'Pending items assigned to store'}</p>
+              </CardContent>
+            </Card>
+
+            {/* Card Reuniões */}
+            <Card 
+              className="cursor-pointer hover:shadow-lg transition-all hover:scale-[1.02] bg-gradient-to-br from-green-500 to-emerald-600 text-white border-0"
+              onClick={() => setActiveTab("reuniao")}
+            >
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <FileText className="h-10 w-10 opacity-80" />
+                  {reuniaoRascunho && (
+                    <Badge className="bg-white/20 text-white border-0">
+                      {language === 'pt' ? 'Rascunho' : 'Draft'}
+                    </Badge>
+                  )}
+                </div>
+                <h3 className="text-xl font-bold mb-2">{t('tabs.reuniao')}</h3>
+                <p className="text-sm opacity-80">{language === 'pt' ? 'Registar reuniões quinzenais' : 'Record biweekly meetings'}</p>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Botão Voltar - visível em todas as seções exceto home */}
+        {activeTab !== "home" && (
           <Button
-            variant={activeTab === "reuniao" ? "default" : "outline"}
-            onClick={() => setActiveTab("reuniao")}
+            variant="outline"
+            onClick={() => setActiveTab("home")}
+            className="mb-4"
           >
-            <FileText className="h-4 w-4 mr-2" />
-            {t('tabs.reuniao')}
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            {language === 'pt' ? 'Voltar' : 'Back'}
           </Button>
-          <Button
-            variant={activeTab === "pendentes" ? "default" : "outline"}
-            onClick={() => setActiveTab("pendentes")}
-          >
-            <AlertTriangle className="h-4 w-4 mr-2" />
-            {t('tabs.pendentes')}
-            {pendentesAtivos.length > 0 && (
-              <Badge variant="destructive" className="ml-2">{pendentesAtivos.length}</Badge>
-            )}
-          </Button>
-          <Button
-            variant={activeTab === "historico" ? "default" : "outline"}
-            onClick={() => setActiveTab("historico")}
-          >
-            <History className="h-4 w-4 mr-2" />
-            {t('tabs.historico')}
-          </Button>
-          <Button
-            variant={activeTab === "tarefas" ? "default" : "outline"}
-            onClick={() => setActiveTab("tarefas")}
-          >
-            <ListTodo className="h-4 w-4 mr-2" />
-            {t('tabs.tarefas')}
-            {((todosCount || 0) + (tarefasInternas?.length || 0)) > 0 && (
-              <Badge variant="secondary" className="ml-2">{(todosCount || 0) + (tarefasInternas?.length || 0)}</Badge>
-            )}
-          </Button>
-        </div>
+        )}
 
         {/* Tab Content */}
         {activeTab === "reuniao" && (
@@ -1389,11 +1455,270 @@ export default function PortalLoja() {
                   </CardContent>
                 </Card>
               ));
-            })()}
+            })()}          </div>
+        )}
+
+        {/* Tab Resultados - Dashboard */}
+        {activeTab === "resultados" && (
+          <div className="space-y-6">
+            {/* Filtro de Período */}
+            <div className="flex flex-wrap gap-4 items-center">
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-muted-foreground" />
+                <Select
+                  value={`${dashboardMes}-${dashboardAno}`}
+                  onValueChange={(value) => {
+                    const [m, a] = value.split('-').map(Number);
+                    setDashboardMes(m);
+                    setDashboardAno(a);
+                  }}
+                >
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {dashboardData?.periodosDisponiveis?.map((p: {mes: number; ano: number}) => (
+                      <SelectItem key={`${p.mes}-${p.ano}`} value={`${p.mes}-${p.ano}`}>
+                        {new Date(p.ano, p.mes - 1).toLocaleDateString('pt-PT', { month: 'long', year: 'numeric' })}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {dashboardLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+              </div>
+            ) : !dashboardData?.resultados ? (
+              <Card className="bg-amber-50 border-amber-200">
+                <CardContent className="py-8 text-center">
+                  <BarChart3 className="h-12 w-12 mx-auto text-amber-500 mb-4" />
+                  <h3 className="text-lg font-semibold text-amber-800">
+                    {language === 'pt' ? 'Sem dados disponíveis' : 'No data available'}
+                  </h3>
+                  <p className="text-amber-600 mt-2">
+                    {language === 'pt' 
+                      ? 'Não existem resultados para o período selecionado.'
+                      : 'No results available for the selected period.'}
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              <>
+                {/* Alertas */}
+                {dashboardData.alertas && dashboardData.alertas.length > 0 && (
+                  <div className="space-y-2">
+                    {dashboardData.alertas.map((alerta: {tipo: string; mensagem: string}, idx: number) => (
+                      <Card key={idx} className={`border-l-4 ${
+                        alerta.tipo === 'danger' ? 'border-l-red-500 bg-red-50' :
+                        alerta.tipo === 'warning' ? 'border-l-amber-500 bg-amber-50' :
+                        'border-l-green-500 bg-green-50'
+                      }`}>
+                        <CardContent className="py-3 flex items-center gap-3">
+                          {alerta.tipo === 'danger' ? (
+                            <AlertTriangle className="h-5 w-5 text-red-500" />
+                          ) : alerta.tipo === 'warning' ? (
+                            <AlertTriangle className="h-5 w-5 text-amber-500" />
+                          ) : (
+                            <Award className="h-5 w-5 text-green-500" />
+                          )}
+                          <span className={`text-sm font-medium ${
+                            alerta.tipo === 'danger' ? 'text-red-700' :
+                            alerta.tipo === 'warning' ? 'text-amber-700' :
+                            'text-green-700'
+                          }`}>
+                            {alerta.mensagem}
+                          </span>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+
+                {/* KPIs Principais */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                  {/* Total Serviços */}
+                  <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <Wrench className="h-8 w-8 opacity-80" />
+                        <div className="text-right">
+                          <p className="text-2xl font-bold">{dashboardData.resultados.totalServicos || 0}</p>
+                          <p className="text-xs opacity-80">{language === 'pt' ? 'Serviços' : 'Services'}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Objetivo */}
+                  <Card className="bg-gradient-to-br from-purple-500 to-purple-600 text-white">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <Target className="h-8 w-8 opacity-80" />
+                        <div className="text-right">
+                          <p className="text-2xl font-bold">{dashboardData.resultados.objetivoMensal || 0}</p>
+                          <p className="text-xs opacity-80">{language === 'pt' ? 'Objetivo' : 'Goal'}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Desvio */}
+                  <Card className={`bg-gradient-to-br ${
+                    parseFloat(String(dashboardData.resultados.desvioPercentualMes || 0)) >= 0 
+                      ? 'from-green-500 to-green-600' 
+                      : 'from-red-500 to-red-600'
+                  } text-white`}>
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        {parseFloat(String(dashboardData.resultados.desvioPercentualMes || 0)) >= 0 ? (
+                          <TrendingUp className="h-8 w-8 opacity-80" />
+                        ) : (
+                          <TrendingDown className="h-8 w-8 opacity-80" />
+                        )}
+                        <div className="text-right">
+                          <p className="text-2xl font-bold">
+                            {dashboardData.resultados.desvioPercentualMes !== null 
+                              ? `${(parseFloat(String(dashboardData.resultados.desvioPercentualMes)) * 100).toFixed(1)}%`
+                              : '-'}
+                          </p>
+                          <p className="text-xs opacity-80">{language === 'pt' ? 'Desvio' : 'Deviation'}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Taxa Reparação */}
+                  <Card className={`bg-gradient-to-br ${
+                    parseFloat(String(dashboardData.resultados.taxaReparacao || 0)) >= 0.22 
+                      ? 'from-green-500 to-green-600' 
+                      : 'from-amber-500 to-amber-600'
+                  } text-white`}>
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <Award className="h-8 w-8 opacity-80" />
+                        <div className="text-right">
+                          <p className="text-2xl font-bold">
+                            {dashboardData.resultados.taxaReparacao !== null 
+                              ? `${(parseFloat(String(dashboardData.resultados.taxaReparacao)) * 100).toFixed(1)}%`
+                              : '-'}
+                          </p>
+                          <p className="text-xs opacity-80">{language === 'pt' ? 'Taxa Rep.' : 'Repair Rate'}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Vendas Complementares */}
+                {dashboardData.complementares && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg">
+                        {language === 'pt' ? 'Vendas Complementares' : 'Complementary Sales'}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {/* Escovas com barra de progresso */}
+                      <div>
+                        <div className="flex justify-between mb-1">
+                          <span className="text-sm font-medium">Escovas</span>
+                          <span className="text-sm">
+                            {dashboardData.complementares.escovasQtd || 0} ({dashboardData.complementares.escovasPercent !== null 
+                              ? `${(parseFloat(String(dashboardData.complementares.escovasPercent)) * 100).toFixed(1)}%`
+                              : '0%'})
+                          </span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-3">
+                          <div 
+                            className={`h-3 rounded-full transition-all ${
+                              parseFloat(String(dashboardData.complementares.escovasPercent || 0)) >= 0.10 
+                                ? 'bg-green-500' 
+                                : parseFloat(String(dashboardData.complementares.escovasPercent || 0)) >= 0.075
+                                  ? 'bg-amber-500'
+                                  : 'bg-red-500'
+                            }`}
+                            style={{ width: `${Math.min(parseFloat(String(dashboardData.complementares.escovasPercent || 0)) * 1000, 100)}%` }}
+                          />
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {language === 'pt' ? 'Objetivo: 10% | Mínimo: 7.5%' : 'Goal: 10% | Minimum: 7.5%'}
+                        </p>
+                      </div>
+
+                      {/* Outros complementares */}
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="p-3 bg-secondary rounded-lg">
+                          <p className="text-sm text-muted-foreground">Polimento</p>
+                          <p className="text-xl font-bold">{dashboardData.complementares.polimentoQtd || 0}</p>
+                        </div>
+                        <div className="p-3 bg-secondary rounded-lg">
+                          <p className="text-sm text-muted-foreground">Tratamento</p>
+                          <p className="text-xl font-bold">{dashboardData.complementares.tratamentoQtd || 0}</p>
+                        </div>
+                        <div className="p-3 bg-secondary rounded-lg">
+                          <p className="text-sm text-muted-foreground">Lavagens</p>
+                          <p className="text-xl font-bold">{dashboardData.complementares.lavagensTotal || 0}</p>
+                        </div>
+                        <div className="p-3 bg-secondary rounded-lg">
+                          <p className="text-sm text-muted-foreground">Outros</p>
+                          <p className="text-xl font-bold">{dashboardData.complementares.outrosQtd || 0}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Evolução Mensal */}
+                {dashboardData.evolucao && dashboardData.evolucao.length > 0 && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg">
+                        {language === 'pt' ? 'Evolução Mensal' : 'Monthly Evolution'}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                          <thead>
+                            <tr className="border-b">
+                              <th className="text-left py-2">{language === 'pt' ? 'Mês' : 'Month'}</th>
+                              <th className="text-right py-2">{language === 'pt' ? 'Serviços' : 'Services'}</th>
+                              <th className="text-right py-2">{language === 'pt' ? 'Objetivo' : 'Goal'}</th>
+                              <th className="text-right py-2">{language === 'pt' ? 'Desvio' : 'Deviation'}</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {dashboardData.evolucao.map((e: any, idx: number) => (
+                              <tr key={idx} className="border-b">
+                                <td className="py-2">
+                                  {new Date(e.ano, e.mes - 1).toLocaleDateString('pt-PT', { month: 'short', year: '2-digit' })}
+                                </td>
+                                <td className="text-right py-2">{e.totalServicos || 0}</td>
+                                <td className="text-right py-2">{e.objetivoMes || 0}</td>
+                                <td className={`text-right py-2 font-medium ${
+                                  parseFloat(String(e.desvioPercentualMes || 0)) >= 0 ? 'text-green-600' : 'text-red-600'
+                                }`}>
+                                  {e.desvioPercentualMes !== null 
+                                    ? `${(parseFloat(String(e.desvioPercentualMes)) * 100).toFixed(1)}%`
+                                    : '-'}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </>
+            )}
           </div>
         )}
 
-        {/* Dialog Devolver To-Do */}
+        {/* Dialog Devolver Tarefa */}
         <Dialog open={devolverTodoOpen} onOpenChange={setDevolverTodoOpen}>
           <DialogContent>
             <DialogHeader>
