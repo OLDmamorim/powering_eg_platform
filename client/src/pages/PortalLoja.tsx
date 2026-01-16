@@ -174,6 +174,33 @@ export default function PortalLoja() {
     setShowInstallBanner(false);
   };
 
+  // Atualizar meta tags para Portal da Loja
+  useEffect(() => {
+    // Atualizar title
+    document.title = lojaAuth ? `${lojaAuth.lojaNome} - PoweringEG` : 'Portal da Loja - PoweringEG';
+    
+    // Atualizar meta description
+    const metaDescription = document.querySelector('meta[name="description"]');
+    if (metaDescription) {
+      metaDescription.setAttribute('content', lojaAuth 
+        ? `Portal de gestão da loja ${lojaAuth.lojaNome} - Reuniões, Tarefas e Resultados ExpressGlass`
+        : 'Portal da Loja ExpressGlass - Acesso exclusivo para lojas da rede'
+      );
+    }
+    
+    // Atualizar og:title
+    const ogTitle = document.querySelector('meta[property="og:title"]');
+    if (ogTitle) {
+      ogTitle.setAttribute('content', lojaAuth ? `${lojaAuth.lojaNome} - PoweringEG` : 'Portal da Loja - PoweringEG');
+    }
+    
+    // Atualizar og:description
+    const ogDescription = document.querySelector('meta[property="og:description"]');
+    if (ogDescription) {
+      ogDescription.setAttribute('content', 'Portal exclusivo para lojas ExpressGlass - Reuniões quinzenais, tarefas e resultados');
+    }
+  }, [lojaAuth]);
+
   // Verificar token na URL ou localStorage
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);

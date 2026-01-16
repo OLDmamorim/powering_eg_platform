@@ -2937,3 +2937,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 
 ## v6.25 - Corrigir URL Imagem Open Graph
 - [x] Usar URL absoluto com domínio publicado (https://poweringeg-3c9mozlh.manus.space/) para imagem OG
+
+## v6.26 - Imagem OG e Meta Tags Dinâmicas
+- [x] Criar imagem OG personalizada 1200x630px com logo + nome PoweringEG
+- [x] Adicionar meta tag og:url com URL canónica
+- [x] Adicionar og:locale pt_PT
+- [x] Atualizar twitter:card para summary_large_image
+- [x] Configurar meta tags dinâmicas no Portal da Loja (título e descrição mudam com nome da loja)
