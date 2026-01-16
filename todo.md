@@ -2944,3 +2944,6 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar og:locale pt_PT
 - [x] Atualizar twitter:card para summary_large_image
 - [x] Configurar meta tags dinâmicas no Portal da Loja (título e descrição mudam com nome da loja)
+
+## v6.27 - Atualizar Descrição OG
+- [x] Atualizar descrição para: "Plataforma de gestão da rede ExpressGlass - Dashboard de resultados, reuniões quinzenais, tarefas e relatórios com IA"
