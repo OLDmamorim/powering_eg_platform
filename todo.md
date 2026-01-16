@@ -2916,3 +2916,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 
 ## Portal da Loja v6.21 - Correção Mês Padrão
 - [x] Alterar mês padrão do Dashboard de Resultados para mês atual (Janeiro 2026)
+
+## Portal da Loja v6.22 - Card Tarefas Piscar
+- [x] Adicionar animação de piscar (animate-pulse + ring) ao card de tarefas na home
+- [x] Ícone de tarefas com animate-bounce quando há novas
+- [x] Badge amarelo com contagem de tarefas novas
+- [x] Texto dinâmico "Tem tarefas novas do gestor!"
+- [x] Marcar tarefas como vistas ao clicar no card

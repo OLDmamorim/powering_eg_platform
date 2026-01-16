@@ -656,22 +656,45 @@ export default function PortalLoja() {
               </CardContent>
             </Card>
 
-            {/* Card To-Do */}
+            {/* Card To-Do - Pisca quando há tarefas novas não lidas */}
             <Card 
-              className="cursor-pointer hover:shadow-lg transition-all hover:scale-[1.02] bg-gradient-to-br from-purple-500 to-purple-600 text-white border-0"
-              onClick={() => setActiveTab("tarefas")}
+              className={`cursor-pointer hover:shadow-lg transition-all hover:scale-[1.02] bg-gradient-to-br from-purple-500 to-purple-600 text-white border-0 ${
+                (todosNaoVistos || 0) > 0 ? 'animate-pulse ring-4 ring-purple-300 ring-opacity-75' : ''
+              }`}
+              onClick={() => {
+                setActiveTab("tarefas");
+                // Marcar tarefas como vistas quando clica no card
+                if (todosList && todosList.length > 0) {
+                  const idsNaoVistos = todosList.filter((t: any) => !t.visto).map((t: any) => t.id);
+                  if (idsNaoVistos.length > 0) {
+                    marcarVistosLojaMutation.mutate({ token, todoIds: idsNaoVistos });
+                  }
+                }
+              }}
             >
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <ListTodo className="h-10 w-10 opacity-80" />
+                  <ListTodo className={`h-10 w-10 opacity-80 ${(todosNaoVistos || 0) > 0 ? 'animate-bounce' : ''}`} />
                   {((todosCount || 0) + (tarefasInternas?.length || 0)) > 0 && (
-                    <Badge className="bg-white/20 text-white border-0 text-lg px-3">
-                      {(todosCount || 0) + (tarefasInternas?.length || 0)}
+                    <Badge className={`text-lg px-3 border-0 ${
+                      (todosNaoVistos || 0) > 0 
+                        ? 'bg-yellow-400 text-purple-800 animate-bounce' 
+                        : 'bg-white/20 text-white'
+                    }`}>
+                      {(todosNaoVistos || 0) > 0 
+                        ? `${todosNaoVistos} ${language === 'pt' ? 'Nova' : 'New'}${todosNaoVistos !== 1 ? 's' : ''}!`
+                        : (todosCount || 0) + (tarefasInternas?.length || 0)
+                      }
                     </Badge>
                   )}
                 </div>
                 <h3 className="text-xl font-bold mb-2">{t('tabs.tarefas')}</h3>
-                <p className="text-sm opacity-80">{language === 'pt' ? 'Gerir tarefas e comunicações' : 'Manage tasks and communications'}</p>
+                <p className="text-sm opacity-80">
+                  {(todosNaoVistos || 0) > 0 
+                    ? (language === 'pt' ? 'Tem tarefas novas do gestor!' : 'You have new tasks from manager!')
+                    : (language === 'pt' ? 'Gerir tarefas e comunicações' : 'Manage tasks and communications')
+                  }
+                </p>
               </CardContent>
             </Card>
 
