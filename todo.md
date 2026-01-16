@@ -2928,3 +2928,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Mover os 4 cards principais (Serviços, Objetivo, Desvio, Taxa Rep.) para o topo
 - [x] Alertas aparecem logo após os cards
 - [x] Vendas Complementares e gráficos abaixo dos alertas
+
+## v6.24 - Open Graph Preview com Logo
+- [x] Configurar meta tags Open Graph para preview de links
+- [x] Usar logo PoweringEG (512x512) como imagem de preview
+- [x] Adicionar descrição da plataforma nas meta tags
+- [x] Configurar Twitter Card para partilha
