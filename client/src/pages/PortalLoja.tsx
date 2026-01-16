@@ -1373,20 +1373,68 @@ export default function PortalLoja() {
           <div className="space-y-6">
             {/* Cabeçalho com Data de Atualização, Filtro de Período e Botão Exportar */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              {/* Data de Atualização */}
-              {dashboardData?.dataAtualizacao && (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Clock className="h-4 w-4" />
-                  <span>
-                    {language === 'pt' ? 'Atualizado em: ' : 'Updated on: '}
-                    {new Date(dashboardData.dataAtualizacao).toLocaleDateString('pt-PT', { 
-                      weekday: 'short', day: '2-digit', month: '2-digit', year: 'numeric'
-                    })}, {new Date(dashboardData.dataAtualizacao).toLocaleTimeString('pt-PT', { 
-                      hour: '2-digit', minute: '2-digit' 
-                    })}
-                  </span>
-                </div>
-              )}
+              {/* Data de Atualização e Indicador de Dia Útil */}
+              {dashboardData?.dataAtualizacao && (() => {
+                const dataAtual = new Date(dashboardData.dataAtualizacao);
+                const ano = dataAtual.getFullYear();
+                const mes = dataAtual.getMonth();
+                const diaAtual = dataAtual.getDate();
+                
+                // Calcular dias úteis do mês (excluir sábados e domingos)
+                const calcularDiasUteis = (ano: number, mes: number, ateDia?: number) => {
+                  const ultimoDia = ateDia || new Date(ano, mes + 1, 0).getDate();
+                  let diasUteis = 0;
+                  for (let dia = 1; dia <= ultimoDia; dia++) {
+                    const data = new Date(ano, mes, dia);
+                    const diaSemana = data.getDay();
+                    if (diaSemana !== 0 && diaSemana !== 6) { // Não é domingo (0) nem sábado (6)
+                      diasUteis++;
+                    }
+                  }
+                  return diasUteis;
+                };
+                
+                const totalDiasUteisMes = calcularDiasUteis(ano, mes);
+                const diasUteisAteHoje = calcularDiasUteis(ano, mes, diaAtual);
+                const percentagemMes = Math.round((diasUteisAteHoje / totalDiasUteisMes) * 100);
+                
+                return (
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Clock className="h-4 w-4" />
+                      <span>
+                        {language === 'pt' ? 'Atualizado em: ' : 'Updated on: '}
+                        {dataAtual.toLocaleDateString('pt-PT', { 
+                          weekday: 'short', day: '2-digit', month: '2-digit', year: 'numeric'
+                        })}, {dataAtual.toLocaleTimeString('pt-PT', { 
+                          hour: '2-digit', minute: '2-digit' 
+                        })}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1.5 text-xs">
+                        <Calendar className="h-3.5 w-3.5 text-blue-500" />
+                        <span className="font-medium text-foreground">
+                          {language === 'pt' 
+                            ? `Dia ${diasUteisAteHoje} de ${totalDiasUteisMes} dias úteis`
+                            : `Day ${diasUteisAteHoje} of ${totalDiasUteisMes} working days`}
+                        </span>
+                      </div>
+                      <div className="flex-1 max-w-[120px] bg-gray-200 rounded-full h-2">
+                        <div 
+                          className={`h-2 rounded-full transition-all ${
+                            percentagemMes >= 80 ? 'bg-red-500' : 
+                            percentagemMes >= 60 ? 'bg-amber-500' : 
+                            'bg-green-500'
+                          }`}
+                          style={{ width: `${percentagemMes}%` }}
+                        />
+                      </div>
+                      <span className="text-xs text-muted-foreground">{percentagemMes}%</span>
+                    </div>
+                  </div>
+                );
+              })()}
               
               <div className="flex items-center gap-3">
                 {/* Botão Exportar PDF */}

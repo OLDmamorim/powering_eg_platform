@@ -2900,3 +2900,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## Portal da Loja v6.18 - Correção de Filtro de Datas
 - [x] Mostrar dia completo na data de atualização (dia da semana, dd/mm/yyyy, hh:mm)
 - [x] Mês anterior já estava selecionado por defeito (verificado no código)
+
+## Portal da Loja v6.19 - Indicador de Dia Útil do Mês
+- [x] Calcular dias úteis do mês (excluir sábados e domingos)
+- [x] Mostrar indicador "Dia X de Y dias úteis" com ícone de calendário
+- [x] Adicionar barra de progresso visual do mês com cores (verde/amarelo/vermelho)
+- [x] Mostrar percentagem do mês decorrido
