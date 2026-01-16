@@ -2814,3 +2814,6 @@ NOTA: Sistema de email requer configuração externa no deployment
 
 ## Bug Fix - Link do Portal de Lojas nos emails
 - [x] Corrigir URL do portal de lojas nos emails (estava a usar domínio incorreto poweringeg.manus.space em vez de poweringeg-3c9mozlh.manus.space)
+
+## Melhoria - Email do Portal de Lojas
+- [x] Adicionar referência às Tarefas na lista de funcionalidades do email

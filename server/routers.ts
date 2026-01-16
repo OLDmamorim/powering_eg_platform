@@ -3485,6 +3485,8 @@ export const appRouter = router({
                 Através deste portal poderá:
               </p>
               <ul style="color: #374151; line-height: 1.8;">
+                <li>Ver e responder às <strong>Tarefas</strong> atribuídas à sua loja</li>
+                <li>Enviar novas tarefas para o gestor</li>
                 <li>Ver os pendentes atribuídos à sua loja</li>
                 <li>Registar as reuniões quinzenais</li>
                 <li>Enviar a ata da reunião automaticamente</li>
