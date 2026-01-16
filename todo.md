@@ -2832,10 +2832,11 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar barra de progresso para escovas (vermelho→verde conforme objetivo)
 
 
-## Feature v6.17 - Reestruturação do Portal da Loja com Cards
-- [ ] Criar página inicial com 4 cards grandes (Resultados, To-Do, Pendentes, Reuniões)
-- [ ] Implementar navegação: ao clicar num card, abre o conteúdo correspondente
-- [ ] Adicionar botão de voltar em cada secção para regressar aos cards
+#### Feature v6.17 - Reestruturar Portal da Loja com Cards
+- [x] Criar página inicial com 4 cards grandes (Resultados, To-Do, Pendentes, Reuniões)
+- [x] Implementar navegação por cards em vez de tabs
+- [x] Adicionar botão de voltar em cada seção
+- [x] Otimizar para mobilecção para regressar aos cards
 - [ ] Otimizar layout para mobile
 - [ ] Remover navegação por tabs antiga
 
