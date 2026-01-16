@@ -2913,3 +2913,6 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Mostrar previsão de serviços necessários para atingir objetivo mensal
 - [x] Mostrar número de feriados no mês atual
 - [x] Mensagem de parabéns quando objetivo é atingido
+
+## Portal da Loja v6.21 - Correção Mês Padrão
+- [x] Alterar mês padrão do Dashboard de Resultados para mês atual (Janeiro 2026)

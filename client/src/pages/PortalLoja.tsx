@@ -102,10 +102,9 @@ export default function PortalLoja() {
   const [filtroTarefas, setFiltroTarefas] = useState<"todas" | "recebidas" | "enviadas" | "internas">("todas");
   // Estado para o filtro de meses do dashboard
   const [mesesSelecionadosDashboard, setMesesSelecionadosDashboard] = useState<MesSelecionado[]>(() => {
-    // Por defeito, selecionar o mês anterior
+    // Por defeito, selecionar o mês atual
     const hoje = new Date();
-    const mesAnterior = new Date(hoje.getFullYear(), hoje.getMonth() - 1, 1);
-    return [{ mes: mesAnterior.getMonth() + 1, ano: mesAnterior.getFullYear() }];
+    return [{ mes: hoje.getMonth() + 1, ano: hoje.getFullYear() }];
   });
   const [responderTodoOpen, setResponderTodoOpen] = useState(false);
   const [respostaTodo, setRespostaTodo] = useState("");
