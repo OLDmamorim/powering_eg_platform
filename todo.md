@@ -2820,3 +2820,13 @@ NOTA: Sistema de email requer configuração externa no deployment
 
 ## Melhoria - Renomear Portal no Email
 - [x] Alterar "Portal de Reuniões Quinzenais" para "Portal da Loja" no email
+
+
+## Feature v6.16 - Dashboard de Resultados no Portal da Loja
+- [x] Criar endpoint backend dashboardCompleto para resultados da loja com filtros
+- [x] Implementar componente Dashboard no Portal da Loja (tab Resultados)
+- [x] Adicionar KPIs visuais (serviços, objetivo, desvio, taxa reparação)
+- [x] Implementar alertas sobre mínimos/máximos (escovas, reparações)
+- [x] Adicionar filtros por período
+- [x] Incluir evolução mensal e vendas complementares
+- [x] Adicionar barra de progresso para escovas (vermelho→verde conforme objetivo)
