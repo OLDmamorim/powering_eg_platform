@@ -5334,42 +5334,26 @@ export const appRouter = router({
         
         // Gerar análise com IA
         const prompt = `
-Analisa os resultados da loja ${auth.loja.nome} e gera uma análise motivacional e estratégica.
+Analisa os resultados da loja ${auth.loja.nome} e gera uma análise simples e motivacional.
 
 DADOS DO MÊS:
-- Serviços realizados: ${totalServicos}
-- Objetivo mensal: ${totalObjetivo}
-- Desvio: ${desvioPercentual.toFixed(1)}%
-- Serviços em falta: ${servicosFaltam}
+- Serviços realizados: ${totalServicos} / Objetivo: ${totalObjetivo} (Desvio: ${desvioPercentual.toFixed(1)}%)
 - Taxa de reparação: ${taxaReparacao.toFixed(1)}% (objetivo: 22%)
-- Reparações em falta para 22%: ${reparacoesFaltam}
-- Escovas: ${escovasPercent.toFixed(1)}% (objetivo: 10%, mínimo: 7.5%)
-- Polimento: ${totalPolimento} unidades
-- Tratamento: ${totalTratamento} unidades
-- Lavagens: ${totalLavagens}
-
-COMPARATIVO MÊS ANTERIOR:
-- Serviços mês anterior: ${servicosAnteriores}
-- Variação: ${variacaoServicos.toFixed(1)}%
-
-TEMPO RESTANTE:
-- Dias úteis restantes no mês: ${diasUteisRestantes}
+- Escovas: ${escovasPercent.toFixed(1)}% (objetivo: 10%)
+- Dias úteis restantes: ${diasUteisRestantes}
 - Ritmo necessário: ${servicosPorDia} serviços/dia
 
 Gera uma resposta em JSON com esta estrutura exata:
 {
-  "urgencias": ["lista de 2-3 pontos de foco urgente"],
-  "alertas": ["lista de 1-2 alertas importantes"],
-  "pontosForca": ["lista de 1-2 pontos positivos"],
-  "comparativo": "breve análise comparativa com mês anterior (1 frase)",
-  "projecao": "previsão realista para fechar o mês (1 frase)",
-  "mensagemMotivacional": "mensagem de força e ânimo personalizada (2-3 frases, tom positivo e encorajador)"
+  "focoUrgente": ["lista de 1-2 pontos de foco urgente, diretos e práticos"],
+  "pontosPositivos": ["lista de 1-2 pontos positivos da loja"],
+  "resumo": "mensagem de síntese e motivação (2-3 frases, tom positivo e encorajador, dar força para os dias que faltam)"
 }
 
 IMPORTANTE:
-- Sê direto e prático nas urgências
-- A mensagem motivacional deve ser genuina, positiva e dar força para os dias que faltam
-- Se o objetivo já foi atingido, celebra e incentiva a superar ainda mais
+- Sê direto e prático no foco urgente
+- O resumo deve ser genuino, positivo e dar força
+- Se o objetivo já foi atingido, celebra e incentiva a superar
 - Usa linguagem portuguesa de Portugal (não brasileiro)
 - Responde APENAS com o JSON, sem texto adicional`;
         
@@ -5387,14 +5371,11 @@ IMPORTANTE:
                 schema: {
                   type: 'object',
                   properties: {
-                    urgencias: { type: 'array', items: { type: 'string' } },
-                    alertas: { type: 'array', items: { type: 'string' } },
-                    pontosForca: { type: 'array', items: { type: 'string' } },
-                    comparativo: { type: 'string' },
-                    projecao: { type: 'string' },
-                    mensagemMotivacional: { type: 'string' }
+                    focoUrgente: { type: 'array', items: { type: 'string' } },
+                    pontosPositivos: { type: 'array', items: { type: 'string' } },
+                    resumo: { type: 'string' }
                   },
-                  required: ['urgencias', 'alertas', 'pontosForca', 'comparativo', 'projecao', 'mensagemMotivacional'],
+                  required: ['focoUrgente', 'pontosPositivos', 'resumo'],
                   additionalProperties: false
                 }
               }
@@ -5424,22 +5405,13 @@ IMPORTANTE:
           console.error('Erro ao gerar análise IA:', error);
           // Retornar análise básica em caso de erro
           return {
-            urgencias: servicosFaltam > 0 
+            focoUrgente: servicosFaltam > 0 
               ? [`Faltam ${servicosFaltam} serviços para atingir o objetivo`]
               : ['Manter o ritmo atual para superar o objetivo'],
-            alertas: taxaReparacao < 22 
-              ? [`Taxa de reparação (${taxaReparacao.toFixed(1)}%) abaixo do objetivo de 22%`]
-              : [],
-            pontosForca: desvioPercentual >= 0 
+            pontosPositivos: desvioPercentual >= 0 
               ? ['Objetivo mensal atingido!']
-              : [],
-            comparativo: variacaoServicos >= 0 
-              ? `Evolução positiva de ${variacaoServicos.toFixed(1)}% face ao mês anterior.`
-              : `Redução de ${Math.abs(variacaoServicos).toFixed(1)}% face ao mês anterior.`,
-            projecao: diasUteisRestantes > 0 
-              ? `Com ${diasUteisRestantes} dias úteis restantes, são necessários ${servicosPorDia} serviços/dia.`
-              : 'Mês encerrado.',
-            mensagemMotivacional: desvioPercentual >= 0
+              : taxaReparacao >= 22 ? ['Taxa de reparação acima do objetivo!'] : [],
+            resumo: desvioPercentual >= 0
               ? 'Parabéns pelo excelente trabalho! Continuem assim e superem ainda mais os objetivos!'
               : `Faltam apenas ${servicosFaltam} serviços! Com foco e determinação, vão conseguir! Força equipa!`,
             metricas: {

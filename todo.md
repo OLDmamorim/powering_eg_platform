@@ -2973,3 +2973,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Cards resumo por semana com percentagem de cumprimento
 - [x] Destaque visual da semana atual
 - [x] Cores dinâmicas (verde/vermelho) conforme performance
+
+## v6.30 - Simplificar Análise IA
+- [x] Manter apenas: Foco Urgente, Pontos Positivos, Resumo
+- [x] Remover: Alertas, Comparativo, Projeção
+- [x] Mudar título "Mensagem de Força" para "Resumo"

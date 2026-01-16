@@ -2599,15 +2599,15 @@ export default function PortalLoja() {
                       </div>
                     ) : (
                       <div className="space-y-4">
-                        {/* Urgências */}
-                        {analiseIA.urgencias && analiseIA.urgencias.length > 0 && (
+                        {/* Foco Urgente */}
+                        {analiseIA.focoUrgente && analiseIA.focoUrgente.length > 0 && (
                           <div className="p-4 bg-red-50 rounded-lg border border-red-200">
                             <h4 className="font-semibold text-red-800 flex items-center gap-2 mb-2">
                               <Zap className="h-4 w-4" />
                               {language === 'pt' ? 'Foco Urgente' : 'Urgent Focus'}
                             </h4>
                             <ul className="space-y-1">
-                              {analiseIA.urgencias.map((u: string, i: number) => (
+                              {analiseIA.focoUrgente.map((u: string, i: number) => (
                                 <li key={i} className="text-red-700 text-sm flex items-start gap-2">
                                   <span className="text-red-500 mt-1">•</span>
                                   {u}
@@ -2617,33 +2617,15 @@ export default function PortalLoja() {
                           </div>
                         )}
 
-                        {/* Alertas */}
-                        {analiseIA.alertas && analiseIA.alertas.length > 0 && (
-                          <div className="p-4 bg-amber-50 rounded-lg border border-amber-200">
-                            <h4 className="font-semibold text-amber-800 flex items-center gap-2 mb-2">
-                              <AlertCircle className="h-4 w-4" />
-                              {language === 'pt' ? 'Alertas' : 'Alerts'}
-                            </h4>
-                            <ul className="space-y-1">
-                              {analiseIA.alertas.map((a: string, i: number) => (
-                                <li key={i} className="text-amber-700 text-sm flex items-start gap-2">
-                                  <span className="text-amber-500 mt-1">•</span>
-                                  {a}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-
-                        {/* Pontos Fortes */}
-                        {analiseIA.pontosForca && analiseIA.pontosForca.length > 0 && (
+                        {/* Pontos Positivos */}
+                        {analiseIA.pontosPositivos && analiseIA.pontosPositivos.length > 0 && (
                           <div className="p-4 bg-green-50 rounded-lg border border-green-200">
                             <h4 className="font-semibold text-green-800 flex items-center gap-2 mb-2">
                               <ThumbsUp className="h-4 w-4" />
-                              {language === 'pt' ? 'Pontos Fortes' : 'Strengths'}
+                              {language === 'pt' ? 'Pontos Positivos' : 'Strengths'}
                             </h4>
                             <ul className="space-y-1">
-                              {analiseIA.pontosForca.map((p: string, i: number) => (
+                              {analiseIA.pontosPositivos.map((p: string, i: number) => (
                                 <li key={i} className="text-green-700 text-sm flex items-start gap-2">
                                   <span className="text-green-500 mt-1">✓</span>
                                   {p}
@@ -2653,37 +2635,15 @@ export default function PortalLoja() {
                           </div>
                         )}
 
-                        {/* Comparativo e Projeção */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          {analiseIA.comparativo && (
-                            <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                              <h4 className="font-semibold text-blue-800 flex items-center gap-2 mb-2">
-                                <TrendingUp className="h-4 w-4" />
-                                {language === 'pt' ? 'Comparativo' : 'Comparison'}
-                              </h4>
-                              <p className="text-blue-700 text-sm">{analiseIA.comparativo}</p>
-                            </div>
-                          )}
-                          {analiseIA.projecao && (
-                            <div className="p-4 bg-indigo-50 rounded-lg border border-indigo-200">
-                              <h4 className="font-semibold text-indigo-800 flex items-center gap-2 mb-2">
-                                <Target className="h-4 w-4" />
-                                {language === 'pt' ? 'Projeção' : 'Projection'}
-                              </h4>
-                              <p className="text-indigo-700 text-sm">{analiseIA.projecao}</p>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Mensagem Motivacional */}
-                        {analiseIA.mensagemMotivacional && (
+                        {/* Resumo */}
+                        {analiseIA.resumo && (
                           <div className="p-5 bg-gradient-to-r from-purple-100 to-pink-100 rounded-lg border border-purple-200">
                             <h4 className="font-semibold text-purple-800 flex items-center gap-2 mb-3">
                               <Rocket className="h-5 w-5" />
-                              {language === 'pt' ? 'Mensagem de Força' : 'Motivational Message'}
+                              {language === 'pt' ? 'Resumo' : 'Summary'}
                             </h4>
                             <p className="text-purple-700 text-base italic leading-relaxed">
-                              "{analiseIA.mensagemMotivacional}"
+                              "{analiseIA.resumo}"
                             </p>
                           </div>
                         )}
