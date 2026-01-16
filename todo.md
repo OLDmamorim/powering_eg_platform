@@ -2861,3 +2861,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Simplificar cabeçalho com loja e gestor
 - [x] Manter apenas os 4 cards grandes na entrada
 - [x] Botão de voltar funcional em todas as secções
+
+
+## Feature v6.19 - Melhorias no Dashboard de Resultados do Portal da Loja
+- [ ] Adicionar data de atualização dos dados
+- [ ] Implementar filtros avançados de período (Mês Anterior, Q1, Q2, Q3, Q4, Semestre, Ano)
+- [ ] Adicionar gráficos de evolução com Chart.js
+- [ ] Implementar comparativos com mês anterior (variação percentual com setas)

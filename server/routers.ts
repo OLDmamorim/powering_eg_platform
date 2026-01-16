@@ -4605,6 +4605,7 @@ export const appRouter = router({
     dashboardCompleto: publicProcedure
       .input(z.object({
         token: z.string(),
+        periodo: z.enum(['mes_anterior', 'q1', 'q2', 'q3', 'q4', 'semestre1', 'semestre2', 'ano', 'mes_atual']).optional(),
         mes: z.number().min(1).max(12).optional(),
         ano: z.number().optional(),
       }))
@@ -4614,28 +4615,166 @@ export const appRouter = router({
           throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
         }
         
-        // Determinar período
-        let mes = input.mes;
-        let ano = input.ano;
-        
         const periodos = await db.getPeriodosDisponiveis();
-        if (!mes || !ano) {
-          if (periodos.length > 0) {
-            mes = periodos[0].mes;
-            ano = periodos[0].ano;
-          } else {
-            const now = new Date();
-            mes = now.getMonth() + 1;
-            ano = now.getFullYear();
+        const now = new Date();
+        const anoAtual = now.getFullYear();
+        const mesAtual = now.getMonth() + 1;
+        
+        // Determinar meses a consultar baseado no período
+        let mesesConsulta: { mes: number; ano: number }[] = [];
+        let periodoLabel = '';
+        
+        const periodo = input.periodo || 'mes_anterior';
+        
+        switch (periodo) {
+          case 'mes_atual':
+            mesesConsulta = [{ mes: mesAtual, ano: anoAtual }];
+            periodoLabel = new Date(anoAtual, mesAtual - 1).toLocaleDateString('pt-PT', { month: 'long', year: 'numeric' });
+            break;
+          case 'mes_anterior':
+            const mesAnt = mesAtual === 1 ? 12 : mesAtual - 1;
+            const anoAnt = mesAtual === 1 ? anoAtual - 1 : anoAtual;
+            mesesConsulta = [{ mes: mesAnt, ano: anoAnt }];
+            periodoLabel = new Date(anoAnt, mesAnt - 1).toLocaleDateString('pt-PT', { month: 'long', year: 'numeric' });
+            break;
+          case 'q1':
+            mesesConsulta = [1, 2, 3].map(m => ({ mes: m, ano: anoAtual }));
+            periodoLabel = `Q1 ${anoAtual} (Jan-Mar)`;
+            break;
+          case 'q2':
+            mesesConsulta = [4, 5, 6].map(m => ({ mes: m, ano: anoAtual }));
+            periodoLabel = `Q2 ${anoAtual} (Abr-Jun)`;
+            break;
+          case 'q3':
+            mesesConsulta = [7, 8, 9].map(m => ({ mes: m, ano: anoAtual }));
+            periodoLabel = `Q3 ${anoAtual} (Jul-Set)`;
+            break;
+          case 'q4':
+            mesesConsulta = [10, 11, 12].map(m => ({ mes: m, ano: anoAtual }));
+            periodoLabel = `Q4 ${anoAtual} (Out-Dez)`;
+            break;
+          case 'semestre1':
+            mesesConsulta = [1, 2, 3, 4, 5, 6].map(m => ({ mes: m, ano: anoAtual }));
+            periodoLabel = `1º Semestre ${anoAtual}`;
+            break;
+          case 'semestre2':
+            mesesConsulta = [7, 8, 9, 10, 11, 12].map(m => ({ mes: m, ano: anoAtual }));
+            periodoLabel = `2º Semestre ${anoAtual}`;
+            break;
+          case 'ano':
+            mesesConsulta = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(m => ({ mes: m, ano: anoAtual }));
+            periodoLabel = `Ano ${anoAtual}`;
+            break;
+          default:
+            if (input.mes && input.ano) {
+              mesesConsulta = [{ mes: input.mes, ano: input.ano }];
+              periodoLabel = new Date(input.ano, input.mes - 1).toLocaleDateString('pt-PT', { month: 'long', year: 'numeric' });
+            } else if (periodos.length > 0) {
+              mesesConsulta = [{ mes: periodos[0].mes, ano: periodos[0].ano }];
+              periodoLabel = new Date(periodos[0].ano, periodos[0].mes - 1).toLocaleDateString('pt-PT', { month: 'long', year: 'numeric' });
+            } else {
+              mesesConsulta = [{ mes: mesAtual, ano: anoAtual }];
+              periodoLabel = new Date(anoAtual, mesAtual - 1).toLocaleDateString('pt-PT', { month: 'long', year: 'numeric' });
+            }
+        }
+        
+        // Buscar dados agregados para todos os meses do período
+        let totalServicos = 0;
+        let totalObjetivo = 0;
+        let totalReparacoes = 0;
+        let totalEscovas = 0;
+        let totalPolimento = 0;
+        let totalTratamento = 0;
+        let totalLavagens = 0;
+        let totalOutros = 0;
+        let dataUltimaAtualizacao: Date | null = null;
+        let resultadosAgregados: any = null;
+        let complementaresAgregados: any = null;
+        
+        for (const p of mesesConsulta) {
+          const resultadosArr = await db.getResultadosMensaisPorLoja(auth.loja.id, p.mes, p.ano);
+          if (resultadosArr) {
+            totalServicos += Number(resultadosArr.totalServicos) || 0;
+            totalObjetivo += Number(resultadosArr.objetivoMensal) || 0;
+            totalReparacoes += Number(resultadosArr.qtdReparacoes) || 0;
+            if (resultadosArr.updatedAt) {
+              const dataAtual = new Date(resultadosArr.updatedAt);
+              if (!dataUltimaAtualizacao || dataAtual > dataUltimaAtualizacao) {
+                dataUltimaAtualizacao = dataAtual;
+              }
+            }
+            if (!resultadosAgregados) resultadosAgregados = resultadosArr;
+          }
+          
+          const complementaresArr = await db.getVendasComplementares(p.mes, p.ano, auth.loja.id);
+          if (complementaresArr && complementaresArr.length > 0) {
+            const c = complementaresArr[0];
+            totalEscovas += Number(c.escovasQtd) || 0;
+            totalPolimento += Number(c.polimentoQtd) || 0;
+            totalTratamento += Number(c.tratamentoQtd) || 0;
+            totalLavagens += Number(c.lavagensTotal) || 0;
+            totalOutros += Number(c.outrosQtd) || 0;
+            if (!complementaresAgregados) complementaresAgregados = c;
           }
         }
         
-        // Buscar dados da loja - usar funções simples com filtro por lojaId
-        const resultadosArr = await db.getResultadosMensaisPorLoja(auth.loja.id, mes!, ano!);
-        const resultados = resultadosArr;
-        const complementaresArr = await db.getVendasComplementares(mes!, ano!, auth.loja.id);
-        const complementares = complementaresArr && complementaresArr.length > 0 ? complementaresArr[0] : null;
-        const evolucao = await db.getEvolucaoMensal(auth.loja.id, 6);
+        // Calcular métricas agregadas
+        const desvioPercentual = totalObjetivo > 0 ? (totalServicos - totalObjetivo) / totalObjetivo : null;
+        const taxaReparacao = totalServicos > 0 ? totalReparacoes / totalServicos : null;
+        const escovasPercent = totalServicos > 0 ? totalEscovas / totalServicos : null;
+        
+        // Criar objeto de resultados agregados
+        const resultados = {
+          totalServicos,
+          objetivoMensal: totalObjetivo,
+          desvioPercentualMes: desvioPercentual,
+          taxaReparacao,
+          totalReparacoes,
+          gapReparacoes22: taxaReparacao !== null && taxaReparacao < 0.22 
+            ? Math.ceil(totalServicos * 0.22 - totalReparacoes) 
+            : 0,
+        };
+        
+        const complementares = {
+          escovasQtd: totalEscovas,
+          escovasPercent,
+          polimentoQtd: totalPolimento,
+          tratamentoQtd: totalTratamento,
+          lavagensTotal: totalLavagens,
+          outrosQtd: totalOutros,
+        };
+        
+        // Buscar dados do mês anterior para comparativo
+        const mesAnteriorData = mesesConsulta[0];
+        const mesCompMes = mesAnteriorData.mes === 1 ? 12 : mesAnteriorData.mes - 1;
+        const mesCompAno = mesAnteriorData.mes === 1 ? mesAnteriorData.ano - 1 : mesAnteriorData.ano;
+        const resultadosMesAnterior = await db.getResultadosMensaisPorLoja(auth.loja.id, mesCompMes, mesCompAno);
+        const complementaresMesAnterior = await db.getVendasComplementares(mesCompMes, mesCompAno, auth.loja.id);
+        
+        // Calcular variações
+        const variacaoServicos = resultadosMesAnterior && resultadosMesAnterior.totalServicos 
+          ? ((totalServicos - Number(resultadosMesAnterior.totalServicos)) / Number(resultadosMesAnterior.totalServicos)) * 100 
+          : null;
+        const variacaoReparacoes = resultadosMesAnterior && resultadosMesAnterior.qtdReparacoes 
+          ? ((totalReparacoes - Number(resultadosMesAnterior.qtdReparacoes)) / Number(resultadosMesAnterior.qtdReparacoes)) * 100 
+          : null;
+        const escovasAnterior = complementaresMesAnterior && complementaresMesAnterior.length > 0 
+          ? Number(complementaresMesAnterior[0].escovasQtd) || 0 
+          : 0;
+        const variacaoEscovas = escovasAnterior > 0 
+          ? ((totalEscovas - escovasAnterior) / escovasAnterior) * 100 
+          : null;
+        
+        const comparativoMesAnterior = {
+          servicosAnterior: resultadosMesAnterior?.totalServicos || 0,
+          variacaoServicos,
+          reparacoesAnterior: resultadosMesAnterior?.qtdReparacoes || 0,
+          variacaoReparacoes,
+          escovasAnterior,
+          variacaoEscovas,
+        };
+        
+        const evolucao = await db.getEvolucaoMensal(auth.loja.id, 12);
         
         // Gerar alertas
         const alertas: { tipo: 'warning' | 'danger' | 'success'; mensagem: string }[] = [];
@@ -4695,7 +4834,11 @@ export const appRouter = router({
           evolucao,
           alertas,
           periodosDisponiveis: periodos,
-          periodoAtual: { mes, ano },
+          periodoAtual: mesesConsulta[0],
+          periodoLabel,
+          periodoSelecionado: periodo,
+          dataAtualizacao: dataUltimaAtualizacao?.toISOString() || null,
+          comparativoMesAnterior,
         };
       }),
   }),

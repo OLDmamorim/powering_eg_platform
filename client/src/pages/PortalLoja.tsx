@@ -69,8 +69,7 @@ export default function PortalLoja() {
   const [lojaAuth, setLojaAuth] = useState<LojaAuth | null>(null);
   const [activeTab, setActiveTab] = useState<"home" | "reuniao" | "pendentes" | "historico" | "tarefas" | "resultados">("home");
   const [filtroTarefas, setFiltroTarefas] = useState<"todas" | "recebidas" | "enviadas" | "internas">("todas");
-  const [dashboardMes, setDashboardMes] = useState<number | undefined>(undefined);
-  const [dashboardAno, setDashboardAno] = useState<number | undefined>(undefined);
+  const [dashboardPeriodo, setDashboardPeriodo] = useState<'mes_anterior' | 'q1' | 'q2' | 'q3' | 'q4' | 'semestre1' | 'semestre2' | 'ano' | 'mes_atual'>('mes_anterior');
   const [responderTodoOpen, setResponderTodoOpen] = useState(false);
   const [respostaTodo, setRespostaTodo] = useState("");
   const [observacaoTodoOpen, setObservacaoTodoOpen] = useState(false);
@@ -227,7 +226,7 @@ export default function PortalLoja() {
 
   // Dashboard de Resultados
   const { data: dashboardData, isLoading: dashboardLoading } = trpc.todosPortalLoja.dashboardCompleto.useQuery(
-    { token, mes: dashboardMes, ano: dashboardAno },
+    { token, periodo: dashboardPeriodo },
     { enabled: !!token && !!lojaAuth && activeTab === 'resultados' }
   );
 
@@ -1247,31 +1246,54 @@ export default function PortalLoja() {
         {/* Tab Resultados - Dashboard */}
         {activeTab === "resultados" && (
           <div className="space-y-6">
-            {/* Filtro de Período */}
-            <div className="flex flex-wrap gap-4 items-center">
+            {/* Cabeçalho com Data de Atualização e Filtro de Período */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              {/* Data de Atualização */}
+              {dashboardData?.dataAtualizacao && (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Clock className="h-4 w-4" />
+                  <span>
+                    {language === 'pt' ? 'Atualizado em: ' : 'Updated on: '}
+                    {new Date(dashboardData.dataAtualizacao).toLocaleDateString('pt-PT', { 
+                      day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' 
+                    })}
+                  </span>
+                </div>
+              )}
+              
+              {/* Filtro de Período Avançado */}
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-muted-foreground" />
                 <Select
-                  value={`${dashboardMes}-${dashboardAno}`}
-                  onValueChange={(value) => {
-                    const [m, a] = value.split('-').map(Number);
-                    setDashboardMes(m);
-                    setDashboardAno(a);
-                  }}
+                  value={dashboardPeriodo}
+                  onValueChange={(value: any) => setDashboardPeriodo(value)}
                 >
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue />
+                  <SelectTrigger className="w-[200px]">
+                    <SelectValue placeholder={language === 'pt' ? 'Selecionar período' : 'Select period'} />
                   </SelectTrigger>
                   <SelectContent>
-                    {dashboardData?.periodosDisponiveis?.map((p: {mes: number; ano: number}) => (
-                      <SelectItem key={`${p.mes}-${p.ano}`} value={`${p.mes}-${p.ano}`}>
-                        {new Date(p.ano, p.mes - 1).toLocaleDateString('pt-PT', { month: 'long', year: 'numeric' })}
-                      </SelectItem>
-                    ))}
+                    <SelectItem value="mes_anterior">{language === 'pt' ? 'Mês Anterior' : 'Previous Month'}</SelectItem>
+                    <SelectItem value="mes_atual">{language === 'pt' ? 'Mês Atual' : 'Current Month'}</SelectItem>
+                    <SelectItem value="q1">Q1 (Jan-Mar)</SelectItem>
+                    <SelectItem value="q2">Q2 (Abr-Jun)</SelectItem>
+                    <SelectItem value="q3">Q3 (Jul-Set)</SelectItem>
+                    <SelectItem value="q4">Q4 (Out-Dez)</SelectItem>
+                    <SelectItem value="semestre1">{language === 'pt' ? '1º Semestre' : '1st Semester'}</SelectItem>
+                    <SelectItem value="semestre2">{language === 'pt' ? '2º Semestre' : '2nd Semester'}</SelectItem>
+                    <SelectItem value="ano">{language === 'pt' ? 'Ano Completo' : 'Full Year'}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
+            
+            {/* Label do Período Selecionado */}
+            {dashboardData?.periodoLabel && (
+              <div className="text-center">
+                <h2 className="text-xl font-bold text-foreground">
+                  {dashboardData.periodoLabel}
+                </h2>
+              </div>
+            )}
 
             {dashboardLoading ? (
               <div className="flex items-center justify-center py-12">
@@ -1457,12 +1479,180 @@ export default function PortalLoja() {
                   </Card>
                 )}
 
-                {/* Evolução Mensal */}
+                {/* Comparativo com Mês Anterior */}
+                {dashboardData.comparativoMesAnterior && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <TrendingUp className="h-5 w-5" />
+                        {language === 'pt' ? 'Comparação com Mês Anterior' : 'Comparison with Previous Month'}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        {/* Serviços */}
+                        <div className="p-4 bg-gray-50 rounded-lg">
+                          <p className="text-sm text-muted-foreground mb-1">{language === 'pt' ? 'Serviços' : 'Services'}</p>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xl font-bold">
+                              {Number(dashboardData.resultados?.totalServicos || 0)}
+                            </span>
+                            {dashboardData.comparativoMesAnterior.variacaoServicos !== null && (
+                              <span className={`text-sm flex items-center gap-1 ${
+                                dashboardData.comparativoMesAnterior.variacaoServicos >= 0 ? 'text-green-600' : 'text-red-600'
+                              }`}>
+                                {dashboardData.comparativoMesAnterior.variacaoServicos >= 0 ? (
+                                  <TrendingUp className="h-4 w-4" />
+                                ) : (
+                                  <TrendingDown className="h-4 w-4" />
+                                )}
+                                {dashboardData.comparativoMesAnterior.variacaoServicos >= 0 ? '+' : ''}
+                                {dashboardData.comparativoMesAnterior.variacaoServicos.toFixed(1)}%
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {language === 'pt' ? 'Anterior: ' : 'Previous: '}
+                            {Number(dashboardData.comparativoMesAnterior.servicosAnterior || 0)}
+                          </p>
+                        </div>
+                        
+                        {/* Reparações */}
+                        <div className="p-4 bg-gray-50 rounded-lg">
+                          <p className="text-sm text-muted-foreground mb-1">{language === 'pt' ? 'Reparações' : 'Repairs'}</p>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xl font-bold">
+                              {Number(dashboardData.resultados?.totalReparacoes || 0)}
+                            </span>
+                            {dashboardData.comparativoMesAnterior.variacaoReparacoes !== null && (
+                              <span className={`text-sm flex items-center gap-1 ${
+                                dashboardData.comparativoMesAnterior.variacaoReparacoes >= 0 ? 'text-green-600' : 'text-red-600'
+                              }`}>
+                                {dashboardData.comparativoMesAnterior.variacaoReparacoes >= 0 ? (
+                                  <TrendingUp className="h-4 w-4" />
+                                ) : (
+                                  <TrendingDown className="h-4 w-4" />
+                                )}
+                                {dashboardData.comparativoMesAnterior.variacaoReparacoes >= 0 ? '+' : ''}
+                                {dashboardData.comparativoMesAnterior.variacaoReparacoes.toFixed(1)}%
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {language === 'pt' ? 'Anterior: ' : 'Previous: '}
+                            {Number(dashboardData.comparativoMesAnterior.reparacoesAnterior || 0)}
+                          </p>
+                        </div>
+                        
+                        {/* Escovas */}
+                        <div className="p-4 bg-gray-50 rounded-lg">
+                          <p className="text-sm text-muted-foreground mb-1">Escovas</p>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xl font-bold">
+                              {Number(dashboardData.complementares?.escovasQtd || 0)}
+                            </span>
+                            {dashboardData.comparativoMesAnterior.variacaoEscovas !== null && (
+                              <span className={`text-sm flex items-center gap-1 ${
+                                dashboardData.comparativoMesAnterior.variacaoEscovas >= 0 ? 'text-green-600' : 'text-red-600'
+                              }`}>
+                                {dashboardData.comparativoMesAnterior.variacaoEscovas >= 0 ? (
+                                  <TrendingUp className="h-4 w-4" />
+                                ) : (
+                                  <TrendingDown className="h-4 w-4" />
+                                )}
+                                {dashboardData.comparativoMesAnterior.variacaoEscovas >= 0 ? '+' : ''}
+                                {dashboardData.comparativoMesAnterior.variacaoEscovas.toFixed(1)}%
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {language === 'pt' ? 'Anterior: ' : 'Previous: '}
+                            {Number(dashboardData.comparativoMesAnterior.escovasAnterior || 0)}
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Gráfico de Evolução Mensal */}
+                {dashboardData.evolucao && dashboardData.evolucao.length > 0 && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <BarChart3 className="h-5 w-5" />
+                        {language === 'pt' ? 'Evolução Mensal' : 'Monthly Evolution'}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {/* Gráfico de Barras Simples */}
+                      <div className="space-y-3">
+                        {dashboardData.evolucao.slice(-6).map((e: any, idx: number) => {
+                          const maxServicos = Math.max(...dashboardData.evolucao.slice(-6).map((ev: any) => Number(ev.totalServicos) || 0));
+                          const percentWidth = maxServicos > 0 ? ((Number(e.totalServicos) || 0) / maxServicos) * 100 : 0;
+                          const desvio = parseFloat(String(e.desvioPercentualMes || 0));
+                          return (
+                            <div key={idx} className="space-y-1">
+                              <div className="flex justify-between text-sm">
+                                <span className="font-medium">
+                                  {new Date(e.ano, e.mes - 1).toLocaleDateString('pt-PT', { month: 'short', year: '2-digit' })}
+                                </span>
+                                <span className="flex items-center gap-2">
+                                  <span>{e.totalServicos || 0} / {e.objetivoMes || 0}</span>
+                                  <span className={`text-xs font-medium ${desvio >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                    {desvio >= 0 ? '+' : ''}{(desvio * 100).toFixed(0)}%
+                                  </span>
+                                </span>
+                              </div>
+                              <div className="relative h-6 bg-gray-100 rounded overflow-hidden">
+                                <div 
+                                  className={`absolute left-0 top-0 h-full rounded transition-all ${
+                                    desvio >= 0 ? 'bg-green-500' : desvio >= -0.1 ? 'bg-amber-500' : 'bg-red-500'
+                                  }`}
+                                  style={{ width: `${percentWidth}%` }}
+                                />
+                                {e.objetivoMes && maxServicos > 0 && (
+                                  <div 
+                                    className="absolute top-0 h-full w-0.5 bg-gray-800"
+                                    style={{ left: `${(Number(e.objetivoMes) / maxServicos) * 100}%` }}
+                                    title={`Objetivo: ${e.objetivoMes}`}
+                                  />
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      
+                      {/* Legenda */}
+                      <div className="flex flex-wrap gap-4 mt-4 text-xs text-muted-foreground">
+                        <div className="flex items-center gap-1">
+                          <div className="w-3 h-3 bg-green-500 rounded" />
+                          <span>{language === 'pt' ? 'Acima do objetivo' : 'Above goal'}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <div className="w-3 h-3 bg-amber-500 rounded" />
+                          <span>{language === 'pt' ? 'Próximo do objetivo' : 'Near goal'}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <div className="w-3 h-3 bg-red-500 rounded" />
+                          <span>{language === 'pt' ? 'Abaixo do objetivo' : 'Below goal'}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <div className="w-3 h-0.5 bg-gray-800" />
+                          <span>{language === 'pt' ? 'Linha do objetivo' : 'Goal line'}</span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Tabela de Evolução Mensal */}
                 {dashboardData.evolucao && dashboardData.evolucao.length > 0 && (
                   <Card>
                     <CardHeader>
                       <CardTitle className="text-lg">
-                        {language === 'pt' ? 'Evolução Mensal' : 'Monthly Evolution'}
+                        {language === 'pt' ? 'Detalhes da Evolução' : 'Evolution Details'}
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
