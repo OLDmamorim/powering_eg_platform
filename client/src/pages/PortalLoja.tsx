@@ -1623,37 +1623,7 @@ export default function PortalLoja() {
               </Card>
             ) : (
               <div ref={dashboardRef} className="space-y-6 bg-white p-4 rounded-lg">
-                {/* Alertas */}
-                {dashboardData.alertas && dashboardData.alertas.length > 0 && (
-                  <div className="space-y-2">
-                    {dashboardData.alertas.map((alerta: {tipo: string; mensagem: string}, idx: number) => (
-                      <Card key={idx} className={`border-l-4 ${
-                        alerta.tipo === 'danger' ? 'border-l-red-500 bg-red-50' :
-                        alerta.tipo === 'warning' ? 'border-l-amber-500 bg-amber-50' :
-                        'border-l-green-500 bg-green-50'
-                      }`}>
-                        <CardContent className="py-3 flex items-center gap-3">
-                          {alerta.tipo === 'danger' ? (
-                            <AlertTriangle className="h-5 w-5 text-red-500" />
-                          ) : alerta.tipo === 'warning' ? (
-                            <AlertTriangle className="h-5 w-5 text-amber-500" />
-                          ) : (
-                            <Award className="h-5 w-5 text-green-500" />
-                          )}
-                          <span className={`text-sm font-medium ${
-                            alerta.tipo === 'danger' ? 'text-red-700' :
-                            alerta.tipo === 'warning' ? 'text-amber-700' :
-                            'text-green-700'
-                          }`}>
-                            {alerta.mensagem}
-                          </span>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                )}
-
-                {/* KPIs Principais */}
+                {/* KPIs Principais - Primeiro no topo */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                   {/* Total Serviços */}
                   <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white">
@@ -1727,6 +1697,36 @@ export default function PortalLoja() {
                     </CardContent>
                   </Card>
                 </div>
+
+                {/* Alertas - Agora depois dos KPIs */}
+                {dashboardData.alertas && dashboardData.alertas.length > 0 && (
+                  <div className="space-y-2">
+                    {dashboardData.alertas.map((alerta: {tipo: string; mensagem: string}, idx: number) => (
+                      <Card key={idx} className={`border-l-4 ${
+                        alerta.tipo === 'danger' ? 'border-l-red-500 bg-red-50' :
+                        alerta.tipo === 'warning' ? 'border-l-amber-500 bg-amber-50' :
+                        'border-l-green-500 bg-green-50'
+                      }`}>
+                        <CardContent className="py-3 flex items-center gap-3">
+                          {alerta.tipo === 'danger' ? (
+                            <AlertTriangle className="h-5 w-5 text-red-500" />
+                          ) : alerta.tipo === 'warning' ? (
+                            <AlertTriangle className="h-5 w-5 text-amber-500" />
+                          ) : (
+                            <Award className="h-5 w-5 text-green-500" />
+                          )}
+                          <span className={`text-sm font-medium ${
+                            alerta.tipo === 'danger' ? 'text-red-700' :
+                            alerta.tipo === 'warning' ? 'text-amber-700' :
+                            'text-green-700'
+                          }`}>
+                            {alerta.mensagem}
+                          </span>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
 
                 {/* Vendas Complementares com Gráfico */}
                 {dashboardData.complementares && (() => {

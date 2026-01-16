@@ -2923,3 +2923,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Badge amarelo com contagem de tarefas novas
 - [x] Texto dinâmico "Tem tarefas novas do gestor!"
 - [x] Marcar tarefas como vistas ao clicar no card
+
+## Portal da Loja v6.23 - Reorganizar Dashboard Resultados
+- [x] Mover os 4 cards principais (Serviços, Objetivo, Desvio, Taxa Rep.) para o topo
+- [x] Alertas aparecem logo após os cards
+- [x] Vendas Complementares e gráficos abaixo dos alertas
