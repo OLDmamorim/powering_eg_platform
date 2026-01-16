@@ -1380,7 +1380,9 @@ export default function PortalLoja() {
                   <span>
                     {language === 'pt' ? 'Atualizado em: ' : 'Updated on: '}
                     {new Date(dashboardData.dataAtualizacao).toLocaleDateString('pt-PT', { 
-                      day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' 
+                      weekday: 'short', day: '2-digit', month: '2-digit', year: 'numeric'
+                    })}, {new Date(dashboardData.dataAtualizacao).toLocaleTimeString('pt-PT', { 
+                      hour: '2-digit', minute: '2-digit' 
                     })}
                   </span>
                 </div>

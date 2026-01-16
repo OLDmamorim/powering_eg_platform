@@ -2896,3 +2896,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Mostrar comparação visual entre categorias com cores distintas
 - [x] Barra de progresso de escovas com marcadores de objetivo (10%) e mínimo (7.5%)
 - [x] Cards coloridos com valores por categoria
+
+## Portal da Loja v6.18 - Correção de Filtro de Datas
+- [x] Mostrar dia completo na data de atualização (dia da semana, dd/mm/yyyy, hh:mm)
+- [x] Mês anterior já estava selecionado por defeito (verificado no código)
