@@ -2906,3 +2906,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Mostrar indicador "Dia X de Y dias úteis" com ícone de calendário
 - [x] Adicionar barra de progresso visual do mês com cores (verde/amarelo/vermelho)
 - [x] Mostrar percentagem do mês decorrido
+
+## Portal da Loja v6.20 - Feriados, Alertas e Previsão
+- [x] Adicionar feriados nacionais portugueses ao cálculo de dias úteis (10 fixos + 3 móveis)
+- [x] Implementar alerta quando faltar menos de 5 dias úteis para fim do mês
+- [x] Mostrar previsão de serviços necessários para atingir objetivo mensal
+- [x] Mostrar número de feriados no mês atual
+- [x] Mensagem de parabéns quando objetivo é atingido

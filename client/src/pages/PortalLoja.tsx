@@ -1380,14 +1380,69 @@ export default function PortalLoja() {
                 const mes = dataAtual.getMonth();
                 const diaAtual = dataAtual.getDate();
                 
-                // Calcular dias úteis do mês (excluir sábados e domingos)
+                // Feriados nacionais portugueses (fixos e móveis)
+                const getFeriadosPortugueses = (ano: number): Date[] => {
+                  // Feriados fixos
+                  const feriadosFixos = [
+                    new Date(ano, 0, 1),   // Ano Novo
+                    new Date(ano, 3, 25),  // Dia da Liberdade
+                    new Date(ano, 4, 1),   // Dia do Trabalhador
+                    new Date(ano, 5, 10),  // Dia de Portugal
+                    new Date(ano, 7, 15),  // Assunção de Nossa Senhora
+                    new Date(ano, 9, 5),   // Implantação da República
+                    new Date(ano, 10, 1),  // Dia de Todos os Santos
+                    new Date(ano, 11, 1),  // Restauração da Independência
+                    new Date(ano, 11, 8),  // Imaculada Conceição
+                    new Date(ano, 11, 25), // Natal
+                  ];
+                  
+                  // Cálculo da Páscoa (Algoritmo de Meeus/Jones/Butcher)
+                  const a = ano % 19;
+                  const b = Math.floor(ano / 100);
+                  const c = ano % 100;
+                  const d = Math.floor(b / 4);
+                  const e = b % 4;
+                  const f = Math.floor((b + 8) / 25);
+                  const g = Math.floor((b - f + 1) / 3);
+                  const h = (19 * a + b - d - g + 15) % 30;
+                  const i = Math.floor(c / 4);
+                  const k = c % 4;
+                  const l = (32 + 2 * e + 2 * i - h - k) % 7;
+                  const m = Math.floor((a + 11 * h + 22 * l) / 451);
+                  const mesPascoa = Math.floor((h + l - 7 * m + 114) / 31) - 1;
+                  const diaPascoa = ((h + l - 7 * m + 114) % 31) + 1;
+                  const pascoa = new Date(ano, mesPascoa, diaPascoa);
+                  
+                  // Feriados móveis baseados na Páscoa
+                  const sextaFeiraSanta = new Date(pascoa);
+                  sextaFeiraSanta.setDate(pascoa.getDate() - 2);
+                  
+                  const corpusChristi = new Date(pascoa);
+                  corpusChristi.setDate(pascoa.getDate() + 60);
+                  
+                  return [...feriadosFixos, pascoa, sextaFeiraSanta, corpusChristi];
+                };
+                
+                const feriados = getFeriadosPortugueses(ano);
+                
+                // Função para verificar se uma data é feriado
+                const ehFeriado = (data: Date): boolean => {
+                  return feriados.some(f => 
+                    f.getDate() === data.getDate() && 
+                    f.getMonth() === data.getMonth() && 
+                    f.getFullYear() === data.getFullYear()
+                  );
+                };
+                
+                // Calcular dias úteis do mês (excluir sábados, domingos e feriados)
                 const calcularDiasUteis = (ano: number, mes: number, ateDia?: number) => {
                   const ultimoDia = ateDia || new Date(ano, mes + 1, 0).getDate();
                   let diasUteis = 0;
                   for (let dia = 1; dia <= ultimoDia; dia++) {
                     const data = new Date(ano, mes, dia);
                     const diaSemana = data.getDay();
-                    if (diaSemana !== 0 && diaSemana !== 6) { // Não é domingo (0) nem sábado (6)
+                    // Não é domingo (0), sábado (6) nem feriado
+                    if (diaSemana !== 0 && diaSemana !== 6 && !ehFeriado(data)) {
                       diasUteis++;
                     }
                   }
@@ -1396,7 +1451,18 @@ export default function PortalLoja() {
                 
                 const totalDiasUteisMes = calcularDiasUteis(ano, mes);
                 const diasUteisAteHoje = calcularDiasUteis(ano, mes, diaAtual);
+                const diasUteisRestantes = totalDiasUteisMes - diasUteisAteHoje;
                 const percentagemMes = Math.round((diasUteisAteHoje / totalDiasUteisMes) * 100);
+                
+                // Calcular previsão de serviços para atingir objetivo
+                const servicosAtuais = dashboardData.resultados?.totalServicos || 0;
+                const objetivoMensal = dashboardData.resultados?.objetivoMensal || 0;
+                const servicosFaltam = Math.max(0, objetivoMensal - servicosAtuais);
+                const servicosPorDia = diasUteisRestantes > 0 ? Math.ceil(servicosFaltam / diasUteisRestantes) : 0;
+                const atingiuObjetivo = servicosAtuais >= objetivoMensal;
+                
+                // Contar feriados no mês atual
+                const feriadosNoMes = feriados.filter(f => f.getMonth() === mes).length;
                 
                 return (
                   <div className="flex flex-col gap-2">
@@ -1411,27 +1477,71 @@ export default function PortalLoja() {
                         })}
                       </span>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
                       <div className="flex items-center gap-1.5 text-xs">
                         <Calendar className="h-3.5 w-3.5 text-blue-500" />
                         <span className="font-medium text-foreground">
                           {language === 'pt' 
                             ? `Dia ${diasUteisAteHoje} de ${totalDiasUteisMes} dias úteis`
                             : `Day ${diasUteisAteHoje} of ${totalDiasUteisMes} working days`}
+                          {feriadosNoMes > 0 && (
+                            <span className="text-muted-foreground ml-1">({feriadosNoMes} {language === 'pt' ? 'feriado(s)' : 'holiday(s)'})</span>
+                          )}
                         </span>
                       </div>
-                      <div className="flex-1 max-w-[120px] bg-gray-200 rounded-full h-2">
-                        <div 
-                          className={`h-2 rounded-full transition-all ${
-                            percentagemMes >= 80 ? 'bg-red-500' : 
-                            percentagemMes >= 60 ? 'bg-amber-500' : 
-                            'bg-green-500'
-                          }`}
-                          style={{ width: `${percentagemMes}%` }}
-                        />
+                      <div className="flex items-center gap-2">
+                        <div className="w-[100px] bg-gray-200 rounded-full h-2">
+                          <div 
+                            className={`h-2 rounded-full transition-all ${
+                              percentagemMes >= 80 ? 'bg-red-500' : 
+                              percentagemMes >= 60 ? 'bg-amber-500' : 
+                              'bg-green-500'
+                            }`}
+                            style={{ width: `${percentagemMes}%` }}
+                          />
+                        </div>
+                        <span className="text-xs text-muted-foreground">{percentagemMes}%</span>
                       </div>
-                      <span className="text-xs text-muted-foreground">{percentagemMes}%</span>
                     </div>
+                    
+                    {/* Alerta de fim de mês */}
+                    {diasUteisRestantes <= 5 && diasUteisRestantes > 0 && (
+                      <div className="flex items-center gap-2 text-xs bg-amber-50 border border-amber-200 rounded-md px-2 py-1">
+                        <AlertTriangle className="h-3.5 w-3.5 text-amber-600" />
+                        <span className="text-amber-700 font-medium">
+                          {language === 'pt' 
+                            ? `Atenção: Faltam apenas ${diasUteisRestantes} dias úteis para o fim do mês!`
+                            : `Warning: Only ${diasUteisRestantes} working days left this month!`}
+                        </span>
+                      </div>
+                    )}
+                    
+                    {/* Previsão de serviços para objetivo */}
+                    {objetivoMensal > 0 && !atingiuObjetivo && diasUteisRestantes > 0 && (
+                      <div className="flex items-center gap-2 text-xs bg-blue-50 border border-blue-200 rounded-md px-2 py-1">
+                        <Target className="h-3.5 w-3.5 text-blue-600" />
+                        <span className="text-blue-700">
+                          {language === 'pt' 
+                            ? `Para atingir o objetivo: ${servicosFaltam} serviços em ${diasUteisRestantes} dias = `
+                            : `To reach goal: ${servicosFaltam} services in ${diasUteisRestantes} days = `}
+                          <span className="font-bold">
+                            {servicosPorDia} {language === 'pt' ? 'serviços/dia' : 'services/day'}
+                          </span>
+                        </span>
+                      </div>
+                    )}
+                    
+                    {/* Mensagem de objetivo atingido */}
+                    {objetivoMensal > 0 && atingiuObjetivo && (
+                      <div className="flex items-center gap-2 text-xs bg-green-50 border border-green-200 rounded-md px-2 py-1">
+                        <Award className="h-3.5 w-3.5 text-green-600" />
+                        <span className="text-green-700 font-medium">
+                          {language === 'pt' 
+                            ? `Parabéns! Objetivo mensal atingido (+${servicosAtuais - objetivoMensal} acima)`
+                            : `Congratulations! Monthly goal reached (+${servicosAtuais - objetivoMensal} above)`}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 );
               })()}
