@@ -2965,3 +2965,11 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Projeção para fechar o mês
 - [x] Mensagem motivacional personalizada
 - [x] Botão para regenerar análise
+
+## v6.29 - Gráfico de Evolução Semanal
+- [x] Criar gráfico de linha mostrando evolução semana a semana dentro do mês
+- [x] Mostrar serviços acumulados por semana (Semana 1, 2, 3, 4)
+- [x] Incluir linha de objetivo acumulado para comparação
+- [x] Cards resumo por semana com percentagem de cumprimento
+- [x] Destaque visual da semana atual
+- [x] Cores dinâmicas (verde/vermelho) conforme performance
