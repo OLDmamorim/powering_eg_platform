@@ -1815,6 +1815,84 @@ export const appRouter = router({
         };
       }),
     
+    // Exportar toda a semana num único ficheiro ICS
+    exportarSemanaICS: gestorProcedure
+      .input(z.object({ projecaoId: z.number() }))
+      .mutation(async ({ input }) => {
+        // Buscar todas as visitas da projeção
+        const visitas = await db.getVisitasPlaneadasPorProjecao(input.projecaoId);
+        
+        if (visitas.length === 0) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Nenhuma visita encontrada' });
+        }
+        
+        // Construir eventos ICS para cada visita
+        const eventos: string[] = [];
+        
+        for (const visita of visitas) {
+          // Buscar pendentes da loja
+          const pendentesLoja = await db.listarPendentesLoja(visita.lojaId, true);
+          
+          // Construir lista de pendentes
+          let listaPendentes = '';
+          if (pendentesLoja.length > 0) {
+            listaPendentes = '\n\nPENDENTES A RESOLVER:\n';
+            pendentesLoja.slice(0, 10).forEach((p, i) => {
+              const prioridade = p.prioridade || 'normal';
+              const descPendente = p.descricao?.substring(0, 80) || 'Sem descrição';
+              listaPendentes += `${i + 1}. [${prioridade.toUpperCase()}] ${descPendente}${p.descricao && p.descricao.length > 80 ? '...' : ''}\n`;
+            });
+            if (pendentesLoja.length > 10) {
+              listaPendentes += `... e mais ${pendentesLoja.length - 10} pendente(s)\n`;
+            }
+          }
+          
+          const titulo = `Visita ExpressGlass - ${visita.lojaNome}`;
+          const descricao = `Visita de supervisão à loja ${visita.lojaNome}\n\nMotivo: ${visita.detalheMotivo || 'Visita planeada'}${listaPendentes}`;
+          const local = visita.lojaNome;
+          
+          // Formatar datas
+          const dataBase = visita.dataVisita instanceof Date 
+            ? visita.dataVisita.toISOString().split('T')[0] 
+            : new Date(visita.dataVisita).toISOString().split('T')[0];
+          const horaInicio = visita.horaInicio || '09:00';
+          const horaFim = visita.horaFim || '12:00';
+          const inicio = `${dataBase}T${horaInicio}:00`.replace(/[-:]/g, '');
+          const fim = `${dataBase}T${horaFim}:00`.replace(/[-:]/g, '');
+          
+          // Gerar UID único para cada evento
+          const uid = `visita-${visita.id}-${Date.now()}@poweringeg.com`;
+          
+          eventos.push([
+            'BEGIN:VEVENT',
+            `UID:${uid}`,
+            `DTSTART:${inicio}`,
+            `DTEND:${fim}`,
+            `SUMMARY:${titulo}`,
+            `DESCRIPTION:${descricao.replace(/\n/g, '\\n')}`,
+            `LOCATION:${local}`,
+            'END:VEVENT'
+          ].join('\n'));
+        }
+        
+        // Construir ficheiro ICS completo
+        const icsContent = [
+          'BEGIN:VCALENDAR',
+          'VERSION:2.0',
+          'PRODID:-//PoweringEG//Visitas//PT',
+          'CALSCALE:GREGORIAN',
+          'METHOD:PUBLISH',
+          ...eventos,
+          'END:VCALENDAR'
+        ].join('\n');
+        
+        return {
+          icsContent,
+          filename: `projecao-visitas-${new Date().toISOString().split('T')[0]}.ics`,
+          totalVisitas: visitas.length
+        };
+      }),
+    
     // Obter histórico de projeções
     historico: gestorProcedure
       .input(z.object({ limite: z.number().optional() }))

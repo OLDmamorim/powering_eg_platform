@@ -20,7 +20,8 @@ import {
   Route,
   Building2,
   CheckCircle2,
-  XCircle
+  XCircle,
+  Download
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -137,6 +138,28 @@ export function ProjecaoVisitas() {
     }
   });
   
+  // Mutation para exportar semana completa em ICS
+  const exportarSemanaMutation = trpc.projecaoVisitas.exportarSemanaICS.useMutation({
+    onSuccess: (data) => {
+      // Criar blob e fazer download
+      const blob = new Blob([data.icsContent], { type: 'text/calendar;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = data.filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      toast.success(language === 'pt' 
+        ? `${data.totalVisitas} visitas exportadas para o calendário!` 
+        : `${data.totalVisitas} visits exported to calendar!`);
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    }
+  });
+  
   const handleGerarProjecao = () => {
     gerarMutation.mutate({ tipoPeriodo });
   };
@@ -238,17 +261,34 @@ export function ProjecaoVisitas() {
               </div>
             </div>
             
-            <div className="flex gap-2 justify-end">
+            <div className="flex gap-2 justify-end flex-wrap">
               {projecaoAtual && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={(e) => { e.stopPropagation(); eliminarMutation.mutate({ projecaoId: projecaoAtual.id }); }}
-                  disabled={eliminarMutation.isPending}
-                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                >
-                  <XCircle className="h-4 w-4" />
-                </Button>
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={(e) => { 
+                      e.stopPropagation(); 
+                      exportarSemanaMutation.mutate({ projecaoId: projecaoAtual.id }); 
+                    }}
+                    disabled={exportarSemanaMutation.isPending}
+                    className="gap-2 border-green-500 text-green-600 hover:bg-green-50"
+                  >
+                    <Download className="h-4 w-4" />
+                    <span className="hidden sm:inline">
+                      {language === 'pt' ? 'Exportar Semana' : 'Export Week'}
+                    </span>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={(e) => { e.stopPropagation(); eliminarMutation.mutate({ projecaoId: projecaoAtual.id }); }}
+                    disabled={eliminarMutation.isPending}
+                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                  >
+                    <XCircle className="h-4 w-4" />
+                  </Button>
+                </>
               )}
               <Button
                 onClick={() => setShowGerarDialog(true)}
