@@ -1698,12 +1698,16 @@ export default function PortalLoja() {
                     </CardContent>
                   </Card>
 
-                  {/* Desvio vs Objetivo Diário */}
-                  <Card className={`bg-gradient-to-br ${
-                    parseFloat(String(dashboardData.resultados.desvioPercentualDia || 0)) >= 0 
-                      ? 'from-green-500 to-green-600' 
-                      : 'from-red-500 to-red-600'
-                  } text-white`}>
+                  {/* Desvio vs Objetivo Diário - Cores graduais baseadas na magnitude */}
+                  <Card className={`bg-gradient-to-br ${(() => {
+                    const desvio = parseFloat(String(dashboardData.resultados.desvioPercentualDia || 0)) * 100;
+                    if (desvio >= 20) return 'from-green-600 to-green-700'; // Excelente: +20% ou mais
+                    if (desvio >= 10) return 'from-green-500 to-green-600'; // Muito bom: +10% a +20%
+                    if (desvio >= 0) return 'from-green-400 to-green-500';  // Bom: 0% a +10%
+                    if (desvio >= -10) return 'from-red-400 to-red-500';    // Atenção: -10% a 0%
+                    if (desvio >= -20) return 'from-red-500 to-red-600';    // Alerta: -20% a -10%
+                    return 'from-red-600 to-red-700';                       // Crítico: abaixo de -20%
+                  })()} text-white`}>
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between">
                         {parseFloat(String(dashboardData.resultados.desvioPercentualDia || 0)) >= 0 ? (
