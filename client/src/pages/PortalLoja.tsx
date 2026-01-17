@@ -677,7 +677,7 @@ export default function PortalLoja() {
                       toast.success(language === 'pt' ? 'Loja alterada!' : 'Store changed!');
                     }}
                   >
-                    <SelectTrigger className="h-auto px-3 py-1 border border-white/30 bg-white/10 text-white text-xl font-bold hover:bg-white/20 rounded-lg flex items-center gap-2">
+                    <SelectTrigger className="h-auto px-4 py-2 border-2 border-emerald-200 bg-white text-emerald-800 text-lg font-semibold hover:bg-emerald-50 rounded-lg flex items-center gap-2 shadow-sm">
                       <SelectValue>
                         {(() => {
                           const currentId = lojaAtualId || lojaAuth.lojaId;

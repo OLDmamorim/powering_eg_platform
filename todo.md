@@ -3050,3 +3050,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Criar endpoint para gerar meta tags dinâmicos com nome da loja
 - [x] Mostrar nome da loja no título do preview
 - [x] Descrição personalizada com informações da loja
+
+## Melhoria v6.6.18 - Layout do Seletor de Lojas
+- [x] Fundo branco no seletor para indicar que é clicável
+- [x] Texto escuro para melhor contraste
+- [x] Ícone de seta mais visível
