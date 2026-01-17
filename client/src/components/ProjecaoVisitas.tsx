@@ -149,6 +149,7 @@ export function ProjecaoVisitas() {
     if (!visita.linkGoogleCalendar) {
       gerarLinksMutation.mutate({
         visitaId: visita.id,
+        lojaId: visita.lojaId,
         lojaNome: visita.lojaNome,
         lojaEndereco: undefined,
         dataVisita: typeof visita.dataVisita === 'string' ? visita.dataVisita : visita.dataVisita.toISOString(),

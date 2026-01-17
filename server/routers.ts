@@ -1741,6 +1741,7 @@ export const appRouter = router({
     gerarLinksCalendario: gestorProcedure
       .input(z.object({
         visitaId: z.number(),
+        lojaId: z.number(),
         lojaNome: z.string(),
         lojaEndereco: z.string().optional(),
         dataVisita: z.string(),
@@ -1749,8 +1750,26 @@ export const appRouter = router({
         motivo: z.string(),
       }))
       .mutation(async ({ input }) => {
+        // Buscar pendentes da loja
+        const pendentesLoja = await db.listarPendentesLoja(input.lojaId, true);
+        const pendentesAtivos = pendentesLoja;
+        
+        // Construir lista de pendentes para a descrição
+        let listaPendentes = '';
+        if (pendentesAtivos.length > 0) {
+          listaPendentes = '\n\n📋 PENDENTES A RESOLVER:\n';
+          pendentesAtivos.slice(0, 10).forEach((p, i) => {
+            const prioridade = p.prioridade || 'normal';
+            const descPendente = p.descricao?.substring(0, 80) || 'Sem descrição';
+            listaPendentes += `${i + 1}. [${prioridade.toUpperCase()}] ${descPendente}${p.descricao && p.descricao.length > 80 ? '...' : ''}\n`;
+          });
+          if (pendentesAtivos.length > 10) {
+            listaPendentes += `... e mais ${pendentesAtivos.length - 10} pendente(s)\n`;
+          }
+        }
+        
         const titulo = `Visita ExpressGlass - ${input.lojaNome}`;
-        const descricao = `Visita de supervisão à loja ${input.lojaNome}\n\nMotivo: ${input.motivo}`;
+        const descricao = `Visita de supervisão à loja ${input.lojaNome}\n\nMotivo: ${input.motivo}${listaPendentes}`;
         const local = input.lojaEndereco || input.lojaNome;
         
         // Formatar datas para calendário
