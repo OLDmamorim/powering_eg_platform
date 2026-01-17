@@ -1,4 +1,5 @@
 import PDFDocument from 'pdfkit';
+import { gerarGraficoServicosVsObjetivo, gerarGraficoDesvio, gerarGraficoTaxaReparacao } from './chartService';
 
 interface EvolucaoItem {
   mes: number;
@@ -107,58 +108,28 @@ function drawInfoBox(
   }
 }
 
-// Helper para desenhar gráfico de barras simples
-function drawBarChart(
-  doc: PDFKit.PDFDocument,
-  x: number,
-  y: number,
-  width: number,
-  height: number,
-  data: { label: string; value: number; objetivo?: number }[],
-  title: string,
-  maxValue?: number
-) {
-  // Título
-  doc.fontSize(11).fillColor('#374151');
-  doc.text(title, x, y);
-  y += 16;
-  
-  const chartHeight = height - 20;
-  const barWidth = (width - 40) / data.length;
-  const max = maxValue || Math.max(...data.map(d => Math.max(d.value, d.objetivo || 0))) * 1.2;
-  
-  // Desenhar barras
-  data.forEach((item, i) => {
-    const barX = x + 20 + i * barWidth;
-    const barH = (item.value / max) * chartHeight;
-    
-    // Barra de valor
-    doc.rect(barX + 5, y + chartHeight - barH, barWidth - 20, barH).fill(azul);
-    
-    // Linha de objetivo se existir
-    if (item.objetivo) {
-      const objY = y + chartHeight - (item.objetivo / max) * chartHeight;
-      doc.strokeColor(vermelho).lineWidth(2);
-      doc.moveTo(barX, objY).lineTo(barX + barWidth - 10, objY).stroke();
-    }
-    
-    // Label
-    doc.fontSize(7).fillColor(cinza);
-    doc.text(item.label, barX, y + chartHeight + 3, { width: barWidth - 10, align: 'center' });
-    
-    // Valor
-    doc.fontSize(8).fillColor('#374151');
-    doc.text(String(item.value), barX, y + chartHeight - barH - 12, { width: barWidth - 10, align: 'center' });
-  });
-  
-  return y + chartHeight + 20;
-}
-
 export async function gerarPDFResultados(
   nomeLoja: string,
   dashboardData: DashboardData,
   analiseIA?: AnaliseIA | null
 ): Promise<Buffer> {
+  const { kpis, complementares, alertas, periodoLabel, comparativoMesAnterior, resultados, ritmo, evolucao } = dashboardData;
+
+  // Pré-gerar os gráficos antes de criar o PDF
+  let chartServicos: Buffer | null = null;
+  let chartDesvio: Buffer | null = null;
+  let chartTaxa: Buffer | null = null;
+
+  if (evolucao && evolucao.length > 0) {
+    try {
+      chartServicos = await gerarGraficoServicosVsObjetivo(evolucao.slice(0, 6));
+      chartDesvio = await gerarGraficoDesvio(evolucao.slice(0, 6));
+      chartTaxa = await gerarGraficoTaxaReparacao(evolucao.slice(0, 6));
+    } catch (chartError) {
+      console.error('Erro ao gerar gráficos:', chartError);
+    }
+  }
+
   return new Promise((resolve, reject) => {
     try {
       const doc = new PDFDocument({ 
@@ -171,8 +142,6 @@ export async function gerarPDFResultados(
       doc.on('data', (chunk) => chunks.push(chunk));
       doc.on('end', () => resolve(Buffer.concat(chunks)));
       doc.on('error', reject);
-
-      const { kpis, complementares, alertas, periodoLabel, comparativoMesAnterior, resultados, ritmo, evolucao } = dashboardData;
 
       const pageWidth = doc.page.width - 80;
       let currentY = 40;
@@ -344,81 +313,31 @@ export async function gerarPDFResultados(
       
       currentY += compMesHeight + 20;
 
-      // ========== EVOLUÇÃO MENSAL ==========
-      if (evolucao && evolucao.length > 0) {
-        // Nova página se necessário
-        if (currentY > 580) {
+      // ========== GRÁFICOS DE EVOLUÇÃO MENSAL ==========
+      if (chartServicos && chartDesvio && chartTaxa) {
+        // Nova página para gráficos
+        doc.addPage();
+        currentY = 40;
+        
+        doc.fontSize(14).fillColor('#1f2937');
+        doc.text('Evolução Mensal (Gráficos)', 40, currentY, { align: 'center', width: pageWidth });
+        currentY += 25;
+
+        // Gráfico 1: Serviços vs Objetivo
+        doc.image(chartServicos, 55, currentY, { width: pageWidth - 30 });
+        currentY += 200;
+
+        // Gráfico 2: Desvio %
+        doc.image(chartDesvio, 55, currentY, { width: pageWidth - 30 });
+        currentY += 200;
+
+        // Gráfico 3: Taxa de Reparação (nova página se necessário)
+        if (currentY > 550) {
           doc.addPage();
           currentY = 40;
         }
-        
-        doc.fontSize(12).fillColor('#1f2937');
-        doc.text('Evolução Mensal (Últimos 6 Meses)', 40, currentY);
-        currentY += 16;
-
-        // Tabela de evolução
-        const colWidth = pageWidth / 7;
-        const rowHeight = 22;
-        
-        // Cabeçalho
-        doc.rect(40, currentY, pageWidth, rowHeight).fill('#e5e7eb');
-        doc.fillColor('#374151').fontSize(8);
-        doc.text('Mês', 45, currentY + 6);
-        
-        const mesesNomes = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-        evolucao.slice(0, 6).forEach((item, i) => {
-          doc.text(`${mesesNomes[item.mes - 1]}/${String(item.ano).slice(2)}`, 45 + colWidth * (i + 1), currentY + 6, { width: colWidth - 10, align: 'center' });
-        });
-        currentY += rowHeight;
-        
-        // Linha Serviços
-        doc.rect(40, currentY, pageWidth, rowHeight).fill('white');
-        doc.strokeColor('#e5e7eb').lineWidth(1);
-        doc.rect(40, currentY, pageWidth, rowHeight).stroke();
-        doc.fillColor('#374151').fontSize(8);
-        doc.text('Serviços', 45, currentY + 6);
-        evolucao.slice(0, 6).forEach((item, i) => {
-          doc.text(String(item.totalServicos || 0), 45 + colWidth * (i + 1), currentY + 6, { width: colWidth - 10, align: 'center' });
-        });
-        currentY += rowHeight;
-        
-        // Linha Objetivo
-        doc.rect(40, currentY, pageWidth, rowHeight).fill(cinzaClaro);
-        doc.fillColor('#374151').fontSize(8);
-        doc.text('Objetivo', 45, currentY + 6);
-        evolucao.slice(0, 6).forEach((item, i) => {
-          doc.text(String(item.objetivoMensal || 0), 45 + colWidth * (i + 1), currentY + 6, { width: colWidth - 10, align: 'center' });
-        });
-        currentY += rowHeight;
-        
-        // Linha Desvio %
-        doc.rect(40, currentY, pageWidth, rowHeight).fill('white');
-        doc.rect(40, currentY, pageWidth, rowHeight).stroke();
-        doc.fillColor('#374151').fontSize(8);
-        doc.text('Desvio %', 45, currentY + 6);
-        evolucao.slice(0, 6).forEach((item, i) => {
-          const servicos = item.totalServicos || 0;
-          const objetivo = item.objetivoMensal || 0;
-          const desvio = objetivo > 0 ? ((servicos - objetivo) / objetivo * 100) : 0;
-          const desvioColor = desvio >= 0 ? verde : vermelho;
-          doc.fillColor(desvioColor);
-          doc.text(`${desvio >= 0 ? '+' : ''}${desvio.toFixed(1)}%`, 45 + colWidth * (i + 1), currentY + 6, { width: colWidth - 10, align: 'center' });
-        });
-        currentY += rowHeight;
-        
-        // Linha Taxa Reparação
-        doc.rect(40, currentY, pageWidth, rowHeight).fill(cinzaClaro);
-        doc.fillColor('#374151').fontSize(8);
-        doc.text('Taxa Rep.', 45, currentY + 6);
-        evolucao.slice(0, 6).forEach((item, i) => {
-          const servicos = item.totalServicos || 0;
-          const reparacoes = item.qtdReparacoes || 0;
-          const taxa = servicos > 0 ? (reparacoes / servicos * 100) : 0;
-          const taxaColor = taxa >= 22 ? verde : laranja;
-          doc.fillColor(taxaColor);
-          doc.text(`${taxa.toFixed(1)}%`, 45 + colWidth * (i + 1), currentY + 6, { width: colWidth - 10, align: 'center' });
-        });
-        currentY += rowHeight + 20;
+        doc.image(chartTaxa, 55, currentY, { width: pageWidth - 30 });
+        currentY += 200;
       }
 
       // ========== ANÁLISE IA ==========

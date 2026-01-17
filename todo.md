@@ -3127,3 +3127,11 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Garantir que análise IA é sempre gerada e incluída
 - [ ] Testar PDF completo
 
+
+## Melhoria v6.6.6 - Gráficos visuais no PDF
+- [x] Instalar biblioteca de gráficos para PDFKit (chartjs-node-canvas)
+- [x] Adicionar gráfico de barras: Serviços vs Objetivo (6 meses)
+- [x] Adicionar gráfico de barras colorido: Desvio % (6 meses)
+- [x] Adicionar gráfico de linha: Taxa de Reparação com objetivo 22% (6 meses)
+- [ ] Testar PDF com gráficos
+
