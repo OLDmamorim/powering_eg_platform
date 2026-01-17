@@ -3045,3 +3045,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Tornar seletor de lojas mais visível com ícone de seta claro
 - [x] Garantir que os dados mudam quando se seleciona outra loja
 - [x] Melhorar UX do seletor em mobile
+
+## Funcionalidade v6.6.17 - Preview do Link no WhatsApp
+- [x] Criar endpoint para gerar meta tags dinâmicos com nome da loja
+- [x] Mostrar nome da loja no título do preview
+- [x] Descrição personalizada com informações da loja
