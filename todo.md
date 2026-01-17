@@ -2981,3 +2981,6 @@ NOTA: Sistema de email requer configuração externa no deployment
 
 ## v6.31 - Renomear Menu
 - [x] Mudar "Reuniões Quinzenais" para "Portal da Loja" no menu lateral
+
+## v6.32 - Remover Gráfico Semanal
+- [x] Remover gráfico de Evolução Semanal do Mês (dados não são reais, apenas estimativa)
