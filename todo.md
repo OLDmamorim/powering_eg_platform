@@ -3104,3 +3104,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar título, período e rodapé ao PDF
 - [x] Testar exportação
 
+
+## Funcionalidade v6.6.3 - Exportação PDF via Servidor
+- [x] Criar endpoint de exportação PDF no servidor usando PDFKit
+- [x] Gerar PDF com dados estruturados (KPIs, alertas, complementares, comparativo)
+- [x] Atualizar frontend para usar endpoint do servidor
+- [ ] Testar em dispositivos móveis
+

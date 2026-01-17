@@ -811,6 +811,262 @@ IMPORTANTE:
           };
         }
       }),
+    
+    // Exportar PDF dos resultados da loja (gestor)
+    exportarPDFResultados: gestorProcedure
+      .input(z.object({
+        lojaId: z.number(),
+        meses: z.array(z.object({ mes: z.number().min(1).max(12), ano: z.number() })).optional(),
+        incluirAnaliseIA: z.boolean().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const { gerarPDFResultados } = await import('./pdfService');
+        
+        const gestor = await db.getGestorByUserId(ctx.user.id);
+        if (!gestor) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Não é gestor' });
+        }
+        
+        const lojasDoGestor = await db.getLojasByGestorId(gestor.id);
+        const loja = lojasDoGestor.find(l => l.id === input.lojaId);
+        if (!loja) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Não tem acesso a esta loja' });
+        }
+        
+        const now = new Date();
+        const anoAtual = now.getFullYear();
+        const mesAtual = now.getMonth() + 1;
+        
+        let mesesConsulta: { mes: number; ano: number }[] = [];
+        let periodoLabel = '';
+        
+        if (input.meses && input.meses.length > 0) {
+          mesesConsulta = input.meses;
+          if (mesesConsulta.length === 1) {
+            periodoLabel = new Date(mesesConsulta[0].ano, mesesConsulta[0].mes - 1).toLocaleDateString('pt-PT', { month: 'long', year: 'numeric' });
+          } else {
+            const mesesOrdenados = [...mesesConsulta].sort((a, b) => {
+              if (a.ano !== b.ano) return a.ano - b.ano;
+              return a.mes - b.mes;
+            });
+            const primeiro = mesesOrdenados[0];
+            const ultimo = mesesOrdenados[mesesOrdenados.length - 1];
+            periodoLabel = `${new Date(primeiro.ano, primeiro.mes - 1).toLocaleDateString('pt-PT', { month: 'short', year: 'numeric' })} - ${new Date(ultimo.ano, ultimo.mes - 1).toLocaleDateString('pt-PT', { month: 'short', year: 'numeric' })}`;
+          }
+        } else {
+          mesesConsulta = [{ mes: mesAtual, ano: anoAtual }];
+          periodoLabel = new Date(anoAtual, mesAtual - 1).toLocaleDateString('pt-PT', { month: 'long', year: 'numeric' });
+        }
+        
+        // Buscar dados agregados
+        let totalServicos = 0;
+        let totalObjetivo = 0;
+        let totalReparacoes = 0;
+        let totalEscovas = 0;
+        let totalPolimento = 0;
+        let totalTratamento = 0;
+        let totalLavagens = 0;
+        let totalOutros = 0;
+        
+        for (const p of mesesConsulta) {
+          const resultadosArr = await db.getResultadosMensaisPorLoja(input.lojaId, p.mes, p.ano);
+          if (resultadosArr) {
+            totalServicos += Number(resultadosArr.totalServicos) || 0;
+            totalObjetivo += Number(resultadosArr.objetivoMensal) || 0;
+            totalReparacoes += Number(resultadosArr.qtdReparacoes) || 0;
+          }
+          
+          const complementaresArr = await db.getVendasComplementares(p.mes, p.ano, input.lojaId);
+          if (complementaresArr && complementaresArr.length > 0) {
+            const c = complementaresArr[0];
+            totalEscovas += Number(c.escovasQtd) || 0;
+            totalPolimento += Number(c.polimentoQtd) || 0;
+            totalTratamento += Number(c.tratamentoQtd) || 0;
+            totalLavagens += Number(c.lavagensTotal) || 0;
+            totalOutros += Number(c.outrosQtd) || 0;
+          }
+        }
+        
+        // Calcular métricas
+        const desvioPercentual = totalObjetivo > 0 ? (totalServicos - totalObjetivo) / totalObjetivo : null;
+        const taxaReparacao = totalServicos > 0 ? totalReparacoes / totalServicos : null;
+        const escovasPercent = totalServicos > 0 ? totalEscovas / totalServicos : null;
+        
+        // Calcular desvio objetivo diário
+        const diaAtual = now.getDate();
+        const diasNoMes = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+        const objetivoDiario = totalObjetivo / diasNoMes;
+        const servicosEsperados = objetivoDiario * diaAtual;
+        const desvioObjetivoDiario = servicosEsperados > 0 
+          ? ((totalServicos - servicosEsperados) / servicosEsperados) * 100 
+          : 0;
+        
+        // Buscar dados do mês anterior
+        const mesAnteriorData = mesesConsulta[0];
+        const mesCompMes = mesAnteriorData.mes === 1 ? 12 : mesAnteriorData.mes - 1;
+        const mesCompAno = mesAnteriorData.mes === 1 ? mesAnteriorData.ano - 1 : mesAnteriorData.ano;
+        const resultadosMesAnterior = await db.getResultadosMensaisPorLoja(input.lojaId, mesCompMes, mesCompAno);
+        const complementaresMesAnterior = await db.getVendasComplementares(mesCompMes, mesCompAno, input.lojaId);
+        
+        const variacaoServicos = resultadosMesAnterior && resultadosMesAnterior.totalServicos 
+          ? ((totalServicos - Number(resultadosMesAnterior.totalServicos)) / Number(resultadosMesAnterior.totalServicos)) * 100 
+          : null;
+        const variacaoReparacoes = resultadosMesAnterior && resultadosMesAnterior.qtdReparacoes 
+          ? ((totalReparacoes - Number(resultadosMesAnterior.qtdReparacoes)) / Number(resultadosMesAnterior.qtdReparacoes)) * 100 
+          : null;
+        const escovasAnterior = complementaresMesAnterior && complementaresMesAnterior.length > 0 
+          ? Number(complementaresMesAnterior[0].escovasQtd) || 0 
+          : 0;
+        const variacaoEscovas = escovasAnterior > 0 
+          ? ((totalEscovas - escovasAnterior) / escovasAnterior) * 100 
+          : null;
+        
+        // Gerar alertas
+        const alertas: { tipo: 'warning' | 'danger' | 'success'; mensagem: string }[] = [];
+        
+        const taxaRep = taxaReparacao !== null ? taxaReparacao : null;
+        if (taxaRep !== null && taxaRep < 0.22) {
+          alertas.push({
+            tipo: 'warning',
+            mensagem: `Taxa de reparação (${(taxaRep * 100).toFixed(1)}%) abaixo do objetivo de 22%`
+          });
+        }
+        
+        if (desvioObjetivoDiario < -10) {
+          alertas.push({
+            tipo: 'danger',
+            mensagem: `Desvio de ${desvioObjetivoDiario.toFixed(1)}% abaixo do objetivo diário acumulado`
+          });
+        } else if (desvioObjetivoDiario >= 0) {
+          alertas.push({
+            tipo: 'success',
+            mensagem: `Parabéns! Objetivo diário acumulado atingido (+${desvioObjetivoDiario.toFixed(1)}%)`
+          });
+        }
+        
+        const escovasPerc = escovasPercent !== null ? escovasPercent : null;
+        if (escovasPerc !== null && escovasPerc < 0.075) {
+          alertas.push({
+            tipo: 'warning',
+            mensagem: `Escovas (${(escovasPerc * 100).toFixed(1)}%) abaixo do objetivo de 7.5%`
+          });
+        } else if (escovasPerc !== null && escovasPerc >= 0.10) {
+          alertas.push({
+            tipo: 'success',
+            mensagem: `Excelente! Escovas acima de 10% (${(escovasPerc * 100).toFixed(1)}%)`
+          });
+        }
+        
+        const dashboardData = {
+          kpis: {
+            servicosRealizados: totalServicos,
+            objetivoMensal: totalObjetivo,
+            taxaReparacao: taxaReparacao !== null ? taxaReparacao * 100 : 0,
+            desvioObjetivoDiario,
+            vendasComplementares: totalEscovas + totalPolimento + totalTratamento + totalLavagens + totalOutros,
+          },
+          resultados: {
+            totalServicos,
+            objetivoMensal: totalObjetivo,
+            desvioPercentualMes: desvioPercentual,
+            taxaReparacao,
+            totalReparacoes,
+            gapReparacoes22: taxaReparacao !== null && taxaReparacao < 0.22 
+              ? Math.ceil(totalServicos * 0.22 - totalReparacoes) 
+              : 0,
+          },
+          complementares: {
+            escovasQtd: totalEscovas,
+            escovasPercent,
+            polimentoQtd: totalPolimento,
+            tratamentoQtd: totalTratamento,
+            lavagensTotal: totalLavagens,
+            outrosQtd: totalOutros,
+          },
+          alertas,
+          periodoLabel,
+          comparativoMesAnterior: {
+            servicosAnterior: Number(resultadosMesAnterior?.totalServicos) || 0,
+            variacaoServicos,
+            reparacoesAnterior: Number(resultadosMesAnterior?.qtdReparacoes) || 0,
+            variacaoReparacoes,
+            escovasAnterior,
+            variacaoEscovas,
+          },
+        };
+        
+        // Gerar análise IA se solicitado
+        let analiseIA = null;
+        if (input.incluirAnaliseIA) {
+          try {
+            const { invokeLLM } = await import('./_core/llm');
+            const desvioPercentualCalc = totalObjetivo > 0 ? ((totalServicos - totalObjetivo) / totalObjetivo) * 100 : 0;
+            const taxaReparacaoCalc = totalServicos > 0 ? (totalReparacoes / totalServicos) * 100 : 0;
+            const escovasPercentCalc = totalServicos > 0 ? (totalEscovas / totalServicos) * 100 : 0;
+            const servicosFaltam = Math.max(0, totalObjetivo - totalServicos);
+            
+            const prompt = `
+Analisa os resultados da loja ${loja.nome} e gera uma análise simples e motivacional.
+
+DADOS DO MÊS:
+- Serviços realizados: ${totalServicos} / Objetivo: ${totalObjetivo} (Desvio: ${desvioPercentualCalc.toFixed(1)}%)
+- Taxa de reparação: ${taxaReparacaoCalc.toFixed(1)}% (objetivo: 22%)
+- Escovas: ${escovasPercentCalc.toFixed(1)}% (objetivo: 10%)
+
+Gera uma resposta em JSON com esta estrutura exata:
+{
+  "focoUrgente": ["lista de 1-2 pontos de foco urgente, diretos e práticos"],
+  "pontosPositivos": ["lista de 1-2 pontos positivos da loja"],
+  "resumo": "mensagem de síntese e motivação (2-3 frases, tom positivo e encorajador)"
+}
+
+IMPORTANTE:
+- Sê direto e prático no foco urgente
+- O resumo deve ser genuino, positivo e dar força
+- Usa linguagem portuguesa de Portugal (não brasileiro)
+- Responde APENAS com o JSON, sem texto adicional`;
+            
+            const response = await invokeLLM({
+              messages: [
+                { role: 'system', content: 'És um analista de performance de lojas ExpressGlass. Geras análises estratégicas e motivacionais em português de Portugal. Respondes sempre em JSON válido.' },
+                { role: 'user', content: prompt }
+              ],
+              response_format: {
+                type: 'json_schema',
+                json_schema: {
+                  name: 'analise_loja',
+                  strict: true,
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      focoUrgente: { type: 'array', items: { type: 'string' } },
+                      pontosPositivos: { type: 'array', items: { type: 'string' } },
+                      resumo: { type: 'string' }
+                    },
+                    required: ['focoUrgente', 'pontosPositivos', 'resumo'],
+                    additionalProperties: false
+                  }
+                }
+              }
+            });
+            
+            const messageContent = response.choices?.[0]?.message?.content;
+            const content = typeof messageContent === 'string' ? messageContent : '{}';
+            analiseIA = JSON.parse(content);
+          } catch (error) {
+            console.error('Erro ao gerar análise IA para PDF:', error);
+          }
+        }
+        
+        // Gerar PDF
+        const pdfBuffer = await gerarPDFResultados(loja.nome, dashboardData, analiseIA);
+        
+        // Retornar como base64
+        return {
+          pdf: pdfBuffer.toString('base64'),
+          filename: `resultados_${loja.nome.replace(/\s+/g, '_').toLowerCase()}_${new Date().toISOString().split('T')[0]}.pdf`
+        };
+      }),
   }),
 
   // ==================== GESTORES ====================
