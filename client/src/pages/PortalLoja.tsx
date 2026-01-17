@@ -1781,12 +1781,11 @@ export default function PortalLoja() {
 
                 {/* Vendas Complementares com Gráfico */}
                 {dashboardData.complementares && (() => {
-                  const complementaresLabels = ['Escovas', 'Polimento', 'Tratamento', 'Lavagens', 'Outros'];
+                  const complementaresLabels = ['Escovas', 'Polimento', 'Tratamento', 'Outros'];
                   const complementaresData = [
                     Number(dashboardData.complementares.escovasQtd) || 0,
                     Number(dashboardData.complementares.polimentoQtd) || 0,
                     Number(dashboardData.complementares.tratamentoQtd) || 0,
-                    Number(dashboardData.complementares.lavagensTotal) || 0,
                     Number(dashboardData.complementares.outrosQtd) || 0,
                   ];
                   const totalComplementares = complementaresData.reduce((a, b) => a + b, 0);
@@ -1794,14 +1793,12 @@ export default function PortalLoja() {
                     'rgba(59, 130, 246, 0.8)',   // Azul - Escovas
                     'rgba(168, 85, 247, 0.8)',   // Roxo - Polimento
                     'rgba(34, 197, 94, 0.8)',    // Verde - Tratamento
-                    'rgba(251, 191, 36, 0.8)',   // Amarelo - Lavagens
                     'rgba(156, 163, 175, 0.8)',  // Cinza - Outros
                   ];
                   const complementaresBorders = [
                     'rgb(59, 130, 246)',
                     'rgb(168, 85, 247)',
                     'rgb(34, 197, 94)',
-                    'rgb(251, 191, 36)',
                     'rgb(156, 163, 175)',
                   ];
 
@@ -1982,10 +1979,6 @@ export default function PortalLoja() {
                           <div className="p-3 bg-green-50 rounded-lg text-center">
                             <p className="text-xs text-green-600 font-medium">Tratamento</p>
                             <p className="text-xl font-bold text-green-700">{dashboardData.complementares.tratamentoQtd || 0}</p>
-                          </div>
-                          <div className="p-3 bg-yellow-50 rounded-lg text-center">
-                            <p className="text-xs text-yellow-600 font-medium">Lavagens</p>
-                            <p className="text-xl font-bold text-yellow-700">{dashboardData.complementares.lavagensTotal || 0}</p>
                           </div>
                           <div className="p-3 bg-gray-100 rounded-lg text-center">
                             <p className="text-xs text-gray-600 font-medium">Outros</p>
