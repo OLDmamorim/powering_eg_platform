@@ -221,7 +221,8 @@
       "historicoLoja": "Store History",
       "relatorioBoard": "Board Report",
       "todo": "To-Do",
-      "pendentes": "Pending"
+      "pendentes": "Pending",
+      "projecaoVisitas": "Visit Projection"
     }
   },
   "dashboard": {

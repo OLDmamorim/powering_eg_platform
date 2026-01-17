@@ -41,7 +41,7 @@ import {
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { Button } from "./ui/button";
 
-import { Building2, ClipboardList, FileText, ListTodo, Sparkles, History, Bell, Settings, Tag, BarChart3, UserCog, CalendarDays, Store, TrendingUp, GitCompare, Users2, AlertTriangle, Bot, MessageSquarePlus } from "lucide-react";
+import { Building2, ClipboardList, FileText, ListTodo, Sparkles, History, Bell, Settings, Tag, BarChart3, UserCog, CalendarDays, Store, TrendingUp, GitCompare, Users2, AlertTriangle, Bot, MessageSquarePlus, Route } from "lucide-react";
 
 // Grupos de menu com cores
 type MenuGroup = {
@@ -161,6 +161,7 @@ const getMenuGroups = (userRole?: string, t?: (key: string) => string): MenuGrou
       items: [
         { icon: ListTodo, label: tr('menu.items.todo', 'To-Do'), path: "/todos", show: true, showBadge: false },
         { icon: ListTodo, label: tr('menu.items.pendentes', 'Pendentes'), path: isAdmin ? "/pendentes-admin" : "/pendentes", show: true, showBadge: false },
+        { icon: Route, label: tr('menu.items.projecaoVisitas', 'Projeção Visitas'), path: "/projecao-visitas", show: isGestor || isAdmin, showBadge: false },
       ]
     },
   ];

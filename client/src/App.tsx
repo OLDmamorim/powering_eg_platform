@@ -43,6 +43,7 @@ import RelatorioBoard from "./pages/RelatorioBoard";
 import AssistenteIA from "./pages/AssistenteIA";
 import AssistenteWidget from "./pages/AssistenteWidget";
 import TopicosReuniao from "./pages/TopicosReuniao";
+import ProjecaoVisitasPage from "./pages/ProjecaoVisitasPage";
 import { DemoBanner } from "./components/DemoBanner";
 import { LanguageProvider } from "./contexts/LanguageContext";
 
@@ -101,6 +102,9 @@ function Router() {
       {/* To-Do */}
       <Route path={"/todos"} component={Todos} />
       <Route path={"/todo-widget"} component={TodoWidget} />
+      
+      {/* Projeção de Visitas */}
+      <Route path={"/projecao-visitas"} component={ProjecaoVisitasPage} />
       
       {/* Assistente IA Widget */}
       <Route path={"/assistente-widget"} component={AssistenteWidget} />

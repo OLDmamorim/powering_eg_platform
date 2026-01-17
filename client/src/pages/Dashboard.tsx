@@ -9,7 +9,6 @@ import { useMemo, useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { ReminderDialog } from "@/components/ReminderDialog";
-import { ProjecaoVisitas } from "@/components/ProjecaoVisitas";
 import { RelatorioIACategorias } from "@/components/RelatorioIACategorias";
 import { useDemo } from "@/contexts/DemoContext";
 import { demoLojas, demoGestores, demoRelatoriosLivres, demoRelatoriosCompletos, demoPendentes, demoAlertas, demoEstatisticas, demoAtividadeRecente, demoUser } from "@/lib/demoData";
@@ -574,11 +573,6 @@ export default function Dashboard() {
         
         {/* Lembretes de Resumos Globais */}
         <LembretesResumosGlobais isAdmin={isAdmin} isGestor={isGestor} setLocation={setLocation} />
-
-        {/* Projeção de Visitas - Apenas para Gestores e Admin */}
-        {(isGestor || isAdmin) && !isDemo && (
-          <ProjecaoVisitas />
-        )}
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {isAdmin && (
