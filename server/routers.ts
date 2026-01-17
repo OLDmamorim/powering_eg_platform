@@ -3848,19 +3848,41 @@ export const appRouter = router({
     
     // Obter dados da loja para o dashboard
     getDadosLoja: publicProcedure
-      .input(z.object({ token: z.string() }))
+      .input(z.object({ 
+        token: z.string(),
+        lojaId: z.number().optional(), // Para ver dados de loja relacionada
+      }))
       .query(async ({ input }) => {
         const auth = await db.validarTokenLoja(input.token);
         if (!auth) {
           throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
         }
         
-        const pendentesAtivos = await db.contarPendentesLojaAtivos(auth.loja.id);
-        const ultimaReuniao = await db.getUltimaReuniaoQuinzenal(auth.loja.id);
-        const gestor = await db.getGestorDaLoja(auth.loja.id);
+        // Determinar qual loja usar
+        let lojaIdParaConsulta = auth.loja.id;
+        let lojaParaRetornar = auth.loja;
+        
+        if (input.lojaId && input.lojaId !== auth.loja.id) {
+          // Verificar se a loja solicitada é uma loja relacionada
+          const lojasRelacionadas = await db.getLojasRelacionadas(auth.loja.id);
+          const lojaRelacionada = lojasRelacionadas.find(l => l.lojaId === input.lojaId);
+          
+          if (lojaRelacionada) {
+            lojaIdParaConsulta = input.lojaId;
+            // Buscar dados completos da loja relacionada
+            const lojaCompleta = await db.getLojaById(input.lojaId);
+            if (lojaCompleta) {
+              lojaParaRetornar = lojaCompleta;
+            }
+          }
+        }
+        
+        const pendentesAtivos = await db.contarPendentesLojaAtivos(lojaIdParaConsulta);
+        const ultimaReuniao = await db.getUltimaReuniaoQuinzenal(lojaIdParaConsulta);
+        const gestor = await db.getGestorDaLoja(lojaIdParaConsulta);
         
         return {
-          loja: auth.loja,
+          loja: lojaParaRetornar,
           pendentesAtivos,
           ultimaReuniao,
           gestorNome: gestor?.nome || null,
@@ -5095,11 +5117,25 @@ export const appRouter = router({
       .input(z.object({
         token: z.string(),
         meses: z.array(z.object({ mes: z.number().min(1).max(12), ano: z.number() })).optional(),
+        lojaId: z.number().optional(), // Para ver dados de loja relacionada
       }))
       .query(async ({ input }) => {
         const auth = await db.validarTokenLoja(input.token);
         if (!auth) {
           throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        
+        // Determinar qual loja usar
+        let lojaIdParaConsulta = auth.loja.id;
+        
+        if (input.lojaId && input.lojaId !== auth.loja.id) {
+          // Verificar se a loja solicitada é uma loja relacionada
+          const lojasRelacionadas = await db.getLojasRelacionadas(auth.loja.id);
+          const lojaRelacionada = lojasRelacionadas.find(l => l.lojaId === input.lojaId);
+          
+          if (lojaRelacionada) {
+            lojaIdParaConsulta = input.lojaId;
+          }
         }
         
         const now = new Date();
@@ -5146,7 +5182,7 @@ export const appRouter = router({
         let complementaresAgregados: any = null;
         
         for (const p of mesesConsulta) {
-          const resultadosArr = await db.getResultadosMensaisPorLoja(auth.loja.id, p.mes, p.ano);
+          const resultadosArr = await db.getResultadosMensaisPorLoja(lojaIdParaConsulta, p.mes, p.ano);
           if (resultadosArr) {
             totalServicos += Number(resultadosArr.totalServicos) || 0;
             totalObjetivo += Number(resultadosArr.objetivoMensal) || 0;
@@ -5160,7 +5196,7 @@ export const appRouter = router({
             if (!resultadosAgregados) resultadosAgregados = resultadosArr;
           }
           
-          const complementaresArr = await db.getVendasComplementares(p.mes, p.ano, auth.loja.id);
+          const complementaresArr = await db.getVendasComplementares(p.mes, p.ano, lojaIdParaConsulta);
           if (complementaresArr && complementaresArr.length > 0) {
             const c = complementaresArr[0];
             totalEscovas += Number(c.escovasQtd) || 0;
@@ -5210,8 +5246,8 @@ export const appRouter = router({
         const mesAnteriorData = mesesConsulta[0];
         const mesCompMes = mesAnteriorData.mes === 1 ? 12 : mesAnteriorData.mes - 1;
         const mesCompAno = mesAnteriorData.mes === 1 ? mesAnteriorData.ano - 1 : mesAnteriorData.ano;
-        const resultadosMesAnterior = await db.getResultadosMensaisPorLoja(auth.loja.id, mesCompMes, mesCompAno);
-        const complementaresMesAnterior = await db.getVendasComplementares(mesCompMes, mesCompAno, auth.loja.id);
+        const resultadosMesAnterior = await db.getResultadosMensaisPorLoja(lojaIdParaConsulta, mesCompMes, mesCompAno);
+        const complementaresMesAnterior = await db.getVendasComplementares(mesCompMes, mesCompAno, lojaIdParaConsulta);
         
         // Calcular variações
         const variacaoServicos = resultadosMesAnterior && resultadosMesAnterior.totalServicos 
@@ -5236,7 +5272,7 @@ export const appRouter = router({
           variacaoEscovas,
         };
         
-        const evolucao = await db.getEvolucaoMensal(auth.loja.id, 12);
+        const evolucao = await db.getEvolucaoMensal(lojaIdParaConsulta, 12);
         
         // Gerar alertas
         const alertas: { tipo: 'warning' | 'danger' | 'success'; mensagem: string }[] = [];

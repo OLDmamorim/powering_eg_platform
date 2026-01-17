@@ -3039,3 +3039,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Agrupar relações por loja principal (mostrar grupo completo numa única linha)
 - [x] Botão "Adicionar loja" diretamente em cada grupo existente
 - [x] Visualização clara de todas as lojas relacionadas num grupo
+
+## Bug v6.6.16 - Seletor de Lojas no Portal da Loja
+- [x] Corrigir nome duplicado no header (ex: "MycarcenterMycarcenter")
+- [x] Tornar seletor de lojas mais visível com ícone de seta claro
+- [x] Garantir que os dados mudam quando se seleciona outra loja
+- [x] Melhorar UX do seletor em mobile

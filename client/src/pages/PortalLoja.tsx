@@ -248,8 +248,11 @@ export default function PortalLoja() {
   }, [token]);
 
   // Queries
+  // Usar lojaAtualId para queries quando disponível
+  const lojaIdAtiva = lojaAtualId || lojaAuth?.lojaId;
+  
   const { data: dadosLoja, refetch: refetchDados } = trpc.reunioesQuinzenais.getDadosLoja.useQuery(
-    { token },
+    { token, lojaId: lojaIdAtiva },
     { enabled: !!token && !!lojaAuth }
   );
 
@@ -302,7 +305,7 @@ export default function PortalLoja() {
 
   // Dashboard de Resultados
   const { data: dashboardData, isLoading: dashboardLoading } = trpc.todosPortalLoja.dashboardCompleto.useQuery(
-    { token, meses: mesesSelecionadosDashboard },
+    { token, meses: mesesSelecionadosDashboard, lojaId: lojaIdAtiva },
     { enabled: !!token && !!lojaAuth && activeTab === 'resultados' && mesesSelecionadosDashboard.length > 0 }
   );
 
@@ -666,22 +669,7 @@ export default function PortalLoja() {
                     onValueChange={(value) => {
                       const novaLojaId = parseInt(value);
                       setLojaAtualId(novaLojaId);
-                      // Encontrar o nome da loja selecionada
-                      if (novaLojaId === lojaAuth.lojaId) {
-                        // Loja principal
-                        setLojaAuth({ ...lojaAuth });
-                      } else {
-                        // Loja relacionada
-                        const lojaRelacionada = lojaAuth.lojasRelacionadas?.find(l => l.id === novaLojaId);
-                        if (lojaRelacionada) {
-                          setLojaAuth({ 
-                            ...lojaAuth, 
-                            lojaId: lojaRelacionada.id, 
-                            lojaNome: lojaRelacionada.nome 
-                          });
-                        }
-                      }
-                      // Recarregar dados
+                      // Recarregar dados com o novo lojaId
                       refetchDados();
                       refetchPendentes();
                       refetchReunioes();
@@ -689,13 +677,33 @@ export default function PortalLoja() {
                       toast.success(language === 'pt' ? 'Loja alterada!' : 'Store changed!');
                     }}
                   >
-                    <SelectTrigger className="h-auto p-0 border-0 bg-transparent text-white text-xl font-bold hover:bg-white/10 rounded">
-                      <SelectValue />
+                    <SelectTrigger className="h-auto px-3 py-1 border border-white/30 bg-white/10 text-white text-xl font-bold hover:bg-white/20 rounded-lg flex items-center gap-2">
+                      <SelectValue>
+                        {(() => {
+                          const currentId = lojaAtualId || lojaAuth.lojaId;
+                          if (currentId === lojaAuth.lojaId) {
+                            return lojaAuth.lojaNome;
+                          }
+                          const lojaRelacionada = lojaAuth.lojasRelacionadas?.find(l => l.id === currentId);
+                          return lojaRelacionada?.nome || lojaAuth.lojaNome;
+                        })()}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value={String(lojaAuth.lojaId)}>{lojaAuth.lojaNome}</SelectItem>
+                      <SelectItem value={String(lojaAuth.lojaId)}>
+                        <span className="flex items-center gap-2">
+                          <Store className="h-4 w-4" />
+                          {lojaAuth.lojaNome}
+                          <Badge variant="outline" className="text-xs">Principal</Badge>
+                        </span>
+                      </SelectItem>
                       {lojaAuth.lojasRelacionadas.map(loja => (
-                        <SelectItem key={loja.id} value={String(loja.id)}>{loja.nome}</SelectItem>
+                        <SelectItem key={loja.id} value={String(loja.id)}>
+                          <span className="flex items-center gap-2">
+                            <Store className="h-4 w-4" />
+                            {loja.nome}
+                          </span>
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
