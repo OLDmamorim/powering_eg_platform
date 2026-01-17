@@ -1717,7 +1717,7 @@ export default function PortalLoja() {
                               ? `${parseFloat(String(dashboardData.resultados.desvioPercentualDia)) >= 0 ? '+' : ''}${(parseFloat(String(dashboardData.resultados.desvioPercentualDia)) * 100).toFixed(1)}%`
                               : '-'}
                           </p>
-                          <p className="text-xs opacity-80">{language === 'pt' ? 'Desvio' : 'Deviation'}</p>
+                          <p className="text-xs opacity-80">{language === 'pt' ? 'Desvio Obj. Diário' : 'Daily Goal Dev.'}</p>
                         </div>
                       </div>
                     </CardContent>
