@@ -3119,3 +3119,11 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Corrigir barra de progresso das escovas
 - [x] Melhorar espaçamento entre secções
 
+
+## Melhoria v6.6.5 - PDF completo como o portal da loja
+- [x] Adicionar secção "Ritmo Necessário" (serviços/dia, dias úteis restantes)
+- [x] Adicionar secção "Gap Reparações" (quantas faltam para 22%)
+- [x] Adicionar tabela de evolução mensal (Serviços, Objetivo, Desvio%, Taxa Rep.)
+- [x] Garantir que análise IA é sempre gerada e incluída
+- [ ] Testar PDF completo
+

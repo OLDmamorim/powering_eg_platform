@@ -957,6 +957,24 @@ IMPORTANTE:
           });
         }
         
+        // Calcular dias úteis restantes e ritmo necessário
+        const mesAtualData = mesesConsulta[0];
+        const ultimoDiaMes = new Date(mesAtualData.ano, mesAtualData.mes, 0).getDate();
+        let diasUteisRestantes = 0;
+        for (let d = diaAtual + 1; d <= ultimoDiaMes; d++) {
+          const data = new Date(mesAtualData.ano, mesAtualData.mes - 1, d);
+          const diaSemana = data.getDay();
+          if (diaSemana !== 0 && diaSemana !== 6) diasUteisRestantes++;
+        }
+        const servicosFaltam = Math.max(0, totalObjetivo - totalServicos);
+        const servicosPorDia = diasUteisRestantes > 0 ? Math.ceil(servicosFaltam / diasUteisRestantes) : 0;
+        const gapReparacoes = taxaReparacao !== null && taxaReparacao < 0.22 
+          ? Math.ceil(totalServicos * 0.22 - totalReparacoes) 
+          : 0;
+        
+        // Buscar evolução mensal (6 meses)
+        const evolucao = await db.getEvolucaoMensal(input.lojaId, 6);
+        
         const dashboardData = {
           kpis: {
             servicosRealizados: totalServicos,
@@ -971,9 +989,7 @@ IMPORTANTE:
             desvioPercentualMes: desvioPercentual,
             taxaReparacao,
             totalReparacoes,
-            gapReparacoes22: taxaReparacao !== null && taxaReparacao < 0.22 
-              ? Math.ceil(totalServicos * 0.22 - totalReparacoes) 
-              : 0,
+            gapReparacoes22: gapReparacoes,
           },
           complementares: {
             escovasQtd: totalEscovas,
@@ -993,11 +1009,18 @@ IMPORTANTE:
             escovasAnterior,
             variacaoEscovas,
           },
+          ritmo: {
+            servicosFaltam,
+            diasUteisRestantes,
+            servicosPorDia,
+            gapReparacoes,
+          },
+          evolucao: evolucao || [],
         };
         
-        // Gerar análise IA se solicitado
+        // Sempre gerar análise IA para o PDF
         let analiseIA = null;
-        if (input.incluirAnaliseIA) {
+        {
           try {
             const { invokeLLM } = await import('./_core/llm');
             const desvioPercentualCalc = totalObjetivo > 0 ? ((totalServicos - totalObjetivo) / totalObjetivo) * 100 : 0;
