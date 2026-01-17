@@ -1940,6 +1940,78 @@ export const appRouter = router({
         await db.eliminarProjecaoVisitas(input.projecaoId);
         return { success: true };
       }),
+    
+    // Apagar uma visita individual
+    apagarVisita: gestorProcedure
+      .input(z.object({ visitaId: z.number() }))
+      .mutation(async ({ input }) => {
+        await db.apagarVisitaPlaneada(input.visitaId);
+        return { success: true };
+      }),
+    
+    // Trocar ordem de duas visitas (trocar datas)
+    trocarOrdem: gestorProcedure
+      .input(z.object({ 
+        visitaId1: z.number(), 
+        visitaId2: z.number() 
+      }))
+      .mutation(async ({ input }) => {
+        // Buscar as duas visitas
+        const visita1 = await db.getVisitaPlaneadaById(input.visitaId1);
+        const visita2 = await db.getVisitaPlaneadaById(input.visitaId2);
+        
+        if (!visita1 || !visita2) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Visita não encontrada' });
+        }
+        
+        // Trocar as datas entre as duas visitas
+        await db.atualizarDataVisita(input.visitaId1, visita2.dataVisita);
+        await db.atualizarDataVisita(input.visitaId2, visita1.dataVisita);
+        
+        return { success: true };
+      }),
+    
+    // Mover visita para cima (trocar com a anterior)
+    moverParaCima: gestorProcedure
+      .input(z.object({ visitaId: z.number(), projecaoId: z.number() }))
+      .mutation(async ({ input }) => {
+        const visitas = await db.getVisitasPlaneadasPorProjecao(input.projecaoId);
+        const index = visitas.findIndex(v => v.id === input.visitaId);
+        
+        if (index <= 0) {
+          throw new TRPCError({ code: 'BAD_REQUEST', message: 'Não é possível mover para cima' });
+        }
+        
+        const visitaAtual = visitas[index];
+        const visitaAnterior = visitas[index - 1];
+        
+        // Trocar as datas
+        await db.atualizarDataVisita(visitaAtual.id, visitaAnterior.dataVisita);
+        await db.atualizarDataVisita(visitaAnterior.id, visitaAtual.dataVisita);
+        
+        return { success: true };
+      }),
+    
+    // Mover visita para baixo (trocar com a próxima)
+    moverParaBaixo: gestorProcedure
+      .input(z.object({ visitaId: z.number(), projecaoId: z.number() }))
+      .mutation(async ({ input }) => {
+        const visitas = await db.getVisitasPlaneadasPorProjecao(input.projecaoId);
+        const index = visitas.findIndex(v => v.id === input.visitaId);
+        
+        if (index < 0 || index >= visitas.length - 1) {
+          throw new TRPCError({ code: 'BAD_REQUEST', message: 'Não é possível mover para baixo' });
+        }
+        
+        const visitaAtual = visitas[index];
+        const visitaProxima = visitas[index + 1];
+        
+        // Trocar as datas
+        await db.atualizarDataVisita(visitaAtual.id, visitaProxima.dataVisita);
+        await db.atualizarDataVisita(visitaProxima.id, visitaAtual.dataVisita);
+        
+        return { success: true };
+      }),
   }),
 
   // ==================== CATEGORIZAÇÃO DE RELATÓRIOS ====================

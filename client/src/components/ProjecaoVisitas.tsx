@@ -21,7 +21,10 @@ import {
   Building2,
   CheckCircle2,
   XCircle,
-  Download
+  Download,
+  ChevronUp,
+  ChevronDown,
+  Trash2
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -154,6 +157,39 @@ export function ProjecaoVisitas() {
       toast.success(language === 'pt' 
         ? `${data.totalVisitas} visitas exportadas para o calendário!` 
         : `${data.totalVisitas} visits exported to calendar!`);
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    }
+  });
+  
+  // Mutation para mover visita para cima
+  const moverParaCimaMutation = trpc.projecaoVisitas.moverParaCima.useMutation({
+    onSuccess: () => {
+      utils.projecaoVisitas.getVisitas.invalidate();
+      toast.success(language === 'pt' ? 'Visita movida para cima' : 'Visit moved up');
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    }
+  });
+  
+  // Mutation para mover visita para baixo
+  const moverParaBaixoMutation = trpc.projecaoVisitas.moverParaBaixo.useMutation({
+    onSuccess: () => {
+      utils.projecaoVisitas.getVisitas.invalidate();
+      toast.success(language === 'pt' ? 'Visita movida para baixo' : 'Visit moved down');
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    }
+  });
+  
+  // Mutation para apagar visita individual
+  const apagarVisitaMutation = trpc.projecaoVisitas.apagarVisita.useMutation({
+    onSuccess: () => {
+      utils.projecaoVisitas.getVisitas.invalidate();
+      toast.success(language === 'pt' ? 'Visita removida' : 'Visit removed');
     },
     onError: (error) => {
       toast.error(error.message);
@@ -336,18 +372,52 @@ export function ProjecaoVisitas() {
                 {visitas.map((visita, index) => (
                   <div
                     key={visita.id}
-                    className="p-3 bg-white/60 dark:bg-white/5 rounded-lg border border-violet-100 dark:border-violet-800/50 hover:shadow-md transition-all cursor-pointer group"
-                    onClick={() => handleOpenCalendarDialog(visita as VisitaSugerida)}
+                    className="p-3 bg-white/60 dark:bg-white/5 rounded-lg border border-violet-100 dark:border-violet-800/50 hover:shadow-md transition-all group"
                   >
                     {/* Layout mobile-first */}
-                    <div className="flex items-start gap-3">
+                    <div className="flex items-start gap-2">
+                      {/* Botões de reordenar */}
+                      <div className="flex flex-col gap-0.5 flex-shrink-0">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6 text-violet-500 hover:text-violet-700 hover:bg-violet-100 disabled:opacity-30"
+                          disabled={index === 0 || moverParaCimaMutation.isPending}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (projecaoAtual) {
+                              moverParaCimaMutation.mutate({ visitaId: visita.id, projecaoId: projecaoAtual.id });
+                            }
+                          }}
+                        >
+                          <ChevronUp className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6 text-violet-500 hover:text-violet-700 hover:bg-violet-100 disabled:opacity-30"
+                          disabled={index === visitas.length - 1 || moverParaBaixoMutation.isPending}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (projecaoAtual) {
+                              moverParaBaixoMutation.mutate({ visitaId: visita.id, projecaoId: projecaoAtual.id });
+                            }
+                          }}
+                        >
+                          <ChevronDown className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      
                       {/* Número de prioridade */}
                       <div className="flex-shrink-0 w-8 h-8 rounded-full bg-violet-600 text-white flex items-center justify-center font-bold text-sm">
                         {index + 1}
                       </div>
                       
-                      {/* Info da visita */}
-                      <div className="flex-1 min-w-0">
+                      {/* Info da visita - clicável para abrir calendário */}
+                      <div 
+                        className="flex-1 min-w-0 cursor-pointer"
+                        onClick={() => handleOpenCalendarDialog(visita as VisitaSugerida)}
+                      >
                         {/* Nome da loja - sempre visível completo */}
                         <div className="flex items-center gap-2 mb-1">
                           <Building2 className="h-4 w-4 flex-shrink-0 text-violet-500" />
@@ -377,6 +447,22 @@ export function ProjecaoVisitas() {
                           <ChevronRight className="h-4 w-4 text-violet-400 group-hover:translate-x-1 transition-transform" />
                         </div>
                       </div>
+                      
+                      {/* Botão de apagar */}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 flex-shrink-0 text-red-500 hover:text-red-700 hover:bg-red-100"
+                        disabled={apagarVisitaMutation.isPending}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (confirm(language === 'pt' ? 'Tem a certeza que quer remover esta visita?' : 'Are you sure you want to remove this visit?')) {
+                            apagarVisitaMutation.mutate({ visitaId: visita.id });
+                          }
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
                   </div>
                 ))}

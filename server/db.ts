@@ -7634,3 +7634,43 @@ export async function getDadosPriorizacaoTodasLojas(): Promise<DadosPriorizacaoL
   
   return resultado;
 }
+
+
+/**
+ * Apagar uma visita planeada individual
+ */
+export async function apagarVisitaPlaneada(visitaId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  
+  await db.delete(visitasPlaneadas).where(eq(visitasPlaneadas.id, visitaId));
+}
+
+/**
+ * Obter uma visita planeada por ID
+ */
+export async function getVisitaPlaneadaById(visitaId: number): Promise<VisitaPlaneada | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const [visita] = await db
+    .select()
+    .from(visitasPlaneadas)
+    .where(eq(visitasPlaneadas.id, visitaId))
+    .limit(1);
+  
+  return visita || null;
+}
+
+/**
+ * Atualizar a data de uma visita planeada
+ */
+export async function atualizarDataVisita(visitaId: number, novaData: Date): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  
+  await db
+    .update(visitasPlaneadas)
+    .set({ dataVisita: novaData, updatedAt: new Date() })
+    .where(eq(visitasPlaneadas.id, visitaId));
+}
