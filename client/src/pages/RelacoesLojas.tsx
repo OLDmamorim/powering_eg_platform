@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { trpc } from '@/lib/trpc';
-import { Link2, Unlink, Plus, Store, ArrowRight, Loader2 } from 'lucide-react';
+import { Link2, Unlink, Plus, Store, ArrowRight, Loader2, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   Dialog,
@@ -15,23 +15,72 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
+
+interface GrupoLojas {
+  lojaPrincipalId: number;
+  lojaPrincipalNome: string;
+  lojasRelacionadas: Array<{
+    relacaoId: number;
+    lojaId: number;
+    lojaNome: string;
+  }>;
+}
 
 export default function RelacoesLojas() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [lojaPrincipalId, setLojaPrincipalId] = useState<string>('');
   const [lojaRelacionadaId, setLojaRelacionadaId] = useState<string>('');
+  // Estado para adicionar loja a um grupo existente
+  const [addToGroupDialogOpen, setAddToGroupDialogOpen] = useState(false);
+  const [selectedGroupPrincipalId, setSelectedGroupPrincipalId] = useState<number | null>(null);
+  const [novaLojaParaGrupo, setNovaLojaParaGrupo] = useState<string>('');
 
   // Queries
   const { data: relacoes, isLoading: loadingRelacoes, refetch: refetchRelacoes } = trpc.lojas.listarRelacoes.useQuery();
   const { data: lojas, isLoading: loadingLojas } = trpc.lojas.getByGestor.useQuery();
+
+  // Agrupar relações por loja principal
+  const grupos = useMemo<GrupoLojas[]>(() => {
+    if (!relacoes) return [];
+    
+    const gruposMap = new Map<number, GrupoLojas>();
+    
+    relacoes.forEach((relacao) => {
+      const grupoExistente = gruposMap.get(relacao.lojaPrincipalId);
+      
+      if (grupoExistente) {
+        grupoExistente.lojasRelacionadas.push({
+          relacaoId: relacao.relacaoId,
+          lojaId: relacao.lojaRelacionadaId,
+          lojaNome: relacao.lojaRelacionadaNome,
+        });
+      } else {
+        gruposMap.set(relacao.lojaPrincipalId, {
+          lojaPrincipalId: relacao.lojaPrincipalId,
+          lojaPrincipalNome: relacao.lojaPrincipalNome,
+          lojasRelacionadas: [{
+            relacaoId: relacao.relacaoId,
+            lojaId: relacao.lojaRelacionadaId,
+            lojaNome: relacao.lojaRelacionadaNome,
+          }],
+        });
+      }
+    });
+    
+    return Array.from(gruposMap.values());
+  }, [relacoes]);
 
   // Mutations
   const criarRelacaoMutation = trpc.lojas.criarRelacao.useMutation({
     onSuccess: () => {
       toast.success('Relação criada com sucesso!');
       setDialogOpen(false);
+      setAddToGroupDialogOpen(false);
       setLojaPrincipalId('');
       setLojaRelacionadaId('');
+      setNovaLojaParaGrupo('');
+      setSelectedGroupPrincipalId(null);
       refetchRelacoes();
     },
     onError: (error) => {
@@ -60,15 +109,47 @@ export default function RelacoesLojas() {
     });
   };
 
+  const handleAdicionarAoGrupo = () => {
+    if (!selectedGroupPrincipalId || !novaLojaParaGrupo) {
+      toast.error('Selecione a loja para adicionar ao grupo.');
+      return;
+    }
+    criarRelacaoMutation.mutate({
+      lojaPrincipalId: selectedGroupPrincipalId,
+      lojaRelacionadaId: parseInt(novaLojaParaGrupo),
+    });
+  };
+
   const handleRemoverRelacao = (relacaoId: number) => {
     if (confirm('Tem a certeza que deseja remover esta relação?')) {
       removerRelacaoMutation.mutate({ relacaoId });
     }
   };
 
+  const openAddToGroupDialog = (grupo: GrupoLojas) => {
+    setSelectedGroupPrincipalId(grupo.lojaPrincipalId);
+    setNovaLojaParaGrupo('');
+    setAddToGroupDialogOpen(true);
+  };
+
   // Filtrar lojas disponíveis para seleção (excluir a já selecionada)
   const lojasDisponiveis = lojas?.filter(l => l.id.toString() !== lojaPrincipalId) || [];
   const lojasPrincipaisDisponiveis = lojas?.filter(l => l.id.toString() !== lojaRelacionadaId) || [];
+
+  // Lojas disponíveis para adicionar a um grupo (excluir a principal e as já relacionadas)
+  const lojasDisponiveisParaGrupo = useMemo(() => {
+    if (!lojas || !selectedGroupPrincipalId) return [];
+    
+    const grupo = grupos.find(g => g.lojaPrincipalId === selectedGroupPrincipalId);
+    if (!grupo) return lojas;
+    
+    const idsNoGrupo = new Set([
+      grupo.lojaPrincipalId,
+      ...grupo.lojasRelacionadas.map(l => l.lojaId)
+    ]);
+    
+    return lojas.filter(l => !idsNoGrupo.has(l.id));
+  }, [lojas, selectedGroupPrincipalId, grupos]);
 
   return (
     <DashboardLayout>
@@ -171,12 +252,12 @@ export default function RelacoesLojas() {
           </CardContent>
         </Card>
 
-        {/* Lista de Relações */}
+        {/* Lista de Grupos */}
         <Card>
           <CardHeader>
-            <CardTitle>Relações Ativas</CardTitle>
+            <CardTitle>Grupos de Lojas</CardTitle>
             <CardDescription>
-              Lista de lojas relacionadas que partilham acesso ao Portal
+              Lojas agrupadas que partilham o mesmo token de acesso ao Portal
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -184,33 +265,67 @@ export default function RelacoesLojas() {
               <div className="flex items-center justify-center py-8">
                 <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
               </div>
-            ) : relacoes && relacoes.length > 0 ? (
-              <div className="space-y-3">
-                {relacoes.map((relacao) => (
+            ) : grupos && grupos.length > 0 ? (
+              <div className="space-y-4">
+                {grupos.map((grupo) => (
                   <div 
-                    key={relacao.relacaoId}
-                    className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg gap-3"
+                    key={grupo.lojaPrincipalId}
+                    className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
                   >
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
-                      <div className="flex items-center gap-2 bg-white dark:bg-gray-700 px-3 py-2 rounded-md border w-full sm:w-auto">
-                        <Store className="h-4 w-4 text-purple-600 flex-shrink-0" />
-                        <span className="font-medium text-sm">{relacao.lojaPrincipalNome}</span>
+                    {/* Cabeçalho do grupo */}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+                      <div className="flex items-center gap-2">
+                        <Users className="h-5 w-5 text-purple-600" />
+                        <span className="font-semibold text-gray-900 dark:text-white">
+                          Grupo: {grupo.lojaPrincipalNome}
+                        </span>
+                        <Badge variant="secondary" className="bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300">
+                          {grupo.lojasRelacionadas.length + 1} lojas
+                        </Badge>
                       </div>
-                      <ArrowRight className="h-4 w-4 text-gray-400 hidden sm:block" />
-                      <div className="flex items-center gap-2 bg-white dark:bg-gray-700 px-3 py-2 rounded-md border w-full sm:w-auto">
-                        <Store className="h-4 w-4 text-blue-600 flex-shrink-0" />
-                        <span className="font-medium text-sm">{relacao.lojaRelacionadaNome}</span>
-                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => openAddToGroupDialog(grupo)}
+                        className="text-purple-600 border-purple-300 hover:bg-purple-50"
+                      >
+                        <Plus className="h-4 w-4 mr-1" />
+                        Adicionar Loja
+                      </Button>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleRemoverRelacao(relacao.relacaoId)}
-                      disabled={removerRelacaoMutation.isPending}
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50 self-end sm:self-auto"
-                    >
-                      <Unlink className="h-4 w-4" />
-                    </Button>
+                    
+                    {/* Lojas do grupo */}
+                    <div className="flex flex-wrap gap-2 items-center">
+                      {/* Loja principal */}
+                      <div className="flex items-center gap-2 bg-purple-100 dark:bg-purple-900/50 px-3 py-2 rounded-md border border-purple-300 dark:border-purple-700">
+                        <Store className="h-4 w-4 text-purple-600 flex-shrink-0" />
+                        <span className="font-medium text-sm text-purple-800 dark:text-purple-200">
+                          {grupo.lojaPrincipalNome}
+                        </span>
+                        <Badge variant="outline" className="text-xs border-purple-400 text-purple-600">
+                          Principal
+                        </Badge>
+                      </div>
+                      
+                      {/* Lojas relacionadas */}
+                      {grupo.lojasRelacionadas.map((loja) => (
+                        <div 
+                          key={loja.relacaoId}
+                          className="flex items-center gap-2 bg-white dark:bg-gray-700 px-3 py-2 rounded-md border border-gray-200 dark:border-gray-600 group"
+                        >
+                          <Store className="h-4 w-4 text-blue-600 flex-shrink-0" />
+                          <span className="font-medium text-sm">{loja.lojaNome}</span>
+                          <button
+                            onClick={() => handleRemoverRelacao(loja.relacaoId)}
+                            disabled={removerRelacaoMutation.isPending}
+                            className="text-gray-400 hover:text-red-600 transition-colors ml-1"
+                            title="Remover do grupo"
+                          >
+                            <Unlink className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -223,6 +338,55 @@ export default function RelacoesLojas() {
             )}
           </CardContent>
         </Card>
+
+        {/* Dialog para adicionar loja a grupo existente */}
+        <Dialog open={addToGroupDialogOpen} onOpenChange={setAddToGroupDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Adicionar Loja ao Grupo</DialogTitle>
+              <DialogDescription>
+                Selecione a loja que pretende adicionar ao grupo "{grupos.find(g => g.lojaPrincipalId === selectedGroupPrincipalId)?.lojaPrincipalNome}".
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Loja a Adicionar</label>
+                <Select value={novaLojaParaGrupo} onValueChange={setNovaLojaParaGrupo}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione a loja" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {lojasDisponiveisParaGrupo.map((loja) => (
+                      <SelectItem key={loja.id} value={loja.id.toString()}>
+                        {loja.nome}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {lojasDisponiveisParaGrupo.length === 0 && (
+                  <p className="text-sm text-gray-500">
+                    Todas as lojas já estão neste grupo ou noutros grupos.
+                  </p>
+                )}
+              </div>
+            </div>
+            
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setAddToGroupDialogOpen(false)}>
+                Cancelar
+              </Button>
+              <Button 
+                onClick={handleAdicionarAoGrupo}
+                disabled={criarRelacaoMutation.isPending || !novaLojaParaGrupo}
+                className="bg-purple-600 hover:bg-purple-700"
+              >
+                {criarRelacaoMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                Adicionar ao Grupo
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </DashboardLayout>
   );

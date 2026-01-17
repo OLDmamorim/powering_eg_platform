@@ -3034,3 +3034,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [ ] Modificar Portal da Loja para suportar lojas relacionadas
 - [ ] Adicionar seletor de loja quando há lojas relacionadas
 
+
+## Funcionalidades v6.6.15 - Melhorias na Página de Relações de Lojas
+- [x] Agrupar relações por loja principal (mostrar grupo completo numa única linha)
+- [x] Botão "Adicionar loja" diretamente em cada grupo existente
+- [x] Visualização clara de todas as lojas relacionadas num grupo
