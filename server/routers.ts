@@ -316,6 +316,167 @@ export const appRouter = router({
       .query(async ({ input }) => {
         return await db.getLojasRelacionadas(input.lojaId);
       }),
+    
+    // ==================== PORTAL DO GESTOR ====================
+    // Obter dados da loja para o gestor (sem token, usa autenticação normal)
+    getDadosLojaGestor: gestorProcedure
+      .input(z.object({ lojaId: z.number() }))
+      .query(async ({ ctx, input }) => {
+        // Verificar se o gestor tem acesso a esta loja
+        const gestor = await db.getGestorByUserId(ctx.user.id);
+        if (!gestor) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Não é gestor' });
+        }
+        
+        const lojasDoGestor = await db.getLojasByGestorId(gestor.id);
+        const temAcesso = lojasDoGestor.some(l => l.id === input.lojaId);
+        if (!temAcesso) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Não tem acesso a esta loja' });
+        }
+        
+        const loja = await db.getLojaById(input.lojaId);
+        const pendentesAtivos = await db.contarPendentesLojaAtivos(input.lojaId);
+        const ultimaReuniao = await db.getUltimaReuniaoQuinzenal(input.lojaId);
+        const gestorDaLoja = await db.getGestorDaLoja(input.lojaId);
+        
+        return {
+          loja,
+          pendentesAtivos,
+          ultimaReuniao,
+          gestorNome: gestorDaLoja?.nome || null,
+        };
+      }),
+    
+    // Obter pendentes da loja para o gestor
+    getPendentesLojaGestor: gestorProcedure
+      .input(z.object({ lojaId: z.number() }))
+      .query(async ({ ctx, input }) => {
+        const gestor = await db.getGestorByUserId(ctx.user.id);
+        if (!gestor) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Não é gestor' });
+        }
+        
+        const lojasDoGestor = await db.getLojasByGestorId(gestor.id);
+        const temAcesso = lojasDoGestor.some(l => l.id === input.lojaId);
+        if (!temAcesso) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Não tem acesso a esta loja' });
+        }
+        
+        return await db.getPendentesByLojaId(input.lojaId);
+      }),
+    
+    // Obter reuniões da loja para o gestor
+    getReunioesLojaGestor: gestorProcedure
+      .input(z.object({ lojaId: z.number() }))
+      .query(async ({ ctx, input }) => {
+        const gestor = await db.getGestorByUserId(ctx.user.id);
+        if (!gestor) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Não é gestor' });
+        }
+        
+        const lojasDoGestor = await db.getLojasByGestorId(gestor.id);
+        const temAcesso = lojasDoGestor.some(l => l.id === input.lojaId);
+        if (!temAcesso) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Não tem acesso a esta loja' });
+        }
+        
+        return await db.listarReunioesQuinzenaisLoja(input.lojaId);
+      }),
+    
+    // Obter todos/tarefas da loja para o gestor
+    getTodosLojaGestor: gestorProcedure
+      .input(z.object({ lojaId: z.number() }))
+      .query(async ({ ctx, input }) => {
+        const gestor = await db.getGestorByUserId(ctx.user.id);
+        if (!gestor) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Não é gestor' });
+        }
+        
+        const lojasDoGestor = await db.getLojasByGestorId(gestor.id);
+        const temAcesso = lojasDoGestor.some(l => l.id === input.lojaId);
+        if (!temAcesso) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Não tem acesso a esta loja' });
+        }
+        
+        return await db.getTodosByLojaId(input.lojaId);
+      }),
+    
+    // Dashboard completo da loja para o gestor
+    dashboardCompletoGestor: gestorProcedure
+      .input(z.object({
+        lojaId: z.number(),
+        meses: z.array(z.object({ mes: z.number().min(1).max(12), ano: z.number() })).optional(),
+      }))
+      .query(async ({ ctx, input }) => {
+        const gestor = await db.getGestorByUserId(ctx.user.id);
+        if (!gestor) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Não é gestor' });
+        }
+        
+        const lojasDoGestor = await db.getLojasByGestorId(gestor.id);
+        const temAcesso = lojasDoGestor.some(l => l.id === input.lojaId);
+        if (!temAcesso) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Não tem acesso a esta loja' });
+        }
+        
+        const now = new Date();
+        const anoAtual = now.getFullYear();
+        const mesAtual = now.getMonth() + 1;
+        
+        let mesesConsulta: { mes: number; ano: number }[] = [];
+        if (input.meses && input.meses.length > 0) {
+          mesesConsulta = input.meses;
+        } else {
+          mesesConsulta = [{ mes: mesAtual, ano: anoAtual }];
+        }
+        
+        // Buscar KPIs agregados dos meses selecionados
+        let totalServicos = 0;
+        let totalObjetivo = 0;
+        let totalReparacoes = 0;
+        let vendasComplementares = 0;
+        
+        for (const p of mesesConsulta) {
+          const resultados = await db.getResultadosMensaisPorLoja(input.lojaId, p.mes, p.ano);
+          if (resultados) {
+            totalServicos += Number(resultados.totalServicos) || 0;
+            totalObjetivo += Number(resultados.objetivoMensal) || 0;
+            totalReparacoes += Number(resultados.qtdReparacoes) || 0;
+          }
+          
+          const complementares = await db.getVendasComplementares(p.mes, p.ano, input.lojaId);
+          if (complementares && complementares.length > 0) {
+            const c = complementares[0];
+            vendasComplementares += (Number(c.escovasQtd) || 0) + 
+                                   (Number(c.polimentoQtd) || 0) + 
+                                   (Number(c.tratamentoQtd) || 0) + 
+                                   (Number(c.lavagensTotal) || 0);
+          }
+        }
+        
+        // Calcular métricas derivadas
+        const taxaReparacao = totalServicos > 0 ? (totalReparacoes / totalServicos) * 100 : 0;
+        
+        // Calcular desvio objetivo diário
+        const diaAtual = now.getDate();
+        const diasNoMes = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+        const objetivoDiario = totalObjetivo / diasNoMes;
+        const servicosEsperados = objetivoDiario * diaAtual;
+        const desvioObjetivoDiario = servicosEsperados > 0 
+          ? ((totalServicos - servicosEsperados) / servicosEsperados) * 100 
+          : 0;
+        
+        return {
+          kpis: {
+            servicosRealizados: totalServicos,
+            objetivoMensal: totalObjetivo,
+            taxaReparacao,
+            desvioObjetivoDiario,
+            vendasComplementares,
+          },
+          mesesConsultados: mesesConsulta,
+        };
+      }),
   }),
 
   // ==================== GESTORES ====================

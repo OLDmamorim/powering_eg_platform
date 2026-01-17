@@ -3059,3 +3059,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## Bug v6.6.19 - Sobreposição no Header Mobile
 - [x] Corrigir sobreposição do seletor de lojas com o seletor de idioma
 - [x] Reorganizar layout do header para mobile
+
+## Funcionalidade v6.6.20 - Portal do Gestor
+- [x] Criar página PortalGestor.tsx com seletor de todas as lojas do gestor
+- [x] Reutilizar interface do Portal da Loja (cards Resultados, Tarefas, Pendentes, Reunião)
+- [x] Adicionar rota /portal-gestor no App.tsx
+- [x] Adicionar entrada "Portal Gestor" no menu lateral

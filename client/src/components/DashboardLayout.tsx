@@ -41,7 +41,7 @@ import {
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { Button } from "./ui/button";
 
-import { Building2, ClipboardList, FileText, ListTodo, Sparkles, History, Bell, Settings, Tag, BarChart3, UserCog, CalendarDays, Store, TrendingUp, GitCompare, Users2, AlertTriangle, Bot, MessageSquarePlus, Route, Link2 } from "lucide-react";
+import { Building2, ClipboardList, FileText, ListTodo, Sparkles, History, Bell, Settings, Tag, BarChart3, UserCog, CalendarDays, Store, TrendingUp, GitCompare, Users2, AlertTriangle, Bot, MessageSquarePlus, Route, Link2, Eye } from "lucide-react";
 
 // Grupos de menu com cores
 type MenuGroup = {
@@ -91,6 +91,7 @@ const getMenuGroups = (userRole?: string, t?: (key: string) => string): MenuGrou
         { icon: Building2, label: tr('menu.items.lojas', 'Lojas'), path: "/lojas", show: isAdmin, showBadge: false },
         { icon: Users, label: tr('menu.items.gestores', 'Gestores'), path: "/gestores", show: isAdmin, showBadge: false },
         { icon: UserCog, label: tr('menu.items.utilizadores', 'Utilizadores'), path: "/utilizadores", show: isAdmin, showBadge: false },
+        { icon: Eye, label: tr('menu.items.portalGestor', 'Portal Gestor'), path: "/portal-gestor", show: isGestor, showBadge: false },
         { icon: Building2, label: tr('menu.items.minhasLojas', 'Minhas Lojas'), path: "/minhas-lojas", show: isGestor, showBadge: false },
         { icon: Link2, label: tr('menu.items.relacoesLojas', 'Relações Lojas'), path: "/relacoes-lojas", show: isGestor || isAdmin, showBadge: false },
       ]
