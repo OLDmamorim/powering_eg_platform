@@ -1,0 +1,18 @@
+{
+  "query": "SELECT u.id as oderId, u.name, u.email, u.role, g.id as gestorId, \n       (SELECT COUNT(*) FROM gestor_lojas gl WHERE gl.gestorId = g.id) as numLojas\nFROM users u\nLEFT JOIN gestores g ON g.userId = u.id\nWHERE u.name LIKE '%Fábio%' OR u.name LIKE '%Fabio%';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT u.id as oderId, u.name, u.email, u.role, g.id as gestorId, \n       (SELECT COUNT(*) FROM gestor_lojas gl WHERE gl.gestorId = g.id) as numLojas\nFROM users u\nLEFT JOIN gestores g ON g.userId = u.id\nWHERE u.name LIKE '%Fábio%' OR u.name LIKE '%Fabio%';",
+  "rows": [
+    {
+      "oderId": "7980023",
+      "name": "Fabio Dias",
+      "email": "fdias@expressglass.pt",
+      "role": "gestor",
+      "gestorId": "1350001",
+      "numLojas": "13"
+    }
+  ],
+  "messages": [],
+  "stdout": "oderId\tname\temail\trole\tgestorId\tnumLojas\n7980023\tFabio Dias\tfdias@expressglass.pt\tgestor\t1350001\t13\n",
+  "stderr": "",
+  "execution_time_ms": 59
+}

@@ -1,0 +1,46 @@
+{
+  "query": "SELECT rl.id, rl.lojaId, l.nome as lojaNome, rl.gestorId, rl.dataVisita, LEFT(rl.descricao, 50) as descricao\nFROM relatorios_livres rl\nLEFT JOIN gestores g ON rl.gestorId = g.id\nLEFT JOIN lojas l ON rl.lojaId = l.id\nWHERE g.id IS NULL\nAND rl.lojaId IN (\n  SELECT gl2.lojaId FROM gestor_lojas gl2 \n  INNER JOIN gestores g2 ON gl2.gestorId = g2.id\n  INNER JOIN users u2 ON g2.userId = u2.id\n  WHERE u2.name LIKE '%Fábio%' OR u2.name LIKE '%Fabio%'\n)\nORDER BY rl.dataVisita DESC;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT rl.id, rl.lojaId, l.nome as lojaNome, rl.gestorId, rl.dataVisita, LEFT(rl.descricao, 50) as descricao\nFROM relatorios_livres rl\nLEFT JOIN gestores g ON rl.gestorId = g.id\nLEFT JOIN lojas l ON rl.lojaId = l.id\nWHERE g.id IS NULL\nAND rl.lojaId IN (\n  SELECT gl2.lojaId FROM gestor_lojas gl2 \n  INNER JOIN gestores g2 ON gl2.gestorId = g2.id\n  INNER JOIN users u2 ON g2.userId = u2.id\n  WHERE u2.name LIKE '%Fábio%' OR u2.name LIKE '%Fabio%'\n)\nORDER BY rl.dataVisita DESC;",
+  "rows": [
+    {
+      "id": "1260003",
+      "lojaId": "180049",
+      "lojaNome": "Santarém",
+      "gestorId": "1020001",
+      "dataVisita": "2026-01-12 17:00:15",
+      "descricao": "Primeira visita em 2026 "
+    },
+    {
+      "id": "1260001",
+      "lojaId": "180001",
+      "lojaNome": "Abrantes",
+      "gestorId": "1020001",
+      "dataVisita": "2026-01-12 15:53:00",
+      "descricao": "Curta visita pela loja de Abrantes "
+    },
+    {
+      "id": "1230002",
+      "lojaId": "180013",
+      "lojaNome": "Castanheira do ribatejo",
+      "gestorId": "1020001",
+      "dataVisita": "2026-01-12 13:38:00",
+      "descricao": "Reunião de 30 minutos ao início do dia."
+    },
+    {
+      "id": "1230001",
+      "lojaId": "180018",
+      "lojaNome": "Entroncamento",
+      "gestorId": "1020001",
+      "dataVisita": "2026-01-12 13:34:00",
+      "descricao": "A visita foi motivado para abordar o colega, José "
+    }
+  ],
+  "messages": [
+    "Visita rápida para cumpri",
+    "Perceber se os",
+    "O Paulo Ro"
+  ],
+  "stdout": "id\tlojaId\tlojaNome\tgestorId\tdataVisita\tdescricao\n1260003\t180049\tSantarém\t1020001\t2026-01-12 17:00:15\tPrimeira visita em 2026 \nVisita rápida para cumpri\n1260001\t180001\tAbrantes\t1020001\t2026-01-12 15:53:00\tCurta visita pela loja de Abrantes \nPerceber se os\n1230002\t180013\tCastanheira do ribatejo\t1020001\t2026-01-12 13:38:00\tReunião de 30 minutos ao início do dia.\nO Paulo Ro\n1230001\t180018\tEntroncamento\t1020001\t2026-01-12 13:34:00\tA visita foi motivado para abordar o colega, José \n",
+  "stderr": "",
+  "execution_time_ms": 64
+}

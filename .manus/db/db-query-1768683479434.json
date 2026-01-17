@@ -1,0 +1,9 @@
+{
+  "query": "SELECT vp.id, vp.lojaId, l.nome as lojaNome, vp.dataVisita, vp.estado, pv.gestorId\nFROM visitas_planeadas vp\nINNER JOIN projecoes_visitas pv ON vp.projecaoId = pv.id\nINNER JOIN lojas l ON vp.lojaId = l.id\nINNER JOIN gestores g ON pv.gestorId = g.id\nINNER JOIN users u ON g.userId = u.id\nWHERE u.name LIKE '%Fábio%' OR u.name LIKE '%Fabio%'\nORDER BY vp.dataVisita DESC\nLIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT vp.id, vp.lojaId, l.nome as lojaNome, vp.dataVisita, vp.estado, pv.gestorId\nFROM visitas_planeadas vp\nINNER JOIN projecoes_visitas pv ON vp.projecaoId = pv.id\nINNER JOIN lojas l ON vp.lojaId = l.id\nINNER JOIN gestores g ON pv.gestorId = g.id\nINNER JOIN users u ON g.userId = u.id\nWHERE u.name LIKE '%Fábio%' OR u.name LIKE '%Fabio%'\nORDER BY vp.dataVisita DESC\nLIMIT 10;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 60
+}

@@ -1,0 +1,22 @@
+{
+  "query": "SELECT 'Fábio' as tipo, g.id as gestorId, g.userId, u.name\nFROM gestores g\nINNER JOIN users u ON g.userId = u.id\nWHERE u.name LIKE '%Fábio%' OR u.name LIKE '%Fabio%'\nUNION ALL\nSELECT 'Criador Relatórios' as tipo, g.id as gestorId, g.userId, u.name\nFROM gestores g\nINNER JOIN users u ON g.userId = u.id\nWHERE g.id IN (SELECT DISTINCT gestorId FROM relatorios_livres);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT 'Fábio' as tipo, g.id as gestorId, g.userId, u.name\nFROM gestores g\nINNER JOIN users u ON g.userId = u.id\nWHERE u.name LIKE '%Fábio%' OR u.name LIKE '%Fabio%'\nUNION ALL\nSELECT 'Criador Relatórios' as tipo, g.id as gestorId, g.userId, u.name\nFROM gestores g\nINNER JOIN users u ON g.userId = u.id\nWHERE g.id IN (SELECT DISTINCT gestorId FROM relatorios_livres);",
+  "rows": [
+    {
+      "tipo": "Fábio",
+      "gestorId": "1350001",
+      "userId": "7980023",
+      "name": "Fabio Dias"
+    },
+    {
+      "tipo": "Criador Relatórios",
+      "gestorId": "30001",
+      "userId": "420030",
+      "name": "Marco Amorim"
+    }
+  ],
+  "messages": [],
+  "stdout": "tipo\tgestorId\tuserId\tname\nFábio\t1350001\t7980023\tFabio Dias\nCriador Relatórios\t30001\t420030\tMarco Amorim\n",
+  "stderr": "",
+  "execution_time_ms": 57
+}

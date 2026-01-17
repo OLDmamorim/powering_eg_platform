@@ -1,0 +1,88 @@
+{
+  "query": "SELECT g.id as gestorId, u.name as gestorNome, gl.lojaId, l.nome as lojaNome\nFROM gestores g\nINNER JOIN users u ON g.userId = u.id\nLEFT JOIN gestor_lojas gl ON g.id = gl.gestorId\nLEFT JOIN lojas l ON gl.lojaId = l.id\nWHERE u.name LIKE '%Fábio%' OR u.name LIKE '%Fabio%';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT g.id as gestorId, u.name as gestorNome, gl.lojaId, l.nome as lojaNome\nFROM gestores g\nINNER JOIN users u ON g.userId = u.id\nLEFT JOIN gestor_lojas gl ON g.id = gl.gestorId\nLEFT JOIN lojas l ON gl.lojaId = l.id\nWHERE u.name LIKE '%Fábio%' OR u.name LIKE '%Fabio%';",
+  "rows": [
+    {
+      "gestorId": "1350001",
+      "gestorNome": "Fabio Dias",
+      "lojaId": "180001",
+      "lojaNome": "Abrantes"
+    },
+    {
+      "gestorId": "1350001",
+      "gestorNome": "Fabio Dias",
+      "lojaId": "180012",
+      "lojaNome": "Caldas da rainha"
+    },
+    {
+      "gestorId": "1350001",
+      "gestorNome": "Fabio Dias",
+      "lojaId": "180013",
+      "lojaNome": "Castanheira do ribatejo"
+    },
+    {
+      "gestorId": "1350001",
+      "gestorNome": "Fabio Dias",
+      "lojaId": "180018",
+      "lojaNome": "Entroncamento"
+    },
+    {
+      "gestorId": "1350001",
+      "gestorNome": "Fabio Dias",
+      "lojaId": "180020",
+      "lojaNome": "Faro"
+    },
+    {
+      "gestorId": "1350001",
+      "gestorNome": "Fabio Dias",
+      "lojaId": "180021",
+      "lojaNome": "Faro sm"
+    },
+    {
+      "gestorId": "1350001",
+      "gestorNome": "Fabio Dias",
+      "lojaId": "180027",
+      "lojaNome": "Leziria sm"
+    },
+    {
+      "gestorId": "1350001",
+      "gestorNome": "Fabio Dias",
+      "lojaId": "180034",
+      "lojaNome": "Montijo"
+    },
+    {
+      "gestorId": "1350001",
+      "gestorNome": "Fabio Dias",
+      "lojaId": "180040",
+      "lojaNome": "Portimão"
+    },
+    {
+      "gestorId": "1350001",
+      "gestorNome": "Fabio Dias",
+      "lojaId": "180043",
+      "lojaNome": "Porto alto"
+    },
+    {
+      "gestorId": "1350001",
+      "gestorNome": "Fabio Dias",
+      "lojaId": "180049",
+      "lojaNome": "Santarém"
+    },
+    {
+      "gestorId": "1350001",
+      "gestorNome": "Fabio Dias",
+      "lojaId": "180052",
+      "lojaNome": "Sm caldas da rainha"
+    },
+    {
+      "gestorId": "1350001",
+      "gestorNome": "Fabio Dias",
+      "lojaId": "180056",
+      "lojaNome": "Vale do tejo sm"
+    }
+  ],
+  "messages": [],
+  "stdout": "gestorId\tgestorNome\tlojaId\tlojaNome\n1350001\tFabio Dias\t180001\tAbrantes\n1350001\tFabio Dias\t180012\tCaldas da rainha\n1350001\tFabio Dias\t180013\tCastanheira do ribatejo\n1350001\tFabio Dias\t180018\tEntroncamento\n1350001\tFabio Dias\t180020\tFaro\n1350001\tFabio Dias\t180021\tFaro sm\n1350001\tFabio Dias\t180027\tLeziria sm\n1350001\tFabio Dias\t180034\tMontijo\n1350001\tFabio Dias\t180040\tPortimão\n1350001\tFabio Dias\t180043\tPorto alto\n1350001\tFabio Dias\t180049\tSantarém\n1350001\tFabio Dias\t180052\tSm caldas da rainha\n1350001\tFabio Dias\t180056\tVale do tejo sm\n",
+  "stderr": "",
+  "execution_time_ms": 54
+}

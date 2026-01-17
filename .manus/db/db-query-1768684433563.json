@@ -1,0 +1,1288 @@
+{
+  "query": "SELECT rl.lojaId, l.nome as lojaNome, COUNT(*) as numRelatorios,\n       CASE WHEN gl.lojaId IS NOT NULL THEN 'Sim' ELSE 'Não' END as lojaDoFabio\nFROM relatorios_livres rl\nLEFT JOIN gestores g ON rl.gestorId = g.id\nLEFT JOIN lojas l ON rl.lojaId = l.id\nLEFT JOIN (\n  SELECT gl2.lojaId FROM gestor_lojas gl2 \n  INNER JOIN gestores g2 ON gl2.gestorId = g2.id\n  INNER JOIN users u2 ON g2.userId = u2.id\n  WHERE u2.name LIKE '%Fábio%' OR u2.name LIKE '%Fabio%'\n) gl ON rl.lojaId = gl.lojaId\nWHERE g.id IS NULL\nGROUP BY rl.lojaId, l.nome, gl.lojaId\nORDER BY l.nome;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT rl.lojaId, l.nome as lojaNome, COUNT(*) as numRelatorios,\n       CASE WHEN gl.lojaId IS NOT NULL THEN 'Sim' ELSE 'Não' END as lojaDoFabio\nFROM relatorios_livres rl\nLEFT JOIN gestores g ON rl.gestorId = g.id\nLEFT JOIN lojas l ON rl.lojaId = l.id\nLEFT JOIN (\n  SELECT gl2.lojaId FROM gestor_lojas gl2 \n  INNER JOIN gestores g2 ON gl2.gestorId = g2.id\n  INNER JOIN users u2 ON g2.userId = u2.id\n  WHERE u2.name LIKE '%Fábio%' OR u2.name LIKE '%Fabio%'\n) gl ON rl.lojaId = gl.lojaId\nWHERE g.id IS NULL\nGROUP BY rl.lojaId, l.nome, gl.lojaId\nORDER BY l.nome;",
+  "rows": [
+    {
+      "lojaId": "720006",
+      "lojaNome": "NULL",
+      "numRelatorios": "2",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "1050007",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "840062",
+      "lojaNome": "NULL",
+      "numRelatorios": "3",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "600043",
+      "lojaNome": "NULL",
+      "numRelatorios": "2",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "870005",
+      "lojaNome": "NULL",
+      "numRelatorios": "3",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "750007",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "540037",
+      "lojaNome": "NULL",
+      "numRelatorios": "2",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "870014",
+      "lojaNome": "NULL",
+      "numRelatorios": "2",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "660032",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "900021",
+      "lojaNome": "NULL",
+      "numRelatorios": "3",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "540059",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "660002",
+      "lojaNome": "NULL",
+      "numRelatorios": "3",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "600003",
+      "lojaNome": "NULL",
+      "numRelatorios": "2",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "720004",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "840114",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "660006",
+      "lojaNome": "NULL",
+      "numRelatorios": "3",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "960005",
+      "lojaNome": "NULL",
+      "numRelatorios": "3",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "960045",
+      "lojaNome": "NULL",
+      "numRelatorios": "2",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "840011",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "1020002",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "990002",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "1050005",
+      "lojaNome": "NULL",
+      "numRelatorios": "3",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "840010",
+      "lojaNome": "NULL",
+      "numRelatorios": "2",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "600051",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "510013",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "750037",
+      "lojaNome": "NULL",
+      "numRelatorios": "2",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "690049",
+      "lojaNome": "NULL",
+      "numRelatorios": "2",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "690057",
+      "lojaNome": "NULL",
+      "numRelatorios": "2",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "810002",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "510017",
+      "lojaNome": "NULL",
+      "numRelatorios": "2",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "960076",
+      "lojaNome": "NULL",
+      "numRelatorios": "2",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "840077",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "900002",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "510009",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "1050037",
+      "lojaNome": "NULL",
+      "numRelatorios": "2",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "960007",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "990006",
+      "lojaNome": "NULL",
+      "numRelatorios": "2",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "1020005",
+      "lojaNome": "NULL",
+      "numRelatorios": "3",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "690050",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "510043",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "960044",
+      "lojaNome": "NULL",
+      "numRelatorios": "3",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "840032",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "960042",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "690041",
+      "lojaNome": "NULL",
+      "numRelatorios": "2",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "900018",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "840009",
+      "lojaNome": "NULL",
+      "numRelatorios": "3",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "840063",
+      "lojaNome": "NULL",
+      "numRelatorios": "2",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "780039",
+      "lojaNome": "NULL",
+      "numRelatorios": "2",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "600030",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "600063",
+      "lojaNome": "NULL",
+      "numRelatorios": "2",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "540041",
+      "lojaNome": "NULL",
+      "numRelatorios": "3",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "840087",
+      "lojaNome": "NULL",
+      "numRelatorios": "2",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "840076",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "120004",
+      "lojaNome": "NULL",
+      "numRelatorios": "3",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "990003",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "600006",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "510041",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "960006",
+      "lojaNome": "NULL",
+      "numRelatorios": "2",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "840110",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "510020",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "690006",
+      "lojaNome": "NULL",
+      "numRelatorios": "4",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "540069",
+      "lojaNome": "NULL",
+      "numRelatorios": "2",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "780009",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "90005",
+      "lojaNome": "NULL",
+      "numRelatorios": "5",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "870007",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "690052",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "720037",
+      "lojaNome": "NULL",
+      "numRelatorios": "2",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "900023",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "540058",
+      "lojaNome": "NULL",
+      "numRelatorios": "2",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "1050002",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "840079",
+      "lojaNome": "NULL",
+      "numRelatorios": "2",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "570004",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "120001",
+      "lojaNome": "NULL",
+      "numRelatorios": "3",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "690073",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "690064",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "510004",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "1050004",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "960043",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "750004",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "600047",
+      "lojaNome": "NULL",
+      "numRelatorios": "3",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "690065",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "840078",
+      "lojaNome": "NULL",
+      "numRelatorios": "3",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "840109",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "840116",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "1020006",
+      "lojaNome": "NULL",
+      "numRelatorios": "2",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "1050006",
+      "lojaNome": "NULL",
+      "numRelatorios": "2",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "510035",
+      "lojaNome": "NULL",
+      "numRelatorios": "2",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "840006",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "360001",
+      "lojaNome": "NULL",
+      "numRelatorios": "2",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "570002",
+      "lojaNome": "NULL",
+      "numRelatorios": "3",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "690007",
+      "lojaNome": "NULL",
+      "numRelatorios": "2",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "840094",
+      "lojaNome": "NULL",
+      "numRelatorios": "3",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "690009",
+      "lojaNome": "NULL",
+      "numRelatorios": "3",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "960004",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "750006",
+      "lojaNome": "NULL",
+      "numRelatorios": "2",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "900020",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "570007",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "540043",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "240003",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "570005",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "840008",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "540002",
+      "lojaNome": "NULL",
+      "numRelatorios": "3",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "540044",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "960046",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "840064",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "750005",
+      "lojaNome": "NULL",
+      "numRelatorios": "3",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "690036",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "990005",
+      "lojaNome": "NULL",
+      "numRelatorios": "3",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "870006",
+      "lojaNome": "NULL",
+      "numRelatorios": "2",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "510006",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "690002",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "780008",
+      "lojaNome": "NULL",
+      "numRelatorios": "2",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "840080",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "720002",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "240002",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "690010",
+      "lojaNome": "NULL",
+      "numRelatorios": "2",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "540046",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "600028",
+      "lojaNome": "NULL",
+      "numRelatorios": "2",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "1020007",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "540003",
+      "lojaNome": "NULL",
+      "numRelatorios": "2",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "870003",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "690047",
+      "lojaNome": "NULL",
+      "numRelatorios": "3",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "900007",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "510012",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "900006",
+      "lojaNome": "NULL",
+      "numRelatorios": "2",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "240001",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "570003",
+      "lojaNome": "NULL",
+      "numRelatorios": "2",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "840035",
+      "lojaNome": "NULL",
+      "numRelatorios": "3",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "900005",
+      "lojaNome": "NULL",
+      "numRelatorios": "3",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "510021",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "510016",
+      "lojaNome": "NULL",
+      "numRelatorios": "3",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "810007",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "540053",
+      "lojaNome": "NULL",
+      "numRelatorios": "2",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "960037",
+      "lojaNome": "NULL",
+      "numRelatorios": "2",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "600027",
+      "lojaNome": "NULL",
+      "numRelatorios": "3",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "900022",
+      "lojaNome": "NULL",
+      "numRelatorios": "2",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "990007",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "690004",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "540006",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "900030",
+      "lojaNome": "NULL",
+      "numRelatorios": "2",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "600050",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "270001",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "840059",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "600007",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "840092",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "600032",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "1020037",
+      "lojaNome": "NULL",
+      "numRelatorios": "2",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "540061",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "540062",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "540042",
+      "lojaNome": "NULL",
+      "numRelatorios": "2",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "870004",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "840111",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "660037",
+      "lojaNome": "NULL",
+      "numRelatorios": "2",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "510002",
+      "lojaNome": "NULL",
+      "numRelatorios": "3",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "600002",
+      "lojaNome": "NULL",
+      "numRelatorios": "3",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "510003",
+      "lojaNome": "NULL",
+      "numRelatorios": "2",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "540057",
+      "lojaNome": "NULL",
+      "numRelatorios": "3",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "660004",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "690011",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "660005",
+      "lojaNome": "NULL",
+      "numRelatorios": "4",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "690008",
+      "lojaNome": "NULL",
+      "numRelatorios": "3",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "720007",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "840096",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "510040",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "690003",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "690066",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "810006",
+      "lojaNome": "NULL",
+      "numRelatorios": "2",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "690046",
+      "lojaNome": "NULL",
+      "numRelatorios": "2",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "660003",
+      "lojaNome": "NULL",
+      "numRelatorios": "2",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "840036",
+      "lojaNome": "NULL",
+      "numRelatorios": "2",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "600048",
+      "lojaNome": "NULL",
+      "numRelatorios": "2",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "810003",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "690048",
+      "lojaNome": "NULL",
+      "numRelatorios": "3",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "540005",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "690071",
+      "lojaNome": "NULL",
+      "numRelatorios": "3",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "510038",
+      "lojaNome": "NULL",
+      "numRelatorios": "3",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "1110006",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "270002",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "600029",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "900014",
+      "lojaNome": "NULL",
+      "numRelatorios": "2",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "690072",
+      "lojaNome": "NULL",
+      "numRelatorios": "2",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "840093",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "510063",
+      "lojaNome": "NULL",
+      "numRelatorios": "2",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "840095",
+      "lojaNome": "NULL",
+      "numRelatorios": "2",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "660007",
+      "lojaNome": "NULL",
+      "numRelatorios": "2",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "840071",
+      "lojaNome": "NULL",
+      "numRelatorios": "2",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "960002",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "510018",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "600004",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "540004",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "810014",
+      "lojaNome": "NULL",
+      "numRelatorios": "2",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "840061",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "840033",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "810005",
+      "lojaNome": "NULL",
+      "numRelatorios": "3",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "510039",
+      "lojaNome": "NULL",
+      "numRelatorios": "2",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "780007",
+      "lojaNome": "NULL",
+      "numRelatorios": "3",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "840055",
+      "lojaNome": "NULL",
+      "numRelatorios": "2",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "840003",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "840103",
+      "lojaNome": "NULL",
+      "numRelatorios": "2",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "1110001",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "210002",
+      "lojaNome": "NULL",
+      "numRelatorios": "3",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "600049",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "750003",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "720005",
+      "lojaNome": "NULL",
+      "numRelatorios": "3",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "990037",
+      "lojaNome": "NULL",
+      "numRelatorios": "2",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "840037",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "1020003",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "690045",
+      "lojaNome": "NULL",
+      "numRelatorios": "4",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "900003",
+      "lojaNome": "NULL",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Não"
+    },
+    {
+      "lojaId": "180001",
+      "lojaNome": "Abrantes",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Sim"
+    },
+    {
+      "lojaId": "180013",
+      "lojaNome": "Castanheira do ribatejo",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Sim"
+    },
+    {
+      "lojaId": "180018",
+      "lojaNome": "Entroncamento",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Sim"
+    },
+    {
+      "lojaId": "180049",
+      "lojaNome": "Santarém",
+      "numRelatorios": "1",
+      "lojaDoFabio": "Sim"
+    }
+  ],
+  "messages": [],
+  "stdout": "lojaId\tlojaNome\tnumRelatorios\tlojaDoFabio\n720006\tNULL\t2\tNão\n1050007\tNULL\t1\tNão\n840062\tNULL\t3\tNão\n600043\tNULL\t2\tNão\n870005\tNULL\t3\tNão\n750007\tNULL\t1\tNão\n540037\tNULL\t2\tNão\n870014\tNULL\t2\tNão\n660032\tNULL\t1\tNão\n900021\tNULL\t3\tNão\n540059\tNULL\t1\tNão\n660002\tNULL\t3\tNão\n600003\tNULL\t2\tNão\n720004\tNULL\t1\tNão\n840114\tNULL\t1\tNão\n660006\tNULL\t3\tNão\n960005\tNULL\t3\tNão\n960045\tNULL\t2\tNão\n840011\tNULL\t1\tNão\n1020002\tNULL\t1\tNão\n990002\tNULL\t1\tNão\n1050005\tNULL\t3\tNão\n840010\tNULL\t2\tNão\n600051\tNULL\t1\tNão\n510013\tNULL\t1\tNão\n750037\tNULL\t2\tNão\n690049\tNULL\t2\tNão\n690057\tNULL\t2\tNão\n810002\tNULL\t1\tNão\n510017\tNULL\t2\tNão\n960076\tNULL\t2\tNão\n840077\tNULL\t1\tNão\n900002\tNULL\t1\tNão\n510009\tNULL\t1\tNão\n1050037\tNULL\t2\tNão\n960007\tNULL\t1\tNão\n990006\tNULL\t2\tNão\n1020005\tNULL\t3\tNão\n690050\tNULL\t1\tNão\n510043\tNULL\t1\tNão\n960044\tNULL\t3\tNão\n840032\tNULL\t1\tNão\n960042\tNULL\t1\tNão\n690041\tNULL\t2\tNão\n900018\tNULL\t1\tNão\n840009\tNULL\t3\tNão\n840063\tNULL\t2\tNão\n780039\tNULL\t2\tNão\n600030\tNULL\t1\tNão\n600063\tNULL\t2\tNão\n540041\tNULL\t3\tNão\n840087\tNULL\t2\tNão\n840076\tNULL\t1\tNão\n120004\tNULL\t3\tNão\n990003\tNULL\t1\tNão\n600006\tNULL\t1\tNão\n510041\tNULL\t1\tNão\n960006\tNULL\t2\tNão\n840110\tNULL\t1\tNão\n510020\tNULL\t1\tNão\n690006\tNULL\t4\tNão\n540069\tNULL\t2\tNão\n780009\tNULL\t1\tNão\n90005\tNULL\t5\tNão\n870007\tNULL\t1\tNão\n690052\tNULL\t1\tNão\n720037\tNULL\t2\tNão\n900023\tNULL\t1\tNão\n540058\tNULL\t2\tNão\n1050002\tNULL\t1\tNão\n840079\tNULL\t2\tNão\n570004\tNULL\t1\tNão\n120001\tNULL\t3\tNão\n690073\tNULL\t1\tNão\n690064\tNULL\t1\tNão\n510004\tNULL\t1\tNão\n1050004\tNULL\t1\tNão\n960043\tNULL\t1\tNão\n750004\tNULL\t1\tNão\n600047\tNULL\t3\tNão\n690065\tNULL\t1\tNão\n840078\tNULL\t3\tNão\n840109\tNULL\t1\tNão\n840116\tNULL\t1\tNão\n1020006\tNULL\t2\tNão\n1050006\tNULL\t2\tNão\n510035\tNULL\t2\tNão\n840006\tNULL\t1\tNão\n360001\tNULL\t2\tNão\n570002\tNULL\t3\tNão\n690007\tNULL\t2\tNão\n840094\tNULL\t3\tNão\n690009\tNULL\t3\tNão\n960004\tNULL\t1\tNão\n750006\tNULL\t2\tNão\n900020\tNULL\t1\tNão\n570007\tNULL\t1\tNão\n540043\tNULL\t1\tNão\n240003\tNULL\t1\tNão\n570005\tNULL\t1\tNão\n840008\tNULL\t1\tNão\n540002\tNULL\t3\tNão\n540044\tNULL\t1\tNão\n960046\tNULL\t1\tNão\n840064\tNULL\t1\tNão\n750005\tNULL\t3\tNão\n690036\tNULL\t1\tNão\n990005\tNULL\t3\tNão\n870006\tNULL\t2\tNão\n510006\tNULL\t1\tNão\n690002\tNULL\t1\tNão\n780008\tNULL\t2\tNão\n840080\tNULL\t1\tNão\n720002\tNULL\t1\tNão\n240002\tNULL\t1\tNão\n690010\tNULL\t2\tNão\n540046\tNULL\t1\tNão\n600028\tNULL\t2\tNão\n1020007\tNULL\t1\tNão\n540003\tNULL\t2\tNão\n870003\tNULL\t1\tNão\n690047\tNULL\t3\tNão\n900007\tNULL\t1\tNão\n510012\tNULL\t1\tNão\n900006\tNULL\t2\tNão\n240001\tNULL\t1\tNão\n570003\tNULL\t2\tNão\n840035\tNULL\t3\tNão\n900005\tNULL\t3\tNão\n510021\tNULL\t1\tNão\n510016\tNULL\t3\tNão\n810007\tNULL\t1\tNão\n540053\tNULL\t2\tNão\n960037\tNULL\t2\tNão\n600027\tNULL\t3\tNão\n900022\tNULL\t2\tNão\n990007\tNULL\t1\tNão\n690004\tNULL\t1\tNão\n540006\tNULL\t1\tNão\n900030\tNULL\t2\tNão\n600050\tNULL\t1\tNão\n270001\tNULL\t1\tNão\n840059\tNULL\t1\tNão\n600007\tNULL\t1\tNão\n840092\tNULL\t1\tNão\n600032\tNULL\t1\tNão\n1020037\tNULL\t2\tNão\n540061\tNULL\t1\tNão\n540062\tNULL\t1\tNão\n540042\tNULL\t2\tNão\n870004\tNULL\t1\tNão\n840111\tNULL\t1\tNão\n660037\tNULL\t2\tNão\n510002\tNULL\t3\tNão\n600002\tNULL\t3\tNão\n510003\tNULL\t2\tNão\n540057\tNULL\t3\tNão\n660004\tNULL\t1\tNão\n690011\tNULL\t1\tNão\n660005\tNULL\t4\tNão\n690008\tNULL\t3\tNão\n720007\tNULL\t1\tNão\n840096\tNULL\t1\tNão\n510040\tNULL\t1\tNão\n690003\tNULL\t1\tNão\n690066\tNULL\t1\tNão\n810006\tNULL\t2\tNão\n690046\tNULL\t2\tNão\n660003\tNULL\t2\tNão\n840036\tNULL\t2\tNão\n600048\tNULL\t2\tNão\n810003\tNULL\t1\tNão\n690048\tNULL\t3\tNão\n540005\tNULL\t1\tNão\n690071\tNULL\t3\tNão\n510038\tNULL\t3\tNão\n1110006\tNULL\t1\tNão\n270002\tNULL\t1\tNão\n600029\tNULL\t1\tNão\n900014\tNULL\t2\tNão\n690072\tNULL\t2\tNão\n840093\tNULL\t1\tNão\n510063\tNULL\t2\tNão\n840095\tNULL\t2\tNão\n660007\tNULL\t2\tNão\n840071\tNULL\t2\tNão\n960002\tNULL\t1\tNão\n510018\tNULL\t1\tNão\n600004\tNULL\t1\tNão\n540004\tNULL\t1\tNão\n810014\tNULL\t2\tNão\n840061\tNULL\t1\tNão\n840033\tNULL\t1\tNão\n810005\tNULL\t3\tNão\n510039\tNULL\t2\tNão\n780007\tNULL\t3\tNão\n840055\tNULL\t2\tNão\n840003\tNULL\t1\tNão\n840103\tNULL\t2\tNão\n1110001\tNULL\t1\tNão\n210002\tNULL\t3\tNão\n600049\tNULL\t1\tNão\n750003\tNULL\t1\tNão\n720005\tNULL\t3\tNão\n990037\tNULL\t2\tNão\n840037\tNULL\t1\tNão\n1020003\tNULL\t1\tNão\n690045\tNULL\t4\tNão\n900003\tNULL\t1\tNão\n180001\tAbrantes\t1\tSim\n180013\tCastanheira do ribatejo\t1\tSim\n180018\tEntroncamento\t1\tSim\n180049\tSantarém\t1\tSim\n",
+  "stderr": "",
+  "execution_time_ms": 64
+}

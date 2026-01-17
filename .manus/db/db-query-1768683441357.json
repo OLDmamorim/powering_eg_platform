@@ -1,0 +1,14 @@
+{
+  "query": "SELECT g.id, u.name FROM gestores g INNER JOIN users u ON g.userId = u.id WHERE u.name LIKE '%Fábio%' OR u.name LIKE '%Fabio%';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT g.id, u.name FROM gestores g INNER JOIN users u ON g.userId = u.id WHERE u.name LIKE '%Fábio%' OR u.name LIKE '%Fabio%';",
+  "rows": [
+    {
+      "id": "1350001",
+      "name": "Fabio Dias"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\n1350001\tFabio Dias\n",
+  "stderr": "",
+  "execution_time_ms": 61
+}

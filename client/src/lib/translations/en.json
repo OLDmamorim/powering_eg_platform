@@ -223,7 +223,8 @@
       "todo": "To-Do",
       "pendentes": "Pending",
       "projecaoVisitas": "Visit Projection",
-      "relacoesLojas": "Store Relations"
+      "relacoesLojas": "Store Relations",
+      "portalGestor": "Manager Portal"
     }
   },
   "dashboard": {

@@ -1,0 +1,49 @@
+{
+  "query": "SELECT p.*\nFROM pendentes p\nINNER JOIN lojas l ON p.lojaId = l.id\nWHERE p.lojaId IN (\n  SELECT gl.lojaId FROM gestor_lojas gl \n  INNER JOIN gestores g ON gl.gestorId = g.id\n  INNER JOIN users u ON g.userId = u.id\n  WHERE u.name LIKE '%Fábio%' OR u.name LIKE '%Fabio%'\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT p.*\nFROM pendentes p\nINNER JOIN lojas l ON p.lojaId = l.id\nWHERE p.lojaId IN (\n  SELECT gl.lojaId FROM gestor_lojas gl \n  INNER JOIN gestores g ON gl.gestorId = g.id\n  INNER JOIN users u ON g.userId = u.id\n  WHERE u.name LIKE '%Fábio%' OR u.name LIKE '%Fabio%'\n);",
+  "rows": [
+    {
+      "id": "570001",
+      "lojaId": "180018",
+      "relatorioId": "1230001",
+      "tipoRelatorio": "livre",
+      "descricao": "Valor acordo - José Trapp",
+      "resolvido": "0",
+      "dataResolucao": "NULL",
+      "createdAt": "2026-01-12 13:37:54",
+      "updatedAt": "2026-01-12 14:18:16",
+      "visto": "1",
+      "dataLimite": "NULL"
+    },
+    {
+      "id": "600001",
+      "lojaId": "180001",
+      "relatorioId": "1260001",
+      "tipoRelatorio": "livre",
+      "descricao": "Limpar o chão e rodapés",
+      "resolvido": "0",
+      "dataResolucao": "NULL",
+      "createdAt": "2026-01-12 15:55:37",
+      "updatedAt": "2026-01-12 16:03:42",
+      "visto": "1",
+      "dataLimite": "NULL"
+    },
+    {
+      "id": "600002",
+      "lojaId": "180001",
+      "relatorioId": "1260001",
+      "tipoRelatorio": "livre",
+      "descricao": "Reparar e pintar o furo na parede",
+      "resolvido": "0",
+      "dataResolucao": "NULL",
+      "createdAt": "2026-01-12 15:55:37",
+      "updatedAt": "2026-01-12 16:03:42",
+      "visto": "1",
+      "dataLimite": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tlojaId\trelatorioId\ttipoRelatorio\tdescricao\tresolvido\tdataResolucao\tcreatedAt\tupdatedAt\tvisto\tdataLimite\n570001\t180018\t1230001\tlivre\tValor acordo - José Trapp\t0\tNULL\t2026-01-12 13:37:54\t2026-01-12 14:18:16\t1\tNULL\n600001\t180001\t1260001\tlivre\tLimpar o chão e rodapés\t0\tNULL\t2026-01-12 15:55:37\t2026-01-12 16:03:42\t1\tNULL\n600002\t180001\t1260001\tlivre\tReparar e pintar o furo na parede\t0\tNULL\t2026-01-12 15:55:37\t2026-01-12 16:03:42\t1\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 54
+}

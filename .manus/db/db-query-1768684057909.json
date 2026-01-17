@@ -1,0 +1,495 @@
+{
+  "query": "SELECT rl.gestorId, \n       (SELECT COUNT(*) FROM gestores g WHERE g.id = rl.gestorId) as gestorExiste,\n       COUNT(*) as numRelatorios\nFROM relatorios_livres rl\nGROUP BY rl.gestorId;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT rl.gestorId, \n       (SELECT COUNT(*) FROM gestores g WHERE g.id = rl.gestorId) as gestorExiste,\n       COUNT(*) as numRelatorios\nFROM relatorios_livres rl\nGROUP BY rl.gestorId;",
+  "rows": [
+    {
+      "gestorId": "1080026",
+      "gestorExiste": "0",
+      "numRelatorios": "1"
+    },
+    {
+      "gestorId": "810012",
+      "gestorExiste": "0",
+      "numRelatorios": "6"
+    },
+    {
+      "gestorId": "480007",
+      "gestorExiste": "0",
+      "numRelatorios": "3"
+    },
+    {
+      "gestorId": "660002",
+      "gestorExiste": "0",
+      "numRelatorios": "10"
+    },
+    {
+      "gestorId": "1170011",
+      "gestorExiste": "0",
+      "numRelatorios": "6"
+    },
+    {
+      "gestorId": "1110021",
+      "gestorExiste": "0",
+      "numRelatorios": "2"
+    },
+    {
+      "gestorId": "1230008",
+      "gestorExiste": "0",
+      "numRelatorios": "1"
+    },
+    {
+      "gestorId": "480008",
+      "gestorExiste": "0",
+      "numRelatorios": "3"
+    },
+    {
+      "gestorId": "1230003",
+      "gestorExiste": "1",
+      "numRelatorios": "3"
+    },
+    {
+      "gestorId": "1080027",
+      "gestorExiste": "0",
+      "numRelatorios": "1"
+    },
+    {
+      "gestorId": "300005",
+      "gestorExiste": "1",
+      "numRelatorios": "6"
+    },
+    {
+      "gestorId": "510006",
+      "gestorExiste": "0",
+      "numRelatorios": "4"
+    },
+    {
+      "gestorId": "660006",
+      "gestorExiste": "0",
+      "numRelatorios": "1"
+    },
+    {
+      "gestorId": "1080032",
+      "gestorExiste": "0",
+      "numRelatorios": "6"
+    },
+    {
+      "gestorId": "480046",
+      "gestorExiste": "0",
+      "numRelatorios": "2"
+    },
+    {
+      "gestorId": "660003",
+      "gestorExiste": "0",
+      "numRelatorios": "4"
+    },
+    {
+      "gestorId": "750012",
+      "gestorExiste": "0",
+      "numRelatorios": "6"
+    },
+    {
+      "gestorId": "660004",
+      "gestorExiste": "0",
+      "numRelatorios": "6"
+    },
+    {
+      "gestorId": "840007",
+      "gestorExiste": "0",
+      "numRelatorios": "1"
+    },
+    {
+      "gestorId": "540030",
+      "gestorExiste": "0",
+      "numRelatorios": "2"
+    },
+    {
+      "gestorId": "60001",
+      "gestorExiste": "0",
+      "numRelatorios": "5"
+    },
+    {
+      "gestorId": "750019",
+      "gestorExiste": "0",
+      "numRelatorios": "2"
+    },
+    {
+      "gestorId": "510008",
+      "gestorExiste": "0",
+      "numRelatorios": "4"
+    },
+    {
+      "gestorId": "1080011",
+      "gestorExiste": "0",
+      "numRelatorios": "6"
+    },
+    {
+      "gestorId": "450004",
+      "gestorExiste": "0",
+      "numRelatorios": "21"
+    },
+    {
+      "gestorId": "450007",
+      "gestorExiste": "0",
+      "numRelatorios": "3"
+    },
+    {
+      "gestorId": "1290002",
+      "gestorExiste": "1",
+      "numRelatorios": "8"
+    },
+    {
+      "gestorId": "1230006",
+      "gestorExiste": "0",
+      "numRelatorios": "1"
+    },
+    {
+      "gestorId": "750007",
+      "gestorExiste": "0",
+      "numRelatorios": "1"
+    },
+    {
+      "gestorId": "1170006",
+      "gestorExiste": "0",
+      "numRelatorios": "1"
+    },
+    {
+      "gestorId": "1320006",
+      "gestorExiste": "0",
+      "numRelatorios": "2"
+    },
+    {
+      "gestorId": "1290003",
+      "gestorExiste": "1",
+      "numRelatorios": "3"
+    },
+    {
+      "gestorId": "660015",
+      "gestorExiste": "0",
+      "numRelatorios": "2"
+    },
+    {
+      "gestorId": "810019",
+      "gestorExiste": "0",
+      "numRelatorios": "2"
+    },
+    {
+      "gestorId": "840023",
+      "gestorExiste": "0",
+      "numRelatorios": "2"
+    },
+    {
+      "gestorId": "810005",
+      "gestorExiste": "0",
+      "numRelatorios": "1"
+    },
+    {
+      "gestorId": "90001",
+      "gestorExiste": "0",
+      "numRelatorios": "6"
+    },
+    {
+      "gestorId": "660001",
+      "gestorExiste": "0",
+      "numRelatorios": "10"
+    },
+    {
+      "gestorId": "720025",
+      "gestorExiste": "0",
+      "numRelatorios": "12"
+    },
+    {
+      "gestorId": "1080019",
+      "gestorExiste": "0",
+      "numRelatorios": "2"
+    },
+    {
+      "gestorId": "450006",
+      "gestorExiste": "0",
+      "numRelatorios": "2"
+    },
+    {
+      "gestorId": "990038",
+      "gestorExiste": "0",
+      "numRelatorios": "2"
+    },
+    {
+      "gestorId": "1290004",
+      "gestorExiste": "1",
+      "numRelatorios": "8"
+    },
+    {
+      "gestorId": "750005",
+      "gestorExiste": "0",
+      "numRelatorios": "1"
+    },
+    {
+      "gestorId": "270001",
+      "gestorExiste": "1",
+      "numRelatorios": "9"
+    },
+    {
+      "gestorId": "1110006",
+      "gestorExiste": "0",
+      "numRelatorios": "1"
+    },
+    {
+      "gestorId": "1230017",
+      "gestorExiste": "1",
+      "numRelatorios": "1"
+    },
+    {
+      "gestorId": "810008",
+      "gestorExiste": "0",
+      "numRelatorios": "1"
+    },
+    {
+      "gestorId": "1230004",
+      "gestorExiste": "1",
+      "numRelatorios": "1"
+    },
+    {
+      "gestorId": "930008",
+      "gestorExiste": "0",
+      "numRelatorios": "9"
+    },
+    {
+      "gestorId": "480016",
+      "gestorExiste": "0",
+      "numRelatorios": "2"
+    },
+    {
+      "gestorId": "300001",
+      "gestorExiste": "1",
+      "numRelatorios": "25"
+    },
+    {
+      "gestorId": "750001",
+      "gestorExiste": "1",
+      "numRelatorios": "21"
+    },
+    {
+      "gestorId": "30001",
+      "gestorExiste": "1",
+      "numRelatorios": "16"
+    },
+    {
+      "gestorId": "930005",
+      "gestorExiste": "0",
+      "numRelatorios": "11"
+    },
+    {
+      "gestorId": "750003",
+      "gestorExiste": "1",
+      "numRelatorios": "59"
+    },
+    {
+      "gestorId": "540045",
+      "gestorExiste": "0",
+      "numRelatorios": "2"
+    },
+    {
+      "gestorId": "840016",
+      "gestorExiste": "0",
+      "numRelatorios": "12"
+    },
+    {
+      "gestorId": "1110012",
+      "gestorExiste": "0",
+      "numRelatorios": "6"
+    },
+    {
+      "gestorId": "1230012",
+      "gestorExiste": "0",
+      "numRelatorios": "6"
+    },
+    {
+      "gestorId": "480002",
+      "gestorExiste": "0",
+      "numRelatorios": "18"
+    },
+    {
+      "gestorId": "1230001",
+      "gestorExiste": "1",
+      "numRelatorios": "3"
+    },
+    {
+      "gestorId": "720055",
+      "gestorExiste": "0",
+      "numRelatorios": "2"
+    },
+    {
+      "gestorId": "1050007",
+      "gestorExiste": "0",
+      "numRelatorios": "1"
+    },
+    {
+      "gestorId": "1080039",
+      "gestorExiste": "0",
+      "numRelatorios": "2"
+    },
+    {
+      "gestorId": "660008",
+      "gestorExiste": "0",
+      "numRelatorios": "1"
+    },
+    {
+      "gestorId": "1110007",
+      "gestorExiste": "0",
+      "numRelatorios": "1"
+    },
+    {
+      "gestorId": "240001",
+      "gestorExiste": "1",
+      "numRelatorios": "28"
+    },
+    {
+      "gestorId": "1050006",
+      "gestorExiste": "0",
+      "numRelatorios": "1"
+    },
+    {
+      "gestorId": "1020001",
+      "gestorExiste": "0",
+      "numRelatorios": "4"
+    },
+    {
+      "gestorId": "450045",
+      "gestorExiste": "0",
+      "numRelatorios": "2"
+    },
+    {
+      "gestorId": "720032",
+      "gestorExiste": "0",
+      "numRelatorios": "2"
+    },
+    {
+      "gestorId": "750002",
+      "gestorExiste": "1",
+      "numRelatorios": "61"
+    },
+    {
+      "gestorId": "930023",
+      "gestorExiste": "0",
+      "numRelatorios": "50"
+    },
+    {
+      "gestorId": "270002",
+      "gestorExiste": "0",
+      "numRelatorios": "2"
+    },
+    {
+      "gestorId": "840008",
+      "gestorExiste": "0",
+      "numRelatorios": "1"
+    },
+    {
+      "gestorId": "480031",
+      "gestorExiste": "0",
+      "numRelatorios": "2"
+    },
+    {
+      "gestorId": "750015",
+      "gestorExiste": "1",
+      "numRelatorios": "16"
+    },
+    {
+      "gestorId": "510002",
+      "gestorExiste": "0",
+      "numRelatorios": "24"
+    },
+    {
+      "gestorId": "960019",
+      "gestorExiste": "0",
+      "numRelatorios": "2"
+    },
+    {
+      "gestorId": "720069",
+      "gestorExiste": "0",
+      "numRelatorios": "9"
+    },
+    {
+      "gestorId": "930106",
+      "gestorExiste": "0",
+      "numRelatorios": "2"
+    },
+    {
+      "gestorId": "660011",
+      "gestorExiste": "0",
+      "numRelatorios": "3"
+    },
+    {
+      "gestorId": "1230021",
+      "gestorExiste": "0",
+      "numRelatorios": "2"
+    },
+    {
+      "gestorId": "360001",
+      "gestorExiste": "0",
+      "numRelatorios": "2"
+    },
+    {
+      "gestorId": "450030",
+      "gestorExiste": "0",
+      "numRelatorios": "2"
+    },
+    {
+      "gestorId": "930068",
+      "gestorExiste": "0",
+      "numRelatorios": "2"
+    },
+    {
+      "gestorId": "1170021",
+      "gestorExiste": "0",
+      "numRelatorios": "2"
+    },
+    {
+      "gestorId": "240002",
+      "gestorExiste": "0",
+      "numRelatorios": "3"
+    },
+    {
+      "gestorId": "990019",
+      "gestorExiste": "0",
+      "numRelatorios": "2"
+    },
+    {
+      "gestorId": "720011",
+      "gestorExiste": "0",
+      "numRelatorios": "2"
+    },
+    {
+      "gestorId": "930087",
+      "gestorExiste": "0",
+      "numRelatorios": "2"
+    },
+    {
+      "gestorId": "930049",
+      "gestorExiste": "0",
+      "numRelatorios": "2"
+    },
+    {
+      "gestorId": "720012",
+      "gestorExiste": "0",
+      "numRelatorios": "2"
+    },
+    {
+      "gestorId": "1170007",
+      "gestorExiste": "0",
+      "numRelatorios": "1"
+    },
+    {
+      "gestorId": "150001",
+      "gestorExiste": "0",
+      "numRelatorios": "3"
+    },
+    {
+      "gestorId": "870019",
+      "gestorExiste": "0",
+      "numRelatorios": "2"
+    }
+  ],
+  "messages": [],
+  "stdout": "gestorId\tgestorExiste\tnumRelatorios\n1080026\t0\t1\n810012\t0\t6\n480007\t0\t3\n660002\t0\t10\n1170011\t0\t6\n1110021\t0\t2\n1230008\t0\t1\n480008\t0\t3\n1230003\t1\t3\n1080027\t0\t1\n300005\t1\t6\n510006\t0\t4\n660006\t0\t1\n1080032\t0\t6\n480046\t0\t2\n660003\t0\t4\n750012\t0\t6\n660004\t0\t6\n840007\t0\t1\n540030\t0\t2\n60001\t0\t5\n750019\t0\t2\n510008\t0\t4\n1080011\t0\t6\n450004\t0\t21\n450007\t0\t3\n1290002\t1\t8\n1230006\t0\t1\n750007\t0\t1\n1170006\t0\t1\n1320006\t0\t2\n1290003\t1\t3\n660015\t0\t2\n810019\t0\t2\n840023\t0\t2\n810005\t0\t1\n90001\t0\t6\n660001\t0\t10\n720025\t0\t12\n1080019\t0\t2\n450006\t0\t2\n990038\t0\t2\n1290004\t1\t8\n750005\t0\t1\n270001\t1\t9\n1110006\t0\t1\n1230017\t1\t1\n810008\t0\t1\n1230004\t1\t1\n930008\t0\t9\n480016\t0\t2\n300001\t1\t25\n750001\t1\t21\n30001\t1\t16\n930005\t0\t11\n750003\t1\t59\n540045\t0\t2\n840016\t0\t12\n1110012\t0\t6\n1230012\t0\t6\n480002\t0\t18\n1230001\t1\t3\n720055\t0\t2\n1050007\t0\t1\n1080039\t0\t2\n660008\t0\t1\n1110007\t0\t1\n240001\t1\t28\n1050006\t0\t1\n1020001\t0\t4\n450045\t0\t2\n720032\t0\t2\n750002\t1\t61\n930023\t0\t50\n270002\t0\t2\n840008\t0\t1\n480031\t0\t2\n750015\t1\t16\n510002\t0\t24\n960019\t0\t2\n720069\t0\t9\n930106\t0\t2\n660011\t0\t3\n1230021\t0\t2\n360001\t0\t2\n450030\t0\t2\n930068\t0\t2\n1170021\t0\t2\n240002\t0\t3\n990019\t0\t2\n720011\t0\t2\n930087\t0\t2\n930049\t0\t2\n720012\t0\t2\n1170007\t0\t1\n150001\t0\t3\n870019\t0\t2\n",
+  "stderr": "",
+  "execution_time_ms": 65
+}

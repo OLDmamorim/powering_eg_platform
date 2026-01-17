@@ -3065,3 +3065,12 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Reutilizar interface do Portal da Loja (cards Resultados, Tarefas, Pendentes, Reunião)
 - [x] Adicionar rota /portal-gestor no App.tsx
 - [x] Adicionar entrada "Portal Gestor" no menu lateral
+
+## Bug v6.6.21 - Dashboard do Gestor sem Dados
+- [ ] Gráfico "Evolução de Visitas" vazio para gestor Fábio Dias
+- [ ] "Meus Relatórios" mostra 0 apesar de ter feito relatórios
+- [ ] Investigar associação do gestor com user
+- [ ] Verificar queries que filtram por gestorId
+
+## Bug v6.6.21 - Tradução Menu Portal Gestor
+- [x] Corrigir tradução "menu.items.portalGestor" que mostra a chave em vez do texto

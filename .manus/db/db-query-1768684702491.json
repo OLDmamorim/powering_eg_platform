@@ -1,0 +1,9 @@
+{
+  "query": "SELECT rl.id, rl.gestorId, rl.lojaId, l.nome\nFROM relatorios_livres rl\nLEFT JOIN gestores g ON rl.gestorId = g.id\nLEFT JOIN lojas l ON rl.lojaId = l.id\nWHERE g.id IS NULL\nAND rl.lojaId IN (\n  SELECT gl.lojaId FROM gestor_lojas gl \n  INNER JOIN gestores g2 ON gl.gestorId = g2.id\n  INNER JOIN users u ON g2.userId = u.id\n  WHERE u.name LIKE '%Fábio%' OR u.name LIKE '%Fabio%'\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT rl.id, rl.gestorId, rl.lojaId, l.nome\nFROM relatorios_livres rl\nLEFT JOIN gestores g ON rl.gestorId = g.id\nLEFT JOIN lojas l ON rl.lojaId = l.id\nWHERE g.id IS NULL\nAND rl.lojaId IN (\n  SELECT gl.lojaId FROM gestor_lojas gl \n  INNER JOIN gestores g2 ON gl.gestorId = g2.id\n  INNER JOIN users u ON g2.userId = u.id\n  WHERE u.name LIKE '%Fábio%' OR u.name LIKE '%Fabio%'\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 54
+}

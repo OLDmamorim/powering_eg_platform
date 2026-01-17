@@ -1,0 +1,13 @@
+{
+  "query": "SELECT COUNT(*) as totalOrfaos\nFROM relatorios_livres rl\nLEFT JOIN gestores g ON rl.gestorId = g.id\nWHERE g.id IS NULL;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT COUNT(*) as totalOrfaos\nFROM relatorios_livres rl\nLEFT JOIN gestores g ON rl.gestorId = g.id\nWHERE g.id IS NULL;",
+  "rows": [
+    {
+      "totalOrfaos": "361"
+    }
+  ],
+  "messages": [],
+  "stdout": "totalOrfaos\n361\n",
+  "stderr": "",
+  "execution_time_ms": 53
+}

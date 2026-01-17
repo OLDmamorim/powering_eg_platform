@@ -1,0 +1,15 @@
+{
+  "query": "SELECT DISTINCT rl.gestorId, u.name as gestorNome, COUNT(*) as totalRelatorios\nFROM relatorios_livres rl\nINNER JOIN gestores g ON rl.gestorId = g.id\nINNER JOIN users u ON g.userId = u.id\nGROUP BY rl.gestorId, u.name\nORDER BY totalRelatorios DESC;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT DISTINCT rl.gestorId, u.name as gestorNome, COUNT(*) as totalRelatorios\nFROM relatorios_livres rl\nINNER JOIN gestores g ON rl.gestorId = g.id\nINNER JOIN users u ON g.userId = u.id\nGROUP BY rl.gestorId, u.name\nORDER BY totalRelatorios DESC;",
+  "rows": [
+    {
+      "gestorId": "30001",
+      "gestorNome": "Marco Amorim",
+      "totalRelatorios": "16"
+    }
+  ],
+  "messages": [],
+  "stdout": "gestorId\tgestorNome\ttotalRelatorios\n30001\tMarco Amorim\t16\n",
+  "stderr": "",
+  "execution_time_ms": 55
+}

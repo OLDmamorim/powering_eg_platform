@@ -1,0 +1,58 @@
+{
+  "query": "SELECT DISTINCT rl.lojaId, l.nome as lojaNome\nFROM relatorios_livres rl\nINNER JOIN lojas l ON rl.lojaId = l.id\nORDER BY l.nome;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT DISTINCT rl.lojaId, l.nome as lojaNome\nFROM relatorios_livres rl\nINNER JOIN lojas l ON rl.lojaId = l.id\nORDER BY l.nome;",
+  "rows": [
+    {
+      "lojaId": "180001",
+      "lojaNome": "Abrantes"
+    },
+    {
+      "lojaId": "60002",
+      "lojaNome": "Barcelos"
+    },
+    {
+      "lojaId": "180010",
+      "lojaNome": "Braga - minho center"
+    },
+    {
+      "lojaId": "180011",
+      "lojaNome": "Braga sm"
+    },
+    {
+      "lojaId": "180013",
+      "lojaNome": "Castanheira do ribatejo"
+    },
+    {
+      "lojaId": "180018",
+      "lojaNome": "Entroncamento"
+    },
+    {
+      "lojaId": "60001",
+      "lojaNome": "Famalicão"
+    },
+    {
+      "lojaId": "180024",
+      "lojaNome": "Guimarães shopping"
+    },
+    {
+      "lojaId": "60006",
+      "lojaNome": "Paredes"
+    },
+    {
+      "lojaId": "180049",
+      "lojaNome": "Santarém"
+    },
+    {
+      "lojaId": "60004",
+      "lojaNome": "Viana do Castelo "
+    },
+    {
+      "lojaId": "60003",
+      "lojaNome": "Vila Verde"
+    }
+  ],
+  "messages": [],
+  "stdout": "lojaId\tlojaNome\n180001\tAbrantes\n60002\tBarcelos\n180010\tBraga - minho center\n180011\tBraga sm\n180013\tCastanheira do ribatejo\n180018\tEntroncamento\n60001\tFamalicão\n180024\tGuimarães shopping\n60006\tParedes\n180049\tSantarém\n60004\tViana do Castelo \n60003\tVila Verde\n",
+  "stderr": "",
+  "execution_time_ms": 51
+}

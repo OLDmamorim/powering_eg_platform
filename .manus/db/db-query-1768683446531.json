@@ -1,0 +1,136 @@
+{
+  "query": "SELECT rl.id, rl.lojaId, l.nome as lojaNome, rl.gestorId, g.userId, u.name as gestorNome, rl.dataVisita\nFROM relatorios_livres rl\nINNER JOIN lojas l ON rl.lojaId = l.id\nINNER JOIN gestores g ON rl.gestorId = g.id\nINNER JOIN users u ON g.userId = u.id\nORDER BY rl.dataVisita DESC\nLIMIT 20;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT rl.id, rl.lojaId, l.nome as lojaNome, rl.gestorId, g.userId, u.name as gestorNome, rl.dataVisita\nFROM relatorios_livres rl\nINNER JOIN lojas l ON rl.lojaId = l.id\nINNER JOIN gestores g ON rl.gestorId = g.id\nINNER JOIN users u ON g.userId = u.id\nORDER BY rl.dataVisita DESC\nLIMIT 20;",
+  "rows": [
+    {
+      "id": "1290001",
+      "lojaId": "60006",
+      "lojaNome": "Paredes",
+      "gestorId": "30001",
+      "userId": "420030",
+      "gestorNome": "Marco Amorim",
+      "dataVisita": "2026-01-13 11:45:35"
+    },
+    {
+      "id": "1080001",
+      "lojaId": "180010",
+      "lojaNome": "Braga - minho center",
+      "gestorId": "30001",
+      "userId": "420030",
+      "gestorNome": "Marco Amorim",
+      "dataVisita": "2026-01-09 11:12:07"
+    },
+    {
+      "id": "1080002",
+      "lojaId": "180011",
+      "lojaNome": "Braga sm",
+      "gestorId": "30001",
+      "userId": "420030",
+      "gestorNome": "Marco Amorim",
+      "dataVisita": "2026-01-09 11:12:07"
+    },
+    {
+      "id": "870001",
+      "lojaId": "180010",
+      "lojaNome": "Braga - minho center",
+      "gestorId": "30001",
+      "userId": "420030",
+      "gestorNome": "Marco Amorim",
+      "dataVisita": "2026-01-05 00:00:00"
+    },
+    {
+      "id": "600001",
+      "lojaId": "60001",
+      "lojaNome": "Famalicão",
+      "gestorId": "30001",
+      "userId": "420030",
+      "gestorNome": "Marco Amorim",
+      "dataVisita": "2025-12-29 00:00:00"
+    },
+    {
+      "id": "570001",
+      "lojaId": "180010",
+      "lojaNome": "Braga - minho center",
+      "gestorId": "30001",
+      "userId": "420030",
+      "gestorNome": "Marco Amorim",
+      "dataVisita": "2025-12-22 18:47:10"
+    },
+    {
+      "id": "510001",
+      "lojaId": "180024",
+      "lojaNome": "Guimarães shopping",
+      "gestorId": "30001",
+      "userId": "420030",
+      "gestorNome": "Marco Amorim",
+      "dataVisita": "2025-12-19 15:08:00"
+    },
+    {
+      "id": "390001",
+      "lojaId": "60006",
+      "lojaNome": "Paredes",
+      "gestorId": "30001",
+      "userId": "420030",
+      "gestorNome": "Marco Amorim",
+      "dataVisita": "2025-12-18 12:50:46"
+    },
+    {
+      "id": "330001",
+      "lojaId": "180011",
+      "lojaNome": "Braga sm",
+      "gestorId": "30001",
+      "userId": "420030",
+      "gestorNome": "Marco Amorim",
+      "dataVisita": "2025-12-18 00:00:00"
+    },
+    {
+      "id": "300001",
+      "lojaId": "180010",
+      "lojaNome": "Braga - minho center",
+      "gestorId": "30001",
+      "userId": "420030",
+      "gestorNome": "Marco Amorim",
+      "dataVisita": "2025-12-17 23:38:53"
+    },
+    {
+      "id": "270003",
+      "lojaId": "60002",
+      "lojaNome": "Barcelos",
+      "gestorId": "30001",
+      "userId": "420030",
+      "gestorNome": "Marco Amorim",
+      "dataVisita": "2025-12-17 20:48:32"
+    },
+    {
+      "id": "270001",
+      "lojaId": "60003",
+      "lojaNome": "Vila Verde",
+      "gestorId": "30001",
+      "userId": "420030",
+      "gestorNome": "Marco Amorim",
+      "dataVisita": "2025-12-17 20:02:16"
+    },
+    {
+      "id": "150001",
+      "lojaId": "60004",
+      "lojaNome": "Viana do Castelo ",
+      "gestorId": "30001",
+      "userId": "420030",
+      "gestorNome": "Marco Amorim",
+      "dataVisita": "2025-12-16 14:33:07"
+    },
+    {
+      "id": "120001",
+      "lojaId": "60001",
+      "lojaNome": "Famalicão",
+      "gestorId": "30001",
+      "userId": "420030",
+      "gestorNome": "Marco Amorim",
+      "dataVisita": "2025-12-16 08:03:15"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tlojaId\tlojaNome\tgestorId\tuserId\tgestorNome\tdataVisita\n1290001\t60006\tParedes\t30001\t420030\tMarco Amorim\t2026-01-13 11:45:35\n1080001\t180010\tBraga - minho center\t30001\t420030\tMarco Amorim\t2026-01-09 11:12:07\n1080002\t180011\tBraga sm\t30001\t420030\tMarco Amorim\t2026-01-09 11:12:07\n870001\t180010\tBraga - minho center\t30001\t420030\tMarco Amorim\t2026-01-05 00:00:00\n600001\t60001\tFamalicão\t30001\t420030\tMarco Amorim\t2025-12-29 00:00:00\n570001\t180010\tBraga - minho center\t30001\t420030\tMarco Amorim\t2025-12-22 18:47:10\n510001\t180024\tGuimarães shopping\t30001\t420030\tMarco Amorim\t2025-12-19 15:08:00\n390001\t60006\tParedes\t30001\t420030\tMarco Amorim\t2025-12-18 12:50:46\n330001\t180011\tBraga sm\t30001\t420030\tMarco Amorim\t2025-12-18 00:00:00\n300001\t180010\tBraga - minho center\t30001\t420030\tMarco Amorim\t2025-12-17 23:38:53\n270003\t60002\tBarcelos\t30001\t420030\tMarco Amorim\t2025-12-17 20:48:32\n270001\t60003\tVila Verde\t30001\t420030\tMarco Amorim\t2025-12-17 20:02:16\n150001\t60004\tViana do Castelo \t30001\t420030\tMarco Amorim\t2025-12-16 14:33:07\n120001\t60001\tFamalicão\t30001\t420030\tMarco Amorim\t2025-12-16 08:03:15\n",
+  "stderr": "",
+  "execution_time_ms": 57
+}

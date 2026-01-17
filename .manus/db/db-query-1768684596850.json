@@ -1,0 +1,30 @@
+{
+  "query": "SELECT rl.id, l.nome as loja, DATE_FORMAT(rl.dataVisita, '%Y-%m-%d') as dataVisita\nFROM relatorios_livres rl\nLEFT JOIN gestores g ON rl.gestorId = g.id\nLEFT JOIN lojas l ON rl.lojaId = l.id\nWHERE g.id IS NULL\nAND rl.lojaId IN (\n  SELECT gl2.lojaId FROM gestor_lojas gl2 \n  INNER JOIN gestores g2 ON gl2.gestorId = g2.id\n  INNER JOIN users u2 ON g2.userId = u2.id\n  WHERE u2.name LIKE '%Fábio%' OR u2.name LIKE '%Fabio%'\n)\nORDER BY rl.dataVisita DESC;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT rl.id, l.nome as loja, DATE_FORMAT(rl.dataVisita, '%Y-%m-%d') as dataVisita\nFROM relatorios_livres rl\nLEFT JOIN gestores g ON rl.gestorId = g.id\nLEFT JOIN lojas l ON rl.lojaId = l.id\nWHERE g.id IS NULL\nAND rl.lojaId IN (\n  SELECT gl2.lojaId FROM gestor_lojas gl2 \n  INNER JOIN gestores g2 ON gl2.gestorId = g2.id\n  INNER JOIN users u2 ON g2.userId = u2.id\n  WHERE u2.name LIKE '%Fábio%' OR u2.name LIKE '%Fabio%'\n)\nORDER BY rl.dataVisita DESC;",
+  "rows": [
+    {
+      "id": "1260003",
+      "loja": "Santarém",
+      "dataVisita": "2026-01-12"
+    },
+    {
+      "id": "1260001",
+      "loja": "Abrantes",
+      "dataVisita": "2026-01-12"
+    },
+    {
+      "id": "1230002",
+      "loja": "Castanheira do ribatejo",
+      "dataVisita": "2026-01-12"
+    },
+    {
+      "id": "1230001",
+      "loja": "Entroncamento",
+      "dataVisita": "2026-01-12"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tloja\tdataVisita\n1260003\tSantarém\t2026-01-12\n1260001\tAbrantes\t2026-01-12\n1230002\tCastanheira do ribatejo\t2026-01-12\n1230001\tEntroncamento\t2026-01-12\n",
+  "stderr": "",
+  "execution_time_ms": 101
+}

@@ -1,0 +1,8 @@
+{
+  "query": "\nSELECT g.id as gestor_id, g.nome as gestor_nome, g.userId, u.id as user_id, u.name as user_name, u.email as user_email, u.role\nFROM gestores g\nLEFT JOIN users u ON g.userId = u.id\nWHERE g.nome LIKE '%Fábio%' OR g.nome LIKE '%Fabio%' OR u.name LIKE '%Fábio%' OR u.name LIKE '%Fabio%';\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute \nSELECT g.id as gestor_id, g.nome as gestor_nome, g.userId, u.id as user_id, u.name as user_name, u.email as user_email, u.role\nFROM gestores g\nLEFT JOIN users u ON g.userId = u.id\nWHERE g.nome LIKE '%Fábio%' OR g.nome LIKE '%Fabio%' OR u.name LIKE '%Fábio%' OR u.name LIKE '%Fabio%';\n",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 2: Unknown column 'g.nome' in 'where clause'"
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "query": "UPDATE relatorios_livres rl\nSET rl.gestorId = (\n  SELECT g.id FROM gestores g \n  INNER JOIN users u ON g.userId = u.id \n  WHERE u.name LIKE '%Fábio%' OR u.name LIKE '%Fabio%'\n  LIMIT 1\n)\nWHERE rl.gestorId NOT IN (SELECT id FROM gestores)\nAND rl.lojaId IN (\n  SELECT gl.lojaId FROM gestor_lojas gl \n  INNER JOIN gestores g ON gl.gestorId = g.id\n  INNER JOIN users u ON g.userId = u.id\n  WHERE u.name LIKE '%Fábio%' OR u.name LIKE '%Fabio%'\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute UPDATE relatorios_livres rl\nSET rl.gestorId = (\n  SELECT g.id FROM gestores g \n  INNER JOIN users u ON g.userId = u.id \n  WHERE u.name LIKE '%Fábio%' OR u.name LIKE '%Fabio%'\n  LIMIT 1\n)\nWHERE rl.gestorId NOT IN (SELECT id FROM gestores)\nAND rl.lojaId IN (\n  SELECT gl.lojaId FROM gestor_lojas gl \n  INNER JOIN gestores g ON gl.gestorId = g.id\n  INNER JOIN users u ON g.userId = u.id\n  WHERE u.name LIKE '%Fábio%' OR u.name LIKE '%Fabio%'\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 69
+}

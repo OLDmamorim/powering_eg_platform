@@ -1,0 +1,31 @@
+{
+  "query": "SELECT p.id, p.lojaId, l.nome as lojaNome, p.descricao, p.resolvido\nFROM pendentes p\nINNER JOIN lojas l ON p.lojaId = l.id\nWHERE p.lojaId IN (\n  SELECT gl.lojaId FROM gestor_lojas gl \n  INNER JOIN gestores g ON gl.gestorId = g.id\n  INNER JOIN users u ON g.userId = u.id\n  WHERE u.name LIKE '%Fábio%' OR u.name LIKE '%Fabio%'\n)\nLIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT p.id, p.lojaId, l.nome as lojaNome, p.descricao, p.resolvido\nFROM pendentes p\nINNER JOIN lojas l ON p.lojaId = l.id\nWHERE p.lojaId IN (\n  SELECT gl.lojaId FROM gestor_lojas gl \n  INNER JOIN gestores g ON gl.gestorId = g.id\n  INNER JOIN users u ON g.userId = u.id\n  WHERE u.name LIKE '%Fábio%' OR u.name LIKE '%Fabio%'\n)\nLIMIT 10;",
+  "rows": [
+    {
+      "id": "600002",
+      "lojaId": "180001",
+      "lojaNome": "Abrantes",
+      "descricao": "Reparar e pintar o furo na parede",
+      "resolvido": "0"
+    },
+    {
+      "id": "600001",
+      "lojaId": "180001",
+      "lojaNome": "Abrantes",
+      "descricao": "Limpar o chão e rodapés",
+      "resolvido": "0"
+    },
+    {
+      "id": "570001",
+      "lojaId": "180018",
+      "lojaNome": "Entroncamento",
+      "descricao": "Valor acordo - José Trapp",
+      "resolvido": "0"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tlojaId\tlojaNome\tdescricao\tresolvido\n600002\t180001\tAbrantes\tReparar e pintar o furo na parede\t0\n600001\t180001\tAbrantes\tLimpar o chão e rodapés\t0\n570001\t180018\tEntroncamento\tValor acordo - José Trapp\t0\n",
+  "stderr": "",
+  "execution_time_ms": 52
+}

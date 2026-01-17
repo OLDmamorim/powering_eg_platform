@@ -1,0 +1,9 @@
+{
+  "query": "SELECT rl.id, rl.lojaId, l.nome as lojaNome, rl.gestorId, u.name as gestorCriador, rl.dataVisita\nFROM relatorios_livres rl\nINNER JOIN lojas l ON rl.lojaId = l.id\nINNER JOIN gestores g ON rl.gestorId = g.id\nINNER JOIN users u ON g.userId = u.id\nWHERE rl.lojaId IN (\n  SELECT gl.lojaId FROM gestor_lojas gl \n  INNER JOIN gestores g2 ON gl.gestorId = g2.id\n  INNER JOIN users u2 ON g2.userId = u2.id\n  WHERE u2.name LIKE '%Fábio%' OR u2.name LIKE '%Fabio%'\n)\nORDER BY rl.dataVisita DESC;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT rl.id, rl.lojaId, l.nome as lojaNome, rl.gestorId, u.name as gestorCriador, rl.dataVisita\nFROM relatorios_livres rl\nINNER JOIN lojas l ON rl.lojaId = l.id\nINNER JOIN gestores g ON rl.gestorId = g.id\nINNER JOIN users u ON g.userId = u.id\nWHERE rl.lojaId IN (\n  SELECT gl.lojaId FROM gestor_lojas gl \n  INNER JOIN gestores g2 ON gl.gestorId = g2.id\n  INNER JOIN users u2 ON g2.userId = u2.id\n  WHERE u2.name LIKE '%Fábio%' OR u2.name LIKE '%Fabio%'\n)\nORDER BY rl.dataVisita DESC;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 54
+}

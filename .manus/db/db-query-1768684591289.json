@@ -1,0 +1,54 @@
+{
+  "query": "SELECT rl.id, l.nome as loja, DATE_FORMAT(rl.dataVisita, '%Y-%m-%d') as dataVisita, rl.descricao\nFROM relatorios_livres rl\nLEFT JOIN gestores g ON rl.gestorId = g.id\nLEFT JOIN lojas l ON rl.lojaId = l.id\nWHERE g.id IS NULL\nAND rl.lojaId IN (\n  SELECT gl2.lojaId FROM gestor_lojas gl2 \n  INNER JOIN gestores g2 ON gl2.gestorId = g2.id\n  INNER JOIN users u2 ON g2.userId = u2.id\n  WHERE u2.name LIKE '%Fábio%' OR u2.name LIKE '%Fabio%'\n)\nORDER BY rl.dataVisita DESC;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT rl.id, l.nome as loja, DATE_FORMAT(rl.dataVisita, '%Y-%m-%d') as dataVisita, rl.descricao\nFROM relatorios_livres rl\nLEFT JOIN gestores g ON rl.gestorId = g.id\nLEFT JOIN lojas l ON rl.lojaId = l.id\nWHERE g.id IS NULL\nAND rl.lojaId IN (\n  SELECT gl2.lojaId FROM gestor_lojas gl2 \n  INNER JOIN gestores g2 ON gl2.gestorId = g2.id\n  INNER JOIN users u2 ON g2.userId = u2.id\n  WHERE u2.name LIKE '%Fábio%' OR u2.name LIKE '%Fabio%'\n)\nORDER BY rl.dataVisita DESC;",
+  "rows": [
+    {
+      "id": "1260003",
+      "loja": "Santarém",
+      "dataVisita": "2026-01-12",
+      "descricao": "Primeira visita em 2026 "
+    },
+    {
+      "id": "1260001",
+      "loja": "Abrantes",
+      "dataVisita": "2026-01-12",
+      "descricao": "Curta visita pela loja de Abrantes "
+    },
+    {
+      "id": "1230002",
+      "loja": "Castanheira do ribatejo",
+      "dataVisita": "2026-01-12",
+      "descricao": "Reunião de 30 minutos ao início do dia."
+    },
+    {
+      "id": "1230001",
+      "loja": "Entroncamento",
+      "dataVisita": "2026-01-12",
+      "descricao": "A visita foi motivado para abordar o colega, José Trapp. "
+    }
+  ],
+  "messages": [
+    "Visita rápida para cumprimentar os colegas. ",
+    "O Ruben e o Luís rei, demonstraram a sua preocupação por o mapa de serviços diários ainda nao ter saído.",
+    "O mesmo acontece com os objetivos e modelo de comissionamento. ",
+    "Perceber se os dois postos de trabalho estão a resultar. Na receção.",
+    "Antes tinham um pc e desde a semana passada tem dois. ",
+    "Pendentes - Senhorio, pela entrada de água que temos no telhado, na parte direita quando entramos na loja",
+    "Levei um módulo para a receção da loja para arrumar os modems e com isto ganhar mais espaço. ",
+    "Fotos em anexo. ",
+    "O Paulo Rosário mesmo estando de férias, fez questão de ir à loja para falarmos. ",
+    "Os 3 elementos ",
+    "Ricardo ",
+    "Paulo ",
+    "Carlos ",
+    "Tem de funcionar em equipa e cada um ter as suas responsabilidades. ",
+    "Todos fazem as mesmas coisas ao mesmo tempo e faz com que com pouco trabalho, andem sempre a correr e sem tempo para nada. ",
+    "Temos tido várias reclamações em que equipa ou estraga e oculta ou não está a fazer a check-list à viatura o que acaba por termos clientes insatisfeitos e perdermos muito tempo com reclamações. ",
+    "Isto, na sequência da repreensão que recebeu em casa e no desentendimento que teve com o Carlos Ferreira.",
+    "Foi lhe dito para ir-se informar de valores para chegarmos a um acordo com ele. ",
+    "Caso contrário iremos continuar a relatar à administração todas as ocorrências naquela loja, o que pode traduzir em vários processos disciplinares. "
+  ],
+  "stdout": "id\tloja\tdataVisita\tdescricao\n1260003\tSantarém\t2026-01-12\tPrimeira visita em 2026 \nVisita rápida para cumprimentar os colegas. \n\nO Ruben e o Luís rei, demonstraram a sua preocupação por o mapa de serviços diários ainda nao ter saído.\nO mesmo acontece com os objetivos e modelo de comissionamento. \n1260001\tAbrantes\t2026-01-12\tCurta visita pela loja de Abrantes \nPerceber se os dois postos de trabalho estão a resultar. Na receção.\nAntes tinham um pc e desde a semana passada tem dois. \nPendentes - Senhorio, pela entrada de água que temos no telhado, na parte direita quando entramos na loja\n\nLevei um módulo para a receção da loja para arrumar os modems e com isto ganhar mais espaço. \n\nFotos em anexo. \n1230002\tCastanheira do ribatejo\t2026-01-12\tReunião de 30 minutos ao início do dia.\nO Paulo Rosário mesmo estando de férias, fez questão de ir à loja para falarmos. \n\nOs 3 elementos \nRicardo \nPaulo \nCarlos \n\nTem de funcionar em equipa e cada um ter as suas responsabilidades. \nTodos fazem as mesmas coisas ao mesmo tempo e faz com que com pouco trabalho, andem sempre a correr e sem tempo para nada. \n\nTemos tido várias reclamações em que equipa ou estraga e oculta ou não está a fazer a check-list à viatura o que acaba por termos clientes insatisfeitos e perdermos muito tempo com reclamações. \n1230001\tEntroncamento\t2026-01-12\tA visita foi motivado para abordar o colega, José Trapp. \nIsto, na sequência da repreensão que recebeu em casa e no desentendimento que teve com o Carlos Ferreira.\n\nFoi lhe dito para ir-se informar de valores para chegarmos a um acordo com ele. \n\nCaso contrário iremos continuar a relatar à administração todas as ocorrências naquela loja, o que pode traduzir em vários processos disciplinares. \n",
+  "stderr": "",
+  "execution_time_ms": 108
+}

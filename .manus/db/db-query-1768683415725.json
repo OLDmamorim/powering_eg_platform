@@ -1,0 +1,16 @@
+{
+  "query": "SELECT g.id, g.userId, u.name as userName, u.email\nFROM gestores g\nLEFT JOIN users u ON g.userId = u.id\nWHERE u.name LIKE '%Fábio%' OR u.name LIKE '%Fabio%';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT g.id, g.userId, u.name as userName, u.email\nFROM gestores g\nLEFT JOIN users u ON g.userId = u.id\nWHERE u.name LIKE '%Fábio%' OR u.name LIKE '%Fabio%';",
+  "rows": [
+    {
+      "id": "1350001",
+      "userId": "7980023",
+      "userName": "Fabio Dias",
+      "email": "fdias@expressglass.pt"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tuserId\tuserName\temail\n1350001\t7980023\tFabio Dias\tfdias@expressglass.pt\n",
+  "stderr": "",
+  "execution_time_ms": 53
+}

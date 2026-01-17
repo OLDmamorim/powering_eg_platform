@@ -1,0 +1,62 @@
+{
+  "query": "SELECT gl.lojaId, l.nome as lojaNome\nFROM gestor_lojas gl \nINNER JOIN gestores g ON gl.gestorId = g.id\nINNER JOIN users u ON g.userId = u.id\nINNER JOIN lojas l ON gl.lojaId = l.id\nWHERE u.name LIKE '%Fábio%' OR u.name LIKE '%Fabio%'\nORDER BY l.nome;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT gl.lojaId, l.nome as lojaNome\nFROM gestor_lojas gl \nINNER JOIN gestores g ON gl.gestorId = g.id\nINNER JOIN users u ON g.userId = u.id\nINNER JOIN lojas l ON gl.lojaId = l.id\nWHERE u.name LIKE '%Fábio%' OR u.name LIKE '%Fabio%'\nORDER BY l.nome;",
+  "rows": [
+    {
+      "lojaId": "180001",
+      "lojaNome": "Abrantes"
+    },
+    {
+      "lojaId": "180012",
+      "lojaNome": "Caldas da rainha"
+    },
+    {
+      "lojaId": "180013",
+      "lojaNome": "Castanheira do ribatejo"
+    },
+    {
+      "lojaId": "180018",
+      "lojaNome": "Entroncamento"
+    },
+    {
+      "lojaId": "180020",
+      "lojaNome": "Faro"
+    },
+    {
+      "lojaId": "180021",
+      "lojaNome": "Faro sm"
+    },
+    {
+      "lojaId": "180027",
+      "lojaNome": "Leziria sm"
+    },
+    {
+      "lojaId": "180034",
+      "lojaNome": "Montijo"
+    },
+    {
+      "lojaId": "180040",
+      "lojaNome": "Portimão"
+    },
+    {
+      "lojaId": "180043",
+      "lojaNome": "Porto alto"
+    },
+    {
+      "lojaId": "180049",
+      "lojaNome": "Santarém"
+    },
+    {
+      "lojaId": "180052",
+      "lojaNome": "Sm caldas da rainha"
+    },
+    {
+      "lojaId": "180056",
+      "lojaNome": "Vale do tejo sm"
+    }
+  ],
+  "messages": [],
+  "stdout": "lojaId\tlojaNome\n180001\tAbrantes\n180012\tCaldas da rainha\n180013\tCastanheira do ribatejo\n180018\tEntroncamento\n180020\tFaro\n180021\tFaro sm\n180027\tLeziria sm\n180034\tMontijo\n180040\tPortimão\n180043\tPorto alto\n180049\tSantarém\n180052\tSm caldas da rainha\n180056\tVale do tejo sm\n",
+  "stderr": "",
+  "execution_time_ms": 50
+}

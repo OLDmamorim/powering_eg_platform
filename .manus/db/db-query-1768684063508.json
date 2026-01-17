@@ -1,0 +1,150 @@
+{
+  "query": "SELECT rl.id, rl.gestorId, rl.lojaId, l.nome as lojaNome, rl.dataVisita\nFROM relatorios_livres rl\nLEFT JOIN gestores g ON rl.gestorId = g.id\nLEFT JOIN lojas l ON rl.lojaId = l.id\nWHERE g.id IS NULL\nORDER BY rl.dataVisita DESC\nLIMIT 20;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT rl.id, rl.gestorId, rl.lojaId, l.nome as lojaNome, rl.dataVisita\nFROM relatorios_livres rl\nLEFT JOIN gestores g ON rl.gestorId = g.id\nLEFT JOIN lojas l ON rl.lojaId = l.id\nWHERE g.id IS NULL\nORDER BY rl.dataVisita DESC\nLIMIT 20;",
+  "rows": [
+    {
+      "id": "1350015",
+      "gestorId": "1320006",
+      "lojaId": "1110006",
+      "lojaNome": "NULL",
+      "dataVisita": "2026-01-16 18:44:18"
+    },
+    {
+      "id": "1350007",
+      "gestorId": "1320006",
+      "lojaId": "1110001",
+      "lojaNome": "NULL",
+      "dataVisita": "2026-01-16 18:43:58"
+    },
+    {
+      "id": "1260003",
+      "gestorId": "1020001",
+      "lojaId": "180049",
+      "lojaNome": "Santarém",
+      "dataVisita": "2026-01-12 17:00:15"
+    },
+    {
+      "id": "1260001",
+      "gestorId": "1020001",
+      "lojaId": "180001",
+      "lojaNome": "Abrantes",
+      "dataVisita": "2026-01-12 15:53:00"
+    },
+    {
+      "id": "1230002",
+      "gestorId": "1020001",
+      "lojaId": "180013",
+      "lojaNome": "Castanheira do ribatejo",
+      "dataVisita": "2026-01-12 13:38:00"
+    },
+    {
+      "id": "1230001",
+      "gestorId": "1020001",
+      "lojaId": "180018",
+      "lojaNome": "Entroncamento",
+      "dataVisita": "2026-01-12 13:34:00"
+    },
+    {
+      "id": "1200017",
+      "gestorId": "1230021",
+      "lojaId": "1050037",
+      "lojaNome": "NULL",
+      "dataVisita": "2026-01-10 22:52:42"
+    },
+    {
+      "id": "1200018",
+      "gestorId": "1230021",
+      "lojaId": "1050037",
+      "lojaNome": "NULL",
+      "dataVisita": "2026-01-10 22:52:42"
+    },
+    {
+      "id": "1200014",
+      "gestorId": "1230012",
+      "lojaId": "1050005",
+      "lojaNome": "NULL",
+      "dataVisita": "2026-01-10 22:52:21"
+    },
+    {
+      "id": "1200013",
+      "gestorId": "1230012",
+      "lojaId": "1050005",
+      "lojaNome": "NULL",
+      "dataVisita": "2026-01-10 22:52:21"
+    },
+    {
+      "id": "1200015",
+      "gestorId": "1230012",
+      "lojaId": "1050006",
+      "lojaNome": "NULL",
+      "dataVisita": "2026-01-10 22:52:21"
+    },
+    {
+      "id": "1200011",
+      "gestorId": "1230012",
+      "lojaId": "1050006",
+      "lojaNome": "NULL",
+      "dataVisita": "2026-01-10 22:52:19"
+    },
+    {
+      "id": "1200010",
+      "gestorId": "1230012",
+      "lojaId": "1050005",
+      "lojaNome": "NULL",
+      "dataVisita": "2026-01-10 22:52:19"
+    },
+    {
+      "id": "1200012",
+      "gestorId": "1230012",
+      "lojaId": "1050007",
+      "lojaNome": "NULL",
+      "dataVisita": "2026-01-10 22:52:19"
+    },
+    {
+      "id": "1200008",
+      "gestorId": "1230008",
+      "lojaId": "1050004",
+      "lojaNome": "NULL",
+      "dataVisita": "2026-01-10 22:52:14"
+    },
+    {
+      "id": "1200007",
+      "gestorId": "1230006",
+      "lojaId": "1050002",
+      "lojaNome": "NULL",
+      "dataVisita": "2026-01-10 22:52:14"
+    },
+    {
+      "id": "1170017",
+      "gestorId": "1170021",
+      "lojaId": "1020037",
+      "lojaNome": "NULL",
+      "dataVisita": "2026-01-09 22:18:42"
+    },
+    {
+      "id": "1170018",
+      "gestorId": "1170021",
+      "lojaId": "1020037",
+      "lojaNome": "NULL",
+      "dataVisita": "2026-01-09 22:18:42"
+    },
+    {
+      "id": "1170015",
+      "gestorId": "1170011",
+      "lojaId": "1020006",
+      "lojaNome": "NULL",
+      "dataVisita": "2026-01-09 22:18:34"
+    },
+    {
+      "id": "1170014",
+      "gestorId": "1170011",
+      "lojaId": "1020005",
+      "lojaNome": "NULL",
+      "dataVisita": "2026-01-09 22:18:34"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tgestorId\tlojaId\tlojaNome\tdataVisita\n1350015\t1320006\t1110006\tNULL\t2026-01-16 18:44:18\n1350007\t1320006\t1110001\tNULL\t2026-01-16 18:43:58\n1260003\t1020001\t180049\tSantarém\t2026-01-12 17:00:15\n1260001\t1020001\t180001\tAbrantes\t2026-01-12 15:53:00\n1230002\t1020001\t180013\tCastanheira do ribatejo\t2026-01-12 13:38:00\n1230001\t1020001\t180018\tEntroncamento\t2026-01-12 13:34:00\n1200017\t1230021\t1050037\tNULL\t2026-01-10 22:52:42\n1200018\t1230021\t1050037\tNULL\t2026-01-10 22:52:42\n1200014\t1230012\t1050005\tNULL\t2026-01-10 22:52:21\n1200013\t1230012\t1050005\tNULL\t2026-01-10 22:52:21\n1200015\t1230012\t1050006\tNULL\t2026-01-10 22:52:21\n1200011\t1230012\t1050006\tNULL\t2026-01-10 22:52:19\n1200010\t1230012\t1050005\tNULL\t2026-01-10 22:52:19\n1200012\t1230012\t1050007\tNULL\t2026-01-10 22:52:19\n1200008\t1230008\t1050004\tNULL\t2026-01-10 22:52:14\n1200007\t1230006\t1050002\tNULL\t2026-01-10 22:52:14\n1170017\t1170021\t1020037\tNULL\t2026-01-09 22:18:42\n1170018\t1170021\t1020037\tNULL\t2026-01-09 22:18:42\n1170015\t1170011\t1020006\tNULL\t2026-01-09 22:18:34\n1170014\t1170011\t1020005\tNULL\t2026-01-09 22:18:34\n",
+  "stderr": "",
+  "execution_time_ms": 56
+}

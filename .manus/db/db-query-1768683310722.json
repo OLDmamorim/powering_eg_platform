@@ -1,0 +1,1682 @@
+{
+  "query": "\nSELECT g.id as gestor_id, g.userId, u.id as user_id, u.name as user_name, u.email as user_email, u.role\nFROM gestores g\nLEFT JOIN users u ON g.userId = u.id;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute \nSELECT g.id as gestor_id, g.userId, u.id as user_id, u.name as user_name, u.email as user_email, u.role\nFROM gestores g\nLEFT JOIN users u ON g.userId = u.id;\n",
+  "rows": [
+    {
+      "gestor_id": "2",
+      "userId": "240006",
+      "user_id": "240006",
+      "user_name": "Mauro Furtado",
+      "user_email": "mfurtado@expressglass.pt",
+      "role": "admin"
+    },
+    {
+      "gestor_id": "30001",
+      "userId": "420030",
+      "user_id": "420030",
+      "user_name": "Marco Amorim",
+      "user_email": "mamorim@expressglass.pt",
+      "role": "gestor"
+    },
+    {
+      "gestor_id": "120001",
+      "userId": "2160121",
+      "user_id": "2160121",
+      "user_name": "Marco Vilar",
+      "user_email": "mvilar@expressglass.pt",
+      "role": "gestor"
+    },
+    {
+      "gestor_id": "120002",
+      "userId": "2160125",
+      "user_id": "2160125",
+      "user_name": "Mónica Correira",
+      "user_email": "mcorreia@expressglass.pt",
+      "role": "gestor"
+    },
+    {
+      "gestor_id": "210001",
+      "userId": "240006",
+      "user_id": "240006",
+      "user_name": "Mauro Furtado",
+      "user_email": "mfurtado@expressglass.pt",
+      "role": "admin"
+    },
+    {
+      "gestor_id": "240001",
+      "userId": "4020003",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "240003",
+      "userId": "4020003",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "240005",
+      "userId": "4020003",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "270001",
+      "userId": "4050001",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "270003",
+      "userId": "4050001",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "300001",
+      "userId": "4080004",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "300003",
+      "userId": "4080004",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "300005",
+      "userId": "4080052",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "330001",
+      "userId": "4080052",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "390002",
+      "userId": "4500005",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "390004",
+      "userId": "4500007",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "390006",
+      "userId": "4500009",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "420001",
+      "userId": "6030026",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "420002",
+      "userId": "6030026",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "420004",
+      "userId": "6030026",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "420006",
+      "userId": "6030026",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "450001",
+      "userId": "4080004",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "450002",
+      "userId": "4050001",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "450003",
+      "userId": "4020003",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "450010",
+      "userId": "4020003",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "450011",
+      "userId": "4080004",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "450015",
+      "userId": "4050001",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "450017",
+      "userId": "4080004",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "450018",
+      "userId": "4020003",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "450023",
+      "userId": "4050001",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "450026",
+      "userId": "6300015",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "450027",
+      "userId": "4080052",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "450028",
+      "userId": "6030026",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "450032",
+      "userId": "4020003",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "450033",
+      "userId": "4080004",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "450034",
+      "userId": "4050001",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "450040",
+      "userId": "6300019",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "450041",
+      "userId": "4080052",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "450043",
+      "userId": "6030026",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "480003",
+      "userId": "4050001",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "480004",
+      "userId": "4020003",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "480006",
+      "userId": "4080004",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "480011",
+      "userId": "6360261",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "480012",
+      "userId": "4080052",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "480014",
+      "userId": "6030026",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "480018",
+      "userId": "4080004",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "480019",
+      "userId": "4050001",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "480020",
+      "userId": "4020003",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "480026",
+      "userId": "6360268",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "480027",
+      "userId": "4080052",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "480029",
+      "userId": "6030026",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "480033",
+      "userId": "4080004",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "480034",
+      "userId": "4050001",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "480035",
+      "userId": "4020003",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "480041",
+      "userId": "6360278",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "480042",
+      "userId": "4080052",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "480044",
+      "userId": "6030026",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "480050",
+      "userId": "4050001",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "480052",
+      "userId": "4080004",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "480053",
+      "userId": "4020003",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "480057",
+      "userId": "4080004",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "480058",
+      "userId": "4050001",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "480061",
+      "userId": "4020003",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "480066",
+      "userId": "6361034",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "480067",
+      "userId": "4080052",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "570001",
+      "userId": "6600014",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "570003",
+      "userId": "6600028",
+      "user_id": "6600028",
+      "user_name": "Rui Adriao ",
+      "user_email": "rui.adriao@expressglass.pt",
+      "role": "gestor"
+    },
+    {
+      "gestor_id": "660013",
+      "userId": "7290150",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "720030",
+      "userId": "7290150",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "720053",
+      "userId": "7290150",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "720086",
+      "userId": "7290150",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "750001",
+      "userId": "7410262",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "750002",
+      "userId": "7410263",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "750003",
+      "userId": "7410264",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "750014",
+      "userId": "7410273",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "750015",
+      "userId": "7410274",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "750017",
+      "userId": "7290150",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "780001",
+      "userId": "7470026",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "780002",
+      "userId": "6960011",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "810002",
+      "userId": "7410264",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "810003",
+      "userId": "7410263",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "810004",
+      "userId": "7410262",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "810014",
+      "userId": "7890173",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "810015",
+      "userId": "7410274",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "810017",
+      "userId": "7290150",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "840001",
+      "userId": "7410264",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "840003",
+      "userId": "7410263",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "840004",
+      "userId": "7410262",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "840010",
+      "userId": "7410263",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "840018",
+      "userId": "7920133",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "840019",
+      "userId": "7410274",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "840021",
+      "userId": "7290150",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "870001",
+      "userId": "7410264",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "870005",
+      "userId": "7410262",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "870006",
+      "userId": "7410263",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "870014",
+      "userId": "7950039",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "870015",
+      "userId": "7410274",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "870017",
+      "userId": "7290150",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "930002",
+      "userId": "7410263",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "930003",
+      "userId": "7410264",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "930007",
+      "userId": "7410262",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "930013",
+      "userId": "7410263",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "930014",
+      "userId": "7410262",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "930017",
+      "userId": "7410264",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "930025",
+      "userId": "8370016",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "930026",
+      "userId": "7410274",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "930028",
+      "userId": "7290150",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "930030",
+      "userId": "8370017",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "930031",
+      "userId": "7410262",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "930033",
+      "userId": "7410264",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "930034",
+      "userId": "7410263",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "930044",
+      "userId": "8370025",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "930045",
+      "userId": "7410274",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "930047",
+      "userId": "7290150",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "930050",
+      "userId": "7410262",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "930051",
+      "userId": "7410263",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "930052",
+      "userId": "7410264",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "930063",
+      "userId": "8370044",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "930064",
+      "userId": "7410274",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "930066",
+      "userId": "7290150",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "930069",
+      "userId": "7410263",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "930070",
+      "userId": "7410262",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "930072",
+      "userId": "7410264",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "930082",
+      "userId": "8370048",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "930083",
+      "userId": "7410274",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "930085",
+      "userId": "7290150",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "930088",
+      "userId": "7410263",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "930089",
+      "userId": "7410264",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "930091",
+      "userId": "7410262",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "930101",
+      "userId": "8370052",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "930102",
+      "userId": "7410274",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "930104",
+      "userId": "7290150",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "930107",
+      "userId": "7410263",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "930108",
+      "userId": "7410262",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "930109",
+      "userId": "7410264",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "930119",
+      "userId": "7410262",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "930120",
+      "userId": "7410263",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "930122",
+      "userId": "7410264",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "960001",
+      "userId": "7410263",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "960003",
+      "userId": "7410262",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "960005",
+      "userId": "7410264",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "960014",
+      "userId": "8400019",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "960015",
+      "userId": "7410274",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "960017",
+      "userId": "7290150",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "990002",
+      "userId": "7410264",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "990003",
+      "userId": "7410262",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "990005",
+      "userId": "7410263",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "990014",
+      "userId": "8640005",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "990015",
+      "userId": "7410274",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "990017",
+      "userId": "7290150",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "990021",
+      "userId": "7410262",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "990022",
+      "userId": "7410263",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "990024",
+      "userId": "7410264",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "990033",
+      "userId": "8640330",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "990034",
+      "userId": "7410274",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "990036",
+      "userId": "7290150",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "1020002",
+      "userId": "8700033",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "1050001",
+      "userId": "7410264",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "1050002",
+      "userId": "7410262",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "1050003",
+      "userId": "7410263",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "1080001",
+      "userId": "7410262",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "1080003",
+      "userId": "7410263",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "1080004",
+      "userId": "7410264",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "1080014",
+      "userId": "8940005",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "1080015",
+      "userId": "7410274",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "1080017",
+      "userId": "7290150",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "1080020",
+      "userId": "8940679",
+      "user_id": "8940679",
+      "user_name": "Carlos Eduardo",
+      "user_email": "carlos.eduardo@expressglass.pt",
+      "role": "gestor"
+    },
+    {
+      "gestor_id": "1080022",
+      "userId": "7410262",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "1080023",
+      "userId": "7410263",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "1080024",
+      "userId": "7410264",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "1080034",
+      "userId": "8940825",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "1080035",
+      "userId": "7410274",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "1080037",
+      "userId": "7290150",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "1080040",
+      "userId": "8940851",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "1080042",
+      "userId": "8940859",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "1080045",
+      "userId": "7410262",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "1080046",
+      "userId": "7410263",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "1080048",
+      "userId": "7410264",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "1110002",
+      "userId": "7410262",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "1110003",
+      "userId": "7410263",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "1110004",
+      "userId": "7410264",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "1110013",
+      "userId": "9000004",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "1110016",
+      "userId": "9000007",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "1110017",
+      "userId": "7410274",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "1110018",
+      "userId": "7290150",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "1170001",
+      "userId": "7410262",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "1170003",
+      "userId": "7410263",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "1170004",
+      "userId": "7410264",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "1170013",
+      "userId": "9090002",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "1170016",
+      "userId": "7410274",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "1170018",
+      "userId": "9090005",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "1170019",
+      "userId": "7290150",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "1230001",
+      "userId": "9540028",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "1230003",
+      "userId": "9540030",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "1230004",
+      "userId": "9540031",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "1230013",
+      "userId": "9540038",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "1230016",
+      "userId": "9540041",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "1230017",
+      "userId": "9540042",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "1230018",
+      "userId": "9540043",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "1290002",
+      "userId": "10380018",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "1290003",
+      "userId": "10380019",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "1290004",
+      "userId": "10380020",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "1320001",
+      "userId": "10380018",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "1320003",
+      "userId": "10380020",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "1320004",
+      "userId": "10380019",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "1320012",
+      "userId": "10380020",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "1320014",
+      "userId": "10380018",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "1320015",
+      "userId": "10380019",
+      "user_id": "NULL",
+      "user_name": "NULL",
+      "user_email": "NULL",
+      "role": "NULL"
+    },
+    {
+      "gestor_id": "1350001",
+      "userId": "7980023",
+      "user_id": "7980023",
+      "user_name": "Fabio Dias",
+      "user_email": "fdias@expressglass.pt",
+      "role": "gestor"
+    }
+  ],
+  "messages": [],
+  "stdout": "gestor_id\tuserId\tuser_id\tuser_name\tuser_email\trole\n2\t240006\t240006\tMauro Furtado\tmfurtado@expressglass.pt\tadmin\n30001\t420030\t420030\tMarco Amorim\tmamorim@expressglass.pt\tgestor\n120001\t2160121\t2160121\tMarco Vilar\tmvilar@expressglass.pt\tgestor\n120002\t2160125\t2160125\tMónica Correira\tmcorreia@expressglass.pt\tgestor\n210001\t240006\t240006\tMauro Furtado\tmfurtado@expressglass.pt\tadmin\n240001\t4020003\tNULL\tNULL\tNULL\tNULL\n240003\t4020003\tNULL\tNULL\tNULL\tNULL\n240005\t4020003\tNULL\tNULL\tNULL\tNULL\n270001\t4050001\tNULL\tNULL\tNULL\tNULL\n270003\t4050001\tNULL\tNULL\tNULL\tNULL\n300001\t4080004\tNULL\tNULL\tNULL\tNULL\n300003\t4080004\tNULL\tNULL\tNULL\tNULL\n300005\t4080052\tNULL\tNULL\tNULL\tNULL\n330001\t4080052\tNULL\tNULL\tNULL\tNULL\n390002\t4500005\tNULL\tNULL\tNULL\tNULL\n390004\t4500007\tNULL\tNULL\tNULL\tNULL\n390006\t4500009\tNULL\tNULL\tNULL\tNULL\n420001\t6030026\tNULL\tNULL\tNULL\tNULL\n420002\t6030026\tNULL\tNULL\tNULL\tNULL\n420004\t6030026\tNULL\tNULL\tNULL\tNULL\n420006\t6030026\tNULL\tNULL\tNULL\tNULL\n450001\t4080004\tNULL\tNULL\tNULL\tNULL\n450002\t4050001\tNULL\tNULL\tNULL\tNULL\n450003\t4020003\tNULL\tNULL\tNULL\tNULL\n450010\t4020003\tNULL\tNULL\tNULL\tNULL\n450011\t4080004\tNULL\tNULL\tNULL\tNULL\n450015\t4050001\tNULL\tNULL\tNULL\tNULL\n450017\t4080004\tNULL\tNULL\tNULL\tNULL\n450018\t4020003\tNULL\tNULL\tNULL\tNULL\n450023\t4050001\tNULL\tNULL\tNULL\tNULL\n450026\t6300015\tNULL\tNULL\tNULL\tNULL\n450027\t4080052\tNULL\tNULL\tNULL\tNULL\n450028\t6030026\tNULL\tNULL\tNULL\tNULL\n450032\t4020003\tNULL\tNULL\tNULL\tNULL\n450033\t4080004\tNULL\tNULL\tNULL\tNULL\n450034\t4050001\tNULL\tNULL\tNULL\tNULL\n450040\t6300019\tNULL\tNULL\tNULL\tNULL\n450041\t4080052\tNULL\tNULL\tNULL\tNULL\n450043\t6030026\tNULL\tNULL\tNULL\tNULL\n480003\t4050001\tNULL\tNULL\tNULL\tNULL\n480004\t4020003\tNULL\tNULL\tNULL\tNULL\n480006\t4080004\tNULL\tNULL\tNULL\tNULL\n480011\t6360261\tNULL\tNULL\tNULL\tNULL\n480012\t4080052\tNULL\tNULL\tNULL\tNULL\n480014\t6030026\tNULL\tNULL\tNULL\tNULL\n480018\t4080004\tNULL\tNULL\tNULL\tNULL\n480019\t4050001\tNULL\tNULL\tNULL\tNULL\n480020\t4020003\tNULL\tNULL\tNULL\tNULL\n480026\t6360268\tNULL\tNULL\tNULL\tNULL\n480027\t4080052\tNULL\tNULL\tNULL\tNULL\n480029\t6030026\tNULL\tNULL\tNULL\tNULL\n480033\t4080004\tNULL\tNULL\tNULL\tNULL\n480034\t4050001\tNULL\tNULL\tNULL\tNULL\n480035\t4020003\tNULL\tNULL\tNULL\tNULL\n480041\t6360278\tNULL\tNULL\tNULL\tNULL\n480042\t4080052\tNULL\tNULL\tNULL\tNULL\n480044\t6030026\tNULL\tNULL\tNULL\tNULL\n480050\t4050001\tNULL\tNULL\tNULL\tNULL\n480052\t4080004\tNULL\tNULL\tNULL\tNULL\n480053\t4020003\tNULL\tNULL\tNULL\tNULL\n480057\t4080004\tNULL\tNULL\tNULL\tNULL\n480058\t4050001\tNULL\tNULL\tNULL\tNULL\n480061\t4020003\tNULL\tNULL\tNULL\tNULL\n480066\t6361034\tNULL\tNULL\tNULL\tNULL\n480067\t4080052\tNULL\tNULL\tNULL\tNULL\n570001\t6600014\tNULL\tNULL\tNULL\tNULL\n570003\t6600028\t6600028\tRui Adriao \trui.adriao@expressglass.pt\tgestor\n660013\t7290150\tNULL\tNULL\tNULL\tNULL\n720030\t7290150\tNULL\tNULL\tNULL\tNULL\n720053\t7290150\tNULL\tNULL\tNULL\tNULL\n720086\t7290150\tNULL\tNULL\tNULL\tNULL\n750001\t7410262\tNULL\tNULL\tNULL\tNULL\n750002\t7410263\tNULL\tNULL\tNULL\tNULL\n750003\t7410264\tNULL\tNULL\tNULL\tNULL\n750014\t7410273\tNULL\tNULL\tNULL\tNULL\n750015\t7410274\tNULL\tNULL\tNULL\tNULL\n750017\t7290150\tNULL\tNULL\tNULL\tNULL\n780001\t7470026\tNULL\tNULL\tNULL\tNULL\n780002\t6960011\tNULL\tNULL\tNULL\tNULL\n810002\t7410264\tNULL\tNULL\tNULL\tNULL\n810003\t7410263\tNULL\tNULL\tNULL\tNULL\n810004\t7410262\tNULL\tNULL\tNULL\tNULL\n810014\t7890173\tNULL\tNULL\tNULL\tNULL\n810015\t7410274\tNULL\tNULL\tNULL\tNULL\n810017\t7290150\tNULL\tNULL\tNULL\tNULL\n840001\t7410264\tNULL\tNULL\tNULL\tNULL\n840003\t7410263\tNULL\tNULL\tNULL\tNULL\n840004\t7410262\tNULL\tNULL\tNULL\tNULL\n840010\t7410263\tNULL\tNULL\tNULL\tNULL\n840018\t7920133\tNULL\tNULL\tNULL\tNULL\n840019\t7410274\tNULL\tNULL\tNULL\tNULL\n840021\t7290150\tNULL\tNULL\tNULL\tNULL\n870001\t7410264\tNULL\tNULL\tNULL\tNULL\n870005\t7410262\tNULL\tNULL\tNULL\tNULL\n870006\t7410263\tNULL\tNULL\tNULL\tNULL\n870014\t7950039\tNULL\tNULL\tNULL\tNULL\n870015\t7410274\tNULL\tNULL\tNULL\tNULL\n870017\t7290150\tNULL\tNULL\tNULL\tNULL\n930002\t7410263\tNULL\tNULL\tNULL\tNULL\n930003\t7410264\tNULL\tNULL\tNULL\tNULL\n930007\t7410262\tNULL\tNULL\tNULL\tNULL\n930013\t7410263\tNULL\tNULL\tNULL\tNULL\n930014\t7410262\tNULL\tNULL\tNULL\tNULL\n930017\t7410264\tNULL\tNULL\tNULL\tNULL\n930025\t8370016\tNULL\tNULL\tNULL\tNULL\n930026\t7410274\tNULL\tNULL\tNULL\tNULL\n930028\t7290150\tNULL\tNULL\tNULL\tNULL\n930030\t8370017\tNULL\tNULL\tNULL\tNULL\n930031\t7410262\tNULL\tNULL\tNULL\tNULL\n930033\t7410264\tNULL\tNULL\tNULL\tNULL\n930034\t7410263\tNULL\tNULL\tNULL\tNULL\n930044\t8370025\tNULL\tNULL\tNULL\tNULL\n930045\t7410274\tNULL\tNULL\tNULL\tNULL\n930047\t7290150\tNULL\tNULL\tNULL\tNULL\n930050\t7410262\tNULL\tNULL\tNULL\tNULL\n930051\t7410263\tNULL\tNULL\tNULL\tNULL\n930052\t7410264\tNULL\tNULL\tNULL\tNULL\n930063\t8370044\tNULL\tNULL\tNULL\tNULL\n930064\t7410274\tNULL\tNULL\tNULL\tNULL\n930066\t7290150\tNULL\tNULL\tNULL\tNULL\n930069\t7410263\tNULL\tNULL\tNULL\tNULL\n930070\t7410262\tNULL\tNULL\tNULL\tNULL\n930072\t7410264\tNULL\tNULL\tNULL\tNULL\n930082\t8370048\tNULL\tNULL\tNULL\tNULL\n930083\t7410274\tNULL\tNULL\tNULL\tNULL\n930085\t7290150\tNULL\tNULL\tNULL\tNULL\n930088\t7410263\tNULL\tNULL\tNULL\tNULL\n930089\t7410264\tNULL\tNULL\tNULL\tNULL\n930091\t7410262\tNULL\tNULL\tNULL\tNULL\n930101\t8370052\tNULL\tNULL\tNULL\tNULL\n930102\t7410274\tNULL\tNULL\tNULL\tNULL\n930104\t7290150\tNULL\tNULL\tNULL\tNULL\n930107\t7410263\tNULL\tNULL\tNULL\tNULL\n930108\t7410262\tNULL\tNULL\tNULL\tNULL\n930109\t7410264\tNULL\tNULL\tNULL\tNULL\n930119\t7410262\tNULL\tNULL\tNULL\tNULL\n930120\t7410263\tNULL\tNULL\tNULL\tNULL\n930122\t7410264\tNULL\tNULL\tNULL\tNULL\n960001\t7410263\tNULL\tNULL\tNULL\tNULL\n960003\t7410262\tNULL\tNULL\tNULL\tNULL\n960005\t7410264\tNULL\tNULL\tNULL\tNULL\n960014\t8400019\tNULL\tNULL\tNULL\tNULL\n960015\t7410274\tNULL\tNULL\tNULL\tNULL\n960017\t7290150\tNULL\tNULL\tNULL\tNULL\n990002\t7410264\tNULL\tNULL\tNULL\tNULL\n990003\t7410262\tNULL\tNULL\tNULL\tNULL\n990005\t7410263\tNULL\tNULL\tNULL\tNULL\n990014\t8640005\tNULL\tNULL\tNULL\tNULL\n990015\t7410274\tNULL\tNULL\tNULL\tNULL\n990017\t7290150\tNULL\tNULL\tNULL\tNULL\n990021\t7410262\tNULL\tNULL\tNULL\tNULL\n990022\t7410263\tNULL\tNULL\tNULL\tNULL\n990024\t7410264\tNULL\tNULL\tNULL\tNULL\n990033\t8640330\tNULL\tNULL\tNULL\tNULL\n990034\t7410274\tNULL\tNULL\tNULL\tNULL\n990036\t7290150\tNULL\tNULL\tNULL\tNULL\n1020002\t8700033\tNULL\tNULL\tNULL\tNULL\n1050001\t7410264\tNULL\tNULL\tNULL\tNULL\n1050002\t7410262\tNULL\tNULL\tNULL\tNULL\n1050003\t7410263\tNULL\tNULL\tNULL\tNULL\n1080001\t7410262\tNULL\tNULL\tNULL\tNULL\n1080003\t7410263\tNULL\tNULL\tNULL\tNULL\n1080004\t7410264\tNULL\tNULL\tNULL\tNULL\n1080014\t8940005\tNULL\tNULL\tNULL\tNULL\n1080015\t7410274\tNULL\tNULL\tNULL\tNULL\n1080017\t7290150\tNULL\tNULL\tNULL\tNULL\n1080020\t8940679\t8940679\tCarlos Eduardo\tcarlos.eduardo@expressglass.pt\tgestor\n1080022\t7410262\tNULL\tNULL\tNULL\tNULL\n1080023\t7410263\tNULL\tNULL\tNULL\tNULL\n1080024\t7410264\tNULL\tNULL\tNULL\tNULL\n1080034\t8940825\tNULL\tNULL\tNULL\tNULL\n1080035\t7410274\tNULL\tNULL\tNULL\tNULL\n1080037\t7290150\tNULL\tNULL\tNULL\tNULL\n1080040\t8940851\tNULL\tNULL\tNULL\tNULL\n1080042\t8940859\tNULL\tNULL\tNULL\tNULL\n1080045\t7410262\tNULL\tNULL\tNULL\tNULL\n1080046\t7410263\tNULL\tNULL\tNULL\tNULL\n1080048\t7410264\tNULL\tNULL\tNULL\tNULL\n1110002\t7410262\tNULL\tNULL\tNULL\tNULL\n1110003\t7410263\tNULL\tNULL\tNULL\tNULL\n1110004\t7410264\tNULL\tNULL\tNULL\tNULL\n1110013\t9000004\tNULL\tNULL\tNULL\tNULL\n1110016\t9000007\tNULL\tNULL\tNULL\tNULL\n1110017\t7410274\tNULL\tNULL\tNULL\tNULL\n1110018\t7290150\tNULL\tNULL\tNULL\tNULL\n1170001\t7410262\tNULL\tNULL\tNULL\tNULL\n1170003\t7410263\tNULL\tNULL\tNULL\tNULL\n1170004\t7410264\tNULL\tNULL\tNULL\tNULL\n1170013\t9090002\tNULL\tNULL\tNULL\tNULL\n1170016\t7410274\tNULL\tNULL\tNULL\tNULL\n1170018\t9090005\tNULL\tNULL\tNULL\tNULL\n1170019\t7290150\tNULL\tNULL\tNULL\tNULL\n1230001\t9540028\tNULL\tNULL\tNULL\tNULL\n1230003\t9540030\tNULL\tNULL\tNULL\tNULL\n1230004\t9540031\tNULL\tNULL\tNULL\tNULL\n1230013\t9540038\tNULL\tNULL\tNULL\tNULL\n1230016\t9540041\tNULL\tNULL\tNULL\tNULL\n1230017\t9540042\tNULL\tNULL\tNULL\tNULL\n1230018\t9540043\tNULL\tNULL\tNULL\tNULL\n1290002\t10380018\tNULL\tNULL\tNULL\tNULL\n1290003\t10380019\tNULL\tNULL\tNULL\tNULL\n1290004\t10380020\tNULL\tNULL\tNULL\tNULL\n1320001\t10380018\tNULL\tNULL\tNULL\tNULL\n1320003\t10380020\tNULL\tNULL\tNULL\tNULL\n1320004\t10380019\tNULL\tNULL\tNULL\tNULL\n1320012\t10380020\tNULL\tNULL\tNULL\tNULL\n1320014\t10380018\tNULL\tNULL\tNULL\tNULL\n1320015\t10380019\tNULL\tNULL\tNULL\tNULL\n1350001\t7980023\t7980023\tFabio Dias\tfdias@expressglass.pt\tgestor\n",
+  "stderr": "",
+  "execution_time_ms": 59
+}

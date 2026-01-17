@@ -1,0 +1,18 @@
+{
+  "query": "\nSELECT g.id as gestor_id, g.userId, u.id as user_id, u.name as user_name, u.email as user_email, u.role\nFROM gestores g\nLEFT JOIN users u ON g.userId = u.id\nWHERE u.name LIKE '%Fábio%' OR u.name LIKE '%Fabio%' OR u.email LIKE '%fabio%';\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute \nSELECT g.id as gestor_id, g.userId, u.id as user_id, u.name as user_name, u.email as user_email, u.role\nFROM gestores g\nLEFT JOIN users u ON g.userId = u.id\nWHERE u.name LIKE '%Fábio%' OR u.name LIKE '%Fabio%' OR u.email LIKE '%fabio%';\n",
+  "rows": [
+    {
+      "gestor_id": "1350001",
+      "userId": "7980023",
+      "user_id": "7980023",
+      "user_name": "Fabio Dias",
+      "user_email": "fdias@expressglass.pt",
+      "role": "gestor"
+    }
+  ],
+  "messages": [],
+  "stdout": "gestor_id\tuserId\tuser_id\tuser_name\tuser_email\trole\n1350001\t7980023\t7980023\tFabio Dias\tfdias@expressglass.pt\tgestor\n",
+  "stderr": "",
+  "execution_time_ms": 51
+}
