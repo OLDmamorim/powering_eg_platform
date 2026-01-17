@@ -2984,3 +2984,6 @@ NOTA: Sistema de email requer configuração externa no deployment
 
 ## v6.32 - Remover Gráfico Semanal
 - [x] Remover gráfico de Evolução Semanal do Mês (dados não são reais, apenas estimativa)
+
+## v6.33 - Remover Avisos Relatórios
+- [x] Remover aviso de "Lojas com relatórios em atraso" do Dashboard (ocupa muito espaço)

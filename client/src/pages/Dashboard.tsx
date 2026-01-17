@@ -571,41 +571,6 @@ export default function Dashboard() {
           </Alert>
         )}
         
-        {isGestor && atrasosLojas && atrasosLojas.length > 0 && (
-          <Alert className="border-red-500 bg-red-50 text-red-900 dark:bg-red-950/30 dark:text-red-200">
-            <Clock className="h-4 w-4" />
-            <AlertTitle>{language === 'pt' ? 'Atenção: Lojas com relatórios em atraso' : 'Attention: Stores with overdue reports'}</AlertTitle>
-            <AlertDescription className="space-y-2">
-              <p className="mb-3">{language === 'pt' ? 'As seguintes lojas estão abaixo do mínimo mensal esperado:' : 'The following stores are below the expected monthly minimum:'}</p>
-              <div className="space-y-2">
-                {atrasosLojas.map((atraso) => (
-                  <div key={atraso.lojaId} className="flex items-center justify-between bg-white dark:bg-red-950/50 p-2 rounded border border-red-200 dark:border-red-800">
-                    <div>
-                      <p className="font-semibold">{atraso.lojaNome}</p>
-                      <div className="text-xs space-y-0.5 mt-1">
-                        {atraso.emAtrasoLivres && (
-                          <p>📄 Livres: {atraso.realizadosLivres}/{atraso.minimoLivres} (mínimo mensal)</p>
-                        )}
-                        {atraso.emAtrasoCompletos && (
-                          <p>📊 Completos: {atraso.realizadosCompletos}/{atraso.minimoCompletos} (mínimo mensal)</p>
-                        )}
-                      </div>
-                    </div>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={() => setLocation('/relatorios')}
-                      className="border-red-500 text-red-700 hover:bg-red-100 dark:text-red-200 dark:hover:bg-red-950"
-                    >
-                      Criar Relatório
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </AlertDescription>
-          </Alert>
-        )}
-
         {/* Lembretes de Resumos Globais */}
         <LembretesResumosGlobais isAdmin={isAdmin} isGestor={isGestor} setLocation={setLocation} />
 
