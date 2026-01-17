@@ -49,6 +49,51 @@ interface AnaliseIA {
   resumo: string;
 }
 
+// Helper para desenhar retângulo com texto centrado
+function drawKPIBox(
+  doc: PDFKit.PDFDocument,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  bgColor: string,
+  label: string,
+  value: string
+) {
+  // Fundo
+  doc.rect(x, y, width, height).fill(bgColor);
+  
+  // Label (pequeno, no topo)
+  doc.fillColor('white').fontSize(9);
+  doc.text(label, x, y + 8, { width, align: 'center' });
+  
+  // Valor (grande, centrado)
+  doc.fontSize(22);
+  doc.text(value, x, y + 25, { width, align: 'center' });
+}
+
+// Helper para desenhar caixa de complementar
+function drawCompBox(
+  doc: PDFKit.PDFDocument,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  label: string,
+  value: number,
+  percent?: string
+) {
+  doc.rect(x, y, width, height).fill('#f3f4f6');
+  doc.fillColor('#374151').fontSize(9);
+  doc.text(label, x + 8, y + 8, { width: width - 16 });
+  doc.fontSize(18);
+  doc.text(String(value), x + 8, y + 24, { width: width - 16 });
+  if (percent) {
+    doc.fontSize(8).fillColor('#6b7280');
+    doc.text(percent, x + 8, y + 45, { width: width - 16 });
+  }
+}
+
 export async function gerarPDFResultados(
   nomeLoja: string,
   dashboardData: DashboardData,
@@ -67,7 +112,7 @@ export async function gerarPDFResultados(
       doc.on('end', () => resolve(Buffer.concat(chunks)));
       doc.on('error', reject);
 
-      const { kpis, resultados, complementares, alertas, periodoLabel, comparativoMesAnterior } = dashboardData;
+      const { kpis, complementares, alertas, periodoLabel, comparativoMesAnterior, resultados } = dashboardData;
 
       // Cores
       const verde = '#10b981';
@@ -76,178 +121,225 @@ export async function gerarPDFResultados(
       const roxo = '#8b5cf6';
       const laranja = '#f97316';
       const cinza = '#6b7280';
-      const cinzaClaro = '#f3f4f6';
+
+      const pageWidth = doc.page.width - 80; // 40 margin each side
+      let currentY = 40;
 
       // ========== CABEÇALHO ==========
-      doc.fontSize(24).fillColor('#1f2937').text('Relatório de Resultados', { align: 'center' });
-      doc.moveDown(0.3);
-      doc.fontSize(16).fillColor(verde).text(nomeLoja, { align: 'center' });
-      doc.moveDown(0.3);
-      doc.fontSize(10).fillColor(cinza).text(`Período: ${periodoLabel}`, { align: 'center' });
-      doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-PT', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}`, { align: 'center' });
+      doc.fontSize(22).fillColor('#1f2937');
+      doc.text('Relatório de Resultados', 40, currentY, { align: 'center', width: pageWidth });
+      currentY += 30;
       
-      doc.moveDown(1);
+      doc.fontSize(16).fillColor(verde);
+      doc.text(nomeLoja, 40, currentY, { align: 'center', width: pageWidth });
+      currentY += 22;
+      
+      doc.fontSize(10).fillColor(cinza);
+      doc.text(`Período: ${periodoLabel}`, 40, currentY, { align: 'center', width: pageWidth });
+      currentY += 14;
+      doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-PT', { day: '2-digit', month: 'long', year: 'numeric' })} às ${new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })}`, 40, currentY, { align: 'center', width: pageWidth });
+      currentY += 30;
 
       // ========== KPIs PRINCIPAIS ==========
-      doc.fontSize(14).fillColor('#1f2937').text('Indicadores Principais', { underline: true });
-      doc.moveDown(0.5);
+      doc.fontSize(13).fillColor('#1f2937');
+      doc.text('Indicadores Principais', 40, currentY);
+      currentY += 20;
 
-      // Tabela de KPIs
-      const kpiY = doc.y;
-      const colWidth = 125;
+      // 4 KPIs em linha
+      const kpiWidth = (pageWidth - 30) / 4; // 30 = 3 gaps de 10px
+      const kpiHeight = 55;
       
-      // Serviços
-      doc.rect(40, kpiY, colWidth, 60).fill(azul);
-      doc.fillColor('white').fontSize(10).text('Serviços', 50, kpiY + 10);
-      doc.fontSize(20).text(String(kpis.servicosRealizados), 50, kpiY + 28);
+      // Serviços (azul)
+      drawKPIBox(doc, 40, currentY, kpiWidth, kpiHeight, azul, 'Serviços', String(kpis.servicosRealizados));
       
-      // Objetivo
-      doc.rect(40 + colWidth + 10, kpiY, colWidth, 60).fill(roxo);
-      doc.fillColor('white').fontSize(10).text('Objetivo', 50 + colWidth + 10, kpiY + 10);
-      doc.fontSize(20).text(String(kpis.objetivoMensal), 50 + colWidth + 10, kpiY + 28);
+      // Objetivo (roxo)
+      drawKPIBox(doc, 40 + kpiWidth + 10, currentY, kpiWidth, kpiHeight, roxo, 'Objetivo', String(kpis.objetivoMensal));
       
-      // Desvio
+      // Desvio Obj. Diário (verde/vermelho)
       const desvioColor = kpis.desvioObjetivoDiario >= 0 ? verde : vermelho;
-      doc.rect(40 + (colWidth + 10) * 2, kpiY, colWidth, 60).fill(desvioColor);
-      doc.fillColor('white').fontSize(10).text('Desvio Obj. Diário', 50 + (colWidth + 10) * 2, kpiY + 10);
-      doc.fontSize(20).text(`${kpis.desvioObjetivoDiario >= 0 ? '+' : ''}${kpis.desvioObjetivoDiario.toFixed(1)}%`, 50 + (colWidth + 10) * 2, kpiY + 28);
+      const desvioValue = `${kpis.desvioObjetivoDiario >= 0 ? '+' : ''}${kpis.desvioObjetivoDiario.toFixed(1)}%`;
+      drawKPIBox(doc, 40 + (kpiWidth + 10) * 2, currentY, kpiWidth, kpiHeight, desvioColor, 'Desvio Obj. Diário', desvioValue);
       
-      // Taxa Reparação
+      // Taxa Reparação (verde/laranja)
       const taxaColor = kpis.taxaReparacao >= 22 ? verde : laranja;
-      doc.rect(40 + (colWidth + 10) * 3, kpiY, colWidth, 60).fill(taxaColor);
-      doc.fillColor('white').fontSize(10).text('Taxa Reparação', 50 + (colWidth + 10) * 3, kpiY + 10);
-      doc.fontSize(20).text(`${kpis.taxaReparacao.toFixed(1)}%`, 50 + (colWidth + 10) * 3, kpiY + 28);
-
-      doc.y = kpiY + 80;
+      drawKPIBox(doc, 40 + (kpiWidth + 10) * 3, currentY, kpiWidth, kpiHeight, taxaColor, 'Taxa Reparação', `${kpis.taxaReparacao.toFixed(1)}%`);
+      
+      currentY += kpiHeight + 25;
 
       // ========== ALERTAS ==========
       if (alertas && alertas.length > 0) {
-        doc.fontSize(14).fillColor('#1f2937').text('Alertas', { underline: true });
-        doc.moveDown(0.3);
+        doc.fontSize(13).fillColor('#1f2937');
+        doc.text('Alertas', 40, currentY);
+        currentY += 18;
         
         alertas.forEach(alerta => {
           const alertaColor = alerta.tipo === 'success' ? verde : alerta.tipo === 'warning' ? laranja : vermelho;
-          const icon = alerta.tipo === 'success' ? '✓' : alerta.tipo === 'warning' ? '⚠' : '✗';
-          doc.fontSize(10).fillColor(alertaColor).text(`${icon} ${alerta.mensagem}`);
+          const icon = alerta.tipo === 'success' ? '✓' : alerta.tipo === 'warning' ? '!' : '✗';
+          doc.fontSize(10).fillColor(alertaColor);
+          doc.text(`${icon} ${alerta.mensagem}`, 50, currentY, { width: pageWidth - 20 });
+          currentY += 14;
         });
-        doc.moveDown(0.5);
+        currentY += 15;
       }
 
       // ========== VENDAS COMPLEMENTARES ==========
-      doc.fontSize(14).fillColor('#1f2937').text('Vendas Complementares', { underline: true });
-      doc.moveDown(0.5);
+      doc.fontSize(13).fillColor('#1f2937');
+      doc.text('Vendas Complementares', 40, currentY);
+      currentY += 18;
 
-      const compY = doc.y;
-      const compData = [
-        { label: 'Escovas', valor: complementares.escovasQtd, percent: complementares.escovasPercent },
-        { label: 'Polimento', valor: complementares.polimentoQtd },
-        { label: 'Tratamento', valor: complementares.tratamentoQtd },
-        { label: 'Lavagens', valor: complementares.lavagensTotal },
-        { label: 'Outros', valor: complementares.outrosQtd },
-      ];
-
-      let compX = 40;
-      compData.forEach((item, i) => {
-        doc.rect(compX, compY, 100, 45).fill(cinzaClaro);
-        doc.fillColor('#1f2937').fontSize(9).text(item.label, compX + 10, compY + 8);
-        doc.fontSize(16).text(String(item.valor), compX + 10, compY + 22);
-        if (item.percent !== undefined && item.percent !== null) {
-          doc.fontSize(8).fillColor(cinza).text(`(${(item.percent * 100).toFixed(1)}%)`, compX + 50, compY + 26);
-        }
-        compX += 105;
-      });
-
-      doc.y = compY + 60;
+      // 5 caixas em linha
+      const compWidth = (pageWidth - 40) / 5; // 40 = 4 gaps de 10px
+      const compHeight = 58;
+      
+      const escovasPercent = complementares.escovasPercent !== null ? `(${(complementares.escovasPercent * 100).toFixed(1)}%)` : '';
+      
+      drawCompBox(doc, 40, currentY, compWidth, compHeight, 'Escovas', complementares.escovasQtd, escovasPercent);
+      drawCompBox(doc, 40 + compWidth + 10, currentY, compWidth, compHeight, 'Polimento', complementares.polimentoQtd);
+      drawCompBox(doc, 40 + (compWidth + 10) * 2, currentY, compWidth, compHeight, 'Tratamento', complementares.tratamentoQtd);
+      drawCompBox(doc, 40 + (compWidth + 10) * 3, currentY, compWidth, compHeight, 'Lavagens', complementares.lavagensTotal);
+      drawCompBox(doc, 40 + (compWidth + 10) * 4, currentY, compWidth, compHeight, 'Outros', complementares.outrosQtd);
+      
+      currentY += compHeight + 25;
 
       // ========== BARRA DE PROGRESSO ESCOVAS ==========
-      doc.fontSize(12).fillColor('#1f2937').text('Progresso Escovas (Objetivo: 10%)');
-      doc.moveDown(0.3);
+      doc.fontSize(12).fillColor('#1f2937');
+      doc.text('Progresso Escovas (Objetivo: 10%)', 40, currentY);
+      currentY += 16;
       
-      const barY = doc.y;
-      const barWidth = 500;
-      const escovasPercent = (complementares.escovasPercent || 0) * 100;
-      const progressWidth = Math.min(escovasPercent / 15 * barWidth, barWidth); // Escala até 15%
+      const barWidth = pageWidth;
+      const barHeight = 22;
+      const escovasPercValue = (complementares.escovasPercent || 0) * 100;
+      const maxPercent = 15; // Escala até 15%
+      const progressWidth = Math.min((escovasPercValue / maxPercent) * barWidth, barWidth);
       
       // Barra de fundo
-      doc.rect(40, barY, barWidth, 20).fill(cinzaClaro);
+      doc.rect(40, currentY, barWidth, barHeight).fill('#e5e7eb');
       
       // Barra de progresso
-      const progressColor = escovasPercent >= 10 ? verde : escovasPercent >= 7.5 ? laranja : vermelho;
-      doc.rect(40, barY, progressWidth, 20).fill(progressColor);
+      const progressColor = escovasPercValue >= 10 ? verde : escovasPercValue >= 7.5 ? laranja : vermelho;
+      if (progressWidth > 0) {
+        doc.rect(40, currentY, progressWidth, barHeight).fill(progressColor);
+      }
       
       // Marcadores
-      const marker75 = barWidth * (7.5 / 15);
-      const marker10 = barWidth * (10 / 15);
-      doc.strokeColor(cinza).lineWidth(2);
-      doc.moveTo(40 + marker75, barY).lineTo(40 + marker75, barY + 20).stroke();
-      doc.moveTo(40 + marker10, barY).lineTo(40 + marker10, barY + 20).stroke();
+      const marker75X = 40 + (7.5 / maxPercent) * barWidth;
+      const marker10X = 40 + (10 / maxPercent) * barWidth;
       
-      doc.fontSize(8).fillColor(cinza);
-      doc.text('7.5%', 40 + marker75 - 10, barY + 22);
-      doc.text('10%', 40 + marker10 - 8, barY + 22);
-      doc.text(`${escovasPercent.toFixed(1)}%`, 40 + progressWidth - 15, barY + 5);
-
-      doc.y = barY + 45;
+      doc.strokeColor('#374151').lineWidth(2);
+      doc.moveTo(marker75X, currentY).lineTo(marker75X, currentY + barHeight).stroke();
+      doc.moveTo(marker10X, currentY).lineTo(marker10X, currentY + barHeight).stroke();
+      
+      // Labels dos marcadores
+      doc.fontSize(8).fillColor('#374151');
+      doc.text('7.5%', marker75X - 12, currentY + barHeight + 3);
+      doc.text('10%', marker10X - 10, currentY + barHeight + 3);
+      
+      // Valor atual
+      doc.fontSize(10).fillColor('white');
+      if (progressWidth > 40) {
+        doc.text(`${escovasPercValue.toFixed(1)}%`, 40 + progressWidth - 35, currentY + 5);
+      } else {
+        doc.fillColor('#374151');
+        doc.text(`${escovasPercValue.toFixed(1)}%`, 40 + progressWidth + 5, currentY + 5);
+      }
+      
+      currentY += barHeight + 30;
 
       // ========== COMPARATIVO MÊS ANTERIOR ==========
-      doc.fontSize(14).fillColor('#1f2937').text('Comparativo com Mês Anterior', { underline: true });
-      doc.moveDown(0.5);
+      doc.fontSize(13).fillColor('#1f2937');
+      doc.text('Comparativo com Mês Anterior', 40, currentY);
+      currentY += 18;
 
-      const compMesY = doc.y;
-      const compMesData = [
-        { label: 'Serviços', atual: kpis.servicosRealizados, anterior: comparativoMesAnterior.servicosAnterior, variacao: comparativoMesAnterior.variacaoServicos },
-        { label: 'Reparações', atual: resultados.totalReparacoes, anterior: comparativoMesAnterior.reparacoesAnterior, variacao: comparativoMesAnterior.variacaoReparacoes },
-        { label: 'Escovas', atual: complementares.escovasQtd, anterior: comparativoMesAnterior.escovasAnterior, variacao: comparativoMesAnterior.variacaoEscovas },
-      ];
-
-      let compMesX = 40;
-      compMesData.forEach(item => {
-        doc.rect(compMesX, compMesY, 170, 55).fill(cinzaClaro);
-        doc.fillColor('#1f2937').fontSize(10).text(item.label, compMesX + 10, compMesY + 8);
-        doc.fontSize(14).text(`${item.atual} (ant: ${item.anterior})`, compMesX + 10, compMesY + 24);
-        
-        if (item.variacao !== null) {
-          const varColor = item.variacao >= 0 ? verde : vermelho;
-          const varIcon = item.variacao >= 0 ? '↑' : '↓';
-          doc.fontSize(10).fillColor(varColor).text(`${varIcon} ${Math.abs(item.variacao).toFixed(1)}%`, compMesX + 10, compMesY + 40);
-        }
-        compMesX += 175;
-      });
-
-      doc.y = compMesY + 70;
+      // 3 caixas em linha
+      const compMesWidth = (pageWidth - 20) / 3; // 20 = 2 gaps de 10px
+      const compMesHeight = 65;
+      
+      // Serviços
+      doc.rect(40, currentY, compMesWidth, compMesHeight).fill('#f3f4f6');
+      doc.fillColor('#374151').fontSize(10);
+      doc.text('Serviços', 50, currentY + 8);
+      doc.fontSize(16);
+      doc.text(`${kpis.servicosRealizados} (ant: ${comparativoMesAnterior.servicosAnterior})`, 50, currentY + 24);
+      if (comparativoMesAnterior.variacaoServicos !== null) {
+        const varColor = comparativoMesAnterior.variacaoServicos >= 0 ? verde : vermelho;
+        const varIcon = comparativoMesAnterior.variacaoServicos >= 0 ? '↑' : '↓';
+        doc.fontSize(11).fillColor(varColor);
+        doc.text(`${varIcon} ${Math.abs(comparativoMesAnterior.variacaoServicos).toFixed(1)}%`, 50, currentY + 46);
+      }
+      
+      // Reparações
+      doc.rect(40 + compMesWidth + 10, currentY, compMesWidth, compMesHeight).fill('#f3f4f6');
+      doc.fillColor('#374151').fontSize(10);
+      doc.text('Reparações', 50 + compMesWidth + 10, currentY + 8);
+      doc.fontSize(16);
+      doc.text(`${resultados.totalReparacoes} (ant: ${comparativoMesAnterior.reparacoesAnterior})`, 50 + compMesWidth + 10, currentY + 24);
+      if (comparativoMesAnterior.variacaoReparacoes !== null) {
+        const varColor = comparativoMesAnterior.variacaoReparacoes >= 0 ? verde : vermelho;
+        const varIcon = comparativoMesAnterior.variacaoReparacoes >= 0 ? '↑' : '↓';
+        doc.fontSize(11).fillColor(varColor);
+        doc.text(`${varIcon} ${Math.abs(comparativoMesAnterior.variacaoReparacoes).toFixed(1)}%`, 50 + compMesWidth + 10, currentY + 46);
+      }
+      
+      // Escovas
+      doc.rect(40 + (compMesWidth + 10) * 2, currentY, compMesWidth, compMesHeight).fill('#f3f4f6');
+      doc.fillColor('#374151').fontSize(10);
+      doc.text('Escovas', 50 + (compMesWidth + 10) * 2, currentY + 8);
+      doc.fontSize(16);
+      doc.text(`${complementares.escovasQtd} (ant: ${comparativoMesAnterior.escovasAnterior})`, 50 + (compMesWidth + 10) * 2, currentY + 24);
+      if (comparativoMesAnterior.variacaoEscovas !== null) {
+        const varColor = comparativoMesAnterior.variacaoEscovas >= 0 ? verde : vermelho;
+        const varIcon = comparativoMesAnterior.variacaoEscovas >= 0 ? '↑' : '↓';
+        doc.fontSize(11).fillColor(varColor);
+        doc.text(`${varIcon} ${Math.abs(comparativoMesAnterior.variacaoEscovas).toFixed(1)}%`, 50 + (compMesWidth + 10) * 2, currentY + 46);
+      }
+      
+      currentY += compMesHeight + 25;
 
       // ========== ANÁLISE IA ==========
       if (analiseIA) {
-        // Nova página se necessário
-        if (doc.y > 650) {
+        // Verificar se precisa de nova página
+        if (currentY > 650) {
           doc.addPage();
+          currentY = 40;
         }
         
-        doc.fontSize(14).fillColor('#1f2937').text('Análise Inteligente', { underline: true });
-        doc.moveDown(0.5);
+        doc.fontSize(13).fillColor('#1f2937');
+        doc.text('Análise Inteligente', 40, currentY);
+        currentY += 20;
 
         // Foco Urgente
         if (analiseIA.focoUrgente && analiseIA.focoUrgente.length > 0) {
-          doc.fontSize(11).fillColor(vermelho).text('🎯 Foco Urgente:');
+          doc.fontSize(11).fillColor(vermelho);
+          doc.text('Foco Urgente:', 40, currentY);
+          currentY += 14;
           analiseIA.focoUrgente.forEach(item => {
-            doc.fontSize(10).fillColor('#1f2937').text(`  • ${item}`);
+            doc.fontSize(10).fillColor('#374151');
+            doc.text(`• ${item}`, 50, currentY, { width: pageWidth - 20 });
+            currentY += 14;
           });
-          doc.moveDown(0.3);
+          currentY += 8;
         }
 
         // Pontos Positivos
         if (analiseIA.pontosPositivos && analiseIA.pontosPositivos.length > 0) {
-          doc.fontSize(11).fillColor(verde).text('✓ Pontos Positivos:');
+          doc.fontSize(11).fillColor(verde);
+          doc.text('Pontos Positivos:', 40, currentY);
+          currentY += 14;
           analiseIA.pontosPositivos.forEach(item => {
-            doc.fontSize(10).fillColor('#1f2937').text(`  • ${item}`);
+            doc.fontSize(10).fillColor('#374151');
+            doc.text(`• ${item}`, 50, currentY, { width: pageWidth - 20 });
+            currentY += 14;
           });
-          doc.moveDown(0.3);
+          currentY += 8;
         }
 
         // Resumo
         if (analiseIA.resumo) {
-          doc.fontSize(11).fillColor(azul).text('💡 Resumo:');
-          doc.fontSize(10).fillColor('#1f2937').text(analiseIA.resumo, { width: 500 });
+          doc.fontSize(11).fillColor(azul);
+          doc.text('Resumo:', 40, currentY);
+          currentY += 14;
+          doc.fontSize(10).fillColor('#374151');
+          doc.text(analiseIA.resumo, 50, currentY, { width: pageWidth - 20 });
         }
       }
 
@@ -260,7 +352,7 @@ export async function gerarPDFResultados(
           `PoweringEG Platform 2.0 - a IA ao serviço da ExpressGlass | Página ${i + 1} de ${pageCount}`,
           40,
           doc.page.height - 30,
-          { align: 'center', width: doc.page.width - 80 }
+          { align: 'center', width: pageWidth }
         );
       }
 

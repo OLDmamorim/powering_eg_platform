@@ -3111,3 +3111,11 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Atualizar frontend para usar endpoint do servidor
 - [ ] Testar em dispositivos móveis
 
+
+## Bug v6.6.4 - Layout do PDF mal configurado
+- [x] Corrigir sobreposição de textos no PDF
+- [x] Organizar secções verticalmente (não lado a lado)
+- [x] Corrigir posicionamento dos alertas
+- [x] Corrigir barra de progresso das escovas
+- [x] Melhorar espaçamento entre secções
+
