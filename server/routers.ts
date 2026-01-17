@@ -261,6 +261,61 @@ export const appRouter = router({
         if (!ctx.gestor) return [];
         return await db.verificarAtrasosGestor(ctx.gestor.id);
       }),
+    
+    // ==================== RELAÇÕES ENTRE LOJAS ====================
+    
+    // Listar relações de lojas (gestor vê as suas, admin vê todas)
+    listarRelacoes: gestorProcedure.query(async ({ ctx }) => {
+      if (ctx.user.role === 'admin') {
+        return await db.getAllRelacoesLojas();
+      }
+      if (!ctx.gestor) return [];
+      return await db.getRelacoesLojasByGestorId(ctx.gestor.id);
+    }),
+    
+    // Criar relação entre lojas
+    criarRelacao: gestorProcedure
+      .input(z.object({
+        lojaPrincipalId: z.number(),
+        lojaRelacionadaId: z.number(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        // Verificar se gestor tem acesso às duas lojas
+        if (ctx.user.role !== 'admin' && ctx.gestor) {
+          const lojasGestor = await db.getLojasByGestorId(ctx.gestor.id);
+          const lojasIds = lojasGestor.map(l => l.id);
+          if (!lojasIds.includes(input.lojaPrincipalId) || !lojasIds.includes(input.lojaRelacionadaId)) {
+            throw new TRPCError({ code: 'FORBIDDEN', message: 'Não tem acesso a uma das lojas' });
+          }
+        }
+        
+        // Não permitir relacionar uma loja consigo mesma
+        if (input.lojaPrincipalId === input.lojaRelacionadaId) {
+          throw new TRPCError({ code: 'BAD_REQUEST', message: 'Não pode relacionar uma loja consigo mesma' });
+        }
+        
+        const relacao = await db.criarRelacaoLojas(
+          input.lojaPrincipalId,
+          input.lojaRelacionadaId,
+          ctx.gestor?.id
+        );
+        return { success: true, relacao };
+      }),
+    
+    // Remover relação entre lojas
+    removerRelacao: gestorProcedure
+      .input(z.object({ relacaoId: z.number() }))
+      .mutation(async ({ input }) => {
+        await db.removerRelacaoLojas(input.relacaoId);
+        return { success: true };
+      }),
+    
+    // Obter lojas relacionadas com uma loja
+    getLojasRelacionadas: gestorProcedure
+      .input(z.object({ lojaId: z.number() }))
+      .query(async ({ input }) => {
+        return await db.getLojasRelacionadas(input.lojaId);
+      }),
   }),
 
   // ==================== GESTORES ====================
@@ -3615,10 +3670,18 @@ export const appRouter = router({
         if (!result) {
           throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido ou inativo' });
         }
+        
+        // Obter lojas relacionadas
+        const lojasRelacionadas = await db.getLojasRelacionadas(result.loja.id);
+        
         return {
           lojaId: result.loja.id,
           lojaNome: result.loja.nome,
           lojaEmail: result.loja.email,
+          lojasRelacionadas: lojasRelacionadas.map(l => ({
+            id: l.lojaId,
+            nome: l.lojaNome,
+          })),
         };
       }),
     

@@ -337,6 +337,13 @@
       "when": 1768609979825,
       "tag": "0047_cuddly_boomerang",
       "breakpoints": true
+    },
+    {
+      "idx": 48,
+      "version": "5",
+      "when": 1768661462344,
+      "tag": "0048_freezing_colonel_america",
+      "breakpoints": true
     }
   ]
 }

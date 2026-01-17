@@ -98,6 +98,7 @@ interface LojaAuth {
   lojaId: number;
   lojaNome: string;
   lojaEmail: string | null;
+  lojasRelacionadas?: Array<{ id: number; nome: string }>;
 }
 
 export default function PortalLoja() {
@@ -105,6 +106,7 @@ export default function PortalLoja() {
   const [token, setToken] = useState<string>("");
   const [inputToken, setInputToken] = useState<string>("");
   const [lojaAuth, setLojaAuth] = useState<LojaAuth | null>(null);
+  const [lojaAtualId, setLojaAtualId] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<"home" | "reuniao" | "pendentes" | "historico" | "tarefas" | "resultados">("home");
   const [filtroTarefas, setFiltroTarefas] = useState<"todas" | "recebidas" | "enviadas" | "internas">("todas");
   // Estado para o filtro de meses do dashboard
@@ -657,7 +659,49 @@ export default function PortalLoja() {
                 <Store className="h-6 w-6 text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-bold">{lojaAuth.lojaNome}</h1>
+                {/* Se tem lojas relacionadas, mostrar seletor */}
+                {lojaAuth.lojasRelacionadas && lojaAuth.lojasRelacionadas.length > 0 ? (
+                  <Select 
+                    value={String(lojaAtualId || lojaAuth.lojaId)} 
+                    onValueChange={(value) => {
+                      const novaLojaId = parseInt(value);
+                      setLojaAtualId(novaLojaId);
+                      // Encontrar o nome da loja selecionada
+                      if (novaLojaId === lojaAuth.lojaId) {
+                        // Loja principal
+                        setLojaAuth({ ...lojaAuth });
+                      } else {
+                        // Loja relacionada
+                        const lojaRelacionada = lojaAuth.lojasRelacionadas?.find(l => l.id === novaLojaId);
+                        if (lojaRelacionada) {
+                          setLojaAuth({ 
+                            ...lojaAuth, 
+                            lojaId: lojaRelacionada.id, 
+                            lojaNome: lojaRelacionada.nome 
+                          });
+                        }
+                      }
+                      // Recarregar dados
+                      refetchDados();
+                      refetchPendentes();
+                      refetchReunioes();
+                      refetchTodos();
+                      toast.success(language === 'pt' ? 'Loja alterada!' : 'Store changed!');
+                    }}
+                  >
+                    <SelectTrigger className="h-auto p-0 border-0 bg-transparent text-white text-xl font-bold hover:bg-white/10 rounded">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={String(lojaAuth.lojaId)}>{lojaAuth.lojaNome}</SelectItem>
+                      {lojaAuth.lojasRelacionadas.map(loja => (
+                        <SelectItem key={loja.id} value={String(loja.id)}>{loja.nome}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <h1 className="text-xl font-bold">{lojaAuth.lojaNome}</h1>
+                )}
                 <p className="text-sm text-emerald-100 flex items-center gap-1">
                   <Users className="h-4 w-4" />
                   {language === 'pt' ? 'Gestor:' : 'Manager:'} {dadosLoja?.gestorNome || 'N/A'}

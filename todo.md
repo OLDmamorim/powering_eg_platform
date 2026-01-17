@@ -3025,3 +3025,12 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Atualizar card vermelho para mostrar desvio vs objetivo diário
 - [x] Testar no Portal da Loja
 
+
+## Relacionamento de Lojas (v6.7)
+- [ ] Criar tabela de relações entre lojas no schema
+- [ ] Adicionar funções de base de dados para gerir relações
+- [ ] Criar routers para CRUD de relações
+- [ ] Adicionar interface de gestão de relações na página do gestor
+- [ ] Modificar Portal da Loja para suportar lojas relacionadas
+- [ ] Adicionar seletor de loja quando há lojas relacionadas
+

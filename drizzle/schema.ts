@@ -882,3 +882,31 @@ export const visitasPlaneadas = mysqlTable("visitas_planeadas", {
 
 export type VisitaPlaneada = typeof visitasPlaneadas.$inferSelect;
 export type InsertVisitaPlaneada = typeof visitasPlaneadas.$inferInsert;
+
+
+/**
+ * Relações entre Lojas - Permite agrupar lojas relacionadas
+ * Lojas relacionadas partilham o mesmo token de acesso ao Portal da Loja
+ * Ex: Braga Minho Center e Braga SM são lojas relacionadas
+ */
+export const relacoesLojas = mysqlTable("relacoes_lojas", {
+  id: int("id").autoincrement().primaryKey(),
+  
+  // Loja principal (a que tem o token de acesso)
+  lojaPrincipalId: int("lojaPrincipalId").notNull(), // FK para lojas.id
+  
+  // Loja relacionada (pode aceder com o token da loja principal)
+  lojaRelacionadaId: int("lojaRelacionadaId").notNull(), // FK para lojas.id
+  
+  // Gestor que criou a relação
+  gestorId: int("gestorId"), // FK para gestores.id (null se admin)
+  
+  // Estado da relação
+  ativo: boolean("ativo").default(true).notNull(),
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type RelacaoLojas = typeof relacoesLojas.$inferSelect;
+export type InsertRelacaoLojas = typeof relacoesLojas.$inferInsert;

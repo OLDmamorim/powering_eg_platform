@@ -222,7 +222,8 @@
       "relatorioBoard": "Board Report",
       "todo": "To-Do",
       "pendentes": "Pending",
-      "projecaoVisitas": "Visit Projection"
+      "projecaoVisitas": "Visit Projection",
+      "relacoesLojas": "Store Relations"
     }
   },
   "dashboard": {

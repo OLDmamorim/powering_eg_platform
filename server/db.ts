@@ -87,7 +87,10 @@ import {
   InsertProjecaoVisitas,
   visitasPlaneadas,
   VisitaPlaneada,
-  InsertVisitaPlaneada
+  InsertVisitaPlaneada,
+  relacoesLojas,
+  RelacaoLojas,
+  InsertRelacaoLojas
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -7673,4 +7676,262 @@ export async function atualizarDataVisita(visitaId: number, novaData: Date): Pro
     .update(visitasPlaneadas)
     .set({ dataVisita: novaData, updatedAt: new Date() })
     .where(eq(visitasPlaneadas.id, visitaId));
+}
+
+
+// ==================== RELAÇÕES ENTRE LOJAS ====================
+
+/**
+ * Criar uma relação entre duas lojas
+ */
+export async function criarRelacaoLojas(
+  lojaPrincipalId: number,
+  lojaRelacionadaId: number,
+  gestorId?: number
+): Promise<RelacaoLojas | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  // Verificar se já existe relação
+  const [existente] = await db
+    .select()
+    .from(relacoesLojas)
+    .where(
+      and(
+        eq(relacoesLojas.lojaPrincipalId, lojaPrincipalId),
+        eq(relacoesLojas.lojaRelacionadaId, lojaRelacionadaId)
+      )
+    )
+    .limit(1);
+  
+  if (existente) {
+    // Se existe mas está inativa, reativar
+    if (!existente.ativo) {
+      await db
+        .update(relacoesLojas)
+        .set({ ativo: true, updatedAt: new Date() })
+        .where(eq(relacoesLojas.id, existente.id));
+      return { ...existente, ativo: true };
+    }
+    return existente;
+  }
+  
+  const [result] = await db
+    .insert(relacoesLojas)
+    .values({
+      lojaPrincipalId,
+      lojaRelacionadaId,
+      gestorId: gestorId || null,
+    })
+    .$returningId();
+  
+  const [novaRelacao] = await db
+    .select()
+    .from(relacoesLojas)
+    .where(eq(relacoesLojas.id, result.id))
+    .limit(1);
+  
+  return novaRelacao || null;
+}
+
+/**
+ * Remover uma relação entre lojas (soft delete)
+ */
+export async function removerRelacaoLojas(relacaoId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  
+  await db
+    .update(relacoesLojas)
+    .set({ ativo: false, updatedAt: new Date() })
+    .where(eq(relacoesLojas.id, relacaoId));
+}
+
+/**
+ * Obter todas as lojas relacionadas com uma loja principal
+ */
+export async function getLojasRelacionadas(lojaPrincipalId: number): Promise<Array<{
+  relacaoId: number;
+  lojaId: number;
+  lojaNome: string;
+}>> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const relacoes = await db
+    .select({
+      relacaoId: relacoesLojas.id,
+      lojaId: relacoesLojas.lojaRelacionadaId,
+      lojaNome: lojas.nome,
+    })
+    .from(relacoesLojas)
+    .innerJoin(lojas, eq(relacoesLojas.lojaRelacionadaId, lojas.id))
+    .where(
+      and(
+        eq(relacoesLojas.lojaPrincipalId, lojaPrincipalId),
+        eq(relacoesLojas.ativo, true)
+      )
+    );
+  
+  return relacoes;
+}
+
+/**
+ * Obter a loja principal de uma loja relacionada
+ * (para quando acedemos com token de uma loja e queremos ver outra relacionada)
+ */
+export async function getLojaPrincipalDeRelacionada(lojaRelacionadaId: number): Promise<{
+  lojaPrincipalId: number;
+  lojaPrincipalNome: string;
+} | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const [relacao] = await db
+    .select({
+      lojaPrincipalId: relacoesLojas.lojaPrincipalId,
+      lojaPrincipalNome: lojas.nome,
+    })
+    .from(relacoesLojas)
+    .innerJoin(lojas, eq(relacoesLojas.lojaPrincipalId, lojas.id))
+    .where(
+      and(
+        eq(relacoesLojas.lojaRelacionadaId, lojaRelacionadaId),
+        eq(relacoesLojas.ativo, true)
+      )
+    )
+    .limit(1);
+  
+  return relacao || null;
+}
+
+/**
+ * Obter todas as lojas acessíveis com um token (a própria + relacionadas)
+ */
+export async function getLojasAcessiveisComToken(lojaTokenId: number): Promise<Array<{
+  lojaId: number;
+  lojaNome: string;
+  isPrincipal: boolean;
+}>> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  // Obter a loja do token
+  const [lojaPrincipal] = await db
+    .select({ id: lojas.id, nome: lojas.nome })
+    .from(lojas)
+    .where(eq(lojas.id, lojaTokenId))
+    .limit(1);
+  
+  if (!lojaPrincipal) return [];
+  
+  // Obter lojas relacionadas
+  const relacionadas = await getLojasRelacionadas(lojaTokenId);
+  
+  // Combinar: loja principal + relacionadas
+  const resultado: Array<{ lojaId: number; lojaNome: string; isPrincipal: boolean }> = [
+    { lojaId: lojaPrincipal.id, lojaNome: lojaPrincipal.nome, isPrincipal: true }
+  ];
+  
+  for (const rel of relacionadas) {
+    resultado.push({
+      lojaId: rel.lojaId,
+      lojaNome: rel.lojaNome,
+      isPrincipal: false
+    });
+  }
+  
+  return resultado;
+}
+
+/**
+ * Obter todas as relações de lojas de um gestor
+ */
+export async function getRelacoesLojasByGestorId(gestorId: number): Promise<Array<{
+  relacaoId: number;
+  lojaPrincipalId: number;
+  lojaPrincipalNome: string;
+  lojaRelacionadaId: number;
+  lojaRelacionadaNome: string;
+}>> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  // Obter lojas do gestor
+  const lojasGestor = await getLojasByGestorId(gestorId);
+  const lojasIds = lojasGestor.map(l => l.id);
+  
+  if (lojasIds.length === 0) return [];
+  
+  // Obter relações onde a loja principal é do gestor
+  const relacoes = await db
+    .select({
+      relacaoId: relacoesLojas.id,
+      lojaPrincipalId: relacoesLojas.lojaPrincipalId,
+      lojaRelacionadaId: relacoesLojas.lojaRelacionadaId,
+    })
+    .from(relacoesLojas)
+    .where(
+      and(
+        inArray(relacoesLojas.lojaPrincipalId, lojasIds),
+        eq(relacoesLojas.ativo, true)
+      )
+    );
+  
+  // Obter nomes das lojas
+  const resultado = [];
+  for (const rel of relacoes) {
+    const [lojaPrincipal] = await db.select({ nome: lojas.nome }).from(lojas).where(eq(lojas.id, rel.lojaPrincipalId)).limit(1);
+    const [lojaRelacionada] = await db.select({ nome: lojas.nome }).from(lojas).where(eq(lojas.id, rel.lojaRelacionadaId)).limit(1);
+    
+    resultado.push({
+      relacaoId: rel.relacaoId,
+      lojaPrincipalId: rel.lojaPrincipalId,
+      lojaPrincipalNome: lojaPrincipal?.nome || 'Desconhecida',
+      lojaRelacionadaId: rel.lojaRelacionadaId,
+      lojaRelacionadaNome: lojaRelacionada?.nome || 'Desconhecida',
+    });
+  }
+  
+  return resultado;
+}
+
+/**
+ * Obter todas as relações de lojas (para admin)
+ */
+export async function getAllRelacoesLojas(): Promise<Array<{
+  relacaoId: number;
+  lojaPrincipalId: number;
+  lojaPrincipalNome: string;
+  lojaRelacionadaId: number;
+  lojaRelacionadaNome: string;
+}>> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const relacoes = await db
+    .select({
+      relacaoId: relacoesLojas.id,
+      lojaPrincipalId: relacoesLojas.lojaPrincipalId,
+      lojaRelacionadaId: relacoesLojas.lojaRelacionadaId,
+    })
+    .from(relacoesLojas)
+    .where(eq(relacoesLojas.ativo, true));
+  
+  // Obter nomes das lojas
+  const resultado = [];
+  for (const rel of relacoes) {
+    const [lojaPrincipal] = await db.select({ nome: lojas.nome }).from(lojas).where(eq(lojas.id, rel.lojaPrincipalId)).limit(1);
+    const [lojaRelacionada] = await db.select({ nome: lojas.nome }).from(lojas).where(eq(lojas.id, rel.lojaRelacionadaId)).limit(1);
+    
+    resultado.push({
+      relacaoId: rel.relacaoId,
+      lojaPrincipalId: rel.lojaPrincipalId,
+      lojaPrincipalNome: lojaPrincipal?.nome || 'Desconhecida',
+      lojaRelacionadaId: rel.lojaRelacionadaId,
+      lojaRelacionadaNome: lojaRelacionada?.nome || 'Desconhecida',
+    });
+  }
+  
+  return resultado;
 }
