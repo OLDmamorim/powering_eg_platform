@@ -2978,3 +2978,6 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Manter apenas: Foco Urgente, Pontos Positivos, Resumo
 - [x] Remover: Alertas, Comparativo, Projeção
 - [x] Mudar título "Mensagem de Força" para "Resumo"
+
+## v6.31 - Renomear Menu
+- [x] Mudar "Reuniões Quinzenais" para "Portal da Loja" no menu lateral
