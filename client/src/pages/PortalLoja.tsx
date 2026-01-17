@@ -655,71 +655,22 @@ export default function PortalLoja() {
     <div className="min-h-screen bg-gray-50">
       {/* Header Simplificado */}
       <header className="bg-emerald-600 text-white sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
-                <Store className="h-6 w-6 text-white" />
+        <div className="container mx-auto px-4 py-3">
+          {/* Linha superior: Ícone da loja + Botões de idioma e logout */}
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+                <Store className="h-4 w-4 text-white" />
               </div>
-              <div>
-                {/* Se tem lojas relacionadas, mostrar seletor */}
-                {lojaAuth.lojasRelacionadas && lojaAuth.lojasRelacionadas.length > 0 ? (
-                  <Select 
-                    value={String(lojaAtualId || lojaAuth.lojaId)} 
-                    onValueChange={(value) => {
-                      const novaLojaId = parseInt(value);
-                      setLojaAtualId(novaLojaId);
-                      // Recarregar dados com o novo lojaId
-                      refetchDados();
-                      refetchPendentes();
-                      refetchReunioes();
-                      refetchTodos();
-                      toast.success(language === 'pt' ? 'Loja alterada!' : 'Store changed!');
-                    }}
-                  >
-                    <SelectTrigger className="h-auto px-4 py-2 border-2 border-emerald-200 bg-white text-emerald-800 text-lg font-semibold hover:bg-emerald-50 rounded-lg flex items-center gap-2 shadow-sm">
-                      <SelectValue>
-                        {(() => {
-                          const currentId = lojaAtualId || lojaAuth.lojaId;
-                          if (currentId === lojaAuth.lojaId) {
-                            return lojaAuth.lojaNome;
-                          }
-                          const lojaRelacionada = lojaAuth.lojasRelacionadas?.find(l => l.id === currentId);
-                          return lojaRelacionada?.nome || lojaAuth.lojaNome;
-                        })()}
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value={String(lojaAuth.lojaId)}>
-                        <span className="flex items-center gap-2">
-                          <Store className="h-4 w-4" />
-                          {lojaAuth.lojaNome}
-                          <Badge variant="outline" className="text-xs">Principal</Badge>
-                        </span>
-                      </SelectItem>
-                      {lojaAuth.lojasRelacionadas.map(loja => (
-                        <SelectItem key={loja.id} value={String(loja.id)}>
-                          <span className="flex items-center gap-2">
-                            <Store className="h-4 w-4" />
-                            {loja.nome}
-                          </span>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                ) : (
-                  <h1 className="text-xl font-bold">{lojaAuth.lojaNome}</h1>
-                )}
-                <p className="text-sm text-emerald-100 flex items-center gap-1">
-                  <Users className="h-4 w-4" />
-                  {language === 'pt' ? 'Gestor:' : 'Manager:'} {dadosLoja?.gestorNome || 'N/A'}
-                </p>
-              </div>
+              <p className="text-sm text-emerald-100 flex items-center gap-1">
+                <Users className="h-3 w-3" />
+                {dadosLoja?.gestorNome || 'N/A'}
+              </p>
             </div>
             <div className="flex items-center gap-2">
               {/* Seletor de Idioma */}
               <Select value={language} onValueChange={(value) => setLanguage(value as 'pt' | 'en')}>
-                <SelectTrigger className="w-20 h-8 bg-white/20 border-white/30 text-white text-xs">
+                <SelectTrigger className="w-16 h-7 bg-white/20 border-white/30 text-white text-xs">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -727,10 +678,64 @@ export default function PortalLoja() {
                   <SelectItem value="en">EN</SelectItem>
                 </SelectContent>
               </Select>
-              <Button variant="ghost" size="sm" onClick={handleLogout} className="text-white hover:bg-white/20">
+              <Button variant="ghost" size="sm" onClick={handleLogout} className="text-white hover:bg-white/20 h-7 w-7 p-0">
                 <LogOut className="h-4 w-4" />
               </Button>
             </div>
+          </div>
+          
+          {/* Linha inferior: Seletor de loja (ocupa toda a largura) */}
+          <div className="w-full">
+            {lojaAuth.lojasRelacionadas && lojaAuth.lojasRelacionadas.length > 0 ? (
+              <Select 
+                value={String(lojaAtualId || lojaAuth.lojaId)} 
+                onValueChange={(value) => {
+                  const novaLojaId = parseInt(value);
+                  setLojaAtualId(novaLojaId);
+                  // Recarregar dados com o novo lojaId
+                  refetchDados();
+                  refetchPendentes();
+                  refetchReunioes();
+                  refetchTodos();
+                  toast.success(language === 'pt' ? 'Loja alterada!' : 'Store changed!');
+                }}
+              >
+                <SelectTrigger className="w-full h-auto px-4 py-2 border-2 border-emerald-200 bg-white text-emerald-800 text-base font-semibold hover:bg-emerald-50 rounded-lg flex items-center justify-between shadow-sm">
+                  <span className="flex items-center gap-2 truncate">
+                    <Store className="h-4 w-4 flex-shrink-0 text-emerald-600" />
+                    <span className="truncate">
+                      {(() => {
+                        const currentId = lojaAtualId || lojaAuth.lojaId;
+                        if (currentId === lojaAuth.lojaId) {
+                          return lojaAuth.lojaNome;
+                        }
+                        const lojaRelacionada = lojaAuth.lojasRelacionadas?.find(l => l.id === currentId);
+                        return lojaRelacionada?.nome || lojaAuth.lojaNome;
+                      })()}
+                    </span>
+                  </span>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={String(lojaAuth.lojaId)}>
+                    <span className="flex items-center gap-2">
+                      <Store className="h-4 w-4" />
+                      {lojaAuth.lojaNome}
+                      <Badge variant="outline" className="text-xs">Principal</Badge>
+                    </span>
+                  </SelectItem>
+                  {lojaAuth.lojasRelacionadas.map(loja => (
+                    <SelectItem key={loja.id} value={String(loja.id)}>
+                      <span className="flex items-center gap-2">
+                        <Store className="h-4 w-4" />
+                        {loja.nome}
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : (
+              <h1 className="text-xl font-bold">{lojaAuth.lojaNome}</h1>
+            )}
           </div>
         </div>
       </header>

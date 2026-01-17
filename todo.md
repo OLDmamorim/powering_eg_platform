@@ -3055,3 +3055,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Fundo branco no seletor para indicar que é clicável
 - [x] Texto escuro para melhor contraste
 - [x] Ícone de seta mais visível
+
+## Bug v6.6.19 - Sobreposição no Header Mobile
+- [x] Corrigir sobreposição do seletor de lojas com o seletor de idioma
+- [x] Reorganizar layout do header para mobile
