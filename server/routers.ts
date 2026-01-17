@@ -1588,6 +1588,231 @@ export const appRouter = router({
       }),
   }),
 
+  // ==================== PROJEÇÃO DE VISITAS ====================
+  projecaoVisitas: router({
+    // Obter dados de priorização das lojas do gestor
+    getDadosPriorizacao: gestorProcedure.query(async ({ ctx }) => {
+      if (!ctx.gestor) return [];
+      return await db.getDadosPriorizacaoLojas(ctx.gestor.id);
+    }),
+    
+    // Gerar projeção de visitas para uma semana
+    gerar: gestorProcedure
+      .input(z.object({
+        tipoPeriodo: z.enum(['esta_semana', 'proxima_semana']),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        // Para admins sem gestor associado, usar um gestor padrão ou mostrar todas as lojas
+        const gestorId = ctx.gestor?.id;
+        if (!gestorId && ctx.user.role !== 'admin') {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Gestor não encontrado' });
+        }
+        
+        // Calcular datas da semana
+        const hoje = new Date();
+        const diaSemana = hoje.getDay(); // 0 = Domingo, 1 = Segunda, ..., 6 = Sábado
+        
+        let semanaInicio: Date;
+        let semanaFim: Date;
+        
+        if (input.tipoPeriodo === 'esta_semana') {
+          // Encontrar a segunda-feira desta semana
+          const diasParaSegunda = diaSemana === 0 ? -6 : 1 - diaSemana;
+          semanaInicio = new Date(hoje);
+          semanaInicio.setDate(hoje.getDate() + diasParaSegunda);
+          semanaInicio.setHours(0, 0, 0, 0);
+          
+          // Sexta-feira desta semana
+          semanaFim = new Date(semanaInicio);
+          semanaFim.setDate(semanaInicio.getDate() + 4);
+          semanaFim.setHours(23, 59, 59, 999);
+        } else {
+          // Próxima semana
+          const diasParaProximaSegunda = diaSemana === 0 ? 1 : 8 - diaSemana;
+          semanaInicio = new Date(hoje);
+          semanaInicio.setDate(hoje.getDate() + diasParaProximaSegunda);
+          semanaInicio.setHours(0, 0, 0, 0);
+          
+          // Sexta-feira da próxima semana
+          semanaFim = new Date(semanaInicio);
+          semanaFim.setDate(semanaInicio.getDate() + 4);
+          semanaFim.setHours(23, 59, 59, 999);
+        }
+        
+        // Obter dados de priorização
+        // Para admins sem gestor, obter todas as lojas; para gestores, apenas as suas lojas
+        const dadosPriorizacao = gestorId 
+          ? await db.getDadosPriorizacaoLojas(gestorId)
+          : await db.getDadosPriorizacaoTodasLojas();
+        
+        // Calcular dias úteis disponíveis
+        const diasUteis: Date[] = [];
+        const feriadosPortugueses = obterFeriadosPortugueses(semanaInicio.getFullYear());
+        
+        for (let i = 0; i <= 4; i++) {
+          const dia = new Date(semanaInicio);
+          dia.setDate(semanaInicio.getDate() + i);
+          
+          // Verificar se é dia útil (não é fim de semana e não é feriado)
+          const diaSem = dia.getDay();
+          if (diaSem !== 0 && diaSem !== 6) {
+            const dataStr = dia.toISOString().split('T')[0];
+            if (!feriadosPortugueses.includes(dataStr)) {
+              // Para "esta semana", só incluir dias a partir de hoje
+              if (input.tipoPeriodo === 'esta_semana') {
+                if (dia >= hoje || dia.toDateString() === hoje.toDateString()) {
+                  diasUteis.push(new Date(dia));
+                }
+              } else {
+                diasUteis.push(new Date(dia));
+              }
+            }
+          }
+        }
+        
+        // Criar projeção
+        const visitasPlaneadasJson = diasUteis.slice(0, dadosPriorizacao.length).map((dia, index) => {
+          const loja = dadosPriorizacao[index];
+          return {
+            data: dia.toISOString(),
+            lojaId: loja.lojaId,
+            lojaNome: loja.lojaNome,
+            motivo: loja.motivo,
+            prioridade: index + 1,
+            detalheMotivo: loja.detalheMotivo,
+          };
+        });
+        
+        const projecaoId = await db.criarProjecaoVisitas({
+          gestorId: gestorId || 0, // 0 para admin sem gestor associado
+          semanaInicio,
+          semanaFim,
+          tipoPeriodo: input.tipoPeriodo,
+          visitasPlaneadas: JSON.stringify(visitasPlaneadasJson),
+          estado: 'gerada',
+        });
+        
+        // Criar visitas individuais
+        const visitasParaCriar = diasUteis.slice(0, dadosPriorizacao.length).map((dia, index) => {
+          const loja = dadosPriorizacao[index];
+          return {
+            projecaoId,
+            lojaId: loja.lojaId,
+            dataVisita: dia,
+            horaInicio: '09:00',
+            horaFim: '12:00',
+            motivo: loja.motivo,
+            prioridade: index + 1,
+            detalheMotivo: loja.detalheMotivo,
+            estado: 'planeada' as const,
+          };
+        });
+        
+        await db.criarVisitasPlaneadas(visitasParaCriar);
+        
+        return { projecaoId, visitasCount: visitasParaCriar.length };
+      }),
+    
+    // Obter projeção atual do gestor
+    atual: gestorProcedure.query(async ({ ctx }) => {
+      const gestorId = ctx.gestor?.id || 0;
+      return await db.getProjecaoVisitasAtual(gestorId);
+    }),
+    
+    // Obter visitas de uma projeção
+    getVisitas: gestorProcedure
+      .input(z.object({ projecaoId: z.number() }))
+      .query(async ({ input }) => {
+        return await db.getVisitasPlaneadasPorProjecao(input.projecaoId);
+      }),
+    
+    // Atualizar estado de uma visita
+    atualizarEstadoVisita: gestorProcedure
+      .input(z.object({
+        visitaId: z.number(),
+        estado: z.enum(['planeada', 'confirmada', 'realizada', 'cancelada']),
+      }))
+      .mutation(async ({ input }) => {
+        await db.atualizarEstadoVisita(input.visitaId, input.estado);
+        return { success: true };
+      }),
+    
+    // Gerar links de calendário para uma visita
+    gerarLinksCalendario: gestorProcedure
+      .input(z.object({
+        visitaId: z.number(),
+        lojaNome: z.string(),
+        lojaEndereco: z.string().optional(),
+        dataVisita: z.string(),
+        horaInicio: z.string(),
+        horaFim: z.string(),
+        motivo: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        const titulo = `Visita ExpressGlass - ${input.lojaNome}`;
+        const descricao = `Visita de supervisão à loja ${input.lojaNome}\n\nMotivo: ${input.motivo}`;
+        const local = input.lojaEndereco || input.lojaNome;
+        
+        // Formatar datas para calendário
+        const dataBase = input.dataVisita.split('T')[0];
+        const inicio = `${dataBase}T${input.horaInicio}:00`;
+        const fim = `${dataBase}T${input.horaFim}:00`;
+        
+        // Formato para Google Calendar
+        const inicioGoogle = inicio.replace(/[-:]/g, '').replace('T', 'T');
+        const fimGoogle = fim.replace(/[-:]/g, '').replace('T', 'T');
+        const linkGoogle = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(titulo)}&dates=${inicioGoogle}/${fimGoogle}&details=${encodeURIComponent(descricao)}&location=${encodeURIComponent(local)}`;
+        
+        // Formato para Outlook Web
+        const linkOutlook = `https://outlook.live.com/calendar/0/deeplink/compose?subject=${encodeURIComponent(titulo)}&startdt=${encodeURIComponent(inicio)}&enddt=${encodeURIComponent(fim)}&body=${encodeURIComponent(descricao)}&location=${encodeURIComponent(local)}`;
+        
+        // Formato ICS para Apple Calendar
+        const icsContent = [
+          'BEGIN:VCALENDAR',
+          'VERSION:2.0',
+          'PRODID:-//PoweringEG//Visitas//PT',
+          'BEGIN:VEVENT',
+          `DTSTART:${inicioGoogle}`,
+          `DTEND:${fimGoogle}`,
+          `SUMMARY:${titulo}`,
+          `DESCRIPTION:${descricao.replace(/\n/g, '\\n')}`,
+          `LOCATION:${local}`,
+          'END:VEVENT',
+          'END:VCALENDAR'
+        ].join('\n');
+        const linkICS = `data:text/calendar;charset=utf-8,${encodeURIComponent(icsContent)}`;
+        
+        // Guardar links na base de dados
+        await db.atualizarLinksCalendario(input.visitaId, {
+          linkGoogleCalendar: linkGoogle,
+          linkOutlook: linkOutlook,
+          linkICS: linkICS,
+        });
+        
+        return {
+          linkGoogleCalendar: linkGoogle,
+          linkOutlook: linkOutlook,
+          linkICS: linkICS,
+        };
+      }),
+    
+    // Obter histórico de projeções
+    historico: gestorProcedure
+      .input(z.object({ limite: z.number().optional() }))
+      .query(async ({ ctx, input }) => {
+        if (!ctx.gestor) return [];
+        return await db.getHistoricoProjecoes(ctx.gestor.id, input.limite || 10);
+      }),
+    
+    // Eliminar projeção
+    eliminar: gestorProcedure
+      .input(z.object({ projecaoId: z.number() }))
+      .mutation(async ({ input }) => {
+        await db.eliminarProjecaoVisitas(input.projecaoId);
+        return { success: true };
+      }),
+  }),
+
   // ==================== CATEGORIZAÇÃO DE RELATÓRIOS ====================
   categorizacao: router({
     // Obter todas as categorias únicas
@@ -5979,6 +6204,74 @@ function gerarHTMLOcorrenciaEstrutural(dados: {
 </body>
 </html>
   `;
+}
+
+/**
+ * Calcula a data da Páscoa usando o algoritmo de Gauss
+ */
+function calcularPascoa(ano: number): Date {
+  const a = ano % 19;
+  const b = Math.floor(ano / 100);
+  const c = ano % 100;
+  const d = Math.floor(b / 4);
+  const e = b % 4;
+  const f = Math.floor((b + 8) / 25);
+  const g = Math.floor((b - f + 1) / 3);
+  const h = (19 * a + b - d - g + 15) % 30;
+  const i = Math.floor(c / 4);
+  const k = c % 4;
+  const l = (32 + 2 * e + 2 * i - h - k) % 7;
+  const m = Math.floor((a + 11 * h + 22 * l) / 451);
+  const mes = Math.floor((h + l - 7 * m + 114) / 31);
+  const dia = ((h + l - 7 * m + 114) % 31) + 1;
+  return new Date(ano, mes - 1, dia);
+}
+
+/**
+ * Obtém a lista de feriados portugueses para um ano
+ * Retorna array de strings no formato 'YYYY-MM-DD'
+ */
+function obterFeriadosPortugueses(ano: number): string[] {
+  const feriados: string[] = [];
+  
+  // Feriados fixos
+  const feriadosFixos = [
+    { mes: 1, dia: 1, nome: 'Ano Novo' },
+    { mes: 4, dia: 25, nome: 'Dia da Liberdade' },
+    { mes: 5, dia: 1, nome: 'Dia do Trabalhador' },
+    { mes: 6, dia: 10, nome: 'Dia de Portugal' },
+    { mes: 8, dia: 15, nome: 'Assunção de Nossa Senhora' },
+    { mes: 10, dia: 5, nome: 'Implantação da República' },
+    { mes: 11, dia: 1, nome: 'Dia de Todos os Santos' },
+    { mes: 12, dia: 1, nome: 'Restauração da Independência' },
+    { mes: 12, dia: 8, nome: 'Imaculada Conceição' },
+    { mes: 12, dia: 25, nome: 'Natal' },
+  ];
+  
+  for (const feriado of feriadosFixos) {
+    const data = new Date(ano, feriado.mes - 1, feriado.dia);
+    feriados.push(data.toISOString().split('T')[0]);
+  }
+  
+  // Feriados móveis (baseados na Páscoa)
+  const pascoa = calcularPascoa(ano);
+  
+  // Sexta-feira Santa (2 dias antes da Páscoa)
+  const sextaSanta = new Date(pascoa);
+  sextaSanta.setDate(pascoa.getDate() - 2);
+  feriados.push(sextaSanta.toISOString().split('T')[0]);
+  
+  // Corpo de Deus (60 dias após a Páscoa)
+  const corpoDeDeus = new Date(pascoa);
+  corpoDeDeus.setDate(pascoa.getDate() + 60);
+  feriados.push(corpoDeDeus.toISOString().split('T')[0]);
+  
+  // Carnaval (47 dias antes da Páscoa) - não é feriado oficial mas muitas empresas fecham
+  // const carnaval = new Date(pascoa);
+  // carnaval.setDate(pascoa.getDate() - 47);
+  // feriados.push(carnaval.toISOString().split('T')[0]);
+  
+  return feriados;
 }
 
 export type AppRouter = typeof appRouter;

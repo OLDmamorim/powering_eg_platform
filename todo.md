@@ -2990,3 +2990,25 @@ NOTA: Sistema de email requer configuração externa no deployment
 
 ## v6.34 - Corrigir Tradução Menu
 - [x] Corrigir erro de tradução 'menu.items.portalLoja' no menu lateral (PT e EN)
+
+## v6.35 - Projeção de Visitas (Super Projeto)
+- [ ] Criar schema de base de dados para projeções de visitas
+- [ ] Criar procedimento backend para gerar projeção automática
+- [ ] Implementar critérios: lojas menos visitadas, mais pendentes, resultados baixos
+- [ ] Criar página/componente frontend de Projeção de Visitas
+- [ ] Permitir escolher período: esta semana ou próxima semana
+- [ ] Gerar links para Google Calendar
+- [ ] Gerar links para Apple Calendar (ICS)
+- [ ] Gerar links para Outlook
+- [ ] Adicionar ao menu e Dashboard principal
+
+## Projeção de Visitas v6.6
+- [x] Criar tabelas projecoesVisitas e visitasPlaneadas no schema
+- [x] Implementar funções de base de dados para projeções
+- [x] Criar router projecaoVisitas com endpoints gerar, atual, getVisitas
+- [x] Implementar algoritmo de priorização (tempo sem visita, pendentes, resultados)
+- [x] Criar componente ProjecaoVisitas com modal de seleção de período
+- [x] Integrar com Google Calendar, Outlook e Apple Calendar
+- [x] Suporte para admins sem gestor associado
+- [x] Testar geração de projeção e links de calendário
+

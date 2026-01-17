@@ -81,7 +81,13 @@ import {
   todos,
   Todo,
   InsertTodo,
-  User
+  User,
+  projecoesVisitas,
+  ProjecaoVisitas,
+  InsertProjecaoVisitas,
+  visitasPlaneadas,
+  VisitaPlaneada,
+  InsertVisitaPlaneada
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -7251,4 +7257,380 @@ export async function getResultadosMensaisPorLoja(lojaId: number, mes: number, a
     .limit(1);
   
   return resultado || null;
+}
+
+
+// ==================== FUNÇÕES PARA PROJEÇÃO DE VISITAS ====================
+
+/**
+ * Interface para dados de priorização de lojas
+ */
+export interface DadosPriorizacaoLoja {
+  lojaId: number;
+  lojaNome: string;
+  lojaCodigo: string;
+  lojaEndereco: string | null;
+  diasSemVisita: number;
+  ultimaVisita: Date | null;
+  pendentesAtivos: number;
+  resultadoVsObjetivo: number; // Percentagem (ex: 85 = 85%)
+  pontuacaoTotal: number;
+  motivo: 'tempo_sem_visita' | 'pendentes_ativos' | 'resultados_baixos';
+  detalheMotivo: string;
+}
+
+/**
+ * Obter dados de priorização para todas as lojas de um gestor
+ */
+export async function getDadosPriorizacaoLojas(gestorId: number): Promise<DadosPriorizacaoLoja[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  // Obter lojas do gestor
+  const lojasGestor = await db
+    .select({
+      lojaId: gestorLojas.lojaId,
+      lojaNome: lojas.nome,
+    })
+    .from(gestorLojas)
+    .innerJoin(lojas, eq(gestorLojas.lojaId, lojas.id))
+    .where(eq(gestorLojas.gestorId, gestorId));
+  
+  const resultado: DadosPriorizacaoLoja[] = [];
+  const hoje = new Date();
+  const mesAtual = hoje.getMonth() + 1;
+  const anoAtual = hoje.getFullYear();
+  
+  for (const loja of lojasGestor) {
+    // Obter último relatório (visita) da loja
+    const [ultimoRelatorio] = await db
+      .select({ createdAt: relatoriosCompletos.createdAt })
+      .from(relatoriosCompletos)
+      .where(eq(relatoriosCompletos.lojaId, loja.lojaId))
+      .orderBy(desc(relatoriosCompletos.createdAt))
+      .limit(1);
+    
+    const ultimaVisita = ultimoRelatorio?.createdAt || null;
+    const diasSemVisita = ultimaVisita 
+      ? Math.floor((hoje.getTime() - new Date(ultimaVisita).getTime()) / (1000 * 60 * 60 * 24))
+      : 365; // Se nunca visitou, assume 1 ano
+    
+    // Obter pendentes ativos da loja
+    const pendentesResult = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(pendentesLoja)
+      .where(
+        and(
+          eq(pendentesLoja.lojaId, loja.lojaId),
+          eq(pendentesLoja.estado, 'pendente')
+        )
+      );
+    const pendentesAtivos = Number(pendentesResult[0]?.count || 0);
+    
+    // Obter resultados vs objetivo do mês atual
+    const [resultadoMensal] = await db
+      .select()
+      .from(resultadosMensais)
+      .where(
+        and(
+          eq(resultadosMensais.lojaId, loja.lojaId),
+          eq(resultadosMensais.mes, mesAtual),
+          eq(resultadosMensais.ano, anoAtual)
+        )
+      )
+      .limit(1);
+    
+    let resultadoVsObjetivo = 100; // Default se não houver dados
+    if (resultadoMensal && resultadoMensal.objetivoMensal && resultadoMensal.objetivoMensal > 0) {
+      const totalServicos = resultadoMensal.totalServicos || 0;
+      resultadoVsObjetivo = Math.round((totalServicos / resultadoMensal.objetivoMensal) * 100);
+    }
+    
+    // Calcular pontuação de prioridade (quanto maior, mais prioritário)
+    // Pesos: tempo sem visita (40%), pendentes (35%), resultados baixos (25%)
+    const pontosTempo = Math.min(diasSemVisita * 2, 100); // Max 100 pontos
+    const pontosPendentes = Math.min(pendentesAtivos * 10, 100); // Max 100 pontos
+    const pontosResultados = Math.max(0, 100 - resultadoVsObjetivo); // Quanto menor o resultado, mais pontos
+    
+    const pontuacaoTotal = (pontosTempo * 0.4) + (pontosPendentes * 0.35) + (pontosResultados * 0.25);
+    
+    // Determinar motivo principal
+    let motivo: 'tempo_sem_visita' | 'pendentes_ativos' | 'resultados_baixos' = 'tempo_sem_visita';
+    let detalheMotivo = `${diasSemVisita} dias sem visita`;
+    
+    if (pontosPendentes * 0.35 > pontosTempo * 0.4 && pontosPendentes * 0.35 > pontosResultados * 0.25) {
+      motivo = 'pendentes_ativos';
+      detalheMotivo = `${pendentesAtivos} pendentes ativos`;
+    } else if (pontosResultados * 0.25 > pontosTempo * 0.4 && pontosResultados * 0.25 > pontosPendentes * 0.35) {
+      motivo = 'resultados_baixos';
+      detalheMotivo = `${resultadoVsObjetivo}% do objetivo mensal`;
+    }
+    
+    resultado.push({
+      lojaId: loja.lojaId,
+      lojaNome: loja.lojaNome,
+      lojaCodigo: loja.lojaNome, // Usar nome como código (tabela não tem campo código)
+      lojaEndereco: null, // Tabela não tem campo endereço
+      diasSemVisita,
+      ultimaVisita,
+      pendentesAtivos,
+      resultadoVsObjetivo,
+      pontuacaoTotal,
+      motivo,
+      detalheMotivo,
+    });
+  }
+  
+  // Ordenar por pontuação (mais prioritário primeiro)
+  resultado.sort((a, b) => b.pontuacaoTotal - a.pontuacaoTotal);
+  
+  return resultado;
+}
+
+/**
+ * Criar uma nova projeção de visitas
+ */
+export async function criarProjecaoVisitas(data: InsertProjecaoVisitas): Promise<number> {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  
+  const [result] = await db.insert(projecoesVisitas).values(data);
+  return result.insertId;
+}
+
+/**
+ * Criar visitas planeadas para uma projeção
+ */
+export async function criarVisitasPlaneadas(visitas: InsertVisitaPlaneada[]): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  
+  if (visitas.length > 0) {
+    await db.insert(visitasPlaneadas).values(visitas);
+  }
+}
+
+/**
+ * Obter projeção de visitas atual do gestor
+ */
+export async function getProjecaoVisitasAtual(gestorId: number): Promise<ProjecaoVisitas | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const hoje = new Date();
+  
+  const [projecao] = await db
+    .select()
+    .from(projecoesVisitas)
+    .where(
+      and(
+        eq(projecoesVisitas.gestorId, gestorId),
+        gte(projecoesVisitas.semanaFim, hoje)
+      )
+    )
+    .orderBy(desc(projecoesVisitas.createdAt))
+    .limit(1);
+  
+  return projecao || null;
+}
+
+/**
+ * Obter visitas planeadas de uma projeção
+ */
+export async function getVisitasPlaneadasPorProjecao(projecaoId: number): Promise<(VisitaPlaneada & { lojaNome: string })[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const visitas = await db
+    .select({
+      id: visitasPlaneadas.id,
+      projecaoId: visitasPlaneadas.projecaoId,
+      lojaId: visitasPlaneadas.lojaId,
+      dataVisita: visitasPlaneadas.dataVisita,
+      horaInicio: visitasPlaneadas.horaInicio,
+      horaFim: visitasPlaneadas.horaFim,
+      motivo: visitasPlaneadas.motivo,
+      prioridade: visitasPlaneadas.prioridade,
+      detalheMotivo: visitasPlaneadas.detalheMotivo,
+      estado: visitasPlaneadas.estado,
+      linkGoogleCalendar: visitasPlaneadas.linkGoogleCalendar,
+      linkOutlook: visitasPlaneadas.linkOutlook,
+      linkICS: visitasPlaneadas.linkICS,
+      createdAt: visitasPlaneadas.createdAt,
+      updatedAt: visitasPlaneadas.updatedAt,
+      lojaNome: lojas.nome,
+    })
+    .from(visitasPlaneadas)
+    .innerJoin(lojas, eq(visitasPlaneadas.lojaId, lojas.id))
+    .where(eq(visitasPlaneadas.projecaoId, projecaoId))
+    .orderBy(visitasPlaneadas.dataVisita);
+  
+  return visitas;
+}
+
+/**
+ * Atualizar estado de uma visita planeada
+ */
+export async function atualizarEstadoVisita(visitaId: number, estado: 'planeada' | 'confirmada' | 'realizada' | 'cancelada'): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  
+  await db
+    .update(visitasPlaneadas)
+    .set({ estado })
+    .where(eq(visitasPlaneadas.id, visitaId));
+}
+
+/**
+ * Atualizar links de calendário de uma visita
+ */
+export async function atualizarLinksCalendario(
+  visitaId: number, 
+  links: { linkGoogleCalendar?: string; linkOutlook?: string; linkICS?: string }
+): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  
+  await db
+    .update(visitasPlaneadas)
+    .set(links)
+    .where(eq(visitasPlaneadas.id, visitaId));
+}
+
+/**
+ * Obter histórico de projeções de um gestor
+ */
+export async function getHistoricoProjecoes(gestorId: number, limite: number = 10): Promise<ProjecaoVisitas[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const projecoes = await db
+    .select()
+    .from(projecoesVisitas)
+    .where(eq(projecoesVisitas.gestorId, gestorId))
+    .orderBy(desc(projecoesVisitas.createdAt))
+    .limit(limite);
+  
+  return projecoes;
+}
+
+/**
+ * Eliminar projeção de visitas e suas visitas associadas
+ */
+export async function eliminarProjecaoVisitas(projecaoId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  
+  // Primeiro eliminar as visitas associadas
+  await db.delete(visitasPlaneadas).where(eq(visitasPlaneadas.projecaoId, projecaoId));
+  
+  // Depois eliminar a projeção
+  await db.delete(projecoesVisitas).where(eq(projecoesVisitas.id, projecaoId));
+}
+
+
+/**
+ * Obter dados de priorização de TODAS as lojas (para admins)
+ */
+export async function getDadosPriorizacaoTodasLojas(): Promise<DadosPriorizacaoLoja[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  // Obter todas as lojas ativas
+  const todasLojas = await db
+    .select({
+      lojaId: lojas.id,
+      lojaNome: lojas.nome,
+    })
+    .from(lojas);
+  
+  const resultado: DadosPriorizacaoLoja[] = [];
+  const hoje = new Date();
+  const mesAtual = hoje.getMonth() + 1;
+  const anoAtual = hoje.getFullYear();
+  
+  for (const loja of todasLojas) {
+    // Obter último relatório (visita) da loja
+    const [ultimoRelatorio] = await db
+      .select({ createdAt: relatoriosCompletos.createdAt })
+      .from(relatoriosCompletos)
+      .where(eq(relatoriosCompletos.lojaId, loja.lojaId))
+      .orderBy(desc(relatoriosCompletos.createdAt))
+      .limit(1);
+    
+    const ultimaVisita = ultimoRelatorio?.createdAt || null;
+    const diasSemVisita = ultimaVisita 
+      ? Math.floor((hoje.getTime() - new Date(ultimaVisita).getTime()) / (1000 * 60 * 60 * 24))
+      : 365; // Se nunca visitou, assume 1 ano
+    
+    // Obter pendentes ativos da loja
+    const pendentesResult = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(pendentesLoja)
+      .where(
+        and(
+          eq(pendentesLoja.lojaId, loja.lojaId),
+          eq(pendentesLoja.estado, 'pendente')
+        )
+      );
+    const pendentesAtivos = Number(pendentesResult[0]?.count || 0);
+    
+    // Obter resultados vs objetivo do mês atual
+    const [resultadoMensal] = await db
+      .select()
+      .from(resultadosMensais)
+      .where(
+        and(
+          eq(resultadosMensais.lojaId, loja.lojaId),
+          eq(resultadosMensais.mes, mesAtual),
+          eq(resultadosMensais.ano, anoAtual)
+        )
+      )
+      .limit(1);
+    
+    let resultadoVsObjetivo = 100; // Default se não houver dados
+    if (resultadoMensal && resultadoMensal.objetivoMensal && resultadoMensal.objetivoMensal > 0) {
+      const totalServicos = resultadoMensal.totalServicos || 0;
+      resultadoVsObjetivo = Math.round((totalServicos / resultadoMensal.objetivoMensal) * 100);
+    }
+    
+    // Calcular pontuação de prioridade (quanto maior, mais prioritário)
+    // Pesos: tempo sem visita (40%), pendentes (35%), resultados baixos (25%)
+    const pontosTempo = Math.min(diasSemVisita * 2, 100); // Max 100 pontos
+    const pontosPendentes = Math.min(pendentesAtivos * 10, 100); // Max 100 pontos
+    const pontosResultados = Math.max(0, 100 - resultadoVsObjetivo); // Quanto menor o resultado, mais pontos
+    
+    const pontuacaoTotal = (pontosTempo * 0.4) + (pontosPendentes * 0.35) + (pontosResultados * 0.25);
+    
+    // Determinar motivo principal
+    let motivo: 'tempo_sem_visita' | 'pendentes_ativos' | 'resultados_baixos' = 'tempo_sem_visita';
+    let detalheMotivo = `${diasSemVisita} dias sem visita`;
+    
+    if (pontosPendentes * 0.35 > pontosTempo * 0.4 && pontosPendentes * 0.35 > pontosResultados * 0.25) {
+      motivo = 'pendentes_ativos';
+      detalheMotivo = `${pendentesAtivos} pendentes ativos`;
+    } else if (pontosResultados * 0.25 > pontosTempo * 0.4 && pontosResultados * 0.25 > pontosPendentes * 0.35) {
+      motivo = 'resultados_baixos';
+      detalheMotivo = `${resultadoVsObjetivo}% do objetivo mensal`;
+    }
+    
+    resultado.push({
+      lojaId: loja.lojaId,
+      lojaNome: loja.lojaNome,
+      lojaCodigo: loja.lojaNome, // Usar nome como código (tabela não tem campo código)
+      lojaEndereco: null, // Tabela não tem campo endereço
+      diasSemVisita,
+      ultimaVisita,
+      pendentesAtivos,
+      resultadoVsObjetivo,
+      pontuacaoTotal,
+      motivo,
+      detalheMotivo,
+    });
+  }
+  
+  // Ordenar por pontuação (mais prioritário primeiro)
+  resultado.sort((a, b) => b.pontuacaoTotal - a.pontuacaoTotal);
+  
+  return resultado;
 }

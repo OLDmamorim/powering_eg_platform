@@ -1,0 +1,31 @@
+{
+  "query": "SELECT u.id, u.name, u.email, u.role, g.id as gestor_id FROM users u LEFT JOIN gestores g ON g.userId = u.id WHERE u.email LIKE '%marco%' OR u.name LIKE '%Marco%' LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT u.id, u.name, u.email, u.role, g.id as gestor_id FROM users u LEFT JOIN gestores g ON g.userId = u.id WHERE u.email LIKE '%marco%' OR u.name LIKE '%Marco%' LIMIT 5;",
+  "rows": [
+    {
+      "id": "420030",
+      "name": "Marco Amorim",
+      "email": "mamorim@expressglass.pt",
+      "role": "gestor",
+      "gestor_id": "30001"
+    },
+    {
+      "id": "2160121",
+      "name": "Marco Vilar",
+      "email": "mvilar@expressglass.pt",
+      "role": "gestor",
+      "gestor_id": "120001"
+    },
+    {
+      "id": "1",
+      "name": "Marco Amorim",
+      "email": "mramorim78@gmail.com",
+      "role": "admin",
+      "gestor_id": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\temail\trole\tgestor_id\n420030\tMarco Amorim\tmamorim@expressglass.pt\tgestor\t30001\n2160121\tMarco Vilar\tmvilar@expressglass.pt\tgestor\t120001\n1\tMarco Amorim\tmramorim78@gmail.com\tadmin\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 58
+}

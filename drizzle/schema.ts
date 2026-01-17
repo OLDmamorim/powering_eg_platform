@@ -802,3 +802,83 @@ export const relatoriosReuniaoGestores = mysqlTable("relatorios_reuniao_gestores
 
 export type RelatorioReuniaoGestores = typeof relatoriosReuniaoGestores.$inferSelect;
 export type InsertRelatorioReuniaoGestores = typeof relatoriosReuniaoGestores.$inferInsert;
+
+
+/**
+ * Projeções de Visitas - Agenda inteligente de visitas para gestores
+ * Gera sugestões automáticas baseadas em critérios de prioridade
+ */
+export const projecoesVisitas = mysqlTable("projecoes_visitas", {
+  id: int("id").autoincrement().primaryKey(),
+  
+  // Gestor que gerou a projeção
+  gestorId: int("gestorId").notNull(), // FK para gestores.id
+  
+  // Período da projeção
+  semanaInicio: timestamp("semanaInicio").notNull(), // Segunda-feira da semana
+  semanaFim: timestamp("semanaFim").notNull(), // Sexta-feira da semana
+  
+  // Tipo de período
+  tipoPeriodo: mysqlEnum("tipoPeriodo", ["esta_semana", "proxima_semana"]).notNull(),
+  
+  // Visitas planeadas (JSON array de {data, lojaId, lojaNome, motivo, prioridade})
+  visitasPlaneadas: text("visitasPlaneadas").notNull(),
+  
+  // Estado da projeção
+  estado: mysqlEnum("estado", ["gerada", "confirmada", "em_progresso", "concluida"]).default("gerada").notNull(),
+  
+  // Notas do gestor
+  notas: text("notas"),
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type ProjecaoVisitas = typeof projecoesVisitas.$inferSelect;
+export type InsertProjecaoVisitas = typeof projecoesVisitas.$inferInsert;
+
+/**
+ * Visitas Individuais - Cada visita planeada dentro de uma projeção
+ */
+export const visitasPlaneadas = mysqlTable("visitas_planeadas", {
+  id: int("id").autoincrement().primaryKey(),
+  
+  // Projeção pai
+  projecaoId: int("projecaoId").notNull(), // FK para projecoes_visitas.id
+  
+  // Loja a visitar
+  lojaId: int("lojaId").notNull(), // FK para lojas.id
+  
+  // Data e hora planeada
+  dataVisita: timestamp("dataVisita").notNull(),
+  horaInicio: varchar("horaInicio", { length: 5 }), // "09:00"
+  horaFim: varchar("horaFim", { length: 5 }), // "12:00"
+  
+  // Motivo da visita (baseado nos critérios)
+  motivo: mysqlEnum("motivo", [
+    "tempo_sem_visita",    // Loja há muito tempo sem relatório
+    "pendentes_ativos",    // Loja com muitos pendentes
+    "resultados_baixos",   // Resultados abaixo do objetivo
+    "manual"               // Adicionada manualmente pelo gestor
+  ]).notNull(),
+  
+  // Prioridade calculada (1 = mais urgente)
+  prioridade: int("prioridade").notNull(),
+  
+  // Detalhes do motivo
+  detalheMotivo: text("detalheMotivo"), // Ex: "45 dias sem visita", "8 pendentes ativos"
+  
+  // Estado da visita
+  estado: mysqlEnum("estado", ["planeada", "confirmada", "realizada", "cancelada"]).default("planeada").notNull(),
+  
+  // Link para calendário (gerado quando confirmada)
+  linkGoogleCalendar: text("linkGoogleCalendar"),
+  linkOutlook: text("linkOutlook"),
+  linkICS: text("linkICS"), // Apple Calendar
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type VisitaPlaneada = typeof visitasPlaneadas.$inferSelect;
+export type InsertVisitaPlaneada = typeof visitasPlaneadas.$inferInsert;
