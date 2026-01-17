@@ -1815,10 +1815,29 @@ export const appRouter = router({
         };
       }),
     
+    // Função auxiliar para escapar texto ICS (RFC 5545)
+    // Escapa caracteres especiais e formata corretamente para ICS
+    
     // Exportar toda a semana num único ficheiro ICS
     exportarSemanaICS: gestorProcedure
       .input(z.object({ projecaoId: z.number() }))
       .mutation(async ({ input }) => {
+        // Função para escapar texto ICS conforme RFC 5545
+        const escapeICS = (text: string): string => {
+          return text
+            .replace(/\\/g, '\\\\')
+            .replace(/;/g, '\\;')
+            .replace(/,/g, '\\,')
+            .replace(/\n/g, '\\n');
+        };
+        
+        // Função para formatar data/hora no formato ICS com timezone
+        const formatICSDateTime = (dateStr: string, time: string): string => {
+          const cleanDate = dateStr.replace(/-/g, '');
+          const cleanTime = time.replace(/:/g, '') + '00';
+          return `${cleanDate}T${cleanTime}`;
+        };
+        
         // Buscar todas as visitas da projeção
         const visitas = await db.getVisitasPlaneadasPorProjecao(input.projecaoId);
         
@@ -1828,28 +1847,36 @@ export const appRouter = router({
         
         // Construir eventos ICS para cada visita
         const eventos: string[] = [];
+        const now = new Date();
+        const dtstamp = now.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
         
-        for (const visita of visitas) {
+        for (let i = 0; i < visitas.length; i++) {
+          const visita = visitas[i];
           // Buscar pendentes da loja
           const pendentesLoja = await db.listarPendentesLoja(visita.lojaId, true);
           
-          // Construir lista de pendentes
+          // Construir lista de pendentes (simplificada para ICS)
           let listaPendentes = '';
           if (pendentesLoja.length > 0) {
-            listaPendentes = '\n\nPENDENTES A RESOLVER:\n';
-            pendentesLoja.slice(0, 10).forEach((p, i) => {
+            listaPendentes = '\n\nPENDENTES A RESOLVER:';
+            pendentesLoja.slice(0, 5).forEach((p, idx) => {
               const prioridade = p.prioridade || 'normal';
-              const descPendente = p.descricao?.substring(0, 80) || 'Sem descrição';
-              listaPendentes += `${i + 1}. [${prioridade.toUpperCase()}] ${descPendente}${p.descricao && p.descricao.length > 80 ? '...' : ''}\n`;
+              const descPendente = (p.descricao?.substring(0, 60) || 'Sem descricao').replace(/[\n\r]/g, ' ');
+              listaPendentes += `\n${idx + 1}. [${prioridade.toUpperCase()}] ${descPendente}`;
             });
-            if (pendentesLoja.length > 10) {
-              listaPendentes += `... e mais ${pendentesLoja.length - 10} pendente(s)\n`;
+            if (pendentesLoja.length > 5) {
+              listaPendentes += `\n... e mais ${pendentesLoja.length - 5} pendente(s)`;
             }
           }
           
-          const titulo = `Visita ExpressGlass - ${visita.lojaNome}`;
-          const descricao = `Visita de supervisão à loja ${visita.lojaNome}\n\nMotivo: ${visita.detalheMotivo || 'Visita planeada'}${listaPendentes}`;
-          const local = visita.lojaNome;
+          // Remover acentos para maior compatibilidade
+          const removeAcentos = (str: string): string => {
+            return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+          };
+          
+          const titulo = removeAcentos(`Visita ExpressGlass - ${visita.lojaNome}`);
+          const descricao = removeAcentos(`Visita de supervisao a loja ${visita.lojaNome}\n\nMotivo: ${visita.detalheMotivo || 'Visita planeada'}${listaPendentes}`);
+          const local = removeAcentos(visita.lojaNome);
           
           // Formatar datas
           const dataBase = visita.dataVisita instanceof Date 
@@ -1857,34 +1884,39 @@ export const appRouter = router({
             : new Date(visita.dataVisita).toISOString().split('T')[0];
           const horaInicio = visita.horaInicio || '09:00';
           const horaFim = visita.horaFim || '12:00';
-          const inicio = `${dataBase}T${horaInicio}:00`.replace(/[-:]/g, '');
-          const fim = `${dataBase}T${horaFim}:00`.replace(/[-:]/g, '');
           
-          // Gerar UID único para cada evento
-          const uid = `visita-${visita.id}-${Date.now()}@poweringeg.com`;
+          const inicio = formatICSDateTime(dataBase, horaInicio);
+          const fim = formatICSDateTime(dataBase, horaFim);
+          
+          // Gerar UID único para cada evento (com índice para garantir unicidade)
+          const uid = `visita-${visita.id}-${i}-${Date.now()}@poweringeg.com`;
           
           eventos.push([
             'BEGIN:VEVENT',
             `UID:${uid}`,
+            `DTSTAMP:${dtstamp}`,
             `DTSTART:${inicio}`,
             `DTEND:${fim}`,
-            `SUMMARY:${titulo}`,
-            `DESCRIPTION:${descricao.replace(/\n/g, '\\n')}`,
-            `LOCATION:${local}`,
+            `SUMMARY:${escapeICS(titulo)}`,
+            `DESCRIPTION:${escapeICS(descricao)}`,
+            `LOCATION:${escapeICS(local)}`,
+            'STATUS:CONFIRMED',
+            'TRANSP:OPAQUE',
             'END:VEVENT'
-          ].join('\n'));
+          ].join('\r\n'));
         }
         
-        // Construir ficheiro ICS completo
+        // Construir ficheiro ICS completo (usar CRLF conforme RFC 5545)
         const icsContent = [
           'BEGIN:VCALENDAR',
           'VERSION:2.0',
           'PRODID:-//PoweringEG//Visitas//PT',
           'CALSCALE:GREGORIAN',
           'METHOD:PUBLISH',
+          'X-WR-CALNAME:Projecao Visitas ExpressGlass',
           ...eventos,
           'END:VCALENDAR'
-        ].join('\n');
+        ].join('\r\n');
         
         return {
           icsContent,
