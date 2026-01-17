@@ -4914,9 +4914,17 @@ export const appRouter = router({
         const escovasPercent = totalServicos > 0 ? totalEscovas / totalServicos : null;
         
         // Criar objeto de resultados agregados
+        // Obter dados de objetivo diário do primeiro mês (mais recente)
+        const objetivoDiaAtual = resultadosAgregados?.objetivoDiaAtual ? parseFloat(String(resultadosAgregados.objetivoDiaAtual)) : null;
+        const desvioObjetivoAcumulado = resultadosAgregados?.desvioObjetivoAcumulado ? parseFloat(String(resultadosAgregados.desvioObjetivoAcumulado)) : null;
+        const desvioPercentualDia = resultadosAgregados?.desvioPercentualDia ? parseFloat(String(resultadosAgregados.desvioPercentualDia)) : null;
+        
         const resultados = {
           totalServicos,
           objetivoMensal: totalObjetivo,
+          objetivoDiaAtual,
+          desvioObjetivoAcumulado,
+          desvioPercentualDia,
           desvioPercentualMes: desvioPercentual,
           taxaReparacao,
           totalReparacoes,
@@ -4979,17 +4987,17 @@ export const appRouter = router({
             });
           }
           
-          // Alerta desvio objetivo
-          const desvio = resultados.desvioPercentualMes !== null ? parseFloat(String(resultados.desvioPercentualMes)) : null;
-          if (desvio !== null && desvio < -0.1) {
+          // Alerta desvio objetivo diário
+          const desvioDia = resultados.desvioPercentualDia !== null ? parseFloat(String(resultados.desvioPercentualDia)) : null;
+          if (desvioDia !== null && desvioDia < -0.1) {
             alertas.push({
               tipo: 'danger',
-              mensagem: `Desvio de ${(desvio * 100).toFixed(1)}% abaixo do objetivo mensal`
+              mensagem: `Desvio de ${(desvioDia * 100).toFixed(1)}% abaixo do objetivo diário acumulado`
             });
-          } else if (desvio !== null && desvio >= 0) {
+          } else if (desvioDia !== null && desvioDia >= 0) {
             alertas.push({
               tipo: 'success',
-              mensagem: `Parabéns! Objetivo mensal atingido (+${(desvio * 100).toFixed(1)}%)`
+              mensagem: `Parabéns! Objetivo diário acumulado atingido (+${(desvioDia * 100).toFixed(1)}%)`
             });
           }
           

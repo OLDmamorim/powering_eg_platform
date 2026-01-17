@@ -3019,3 +3019,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Corrigir o código que carrega os objetivos (campo objetivoMes -> objetivoMensal)
 - [x] Testar no Portal da Loja Paredes
 
+
+## Desvio vs Objetivo Diário no Portal da Loja
+- [x] Verificar campos de objetivo diário no schema (objetivoDiaAtual, desvioObjetivoAcumulado)
+- [x] Atualizar card vermelho para mostrar desvio vs objetivo diário
+- [x] Testar no Portal da Loja
+

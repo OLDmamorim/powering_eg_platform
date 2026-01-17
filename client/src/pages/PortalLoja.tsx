@@ -1698,23 +1698,23 @@ export default function PortalLoja() {
                     </CardContent>
                   </Card>
 
-                  {/* Desvio */}
+                  {/* Desvio vs Objetivo Diário */}
                   <Card className={`bg-gradient-to-br ${
-                    parseFloat(String(dashboardData.resultados.desvioPercentualMes || 0)) >= 0 
+                    parseFloat(String(dashboardData.resultados.desvioPercentualDia || 0)) >= 0 
                       ? 'from-green-500 to-green-600' 
                       : 'from-red-500 to-red-600'
                   } text-white`}>
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between">
-                        {parseFloat(String(dashboardData.resultados.desvioPercentualMes || 0)) >= 0 ? (
+                        {parseFloat(String(dashboardData.resultados.desvioPercentualDia || 0)) >= 0 ? (
                           <TrendingUp className="h-8 w-8 opacity-80" />
                         ) : (
                           <TrendingDown className="h-8 w-8 opacity-80" />
                         )}
                         <div className="text-right">
                           <p className="text-2xl font-bold">
-                            {dashboardData.resultados.desvioPercentualMes !== null 
-                              ? `${(parseFloat(String(dashboardData.resultados.desvioPercentualMes)) * 100).toFixed(1)}%`
+                            {dashboardData.resultados.desvioPercentualDia !== null 
+                              ? `${parseFloat(String(dashboardData.resultados.desvioPercentualDia)) >= 0 ? '+' : ''}${(parseFloat(String(dashboardData.resultados.desvioPercentualDia)) * 100).toFixed(1)}%`
                               : '-'}
                           </p>
                           <p className="text-xs opacity-80">{language === 'pt' ? 'Desvio' : 'Deviation'}</p>
