@@ -156,14 +156,22 @@ export default function PortalGestor() {
 
   // Exportar PDF
   const handleExportPDF = async () => {
-    if (!dashboardRef.current || !dadosLoja) return;
+    if (!dashboardRef.current) {
+      toast.error(language === 'pt' ? 'Não há conteúdo para exportar' : 'No content to export');
+      return;
+    }
     
     setExportandoPDF(true);
     try {
+      // Aguardar um pouco para garantir que os gráficos estão renderizados
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
       const canvas = await html2canvas(dashboardRef.current, {
         scale: 2,
         useCORS: true,
         logging: false,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
       });
       
       const imgData = canvas.toDataURL('image/png');
@@ -171,8 +179,23 @@ export default function PortalGestor() {
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
       
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-      pdf.save(`resultados-${dadosLoja?.loja?.nome || 'loja'}-${new Date().toISOString().split('T')[0]}.pdf`);
+      // Se o conteúdo for maior que uma página, dividir em múltiplas páginas
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      let heightLeft = pdfHeight;
+      let position = 0;
+      
+      pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+      heightLeft -= pageHeight;
+      
+      while (heightLeft > 0) {
+        position = heightLeft - pdfHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+        heightLeft -= pageHeight;
+      }
+      
+      const nomeLoja = lojaAtual?.nome || 'loja';
+      pdf.save(`resultados-${nomeLoja.replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.pdf`);
       
       toast.success(language === 'pt' ? 'PDF exportado com sucesso!' : 'PDF exported successfully!');
     } catch (error) {

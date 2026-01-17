@@ -3096,3 +3096,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar exportar PDF dos resultados
 - [x] Interface igual ao Portal da Loja
 
+
+## Bug v6.6.1 - Erro ao exportar PDF no Portal do Gestor
+- [x] Investigar erro de exportação PDF
+- [x] Corrigir função handleExportPDF (remover dependência de dadosLoja, usar lojaAtual)
+- [x] Adicionar suporte a múltiplas páginas no PDF
+- [ ] Testar exportação
+
