@@ -2987,3 +2987,6 @@ NOTA: Sistema de email requer configuração externa no deployment
 
 ## v6.33 - Remover Avisos Relatórios
 - [x] Remover aviso de "Lojas com relatórios em atraso" do Dashboard (ocupa muito espaço)
+
+## v6.34 - Corrigir Tradução Menu
+- [x] Corrigir erro de tradução 'menu.items.portalLoja' no menu lateral (PT e EN)
