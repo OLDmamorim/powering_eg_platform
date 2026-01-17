@@ -1,0 +1,18 @@
+{
+  "query": "SELECT tl.id, tl.lojaId, l.nome as lojaNome, tl.token, tl.ativo, tl.createdAt \nFROM tokens_loja tl \nJOIN lojas l ON tl.lojaId = l.id \nWHERE l.nome LIKE '%Paredes%' \nORDER BY tl.createdAt DESC \nLIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT tl.id, tl.lojaId, l.nome as lojaNome, tl.token, tl.ativo, tl.createdAt \nFROM tokens_loja tl \nJOIN lojas l ON tl.lojaId = l.id \nWHERE l.nome LIKE '%Paredes%' \nORDER BY tl.createdAt DESC \nLIMIT 5;",
+  "rows": [
+    {
+      "id": "120003",
+      "lojaId": "60006",
+      "lojaNome": "Paredes",
+      "token": "2TPh6QKsZjydw4cmjjjqxEeIGWoYE0248SXKdwRYSGBeSRwcgElfES9z1JsLVqzt",
+      "ativo": "1",
+      "createdAt": "2026-01-16 23:50:26"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tlojaId\tlojaNome\ttoken\tativo\tcreatedAt\n120003\t60006\tParedes\t2TPh6QKsZjydw4cmjjjqxEeIGWoYE0248SXKdwRYSGBeSRwcgElfES9z1JsLVqzt\t1\t2026-01-16 23:50:26\n",
+  "stderr": "",
+  "execution_time_ms": 60
+}

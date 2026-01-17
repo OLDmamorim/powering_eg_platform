@@ -3012,3 +3012,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Suporte para admins sem gestor associado
 - [x] Testar geração de projeção e links de calendário
 
+
+## Bug: Objetivos Mensais a Zero no Portal da Loja
+- [x] Investigar porque os objetivos mensais aparecem a zero no gráfico
+- [x] Verificar se os dados existem na base de dados
+- [x] Corrigir o código que carrega os objetivos (campo objetivoMes -> objetivoMensal)
+- [x] Testar no Portal da Loja Paredes
+

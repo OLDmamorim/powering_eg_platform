@@ -1,0 +1,190 @@
+{
+  "query": "SELECT rm.id, rm.lojaId, l.nome as lojaNome, rm.mes, rm.ano, rm.objetivoMensal, rm.totalServicos, rm.createdAt \nFROM resultados_mensais rm \nJOIN lojas l ON rm.lojaId = l.id \nWHERE l.nome LIKE '%Paredes%' \nORDER BY rm.ano DESC, rm.mes DESC \nLIMIT 20;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT rm.id, rm.lojaId, l.nome as lojaNome, rm.mes, rm.ano, rm.objetivoMensal, rm.totalServicos, rm.createdAt \nFROM resultados_mensais rm \nJOIN lojas l ON rm.lojaId = l.id \nWHERE l.nome LIKE '%Paredes%' \nORDER BY rm.ano DESC, rm.mes DESC \nLIMIT 20;",
+  "rows": [
+    {
+      "id": "120042",
+      "lojaId": "180038",
+      "lojaNome": "Paredes sm",
+      "mes": "1",
+      "ano": "2026",
+      "objetivoMensal": "56",
+      "totalServicos": "5",
+      "createdAt": "2026-01-13 17:15:50"
+    },
+    {
+      "id": "120041",
+      "lojaId": "60006",
+      "lojaNome": "Paredes",
+      "mes": "1",
+      "ano": "2026",
+      "objetivoMensal": "56",
+      "totalServicos": "15",
+      "createdAt": "2026-01-13 17:15:50"
+    },
+    {
+      "id": "42",
+      "lojaId": "180038",
+      "lojaNome": "Paredes sm",
+      "mes": "12",
+      "ano": "2025",
+      "objetivoMensal": "53",
+      "totalServicos": "40",
+      "createdAt": "2025-12-29 11:25:09"
+    },
+    {
+      "id": "41",
+      "lojaId": "60006",
+      "lojaNome": "Paredes",
+      "mes": "12",
+      "ano": "2025",
+      "objetivoMensal": "54",
+      "totalServicos": "54",
+      "createdAt": "2025-12-29 11:25:09"
+    },
+    {
+      "id": "60112",
+      "lojaId": "180038",
+      "lojaNome": "Paredes sm",
+      "mes": "11",
+      "ano": "2025",
+      "objetivoMensal": "53",
+      "totalServicos": "48",
+      "createdAt": "2025-12-29 20:01:18"
+    },
+    {
+      "id": "60111",
+      "lojaId": "60006",
+      "lojaNome": "Paredes",
+      "mes": "11",
+      "ano": "2025",
+      "objetivoMensal": "54",
+      "totalServicos": "58",
+      "createdAt": "2025-12-29 20:01:18"
+    },
+    {
+      "id": "60042",
+      "lojaId": "180038",
+      "lojaNome": "Paredes sm",
+      "mes": "10",
+      "ano": "2025",
+      "objetivoMensal": "59",
+      "totalServicos": "46",
+      "createdAt": "2025-12-29 20:00:54"
+    },
+    {
+      "id": "60041",
+      "lojaId": "60006",
+      "lojaNome": "Paredes",
+      "mes": "10",
+      "ano": "2025",
+      "objetivoMensal": "59",
+      "totalServicos": "81",
+      "createdAt": "2025-12-29 20:00:54"
+    },
+    {
+      "id": "60182",
+      "lojaId": "180038",
+      "lojaNome": "Paredes sm",
+      "mes": "9",
+      "ano": "2025",
+      "objetivoMensal": "53",
+      "totalServicos": "56",
+      "createdAt": "2025-12-29 21:37:54"
+    },
+    {
+      "id": "60181",
+      "lojaId": "60006",
+      "lojaNome": "Paredes",
+      "mes": "9",
+      "ano": "2025",
+      "objetivoMensal": "53",
+      "totalServicos": "56",
+      "createdAt": "2025-12-29 21:37:54"
+    },
+    {
+      "id": "60252",
+      "lojaId": "180038",
+      "lojaNome": "Paredes sm",
+      "mes": "8",
+      "ano": "2025",
+      "objetivoMensal": "53",
+      "totalServicos": "69",
+      "createdAt": "2025-12-29 21:41:48"
+    },
+    {
+      "id": "60251",
+      "lojaId": "60006",
+      "lojaNome": "Paredes",
+      "mes": "8",
+      "ano": "2025",
+      "objetivoMensal": "54",
+      "totalServicos": "67",
+      "createdAt": "2025-12-29 21:41:48"
+    },
+    {
+      "id": "60322",
+      "lojaId": "180038",
+      "lojaNome": "Paredes sm",
+      "mes": "7",
+      "ano": "2025",
+      "objetivoMensal": "59",
+      "totalServicos": "68",
+      "createdAt": "2025-12-29 21:42:27"
+    },
+    {
+      "id": "60321",
+      "lojaId": "60006",
+      "lojaNome": "Paredes",
+      "mes": "7",
+      "ano": "2025",
+      "objetivoMensal": "61",
+      "totalServicos": "62",
+      "createdAt": "2025-12-29 21:42:27"
+    },
+    {
+      "id": "60391",
+      "lojaId": "60006",
+      "lojaNome": "Paredes",
+      "mes": "6",
+      "ano": "2025",
+      "objetivoMensal": "50",
+      "totalServicos": "62",
+      "createdAt": "2025-12-29 21:42:47"
+    },
+    {
+      "id": "60392",
+      "lojaId": "180038",
+      "lojaNome": "Paredes sm",
+      "mes": "6",
+      "ano": "2025",
+      "objetivoMensal": "49",
+      "totalServicos": "61",
+      "createdAt": "2025-12-29 21:42:47"
+    },
+    {
+      "id": "90041",
+      "lojaId": "180038",
+      "lojaNome": "Paredes sm",
+      "mes": "5",
+      "ano": "2025",
+      "objetivoMensal": "57",
+      "totalServicos": "58",
+      "createdAt": "2026-01-02 12:06:06"
+    },
+    {
+      "id": "90040",
+      "lojaId": "60006",
+      "lojaNome": "Paredes",
+      "mes": "5",
+      "ano": "2025",
+      "objetivoMensal": "57",
+      "totalServicos": "60",
+      "createdAt": "2026-01-02 12:06:06"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tlojaId\tlojaNome\tmes\tano\tobjetivoMensal\ttotalServicos\tcreatedAt\n120042\t180038\tParedes sm\t1\t2026\t56\t5\t2026-01-13 17:15:50\n120041\t60006\tParedes\t1\t2026\t56\t15\t2026-01-13 17:15:50\n42\t180038\tParedes sm\t12\t2025\t53\t40\t2025-12-29 11:25:09\n41\t60006\tParedes\t12\t2025\t54\t54\t2025-12-29 11:25:09\n60112\t180038\tParedes sm\t11\t2025\t53\t48\t2025-12-29 20:01:18\n60111\t60006\tParedes\t11\t2025\t54\t58\t2025-12-29 20:01:18\n60042\t180038\tParedes sm\t10\t2025\t59\t46\t2025-12-29 20:00:54\n60041\t60006\tParedes\t10\t2025\t59\t81\t2025-12-29 20:00:54\n60182\t180038\tParedes sm\t9\t2025\t53\t56\t2025-12-29 21:37:54\n60181\t60006\tParedes\t9\t2025\t53\t56\t2025-12-29 21:37:54\n60252\t180038\tParedes sm\t8\t2025\t53\t69\t2025-12-29 21:41:48\n60251\t60006\tParedes\t8\t2025\t54\t67\t2025-12-29 21:41:48\n60322\t180038\tParedes sm\t7\t2025\t59\t68\t2025-12-29 21:42:27\n60321\t60006\tParedes\t7\t2025\t61\t62\t2025-12-29 21:42:27\n60391\t60006\tParedes\t6\t2025\t50\t62\t2025-12-29 21:42:47\n60392\t180038\tParedes sm\t6\t2025\t49\t61\t2025-12-29 21:42:47\n90041\t180038\tParedes sm\t5\t2025\t57\t58\t2026-01-02 12:06:06\n90040\t60006\tParedes\t5\t2025\t57\t60\t2026-01-02 12:06:06\n",
+  "stderr": "",
+  "execution_time_ms": 59
+}

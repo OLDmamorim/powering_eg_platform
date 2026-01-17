@@ -2095,7 +2095,7 @@ export default function PortalLoja() {
                   const evolucaoData = dashboardData.evolucao.slice(-12);
                   const labels = evolucaoData.map((e: any) => `${mesesNomes[e.mes - 1]} ${String(e.ano).slice(-2)}`);
                   const servicos = evolucaoData.map((e: any) => Number(e.totalServicos) || 0);
-                  const objetivos = evolucaoData.map((e: any) => Number(e.objetivoMes) || 0);
+                  const objetivos = evolucaoData.map((e: any) => Number(e.objetivoMensal) || 0);
                   const desvios = evolucaoData.map((e: any) => parseFloat(String(e.desvioPercentualMes || 0)) * 100);
                   const taxasReparacao = evolucaoData.map((e: any) => parseFloat(String(e.taxaReparacao || 0)) * 100);
                   
@@ -2334,7 +2334,7 @@ export default function PortalLoja() {
                                       {new Date(e.ano, e.mes - 1).toLocaleDateString('pt-PT', { month: 'short', year: '2-digit' })}
                                     </td>
                                     <td className="text-right py-2">{e.totalServicos || 0}</td>
-                                    <td className="text-right py-2">{e.objetivoMes || 0}</td>
+                                    <td className="text-right py-2">{e.objetivoMensal || 0}</td>
                                     <td className={`text-right py-2 font-medium ${
                                       parseFloat(String(e.desvioPercentualMes || 0)) >= 0 ? 'text-green-600' : 'text-red-600'
                                     }`}>
