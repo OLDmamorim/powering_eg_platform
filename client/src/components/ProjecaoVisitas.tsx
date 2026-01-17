@@ -219,9 +219,9 @@ export function ProjecaoVisitas() {
     <>
       <Card className="bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:from-violet-950/50 dark:via-purple-950/50 dark:to-fuchsia-950/50 border-violet-200 dark:border-violet-800 shadow-lg">
         <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-violet-100 dark:bg-violet-900/50 rounded-lg">
+              <div className="p-2 bg-violet-100 dark:bg-violet-900/50 rounded-lg flex-shrink-0">
                 <Route className="h-6 w-6 text-violet-600 dark:text-violet-400" />
               </div>
               <div>
@@ -229,7 +229,7 @@ export function ProjecaoVisitas() {
                   {language === 'pt' ? 'Projeção de Visitas' : 'Visit Projection'}
                   <Sparkles className="h-4 w-4 text-amber-500" />
                 </CardTitle>
-                <CardDescription className="text-violet-600/70 dark:text-violet-400/70">
+                <CardDescription className="text-violet-600/70 dark:text-violet-400/70 text-sm">
                   {language === 'pt' 
                     ? 'Agenda inteligente baseada em prioridades' 
                     : 'Smart schedule based on priorities'}
@@ -237,12 +237,12 @@ export function ProjecaoVisitas() {
               </div>
             </div>
             
-            <div className="flex gap-2">
+            <div className="flex gap-2 justify-end">
               {projecaoAtual && (
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => eliminarMutation.mutate({ projecaoId: projecaoAtual.id })}
+                  onClick={(e) => { e.stopPropagation(); eliminarMutation.mutate({ projecaoId: projecaoAtual.id }); }}
                   disabled={eliminarMutation.isPending}
                   className="text-red-600 hover:text-red-700 hover:bg-red-50"
                 >
@@ -255,9 +255,11 @@ export function ProjecaoVisitas() {
                 size="sm"
               >
                 <CalendarPlus className="h-4 w-4" />
-                {projecaoAtual 
-                  ? (language === 'pt' ? 'Nova Projeção' : 'New Projection')
-                  : (language === 'pt' ? 'Gerar Projeção' : 'Generate Projection')}
+                <span className="whitespace-nowrap">
+                  {projecaoAtual 
+                    ? (language === 'pt' ? 'Nova Projeção' : 'New Projection')
+                    : (language === 'pt' ? 'Gerar Projeção' : 'Generate Projection')}
+                </span>
               </Button>
             </div>
           </div>
@@ -271,10 +273,10 @@ export function ProjecaoVisitas() {
           ) : projecaoAtual && visitas && visitas.length > 0 ? (
             <div className="space-y-3">
               {/* Header com período */}
-              <div className="flex items-center justify-between mb-4 pb-3 border-b border-violet-200 dark:border-violet-800">
-                <div className="flex items-center gap-2 text-sm text-violet-600 dark:text-violet-400">
-                  <Calendar className="h-4 w-4" />
-                  <span>
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-4 pb-3 border-b border-violet-200 dark:border-violet-800">
+                <div className="flex flex-wrap items-center gap-2 text-sm text-violet-600 dark:text-violet-400">
+                  <Calendar className="h-4 w-4 flex-shrink-0" />
+                  <span className="font-medium">
                     {projecaoAtual.tipoPeriodo === 'esta_semana' 
                       ? (language === 'pt' ? 'Esta Semana' : 'This Week')
                       : (language === 'pt' ? 'Próxima Semana' : 'Next Week')}
@@ -283,7 +285,7 @@ export function ProjecaoVisitas() {
                     ({new Date(projecaoAtual.semanaInicio).toLocaleDateString(language === 'pt' ? 'pt-PT' : 'en-US', { day: '2-digit', month: '2-digit' })} - {new Date(projecaoAtual.semanaFim).toLocaleDateString(language === 'pt' ? 'pt-PT' : 'en-US', { day: '2-digit', month: '2-digit' })})
                   </span>
                 </div>
-                <Badge variant="secondary" className="bg-violet-100 text-violet-700 dark:bg-violet-900/50 dark:text-violet-300">
+                <Badge variant="secondary" className="bg-violet-100 text-violet-700 dark:bg-violet-900/50 dark:text-violet-300 flex-shrink-0">
                   {visitas.length} {language === 'pt' ? 'visitas' : 'visits'}
                 </Badge>
               </div>
@@ -293,41 +295,47 @@ export function ProjecaoVisitas() {
                 {visitas.map((visita, index) => (
                   <div
                     key={visita.id}
-                    className="flex items-center gap-3 p-3 bg-white/60 dark:bg-white/5 rounded-lg border border-violet-100 dark:border-violet-800/50 hover:shadow-md transition-all cursor-pointer group"
+                    className="p-3 bg-white/60 dark:bg-white/5 rounded-lg border border-violet-100 dark:border-violet-800/50 hover:shadow-md transition-all cursor-pointer group"
                     onClick={() => handleOpenCalendarDialog(visita as VisitaSugerida)}
                   >
-                    {/* Número de prioridade */}
-                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-violet-600 text-white flex items-center justify-center font-bold text-sm">
-                      {index + 1}
-                    </div>
-                    
-                    {/* Info da visita */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <Building2 className="h-4 w-4 text-violet-500" />
-                        <span className="font-medium text-violet-900 dark:text-violet-100 truncate">
-                          {visita.lojaNome}
-                        </span>
+                    {/* Layout mobile-first */}
+                    <div className="flex items-start gap-3">
+                      {/* Número de prioridade */}
+                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-violet-600 text-white flex items-center justify-center font-bold text-sm">
+                        {index + 1}
                       </div>
-                      <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          <Calendar className="h-3 w-3" />
-                          {formatShortDate(visita.dataVisita)}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Clock className="h-3 w-3" />
-                          {visita.horaInicio || '09:00'} - {visita.horaFim || '12:00'}
-                        </span>
+                      
+                      {/* Info da visita */}
+                      <div className="flex-1 min-w-0">
+                        {/* Nome da loja - sempre visível completo */}
+                        <div className="flex items-center gap-2 mb-1">
+                          <Building2 className="h-4 w-4 flex-shrink-0 text-violet-500" />
+                          <span className="font-medium text-violet-900 dark:text-violet-100">
+                            {visita.lojaNome}
+                          </span>
+                        </div>
+                        
+                        {/* Data e hora */}
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                          <span className="flex items-center gap-1">
+                            <Calendar className="h-3 w-3" />
+                            {formatShortDate(visita.dataVisita)}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            {visita.horaInicio || '09:00'} - {visita.horaFim || '12:00'}
+                          </span>
+                        </div>
+                        
+                        {/* Badge de motivo - em linha separada no mobile */}
+                        <div className="flex items-center justify-between mt-2">
+                          <Badge className={`text-xs ${getMotivoBadgeColor(visita.motivo)}`}>
+                            {getMotivoIcon(visita.motivo)}
+                            <span className="ml-1">{visita.detalheMotivo || getMotivoLabel(visita.motivo)}</span>
+                          </Badge>
+                          <ChevronRight className="h-4 w-4 text-violet-400 group-hover:translate-x-1 transition-transform" />
+                        </div>
                       </div>
-                    </div>
-                    
-                    {/* Badge de motivo */}
-                    <div className="flex items-center gap-2">
-                      <Badge className={`text-xs ${getMotivoBadgeColor(visita.motivo)}`}>
-                        {getMotivoIcon(visita.motivo)}
-                        <span className="ml-1">{visita.detalheMotivo || getMotivoLabel(visita.motivo)}</span>
-                      </Badge>
-                      <ChevronRight className="h-4 w-4 text-violet-400 group-hover:translate-x-1 transition-transform" />
                     </div>
                   </div>
                 ))}
