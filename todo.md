@@ -3099,7 +3099,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 
 ## Bug v6.6.1 - Erro ao exportar PDF no Portal do Gestor
 - [x] Investigar erro de exportação PDF
-- [x] Corrigir função handleExportPDF (remover dependência de dadosLoja, usar lojaAtual)
+- [x] Corrigir função handleExportPDF (usar mesma lógica do PortalLoja)
 - [x] Adicionar suporte a múltiplas páginas no PDF
-- [ ] Testar exportação
+- [x] Adicionar título, período e rodapé ao PDF
+- [x] Testar exportação
 

@@ -156,51 +156,85 @@ export default function PortalGestor() {
 
   // Exportar PDF
   const handleExportPDF = async () => {
-    if (!dashboardRef.current) {
-      toast.error(language === 'pt' ? 'Não há conteúdo para exportar' : 'No content to export');
+    if (!dashboardRef.current || !dashboardData) {
+      toast.error(language === 'pt' ? 'Sem dados para exportar' : 'No data to export');
       return;
     }
-    
+
     setExportandoPDF(true);
+    toast.info(language === 'pt' ? 'A gerar PDF...' : 'Generating PDF...');
+
     try {
-      // Aguardar um pouco para garantir que os gráficos estão renderizados
+      // Aguardar um momento para os gráficos renderizarem completamente
       await new Promise(resolve => setTimeout(resolve, 500));
+
+      const element = dashboardRef.current;
       
-      const canvas = await html2canvas(dashboardRef.current, {
+      // Configurações para captura de alta qualidade
+      const canvas = await html2canvas(element, {
         scale: 2,
         useCORS: true,
         logging: false,
-        allowTaint: true,
         backgroundColor: '#ffffff',
+        windowWidth: element.scrollWidth,
+        windowHeight: element.scrollHeight,
       });
-      
+
       const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-      
-      // Se o conteúdo for maior que uma página, dividir em múltiplas páginas
-      const pageHeight = pdf.internal.pageSize.getHeight();
-      let heightLeft = pdfHeight;
+      const imgWidth = 210; // A4 width in mm
+      const pageHeight = 297; // A4 height in mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
       let position = 0;
+
+      const pdf = new jsPDF('p', 'mm', 'a4');
       
-      pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
-      heightLeft -= pageHeight;
+      // Adicionar título
+      pdf.setFontSize(16);
+      pdf.setTextColor(40, 40, 40);
+      pdf.text(`${language === 'pt' ? 'Relatório de Resultados' : 'Results Report'} - ${lojaAtual?.nome || ''}`, 10, 15);
       
+      pdf.setFontSize(10);
+      pdf.setTextColor(100, 100, 100);
+      pdf.text(`${language === 'pt' ? 'Período' : 'Period'}: ${dashboardData.periodoLabel || ''}`, 10, 22);
+      pdf.text(`${language === 'pt' ? 'Gerado em' : 'Generated on'}: ${new Date().toLocaleDateString('pt-PT', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}`, 10, 28);
+
+      // Adicionar imagem do dashboard
+      position = 35;
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= (pageHeight - position);
+
+      // Adicionar páginas adicionais se necessário
       while (heightLeft > 0) {
-        position = heightLeft - pdfHeight;
+        position = heightLeft - imgHeight;
         pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
         heightLeft -= pageHeight;
       }
+
+      // Adicionar rodapé em todas as páginas
+      const pageCount = pdf.getNumberOfPages();
+      for (let i = 1; i <= pageCount; i++) {
+        pdf.setPage(i);
+        pdf.setFontSize(8);
+        pdf.setTextColor(150, 150, 150);
+        pdf.text(
+          `PoweringEG Platform 2.0 - a IA ao serviço da ExpressGlass - ${language === 'pt' ? 'Página' : 'Page'} ${i} ${language === 'pt' ? 'de' : 'of'} ${pageCount}`,
+          105,
+          292,
+          { align: 'center' }
+        );
+      }
+
+      // Gerar nome do ficheiro
+      const dataAtual = new Date().toISOString().split('T')[0];
+      const nomeArquivo = `resultados_${lojaAtual?.nome?.replace(/\s+/g, '_').toLowerCase() || 'loja'}_${dataAtual}.pdf`;
       
-      const nomeLoja = lojaAtual?.nome || 'loja';
-      pdf.save(`resultados-${nomeLoja.replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.pdf`);
-      
+      pdf.save(nomeArquivo);
       toast.success(language === 'pt' ? 'PDF exportado com sucesso!' : 'PDF exported successfully!');
     } catch (error) {
       console.error('Erro ao exportar PDF:', error);
-      toast.error(language === 'pt' ? 'Erro ao exportar PDF' : 'Error exporting PDF');
+      toast.error(language === 'pt' ? 'Erro ao gerar PDF' : 'Error generating PDF');
     } finally {
       setExportandoPDF(false);
     }
