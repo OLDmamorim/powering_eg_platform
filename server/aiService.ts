@@ -1039,6 +1039,8 @@ Examples of good tips:
 - "A well-documented visit today can prevent problems tomorrow. Take time to record detailed observations."
 - "Small gestures of recognition to store teams make a big difference in motivation and results."
 - "Take advantage of visits to identify opportunities for improvement in customer service processes."
+- "Try the new Visit Projection feature in the side menu - it automatically generates your weekly schedule based on store priorities."
+- "Did you know you can export your entire week of visits to your calendar with one click? Go to Visit Projection and click Export Week."
 
 Respond only with the tip, without quotes or additional formatting.`
       : `Gera uma dica motivacional e prática (máximo 2 frases) para ${userName}, um gestor de lojas Express Glass.
@@ -1053,6 +1055,8 @@ Exemplos de boas dicas:
 - "Uma visita bem documentada hoje pode prevenir problemas amanhã. Dedique tempo a registar observações detalhadas."
 - "Pequenos gestos de reconhecimento às equipas das lojas fazem grande diferença na motivação e resultados."
 - "Aproveite as visitas para identificar oportunidades de melhoria nos processos de atendimento."
+- "Experimenta a nova funcionalidade Projeção de Visitas no menu lateral - gera automaticamente a tua agenda semanal com base nas prioridades das lojas."
+- "Sabias que podes exportar toda a semana de visitas para o calendário com um só clique? Vai a Projeção Visitas e clica em Exportar Semana."
 
 Responde apenas com a dica, sem aspas nem formatação adicional.`);
 
