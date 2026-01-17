@@ -1,0 +1,66 @@
+{
+  "query": "SELECT g.id, u.name, u.email, g.userId, COUNT(gl.lojaId) as num_lojas\nFROM gestores g\nJOIN users u ON g.userId = u.id\nLEFT JOIN gestor_lojas gl ON g.id = gl.gestorId\nGROUP BY g.id, u.name, u.email, g.userId\nORDER BY num_lojas DESC;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT g.id, u.name, u.email, g.userId, COUNT(gl.lojaId) as num_lojas\nFROM gestores g\nJOIN users u ON g.userId = u.id\nLEFT JOIN gestor_lojas gl ON g.id = gl.gestorId\nGROUP BY g.id, u.name, u.email, g.userId\nORDER BY num_lojas DESC;",
+  "rows": [
+    {
+      "id": "120002",
+      "name": "Mónica Correira",
+      "email": "mcorreia@expressglass.pt",
+      "userId": "2160125",
+      "num_lojas": "16"
+    },
+    {
+      "id": "30001",
+      "name": "Marco Amorim",
+      "email": "mamorim@expressglass.pt",
+      "userId": "420030",
+      "num_lojas": "16"
+    },
+    {
+      "id": "1350001",
+      "name": "Fabio Dias",
+      "email": "fdias@expressglass.pt",
+      "userId": "7980023",
+      "num_lojas": "13"
+    },
+    {
+      "id": "1080020",
+      "name": "Carlos Eduardo",
+      "email": "carlos.eduardo@expressglass.pt",
+      "userId": "8940679",
+      "num_lojas": "12"
+    },
+    {
+      "id": "120001",
+      "name": "Marco Vilar",
+      "email": "mvilar@expressglass.pt",
+      "userId": "2160121",
+      "num_lojas": "12"
+    },
+    {
+      "id": "570003",
+      "name": "Rui Adriao ",
+      "email": "rui.adriao@expressglass.pt",
+      "userId": "6600028",
+      "num_lojas": "3"
+    },
+    {
+      "id": "2",
+      "name": "Mauro Furtado",
+      "email": "mfurtado@expressglass.pt",
+      "userId": "240006",
+      "num_lojas": "1"
+    },
+    {
+      "id": "210001",
+      "name": "Mauro Furtado",
+      "email": "mfurtado@expressglass.pt",
+      "userId": "240006",
+      "num_lojas": "0"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\temail\tuserId\tnum_lojas\n120002\tMónica Correira\tmcorreia@expressglass.pt\t2160125\t16\n30001\tMarco Amorim\tmamorim@expressglass.pt\t420030\t16\n1350001\tFabio Dias\tfdias@expressglass.pt\t7980023\t13\n1080020\tCarlos Eduardo\tcarlos.eduardo@expressglass.pt\t8940679\t12\n120001\tMarco Vilar\tmvilar@expressglass.pt\t2160121\t12\n570003\tRui Adriao \trui.adriao@expressglass.pt\t6600028\t3\n2\tMauro Furtado\tmfurtado@expressglass.pt\t240006\t1\n210001\tMauro Furtado\tmfurtado@expressglass.pt\t240006\t0\n",
+  "stderr": "",
+  "execution_time_ms": 70
+}

@@ -3074,3 +3074,25 @@ NOTA: Sistema de email requer configuração externa no deployment
 
 ## Bug v6.6.21 - Tradução Menu Portal Gestor
 - [x] Corrigir tradução "menu.items.portalGestor" que mostra a chave em vez do texto
+
+## Funcionalidade v6.6.22 - Completar Portal do Gestor
+- [ ] Reescrever PortalGestor.tsx para ter exatamente a mesma interface do PortalLoja.tsx
+- [ ] Incluir gráficos de evolução mensal
+- [ ] Incluir calendário com dias úteis e feriados
+- [ ] Incluir recomendações/Análise IA
+- [ ] Incluir todos os KPIs detalhados
+- [ ] Manter seletor de lojas no topo para o gestor alternar entre lojas
+
+## Portal do Gestor - Funcionalidades Completas v6.6
+- [x] Expandir endpoint dashboardCompletoGestor com todos os dados (complementares, evolução, comparativo, alertas)
+- [x] Criar endpoint analiseIAGestor para análise IA de lojas do gestor
+- [x] Adicionar KPIs principais (Serviços, Objetivo, Desvio, Taxa Reparação)
+- [x] Adicionar alertas automáticos baseados nos KPIs
+- [x] Adicionar gráficos de vendas complementares (barras + doughnut)
+- [x] Adicionar barra de progresso de escovas com objetivos (10% e 7.5%)
+- [x] Adicionar comparativo com mês anterior (variações)
+- [x] Adicionar gráficos de evolução mensal (Serviços vs Objetivo, Desvio %, Taxa Reparação)
+- [x] Adicionar análise IA com foco urgente, pontos positivos e resumo
+- [x] Adicionar exportar PDF dos resultados
+- [x] Interface igual ao Portal da Loja
+

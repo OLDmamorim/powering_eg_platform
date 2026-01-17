@@ -1,0 +1,8 @@
+{
+  "query": "SELECT g.id, g.nome, g.email, g.user_id, COUNT(gl.loja_id) as num_lojas\nFROM gestores g\nLEFT JOIN gestor_lojas gl ON g.id = gl.gestor_id\nGROUP BY g.id, g.nome, g.email, g.user_id\nORDER BY num_lojas DESC\nLIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT g.id, g.nome, g.email, g.user_id, COUNT(gl.loja_id) as num_lojas\nFROM gestores g\nLEFT JOIN gestor_lojas gl ON g.id = gl.gestor_id\nGROUP BY g.id, g.nome, g.email, g.user_id\nORDER BY num_lojas DESC\nLIMIT 10;",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 'gl.gestor_id' in 'on clause'"
+  ]
+}

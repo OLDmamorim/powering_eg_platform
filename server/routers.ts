@@ -424,40 +424,182 @@ export const appRouter = router({
         const mesAtual = now.getMonth() + 1;
         
         let mesesConsulta: { mes: number; ano: number }[] = [];
+        let periodoLabel = '';
+        
         if (input.meses && input.meses.length > 0) {
           mesesConsulta = input.meses;
+          if (mesesConsulta.length === 1) {
+            periodoLabel = new Date(mesesConsulta[0].ano, mesesConsulta[0].mes - 1).toLocaleDateString('pt-PT', { month: 'long', year: 'numeric' });
+          } else {
+            const mesesOrdenados = [...mesesConsulta].sort((a, b) => {
+              if (a.ano !== b.ano) return a.ano - b.ano;
+              return a.mes - b.mes;
+            });
+            const primeiro = mesesOrdenados[0];
+            const ultimo = mesesOrdenados[mesesOrdenados.length - 1];
+            periodoLabel = `${new Date(primeiro.ano, primeiro.mes - 1).toLocaleDateString('pt-PT', { month: 'short', year: 'numeric' })} - ${new Date(ultimo.ano, ultimo.mes - 1).toLocaleDateString('pt-PT', { month: 'short', year: 'numeric' })} (${mesesConsulta.length} meses)`;
+          }
         } else {
           mesesConsulta = [{ mes: mesAtual, ano: anoAtual }];
+          periodoLabel = new Date(anoAtual, mesAtual - 1).toLocaleDateString('pt-PT', { month: 'long', year: 'numeric' });
         }
         
-        // Buscar KPIs agregados dos meses selecionados
+        // Buscar dados agregados para todos os meses do período
         let totalServicos = 0;
         let totalObjetivo = 0;
         let totalReparacoes = 0;
-        let vendasComplementares = 0;
+        let totalEscovas = 0;
+        let totalPolimento = 0;
+        let totalTratamento = 0;
+        let totalLavagens = 0;
+        let totalOutros = 0;
+        let dataUltimaAtualizacao: Date | null = null;
+        let resultadosAgregados: any = null;
         
         for (const p of mesesConsulta) {
-          const resultados = await db.getResultadosMensaisPorLoja(input.lojaId, p.mes, p.ano);
-          if (resultados) {
-            totalServicos += Number(resultados.totalServicos) || 0;
-            totalObjetivo += Number(resultados.objetivoMensal) || 0;
-            totalReparacoes += Number(resultados.qtdReparacoes) || 0;
+          const resultadosArr = await db.getResultadosMensaisPorLoja(input.lojaId, p.mes, p.ano);
+          if (resultadosArr) {
+            totalServicos += Number(resultadosArr.totalServicos) || 0;
+            totalObjetivo += Number(resultadosArr.objetivoMensal) || 0;
+            totalReparacoes += Number(resultadosArr.qtdReparacoes) || 0;
+            if (resultadosArr.updatedAt) {
+              const dataAtual = new Date(resultadosArr.updatedAt);
+              if (!dataUltimaAtualizacao || dataAtual > dataUltimaAtualizacao) {
+                dataUltimaAtualizacao = dataAtual;
+              }
+            }
+            if (!resultadosAgregados) resultadosAgregados = resultadosArr;
           }
           
-          const complementares = await db.getVendasComplementares(p.mes, p.ano, input.lojaId);
-          if (complementares && complementares.length > 0) {
-            const c = complementares[0];
-            vendasComplementares += (Number(c.escovasQtd) || 0) + 
-                                   (Number(c.polimentoQtd) || 0) + 
-                                   (Number(c.tratamentoQtd) || 0) + 
-                                   (Number(c.lavagensTotal) || 0);
+          const complementaresArr = await db.getVendasComplementares(p.mes, p.ano, input.lojaId);
+          if (complementaresArr && complementaresArr.length > 0) {
+            const c = complementaresArr[0];
+            totalEscovas += Number(c.escovasQtd) || 0;
+            totalPolimento += Number(c.polimentoQtd) || 0;
+            totalTratamento += Number(c.tratamentoQtd) || 0;
+            totalLavagens += Number(c.lavagensTotal) || 0;
+            totalOutros += Number(c.outrosQtd) || 0;
           }
         }
         
-        // Calcular métricas derivadas
-        const taxaReparacao = totalServicos > 0 ? (totalReparacoes / totalServicos) * 100 : 0;
+        // Calcular métricas agregadas
+        const desvioPercentual = totalObjetivo > 0 ? (totalServicos - totalObjetivo) / totalObjetivo : null;
+        const taxaReparacao = totalServicos > 0 ? totalReparacoes / totalServicos : null;
+        const escovasPercent = totalServicos > 0 ? totalEscovas / totalServicos : null;
         
-        // Calcular desvio objetivo diário
+        // Obter dados de objetivo diário do primeiro mês (mais recente)
+        const objetivoDiaAtual = resultadosAgregados?.objetivoDiaAtual ? parseFloat(String(resultadosAgregados.objetivoDiaAtual)) : null;
+        const desvioObjetivoAcumulado = resultadosAgregados?.desvioObjetivoAcumulado ? parseFloat(String(resultadosAgregados.desvioObjetivoAcumulado)) : null;
+        const desvioPercentualDia = resultadosAgregados?.desvioPercentualDia ? parseFloat(String(resultadosAgregados.desvioPercentualDia)) : null;
+        
+        const resultados = {
+          totalServicos,
+          objetivoMensal: totalObjetivo,
+          objetivoDiaAtual,
+          desvioObjetivoAcumulado,
+          desvioPercentualDia,
+          desvioPercentualMes: desvioPercentual,
+          taxaReparacao,
+          totalReparacoes,
+          gapReparacoes22: taxaReparacao !== null && taxaReparacao < 0.22 
+            ? Math.ceil(totalServicos * 0.22 - totalReparacoes) 
+            : 0,
+        };
+        
+        const complementares = {
+          escovasQtd: totalEscovas,
+          escovasPercent,
+          polimentoQtd: totalPolimento,
+          tratamentoQtd: totalTratamento,
+          lavagensTotal: totalLavagens,
+          outrosQtd: totalOutros,
+        };
+        
+        // Buscar dados do mês anterior para comparativo
+        const mesAnteriorData = mesesConsulta[0];
+        const mesCompMes = mesAnteriorData.mes === 1 ? 12 : mesAnteriorData.mes - 1;
+        const mesCompAno = mesAnteriorData.mes === 1 ? mesAnteriorData.ano - 1 : mesAnteriorData.ano;
+        const resultadosMesAnterior = await db.getResultadosMensaisPorLoja(input.lojaId, mesCompMes, mesCompAno);
+        const complementaresMesAnterior = await db.getVendasComplementares(mesCompMes, mesCompAno, input.lojaId);
+        
+        // Calcular variações
+        const variacaoServicos = resultadosMesAnterior && resultadosMesAnterior.totalServicos 
+          ? ((totalServicos - Number(resultadosMesAnterior.totalServicos)) / Number(resultadosMesAnterior.totalServicos)) * 100 
+          : null;
+        const variacaoReparacoes = resultadosMesAnterior && resultadosMesAnterior.qtdReparacoes 
+          ? ((totalReparacoes - Number(resultadosMesAnterior.qtdReparacoes)) / Number(resultadosMesAnterior.qtdReparacoes)) * 100 
+          : null;
+        const escovasAnterior = complementaresMesAnterior && complementaresMesAnterior.length > 0 
+          ? Number(complementaresMesAnterior[0].escovasQtd) || 0 
+          : 0;
+        const variacaoEscovas = escovasAnterior > 0 
+          ? ((totalEscovas - escovasAnterior) / escovasAnterior) * 100 
+          : null;
+        
+        const comparativoMesAnterior = {
+          servicosAnterior: resultadosMesAnterior?.totalServicos || 0,
+          variacaoServicos,
+          reparacoesAnterior: resultadosMesAnterior?.qtdReparacoes || 0,
+          variacaoReparacoes,
+          escovasAnterior,
+          variacaoEscovas,
+        };
+        
+        const evolucao = await db.getEvolucaoMensal(input.lojaId, 12);
+        
+        // Gerar alertas
+        const alertas: { tipo: 'warning' | 'danger' | 'success'; mensagem: string }[] = [];
+        
+        if (resultados) {
+          // Alerta taxa de reparação
+          const taxaRep = resultados.taxaReparacao !== null ? parseFloat(String(resultados.taxaReparacao)) : null;
+          if (taxaRep !== null && taxaRep < 0.22) {
+            alertas.push({
+              tipo: 'warning',
+              mensagem: `Taxa de reparação (${(taxaRep * 100).toFixed(1)}%) abaixo do objetivo de 22%`
+            });
+          }
+          
+          // Alerta desvio objetivo diário
+          const desvioDia = resultados.desvioPercentualDia !== null ? parseFloat(String(resultados.desvioPercentualDia)) : null;
+          if (desvioDia !== null && desvioDia < -0.1) {
+            alertas.push({
+              tipo: 'danger',
+              mensagem: `Desvio de ${(desvioDia * 100).toFixed(1)}% abaixo do objetivo diário acumulado`
+            });
+          } else if (desvioDia !== null && desvioDia >= 0) {
+            alertas.push({
+              tipo: 'success',
+              mensagem: `Parabéns! Objetivo diário acumulado atingido (+${(desvioDia * 100).toFixed(1)}%)`
+            });
+          }
+          
+          // Alerta gap reparações
+          if (resultados.gapReparacoes22 !== null && resultados.gapReparacoes22 > 0) {
+            alertas.push({
+              tipo: 'warning',
+              mensagem: `Faltam ${resultados.gapReparacoes22} reparações para atingir 22%`
+            });
+          }
+        }
+        
+        if (complementares) {
+          // Alerta escovas
+          const escovasPerc = complementares.escovasPercent !== null ? parseFloat(String(complementares.escovasPercent)) : null;
+          if (escovasPerc !== null && escovasPerc < 0.075) {
+            alertas.push({
+              tipo: 'warning',
+              mensagem: `Escovas (${(escovasPerc * 100).toFixed(1)}%) abaixo do objetivo de 7.5%`
+            });
+          } else if (escovasPerc !== null && escovasPerc >= 0.10) {
+            alertas.push({
+              tipo: 'success',
+              mensagem: `Excelente! Escovas acima de 10% (${(escovasPerc * 100).toFixed(1)}%)`
+            });
+          }
+        }
+        
+        // Calcular desvio objetivo diário para KPIs
         const diaAtual = now.getDate();
         const diasNoMes = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
         const objetivoDiario = totalObjetivo / diasNoMes;
@@ -470,12 +612,204 @@ export const appRouter = router({
           kpis: {
             servicosRealizados: totalServicos,
             objetivoMensal: totalObjetivo,
-            taxaReparacao,
+            taxaReparacao: taxaReparacao !== null ? taxaReparacao * 100 : 0,
             desvioObjetivoDiario,
-            vendasComplementares,
+            vendasComplementares: totalEscovas + totalPolimento + totalTratamento + totalLavagens + totalOutros,
           },
+          resultados,
+          complementares,
+          evolucao,
+          alertas,
+          mesesSelecionados: mesesConsulta,
+          periodoAtual: mesesConsulta[0],
+          periodoLabel,
+          dataAtualizacao: dataUltimaAtualizacao?.toISOString() || null,
+          comparativoMesAnterior,
           mesesConsultados: mesesConsulta,
         };
+      }),
+    
+    // Análise IA para o Portal do Gestor
+    analiseIAGestor: gestorProcedure
+      .input(z.object({
+        lojaId: z.number(),
+        meses: z.array(z.object({
+          mes: z.number().min(1).max(12),
+          ano: z.number().min(2020).max(2100)
+        })).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const { invokeLLM } = await import('./_core/llm');
+        
+        // Verificar acesso
+        const gestor = await db.getGestorByUserId(ctx.user.id);
+        if (!gestor) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Não é gestor' });
+        }
+        
+        const lojasDoGestor = await db.getLojasByGestorId(gestor.id);
+        const loja = lojasDoGestor.find(l => l.id === input.lojaId);
+        if (!loja) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Não tem acesso a esta loja' });
+        }
+        
+        // Determinar período
+        const hoje = new Date();
+        const mesesConsulta = input.meses && input.meses.length > 0 
+          ? input.meses 
+          : [{ mes: hoje.getMonth() + 1, ano: hoje.getFullYear() }];
+        
+        // Buscar dados da loja
+        let totalServicos = 0;
+        let totalObjetivo = 0;
+        let totalReparacoes = 0;
+        let totalEscovas = 0;
+        let totalPolimento = 0;
+        let totalTratamento = 0;
+        let totalLavagens = 0;
+        
+        for (const p of mesesConsulta) {
+          const resultados = await db.getResultadosMensaisPorLoja(input.lojaId, p.mes, p.ano);
+          if (resultados) {
+            totalServicos += Number(resultados.totalServicos) || 0;
+            totalObjetivo += Number(resultados.objetivoMensal) || 0;
+            totalReparacoes += Number(resultados.qtdReparacoes) || 0;
+          }
+          
+          const complementares = await db.getVendasComplementares(p.mes, p.ano, input.lojaId);
+          if (complementares && complementares.length > 0) {
+            const c = complementares[0];
+            totalEscovas += Number(c.escovasQtd) || 0;
+            totalPolimento += Number(c.polimentoQtd) || 0;
+            totalTratamento += Number(c.tratamentoQtd) || 0;
+            totalLavagens += Number(c.lavagensTotal) || 0;
+          }
+        }
+        
+        // Calcular métricas
+        const desvioPercentual = totalObjetivo > 0 ? ((totalServicos - totalObjetivo) / totalObjetivo) * 100 : 0;
+        const taxaReparacao = totalServicos > 0 ? (totalReparacoes / totalServicos) * 100 : 0;
+        const escovasPercent = totalServicos > 0 ? (totalEscovas / totalServicos) * 100 : 0;
+        const servicosFaltam = Math.max(0, totalObjetivo - totalServicos);
+        const reparacoesFaltam = Math.max(0, Math.ceil(totalServicos * 0.22) - totalReparacoes);
+        
+        // Buscar dados do mês anterior para comparativo
+        const mesAnterior = mesesConsulta[0].mes === 1 ? 12 : mesesConsulta[0].mes - 1;
+        const anoAnterior = mesesConsulta[0].mes === 1 ? mesesConsulta[0].ano - 1 : mesesConsulta[0].ano;
+        const resultadosAnt = await db.getResultadosMensaisPorLoja(input.lojaId, mesAnterior, anoAnterior);
+        const servicosAnteriores = resultadosAnt ? Number(resultadosAnt.totalServicos) || 0 : 0;
+        const variacaoServicos = servicosAnteriores > 0 ? ((totalServicos - servicosAnteriores) / servicosAnteriores) * 100 : 0;
+        
+        // Calcular dias úteis restantes
+        const mesAtual = mesesConsulta[0];
+        const ultimoDia = new Date(mesAtual.ano, mesAtual.mes, 0).getDate();
+        const diaAtual = hoje.getDate();
+        let diasUteisRestantes = 0;
+        for (let d = diaAtual + 1; d <= ultimoDia; d++) {
+          const data = new Date(mesAtual.ano, mesAtual.mes - 1, d);
+          const diaSemana = data.getDay();
+          if (diaSemana !== 0 && diaSemana !== 6) diasUteisRestantes++;
+        }
+        
+        // Calcular ritmo necessário
+        const servicosPorDia = diasUteisRestantes > 0 ? Math.ceil(servicosFaltam / diasUteisRestantes) : 0;
+        
+        // Gerar análise com IA
+        const prompt = `
+Analisa os resultados da loja ${loja.nome} e gera uma análise simples e motivacional.
+
+DADOS DO MÊS:
+- Serviços realizados: ${totalServicos} / Objetivo: ${totalObjetivo} (Desvio: ${desvioPercentual.toFixed(1)}%)
+- Taxa de reparação: ${taxaReparacao.toFixed(1)}% (objetivo: 22%)
+- Escovas: ${escovasPercent.toFixed(1)}% (objetivo: 10%)
+- Dias úteis restantes: ${diasUteisRestantes}
+- Ritmo necessário: ${servicosPorDia} serviços/dia
+
+Gera uma resposta em JSON com esta estrutura exata:
+{
+  "focoUrgente": ["lista de 1-2 pontos de foco urgente, diretos e práticos"],
+  "pontosPositivos": ["lista de 1-2 pontos positivos da loja"],
+  "resumo": "mensagem de síntese e motivação (2-3 frases, tom positivo e encorajador, dar força para os dias que faltam)"
+}
+
+IMPORTANTE:
+- Sê direto e prático no foco urgente
+- O resumo deve ser genuino, positivo e dar força
+- Se o objetivo já foi atingido, celebra e incentiva a superar
+- Usa linguagem portuguesa de Portugal (não brasileiro)
+- Responde APENAS com o JSON, sem texto adicional`;
+        
+        try {
+          const response = await invokeLLM({
+            messages: [
+              { role: 'system', content: 'És um analista de performance de lojas ExpressGlass. Geras análises estratégicas e motivacionais em português de Portugal. Respondes sempre em JSON válido.' },
+              { role: 'user', content: prompt }
+            ],
+            response_format: {
+              type: 'json_schema',
+              json_schema: {
+                name: 'analise_loja',
+                strict: true,
+                schema: {
+                  type: 'object',
+                  properties: {
+                    focoUrgente: { type: 'array', items: { type: 'string' } },
+                    pontosPositivos: { type: 'array', items: { type: 'string' } },
+                    resumo: { type: 'string' }
+                  },
+                  required: ['focoUrgente', 'pontosPositivos', 'resumo'],
+                  additionalProperties: false
+                }
+              }
+            }
+          });
+          
+          const messageContent = response.choices?.[0]?.message?.content;
+          const content = typeof messageContent === 'string' ? messageContent : '{}';
+          const analise = JSON.parse(content);
+          
+          return {
+            ...analise,
+            metricas: {
+              totalServicos,
+              totalObjetivo,
+              desvioPercentual,
+              taxaReparacao,
+              escovasPercent,
+              servicosFaltam,
+              reparacoesFaltam,
+              diasUteisRestantes,
+              servicosPorDia,
+              variacaoServicos
+            }
+          };
+        } catch (error) {
+          console.error('Erro ao gerar análise IA:', error);
+          // Retornar análise básica em caso de erro
+          return {
+            focoUrgente: servicosFaltam > 0 
+              ? [`Faltam ${servicosFaltam} serviços para atingir o objetivo`]
+              : ['Manter o ritmo atual para superar o objetivo'],
+            pontosPositivos: desvioPercentual >= 0 
+              ? ['Objetivo mensal atingido!']
+              : taxaReparacao >= 22 ? ['Taxa de reparação acima do objetivo!'] : [],
+            resumo: desvioPercentual >= 0
+              ? 'Parabéns pelo excelente trabalho! Continuem assim e superem ainda mais os objetivos!'
+              : `Faltam apenas ${servicosFaltam} serviços! Com foco e determinação, vão conseguir! Força equipa!`,
+            metricas: {
+              totalServicos,
+              totalObjetivo,
+              desvioPercentual,
+              taxaReparacao,
+              escovasPercent,
+              servicosFaltam,
+              reparacoesFaltam,
+              diasUteisRestantes,
+              servicosPorDia,
+              variacaoServicos
+            }
+          };
+        }
       }),
   }),
 
