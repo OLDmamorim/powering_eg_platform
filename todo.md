@@ -3239,3 +3239,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Incluir análise IA no PDF exportado do Portal da Loja (parsing robusto melhorado)
 - [x] Esconder métricas de dias úteis/tempo em falta quando mês selecionado não é o atual
 - [x] Tornar botão de instalação PWA mais visível no header (botão branco com texto "Instalar App")
+
+
+## Bugs v6.7.3 - Correções Portal da Loja
+- [x] Corrigir emojis no PDF (aparecem como caracteres estranhos) - substituídos por [!], [+], [>]
+- [x] Melhorar feedback do botão de instalação PWA (toast com instruções detalhadas)

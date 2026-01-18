@@ -188,16 +188,45 @@ export default function PortalLoja() {
   }, []);
 
   const handleInstallPWA = async () => {
-    if (!deferredPrompt) {
-      // Mostrar instruções manuais
-      toast.info('Para instalar: Menu do browser > "Adicionar ao Ecrã Inicial"');
+    // Verificar se já está instalada
+    const isInstalled = localStorage.getItem('pwa_installed') === 'true';
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
+                         (window.navigator as any).standalone === true;
+    
+    if (isStandalone) {
+      toast.success(language === 'pt' 
+        ? 'A app já está instalada e a correr!' 
+        : 'The app is already installed and running!');
       return;
     }
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') {
-      localStorage.setItem('pwa_installed', 'true');
-      toast.success('App instalada com sucesso!');
+    
+    if (!deferredPrompt) {
+      // Mostrar instruções manuais com mais detalhe
+      toast.info(
+        language === 'pt'
+          ? 'Para instalar: Toque nos 3 pontos (menu) > "Adicionar ao Ecrã Inicial" ou "Instalar aplicação"'
+          : 'To install: Tap the 3 dots (menu) > "Add to Home Screen" or "Install app"',
+        { duration: 6000 }
+      );
+      return;
+    }
+    
+    try {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        localStorage.setItem('pwa_installed', 'true');
+        toast.success(language === 'pt' ? 'App instalada com sucesso!' : 'App installed successfully!');
+      } else {
+        toast.info(language === 'pt' 
+          ? 'Instalação cancelada. Pode instalar mais tarde.' 
+          : 'Installation cancelled. You can install later.');
+      }
+    } catch (error) {
+      console.error('Erro ao instalar PWA:', error);
+      toast.error(language === 'pt' 
+        ? 'Erro ao instalar. Tente pelo menu do browser.' 
+        : 'Installation error. Try from browser menu.');
     }
     setDeferredPrompt(null);
     setShowInstallBanner(false);

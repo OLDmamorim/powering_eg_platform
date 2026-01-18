@@ -619,7 +619,7 @@ export async function gerarPDFResultados(
         // Foco Urgente
         if (analiseIA.focoUrgente && analiseIA.focoUrgente.length > 0) {
           doc.fontSize(10).fillColor(vermelho);
-          doc.text('🎯 Foco Urgente:', 40, currentY);
+          doc.text('[!] Foco Urgente:', 40, currentY);
           currentY += 12;
           analiseIA.focoUrgente.forEach(item => {
             doc.fontSize(9).fillColor(cinzaEscuro);
@@ -632,7 +632,7 @@ export async function gerarPDFResultados(
         // Pontos Positivos
         if (analiseIA.pontosPositivos && analiseIA.pontosPositivos.length > 0) {
           doc.fontSize(10).fillColor(verde);
-          doc.text('✅ Pontos Positivos:', 40, currentY);
+          doc.text('[+] Pontos Positivos:', 40, currentY);
           currentY += 12;
           analiseIA.pontosPositivos.forEach(item => {
             doc.fontSize(9).fillColor(cinzaEscuro);
@@ -645,7 +645,7 @@ export async function gerarPDFResultados(
         // Resumo
         if (analiseIA.resumo) {
           doc.fontSize(10).fillColor(azul);
-          doc.text('💬 Resumo:', 40, currentY);
+          doc.text('[>] Resumo:', 40, currentY);
           currentY += 12;
           doc.fontSize(9).fillColor(cinzaEscuro);
           doc.text(analiseIA.resumo, 50, currentY, { width: pageWidth - 20 });
