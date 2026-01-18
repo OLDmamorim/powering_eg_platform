@@ -3233,3 +3233,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## Bugs v6.7.1 - Correções Portal da Loja
 - [x] Corrigir erro ao gerar PDF no Portal da Loja (erro reportado pelo utilizador) - NOTA: Já corrigido em v6.7, falta publicar
 - [x] Adicionar botão permanente "Instalar App" no header do Portal da Loja
+
+
+## Bugs v6.7.2 - Correções Portal da Loja
+- [x] Incluir análise IA no PDF exportado do Portal da Loja (parsing robusto melhorado)
+- [x] Esconder métricas de dias úteis/tempo em falta quando mês selecionado não é o atual
+- [x] Tornar botão de instalação PWA mais visível no header (botão branco com texto "Instalar App")

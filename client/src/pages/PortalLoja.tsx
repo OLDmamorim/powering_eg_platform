@@ -650,16 +650,16 @@ export default function PortalLoja() {
               </p>
             </div>
             <div className="flex items-center gap-2">
-              {/* Botão Instalar App */}
+              {/* Botão Instalar App - Sempre visível com destaque */}
               <Button 
-                variant="ghost" 
+                variant="outline" 
                 size="sm" 
                 onClick={handleInstallPWA} 
-                className="text-white hover:bg-white/20 h-7 px-2 text-xs flex items-center gap-1"
-                title={language === 'pt' ? 'Instalar App' : 'Install App'}
+                className="bg-white text-green-700 hover:bg-green-50 border-white h-7 px-3 text-xs font-medium flex items-center gap-1.5 shadow-sm"
+                title={language === 'pt' ? 'Instalar App no seu dispositivo' : 'Install App on your device'}
               >
-                <Smartphone className="h-4 w-4" />
-                <span className="hidden sm:inline">{language === 'pt' ? 'Instalar' : 'Install'}</span>
+                <Download className="h-4 w-4" />
+                <span>{language === 'pt' ? 'Instalar App' : 'Install App'}</span>
               </Button>
               {/* Seletor de Idioma */}
               <Select value={language} onValueChange={(value) => setLanguage(value as 'pt' | 'en')}>
@@ -1530,6 +1530,12 @@ export default function PortalLoja() {
                 const mes = dataAtual.getMonth();
                 const diaAtual = dataAtual.getDate();
                 
+                // Verificar se o mês selecionado é o mês atual
+                const hoje = new Date();
+                const mesAtualSelecionado = mesesSelecionadosDashboard.length === 1 && 
+                  mesesSelecionadosDashboard[0].mes === (hoje.getMonth() + 1) && 
+                  mesesSelecionadosDashboard[0].ano === hoje.getFullYear();
+                
                 // Feriados nacionais portugueses (fixos e móveis)
                 const getFeriadosPortugueses = (ano: number): Date[] => {
                   // Feriados fixos
@@ -1627,70 +1633,75 @@ export default function PortalLoja() {
                         })}
                       </span>
                     </div>
-                    <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-                      <div className="flex items-center gap-1.5 text-xs">
-                        <Calendar className="h-3.5 w-3.5 text-blue-500" />
-                        <span className="font-medium text-foreground">
-                          {language === 'pt' 
-                            ? `Dia ${diasUteisAteHoje} de ${totalDiasUteisMes} dias úteis`
-                            : `Day ${diasUteisAteHoje} of ${totalDiasUteisMes} working days`}
-                          {feriadosNoMes > 0 && (
-                            <span className="text-muted-foreground ml-1">({feriadosNoMes} {language === 'pt' ? 'feriado(s)' : 'holiday(s)'})</span>
-                          )}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-[100px] bg-gray-200 rounded-full h-2">
-                          <div 
-                            className={`h-2 rounded-full transition-all ${
-                              percentagemMes >= 80 ? 'bg-red-500' : 
-                              percentagemMes >= 60 ? 'bg-amber-500' : 
-                              'bg-green-500'
-                            }`}
-                            style={{ width: `${percentagemMes}%` }}
-                          />
+                    {/* Métricas de dias úteis - SÓ mostrar para o mês atual */}
+                    {mesAtualSelecionado && (
+                      <>
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                          <div className="flex items-center gap-1.5 text-xs">
+                            <Calendar className="h-3.5 w-3.5 text-blue-500" />
+                            <span className="font-medium text-foreground">
+                              {language === 'pt' 
+                                ? `Dia ${diasUteisAteHoje} de ${totalDiasUteisMes} dias úteis`
+                                : `Day ${diasUteisAteHoje} of ${totalDiasUteisMes} working days`}
+                              {feriadosNoMes > 0 && (
+                                <span className="text-muted-foreground ml-1">({feriadosNoMes} {language === 'pt' ? 'feriado(s)' : 'holiday(s)'})</span>
+                              )}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="w-[100px] bg-gray-200 rounded-full h-2">
+                              <div 
+                                className={`h-2 rounded-full transition-all ${
+                                  percentagemMes >= 80 ? 'bg-red-500' : 
+                                  percentagemMes >= 60 ? 'bg-amber-500' : 
+                                  'bg-green-500'
+                                }`}
+                                style={{ width: `${percentagemMes}%` }}
+                              />
+                            </div>
+                            <span className="text-xs text-muted-foreground">{percentagemMes}%</span>
+                          </div>
                         </div>
-                        <span className="text-xs text-muted-foreground">{percentagemMes}%</span>
-                      </div>
-                    </div>
-                    
-                    {/* Alerta de fim de mês */}
-                    {diasUteisRestantes <= 5 && diasUteisRestantes > 0 && (
-                      <div className="flex items-center gap-2 text-xs bg-amber-50 border border-amber-200 rounded-md px-2 py-1">
-                        <AlertTriangle className="h-3.5 w-3.5 text-amber-600" />
-                        <span className="text-amber-700 font-medium">
-                          {language === 'pt' 
-                            ? `Atenção: Faltam apenas ${diasUteisRestantes} dias úteis para o fim do mês!`
-                            : `Warning: Only ${diasUteisRestantes} working days left this month!`}
-                        </span>
-                      </div>
-                    )}
-                    
-                    {/* Previsão de serviços para objetivo */}
-                    {objetivoMensal > 0 && !atingiuObjetivo && diasUteisRestantes > 0 && (
-                      <div className="flex items-center gap-2 text-xs bg-blue-50 border border-blue-200 rounded-md px-2 py-1">
-                        <Target className="h-3.5 w-3.5 text-blue-600" />
-                        <span className="text-blue-700">
-                          {language === 'pt' 
-                            ? `Para atingir o objetivo: ${servicosFaltam} serviços em ${diasUteisRestantes} dias = `
-                            : `To reach goal: ${servicosFaltam} services in ${diasUteisRestantes} days = `}
-                          <span className="font-bold">
-                            {servicosPorDia} {language === 'pt' ? 'serviços/dia' : 'services/day'}
-                          </span>
-                        </span>
-                      </div>
-                    )}
-                    
-                    {/* Mensagem de objetivo atingido */}
-                    {objetivoMensal > 0 && atingiuObjetivo && (
-                      <div className="flex items-center gap-2 text-xs bg-green-50 border border-green-200 rounded-md px-2 py-1">
-                        <Award className="h-3.5 w-3.5 text-green-600" />
-                        <span className="text-green-700 font-medium">
-                          {language === 'pt' 
-                            ? `Parabéns! Objetivo mensal atingido (+${servicosAtuais - objetivoMensal} acima)`
-                            : `Congratulations! Monthly goal reached (+${servicosAtuais - objetivoMensal} above)`}
-                        </span>
-                      </div>
+                        
+                        {/* Alerta de fim de mês */}
+                        {diasUteisRestantes <= 5 && diasUteisRestantes > 0 && (
+                          <div className="flex items-center gap-2 text-xs bg-amber-50 border border-amber-200 rounded-md px-2 py-1">
+                            <AlertTriangle className="h-3.5 w-3.5 text-amber-600" />
+                            <span className="text-amber-700 font-medium">
+                              {language === 'pt' 
+                                ? `Atenção: Faltam apenas ${diasUteisRestantes} dias úteis para o fim do mês!`
+                                : `Warning: Only ${diasUteisRestantes} working days left this month!`}
+                            </span>
+                          </div>
+                        )}
+                        
+                        {/* Previsão de serviços para objetivo */}
+                        {objetivoMensal > 0 && !atingiuObjetivo && diasUteisRestantes > 0 && (
+                          <div className="flex items-center gap-2 text-xs bg-blue-50 border border-blue-200 rounded-md px-2 py-1">
+                            <Target className="h-3.5 w-3.5 text-blue-600" />
+                            <span className="text-blue-700">
+                              {language === 'pt' 
+                                ? `Para atingir o objetivo: ${servicosFaltam} serviços em ${diasUteisRestantes} dias = `
+                                : `To reach goal: ${servicosFaltam} services in ${diasUteisRestantes} days = `}
+                              <span className="font-bold">
+                                {servicosPorDia} {language === 'pt' ? 'serviços/dia' : 'services/day'}
+                              </span>
+                            </span>
+                          </div>
+                        )}
+                        
+                        {/* Mensagem de objetivo atingido */}
+                        {objetivoMensal > 0 && atingiuObjetivo && (
+                          <div className="flex items-center gap-2 text-xs bg-green-50 border border-green-200 rounded-md px-2 py-1">
+                            <Award className="h-3.5 w-3.5 text-green-600" />
+                            <span className="text-green-700 font-medium">
+                              {language === 'pt' 
+                                ? `Parabéns! Objetivo mensal atingido (+${servicosAtuais - objetivoMensal} acima)`
+                                : `Congratulations! Monthly goal reached (+${servicosAtuais - objetivoMensal} above)`}
+                            </span>
+                          </div>
+                        )}
+                      </>
                     )}
                   </div>
                 );

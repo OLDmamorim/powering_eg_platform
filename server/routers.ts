@@ -6349,11 +6349,58 @@ Fornece uma análise breve com:
         };
         
         // Preparar análise IA no formato correto (interface: focoUrgente: string[], pontosPositivos: string[], resumo: string)
-        const analiseIAFormatada = analiseIA && typeof analiseIA === 'string' ? {
-          focoUrgente: [analiseIA.split('\n')[0] || ''],
-          pontosPositivos: analiseIA.split('\n').slice(1, 3).filter((s: string) => s.trim()) || [],
-          resumo: analiseIA.split('\n').slice(3).join(' ').trim() || '',
-        } : null;
+        let analiseIAFormatada = null;
+        if (analiseIA && typeof analiseIA === 'string') {
+          // Parsing mais robusto da análise IA
+          const linhas = analiseIA.split('\n').filter((l: string) => l.trim());
+          const focoUrgente: string[] = [];
+          const pontosPositivos: string[] = [];
+          let resumo = '';
+          
+          let secaoAtual = '';
+          for (const linha of linhas) {
+            const linhaLower = linha.toLowerCase();
+            if (linhaLower.includes('foco urgente') || linhaLower.includes('1.')) {
+              secaoAtual = 'foco';
+              // Se a linha contém mais que o título, extrair o conteúdo
+              const match = linha.match(/(?:foco urgente|1\.)\s*[:\-]?\s*(.+)/i);
+              if (match && match[1]) focoUrgente.push(match[1].trim());
+            } else if (linhaLower.includes('pontos positivos') || linhaLower.includes('2.')) {
+              secaoAtual = 'positivos';
+              const match = linha.match(/(?:pontos positivos|2\.)\s*[:\-]?\s*(.+)/i);
+              if (match && match[1]) pontosPositivos.push(match[1].trim());
+            } else if (linhaLower.includes('resumo') || linhaLower.includes('3.')) {
+              secaoAtual = 'resumo';
+              const match = linha.match(/(?:resumo|3\.)\s*[:\-]?\s*(.+)/i);
+              if (match && match[1]) resumo = match[1].trim();
+            } else if (linha.trim().startsWith('-') || linha.trim().startsWith('•')) {
+              // Linha de lista
+              const conteudo = linha.replace(/^[\-•]\s*/, '').trim();
+              if (secaoAtual === 'foco') focoUrgente.push(conteudo);
+              else if (secaoAtual === 'positivos') pontosPositivos.push(conteudo);
+              else if (secaoAtual === 'resumo') resumo += ' ' + conteudo;
+            } else if (secaoAtual === 'resumo') {
+              resumo += ' ' + linha.trim();
+            } else if (secaoAtual === 'foco' && focoUrgente.length === 0) {
+              focoUrgente.push(linha.trim());
+            } else if (secaoAtual === 'positivos') {
+              pontosPositivos.push(linha.trim());
+            }
+          }
+          
+          // Se não conseguiu parsear, usar a análise completa como resumo
+          if (focoUrgente.length === 0 && pontosPositivos.length === 0 && !resumo) {
+            resumo = analiseIA;
+          }
+          
+          analiseIAFormatada = {
+            focoUrgente: focoUrgente.filter(f => f),
+            pontosPositivos: pontosPositivos.filter(p => p),
+            resumo: resumo.trim(),
+          };
+          
+          console.log('[PDF] Análise IA formatada:', JSON.stringify(analiseIAFormatada));
+        }
         
         // Gerar PDF
         const pdfBuffer = await gerarPDFResultados(
