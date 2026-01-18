@@ -161,9 +161,26 @@ export default function PortalLoja() {
     };
     window.addEventListener('beforeinstallprompt', handler);
     
-    // Registar service worker
+    // Registar service worker específico do Portal da Loja
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js').catch(console.error);
+      navigator.serviceWorker.register('/sw-portal-loja.js').catch(console.error);
+    }
+    
+    // Adicionar manifest específico do Portal da Loja
+    const existingManifest = document.querySelector('link[rel="manifest"]');
+    if (existingManifest) {
+      existingManifest.setAttribute('href', '/manifest-portal-loja.json');
+    } else {
+      const manifestLink = document.createElement('link');
+      manifestLink.rel = 'manifest';
+      manifestLink.href = '/manifest-portal-loja.json';
+      document.head.appendChild(manifestLink);
+    }
+    
+    // Atualizar Apple Touch Icon
+    const appleIcon = document.querySelector('link[rel="apple-touch-icon"]');
+    if (appleIcon) {
+      appleIcon.setAttribute('href', '/portal-loja-apple-touch-icon.png');
     }
     
     return () => window.removeEventListener('beforeinstallprompt', handler);
@@ -739,6 +756,37 @@ export default function PortalLoja() {
           </div>
         </div>
       </header>
+
+      {/* Banner de Instalação PWA */}
+      {showInstallBanner && (
+        <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Smartphone className="h-6 w-6" />
+            <div>
+              <p className="font-semibold text-sm">{language === 'pt' ? 'Instalar App' : 'Install App'}</p>
+              <p className="text-xs opacity-90">{language === 'pt' ? 'Acesso rápido no ecrã inicial' : 'Quick access from home screen'}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button 
+              size="sm" 
+              variant="secondary"
+              onClick={handleInstallPWA}
+              className="bg-white text-emerald-600 hover:bg-emerald-50 font-semibold"
+            >
+              {language === 'pt' ? 'Instalar' : 'Install'}
+            </Button>
+            <Button 
+              size="sm" 
+              variant="ghost"
+              onClick={() => setShowInstallBanner(false)}
+              className="text-white hover:bg-white/20 h-8 w-8 p-0"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Conteúdo Principal */}
       <div className="container mx-auto px-4 py-6">

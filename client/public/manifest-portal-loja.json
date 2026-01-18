@@ -1,0 +1,74 @@
+{
+  "id": "poweringeg-portal-loja",
+  "name": "Portal da Loja - ExpressGlass",
+  "short_name": "Portal Loja",
+  "description": "Portal de gestão para lojas ExpressGlass - Reuniões, Tarefas, Pendentes e Resultados",
+  "start_url": "/portal-loja",
+  "scope": "/portal-loja",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#10b981",
+  "orientation": "portrait",
+  "lang": "pt-PT",
+  "icons": [
+    {
+      "src": "/portal-loja-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/portal-loja-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/portal-loja-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/portal-loja-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "categories": ["business", "productivity"],
+  "screenshots": [
+    {
+      "src": "/portal-loja-screenshot.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Portal da Loja - Dashboard"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Tarefas",
+      "short_name": "Tarefas",
+      "description": "Ver tarefas pendentes",
+      "url": "/portal-loja?tab=tarefas",
+      "icons": [{ "src": "/portal-loja-icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Resultados",
+      "short_name": "Resultados",
+      "description": "Ver resultados da loja",
+      "url": "/portal-loja?tab=resultados",
+      "icons": [{ "src": "/portal-loja-icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Reuniões",
+      "short_name": "Reuniões",
+      "description": "Registar reunião quinzenal",
+      "url": "/portal-loja?tab=reuniao",
+      "icons": [{ "src": "/portal-loja-icon-192.png", "sizes": "192x192" }]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
+}

@@ -3188,3 +3188,11 @@ NOTA: Sistema de email requer configuração externa no deployment
 
 ## Limitar pendentes por foto (18/01/2026)
 - [x] Limitar criação de pendentes a máximo 2 por foto na análise de imagens
+
+
+## PWA Portal da Loja (18/01/2026)
+- [x] Criar manifest.json para PWA (manifest-portal-loja.json)
+- [x] Criar service worker para funcionamento offline (sw-portal-loja.js)
+- [x] Adicionar prompt de instalação com instruções (banner verde com botão Instalar)
+- [x] Guardar token no localStorage para persistência (já existia)
+- [x] Criar ícones da app (portal-loja-icon-192.png e portal-loja-icon-512.png)
