@@ -1078,6 +1078,7 @@ IMPORTANTE:
             const messageContent = response.choices?.[0]?.message?.content;
             const content = typeof messageContent === 'string' ? messageContent : '{}';
             analiseIA = JSON.parse(content);
+            console.log('[ExportPDF] Análise IA gerada:', JSON.stringify(analiseIA));
           } catch (error) {
             console.error('Erro ao gerar análise IA para PDF:', error);
           }
