@@ -27,7 +27,10 @@ Analisa fotos de lojas e identifica problemas relacionados com:
 - Problemas de segurança (EPIs, extintores, etc.)
 - Estado geral das instalações
 
-Sê específico e objetivo nas tuas observações.`
+Sê específico e objetivo nas tuas observações.
+
+IMPORTANTE: Gera NO MÁXIMO 2 pendentes por foto. Prioriza os problemas mais críticos ou urgentes.
+Se identificares mais de 2 problemas, agrupa-os ou seleciona apenas os 2 mais importantes.`
         },
         {
           role: "user",
@@ -67,7 +70,7 @@ Sê específico e objetivo nas tuas observações.`
               },
               suggestedPendentes: {
                 type: "array",
-                description: "Lista de pendentes sugeridos baseados nos problemas (ações específicas)",
+                description: "Lista de pendentes sugeridos baseados nos problemas (MÁXIMO 2 pendentes - priorizar os mais críticos)",
                 items: {
                   type: "string"
                 }
@@ -93,6 +96,12 @@ Sê específico e objetivo nas tuas observações.`
     // Content deve ser string quando usamos response_format
     const contentStr = typeof content === 'string' ? content : JSON.stringify(content);
     const result = JSON.parse(contentStr) as PhotoAnalysisResult;
+    
+    // Garantir máximo de 2 pendentes por foto (segurança adicional)
+    if (result.suggestedPendentes && result.suggestedPendentes.length > 2) {
+      result.suggestedPendentes = result.suggestedPendentes.slice(0, 2);
+    }
+    
     return result;
 
   } catch (error) {

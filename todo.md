@@ -3184,3 +3184,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Gráficos de evolução (3 páginas)
 - [x] Sem páginas vazias
 - [x] Rodapé na última página
+
+
+## Limitar pendentes por foto (18/01/2026)
+- [x] Limitar criação de pendentes a máximo 2 por foto na análise de imagens
