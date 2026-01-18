@@ -3152,3 +3152,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar logs de debug para diagnosticar problemas
 - [ ] Testar PDF completo
 
+
+## Melhoria v6.6.9 - Logótipo ExpressGlass no PDF
+- [x] Encontrar ou descarregar logótipo ExpressGlass (já existia em client/public)
+- [x] Copiar logótipo para server/assets
+- [x] Adicionar logótipo ao cabeçalho do PDF
+- [ ] Testar PDF com logótipo
+

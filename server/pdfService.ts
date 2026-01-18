@@ -1,4 +1,9 @@
 import PDFDocument from 'pdfkit';
+import path from 'path';
+import fs from 'fs';
+
+// Caminho para o logótipo ExpressGlass
+const LOGO_PATH = path.join(__dirname, 'assets', 'eglass-logo.png');
 
 interface EvolucaoItem {
   mes: number;
@@ -384,6 +389,16 @@ export async function gerarPDFResultados(
       let currentY = 40;
 
       // ========== CABEÇALHO ==========
+      // Logótipo ExpressGlass (se existir)
+      try {
+        if (fs.existsSync(LOGO_PATH)) {
+          doc.image(LOGO_PATH, pageWidth / 2 - 30, currentY, { width: 120 });
+          currentY += 40;
+        }
+      } catch (logoError) {
+        console.log('[PDF] Logótipo não encontrado, continuando sem ele');
+      }
+
       doc.fontSize(18).fillColor('#1f2937');
       doc.text('Relatório de Resultados', 40, currentY, { align: 'center', width: pageWidth });
       currentY += 25;
