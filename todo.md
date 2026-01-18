@@ -3159,3 +3159,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar logótipo ao cabeçalho do PDF
 - [ ] Testar PDF com logótipo
 
+
+## Bug v6.7.0 - PDF incompleto (logótipo, gráficos, análise IA em falta)
+- [ ] Corrigir caminho do logótipo ExpressGlass
+- [ ] Corrigir geração de gráficos de evolução (página 2 vazia)
+- [ ] Garantir que análise IA é sempre incluída
+- [ ] Testar PDF completo
+

@@ -3,7 +3,8 @@ import path from 'path';
 import fs from 'fs';
 
 // Caminho para o logótipo ExpressGlass
-const LOGO_PATH = path.join(__dirname, 'assets', 'eglass-logo.png');
+// Usar caminho absoluto para garantir que funciona em produção
+const LOGO_PATH = path.resolve(process.cwd(), 'server', 'assets', 'eglass-logo.png');
 
 interface EvolucaoItem {
   mes: number;
@@ -390,13 +391,21 @@ export async function gerarPDFResultados(
 
       // ========== CABEÇALHO ==========
       // Logótipo ExpressGlass (se existir)
+      console.log('[PDF] Caminho do logótipo:', LOGO_PATH);
+      console.log('[PDF] Logótipo existe?', fs.existsSync(LOGO_PATH));
       try {
         if (fs.existsSync(LOGO_PATH)) {
-          doc.image(LOGO_PATH, pageWidth / 2 - 30, currentY, { width: 120 });
-          currentY += 40;
+          // Centrar o logótipo: (largura da página - largura do logo) / 2
+          const logoWidth = 150;
+          const logoX = (doc.page.width - logoWidth) / 2;
+          doc.image(LOGO_PATH, logoX, currentY, { width: logoWidth });
+          currentY += 50;
+          console.log('[PDF] Logótipo adicionado com sucesso em x:', logoX);
+        } else {
+          console.log('[PDF] Logótipo não encontrado no caminho:', LOGO_PATH);
         }
       } catch (logoError) {
-        console.log('[PDF] Logótipo não encontrado, continuando sem ele');
+        console.log('[PDF] Erro ao carregar logótipo:', logoError);
       }
 
       doc.fontSize(18).fillColor('#1f2937');
@@ -594,7 +603,60 @@ export async function gerarPDFResultados(
       
       currentY += compMesHeight + 20;
 
-      // ========== GRÁFICOS DE EVOLUÇÃO MENSAL ==========
+      // ========== ANÁLISE IA (na página 1) ==========
+      if (analiseIA) {
+        console.log('[PDF] A adicionar análise IA na página 1...');
+        
+        // Verificar se precisa de nova página
+        if (currentY > 600) {
+          doc.addPage();
+          currentY = 40;
+        }
+        
+        doc.fontSize(12).fillColor('#1f2937');
+        doc.text('Análise Inteligente', 40, currentY);
+        currentY += 15;
+
+        // Foco Urgente
+        if (analiseIA.focoUrgente && analiseIA.focoUrgente.length > 0) {
+          doc.fontSize(10).fillColor(vermelho);
+          doc.text('🎯 Foco Urgente:', 40, currentY);
+          currentY += 12;
+          analiseIA.focoUrgente.forEach(item => {
+            doc.fontSize(9).fillColor(cinzaEscuro);
+            doc.text(`• ${item}`, 50, currentY, { width: pageWidth - 20 });
+            currentY += doc.heightOfString(`• ${item}`, { width: pageWidth - 20 }) + 4;
+          });
+          currentY += 8;
+        }
+
+        // Pontos Positivos
+        if (analiseIA.pontosPositivos && analiseIA.pontosPositivos.length > 0) {
+          doc.fontSize(10).fillColor(verde);
+          doc.text('✅ Pontos Positivos:', 40, currentY);
+          currentY += 12;
+          analiseIA.pontosPositivos.forEach(item => {
+            doc.fontSize(9).fillColor(cinzaEscuro);
+            doc.text(`• ${item}`, 50, currentY, { width: pageWidth - 20 });
+            currentY += doc.heightOfString(`• ${item}`, { width: pageWidth - 20 }) + 4;
+          });
+          currentY += 8;
+        }
+
+        // Resumo
+        if (analiseIA.resumo) {
+          doc.fontSize(10).fillColor(azul);
+          doc.text('💬 Resumo:', 40, currentY);
+          currentY += 12;
+          doc.fontSize(9).fillColor(cinzaEscuro);
+          doc.text(analiseIA.resumo, 50, currentY, { width: pageWidth - 20 });
+          currentY += doc.heightOfString(analiseIA.resumo, { width: pageWidth - 20 }) + 10;
+        }
+        
+        console.log('[PDF] Análise IA adicionada na página 1');
+      }
+
+      // ========== GRÁFICOS DE EVOLUÇÃO MENSAL (página 2 - só se houver dados) ==========
       if (evolucao && evolucao.length > 0) {
         console.log('[PDF] A desenhar gráficos de evolução...');
         
@@ -658,58 +720,6 @@ export async function gerarPDFResultados(
         console.log('[PDF] Gráficos desenhados com sucesso');
       } else {
         console.log('[PDF] Sem dados de evolução - gráficos não serão gerados');
-      }
-
-      // ========== ANÁLISE IA ==========
-      if (analiseIA) {
-        console.log('[PDF] A adicionar análise IA...');
-        
-        // Nova página se necessário
-        if (currentY > 500) {
-          doc.addPage();
-          currentY = 40;
-        }
-        
-        doc.fontSize(12).fillColor('#1f2937');
-        doc.text('Análise Inteligente', 40, currentY);
-        currentY += 15;
-
-        // Foco Urgente
-        if (analiseIA.focoUrgente && analiseIA.focoUrgente.length > 0) {
-          doc.fontSize(10).fillColor(vermelho);
-          doc.text('🎯 Foco Urgente:', 40, currentY);
-          currentY += 12;
-          analiseIA.focoUrgente.forEach(item => {
-            doc.fontSize(9).fillColor(cinzaEscuro);
-            doc.text(`• ${item}`, 50, currentY, { width: pageWidth - 20 });
-            currentY += doc.heightOfString(`• ${item}`, { width: pageWidth - 20 }) + 4;
-          });
-          currentY += 8;
-        }
-
-        // Pontos Positivos
-        if (analiseIA.pontosPositivos && analiseIA.pontosPositivos.length > 0) {
-          doc.fontSize(10).fillColor(verde);
-          doc.text('✅ Pontos Positivos:', 40, currentY);
-          currentY += 12;
-          analiseIA.pontosPositivos.forEach(item => {
-            doc.fontSize(9).fillColor(cinzaEscuro);
-            doc.text(`• ${item}`, 50, currentY, { width: pageWidth - 20 });
-            currentY += doc.heightOfString(`• ${item}`, { width: pageWidth - 20 }) + 4;
-          });
-          currentY += 8;
-        }
-
-        // Resumo
-        if (analiseIA.resumo) {
-          doc.fontSize(10).fillColor(azul);
-          doc.text('💬 Resumo:', 40, currentY);
-          currentY += 12;
-          doc.fontSize(9).fillColor(cinzaEscuro);
-          doc.text(analiseIA.resumo, 50, currentY, { width: pageWidth - 20 });
-        }
-        
-        console.log('[PDF] Análise IA adicionada');
       }
 
       // ========== RODAPÉ ==========

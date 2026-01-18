@@ -3275,8 +3275,12 @@ export async function compararPeriodos(
  * Retorna dados ordenados por ano/mês para gráficos de linha
  */
 export async function getEvolucaoMensal(lojaId: number, mesesAtras: number = 6) {
+  console.log('[DB] getEvolucaoMensal chamada para lojaId:', lojaId, 'mesesAtras:', mesesAtras);
   const db = await getDb();
-  if (!db) return [];
+  if (!db) {
+    console.log('[DB] getEvolucaoMensal: db não disponível');
+    return [];
+  }
   
   const dataLimite = new Date();
   dataLimite.setMonth(dataLimite.getMonth() - mesesAtras);
@@ -3309,6 +3313,8 @@ export async function getEvolucaoMensal(lojaId: number, mesesAtras: number = 6) 
       )
     )
     .orderBy(resultadosMensais.ano, resultadosMensais.mes);
+
+  console.log('[DB] getEvolucaoMensal resultados:', resultados.length, 'itens');
 
   return resultados.map(r => ({
     ...r,
