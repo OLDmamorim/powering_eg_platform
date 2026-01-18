@@ -3175,3 +3175,12 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Usar posição Y fixa (780) para rodapé em vez de doc.page.height
 - [x] Adicionar logs de debug para análise IA
 - [x] Testar PDF completo - agora tem 3 páginas sem vazias
+
+
+## v6.8.0 - PDF Completo (18/01/2026)
+- [x] Logótipo ExpressGlass funcional no PDF
+- [x] Secção Ritmo para Atingir Objetivo incluída
+- [x] Análise IA incluída na página 1
+- [x] Gráficos de evolução (3 páginas)
+- [x] Sem páginas vazias
+- [x] Rodapé na última página
