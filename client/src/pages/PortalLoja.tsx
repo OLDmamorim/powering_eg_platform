@@ -650,6 +650,17 @@ export default function PortalLoja() {
               </p>
             </div>
             <div className="flex items-center gap-2">
+              {/* Botão Instalar App */}
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={handleInstallPWA} 
+                className="text-white hover:bg-white/20 h-7 px-2 text-xs flex items-center gap-1"
+                title={language === 'pt' ? 'Instalar App' : 'Install App'}
+              >
+                <Smartphone className="h-4 w-4" />
+                <span className="hidden sm:inline">{language === 'pt' ? 'Instalar' : 'Install'}</span>
+              </Button>
               {/* Seletor de Idioma */}
               <Select value={language} onValueChange={(value) => setLanguage(value as 'pt' | 'en')}>
                 <SelectTrigger className="w-16 h-7 bg-white/20 border-white/30 text-white text-xs">

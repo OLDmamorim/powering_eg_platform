@@ -3228,3 +3228,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar mutation exportarPDFMutation no PortalLoja
 - [x] Criar testes para o endpoint todosPortalLoja.exportarPDFResultados
 - [x] Atualizar versão para v6.7
+
+
+## Bugs v6.7.1 - Correções Portal da Loja
+- [x] Corrigir erro ao gerar PDF no Portal da Loja (erro reportado pelo utilizador) - NOTA: Já corrigido em v6.7, falta publicar
+- [x] Adicionar botão permanente "Instalar App" no header do Portal da Loja
