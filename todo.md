@@ -3135,3 +3135,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar gráfico de linha: Taxa de Reparação com objetivo 22% (6 meses)
 - [ ] Testar PDF com gráficos
 
+
+## Melhoria v6.6.7 - Gráfico de vendas complementares no PDF
+- [x] Criar função gerarGraficoBarrasComplementares no chartService
+- [x] Adicionar gráfico de barras horizontais com distribuição de vendas complementares
+- [x] Integrar gráfico na página de gráficos do PDF
+- [ ] Testar PDF com novo gráfico
+

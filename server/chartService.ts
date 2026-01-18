@@ -219,3 +219,155 @@ export async function gerarGraficoTaxaReparacao(evolucao: EvolucaoItem[]): Promi
 
   return await chartJSNodeCanvas.renderToBuffer(configuration);
 }
+
+
+interface ComplementaresData {
+  escovasQtd: number;
+  polimentoQtd: number;
+  tratamentoQtd: number;
+  lavagensTotal: number;
+  outrosQtd: number;
+}
+
+// Cores para gráfico de complementares
+const coresComplementares = [
+  'rgba(59, 130, 246, 0.8)',   // Azul - Escovas
+  'rgba(139, 92, 246, 0.8)',  // Roxo - Polimento
+  'rgba(16, 185, 129, 0.8)',  // Verde - Tratamento
+  'rgba(249, 115, 22, 0.8)',  // Laranja - Lavagens
+  'rgba(107, 114, 128, 0.8)', // Cinza - Outros
+];
+
+const borderComplementares = [
+  'rgba(59, 130, 246, 1)',
+  'rgba(139, 92, 246, 1)',
+  'rgba(16, 185, 129, 1)',
+  'rgba(249, 115, 22, 1)',
+  'rgba(107, 114, 128, 1)',
+];
+
+export async function gerarGraficoComplementares(complementares: ComplementaresData): Promise<Buffer> {
+  const labels = ['Escovas', 'Polimento', 'Tratamento', 'Lavagens', 'Outros'];
+  const data = [
+    complementares.escovasQtd,
+    complementares.polimentoQtd,
+    complementares.tratamentoQtd,
+    complementares.lavagensTotal,
+    complementares.outrosQtd,
+  ];
+
+  const total = data.reduce((a, b) => a + b, 0);
+
+  const configuration: ChartConfiguration = {
+    type: 'doughnut',
+    data: {
+      labels,
+      datasets: [
+        {
+          data,
+          backgroundColor: coresComplementares,
+          borderColor: borderComplementares,
+          borderWidth: 2,
+        }
+      ]
+    },
+    options: {
+      responsive: false,
+      plugins: {
+        title: {
+          display: true,
+          text: `Vendas Complementares (Total: ${total})`,
+          font: { size: 14, weight: 'bold' },
+          color: '#374151'
+        },
+        legend: {
+          position: 'right',
+          labels: { 
+            color: '#374151',
+            generateLabels: function(chart) {
+              const datasets = chart.data.datasets;
+              return chart.data.labels?.map((label, i) => {
+                const value = datasets[0].data[i] as number;
+                return {
+                  text: `${label}: ${value}`,
+                  fillStyle: coresComplementares[i],
+                  strokeStyle: borderComplementares[i],
+                  lineWidth: 2,
+                  hidden: false,
+                  index: i
+                };
+              }) || [];
+            }
+          }
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              const value = context.parsed;
+              const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : '0';
+              return `${context.label}: ${value} (${percentage}%)`;
+            }
+          }
+        }
+      }
+    }
+  };
+
+  return await chartJSNodeCanvas.renderToBuffer(configuration);
+}
+
+export async function gerarGraficoBarrasComplementares(complementares: ComplementaresData): Promise<Buffer> {
+  const labels = ['Escovas', 'Polimento', 'Tratamento', 'Lavagens', 'Outros'];
+  const data = [
+    complementares.escovasQtd,
+    complementares.polimentoQtd,
+    complementares.tratamentoQtd,
+    complementares.lavagensTotal,
+    complementares.outrosQtd,
+  ];
+
+  const configuration: ChartConfiguration = {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Quantidade',
+          data,
+          backgroundColor: coresComplementares,
+          borderColor: borderComplementares,
+          borderWidth: 1,
+          barPercentage: 0.7,
+        }
+      ]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: false,
+      plugins: {
+        title: {
+          display: true,
+          text: 'Vendas Complementares por Categoria',
+          font: { size: 14, weight: 'bold' },
+          color: '#374151'
+        },
+        legend: {
+          display: false
+        }
+      },
+      scales: {
+        x: {
+          beginAtZero: true,
+          ticks: { color: '#6b7280' },
+          grid: { color: 'rgba(0,0,0,0.1)' }
+        },
+        y: {
+          ticks: { color: '#6b7280' },
+          grid: { display: false }
+        }
+      }
+    }
+  };
+
+  return await chartJSNodeCanvas.renderToBuffer(configuration);
+}

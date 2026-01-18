@@ -1,5 +1,5 @@
 import PDFDocument from 'pdfkit';
-import { gerarGraficoServicosVsObjetivo, gerarGraficoDesvio, gerarGraficoTaxaReparacao } from './chartService';
+import { gerarGraficoServicosVsObjetivo, gerarGraficoDesvio, gerarGraficoTaxaReparacao, gerarGraficoBarrasComplementares } from './chartService';
 
 interface EvolucaoItem {
   mes: number;
@@ -119,6 +119,7 @@ export async function gerarPDFResultados(
   let chartServicos: Buffer | null = null;
   let chartDesvio: Buffer | null = null;
   let chartTaxa: Buffer | null = null;
+  let chartComplementares: Buffer | null = null;
 
   if (evolucao && evolucao.length > 0) {
     try {
@@ -126,8 +127,15 @@ export async function gerarPDFResultados(
       chartDesvio = await gerarGraficoDesvio(evolucao.slice(0, 6));
       chartTaxa = await gerarGraficoTaxaReparacao(evolucao.slice(0, 6));
     } catch (chartError) {
-      console.error('Erro ao gerar gráficos:', chartError);
+      console.error('Erro ao gerar gráficos de evolução:', chartError);
     }
+  }
+
+  // Gráfico de vendas complementares
+  try {
+    chartComplementares = await gerarGraficoBarrasComplementares(complementares);
+  } catch (chartError) {
+    console.error('Erro ao gerar gráfico de complementares:', chartError);
   }
 
   return new Promise((resolve, reject) => {
@@ -337,6 +345,22 @@ export async function gerarPDFResultados(
           currentY = 40;
         }
         doc.image(chartTaxa, 55, currentY, { width: pageWidth - 30 });
+        currentY += 200;
+      }
+
+      // ========== GRÁFICO DE VENDAS COMPLEMENTARES ==========
+      if (chartComplementares) {
+        // Nova página para gráfico de complementares
+        if (currentY > 500) {
+          doc.addPage();
+          currentY = 40;
+        }
+        
+        doc.fontSize(14).fillColor('#1f2937');
+        doc.text('Distribuição de Vendas Complementares', 40, currentY, { align: 'center', width: pageWidth });
+        currentY += 25;
+
+        doc.image(chartComplementares, 55, currentY, { width: pageWidth - 30 });
         currentY += 200;
       }
 
