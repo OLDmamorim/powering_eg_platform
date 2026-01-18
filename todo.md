@@ -3142,3 +3142,13 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Integrar gráfico na página de gráficos do PDF
 - [ ] Testar PDF com novo gráfico
 
+
+## Bug v6.6.8 - PDF sem gráficos e análise IA
+- [x] Reescrever pdfService com gráficos nativos do PDFKit (sem dependência de chartjs-node-canvas)
+- [x] Desenhar gráficos de barras (Serviços vs Objetivo)
+- [x] Desenhar gráfico de desvio % com barras coloridas
+- [x] Desenhar gráfico de linha (Taxa de Reparação)
+- [x] Desenhar gráfico de barras horizontais (Complementares)
+- [x] Adicionar logs de debug para diagnosticar problemas
+- [ ] Testar PDF completo
+

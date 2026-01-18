@@ -1,0 +1,24 @@
+{
+  "query": "SELECT g.id, g.userId, u.name, u.email, COUNT(gl.lojaId) as num_lojas \nFROM gestores g \nLEFT JOIN users u ON g.userId = u.id \nLEFT JOIN gestor_lojas gl ON g.id = gl.gestorId \nWHERE u.email LIKE '%marco%' OR u.name LIKE '%Marco%'\nGROUP BY g.id, g.userId, u.name, u.email;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT g.id, g.userId, u.name, u.email, COUNT(gl.lojaId) as num_lojas \nFROM gestores g \nLEFT JOIN users u ON g.userId = u.id \nLEFT JOIN gestor_lojas gl ON g.id = gl.gestorId \nWHERE u.email LIKE '%marco%' OR u.name LIKE '%Marco%'\nGROUP BY g.id, g.userId, u.name, u.email;",
+  "rows": [
+    {
+      "id": "30001",
+      "userId": "420030",
+      "name": "Marco Amorim",
+      "email": "mamorim@expressglass.pt",
+      "num_lojas": "16"
+    },
+    {
+      "id": "120001",
+      "userId": "2160121",
+      "name": "Marco Vilar",
+      "email": "mvilar@expressglass.pt",
+      "num_lojas": "12"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tuserId\tname\temail\tnum_lojas\n30001\t420030\tMarco Amorim\tmamorim@expressglass.pt\t16\n120001\t2160121\tMarco Vilar\tmvilar@expressglass.pt\t12\n",
+  "stderr": "",
+  "execution_time_ms": 55
+}

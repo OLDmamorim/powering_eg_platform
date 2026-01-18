@@ -1,0 +1,45 @@
+{
+  "query": "SELECT g.id, g.userId, u.name, u.email, COUNT(gl.lojaId) as num_lojas \nFROM gestores g \nLEFT JOIN users u ON g.userId = u.id \nLEFT JOIN gestor_lojas gl ON g.id = gl.gestorId \nGROUP BY g.id, g.userId, u.name, u.email\nHAVING num_lojas > 0\nORDER BY num_lojas DESC\nLIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT g.id, g.userId, u.name, u.email, COUNT(gl.lojaId) as num_lojas \nFROM gestores g \nLEFT JOIN users u ON g.userId = u.id \nLEFT JOIN gestor_lojas gl ON g.id = gl.gestorId \nGROUP BY g.id, g.userId, u.name, u.email\nHAVING num_lojas > 0\nORDER BY num_lojas DESC\nLIMIT 5;",
+  "rows": [
+    {
+      "id": "30001",
+      "userId": "420030",
+      "name": "Marco Amorim",
+      "email": "mamorim@expressglass.pt",
+      "num_lojas": "16"
+    },
+    {
+      "id": "120002",
+      "userId": "2160125",
+      "name": "Mónica Correira",
+      "email": "mcorreia@expressglass.pt",
+      "num_lojas": "16"
+    },
+    {
+      "id": "780001",
+      "userId": "7470026",
+      "name": "NULL",
+      "email": "NULL",
+      "num_lojas": "13"
+    },
+    {
+      "id": "570001",
+      "userId": "6600014",
+      "name": "NULL",
+      "email": "NULL",
+      "num_lojas": "13"
+    },
+    {
+      "id": "1350001",
+      "userId": "7980023",
+      "name": "Fabio Dias",
+      "email": "fdias@expressglass.pt",
+      "num_lojas": "13"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tuserId\tname\temail\tnum_lojas\n30001\t420030\tMarco Amorim\tmamorim@expressglass.pt\t16\n120002\t2160125\tMónica Correira\tmcorreia@expressglass.pt\t16\n780001\t7470026\tNULL\tNULL\t13\n570001\t6600014\tNULL\tNULL\t13\n1350001\t7980023\tFabio Dias\tfdias@expressglass.pt\t13\n",
+  "stderr": "",
+  "execution_time_ms": 56
+}

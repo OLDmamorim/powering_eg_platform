@@ -974,6 +974,8 @@ IMPORTANTE:
         
         // Buscar evolução mensal (6 meses)
         const evolucao = await db.getEvolucaoMensal(input.lojaId, 6);
+        console.log('[ExportPDF] Evolução mensal:', JSON.stringify(evolucao));
+        console.log('[ExportPDF] Evolução length:', evolucao?.length);
         
         const dashboardData = {
           kpis: {
