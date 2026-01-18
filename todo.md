@@ -3208,3 +3208,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Criar manifest para Portal do Gestor (manifest-portal-gestor.json)
 - [x] Criar service worker para Portal do Gestor (sw-portal-gestor.js)
 - [x] Adicionar lógica PWA ao Portal do Gestor (banner de instalação roxo)
+
+
+## Bug Crítico - Erro de Publicação canvas (18/01/2026)
+- [x] Remover dependência chartjs-node-canvas que requer canvas nativo
+- [x] Remover referência a canvas do onlyBuiltDependencies
