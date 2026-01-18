@@ -376,7 +376,7 @@ export async function gerarPDFResultados(
       const doc = new PDFDocument({ 
         size: 'A4', 
         margin: 40,
-        bufferPages: true 
+        autoFirstPage: true
       });
       
       const chunks: Buffer[] = [];
@@ -599,10 +599,17 @@ export async function gerarPDFResultados(
       if (analiseIA) {
         console.log('[PDF] A adicionar análise IA na página 1...');
         
-        // Verificar se precisa de nova página
-        if (currentY > 600) {
+        // Calcular altura necessária para análise IA
+        const alturaAnaliseIA = 150; // Estimativa conservadora
+        
+        // Verificar se precisa de nova página (só se não couber)
+        console.log(`[PDF] currentY antes da análise IA: ${currentY}, altura página: ${doc.page.height}`);
+        if (currentY + alturaAnaliseIA > doc.page.height - 60) {
+          console.log('[PDF] A criar nova página para análise IA');
           doc.addPage();
           currentY = 40;
+        } else {
+          console.log('[PDF] Análise IA cabe na página atual');
         }
         
         doc.fontSize(12).fillColor('#1f2937');
@@ -649,11 +656,21 @@ export async function gerarPDFResultados(
       }
 
       // ========== GRÁFICOS DE EVOLUÇÃO MENSAL (página 2 - só se houver dados) ==========
+      // Contar páginas criadas para o rodapé
+      // Verificar quantas páginas já foram criadas até agora
+      let paginasReais = 1; // Página 1 já existe
+      // Se a análise IA criou uma nova página, contar
+      if (analiseIA && currentY < 100) {
+        // Se currentY é baixo, significa que foi criada nova página para análise IA
+        paginasReais = 2;
+      }
+      
       if (evolucao && evolucao.length > 0) {
         console.log('[PDF] A desenhar gráficos de evolução...');
         
         // Nova página para gráficos
         doc.addPage();
+        paginasReais++;
         currentY = 40;
         
         doc.fontSize(14).fillColor('#1f2937');
@@ -693,37 +710,38 @@ export async function gerarPDFResultados(
         desenharGraficoDesvio(doc, 40, currentY, pageWidth, 180, dadosDesvio, 'Desvio % (Serviços vs Objetivo)');
         currentY += 190;
 
-        // Gráfico 3: Taxa de Reparação (nova página se necessário)
-        if (currentY > 550) {
-          doc.addPage();
-          currentY = 40;
-        }
+        // Gráfico 3: Taxa de Reparação
         desenharGraficoLinha(doc, 40, currentY, pageWidth, 180, dadosTaxa, 'Taxa de Reparação (%)', verde, 22, '%');
         currentY += 190;
 
-        // Gráfico 4: Vendas Complementares
-        if (currentY > 500) {
-          doc.addPage();
-          currentY = 40;
-        }
+        // Gráfico 4: Vendas Complementares - nova página
+        doc.addPage();
+        paginasReais++;
+        currentY = 40;
         desenharGraficoComplementares(doc, 40, currentY, pageWidth, 180, complementares, 'Distribuição de Vendas Complementares');
-        currentY += 190;
+        
+        // Rodapé na página de complementares (posicionar sem criar nova página)
+        // A página A4 tem 841.89 pts de altura, usar 780 para garantir que cabe
+        const rodapeY3 = 780;
+        doc.fontSize(8).fillColor('#9ca3af');
+        doc.text(
+          `PoweringEG Platform 2.0 - a IA ao serviço da ExpressGlass | Página ${paginasReais} de ${paginasReais}`,
+          40,
+          rodapeY3,
+          { align: 'center', width: pageWidth, lineBreak: false }
+        );
         
         console.log('[PDF] Gráficos desenhados com sucesso');
       } else {
         console.log('[PDF] Sem dados de evolução - gráficos não serão gerados');
-      }
-
-      // ========== RODAPÉ ==========
-      const totalPages = doc.bufferedPageRange().count;
-      for (let i = 0; i < totalPages; i++) {
-        doc.switchToPage(i);
+        // Rodapé na página 1 se não houver gráficos
+        const rodapeY1 = 780;
         doc.fontSize(8).fillColor('#9ca3af');
         doc.text(
-          `PoweringEG Platform 2.0 - a IA ao serviço da ExpressGlass | Página ${i + 1} de ${totalPages}`,
+          `PoweringEG Platform 2.0 - a IA ao serviço da ExpressGlass | Página 1 de 1`,
           40,
-          doc.page.height - 30,
-          { align: 'center', width: pageWidth }
+          rodapeY1,
+          { align: 'center', width: pageWidth, lineBreak: false }
         );
       }
 

@@ -3166,3 +3166,12 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [ ] Garantir que análise IA é sempre incluída
 - [ ] Testar PDF completo
 
+
+
+## Bug v6.7.1 - PDF com páginas vazias e logótipo em falta
+- [x] Corrigir base64 do logótipo ExpressGlass (estava corrompido)
+- [x] Validar que o logótipo gera PNG válido (7187 bytes)
+- [x] Corrigir lógica de paginação para evitar páginas vazias
+- [x] Usar posição Y fixa (780) para rodapé em vez de doc.page.height
+- [x] Adicionar logs de debug para análise IA
+- [x] Testar PDF completo - agora tem 3 páginas sem vazias
