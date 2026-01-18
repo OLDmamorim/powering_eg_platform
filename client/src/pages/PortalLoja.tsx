@@ -1,7 +1,8 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { trpc } from "@/lib/trpc";
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
+// Imports removidos - PDF agora gerado via servidor
+// import html2canvas from 'html2canvas';
+// import jsPDF from 'jspdf';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -497,6 +498,38 @@ export default function PortalLoja() {
     onError: (error) => toast.error(error.message),
   });
 
+  // Mutation para exportar PDF via servidor
+  const exportarPDFMutation = trpc.todosPortalLoja.exportarPDFResultados.useMutation({
+    onSuccess: (data) => {
+      // Converter base64 para blob e fazer download
+      const byteCharacters = atob(data.pdf);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: 'application/pdf' });
+      
+      // Criar link de download
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = data.filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      toast.success(language === 'pt' ? 'PDF exportado com sucesso!' : 'PDF exported successfully!');
+      setExportandoPDF(false);
+    },
+    onError: (error) => {
+      console.error('Erro ao exportar PDF:', error);
+      toast.error(language === 'pt' ? 'Erro ao gerar PDF' : 'Error generating PDF');
+      setExportandoPDF(false);
+    },
+  });
+
   // Query de categorias (via token público)
   const { data: categorias } = trpc.todoCategories.listarPublico.useQuery(
     { token, apenasAtivas: true },
@@ -531,91 +564,23 @@ export default function PortalLoja() {
     });
   };
 
-  // Função para exportar o dashboard para PDF
+  // Função para exportar o dashboard para PDF via servidor
   const handleExportarPDF = useCallback(async () => {
-    if (!dashboardRef.current || !dashboardData) {
+    if (!dashboardData || !token) {
       toast.error(language === 'pt' ? 'Sem dados para exportar' : 'No data to export');
       return;
     }
 
     setExportandoPDF(true);
-    toast.info(language === 'pt' ? 'A gerar PDF...' : 'Generating PDF...');
+    toast.info(language === 'pt' ? 'A gerar PDF profissional...' : 'Generating professional PDF...');
 
-    try {
-      // Aguardar um momento para os gráficos renderizarem completamente
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      const element = dashboardRef.current;
-      
-      // Configurações para captura de alta qualidade
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        backgroundColor: '#ffffff',
-        windowWidth: element.scrollWidth,
-        windowHeight: element.scrollHeight,
-      });
-
-      const imgData = canvas.toDataURL('image/png');
-      const imgWidth = 210; // A4 width in mm
-      const pageHeight = 297; // A4 height in mm
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let heightLeft = imgHeight;
-      let position = 0;
-
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      
-      // Adicionar título
-      pdf.setFontSize(16);
-      pdf.setTextColor(40, 40, 40);
-      pdf.text(`${language === 'pt' ? 'Relatório de Resultados' : 'Results Report'} - ${lojaAuth?.lojaNome || ''}`, 10, 15);
-      
-      pdf.setFontSize(10);
-      pdf.setTextColor(100, 100, 100);
-      pdf.text(`${language === 'pt' ? 'Período' : 'Period'}: ${dashboardData.periodoLabel || ''}`, 10, 22);
-      pdf.text(`${language === 'pt' ? 'Gerado em' : 'Generated on'}: ${new Date().toLocaleDateString('pt-PT', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}`, 10, 28);
-
-      // Adicionar imagem do dashboard
-      position = 35;
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= (pageHeight - position);
-
-      // Adicionar páginas adicionais se necessário
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-      }
-
-      // Adicionar rodapé em todas as páginas
-      const pageCount = pdf.getNumberOfPages();
-      for (let i = 1; i <= pageCount; i++) {
-        pdf.setPage(i);
-        pdf.setFontSize(8);
-        pdf.setTextColor(150, 150, 150);
-        pdf.text(
-          `PoweringEG Platform - ${language === 'pt' ? 'Página' : 'Page'} ${i} ${language === 'pt' ? 'de' : 'of'} ${pageCount}`,
-          105,
-          292,
-          { align: 'center' }
-        );
-      }
-
-      // Gerar nome do ficheiro
-      const dataAtual = new Date().toISOString().split('T')[0];
-      const nomeArquivo = `resultados_${lojaAuth?.lojaNome?.replace(/\s+/g, '_').toLowerCase() || 'loja'}_${dataAtual}.pdf`;
-      
-      pdf.save(nomeArquivo);
-      toast.success(language === 'pt' ? 'PDF exportado com sucesso!' : 'PDF exported successfully!');
-    } catch (error) {
-      console.error('Erro ao exportar PDF:', error);
-      toast.error(language === 'pt' ? 'Erro ao gerar PDF' : 'Error generating PDF');
-    } finally {
-      setExportandoPDF(false);
-    }
-  }, [dashboardData, lojaAuth, language]);
+    exportarPDFMutation.mutate({
+      token,
+      meses: mesesSelecionadosDashboard,
+      incluirAnaliseIA: !!analiseIA,
+      lojaId: lojaIdAtiva,
+    });
+  }, [dashboardData, token, mesesSelecionadosDashboard, analiseIA, lojaIdAtiva, language]);
 
   // Tela de login
   if (!lojaAuth) {

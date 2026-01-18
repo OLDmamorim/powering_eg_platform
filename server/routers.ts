@@ -6115,6 +6115,261 @@ IMPORTANTE:
           comparativoMesAnterior,
         };
       }),
+    
+    // Exportar PDF de resultados (para Portal da Loja)
+    exportarPDFResultados: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        meses: z.array(z.object({ mes: z.number().min(1).max(12), ano: z.number() })).optional(),
+        incluirAnaliseIA: z.boolean().optional(),
+        lojaId: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { gerarPDFResultados } = await import('./pdfService');
+        
+        const auth = await db.validarTokenLoja(input.token);
+        if (!auth) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        
+        // Determinar qual loja usar
+        let lojaIdParaConsulta = auth.loja.id;
+        let lojaNome = auth.loja.nome;
+        
+        if (input.lojaId && input.lojaId !== auth.loja.id) {
+          const lojasRelacionadas = await db.getLojasRelacionadas(auth.loja.id);
+          const lojaRelacionada = lojasRelacionadas.find(l => l.lojaId === input.lojaId);
+          if (lojaRelacionada) {
+            lojaIdParaConsulta = input.lojaId;
+            lojaNome = lojaRelacionada.lojaNome;
+          }
+        }
+        
+        const now = new Date();
+        const anoAtual = now.getFullYear();
+        const mesAtual = now.getMonth() + 1;
+        
+        let mesesConsulta: { mes: number; ano: number }[] = [];
+        let periodoLabel = '';
+        
+        if (input.meses && input.meses.length > 0) {
+          mesesConsulta = input.meses;
+          if (mesesConsulta.length === 1) {
+            periodoLabel = new Date(mesesConsulta[0].ano, mesesConsulta[0].mes - 1).toLocaleDateString('pt-PT', { month: 'long', year: 'numeric' });
+          } else {
+            const mesesOrdenados = [...mesesConsulta].sort((a, b) => {
+              if (a.ano !== b.ano) return a.ano - b.ano;
+              return a.mes - b.mes;
+            });
+            const primeiro = mesesOrdenados[0];
+            const ultimo = mesesOrdenados[mesesOrdenados.length - 1];
+            periodoLabel = `${new Date(primeiro.ano, primeiro.mes - 1).toLocaleDateString('pt-PT', { month: 'short', year: 'numeric' })} - ${new Date(ultimo.ano, ultimo.mes - 1).toLocaleDateString('pt-PT', { month: 'short', year: 'numeric' })}`;
+          }
+        } else {
+          mesesConsulta = [{ mes: mesAtual, ano: anoAtual }];
+          periodoLabel = new Date(anoAtual, mesAtual - 1).toLocaleDateString('pt-PT', { month: 'long', year: 'numeric' });
+        }
+        
+        // Buscar dados agregados
+        let totalServicos = 0;
+        let totalObjetivo = 0;
+        let totalReparacoes = 0;
+        let totalEscovas = 0;
+        let totalPolimento = 0;
+        let totalTratamento = 0;
+        let totalLavagens = 0;
+        let totalOutros = 0;
+        
+        for (const p of mesesConsulta) {
+          const resultadosArr = await db.getResultadosMensaisPorLoja(lojaIdParaConsulta, p.mes, p.ano);
+          if (resultadosArr) {
+            totalServicos += Number(resultadosArr.totalServicos) || 0;
+            totalObjetivo += Number(resultadosArr.objetivoMensal) || 0;
+            totalReparacoes += Number(resultadosArr.qtdReparacoes) || 0;
+          }
+          
+          const complementaresArr = await db.getVendasComplementares(p.mes, p.ano, lojaIdParaConsulta);
+          if (complementaresArr && complementaresArr.length > 0) {
+            const c = complementaresArr[0];
+            totalEscovas += Number(c.escovasQtd) || 0;
+            totalPolimento += Number(c.polimentoQtd) || 0;
+            totalTratamento += Number(c.tratamentoQtd) || 0;
+            totalLavagens += Number(c.lavagensTotal) || 0;
+            totalOutros += Number(c.outrosQtd) || 0;
+          }
+        }
+        
+        // Calcular métricas
+        const desvioPercentual = totalObjetivo > 0 ? (totalServicos - totalObjetivo) / totalObjetivo : null;
+        const taxaReparacao = totalServicos > 0 ? totalReparacoes / totalServicos : null;
+        const escovasPercent = totalServicos > 0 ? totalEscovas / totalServicos : null;
+        
+        // Calcular desvio objetivo diário
+        const diaAtual = now.getDate();
+        const diasNoMes = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+        const objetivoDiario = totalObjetivo / diasNoMes;
+        const servicosEsperados = objetivoDiario * diaAtual;
+        const desvioObjetivoDiario = servicosEsperados > 0 
+          ? (totalServicos - servicosEsperados) / servicosEsperados 
+          : null;
+        
+        // Buscar evolução mensal (6 meses)
+        const evolucao = [];
+        for (let i = 5; i >= 0; i--) {
+          const d = new Date(anoAtual, mesAtual - 1 - i, 1);
+          const m = d.getMonth() + 1;
+          const a = d.getFullYear();
+          const res = await db.getResultadosMensaisPorLoja(lojaIdParaConsulta, m, a);
+          evolucao.push({
+            mes: m,
+            ano: a,
+            label: d.toLocaleDateString('pt-PT', { month: 'short' }),
+            servicos: res ? Number(res.totalServicos) || 0 : 0,
+            objetivo: res ? Number(res.objetivoMensal) || 0 : 0,
+            reparacoes: res ? Number(res.qtdReparacoes) || 0 : 0,
+          });
+        }
+        
+        // Buscar alertas (simplificado - sem função específica)
+        const alertas: Array<{ tipo: string; mensagem: string }> = [];
+        
+        // Adicionar alertas baseados nos dados
+        if (desvioPercentual !== null && desvioPercentual < -0.15) {
+          alertas.push({ tipo: 'warning', mensagem: `Desvio de ${(desvioPercentual * 100).toFixed(1)}% abaixo do objetivo` });
+        }
+        if (taxaReparacao !== null && taxaReparacao < 0.22) {
+          alertas.push({ tipo: 'warning', mensagem: `Taxa de reparação (${(taxaReparacao * 100).toFixed(1)}%) abaixo do objetivo de 22%` });
+        }
+        if (escovasPercent !== null && escovasPercent < 0.10) {
+          alertas.push({ tipo: 'info', mensagem: `Escovas (${(escovasPercent * 100).toFixed(1)}%) abaixo do objetivo de 10%` });
+        }
+        
+        // Gerar análise IA se solicitado
+        let analiseIA = null;
+        if (input.incluirAnaliseIA) {
+          try {
+            const { invokeLLM } = await import('./_core/llm');
+            const prompt = `Analisa os resultados da loja ${lojaNome}:
+- Serviços: ${totalServicos} (Objetivo: ${totalObjetivo})
+- Desvio: ${desvioPercentual ? (desvioPercentual * 100).toFixed(1) : 0}%
+- Taxa Reparação: ${taxaReparacao ? (taxaReparacao * 100).toFixed(1) : 0}%
+- Escovas: ${totalEscovas} (${escovasPercent ? (escovasPercent * 100).toFixed(1) : 0}%)
+
+Fornece uma análise breve com:
+1. Foco Urgente (1 frase)
+2. Pontos Positivos (1-2 pontos)
+3. Resumo (2 frases)`;
+            
+            const response = await invokeLLM({
+              messages: [
+                { role: 'system', content: 'És um analista de performance de lojas ExpressGlass. Responde em português de forma concisa.' },
+                { role: 'user', content: prompt }
+              ]
+            });
+            analiseIA = response.choices[0]?.message?.content || null;
+          } catch (e) {
+            console.error('Erro ao gerar análise IA:', e);
+          }
+        }
+        
+        // Comparativo com mês anterior
+        const mesAnt = mesAtual === 1 ? 12 : mesAtual - 1;
+        const anoAnt = mesAtual === 1 ? anoAtual - 1 : anoAtual;
+        const resAnt = await db.getResultadosMensaisPorLoja(lojaIdParaConsulta, mesAnt, anoAnt);
+        const servicosAnt = resAnt ? Number(resAnt.totalServicos) || 0 : 0;
+        const objetivoAnt = resAnt ? Number(resAnt.objetivoMensal) || 0 : 0;
+        const reparacoesAnt = resAnt ? Number(resAnt.qtdReparacoes) || 0 : 0;
+        
+        // Calcular ritmo para atingir objetivo
+        // Calcular dias úteis restantes no mês
+        const ultimoDiaMes = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+        const diaAtualMes = now.getDate();
+        let diasUteisRestantes = 0;
+        for (let d = diaAtualMes + 1; d <= ultimoDiaMes; d++) {
+          const data = new Date(now.getFullYear(), now.getMonth(), d);
+          const diaSemana = data.getDay();
+          if (diaSemana !== 0 && diaSemana !== 6) diasUteisRestantes++;
+        }
+        const servicosFaltam = Math.max(0, totalObjetivo - totalServicos);
+        const servicosPorDia = diasUteisRestantes > 0 ? servicosFaltam / diasUteisRestantes : 0;
+        const reparacoesNecessarias = Math.ceil(totalServicos * 0.22);
+        const gapReparacoes = Math.max(0, reparacoesNecessarias - totalReparacoes);
+        
+        // Preparar dados no formato DashboardData
+        const dashboardData = {
+          kpis: {
+            servicosRealizados: totalServicos,
+            objetivoMensal: totalObjetivo,
+            taxaReparacao: taxaReparacao ? taxaReparacao * 100 : 0,
+            desvioObjetivoDiario: desvioPercentual ? desvioPercentual * 100 : 0,
+            vendasComplementares: totalEscovas + totalPolimento + totalTratamento + totalLavagens + totalOutros,
+          },
+          resultados: {
+            totalServicos,
+            objetivoMensal: totalObjetivo,
+            desvioPercentualMes: desvioPercentual,
+            taxaReparacao,
+            totalReparacoes,
+            gapReparacoes22: gapReparacoes,
+          },
+          complementares: {
+            escovasQtd: totalEscovas,
+            escovasPercent,
+            polimentoQtd: totalPolimento,
+            tratamentoQtd: totalTratamento,
+            lavagensTotal: totalLavagens,
+            outrosQtd: totalOutros,
+          },
+          alertas: alertas.map((a: { tipo: string; mensagem: string }) => ({ 
+            tipo: a.tipo as 'warning' | 'danger' | 'success', 
+            mensagem: a.mensagem 
+          })),
+          periodoLabel,
+          comparativoMesAnterior: {
+            servicosAnterior: servicosAnt,
+            variacaoServicos: servicosAnt > 0 ? ((totalServicos - servicosAnt) / servicosAnt) * 100 : null,
+            reparacoesAnterior: reparacoesAnt,
+            variacaoReparacoes: reparacoesAnt > 0 ? ((totalReparacoes - reparacoesAnt) / reparacoesAnt) * 100 : null,
+            escovasAnterior: 0,
+            variacaoEscovas: null,
+          },
+          ritmo: {
+            servicosFaltam,
+            diasUteisRestantes,
+            servicosPorDia: Math.ceil(servicosPorDia),
+            gapReparacoes,
+          },
+          evolucao: evolucao.map((e: { mes: number; ano: number; servicos: number; objetivo: number; reparacoes: number }) => ({
+            mes: e.mes,
+            ano: e.ano,
+            totalServicos: e.servicos,
+            objetivoMensal: e.objetivo,
+            qtdReparacoes: e.reparacoes,
+          })),
+        };
+        
+        // Preparar análise IA no formato correto (interface: focoUrgente: string[], pontosPositivos: string[], resumo: string)
+        const analiseIAFormatada = analiseIA && typeof analiseIA === 'string' ? {
+          focoUrgente: [analiseIA.split('\n')[0] || ''],
+          pontosPositivos: analiseIA.split('\n').slice(1, 3).filter((s: string) => s.trim()) || [],
+          resumo: analiseIA.split('\n').slice(3).join(' ').trim() || '',
+        } : null;
+        
+        // Gerar PDF
+        const pdfBuffer = await gerarPDFResultados(
+          lojaNome,
+          dashboardData,
+          analiseIAFormatada
+        );
+        
+        const dataAtual = new Date().toISOString().split('T')[0];
+        const filename = `resultados_${lojaNome.replace(/\s+/g, '_').toLowerCase()}_${dataAtual}.pdf`;
+        
+        return {
+          pdf: pdfBuffer.toString('base64'),
+          filename,
+        };
+      }),
   }),
   
   // ==================== RELATÓRIO BOARD (ADMINISTRAÇÃO) ====================

@@ -3213,3 +3213,18 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## Bug Crítico - Erro de Publicação canvas (18/01/2026)
 - [x] Remover dependência chartjs-node-canvas que requer canvas nativo
 - [x] Remover referência a canvas do onlyBuiltDependencies
+
+
+## Exportar PDF no Portal da Loja (18/01/2026)
+- [ ] Adicionar botão Exportar PDF na secção Resultados do Portal da Loja
+- [ ] Reutilizar o pdfService existente para gerar o PDF
+
+
+## Funcionalidades v6.7 - PDF Profissional no Portal da Loja
+- [x] Replicar exportação PDF do Portal do Gestor para o Portal da Loja
+- [x] Usar endpoint do servidor (pdfService) em vez de html2canvas
+- [x] PDF inclui: logótipo, KPIs, alertas, ritmo para objetivo, complementares, análise IA, gráficos evolução
+- [x] Remover imports não utilizados (html2canvas, jsPDF) do PortalLoja
+- [x] Adicionar mutation exportarPDFMutation no PortalLoja
+- [x] Criar testes para o endpoint todosPortalLoja.exportarPDFResultados
+- [x] Atualizar versão para v6.7
