@@ -74,6 +74,77 @@ ChartJS.register(
 export default function PortalGestor() {
   const { language, setLanguage, t } = useLanguage();
   const [lojaAtualId, setLojaAtualId] = useState<number | null>(null);
+  const [showInstallBanner, setShowInstallBanner] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+
+  // PWA: Registar service worker e manifest específico
+  useEffect(() => {
+    // Trocar manifest para o do Portal do Gestor
+    const existingManifest = document.querySelector('link[rel="manifest"]');
+    if (existingManifest) {
+      existingManifest.setAttribute('href', '/manifest-portal-gestor.json');
+    } else {
+      const manifestLink = document.createElement('link');
+      manifestLink.rel = 'manifest';
+      manifestLink.href = '/manifest-portal-gestor.json';
+      document.head.appendChild(manifestLink);
+    }
+
+    // Registar service worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw-portal-gestor.js')
+        .then((registration) => {
+          console.log('PoweringEG Portal Gestor SW registered:', registration.scope);
+        })
+        .catch((error) => {
+          console.log('PoweringEG Portal Gestor SW registration failed:', error);
+        });
+    }
+
+    // Capturar evento de instalação
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      // Mostrar banner se não foi instalado e não foi ignorado recentemente
+      const dismissed = localStorage.getItem('pwa_gestor_dismissed');
+      const dismissedTime = dismissed ? parseInt(dismissed) : 0;
+      const oneWeek = 7 * 24 * 60 * 60 * 1000;
+      if (!dismissed || Date.now() - dismissedTime > oneWeek) {
+        setShowInstallBanner(true);
+      }
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  // Função para instalar PWA
+  const handleInstallPWA = async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        toast.success(language === 'pt' ? 'App instalada com sucesso!' : 'App installed successfully!');
+      }
+      setDeferredPrompt(null);
+      setShowInstallBanner(false);
+    } else {
+      // Mostrar instruções manuais
+      toast.info(
+        language === 'pt' 
+          ? 'Use o menu do browser (3 pontos) > "Adicionar ao ecrã inicial"' 
+          : 'Use browser menu (3 dots) > "Add to Home Screen"'
+      );
+    }
+  };
+
+  const dismissInstallBanner = () => {
+    setShowInstallBanner(false);
+    localStorage.setItem('pwa_gestor_dismissed', Date.now().toString());
+  };
   const [activeTab, setActiveTab] = useState<"home" | "reuniao" | "pendentes" | "historico" | "tarefas" | "resultados">("home");
   const [filtroTarefas, setFiltroTarefas] = useState<"todas" | "recebidas" | "enviadas" | "internas">("todas");
   const [mesesSelecionadosDashboard, setMesesSelecionadosDashboard] = useState<MesSelecionado[]>(() => {
@@ -309,6 +380,39 @@ export default function PortalGestor() {
             </div>
           </div>
         </header>
+
+        {/* Banner de Instalação PWA */}
+        {showInstallBanner && (
+          <div className="bg-gradient-to-r from-purple-600 to-purple-700 text-white px-4 py-3 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                <Download className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="font-semibold text-sm">{language === 'pt' ? 'Instalar PoweringEG' : 'Install PoweringEG'}</p>
+                <p className="text-xs opacity-90">{language === 'pt' ? 'Acesso rápido no ecrã inicial' : 'Quick access from home screen'}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button 
+                size="sm" 
+                variant="secondary"
+                onClick={handleInstallPWA}
+                className="bg-white text-purple-600 hover:bg-purple-50 font-semibold"
+              >
+                {language === 'pt' ? 'Instalar' : 'Install'}
+              </Button>
+              <Button 
+                size="sm" 
+                variant="ghost"
+                onClick={dismissInstallBanner}
+                className="text-white hover:bg-white/20 h-8 w-8 p-0"
+              >
+                ×
+              </Button>
+            </div>
+          </div>
+        )}
 
         {/* Conteúdo Principal */}
         <div className="container mx-auto px-4 py-6">

@@ -3202,3 +3202,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Criar ícones PWA com logo PoweringEG (copiados de poweringeg-ai-icon)
 - [x] Atualizar manifests para usar novos ícones e nome PoweringEG
 - [x] Incrementar versão do service worker para forçar atualização (v2)
+
+
+## PWA Portal do Gestor (18/01/2026)
+- [x] Criar manifest para Portal do Gestor (manifest-portal-gestor.json)
+- [x] Criar service worker para Portal do Gestor (sw-portal-gestor.js)
+- [x] Adicionar lógica PWA ao Portal do Gestor (banner de instalação roxo)
