@@ -1,10 +1,10 @@
 {
-  "id": "poweringeg-tarefas-widget",
-  "name": "PoweringEG - Tarefas",
-  "short_name": "Tarefas EG",
-  "description": "Widget de tarefas To-Do para lojas Express Glass",
-  "start_url": "/portal-loja/widget",
-  "scope": "/portal-loja",
+  "id": "poweringeg-platform-v2",
+  "name": "PoweringEG Platform",
+  "short_name": "PoweringEG",
+  "description": "Plataforma de gestão PoweringEG para a rede ExpressGlass",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#10b981",
@@ -38,10 +38,10 @@
   "categories": ["business", "productivity"],
   "shortcuts": [
     {
-      "name": "Ver Tarefas",
-      "short_name": "Tarefas",
-      "description": "Ver lista de tarefas pendentes",
-      "url": "/portal-loja/widget",
+      "name": "Portal da Loja",
+      "short_name": "Portal",
+      "description": "Aceder ao Portal da Loja",
+      "url": "/portal-loja",
       "icons": [{ "src": "/pwa-icon-192.png", "sizes": "192x192" }]
     }
   ]

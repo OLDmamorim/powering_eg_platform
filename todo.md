@@ -3196,3 +3196,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar prompt de instalação com instruções (banner verde com botão Instalar)
 - [x] Guardar token no localStorage para persistência (já existia)
 - [x] Criar ícones da app (portal-loja-icon-192.png e portal-loja-icon-512.png)
+
+
+## Atualizar PWA com logo PoweringEG (18/01/2026)
+- [x] Criar ícones PWA com logo PoweringEG (copiados de poweringeg-ai-icon)
+- [x] Atualizar manifests para usar novos ícones e nome PoweringEG
+- [x] Incrementar versão do service worker para forçar atualização (v2)

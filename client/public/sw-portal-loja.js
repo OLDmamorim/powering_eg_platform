@@ -1,4 +1,4 @@
-const CACHE_NAME = 'poweringeg-portal-loja-v1';
+const CACHE_NAME = 'poweringeg-portal-loja-v2';
 const urlsToCache = [
   '/portal-loja',
   '/portal-loja-icon-192.png',

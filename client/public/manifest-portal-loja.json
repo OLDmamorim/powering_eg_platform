@@ -1,8 +1,8 @@
 {
-  "id": "poweringeg-portal-loja",
-  "name": "Portal da Loja - ExpressGlass",
-  "short_name": "Portal Loja",
-  "description": "Portal de gestão para lojas ExpressGlass - Reuniões, Tarefas, Pendentes e Resultados",
+  "id": "poweringeg-portal-loja-v2",
+  "name": "PoweringEG - Portal da Loja",
+  "short_name": "PoweringEG",
+  "description": "Portal de gestão PoweringEG para lojas ExpressGlass - Reuniões, Tarefas, Pendentes e Resultados",
   "start_url": "/portal-loja",
   "scope": "/portal-loja",
   "display": "standalone",
@@ -37,15 +37,6 @@
     }
   ],
   "categories": ["business", "productivity"],
-  "screenshots": [
-    {
-      "src": "/portal-loja-screenshot.png",
-      "sizes": "1080x1920",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Portal da Loja - Dashboard"
-    }
-  ],
   "shortcuts": [
     {
       "name": "Tarefas",
