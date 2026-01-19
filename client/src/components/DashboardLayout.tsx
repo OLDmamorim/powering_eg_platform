@@ -276,6 +276,25 @@ function DashboardLayoutContent({
   const activeMenuItem = menuItems.find(item => item.path === location);
   const isMobile = useIsMobile();
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [isPWAInstalled, setIsPWAInstalled] = useState(false);
+  
+  // Verificar se PWA já está instalada
+  useEffect(() => {
+    const checkInstalled = () => {
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
+                           (window.navigator as any).standalone === true;
+      const wasInstalled = localStorage.getItem('pwa_installed') === 'true';
+      setIsPWAInstalled(isStandalone || wasInstalled);
+    };
+    
+    checkInstalled();
+    
+    // Verificar quando a app é instalada
+    window.addEventListener('appinstalled', () => {
+      localStorage.setItem('pwa_installed', 'true');
+      setIsPWAInstalled(true);
+    });
+  }, []);
   
   // Capturar evento de instalação PWA
   useEffect(() => {
@@ -525,19 +544,21 @@ function DashboardLayoutContent({
                 />
               </div>
             </div>
-            {/* Linha 2: Botão Instalar centralizado */}
-            <div className="flex items-center justify-center pb-2 px-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleInstallPWA}
-                className="h-8 px-4 text-xs font-medium bg-green-50 text-green-700 border-green-300 hover:bg-green-100 w-full max-w-xs"
-                title={language === 'pt' ? 'Instalar App' : 'Install App'}
-              >
-                <Download className="h-4 w-4 mr-2" />
-                {language === 'pt' ? 'Instalar PoweringEG' : 'Install PoweringEG'}
-              </Button>
-            </div>
+            {/* Linha 2: Botão Instalar centralizado - só mostra se não estiver instalada */}
+            {!isPWAInstalled && (
+              <div className="flex items-center justify-center pb-2 px-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleInstallPWA}
+                  className="h-8 px-4 text-xs font-medium bg-green-50 text-green-700 border-green-300 hover:bg-green-100 w-full max-w-xs"
+                  title={language === 'pt' ? 'Instalar App' : 'Install App'}
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  {language === 'pt' ? 'Instalar PoweringEG' : 'Install PoweringEG'}
+                </Button>
+              </div>
+            )}
           </div>
         )}
         {/* Header Desktop */}
@@ -577,7 +598,7 @@ function DashboardLayoutContent({
           {children}
 
           <div className="fixed bottom-4 right-4 text-xs text-foreground/60 select-none pointer-events-none">
-            v6.9.2
+            v6.9.3
           </div>
         </main>
       </SidebarInset>

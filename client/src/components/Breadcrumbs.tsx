@@ -1,5 +1,6 @@
 import { Link, useLocation } from "wouter";
-import { ChevronRight, Home, Globe } from "lucide-react";
+import { ChevronRight, Home, Globe, ArrowLeft } from "lucide-react";
+import { useAuth } from "@/_core/hooks/useAuth";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
 import {
@@ -26,8 +27,15 @@ const routeNames: Record<string, { pt: string; en: string }> = {
 };
 
 export function Breadcrumbs() {
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
   const { language, setLanguage, t } = useLanguage();
+  const { user } = useAuth();
+  
+  // Verificar se o utilizador é gestor ou admin (para mostrar botão Voltar ao Menu)
+  const isManagerOrAdmin = user?.role === 'admin' || user?.role === 'gestor';
+  
+  // Páginas que devem mostrar o botão "Voltar ao Menu"
+  const pagesWithBackToMenu = ['/dashboard', '/assistente-ia', '/portal-gestor'];
   
   // Dividir o caminho em partes
   const pathParts = location.split("/").filter(Boolean);
@@ -43,15 +51,33 @@ export function Breadcrumbs() {
     return part;
   };
   
+  // Verificar se deve mostrar o botão "Voltar ao Menu"
+  const showBackToMenu = isManagerOrAdmin && pagesWithBackToMenu.includes(location);
+  
   return (
     <div className="flex items-center justify-between mb-4">
-      {/* Breadcrumbs */}
-      {showBreadcrumbs ? (
-        <nav className="flex items-center gap-1 text-sm text-muted-foreground">
-          <Link href="/dashboard" className="flex items-center gap-1 hover:text-foreground transition-colors">
-            <Home className="h-4 w-4" />
-            <span>Dashboard</span>
-          </Link>
+      {/* Botão Voltar ao Menu + Breadcrumbs */}
+      <div className="flex items-center gap-3">
+        {/* Botão Voltar ao Menu - apenas em páginas internas para gestores/admins */}
+        {showBackToMenu && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setLocation('/menu')}
+            className="h-8 px-3 text-xs font-medium gap-1 bg-violet-50 text-violet-700 border-violet-300 hover:bg-violet-100 dark:bg-violet-900/30 dark:text-violet-300 dark:border-violet-700 dark:hover:bg-violet-900/50"
+          >
+            <ArrowLeft className="h-3 w-3" />
+            <span className="hidden sm:inline">{language === 'pt' ? 'Menu' : 'Menu'}</span>
+          </Button>
+        )}
+        
+        {/* Breadcrumbs */}
+        {showBreadcrumbs ? (
+          <nav className="flex items-center gap-1 text-sm text-muted-foreground">
+            <Link href="/dashboard" className="flex items-center gap-1 hover:text-foreground transition-colors">
+              <Home className="h-4 w-4" />
+              <span>Dashboard</span>
+            </Link>
           
           {pathParts.map((part, index) => {
             const path = "/" + pathParts.slice(0, index + 1).join("/");
@@ -71,10 +97,11 @@ export function Breadcrumbs() {
               </span>
             );
           })}
-        </nav>
-      ) : (
-        <div /> // Placeholder para manter o layout
-      )}
+          </nav>
+        ) : (
+          <div /> // Placeholder para manter o layout
+        )}
+      </div>
       
       {/* Seletor de Idioma - Sempre visível no desktop */}
       <div className="hidden md:flex items-center">

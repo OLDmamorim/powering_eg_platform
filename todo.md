@@ -3291,3 +3291,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## Correção v6.9.2 - Layout Header Mobile
 - [x] Reorganizar header mobile para evitar sobreposição do botão Instalar
 - [x] Melhorar espaçamento entre elementos no header
+
+## Funcionalidades v6.9.3 - UX Melhorias
+- [x] Esconder botão Instalar quando PWA já estiver instalada
+- [x] Adicionar botão "Voltar ao Menu" nas páginas internas (Dashboard, Assistente IA, Portal Gestor)

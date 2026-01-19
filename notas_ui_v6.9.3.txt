@@ -1,0 +1,10 @@
+Screenshot do Dashboard v6.9.3:
+
+- Botão "Menu" roxo aparece nos breadcrumbs (canto superior esquerdo)
+- O botão tem seta para a esquerda e texto "Menu"
+- Cor roxa (violet) para combinar com a identidade PoweringEG
+- Funciona corretamente para voltar ao menu inicial dos 3 cards
+
+Funcionalidades implementadas:
+1. Botão "Voltar ao Menu" visível nas páginas internas (Dashboard, Assistente IA, Portal Gestor)
+2. Botão Instalar escondido quando PWA já está instalada
