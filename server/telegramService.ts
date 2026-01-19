@@ -269,3 +269,201 @@ export async function verificarBotTelegram(): Promise<{
     return { ok: false, error: String(error) };
   }
 }
+
+
+/**
+ * Interface para mensagem recebida do Telegram
+ */
+interface TelegramUpdate {
+  update_id: number;
+  message?: {
+    message_id: number;
+    from: {
+      id: number;
+      is_bot: boolean;
+      first_name: string;
+      last_name?: string;
+      username?: string;
+    };
+    chat: {
+      id: number;
+      first_name: string;
+      last_name?: string;
+      username?: string;
+      type: string;
+    };
+    date: number;
+    text?: string;
+  };
+}
+
+/**
+ * Processa uma mensagem recebida do webhook do Telegram
+ * Responde ao comando /start com o Chat ID do utilizador
+ */
+export async function processarWebhookTelegram(update: TelegramUpdate): Promise<boolean> {
+  if (!update.message || !update.message.text) {
+    return false;
+  }
+
+  const chatId = update.message.chat.id.toString();
+  const text = update.message.text.trim();
+  const firstName = update.message.from.first_name || '';
+  const username = update.message.from.username || '';
+
+  // Comando /start - responder com o Chat ID
+  if (text === '/start' || text.startsWith('/start ')) {
+    const mensagem = `
+👋 <b>Olá${firstName ? ` ${firstName}` : ''}!</b>
+
+Bem-vindo ao bot de notificações da <b>PoweringEG</b>.
+
+📱 <b>O seu Chat ID é:</b>
+<code>${chatId}</code>
+
+<i>Copie este número e cole no campo "Chat ID do Telegram" nas configurações do portal do volante para receber notificações de novos pedidos de apoio.</i>
+
+${username ? `\n👤 Username: @${username}` : ''}
+    `.trim();
+
+    return sendTelegramMessage(chatId, mensagem);
+  }
+
+  // Comando /help - mostrar ajuda
+  if (text === '/help') {
+    const mensagem = `
+ℹ️ <b>Ajuda - PoweringEG Bot</b>
+
+Este bot envia notificações automáticas quando:
+• Uma loja cria um novo pedido de apoio
+• Um pedido é aprovado ou anulado
+• Um agendamento é alterado
+
+<b>Comandos disponíveis:</b>
+/start - Obter o seu Chat ID
+/help - Mostrar esta ajuda
+/status - Verificar estado do bot
+
+<b>Como configurar:</b>
+1. Use /start para obter o seu Chat ID
+2. Aceda ao portal do volante
+3. Vá a Configurações
+4. Cole o Chat ID no campo apropriado
+5. Guarde as configurações
+
+<i>Pode adicionar múltiplos Chat IDs separados por vírgula para notificar várias pessoas.</i>
+    `.trim();
+
+    return sendTelegramMessage(chatId, mensagem);
+  }
+
+  // Comando /status - verificar estado
+  if (text === '/status') {
+    const mensagem = `
+✅ <b>Bot Ativo</b>
+
+O bot está a funcionar corretamente e pronto para enviar notificações.
+
+📱 <b>O seu Chat ID:</b> <code>${chatId}</code>
+    `.trim();
+
+    return sendTelegramMessage(chatId, mensagem);
+  }
+
+  // Mensagem não reconhecida
+  const mensagem = `
+❓ Comando não reconhecido.
+
+Use /help para ver os comandos disponíveis.
+  `.trim();
+
+  return sendTelegramMessage(chatId, mensagem);
+}
+
+/**
+ * Configura o webhook do Telegram para receber mensagens
+ */
+export async function configurarWebhookTelegram(webhookUrl: string): Promise<{
+  ok: boolean;
+  error?: string;
+}> {
+  if (!TELEGRAM_BOT_TOKEN) {
+    return { ok: false, error: 'Bot token não configurado' };
+  }
+
+  try {
+    const response = await fetch(`${TELEGRAM_API_URL}/setWebhook`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        url: webhookUrl,
+        allowed_updates: ['message'],
+      }),
+    });
+
+    const data: TelegramResponse = await response.json();
+
+    if (!data.ok) {
+      return { ok: false, error: data.description };
+    }
+
+    console.log('[Telegram] Webhook configurado com sucesso:', webhookUrl);
+    return { ok: true };
+  } catch (error) {
+    return { ok: false, error: String(error) };
+  }
+}
+
+/**
+ * Remove o webhook do Telegram
+ */
+export async function removerWebhookTelegram(): Promise<{
+  ok: boolean;
+  error?: string;
+}> {
+  if (!TELEGRAM_BOT_TOKEN) {
+    return { ok: false, error: 'Bot token não configurado' };
+  }
+
+  try {
+    const response = await fetch(`${TELEGRAM_API_URL}/deleteWebhook`);
+    const data: TelegramResponse = await response.json();
+
+    if (!data.ok) {
+      return { ok: false, error: data.description };
+    }
+
+    console.log('[Telegram] Webhook removido com sucesso');
+    return { ok: true };
+  } catch (error) {
+    return { ok: false, error: String(error) };
+  }
+}
+
+/**
+ * Obtém informações sobre o webhook atual
+ */
+export async function getWebhookInfo(): Promise<{
+  ok: boolean;
+  url?: string;
+  error?: string;
+}> {
+  if (!TELEGRAM_BOT_TOKEN) {
+    return { ok: false, error: 'Bot token não configurado' };
+  }
+
+  try {
+    const response = await fetch(`${TELEGRAM_API_URL}/getWebhookInfo`);
+    const data: TelegramResponse = await response.json();
+
+    if (!data.ok) {
+      return { ok: false, error: data.description };
+    }
+
+    return { ok: true, url: data.result.url };
+  } catch (error) {
+    return { ok: false, error: String(error) };
+  }
+}

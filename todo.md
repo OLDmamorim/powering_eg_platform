@@ -3439,3 +3439,19 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## Múltiplos Chat IDs Telegram por Volante
 - [x] Atualizar serviço de Telegram para enviar para múltiplos IDs
 - [x] Atualizar interface para permitir múltiplos Chat IDs separados por vírgula
+
+
+## Webhook Telegram para /start
+- [ ] Criar endpoint webhook para receber mensagens do Telegram
+- [ ] Configurar o webhook no Telegram
+- [ ] Testar resposta automática ao /start
+
+
+## Portal Volante - Telegram Webhook v6.12.0
+- [x] Criar rota do webhook do Telegram no servidor (/api/telegram/webhook)
+- [x] Implementar função processarWebhookTelegram para responder a comandos
+- [x] Comando /start - responde com o Chat ID do utilizador
+- [x] Comando /help - mostra ajuda e instruções
+- [x] Comando /status - verifica estado do bot
+- [x] Registar webhook na API do Telegram
+- [x] Testar funcionamento do bot @PoweringEG_bot
