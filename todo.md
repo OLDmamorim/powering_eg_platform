@@ -3426,3 +3426,6 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Criar serviço de envio de mensagens Telegram
 - [ ] Integrar notificação na criação de pedidos
 - [ ] Interface para configurar Telegram no portal do volante
+
+## Corrigir Nome do Bot Telegram
+- [x] Alterar @PoweringEGBot para @GZminho_bot nas instruções
