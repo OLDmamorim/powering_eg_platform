@@ -3267,3 +3267,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 
 ## Funcionalidade v6.8.4 - Logo no Menu Inicial
 - [x] Adicionar logo PoweringEG no header do Menu Inicial (página dos 3 cards)
+
+
+## Funcionalidade v6.8.5 - Logo na Página de Login
+- [x] Adicionar logo PoweringEG na página de login (página com 2 cards: Gestor/Admin e Loja)

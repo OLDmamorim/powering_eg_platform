@@ -110,12 +110,9 @@ export default function MenuInicial() {
         {/* Logo e Título */}
         <div className="text-center mb-8">
           <img 
-            src="/poweringeg-logo.png" 
+            src="/poweringeg-ai-icon-192.png" 
             alt="PoweringEG" 
-            className="h-20 mx-auto mb-4"
-            onError={(e) => {
-              e.currentTarget.style.display = 'none';
-            }}
+            className="h-20 w-20 mx-auto mb-4 rounded-2xl shadow-lg"
           />
           <h1 className="text-3xl font-bold text-gray-800 mb-2">PoweringEG</h1>
           <p className="text-gray-600">Selecione o tipo de acesso</p>
