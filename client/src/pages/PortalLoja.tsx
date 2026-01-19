@@ -679,12 +679,12 @@ export default function PortalLoja() {
               </p>
             </div>
             <div className="flex items-center gap-2">
-              {/* Botão Instalar App - Sempre visível com destaque */}
+              {/* Botão Instalar App - apenas mobile */}
               <Button 
                 variant="outline" 
                 size="sm" 
                 onClick={handleInstallPWA} 
-                className="bg-white text-green-700 hover:bg-green-50 border-white h-7 px-3 text-xs font-medium flex items-center gap-1.5 shadow-sm"
+                className="md:hidden bg-white text-green-700 hover:bg-green-50 border-white h-7 px-3 text-xs font-medium flex items-center gap-1.5 shadow-sm"
                 title={language === 'pt' ? 'Instalar App no seu dispositivo' : 'Install App on your device'}
               >
                 <Download className="h-4 w-4" />

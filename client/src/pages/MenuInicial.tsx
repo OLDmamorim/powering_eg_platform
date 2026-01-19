@@ -8,9 +8,11 @@ import {
   FileText, 
   Store,
   Loader2,
-  LogOut
+  LogOut,
+  Download
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 // Verificar se há sessão de loja ativa
 const getLojaSession = () => {
@@ -33,13 +35,55 @@ export default function MenuInicial() {
   const { user, loading: authLoading } = useAuth();
   const [lojaSession, setLojaSession] = useState<any>(null);
   const [checking, setChecking] = useState(true);
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
 
   useEffect(() => {
     // Verificar sessões
     const loja = getLojaSession();
     setLojaSession(loja);
     setChecking(false);
+    
+    // Capturar evento de instalação PWA
+    const handler = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+    window.addEventListener('beforeinstallprompt', handler);
+    return () => window.removeEventListener('beforeinstallprompt', handler);
   }, []);
+
+  const handleInstallPWA = async () => {
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
+                         (window.navigator as any).standalone === true;
+    
+    if (isStandalone) {
+      toast.success('A app já está instalada e a correr!');
+      return;
+    }
+    
+    if (!deferredPrompt) {
+      toast.info(
+        'Para instalar: Toque nos 3 pontos (menu) > "Adicionar ao Ecrã Inicial" ou "Instalar aplicação"',
+        { duration: 6000 }
+      );
+      return;
+    }
+    
+    try {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        localStorage.setItem('pwa_installed', 'true');
+        toast.success('App instalada com sucesso!');
+      } else {
+        toast.info('Instalação cancelada. Pode instalar mais tarde.');
+      }
+    } catch (error) {
+      console.error('Erro ao instalar PWA:', error);
+      toast.error('Erro ao instalar. Tente pelo menu do browser.');
+    }
+    setDeferredPrompt(null);
+  };
 
   // Se está a carregar, mostrar loading
   if (authLoading || checking) {
@@ -135,14 +179,26 @@ export default function MenuInicial() {
             <p className="text-sm text-gray-500">Olá, {user?.name || 'Utilizador'}</p>
           </div>
         </div>
-        <Button 
-          variant="ghost" 
-          size="sm"
-          onClick={() => setLocation('/login')}
-          className="text-gray-500 hover:text-gray-700"
-        >
-          <LogOut className="h-5 w-5" />
-        </Button>
+<div className="flex items-center gap-2">
+          {/* Botão Instalar - apenas mobile */}
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={handleInstallPWA}
+            className="md:hidden bg-white text-green-700 border-green-300 hover:bg-green-50 flex items-center gap-1"
+          >
+            <Download className="h-4 w-4" />
+            <span className="text-xs">Instalar</span>
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={() => setLocation('/login')}
+            className="text-gray-500 hover:text-gray-700"
+          >
+            <LogOut className="h-5 w-5" />
+          </Button>
+        </div>
       </div>
 
       {/* Título */}

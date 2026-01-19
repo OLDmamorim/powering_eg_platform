@@ -3252,3 +3252,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Para Lojas: Redirecionar direto para Portal da Loja
 - [x] Sem sessão: Mostrar página de login com opções (Gestor/Loja)
 - [x] Configurar como página inicial da PWA (rota /)
+
+
+## Funcionalidade v6.8.2 - Botão Instalar App Mobile
+- [x] Adicionar botão Instalar App no Menu Inicial (apenas visível em mobile)
+- [x] Ajustar botão Instalar App no Portal da Loja (apenas visível em mobile)
