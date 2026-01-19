@@ -1,0 +1,90 @@
+{
+  "query": "SELECT * FROM tokens_loja ORDER BY id;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT * FROM tokens_loja ORDER BY id;",
+  "rows": [
+    {
+      "id": "180009",
+      "lojaId": "180010",
+      "token": "5BpPlYSDdV1bfOJcykKF5HzCTTebpSMyEKe85XVI0XjC8MEtHsmDSMAuVYqHCc0s",
+      "ativo": "1",
+      "ultimoAcesso": "2026-01-19 16:11:28",
+      "createdAt": "2026-01-19 10:01:04",
+      "updatedAt": "2026-01-19 16:11:28",
+      "token_loja_type": "responsavel"
+    },
+    {
+      "id": "180010",
+      "lojaId": "180010",
+      "token": "eAcXYAMppgALCp7KkYhdgBYCUw1izlBwDHmlmL6GVpPpgiKPtR9EIheyrbsdNHbY",
+      "ativo": "1",
+      "ultimoAcesso": "2026-01-19 13:42:38",
+      "createdAt": "2026-01-19 10:01:04",
+      "updatedAt": "2026-01-19 13:42:37",
+      "token_loja_type": "colaborador"
+    },
+    {
+      "id": "210001",
+      "lojaId": "60003",
+      "token": "VXyML0kJfaFsiC8B6ymkHWHr1h8QveM5NBVcJndydClQyMTs14Az4q1GzCE5gKV2",
+      "ativo": "1",
+      "ultimoAcesso": "2026-01-19 16:20:26",
+      "createdAt": "2026-01-19 15:16:18",
+      "updatedAt": "2026-01-19 16:20:26",
+      "token_loja_type": "responsavel"
+    },
+    {
+      "id": "210002",
+      "lojaId": "60003",
+      "token": "L1XNjUetrKiqMFyEbuzmH4I2aQT4EUE0jiwHx0r1Zv5eeBzMzRqGdNBQrx2F1L6R",
+      "ativo": "1",
+      "ultimoAcesso": "NULL",
+      "createdAt": "2026-01-19 15:16:18",
+      "updatedAt": "2026-01-19 15:16:18",
+      "token_loja_type": "colaborador"
+    },
+    {
+      "id": "240001",
+      "lojaId": "60002",
+      "token": "Xq3LEVVdNyoTNbmm4TFZwPGEG88FHUQkJf0xtumq5n0iS98yUL0GZ1AbQKzrUeGl",
+      "ativo": "1",
+      "ultimoAcesso": "2026-01-19 16:29:33",
+      "createdAt": "2026-01-19 16:21:05",
+      "updatedAt": "2026-01-19 16:29:33",
+      "token_loja_type": "responsavel"
+    },
+    {
+      "id": "240002",
+      "lojaId": "60002",
+      "token": "eJxGRx0j2dGI00GFo3d9uFD83rxxBcI3vywVlJOvhUUPOK6yxYE1MTAe8n9Wxmfv",
+      "ativo": "1",
+      "ultimoAcesso": "NULL",
+      "createdAt": "2026-01-19 16:21:05",
+      "updatedAt": "2026-01-19 16:21:05",
+      "token_loja_type": "colaborador"
+    },
+    {
+      "id": "240003",
+      "lojaId": "180011",
+      "token": "vwbeS5h2YnlPSlMPlUHDRH7oWuOoLBIkqgnhLQrcx16Kksn06N3dz2mvXl6EzqEe",
+      "ativo": "1",
+      "ultimoAcesso": "NULL",
+      "createdAt": "2026-01-19 16:21:19",
+      "updatedAt": "2026-01-19 16:21:19",
+      "token_loja_type": "responsavel"
+    },
+    {
+      "id": "240004",
+      "lojaId": "180011",
+      "token": "QlXY3APrYGS792QudLmM1UeuQwUp5zTWwUz4Ye4ItyzA0pgyKmI3mFNV1nkbLGUi",
+      "ativo": "1",
+      "ultimoAcesso": "NULL",
+      "createdAt": "2026-01-19 16:21:19",
+      "updatedAt": "2026-01-19 16:21:19",
+      "token_loja_type": "colaborador"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tlojaId\ttoken\tativo\tultimoAcesso\tcreatedAt\tupdatedAt\ttoken_loja_type\n180009\t180010\t5BpPlYSDdV1bfOJcykKF5HzCTTebpSMyEKe85XVI0XjC8MEtHsmDSMAuVYqHCc0s\t1\t2026-01-19 16:11:28\t2026-01-19 10:01:04\t2026-01-19 16:11:28\tresponsavel\n180010\t180010\teAcXYAMppgALCp7KkYhdgBYCUw1izlBwDHmlmL6GVpPpgiKPtR9EIheyrbsdNHbY\t1\t2026-01-19 13:42:38\t2026-01-19 10:01:04\t2026-01-19 13:42:37\tcolaborador\n210001\t60003\tVXyML0kJfaFsiC8B6ymkHWHr1h8QveM5NBVcJndydClQyMTs14Az4q1GzCE5gKV2\t1\t2026-01-19 16:20:26\t2026-01-19 15:16:18\t2026-01-19 16:20:26\tresponsavel\n210002\t60003\tL1XNjUetrKiqMFyEbuzmH4I2aQT4EUE0jiwHx0r1Zv5eeBzMzRqGdNBQrx2F1L6R\t1\tNULL\t2026-01-19 15:16:18\t2026-01-19 15:16:18\tcolaborador\n240001\t60002\tXq3LEVVdNyoTNbmm4TFZwPGEG88FHUQkJf0xtumq5n0iS98yUL0GZ1AbQKzrUeGl\t1\t2026-01-19 16:29:33\t2026-01-19 16:21:05\t2026-01-19 16:29:33\tresponsavel\n240002\t60002\teJxGRx0j2dGI00GFo3d9uFD83rxxBcI3vywVlJOvhUUPOK6yxYE1MTAe8n9Wxmfv\t1\tNULL\t2026-01-19 16:21:05\t2026-01-19 16:21:05\tcolaborador\n240003\t180011\tvwbeS5h2YnlPSlMPlUHDRH7oWuOoLBIkqgnhLQrcx16Kksn06N3dz2mvXl6EzqEe\t1\tNULL\t2026-01-19 16:21:19\t2026-01-19 16:21:19\tresponsavel\n240004\t180011\tQlXY3APrYGS792QudLmM1UeuQwUp5zTWwUz4Ye4ItyzA0pgyKmI3mFNV1nkbLGUi\t1\tNULL\t2026-01-19 16:21:19\t2026-01-19 16:21:19\tcolaborador\n",
+  "stderr": "",
+  "execution_time_ms": 357
+}

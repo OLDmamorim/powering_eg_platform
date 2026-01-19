@@ -710,9 +710,15 @@ export default function ReunioesQuinzenais() {
                                   <Button
                                     size="sm"
                                     onClick={async () => {
-                                      // Criar ambos os tokens (responsável e colaborador)
-                                      await criarTokenMutation.mutateAsync({ lojaId: loja.id, tipo: 'responsavel' });
-                                      await criarTokenMutation.mutateAsync({ lojaId: loja.id, tipo: 'colaborador' });
+                                      try {
+                                        // Criar ambos os tokens (responsável e colaborador)
+                                        await criarTokenMutation.mutateAsync({ lojaId: loja.id, tipo: 'responsavel' });
+                                        await criarTokenMutation.mutateAsync({ lojaId: loja.id, tipo: 'colaborador' });
+                                        // Forçar refetch após ambos serem criados
+                                        await refetchTokens();
+                                      } catch (error) {
+                                        console.error('Erro ao criar tokens:', error);
+                                      }
                                     }}
                                     disabled={criarTokenMutation.isPending}
                                   >

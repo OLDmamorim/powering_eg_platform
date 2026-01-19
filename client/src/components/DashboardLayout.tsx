@@ -632,7 +632,7 @@ function DashboardLayoutContent({
           {children}
 
           <div className="fixed bottom-4 right-4 text-xs text-foreground/60 select-none pointer-events-none">
-            v6.11.1
+            v6.11.2
           </div>
         </main>
       </SidebarInset>
