@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/sidebar";
 import { getLoginUrl } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
-import { LayoutDashboard, LogOut, PanelLeft, Users, Moon, Sun, Globe } from "lucide-react";
+import { LayoutDashboard, LogOut, PanelLeft, Users, Moon, Sun, Globe, Download } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
@@ -275,6 +275,46 @@ function DashboardLayoutContent({
   const menuGroups = getMenuGroups(user?.role, t);
   const activeMenuItem = menuItems.find(item => item.path === location);
   const isMobile = useIsMobile();
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  
+  // Capturar evento de instalação PWA
+  useEffect(() => {
+    const handler = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+    window.addEventListener('beforeinstallprompt', handler);
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
+  const handleInstallPWA = async () => {
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
+                         (window.navigator as any).standalone === true;
+    
+    if (isStandalone) {
+      // App já instalada
+      return;
+    }
+    
+    if (!deferredPrompt) {
+      // Mostrar instruções manuais
+      alert(language === 'pt' 
+        ? 'Para instalar: Toque nos 3 pontos (menu) > "Adicionar ao Ecrã Inicial"' 
+        : 'To install: Tap the 3 dots (menu) > "Add to Home Screen"');
+      return;
+    }
+    
+    try {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        localStorage.setItem('pwa_installed', 'true');
+      }
+    } catch (error) {
+      console.error('Erro ao instalar PWA:', error);
+    }
+    setDeferredPrompt(null);
+  };
   
   // Query para contar alertas pendentes (apenas para admin)
   const { data: alertasPendentes } = trpc.alertas.listPendentes.useQuery(undefined, {
@@ -461,6 +501,17 @@ function DashboardLayoutContent({
               </div>
             </div>
             <div className="flex items-center gap-2">
+              {/* Botão Instalar App - apenas mobile */}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleInstallPWA}
+                className="h-8 px-2 text-xs font-medium bg-green-50 text-green-700 border-green-300 hover:bg-green-100"
+                title={language === 'pt' ? 'Instalar App' : 'Install App'}
+              >
+                <Download className="h-4 w-4 mr-1" />
+                {language === 'pt' ? 'Instalar' : 'Install'}
+              </Button>
               {switchable && (
                 <Button
                   variant="ghost"

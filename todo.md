@@ -3257,3 +3257,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## Funcionalidade v6.8.2 - Botão Instalar App Mobile
 - [x] Adicionar botão Instalar App no Menu Inicial (apenas visível em mobile)
 - [x] Ajustar botão Instalar App no Portal da Loja (apenas visível em mobile)
+
+
+## Funcionalidade v6.8.3 - Botão Instalar no Dashboard
+- [x] Adicionar botão Instalar App no header mobile do Dashboard
+- [x] Botão com estilo verde (bg-green-50, text-green-700)
+- [x] Lógica PWA com instruções manuais quando não disponível
