@@ -244,18 +244,7 @@ export default function MenuInicial() {
             </Button>
           </div>
         </div>
-        {/* Linha 2: Botão Instalar - apenas quando não instalado */}
-        {!isPWAInstalled && (
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={handleInstallPWA}
-            className="w-full bg-white text-green-700 border-green-300 hover:bg-green-50 flex items-center justify-center gap-2 h-9 dark:bg-gray-800 dark:text-green-400 dark:border-green-700 dark:hover:bg-gray-700"
-          >
-            <Download className="h-4 w-4" />
-            <span className="text-sm font-medium">{language === 'pt' ? 'Instalar PoweringEG' : 'Install PoweringEG'}</span>
-          </Button>
-        )}
+        {/* Botão Instalar removido - gestores não devem instalar PWA a partir daqui */}
       </div>
 
       {/* Título */}
