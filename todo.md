@@ -3386,3 +3386,12 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Gerar links de calendário (Google, Outlook, ICS) para pedidos aprovados
 - [x] Implementar visualização de resultados das lojas atribuídas
 - [x] Testar interface completa do volante
+
+
+## Refatoração Interface Volante - Padrão Dashboard
+- [x] Página de entrada com dois cards (Calendário e Resultados)
+- [x] Interface Resultados com seletor de lojas
+- [x] Tema claro/escuro
+- [x] Seletor de idioma com ícone Globe (igual ao resto do projeto)
+- [x] Botão voltar para navegar entre vistas
+

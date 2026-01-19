@@ -55,6 +55,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useTheme } from "@/contexts/ThemeContext";
 import { setAppBadge } from "@/hooks/useAppBadge";
 import { usePushNotificationsLoja } from "@/hooks/usePushNotifications";
 import {
@@ -102,6 +103,9 @@ import {
   ChevronLeft,
   ChevronRight,
   Mail,
+  Moon,
+  Sun,
+  Globe,
 } from "lucide-react";
 
 interface LojaAuth {
@@ -4183,6 +4187,8 @@ function VolanteInterface({
   setLanguage: (lang: 'pt' | 'en') => void;
   t: (key: string) => string;
 }) {
+  const { theme, toggleTheme } = useTheme();
+  const [activeView, setActiveView] = useState<"menu" | "agenda" | "resultados">("menu");
   const [activeTab, setActiveTab] = useState<"agenda" | "resultados">("agenda");
   const [mesSelecionado, setMesSelecionado] = useState(() => {
     const hoje = new Date();
@@ -4361,37 +4367,178 @@ END:VCALENDAR`;
     ? ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
     : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
+  // Se está na vista de menu, mostrar os dois cards de entrada
+  if (activeView === "menu") {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 dark:from-gray-900 dark:to-gray-800 flex flex-col p-4">
+        {/* Header */}
+        <div className="flex flex-col gap-2 mb-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-teal-600 rounded-xl flex items-center justify-center shadow-md">
+                <Car className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-gray-800 dark:text-gray-100">{volanteAuth.volanteNome}</h1>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  {volanteAuth.lojasAtribuidas.length} {language === 'pt' ? 'lojas atribuídas' : 'assigned stores'}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-1">
+              {/* Toggle Tema */}
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={toggleTheme}
+                className="h-8 w-8 p-0 text-gray-500 hover:text-gray-700 hover:bg-white/50 dark:text-gray-400 dark:hover:text-gray-200"
+                title={theme === 'light' ? (language === 'pt' ? 'Modo Escuro' : 'Dark Mode') : (language === 'pt' ? 'Modo Claro' : 'Light Mode')}
+              >
+                {theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+              </Button>
+              {/* Seletor Idioma */}
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => setLanguage(language === 'pt' ? 'en' : 'pt')}
+                className="h-8 w-8 p-0 text-gray-500 hover:text-gray-700 hover:bg-white/50 dark:text-gray-400 dark:hover:text-gray-200"
+                title={language === 'pt' ? 'English' : 'Português'}
+              >
+                <Globe className="h-4 w-4" />
+              </Button>
+              {/* Logout */}
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={onLogout}
+                className="h-8 w-8 p-0 text-gray-500 hover:text-gray-700 hover:bg-white/50 dark:text-gray-400 dark:hover:text-gray-200"
+                title={language === 'pt' ? 'Sair' : 'Logout'}
+              >
+                <LogOut className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Título */}
+        <div className="text-center mb-8">
+          <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">
+            {language === 'pt' ? 'O que pretende fazer?' : 'What would you like to do?'}
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400">
+            {language === 'pt' ? 'Selecione uma opção para continuar' : 'Select an option to continue'}
+          </p>
+        </div>
+
+        {/* Cards Selecionáveis */}
+        <div className="flex-1 flex items-center justify-center">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl w-full">
+            {/* Card Calendário */}
+            <Card 
+              className="p-8 cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-105 bg-white dark:bg-gray-800 border-2 border-transparent hover:border-teal-400 group"
+              onClick={() => setActiveView("agenda")}
+            >
+              <div className="text-center">
+                <div className="w-24 h-24 bg-teal-100 dark:bg-teal-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-teal-200 dark:group-hover:bg-teal-900/50 transition-colors">
+                  <Calendar className="h-12 w-12 text-teal-600" />
+                </div>
+                <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">
+                  {language === 'pt' ? 'Calendário' : 'Calendar'}
+                </h2>
+                <p className="text-gray-500 dark:text-gray-400 text-sm">
+                  {language === 'pt' ? 'Agenda de apoios e pedidos pendentes' : 'Support schedule and pending requests'}
+                </p>
+                {pedidosPendentes.length > 0 && (
+                  <Badge className="mt-3 bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300">
+                    {pedidosPendentes.length} {language === 'pt' ? 'pendente(s)' : 'pending'}
+                  </Badge>
+                )}
+              </div>
+            </Card>
+
+            {/* Card Resultados */}
+            <Card 
+              className="p-8 cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-105 bg-white dark:bg-gray-800 border-2 border-transparent hover:border-blue-400 group"
+              onClick={() => setActiveView("resultados")}
+            >
+              <div className="text-center">
+                <div className="w-24 h-24 bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-200 dark:group-hover:bg-blue-900/50 transition-colors">
+                  <BarChart3 className="h-12 w-12 text-blue-600" />
+                </div>
+                <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">
+                  {language === 'pt' ? 'Resultados' : 'Results'}
+                </h2>
+                <p className="text-gray-500 dark:text-gray-400 text-sm">
+                  {language === 'pt' ? 'Faturação e serviços das lojas' : 'Store revenue and services'}
+                </p>
+              </div>
+            </Card>
+          </div>
+        </div>
+
+        {/* Rodapé */}
+        <p className="text-gray-400 dark:text-gray-500 text-xs text-center mt-6">
+          PoweringEG Platform 2.0 - {language === 'pt' ? 'a IA ao serviço da ExpressGlass' : 'AI at the service of ExpressGlass'}
+        </p>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
       <header className="bg-teal-600 text-white sticky top-0 z-10">
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setActiveView("menu")}
+                className="text-white hover:bg-white/20 -ml-2"
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
               <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
                 <Car className="h-5 w-5 text-white" />
               </div>
               <div>
                 <h1 className="font-bold text-lg">{volanteAuth.volanteNome}</h1>
                 <p className="text-xs text-teal-100">
-                  {volanteAuth.lojasAtribuidas.length} {language === 'pt' ? 'lojas atribuídas' : 'assigned stores'}
+                  {activeView === "agenda" 
+                    ? (language === 'pt' ? 'Calendário de Apoios' : 'Support Calendar')
+                    : (language === 'pt' ? 'Resultados das Lojas' : 'Store Results')}
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
+              {/* Toggle Tema */}
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={toggleTheme}
+                className="h-8 w-8 p-0 text-white hover:bg-white/20"
+                title={theme === 'light' ? (language === 'pt' ? 'Modo Escuro' : 'Dark Mode') : (language === 'pt' ? 'Modo Claro' : 'Light Mode')}
+              >
+                {theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+              </Button>
+              {/* Seletor Idioma */}
               <Button 
                 variant="ghost" 
                 size="sm" 
                 onClick={() => setLanguage(language === 'pt' ? 'en' : 'pt')}
-                className="text-white hover:bg-white/20"
+                className="h-8 w-8 p-0 text-white hover:bg-white/20"
+                title={language === 'pt' ? 'English' : 'Português'}
               >
-                {language === 'pt' ? '🇬🇧' : '🇵🇹'}
+                <Globe className="h-4 w-4" />
               </Button>
+              {/* Logout */}
               <Button 
                 variant="ghost" 
                 size="sm" 
                 onClick={onLogout}
-                className="text-white hover:bg-white/20"
+                className="h-8 w-8 p-0 text-white hover:bg-white/20"
+                title={language === 'pt' ? 'Sair' : 'Logout'}
               >
                 <LogOut className="h-4 w-4" />
               </Button>
@@ -4400,38 +4547,8 @@ END:VCALENDAR`;
         </div>
       </header>
 
-      {/* Tabs */}
-      <div className="bg-white border-b sticky top-[60px] z-10">
-        <div className="container mx-auto px-4">
-          <div className="flex gap-4">
-            <button
-              onClick={() => setActiveTab("agenda")}
-              className={`py-3 px-4 font-medium border-b-2 transition-colors ${
-                activeTab === "agenda" 
-                  ? 'border-teal-600 text-teal-600' 
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              <Calendar className="h-4 w-4 inline mr-2" />
-              {language === 'pt' ? 'Agenda' : 'Schedule'}
-            </button>
-            <button
-              onClick={() => setActiveTab("resultados")}
-              className={`py-3 px-4 font-medium border-b-2 transition-colors ${
-                activeTab === "resultados" 
-                  ? 'border-teal-600 text-teal-600' 
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              <BarChart3 className="h-4 w-4 inline mr-2" />
-              {language === 'pt' ? 'Resultados' : 'Results'}
-            </button>
-          </div>
-        </div>
-      </div>
-
       <main className="container mx-auto px-4 py-6">
-        {activeTab === "agenda" && (
+        {activeView === "agenda" && (
           <div className="space-y-6">
             {/* Pedidos Pendentes */}
             {pedidosPendentes.length > 0 && (
@@ -4656,13 +4773,34 @@ END:VCALENDAR`;
           </div>
         )}
 
-        {activeTab === "resultados" && (
+        {activeView === "resultados" && (
           <div className="space-y-6">
-            {/* Seletor de Mês */}
-            <Card>
+            {/* Seletor de Loja */}
+            <Card className="dark:bg-gray-800 dark:border-gray-700">
               <CardContent className="py-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-medium">{language === 'pt' ? 'Período' : 'Period'}</h3>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div className="flex items-center gap-4 w-full sm:w-auto">
+                    <h3 className="font-medium dark:text-gray-100">{language === 'pt' ? 'Loja' : 'Store'}</h3>
+                    <Select
+                      value={lojaResultadosSelecionada?.toString() || "todas"}
+                      onValueChange={(value) => setLojaResultadosSelecionada(value === "todas" ? null : parseInt(value))}
+                    >
+                      <SelectTrigger className="w-[200px] dark:bg-gray-700 dark:border-gray-600">
+                        <SelectValue placeholder={language === 'pt' ? 'Selecionar loja' : 'Select store'} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="todas">{language === 'pt' ? 'Todas as lojas' : 'All stores'}</SelectItem>
+                        {volanteAuth.lojasAtribuidas
+                          .sort((a, b) => a.nome.localeCompare(b.nome))
+                          .map((loja) => (
+                            <SelectItem key={loja.id} value={loja.id.toString()}>
+                              {loja.nome}
+                            </SelectItem>
+                          ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <h3 className="font-medium dark:text-gray-100">{language === 'pt' ? 'Período' : 'Period'}</h3>
                   <div className="flex items-center gap-2">
                     <Button
                       variant="outline"
