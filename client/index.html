@@ -28,8 +28,27 @@
     <meta name="twitter:image" content="https://poweringeg-3c9mozlh.manus.space/og-image.png" />
     
     <link rel="icon" type="image/png" href="/favicon.png" />
-    <!-- PWA -->
-    <link rel="manifest" href="/manifest.json" />
+    <!-- PWA - Script para trocar manifest baseado no URL (antes do React) -->
+    <script>
+      (function() {
+        var isPortalLoja = window.location.pathname.indexOf('/portal-loja') === 0 || 
+                           window.location.search.indexOf('token=') !== -1;
+        var manifestHref = isPortalLoja ? '/manifest-portal-loja.json' : '/manifest.json';
+        var link = document.createElement('link');
+        link.rel = 'manifest';
+        link.href = manifestHref;
+        document.head.appendChild(link);
+        
+        // Também atualizar Apple Touch Icon e título para Portal da Loja
+        if (isPortalLoja) {
+          document.title = 'Portal da Loja - PoweringEG';
+          var appleIcon = document.querySelector('link[rel="apple-touch-icon"]');
+          if (appleIcon) appleIcon.href = '/portal-loja-icon-192.png';
+          var appleTitleMeta = document.querySelector('meta[name="apple-mobile-web-app-title"]');
+          if (appleTitleMeta) appleTitleMeta.content = 'Portal Loja';
+        }
+      })();
+    </script>
     <meta name="theme-color" content="#10b981" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
