@@ -3302,3 +3302,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 
 ## Correção v6.9.5 - Esconder Instalar no Menu Inicial
 - [x] Esconder botão Instalar no Menu Inicial (/menu) quando PWA já está instalada
+
+## Funcionalidade v6.9.6 - Tema e Idioma no Menu Inicial
+- [x] Adicionar toggle de tema (modo escuro/claro) ao Menu Inicial
+- [x] Adicionar seletor de idioma (PT/EN) ao Menu Inicial

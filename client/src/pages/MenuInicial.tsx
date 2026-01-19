@@ -9,10 +9,15 @@ import {
   Store,
   Loader2,
   LogOut,
-  Download
+  Download,
+  Moon,
+  Sun,
+  Globe
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { useTheme } from "@/contexts/ThemeContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 // Verificar se há sessão de loja ativa
 const getLojaSession = () => {
@@ -33,6 +38,8 @@ const getLojaSession = () => {
 export default function MenuInicial() {
   const [, setLocation] = useLocation();
   const { user, loading: authLoading } = useAuth();
+  const { theme, toggleTheme } = useTheme();
+  const { language, setLanguage } = useLanguage();
   const [lojaSession, setLojaSession] = useState<any>(null);
   const [checking, setChecking] = useState(true);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
@@ -175,7 +182,7 @@ export default function MenuInicial() {
 
   // Se é Gestor/Admin, mostrar menu com 3 cards
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex flex-col p-4">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 dark:from-gray-900 dark:to-gray-800 flex flex-col p-4">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
@@ -185,38 +192,66 @@ export default function MenuInicial() {
             className="h-12 w-12 rounded-xl shadow-md"
           />
           <div>
-            <h1 className="text-xl font-bold text-gray-800">PoweringEG</h1>
-            <p className="text-sm text-gray-500">Olá, {user?.name || 'Utilizador'}</p>
+            <h1 className="text-xl font-bold text-gray-800 dark:text-gray-100">PoweringEG</h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              {language === 'pt' ? 'Olá' : 'Hello'}, {user?.name || (language === 'pt' ? 'Utilizador' : 'User')}
+            </p>
           </div>
         </div>
-<div className="flex items-center gap-2">
+<div className="flex items-center gap-1">
           {/* Botão Instalar - apenas mobile e quando não instalado */}
           {!isPWAInstalled && (
             <Button 
               variant="outline" 
               size="sm"
               onClick={handleInstallPWA}
-              className="md:hidden bg-white text-green-700 border-green-300 hover:bg-green-50 flex items-center gap-1"
+              className="md:hidden bg-white text-green-700 border-green-300 hover:bg-green-50 flex items-center gap-1 h-8 px-2"
             >
               <Download className="h-4 w-4" />
               <span className="text-xs">Instalar</span>
             </Button>
           )}
+          {/* Toggle Tema */}
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={toggleTheme}
+            className="h-8 w-8 p-0 text-gray-500 hover:text-gray-700 hover:bg-white/50"
+            title={theme === 'light' ? 'Modo Escuro' : 'Modo Claro'}
+          >
+            {theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+          </Button>
+          {/* Seletor Idioma */}
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={() => setLanguage(language === 'pt' ? 'en' : 'pt')}
+            className="h-8 w-8 p-0 text-gray-500 hover:text-gray-700 hover:bg-white/50"
+            title={language === 'pt' ? 'English' : 'Português'}
+          >
+            <Globe className="h-4 w-4" />
+          </Button>
+          {/* Logout */}
           <Button 
             variant="ghost" 
             size="sm"
             onClick={() => setLocation('/login')}
-            className="text-gray-500 hover:text-gray-700"
+            className="h-8 w-8 p-0 text-gray-500 hover:text-gray-700 hover:bg-white/50"
+            title="Sair"
           >
-            <LogOut className="h-5 w-5" />
+            <LogOut className="h-4 w-4" />
           </Button>
         </div>
       </div>
 
       {/* Título */}
       <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">O que pretende fazer?</h2>
-        <p className="text-gray-600">Selecione uma opção para continuar</p>
+        <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">
+          {language === 'pt' ? 'O que pretende fazer?' : 'What would you like to do?'}
+        </h2>
+        <p className="text-gray-600 dark:text-gray-400">
+          {language === 'pt' ? 'Selecione uma opção para continuar' : 'Select an option to continue'}
+        </p>
       </div>
 
       {/* Cards Selecionáveis */}
@@ -224,51 +259,59 @@ export default function MenuInicial() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl w-full">
           {/* Card Dashboard */}
           <Card 
-            className="p-8 cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-105 bg-white border-2 border-transparent hover:border-blue-400 group"
+            className="p-8 cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-105 bg-white dark:bg-gray-800 border-2 border-transparent hover:border-blue-400 group"
             onClick={() => setLocation('/dashboard')}
           >
             <div className="text-center">
-              <div className="w-24 h-24 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-200 transition-colors">
+              <div className="w-24 h-24 bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-200 dark:group-hover:bg-blue-900/50 transition-colors">
                 <LayoutDashboard className="h-12 w-12 text-blue-600" />
               </div>
-              <h2 className="text-xl font-bold text-gray-800 mb-2">Dashboard</h2>
-              <p className="text-gray-500 text-sm">Painel de gestão completo com todas as funcionalidades</p>
+              <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">Dashboard</h2>
+              <p className="text-gray-500 dark:text-gray-400 text-sm">
+                {language === 'pt' ? 'Painel de gestão completo com todas as funcionalidades' : 'Complete management panel with all features'}
+              </p>
             </div>
           </Card>
 
           {/* Card Chatbot IA */}
           <Card 
-            className="p-8 cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-105 bg-white border-2 border-transparent hover:border-purple-400 group"
+            className="p-8 cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-105 bg-white dark:bg-gray-800 border-2 border-transparent hover:border-purple-400 group"
             onClick={() => setLocation('/assistente-ia')}
           >
             <div className="text-center">
-              <div className="w-24 h-24 bg-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-purple-200 transition-colors">
+              <div className="w-24 h-24 bg-purple-100 dark:bg-purple-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-purple-200 dark:group-hover:bg-purple-900/50 transition-colors">
                 <MessageSquare className="h-12 w-12 text-purple-600" />
               </div>
-              <h2 className="text-xl font-bold text-gray-800 mb-2">Chatbot IA</h2>
-              <p className="text-gray-500 text-sm">Assistente inteligente para consultas rápidas</p>
+              <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">Chatbot IA</h2>
+              <p className="text-gray-500 dark:text-gray-400 text-sm">
+                {language === 'pt' ? 'Assistente inteligente para consultas rápidas' : 'Intelligent assistant for quick queries'}
+              </p>
             </div>
           </Card>
 
           {/* Card Portal do Gestor */}
           <Card 
-            className="p-8 cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-105 bg-white border-2 border-transparent hover:border-green-400 group"
+            className="p-8 cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-105 bg-white dark:bg-gray-800 border-2 border-transparent hover:border-green-400 group"
             onClick={() => setLocation('/portal-gestor')}
           >
             <div className="text-center">
-              <div className="w-24 h-24 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-green-200 transition-colors">
+              <div className="w-24 h-24 bg-green-100 dark:bg-green-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-green-200 dark:group-hover:bg-green-900/50 transition-colors">
                 <FileText className="h-12 w-12 text-green-600" />
               </div>
-              <h2 className="text-xl font-bold text-gray-800 mb-2">Portal do Gestor</h2>
-              <p className="text-gray-500 text-sm">Relatórios, análises e gestão de lojas</p>
+              <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">
+                {language === 'pt' ? 'Portal do Gestor' : 'Manager Portal'}
+              </h2>
+              <p className="text-gray-500 dark:text-gray-400 text-sm">
+                {language === 'pt' ? 'Relatórios, análises e gestão de lojas' : 'Reports, analytics and store management'}
+              </p>
             </div>
           </Card>
         </div>
       </div>
 
       {/* Rodapé */}
-      <p className="text-gray-400 text-xs text-center mt-6">
-        PoweringEG Platform 2.0 - a IA ao serviço da ExpressGlass
+      <p className="text-gray-400 dark:text-gray-500 text-xs text-center mt-6">
+        PoweringEG Platform 2.0 - {language === 'pt' ? 'a IA ao serviço da ExpressGlass' : 'AI at the service of ExpressGlass'}
       </p>
     </div>
   );
