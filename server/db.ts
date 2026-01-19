@@ -3981,38 +3981,65 @@ function generateToken(): string {
 }
 
 /**
- * Cria ou obtém token de acesso para uma loja
+ * Cria ou obtém tokens de acesso para uma loja (responsável e colaborador)
  */
-export async function getOrCreateTokenLoja(lojaId: number): Promise<TokenLoja | null> {
+export async function getOrCreateTokensLoja(lojaId: number): Promise<{ responsavel: TokenLoja | null; colaborador: TokenLoja | null }> {
   const db = await getDb();
-  if (!db) return null;
+  if (!db) return { responsavel: null, colaborador: null };
   
-  // Verificar se já existe token
+  // Verificar tokens existentes
   const existing = await db
     .select()
     .from(tokensLoja)
-    .where(eq(tokensLoja.lojaId, lojaId))
-    .limit(1);
+    .where(eq(tokensLoja.lojaId, lojaId));
   
-  if (existing.length > 0) {
-    return existing[0];
+  let tokenResponsavel = existing.find(t => t.tipo === 'responsavel') || null;
+  let tokenColaborador = existing.find(t => t.tipo === 'colaborador') || null;
+  
+  // Criar token de responsável se não existir
+  if (!tokenResponsavel) {
+    const token = generateToken();
+    await db.insert(tokensLoja).values({
+      lojaId,
+      token,
+      tipo: 'responsavel',
+      ativo: true,
+    });
+    const [newToken] = await db
+      .select()
+      .from(tokensLoja)
+      .where(and(eq(tokensLoja.lojaId, lojaId), eq(tokensLoja.tipo, 'responsavel')))
+      .limit(1);
+    tokenResponsavel = newToken || null;
   }
   
-  // Criar novo token
-  const token = generateToken();
-  await db.insert(tokensLoja).values({
-    lojaId,
-    token,
-    ativo: true,
-  });
+  // Criar token de colaborador se não existir
+  if (!tokenColaborador) {
+    const token = generateToken();
+    await db.insert(tokensLoja).values({
+      lojaId,
+      token,
+      tipo: 'colaborador',
+      ativo: true,
+    });
+    const [newToken] = await db
+      .select()
+      .from(tokensLoja)
+      .where(and(eq(tokensLoja.lojaId, lojaId), eq(tokensLoja.tipo, 'colaborador')))
+      .limit(1);
+    tokenColaborador = newToken || null;
+  }
   
-  const newToken = await db
-    .select()
-    .from(tokensLoja)
-    .where(eq(tokensLoja.lojaId, lojaId))
-    .limit(1);
-  
-  return newToken[0] || null;
+  return { responsavel: tokenResponsavel, colaborador: tokenColaborador };
+}
+
+/**
+ * Cria ou obtém token de acesso para uma loja
+ * @param tipo - 'responsavel' (acesso completo) ou 'colaborador' (apenas resultados e tarefas)
+ */
+export async function getOrCreateTokenLoja(lojaId: number, tipo: 'responsavel' | 'colaborador' = 'responsavel'): Promise<TokenLoja | null> {
+  const tokens = await getOrCreateTokensLoja(lojaId);
+  return tipo === 'colaborador' ? tokens.colaborador : tokens.responsavel;
 }
 
 /**
@@ -4063,6 +4090,7 @@ export async function listarTokensLoja(): Promise<Array<TokenLoja & { lojaNome: 
       id: tokensLoja.id,
       lojaId: tokensLoja.lojaId,
       token: tokensLoja.token,
+      tipo: tokensLoja.tipo,
       ativo: tokensLoja.ativo,
       ultimoAcesso: tokensLoja.ultimoAcesso,
       createdAt: tokensLoja.createdAt,
@@ -4072,7 +4100,7 @@ export async function listarTokensLoja(): Promise<Array<TokenLoja & { lojaNome: 
     })
     .from(tokensLoja)
     .innerJoin(lojas, eq(tokensLoja.lojaId, lojas.id))
-    .orderBy(lojas.nome);
+    .orderBy(lojas.nome, tokensLoja.tipo);
   
   return result;
 }
@@ -4610,6 +4638,7 @@ export async function listarTokensLojaByGestor(gestorId: number): Promise<Array<
       id: tokensLoja.id,
       lojaId: tokensLoja.lojaId,
       token: tokensLoja.token,
+      tipo: tokensLoja.tipo,
       ativo: tokensLoja.ativo,
       ultimoAcesso: tokensLoja.ultimoAcesso,
       createdAt: tokensLoja.createdAt,
@@ -4620,7 +4649,7 @@ export async function listarTokensLojaByGestor(gestorId: number): Promise<Array<
     .from(tokensLoja)
     .innerJoin(lojas, eq(tokensLoja.lojaId, lojas.id))
     .where(inArray(tokensLoja.lojaId, lojaIds))
-    .orderBy(lojas.nome);
+    .orderBy(lojas.nome, tokensLoja.tipo);
   
   return result;
 }

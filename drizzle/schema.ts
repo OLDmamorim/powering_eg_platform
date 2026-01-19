@@ -589,10 +589,13 @@ export type InsertReuniaoQuinzenal = typeof reunioesQuinzenais.$inferInsert;
 /**
  * Tokens de Acesso de Loja - Tokens para lojas acederem à plataforma via email
  */
+export const tokenLojaTypeEnum = mysqlEnum('token_loja_type', ['responsavel', 'colaborador']);
+
 export const tokensLoja = mysqlTable("tokens_loja", {
   id: int("id").autoincrement().primaryKey(),
-  lojaId: int("lojaId").notNull().unique(), // FK para lojas.id (1 token por loja)
+  lojaId: int("lojaId").notNull(), // FK para lojas.id (2 tokens por loja: responsavel + colaborador)
   token: varchar("token", { length: 64 }).notNull().unique(), // Token único de acesso
+  tipo: tokenLojaTypeEnum.default('responsavel').notNull(), // Tipo de token: responsavel (acesso completo) ou colaborador (apenas Resultados e Tarefas)
   ativo: boolean("ativo").default(true).notNull(),
   ultimoAcesso: timestamp("ultimoAcesso"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),

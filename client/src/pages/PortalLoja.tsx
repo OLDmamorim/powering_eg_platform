@@ -102,6 +102,7 @@ interface LojaAuth {
   lojaId: number;
   lojaNome: string;
   lojaEmail: string | null;
+  tipoToken: 'responsavel' | 'colaborador';
   lojasRelacionadas?: Array<{ id: number; nome: string }>;
 }
 
@@ -872,43 +873,47 @@ export default function PortalLoja() {
               </CardContent>
             </Card>
 
-            {/* Card Pendentes */}
-            <Card 
-              className="cursor-pointer hover:shadow-lg transition-all hover:scale-[1.02] bg-gradient-to-br from-amber-500 to-orange-500 text-white border-0"
-              onClick={() => setActiveTab("pendentes")}
-            >
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <AlertTriangle className="h-10 w-10 opacity-80" />
-                  {pendentesAtivos.length > 0 && (
-                    <Badge className="bg-white/20 text-white border-0 text-lg px-3">
-                      {pendentesAtivos.length}
-                    </Badge>
-                  )}
-                </div>
-                <h3 className="text-xl font-bold mb-2">{t('tabs.pendentes')}</h3>
-                <p className="text-sm opacity-80">{language === 'pt' ? 'Pendentes atribuídos à loja' : 'Pending items assigned to store'}</p>
-              </CardContent>
-            </Card>
+            {/* Card Pendentes - Apenas para Responsável */}
+            {lojaAuth?.tipoToken === 'responsavel' && (
+              <Card 
+                className="cursor-pointer hover:shadow-lg transition-all hover:scale-[1.02] bg-gradient-to-br from-amber-500 to-orange-500 text-white border-0"
+                onClick={() => setActiveTab("pendentes")}
+              >
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <AlertTriangle className="h-10 w-10 opacity-80" />
+                    {pendentesAtivos.length > 0 && (
+                      <Badge className="bg-white/20 text-white border-0 text-lg px-3">
+                        {pendentesAtivos.length}
+                      </Badge>
+                    )}
+                  </div>
+                  <h3 className="text-xl font-bold mb-2">{t('tabs.pendentes')}</h3>
+                  <p className="text-sm opacity-80">{language === 'pt' ? 'Pendentes atribuídos à loja' : 'Pending items assigned to store'}</p>
+                </CardContent>
+              </Card>
+            )}
 
-            {/* Card Reuniões */}
-            <Card 
-              className="cursor-pointer hover:shadow-lg transition-all hover:scale-[1.02] bg-gradient-to-br from-green-500 to-emerald-600 text-white border-0"
-              onClick={() => setActiveTab("reuniao")}
-            >
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <FileText className="h-10 w-10 opacity-80" />
-                  {reuniaoRascunho && (
-                    <Badge className="bg-white/20 text-white border-0">
-                      {language === 'pt' ? 'Rascunho' : 'Draft'}
-                    </Badge>
-                  )}
-                </div>
-                <h3 className="text-xl font-bold mb-2">{t('tabs.reuniao')}</h3>
-                <p className="text-sm opacity-80">{language === 'pt' ? 'Registar reuniões quinzenais' : 'Record biweekly meetings'}</p>
-              </CardContent>
-            </Card>
+            {/* Card Reuniões - Apenas para Responsável */}
+            {lojaAuth?.tipoToken === 'responsavel' && (
+              <Card 
+                className="cursor-pointer hover:shadow-lg transition-all hover:scale-[1.02] bg-gradient-to-br from-green-500 to-emerald-600 text-white border-0"
+                onClick={() => setActiveTab("reuniao")}
+              >
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <FileText className="h-10 w-10 opacity-80" />
+                    {reuniaoRascunho && (
+                      <Badge className="bg-white/20 text-white border-0">
+                        {language === 'pt' ? 'Rascunho' : 'Draft'}
+                      </Badge>
+                    )}
+                  </div>
+                  <h3 className="text-xl font-bold mb-2">{t('tabs.reuniao')}</h3>
+                  <p className="text-sm opacity-80">{language === 'pt' ? 'Registar reuniões quinzenais' : 'Record biweekly meetings'}</p>
+                </CardContent>
+              </Card>
+            )}
           </div>
         )}
 

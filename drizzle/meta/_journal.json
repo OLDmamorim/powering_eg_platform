@@ -351,6 +351,13 @@
       "when": 1768809133524,
       "tag": "0049_motionless_beast",
       "breakpoints": true
+    },
+    {
+      "idx": 50,
+      "version": "5",
+      "when": 1768812619084,
+      "tag": "0050_yummy_menace",
+      "breakpoints": true
     }
   ]
 }

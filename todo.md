@@ -3334,3 +3334,11 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## Funcionalidade v6.10.1 - VAPID Keys para Push Notifications
 - [x] Verificar e corrigir configuração das VAPID keys
 - [x] Testar notificações push para badge no ícone
+
+## Funcionalidade v6.10.2 - Tokens Responsável e Colaborador
+- [ ] Adicionar campo tokenType ao schema de lojas (responsavel/colaborador)
+- [ ] Gerar dois tokens por loja: um para responsável e outro para colaborador
+- [ ] Atualizar Portal da Loja para mostrar cards conforme tipo de token
+- [x] Colaborador vê cards de Resultados e Tarefas (sem Reuniões e Pendentes)
+- [ ] Responsável vê todos os cards (Resultados, Tarefas, Reuniões, Pendentes)
+- [ ] Atualizar interface de gestão de tokens para mostrar ambos

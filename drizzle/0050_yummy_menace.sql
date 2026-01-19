@@ -1,0 +1,2 @@
+ALTER TABLE `tokens_loja` DROP INDEX `tokens_loja_lojaId_unique`;--> statement-breakpoint
+ALTER TABLE `tokens_loja` ADD `token_loja_type` enum('responsavel','colaborador') DEFAULT 'responsavel' NOT NULL;

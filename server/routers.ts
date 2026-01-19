@@ -4533,6 +4533,7 @@ IMPORTANTE:
           lojaId: result.loja.id,
           lojaNome: result.loja.nome,
           lojaEmail: result.loja.email,
+          tipoToken: result.tokenData.tipo,
           lojasRelacionadas: lojasRelacionadas.map(l => ({
             id: l.lojaId,
             nome: l.lojaNome,
@@ -4760,7 +4761,10 @@ IMPORTANTE:
     
     // Criar/obter token para uma loja (gestor só pode criar para suas lojas)
     criarToken: gestorProcedure
-      .input(z.object({ lojaId: z.number() }))
+      .input(z.object({ 
+        lojaId: z.number(),
+        tipo: z.enum(['responsavel', 'colaborador']).optional().default('responsavel'),
+      }))
       .mutation(async ({ input, ctx }) => {
         // Verificar se gestor tem acesso à loja
         if (ctx.user.role !== 'admin') {
@@ -4771,7 +4775,7 @@ IMPORTANTE:
             throw new TRPCError({ code: 'FORBIDDEN', message: 'Não tem acesso a esta loja' });
           }
         }
-        return await db.getOrCreateTokenLoja(input.lojaId);
+        return await db.getOrCreateTokenLoja(input.lojaId, input.tipo);
       }),
     
     // Ativar/desativar token (gestor só pode para suas lojas)
@@ -4812,7 +4816,10 @@ IMPORTANTE:
     
     // Enviar token por email para a loja
     enviarEmail: gestorProcedure
-      .input(z.object({ lojaId: z.number() }))
+      .input(z.object({ 
+        lojaId: z.number(),
+        tipo: z.enum(['responsavel', 'colaborador']).optional().default('responsavel'),
+      }))
       .mutation(async ({ input, ctx }) => {
         // Verificar acesso
         if (ctx.user.role !== 'admin') {
@@ -4829,7 +4836,7 @@ IMPORTANTE:
         if (!loja) throw new TRPCError({ code: 'NOT_FOUND', message: 'Loja não encontrada' });
         if (!loja.email) throw new TRPCError({ code: 'BAD_REQUEST', message: 'Loja não tem email configurado' });
         
-        const token = await db.getOrCreateTokenLoja(input.lojaId);
+        const token = await db.getOrCreateTokenLoja(input.lojaId, input.tipo);
         if (!token) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Erro ao criar token' });
         
         // Construir URL do portal - usar o domínio publicado correto
