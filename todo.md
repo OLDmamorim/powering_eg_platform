@@ -3322,3 +3322,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [ ] Criar endpoint para guardar subscriptions dos utilizadores
 - [ ] Implementar envio de notificações quando há novas tarefas
 - [ ] Integrar com criação de tarefas (gestor -> loja e loja -> gestor)
+
+## Funcionalidade v6.9.9 - Push Notifications Portal Loja
+- [x] Adicionar botão "Ativar Notificações" ao Portal da Loja
+- [x] Usar hook usePushNotificationsLoja com token da loja

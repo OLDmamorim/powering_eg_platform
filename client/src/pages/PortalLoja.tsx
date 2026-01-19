@@ -56,6 +56,7 @@ import {
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { setAppBadge } from "@/hooks/useAppBadge";
+import { usePushNotificationsLoja } from "@/hooks/usePushNotifications";
 import {
   Store,
   Calendar,
@@ -94,6 +95,7 @@ import {
   ThumbsUp,
   Rocket,
   RefreshCw,
+  Bell,
 } from "lucide-react";
 
 interface LojaAuth {
@@ -149,6 +151,27 @@ export default function PortalLoja() {
   const [analiseIA, setAnaliseIA] = useState<any>(null);
   const [gerandoAnaliseIA, setGerandoAnaliseIA] = useState(false);
   const dashboardRef = useRef<HTMLDivElement>(null);
+  
+  // Push Notifications para Loja
+  const pushNotifications = usePushNotificationsLoja(token);
+  const [isPWAInstalled, setIsPWAInstalled] = useState(false);
+  
+  // Verificar se PWA está instalada
+  useEffect(() => {
+    const checkInstalled = () => {
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
+                           (window.navigator as any).standalone === true;
+      const wasInstalled = localStorage.getItem('pwa_installed') === 'true';
+      setIsPWAInstalled(isStandalone || wasInstalled);
+    };
+    
+    checkInstalled();
+    
+    window.addEventListener('appinstalled', () => {
+      localStorage.setItem('pwa_installed', 'true');
+      setIsPWAInstalled(true);
+    });
+  }, []);
 
   // PWA: Capturar evento de instalação
   useEffect(() => {
@@ -687,17 +710,33 @@ export default function PortalLoja() {
               </p>
             </div>
             <div className="flex items-center gap-2">
-              {/* Botão Instalar App - apenas mobile */}
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={handleInstallPWA} 
-                className="md:hidden bg-white text-green-700 hover:bg-green-50 border-white h-7 px-3 text-xs font-medium flex items-center gap-1.5 shadow-sm"
-                title={language === 'pt' ? 'Instalar App no seu dispositivo' : 'Install App on your device'}
-              >
-                <Download className="h-4 w-4" />
-                <span>{language === 'pt' ? 'Instalar App' : 'Install App'}</span>
-              </Button>
+              {/* Botão Instalar App ou Ativar Notificações - apenas mobile */}
+              {!isPWAInstalled ? (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleInstallPWA} 
+                  className="md:hidden bg-white text-green-700 hover:bg-green-50 border-white h-7 px-3 text-xs font-medium flex items-center gap-1.5 shadow-sm"
+                  title={language === 'pt' ? 'Instalar App no seu dispositivo' : 'Install App on your device'}
+                >
+                  <Download className="h-4 w-4" />
+                  <span>{language === 'pt' ? 'Instalar' : 'Install'}</span>
+                </Button>
+              ) : pushNotifications.isSupported && !pushNotifications.isSubscribed && (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => pushNotifications.subscribe()} 
+                  disabled={pushNotifications.isLoading}
+                  className="md:hidden bg-white text-blue-700 hover:bg-blue-50 border-white h-7 px-3 text-xs font-medium flex items-center gap-1.5 shadow-sm"
+                  title={language === 'pt' ? 'Ativar notificações de novas tarefas' : 'Enable notifications for new tasks'}
+                >
+                  <Bell className="h-4 w-4" />
+                  <span>{pushNotifications.isLoading 
+                    ? (language === 'pt' ? 'A ativar...' : 'Enabling...') 
+                    : (language === 'pt' ? 'Notificações' : 'Notifications')}</span>
+                </Button>
+              )}
               {/* Seletor de Idioma */}
               <Select value={language} onValueChange={(value) => setLanguage(value as 'pt' | 'en')}>
                 <SelectTrigger className="w-16 h-7 bg-white/20 border-white/30 text-white text-xs">
