@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "wouter";
+import { useLocation, useSearch } from "wouter";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Card } from "@/components/ui/card";
 import { 
@@ -37,6 +37,7 @@ const getLojaSession = () => {
 
 export default function MenuInicial() {
   const [, setLocation] = useLocation();
+  const searchString = useSearch();
   const { user, loading: authLoading } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const { language, setLanguage } = useLanguage();
@@ -44,6 +45,16 @@ export default function MenuInicial() {
   const [checking, setChecking] = useState(true);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [isPWAInstalled, setIsPWAInstalled] = useState(false);
+
+  // Se há token na URL, redirecionar diretamente para o Portal da Loja
+  useEffect(() => {
+    const urlParams = new URLSearchParams(searchString);
+    const tokenFromUrl = urlParams.get('token');
+    if (tokenFromUrl) {
+      setLocation(`/portal-loja?token=${tokenFromUrl}`);
+      return;
+    }
+  }, [searchString, setLocation]);
 
   useEffect(() => {
     // Verificar sessões
