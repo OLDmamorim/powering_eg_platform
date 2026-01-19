@@ -108,9 +108,28 @@ interface LojaAuth {
 
 export default function PortalLoja() {
   const { language, setLanguage, t } = useLanguage();
-  const [token, setToken] = useState<string>("");
+  // Inicializar token do localStorage se existir
+  const [token, setToken] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('loja_token') || '';
+    }
+    return '';
+  });
   const [inputToken, setInputToken] = useState<string>("");
-  const [lojaAuth, setLojaAuth] = useState<LojaAuth | null>(null);
+  // Inicializar lojaAuth do localStorage se existir
+  const [lojaAuth, setLojaAuth] = useState<LojaAuth | null>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('lojaAuth');
+        if (saved) {
+          return JSON.parse(saved);
+        }
+      } catch (e) {
+        console.error('Erro ao restaurar lojaAuth:', e);
+      }
+    }
+    return null;
+  });
   const [lojaAtualId, setLojaAtualId] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<"home" | "reuniao" | "pendentes" | "historico" | "tarefas" | "resultados">("home");
   const [filtroTarefas, setFiltroTarefas] = useState<"todas" | "recebidas" | "enviadas" | "internas">("todas");
@@ -303,21 +322,29 @@ export default function PortalLoja() {
     onSuccess: (data) => {
       setLojaAuth(data);
       localStorage.setItem("loja_token", token);
+      // Guardar lojaAuth no localStorage para persistir sessão na PWA
+      localStorage.setItem("lojaAuth", JSON.stringify(data));
       toast.success(`Bem-vindo, ${data.lojaNome}!`);
     },
     onError: (error) => {
       toast.error(error.message);
       localStorage.removeItem("loja_token");
+      localStorage.removeItem("lojaAuth");
       setToken("");
+      setLojaAuth(null);
     },
   });
 
-  // Autenticar quando token muda
+  // Autenticar quando token muda (ou validar sessão existente)
   useEffect(() => {
     if (token && !lojaAuth) {
       autenticarMutation.mutate({ token });
+    } else if (token && lojaAuth) {
+      // Se já temos lojaAuth do localStorage, validar se o token ainda é válido
+      // fazendo uma autenticação silenciosa em background
+      autenticarMutation.mutate({ token });
     }
-  }, [token]);
+  }, []);  // Executar apenas uma vez na inicialização
 
   // Queries
   // Usar lojaAtualId para queries quando disponível
@@ -607,6 +634,7 @@ export default function PortalLoja() {
 
   const handleLogout = () => {
     localStorage.removeItem("loja_token");
+    localStorage.removeItem("lojaAuth");
     setToken("");
     setLojaAuth(null);
     setInputToken("");
