@@ -90,7 +90,10 @@ import {
   InsertVisitaPlaneada,
   relacoesLojas,
   RelacaoLojas,
-  InsertRelacaoLojas
+  InsertRelacaoLojas,
+  pushSubscriptions,
+  PushSubscription,
+  InsertPushSubscription
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -7940,4 +7943,114 @@ export async function getAllRelacoesLojas(): Promise<Array<{
   }
   
   return resultado;
+}
+
+
+// ==================== PUSH SUBSCRIPTIONS ====================
+
+/**
+ * Guardar ou atualizar subscrição push de um utilizador
+ */
+export async function upsertPushSubscription(data: {
+  userId?: number;
+  lojaId?: number;
+  endpoint: string;
+  p256dh: string;
+  auth: string;
+  userAgent?: string;
+}): Promise<{ id: number } | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  // Verificar se já existe uma subscrição com este endpoint
+  const [existing] = await db
+    .select({ id: pushSubscriptions.id })
+    .from(pushSubscriptions)
+    .where(eq(pushSubscriptions.endpoint, data.endpoint))
+    .limit(1);
+  
+  if (existing) {
+    // Atualizar subscrição existente
+    await db
+      .update(pushSubscriptions)
+      .set({
+        userId: data.userId,
+        lojaId: data.lojaId,
+        p256dh: data.p256dh,
+        auth: data.auth,
+        userAgent: data.userAgent,
+        ativo: true,
+      })
+      .where(eq(pushSubscriptions.id, existing.id));
+    return { id: existing.id };
+  }
+  
+  // Criar nova subscrição
+  const [result] = await db.insert(pushSubscriptions).values({
+    userId: data.userId,
+    lojaId: data.lojaId,
+    endpoint: data.endpoint,
+    p256dh: data.p256dh,
+    auth: data.auth,
+    userAgent: data.userAgent,
+  });
+  
+  return { id: result.insertId };
+}
+
+/**
+ * Obter subscrições push de um utilizador
+ */
+export async function getPushSubscriptionsByUserId(userId: number): Promise<PushSubscription[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db
+    .select()
+    .from(pushSubscriptions)
+    .where(and(
+      eq(pushSubscriptions.userId, userId),
+      eq(pushSubscriptions.ativo, true)
+    ));
+}
+
+/**
+ * Obter subscrições push de uma loja
+ */
+export async function getPushSubscriptionsByLojaId(lojaId: number): Promise<PushSubscription[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db
+    .select()
+    .from(pushSubscriptions)
+    .where(and(
+      eq(pushSubscriptions.lojaId, lojaId),
+      eq(pushSubscriptions.ativo, true)
+    ));
+}
+
+/**
+ * Desativar subscrição push (quando falha o envio)
+ */
+export async function deactivatePushSubscription(endpoint: string): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  
+  await db
+    .update(pushSubscriptions)
+    .set({ ativo: false })
+    .where(eq(pushSubscriptions.endpoint, endpoint));
+}
+
+/**
+ * Remover subscrição push
+ */
+export async function removePushSubscription(endpoint: string): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  
+  await db
+    .delete(pushSubscriptions)
+    .where(eq(pushSubscriptions.endpoint, endpoint));
 }

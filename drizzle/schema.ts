@@ -910,3 +910,30 @@ export const relacoesLojas = mysqlTable("relacoes_lojas", {
 
 export type RelacaoLojas = typeof relacoesLojas.$inferSelect;
 export type InsertRelacaoLojas = typeof relacoesLojas.$inferInsert;
+
+
+/**
+ * Push Subscriptions - Armazena as subscrições de push notifications dos utilizadores
+ * Permite enviar notificações push para gestores e lojas
+ */
+export const pushSubscriptions = mysqlTable("push_subscriptions", {
+  id: int("id").autoincrement().primaryKey(),
+  
+  // Identificador do dispositivo (pode ser user ou loja)
+  userId: int("userId"), // FK para users.id (para gestores/admin)
+  lojaId: int("lojaId"), // FK para lojas.id (para lojas via portal)
+  
+  // Dados da subscrição (Web Push Protocol)
+  endpoint: text("endpoint").notNull(),
+  p256dh: text("p256dh").notNull(), // Chave pública
+  auth: text("auth").notNull(), // Segredo de autenticação
+  
+  // Metadados
+  userAgent: text("userAgent"), // Browser/dispositivo
+  ativo: boolean("ativo").default(true).notNull(),
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type PushSubscription = typeof pushSubscriptions.$inferSelect;
+export type InsertPushSubscription = typeof pushSubscriptions.$inferInsert;

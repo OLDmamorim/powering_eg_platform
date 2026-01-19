@@ -24,6 +24,7 @@ import {
 import { getLoginUrl } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
 import { setAppBadge } from "@/hooks/useAppBadge";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { LayoutDashboard, LogOut, PanelLeft, Users, Moon, Sun, Globe, Download } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
@@ -278,6 +279,9 @@ function DashboardLayoutContent({
   const isMobile = useIsMobile();
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [isPWAInstalled, setIsPWAInstalled] = useState(false);
+  
+  // Push Notifications
+  const pushNotifications = usePushNotifications();
   
   // Verificar se PWA já está instalada
   useEffect(() => {
@@ -558,8 +562,8 @@ function DashboardLayoutContent({
                 />
               </div>
             </div>
-            {/* Linha 2: Botão Instalar centralizado - só mostra se não estiver instalada */}
-            {!isPWAInstalled && (
+            {/* Linha 2: Botão Instalar ou Ativar Notificações */}
+            {!isPWAInstalled ? (
               <div className="flex items-center justify-center pb-2 px-2">
                 <Button
                   variant="outline"
@@ -570,6 +574,22 @@ function DashboardLayoutContent({
                 >
                   <Download className="h-4 w-4 mr-2" />
                   {language === 'pt' ? 'Instalar PoweringEG' : 'Install PoweringEG'}
+                </Button>
+              </div>
+            ) : pushNotifications.isSupported && !pushNotifications.isSubscribed && (
+              <div className="flex items-center justify-center pb-2 px-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => pushNotifications.subscribe()}
+                  disabled={pushNotifications.isLoading}
+                  className="h-8 px-4 text-xs font-medium bg-blue-50 text-blue-700 border-blue-300 hover:bg-blue-100 w-full max-w-xs dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-700 dark:hover:bg-blue-900/50"
+                  title={language === 'pt' ? 'Ativar Notificações' : 'Enable Notifications'}
+                >
+                  <Bell className="h-4 w-4 mr-2" />
+                  {pushNotifications.isLoading 
+                    ? (language === 'pt' ? 'A ativar...' : 'Enabling...') 
+                    : (language === 'pt' ? 'Ativar Notificações' : 'Enable Notifications')}
                 </Button>
               </div>
             )}
@@ -612,7 +632,7 @@ function DashboardLayoutContent({
           {children}
 
           <div className="fixed bottom-4 right-4 text-xs text-foreground/60 select-none pointer-events-none">
-            v6.9.7
+            v6.9.8
           </div>
         </main>
       </SidebarInset>

@@ -14,6 +14,7 @@ import { gerarPlanoVisitasSemanal, gerarPlanosSemanaisParaTodosGestores, verific
 import { notificarGestorRelatorioAdmin } from "./notificacaoGestor";
 import { notifyOwner } from "./_core/notification";
 import { processarPergunta, getSugestoesPergunta } from "./chatbotService";
+import { vapidPublicKey, notificarGestorNovaTarefa, notificarLojaNovaTarefa, notificarGestorRespostaLoja, notificarLojaRespostaGestor } from "./pushService";
 
 // Middleware para verificar se o utilizador é admin
 const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
@@ -52,6 +53,83 @@ export const appRouter = router({
       const enviado = await enviarResumoSemanal();
       return { success: enviado };
     }),
+  }),
+  
+  // ==================== PUSH NOTIFICATIONS ====================
+  push: router({
+    // Obter chave pública VAPID para o cliente
+    getVapidPublicKey: publicProcedure.query(() => {
+      return { publicKey: vapidPublicKey };
+    }),
+    
+    // Subscrever para push notifications (utilizador autenticado)
+    subscribe: protectedProcedure
+      .input(z.object({
+        endpoint: z.string(),
+        p256dh: z.string(),
+        auth: z.string(),
+        userAgent: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const result = await db.upsertPushSubscription({
+          userId: ctx.user.id,
+          endpoint: input.endpoint,
+          p256dh: input.p256dh,
+          auth: input.auth,
+          userAgent: input.userAgent,
+        });
+        return { success: !!result, subscriptionId: result?.id };
+      }),
+    
+    // Cancelar subscrição
+    unsubscribe: protectedProcedure
+      .input(z.object({ endpoint: z.string() }))
+      .mutation(async ({ input }) => {
+        await db.removePushSubscription(input.endpoint);
+        return { success: true };
+      }),
+  }),
+  
+  // Push para Portal da Loja (sem autenticação OAuth)
+  pushPortalLoja: router({
+    subscribe: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        endpoint: z.string(),
+        p256dh: z.string(),
+        auth: z.string(),
+        userAgent: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const auth = await db.validarTokenLoja(input.token);
+        if (!auth) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        
+        const result = await db.upsertPushSubscription({
+          lojaId: auth.loja.id,
+          endpoint: input.endpoint,
+          p256dh: input.p256dh,
+          auth: input.auth,
+          userAgent: input.userAgent,
+        });
+        return { success: !!result, subscriptionId: result?.id };
+      }),
+    
+    unsubscribe: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        endpoint: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        const auth = await db.validarTokenLoja(input.token);
+        if (!auth) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        
+        await db.removePushSubscription(input.endpoint);
+        return { success: true };
+      }),
   }),
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
@@ -5065,6 +5143,13 @@ IMPORTANTE:
               console.error('Erro ao enviar email de notificação:', e);
             }
           }
+          
+          // Enviar notificação push para a loja
+          try {
+            await notificarLojaNovaTarefa(input.atribuidoLojaId, input.titulo);
+          } catch (e) {
+            console.error('Erro ao enviar push notification:', e);
+          }
         }
         
         return todo;
@@ -5564,6 +5649,13 @@ IMPORTANTE:
           }
         }
         
+        // Enviar notificação push ao gestor
+        try {
+          await notificarGestorRespostaLoja(todo.criadoPorId, auth.loja.nome, todo.titulo);
+        } catch (e) {
+          console.error('Erro ao enviar push notification:', e);
+        }
+        
         return { success: true };
       }),
     
@@ -5628,6 +5720,13 @@ IMPORTANTE:
           } catch (e) {
             console.error('Erro ao enviar email de notificação:', e);
           }
+        }
+        
+        // Enviar notificação push ao gestor
+        try {
+          await notificarGestorNovaTarefa(gestorDaLoja.userId, auth.loja.nome, input.titulo);
+        } catch (e) {
+          console.error('Erro ao enviar push notification:', e);
         }
         
         return { success: true, todoId: todo.id };

@@ -3311,3 +3311,14 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Implementar App Badge API para mostrar contagem de tarefas pendentes
 - [x] Atualizar badge quando há novas tarefas (gestores)
 - [x] Atualizar badge quando há novas tarefas (lojas)
+
+## Investigação v6.9.8 - App Badge não funciona
+- [ ] Investigar porque App Badge não aparece no ícone da PWA
+- [ ] Verificar suporte do dispositivo/launcher
+- [ ] Adicionar logs de debug para verificar se API está a ser chamada
+
+## Funcionalidade v6.9.8 - Push Notifications
+- [x] Configurar Service Worker para receber push notifications
+- [ ] Criar endpoint para guardar subscriptions dos utilizadores
+- [ ] Implementar envio de notificações quando há novas tarefas
+- [ ] Integrar com criação de tarefas (gestor -> loja e loja -> gestor)
