@@ -381,38 +381,6 @@ export default function PortalGestor() {
           </div>
         </header>
 
-        {/* Banner de Instalação PWA */}
-        {showInstallBanner && (
-          <div className="bg-gradient-to-r from-purple-600 to-purple-700 text-white px-4 py-3 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                <Download className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="font-semibold text-sm">{language === 'pt' ? 'Instalar PoweringEG' : 'Install PoweringEG'}</p>
-                <p className="text-xs opacity-90">{language === 'pt' ? 'Acesso rápido no ecrã inicial' : 'Quick access from home screen'}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button 
-                size="sm" 
-                variant="secondary"
-                onClick={handleInstallPWA}
-                className="bg-white text-purple-600 hover:bg-purple-50 font-semibold"
-              >
-                {language === 'pt' ? 'Instalar' : 'Install'}
-              </Button>
-              <Button 
-                size="sm" 
-                variant="ghost"
-                onClick={dismissInstallBanner}
-                className="text-white hover:bg-white/20 h-8 w-8 p-0"
-              >
-                ×
-              </Button>
-            </div>
-          </div>
-        )}
 
         {/* Conteúdo Principal */}
         <div className="container mx-auto px-4 py-6">

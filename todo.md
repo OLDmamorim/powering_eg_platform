@@ -3295,3 +3295,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## Funcionalidades v6.9.3 - UX Melhorias
 - [x] Esconder botão Instalar quando PWA já estiver instalada
 - [x] Adicionar botão "Voltar ao Menu" nas páginas internas (Dashboard, Assistente IA, Portal Gestor)
+
+## Correção v6.9.4 - Duplicados e Botão Menu
+- [x] Remover banner Instalar duplicado do Portal Gestor (já existe no header)
+- [x] Mostrar texto "Menu" no botão de voltar (não apenas a seta)

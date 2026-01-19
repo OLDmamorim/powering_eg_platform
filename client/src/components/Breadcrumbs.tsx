@@ -67,7 +67,7 @@ export function Breadcrumbs() {
             className="h-8 px-3 text-xs font-medium gap-1 bg-violet-50 text-violet-700 border-violet-300 hover:bg-violet-100 dark:bg-violet-900/30 dark:text-violet-300 dark:border-violet-700 dark:hover:bg-violet-900/50"
           >
             <ArrowLeft className="h-3 w-3" />
-            <span className="hidden sm:inline">{language === 'pt' ? 'Menu' : 'Menu'}</span>
+            <span>{language === 'pt' ? 'Menu' : 'Menu'}</span>
           </Button>
         )}
         
