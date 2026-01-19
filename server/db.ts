@@ -8163,6 +8163,22 @@ export async function updateVolante(id: number, data: { nome?: string; email?: s
 }
 
 /**
+ * Atualizar configurações de Telegram do volante
+ */
+export async function atualizarTelegramVolante(id: number, data: { telegramChatId: string | null; telegramUsername: string | null }): Promise<Volante | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  await db.update(volantes).set({
+    telegramChatId: data.telegramChatId,
+    telegramUsername: data.telegramUsername,
+  }).where(eq(volantes.id, id));
+  
+  const updated = await db.select().from(volantes).where(eq(volantes.id, id));
+  return updated[0] || null;
+}
+
+/**
  * Eliminar volante
  */
 export async function deleteVolante(id: number): Promise<boolean> {

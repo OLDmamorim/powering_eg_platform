@@ -15,6 +15,7 @@ import { notificarGestorRelatorioAdmin } from "./notificacaoGestor";
 import { notifyOwner } from "./_core/notification";
 import { processarPergunta, getSugestoesPergunta } from "./chatbotService";
 import { vapidPublicKey, notificarGestorNovaTarefa, notificarLojaNovaTarefa, notificarGestorRespostaLoja, notificarLojaRespostaGestor } from "./pushService";
+import { notificarNovoPedidoApoio, notificarPedidoAnulado, notificarPedidoEditado } from "./telegramService";
 
 // Middleware para verificar se o utilizador é admin
 const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
@@ -7466,6 +7467,22 @@ IMPORTANTE:
           }
         }
         
+        // Enviar notificação Telegram ao volante (se configurado)
+        if (volante.telegramChatId) {
+          try {
+            await notificarNovoPedidoApoio(volante.telegramChatId, {
+              lojaNome: tokenData.loja.nome,
+              data: dataApoio,
+              periodo: input.periodo,
+              tipoApoio: input.tipoApoio,
+              observacoes: input.observacoes,
+            });
+            console.log(`[Telegram] Notificação de novo pedido enviada para volante: ${volante.telegramChatId}`);
+          } catch (e) {
+            console.error('[Telegram] Erro ao enviar notificação ao volante:', e);
+          }
+        }
+        
         return pedido;
       }),
     
@@ -8066,6 +8083,43 @@ IMPORTANTE:
         }
         
         return pedidoAtualizado;
+      }),
+    
+    // Configurar Telegram para notificações
+    configurarTelegram: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        telegramChatId: z.string().optional(),
+        telegramUsername: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const tokenData = await db.validateTokenVolante(input.token);
+        if (!tokenData) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        
+        // Atualizar dados do Telegram no volante
+        await db.atualizarTelegramVolante(tokenData.volante.id, {
+          telegramChatId: input.telegramChatId || null,
+          telegramUsername: input.telegramUsername || null,
+        });
+        
+        return { success: true };
+      }),
+    
+    // Obter configurações do Telegram
+    getTelegramConfig: publicProcedure
+      .input(z.object({ token: z.string() }))
+      .query(async ({ input }) => {
+        const tokenData = await db.validateTokenVolante(input.token);
+        if (!tokenData) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        
+        return {
+          telegramChatId: tokenData.volante.telegramChatId,
+          telegramUsername: tokenData.volante.telegramUsername,
+        };
       }),
   }),
 });

@@ -35,6 +35,7 @@ import FiltroMesesCheckbox, { MesSelecionado } from "@/components/FiltroMesesChe
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -109,6 +110,7 @@ import {
   Smartphone as AppleIcon,
   Ban,
   Pencil,
+  Settings,
 } from "lucide-react";
 
 interface LojaAuth {
@@ -4191,7 +4193,7 @@ function VolanteInterface({
   t: (key: string) => string;
 }) {
   const { theme, toggleTheme } = useTheme();
-  const [activeView, setActiveView] = useState<"menu" | "agenda" | "resultados" | "historico">("menu");
+  const [activeView, setActiveView] = useState<"menu" | "agenda" | "resultados" | "historico" | "configuracoes">("menu");
   const [activeTab, setActiveTab] = useState<"agenda" | "resultados">("agenda");
   const [mesSelecionado, setMesSelecionado] = useState(() => {
     const hoje = new Date();
@@ -4208,6 +4210,8 @@ function VolanteInterface({
   const [editarTipoApoio, setEditarTipoApoio] = useState<'cobertura_ferias' | 'substituicao_vidros' | 'outro'>('cobertura_ferias');
   const [editarObservacoes, setEditarObservacoes] = useState("");
   const [lojaResultadosSelecionada, setLojaResultadosSelecionada] = useState<number | null>(null);
+  const [telegramChatId, setTelegramChatId] = useState("");
+  const [telegramUsername, setTelegramUsername] = useState("");
   const [mesesSelecionadosVolante, setMesesSelecionadosVolante] = useState<Array<{mes: number; ano: number}>>(() => {
     const hoje = new Date();
     return [{ mes: hoje.getMonth() + 1, ano: hoje.getFullYear() }];
@@ -4236,6 +4240,31 @@ function VolanteInterface({
     { token, lojaId: lojaResultadosSelecionada!, meses: mesesSelecionadosVolante },
     { enabled: !!token && activeView === "resultados" && !!lojaResultadosSelecionada && mesesSelecionadosVolante.length > 0 }
   );
+
+  // Query para obter configurações do Telegram
+  const { data: telegramConfig, refetch: refetchTelegramConfig } = trpc.portalVolante.getTelegramConfig.useQuery(
+    { token },
+    { enabled: !!token && activeView === "configuracoes" }
+  );
+
+  // Atualizar estados quando telegramConfig mudar
+  useEffect(() => {
+    if (telegramConfig) {
+      setTelegramChatId(telegramConfig.telegramChatId || "");
+      setTelegramUsername(telegramConfig.telegramUsername || "");
+    }
+  }, [telegramConfig]);
+
+  // Mutation para configurar Telegram
+  const configurarTelegramMutation = trpc.portalVolante.configurarTelegram.useMutation({
+    onSuccess: () => {
+      toast.success(language === 'pt' ? 'Telegram configurado com sucesso!' : 'Telegram configured successfully!');
+      refetchTelegramConfig();
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
 
   // Mutation para aprovar pedido
   const aprovarMutation = trpc.pedidosApoio.aprovar.useMutation({
@@ -4549,6 +4578,24 @@ END:VCALENDAR`;
                 )}
               </div>
             </Card>
+
+            {/* Card Configurações */}
+            <Card 
+              className="p-8 cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-105 bg-white dark:bg-gray-800 border-2 border-transparent hover:border-gray-400 group"
+              onClick={() => setActiveView("configuracoes")}
+            >
+              <div className="text-center">
+                <div className="w-24 h-24 bg-gray-100 dark:bg-gray-700 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200 dark:group-hover:bg-gray-600 transition-colors">
+                  <Settings className="h-12 w-12 text-gray-600 dark:text-gray-300" />
+                </div>
+                <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">
+                  {language === 'pt' ? 'Configurações' : 'Settings'}
+                </h2>
+                <p className="text-gray-500 dark:text-gray-400 text-sm">
+                  {language === 'pt' ? 'Notificações Telegram' : 'Telegram notifications'}
+                </p>
+              </div>
+            </Card>
           </div>
         </div>
 
@@ -4585,7 +4632,9 @@ END:VCALENDAR`;
                     ? (language === 'pt' ? 'Calendário de Apoios' : 'Support Calendar')
                     : activeView === "historico"
                       ? (language === 'pt' ? 'Histórico de Apoios' : 'Support History')
-                      : (language === 'pt' ? 'Resultados das Lojas' : 'Store Results')}
+                      : activeView === "configuracoes"
+                        ? (language === 'pt' ? 'Configurações' : 'Settings')
+                        : (language === 'pt' ? 'Resultados das Lojas' : 'Store Results')}
                 </p>
               </div>
             </div>
@@ -5546,6 +5595,110 @@ END:VCALENDAR`;
                 </div>
               );
             })()}
+          </div>
+        )}
+
+        {/* Vista Configurações */}
+        {activeView === "configuracoes" && (
+          <div className="container mx-auto px-4 py-6 space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Send className="h-5 w-5 text-blue-500" />
+                  {language === 'pt' ? 'Notificações Telegram' : 'Telegram Notifications'}
+                </CardTitle>
+                <CardDescription>
+                  {language === 'pt' 
+                    ? 'Receba notificações no Telegram quando houver novos pedidos de apoio' 
+                    : 'Receive Telegram notifications when there are new support requests'}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Instruções */}
+                <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg space-y-3">
+                  <h4 className="font-medium text-blue-800 dark:text-blue-200">
+                    {language === 'pt' ? 'Como configurar:' : 'How to configure:'}
+                  </h4>
+                  <ol className="list-decimal list-inside space-y-2 text-sm text-blue-700 dark:text-blue-300">
+                    <li>{language === 'pt' ? 'Abra o Telegram e procure por' : 'Open Telegram and search for'} <strong>@PoweringEGBot</strong></li>
+                    <li>{language === 'pt' ? 'Inicie uma conversa com o bot clicando em "Start"' : 'Start a conversation with the bot by clicking "Start"'}</li>
+                    <li>{language === 'pt' ? 'O bot irá enviar-lhe o seu Chat ID' : 'The bot will send you your Chat ID'}</li>
+                    <li>{language === 'pt' ? 'Cole o Chat ID no campo abaixo' : 'Paste the Chat ID in the field below'}</li>
+                  </ol>
+                </div>
+
+                {/* Formulário */}
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="telegramChatId">
+                      {language === 'pt' ? 'Chat ID do Telegram' : 'Telegram Chat ID'}
+                    </Label>
+                    <Input
+                      id="telegramChatId"
+                      placeholder={language === 'pt' ? 'Ex: 123456789' : 'E.g.: 123456789'}
+                      value={telegramChatId}
+                      onChange={(e) => setTelegramChatId(e.target.value)}
+                    />
+                    <p className="text-xs text-gray-500">
+                      {language === 'pt' 
+                        ? 'O Chat ID é um número único que identifica a sua conversa com o bot' 
+                        : 'The Chat ID is a unique number that identifies your conversation with the bot'}
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="telegramUsername">
+                      {language === 'pt' ? 'Username do Telegram (opcional)' : 'Telegram Username (optional)'}
+                    </Label>
+                    <Input
+                      id="telegramUsername"
+                      placeholder="@username"
+                      value={telegramUsername}
+                      onChange={(e) => setTelegramUsername(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                {/* Botão Guardar */}
+                <div className="flex justify-end">
+                  <Button
+                    onClick={() => {
+                      configurarTelegramMutation.mutate({
+                        token,
+                        telegramChatId: telegramChatId || undefined,
+                        telegramUsername: telegramUsername || undefined,
+                      });
+                    }}
+                    disabled={configurarTelegramMutation.isPending}
+                    className="bg-teal-600 hover:bg-teal-700"
+                  >
+                    {configurarTelegramMutation.isPending ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    ) : (
+                      <Send className="h-4 w-4 mr-2" />
+                    )}
+                    {language === 'pt' ? 'Guardar Configurações' : 'Save Settings'}
+                  </Button>
+                </div>
+
+                {/* Estado Atual */}
+                {telegramConfig && telegramConfig.telegramChatId && (
+                  <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
+                    <div className="flex items-center gap-2 text-green-700 dark:text-green-300">
+                      <CheckCircle2 className="h-5 w-5" />
+                      <span className="font-medium">
+                        {language === 'pt' ? 'Telegram configurado!' : 'Telegram configured!'}
+                      </span>
+                    </div>
+                    <p className="text-sm text-green-600 dark:text-green-400 mt-1">
+                      {language === 'pt' 
+                        ? `Irá receber notificações no Chat ID: ${telegramConfig.telegramChatId}` 
+                        : `You will receive notifications on Chat ID: ${telegramConfig.telegramChatId}`}
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </div>
         )}
       </main>

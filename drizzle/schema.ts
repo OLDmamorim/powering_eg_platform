@@ -953,6 +953,8 @@ export const volantes = mysqlTable("volantes", {
   telefone: varchar("telefone", { length: 50 }),
   gestorId: int("gestorId").notNull(), // FK para gestores.id - gestor responsável pelo volante
   ativo: boolean("ativo").default(true).notNull(),
+  telegramChatId: varchar("telegramChatId", { length: 100 }), // Chat ID do Telegram para notificações
+  telegramUsername: varchar("telegramUsername", { length: 100 }), // Username do Telegram (opcional)
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

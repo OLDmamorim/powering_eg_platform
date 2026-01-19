@@ -3419,3 +3419,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [ ] Adicionar botão Apple Calendar ao dialog de detalhes do pedido
 - [ ] Adicionar opção de anular pedidos aprovados
 - [ ] Adicionar opção de editar agendamentos
+
+
+## Notificações Telegram para Volantes
+- [x] Adicionar campo telegramChatId ao schema de volantes
+- [x] Criar serviço de envio de mensagens Telegram
+- [ ] Integrar notificação na criação de pedidos
+- [ ] Interface para configurar Telegram no portal do volante
