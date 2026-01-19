@@ -3429,3 +3429,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 
 ## Corrigir Nome do Bot Telegram
 - [x] Alterar @PoweringEGBot para @GZminho_bot nas instruções
+
+
+## Configurar Novo Bot Telegram @PoweringEG_bot
+- [x] Atualizar token do bot nas variáveis de ambiente
+- [x] Atualizar nome do bot nas instruções (@GZminho_bot -> @PoweringEG_bot)

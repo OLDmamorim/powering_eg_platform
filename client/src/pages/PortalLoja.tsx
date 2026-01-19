@@ -5620,7 +5620,7 @@ END:VCALENDAR`;
                     {language === 'pt' ? 'Como configurar:' : 'How to configure:'}
                   </h4>
                   <ol className="list-decimal list-inside space-y-2 text-sm text-blue-700 dark:text-blue-300">
-                    <li>{language === 'pt' ? 'Abra o Telegram e procure por' : 'Open Telegram and search for'} <strong>@GZminho_bot</strong></li>
+                    <li>{language === 'pt' ? 'Abra o Telegram e procure por' : 'Open Telegram and search for'} <strong>@PoweringEG_bot</strong></li>
                     <li>{language === 'pt' ? 'Inicie uma conversa com o bot clicando em "Start"' : 'Start a conversation with the bot by clicking "Start"'}</li>
                     <li>{language === 'pt' ? 'O bot irá enviar-lhe o seu Chat ID' : 'The bot will send you your Chat ID'}</li>
                     <li>{language === 'pt' ? 'Cole o Chat ID no campo abaixo' : 'Paste the Chat ID in the field below'}</li>
