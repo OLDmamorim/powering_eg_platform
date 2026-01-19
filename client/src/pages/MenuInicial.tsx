@@ -184,64 +184,67 @@ export default function MenuInicial() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 dark:from-gray-900 dark:to-gray-800 flex flex-col p-4">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <img 
-            src="/poweringeg-ai-icon-192.png" 
-            alt="PoweringEG" 
-            className="h-12 w-12 rounded-xl shadow-md"
-          />
-          <div>
-            <h1 className="text-xl font-bold text-gray-800 dark:text-gray-100">PoweringEG</h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              {language === 'pt' ? 'Olá' : 'Hello'}, {user?.name || (language === 'pt' ? 'Utilizador' : 'User')}
-            </p>
+      <div className="flex flex-col gap-2 mb-6">
+        {/* Linha 1: Logo, Nome e Botões */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <img 
+              src="/poweringeg-ai-icon-192.png" 
+              alt="PoweringEG" 
+              className="h-12 w-12 rounded-xl shadow-md"
+            />
+            <div>
+              <h1 className="text-xl font-bold text-gray-800 dark:text-gray-100">PoweringEG</h1>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                {language === 'pt' ? 'Olá' : 'Hello'}, {user?.name || (language === 'pt' ? 'Utilizador' : 'User')}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-1">
+            {/* Toggle Tema */}
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={toggleTheme}
+              className="h-8 w-8 p-0 text-gray-500 hover:text-gray-700 hover:bg-white/50 dark:text-gray-400 dark:hover:text-gray-200"
+              title={theme === 'light' ? 'Modo Escuro' : 'Modo Claro'}
+            >
+              {theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+            </Button>
+            {/* Seletor Idioma */}
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => setLanguage(language === 'pt' ? 'en' : 'pt')}
+              className="h-8 w-8 p-0 text-gray-500 hover:text-gray-700 hover:bg-white/50 dark:text-gray-400 dark:hover:text-gray-200"
+              title={language === 'pt' ? 'English' : 'Português'}
+            >
+              <Globe className="h-4 w-4" />
+            </Button>
+            {/* Logout */}
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => setLocation('/login')}
+              className="h-8 w-8 p-0 text-gray-500 hover:text-gray-700 hover:bg-white/50 dark:text-gray-400 dark:hover:text-gray-200"
+              title="Sair"
+            >
+              <LogOut className="h-4 w-4" />
+            </Button>
           </div>
         </div>
-<div className="flex items-center gap-1">
-          {/* Botão Instalar - apenas mobile e quando não instalado */}
-          {!isPWAInstalled && (
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={handleInstallPWA}
-              className="md:hidden bg-white text-green-700 border-green-300 hover:bg-green-50 flex items-center gap-1 h-8 px-2"
-            >
-              <Download className="h-4 w-4" />
-              <span className="text-xs">Instalar</span>
-            </Button>
-          )}
-          {/* Toggle Tema */}
+        {/* Linha 2: Botão Instalar - apenas quando não instalado */}
+        {!isPWAInstalled && (
           <Button 
-            variant="ghost" 
+            variant="outline" 
             size="sm"
-            onClick={toggleTheme}
-            className="h-8 w-8 p-0 text-gray-500 hover:text-gray-700 hover:bg-white/50"
-            title={theme === 'light' ? 'Modo Escuro' : 'Modo Claro'}
+            onClick={handleInstallPWA}
+            className="w-full bg-white text-green-700 border-green-300 hover:bg-green-50 flex items-center justify-center gap-2 h-9 dark:bg-gray-800 dark:text-green-400 dark:border-green-700 dark:hover:bg-gray-700"
           >
-            {theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+            <Download className="h-4 w-4" />
+            <span className="text-sm font-medium">{language === 'pt' ? 'Instalar PoweringEG' : 'Install PoweringEG'}</span>
           </Button>
-          {/* Seletor Idioma */}
-          <Button 
-            variant="ghost" 
-            size="sm"
-            onClick={() => setLanguage(language === 'pt' ? 'en' : 'pt')}
-            className="h-8 w-8 p-0 text-gray-500 hover:text-gray-700 hover:bg-white/50"
-            title={language === 'pt' ? 'English' : 'Português'}
-          >
-            <Globe className="h-4 w-4" />
-          </Button>
-          {/* Logout */}
-          <Button 
-            variant="ghost" 
-            size="sm"
-            onClick={() => setLocation('/login')}
-            className="h-8 w-8 p-0 text-gray-500 hover:text-gray-700 hover:bg-white/50"
-            title="Sair"
-          >
-            <LogOut className="h-4 w-4" />
-          </Button>
-        </div>
+        )}
       </div>
 
       {/* Título */}

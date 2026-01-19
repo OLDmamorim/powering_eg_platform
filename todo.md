@@ -3326,3 +3326,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## Funcionalidade v6.9.9 - Push Notifications Portal Loja
 - [x] Adicionar botão "Ativar Notificações" ao Portal da Loja
 - [x] Usar hook usePushNotificationsLoja com token da loja
+
+## Correção v6.10.0 - Botão Instalar Menu Inicial
+- [x] Corrigir lógica de deteção de PWA instalada no Menu Inicial
+- [x] Esconder botão quando app já está instalada (localStorage ou standalone mode)
