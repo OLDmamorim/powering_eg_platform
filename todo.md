@@ -3306,3 +3306,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## Funcionalidade v6.9.6 - Tema e Idioma no Menu Inicial
 - [x] Adicionar toggle de tema (modo escuro/claro) ao Menu Inicial
 - [x] Adicionar seletor de idioma (PT/EN) ao Menu Inicial
+
+## Funcionalidade v6.9.7 - App Badge (Numerador no Ícone)
+- [x] Implementar App Badge API para mostrar contagem de tarefas pendentes
+- [x] Atualizar badge quando há novas tarefas (gestores)
+- [x] Atualizar badge quando há novas tarefas (lojas)

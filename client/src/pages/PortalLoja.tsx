@@ -55,6 +55,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { setAppBadge } from "@/hooks/useAppBadge";
 import {
   Store,
   Calendar,
@@ -337,6 +338,13 @@ export default function PortalLoja() {
       refetchInterval: 30000, // Atualizar a cada 30 segundos
     }
   );
+  
+  // Atualizar App Badge quando há tarefas não vistas
+  useEffect(() => {
+    if (todosNaoVistos !== undefined) {
+      setAppBadge(todosNaoVistos);
+    }
+  }, [todosNaoVistos]);
 
   // Histórico de tarefas enviadas ao gestor
   const { data: historicoTarefas, refetch: refetchHistoricoTarefas } = trpc.todosPortalLoja.historicoEnviadas.useQuery(

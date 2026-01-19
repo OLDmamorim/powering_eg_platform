@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/sidebar";
 import { getLoginUrl } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
+import { setAppBadge } from "@/hooks/useAppBadge";
 import { LayoutDashboard, LogOut, PanelLeft, Users, Moon, Sun, Globe, Download } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
@@ -342,6 +343,19 @@ function DashboardLayoutContent({
   });
   const alertasCount = alertasPendentes?.length || 0;
   
+  // Query para contar tarefas pendentes (para App Badge)
+  const { data: tarefasPendentes } = trpc.todos.countPendentesAtribuidosAMim.useQuery(undefined, {
+    enabled: !!user,
+    refetchInterval: 60000, // Atualizar a cada 60 segundos
+  });
+  
+  // Atualizar App Badge quando há tarefas pendentes
+  useEffect(() => {
+    if (tarefasPendentes !== undefined) {
+      setAppBadge(tarefasPendentes);
+    }
+  }, [tarefasPendentes]);
+  
 
   useEffect(() => {
     if (isCollapsed) {
@@ -598,7 +612,7 @@ function DashboardLayoutContent({
           {children}
 
           <div className="fixed bottom-4 right-4 text-xs text-foreground/60 select-none pointer-events-none">
-            v6.9.6
+            v6.9.7
           </div>
         </main>
       </SidebarInset>
