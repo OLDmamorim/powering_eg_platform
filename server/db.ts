@@ -8504,6 +8504,50 @@ export async function cancelarPedidoApoio(pedidoId: number): Promise<boolean> {
 }
 
 /**
+ * Anular pedido de apoio aprovado (pelo volante)
+ */
+export async function anularPedidoApoio(pedidoId: number, motivo?: string): Promise<boolean> {
+  const db = await getDb();
+  if (!db) return false;
+  
+  await db.update(pedidosApoio).set({ 
+    estado: 'anulado',
+    motivoReprovacao: motivo || null,
+  }).where(eq(pedidosApoio.id, pedidoId));
+  return true;
+}
+
+/**
+ * Editar pedido de apoio (pelo volante)
+ */
+export async function editarPedidoApoio(pedidoId: number, dados: {
+  data?: string;
+  periodo?: 'manha' | 'tarde';
+  tipoApoio?: 'cobertura_ferias' | 'substituicao_vidros' | 'outro';
+  observacoes?: string;
+}): Promise<PedidoApoio | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const updateData: Record<string, unknown> = {};
+  if (dados.data) updateData.data = new Date(dados.data);
+  if (dados.periodo) updateData.periodo = dados.periodo;
+  if (dados.tipoApoio) updateData.tipoApoio = dados.tipoApoio;
+  if (dados.observacoes !== undefined) updateData.observacoes = dados.observacoes;
+  
+  if (Object.keys(updateData).length === 0) {
+    // Nada para atualizar, retornar pedido existente
+    const [pedido] = await db.select().from(pedidosApoio).where(eq(pedidosApoio.id, pedidoId));
+    return pedido || null;
+  }
+  
+  await db.update(pedidosApoio).set(updateData).where(eq(pedidosApoio.id, pedidoId));
+  
+  const [pedidoAtualizado] = await db.select().from(pedidosApoio).where(eq(pedidosApoio.id, pedidoId));
+  return pedidoAtualizado || null;
+}
+
+/**
  * Verificar disponibilidade de um dia para pedidos de apoio
  * Retorna o estado do dia: 'livre', 'manha_ocupada', 'tarde_ocupada', 'dia_completo'
  */

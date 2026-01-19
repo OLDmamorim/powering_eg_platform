@@ -3414,3 +3414,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 
 ## Bug Fix - Seletor de Meses no Calendário do Volante
 - [x] Adicionar botão para avançar mês no calendário
+
+## Adicionar Apple Calendar
+- [ ] Adicionar botão Apple Calendar ao dialog de detalhes do pedido
+- [ ] Adicionar opção de anular pedidos aprovados
+- [ ] Adicionar opção de editar agendamentos

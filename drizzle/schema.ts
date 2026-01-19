@@ -1000,7 +1000,7 @@ export type InsertTokenVolante = typeof tokensVolante.$inferInsert;
  */
 export const pedidosApoioTipoEnum = mysqlEnum('pedido_apoio_tipo', ['cobertura_ferias', 'substituicao_vidros', 'outro']);
 export const pedidosApoioPeriodoEnum = mysqlEnum('pedido_apoio_periodo', ['manha', 'tarde']);
-export const pedidosApoioEstadoEnum = mysqlEnum('pedido_apoio_estado', ['pendente', 'aprovado', 'reprovado', 'cancelado']);
+export const pedidosApoioEstadoEnum = mysqlEnum('pedido_apoio_estado', ['pendente', 'aprovado', 'reprovado', 'cancelado', 'anulado']);
 
 export const pedidosApoio = mysqlTable("pedidos_apoio", {
   id: int("id").autoincrement().primaryKey(),

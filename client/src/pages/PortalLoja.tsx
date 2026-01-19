@@ -106,6 +106,9 @@ import {
   Moon,
   Sun,
   Globe,
+  Smartphone as AppleIcon,
+  Ban,
+  Pencil,
 } from "lucide-react";
 
 interface LojaAuth {
@@ -4197,6 +4200,13 @@ function VolanteInterface({
   const [pedidoSelecionado, setPedidoSelecionado] = useState<any>(null);
   const [motivoReprovacao, setMotivoReprovacao] = useState("");
   const [reprovarDialogOpen, setReprovarDialogOpen] = useState(false);
+  const [anularDialogOpen, setAnularDialogOpen] = useState(false);
+  const [editarDialogOpen, setEditarDialogOpen] = useState(false);
+  const [motivoAnulacao, setMotivoAnulacao] = useState("");
+  const [editarData, setEditarData] = useState("");
+  const [editarPeriodo, setEditarPeriodo] = useState<'manha' | 'tarde'>('manha');
+  const [editarTipoApoio, setEditarTipoApoio] = useState<'cobertura_ferias' | 'substituicao_vidros' | 'outro'>('cobertura_ferias');
+  const [editarObservacoes, setEditarObservacoes] = useState("");
   const [lojaResultadosSelecionada, setLojaResultadosSelecionada] = useState<number | null>(null);
   const [mesesSelecionadosVolante, setMesesSelecionadosVolante] = useState<Array<{mes: number; ano: number}>>(() => {
     const hoje = new Date();
@@ -4234,6 +4244,39 @@ function VolanteInterface({
       refetchPedidos();
       refetchEstadoMes();
       setPedidoSelecionado(null);
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  // Mutation para anular pedido
+  const anularMutation = trpc.portalVolante.anularPedido.useMutation({
+    onSuccess: () => {
+      toast.success(language === 'pt' ? 'Pedido anulado com sucesso!' : 'Request cancelled successfully!');
+      refetchPedidos();
+      refetchEstadoMes();
+      setPedidoSelecionado(null);
+      setAnularDialogOpen(false);
+      setMotivoAnulacao("");
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  // Mutation para editar pedido
+  const editarMutation = trpc.portalVolante.editarPedido.useMutation({
+    onSuccess: () => {
+      toast.success(language === 'pt' ? 'Pedido atualizado com sucesso!' : 'Request updated successfully!');
+      refetchPedidos();
+      refetchEstadoMes();
+      setPedidoSelecionado(null);
+      setEditarDialogOpen(false);
+      setEditarData("");
+      setEditarPeriodo('manha');
+      setEditarTipoApoio('cobertura_ferias');
+      setEditarObservacoes("");
     },
     onError: (error) => {
       toast.error(error.message);
@@ -5651,9 +5694,29 @@ END:VCALENDAR`;
               )}
 
               {pedidoSelecionado.estado === 'aprovado' && (
-                <div className="pt-4 border-t">
-                  <p className="text-sm text-gray-500 mb-2">{language === 'pt' ? 'Adicionar ao Calendário' : 'Add to Calendar'}</p>
+                <div className="pt-4 border-t space-y-4">
+                  {/* Botões de Ação */}
                   <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      className="flex-1"
+                      onClick={() => setEditarDialogOpen(true)}
+                    >
+                      <Pencil className="h-4 w-4 mr-2" />
+                      {language === 'pt' ? 'Editar' : 'Edit'}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="flex-1 text-orange-600 border-orange-300 hover:bg-orange-50"
+                      onClick={() => setAnularDialogOpen(true)}
+                    >
+                      <Ban className="h-4 w-4 mr-2" />
+                      {language === 'pt' ? 'Anular' : 'Cancel'}
+                    </Button>
+                  </div>
+                  
+                  <p className="text-sm text-gray-500 mb-2">{language === 'pt' ? 'Adicionar ao Calendário' : 'Add to Calendar'}</p>
+                  <div className="flex flex-wrap gap-2">
                     {(() => {
                       const links = gerarLinksCalendario(pedidoSelecionado);
                       return (
@@ -5684,6 +5747,19 @@ END:VCALENDAR`;
                               a.click();
                             }}
                           >
+                            <AppleIcon className="h-4 w-4 mr-2" />
+                            Apple
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              const a = document.createElement('a');
+                              a.href = links.icsUrl;
+                              a.download = `apoio-${pedidoSelecionado.id}.ics`;
+                              a.click();
+                            }}
+                          >
                             <Download className="h-4 w-4 mr-2" />
                             ICS
                           </Button>
@@ -5695,6 +5771,148 @@ END:VCALENDAR`;
               )}
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog de Anular Pedido */}
+      <Dialog open={anularDialogOpen} onOpenChange={setAnularDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{language === 'pt' ? 'Anular Pedido' : 'Cancel Request'}</DialogTitle>
+            <DialogDescription>
+              {language === 'pt' ? 'Tem a certeza que pretende anular este pedido aprovado?' : 'Are you sure you want to cancel this approved request?'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium">{language === 'pt' ? 'Motivo (opcional)' : 'Reason (optional)'}</label>
+              <Textarea
+                value={motivoAnulacao}
+                onChange={(e) => setMotivoAnulacao(e.target.value)}
+                placeholder={language === 'pt' ? 'Indique o motivo da anulação...' : 'Enter the cancellation reason...'}
+                className="mt-1"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAnularDialogOpen(false)}>
+              {language === 'pt' ? 'Cancelar' : 'Cancel'}
+            </Button>
+            <Button
+              className="bg-orange-600 hover:bg-orange-700"
+              onClick={() => {
+                if (pedidoSelecionado) {
+                  anularMutation.mutate({
+                    token,
+                    pedidoId: pedidoSelecionado.id,
+                    motivo: motivoAnulacao || undefined,
+                  });
+                }
+              }}
+              disabled={anularMutation.isPending}
+            >
+              {anularMutation.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : (
+                <Ban className="h-4 w-4 mr-2" />
+              )}
+              {language === 'pt' ? 'Anular' : 'Cancel Request'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog de Editar Pedido */}
+      <Dialog open={editarDialogOpen} onOpenChange={(open) => {
+        setEditarDialogOpen(open);
+        if (open && pedidoSelecionado) {
+          // Preencher com dados atuais
+          const dataStr = new Date(pedidoSelecionado.data).toISOString().split('T')[0];
+          setEditarData(dataStr);
+          setEditarPeriodo(pedidoSelecionado.periodo);
+          setEditarTipoApoio(pedidoSelecionado.tipoApoio);
+          setEditarObservacoes(pedidoSelecionado.observacoes || "");
+        }
+      }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{language === 'pt' ? 'Editar Pedido' : 'Edit Request'}</DialogTitle>
+            <DialogDescription>
+              {language === 'pt' ? 'Altere os detalhes do pedido de apoio' : 'Change the support request details'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium">{language === 'pt' ? 'Data' : 'Date'}</label>
+              <Input
+                type="date"
+                value={editarData}
+                onChange={(e) => setEditarData(e.target.value)}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">{language === 'pt' ? 'Período' : 'Period'}</label>
+              <Select value={editarPeriodo} onValueChange={(v) => setEditarPeriodo(v as 'manha' | 'tarde')}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="manha">{language === 'pt' ? 'Manhã (9h-13h)' : 'Morning (9am-1pm)'}</SelectItem>
+                  <SelectItem value="tarde">{language === 'pt' ? 'Tarde (14h-18h)' : 'Afternoon (2pm-6pm)'}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="text-sm font-medium">{language === 'pt' ? 'Tipo de Apoio' : 'Support Type'}</label>
+              <Select value={editarTipoApoio} onValueChange={(v) => setEditarTipoApoio(v as 'cobertura_ferias' | 'substituicao_vidros' | 'outro')}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="cobertura_ferias">{language === 'pt' ? 'Cobertura de Férias' : 'Vacation Coverage'}</SelectItem>
+                  <SelectItem value="substituicao_vidros">{language === 'pt' ? 'Substituição de Vidros' : 'Glass Replacement'}</SelectItem>
+                  <SelectItem value="outro">{language === 'pt' ? 'Outro' : 'Other'}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="text-sm font-medium">{language === 'pt' ? 'Observações' : 'Notes'}</label>
+              <Textarea
+                value={editarObservacoes}
+                onChange={(e) => setEditarObservacoes(e.target.value)}
+                placeholder={language === 'pt' ? 'Observações adicionais...' : 'Additional notes...'}
+                className="mt-1"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditarDialogOpen(false)}>
+              {language === 'pt' ? 'Cancelar' : 'Cancel'}
+            </Button>
+            <Button
+              onClick={() => {
+                if (pedidoSelecionado) {
+                  editarMutation.mutate({
+                    token,
+                    pedidoId: pedidoSelecionado.id,
+                    data: editarData,
+                    periodo: editarPeriodo,
+                    tipoApoio: editarTipoApoio,
+                    observacoes: editarObservacoes,
+                  });
+                }
+              }}
+              disabled={editarMutation.isPending}
+            >
+              {editarMutation.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : (
+                <Pencil className="h-4 w-4 mr-2" />
+              )}
+              {language === 'pt' ? 'Guardar' : 'Save'}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

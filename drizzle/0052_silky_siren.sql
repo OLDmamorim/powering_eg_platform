@@ -1,0 +1,1 @@
+ALTER TABLE `pedidos_apoio` MODIFY COLUMN `pedido_apoio_estado` enum('pendente','aprovado','reprovado','cancelado','anulado') NOT NULL DEFAULT 'pendente';

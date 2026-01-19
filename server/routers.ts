@@ -7953,6 +7953,120 @@ IMPORTANTE:
           evolucao,
         };
       }),
+    
+    // Anular pedido de apoio aprovado (pelo volante)
+    anularPedido: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        pedidoId: z.number(),
+        motivo: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const tokenData = await db.validateTokenVolante(input.token);
+        if (!tokenData) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        
+        // Obter dados do pedido antes de anular
+        const pedidoExistente = await db.getPedidoApoioById(input.pedidoId);
+        if (!pedidoExistente) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Pedido não encontrado' });
+        }
+        
+        if (pedidoExistente.estado !== 'aprovado') {
+          throw new TRPCError({ code: 'BAD_REQUEST', message: 'Apenas pedidos aprovados podem ser anulados' });
+        }
+        
+        // Anular o pedido (mudar estado para 'anulado')
+        await db.anularPedidoApoio(input.pedidoId, input.motivo);
+        
+        // Enviar email à loja sobre anulação
+        const loja = await db.getLojaById(pedidoExistente.lojaId);
+        if (loja?.email) {
+          const tipoApoioTexto = pedidoExistente.tipoApoio === 'cobertura_ferias' ? 'Cobertura de Férias' : 
+                                pedidoExistente.tipoApoio === 'substituicao_vidros' ? 'Substituição de Vidros' : 'Outro';
+          const periodoTexto = pedidoExistente.periodo === 'manha' ? 'Manhã (9h-13h)' : 'Tarde (14h-18h)';
+          const dataFormatada = new Date(pedidoExistente.data).toLocaleDateString('pt-PT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+          
+          try {
+            await sendEmail({
+              to: loja.email,
+              subject: `Apoio Anulado - ${dataFormatada}`,
+              html: gerarHTMLPedidoAnulado({
+                lojaNome: loja.nome,
+                volanteNome: tokenData.volante.nome,
+                data: dataFormatada,
+                periodo: periodoTexto,
+                tipoApoio: tipoApoioTexto,
+                motivo: input.motivo,
+              }),
+            });
+          } catch (emailError) {
+            console.error('Erro ao enviar email de anulação:', emailError);
+          }
+        }
+        
+        return { success: true };
+      }),
+    
+    // Editar pedido de apoio (pelo volante)
+    editarPedido: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        pedidoId: z.number(),
+        data: z.string().optional(),
+        periodo: z.enum(['manha', 'tarde']).optional(),
+        tipoApoio: z.enum(['cobertura_ferias', 'substituicao_vidros', 'outro']).optional(),
+        observacoes: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const tokenData = await db.validateTokenVolante(input.token);
+        if (!tokenData) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        
+        // Obter dados do pedido antes de editar
+        const pedidoExistente = await db.getPedidoApoioById(input.pedidoId);
+        if (!pedidoExistente) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Pedido não encontrado' });
+        }
+        
+        // Editar o pedido
+        const pedidoAtualizado = await db.editarPedidoApoio(input.pedidoId, {
+          data: input.data,
+          periodo: input.periodo,
+          tipoApoio: input.tipoApoio,
+          observacoes: input.observacoes,
+        });
+        
+        // Enviar email à loja sobre edição
+        const loja = await db.getLojaById(pedidoExistente.lojaId);
+        if (loja?.email) {
+          const tipoApoioTexto = (input.tipoApoio || pedidoExistente.tipoApoio) === 'cobertura_ferias' ? 'Cobertura de Férias' : 
+                                (input.tipoApoio || pedidoExistente.tipoApoio) === 'substituicao_vidros' ? 'Substituição de Vidros' : 'Outro';
+          const periodoTexto = (input.periodo || pedidoExistente.periodo) === 'manha' ? 'Manhã (9h-13h)' : 'Tarde (14h-18h)';
+          const dataFormatada = new Date(input.data || pedidoExistente.data).toLocaleDateString('pt-PT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+          
+          try {
+            await sendEmail({
+              to: loja.email,
+              subject: `Apoio Alterado - ${dataFormatada}`,
+              html: gerarHTMLPedidoEditado({
+                lojaNome: loja.nome,
+                volanteNome: tokenData.volante.nome,
+                data: dataFormatada,
+                periodo: periodoTexto,
+                tipoApoio: tipoApoioTexto,
+                observacoes: input.observacoes || pedidoExistente.observacoes,
+              }),
+            });
+          } catch (emailError) {
+            console.error('Erro ao enviar email de edição:', emailError);
+          }
+        }
+        
+        return pedidoAtualizado;
+      }),
   }),
 });
 
@@ -8730,6 +8844,137 @@ function gerarHTMLPedidoReprovado(dados: {
       ` : ''}
       
       <p style="margin-top: 25px;">Se precisar de apoio, por favor submeta um novo pedido para uma data diferente.</p>
+    </div>
+    <div class="footer">
+      <p>PoweringEG Platform 2.0 - Sistema de Gestão de Apoios</p>
+      <p>Este email foi gerado automaticamente.</p>
+    </div>
+  </div>
+</body>
+</html>
+  `;
+}
+
+// Função auxiliar para gerar HTML do email de pedido anulado
+function gerarHTMLPedidoAnulado(dados: {
+  lojaNome: string;
+  volanteNome: string;
+  data: string;
+  periodo: string;
+  tipoApoio: string;
+  motivo?: string;
+}): string {
+  return `
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f3f4f6; }
+    .container { max-width: 600px; margin: 0 auto; background: #ffffff; }
+    .header { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); padding: 30px; text-align: center; }
+    .header img { max-width: 150px; margin-bottom: 15px; }
+    .header h1 { color: #ffffff; margin: 0; font-size: 24px; }
+    .content { padding: 30px; }
+    .badge { display: inline-block; background: #fef3c7; color: #92400e; padding: 8px 16px; border-radius: 20px; font-weight: bold; margin: 15px 0; }
+    .info-box { background: #f9fafb; border-radius: 8px; padding: 20px; margin: 20px 0; }
+    .info-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e5e7eb; }
+    .info-row:last-child { border-bottom: none; }
+    .info-label { color: #6b7280; }
+    .info-value { font-weight: 600; color: #111827; }
+    .motivo-box { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0; border-radius: 0 8px 8px 0; }
+    .footer { background: #1f2937; color: #9ca3af; padding: 20px; text-align: center; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663088836799/YrkmGCRDVqYgFnZO.png" alt="ExpressGlass" />
+      <h1>Apoio Anulado</h1>
+    </div>
+    <div class="content">
+      <p>Olá <strong>${dados.lojaNome}</strong>,</p>
+      <p>O apoio previamente aprovado foi <strong>anulado</strong>.</p>
+      
+      <div class="badge">⚠️ Anulado</div>
+      
+      <div class="info-box">
+        <div class="info-row"><span class="info-label">👤 Volante:</span> <span class="info-value">${dados.volanteNome}</span></div>
+        <div class="info-row"><span class="info-label">📅 Data:</span> <span class="info-value">${dados.data}</span></div>
+        <div class="info-row"><span class="info-label">⏰ Período:</span> <span class="info-value">${dados.periodo}</span></div>
+        <div class="info-row"><span class="info-label">📝 Tipo:</span> <span class="info-value">${dados.tipoApoio}</span></div>
+      </div>
+      
+      ${dados.motivo ? `
+      <div class="motivo-box">
+        <strong>💬 Motivo da anulação:</strong><br/>
+        ${dados.motivo}
+      </div>
+      ` : ''}
+      
+      <p style="margin-top: 25px;">Se precisar de apoio, por favor submeta um novo pedido.</p>
+    </div>
+    <div class="footer">
+      <p>PoweringEG Platform 2.0 - Sistema de Gestão de Apoios</p>
+      <p>Este email foi gerado automaticamente.</p>
+    </div>
+  </div>
+</body>
+</html>
+  `;
+}
+
+// Função auxiliar para gerar HTML do email de pedido editado
+function gerarHTMLPedidoEditado(dados: {
+  lojaNome: string;
+  volanteNome: string;
+  data: string;
+  periodo: string;
+  tipoApoio: string;
+  observacoes?: string | null;
+}): string {
+  return `
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f3f4f6; }
+    .container { max-width: 600px; margin: 0 auto; background: #ffffff; }
+    .header { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); padding: 30px; text-align: center; }
+    .header img { max-width: 150px; margin-bottom: 15px; }
+    .header h1 { color: #ffffff; margin: 0; font-size: 24px; }
+    .content { padding: 30px; }
+    .badge { display: inline-block; background: #dbeafe; color: #1e40af; padding: 8px 16px; border-radius: 20px; font-weight: bold; margin: 15px 0; }
+    .info-box { background: #f9fafb; border-radius: 8px; padding: 20px; margin: 20px 0; }
+    .info-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e5e7eb; }
+    .info-row:last-child { border-bottom: none; }
+    .info-label { color: #6b7280; }
+    .info-value { font-weight: 600; color: #111827; }
+    .footer { background: #1f2937; color: #9ca3af; padding: 20px; text-align: center; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663088836799/YrkmGCRDVqYgFnZO.png" alt="ExpressGlass" />
+      <h1>Apoio Alterado</h1>
+    </div>
+    <div class="content">
+      <p>Olá <strong>${dados.lojaNome}</strong>,</p>
+      <p>Os detalhes do seu apoio foram <strong>alterados</strong>.</p>
+      
+      <div class="badge">✏️ Alterado</div>
+      
+      <div class="info-box">
+        <div class="info-row"><span class="info-label">👤 Volante:</span> <span class="info-value">${dados.volanteNome}</span></div>
+        <div class="info-row"><span class="info-label">📅 Data:</span> <span class="info-value">${dados.data}</span></div>
+        <div class="info-row"><span class="info-label">⏰ Período:</span> <span class="info-value">${dados.periodo}</span></div>
+        <div class="info-row"><span class="info-label">📝 Tipo:</span> <span class="info-value">${dados.tipoApoio}</span></div>
+        ${dados.observacoes ? `<div class="info-row"><span class="info-label">💬 Observações:</span> <span class="info-value">${dados.observacoes}</span></div>` : ''}
+      </div>
+      
+      <p style="margin-top: 25px;">Por favor, verifique os novos detalhes do apoio.</p>
     </div>
     <div class="footer">
       <p>PoweringEG Platform 2.0 - Sistema de Gestão de Apoios</p>
