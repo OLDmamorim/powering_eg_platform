@@ -3244,3 +3244,11 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## Bugs v6.7.3 - Correções Portal da Loja
 - [x] Corrigir emojis no PDF (aparecem como caracteres estranhos) - substituídos por [!], [+], [>]
 - [x] Melhorar feedback do botão de instalação PWA (toast com instruções detalhadas)
+
+
+## Funcionalidade v6.8 - Menu Inicial PWA
+- [x] Criar página MenuInicial com cards selecionáveis grandes
+- [x] Para Gestores/Admins: 3 cards (Dashboard, Chatbot IA, Portal do Gestor)
+- [x] Para Lojas: Redirecionar direto para Portal da Loja
+- [x] Sem sessão: Mostrar página de login com opções (Gestor/Loja)
+- [x] Configurar como página inicial da PWA (rota /)

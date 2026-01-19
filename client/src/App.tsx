@@ -46,6 +46,7 @@ import TopicosReuniao from "./pages/TopicosReuniao";
 import ProjecaoVisitasPage from "./pages/ProjecaoVisitasPage";
 import RelacoesLojas from "./pages/RelacoesLojas";
 import PortalGestor from "./pages/PortalGestor";
+import MenuInicial from "./pages/MenuInicial";
 import { DemoBanner } from "./components/DemoBanner";
 import { LanguageProvider } from "./contexts/LanguageContext";
 
@@ -53,9 +54,8 @@ import { LanguageProvider } from "./contexts/LanguageContext";
 function Router() {
   return (
     <Switch>
-      <Route path={"/"}>
-        <Redirect to="/dashboard" />
-      </Route>
+      <Route path={"/"} component={MenuInicial} />
+      <Route path={"/menu"} component={MenuInicial} />
       <Route path={"/dashboard"} component={Dashboard} />
       <Route path={"/assistente-ia"} component={AssistenteIA} />
       
