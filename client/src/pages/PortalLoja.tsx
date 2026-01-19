@@ -709,6 +709,20 @@ export default function PortalLoja() {
                 <Users className="h-3 w-3" />
                 {dadosLoja?.gestorNome || 'N/A'}
               </p>
+              {/* Badge de tipo de acesso */}
+              <Badge 
+                variant="outline" 
+                className={`text-xs px-2 py-0.5 border-white/50 ${
+                  lojaAuth.tipoToken === 'responsavel' 
+                    ? 'bg-emerald-200/30 text-white' 
+                    : 'bg-amber-200/30 text-white'
+                }`}
+              >
+                {lojaAuth.tipoToken === 'responsavel' 
+                  ? (language === 'pt' ? 'Responsável' : 'Manager')
+                  : (language === 'pt' ? 'Colaborador' : 'Staff')
+                }
+              </Badge>
             </div>
             <div className="flex items-center gap-2">
               {/* Botão Instalar App ou Ativar Notificações - apenas mobile */}

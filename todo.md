@@ -3342,3 +3342,6 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Colaborador vê cards de Resultados e Tarefas (sem Reuniões e Pendentes)
 - [ ] Responsável vê todos os cards (Resultados, Tarefas, Reuniões, Pendentes)
 - [ ] Atualizar interface de gestão de tokens para mostrar ambos
+
+## Funcionalidade v6.10.3 - Indicador Tipo de Acesso
+- [x] Adicionar badge/indicador visual no Portal da Loja mostrando "Responsável" ou "Colaborador"
