@@ -3411,3 +3411,6 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [ ] Interface de Resultados do Volante igual ao Portal das Lojas
 - [ ] Mesmos gráficos, métricas e layout completo
 - [ ] Seletor de lojas com todas as lojas atribuídas ao volante
+
+## Bug Fix - Seletor de Meses no Calendário do Volante
+- [x] Adicionar botão para avançar mês no calendário

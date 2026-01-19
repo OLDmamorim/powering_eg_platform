@@ -4656,36 +4656,38 @@ END:VCALENDAR`;
             {/* Calendário */}
             <Card>
               <CardHeader>
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                   <CardTitle className="flex items-center gap-2">
                     <Calendar className="h-5 w-5" />
                     {language === 'pt' ? 'Calendário de Apoios' : 'Support Calendar'}
                   </CardTitle>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center justify-center gap-2">
                     <Button
                       variant="outline"
                       size="sm"
+                      className="h-10 w-10 p-0"
                       onClick={() => {
                         const novoMes = mesSelecionado.mes === 1 ? 12 : mesSelecionado.mes - 1;
                         const novoAno = mesSelecionado.mes === 1 ? mesSelecionado.ano - 1 : mesSelecionado.ano;
                         setMesSelecionado({ mes: novoMes, ano: novoAno });
                       }}
                     >
-                      <ChevronLeft className="h-4 w-4" />
+                      <ChevronLeft className="h-5 w-5" />
                     </Button>
-                    <span className="font-medium min-w-[140px] text-center">
+                    <span className="font-semibold text-lg min-w-[160px] text-center">
                       {nomesMeses[mesSelecionado.mes - 1]} {mesSelecionado.ano}
                     </span>
                     <Button
                       variant="outline"
                       size="sm"
+                      className="h-10 w-10 p-0"
                       onClick={() => {
                         const novoMes = mesSelecionado.mes === 12 ? 1 : mesSelecionado.mes + 1;
                         const novoAno = mesSelecionado.mes === 12 ? mesSelecionado.ano + 1 : mesSelecionado.ano;
                         setMesSelecionado({ mes: novoMes, ano: novoAno });
                       }}
                     >
-                      <ChevronRight className="h-4 w-4" />
+                      <ChevronRight className="h-5 w-5" />
                     </Button>
                   </div>
                 </div>
