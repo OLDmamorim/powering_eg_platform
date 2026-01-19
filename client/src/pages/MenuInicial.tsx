@@ -167,12 +167,9 @@ export default function MenuInicial() {
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <img 
-            src="/poweringeg-logo.png" 
+            src="/poweringeg-ai-icon-192.png" 
             alt="PoweringEG" 
-            className="h-10"
-            onError={(e) => {
-              e.currentTarget.style.display = 'none';
-            }}
+            className="h-12 w-12 rounded-xl shadow-md"
           />
           <div>
             <h1 className="text-xl font-bold text-gray-800">PoweringEG</h1>

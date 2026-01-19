@@ -3263,3 +3263,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar botão Instalar App no header mobile do Dashboard
 - [x] Botão com estilo verde (bg-green-50, text-green-700)
 - [x] Lógica PWA com instruções manuais quando não disponível
+
+
+## Funcionalidade v6.8.4 - Logo no Menu Inicial
+- [x] Adicionar logo PoweringEG no header do Menu Inicial (página dos 3 cards)
