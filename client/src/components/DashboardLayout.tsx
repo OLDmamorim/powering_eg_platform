@@ -489,54 +489,54 @@ function DashboardLayoutContent({
       <SidebarInset>
         {/* Header Mobile */}
         {isMobile && (
-          <div className="flex border-b h-14 items-center justify-between bg-background/95 px-2 backdrop-blur supports-[backdrop-filter]:backdrop-blur sticky top-0 z-40">
-            <div className="flex items-center gap-2">
-              <SidebarTrigger className="h-9 w-9 rounded-lg bg-background" />
-              <div className="flex items-center gap-3">
-                <div className="flex flex-col gap-1">
-                  <span className="tracking-tight text-foreground">
-                    {activeMenuItem?.label ?? "Menu"}
-                  </span>
-                </div>
+          <div className="flex flex-col border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:backdrop-blur sticky top-0 z-40">
+            {/* Linha 1: Menu toggle, Título, Ações principais */}
+            <div className="flex h-12 items-center justify-between px-2">
+              <div className="flex items-center gap-2 min-w-0 flex-1">
+                <SidebarTrigger className="h-9 w-9 rounded-lg bg-background flex-shrink-0" />
+                <span className="tracking-tight text-foreground text-sm font-medium truncate">
+                  {activeMenuItem?.label ?? "Menu"}
+                </span>
+              </div>
+              <div className="flex items-center gap-1 flex-shrink-0">
+                {switchable && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={toggleTheme}
+                    className="h-8 w-8 p-0"
+                    title={theme === 'light' ? (language === 'pt' ? 'Modo Escuro' : 'Dark Mode') : (language === 'pt' ? 'Modo Claro' : 'Light Mode')}
+                  >
+                    {theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+                  </Button>
+                )}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setLanguage(language === 'pt' ? 'en' : 'pt')}
+                  className="h-8 w-8 p-0"
+                >
+                  <Globe className="h-4 w-4" />
+                </Button>
+                <img 
+                  src="/eglass-logo.png" 
+                  alt="ExpressGlass Logo" 
+                  className="h-7 w-auto object-contain"
+                />
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              {/* Botão Instalar App - apenas mobile */}
+            {/* Linha 2: Botão Instalar centralizado */}
+            <div className="flex items-center justify-center pb-2 px-2">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={handleInstallPWA}
-                className="h-8 px-2 text-xs font-medium bg-green-50 text-green-700 border-green-300 hover:bg-green-100"
+                className="h-8 px-4 text-xs font-medium bg-green-50 text-green-700 border-green-300 hover:bg-green-100 w-full max-w-xs"
                 title={language === 'pt' ? 'Instalar App' : 'Install App'}
               >
-                <Download className="h-4 w-4 mr-1" />
-                {language === 'pt' ? 'Instalar' : 'Install'}
+                <Download className="h-4 w-4 mr-2" />
+                {language === 'pt' ? 'Instalar PoweringEG' : 'Install PoweringEG'}
               </Button>
-              {switchable && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={toggleTheme}
-                  className="h-8 w-8 p-0"
-                  title={theme === 'light' ? (language === 'pt' ? 'Modo Escuro' : 'Dark Mode') : (language === 'pt' ? 'Modo Claro' : 'Light Mode')}
-                >
-                  {theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
-                </Button>
-              )}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setLanguage(language === 'pt' ? 'en' : 'pt')}
-                className="h-8 px-2 text-xs font-medium"
-              >
-                <Globe className="h-4 w-4 mr-1" />
-                {language.toUpperCase()}
-              </Button>
-              <img 
-                src="/eglass-logo.png" 
-                alt="ExpressGlass Logo" 
-                className="h-8 w-auto object-contain"
-              />
             </div>
           </div>
         )}
@@ -577,7 +577,7 @@ function DashboardLayoutContent({
           {children}
 
           <div className="fixed bottom-4 right-4 text-xs text-foreground/60 select-none pointer-events-none">
-            v6.9.1
+            v6.9.2
           </div>
         </main>
       </SidebarInset>

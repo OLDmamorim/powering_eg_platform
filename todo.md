@@ -3287,3 +3287,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Remover botão Instalar duplicado do AssistenteIA (aparecia no header E nos breadcrumbs)
 - [x] Manter apenas um botão Instalar no header do DashboardLayout
 - [x] Limpar imports não utilizados (Download, Smartphone, usePWAInstallAssistente)
+
+## Correção v6.9.2 - Layout Header Mobile
+- [x] Reorganizar header mobile para evitar sobreposição do botão Instalar
+- [x] Melhorar espaçamento entre elementos no header
