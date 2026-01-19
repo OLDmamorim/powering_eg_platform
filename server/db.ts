@@ -93,7 +93,22 @@ import {
   InsertRelacaoLojas,
   pushSubscriptions,
   PushSubscription,
-  InsertPushSubscription
+  InsertPushSubscription,
+  volantes,
+  Volante,
+  InsertVolante,
+  volanteLojas,
+  VolanteLoja,
+  InsertVolanteLoja,
+  tokensVolante,
+  TokenVolante,
+  InsertTokenVolante,
+  pedidosApoio,
+  PedidoApoio,
+  InsertPedidoApoio,
+  lojaVolante,
+  LojaVolante,
+  InsertLojaVolante
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -8082,4 +8097,508 @@ export async function removePushSubscription(endpoint: string): Promise<void> {
   await db
     .delete(pushSubscriptions)
     .where(eq(pushSubscriptions.endpoint, endpoint));
+}
+
+
+// ==================== VOLANTES ====================
+
+/**
+ * Criar um novo volante
+ */
+export async function createVolante(data: { nome: string; email?: string; telefone?: string; gestorId: number }): Promise<Volante | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const result = await db.insert(volantes).values({
+    nome: data.nome,
+    email: data.email || null,
+    telefone: data.telefone || null,
+    gestorId: data.gestorId,
+    ativo: true
+  });
+  
+  const insertId = result[0]?.insertId;
+  if (!insertId) return null;
+  
+  const created = await db.select().from(volantes).where(eq(volantes.id, insertId));
+  return created[0] || null;
+}
+
+/**
+ * Obter todos os volantes de um gestor
+ */
+export async function getVolantesByGestorId(gestorId: number): Promise<Volante[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db
+    .select()
+    .from(volantes)
+    .where(eq(volantes.gestorId, gestorId))
+    .orderBy(volantes.nome);
+}
+
+/**
+ * Obter volante por ID
+ */
+export async function getVolanteById(id: number): Promise<Volante | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const result = await db.select().from(volantes).where(eq(volantes.id, id));
+  return result[0] || null;
+}
+
+/**
+ * Atualizar volante
+ */
+export async function updateVolante(id: number, data: { nome?: string; email?: string; telefone?: string; ativo?: boolean }): Promise<Volante | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  await db.update(volantes).set(data).where(eq(volantes.id, id));
+  
+  const updated = await db.select().from(volantes).where(eq(volantes.id, id));
+  return updated[0] || null;
+}
+
+/**
+ * Eliminar volante
+ */
+export async function deleteVolante(id: number): Promise<boolean> {
+  const db = await getDb();
+  if (!db) return false;
+  
+  // Primeiro eliminar associações
+  await db.delete(volanteLojas).where(eq(volanteLojas.volanteId, id));
+  await db.delete(tokensVolante).where(eq(tokensVolante.volanteId, id));
+  await db.delete(lojaVolante).where(eq(lojaVolante.volanteId, id));
+  
+  // Depois eliminar o volante
+  await db.delete(volantes).where(eq(volantes.id, id));
+  return true;
+}
+
+// ==================== VOLANTE-LOJAS (Lojas que o volante pode apoiar) ====================
+
+/**
+ * Atribuir lojas a um volante (lojas que ele pode apoiar)
+ */
+export async function assignLojasToVolante(volanteId: number, lojaIds: number[]): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  
+  // Remover atribuições existentes
+  await db.delete(volanteLojas).where(eq(volanteLojas.volanteId, volanteId));
+  
+  // Adicionar novas atribuições
+  if (lojaIds.length > 0) {
+    await db.insert(volanteLojas).values(
+      lojaIds.map(lojaId => ({ volanteId, lojaId }))
+    );
+  }
+}
+
+/**
+ * Obter lojas atribuídas a um volante
+ */
+export async function getLojasByVolanteId(volanteId: number): Promise<Loja[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const result = await db
+    .select({ loja: lojas })
+    .from(volanteLojas)
+    .innerJoin(lojas, eq(volanteLojas.lojaId, lojas.id))
+    .where(eq(volanteLojas.volanteId, volanteId))
+    .orderBy(lojas.nome);
+  
+  return result.map(r => r.loja);
+}
+
+// ==================== LOJA-VOLANTE (Volante atribuído a cada loja) ====================
+
+/**
+ * Atribuir volante a uma loja (cada loja só pode ter 1 volante)
+ */
+export async function assignVolanteToLoja(lojaId: number, volanteId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  
+  // Verificar se já existe atribuição
+  const existing = await db.select().from(lojaVolante).where(eq(lojaVolante.lojaId, lojaId));
+  
+  if (existing.length > 0) {
+    // Atualizar
+    await db.update(lojaVolante).set({ volanteId }).where(eq(lojaVolante.lojaId, lojaId));
+  } else {
+    // Inserir
+    await db.insert(lojaVolante).values({ lojaId, volanteId });
+  }
+}
+
+/**
+ * Remover volante de uma loja
+ */
+export async function removeVolanteFromLoja(lojaId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  
+  await db.delete(lojaVolante).where(eq(lojaVolante.lojaId, lojaId));
+}
+
+/**
+ * Obter volante atribuído a uma loja
+ */
+export async function getVolanteByLojaId(lojaId: number): Promise<Volante | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const result = await db
+    .select({ volante: volantes })
+    .from(lojaVolante)
+    .innerJoin(volantes, eq(lojaVolante.volanteId, volantes.id))
+    .where(eq(lojaVolante.lojaId, lojaId));
+  
+  return result[0]?.volante || null;
+}
+
+// ==================== TOKENS VOLANTE ====================
+
+/**
+ * Criar ou obter token de um volante
+ */
+export async function getOrCreateTokenVolante(volanteId: number): Promise<TokenVolante | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  // Verificar se já existe token ativo
+  const existing = await db
+    .select()
+    .from(tokensVolante)
+    .where(and(
+      eq(tokensVolante.volanteId, volanteId),
+      eq(tokensVolante.ativo, true)
+    ));
+  
+  if (existing.length > 0) {
+    return existing[0];
+  }
+  
+  // Criar novo token
+  const token = generateSecureToken();
+  const result = await db.insert(tokensVolante).values({
+    volanteId,
+    token,
+    ativo: true
+  });
+  
+  const insertId = result[0]?.insertId;
+  if (!insertId) return null;
+  
+  const created = await db.select().from(tokensVolante).where(eq(tokensVolante.id, insertId));
+  return created[0] || null;
+}
+
+/**
+ * Validar token de volante
+ */
+export async function validateTokenVolante(token: string): Promise<{ volante: Volante; tokenData: TokenVolante } | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const result = await db
+    .select({ tokenData: tokensVolante, volante: volantes })
+    .from(tokensVolante)
+    .innerJoin(volantes, eq(tokensVolante.volanteId, volantes.id))
+    .where(and(
+      eq(tokensVolante.token, token),
+      eq(tokensVolante.ativo, true),
+      eq(volantes.ativo, true)
+    ));
+  
+  if (result.length === 0) return null;
+  
+  // Atualizar último acesso
+  await db.update(tokensVolante).set({ ultimoAcesso: new Date() }).where(eq(tokensVolante.token, token));
+  
+  return result[0];
+}
+
+/**
+ * Obter token de um volante
+ */
+export async function getTokenVolante(volanteId: number): Promise<TokenVolante | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const result = await db
+    .select()
+    .from(tokensVolante)
+    .where(and(
+      eq(tokensVolante.volanteId, volanteId),
+      eq(tokensVolante.ativo, true)
+    ));
+  
+  return result[0] || null;
+}
+
+/**
+ * Desativar token de volante
+ */
+export async function deactivateTokenVolante(volanteId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  
+  await db.update(tokensVolante).set({ ativo: false }).where(eq(tokensVolante.volanteId, volanteId));
+}
+
+// ==================== PEDIDOS DE APOIO ====================
+
+/**
+ * Criar pedido de apoio
+ */
+export async function createPedidoApoio(data: {
+  lojaId: number;
+  volanteId: number;
+  data: Date;
+  periodo: 'manha' | 'tarde';
+  tipoApoio: 'cobertura_ferias' | 'substituicao_vidros' | 'outro';
+  observacoes?: string;
+}): Promise<PedidoApoio | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const result = await db.insert(pedidosApoio).values({
+    lojaId: data.lojaId,
+    volanteId: data.volanteId,
+    data: data.data,
+    periodo: data.periodo,
+    tipoApoio: data.tipoApoio,
+    observacoes: data.observacoes || null,
+    estado: 'pendente'
+  });
+  
+  const insertId = result[0]?.insertId;
+  if (!insertId) return null;
+  
+  const created = await db.select().from(pedidosApoio).where(eq(pedidosApoio.id, insertId));
+  return created[0] || null;
+}
+
+/**
+ * Obter pedido de apoio por ID
+ */
+export async function getPedidoApoioById(pedidoId: number): Promise<PedidoApoio | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const result = await db
+    .select()
+    .from(pedidosApoio)
+    .where(eq(pedidosApoio.id, pedidoId));
+  
+  return result[0] || null;
+}
+
+/**
+ * Obter pedidos de apoio de um volante
+ */
+export async function getPedidosApoioByVolanteId(volanteId: number): Promise<(PedidoApoio & { loja: Loja })[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const result = await db
+    .select({ pedido: pedidosApoio, loja: lojas })
+    .from(pedidosApoio)
+    .innerJoin(lojas, eq(pedidosApoio.lojaId, lojas.id))
+    .where(eq(pedidosApoio.volanteId, volanteId))
+    .orderBy(desc(pedidosApoio.data));
+  
+  return result.map(r => ({ ...r.pedido, loja: r.loja }));
+}
+
+/**
+ * Obter pedidos de apoio de uma loja
+ */
+export async function getPedidosApoioByLojaId(lojaId: number): Promise<PedidoApoio[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db
+    .select()
+    .from(pedidosApoio)
+    .where(eq(pedidosApoio.lojaId, lojaId))
+    .orderBy(desc(pedidosApoio.data));
+}
+
+/**
+ * Obter pedidos de apoio por data (para o calendário)
+ */
+export async function getPedidosApoioByVolanteIdAndMonth(volanteId: number, year: number, month: number): Promise<(PedidoApoio & { loja: Loja })[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const startDate = new Date(year, month - 1, 1);
+  const endDate = new Date(year, month, 0, 23, 59, 59);
+  
+  const result = await db
+    .select({ pedido: pedidosApoio, loja: lojas })
+    .from(pedidosApoio)
+    .innerJoin(lojas, eq(pedidosApoio.lojaId, lojas.id))
+    .where(and(
+      eq(pedidosApoio.volanteId, volanteId),
+      gte(pedidosApoio.data, startDate),
+      lte(pedidosApoio.data, endDate)
+    ))
+    .orderBy(pedidosApoio.data);
+  
+  return result.map(r => ({ ...r.pedido, loja: r.loja }));
+}
+
+/**
+ * Aprovar pedido de apoio
+ */
+export async function aprovarPedidoApoio(pedidoId: number, links: { google?: string; outlook?: string; ics?: string }): Promise<PedidoApoio | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  await db.update(pedidosApoio).set({
+    estado: 'aprovado',
+    dataResposta: new Date(),
+    linkGoogleCalendar: links.google || null,
+    linkOutlook: links.outlook || null,
+    linkICS: links.ics || null
+  }).where(eq(pedidosApoio.id, pedidoId));
+  
+  const updated = await db.select().from(pedidosApoio).where(eq(pedidosApoio.id, pedidoId));
+  return updated[0] || null;
+}
+
+/**
+ * Reprovar pedido de apoio
+ */
+export async function reprovarPedidoApoio(pedidoId: number, motivo?: string): Promise<PedidoApoio | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  await db.update(pedidosApoio).set({
+    estado: 'reprovado',
+    dataResposta: new Date(),
+    motivoReprovacao: motivo || null
+  }).where(eq(pedidosApoio.id, pedidoId));
+  
+  const updated = await db.select().from(pedidosApoio).where(eq(pedidosApoio.id, pedidoId));
+  return updated[0] || null;
+}
+
+/**
+ * Cancelar pedido de apoio (pela loja)
+ */
+export async function cancelarPedidoApoio(pedidoId: number): Promise<boolean> {
+  const db = await getDb();
+  if (!db) return false;
+  
+  await db.update(pedidosApoio).set({ estado: 'cancelado' }).where(eq(pedidosApoio.id, pedidoId));
+  return true;
+}
+
+/**
+ * Verificar disponibilidade de um dia para pedidos de apoio
+ * Retorna o estado do dia: 'livre', 'manha_ocupada', 'tarde_ocupada', 'dia_completo'
+ */
+export async function verificarDisponibilidadeDia(volanteId: number, data: Date): Promise<'livre' | 'manha_ocupada' | 'tarde_ocupada' | 'dia_completo'> {
+  const db = await getDb();
+  if (!db) return 'livre';
+  
+  // Normalizar data para início do dia
+  const startOfDay = new Date(data);
+  startOfDay.setHours(0, 0, 0, 0);
+  const endOfDay = new Date(data);
+  endOfDay.setHours(23, 59, 59, 999);
+  
+  const pedidos = await db
+    .select()
+    .from(pedidosApoio)
+    .where(and(
+      eq(pedidosApoio.volanteId, volanteId),
+      gte(pedidosApoio.data, startOfDay),
+      lte(pedidosApoio.data, endOfDay),
+      eq(pedidosApoio.estado, 'aprovado')
+    ));
+  
+  const temManha = pedidos.some(p => p.periodo === 'manha');
+  const temTarde = pedidos.some(p => p.periodo === 'tarde');
+  
+  if (temManha && temTarde) return 'dia_completo';
+  if (temManha) return 'manha_ocupada';
+  if (temTarde) return 'tarde_ocupada';
+  return 'livre';
+}
+
+/**
+ * Obter estado de todos os dias de um mês para o calendário
+ */
+export async function getEstadoDiasDoMes(volanteId: number, year: number, month: number): Promise<Map<string, { estado: string; pedidos: PedidoApoio[] }>> {
+  const db = await getDb();
+  const resultado = new Map<string, { estado: string; pedidos: PedidoApoio[] }>();
+  
+  if (!db) return resultado;
+  
+  const startDate = new Date(year, month - 1, 1);
+  const endDate = new Date(year, month, 0, 23, 59, 59);
+  
+  const pedidos = await db
+    .select()
+    .from(pedidosApoio)
+    .where(and(
+      eq(pedidosApoio.volanteId, volanteId),
+      gte(pedidosApoio.data, startDate),
+      lte(pedidosApoio.data, endDate)
+    ));
+  
+  // Agrupar por dia
+  for (const pedido of pedidos) {
+    const dataStr = pedido.data.toISOString().split('T')[0];
+    
+    if (!resultado.has(dataStr)) {
+      resultado.set(dataStr, { estado: 'livre', pedidos: [] });
+    }
+    
+    resultado.get(dataStr)!.pedidos.push(pedido);
+  }
+  
+  // Calcular estado de cada dia
+  for (const [dataStr, dados] of Array.from(resultado.entries())) {
+    const pedidosAprovados = dados.pedidos.filter((p: PedidoApoio) => p.estado === 'aprovado');
+    const pedidosPendentes = dados.pedidos.filter((p: PedidoApoio) => p.estado === 'pendente');
+    
+    const manhaAprovada = pedidosAprovados.some((p: PedidoApoio) => p.periodo === 'manha');
+    const tardeAprovada = pedidosAprovados.some((p: PedidoApoio) => p.periodo === 'tarde');
+    const temPendente = pedidosPendentes.length > 0;
+    
+    if (manhaAprovada && tardeAprovada) {
+      dados.estado = 'dia_completo'; // Vermelho
+    } else if (manhaAprovada) {
+      dados.estado = 'manha_aprovada'; // Roxo
+    } else if (tardeAprovada) {
+      dados.estado = 'tarde_aprovada'; // Azul
+    } else if (temPendente) {
+      dados.estado = 'pendente'; // Amarelo
+    } else {
+      dados.estado = 'livre';
+    }
+  }
+  
+  return resultado;
+}
+
+// Helper para gerar token seguro (já existe no ficheiro, mas vamos garantir)
+function generateSecureToken(): string {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let token = '';
+  for (let i = 0; i < 64; i++) {
+    token += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return token;
 }

@@ -1,0 +1,28 @@
+{
+  "query": "SELECT * FROM volante_lojas;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT * FROM volante_lojas;",
+  "rows": [
+    {
+      "id": "1",
+      "volanteId": "1",
+      "lojaId": "1",
+      "createdAt": "2026-01-19 18:36:33"
+    },
+    {
+      "id": "2",
+      "volanteId": "1",
+      "lojaId": "2",
+      "createdAt": "2026-01-19 18:36:33"
+    },
+    {
+      "id": "3",
+      "volanteId": "1",
+      "lojaId": "3",
+      "createdAt": "2026-01-19 18:36:33"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tvolanteId\tlojaId\tcreatedAt\n1\t1\t1\t2026-01-19 18:36:33\n2\t1\t2\t2026-01-19 18:36:33\n3\t1\t3\t2026-01-19 18:36:33\n",
+  "stderr": "",
+  "execution_time_ms": 350
+}

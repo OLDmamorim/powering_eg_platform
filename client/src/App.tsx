@@ -45,6 +45,7 @@ import AssistenteWidget from "./pages/AssistenteWidget";
 import TopicosReuniao from "./pages/TopicosReuniao";
 import ProjecaoVisitasPage from "./pages/ProjecaoVisitasPage";
 import RelacoesLojas from "./pages/RelacoesLojas";
+import Volantes from "./pages/Volantes";
 import PortalGestor from "./pages/PortalGestor";
 import MenuInicial from "./pages/MenuInicial";
 import { DemoBanner } from "./components/DemoBanner";
@@ -69,6 +70,7 @@ function Router() {
       {/* Gestor routes */}
       <Route path={"/minhas-lojas"} component={MinhasLojas} />
       <Route path={"/relacoes-lojas"} component={RelacoesLojas} />
+      <Route path={"/volantes"} component={Volantes} />
       <Route path={"/portal-gestor"} component={PortalGestor} />
       <Route path={"/relatorio-livre"} component={RelatorioLivre} />
       <Route path={"/relatorio-completo"} component={RelatorioCompleto} />

@@ -1,0 +1,22 @@
+{
+  "query": "SELECT id, nome FROM lojas LIMIT 3;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT id, nome FROM lojas LIMIT 3;",
+  "rows": [
+    {
+      "id": "60001",
+      "nome": "Famalicão"
+    },
+    {
+      "id": "60002",
+      "nome": "Barcelos"
+    },
+    {
+      "id": "60003",
+      "nome": "Vila Verde"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tnome\n60001\tFamalicão\n60002\tBarcelos\n60003\tVila Verde\n",
+  "stderr": "",
+  "execution_time_ms": 339
+}

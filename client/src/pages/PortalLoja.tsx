@@ -96,6 +96,12 @@ import {
   Rocket,
   RefreshCw,
   Bell,
+  Car,
+  Check,
+  XCircle,
+  ChevronLeft,
+  ChevronRight,
+  Mail,
 } from "lucide-react";
 
 interface LojaAuth {
@@ -104,6 +110,13 @@ interface LojaAuth {
   lojaEmail: string | null;
   tipoToken: 'responsavel' | 'colaborador';
   lojasRelacionadas?: Array<{ id: number; nome: string }>;
+}
+
+interface VolanteAuth {
+  volanteId: number;
+  volanteNome: string;
+  volanteEmail: string | null;
+  lojasAtribuidas: Array<{ id: number; nome: string }>;
 }
 
 export default function PortalLoja() {
@@ -131,7 +144,21 @@ export default function PortalLoja() {
     return null;
   });
   const [lojaAtualId, setLojaAtualId] = useState<number | null>(null);
-  const [activeTab, setActiveTab] = useState<"home" | "reuniao" | "pendentes" | "historico" | "tarefas" | "resultados">("home");
+  // Estado para autenticação de volante
+  const [volanteAuth, setVolanteAuth] = useState<VolanteAuth | null>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('volanteAuth');
+        if (saved) {
+          return JSON.parse(saved);
+        }
+      } catch (e) {
+        console.error('Erro ao restaurar volanteAuth:', e);
+      }
+    }
+    return null;
+  });
+  const [activeTab, setActiveTab] = useState<"home" | "reuniao" | "pendentes" | "historico" | "tarefas" | "resultados" | "volante" | "agenda">("home");
   const [filtroTarefas, setFiltroTarefas] = useState<"todas" | "recebidas" | "enviadas" | "internas">("todas");
   // Estado para o filtro de meses do dashboard
   const [mesesSelecionadosDashboard, setMesesSelecionadosDashboard] = useState<MesSelecionado[]>(() => {
@@ -320,26 +347,89 @@ export default function PortalLoja() {
     }
   }, []);
 
+  // Query para validar token de volante
+  const { data: volanteValidation, isLoading: isValidatingVolante } = trpc.portalVolante.validarToken.useQuery(
+    { token },
+    { 
+      enabled: !!token && !lojaAuth && !volanteAuth,
+      retry: false,
+    }
+  );
+
   // Autenticar loja
   const autenticarMutation = trpc.reunioesQuinzenais.autenticarLoja.useMutation({
     onSuccess: (data) => {
       setLojaAuth(data);
+      setVolanteAuth(null);
       localStorage.setItem("loja_token", token);
       // Guardar lojaAuth no localStorage para persistir sessão na PWA
       localStorage.setItem("lojaAuth", JSON.stringify(data));
+      localStorage.removeItem("volanteAuth");
       toast.success(`Bem-vindo, ${data.lojaNome}!`);
     },
     onError: (error) => {
-      toast.error(error.message);
-      localStorage.removeItem("loja_token");
-      localStorage.removeItem("lojaAuth");
-      setToken("");
-      setLojaAuth(null);
+      // Se falhou como loja, tentar como volante
+      if (volanteValidation?.valid && volanteValidation.volante) {
+        const volante = volanteValidation.volante;
+        const lojas = volanteValidation.lojas || [];
+        const volanteData: VolanteAuth = {
+          volanteId: volante.id,
+          volanteNome: volante.nome,
+          volanteEmail: volante.email,
+          lojasAtribuidas: lojas.map((l: any) => ({ id: l.id, nome: l.nome })),
+        };
+        setVolanteAuth(volanteData);
+        setLojaAuth(null);
+        localStorage.setItem("loja_token", token);
+        localStorage.setItem("volanteAuth", JSON.stringify(volanteData));
+        localStorage.removeItem("lojaAuth");
+        setActiveTab("agenda");
+        toast.success(`Bem-vindo, ${volante.nome}!`);
+      } else {
+        toast.error(error.message);
+        localStorage.removeItem("loja_token");
+        localStorage.removeItem("lojaAuth");
+        localStorage.removeItem("volanteAuth");
+        setToken("");
+        setLojaAuth(null);
+        setVolanteAuth(null);
+      }
     },
   });
 
+  // Efeito para processar validação de volante quando a query retorna
+  useEffect(() => {
+    if (volanteValidation?.valid && volanteValidation.volante && !lojaAuth && !volanteAuth) {
+      const volante = volanteValidation.volante;
+      const lojas = volanteValidation.lojas || [];
+      const volanteData: VolanteAuth = {
+        volanteId: volante.id,
+        volanteNome: volante.nome,
+        volanteEmail: volante.email,
+        lojasAtribuidas: lojas.map((l: any) => ({ id: l.id, nome: l.nome })),
+      };
+      setVolanteAuth(volanteData);
+      localStorage.setItem("loja_token", token);
+      localStorage.setItem("volanteAuth", JSON.stringify(volanteData));
+      setActiveTab("agenda");
+      toast.success(`Bem-vindo, ${volante.nome}!`);
+    }
+  }, [volanteValidation, lojaAuth, volanteAuth, token]);
+
   // Autenticar quando token muda (ou validar sessão existente)
   useEffect(() => {
+    // Se já temos volanteAuth do localStorage, não tentar autenticar como loja
+    if (volanteAuth) {
+      return;
+    }
+    // Se a validação de volante ainda está a carregar, esperar
+    if (isValidatingVolante) {
+      return;
+    }
+    // Se é um token de volante válido, não tentar autenticar como loja
+    if (volanteValidation?.valid) {
+      return;
+    }
     if (token && !lojaAuth) {
       autenticarMutation.mutate({ token });
     } else if (token && lojaAuth) {
@@ -347,7 +437,7 @@ export default function PortalLoja() {
       // fazendo uma autenticação silenciosa em background
       autenticarMutation.mutate({ token });
     }
-  }, []);  // Executar apenas uma vez na inicialização
+  }, [isValidatingVolante, volanteValidation]);  // Executar quando a validação de volante terminar
 
   // Queries
   // Usar lojaAtualId para queries quando disponível
@@ -417,6 +507,20 @@ export default function PortalLoja() {
     { token, meses: mesesSelecionadosDashboard, lojaId: lojaIdAtiva },
     { enabled: !!token && !!lojaAuth && activeTab === 'resultados' && mesesSelecionadosDashboard.length > 0 }
   );
+
+  // Volante atribuído à loja
+  const { data: volanteAtribuido } = trpc.volantes.getVolanteByLoja.useQuery(
+    { lojaId: lojaAuth?.lojaId || 0 },
+    { enabled: !!lojaAuth?.lojaId && lojaAuth?.tipoToken === 'responsavel' }
+  );
+
+  // Pedidos de apoio ao volante (para contar pendentes)
+  const { data: pedidosVolante, refetch: refetchPedidosVolante } = trpc.pedidosApoio.listarPorLoja.useQuery(
+    { token },
+    { enabled: !!token && !!lojaAuth && !!volanteAtribuido }
+  );
+
+  const pedidosVolantePendentes = pedidosVolante?.filter((p: any) => p.estado === 'pendente').length || 0;
 
   // Mutation para Análise IA
   const analiseIAMutation = trpc.analiseIALoja.gerar.useMutation({
@@ -638,8 +742,10 @@ export default function PortalLoja() {
   const handleLogout = () => {
     localStorage.removeItem("loja_token");
     localStorage.removeItem("lojaAuth");
+    localStorage.removeItem("volanteAuth");
     setToken("");
     setLojaAuth(null);
+    setVolanteAuth(null);
     setInputToken("");
   };
 
@@ -674,8 +780,8 @@ export default function PortalLoja() {
     });
   }, [dashboardData, token, mesesSelecionadosDashboard, analiseIA, lojaIdAtiva, language]);
 
-  // Tela de login
-  if (!lojaAuth) {
+  // Tela de login - mostrar se não tiver lojaAuth NEM volanteAuth
+  if (!lojaAuth && !volanteAuth) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
@@ -685,7 +791,7 @@ export default function PortalLoja() {
             </div>
             <CardTitle className="text-2xl">{t('portal.title')}</CardTitle>
             <CardDescription>
-              {language === 'pt' ? 'Aceda ao sistema de reuniões quinzenais' : 'Access the bi-weekly meeting system'}
+              {language === 'pt' ? 'Aceda ao sistema de gestão da loja' : 'Access the store management system'}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -702,9 +808,9 @@ export default function PortalLoja() {
             <Button
               className="w-full"
               onClick={handleLogin}
-              disabled={autenticarMutation.isPending}
+              disabled={autenticarMutation.isPending || isValidatingVolante}
             >
-              {autenticarMutation.isPending ? (
+              {(autenticarMutation.isPending || isValidatingVolante) ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   A verificar...
@@ -714,7 +820,7 @@ export default function PortalLoja() {
               )}
             </Button>
             <p className="text-xs text-center text-muted-foreground">
-              O token foi enviado para o email da loja pelo gestor de zona.
+              O token foi enviado para o email da loja ou volante pelo gestor de zona.
             </p>
           </CardContent>
         </Card>
@@ -722,8 +828,25 @@ export default function PortalLoja() {
     );
   }
 
+  // Se é um volante, mostrar interface do volante
+  if (volanteAuth) {
+    return (
+      <VolanteInterface 
+        token={token}
+        volanteAuth={volanteAuth}
+        onLogout={handleLogout}
+        language={language}
+        setLanguage={setLanguage}
+        t={t}
+      />
+    );
+  }
+
   const pendentesAtivos = pendentes?.filter(p => p.estado !== 'resolvido') || [];
   const reuniaoRascunho = reunioes?.find(r => r.estado === 'rascunho');
+
+  // Garantir que lojaAuth não é null (já verificado acima)
+  if (!lojaAuth) return null;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -956,6 +1079,27 @@ export default function PortalLoja() {
                   </div>
                   <h3 className="text-xl font-bold mb-2">{t('tabs.reuniao')}</h3>
                   <p className="text-sm opacity-80">{language === 'pt' ? 'Registar reuniões quinzenais' : 'Record biweekly meetings'}</p>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Card Volante - Apenas para Responsável quando tem volante atribuído */}
+            {lojaAuth?.tipoToken === 'responsavel' && volanteAtribuido && (
+              <Card 
+                className="cursor-pointer hover:shadow-lg transition-all hover:scale-[1.02] bg-gradient-to-br from-cyan-500 to-teal-600 text-white border-0"
+                onClick={() => setActiveTab("volante")}
+              >
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <Car className="h-10 w-10 opacity-80" />
+                    {pedidosVolantePendentes > 0 && (
+                      <Badge className="bg-white/20 text-white border-0 text-lg px-3">
+                        {pedidosVolantePendentes}
+                      </Badge>
+                    )}
+                  </div>
+                  <h3 className="text-xl font-bold mb-2">{volanteAtribuido.nome}</h3>
+                  <p className="text-sm opacity-80">{language === 'pt' ? 'Pedir apoio do volante' : 'Request support from mobile team'}</p>
                 </CardContent>
               </Card>
             )}
@@ -3247,6 +3391,17 @@ export default function PortalLoja() {
         </Dialog>
       </div>
 
+      {/* Tab Volante - Calendário de Requisições */}
+      {activeTab === "volante" && volanteAtribuido && (
+        <VolanteTab 
+          token={token}
+          volanteId={volanteAtribuido.id}
+          volanteNome={volanteAtribuido.nome}
+          language={language}
+          refetchPedidos={refetchPedidosVolante}
+        />
+      )}
+
       {/* Botão Flutuante de Acesso Rápido às Tarefas - Pulsa quando há NOVAS */}
       {activeTab !== 'tarefas' && (
         <button
@@ -3588,5 +3743,1227 @@ function PendenteCard({
         )}
       </CardContent>
     </Card>
+  );
+}
+
+
+// Componente VolanteTab - Calendário de Requisições de Apoio
+function VolanteTab({
+  token,
+  volanteId,
+  volanteNome,
+  language,
+  refetchPedidos,
+}: {
+  token: string;
+  volanteId: number;
+  volanteNome: string;
+  language: string;
+  refetchPedidos: () => void;
+}) {
+  const [mesSelecionado, setMesSelecionado] = useState(() => {
+    const hoje = new Date();
+    return { mes: hoje.getMonth(), ano: hoje.getFullYear() };
+  });
+  const [diaSelecionado, setDiaSelecionado] = useState<Date | null>(null);
+  const [periodoSelecionado, setPeriodoSelecionado] = useState<'manha' | 'tarde'>('manha');
+  const [tipoApoio, setTipoApoio] = useState<'cobertura_ferias' | 'substituicao_vidros' | 'outro'>('substituicao_vidros');
+  const [observacoes, setObservacoes] = useState('');
+  const [dialogOpen, setDialogOpen] = useState(false);
+
+  // Query para obter estado dos dias do mês
+  const { data: estadoDias, refetch: refetchEstadoDias } = trpc.pedidosApoio.estadoMes.useQuery(
+    { token, mes: mesSelecionado.mes + 1, ano: mesSelecionado.ano },
+    { enabled: !!token }
+  );
+
+  // Query para obter pedidos da loja
+  const { data: meusPedidos, refetch: refetchMeusPedidos } = trpc.pedidosApoio.listarPorLoja.useQuery(
+    { token },
+    { enabled: !!token }
+  );
+
+  // Mutation para criar pedido
+  const criarPedidoMutation = trpc.pedidosApoio.criar.useMutation({
+    onSuccess: () => {
+      toast.success(language === 'pt' ? 'Pedido de apoio enviado!' : 'Support request sent!');
+      setDialogOpen(false);
+      setDiaSelecionado(null);
+      setObservacoes('');
+      refetchEstadoDias();
+      refetchMeusPedidos();
+      refetchPedidos();
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  // Mutation para cancelar pedido
+  const cancelarPedidoMutation = trpc.pedidosApoio.cancelar.useMutation({
+    onSuccess: () => {
+      toast.success(language === 'pt' ? 'Pedido cancelado!' : 'Request cancelled!');
+      refetchEstadoDias();
+      refetchMeusPedidos();
+      refetchPedidos();
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  // Gerar dias do mês
+  const gerarDiasMes = () => {
+    const primeiroDia = new Date(mesSelecionado.ano, mesSelecionado.mes, 1);
+    const ultimoDia = new Date(mesSelecionado.ano, mesSelecionado.mes + 1, 0);
+    const dias: Date[] = [];
+    
+    // Adicionar dias vazios para alinhar com o dia da semana
+    const diaSemanaInicio = primeiroDia.getDay();
+    const diasVazios = diaSemanaInicio === 0 ? 6 : diaSemanaInicio - 1; // Segunda = 0
+    for (let i = 0; i < diasVazios; i++) {
+      dias.push(new Date(0)); // Placeholder
+    }
+    
+    // Adicionar dias do mês
+    for (let d = 1; d <= ultimoDia.getDate(); d++) {
+      dias.push(new Date(mesSelecionado.ano, mesSelecionado.mes, d));
+    }
+    
+    return dias;
+  };
+
+  const dias = gerarDiasMes();
+  const hoje = new Date();
+  hoje.setHours(0, 0, 0, 0);
+
+  // Obter cor do dia baseado no estado
+  const getCorDia = (data: Date): string => {
+    if (data.getTime() === 0) return 'bg-transparent';
+    
+    const dataStr = data.toISOString().split('T')[0];
+    const estado = estadoDias?.[dataStr];
+    
+    if (!estado) return 'bg-white hover:bg-gray-100';
+    
+    switch (estado.estado) {
+      case 'pendente': return 'bg-yellow-200 hover:bg-yellow-300'; // Amarelo - pedido pendente
+      case 'manha_aprovada': return 'bg-purple-300 hover:bg-purple-400'; // Roxo - manhã aprovada
+      case 'tarde_aprovada': return 'bg-blue-300 hover:bg-blue-400'; // Azul - tarde aprovada
+      case 'dia_completo': return 'bg-red-400 text-white cursor-not-allowed'; // Vermelho - dia completo
+      default: return 'bg-white hover:bg-gray-100';
+    }
+  };
+
+  // Verificar se dia está disponível
+  const diaDisponivel = (data: Date): boolean => {
+    if (data.getTime() === 0) return false;
+    if (data < hoje) return false;
+    
+    const dataStr = data.toISOString().split('T')[0];
+    const estado = estadoDias?.[dataStr];
+    
+    return !estado || estado.estado !== 'dia_completo';
+  };
+
+  // Navegar entre meses
+  const mesAnterior = () => {
+    setMesSelecionado(prev => {
+      if (prev.mes === 0) {
+        return { mes: 11, ano: prev.ano - 1 };
+      }
+      return { mes: prev.mes - 1, ano: prev.ano };
+    });
+  };
+
+  const mesProximo = () => {
+    setMesSelecionado(prev => {
+      if (prev.mes === 11) {
+        return { mes: 0, ano: prev.ano + 1 };
+      }
+      return { mes: prev.mes + 1, ano: prev.ano };
+    });
+  };
+
+  const nomeMes = new Date(mesSelecionado.ano, mesSelecionado.mes).toLocaleDateString(
+    language === 'pt' ? 'pt-PT' : 'en-US',
+    { month: 'long', year: 'numeric' }
+  );
+
+  return (
+    <div className="space-y-6">
+      {/* Cabeçalho */}
+      <Card className="bg-gradient-to-r from-cyan-500 to-teal-600 text-white">
+        <CardContent className="p-6">
+          <div className="flex items-center gap-3">
+            <Car className="h-8 w-8" />
+            <div>
+              <h2 className="text-xl font-bold">{volanteNome}</h2>
+              <p className="text-sm opacity-90">
+                {language === 'pt' ? 'Pedir apoio do volante' : 'Request mobile team support'}
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Legenda de Cores */}
+      <Card>
+        <CardContent className="p-4">
+          <h3 className="font-semibold mb-3">{language === 'pt' ? 'Legenda' : 'Legend'}</h3>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-sm">
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded bg-yellow-200 border"></div>
+              <span>{language === 'pt' ? 'Pendente' : 'Pending'}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded bg-purple-300 border"></div>
+              <span>{language === 'pt' ? 'Manhã aprovada' : 'Morning approved'}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded bg-blue-300 border"></div>
+              <span>{language === 'pt' ? 'Tarde aprovada' : 'Afternoon approved'}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded bg-red-400 border"></div>
+              <span>{language === 'pt' ? 'Dia completo' : 'Full day'}</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Calendário */}
+      <Card>
+        <CardHeader className="pb-2">
+          <div className="flex items-center justify-between">
+            <Button variant="ghost" size="icon" onClick={mesAnterior}>
+              <ChevronLeft className="h-5 w-5" />
+            </Button>
+            <CardTitle className="text-lg capitalize">{nomeMes}</CardTitle>
+            <Button variant="ghost" size="icon" onClick={mesProximo}>
+              <ChevronRight className="h-5 w-5" />
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {/* Cabeçalho dos dias da semana */}
+          <div className="grid grid-cols-7 gap-1 mb-2">
+            {['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'].map((dia) => (
+              <div key={dia} className="text-center text-sm font-medium text-muted-foreground py-2">
+                {dia}
+              </div>
+            ))}
+          </div>
+          
+          {/* Dias do mês */}
+          <div className="grid grid-cols-7 gap-1">
+            {dias.map((data, index) => {
+              const ehPlaceholder = data.getTime() === 0;
+              const ehHoje = !ehPlaceholder && data.toDateString() === hoje.toDateString();
+              const disponivel = diaDisponivel(data);
+              const passado = !ehPlaceholder && data < hoje;
+              
+              return (
+                <button
+                  key={index}
+                  onClick={() => {
+                    if (disponivel && !passado) {
+                      setDiaSelecionado(data);
+                      setDialogOpen(true);
+                    }
+                  }}
+                  disabled={ehPlaceholder || !disponivel || passado}
+                  className={`
+                    aspect-square rounded-lg text-sm font-medium transition-all
+                    ${ehPlaceholder ? 'invisible' : ''}
+                    ${ehHoje ? 'ring-2 ring-cyan-500' : ''}
+                    ${passado ? 'opacity-40 cursor-not-allowed' : ''}
+                    ${getCorDia(data)}
+                    ${disponivel && !passado ? 'cursor-pointer' : ''}
+                  `}
+                >
+                  {!ehPlaceholder && data.getDate()}
+                </button>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Meus Pedidos */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">
+            {language === 'pt' ? 'Meus Pedidos' : 'My Requests'}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {!meusPedidos || meusPedidos.length === 0 ? (
+            <p className="text-muted-foreground text-center py-4">
+              {language === 'pt' ? 'Nenhum pedido de apoio' : 'No support requests'}
+            </p>
+          ) : (
+            <div className="space-y-3">
+              {meusPedidos.map((pedido: any) => (
+                <div
+                  key={pedido.id}
+                  className={`p-4 rounded-lg border ${
+                    pedido.estado === 'pendente' ? 'bg-yellow-50 border-yellow-200' :
+                    pedido.estado === 'aprovado' ? 'bg-green-50 border-green-200' :
+                    pedido.estado === 'rejeitado' ? 'bg-red-50 border-red-200' :
+                    'bg-gray-50 border-gray-200'
+                  }`}
+                >
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="font-medium">
+                        {new Date(pedido.data).toLocaleDateString(language === 'pt' ? 'pt-PT' : 'en-US', {
+                          weekday: 'long',
+                          day: 'numeric',
+                          month: 'long'
+                        })}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {pedido.periodo === 'manha' ? (language === 'pt' ? 'Manhã' : 'Morning') : (language === 'pt' ? 'Tarde' : 'Afternoon')}
+                        {' • '}
+                        {pedido.tipoApoio === 'cobertura_ferias' ? (language === 'pt' ? 'Cobertura de férias' : 'Holiday cover') :
+                         pedido.tipoApoio === 'substituicao_vidros' ? (language === 'pt' ? 'Substituição de vidros' : 'Glass replacement') :
+                         (language === 'pt' ? 'Outro' : 'Other')}
+                      </p>
+                      {pedido.observacoes && (
+                        <p className="text-sm mt-1">{pedido.observacoes}</p>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant={
+                        pedido.estado === 'pendente' ? 'secondary' :
+                        pedido.estado === 'aprovado' ? 'default' :
+                        'destructive'
+                      }>
+                        {pedido.estado === 'pendente' ? (language === 'pt' ? 'Pendente' : 'Pending') :
+                         pedido.estado === 'aprovado' ? (language === 'pt' ? 'Aprovado' : 'Approved') :
+                         (language === 'pt' ? 'Rejeitado' : 'Rejected')}
+                      </Badge>
+                      {pedido.estado === 'pendente' && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => cancelarPedidoMutation.mutate({ token, pedidoId: pedido.id })}
+                          disabled={cancelarPedidoMutation.isPending}
+                        >
+                          <X className="h-4 w-4 text-red-500" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Dialog para criar pedido */}
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {language === 'pt' ? 'Pedir Apoio' : 'Request Support'}
+            </DialogTitle>
+            <DialogDescription>
+              {diaSelecionado && diaSelecionado.toLocaleDateString(language === 'pt' ? 'pt-PT' : 'en-US', {
+                weekday: 'long',
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+              })}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            {/* Período */}
+            <div>
+              <label className="text-sm font-medium mb-2 block">
+                {language === 'pt' ? 'Período' : 'Period'}
+              </label>
+              <Select value={periodoSelecionado} onValueChange={(v) => setPeriodoSelecionado(v as 'manha' | 'tarde')}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="manha">{language === 'pt' ? 'Manhã' : 'Morning'}</SelectItem>
+                  <SelectItem value="tarde">{language === 'pt' ? 'Tarde' : 'Afternoon'}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Tipo de Apoio */}
+            <div>
+              <label className="text-sm font-medium mb-2 block">
+                {language === 'pt' ? 'Tipo de Apoio' : 'Support Type'}
+              </label>
+              <Select value={tipoApoio} onValueChange={(v) => setTipoApoio(v as typeof tipoApoio)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="substituicao_vidros">
+                    {language === 'pt' ? 'Substituição de vidros' : 'Glass replacement'}
+                  </SelectItem>
+                  <SelectItem value="cobertura_ferias">
+                    {language === 'pt' ? 'Cobertura de férias' : 'Holiday cover'}
+                  </SelectItem>
+                  <SelectItem value="outro">
+                    {language === 'pt' ? 'Outro' : 'Other'}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Observações */}
+            <div>
+              <label className="text-sm font-medium mb-2 block">
+                {language === 'pt' ? 'Observações' : 'Notes'}
+              </label>
+              <Textarea
+                value={observacoes}
+                onChange={(e) => setObservacoes(e.target.value)}
+                placeholder={language === 'pt' ? 'Ex: 3 para-brisas' : 'Ex: 3 windshields'}
+                rows={3}
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDialogOpen(false)}>
+              {language === 'pt' ? 'Cancelar' : 'Cancel'}
+            </Button>
+            <Button
+              onClick={() => {
+                if (diaSelecionado) {
+                  criarPedidoMutation.mutate({
+                    token,
+                    data: diaSelecionado.toISOString(),
+                    periodo: periodoSelecionado,
+                    tipoApoio,
+                    observacoes: observacoes || undefined,
+                  });
+                }
+              }}
+              disabled={criarPedidoMutation.isPending}
+            >
+              {criarPedidoMutation.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : (
+                <Send className="h-4 w-4 mr-2" />
+              )}
+              {language === 'pt' ? 'Enviar Pedido' : 'Send Request'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+
+// ==================== INTERFACE DO VOLANTE ====================
+function VolanteInterface({
+  token,
+  volanteAuth,
+  onLogout,
+  language,
+  setLanguage,
+  t,
+}: {
+  token: string;
+  volanteAuth: VolanteAuth;
+  onLogout: () => void;
+  language: 'pt' | 'en';
+  setLanguage: (lang: 'pt' | 'en') => void;
+  t: (key: string) => string;
+}) {
+  const [activeTab, setActiveTab] = useState<"agenda" | "resultados">("agenda");
+  const [mesSelecionado, setMesSelecionado] = useState(() => {
+    const hoje = new Date();
+    return { mes: hoje.getMonth() + 1, ano: hoje.getFullYear() };
+  });
+  const [pedidoSelecionado, setPedidoSelecionado] = useState<any>(null);
+  const [motivoReprovacao, setMotivoReprovacao] = useState("");
+  const [reprovarDialogOpen, setReprovarDialogOpen] = useState(false);
+  const [lojaResultadosSelecionada, setLojaResultadosSelecionada] = useState<number | null>(null);
+
+  // Query para obter pedidos de apoio do volante
+  const { data: pedidosApoio, refetch: refetchPedidos, isLoading: loadingPedidos } = trpc.pedidosApoio.listarPorVolante.useQuery(
+    { token },
+    { enabled: !!token }
+  );
+
+  // Query para obter estado dos dias do mês (calendário)
+  const { data: estadoMes, refetch: refetchEstadoMes } = trpc.pedidosApoio.estadoMes.useQuery(
+    { token, ano: mesSelecionado.ano, mes: mesSelecionado.mes },
+    { enabled: !!token }
+  );
+
+  // Query para obter resultados das lojas
+  const { data: resultadosLojas, isLoading: loadingResultados } = trpc.portalVolante.resultadosLojas.useQuery(
+    { token, ano: mesSelecionado.ano, mes: mesSelecionado.mes },
+    { enabled: !!token && activeTab === "resultados" }
+  );
+
+  // Mutation para aprovar pedido
+  const aprovarMutation = trpc.pedidosApoio.aprovar.useMutation({
+    onSuccess: () => {
+      toast.success(language === 'pt' ? 'Pedido aprovado com sucesso!' : 'Request approved successfully!');
+      refetchPedidos();
+      refetchEstadoMes();
+      setPedidoSelecionado(null);
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  // Mutation para reprovar pedido
+  const reprovarMutation = trpc.pedidosApoio.reprovar.useMutation({
+    onSuccess: () => {
+      toast.success(language === 'pt' ? 'Pedido reprovado' : 'Request rejected');
+      refetchPedidos();
+      refetchEstadoMes();
+      setPedidoSelecionado(null);
+      setReprovarDialogOpen(false);
+      setMotivoReprovacao("");
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  // Agrupar pedidos por estado
+  const pedidosPendentes = pedidosApoio?.filter((p: any) => p.estado === 'pendente') || [];
+  const pedidosAprovados = pedidosApoio?.filter((p: any) => p.estado === 'aprovado') || [];
+  const pedidosReprovados = pedidosApoio?.filter((p: any) => p.estado === 'reprovado') || [];
+
+  // Função para gerar links de calendário
+  const gerarLinksCalendario = (pedido: any) => {
+    const dataInicio = new Date(pedido.data);
+    const horaInicio = pedido.periodo === 'manha' ? 9 : 14;
+    const horaFim = pedido.periodo === 'manha' ? 13 : 18;
+    
+    dataInicio.setHours(horaInicio, 0, 0, 0);
+    const dataFim = new Date(dataInicio);
+    dataFim.setHours(horaFim, 0, 0, 0);
+
+    const titulo = encodeURIComponent(`Apoio: ${pedido.loja?.nome || 'Loja'} - ${pedido.tipoApoio === 'cobertura_ferias' ? 'Cobertura Férias' : pedido.tipoApoio === 'substituicao_vidros' ? 'Substituição Vidros' : 'Outro'}`);
+    const descricao = encodeURIComponent(pedido.observacoes || '');
+    const local = encodeURIComponent(pedido.loja?.nome || '');
+
+    // Formato para Google Calendar
+    const formatoGoogle = (date: Date) => date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+    const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${titulo}&dates=${formatoGoogle(dataInicio)}/${formatoGoogle(dataFim)}&details=${descricao}&location=${local}`;
+
+    // Formato para Outlook
+    const formatoOutlook = (date: Date) => date.toISOString();
+    const outlookUrl = `https://outlook.live.com/calendar/0/deeplink/compose?subject=${titulo}&startdt=${formatoOutlook(dataInicio)}&enddt=${formatoOutlook(dataFim)}&body=${descricao}&location=${local}`;
+
+    // Formato ICS (Apple Calendar)
+    const formatoICS = (date: Date) => date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+    const icsContent = `BEGIN:VCALENDAR
+VERSION:2.0
+BEGIN:VEVENT
+DTSTART:${formatoICS(dataInicio)}
+DTEND:${formatoICS(dataFim)}
+SUMMARY:${decodeURIComponent(titulo)}
+DESCRIPTION:${decodeURIComponent(descricao)}
+LOCATION:${decodeURIComponent(local)}
+END:VEVENT
+END:VCALENDAR`;
+    const icsBlob = new Blob([icsContent], { type: 'text/calendar' });
+    const icsUrl = URL.createObjectURL(icsBlob);
+
+    return { googleUrl, outlookUrl, icsUrl };
+  };
+
+  // Renderizar calendário
+  const renderCalendario = () => {
+    const primeiroDia = new Date(mesSelecionado.ano, mesSelecionado.mes - 1, 1);
+    const ultimoDia = new Date(mesSelecionado.ano, mesSelecionado.mes, 0);
+    const diasNoMes = ultimoDia.getDate();
+    const diaSemanaInicio = primeiroDia.getDay();
+
+    const dias = [];
+    
+    // Dias vazios no início
+    for (let i = 0; i < diaSemanaInicio; i++) {
+      dias.push(<div key={`empty-${i}`} className="h-20 bg-gray-50 rounded-lg"></div>);
+    }
+
+    // Dias do mês
+    for (let dia = 1; dia <= diasNoMes; dia++) {
+      const dataStr = `${mesSelecionado.ano}-${String(mesSelecionado.mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
+      const estadoDia = estadoMes?.[dataStr];
+      const pedidosDia = estadoDia?.pedidos || [];
+      
+      let bgColor = 'bg-white';
+      let borderColor = 'border-gray-200';
+      
+      if (estadoDia?.estado === 'dia_completo') {
+        bgColor = 'bg-red-100';
+        borderColor = 'border-red-300';
+      } else if (estadoDia?.estado === 'manha_ocupada') {
+        bgColor = 'bg-purple-100';
+        borderColor = 'border-purple-300';
+      } else if (estadoDia?.estado === 'tarde_ocupada') {
+        bgColor = 'bg-blue-100';
+        borderColor = 'border-blue-300';
+      } else if (pedidosDia.some((p: any) => p.estado === 'pendente')) {
+        bgColor = 'bg-yellow-100';
+        borderColor = 'border-yellow-300';
+      }
+
+      dias.push(
+        <div 
+          key={dia} 
+          className={`h-20 ${bgColor} border ${borderColor} rounded-lg p-1 overflow-hidden`}
+        >
+          <div className="text-xs font-medium text-gray-700 mb-1">{dia}</div>
+          <div className="space-y-0.5">
+            {pedidosDia.slice(0, 2).map((pedido: any, idx: number) => (
+              <div 
+                key={idx}
+                className={`text-[10px] px-1 py-0.5 rounded truncate cursor-pointer hover:opacity-80 ${
+                  pedido.estado === 'pendente' ? 'bg-yellow-300 text-yellow-900' :
+                  pedido.estado === 'aprovado' ? (pedido.periodo === 'manha' ? 'bg-purple-400 text-white' : 'bg-blue-400 text-white') :
+                  'bg-gray-300 text-gray-700'
+                }`}
+                onClick={() => setPedidoSelecionado(pedido)}
+                title={`${pedido.loja?.nome || 'Loja'} - ${pedido.periodo === 'manha' ? 'Manhã' : 'Tarde'}`}
+              >
+                {pedido.loja?.nome?.substring(0, 10) || 'Loja'}
+              </div>
+            ))}
+            {pedidosDia.length > 2 && (
+              <div className="text-[10px] text-gray-500">+{pedidosDia.length - 2}</div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    return dias;
+  };
+
+  const nomesMeses = language === 'pt' 
+    ? ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
+    : ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+  const diasSemana = language === 'pt'
+    ? ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
+    : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-teal-600 text-white sticky top-0 z-10">
+        <div className="container mx-auto px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                <Car className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <h1 className="font-bold text-lg">{volanteAuth.volanteNome}</h1>
+                <p className="text-xs text-teal-100">
+                  {volanteAuth.lojasAtribuidas.length} {language === 'pt' ? 'lojas atribuídas' : 'assigned stores'}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setLanguage(language === 'pt' ? 'en' : 'pt')}
+                className="text-white hover:bg-white/20"
+              >
+                {language === 'pt' ? '🇬🇧' : '🇵🇹'}
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={onLogout}
+                className="text-white hover:bg-white/20"
+              >
+                <LogOut className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Tabs */}
+      <div className="bg-white border-b sticky top-[60px] z-10">
+        <div className="container mx-auto px-4">
+          <div className="flex gap-4">
+            <button
+              onClick={() => setActiveTab("agenda")}
+              className={`py-3 px-4 font-medium border-b-2 transition-colors ${
+                activeTab === "agenda" 
+                  ? 'border-teal-600 text-teal-600' 
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              <Calendar className="h-4 w-4 inline mr-2" />
+              {language === 'pt' ? 'Agenda' : 'Schedule'}
+            </button>
+            <button
+              onClick={() => setActiveTab("resultados")}
+              className={`py-3 px-4 font-medium border-b-2 transition-colors ${
+                activeTab === "resultados" 
+                  ? 'border-teal-600 text-teal-600' 
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              <BarChart3 className="h-4 w-4 inline mr-2" />
+              {language === 'pt' ? 'Resultados' : 'Results'}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <main className="container mx-auto px-4 py-6">
+        {activeTab === "agenda" && (
+          <div className="space-y-6">
+            {/* Pedidos Pendentes */}
+            {pedidosPendentes.length > 0 && (
+              <Card className="border-yellow-300 bg-yellow-50">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-yellow-800">
+                    <Clock className="h-5 w-5" />
+                    {language === 'pt' ? 'Pedidos Pendentes' : 'Pending Requests'} ({pedidosPendentes.length})
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {pedidosPendentes.map((pedido: any) => (
+                      <div 
+                        key={pedido.id} 
+                        className="bg-white p-4 rounded-lg border border-yellow-200 shadow-sm"
+                      >
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <h4 className="font-medium">{pedido.loja?.nome || 'Loja'}</h4>
+                            <p className="text-sm text-gray-600">
+                              {new Date(pedido.data).toLocaleDateString('pt-PT', { weekday: 'long', day: 'numeric', month: 'long' })}
+                              {' - '}
+                              <Badge variant="outline" className={pedido.periodo === 'manha' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'}>
+                                {pedido.periodo === 'manha' ? (language === 'pt' ? 'Manhã' : 'Morning') : (language === 'pt' ? 'Tarde' : 'Afternoon')}
+                              </Badge>
+                            </p>
+                            <p className="text-sm text-gray-500 mt-1">
+                              {pedido.tipoApoio === 'cobertura_ferias' ? (language === 'pt' ? 'Cobertura de Férias' : 'Vacation Coverage') :
+                               pedido.tipoApoio === 'substituicao_vidros' ? (language === 'pt' ? 'Substituição de Vidros' : 'Glass Replacement') :
+                               (language === 'pt' ? 'Outro' : 'Other')}
+                            </p>
+                            {pedido.observacoes && (
+                              <p className="text-sm text-gray-600 mt-1 italic">"{pedido.observacoes}"</p>
+                            )}
+                          </div>
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-red-600 border-red-300 hover:bg-red-50"
+                              onClick={() => {
+                                setPedidoSelecionado(pedido);
+                                setReprovarDialogOpen(true);
+                              }}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              className="bg-green-600 hover:bg-green-700"
+                              onClick={() => aprovarMutation.mutate({ token, pedidoId: pedido.id })}
+                              disabled={aprovarMutation.isPending}
+                            >
+                              {aprovarMutation.isPending ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <Check className="h-4 w-4" />
+                              )}
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Calendário */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <Calendar className="h-5 w-5" />
+                    {language === 'pt' ? 'Calendário de Apoios' : 'Support Calendar'}
+                  </CardTitle>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const novoMes = mesSelecionado.mes === 1 ? 12 : mesSelecionado.mes - 1;
+                        const novoAno = mesSelecionado.mes === 1 ? mesSelecionado.ano - 1 : mesSelecionado.ano;
+                        setMesSelecionado({ mes: novoMes, ano: novoAno });
+                      }}
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <span className="font-medium min-w-[140px] text-center">
+                      {nomesMeses[mesSelecionado.mes - 1]} {mesSelecionado.ano}
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const novoMes = mesSelecionado.mes === 12 ? 1 : mesSelecionado.mes + 1;
+                        const novoAno = mesSelecionado.mes === 12 ? mesSelecionado.ano + 1 : mesSelecionado.ano;
+                        setMesSelecionado({ mes: novoMes, ano: novoAno });
+                      }}
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+                {/* Legenda */}
+                <div className="flex flex-wrap gap-3 mt-3 text-xs">
+                  <div className="flex items-center gap-1">
+                    <div className="w-3 h-3 bg-yellow-300 rounded"></div>
+                    <span>{language === 'pt' ? 'Pendente' : 'Pending'}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="w-3 h-3 bg-purple-400 rounded"></div>
+                    <span>{language === 'pt' ? 'Manhã Aprovada' : 'Morning Approved'}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="w-3 h-3 bg-blue-400 rounded"></div>
+                    <span>{language === 'pt' ? 'Tarde Aprovada' : 'Afternoon Approved'}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="w-3 h-3 bg-red-300 rounded"></div>
+                    <span>{language === 'pt' ? 'Dia Completo' : 'Full Day'}</span>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {/* Cabeçalho dos dias da semana */}
+                <div className="grid grid-cols-7 gap-1 mb-2">
+                  {diasSemana.map(dia => (
+                    <div key={dia} className="text-center text-xs font-medium text-gray-500 py-2">
+                      {dia}
+                    </div>
+                  ))}
+                </div>
+                {/* Grid do calendário */}
+                <div className="grid grid-cols-7 gap-1">
+                  {renderCalendario()}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Próximos Apoios Aprovados */}
+            {pedidosAprovados.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-green-700">
+                    <Check className="h-5 w-5" />
+                    {language === 'pt' ? 'Próximos Apoios' : 'Upcoming Support'} ({pedidosAprovados.length})
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {pedidosAprovados
+                      .filter((p: any) => new Date(p.data) >= new Date())
+                      .sort((a: any, b: any) => new Date(a.data).getTime() - new Date(b.data).getTime())
+                      .slice(0, 5)
+                      .map((pedido: any) => {
+                        const links = gerarLinksCalendario(pedido);
+                        return (
+                          <div 
+                            key={pedido.id} 
+                            className="bg-green-50 p-4 rounded-lg border border-green-200"
+                          >
+                            <div className="flex items-start justify-between">
+                              <div>
+                                <h4 className="font-medium">{pedido.loja?.nome || 'Loja'}</h4>
+                                <p className="text-sm text-gray-600">
+                                  {new Date(pedido.data).toLocaleDateString('pt-PT', { weekday: 'long', day: 'numeric', month: 'long' })}
+                                  {' - '}
+                                  <Badge variant="outline" className={pedido.periodo === 'manha' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'}>
+                                    {pedido.periodo === 'manha' ? (language === 'pt' ? 'Manhã (9h-13h)' : 'Morning (9am-1pm)') : (language === 'pt' ? 'Tarde (14h-18h)' : 'Afternoon (2pm-6pm)')}
+                                  </Badge>
+                                </p>
+                                <p className="text-sm text-gray-500 mt-1">
+                                  {pedido.tipoApoio === 'cobertura_ferias' ? (language === 'pt' ? 'Cobertura de Férias' : 'Vacation Coverage') :
+                                   pedido.tipoApoio === 'substituicao_vidros' ? (language === 'pt' ? 'Substituição de Vidros' : 'Glass Replacement') :
+                                   (language === 'pt' ? 'Outro' : 'Other')}
+                                </p>
+                              </div>
+                              <div className="flex gap-1">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="text-xs"
+                                  onClick={() => window.open(links.googleUrl, '_blank')}
+                                  title="Google Calendar"
+                                >
+                                  <Calendar className="h-3 w-3" />
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="text-xs"
+                                  onClick={() => window.open(links.outlookUrl, '_blank')}
+                                  title="Outlook"
+                                >
+                                  <Mail className="h-3 w-3" />
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="text-xs"
+                                  onClick={() => {
+                                    const a = document.createElement('a');
+                                    a.href = links.icsUrl;
+                                    a.download = `apoio-${pedido.id}.ics`;
+                                    a.click();
+                                  }}
+                                  title="Apple Calendar (ICS)"
+                                >
+                                  <Download className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        )}
+
+        {activeTab === "resultados" && (
+          <div className="space-y-6">
+            {/* Seletor de Mês */}
+            <Card>
+              <CardContent className="py-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-medium">{language === 'pt' ? 'Período' : 'Period'}</h3>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const novoMes = mesSelecionado.mes === 1 ? 12 : mesSelecionado.mes - 1;
+                        const novoAno = mesSelecionado.mes === 1 ? mesSelecionado.ano - 1 : mesSelecionado.ano;
+                        setMesSelecionado({ mes: novoMes, ano: novoAno });
+                      }}
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <span className="font-medium min-w-[140px] text-center">
+                      {nomesMeses[mesSelecionado.mes - 1]} {mesSelecionado.ano}
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const novoMes = mesSelecionado.mes === 12 ? 1 : mesSelecionado.mes + 1;
+                        const novoAno = mesSelecionado.mes === 12 ? mesSelecionado.ano + 1 : mesSelecionado.ano;
+                        setMesSelecionado({ mes: novoMes, ano: novoAno });
+                      }}
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Lista de Lojas */}
+            {loadingResultados ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-teal-600" />
+              </div>
+            ) : resultadosLojas && resultadosLojas.length > 0 ? (
+              <div className="grid gap-4 md:grid-cols-2">
+                {resultadosLojas.map((item: any) => (
+                  <Card 
+                    key={item.loja.id}
+                    className={`cursor-pointer transition-all hover:shadow-md ${
+                      lojaResultadosSelecionada === item.loja.id ? 'ring-2 ring-teal-500' : ''
+                    }`}
+                    onClick={() => setLojaResultadosSelecionada(
+                      lojaResultadosSelecionada === item.loja.id ? null : item.loja.id
+                    )}
+                  >
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <Store className="h-5 w-5 text-teal-600" />
+                        {item.loja.nome}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {item.resultado ? (
+                        <div className="space-y-3">
+                          <div className="grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                              <p className="text-gray-500">{language === 'pt' ? 'Faturação' : 'Revenue'}</p>
+                              <p className="font-bold text-lg">
+                                {item.resultado.faturacao?.toLocaleString('pt-PT', { style: 'currency', currency: 'EUR' }) || 'N/A'}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-gray-500">{language === 'pt' ? 'Serviços' : 'Services'}</p>
+                              <p className="font-bold text-lg">{item.resultado.servicos || 0}</p>
+                            </div>
+                          </div>
+                          {lojaResultadosSelecionada === item.loja.id && (
+                            <div className="pt-3 border-t space-y-2 text-sm">
+                              <div className="flex justify-between">
+                                <span className="text-gray-500">{language === 'pt' ? 'Calibrações' : 'Calibrations'}</span>
+                                <span className="font-medium">{item.resultado.calibracoes || 0}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-gray-500">{language === 'pt' ? 'Reparações' : 'Repairs'}</span>
+                                <span className="font-medium">{item.resultado.reparacoes || 0}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-gray-500">{language === 'pt' ? 'Ticket Médio' : 'Average Ticket'}</span>
+                                <span className="font-medium">
+                                  {item.resultado.ticketMedio?.toLocaleString('pt-PT', { style: 'currency', currency: 'EUR' }) || 'N/A'}
+                                </span>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <p className="text-gray-500 text-sm">
+                          {language === 'pt' ? 'Sem dados para este período' : 'No data for this period'}
+                        </p>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <Card>
+                <CardContent className="py-12 text-center">
+                  <BarChart3 className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                  <p className="text-gray-500">
+                    {language === 'pt' ? 'Sem resultados para este período' : 'No results for this period'}
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        )}
+      </main>
+
+      {/* Dialog de Reprovação */}
+      <Dialog open={reprovarDialogOpen} onOpenChange={setReprovarDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{language === 'pt' ? 'Reprovar Pedido' : 'Reject Request'}</DialogTitle>
+            <DialogDescription>
+              {language === 'pt' 
+                ? 'Indique o motivo da reprovação (opcional)' 
+                : 'Indicate the reason for rejection (optional)'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            {pedidoSelecionado && (
+              <div className="bg-gray-50 p-3 rounded-lg text-sm">
+                <p className="font-medium">{pedidoSelecionado.loja?.nome}</p>
+                <p className="text-gray-600">
+                  {new Date(pedidoSelecionado.data).toLocaleDateString('pt-PT')} - {pedidoSelecionado.periodo === 'manha' ? 'Manhã' : 'Tarde'}
+                </p>
+              </div>
+            )}
+            <Textarea
+              placeholder={language === 'pt' ? 'Motivo da reprovação...' : 'Reason for rejection...'}
+              value={motivoReprovacao}
+              onChange={(e) => setMotivoReprovacao(e.target.value)}
+              rows={3}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setReprovarDialogOpen(false);
+              setMotivoReprovacao("");
+              setPedidoSelecionado(null);
+            }}>
+              {language === 'pt' ? 'Cancelar' : 'Cancel'}
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                if (pedidoSelecionado) {
+                  reprovarMutation.mutate({
+                    token,
+                    pedidoId: pedidoSelecionado.id,
+                    motivo: motivoReprovacao || undefined,
+                  });
+                }
+              }}
+              disabled={reprovarMutation.isPending}
+            >
+              {reprovarMutation.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : (
+                <X className="h-4 w-4 mr-2" />
+              )}
+              {language === 'pt' ? 'Reprovar' : 'Reject'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog de Detalhes do Pedido */}
+      <Dialog open={!!pedidoSelecionado && !reprovarDialogOpen} onOpenChange={(open) => !open && setPedidoSelecionado(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{language === 'pt' ? 'Detalhes do Pedido' : 'Request Details'}</DialogTitle>
+          </DialogHeader>
+          {pedidoSelecionado && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-gray-500">{language === 'pt' ? 'Loja' : 'Store'}</p>
+                  <p className="font-medium">{pedidoSelecionado.loja?.nome}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">{language === 'pt' ? 'Estado' : 'Status'}</p>
+                  <Badge className={
+                    pedidoSelecionado.estado === 'pendente' ? 'bg-yellow-100 text-yellow-800' :
+                    pedidoSelecionado.estado === 'aprovado' ? 'bg-green-100 text-green-800' :
+                    'bg-red-100 text-red-800'
+                  }>
+                    {pedidoSelecionado.estado === 'pendente' ? (language === 'pt' ? 'Pendente' : 'Pending') :
+                     pedidoSelecionado.estado === 'aprovado' ? (language === 'pt' ? 'Aprovado' : 'Approved') :
+                     (language === 'pt' ? 'Reprovado' : 'Rejected')}
+                  </Badge>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">{language === 'pt' ? 'Data' : 'Date'}</p>
+                  <p className="font-medium">
+                    {new Date(pedidoSelecionado.data).toLocaleDateString('pt-PT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">{language === 'pt' ? 'Período' : 'Period'}</p>
+                  <p className="font-medium">
+                    {pedidoSelecionado.periodo === 'manha' ? (language === 'pt' ? 'Manhã (9h-13h)' : 'Morning (9am-1pm)') : (language === 'pt' ? 'Tarde (14h-18h)' : 'Afternoon (2pm-6pm)')}
+                  </p>
+                </div>
+                <div className="col-span-2">
+                  <p className="text-sm text-gray-500">{language === 'pt' ? 'Tipo de Apoio' : 'Support Type'}</p>
+                  <p className="font-medium">
+                    {pedidoSelecionado.tipoApoio === 'cobertura_ferias' ? (language === 'pt' ? 'Cobertura de Férias' : 'Vacation Coverage') :
+                     pedidoSelecionado.tipoApoio === 'substituicao_vidros' ? (language === 'pt' ? 'Substituição de Vidros' : 'Glass Replacement') :
+                     (language === 'pt' ? 'Outro' : 'Other')}
+                  </p>
+                </div>
+                {pedidoSelecionado.observacoes && (
+                  <div className="col-span-2">
+                    <p className="text-sm text-gray-500">{language === 'pt' ? 'Observações' : 'Notes'}</p>
+                    <p className="font-medium">{pedidoSelecionado.observacoes}</p>
+                  </div>
+                )}
+                {pedidoSelecionado.motivoReprovacao && (
+                  <div className="col-span-2">
+                    <p className="text-sm text-gray-500">{language === 'pt' ? 'Motivo da Reprovação' : 'Rejection Reason'}</p>
+                    <p className="font-medium text-red-600">{pedidoSelecionado.motivoReprovacao}</p>
+                  </div>
+                )}
+              </div>
+
+              {pedidoSelecionado.estado === 'pendente' && (
+                <div className="flex gap-2 pt-4 border-t">
+                  <Button
+                    variant="outline"
+                    className="flex-1 text-red-600 border-red-300 hover:bg-red-50"
+                    onClick={() => setReprovarDialogOpen(true)}
+                  >
+                    <X className="h-4 w-4 mr-2" />
+                    {language === 'pt' ? 'Reprovar' : 'Reject'}
+                  </Button>
+                  <Button
+                    className="flex-1 bg-green-600 hover:bg-green-700"
+                    onClick={() => aprovarMutation.mutate({ token, pedidoId: pedidoSelecionado.id })}
+                    disabled={aprovarMutation.isPending}
+                  >
+                    {aprovarMutation.isPending ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    ) : (
+                      <Check className="h-4 w-4 mr-2" />
+                    )}
+                    {language === 'pt' ? 'Aprovar' : 'Approve'}
+                  </Button>
+                </div>
+              )}
+
+              {pedidoSelecionado.estado === 'aprovado' && (
+                <div className="pt-4 border-t">
+                  <p className="text-sm text-gray-500 mb-2">{language === 'pt' ? 'Adicionar ao Calendário' : 'Add to Calendar'}</p>
+                  <div className="flex gap-2">
+                    {(() => {
+                      const links = gerarLinksCalendario(pedidoSelecionado);
+                      return (
+                        <>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => window.open(links.googleUrl, '_blank')}
+                          >
+                            <Calendar className="h-4 w-4 mr-2" />
+                            Google
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => window.open(links.outlookUrl, '_blank')}
+                          >
+                            <Mail className="h-4 w-4 mr-2" />
+                            Outlook
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              const a = document.createElement('a');
+                              a.href = links.icsUrl;
+                              a.download = `apoio-${pedidoSelecionado.id}.ics`;
+                              a.click();
+                            }}
+                          >
+                            <Download className="h-4 w-4 mr-2" />
+                            ICS
+                          </Button>
+                        </>
+                      );
+                    })()}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 }

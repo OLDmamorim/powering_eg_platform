@@ -1,0 +1,40 @@
+{
+  "query": "SELECT vl.id, vl.volanteId, vl.lojaId FROM volante_lojas vl;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT vl.id, vl.volanteId, vl.lojaId FROM volante_lojas vl;",
+  "rows": [
+    {
+      "id": "1",
+      "volanteId": "1",
+      "lojaId": "1"
+    },
+    {
+      "id": "2",
+      "volanteId": "1",
+      "lojaId": "2"
+    },
+    {
+      "id": "3",
+      "volanteId": "1",
+      "lojaId": "3"
+    },
+    {
+      "id": "4",
+      "volanteId": "1",
+      "lojaId": "1"
+    },
+    {
+      "id": "5",
+      "volanteId": "1",
+      "lojaId": "2"
+    },
+    {
+      "id": "6",
+      "volanteId": "1",
+      "lojaId": "3"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tvolanteId\tlojaId\n1\t1\t1\n2\t1\t2\n3\t1\t3\n4\t1\t1\n5\t1\t2\n6\t1\t3\n",
+  "stderr": "",
+  "execution_time_ms": 369
+}

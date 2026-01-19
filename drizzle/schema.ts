@@ -940,3 +940,112 @@ export const pushSubscriptions = mysqlTable("push_subscriptions", {
 });
 export type PushSubscription = typeof pushSubscriptions.$inferSelect;
 export type InsertPushSubscription = typeof pushSubscriptions.$inferInsert;
+
+
+/**
+ * Volantes - Colaboradores móveis que apoiam várias lojas de uma zona
+ * Cada gestor pode ter um ou mais volantes na sua região
+ */
+export const volantes = mysqlTable("volantes", {
+  id: int("id").autoincrement().primaryKey(),
+  nome: varchar("nome", { length: 255 }).notNull(),
+  email: varchar("email", { length: 320 }),
+  telefone: varchar("telefone", { length: 50 }),
+  gestorId: int("gestorId").notNull(), // FK para gestores.id - gestor responsável pelo volante
+  ativo: boolean("ativo").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Volante = typeof volantes.$inferSelect;
+export type InsertVolante = typeof volantes.$inferInsert;
+
+
+/**
+ * Volante-Lojas - Associação many-to-many entre volantes e lojas
+ * Define quais lojas cada volante pode apoiar
+ */
+export const volanteLojas = mysqlTable("volante_lojas", {
+  id: int("id").autoincrement().primaryKey(),
+  volanteId: int("volanteId").notNull(), // FK para volantes.id
+  lojaId: int("lojaId").notNull(), // FK para lojas.id
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type VolanteLoja = typeof volanteLojas.$inferSelect;
+export type InsertVolanteLoja = typeof volanteLojas.$inferInsert;
+
+
+/**
+ * Tokens de Acesso de Volante - Tokens para volantes acederem ao Portal da Loja
+ * Similar aos tokens de loja, mas para volantes
+ */
+export const tokensVolante = mysqlTable("tokens_volante", {
+  id: int("id").autoincrement().primaryKey(),
+  volanteId: int("volanteId").notNull(), // FK para volantes.id
+  token: varchar("token", { length: 64 }).notNull().unique(), // Token único de acesso
+  ativo: boolean("ativo").default(true).notNull(),
+  ultimoAcesso: timestamp("ultimoAcesso"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type TokenVolante = typeof tokensVolante.$inferSelect;
+export type InsertTokenVolante = typeof tokensVolante.$inferInsert;
+
+
+/**
+ * Pedidos de Apoio - Requisições de apoio das lojas aos volantes
+ * As lojas pedem apoio através do calendário, o volante aprova/reprova
+ */
+export const pedidosApoioTipoEnum = mysqlEnum('pedido_apoio_tipo', ['cobertura_ferias', 'substituicao_vidros', 'outro']);
+export const pedidosApoioPeriodoEnum = mysqlEnum('pedido_apoio_periodo', ['manha', 'tarde']);
+export const pedidosApoioEstadoEnum = mysqlEnum('pedido_apoio_estado', ['pendente', 'aprovado', 'reprovado', 'cancelado']);
+
+export const pedidosApoio = mysqlTable("pedidos_apoio", {
+  id: int("id").autoincrement().primaryKey(),
+  lojaId: int("lojaId").notNull(), // FK para lojas.id - loja que pediu apoio
+  volanteId: int("volanteId").notNull(), // FK para volantes.id - volante atribuído à loja
+  
+  // Data e período do apoio
+  data: timestamp("data").notNull(), // Dia do apoio
+  periodo: pedidosApoioPeriodoEnum.notNull(), // Manhã ou Tarde
+  
+  // Tipo de apoio
+  tipoApoio: pedidosApoioTipoEnum.notNull(),
+  observacoes: text("observacoes"), // Ex: "3 para-brisas"
+  
+  // Estado do pedido
+  estado: pedidosApoioEstadoEnum.default('pendente').notNull(),
+  
+  // Dados de aprovação/reprovação
+  dataResposta: timestamp("dataResposta"),
+  motivoReprovacao: text("motivoReprovacao"), // Se reprovado, motivo
+  
+  // Links para calendário (gerados quando aprovado)
+  linkGoogleCalendar: text("linkGoogleCalendar"),
+  linkOutlook: text("linkOutlook"),
+  linkICS: text("linkICS"), // Apple Calendar
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type PedidoApoio = typeof pedidosApoio.$inferSelect;
+export type InsertPedidoApoio = typeof pedidosApoio.$inferInsert;
+
+
+/**
+ * Loja-Volante - Associação de qual volante está atribuído a cada loja
+ * Cada loja só pode ter um volante atribuído
+ */
+export const lojaVolante = mysqlTable("loja_volante", {
+  id: int("id").autoincrement().primaryKey(),
+  lojaId: int("lojaId").notNull().unique(), // FK para lojas.id - UNIQUE porque cada loja só pode ter 1 volante
+  volanteId: int("volanteId").notNull(), // FK para volantes.id
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type LojaVolante = typeof lojaVolante.$inferSelect;
+export type InsertLojaVolante = typeof lojaVolante.$inferInsert;

@@ -7177,6 +7177,479 @@ IMPORTANTE:
         return await getSugestoesPergunta(input?.language || 'pt');
       }),
   }),
+  
+  // ==================== VOLANTES ====================
+  volantes: router({
+    // Listar volantes do gestor
+    listar: gestorProcedure.query(async ({ ctx }) => {
+      if (!ctx.gestor) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Gestor não encontrado' });
+      }
+      const volantes = await db.getVolantesByGestorId(ctx.gestor.id);
+      
+      // Para cada volante, buscar as lojas atribuídas e o token
+      const volantesComLojas = await Promise.all(
+        volantes.map(async (volante) => {
+          const lojas = await db.getLojasByVolanteId(volante.id);
+          const token = await db.getTokenVolante(volante.id);
+          return { ...volante, lojas, token };
+        })
+      );
+      
+      return volantesComLojas;
+    }),
+    
+    // Criar volante
+    criar: gestorProcedure
+      .input(z.object({
+        nome: z.string().min(1),
+        email: z.string().email().optional(),
+        telefone: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (!ctx.gestor) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Gestor não encontrado' });
+        }
+        
+        const volante = await db.createVolante({
+          nome: input.nome,
+          email: input.email,
+          telefone: input.telefone,
+          gestorId: ctx.gestor.id,
+        });
+        
+        if (!volante) {
+          throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Erro ao criar volante' });
+        }
+        
+        return volante;
+      }),
+    
+    // Atualizar volante
+    atualizar: gestorProcedure
+      .input(z.object({
+        id: z.number(),
+        nome: z.string().min(1).optional(),
+        email: z.string().email().optional().nullable(),
+        telefone: z.string().optional().nullable(),
+        ativo: z.boolean().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        // Verificar se o volante pertence ao gestor
+        const volante = await db.getVolanteById(input.id);
+        if (!volante || (ctx.gestor && volante.gestorId !== ctx.gestor.id)) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Volante não encontrado' });
+        }
+        
+        const updated = await db.updateVolante(input.id, {
+          nome: input.nome,
+          email: input.email ?? undefined,
+          telefone: input.telefone ?? undefined,
+          ativo: input.ativo,
+        });
+        
+        return updated;
+      }),
+    
+    // Eliminar volante
+    eliminar: gestorProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        const volante = await db.getVolanteById(input.id);
+        if (!volante || (ctx.gestor && volante.gestorId !== ctx.gestor.id)) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Volante não encontrado' });
+        }
+        
+        await db.deleteVolante(input.id);
+        return { success: true };
+      }),
+    
+    // Atribuir lojas a um volante (lojas que ele pode apoiar)
+    atribuirLojas: gestorProcedure
+      .input(z.object({
+        volanteId: z.number(),
+        lojaIds: z.array(z.number()),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const volante = await db.getVolanteById(input.volanteId);
+        if (!volante || (ctx.gestor && volante.gestorId !== ctx.gestor.id)) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Volante não encontrado' });
+        }
+        
+        await db.assignLojasToVolante(input.volanteId, input.lojaIds);
+        
+        // Também atribuir o volante a cada loja
+        for (const lojaId of input.lojaIds) {
+          await db.assignVolanteToLoja(lojaId, input.volanteId);
+        }
+        
+        return { success: true };
+      }),
+    
+    // Obter lojas disponíveis para atribuir (lojas do gestor)
+    lojasDisponiveis: gestorProcedure.query(async ({ ctx }) => {
+      if (!ctx.gestor) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Gestor não encontrado' });
+      }
+      
+      const lojas = await db.getLojasByGestorId(ctx.gestor.id);
+      return lojas;
+    }),
+    
+    // Criar ou obter token de um volante
+    criarToken: gestorProcedure
+      .input(z.object({ volanteId: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        const volante = await db.getVolanteById(input.volanteId);
+        if (!volante || (ctx.gestor && volante.gestorId !== ctx.gestor.id)) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Volante não encontrado' });
+        }
+        
+        const token = await db.getOrCreateTokenVolante(input.volanteId);
+        return token;
+      }),
+    
+    // Desativar token de um volante
+    desativarToken: gestorProcedure
+      .input(z.object({ volanteId: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        const volante = await db.getVolanteById(input.volanteId);
+        if (!volante || (ctx.gestor && volante.gestorId !== ctx.gestor.id)) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Volante não encontrado' });
+        }
+        
+        await db.deactivateTokenVolante(input.volanteId);
+        return { success: true };
+      }),
+    
+    // Enviar token por email
+    enviarTokenEmail: gestorProcedure
+      .input(z.object({ volanteId: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        const volante = await db.getVolanteById(input.volanteId);
+        if (!volante || (ctx.gestor && volante.gestorId !== ctx.gestor.id)) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Volante não encontrado' });
+        }
+        
+        if (!volante.email) {
+          throw new TRPCError({ code: 'BAD_REQUEST', message: 'Volante não tem email configurado' });
+        }
+        
+        const token = await db.getOrCreateTokenVolante(input.volanteId);
+        if (!token) {
+          throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Erro ao criar token' });
+        }
+        
+        // Construir URL do portal
+        const baseUrl = process.env.NODE_ENV === 'production' 
+          ? 'https://poweringeg-3c9mozlh.manus.space'
+          : 'http://localhost:3000';
+        const portalUrl = `${baseUrl}/portal-loja?token=${token.token}`;
+        
+        // Enviar email
+        const html = `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 30px; text-align: center;">
+              <h1 style="color: white; margin: 0;">PoweringEG Platform</h1>
+              <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0;">Portal do Volante</p>
+            </div>
+            <div style="padding: 30px; background: #f9fafb;">
+              <h2 style="color: #1f2937;">Olá ${volante.nome}!</h2>
+              <p style="color: #4b5563;">Foi-lhe atribuído acesso ao Portal do Volante da PoweringEG Platform.</p>
+              <p style="color: #4b5563;">Através deste portal poderá:</p>
+              <ul style="color: #4b5563;">
+                <li>Ver os resultados das lojas atribuídas</li>
+                <li>Gerir a sua agenda de apoios</li>
+                <li>Aprovar ou reprovar pedidos de apoio das lojas</li>
+              </ul>
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${portalUrl}" style="background: #10b981; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold;">Aceder ao Portal</a>
+              </div>
+              <p style="color: #6b7280; font-size: 12px;">Se o botão não funcionar, copie e cole este link no seu browser:</p>
+              <p style="color: #10b981; font-size: 12px; word-break: break-all;">${portalUrl}</p>
+            </div>
+            <div style="padding: 20px; text-align: center; background: #1f2937;">
+              <p style="color: #9ca3af; margin: 0; font-size: 12px;">PoweringEG Platform 2.0 - ExpressGlass</p>
+            </div>
+          </div>
+        `;
+        
+        await sendEmail({
+          to: volante.email,
+          subject: 'Acesso ao Portal do Volante - PoweringEG',
+          html,
+        });
+        
+        return { success: true };
+      }),
+    
+    // Obter volante atribuído a uma loja (para o Portal da Loja)
+    getVolanteByLoja: publicProcedure
+      .input(z.object({ lojaId: z.number() }))
+      .query(async ({ input }) => {
+        const volante = await db.getVolanteByLojaId(input.lojaId);
+        return volante;
+      }),
+  }),
+  
+  // ==================== PEDIDOS DE APOIO (VOLANTES) ====================
+  pedidosApoio: router({
+    // Criar pedido de apoio (pela loja)
+    criar: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        data: z.string(), // ISO date string
+        periodo: z.enum(['manha', 'tarde']),
+        tipoApoio: z.enum(['cobertura_ferias', 'substituicao_vidros', 'outro']),
+        observacoes: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        // Validar token da loja
+        const tokenData = await db.validarTokenLoja(input.token);
+        if (!tokenData) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        
+        // Obter volante atribuído à loja
+        const volante = await db.getVolanteByLojaId(tokenData.loja.id);
+        if (!volante) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Nenhum volante atribuído a esta loja' });
+        }
+        
+        // Verificar disponibilidade do dia
+        const dataApoio = new Date(input.data);
+        const disponibilidade = await db.verificarDisponibilidadeDia(volante.id, dataApoio);
+        
+        if (disponibilidade === 'dia_completo') {
+          throw new TRPCError({ code: 'BAD_REQUEST', message: 'Este dia já está completamente ocupado' });
+        }
+        if (disponibilidade === 'manha_ocupada' && input.periodo === 'manha') {
+          throw new TRPCError({ code: 'BAD_REQUEST', message: 'A manhã deste dia já está ocupada' });
+        }
+        if (disponibilidade === 'tarde_ocupada' && input.periodo === 'tarde') {
+          throw new TRPCError({ code: 'BAD_REQUEST', message: 'A tarde deste dia já está ocupada' });
+        }
+        
+        // Criar pedido
+        const pedido = await db.createPedidoApoio({
+          lojaId: tokenData.loja.id,
+          volanteId: volante.id,
+          data: dataApoio,
+          periodo: input.periodo,
+          tipoApoio: input.tipoApoio,
+          observacoes: input.observacoes,
+        });
+        
+        return pedido;
+      }),
+    
+    // Listar pedidos de apoio (para o volante)
+    listarPorVolante: publicProcedure
+      .input(z.object({ token: z.string() }))
+      .query(async ({ input }) => {
+        // Validar token do volante
+        const tokenData = await db.validateTokenVolante(input.token);
+        if (!tokenData) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        
+        const pedidos = await db.getPedidosApoioByVolanteId(tokenData.volante.id);
+        return pedidos;
+      }),
+    
+    // Listar pedidos de apoio (para a loja)
+    listarPorLoja: publicProcedure
+      .input(z.object({ token: z.string() }))
+      .query(async ({ input }) => {
+        const tokenData = await db.validarTokenLoja(input.token);
+        if (!tokenData) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        
+        const pedidos = await db.getPedidosApoioByLojaId(tokenData.loja.id);
+        return pedidos;
+      }),
+    
+    // Obter estado dos dias do mês (para o calendário)
+    estadoMes: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        ano: z.number(),
+        mes: z.number(),
+      }))
+      .query(async ({ input }) => {
+        // Tentar validar como token de volante primeiro
+        let volanteId: number | null = null;
+        
+        const tokenVolante = await db.validateTokenVolante(input.token);
+        if (tokenVolante) {
+          volanteId = tokenVolante.volante.id;
+        } else {
+          // Tentar como token de loja
+          const tokenLoja = await db.validarTokenLoja(input.token);
+          if (tokenLoja) {
+            const volante = await db.getVolanteByLojaId(tokenLoja.loja.id);
+            if (volante) {
+              volanteId = volante.id;
+            }
+          }
+        }
+        
+        if (!volanteId) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido ou nenhum volante atribuído' });
+        }
+        
+        const estadoDias = await db.getEstadoDiasDoMes(volanteId, input.ano, input.mes);
+        
+        // Converter Map para objeto
+        const resultado: Record<string, { estado: string; pedidos: any[] }> = {};
+        estadoDias.forEach((value, key) => {
+          resultado[key] = value;
+        });
+        
+        return resultado;
+      }),
+    
+    // Aprovar pedido de apoio (pelo volante)
+    aprovar: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        pedidoId: z.number(),
+      }))
+      .mutation(async ({ input }) => {
+        const tokenData = await db.validateTokenVolante(input.token);
+        if (!tokenData) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        
+        // Obter dados do pedido para gerar links
+        const pedidoExistente = await db.getPedidoApoioById(input.pedidoId);
+        if (!pedidoExistente) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Pedido não encontrado' });
+        }
+        
+        // Gerar links para calendário
+        const dataInicio = new Date(pedidoExistente.data);
+        const horaInicio = pedidoExistente.periodo === 'manha' ? 9 : 14;
+        const horaFim = pedidoExistente.periodo === 'manha' ? 13 : 18;
+        
+        dataInicio.setHours(horaInicio, 0, 0, 0);
+        const dataFim = new Date(dataInicio);
+        dataFim.setHours(horaFim, 0, 0, 0);
+
+        const loja = await db.getLojaById(pedidoExistente.lojaId);
+        const tipoApoioTexto = pedidoExistente.tipoApoio === 'cobertura_ferias' ? 'Cobertura Férias' : 
+                              pedidoExistente.tipoApoio === 'substituicao_vidros' ? 'Substituição Vidros' : 'Outro';
+        
+        const titulo = encodeURIComponent(`Apoio: ${loja?.nome || 'Loja'} - ${tipoApoioTexto}`);
+        const descricao = encodeURIComponent(pedidoExistente.observacoes || '');
+        const local = encodeURIComponent(loja?.nome || '');
+
+        // Formato para Google Calendar
+        const formatoGoogle = (date: Date) => date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+        const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${titulo}&dates=${formatoGoogle(dataInicio)}/${formatoGoogle(dataFim)}&details=${descricao}&location=${local}`;
+
+        // Formato para Outlook
+        const formatoOutlook = (date: Date) => date.toISOString();
+        const outlookUrl = `https://outlook.live.com/calendar/0/deeplink/compose?subject=${titulo}&startdt=${formatoOutlook(dataInicio)}&enddt=${formatoOutlook(dataFim)}&body=${descricao}&location=${local}`;
+
+        const links = {
+          google: googleUrl,
+          outlook: outlookUrl,
+          ics: '', // ICS é gerado no cliente
+        };
+        
+        const pedido = await db.aprovarPedidoApoio(input.pedidoId, links);
+        return pedido;
+      }),
+    
+    // Reprovar pedido de apoio (pelo volante)
+    reprovar: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        pedidoId: z.number(),
+        motivo: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const tokenData = await db.validateTokenVolante(input.token);
+        if (!tokenData) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        
+        const pedido = await db.reprovarPedidoApoio(input.pedidoId, input.motivo);
+        return pedido;
+      }),
+    
+    // Cancelar pedido de apoio (pela loja)
+    cancelar: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        pedidoId: z.number(),
+      }))
+      .mutation(async ({ input }) => {
+        const tokenData = await db.validarTokenLoja(input.token);
+        if (!tokenData) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        
+        await db.cancelarPedidoApoio(input.pedidoId);
+        return { success: true };
+      }),
+  }),
+  
+  // ==================== PORTAL VOLANTE ====================
+  portalVolante: router({
+    // Validar token de volante
+    validarToken: publicProcedure
+      .input(z.object({ token: z.string() }))
+      .query(async ({ input }) => {
+        const tokenData = await db.validateTokenVolante(input.token);
+        if (!tokenData) {
+          return { valid: false, volante: null, lojas: [] };
+        }
+        
+        // Obter lojas atribuídas ao volante
+        const lojas = await db.getLojasByVolanteId(tokenData.volante.id);
+        
+        return {
+          valid: true,
+          volante: tokenData.volante,
+          lojas,
+        };
+      }),
+    
+    // Obter resultados das lojas do volante
+    resultadosLojas: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        ano: z.number().optional(),
+        mes: z.number().optional(),
+      }))
+      .query(async ({ input }) => {
+        const tokenData = await db.validateTokenVolante(input.token);
+        if (!tokenData) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        
+        const lojas = await db.getLojasByVolanteId(tokenData.volante.id);
+        const now = new Date();
+        const ano = input.ano || now.getFullYear();
+        const mes = input.mes || now.getMonth() + 1;
+        
+        // Obter resultados de cada loja
+        const resultados = await Promise.all(
+          lojas.map(async (loja) => {
+            const resultado = await db.getResultadosMensaisPorLoja(loja.id, mes, ano);
+            return {
+              loja,
+              resultado,
+            };
+          })
+        );
+        
+        return resultados;
+      }),
+  }),
 });
 
 // Função auxiliar para gerar HTML do email de reunião quinzenal

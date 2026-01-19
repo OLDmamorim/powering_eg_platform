@@ -3360,3 +3360,29 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Corrigir troca de manifest para PWA do Portal da Loja (atualmente instala como 'PoweringEG' em vez de 'Portal Loja')
 - [ ] Corrigir criação de tokens das lojas - fica a carregar infinitamente
 - [x] Lista de tokens não atualiza após criação (refetch não funciona)
+
+## Módulo Volante v6.12
+- [x] Schema BD: tabela volantes (id, nome, email, gestor_id, ativo)
+- [x] Schema BD: tabela volante_lojas (volante_id, loja_id) - atribuição de lojas ao volante
+- [x] Schema BD: tabela tokens_volante (id, volante_id, token, tipo, ativo)
+- [x] Schema BD: tabela pedidos_apoio (id, loja_id, volante_id, data, periodo, tipo_apoio, observacoes, estado)
+- [ ] Página gestão de Volantes no Dashboard (criar, editar, atribuir lojas)
+- [ ] Sistema de tokens para volantes (criar, enviar email)
+- [ ] Card "Volante" no Portal da Loja com calendário de requisições
+- [ ] Formulário de requisição: dia, período (manhã/tarde), tipo apoio, observações
+- [ ] Vista do Volante: agenda com todos os pedidos das lojas atribuídas
+- [ ] Aprovar/reprovar pedidos de apoio
+- [ ] Sistema de cores: amarelo (pendente), roxo (manhã aprovada), azul (tarde aprovada), vermelho (dia completo)
+- [ ] Geração de links para calendários externos (Gmail, Outlook, Apple)
+- [ ] Volante vê resultados de todas as lojas atribuídas
+
+
+## Interface do Volante no Portal da Loja
+- [x] Adicionar tipo VolanteAuth para autenticação de volantes
+- [x] Implementar validação de token de volante no PortalLoja
+- [x] Criar componente VolanteInterface com agenda e resultados
+- [x] Implementar calendário de apoios com visualização mensal
+- [x] Implementar aprovação/reprovação de pedidos de apoio
+- [x] Gerar links de calendário (Google, Outlook, ICS) para pedidos aprovados
+- [x] Implementar visualização de resultados das lojas atribuídas
+- [x] Testar interface completa do volante
