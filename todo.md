@@ -3405,3 +3405,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Interface no portal do volante para ver histórico de apoios
 - [x] Filtros por período e loja no histórico
 - [x] Testar funcionalidades completas
+
+
+## Refatorar Interface Resultados do Volante v6.14
+- [ ] Interface de Resultados do Volante igual ao Portal das Lojas
+- [ ] Mesmos gráficos, métricas e layout completo
+- [ ] Seletor de lojas com todas as lojas atribuídas ao volante

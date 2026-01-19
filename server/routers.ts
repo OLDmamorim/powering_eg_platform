@@ -7737,6 +7737,222 @@ IMPORTANTE:
         
         return resultados;
       }),
+    // Dashboard completo de uma loja específica (igual ao portal das lojas)
+    dashboardLoja: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        lojaId: z.number(),
+        meses: z.array(z.object({ mes: z.number().min(1).max(12), ano: z.number() })).optional(),
+      }))
+      .query(async ({ input }) => {
+        const tokenData = await db.validateTokenVolante(input.token);
+        if (!tokenData) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        
+        // Verificar se o volante tem acesso a esta loja
+        const lojas = await db.getLojasByVolanteId(tokenData.volante.id);
+        const temAcesso = lojas.some(l => l.id === input.lojaId);
+        if (!temAcesso) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Não tem acesso a esta loja' });
+        }
+        
+        const lojaIdParaConsulta = input.lojaId;
+        const now = new Date();
+        const anoAtual = now.getFullYear();
+        const mesAtual = now.getMonth() + 1;
+        
+        // Usar meses fornecidos ou mês atual por defeito
+        let mesesConsulta: { mes: number; ano: number }[] = [];
+        let periodoLabel = '';
+        
+        if (input.meses && input.meses.length > 0) {
+          mesesConsulta = input.meses;
+          if (mesesConsulta.length === 1) {
+            periodoLabel = new Date(mesesConsulta[0].ano, mesesConsulta[0].mes - 1).toLocaleDateString('pt-PT', { month: 'long', year: 'numeric' });
+          } else {
+            const mesesOrdenados = [...mesesConsulta].sort((a, b) => {
+              if (a.ano !== b.ano) return a.ano - b.ano;
+              return a.mes - b.mes;
+            });
+            const primeiro = mesesOrdenados[0];
+            const ultimo = mesesOrdenados[mesesOrdenados.length - 1];
+            periodoLabel = `${new Date(primeiro.ano, primeiro.mes - 1).toLocaleDateString('pt-PT', { month: 'short', year: 'numeric' })} - ${new Date(ultimo.ano, ultimo.mes - 1).toLocaleDateString('pt-PT', { month: 'short', year: 'numeric' })} (${mesesConsulta.length} meses)`;
+          }
+        } else {
+          mesesConsulta = [{ mes: mesAtual, ano: anoAtual }];
+          periodoLabel = new Date(anoAtual, mesAtual - 1).toLocaleDateString('pt-PT', { month: 'long', year: 'numeric' });
+        }
+        
+        // Buscar dados agregados para todos os meses do período
+        let totalServicos = 0;
+        let totalObjetivo = 0;
+        let totalReparacoes = 0;
+        let totalEscovas = 0;
+        let totalPolimento = 0;
+        let totalTratamento = 0;
+        let totalLavagens = 0;
+        let totalOutros = 0;
+        let dataUltimaAtualizacao: Date | null = null;
+        let resultadosAgregados: any = null;
+        let complementaresAgregados: any = null;
+        
+        for (const p of mesesConsulta) {
+          const resultadosArr = await db.getResultadosMensaisPorLoja(lojaIdParaConsulta, p.mes, p.ano);
+          if (resultadosArr) {
+            totalServicos += Number(resultadosArr.totalServicos) || 0;
+            totalObjetivo += Number(resultadosArr.objetivoMensal) || 0;
+            totalReparacoes += Number(resultadosArr.qtdReparacoes) || 0;
+            if (resultadosArr.updatedAt) {
+              const dataAtual = new Date(resultadosArr.updatedAt);
+              if (!dataUltimaAtualizacao || dataAtual > dataUltimaAtualizacao) {
+                dataUltimaAtualizacao = dataAtual;
+              }
+            }
+            if (!resultadosAgregados) resultadosAgregados = resultadosArr;
+          }
+          
+          const complementaresArr = await db.getVendasComplementares(p.mes, p.ano, lojaIdParaConsulta);
+          if (complementaresArr && complementaresArr.length > 0) {
+            const c = complementaresArr[0];
+            totalEscovas += Number(c.escovasQtd) || 0;
+            totalPolimento += Number(c.polimentoQtd) || 0;
+            totalTratamento += Number(c.tratamentoQtd) || 0;
+            totalLavagens += Number(c.lavagensTotal) || 0;
+            totalOutros += Number(c.outrosQtd) || 0;
+            if (!complementaresAgregados) complementaresAgregados = c;
+          }
+        }
+        
+        // Calcular métricas agregadas
+        const desvioPercentual = totalObjetivo > 0 ? (totalServicos - totalObjetivo) / totalObjetivo : null;
+        const taxaReparacao = totalServicos > 0 ? totalReparacoes / totalServicos : null;
+        const escovasPercent = totalServicos > 0 ? totalEscovas / totalServicos : null;
+        
+        const objetivoDiaAtual = resultadosAgregados?.objetivoDiaAtual ? parseFloat(String(resultadosAgregados.objetivoDiaAtual)) : null;
+        const desvioObjetivoAcumulado = resultadosAgregados?.desvioObjetivoAcumulado ? parseFloat(String(resultadosAgregados.desvioObjetivoAcumulado)) : null;
+        const desvioPercentualDia = resultadosAgregados?.desvioPercentualDia ? parseFloat(String(resultadosAgregados.desvioPercentualDia)) : null;
+        
+        const resultados = {
+          totalServicos,
+          objetivoMensal: totalObjetivo,
+          objetivoDiaAtual,
+          desvioObjetivoAcumulado,
+          desvioPercentualDia,
+          desvioPercentualMes: desvioPercentual,
+          taxaReparacao,
+          totalReparacoes,
+          gapReparacoes22: taxaReparacao !== null && taxaReparacao < 0.22 
+            ? Math.ceil(totalServicos * 0.22 - totalReparacoes) 
+            : 0,
+        };
+        
+        const complementares = {
+          escovasQtd: totalEscovas,
+          escovasPercent,
+          polimentoQtd: totalPolimento,
+          tratamentoQtd: totalTratamento,
+          lavagensTotal: totalLavagens,
+          outrosQtd: totalOutros,
+        };
+        
+        // Buscar dados do mês anterior para comparativo
+        const mesAnteriorData = mesesConsulta[0];
+        const mesCompMes = mesAnteriorData.mes === 1 ? 12 : mesAnteriorData.mes - 1;
+        const mesCompAno = mesAnteriorData.mes === 1 ? mesAnteriorData.ano - 1 : mesAnteriorData.ano;
+        const resultadosMesAnterior = await db.getResultadosMensaisPorLoja(lojaIdParaConsulta, mesCompMes, mesCompAno);
+        const complementaresMesAnterior = await db.getVendasComplementares(mesCompMes, mesCompAno, lojaIdParaConsulta);
+        
+        // Calcular variações
+        const variacaoServicos = resultadosMesAnterior && resultadosMesAnterior.totalServicos 
+          ? ((totalServicos - Number(resultadosMesAnterior.totalServicos)) / Number(resultadosMesAnterior.totalServicos)) * 100 
+          : null;
+        const variacaoReparacoes = resultadosMesAnterior && resultadosMesAnterior.qtdReparacoes 
+          ? ((totalReparacoes - Number(resultadosMesAnterior.qtdReparacoes)) / Number(resultadosMesAnterior.qtdReparacoes)) * 100 
+          : null;
+        const escovasAnterior = complementaresMesAnterior && complementaresMesAnterior.length > 0 
+          ? Number(complementaresMesAnterior[0].escovasQtd) || 0 
+          : 0;
+        const variacaoEscovas = escovasAnterior > 0 
+          ? ((totalEscovas - escovasAnterior) / escovasAnterior) * 100 
+          : null;
+        
+        const comparativoMesAnterior = {
+          servicosAnterior: resultadosMesAnterior?.totalServicos || 0,
+          reparacoesAnterior: resultadosMesAnterior?.qtdReparacoes || 0,
+          escovasAnterior,
+          variacaoServicos,
+          variacaoReparacoes,
+          variacaoEscovas,
+        };
+        
+        // Gerar alertas
+        const alertas: Array<{tipo: string; mensagem: string}> = [];
+        
+        if (taxaReparacao !== null && taxaReparacao < 0.22) {
+          const gapReparacoes = Math.ceil(totalServicos * 0.22 - totalReparacoes);
+          alertas.push({
+            tipo: 'warning',
+            mensagem: `Taxa de reparação abaixo de 22% (${(taxaReparacao * 100).toFixed(1)}%). Faltam ${gapReparacoes} reparações.`,
+          });
+        }
+        
+        if (escovasPercent !== null && escovasPercent < 0.075) {
+          alertas.push({
+            tipo: 'danger',
+            mensagem: `Percentagem de escovas abaixo do mínimo (${(escovasPercent * 100).toFixed(1)}% < 7.5%)`,
+          });
+        } else if (escovasPercent !== null && escovasPercent < 0.10) {
+          alertas.push({
+            tipo: 'warning',
+            mensagem: `Percentagem de escovas abaixo do objetivo (${(escovasPercent * 100).toFixed(1)}% < 10%)`,
+          });
+        }
+        
+        if (desvioPercentualDia !== null && desvioPercentualDia < -0.10) {
+          alertas.push({
+            tipo: 'danger',
+            mensagem: `Desvio diário crítico: ${(desvioPercentualDia * 100).toFixed(1)}% abaixo do objetivo`,
+          });
+        }
+        
+        // Buscar evolução dos últimos 12 meses
+        const evolucao = [];
+        for (let i = 11; i >= 0; i--) {
+          const d = new Date(anoAtual, mesAtual - 1 - i, 1);
+          const m = d.getMonth() + 1;
+          const a = d.getFullYear();
+          const res = await db.getResultadosMensaisPorLoja(lojaIdParaConsulta, m, a);
+          if (res) {
+            evolucao.push({
+              mes: m,
+              ano: a,
+              totalServicos: res.totalServicos,
+              objetivoMensal: res.objetivoMensal,
+              desvioPercentualMes: res.objetivoMensal && Number(res.objetivoMensal) > 0
+                ? (Number(res.totalServicos) - Number(res.objetivoMensal)) / Number(res.objetivoMensal)
+                : null,
+              taxaReparacao: res.totalServicos && Number(res.totalServicos) > 0
+                ? Number(res.qtdReparacoes) / Number(res.totalServicos)
+                : null,
+            });
+          }
+        }
+        
+        // Obter nome da loja
+        const lojaInfo = lojas.find(l => l.id === lojaIdParaConsulta);
+        
+        return {
+          lojaNome: lojaInfo?.nome || 'Loja',
+          periodoLabel,
+          dataAtualizacao: dataUltimaAtualizacao?.toISOString() || null,
+          resultados,
+          complementares,
+          comparativoMesAnterior,
+          alertas,
+          evolucao,
+        };
+      }),
   }),
 });
 

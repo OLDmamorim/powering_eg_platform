@@ -4198,6 +4198,10 @@ function VolanteInterface({
   const [motivoReprovacao, setMotivoReprovacao] = useState("");
   const [reprovarDialogOpen, setReprovarDialogOpen] = useState(false);
   const [lojaResultadosSelecionada, setLojaResultadosSelecionada] = useState<number | null>(null);
+  const [mesesSelecionadosVolante, setMesesSelecionadosVolante] = useState<Array<{mes: number; ano: number}>>(() => {
+    const hoje = new Date();
+    return [{ mes: hoje.getMonth() + 1, ano: hoje.getFullYear() }];
+  });
 
   // Query para obter pedidos de apoio do volante
   const { data: pedidosApoio, refetch: refetchPedidos, isLoading: loadingPedidos } = trpc.pedidosApoio.listarPorVolante.useQuery(
@@ -4211,10 +4215,16 @@ function VolanteInterface({
     { enabled: !!token }
   );
 
-  // Query para obter resultados das lojas
+  // Query para obter resultados das lojas (lista simples)
   const { data: resultadosLojas, isLoading: loadingResultados } = trpc.portalVolante.resultadosLojas.useQuery(
     { token, ano: mesSelecionado.ano, mes: mesSelecionado.mes },
-    { enabled: !!token && activeTab === "resultados" }
+    { enabled: !!token && activeView === "resultados" && !lojaResultadosSelecionada }
+  );
+
+  // Query para obter dashboard completo de uma loja específica
+  const { data: dashboardLojaVolante, isLoading: loadingDashboardLoja } = trpc.portalVolante.dashboardLoja.useQuery(
+    { token, lojaId: lojaResultadosSelecionada!, meses: mesesSelecionadosVolante },
+    { enabled: !!token && activeView === "resultados" && !!lojaResultadosSelecionada && mesesSelecionadosVolante.length > 0 }
   );
 
   // Mutation para aprovar pedido
@@ -4800,21 +4810,22 @@ END:VCALENDAR`;
 
         {activeView === "resultados" && (
           <div className="space-y-6">
-            {/* Seletor de Loja */}
+            {/* Seletor de Loja e Período */}
             <Card className="dark:bg-gray-800 dark:border-gray-700">
               <CardContent className="py-4">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                  <div className="flex items-center gap-4 w-full sm:w-auto">
+                <div className="flex flex-col gap-4">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                     <h3 className="font-medium dark:text-gray-100">{language === 'pt' ? 'Loja' : 'Store'}</h3>
                     <Select
-                      value={lojaResultadosSelecionada?.toString() || "todas"}
-                      onValueChange={(value) => setLojaResultadosSelecionada(value === "todas" ? null : parseInt(value))}
+                      value={lojaResultadosSelecionada?.toString() || ""}
+                      onValueChange={(value) => {
+                        setLojaResultadosSelecionada(value ? parseInt(value) : null);
+                      }}
                     >
-                      <SelectTrigger className="w-[200px] dark:bg-gray-700 dark:border-gray-600">
+                      <SelectTrigger className="w-[250px] dark:bg-gray-700 dark:border-gray-600">
                         <SelectValue placeholder={language === 'pt' ? 'Selecionar loja' : 'Select store'} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="todas">{language === 'pt' ? 'Todas as lojas' : 'All stores'}</SelectItem>
                         {volanteAuth.lojasAtribuidas
                           .sort((a, b) => a.nome.localeCompare(b.nome))
                           .map((loja) => (
@@ -4825,103 +4836,472 @@ END:VCALENDAR`;
                       </SelectContent>
                     </Select>
                   </div>
-                  <h3 className="font-medium dark:text-gray-100">{language === 'pt' ? 'Período' : 'Period'}</h3>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        const novoMes = mesSelecionado.mes === 1 ? 12 : mesSelecionado.mes - 1;
-                        const novoAno = mesSelecionado.mes === 1 ? mesSelecionado.ano - 1 : mesSelecionado.ano;
-                        setMesSelecionado({ mes: novoMes, ano: novoAno });
-                      }}
-                    >
-                      <ChevronLeft className="h-4 w-4" />
-                    </Button>
-                    <span className="font-medium min-w-[140px] text-center">
-                      {nomesMeses[mesSelecionado.mes - 1]} {mesSelecionado.ano}
-                    </span>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        const novoMes = mesSelecionado.mes === 12 ? 1 : mesSelecionado.mes + 1;
-                        const novoAno = mesSelecionado.mes === 12 ? mesSelecionado.ano + 1 : mesSelecionado.ano;
-                        setMesSelecionado({ mes: novoMes, ano: novoAno });
-                      }}
-                    >
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
-                  </div>
+                  {lojaResultadosSelecionada && (
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                      <h3 className="font-medium dark:text-gray-100">{language === 'pt' ? 'Período' : 'Period'}</h3>
+                      <FiltroMesesCheckbox
+                        mesesSelecionados={mesesSelecionadosVolante}
+                        onMesesChange={setMesesSelecionadosVolante}
+                        placeholder={language === 'pt' ? 'Selecionar meses' : 'Select months'}
+                      />
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
 
-            {/* Lista de Lojas */}
-            {loadingResultados ? (
+            {/* Conteúdo baseado na seleção */}
+            {!lojaResultadosSelecionada ? (
+              <Card>
+                <CardContent className="py-12 text-center">
+                  <Store className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                  <p className="text-gray-500">
+                    {language === 'pt' ? 'Selecione uma loja para ver os resultados' : 'Select a store to view results'}
+                  </p>
+                </CardContent>
+              </Card>
+            ) : loadingDashboardLoja ? (
               <div className="flex items-center justify-center py-12">
                 <Loader2 className="h-8 w-8 animate-spin text-teal-600" />
               </div>
-            ) : resultadosLojas && resultadosLojas.length > 0 ? (
-              <div className="grid gap-4 md:grid-cols-2">
-                {resultadosLojas.map((item: any) => (
-                  <Card 
-                    key={item.loja.id}
-                    className={`cursor-pointer transition-all hover:shadow-md ${
-                      lojaResultadosSelecionada === item.loja.id ? 'ring-2 ring-teal-500' : ''
-                    }`}
-                    onClick={() => setLojaResultadosSelecionada(
-                      lojaResultadosSelecionada === item.loja.id ? null : item.loja.id
-                    )}
-                  >
-                    <CardHeader className="pb-2">
+            ) : dashboardLojaVolante ? (
+              <div className="space-y-6 bg-white dark:bg-gray-900 p-4 rounded-lg">
+                {/* Label do Período */}
+                {dashboardLojaVolante.periodoLabel && (
+                  <div className="text-center">
+                    <h2 className="text-xl font-bold text-foreground">
+                      {dashboardLojaVolante.lojaNome} - {dashboardLojaVolante.periodoLabel}
+                    </h2>
+                  </div>
+                )}
+
+                {/* KPIs Principais */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                  {/* Total Serviços */}
+                  <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <Wrench className="h-8 w-8 opacity-80" />
+                        <div className="text-right">
+                          <p className="text-2xl font-bold">{dashboardLojaVolante.resultados?.totalServicos || 0}</p>
+                          <p className="text-xs opacity-80">{language === 'pt' ? 'Serviços' : 'Services'}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Objetivo */}
+                  <Card className="bg-gradient-to-br from-purple-500 to-purple-600 text-white">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <Target className="h-8 w-8 opacity-80" />
+                        <div className="text-right">
+                          <p className="text-2xl font-bold">{dashboardLojaVolante.resultados?.objetivoMensal || 0}</p>
+                          <p className="text-xs opacity-80">{language === 'pt' ? 'Objetivo' : 'Goal'}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Desvio vs Objetivo Diário */}
+                  <Card className={`bg-gradient-to-br ${(() => {
+                    const desvio = parseFloat(String(dashboardLojaVolante.resultados?.desvioPercentualDia || 0)) * 100;
+                    if (desvio >= 20) return 'from-green-600 to-green-700';
+                    if (desvio >= 10) return 'from-green-500 to-green-600';
+                    if (desvio >= 0) return 'from-green-400 to-green-500';
+                    if (desvio >= -10) return 'from-red-400 to-red-500';
+                    if (desvio >= -20) return 'from-red-500 to-red-600';
+                    return 'from-red-600 to-red-700';
+                  })()} text-white`}>
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        {parseFloat(String(dashboardLojaVolante.resultados?.desvioPercentualDia || 0)) >= 0 ? (
+                          <TrendingUp className="h-8 w-8 opacity-80" />
+                        ) : (
+                          <TrendingDown className="h-8 w-8 opacity-80" />
+                        )}
+                        <div className="text-right">
+                          <p className="text-2xl font-bold">
+                            {dashboardLojaVolante.resultados?.desvioPercentualDia !== null 
+                              ? `${parseFloat(String(dashboardLojaVolante.resultados?.desvioPercentualDia)) >= 0 ? '+' : ''}${(parseFloat(String(dashboardLojaVolante.resultados?.desvioPercentualDia)) * 100).toFixed(1)}%`
+                              : '-'}
+                          </p>
+                          <p className="text-xs opacity-80">{language === 'pt' ? 'Desvio Obj. Diário' : 'Daily Goal Dev.'}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Taxa Reparação */}
+                  <Card className={`bg-gradient-to-br ${
+                    parseFloat(String(dashboardLojaVolante.resultados?.taxaReparacao || 0)) >= 0.22 
+                      ? 'from-green-500 to-green-600' 
+                      : 'from-amber-500 to-amber-600'
+                  } text-white`}>
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <Award className="h-8 w-8 opacity-80" />
+                        <div className="text-right">
+                          <p className="text-2xl font-bold">
+                            {dashboardLojaVolante.resultados?.taxaReparacao !== null 
+                              ? `${(parseFloat(String(dashboardLojaVolante.resultados?.taxaReparacao)) * 100).toFixed(1)}%`
+                              : '-'}
+                          </p>
+                          <p className="text-xs opacity-80">{language === 'pt' ? 'Taxa Rep.' : 'Repair Rate'}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Alertas */}
+                {dashboardLojaVolante.alertas && dashboardLojaVolante.alertas.length > 0 && (
+                  <div className="space-y-2">
+                    {dashboardLojaVolante.alertas.map((alerta: {tipo: string; mensagem: string}, idx: number) => (
+                      <Card key={idx} className={`border-l-4 ${
+                        alerta.tipo === 'danger' ? 'border-l-red-500 bg-red-50 dark:bg-red-900/20' :
+                        alerta.tipo === 'warning' ? 'border-l-amber-500 bg-amber-50 dark:bg-amber-900/20' :
+                        'border-l-green-500 bg-green-50 dark:bg-green-900/20'
+                      }`}>
+                        <CardContent className="py-3 flex items-center gap-3">
+                          {alerta.tipo === 'danger' ? (
+                            <AlertTriangle className="h-5 w-5 text-red-500" />
+                          ) : alerta.tipo === 'warning' ? (
+                            <AlertTriangle className="h-5 w-5 text-amber-500" />
+                          ) : (
+                            <Award className="h-5 w-5 text-green-500" />
+                          )}
+                          <span className={`text-sm font-medium ${
+                            alerta.tipo === 'danger' ? 'text-red-700 dark:text-red-300' :
+                            alerta.tipo === 'warning' ? 'text-amber-700 dark:text-amber-300' :
+                            'text-green-700 dark:text-green-300'
+                          }`}>
+                            {alerta.mensagem}
+                          </span>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+
+                {/* Vendas Complementares */}
+                {dashboardLojaVolante.complementares && (() => {
+                  const complementaresLabels = ['Escovas', 'Polimento', 'Tratamento', 'Outros'];
+                  const complementaresData = [
+                    Number(dashboardLojaVolante.complementares.escovasQtd) || 0,
+                    Number(dashboardLojaVolante.complementares.polimentoQtd) || 0,
+                    Number(dashboardLojaVolante.complementares.tratamentoQtd) || 0,
+                    Number(dashboardLojaVolante.complementares.outrosQtd) || 0,
+                  ];
+                  const totalComplementares = complementaresData.reduce((a, b) => a + b, 0);
+                  const complementaresColors = [
+                    'rgba(59, 130, 246, 0.8)',
+                    'rgba(168, 85, 247, 0.8)',
+                    'rgba(34, 197, 94, 0.8)',
+                    'rgba(156, 163, 175, 0.8)',
+                  ];
+                  const complementaresBorders = [
+                    'rgb(59, 130, 246)',
+                    'rgb(168, 85, 247)',
+                    'rgb(34, 197, 94)',
+                    'rgb(156, 163, 175)',
+                  ];
+
+                  return (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-lg flex items-center gap-2">
+                          <BarChart3 className="h-5 w-5" />
+                          {language === 'pt' ? 'Vendas Complementares' : 'Complementary Sales'}
+                        </CardTitle>
+                        <CardDescription>
+                          {language === 'pt' 
+                            ? `Total: ${totalComplementares} vendas complementares`
+                            : `Total: ${totalComplementares} complementary sales`}
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        {/* Gráficos */}
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                          <div style={{ height: '250px' }}>
+                            <Bar
+                              data={{
+                                labels: complementaresLabels,
+                                datasets: [
+                                  {
+                                    label: language === 'pt' ? 'Quantidade' : 'Quantity',
+                                    data: complementaresData,
+                                    backgroundColor: complementaresColors,
+                                    borderColor: complementaresBorders,
+                                    borderWidth: 1,
+                                  },
+                                ],
+                              }}
+                              options={{
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                indexAxis: 'y',
+                                plugins: {
+                                  legend: { display: false },
+                                  tooltip: {
+                                    callbacks: {
+                                      label: (context) => {
+                                        const value = context.parsed.x ?? 0;
+                                        const percent = totalComplementares > 0 ? ((value / totalComplementares) * 100).toFixed(1) : '0';
+                                        return `${value} (${percent}%)`;
+                                      },
+                                    },
+                                  },
+                                },
+                                scales: {
+                                  x: { beginAtZero: true, ticks: { stepSize: 1 } },
+                                },
+                              }}
+                            />
+                          </div>
+                          <div style={{ height: '250px' }} className="flex items-center justify-center">
+                            <Doughnut
+                              data={{
+                                labels: complementaresLabels,
+                                datasets: [
+                                  {
+                                    data: complementaresData,
+                                    backgroundColor: complementaresColors,
+                                    borderColor: complementaresBorders,
+                                    borderWidth: 2,
+                                  },
+                                ],
+                              }}
+                              options={{
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                  legend: { position: 'right', labels: { boxWidth: 12, padding: 8 } },
+                                  tooltip: {
+                                    callbacks: {
+                                      label: (context) => {
+                                        const value = context.parsed ?? 0;
+                                        const percent = totalComplementares > 0 ? ((value / totalComplementares) * 100).toFixed(1) : '0';
+                                        return `${context.label}: ${value} (${percent}%)`;
+                                      },
+                                    },
+                                  },
+                                },
+                              }}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Barra de Escovas */}
+                        <div className="border-t pt-4">
+                          <div className="flex justify-between mb-2">
+                            <span className="text-sm font-medium flex items-center gap-2">
+                              <div className="w-3 h-3 rounded-full bg-blue-500" />
+                              Escovas
+                            </span>
+                            <span className="text-sm font-medium">
+                              {dashboardLojaVolante.complementares.escovasQtd || 0} 
+                              <span className={`ml-2 ${
+                                parseFloat(String(dashboardLojaVolante.complementares.escovasPercent || 0)) >= 0.10 
+                                  ? 'text-green-600' 
+                                  : parseFloat(String(dashboardLojaVolante.complementares.escovasPercent || 0)) >= 0.075
+                                    ? 'text-amber-600'
+                                    : 'text-red-600'
+                              }`}>
+                                ({dashboardLojaVolante.complementares.escovasPercent !== null 
+                                  ? `${(parseFloat(String(dashboardLojaVolante.complementares.escovasPercent)) * 100).toFixed(1)}%`
+                                  : '0%'})
+                              </span>
+                            </span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-4 relative">
+                            <div 
+                              className={`h-4 rounded-full transition-all ${
+                                parseFloat(String(dashboardLojaVolante.complementares.escovasPercent || 0)) >= 0.10 
+                                  ? 'bg-green-500' 
+                                  : parseFloat(String(dashboardLojaVolante.complementares.escovasPercent || 0)) >= 0.075
+                                    ? 'bg-amber-500'
+                                    : 'bg-red-500'
+                              }`}
+                              style={{ width: `${Math.min(parseFloat(String(dashboardLojaVolante.complementares.escovasPercent || 0)) * 1000, 100)}%` }}
+                            />
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {language === 'pt' ? 'Objetivo: 10% | Mínimo: 7.5%' : 'Goal: 10% | Minimum: 7.5%'}
+                          </p>
+                        </div>
+
+                        {/* Cards de Complementares */}
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                          <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center">
+                            <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">Escovas</p>
+                            <p className="text-xl font-bold text-blue-700 dark:text-blue-300">{dashboardLojaVolante.complementares.escovasQtd || 0}</p>
+                          </div>
+                          <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg text-center">
+                            <p className="text-xs text-purple-600 dark:text-purple-400 font-medium">Polimento</p>
+                            <p className="text-xl font-bold text-purple-700 dark:text-purple-300">{dashboardLojaVolante.complementares.polimentoQtd || 0}</p>
+                          </div>
+                          <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
+                            <p className="text-xs text-green-600 dark:text-green-400 font-medium">Tratamento</p>
+                            <p className="text-xl font-bold text-green-700 dark:text-green-300">{dashboardLojaVolante.complementares.tratamentoQtd || 0}</p>
+                          </div>
+                          <div className="p-3 bg-gray-100 dark:bg-gray-800 rounded-lg text-center">
+                            <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">Outros</p>
+                            <p className="text-xl font-bold text-gray-700 dark:text-gray-300">{dashboardLojaVolante.complementares.outrosQtd || 0}</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })()}
+
+                {/* Comparativo com Mês Anterior */}
+                {dashboardLojaVolante.comparativoMesAnterior && (
+                  <Card>
+                    <CardHeader>
                       <CardTitle className="text-lg flex items-center gap-2">
-                        <Store className="h-5 w-5 text-teal-600" />
-                        {item.loja.nome}
+                        <TrendingUp className="h-5 w-5" />
+                        {language === 'pt' ? 'Comparação com Mês Anterior' : 'Comparison with Previous Month'}
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      {item.resultado ? (
-                        <div className="space-y-3">
-                          <div className="grid grid-cols-2 gap-4 text-sm">
-                            <div>
-                              <p className="text-gray-500">{language === 'pt' ? 'Faturação' : 'Revenue'}</p>
-                              <p className="font-bold text-lg">
-                                {item.resultado.faturacao?.toLocaleString('pt-PT', { style: 'currency', currency: 'EUR' }) || 'N/A'}
-                              </p>
-                            </div>
-                            <div>
-                              <p className="text-gray-500">{language === 'pt' ? 'Serviços' : 'Services'}</p>
-                              <p className="font-bold text-lg">{item.resultado.servicos || 0}</p>
-                            </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <p className="text-sm text-muted-foreground mb-1">{language === 'pt' ? 'Serviços' : 'Services'}</p>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xl font-bold">
+                              {Number(dashboardLojaVolante.resultados?.totalServicos || 0)}
+                            </span>
+                            {dashboardLojaVolante.comparativoMesAnterior.variacaoServicos !== null && (
+                              <span className={`text-sm flex items-center gap-1 ${
+                                dashboardLojaVolante.comparativoMesAnterior.variacaoServicos >= 0 ? 'text-green-600' : 'text-red-600'
+                              }`}>
+                                {dashboardLojaVolante.comparativoMesAnterior.variacaoServicos >= 0 ? (
+                                  <TrendingUp className="h-4 w-4" />
+                                ) : (
+                                  <TrendingDown className="h-4 w-4" />
+                                )}
+                                {dashboardLojaVolante.comparativoMesAnterior.variacaoServicos >= 0 ? '+' : ''}
+                                {dashboardLojaVolante.comparativoMesAnterior.variacaoServicos.toFixed(1)}%
+                              </span>
+                            )}
                           </div>
-                          {lojaResultadosSelecionada === item.loja.id && (
-                            <div className="pt-3 border-t space-y-2 text-sm">
-                              <div className="flex justify-between">
-                                <span className="text-gray-500">{language === 'pt' ? 'Calibrações' : 'Calibrations'}</span>
-                                <span className="font-medium">{item.resultado.calibracoes || 0}</span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span className="text-gray-500">{language === 'pt' ? 'Reparações' : 'Repairs'}</span>
-                                <span className="font-medium">{item.resultado.reparacoes || 0}</span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span className="text-gray-500">{language === 'pt' ? 'Ticket Médio' : 'Average Ticket'}</span>
-                                <span className="font-medium">
-                                  {item.resultado.ticketMedio?.toLocaleString('pt-PT', { style: 'currency', currency: 'EUR' }) || 'N/A'}
-                                </span>
-                              </div>
-                            </div>
-                          )}
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {language === 'pt' ? 'Anterior: ' : 'Previous: '}
+                            {Number(dashboardLojaVolante.comparativoMesAnterior.servicosAnterior || 0)}
+                          </p>
                         </div>
-                      ) : (
-                        <p className="text-gray-500 text-sm">
-                          {language === 'pt' ? 'Sem dados para este período' : 'No data for this period'}
-                        </p>
-                      )}
+                        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <p className="text-sm text-muted-foreground mb-1">{language === 'pt' ? 'Reparações' : 'Repairs'}</p>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xl font-bold">
+                              {Number(dashboardLojaVolante.resultados?.totalReparacoes || 0)}
+                            </span>
+                            {dashboardLojaVolante.comparativoMesAnterior.variacaoReparacoes !== null && (
+                              <span className={`text-sm flex items-center gap-1 ${
+                                dashboardLojaVolante.comparativoMesAnterior.variacaoReparacoes >= 0 ? 'text-green-600' : 'text-red-600'
+                              }`}>
+                                {dashboardLojaVolante.comparativoMesAnterior.variacaoReparacoes >= 0 ? (
+                                  <TrendingUp className="h-4 w-4" />
+                                ) : (
+                                  <TrendingDown className="h-4 w-4" />
+                                )}
+                                {dashboardLojaVolante.comparativoMesAnterior.variacaoReparacoes >= 0 ? '+' : ''}
+                                {dashboardLojaVolante.comparativoMesAnterior.variacaoReparacoes.toFixed(1)}%
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {language === 'pt' ? 'Anterior: ' : 'Previous: '}
+                            {Number(dashboardLojaVolante.comparativoMesAnterior.reparacoesAnterior || 0)}
+                          </p>
+                        </div>
+                        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <p className="text-sm text-muted-foreground mb-1">Escovas</p>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xl font-bold">
+                              {Number(dashboardLojaVolante.complementares?.escovasQtd || 0)}
+                            </span>
+                            {dashboardLojaVolante.comparativoMesAnterior.variacaoEscovas !== null && (
+                              <span className={`text-sm flex items-center gap-1 ${
+                                dashboardLojaVolante.comparativoMesAnterior.variacaoEscovas >= 0 ? 'text-green-600' : 'text-red-600'
+                              }`}>
+                                {dashboardLojaVolante.comparativoMesAnterior.variacaoEscovas >= 0 ? (
+                                  <TrendingUp className="h-4 w-4" />
+                                ) : (
+                                  <TrendingDown className="h-4 w-4" />
+                                )}
+                                {dashboardLojaVolante.comparativoMesAnterior.variacaoEscovas >= 0 ? '+' : ''}
+                                {dashboardLojaVolante.comparativoMesAnterior.variacaoEscovas.toFixed(1)}%
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {language === 'pt' ? 'Anterior: ' : 'Previous: '}
+                            {Number(dashboardLojaVolante.comparativoMesAnterior.escovasAnterior || 0)}
+                          </p>
+                        </div>
+                      </div>
                     </CardContent>
                   </Card>
-                ))}
+                )}
+
+                {/* Gráfico de Evolução Mensal */}
+                {dashboardLojaVolante.evolucao && dashboardLojaVolante.evolucao.length > 0 && (() => {
+                  const mesesNomes = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+                  const evolucaoData = dashboardLojaVolante.evolucao.slice(-12);
+                  const labels = evolucaoData.map((e: any) => `${mesesNomes[e.mes - 1]} ${String(e.ano).slice(-2)}`);
+                  const servicos = evolucaoData.map((e: any) => Number(e.totalServicos) || 0);
+                  const objetivos = evolucaoData.map((e: any) => Number(e.objetivoMensal) || 0);
+
+                  return (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-lg flex items-center gap-2">
+                          <TrendingUp className="h-5 w-5" />
+                          {language === 'pt' ? 'Evolução Mensal' : 'Monthly Evolution'}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div style={{ height: '300px' }}>
+                          <Line
+                            data={{
+                              labels,
+                              datasets: [
+                                {
+                                  label: language === 'pt' ? 'Serviços' : 'Services',
+                                  data: servicos,
+                                  borderColor: 'rgb(59, 130, 246)',
+                                  backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                                  fill: true,
+                                  tension: 0.3,
+                                },
+                                {
+                                  label: language === 'pt' ? 'Objetivo' : 'Goal',
+                                  data: objetivos,
+                                  borderColor: 'rgb(168, 85, 247)',
+                                  backgroundColor: 'transparent',
+                                  borderDash: [5, 5],
+                                  tension: 0.3,
+                                },
+                              ],
+                            }}
+                            options={{
+                              responsive: true,
+                              maintainAspectRatio: false,
+                              plugins: {
+                                legend: { position: 'top' },
+                              },
+                              scales: {
+                                y: { beginAtZero: true },
+                              },
+                            }}
+                          />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })()}
               </div>
             ) : (
               <Card>
