@@ -3434,3 +3434,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## Configurar Novo Bot Telegram @PoweringEG_bot
 - [x] Atualizar token do bot nas variáveis de ambiente
 - [x] Atualizar nome do bot nas instruções (@GZminho_bot -> @PoweringEG_bot)
+
+
+## Múltiplos Chat IDs Telegram por Volante
+- [x] Atualizar serviço de Telegram para enviar para múltiplos IDs
+- [x] Atualizar interface para permitir múltiplos Chat IDs separados por vírgula

@@ -54,10 +54,38 @@ export async function sendTelegramMessage(
 }
 
 /**
+ * Envia uma mensagem para múltiplos chats do Telegram
+ * Os Chat IDs podem ser separados por vírgula
+ */
+export async function sendTelegramMessageToMultiple(
+  chatIds: string,
+  message: string,
+  parseMode: 'HTML' | 'Markdown' = 'HTML'
+): Promise<{ success: number; failed: number }> {
+  // Separar os IDs por vírgula e limpar espaços
+  const ids = chatIds.split(',').map(id => id.trim()).filter(id => id.length > 0);
+  
+  let success = 0;
+  let failed = 0;
+  
+  for (const chatId of ids) {
+    const result = await sendTelegramMessage(chatId, message, parseMode);
+    if (result) {
+      success++;
+    } else {
+      failed++;
+    }
+  }
+  
+  return { success, failed };
+}
+
+/**
  * Formata e envia notificação de novo pedido de apoio
+ * Suporta múltiplos Chat IDs separados por vírgula
  */
 export async function notificarNovoPedidoApoio(
-  chatId: string,
+  chatIds: string,
   pedido: {
     lojaNome: string;
     data: Date;
@@ -93,14 +121,16 @@ ${pedido.observacoes ? `📝 <b>Observações:</b> ${pedido.observacoes}` : ''}
 <i>Aceda ao portal para aprovar ou reprovar este pedido.</i>
   `.trim();
 
-  return sendTelegramMessage(chatId, message);
+  const result = await sendTelegramMessageToMultiple(chatIds, message);
+  return result.success > 0;
 }
 
 /**
  * Formata e envia notificação de pedido aprovado (para a loja)
+ * Suporta múltiplos Chat IDs separados por vírgula
  */
 export async function notificarPedidoAprovado(
-  chatId: string,
+  chatIds: string,
   pedido: {
     lojaNome: string;
     volanteNome: string;
@@ -129,14 +159,16 @@ export async function notificarPedidoAprovado(
 <i>O apoio foi confirmado!</i>
   `.trim();
 
-  return sendTelegramMessage(chatId, message);
+  const result = await sendTelegramMessageToMultiple(chatIds, message);
+  return result.success > 0;
 }
 
 /**
  * Formata e envia notificação de pedido anulado
+ * Suporta múltiplos Chat IDs separados por vírgula
  */
 export async function notificarPedidoAnulado(
-  chatId: string,
+  chatIds: string,
   pedido: {
     lojaNome: string;
     data: Date;
@@ -164,14 +196,16 @@ ${pedido.motivo ? `📝 <b>Motivo:</b> ${pedido.motivo}` : ''}
 <i>Este apoio foi cancelado.</i>
   `.trim();
 
-  return sendTelegramMessage(chatId, message);
+  const result = await sendTelegramMessageToMultiple(chatIds, message);
+  return result.success > 0;
 }
 
 /**
  * Formata e envia notificação de pedido editado
+ * Suporta múltiplos Chat IDs separados por vírgula
  */
 export async function notificarPedidoEditado(
-  chatId: string,
+  chatIds: string,
   pedido: {
     lojaNome: string;
     dataAnterior: Date;
@@ -206,7 +240,8 @@ export async function notificarPedidoEditado(
 <i>Por favor verifique a sua agenda.</i>
   `.trim();
 
-  return sendTelegramMessage(chatId, message);
+  const result = await sendTelegramMessageToMultiple(chatIds, message);
+  return result.success > 0;
 }
 
 /**

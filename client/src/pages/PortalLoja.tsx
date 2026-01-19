@@ -5631,18 +5631,18 @@ END:VCALENDAR`;
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="telegramChatId">
-                      {language === 'pt' ? 'Chat ID do Telegram' : 'Telegram Chat ID'}
+                      {language === 'pt' ? 'Chat ID(s) do Telegram' : 'Telegram Chat ID(s)'}
                     </Label>
                     <Input
                       id="telegramChatId"
-                      placeholder={language === 'pt' ? 'Ex: 123456789' : 'E.g.: 123456789'}
+                      placeholder={language === 'pt' ? 'Ex: 123456789, 987654321' : 'E.g.: 123456789, 987654321'}
                       value={telegramChatId}
                       onChange={(e) => setTelegramChatId(e.target.value)}
                     />
                     <p className="text-xs text-gray-500">
                       {language === 'pt' 
-                        ? 'O Chat ID é um número único que identifica a sua conversa com o bot' 
-                        : 'The Chat ID is a unique number that identifies your conversation with the bot'}
+                        ? 'Pode adicionar vários Chat IDs separados por vírgula para notificar múltiplas pessoas' 
+                        : 'You can add multiple Chat IDs separated by comma to notify multiple people'}
                     </p>
                   </div>
 
@@ -5692,8 +5692,8 @@ END:VCALENDAR`;
                     </div>
                     <p className="text-sm text-green-600 dark:text-green-400 mt-1">
                       {language === 'pt' 
-                        ? `Irá receber notificações no Chat ID: ${telegramConfig.telegramChatId}` 
-                        : `You will receive notifications on Chat ID: ${telegramConfig.telegramChatId}`}
+                        ? `Irá receber notificações no(s) Chat ID(s): ${telegramConfig.telegramChatId}` 
+                        : `You will receive notifications on Chat ID(s): ${telegramConfig.telegramChatId}`}
                     </p>
                   </div>
                 )}
