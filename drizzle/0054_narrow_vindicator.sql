@@ -1,0 +1,1 @@
+ALTER TABLE `pedidos_apoio` MODIFY COLUMN `pedido_apoio_periodo` enum('manha','tarde','dia_todo') NOT NULL;

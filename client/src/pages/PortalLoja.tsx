@@ -3775,7 +3775,7 @@ function VolanteTab({
     return { mes: hoje.getMonth(), ano: hoje.getFullYear() };
   });
   const [diaSelecionado, setDiaSelecionado] = useState<Date | null>(null);
-  const [periodoSelecionado, setPeriodoSelecionado] = useState<'manha' | 'tarde'>('manha');
+  const [periodoSelecionado, setPeriodoSelecionado] = useState<'manha' | 'tarde' | 'dia_todo'>('manha');
   const [tipoApoio, setTipoApoio] = useState<'cobertura_ferias' | 'substituicao_vidros' | 'outro'>('substituicao_vidros');
   const [observacoes, setObservacoes] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -3976,19 +3976,21 @@ function VolanteTab({
                 <button
                   key={index}
                   onClick={() => {
-                    if (disponivel && !passado) {
+                    if (!ehPlaceholder && !passado) {
                       setDiaSelecionado(data);
+                      // Se o dia está disponível, abrir dialog para criar pedido
+                      // Se não está disponível (fechado), abrir dialog para ver o que tem
                       setDialogOpen(true);
                     }
                   }}
-                  disabled={ehPlaceholder || !disponivel || passado}
+                  disabled={ehPlaceholder || passado}
                   className={`
                     aspect-square rounded-lg text-sm font-medium transition-all
                     ${ehPlaceholder ? 'invisible' : ''}
                     ${ehHoje ? 'ring-2 ring-cyan-500' : ''}
                     ${passado ? 'opacity-40 cursor-not-allowed' : ''}
                     ${getCorDia(data)}
-                    ${disponivel && !passado ? 'cursor-pointer' : ''}
+                    ${!passado ? 'cursor-pointer' : ''}
                   `}
                 >
                   {!ehPlaceholder && data.getDate()}
@@ -4033,7 +4035,9 @@ function VolanteTab({
                         })}
                       </p>
                       <p className="text-sm text-muted-foreground">
-                        {pedido.periodo === 'manha' ? (language === 'pt' ? 'Manhã' : 'Morning') : (language === 'pt' ? 'Tarde' : 'Afternoon')}
+                        {pedido.periodo === 'manha' ? (language === 'pt' ? 'Manhã' : 'Morning') 
+                          : pedido.periodo === 'tarde' ? (language === 'pt' ? 'Tarde' : 'Afternoon')
+                          : (language === 'pt' ? 'Dia Todo' : 'Full Day')}
                         {' • '}
                         {pedido.tipoApoio === 'cobertura_ferias' ? (language === 'pt' ? 'Cobertura de férias' : 'Holiday cover') :
                          pedido.tipoApoio === 'substituicao_vidros' ? (language === 'pt' ? 'Substituição de vidros' : 'Glass replacement') :
@@ -4072,103 +4076,195 @@ function VolanteTab({
         </CardContent>
       </Card>
 
-      {/* Dialog para criar pedido */}
+      {/* Dialog para criar pedido ou ver dia fechado */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              {language === 'pt' ? 'Pedir Apoio' : 'Request Support'}
-            </DialogTitle>
-            <DialogDescription>
-              {diaSelecionado && diaSelecionado.toLocaleDateString(language === 'pt' ? 'pt-PT' : 'en-US', {
-                weekday: 'long',
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric'
-              })}
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="space-y-4">
-            {/* Período */}
-            <div>
-              <label className="text-sm font-medium mb-2 block">
-                {language === 'pt' ? 'Período' : 'Period'}
-              </label>
-              <Select value={periodoSelecionado} onValueChange={(v) => setPeriodoSelecionado(v as 'manha' | 'tarde')}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="manha">{language === 'pt' ? 'Manhã' : 'Morning'}</SelectItem>
-                  <SelectItem value="tarde">{language === 'pt' ? 'Tarde' : 'Afternoon'}</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          {(() => {
+            // Verificar se o dia está disponível
+            const dataStr = diaSelecionado?.toISOString().split('T')[0];
+            const estadoDia = dataStr ? estadoDias?.[dataStr] : null;
+            const diaFechado = estadoDia?.estado === 'dia_completo';
+            const pedidosDoDia = estadoDia?.pedidos || [];
+            
+            if (diaFechado) {
+              // Mostrar informação do dia fechado
+              return (
+                <>
+                  <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2">
+                      <AlertCircle className="h-5 w-5 text-red-500" />
+                      {language === 'pt' ? 'Dia Ocupado' : 'Day Occupied'}
+                    </DialogTitle>
+                    <DialogDescription>
+                      {diaSelecionado && diaSelecionado.toLocaleDateString(language === 'pt' ? 'pt-PT' : 'en-US', {
+                        weekday: 'long',
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric'
+                      })}
+                    </DialogDescription>
+                  </DialogHeader>
+                  
+                  <div className="space-y-4">
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                      <p className="text-sm text-red-700 font-medium mb-3">
+                        {language === 'pt' 
+                          ? 'Este dia já está completamente ocupado. Veja os apoios agendados:'
+                          : 'This day is fully booked. See scheduled support:'}
+                      </p>
+                      <div className="space-y-2">
+                        {pedidosDoDia.filter((p: any) => p.estado === 'aprovado').map((pedido: any, idx: number) => (
+                          <div key={idx} className="bg-white rounded p-3 border">
+                            <p className="font-medium text-sm">{pedido.loja?.nome || 'Loja'}</p>
+                            <p className="text-xs text-gray-500">
+                              {pedido.periodo === 'manha' ? (language === 'pt' ? 'Manhã (9h-13h)' : 'Morning') 
+                                : pedido.periodo === 'tarde' ? (language === 'pt' ? 'Tarde (14h-18h)' : 'Afternoon')
+                                : (language === 'pt' ? 'Dia Todo (9h-18h)' : 'Full Day')}
+                              {' • '}
+                              {pedido.tipoApoio === 'cobertura_ferias' ? (language === 'pt' ? 'Cobertura de férias' : 'Holiday cover') :
+                               pedido.tipoApoio === 'substituicao_vidros' ? (language === 'pt' ? 'Substituição de vidros' : 'Glass replacement') :
+                               (language === 'pt' ? 'Outro' : 'Other')}
+                            </p>
+                            {pedido.observacoes && (
+                              <p className="text-xs text-gray-400 mt-1">{pedido.observacoes}</p>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
 
-            {/* Tipo de Apoio */}
-            <div>
-              <label className="text-sm font-medium mb-2 block">
-                {language === 'pt' ? 'Tipo de Apoio' : 'Support Type'}
-              </label>
-              <Select value={tipoApoio} onValueChange={(v) => setTipoApoio(v as typeof tipoApoio)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="substituicao_vidros">
-                    {language === 'pt' ? 'Substituição de vidros' : 'Glass replacement'}
-                  </SelectItem>
-                  <SelectItem value="cobertura_ferias">
-                    {language === 'pt' ? 'Cobertura de férias' : 'Holiday cover'}
-                  </SelectItem>
-                  <SelectItem value="outro">
-                    {language === 'pt' ? 'Outro' : 'Other'}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+                  <DialogFooter>
+                    <Button variant="outline" onClick={() => setDialogOpen(false)}>
+                      {language === 'pt' ? 'Fechar' : 'Close'}
+                    </Button>
+                  </DialogFooter>
+                </>
+              );
+            }
+            
+            // Formulário para criar pedido
+            return (
+              <>
+                <DialogHeader>
+                  <DialogTitle>
+                    {language === 'pt' ? 'Pedir Apoio' : 'Request Support'}
+                  </DialogTitle>
+                  <DialogDescription>
+                    {diaSelecionado && diaSelecionado.toLocaleDateString(language === 'pt' ? 'pt-PT' : 'en-US', {
+                      weekday: 'long',
+                      day: 'numeric',
+                      month: 'long',
+                      year: 'numeric'
+                    })}
+                  </DialogDescription>
+                </DialogHeader>
+                
+                <div className="space-y-4">
+                  {/* Mostrar aviso se algum período já está ocupado */}
+                  {estadoDia?.estado === 'manha_ocupada' && (
+                    <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 text-sm text-purple-700">
+                      {language === 'pt' ? 'A manhã deste dia já está ocupada' : 'Morning is already booked'}
+                    </div>
+                  )}
+                  {estadoDia?.estado === 'tarde_ocupada' && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm text-blue-700">
+                      {language === 'pt' ? 'A tarde deste dia já está ocupada' : 'Afternoon is already booked'}
+                    </div>
+                  )}
+                  
+                  {/* Período */}
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">
+                      {language === 'pt' ? 'Período' : 'Period'}
+                    </label>
+                    <Select value={periodoSelecionado} onValueChange={(v) => setPeriodoSelecionado(v as 'manha' | 'tarde' | 'dia_todo')}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="manha" disabled={estadoDia?.estado === 'manha_ocupada'}>
+                          {language === 'pt' ? 'Manhã (9h-13h)' : 'Morning (9am-1pm)'}
+                          {estadoDia?.estado === 'manha_ocupada' && ' ✘'}
+                        </SelectItem>
+                        <SelectItem value="tarde" disabled={estadoDia?.estado === 'tarde_ocupada'}>
+                          {language === 'pt' ? 'Tarde (14h-18h)' : 'Afternoon (2pm-6pm)'}
+                          {estadoDia?.estado === 'tarde_ocupada' && ' ✘'}
+                        </SelectItem>
+                        <SelectItem value="dia_todo" disabled={estadoDia?.estado !== undefined && estadoDia?.estado !== 'livre'}>
+                          {language === 'pt' ? 'Dia Todo (9h-18h)' : 'Full Day (9am-6pm)'}
+                          {estadoDia?.estado !== undefined && estadoDia?.estado !== 'livre' && ' ✘'}
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-            {/* Observações */}
-            <div>
-              <label className="text-sm font-medium mb-2 block">
-                {language === 'pt' ? 'Observações' : 'Notes'}
-              </label>
-              <Textarea
-                value={observacoes}
-                onChange={(e) => setObservacoes(e.target.value)}
-                placeholder={language === 'pt' ? 'Ex: 3 para-brisas' : 'Ex: 3 windshields'}
-                rows={3}
-              />
-            </div>
-          </div>
+                  {/* Tipo de Apoio */}
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">
+                      {language === 'pt' ? 'Tipo de Apoio' : 'Support Type'}
+                    </label>
+                    <Select value={tipoApoio} onValueChange={(v) => setTipoApoio(v as typeof tipoApoio)}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="substituicao_vidros">
+                          {language === 'pt' ? 'Substituição de vidros' : 'Glass replacement'}
+                        </SelectItem>
+                        <SelectItem value="cobertura_ferias">
+                          {language === 'pt' ? 'Cobertura de férias' : 'Holiday cover'}
+                        </SelectItem>
+                        <SelectItem value="outro">
+                          {language === 'pt' ? 'Outro' : 'Other'}
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>
-              {language === 'pt' ? 'Cancelar' : 'Cancel'}
-            </Button>
-            <Button
-              onClick={() => {
-                if (diaSelecionado) {
-                  criarPedidoMutation.mutate({
-                    token,
-                    data: diaSelecionado.toISOString(),
-                    periodo: periodoSelecionado,
-                    tipoApoio,
-                    observacoes: observacoes || undefined,
-                  });
-                }
-              }}
-              disabled={criarPedidoMutation.isPending}
-            >
-              {criarPedidoMutation.isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              ) : (
-                <Send className="h-4 w-4 mr-2" />
-              )}
-              {language === 'pt' ? 'Enviar Pedido' : 'Send Request'}
-            </Button>
-          </DialogFooter>
+                  {/* Observações */}
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">
+                      {language === 'pt' ? 'Observações' : 'Notes'}
+                    </label>
+                    <Textarea
+                      value={observacoes}
+                      onChange={(e) => setObservacoes(e.target.value)}
+                      placeholder={language === 'pt' ? 'Ex: 3 para-brisas' : 'Ex: 3 windshields'}
+                      rows={3}
+                    />
+                  </div>
+                </div>
+
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setDialogOpen(false)}>
+                    {language === 'pt' ? 'Cancelar' : 'Cancel'}
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      if (diaSelecionado) {
+                        criarPedidoMutation.mutate({
+                          token,
+                          data: diaSelecionado.toISOString(),
+                          periodo: periodoSelecionado,
+                          tipoApoio,
+                          observacoes: observacoes || undefined,
+                        });
+                      }
+                    }}
+                    disabled={criarPedidoMutation.isPending}
+                  >
+                    {criarPedidoMutation.isPending ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    ) : (
+                      <Send className="h-4 w-4 mr-2" />
+                    )}
+                    {language === 'pt' ? 'Enviar Pedido' : 'Send Request'}
+                  </Button>
+                </DialogFooter>
+              </>
+            );
+          })()}
         </DialogContent>
       </Dialog>
     </div>
@@ -4206,7 +4302,7 @@ function VolanteInterface({
   const [editarDialogOpen, setEditarDialogOpen] = useState(false);
   const [motivoAnulacao, setMotivoAnulacao] = useState("");
   const [editarData, setEditarData] = useState("");
-  const [editarPeriodo, setEditarPeriodo] = useState<'manha' | 'tarde'>('manha');
+  const [editarPeriodo, setEditarPeriodo] = useState<'manha' | 'tarde' | 'dia_todo'>('manha');
   const [editarTipoApoio, setEditarTipoApoio] = useState<'cobertura_ferias' | 'substituicao_vidros' | 'outro'>('cobertura_ferias');
   const [editarObservacoes, setEditarObservacoes] = useState("");
   const [lojaResultadosSelecionada, setLojaResultadosSelecionada] = useState<number | null>(null);
@@ -4335,8 +4431,8 @@ function VolanteInterface({
   // Função para gerar links de calendário
   const gerarLinksCalendario = (pedido: any) => {
     const dataInicio = new Date(pedido.data);
-    const horaInicio = pedido.periodo === 'manha' ? 9 : 14;
-    const horaFim = pedido.periodo === 'manha' ? 13 : 18;
+    const horaInicio = pedido.periodo === 'manha' ? 9 : pedido.periodo === 'tarde' ? 14 : 9;
+    const horaFim = pedido.periodo === 'manha' ? 13 : pedido.periodo === 'tarde' ? 18 : 18;
     
     dataInicio.setHours(horaInicio, 0, 0, 0);
     const dataFim = new Date(dataInicio);
@@ -4421,11 +4517,11 @@ END:VCALENDAR`;
                 key={idx}
                 className={`text-[10px] px-1 py-0.5 rounded truncate cursor-pointer hover:opacity-80 ${
                   pedido.estado === 'pendente' ? 'bg-yellow-300 text-yellow-900' :
-                  pedido.estado === 'aprovado' ? (pedido.periodo === 'manha' ? 'bg-purple-400 text-white' : 'bg-blue-400 text-white') :
+                  pedido.estado === 'aprovado' ? (pedido.periodo === 'manha' ? 'bg-purple-400 text-white' : pedido.periodo === 'tarde' ? 'bg-blue-400 text-white' : 'bg-green-400 text-white') :
                   'bg-gray-300 text-gray-700'
                 }`}
                 onClick={() => setPedidoSelecionado(pedido)}
-                title={`${pedido.loja?.nome || 'Loja'} - ${pedido.periodo === 'manha' ? 'Manhã' : 'Tarde'}`}
+                title={`${pedido.loja?.nome || 'Loja'} - ${pedido.periodo === 'manha' ? 'Manhã' : pedido.periodo === 'tarde' ? 'Tarde' : 'Dia Todo'}`}
               >
                 {pedido.loja?.nome?.substring(0, 10) || 'Loja'}
               </div>
@@ -4699,8 +4795,8 @@ END:VCALENDAR`;
                             <p className="text-sm text-gray-600">
                               {new Date(pedido.data).toLocaleDateString('pt-PT', { weekday: 'long', day: 'numeric', month: 'long' })}
                               {' - '}
-                              <Badge variant="outline" className={pedido.periodo === 'manha' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'}>
-                                {pedido.periodo === 'manha' ? (language === 'pt' ? 'Manhã' : 'Morning') : (language === 'pt' ? 'Tarde' : 'Afternoon')}
+                              <Badge variant="outline" className={pedido.periodo === 'manha' ? 'bg-purple-100 text-purple-800' : pedido.periodo === 'tarde' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}>
+                                {pedido.periodo === 'manha' ? (language === 'pt' ? 'Manhã' : 'Morning') : pedido.periodo === 'tarde' ? (language === 'pt' ? 'Tarde' : 'Afternoon') : (language === 'pt' ? 'Dia Todo' : 'Full Day')}
                               </Badge>
                             </p>
                             <p className="text-sm text-gray-500 mt-1">
@@ -4847,8 +4943,8 @@ END:VCALENDAR`;
                                 <p className="text-sm text-gray-600">
                                   {new Date(pedido.data).toLocaleDateString('pt-PT', { weekday: 'long', day: 'numeric', month: 'long' })}
                                   {' - '}
-                                  <Badge variant="outline" className={pedido.periodo === 'manha' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'}>
-                                    {pedido.periodo === 'manha' ? (language === 'pt' ? 'Manhã (9h-13h)' : 'Morning (9am-1pm)') : (language === 'pt' ? 'Tarde (14h-18h)' : 'Afternoon (2pm-6pm)')}
+                                  <Badge variant="outline" className={pedido.periodo === 'manha' ? 'bg-purple-100 text-purple-800' : pedido.periodo === 'tarde' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}>
+                                    {pedido.periodo === 'manha' ? (language === 'pt' ? 'Manhã (9h-13h)' : 'Morning (9am-1pm)') : pedido.periodo === 'tarde' ? (language === 'pt' ? 'Tarde (14h-18h)' : 'Afternoon (2pm-6pm)') : (language === 'pt' ? 'Dia Todo (9h-18h)' : 'Full Day (9am-6pm)')}
                                   </Badge>
                                 </p>
                                 <p className="text-sm text-gray-500 mt-1">
@@ -5503,7 +5599,7 @@ END:VCALENDAR`;
                   {/* Resumo */}
                   <Card className="bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 border-orange-200 dark:border-orange-800">
                     <CardContent className="py-4">
-                      <div className="grid grid-cols-3 gap-4 text-center">
+                      <div className="grid grid-cols-4 gap-4 text-center">
                         <div>
                           <p className="text-2xl font-bold text-orange-600">{pedidosOrdenados.length}</p>
                           <p className="text-xs text-gray-500">{language === 'pt' ? 'Total Apoios' : 'Total Support'}</p>
@@ -5519,6 +5615,12 @@ END:VCALENDAR`;
                             {pedidosOrdenados.filter((p: any) => p.periodo === 'tarde').length}
                           </p>
                           <p className="text-xs text-gray-500">{language === 'pt' ? 'Tardes' : 'Afternoons'}</p>
+                        </div>
+                        <div>
+                          <p className="text-2xl font-bold text-green-600">
+                            {pedidosOrdenados.filter((p: any) => p.periodo === 'dia_todo').length}
+                          </p>
+                          <p className="text-xs text-gray-500">{language === 'pt' ? 'Dias Completos' : 'Full Days'}</p>
                         </div>
                       </div>
                     </CardContent>
@@ -5719,7 +5821,7 @@ END:VCALENDAR`;
               <div className="bg-gray-50 p-3 rounded-lg text-sm">
                 <p className="font-medium">{pedidoSelecionado.loja?.nome}</p>
                 <p className="text-gray-600">
-                  {new Date(pedidoSelecionado.data).toLocaleDateString('pt-PT')} - {pedidoSelecionado.periodo === 'manha' ? 'Manhã' : 'Tarde'}
+                  {new Date(pedidoSelecionado.data).toLocaleDateString('pt-PT')} - {pedidoSelecionado.periodo === 'manha' ? 'Manhã' : pedidoSelecionado.periodo === 'tarde' ? 'Tarde' : 'Dia Todo'}
                 </p>
               </div>
             )}
@@ -5796,7 +5898,7 @@ END:VCALENDAR`;
                 <div>
                   <p className="text-sm text-gray-500">{language === 'pt' ? 'Período' : 'Period'}</p>
                   <p className="font-medium">
-                    {pedidoSelecionado.periodo === 'manha' ? (language === 'pt' ? 'Manhã (9h-13h)' : 'Morning (9am-1pm)') : (language === 'pt' ? 'Tarde (14h-18h)' : 'Afternoon (2pm-6pm)')}
+                    {pedidoSelecionado.periodo === 'manha' ? (language === 'pt' ? 'Manhã (9h-13h)' : 'Morning (9am-1pm)') : pedidoSelecionado.periodo === 'tarde' ? (language === 'pt' ? 'Tarde (14h-18h)' : 'Afternoon (2pm-6pm)') : (language === 'pt' ? 'Dia Todo (9h-18h)' : 'Full Day (9am-6pm)')}
                   </p>
                 </div>
                 <div className="col-span-2">
@@ -6006,13 +6108,14 @@ END:VCALENDAR`;
             </div>
             <div>
               <label className="text-sm font-medium">{language === 'pt' ? 'Período' : 'Period'}</label>
-              <Select value={editarPeriodo} onValueChange={(v) => setEditarPeriodo(v as 'manha' | 'tarde')}>
+              <Select value={editarPeriodo} onValueChange={(v) => setEditarPeriodo(v as 'manha' | 'tarde' | 'dia_todo')}>
                 <SelectTrigger className="mt-1">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="manha">{language === 'pt' ? 'Manhã (9h-13h)' : 'Morning (9am-1pm)'}</SelectItem>
                   <SelectItem value="tarde">{language === 'pt' ? 'Tarde (14h-18h)' : 'Afternoon (2pm-6pm)'}</SelectItem>
+                  <SelectItem value="dia_todo">{language === 'pt' ? 'Dia Todo (9h-18h)' : 'Full Day (9am-6pm)'}</SelectItem>
                 </SelectContent>
               </Select>
             </div>

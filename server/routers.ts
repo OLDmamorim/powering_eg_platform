@@ -7400,7 +7400,7 @@ IMPORTANTE:
       .input(z.object({
         token: z.string(),
         data: z.string(), // ISO date string
-        periodo: z.enum(['manha', 'tarde']),
+        periodo: z.enum(['manha', 'tarde', 'dia_todo']),
         tipoApoio: z.enum(['cobertura_ferias', 'substituicao_vidros', 'outro']),
         observacoes: z.string().optional(),
       }))
@@ -7424,6 +7424,10 @@ IMPORTANTE:
         if (disponibilidade === 'dia_completo') {
           throw new TRPCError({ code: 'BAD_REQUEST', message: 'Este dia já está completamente ocupado' });
         }
+        // Se pedir dia_todo, verificar se ambos os períodos estão livres
+        if (input.periodo === 'dia_todo' && disponibilidade !== 'livre') {
+          throw new TRPCError({ code: 'BAD_REQUEST', message: 'Para pedir o dia todo, ambos os períodos precisam estar livres' });
+        }
         if (disponibilidade === 'manha_ocupada' && input.periodo === 'manha') {
           throw new TRPCError({ code: 'BAD_REQUEST', message: 'A manhã deste dia já está ocupada' });
         }
@@ -7445,7 +7449,7 @@ IMPORTANTE:
         if (volante.email) {
           const tipoApoioTexto = input.tipoApoio === 'cobertura_ferias' ? 'Cobertura de Férias' : 
                                 input.tipoApoio === 'substituicao_vidros' ? 'Substituição de Vidros' : 'Outro';
-          const periodoTexto = input.periodo === 'manha' ? 'Manhã (9h-13h)' : 'Tarde (14h-18h)';
+          const periodoTexto = input.periodo === 'manha' ? 'Manhã (9h-13h)' : input.periodo === 'tarde' ? 'Tarde (14h-18h)' : 'Dia Todo (9h-18h)';
           const dataFormatada = dataApoio.toLocaleDateString('pt-PT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
           
           try {
@@ -8032,7 +8036,7 @@ IMPORTANTE:
         token: z.string(),
         pedidoId: z.number(),
         data: z.string().optional(),
-        periodo: z.enum(['manha', 'tarde']).optional(),
+        periodo: z.enum(['manha', 'tarde', 'dia_todo']).optional(),
         tipoApoio: z.enum(['cobertura_ferias', 'substituicao_vidros', 'outro']).optional(),
         observacoes: z.string().optional(),
       }))

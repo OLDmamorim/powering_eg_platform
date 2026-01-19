@@ -1001,7 +1001,7 @@ export type InsertTokenVolante = typeof tokensVolante.$inferInsert;
  * As lojas pedem apoio através do calendário, o volante aprova/reprova
  */
 export const pedidosApoioTipoEnum = mysqlEnum('pedido_apoio_tipo', ['cobertura_ferias', 'substituicao_vidros', 'outro']);
-export const pedidosApoioPeriodoEnum = mysqlEnum('pedido_apoio_periodo', ['manha', 'tarde']);
+export const pedidosApoioPeriodoEnum = mysqlEnum('pedido_apoio_periodo', ['manha', 'tarde', 'dia_todo']);
 export const pedidosApoioEstadoEnum = mysqlEnum('pedido_apoio_estado', ['pendente', 'aprovado', 'reprovado', 'cancelado', 'anulado']);
 
 export const pedidosApoio = mysqlTable("pedidos_apoio", {

@@ -3463,3 +3463,11 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Reutilizar vista de solicitação de apoio existente (VolanteTab)
 - [x] Integrar com o sistema de pedidos de apoio existente
 - [ ] Testar funcionalidade completa
+
+
+## Melhorias Pedidos Apoio v6.14.0
+- [x] Adicionar link do portal do volante nas notificações Telegram
+- [x] Adicionar opção "Dia Todo" nos períodos de pedido (além de Manhã e Tarde)
+- [x] Permitir lojas consultarem dias fechados (vermelhos) para ver o que está agendado
+- [x] Atualizar schema da base de dados para suportar período "dia_todo"
+- [ ] Testar funcionalidade completa

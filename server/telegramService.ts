@@ -89,9 +89,10 @@ export async function notificarNovoPedidoApoio(
   pedido: {
     lojaNome: string;
     data: Date;
-    periodo: 'manha' | 'tarde';
+    periodo: 'manha' | 'tarde' | 'dia_todo';
     tipoApoio: string;
     observacoes?: string;
+    portalUrl?: string;
   }
 ): Promise<boolean> {
   const dataFormatada = new Date(pedido.data).toLocaleDateString('pt-PT', {
@@ -101,13 +102,21 @@ export async function notificarNovoPedidoApoio(
     year: 'numeric',
   });
 
-  const periodoTexto = pedido.periodo === 'manha' ? 'Manhã (9h-13h)' : 'Tarde (14h-18h)';
+  const periodoTexto = pedido.periodo === 'manha' 
+    ? 'Manhã (9h-13h)' 
+    : pedido.periodo === 'tarde' 
+      ? 'Tarde (14h-18h)' 
+      : 'Dia Todo (9h-18h)';
   
   const tipoApoioTexto = {
     cobertura_ferias: 'Cobertura de Férias',
     substituicao_vidros: 'Substituição de Vidros',
     outro: 'Outro',
   }[pedido.tipoApoio] || pedido.tipoApoio;
+
+  // URL do portal do volante
+  const baseUrl = process.env.VITE_APP_URL || 'https://poweringeg-3c9mozlh.manus.space';
+  const portalLink = pedido.portalUrl || baseUrl;
 
   const message = `
 🔔 <b>Novo Pedido de Apoio</b>
@@ -119,6 +128,8 @@ export async function notificarNovoPedidoApoio(
 ${pedido.observacoes ? `📝 <b>Observações:</b> ${pedido.observacoes}` : ''}
 
 <i>Aceda ao portal para aprovar ou reprovar este pedido.</i>
+
+🔗 <a href="${portalLink}">Abrir Portal do Volante</a>
   `.trim();
 
   const result = await sendTelegramMessageToMultiple(chatIds, message);

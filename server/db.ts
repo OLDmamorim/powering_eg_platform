@@ -8378,7 +8378,7 @@ export async function createPedidoApoio(data: {
   lojaId: number;
   volanteId: number;
   data: Date;
-  periodo: 'manha' | 'tarde';
+  periodo: 'manha' | 'tarde' | 'dia_todo';
   tipoApoio: 'cobertura_ferias' | 'substituicao_vidros' | 'outro';
   observacoes?: string;
 }): Promise<PedidoApoio | null> {
@@ -8538,7 +8538,7 @@ export async function anularPedidoApoio(pedidoId: number, motivo?: string): Prom
  */
 export async function editarPedidoApoio(pedidoId: number, dados: {
   data?: string;
-  periodo?: 'manha' | 'tarde';
+  periodo?: 'manha' | 'tarde' | 'dia_todo';
   tipoApoio?: 'cobertura_ferias' | 'substituicao_vidros' | 'outro';
   observacoes?: string;
 }): Promise<PedidoApoio | null> {
