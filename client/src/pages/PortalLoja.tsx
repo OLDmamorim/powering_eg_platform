@@ -193,7 +193,27 @@ export default function PortalLoja() {
     });
   }, []);
 
-  // PWA: Capturar evento de instalação
+  // Trocar manifest IMEDIATAMENTE (antes de qualquer useEffect)
+  // Isto é crítico para que a PWA use o manifest correto quando instalada
+  if (typeof window !== 'undefined') {
+    const existingManifest = document.querySelector('link[rel="manifest"]');
+    if (existingManifest) {
+      existingManifest.setAttribute('href', '/manifest-portal-loja.json');
+    } else {
+      const manifestLink = document.createElement('link');
+      manifestLink.rel = 'manifest';
+      manifestLink.href = '/manifest-portal-loja.json';
+      document.head.appendChild(manifestLink);
+    }
+    
+    // Atualizar Apple Touch Icon
+    const appleIcon = document.querySelector('link[rel="apple-touch-icon"]');
+    if (appleIcon) {
+      appleIcon.setAttribute('href', '/portal-loja-apple-touch-icon.png');
+    }
+  }
+
+  // PWA: Capturar evento de instalação e registar service worker
   useEffect(() => {
     const handler = (e: any) => {
       e.preventDefault();
@@ -209,23 +229,6 @@ export default function PortalLoja() {
     // Registar service worker específico do Portal da Loja
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw-portal-loja.js').catch(console.error);
-    }
-    
-    // Adicionar manifest específico do Portal da Loja
-    const existingManifest = document.querySelector('link[rel="manifest"]');
-    if (existingManifest) {
-      existingManifest.setAttribute('href', '/manifest-portal-loja.json');
-    } else {
-      const manifestLink = document.createElement('link');
-      manifestLink.rel = 'manifest';
-      manifestLink.href = '/manifest-portal-loja.json';
-      document.head.appendChild(manifestLink);
-    }
-    
-    // Atualizar Apple Touch Icon
-    const appleIcon = document.querySelector('link[rel="apple-touch-icon"]');
-    if (appleIcon) {
-      appleIcon.setAttribute('href', '/portal-loja-apple-touch-icon.png');
     }
     
     return () => window.removeEventListener('beforeinstallprompt', handler);

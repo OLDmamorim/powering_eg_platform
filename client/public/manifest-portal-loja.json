@@ -1,10 +1,10 @@
 {
-  "id": "poweringeg-portal-loja-v2",
+  "id": "poweringeg-portal-loja-v3",
   "name": "PoweringEG - Portal da Loja",
-  "short_name": "PoweringEG",
+  "short_name": "Portal Loja",
   "description": "Portal de gestão PoweringEG para lojas ExpressGlass - Reuniões, Tarefas, Pendentes e Resultados",
   "start_url": "/portal-loja",
-  "scope": "/portal-loja",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#10b981",

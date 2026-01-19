@@ -3355,3 +3355,4 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Corrigir função criarToken para criar ambos os tipos (Responsável e Colaborador) automaticamente
 - [x] Link do token deve ir diretamente ao Portal da Loja (não mostrar página de seleção Gestor/Loja)
 - [x] PWA do Portal da Loja agora guarda sessão no localStorage para persistir entre aberturas
+- [x] Atualizar manifest do Portal da Loja para v3 com scope mais amplo

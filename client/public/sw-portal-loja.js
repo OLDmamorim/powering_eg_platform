@@ -1,4 +1,4 @@
-const CACHE_NAME = 'poweringeg-portal-loja-v2';
+const CACHE_NAME = 'poweringeg-portal-loja-v3';
 const urlsToCache = [
   '/portal-loja',
   '/portal-loja-icon-192.png',
@@ -12,11 +12,11 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
-        console.log('[SW Portal Loja] Cache aberto');
+        console.log('[SW Portal Loja v3] Cache aberto');
         return cache.addAll(urlsToCache);
       })
       .catch((err) => {
-        console.log('[SW Portal Loja] Erro ao abrir cache:', err);
+        console.log('[SW Portal Loja v3] Erro ao abrir cache:', err);
       })
   );
   self.skipWaiting();
@@ -30,7 +30,7 @@ self.addEventListener('activate', (event) => {
         cacheNames.map((cacheName) => {
           // Remover caches antigos do portal da loja
           if (cacheName.startsWith('poweringeg-portal-loja') && cacheName !== CACHE_NAME) {
-            console.log('[SW Portal Loja] A remover cache antigo:', cacheName);
+            console.log('[SW Portal Loja v3] A remover cache antigo:', cacheName);
             return caches.delete(cacheName);
           }
         })
@@ -90,7 +90,7 @@ self.addEventListener('message', (event) => {
   }
 });
 
-// Notificações push (para futuro)
+// Notificações push
 self.addEventListener('push', (event) => {
   if (event.data) {
     const data = event.data.json();
