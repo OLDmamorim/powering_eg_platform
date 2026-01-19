@@ -3350,3 +3350,6 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Criar interface para mostrar ambos os tokens (Responsável e Colaborador) por loja
 - [x] Adicionar botões de copiar para cada tipo de token
 - [x] Adicionar botões de enviar por email para cada tipo de token
+
+## Correção v6.10.5 - Criar Ambos os Tokens
+- [x] Corrigir função criarToken para criar ambos os tipos (Responsável e Colaborador) automaticamente

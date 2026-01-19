@@ -709,7 +709,11 @@ export default function ReunioesQuinzenais() {
                                 <TableCell className="text-right">
                                   <Button
                                     size="sm"
-                                    onClick={() => criarTokenMutation.mutate({ lojaId: loja.id })}
+                                    onClick={async () => {
+                                      // Criar ambos os tokens (responsável e colaborador)
+                                      await criarTokenMutation.mutateAsync({ lojaId: loja.id, tipo: 'responsavel' });
+                                      await criarTokenMutation.mutateAsync({ lojaId: loja.id, tipo: 'colaborador' });
+                                    }}
                                     disabled={criarTokenMutation.isPending}
                                   >
                                     {criarTokenMutation.isPending ? (
