@@ -18,11 +18,8 @@ import {
   MessageSquare,
   Lightbulb,
   HelpCircle,
-  Mic,
-  Download,
-  Smartphone
+  Mic
 } from 'lucide-react';
-import { usePWAInstallAssistente } from '@/hooks/usePWAInstallAssistente';
 import { toast } from 'sonner';
 import { Streamdown } from 'streamdown';
 
@@ -34,7 +31,7 @@ interface Message {
 
 export default function AssistenteIA() {
   const { language, t } = useLanguage();
-  const { isInstallable, isInstalled, install } = usePWAInstallAssistente();
+
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -367,32 +364,7 @@ export default function AssistenteIA() {
           </Card>
         </div>
         
-        {/* Botão de Instalação PWA - Redireciona para página dedicada */}
-        {!isInstalled && (
-          <div className="fixed top-16 right-4 z-50 md:hidden">
-            <Button 
-              onClick={() => {
-                // Redirecionar diretamente para a página de instalação dedicada
-                window.location.href = '/assistente-pwa.html';
-              }}
-              size="sm"
-              className="bg-green-600 hover:bg-green-700 text-white shadow-lg flex items-center gap-2 px-3 py-2 animate-pulse"
-            >
-              <Download className="h-4 w-4" />
-              <span className="text-xs font-medium">{language === 'pt' ? 'Instalar App' : 'Install App'}</span>
-            </Button>
-          </div>
-        )}
-        
-        {/* Badge de App Instalada */}
-        {isInstalled && (
-          <div className="fixed top-16 right-4 z-50 md:hidden">
-            <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 px-3 py-2 shadow-md">
-              <Smartphone className="h-4 w-4 mr-1" />
-              {language === 'pt' ? 'Instalada' : 'Installed'}
-            </Badge>
-          </div>
-        )}
+
       </div>
     </DashboardLayout>
   );

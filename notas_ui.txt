@@ -1,0 +1,20 @@
+Observações das imagens do utilizador:
+
+Imagem 1 (Dashboard):
+- Header: Sidebar toggle | "Dashboard" | Botão "Instalar" (verde) | Toggle tema | PT | Logo ExpressGlass
+- Botão Instalar está no header principal
+
+Imagem 2 (Assistente IA):
+- Header: Sidebar toggle | "Powerin..." (cortado) | Botão "Instalar" (verde) | Toggle tema | PT | Logo ExpressGlass
+- Breadcrumbs: Dashboard > assistente-ia | Botão "Insta..." (verde cortado)
+- PROBLEMA: Dois botões "Instalar" - um no header e outro nos breadcrumbs
+
+Imagem 3 (Portal Gestor):
+- Header: Sidebar toggle | "Portal Gestor" | Botão "Instalar" (verde) | Toggle tema | PT | Logo ExpressGlass
+- Breadcrumbs: Dashboard > portal-gestor | (sem botão duplicado)
+- Conteúdo: Cards coloridos (Resultados, Tarefas, Pendentes, Reunião)
+
+SOLUÇÃO:
+- O botão "Instalar" no header do DashboardLayout está correto
+- O botão duplicado está a aparecer nos breadcrumbs do AssistenteIA (fixed top-16 right-4)
+- Remover o botão fixed do AssistenteIA pois o DashboardLayout já tem o botão

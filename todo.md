@@ -3271,3 +3271,19 @@ NOTA: Sistema de email requer configuração externa no deployment
 
 ## Funcionalidade v6.8.5 - Logo na Página de Login
 - [x] Adicionar logo PoweringEG na página de login (página com 2 cards: Gestor/Admin e Loja)
+
+
+## Funcionalidade v6.9.1 - Ícones PWA PoweringEG
+- [ ] Atualizar manifest.json para usar logo PoweringEG
+- [ ] Criar/atualizar ícones da PWA com logo PoweringEG
+- [ ] Atualizar splash screen com logo PoweringEG
+
+
+## Correção v6.9.2 - Organizar Botão Instalar
+- [ ] Remover botão Instalar duplicado (aparece no header e nos breadcrumbs)
+- [ ] Manter apenas um botão Instalar no header, posicionado corretamente
+
+## Correção v6.9.1 - Organizar Botão Instalar
+- [x] Remover botão Instalar duplicado do AssistenteIA (aparecia no header E nos breadcrumbs)
+- [x] Manter apenas um botão Instalar no header do DashboardLayout
+- [x] Limpar imports não utilizados (Download, Smartphone, usePWAInstallAssistente)
