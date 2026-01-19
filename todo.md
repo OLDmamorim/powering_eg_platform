@@ -3330,3 +3330,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## Correção v6.10.0 - Botão Instalar Menu Inicial
 - [x] Corrigir lógica de deteção de PWA instalada no Menu Inicial
 - [x] Esconder botão quando app já está instalada (localStorage ou standalone mode)
+
+## Funcionalidade v6.10.1 - VAPID Keys para Push Notifications
+- [x] Verificar e corrigir configuração das VAPID keys
+- [x] Testar notificações push para badge no ícone
