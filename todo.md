@@ -3299,3 +3299,6 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## Correção v6.9.4 - Duplicados e Botão Menu
 - [x] Remover banner Instalar duplicado do Portal Gestor (já existe no header)
 - [x] Mostrar texto "Menu" no botão de voltar (não apenas a seta)
+
+## Correção v6.9.5 - Esconder Instalar no Menu Inicial
+- [x] Esconder botão Instalar no Menu Inicial (/menu) quando PWA já está instalada

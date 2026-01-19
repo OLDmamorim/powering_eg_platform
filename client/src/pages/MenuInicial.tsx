@@ -36,12 +36,28 @@ export default function MenuInicial() {
   const [lojaSession, setLojaSession] = useState<any>(null);
   const [checking, setChecking] = useState(true);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [isPWAInstalled, setIsPWAInstalled] = useState(false);
 
   useEffect(() => {
     // Verificar sessões
     const loja = getLojaSession();
     setLojaSession(loja);
     setChecking(false);
+    
+    // Verificar se PWA já está instalada
+    const checkInstalled = () => {
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
+                           (window.navigator as any).standalone === true;
+      const wasInstalled = localStorage.getItem('pwa_installed') === 'true';
+      setIsPWAInstalled(isStandalone || wasInstalled);
+    };
+    checkInstalled();
+    
+    // Verificar quando a app é instalada
+    window.addEventListener('appinstalled', () => {
+      localStorage.setItem('pwa_installed', 'true');
+      setIsPWAInstalled(true);
+    });
     
     // Capturar evento de instalação PWA
     const handler = (e: Event) => {
@@ -174,16 +190,18 @@ export default function MenuInicial() {
           </div>
         </div>
 <div className="flex items-center gap-2">
-          {/* Botão Instalar - apenas mobile */}
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={handleInstallPWA}
-            className="md:hidden bg-white text-green-700 border-green-300 hover:bg-green-50 flex items-center gap-1"
-          >
-            <Download className="h-4 w-4" />
-            <span className="text-xs">Instalar</span>
-          </Button>
+          {/* Botão Instalar - apenas mobile e quando não instalado */}
+          {!isPWAInstalled && (
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={handleInstallPWA}
+              className="md:hidden bg-white text-green-700 border-green-300 hover:bg-green-50 flex items-center gap-1"
+            >
+              <Download className="h-4 w-4" />
+              <span className="text-xs">Instalar</span>
+            </Button>
+          )}
           <Button 
             variant="ghost" 
             size="sm"
