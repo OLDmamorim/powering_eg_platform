@@ -3455,3 +3455,11 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Comando /status - verifica estado do bot
 - [x] Registar webhook na API do Telegram
 - [x] Testar funcionamento do bot @PoweringEG_bot
+
+
+## Portal Loja - Solicitar Apoio v6.13.0
+- [x] Adicionar card "Solicitar Apoio" na página inicial do portal da loja
+- [x] Card disponível tanto para Responsável como para Colaborador
+- [x] Reutilizar vista de solicitação de apoio existente (VolanteTab)
+- [x] Integrar com o sistema de pedidos de apoio existente
+- [ ] Testar funcionalidade completa

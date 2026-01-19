@@ -517,10 +517,10 @@ export default function PortalLoja() {
     { enabled: !!token && !!lojaAuth && activeTab === 'resultados' && mesesSelecionadosDashboard.length > 0 }
   );
 
-  // Volante atribuído à loja
+  // Volante atribuído à loja (disponível para responsável E colaborador)
   const { data: volanteAtribuido } = trpc.volantes.getVolanteByLoja.useQuery(
     { lojaId: lojaAuth?.lojaId || 0 },
-    { enabled: !!lojaAuth?.lojaId && lojaAuth?.tipoToken === 'responsavel' }
+    { enabled: !!lojaAuth?.lojaId }
   );
 
   // Pedidos de apoio ao volante (para contar pendentes)
@@ -1092,8 +1092,8 @@ export default function PortalLoja() {
               </Card>
             )}
 
-            {/* Card Volante - Apenas para Responsável quando tem volante atribuído */}
-            {lojaAuth?.tipoToken === 'responsavel' && volanteAtribuido && (
+            {/* Card Solicitar Apoio - Disponível para Responsável E Colaborador quando tem volante atribuído */}
+            {volanteAtribuido && (
               <Card 
                 className="cursor-pointer hover:shadow-lg transition-all hover:scale-[1.02] bg-gradient-to-br from-cyan-500 to-teal-600 text-white border-0"
                 onClick={() => setActiveTab("volante")}
