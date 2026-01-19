@@ -171,7 +171,7 @@ export default function MenuInicial() {
           {/* Card Chatbot IA */}
           <Card 
             className="p-8 cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-105 bg-white border-2 border-transparent hover:border-purple-400 group"
-            onClick={() => setLocation('/chatbot')}
+            onClick={() => setLocation('/assistente-ia')}
           >
             <div className="text-center">
               <div className="w-24 h-24 bg-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-purple-200 transition-colors">
