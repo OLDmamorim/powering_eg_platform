@@ -4188,7 +4188,7 @@ function VolanteInterface({
   t: (key: string) => string;
 }) {
   const { theme, toggleTheme } = useTheme();
-  const [activeView, setActiveView] = useState<"menu" | "agenda" | "resultados">("menu");
+  const [activeView, setActiveView] = useState<"menu" | "agenda" | "resultados" | "historico">("menu");
   const [activeTab, setActiveTab] = useState<"agenda" | "resultados">("agenda");
   const [mesSelecionado, setMesSelecionado] = useState(() => {
     const hoje = new Date();
@@ -4432,7 +4432,7 @@ END:VCALENDAR`;
 
         {/* Cards Selecionáveis */}
         <div className="flex-1 flex items-center justify-center">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl w-full">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl w-full">
             {/* Card Calendário */}
             <Card 
               className="p-8 cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-105 bg-white dark:bg-gray-800 border-2 border-transparent hover:border-teal-400 group"
@@ -4473,6 +4473,29 @@ END:VCALENDAR`;
                 </p>
               </div>
             </Card>
+
+            {/* Card Histórico */}
+            <Card 
+              className="p-8 cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-105 bg-white dark:bg-gray-800 border-2 border-transparent hover:border-orange-400 group"
+              onClick={() => setActiveView("historico")}
+            >
+              <div className="text-center">
+                <div className="w-24 h-24 bg-orange-100 dark:bg-orange-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-orange-200 dark:group-hover:bg-orange-900/50 transition-colors">
+                  <History className="h-12 w-12 text-orange-600" />
+                </div>
+                <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">
+                  {language === 'pt' ? 'Histórico' : 'History'}
+                </h2>
+                <p className="text-gray-500 dark:text-gray-400 text-sm">
+                  {language === 'pt' ? 'Apoios realizados e concluídos' : 'Completed support visits'}
+                </p>
+                {pedidosAprovados.length > 0 && (
+                  <Badge className="mt-3 bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
+                    {pedidosAprovados.length} {language === 'pt' ? 'realizado(s)' : 'completed'}
+                  </Badge>
+                )}
+              </div>
+            </Card>
           </div>
         </div>
 
@@ -4507,7 +4530,9 @@ END:VCALENDAR`;
                 <p className="text-xs text-teal-100">
                   {activeView === "agenda" 
                     ? (language === 'pt' ? 'Calendário de Apoios' : 'Support Calendar')
-                    : (language === 'pt' ? 'Resultados das Lojas' : 'Store Results')}
+                    : activeView === "historico"
+                      ? (language === 'pt' ? 'Histórico de Apoios' : 'Support History')
+                      : (language === 'pt' ? 'Resultados das Lojas' : 'Store Results')}
                 </p>
               </div>
             </div>
@@ -4908,6 +4933,194 @@ END:VCALENDAR`;
                 </CardContent>
               </Card>
             )}
+          </div>
+        )}
+
+        {/* Vista Histórico */}
+        {activeView === "historico" && (
+          <div className="container mx-auto px-4 py-6 space-y-6">
+            {/* Filtro por Mês */}
+            <Card>
+              <CardContent className="py-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <History className="h-5 w-5 text-orange-600" />
+                    <span className="font-medium">
+                      {language === 'pt' ? 'Histórico de Apoios' : 'Support History'}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setMesSelecionado(prev => {
+                        const novoMes = prev.mes === 1 ? 12 : prev.mes - 1;
+                        const novoAno = prev.mes === 1 ? prev.ano - 1 : prev.ano;
+                        return { mes: novoMes, ano: novoAno };
+                      })}
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <span className="text-sm font-medium min-w-[120px] text-center">
+                      {nomesMeses[mesSelecionado.mes - 1]} {mesSelecionado.ano}
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setMesSelecionado(prev => {
+                        const novoMes = prev.mes === 12 ? 1 : prev.mes + 1;
+                        const novoAno = prev.mes === 12 ? prev.ano + 1 : prev.ano;
+                        return { mes: novoMes, ano: novoAno };
+                      })}
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Lista de Apoios Realizados */}
+            {loadingPedidos ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-orange-600" />
+              </div>
+            ) : (() => {
+              // Filtrar pedidos aprovados do mês selecionado
+              const pedidosDoMes = pedidosAprovados.filter((p: any) => {
+                const dataPedido = new Date(p.data);
+                return dataPedido.getMonth() + 1 === mesSelecionado.mes && 
+                       dataPedido.getFullYear() === mesSelecionado.ano;
+              });
+              
+              // Ordenar por data (mais recente primeiro)
+              const pedidosOrdenados = [...pedidosDoMes].sort((a: any, b: any) => 
+                new Date(b.data).getTime() - new Date(a.data).getTime()
+              );
+
+              if (pedidosOrdenados.length === 0) {
+                return (
+                  <Card>
+                    <CardContent className="py-12 text-center">
+                      <History className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                      <p className="text-gray-500">
+                        {language === 'pt' ? 'Sem apoios realizados neste período' : 'No support visits in this period'}
+                      </p>
+                    </CardContent>
+                  </Card>
+                );
+              }
+
+              // Agrupar por loja
+              const apoiosPorLoja = pedidosOrdenados.reduce((acc: any, pedido: any) => {
+                const lojaId = pedido.lojaId;
+                if (!acc[lojaId]) {
+                  acc[lojaId] = {
+                    loja: pedido.loja,
+                    pedidos: []
+                  };
+                }
+                acc[lojaId].pedidos.push(pedido);
+                return acc;
+              }, {});
+
+              return (
+                <div className="space-y-4">
+                  {/* Resumo */}
+                  <Card className="bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 border-orange-200 dark:border-orange-800">
+                    <CardContent className="py-4">
+                      <div className="grid grid-cols-3 gap-4 text-center">
+                        <div>
+                          <p className="text-2xl font-bold text-orange-600">{pedidosOrdenados.length}</p>
+                          <p className="text-xs text-gray-500">{language === 'pt' ? 'Total Apoios' : 'Total Support'}</p>
+                        </div>
+                        <div>
+                          <p className="text-2xl font-bold text-purple-600">
+                            {pedidosOrdenados.filter((p: any) => p.periodo === 'manha').length}
+                          </p>
+                          <p className="text-xs text-gray-500">{language === 'pt' ? 'Manhãs' : 'Mornings'}</p>
+                        </div>
+                        <div>
+                          <p className="text-2xl font-bold text-blue-600">
+                            {pedidosOrdenados.filter((p: any) => p.periodo === 'tarde').length}
+                          </p>
+                          <p className="text-xs text-gray-500">{language === 'pt' ? 'Tardes' : 'Afternoons'}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Lista por Loja */}
+                  {Object.values(apoiosPorLoja).map((grupo: any) => (
+                    <Card key={grupo.loja?.id || 'unknown'}>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-lg flex items-center gap-2">
+                          <Store className="h-5 w-5 text-orange-600" />
+                          {grupo.loja?.nome || 'Loja'}
+                          <Badge variant="outline" className="ml-auto">
+                            {grupo.pedidos.length} {language === 'pt' ? 'apoio(s)' : 'support(s)'}
+                          </Badge>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2">
+                          {grupo.pedidos.map((pedido: any) => {
+                            const dataPedido = new Date(pedido.data);
+                            const tipoApoioTexto = pedido.tipoApoio === 'cobertura_ferias' 
+                              ? (language === 'pt' ? 'Cobertura Férias' : 'Holiday Coverage')
+                              : pedido.tipoApoio === 'substituicao_vidros' 
+                                ? (language === 'pt' ? 'Substituição Vidros' : 'Glass Replacement')
+                                : (language === 'pt' ? 'Outro' : 'Other');
+                            
+                            return (
+                              <div 
+                                key={pedido.id}
+                                className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"
+                              >
+                                <div className="flex items-center gap-3">
+                                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                                    pedido.periodo === 'manha' 
+                                      ? 'bg-purple-100 text-purple-600' 
+                                      : 'bg-blue-100 text-blue-600'
+                                  }`}>
+                                    <Calendar className="h-5 w-5" />
+                                  </div>
+                                  <div>
+                                    <p className="font-medium text-sm">
+                                      {dataPedido.toLocaleDateString('pt-PT', { 
+                                        weekday: 'short', 
+                                        day: 'numeric', 
+                                        month: 'short' 
+                                      })}
+                                    </p>
+                                    <p className="text-xs text-gray-500">
+                                      {pedido.periodo === 'manha' 
+                                        ? (language === 'pt' ? 'Manhã (9h-13h)' : 'Morning (9am-1pm)')
+                                        : (language === 'pt' ? 'Tarde (14h-18h)' : 'Afternoon (2pm-6pm)')
+                                      }
+                                    </p>
+                                  </div>
+                                </div>
+                                <div className="text-right">
+                                  <Badge variant="secondary" className="text-xs">
+                                    {tipoApoioTexto}
+                                  </Badge>
+                                  {pedido.observacoes && (
+                                    <p className="text-xs text-gray-400 mt-1 max-w-[150px] truncate" title={pedido.observacoes}>
+                                      {pedido.observacoes}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              );
+            })()}
           </div>
         )}
       </main>

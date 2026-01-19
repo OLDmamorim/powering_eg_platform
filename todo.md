@@ -3395,3 +3395,13 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Seletor de idioma com ícone Globe (igual ao resto do projeto)
 - [x] Botão voltar para navegar entre vistas
 
+
+
+## Notificações Email e Histórico de Apoios v6.13
+- [x] Enviar email ao volante quando há novo pedido de apoio pendente
+- [x] Enviar email à loja quando pedido é aprovado
+- [x] Enviar email à loja quando pedido é reprovado (com motivo)
+- [x] Criar tabela/campo para histórico de apoios realizados (usa pedidos aprovados)
+- [x] Interface no portal do volante para ver histórico de apoios
+- [x] Filtros por período e loja no histórico
+- [x] Testar funcionalidades completas

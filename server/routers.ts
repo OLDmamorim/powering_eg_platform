@@ -7440,6 +7440,32 @@ IMPORTANTE:
           observacoes: input.observacoes,
         });
         
+        // Enviar email ao volante sobre novo pedido
+        if (volante.email) {
+          const tipoApoioTexto = input.tipoApoio === 'cobertura_ferias' ? 'Cobertura de Férias' : 
+                                input.tipoApoio === 'substituicao_vidros' ? 'Substituição de Vidros' : 'Outro';
+          const periodoTexto = input.periodo === 'manha' ? 'Manhã (9h-13h)' : 'Tarde (14h-18h)';
+          const dataFormatada = dataApoio.toLocaleDateString('pt-PT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+          
+          try {
+            await sendEmail({
+              to: volante.email,
+              subject: `Novo Pedido de Apoio - ${tokenData.loja.nome}`,
+              html: gerarHTMLNovoPedidoApoio({
+                volanteNome: volante.nome,
+                lojaNome: tokenData.loja.nome,
+                data: dataFormatada,
+                periodo: periodoTexto,
+                tipoApoio: tipoApoioTexto,
+                observacoes: input.observacoes,
+              }),
+            });
+            console.log(`[Email] Notificação de novo pedido enviada para volante: ${volante.email}`);
+          } catch (e) {
+            console.error('[Email] Erro ao enviar notificação ao volante:', e);
+          }
+        }
+        
         return pedido;
       }),
     
@@ -7560,6 +7586,33 @@ IMPORTANTE:
         };
         
         const pedido = await db.aprovarPedidoApoio(input.pedidoId, links);
+        
+        // Enviar email à loja sobre aprovação
+        if (loja?.email) {
+          const tipoApoioTexto = pedidoExistente.tipoApoio === 'cobertura_ferias' ? 'Cobertura de Férias' : 
+                                pedidoExistente.tipoApoio === 'substituicao_vidros' ? 'Substituição de Vidros' : 'Outro';
+          const periodoTexto = pedidoExistente.periodo === 'manha' ? 'Manhã (9h-13h)' : 'Tarde (14h-18h)';
+          const dataFormatada = new Date(pedidoExistente.data).toLocaleDateString('pt-PT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+          
+          try {
+            await sendEmail({
+              to: loja.email,
+              subject: `Pedido de Apoio Aprovado - ${dataFormatada}`,
+              html: gerarHTMLPedidoAprovado({
+                lojaNome: loja.nome,
+                volanteNome: tokenData.volante.nome,
+                data: dataFormatada,
+                periodo: periodoTexto,
+                tipoApoio: tipoApoioTexto,
+                observacoes: pedidoExistente.observacoes,
+              }),
+            });
+            console.log(`[Email] Notificação de aprovação enviada para loja: ${loja.email}`);
+          } catch (e) {
+            console.error('[Email] Erro ao enviar notificação à loja:', e);
+          }
+        }
+        
         return pedido;
       }),
     
@@ -7576,7 +7629,42 @@ IMPORTANTE:
           throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
         }
         
+        // Obter dados do pedido antes de reprovar
+        const pedidoExistente = await db.getPedidoApoioById(input.pedidoId);
+        if (!pedidoExistente) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Pedido não encontrado' });
+        }
+        
         const pedido = await db.reprovarPedidoApoio(input.pedidoId, input.motivo);
+        
+        // Enviar email à loja sobre reprovação
+        const loja = await db.getLojaById(pedidoExistente.lojaId);
+        if (loja?.email) {
+          const tipoApoioTexto = pedidoExistente.tipoApoio === 'cobertura_ferias' ? 'Cobertura de Férias' : 
+                                pedidoExistente.tipoApoio === 'substituicao_vidros' ? 'Substituição de Vidros' : 'Outro';
+          const periodoTexto = pedidoExistente.periodo === 'manha' ? 'Manhã (9h-13h)' : 'Tarde (14h-18h)';
+          const dataFormatada = new Date(pedidoExistente.data).toLocaleDateString('pt-PT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+          
+          try {
+            await sendEmail({
+              to: loja.email,
+              subject: `Pedido de Apoio Reprovado - ${dataFormatada}`,
+              html: gerarHTMLPedidoReprovado({
+                lojaNome: loja.nome,
+                volanteNome: tokenData.volante.nome,
+                data: dataFormatada,
+                periodo: periodoTexto,
+                tipoApoio: tipoApoioTexto,
+                observacoes: pedidoExistente.observacoes,
+                motivo: input.motivo,
+              }),
+            });
+            console.log(`[Email] Notificação de reprovação enviada para loja: ${loja.email}`);
+          } catch (e) {
+            console.error('[Email] Erro ao enviar notificação à loja:', e);
+          }
+        }
+        
         return pedido;
       }),
     
@@ -8238,6 +8326,203 @@ function obterFeriadosPortugueses(ano: number): string[] {
   // feriados.push(carnaval.toISOString().split('T')[0]);
   
   return feriados;
+}
+
+// Função auxiliar para gerar HTML do email de novo pedido de apoio
+function gerarHTMLNovoPedidoApoio(dados: {
+  volanteNome: string;
+  lojaNome: string;
+  data: string;
+  periodo: string;
+  tipoApoio: string;
+  observacoes?: string;
+}): string {
+  return `
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f3f4f6; }
+    .container { max-width: 600px; margin: 0 auto; background: #ffffff; }
+    .header { background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 30px; text-align: center; }
+    .header img { max-width: 150px; margin-bottom: 15px; }
+    .header h1 { color: #ffffff; margin: 0; font-size: 24px; }
+    .content { padding: 30px; }
+    .badge { display: inline-block; background: #fef3c7; color: #92400e; padding: 8px 16px; border-radius: 20px; font-weight: bold; margin-bottom: 20px; }
+    .info-box { background: #f9fafb; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+    .info-row { display: flex; margin-bottom: 12px; }
+    .info-label { font-weight: bold; color: #6b7280; width: 120px; }
+    .info-value { color: #1f2937; }
+    .observacoes { background: #fff; border: 1px solid #e5e7eb; padding: 15px; border-radius: 8px; margin-top: 20px; }
+    .footer { background: #1f2937; padding: 20px; text-align: center; color: #9ca3af; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663088836799/YrkmGCRDVqYgFnZO.png" alt="ExpressGlass" />
+      <h1>Novo Pedido de Apoio</h1>
+    </div>
+    <div class="content">
+      <p>Olá <strong>${dados.volanteNome}</strong>,</p>
+      <p>Recebeu um novo pedido de apoio que requer a sua atenção:</p>
+      
+      <div class="badge">⏳ Pendente de Aprovação</div>
+      
+      <div class="info-box">
+        <div class="info-row"><span class="info-label">🏪 Loja:</span> <span class="info-value">${dados.lojaNome}</span></div>
+        <div class="info-row"><span class="info-label">📅 Data:</span> <span class="info-value">${dados.data}</span></div>
+        <div class="info-row"><span class="info-label">⏰ Período:</span> <span class="info-value">${dados.periodo}</span></div>
+        <div class="info-row"><span class="info-label">📝 Tipo:</span> <span class="info-value">${dados.tipoApoio}</span></div>
+      </div>
+      
+      ${dados.observacoes ? `
+      <div class="observacoes">
+        <strong>Observações:</strong><br/>
+        ${dados.observacoes}
+      </div>
+      ` : ''}
+      
+      <p style="margin-top: 25px;">Aceda ao Portal do Volante para aprovar ou reprovar este pedido.</p>
+    </div>
+    <div class="footer">
+      <p>PoweringEG Platform 2.0 - Sistema de Gestão de Apoios</p>
+      <p>Este email foi gerado automaticamente.</p>
+    </div>
+  </div>
+</body>
+</html>
+  `;
+}
+
+// Função auxiliar para gerar HTML do email de pedido aprovado
+function gerarHTMLPedidoAprovado(dados: {
+  lojaNome: string;
+  volanteNome: string;
+  data: string;
+  periodo: string;
+  tipoApoio: string;
+  observacoes?: string | null;
+}): string {
+  return `
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f3f4f6; }
+    .container { max-width: 600px; margin: 0 auto; background: #ffffff; }
+    .header { background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 30px; text-align: center; }
+    .header img { max-width: 150px; margin-bottom: 15px; }
+    .header h1 { color: #ffffff; margin: 0; font-size: 24px; }
+    .content { padding: 30px; }
+    .badge { display: inline-block; background: #d1fae5; color: #065f46; padding: 8px 16px; border-radius: 20px; font-weight: bold; margin-bottom: 20px; }
+    .info-box { background: #f9fafb; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+    .info-row { display: flex; margin-bottom: 12px; }
+    .info-label { font-weight: bold; color: #6b7280; width: 120px; }
+    .info-value { color: #1f2937; }
+    .footer { background: #1f2937; padding: 20px; text-align: center; color: #9ca3af; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663088836799/YrkmGCRDVqYgFnZO.png" alt="ExpressGlass" />
+      <h1>Pedido de Apoio Aprovado</h1>
+    </div>
+    <div class="content">
+      <p>Olá <strong>${dados.lojaNome}</strong>,</p>
+      <p>O seu pedido de apoio foi <strong>aprovado</strong>!</p>
+      
+      <div class="badge">✅ Aprovado</div>
+      
+      <div class="info-box">
+        <div class="info-row"><span class="info-label">👤 Volante:</span> <span class="info-value">${dados.volanteNome}</span></div>
+        <div class="info-row"><span class="info-label">📅 Data:</span> <span class="info-value">${dados.data}</span></div>
+        <div class="info-row"><span class="info-label">⏰ Período:</span> <span class="info-value">${dados.periodo}</span></div>
+        <div class="info-row"><span class="info-label">📝 Tipo:</span> <span class="info-value">${dados.tipoApoio}</span></div>
+      </div>
+      
+      <p style="margin-top: 25px;">O volante <strong>${dados.volanteNome}</strong> estará presente na sua loja na data e horário indicados.</p>
+    </div>
+    <div class="footer">
+      <p>PoweringEG Platform 2.0 - Sistema de Gestão de Apoios</p>
+      <p>Este email foi gerado automaticamente.</p>
+    </div>
+  </div>
+</body>
+</html>
+  `;
+}
+
+// Função auxiliar para gerar HTML do email de pedido reprovado
+function gerarHTMLPedidoReprovado(dados: {
+  lojaNome: string;
+  volanteNome: string;
+  data: string;
+  periodo: string;
+  tipoApoio: string;
+  observacoes?: string | null;
+  motivo?: string;
+}): string {
+  return `
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f3f4f6; }
+    .container { max-width: 600px; margin: 0 auto; background: #ffffff; }
+    .header { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); padding: 30px; text-align: center; }
+    .header img { max-width: 150px; margin-bottom: 15px; }
+    .header h1 { color: #ffffff; margin: 0; font-size: 24px; }
+    .content { padding: 30px; }
+    .badge { display: inline-block; background: #fee2e2; color: #991b1b; padding: 8px 16px; border-radius: 20px; font-weight: bold; margin-bottom: 20px; }
+    .info-box { background: #f9fafb; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+    .info-row { display: flex; margin-bottom: 12px; }
+    .info-label { font-weight: bold; color: #6b7280; width: 120px; }
+    .info-value { color: #1f2937; }
+    .motivo-box { background: #fef2f2; border: 1px solid #fecaca; padding: 15px; border-radius: 8px; margin-top: 20px; }
+    .footer { background: #1f2937; padding: 20px; text-align: center; color: #9ca3af; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663088836799/YrkmGCRDVqYgFnZO.png" alt="ExpressGlass" />
+      <h1>Pedido de Apoio Reprovado</h1>
+    </div>
+    <div class="content">
+      <p>Olá <strong>${dados.lojaNome}</strong>,</p>
+      <p>Lamentamos informar que o seu pedido de apoio foi <strong>reprovado</strong>.</p>
+      
+      <div class="badge">❌ Reprovado</div>
+      
+      <div class="info-box">
+        <div class="info-row"><span class="info-label">👤 Volante:</span> <span class="info-value">${dados.volanteNome}</span></div>
+        <div class="info-row"><span class="info-label">📅 Data:</span> <span class="info-value">${dados.data}</span></div>
+        <div class="info-row"><span class="info-label">⏰ Período:</span> <span class="info-value">${dados.periodo}</span></div>
+        <div class="info-row"><span class="info-label">📝 Tipo:</span> <span class="info-value">${dados.tipoApoio}</span></div>
+      </div>
+      
+      ${dados.motivo ? `
+      <div class="motivo-box">
+        <strong>💬 Motivo da reprovação:</strong><br/>
+        ${dados.motivo}
+      </div>
+      ` : ''}
+      
+      <p style="margin-top: 25px;">Se precisar de apoio, por favor submeta um novo pedido para uma data diferente.</p>
+    </div>
+    <div class="footer">
+      <p>PoweringEG Platform 2.0 - Sistema de Gestão de Apoios</p>
+      <p>Este email foi gerado automaticamente.</p>
+    </div>
+  </div>
+</body>
+</html>
+  `;
 }
 
 export type AppRouter = typeof appRouter;
