@@ -1,4 +1,5 @@
 import { useState } from "react";
+import React from "react";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import DashboardLayout from "@/components/DashboardLayout";
@@ -676,109 +677,36 @@ export default function ReunioesQuinzenais() {
                         <TableRow>
                           <TableHead>{language === 'pt' ? "Loja" : "Store"}</TableHead>
                           <TableHead>Email</TableHead>
+                          <TableHead>{language === 'pt' ? "Tipo" : "Type"}</TableHead>
                           <TableHead>Token</TableHead>
                           <TableHead>{language === 'pt' ? "Estado" : "Status"}</TableHead>
-                          <TableHead>Último Acesso</TableHead>
-                          <TableHead className="text-right">Ações</TableHead>
+                          <TableHead className="text-right">{language === 'pt' ? "Ações" : "Actions"}</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {lojasParaMostrar?.map((loja) => {
-                          const tokenData = tokens?.find(t => t.lojaId === loja.id);
-                          return (
-                            <TableRow key={loja.id}>
-                              <TableCell className="font-medium">
-                                <div className="flex items-center gap-2">
-                                  <Store className="h-4 w-4 text-muted-foreground" />
-                                  {loja.nome}
-                                </div>
-                              </TableCell>
-                              <TableCell className="text-sm text-muted-foreground">
-                                {loja.email || <span className="text-amber-600">Sem email</span>}
-                              </TableCell>
-                              <TableCell>
-                                {tokenData ? (
+                          // Encontrar tokens de responsável e colaborador para esta loja
+                          const tokenResponsavel = tokens?.find(t => t.lojaId === loja.id && t.tipo === 'responsavel');
+                          const tokenColaborador = tokens?.find(t => t.lojaId === loja.id && t.tipo === 'colaborador');
+                          const temTokens = tokenResponsavel || tokenColaborador;
+                          
+                          // Se não tem nenhum token, mostrar linha única com botão criar
+                          if (!temTokens) {
+                            return (
+                              <TableRow key={loja.id}>
+                                <TableCell className="font-medium">
                                   <div className="flex items-center gap-2">
-                                    <code className="text-xs bg-muted px-2 py-1 rounded">
-                                      {tokenData.token.substring(0, 12)}...
-                                    </code>
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      className="h-6 w-6"
-                                      onClick={() => copyToClipboard(getPortalUrl(tokenData.token))}
-                                      title={language === 'pt' ? "Copiar link" : "Copy link"}
-                                    >
-                                      <Copy className="h-3 w-3" />
-                                    </Button>
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      className="h-6 w-6"
-                                      onClick={() => window.open(getPortalUrl(tokenData.token), '_blank')}
-                                      title={language === 'pt' ? "Abrir portal" : "Open portal"}
-                                    >
-                                      <ExternalLink className="h-3 w-3" />
-                                    </Button>
+                                    <Store className="h-4 w-4 text-muted-foreground" />
+                                    {loja.nome}
                                   </div>
-                                ) : (
-                                  <span className="text-muted-foreground text-sm">Sem token</span>
-                                )}
-                              </TableCell>
-                              <TableCell>
-                                {tokenData ? (
-                                  <Badge className={tokenData.ativo ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}>
-                                    {tokenData.ativo ? "Ativo" : "Inativo"}
-                                  </Badge>
-                                ) : (
-                                  "-"
-                                )}
-                              </TableCell>
-                              <TableCell className="text-sm text-muted-foreground">
-                                {tokenData?.ultimoAcesso
-                                  ? new Date(tokenData.ultimoAcesso).toLocaleDateString('pt-PT')
-                                  : "-"}
-                              </TableCell>
-                              <TableCell className="text-right">
-                                {tokenData ? (
-                                  <div className="flex justify-end gap-2">
-                                    {/* Botão Enviar Email */}
-                                    <Button
-                                      variant="default"
-                                      size="sm"
-                                      onClick={() => enviarEmailTokenMutation.mutate({ lojaId: loja.id })}
-                                      disabled={!loja.email || enviarEmailTokenMutation.isPending}
-                                      title={loja.email ? "Enviar token por email" : "Loja sem email configurado"}
-                                    >
-                                      {enviarEmailTokenMutation.isPending ? (
-                                        <Loader2 className="h-4 w-4 animate-spin" />
-                                      ) : (
-                                        <>
-                                          <Send className="h-4 w-4 mr-2" />
-                                          Enviar Email
-                                        </>
-                                      )}
-                                    </Button>
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      onClick={() => toggleTokenMutation.mutate({
-                                        tokenId: tokenData.id,
-                                        ativo: !tokenData.ativo,
-                                      })}
-                                    >
-                                      {tokenData.ativo ? "Desativar" : "Ativar"}
-                                    </Button>
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      onClick={() => regenerarTokenMutation.mutate({ lojaId: loja.id })}
-                                      title={language === 'pt' ? "Regenerar token" : "Regenerate token"}
-                                    >
-                                      <RefreshCw className="h-4 w-4" />
-                                    </Button>
-                                  </div>
-                                ) : (
+                                </TableCell>
+                                <TableCell className="text-sm text-muted-foreground">
+                                  {loja.email || <span className="text-amber-600">Sem email</span>}
+                                </TableCell>
+                                <TableCell colSpan={3} className="text-center text-muted-foreground">
+                                  {language === 'pt' ? 'Sem tokens criados' : 'No tokens created'}
+                                </TableCell>
+                                <TableCell className="text-right">
                                   <Button
                                     size="sm"
                                     onClick={() => criarTokenMutation.mutate({ lojaId: loja.id })}
@@ -789,13 +717,146 @@ export default function ReunioesQuinzenais() {
                                     ) : (
                                       <>
                                         <Key className="h-4 w-4 mr-2" />
-                                        Criar Token
+                                        {language === 'pt' ? 'Criar Tokens' : 'Create Tokens'}
                                       </>
                                     )}
                                   </Button>
-                                )}
-                              </TableCell>
-                            </TableRow>
+                                </TableCell>
+                              </TableRow>
+                            );
+                          }
+                          
+                          // Se tem tokens, mostrar duas linhas (uma para cada tipo)
+                          return (
+                            <React.Fragment key={loja.id}>
+                              {/* Linha do Token Responsável */}
+                              <TableRow className="bg-emerald-50/50 dark:bg-emerald-950/20">
+                                <TableCell className="font-medium" rowSpan={2}>
+                                  <div className="flex items-center gap-2">
+                                    <Store className="h-4 w-4 text-muted-foreground" />
+                                    {loja.nome}
+                                  </div>
+                                </TableCell>
+                                <TableCell className="text-sm text-muted-foreground" rowSpan={2}>
+                                  {loja.email || <span className="text-amber-600">Sem email</span>}
+                                </TableCell>
+                                <TableCell>
+                                  <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300">
+                                    {language === 'pt' ? 'Responsável' : 'Manager'}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell>
+                                  {tokenResponsavel ? (
+                                    <div className="flex items-center gap-2">
+                                      <code className="text-xs bg-muted px-2 py-1 rounded">
+                                        {tokenResponsavel.token.substring(0, 8)}...
+                                      </code>
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-6 w-6"
+                                        onClick={() => copyToClipboard(getPortalUrl(tokenResponsavel.token))}
+                                        title={language === 'pt' ? 'Copiar link Responsável' : 'Copy Manager link'}
+                                      >
+                                        <Copy className="h-3 w-3" />
+                                      </Button>
+                                    </div>
+                                  ) : (
+                                    <span className="text-muted-foreground text-sm">-</span>
+                                  )}
+                                </TableCell>
+                                <TableCell>
+                                  {tokenResponsavel ? (
+                                    <Badge className={tokenResponsavel.ativo ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}>
+                                      {tokenResponsavel.ativo ? (language === 'pt' ? 'Ativo' : 'Active') : (language === 'pt' ? 'Inativo' : 'Inactive')}
+                                    </Badge>
+                                  ) : '-'}
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  {tokenResponsavel && (
+                                    <div className="flex justify-end gap-1">
+                                      <Button
+                                        variant="default"
+                                        size="sm"
+                                        className="h-7 px-2"
+                                        onClick={() => enviarEmailTokenMutation.mutate({ lojaId: loja.id, tipo: 'responsavel' })}
+                                        disabled={!loja.email || enviarEmailTokenMutation.isPending}
+                                        title={language === 'pt' ? 'Enviar email Responsável' : 'Send Manager email'}
+                                      >
+                                        <Send className="h-3 w-3" />
+                                      </Button>
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="h-7 px-2"
+                                        onClick={() => toggleTokenMutation.mutate({ tokenId: tokenResponsavel.id, ativo: !tokenResponsavel.ativo })}
+                                      >
+                                        {tokenResponsavel.ativo ? (language === 'pt' ? 'Desativar' : 'Disable') : (language === 'pt' ? 'Ativar' : 'Enable')}
+                                      </Button>
+                                    </div>
+                                  )}
+                                </TableCell>
+                              </TableRow>
+                              {/* Linha do Token Colaborador */}
+                              <TableRow className="bg-amber-50/50 dark:bg-amber-950/20">
+                                <TableCell>
+                                  <Badge className="bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300">
+                                    {language === 'pt' ? 'Colaborador' : 'Staff'}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell>
+                                  {tokenColaborador ? (
+                                    <div className="flex items-center gap-2">
+                                      <code className="text-xs bg-muted px-2 py-1 rounded">
+                                        {tokenColaborador.token.substring(0, 8)}...
+                                      </code>
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-6 w-6"
+                                        onClick={() => copyToClipboard(getPortalUrl(tokenColaborador.token))}
+                                        title={language === 'pt' ? 'Copiar link Colaborador' : 'Copy Staff link'}
+                                      >
+                                        <Copy className="h-3 w-3" />
+                                      </Button>
+                                    </div>
+                                  ) : (
+                                    <span className="text-muted-foreground text-sm">-</span>
+                                  )}
+                                </TableCell>
+                                <TableCell>
+                                  {tokenColaborador ? (
+                                    <Badge className={tokenColaborador.ativo ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}>
+                                      {tokenColaborador.ativo ? (language === 'pt' ? 'Ativo' : 'Active') : (language === 'pt' ? 'Inativo' : 'Inactive')}
+                                    </Badge>
+                                  ) : '-'}
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  {tokenColaborador && (
+                                    <div className="flex justify-end gap-1">
+                                      <Button
+                                        variant="default"
+                                        size="sm"
+                                        className="h-7 px-2"
+                                        onClick={() => enviarEmailTokenMutation.mutate({ lojaId: loja.id, tipo: 'colaborador' })}
+                                        disabled={!loja.email || enviarEmailTokenMutation.isPending}
+                                        title={language === 'pt' ? 'Enviar email Colaborador' : 'Send Staff email'}
+                                      >
+                                        <Send className="h-3 w-3" />
+                                      </Button>
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="h-7 px-2"
+                                        onClick={() => toggleTokenMutation.mutate({ tokenId: tokenColaborador.id, ativo: !tokenColaborador.ativo })}
+                                      >
+                                        {tokenColaborador.ativo ? (language === 'pt' ? 'Desativar' : 'Disable') : (language === 'pt' ? 'Ativar' : 'Enable')}
+                                      </Button>
+                                    </div>
+                                  )}
+                                </TableCell>
+                              </TableRow>
+                            </React.Fragment>
                           );
                         })}
                       </TableBody>

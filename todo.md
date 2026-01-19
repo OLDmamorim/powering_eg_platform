@@ -3345,3 +3345,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 
 ## Funcionalidade v6.10.3 - Indicador Tipo de Acesso
 - [x] Adicionar badge/indicador visual no Portal da Loja mostrando "Responsável" ou "Colaborador"
+
+## Funcionalidade v6.10.4 - Interface Tokens Separados
+- [x] Criar interface para mostrar ambos os tokens (Responsável e Colaborador) por loja
+- [x] Adicionar botões de copiar para cada tipo de token
+- [x] Adicionar botões de enviar por email para cada tipo de token
