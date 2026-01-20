@@ -1,0 +1,46 @@
+{
+  "query": "SELECT g.id as gestor_id, u.name as gestor_nome \nFROM gestores g \nJOIN users u ON u.id = g.userId \nORDER BY u.name;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT g.id as gestor_id, u.name as gestor_nome \nFROM gestores g \nJOIN users u ON u.id = g.userId \nORDER BY u.name;",
+  "rows": [
+    {
+      "gestor_id": "1080020",
+      "gestor_nome": "Carlos Eduardo"
+    },
+    {
+      "gestor_id": "1350001",
+      "gestor_nome": "Fabio Dias"
+    },
+    {
+      "gestor_id": "30001",
+      "gestor_nome": "Marco Amorim"
+    },
+    {
+      "gestor_id": "1380001",
+      "gestor_nome": "Marco Amorim"
+    },
+    {
+      "gestor_id": "120001",
+      "gestor_nome": "Marco Vilar"
+    },
+    {
+      "gestor_id": "2",
+      "gestor_nome": "Mauro Furtado"
+    },
+    {
+      "gestor_id": "210001",
+      "gestor_nome": "Mauro Furtado"
+    },
+    {
+      "gestor_id": "120002",
+      "gestor_nome": "Mónica Correira"
+    },
+    {
+      "gestor_id": "570003",
+      "gestor_nome": "Rui Adriao "
+    }
+  ],
+  "messages": [],
+  "stdout": "gestor_id\tgestor_nome\n1080020\tCarlos Eduardo\n1350001\tFabio Dias\n30001\tMarco Amorim\n1380001\tMarco Amorim\n120001\tMarco Vilar\n2\tMauro Furtado\n210001\tMauro Furtado\n120002\tMónica Correira\n570003\tRui Adriao \n",
+  "stderr": "",
+  "execution_time_ms": 53
+}

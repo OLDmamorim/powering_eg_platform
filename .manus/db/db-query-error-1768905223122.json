@@ -1,0 +1,8 @@
+{
+  "query": "SELECT gl.id, gl.gestor_id, gl.loja_id, g.nome as gestor_nome, l.nome as loja_nome \nFROM gestor_lojas gl \nJOIN gestores g ON gl.gestor_id = g.id \nJOIN lojas l ON gl.loja_id = l.id \nORDER BY l.nome \nLIMIT 50;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT gl.id, gl.gestor_id, gl.loja_id, g.nome as gestor_nome, l.nome as loja_nome \nFROM gestor_lojas gl \nJOIN gestores g ON gl.gestor_id = g.id \nJOIN lojas l ON gl.loja_id = l.id \nORDER BY l.nome \nLIMIT 50;",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 'gl.gestor_id' in 'on clause'"
+  ]
+}

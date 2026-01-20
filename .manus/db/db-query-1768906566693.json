@@ -1,0 +1,64 @@
+{
+  "query": "SELECT g.id as gestor_id, u.id as user_id, u.name as gestor_nome, u.email\nFROM gestores g \nJOIN users u ON u.id = g.userId \nORDER BY u.name;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT g.id as gestor_id, u.id as user_id, u.name as gestor_nome, u.email\nFROM gestores g \nJOIN users u ON u.id = g.userId \nORDER BY u.name;",
+  "rows": [
+    {
+      "gestor_id": "1080020",
+      "user_id": "8940679",
+      "gestor_nome": "Carlos Eduardo",
+      "email": "carlos.eduardo@expressglass.pt"
+    },
+    {
+      "gestor_id": "1350001",
+      "user_id": "7980023",
+      "gestor_nome": "Fabio Dias",
+      "email": "fdias@expressglass.pt"
+    },
+    {
+      "gestor_id": "30001",
+      "user_id": "420030",
+      "gestor_nome": "Marco Amorim",
+      "email": "mamorim@expressglass.pt"
+    },
+    {
+      "gestor_id": "1380001",
+      "user_id": "1",
+      "gestor_nome": "Marco Amorim",
+      "email": "mramorim78@gmail.com"
+    },
+    {
+      "gestor_id": "120001",
+      "user_id": "2160121",
+      "gestor_nome": "Marco Vilar",
+      "email": "mvilar@expressglass.pt"
+    },
+    {
+      "gestor_id": "2",
+      "user_id": "240006",
+      "gestor_nome": "Mauro Furtado",
+      "email": "mfurtado@expressglass.pt"
+    },
+    {
+      "gestor_id": "210001",
+      "user_id": "240006",
+      "gestor_nome": "Mauro Furtado",
+      "email": "mfurtado@expressglass.pt"
+    },
+    {
+      "gestor_id": "120002",
+      "user_id": "2160125",
+      "gestor_nome": "Mónica Correira",
+      "email": "mcorreia@expressglass.pt"
+    },
+    {
+      "gestor_id": "570003",
+      "user_id": "6600028",
+      "gestor_nome": "Rui Adriao ",
+      "email": "rui.adriao@expressglass.pt"
+    }
+  ],
+  "messages": [],
+  "stdout": "gestor_id\tuser_id\tgestor_nome\temail\n1080020\t8940679\tCarlos Eduardo\tcarlos.eduardo@expressglass.pt\n1350001\t7980023\tFabio Dias\tfdias@expressglass.pt\n30001\t420030\tMarco Amorim\tmamorim@expressglass.pt\n1380001\t1\tMarco Amorim\tmramorim78@gmail.com\n120001\t2160121\tMarco Vilar\tmvilar@expressglass.pt\n2\t240006\tMauro Furtado\tmfurtado@expressglass.pt\n210001\t240006\tMauro Furtado\tmfurtado@expressglass.pt\n120002\t2160125\tMónica Correira\tmcorreia@expressglass.pt\n570003\t6600028\tRui Adriao \trui.adriao@expressglass.pt\n",
+  "stderr": "",
+  "execution_time_ms": 56
+}

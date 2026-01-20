@@ -1,0 +1,22 @@
+{
+  "query": "SELECT g.id as gestor_id, u.name as gestor_nome\nFROM gestores g\nJOIN users u ON g.userId = u.id\nWHERE u.name IN ('Fabio Dias', 'Marco Vilar', 'Carlos Eduardo');",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT g.id as gestor_id, u.name as gestor_nome\nFROM gestores g\nJOIN users u ON g.userId = u.id\nWHERE u.name IN ('Fabio Dias', 'Marco Vilar', 'Carlos Eduardo');",
+  "rows": [
+    {
+      "gestor_id": "120001",
+      "gestor_nome": "Marco Vilar"
+    },
+    {
+      "gestor_id": "1080020",
+      "gestor_nome": "Carlos Eduardo"
+    },
+    {
+      "gestor_id": "1350001",
+      "gestor_nome": "Fabio Dias"
+    }
+  ],
+  "messages": [],
+  "stdout": "gestor_id\tgestor_nome\n120001\tMarco Vilar\n1080020\tCarlos Eduardo\n1350001\tFabio Dias\n",
+  "stderr": "",
+  "execution_time_ms": 52
+}

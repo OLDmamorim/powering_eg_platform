@@ -1,0 +1,154 @@
+{
+  "query": "SELECT l.id as loja_id, l.nome as loja_nome, gl.gestorId, u.name as gestor_atual\nFROM lojas l\nLEFT JOIN gestor_lojas gl ON l.id = gl.lojaId\nLEFT JOIN gestores g ON gl.gestorId = g.id\nLEFT JOIN users u ON g.userId = u.id\nWHERE LOWER(l.nome) IN ('abrantes', 'aeroporto porto', 'águeda', 'algés', 'almada', 'amadora', 'amoreiras')\nORDER BY l.nome;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT l.id as loja_id, l.nome as loja_nome, gl.gestorId, u.name as gestor_atual\nFROM lojas l\nLEFT JOIN gestor_lojas gl ON l.id = gl.lojaId\nLEFT JOIN gestores g ON gl.gestorId = g.id\nLEFT JOIN users u ON g.userId = u.id\nWHERE LOWER(l.nome) IN ('abrantes', 'aeroporto porto', 'águeda', 'algés', 'almada', 'amadora', 'amoreiras')\nORDER BY l.nome;",
+  "rows": [
+    {
+      "loja_id": "180001",
+      "loja_nome": "Abrantes",
+      "gestorId": "1350001",
+      "gestor_atual": "Fabio Dias"
+    },
+    {
+      "loja_id": "180001",
+      "loja_nome": "Abrantes",
+      "gestorId": "570001",
+      "gestor_atual": "NULL"
+    },
+    {
+      "loja_id": "180001",
+      "loja_nome": "Abrantes",
+      "gestorId": "780001",
+      "gestor_atual": "NULL"
+    },
+    {
+      "loja_id": "180001",
+      "loja_nome": "Abrantes",
+      "gestorId": "1380001",
+      "gestor_atual": "Marco Amorim"
+    },
+    {
+      "loja_id": "180002",
+      "loja_nome": "Aeroporto porto",
+      "gestorId": "120001",
+      "gestor_atual": "Marco Vilar"
+    },
+    {
+      "loja_id": "180002",
+      "loja_nome": "Aeroporto porto",
+      "gestorId": "1380001",
+      "gestor_atual": "Marco Amorim"
+    },
+    {
+      "loja_id": "180003",
+      "loja_nome": "Águeda",
+      "gestorId": "1380001",
+      "gestor_atual": "Marco Amorim"
+    },
+    {
+      "loja_id": "180003",
+      "loja_nome": "Águeda",
+      "gestorId": "120002",
+      "gestor_atual": "Mónica Correira"
+    },
+    {
+      "loja_id": "180004",
+      "loja_nome": "Algés",
+      "gestorId": "780002",
+      "gestor_atual": "NULL"
+    },
+    {
+      "loja_id": "180004",
+      "loja_nome": "Algés",
+      "gestorId": "1380001",
+      "gestor_atual": "Marco Amorim"
+    },
+    {
+      "loja_id": "180004",
+      "loja_nome": "Algés",
+      "gestorId": "1020002",
+      "gestor_atual": "NULL"
+    },
+    {
+      "loja_id": "180004",
+      "loja_nome": "Algés",
+      "gestorId": "1080020",
+      "gestor_atual": "Carlos Eduardo"
+    },
+    {
+      "loja_id": "180005",
+      "loja_nome": "Almada",
+      "gestorId": "780002",
+      "gestor_atual": "NULL"
+    },
+    {
+      "loja_id": "180005",
+      "loja_nome": "Almada",
+      "gestorId": "1020002",
+      "gestor_atual": "NULL"
+    },
+    {
+      "loja_id": "180005",
+      "loja_nome": "Almada",
+      "gestorId": "1380001",
+      "gestor_atual": "Marco Amorim"
+    },
+    {
+      "loja_id": "180005",
+      "loja_nome": "Almada",
+      "gestorId": "1080020",
+      "gestor_atual": "Carlos Eduardo"
+    },
+    {
+      "loja_id": "180006",
+      "loja_nome": "Amadora",
+      "gestorId": "1380001",
+      "gestor_atual": "Marco Amorim"
+    },
+    {
+      "loja_id": "180006",
+      "loja_nome": "Amadora",
+      "gestorId": "1080020",
+      "gestor_atual": "Carlos Eduardo"
+    },
+    {
+      "loja_id": "180006",
+      "loja_nome": "Amadora",
+      "gestorId": "1020002",
+      "gestor_atual": "NULL"
+    },
+    {
+      "loja_id": "180006",
+      "loja_nome": "Amadora",
+      "gestorId": "780002",
+      "gestor_atual": "NULL"
+    },
+    {
+      "loja_id": "180007",
+      "loja_nome": "Amoreiras",
+      "gestorId": "1380001",
+      "gestor_atual": "Marco Amorim"
+    },
+    {
+      "loja_id": "180007",
+      "loja_nome": "Amoreiras",
+      "gestorId": "1080020",
+      "gestor_atual": "Carlos Eduardo"
+    },
+    {
+      "loja_id": "180007",
+      "loja_nome": "Amoreiras",
+      "gestorId": "1020002",
+      "gestor_atual": "NULL"
+    },
+    {
+      "loja_id": "180007",
+      "loja_nome": "Amoreiras",
+      "gestorId": "780002",
+      "gestor_atual": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "loja_id\tloja_nome\tgestorId\tgestor_atual\n180001\tAbrantes\t1350001\tFabio Dias\n180001\tAbrantes\t570001\tNULL\n180001\tAbrantes\t780001\tNULL\n180001\tAbrantes\t1380001\tMarco Amorim\n180002\tAeroporto porto\t120001\tMarco Vilar\n180002\tAeroporto porto\t1380001\tMarco Amorim\n180003\tÁgueda\t1380001\tMarco Amorim\n180003\tÁgueda\t120002\tMónica Correira\n180004\tAlgés\t780002\tNULL\n180004\tAlgés\t1380001\tMarco Amorim\n180004\tAlgés\t1020002\tNULL\n180004\tAlgés\t1080020\tCarlos Eduardo\n180005\tAlmada\t780002\tNULL\n180005\tAlmada\t1020002\tNULL\n180005\tAlmada\t1380001\tMarco Amorim\n180005\tAlmada\t1080020\tCarlos Eduardo\n180006\tAmadora\t1380001\tMarco Amorim\n180006\tAmadora\t1080020\tCarlos Eduardo\n180006\tAmadora\t1020002\tNULL\n180006\tAmadora\t780002\tNULL\n180007\tAmoreiras\t1380001\tMarco Amorim\n180007\tAmoreiras\t1080020\tCarlos Eduardo\n180007\tAmoreiras\t1020002\tNULL\n180007\tAmoreiras\t780002\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 57
+}

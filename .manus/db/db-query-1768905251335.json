@@ -1,0 +1,220 @@
+{
+  "query": "SELECT gl.id, gl.gestorId, gl.lojaId, u.name as gestor_nome, l.nome as loja_nome \nFROM gestor_lojas gl \nJOIN gestores g ON gl.gestorId = g.id \nJOIN users u ON g.userId = u.id\nJOIN lojas l ON gl.lojaId = l.id \nORDER BY l.nome \nLIMIT 30;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT gl.id, gl.gestorId, gl.lojaId, u.name as gestor_nome, l.nome as loja_nome \nFROM gestor_lojas gl \nJOIN gestores g ON gl.gestorId = g.id \nJOIN users u ON g.userId = u.id\nJOIN lojas l ON gl.lojaId = l.id \nORDER BY l.nome \nLIMIT 30;",
+  "rows": [
+    {
+      "id": "1290001",
+      "gestorId": "1350001",
+      "lojaId": "180001",
+      "gestor_nome": "Fabio Dias",
+      "loja_nome": "Abrantes"
+    },
+    {
+      "id": "1320008",
+      "gestorId": "1380001",
+      "lojaId": "180001",
+      "gestor_nome": "Marco Amorim",
+      "loja_nome": "Abrantes"
+    },
+    {
+      "id": "420001",
+      "gestorId": "120001",
+      "lojaId": "180002",
+      "gestor_nome": "Marco Vilar",
+      "loja_nome": "Aeroporto porto"
+    },
+    {
+      "id": "1320009",
+      "gestorId": "1380001",
+      "lojaId": "180002",
+      "gestor_nome": "Marco Amorim",
+      "loja_nome": "Aeroporto porto"
+    },
+    {
+      "id": "1320010",
+      "gestorId": "1380001",
+      "lojaId": "180003",
+      "gestor_nome": "Marco Amorim",
+      "loja_nome": "Águeda"
+    },
+    {
+      "id": "420012",
+      "gestorId": "120002",
+      "lojaId": "180003",
+      "gestor_nome": "Mónica Correira",
+      "loja_nome": "Águeda"
+    },
+    {
+      "id": "1110012",
+      "gestorId": "1080020",
+      "lojaId": "180004",
+      "gestor_nome": "Carlos Eduardo",
+      "loja_nome": "Algés"
+    },
+    {
+      "id": "1320011",
+      "gestorId": "1380001",
+      "lojaId": "180004",
+      "gestor_nome": "Marco Amorim",
+      "loja_nome": "Algés"
+    },
+    {
+      "id": "1110013",
+      "gestorId": "1080020",
+      "lojaId": "180005",
+      "gestor_nome": "Carlos Eduardo",
+      "loja_nome": "Almada"
+    },
+    {
+      "id": "1320012",
+      "gestorId": "1380001",
+      "lojaId": "180005",
+      "gestor_nome": "Marco Amorim",
+      "loja_nome": "Almada"
+    },
+    {
+      "id": "1320013",
+      "gestorId": "1380001",
+      "lojaId": "180006",
+      "gestor_nome": "Marco Amorim",
+      "loja_nome": "Amadora"
+    },
+    {
+      "id": "1110014",
+      "gestorId": "1080020",
+      "lojaId": "180006",
+      "gestor_nome": "Carlos Eduardo",
+      "loja_nome": "Amadora"
+    },
+    {
+      "id": "1110015",
+      "gestorId": "1080020",
+      "lojaId": "180007",
+      "gestor_nome": "Carlos Eduardo",
+      "loja_nome": "Amoreiras"
+    },
+    {
+      "id": "1320014",
+      "gestorId": "1380001",
+      "lojaId": "180007",
+      "gestor_nome": "Marco Amorim",
+      "loja_nome": "Amoreiras"
+    },
+    {
+      "id": "420013",
+      "gestorId": "120002",
+      "lojaId": "180008",
+      "gestor_nome": "Mónica Correira",
+      "loja_nome": "Aveiro"
+    },
+    {
+      "id": "60001",
+      "gestorId": "30001",
+      "lojaId": "60002",
+      "gestor_nome": "Marco Amorim",
+      "loja_nome": "Barcelos"
+    },
+    {
+      "id": "1320002",
+      "gestorId": "1380001",
+      "lojaId": "60002",
+      "gestor_nome": "Marco Amorim",
+      "loja_nome": "Barcelos"
+    },
+    {
+      "id": "420014",
+      "gestorId": "120002",
+      "lojaId": "180009",
+      "gestor_nome": "Mónica Correira",
+      "loja_nome": "Beira baixa sm"
+    },
+    {
+      "id": "150001",
+      "gestorId": "30001",
+      "lojaId": "180010",
+      "gestor_nome": "Marco Amorim",
+      "loja_nome": "Braga - minho center"
+    },
+    {
+      "id": "150002",
+      "gestorId": "30001",
+      "lojaId": "180011",
+      "gestor_nome": "Marco Amorim",
+      "loja_nome": "Braga sm"
+    },
+    {
+      "id": "1290002",
+      "gestorId": "1350001",
+      "lojaId": "180012",
+      "gestor_nome": "Fabio Dias",
+      "loja_nome": "Caldas da rainha"
+    },
+    {
+      "id": "1290003",
+      "gestorId": "1350001",
+      "lojaId": "180013",
+      "gestor_nome": "Fabio Dias",
+      "loja_nome": "Castanheira do ribatejo"
+    },
+    {
+      "id": "420015",
+      "gestorId": "120002",
+      "lojaId": "180014",
+      "gestor_nome": "Mónica Correira",
+      "loja_nome": "Coimbra"
+    },
+    {
+      "id": "420016",
+      "gestorId": "120002",
+      "lojaId": "180015",
+      "gestor_nome": "Mónica Correira",
+      "loja_nome": "Coimbra sm"
+    },
+    {
+      "id": "420017",
+      "gestorId": "120002",
+      "lojaId": "180016",
+      "gestor_nome": "Mónica Correira",
+      "loja_nome": "Coimbra sul"
+    },
+    {
+      "id": "420018",
+      "gestorId": "120002",
+      "lojaId": "180017",
+      "gestor_nome": "Mónica Correira",
+      "loja_nome": "Costa de prata sm"
+    },
+    {
+      "id": "1290004",
+      "gestorId": "1350001",
+      "lojaId": "180018",
+      "gestor_nome": "Fabio Dias",
+      "loja_nome": "Entroncamento"
+    },
+    {
+      "id": "1320001",
+      "gestorId": "1380001",
+      "lojaId": "60001",
+      "gestor_nome": "Marco Amorim",
+      "loja_nome": "Famalicão"
+    },
+    {
+      "id": "60003",
+      "gestorId": "30001",
+      "lojaId": "60001",
+      "gestor_nome": "Marco Amorim",
+      "loja_nome": "Famalicão"
+    },
+    {
+      "id": "150003",
+      "gestorId": "30001",
+      "lojaId": "180019",
+      "gestor_nome": "Marco Amorim",
+      "loja_nome": "Famalicão sm"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tgestorId\tlojaId\tgestor_nome\tloja_nome\n1290001\t1350001\t180001\tFabio Dias\tAbrantes\n1320008\t1380001\t180001\tMarco Amorim\tAbrantes\n420001\t120001\t180002\tMarco Vilar\tAeroporto porto\n1320009\t1380001\t180002\tMarco Amorim\tAeroporto porto\n1320010\t1380001\t180003\tMarco Amorim\tÁgueda\n420012\t120002\t180003\tMónica Correira\tÁgueda\n1110012\t1080020\t180004\tCarlos Eduardo\tAlgés\n1320011\t1380001\t180004\tMarco Amorim\tAlgés\n1110013\t1080020\t180005\tCarlos Eduardo\tAlmada\n1320012\t1380001\t180005\tMarco Amorim\tAlmada\n1320013\t1380001\t180006\tMarco Amorim\tAmadora\n1110014\t1080020\t180006\tCarlos Eduardo\tAmadora\n1110015\t1080020\t180007\tCarlos Eduardo\tAmoreiras\n1320014\t1380001\t180007\tMarco Amorim\tAmoreiras\n420013\t120002\t180008\tMónica Correira\tAveiro\n60001\t30001\t60002\tMarco Amorim\tBarcelos\n1320002\t1380001\t60002\tMarco Amorim\tBarcelos\n420014\t120002\t180009\tMónica Correira\tBeira baixa sm\n150001\t30001\t180010\tMarco Amorim\tBraga - minho center\n150002\t30001\t180011\tMarco Amorim\tBraga sm\n1290002\t1350001\t180012\tFabio Dias\tCaldas da rainha\n1290003\t1350001\t180013\tFabio Dias\tCastanheira do ribatejo\n420015\t120002\t180014\tMónica Correira\tCoimbra\n420016\t120002\t180015\tMónica Correira\tCoimbra sm\n420017\t120002\t180016\tMónica Correira\tCoimbra sul\n420018\t120002\t180017\tMónica Correira\tCosta de prata sm\n1290004\t1350001\t180018\tFabio Dias\tEntroncamento\n1320001\t1380001\t60001\tMarco Amorim\tFamalicão\n60003\t30001\t60001\tMarco Amorim\tFamalicão\n150003\t30001\t180019\tMarco Amorim\tFamalicão sm\n",
+  "stderr": "",
+  "execution_time_ms": 49
+}

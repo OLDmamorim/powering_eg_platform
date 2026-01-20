@@ -1,0 +1,220 @@
+{
+  "query": "SELECT gl.id, gl.gestorId, gl.lojaId, g.id as gestor_id_real, l.nome as loja_nome \nFROM gestor_lojas gl \nJOIN gestores g ON gl.gestorId = g.id \nJOIN lojas l ON gl.lojaId = l.id \nORDER BY l.nome \nLIMIT 30;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT gl.id, gl.gestorId, gl.lojaId, g.id as gestor_id_real, l.nome as loja_nome \nFROM gestor_lojas gl \nJOIN gestores g ON gl.gestorId = g.id \nJOIN lojas l ON gl.lojaId = l.id \nORDER BY l.nome \nLIMIT 30;",
+  "rows": [
+    {
+      "id": "1290001",
+      "gestorId": "1350001",
+      "lojaId": "180001",
+      "gestor_id_real": "1350001",
+      "loja_nome": "Abrantes"
+    },
+    {
+      "id": "600001",
+      "gestorId": "570001",
+      "lojaId": "180001",
+      "gestor_id_real": "570001",
+      "loja_nome": "Abrantes"
+    },
+    {
+      "id": "1320008",
+      "gestorId": "1380001",
+      "lojaId": "180001",
+      "gestor_id_real": "1380001",
+      "loja_nome": "Abrantes"
+    },
+    {
+      "id": "810012",
+      "gestorId": "780001",
+      "lojaId": "180001",
+      "gestor_id_real": "780001",
+      "loja_nome": "Abrantes"
+    },
+    {
+      "id": "1320009",
+      "gestorId": "1380001",
+      "lojaId": "180002",
+      "gestor_id_real": "1380001",
+      "loja_nome": "Aeroporto porto"
+    },
+    {
+      "id": "420001",
+      "gestorId": "120001",
+      "lojaId": "180002",
+      "gestor_id_real": "120001",
+      "loja_nome": "Aeroporto porto"
+    },
+    {
+      "id": "1320010",
+      "gestorId": "1380001",
+      "lojaId": "180003",
+      "gestor_id_real": "1380001",
+      "loja_nome": "Águeda"
+    },
+    {
+      "id": "420012",
+      "gestorId": "120002",
+      "lojaId": "180003",
+      "gestor_id_real": "120002",
+      "loja_nome": "Águeda"
+    },
+    {
+      "id": "1320011",
+      "gestorId": "1380001",
+      "lojaId": "180004",
+      "gestor_id_real": "1380001",
+      "loja_nome": "Algés"
+    },
+    {
+      "id": "1050016",
+      "gestorId": "1020002",
+      "lojaId": "180004",
+      "gestor_id_real": "1020002",
+      "loja_nome": "Algés"
+    },
+    {
+      "id": "1110012",
+      "gestorId": "1080020",
+      "lojaId": "180004",
+      "gestor_id_real": "1080020",
+      "loja_nome": "Algés"
+    },
+    {
+      "id": "810001",
+      "gestorId": "780002",
+      "lojaId": "180004",
+      "gestor_id_real": "780002",
+      "loja_nome": "Algés"
+    },
+    {
+      "id": "1320012",
+      "gestorId": "1380001",
+      "lojaId": "180005",
+      "gestor_id_real": "1380001",
+      "loja_nome": "Almada"
+    },
+    {
+      "id": "1050017",
+      "gestorId": "1020002",
+      "lojaId": "180005",
+      "gestor_id_real": "1020002",
+      "loja_nome": "Almada"
+    },
+    {
+      "id": "810002",
+      "gestorId": "780002",
+      "lojaId": "180005",
+      "gestor_id_real": "780002",
+      "loja_nome": "Almada"
+    },
+    {
+      "id": "1110013",
+      "gestorId": "1080020",
+      "lojaId": "180005",
+      "gestor_id_real": "1080020",
+      "loja_nome": "Almada"
+    },
+    {
+      "id": "1320013",
+      "gestorId": "1380001",
+      "lojaId": "180006",
+      "gestor_id_real": "1380001",
+      "loja_nome": "Amadora"
+    },
+    {
+      "id": "1110014",
+      "gestorId": "1080020",
+      "lojaId": "180006",
+      "gestor_id_real": "1080020",
+      "loja_nome": "Amadora"
+    },
+    {
+      "id": "1050018",
+      "gestorId": "1020002",
+      "lojaId": "180006",
+      "gestor_id_real": "1020002",
+      "loja_nome": "Amadora"
+    },
+    {
+      "id": "810003",
+      "gestorId": "780002",
+      "lojaId": "180006",
+      "gestor_id_real": "780002",
+      "loja_nome": "Amadora"
+    },
+    {
+      "id": "1110015",
+      "gestorId": "1080020",
+      "lojaId": "180007",
+      "gestor_id_real": "1080020",
+      "loja_nome": "Amoreiras"
+    },
+    {
+      "id": "810004",
+      "gestorId": "780002",
+      "lojaId": "180007",
+      "gestor_id_real": "780002",
+      "loja_nome": "Amoreiras"
+    },
+    {
+      "id": "1320014",
+      "gestorId": "1380001",
+      "lojaId": "180007",
+      "gestor_id_real": "1380001",
+      "loja_nome": "Amoreiras"
+    },
+    {
+      "id": "1050019",
+      "gestorId": "1020002",
+      "lojaId": "180007",
+      "gestor_id_real": "1020002",
+      "loja_nome": "Amoreiras"
+    },
+    {
+      "id": "420013",
+      "gestorId": "120002",
+      "lojaId": "180008",
+      "gestor_id_real": "120002",
+      "loja_nome": "Aveiro"
+    },
+    {
+      "id": "1320002",
+      "gestorId": "1380001",
+      "lojaId": "60002",
+      "gestor_id_real": "1380001",
+      "loja_nome": "Barcelos"
+    },
+    {
+      "id": "60001",
+      "gestorId": "30001",
+      "lojaId": "60002",
+      "gestor_id_real": "30001",
+      "loja_nome": "Barcelos"
+    },
+    {
+      "id": "420014",
+      "gestorId": "120002",
+      "lojaId": "180009",
+      "gestor_id_real": "120002",
+      "loja_nome": "Beira baixa sm"
+    },
+    {
+      "id": "150001",
+      "gestorId": "30001",
+      "lojaId": "180010",
+      "gestor_id_real": "30001",
+      "loja_nome": "Braga - minho center"
+    },
+    {
+      "id": "150002",
+      "gestorId": "30001",
+      "lojaId": "180011",
+      "gestor_id_real": "30001",
+      "loja_nome": "Braga sm"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tgestorId\tlojaId\tgestor_id_real\tloja_nome\n1290001\t1350001\t180001\t1350001\tAbrantes\n600001\t570001\t180001\t570001\tAbrantes\n1320008\t1380001\t180001\t1380001\tAbrantes\n810012\t780001\t180001\t780001\tAbrantes\n1320009\t1380001\t180002\t1380001\tAeroporto porto\n420001\t120001\t180002\t120001\tAeroporto porto\n1320010\t1380001\t180003\t1380001\tÁgueda\n420012\t120002\t180003\t120002\tÁgueda\n1320011\t1380001\t180004\t1380001\tAlgés\n1050016\t1020002\t180004\t1020002\tAlgés\n1110012\t1080020\t180004\t1080020\tAlgés\n810001\t780002\t180004\t780002\tAlgés\n1320012\t1380001\t180005\t1380001\tAlmada\n1050017\t1020002\t180005\t1020002\tAlmada\n810002\t780002\t180005\t780002\tAlmada\n1110013\t1080020\t180005\t1080020\tAlmada\n1320013\t1380001\t180006\t1380001\tAmadora\n1110014\t1080020\t180006\t1080020\tAmadora\n1050018\t1020002\t180006\t1020002\tAmadora\n810003\t780002\t180006\t780002\tAmadora\n1110015\t1080020\t180007\t1080020\tAmoreiras\n810004\t780002\t180007\t780002\tAmoreiras\n1320014\t1380001\t180007\t1380001\tAmoreiras\n1050019\t1020002\t180007\t1020002\tAmoreiras\n420013\t120002\t180008\t120002\tAveiro\n1320002\t1380001\t60002\t1380001\tBarcelos\n60001\t30001\t60002\t30001\tBarcelos\n420014\t120002\t180009\t120002\tBeira baixa sm\n150001\t30001\t180010\t30001\tBraga - minho center\n150002\t30001\t180011\t30001\tBraga sm\n",
+  "stderr": "",
+  "execution_time_ms": 57
+}

@@ -594,6 +594,10 @@ export async function associateGestorLoja(gestorId: number, lojaId: number): Pro
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
+  // Primeiro, remover TODAS as associações anteriores desta loja com outros gestores
+  await db.delete(gestorLojas).where(eq(gestorLojas.lojaId, lojaId));
+  
+  // Depois, criar a nova associação
   await db.insert(gestorLojas).values({ gestorId, lojaId });
 }
 

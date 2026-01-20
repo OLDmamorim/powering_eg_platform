@@ -1,0 +1,150 @@
+{
+  "query": "SELECT l.id, l.nome, gl.gestorId\nFROM lojas l\nJOIN gestor_lojas gl ON l.id = gl.lojaId\nJOIN gestores g ON gl.gestorId = g.id\nJOIN users u ON g.userId = u.id\nWHERE u.name LIKE '%Marco Amorim%'\nORDER BY l.nome;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT l.id, l.nome, gl.gestorId\nFROM lojas l\nJOIN gestor_lojas gl ON l.id = gl.lojaId\nJOIN gestores g ON gl.gestorId = g.id\nJOIN users u ON g.userId = u.id\nWHERE u.name LIKE '%Marco Amorim%'\nORDER BY l.nome;",
+  "rows": [
+    {
+      "id": "180001",
+      "nome": "Abrantes",
+      "gestorId": "1380001"
+    },
+    {
+      "id": "180002",
+      "nome": "Aeroporto porto",
+      "gestorId": "1380001"
+    },
+    {
+      "id": "180003",
+      "nome": "Águeda",
+      "gestorId": "1380001"
+    },
+    {
+      "id": "180004",
+      "nome": "Algés",
+      "gestorId": "1380001"
+    },
+    {
+      "id": "180005",
+      "nome": "Almada",
+      "gestorId": "1380001"
+    },
+    {
+      "id": "180006",
+      "nome": "Amadora",
+      "gestorId": "1380001"
+    },
+    {
+      "id": "180007",
+      "nome": "Amoreiras",
+      "gestorId": "1380001"
+    },
+    {
+      "id": "60002",
+      "nome": "Barcelos",
+      "gestorId": "1380001"
+    },
+    {
+      "id": "60002",
+      "nome": "Barcelos",
+      "gestorId": "30001"
+    },
+    {
+      "id": "180010",
+      "nome": "Braga - minho center",
+      "gestorId": "30001"
+    },
+    {
+      "id": "180011",
+      "nome": "Braga sm",
+      "gestorId": "30001"
+    },
+    {
+      "id": "60001",
+      "nome": "Famalicão",
+      "gestorId": "1380001"
+    },
+    {
+      "id": "60001",
+      "nome": "Famalicão",
+      "gestorId": "30001"
+    },
+    {
+      "id": "180019",
+      "nome": "Famalicão sm",
+      "gestorId": "30001"
+    },
+    {
+      "id": "180024",
+      "nome": "Guimarães shopping",
+      "gestorId": "30001"
+    },
+    {
+      "id": "180036",
+      "nome": "Mycarcenter",
+      "gestorId": "30001"
+    },
+    {
+      "id": "60007",
+      "nome": "Paços de Ferreira ",
+      "gestorId": "1380001"
+    },
+    {
+      "id": "60007",
+      "nome": "Paços de Ferreira ",
+      "gestorId": "30001"
+    },
+    {
+      "id": "60006",
+      "nome": "Paredes",
+      "gestorId": "30001"
+    },
+    {
+      "id": "60006",
+      "nome": "Paredes",
+      "gestorId": "1380001"
+    },
+    {
+      "id": "180038",
+      "nome": "Paredes sm",
+      "gestorId": "30001"
+    },
+    {
+      "id": "60005",
+      "nome": "Póvoa de Varzim",
+      "gestorId": "30001"
+    },
+    {
+      "id": "60005",
+      "nome": "Póvoa de Varzim",
+      "gestorId": "1380001"
+    },
+    {
+      "id": "60004",
+      "nome": "Viana do Castelo ",
+      "gestorId": "1380001"
+    },
+    {
+      "id": "60004",
+      "nome": "Viana do Castelo ",
+      "gestorId": "30001"
+    },
+    {
+      "id": "180057",
+      "nome": "Viana do castelo sm",
+      "gestorId": "30001"
+    },
+    {
+      "id": "60003",
+      "nome": "Vila Verde",
+      "gestorId": "1380001"
+    },
+    {
+      "id": "60003",
+      "nome": "Vila Verde",
+      "gestorId": "30001"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tnome\tgestorId\n180001\tAbrantes\t1380001\n180002\tAeroporto porto\t1380001\n180003\tÁgueda\t1380001\n180004\tAlgés\t1380001\n180005\tAlmada\t1380001\n180006\tAmadora\t1380001\n180007\tAmoreiras\t1380001\n60002\tBarcelos\t1380001\n60002\tBarcelos\t30001\n180010\tBraga - minho center\t30001\n180011\tBraga sm\t30001\n60001\tFamalicão\t1380001\n60001\tFamalicão\t30001\n180019\tFamalicão sm\t30001\n180024\tGuimarães shopping\t30001\n180036\tMycarcenter\t30001\n60007\tPaços de Ferreira \t1380001\n60007\tPaços de Ferreira \t30001\n60006\tParedes\t30001\n60006\tParedes\t1380001\n180038\tParedes sm\t30001\n60005\tPóvoa de Varzim\t30001\n60005\tPóvoa de Varzim\t1380001\n60004\tViana do Castelo \t1380001\n60004\tViana do Castelo \t30001\n180057\tViana do castelo sm\t30001\n60003\tVila Verde\t1380001\n60003\tVila Verde\t30001\n",
+  "stderr": "",
+  "execution_time_ms": 53
+}

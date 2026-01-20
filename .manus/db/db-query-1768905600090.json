@@ -1,0 +1,66 @@
+{
+  "query": "SELECT id, nome FROM lojas \nWHERE LOWER(nome) IN (\n  'barcelos', 'braga - minho center', 'braga minho center', 'braga sm', \n  'famalicão', 'famalicão sm', 'guimarães', 'guimarães shopping',\n  'mycarcenter', 'paços de ferreira', 'paredes', 'paredes sm',\n  'póvoa de varzim', 'viana do castelo', 'viana do castelo sm', 'vila verde'\n)\nORDER BY nome;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT id, nome FROM lojas \nWHERE LOWER(nome) IN (\n  'barcelos', 'braga - minho center', 'braga minho center', 'braga sm', \n  'famalicão', 'famalicão sm', 'guimarães', 'guimarães shopping',\n  'mycarcenter', 'paços de ferreira', 'paredes', 'paredes sm',\n  'póvoa de varzim', 'viana do castelo', 'viana do castelo sm', 'vila verde'\n)\nORDER BY nome;",
+  "rows": [
+    {
+      "id": "60002",
+      "nome": "Barcelos"
+    },
+    {
+      "id": "180010",
+      "nome": "Braga - minho center"
+    },
+    {
+      "id": "180011",
+      "nome": "Braga sm"
+    },
+    {
+      "id": "60001",
+      "nome": "Famalicão"
+    },
+    {
+      "id": "180019",
+      "nome": "Famalicão sm"
+    },
+    {
+      "id": "180024",
+      "nome": "Guimarães shopping"
+    },
+    {
+      "id": "180036",
+      "nome": "Mycarcenter"
+    },
+    {
+      "id": "60007",
+      "nome": "Paços de Ferreira "
+    },
+    {
+      "id": "60006",
+      "nome": "Paredes"
+    },
+    {
+      "id": "180038",
+      "nome": "Paredes sm"
+    },
+    {
+      "id": "60005",
+      "nome": "Póvoa de Varzim"
+    },
+    {
+      "id": "60004",
+      "nome": "Viana do Castelo "
+    },
+    {
+      "id": "180057",
+      "nome": "Viana do castelo sm"
+    },
+    {
+      "id": "60003",
+      "nome": "Vila Verde"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tnome\n60002\tBarcelos\n180010\tBraga - minho center\n180011\tBraga sm\n60001\tFamalicão\n180019\tFamalicão sm\n180024\tGuimarães shopping\n180036\tMycarcenter\n60007\tPaços de Ferreira \n60006\tParedes\n180038\tParedes sm\n60005\tPóvoa de Varzim\n60004\tViana do Castelo \n180057\tViana do castelo sm\n60003\tVila Verde\n",
+  "stderr": "",
+  "execution_time_ms": 50
+}

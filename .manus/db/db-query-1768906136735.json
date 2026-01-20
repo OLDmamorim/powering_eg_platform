@@ -1,0 +1,38 @@
+{
+  "query": "SELECT id, nome FROM lojas \nWHERE LOWER(nome) IN ('abrantes', 'aeroporto porto', 'águeda', 'algés', 'almada', 'amadora', 'amoreiras')\nORDER BY nome;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT id, nome FROM lojas \nWHERE LOWER(nome) IN ('abrantes', 'aeroporto porto', 'águeda', 'algés', 'almada', 'amadora', 'amoreiras')\nORDER BY nome;",
+  "rows": [
+    {
+      "id": "180001",
+      "nome": "Abrantes"
+    },
+    {
+      "id": "180002",
+      "nome": "Aeroporto porto"
+    },
+    {
+      "id": "180003",
+      "nome": "Águeda"
+    },
+    {
+      "id": "180004",
+      "nome": "Algés"
+    },
+    {
+      "id": "180005",
+      "nome": "Almada"
+    },
+    {
+      "id": "180006",
+      "nome": "Amadora"
+    },
+    {
+      "id": "180007",
+      "nome": "Amoreiras"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tnome\n180001\tAbrantes\n180002\tAeroporto porto\n180003\tÁgueda\n180004\tAlgés\n180005\tAlmada\n180006\tAmadora\n180007\tAmoreiras\n",
+  "stderr": "",
+  "execution_time_ms": 56
+}

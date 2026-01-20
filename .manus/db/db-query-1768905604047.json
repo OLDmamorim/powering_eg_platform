@@ -1,0 +1,290 @@
+{
+  "query": "SELECT id, nome FROM lojas ORDER BY nome;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT id, nome FROM lojas ORDER BY nome;",
+  "rows": [
+    {
+      "id": "180001",
+      "nome": "Abrantes"
+    },
+    {
+      "id": "180002",
+      "nome": "Aeroporto porto"
+    },
+    {
+      "id": "180003",
+      "nome": "Águeda"
+    },
+    {
+      "id": "180004",
+      "nome": "Algés"
+    },
+    {
+      "id": "180005",
+      "nome": "Almada"
+    },
+    {
+      "id": "180006",
+      "nome": "Amadora"
+    },
+    {
+      "id": "180007",
+      "nome": "Amoreiras"
+    },
+    {
+      "id": "180008",
+      "nome": "Aveiro"
+    },
+    {
+      "id": "60002",
+      "nome": "Barcelos"
+    },
+    {
+      "id": "180009",
+      "nome": "Beira baixa sm"
+    },
+    {
+      "id": "180010",
+      "nome": "Braga - minho center"
+    },
+    {
+      "id": "180011",
+      "nome": "Braga sm"
+    },
+    {
+      "id": "180012",
+      "nome": "Caldas da rainha"
+    },
+    {
+      "id": "180013",
+      "nome": "Castanheira do ribatejo"
+    },
+    {
+      "id": "180014",
+      "nome": "Coimbra"
+    },
+    {
+      "id": "180015",
+      "nome": "Coimbra sm"
+    },
+    {
+      "id": "180016",
+      "nome": "Coimbra sul"
+    },
+    {
+      "id": "180017",
+      "nome": "Costa de prata sm"
+    },
+    {
+      "id": "180018",
+      "nome": "Entroncamento"
+    },
+    {
+      "id": "60001",
+      "nome": "Famalicão"
+    },
+    {
+      "id": "180019",
+      "nome": "Famalicão sm"
+    },
+    {
+      "id": "180020",
+      "nome": "Faro"
+    },
+    {
+      "id": "180021",
+      "nome": "Faro sm"
+    },
+    {
+      "id": "180022",
+      "nome": "Gondomar"
+    },
+    {
+      "id": "180023",
+      "nome": "Guarda"
+    },
+    {
+      "id": "180024",
+      "nome": "Guimarães shopping"
+    },
+    {
+      "id": "180025",
+      "nome": "Leiria"
+    },
+    {
+      "id": "180026",
+      "nome": "Leiria sm"
+    },
+    {
+      "id": "180027",
+      "nome": "Leziria sm"
+    },
+    {
+      "id": "180028",
+      "nome": "Lisboa sm"
+    },
+    {
+      "id": "180029",
+      "nome": "Lisboa smr"
+    },
+    {
+      "id": "180030",
+      "nome": "Maia - maiashopping"
+    },
+    {
+      "id": "180031",
+      "nome": "Maia - moreira"
+    },
+    {
+      "id": "180032",
+      "nome": "Maia sm"
+    },
+    {
+      "id": "180033",
+      "nome": "Matosinhos"
+    },
+    {
+      "id": "180034",
+      "nome": "Montijo"
+    },
+    {
+      "id": "180035",
+      "nome": "Movida"
+    },
+    {
+      "id": "180036",
+      "nome": "Mycarcenter"
+    },
+    {
+      "id": "180037",
+      "nome": "Odivelas - loures"
+    },
+    {
+      "id": "60007",
+      "nome": "Paços de Ferreira "
+    },
+    {
+      "id": "60006",
+      "nome": "Paredes"
+    },
+    {
+      "id": "180038",
+      "nome": "Paredes sm"
+    },
+    {
+      "id": "180039",
+      "nome": "Pombal"
+    },
+    {
+      "id": "180040",
+      "nome": "Portimão"
+    },
+    {
+      "id": "180041",
+      "nome": "Porto - marquês"
+    },
+    {
+      "id": "180042",
+      "nome": "Porto - zona industrial"
+    },
+    {
+      "id": "180043",
+      "nome": "Porto alto"
+    },
+    {
+      "id": "180044",
+      "nome": "Porto sul sm"
+    },
+    {
+      "id": "180045",
+      "nome": "Póvoa de santa iria"
+    },
+    {
+      "id": "60005",
+      "nome": "Póvoa de Varzim"
+    },
+    {
+      "id": "180046",
+      "nome": "Rotunda do relógio"
+    },
+    {
+      "id": "180047",
+      "nome": "Sacavém"
+    },
+    {
+      "id": "180048",
+      "nome": "Santa maria da feira"
+    },
+    {
+      "id": "180049",
+      "nome": "Santarém"
+    },
+    {
+      "id": "180050",
+      "nome": "Seia"
+    },
+    {
+      "id": "180051",
+      "nome": "Seia sm"
+    },
+    {
+      "id": "180052",
+      "nome": "Sm caldas da rainha"
+    },
+    {
+      "id": "180053",
+      "nome": "Sm castanheira do ribatejo"
+    },
+    {
+      "id": "180063",
+      "nome": "Sm pesados porto"
+    },
+    {
+      "id": "180054",
+      "nome": "Sm viseu2"
+    },
+    {
+      "id": "180055",
+      "nome": "Telheiras"
+    },
+    {
+      "id": "180056",
+      "nome": "Vale do tejo sm"
+    },
+    {
+      "id": "60004",
+      "nome": "Viana do Castelo "
+    },
+    {
+      "id": "180057",
+      "nome": "Viana do castelo sm"
+    },
+    {
+      "id": "180058",
+      "nome": "Vila nova de gaia"
+    },
+    {
+      "id": "180059",
+      "nome": "Vila nova de gaia - canelas"
+    },
+    {
+      "id": "60003",
+      "nome": "Vila Verde"
+    },
+    {
+      "id": "180060",
+      "nome": "Viseu"
+    },
+    {
+      "id": "180061",
+      "nome": "Viseu sm"
+    },
+    {
+      "id": "180062",
+      "nome": "Viseu smr"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tnome\n180001\tAbrantes\n180002\tAeroporto porto\n180003\tÁgueda\n180004\tAlgés\n180005\tAlmada\n180006\tAmadora\n180007\tAmoreiras\n180008\tAveiro\n60002\tBarcelos\n180009\tBeira baixa sm\n180010\tBraga - minho center\n180011\tBraga sm\n180012\tCaldas da rainha\n180013\tCastanheira do ribatejo\n180014\tCoimbra\n180015\tCoimbra sm\n180016\tCoimbra sul\n180017\tCosta de prata sm\n180018\tEntroncamento\n60001\tFamalicão\n180019\tFamalicão sm\n180020\tFaro\n180021\tFaro sm\n180022\tGondomar\n180023\tGuarda\n180024\tGuimarães shopping\n180025\tLeiria\n180026\tLeiria sm\n180027\tLeziria sm\n180028\tLisboa sm\n180029\tLisboa smr\n180030\tMaia - maiashopping\n180031\tMaia - moreira\n180032\tMaia sm\n180033\tMatosinhos\n180034\tMontijo\n180035\tMovida\n180036\tMycarcenter\n180037\tOdivelas - loures\n60007\tPaços de Ferreira \n60006\tParedes\n180038\tParedes sm\n180039\tPombal\n180040\tPortimão\n180041\tPorto - marquês\n180042\tPorto - zona industrial\n180043\tPorto alto\n180044\tPorto sul sm\n180045\tPóvoa de santa iria\n60005\tPóvoa de Varzim\n180046\tRotunda do relógio\n180047\tSacavém\n180048\tSanta maria da feira\n180049\tSantarém\n180050\tSeia\n180051\tSeia sm\n180052\tSm caldas da rainha\n180053\tSm castanheira do ribatejo\n180063\tSm pesados porto\n180054\tSm viseu2\n180055\tTelheiras\n180056\tVale do tejo sm\n60004\tViana do Castelo \n180057\tViana do castelo sm\n180058\tVila nova de gaia\n180059\tVila nova de gaia - canelas\n60003\tVila Verde\n180060\tViseu\n180061\tViseu sm\n180062\tViseu smr\n",
+  "stderr": "",
+  "execution_time_ms": 51
+}

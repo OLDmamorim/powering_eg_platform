@@ -1,0 +1,8 @@
+{
+  "query": "SELECT gl.id, gl.loja_id, l.nome as loja_nome, gl.gestor_id, u.name as gestor_nome, gl.created_at\nFROM gestor_lojas gl\nJOIN lojas l ON l.id = gl.loja_id\nJOIN users u ON u.id = gl.gestor_id\nWHERE l.nome IN ('Abrantes', 'Aeroporto porto', 'Águeda', 'Algés', 'Almada', 'Amadora', 'Amoreiras')\nORDER BY l.nome, gl.created_at DESC;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT gl.id, gl.loja_id, l.nome as loja_nome, gl.gestor_id, u.name as gestor_nome, gl.created_at\nFROM gestor_lojas gl\nJOIN lojas l ON l.id = gl.loja_id\nJOIN users u ON u.id = gl.gestor_id\nWHERE l.nome IN ('Abrantes', 'Aeroporto porto', 'Águeda', 'Algés', 'Almada', 'Amadora', 'Amoreiras')\nORDER BY l.nome, gl.created_at DESC;",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 'gl.loja_id' in 'on clause'"
+  ]
+}

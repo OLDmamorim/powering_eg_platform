@@ -3537,3 +3537,15 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Texto "Lojas Associadas" mostra o nome do gestor que está a ser editado em vez do gestor realmente associado à loja
 - [x] Corrigir para mostrar o gestor correto de cada loja (loja.gestorNome)
 - [x] Testar modal de associação
+
+
+## Bug v6.16.2 - Associações de lojas duplicadas
+- [x] Corrigir função associateGestorLoja para remover associações anteriores antes de criar nova
+- [x] Corrigir associações incorretas na base de dados:
+  - [x] Abrantes → Fabio Dias
+  - [x] Aeroporto Porto → Marco Vilar
+  - [x] Águeda → Carlos Eduardo
+  - [x] Algés → Carlos Eduardo
+  - [x] Almada → Carlos Eduardo
+  - [x] Amadora → Carlos Eduardo
+  - [x] Amoreiras → Carlos Eduardo

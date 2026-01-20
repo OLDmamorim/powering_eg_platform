@@ -1,0 +1,55 @@
+{
+  "query": "SELECT g.id as gestor_id, u.name, u.email \nFROM gestores g \nJOIN users u ON g.userId = u.id \nORDER BY u.name;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT g.id as gestor_id, u.name, u.email \nFROM gestores g \nJOIN users u ON g.userId = u.id \nORDER BY u.name;",
+  "rows": [
+    {
+      "gestor_id": "1080020",
+      "name": "Carlos Eduardo",
+      "email": "carlos.eduardo@expressglass.pt"
+    },
+    {
+      "gestor_id": "1350001",
+      "name": "Fabio Dias",
+      "email": "fdias@expressglass.pt"
+    },
+    {
+      "gestor_id": "30001",
+      "name": "Marco Amorim",
+      "email": "mamorim@expressglass.pt"
+    },
+    {
+      "gestor_id": "1380001",
+      "name": "Marco Amorim",
+      "email": "mramorim78@gmail.com"
+    },
+    {
+      "gestor_id": "120001",
+      "name": "Marco Vilar",
+      "email": "mvilar@expressglass.pt"
+    },
+    {
+      "gestor_id": "2",
+      "name": "Mauro Furtado",
+      "email": "mfurtado@expressglass.pt"
+    },
+    {
+      "gestor_id": "210001",
+      "name": "Mauro Furtado",
+      "email": "mfurtado@expressglass.pt"
+    },
+    {
+      "gestor_id": "120002",
+      "name": "Mónica Correira",
+      "email": "mcorreia@expressglass.pt"
+    },
+    {
+      "gestor_id": "570003",
+      "name": "Rui Adriao ",
+      "email": "rui.adriao@expressglass.pt"
+    }
+  ],
+  "messages": [],
+  "stdout": "gestor_id\tname\temail\n1080020\tCarlos Eduardo\tcarlos.eduardo@expressglass.pt\n1350001\tFabio Dias\tfdias@expressglass.pt\n30001\tMarco Amorim\tmamorim@expressglass.pt\n1380001\tMarco Amorim\tmramorim78@gmail.com\n120001\tMarco Vilar\tmvilar@expressglass.pt\n2\tMauro Furtado\tmfurtado@expressglass.pt\n210001\tMauro Furtado\tmfurtado@expressglass.pt\n120002\tMónica Correira\tmcorreia@expressglass.pt\n570003\tRui Adriao \trui.adriao@expressglass.pt\n",
+  "stderr": "",
+  "execution_time_ms": 51
+}
