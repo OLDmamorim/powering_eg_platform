@@ -1051,3 +1051,56 @@ export const lojaVolante = mysqlTable("loja_volante", {
 
 export type LojaVolante = typeof lojaVolante.$inferSelect;
 export type InsertLojaVolante = typeof lojaVolante.$inferInsert;
+
+
+
+/**
+ * Bloqueios de Volante - Dias bloqueados pelo volante (férias, faltas, formações, etc.)
+ * Permite ao volante marcar dias como indisponíveis
+ */
+export const bloqueioVolanteTipoEnum = mysqlEnum('bloqueio_volante_tipo', ['ferias', 'falta', 'formacao', 'pessoal', 'outro']);
+
+export const bloqueiosVolante = mysqlTable("bloqueios_volante", {
+  id: int("id").autoincrement().primaryKey(),
+  volanteId: int("volanteId").notNull(), // FK para volantes.id
+  
+  // Data e período do bloqueio
+  data: timestamp("data").notNull(), // Dia do bloqueio
+  periodo: pedidosApoioPeriodoEnum.notNull(), // Manhã, Tarde ou Dia Todo
+  
+  // Tipo de bloqueio
+  tipo: bloqueioVolanteTipoEnum.notNull(),
+  motivo: text("motivo"), // Descrição opcional do motivo
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type BloqueioVolante = typeof bloqueiosVolante.$inferSelect;
+export type InsertBloqueioVolante = typeof bloqueiosVolante.$inferInsert;
+
+
+/**
+ * Agendamentos do Volante - Agendamentos criados pelo próprio volante
+ * Pode ser para uma loja específica ou compromisso pessoal (lojaId = null)
+ */
+export const agendamentosVolante = mysqlTable("agendamentos_volante", {
+  id: int("id").autoincrement().primaryKey(),
+  volanteId: int("volanteId").notNull(), // FK para volantes.id
+  lojaId: int("lojaId"), // FK para lojas.id - NULL se for compromisso pessoal/interno
+  
+  // Data e período
+  data: timestamp("data").notNull(),
+  periodo: pedidosApoioPeriodoEnum.notNull(), // Manhã, Tarde ou Dia Todo
+  
+  // Tipo e descrição
+  tipoApoio: pedidosApoioTipoEnum, // Tipo de apoio (se for para loja)
+  titulo: varchar("titulo", { length: 255 }), // Título do agendamento (se for pessoal)
+  descricao: text("descricao"), // Descrição/observações
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type AgendamentoVolante = typeof agendamentosVolante.$inferSelect;
+export type InsertAgendamentoVolante = typeof agendamentosVolante.$inferInsert;

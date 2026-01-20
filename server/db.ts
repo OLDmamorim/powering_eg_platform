@@ -108,7 +108,13 @@ import {
   InsertPedidoApoio,
   lojaVolante,
   LojaVolante,
-  InsertLojaVolante
+  InsertLojaVolante,
+  bloqueiosVolante,
+  BloqueioVolante,
+  InsertBloqueioVolante,
+  agendamentosVolante,
+  AgendamentoVolante,
+  InsertAgendamentoVolante
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -8691,4 +8697,325 @@ function generateSecureToken(): string {
     token += chars.charAt(Math.floor(Math.random() * chars.length));
   }
   return token;
+}
+
+
+// ==================== BLOQUEIOS DE VOLANTE ====================
+
+/**
+ * Criar bloqueio de dia para volante
+ */
+export async function criarBloqueioVolante(data: InsertBloqueioVolante): Promise<BloqueioVolante | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const result = await db.insert(bloqueiosVolante).values(data);
+  const insertId = result[0]?.insertId;
+  if (!insertId) return null;
+  
+  const created = await db.select().from(bloqueiosVolante).where(eq(bloqueiosVolante.id, insertId));
+  return created[0] || null;
+}
+
+/**
+ * Obter bloqueios de um volante por mês
+ */
+export async function getBloqueiosVolanteByMonth(volanteId: number, year: number, month: number): Promise<BloqueioVolante[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const startDate = new Date(year, month - 1, 1);
+  const endDate = new Date(year, month, 0, 23, 59, 59);
+  
+  return await db
+    .select()
+    .from(bloqueiosVolante)
+    .where(and(
+      eq(bloqueiosVolante.volanteId, volanteId),
+      gte(bloqueiosVolante.data, startDate),
+      lte(bloqueiosVolante.data, endDate)
+    ))
+    .orderBy(bloqueiosVolante.data);
+}
+
+/**
+ * Eliminar bloqueio de volante
+ */
+export async function eliminarBloqueioVolante(bloqueioId: number, volanteId: number): Promise<boolean> {
+  const db = await getDb();
+  if (!db) return false;
+  
+  await db.delete(bloqueiosVolante).where(and(
+    eq(bloqueiosVolante.id, bloqueioId),
+    eq(bloqueiosVolante.volanteId, volanteId)
+  ));
+  return true;
+}
+
+/**
+ * Verificar se um dia/período está bloqueado
+ */
+export async function verificarBloqueio(volanteId: number, data: Date, periodo: string): Promise<BloqueioVolante | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const startOfDay = new Date(data);
+  startOfDay.setHours(0, 0, 0, 0);
+  const endOfDay = new Date(data);
+  endOfDay.setHours(23, 59, 59, 999);
+  
+  const bloqueios = await db
+    .select()
+    .from(bloqueiosVolante)
+    .where(and(
+      eq(bloqueiosVolante.volanteId, volanteId),
+      gte(bloqueiosVolante.data, startOfDay),
+      lte(bloqueiosVolante.data, endOfDay)
+    ));
+  
+  // Verificar se algum bloqueio afeta o período solicitado
+  for (const bloqueio of bloqueios) {
+    if (bloqueio.periodo === 'dia_todo') return bloqueio;
+    if (bloqueio.periodo === periodo) return bloqueio;
+    if (periodo === 'dia_todo') return bloqueio;
+  }
+  
+  return null;
+}
+
+// ==================== AGENDAMENTOS DO VOLANTE ====================
+
+/**
+ * Criar agendamento pelo volante
+ */
+export async function criarAgendamentoVolante(data: InsertAgendamentoVolante): Promise<AgendamentoVolante | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const result = await db.insert(agendamentosVolante).values(data);
+  const insertId = result[0]?.insertId;
+  if (!insertId) return null;
+  
+  const created = await db.select().from(agendamentosVolante).where(eq(agendamentosVolante.id, insertId));
+  return created[0] || null;
+}
+
+/**
+ * Obter agendamentos de um volante por mês
+ */
+export async function getAgendamentosVolanteByMonth(volanteId: number, year: number, month: number): Promise<(AgendamentoVolante & { loja?: Loja | null })[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const startDate = new Date(year, month - 1, 1);
+  const endDate = new Date(year, month, 0, 23, 59, 59);
+  
+  const result = await db
+    .select({ agendamento: agendamentosVolante, loja: lojas })
+    .from(agendamentosVolante)
+    .leftJoin(lojas, eq(agendamentosVolante.lojaId, lojas.id))
+    .where(and(
+      eq(agendamentosVolante.volanteId, volanteId),
+      gte(agendamentosVolante.data, startDate),
+      lte(agendamentosVolante.data, endDate)
+    ))
+    .orderBy(agendamentosVolante.data);
+  
+  return result.map(r => ({ ...r.agendamento, loja: r.loja }));
+}
+
+/**
+ * Obter todos os agendamentos futuros de um volante
+ */
+export async function getAgendamentosVolanteFuturos(volanteId: number): Promise<(AgendamentoVolante & { loja?: Loja | null })[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const hoje = new Date();
+  hoje.setHours(0, 0, 0, 0);
+  
+  const result = await db
+    .select({ agendamento: agendamentosVolante, loja: lojas })
+    .from(agendamentosVolante)
+    .leftJoin(lojas, eq(agendamentosVolante.lojaId, lojas.id))
+    .where(and(
+      eq(agendamentosVolante.volanteId, volanteId),
+      gte(agendamentosVolante.data, hoje)
+    ))
+    .orderBy(asc(agendamentosVolante.data));
+  
+  return result.map(r => ({ ...r.agendamento, loja: r.loja }));
+}
+
+/**
+ * Eliminar agendamento do volante
+ */
+export async function eliminarAgendamentoVolante(agendamentoId: number, volanteId: number): Promise<boolean> {
+  const db = await getDb();
+  if (!db) return false;
+  
+  await db.delete(agendamentosVolante).where(and(
+    eq(agendamentosVolante.id, agendamentoId),
+    eq(agendamentosVolante.volanteId, volanteId)
+  ));
+  return true;
+}
+
+/**
+ * Atualizar agendamento do volante
+ */
+export async function atualizarAgendamentoVolante(
+  agendamentoId: number, 
+  volanteId: number, 
+  updates: Partial<InsertAgendamentoVolante>
+): Promise<AgendamentoVolante | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  await db.update(agendamentosVolante)
+    .set(updates)
+    .where(and(
+      eq(agendamentosVolante.id, agendamentoId),
+      eq(agendamentosVolante.volanteId, volanteId)
+    ));
+  
+  const updated = await db.select().from(agendamentosVolante).where(eq(agendamentosVolante.id, agendamentoId));
+  return updated[0] || null;
+}
+
+/**
+ * Obter estado completo dos dias do mês (incluindo bloqueios e agendamentos do volante)
+ */
+export async function getEstadoCompletoDoMes(volanteId: number, year: number, month: number): Promise<Map<string, { 
+  estado: string; 
+  pedidos: PedidoApoio[]; 
+  bloqueios: BloqueioVolante[];
+  agendamentos: AgendamentoVolante[];
+}>> {
+  const db = await getDb();
+  const resultado = new Map<string, { estado: string; pedidos: PedidoApoio[]; bloqueios: BloqueioVolante[]; agendamentos: AgendamentoVolante[] }>();
+  
+  if (!db) return resultado;
+  
+  const startDate = new Date(year, month - 1, 1);
+  const endDate = new Date(year, month, 0, 23, 59, 59);
+  
+  // Obter pedidos de apoio (excluindo rejeitados)
+  const pedidos = await db
+    .select({
+      id: pedidosApoio.id,
+      lojaId: pedidosApoio.lojaId,
+      volanteId: pedidosApoio.volanteId,
+      data: pedidosApoio.data,
+      periodo: pedidosApoio.periodo,
+      tipoApoio: pedidosApoio.tipoApoio,
+      observacoes: pedidosApoio.observacoes,
+      estado: pedidosApoio.estado,
+      createdAt: pedidosApoio.createdAt,
+      updatedAt: pedidosApoio.updatedAt,
+      lojaNome: lojas.nome,
+      lojaEmail: lojas.email,
+    })
+    .from(pedidosApoio)
+    .leftJoin(lojas, eq(pedidosApoio.lojaId, lojas.id))
+    .where(and(
+      eq(pedidosApoio.volanteId, volanteId),
+      gte(pedidosApoio.data, startDate),
+      lte(pedidosApoio.data, endDate),
+      sql`${pedidosApoio.estado} NOT IN ('reprovado', 'anulado', 'cancelado')`
+    ));
+  
+  // Obter bloqueios
+  const bloqueios = await db
+    .select()
+    .from(bloqueiosVolante)
+    .where(and(
+      eq(bloqueiosVolante.volanteId, volanteId),
+      gte(bloqueiosVolante.data, startDate),
+      lte(bloqueiosVolante.data, endDate)
+    ));
+  
+  // Obter agendamentos do volante
+  const agendamentos = await db
+    .select({ agendamento: agendamentosVolante, loja: lojas })
+    .from(agendamentosVolante)
+    .leftJoin(lojas, eq(agendamentosVolante.lojaId, lojas.id))
+    .where(and(
+      eq(agendamentosVolante.volanteId, volanteId),
+      gte(agendamentosVolante.data, startDate),
+      lte(agendamentosVolante.data, endDate)
+    ));
+  
+  // Agrupar por dia
+  for (const pedido of pedidos) {
+    const dataStr = pedido.data.toISOString().split('T')[0];
+    
+    if (!resultado.has(dataStr)) {
+      resultado.set(dataStr, { estado: 'livre', pedidos: [], bloqueios: [], agendamentos: [] });
+    }
+    
+    const pedidoComLoja = {
+      ...pedido,
+      loja: pedido.lojaNome ? { id: pedido.lojaId, nome: pedido.lojaNome, email: pedido.lojaEmail } : null
+    };
+    resultado.get(dataStr)!.pedidos.push(pedidoComLoja as any);
+  }
+  
+  for (const bloqueio of bloqueios) {
+    const dataStr = bloqueio.data.toISOString().split('T')[0];
+    
+    if (!resultado.has(dataStr)) {
+      resultado.set(dataStr, { estado: 'livre', pedidos: [], bloqueios: [], agendamentos: [] });
+    }
+    
+    resultado.get(dataStr)!.bloqueios.push(bloqueio);
+  }
+  
+  for (const { agendamento, loja } of agendamentos) {
+    const dataStr = agendamento.data.toISOString().split('T')[0];
+    
+    if (!resultado.has(dataStr)) {
+      resultado.set(dataStr, { estado: 'livre', pedidos: [], bloqueios: [], agendamentos: [] });
+    }
+    
+    resultado.get(dataStr)!.agendamentos.push({ ...agendamento, loja } as any);
+  }
+  
+  // Calcular estado de cada dia
+  for (const [dataStr, dados] of Array.from(resultado)) {
+    const pedidosAprovados = dados.pedidos.filter((p: any) => p.estado === 'aprovado');
+    const manhaAprovada = pedidosAprovados.some((p: any) => p.periodo === 'manha');
+    const tardeAprovada = pedidosAprovados.some((p: any) => p.periodo === 'tarde');
+    const diaTodoAprovado = pedidosAprovados.some((p: any) => p.periodo === 'dia_todo');
+    const temPendente = dados.pedidos.some((p: any) => p.estado === 'pendente');
+    
+    // Verificar bloqueios
+    const manhaBloqueada = dados.bloqueios.some(b => b.periodo === 'manha' || b.periodo === 'dia_todo');
+    const tardeBloqueada = dados.bloqueios.some(b => b.periodo === 'tarde' || b.periodo === 'dia_todo');
+    const diaTodoBloqueado = dados.bloqueios.some(b => b.periodo === 'dia_todo');
+    
+    // Verificar agendamentos do volante
+    const manhaAgendada = dados.agendamentos.some((a: any) => a.periodo === 'manha' || a.periodo === 'dia_todo');
+    const tardeAgendada = dados.agendamentos.some((a: any) => a.periodo === 'tarde' || a.periodo === 'dia_todo');
+    const diaTodoAgendado = dados.agendamentos.some((a: any) => a.periodo === 'dia_todo');
+    
+    // Determinar estado final
+    if (diaTodoBloqueado || (manhaBloqueada && tardeBloqueada)) {
+      dados.estado = 'bloqueado'; // Cinza
+    } else if (diaTodoAprovado || diaTodoAgendado || (manhaAprovada && tardeAprovada) || (manhaAgendada && tardeAgendada) || 
+               (manhaAprovada && tardeAgendada) || (manhaAgendada && tardeAprovada) ||
+               (manhaBloqueada && (tardeAprovada || tardeAgendada)) || (tardeBloqueada && (manhaAprovada || manhaAgendada))) {
+      dados.estado = 'dia_completo'; // Vermelho
+    } else if (manhaAprovada || manhaAgendada || manhaBloqueada) {
+      dados.estado = 'manha_ocupada'; // Roxo
+    } else if (tardeAprovada || tardeAgendada || tardeBloqueada) {
+      dados.estado = 'tarde_ocupada'; // Azul
+    } else if (temPendente) {
+      dados.estado = 'pendente'; // Amarelo
+    } else {
+      dados.estado = 'livre';
+    }
+  }
+  
+  return resultado;
 }

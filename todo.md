@@ -3514,3 +3514,20 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Rejeitados/Reprovados/Anulados/Cancelados filtrados do modal e calendário
 - [x] Adicionar botão de editar agendamentos aprovados no modal
 - [x] Adicionar ícones de calendário (Google, Outlook, ICS) no modal para pedidos aprovados
+
+
+## Funcionalidades Volante - Criar Agendamentos e Bloquear Dias v6.16.0
+- [x] Volante pode criar agendamentos próprios
+  - [x] Dropdown para selecionar loja (das lojas atribuídas)
+  - [x] Opção "Volante" para compromissos pessoais/internos
+  - [x] Selecionar data, período e tipo de apoio
+- [x] Volante pode bloquear dias
+  - [x] Bloquear para férias
+  - [x] Bloquear para faltas
+  - [x] Bloquear para formações
+  - [x] Outros motivos personalizados
+- [x] Criar tabela bloqueios_volante na base de dados
+- [x] API para criar agendamentos pelo volante
+- [x] API para bloquear/desbloquear dias
+- [x] Interface com botões de criar e bloquear no calendário
+- [ ] Dias bloqueados aparecem em cinza/indisponíveis no calendário

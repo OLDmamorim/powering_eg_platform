@@ -7704,6 +7704,188 @@ IMPORTANTE:
         await db.cancelarPedidoApoio(input.pedidoId);
         return { success: true };
       }),
+    
+    // Criar agendamento pelo volante
+    criarAgendamento: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        lojaId: z.number().nullable(), // null = compromisso pessoal
+        data: z.string(), // ISO date string
+        periodo: z.enum(['manha', 'tarde', 'dia_todo']),
+        tipoApoio: z.enum(['cobertura_ferias', 'substituicao_vidros', 'outro']).nullable(),
+        titulo: z.string().optional(),
+        descricao: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const tokenData = await db.validateTokenVolante(input.token);
+        if (!tokenData) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        
+        const volanteId = tokenData.volante.id;
+        const dataAgendamento = new Date(input.data);
+        
+        // Verificar se o dia/período está bloqueado
+        const bloqueio = await db.verificarBloqueio(volanteId, dataAgendamento, input.periodo);
+        if (bloqueio) {
+          throw new TRPCError({ code: 'BAD_REQUEST', message: 'Este dia/período está bloqueado' });
+        }
+        
+        // Se for para uma loja, verificar se o volante tem acesso
+        if (input.lojaId) {
+          const lojas = await db.getLojasByVolanteId(volanteId);
+          const temAcesso = lojas.some(l => l.id === input.lojaId);
+          if (!temAcesso) {
+            throw new TRPCError({ code: 'FORBIDDEN', message: 'Não tem acesso a esta loja' });
+          }
+        }
+        
+        const agendamento = await db.criarAgendamentoVolante({
+          volanteId,
+          lojaId: input.lojaId,
+          data: dataAgendamento,
+          periodo: input.periodo,
+          tipoApoio: input.tipoApoio,
+          titulo: input.titulo,
+          descricao: input.descricao,
+        });
+        
+        return agendamento;
+      }),
+    
+    // Listar agendamentos do volante
+    listarAgendamentos: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        ano: z.number().optional(),
+        mes: z.number().optional(),
+      }))
+      .query(async ({ input }) => {
+        const tokenData = await db.validateTokenVolante(input.token);
+        if (!tokenData) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        
+        if (input.ano && input.mes) {
+          return await db.getAgendamentosVolanteByMonth(tokenData.volante.id, input.ano, input.mes);
+        }
+        
+        return await db.getAgendamentosVolanteFuturos(tokenData.volante.id);
+      }),
+    
+    // Eliminar agendamento do volante
+    eliminarAgendamento: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        agendamentoId: z.number(),
+      }))
+      .mutation(async ({ input }) => {
+        const tokenData = await db.validateTokenVolante(input.token);
+        if (!tokenData) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        
+        await db.eliminarAgendamentoVolante(input.agendamentoId, tokenData.volante.id);
+        return { success: true };
+      }),
+    
+    // Criar bloqueio de dia
+    criarBloqueio: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        data: z.string(), // ISO date string
+        periodo: z.enum(['manha', 'tarde', 'dia_todo']),
+        tipo: z.enum(['ferias', 'falta', 'formacao', 'pessoal', 'outro']),
+        motivo: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const tokenData = await db.validateTokenVolante(input.token);
+        if (!tokenData) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        
+        const bloqueio = await db.criarBloqueioVolante({
+          volanteId: tokenData.volante.id,
+          data: new Date(input.data),
+          periodo: input.periodo,
+          tipo: input.tipo,
+          motivo: input.motivo,
+        });
+        
+        return bloqueio;
+      }),
+    
+    // Listar bloqueios do volante
+    listarBloqueios: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        ano: z.number(),
+        mes: z.number(),
+      }))
+      .query(async ({ input }) => {
+        const tokenData = await db.validateTokenVolante(input.token);
+        if (!tokenData) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        
+        return await db.getBloqueiosVolanteByMonth(tokenData.volante.id, input.ano, input.mes);
+      }),
+    
+    // Eliminar bloqueio
+    eliminarBloqueio: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        bloqueioId: z.number(),
+      }))
+      .mutation(async ({ input }) => {
+        const tokenData = await db.validateTokenVolante(input.token);
+        if (!tokenData) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        
+        await db.eliminarBloqueioVolante(input.bloqueioId, tokenData.volante.id);
+        return { success: true };
+      }),
+    
+    // Obter estado completo do mês (pedidos + bloqueios + agendamentos)
+    estadoCompletoMes: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        ano: z.number(),
+        mes: z.number(),
+      }))
+      .query(async ({ input }) => {
+        // Tentar validar como token de volante primeiro
+        let volanteId: number | null = null;
+        
+        const tokenVolante = await db.validateTokenVolante(input.token);
+        if (tokenVolante) {
+          volanteId = tokenVolante.volante.id;
+        } else {
+          // Tentar como token de loja
+          const tokenLoja = await db.validarTokenLoja(input.token);
+          if (tokenLoja) {
+            const volante = await db.getVolanteByLojaId(tokenLoja.loja.id);
+            if (volante) {
+              volanteId = volante.id;
+            }
+          }
+        }
+        
+        if (!volanteId) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido ou nenhum volante atribuído' });
+        }
+        
+        const estadoDias = await db.getEstadoCompletoDoMes(volanteId, input.ano, input.mes);
+        
+        // Converter Map para objeto
+        const resultado: Record<string, { estado: string; pedidos: any[]; bloqueios: any[]; agendamentos: any[] }> = {};
+        estadoDias.forEach((value, key) => {
+          resultado[key] = value;
+        });
+        
+        return resultado;
+      }),
   }),
   
   // ==================== PORTAL VOLANTE ====================

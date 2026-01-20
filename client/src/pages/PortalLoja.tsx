@@ -4313,7 +4313,23 @@ function VolanteInterface({
     return [{ mes: hoje.getMonth() + 1, ano: hoje.getFullYear() }];
   });
   const [diaDetalheOpen, setDiaDetalheOpen] = useState(false);
-  const [diaDetalheSelecionado, setDiaDetalheSelecionado] = useState<{data: string; pedidos: any[]}>({ data: '', pedidos: [] });
+  const [diaDetalheSelecionado, setDiaDetalheSelecionado] = useState<{data: string; pedidos: any[]; bloqueios?: any[]; agendamentos?: any[]}>({ data: '', pedidos: [], bloqueios: [], agendamentos: [] });
+  
+  // Estados para criar agendamento
+  const [criarAgendamentoOpen, setCriarAgendamentoOpen] = useState(false);
+  const [novoAgendamentoData, setNovoAgendamentoData] = useState('');
+  const [novoAgendamentoPeriodo, setNovoAgendamentoPeriodo] = useState<'manha' | 'tarde' | 'dia_todo'>('manha');
+  const [novoAgendamentoLojaId, setNovoAgendamentoLojaId] = useState<number | null>(null);
+  const [novoAgendamentoTipoApoio, setNovoAgendamentoTipoApoio] = useState<'cobertura_ferias' | 'substituicao_vidros' | 'outro' | null>(null);
+  const [novoAgendamentoTitulo, setNovoAgendamentoTitulo] = useState('');
+  const [novoAgendamentoDescricao, setNovoAgendamentoDescricao] = useState('');
+  
+  // Estados para bloquear dia
+  const [bloquearDiaOpen, setBloquearDiaOpen] = useState(false);
+  const [bloqueioData, setBloqueioData] = useState('');
+  const [bloqueioPeriodo, setBloqueioPeriodo] = useState<'manha' | 'tarde' | 'dia_todo'>('dia_todo');
+  const [bloqueioTipo, setBloqueioTipo] = useState<'ferias' | 'falta' | 'formacao' | 'pessoal' | 'outro'>('ferias');
+  const [bloqueioMotivo, setBloqueioMotivo] = useState('');
 
   // Query para obter pedidos de apoio do volante
   const { data: pedidosApoio, refetch: refetchPedidos, isLoading: loadingPedidos } = trpc.pedidosApoio.listarPorVolante.useQuery(
@@ -4419,6 +4435,66 @@ function VolanteInterface({
       setPedidoSelecionado(null);
       setReprovarDialogOpen(false);
       setMotivoReprovacao("");
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  // Mutation para criar agendamento pelo volante
+  const criarAgendamentoMutation = trpc.pedidosApoio.criarAgendamento.useMutation({
+    onSuccess: () => {
+      toast.success(language === 'pt' ? 'Agendamento criado com sucesso!' : 'Appointment created successfully!');
+      refetchPedidos();
+      refetchEstadoMes();
+      setCriarAgendamentoOpen(false);
+      setNovoAgendamentoData('');
+      setNovoAgendamentoPeriodo('manha');
+      setNovoAgendamentoLojaId(null);
+      setNovoAgendamentoTipoApoio(null);
+      setNovoAgendamentoTitulo('');
+      setNovoAgendamentoDescricao('');
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  // Mutation para eliminar agendamento
+  const eliminarAgendamentoMutation = trpc.pedidosApoio.eliminarAgendamento.useMutation({
+    onSuccess: () => {
+      toast.success(language === 'pt' ? 'Agendamento eliminado!' : 'Appointment deleted!');
+      refetchPedidos();
+      refetchEstadoMes();
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  // Mutation para criar bloqueio
+  const criarBloqueioMutation = trpc.pedidosApoio.criarBloqueio.useMutation({
+    onSuccess: () => {
+      toast.success(language === 'pt' ? 'Dia bloqueado com sucesso!' : 'Day blocked successfully!');
+      refetchPedidos();
+      refetchEstadoMes();
+      setBloquearDiaOpen(false);
+      setBloqueioData('');
+      setBloqueioPeriodo('dia_todo');
+      setBloqueioTipo('ferias');
+      setBloqueioMotivo('');
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  // Mutation para eliminar bloqueio
+  const eliminarBloqueioMutation = trpc.pedidosApoio.eliminarBloqueio.useMutation({
+    onSuccess: () => {
+      toast.success(language === 'pt' ? 'Bloqueio removido!' : 'Block removed!');
+      refetchPedidos();
+      refetchEstadoMes();
     },
     onError: (error) => {
       toast.error(error.message);
@@ -4905,6 +4981,40 @@ END:VCALENDAR`;
                     </Button>
                   </div>
                 </div>
+                {/* Botões de Ação */}
+                <div className="flex flex-wrap gap-2 mt-3">
+                  <Button
+                    size="sm"
+                    className="bg-teal-600 hover:bg-teal-700 text-white"
+                    onClick={() => {
+                      setNovoAgendamentoData('');
+                      setNovoAgendamentoPeriodo('manha');
+                      setNovoAgendamentoLojaId(null);
+                      setNovoAgendamentoTipoApoio(null);
+                      setNovoAgendamentoTitulo('');
+                      setNovoAgendamentoDescricao('');
+                      setCriarAgendamentoOpen(true);
+                    }}
+                  >
+                    <Plus className="h-4 w-4 mr-1" />
+                    {language === 'pt' ? 'Criar Agendamento' : 'Create Appointment'}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="border-gray-400 text-gray-700"
+                    onClick={() => {
+                      setBloqueioData('');
+                      setBloqueioPeriodo('dia_todo');
+                      setBloqueioTipo('ferias');
+                      setBloqueioMotivo('');
+                      setBloquearDiaOpen(true);
+                    }}
+                  >
+                    <Ban className="h-4 w-4 mr-1" />
+                    {language === 'pt' ? 'Bloquear Dia' : 'Block Day'}
+                  </Button>
+                </div>
                 {/* Legenda */}
                 <div className="flex flex-wrap gap-3 mt-3 text-xs">
                   <div className="flex items-center gap-1">
@@ -4922,6 +5032,14 @@ END:VCALENDAR`;
                   <div className="flex items-center gap-1">
                     <div className="w-3 h-3 bg-red-300 rounded"></div>
                     <span>{language === 'pt' ? 'Dia Completo' : 'Full Day'}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="w-3 h-3 bg-gray-400 rounded"></div>
+                    <span>{language === 'pt' ? 'Bloqueado' : 'Blocked'}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="w-3 h-3 bg-teal-400 rounded"></div>
+                    <span>{language === 'pt' ? 'Agendamento Próprio' : 'Own Appointment'}</span>
                   </div>
                 </div>
               </CardHeader>
@@ -6346,6 +6464,321 @@ END:VCALENDAR`;
           <DialogFooter>
             <Button variant="outline" onClick={() => setDiaDetalheOpen(false)}>
               {language === 'pt' ? 'Fechar' : 'Close'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog de Criar Agendamento */}
+      <Dialog open={criarAgendamentoOpen} onOpenChange={setCriarAgendamentoOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="h-5 w-5 text-teal-600" />
+              {language === 'pt' ? 'Criar Agendamento' : 'Create Appointment'}
+            </DialogTitle>
+            <DialogDescription>
+              {language === 'pt' ? 'Crie um novo agendamento para uma loja ou compromisso pessoal.' : 'Create a new appointment for a store or personal commitment.'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            {/* Seletor de Loja ou Pessoal */}
+            <div>
+              <Label>{language === 'pt' ? 'Para quem?' : 'For whom?'}</Label>
+              <Select
+                value={novoAgendamentoLojaId?.toString() || 'pessoal'}
+                onValueChange={(value) => {
+                  if (value === 'pessoal') {
+                    setNovoAgendamentoLojaId(null);
+                    setNovoAgendamentoTipoApoio(null);
+                  } else {
+                    setNovoAgendamentoLojaId(parseInt(value));
+                    setNovoAgendamentoTipoApoio('cobertura_ferias');
+                  }
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={language === 'pt' ? 'Selecionar...' : 'Select...'} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pessoal">
+                    <div className="flex items-center gap-2">
+                      <Car className="h-4 w-4 text-teal-600" />
+                      {language === 'pt' ? 'Volante (Pessoal)' : 'Driver (Personal)'}
+                    </div>
+                  </SelectItem>
+                  {volanteAuth.lojasAtribuidas
+                    .sort((a, b) => a.nome.localeCompare(b.nome))
+                    .map((loja) => (
+                      <SelectItem key={loja.id} value={loja.id.toString()}>
+                        <div className="flex items-center gap-2">
+                          <Store className="h-4 w-4 text-blue-600" />
+                          {loja.nome}
+                        </div>
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Data */}
+            <div>
+              <Label>{language === 'pt' ? 'Data' : 'Date'}</Label>
+              <Input
+                type="date"
+                value={novoAgendamentoData}
+                onChange={(e) => setNovoAgendamentoData(e.target.value)}
+                min={new Date().toISOString().split('T')[0]}
+              />
+            </div>
+
+            {/* Período */}
+            <div>
+              <Label>{language === 'pt' ? 'Período' : 'Period'}</Label>
+              <Select
+                value={novoAgendamentoPeriodo}
+                onValueChange={(value) => setNovoAgendamentoPeriodo(value as 'manha' | 'tarde' | 'dia_todo')}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="manha">
+                    <div className="flex items-center gap-2">
+                      <span className="w-3 h-3 bg-purple-400 rounded"></span>
+                      {language === 'pt' ? 'Manhã (9h-13h)' : 'Morning (9am-1pm)'}
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="tarde">
+                    <div className="flex items-center gap-2">
+                      <span className="w-3 h-3 bg-blue-400 rounded"></span>
+                      {language === 'pt' ? 'Tarde (14h-18h)' : 'Afternoon (2pm-6pm)'}
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="dia_todo">
+                    <div className="flex items-center gap-2">
+                      <span className="w-3 h-3 bg-green-400 rounded"></span>
+                      {language === 'pt' ? 'Dia Todo (9h-18h)' : 'Full Day (9am-6pm)'}
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Tipo de Apoio (apenas para lojas) */}
+            {novoAgendamentoLojaId && (
+              <div>
+                <Label>{language === 'pt' ? 'Tipo de Apoio' : 'Support Type'}</Label>
+                <Select
+                  value={novoAgendamentoTipoApoio || 'cobertura_ferias'}
+                  onValueChange={(value) => setNovoAgendamentoTipoApoio(value as 'cobertura_ferias' | 'substituicao_vidros' | 'outro')}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="cobertura_ferias">
+                      {language === 'pt' ? 'Cobertura de Férias' : 'Vacation Coverage'}
+                    </SelectItem>
+                    <SelectItem value="substituicao_vidros">
+                      {language === 'pt' ? 'Substituição de Vidros' : 'Glass Replacement'}
+                    </SelectItem>
+                    <SelectItem value="outro">
+                      {language === 'pt' ? 'Outro' : 'Other'}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            {/* Título (apenas para pessoal) */}
+            {!novoAgendamentoLojaId && (
+              <div>
+                <Label>{language === 'pt' ? 'Título' : 'Title'}</Label>
+                <Input
+                  value={novoAgendamentoTitulo}
+                  onChange={(e) => setNovoAgendamentoTitulo(e.target.value)}
+                  placeholder={language === 'pt' ? 'Ex: Reunião, Formação...' : 'Ex: Meeting, Training...'}
+                />
+              </div>
+            )}
+
+            {/* Descrição */}
+            <div>
+              <Label>{language === 'pt' ? 'Observações' : 'Notes'}</Label>
+              <Textarea
+                value={novoAgendamentoDescricao}
+                onChange={(e) => setNovoAgendamentoDescricao(e.target.value)}
+                placeholder={language === 'pt' ? 'Detalhes adicionais...' : 'Additional details...'}
+                rows={2}
+              />
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setCriarAgendamentoOpen(false)}>
+              {language === 'pt' ? 'Cancelar' : 'Cancel'}
+            </Button>
+            <Button
+              className="bg-teal-600 hover:bg-teal-700"
+              onClick={() => {
+                if (!novoAgendamentoData) {
+                  toast.error(language === 'pt' ? 'Selecione uma data' : 'Select a date');
+                  return;
+                }
+                criarAgendamentoMutation.mutate({
+                  token,
+                  lojaId: novoAgendamentoLojaId,
+                  data: novoAgendamentoData,
+                  periodo: novoAgendamentoPeriodo,
+                  tipoApoio: novoAgendamentoLojaId ? novoAgendamentoTipoApoio : null,
+                  titulo: !novoAgendamentoLojaId ? novoAgendamentoTitulo : undefined,
+                  descricao: novoAgendamentoDescricao || undefined,
+                });
+              }}
+              disabled={criarAgendamentoMutation.isPending}
+            >
+              {criarAgendamentoMutation.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-1" />
+              ) : (
+                <Plus className="h-4 w-4 mr-1" />
+              )}
+              {language === 'pt' ? 'Criar' : 'Create'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog de Bloquear Dia */}
+      <Dialog open={bloquearDiaOpen} onOpenChange={setBloquearDiaOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Ban className="h-5 w-5 text-gray-600" />
+              {language === 'pt' ? 'Bloquear Dia' : 'Block Day'}
+            </DialogTitle>
+            <DialogDescription>
+              {language === 'pt' ? 'Bloqueie um dia para férias, faltas, formações ou outros motivos.' : 'Block a day for vacations, absences, training or other reasons.'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            {/* Data */}
+            <div>
+              <Label>{language === 'pt' ? 'Data' : 'Date'}</Label>
+              <Input
+                type="date"
+                value={bloqueioData}
+                onChange={(e) => setBloqueioData(e.target.value)}
+              />
+            </div>
+
+            {/* Período */}
+            <div>
+              <Label>{language === 'pt' ? 'Período' : 'Period'}</Label>
+              <Select
+                value={bloqueioPeriodo}
+                onValueChange={(value) => setBloqueioPeriodo(value as 'manha' | 'tarde' | 'dia_todo')}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="manha">
+                    {language === 'pt' ? 'Manhã (9h-13h)' : 'Morning (9am-1pm)'}
+                  </SelectItem>
+                  <SelectItem value="tarde">
+                    {language === 'pt' ? 'Tarde (14h-18h)' : 'Afternoon (2pm-6pm)'}
+                  </SelectItem>
+                  <SelectItem value="dia_todo">
+                    {language === 'pt' ? 'Dia Todo' : 'Full Day'}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Tipo de Bloqueio */}
+            <div>
+              <Label>{language === 'pt' ? 'Motivo' : 'Reason'}</Label>
+              <Select
+                value={bloqueioTipo}
+                onValueChange={(value) => setBloqueioTipo(value as 'ferias' | 'falta' | 'formacao' | 'pessoal' | 'outro')}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ferias">
+                    <div className="flex items-center gap-2">
+                      <span>🏖️</span>
+                      {language === 'pt' ? 'Férias' : 'Vacation'}
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="falta">
+                    <div className="flex items-center gap-2">
+                      <span>🩺</span>
+                      {language === 'pt' ? 'Falta' : 'Absence'}
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="formacao">
+                    <div className="flex items-center gap-2">
+                      <span>📚</span>
+                      {language === 'pt' ? 'Formação' : 'Training'}
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="pessoal">
+                    <div className="flex items-center gap-2">
+                      <span>👤</span>
+                      {language === 'pt' ? 'Pessoal' : 'Personal'}
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="outro">
+                    <div className="flex items-center gap-2">
+                      <span>📝</span>
+                      {language === 'pt' ? 'Outro' : 'Other'}
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Descrição */}
+            <div>
+              <Label>{language === 'pt' ? 'Descrição (opcional)' : 'Description (optional)'}</Label>
+              <Textarea
+                value={bloqueioMotivo}
+                onChange={(e) => setBloqueioMotivo(e.target.value)}
+                placeholder={language === 'pt' ? 'Detalhes adicionais...' : 'Additional details...'}
+                rows={2}
+              />
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setBloquearDiaOpen(false)}>
+              {language === 'pt' ? 'Cancelar' : 'Cancel'}
+            </Button>
+            <Button
+              variant="secondary"
+              className="bg-gray-600 hover:bg-gray-700 text-white"
+              onClick={() => {
+                if (!bloqueioData) {
+                  toast.error(language === 'pt' ? 'Selecione uma data' : 'Select a date');
+                  return;
+                }
+                criarBloqueioMutation.mutate({
+                  token,
+                  data: bloqueioData,
+                  periodo: bloqueioPeriodo,
+                  tipo: bloqueioTipo,
+                  motivo: bloqueioMotivo || undefined,
+                });
+              }}
+              disabled={criarBloqueioMutation.isPending}
+            >
+              {criarBloqueioMutation.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-1" />
+              ) : (
+                <Ban className="h-4 w-4 mr-1" />
+              )}
+              {language === 'pt' ? 'Bloquear' : 'Block'}
             </Button>
           </DialogFooter>
         </DialogContent>
