@@ -4549,25 +4549,46 @@ export async function adicionarFeedbackReuniao(
 
 /**
  * Obtém o gestor responsável por uma loja
+ * Prioriza gestores com role 'gestor' sobre 'admin' para evitar atribuições incorretas
  */
 export async function getGestorDaLoja(lojaId: number): Promise<{ gestorId: number; userId: number; nome: string | null; email: string | null } | null> {
   const db = await getDb();
   if (!db) return null;
   
+  // Buscar todos os gestores associados à loja
   const result = await db
     .select({
       gestorId: gestores.id,
       userId: gestores.userId,
       nome: users.name,
       email: users.email,
+      role: users.role,
     })
     .from(gestorLojas)
     .innerJoin(gestores, eq(gestorLojas.gestorId, gestores.id))
     .innerJoin(users, eq(gestores.userId, users.id))
-    .where(eq(gestorLojas.lojaId, lojaId))
-    .limit(1);
+    .where(eq(gestorLojas.lojaId, lojaId));
   
-  return result[0] || null;
+  if (result.length === 0) return null;
+  
+  // Priorizar gestor com role 'gestor' sobre 'admin'
+  const gestorReal = result.find(g => g.role === 'gestor');
+  if (gestorReal) {
+    return {
+      gestorId: gestorReal.gestorId,
+      userId: gestorReal.userId,
+      nome: gestorReal.nome,
+      email: gestorReal.email,
+    };
+  }
+  
+  // Se não houver gestor com role 'gestor', retornar o primeiro
+  return {
+    gestorId: result[0].gestorId,
+    userId: result[0].userId,
+    nome: result[0].nome,
+    email: result[0].email,
+  };
 }
 
 /**

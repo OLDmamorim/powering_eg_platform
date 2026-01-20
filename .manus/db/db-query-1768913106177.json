@@ -1,0 +1,9 @@
+{
+  "query": "SELECT gl.gestorId, u.name as gestor_nome, COUNT(gl.lojaId) as num_lojas\nFROM gestor_lojas gl\nJOIN users u ON gl.gestorId = u.id\nGROUP BY gl.gestorId, u.name\nORDER BY u.name;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT gl.gestorId, u.name as gestor_nome, COUNT(gl.lojaId) as num_lojas\nFROM gestor_lojas gl\nJOIN users u ON gl.gestorId = u.id\nGROUP BY gl.gestorId, u.name\nORDER BY u.name;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 54
+}

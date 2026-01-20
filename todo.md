@@ -3561,3 +3561,13 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Tarefa da Póvoa de Varzim não aparecia nas tarefas recebidas do gestor
 - [x] Corrigir lógica de paraMim para incluir tarefas criadas por lojas do gestor
 - [x] Adicionar condição: se criadoPorLojaId está nas lojas do gestor, paraMim = true
+
+## Bug v6.11.3 - Tarefas das lojas não aparecem nas "Recebidas" do gestor
+- [x] Identificar causa raiz: associações duplicadas de gestores (admin + gestor real)
+- [x] Remover associações do gestor admin 1380001 (9 lojas afetadas)
+- [x] Remover associações órfãs de gestores inexistentes (570001, 780001, 780002, 1020002)
+- [x] Remover associações órfãs da loja 30001 (não existe)
+- [x] Corrigir 3 tarefas atribuídas ao admin (userId=1) para o gestor correto (userId=420030)
+- [x] Melhorar função getGestorDaLoja para priorizar gestores com role 'gestor' sobre 'admin'
+- [x] Testar que tarefas agora aparecem corretamente nas "Recebidas"
+

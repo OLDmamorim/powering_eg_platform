@@ -1,0 +1,22 @@
+{
+  "query": "SELECT * FROM gestor_lojas WHERE lojaId = 30001;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT * FROM gestor_lojas WHERE lojaId = 30001;",
+  "rows": [
+    {
+      "id": "1",
+      "gestorId": "2",
+      "lojaId": "30001",
+      "createdAt": "2025-12-15 01:00:22"
+    },
+    {
+      "id": "60002",
+      "gestorId": "30001",
+      "lojaId": "30001",
+      "createdAt": "2025-12-16 01:35:55"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tgestorId\tlojaId\tcreatedAt\n1\t2\t30001\t2025-12-15 01:00:22\n60002\t30001\t30001\t2025-12-16 01:35:55\n",
+  "stderr": "",
+  "execution_time_ms": 71
+}
