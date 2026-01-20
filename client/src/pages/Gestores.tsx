@@ -423,9 +423,8 @@ export default function Gestores() {
                   (gl: any) => gl.id === loja.id
                 );
                 const hasOtherGestor = loja.gestorNome && !isAssociated;
-                const gestorAtribuido = isAssociated 
-                  ? selectedGestor?.user?.name 
-                  : (loja.gestorNome || null);
+                // Mostrar sempre o gestor real da loja (não o gestor selecionado)
+                const gestorAtribuido = loja.gestorNome || null;
                 return (
                   <div
                     key={loja.id}

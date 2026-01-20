@@ -3531,3 +3531,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] API para bloquear/desbloquear dias
 - [x] Interface com botões de criar e bloquear no calendário
 - [ ] Dias bloqueados aparecem em cinza/indisponíveis no calendário
+
+
+## Bug v6.16.1 - Modal Associar Lojas mostra gestor errado
+- [x] Texto "Lojas Associadas" mostra o nome do gestor que está a ser editado em vez do gestor realmente associado à loja
+- [x] Corrigir para mostrar o gestor correto de cada loja (loja.gestorNome)
+- [x] Testar modal de associação
