@@ -296,6 +296,19 @@ export default function Volantes() {
                       <Badge variant={volante.ativo ? "default" : "secondary"}>
                         {volante.ativo ? "Ativo" : "Inativo"}
                       </Badge>
+                      {volante.token && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            const portalUrl = `${window.location.origin}/portal-loja?token=${volante.token?.token}`;
+                            window.open(portalUrl, '_blank');
+                          }}
+                          title="Ver Calendário do Volante"
+                        >
+                          <Calendar className="h-4 w-4 text-blue-500" />
+                        </Button>
+                      )}
                       <Button
                         variant="ghost"
                         size="icon"

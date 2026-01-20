@@ -3475,3 +3475,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 
 ## Bug Fix - Tradução Menu v6.14.1
 - [x] Corrigir tradução em falta para "menu.items.volantes" no menu do Dashboard
+
+
+## Gestão Volantes - Acesso ao Calendário v6.15.0
+- [x] Adicionar botão para ver calendário do volante na página de Gestão de Volantes
+- [x] Mostrar agenda/pedidos de apoio do volante selecionado (abre portal do volante)
