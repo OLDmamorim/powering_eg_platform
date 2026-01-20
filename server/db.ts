@@ -8418,7 +8418,7 @@ export async function getPedidoApoioById(pedidoId: number): Promise<PedidoApoio 
 }
 
 /**
- * Obter pedidos de apoio de um volante (exclui rejeitados)
+ * Obter pedidos de apoio de um volante (exclui reprovados/anulados/cancelados)
  */
 export async function getPedidosApoioByVolanteId(volanteId: number): Promise<(PedidoApoio & { loja: Loja })[]> {
   const db = await getDb();
@@ -8433,8 +8433,8 @@ export async function getPedidosApoioByVolanteId(volanteId: number): Promise<(Pe
     .innerJoin(lojas, eq(pedidosApoio.lojaId, lojas.id))
     .where(and(
       eq(pedidosApoio.volanteId, volanteId),
-      // Excluir pedidos rejeitados
-      sql`${pedidosApoio.estado} != 'rejeitado'`
+      // Excluir pedidos reprovados/anulados/cancelados
+      sql`${pedidosApoio.estado} NOT IN ('reprovado', 'anulado', 'cancelado')`
     ))
     .orderBy(asc(pedidosApoio.data));
   
@@ -8636,8 +8636,8 @@ export async function getEstadoDiasDoMes(volanteId: number, year: number, month:
       eq(pedidosApoio.volanteId, volanteId),
       gte(pedidosApoio.data, startDate),
       lte(pedidosApoio.data, endDate),
-      // Excluir pedidos rejeitados do calendário
-      sql`${pedidosApoio.estado} != 'rejeitado'`
+      // Excluir pedidos reprovados/anulados/cancelados do calendário
+      sql`${pedidosApoio.estado} NOT IN ('reprovado', 'anulado', 'cancelado')`
     ));
   
   // Agrupar por dia

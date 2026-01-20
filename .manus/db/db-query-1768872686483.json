@@ -1,0 +1,15 @@
+{
+  "query": "SELECT g.id, u.name, u.email FROM gestores g INNER JOIN users u ON g.userId = u.id WHERE u.email = 'mramorim78@gmail.com';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT g.id, u.name, u.email FROM gestores g INNER JOIN users u ON g.userId = u.id WHERE u.email = 'mramorim78@gmail.com';",
+  "rows": [
+    {
+      "id": "1380001",
+      "name": "Marco Amorim",
+      "email": "mramorim78@gmail.com"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\temail\n1380001\tMarco Amorim\tmramorim78@gmail.com\n",
+  "stderr": "",
+  "execution_time_ms": 58
+}

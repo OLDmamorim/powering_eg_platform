@@ -1,0 +1,20 @@
+{
+  "query": "SELECT id, nome, gestorId FROM volantes WHERE ativo = 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT id, nome, gestorId FROM volantes WHERE ativo = 1;",
+  "rows": [
+    {
+      "id": "1",
+      "nome": "Volante Minho Teste",
+      "gestorId": "1"
+    },
+    {
+      "id": "2",
+      "nome": "Volante Minho ",
+      "gestorId": "30001"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tnome\tgestorId\n1\tVolante Minho Teste\t1\n2\tVolante Minho \t30001\n",
+  "stderr": "",
+  "execution_time_ms": 52
+}

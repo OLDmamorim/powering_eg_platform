@@ -1,0 +1,15 @@
+{
+  "query": "SELECT g.id as gestor_id, v.id as volante_id, v.nome as volante_nome FROM gestores g LEFT JOIN volantes v ON v.gestorId = g.id INNER JOIN users u ON g.userId = u.id WHERE u.email = 'mramorim78@gmail.com';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT g.id as gestor_id, v.id as volante_id, v.nome as volante_nome FROM gestores g LEFT JOIN volantes v ON v.gestorId = g.id INNER JOIN users u ON g.userId = u.id WHERE u.email = 'mramorim78@gmail.com';",
+  "rows": [
+    {
+      "gestor_id": "1380001",
+      "volante_id": "NULL",
+      "volante_nome": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "gestor_id\tvolante_id\tvolante_nome\n1380001\tNULL\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 55
+}

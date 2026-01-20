@@ -4498,7 +4498,7 @@ END:VCALENDAR`;
       const estadoDia = estadoMes?.[dataStr];
       // Filtrar pedidos rejeitados - não devem aparecer no calendário
       const todosPedidosDia = estadoDia?.pedidos || [];
-      const pedidosDia = todosPedidosDia.filter((p: any) => p.estado !== 'rejeitado');
+      const pedidosDia = todosPedidosDia.filter((p: any) => p.estado !== 'reprovado' && p.estado !== 'anulado' && p.estado !== 'cancelado');
       
       let bgColor = 'bg-white';
       let borderColor = 'border-gray-200';
@@ -6209,7 +6209,7 @@ END:VCALENDAR`;
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3 max-h-[400px] overflow-y-auto">
-            {diaDetalheSelecionado.pedidos.filter((p: any) => p.estado !== 'rejeitado').map((pedido: any, idx: number) => (
+            {diaDetalheSelecionado.pedidos.filter((p: any) => p.estado !== 'reprovado' && p.estado !== 'anulado' && p.estado !== 'cancelado').map((pedido: any, idx: number) => (
               <div 
                 key={idx}
                 className={`p-3 rounded-lg border ${
@@ -6286,6 +6286,58 @@ END:VCALENDAR`;
                       <X className="h-4 w-4 mr-1" />
                       {language === 'pt' ? 'Reprovar' : 'Reject'}
                     </Button>
+                  </div>
+                )}
+                {pedido.estado === 'aprovado' && (
+                  <div className="mt-3 flex gap-2 flex-wrap">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="flex-1"
+                      onClick={() => {
+                        setPedidoSelecionado(pedido);
+                        setEditarData(new Date(pedido.data).toISOString().split('T')[0]);
+                        setEditarPeriodo(pedido.periodo);
+                        setDiaDetalheOpen(false);
+                        setEditarDialogOpen(true);
+                      }}
+                    >
+                      <Pencil className="h-4 w-4 mr-1" />
+                      {language === 'pt' ? 'Editar' : 'Edit'}
+                    </Button>
+                    {(() => {
+                      const links = gerarLinksCalendario(pedido);
+                      return (
+                        <>
+                          <a
+                            href={links.googleUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center justify-center px-3 py-1.5 text-xs border rounded-md hover:bg-gray-50"
+                            title="Google Calendar"
+                          >
+                            <Calendar className="h-4 w-4" />
+                          </a>
+                          <a
+                            href={links.outlookUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center justify-center px-3 py-1.5 text-xs border rounded-md hover:bg-gray-50"
+                            title="Outlook"
+                          >
+                            <Mail className="h-4 w-4" />
+                          </a>
+                          <a
+                            href={links.icsUrl}
+                            download={`apoio-${pedido.id}.ics`}
+                            className="inline-flex items-center justify-center px-3 py-1.5 text-xs border rounded-md hover:bg-gray-50"
+                            title="Download ICS"
+                          >
+                            <Download className="h-4 w-4" />
+                          </a>
+                        </>
+                      );
+                    })()}
                   </div>
                 )}
               </div>

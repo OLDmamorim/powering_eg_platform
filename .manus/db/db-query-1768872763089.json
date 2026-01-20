@@ -1,0 +1,13 @@
+{
+  "query": "SELECT tv.token FROM tokens_volante tv WHERE tv.ativo = 1 LIMIT 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT tv.token FROM tokens_volante tv WHERE tv.ativo = 1 LIMIT 1;",
+  "rows": [
+    {
+      "token": "0e899b28c72cc5b63b67f22004cfd1dff99e644ebd1885e5040ad0cac437634d"
+    }
+  ],
+  "messages": [],
+  "stdout": "token\n0e899b28c72cc5b63b67f22004cfd1dff99e644ebd1885e5040ad0cac437634d\n",
+  "stderr": "",
+  "execution_time_ms": 60
+}

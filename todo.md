@@ -3508,3 +3508,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Barcelos (dia 20 - hoje) agora aparece na lista Próximos Apoios
 - [x] Botões de aprovar/reprovar estão no modal (já existiam)
 - [x] Ícones de adicionar ao calendário (Google, Outlook, ICS) já existem
+
+
+## Bug Fix URGENTE - Calendário Volante v6.15.6
+- [x] Rejeitados/Reprovados/Anulados/Cancelados filtrados do modal e calendário
+- [x] Adicionar botão de editar agendamentos aprovados no modal
+- [x] Adicionar ícones de calendário (Google, Outlook, ICS) no modal para pedidos aprovados

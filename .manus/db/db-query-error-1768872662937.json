@@ -1,0 +1,8 @@
+{
+  "query": "SELECT v.id, v.nome, v.gestorId, g.nome as gestor_nome FROM volantes v LEFT JOIN gestores g ON v.gestorId = g.id WHERE v.ativo = 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT v.id, v.nome, v.gestorId, g.nome as gestor_nome FROM volantes v LEFT JOIN gestores g ON v.gestorId = g.id WHERE v.ativo = 1;",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 'g.nome' in 'field list'"
+  ]
+}

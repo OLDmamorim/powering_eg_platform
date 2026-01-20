@@ -1,0 +1,20 @@
+{
+  "query": "SELECT tv.token, tv.volanteId, v.nome as volante_nome FROM tokens_volante tv INNER JOIN volantes v ON tv.volanteId = v.id WHERE tv.ativo = 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT tv.token, tv.volanteId, v.nome as volante_nome FROM tokens_volante tv INNER JOIN volantes v ON tv.volanteId = v.id WHERE tv.ativo = 1;",
+  "rows": [
+    {
+      "token": "0e899b28c72cc5b63b67f22004cfd1dff99e644ebd1885e5040ad0cac437634d",
+      "volanteId": "1",
+      "volante_nome": "Volante Minho Teste"
+    },
+    {
+      "token": "ZLBXf3Rfqh455bRfsHIytC0xaovesbrOnSZEkotFfW1duQKBDq0nw5W2OWONNDny",
+      "volanteId": "2",
+      "volante_nome": "Volante Minho "
+    }
+  ],
+  "messages": [],
+  "stdout": "token\tvolanteId\tvolante_nome\n0e899b28c72cc5b63b67f22004cfd1dff99e644ebd1885e5040ad0cac437634d\t1\tVolante Minho Teste\nZLBXf3Rfqh455bRfsHIytC0xaovesbrOnSZEkotFfW1duQKBDq0nw5W2OWONNDny\t2\tVolante Minho \n",
+  "stderr": "",
+  "execution_time_ms": 58
+}
