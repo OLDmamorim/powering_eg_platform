@@ -7474,12 +7474,18 @@ IMPORTANTE:
         // Enviar notificação Telegram ao volante (se configurado)
         if (volante.telegramChatId) {
           try {
+            // Obter token do volante para o link do portal
+            const tokenVolante = await db.getOrCreateTokenVolante(volante.id);
+            const baseUrl = process.env.VITE_APP_URL || 'https://poweringeg-3c9mozlh.manus.space';
+            const portalUrl = tokenVolante ? `${baseUrl}/portal-volante?token=${tokenVolante.token}` : baseUrl;
+            
             await notificarNovoPedidoApoio(volante.telegramChatId, {
               lojaNome: tokenData.loja.nome,
               data: dataApoio,
               periodo: input.periodo,
               tipoApoio: input.tipoApoio,
               observacoes: input.observacoes,
+              portalUrl: portalUrl,
             });
             console.log(`[Telegram] Notificação de novo pedido enviada para volante: ${volante.telegramChatId}`);
           } catch (e) {

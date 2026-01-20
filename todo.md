@@ -3571,3 +3571,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Melhorar função getGestorDaLoja para priorizar gestores com role 'gestor' sobre 'admin'
 - [x] Testar que tarefas agora aparecem corretamente nas "Recebidas"
 
+
+## Bug v6.11.4 - Link do Telegram para Portal do Volante sem token
+- [x] Localizar código que envia notificações Telegram para volantes
+- [x] Corrigir URL para incluir o token de autenticação do volante
+- [x] Testar que o link abre diretamente a página do volante sem login
+
