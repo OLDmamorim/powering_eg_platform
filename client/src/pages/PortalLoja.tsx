@@ -4486,7 +4486,8 @@ END:VCALENDAR`;
     for (let dia = 1; dia <= diasNoMes; dia++) {
       const dataStr = `${mesSelecionado.ano}-${String(mesSelecionado.mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
       const estadoDia = estadoMes?.[dataStr];
-      const pedidosDia = estadoDia?.pedidos || [];
+      // Filtrar pedidos rejeitados - não devem aparecer no calendário
+      const pedidosDia = (estadoDia?.pedidos || []).filter((p: any) => p.estado !== 'rejeitado');
       
       let bgColor = 'bg-white';
       let borderColor = 'border-gray-200';

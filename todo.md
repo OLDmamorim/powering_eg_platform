@@ -3484,3 +3484,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 
 ## Bug Fix - Nome da Loja no Modal Dia Ocupado v6.15.1
 - [x] Corrigir exibição do nome da loja no modal de "Dia Ocupado" (mostra "Loja" em vez do nome real)
+
+
+## Bug Fix - Calendário Volante v6.15.2
+- [x] Pedidos rejeitados não devem aparecer no calendário
+- [x] Pedido aprovado de Braga dia 22 não aparece no calendário (corrigido suporte para dia_todo)

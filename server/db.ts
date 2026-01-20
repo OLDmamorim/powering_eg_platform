@@ -8654,9 +8654,11 @@ export async function getEstadoDiasDoMes(volanteId: number, year: number, month:
     
     const manhaAprovada = pedidosAprovados.some((p: PedidoApoio) => p.periodo === 'manha');
     const tardeAprovada = pedidosAprovados.some((p: PedidoApoio) => p.periodo === 'tarde');
+    const diaTodoAprovado = pedidosAprovados.some((p: PedidoApoio) => p.periodo === 'dia_todo');
     const temPendente = pedidosPendentes.length > 0;
     
-    if (manhaAprovada && tardeAprovada) {
+    // Se tem dia_todo aprovado, o dia está completo
+    if (diaTodoAprovado || (manhaAprovada && tardeAprovada)) {
       dados.estado = 'dia_completo'; // Vermelho
     } else if (manhaAprovada) {
       dados.estado = 'manha_aprovada'; // Roxo
