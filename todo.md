@@ -3583,3 +3583,11 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Corrigir filtro para excluir tarefas internas (interna=true) criadas pela loja para si própria
 - [x] Testar que tarefas internas da loja não aparecem nas "Recebidas" do gestor
 
+
+## Melhoria v6.11.6 - Cache e atualização de dados do To-Do
+- [x] Analisar sistema atual de cache e queries do To-Do
+- [x] Implementar invalidação automática de cache após alterações
+- [x] Adicionar refetch automático ou polling para verificar novas tarefas (30s)
+- [x] Adicionar refetchOnWindowFocus para atualizar quando a janela ganha foco
+- [x] Testar que alterações aparecem imediatamente sem logout/refresh
+

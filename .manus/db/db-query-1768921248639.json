@@ -1,0 +1,82 @@
+{
+  "query": "SELECT \n  t.id, \n  t.titulo, \n  t.estado, \n  t.isInterna, \n  t.atribuidoUserId,\n  t.criadoPorLojaId,\n  l.nome as lojaNome\nFROM todos t\nLEFT JOIN lojas l ON t.criadoPorLojaId = l.id\nWHERE t.estado IN ('pendente', 'em_progresso')\n  AND (t.atribuidoUserId = 420030 \n       OR t.criadoPorLojaId IN (\n         SELECT lojaId FROM gestor_lojas WHERE gestorId = 30001\n       ))\nORDER BY t.createdAt DESC;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT \n  t.id, \n  t.titulo, \n  t.estado, \n  t.isInterna, \n  t.atribuidoUserId,\n  t.criadoPorLojaId,\n  l.nome as lojaNome\nFROM todos t\nLEFT JOIN lojas l ON t.criadoPorLojaId = l.id\nWHERE t.estado IN ('pendente', 'em_progresso')\n  AND (t.atribuidoUserId = 420030 \n       OR t.criadoPorLojaId IN (\n         SELECT lojaId FROM gestor_lojas WHERE gestorId = 30001\n       ))\nORDER BY t.createdAt DESC;",
+  "rows": [
+    {
+      "id": "600005",
+      "titulo": "Teste Vânia",
+      "estado": "pendente",
+      "isInterna": "1",
+      "atribuidoUserId": "NULL",
+      "criadoPorLojaId": "180010",
+      "lojaNome": "Braga - minho center"
+    },
+    {
+      "id": "600004",
+      "titulo": "Agendar porsche para sexta",
+      "estado": "pendente",
+      "isInterna": "1",
+      "atribuidoUserId": "NULL",
+      "criadoPorLojaId": "180010",
+      "lojaNome": "Braga - minho center"
+    },
+    {
+      "id": "600003",
+      "titulo": "Suporte de vidros",
+      "estado": "pendente",
+      "isInterna": "0",
+      "atribuidoUserId": "420030",
+      "criadoPorLojaId": "60005",
+      "lojaNome": "Póvoa de Varzim"
+    },
+    {
+      "id": "600001",
+      "titulo": "60-MV-90",
+      "estado": "pendente",
+      "isInterna": "0",
+      "atribuidoUserId": "420030",
+      "criadoPorLojaId": "180010",
+      "lojaNome": "Braga - minho center"
+    },
+    {
+      "id": "510003",
+      "titulo": "Teste",
+      "estado": "pendente",
+      "isInterna": "0",
+      "atribuidoUserId": "420030",
+      "criadoPorLojaId": "60003",
+      "lojaNome": "Vila Verde"
+    },
+    {
+      "id": "510001",
+      "titulo": "Fs 34",
+      "estado": "pendente",
+      "isInterna": "0",
+      "atribuidoUserId": "420030",
+      "criadoPorLojaId": "60003",
+      "lojaNome": "Vila Verde"
+    },
+    {
+      "id": "120002",
+      "titulo": "Entrada de água",
+      "estado": "em_progresso",
+      "isInterna": "0",
+      "atribuidoUserId": "420030",
+      "criadoPorLojaId": "180010",
+      "lojaNome": "Braga - minho center"
+    },
+    {
+      "id": "120001",
+      "titulo": "Estrutura para oficina (frio)",
+      "estado": "em_progresso",
+      "isInterna": "0",
+      "atribuidoUserId": "420030",
+      "criadoPorLojaId": "180010",
+      "lojaNome": "Braga - minho center"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitulo\testado\tisInterna\tatribuidoUserId\tcriadoPorLojaId\tlojaNome\n600005\tTeste Vânia\tpendente\t1\tNULL\t180010\tBraga - minho center\n600004\tAgendar porsche para sexta\tpendente\t1\tNULL\t180010\tBraga - minho center\n600003\tSuporte de vidros\tpendente\t0\t420030\t60005\tPóvoa de Varzim\n600001\t60-MV-90\tpendente\t0\t420030\t180010\tBraga - minho center\n510003\tTeste\tpendente\t0\t420030\t60003\tVila Verde\n510001\tFs 34\tpendente\t0\t420030\t60003\tVila Verde\n120002\tEntrada de água\tem_progresso\t0\t420030\t180010\tBraga - minho center\n120001\tEstrutura para oficina (frio)\tem_progresso\t0\t420030\t180010\tBraga - minho center\n",
+  "stderr": "",
+  "execution_time_ms": 64
+}

@@ -351,7 +351,9 @@ function DashboardLayoutContent({
   // Query para contar tarefas pendentes (para App Badge)
   const { data: tarefasPendentes } = trpc.todos.countPendentesAtribuidosAMim.useQuery(undefined, {
     enabled: !!user,
-    refetchInterval: 60000, // Atualizar a cada 60 segundos
+    refetchInterval: 30000, // Atualizar a cada 30 segundos
+    staleTime: 10000,
+    refetchOnWindowFocus: true,
   });
   
   // Atualizar App Badge quando há tarefas pendentes

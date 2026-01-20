@@ -1,0 +1,28 @@
+{
+  "query": "SELECT \n  estado, \n  COUNT(*) as total,\n  SUM(CASE WHEN isInterna = 1 THEN 1 ELSE 0 END) as internas,\n  SUM(CASE WHEN isInterna = 0 OR isInterna IS NULL THEN 1 ELSE 0 END) as nao_internas\nFROM todos \nWHERE atribuidoUserId = 420030 \n   OR criadoPorLojaId IN (\n     SELECT lojaId FROM gestor_lojas WHERE gestorId = 30001\n   )\nGROUP BY estado;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT \n  estado, \n  COUNT(*) as total,\n  SUM(CASE WHEN isInterna = 1 THEN 1 ELSE 0 END) as internas,\n  SUM(CASE WHEN isInterna = 0 OR isInterna IS NULL THEN 1 ELSE 0 END) as nao_internas\nFROM todos \nWHERE atribuidoUserId = 420030 \n   OR criadoPorLojaId IN (\n     SELECT lojaId FROM gestor_lojas WHERE gestorId = 30001\n   )\nGROUP BY estado;",
+  "rows": [
+    {
+      "estado": "em_progresso",
+      "total": "2",
+      "internas": "0",
+      "nao_internas": "2"
+    },
+    {
+      "estado": "concluida",
+      "total": "11",
+      "internas": "4",
+      "nao_internas": "7"
+    },
+    {
+      "estado": "pendente",
+      "total": "6",
+      "internas": "2",
+      "nao_internas": "4"
+    }
+  ],
+  "messages": [],
+  "stdout": "estado\ttotal\tinternas\tnao_internas\nem_progresso\t2\t0\t2\nconcluida\t11\t4\t7\npendente\t6\t2\t4\n",
+  "stderr": "",
+  "execution_time_ms": 152
+}

@@ -475,12 +475,22 @@ export default function PortalLoja() {
   // To-Do Queries
   const { data: todosList, refetch: refetchTodos } = trpc.todosPortalLoja.listar.useQuery(
     { token, apenasAtivos: true },
-    { enabled: !!token && !!lojaAuth }
+    { 
+      enabled: !!token && !!lojaAuth,
+      refetchInterval: 30000, // Atualizar a cada 30 segundos
+      staleTime: 10000,
+      refetchOnWindowFocus: true,
+    }
   );
 
   const { data: todosCount } = trpc.todosPortalLoja.contar.useQuery(
     { token },
-    { enabled: !!token && !!lojaAuth }
+    { 
+      enabled: !!token && !!lojaAuth,
+      refetchInterval: 30000,
+      staleTime: 10000,
+      refetchOnWindowFocus: true,
+    }
   );
 
   // Contar tarefas NÃO VISTAS (para alerta/badge pulsante)
@@ -502,13 +512,23 @@ export default function PortalLoja() {
   // Histórico de tarefas enviadas ao gestor
   const { data: historicoTarefas, refetch: refetchHistoricoTarefas } = trpc.todosPortalLoja.historicoEnviadas.useQuery(
     { token },
-    { enabled: !!token && !!lojaAuth }
+    { 
+      enabled: !!token && !!lojaAuth,
+      refetchInterval: 30000,
+      staleTime: 10000,
+      refetchOnWindowFocus: true,
+    }
   );
 
   // Tarefas internas da loja
   const { data: tarefasInternas, refetch: refetchTarefasInternas } = trpc.todosPortalLoja.listarInternas.useQuery(
     { token, apenasAtivas: true },
-    { enabled: !!token && !!lojaAuth }
+    { 
+      enabled: !!token && !!lojaAuth,
+      refetchInterval: 30000,
+      staleTime: 10000,
+      refetchOnWindowFocus: true,
+    }
   );
 
   // Dashboard de Resultados

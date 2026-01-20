@@ -95,20 +95,28 @@ export default function Todos() {
   const [novaCategoriaNome, setNovaCategoriaNome] = useState("");
   const [novaCategoriaCor, setNovaCategoriaCor] = useState("#3B82F6");
   
-  // Queries
+  // Queries - com refetchInterval para atualização automática
   const { data: todos, refetch: refetchTodos } = trpc.todos.listar.useQuery({
     lojaId: filtroLoja !== "todas" ? parseInt(filtroLoja) : undefined,
     estado: filtroEstado !== "todos" ? filtroEstado : undefined,
     categoriaId: filtroCategoria !== "todas" ? parseInt(filtroCategoria) : undefined,
     prioridade: filtroPrioridade !== "todas" ? filtroPrioridade : undefined,
     apenasMeus: apenasMeus,
+  }, {
+    refetchInterval: 30000, // Atualizar a cada 30 segundos
+    staleTime: 10000, // Considerar dados frescos por 10 segundos
+    refetchOnWindowFocus: true, // Refetch quando a janela ganha foco
   });
   
   const { data: categorias, refetch: refetchCategorias } = trpc.todoCategories.listar.useQuery();
   const { data: lojas } = trpc.lojas.getByGestor.useQuery();
   // Usar endpoint acessível a gestores e admins para listar utilizadores
   const { data: utilizadores } = trpc.gestores.listarParaTodos.useQuery();
-  const { data: estatisticas, refetch: refetchEstatisticas } = trpc.todos.estatisticas.useQuery();
+  const { data: estatisticas, refetch: refetchEstatisticas } = trpc.todos.estatisticas.useQuery(undefined, {
+    refetchInterval: 30000, // Atualizar estatísticas a cada 30 segundos
+    staleTime: 10000,
+    refetchOnWindowFocus: true,
+  });
   
   // Utils para invalidar queries
   const utils = trpc.useUtils();
