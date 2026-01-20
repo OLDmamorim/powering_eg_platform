@@ -3480,3 +3480,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## Gestão Volantes - Acesso ao Calendário v6.15.0
 - [x] Adicionar botão para ver calendário do volante na página de Gestão de Volantes
 - [x] Mostrar agenda/pedidos de apoio do volante selecionado (abre portal do volante)
+
+
+## Bug Fix - Nome da Loja no Modal Dia Ocupado v6.15.1
+- [x] Corrigir exibição do nome da loja no modal de "Dia Ocupado" (mostra "Loja" em vez do nome real)

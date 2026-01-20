@@ -8609,8 +8609,22 @@ export async function getEstadoDiasDoMes(volanteId: number, year: number, month:
   const endDate = new Date(year, month, 0, 23, 59, 59);
   
   const pedidos = await db
-    .select()
+    .select({
+      id: pedidosApoio.id,
+      lojaId: pedidosApoio.lojaId,
+      volanteId: pedidosApoio.volanteId,
+      data: pedidosApoio.data,
+      periodo: pedidosApoio.periodo,
+      tipoApoio: pedidosApoio.tipoApoio,
+      observacoes: pedidosApoio.observacoes,
+      estado: pedidosApoio.estado,
+      createdAt: pedidosApoio.createdAt,
+      updatedAt: pedidosApoio.updatedAt,
+      lojaNome: lojas.nome,
+      lojaEmail: lojas.email,
+    })
     .from(pedidosApoio)
+    .leftJoin(lojas, eq(pedidosApoio.lojaId, lojas.id))
     .where(and(
       eq(pedidosApoio.volanteId, volanteId),
       gte(pedidosApoio.data, startDate),
@@ -8625,7 +8639,12 @@ export async function getEstadoDiasDoMes(volanteId: number, year: number, month:
       resultado.set(dataStr, { estado: 'livre', pedidos: [] });
     }
     
-    resultado.get(dataStr)!.pedidos.push(pedido);
+    // Adicionar info da loja ao pedido
+    const pedidoComLoja = {
+      ...pedido,
+      loja: pedido.lojaNome ? { id: pedido.lojaId, nome: pedido.lojaNome, email: pedido.lojaEmail } : null
+    };
+    resultado.get(dataStr)!.pedidos.push(pedidoComLoja as any);
   }
   
   // Calcular estado de cada dia
