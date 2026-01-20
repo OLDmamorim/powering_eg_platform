@@ -4930,15 +4930,15 @@ export async function getAllTodos(filtros?: {
     if (userContext) {
       // É para mim se:
       // 1. Atribuído diretamente a mim (user)
-      // 2. Atribuído a uma das minhas lojas E criado por uma loja (comunicação loja->gestor)
-      // 3. Criado por uma das minhas lojas (comunicação loja->gestor, mesmo sem atribuidoLojaId)
+      // 2. Criado por uma das minhas lojas E NÃO é interna (comunicação loja->gestor)
+      // NOTA: Tarefas internas (isInterna=true) criadas pela loja para si própria NÃO aparecem para o gestor
       if (todo.atribuidoUserId === userContext.userId) {
         paraMim = true;
-      } else if (userContext.lojasIds && todo.atribuidoLojaId && userContext.lojasIds.includes(todo.atribuidoLojaId) && todo.criadoPorLojaId !== null) {
-        paraMim = true;
       } else if (userContext.lojasIds && todo.criadoPorLojaId && userContext.lojasIds.includes(todo.criadoPorLojaId)) {
-        // Tarefa criada por uma das minhas lojas - é para mim
-        paraMim = true;
+        // Tarefa criada por uma das minhas lojas - só é para mim se NÃO for interna
+        if (!todo.isInterna) {
+          paraMim = true;
+        }
       }
     }
     return {

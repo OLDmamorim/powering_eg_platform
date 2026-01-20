@@ -3577,3 +3577,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Corrigir URL para incluir o token de autenticação do volante
 - [x] Testar que o link abre diretamente a página do volante sem login
 
+
+## Bug v6.11.5 - Tarefas internas da loja aparecem no mural do gestor
+- [x] Analisar lógica atual de visibilidade de tarefas (paraMim)
+- [x] Corrigir filtro para excluir tarefas internas (interna=true) criadas pela loja para si própria
+- [x] Testar que tarefas internas da loja não aparecem nas "Recebidas" do gestor
+
