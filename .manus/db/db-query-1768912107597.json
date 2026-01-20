@@ -1,0 +1,40 @@
+{
+  "query": "SELECT gl.id as associacaoId, l.id as lojaId, l.nome as lojaNome, gl.gestorId, g.userId, u.name as gestorNome, u.email, gl.createdAt FROM lojas l JOIN gestor_lojas gl ON l.id = gl.lojaId JOIN gestores g ON gl.gestorId = g.id JOIN users u ON g.userId = u.id WHERE l.nome LIKE '%Póvoa%' OR l.nome LIKE '%Povoa%' ORDER BY gl.createdAt DESC;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT gl.id as associacaoId, l.id as lojaId, l.nome as lojaNome, gl.gestorId, g.userId, u.name as gestorNome, u.email, gl.createdAt FROM lojas l JOIN gestor_lojas gl ON l.id = gl.lojaId JOIN gestores g ON gl.gestorId = g.id JOIN users u ON g.userId = u.id WHERE l.nome LIKE '%Póvoa%' OR l.nome LIKE '%Povoa%' ORDER BY gl.createdAt DESC;",
+  "rows": [
+    {
+      "associacaoId": "1320005",
+      "lojaId": "60005",
+      "lojaNome": "Póvoa de Varzim",
+      "gestorId": "1380001",
+      "userId": "1",
+      "gestorNome": "Marco Amorim",
+      "email": "mramorim78@gmail.com",
+      "createdAt": "2026-01-18 12:18:04"
+    },
+    {
+      "associacaoId": "1110020",
+      "lojaId": "180045",
+      "lojaNome": "Póvoa de santa iria",
+      "gestorId": "1080020",
+      "userId": "8940679",
+      "gestorNome": "Carlos Eduardo",
+      "email": "carlos.eduardo@expressglass.pt",
+      "createdAt": "2026-01-09 16:14:53"
+    },
+    {
+      "associacaoId": "60006",
+      "lojaId": "60005",
+      "lojaNome": "Póvoa de Varzim",
+      "gestorId": "30001",
+      "userId": "420030",
+      "gestorNome": "Marco Amorim",
+      "email": "mamorim@expressglass.pt",
+      "createdAt": "2025-12-16 01:35:58"
+    }
+  ],
+  "messages": [],
+  "stdout": "associacaoId\tlojaId\tlojaNome\tgestorId\tuserId\tgestorNome\temail\tcreatedAt\n1320005\t60005\tPóvoa de Varzim\t1380001\t1\tMarco Amorim\tmramorim78@gmail.com\t2026-01-18 12:18:04\n1110020\t180045\tPóvoa de santa iria\t1080020\t8940679\tCarlos Eduardo\tcarlos.eduardo@expressglass.pt\t2026-01-09 16:14:53\n60006\t60005\tPóvoa de Varzim\t30001\t420030\tMarco Amorim\tmamorim@expressglass.pt\t2025-12-16 01:35:58\n",
+  "stderr": "",
+  "execution_time_ms": 59
+}

@@ -3549,3 +3549,15 @@ NOTA: Sistema de email requer configuração externa no deployment
   - [x] Almada → Carlos Eduardo
   - [x] Amadora → Carlos Eduardo
   - [x] Amoreiras → Carlos Eduardo
+
+
+## Bug v6.16.3 - Tarefas To-Do não deixam de piscar ao clicar
+- [ ] Investigar porque as tarefas não são marcadas como vistas ao clicar
+- [ ] Corrigir função de marcar como visto
+- [ ] Testar que o piscar para quando a tarefa é clicada
+
+
+## Bug v6.16.4 - Tarefas criadas por lojas não aparecem para o gestor
+- [x] Tarefa da Póvoa de Varzim não aparecia nas tarefas recebidas do gestor
+- [x] Corrigir lógica de paraMim para incluir tarefas criadas por lojas do gestor
+- [x] Adicionar condição: se criadoPorLojaId está nas lojas do gestor, paraMim = true

@@ -1,0 +1,170 @@
+{
+  "query": "SELECT gl.id, gl.lojaId, l.nome, gl.gestorId, g.userId, u.name as gestorNome FROM gestor_lojas gl JOIN lojas l ON gl.lojaId = l.id JOIN gestores g ON gl.gestorId = g.id JOIN users u ON g.userId = u.id WHERE l.nome IN ('Barcelos', 'Braga - minho center', 'Braga sm', 'Famalicão', 'Famalicão sm', 'Guimarães', 'Mycarcenter', 'Paços de Ferreira', 'Paredes', 'Paredes sm', 'Póvoa de Varzim', 'Viana do Castelo', 'Viana do Castelo sm', 'Vila Verde') ORDER BY l.nome, gl.createdAt DESC;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT gl.id, gl.lojaId, l.nome, gl.gestorId, g.userId, u.name as gestorNome FROM gestor_lojas gl JOIN lojas l ON gl.lojaId = l.id JOIN gestores g ON gl.gestorId = g.id JOIN users u ON g.userId = u.id WHERE l.nome IN ('Barcelos', 'Braga - minho center', 'Braga sm', 'Famalicão', 'Famalicão sm', 'Guimarães', 'Mycarcenter', 'Paços de Ferreira', 'Paredes', 'Paredes sm', 'Póvoa de Varzim', 'Viana do Castelo', 'Viana do Castelo sm', 'Vila Verde') ORDER BY l.nome, gl.createdAt DESC;",
+  "rows": [
+    {
+      "id": "1320002",
+      "lojaId": "60002",
+      "nome": "Barcelos",
+      "gestorId": "1380001",
+      "userId": "1",
+      "gestorNome": "Marco Amorim"
+    },
+    {
+      "id": "60001",
+      "lojaId": "60002",
+      "nome": "Barcelos",
+      "gestorId": "30001",
+      "userId": "420030",
+      "gestorNome": "Marco Amorim"
+    },
+    {
+      "id": "150001",
+      "lojaId": "180010",
+      "nome": "Braga - minho center",
+      "gestorId": "30001",
+      "userId": "420030",
+      "gestorNome": "Marco Amorim"
+    },
+    {
+      "id": "150002",
+      "lojaId": "180011",
+      "nome": "Braga sm",
+      "gestorId": "30001",
+      "userId": "420030",
+      "gestorNome": "Marco Amorim"
+    },
+    {
+      "id": "1320001",
+      "lojaId": "60001",
+      "nome": "Famalicão",
+      "gestorId": "1380001",
+      "userId": "1",
+      "gestorNome": "Marco Amorim"
+    },
+    {
+      "id": "60003",
+      "lojaId": "60001",
+      "nome": "Famalicão",
+      "gestorId": "30001",
+      "userId": "420030",
+      "gestorNome": "Marco Amorim"
+    },
+    {
+      "id": "150003",
+      "lojaId": "180019",
+      "nome": "Famalicão sm",
+      "gestorId": "30001",
+      "userId": "420030",
+      "gestorNome": "Marco Amorim"
+    },
+    {
+      "id": "150005",
+      "lojaId": "180036",
+      "nome": "Mycarcenter",
+      "gestorId": "30001",
+      "userId": "420030",
+      "gestorNome": "Marco Amorim"
+    },
+    {
+      "id": "1320007",
+      "lojaId": "60007",
+      "nome": "Paços de Ferreira ",
+      "gestorId": "1380001",
+      "userId": "1",
+      "gestorNome": "Marco Amorim"
+    },
+    {
+      "id": "60004",
+      "lojaId": "60007",
+      "nome": "Paços de Ferreira ",
+      "gestorId": "30001",
+      "userId": "420030",
+      "gestorNome": "Marco Amorim"
+    },
+    {
+      "id": "1320006",
+      "lojaId": "60006",
+      "nome": "Paredes",
+      "gestorId": "1380001",
+      "userId": "1",
+      "gestorNome": "Marco Amorim"
+    },
+    {
+      "id": "60005",
+      "lojaId": "60006",
+      "nome": "Paredes",
+      "gestorId": "30001",
+      "userId": "420030",
+      "gestorNome": "Marco Amorim"
+    },
+    {
+      "id": "150006",
+      "lojaId": "180038",
+      "nome": "Paredes sm",
+      "gestorId": "30001",
+      "userId": "420030",
+      "gestorNome": "Marco Amorim"
+    },
+    {
+      "id": "1320005",
+      "lojaId": "60005",
+      "nome": "Póvoa de Varzim",
+      "gestorId": "1380001",
+      "userId": "1",
+      "gestorNome": "Marco Amorim"
+    },
+    {
+      "id": "60006",
+      "lojaId": "60005",
+      "nome": "Póvoa de Varzim",
+      "gestorId": "30001",
+      "userId": "420030",
+      "gestorNome": "Marco Amorim"
+    },
+    {
+      "id": "1320004",
+      "lojaId": "60004",
+      "nome": "Viana do Castelo ",
+      "gestorId": "1380001",
+      "userId": "1",
+      "gestorNome": "Marco Amorim"
+    },
+    {
+      "id": "60007",
+      "lojaId": "60004",
+      "nome": "Viana do Castelo ",
+      "gestorId": "30001",
+      "userId": "420030",
+      "gestorNome": "Marco Amorim"
+    },
+    {
+      "id": "150007",
+      "lojaId": "180057",
+      "nome": "Viana do castelo sm",
+      "gestorId": "30001",
+      "userId": "420030",
+      "gestorNome": "Marco Amorim"
+    },
+    {
+      "id": "1320003",
+      "lojaId": "60003",
+      "nome": "Vila Verde",
+      "gestorId": "1380001",
+      "userId": "1",
+      "gestorNome": "Marco Amorim"
+    },
+    {
+      "id": "60008",
+      "lojaId": "60003",
+      "nome": "Vila Verde",
+      "gestorId": "30001",
+      "userId": "420030",
+      "gestorNome": "Marco Amorim"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tlojaId\tnome\tgestorId\tuserId\tgestorNome\n1320002\t60002\tBarcelos\t1380001\t1\tMarco Amorim\n60001\t60002\tBarcelos\t30001\t420030\tMarco Amorim\n150001\t180010\tBraga - minho center\t30001\t420030\tMarco Amorim\n150002\t180011\tBraga sm\t30001\t420030\tMarco Amorim\n1320001\t60001\tFamalicão\t1380001\t1\tMarco Amorim\n60003\t60001\tFamalicão\t30001\t420030\tMarco Amorim\n150003\t180019\tFamalicão sm\t30001\t420030\tMarco Amorim\n150005\t180036\tMycarcenter\t30001\t420030\tMarco Amorim\n1320007\t60007\tPaços de Ferreira \t1380001\t1\tMarco Amorim\n60004\t60007\tPaços de Ferreira \t30001\t420030\tMarco Amorim\n1320006\t60006\tParedes\t1380001\t1\tMarco Amorim\n60005\t60006\tParedes\t30001\t420030\tMarco Amorim\n150006\t180038\tParedes sm\t30001\t420030\tMarco Amorim\n1320005\t60005\tPóvoa de Varzim\t1380001\t1\tMarco Amorim\n60006\t60005\tPóvoa de Varzim\t30001\t420030\tMarco Amorim\n1320004\t60004\tViana do Castelo \t1380001\t1\tMarco Amorim\n60007\t60004\tViana do Castelo \t30001\t420030\tMarco Amorim\n150007\t180057\tViana do castelo sm\t30001\t420030\tMarco Amorim\n1320003\t60003\tVila Verde\t1380001\t1\tMarco Amorim\n60008\t60003\tVila Verde\t30001\t420030\tMarco Amorim\n",
+  "stderr": "",
+  "execution_time_ms": 60
+}

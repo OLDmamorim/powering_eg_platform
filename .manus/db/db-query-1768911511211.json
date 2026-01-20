@@ -1,0 +1,130 @@
+{
+  "query": "SELECT id, titulo, estado, criadoPorId, criadoPorLojaId, atribuidoUserId, atribuidoLojaId, visto, vistoGestor, createdAt FROM todos ORDER BY createdAt DESC LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT id, titulo, estado, criadoPorId, criadoPorLojaId, atribuidoUserId, atribuidoLojaId, visto, vistoGestor, createdAt FROM todos ORDER BY createdAt DESC LIMIT 10;",
+  "rows": [
+    {
+      "id": "600003",
+      "titulo": "Suporte de vidros",
+      "estado": "pendente",
+      "criadoPorId": "1",
+      "criadoPorLojaId": "60005",
+      "atribuidoUserId": "1",
+      "atribuidoLojaId": "NULL",
+      "visto": "0",
+      "vistoGestor": "0",
+      "createdAt": "2026-01-20 12:14:08"
+    },
+    {
+      "id": "600002",
+      "titulo": "Pedir cola",
+      "estado": "pendente",
+      "criadoPorId": "420030",
+      "criadoPorLojaId": "180010",
+      "atribuidoUserId": "NULL",
+      "atribuidoLojaId": "180010",
+      "visto": "0",
+      "vistoGestor": "0",
+      "createdAt": "2026-01-20 10:54:30"
+    },
+    {
+      "id": "600001",
+      "titulo": "60-MV-90",
+      "estado": "pendente",
+      "criadoPorId": "420030",
+      "criadoPorLojaId": "180010",
+      "atribuidoUserId": "420030",
+      "atribuidoLojaId": "NULL",
+      "visto": "0",
+      "vistoGestor": "0",
+      "createdAt": "2026-01-20 10:12:35"
+    },
+    {
+      "id": "570002",
+      "titulo": "Encomendar 72-RZ-08",
+      "estado": "concluida",
+      "criadoPorId": "420030",
+      "criadoPorLojaId": "180010",
+      "atribuidoUserId": "NULL",
+      "atribuidoLojaId": "180010",
+      "visto": "0",
+      "vistoGestor": "0",
+      "createdAt": "2026-01-20 00:19:58"
+    },
+    {
+      "id": "570001",
+      "titulo": "Devolver vidro oem mercedes",
+      "estado": "concluida",
+      "criadoPorId": "420030",
+      "criadoPorLojaId": "180010",
+      "atribuidoUserId": "NULL",
+      "atribuidoLojaId": "180010",
+      "visto": "0",
+      "vistoGestor": "0",
+      "createdAt": "2026-01-20 00:19:06"
+    },
+    {
+      "id": "540001",
+      "titulo": "Pedir vidro",
+      "estado": "pendente",
+      "criadoPorId": "420030",
+      "criadoPorLojaId": "180010",
+      "atribuidoUserId": "420030",
+      "atribuidoLojaId": "NULL",
+      "visto": "0",
+      "vistoGestor": "0",
+      "createdAt": "2026-01-19 18:11:23"
+    },
+    {
+      "id": "510003",
+      "titulo": "Teste",
+      "estado": "pendente",
+      "criadoPorId": "1",
+      "criadoPorLojaId": "60003",
+      "atribuidoUserId": "1",
+      "atribuidoLojaId": "NULL",
+      "visto": "0",
+      "vistoGestor": "0",
+      "createdAt": "2026-01-19 15:22:33"
+    },
+    {
+      "id": "510002",
+      "titulo": "teste",
+      "estado": "concluida",
+      "criadoPorId": "420030",
+      "criadoPorLojaId": "NULL",
+      "atribuidoUserId": "NULL",
+      "atribuidoLojaId": "60003",
+      "visto": "1",
+      "vistoGestor": "0",
+      "createdAt": "2026-01-19 15:21:24"
+    },
+    {
+      "id": "510001",
+      "titulo": "Fs 34",
+      "estado": "pendente",
+      "criadoPorId": "1",
+      "criadoPorLojaId": "60003",
+      "atribuidoUserId": "1",
+      "atribuidoLojaId": "NULL",
+      "visto": "0",
+      "vistoGestor": "0",
+      "createdAt": "2026-01-19 15:20:01"
+    },
+    {
+      "id": "420001",
+      "titulo": "Encerrar fs: 13   AF-72-FE",
+      "estado": "concluida",
+      "criadoPorId": "420030",
+      "criadoPorLojaId": "60007",
+      "atribuidoUserId": "420030",
+      "atribuidoLojaId": "NULL",
+      "visto": "1",
+      "vistoGestor": "1",
+      "createdAt": "2026-01-16 14:23:30"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitulo\testado\tcriadoPorId\tcriadoPorLojaId\tatribuidoUserId\tatribuidoLojaId\tvisto\tvistoGestor\tcreatedAt\n600003\tSuporte de vidros\tpendente\t1\t60005\t1\tNULL\t0\t0\t2026-01-20 12:14:08\n600002\tPedir cola\tpendente\t420030\t180010\tNULL\t180010\t0\t0\t2026-01-20 10:54:30\n600001\t60-MV-90\tpendente\t420030\t180010\t420030\tNULL\t0\t0\t2026-01-20 10:12:35\n570002\tEncomendar 72-RZ-08\tconcluida\t420030\t180010\tNULL\t180010\t0\t0\t2026-01-20 00:19:58\n570001\tDevolver vidro oem mercedes\tconcluida\t420030\t180010\tNULL\t180010\t0\t0\t2026-01-20 00:19:06\n540001\tPedir vidro\tpendente\t420030\t180010\t420030\tNULL\t0\t0\t2026-01-19 18:11:23\n510003\tTeste\tpendente\t1\t60003\t1\tNULL\t0\t0\t2026-01-19 15:22:33\n510002\tteste\tconcluida\t420030\tNULL\tNULL\t60003\t1\t0\t2026-01-19 15:21:24\n510001\tFs 34\tpendente\t1\t60003\t1\tNULL\t0\t0\t2026-01-19 15:20:01\n420001\tEncerrar fs: 13   AF-72-FE\tconcluida\t420030\t60007\t420030\tNULL\t1\t1\t2026-01-16 14:23:30\n",
+  "stderr": "",
+  "execution_time_ms": 63
+}

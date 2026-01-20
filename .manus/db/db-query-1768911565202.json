@@ -1,0 +1,31 @@
+{
+  "query": "SELECT gl.id, gl.gestorId, g.userId, u.name, l.nome as lojaNome FROM gestor_lojas gl JOIN gestores g ON gl.gestorId = g.id JOIN users u ON g.userId = u.id JOIN lojas l ON gl.lojaId = l.id WHERE l.nome LIKE '%Póvoa%' OR l.nome LIKE '%Povoa%';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT gl.id, gl.gestorId, g.userId, u.name, l.nome as lojaNome FROM gestor_lojas gl JOIN gestores g ON gl.gestorId = g.id JOIN users u ON g.userId = u.id JOIN lojas l ON gl.lojaId = l.id WHERE l.nome LIKE '%Póvoa%' OR l.nome LIKE '%Povoa%';",
+  "rows": [
+    {
+      "id": "1320005",
+      "gestorId": "1380001",
+      "userId": "1",
+      "name": "Marco Amorim",
+      "lojaNome": "Póvoa de Varzim"
+    },
+    {
+      "id": "60006",
+      "gestorId": "30001",
+      "userId": "420030",
+      "name": "Marco Amorim",
+      "lojaNome": "Póvoa de Varzim"
+    },
+    {
+      "id": "1110020",
+      "gestorId": "1080020",
+      "userId": "8940679",
+      "name": "Carlos Eduardo",
+      "lojaNome": "Póvoa de santa iria"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tgestorId\tuserId\tname\tlojaNome\n1320005\t1380001\t1\tMarco Amorim\tPóvoa de Varzim\n60006\t30001\t420030\tMarco Amorim\tPóvoa de Varzim\n1110020\t1080020\t8940679\tCarlos Eduardo\tPóvoa de santa iria\n",
+  "stderr": "",
+  "execution_time_ms": 58
+}

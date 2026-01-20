@@ -1,0 +1,18 @@
+{
+  "query": "SELECT t.id, t.titulo, t.criadoPorLojaId, t.atribuidoLojaId, l.id as lojaId, l.nome as lojaNome FROM todos t JOIN lojas l ON t.criadoPorLojaId = l.id WHERE l.nome LIKE '%Póvoa%' OR l.nome LIKE '%Povoa%' ORDER BY t.createdAt DESC LIMIT 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT t.id, t.titulo, t.criadoPorLojaId, t.atribuidoLojaId, l.id as lojaId, l.nome as lojaNome FROM todos t JOIN lojas l ON t.criadoPorLojaId = l.id WHERE l.nome LIKE '%Póvoa%' OR l.nome LIKE '%Povoa%' ORDER BY t.createdAt DESC LIMIT 1;",
+  "rows": [
+    {
+      "id": "600003",
+      "titulo": "Suporte de vidros",
+      "criadoPorLojaId": "60005",
+      "atribuidoLojaId": "NULL",
+      "lojaId": "60005",
+      "lojaNome": "Póvoa de Varzim"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitulo\tcriadoPorLojaId\tatribuidoLojaId\tlojaId\tlojaNome\n600003\tSuporte de vidros\t60005\tNULL\t60005\tPóvoa de Varzim\n",
+  "stderr": "",
+  "execution_time_ms": 56
+}

@@ -1,0 +1,21 @@
+{
+  "query": "SELECT t.id, t.titulo, t.estado, t.criadoPorId, t.criadoPorLojaId, t.atribuidoUserId, t.atribuidoLojaId, l1.nome as lojaCriadora, l2.nome as lojaAtribuida FROM todos t LEFT JOIN lojas l1 ON t.criadoPorLojaId = l1.id LEFT JOIN lojas l2 ON t.atribuidoLojaId = l2.id WHERE l1.nome LIKE '%Póvoa%' OR l1.nome LIKE '%Povoa%' ORDER BY t.createdAt DESC LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT t.id, t.titulo, t.estado, t.criadoPorId, t.criadoPorLojaId, t.atribuidoUserId, t.atribuidoLojaId, l1.nome as lojaCriadora, l2.nome as lojaAtribuida FROM todos t LEFT JOIN lojas l1 ON t.criadoPorLojaId = l1.id LEFT JOIN lojas l2 ON t.atribuidoLojaId = l2.id WHERE l1.nome LIKE '%Póvoa%' OR l1.nome LIKE '%Povoa%' ORDER BY t.createdAt DESC LIMIT 5;",
+  "rows": [
+    {
+      "id": "600003",
+      "titulo": "Suporte de vidros",
+      "estado": "pendente",
+      "criadoPorId": "1",
+      "criadoPorLojaId": "60005",
+      "atribuidoUserId": "1",
+      "atribuidoLojaId": "NULL",
+      "lojaCriadora": "Póvoa de Varzim",
+      "lojaAtribuida": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitulo\testado\tcriadoPorId\tcriadoPorLojaId\tatribuidoUserId\tatribuidoLojaId\tlojaCriadora\tlojaAtribuida\n600003\tSuporte de vidros\tpendente\t1\t60005\t1\tNULL\tPóvoa de Varzim\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 67
+}

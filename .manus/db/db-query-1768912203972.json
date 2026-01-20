@@ -1,0 +1,62 @@
+{
+  "query": "SELECT id, nome FROM lojas WHERE nome IN ('Barcelos', 'Braga - minho center', 'Braga sm', 'Famalicão', 'Famalicão sm', 'Guimarães', 'Mycarcenter', 'Paços de Ferreira', 'Paredes', 'Paredes sm', 'Póvoa de Varzim', 'Viana do Castelo', 'Viana do Castelo sm', 'Vila Verde');",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT id, nome FROM lojas WHERE nome IN ('Barcelos', 'Braga - minho center', 'Braga sm', 'Famalicão', 'Famalicão sm', 'Guimarães', 'Mycarcenter', 'Paços de Ferreira', 'Paredes', 'Paredes sm', 'Póvoa de Varzim', 'Viana do Castelo', 'Viana do Castelo sm', 'Vila Verde');",
+  "rows": [
+    {
+      "id": "60001",
+      "nome": "Famalicão"
+    },
+    {
+      "id": "60002",
+      "nome": "Barcelos"
+    },
+    {
+      "id": "60003",
+      "nome": "Vila Verde"
+    },
+    {
+      "id": "60004",
+      "nome": "Viana do Castelo "
+    },
+    {
+      "id": "60005",
+      "nome": "Póvoa de Varzim"
+    },
+    {
+      "id": "60006",
+      "nome": "Paredes"
+    },
+    {
+      "id": "60007",
+      "nome": "Paços de Ferreira "
+    },
+    {
+      "id": "180010",
+      "nome": "Braga - minho center"
+    },
+    {
+      "id": "180011",
+      "nome": "Braga sm"
+    },
+    {
+      "id": "180019",
+      "nome": "Famalicão sm"
+    },
+    {
+      "id": "180036",
+      "nome": "Mycarcenter"
+    },
+    {
+      "id": "180038",
+      "nome": "Paredes sm"
+    },
+    {
+      "id": "180057",
+      "nome": "Viana do castelo sm"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tnome\n60001\tFamalicão\n60002\tBarcelos\n60003\tVila Verde\n60004\tViana do Castelo \n60005\tPóvoa de Varzim\n60006\tParedes\n60007\tPaços de Ferreira \n180010\tBraga - minho center\n180011\tBraga sm\n180019\tFamalicão sm\n180036\tMycarcenter\n180038\tParedes sm\n180057\tViana do castelo sm\n",
+  "stderr": "",
+  "execution_time_ms": 60
+}

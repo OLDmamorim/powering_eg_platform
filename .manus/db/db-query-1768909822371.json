@@ -1,0 +1,21 @@
+{
+  "query": "SELECT id, titulo, visto, vistoGestor, estado, criadoPorId, criadoPorLojaId, atribuidoUserId, atribuidoLojaId FROM todos WHERE titulo LIKE '%AF-72-FE%' LIMIT 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT id, titulo, visto, vistoGestor, estado, criadoPorId, criadoPorLojaId, atribuidoUserId, atribuidoLojaId FROM todos WHERE titulo LIKE '%AF-72-FE%' LIMIT 1;",
+  "rows": [
+    {
+      "id": "420001",
+      "titulo": "Encerrar fs: 13   AF-72-FE",
+      "visto": "1",
+      "vistoGestor": "1",
+      "estado": "concluida",
+      "criadoPorId": "420030",
+      "criadoPorLojaId": "60007",
+      "atribuidoUserId": "420030",
+      "atribuidoLojaId": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitulo\tvisto\tvistoGestor\testado\tcriadoPorId\tcriadoPorLojaId\tatribuidoUserId\tatribuidoLojaId\n420001\tEncerrar fs: 13   AF-72-FE\t1\t1\tconcluida\t420030\t60007\t420030\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 65
+}

@@ -1,0 +1,130 @@
+{
+  "query": "SELECT t.id, t.titulo, t.estado, t.criadoPorId, t.criadoPorLojaId, t.atribuidoUserId, t.atribuidoLojaId, t.visto, t.vistoGestor, l.nome as lojaCriadora FROM todos t LEFT JOIN lojas l ON t.criadoPorLojaId = l.id ORDER BY t.createdAt DESC LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT t.id, t.titulo, t.estado, t.criadoPorId, t.criadoPorLojaId, t.atribuidoUserId, t.atribuidoLojaId, t.visto, t.vistoGestor, l.nome as lojaCriadora FROM todos t LEFT JOIN lojas l ON t.criadoPorLojaId = l.id ORDER BY t.createdAt DESC LIMIT 10;",
+  "rows": [
+    {
+      "id": "600003",
+      "titulo": "Suporte de vidros",
+      "estado": "pendente",
+      "criadoPorId": "1",
+      "criadoPorLojaId": "60005",
+      "atribuidoUserId": "1",
+      "atribuidoLojaId": "NULL",
+      "visto": "0",
+      "vistoGestor": "0",
+      "lojaCriadora": "Póvoa de Varzim"
+    },
+    {
+      "id": "600002",
+      "titulo": "Pedir cola",
+      "estado": "pendente",
+      "criadoPorId": "420030",
+      "criadoPorLojaId": "180010",
+      "atribuidoUserId": "NULL",
+      "atribuidoLojaId": "180010",
+      "visto": "0",
+      "vistoGestor": "0",
+      "lojaCriadora": "Braga - minho center"
+    },
+    {
+      "id": "600001",
+      "titulo": "60-MV-90",
+      "estado": "pendente",
+      "criadoPorId": "420030",
+      "criadoPorLojaId": "180010",
+      "atribuidoUserId": "420030",
+      "atribuidoLojaId": "NULL",
+      "visto": "0",
+      "vistoGestor": "0",
+      "lojaCriadora": "Braga - minho center"
+    },
+    {
+      "id": "570002",
+      "titulo": "Encomendar 72-RZ-08",
+      "estado": "concluida",
+      "criadoPorId": "420030",
+      "criadoPorLojaId": "180010",
+      "atribuidoUserId": "NULL",
+      "atribuidoLojaId": "180010",
+      "visto": "0",
+      "vistoGestor": "0",
+      "lojaCriadora": "Braga - minho center"
+    },
+    {
+      "id": "570001",
+      "titulo": "Devolver vidro oem mercedes",
+      "estado": "concluida",
+      "criadoPorId": "420030",
+      "criadoPorLojaId": "180010",
+      "atribuidoUserId": "NULL",
+      "atribuidoLojaId": "180010",
+      "visto": "0",
+      "vistoGestor": "0",
+      "lojaCriadora": "Braga - minho center"
+    },
+    {
+      "id": "540001",
+      "titulo": "Pedir vidro",
+      "estado": "pendente",
+      "criadoPorId": "420030",
+      "criadoPorLojaId": "180010",
+      "atribuidoUserId": "420030",
+      "atribuidoLojaId": "NULL",
+      "visto": "0",
+      "vistoGestor": "0",
+      "lojaCriadora": "Braga - minho center"
+    },
+    {
+      "id": "510003",
+      "titulo": "Teste",
+      "estado": "pendente",
+      "criadoPorId": "1",
+      "criadoPorLojaId": "60003",
+      "atribuidoUserId": "1",
+      "atribuidoLojaId": "NULL",
+      "visto": "0",
+      "vistoGestor": "0",
+      "lojaCriadora": "Vila Verde"
+    },
+    {
+      "id": "510002",
+      "titulo": "teste",
+      "estado": "concluida",
+      "criadoPorId": "420030",
+      "criadoPorLojaId": "NULL",
+      "atribuidoUserId": "NULL",
+      "atribuidoLojaId": "60003",
+      "visto": "1",
+      "vistoGestor": "0",
+      "lojaCriadora": "NULL"
+    },
+    {
+      "id": "510001",
+      "titulo": "Fs 34",
+      "estado": "pendente",
+      "criadoPorId": "1",
+      "criadoPorLojaId": "60003",
+      "atribuidoUserId": "1",
+      "atribuidoLojaId": "NULL",
+      "visto": "0",
+      "vistoGestor": "0",
+      "lojaCriadora": "Vila Verde"
+    },
+    {
+      "id": "420001",
+      "titulo": "Encerrar fs: 13   AF-72-FE",
+      "estado": "concluida",
+      "criadoPorId": "420030",
+      "criadoPorLojaId": "60007",
+      "atribuidoUserId": "420030",
+      "atribuidoLojaId": "NULL",
+      "visto": "1",
+      "vistoGestor": "1",
+      "lojaCriadora": "Paços de Ferreira "
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitulo\testado\tcriadoPorId\tcriadoPorLojaId\tatribuidoUserId\tatribuidoLojaId\tvisto\tvistoGestor\tlojaCriadora\n600003\tSuporte de vidros\tpendente\t1\t60005\t1\tNULL\t0\t0\tPóvoa de Varzim\n600002\tPedir cola\tpendente\t420030\t180010\tNULL\t180010\t0\t0\tBraga - minho center\n600001\t60-MV-90\tpendente\t420030\t180010\t420030\tNULL\t0\t0\tBraga - minho center\n570002\tEncomendar 72-RZ-08\tconcluida\t420030\t180010\tNULL\t180010\t0\t0\tBraga - minho center\n570001\tDevolver vidro oem mercedes\tconcluida\t420030\t180010\tNULL\t180010\t0\t0\tBraga - minho center\n540001\tPedir vidro\tpendente\t420030\t180010\t420030\tNULL\t0\t0\tBraga - minho center\n510003\tTeste\tpendente\t1\t60003\t1\tNULL\t0\t0\tVila Verde\n510002\tteste\tconcluida\t420030\tNULL\tNULL\t60003\t1\t0\tNULL\n510001\tFs 34\tpendente\t1\t60003\t1\tNULL\t0\t0\tVila Verde\n420001\tEncerrar fs: 13   AF-72-FE\tconcluida\t420030\t60007\t420030\tNULL\t1\t1\tPaços de Ferreira \n",
+  "stderr": "",
+  "execution_time_ms": 61
+}

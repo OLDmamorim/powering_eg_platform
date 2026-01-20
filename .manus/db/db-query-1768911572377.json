@@ -1,0 +1,37 @@
+{
+  "query": "SELECT gl.id, gl.gestorId, gl.lojaId, g.userId, u.name as gestorNome, u.email, l.nome as lojaNome FROM gestor_lojas gl JOIN gestores g ON gl.gestorId = g.id JOIN users u ON g.userId = u.id JOIN lojas l ON gl.lojaId = l.id WHERE l.nome LIKE '%Póvoa%' OR l.nome LIKE '%Povoa%' ORDER BY gl.createdAt DESC;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT gl.id, gl.gestorId, gl.lojaId, g.userId, u.name as gestorNome, u.email, l.nome as lojaNome FROM gestor_lojas gl JOIN gestores g ON gl.gestorId = g.id JOIN users u ON g.userId = u.id JOIN lojas l ON gl.lojaId = l.id WHERE l.nome LIKE '%Póvoa%' OR l.nome LIKE '%Povoa%' ORDER BY gl.createdAt DESC;",
+  "rows": [
+    {
+      "id": "1320005",
+      "gestorId": "1380001",
+      "lojaId": "60005",
+      "userId": "1",
+      "gestorNome": "Marco Amorim",
+      "email": "mramorim78@gmail.com",
+      "lojaNome": "Póvoa de Varzim"
+    },
+    {
+      "id": "1110020",
+      "gestorId": "1080020",
+      "lojaId": "180045",
+      "userId": "8940679",
+      "gestorNome": "Carlos Eduardo",
+      "email": "carlos.eduardo@expressglass.pt",
+      "lojaNome": "Póvoa de santa iria"
+    },
+    {
+      "id": "60006",
+      "gestorId": "30001",
+      "lojaId": "60005",
+      "userId": "420030",
+      "gestorNome": "Marco Amorim",
+      "email": "mamorim@expressglass.pt",
+      "lojaNome": "Póvoa de Varzim"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tgestorId\tlojaId\tuserId\tgestorNome\temail\tlojaNome\n1320005\t1380001\t60005\t1\tMarco Amorim\tmramorim78@gmail.com\tPóvoa de Varzim\n1110020\t1080020\t180045\t8940679\tCarlos Eduardo\tcarlos.eduardo@expressglass.pt\tPóvoa de santa iria\n60006\t30001\t60005\t420030\tMarco Amorim\tmamorim@expressglass.pt\tPóvoa de Varzim\n",
+  "stderr": "",
+  "execution_time_ms": 59
+}

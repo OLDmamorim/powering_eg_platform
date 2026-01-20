@@ -175,7 +175,12 @@ export default function Todos() {
   
   const marcarVistoMutation = trpc.todos.marcarVisto.useMutation({
     onSuccess: () => {
+      console.log('[marcarVisto] Sucesso - refetching todos');
       refetchTodos();
+    },
+    onError: (error) => {
+      console.error('[marcarVisto] Erro:', error);
+      toast.error('Erro ao marcar como visto: ' + error.message);
     },
   });
   
@@ -1083,12 +1088,24 @@ function TodoCard({
 }) {
   // Marcar como visto ao clicar no card (se não visto e é para mim)
   const handleClick = () => {
+    console.log('[TodoCard] handleClick chamado', { 
+      todoId: todo.id, 
+      titulo: todo.titulo,
+      visto: todo.visto, 
+      vistoGestor: todo.vistoGestor,
+      isParaMim,
+      shouldMarkVisto: !todo.visto && isParaMim,
+      shouldMarkVistoGestor: !todo.vistoGestor && isParaMim
+    });
+    
     // Marcar como visto pela loja (campo visto)
     if (!todo.visto && isParaMim) {
+      console.log('[TodoCard] Chamando onMarcarVisto para todo.id:', todo.id);
       onMarcarVisto(todo.id);
     }
     // Marcar como visto pelo gestor (campo vistoGestor) - para controlar animação do botão
     if (!todo.vistoGestor && isParaMim) {
+      console.log('[TodoCard] Chamando onMarcarVistoGestor para todo.id:', todo.id);
       onMarcarVistoGestor(todo.id);
     }
   };
