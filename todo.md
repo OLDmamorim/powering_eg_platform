@@ -3489,3 +3489,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## Bug Fix - Calendário Volante v6.15.2
 - [x] Pedidos rejeitados não devem aparecer no calendário
 - [x] Pedido aprovado de Braga dia 22 não aparece no calendário (corrigido suporte para dia_todo)
+
+
+## Melhorias Calendário Volante v6.15.3
+- [x] Aumentar tamanho dos dias no calendário para melhor visualização
+- [x] Ao clicar num dia, abrir modal com todas as atividades desse dia
+- [x] Garantir que pedidos rejeitados não aparecem no calendário (filtrado no servidor)

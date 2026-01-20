@@ -1,4 +1,4 @@
-import { eq, and, desc, asc, sql, inArray, gte, lte, or, gt, lt, isNull } from "drizzle-orm";
+import { eq, and, desc, asc, sql, inArray, gte, lte, or, gt, lt, isNull, not } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { 
   InsertUser, 
@@ -8628,7 +8628,9 @@ export async function getEstadoDiasDoMes(volanteId: number, year: number, month:
     .where(and(
       eq(pedidosApoio.volanteId, volanteId),
       gte(pedidosApoio.data, startDate),
-      lte(pedidosApoio.data, endDate)
+      lte(pedidosApoio.data, endDate),
+      // Excluir pedidos rejeitados do calendário
+      sql`${pedidosApoio.estado} != 'rejeitado'`
     ));
   
   // Agrupar por dia

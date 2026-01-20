@@ -4312,6 +4312,8 @@ function VolanteInterface({
     const hoje = new Date();
     return [{ mes: hoje.getMonth() + 1, ano: hoje.getFullYear() }];
   });
+  const [diaDetalheOpen, setDiaDetalheOpen] = useState(false);
+  const [diaDetalheSelecionado, setDiaDetalheSelecionado] = useState<{data: string; pedidos: any[]}>({ data: '', pedidos: [] });
 
   // Query para obter pedidos de apoio do volante
   const { data: pedidosApoio, refetch: refetchPedidos, isLoading: loadingPedidos } = trpc.pedidosApoio.listarPorVolante.useQuery(
@@ -4479,7 +4481,7 @@ END:VCALENDAR`;
     
     // Dias vazios no início
     for (let i = 0; i < diaSemanaInicio; i++) {
-      dias.push(<div key={`empty-${i}`} className="h-20 bg-gray-50 rounded-lg"></div>);
+      dias.push(<div key={`empty-${i}`} className="min-h-[100px] bg-gray-50 rounded-lg"></div>);
     }
 
     // Dias do mês
@@ -4487,48 +4489,63 @@ END:VCALENDAR`;
       const dataStr = `${mesSelecionado.ano}-${String(mesSelecionado.mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
       const estadoDia = estadoMes?.[dataStr];
       // Filtrar pedidos rejeitados - não devem aparecer no calendário
-      const pedidosDia = (estadoDia?.pedidos || []).filter((p: any) => p.estado !== 'rejeitado');
+      const todosPedidosDia = estadoDia?.pedidos || [];
+      const pedidosDia = todosPedidosDia.filter((p: any) => p.estado !== 'rejeitado');
       
       let bgColor = 'bg-white';
       let borderColor = 'border-gray-200';
       
-      if (estadoDia?.estado === 'dia_completo') {
+      // Recalcular estado baseado apenas em pedidos não rejeitados
+      const pedidosAprovados = pedidosDia.filter((p: any) => p.estado === 'aprovado');
+      const manhaAprovada = pedidosAprovados.some((p: any) => p.periodo === 'manha');
+      const tardeAprovada = pedidosAprovados.some((p: any) => p.periodo === 'tarde');
+      const diaTodoAprovado = pedidosAprovados.some((p: any) => p.periodo === 'dia_todo');
+      const temPendente = pedidosDia.some((p: any) => p.estado === 'pendente');
+      
+      if (diaTodoAprovado || (manhaAprovada && tardeAprovada)) {
         bgColor = 'bg-red-100';
         borderColor = 'border-red-300';
-      } else if (estadoDia?.estado === 'manha_ocupada') {
+      } else if (manhaAprovada) {
         bgColor = 'bg-purple-100';
         borderColor = 'border-purple-300';
-      } else if (estadoDia?.estado === 'tarde_ocupada') {
+      } else if (tardeAprovada) {
         bgColor = 'bg-blue-100';
         borderColor = 'border-blue-300';
-      } else if (pedidosDia.some((p: any) => p.estado === 'pendente')) {
+      } else if (temPendente) {
         bgColor = 'bg-yellow-100';
         borderColor = 'border-yellow-300';
       }
 
+      const handleDiaClick = () => {
+        if (pedidosDia.length > 0) {
+          setDiaDetalheSelecionado({ data: dataStr, pedidos: pedidosDia });
+          setDiaDetalheOpen(true);
+        }
+      };
+
       dias.push(
         <div 
           key={dia} 
-          className={`h-20 ${bgColor} border ${borderColor} rounded-lg p-1 overflow-hidden`}
+          className={`min-h-[100px] ${bgColor} border ${borderColor} rounded-lg p-2 overflow-hidden cursor-pointer hover:shadow-md transition-shadow`}
+          onClick={handleDiaClick}
         >
-          <div className="text-xs font-medium text-gray-700 mb-1">{dia}</div>
-          <div className="space-y-0.5">
+          <div className="text-sm font-semibold text-gray-700 mb-1">{dia}</div>
+          <div className="space-y-1">
             {pedidosDia.slice(0, 2).map((pedido: any, idx: number) => (
               <div 
                 key={idx}
-                className={`text-[10px] px-1 py-0.5 rounded truncate cursor-pointer hover:opacity-80 ${
+                className={`text-xs px-1.5 py-1 rounded truncate ${
                   pedido.estado === 'pendente' ? 'bg-yellow-300 text-yellow-900' :
                   pedido.estado === 'aprovado' ? (pedido.periodo === 'manha' ? 'bg-purple-400 text-white' : pedido.periodo === 'tarde' ? 'bg-blue-400 text-white' : 'bg-green-400 text-white') :
                   'bg-gray-300 text-gray-700'
                 }`}
-                onClick={() => setPedidoSelecionado(pedido)}
                 title={`${pedido.loja?.nome || 'Loja'} - ${pedido.periodo === 'manha' ? 'Manhã' : pedido.periodo === 'tarde' ? 'Tarde' : 'Dia Todo'}`}
               >
-                {pedido.loja?.nome?.substring(0, 10) || 'Loja'}
+                {pedido.loja?.nome?.substring(0, 12) || 'Loja'}
               </div>
             ))}
             {pedidosDia.length > 2 && (
-              <div className="text-[10px] text-gray-500">+{pedidosDia.length - 2}</div>
+              <div className="text-xs text-gray-500 font-medium">+{pedidosDia.length - 2} mais</div>
             )}
           </div>
         </div>
@@ -6168,6 +6185,109 @@ END:VCALENDAR`;
                 <Pencil className="h-4 w-4 mr-2" />
               )}
               {language === 'pt' ? 'Guardar' : 'Save'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog de Detalhes do Dia */}
+      <Dialog open={diaDetalheOpen} onOpenChange={setDiaDetalheOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Calendar className="h-5 w-5 text-teal-600" />
+              {language === 'pt' ? 'Atividades do Dia' : 'Day Activities'}
+            </DialogTitle>
+            <DialogDescription>
+              {diaDetalheSelecionado.data && new Date(diaDetalheSelecionado.data + 'T12:00:00').toLocaleDateString(language === 'pt' ? 'pt-PT' : 'en-US', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 max-h-[400px] overflow-y-auto">
+            {diaDetalheSelecionado.pedidos.map((pedido: any, idx: number) => (
+              <div 
+                key={idx}
+                className={`p-3 rounded-lg border ${
+                  pedido.estado === 'pendente' ? 'bg-yellow-50 border-yellow-200' :
+                  pedido.estado === 'aprovado' ? 'bg-green-50 border-green-200' :
+                  'bg-gray-50 border-gray-200'
+                }`}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-semibold text-gray-800">{pedido.loja?.nome || 'Loja'}</span>
+                  <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                    pedido.estado === 'pendente' ? 'bg-yellow-200 text-yellow-800' :
+                    pedido.estado === 'aprovado' ? 'bg-green-200 text-green-800' :
+                    'bg-gray-200 text-gray-800'
+                  }`}>
+                    {pedido.estado === 'pendente' ? (language === 'pt' ? 'Pendente' : 'Pending') :
+                     pedido.estado === 'aprovado' ? (language === 'pt' ? 'Aprovado' : 'Approved') :
+                     (language === 'pt' ? 'Rejeitado' : 'Rejected')}
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div>
+                    <span className="text-gray-500">{language === 'pt' ? 'Período:' : 'Period:'}</span>
+                    <span className={`ml-1 font-medium ${
+                      pedido.periodo === 'manha' ? 'text-purple-600' :
+                      pedido.periodo === 'tarde' ? 'text-blue-600' :
+                      'text-green-600'
+                    }`}>
+                      {pedido.periodo === 'manha' ? (language === 'pt' ? 'Manhã (9h-13h)' : 'Morning (9h-13h)') :
+                       pedido.periodo === 'tarde' ? (language === 'pt' ? 'Tarde (14h-18h)' : 'Afternoon (14h-18h)') :
+                       (language === 'pt' ? 'Dia Todo (9h-18h)' : 'Full Day (9h-18h)')}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-gray-500">{language === 'pt' ? 'Tipo:' : 'Type:'}</span>
+                    <span className="ml-1 font-medium text-gray-700">
+                      {pedido.tipoApoio === 'cobertura_ferias' ? (language === 'pt' ? 'Cobertura de férias' : 'Holiday coverage') :
+                       pedido.tipoApoio === 'substituicao_vidros' ? (language === 'pt' ? 'Substituição de vidros' : 'Glass replacement') :
+                       (language === 'pt' ? 'Outro' : 'Other')}
+                    </span>
+                  </div>
+                </div>
+                {pedido.observacoes && (
+                  <div className="mt-2 text-sm">
+                    <span className="text-gray-500">{language === 'pt' ? 'Obs:' : 'Notes:'}</span>
+                    <span className="ml-1 text-gray-700">{pedido.observacoes}</span>
+                  </div>
+                )}
+                {pedido.estado === 'pendente' && (
+                  <div className="mt-3 flex gap-2">
+                    <Button
+                      size="sm"
+                      className="bg-green-600 hover:bg-green-700 flex-1"
+                      onClick={() => {
+                        setPedidoSelecionado(pedido);
+                        setDiaDetalheOpen(false);
+                        aprovarMutation.mutate({ token, pedidoId: pedido.id });
+                      }}
+                      disabled={aprovarMutation.isPending}
+                    >
+                      <Check className="h-4 w-4 mr-1" />
+                      {language === 'pt' ? 'Aprovar' : 'Approve'}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      className="flex-1"
+                      onClick={() => {
+                        setPedidoSelecionado(pedido);
+                        setDiaDetalheOpen(false);
+                        setReprovarDialogOpen(true);
+                      }}
+                    >
+                      <X className="h-4 w-4 mr-1" />
+                      {language === 'pt' ? 'Reprovar' : 'Reject'}
+                    </Button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDiaDetalheOpen(false)}>
+              {language === 'pt' ? 'Fechar' : 'Close'}
             </Button>
           </DialogFooter>
         </DialogContent>
