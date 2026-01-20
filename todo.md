@@ -3471,3 +3471,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Permitir lojas consultarem dias fechados (vermelhos) para ver o que está agendado
 - [x] Atualizar schema da base de dados para suportar período "dia_todo"
 - [ ] Testar funcionalidade completa
+
+
+## Bug Fix - Tradução Menu v6.14.1
+- [x] Corrigir tradução em falta para "menu.items.volantes" no menu do Dashboard
