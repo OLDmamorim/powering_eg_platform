@@ -8418,18 +8418,25 @@ export async function getPedidoApoioById(pedidoId: number): Promise<PedidoApoio 
 }
 
 /**
- * Obter pedidos de apoio de um volante
+ * Obter pedidos de apoio de um volante (exclui rejeitados)
  */
 export async function getPedidosApoioByVolanteId(volanteId: number): Promise<(PedidoApoio & { loja: Loja })[]> {
   const db = await getDb();
   if (!db) return [];
   
+  const hoje = new Date();
+  hoje.setHours(0, 0, 0, 0);
+  
   const result = await db
     .select({ pedido: pedidosApoio, loja: lojas })
     .from(pedidosApoio)
     .innerJoin(lojas, eq(pedidosApoio.lojaId, lojas.id))
-    .where(eq(pedidosApoio.volanteId, volanteId))
-    .orderBy(desc(pedidosApoio.data));
+    .where(and(
+      eq(pedidosApoio.volanteId, volanteId),
+      // Excluir pedidos rejeitados
+      sql`${pedidosApoio.estado} != 'rejeitado'`
+    ))
+    .orderBy(asc(pedidosApoio.data));
   
   return result.map(r => ({ ...r.pedido, loja: r.loja }));
 }

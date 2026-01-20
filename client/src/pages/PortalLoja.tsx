@@ -4427,7 +4427,15 @@ function VolanteInterface({
 
   // Agrupar pedidos por estado
   const pedidosPendentes = pedidosApoio?.filter((p: any) => p.estado === 'pendente') || [];
-  const pedidosAprovados = pedidosApoio?.filter((p: any) => p.estado === 'aprovado') || [];
+  // Próximos apoios: apenas aprovados com data >= hoje
+  const hoje = new Date();
+  hoje.setHours(0, 0, 0, 0);
+  const pedidosAprovados = pedidosApoio?.filter((p: any) => {
+    if (p.estado !== 'aprovado') return false;
+    const dataPedido = new Date(p.data);
+    dataPedido.setHours(0, 0, 0, 0);
+    return dataPedido >= hoje;
+  }).sort((a: any, b: any) => new Date(a.data).getTime() - new Date(b.data).getTime()) || [];
   const pedidosReprovados = pedidosApoio?.filter((p: any) => p.estado === 'reprovado') || [];
 
   // Função para gerar links de calendário
@@ -4481,7 +4489,7 @@ END:VCALENDAR`;
     
     // Dias vazios no início
     for (let i = 0; i < diaSemanaInicio; i++) {
-      dias.push(<div key={`empty-${i}`} className="min-h-[100px] bg-gray-50 rounded-lg"></div>);
+      dias.push(<div key={`empty-${i}`} className="h-20 bg-gray-50 rounded-lg"></div>);
     }
 
     // Dias do mês
@@ -4526,26 +4534,26 @@ END:VCALENDAR`;
       dias.push(
         <div 
           key={dia} 
-          className={`min-h-[100px] ${bgColor} border ${borderColor} rounded-lg p-2 overflow-hidden cursor-pointer hover:shadow-md transition-shadow`}
+          className={`h-20 ${bgColor} border ${borderColor} rounded-lg p-1 overflow-hidden cursor-pointer hover:shadow-md transition-shadow`}
           onClick={handleDiaClick}
         >
-          <div className="text-sm font-semibold text-gray-700 mb-1">{dia}</div>
-          <div className="space-y-1">
+          <div className="text-xs font-medium text-gray-700 mb-0.5">{dia}</div>
+          <div className="space-y-0.5">
             {pedidosDia.slice(0, 2).map((pedido: any, idx: number) => (
               <div 
                 key={idx}
-                className={`text-xs px-1.5 py-1 rounded truncate ${
+                className={`text-[10px] px-1 py-0.5 rounded truncate ${
                   pedido.estado === 'pendente' ? 'bg-yellow-300 text-yellow-900' :
                   pedido.estado === 'aprovado' ? (pedido.periodo === 'manha' ? 'bg-purple-400 text-white' : pedido.periodo === 'tarde' ? 'bg-blue-400 text-white' : 'bg-green-400 text-white') :
                   'bg-gray-300 text-gray-700'
                 }`}
                 title={`${pedido.loja?.nome || 'Loja'} - ${pedido.periodo === 'manha' ? 'Manhã' : pedido.periodo === 'tarde' ? 'Tarde' : 'Dia Todo'}`}
               >
-                {pedido.loja?.nome?.substring(0, 12) || 'Loja'}
+                {pedido.loja?.nome?.substring(0, 8) || 'Loja'}
               </div>
             ))}
             {pedidosDia.length > 2 && (
-              <div className="text-xs text-gray-500 font-medium">+{pedidosDia.length - 2} mais</div>
+              <div className="text-[10px] text-gray-500">+{pedidosDia.length - 2}</div>
             )}
           </div>
         </div>

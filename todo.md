@@ -3495,3 +3495,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Aumentar tamanho dos dias no calendário para melhor visualização
 - [x] Ao clicar num dia, abrir modal com todas as atividades desse dia
 - [x] Garantir que pedidos rejeitados não aparecem no calendário (filtrado no servidor)
+
+
+## Bug Fix - Calendário Volante v6.15.4
+- [x] Corrigir tamanho dos dias (reduzido para h-20)
+- [x] Pedidos rejeitados filtrados no servidor (getPedidosApoioByVolanteId e getEstadoDiasDoMes)
+- [x] Lista "Próximos Apoios" mostra apenas datas >= hoje, ordenadas por data
