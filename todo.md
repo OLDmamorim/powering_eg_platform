@@ -3501,3 +3501,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Corrigir tamanho dos dias (reduzido para h-20)
 - [x] Pedidos rejeitados filtrados no servidor (getPedidosApoioByVolanteId e getEstadoDiasDoMes)
 - [x] Lista "Próximos Apoios" mostra apenas datas >= hoje, ordenadas por data
+
+
+## Bug Fix CRÍTICO - Calendário Volante v6.15.5
+- [x] Rejeitados filtrados no modal de Atividades do Dia
+- [x] Barcelos (dia 20 - hoje) agora aparece na lista Próximos Apoios
+- [x] Botões de aprovar/reprovar estão no modal (já existiam)
+- [x] Ícones de adicionar ao calendário (Google, Outlook, ICS) já existem

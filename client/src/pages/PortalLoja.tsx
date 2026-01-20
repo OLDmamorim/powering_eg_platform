@@ -4953,8 +4953,6 @@ END:VCALENDAR`;
                 <CardContent>
                   <div className="space-y-3">
                     {pedidosAprovados
-                      .filter((p: any) => new Date(p.data) >= new Date())
-                      .sort((a: any, b: any) => new Date(a.data).getTime() - new Date(b.data).getTime())
                       .slice(0, 5)
                       .map((pedido: any) => {
                         const links = gerarLinksCalendario(pedido);
@@ -6211,7 +6209,7 @@ END:VCALENDAR`;
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3 max-h-[400px] overflow-y-auto">
-            {diaDetalheSelecionado.pedidos.map((pedido: any, idx: number) => (
+            {diaDetalheSelecionado.pedidos.filter((p: any) => p.estado !== 'rejeitado').map((pedido: any, idx: number) => (
               <div 
                 key={idx}
                 className={`p-3 rounded-lg border ${
