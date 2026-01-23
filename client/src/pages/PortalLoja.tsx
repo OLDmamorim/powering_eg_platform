@@ -4358,7 +4358,7 @@ function VolanteInterface({
   );
 
   // Query para obter estado dos dias do mês (calendário)
-  const { data: estadoMes, refetch: refetchEstadoMes } = trpc.pedidosApoio.estadoMes.useQuery(
+  const { data: estadoMes, refetch: refetchEstadoMes } = trpc.pedidosApoio.estadoCompletoMes.useQuery(
     { token, ano: mesSelecionado.ano, mes: mesSelecionado.mes },
     { enabled: !!token }
   );

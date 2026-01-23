@@ -3591,3 +3591,11 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar refetchOnWindowFocus para atualizar quando a janela ganha foco
 - [x] Testar que alterações aparecem imediatamente sem logout/refresh
 
+
+## Bug v6.11.7 - Agendamentos criados no portal do volante não aparecem no calendário
+- [x] Localizar o código do portal do volante e calendário
+- [x] Analisar a lógica de criação de agendamentos
+- [x] Verificar se o agendamento é gravado na base de dados
+- [x] Identificar porque não aparece no calendário após criação (query errada)
+- [x] Corrigir o problema (mudar para estadoCompletoMes)
+- [x] Testar criação de agendamento e visualização no calendário
