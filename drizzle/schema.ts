@@ -1084,6 +1084,9 @@ export type InsertBloqueioVolante = typeof bloqueiosVolante.$inferInsert;
  * Agendamentos do Volante - Agendamentos criados pelo próprio volante
  * Pode ser para uma loja específica ou compromisso pessoal (lojaId = null)
  */
+export const agendamentoVolantePeriodoEnum = mysqlEnum('agendamento_volante_periodo', ['manha', 'tarde', 'dia_todo']);
+export const agendamentoVolanteTipoEnum = mysqlEnum('agendamento_volante_tipo', ['cobertura_ferias', 'substituicao_vidros', 'outro']);
+
 export const agendamentosVolante = mysqlTable("agendamentos_volante", {
   id: int("id").autoincrement().primaryKey(),
   volanteId: int("volanteId").notNull(), // FK para volantes.id
@@ -1091,10 +1094,10 @@ export const agendamentosVolante = mysqlTable("agendamentos_volante", {
   
   // Data e período
   data: timestamp("data").notNull(),
-  periodo: pedidosApoioPeriodoEnum.notNull(), // Manhã, Tarde ou Dia Todo
+  periodo: agendamentoVolantePeriodoEnum.notNull(), // Manhã, Tarde ou Dia Todo
   
   // Tipo e descrição
-  tipoApoio: pedidosApoioTipoEnum, // Tipo de apoio (se for para loja)
+  tipoApoio: agendamentoVolanteTipoEnum, // Tipo de apoio (se for para loja)
   titulo: varchar("titulo", { length: 255 }), // Título do agendamento (se for pessoal)
   descricao: text("descricao"), // Descrição/observações
   

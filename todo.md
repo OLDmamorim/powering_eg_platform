@@ -3599,3 +3599,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Identificar porque não aparece no calendário após criação (query errada)
 - [x] Corrigir o problema (mudar para estadoCompletoMes)
 - [x] Testar criação de agendamento e visualização no calendário
+
+## Bug v6.11.8 - Erro ao criar agendamento no portal do volante
+- [x] Verificar estrutura da tabela agendamentos_volante
+- [x] Corrigir função criarAgendamentoVolante para incluir todos os campos obrigatórios (criar enums separados)
+- [x] Testar criação de agendamento
