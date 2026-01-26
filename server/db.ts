@@ -9024,9 +9024,9 @@ export async function getEstadoCompletoDoMes(volanteId: number, year: number, mo
     const diaTodoBloqueado = dados.bloqueios.some(b => b.periodo === 'dia_todo');
     
     // Verificar agendamentos do volante
-    const manhaAgendada = dados.agendamentos.some((a: any) => a.periodo === 'manha' || a.periodo === 'dia_todo');
-    const tardeAgendada = dados.agendamentos.some((a: any) => a.periodo === 'tarde' || a.periodo === 'dia_todo');
-    const diaTodoAgendado = dados.agendamentos.some((a: any) => a.periodo === 'dia_todo');
+    const manhaAgendada = dados.agendamentos.some((a: any) => a.agendamento_volante_periodo === 'manha' || a.agendamento_volante_periodo === 'dia_todo');
+    const tardeAgendada = dados.agendamentos.some((a: any) => a.agendamento_volante_periodo === 'tarde' || a.agendamento_volante_periodo === 'dia_todo');
+    const diaTodoAgendado = dados.agendamentos.some((a: any) => a.agendamento_volante_periodo === 'dia_todo');
     
     // Determinar estado final
     if (diaTodoBloqueado || (manhaBloqueada && tardeBloqueada)) {

@@ -1,0 +1,22 @@
+{
+  "query": "SELECT * FROM agendamentos_volante LIMIT 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT * FROM agendamentos_volante LIMIT 1;",
+  "rows": [
+    {
+      "id": "1",
+      "volanteId": "2",
+      "lojaId": "60002",
+      "data": "2026-01-21 00:00:00",
+      "titulo": "NULL",
+      "descricao": "NULL",
+      "createdAt": "2026-01-20 12:43:05",
+      "updatedAt": "2026-01-20 12:43:05",
+      "agendamento_volante_periodo": "manha",
+      "agendamento_volante_tipo": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tvolanteId\tlojaId\tdata\ttitulo\tdescricao\tcreatedAt\tupdatedAt\tagendamento_volante_periodo\tagendamento_volante_tipo\n1\t2\t60002\t2026-01-21 00:00:00\tNULL\tNULL\t2026-01-20 12:43:05\t2026-01-20 12:43:05\tmanha\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 1198
+}

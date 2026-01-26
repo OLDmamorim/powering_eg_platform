@@ -1094,10 +1094,10 @@ export const agendamentosVolante = mysqlTable("agendamentos_volante", {
   
   // Data e período
   data: timestamp("data").notNull(),
-  periodo: agendamentoVolantePeriodoEnum.notNull(), // Manhã, Tarde ou Dia Todo
+  agendamento_volante_periodo: agendamentoVolantePeriodoEnum.notNull(), // Manhã, Tarde ou Dia Todo
   
   // Tipo e descrição
-  tipoApoio: agendamentoVolanteTipoEnum, // Tipo de apoio (se for para loja)
+  agendamento_volante_tipo: agendamentoVolanteTipoEnum, // Tipo de apoio (se for para loja)
   titulo: varchar("titulo", { length: 255 }), // Título do agendamento (se for pessoal)
   descricao: text("descricao"), // Descrição/observações
   

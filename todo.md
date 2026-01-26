@@ -3604,3 +3604,12 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Verificar estrutura da tabela agendamentos_volante
 - [x] Corrigir função criarAgendamentoVolante para incluir todos os campos obrigatórios (criar enums separados)
 - [x] Testar criação de agendamento
+
+## Bug v6.11.9 - Agendamento criado mas não aparece no calendário
+- [x] Verificar se o agendamento foi criado na base de dados
+- [x] Verificar se a query estadoCompletoMes está a carregar os agendamentos corretamente
+- [x] Corrigir nomes de colunas no schema (agendamento_volante_periodo, agendamento_volante_tipo)
+- [x] Atualizar routers.ts para usar os novos nomes de propriedades
+- [x] Atualizar db.ts para usar os novos nomes ao verificar períodos
+- [x] Executar migração da base de dados
+- [x] Testar criação de agendamento

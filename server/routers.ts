@@ -7750,8 +7750,8 @@ IMPORTANTE:
           volanteId,
           lojaId: input.lojaId,
           data: dataAgendamento,
-          periodo: input.periodo,
-          tipoApoio: input.tipoApoio,
+          agendamento_volante_periodo: input.periodo,
+          agendamento_volante_tipo: input.tipoApoio,
           titulo: input.titulo,
           descricao: input.descricao,
         });
