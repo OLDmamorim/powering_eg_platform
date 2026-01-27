@@ -1,0 +1,32 @@
+{
+  "query": "\nSELECT \n  l.nome as loja_nome,\n  rm.mes,\n  rm.ano,\n  rm.totalServicos,\n  rm.qtdReparacoes,\n  rm.qtdParaBrisas,\n  rm.taxaReparacao,\n  (rm.qtdReparacoes / rm.totalServicos) as taxa_calc_servicos,\n  (rm.qtdReparacoes / rm.qtdParaBrisas) as taxa_calc_parabrisas\nFROM resultados_mensais rm\nJOIN lojas l ON rm.lojaId = l.id\nWHERE l.nome LIKE '%Braga%'\n  AND rm.mes = 1\n  AND rm.ano = 2026;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute \nSELECT \n  l.nome as loja_nome,\n  rm.mes,\n  rm.ano,\n  rm.totalServicos,\n  rm.qtdReparacoes,\n  rm.qtdParaBrisas,\n  rm.taxaReparacao,\n  (rm.qtdReparacoes / rm.totalServicos) as taxa_calc_servicos,\n  (rm.qtdReparacoes / rm.qtdParaBrisas) as taxa_calc_parabrisas\nFROM resultados_mensais rm\nJOIN lojas l ON rm.lojaId = l.id\nWHERE l.nome LIKE '%Braga%'\n  AND rm.mes = 1\n  AND rm.ano = 2026;\n",
+  "rows": [
+    {
+      "loja_nome": "Braga - minho center",
+      "mes": "1",
+      "ano": "2026",
+      "totalServicos": "57",
+      "qtdReparacoes": "9",
+      "qtdParaBrisas": "22",
+      "taxaReparacao": "0.2903",
+      "taxa_calc_servicos": "0.1579",
+      "taxa_calc_parabrisas": "0.4091"
+    },
+    {
+      "loja_nome": "Braga sm",
+      "mes": "1",
+      "ano": "2026",
+      "totalServicos": "0",
+      "qtdReparacoes": "0",
+      "qtdParaBrisas": "0",
+      "taxaReparacao": "0.0000",
+      "taxa_calc_servicos": "NULL",
+      "taxa_calc_parabrisas": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "loja_nome\tmes\tano\ttotalServicos\tqtdReparacoes\tqtdParaBrisas\ttaxaReparacao\ttaxa_calc_servicos\ttaxa_calc_parabrisas\nBraga - minho center\t1\t2026\t57\t9\t22\t0.2903\t0.1579\t0.4091\nBraga sm\t1\t2026\t0\t0\t0\t0.0000\tNULL\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 403
+}

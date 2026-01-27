@@ -3613,3 +3613,19 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Atualizar db.ts para usar os novos nomes ao verificar períodos
 - [x] Executar migração da base de dados
 - [x] Testar criação de agendamento
+## Bug v6.12.0 - Taxa de reparação errada no portal da loja
+- [ ] Localizar o código que calcula a taxa de reparação no portal da loja (Resultados das Lojas)
+- [ ] Comparar com o cálculo correto do dashboard de resultados
+- [ ] Corrigir o cálculo para corresponder ao dashboard
+- [ ] Testar com a loja Braga - minho center em janeiro 2026
+
+## Bug v6.11.10 - Taxa de Reparação Incorreta no Portal da Loja
+- [x] Identificar discrepância: Portal mostrava 15.8%, Dashboard mostrava 29.0%
+- [x] Localizar código: query dashboardLoja em routers.ts (linha 8038)
+- [x] Identificar causa: taxa calculada como qtdReparacoes/totalServicos (ERRADO)
+- [x] Corrigir cálculo: taxa deve ser qtdReparacoes/qtdParaBrisas (CORRETO)
+- [x] Adicionar variável totalParaBrisas ao loop de agregação
+- [x] Atualizar fórmula na linha 8040
+- [x] Criar teste dashboardLoja.taxaReparacao.test.ts
+- [x] Validar correção: teste confirma 40.9% (correto) vs 15.8% (errado)
+- [x] Todos os testes passaram (3/3)

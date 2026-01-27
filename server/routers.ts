@@ -7997,6 +7997,7 @@ IMPORTANTE:
         let totalServicos = 0;
         let totalObjetivo = 0;
         let totalReparacoes = 0;
+        let totalParaBrisas = 0;
         let totalEscovas = 0;
         let totalPolimento = 0;
         let totalTratamento = 0;
@@ -8012,6 +8013,7 @@ IMPORTANTE:
             totalServicos += Number(resultadosArr.totalServicos) || 0;
             totalObjetivo += Number(resultadosArr.objetivoMensal) || 0;
             totalReparacoes += Number(resultadosArr.qtdReparacoes) || 0;
+            totalParaBrisas += Number(resultadosArr.qtdParaBrisas) || 0;
             if (resultadosArr.updatedAt) {
               const dataAtual = new Date(resultadosArr.updatedAt);
               if (!dataUltimaAtualizacao || dataAtual > dataUltimaAtualizacao) {
@@ -8035,7 +8037,7 @@ IMPORTANTE:
         
         // Calcular métricas agregadas
         const desvioPercentual = totalObjetivo > 0 ? (totalServicos - totalObjetivo) / totalObjetivo : null;
-        const taxaReparacao = totalServicos > 0 ? totalReparacoes / totalServicos : null;
+        const taxaReparacao = totalParaBrisas > 0 ? totalReparacoes / totalParaBrisas : null;
         const escovasPercent = totalServicos > 0 ? totalEscovas / totalServicos : null;
         
         const objetivoDiaAtual = resultadosAgregados?.objetivoDiaAtual ? parseFloat(String(resultadosAgregados.objetivoDiaAtual)) : null;

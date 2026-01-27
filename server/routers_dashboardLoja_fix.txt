@@ -1,0 +1,95 @@
+Linhas 7996-8039 da query dashboardLoja (portalVolante router):
+
+ANTES (ERRADO):
+        // Buscar dados agregados para todos os meses do período
+        let totalServicos = 0;
+        let totalObjetivo = 0;
+        let totalReparacoes = 0;
+        let totalEscovas = 0;
+        let totalPolimento = 0;
+        let totalTratamento = 0;
+        let totalLavagens = 0;
+        let totalOutros = 0;
+        let dataUltimaAtualizacao: Date | null = null;
+        let resultadosAgregados: any = null;
+        let complementaresAgregados: any = null;
+        
+        for (const p of mesesConsulta) {
+          const resultadosArr = await db.getResultadosMensaisPorLoja(lojaIdParaConsulta, p.mes, p.ano);
+          if (resultadosArr) {
+            totalServicos += Number(resultadosArr.totalServicos) || 0;
+            totalObjetivo += Number(resultadosArr.objetivoMensal) || 0;
+            totalReparacoes += Number(resultadosArr.qtdReparacoes) || 0;
+            if (resultadosArr.updatedAt) {
+              const dataAtual = new Date(resultadosArr.updatedAt);
+              if (!dataUltimaAtualizacao || dataAtual > dataUltimaAtualizacao) {
+                dataUltimaAtualizacao = dataAtual;
+              }
+            }
+            if (!resultadosAgregados) resultadosAgregados = resultadosArr;
+          }
+          
+          const complementaresArr = await db.getVendasComplementares(p.mes, p.ano, lojaIdParaConsulta);
+          if (complementaresArr && complementaresArr.length > 0) {
+            const c = complementaresArr[0];
+            totalEscovas += Number(c.escovasQtd) || 0;
+            totalPolimento += Number(c.polimentoQtd) || 0;
+            totalTratamento += Number(c.tratamentoQtd) || 0;
+            totalLavagens += Number(c.lavagensTotal) || 0;
+            totalOutros += Number(c.outrosQtd) || 0;
+            if (!complementaresAgregados) complementaresAgregados = c;
+          }
+        }
+        
+        // Calcular métricas agregadas
+        const desvioPercentual = totalObjetivo > 0 ? (totalServicos - totalObjetivo) / totalObjetivo : null;
+        const taxaReparacao = totalServicos > 0 ? totalReparacoes / totalServicos : null;  // ❌ ERRADO!
+        const escovasPercent = totalServicos > 0 ? totalEscovas / totalServicos : null;
+
+DEPOIS (CORRETO):
+        // Buscar dados agregados para todos os meses do período
+        let totalServicos = 0;
+        let totalObjetivo = 0;
+        let totalReparacoes = 0;
+        let totalParaBrisas = 0;  // ✅ ADICIONADO
+        let totalEscovas = 0;
+        let totalPolimento = 0;
+        let totalTratamento = 0;
+        let totalLavagens = 0;
+        let totalOutros = 0;
+        let dataUltimaAtualizacao: Date | null = null;
+        let resultadosAgregados: any = null;
+        let complementaresAgregados: any = null;
+        
+        for (const p of mesesConsulta) {
+          const resultadosArr = await db.getResultadosMensaisPorLoja(lojaIdParaConsulta, p.mes, p.ano);
+          if (resultadosArr) {
+            totalServicos += Number(resultadosArr.totalServicos) || 0;
+            totalObjetivo += Number(resultadosArr.objetivoMensal) || 0;
+            totalReparacoes += Number(resultadosArr.qtdReparacoes) || 0;
+            totalParaBrisas += Number(resultadosArr.qtdParaBrisas) || 0;  // ✅ ADICIONADO
+            if (resultadosArr.updatedAt) {
+              const dataAtual = new Date(resultadosArr.updatedAt);
+              if (!dataUltimaAtualizacao || dataAtual > dataUltimaAtualizacao) {
+                dataUltimaAtualizacao = dataAtual;
+              }
+            }
+            if (!resultadosAgregados) resultadosAgregados = resultadosArr;
+          }
+          
+          const complementaresArr = await db.getVendasComplementares(p.mes, p.ano, lojaIdParaConsulta);
+          if (complementaresArr && complementaresArr.length > 0) {
+            const c = complementaresArr[0];
+            totalEscovas += Number(c.escovasQtd) || 0;
+            totalPolimento += Number(c.polimentoQtd) || 0;
+            totalTratamento += Number(c.tratamentoQtd) || 0;
+            totalLavagens += Number(c.lavagensTotal) || 0;
+            totalOutros += Number(c.outrosQtd) || 0;
+            if (!complementaresAgregados) complementaresAgregados = c;
+          }
+        }
+        
+        // Calcular métricas agregadas
+        const desvioPercentual = totalObjetivo > 0 ? (totalServicos - totalObjetivo) / totalObjetivo : null;
+        const taxaReparacao = totalParaBrisas > 0 ? totalReparacoes / totalParaBrisas : null;  // ✅ CORRETO!
+        const escovasPercent = totalServicos > 0 ? totalEscovas / totalServicos : null;
