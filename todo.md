@@ -3759,3 +3759,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Acesso a dados nacionais para análise e comparação
 - [x] Sugestões de perguntas específicas para cada portal
 - [x] Testar funcionalidade do chatbot
+
+## Funcionalidade v6.9.1 - Layout do Chatbot no Portal da Loja
+- [x] Reorganizar cards na home para colocar Chatbot ao lado de Resultados (em cima)
+- [x] Alterar tab do chatbot para usar layout completo igual ao portal principal
+- [x] Testar layout em mobile e desktop

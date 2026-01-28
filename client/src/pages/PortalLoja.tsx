@@ -1031,6 +1031,21 @@ export default function PortalLoja() {
               </CardContent>
             </Card>
 
+            {/* Card Chatbot IA - Disponível para todos */}
+            <Card 
+              className="cursor-pointer hover:shadow-lg transition-all hover:scale-[1.02] bg-gradient-to-br from-indigo-500 to-violet-600 text-white border-0"
+              onClick={() => setActiveTab("chatbot")}
+            >
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <Brain className="h-10 w-10 opacity-80" />
+                  <Sparkles className="h-6 w-6 opacity-60" />
+                </div>
+                <h3 className="text-xl font-bold mb-2">{language === 'pt' ? 'Assistente IA' : 'AI Assistant'}</h3>
+                <p className="text-sm opacity-80">{language === 'pt' ? 'Consultar dados e resultados' : 'Query data and results'}</p>
+              </CardContent>
+            </Card>
+
             {/* Card To-Do - Pisca quando há tarefas novas não lidas */}
             <Card 
               className={`cursor-pointer hover:shadow-lg transition-all hover:scale-[1.02] bg-gradient-to-br from-purple-500 to-purple-600 text-white border-0 ${
@@ -1147,21 +1162,6 @@ export default function PortalLoja() {
                 </div>
                 <h3 className="text-xl font-bold mb-2">{language === 'pt' ? 'Mapa de KLM' : 'KLM Map'}</h3>
                 <p className="text-sm opacity-80">{language === 'pt' ? 'Consultar distâncias entre lojas' : 'Check distances between stores'}</p>
-              </CardContent>
-            </Card>
-
-            {/* Card Chatbot IA - Disponível para todos */}
-            <Card 
-              className="cursor-pointer hover:shadow-lg transition-all hover:scale-[1.02] bg-gradient-to-br from-indigo-500 to-violet-600 text-white border-0"
-              onClick={() => setActiveTab("chatbot")}
-            >
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <Brain className="h-10 w-10 opacity-80" />
-                  <Sparkles className="h-6 w-6 opacity-60" />
-                </div>
-                <h3 className="text-xl font-bold mb-2">{language === 'pt' ? 'Assistente IA' : 'AI Assistant'}</h3>
-                <p className="text-sm opacity-80">{language === 'pt' ? 'Consultar dados e resultados' : 'Query data and results'}</p>
               </CardContent>
             </Card>
           </div>
@@ -3465,20 +3465,25 @@ export default function PortalLoja() {
 
       {/* Tab Chatbot IA */}
       {activeTab === "chatbot" && (
-        <div className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Brain className="h-5 w-5 text-indigo-600" />
-                {language === 'pt' ? 'Assistente IA' : 'AI Assistant'}
-              </CardTitle>
-              <CardDescription>
+        <div className="h-[calc(100vh-12rem)] flex flex-col gap-4">
+          {/* Header */}
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-indigo-500/10 rounded-lg">
+              <Brain className="h-6 w-6 text-indigo-600" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold">{language === 'pt' ? 'Assistente IA' : 'AI Assistant'}</h1>
+              <p className="text-sm text-muted-foreground">
                 {language === 'pt' 
-                  ? 'Faça perguntas sobre os dados da sua loja, resultados, tarefas e reuniões. O assistente tem acesso a todos os dados do país para análise e comparação.'
-                  : 'Ask questions about your store data, results, tasks and meetings. The assistant has access to all country data for analysis and comparison.'}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
+                  ? 'Conversar com o assistente inteligente'
+                  : 'Chat with the intelligent assistant'}
+              </p>
+            </div>
+          </div>
+          
+          {/* Chat Area */}
+          <Card className="flex-1 flex flex-col overflow-hidden">
+            <CardContent className="h-full p-4">
               <ChatbotPortalLoja 
                 token={token} 
                 language={language} 
