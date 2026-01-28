@@ -3737,3 +3737,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Corrigir contador de tarefas no dashboard para mostrar apenas tarefas do utilizador logado
 - [x] Verificar query que busca tarefas para o dashboard
 - [x] Testar com novo utilizador sem tarefas
+
+## Bug v6.12.3 - Contador de Tarefas Ainda Mostra 2 Tarefas
+- [x] Investigar todas as queries que contam tarefas no Dashboard
+- [x] Verificar se o botão "Tarefas" usa query diferente
+- [x] Corrigir query incorreta
+- [x] Testar com utilizador "Upload Resultados"

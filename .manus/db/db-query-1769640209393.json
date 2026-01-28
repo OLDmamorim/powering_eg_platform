@@ -1,0 +1,17 @@
+{
+  "query": "SELECT u.id, u.name, u.email, u.role, g.id as gestor_id\nFROM users u\nLEFT JOIN gestores g ON g.userId = u.id\nWHERE u.email = 'pagamentosmaster@protonmail.com';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT u.id, u.name, u.email, u.role, g.id as gestor_id\nFROM users u\nLEFT JOIN gestores g ON g.userId = u.id\nWHERE u.email = 'pagamentosmaster@protonmail.com';",
+  "rows": [
+    {
+      "id": "14280035",
+      "name": "Upload Resultados",
+      "email": "pagamentosmaster@protonmail.com",
+      "role": "admin",
+      "gestor_id": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\temail\trole\tgestor_id\n14280035\tUpload Resultados\tpagamentosmaster@protonmail.com\tadmin\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 52
+}

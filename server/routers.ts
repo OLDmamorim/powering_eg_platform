@@ -5363,19 +5363,13 @@ IMPORTANTE:
     // Para admin: conta TODAS as tarefas criadas por lojas (pendentes)
     // Para gestor: conta apenas as tarefas atribuídas a ele
     countPendentesAtribuidosAMim: gestorProcedure.query(async ({ ctx }) => {
-      if (ctx.user.role === 'admin') {
-        // Admin vê todas as tarefas criadas por lojas
-        return await db.countTodosCriadosPorLojas();
-      }
+      // Tanto admin como gestor veem apenas tarefas atribuídas a eles
       return await db.countTodosPendentesAtribuidosAMim(ctx.user.id);
     }),
     
     // Contar tarefas NÃO VISTAS pelo gestor (para animação pulse)
     countNaoVistosGestor: gestorProcedure.query(async ({ ctx }) => {
-      if (ctx.user.role === 'admin') {
-        // Admin vê todas as tarefas não vistas criadas por lojas
-        return await db.countTodosNaoVistosCriadosPorLojas();
-      }
+      // Tanto admin como gestor veem apenas tarefas não vistas atribuídas a eles
       return await db.countTodosNaoVistosGestor(ctx.user.id);
     }),
     
