@@ -3668,3 +3668,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Investigar porque agendamentos não gravam quando criados pelo volante ou gestor - RESOLVIDO: Os agendamentos estavam a gravar corretamente, mas o calendário só mostrava pedidos
 - [x] Corrigir criação de agendamentos no portal do volante - RESOLVIDO: Calendário agora mostra pedidos, agendamentos e bloqueios com cores diferentes (teal para agendamentos)
 - [x] Corrigir link na notificação Telegram (deve ser portal do volante com token) - RESOLVIDO: Mudado de /portal-loja para /portal-volante
+
+## Bug v6.11.15 - Rota /portal-volante não existe
+- [x] Verificar rotas existentes no App.tsx
+- [x] Adicionar rota /portal-volante que usa o componente PortalLoja
+- [x] Verificar que o token é de volante (confirmado: Volante Minho, ID 2)
+- [ ] Publicar para que a rota fique disponível em produção

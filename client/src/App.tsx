@@ -119,6 +119,9 @@ function Router() {
       <Route path={"/portal-loja"} component={PortalLoja} />
       <Route path={"/portal-loja/widget"} component={PortalLojaWidget} />
       
+      {/* Portal do Volante (acesso público via token) */}
+      <Route path={"/portal-volante"} component={PortalLoja} />
+      
       <Route path={"/login-nao-autorizado"} component={LoginNaoAutorizado} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />

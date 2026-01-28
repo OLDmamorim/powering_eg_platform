@@ -1,0 +1,8 @@
+{
+  "query": "SELECT 'volante' as tipo, v.nome, tv.token \nFROM tokens_volante tv \nJOIN volantes v ON tv.volante_id = v.id \nWHERE tv.token = 'ZLBXf3Rfqh455bRfsHIytC0xaovesbrOnSZEkotFfW1duQKBDq0nw5W2OWONNDny'\nUNION ALL\nSELECT 'loja' as tipo, l.nome, tl.token \nFROM tokens_loja tl \nJOIN lojas l ON tl.loja_id = l.id \nWHERE tl.token = 'ZLBXf3Rfqh455bRfsHIytC0xaovesbrOnSZEkotFfW1duQKBDq0nw5W2OWONNDny';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT 'volante' as tipo, v.nome, tv.token \nFROM tokens_volante tv \nJOIN volantes v ON tv.volante_id = v.id \nWHERE tv.token = 'ZLBXf3Rfqh455bRfsHIytC0xaovesbrOnSZEkotFfW1duQKBDq0nw5W2OWONNDny'\nUNION ALL\nSELECT 'loja' as tipo, l.nome, tl.token \nFROM tokens_loja tl \nJOIN lojas l ON tl.loja_id = l.id \nWHERE tl.token = 'ZLBXf3Rfqh455bRfsHIytC0xaovesbrOnSZEkotFfW1duQKBDq0nw5W2OWONNDny';",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 'tv.volante_id' in 'on clause'"
+  ]
+}
