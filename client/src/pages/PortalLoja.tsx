@@ -112,6 +112,7 @@ import {
   Pencil,
   Settings,
   Trash2,
+  MapPin,
 } from "lucide-react";
 
 interface LojaAuth {
@@ -1133,6 +1134,20 @@ export default function PortalLoja() {
                 </CardContent>
               </Card>
             )}
+
+            {/* Card Mapa de KLM - Disponível para todos */}
+            <Card 
+              className="cursor-pointer hover:shadow-lg transition-all hover:scale-[1.02] bg-gradient-to-br from-purple-500 to-indigo-600 text-white border-0"
+              onClick={() => window.open('https://mapaklmeg.netlify.app', '_blank')}
+            >
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <MapPin className="h-10 w-10 opacity-80" />
+                </div>
+                <h3 className="text-xl font-bold mb-2">{language === 'pt' ? 'Mapa de KLM' : 'KLM Map'}</h3>
+                <p className="text-sm opacity-80">{language === 'pt' ? 'Consultar distâncias entre lojas' : 'Check distances between stores'}</p>
+              </CardContent>
+            </Card>
           </div>
         )}
 

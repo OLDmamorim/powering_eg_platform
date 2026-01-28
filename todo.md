@@ -3714,3 +3714,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Verificar se o estado "Resolvido" está a ser enviado ao backend
 - [x] Corrigir para que pendentes marcados como resolvidos sejam efetivamente guardados
 - [x] Testar que pendentes resolvidos deixam de aparecer na lista
+
+## Feature v6.11.24 - Card Mapa de KLM na Vista de Loja
+- [x] Adicionar card "Mapa de KLM" na vista de loja
+- [x] Configurar para abrir link externo (https://mapaklmeg.netlify.app) em nova janela
+- [x] Testar que o card abre o link corretamente
