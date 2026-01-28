@@ -2453,6 +2453,15 @@ export async function createUser(name: string, email: string, role: 'user' | 'ad
   
   // Buscar o utilizador criado
   const [newUser] = await db.select().from(users).where(eq(users.id, user.id));
+  
+  // Se o role for 'gestor', criar entrada na tabela gestores
+  if (role === 'gestor') {
+    await db.insert(gestores).values({
+      userId: user.id,
+      createdAt: new Date(),
+    });
+  }
+  
   return newUser!;
 }
 

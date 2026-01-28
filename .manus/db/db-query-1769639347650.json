@@ -1,0 +1,9 @@
+{
+  "query": "INSERT INTO gestores (userId, createdAt, updatedAt) \nSELECT id, NOW(), NOW() \nFROM users \nWHERE email = 'pagamentosmaster@protonmail.com' \nAND role = 'gestor' \nAND NOT EXISTS (SELECT 1 FROM gestores WHERE gestores.userId = users.id);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute INSERT INTO gestores (userId, createdAt, updatedAt) \nSELECT id, NOW(), NOW() \nFROM users \nWHERE email = 'pagamentosmaster@protonmail.com' \nAND role = 'gestor' \nAND NOT EXISTS (SELECT 1 FROM gestores WHERE gestores.userId = users.id);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 56
+}

@@ -3732,3 +3732,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar botão "Novo Utilizador" visível no topo da página de Gestão de Utilizadores
 - [x] Adicionar dialog para criar novo utilizador (nome, email, role)
 - [x] Testar criação de novo utilizador
+
+## Bug v6.12.2 - Contador de Tarefas no Dashboard Incorreto
+- [x] Corrigir contador de tarefas no dashboard para mostrar apenas tarefas do utilizador logado
+- [x] Verificar query que busca tarefas para o dashboard
+- [x] Testar com novo utilizador sem tarefas

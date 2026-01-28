@@ -1,0 +1,9 @@
+{
+  "query": "SELECT t.id, t.titulo, t.estado, t.atribuidoUserId, t.criadoPorLojaId \nFROM todos t \nJOIN users u ON t.atribuidoUserId = u.id \nWHERE u.email = 'pagamentosmaster@protonmail.com';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT t.id, t.titulo, t.estado, t.atribuidoUserId, t.criadoPorLojaId \nFROM todos t \nJOIN users u ON t.atribuidoUserId = u.id \nWHERE u.email = 'pagamentosmaster@protonmail.com';",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 59
+}
