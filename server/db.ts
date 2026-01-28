@@ -2430,6 +2430,32 @@ export async function getAllUsers(): Promise<Array<typeof users.$inferSelect>> {
   return await db.select().from(users).orderBy(users.createdAt);
 }
 
+// Criar um novo utilizador
+export async function createUser(name: string, email: string, role: 'user' | 'admin' | 'gestor'): Promise<typeof users.$inferSelect> {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  
+  // Verificar se já existe utilizador com este email
+  const existing = await db.select().from(users).where(eq(users.email, email)).limit(1);
+  if (existing.length > 0) {
+    throw new Error('Já existe um utilizador com este email');
+  }
+  
+  const [user] = await db.insert(users).values({
+    name,
+    email,
+    role,
+    openId: `manual_${Date.now()}`, // OpenID temporário para utilizadores criados manualmente
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    lastSignedIn: new Date(),
+  }).$returningId();
+  
+  // Buscar o utilizador criado
+  const [newUser] = await db.select().from(users).where(eq(users.id, user.id));
+  return newUser!;
+}
+
 // Atualizar dados de um utilizador (nome, email, role)
 export async function updateUser(userId: number, data: {
   name?: string;

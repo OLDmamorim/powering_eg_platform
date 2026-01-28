@@ -3719,3 +3719,16 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar card "Mapa de KLM" na vista de loja
 - [x] Configurar para abrir link externo (https://mapaklmeg.netlify.app) em nova janela
 - [x] Testar que o card abre o link corretamente
+
+## Feature v6.12.0 - Gestão de Utilizadores Admin
+- [ ] Criar tabela de gestores na base de dados (se não existir)
+- [ ] Criar tRPC procedures para listar, adicionar e remover gestores
+- [ ] Criar página de Gestão de Utilizadores no Portal Gestor
+- [ ] Adicionar formulário para criar novos gestores (nome, email)
+- [ ] Implementar lista de gestores com opção de remover
+- [ ] Testar criação e remoção de gestores
+
+## Bug v6.12.1 - Botão de Criar Utilizador não visível
+- [x] Adicionar botão "Novo Utilizador" visível no topo da página de Gestão de Utilizadores
+- [x] Adicionar dialog para criar novo utilizador (nome, email, role)
+- [x] Testar criação de novo utilizador

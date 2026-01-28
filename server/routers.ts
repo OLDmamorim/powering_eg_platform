@@ -3320,6 +3320,17 @@ IMPORTANTE:
       return await db.getAllUsers();
     }),
 
+    create: adminProcedure
+      .input(z.object({
+        name: z.string().min(1),
+        email: z.string().email(),
+        role: z.enum(['user', 'admin', 'gestor']),
+      }))
+      .mutation(async ({ input }) => {
+        const user = await db.createUser(input.name, input.email, input.role);
+        return user;
+      }),
+
     update: adminProcedure
       .input(z.object({
         userId: z.number(),

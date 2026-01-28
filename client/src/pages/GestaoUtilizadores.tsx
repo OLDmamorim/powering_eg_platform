@@ -14,14 +14,28 @@ import { toast } from "sonner";
 
 export default function GestaoUtilizadores() {
   const { language, t } = useLanguage();
+  const [criandoUser, setCriandoUser] = useState(false);
   const [editandoUser, setEditandoUser] = useState<any | null>(null);
   const [eliminandoUser, setEliminandoUser] = useState<any | null>(null);
   const [eliminandoEmLote, setEliminandoEmLote] = useState(false);
   const [selecionados, setSelecionados] = useState<number[]>([]);
-  const [formData, setFormData] = useState({ name: "", email: "", role: "" });
+  const [formData, setFormData] = useState<{ name: string; email: string; role: 'user' | 'admin' | 'gestor' }>({ name: "", email: "", role: "gestor" });
+  const [novoUserData, setNovoUserData] = useState<{ name: string; email: string; role: 'user' | 'admin' | 'gestor' }>({ name: "", email: "", role: "gestor" });
 
   const { data: utilizadores, isLoading, refetch } = trpc.utilizadores.getAll.useQuery();
   
+  const createMutation = trpc.utilizadores.create.useMutation({
+    onSuccess: () => {
+      toast.success(language === 'pt' ? 'Utilizador criado com sucesso' : 'User created successfully');
+      setCriandoUser(false);
+      setNovoUserData({ name: "", email: "", role: "gestor" });
+      refetch();
+    },
+    onError: (error) => {
+      toast.error(error.message || t('common.erro'));
+    },
+  });
+
   const updateMutation = trpc.utilizadores.update.useMutation({
     onSuccess: () => {
       toast.success(t('common.sucesso'));
@@ -59,6 +73,14 @@ export default function GestaoUtilizadores() {
       toast.error(error.message || t('common.erro'));
     },
   });
+
+  const handleCreate = () => {
+    if (!novoUserData.name || !novoUserData.email || !novoUserData.role) {
+      toast.error(language === 'pt' ? 'Preencha todos os campos' : 'Fill all fields');
+      return;
+    }
+    createMutation.mutate(novoUserData);
+  };
 
   const handleEdit = (user: any) => {
     setEditandoUser(user);
@@ -159,7 +181,15 @@ export default function GestaoUtilizadores() {
                   {utilizadores?.length || 0} {language === 'pt' ? "utilizadores registados na plataforma" : "users registered on the platform"}
                 </CardDescription>
               </div>
-              {selecionados.length > 0 && (
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => setCriandoUser(true)}
+                  className="flex items-center gap-2"
+                >
+                  <Users className="h-4 w-4" />
+                  {language === 'pt' ? 'Novo Utilizador' : 'New User'}
+                </Button>
+                {selecionados.length > 0 && (
                 <Button
                   variant="destructive"
                   onClick={() => setEliminandoEmLote(true)}
@@ -170,7 +200,8 @@ export default function GestaoUtilizadores() {
                     ? `Eliminar ${selecionados.length} selecionado(s)` 
                     : `Delete ${selecionados.length} selected`}
                 </Button>
-              )}
+                )}
+              </div>
             </div>
           </CardHeader>
           <CardContent>
@@ -250,6 +281,72 @@ export default function GestaoUtilizadores() {
           </CardContent>
         </Card>
 
+        {/* Dialog de Criação */}
+        <Dialog open={criandoUser} onOpenChange={setCriandoUser}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5" />
+                {language === 'pt' ? 'Criar Novo Utilizador' : 'Create New User'}
+              </DialogTitle>
+              <DialogDescription>
+                {language === 'pt' ? "Adicionar um novo utilizador à plataforma" : "Add a new user to the platform"}
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="novo-name">{language === 'pt' ? "Nome" : "Name"}</Label>
+                <Input
+                  id="novo-name"
+                  value={novoUserData.name}
+                  onChange={(e) => setNovoUserData({ ...novoUserData, name: e.target.value })}
+                  placeholder={language === 'pt' ? "Nome completo" : "Full name"}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="novo-email">{language === 'pt' ? "Email" : "Email"}</Label>
+                <Input
+                  id="novo-email"
+                  type="email"
+                  value={novoUserData.email}
+                  onChange={(e) => setNovoUserData({ ...novoUserData, email: e.target.value })}
+                  placeholder={language === 'pt' ? "email@exemplo.com" : "email@example.com"}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="novo-role">{language === 'pt' ? "Role / Permissões" : "Role / Permissions"}</Label>
+                <Select
+                  value={novoUserData.role}
+                  onValueChange={(value) => setNovoUserData({ ...novoUserData, role: value as 'user' | 'admin' | 'gestor' })}
+                >
+                  <SelectTrigger id="novo-role">
+                    <SelectValue placeholder={language === 'pt' ? "Selecionar role" : "Select role"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="user">{language === 'pt' ? "Utilizador (User)" : "User"}</SelectItem>
+                    <SelectItem value="gestor">{language === 'pt' ? "Gestor" : "Manager"}</SelectItem>
+                    <SelectItem value="admin">{language === 'pt' ? "Administrador (Admin)" : "Administrator (Admin)"}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setCriandoUser(false)}>
+                {t('common.cancelar')}
+              </Button>
+              <Button onClick={handleCreate} disabled={createMutation.isPending}>
+                {createMutation.isPending
+                  ? (language === 'pt' ? 'A criar...' : 'Creating...')
+                  : (language === 'pt' ? 'Criar Utilizador' : 'Create User')}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
         {/* Dialog de Edição */}
         <Dialog open={!!editandoUser} onOpenChange={(open) => !open && setEditandoUser(null)}>
           <DialogContent>
@@ -289,7 +386,7 @@ export default function GestaoUtilizadores() {
                 <Label htmlFor="role">{language === 'pt' ? "Role / Permissões" : "Role / Permissions"}</Label>
                 <Select
                   value={formData.role}
-                  onValueChange={(value) => setFormData({ ...formData, role: value })}
+                  onValueChange={(value) => setFormData({ ...formData, role: value as 'user' | 'admin' | 'gestor' })}
                 >
                   <SelectTrigger id="role">
                     <SelectValue placeholder={language === 'pt' ? "Selecionar role" : "Select role"} />
