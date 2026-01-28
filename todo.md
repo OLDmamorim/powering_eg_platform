@@ -3692,3 +3692,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Investigar lógica de projeção de visitas
 - [x] Corrigir para considerar relatórios livres além dos completos
 - [x] Testar com lojas que têm relatórios livres recentes
+
+## Bug v6.11.20 - Projeção de Visitas não considera Reuniões
+- [x] Adicionar reuniões à lógica de cálculo de dias sem visita
+- [x] Testar com lojas que têm reuniões recentes (ex: Famalicão sm)

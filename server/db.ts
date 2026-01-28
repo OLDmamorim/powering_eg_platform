@@ -7392,6 +7392,12 @@ export async function getDadosPriorizacaoLojas(gestorId: number): Promise<DadosP
   const mesAtual = hoje.getMonth() + 1;
   const anoAtual = hoje.getFullYear();
   
+  // Obter todas as reuniões uma vez (para não repetir a query para cada loja)
+  const todasReunioes = await db
+    .select({ data: reunioesLojas.data, lojaIds: reunioesLojas.lojaIds })
+    .from(reunioesLojas)
+    .orderBy(desc(reunioesLojas.data));
+  
   for (const loja of lojasGestor) {
     // Obter último relatório COMPLETO da loja
     const [ultimoRelatorioCompleto] = await db
@@ -7409,18 +7415,36 @@ export async function getDadosPriorizacaoLojas(gestorId: number): Promise<DadosP
       .orderBy(desc(relatoriosLivres.dataVisita))
       .limit(1);
     
-    // Determinar a data da última visita (a mais recente entre completo e livre)
-    let ultimaVisita: Date | null = null;
+    // Obter última REUNIÃO da loja (reunioesLojas guarda lojaIds como JSON array)
+    let ultimaReuniao: Date | null = null;
+    for (const reuniao of todasReunioes) {
+      try {
+        const lojaIdsArray = JSON.parse(reuniao.lojaIds || '[]');
+        if (lojaIdsArray.includes(loja.lojaId) || lojaIdsArray.includes(String(loja.lojaId))) {
+          ultimaReuniao = new Date(reuniao.data);
+          break; // Já está ordenado por data desc, então a primeira é a mais recente
+        }
+      } catch (e) {
+        // Ignorar erros de parse
+      }
+    }
     
-    if (ultimoRelatorioCompleto?.createdAt && ultimoRelatorioLivre?.dataVisita) {
-      // Ambos existem - usar o mais recente
-      const dataCompleto = new Date(ultimoRelatorioCompleto.createdAt);
-      const dataLivre = new Date(ultimoRelatorioLivre.dataVisita);
-      ultimaVisita = dataCompleto > dataLivre ? dataCompleto : dataLivre;
-    } else if (ultimoRelatorioCompleto?.createdAt) {
-      ultimaVisita = new Date(ultimoRelatorioCompleto.createdAt);
-    } else if (ultimoRelatorioLivre?.dataVisita) {
-      ultimaVisita = new Date(ultimoRelatorioLivre.dataVisita);
+    // Determinar a data da última visita (a mais recente entre completo, livre e reunião)
+    let ultimaVisita: Date | null = null;
+    const datasVisita: Date[] = [];
+    
+    if (ultimoRelatorioCompleto?.createdAt) {
+      datasVisita.push(new Date(ultimoRelatorioCompleto.createdAt));
+    }
+    if (ultimoRelatorioLivre?.dataVisita) {
+      datasVisita.push(new Date(ultimoRelatorioLivre.dataVisita));
+    }
+    if (ultimaReuniao) {
+      datasVisita.push(ultimaReuniao);
+    }
+    
+    if (datasVisita.length > 0) {
+      ultimaVisita = datasVisita.reduce((a, b) => a > b ? a : b);
     }
     
     const diasSemVisita = ultimaVisita 
@@ -7661,6 +7685,12 @@ export async function getDadosPriorizacaoTodasLojas(): Promise<DadosPriorizacaoL
   const mesAtual = hoje.getMonth() + 1;
   const anoAtual = hoje.getFullYear();
   
+  // Obter todas as reuniões uma vez (para não repetir a query para cada loja)
+  const todasReunioesAdmin = await db
+    .select({ data: reunioesLojas.data, lojaIds: reunioesLojas.lojaIds })
+    .from(reunioesLojas)
+    .orderBy(desc(reunioesLojas.data));
+  
   for (const loja of todasLojas) {
     // Obter último relatório COMPLETO da loja
     const [ultimoRelatorioCompleto] = await db
@@ -7678,18 +7708,36 @@ export async function getDadosPriorizacaoTodasLojas(): Promise<DadosPriorizacaoL
       .orderBy(desc(relatoriosLivres.dataVisita))
       .limit(1);
     
-    // Determinar a data da última visita (a mais recente entre completo e livre)
-    let ultimaVisita: Date | null = null;
+    // Obter última REUNIÃO da loja (reunioesLojas guarda lojaIds como JSON array)
+    let ultimaReuniaoAdmin: Date | null = null;
+    for (const reuniao of todasReunioesAdmin) {
+      try {
+        const lojaIdsArray = JSON.parse(reuniao.lojaIds || '[]');
+        if (lojaIdsArray.includes(loja.lojaId) || lojaIdsArray.includes(String(loja.lojaId))) {
+          ultimaReuniaoAdmin = new Date(reuniao.data);
+          break; // Já está ordenado por data desc, então a primeira é a mais recente
+        }
+      } catch (e) {
+        // Ignorar erros de parse
+      }
+    }
     
-    if (ultimoRelatorioCompleto?.createdAt && ultimoRelatorioLivre?.dataVisita) {
-      // Ambos existem - usar o mais recente
-      const dataCompleto = new Date(ultimoRelatorioCompleto.createdAt);
-      const dataLivre = new Date(ultimoRelatorioLivre.dataVisita);
-      ultimaVisita = dataCompleto > dataLivre ? dataCompleto : dataLivre;
-    } else if (ultimoRelatorioCompleto?.createdAt) {
-      ultimaVisita = new Date(ultimoRelatorioCompleto.createdAt);
-    } else if (ultimoRelatorioLivre?.dataVisita) {
-      ultimaVisita = new Date(ultimoRelatorioLivre.dataVisita);
+    // Determinar a data da última visita (a mais recente entre completo, livre e reunião)
+    let ultimaVisita: Date | null = null;
+    const datasVisitaAdmin: Date[] = [];
+    
+    if (ultimoRelatorioCompleto?.createdAt) {
+      datasVisitaAdmin.push(new Date(ultimoRelatorioCompleto.createdAt));
+    }
+    if (ultimoRelatorioLivre?.dataVisita) {
+      datasVisitaAdmin.push(new Date(ultimoRelatorioLivre.dataVisita));
+    }
+    if (ultimaReuniaoAdmin) {
+      datasVisitaAdmin.push(ultimaReuniaoAdmin);
+    }
+    
+    if (datasVisitaAdmin.length > 0) {
+      ultimaVisita = datasVisitaAdmin.reduce((a, b) => a > b ? a : b);
     }
     
     const diasSemVisita = ultimaVisita 
