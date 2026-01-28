@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import * as db from './db';
 
-describe('Taxa de Reparação - Dashboard Loja', () => {
+describe('Taxa de Reparação - Dashboard Loja (usando valor do Excel)', () => {
   let lojaId: number;
   
   beforeAll(async () => {
@@ -14,7 +14,7 @@ describe('Taxa de Reparação - Dashboard Loja', () => {
     lojaId = lojaBraga.id;
   });
 
-  it('deve calcular a taxa de reparação usando qtdParaBrisas, não totalServicos', async () => {
+  it('deve usar a taxa de reparação diretamente do Excel (coluna K)', async () => {
     // Buscar dados de janeiro 2026
     const resultados = await db.getResultadosMensaisPorLoja(lojaId, 1, 2026);
     
@@ -26,30 +26,22 @@ describe('Taxa de Reparação - Dashboard Loja', () => {
     const totalServicos = Number(resultados.totalServicos) || 0;
     const qtdReparacoes = Number(resultados.qtdReparacoes) || 0;
     const qtdParaBrisas = Number(resultados.qtdParaBrisas) || 0;
+    const taxaExcel = resultados.taxaReparacao ? parseFloat(String(resultados.taxaReparacao)) : null;
     
     console.log('Dados da loja Braga - Janeiro 2026:');
     console.log(`  Total Serviços: ${totalServicos}`);
     console.log(`  Qtd Reparações: ${qtdReparacoes}`);
     console.log(`  Qtd Para-brisas: ${qtdParaBrisas}`);
+    console.log(`  Taxa Reparação do EXCEL: ${taxaExcel !== null ? (taxaExcel * 100).toFixed(1) + '%' : 'N/A'}`);
     
-    // Calcular taxa de reparação CORRETA (qtdReparacoes / qtdParaBrisas)
-    const taxaReparacaoCorreta = qtdParaBrisas > 0 ? qtdReparacoes / qtdParaBrisas : 0;
+    // A taxa do Excel deve existir
+    expect(taxaExcel).not.toBeNull();
     
-    // Calcular taxa de reparação ERRADA (qtdReparacoes / totalServicos)
-    const taxaReparacaoErrada = totalServicos > 0 ? qtdReparacoes / totalServicos : 0;
-    
-    console.log(`  Taxa Reparação CORRETA (rep/parabrisas): ${(taxaReparacaoCorreta * 100).toFixed(1)}%`);
-    console.log(`  Taxa Reparação ERRADA (rep/servicos): ${(taxaReparacaoErrada * 100).toFixed(1)}%`);
-    
-    // A taxa correta deve ser MAIOR que a errada (porque para-brisas < total serviços)
-    expect(taxaReparacaoCorreta).toBeGreaterThan(taxaReparacaoErrada);
-    
-    // A taxa correta deve ser maior que 25%
-    expect(taxaReparacaoCorreta).toBeGreaterThan(0.25); // Pelo menos 25%
-    
-    // A taxa errada deve estar próxima de 15.8% (valor que aparecia no Portal)
-    expect(taxaReparacaoErrada).toBeGreaterThan(0.10); // Pelo menos 10%
-    expect(taxaReparacaoErrada).toBeLessThan(0.20); // Máximo 20%
+    // A taxa do Excel deve ser um valor válido entre 0 e 1
+    if (taxaExcel !== null) {
+      expect(taxaExcel).toBeGreaterThanOrEqual(0);
+      expect(taxaExcel).toBeLessThanOrEqual(1);
+    }
   });
 
   it('deve validar que qtdParaBrisas é sempre menor ou igual a totalServicos', async () => {
@@ -67,7 +59,7 @@ describe('Taxa de Reparação - Dashboard Loja', () => {
     expect(qtdParaBrisas).toBeLessThanOrEqual(totalServicos);
   });
 
-  it('deve validar que a taxa de reparação está entre 0 e 1', async () => {
+  it('deve validar que a taxa do Excel é o valor oficial usado pelo sistema', async () => {
     const resultados = await db.getResultadosMensaisPorLoja(lojaId, 1, 2026);
     
     if (!resultados) {
@@ -75,12 +67,21 @@ describe('Taxa de Reparação - Dashboard Loja', () => {
       return;
     }
 
-    const qtdReparacoes = Number(resultados.qtdReparacoes) || 0;
-    const qtdParaBrisas = Number(resultados.qtdParaBrisas) || 0;
+    const taxaExcel = resultados.taxaReparacao ? parseFloat(String(resultados.taxaReparacao)) : null;
     
-    const taxaReparacao = qtdParaBrisas > 0 ? qtdReparacoes / qtdParaBrisas : 0;
+    console.log(`  Taxa do Excel (valor oficial): ${taxaExcel !== null ? (taxaExcel * 100).toFixed(1) + '%' : 'N/A'}`);
     
-    expect(taxaReparacao).toBeGreaterThanOrEqual(0);
-    expect(taxaReparacao).toBeLessThanOrEqual(1);
+    // A taxa do Excel deve existir e ser o valor oficial
+    // O Excel usa fórmula própria que pode diferir do cálculo simples rep/parabrisas
+    expect(taxaExcel).not.toBeNull();
+    
+    // A taxa deve estar dentro de um intervalo razoável (0% a 100%)
+    if (taxaExcel !== null) {
+      expect(taxaExcel).toBeGreaterThanOrEqual(0);
+      expect(taxaExcel).toBeLessThanOrEqual(1);
+      
+      // Para Braga em janeiro 2026, esperamos aproximadamente 31.4%
+      expect(taxaExcel).toBeCloseTo(0.314, 1); // Margem de 10%
+    }
   });
 });

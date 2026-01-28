@@ -528,6 +528,7 @@ export const appRouter = router({
         let totalObjetivo = 0;
         let totalReparacoes = 0;
         let totalParaBrisas = 0;
+        let taxaReparacaoExcel: number | null = null;
         let totalEscovas = 0;
         let totalPolimento = 0;
         let totalTratamento = 0;
@@ -545,6 +546,9 @@ export const appRouter = router({
             if (resultadosArr.updatedAt) {
             totalParaBrisas += Number(resultadosArr.qtdParaBrisas) || 0;
               const dataAtual = new Date(resultadosArr.updatedAt);
+            if (resultadosArr.taxaReparacao !== null && resultadosArr.taxaReparacao !== undefined) {
+              taxaReparacaoExcel = parseFloat(String(resultadosArr.taxaReparacao));
+            }
               if (!dataUltimaAtualizacao || dataAtual > dataUltimaAtualizacao) {
                 dataUltimaAtualizacao = dataAtual;
               }
@@ -565,7 +569,7 @@ export const appRouter = router({
         
         // Calcular métricas agregadas
         const desvioPercentual = totalObjetivo > 0 ? (totalServicos - totalObjetivo) / totalObjetivo : null;
-        const taxaReparacao = totalParaBrisas > 0 ? totalReparacoes / totalParaBrisas : null;
+        const taxaReparacao = taxaReparacaoExcel;
         const escovasPercent = totalServicos > 0 ? totalEscovas / totalServicos : null;
         
         // Obter dados de objetivo diário do primeiro mês (mais recente)
@@ -746,6 +750,7 @@ export const appRouter = router({
         let totalReparacoes = 0;
         let totalEscovas = 0;
         let totalParaBrisas = 0;
+        let taxaReparacaoExcel: number | null = null;
         let totalPolimento = 0;
         let totalTratamento = 0;
         let totalLavagens = 0;
@@ -757,8 +762,10 @@ export const appRouter = router({
             totalObjetivo += Number(resultados.objetivoMensal) || 0;
             totalReparacoes += Number(resultados.qtdReparacoes) || 0;
             totalParaBrisas += Number(resultados.qtdParaBrisas) || 0;
+            if (resultados.taxaReparacao !== null && resultados.taxaReparacao !== undefined) {
+              taxaReparacaoExcel = parseFloat(String(resultados.taxaReparacao));
+            }
           }
-          
           const complementares = await db.getVendasComplementares(p.mes, p.ano, input.lojaId);
           if (complementares && complementares.length > 0) {
             const c = complementares[0];
@@ -771,7 +778,7 @@ export const appRouter = router({
         
         // Calcular métricas
         const desvioPercentual = totalObjetivo > 0 ? ((totalServicos - totalObjetivo) / totalObjetivo) * 100 : 0;
-        const taxaReparacao = totalParaBrisas > 0 ? (totalReparacoes / totalParaBrisas) * 100 : 0;
+        const taxaReparacao = taxaReparacaoExcel !== null ? taxaReparacaoExcel * 100 : 0;
         const escovasPercent = totalServicos > 0 ? (totalEscovas / totalServicos) * 100 : 0;
         const servicosFaltam = Math.max(0, totalObjetivo - totalServicos);
         const reparacoesFaltam = Math.max(0, Math.ceil(totalServicos * 0.22) - totalReparacoes);
@@ -946,6 +953,7 @@ IMPORTANTE:
         let totalObjetivo = 0;
         let totalReparacoes = 0;
         let totalParaBrisas = 0;
+        let taxaReparacaoExcel: number | null = null;
         let totalEscovas = 0;
         let totalPolimento = 0;
         let totalTratamento = 0;
@@ -959,6 +967,9 @@ IMPORTANTE:
             totalObjetivo += Number(resultadosArr.objetivoMensal) || 0;
             totalReparacoes += Number(resultadosArr.qtdReparacoes) || 0;
             totalParaBrisas += Number(resultadosArr.qtdParaBrisas) || 0;
+            if (resultadosArr.taxaReparacao !== null && resultadosArr.taxaReparacao !== undefined) {
+              taxaReparacaoExcel = parseFloat(String(resultadosArr.taxaReparacao));
+            }
           }
           
           const complementaresArr = await db.getVendasComplementares(p.mes, p.ano, input.lojaId);
@@ -974,7 +985,7 @@ IMPORTANTE:
         
         // Calcular métricas
         const desvioPercentual = totalObjetivo > 0 ? (totalServicos - totalObjetivo) / totalObjetivo : null;
-        const taxaReparacao = totalParaBrisas > 0 ? totalReparacoes / totalParaBrisas : null;
+        const taxaReparacao = taxaReparacaoExcel;
         const escovasPercent = totalServicos > 0 ? totalEscovas / totalServicos : null;
         
         // Calcular desvio objetivo diário
@@ -6063,6 +6074,7 @@ IMPORTANTE:
         let totalObjetivo = 0;
         let totalReparacoes = 0;
         let totalParaBrisas = 0;
+        let taxaReparacaoExcel: number | null = null;
         let totalEscovas = 0;
         let totalPolimento = 0;
         let totalTratamento = 0;
@@ -6080,6 +6092,9 @@ IMPORTANTE:
             totalReparacoes += Number(resultadosArr.qtdReparacoes) || 0;
             totalParaBrisas += Number(resultadosArr.qtdParaBrisas) || 0;
             if (resultadosArr.updatedAt) {
+            if (resultadosArr.taxaReparacao !== null && resultadosArr.taxaReparacao !== undefined) {
+              taxaReparacaoExcel = parseFloat(String(resultadosArr.taxaReparacao));
+            }
               const dataAtual = new Date(resultadosArr.updatedAt);
               if (!dataUltimaAtualizacao || dataAtual > dataUltimaAtualizacao) {
                 dataUltimaAtualizacao = dataAtual;
@@ -6102,7 +6117,7 @@ IMPORTANTE:
         
         // Calcular métricas agregadas
         const desvioPercentual = totalObjetivo > 0 ? (totalServicos - totalObjetivo) / totalObjetivo : null;
-        const taxaReparacao = totalParaBrisas > 0 ? totalReparacoes / totalParaBrisas : null;
+        const taxaReparacao = taxaReparacaoExcel;
         const escovasPercent = totalServicos > 0 ? totalEscovas / totalServicos : null;
         
         // Criar objeto de resultados agregados
@@ -6289,6 +6304,7 @@ IMPORTANTE:
         let totalServicos = 0;
         let totalObjetivo = 0;
         let totalReparacoes = 0;
+        let taxaReparacaoExcel: number | null = null;
         let totalParaBrisas = 0;
         let totalEscovas = 0;
         let totalPolimento = 0;
@@ -6303,8 +6319,10 @@ IMPORTANTE:
             totalObjetivo += Number(resultadosArr.objetivoMensal) || 0;
             totalReparacoes += Number(resultadosArr.qtdReparacoes) || 0;
             totalParaBrisas += Number(resultadosArr.qtdParaBrisas) || 0;
+            if (resultadosArr.taxaReparacao !== null && resultadosArr.taxaReparacao !== undefined) {
+              taxaReparacaoExcel = parseFloat(String(resultadosArr.taxaReparacao));
+            }
           }
-          
           const complementaresArr = await db.getVendasComplementares(p.mes, p.ano, lojaIdParaConsulta);
           if (complementaresArr && complementaresArr.length > 0) {
             const c = complementaresArr[0];
@@ -6318,7 +6336,7 @@ IMPORTANTE:
         
         // Calcular métricas
         const desvioPercentual = totalObjetivo > 0 ? (totalServicos - totalObjetivo) / totalObjetivo : null;
-        const taxaReparacao = totalParaBrisas > 0 ? totalReparacoes / totalParaBrisas : null;
+        const taxaReparacao = taxaReparacaoExcel;
         const escovasPercent = totalServicos > 0 ? totalEscovas / totalServicos : null;
         
         // Calcular desvio objetivo diário
@@ -7011,6 +7029,7 @@ Fornece uma análise breve com:
         let totalObjetivo = 0;
         let totalReparacoes = 0;
         let totalParaBrisas = 0;
+        let taxaReparacaoExcel: number | null = null;
         let totalEscovas = 0;
         let totalPolimento = 0;
         let totalTratamento = 0;
@@ -7023,6 +7042,9 @@ Fornece uma análise breve com:
             totalObjetivo += Number(resultados.objetivoMensal) || 0;
             totalReparacoes += Number(resultados.qtdReparacoes) || 0;
             totalParaBrisas += Number(resultados.qtdParaBrisas) || 0;
+            if (resultados.taxaReparacao !== null && resultados.taxaReparacao !== undefined) {
+              taxaReparacaoExcel = parseFloat(String(resultados.taxaReparacao));
+            }
           }
           
           const complementares = await db.getVendasComplementares(p.mes, p.ano, auth.loja.id);
@@ -7037,7 +7059,7 @@ Fornece uma análise breve com:
         
         // Calcular métricas
         const desvioPercentual = totalObjetivo > 0 ? ((totalServicos - totalObjetivo) / totalObjetivo) * 100 : 0;
-        const taxaReparacao = totalParaBrisas > 0 ? (totalReparacoes / totalParaBrisas) * 100 : 0;
+        const taxaReparacao = taxaReparacaoExcel !== null ? taxaReparacaoExcel * 100 : 0;
         const escovasPercent = totalServicos > 0 ? (totalEscovas / totalServicos) * 100 : 0;
         const servicosFaltam = Math.max(0, totalObjetivo - totalServicos);
         const reparacoesFaltam = Math.max(0, Math.ceil(totalServicos * 0.22) - totalReparacoes);
@@ -8010,6 +8032,7 @@ IMPORTANTE:
         let totalObjetivo = 0;
         let totalReparacoes = 0;
         let totalParaBrisas = 0;
+        let taxaReparacaoExcel: number | null = null; // Taxa do Excel (último mês com dados)
         let totalEscovas = 0;
         let totalPolimento = 0;
         let totalTratamento = 0;
@@ -8026,6 +8049,10 @@ IMPORTANTE:
             totalObjetivo += Number(resultadosArr.objetivoMensal) || 0;
             totalReparacoes += Number(resultadosArr.qtdReparacoes) || 0;
             totalParaBrisas += Number(resultadosArr.qtdParaBrisas) || 0;
+            // Guardar a taxa de reparação do Excel (do último mês com dados)
+            if (resultadosArr.taxaReparacao !== null && resultadosArr.taxaReparacao !== undefined) {
+              taxaReparacaoExcel = parseFloat(String(resultadosArr.taxaReparacao));
+            }
             if (resultadosArr.updatedAt) {
               const dataAtual = new Date(resultadosArr.updatedAt);
               if (!dataUltimaAtualizacao || dataAtual > dataUltimaAtualizacao) {
@@ -8049,10 +8076,9 @@ IMPORTANTE:
         
         // Calcular métricas agregadas
         const desvioPercentual = totalObjetivo > 0 ? (totalServicos - totalObjetivo) / totalObjetivo : null;
-        // Correção v6.11.10: Taxa de reparação agora usa qtdParaBrisas em vez de totalServicos
-        const taxaReparacao = totalParaBrisas > 0 ? totalReparacoes / totalParaBrisas : null;
+        // Correção v6.11.12: Usar taxa de reparação diretamente do Excel
+        const taxaReparacao = taxaReparacaoExcel;
         const escovasPercent = totalServicos > 0 ? totalEscovas / totalServicos : null;
-        
         const objetivoDiaAtual = resultadosAgregados?.objetivoDiaAtual ? parseFloat(String(resultadosAgregados.objetivoDiaAtual)) : null;
         const desvioObjetivoAcumulado = resultadosAgregados?.desvioObjetivoAcumulado ? parseFloat(String(resultadosAgregados.desvioObjetivoAcumulado)) : null;
         const desvioPercentualDia = resultadosAgregados?.desvioPercentualDia ? parseFloat(String(resultadosAgregados.desvioPercentualDia)) : null;

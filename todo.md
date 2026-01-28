@@ -3642,3 +3642,18 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar variável totalParaBrisas e acumular no loop em TODAS as queries
 - [x] Criar teste automatizado para validar a correção
 - [x] Todos os testes passaram (3/3)
+
+## Bug v6.11.12 - Usar Taxa de Reparação do Excel (Correção Final)
+- [x] Identificar que a taxa de reparação já vem calculada no Excel (coluna K)
+- [x] Corrigir TODAS as queries para usar taxaReparacaoExcel em vez de recalcular
+- [x] Queries corrigidas:
+  - lojas.dashboardCompletoGestor (linha 572)
+  - lojas.getDadosLojaGestor (linha 782)
+  - lojas.dashboardLojaCompleto (linha 989)
+  - todosPortalLoja.dashboardCompleto (linha 6121)
+  - todosPortalLoja.dashboardCompletoColaborador (linha 6341)
+  - reunioesQuinzenais.getDadosLoja (linha 7064)
+  - portalVolante.dashboardLoja (linha 8058)
+- [x] Corrigir erros de TypeScript (variáveis fora do escopo)
+- [x] Todos os testes passaram (3/3)
+- [x] Taxa do Excel confirmada: 31.4% (valor oficial)
