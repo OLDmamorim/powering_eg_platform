@@ -6515,6 +6515,105 @@ END:VCALENDAR`;
                 )}
               </div>
             ))}
+            
+            {/* Agendamentos do dia */}
+            {diaDetalheSelecionado.agendamentos && diaDetalheSelecionado.agendamentos.length > 0 && (
+              <>
+                <div className="border-t pt-3 mt-3">
+                  <h4 className="text-sm font-semibold text-teal-700 mb-2 flex items-center gap-1">
+                    <Calendar className="h-4 w-4" />
+                    {language === 'pt' ? 'Agendamentos' : 'Appointments'}
+                  </h4>
+                </div>
+                {diaDetalheSelecionado.agendamentos.map((agendamento: any, idx: number) => (
+                  <div 
+                    key={`ag-${idx}`}
+                    className="p-3 rounded-lg border bg-teal-50 border-teal-200"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-semibold text-gray-800">
+                        {agendamento.loja?.nome || agendamento.descricao || (language === 'pt' ? 'Agendamento Pessoal' : 'Personal Appointment')}
+                      </span>
+                      <span className="text-xs px-2 py-1 rounded-full font-medium bg-teal-200 text-teal-800">
+                        {language === 'pt' ? 'Agendamento' : 'Appointment'}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div>
+                        <span className="text-gray-500">{language === 'pt' ? 'Período:' : 'Period:'}</span>
+                        <span className={`ml-1 font-medium ${
+                          agendamento.periodo === 'manha' ? 'text-purple-600' :
+                          agendamento.periodo === 'tarde' ? 'text-blue-600' :
+                          'text-green-600'
+                        }`}>
+                          {agendamento.periodo === 'manha' ? (language === 'pt' ? 'Manhã (9h-13h)' : 'Morning (9h-13h)') :
+                           agendamento.periodo === 'tarde' ? (language === 'pt' ? 'Tarde (14h-18h)' : 'Afternoon (14h-18h)') :
+                           (language === 'pt' ? 'Dia Todo (9h-18h)' : 'Full Day (9h-18h)')}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500">{language === 'pt' ? 'Tipo:' : 'Type:'}</span>
+                        <span className="ml-1 font-medium text-gray-700">
+                          {agendamento.tipo === 'loja' ? (language === 'pt' ? 'Apoio a Loja' : 'Store Support') :
+                           (language === 'pt' ? 'Pessoal' : 'Personal')}
+                        </span>
+                      </div>
+                    </div>
+                    {agendamento.observacoes && (
+                      <div className="mt-2 text-sm">
+                        <span className="text-gray-500">{language === 'pt' ? 'Obs:' : 'Notes:'}</span>
+                        <span className="ml-1 text-gray-700">{agendamento.observacoes}</span>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </>
+            )}
+            
+            {/* Bloqueios do dia */}
+            {diaDetalheSelecionado.bloqueios && diaDetalheSelecionado.bloqueios.length > 0 && (
+              <>
+                <div className="border-t pt-3 mt-3">
+                  <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-1">
+                    <X className="h-4 w-4" />
+                    {language === 'pt' ? 'Bloqueios' : 'Blocks'}
+                  </h4>
+                </div>
+                {diaDetalheSelecionado.bloqueios.map((bloqueio: any, idx: number) => (
+                  <div 
+                    key={`bl-${idx}`}
+                    className="p-3 rounded-lg border bg-gray-100 border-gray-300"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-semibold text-gray-800">
+                        {bloqueio.motivo || (language === 'pt' ? 'Bloqueado' : 'Blocked')}
+                      </span>
+                      <span className="text-xs px-2 py-1 rounded-full font-medium bg-gray-300 text-gray-700">
+                        {language === 'pt' ? 'Bloqueio' : 'Block'}
+                      </span>
+                    </div>
+                    <div className="text-sm">
+                      <span className="text-gray-500">{language === 'pt' ? 'Período:' : 'Period:'}</span>
+                      <span className="ml-1 font-medium text-gray-700">
+                        {bloqueio.periodo === 'manha' ? (language === 'pt' ? 'Manhã' : 'Morning') :
+                         bloqueio.periodo === 'tarde' ? (language === 'pt' ? 'Tarde' : 'Afternoon') :
+                         (language === 'pt' ? 'Dia Todo' : 'Full Day')}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </>
+            )}
+            
+            {/* Mensagem quando não há atividades */}
+            {diaDetalheSelecionado.pedidos.filter((p: any) => p.estado !== 'reprovado' && p.estado !== 'anulado' && p.estado !== 'cancelado').length === 0 && 
+             (!diaDetalheSelecionado.agendamentos || diaDetalheSelecionado.agendamentos.length === 0) && 
+             (!diaDetalheSelecionado.bloqueios || diaDetalheSelecionado.bloqueios.length === 0) && (
+              <div className="text-center py-8 text-gray-500">
+                <Calendar className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                <p>{language === 'pt' ? 'Nenhuma atividade para este dia' : 'No activities for this day'}</p>
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDiaDetalheOpen(false)}>

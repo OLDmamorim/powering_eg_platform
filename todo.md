@@ -3674,3 +3674,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar rota /portal-volante que usa o componente PortalLoja
 - [x] Verificar que o token é de volante (confirmado: Volante Minho, ID 2)
 - [ ] Publicar para que a rota fique disponível em produção
+
+## Bug v6.11.16 - Modal Atividades do Dia vazio no Portal do Volante
+- [x] Investigar porque o modal abre vazio quando clica num dia com atividades - RESOLVIDO: O modal só mostrava pedidos, não agendamentos
+- [x] Corrigir para mostrar os agendamentos e pedidos do dia selecionado - RESOLVIDO: Adicionada renderização de agendamentos (teal) e bloqueios (cinza) no modal
