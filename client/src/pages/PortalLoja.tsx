@@ -56,6 +56,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { ChatbotPortalLoja } from "@/components/ChatbotPortalLoja";
 import { useTheme } from "@/contexts/ThemeContext";
 import { setAppBadge } from "@/hooks/useAppBadge";
 import { usePushNotificationsLoja } from "@/hooks/usePushNotifications";
@@ -169,7 +170,7 @@ export default function PortalLoja() {
     }
     return null;
   });
-  const [activeTab, setActiveTab] = useState<"home" | "reuniao" | "pendentes" | "historico" | "tarefas" | "resultados" | "volante" | "agenda">("home");
+  const [activeTab, setActiveTab] = useState<"home" | "reuniao" | "pendentes" | "historico" | "tarefas" | "resultados" | "volante" | "agenda" | "chatbot">("home");
   const [filtroTarefas, setFiltroTarefas] = useState<"todas" | "recebidas" | "enviadas" | "internas">("todas");
   // Estado para o filtro de meses do dashboard
   const [mesesSelecionadosDashboard, setMesesSelecionadosDashboard] = useState<MesSelecionado[]>(() => {
@@ -1146,6 +1147,21 @@ export default function PortalLoja() {
                 </div>
                 <h3 className="text-xl font-bold mb-2">{language === 'pt' ? 'Mapa de KLM' : 'KLM Map'}</h3>
                 <p className="text-sm opacity-80">{language === 'pt' ? 'Consultar distâncias entre lojas' : 'Check distances between stores'}</p>
+              </CardContent>
+            </Card>
+
+            {/* Card Chatbot IA - Disponível para todos */}
+            <Card 
+              className="cursor-pointer hover:shadow-lg transition-all hover:scale-[1.02] bg-gradient-to-br from-indigo-500 to-violet-600 text-white border-0"
+              onClick={() => setActiveTab("chatbot")}
+            >
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <Brain className="h-10 w-10 opacity-80" />
+                  <Sparkles className="h-6 w-6 opacity-60" />
+                </div>
+                <h3 className="text-xl font-bold mb-2">{language === 'pt' ? 'Assistente IA' : 'AI Assistant'}</h3>
+                <p className="text-sm opacity-80">{language === 'pt' ? 'Consultar dados e resultados' : 'Query data and results'}</p>
               </CardContent>
             </Card>
           </div>
@@ -3445,6 +3461,32 @@ export default function PortalLoja() {
           language={language}
           refetchPedidos={refetchPedidosVolante}
         />
+      )}
+
+      {/* Tab Chatbot IA */}
+      {activeTab === "chatbot" && (
+        <div className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Brain className="h-5 w-5 text-indigo-600" />
+                {language === 'pt' ? 'Assistente IA' : 'AI Assistant'}
+              </CardTitle>
+              <CardDescription>
+                {language === 'pt' 
+                  ? 'Faça perguntas sobre os dados da sua loja, resultados, tarefas e reuniões. O assistente tem acesso a todos os dados do país para análise e comparação.'
+                  : 'Ask questions about your store data, results, tasks and meetings. The assistant has access to all country data for analysis and comparison.'}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ChatbotPortalLoja 
+                token={token} 
+                language={language} 
+                isVolante={!!volanteAuth} 
+              />
+            </CardContent>
+          </Card>
+        </div>
       )}
 
       {/* Botão Flutuante de Acesso Rápido às Tarefas - Pulsa quando há NOVAS */}

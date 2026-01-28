@@ -3743,3 +3743,19 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Verificar se o botão "Tarefas" usa query diferente
 - [x] Corrigir query incorreta
 - [x] Testar com utilizador "Upload Resultados"
+
+- [x] Criar procedure tRPC para chatbot no Portal da Loja
+- [x] Criar procedure tRPC para chatbot no Portal do Volante
+- [ ] Adicionar componente AIChatBox ao Portal da Loja
+- [ ] Adicionar componente AIChatBox ao Portal do Volante
+- [ ] Testar chatbot em ambos os portais
+
+## Funcionalidade v6.9 - Chatbot IA nos Portais (Loja e Volante)
+- [x] Criar procedure tRPC para chatbot no Portal da Loja
+- [x] Criar procedure tRPC para chatbot no Portal do Volante
+- [x] Criar serviço chatbotServicePortais.ts com funções específicas
+- [x] Adicionar componente de chatbot ao Portal da Loja
+- [x] Adicionar componente de chatbot ao Portal do Volante
+- [x] Acesso a dados nacionais para análise e comparação
+- [x] Sugestões de perguntas específicas para cada portal
+- [x] Testar funcionalidade do chatbot

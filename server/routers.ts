@@ -6555,6 +6555,32 @@ Fornece uma análise breve com:
           filename,
         };
       }),
+    
+    // Chatbot IA para o Portal da Loja
+    chatbot: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        pergunta: z.string().min(1),
+        historico: z.array(z.object({
+          role: z.enum(["user", "assistant"]),
+          content: z.string(),
+        })).optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const auth = await db.validarTokenLoja(input.token);
+        if (!auth) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        
+        const { processarPerguntaPortalLoja } = await import('./chatbotServicePortais');
+        const resultado = await processarPerguntaPortalLoja(
+          input.pergunta,
+          input.historico || [],
+          auth.loja.id,
+          auth.loja.nome
+        );
+        return resultado;
+      }),
   }),
   
   // ==================== RELATÓRIO BOARD (ADMINISTRAÇÃO) ====================
@@ -8430,6 +8456,36 @@ IMPORTANTE:
           telegramChatId: tokenData.volante.telegramChatId,
           telegramUsername: tokenData.volante.telegramUsername,
         };
+      }),
+    
+    // Chatbot IA para o Portal do Volante
+    chatbot: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        pergunta: z.string().min(1),
+        historico: z.array(z.object({
+          role: z.enum(["user", "assistant"]),
+          content: z.string(),
+        })).optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const tokenData = await db.validateTokenVolante(input.token);
+        if (!tokenData) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        
+        // Obter lojas atribuídas ao volante
+        const lojas = await db.getLojasByVolanteId(tokenData.volante.id);
+        const lojasAtribuidas = lojas.map(l => ({ id: l.id, nome: l.nome }));
+        
+        const { processarPerguntaPortalVolante } = await import('./chatbotServicePortais');
+        const resultado = await processarPerguntaPortalVolante(
+          input.pergunta,
+          input.historico || [],
+          tokenData.volante.nome,
+          lojasAtribuidas
+        );
+        return resultado;
       }),
   }),
 });
