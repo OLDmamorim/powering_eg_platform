@@ -15,7 +15,7 @@ import { notificarGestorRelatorioAdmin } from "./notificacaoGestor";
 import { notifyOwner } from "./_core/notification";
 import { processarPergunta, getSugestoesPergunta } from "./chatbotService";
 import { vapidPublicKey, notificarGestorNovaTarefa, notificarLojaNovaTarefa, notificarGestorRespostaLoja, notificarLojaRespostaGestor } from "./pushService";
-import { notificarNovoPedidoApoio, notificarPedidoAnulado, notificarPedidoEditado } from "./telegramService";
+import { notificarNovoPedidoApoio, notificarPedidoAnulado, notificarPedidoEditado, notificarAgendamentoCriado } from "./telegramService";
 
 // Middleware para verificar se o utilizador é admin
 const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
@@ -7788,6 +7788,28 @@ IMPORTANTE:
           descricao: input.descricao,
         });
         
+        // Enviar notificação Telegram para o próprio volante (confirmação do agendamento)
+        if (tokenData.volante.telegramChatId) {
+          try {
+            let lojaNome: string | undefined;
+            if (input.lojaId) {
+              const loja = await db.getLojaById(input.lojaId);
+              lojaNome = loja?.nome;
+            }
+            await notificarAgendamentoCriado(tokenData.volante.telegramChatId, {
+              volanteNome: tokenData.volante.nome,
+              lojaNome: lojaNome,
+              data: dataAgendamento,
+              periodo: input.periodo,
+              tipoApoio: input.tipoApoio || undefined,
+              descricao: input.descricao,
+            });
+            console.log(`[Telegram] Notificação de agendamento enviada para volante: ${tokenData.volante.telegramChatId}`);
+          } catch (e) {
+            console.error('[Telegram] Erro ao enviar notificação de agendamento:', e);
+          }
+        }
+        
         return agendamento;
       }),
     
@@ -7809,6 +7831,53 @@ IMPORTANTE:
         }
         
         return await db.getAgendamentosVolanteFuturos(tokenData.volante.id);
+      }),
+    
+    // Editar agendamento do volante
+    editarAgendamento: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        agendamentoId: z.number(),
+        lojaId: z.number().nullable().optional(),
+        data: z.string().optional(), // ISO date string
+        periodo: z.enum(['manha', 'tarde', 'dia_todo']).optional(),
+        tipoApoio: z.enum(['cobertura_ferias', 'substituicao_vidros', 'outro']).nullable().optional(),
+        titulo: z.string().optional(),
+        descricao: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const tokenData = await db.validateTokenVolante(input.token);
+        if (!tokenData) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        
+        const volanteId = tokenData.volante.id;
+        
+        // Verificar se o agendamento pertence ao volante
+        const agendamentoExistente = await db.getAgendamentoVolanteById(input.agendamentoId);
+        if (!agendamentoExistente || agendamentoExistente.volanteId !== volanteId) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Agendamento não encontrado' });
+        }
+        
+        // Se for para uma loja, verificar se o volante tem acesso
+        if (input.lojaId !== undefined && input.lojaId !== null) {
+          const lojas = await db.getLojasByVolanteId(volanteId);
+          const temAcesso = lojas.some(l => l.id === input.lojaId);
+          if (!temAcesso) {
+            throw new TRPCError({ code: 'FORBIDDEN', message: 'Não tem acesso a esta loja' });
+          }
+        }
+        
+        const agendamentoAtualizado = await db.atualizarAgendamentoVolante(input.agendamentoId, volanteId, {
+          lojaId: input.lojaId,
+          data: input.data ? new Date(input.data) : undefined,
+          agendamento_volante_periodo: input.periodo,
+          agendamento_volante_tipo: input.tipoApoio,
+          titulo: input.titulo,
+          descricao: input.descricao,
+        });
+        
+        return agendamentoAtualizado;
       }),
     
     // Eliminar agendamento do volante

@@ -1,0 +1,110 @@
+{
+  "query": "SELECT id, volanteId, lojaId, data, agendamento_volante_periodo, agendamento_volante_tipo, titulo, descricao FROM agendamentos_volante ORDER BY id DESC LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT id, volanteId, lojaId, data, agendamento_volante_periodo, agendamento_volante_tipo, titulo, descricao FROM agendamentos_volante ORDER BY id DESC LIMIT 10;",
+  "rows": [
+    {
+      "id": "210002",
+      "volanteId": "2",
+      "lojaId": "180010",
+      "data": "2026-02-07 00:00:00",
+      "agendamento_volante_periodo": "manha",
+      "agendamento_volante_tipo": "cobertura_ferias",
+      "titulo": "NULL",
+      "descricao": "Teste "
+    },
+    {
+      "id": "210001",
+      "volanteId": "2",
+      "lojaId": "NULL",
+      "data": "2026-01-31 00:00:00",
+      "agendamento_volante_periodo": "manha",
+      "agendamento_volante_tipo": "NULL",
+      "titulo": "Teste",
+      "descricao": "Teste "
+    },
+    {
+      "id": "150001",
+      "volanteId": "2",
+      "lojaId": "NULL",
+      "data": "2026-01-30 00:00:00",
+      "agendamento_volante_periodo": "manha",
+      "agendamento_volante_tipo": "NULL",
+      "titulo": "Teste ",
+      "descricao": "Teste "
+    },
+    {
+      "id": "120001",
+      "volanteId": "2",
+      "lojaId": "NULL",
+      "data": "2026-01-26 00:00:00",
+      "agendamento_volante_periodo": "tarde",
+      "agendamento_volante_tipo": "NULL",
+      "titulo": "Teste ",
+      "descricao": "Teste "
+    },
+    {
+      "id": "90004",
+      "volanteId": "2",
+      "lojaId": "60002",
+      "data": "2026-01-31 00:00:00",
+      "agendamento_volante_periodo": "tarde",
+      "agendamento_volante_tipo": "cobertura_ferias",
+      "titulo": "NULL",
+      "descricao": "Teste "
+    },
+    {
+      "id": "90003",
+      "volanteId": "2",
+      "lojaId": "60002",
+      "data": "2026-01-26 00:00:00",
+      "agendamento_volante_periodo": "manha",
+      "agendamento_volante_tipo": "substituicao_vidros",
+      "titulo": "NULL",
+      "descricao": "Teste "
+    },
+    {
+      "id": "90002",
+      "volanteId": "2",
+      "lojaId": "NULL",
+      "data": "2026-01-26 00:00:00",
+      "agendamento_volante_periodo": "tarde",
+      "agendamento_volante_tipo": "NULL",
+      "titulo": "Teste",
+      "descricao": "Teste"
+    },
+    {
+      "id": "90001",
+      "volanteId": "2",
+      "lojaId": "NULL",
+      "data": "2026-01-25 00:00:00",
+      "agendamento_volante_periodo": "manha",
+      "agendamento_volante_tipo": "NULL",
+      "titulo": "Testr",
+      "descricao": "Teste"
+    },
+    {
+      "id": "60001",
+      "volanteId": "2",
+      "lojaId": "60002",
+      "data": "2026-01-21 00:00:00",
+      "agendamento_volante_periodo": "manha",
+      "agendamento_volante_tipo": "NULL",
+      "titulo": "NULL",
+      "descricao": "NULL"
+    },
+    {
+      "id": "30002",
+      "volanteId": "2",
+      "lojaId": "60003",
+      "data": "2026-01-21 00:00:00",
+      "agendamento_volante_periodo": "manha",
+      "agendamento_volante_tipo": "NULL",
+      "titulo": "NULL",
+      "descricao": "BMW e Berlingo"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tvolanteId\tlojaId\tdata\tagendamento_volante_periodo\tagendamento_volante_tipo\ttitulo\tdescricao\n210002\t2\t180010\t2026-02-07 00:00:00\tmanha\tcobertura_ferias\tNULL\tTeste \n210001\t2\tNULL\t2026-01-31 00:00:00\tmanha\tNULL\tTeste\tTeste \n150001\t2\tNULL\t2026-01-30 00:00:00\tmanha\tNULL\tTeste \tTeste \n120001\t2\tNULL\t2026-01-26 00:00:00\ttarde\tNULL\tTeste \tTeste \n90004\t2\t60002\t2026-01-31 00:00:00\ttarde\tcobertura_ferias\tNULL\tTeste \n90003\t2\t60002\t2026-01-26 00:00:00\tmanha\tsubstituicao_vidros\tNULL\tTeste \n90002\t2\tNULL\t2026-01-26 00:00:00\ttarde\tNULL\tTeste\tTeste\n90001\t2\tNULL\t2026-01-25 00:00:00\tmanha\tNULL\tTestr\tTeste\n60001\t2\t60002\t2026-01-21 00:00:00\tmanha\tNULL\tNULL\tNULL\n30002\t2\t60003\t2026-01-21 00:00:00\tmanha\tNULL\tNULL\tBMW e Berlingo\n",
+  "stderr": "",
+  "execution_time_ms": 111
+}

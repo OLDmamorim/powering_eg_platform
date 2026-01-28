@@ -111,6 +111,7 @@ import {
   Ban,
   Pencil,
   Settings,
+  Trash2,
 } from "lucide-react";
 
 interface LojaAuth {
@@ -4344,6 +4345,16 @@ function VolanteInterface({
   const [novoAgendamentoTitulo, setNovoAgendamentoTitulo] = useState('');
   const [novoAgendamentoDescricao, setNovoAgendamentoDescricao] = useState('');
   
+  // Estados para editar agendamento
+  const [editarAgendamentoOpen, setEditarAgendamentoOpen] = useState(false);
+  const [agendamentoSelecionado, setAgendamentoSelecionado] = useState<any>(null);
+  const [editarAgendamentoData, setEditarAgendamentoData] = useState('');
+  const [editarAgendamentoPeriodo, setEditarAgendamentoPeriodo] = useState<'manha' | 'tarde' | 'dia_todo'>('manha');
+  const [editarAgendamentoLojaId, setEditarAgendamentoLojaId] = useState<number | null>(null);
+  const [editarAgendamentoTipoApoio, setEditarAgendamentoTipoApoio] = useState<'cobertura_ferias' | 'substituicao_vidros' | 'outro' | null>(null);
+  const [editarAgendamentoTitulo, setEditarAgendamentoTitulo] = useState('');
+  const [editarAgendamentoDescricao, setEditarAgendamentoDescricao] = useState('');
+  
   // Estados para bloquear dia
   const [bloquearDiaOpen, setBloquearDiaOpen] = useState(false);
   const [bloqueioData, setBloqueioData] = useState('');
@@ -4486,6 +4497,20 @@ function VolanteInterface({
       toast.success(language === 'pt' ? 'Agendamento eliminado!' : 'Appointment deleted!');
       refetchPedidos();
       refetchEstadoMes();
+      setDiaDetalheOpen(false);
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  // Mutation para editar agendamento
+  const editarAgendamentoMutation = trpc.pedidosApoio.editarAgendamento.useMutation({
+    onSuccess: () => {
+      toast.success(language === 'pt' ? 'Agendamento atualizado!' : 'Appointment updated!');
+      refetchPedidos();
+      refetchEstadoMes();
+      setEditarAgendamentoOpen(false);
     },
     onError: (error) => {
       toast.error(error.message);
@@ -6542,29 +6567,71 @@ END:VCALENDAR`;
                       <div>
                         <span className="text-gray-500">{language === 'pt' ? 'Período:' : 'Period:'}</span>
                         <span className={`ml-1 font-medium ${
-                          agendamento.periodo === 'manha' ? 'text-purple-600' :
-                          agendamento.periodo === 'tarde' ? 'text-blue-600' :
+                          agendamento.agendamento_volante_periodo === 'manha' ? 'text-purple-600' :
+                          agendamento.agendamento_volante_periodo === 'tarde' ? 'text-blue-600' :
                           'text-green-600'
                         }`}>
-                          {agendamento.periodo === 'manha' ? (language === 'pt' ? 'Manhã (9h-13h)' : 'Morning (9h-13h)') :
-                           agendamento.periodo === 'tarde' ? (language === 'pt' ? 'Tarde (14h-18h)' : 'Afternoon (14h-18h)') :
+                          {agendamento.agendamento_volante_periodo === 'manha' ? (language === 'pt' ? 'Manhã (9h-13h)' : 'Morning (9h-13h)') :
+                           agendamento.agendamento_volante_periodo === 'tarde' ? (language === 'pt' ? 'Tarde (14h-18h)' : 'Afternoon (14h-18h)') :
                            (language === 'pt' ? 'Dia Todo (9h-18h)' : 'Full Day (9h-18h)')}
                         </span>
                       </div>
                       <div>
                         <span className="text-gray-500">{language === 'pt' ? 'Tipo:' : 'Type:'}</span>
                         <span className="ml-1 font-medium text-gray-700">
-                          {agendamento.tipo === 'loja' ? (language === 'pt' ? 'Apoio a Loja' : 'Store Support') :
-                           (language === 'pt' ? 'Pessoal' : 'Personal')}
+                          {agendamento.agendamento_volante_tipo ? (
+                            agendamento.agendamento_volante_tipo === 'cobertura_ferias' ? (language === 'pt' ? 'Cobertura de férias' : 'Holiday coverage') :
+                            agendamento.agendamento_volante_tipo === 'substituicao_vidros' ? (language === 'pt' ? 'Substituição de vidros' : 'Glass replacement') :
+                            (language === 'pt' ? 'Outro' : 'Other')
+                          ) : (language === 'pt' ? 'Pessoal' : 'Personal')}
                         </span>
                       </div>
                     </div>
-                    {agendamento.observacoes && (
+                    {agendamento.descricao && (
                       <div className="mt-2 text-sm">
                         <span className="text-gray-500">{language === 'pt' ? 'Obs:' : 'Notes:'}</span>
-                        <span className="ml-1 text-gray-700">{agendamento.observacoes}</span>
+                        <span className="ml-1 text-gray-700">{agendamento.descricao}</span>
                       </div>
                     )}
+                    {/* Botões de editar e apagar */}
+                    <div className="mt-3 flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="flex-1"
+                        onClick={() => {
+                          setAgendamentoSelecionado(agendamento);
+                          setEditarAgendamentoData(new Date(agendamento.data).toISOString().split('T')[0]);
+                          setEditarAgendamentoPeriodo(agendamento.agendamento_volante_periodo);
+                          setEditarAgendamentoLojaId(agendamento.lojaId);
+                          setEditarAgendamentoTipoApoio(agendamento.agendamento_volante_tipo);
+                          setEditarAgendamentoTitulo(agendamento.titulo || '');
+                          setEditarAgendamentoDescricao(agendamento.descricao || '');
+                          setDiaDetalheOpen(false);
+                          setEditarAgendamentoOpen(true);
+                        }}
+                      >
+                        <Pencil className="h-4 w-4 mr-1" />
+                        {language === 'pt' ? 'Editar' : 'Edit'}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        className="flex-1"
+                        onClick={() => {
+                          if (confirm(language === 'pt' ? 'Tem a certeza que quer eliminar este agendamento?' : 'Are you sure you want to delete this appointment?')) {
+                            eliminarAgendamentoMutation.mutate({
+                              token,
+                              agendamentoId: agendamento.id,
+                            });
+                          }
+                        }}
+                        disabled={eliminarAgendamentoMutation.isPending}
+                      >
+                        <Trash2 className="h-4 w-4 mr-1" />
+                        {language === 'pt' ? 'Apagar' : 'Delete'}
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </>
@@ -6797,6 +6864,186 @@ END:VCALENDAR`;
                 <Plus className="h-4 w-4 mr-1" />
               )}
               {language === 'pt' ? 'Criar' : 'Create'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog de Editar Agendamento */}
+      <Dialog open={editarAgendamentoOpen} onOpenChange={setEditarAgendamentoOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Pencil className="h-5 w-5 text-teal-600" />
+              {language === 'pt' ? 'Editar Agendamento' : 'Edit Appointment'}
+            </DialogTitle>
+            <DialogDescription>
+              {language === 'pt' ? 'Altere os detalhes do agendamento.' : 'Change the appointment details.'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            {/* Seletor de Loja ou Pessoal */}
+            <div>
+              <Label>{language === 'pt' ? 'Para quem?' : 'For whom?'}</Label>
+              <Select
+                value={editarAgendamentoLojaId?.toString() || 'pessoal'}
+                onValueChange={(value) => {
+                  if (value === 'pessoal') {
+                    setEditarAgendamentoLojaId(null);
+                    setEditarAgendamentoTipoApoio(null);
+                  } else {
+                    setEditarAgendamentoLojaId(parseInt(value));
+                    setEditarAgendamentoTipoApoio('cobertura_ferias');
+                  }
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={language === 'pt' ? 'Selecionar...' : 'Select...'} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pessoal">
+                    <div className="flex items-center gap-2">
+                      <Car className="h-4 w-4 text-teal-600" />
+                      {language === 'pt' ? 'Volante (Pessoal)' : 'Driver (Personal)'}
+                    </div>
+                  </SelectItem>
+                  {volanteAuth.lojasAtribuidas
+                    .sort((a, b) => a.nome.localeCompare(b.nome))
+                    .map((loja) => (
+                      <SelectItem key={loja.id} value={loja.id.toString()}>
+                        <div className="flex items-center gap-2">
+                          <Store className="h-4 w-4 text-blue-600" />
+                          {loja.nome}
+                        </div>
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Data */}
+            <div>
+              <Label>{language === 'pt' ? 'Data' : 'Date'}</Label>
+              <Input
+                type="date"
+                value={editarAgendamentoData}
+                onChange={(e) => setEditarAgendamentoData(e.target.value)}
+              />
+            </div>
+
+            {/* Período */}
+            <div>
+              <Label>{language === 'pt' ? 'Período' : 'Period'}</Label>
+              <Select
+                value={editarAgendamentoPeriodo}
+                onValueChange={(value) => setEditarAgendamentoPeriodo(value as 'manha' | 'tarde' | 'dia_todo')}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="manha">
+                    <div className="flex items-center gap-2">
+                      <span className="w-3 h-3 bg-purple-400 rounded"></span>
+                      {language === 'pt' ? 'Manhã (9h-13h)' : 'Morning (9am-1pm)'}
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="tarde">
+                    <div className="flex items-center gap-2">
+                      <span className="w-3 h-3 bg-blue-400 rounded"></span>
+                      {language === 'pt' ? 'Tarde (14h-18h)' : 'Afternoon (2pm-6pm)'}
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="dia_todo">
+                    <div className="flex items-center gap-2">
+                      <span className="w-3 h-3 bg-green-400 rounded"></span>
+                      {language === 'pt' ? 'Dia Todo (9h-18h)' : 'Full Day (9am-6pm)'}
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Tipo de Apoio (apenas para lojas) */}
+            {editarAgendamentoLojaId && (
+              <div>
+                <Label>{language === 'pt' ? 'Tipo de Apoio' : 'Support Type'}</Label>
+                <Select
+                  value={editarAgendamentoTipoApoio || 'cobertura_ferias'}
+                  onValueChange={(value) => setEditarAgendamentoTipoApoio(value as 'cobertura_ferias' | 'substituicao_vidros' | 'outro')}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="cobertura_ferias">
+                      {language === 'pt' ? 'Cobertura de Férias' : 'Vacation Coverage'}
+                    </SelectItem>
+                    <SelectItem value="substituicao_vidros">
+                      {language === 'pt' ? 'Substituição de Vidros' : 'Glass Replacement'}
+                    </SelectItem>
+                    <SelectItem value="outro">
+                      {language === 'pt' ? 'Outro' : 'Other'}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            {/* Título (apenas para pessoal) */}
+            {!editarAgendamentoLojaId && (
+              <div>
+                <Label>{language === 'pt' ? 'Título' : 'Title'}</Label>
+                <Input
+                  value={editarAgendamentoTitulo}
+                  onChange={(e) => setEditarAgendamentoTitulo(e.target.value)}
+                  placeholder={language === 'pt' ? 'Ex: Reunião, Formação...' : 'Ex: Meeting, Training...'}
+                />
+              </div>
+            )}
+
+            {/* Descrição */}
+            <div>
+              <Label>{language === 'pt' ? 'Observações' : 'Notes'}</Label>
+              <Textarea
+                value={editarAgendamentoDescricao}
+                onChange={(e) => setEditarAgendamentoDescricao(e.target.value)}
+                placeholder={language === 'pt' ? 'Detalhes adicionais...' : 'Additional details...'}
+                rows={2}
+              />
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setEditarAgendamentoOpen(false)}>
+              {language === 'pt' ? 'Cancelar' : 'Cancel'}
+            </Button>
+            <Button
+              className="bg-teal-600 hover:bg-teal-700"
+              onClick={() => {
+                if (!editarAgendamentoData) {
+                  toast.error(language === 'pt' ? 'Selecione uma data' : 'Select a date');
+                  return;
+                }
+                if (!agendamentoSelecionado) return;
+                editarAgendamentoMutation.mutate({
+                  token,
+                  agendamentoId: agendamentoSelecionado.id,
+                  lojaId: editarAgendamentoLojaId,
+                  data: editarAgendamentoData,
+                  periodo: editarAgendamentoPeriodo,
+                  tipoApoio: editarAgendamentoLojaId ? editarAgendamentoTipoApoio : null,
+                  titulo: !editarAgendamentoLojaId ? editarAgendamentoTitulo : undefined,
+                  descricao: editarAgendamentoDescricao || undefined,
+                });
+              }}
+              disabled={editarAgendamentoMutation.isPending}
+            >
+              {editarAgendamentoMutation.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-1" />
+              ) : (
+                <Pencil className="h-4 w-4 mr-1" />
+              )}
+              {language === 'pt' ? 'Guardar' : 'Save'}
             </Button>
           </DialogFooter>
         </DialogContent>

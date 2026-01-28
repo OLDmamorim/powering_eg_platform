@@ -3678,3 +3678,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## Bug v6.11.16 - Modal Atividades do Dia vazio no Portal do Volante
 - [x] Investigar porque o modal abre vazio quando clica num dia com atividades - RESOLVIDO: O modal só mostrava pedidos, não agendamentos
 - [x] Corrigir para mostrar os agendamentos e pedidos do dia selecionado - RESOLVIDO: Adicionada renderização de agendamentos (teal) e bloqueios (cinza) no modal
+
+## Bug v6.11.17 - Melhorias no Modal de Agendamentos
+- [x] Mostrar a descrição/observações do agendamento no modal
+- [x] Adicionar botão de editar agendamento
+- [x] Adicionar botão de apagar agendamento
+- [x] Enviar notificação Telegram ao criar agendamento

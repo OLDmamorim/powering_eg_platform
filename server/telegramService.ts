@@ -478,3 +478,55 @@ export async function getWebhookInfo(): Promise<{
     return { ok: false, error: String(error) };
   }
 }
+
+
+/**
+ * Formata e envia notificação de agendamento criado pelo volante
+ * Envia para a loja quando o volante agenda um apoio
+ */
+export async function notificarAgendamentoCriado(
+  chatIds: string,
+  agendamento: {
+    volanteNome: string;
+    lojaNome?: string;
+    data: Date;
+    periodo: 'manha' | 'tarde' | 'dia_todo';
+    tipoApoio?: string;
+    descricao?: string;
+  }
+): Promise<boolean> {
+  const dataFormatada = new Date(agendamento.data).toLocaleDateString('pt-PT', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+
+  const periodoTexto = agendamento.periodo === 'manha' 
+    ? 'Manhã (9h-13h)' 
+    : agendamento.periodo === 'tarde' 
+      ? 'Tarde (14h-18h)' 
+      : 'Dia Todo (9h-18h)';
+  
+  const tipoApoioTexto = agendamento.tipoApoio ? ({
+    cobertura_ferias: 'Cobertura de Férias',
+    substituicao_vidros: 'Substituição de Vidros',
+    outro: 'Outro',
+  }[agendamento.tipoApoio] || agendamento.tipoApoio) : null;
+
+  const message = `
+📅 <b>Novo Agendamento do Volante</b>
+
+👤 <b>Volante:</b> ${agendamento.volanteNome}
+${agendamento.lojaNome ? `🏪 <b>Loja:</b> ${agendamento.lojaNome}` : ''}
+📅 <b>Data:</b> ${dataFormatada}
+⏰ <b>Período:</b> ${periodoTexto}
+${tipoApoioTexto ? `🔧 <b>Tipo:</b> ${tipoApoioTexto}` : ''}
+${agendamento.descricao ? `📝 <b>Observações:</b> ${agendamento.descricao}` : ''}
+
+<i>O volante agendou um apoio para esta loja.</i>
+  `.trim();
+
+  const result = await sendTelegramMessageToMultiple(chatIds, message);
+  return result.success > 0;
+}

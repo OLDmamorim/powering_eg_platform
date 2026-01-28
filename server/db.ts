@@ -8877,6 +8877,17 @@ export async function getAgendamentosVolanteFuturos(volanteId: number): Promise<
 }
 
 /**
+ * Obter agendamento por ID
+ */
+export async function getAgendamentoVolanteById(agendamentoId: number): Promise<AgendamentoVolante | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const result = await db.select().from(agendamentosVolante).where(eq(agendamentosVolante.id, agendamentoId));
+  return result[0] || null;
+}
+
+/**
  * Eliminar agendamento do volante
  */
 export async function eliminarAgendamentoVolante(agendamentoId: number, volanteId: number): Promise<boolean> {
