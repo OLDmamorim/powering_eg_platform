@@ -7393,17 +7393,38 @@ export async function getDadosPriorizacaoLojas(gestorId: number): Promise<DadosP
   const anoAtual = hoje.getFullYear();
   
   for (const loja of lojasGestor) {
-    // Obter último relatório (visita) da loja
-    const [ultimoRelatorio] = await db
+    // Obter último relatório COMPLETO da loja
+    const [ultimoRelatorioCompleto] = await db
       .select({ createdAt: relatoriosCompletos.createdAt })
       .from(relatoriosCompletos)
       .where(eq(relatoriosCompletos.lojaId, loja.lojaId))
       .orderBy(desc(relatoriosCompletos.createdAt))
       .limit(1);
     
-    const ultimaVisita = ultimoRelatorio?.createdAt || null;
+    // Obter último relatório LIVRE da loja
+    const [ultimoRelatorioLivre] = await db
+      .select({ dataVisita: relatoriosLivres.dataVisita })
+      .from(relatoriosLivres)
+      .where(eq(relatoriosLivres.lojaId, loja.lojaId))
+      .orderBy(desc(relatoriosLivres.dataVisita))
+      .limit(1);
+    
+    // Determinar a data da última visita (a mais recente entre completo e livre)
+    let ultimaVisita: Date | null = null;
+    
+    if (ultimoRelatorioCompleto?.createdAt && ultimoRelatorioLivre?.dataVisita) {
+      // Ambos existem - usar o mais recente
+      const dataCompleto = new Date(ultimoRelatorioCompleto.createdAt);
+      const dataLivre = new Date(ultimoRelatorioLivre.dataVisita);
+      ultimaVisita = dataCompleto > dataLivre ? dataCompleto : dataLivre;
+    } else if (ultimoRelatorioCompleto?.createdAt) {
+      ultimaVisita = new Date(ultimoRelatorioCompleto.createdAt);
+    } else if (ultimoRelatorioLivre?.dataVisita) {
+      ultimaVisita = new Date(ultimoRelatorioLivre.dataVisita);
+    }
+    
     const diasSemVisita = ultimaVisita 
-      ? Math.floor((hoje.getTime() - new Date(ultimaVisita).getTime()) / (1000 * 60 * 60 * 24))
+      ? Math.floor((hoje.getTime() - ultimaVisita.getTime()) / (1000 * 60 * 60 * 24))
       : 365; // Se nunca visitou, assume 1 ano
     
     // Obter pendentes ativos da loja
@@ -7641,17 +7662,38 @@ export async function getDadosPriorizacaoTodasLojas(): Promise<DadosPriorizacaoL
   const anoAtual = hoje.getFullYear();
   
   for (const loja of todasLojas) {
-    // Obter último relatório (visita) da loja
-    const [ultimoRelatorio] = await db
+    // Obter último relatório COMPLETO da loja
+    const [ultimoRelatorioCompleto] = await db
       .select({ createdAt: relatoriosCompletos.createdAt })
       .from(relatoriosCompletos)
       .where(eq(relatoriosCompletos.lojaId, loja.lojaId))
       .orderBy(desc(relatoriosCompletos.createdAt))
       .limit(1);
     
-    const ultimaVisita = ultimoRelatorio?.createdAt || null;
+    // Obter último relatório LIVRE da loja
+    const [ultimoRelatorioLivre] = await db
+      .select({ dataVisita: relatoriosLivres.dataVisita })
+      .from(relatoriosLivres)
+      .where(eq(relatoriosLivres.lojaId, loja.lojaId))
+      .orderBy(desc(relatoriosLivres.dataVisita))
+      .limit(1);
+    
+    // Determinar a data da última visita (a mais recente entre completo e livre)
+    let ultimaVisita: Date | null = null;
+    
+    if (ultimoRelatorioCompleto?.createdAt && ultimoRelatorioLivre?.dataVisita) {
+      // Ambos existem - usar o mais recente
+      const dataCompleto = new Date(ultimoRelatorioCompleto.createdAt);
+      const dataLivre = new Date(ultimoRelatorioLivre.dataVisita);
+      ultimaVisita = dataCompleto > dataLivre ? dataCompleto : dataLivre;
+    } else if (ultimoRelatorioCompleto?.createdAt) {
+      ultimaVisita = new Date(ultimoRelatorioCompleto.createdAt);
+    } else if (ultimoRelatorioLivre?.dataVisita) {
+      ultimaVisita = new Date(ultimoRelatorioLivre.dataVisita);
+    }
+    
     const diasSemVisita = ultimaVisita 
-      ? Math.floor((hoje.getTime() - new Date(ultimaVisita).getTime()) / (1000 * 60 * 60 * 24))
+      ? Math.floor((hoje.getTime() - ultimaVisita.getTime()) / (1000 * 60 * 60 * 24))
       : 365; // Se nunca visitou, assume 1 ano
     
     // Obter pendentes ativos da loja

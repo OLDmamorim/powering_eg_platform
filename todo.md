@@ -3687,3 +3687,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 
 ## Bug v6.11.18 - Link do Portal na Notificação de Agendamento
 - [x] Adicionar link do portal do volante à notificação Telegram de novo agendamento
+
+## Bug v6.11.19 - Projeção de Visitas não considera Relatórios Livres
+- [x] Investigar lógica de projeção de visitas
+- [x] Corrigir para considerar relatórios livres além dos completos
+- [x] Testar com lojas que têm relatórios livres recentes
