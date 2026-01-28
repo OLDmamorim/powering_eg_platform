@@ -527,6 +527,7 @@ export const appRouter = router({
         let totalServicos = 0;
         let totalObjetivo = 0;
         let totalReparacoes = 0;
+        let totalParaBrisas = 0;
         let totalEscovas = 0;
         let totalPolimento = 0;
         let totalTratamento = 0;
@@ -542,6 +543,7 @@ export const appRouter = router({
             totalObjetivo += Number(resultadosArr.objetivoMensal) || 0;
             totalReparacoes += Number(resultadosArr.qtdReparacoes) || 0;
             if (resultadosArr.updatedAt) {
+            totalParaBrisas += Number(resultadosArr.qtdParaBrisas) || 0;
               const dataAtual = new Date(resultadosArr.updatedAt);
               if (!dataUltimaAtualizacao || dataAtual > dataUltimaAtualizacao) {
                 dataUltimaAtualizacao = dataAtual;
@@ -563,7 +565,7 @@ export const appRouter = router({
         
         // Calcular métricas agregadas
         const desvioPercentual = totalObjetivo > 0 ? (totalServicos - totalObjetivo) / totalObjetivo : null;
-        const taxaReparacao = totalServicos > 0 ? totalReparacoes / totalServicos : null;
+        const taxaReparacao = totalParaBrisas > 0 ? totalReparacoes / totalParaBrisas : null;
         const escovasPercent = totalServicos > 0 ? totalEscovas / totalServicos : null;
         
         // Obter dados de objetivo diário do primeiro mês (mais recente)
@@ -743,6 +745,7 @@ export const appRouter = router({
         let totalObjetivo = 0;
         let totalReparacoes = 0;
         let totalEscovas = 0;
+        let totalParaBrisas = 0;
         let totalPolimento = 0;
         let totalTratamento = 0;
         let totalLavagens = 0;
@@ -753,6 +756,7 @@ export const appRouter = router({
             totalServicos += Number(resultados.totalServicos) || 0;
             totalObjetivo += Number(resultados.objetivoMensal) || 0;
             totalReparacoes += Number(resultados.qtdReparacoes) || 0;
+            totalParaBrisas += Number(resultados.qtdParaBrisas) || 0;
           }
           
           const complementares = await db.getVendasComplementares(p.mes, p.ano, input.lojaId);
@@ -767,7 +771,7 @@ export const appRouter = router({
         
         // Calcular métricas
         const desvioPercentual = totalObjetivo > 0 ? ((totalServicos - totalObjetivo) / totalObjetivo) * 100 : 0;
-        const taxaReparacao = totalServicos > 0 ? (totalReparacoes / totalServicos) * 100 : 0;
+        const taxaReparacao = totalParaBrisas > 0 ? (totalReparacoes / totalParaBrisas) * 100 : 0;
         const escovasPercent = totalServicos > 0 ? (totalEscovas / totalServicos) * 100 : 0;
         const servicosFaltam = Math.max(0, totalObjetivo - totalServicos);
         const reparacoesFaltam = Math.max(0, Math.ceil(totalServicos * 0.22) - totalReparacoes);
@@ -941,6 +945,7 @@ IMPORTANTE:
         let totalServicos = 0;
         let totalObjetivo = 0;
         let totalReparacoes = 0;
+        let totalParaBrisas = 0;
         let totalEscovas = 0;
         let totalPolimento = 0;
         let totalTratamento = 0;
@@ -953,6 +958,7 @@ IMPORTANTE:
             totalServicos += Number(resultadosArr.totalServicos) || 0;
             totalObjetivo += Number(resultadosArr.objetivoMensal) || 0;
             totalReparacoes += Number(resultadosArr.qtdReparacoes) || 0;
+            totalParaBrisas += Number(resultadosArr.qtdParaBrisas) || 0;
           }
           
           const complementaresArr = await db.getVendasComplementares(p.mes, p.ano, input.lojaId);
@@ -968,7 +974,7 @@ IMPORTANTE:
         
         // Calcular métricas
         const desvioPercentual = totalObjetivo > 0 ? (totalServicos - totalObjetivo) / totalObjetivo : null;
-        const taxaReparacao = totalServicos > 0 ? totalReparacoes / totalServicos : null;
+        const taxaReparacao = totalParaBrisas > 0 ? totalReparacoes / totalParaBrisas : null;
         const escovasPercent = totalServicos > 0 ? totalEscovas / totalServicos : null;
         
         // Calcular desvio objetivo diário
@@ -6056,6 +6062,7 @@ IMPORTANTE:
         let totalServicos = 0;
         let totalObjetivo = 0;
         let totalReparacoes = 0;
+        let totalParaBrisas = 0;
         let totalEscovas = 0;
         let totalPolimento = 0;
         let totalTratamento = 0;
@@ -6071,6 +6078,7 @@ IMPORTANTE:
             totalServicos += Number(resultadosArr.totalServicos) || 0;
             totalObjetivo += Number(resultadosArr.objetivoMensal) || 0;
             totalReparacoes += Number(resultadosArr.qtdReparacoes) || 0;
+            totalParaBrisas += Number(resultadosArr.qtdParaBrisas) || 0;
             if (resultadosArr.updatedAt) {
               const dataAtual = new Date(resultadosArr.updatedAt);
               if (!dataUltimaAtualizacao || dataAtual > dataUltimaAtualizacao) {
@@ -6094,7 +6102,7 @@ IMPORTANTE:
         
         // Calcular métricas agregadas
         const desvioPercentual = totalObjetivo > 0 ? (totalServicos - totalObjetivo) / totalObjetivo : null;
-        const taxaReparacao = totalServicos > 0 ? totalReparacoes / totalServicos : null;
+        const taxaReparacao = totalParaBrisas > 0 ? totalReparacoes / totalParaBrisas : null;
         const escovasPercent = totalServicos > 0 ? totalEscovas / totalServicos : null;
         
         // Criar objeto de resultados agregados
@@ -6281,6 +6289,7 @@ IMPORTANTE:
         let totalServicos = 0;
         let totalObjetivo = 0;
         let totalReparacoes = 0;
+        let totalParaBrisas = 0;
         let totalEscovas = 0;
         let totalPolimento = 0;
         let totalTratamento = 0;
@@ -6293,6 +6302,7 @@ IMPORTANTE:
             totalServicos += Number(resultadosArr.totalServicos) || 0;
             totalObjetivo += Number(resultadosArr.objetivoMensal) || 0;
             totalReparacoes += Number(resultadosArr.qtdReparacoes) || 0;
+            totalParaBrisas += Number(resultadosArr.qtdParaBrisas) || 0;
           }
           
           const complementaresArr = await db.getVendasComplementares(p.mes, p.ano, lojaIdParaConsulta);
@@ -6308,7 +6318,7 @@ IMPORTANTE:
         
         // Calcular métricas
         const desvioPercentual = totalObjetivo > 0 ? (totalServicos - totalObjetivo) / totalObjetivo : null;
-        const taxaReparacao = totalServicos > 0 ? totalReparacoes / totalServicos : null;
+        const taxaReparacao = totalParaBrisas > 0 ? totalReparacoes / totalParaBrisas : null;
         const escovasPercent = totalServicos > 0 ? totalEscovas / totalServicos : null;
         
         // Calcular desvio objetivo diário
@@ -7000,6 +7010,7 @@ Fornece uma análise breve com:
         let totalServicos = 0;
         let totalObjetivo = 0;
         let totalReparacoes = 0;
+        let totalParaBrisas = 0;
         let totalEscovas = 0;
         let totalPolimento = 0;
         let totalTratamento = 0;
@@ -7011,6 +7022,7 @@ Fornece uma análise breve com:
             totalServicos += Number(resultados.totalServicos) || 0;
             totalObjetivo += Number(resultados.objetivoMensal) || 0;
             totalReparacoes += Number(resultados.qtdReparacoes) || 0;
+            totalParaBrisas += Number(resultados.qtdParaBrisas) || 0;
           }
           
           const complementares = await db.getVendasComplementares(p.mes, p.ano, auth.loja.id);
@@ -7025,7 +7037,7 @@ Fornece uma análise breve com:
         
         // Calcular métricas
         const desvioPercentual = totalObjetivo > 0 ? ((totalServicos - totalObjetivo) / totalObjetivo) * 100 : 0;
-        const taxaReparacao = totalServicos > 0 ? (totalReparacoes / totalServicos) * 100 : 0;
+        const taxaReparacao = totalParaBrisas > 0 ? (totalReparacoes / totalParaBrisas) * 100 : 0;
         const escovasPercent = totalServicos > 0 ? (totalEscovas / totalServicos) * 100 : 0;
         const servicosFaltam = Math.max(0, totalObjetivo - totalServicos);
         const reparacoesFaltam = Math.max(0, Math.ceil(totalServicos * 0.22) - totalReparacoes);
@@ -8037,6 +8049,7 @@ IMPORTANTE:
         
         // Calcular métricas agregadas
         const desvioPercentual = totalObjetivo > 0 ? (totalServicos - totalObjetivo) / totalObjetivo : null;
+        // Correção v6.11.10: Taxa de reparação agora usa qtdParaBrisas em vez de totalServicos
         const taxaReparacao = totalParaBrisas > 0 ? totalReparacoes / totalParaBrisas : null;
         const escovasPercent = totalServicos > 0 ? totalEscovas / totalServicos : null;
         

@@ -3629,3 +3629,16 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Criar teste dashboardLoja.taxaReparacao.test.ts
 - [x] Validar correção: teste confirma 40.9% (correto) vs 15.8% (errado)
 - [x] Todos os testes passaram (3/3)
+
+## Bug v6.11.11 - Taxa de Reparação em TODAS as queries (Correção Completa)
+- [x] Identificar o problema: taxa de reparação calculada como qtdReparacoes/totalServicos em vez de qtdReparacoes/qtdParaBrisas
+- [x] Corrigir query portalVolante.dashboardLoja (linha 8040)
+- [x] Corrigir query lojas.dashboardCompletoGestor (linha 568)
+- [x] Corrigir query lojas.getDadosLojaGestor (linha 774)
+- [x] Corrigir query lojas.dashboardLojaCompleto (linha 977)
+- [x] Corrigir query todosPortalLoja.dashboardCompleto (linha 6105)
+- [x] Corrigir query todosPortalLoja.dashboardCompletoColaborador (linha 6321)
+- [x] Corrigir query reunioesQuinzenais.getDadosLoja (linha 7040)
+- [x] Adicionar variável totalParaBrisas e acumular no loop em TODAS as queries
+- [x] Criar teste automatizado para validar a correção
+- [x] Todos os testes passaram (3/3)
