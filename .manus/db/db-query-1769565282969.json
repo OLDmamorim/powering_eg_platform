@@ -1,0 +1,130 @@
+{
+  "query": "SELECT * FROM agendamentos_volante ORDER BY id DESC LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT * FROM agendamentos_volante ORDER BY id DESC LIMIT 10;",
+  "rows": [
+    {
+      "id": "150001",
+      "volanteId": "2",
+      "lojaId": "NULL",
+      "data": "2026-01-30 00:00:00",
+      "titulo": "Teste ",
+      "descricao": "Teste ",
+      "createdAt": "2026-01-26 07:52:19",
+      "updatedAt": "2026-01-26 07:52:19",
+      "agendamento_volante_periodo": "manha",
+      "agendamento_volante_tipo": "NULL"
+    },
+    {
+      "id": "120001",
+      "volanteId": "2",
+      "lojaId": "NULL",
+      "data": "2026-01-26 00:00:00",
+      "titulo": "Teste ",
+      "descricao": "Teste ",
+      "createdAt": "2026-01-25 12:23:45",
+      "updatedAt": "2026-01-25 12:23:45",
+      "agendamento_volante_periodo": "tarde",
+      "agendamento_volante_tipo": "NULL"
+    },
+    {
+      "id": "90004",
+      "volanteId": "2",
+      "lojaId": "60002",
+      "data": "2026-01-31 00:00:00",
+      "titulo": "NULL",
+      "descricao": "Teste ",
+      "createdAt": "2026-01-24 00:43:01",
+      "updatedAt": "2026-01-24 00:43:01",
+      "agendamento_volante_periodo": "tarde",
+      "agendamento_volante_tipo": "cobertura_ferias"
+    },
+    {
+      "id": "90003",
+      "volanteId": "2",
+      "lojaId": "60002",
+      "data": "2026-01-26 00:00:00",
+      "titulo": "NULL",
+      "descricao": "Teste ",
+      "createdAt": "2026-01-24 00:42:23",
+      "updatedAt": "2026-01-24 00:42:23",
+      "agendamento_volante_periodo": "manha",
+      "agendamento_volante_tipo": "substituicao_vidros"
+    },
+    {
+      "id": "90002",
+      "volanteId": "2",
+      "lojaId": "NULL",
+      "data": "2026-01-26 00:00:00",
+      "titulo": "Teste",
+      "descricao": "Teste",
+      "createdAt": "2026-01-24 00:41:10",
+      "updatedAt": "2026-01-24 00:41:10",
+      "agendamento_volante_periodo": "tarde",
+      "agendamento_volante_tipo": "NULL"
+    },
+    {
+      "id": "90001",
+      "volanteId": "2",
+      "lojaId": "NULL",
+      "data": "2026-01-25 00:00:00",
+      "titulo": "Testr",
+      "descricao": "Teste",
+      "createdAt": "2026-01-24 00:40:29",
+      "updatedAt": "2026-01-24 00:40:29",
+      "agendamento_volante_periodo": "manha",
+      "agendamento_volante_tipo": "NULL"
+    },
+    {
+      "id": "60001",
+      "volanteId": "2",
+      "lojaId": "60002",
+      "data": "2026-01-21 00:00:00",
+      "titulo": "NULL",
+      "descricao": "NULL",
+      "createdAt": "2026-01-20 19:33:53",
+      "updatedAt": "2026-01-20 19:33:53",
+      "agendamento_volante_periodo": "manha",
+      "agendamento_volante_tipo": "NULL"
+    },
+    {
+      "id": "30002",
+      "volanteId": "2",
+      "lojaId": "60003",
+      "data": "2026-01-21 00:00:00",
+      "titulo": "NULL",
+      "descricao": "BMW e Berlingo",
+      "createdAt": "2026-01-20 17:20:49",
+      "updatedAt": "2026-01-20 17:20:49",
+      "agendamento_volante_periodo": "manha",
+      "agendamento_volante_tipo": "NULL"
+    },
+    {
+      "id": "30001",
+      "volanteId": "2",
+      "lojaId": "60003",
+      "data": "2026-01-21 00:00:00",
+      "titulo": "NULL",
+      "descricao": "BMW e Berlingo",
+      "createdAt": "2026-01-20 17:04:21",
+      "updatedAt": "2026-01-20 17:04:21",
+      "agendamento_volante_periodo": "manha",
+      "agendamento_volante_tipo": "NULL"
+    },
+    {
+      "id": "1",
+      "volanteId": "2",
+      "lojaId": "60002",
+      "data": "2026-01-21 00:00:00",
+      "titulo": "NULL",
+      "descricao": "NULL",
+      "createdAt": "2026-01-20 12:43:05",
+      "updatedAt": "2026-01-20 12:43:05",
+      "agendamento_volante_periodo": "manha",
+      "agendamento_volante_tipo": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tvolanteId\tlojaId\tdata\ttitulo\tdescricao\tcreatedAt\tupdatedAt\tagendamento_volante_periodo\tagendamento_volante_tipo\n150001\t2\tNULL\t2026-01-30 00:00:00\tTeste \tTeste \t2026-01-26 07:52:19\t2026-01-26 07:52:19\tmanha\tNULL\n120001\t2\tNULL\t2026-01-26 00:00:00\tTeste \tTeste \t2026-01-25 12:23:45\t2026-01-25 12:23:45\ttarde\tNULL\n90004\t2\t60002\t2026-01-31 00:00:00\tNULL\tTeste \t2026-01-24 00:43:01\t2026-01-24 00:43:01\ttarde\tcobertura_ferias\n90003\t2\t60002\t2026-01-26 00:00:00\tNULL\tTeste \t2026-01-24 00:42:23\t2026-01-24 00:42:23\tmanha\tsubstituicao_vidros\n90002\t2\tNULL\t2026-01-26 00:00:00\tTeste\tTeste\t2026-01-24 00:41:10\t2026-01-24 00:41:10\ttarde\tNULL\n90001\t2\tNULL\t2026-01-25 00:00:00\tTestr\tTeste\t2026-01-24 00:40:29\t2026-01-24 00:40:29\tmanha\tNULL\n60001\t2\t60002\t2026-01-21 00:00:00\tNULL\tNULL\t2026-01-20 19:33:53\t2026-01-20 19:33:53\tmanha\tNULL\n30002\t2\t60003\t2026-01-21 00:00:00\tNULL\tBMW e Berlingo\t2026-01-20 17:20:49\t2026-01-20 17:20:49\tmanha\tNULL\n30001\t2\t60003\t2026-01-21 00:00:00\tNULL\tBMW e Berlingo\t2026-01-20 17:04:21\t2026-01-20 17:04:21\tmanha\tNULL\n1\t2\t60002\t2026-01-21 00:00:00\tNULL\tNULL\t2026-01-20 12:43:05\t2026-01-20 12:43:05\tmanha\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 110
+}

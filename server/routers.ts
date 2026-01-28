@@ -7377,7 +7377,7 @@ IMPORTANTE:
         const baseUrl = process.env.NODE_ENV === 'production' 
           ? 'https://poweringeg-3c9mozlh.manus.space'
           : 'http://localhost:3000';
-        const portalUrl = `${baseUrl}/portal-loja?token=${token.token}`;
+        const portalUrl = `${baseUrl}/portal-volante?token=${token.token}`;
         
         // Enviar email
         const html = `

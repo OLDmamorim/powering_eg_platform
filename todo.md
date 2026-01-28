@@ -3663,3 +3663,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Identificar a fonte dos dados de cada componente (card usava cálculo manual, alerta usava Excel)
 - [x] Corrigir a inconsistência - agora ambos usam desvioPercentualDia do Excel
 - [x] Queries corrigidas: dashboardCompletoGestor, dashboardLojaCompleto, dashboardCompletoColaborador
+
+## Bug v6.11.14 - Portal do Volante - Agendamentos e Link Telegram
+- [x] Investigar porque agendamentos não gravam quando criados pelo volante ou gestor - RESOLVIDO: Os agendamentos estavam a gravar corretamente, mas o calendário só mostrava pedidos
+- [x] Corrigir criação de agendamentos no portal do volante - RESOLVIDO: Calendário agora mostra pedidos, agendamentos e bloqueios com cores diferentes (teal para agendamentos)
+- [x] Corrigir link na notificação Telegram (deve ser portal do volante com token) - RESOLVIDO: Mudado de /portal-loja para /portal-volante

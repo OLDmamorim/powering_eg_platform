@@ -1,0 +1,110 @@
+{
+  "query": "SELECT av.id, av.volanteId, v.nome as volante_nome, av.lojaId, av.data, av.agendamento_volante_periodo, av.titulo, av.createdAt \nFROM agendamentos_volante av \nLEFT JOIN volantes v ON av.volanteId = v.id \nORDER BY av.createdAt DESC \nLIMIT 15;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT av.id, av.volanteId, v.nome as volante_nome, av.lojaId, av.data, av.agendamento_volante_periodo, av.titulo, av.createdAt \nFROM agendamentos_volante av \nLEFT JOIN volantes v ON av.volanteId = v.id \nORDER BY av.createdAt DESC \nLIMIT 15;",
+  "rows": [
+    {
+      "id": "150001",
+      "volanteId": "2",
+      "volante_nome": "Volante Minho ",
+      "lojaId": "NULL",
+      "data": "2026-01-30 00:00:00",
+      "agendamento_volante_periodo": "manha",
+      "titulo": "Teste ",
+      "createdAt": "2026-01-26 07:52:19"
+    },
+    {
+      "id": "120001",
+      "volanteId": "2",
+      "volante_nome": "Volante Minho ",
+      "lojaId": "NULL",
+      "data": "2026-01-26 00:00:00",
+      "agendamento_volante_periodo": "tarde",
+      "titulo": "Teste ",
+      "createdAt": "2026-01-25 12:23:45"
+    },
+    {
+      "id": "90004",
+      "volanteId": "2",
+      "volante_nome": "Volante Minho ",
+      "lojaId": "60002",
+      "data": "2026-01-31 00:00:00",
+      "agendamento_volante_periodo": "tarde",
+      "titulo": "NULL",
+      "createdAt": "2026-01-24 00:43:01"
+    },
+    {
+      "id": "90003",
+      "volanteId": "2",
+      "volante_nome": "Volante Minho ",
+      "lojaId": "60002",
+      "data": "2026-01-26 00:00:00",
+      "agendamento_volante_periodo": "manha",
+      "titulo": "NULL",
+      "createdAt": "2026-01-24 00:42:23"
+    },
+    {
+      "id": "90002",
+      "volanteId": "2",
+      "volante_nome": "Volante Minho ",
+      "lojaId": "NULL",
+      "data": "2026-01-26 00:00:00",
+      "agendamento_volante_periodo": "tarde",
+      "titulo": "Teste",
+      "createdAt": "2026-01-24 00:41:10"
+    },
+    {
+      "id": "90001",
+      "volanteId": "2",
+      "volante_nome": "Volante Minho ",
+      "lojaId": "NULL",
+      "data": "2026-01-25 00:00:00",
+      "agendamento_volante_periodo": "manha",
+      "titulo": "Testr",
+      "createdAt": "2026-01-24 00:40:29"
+    },
+    {
+      "id": "60001",
+      "volanteId": "2",
+      "volante_nome": "Volante Minho ",
+      "lojaId": "60002",
+      "data": "2026-01-21 00:00:00",
+      "agendamento_volante_periodo": "manha",
+      "titulo": "NULL",
+      "createdAt": "2026-01-20 19:33:53"
+    },
+    {
+      "id": "30002",
+      "volanteId": "2",
+      "volante_nome": "Volante Minho ",
+      "lojaId": "60003",
+      "data": "2026-01-21 00:00:00",
+      "agendamento_volante_periodo": "manha",
+      "titulo": "NULL",
+      "createdAt": "2026-01-20 17:20:49"
+    },
+    {
+      "id": "30001",
+      "volanteId": "2",
+      "volante_nome": "Volante Minho ",
+      "lojaId": "60003",
+      "data": "2026-01-21 00:00:00",
+      "agendamento_volante_periodo": "manha",
+      "titulo": "NULL",
+      "createdAt": "2026-01-20 17:04:21"
+    },
+    {
+      "id": "1",
+      "volanteId": "2",
+      "volante_nome": "Volante Minho ",
+      "lojaId": "60002",
+      "data": "2026-01-21 00:00:00",
+      "agendamento_volante_periodo": "manha",
+      "titulo": "NULL",
+      "createdAt": "2026-01-20 12:43:05"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tvolanteId\tvolante_nome\tlojaId\tdata\tagendamento_volante_periodo\ttitulo\tcreatedAt\n150001\t2\tVolante Minho \tNULL\t2026-01-30 00:00:00\tmanha\tTeste \t2026-01-26 07:52:19\n120001\t2\tVolante Minho \tNULL\t2026-01-26 00:00:00\ttarde\tTeste \t2026-01-25 12:23:45\n90004\t2\tVolante Minho \t60002\t2026-01-31 00:00:00\ttarde\tNULL\t2026-01-24 00:43:01\n90003\t2\tVolante Minho \t60002\t2026-01-26 00:00:00\tmanha\tNULL\t2026-01-24 00:42:23\n90002\t2\tVolante Minho \tNULL\t2026-01-26 00:00:00\ttarde\tTeste\t2026-01-24 00:41:10\n90001\t2\tVolante Minho \tNULL\t2026-01-25 00:00:00\tmanha\tTestr\t2026-01-24 00:40:29\n60001\t2\tVolante Minho \t60002\t2026-01-21 00:00:00\tmanha\tNULL\t2026-01-20 19:33:53\n30002\t2\tVolante Minho \t60003\t2026-01-21 00:00:00\tmanha\tNULL\t2026-01-20 17:20:49\n30001\t2\tVolante Minho \t60003\t2026-01-21 00:00:00\tmanha\tNULL\t2026-01-20 17:04:21\n1\t2\tVolante Minho \t60002\t2026-01-21 00:00:00\tmanha\tNULL\t2026-01-20 12:43:05\n",
+  "stderr": "",
+  "execution_time_ms": 50
+}

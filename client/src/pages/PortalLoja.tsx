@@ -4595,37 +4595,70 @@ END:VCALENDAR`;
       // Filtrar pedidos rejeitados - não devem aparecer no calendário
       const todosPedidosDia = estadoDia?.pedidos || [];
       const pedidosDia = todosPedidosDia.filter((p: any) => p.estado !== 'reprovado' && p.estado !== 'anulado' && p.estado !== 'cancelado');
+      // Obter agendamentos do volante
+      const agendamentosDia = estadoDia?.agendamentos || [];
+      // Obter bloqueios
+      const bloqueiosDia = estadoDia?.bloqueios || [];
       
       let bgColor = 'bg-white';
       let borderColor = 'border-gray-200';
       
-      // Recalcular estado baseado apenas em pedidos não rejeitados
+      // Recalcular estado baseado em pedidos, agendamentos e bloqueios
       const pedidosAprovados = pedidosDia.filter((p: any) => p.estado === 'aprovado');
       const manhaAprovada = pedidosAprovados.some((p: any) => p.periodo === 'manha');
       const tardeAprovada = pedidosAprovados.some((p: any) => p.periodo === 'tarde');
       const diaTodoAprovado = pedidosAprovados.some((p: any) => p.periodo === 'dia_todo');
       const temPendente = pedidosDia.some((p: any) => p.estado === 'pendente');
       
-      if (diaTodoAprovado || (manhaAprovada && tardeAprovada)) {
+      // Verificar agendamentos do volante
+      const manhaAgendada = agendamentosDia.some((a: any) => a.agendamento_volante_periodo === 'manha' || a.agendamento_volante_periodo === 'dia_todo');
+      const tardeAgendada = agendamentosDia.some((a: any) => a.agendamento_volante_periodo === 'tarde' || a.agendamento_volante_periodo === 'dia_todo');
+      const diaTodoAgendado = agendamentosDia.some((a: any) => a.agendamento_volante_periodo === 'dia_todo');
+      
+      // Verificar bloqueios
+      const manhaBloqueada = bloqueiosDia.some((b: any) => b.periodo === 'manha' || b.periodo === 'dia_todo');
+      const tardeBloqueada = bloqueiosDia.some((b: any) => b.periodo === 'tarde' || b.periodo === 'dia_todo');
+      const diaTodoBloqueado = bloqueiosDia.some((b: any) => b.periodo === 'dia_todo');
+      
+      // Determinar cor de fundo baseado no estado
+      if (diaTodoBloqueado || (manhaBloqueada && tardeBloqueada)) {
+        bgColor = 'bg-gray-200';
+        borderColor = 'border-gray-400';
+      } else if (diaTodoAprovado || diaTodoAgendado || (manhaAprovada && tardeAprovada) || (manhaAgendada && tardeAgendada) || 
+                 (manhaAprovada && tardeAgendada) || (manhaAgendada && tardeAprovada) ||
+                 (manhaBloqueada && (tardeAprovada || tardeAgendada)) || (tardeBloqueada && (manhaAprovada || manhaAgendada))) {
         bgColor = 'bg-red-100';
         borderColor = 'border-red-300';
-      } else if (manhaAprovada) {
+      } else if (manhaAprovada || manhaBloqueada) {
         bgColor = 'bg-purple-100';
         borderColor = 'border-purple-300';
-      } else if (tardeAprovada) {
+      } else if (tardeAprovada || tardeBloqueada) {
         bgColor = 'bg-blue-100';
         borderColor = 'border-blue-300';
+      } else if (manhaAgendada) {
+        bgColor = 'bg-teal-100';
+        borderColor = 'border-teal-300';
+      } else if (tardeAgendada) {
+        bgColor = 'bg-teal-100';
+        borderColor = 'border-teal-300';
       } else if (temPendente) {
         bgColor = 'bg-yellow-100';
         borderColor = 'border-yellow-300';
       }
 
       const handleDiaClick = () => {
-        if (pedidosDia.length > 0) {
-          setDiaDetalheSelecionado({ data: dataStr, pedidos: pedidosDia });
+        if (pedidosDia.length > 0 || agendamentosDia.length > 0 || bloqueiosDia.length > 0) {
+          setDiaDetalheSelecionado({ data: dataStr, pedidos: pedidosDia, bloqueios: bloqueiosDia, agendamentos: agendamentosDia });
           setDiaDetalheOpen(true);
         }
       };
+
+      // Combinar pedidos e agendamentos para mostrar no calendário
+      const itensParaMostrar = [
+        ...pedidosDia.map((p: any) => ({ tipo: 'pedido', ...p })),
+        ...agendamentosDia.map((a: any) => ({ tipo: 'agendamento', ...a })),
+        ...bloqueiosDia.map((b: any) => ({ tipo: 'bloqueio', ...b }))
+      ];
 
       dias.push(
         <div 
@@ -4635,21 +4668,23 @@ END:VCALENDAR`;
         >
           <div className="text-xs font-medium text-gray-700 mb-0.5">{dia}</div>
           <div className="space-y-0.5">
-            {pedidosDia.slice(0, 2).map((pedido: any, idx: number) => (
+            {itensParaMostrar.slice(0, 2).map((item: any, idx: number) => (
               <div 
                 key={idx}
                 className={`text-[10px] px-1 py-0.5 rounded truncate ${
-                  pedido.estado === 'pendente' ? 'bg-yellow-300 text-yellow-900' :
-                  pedido.estado === 'aprovado' ? (pedido.periodo === 'manha' ? 'bg-purple-400 text-white' : pedido.periodo === 'tarde' ? 'bg-blue-400 text-white' : 'bg-green-400 text-white') :
+                  item.tipo === 'bloqueio' ? 'bg-gray-400 text-white' :
+                  item.tipo === 'agendamento' ? 'bg-teal-400 text-white' :
+                  item.estado === 'pendente' ? 'bg-yellow-300 text-yellow-900' :
+                  item.estado === 'aprovado' ? (item.periodo === 'manha' ? 'bg-purple-400 text-white' : item.periodo === 'tarde' ? 'bg-blue-400 text-white' : 'bg-green-400 text-white') :
                   'bg-gray-300 text-gray-700'
                 }`}
-                title={`${pedido.loja?.nome || 'Loja'} - ${pedido.periodo === 'manha' ? 'Manhã' : pedido.periodo === 'tarde' ? 'Tarde' : 'Dia Todo'}`}
+                title={item.tipo === 'bloqueio' ? `Bloqueado - ${item.tipo}` : item.tipo === 'agendamento' ? `${item.loja?.nome || item.titulo || 'Agendamento'} - ${item.agendamento_volante_periodo === 'manha' ? 'Manhã' : item.agendamento_volante_periodo === 'tarde' ? 'Tarde' : 'Dia Todo'}` : `${item.loja?.nome || 'Loja'} - ${item.periodo === 'manha' ? 'Manhã' : item.periodo === 'tarde' ? 'Tarde' : 'Dia Todo'}`}
               >
-                {pedido.loja?.nome?.substring(0, 8) || 'Loja'}
+                {item.tipo === 'bloqueio' ? 'Bloqueado' : item.tipo === 'agendamento' ? (item.loja?.nome?.substring(0, 8) || item.titulo?.substring(0, 8) || 'Agend.') : (item.loja?.nome?.substring(0, 8) || 'Loja')}
               </div>
             ))}
-            {pedidosDia.length > 2 && (
-              <div className="text-[10px] text-gray-500">+{pedidosDia.length - 2}</div>
+            {itensParaMostrar.length > 2 && (
+              <div className="text-[10px] text-gray-500">+{itensParaMostrar.length - 2}</div>
             )}
           </div>
         </div>
