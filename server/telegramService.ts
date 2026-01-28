@@ -493,6 +493,7 @@ export async function notificarAgendamentoCriado(
     periodo: 'manha' | 'tarde' | 'dia_todo';
     tipoApoio?: string;
     descricao?: string;
+    portalUrl?: string;
   }
 ): Promise<boolean> {
   const dataFormatada = new Date(agendamento.data).toLocaleDateString('pt-PT', {
@@ -525,6 +526,8 @@ ${tipoApoioTexto ? `🔧 <b>Tipo:</b> ${tipoApoioTexto}` : ''}
 ${agendamento.descricao ? `📝 <b>Observações:</b> ${agendamento.descricao}` : ''}
 
 <i>O volante agendou um apoio para esta loja.</i>
+${agendamento.portalUrl ? `
+🔗 <a href="${agendamento.portalUrl}">Abrir Portal do Volante</a>` : ''}
   `.trim();
 
   const result = await sendTelegramMessageToMultiple(chatIds, message);

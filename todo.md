@@ -3684,3 +3684,6 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar botão de editar agendamento
 - [x] Adicionar botão de apagar agendamento
 - [x] Enviar notificação Telegram ao criar agendamento
+
+## Bug v6.11.18 - Link do Portal na Notificação de Agendamento
+- [x] Adicionar link do portal do volante à notificação Telegram de novo agendamento

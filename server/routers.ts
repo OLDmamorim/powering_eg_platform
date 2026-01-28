@@ -7796,6 +7796,10 @@ IMPORTANTE:
               const loja = await db.getLojaById(input.lojaId);
               lojaNome = loja?.nome;
             }
+            // Construir URL do portal do volante
+            const baseUrl = process.env.VITE_APP_URL || 'https://poweringeg-3c9mozlh.manus.space';
+            const portalUrl = `${baseUrl}/portal-volante?token=${input.token}`;
+            
             await notificarAgendamentoCriado(tokenData.volante.telegramChatId, {
               volanteNome: tokenData.volante.nome,
               lojaNome: lojaNome,
@@ -7803,6 +7807,7 @@ IMPORTANTE:
               periodo: input.periodo,
               tipoApoio: input.tipoApoio || undefined,
               descricao: input.descricao,
+              portalUrl: portalUrl,
             });
             console.log(`[Telegram] Notificação de agendamento enviada para volante: ${tokenData.volante.telegramChatId}`);
           } catch (e) {
