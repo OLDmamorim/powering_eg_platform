@@ -3702,3 +3702,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar relatórios livres ao relatório IA
 - [x] Adicionar reuniões ao relatório IA
 - [x] Testar geração de relatório IA com todos os tipos de dados
+
+## Bug v6.11.22 - Respostas às Perguntas das Tarefas não aparecem na Tarefa
+- [x] Investigar onde são guardadas as respostas às perguntas das tarefas
+- [x] Verificar como as respostas são exibidas no email
+- [x] Corrigir visualização das respostas na própria tarefa
+- [x] Testar que as respostas aparecem tanto no email como na tarefa

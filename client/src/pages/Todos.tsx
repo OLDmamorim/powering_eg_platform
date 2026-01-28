@@ -1218,6 +1218,12 @@ function TodoCard({
                 <strong>Comentário:</strong> {todo.comentario}
               </div>
             )}
+            
+            {todo.respostaLoja && (
+              <div className="mt-2 p-2 bg-blue-50 dark:bg-blue-900/20 rounded text-sm">
+                <strong>Resposta da Loja:</strong> {todo.respostaLoja}
+              </div>
+            )}
           </div>
           
           <DropdownMenu>
