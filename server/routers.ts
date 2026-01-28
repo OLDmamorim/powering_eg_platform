@@ -529,6 +529,7 @@ export const appRouter = router({
         let totalReparacoes = 0;
         let totalParaBrisas = 0;
         let taxaReparacaoExcel: number | null = null;
+        let desvioPercentualDiaExcel: number | null = null;
         let totalEscovas = 0;
         let totalPolimento = 0;
         let totalTratamento = 0;
@@ -684,13 +685,9 @@ export const appRouter = router({
           }
         }
         
-        // Calcular desvio objetivo diário para KPIs
-        const diaAtual = now.getDate();
-        const diasNoMes = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-        const objetivoDiario = totalObjetivo / diasNoMes;
-        const servicosEsperados = objetivoDiario * diaAtual;
-        const desvioObjetivoDiario = servicosEsperados > 0 
-          ? ((totalServicos - servicosEsperados) / servicosEsperados) * 100 
+        // Usar desvio objetivo diário do Excel (v6.11.13) em vez de recalcular
+        const desvioObjetivoDiario = resultados?.desvioPercentualDia !== null && resultados?.desvioPercentualDia !== undefined
+          ? parseFloat(String(resultados.desvioPercentualDia)) * 100
           : 0;
         
         return {
@@ -954,6 +951,7 @@ IMPORTANTE:
         let totalReparacoes = 0;
         let totalParaBrisas = 0;
         let taxaReparacaoExcel: number | null = null;
+        let desvioPercentualDiaExcel: number | null = null;
         let totalEscovas = 0;
         let totalPolimento = 0;
         let totalTratamento = 0;
@@ -969,6 +967,9 @@ IMPORTANTE:
             totalParaBrisas += Number(resultadosArr.qtdParaBrisas) || 0;
             if (resultadosArr.taxaReparacao !== null && resultadosArr.taxaReparacao !== undefined) {
               taxaReparacaoExcel = parseFloat(String(resultadosArr.taxaReparacao));
+            }
+            if (resultadosArr.desvioPercentualDia !== null && resultadosArr.desvioPercentualDia !== undefined) {
+              desvioPercentualDiaExcel = parseFloat(String(resultadosArr.desvioPercentualDia));
             }
           }
           
@@ -988,13 +989,10 @@ IMPORTANTE:
         const taxaReparacao = taxaReparacaoExcel;
         const escovasPercent = totalServicos > 0 ? totalEscovas / totalServicos : null;
         
-        // Calcular desvio objetivo diário
-        const diaAtual = now.getDate();
-        const diasNoMes = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-        const objetivoDiario = totalObjetivo / diasNoMes;
-        const servicosEsperados = objetivoDiario * diaAtual;
-        const desvioObjetivoDiario = servicosEsperados > 0 
-          ? ((totalServicos - servicosEsperados) / servicosEsperados) * 100 
+        // Usar desvio objetivo diário do Excel (v6.11.13) em vez de recalcular
+        const diaAtual = new Date().getDate();
+        const desvioObjetivoDiario = desvioPercentualDiaExcel !== null
+          ? desvioPercentualDiaExcel * 100
           : 0;
         
         // Buscar dados do mês anterior
@@ -6306,6 +6304,7 @@ IMPORTANTE:
         let totalReparacoes = 0;
         let taxaReparacaoExcel: number | null = null;
         let totalParaBrisas = 0;
+        let desvioPercentualDiaExcel: number | null = null;
         let totalEscovas = 0;
         let totalPolimento = 0;
         let totalTratamento = 0;
@@ -6321,6 +6320,9 @@ IMPORTANTE:
             totalParaBrisas += Number(resultadosArr.qtdParaBrisas) || 0;
             if (resultadosArr.taxaReparacao !== null && resultadosArr.taxaReparacao !== undefined) {
               taxaReparacaoExcel = parseFloat(String(resultadosArr.taxaReparacao));
+            }
+            if (resultadosArr.desvioPercentualDia !== null && resultadosArr.desvioPercentualDia !== undefined) {
+              desvioPercentualDiaExcel = parseFloat(String(resultadosArr.desvioPercentualDia));
             }
           }
           const complementaresArr = await db.getVendasComplementares(p.mes, p.ano, lojaIdParaConsulta);
@@ -6339,13 +6341,9 @@ IMPORTANTE:
         const taxaReparacao = taxaReparacaoExcel;
         const escovasPercent = totalServicos > 0 ? totalEscovas / totalServicos : null;
         
-        // Calcular desvio objetivo diário
-        const diaAtual = now.getDate();
-        const diasNoMes = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-        const objetivoDiario = totalObjetivo / diasNoMes;
-        const servicosEsperados = objetivoDiario * diaAtual;
-        const desvioObjetivoDiario = servicosEsperados > 0 
-          ? (totalServicos - servicosEsperados) / servicosEsperados 
+        // Usar desvio objetivo diário do Excel (v6.11.13) em vez de recalcular
+        const desvioObjetivoDiario = desvioPercentualDiaExcel !== null
+          ? desvioPercentualDiaExcel
           : null;
         
         // Buscar evolução mensal (6 meses)

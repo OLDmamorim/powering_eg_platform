@@ -3657,3 +3657,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Corrigir erros de TypeScript (variáveis fora do escopo)
 - [x] Todos os testes passaram (3/3)
 - [x] Taxa do Excel confirmada: 31.4% (valor oficial)
+
+## Bug v6.11.13 - Inconsistência Desvio Objetivo Diário
+- [x] Investigar porque o card mostra -0.5% mas o alerta diz +11.0%
+- [x] Identificar a fonte dos dados de cada componente (card usava cálculo manual, alerta usava Excel)
+- [x] Corrigir a inconsistência - agora ambos usam desvioPercentualDia do Excel
+- [x] Queries corrigidas: dashboardCompletoGestor, dashboardLojaCompleto, dashboardCompletoColaborador
