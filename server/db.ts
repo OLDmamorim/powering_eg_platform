@@ -944,7 +944,10 @@ export async function getPendentesByLojaId(lojaId: number): Promise<Array<Penden
     })
     .from(pendentes)
     .innerJoin(lojas, eq(pendentes.lojaId, lojas.id))
-    .where(eq(pendentes.lojaId, lojaId))
+    .where(and(
+      eq(pendentes.lojaId, lojaId),
+      eq(pendentes.resolvido, false)
+    ))
     .orderBy(desc(pendentes.createdAt));
   
   return result.map(r => ({

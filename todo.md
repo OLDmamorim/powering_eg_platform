@@ -3708,3 +3708,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Verificar como as respostas são exibidas no email
 - [x] Corrigir visualização das respostas na própria tarefa
 - [x] Testar que as respostas aparecem tanto no email como na tarefa
+
+## Bug v6.11.23 - Pendentes marcados como Resolvidos no Relatório Livre não são guardados
+- [x] Investigar como os pendentes são marcados no formulário do relatório livre
+- [x] Verificar se o estado "Resolvido" está a ser enviado ao backend
+- [x] Corrigir para que pendentes marcados como resolvidos sejam efetivamente guardados
+- [x] Testar que pendentes resolvidos deixam de aparecer na lista
