@@ -5,7 +5,7 @@ interface RelatorioAnalise {
   lojaId: number;
   lojaNome: string;
   dataVisita: Date;
-  tipo: "livre" | "completo";
+  tipo: "livre" | "completo" | "reuniao";
   conteudo: string;
   pontosPositivosRelatorio?: string;
   pontosNegativosRelatorio?: string;
@@ -188,6 +188,29 @@ export async function gerarRelatorioComIA(
     return dataVisita >= dataInicio && dataVisita <= dataFim;
   });
 
+  // ========== BUSCAR REUNIÕES DE LOJAS ==========
+  const reunioesLojas = await db.getHistoricoReuniõesLojas(gestorId, {
+    dataInicio,
+    dataFim
+  });
+  
+  // Filtrar reuniões por lojas específicas se fornecidas
+  let reunioesFiltradas = reunioesLojas;
+  if (lojasIds && lojasIds.length > 0) {
+    reunioesFiltradas = reunioesLojas.filter((r: any) => {
+      try {
+        const lojaIdsReuniao = JSON.parse(r.lojaIds || '[]');
+        return lojaIdsReuniao.some((id: number) => lojasIds.includes(id));
+      } catch (e) {
+        return false;
+      }
+    });
+  }
+  
+  // Obter nomes das lojas para as reuniões
+  const todasLojas = await db.getAllLojas();
+  const lojasMap = new Map(todasLojas.map((l: any) => [l.id, l.nome]));
+
   const todosRelatorios: RelatorioAnalise[] = [
     ...relatoriosLivresFiltrados.map((r: any) => ({
       lojaId: r.lojaId,
@@ -207,6 +230,23 @@ export async function gerarRelatorioComIA(
       pontosPositivosRelatorio: r.pontosPositivosDestacar,
       pontosNegativosRelatorio: r.pontosNegativosDestacar,
     })),
+    // Adicionar reuniões de lojas
+    ...reunioesFiltradas.flatMap((r: any) => {
+      try {
+        const lojaIdsReuniao = JSON.parse(r.lojaIds || '[]');
+        return lojaIdsReuniao.map((lojaId: number) => ({
+          lojaId: lojaId,
+          lojaNome: lojasMap.get(lojaId) || "Loja desconhecida",
+          dataVisita: new Date(r.data),
+          tipo: "reuniao" as const,
+          conteudo: `Reunião: ${r.conteudo || ""}${r.resumoIA ? ` | Resumo IA: ${r.resumoIA}` : ""}`,
+          pontosPositivosRelatorio: undefined,
+          pontosNegativosRelatorio: undefined,
+        }));
+      } catch (e) {
+        return [];
+      }
+    }),
   ];
 
   const frequenciaVisitas: { [loja: string]: number } = {};
@@ -1754,6 +1794,12 @@ export async function gerarRelatorioIAGestor(
   const relatoriosLivres = await db.getRelatoriosLivresByGestorId(gestorId);
   const relatoriosCompletos = await db.getRelatoriosCompletosByGestorId(gestorId);
   
+  // Buscar reuniões de lojas do gestor
+  const reunioesLojas = await db.getHistoricoReuniõesLojas(gestorId, {
+    dataInicio: inicio,
+    dataFim: fim
+  });
+  
   // Filtrar por período
   const livresFiltrados = relatoriosLivres.filter((r: any) => {
     const dataVisita = new Date(r.dataVisita);
@@ -1850,10 +1896,27 @@ export async function gerarRelatorioIAGestor(
     }
   });
   
+  // Obter nomes das lojas para as reuniões
+  const todasLojasGestor = await db.getLojasByGestorId(gestorId);
+  const lojasMapGestor = new Map(todasLojasGestor.map((l: any) => [l.id, l.nome]));
+  
   // Lojas visitadas
   const lojasVisitadas = new Set<string>();
   livresFiltrados.forEach((r: any) => lojasVisitadas.add(r.loja?.nome || 'Desconhecida'));
   completosFiltrados.forEach((r: any) => lojasVisitadas.add(r.loja?.nome || 'Desconhecida'));
+  
+  // Adicionar lojas das reuniões
+  reunioesLojas.forEach((r: any) => {
+    try {
+      const lojaIdsReuniao = JSON.parse(r.lojaIds || '[]');
+      lojaIdsReuniao.forEach((lojaId: number) => {
+        const lojaNome = lojasMapGestor.get(lojaId) || 'Desconhecida';
+        lojasVisitadas.add(lojaNome);
+      });
+    } catch (e) {
+      // Ignorar erros de parse
+    }
+  });
   
   // NOVO v6.3.1: Visitas por loja com contagem e última visita
   const visitasPorLojaMap = new Map<string, { visitas: number; ultimaVisita: Date | null }>();
@@ -1886,6 +1949,27 @@ export async function gerarRelatorioIAGestor(
     }
   });
   
+  // Contar reuniões de lojas
+  reunioesLojas.forEach((r: any) => {
+    try {
+      const lojaIdsReuniao = JSON.parse(r.lojaIds || '[]');
+      const dataReuniao = new Date(r.data);
+      lojaIdsReuniao.forEach((lojaId: number) => {
+        const lojaNome = lojasMapGestor.get(lojaId) || 'Desconhecida';
+        if (!visitasPorLojaMap.has(lojaNome)) {
+          visitasPorLojaMap.set(lojaNome, { visitas: 0, ultimaVisita: null });
+        }
+        const stats = visitasPorLojaMap.get(lojaNome)!;
+        stats.visitas++;
+        if (!stats.ultimaVisita || dataReuniao > stats.ultimaVisita) {
+          stats.ultimaVisita = dataReuniao;
+        }
+      });
+    } catch (e) {
+      // Ignorar erros de parse
+    }
+  });
+  
   // Converter para array ordenado por visitas
   const visitasPorLoja = Array.from(visitasPorLojaMap.entries())
     .map(([loja, stats]) => ({
@@ -1901,11 +1985,28 @@ export async function gerarRelatorioIAGestor(
     .filter((l: any) => !lojasVisitadas.has(l.nome))
     .map((l: any) => l.nome);
   
+  // Preparar resumos das reuniões
+  const resumoReunioes = reunioesLojas.slice(0, 5).map((r: any) => {
+    try {
+      const lojaIdsReuniao = JSON.parse(r.lojaIds || '[]');
+      const lojasNomes = lojaIdsReuniao.map((id: number) => lojasMapGestor.get(id) || 'Desconhecida').join(', ');
+      return {
+        lojas: lojasNomes,
+        data: new Date(r.data).toLocaleDateString('pt-PT'),
+        conteudo: r.conteudo?.substring(0, 200) || '',
+        resumoIA: r.resumoIA?.substring(0, 200) || ''
+      };
+    } catch (e) {
+      return null;
+    }
+  }).filter(Boolean);
+  
   // Preparar dados para análise IA
   const dadosParaIA = {
     periodo,
     totalRelatoriosLivres: livresFiltrados.length,
     totalRelatoriosCompletos: completosFiltrados.length,
+    totalReunioes: reunioesLojas.length,
     lojasVisitadas: Array.from(lojasVisitadas),
     pontosPositivos: pontosPositivos.map(p => `${p.loja}: ${p.descricao}`),
     pontosNegativos: pontosNegativos.map(p => `${p.loja}: ${p.descricao}`),
@@ -1915,7 +2016,8 @@ export async function gerarRelatorioIAGestor(
     resumoRelatorios: livresFiltrados.slice(0, 5).map((r: any) => ({
       loja: r.loja?.nome,
       descricao: r.descricao?.substring(0, 200)
-    }))
+    })),
+    resumoReunioes
   };
   
   // Chamar IA para análise qualitativa
@@ -1942,10 +2044,14 @@ O tom deve ser profissional mas motivador.`
           role: "user",
           content: `Analisa os seguintes dados do gestor no período ${periodo}:
 
-RELATÓRIOS SUBMETIDOS:
+RELATÓRIOS E REUNIÕES SUBMETIDOS:
 - Relatórios Livres: ${dadosParaIA.totalRelatoriosLivres}
 - Relatórios Completos: ${dadosParaIA.totalRelatoriosCompletos}
-- Lojas visitadas: ${dadosParaIA.lojasVisitadas.join(', ') || 'Nenhuma'}
+- Reuniões de Lojas: ${dadosParaIA.totalReunioes}
+- Lojas visitadas/contactadas: ${dadosParaIA.lojasVisitadas.join(', ') || 'Nenhuma'}
+
+RESUMO DAS REUNIÕES:
+${dadosParaIA.resumoReunioes.length > 0 ? dadosParaIA.resumoReunioes.map((r: any) => `- ${r.lojas} (${r.data}): ${r.conteudo || r.resumoIA || 'Sem conteúdo'}`).join('\n') : 'Nenhuma reunião registada'}
 
 PONTOS POSITIVOS DESTACADOS:
 ${dadosParaIA.pontosPositivos.length > 0 ? dadosParaIA.pontosPositivos.join('\n') : 'Nenhum ponto positivo registado'}

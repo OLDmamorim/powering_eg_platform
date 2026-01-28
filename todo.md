@@ -3696,3 +3696,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## Bug v6.11.20 - Projeção de Visitas não considera Reuniões
 - [x] Adicionar reuniões à lógica de cálculo de dias sem visita
 - [x] Testar com lojas que têm reuniões recentes (ex: Famalicão sm)
+
+## Bug v6.11.21 - Relatório IA não considera Relatórios Livres e Reuniões
+- [x] Investigar lógica do relatório IA
+- [x] Adicionar relatórios livres ao relatório IA
+- [x] Adicionar reuniões ao relatório IA
+- [x] Testar geração de relatório IA com todos os tipos de dados
