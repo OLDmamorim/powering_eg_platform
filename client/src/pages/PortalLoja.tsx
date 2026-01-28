@@ -114,6 +114,7 @@ import {
   Settings,
   Trash2,
   MapPin,
+  Bot,
 } from "lucide-react";
 
 interface LojaAuth {
@@ -3468,11 +3469,11 @@ export default function PortalLoja() {
         <div className="h-[calc(100vh-12rem)] flex flex-col gap-4">
           {/* Header */}
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-indigo-500/10 rounded-lg">
-              <Brain className="h-6 w-6 text-indigo-600" />
+            <div className="p-2 bg-primary/10 rounded-lg">
+              <Bot className="h-6 w-6 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold">{language === 'pt' ? 'Assistente IA' : 'AI Assistant'}</h1>
+              <h1 className="text-2xl font-bold">PoweringEG</h1>
               <p className="text-sm text-muted-foreground">
                 {language === 'pt' 
                   ? 'Conversar com o assistente inteligente'

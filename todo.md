@@ -3764,3 +3764,11 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Reorganizar cards na home para colocar Chatbot ao lado de Resultados (em cima)
 - [x] Alterar tab do chatbot para usar layout completo igual ao portal principal
 - [x] Testar layout em mobile e desktop
+
+## Funcionalidade v6.9.2 - Corrigir Layout do Chatbot Portal da Loja
+- [x] Alterar título do header para "PoweringEG"
+- [x] Adicionar empty state completo com ícone Sparkles grande
+- [x] Adicionar badges de categorias no empty state
+- [x] Adicionar botão "Gravar mensagem de voz"
+- [x] Mostrar sugestões de perguntas diretamente no empty state
+- [x] Testar layout final
