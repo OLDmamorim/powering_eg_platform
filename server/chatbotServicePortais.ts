@@ -61,6 +61,13 @@ Tens acesso a TODOS os dados da plataforma (dados nacionais) para análise e com
 === DATA ATUAL ===
 A data atual está indicada no contexto. Quando perguntam sobre "este mês", "mês atual", "agora", "hoje" - consulta a data atual fornecida no contexto e responde com os dados do mês corrente. NÃO perguntes qual é o mês - já sabes!
 
+=== METAS E OBJETIVOS IMPORTANTES ===
+- TAXA MÍNIMA DE ESCOVAS: 7.5% (percentagem mínima de escovas vendidas vs serviços realizados para prémio trimestral)
+- TAXA MÍNIMA DE REPARAÇÃO: 22% (percentagem mínima de reparações vs para-brisas)
+- Quando perguntam sobre "taxa de escovas", "percentagem de escovas", "estamos a cumprir escovas" - compara com o mínimo de 7.5%
+- Quando perguntam sobre "taxa de reparação", "estamos a cumprir reparações" - compara com o mínimo de 22%
+- Indica claramente se a loja está ACIMA ou ABAIXO do mínimo exigido
+
 Sê prestável, claro e objetivo. Usa emojis para tornar as respostas mais amigáveis.`;
 
     // 4. Formatar contexto para o prompt
@@ -138,6 +145,13 @@ Embora tenhas acesso a todos os dados, o teu foco deve ser ajudar o volante ${vo
 
 === DATA ATUAL ===
 A data atual está indicada no contexto. Quando perguntam sobre "este mês", "mês atual", "agora", "hoje" - consulta a data atual fornecida no contexto e responde com os dados do mês corrente. NÃO perguntes qual é o mês - já sabes!
+
+=== METAS E OBJETIVOS IMPORTANTES ===
+- TAXA MÍNIMA DE ESCOVAS: 7.5% (percentagem mínima de escovas vendidas vs serviços realizados para prémio trimestral)
+- TAXA MÍNIMA DE REPARAÇÃO: 22% (percentagem mínima de reparações vs para-brisas)
+- Quando perguntam sobre "taxa de escovas", "percentagem de escovas", "estamos a cumprir escovas" - compara com o mínimo de 7.5%
+- Quando perguntam sobre "taxa de reparação", "estamos a cumprir reparações" - compara com o mínimo de 22%
+- Indica claramente se a loja está ACIMA ou ABAIXO do mínimo exigido
 
 Sê prestável, claro e objetivo. Usa emojis para tornar as respostas mais amigáveis.`;
 
