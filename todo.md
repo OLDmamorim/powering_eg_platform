@@ -3819,3 +3819,6 @@ NOTA: Sistema de email requer configuração externa no deployment
 
 ## Funcionalidade v6.10.1 - Esconder Header Verde na Tab Chatbot
 - [x] Esconder header verde (nome utilizador, Responsável, nome loja) quando activeTab === "chatbot"
+
+## Funcionalidade v6.10.2 - Remover Espaço Extra em Baixo do Input
+- [x] Remover espaço/padding extra em baixo do campo de input do chatbot

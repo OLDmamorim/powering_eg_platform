@@ -3467,7 +3467,7 @@ export default function PortalLoja() {
 
       {/* Tab Chatbot IA - Layout igual ao portal principal */}
       {activeTab === "chatbot" && (
-        <div className="h-[calc(100vh-14rem)] flex flex-col gap-3 overflow-hidden">
+        <div className="h-[calc(100vh-6rem)] flex flex-col gap-3 overflow-hidden">
           {/* Header compacto - igual ao AssistenteIA */}
           <div className="flex items-center justify-between flex-shrink-0">
             <div className="flex items-center gap-3">
