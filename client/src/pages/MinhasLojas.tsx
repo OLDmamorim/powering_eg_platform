@@ -44,6 +44,7 @@ export default function MinhasLojas() {
   const { language, t } = useLanguage();
   const [, setLocation] = useLocation();
   const [editingLoja, setEditingLoja] = useState<any>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
   const [formData, setFormData] = useState({
     nome: "",
     numeroLoja: null as number | null,
@@ -57,6 +58,7 @@ export default function MinhasLojas() {
     onSuccess: () => {
       toast.success(t('lojas.lojaAtualizada'));
       setEditingLoja(null);
+      setDialogOpen(false);
       utils.lojas.getByGestor.invalidate();
     },
     onError: (error) => {
@@ -117,12 +119,20 @@ export default function MinhasLojas() {
                       <Building2 className="h-5 w-5 text-primary" />
                       {loja.numeroLoja ? `${loja.nome} (${loja.numeroLoja})` : loja.nome}
                     </div>
-                    <Dialog>
+                    <Dialog open={dialogOpen && editingLoja?.id === loja.id} onOpenChange={(open) => {
+                        if (!open) {
+                          setDialogOpen(false);
+                          setEditingLoja(null);
+                        }
+                      }}>
                       <DialogTrigger asChild>
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => handleEdit(loja)}
+                          onClick={() => {
+                            handleEdit(loja);
+                            setDialogOpen(true);
+                          }}
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
