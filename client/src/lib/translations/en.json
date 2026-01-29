@@ -225,7 +225,8 @@
       "projecaoVisitas": "Visit Projection",
       "relacoesLojas": "Store Relations",
       "portalGestor": "Manager Portal",
-      "volantes": "Mobile Staff"
+      "volantes": "Mobile Staff",
+      "analiseFichas": "Service Sheets Analysis"
     }
   },
   "dashboard": {
