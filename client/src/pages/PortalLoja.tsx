@@ -1042,7 +1042,7 @@ export default function PortalLoja() {
                   <Brain className="h-10 w-10 opacity-80" />
                   <Sparkles className="h-6 w-6 opacity-60" />
                 </div>
-                <h3 className="text-xl font-bold mb-2">{language === 'pt' ? 'Assistente IA' : 'AI Assistant'}</h3>
+                <h3 className="text-xl font-bold mb-2">PoweringEG</h3>
                 <p className="text-sm opacity-80">{language === 'pt' ? 'Consultar dados e resultados' : 'Query data and results'}</p>
               </CardContent>
             </Card>

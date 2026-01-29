@@ -3772,3 +3772,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar botão "Gravar mensagem de voz"
 - [x] Mostrar sugestões de perguntas diretamente no empty state
 - [x] Testar layout final
+
+## Funcionalidade v6.9.3 - Correções Urgentes do Chatbot
+- [x] Alterar título do card na home de "Assistente IA" para "PoweringEG"
+- [x] Corrigir layout do empty state (texto está a ser cortado)
+- [x] Ajustar altura e espaçamento do empty state
+- [x] Testar layout final no mobile

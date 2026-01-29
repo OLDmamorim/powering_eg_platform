@@ -165,42 +165,42 @@ export function ChatbotPortalLoja({ token, language, isVolante = false }: Chatbo
       {/* Mensagens */}
       <ScrollArea className="flex-1 pr-4" ref={scrollRef}>
         {messages.length === 0 ? (
-          <div className="h-full flex flex-col items-center justify-center text-center p-8">
-            <div className="p-4 bg-primary/10 rounded-full mb-4">
-              <Sparkles className="h-12 w-12 text-primary" />
+          <div className="h-full flex flex-col items-center justify-start text-center p-4 overflow-y-auto">
+            <div className="p-3 bg-primary/10 rounded-full mb-3 mt-4">
+              <Sparkles className="h-10 w-10 text-primary" />
             </div>
-            <h2 className="text-xl font-semibold mb-2">
+            <h2 className="text-lg font-semibold mb-2">
               PoweringEG
             </h2>
-            <p className="text-base text-muted-foreground max-w-md mb-6">
+            <p className="text-sm text-muted-foreground max-w-sm mb-4 px-2">
               {language === 'pt'
                 ? 'Pergunte-me sobre lojas, gestores, relatórios, pendentes ou qualquer informação da plataforma.'
                 : 'Ask me about stores, managers, reports, pending items or any platform information.'}
             </p>
             
             {/* Botão de voz (placeholder) */}
-            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4 bg-muted/50 px-4 py-2 rounded-full">
-              <Mic className="h-4 w-4" />
+            <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3 bg-muted/50 px-3 py-1.5 rounded-full">
+              <Mic className="h-3 w-3" />
               <span>{language === 'pt' ? 'Gravar mensagem de voz' : 'Record voice message'}</span>
             </div>
             
             {/* Badges de categorias */}
-            <div className="flex flex-wrap gap-2 justify-center mb-6">
+            <div className="flex flex-wrap gap-1.5 justify-center mb-4 px-2">
               {categorias.map((cat, index) => (
-                <Badge key={index} variant="secondary" className="flex items-center gap-1 text-xs">
-                  <HelpCircle className="h-3 w-3" />
+                <Badge key={index} variant="secondary" className="flex items-center gap-1 text-[10px] px-2 py-0.5">
+                  <HelpCircle className="h-2.5 w-2.5" />
                   {cat}
                 </Badge>
               ))}
             </div>
             
             {/* Sugestões de perguntas */}
-            <div className="w-full max-w-2xl space-y-2">
+            <div className="w-full max-w-lg space-y-1.5 px-2">
               {sugestoes.slice(0, 5).map((sugestao, index) => (
                 <Button
                   key={index}
                   variant="outline"
-                  className="w-full justify-start text-left h-auto py-3 px-4 text-sm font-normal"
+                  className="w-full justify-start text-left h-auto py-2 px-3 text-xs font-normal"
                   onClick={() => enviarPergunta(sugestao)}
                   disabled={isLoading}
                 >
