@@ -334,42 +334,75 @@ function formatarContextoParaLoja(contextoNacional: any, dadosLoja: any, lojaNom
   }
   texto += `\n`;
   
-  // Vendas complementares de TODAS as lojas (para rankings)
-  texto += `💰 VENDAS COMPLEMENTARES NACIONAIS (todas as lojas - mês atual ${mesAtual}/${anoAtual}):\n`;
-  const vendasMesAtual = (contextoNacional.vendasComplementaresNacionais || []).filter((v: any) => {
-    const [mes, ano] = v.periodo.split('/').map(Number);
-    return mes === mesAtual && ano === anoAtual;
+  // Vendas complementares de TODAS as lojas - DADOS COMPLETOS
+  texto += `💰 VENDAS COMPLEMENTARES NACIONAIS - DADOS COMPLETOS DE TODAS AS LOJAS:\n`;
+  texto += `========================================\n\n`;
+  
+  // Agrupar por período
+  const vendasPorPeriodo: { [key: string]: any[] } = {};
+  (contextoNacional.vendasComplementaresNacionais || []).forEach((v: any) => {
+    if (!vendasPorPeriodo[v.periodo]) {
+      vendasPorPeriodo[v.periodo] = [];
+    }
+    vendasPorPeriodo[v.periodo].push(v);
   });
-  if (vendasMesAtual.length > 0) {
+  
+  // Ordenar períodos (mais recente primeiro)
+  const periodosOrdenados = Object.keys(vendasPorPeriodo).sort((a, b) => {
+    const [mesA, anoA] = a.split('/').map(Number);
+    const [mesB, anoB] = b.split('/').map(Number);
+    if (anoA !== anoB) return anoB - anoA;
+    return mesB - mesA;
+  });
+  
+  for (const periodo of periodosOrdenados) {
+    const vendasPeriodo = vendasPorPeriodo[periodo];
+    texto += `\n📅 PERÍODO ${periodo}:\n`;
+    texto += `  Total de lojas: ${vendasPeriodo.length}\n\n`;
+    
+    // Ranking por quantidade de escovas vendidas
+    const rankingEscovasQtd = [...vendasPeriodo].sort((a: any, b: any) => (b.escovasQtd || 0) - (a.escovasQtd || 0));
+    texto += `  🏆 RANKING POR ESCOVAS VENDIDAS (unidades):\n`;
+    rankingEscovasQtd.forEach((v: any, i: number) => {
+      const escovasQtd = v.escovasQtd || 0;
+      const escovasPercent = v.escovasPercent ? `${(parseFloat(v.escovasPercent) * 100).toFixed(1)}%` : '0%';
+      const escovasValor = v.escovasVendas ? `€${parseFloat(v.escovasVendas).toFixed(2)}` : '€0';
+      texto += `    ${i + 1}º ${v.lojaNome}: ${escovasQtd} unid. (${escovasPercent} vs serviços, ${escovasValor})\n`;
+    });
+    
+    // Ranking por % escovas vs serviços
+    const rankingEscovasPercent = [...vendasPeriodo].sort((a: any, b: any) => (parseFloat(b.escovasPercent) || 0) - (parseFloat(a.escovasPercent) || 0));
+    texto += `\n  🏆 RANKING POR % ESCOVAS VS SERVIÇOS:\n`;
+    rankingEscovasPercent.forEach((v: any, i: number) => {
+      const escovasPercent = v.escovasPercent ? `${(parseFloat(v.escovasPercent) * 100).toFixed(1)}%` : '0%';
+      const escovasQtd = v.escovasQtd || 0;
+      texto += `    ${i + 1}º ${v.lojaNome}: ${escovasPercent} (${escovasQtd} unidades)\n`;
+    });
+    
     // Ranking por total de vendas complementares
-    const rankingVendas = [...vendasMesAtual].sort((a: any, b: any) => (parseFloat(b.totalVendas) || 0) - (parseFloat(a.totalVendas) || 0));
-    texto += `  Total de lojas com dados: ${vendasMesAtual.length}\n`;
-    texto += `  Top 5 por vendas complementares:\n`;
-    rankingVendas.slice(0, 5).forEach((v: any, i: number) => {
+    const rankingVendasTotal = [...vendasPeriodo].sort((a: any, b: any) => (parseFloat(b.totalVendas) || 0) - (parseFloat(a.totalVendas) || 0));
+    texto += `\n  🏆 RANKING POR TOTAL VENDAS COMPLEMENTARES (€):\n`;
+    rankingVendasTotal.forEach((v: any, i: number) => {
       const total = v.totalVendas ? `€${parseFloat(v.totalVendas).toFixed(2)}` : '€0';
-      texto += `    ${i + 1}º ${v.lojaNome}: ${total}\n`;
+      const polimentoQtd = v.polimentoQtd || 0;
+      const tratamentoQtd = v.tratamentoQtd || 0;
+      const lavagensQtd = v.lavagensTotal || 0;
+      texto += `    ${i + 1}º ${v.lojaNome}: ${total} (Polimento: ${polimentoQtd}, Tratamento: ${tratamentoQtd}, Lavagens: ${lavagensQtd})\n`;
     });
-    // Ranking por % escovas
-    const rankingEscovas = [...vendasMesAtual].sort((a: any, b: any) => (parseFloat(b.escovasPercent) || 0) - (parseFloat(a.escovasPercent) || 0));
-    texto += `  Top 5 por % escovas vs serviços:\n`;
-    rankingEscovas.slice(0, 5).forEach((v: any, i: number) => {
-      const percent = v.escovasPercent ? `${(parseFloat(v.escovasPercent) * 100).toFixed(1)}%` : '0%';
-      texto += `    ${i + 1}º ${v.lojaNome}: ${percent}\n`;
-    });
-    // Encontrar posição da loja atual
+    
+    // Posição da loja atual neste período
     const lojaAtual = contextoNacional.lojas.find((l: any) => l.nome === lojaNome);
     if (lojaAtual) {
-      const posVendas = rankingVendas.findIndex((v: any) => v.lojaId === lojaAtual.id) + 1;
-      const posEscovas = rankingEscovas.findIndex((v: any) => v.lojaId === lojaAtual.id) + 1;
-      if (posVendas > 0) {
-        texto += `  📍 Posição da ${lojaNome} em vendas: ${posVendas}º lugar de ${vendasMesAtual.length} lojas\n`;
-      }
-      if (posEscovas > 0) {
-        texto += `  📍 Posição da ${lojaNome} em % escovas: ${posEscovas}º lugar de ${vendasMesAtual.length} lojas\n`;
+      const posEscovasQtd = rankingEscovasQtd.findIndex((v: any) => v.lojaId === lojaAtual.id) + 1;
+      const posEscovasPercent = rankingEscovasPercent.findIndex((v: any) => v.lojaId === lojaAtual.id) + 1;
+      const posVendasTotal = rankingVendasTotal.findIndex((v: any) => v.lojaId === lojaAtual.id) + 1;
+      if (posEscovasQtd > 0 || posEscovasPercent > 0 || posVendasTotal > 0) {
+        texto += `\n  📍 POSIÇÃO DA ${lojaNome.toUpperCase()} EM ${periodo}:\n`;
+        if (posEscovasQtd > 0) texto += `    - Escovas (qtd): ${posEscovasQtd}º de ${vendasPeriodo.length}\n`;
+        if (posEscovasPercent > 0) texto += `    - Escovas (%): ${posEscovasPercent}º de ${vendasPeriodo.length}\n`;
+        if (posVendasTotal > 0) texto += `    - Total vendas: ${posVendasTotal}º de ${vendasPeriodo.length}\n`;
       }
     }
-  } else {
-    texto += `  - Sem dados disponíveis para o mês atual\n`;
   }
   texto += `\n`;
   
