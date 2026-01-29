@@ -3793,3 +3793,6 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Layout responsivo com md: breakpoints
 - [x] Scroll automático para última mensagem
 
+
+## Funcionalidade v6.9.6 - Esconder Botão Flutuante na Tab Chatbot
+- [x] Esconder botão flutuante de tarefas quando activeTab === "chatbot"

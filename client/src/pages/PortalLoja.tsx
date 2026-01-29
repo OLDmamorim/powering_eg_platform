@@ -3498,7 +3498,7 @@ export default function PortalLoja() {
       )}
 
       {/* Botão Flutuante de Acesso Rápido às Tarefas - Pulsa quando há NOVAS */}
-      {activeTab !== 'tarefas' && (
+      {activeTab !== 'tarefas' && activeTab !== 'chatbot' && (
         <button
           onClick={() => {
             setActiveTab('tarefas');
