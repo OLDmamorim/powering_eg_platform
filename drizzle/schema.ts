@@ -1202,3 +1202,37 @@ export const evolucaoAnalises = mysqlTable("evolucao_analises", {
 
 export type EvolucaoAnalise = typeof evolucaoAnalises.$inferSelect;
 export type InsertEvolucaoAnalise = typeof evolucaoAnalises.$inferInsert;
+
+
+/**
+ * Fichas Identificadas por Análise - Guarda os números das fichas identificadas em cada categoria
+ * Permite comparar entre análises e identificar processos repetidos
+ */
+export const fichasIdentificadasAnalise = mysqlTable("fichas_identificadas_analise", {
+  id: int("id").autoincrement().primaryKey(),
+  relatorioId: int("relatorioId").notNull(), // FK para relatorios_analise_loja.id
+  analiseId: int("analiseId").notNull(), // FK para analises_fichas_servico.id
+  nomeLoja: varchar("nomeLoja", { length: 255 }).notNull(),
+  
+  // Categoria do problema
+  categoria: mysqlEnum("categoria", [
+    "abertas5Dias",
+    "aposAgendamento", 
+    "statusAlerta",
+    "semNotas",
+    "notasAntigas",
+    "devolverVidro",
+    "semEmailCliente"
+  ]).notNull(),
+  
+  // Identificação da ficha
+  obrano: int("obrano").notNull(), // Número da obra/ficha
+  matricula: varchar("matricula", { length: 20 }), // Matrícula do veículo
+  diasAberto: int("diasAberto"), // Dias em aberto
+  status: varchar("status", { length: 100 }), // Status atual da ficha
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type FichaIdentificadaAnalise = typeof fichasIdentificadasAnalise.$inferSelect;
+export type InsertFichaIdentificadaAnalise = typeof fichasIdentificadasAnalise.$inferInsert;

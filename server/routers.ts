@@ -18,6 +18,46 @@ import { vapidPublicKey, notificarGestorNovaTarefa, notificarLojaNovaTarefa, not
 import { notificarNovoPedidoApoio, notificarPedidoAnulado, notificarPedidoEditado, notificarAgendamentoCriado } from "./telegramService";
 import { processarAnalise, ResultadoAnalise, RelatorioLoja } from "./analiseFichasService";
 
+// Função auxiliar para gerar alerta de processos repetidos
+function gerarAlertaProcessosRepetidos(processosRepetidos: Array<{ obrano: number; matricula: string; categoria: string; diasAberto: number }>): string {
+  const categoriasNomes: Record<string, string> = {
+    'abertas5Dias': 'Aberta +5 dias',
+    'aposAgendamento': 'Após Agendamento',
+    'statusAlerta': 'Status Alerta',
+    'semNotas': 'Sem Notas',
+    'notasAntigas': 'Notas Antigas',
+    'devolverVidro': 'Devolver Vidro',
+    'semEmailCliente': 'Sem Email Cliente',
+  };
+  
+  let html = `<div style="background: #fef2f2; border: 2px solid #dc2626; padding: 15px; margin-bottom: 20px; border-radius: 8px;">`;
+  html += `<strong style="color: #dc2626; font-size: 16px;">⚠️ ATENÇÃO: PROCESSOS JÁ IDENTIFICADOS NA ANÁLISE ANTERIOR!</strong><br><br>`;
+  html += `<span style="color: #991b1b;">Os seguintes <strong>${processosRepetidos.length} processos</strong> já tinham sido identificados na análise anterior e <strong>NÃO TIVERAM NENHUMA INTERVENÇÃO</strong> desde então:</span><br><br>`;
+  
+  // Agrupar por categoria
+  const porCategoria: Record<string, typeof processosRepetidos> = {};
+  for (const p of processosRepetidos) {
+    if (!porCategoria[p.categoria]) porCategoria[p.categoria] = [];
+    porCategoria[p.categoria].push(p);
+  }
+  
+  for (const [categoria, processos] of Object.entries(porCategoria)) {
+    html += `<strong>${categoriasNomes[categoria] || categoria}:</strong><br>`;
+    for (const p of processos.slice(0, 10)) { // Limitar a 10 por categoria
+      html += `&nbsp;&nbsp;• FS ${p.obrano} // ${p.matricula} (${p.diasAberto} dias)<br>`;
+    }
+    if (processos.length > 10) {
+      html += `&nbsp;&nbsp;<em>... e mais ${processos.length - 10} processos</em><br>`;
+    }
+    html += `<br>`;
+  }
+  
+  html += `<strong style="color: #dc2626;">DEVERÁ CORRIGIR IMEDIATAMENTE ESTES PROBLEMAS!</strong>`;
+  html += `</div>`;
+  
+  return html;
+}
+
 // Middleware para verificar se o utilizador é admin
 const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
   if (ctx.user.role !== 'admin') {
@@ -8494,6 +8534,8 @@ IMPORTANTE:
   }),
   
   // ==================== ANÁLISE DE FICHAS DE SERVIÇO ====================
+  // Função auxiliar para gerar alerta de processos repetidos
+  
   analiseFichas: router({
     // Upload e análise do ficheiro Excel
     analisar: gestorProcedure
@@ -8566,9 +8608,81 @@ IMPORTANTE:
             resumo: relatorio.resumo,
           });
           
+          // Guardar fichas identificadas para comparacao futura
+          const fichasParaGuardar: Array<{
+            relatorioId: number;
+            analiseId: number;
+            nomeLoja: string;
+            categoria: 'abertas5Dias' | 'aposAgendamento' | 'statusAlerta' | 'semNotas' | 'notasAntigas' | 'devolverVidro' | 'semEmailCliente';
+            obrano: number;
+            matricula: string | null;
+            diasAberto: number | null;
+            status: string | null;
+          }> = [];
+          
+          // Mapear fichas por categoria
+          const categoriasMap: Array<{ fichas: typeof relatorio.fichasAbertas5Dias; categoria: 'abertas5Dias' | 'aposAgendamento' | 'statusAlerta' | 'semNotas' | 'notasAntigas' | 'devolverVidro' | 'semEmailCliente' }> = [
+            { fichas: relatorio.fichasAbertas5Dias, categoria: 'abertas5Dias' },
+            { fichas: relatorio.fichasAposAgendamento, categoria: 'aposAgendamento' },
+            { fichas: relatorio.fichasStatusAlerta, categoria: 'statusAlerta' },
+            { fichas: relatorio.fichasSemNotas, categoria: 'semNotas' },
+            { fichas: relatorio.fichasNotasAntigas, categoria: 'notasAntigas' },
+            { fichas: relatorio.fichasDevolverVidro, categoria: 'devolverVidro' },
+            { fichas: relatorio.fichasSemEmailCliente, categoria: 'semEmailCliente' },
+          ];
+          
+          for (const { fichas, categoria } of categoriasMap) {
+            for (const ficha of fichas) {
+              fichasParaGuardar.push({
+                relatorioId: relatorioGuardado.id,
+                analiseId: analise.id,
+                nomeLoja: relatorio.nomeLoja,
+                categoria,
+                obrano: ficha.obrano,
+                matricula: ficha.matricula || null,
+                diasAberto: ficha.diasAberto || null,
+                status: ficha.status || null,
+              });
+            }
+          }
+          
+          // Guardar fichas identificadas
+          if (fichasParaGuardar.length > 0) {
+            await db.saveFichasIdentificadas(fichasParaGuardar);
+          }
+          
+          // Buscar fichas da analise anterior para comparacao
+          const fichasAnteriores = await db.getFichasIdentificadasAnterior(analise.id, relatorio.nomeLoja, ctx.gestor.id);
+          
+          // Identificar processos repetidos (mesmo obrano em categorias problematicas)
+          const obrasAnteriores = new Set(fichasAnteriores.map(f => f.obrano));
+          const processosRepetidos: Array<{ obrano: number; matricula: string; categoria: string; diasAberto: number }> = [];
+          
+          for (const { fichas, categoria } of categoriasMap) {
+            for (const ficha of fichas) {
+              if (obrasAnteriores.has(ficha.obrano)) {
+                processosRepetidos.push({
+                  obrano: ficha.obrano,
+                  matricula: ficha.matricula || '',
+                  categoria,
+                  diasAberto: ficha.diasAberto || 0,
+                });
+              }
+            }
+          }
+          
+          // Se houver processos repetidos, atualizar o resumo com alerta
+          if (processosRepetidos.length > 0) {
+            const alertaRepetidos = gerarAlertaProcessosRepetidos(processosRepetidos);
+            const novoResumo = alertaRepetidos + relatorio.resumo;
+            await db.updateRelatorioResumo(relatorioGuardado.id, novoResumo);
+            relatorioGuardado.resumo = novoResumo;
+          }
+          
           relatoriosGuardados.push({
             ...relatorioGuardado,
             pertenceAoGestor: !!lojaDoGestor,
+            processosRepetidos: processosRepetidos.length,
           });
           
           // Verificar evolução em relação à análise anterior

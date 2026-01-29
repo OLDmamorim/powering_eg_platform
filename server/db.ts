@@ -123,7 +123,10 @@ import {
   InsertRelatorioAnaliseLoja,
   evolucaoAnalises,
   EvolucaoAnalise,
-  InsertEvolucaoAnalise
+  InsertEvolucaoAnalise,
+  fichasIdentificadasAnalise,
+  FichaIdentificadaAnalise,
+  InsertFichaIdentificadaAnalise
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -9488,4 +9491,86 @@ export async function getLojaByNomeAproximado(nome: string) {
     .where(like(lojas.nome, `%${nome}%`))
     .limit(1);
   return result[0] || null;
+}
+
+
+// ==================== FICHAS IDENTIFICADAS POR ANÁLISE ====================
+
+/**
+ * Guardar fichas identificadas numa análise
+ */
+export async function saveFichasIdentificadas(fichas: InsertFichaIdentificadaAnalise[]) {
+  const db = await getDb();
+  if (!db || fichas.length === 0) return;
+  
+  await db.insert(fichasIdentificadasAnalise).values(fichas);
+}
+
+/**
+ * Obter fichas identificadas de uma análise anterior para uma loja
+ * Apenas considera análises de dias anteriores (pelo menos 1 dia antes)
+ */
+export async function getFichasIdentificadasAnterior(
+  analiseAtualId: number, 
+  nomeLoja: string, 
+  gestorId: number
+): Promise<FichaIdentificadaAnalise[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  // Calcular a data de ontem (início do dia)
+  const hoje = new Date();
+  hoje.setHours(0, 0, 0, 0);
+  
+  // Buscar análise anterior de um dia diferente (pelo menos 1 dia antes)
+  const analisesAnteriores = await db.select()
+    .from(analisesFichasServico)
+    .where(and(
+      lt(analisesFichasServico.id, analiseAtualId),
+      eq(analisesFichasServico.gestorId, gestorId),
+      lt(analisesFichasServico.createdAt, hoje) // Apenas análises de dias anteriores
+    ))
+    .orderBy(desc(analisesFichasServico.id))
+    .limit(1);
+  
+  if (analisesAnteriores.length === 0) {
+    console.log('[getFichasIdentificadasAnterior] Nenhuma análise anterior encontrada de dias anteriores');
+    return [];
+  }
+  
+  const analiseAnteriorId = analisesAnteriores[0].id;
+  console.log(`[getFichasIdentificadasAnterior] Comparando com análise ${analiseAnteriorId} de ${analisesAnteriores[0].createdAt}`);
+  
+  // Buscar fichas identificadas na análise anterior para esta loja
+  return await db.select()
+    .from(fichasIdentificadasAnalise)
+    .where(and(
+      eq(fichasIdentificadasAnalise.analiseId, analiseAnteriorId),
+      eq(fichasIdentificadasAnalise.nomeLoja, nomeLoja)
+    ));
+}
+
+/**
+ * Obter fichas identificadas por relatório
+ */
+export async function getFichasIdentificadasByRelatorioId(relatorioId: number): Promise<FichaIdentificadaAnalise[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.select()
+    .from(fichasIdentificadasAnalise)
+    .where(eq(fichasIdentificadasAnalise.relatorioId, relatorioId));
+}
+
+
+/**
+ * Atualizar o resumo de um relatório de análise
+ */
+export async function updateRelatorioResumo(relatorioId: number, novoResumo: string) {
+  const db = await getDb();
+  if (!db) return;
+  
+  await db.update(relatoriosAnaliseLoja)
+    .set({ resumo: novoResumo, updatedAt: new Date() })
+    .where(eq(relatoriosAnaliseLoja.id, relatorioId));
 }
