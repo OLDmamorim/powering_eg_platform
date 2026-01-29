@@ -158,6 +158,7 @@ export const appRouter = router({
     create: adminProcedure
       .input(z.object({
         nome: z.string().min(1),
+        numeroLoja: z.number().optional().nullable(),
         email: z.string().email().optional(),
         latitude: z.string().optional(),
         longitude: z.string().optional(),
@@ -170,6 +171,7 @@ export const appRouter = router({
       .input(z.object({
         id: z.number(),
         nome: z.string().min(1).optional(),
+        numeroLoja: z.number().optional().nullable(),
         email: z.string().email().optional().nullable(),
         contacto: z.string().optional().nullable(),
         latitude: z.string().optional(),

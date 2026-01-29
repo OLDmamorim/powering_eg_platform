@@ -40,6 +40,7 @@ export default function Lojas() {
   const [editingLoja, setEditingLoja] = useState<any>(null);
   const [formData, setFormData] = useState({
     nome: "",
+    numeroLoja: null as number | null,
     email: "",
     minimoRelatoriosLivres: 0,
     minimoRelatoriosCompletos: 0,
@@ -142,6 +143,7 @@ export default function Lojas() {
   const resetForm = () => {
     setFormData({
       nome: "",
+      numeroLoja: null,
       email: "",
       minimoRelatoriosLivres: 0,
       minimoRelatoriosCompletos: 0,
@@ -154,6 +156,7 @@ export default function Lojas() {
       setEditingLoja(loja);
       setFormData({
         nome: loja.nome,
+        numeroLoja: loja.numeroLoja || null,
         email: loja.email || "",
         minimoRelatoriosLivres: loja.minimoRelatoriosLivres || 0,
         minimoRelatoriosCompletos: loja.minimoRelatoriosCompletos || 0,
@@ -307,6 +310,7 @@ export default function Lojas() {
                       className={isSomeSelected ? "data-[state=checked]:bg-primary/50" : ""}
                     />
                   </TableHead>
+                  <TableHead>Nº</TableHead>
                   <TableHead>{t('lojas.nome')}</TableHead>
                   <TableHead>{t('lojas.email')}</TableHead>
                   <TableHead>{t('lojas.gestor')}</TableHead>
@@ -323,6 +327,9 @@ export default function Lojas() {
                           onCheckedChange={(checked) => handleSelectOne(loja.id, !!checked)}
                           aria-label={`${t('common.selecionarTodos')} ${loja.nome}`}
                         />
+                      </TableCell>
+                      <TableCell className="text-center font-mono text-sm">
+                        {loja.numeroLoja || "-"}
                       </TableCell>
                       <TableCell className="font-medium">
                         <div className="flex items-center gap-2">
@@ -354,7 +361,7 @@ export default function Lojas() {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8">
+                    <TableCell colSpan={6} className="text-center py-8">
                       <p className="text-muted-foreground">
                         {t('lojas.semLojas')}
                       </p>
@@ -382,16 +389,31 @@ export default function Lojas() {
           </DialogHeader>
           <form onSubmit={handleSubmit}>
             <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="nome">{t('lojas.nome')} *</Label>
-                <Input
-                  id="nome"
-                  value={formData.nome}
-                  onChange={(e) =>
-                    setFormData({ ...formData, nome: e.target.value })
-                  }
-                  required
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="nome">{t('lojas.nome')} *</Label>
+                  <Input
+                    id="nome"
+                    value={formData.nome}
+                    onChange={(e) =>
+                      setFormData({ ...formData, nome: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="numeroLoja">Número da Loja</Label>
+                  <Input
+                    id="numeroLoja"
+                    type="number"
+                    min="1"
+                    placeholder="Ex: 23"
+                    value={formData.numeroLoja || ""}
+                    onChange={(e) =>
+                      setFormData({ ...formData, numeroLoja: e.target.value ? parseInt(e.target.value) : null })
+                    }
+                  />
+                </div>
               </div>
 
               <div className="space-y-2">

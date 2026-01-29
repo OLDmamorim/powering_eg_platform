@@ -31,6 +31,7 @@ export type InsertUser = typeof users.$inferInsert;
 export const lojas = mysqlTable("lojas", {
   id: int("id").autoincrement().primaryKey(),
   nome: varchar("nome", { length: 255 }).notNull(),
+  numeroLoja: int("numeroLoja"), // Número da loja (ex: 23 para Barcelos)
   contacto: varchar("contacto", { length: 50 }),
   email: varchar("email", { length: 320 }),
   minimoRelatoriosLivres: int("minimoRelatoriosLivres").default(0).notNull(), // Mínimo mensal de relatórios livres (0 = sem mínimo)
