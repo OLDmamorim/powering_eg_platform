@@ -9220,8 +9220,33 @@ export async function createAnaliseFichasServico(data: {
     totalLojas: data.totalLojas,
     resumoGeral: data.resumoGeral,
   });
-  const rawInsertId = (insertResult as any).insertId;
-  const insertId = typeof rawInsertId === 'bigint' ? Number(rawInsertId) : Number(rawInsertId);
+  
+  // Extrair o insertId de forma robusta
+  const rawInsertId = (insertResult as any).insertId ?? (insertResult as any)[0]?.insertId;
+  let insertId: number;
+  
+  if (typeof rawInsertId === 'bigint') {
+    insertId = Number(rawInsertId);
+  } else if (typeof rawInsertId === 'number') {
+    insertId = rawInsertId;
+  } else if (typeof rawInsertId === 'string') {
+    insertId = parseInt(rawInsertId, 10);
+  } else {
+    // Fallback: buscar o ultimo registro inserido
+    const lastRecord = await db.select({ id: analisesFichasServico.id })
+      .from(analisesFichasServico)
+      .where(eq(analisesFichasServico.gestorId, data.gestorId))
+      .orderBy(desc(analisesFichasServico.id))
+      .limit(1);
+    insertId = lastRecord[0]?.id ?? 0;
+  }
+  
+  // Validar que o ID e um numero valido
+  if (!Number.isFinite(insertId) || insertId <= 0) {
+    throw new Error('Failed to get valid insertId for analise. Raw value: ' + rawInsertId + ', Converted: ' + insertId);
+  }
+  
+  console.log('[createAnaliseFichasServico] Created analise with ID: ' + insertId);
   return { id: insertId, ...data };
 }
 
@@ -9247,11 +9272,24 @@ export async function createRelatorioAnaliseLoja(data: {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
+  // Validar analiseId
+  if (!Number.isFinite(data.analiseId) || data.analiseId <= 0) {
+    throw new Error('Invalid analiseId: ' + data.analiseId + ' (type: ' + typeof data.analiseId + ')');
+  }
+  
+  // Garantir que lojaId nao e NaN
+  const lojaIdValidado = (typeof data.lojaId === 'number' && Number.isFinite(data.lojaId)) ? data.lojaId : null;
+  
+  // Garantir que numeroLoja nao e NaN
+  const numeroLojaValidado = (typeof data.numeroLoja === 'number' && Number.isFinite(data.numeroLoja)) ? data.numeroLoja : null;
+  
+  console.log('[createRelatorioAnaliseLoja] Creating report for loja: ' + data.nomeLoja + ', analiseId: ' + data.analiseId);
+  
   const insertResult = await db.insert(relatoriosAnaliseLoja).values({
     analiseId: data.analiseId,
-    lojaId: data.lojaId,
+    lojaId: lojaIdValidado,
     nomeLoja: data.nomeLoja,
-    numeroLoja: data.numeroLoja,
+    numeroLoja: numeroLojaValidado,
     totalFichas: data.totalFichas,
     fichasAbertas5Dias: data.fichasAbertas5Dias,
     fichasAposAgendamento: data.fichasAposAgendamento,
