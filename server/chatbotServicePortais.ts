@@ -58,6 +58,9 @@ Tens acesso a TODOS os dados da plataforma (dados nacionais) para análise e com
 - "Estamos acima ou abaixo da média?" → Comparar loja ${lojaNome} com média nacional
 - "Qual a loja com mais vendas?" → Usar dados nacionais para responder
 
+=== DATA ATUAL ===
+A data atual está indicada no contexto. Quando perguntam sobre "este mês", "mês atual", "agora", "hoje" - consulta a data atual fornecida no contexto e responde com os dados do mês corrente. NÃO perguntes qual é o mês - já sabes!
+
 Sê prestável, claro e objetivo. Usa emojis para tornar as respostas mais amigáveis.`;
 
     // 4. Formatar contexto para o prompt
@@ -132,6 +135,9 @@ Embora tenhas acesso a todos os dados, o teu foco deve ser ajudar o volante ${vo
 - "Como está a loja X?" → Fornecer resumo completo da loja X
 - "Qual a melhor rota para visitar as lojas?" → Sugerir ordem de visitas
 - "Que lojas têm mais pendentes?" → Ranking de lojas por pendentes
+
+=== DATA ATUAL ===
+A data atual está indicada no contexto. Quando perguntam sobre "este mês", "mês atual", "agora", "hoje" - consulta a data atual fornecida no contexto e responde com os dados do mês corrente. NÃO perguntes qual é o mês - já sabes!
 
 Sê prestável, claro e objetivo. Usa emojis para tornar as respostas mais amigáveis.`;
 
@@ -268,7 +274,17 @@ async function obterDadosLoja(lojaId: number): Promise<any> {
  * Formata contexto para o Portal da Loja
  */
 function formatarContextoParaLoja(contextoNacional: any, dadosLoja: any, lojaNome: string): string {
+  const now = new Date();
+  const mesAtual = now.getMonth() + 1;
+  const anoAtual = now.getFullYear();
+  const diaAtual = now.getDate();
+  const mesesNomes = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+  const mesNome = mesesNomes[mesAtual - 1];
+  
   let texto = `\n\n========================================\n`;
+  texto += `📅 DATA ATUAL: ${diaAtual} de ${mesNome} de ${anoAtual}\n`;
+  texto += `📆 MÊS CORRENTE: ${mesNome} ${anoAtual} (${mesAtual}/${anoAtual})\n`;
+  texto += `========================================\n\n`;
   texto += `📊 CONTEXTO DA PLATAFORMA\n`;
   texto += `========================================\n\n`;
   
@@ -331,7 +347,17 @@ function formatarContextoParaLoja(contextoNacional: any, dadosLoja: any, lojaNom
  * Formata contexto para o Portal do Volante
  */
 function formatarContextoParaVolante(contextoNacional: any, lojasAtribuidas: Array<{ id: number; nome: string }>): string {
+  const now = new Date();
+  const mesAtual = now.getMonth() + 1;
+  const anoAtual = now.getFullYear();
+  const diaAtual = now.getDate();
+  const mesesNomes = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+  const mesNome = mesesNomes[mesAtual - 1];
+  
   let texto = `\n\n========================================\n`;
+  texto += `📅 DATA ATUAL: ${diaAtual} de ${mesNome} de ${anoAtual}\n`;
+  texto += `📆 MÊS CORRENTE: ${mesNome} ${anoAtual} (${mesAtual}/${anoAtual})\n`;
+  texto += `========================================\n\n`;
   texto += `📊 CONTEXTO DA PLATAFORMA (DADOS NACIONAIS)\n`;
   texto += `========================================\n\n`;
   
