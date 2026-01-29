@@ -3483,13 +3483,15 @@ export default function PortalLoja() {
           </div>
           
           {/* Chat Area */}
-          <Card className="flex-1 flex flex-col overflow-hidden">
-            <CardContent className="h-full p-4">
-              <ChatbotPortalLoja 
-                token={token} 
-                language={language} 
-                isVolante={!!volanteAuth} 
-              />
+          <Card className="flex-1 overflow-hidden">
+            <CardContent className="h-full p-0">
+              <div className="h-full p-4">
+                <ChatbotPortalLoja 
+                  token={token} 
+                  language={language} 
+                  isVolante={!!volanteAuth} 
+                />
+              </div>
             </CardContent>
           </Card>
         </div>

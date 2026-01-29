@@ -3778,3 +3778,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Corrigir layout do empty state (texto está a ser cortado)
 - [x] Ajustar altura e espaçamento do empty state
 - [x] Testar layout final no mobile
+
+## Funcionalidade v6.9.4 - Corrigir Layout do Chatbot (Campo de Input Invisível)
+- [x] Ler página principal do chatbot (AssistenteIA.tsx) para copiar layout completo
+- [x] Ajustar altura do container do chatbot no Portal da Loja
+- [x] Garantir que campo de input (Textarea) fica visível em baixo
+- [x] Copiar estrutura de layout da página principal
+- [x] Testar no mobile que o input está visível e funcional
