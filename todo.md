@@ -3785,3 +3785,11 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Garantir que campo de input (Textarea) fica visível em baixo
 - [x] Copiar estrutura de layout da página principal
 - [x] Testar no mobile que o input está visível e funcional
+
+## Funcionalidade v6.9.5 - Reescrita Completa do ChatbotPortalLoja
+- [x] Copiado layout exato do AssistenteIA.tsx
+- [x] Adicionado VoiceChatInput para gravação de voz
+- [x] Input com border e estilo igual ao portal principal
+- [x] Layout responsivo com md: breakpoints
+- [x] Scroll automático para última mensagem
+
