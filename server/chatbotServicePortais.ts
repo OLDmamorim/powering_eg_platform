@@ -315,7 +315,10 @@ function formatarContextoParaLoja(contextoNacional: any, dadosLoja: any, lojaNom
   texto += `📊 RESULTADOS MENSAIS (últimos 3 meses):\n`;
   if (dadosLoja.resultadosMensais.length > 0) {
     dadosLoja.resultadosMensais.forEach((r: any) => {
-      texto += `  - ${r.mes}/${r.ano}: Objetivo ${r.objetivoMensal || 'N/A'}, Real ${r.realMensal || 'N/A'}\n`;
+      const objetivo = r.objetivoMensal || 'N/A';
+      const realizado = r.totalServicos || 'N/A';
+      const desvio = r.desvioPercentualDia ? `${(parseFloat(r.desvioPercentualDia) * 100).toFixed(1)}%` : 'N/A';
+      texto += `  - ${r.mes}/${r.ano}: Objetivo ${objetivo}, Realizado ${realizado}, Desvio ${desvio}\n`;
     });
   } else {
     texto += `  - Sem dados disponíveis\n`;

@@ -3822,3 +3822,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 
 ## Funcionalidade v6.10.2 - Remover Espaço Extra em Baixo do Input
 - [x] Remover espaço/padding extra em baixo do campo de input do chatbot
+
+## Bug v6.10.3 - Chatbot não mostra dados de serviços realizados
+- [x] Corrigir função de contexto do chatbot para obter dados de serviços realizados da loja
+- [x] Garantir que o chatbot mostra "Realizado: 45" em vez de "N/A"
