@@ -306,31 +306,105 @@ function formatarContextoParaLoja(contextoNacional: any, dadosLoja: any, lojaNom
   texto += `- Alertas ativos (nacional): ${contextoNacional.alertas.filter((a: any) => a.estado === 'pendente').length}\n\n`;
   
   // Resultados mensais de TODAS as lojas (para rankings)
-  texto += `🏆 RESULTADOS NACIONAIS (todas as lojas - mês atual ${mesAtual}/${anoAtual}):\n`;
-  const resultadosMesAtual = contextoNacional.resultadosMensais.filter((r: any) => r.mes === mesAtual && r.ano === anoAtual);
-  if (resultadosMesAtual.length > 0) {
-    // Ordenar por total de serviços (descendente)
-    const rankingServicos = [...resultadosMesAtual].sort((a: any, b: any) => (b.totalServicos || 0) - (a.totalServicos || 0));
-    texto += `  Total de lojas com dados: ${resultadosMesAtual.length}\n`;
-    texto += `  Top 5 por serviços:\n`;
-    rankingServicos.slice(0, 5).forEach((r: any, i: number) => {
-      texto += `    ${i + 1}º ${r.lojaNome}: ${r.totalServicos} serviços (obj: ${r.objetivoMensal || 'N/A'})\n`;
+  // RESULTADOS MENSAIS COMPLETOS DE TODAS AS LOJAS - TODOS OS CAMPOS
+  texto += `🏆 RESULTADOS MENSAIS NACIONAIS - DADOS COMPLETOS DE TODAS AS LOJAS:\n`;
+  texto += `========================================\n\n`;
+  
+  // Agrupar resultados por período
+  const resultadosPorPeriodo: { [key: string]: any[] } = {};
+  contextoNacional.resultadosMensais.forEach((r: any) => {
+    const periodo = `${r.mes}/${r.ano}`;
+    if (!resultadosPorPeriodo[periodo]) {
+      resultadosPorPeriodo[periodo] = [];
+    }
+    resultadosPorPeriodo[periodo].push(r);
+  });
+  
+  // Ordenar períodos (mais recente primeiro)
+  const periodosResultados = Object.keys(resultadosPorPeriodo).sort((a, b) => {
+    const [mesA, anoA] = a.split('/').map(Number);
+    const [mesB, anoB] = b.split('/').map(Number);
+    if (anoA !== anoB) return anoB - anoA;
+    return mesB - mesA;
+  });
+  
+  for (const periodo of periodosResultados) {
+    const resultadosPeriodo = resultadosPorPeriodo[periodo];
+    texto += `\n📅 PERÍODO ${periodo}:\n`;
+    texto += `  Total de lojas: ${resultadosPeriodo.length}\n\n`;
+    
+    // RANKING POR SERVIÇOS
+    const rankingServicos = [...resultadosPeriodo].sort((a: any, b: any) => (b.totalServicos || 0) - (a.totalServicos || 0));
+    texto += `  🏆 RANKING POR SERVIÇOS:\n`;
+    rankingServicos.forEach((r: any, i: number) => {
+      const desvioPercent = r.desvioPercentualDia ? `${(parseFloat(r.desvioPercentualDia) * 100).toFixed(1)}%` : 'N/A';
+      texto += `    ${i + 1}º ${r.lojaNome}: ${r.totalServicos || 0} serv. (obj: ${r.objetivoMensal || 'N/A'}, desvio: ${desvioPercent})\n`;
     });
-    texto += `  Bottom 5 por serviços:\n`;
-    rankingServicos.slice(-5).reverse().forEach((r: any, i: number) => {
-      const pos = resultadosMesAtual.length - i;
-      texto += `    ${pos}º ${r.lojaNome}: ${r.totalServicos} serviços (obj: ${r.objetivoMensal || 'N/A'})\n`;
+    
+    // RANKING POR TAXA DE REPARAÇÃO
+    const rankingTaxaReparacao = [...resultadosPeriodo].sort((a: any, b: any) => (parseFloat(b.taxaReparacao) || 0) - (parseFloat(a.taxaReparacao) || 0));
+    texto += `\n  🏆 RANKING POR TAXA DE REPARAÇÃO:\n`;
+    rankingTaxaReparacao.forEach((r: any, i: number) => {
+      const taxa = r.taxaReparacao ? `${(parseFloat(r.taxaReparacao) * 100).toFixed(1)}%` : 'N/A';
+      const qtdRep = r.qtdReparacoes || 0;
+      const qtdPB = r.qtdParaBrisas || 0;
+      const gap22 = r.gapReparacoes22 || 0;
+      texto += `    ${i + 1}º ${r.lojaNome}: ${taxa} (${qtdRep} rep. / ${qtdPB} PB, faltam ${gap22} para 22%)\n`;
     });
-    // Encontrar posição da loja atual
+    
+    // RANKING POR QUANTIDADE DE REPARAÇÕES
+    const rankingQtdReparacoes = [...resultadosPeriodo].sort((a: any, b: any) => (b.qtdReparacoes || 0) - (a.qtdReparacoes || 0));
+    texto += `\n  🏆 RANKING POR QTD REPARAÇÕES:\n`;
+    rankingQtdReparacoes.forEach((r: any, i: number) => {
+      const qtdRep = r.qtdReparacoes || 0;
+      const taxa = r.taxaReparacao ? `${(parseFloat(r.taxaReparacao) * 100).toFixed(1)}%` : 'N/A';
+      texto += `    ${i + 1}º ${r.lojaNome}: ${qtdRep} reparações (taxa: ${taxa})\n`;
+    });
+    
+    // RANKING POR DESVIO PERCENTUAL (cumprimento de objetivo)
+    const rankingDesvio = [...resultadosPeriodo].sort((a: any, b: any) => (parseFloat(b.desvioPercentualDia) || -999) - (parseFloat(a.desvioPercentualDia) || -999));
+    texto += `\n  🏆 RANKING POR CUMPRIMENTO DE OBJETIVO (desvio %):\n`;
+    rankingDesvio.forEach((r: any, i: number) => {
+      const desvio = r.desvioPercentualDia ? `${(parseFloat(r.desvioPercentualDia) * 100).toFixed(1)}%` : 'N/A';
+      const servicos = r.totalServicos || 0;
+      const objetivo = r.objetivoMensal || 'N/A';
+      texto += `    ${i + 1}º ${r.lojaNome}: ${desvio} (${servicos}/${objetivo})\n`;
+    });
+    
+    // DADOS COMPLETOS DE CADA LOJA
+    texto += `\n  📊 DADOS COMPLETOS POR LOJA:\n`;
+    resultadosPeriodo.forEach((r: any) => {
+      texto += `\n    🏢 ${r.lojaNome}:\n`;
+      texto += `      - Zona: ${r.zona || 'N/A'}\n`;
+      texto += `      - Total Serviços: ${r.totalServicos || 0}\n`;
+      texto += `      - Objetivo Mensal: ${r.objetivoMensal || 'N/A'}\n`;
+      texto += `      - Objetivo ao Dia: ${r.objetivoDiaAtual || 'N/A'}\n`;
+      texto += `      - Desvio vs Obj Dia: ${r.desvioPercentualDia ? `${(parseFloat(r.desvioPercentualDia) * 100).toFixed(1)}%` : 'N/A'}\n`;
+      texto += `      - Desvio vs Obj Mês: ${r.desvioPercentualMes ? `${(parseFloat(r.desvioPercentualMes) * 100).toFixed(1)}%` : 'N/A'}\n`;
+      texto += `      - Desvio Acumulado: ${r.desvioObjetivoAcumulado || 'N/A'}\n`;
+      texto += `      - Nº Colaboradores: ${r.numColaboradores || 'N/A'}\n`;
+      texto += `      - Serv./Colaborador: ${r.servicosPorColaborador || 'N/A'}\n`;
+      texto += `      - TAXA REPARAÇÃO: ${r.taxaReparacao ? `${(parseFloat(r.taxaReparacao) * 100).toFixed(1)}%` : 'N/A'}\n`;
+      texto += `      - Qtd Reparações: ${r.qtdReparacoes || 0}\n`;
+      texto += `      - Qtd Para-Brisas: ${r.qtdParaBrisas || 0}\n`;
+      texto += `      - Gap para 22%: ${r.gapReparacoes22 || 0} reparações\n`;
+    });
+    
+    // Posição da loja atual neste período
     const lojaAtual = contextoNacional.lojas.find((l: any) => l.nome === lojaNome);
     if (lojaAtual) {
-      const posicaoLoja = rankingServicos.findIndex((r: any) => r.lojaId === lojaAtual.id) + 1;
-      if (posicaoLoja > 0) {
-        texto += `  📍 Posição da ${lojaNome}: ${posicaoLoja}º lugar de ${resultadosMesAtual.length} lojas\n`;
+      const posServicos = rankingServicos.findIndex((r: any) => r.lojaId === lojaAtual.id) + 1;
+      const posTaxa = rankingTaxaReparacao.findIndex((r: any) => r.lojaId === lojaAtual.id) + 1;
+      const posQtdRep = rankingQtdReparacoes.findIndex((r: any) => r.lojaId === lojaAtual.id) + 1;
+      const posDesvio = rankingDesvio.findIndex((r: any) => r.lojaId === lojaAtual.id) + 1;
+      if (posServicos > 0 || posTaxa > 0 || posQtdRep > 0 || posDesvio > 0) {
+        texto += `\n  📍 POSIÇÃO DA ${lojaNome.toUpperCase()} EM ${periodo}:\n`;
+        if (posServicos > 0) texto += `    - Serviços: ${posServicos}º de ${resultadosPeriodo.length}\n`;
+        if (posTaxa > 0) texto += `    - Taxa Reparação: ${posTaxa}º de ${resultadosPeriodo.length}\n`;
+        if (posQtdRep > 0) texto += `    - Qtd Reparações: ${posQtdRep}º de ${resultadosPeriodo.length}\n`;
+        if (posDesvio > 0) texto += `    - Cumprimento Obj: ${posDesvio}º de ${resultadosPeriodo.length}\n`;
       }
     }
-  } else {
-    texto += `  - Sem dados disponíveis para o mês atual\n`;
   }
   texto += `\n`;
   
