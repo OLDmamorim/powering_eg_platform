@@ -1168,8 +1168,8 @@ export default function PortalLoja() {
           </div>
         )}
 
-        {/* Botão Voltar - visível em todas as seções exceto home e chatbot */}
-        {activeTab !== "home" && activeTab !== "chatbot" && (
+        {/* Botão Voltar - visível em todas as seções exceto home */}
+        {activeTab !== "home" && (
           <Button
             variant="outline"
             onClick={() => setActiveTab("home")}
@@ -3466,15 +3466,42 @@ export default function PortalLoja() {
 
       {/* Tab Chatbot IA - Layout igual ao portal principal */}
       {activeTab === "chatbot" && (
-        <Card className="h-[calc(100vh-10rem)] overflow-hidden">
-          <CardContent className="h-full p-4">
-            <ChatbotPortalLoja 
-              token={token} 
-              language={language} 
-              isVolante={!!volanteAuth} 
-            />
-          </CardContent>
-        </Card>
+        <div className="h-[calc(100vh-14rem)] flex flex-col gap-3 overflow-hidden">
+          {/* Header compacto - igual ao AssistenteIA */}
+          <div className="flex items-center justify-between flex-shrink-0">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <Bot className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <h1 className="text-lg font-bold">PoweringEG</h1>
+                <p className="text-xs text-muted-foreground">
+                  {language === 'pt' ? 'Conversar com o assistente inteligente' : 'Chat with the intelligent assistant'}
+                </p>
+              </div>
+            </div>
+            <Button 
+              variant="outline" 
+              size="icon"
+              onClick={() => window.location.reload()}
+              className="h-8 w-8"
+              title={language === 'pt' ? 'Atualizar' : 'Refresh'}
+            >
+              <RefreshCw className="h-4 w-4" />
+            </Button>
+          </div>
+          
+          {/* Área de Chat - Card igual ao AssistenteIA */}
+          <Card className="flex-1 flex flex-col min-h-0 overflow-hidden">
+            <CardContent className="h-full flex flex-col p-3 overflow-hidden">
+              <ChatbotPortalLoja 
+                token={token} 
+                language={language} 
+                isVolante={!!volanteAuth} 
+              />
+            </CardContent>
+          </Card>
+        </div>
       )}
 
       {/* Botão Flutuante de Acesso Rápido às Tarefas - Pulsa quando há NOVAS */}

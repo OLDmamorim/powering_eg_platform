@@ -198,19 +198,6 @@ export function ChatbotPortalLoja({ token, language, isVolante = false }: Chatbo
 
   return (
     <div className="h-full flex flex-col overflow-hidden">
-      {/* Botão refresh no canto - igual ao portal principal */}
-      <div className="flex justify-end mb-2 flex-shrink-0">
-        <Button 
-          variant="outline" 
-          size="icon"
-          onClick={limparConversa}
-          className="h-8 w-8 md:h-9 md:w-9"
-          title={language === 'pt' ? 'Limpar conversa' : 'Clear conversation'}
-        >
-          <RefreshCw className="h-4 w-4" />
-        </Button>
-      </div>
-      
       {/* Mensagens */}
       <ScrollArea className="flex-1 min-h-0 pr-2 md:pr-4" ref={scrollRef}>
         {messages.length === 0 ? (

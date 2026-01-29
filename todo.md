@@ -3807,3 +3807,12 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Remover botão Voltar da tab chatbot
 - [x] Remover header duplicado (PoweringEG + refresh) do ChatbotPortalLoja
 - [x] Manter apenas empty state com ícone Sparkles, título, descrição, voz, badges
+
+## Funcionalidade v6.9.9 - Remover Espaço Vazio no Topo do Card
+- [ ] Remover espaço vazio entre header verde e conteúdo do chatbot
+- [ ] Ajustar padding do Card para começar logo no topo
+
+## Funcionalidade v6.10.0 - Layout Chatbot EXATAMENTE Igual ao Principal
+- [x] Manter botão Voltar na tab chatbot
+- [x] Reduzir/remover caixa branca do header
+- [x] Copiar EXATAMENTE o layout do AssistenteIA.tsx para ChatbotPortalLoja
