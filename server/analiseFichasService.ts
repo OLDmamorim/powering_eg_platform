@@ -239,7 +239,7 @@ function agruparPorLoja(fichas: FichaServico[]): Map<string, FichaServico[]> {
  * Formata uma ficha para exibição na tabela
  */
 function formatarFichaParaTabela(ficha: FichaServico, incluirDias: boolean = false, tipoDias: 'aberto' | 'nota' | 'executado' = 'aberto'): string {
-  let texto = `${ficha.coordenador} // ${ficha.obrano} // ${ficha.matricula}: <b><i>${ficha.status}</i></b>`;
+  let texto = `FS ${ficha.obrano} // ${ficha.matricula}: <b><i>${ficha.status}</i></b>`;
   
   if (incluirDias) {
     if (tipoDias === 'aberto') {
