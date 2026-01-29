@@ -8553,7 +8553,7 @@ IMPORTANTE:
             analiseId: analise.id,
             lojaId: lojaDoGestor ? lojaId : null,
             nomeLoja: relatorio.nomeLoja,
-            numeroLoja: (relatorio.numeroLoja && !isNaN(relatorio.numeroLoja)) ? relatorio.numeroLoja : null,
+            numeroLoja: (typeof relatorio.numeroLoja === 'number' && Number.isFinite(relatorio.numeroLoja)) ? relatorio.numeroLoja : null,
             totalFichas: relatorio.totalFichas,
             fichasAbertas5Dias: relatorio.fichasAbertas5Dias.length,
             fichasAposAgendamento: relatorio.fichasAposAgendamento.length,

@@ -96,11 +96,12 @@ const STATUS_ALERTA = ['FALTA DOCUMENTOS', 'RECUSADO', 'INCIDÊNCIA'];
  * Ex: "Ficha Servico 23" -> 23
  */
 function extrairNumeroLoja(nmdos: string): number | null {
-  if (!nmdos) return null;
+  if (!nmdos || typeof nmdos !== 'string') return null;
   const match = nmdos.match(/(\d+)/);
-  if (!match) return null;
+  if (!match || !match[1]) return null;
   const num = parseInt(match[1], 10);
-  return isNaN(num) ? null : num;
+  if (!Number.isFinite(num) || num <= 0) return null;
+  return num;
 }
 
 /**
