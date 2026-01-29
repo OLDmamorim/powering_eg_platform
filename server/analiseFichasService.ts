@@ -421,38 +421,113 @@ function gerarHTMLRelatorio(relatorio: RelatorioLoja): string {
 }
 
 /**
- * Gera o resumo textual para uma loja
+ * Gera o resumo textual extenso para uma loja com instrucoes claras de acao
  */
 function gerarResumo(relatorio: RelatorioLoja): string {
-  const problemas: string[] = [];
+  const linhas: string[] = [];
+  
+  // Introducao
+  linhas.push(`<strong>PONTO DE SITUACAO - ${relatorio.nomeLoja.toUpperCase()}</strong>`);
+  linhas.push(``);
+  linhas.push(`A loja tem atualmente <strong>${relatorio.totalFichas} fichas de servico em aberto</strong> que requerem atencao e acompanhamento.`);
+  linhas.push(``);
+  
+  // Calcular nivel de urgencia
+  const totalProblemas = relatorio.fichasAbertas5Dias.length + relatorio.fichasAposAgendamento.length + 
+    relatorio.fichasStatusAlerta.length + relatorio.fichasSemNotas.length + relatorio.fichasNotasAntigas.length;
+  
+  let nivelUrgencia = 'BAIXO';
+  let corUrgencia = '#16a34a';
+  if (totalProblemas > 20) {
+    nivelUrgencia = 'CRITICO';
+    corUrgencia = '#dc2626';
+  } else if (totalProblemas > 10) {
+    nivelUrgencia = 'ALTO';
+    corUrgencia = '#ea580c';
+  } else if (totalProblemas > 5) {
+    nivelUrgencia = 'MEDIO';
+    corUrgencia = '#ca8a04';
+  }
+  
+  linhas.push(`<strong style="color: ${corUrgencia};">NIVEL DE URGENCIA: ${nivelUrgencia}</strong>`);
+  linhas.push(``);
+  
+  // Detalhes e instrucoes por categoria
+  linhas.push(`<strong>ACOES NECESSARIAS:</strong>`);
+  linhas.push(``);
   
   if (relatorio.fichasAbertas5Dias.length > 0) {
-    problemas.push(`${relatorio.fichasAbertas5Dias.length} fichas abertas há mais de 5 dias`);
+    linhas.push(`<strong>1. FICHAS ABERTAS HA MAIS DE 5 DIAS (${relatorio.fichasAbertas5Dias.length} processos)</strong>`);
+    linhas.push(`   - Verificar o motivo do atraso em cada processo`);
+    linhas.push(`   - Contactar o cliente para confirmar disponibilidade`);
+    linhas.push(`   - Agendar servico ou encerrar processo se nao houver resposta`);
+    linhas.push(`   - Prioridade: Processos com mais de 30 dias devem ser tratados HOJE`);
+    linhas.push(``);
   }
+  
   if (relatorio.fichasAposAgendamento.length > 0) {
-    problemas.push(`${relatorio.fichasAposAgendamento.length} fichas que passaram do agendamento`);
+    linhas.push(`<strong>2. FICHAS APOS DATA DE AGENDAMENTO (${relatorio.fichasAposAgendamento.length} processos)</strong>`);
+    linhas.push(`   - Contactar IMEDIATAMENTE o cliente para reagendar`);
+    linhas.push(`   - Verificar se o vidro esta disponivel em stock`);
+    linhas.push(`   - Atualizar a data de agendamento no sistema`);
+    linhas.push(`   - Se cliente nao atender, registar tentativa nas notas`);
+    linhas.push(``);
   }
+  
   if (relatorio.fichasStatusAlerta.length > 0) {
-    problemas.push(`${relatorio.fichasStatusAlerta.length} fichas em status de alerta`);
+    linhas.push(`<strong>3. FICHAS EM STATUS DE ALERTA (${relatorio.fichasStatusAlerta.length} processos)</strong>`);
+    linhas.push(`   - RECUSADO: Verificar motivo e tentar reverter com seguradora`);
+    linhas.push(`   - FALTA DOCUMENTOS: Contactar cliente para obter documentacao`);
+    linhas.push(`   - INCIDENCIA: Resolver problema e atualizar status`);
+    linhas.push(`   - Documentar todas as acoes tomadas nas notas`);
+    linhas.push(``);
   }
+  
   if (relatorio.fichasSemNotas.length > 0) {
-    problemas.push(`${relatorio.fichasSemNotas.length} fichas sem notas`);
+    linhas.push(`<strong>4. FICHAS SEM NOTAS (${relatorio.fichasSemNotas.length} processos)</strong>`);
+    linhas.push(`   - OBRIGATORIO: Adicionar nota com ponto de situacao atual`);
+    linhas.push(`   - Indicar proxima acao prevista e data`);
+    linhas.push(`   - Registar contactos realizados com cliente/seguradora`);
+    linhas.push(``);
   }
+  
   if (relatorio.fichasNotasAntigas.length > 0) {
-    problemas.push(`${relatorio.fichasNotasAntigas.length} fichas com notas desatualizadas`);
+    linhas.push(`<strong>5. FICHAS COM NOTAS DESATUALIZADAS (${relatorio.fichasNotasAntigas.length} processos)</strong>`);
+    linhas.push(`   - Atualizar notas com informacao atual do processo`);
+    linhas.push(`   - Indicar se houve contacto com cliente nos ultimos dias`);
+    linhas.push(`   - Registar evolucao ou bloqueios encontrados`);
+    linhas.push(``);
   }
+  
   if (relatorio.fichasDevolverVidro.length > 0) {
-    problemas.push(`${relatorio.fichasDevolverVidro.length} vidros para devolver`);
+    linhas.push(`<strong>6. VIDROS PARA DEVOLVER (${relatorio.fichasDevolverVidro.length} processos)</strong>`);
+    linhas.push(`   - Preparar vidros para recolha pelo fornecedor`);
+    linhas.push(`   - Verificar se guia de devolucao esta emitida`);
+    linhas.push(`   - Contactar fornecedor para agendar recolha`);
+    linhas.push(``);
   }
+  
   if (relatorio.fichasSemEmailCliente.length > 0) {
-    problemas.push(`${relatorio.fichasSemEmailCliente.length} fichas sem email de cliente`);
+    linhas.push(`<strong>7. FICHAS SEM EMAIL DE CLIENTE (${relatorio.fichasSemEmailCliente.length} processos)</strong>`);
+    linhas.push(`   - Solicitar email ao cliente no proximo contacto`);
+    linhas.push(`   - Registar email no sistema para comunicacoes futuras`);
+    linhas.push(`   - Importante para envio de orcamentos e confirmacoes`);
+    linhas.push(``);
   }
   
-  if (problemas.length === 0) {
-    return `A loja ${relatorio.nomeLoja} não apresenta problemas significativos nas fichas de serviço analisadas. Total de ${relatorio.totalFichas} fichas em análise.`;
+  if (totalProblemas === 0) {
+    linhas.push(`<strong style="color: #16a34a;">PARABENS!</strong> A loja nao apresenta problemas significativos.`);
+    linhas.push(`Continuar o bom trabalho e manter os processos atualizados.`);
+  } else {
+    linhas.push(`<strong>PRAZO PARA RESOLUCAO:</strong>`);
+    linhas.push(`- Processos CRITICOS (>30 dias): Resolver HOJE`);
+    linhas.push(`- Processos URGENTES (>15 dias): Resolver em 24 horas`);
+    linhas.push(`- Demais processos: Resolver em 48 horas`);
+    linhas.push(``);
+    linhas.push(`<em>Este relatorio deve ser revisto diariamente ate que todos os pontos estejam resolvidos.</em>`);
   }
   
-  return `A loja ${relatorio.nomeLoja} tem ${relatorio.totalFichas} fichas de serviço em análise. Foram identificados os seguintes pontos de atenção: ${problemas.join('; ')}. Recomenda-se intervenção imediata nos processos identificados.`;
+  return linhas.join('<br>');
 }
 
 /**
