@@ -187,7 +187,7 @@ async function obterContextoPlataformaNacional(): Promise<any> {
   const periodosDisponiveis = await db.getPeriodosDisponiveis();
   const resultadosMensais: any[] = [];
   const vendasComplementaresNacionais: any[] = [];
-  const periodosParaCarregar = periodosDisponiveis.slice(0, 3); // Últimos 3 meses
+  const periodosParaCarregar = periodosDisponiveis; // Todos os períodos disponíveis
   
   for (const periodo of periodosParaCarregar) {
     const resultadosPeriodo = await db.getResultadosMensais(
@@ -243,31 +243,23 @@ async function obterDadosLoja(lojaId: number): Promise<any> {
     return false;
   });
   
-  // Resultados mensais da loja - últimos 3 meses
-  const now = new Date();
-  const mesAtual = now.getMonth() + 1;
-  const anoAtual = now.getFullYear();
+  // Resultados mensais da loja - todos os períodos disponíveis
+  const periodosDisponiveis = await db.getPeriodosDisponiveis();
   
   const resultadosMensais: any[] = [];
   const vendasComplementares: any[] = [];
   
-  for (let i = 0; i < 3; i++) {
-    let mes = mesAtual - i;
-    let ano = anoAtual;
-    if (mes <= 0) {
-      mes += 12;
-      ano -= 1;
-    }
+  for (const periodo of periodosDisponiveis) {
     try {
-      const resultado = await db.getResultadosMensaisPorLoja(lojaId, mes, ano);
+      const resultado = await db.getResultadosMensaisPorLoja(lojaId, periodo.mes, periodo.ano);
       if (resultado) {
-        resultadosMensais.push({ ...resultado, periodo: `${mes}/${ano}` });
+        resultadosMensais.push({ ...resultado, periodo: `${periodo.mes}/${periodo.ano}` });
       }
       
       // Obter vendas complementares do mesmo período
-      const vendas = await db.getVendasComplementares(mes, ano, lojaId);
+      const vendas = await db.getVendasComplementares(periodo.mes, periodo.ano, lojaId);
       if (vendas && vendas.length > 0) {
-        vendasComplementares.push({ ...vendas[0], periodo: `${mes}/${ano}` });
+        vendasComplementares.push({ ...vendas[0], periodo: `${periodo.mes}/${periodo.ano}` });
       }
     } catch (e) {
       // Ignorar erros de períodos sem dados
@@ -413,7 +405,7 @@ function formatarContextoParaLoja(contextoNacional: any, dadosLoja: any, lojaNom
   texto += `- Tarefas ativas: ${todosAtivos.length}\n`;
   texto += `- Tarefas concluídas: ${dadosLoja.todos.length - todosAtivos.length}\n\n`;
   
-  texto += `📊 RESULTADOS MENSAIS (últimos 3 meses):\n`;
+  texto += `📊 RESULTADOS MENSAIS (todos os períodos disponíveis):\n`;
   if (dadosLoja.resultadosMensais.length > 0) {
     dadosLoja.resultadosMensais.forEach((r: any) => {
       const objetivo = r.objetivoMensal || 'N/A';
@@ -426,7 +418,7 @@ function formatarContextoParaLoja(contextoNacional: any, dadosLoja: any, lojaNom
   }
   
   // Vendas Complementares
-  texto += `\n💰 VENDAS COMPLEMENTARES (últimos 3 meses):\n`;
+  texto += `\n💰 VENDAS COMPLEMENTARES (todos os períodos disponíveis):\n`;
   if (dadosLoja.vendasComplementares && dadosLoja.vendasComplementares.length > 0) {
     dadosLoja.vendasComplementares.forEach((v: any) => {
       const total = v.totalVendas ? `€${parseFloat(v.totalVendas).toFixed(2)}` : 'N/A';
