@@ -94,14 +94,26 @@ const STATUS_ALERTA = ['FALTA DOCUMENTOS', 'RECUSADO', 'INCIDÊNCIA'];
 /**
  * Extrai número da loja do campo nmdos
  * Ex: "Ficha Servico 23" -> 23
+ * Ex: "Ficha S.Movel 7-Leiria" -> null (servico movel nao tem numero de loja tradicional)
  */
 function extrairNumeroLoja(nmdos: string): number | null {
   if (!nmdos || typeof nmdos !== 'string') return null;
-  const match = nmdos.match(/(\d+)/);
-  if (!match || !match[1]) return null;
-  const num = parseInt(match[1], 10);
-  if (!Number.isFinite(num) || num <= 0) return null;
-  return num;
+  
+  // Se for servico movel, nao extrair numero (o numero e do servico, nao da loja)
+  if (nmdos.toLowerCase().includes('s.movel') || nmdos.toLowerCase().includes('smovel') || nmdos.toLowerCase().includes('movel')) {
+    return null;
+  }
+  
+  // Padrao: "Ficha Servico XX" onde XX e o numero da loja
+  const matchServico = nmdos.match(/ficha\s*servi[cç]o\s*(\d+)/i);
+  if (matchServico && matchServico[1]) {
+    const num = parseInt(matchServico[1], 10);
+    if (Number.isFinite(num) && num > 0) {
+      return num;
+    }
+  }
+  
+  return null;
 }
 
 /**
@@ -166,6 +178,10 @@ export function processarFicheiroExcel(buffer: Buffer): FichaServico[] {
     if (h) colIndex[h.toLowerCase().trim()] = i;
   });
   
+  // Debug: mostrar cabeçalhos encontrados
+  console.log('[processarFicheiroExcel] Cabeçalhos encontrados:', Object.keys(colIndex).join(', '));
+  console.log('[processarFicheiroExcel] Coluna lojas index:', colIndex['lojas']);
+  
   // Processar linhas de dados
   const fichas: FichaServico[] = [];
   
@@ -213,8 +229,19 @@ export function processarFicheiroExcel(buffer: Buffer): FichaServico[] {
     };
     
     fichas.push(ficha);
+    
+    // Debug: mostrar primeiras 3 fichas
+    if (fichas.length <= 3) {
+      console.log('[processarFicheiroExcel] Ficha ' + fichas.length + ':', {
+        nmdos: ficha.nmdos,
+        loja: ficha.loja,
+        obrano: ficha.obrano,
+        status: ficha.status
+      });
+    }
   }
   
+  console.log('[processarFicheiroExcel] Total fichas processadas:', fichas.length);
   return fichas;
 }
 
