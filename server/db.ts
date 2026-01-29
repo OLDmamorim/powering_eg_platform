@@ -1,4 +1,4 @@
-import { eq, and, desc, asc, sql, inArray, gte, lte, or, gt, lt, isNull, not } from "drizzle-orm";
+import { eq, and, desc, asc, sql, inArray, gte, lte, or, gt, lt, isNull, not, like } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { 
   InsertUser, 
@@ -114,7 +114,16 @@ import {
   InsertBloqueioVolante,
   agendamentosVolante,
   AgendamentoVolante,
-  InsertAgendamentoVolante
+  InsertAgendamentoVolante,
+  analisesFichasServico,
+  AnaliseFichasServico,
+  InsertAnaliseFichasServico,
+  relatoriosAnaliseLoja,
+  RelatorioAnaliseLoja,
+  InsertRelatorioAnaliseLoja,
+  evolucaoAnalises,
+  EvolucaoAnalise,
+  InsertEvolucaoAnalise
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -9186,4 +9195,259 @@ export async function getEstadoCompletoDoMes(volanteId: number, year: number, mo
   }
   
   return resultado;
+}
+
+
+// ==================== ANÁLISE DE FICHAS DE SERVIÇO ====================
+
+/**
+ * Criar uma nova análise de fichas de serviço
+ */
+export async function createAnaliseFichasServico(data: {
+  gestorId: number;
+  nomeArquivo: string;
+  totalFichas: number;
+  totalLojas: number;
+  resumoGeral: string;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const insertResult = await db.insert(analisesFichasServico).values({
+    gestorId: data.gestorId,
+    nomeArquivo: data.nomeArquivo,
+    totalFichas: data.totalFichas,
+    totalLojas: data.totalLojas,
+    resumoGeral: data.resumoGeral,
+  });
+  const rawInsertId = (insertResult as any).insertId;
+  const insertId = typeof rawInsertId === 'bigint' ? Number(rawInsertId) : Number(rawInsertId);
+  return { id: insertId, ...data };
+}
+
+/**
+ * Criar relatório de análise por loja
+ */
+export async function createRelatorioAnaliseLoja(data: {
+  analiseId: number;
+  lojaId: number | null;
+  nomeLoja: string;
+  numeroLoja: number | null;
+  totalFichas: number;
+  fichasAbertas5Dias: number;
+  fichasAposAgendamento: number;
+  fichasStatusAlerta: number;
+  fichasSemNotas: number;
+  fichasNotasAntigas: number;
+  fichasDevolverVidro: number;
+  fichasSemEmailCliente: number;
+  conteudoRelatorio: string;
+  resumo: string;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const insertResult = await db.insert(relatoriosAnaliseLoja).values({
+    analiseId: data.analiseId,
+    lojaId: data.lojaId,
+    nomeLoja: data.nomeLoja,
+    numeroLoja: data.numeroLoja,
+    totalFichas: data.totalFichas,
+    fichasAbertas5Dias: data.fichasAbertas5Dias,
+    fichasAposAgendamento: data.fichasAposAgendamento,
+    fichasStatusAlerta: data.fichasStatusAlerta,
+    fichasSemNotas: data.fichasSemNotas,
+    fichasNotasAntigas: data.fichasNotasAntigas,
+    fichasDevolverVidro: data.fichasDevolverVidro,
+    fichasSemEmailCliente: data.fichasSemEmailCliente,
+    conteudoRelatorio: data.conteudoRelatorio,
+    resumo: data.resumo,
+  });
+  const rawInsertId = (insertResult as any).insertId;
+  const insertId = typeof rawInsertId === 'bigint' ? Number(rawInsertId) : Number(rawInsertId);
+  return { id: insertId, ...data };
+}
+
+/**
+ * Obter todas as análises de um gestor
+ */
+export async function getAnalisesByGestorId(gestorId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.select().from(analisesFichasServico)
+    .where(eq(analisesFichasServico.gestorId, gestorId))
+    .orderBy(desc(analisesFichasServico.dataUpload));
+}
+
+/**
+ * Obter análise por ID
+ */
+export async function getAnaliseById(id: number) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const result = await db.select().from(analisesFichasServico)
+    .where(eq(analisesFichasServico.id, id))
+    .limit(1);
+  return result[0] || null;
+}
+
+/**
+ * Obter relatórios de uma análise
+ */
+export async function getRelatoriosByAnaliseId(analiseId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.select().from(relatoriosAnaliseLoja)
+    .where(eq(relatoriosAnaliseLoja.analiseId, analiseId))
+    .orderBy(asc(relatoriosAnaliseLoja.nomeLoja));
+}
+
+/**
+ * Obter relatório por ID
+ */
+export async function getRelatorioAnaliseById(id: number) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const result = await db.select().from(relatoriosAnaliseLoja)
+    .where(eq(relatoriosAnaliseLoja.id, id))
+    .limit(1);
+  return result[0] || null;
+}
+
+/**
+ * Marcar relatório como enviado por email
+ */
+export async function marcarRelatorioEnviado(id: number) {
+  const db = await getDb();
+  if (!db) return;
+  
+  await db.update(relatoriosAnaliseLoja)
+    .set({ emailEnviado: true, dataEnvioEmail: new Date(), updatedAt: new Date() })
+    .where(eq(relatoriosAnaliseLoja.id, id));
+}
+
+/**
+ * Obter última análise de um gestor
+ */
+export async function getUltimaAnaliseByGestorId(gestorId: number) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const result = await db.select().from(analisesFichasServico)
+    .where(eq(analisesFichasServico.gestorId, gestorId))
+    .orderBy(desc(analisesFichasServico.dataUpload))
+    .limit(1);
+  return result[0] || null;
+}
+
+/**
+ * Obter relatório anterior de uma loja (para comparação)
+ */
+export async function getRelatorioAnteriorLoja(analiseAtualId: number, nomeLoja: string, gestorId: number) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  // Primeiro obter as análises anteriores deste gestor
+  const analisesAnteriores = await db.select().from(analisesFichasServico)
+    .where(and(
+      eq(analisesFichasServico.gestorId, gestorId),
+      lt(analisesFichasServico.id, analiseAtualId)
+    ))
+    .orderBy(desc(analisesFichasServico.dataUpload))
+    .limit(10);
+  
+  // Procurar relatório da loja nas análises anteriores
+  for (const analise of analisesAnteriores) {
+    const relatorio = await db.select().from(relatoriosAnaliseLoja)
+      .where(and(
+        eq(relatoriosAnaliseLoja.analiseId, analise.id),
+        eq(relatoriosAnaliseLoja.nomeLoja, nomeLoja)
+      ))
+      .limit(1);
+    if (relatorio.length > 0) {
+      return relatorio[0];
+    }
+  }
+  return null;
+}
+
+/**
+ * Criar registo de evolução entre análises
+ */
+export async function createEvolucaoAnalise(data: {
+  analiseAtualId: number;
+  analiseAnteriorId: number;
+  lojaId: number | null;
+  nomeLoja: string;
+  variacaoFichasAbertas5Dias: number;
+  variacaoFichasAposAgendamento: number;
+  variacaoFichasStatusAlerta: number;
+  variacaoFichasSemNotas: number;
+  variacaoFichasNotasAntigas: number;
+  variacaoFichasDevolverVidro: number;
+  evolucaoGeral: 'melhorou' | 'piorou' | 'estavel';
+  comentario: string;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const insertResult = await db.insert(evolucaoAnalises).values({
+    analiseAtualId: data.analiseAtualId,
+    analiseAnteriorId: data.analiseAnteriorId,
+    lojaId: data.lojaId,
+    nomeLoja: data.nomeLoja,
+    variacaoFichasAbertas5Dias: data.variacaoFichasAbertas5Dias,
+    variacaoFichasAposAgendamento: data.variacaoFichasAposAgendamento,
+    variacaoFichasStatusAlerta: data.variacaoFichasStatusAlerta,
+    variacaoFichasSemNotas: data.variacaoFichasSemNotas,
+    variacaoFichasNotasAntigas: data.variacaoFichasNotasAntigas,
+    variacaoFichasDevolverVidro: data.variacaoFichasDevolverVidro,
+    evolucaoGeral: data.evolucaoGeral,
+    comentario: data.comentario,
+  });
+  const rawInsertId = (insertResult as any).insertId;
+  const insertId = typeof rawInsertId === 'bigint' ? Number(rawInsertId) : Number(rawInsertId);
+  return { id: insertId, ...data };
+}
+
+/**
+ * Obter evolução de uma análise
+ */
+export async function getEvolucaoByAnaliseId(analiseId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.select().from(evolucaoAnalises)
+    .where(eq(evolucaoAnalises.analiseAtualId, analiseId))
+    .orderBy(asc(evolucaoAnalises.nomeLoja));
+}
+
+/**
+ * Encontrar loja por número
+ */
+export async function getLojaByNumero(numeroLoja: number) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const result = await db.select().from(lojas)
+    .where(eq(lojas.numeroLoja, numeroLoja))
+    .limit(1);
+  return result[0] || null;
+}
+
+/**
+ * Encontrar loja por nome (aproximado)
+ */
+export async function getLojaByNomeAproximado(nome: string) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const result = await db.select().from(lojas)
+    .where(like(lojas.nome, `%${nome}%`))
+    .limit(1);
+  return result[0] || null;
 }

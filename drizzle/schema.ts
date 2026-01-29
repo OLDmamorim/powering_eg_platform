@@ -1108,3 +1108,97 @@ export const agendamentosVolante = mysqlTable("agendamentos_volante", {
 
 export type AgendamentoVolante = typeof agendamentosVolante.$inferSelect;
 export type InsertAgendamentoVolante = typeof agendamentosVolante.$inferInsert;
+
+
+
+/**
+ * Análises de Fichas de Serviço - Histórico de uploads e análises
+ */
+export const analisesFichasServico = mysqlTable("analises_fichas_servico", {
+  id: int("id").autoincrement().primaryKey(),
+  gestorId: int("gestorId").notNull(), // FK para gestores.id - quem fez o upload
+  
+  // Informação do ficheiro
+  nomeArquivo: varchar("nomeArquivo", { length: 255 }).notNull(),
+  dataUpload: timestamp("dataUpload").defaultNow().notNull(),
+  
+  // Estatísticas gerais
+  totalFichas: int("totalFichas").default(0).notNull(),
+  totalLojas: int("totalLojas").default(0).notNull(),
+  
+  // JSON com resumo geral da análise
+  resumoGeral: text("resumoGeral"), // JSON com totais por status, etc.
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type AnaliseFichasServico = typeof analisesFichasServico.$inferSelect;
+export type InsertAnaliseFichasServico = typeof analisesFichasServico.$inferInsert;
+
+
+/**
+ * Relatórios de Análise por Loja - Relatório gerado para cada loja na análise
+ */
+export const relatoriosAnaliseLoja = mysqlTable("relatorios_analise_loja", {
+  id: int("id").autoincrement().primaryKey(),
+  analiseId: int("analiseId").notNull(), // FK para analises_fichas_servico.id
+  lojaId: int("lojaId"), // FK para lojas.id (pode ser null se loja não existir no sistema)
+  nomeLoja: varchar("nomeLoja", { length: 255 }).notNull(), // Nome da loja no ficheiro
+  numeroLoja: int("numeroLoja"), // Número da loja (ex: 23 para Barcelos)
+  
+  // Contadores por categoria
+  totalFichas: int("totalFichas").default(0).notNull(),
+  fichasAbertas5Dias: int("fichasAbertas5Dias").default(0).notNull(),
+  fichasAposAgendamento: int("fichasAposAgendamento").default(0).notNull(),
+  fichasStatusAlerta: int("fichasStatusAlerta").default(0).notNull(), // FALTA DOCUMENTOS, RECUSADO, INCIDÊNCIA
+  fichasSemNotas: int("fichasSemNotas").default(0).notNull(),
+  fichasNotasAntigas: int("fichasNotasAntigas").default(0).notNull(), // Notas > 5 dias
+  fichasDevolverVidro: int("fichasDevolverVidro").default(0).notNull(),
+  fichasSemEmailCliente: int("fichasSemEmailCliente").default(0).notNull(),
+  
+  // Conteúdo do relatório (HTML formatado)
+  conteudoRelatorio: text("conteudoRelatorio").notNull(),
+  
+  // Resumo em texto
+  resumo: text("resumo"),
+  
+  // Estado de envio
+  emailEnviado: boolean("emailEnviado").default(false).notNull(),
+  dataEnvioEmail: timestamp("dataEnvioEmail"),
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type RelatorioAnaliseLoja = typeof relatoriosAnaliseLoja.$inferSelect;
+export type InsertRelatorioAnaliseLoja = typeof relatoriosAnaliseLoja.$inferInsert;
+
+
+/**
+ * Evolução de Análises - Comparação entre análises consecutivas
+ */
+export const evolucaoAnalises = mysqlTable("evolucao_analises", {
+  id: int("id").autoincrement().primaryKey(),
+  analiseAtualId: int("analiseAtualId").notNull(), // FK para analises_fichas_servico.id
+  analiseAnteriorId: int("analiseAnteriorId").notNull(), // FK para analises_fichas_servico.id
+  lojaId: int("lojaId"), // FK para lojas.id
+  nomeLoja: varchar("nomeLoja", { length: 255 }).notNull(),
+  
+  // Variações (positivo = piorou, negativo = melhorou)
+  variacaoFichasAbertas5Dias: int("variacaoFichasAbertas5Dias").default(0),
+  variacaoFichasAposAgendamento: int("variacaoFichasAposAgendamento").default(0),
+  variacaoFichasStatusAlerta: int("variacaoFichasStatusAlerta").default(0),
+  variacaoFichasSemNotas: int("variacaoFichasSemNotas").default(0),
+  variacaoFichasNotasAntigas: int("variacaoFichasNotasAntigas").default(0),
+  variacaoFichasDevolverVidro: int("variacaoFichasDevolverVidro").default(0),
+  
+  // Avaliação geral
+  evolucaoGeral: mysqlEnum("evolucaoGeral", ["melhorou", "piorou", "estavel"]).default("estavel"),
+  comentario: text("comentario"), // Comentário automático sobre a evolução
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type EvolucaoAnalise = typeof evolucaoAnalises.$inferSelect;
+export type InsertEvolucaoAnalise = typeof evolucaoAnalises.$inferInsert;

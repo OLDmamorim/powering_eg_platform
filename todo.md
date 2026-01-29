@@ -3826,3 +3826,14 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## Bug v6.10.3 - Chatbot não mostra dados de serviços realizados
 - [x] Corrigir função de contexto do chatbot para obter dados de serviços realizados da loja
 - [x] Garantir que o chatbot mostra "Realizado: 45" em vez de "N/A"
+
+## Análise de Fichas de Serviço (v6.11)
+- [ ] Schema BD: tabelas para análises e histórico
+- [ ] Backend: upload e processamento de ficheiro Excel
+- [ ] Backend: lógica de análise segundo critérios definidos
+- [ ] Backend: geração de relatórios por loja
+- [ ] Frontend: página de upload e visualização
+- [ ] Frontend: quadro resumo com relatórios por loja
+- [ ] Comparação com análise anterior (evolução)
+- [ ] Envio de relatórios por email às lojas
+- [ ] Histórico de análises por gestor

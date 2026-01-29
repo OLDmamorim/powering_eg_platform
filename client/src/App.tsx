@@ -47,6 +47,7 @@ import ProjecaoVisitasPage from "./pages/ProjecaoVisitasPage";
 import RelacoesLojas from "./pages/RelacoesLojas";
 import Volantes from "./pages/Volantes";
 import PortalGestor from "./pages/PortalGestor";
+import AnaliseFichas from "./pages/AnaliseFichas";
 import MenuInicial from "./pages/MenuInicial";
 import { DemoBanner } from "./components/DemoBanner";
 import { LanguageProvider } from "./contexts/LanguageContext";
@@ -72,6 +73,7 @@ function Router() {
       <Route path={"/relacoes-lojas"} component={RelacoesLojas} />
       <Route path={"/volantes"} component={Volantes} />
       <Route path={"/portal-gestor"} component={PortalGestor} />
+      <Route path={"/analise-fichas"} component={AnaliseFichas} />
       <Route path={"/relatorio-livre"} component={RelatorioLivre} />
       <Route path={"/relatorio-completo"} component={RelatorioCompleto} />
       <Route path={"/meus-relatorios"} component={MeusRelatorios} />

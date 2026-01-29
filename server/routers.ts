@@ -16,6 +16,7 @@ import { notifyOwner } from "./_core/notification";
 import { processarPergunta, getSugestoesPergunta } from "./chatbotService";
 import { vapidPublicKey, notificarGestorNovaTarefa, notificarLojaNovaTarefa, notificarGestorRespostaLoja, notificarLojaRespostaGestor } from "./pushService";
 import { notificarNovoPedidoApoio, notificarPedidoAnulado, notificarPedidoEditado, notificarAgendamentoCriado } from "./telegramService";
+import { processarAnalise, ResultadoAnalise, RelatorioLoja } from "./analiseFichasService";
 
 // Middleware para verificar se o utilizador é admin
 const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
@@ -8489,6 +8490,301 @@ IMPORTANTE:
           lojasAtribuidas
         );
         return resultado;
+      }),
+  }),
+  
+  // ==================== ANÁLISE DE FICHAS DE SERVIÇO ====================
+  analiseFichas: router({
+    // Upload e análise do ficheiro Excel
+    analisar: gestorProcedure
+      .input(z.object({
+        fileBase64: z.string(),
+        nomeArquivo: z.string(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (!ctx.gestor) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Apenas gestores podem analisar ficheiros' });
+        }
+        
+        // Converter base64 para buffer
+        const buffer = Buffer.from(input.fileBase64, 'base64');
+        
+        // Processar análise
+        const resultado = processarAnalise(buffer, input.nomeArquivo);
+        
+        // Guardar análise na base de dados
+        const analise = await db.createAnaliseFichasServico({
+          gestorId: ctx.gestor.id,
+          nomeArquivo: input.nomeArquivo,
+          totalFichas: resultado.totalFichas,
+          totalLojas: resultado.totalLojas,
+          resumoGeral: JSON.stringify(resultado.resumoGeral),
+        });
+        
+        // Obter lojas do gestor para fazer correspondência
+        const lojasGestor = await db.getLojasByGestorId(ctx.gestor.id);
+        
+        // Guardar relatórios por loja
+        const relatoriosGuardados = [];
+        for (const relatorio of resultado.relatoriosPorLoja) {
+          // Tentar encontrar a loja no sistema
+          let lojaId: number | null = null;
+          
+          // Primeiro tentar por número
+          if (relatorio.numeroLoja) {
+            const lojaPorNumero = await db.getLojaByNumero(relatorio.numeroLoja);
+            if (lojaPorNumero) {
+              lojaId = lojaPorNumero.id;
+            }
+          }
+          
+          // Se não encontrou por número, tentar por nome aproximado
+          if (!lojaId) {
+            const lojaPorNome = await db.getLojaByNomeAproximado(relatorio.nomeLoja);
+            if (lojaPorNome) {
+              lojaId = lojaPorNome.id;
+            }
+          }
+          
+          // Verificar se a loja pertence ao gestor
+          const lojaDoGestor = lojaId ? lojasGestor.find(l => l.id === lojaId) : null;
+          
+          const relatorioGuardado = await db.createRelatorioAnaliseLoja({
+            analiseId: analise.id,
+            lojaId: lojaDoGestor ? lojaId : null,
+            nomeLoja: relatorio.nomeLoja,
+            numeroLoja: relatorio.numeroLoja,
+            totalFichas: relatorio.totalFichas,
+            fichasAbertas5Dias: relatorio.fichasAbertas5Dias.length,
+            fichasAposAgendamento: relatorio.fichasAposAgendamento.length,
+            fichasStatusAlerta: relatorio.fichasStatusAlerta.length,
+            fichasSemNotas: relatorio.fichasSemNotas.length,
+            fichasNotasAntigas: relatorio.fichasNotasAntigas.length,
+            fichasDevolverVidro: relatorio.fichasDevolverVidro.length,
+            fichasSemEmailCliente: relatorio.fichasSemEmailCliente.length,
+            conteudoRelatorio: relatorio.conteudoHTML,
+            resumo: relatorio.resumo,
+          });
+          
+          relatoriosGuardados.push({
+            ...relatorioGuardado,
+            pertenceAoGestor: !!lojaDoGestor,
+          });
+          
+          // Verificar evolução em relação à análise anterior
+          const relatorioAnterior = await db.getRelatorioAnteriorLoja(analise.id, relatorio.nomeLoja, ctx.gestor.id);
+          if (relatorioAnterior) {
+            const variacaoAbertas = relatorio.fichasAbertas5Dias.length - relatorioAnterior.fichasAbertas5Dias;
+            const variacaoApos = relatorio.fichasAposAgendamento.length - relatorioAnterior.fichasAposAgendamento;
+            const variacaoAlerta = relatorio.fichasStatusAlerta.length - relatorioAnterior.fichasStatusAlerta;
+            const variacaoSemNotas = relatorio.fichasSemNotas.length - relatorioAnterior.fichasSemNotas;
+            const variacaoNotasAntigas = relatorio.fichasNotasAntigas.length - relatorioAnterior.fichasNotasAntigas;
+            const variacaoDevolver = relatorio.fichasDevolverVidro.length - relatorioAnterior.fichasDevolverVidro;
+            
+            const totalVariacao = variacaoAbertas + variacaoApos + variacaoAlerta + variacaoSemNotas + variacaoNotasAntigas + variacaoDevolver;
+            let evolucaoGeral: 'melhorou' | 'piorou' | 'estavel' = 'estavel';
+            let comentario = '';
+            
+            if (totalVariacao < -2) {
+              evolucaoGeral = 'melhorou';
+              comentario = `A loja melhorou significativamente! Redução de ${Math.abs(totalVariacao)} problemas em relação à análise anterior.`;
+            } else if (totalVariacao > 2) {
+              evolucaoGeral = 'piorou';
+              comentario = `A loja piorou! Aumento de ${totalVariacao} problemas em relação à análise anterior. Requer atenção imediata.`;
+            } else {
+              comentario = 'A loja manteve-se estável em relação à análise anterior.';
+            }
+            
+            await db.createEvolucaoAnalise({
+              analiseAtualId: analise.id,
+              analiseAnteriorId: relatorioAnterior.analiseId,
+              lojaId: lojaDoGestor ? lojaId : null,
+              nomeLoja: relatorio.nomeLoja,
+              variacaoFichasAbertas5Dias: variacaoAbertas,
+              variacaoFichasAposAgendamento: variacaoApos,
+              variacaoFichasStatusAlerta: variacaoAlerta,
+              variacaoFichasSemNotas: variacaoSemNotas,
+              variacaoFichasNotasAntigas: variacaoNotasAntigas,
+              variacaoFichasDevolverVidro: variacaoDevolver,
+              evolucaoGeral,
+              comentario,
+            });
+          }
+        }
+        
+        return {
+          analiseId: analise.id,
+          totalFichas: resultado.totalFichas,
+          totalLojas: resultado.totalLojas,
+          resumoGeral: resultado.resumoGeral,
+          relatorios: relatoriosGuardados,
+        };
+      }),
+    
+    // Listar análises do gestor
+    listar: gestorProcedure
+      .query(async ({ ctx }) => {
+        if (!ctx.gestor) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Apenas gestores podem ver análises' });
+        }
+        
+        return await db.getAnalisesByGestorId(ctx.gestor.id);
+      }),
+    
+    // Obter detalhes de uma análise
+    detalhes: gestorProcedure
+      .input(z.object({ analiseId: z.number() }))
+      .query(async ({ input, ctx }) => {
+        if (!ctx.gestor) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Apenas gestores podem ver análises' });
+        }
+        
+        const analise = await db.getAnaliseById(input.analiseId);
+        if (!analise || analise.gestorId !== ctx.gestor.id) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Análise não encontrada' });
+        }
+        
+        const relatorios = await db.getRelatoriosByAnaliseId(input.analiseId);
+        const evolucao = await db.getEvolucaoByAnaliseId(input.analiseId);
+        
+        // Obter lojas do gestor para marcar quais pertencem a ele
+        const lojasGestor = await db.getLojasByGestorId(ctx.gestor.id);
+        const lojasGestorIds = lojasGestor.map(l => l.id);
+        
+        const relatoriosComInfo = relatorios.map(r => ({
+          ...r,
+          pertenceAoGestor: r.lojaId ? lojasGestorIds.includes(r.lojaId) : false,
+          evolucao: evolucao.find(e => e.nomeLoja === r.nomeLoja) || null,
+        }));
+        
+        return {
+          analise,
+          relatorios: relatoriosComInfo,
+        };
+      }),
+    
+    // Obter relatório individual
+    relatorio: gestorProcedure
+      .input(z.object({ relatorioId: z.number() }))
+      .query(async ({ input, ctx }) => {
+        if (!ctx.gestor) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Apenas gestores podem ver relatórios' });
+        }
+        
+        const relatorio = await db.getRelatorioAnaliseById(input.relatorioId);
+        if (!relatorio) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Relatório não encontrado' });
+        }
+        
+        // Verificar se a análise pertence ao gestor
+        const analise = await db.getAnaliseById(relatorio.analiseId);
+        if (!analise || analise.gestorId !== ctx.gestor.id) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Sem permissão para ver este relatório' });
+        }
+        
+        return relatorio;
+      }),
+    
+    // Enviar relatório por email
+    enviarEmail: gestorProcedure
+      .input(z.object({ 
+        relatorioId: z.number(),
+        emailDestino: z.string().email().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (!ctx.gestor) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Apenas gestores podem enviar relatórios' });
+        }
+        
+        const relatorio = await db.getRelatorioAnaliseById(input.relatorioId);
+        if (!relatorio) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Relatório não encontrado' });
+        }
+        
+        // Verificar se a análise pertence ao gestor
+        const analise = await db.getAnaliseById(relatorio.analiseId);
+        if (!analise || analise.gestorId !== ctx.gestor.id) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Sem permissão para enviar este relatório' });
+        }
+        
+        // Determinar email de destino
+        let emailDestino = input.emailDestino;
+        if (!emailDestino && relatorio.lojaId) {
+          const loja = await db.getLojaById(relatorio.lojaId);
+          emailDestino = loja?.email || undefined;
+        }
+        
+        if (!emailDestino) {
+          throw new TRPCError({ code: 'BAD_REQUEST', message: 'Email de destino não especificado e loja não tem email configurado' });
+        }
+        
+        // Enviar email
+        const dataAnalise = new Date(analise.dataUpload).toLocaleDateString('pt-PT');
+        await sendEmail({
+          to: emailDestino,
+          subject: `Análise de Fichas de Serviço - ${relatorio.nomeLoja} - ${dataAnalise}`,
+          html: relatorio.conteudoRelatorio,
+        });
+        
+        // Marcar como enviado
+        await db.marcarRelatorioEnviado(input.relatorioId);
+        
+        return { success: true, emailEnviado: emailDestino };
+      }),
+    
+    // Enviar múltiplos relatórios por email
+    enviarEmails: gestorProcedure
+      .input(z.object({ 
+        relatorioIds: z.array(z.number()),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (!ctx.gestor) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Apenas gestores podem enviar relatórios' });
+        }
+        
+        const resultados: Array<{ relatorioId: number; sucesso: boolean; email?: string; erro?: string }> = [];
+        
+        for (const relatorioId of input.relatorioIds) {
+          try {
+            const relatorio = await db.getRelatorioAnaliseById(relatorioId);
+            if (!relatorio) {
+              resultados.push({ relatorioId, sucesso: false, erro: 'Relatório não encontrado' });
+              continue;
+            }
+            
+            const analise = await db.getAnaliseById(relatorio.analiseId);
+            if (!analise || analise.gestorId !== ctx.gestor.id) {
+              resultados.push({ relatorioId, sucesso: false, erro: 'Sem permissão' });
+              continue;
+            }
+            
+            // Obter email da loja
+            let emailDestino: string | undefined;
+            if (relatorio.lojaId) {
+              const loja = await db.getLojaById(relatorio.lojaId);
+              emailDestino = loja?.email || undefined;
+            }
+            
+            if (!emailDestino) {
+              resultados.push({ relatorioId, sucesso: false, erro: 'Loja sem email configurado' });
+              continue;
+            }
+            
+            const dataAnalise = new Date(analise.dataUpload).toLocaleDateString('pt-PT');
+            await sendEmail({
+              to: emailDestino,
+              subject: `Análise de Fichas de Serviço - ${relatorio.nomeLoja} - ${dataAnalise}`,
+              html: relatorio.conteudoRelatorio,
+            });
+            
+            await db.marcarRelatorioEnviado(relatorioId);
+            resultados.push({ relatorioId, sucesso: true, email: emailDestino });
+          } catch (error) {
+            resultados.push({ relatorioId, sucesso: false, erro: String(error) });
+          }
+        }
+        
+        return { resultados };
       }),
   }),
 });
