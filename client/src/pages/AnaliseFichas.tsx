@@ -521,7 +521,7 @@ export default function AnaliseFichas() {
                   </div>
                 </div>
                 
-                {/* Resumo */}
+                {/* Resumo da Análise - Conteúdo principal */}
                 <Card>
                   <CardHeader>
                     <CardTitle className="text-base">Resumo da Análise</CardTitle>
@@ -530,19 +530,6 @@ export default function AnaliseFichas() {
                     <div 
                       className="text-sm leading-relaxed"
                       dangerouslySetInnerHTML={{ __html: selectedRelatorio.resumo }}
-                    />
-                  </CardContent>
-                </Card>
-                
-                {/* Conteúdo HTML do Relatório */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-base">Relatório Completo</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div 
-                      className="prose prose-sm max-w-none"
-                      dangerouslySetInnerHTML={{ __html: selectedRelatorio.conteudoRelatorio }}
                     />
                   </CardContent>
                 </Card>

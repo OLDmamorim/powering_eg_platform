@@ -426,6 +426,11 @@ function gerarHTMLRelatorio(relatorio: RelatorioLoja): string {
 function gerarResumo(relatorio: RelatorioLoja): string {
   const linhas: string[] = [];
   
+  // Instrucao de impressao em destaque
+  linhas.push(`<div style="background: #fef3c7; border: 2px solid #f59e0b; padding: 10px; margin-bottom: 15px; border-radius: 6px;">`);
+  linhas.push(`<strong style="color: #92400e; font-size: 14px;">⚠️ IMPRIMIR ESTE RELATORIO E ATUAR EM CONFORMIDADE NOS PROCESSOS IDENTIFICADOS</strong>`);
+  linhas.push(`</div>`);
+  
   // Introducao
   linhas.push(`<strong>PONTO DE SITUACAO - ${relatorio.nomeLoja.toUpperCase()}</strong>`);
   linhas.push(``);
@@ -476,8 +481,8 @@ function gerarResumo(relatorio: RelatorioLoja): string {
   
   if (relatorio.fichasStatusAlerta.length > 0) {
     linhas.push(`<strong>3. FICHAS EM STATUS DE ALERTA (${relatorio.fichasStatusAlerta.length} processos)</strong>`);
-    linhas.push(`   - RECUSADO: Verificar motivo e tentar reverter com seguradora`);
-    linhas.push(`   - FALTA DOCUMENTOS: Contactar cliente para obter documentacao`);
+    linhas.push(`   - RECUSADO: Verificar o que solicitam imediatamente`);
+    linhas.push(`   - FALTA DOCUMENTOS: Verificar o que falta para finalizar processo`);
     linhas.push(`   - INCIDENCIA: Resolver problema e atualizar status`);
     linhas.push(`   - Documentar todas as acoes tomadas nas notas`);
     linhas.push(``);
