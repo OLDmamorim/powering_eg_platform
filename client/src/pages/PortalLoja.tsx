@@ -1168,8 +1168,8 @@ export default function PortalLoja() {
           </div>
         )}
 
-        {/* Botão Voltar - visível em todas as seções exceto home */}
-        {activeTab !== "home" && (
+        {/* Botão Voltar - visível em todas as seções exceto home e chatbot */}
+        {activeTab !== "home" && activeTab !== "chatbot" && (
           <Button
             variant="outline"
             onClick={() => setActiveTab("home")}

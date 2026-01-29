@@ -198,19 +198,8 @@ export function ChatbotPortalLoja({ token, language, isVolante = false }: Chatbo
 
   return (
     <div className="h-full flex flex-col overflow-hidden">
-      {/* Header com botão refresh */}
-      <div className="flex items-center justify-between mb-3 flex-shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-primary/10 rounded-lg">
-            <Bot className="h-5 w-5 md:h-6 md:w-6 text-primary" />
-          </div>
-          <div>
-            <h1 className="text-lg md:text-xl font-bold">PoweringEG</h1>
-            <p className="text-xs md:text-sm text-muted-foreground">
-              {language === 'pt' ? 'Conversar com o assistente inteligente' : 'Chat with the intelligent assistant'}
-            </p>
-          </div>
-        </div>
+      {/* Botão refresh no canto - igual ao portal principal */}
+      <div className="flex justify-end mb-2 flex-shrink-0">
         <Button 
           variant="outline" 
           size="icon"

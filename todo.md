@@ -3802,3 +3802,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Remover Card wrapper extra que está a cortar espaço
 - [x] Fazer chatbot ocupar ecrã inteiro como portal principal
 - [x] Adicionar botão refresh no canto como portal principal
+
+## Funcionalidade v6.9.8 - Corrigir Layout Chatbot (Remover Duplicações)
+- [x] Remover botão Voltar da tab chatbot
+- [x] Remover header duplicado (PoweringEG + refresh) do ChatbotPortalLoja
+- [x] Manter apenas empty state com ícone Sparkles, título, descrição, voz, badges
