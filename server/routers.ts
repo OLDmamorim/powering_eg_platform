@@ -190,10 +190,11 @@ export const appRouter = router({
           if (!lojasGestor.some(l => l.id === id)) {
             throw new TRPCError({ code: 'FORBIDDEN', message: 'Não tem acesso a esta loja' });
           }
-          // Gestor só pode editar email e contacto, não nome ou mínimos
+          // Gestor pode editar email, contacto e numeroLoja, não nome ou mínimos
           const gestorData: any = {};
           if (data.email !== undefined) gestorData.email = data.email;
           if (data.contacto !== undefined) gestorData.contacto = data.contacto;
+          if (data.numeroLoja !== undefined) gestorData.numeroLoja = data.numeroLoja;
           await db.updateLoja(id, gestorData);
         } else {
           // Admin pode editar tudo

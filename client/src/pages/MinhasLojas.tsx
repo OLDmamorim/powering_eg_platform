@@ -46,6 +46,7 @@ export default function MinhasLojas() {
   const [editingLoja, setEditingLoja] = useState<any>(null);
   const [formData, setFormData] = useState({
     nome: "",
+    numeroLoja: null as number | null,
     morada: "",
     contacto: "",
     email: "",
@@ -76,6 +77,7 @@ export default function MinhasLojas() {
     setEditingLoja(loja);
     setFormData({
       nome: loja.nome || "",
+      numeroLoja: loja.numeroLoja || null,
       morada: loja.morada || "",
       contacto: loja.contacto || "",
       email: loja.email || "",
@@ -113,7 +115,7 @@ export default function MinhasLojas() {
                   <CardTitle className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
                       <Building2 className="h-5 w-5 text-primary" />
-                      {loja.nome}
+                      {loja.numeroLoja ? `${loja.nome} (${loja.numeroLoja})` : loja.nome}
                     </div>
                     <Dialog>
                       <DialogTrigger asChild>
@@ -130,13 +132,26 @@ export default function MinhasLojas() {
                           <DialogTitle>{t('lojas.editarLoja')}</DialogTitle>
                         </DialogHeader>
                         <div className="space-y-4">
-                          <div>
-                            <Label htmlFor="nome">{t('lojas.nome')}</Label>
-                            <Input
-                              id="nome"
-                              value={formData.nome}
-                              onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
-                            />
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <Label htmlFor="nome">{t('lojas.nome')}</Label>
+                              <Input
+                                id="nome"
+                                value={formData.nome}
+                                onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="numeroLoja">Número da Loja</Label>
+                              <Input
+                                id="numeroLoja"
+                                type="number"
+                                min="1"
+                                placeholder="Ex: 23"
+                                value={formData.numeroLoja || ""}
+                                onChange={(e) => setFormData({ ...formData, numeroLoja: e.target.value ? parseInt(e.target.value) : null })}
+                              />
+                            </div>
                           </div>
                           <div>
                             <Label htmlFor="morada">{t('common.descricao')}</Label>
