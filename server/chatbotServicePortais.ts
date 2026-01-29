@@ -241,6 +241,8 @@ async function obterDadosLoja(lojaId: number): Promise<any> {
   const anoAtual = now.getFullYear();
   
   const resultadosMensais: any[] = [];
+  const vendasComplementares: any[] = [];
+  
   for (let i = 0; i < 3; i++) {
     let mes = mesAtual - i;
     let ano = anoAtual;
@@ -252,6 +254,12 @@ async function obterDadosLoja(lojaId: number): Promise<any> {
       const resultado = await db.getResultadosMensaisPorLoja(lojaId, mes, ano);
       if (resultado) {
         resultadosMensais.push({ ...resultado, periodo: `${mes}/${ano}` });
+      }
+      
+      // Obter vendas complementares do mesmo período
+      const vendas = await db.getVendasComplementares(mes, ano, lojaId);
+      if (vendas && vendas.length > 0) {
+        vendasComplementares.push({ ...vendas[0], periodo: `${mes}/${ano}` });
       }
     } catch (e) {
       // Ignorar erros de períodos sem dados
@@ -266,7 +274,8 @@ async function obterDadosLoja(lojaId: number): Promise<any> {
     alertas,
     todos,
     reunioes,
-    resultadosMensais
+    resultadosMensais,
+    vendasComplementares
   };
 }
 
@@ -335,6 +344,33 @@ function formatarContextoParaLoja(contextoNacional: any, dadosLoja: any, lojaNom
       const realizado = r.totalServicos || 'N/A';
       const desvio = r.desvioPercentualDia ? `${(parseFloat(r.desvioPercentualDia) * 100).toFixed(1)}%` : 'N/A';
       texto += `  - ${r.mes}/${r.ano}: Objetivo ${objetivo}, Realizado ${realizado}, Desvio ${desvio}\n`;
+    });
+  } else {
+    texto += `  - Sem dados disponíveis\n`;
+  }
+  
+  // Vendas Complementares
+  texto += `\n💰 VENDAS COMPLEMENTARES (últimos 3 meses):\n`;
+  if (dadosLoja.vendasComplementares && dadosLoja.vendasComplementares.length > 0) {
+    dadosLoja.vendasComplementares.forEach((v: any) => {
+      const total = v.totalVendas ? `€${parseFloat(v.totalVendas).toFixed(2)}` : 'N/A';
+      const escovas = v.escovasVendas ? `€${parseFloat(v.escovasVendas).toFixed(2)}` : '€0';
+      const escovasQtd = v.escovasQtd || 0;
+      const escovasPercent = v.escovasPercent ? `${(parseFloat(v.escovasPercent) * 100).toFixed(1)}%` : 'N/A';
+      const polimento = v.polimentoVendas ? `€${parseFloat(v.polimentoVendas).toFixed(2)}` : '€0';
+      const polimentoQtd = v.polimentoQtd || 0;
+      const tratamento = v.tratamentoVendas ? `€${parseFloat(v.tratamentoVendas).toFixed(2)}` : '€0';
+      const tratamentoQtd = v.tratamentoQtd || 0;
+      const lavagens = v.lavagensVendas ? `€${parseFloat(v.lavagensVendas).toFixed(2)}` : '€0';
+      const lavagensQtd = v.lavagensTotal || 0;
+      const peliculas = v.peliculaVendas ? `€${parseFloat(v.peliculaVendas).toFixed(2)}` : '€0';
+      
+      texto += `  - ${v.periodo}: Total ${total}\n`;
+      texto += `    • Escovas: ${escovasQtd} unid. (${escovas}) - ${escovasPercent} vs serviços\n`;
+      texto += `    • Polimento Faróis: ${polimentoQtd} unid. (${polimento})\n`;
+      texto += `    • Tratamento Carroçarias: ${tratamentoQtd} unid. (${tratamento})\n`;
+      texto += `    • Lavagens ECO: ${lavagensQtd} unid. (${lavagens})\n`;
+      texto += `    • Películas: ${peliculas}\n`;
     });
   } else {
     texto += `  - Sem dados disponíveis\n`;
