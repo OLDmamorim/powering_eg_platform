@@ -12,7 +12,8 @@ import {
   User, 
   Sparkles,
   HelpCircle,
-  Mic
+  Mic,
+  RefreshCw
 } from "lucide-react";
 import { Streamdown } from "streamdown";
 
@@ -190,8 +191,37 @@ export function ChatbotPortalLoja({ token, language, isVolante = false }: Chatbo
 
   const sugestoes = isVolante ? sugestoesVolante : sugestoesLoja;
 
+  // Limpar conversa
+  const limparConversa = () => {
+    setMessages([]);
+  };
+
   return (
     <div className="h-full flex flex-col overflow-hidden">
+      {/* Header com botão refresh */}
+      <div className="flex items-center justify-between mb-3 flex-shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-primary/10 rounded-lg">
+            <Bot className="h-5 w-5 md:h-6 md:w-6 text-primary" />
+          </div>
+          <div>
+            <h1 className="text-lg md:text-xl font-bold">PoweringEG</h1>
+            <p className="text-xs md:text-sm text-muted-foreground">
+              {language === 'pt' ? 'Conversar com o assistente inteligente' : 'Chat with the intelligent assistant'}
+            </p>
+          </div>
+        </div>
+        <Button 
+          variant="outline" 
+          size="icon"
+          onClick={limparConversa}
+          className="h-8 w-8 md:h-9 md:w-9"
+          title={language === 'pt' ? 'Limpar conversa' : 'Clear conversation'}
+        >
+          <RefreshCw className="h-4 w-4" />
+        </Button>
+      </div>
+      
       {/* Mensagens */}
       <ScrollArea className="flex-1 min-h-0 pr-2 md:pr-4" ref={scrollRef}>
         {messages.length === 0 ? (

@@ -3464,37 +3464,17 @@ export default function PortalLoja() {
         />
       )}
 
-      {/* Tab Chatbot IA */}
+      {/* Tab Chatbot IA - Layout igual ao portal principal */}
       {activeTab === "chatbot" && (
-        <div className="h-[calc(100vh-12rem)] flex flex-col gap-4">
-          {/* Header */}
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-primary/10 rounded-lg">
-              <Bot className="h-6 w-6 text-primary" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold">PoweringEG</h1>
-              <p className="text-sm text-muted-foreground">
-                {language === 'pt' 
-                  ? 'Conversar com o assistente inteligente'
-                  : 'Chat with the intelligent assistant'}
-              </p>
-            </div>
-          </div>
-          
-          {/* Chat Area */}
-          <Card className="flex-1 overflow-hidden">
-            <CardContent className="h-full p-0">
-              <div className="h-full p-4">
-                <ChatbotPortalLoja 
-                  token={token} 
-                  language={language} 
-                  isVolante={!!volanteAuth} 
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        <Card className="h-[calc(100vh-10rem)] overflow-hidden">
+          <CardContent className="h-full p-4">
+            <ChatbotPortalLoja 
+              token={token} 
+              language={language} 
+              isVolante={!!volanteAuth} 
+            />
+          </CardContent>
+        </Card>
       )}
 
       {/* Botão Flutuante de Acesso Rápido às Tarefas - Pulsa quando há NOVAS */}

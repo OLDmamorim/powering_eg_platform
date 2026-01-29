@@ -3796,3 +3796,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 
 ## Funcionalidade v6.9.6 - Esconder Botão Flutuante na Tab Chatbot
 - [x] Esconder botão flutuante de tarefas quando activeTab === "chatbot"
+
+## Funcionalidade v6.9.7 - Layout Chatbot Igual ao Portal Principal
+- [x] Remover header extra (Voltar, PoweringEG, descrição) da tab chatbot
+- [x] Remover Card wrapper extra que está a cortar espaço
+- [x] Fazer chatbot ocupar ecrã inteiro como portal principal
+- [x] Adicionar botão refresh no canto como portal principal
