@@ -3816,3 +3816,6 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Manter botão Voltar na tab chatbot
 - [x] Reduzir/remover caixa branca do header
 - [x] Copiar EXATAMENTE o layout do AssistenteIA.tsx para ChatbotPortalLoja
+
+## Funcionalidade v6.10.1 - Esconder Header Verde na Tab Chatbot
+- [x] Esconder header verde (nome utilizador, Responsável, nome loja) quando activeTab === "chatbot"

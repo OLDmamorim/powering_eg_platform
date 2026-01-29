@@ -883,7 +883,8 @@ export default function PortalLoja() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header Simplificado */}
+      {/* Header Simplificado - escondido na tab chatbot */}
+      {activeTab !== "chatbot" && (
       <header className="bg-emerald-600 text-white sticky top-0 z-10">
         <div className="container mx-auto px-4 py-3">
           {/* Linha superior: Ícone da loja + Botões de idioma e logout */}
@@ -1010,7 +1011,7 @@ export default function PortalLoja() {
           </div>
         </div>
       </header>
-
+      )}
 
       {/* Conteúdo Principal */}
       <div className="container mx-auto px-4 py-6">
