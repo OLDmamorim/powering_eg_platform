@@ -241,13 +241,14 @@ export default function AnaliseFichas() {
                       <Button 
                         onClick={handleEnviarTodos}
                         disabled={enviarEmailsMutation.isPending}
+                        title="Envia relatórios apenas para as suas lojas (lojas atribuídas a si)"
                       >
                         {enviarEmailsMutation.isPending ? (
                           <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
                         ) : (
                           <Send className="mr-2 h-4 w-4" />
                         )}
-                        Enviar Todos
+                        Enviar às Minhas Lojas
                       </Button>
                     </div>
                   </CardHeader>
@@ -458,7 +459,7 @@ export default function AnaliseFichas() {
         
         {/* Dialog: Ver Relatório */}
         <Dialog open={showRelatorioDialog} onOpenChange={setShowRelatorioDialog}>
-          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <Store className="h-5 w-5" />
@@ -523,10 +524,13 @@ export default function AnaliseFichas() {
                 {/* Resumo */}
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-base">Resumo</CardTitle>
+                    <CardTitle className="text-base">Resumo da Análise</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm whitespace-pre-wrap">{selectedRelatorio.resumo}</p>
+                    <div 
+                      className="text-sm leading-relaxed"
+                      dangerouslySetInnerHTML={{ __html: selectedRelatorio.resumo }}
+                    />
                   </CardContent>
                 </Card>
                 
