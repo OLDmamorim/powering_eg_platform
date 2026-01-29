@@ -98,7 +98,9 @@ const STATUS_ALERTA = ['FALTA DOCUMENTOS', 'RECUSADO', 'INCIDÊNCIA'];
 function extrairNumeroLoja(nmdos: string): number | null {
   if (!nmdos) return null;
   const match = nmdos.match(/(\d+)/);
-  return match ? parseInt(match[1]) : null;
+  if (!match) return null;
+  const num = parseInt(match[1], 10);
+  return isNaN(num) ? null : num;
 }
 
 /**
