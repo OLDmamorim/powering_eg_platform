@@ -186,6 +186,7 @@ async function obterContextoPlataformaNacional(): Promise<any> {
   
   const periodosDisponiveis = await db.getPeriodosDisponiveis();
   const resultadosMensais: any[] = [];
+  const vendasComplementaresNacionais: any[] = [];
   const periodosParaCarregar = periodosDisponiveis.slice(0, 3); // Últimos 3 meses
   
   for (const periodo of periodosParaCarregar) {
@@ -194,6 +195,12 @@ async function obterContextoPlataformaNacional(): Promise<any> {
       { id: 1, role: 'admin' } as any
     );
     resultadosMensais.push(...resultadosPeriodo);
+    
+    // Obter vendas complementares de todas as lojas para este período
+    const vendasPeriodo = await db.getVendasComplementares(periodo.mes, periodo.ano);
+    if (vendasPeriodo && vendasPeriodo.length > 0) {
+      vendasComplementaresNacionais.push(...vendasPeriodo.map(v => ({ ...v, periodo: `${periodo.mes}/${periodo.ano}` })));
+    }
   }
   
   return {
@@ -205,7 +212,8 @@ async function obterContextoPlataformaNacional(): Promise<any> {
     alertas,
     todos,
     reunioesLojas,
-    resultadosMensais
+    resultadosMensais,
+    vendasComplementaresNacionais
   };
 }
 
@@ -304,6 +312,74 @@ function formatarContextoParaLoja(contextoNacional: any, dadosLoja: any, lojaNom
   texto += `- Pendentes ativos (nacional): ${contextoNacional.pendentes.filter((p: any) => !p.resolvido).length}\n`;
   texto += `- Relatórios este mês (nacional): ${contextoNacional.relatoriosLivres.length + contextoNacional.relatoriosCompletos.length}\n`;
   texto += `- Alertas ativos (nacional): ${contextoNacional.alertas.filter((a: any) => a.estado === 'pendente').length}\n\n`;
+  
+  // Resultados mensais de TODAS as lojas (para rankings)
+  texto += `🏆 RESULTADOS NACIONAIS (todas as lojas - mês atual ${mesAtual}/${anoAtual}):\n`;
+  const resultadosMesAtual = contextoNacional.resultadosMensais.filter((r: any) => r.mes === mesAtual && r.ano === anoAtual);
+  if (resultadosMesAtual.length > 0) {
+    // Ordenar por total de serviços (descendente)
+    const rankingServicos = [...resultadosMesAtual].sort((a: any, b: any) => (b.totalServicos || 0) - (a.totalServicos || 0));
+    texto += `  Total de lojas com dados: ${resultadosMesAtual.length}\n`;
+    texto += `  Top 5 por serviços:\n`;
+    rankingServicos.slice(0, 5).forEach((r: any, i: number) => {
+      texto += `    ${i + 1}º ${r.lojaNome}: ${r.totalServicos} serviços (obj: ${r.objetivoMensal || 'N/A'})\n`;
+    });
+    texto += `  Bottom 5 por serviços:\n`;
+    rankingServicos.slice(-5).reverse().forEach((r: any, i: number) => {
+      const pos = resultadosMesAtual.length - i;
+      texto += `    ${pos}º ${r.lojaNome}: ${r.totalServicos} serviços (obj: ${r.objetivoMensal || 'N/A'})\n`;
+    });
+    // Encontrar posição da loja atual
+    const lojaAtual = contextoNacional.lojas.find((l: any) => l.nome === lojaNome);
+    if (lojaAtual) {
+      const posicaoLoja = rankingServicos.findIndex((r: any) => r.lojaId === lojaAtual.id) + 1;
+      if (posicaoLoja > 0) {
+        texto += `  📍 Posição da ${lojaNome}: ${posicaoLoja}º lugar de ${resultadosMesAtual.length} lojas\n`;
+      }
+    }
+  } else {
+    texto += `  - Sem dados disponíveis para o mês atual\n`;
+  }
+  texto += `\n`;
+  
+  // Vendas complementares de TODAS as lojas (para rankings)
+  texto += `💰 VENDAS COMPLEMENTARES NACIONAIS (todas as lojas - mês atual ${mesAtual}/${anoAtual}):\n`;
+  const vendasMesAtual = (contextoNacional.vendasComplementaresNacionais || []).filter((v: any) => {
+    const [mes, ano] = v.periodo.split('/').map(Number);
+    return mes === mesAtual && ano === anoAtual;
+  });
+  if (vendasMesAtual.length > 0) {
+    // Ranking por total de vendas complementares
+    const rankingVendas = [...vendasMesAtual].sort((a: any, b: any) => (parseFloat(b.totalVendas) || 0) - (parseFloat(a.totalVendas) || 0));
+    texto += `  Total de lojas com dados: ${vendasMesAtual.length}\n`;
+    texto += `  Top 5 por vendas complementares:\n`;
+    rankingVendas.slice(0, 5).forEach((v: any, i: number) => {
+      const total = v.totalVendas ? `€${parseFloat(v.totalVendas).toFixed(2)}` : '€0';
+      texto += `    ${i + 1}º ${v.lojaNome}: ${total}\n`;
+    });
+    // Ranking por % escovas
+    const rankingEscovas = [...vendasMesAtual].sort((a: any, b: any) => (parseFloat(b.escovasPercent) || 0) - (parseFloat(a.escovasPercent) || 0));
+    texto += `  Top 5 por % escovas vs serviços:\n`;
+    rankingEscovas.slice(0, 5).forEach((v: any, i: number) => {
+      const percent = v.escovasPercent ? `${(parseFloat(v.escovasPercent) * 100).toFixed(1)}%` : '0%';
+      texto += `    ${i + 1}º ${v.lojaNome}: ${percent}\n`;
+    });
+    // Encontrar posição da loja atual
+    const lojaAtual = contextoNacional.lojas.find((l: any) => l.nome === lojaNome);
+    if (lojaAtual) {
+      const posVendas = rankingVendas.findIndex((v: any) => v.lojaId === lojaAtual.id) + 1;
+      const posEscovas = rankingEscovas.findIndex((v: any) => v.lojaId === lojaAtual.id) + 1;
+      if (posVendas > 0) {
+        texto += `  📍 Posição da ${lojaNome} em vendas: ${posVendas}º lugar de ${vendasMesAtual.length} lojas\n`;
+      }
+      if (posEscovas > 0) {
+        texto += `  📍 Posição da ${lojaNome} em % escovas: ${posEscovas}º lugar de ${vendasMesAtual.length} lojas\n`;
+      }
+    }
+  } else {
+    texto += `  - Sem dados disponíveis para o mês atual\n`;
+  }
+  texto += `\n`;
   
   // Dados da loja específica
   texto += `========================================\n`;
