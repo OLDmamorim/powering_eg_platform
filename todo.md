@@ -3854,3 +3854,4 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Fix: Mapeamento Porto Alto case-insensitive na análise de fichas
 - [x] Bug: Gestores não recebem cópia do relatório de análise de fichas enviado para as lojas
 - [x] Feature: Gestores recebem cópia dos relatórios livres e completos enviados para as lojas
+- [x] Feature: Anexar PDF do relatório de análise de fichas no email

@@ -8973,10 +8973,36 @@ IMPORTANTE:
           conteudoRelatorio: relatorio.conteudoRelatorio,
         }, dataAnalise);
         
+        // Gerar PDF do relatório
+        const { gerarPDFAnaliseFichas } = await import('./pdfAnaliseFichas');
+        const pdfBase64 = await gerarPDFAnaliseFichas({
+          nomeLoja: relatorio.nomeLoja,
+          numeroLoja: relatorio.numeroLoja,
+          totalFichas: relatorio.totalFichas,
+          fichasAbertas5Dias: relatorio.fichasAbertas5Dias,
+          fichasAposAgendamento: relatorio.fichasAposAgendamento,
+          fichasStatusAlerta: relatorio.fichasStatusAlerta,
+          fichasSemNotas: relatorio.fichasSemNotas,
+          fichasNotasAntigas: relatorio.fichasNotasAntigas,
+          fichasDevolverVidro: relatorio.fichasDevolverVidro,
+          fichasSemEmailCliente: relatorio.fichasSemEmailCliente,
+          resumo: relatorio.resumo || '',
+          conteudoRelatorio: relatorio.conteudoRelatorio,
+        }, dataAnalise);
+        
+        const nomeLojaSlug = relatorio.nomeLoja.replace(/\s+/g, '_').toLowerCase();
+        const dataSlug = dataFormatada.replace(/\//g, '-');
+        const pdfFilename = `analise_fichas_${nomeLojaSlug}_${dataSlug}.pdf`;
+        
         await sendEmail({
           to: emailDestino,
           subject: `Análise de Fichas de Serviço - ${relatorio.nomeLoja} - ${dataFormatada}`,
           html: htmlEmail,
+          attachments: [{
+            filename: pdfFilename,
+            content: pdfBase64,
+            contentType: 'application/pdf',
+          }],
         });
         
         // Enviar cópia para o gestor
@@ -8996,6 +9022,11 @@ IMPORTANTE:
               to: gestorUser.email,
               subject: `[Cópia] Análise de Fichas de Serviço - ${relatorio.nomeLoja} - ${dataFormatada}`,
               html: htmlCopia,
+              attachments: [{
+                filename: pdfFilename,
+                content: pdfBase64,
+                contentType: 'application/pdf',
+              }],
             });
             console.log(`[Email] Cópia enviada para gestor: ${gestorUser.email}`);
           } catch (e) {
@@ -9066,10 +9097,36 @@ IMPORTANTE:
               conteudoRelatorio: relatorio.conteudoRelatorio,
             }, dataAnalise);
             
+            // Gerar PDF do relatório
+            const { gerarPDFAnaliseFichas } = await import('./pdfAnaliseFichas');
+            const pdfBase64 = await gerarPDFAnaliseFichas({
+              nomeLoja: relatorio.nomeLoja,
+              numeroLoja: relatorio.numeroLoja,
+              totalFichas: relatorio.totalFichas,
+              fichasAbertas5Dias: relatorio.fichasAbertas5Dias,
+              fichasAposAgendamento: relatorio.fichasAposAgendamento,
+              fichasStatusAlerta: relatorio.fichasStatusAlerta,
+              fichasSemNotas: relatorio.fichasSemNotas,
+              fichasNotasAntigas: relatorio.fichasNotasAntigas,
+              fichasDevolverVidro: relatorio.fichasDevolverVidro,
+              fichasSemEmailCliente: relatorio.fichasSemEmailCliente,
+              resumo: relatorio.resumo || '',
+              conteudoRelatorio: relatorio.conteudoRelatorio,
+            }, dataAnalise);
+            
+            const nomeLojaSlug = relatorio.nomeLoja.replace(/\s+/g, '_').toLowerCase();
+            const dataSlug = dataFormatada.replace(/\//g, '-');
+            const pdfFilename = `analise_fichas_${nomeLojaSlug}_${dataSlug}.pdf`;
+            
             await sendEmail({
               to: emailDestino,
               subject: `Análise de Fichas de Serviço - ${relatorio.nomeLoja} - ${dataFormatada}`,
               html: htmlEmail,
+              attachments: [{
+                filename: pdfFilename,
+                content: pdfBase64,
+                contentType: 'application/pdf',
+              }],
             });
             
             await db.marcarRelatorioEnviado(relatorioId);
