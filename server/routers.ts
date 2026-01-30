@@ -8781,25 +8781,39 @@ IMPORTANTE:
     detalhes: gestorProcedure
       .input(z.object({ analiseId: z.number() }))
       .query(async ({ input, ctx }) => {
-        if (!ctx.gestor) {
-          throw new TRPCError({ code: 'FORBIDDEN', message: 'Apenas gestores podem ver análises' });
+        const analise = await db.getAnaliseById(input.analiseId);
+        if (!analise) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Análise não encontrada' });
         }
         
-        const analise = await db.getAnaliseById(input.analiseId);
-        if (!analise || analise.gestorId !== ctx.gestor.id) {
-          throw new TRPCError({ code: 'NOT_FOUND', message: 'Análise não encontrada' });
+        // Admin pode ver todas as análises, gestor apenas as suas
+        if (ctx.user.role !== 'admin') {
+          if (!ctx.gestor) {
+            throw new TRPCError({ code: 'FORBIDDEN', message: 'Apenas gestores podem ver análises' });
+          }
+          if (analise.gestorId !== ctx.gestor.id) {
+            throw new TRPCError({ code: 'NOT_FOUND', message: 'Análise não encontrada' });
+          }
         }
         
         const relatorios = await db.getRelatoriosByAnaliseId(input.analiseId);
         const evolucao = await db.getEvolucaoByAnaliseId(input.analiseId);
         
         // Obter lojas do gestor para marcar quais pertencem a ele
-        const lojasGestor = await db.getLojasByGestorId(ctx.gestor.id);
-        const lojasGestorIds = lojasGestor.map(l => l.id);
+        // Admin vê todas as lojas como pertencentes, gestor vê apenas as suas
+        let lojasGestorIds: number[] = [];
+        if (ctx.user.role === 'admin') {
+          // Admin vê todas as lojas
+          const todasLojas = await db.getAllLojas();
+          lojasGestorIds = todasLojas.map(l => l.id);
+        } else if (ctx.gestor) {
+          const lojasGestor = await db.getLojasByGestorId(ctx.gestor.id);
+          lojasGestorIds = lojasGestor.map(l => l.id);
+        }
         
         const relatoriosComInfo = relatorios.map(r => ({
           ...r,
-          pertenceAoGestor: r.lojaId ? lojasGestorIds.includes(r.lojaId) : false,
+          pertenceAoGestor: r.lojaId ? lojasGestorIds.includes(r.lojaId) : (ctx.user.role === 'admin'),
           evolucao: evolucao.find(e => e.nomeLoja === r.nomeLoja) || null,
         }));
         

@@ -3843,3 +3843,4 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [ ] Bug: Histórico de análise de fichas não mostra detalhes ao clicar
 
 - [x] Fix: Chatbot das lojas deve mostrar apenas pendentes/tarefas da própria loja, não de toda a zona ou nacionais
+- [x] Fix: Histórico de análises de fichas de serviço não abre análises anteriores
