@@ -3841,3 +3841,5 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Bug Email: Frase IMPRIMIR duplicada no email de análise
 - [ ] Bug Email: Fichas a Intervir não aparecem no email (só mostra ...)
 - [ ] Bug: Histórico de análise de fichas não mostra detalhes ao clicar
+
+- [x] Fix: Chatbot das lojas deve mostrar apenas pendentes/tarefas da própria loja, não de toda a zona ou nacionais

@@ -28,35 +28,40 @@ export async function processarPerguntaPortalLoja(
 
 🏪 LOJA ATUAL: ${lojaNome} (ID: ${lojaId})
 
-Tens acesso a TODOS os dados da plataforma (dados nacionais) para análise e comparação, mas as tuas respostas devem focar-se principalmente nos dados da loja ${lojaNome}.
+=== REGRA FUNDAMENTAL ===
+⚠️ ATENÇÃO: Quando perguntam sobre PENDENTES, TAREFAS, ALERTAS ou qualquer informação operacional, APENAS podes responder com dados da loja ${lojaNome}.
+NUNCA reveles informação de pendentes, tarefas ou alertas de outras lojas, zonas ou dados nacionais.
+Se perguntarem "quantos pendentes tem a zona X" ou "quantos pendentes há no país", responde APENAS com os pendentes da loja ${lojaNome}.
 
 === DADOS QUE PODES CONSULTAR ===
-📊 DADOS NACIONAIS (para comparação):
+📊 DADOS NACIONAIS (APENAS para comparação de RESULTADOS e RANKINGS):
 - Total de lojas na rede
-- Estatísticas gerais de todas as lojas
-- Rankings e comparações entre lojas
-- Médias nacionais de performance
+- Rankings de serviços, reparações, vendas complementares
+- Médias nacionais de performance (serviços, taxas de reparação, escovas)
+- Posição da loja ${lojaNome} nos rankings
 
-📋 DADOS DA LOJA ${lojaNome}:
-- Pendentes ativos e resolvidos
+📋 DADOS DA LOJA ${lojaNome} (informação completa):
+- Pendentes ativos e resolvidos (APENAS desta loja)
+- Tarefas To-Do (APENAS desta loja)
+- Alertas ativos (APENAS desta loja)
 - Relatórios (livres e completos)
 - Reuniões realizadas
 - Resultados mensais e vendas complementares
-- Alertas ativos
-- Tarefas To-Do
 - Histórico de visitas de gestores
 
 === COMO RESPONDER ===
-- Quando perguntam sobre "a loja", "aqui", "nós", "nossos resultados" → Foca nos dados da loja ${lojaNome}
-- Quando perguntam "como estamos comparados com outras lojas" → Usa dados nacionais para comparação
-- Quando perguntam "qual a melhor loja" → Usa dados nacionais
-- Sempre que relevante, compara a performance da loja com a média nacional
+- Quando perguntam sobre "pendentes", "tarefas", "alertas" → APENAS dados da loja ${lojaNome}
+- Quando perguntam sobre "a loja", "aqui", "nós", "nossos resultados" → Dados da loja ${lojaNome}
+- Quando perguntam "como estamos comparados com outras lojas" → Usa rankings de RESULTADOS (serviços, vendas), NÃO pendentes
+- Quando perguntam "qual a melhor loja" → Usa rankings de RESULTADOS (serviços, vendas)
+- Quando perguntam sobre "zona", "região", "nacional" em relação a pendentes/tarefas → Responde APENAS com dados da loja ${lojaNome}
 
 === EXEMPLOS ===
 - "Quantos pendentes temos?" → Responder com pendentes da loja ${lojaNome}
+- "Quantos pendentes tem a zona Minho?" → Responder APENAS com pendentes da loja ${lojaNome} (não tens acesso a outras lojas)
 - "Como está a nossa performance?" → Analisar resultados da loja ${lojaNome}
-- "Estamos acima ou abaixo da média?" → Comparar loja ${lojaNome} com média nacional
-- "Qual a loja com mais vendas?" → Usar dados nacionais para responder
+- "Estamos acima ou abaixo da média?" → Comparar RESULTADOS (serviços, vendas) da loja ${lojaNome} com média nacional
+- "Qual a loja com mais vendas?" → Usar ranking de vendas (dados nacionais de RESULTADOS)
 
 === DATA ATUAL ===
 A data atual está indicada no contexto. Quando perguntam sobre "este mês", "mês atual", "agora", "hoje" - consulta a data atual fornecida no contexto e responde com os dados do mês corrente. NÃO perguntes qual é o mês - já sabes!
@@ -311,13 +316,12 @@ function formatarContextoParaLoja(contextoNacional: any, dadosLoja: any, lojaNom
   texto += `📊 CONTEXTO DA PLATAFORMA\n`;
   texto += `========================================\n\n`;
   
-  // Dados nacionais resumidos
-  texto += `🌍 DADOS NACIONAIS:\n`;
+  // Dados nacionais resumidos (APENAS resultados e rankings, SEM pendentes/tarefas/alertas)
+  texto += `🌍 DADOS NACIONAIS (apenas para rankings de resultados):\n`;
   texto += `- Total de lojas: ${contextoNacional.lojas.length}\n`;
   texto += `- Total de gestores: ${contextoNacional.gestores.length}\n`;
-  texto += `- Pendentes ativos (nacional): ${contextoNacional.pendentes.filter((p: any) => !p.resolvido).length}\n`;
-  texto += `- Relatórios este mês (nacional): ${contextoNacional.relatoriosLivres.length + contextoNacional.relatoriosCompletos.length}\n`;
-  texto += `- Alertas ativos (nacional): ${contextoNacional.alertas.filter((a: any) => a.estado === 'pendente').length}\n\n`;
+  // NÃO incluir pendentes, alertas ou tarefas nacionais - a loja só deve ver os seus próprios
+  texto += `\n`;
   
   // Resultados mensais de TODAS as lojas (para rankings)
   // RESULTADOS MENSAIS COMPLETOS DE TODAS AS LOJAS - TODOS OS CAMPOS
