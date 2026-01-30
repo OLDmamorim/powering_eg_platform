@@ -786,21 +786,12 @@ export function gerarHTMLEmailAnalise(relatorio: {
       <td align="center" style="padding: 20px;">
         <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="background: #ffffff; border-radius: 8px; overflow: hidden;">
           
-          <!-- Cabeçalho com Logo -->
+          <!-- Cabeçalho com Logo em Texto -->
           <tr>
             <td align="center" style="padding: 30px 30px 20px 30px; border-bottom: 1px solid #e5e7eb;">
-              <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663088836799/YrkmGCRDVqYgFnZO.png" alt="ExpressGlass" width="180" style="display: block; width: 180px; max-width: 180px; height: auto;" />
-              <h1 style="color: #1f2937; margin: 15px 0 8px 0; font-size: 20px; font-weight: 500;">Análise de Fichas de Serviço</h1>
+              <div style="font-size: 28px; font-weight: 600; color: #1a365d; margin-bottom: 15px;">Express<span style="color: #10b981;">Glass</span></div>
+              <h1 style="color: #1f2937; margin: 0 0 8px 0; font-size: 20px; font-weight: 500;">Análise de Fichas de Serviço</h1>
               <p style="color: #6b7280; margin: 0; font-size: 13px; font-weight: 400;">${dataFormatada}</p>
-            </td>
-          </tr>
-          
-          <!-- Botão Imprimir -->
-          <tr class="no-print">
-            <td align="center" style="padding: 20px 30px;">
-              <a href="javascript:window.print()" style="display: inline-block; background: #1a365d; color: #ffffff; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-size: 14px; font-weight: 500;">
-                🖨️ Imprimir Relatório
-              </a>
             </td>
           </tr>
           
