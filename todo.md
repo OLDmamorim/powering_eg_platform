@@ -3844,3 +3844,4 @@ NOTA: Sistema de email requer configuração externa no deployment
 
 - [x] Fix: Chatbot das lojas deve mostrar apenas pendentes/tarefas da própria loja, não de toda a zona ou nacionais
 - [x] Fix: Histórico de análises de fichas de serviço não abre análises anteriores
+- [x] Associar loja "Paredes II" ao nome "Mycarcenter" na análise de fichas de serviço

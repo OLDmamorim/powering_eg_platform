@@ -1,0 +1,22 @@
+{
+  "query": "SELECT id, nome FROM lojas WHERE nome LIKE '%Paredes%' OR nome LIKE '%Mycarcenter%' OR nome LIKE '%mycar%' OR nome LIKE '%car%center%';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT id, nome FROM lojas WHERE nome LIKE '%Paredes%' OR nome LIKE '%Mycarcenter%' OR nome LIKE '%mycar%' OR nome LIKE '%car%center%';",
+  "rows": [
+    {
+      "id": "60006",
+      "nome": "Paredes"
+    },
+    {
+      "id": "180036",
+      "nome": "Mycarcenter"
+    },
+    {
+      "id": "180038",
+      "nome": "Paredes sm"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tnome\n60006\tParedes\n180036\tMycarcenter\n180038\tParedes sm\n",
+  "stderr": "",
+  "execution_time_ms": 501
+}

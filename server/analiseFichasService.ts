@@ -91,6 +91,13 @@ const STATUS_EXCLUIR = ['Serviço Pronto', 'REVISAR'];
 // Status de alerta
 const STATUS_ALERTA = ['FALTA DOCUMENTOS', 'RECUSADO', 'INCIDÊNCIA'];
 
+// Mapeamento de nomes especiais de lojas (nome no Excel -> nome no sistema)
+const MAPEAMENTO_NOMES_LOJAS: Record<string, string> = {
+  'Paredes II': 'Mycarcenter',
+  'paredes ii': 'Mycarcenter',
+  'PAREDES II': 'Mycarcenter',
+};
+
 // Mapeamento de cidades conhecidas para normalização
 const CIDADES_CONHECIDAS = [
   'Abrantes', 'Albufeira', 'Almada', 'Amadora', 'Aveiro', 'Barcelos', 'Braga', 'Bragança',
@@ -148,6 +155,12 @@ function extrairCidade(nmdos: string, nomeLoja: string): string | null {
  * - "Ficha Servico 7" + "Guimarães" -> "Guimarães"
  */
 export function normalizarNomeLoja(nmdos: string, nomeLoja: string): string {
+  // Verificar primeiro se há mapeamento especial para este nome de loja
+  const nomeMapeado = MAPEAMENTO_NOMES_LOJAS[nomeLoja] || MAPEAMENTO_NOMES_LOJAS[nomeLoja.trim()];
+  if (nomeMapeado) {
+    return nomeMapeado;
+  }
+  
   const isSM = isServicoMovel(nmdos, nomeLoja);
   const cidade = extrairCidade(nmdos, nomeLoja);
   
