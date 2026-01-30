@@ -409,6 +409,7 @@ export default function AnaliseFichas() {
           
           {/* Tab: Histórico */}
           <TabsContent value="historico" className="space-y-4">
+            {/* Lista de Análises */}
             {analises && analises.length > 0 ? (
               <div className="space-y-2">
                 {analises.map((analise) => (
@@ -453,6 +454,163 @@ export default function AnaliseFichas() {
                   </p>
                 </CardContent>
               </Card>
+            )}
+            
+            {/* Detalhes da Análise Selecionada no Histórico */}
+            {selectedAnalise && detalhesAnalise && (
+              <div className="mt-6 space-y-4">
+                <Card>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle className="flex items-center gap-2">
+                          <FileSpreadsheet className="h-5 w-5" />
+                          {detalhesAnalise.analise.nomeArquivo}
+                        </CardTitle>
+                        <CardDescription>
+                          Analisado em {new Date(detalhesAnalise.analise.dataUpload).toLocaleString('pt-PT')}
+                        </CardDescription>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid gap-4 md:grid-cols-4">
+                      <div className="rounded-lg border p-3">
+                        <div className="text-2xl font-bold">{detalhesAnalise.analise.totalFichas}</div>
+                        <div className="text-sm text-muted-foreground">Total de Fichas</div>
+                      </div>
+                      <div className="rounded-lg border p-3">
+                        <div className="text-2xl font-bold">{detalhesAnalise.analise.totalLojas}</div>
+                        <div className="text-sm text-muted-foreground">Lojas Analisadas</div>
+                      </div>
+                      <div className="rounded-lg border p-3">
+                        <div className="text-2xl font-bold text-green-600">
+                          {detalhesAnalise.relatorios.filter(r => r.pertenceAoGestor).length}
+                        </div>
+                        <div className="text-sm text-muted-foreground">Suas Lojas</div>
+                      </div>
+                      <div className="rounded-lg border p-3">
+                        <div className="text-2xl font-bold text-blue-600">
+                          {detalhesAnalise.relatorios.filter(r => r.emailEnviado).length}
+                        </div>
+                        <div className="text-sm text-muted-foreground">Emails Enviados</div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                {/* Lista de Relatórios do Histórico */}
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {detalhesAnalise.relatorios
+                    .filter(r => r.pertenceAoGestor)
+                    .map((relatorio) => (
+                      <Card 
+                        key={relatorio.id} 
+                        className={`cursor-pointer transition-shadow hover:shadow-md ${
+                          relatorio.pertenceAoGestor ? 'border-primary/20' : 'opacity-60'
+                        }`}
+                        onClick={() => {
+                          setSelectedRelatorio(relatorio);
+                          setShowRelatorioDialog(true);
+                        }}
+                      >
+                        <CardHeader className="pb-2">
+                          <div className="flex items-center justify-between">
+                            <CardTitle className="text-base flex items-center gap-2">
+                              <Store className="h-4 w-4" />
+                              {relatorio.nomeLoja}
+                              {relatorio.numeroLoja && (
+                                <Badge variant="outline" className="ml-1">
+                                  #{relatorio.numeroLoja}
+                                </Badge>
+                              )}
+                            </CardTitle>
+                            {getEvolucaoBadge(relatorio.evolucao)}
+                          </div>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-2 text-sm">
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Total Fichas:</span>
+                              <span className="font-medium">{relatorio.totalFichas}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground flex items-center gap-1">
+                                <Clock className="h-3 w-3" /> Abertas +5 dias:
+                              </span>
+                              <span className={`font-medium ${relatorio.fichasAbertas5Dias > 0 ? 'text-red-500' : 'text-green-500'}`}>
+                                {relatorio.fichasAbertas5Dias}
+                              </span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground flex items-center gap-1">
+                                <AlertTriangle className="h-3 w-3" /> Status Alerta:
+                              </span>
+                              <span className={`font-medium ${relatorio.fichasStatusAlerta > 0 ? 'text-orange-500' : 'text-green-500'}`}>
+                                {relatorio.fichasStatusAlerta}
+                              </span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground flex items-center gap-1">
+                                <FileText className="h-3 w-3" /> Sem Notas:
+                              </span>
+                              <span className={`font-medium ${relatorio.fichasSemNotas > 0 ? 'text-yellow-500' : 'text-green-500'}`}>
+                                {relatorio.fichasSemNotas}
+                              </span>
+                            </div>
+                          </div>
+                          
+                          <div className="mt-4 flex items-center justify-between">
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                              {relatorio.emailEnviado ? (
+                                <>
+                                  <CheckCircle className="h-3 w-3 text-green-500" />
+                                  Email enviado
+                                </>
+                              ) : (
+                                <>
+                                  <Mail className="h-3 w-3" />
+                                  Pendente
+                                </>
+                              )}
+                            </div>
+                            <Button variant="ghost" size="sm">
+                              <Eye className="mr-1 h-3 w-3" />
+                              Ver
+                              <ChevronRight className="ml-1 h-3 w-3" />
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                </div>
+                
+                {/* Lojas não atribuídas ao gestor (histórico) */}
+                {detalhesAnalise.relatorios.filter(r => !r.pertenceAoGestor).length > 0 && (
+                  <Card className="border-dashed">
+                    <CardHeader>
+                      <CardTitle className="text-base">Outras Lojas no Ficheiro</CardTitle>
+                      <CardDescription>
+                        Lojas que não estão atribuídas a si
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex flex-wrap gap-2">
+                        {detalhesAnalise.relatorios
+                          .filter(r => !r.pertenceAoGestor)
+                          .map((r) => (
+                            <Badge key={r.id} variant="outline" className="cursor-pointer" onClick={() => {
+                              setSelectedRelatorio(r);
+                              setShowRelatorioDialog(true);
+                            }}>
+                              {r.nomeLoja} ({r.totalFichas})
+                            </Badge>
+                          ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
             )}
           </TabsContent>
         </Tabs>

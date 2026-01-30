@@ -3837,3 +3837,4 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [ ] Comparação com análise anterior (evolução)
 - [ ] Envio de relatórios por email às lojas
 - [ ] Histórico de análises por gestor
+- [ ] Bug: Não dá para abrir os relatórios que estão no histórico de análise de fichas
