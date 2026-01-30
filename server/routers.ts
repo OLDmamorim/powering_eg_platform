@@ -8874,7 +8874,7 @@ IMPORTANTE:
           fichasNotasAntigas: relatorio.fichasNotasAntigas,
           fichasDevolverVidro: relatorio.fichasDevolverVidro,
           fichasSemEmailCliente: relatorio.fichasSemEmailCliente,
-          resumo: relatorio.resumo,
+          resumo: relatorio.resumo || '',
           conteudoRelatorio: relatorio.conteudoRelatorio,
         }, dataAnalise);
         
@@ -8943,7 +8943,7 @@ IMPORTANTE:
               fichasNotasAntigas: relatorio.fichasNotasAntigas,
               fichasDevolverVidro: relatorio.fichasDevolverVidro,
               fichasSemEmailCliente: relatorio.fichasSemEmailCliente,
-              resumo: relatorio.resumo,
+              resumo: relatorio.resumo || '',
               conteudoRelatorio: relatorio.conteudoRelatorio,
             }, dataAnalise);
             
