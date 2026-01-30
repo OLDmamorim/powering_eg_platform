@@ -629,3 +629,136 @@ export function processarAnalise(buffer: Buffer, nomeArquivo: string): Resultado
   const fichas = processarFicheiroExcel(buffer);
   return analisarFichas(fichas, nomeArquivo);
 }
+
+
+/**
+ * Gera o HTML completo para email de análise de fichas
+ * Inclui cabeçalho, instrução para imprimir, resumo, métricas e fichas a intervir
+ */
+export function gerarHTMLEmailAnalise(relatorio: {
+  nomeLoja: string;
+  numeroLoja: number | null;
+  totalFichas: number;
+  fichasAbertas5Dias: number;
+  fichasAposAgendamento: number;
+  fichasStatusAlerta: number;
+  fichasSemNotas: number;
+  fichasNotasAntigas: number;
+  fichasDevolverVidro: number;
+  fichasSemEmailCliente: number;
+  resumo: string;
+  conteudoRelatorio: string;
+}, dataAnalise: Date): string {
+  const dataFormatada = dataAnalise.toLocaleDateString('pt-PT', {
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
+  });
+  
+  const numeroLojaTexto = relatorio.numeroLoja ? ` (#${relatorio.numeroLoja})` : '';
+  
+  return `
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Análise de Fichas de Serviço - ${relatorio.nomeLoja}</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f5f5f5; }
+    .container { max-width: 800px; margin: 0 auto; background: white; }
+    .header { background: linear-gradient(135deg, #1a365d 0%, #2c5282 100%); padding: 30px; text-align: center; }
+    .header h1 { color: white; margin: 0 0 10px 0; font-size: 24px; }
+    .header p { color: #e2e8f0; margin: 0; font-size: 14px; }
+    .logo { font-size: 28px; font-weight: bold; color: white; margin-bottom: 15px; }
+    .logo span { color: #48bb78; }
+    .print-notice { background: #fef3c7; border: 2px solid #f59e0b; padding: 15px; margin: 20px; border-radius: 8px; text-align: center; }
+    .print-notice p { color: #92400e; font-weight: bold; margin: 0; font-size: 14px; }
+    .loja-title { background: #f8fafc; padding: 20px; border-bottom: 3px solid #1a365d; margin: 0; }
+    .loja-title h2 { color: #1a365d; margin: 0; font-size: 22px; }
+    .loja-title p { color: #64748b; margin: 5px 0 0 0; font-size: 14px; }
+    .metrics { display: flex; justify-content: space-around; padding: 20px; background: #f8fafc; flex-wrap: wrap; }
+    .metric { text-align: center; padding: 15px; min-width: 100px; }
+    .metric-value { font-size: 32px; font-weight: bold; }
+    .metric-label { font-size: 12px; color: #64748b; margin-top: 5px; }
+    .metric-green { color: #16a34a; }
+    .metric-red { color: #dc2626; }
+    .metric-orange { color: #ea580c; }
+    .metric-yellow { color: #ca8a04; }
+    .resumo { padding: 20px; border-bottom: 1px solid #e2e8f0; }
+    .resumo h3 { color: #1a365d; margin: 0 0 15px 0; font-size: 18px; border-bottom: 2px solid #1a365d; padding-bottom: 10px; }
+    .fichas { padding: 20px; }
+    .fichas h3 { color: #1a365d; margin: 0 0 15px 0; font-size: 18px; border-bottom: 2px solid #1a365d; padding-bottom: 10px; }
+    .footer { background: #1a365d; color: white; padding: 20px; text-align: center; font-size: 12px; }
+    .footer a { color: #48bb78; text-decoration: none; }
+    @media print {
+      body { background: white; }
+      .container { box-shadow: none; }
+      .print-notice { background: #fff9db !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Cabeçalho -->
+    <div class="header">
+      <div class="logo">Express<span>Glass</span></div>
+      <h1>Análise de Fichas de Serviço</h1>
+      <p>${dataFormatada}</p>
+    </div>
+    
+    <!-- Aviso para Imprimir -->
+    <div class="print-notice">
+      <p>⚠️ IMPRIMIR ESTE RELATÓRIO E ATUAR EM CONFORMIDADE NOS PROCESSOS IDENTIFICADOS</p>
+    </div>
+    
+    <!-- Título da Loja -->
+    <div class="loja-title">
+      <h2>${relatorio.nomeLoja}${numeroLojaTexto}</h2>
+      <p>Relatório de Monitorização de Fichas de Serviço</p>
+    </div>
+    
+    <!-- Métricas -->
+    <div class="metrics">
+      <div class="metric">
+        <div class="metric-value">${relatorio.totalFichas}</div>
+        <div class="metric-label">Total Fichas</div>
+      </div>
+      <div class="metric">
+        <div class="metric-value ${relatorio.fichasAbertas5Dias > 0 ? 'metric-red' : 'metric-green'}">${relatorio.fichasAbertas5Dias}</div>
+        <div class="metric-label">Abertas +5 dias</div>
+      </div>
+      <div class="metric">
+        <div class="metric-value ${relatorio.fichasStatusAlerta > 0 ? 'metric-orange' : 'metric-green'}">${relatorio.fichasStatusAlerta}</div>
+        <div class="metric-label">Status Alerta</div>
+      </div>
+      <div class="metric">
+        <div class="metric-value ${relatorio.fichasSemNotas > 0 ? 'metric-yellow' : 'metric-green'}">${relatorio.fichasSemNotas}</div>
+        <div class="metric-label">Sem Notas</div>
+      </div>
+    </div>
+    
+    <!-- Resumo da Análise -->
+    <div class="resumo">
+      <h3>Resumo da Análise</h3>
+      <div style="line-height: 1.6;">
+        ${relatorio.resumo}
+      </div>
+    </div>
+    
+    <!-- Fichas a Intervir -->
+    <div class="fichas">
+      <h3>Fichas a Intervir (Detalhe)</h3>
+      ${relatorio.conteudoRelatorio}
+    </div>
+    
+    <!-- Rodapé -->
+    <div class="footer">
+      <p>PoweringEG Platform 2.0 - Sistema de Gestão ExpressGlass</p>
+      <p>Este email foi gerado automaticamente. Por favor, não responda a este email.</p>
+    </div>
+  </div>
+</body>
+</html>
+  `.trim();
+}

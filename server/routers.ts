@@ -16,7 +16,7 @@ import { notifyOwner } from "./_core/notification";
 import { processarPergunta, getSugestoesPergunta } from "./chatbotService";
 import { vapidPublicKey, notificarGestorNovaTarefa, notificarLojaNovaTarefa, notificarGestorRespostaLoja, notificarLojaRespostaGestor } from "./pushService";
 import { notificarNovoPedidoApoio, notificarPedidoAnulado, notificarPedidoEditado, notificarAgendamentoCriado } from "./telegramService";
-import { processarAnalise, ResultadoAnalise, RelatorioLoja } from "./analiseFichasService";
+import { processarAnalise, ResultadoAnalise, RelatorioLoja, gerarHTMLEmailAnalise } from "./analiseFichasService";
 
 // Função auxiliar para gerar alerta de processos repetidos
 function gerarAlertaProcessosRepetidos(processosRepetidos: Array<{ obrano: number; matricula: string; categoria: string; diasAberto: number }>): string {
@@ -8859,12 +8859,29 @@ IMPORTANTE:
           throw new TRPCError({ code: 'BAD_REQUEST', message: 'Email de destino não especificado e loja não tem email configurado' });
         }
         
-        // Enviar email
-        const dataAnalise = new Date(analise.dataUpload).toLocaleDateString('pt-PT');
+        // Gerar HTML completo do email com cabeçalho, resumo e métricas
+        const dataAnalise = new Date(analise.dataUpload);
+        const dataFormatada = dataAnalise.toLocaleDateString('pt-PT');
+        
+        const htmlEmail = gerarHTMLEmailAnalise({
+          nomeLoja: relatorio.nomeLoja,
+          numeroLoja: relatorio.numeroLoja,
+          totalFichas: relatorio.totalFichas,
+          fichasAbertas5Dias: relatorio.fichasAbertas5Dias,
+          fichasAposAgendamento: relatorio.fichasAposAgendamento,
+          fichasStatusAlerta: relatorio.fichasStatusAlerta,
+          fichasSemNotas: relatorio.fichasSemNotas,
+          fichasNotasAntigas: relatorio.fichasNotasAntigas,
+          fichasDevolverVidro: relatorio.fichasDevolverVidro,
+          fichasSemEmailCliente: relatorio.fichasSemEmailCliente,
+          resumo: relatorio.resumo,
+          conteudoRelatorio: relatorio.conteudoRelatorio,
+        }, dataAnalise);
+        
         await sendEmail({
           to: emailDestino,
-          subject: `Análise de Fichas de Serviço - ${relatorio.nomeLoja} - ${dataAnalise}`,
-          html: relatorio.conteudoRelatorio,
+          subject: `Análise de Fichas de Serviço - ${relatorio.nomeLoja} - ${dataFormatada}`,
+          html: htmlEmail,
         });
         
         // Marcar como enviado
@@ -8911,11 +8928,29 @@ IMPORTANTE:
               continue;
             }
             
-            const dataAnalise = new Date(analise.dataUpload).toLocaleDateString('pt-PT');
+            // Gerar HTML completo do email
+            const dataAnalise = new Date(analise.dataUpload);
+            const dataFormatada = dataAnalise.toLocaleDateString('pt-PT');
+            
+            const htmlEmail = gerarHTMLEmailAnalise({
+              nomeLoja: relatorio.nomeLoja,
+              numeroLoja: relatorio.numeroLoja,
+              totalFichas: relatorio.totalFichas,
+              fichasAbertas5Dias: relatorio.fichasAbertas5Dias,
+              fichasAposAgendamento: relatorio.fichasAposAgendamento,
+              fichasStatusAlerta: relatorio.fichasStatusAlerta,
+              fichasSemNotas: relatorio.fichasSemNotas,
+              fichasNotasAntigas: relatorio.fichasNotasAntigas,
+              fichasDevolverVidro: relatorio.fichasDevolverVidro,
+              fichasSemEmailCliente: relatorio.fichasSemEmailCliente,
+              resumo: relatorio.resumo,
+              conteudoRelatorio: relatorio.conteudoRelatorio,
+            }, dataAnalise);
+            
             await sendEmail({
               to: emailDestino,
-              subject: `Análise de Fichas de Serviço - ${relatorio.nomeLoja} - ${dataAnalise}`,
-              html: relatorio.conteudoRelatorio,
+              subject: `Análise de Fichas de Serviço - ${relatorio.nomeLoja} - ${dataFormatada}`,
+              html: htmlEmail,
             });
             
             await db.marcarRelatorioEnviado(relatorioId);
