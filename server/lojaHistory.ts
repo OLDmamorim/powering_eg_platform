@@ -238,7 +238,7 @@ async function generateLojaHistoryInterno(
     // Buscar pendentes da loja
     const todosPendentes = await db.getPendentesByLojaId(lojaId);
     const pendentes = todosPendentes.filter(p => {
-      const dataCriacao = new Date(p.createdAt);
+      const dataCriacao = new Date(p.dataCriacao);
       return dataCriacao >= dataInicio && dataCriacao <= dataFim;
     });
     
@@ -388,7 +388,7 @@ async function generateLojaHistoryInterno(
       pendentes: pendentes.map((p: any) => ({
         descricao: p.descricao,
         resolvido: p.resolvido,
-        dataCriacao: p.createdAt,
+        dataCriacao: p.dataCriacao,
         dataResolucao: p.resolvedAt,
       })),
       ocorrencias: ocorrencias.map((o: any) => ({
@@ -604,7 +604,7 @@ Gera uma análise completa incluindo evolução, problemas, pontos fortes, alert
         // Agrupar pendentes por mês
         const porMes = new Map<string, { criados: number; resolvidos: number }>();
         pendentes.forEach((p: any) => {
-          const data = new Date(p.createdAt);
+          const data = new Date(p.dataCriacao);
           const chave = `${NOMES_MESES_CURTOS[data.getMonth()]} ${data.getFullYear()}`;
           const atual = porMes.get(chave) || { criados: 0, resolvidos: 0 };
           atual.criados++;
@@ -816,7 +816,7 @@ async function buscarDadosPeriodo(lojaId: number, dataInicio: Date, dataFim: Dat
   // Buscar pendentes
   const todosPendentes = await db.getPendentesByLojaId(lojaId);
   const pendentes = todosPendentes.filter(p => {
-    const dataCriacao = new Date(p.createdAt);
+    const dataCriacao = new Date(p.dataCriacao);
     return dataCriacao >= dataInicio && dataCriacao <= dataFim;
   });
 

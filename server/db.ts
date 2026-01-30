@@ -945,11 +945,12 @@ export async function getAllPendentes(): Promise<Array<Pendente & { loja: Loja }
   }));
 }
 
-export async function getPendentesByLojaId(lojaId: number): Promise<Array<Pendente & { loja: Loja }>> {
+export async function getPendentesByLojaId(lojaId: number): Promise<Array<{ id: number; lojaId: number; descricao: string; resolvido: boolean; dataCriacao: Date; loja: Loja }>> {
   const db = await getDb();
   if (!db) return [];
   
-  const result = await db
+  // Buscar pendentes da tabela antiga
+  const resultAntigos = await db
     .select({
       pendente: pendentes,
       loja: lojas
@@ -962,10 +963,46 @@ export async function getPendentesByLojaId(lojaId: number): Promise<Array<Penden
     ))
     .orderBy(desc(pendentes.createdAt));
   
-  return result.map(r => ({
-    ...r.pendente,
+  // Buscar pendentes da tabela nova (pendentesLoja)
+  const resultNovos = await db
+    .select({
+      pendenteLoja: pendentesLoja,
+      loja: lojas
+    })
+    .from(pendentesLoja)
+    .innerJoin(lojas, eq(pendentesLoja.lojaId, lojas.id))
+    .where(and(
+      eq(pendentesLoja.lojaId, lojaId),
+      or(
+        eq(pendentesLoja.estado, 'pendente'),
+        eq(pendentesLoja.estado, 'em_progresso')
+      )
+    ))
+    .orderBy(desc(pendentesLoja.createdAt));
+  
+  // Combinar resultados
+  const pendentesAntigos = resultAntigos.map(r => ({
+    id: r.pendente.id,
+    lojaId: r.pendente.lojaId,
+    descricao: r.pendente.descricao,
+    resolvido: r.pendente.resolvido,
+    dataCriacao: r.pendente.createdAt,
     loja: r.loja
   }));
+  
+  const pendentesNovos = resultNovos.map(r => ({
+    id: r.pendenteLoja.id + 1000000, // Offset para evitar conflitos de ID
+    lojaId: r.pendenteLoja.lojaId,
+    descricao: r.pendenteLoja.descricao,
+    resolvido: r.pendenteLoja.estado === 'resolvido',
+    dataCriacao: r.pendenteLoja.createdAt,
+    loja: r.loja
+  }));
+  
+  // Ordenar por data de criação (mais recente primeiro)
+  return [...pendentesNovos, ...pendentesAntigos].sort((a, b) => 
+    new Date(b.dataCriacao).getTime() - new Date(a.dataCriacao).getTime()
+  );
 }
 
 export async function getPendenteById(id: number): Promise<Pendente | undefined> {

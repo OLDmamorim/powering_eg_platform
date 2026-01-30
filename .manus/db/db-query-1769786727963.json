@@ -1,0 +1,24 @@
+{
+  "query": "SELECT * FROM pendentes_loja ORDER BY id DESC LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT * FROM pendentes_loja ORDER BY id DESC LIMIT 5;",
+  "rows": [
+    {
+      "id": "1",
+      "lojaId": "180010",
+      "criadoPor": "NULL",
+      "descricao": "Problema impressora _ aberto ticket INC-31105",
+      "prioridade": "media",
+      "estado": "pendente",
+      "comentarioLoja": "aberto ticket INC-31105",
+      "dataResolucao": "NULL",
+      "resolvidoNaReuniaoId": "NULL",
+      "createdAt": "2026-01-30 15:10:02",
+      "updatedAt": "2026-01-30 15:10:50",
+      "criadoPelaLoja": "1"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tlojaId\tcriadoPor\tdescricao\tprioridade\testado\tcomentarioLoja\tdataResolucao\tresolvidoNaReuniaoId\tcreatedAt\tupdatedAt\tcriadoPelaLoja\n1\t180010\tNULL\tProblema impressora _ aberto ticket INC-31105\tmedia\tpendente\taberto ticket INC-31105\tNULL\tNULL\t2026-01-30 15:10:02\t2026-01-30 15:10:50\t1\n",
+  "stderr": "",
+  "execution_time_ms": 576
+}
