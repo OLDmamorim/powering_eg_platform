@@ -92,10 +92,11 @@ const STATUS_EXCLUIR = ['Serviço Pronto', 'REVISAR'];
 const STATUS_ALERTA = ['FALTA DOCUMENTOS', 'RECUSADO', 'INCIDÊNCIA'];
 
 // Mapeamento de nomes especiais de lojas (nome no Excel -> nome no sistema)
+// As chaves devem estar em minúsculas para comparação case-insensitive
 const MAPEAMENTO_NOMES_LOJAS: Record<string, string> = {
-  'Paredes II': 'Mycarcenter',
   'paredes ii': 'Mycarcenter',
-  'PAREDES II': 'Mycarcenter',
+  'porto alto': 'Porto alto',
+  'portoalto': 'Porto alto',
 };
 
 // Mapeamento de cidades conhecidas para normalização
@@ -155,8 +156,9 @@ function extrairCidade(nmdos: string, nomeLoja: string): string | null {
  * - "Ficha Servico 7" + "Guimarães" -> "Guimarães"
  */
 export function normalizarNomeLoja(nmdos: string, nomeLoja: string): string {
-  // Verificar primeiro se há mapeamento especial para este nome de loja
-  const nomeMapeado = MAPEAMENTO_NOMES_LOJAS[nomeLoja] || MAPEAMENTO_NOMES_LOJAS[nomeLoja.trim()];
+  // Verificar primeiro se há mapeamento especial para este nome de loja (case-insensitive)
+  const nomeLower = nomeLoja.toLowerCase().trim();
+  const nomeMapeado = MAPEAMENTO_NOMES_LOJAS[nomeLower];
   if (nomeMapeado) {
     return nomeMapeado;
   }
