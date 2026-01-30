@@ -8646,6 +8646,9 @@ IMPORTANTE:
             }
           }
           
+          // Contador de processos repetidos (inicializado fora do try-catch)
+          let numProcessosRepetidos = 0;
+          
           // Guardar fichas identificadas e comparar com análise anterior
           // Envolvido em try-catch para não bloquear a análise se houver erro
           try {
@@ -8684,6 +8687,8 @@ IMPORTANTE:
                   }
                 }
                 
+                numProcessosRepetidos = processosRepetidos.length;
+                
                 // Se houver processos repetidos, atualizar o resumo com alerta
                 if (processosRepetidos.length > 0) {
                   const alertaRepetidos = gerarAlertaProcessosRepetidos(processosRepetidos);
@@ -8704,7 +8709,7 @@ IMPORTANTE:
           relatoriosGuardados.push({
             ...relatorioGuardado,
             pertenceAoGestor: !!lojaDoGestor,
-            processosRepetidos: processosRepetidos.length,
+            processosRepetidos: numProcessosRepetidos,
           });
           
           // Verificar evolução em relação à análise anterior
