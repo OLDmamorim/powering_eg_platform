@@ -422,11 +422,6 @@ function gerarHTMLRelatorio(relatorio: RelatorioLoja): string {
 function gerarResumo(relatorio: RelatorioLoja): string {
   const linhas: string[] = [];
   
-  // Instrucao de impressao em destaque
-  linhas.push(`<div style="background: #fef3c7; border: 2px solid #f59e0b; padding: 10px; margin-bottom: 15px; border-radius: 6px;">`);
-  linhas.push(`<strong style="color: #92400e; font-size: 14px;">⚠️ IMPRIMIR ESTE RELATORIO E ATUAR EM CONFORMIDADE NOS PROCESSOS IDENTIFICADOS</strong>`);
-  linhas.push(`</div>`);
-  
   // Introducao
   linhas.push(`<strong>PONTO DE SITUACAO - ${relatorio.nomeLoja.toUpperCase()}</strong>`);
   linhas.push(``);

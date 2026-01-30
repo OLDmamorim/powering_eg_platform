@@ -1,0 +1,25 @@
+{
+  "query": "SELECT id, nomeLoja, LEFT(conteudoRelatorio, 300) as preview FROM relatorios_analise_loja ORDER BY id DESC LIMIT 3;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT id, nomeLoja, LEFT(conteudoRelatorio, 300) as preview FROM relatorios_analise_loja ORDER BY id DESC LIMIT 3;",
+  "rows": [
+    {
+      "id": "627",
+      "nomeLoja": "Viseu",
+      "preview": "<div style=\"font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto;\"><h1 style=\"color: #1a365d; border-bottom: 2px solid #1a365d; padding-bottom: 10px;\">Viseu (46)</h1><div style=\"margin: 20px 0; padding: 15px; background: #f7fafc; border-radius: 8px;\"><h3 style=\"margin: 0 0 10px 0; color:"
+    },
+    {
+      "id": "626",
+      "nomeLoja": "Vila Verde",
+      "preview": "<div style=\"font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto;\"><h1 style=\"color: #1a365d; border-bottom: 2px solid #1a365d; padding-bottom: 10px;\">Vila Verde (49)</h1><div style=\"margin: 20px 0; padding: 15px; background: #f7fafc; border-radius: 8px;\"><h3 style=\"margin: 0 0 10px 0; c"
+    },
+    {
+      "id": "625",
+      "nomeLoja": "Viana do Castelo",
+      "preview": "<div style=\"font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto;\"><h1 style=\"color: #1a365d; border-bottom: 2px solid #1a365d; padding-bottom: 10px;\">Viana do Castelo (34)</h1><div style=\"margin: 20px 0; padding: 15px; background: #f7fafc; border-radius: 8px;\"><h3 style=\"margin: 0 0 10p"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tnomeLoja\tpreview\n627\tViseu\t<div style=\"font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto;\"><h1 style=\"color: #1a365d; border-bottom: 2px solid #1a365d; padding-bottom: 10px;\">Viseu (46)</h1><div style=\"margin: 20px 0; padding: 15px; background: #f7fafc; border-radius: 8px;\"><h3 style=\"margin: 0 0 10px 0; color:\n626\tVila Verde\t<div style=\"font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto;\"><h1 style=\"color: #1a365d; border-bottom: 2px solid #1a365d; padding-bottom: 10px;\">Vila Verde (49)</h1><div style=\"margin: 20px 0; padding: 15px; background: #f7fafc; border-radius: 8px;\"><h3 style=\"margin: 0 0 10px 0; c\n625\tViana do Castelo\t<div style=\"font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto;\"><h1 style=\"color: #1a365d; border-bottom: 2px solid #1a365d; padding-bottom: 10px;\">Viana do Castelo (34)</h1><div style=\"margin: 20px 0; padding: 15px; background: #f7fafc; border-radius: 8px;\"><h3 style=\"margin: 0 0 10p\n",
+  "stderr": "",
+  "execution_time_ms": 58
+}
