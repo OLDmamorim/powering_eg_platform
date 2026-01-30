@@ -91,6 +91,95 @@ const STATUS_EXCLUIR = ['Serviço Pronto', 'REVISAR'];
 // Status de alerta
 const STATUS_ALERTA = ['FALTA DOCUMENTOS', 'RECUSADO', 'INCIDÊNCIA'];
 
+// Mapeamento de cidades conhecidas para normalização
+const CIDADES_CONHECIDAS = [
+  'Abrantes', 'Albufeira', 'Almada', 'Amadora', 'Aveiro', 'Barcelos', 'Braga', 'Bragança',
+  'Caldas', 'Cascais', 'Castelo Branco', 'Chaves', 'Coimbra', 'Covilhã', 'Évora',
+  'Famalicão', 'Faro', 'Figueira', 'Funchal', 'Gondomar', 'Guarda', 'Guimarães',
+  'Leiria', 'Lisboa', 'Loures', 'Maia', 'Matosinhos', 'Montijo', 'Odivelas', 'Oeiras',
+  'Olhão', 'Paredes', 'Peniche', 'Pombal', 'Ponte Lima', 'Portalegre', 'Portimão', 'Porto',
+  'Santarém', 'Seixal', 'Setúbal', 'Sintra', 'Tomar', 'Torres Vedras', 'Viana', 'Vila Franca',
+  'Vila Nova Gaia', 'Vila Real', 'Viseu'
+];
+
+/**
+ * Verifica se é um serviço móvel baseado no nmdos ou nome da loja
+ */
+function isServicoMovel(nmdos: string, nomeLoja: string): boolean {
+  const textoCompleto = `${nmdos} ${nomeLoja}`.toLowerCase();
+  return textoCompleto.includes('s.movel') || 
+         textoCompleto.includes('smovel') || 
+         textoCompleto.includes('serviço móvel') || 
+         textoCompleto.includes('servico movel') ||
+         textoCompleto.includes('sm ');
+}
+
+/**
+ * Extrai a cidade do nome da loja ou nmdos
+ */
+function extrairCidade(nmdos: string, nomeLoja: string): string | null {
+  const textoCompleto = `${nmdos} ${nomeLoja}`;
+  
+  // Procurar cidades conhecidas no texto
+  for (const cidade of CIDADES_CONHECIDAS) {
+    const regex = new RegExp(cidade.replace(/\s+/g, '\\s*'), 'i');
+    if (regex.test(textoCompleto)) {
+      return cidade;
+    }
+  }
+  
+  // Tentar extrair cidade do padrão "X-Cidade" no nmdos (ex: "7-Leiria")
+  const matchCidade = nmdos.match(/\d+-([A-Za-zà-ú\s]+)/i);
+  if (matchCidade && matchCidade[1]) {
+    return matchCidade[1].trim();
+  }
+  
+  return null;
+}
+
+/**
+ * Normaliza o nome da loja para identificação correta
+ * Considera: Serviço Móvel (SM), cidade, nome original
+ * 
+ * Exemplos:
+ * - "Ficha S.Movel 7-Leiria" + "Serviço Móvel Leiria" -> "Leiria SM"
+ * - "Ficha S.Movel 1-Braga" + "Serviço Móvel Braga" -> "Braga SM"
+ * - "Ficha Servico 18" + "Braga" -> "Braga"
+ * - "Ficha Servico 7" + "Guimarães" -> "Guimarães"
+ */
+export function normalizarNomeLoja(nmdos: string, nomeLoja: string): string {
+  const isSM = isServicoMovel(nmdos, nomeLoja);
+  const cidade = extrairCidade(nmdos, nomeLoja);
+  
+  // Se é serviço móvel e temos cidade, usar "Cidade SM"
+  if (isSM && cidade) {
+    return `${cidade} SM`;
+  }
+  
+  // Se é serviço móvel mas não identificamos cidade, usar nome original + SM
+  if (isSM) {
+    // Limpar "Serviço Móvel" do nome e adicionar SM
+    let nomeBase = nomeLoja
+      .replace(/serviço\s*móvel/gi, '')
+      .replace(/servico\s*movel/gi, '')
+      .replace(/s\.?movel/gi, '')
+      .replace(/sm\s*/gi, '')
+      .trim();
+    
+    if (nomeBase) {
+      return `${nomeBase} SM`;
+    }
+    return `${nomeLoja} SM`;
+  }
+  
+  // Não é serviço móvel - usar nome original ou cidade
+  if (cidade && nomeLoja.toLowerCase().includes(cidade.toLowerCase())) {
+    return cidade;
+  }
+  
+  return nomeLoja;
+}
+
 /**
  * Extrai número da loja do campo nmdos
  * Ex: "Ficha Servico 23" -> 23
@@ -246,18 +335,25 @@ export function processarFicheiroExcel(buffer: Buffer): FichaServico[] {
 }
 
 /**
- * Agrupa fichas por loja
+ * Agrupa fichas por loja usando normalização de nomes
+ * Considera Serviço Móvel (SM) e cidades para agrupar corretamente
  */
 function agruparPorLoja(fichas: FichaServico[]): Map<string, FichaServico[]> {
   const grupos = new Map<string, FichaServico[]>();
   
   for (const ficha of fichas) {
-    const chave = ficha.loja || 'Desconhecida';
+    // Usar normalização para identificar corretamente a loja
+    const nomeNormalizado = normalizarNomeLoja(ficha.nmdos, ficha.loja);
+    const chave = nomeNormalizado || ficha.loja || 'Desconhecida';
+    
     if (!grupos.has(chave)) {
       grupos.set(chave, []);
     }
     grupos.get(chave)!.push(ficha);
   }
+  
+  // Debug: mostrar grupos criados
+  console.log('[agruparPorLoja] Grupos criados:', Array.from(grupos.keys()).join(', '));
   
   return grupos;
 }

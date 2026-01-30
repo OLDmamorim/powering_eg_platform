@@ -8765,6 +8765,11 @@ IMPORTANTE:
     // Listar análises do gestor
     listar: gestorProcedure
       .query(async ({ ctx }) => {
+        // Admin vê todas as análises, gestor vê apenas as suas
+        if (ctx.user.role === 'admin') {
+          return await db.getAllAnalises();
+        }
+        
         if (!ctx.gestor) {
           throw new TRPCError({ code: 'FORBIDDEN', message: 'Apenas gestores podem ver análises' });
         }

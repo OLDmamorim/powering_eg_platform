@@ -9310,6 +9310,17 @@ export async function createRelatorioAnaliseLoja(data: {
 }
 
 /**
+ * Obter todas as análises (para admin)
+ */
+export async function getAllAnalises() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.select().from(analisesFichasServico)
+    .orderBy(desc(analisesFichasServico.dataUpload));
+}
+
+/**
  * Obter todas as análises de um gestor
  */
 export async function getAnalisesByGestorId(gestorId: number) {

@@ -1,0 +1,70 @@
+{
+  "query": "SELECT id, nomeLoja, LENGTH(conteudoRelatorio) as tamanho_conteudo, LENGTH(resumo) as tamanho_resumo FROM relatorios_analise_loja ORDER BY id DESC LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT id, nomeLoja, LENGTH(conteudoRelatorio) as tamanho_conteudo, LENGTH(resumo) as tamanho_resumo FROM relatorios_analise_loja ORDER BY id DESC LIMIT 10;",
+  "rows": [
+    {
+      "id": "696",
+      "nomeLoja": "Viseu",
+      "tamanho_conteudo": "15490",
+      "tamanho_resumo": "1999"
+    },
+    {
+      "id": "695",
+      "nomeLoja": "Vila Verde",
+      "tamanho_conteudo": "9552",
+      "tamanho_resumo": "2231"
+    },
+    {
+      "id": "694",
+      "nomeLoja": "Viana do Castelo",
+      "tamanho_conteudo": "20220",
+      "tamanho_resumo": "2456"
+    },
+    {
+      "id": "693",
+      "nomeLoja": "Trucks Service Porto",
+      "tamanho_conteudo": "19905",
+      "tamanho_resumo": "2460"
+    },
+    {
+      "id": "692",
+      "nomeLoja": "Trucks Service Lisboa",
+      "tamanho_conteudo": "22738",
+      "tamanho_resumo": "2244"
+    },
+    {
+      "id": "691",
+      "nomeLoja": "Trucks Service Beiras",
+      "tamanho_conteudo": "15428",
+      "tamanho_resumo": "2460"
+    },
+    {
+      "id": "690",
+      "nomeLoja": "Telheiras",
+      "tamanho_conteudo": "8829",
+      "tamanho_resumo": "2140"
+    },
+    {
+      "id": "689",
+      "nomeLoja": "SM Lisboa II (Movida)",
+      "tamanho_conteudo": "11878",
+      "tamanho_resumo": "2015"
+    },
+    {
+      "id": "688",
+      "nomeLoja": "SM Leziria do Tejo",
+      "tamanho_conteudo": "16536",
+      "tamanho_resumo": "2230"
+    },
+    {
+      "id": "687",
+      "nomeLoja": "Serviço Móvel Viseu II",
+      "tamanho_conteudo": "5252",
+      "tamanho_resumo": "1704"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tnomeLoja\ttamanho_conteudo\ttamanho_resumo\n696\tViseu\t15490\t1999\n695\tVila Verde\t9552\t2231\n694\tViana do Castelo\t20220\t2456\n693\tTrucks Service Porto\t19905\t2460\n692\tTrucks Service Lisboa\t22738\t2244\n691\tTrucks Service Beiras\t15428\t2460\n690\tTelheiras\t8829\t2140\n689\tSM Lisboa II (Movida)\t11878\t2015\n688\tSM Leziria do Tejo\t16536\t2230\n687\tServiço Móvel Viseu II\t5252\t1704\n",
+  "stderr": "",
+  "execution_time_ms": 53
+}

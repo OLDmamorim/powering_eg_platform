@@ -1,0 +1,120 @@
+{
+  "query": "SELECT * FROM analises_fichas_servico LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT * FROM analises_fichas_servico LIMIT 10;",
+  "rows": [
+    {
+      "id": "1",
+      "gestorId": "30001",
+      "nomeArquivo": "Monotorização_2025.v4_29012026.xlsm",
+      "dataUpload": "2026-01-29 20:39:28",
+      "totalFichas": "2344",
+      "totalLojas": "69",
+      "resumoGeral": "{\"totalFichasAbertas5Dias\":1407,\"totalFichasAposAgendamento\":751,\"totalFichasStatusAlerta\":159,\"totalFichasSemNotas\":304,\"totalFichasNotasAntigas\":799,\"totalFichasDevolverVidro\":73,\"totalFichasSemEmailCliente\":947,\"statusGeral\":{\"Consulta / Orçamento\":546,\"AUTORIZADO\":1196,\"ORÇAMENTO\":22,\"FALTA DOCUMENTOS\":18,\"RECUSADO\":85,\"Pedido Autorização\":276,\"INCIDÊNCIA\":56,\"AUTORIZADO SEM DADOS\":46,\"STAND BY\":2,\"Serviço Realizado\":7,\"Devolve Vidro e Encerra!\":73,\"SEM QIV\":9,\"ANULADO\":1,\"ORÇAMENTO - ENVIADO\":4,\"Nº AZUL\":1,\"PEDIDO RETIFICACAO\":1}}",
+      "createdAt": "2026-01-29 20:39:28",
+      "updatedAt": "2026-01-29 20:39:28"
+    },
+    {
+      "id": "2",
+      "gestorId": "30001",
+      "nomeArquivo": "Monotorização_2025.v4_29012026.xlsm",
+      "dataUpload": "2026-01-29 20:39:44",
+      "totalFichas": "2344",
+      "totalLojas": "69",
+      "resumoGeral": "{\"totalFichasAbertas5Dias\":1407,\"totalFichasAposAgendamento\":751,\"totalFichasStatusAlerta\":159,\"totalFichasSemNotas\":304,\"totalFichasNotasAntigas\":799,\"totalFichasDevolverVidro\":73,\"totalFichasSemEmailCliente\":947,\"statusGeral\":{\"Consulta / Orçamento\":546,\"AUTORIZADO\":1196,\"ORÇAMENTO\":22,\"FALTA DOCUMENTOS\":18,\"RECUSADO\":85,\"Pedido Autorização\":276,\"INCIDÊNCIA\":56,\"AUTORIZADO SEM DADOS\":46,\"STAND BY\":2,\"Serviço Realizado\":7,\"Devolve Vidro e Encerra!\":73,\"SEM QIV\":9,\"ANULADO\":1,\"ORÇAMENTO - ENVIADO\":4,\"Nº AZUL\":1,\"PEDIDO RETIFICACAO\":1}}",
+      "createdAt": "2026-01-29 20:39:44",
+      "updatedAt": "2026-01-29 20:39:44"
+    },
+    {
+      "id": "3",
+      "gestorId": "30001",
+      "nomeArquivo": "Monotorização_2025.v4_29012026.xlsm",
+      "dataUpload": "2026-01-29 20:54:15",
+      "totalFichas": "2344",
+      "totalLojas": "69",
+      "resumoGeral": "{\"totalFichasAbertas5Dias\":1407,\"totalFichasAposAgendamento\":751,\"totalFichasStatusAlerta\":159,\"totalFichasSemNotas\":304,\"totalFichasNotasAntigas\":799,\"totalFichasDevolverVidro\":73,\"totalFichasSemEmailCliente\":947,\"statusGeral\":{\"Consulta / Orçamento\":546,\"AUTORIZADO\":1196,\"ORÇAMENTO\":22,\"FALTA DOCUMENTOS\":18,\"RECUSADO\":85,\"Pedido Autorização\":276,\"INCIDÊNCIA\":56,\"AUTORIZADO SEM DADOS\":46,\"STAND BY\":2,\"Serviço Realizado\":7,\"Devolve Vidro e Encerra!\":73,\"SEM QIV\":9,\"ANULADO\":1,\"ORÇAMENTO - ENVIADO\":4,\"Nº AZUL\":1,\"PEDIDO RETIFICACAO\":1}}",
+      "createdAt": "2026-01-29 20:54:15",
+      "updatedAt": "2026-01-29 20:54:15"
+    },
+    {
+      "id": "4",
+      "gestorId": "30001",
+      "nomeArquivo": "Monotorização_2025.v4_29012026.xlsm",
+      "dataUpload": "2026-01-29 20:54:31",
+      "totalFichas": "2344",
+      "totalLojas": "69",
+      "resumoGeral": "{\"totalFichasAbertas5Dias\":1407,\"totalFichasAposAgendamento\":751,\"totalFichasStatusAlerta\":159,\"totalFichasSemNotas\":304,\"totalFichasNotasAntigas\":799,\"totalFichasDevolverVidro\":73,\"totalFichasSemEmailCliente\":947,\"statusGeral\":{\"Consulta / Orçamento\":546,\"AUTORIZADO\":1196,\"ORÇAMENTO\":22,\"FALTA DOCUMENTOS\":18,\"RECUSADO\":85,\"Pedido Autorização\":276,\"INCIDÊNCIA\":56,\"AUTORIZADO SEM DADOS\":46,\"STAND BY\":2,\"Serviço Realizado\":7,\"Devolve Vidro e Encerra!\":73,\"SEM QIV\":9,\"ANULADO\":1,\"ORÇAMENTO - ENVIADO\":4,\"Nº AZUL\":1,\"PEDIDO RETIFICACAO\":1}}",
+      "createdAt": "2026-01-29 20:54:31",
+      "updatedAt": "2026-01-29 20:54:31"
+    },
+    {
+      "id": "5",
+      "gestorId": "30001",
+      "nomeArquivo": "Monotorização_2025.v4_29012026.xlsm",
+      "dataUpload": "2026-01-29 20:58:07",
+      "totalFichas": "2344",
+      "totalLojas": "69",
+      "resumoGeral": "{\"totalFichasAbertas5Dias\":1407,\"totalFichasAposAgendamento\":751,\"totalFichasStatusAlerta\":159,\"totalFichasSemNotas\":304,\"totalFichasNotasAntigas\":799,\"totalFichasDevolverVidro\":73,\"totalFichasSemEmailCliente\":947,\"statusGeral\":{\"Consulta / Orçamento\":546,\"AUTORIZADO\":1196,\"ORÇAMENTO\":22,\"FALTA DOCUMENTOS\":18,\"RECUSADO\":85,\"Pedido Autorização\":276,\"INCIDÊNCIA\":56,\"AUTORIZADO SEM DADOS\":46,\"STAND BY\":2,\"Serviço Realizado\":7,\"Devolve Vidro e Encerra!\":73,\"SEM QIV\":9,\"ANULADO\":1,\"ORÇAMENTO - ENVIADO\":4,\"Nº AZUL\":1,\"PEDIDO RETIFICACAO\":1}}",
+      "createdAt": "2026-01-29 20:58:07",
+      "updatedAt": "2026-01-29 20:58:07"
+    },
+    {
+      "id": "6",
+      "gestorId": "30001",
+      "nomeArquivo": "Monotorização_2025.v4_29012026.xlsm",
+      "dataUpload": "2026-01-29 21:48:38",
+      "totalFichas": "2344",
+      "totalLojas": "69",
+      "resumoGeral": "{\"totalFichasAbertas5Dias\":1407,\"totalFichasAposAgendamento\":751,\"totalFichasStatusAlerta\":159,\"totalFichasSemNotas\":304,\"totalFichasNotasAntigas\":799,\"totalFichasDevolverVidro\":73,\"totalFichasSemEmailCliente\":947,\"statusGeral\":{\"Consulta / Orçamento\":546,\"AUTORIZADO\":1196,\"ORÇAMENTO\":22,\"FALTA DOCUMENTOS\":18,\"RECUSADO\":85,\"Pedido Autorização\":276,\"INCIDÊNCIA\":56,\"AUTORIZADO SEM DADOS\":46,\"STAND BY\":2,\"Serviço Realizado\":7,\"Devolve Vidro e Encerra!\":73,\"SEM QIV\":9,\"ANULADO\":1,\"ORÇAMENTO - ENVIADO\":4,\"Nº AZUL\":1,\"PEDIDO RETIFICACAO\":1}}",
+      "createdAt": "2026-01-29 21:48:38",
+      "updatedAt": "2026-01-29 21:48:38"
+    },
+    {
+      "id": "7",
+      "gestorId": "30001",
+      "nomeArquivo": "Monotorização_2025.v4_29012026.xlsm",
+      "dataUpload": "2026-01-29 21:49:54",
+      "totalFichas": "2344",
+      "totalLojas": "69",
+      "resumoGeral": "{\"totalFichasAbertas5Dias\":1407,\"totalFichasAposAgendamento\":751,\"totalFichasStatusAlerta\":159,\"totalFichasSemNotas\":304,\"totalFichasNotasAntigas\":799,\"totalFichasDevolverVidro\":73,\"totalFichasSemEmailCliente\":947,\"statusGeral\":{\"Consulta / Orçamento\":546,\"AUTORIZADO\":1196,\"ORÇAMENTO\":22,\"FALTA DOCUMENTOS\":18,\"RECUSADO\":85,\"Pedido Autorização\":276,\"INCIDÊNCIA\":56,\"AUTORIZADO SEM DADOS\":46,\"STAND BY\":2,\"Serviço Realizado\":7,\"Devolve Vidro e Encerra!\":73,\"SEM QIV\":9,\"ANULADO\":1,\"ORÇAMENTO - ENVIADO\":4,\"Nº AZUL\":1,\"PEDIDO RETIFICACAO\":1}}",
+      "createdAt": "2026-01-29 21:49:54",
+      "updatedAt": "2026-01-29 21:49:54"
+    },
+    {
+      "id": "8",
+      "gestorId": "30001",
+      "nomeArquivo": "Monotorização_2025.v4_29012026.xlsm",
+      "dataUpload": "2026-01-29 22:02:51",
+      "totalFichas": "2344",
+      "totalLojas": "69",
+      "resumoGeral": "{\"totalFichasAbertas5Dias\":1407,\"totalFichasAposAgendamento\":751,\"totalFichasStatusAlerta\":159,\"totalFichasSemNotas\":304,\"totalFichasNotasAntigas\":799,\"totalFichasDevolverVidro\":73,\"totalFichasSemEmailCliente\":947,\"statusGeral\":{\"Consulta / Orçamento\":546,\"AUTORIZADO\":1196,\"ORÇAMENTO\":22,\"FALTA DOCUMENTOS\":18,\"RECUSADO\":85,\"Pedido Autorização\":276,\"INCIDÊNCIA\":56,\"AUTORIZADO SEM DADOS\":46,\"STAND BY\":2,\"Serviço Realizado\":7,\"Devolve Vidro e Encerra!\":73,\"SEM QIV\":9,\"ANULADO\":1,\"ORÇAMENTO - ENVIADO\":4,\"Nº AZUL\":1,\"PEDIDO RETIFICACAO\":1}}",
+      "createdAt": "2026-01-29 22:02:51",
+      "updatedAt": "2026-01-29 22:02:51"
+    },
+    {
+      "id": "9",
+      "gestorId": "30001",
+      "nomeArquivo": "Monotorização_2025.v4_29012026.xlsm",
+      "dataUpload": "2026-01-29 22:11:36",
+      "totalFichas": "2344",
+      "totalLojas": "69",
+      "resumoGeral": "{\"totalFichasAbertas5Dias\":1407,\"totalFichasAposAgendamento\":751,\"totalFichasStatusAlerta\":159,\"totalFichasSemNotas\":304,\"totalFichasNotasAntigas\":799,\"totalFichasDevolverVidro\":73,\"totalFichasSemEmailCliente\":947,\"statusGeral\":{\"Consulta / Orçamento\":546,\"AUTORIZADO\":1196,\"ORÇAMENTO\":22,\"FALTA DOCUMENTOS\":18,\"RECUSADO\":85,\"Pedido Autorização\":276,\"INCIDÊNCIA\":56,\"AUTORIZADO SEM DADOS\":46,\"STAND BY\":2,\"Serviço Realizado\":7,\"Devolve Vidro e Encerra!\":73,\"SEM QIV\":9,\"ANULADO\":1,\"ORÇAMENTO - ENVIADO\":4,\"Nº AZUL\":1,\"PEDIDO RETIFICACAO\":1}}",
+      "createdAt": "2026-01-29 22:11:36",
+      "updatedAt": "2026-01-29 22:11:36"
+    },
+    {
+      "id": "10",
+      "gestorId": "30001",
+      "nomeArquivo": "Monotorização_2025.v4_29012026.xlsm",
+      "dataUpload": "2026-01-29 22:44:27",
+      "totalFichas": "2344",
+      "totalLojas": "69",
+      "resumoGeral": "{\"totalFichasAbertas5Dias\":1407,\"totalFichasAposAgendamento\":751,\"totalFichasStatusAlerta\":159,\"totalFichasSemNotas\":304,\"totalFichasNotasAntigas\":799,\"totalFichasDevolverVidro\":73,\"totalFichasSemEmailCliente\":947,\"statusGeral\":{\"Consulta / Orçamento\":546,\"AUTORIZADO\":1196,\"ORÇAMENTO\":22,\"FALTA DOCUMENTOS\":18,\"RECUSADO\":85,\"Pedido Autorização\":276,\"INCIDÊNCIA\":56,\"AUTORIZADO SEM DADOS\":46,\"STAND BY\":2,\"Serviço Realizado\":7,\"Devolve Vidro e Encerra!\":73,\"SEM QIV\":9,\"ANULADO\":1,\"ORÇAMENTO - ENVIADO\":4,\"Nº AZUL\":1,\"PEDIDO RETIFICACAO\":1}}",
+      "createdAt": "2026-01-29 22:44:27",
+      "updatedAt": "2026-01-29 22:44:27"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tgestorId\tnomeArquivo\tdataUpload\ttotalFichas\ttotalLojas\tresumoGeral\tcreatedAt\tupdatedAt\n1\t30001\tMonotorização_2025.v4_29012026.xlsm\t2026-01-29 20:39:28\t2344\t69\t{\"totalFichasAbertas5Dias\":1407,\"totalFichasAposAgendamento\":751,\"totalFichasStatusAlerta\":159,\"totalFichasSemNotas\":304,\"totalFichasNotasAntigas\":799,\"totalFichasDevolverVidro\":73,\"totalFichasSemEmailCliente\":947,\"statusGeral\":{\"Consulta / Orçamento\":546,\"AUTORIZADO\":1196,\"ORÇAMENTO\":22,\"FALTA DOCUMENTOS\":18,\"RECUSADO\":85,\"Pedido Autorização\":276,\"INCIDÊNCIA\":56,\"AUTORIZADO SEM DADOS\":46,\"STAND BY\":2,\"Serviço Realizado\":7,\"Devolve Vidro e Encerra!\":73,\"SEM QIV\":9,\"ANULADO\":1,\"ORÇAMENTO - ENVIADO\":4,\"Nº AZUL\":1,\"PEDIDO RETIFICACAO\":1}}\t2026-01-29 20:39:28\t2026-01-29 20:39:28\n2\t30001\tMonotorização_2025.v4_29012026.xlsm\t2026-01-29 20:39:44\t2344\t69\t{\"totalFichasAbertas5Dias\":1407,\"totalFichasAposAgendamento\":751,\"totalFichasStatusAlerta\":159,\"totalFichasSemNotas\":304,\"totalFichasNotasAntigas\":799,\"totalFichasDevolverVidro\":73,\"totalFichasSemEmailCliente\":947,\"statusGeral\":{\"Consulta / Orçamento\":546,\"AUTORIZADO\":1196,\"ORÇAMENTO\":22,\"FALTA DOCUMENTOS\":18,\"RECUSADO\":85,\"Pedido Autorização\":276,\"INCIDÊNCIA\":56,\"AUTORIZADO SEM DADOS\":46,\"STAND BY\":2,\"Serviço Realizado\":7,\"Devolve Vidro e Encerra!\":73,\"SEM QIV\":9,\"ANULADO\":1,\"ORÇAMENTO - ENVIADO\":4,\"Nº AZUL\":1,\"PEDIDO RETIFICACAO\":1}}\t2026-01-29 20:39:44\t2026-01-29 20:39:44\n3\t30001\tMonotorização_2025.v4_29012026.xlsm\t2026-01-29 20:54:15\t2344\t69\t{\"totalFichasAbertas5Dias\":1407,\"totalFichasAposAgendamento\":751,\"totalFichasStatusAlerta\":159,\"totalFichasSemNotas\":304,\"totalFichasNotasAntigas\":799,\"totalFichasDevolverVidro\":73,\"totalFichasSemEmailCliente\":947,\"statusGeral\":{\"Consulta / Orçamento\":546,\"AUTORIZADO\":1196,\"ORÇAMENTO\":22,\"FALTA DOCUMENTOS\":18,\"RECUSADO\":85,\"Pedido Autorização\":276,\"INCIDÊNCIA\":56,\"AUTORIZADO SEM DADOS\":46,\"STAND BY\":2,\"Serviço Realizado\":7,\"Devolve Vidro e Encerra!\":73,\"SEM QIV\":9,\"ANULADO\":1,\"ORÇAMENTO - ENVIADO\":4,\"Nº AZUL\":1,\"PEDIDO RETIFICACAO\":1}}\t2026-01-29 20:54:15\t2026-01-29 20:54:15\n4\t30001\tMonotorização_2025.v4_29012026.xlsm\t2026-01-29 20:54:31\t2344\t69\t{\"totalFichasAbertas5Dias\":1407,\"totalFichasAposAgendamento\":751,\"totalFichasStatusAlerta\":159,\"totalFichasSemNotas\":304,\"totalFichasNotasAntigas\":799,\"totalFichasDevolverVidro\":73,\"totalFichasSemEmailCliente\":947,\"statusGeral\":{\"Consulta / Orçamento\":546,\"AUTORIZADO\":1196,\"ORÇAMENTO\":22,\"FALTA DOCUMENTOS\":18,\"RECUSADO\":85,\"Pedido Autorização\":276,\"INCIDÊNCIA\":56,\"AUTORIZADO SEM DADOS\":46,\"STAND BY\":2,\"Serviço Realizado\":7,\"Devolve Vidro e Encerra!\":73,\"SEM QIV\":9,\"ANULADO\":1,\"ORÇAMENTO - ENVIADO\":4,\"Nº AZUL\":1,\"PEDIDO RETIFICACAO\":1}}\t2026-01-29 20:54:31\t2026-01-29 20:54:31\n5\t30001\tMonotorização_2025.v4_29012026.xlsm\t2026-01-29 20:58:07\t2344\t69\t{\"totalFichasAbertas5Dias\":1407,\"totalFichasAposAgendamento\":751,\"totalFichasStatusAlerta\":159,\"totalFichasSemNotas\":304,\"totalFichasNotasAntigas\":799,\"totalFichasDevolverVidro\":73,\"totalFichasSemEmailCliente\":947,\"statusGeral\":{\"Consulta / Orçamento\":546,\"AUTORIZADO\":1196,\"ORÇAMENTO\":22,\"FALTA DOCUMENTOS\":18,\"RECUSADO\":85,\"Pedido Autorização\":276,\"INCIDÊNCIA\":56,\"AUTORIZADO SEM DADOS\":46,\"STAND BY\":2,\"Serviço Realizado\":7,\"Devolve Vidro e Encerra!\":73,\"SEM QIV\":9,\"ANULADO\":1,\"ORÇAMENTO - ENVIADO\":4,\"Nº AZUL\":1,\"PEDIDO RETIFICACAO\":1}}\t2026-01-29 20:58:07\t2026-01-29 20:58:07\n6\t30001\tMonotorização_2025.v4_29012026.xlsm\t2026-01-29 21:48:38\t2344\t69\t{\"totalFichasAbertas5Dias\":1407,\"totalFichasAposAgendamento\":751,\"totalFichasStatusAlerta\":159,\"totalFichasSemNotas\":304,\"totalFichasNotasAntigas\":799,\"totalFichasDevolverVidro\":73,\"totalFichasSemEmailCliente\":947,\"statusGeral\":{\"Consulta / Orçamento\":546,\"AUTORIZADO\":1196,\"ORÇAMENTO\":22,\"FALTA DOCUMENTOS\":18,\"RECUSADO\":85,\"Pedido Autorização\":276,\"INCIDÊNCIA\":56,\"AUTORIZADO SEM DADOS\":46,\"STAND BY\":2,\"Serviço Realizado\":7,\"Devolve Vidro e Encerra!\":73,\"SEM QIV\":9,\"ANULADO\":1,\"ORÇAMENTO - ENVIADO\":4,\"Nº AZUL\":1,\"PEDIDO RETIFICACAO\":1}}\t2026-01-29 21:48:38\t2026-01-29 21:48:38\n7\t30001\tMonotorização_2025.v4_29012026.xlsm\t2026-01-29 21:49:54\t2344\t69\t{\"totalFichasAbertas5Dias\":1407,\"totalFichasAposAgendamento\":751,\"totalFichasStatusAlerta\":159,\"totalFichasSemNotas\":304,\"totalFichasNotasAntigas\":799,\"totalFichasDevolverVidro\":73,\"totalFichasSemEmailCliente\":947,\"statusGeral\":{\"Consulta / Orçamento\":546,\"AUTORIZADO\":1196,\"ORÇAMENTO\":22,\"FALTA DOCUMENTOS\":18,\"RECUSADO\":85,\"Pedido Autorização\":276,\"INCIDÊNCIA\":56,\"AUTORIZADO SEM DADOS\":46,\"STAND BY\":2,\"Serviço Realizado\":7,\"Devolve Vidro e Encerra!\":73,\"SEM QIV\":9,\"ANULADO\":1,\"ORÇAMENTO - ENVIADO\":4,\"Nº AZUL\":1,\"PEDIDO RETIFICACAO\":1}}\t2026-01-29 21:49:54\t2026-01-29 21:49:54\n8\t30001\tMonotorização_2025.v4_29012026.xlsm\t2026-01-29 22:02:51\t2344\t69\t{\"totalFichasAbertas5Dias\":1407,\"totalFichasAposAgendamento\":751,\"totalFichasStatusAlerta\":159,\"totalFichasSemNotas\":304,\"totalFichasNotasAntigas\":799,\"totalFichasDevolverVidro\":73,\"totalFichasSemEmailCliente\":947,\"statusGeral\":{\"Consulta / Orçamento\":546,\"AUTORIZADO\":1196,\"ORÇAMENTO\":22,\"FALTA DOCUMENTOS\":18,\"RECUSADO\":85,\"Pedido Autorização\":276,\"INCIDÊNCIA\":56,\"AUTORIZADO SEM DADOS\":46,\"STAND BY\":2,\"Serviço Realizado\":7,\"Devolve Vidro e Encerra!\":73,\"SEM QIV\":9,\"ANULADO\":1,\"ORÇAMENTO - ENVIADO\":4,\"Nº AZUL\":1,\"PEDIDO RETIFICACAO\":1}}\t2026-01-29 22:02:51\t2026-01-29 22:02:51\n9\t30001\tMonotorização_2025.v4_29012026.xlsm\t2026-01-29 22:11:36\t2344\t69\t{\"totalFichasAbertas5Dias\":1407,\"totalFichasAposAgendamento\":751,\"totalFichasStatusAlerta\":159,\"totalFichasSemNotas\":304,\"totalFichasNotasAntigas\":799,\"totalFichasDevolverVidro\":73,\"totalFichasSemEmailCliente\":947,\"statusGeral\":{\"Consulta / Orçamento\":546,\"AUTORIZADO\":1196,\"ORÇAMENTO\":22,\"FALTA DOCUMENTOS\":18,\"RECUSADO\":85,\"Pedido Autorização\":276,\"INCIDÊNCIA\":56,\"AUTORIZADO SEM DADOS\":46,\"STAND BY\":2,\"Serviço Realizado\":7,\"Devolve Vidro e Encerra!\":73,\"SEM QIV\":9,\"ANULADO\":1,\"ORÇAMENTO - ENVIADO\":4,\"Nº AZUL\":1,\"PEDIDO RETIFICACAO\":1}}\t2026-01-29 22:11:36\t2026-01-29 22:11:36\n10\t30001\tMonotorização_2025.v4_29012026.xlsm\t2026-01-29 22:44:27\t2344\t69\t{\"totalFichasAbertas5Dias\":1407,\"totalFichasAposAgendamento\":751,\"totalFichasStatusAlerta\":159,\"totalFichasSemNotas\":304,\"totalFichasNotasAntigas\":799,\"totalFichasDevolverVidro\":73,\"totalFichasSemEmailCliente\":947,\"statusGeral\":{\"Consulta / Orçamento\":546,\"AUTORIZADO\":1196,\"ORÇAMENTO\":22,\"FALTA DOCUMENTOS\":18,\"RECUSADO\":85,\"Pedido Autorização\":276,\"INCIDÊNCIA\":56,\"AUTORIZADO SEM DADOS\":46,\"STAND BY\":2,\"Serviço Realizado\":7,\"Devolve Vidro e Encerra!\":73,\"SEM QIV\":9,\"ANULADO\":1,\"ORÇAMENTO - ENVIADO\":4,\"Nº AZUL\":1,\"PEDIDO RETIFICACAO\":1}}\t2026-01-29 22:44:27\t2026-01-29 22:44:27\n",
+  "stderr": "",
+  "execution_time_ms": 101
+}
