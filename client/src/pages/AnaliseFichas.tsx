@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { trpc } from '@/lib/trpc';
 import { Button } from '@/components/ui/button';
@@ -38,10 +38,23 @@ export default function AnaliseFichas() {
   
   // Queries
   const { data: analises, refetch: refetchAnalises } = trpc.analiseFichas.listar.useQuery();
-  const { data: detalhesAnalise, isLoading: loadingDetalhes } = trpc.analiseFichas.detalhes.useQuery(
+  const { data: detalhesAnalise, isLoading: loadingDetalhes, error: detalhesError } = trpc.analiseFichas.detalhes.useQuery(
     { analiseId: selectedAnalise! },
     { enabled: !!selectedAnalise }
   );
+  
+  // Debug: log quando selectedAnalise muda
+  useEffect(() => {
+    if (selectedAnalise) {
+      console.log('[AnaliseFichas] selectedAnalise:', selectedAnalise);
+    }
+  }, [selectedAnalise]);
+  
+  useEffect(() => {
+    if (detalhesError) {
+      console.error('[AnaliseFichas] Erro ao carregar detalhes:', detalhesError);
+    }
+  }, [detalhesError]);
   
   // Mutations
   const analisarMutation = trpc.analiseFichas.analisar.useMutation({
@@ -456,8 +469,28 @@ export default function AnaliseFichas() {
               </Card>
             )}
             
+            {/* Indicador de carregamento */}
+            {selectedAnalise && loadingDetalhes && (
+              <Card className="mt-6">
+                <CardContent className="flex items-center justify-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                  <span className="ml-3 text-muted-foreground">A carregar detalhes...</span>
+                </CardContent>
+              </Card>
+            )}
+            
+            {/* Erro ao carregar */}
+            {selectedAnalise && detalhesError && (
+              <Card className="mt-6 border-red-200 bg-red-50">
+                <CardContent className="flex items-center justify-center py-8">
+                  <AlertTriangle className="h-6 w-6 text-red-500 mr-2" />
+                  <span className="text-red-600">Erro ao carregar detalhes da análise</span>
+                </CardContent>
+              </Card>
+            )}
+            
             {/* Detalhes da Análise Selecionada no Histórico */}
-            {selectedAnalise && detalhesAnalise && (
+            {selectedAnalise && detalhesAnalise && !loadingDetalhes && (
               <div className="mt-6 space-y-4">
                 <Card>
                   <CardHeader>

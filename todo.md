@@ -3840,3 +3840,4 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [ ] Bug: Não dá para abrir os relatórios que estão no histórico de análise de fichas
 - [x] Bug Email: Frase IMPRIMIR duplicada no email de análise
 - [ ] Bug Email: Fichas a Intervir não aparecem no email (só mostra ...)
+- [ ] Bug: Histórico de análise de fichas não mostra detalhes ao clicar
