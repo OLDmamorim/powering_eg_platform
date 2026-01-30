@@ -8646,37 +8646,59 @@ IMPORTANTE:
             }
           }
           
-          // Guardar fichas identificadas
-          if (fichasParaGuardar.length > 0) {
-            await db.saveFichasIdentificadas(fichasParaGuardar);
-          }
-          
-          // Buscar fichas da analise anterior para comparacao
-          const fichasAnteriores = await db.getFichasIdentificadasAnterior(analise.id, relatorio.nomeLoja, ctx.gestor.id);
-          
-          // Identificar processos repetidos (mesmo obrano em categorias problematicas)
-          const obrasAnteriores = new Set(fichasAnteriores.map(f => f.obrano));
-          const processosRepetidos: Array<{ obrano: number; matricula: string; categoria: string; diasAberto: number }> = [];
-          
-          for (const { fichas, categoria } of categoriasMap) {
-            for (const ficha of fichas) {
-              if (obrasAnteriores.has(ficha.obrano)) {
-                processosRepetidos.push({
-                  obrano: ficha.obrano,
-                  matricula: ficha.matricula || '',
-                  categoria,
-                  diasAberto: ficha.diasAberto || 0,
-                });
+          // Guardar fichas identificadas e comparar com análise anterior
+          // Envolvido em try-catch para não bloquear a análise se houver erro
+          try {
+            // Validar que analise.id é válido antes de guardar
+            if (Number.isFinite(analise.id) && analise.id > 0) {
+              // Filtrar fichas com obrano válido
+              const fichasValidas = fichasParaGuardar.filter(f => 
+                Number.isFinite(f.obrano) && f.obrano > 0 &&
+                Number.isFinite(f.relatorioId) && f.relatorioId > 0 &&
+                Number.isFinite(f.analiseId) && f.analiseId > 0
+              );
+              
+              if (fichasValidas.length > 0) {
+                await db.saveFichasIdentificadas(fichasValidas);
+                console.log(`[analiseFichas] Guardadas ${fichasValidas.length} fichas identificadas para ${relatorio.nomeLoja}`);
               }
+              
+              // Buscar fichas da analise anterior para comparacao
+              const fichasAnteriores = await db.getFichasIdentificadasAnterior(analise.id, relatorio.nomeLoja, ctx.gestor.id);
+              
+              // Identificar processos repetidos (mesmo obrano em categorias problematicas)
+              if (fichasAnteriores.length > 0) {
+                const obrasAnteriores = new Set(fichasAnteriores.map(f => f.obrano));
+                const processosRepetidos: Array<{ obrano: number; matricula: string; categoria: string; diasAberto: number }> = [];
+                
+                for (const { fichas, categoria } of categoriasMap) {
+                  for (const ficha of fichas) {
+                    if (obrasAnteriores.has(ficha.obrano)) {
+                      processosRepetidos.push({
+                        obrano: ficha.obrano,
+                        matricula: ficha.matricula || '',
+                        categoria,
+                        diasAberto: ficha.diasAberto || 0,
+                      });
+                    }
+                  }
+                }
+                
+                // Se houver processos repetidos, atualizar o resumo com alerta
+                if (processosRepetidos.length > 0) {
+                  const alertaRepetidos = gerarAlertaProcessosRepetidos(processosRepetidos);
+                  const novoResumo = alertaRepetidos + relatorio.resumo;
+                  await db.updateRelatorioResumo(relatorioGuardado.id, novoResumo);
+                  relatorioGuardado.resumo = novoResumo;
+                  console.log(`[analiseFichas] ${processosRepetidos.length} processos repetidos encontrados para ${relatorio.nomeLoja}`);
+                }
+              }
+            } else {
+              console.warn(`[analiseFichas] analise.id inválido: ${analise.id}, não guardando fichas identificadas`);
             }
-          }
-          
-          // Se houver processos repetidos, atualizar o resumo com alerta
-          if (processosRepetidos.length > 0) {
-            const alertaRepetidos = gerarAlertaProcessosRepetidos(processosRepetidos);
-            const novoResumo = alertaRepetidos + relatorio.resumo;
-            await db.updateRelatorioResumo(relatorioGuardado.id, novoResumo);
-            relatorioGuardado.resumo = novoResumo;
+          } catch (fichasError) {
+            // Log do erro mas continua a análise
+            console.error('[analiseFichas] Erro ao guardar/comparar fichas identificadas:', fichasError);
           }
           
           relatoriosGuardados.push({
