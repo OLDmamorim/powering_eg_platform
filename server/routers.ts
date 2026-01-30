@@ -8929,10 +8929,34 @@ IMPORTANTE:
           html: htmlEmail,
         });
         
+        // Enviar cópia para o gestor
+        const gestorUser = await db.getUserById(ctx.user.id);
+        if (gestorUser?.email && gestorUser.email !== emailDestino) {
+          try {
+            // Adicionar nota de cópia no HTML
+            const htmlCopia = htmlEmail.replace(
+              '</body>',
+              `<div style="margin-top: 20px; padding: 15px; background: #f0f9ff; border-left: 4px solid #0ea5e9; border-radius: 4px;">
+                <p style="margin: 0; color: #0369a1; font-size: 13px;">📋 Esta é uma cópia do relatório enviado para <strong>${emailDestino}</strong>.</p>
+              </div>
+              </body>`
+            );
+            
+            await sendEmail({
+              to: gestorUser.email,
+              subject: `[Cópia] Análise de Fichas de Serviço - ${relatorio.nomeLoja} - ${dataFormatada}`,
+              html: htmlCopia,
+            });
+            console.log(`[Email] Cópia enviada para gestor: ${gestorUser.email}`);
+          } catch (e) {
+            console.error(`[Email] Erro ao enviar cópia para gestor:`, e);
+          }
+        }
+        
         // Marcar como enviado
         await db.marcarRelatorioEnviado(input.relatorioId);
         
-        return { success: true, emailEnviado: emailDestino };
+        return { success: true, emailEnviado: emailDestino, copiaEnviada: gestorUser?.email };
       }),
     
     // Enviar múltiplos relatórios por email
@@ -9005,7 +9029,55 @@ IMPORTANTE:
           }
         }
         
-        return { resultados };
+        // Enviar cópia consolidada para o gestor (apenas uma vez com todos os relatórios)
+        const gestorUser = await db.getUserById(ctx.user.id);
+        const emailsEnviados = resultados.filter(r => r.sucesso).map(r => r.email);
+        
+        if (gestorUser?.email && emailsEnviados.length > 0) {
+          try {
+            const lojasEnviadas = resultados.filter(r => r.sucesso).length;
+            
+            await sendEmail({
+              to: gestorUser.email,
+              subject: `[Cópia] Análise de Fichas de Serviço - ${lojasEnviadas} loja(s) - ${new Date().toLocaleDateString('pt-PT')}`,
+              html: `
+                <!DOCTYPE html>
+                <html>
+                <head><meta charset="UTF-8"></head>
+                <body style="font-family: 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 20px; background: #f5f5f5;">
+                  <div style="max-width: 600px; margin: 0 auto; background: white; border-radius: 8px; padding: 30px;">
+                    <div style="text-align: center; margin-bottom: 20px;">
+                      <span style="font-size: 28px; font-weight: 700;">
+                        <span style="color: #e53935; font-style: italic;">EXPRESS</span><span style="color: #1a365d;">GLASS</span>
+                      </span>
+                    </div>
+                    
+                    <h2 style="color: #333; margin-bottom: 20px;">Relatórios de Análise de Fichas Enviados</h2>
+                    
+                    <div style="background: #f0f9ff; border-left: 4px solid #0ea5e9; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
+                      <p style="margin: 0; color: #0369a1;">📋 Esta é uma confirmação de que os relatórios foram enviados com sucesso.</p>
+                    </div>
+                    
+                    <h3 style="color: #666; font-size: 16px;">Lojas que receberam o relatório:</h3>
+                    <ul style="color: #333;">
+                      ${emailsEnviados.map(email => `<li>${email}</li>`).join('')}
+                    </ul>
+                    
+                    <p style="color: #666; font-size: 14px; margin-top: 30px; text-align: center;">
+                      PoweringEG Platform 2.0 - a IA ao serviço da ExpressGlass
+                    </p>
+                  </div>
+                </body>
+                </html>
+              `,
+            });
+            console.log(`[Email] Cópia consolidada enviada para gestor: ${gestorUser.email}`);
+          } catch (e) {
+            console.error(`[Email] Erro ao enviar cópia consolidada para gestor:`, e);
+          }
+        }
+        
+        return { resultados, copiaEnviada: gestorUser?.email };
       }),
   }),
 });
