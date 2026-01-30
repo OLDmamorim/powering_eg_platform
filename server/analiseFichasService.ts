@@ -769,36 +769,35 @@ export function gerarHTMLEmailAnalise(relatorio: {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Análise de Fichas de Serviço - ${relatorio.nomeLoja}</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f5f5f5; }
-    .container { max-width: 800px; margin: 0 auto; background: white; }
-    .header { background: linear-gradient(135deg, #1a365d 0%, #2c5282 100%); padding: 30px; text-align: center; }
-    .header h1 { color: white; margin: 0 0 10px 0; font-size: 24px; }
-    .header p { color: #e2e8f0; margin: 0; font-size: 14px; }
-    .logo { font-size: 28px; font-weight: bold; color: white; margin-bottom: 15px; }
-    .logo span { color: #48bb78; }
-    .print-notice { background: #fef3c7; border: 2px solid #f59e0b; padding: 15px; margin: 20px; border-radius: 8px; text-align: center; }
-    .print-notice p { color: #92400e; font-weight: bold; margin: 0; font-size: 14px; }
-    .loja-title { background: #f8fafc; padding: 20px; border-bottom: 3px solid #1a365d; margin: 0; }
-    .loja-title h2 { color: #1a365d; margin: 0; font-size: 22px; }
-    .loja-title p { color: #64748b; margin: 5px 0 0 0; font-size: 14px; }
-    .metrics { display: flex; justify-content: space-around; padding: 20px; background: #f8fafc; flex-wrap: wrap; }
-    .metric { text-align: center; padding: 15px; min-width: 100px; }
-    .metric-value { font-size: 32px; font-weight: bold; }
-    .metric-label { font-size: 12px; color: #64748b; margin-top: 5px; }
-    .metric-green { color: #16a34a; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; margin: 0; padding: 0; background: #ffffff; color: #333; font-weight: 400; line-height: 1.5; }
+    .container { max-width: 700px; margin: 0 auto; background: white; }
+    .header { background: #ffffff; padding: 30px 30px 20px 30px; text-align: center; border-bottom: 1px solid #e5e7eb; }
+    .header img { max-width: 200px; height: auto; margin-bottom: 15px; }
+    .header h1 { color: #1f2937; margin: 0 0 8px 0; font-size: 20px; font-weight: 500; }
+    .header p { color: #6b7280; margin: 0; font-size: 13px; font-weight: 400; }
+    .print-notice { background: #fffbeb; border: 1px solid #fcd34d; padding: 12px 20px; margin: 20px 30px; border-radius: 6px; text-align: center; }
+    .print-notice p { color: #92400e; font-weight: 500; margin: 0; font-size: 13px; }
+    .loja-title { background: #f9fafb; padding: 20px 30px; border-bottom: 1px solid #e5e7eb; margin: 0; }
+    .loja-title h2 { color: #1f2937; margin: 0; font-size: 18px; font-weight: 500; }
+    .loja-title p { color: #6b7280; margin: 4px 0 0 0; font-size: 13px; font-weight: 400; }
+    .metrics { display: flex; justify-content: space-around; padding: 25px 20px; background: #ffffff; flex-wrap: wrap; border-bottom: 1px solid #e5e7eb; }
+    .metric { text-align: center; padding: 10px 15px; min-width: 80px; }
+    .metric-value { font-size: 28px; font-weight: 500; }
+    .metric-label { font-size: 11px; color: #6b7280; margin-top: 4px; font-weight: 400; text-transform: uppercase; letter-spacing: 0.5px; }
+    .metric-green { color: #059669; }
     .metric-red { color: #dc2626; }
     .metric-orange { color: #ea580c; }
-    .metric-yellow { color: #ca8a04; }
-    .resumo { padding: 20px; border-bottom: 1px solid #e2e8f0; }
-    .resumo h3 { color: #1a365d; margin: 0 0 15px 0; font-size: 18px; border-bottom: 2px solid #1a365d; padding-bottom: 10px; }
-    .fichas { padding: 20px; }
-    .fichas h3 { color: #1a365d; margin: 0 0 15px 0; font-size: 18px; border-bottom: 2px solid #1a365d; padding-bottom: 10px; }
-    .footer { background: #1a365d; color: white; padding: 20px; text-align: center; font-size: 12px; }
-    .footer a { color: #48bb78; text-decoration: none; }
+    .metric-yellow { color: #d97706; }
+    .resumo { padding: 25px 30px; border-bottom: 1px solid #e5e7eb; }
+    .resumo h3 { color: #1f2937; margin: 0 0 15px 0; font-size: 15px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+    .fichas { padding: 25px 30px; }
+    .fichas h3 { color: #1f2937; margin: 0 0 15px 0; font-size: 15px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+    .footer { background: #f9fafb; color: #6b7280; padding: 20px 30px; text-align: center; font-size: 11px; border-top: 1px solid #e5e7eb; }
+    .footer p { margin: 4px 0; }
     @media print {
       body { background: white; }
       .container { box-shadow: none; }
-      .print-notice { background: #fff9db !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .print-notice { background: #fffbeb !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     }
   </style>
 </head>
@@ -806,7 +805,7 @@ export function gerarHTMLEmailAnalise(relatorio: {
   <div class="container">
     <!-- Cabeçalho -->
     <div class="header">
-      <div class="logo">Express<span>Glass</span></div>
+      <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663088836799/YrkmGCRDVqYgFnZO.png" alt="ExpressGlass" />
       <h1>Análise de Fichas de Serviço</h1>
       <p>${dataFormatada}</p>
     </div>
@@ -845,7 +844,7 @@ export function gerarHTMLEmailAnalise(relatorio: {
     <!-- Resumo da Análise -->
     <div class="resumo">
       <h3>Resumo da Análise</h3>
-      <div style="line-height: 1.6;">
+      <div style="line-height: 1.6; font-size: 14px; color: #374151;">
         ${relatorio.resumo}
       </div>
     </div>
@@ -853,13 +852,15 @@ export function gerarHTMLEmailAnalise(relatorio: {
     <!-- Fichas a Intervir -->
     <div class="fichas">
       <h3>Fichas a Intervir (Detalhe)</h3>
-      ${relatorio.conteudoRelatorio}
+      <div style="font-size: 14px; color: #374151;">
+        ${relatorio.conteudoRelatorio}
+      </div>
     </div>
     
     <!-- Rodapé -->
     <div class="footer">
-      <p>PoweringEG Platform 2.0 - Sistema de Gestão ExpressGlass</p>
-      <p>Este email foi gerado automaticamente. Por favor, não responda a este email.</p>
+      <p>PoweringEG Platform 2.0 - a IA ao serviço da ExpressGlass</p>
+      <p>Este email foi gerado automaticamente.</p>
     </div>
   </div>
 </body>
