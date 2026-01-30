@@ -187,6 +187,9 @@ export default function PortalLoja() {
   const [todoSelecionado, setTodoSelecionado] = useState<number | null>(null);
   const [devolverTodoOpen, setDevolverTodoOpen] = useState(false);
   const [novaReuniaoOpen, setNovaReuniaoOpen] = useState(false);
+  const [novoPendenteOpen, setNovoPendenteOpen] = useState(false);
+  const [novoPendenteDescricao, setNovoPendenteDescricao] = useState("");
+  const [novoPendentePrioridade, setNovoPendentePrioridade] = useState<"baixa" | "media" | "alta" | "urgente">("media");
   const [novaTarefaOpen, setNovaTarefaOpen] = useState(false);
   const [novaTarefaTitulo, setNovaTarefaTitulo] = useState("");
   const [novaTarefaDescricao, setNovaTarefaDescricao] = useState("");
@@ -599,6 +602,17 @@ export default function PortalLoja() {
   const atualizarPendenteMutation = trpc.reunioesQuinzenais.atualizarPendente.useMutation({
     onSuccess: () => {
       toast.success(language === 'pt' ? "Pendente atualizado!" : "Pending item updated!");
+      refetchPendentes();
+    },
+    onError: (error) => toast.error(error.message),
+  });
+
+  const criarPendenteMutation = trpc.reunioesQuinzenais.criarPendente.useMutation({
+    onSuccess: () => {
+      toast.success(language === 'pt' ? "Pendente criado!" : "Pending item created!");
+      setNovoPendenteOpen(false);
+      setNovoPendenteDescricao("");
+      setNovoPendentePrioridade("media");
       refetchPendentes();
     },
     onError: (error) => toast.error(error.message),
@@ -1315,14 +1329,105 @@ export default function PortalLoja() {
 
         {activeTab === "pendentes" && (
           <div className="space-y-4">
+            {/* Botão para criar pendente (apenas responsáveis) */}
+            {lojaAuth?.tipoToken === 'responsavel' && (
+              <div className="flex justify-end">
+                <Dialog open={novoPendenteOpen} onOpenChange={setNovoPendenteOpen}>
+                  <DialogTrigger asChild>
+                    <Button className="bg-amber-600 hover:bg-amber-700">
+                      <Plus className="h-4 w-4 mr-2" />
+                      {language === 'pt' ? 'Novo Pendente' : 'New Pending'}
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>
+                        {language === 'pt' ? 'Criar Novo Pendente' : 'Create New Pending Item'}
+                      </DialogTitle>
+                      <DialogDescription>
+                        {language === 'pt' 
+                          ? 'Adicione um pendente para acompanhamento da loja.' 
+                          : 'Add a pending item for store follow-up.'}
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <div>
+                        <Label>{language === 'pt' ? 'Descrição' : 'Description'}</Label>
+                        <Textarea
+                          value={novoPendenteDescricao}
+                          onChange={(e) => setNovoPendenteDescricao(e.target.value)}
+                          placeholder={language === 'pt' ? 'Descreva o pendente...' : 'Describe the pending item...'}
+                          rows={3}
+                        />
+                      </div>
+                      <div>
+                        <Label>{language === 'pt' ? 'Prioridade' : 'Priority'}</Label>
+                        <Select
+                          value={novoPendentePrioridade}
+                          onValueChange={(v) => setNovoPendentePrioridade(v as any)}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="baixa">{language === 'pt' ? 'Baixa' : 'Low'}</SelectItem>
+                            <SelectItem value="media">{language === 'pt' ? 'Média' : 'Medium'}</SelectItem>
+                            <SelectItem value="alta">{language === 'pt' ? 'Alta' : 'High'}</SelectItem>
+                            <SelectItem value="urgente">{language === 'pt' ? 'Urgente' : 'Urgent'}</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <Button
+                        variant="outline"
+                        onClick={() => setNovoPendenteOpen(false)}
+                      >
+                        {language === 'pt' ? 'Cancelar' : 'Cancel'}
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          if (!novoPendenteDescricao.trim()) {
+                            toast.error(language === 'pt' ? 'Descrição é obrigatória' : 'Description is required');
+                            return;
+                          }
+                          criarPendenteMutation.mutate({
+                            token,
+                            descricao: novoPendenteDescricao,
+                            prioridade: novoPendentePrioridade,
+                          });
+                        }}
+                        disabled={criarPendenteMutation.isPending}
+                        className="bg-amber-600 hover:bg-amber-700"
+                      >
+                        {criarPendenteMutation.isPending && (
+                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                        )}
+                        {language === 'pt' ? 'Criar Pendente' : 'Create Pending'}
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              </div>
+            )}
+            
             {pendentes?.length === 0 ? (
               <Card>
                 <CardContent className="py-12 text-center">
                   <CheckCircle2 className="h-12 w-12 mx-auto text-green-500 mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">Sem pendentes!</h3>
+                  <h3 className="text-lg font-semibold mb-2">{language === 'pt' ? 'Sem pendentes!' : 'No pending items!'}</h3>
                   <p className="text-muted-foreground">
-                    Não existem pendentes atribuídos a esta loja.
+                    {language === 'pt' 
+                      ? 'Não existem pendentes atribuídos a esta loja.' 
+                      : 'There are no pending items assigned to this store.'}
                   </p>
+                  {lojaAuth?.tipoToken === 'responsavel' && (
+                    <p className="text-sm text-muted-foreground mt-2">
+                      {language === 'pt' 
+                        ? 'Clique em "Novo Pendente" para adicionar um.' 
+                        : 'Click "New Pending" to add one.'}
+                    </p>
+                  )}
                 </CardContent>
               </Card>
             ) : (
@@ -1339,6 +1444,7 @@ export default function PortalLoja() {
                     });
                   }}
                   isUpdating={atualizarPendenteMutation.isPending}
+                  canResolve={lojaAuth?.tipoToken === 'responsavel'}
                 />
               ))
             )}
@@ -3753,11 +3859,13 @@ function PendenteCard({
   onAtualizar,
   isUpdating,
   compact,
+  canResolve = true,
 }: {
   pendente: any;
   onAtualizar: (estado: 'pendente' | 'em_progresso' | 'resolvido', comentario?: string) => void;
   isUpdating?: boolean;
   compact?: boolean;
+  canResolve?: boolean;
 }) {
   const { language } = useLanguage();
   const [comentario, setComentario] = useState(pendente.comentarioLoja || "");
@@ -3801,7 +3909,7 @@ function PendenteCard({
               </p>
             )}
           </div>
-          {pendente.estado !== 'resolvido' && (
+          {pendente.estado !== 'resolvido' && canResolve && (
             <div className="flex gap-2">
               <Button
                 variant="ghost"

@@ -537,7 +537,8 @@ export type InsertVendaComplementar = typeof vendasComplementares.$inferInsert;
 export const pendentesLoja = mysqlTable("pendentes_loja", {
   id: int("id").autoincrement().primaryKey(),
   lojaId: int("lojaId").notNull(), // FK para lojas.id
-  criadoPor: int("criadoPor").notNull(), // FK para users.id (gestor ou admin que criou)
+  criadoPor: int("criadoPor"), // FK para users.id (gestor ou admin que criou) - NULL quando criado pela loja
+  criadoPelaLoja: boolean("criadoPelaLoja").default(false).notNull(), // Se foi criado pela própria loja
   descricao: text("descricao").notNull(),
   prioridade: mysqlEnum("prioridade", ["baixa", "media", "alta", "urgente"]).default("media").notNull(),
   estado: mysqlEnum("estado", ["pendente", "em_progresso", "resolvido"]).default("pendente").notNull(),

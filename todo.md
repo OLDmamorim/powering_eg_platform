@@ -3849,3 +3849,4 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Fix: Template email análise fichas - métricas na horizontal, botão imprimir, corrigir logo
 - [x] Fix: Template email - remover botão imprimir (erro segurança), corrigir logo que não aparece
 - [x] Fix: Logo no email - imitar estética original (EXPRESS vermelho itálico, GLASS azul)
+- [x] Feature: Portal da Loja - responsáveis podem adicionar pendentes e marcar como resolvido

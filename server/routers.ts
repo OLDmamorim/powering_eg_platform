@@ -4626,6 +4626,32 @@ IMPORTANTE:
         return await db.listarPendentesLoja(auth.loja.id, input.apenasAtivos ?? true);
       }),
     
+    // Criar pendente (pela loja)
+    criarPendente: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        descricao: z.string().min(1, 'Descrição é obrigatória'),
+        prioridade: z.enum(['baixa', 'media', 'alta', 'urgente']).optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const auth = await db.validarTokenLoja(input.token);
+        if (!auth) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        
+        // Verificar se é responsável (não colaborador)
+        if (auth.tokenData.tipo !== 'responsavel') {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Apenas responsáveis podem criar pendentes' });
+        }
+        
+        return await db.criarPendenteLoja({
+          lojaId: auth.loja.id,
+          criadoPelaLoja: true,
+          descricao: input.descricao,
+          prioridade: input.prioridade || 'media',
+        });
+      }),
+    
     // Atualizar estado de pendente (pela loja)
     atualizarPendente: publicProcedure
       .input(z.object({

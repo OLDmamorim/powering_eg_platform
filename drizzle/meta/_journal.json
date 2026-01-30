@@ -421,6 +421,13 @@
       "when": 1769729822266,
       "tag": "0059_bizarre_blacklash",
       "breakpoints": true
+    },
+    {
+      "idx": 60,
+      "version": "5",
+      "when": 1769784982646,
+      "tag": "0060_lush_hairball",
+      "breakpoints": true
     }
   ]
 }
