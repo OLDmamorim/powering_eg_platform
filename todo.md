@@ -3853,3 +3853,4 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Bug: Pendentes criados pela loja não aparecem na lista nem no chatbot
 - [x] Fix: Mapeamento Porto Alto case-insensitive na análise de fichas
 - [x] Bug: Gestores não recebem cópia do relatório de análise de fichas enviado para as lojas
+- [x] Feature: Gestores recebem cópia dos relatórios livres e completos enviados para as lojas

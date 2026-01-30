@@ -437,7 +437,7 @@ export async function getGestorByUserId(userId: number): Promise<Gestor | undefi
   return gestorResult[0];
 }
 
-export async function getGestorById(id: number): Promise<{ id: number; nome: string } | undefined> {
+export async function getGestorById(id: number): Promise<{ id: number; nome: string; email: string | null } | undefined> {
   const db = await getDb();
   if (!db) return undefined;
   
@@ -445,6 +445,7 @@ export async function getGestorById(id: number): Promise<{ id: number; nome: str
     .select({
       id: gestores.id,
       nome: users.name,
+      email: users.email,
     })
     .from(gestores)
     .innerJoin(users, eq(gestores.userId, users.id))
@@ -452,7 +453,7 @@ export async function getGestorById(id: number): Promise<{ id: number; nome: str
     .limit(1);
   
   if (result[0]) {
-    return { id: result[0].id, nome: result[0].nome || 'Desconhecido' };
+    return { id: result[0].id, nome: result[0].nome || 'Desconhecido', email: result[0].email };
   }
   return undefined;
 }

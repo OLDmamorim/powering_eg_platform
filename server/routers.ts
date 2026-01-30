@@ -1596,10 +1596,12 @@ IMPORTANTE:
         });
         
         // Enviar email com fotos como anexos
+        const htmlComAnexos = html + (validAttachments.length > 0 ? `<p style="margin-top: 20px; color: #10b981;"><strong>📷 ${validAttachments.length} foto(s) anexada(s) a este email</strong></p>` : '');
+        
         const enviado = await sendEmail({
           to: loja.email,
           subject: `Relatório de Visita - ${loja.nome} - ${new Date(relatorio.dataVisita).toLocaleDateString('pt-PT')}`,
-          html: html + (validAttachments.length > 0 ? `<p style="margin-top: 20px; color: #10b981;"><strong>📷 ${validAttachments.length} foto(s) anexada(s) a este email</strong></p>` : ''),
+          html: htmlComAnexos,
           attachments: validAttachments,
         });
         
@@ -1607,7 +1609,30 @@ IMPORTANTE:
           throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Falha ao enviar email' });
         }
         
-        return { success: true, email: loja.email };
+        // Enviar cópia para o gestor
+        if (gestor?.email && gestor.email !== loja.email) {
+          try {
+            const htmlCopia = htmlComAnexos.replace(
+              '</body>',
+              `<div style="margin-top: 20px; padding: 15px; background: #f0f9ff; border-left: 4px solid #0ea5e9; border-radius: 4px;">
+                <p style="margin: 0; color: #0369a1; font-size: 13px;">📋 Esta é uma cópia do relatório enviado para <strong>${loja.email}</strong>.</p>
+              </div>
+              </body>`
+            );
+            
+            await sendEmail({
+              to: gestor.email,
+              subject: `[Cópia] Relatório de Visita - ${loja.nome} - ${new Date(relatorio.dataVisita).toLocaleDateString('pt-PT')}`,
+              html: htmlCopia,
+              attachments: validAttachments,
+            });
+            console.log(`[Email] Cópia do relatório livre enviada para gestor: ${gestor.email}`);
+          } catch (e) {
+            console.error(`[Email] Erro ao enviar cópia do relatório livre para gestor:`, e);
+          }
+        }
+        
+        return { success: true, email: loja.email, copiaEnviada: gestor?.email };
       }),
   }),
 
@@ -1892,10 +1917,12 @@ IMPORTANTE:
           throw new TRPCError({ code: 'BAD_REQUEST', message: 'Loja não tem email configurado' });
         }
         
+        const htmlComAnexos = html + (validAttachments.length > 0 ? `<p style="margin-top: 20px; color: #10b981;"><strong>📷 ${validAttachments.length} foto(s) anexada(s) a este email</strong></p>` : '');
+        
         const enviado = await sendEmail({
           to: loja.email,
           subject: `Relatório Completo de Visita - ${loja.nome} - ${new Date(relatorio.dataVisita).toLocaleDateString('pt-PT')}`,
-          html: html + (validAttachments.length > 0 ? `<p style="margin-top: 20px; color: #10b981;"><strong>📷 ${validAttachments.length} foto(s) anexada(s) a este email</strong></p>` : ''),
+          html: htmlComAnexos,
           attachments: validAttachments,
         });
         
@@ -1903,7 +1930,30 @@ IMPORTANTE:
           throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Falha ao enviar email' });
         }
         
-        return { success: true, email: loja.email };
+        // Enviar cópia para o gestor
+        if (gestor?.email && gestor.email !== loja.email) {
+          try {
+            const htmlCopia = htmlComAnexos.replace(
+              '</body>',
+              `<div style="margin-top: 20px; padding: 15px; background: #f0f9ff; border-left: 4px solid #0ea5e9; border-radius: 4px;">
+                <p style="margin: 0; color: #0369a1; font-size: 13px;">📋 Esta é uma cópia do relatório enviado para <strong>${loja.email}</strong>.</p>
+              </div>
+              </body>`
+            );
+            
+            await sendEmail({
+              to: gestor.email,
+              subject: `[Cópia] Relatório Completo de Visita - ${loja.nome} - ${new Date(relatorio.dataVisita).toLocaleDateString('pt-PT')}`,
+              html: htmlCopia,
+              attachments: validAttachments,
+            });
+            console.log(`[Email] Cópia do relatório completo enviada para gestor: ${gestor.email}`);
+          } catch (e) {
+            console.error(`[Email] Erro ao enviar cópia do relatório completo para gestor:`, e);
+          }
+        }
+        
+        return { success: true, email: loja.email, copiaEnviada: gestor?.email };
       }),
   }),
 
