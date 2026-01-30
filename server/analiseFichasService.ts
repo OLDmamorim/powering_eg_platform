@@ -789,7 +789,7 @@ export function gerarHTMLEmailAnalise(relatorio: {
           <!-- Cabeçalho com Logo em Texto -->
           <tr>
             <td align="center" style="padding: 30px 30px 20px 30px; border-bottom: 1px solid #e5e7eb;">
-              <div style="font-size: 28px; font-weight: 600; color: #1a365d; margin-bottom: 15px;">Express<span style="color: #10b981;">Glass</span></div>
+              <div style="font-size: 26px; margin-bottom: 15px;"><span style="color: #e53935; font-weight: 700; font-style: italic;">EXPRESS</span><span style="color: #1a365d; font-weight: 400;">GLASS</span></div>
               <h1 style="color: #1f2937; margin: 0 0 8px 0; font-size: 20px; font-weight: 500;">Análise de Fichas de Serviço</h1>
               <p style="color: #6b7280; margin: 0; font-size: 13px; font-weight: 400;">${dataFormatada}</p>
             </td>

@@ -3848,3 +3848,4 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Fix: Template de email da análise de fichas - mudar Glass para ExpressGlass, design mais limpo, tipografia mais leve
 - [x] Fix: Template email análise fichas - métricas na horizontal, botão imprimir, corrigir logo
 - [x] Fix: Template email - remover botão imprimir (erro segurança), corrigir logo que não aparece
+- [x] Fix: Logo no email - imitar estética original (EXPRESS vermelho itálico, GLASS azul)
