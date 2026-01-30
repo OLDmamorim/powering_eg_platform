@@ -3846,3 +3846,4 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Fix: Histórico de análises de fichas de serviço não abre análises anteriores
 - [x] Associar loja "Paredes II" ao nome "Mycarcenter" na análise de fichas de serviço
 - [x] Fix: Template de email da análise de fichas - mudar Glass para ExpressGlass, design mais limpo, tipografia mais leve
+- [x] Fix: Template email análise fichas - métricas na horizontal, botão imprimir, corrigir logo

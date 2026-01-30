@@ -761,6 +761,11 @@ export function gerarHTMLEmailAnalise(relatorio: {
   
   const numeroLojaTexto = relatorio.numeroLoja ? ` (#${relatorio.numeroLoja})` : '';
   
+  // Cores para métricas
+  const corAbertas5Dias = relatorio.fichasAbertas5Dias > 0 ? '#dc2626' : '#059669';
+  const corStatusAlerta = relatorio.fichasStatusAlerta > 0 ? '#ea580c' : '#059669';
+  const corSemNotas = relatorio.fichasSemNotas > 0 ? '#d97706' : '#059669';
+  
   return `
 <!DOCTYPE html>
 <html lang="pt">
@@ -769,100 +774,115 @@ export function gerarHTMLEmailAnalise(relatorio: {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Análise de Fichas de Serviço - ${relatorio.nomeLoja}</title>
   <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; margin: 0; padding: 0; background: #ffffff; color: #333; font-weight: 400; line-height: 1.5; }
-    .container { max-width: 700px; margin: 0 auto; background: white; }
-    .header { background: #ffffff; padding: 30px 30px 20px 30px; text-align: center; border-bottom: 1px solid #e5e7eb; }
-    .header img { max-width: 200px; height: auto; margin-bottom: 15px; }
-    .header h1 { color: #1f2937; margin: 0 0 8px 0; font-size: 20px; font-weight: 500; }
-    .header p { color: #6b7280; margin: 0; font-size: 13px; font-weight: 400; }
-    .print-notice { background: #fffbeb; border: 1px solid #fcd34d; padding: 12px 20px; margin: 20px 30px; border-radius: 6px; text-align: center; }
-    .print-notice p { color: #92400e; font-weight: 500; margin: 0; font-size: 13px; }
-    .loja-title { background: #f9fafb; padding: 20px 30px; border-bottom: 1px solid #e5e7eb; margin: 0; }
-    .loja-title h2 { color: #1f2937; margin: 0; font-size: 18px; font-weight: 500; }
-    .loja-title p { color: #6b7280; margin: 4px 0 0 0; font-size: 13px; font-weight: 400; }
-    .metrics { display: flex; justify-content: space-around; padding: 25px 20px; background: #ffffff; flex-wrap: wrap; border-bottom: 1px solid #e5e7eb; }
-    .metric { text-align: center; padding: 10px 15px; min-width: 80px; }
-    .metric-value { font-size: 28px; font-weight: 500; }
-    .metric-label { font-size: 11px; color: #6b7280; margin-top: 4px; font-weight: 400; text-transform: uppercase; letter-spacing: 0.5px; }
-    .metric-green { color: #059669; }
-    .metric-red { color: #dc2626; }
-    .metric-orange { color: #ea580c; }
-    .metric-yellow { color: #d97706; }
-    .resumo { padding: 25px 30px; border-bottom: 1px solid #e5e7eb; }
-    .resumo h3 { color: #1f2937; margin: 0 0 15px 0; font-size: 15px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
-    .fichas { padding: 25px 30px; }
-    .fichas h3 { color: #1f2937; margin: 0 0 15px 0; font-size: 15px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
-    .footer { background: #f9fafb; color: #6b7280; padding: 20px 30px; text-align: center; font-size: 11px; border-top: 1px solid #e5e7eb; }
-    .footer p { margin: 4px 0; }
     @media print {
-      body { background: white; }
-      .container { box-shadow: none; }
-      .print-notice { background: #fffbeb !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .no-print { display: none !important; }
+      body { background: white !important; }
     }
   </style>
 </head>
-<body>
-  <div class="container">
-    <!-- Cabeçalho -->
-    <div class="header">
-      <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663088836799/YrkmGCRDVqYgFnZO.png" alt="ExpressGlass" />
-      <h1>Análise de Fichas de Serviço</h1>
-      <p>${dataFormatada}</p>
-    </div>
-    
-    <!-- Aviso para Imprimir -->
-    <div class="print-notice">
-      <p>⚠️ IMPRIMIR ESTE RELATÓRIO E ATUAR EM CONFORMIDADE NOS PROCESSOS IDENTIFICADOS</p>
-    </div>
-    
-    <!-- Título da Loja -->
-    <div class="loja-title">
-      <h2>${relatorio.nomeLoja}${numeroLojaTexto}</h2>
-      <p>Relatório de Monitorização de Fichas de Serviço</p>
-    </div>
-    
-    <!-- Métricas -->
-    <div class="metrics">
-      <div class="metric">
-        <div class="metric-value">${relatorio.totalFichas}</div>
-        <div class="metric-label">Total Fichas</div>
-      </div>
-      <div class="metric">
-        <div class="metric-value ${relatorio.fichasAbertas5Dias > 0 ? 'metric-red' : 'metric-green'}">${relatorio.fichasAbertas5Dias}</div>
-        <div class="metric-label">Abertas +5 dias</div>
-      </div>
-      <div class="metric">
-        <div class="metric-value ${relatorio.fichasStatusAlerta > 0 ? 'metric-orange' : 'metric-green'}">${relatorio.fichasStatusAlerta}</div>
-        <div class="metric-label">Status Alerta</div>
-      </div>
-      <div class="metric">
-        <div class="metric-value ${relatorio.fichasSemNotas > 0 ? 'metric-yellow' : 'metric-green'}">${relatorio.fichasSemNotas}</div>
-        <div class="metric-label">Sem Notas</div>
-      </div>
-    </div>
-    
-    <!-- Resumo da Análise -->
-    <div class="resumo">
-      <h3>Resumo da Análise</h3>
-      <div style="line-height: 1.6; font-size: 14px; color: #374151;">
-        ${relatorio.resumo}
-      </div>
-    </div>
-    
-    <!-- Fichas a Intervir -->
-    <div class="fichas">
-      <h3>Fichas a Intervir (Detalhe)</h3>
-      <div style="font-size: 14px; color: #374151;">
-        ${relatorio.conteudoRelatorio}
-      </div>
-    </div>
-    
-    <!-- Rodapé -->
-    <div class="footer">
-      <p>PoweringEG Platform 2.0 - a IA ao serviço da ExpressGlass</p>
-      <p>Este email foi gerado automaticamente.</p>
-    </div>
-  </div>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; margin: 0; padding: 0; background: #f5f5f5; color: #333; font-weight: 400; line-height: 1.5;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background: #f5f5f5;">
+    <tr>
+      <td align="center" style="padding: 20px;">
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="background: #ffffff; border-radius: 8px; overflow: hidden;">
+          
+          <!-- Cabeçalho com Logo -->
+          <tr>
+            <td align="center" style="padding: 30px 30px 20px 30px; border-bottom: 1px solid #e5e7eb;">
+              <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663088836799/YrkmGCRDVqYgFnZO.png" alt="ExpressGlass" width="180" style="display: block; width: 180px; max-width: 180px; height: auto;" />
+              <h1 style="color: #1f2937; margin: 15px 0 8px 0; font-size: 20px; font-weight: 500;">Análise de Fichas de Serviço</h1>
+              <p style="color: #6b7280; margin: 0; font-size: 13px; font-weight: 400;">${dataFormatada}</p>
+            </td>
+          </tr>
+          
+          <!-- Botão Imprimir -->
+          <tr class="no-print">
+            <td align="center" style="padding: 20px 30px;">
+              <a href="javascript:window.print()" style="display: inline-block; background: #1a365d; color: #ffffff; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-size: 14px; font-weight: 500;">
+                🖨️ Imprimir Relatório
+              </a>
+            </td>
+          </tr>
+          
+          <!-- Aviso para Imprimir -->
+          <tr>
+            <td style="padding: 0 30px 20px 30px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background: #fffbeb; border: 1px solid #fcd34d; border-radius: 6px;">
+                <tr>
+                  <td align="center" style="padding: 12px 20px;">
+                    <p style="color: #92400e; font-weight: 500; margin: 0; font-size: 13px;">⚠️ IMPRIMIR ESTE RELATÓRIO E ATUAR EM CONFORMIDADE NOS PROCESSOS IDENTIFICADOS</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          
+          <!-- Título da Loja -->
+          <tr>
+            <td style="background: #f9fafb; padding: 20px 30px; border-bottom: 1px solid #e5e7eb;">
+              <h2 style="color: #1f2937; margin: 0; font-size: 18px; font-weight: 500;">${relatorio.nomeLoja}${numeroLojaTexto}</h2>
+              <p style="color: #6b7280; margin: 4px 0 0 0; font-size: 13px; font-weight: 400;">Relatório de Monitorização de Fichas de Serviço</p>
+            </td>
+          </tr>
+          
+          <!-- Métricas em Tabela Horizontal -->
+          <tr>
+            <td style="padding: 25px 20px; border-bottom: 1px solid #e5e7eb;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td align="center" width="25%" style="padding: 10px;">
+                    <div style="font-size: 28px; font-weight: 500; color: #1f2937;">${relatorio.totalFichas}</div>
+                    <div style="font-size: 11px; color: #6b7280; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Total Fichas</div>
+                  </td>
+                  <td align="center" width="25%" style="padding: 10px;">
+                    <div style="font-size: 28px; font-weight: 500; color: ${corAbertas5Dias};">${relatorio.fichasAbertas5Dias}</div>
+                    <div style="font-size: 11px; color: #6b7280; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Abertas +5 dias</div>
+                  </td>
+                  <td align="center" width="25%" style="padding: 10px;">
+                    <div style="font-size: 28px; font-weight: 500; color: ${corStatusAlerta};">${relatorio.fichasStatusAlerta}</div>
+                    <div style="font-size: 11px; color: #6b7280; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Status Alerta</div>
+                  </td>
+                  <td align="center" width="25%" style="padding: 10px;">
+                    <div style="font-size: 28px; font-weight: 500; color: ${corSemNotas};">${relatorio.fichasSemNotas}</div>
+                    <div style="font-size: 11px; color: #6b7280; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Sem Notas</div>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          
+          <!-- Resumo da Análise -->
+          <tr>
+            <td style="padding: 25px 30px; border-bottom: 1px solid #e5e7eb;">
+              <h3 style="color: #1f2937; margin: 0 0 15px 0; font-size: 15px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">Resumo da Análise</h3>
+              <div style="line-height: 1.6; font-size: 14px; color: #374151;">
+                ${relatorio.resumo}
+              </div>
+            </td>
+          </tr>
+          
+          <!-- Fichas a Intervir -->
+          <tr>
+            <td style="padding: 25px 30px;">
+              <h3 style="color: #1f2937; margin: 0 0 15px 0; font-size: 15px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">Fichas a Intervir (Detalhe)</h3>
+              <div style="font-size: 14px; color: #374151;">
+                ${relatorio.conteudoRelatorio}
+              </div>
+            </td>
+          </tr>
+          
+          <!-- Rodapé -->
+          <tr>
+            <td style="background: #f9fafb; padding: 20px 30px; text-align: center; border-top: 1px solid #e5e7eb;">
+              <p style="color: #6b7280; margin: 4px 0; font-size: 11px;">PoweringEG Platform 2.0 - a IA ao serviço da ExpressGlass</p>
+              <p style="color: #6b7280; margin: 4px 0; font-size: 11px;">Este email foi gerado automaticamente.</p>
+            </td>
+          </tr>
+          
+        </table>
+      </td>
+    </tr>
+  </table>
 </body>
 </html>
   `.trim();
