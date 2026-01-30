@@ -409,11 +409,7 @@ function gerarHTMLRelatorio(relatorio: RelatorioLoja): string {
     html += `</div>`;
   }
   
-  // Resumo
-  html += `<div style="margin: 20px 0; padding: 15px; background: #f8fafc; border-radius: 8px; border: 2px solid #1a365d;">`;
-  html += `<h3 style="margin: 0 0 10px 0; color: #1a365d;">RESUMO DA ANÁLISE</h3>`;
-  html += `<p style="margin: 0; line-height: 1.6;">${relatorio.resumo}</p>`;
-  html += `</div>`;
+  // Nota: O resumo é mostrado separadamente no modal, não incluir aqui para evitar duplicação
   
   html += `</div>`;
   
