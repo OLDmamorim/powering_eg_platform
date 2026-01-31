@@ -3871,3 +3871,4 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Bug: PDF análise fichas - página 2 quase vazia (só título "FS SEM NOTAS")
 - [x] Bug: PDF análise fichas - conteúdo não flui corretamente entre páginas
 - [x] Bug: PDF análise fichas - títulos órfãos (título de secção sozinho no final da página, itens na página seguinte)
+- [x] Feature: PDF análise fichas - conteúdo flui naturalmente sem páginas vazias

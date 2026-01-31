@@ -252,7 +252,8 @@ export async function gerarPDFAnaliseFichas(relatorio: {
       const seccoesExtraidas = extrairSeccoesDoHTML(relatorio.conteudoRelatorio);
       
       if (seccoesExtraidas.length > 0) {
-        // PDFKit gere automaticamente as quebras de página
+        // Adicionar espaço antes dos detalhes das fichas
+        doc.moveDown(1);
         
         doc.fontSize(14)
            .font('Helvetica-Bold')
