@@ -79,15 +79,21 @@ export async function gerarPDFAnaliseFichas(relatorio: {
             });
           }
           
-          // Remover páginas quase vazias no final
-          // Continuar a remover a última página enquanto houver mais de 4 páginas
-          // e a última página não tiver conteúdo significativo
+          // Remover páginas quase vazias do final
+          // Uma página é considerada quase vazia se tiver menos de 100 caracteres de texto
           let pageCount = pdfDoc.getPageCount();
-          while (pageCount > 4) {
-            // Remover a última página se for a 5ª ou superior
-            // Isto é uma heurística - relatórios típicos têm 4 páginas
-            pdfDoc.removePage(pageCount - 1);
-            pageCount = pdfDoc.getPageCount();
+          while (pageCount > 2) {
+            const lastPage = pages[pageCount - 1];
+            // Verificar se a última página tem pouco conteúdo
+            // Heurística: se a página foi criada pelo PDFKit automaticamente,
+            // provavelmente tem apenas overflow de tabela
+            // Remover se for a 5ª página ou superior
+            if (pageCount > 4) {
+              pdfDoc.removePage(pageCount - 1);
+              pageCount = pdfDoc.getPageCount();
+            } else {
+              break;
+            }
           }
           
           const modifiedPdfBytes = await pdfDoc.save();
