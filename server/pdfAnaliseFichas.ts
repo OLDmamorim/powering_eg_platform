@@ -263,7 +263,14 @@ export async function gerarPDFAnaliseFichas(relatorio: {
         
         // Renderizar cada secção
         for (const seccao of seccoesExtraidas) {
-          // PDFKit gere automaticamente as quebras de página
+          // Verificar se há espaço suficiente para o título + pelo menos 3 itens
+          // Altura necessária: título (28) + 3 itens (3*14) + total (20) + margem (20) = ~110px
+          const espacoNecessario = 110;
+          const espacoDisponivel = 842 - 60 - doc.y; // A4 height - bottom margin - current Y
+          
+          if (espacoDisponivel < espacoNecessario) {
+            doc.addPage();
+          }
           
           // Fundo colorido para o título da secção
           const tituloY = doc.y;
