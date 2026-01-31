@@ -8911,7 +8911,10 @@ IMPORTANTE:
     
     // Obter detalhes de uma análise
     detalhes: gestorProcedure
-      .input(z.object({ analiseId: z.number() }))
+      .input(z.object({ 
+        analiseId: z.number(),
+        gestorIdFiltro: z.number().optional(), // Admin pode filtrar por gestor
+      }))
       .query(async ({ input, ctx }) => {
         const analise = await db.getAnaliseById(input.analiseId);
         if (!analise) {
@@ -8932,12 +8935,22 @@ IMPORTANTE:
         const evolucao = await db.getEvolucaoByAnaliseId(input.analiseId);
         
         // Obter lojas do gestor para marcar quais pertencem a ele
-        // Admin vê todas as lojas como pertencentes, gestor vê apenas as suas
+        // Admin pode filtrar por gestor específico, ou ver todas
         let lojasGestorIds: number[] = [];
+        let gestorFiltrado: { id: number; nome: string } | null = null;
+        
         if (ctx.user.role === 'admin') {
-          // Admin vê todas as lojas
-          const todasLojas = await db.getAllLojas();
-          lojasGestorIds = todasLojas.map(l => l.id);
+          if (input.gestorIdFiltro) {
+            // Admin está a filtrar por um gestor específico
+            const lojasGestor = await db.getLojasByGestorId(input.gestorIdFiltro);
+            lojasGestorIds = lojasGestor.map(l => l.id);
+            const gestor = await db.getGestorById(input.gestorIdFiltro);
+            gestorFiltrado = gestor ? { id: gestor.id, nome: gestor.nome } : null;
+          } else {
+            // Admin vê todas as lojas
+            const todasLojas = await db.getAllLojas();
+            lojasGestorIds = todasLojas.map(l => l.id);
+          }
         } else if (ctx.gestor) {
           const lojasGestor = await db.getLojasByGestorId(ctx.gestor.id);
           lojasGestorIds = lojasGestor.map(l => l.id);
@@ -8945,13 +8958,14 @@ IMPORTANTE:
         
         const relatoriosComInfo = relatorios.map(r => ({
           ...r,
-          pertenceAoGestor: r.lojaId ? lojasGestorIds.includes(r.lojaId) : (ctx.user.role === 'admin'),
+          pertenceAoGestor: r.lojaId ? lojasGestorIds.includes(r.lojaId) : (ctx.user.role === 'admin' && !input.gestorIdFiltro),
           evolucao: evolucao.find(e => e.nomeLoja === r.nomeLoja) || null,
         }));
         
         return {
           analise,
           relatorios: relatoriosComInfo,
+          gestorFiltrado, // Informar qual gestor está filtrado (para Admin)
         };
       }),
     

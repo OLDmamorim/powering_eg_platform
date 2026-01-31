@@ -40,6 +40,7 @@ export default function AnaliseFichas() {
   const [selectedRelatorio, setSelectedRelatorio] = useState<any>(null);
   const [showGestorDialog, setShowGestorDialog] = useState(false);
   const [selectedGestorId, setSelectedGestorId] = useState<number | null>(null);
+  const [filtroGestorId, setFiltroGestorId] = useState<number | null>(null); // Filtro de gestor para visualização (Admin)
   const [pendingFileBase64, setPendingFileBase64] = useState<string | null>(null);
   const [pendingFileName, setPendingFileName] = useState<string | null>(null);
   const [showRelatorioDialog, setShowRelatorioDialog] = useState(false);
@@ -48,7 +49,10 @@ export default function AnaliseFichas() {
   // Queries
   const { data: analises, refetch: refetchAnalises } = trpc.analiseFichas.listar.useQuery();
   const { data: detalhesAnalise, isLoading: loadingDetalhes, error: detalhesError } = trpc.analiseFichas.detalhes.useQuery(
-    { analiseId: selectedAnalise! },
+    { 
+      analiseId: selectedAnalise!, 
+      gestorIdFiltro: isAdmin ? (filtroGestorId ?? undefined) : undefined 
+    },
     { enabled: !!selectedAnalise }
   );
   
@@ -298,20 +302,50 @@ export default function AnaliseFichas() {
                         </CardTitle>
                         <CardDescription>
                           Analisado em {new Date(detalhesAnalise.analise.dataUpload).toLocaleString('pt-PT')}
+                          {isAdmin && detalhesAnalise.gestorFiltrado && (
+                            <span className="ml-2 text-primary font-medium">
+                              • A ver lojas de: {detalhesAnalise.gestorFiltrado.nome}
+                            </span>
+                          )}
                         </CardDescription>
                       </div>
-                      <Button 
-                        onClick={handleEnviarTodos}
-                        disabled={enviarEmailsMutation.isPending}
-                        title="Envia relatórios apenas para as suas lojas (lojas atribuídas a si)"
-                      >
-                        {enviarEmailsMutation.isPending ? (
-                          <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                        ) : (
-                          <Send className="mr-2 h-4 w-4" />
+                      <div className="flex items-center gap-2">
+                        {/* Seletor de Gestor para Admin */}
+                        {isAdmin && gestores && gestores.length > 0 && (
+                          <Select
+                            value={filtroGestorId?.toString() || 'todos'}
+                            onValueChange={(value) => {
+                              setFiltroGestorId(value === 'todos' ? null : parseInt(value));
+                            }}
+                          >
+                            <SelectTrigger className="w-[200px]">
+                              <SelectValue placeholder="Filtrar por gestor" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="todos">Todos os Gestores</SelectItem>
+                              {gestores
+                                .sort((a, b) => a.nome.localeCompare(b.nome))
+                                .map((gestor) => (
+                                  <SelectItem key={gestor.id} value={gestor.id.toString()}>
+                                    {gestor.nome}
+                                  </SelectItem>
+                                ))}
+                            </SelectContent>
+                          </Select>
                         )}
-                        Enviar às Minhas Lojas
-                      </Button>
+                        <Button 
+                          onClick={handleEnviarTodos}
+                          disabled={enviarEmailsMutation.isPending}
+                          title="Envia relatórios apenas para as lojas visíveis"
+                        >
+                          {enviarEmailsMutation.isPending ? (
+                            <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                          ) : (
+                            <Send className="mr-2 h-4 w-4" />
+                          )}
+                          {isAdmin && filtroGestorId ? 'Enviar às Lojas' : 'Enviar às Minhas Lojas'}
+                        </Button>
+                      </div>
                     </div>
                   </CardHeader>
                   <CardContent>
