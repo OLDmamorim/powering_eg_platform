@@ -3861,3 +3861,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Feature: Botão de download PDF do relatório de análise de fichas na interface web
 - [x] Bug: PDF de análise de fichas - limpar tags HTML do resumo, melhorar formatação, remover páginas vazias
 - [x] Feature: Adicionar imagem do logo oficial ExpressGlass no PDF de análise de fichas
+- [x] Fix: PDF análise fichas - texto centrado na página (não encostado à direita)
+- [x] Fix: PDF análise fichas - adicionar tabela de fichas por status
+- [x] Fix: PDF análise fichas - adicionar lista detalhada de fichas abertas +5 dias
+- [x] Fix: PDF análise fichas - adicionar lista detalhada de fichas sem notas
+- [x] Fix: PDF análise fichas - adicionar lista detalhada de fichas sem email
+- [x] Fix: PDF análise fichas - remover páginas vazias no final

@@ -3,6 +3,16 @@
  * Converte o relatório para PDF em base64
  */
 
+interface FichaParaPDF {
+  obrano: number;
+  matricula: string | null;
+  status: string | null;
+  diasAberto?: number;
+  diasExecutado?: number;
+  diasNota?: number;
+  email?: string;
+}
+
 export async function gerarPDFAnaliseFichas(relatorio: {
   nomeLoja: string;
   numeroLoja: number | null;
@@ -16,6 +26,7 @@ export async function gerarPDFAnaliseFichas(relatorio: {
   fichasSemEmailCliente: number;
   resumo: string;
   conteudoRelatorio: string;
+  statusCount?: Record<string, number>;
 }, dataAnalise: Date): Promise<string> {
   const PDFDocument = (await import('pdfkit')).default;
   const path = await import('path');
@@ -25,32 +36,84 @@ export async function gerarPDFAnaliseFichas(relatorio: {
     try {
       const doc = new PDFDocument({
         size: 'A4',
-        margins: { top: 40, bottom: 40, left: 40, right: 40 },
+        margins: { top: 40, bottom: 60, left: 40, right: 40 },
         bufferPages: true,
+        autoFirstPage: true,
+      });
+      
+      // Rastrear páginas com conteúdo
+      const pagesWithContent: Set<number> = new Set([0]); // Página 0 sempre tem conteúdo (cabeçalho)
+      let currentPageIndex = 0;
+      
+      doc.on('pageAdded', () => {
+        currentPageIndex++;
+        // Marcar a página anterior como tendo conteúdo se doc.y > 100
+        // (significa que algo foi escrito)
       });
       
       const chunks: Buffer[] = [];
       
       doc.on('data', (chunk: Buffer) => chunks.push(chunk));
-      doc.on('end', () => {
-        const pdfBuffer = Buffer.concat(chunks);
-        const base64 = pdfBuffer.toString('base64');
-        resolve(base64);
+      doc.on('end', async () => {
+        try {
+          const pdfBuffer = Buffer.concat(chunks);
+          
+          // Pós-processar com pdf-lib para adicionar rodapés e remover páginas vazias
+          const { PDFDocument: PDFLib, rgb, StandardFonts } = await import('pdf-lib');
+          const pdfDoc = await PDFLib.load(pdfBuffer);
+          
+          const pages = pdfDoc.getPages();
+          const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+          const footerText = 'PoweringEG Platform 2.0 - a IA ao serviço da ExpressGlass';
+          const textWidth = font.widthOfTextAtSize(footerText, 8);
+          
+          // Adicionar rodapé a todas as páginas
+          for (const page of pages) {
+            const { width } = page.getSize();
+            page.drawText(footerText, {
+              x: (width - textWidth) / 2,
+              y: 20,
+              size: 8,
+              font: font,
+              color: rgb(0.6, 0.6, 0.6),
+            });
+          }
+          
+          // Remover páginas vazias (manter apenas as primeiras 2-3 páginas com conteúdo)
+          // Determinar quantas páginas manter baseado no conteúdo
+          const maxPages = Math.min(pages.length, 3); // Máximo 3 páginas para este relatório
+          while (pdfDoc.getPageCount() > maxPages) {
+            pdfDoc.removePage(pdfDoc.getPageCount() - 1);
+          }
+          
+          const modifiedPdfBytes = await pdfDoc.save();
+          const base64 = Buffer.from(modifiedPdfBytes).toString('base64');
+          resolve(base64);
+        } catch (postProcessError) {
+          // Se falhar o pós-processamento, retornar o PDF original
+          console.error('Erro no pós-processamento do PDF:', postProcessError);
+          const originalBuffer = Buffer.concat(chunks);
+          const base64 = originalBuffer.toString('base64');
+          resolve(base64);
+        }
       });
       doc.on('error', reject);
       
       const pageWidth = 515; // A4 width - margins
+      const leftMargin = 40;
       
-      // Cabeçalho com logo imagem
+      // ============================================
+      // CABEÇALHO COM LOGO
+      // ============================================
       const logoPath = path.join(process.cwd(), 'server', 'assets', 'eglass-logo.png');
       if (fs.existsSync(logoPath)) {
-        doc.image(logoPath, 40, 35, { width: 150 });
+        doc.image(logoPath, leftMargin, 35, { width: 150 });
       } else {
         // Fallback para texto se imagem não existir
         doc.fontSize(22)
            .font('Helvetica-Bold')
            .fillColor('#e53935')
-           .text('EXPRESS', 40, 40, { continued: true })
+           .text('EXPRESS', leftMargin, 40, { continued: true })
            .fillColor('#1a365d')
            .font('Helvetica')
            .text('GLASS');
@@ -59,10 +122,10 @@ export async function gerarPDFAnaliseFichas(relatorio: {
       doc.y = 70;
       
       // Título do relatório
-      doc.fontSize(16)
+      doc.fontSize(18)
          .font('Helvetica-Bold')
-         .fillColor('#333333')
-         .text('Análise de Fichas de Serviço', { align: 'center' });
+         .fillColor('#1a365d')
+         .text('Análise de Fichas de Serviço', leftMargin, doc.y, { align: 'center', width: pageWidth });
       
       const dataFormatada = dataAnalise.toLocaleDateString('pt-PT', {
         day: '2-digit',
@@ -73,186 +136,252 @@ export async function gerarPDFAnaliseFichas(relatorio: {
       doc.fontSize(11)
          .font('Helvetica')
          .fillColor('#666666')
-         .text(dataFormatada, { align: 'center' });
-      
-      doc.moveDown(1);
-      
-      // Linha separadora
-      doc.strokeColor('#e5e7eb')
-         .lineWidth(1)
-         .moveTo(40, doc.y)
-         .lineTo(555, doc.y)
-         .stroke();
-      
-      doc.moveDown(0.5);
-      
-      // Aviso para imprimir
-      const avisoY = doc.y;
-      doc.rect(40, avisoY, pageWidth, 30)
-         .fillColor('#fef3c7')
-         .fill();
-      
-      doc.fontSize(10)
-         .font('Helvetica-Bold')
-         .fillColor('#92400e')
-         .text('IMPRIMIR ESTE RELATORIO E ATUAR EM CONFORMIDADE NOS PROCESSOS IDENTIFICADOS', 50, avisoY + 10, { align: 'center' });
+         .text(dataFormatada, leftMargin, doc.y + 5, { align: 'center', width: pageWidth });
       
       doc.moveDown(1.5);
       
-      // Nome da loja
-      const numeroLojaTexto = relatorio.numeroLoja ? ` (#${relatorio.numeroLoja})` : '';
-      doc.fontSize(14)
+      // ============================================
+      // AVISO PARA IMPRIMIR
+      // ============================================
+      const avisoY = doc.y;
+      doc.rect(leftMargin, avisoY, pageWidth, 28)
+         .fillColor('#fef3c7')
+         .fill();
+      
+      doc.fontSize(9)
          .font('Helvetica-Bold')
-         .fillColor('#333333')
-         .text(`${relatorio.nomeLoja}${numeroLojaTexto}`);
+         .fillColor('#92400e')
+         .text('IMPRIMIR ESTE RELATÓRIO E ATUAR EM CONFORMIDADE NOS PROCESSOS IDENTIFICADOS', leftMargin, avisoY + 8, { align: 'center', width: pageWidth });
+      
+      doc.y = avisoY + 35;
+      
+      // ============================================
+      // NOME DA LOJA
+      // ============================================
+      const numeroLojaTexto = relatorio.numeroLoja ? ` (#${relatorio.numeroLoja})` : '';
+      doc.fontSize(16)
+         .font('Helvetica-Bold')
+         .fillColor('#1a365d')
+         .text(`${relatorio.nomeLoja}${numeroLojaTexto}`, leftMargin);
       
       doc.fontSize(10)
          .font('Helvetica')
          .fillColor('#666666')
-         .text('Relatório de Monitorização de Fichas de Serviço');
+         .text('Relatório de Monitorização de Fichas de Serviço', leftMargin);
       
       doc.moveDown(0.5);
       
       // Linha separadora
-      doc.strokeColor('#333333')
-         .lineWidth(1)
-         .moveTo(40, doc.y)
-         .lineTo(555, doc.y)
+      doc.strokeColor('#1a365d')
+         .lineWidth(2)
+         .moveTo(leftMargin, doc.y)
+         .lineTo(leftMargin + pageWidth, doc.y)
          .stroke();
       
       doc.moveDown(1);
       
-      // Métricas em tabela horizontal
+      // ============================================
+      // MÉTRICAS PRINCIPAIS (4 colunas)
+      // ============================================
       const metricasY = doc.y;
       const metricaWidth = pageWidth / 4;
       
       const metricas = [
-        { label: 'Total Fichas', valor: relatorio.totalFichas, cor: '#333333' },
-        { label: 'Abertas +5 dias', valor: relatorio.fichasAbertas5Dias, cor: relatorio.fichasAbertas5Dias > 0 ? '#dc2626' : '#059669' },
-        { label: 'Status Alerta', valor: relatorio.fichasStatusAlerta, cor: relatorio.fichasStatusAlerta > 0 ? '#ea580c' : '#059669' },
-        { label: 'Sem Notas', valor: relatorio.fichasSemNotas, cor: relatorio.fichasSemNotas > 0 ? '#d97706' : '#059669' },
+        { label: 'TOTAL FICHAS', valor: relatorio.totalFichas, cor: '#1a365d' },
+        { label: 'ABERTAS +5 DIAS', valor: relatorio.fichasAbertas5Dias, cor: relatorio.fichasAbertas5Dias > 0 ? '#dc2626' : '#059669' },
+        { label: 'STATUS ALERTA', valor: relatorio.fichasStatusAlerta, cor: relatorio.fichasStatusAlerta > 0 ? '#ea580c' : '#059669' },
+        { label: 'SEM NOTAS', valor: relatorio.fichasSemNotas, cor: relatorio.fichasSemNotas > 0 ? '#d97706' : '#059669' },
       ];
       
       metricas.forEach((metrica, index) => {
-        const x = 40 + (index * metricaWidth);
+        const x = leftMargin + (index * metricaWidth);
         
         // Valor grande
-        doc.fontSize(24)
+        doc.fontSize(28)
            .font('Helvetica-Bold')
            .fillColor(metrica.cor)
            .text(String(metrica.valor), x, metricasY, { width: metricaWidth, align: 'center' });
         
         // Label pequeno
-        doc.fontSize(9)
+        doc.fontSize(8)
            .font('Helvetica')
            .fillColor('#666666')
-           .text(metrica.label.toUpperCase(), x, metricasY + 28, { width: metricaWidth, align: 'center' });
+           .text(metrica.label, x, metricasY + 32, { width: metricaWidth, align: 'center' });
       });
       
       doc.y = metricasY + 55;
-      doc.moveDown(1);
       
       // Linha separadora
       doc.strokeColor('#e5e7eb')
          .lineWidth(1)
-         .moveTo(40, doc.y)
-         .lineTo(555, doc.y)
+         .moveTo(leftMargin, doc.y)
+         .lineTo(leftMargin + pageWidth, doc.y)
          .stroke();
       
       doc.moveDown(1);
       
-      // Resumo da Análise - LIMPAR HTML PRIMEIRO
+      // ============================================
+      // RESUMO DA ANÁLISE (IA)
+      // ============================================
       if (relatorio.resumo) {
-        doc.fontSize(12)
+        doc.fontSize(13)
            .font('Helvetica-Bold')
-           .fillColor('#333333')
-           .text('Resumo da Análise');
+           .fillColor('#1a365d')
+           .text('Resumo da Análise', leftMargin);
         
-        doc.moveDown(0.5);
+        doc.moveDown(0.3);
         
         // Limpar HTML do resumo
-        const resumoLimpo = limparHTMLCompleto(relatorio.resumo);
+        const resumoLimpo = limparHTML(relatorio.resumo);
         
         doc.fontSize(10)
            .font('Helvetica')
            .fillColor('#333333')
-           .text(resumoLimpo, { width: pageWidth, lineGap: 3 });
+           .text(resumoLimpo, leftMargin, doc.y, { width: pageWidth, lineGap: 3 });
         
         doc.moveDown(1);
       }
       
-      // Conteúdo do relatório (processar HTML para texto estruturado)
-      const seccoesConteudo = processarConteudoParaSeccoes(relatorio.conteudoRelatorio);
+      // ============================================
+      // DETALHES DAS FICHAS - Extrair do HTML
+      // ============================================
+      const seccoesExtraidas = extrairSeccoesDoHTML(relatorio.conteudoRelatorio);
       
-      if (seccoesConteudo.length > 0) {
-        // Verificar se precisa de nova página
-        if (doc.y > 650) {
-          doc.addPage();
-        }
+      if (seccoesExtraidas.length > 0) {
+        // PDFKit gere automaticamente as quebras de página
         
+        doc.fontSize(14)
+           .font('Helvetica-Bold')
+           .fillColor('#1a365d')
+           .text('Detalhes das Fichas de Serviço', leftMargin);
+        
+        doc.moveDown(0.8);
+        
+        // Renderizar cada secção
+        for (const seccao of seccoesExtraidas) {
+          // PDFKit gere automaticamente as quebras de página
+          
+          // Fundo colorido para o título da secção
+          const tituloY = doc.y;
+          doc.rect(leftMargin, tituloY, pageWidth, 22)
+             .fillColor(seccao.bgColor || '#f8fafc')
+             .fill();
+          
+          // Borda esquerda colorida
+          doc.rect(leftMargin, tituloY, 4, 22)
+             .fillColor(seccao.cor)
+             .fill();
+          
+          // Título da secção
+          doc.fontSize(10)
+             .font('Helvetica-Bold')
+             .fillColor(seccao.cor)
+             .text(seccao.titulo, leftMargin + 10, tituloY + 5, { width: pageWidth - 20 });
+          
+          doc.y = tituloY + 28;
+          
+          // Itens da secção
+          if (seccao.itens.length > 0) {
+            for (const item of seccao.itens) {
+              // PDFKit gere automaticamente as quebras de página
+              
+              doc.fontSize(9)
+                 .font('Helvetica')
+                 .fillColor('#333333')
+                 .text(`• ${item}`, leftMargin + 10, doc.y, { width: pageWidth - 20, lineGap: 2 });
+            }
+            
+            // Total da secção
+            if (seccao.total) {
+              doc.moveDown(0.3);
+              doc.fontSize(9)
+                 .font('Helvetica-Bold')
+                 .fillColor(seccao.cor)
+                 .text(seccao.total, leftMargin + 10);
+            }
+          } else {
+            doc.fontSize(9)
+               .font('Helvetica-Oblique')
+               .fillColor('#999999')
+               .text('Nenhuma ficha nesta categoria', leftMargin + 10);
+          }
+          
+          doc.moveDown(1);
+        }
+      }
+      
+      // ============================================
+      // TABELA DE STATUS (se disponível)
+      // ============================================
+      const statusCount = relatorio.statusCount || extrairStatusDoHTML(relatorio.conteudoRelatorio);
+      
+      if (Object.keys(statusCount).length > 0) {
+        // PDFKit gere automaticamente as quebras de página
+        
+        doc.moveDown(0.5);
         doc.fontSize(12)
            .font('Helvetica-Bold')
-           .fillColor('#333333')
-           .text('Detalhes das Fichas');
+           .fillColor('#1a365d')
+           .text('Quantidade de Processos por Status', leftMargin);
         
         doc.moveDown(0.5);
         
-        // Processar cada secção
-        for (const seccao of seccoesConteudo) {
-          // Verificar se precisa de nova página
-          if (doc.y > 720) {
-            doc.addPage();
-          }
-          
-          // Título da secção
-          if (seccao.titulo) {
-            doc.moveDown(0.5);
-            doc.fontSize(10)
-               .font('Helvetica-Bold')
-               .fillColor('#1a365d')
-               .text(seccao.titulo);
-            doc.moveDown(0.3);
-          }
-          
-          // Itens da secção
-          for (const item of seccao.itens) {
-            // Verificar se precisa de nova página
-            if (doc.y > 750) {
-              doc.addPage();
-            }
-            
-            doc.fontSize(9)
-               .font('Helvetica')
-               .fillColor('#333333')
-               .text(`• ${item}`, { indent: 10, width: pageWidth - 10, lineGap: 2 });
-          }
-          
-          // Total da secção
-          if (seccao.total) {
-            doc.fontSize(9)
-               .font('Helvetica-Bold')
-               .fillColor('#666666')
-               .text(seccao.total, { indent: 10 });
-          }
-        }
-      }
-      
-      // Rodapé em todas as páginas
-      const totalPages = doc.bufferedPageRange().count;
-      for (let i = 0; i < totalPages; i++) {
-        doc.switchToPage(i);
+        // Desenhar tabela
+        const tableTop = doc.y;
+        const colWidth1 = 350;
+        const colWidth2 = 100;
+        const rowHeight = 22;
         
-        doc.fontSize(8)
-           .font('Helvetica')
-           .fillColor('#999999')
-           .text(
-             'PoweringEG Platform 2.0 - a IA ao serviço da ExpressGlass',
-             40,
-             doc.page.height - 30,
-             { align: 'center', width: pageWidth }
-           );
+        // Cabeçalho da tabela
+        doc.rect(leftMargin, tableTop, colWidth1 + colWidth2, rowHeight)
+           .fillColor('#1a365d')
+           .fill();
+        
+        doc.fontSize(9)
+           .font('Helvetica-Bold')
+           .fillColor('#ffffff')
+           .text('Status', leftMargin + 8, tableTop + 6)
+           .text('Quantidade', leftMargin + colWidth1 + 8, tableTop + 6);
+        
+        // Linhas da tabela
+        let currentY = tableTop + rowHeight;
+        const statusEntries = Object.entries(statusCount).sort((a, b) => b[1] - a[1]);
+        
+        for (let i = 0; i < statusEntries.length; i++) {
+          const [status, count] = statusEntries[i];
+          
+          // Tabela pequena, não precisa de quebra de página
+          
+          // Linha alternada
+          if (i % 2 === 0) {
+            doc.rect(leftMargin, currentY, colWidth1 + colWidth2, rowHeight)
+               .fillColor('#f8fafc')
+               .fill();
+          }
+          
+          // Borda
+          doc.rect(leftMargin, currentY, colWidth1 + colWidth2, rowHeight)
+             .strokeColor('#e2e8f0')
+             .stroke();
+          
+          doc.fontSize(9)
+             .font('Helvetica')
+             .fillColor('#333333')
+             .text(status, leftMargin + 8, currentY + 6, { width: colWidth1 - 16 });
+          
+          doc.fontSize(9)
+             .font('Helvetica-Bold')
+             .fillColor('#1a365d')
+             .text(String(count), leftMargin + colWidth1 + 8, currentY + 6, { width: colWidth2 - 16, align: 'center' });
+          
+          currentY += rowHeight;
+        }
+        
+        doc.y = currentY + 10;
       }
       
+      // Finalizar o PDF sem rodapé (será adicionado pelo pdf-lib)
+      doc.flushPages();
       doc.end();
     } catch (error) {
       reject(error);
@@ -261,9 +390,9 @@ export async function gerarPDFAnaliseFichas(relatorio: {
 }
 
 /**
- * Limpa completamente o HTML e retorna texto puro formatado
+ * Limpa HTML e retorna texto puro
  */
-function limparHTMLCompleto(html: string): string {
+function limparHTML(html: string): string {
   if (!html) return '';
   
   let texto = html;
@@ -276,7 +405,7 @@ function limparHTMLCompleto(html: string): string {
   texto = texto.replace(/<h[1-6][^>]*>(.*?)<\/h[1-6]>/gi, '\n$1\n');
   
   // Converter parágrafos
-  texto = texto.replace(/<p[^>]*>(.*?)<\/p>/gi, '$1\n\n');
+  texto = texto.replace(/<p[^>]*>(.*?)<\/p>/gi, '$1\n');
   
   // Converter listas
   texto = texto.replace(/<li[^>]*>(.*?)<\/li>/gi, '- $1\n');
@@ -285,10 +414,8 @@ function limparHTMLCompleto(html: string): string {
   // Converter divs
   texto = texto.replace(/<div[^>]*>(.*?)<\/div>/gi, '$1\n');
   
-  // Converter spans (remover apenas a tag, manter conteúdo)
+  // Remover spans, strong, etc (manter conteúdo)
   texto = texto.replace(/<span[^>]*>(.*?)<\/span>/gi, '$1');
-  
-  // Converter strong/bold (remover tag, manter conteúdo)
   texto = texto.replace(/<strong[^>]*>(.*?)<\/strong>/gi, '$1');
   texto = texto.replace(/<b[^>]*>(.*?)<\/b>/gi, '$1');
   texto = texto.replace(/<em[^>]*>(.*?)<\/em>/gi, '$1');
@@ -308,97 +435,210 @@ function limparHTMLCompleto(html: string): string {
   texto = texto.replace(/&quot;/g, '"');
   texto = texto.replace(/&#39;/g, "'");
   texto = texto.replace(/&apos;/g, "'");
-  texto = texto.replace(/&#x27;/g, "'");
-  texto = texto.replace(/&#(\d+);/g, (_, code) => String.fromCharCode(parseInt(code)));
   
-  // Limpar espaços extras e quebras de linha múltiplas
+  // Limpar espaços extras
   texto = texto.replace(/\n\s*\n\s*\n/g, '\n\n');
   texto = texto.replace(/  +/g, ' ');
-  texto = texto.replace(/^\s+/gm, ''); // Remover espaços no início de cada linha
   
   return texto.trim();
 }
 
 /**
- * Processa o conteúdo HTML em secções estruturadas para o PDF
+ * Interface para secção extraída
  */
-interface SeccaoPDF {
+interface SeccaoExtraida {
   titulo: string;
+  cor: string;
+  bgColor: string;
   itens: string[];
   total?: string;
 }
 
-function processarConteudoParaSeccoes(html: string): SeccaoPDF[] {
+/**
+ * Extrai secções estruturadas do HTML do relatório
+ * O HTML tem estrutura: <div><h3>TITULO</h3><table><tr><td>item</td></tr>...</table><p>Total: X</p></div>
+ */
+function extrairSeccoesDoHTML(html: string): SeccaoExtraida[] {
   if (!html) return [];
   
-  const seccoes: SeccaoPDF[] = [];
+  const seccoes: SeccaoExtraida[] = [];
   
-  // Primeiro limpar o HTML
-  const textoLimpo = limparHTMLCompleto(html);
-  
-  // Dividir por linhas
-  const linhas = textoLimpo.split('\n').filter(l => l.trim());
-  
-  let seccaoAtual: SeccaoPDF | null = null;
-  
-  // Padrões para identificar títulos de secção
-  const padroesTitulo = [
-    /^FS ABERTAS/i,
-    /^FS EM STATUS/i,
-    /^FS SEM NOTAS/i,
-    /^FS SEM EMAIL/i,
-    /^FORAM PEDIDOS/i,
-    /^QUANTIDADE DE PROCESSOS/i,
-    /^[A-ZÁÉÍÓÚÀÈÌÒÙÂÊÎÔÛÃÕÇ\s]{10,}:?$/,
+  // Configuração das secções com cores
+  const seccoesConfig: { regex: RegExp; titulo: string; cor: string; bgColor: string }[] = [
+    { 
+      regex: /FS ABERTAS A 5 OU MAIS DIAS/i,
+      titulo: 'FS ABERTAS A 5 OU MAIS DIAS QUE NÃO ESTÃO FINALIZADOS',
+      cor: '#c53030',
+      bgColor: '#fff5f5'
+    },
+    { 
+      regex: /FS ABERTAS QUE PASSARAM 2 OU MAIS DIAS DO AGENDAMENTO/i,
+      titulo: 'FS ABERTAS QUE PASSARAM DO AGENDAMENTO',
+      cor: '#dd6b20',
+      bgColor: '#fffaf0'
+    },
+    { 
+      regex: /FS EM STATUS DE ALERTA/i,
+      titulo: 'FS EM STATUS DE ALERTA',
+      cor: '#dc2626',
+      bgColor: '#fef2f2'
+    },
+    { 
+      regex: /FS SEM NOTAS/i,
+      titulo: 'FS SEM NOTAS',
+      cor: '#ca8a04',
+      bgColor: '#fefce8'
+    },
+    { 
+      regex: /FS ABERTAS CUJAS NOTAS NÃO SÃO ATUALIZADAS/i,
+      titulo: 'FS COM NOTAS DESATUALIZADAS (+5 DIAS)',
+      cor: '#16a34a',
+      bgColor: '#f0fdf4'
+    },
+    { 
+      regex: /FS COM STATUS.*DEVOLVE VIDRO/i,
+      titulo: 'FS COM STATUS: DEVOLVE VIDRO E ENCERRA',
+      cor: '#7c3aed',
+      bgColor: '#f5f3ff'
+    },
+    { 
+      regex: /FS SEM EMAIL DE CLIENTE/i,
+      titulo: 'FS SEM EMAIL DE CLIENTE',
+      cor: '#0284c7',
+      bgColor: '#f0f9ff'
+    },
   ];
   
-  for (const linha of linhas) {
-    const linhaLimpa = linha.trim();
-    if (!linhaLimpa) continue;
+  // Dividir o HTML em blocos de div
+  // Cada secção está num <div> que contém <h3>, <table> e <p> com total
+  const divRegex = /<div[^>]*>[\s\S]*?<h3[^>]*>([\s\S]*?)<\/h3>[\s\S]*?<table[^>]*>([\s\S]*?)<\/table>[\s\S]*?<p[^>]*>([\s\S]*?)<\/p>[\s\S]*?<\/div>/gi;
+  
+  let match;
+  while ((match = divRegex.exec(html)) !== null) {
+    const tituloHTML = match[1];
+    const tabelaHTML = match[2];
+    const totalHTML = match[3];
     
-    // Verificar se é um título de secção
-    const ehTitulo = padroesTitulo.some(p => p.test(linhaLimpa)) || 
-                     (linhaLimpa === linhaLimpa.toUpperCase() && linhaLimpa.length > 15);
+    // Limpar o título
+    const tituloLimpo = limparHTML(tituloHTML).trim().toUpperCase();
     
-    // Verificar se é uma linha de total
-    const ehTotal = /^Total:?\s*\d+/i.test(linhaLimpa);
+    // Encontrar a configuração correspondente
+    const config = seccoesConfig.find(c => c.regex.test(tituloLimpo));
     
-    if (ehTitulo) {
-      // Guardar secção anterior se existir
-      if (seccaoAtual && seccaoAtual.itens.length > 0) {
-        seccoes.push(seccaoAtual);
+    if (config) {
+      // Extrair itens da tabela
+      const itens: string[] = [];
+      const tdRegex = /<td[^>]*>([\s\S]*?)<\/td>/gi;
+      let tdMatch;
+      
+      while ((tdMatch = tdRegex.exec(tabelaHTML)) !== null) {
+        const itemLimpo = limparHTML(tdMatch[1]).trim();
+        if (itemLimpo && itemLimpo.length > 3) {
+          itens.push(itemLimpo);
+        }
       }
       
-      // Criar nova secção
-      seccaoAtual = {
-        titulo: linhaLimpa,
-        itens: [],
-      };
-    } else if (ehTotal && seccaoAtual) {
-      seccaoAtual.total = linhaLimpa;
-    } else if (seccaoAtual) {
-      // Adicionar como item da secção atual
-      // Limpar prefixos de lista
-      let itemLimpo = linhaLimpa.replace(/^[-•]\s*/, '').trim();
-      if (itemLimpo) {
-        seccaoAtual.itens.push(itemLimpo);
-      }
-    } else {
-      // Criar secção genérica se não houver secção atual
-      if (!seccaoAtual) {
-        seccaoAtual = {
-          titulo: '',
-          itens: [],
-        };
-      }
-      seccaoAtual.itens.push(linhaLimpa);
+      // Extrair total
+      const totalLimpo = limparHTML(totalHTML).trim();
+      const totalMatch = totalLimpo.match(/Total:\s*(\d+)\s*processos?/i);
+      const total = totalMatch ? `Total: ${totalMatch[1]} processos` : undefined;
+      
+      seccoes.push({
+        titulo: config.titulo,
+        cor: config.cor,
+        bgColor: config.bgColor,
+        itens,
+        total
+      });
     }
   }
   
-  // Adicionar última secção
-  if (seccaoAtual && seccaoAtual.itens.length > 0) {
-    seccoes.push(seccaoAtual);
+  // Se não encontrou secções com o regex principal, tentar método alternativo
+  if (seccoes.length === 0) {
+    // Tentar extrair secções de forma mais flexível
+    for (const config of seccoesConfig) {
+      const seccaoRegex = new RegExp(
+        `<h3[^>]*>[^<]*${config.regex.source}[^<]*<\\/h3>`,
+        'gi'
+      );
+      
+      if (seccaoRegex.test(html)) {
+        // Encontrar o bloco que contém este h3
+        const startIndex = html.search(seccaoRegex);
+        if (startIndex >= 0) {
+          // Encontrar o fim do div pai
+          let endIndex = html.indexOf('</div>', startIndex);
+          if (endIndex < 0) endIndex = html.length;
+          
+          const blocoHTML = html.substring(startIndex, endIndex);
+          
+          // Extrair itens
+          const itens: string[] = [];
+          const tdRegex = /<td[^>]*>([\s\S]*?)<\/td>/gi;
+          let tdMatch;
+          
+          while ((tdMatch = tdRegex.exec(blocoHTML)) !== null) {
+            const itemLimpo = limparHTML(tdMatch[1]).trim();
+            if (itemLimpo && itemLimpo.length > 3) {
+              itens.push(itemLimpo);
+            }
+          }
+          
+          // Extrair total
+          const totalMatch = blocoHTML.match(/Total:\s*(\d+)\s*processos?/i);
+          const total = totalMatch ? `Total: ${totalMatch[1]} processos` : undefined;
+          
+          if (itens.length > 0) {
+            seccoes.push({
+              titulo: config.titulo,
+              cor: config.cor,
+              bgColor: config.bgColor,
+              itens,
+              total
+            });
+          }
+        }
+      }
+    }
   }
   
   return seccoes;
+}
+
+/**
+ * Extrai contagem de status do HTML
+ */
+function extrairStatusDoHTML(html: string): Record<string, number> {
+  const statusCount: Record<string, number> = {};
+  
+  if (!html) return statusCount;
+  
+  // Procurar tabela de status
+  const tabelaMatch = html.match(/<h3[^>]*>QUANTIDADE DE PROCESSOS[^<]*<\/h3>[\s\S]*?<table[^>]*>([\s\S]*?)<\/table>/i);
+  
+  if (tabelaMatch) {
+    const tabelaHTML = tabelaMatch[1];
+    
+    // Extrair linhas da tabela
+    const trMatches = tabelaHTML.match(/<tr[^>]*>([\s\S]*?)<\/tr>/gi);
+    
+    if (trMatches) {
+      for (const tr of trMatches) {
+        // Pular cabeçalho
+        if (tr.includes('<th')) continue;
+        
+        const tdMatches = tr.match(/<td[^>]*>([^<]*)<\/td>/gi);
+        if (tdMatches && tdMatches.length >= 2) {
+          const status = tdMatches[0].replace(/<[^>]+>/g, '').trim();
+          const quantidade = parseInt(tdMatches[1].replace(/<[^>]+>/g, '').trim(), 10);
+          
+          if (status && !isNaN(quantidade)) {
+            statusCount[status] = quantidade;
+          }
+        }
+      }
+    }
+  }
+  
+  return statusCount;
 }
