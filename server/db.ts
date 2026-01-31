@@ -9558,14 +9558,15 @@ export async function saveFichasIdentificadas(fichas: InsertFichaIdentificadaAna
 /**
  * Obter fichas identificadas de uma análise anterior para uma loja
  * Apenas considera análises de dias anteriores (pelo menos 1 dia antes)
+ * Retorna também a data da análise anterior para calcular dias desde identificação
  */
 export async function getFichasIdentificadasAnterior(
   analiseAtualId: number, 
   nomeLoja: string, 
   gestorId: number
-): Promise<FichaIdentificadaAnalise[]> {
+): Promise<{ fichas: FichaIdentificadaAnalise[]; dataAnaliseAnterior: Date | null }> {
   const db = await getDb();
-  if (!db) return [];
+  if (!db) return { fichas: [], dataAnaliseAnterior: null };
   
   // Calcular a data de ontem (início do dia)
   const hoje = new Date();
@@ -9584,19 +9585,23 @@ export async function getFichasIdentificadasAnterior(
   
   if (analisesAnteriores.length === 0) {
     console.log('[getFichasIdentificadasAnterior] Nenhuma análise anterior encontrada de dias anteriores');
-    return [];
+    return { fichas: [], dataAnaliseAnterior: null };
   }
   
-  const analiseAnteriorId = analisesAnteriores[0].id;
-  console.log(`[getFichasIdentificadasAnterior] Comparando com análise ${analiseAnteriorId} de ${analisesAnteriores[0].createdAt}`);
+  const analiseAnterior = analisesAnteriores[0];
+  const analiseAnteriorId = analiseAnterior.id;
+  const dataAnaliseAnterior = analiseAnterior.createdAt;
+  console.log(`[getFichasIdentificadasAnterior] Comparando com análise ${analiseAnteriorId} de ${dataAnaliseAnterior}`);
   
   // Buscar fichas identificadas na análise anterior para esta loja
-  return await db.select()
+  const fichas = await db.select()
     .from(fichasIdentificadasAnalise)
     .where(and(
       eq(fichasIdentificadasAnalise.analiseId, analiseAnteriorId),
       eq(fichasIdentificadasAnalise.nomeLoja, nomeLoja)
     ));
+  
+  return { fichas, dataAnaliseAnterior };
 }
 
 /**

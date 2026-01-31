@@ -19,7 +19,11 @@ import { notificarNovoPedidoApoio, notificarPedidoAnulado, notificarPedidoEditad
 import { processarAnalise, ResultadoAnalise, RelatorioLoja, gerarHTMLEmailAnalise } from "./analiseFichasService";
 
 // Função auxiliar para gerar alerta de processos repetidos
-function gerarAlertaProcessosRepetidos(processosRepetidos: Array<{ obrano: number; matricula: string; categoria: string; diasAberto: number }>): string {
+// diasDesdeIdentificacao: número de dias desde a primeira identificação do processo
+function gerarAlertaProcessosRepetidos(
+  processosRepetidos: Array<{ obrano: number; matricula: string; categoria: string; diasAberto: number }>,
+  diasDesdeIdentificacao: number = 0
+): string {
   const categoriasNomes: Record<string, string> = {
     'abertas5Dias': 'Aberta +5 dias',
     'aposAgendamento': 'Após Agendamento',
@@ -30,9 +34,28 @@ function gerarAlertaProcessosRepetidos(processosRepetidos: Array<{ obrano: numbe
     'semEmailCliente': 'Sem Email Cliente',
   };
   
-  let html = `<div style="background: #fef2f2; border: 2px solid #dc2626; padding: 15px; margin-bottom: 20px; border-radius: 8px;">`;
-  html += `<strong style="color: #dc2626; font-size: 16px;">⚠️ ATENÇÃO: PROCESSOS JÁ IDENTIFICADOS NA ANÁLISE ANTERIOR!</strong><br><br>`;
-  html += `<span style="color: #991b1b;">Os seguintes <strong>${processosRepetidos.length} processos</strong> já tinham sido identificados na análise anterior e <strong>NÃO TIVERAM NENHUMA INTERVENÇÃO</strong> desde então:</span><br><br>`;
+  // Quadro MUITO destacado - vermelho forte com borda grossa
+  let html = `<div style="background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); border: 4px solid #dc2626; padding: 20px; margin-bottom: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);">`;
+  
+  // Cabeçalho com ícone grande e texto de alerta
+  html += `<div style="text-align: center; margin-bottom: 15px;">`;
+  html += `<span style="font-size: 48px;">🚨</span><br>`;
+  html += `<strong style="color: #dc2626; font-size: 20px; text-transform: uppercase; letter-spacing: 1px;">AÇÃO IMEDIATA NECESSÁRIA!</strong>`;
+  html += `</div>`;
+  
+  // Mensagem principal com dias desde identificação
+  html += `<div style="background: #dc2626; color: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; text-align: center;">`;
+  if (diasDesdeIdentificacao > 0) {
+    html += `<strong style="font-size: 18px;">⚠️ PROCESSOS IDENTIFICADOS HÁ ${diasDesdeIdentificacao} DIAS SEM INTERVENÇÃO!</strong><br><br>`;
+    html += `<span style="font-size: 14px;">Estes ${processosRepetidos.length} processos foram identificados na análise de há ${diasDesdeIdentificacao} dias e permanecem EXATAMENTE IGUAIS.</span>`;
+  } else {
+    html += `<strong style="font-size: 18px;">⚠️ ${processosRepetidos.length} PROCESSOS REPETIDOS DA ANÁLISE ANTERIOR!</strong><br><br>`;
+    html += `<span style="font-size: 14px;">Estes processos já tinham sido identificados e NÃO TIVERAM NENHUMA INTERVENÇÃO.</span>`;
+  }
+  html += `</div>`;
+  
+  // Lista de processos agrupados por categoria
+  html += `<div style="background: white; padding: 15px; border-radius: 8px; border: 2px solid #fca5a5;">`;
   
   // Agrupar por categoria
   const porCategoria: Record<string, typeof processosRepetidos> = {};
@@ -42,17 +65,28 @@ function gerarAlertaProcessosRepetidos(processosRepetidos: Array<{ obrano: numbe
   }
   
   for (const [categoria, processos] of Object.entries(porCategoria)) {
-    html += `<strong>${categoriasNomes[categoria] || categoria}:</strong><br>`;
-    for (const p of processos.slice(0, 10)) { // Limitar a 10 por categoria
-      html += `&nbsp;&nbsp;• FS ${p.obrano} // ${p.matricula} (${p.diasAberto} dias)<br>`;
+    html += `<div style="margin-bottom: 12px;">`;
+    html += `<strong style="color: #991b1b; font-size: 14px; text-transform: uppercase;">${categoriasNomes[categoria] || categoria} (${processos.length})</strong><br>`;
+    html += `<div style="margin-left: 15px; margin-top: 5px;">`;
+    for (const p of processos.slice(0, 10)) {
+      html += `<span style="display: inline-block; background: #fef2f2; padding: 3px 8px; margin: 2px; border-radius: 4px; border: 1px solid #fca5a5; font-size: 13px;">`;
+      html += `<strong>FS ${p.obrano}</strong> // ${p.matricula} <span style="color: #dc2626;">(${p.diasAberto} dias)</span>`;
+      html += `</span><br>`;
     }
     if (processos.length > 10) {
-      html += `&nbsp;&nbsp;<em>... e mais ${processos.length - 10} processos</em><br>`;
+      html += `<em style="color: #991b1b; font-size: 12px;">... e mais ${processos.length - 10} processos</em><br>`;
     }
-    html += `<br>`;
+    html += `</div></div>`;
   }
   
-  html += `<strong style="color: #dc2626;">DEVERÁ CORRIGIR IMEDIATAMENTE ESTES PROBLEMAS!</strong>`;
+  html += `</div>`;
+  
+  // Rodapé com chamada à ação
+  html += `<div style="background: #7f1d1d; color: white; padding: 12px; border-radius: 8px; margin-top: 15px; text-align: center;">`;
+  html += `<strong style="font-size: 16px;">⚡ DEVERÁ ATUAR IMEDIATAMENTE NESTES PROCESSOS! ⚡</strong><br>`;
+  html += `<span style="font-size: 13px;">Não permita que estes processos se acumulem. Trate-os HOJE.</span>`;
+  html += `</div>`;
+  
   html += `</div>`;
   
   return html;
@@ -8743,7 +8777,7 @@ IMPORTANTE:
               }
               
               // Buscar fichas da analise anterior para comparacao
-              const fichasAnteriores = await db.getFichasIdentificadasAnterior(analise.id, relatorio.nomeLoja, ctx.gestor.id);
+              const { fichas: fichasAnteriores, dataAnaliseAnterior } = await db.getFichasIdentificadasAnterior(analise.id, relatorio.nomeLoja, ctx.gestor.id);
               
               // Identificar processos repetidos (mesmo obrano em categorias problematicas)
               if (fichasAnteriores.length > 0) {
@@ -8767,11 +8801,19 @@ IMPORTANTE:
                 
                 // Se houver processos repetidos, atualizar o resumo com alerta
                 if (processosRepetidos.length > 0) {
-                  const alertaRepetidos = gerarAlertaProcessosRepetidos(processosRepetidos);
+                  // Calcular dias desde a identificação (desde a análise anterior)
+                  let diasDesdeIdentificacao = 0;
+                  if (dataAnaliseAnterior) {
+                    const hoje = new Date();
+                    const diffTime = Math.abs(hoje.getTime() - dataAnaliseAnterior.getTime());
+                    diasDesdeIdentificacao = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                  }
+                  
+                  const alertaRepetidos = gerarAlertaProcessosRepetidos(processosRepetidos, diasDesdeIdentificacao);
                   const novoResumo = alertaRepetidos + relatorio.resumo;
                   await db.updateRelatorioResumo(relatorioGuardado.id, novoResumo);
                   relatorioGuardado.resumo = novoResumo;
-                  console.log(`[analiseFichas] ${processosRepetidos.length} processos repetidos encontrados para ${relatorio.nomeLoja}`);
+                  console.log(`[analiseFichas] ${processosRepetidos.length} processos repetidos encontrados para ${relatorio.nomeLoja} (identificados há ${diasDesdeIdentificacao} dias)`);
                 }
               }
             } else {

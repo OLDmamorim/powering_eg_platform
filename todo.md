@@ -3855,3 +3855,4 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Bug: Gestores não recebem cópia do relatório de análise de fichas enviado para as lojas
 - [x] Feature: Gestores recebem cópia dos relatórios livres e completos enviados para as lojas
 - [x] Feature: Anexar PDF do relatório de análise de fichas no email
+- [ ] Feature: Quadro destacado para fichas repetidas com dias desde identificação e alerta de ação imediata
