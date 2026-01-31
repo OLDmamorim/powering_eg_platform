@@ -1,13 +1,15 @@
 import { useState, useRef, useEffect } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { trpc } from '@/lib/trpc';
+import { useAuth } from '@/_core/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { 
   Upload, 
@@ -30,9 +32,16 @@ import {
 } from 'lucide-react';
 
 export default function AnaliseFichas() {
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
+  
   const [isUploading, setIsUploading] = useState(false);
   const [selectedAnalise, setSelectedAnalise] = useState<number | null>(null);
   const [selectedRelatorio, setSelectedRelatorio] = useState<any>(null);
+  const [showGestorDialog, setShowGestorDialog] = useState(false);
+  const [selectedGestorId, setSelectedGestorId] = useState<number | null>(null);
+  const [pendingFileBase64, setPendingFileBase64] = useState<string | null>(null);
+  const [pendingFileName, setPendingFileName] = useState<string | null>(null);
   const [showRelatorioDialog, setShowRelatorioDialog] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
@@ -42,6 +51,11 @@ export default function AnaliseFichas() {
     { analiseId: selectedAnalise! },
     { enabled: !!selectedAnalise }
   );
+  
+  // Query de gestores (apenas para Admin)
+  const { data: gestores } = trpc.gestores.list.useQuery(undefined, {
+    enabled: isAdmin,
+  });
   
   // Debug: log quando selectedAnalise muda
   useEffect(() => {
@@ -104,29 +118,33 @@ export default function AnaliseFichas() {
       return;
     }
     
-    setIsUploading(true);
-    
-    try {
-      // Converter ficheiro para base64
-      const reader = new FileReader();
-      reader.onload = async (e) => {
-        const base64 = (e.target?.result as string).split(',')[1];
-        
-        await analisarMutation.mutateAsync({
-          fileBase64: base64,
-          nomeArquivo: file.name,
-        });
-        
-        setIsUploading(false);
-      };
-      reader.onerror = () => {
-        toast.error('Erro ao ler o ficheiro');
-        setIsUploading(false);
-      };
-      reader.readAsDataURL(file);
-    } catch (error) {
-      setIsUploading(false);
-    }
+    // Converter ficheiro para base64
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const base64 = (e.target?.result as string).split(',')[1];
+      
+      if (isAdmin) {
+        // Admin: guardar ficheiro e mostrar dialog para selecionar gestor
+        setPendingFileBase64(base64);
+        setPendingFileName(file.name);
+        setShowGestorDialog(true);
+      } else {
+        // Gestor: processar diretamente
+        setIsUploading(true);
+        try {
+          await analisarMutation.mutateAsync({
+            fileBase64: base64,
+            nomeArquivo: file.name,
+          });
+        } finally {
+          setIsUploading(false);
+        }
+      }
+    };
+    reader.onerror = () => {
+      toast.error('Erro ao ler o ficheiro');
+    };
+    reader.readAsDataURL(file);
     
     // Limpar input
     if (fileInputRef.current) {
@@ -147,6 +165,37 @@ export default function AnaliseFichas() {
     }
     
     enviarEmailsMutation.mutate({ relatorioIds: relatoriosComEmail });
+  };
+  
+  // Função para Admin confirmar seleção de gestor e processar análise
+  const handleConfirmGestor = async () => {
+    if (!selectedGestorId || !pendingFileBase64 || !pendingFileName) {
+      toast.error('Por favor selecione um gestor');
+      return;
+    }
+    
+    setShowGestorDialog(false);
+    setIsUploading(true);
+    
+    try {
+      await analisarMutation.mutateAsync({
+        fileBase64: pendingFileBase64,
+        nomeArquivo: pendingFileName,
+        gestorIdSelecionado: selectedGestorId,
+      });
+    } finally {
+      setIsUploading(false);
+      setPendingFileBase64(null);
+      setPendingFileName(null);
+      setSelectedGestorId(null);
+    }
+  };
+  
+  const handleCancelGestor = () => {
+    setShowGestorDialog(false);
+    setPendingFileBase64(null);
+    setPendingFileName(null);
+    setSelectedGestorId(null);
   };
   
   const getEvolucaoIcon = (evolucao: string | null) => {
@@ -767,6 +816,45 @@ export default function AnaliseFichas() {
           </DialogContent>
         </Dialog>
       </div>
+      
+      {/* Dialog para Admin selecionar gestor */}
+      <Dialog open={showGestorDialog} onOpenChange={setShowGestorDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Selecionar Gestor</DialogTitle>
+            <DialogDescription>
+              Selecione o gestor cujas lojas pretende ver nos relatórios.
+              A análise irá mostrar apenas os relatórios das lojas associadas ao gestor selecionado.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <Label htmlFor="gestor-select" className="mb-2 block">Gestor</Label>
+            <Select
+              value={selectedGestorId?.toString() || ''}
+              onValueChange={(value) => setSelectedGestorId(parseInt(value))}
+            >
+              <SelectTrigger id="gestor-select">
+                <SelectValue placeholder="Selecione um gestor..." />
+              </SelectTrigger>
+              <SelectContent>
+                {gestores?.sort((a, b) => a.nome.localeCompare(b.nome)).map((gestor) => (
+                  <SelectItem key={gestor.id} value={gestor.id.toString()}>
+                    {gestor.nome}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={handleCancelGestor}>
+              Cancelar
+            </Button>
+            <Button onClick={handleConfirmGestor} disabled={!selectedGestorId}>
+              Analisar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 }

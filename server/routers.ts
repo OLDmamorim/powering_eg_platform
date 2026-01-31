@@ -8652,10 +8652,27 @@ IMPORTANTE:
       .input(z.object({
         fileBase64: z.string(),
         nomeArquivo: z.string(),
+        gestorIdSelecionado: z.number().optional(), // Admin pode selecionar um gestor
       }))
       .mutation(async ({ input, ctx }) => {
-        if (!ctx.gestor) {
-          throw new TRPCError({ code: 'FORBIDDEN', message: 'Apenas gestores podem analisar ficheiros' });
+        // Determinar o gestorId a usar
+        let gestorIdParaAnalise: number;
+        let lojasGestor: Awaited<ReturnType<typeof db.getLojasByGestorId>>;
+        
+        if (ctx.user.role === 'admin') {
+          // Admin DEVE selecionar um gestor
+          if (!input.gestorIdSelecionado) {
+            throw new TRPCError({ code: 'BAD_REQUEST', message: 'Admin deve selecionar um gestor para ver os relatórios' });
+          }
+          gestorIdParaAnalise = input.gestorIdSelecionado;
+          lojasGestor = await db.getLojasByGestorId(input.gestorIdSelecionado);
+        } else {
+          // Gestor usa o seu próprio ID
+          if (!ctx.gestor) {
+            throw new TRPCError({ code: 'FORBIDDEN', message: 'Apenas gestores podem analisar ficheiros' });
+          }
+          gestorIdParaAnalise = ctx.gestor.id;
+          lojasGestor = await db.getLojasByGestorId(ctx.gestor.id);
         }
         
         // Converter base64 para buffer
@@ -8666,15 +8683,12 @@ IMPORTANTE:
         
         // Guardar análise na base de dados
         const analise = await db.createAnaliseFichasServico({
-          gestorId: ctx.gestor.id,
+          gestorId: gestorIdParaAnalise,
           nomeArquivo: input.nomeArquivo,
           totalFichas: resultado.totalFichas,
           totalLojas: resultado.totalLojas,
           resumoGeral: JSON.stringify(resultado.resumoGeral),
         });
-        
-        // Obter lojas do gestor para fazer correspondência
-        const lojasGestor = await db.getLojasByGestorId(ctx.gestor.id);
         
         // Guardar relatórios por loja
         const relatoriosGuardados = [];
@@ -8777,7 +8791,7 @@ IMPORTANTE:
               }
               
               // Buscar fichas da analise anterior para comparacao
-              const { fichas: fichasAnteriores, dataAnaliseAnterior } = await db.getFichasIdentificadasAnterior(analise.id, relatorio.nomeLoja, ctx.gestor.id);
+              const { fichas: fichasAnteriores, dataAnaliseAnterior } = await db.getFichasIdentificadasAnterior(analise.id, relatorio.nomeLoja, gestorIdParaAnalise);
               
               // Identificar processos repetidos (mesmo obrano em categorias problematicas)
               if (fichasAnteriores.length > 0) {
@@ -8831,7 +8845,7 @@ IMPORTANTE:
           });
           
           // Verificar evolução em relação à análise anterior
-          const relatorioAnterior = await db.getRelatorioAnteriorLoja(analise.id, relatorio.nomeLoja, ctx.gestor.id);
+          const relatorioAnterior = await db.getRelatorioAnteriorLoja(analise.id, relatorio.nomeLoja, gestorIdParaAnalise);
           if (relatorioAnterior) {
             const variacaoAbertas = relatorio.fichasAbertas5Dias.length - relatorioAnterior.fichasAbertas5Dias;
             const variacaoApos = relatorio.fichasAposAgendamento.length - relatorioAnterior.fichasAposAgendamento;
