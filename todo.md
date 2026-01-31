@@ -3867,3 +3867,6 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Fix: PDF análise fichas - adicionar lista detalhada de fichas sem notas
 - [x] Fix: PDF análise fichas - adicionar lista detalhada de fichas sem email
 - [x] Fix: PDF análise fichas - remover páginas vazias no final
+- [x] Bug: PDF análise fichas - secção "FS ABERTAS A 5 OU MAIS DIAS" não aparece
+- [x] Bug: PDF análise fichas - página 2 quase vazia (só título "FS SEM NOTAS")
+- [x] Bug: PDF análise fichas - conteúdo não flui corretamente entre páginas

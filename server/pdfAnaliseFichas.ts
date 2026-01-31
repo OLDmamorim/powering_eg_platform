@@ -79,11 +79,15 @@ export async function gerarPDFAnaliseFichas(relatorio: {
             });
           }
           
-          // Remover páginas vazias (manter apenas as primeiras 2-3 páginas com conteúdo)
-          // Determinar quantas páginas manter baseado no conteúdo
-          const maxPages = Math.min(pages.length, 3); // Máximo 3 páginas para este relatório
-          while (pdfDoc.getPageCount() > maxPages) {
-            pdfDoc.removePage(pdfDoc.getPageCount() - 1);
+          // Remover páginas quase vazias no final
+          // Continuar a remover a última página enquanto houver mais de 4 páginas
+          // e a última página não tiver conteúdo significativo
+          let pageCount = pdfDoc.getPageCount();
+          while (pageCount > 4) {
+            // Remover a última página se for a 5ª ou superior
+            // Isto é uma heurística - relatórios típicos têm 4 páginas
+            pdfDoc.removePage(pageCount - 1);
+            pageCount = pdfDoc.getPageCount();
           }
           
           const modifiedPdfBytes = await pdfDoc.save();
@@ -456,7 +460,7 @@ interface SeccaoExtraida {
 
 /**
  * Extrai secções estruturadas do HTML do relatório
- * O HTML tem estrutura: <div><h3>TITULO</h3><table><tr><td>item</td></tr>...</table><p>Total: X</p></div>
+ * Nova abordagem: encontrar cada h3 e extrair o conteúdo até ao próximo h3
  */
 function extrairSeccoesDoHTML(html: string): SeccaoExtraida[] {
   if (!html) return [];
@@ -509,29 +513,37 @@ function extrairSeccoesDoHTML(html: string): SeccaoExtraida[] {
     },
   ];
   
-  // Dividir o HTML em blocos de div
-  // Cada secção está num <div> que contém <h3>, <table> e <p> com total
-  const divRegex = /<div[^>]*>[\s\S]*?<h3[^>]*>([\s\S]*?)<\/h3>[\s\S]*?<table[^>]*>([\s\S]*?)<\/table>[\s\S]*?<p[^>]*>([\s\S]*?)<\/p>[\s\S]*?<\/div>/gi;
+  // Nova abordagem: encontrar cada h3 e extrair o bloco até ao próximo h3
+  const h3Regex = /<h3[^>]*>([\s\S]*?)<\/h3>/gi;
+  const h3Matches: { index: number; titulo: string }[] = [];
   
-  let match;
-  while ((match = divRegex.exec(html)) !== null) {
-    const tituloHTML = match[1];
-    const tabelaHTML = match[2];
-    const totalHTML = match[3];
-    
-    // Limpar o título
-    const tituloLimpo = limparHTML(tituloHTML).trim().toUpperCase();
+  let h3Match;
+  while ((h3Match = h3Regex.exec(html)) !== null) {
+    const tituloLimpo = limparHTML(h3Match[1]).trim().toUpperCase();
+    h3Matches.push({
+      index: h3Match.index,
+      titulo: tituloLimpo
+    });
+  }
+  
+  // Para cada h3, encontrar o conteúdo até ao próximo h3 ou fim do HTML
+  for (let i = 0; i < h3Matches.length; i++) {
+    const h3 = h3Matches[i];
+    const nextH3Index = i < h3Matches.length - 1 ? h3Matches[i + 1].index : html.length;
     
     // Encontrar a configuração correspondente
-    const config = seccoesConfig.find(c => c.regex.test(tituloLimpo));
+    const config = seccoesConfig.find(c => c.regex.test(h3.titulo));
     
     if (config) {
+      // Extrair o bloco entre este h3 e o próximo
+      const blocoHTML = html.substring(h3.index, nextH3Index);
+      
       // Extrair itens da tabela
       const itens: string[] = [];
       const tdRegex = /<td[^>]*>([\s\S]*?)<\/td>/gi;
       let tdMatch;
       
-      while ((tdMatch = tdRegex.exec(tabelaHTML)) !== null) {
+      while ((tdMatch = tdRegex.exec(blocoHTML)) !== null) {
         const itemLimpo = limparHTML(tdMatch[1]).trim();
         if (itemLimpo && itemLimpo.length > 3) {
           itens.push(itemLimpo);
@@ -539,65 +551,17 @@ function extrairSeccoesDoHTML(html: string): SeccaoExtraida[] {
       }
       
       // Extrair total
-      const totalLimpo = limparHTML(totalHTML).trim();
-      const totalMatch = totalLimpo.match(/Total:\s*(\d+)\s*processos?/i);
+      const totalMatch = blocoHTML.match(/Total:\s*(\d+)\s*processos?/i);
       const total = totalMatch ? `Total: ${totalMatch[1]} processos` : undefined;
       
-      seccoes.push({
-        titulo: config.titulo,
-        cor: config.cor,
-        bgColor: config.bgColor,
-        itens,
-        total
-      });
-    }
-  }
-  
-  // Se não encontrou secções com o regex principal, tentar método alternativo
-  if (seccoes.length === 0) {
-    // Tentar extrair secções de forma mais flexível
-    for (const config of seccoesConfig) {
-      const seccaoRegex = new RegExp(
-        `<h3[^>]*>[^<]*${config.regex.source}[^<]*<\\/h3>`,
-        'gi'
-      );
-      
-      if (seccaoRegex.test(html)) {
-        // Encontrar o bloco que contém este h3
-        const startIndex = html.search(seccaoRegex);
-        if (startIndex >= 0) {
-          // Encontrar o fim do div pai
-          let endIndex = html.indexOf('</div>', startIndex);
-          if (endIndex < 0) endIndex = html.length;
-          
-          const blocoHTML = html.substring(startIndex, endIndex);
-          
-          // Extrair itens
-          const itens: string[] = [];
-          const tdRegex = /<td[^>]*>([\s\S]*?)<\/td>/gi;
-          let tdMatch;
-          
-          while ((tdMatch = tdRegex.exec(blocoHTML)) !== null) {
-            const itemLimpo = limparHTML(tdMatch[1]).trim();
-            if (itemLimpo && itemLimpo.length > 3) {
-              itens.push(itemLimpo);
-            }
-          }
-          
-          // Extrair total
-          const totalMatch = blocoHTML.match(/Total:\s*(\d+)\s*processos?/i);
-          const total = totalMatch ? `Total: ${totalMatch[1]} processos` : undefined;
-          
-          if (itens.length > 0) {
-            seccoes.push({
-              titulo: config.titulo,
-              cor: config.cor,
-              bgColor: config.bgColor,
-              itens,
-              total
-            });
-          }
-        }
+      if (itens.length > 0) {
+        seccoes.push({
+          titulo: config.titulo,
+          cor: config.cor,
+          bgColor: config.bgColor,
+          itens,
+          total
+        });
       }
     }
   }
