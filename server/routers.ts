@@ -8991,6 +8991,52 @@ IMPORTANTE:
         return relatorio;
       }),
     
+    // Download PDF do relatório
+    downloadPDF: gestorProcedure
+      .input(z.object({ relatorioId: z.number() }))
+      .query(async ({ input, ctx }) => {
+        const relatorio = await db.getRelatorioAnaliseById(input.relatorioId);
+        if (!relatorio) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Relatório não encontrado' });
+        }
+        
+        // Verificar permissão
+        const analise = await db.getAnaliseById(relatorio.analiseId);
+        if (!analise) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Análise não encontrada' });
+        }
+        
+        // Admin pode ver todos, gestor apenas os seus
+        if (ctx.user.role !== 'admin') {
+          if (!ctx.gestor || analise.gestorId !== ctx.gestor.id) {
+            throw new TRPCError({ code: 'FORBIDDEN', message: 'Sem permissão para ver este relatório' });
+          }
+        }
+        
+        // Gerar PDF
+        const { gerarPDFAnaliseFichas } = await import('./pdfAnaliseFichas');
+        
+        const pdfBase64 = await gerarPDFAnaliseFichas({
+          nomeLoja: relatorio.nomeLoja,
+          numeroLoja: relatorio.numeroLoja,
+          totalFichas: relatorio.totalFichas,
+          fichasAbertas5Dias: relatorio.fichasAbertas5Dias,
+          fichasAposAgendamento: relatorio.fichasAposAgendamento,
+          fichasStatusAlerta: relatorio.fichasStatusAlerta,
+          fichasSemNotas: relatorio.fichasSemNotas,
+          fichasNotasAntigas: relatorio.fichasNotasAntigas,
+          fichasDevolverVidro: relatorio.fichasDevolverVidro,
+          fichasSemEmailCliente: relatorio.fichasSemEmailCliente,
+          resumo: relatorio.resumo || '',
+          conteudoRelatorio: relatorio.conteudoRelatorio || '',
+        }, new Date(analise.dataUpload));
+        
+        return {
+          pdfBase64,
+          filename: `Analise_Fichas_${relatorio.nomeLoja.replace(/\s+/g, '_')}_${new Date(analise.dataUpload).toISOString().split('T')[0]}.pdf`,
+        };
+      }),
+    
     // Enviar relatório por email
     enviarEmail: gestorProcedure
       .input(z.object({ 

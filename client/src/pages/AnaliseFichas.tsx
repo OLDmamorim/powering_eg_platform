@@ -28,12 +28,14 @@ import {
   FileText,
   Send,
   History,
-  RefreshCw
+  RefreshCw,
+  Download
 } from 'lucide-react';
 
 export default function AnaliseFichas() {
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
+  const utils = trpc.useUtils();
   
   const [isUploading, setIsUploading] = useState(false);
   const [selectedAnalise, setSelectedAnalise] = useState<number | null>(null);
@@ -823,6 +825,44 @@ export default function AnaliseFichas() {
                 
                 {/* Ações */}
                 <div className="flex justify-end gap-2">
+                  {/* Botão Download PDF */}
+                  <Button 
+                    variant="outline"
+                    onClick={async () => {
+                      try {
+                        toast.info('A gerar PDF...');
+                        const result = await utils.analiseFichas.downloadPDF.fetch({ relatorioId: selectedRelatorio.id });
+                        
+                        // Converter base64 para blob e fazer download
+                        const byteCharacters = atob(result.pdfBase64);
+                        const byteNumbers = new Array(byteCharacters.length);
+                        for (let i = 0; i < byteCharacters.length; i++) {
+                          byteNumbers[i] = byteCharacters.charCodeAt(i);
+                        }
+                        const byteArray = new Uint8Array(byteNumbers);
+                        const blob = new Blob([byteArray], { type: 'application/pdf' });
+                        
+                        // Criar link de download
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = result.filename;
+                        document.body.appendChild(a);
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                        document.body.removeChild(a);
+                        
+                        toast.success('PDF descarregado com sucesso!');
+                      } catch (error) {
+                        console.error('Erro ao gerar PDF:', error);
+                        toast.error('Erro ao gerar PDF');
+                      }
+                    }}
+                  >
+                    <Download className="mr-2 h-4 w-4" />
+                    Download PDF
+                  </Button>
+                  
                   {selectedRelatorio.pertenceAoGestor && !selectedRelatorio.emailEnviado && (
                     <Button 
                       onClick={() => {
