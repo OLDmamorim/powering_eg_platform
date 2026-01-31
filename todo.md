@@ -3859,3 +3859,4 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Feature: Admin pode selecionar gestor após carregar ficheiro de análise de fichas
 - [x] Feature: Admin pode mudar de gestor na análise de fichas sem recarregar ficheiro
 - [x] Feature: Botão de download PDF do relatório de análise de fichas na interface web
+- [x] Bug: PDF de análise de fichas - limpar tags HTML do resumo, melhorar formatação, remover páginas vazias

@@ -87,7 +87,7 @@ export async function gerarPDFAnaliseFichas(relatorio: {
       doc.fontSize(10)
          .font('Helvetica-Bold')
          .fillColor('#92400e')
-         .text('⚠️ IMPRIMIR ESTE RELATÓRIO E ATUAR EM CONFORMIDADE NOS PROCESSOS IDENTIFICADOS', 50, avisoY + 10, { align: 'center' });
+         .text('IMPRIMIR ESTE RELATORIO E ATUAR EM CONFORMIDADE NOS PROCESSOS IDENTIFICADOS', 50, avisoY + 10, { align: 'center' });
       
       doc.moveDown(1.5);
       
@@ -153,7 +153,7 @@ export async function gerarPDFAnaliseFichas(relatorio: {
       
       doc.moveDown(1);
       
-      // Resumo da Análise
+      // Resumo da Análise - LIMPAR HTML PRIMEIRO
       if (relatorio.resumo) {
         doc.fontSize(12)
            .font('Helvetica-Bold')
@@ -162,18 +162,21 @@ export async function gerarPDFAnaliseFichas(relatorio: {
         
         doc.moveDown(0.5);
         
+        // Limpar HTML do resumo
+        const resumoLimpo = limparHTMLCompleto(relatorio.resumo);
+        
         doc.fontSize(10)
            .font('Helvetica')
            .fillColor('#333333')
-           .text(relatorio.resumo, { width: pageWidth, lineGap: 3 });
+           .text(resumoLimpo, { width: pageWidth, lineGap: 3 });
         
         doc.moveDown(1);
       }
       
-      // Conteúdo do relatório (processar HTML para texto)
-      const conteudoTexto = processarHTMLParaTexto(relatorio.conteudoRelatorio);
+      // Conteúdo do relatório (processar HTML para texto estruturado)
+      const seccoesConteudo = processarConteudoParaSeccoes(relatorio.conteudoRelatorio);
       
-      if (conteudoTexto) {
+      if (seccoesConteudo.length > 0) {
         // Verificar se precisa de nova página
         if (doc.y > 650) {
           doc.addPage();
@@ -186,50 +189,47 @@ export async function gerarPDFAnaliseFichas(relatorio: {
         
         doc.moveDown(0.5);
         
-        // Processar o conteúdo linha por linha
-        const linhas = conteudoTexto.split('\n');
-        
-        for (const linha of linhas) {
+        // Processar cada secção
+        for (const seccao of seccoesConteudo) {
           // Verificar se precisa de nova página
-          if (doc.y > 750) {
+          if (doc.y > 720) {
             doc.addPage();
           }
           
-          const linhaLimpa = linha.trim();
-          if (!linhaLimpa) {
+          // Título da secção
+          if (seccao.titulo) {
+            doc.moveDown(0.5);
+            doc.fontSize(10)
+               .font('Helvetica-Bold')
+               .fillColor('#1a365d')
+               .text(seccao.titulo);
             doc.moveDown(0.3);
-            continue;
           }
           
-          // Título de secção (em maiúsculas ou com emoji)
-          if (linhaLimpa.startsWith('🔴') || linhaLimpa.startsWith('🟠') || linhaLimpa.startsWith('🟡') || 
-              linhaLimpa.startsWith('📋') || linhaLimpa.startsWith('⚠️') || linhaLimpa.startsWith('📧') ||
-              linhaLimpa.match(/^[A-ZÁÉÍÓÚÀÈÌÒÙÂÊÎÔÛÃÕÇ\s]+:$/)) {
-            doc.moveDown(0.5);
-            doc.fontSize(11)
+          // Itens da secção
+          for (const item of seccao.itens) {
+            // Verificar se precisa de nova página
+            if (doc.y > 750) {
+              doc.addPage();
+            }
+            
+            doc.fontSize(9)
+               .font('Helvetica')
+               .fillColor('#333333')
+               .text(`• ${item}`, { indent: 10, width: pageWidth - 10, lineGap: 2 });
+          }
+          
+          // Total da secção
+          if (seccao.total) {
+            doc.fontSize(9)
                .font('Helvetica-Bold')
-               .fillColor('#333333')
-               .text(linhaLimpa);
-            doc.moveDown(0.3);
-          }
-          // Item de lista
-          else if (linhaLimpa.startsWith('•') || linhaLimpa.startsWith('-') || linhaLimpa.match(/^\d+\./)) {
-            doc.fontSize(9)
-               .font('Helvetica')
-               .fillColor('#333333')
-               .text(linhaLimpa, { indent: 15, width: pageWidth - 15, lineGap: 2 });
-          }
-          // Texto normal
-          else {
-            doc.fontSize(9)
-               .font('Helvetica')
-               .fillColor('#333333')
-               .text(linhaLimpa, { width: pageWidth, lineGap: 2 });
+               .fillColor('#666666')
+               .text(seccao.total, { indent: 10 });
           }
         }
       }
       
-      // Rodapé
+      // Rodapé em todas as páginas
       const totalPages = doc.bufferedPageRange().count;
       for (let i = 0; i < totalPages; i++) {
         doc.switchToPage(i);
@@ -253,9 +253,9 @@ export async function gerarPDFAnaliseFichas(relatorio: {
 }
 
 /**
- * Converte HTML para texto simples
+ * Limpa completamente o HTML e retorna texto puro formatado
  */
-function processarHTMLParaTexto(html: string): string {
+function limparHTMLCompleto(html: string): string {
   if (!html) return '';
   
   let texto = html;
@@ -268,21 +268,25 @@ function processarHTMLParaTexto(html: string): string {
   texto = texto.replace(/<h[1-6][^>]*>(.*?)<\/h[1-6]>/gi, '\n$1\n');
   
   // Converter parágrafos
-  texto = texto.replace(/<p[^>]*>(.*?)<\/p>/gi, '$1\n');
+  texto = texto.replace(/<p[^>]*>(.*?)<\/p>/gi, '$1\n\n');
   
   // Converter listas
-  texto = texto.replace(/<li[^>]*>(.*?)<\/li>/gi, '• $1\n');
+  texto = texto.replace(/<li[^>]*>(.*?)<\/li>/gi, '- $1\n');
   texto = texto.replace(/<ul[^>]*>|<\/ul>|<ol[^>]*>|<\/ol>/gi, '\n');
   
-  // Converter divs e spans
+  // Converter divs
   texto = texto.replace(/<div[^>]*>(.*?)<\/div>/gi, '$1\n');
+  
+  // Converter spans (remover apenas a tag, manter conteúdo)
   texto = texto.replace(/<span[^>]*>(.*?)<\/span>/gi, '$1');
   
-  // Converter strong/bold
+  // Converter strong/bold (remover tag, manter conteúdo)
   texto = texto.replace(/<strong[^>]*>(.*?)<\/strong>/gi, '$1');
   texto = texto.replace(/<b[^>]*>(.*?)<\/b>/gi, '$1');
+  texto = texto.replace(/<em[^>]*>(.*?)<\/em>/gi, '$1');
+  texto = texto.replace(/<i[^>]*>(.*?)<\/i>/gi, '$1');
   
-  // Converter br
+  // Converter br para quebra de linha
   texto = texto.replace(/<br\s*\/?>/gi, '\n');
   
   // Remover todas as outras tags HTML
@@ -295,10 +299,98 @@ function processarHTMLParaTexto(html: string): string {
   texto = texto.replace(/&gt;/g, '>');
   texto = texto.replace(/&quot;/g, '"');
   texto = texto.replace(/&#39;/g, "'");
+  texto = texto.replace(/&apos;/g, "'");
+  texto = texto.replace(/&#x27;/g, "'");
+  texto = texto.replace(/&#(\d+);/g, (_, code) => String.fromCharCode(parseInt(code)));
   
-  // Limpar espaços extras
+  // Limpar espaços extras e quebras de linha múltiplas
   texto = texto.replace(/\n\s*\n\s*\n/g, '\n\n');
   texto = texto.replace(/  +/g, ' ');
+  texto = texto.replace(/^\s+/gm, ''); // Remover espaços no início de cada linha
   
   return texto.trim();
+}
+
+/**
+ * Processa o conteúdo HTML em secções estruturadas para o PDF
+ */
+interface SeccaoPDF {
+  titulo: string;
+  itens: string[];
+  total?: string;
+}
+
+function processarConteudoParaSeccoes(html: string): SeccaoPDF[] {
+  if (!html) return [];
+  
+  const seccoes: SeccaoPDF[] = [];
+  
+  // Primeiro limpar o HTML
+  const textoLimpo = limparHTMLCompleto(html);
+  
+  // Dividir por linhas
+  const linhas = textoLimpo.split('\n').filter(l => l.trim());
+  
+  let seccaoAtual: SeccaoPDF | null = null;
+  
+  // Padrões para identificar títulos de secção
+  const padroesTitulo = [
+    /^FS ABERTAS/i,
+    /^FS EM STATUS/i,
+    /^FS SEM NOTAS/i,
+    /^FS SEM EMAIL/i,
+    /^FORAM PEDIDOS/i,
+    /^QUANTIDADE DE PROCESSOS/i,
+    /^[A-ZÁÉÍÓÚÀÈÌÒÙÂÊÎÔÛÃÕÇ\s]{10,}:?$/,
+  ];
+  
+  for (const linha of linhas) {
+    const linhaLimpa = linha.trim();
+    if (!linhaLimpa) continue;
+    
+    // Verificar se é um título de secção
+    const ehTitulo = padroesTitulo.some(p => p.test(linhaLimpa)) || 
+                     (linhaLimpa === linhaLimpa.toUpperCase() && linhaLimpa.length > 15);
+    
+    // Verificar se é uma linha de total
+    const ehTotal = /^Total:?\s*\d+/i.test(linhaLimpa);
+    
+    if (ehTitulo) {
+      // Guardar secção anterior se existir
+      if (seccaoAtual && seccaoAtual.itens.length > 0) {
+        seccoes.push(seccaoAtual);
+      }
+      
+      // Criar nova secção
+      seccaoAtual = {
+        titulo: linhaLimpa,
+        itens: [],
+      };
+    } else if (ehTotal && seccaoAtual) {
+      seccaoAtual.total = linhaLimpa;
+    } else if (seccaoAtual) {
+      // Adicionar como item da secção atual
+      // Limpar prefixos de lista
+      let itemLimpo = linhaLimpa.replace(/^[-•]\s*/, '').trim();
+      if (itemLimpo) {
+        seccaoAtual.itens.push(itemLimpo);
+      }
+    } else {
+      // Criar secção genérica se não houver secção atual
+      if (!seccaoAtual) {
+        seccaoAtual = {
+          titulo: '',
+          itens: [],
+        };
+      }
+      seccaoAtual.itens.push(linhaLimpa);
+    }
+  }
+  
+  // Adicionar última secção
+  if (seccaoAtual && seccaoAtual.itens.length > 0) {
+    seccoes.push(seccaoAtual);
+  }
+  
+  return seccoes;
 }
