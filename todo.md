@@ -3873,3 +3873,11 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Bug: PDF análise fichas - títulos órfãos (título de secção sozinho no final da página, itens na página seguinte)
 - [x] Feature: PDF análise fichas - conteúdo flui naturalmente sem páginas vazias
 - [x] Bug: PDF análise fichas - tabela "Quantidade de Processos por Status" cortada, páginas vazias removidas
+- [ ] Bug CRÍTICO: PDF análise fichas - tabela de status só mostra cabeçalho, linhas de dados não aparecem
+- [ ] Bug: PDF análise fichas - páginas 3-4 completamente vazias (só rodapé)
+
+## Correção PDF v3.8.1 - Tabela de Status
+- [x] Corrigir extração de status do HTML (usar tabela existente)
+- [x] Remover lógica que eliminava páginas automaticamente (causava perda da tabela)
+- [x] Tabela de status agora aparece completa com todos os dados
+- [x] Testar PDF com dados reais

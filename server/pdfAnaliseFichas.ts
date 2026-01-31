@@ -79,22 +79,8 @@ export async function gerarPDFAnaliseFichas(relatorio: {
             });
           }
           
-          // Remover páginas quase vazias do final
-          // Uma página é considerada quase vazia se tiver menos de 100 caracteres de texto
-          let pageCount = pdfDoc.getPageCount();
-          while (pageCount > 2) {
-            const lastPage = pages[pageCount - 1];
-            // Verificar se a última página tem pouco conteúdo
-            // Heurística: se a página foi criada pelo PDFKit automaticamente,
-            // provavelmente tem apenas overflow de tabela
-            // Remover se for a 5ª página ou superior
-            if (pageCount > 4) {
-              pdfDoc.removePage(pageCount - 1);
-              pageCount = pdfDoc.getPageCount();
-            } else {
-              break;
-            }
-          }
+          // Não remover páginas automaticamente - deixar o PDF com todas as páginas
+          // O conteúdo é gerado dinamicamente e pode precisar de mais páginas
           
           const modifiedPdfBytes = await pdfDoc.save();
           const base64 = Buffer.from(modifiedPdfBytes).toString('base64');
@@ -331,10 +317,25 @@ export async function gerarPDFAnaliseFichas(relatorio: {
       // ============================================
       // TABELA DE STATUS (se disponível)
       // ============================================
-      const statusCount = relatorio.statusCount || extrairStatusDoHTML(relatorio.conteudoRelatorio);
+      let statusCount = relatorio.statusCount || {};
       
-      if (Object.keys(statusCount).length > 0) {
-        // PDFKit gere automaticamente as quebras de página
+      // Se não tiver statusCount, tentar extrair do HTML
+      if (Object.keys(statusCount).length === 0) {
+        statusCount = extrairStatusDoHTML(relatorio.conteudoRelatorio);
+      }
+      
+      // Só desenhar a tabela se houver dados
+      const statusEntries = Object.entries(statusCount).sort((a, b) => b[1] - a[1]);
+      
+      if (statusEntries.length > 0) {
+        // Verificar se há espaço suficiente para a tabela (cabeçalho + pelo menos 3 linhas)
+        const rowHeight = 22;
+        const tabelaAltura = rowHeight * (statusEntries.length + 1) + 40;
+        const espacoDisponivel = 760 - doc.y;
+        
+        if (espacoDisponivel < tabelaAltura && doc.y > 100) {
+          doc.addPage();
+        }
         
         doc.moveDown(0.5);
         doc.fontSize(12)
@@ -348,7 +349,6 @@ export async function gerarPDFAnaliseFichas(relatorio: {
         const tableTop = doc.y;
         const colWidth1 = 350;
         const colWidth2 = 100;
-        const rowHeight = 22;
         
         // Cabeçalho da tabela
         doc.rect(leftMargin, tableTop, colWidth1 + colWidth2, rowHeight)
@@ -363,12 +363,15 @@ export async function gerarPDFAnaliseFichas(relatorio: {
         
         // Linhas da tabela
         let currentY = tableTop + rowHeight;
-        const statusEntries = Object.entries(statusCount).sort((a, b) => b[1] - a[1]);
         
         for (let i = 0; i < statusEntries.length; i++) {
           const [status, count] = statusEntries[i];
           
-          // Tabela pequena, não precisa de quebra de página
+          // Verificar se precisa de nova página
+          if (currentY + rowHeight > 760) {
+            doc.addPage();
+            currentY = 50;
+          }
           
           // Linha alternada
           if (i % 2 === 0) {
@@ -585,32 +588,34 @@ function extrairSeccoesDoHTML(html: string): SeccaoExtraida[] {
 
 /**
  * Extrai contagem de status do HTML
+ * Primeiro tenta extrair da tabela de status, depois das fichas listadas
  */
 function extrairStatusDoHTML(html: string): Record<string, number> {
   const statusCount: Record<string, number> = {};
   
   if (!html) return statusCount;
   
-  // Procurar tabela de status
+  // Método 1: Procurar tabela de status explícita (prioridade)
   const tabelaMatch = html.match(/<h3[^>]*>QUANTIDADE DE PROCESSOS[^<]*<\/h3>[\s\S]*?<table[^>]*>([\s\S]*?)<\/table>/i);
   
   if (tabelaMatch) {
     const tabelaHTML = tabelaMatch[1];
-    
-    // Extrair linhas da tabela
     const trMatches = tabelaHTML.match(/<tr[^>]*>([\s\S]*?)<\/tr>/gi);
     
     if (trMatches) {
       for (const tr of trMatches) {
-        // Pular cabeçalho
+        // Ignorar linha de cabeçalho
         if (tr.includes('<th')) continue;
         
-        const tdMatches = tr.match(/<td[^>]*>([^<]*)<\/td>/gi);
+        // Extrair conteúdo das células td
+        const tdMatches = tr.match(/<td[^>]*>([\s\S]*?)<\/td>/gi);
         if (tdMatches && tdMatches.length >= 2) {
+          // Remover tags HTML e extrair texto
           const status = tdMatches[0].replace(/<[^>]+>/g, '').trim();
-          const quantidade = parseInt(tdMatches[1].replace(/<[^>]+>/g, '').trim(), 10);
+          const quantidadeStr = tdMatches[1].replace(/<[^>]+>/g, '').trim();
+          const quantidade = parseInt(quantidadeStr, 10);
           
-          if (status && !isNaN(quantidade)) {
+          if (status && !isNaN(quantidade) && quantidade > 0) {
             statusCount[status] = quantidade;
           }
         }
@@ -618,5 +623,55 @@ function extrairStatusDoHTML(html: string): Record<string, number> {
     }
   }
   
+  // Método 2: Se não encontrou tabela, extrair status das fichas listadas
+  if (Object.keys(statusCount).length === 0) {
+    // Padrão: "FS XX // YY-ZZ-AA: STATUS" ou "FS XX // YY-ZZ-AA: STATUS (N dias)"
+    const fichaRegex = /FS\s*\d+\s*\/\/\s*[\w-]+:\s*([A-ZÀ-Ü][^(<\n]{2,30})/gi;
+    let match;
+    
+    while ((match = fichaRegex.exec(html)) !== null) {
+      let status = match[1].trim();
+      
+      // Limpar o status
+      status = status.replace(/\s*\(.*$/, '').trim();
+      
+      // Normalizar status conhecidos
+      const statusNormalizado = normalizarStatus(status);
+      
+      if (statusNormalizado) {
+        statusCount[statusNormalizado] = (statusCount[statusNormalizado] || 0) + 1;
+      }
+    }
+  }
+  
   return statusCount;
 }
+
+/**
+ * Normaliza o status para um formato padrão
+ */
+function normalizarStatus(status: string): string | null {
+  const statusLower = status.toLowerCase().trim();
+  
+  // Mapeamento de status
+  if (statusLower.includes('autorizado')) return 'AUTORIZADO';
+  if (statusLower.includes('recusado')) return 'RECUSADO';
+  if (statusLower.includes('anulado')) return 'ANULADO';
+  if (statusLower.includes('orçamento - enviado') || statusLower.includes('orcamento - enviado')) return 'ORÇAMENTO - ENVIADO';
+  if (statusLower.includes('orçamento') || statusLower.includes('orcamento')) return 'ORÇAMENTO';
+  if (statusLower.includes('consulta') && statusLower.includes('orçamento')) return 'Consulta / Orçamento';
+  if (statusLower.includes('consulta')) return 'Consulta / Orçamento';
+  if (statusLower.includes('pedido') && statusLower.includes('autoriza')) return 'Pedido Autorização';
+  if (statusLower.includes('devolve') && statusLower.includes('vidro')) return 'Devolve Vidro e Encerra!';
+  if (statusLower.includes('falta') && statusLower.includes('documento')) return 'FALTA DOCUMENTOS';
+  if (statusLower.includes('incidencia') || statusLower.includes('incidência')) return 'INCIDÊNCIA';
+  
+  // Se não corresponde a nenhum padrão conhecido, retornar o status original
+  if (status.length > 2 && status.length < 50) {
+    return status;
+  }
+  
+  return null;
+}
+
+
