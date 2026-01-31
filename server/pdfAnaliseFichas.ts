@@ -18,6 +18,8 @@ export async function gerarPDFAnaliseFichas(relatorio: {
   conteudoRelatorio: string;
 }, dataAnalise: Date): Promise<string> {
   const PDFDocument = (await import('pdfkit')).default;
+  const path = await import('path');
+  const fs = await import('fs');
   
   return new Promise((resolve, reject) => {
     try {
@@ -39,16 +41,22 @@ export async function gerarPDFAnaliseFichas(relatorio: {
       
       const pageWidth = 515; // A4 width - margins
       
-      // Cabeçalho com logo em texto
-      doc.fontSize(22)
-         .font('Helvetica-Bold')
-         .fillColor('#e53935')
-         .text('EXPRESS', 40, 40, { continued: true })
-         .fillColor('#1a365d')
-         .font('Helvetica')
-         .text('GLASS');
+      // Cabeçalho com logo imagem
+      const logoPath = path.join(process.cwd(), 'server', 'assets', 'eglass-logo.png');
+      if (fs.existsSync(logoPath)) {
+        doc.image(logoPath, 40, 35, { width: 150 });
+      } else {
+        // Fallback para texto se imagem não existir
+        doc.fontSize(22)
+           .font('Helvetica-Bold')
+           .fillColor('#e53935')
+           .text('EXPRESS', 40, 40, { continued: true })
+           .fillColor('#1a365d')
+           .font('Helvetica')
+           .text('GLASS');
+      }
       
-      doc.moveDown(0.5);
+      doc.y = 70;
       
       // Título do relatório
       doc.fontSize(16)
