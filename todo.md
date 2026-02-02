@@ -3904,3 +3904,11 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Corrigir erros de TypeScript (lojaDoGestor -> lojaId)
 - [x] Atualizar registos existentes na BD com lojaId correto (961 registos atualizados)
 - [x] Verificar que filtro por gestor mostra apenas as suas lojas (Fábio Dias: 12 lojas)
+
+
+## Correção v4.7 - Chatbot IA com Acesso a Dados de Reparações
+- [x] Verificar schema de resultados mensais na base de dados (qtdReparacoes, qtdParaBrisas)
+- [x] Verificar código do chatbot IA para entender que dados tem acesso
+- [x] Adicionar reparações e para-brisas na formatação do contexto dos resultados mensais
+- [x] Adicionar menção explícita aos dados de reparações no prompt do sistema
+- [x] Testar perguntas sobre total de reparações por loja (Top 5 Novembro 2025 funciona)

@@ -533,7 +533,12 @@ function formatarContextoPessoal(contexto: ContextoPlataforma): string {
       const desvio = r.desvioPercentualMes != null 
         ? (typeof r.desvioPercentualMes === 'number' ? r.desvioPercentualMes * 100 : parseFloat(r.desvioPercentualMes) * 100).toFixed(1) + '%' 
         : 'N/A';
-      texto += `- ${r.lojaNome}: ${r.totalServicos || 0} serviços, objetivo: ${r.objetivoMensal || 'N/A'}, desvio: ${desvio}\n`;
+      const taxaRep = r.taxaReparacao != null
+        ? (typeof r.taxaReparacao === 'number' ? r.taxaReparacao * 100 : parseFloat(r.taxaReparacao) * 100).toFixed(1) + '%'
+        : 'N/A';
+      const qtdReparacoes = r.qtdReparacoes || 0;
+      const qtdParaBrisas = r.qtdParaBrisas || 0;
+      texto += `- ${r.lojaNome}: ${r.totalServicos || 0} serviços, objetivo: ${r.objetivoMensal || 'N/A'}, desvio: ${desvio}, taxa reparação: ${taxaRep}, reparações: ${qtdReparacoes}, para-brisas: ${qtdParaBrisas}\n`;
     });
     texto += '\n';
   }
@@ -675,7 +680,9 @@ function formatarContextoParaPrompt(contexto: ContextoPlataforma): string {
         const taxaRep = r.taxaReparacao != null
           ? (typeof r.taxaReparacao === 'number' ? r.taxaReparacao * 100 : parseFloat(r.taxaReparacao) * 100).toFixed(1) + '%'
           : 'N/A';
-        texto += `- ${r.lojaNome}: ${r.totalServicos || 0} serviços, objetivo: ${r.objetivoMensal || 'N/A'}, desvio: ${desvio}, taxa reparação: ${taxaRep}\n`;
+        const qtdReparacoes = r.qtdReparacoes || 0;
+        const qtdParaBrisas = r.qtdParaBrisas || 0;
+        texto += `- ${r.lojaNome}: ${r.totalServicos || 0} serviços, objetivo: ${r.objetivoMensal || 'N/A'}, desvio: ${desvio}, taxa reparação: ${taxaRep}, reparações: ${qtdReparacoes}, para-brisas: ${qtdParaBrisas}\n`;
       });
       texto += '\n';
     });
@@ -851,7 +858,7 @@ Tens acesso a todos os dados da plataforma e podes responder a perguntas sobre:
 - Ocorrências estruturais
 - Tarefas To-Do
 - Reuniões (de gestores e de lojas)
-- Resultados mensais e estatísticas de performance
+- Resultados mensais e estatísticas de performance (total de serviços, objetivos, desvios, REPARAÇÕES, para-brisas, taxa de reparação)
 - Vendas complementares
 - HISTÓRICO DE VISITAS POR GESTOR: Podes responder a perguntas como "Quando foi a última visita do gestor X à loja Y?" ou "Quantas visitas fez o gestor X este mês?"
 - COMPARAÇÃO DE VENDAS ENTRE PERÍODOS: Podes analisar a evolução das vendas complementares entre meses, identificar tendências de crescimento ou queda, e comparar performance entre lojas
