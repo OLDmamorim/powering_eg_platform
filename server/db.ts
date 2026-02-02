@@ -9626,6 +9626,12 @@ const ALIASES_LOJAS: Record<string, string[]> = {
   'movida': ['movida'], // Movida = Movida #50
   'sm lisboa ii': ['movida'],
   'sm lisboa ii (movida)': ['movida'],
+  // Mais lojas do Marco Vilar com nomes diferentes no Excel
+  'porto marques': ['porto - marques'], // Porto Marquês = Porto - marquês #12
+  'porto zona industrial': ['porto - zona industrial'], // Porto Zona Industrial = Porto - zona industrial #30
+  'sm porto maia': ['porto sul sm'], // SM Porto Maia = Porto sul sm #80
+  'servico movel porto (maia)': ['porto sul sm'],
+  'servico movel porto': ['porto sul sm'],
 };
 
 /**

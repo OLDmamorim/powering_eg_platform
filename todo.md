@@ -3933,3 +3933,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar mapeamento: Serviço Móvel Rep. Lisboa -> Lisboa SMR (#82)
 - [x] Adicionar mapeamento: SM Lisboa II (Movida) -> Movida (#50)
 - [ ] Testar após novo upload do ficheiro Excel
+
+
+## Correção v4.10 - Mapeamento de Lojas Marco Vilar (Porto Marquês, Porto Zona Industrial, SM Porto)
+- [x] Adicionar mapeamento: Porto Marquês (#12) -> Porto - marquês
+- [x] Adicionar mapeamento: Porto Zona Industrial (#30) -> Porto - zona industrial
+- [x] Adicionar mapeamento: Serviço Móvel Porto (Maia) -> Porto sul sm (#80)
+- [ ] Testar após novo upload do ficheiro Excel

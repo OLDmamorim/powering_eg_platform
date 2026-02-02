@@ -114,6 +114,13 @@ const MAPEAMENTO_NOMES_LOJAS: Record<string, string> = {
   'servico movel rep lisboa': 'Lisboa SMR',
   'sm lisboa ii (movida)': 'Movida',  // Movida #50
   'sm lisboa ii': 'Movida',
+  // Mais lojas do Marco Vilar com nomes específicos
+  'porto marquês': 'Porto Marquês',  // Porto - marquês #12
+  'porto marques': 'Porto Marquês',
+  'porto zona industrial': 'Porto Zona Industrial',  // Porto - zona industrial #30
+  'serviço móvel porto (maia)': 'SM Porto Maia',  // Porto sul sm #80
+  'servico movel porto (maia)': 'SM Porto Maia',
+  'servico movel porto': 'SM Porto Maia',
 };
 
 // Mapeamento de cidades conhecidas para normalização
