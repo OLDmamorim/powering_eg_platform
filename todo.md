@@ -3927,3 +3927,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [ ] Fazer novo upload do ficheiro Excel para aplicar as correções
 
 **Nota:** As correções só terão efeito após novo upload do ficheiro Excel
+
+
+## Correção v4.9 - Mapeamento de Lojas Carlos Eduardo (Lisboa SMR e Movida)
+- [x] Adicionar mapeamento: Serviço Móvel Rep. Lisboa -> Lisboa SMR (#82)
+- [x] Adicionar mapeamento: SM Lisboa II (Movida) -> Movida (#50)
+- [ ] Testar após novo upload do ficheiro Excel

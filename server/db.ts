@@ -9619,6 +9619,13 @@ const ALIASES_LOJAS: Record<string, string[]> = {
   'maia zona industrial': ['maia - moreira'], // Maia Zona Industrial = Maia - moreira #3
   // Lojas da Mónica Correia com nomes diferentes no Excel
   'coimbra sul': ['coimbra sul'], // Coimbra Sul = Coimbra sul #59
+  // Lojas do Carlos Eduardo com nomes diferentes no Excel
+  'lisboa smr': ['lisboa smr'], // Lisboa SMR = Lisboa smr #82
+  'servico movel rep lisboa': ['lisboa smr'],
+  'servico movel rep. lisboa': ['lisboa smr'],
+  'movida': ['movida'], // Movida = Movida #50
+  'sm lisboa ii': ['movida'],
+  'sm lisboa ii (movida)': ['movida'],
 };
 
 /**

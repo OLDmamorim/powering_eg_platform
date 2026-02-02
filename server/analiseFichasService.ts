@@ -108,6 +108,12 @@ const MAPEAMENTO_NOMES_LOJAS: Record<string, string> = {
   'maia zona industrial': 'Maia Zona Industrial',  // Maia - moreira #3
   // Lojas da Mónica Correia com nomes específicos
   'coimbra sul': 'Coimbra Sul',  // Coimbra sul #59 (separar de Coimbra #14)
+  // Lojas do Carlos Eduardo com nomes específicos
+  'serviço móvel rep. lisboa': 'Lisboa SMR',  // Lisboa smr #82
+  'servico movel rep. lisboa': 'Lisboa SMR',
+  'servico movel rep lisboa': 'Lisboa SMR',
+  'sm lisboa ii (movida)': 'Movida',  // Movida #50
+  'sm lisboa ii': 'Movida',
 };
 
 // Mapeamento de cidades conhecidas para normalização
