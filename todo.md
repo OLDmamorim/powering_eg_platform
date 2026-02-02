@@ -3881,3 +3881,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Remover lógica que eliminava páginas automaticamente (causava perda da tabela)
 - [x] Tabela de status agora aparece completa com todos os dados
 - [x] Testar PDF com dados reais
+
+## Bug v3.8.2 - Admin sem acesso à Análise de Fichas
+- [x] Verificar onde está a restrição de acesso
+- [x] Adicionar link no menu lateral do admin (alterado show: isGestor para show: isGestor || isAdmin)
+- [x] Verificar rotas e permissões (rota já existia no App.tsx)
+- [x] Testar acesso do admin
