@@ -1,0 +1,37 @@
+{
+  "query": "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'lojas';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'lojas';",
+  "rows": [
+    {
+      "COLUMN_NAME": "id"
+    },
+    {
+      "COLUMN_NAME": "nome"
+    },
+    {
+      "COLUMN_NAME": "contacto"
+    },
+    {
+      "COLUMN_NAME": "email"
+    },
+    {
+      "COLUMN_NAME": "createdAt"
+    },
+    {
+      "COLUMN_NAME": "updatedAt"
+    },
+    {
+      "COLUMN_NAME": "minimoRelatoriosLivres"
+    },
+    {
+      "COLUMN_NAME": "minimoRelatoriosCompletos"
+    },
+    {
+      "COLUMN_NAME": "numeroLoja"
+    }
+  ],
+  "messages": [],
+  "stdout": "COLUMN_NAME\nid\nnome\ncontacto\nemail\ncreatedAt\nupdatedAt\nminimoRelatoriosLivres\nminimoRelatoriosCompletos\nnumeroLoja\n",
+  "stderr": "",
+  "execution_time_ms": 54
+}

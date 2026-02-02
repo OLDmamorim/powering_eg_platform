@@ -1,0 +1,8 @@
+{
+  "query": "\nSELECT \n  a.id as analise_id,\n  a.created_at,\n  COUNT(*) as total_relatorios,\n  COUNT(r.loja_id) as com_loja_id,\n  COUNT(*) - COUNT(r.loja_id) as sem_loja_id\nFROM analises_fichas_servico a\nJOIN relatorios_analise_loja r ON r.analise_id = a.id\nGROUP BY a.id, a.created_at\nORDER BY a.created_at DESC\nLIMIT 5;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute \nSELECT \n  a.id as analise_id,\n  a.created_at,\n  COUNT(*) as total_relatorios,\n  COUNT(r.loja_id) as com_loja_id,\n  COUNT(*) - COUNT(r.loja_id) as sem_loja_id\nFROM analises_fichas_servico a\nJOIN relatorios_analise_loja r ON r.analise_id = a.id\nGROUP BY a.id, a.created_at\nORDER BY a.created_at DESC\nLIMIT 5;\n",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 2: Unknown column 'r.analise_id' in 'on clause'"
+  ]
+}

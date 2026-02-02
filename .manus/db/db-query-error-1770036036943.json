@@ -1,0 +1,8 @@
+{
+  "query": "\nSELECT g.id, g.nome, COUNT(gl.lojaId) as total_lojas\nFROM gestores g\nLEFT JOIN gestor_lojas gl ON gl.gestorId = g.id\nWHERE g.nome LIKE '%Fabio%' OR g.nome LIKE '%Fábio%'\nGROUP BY g.id, g.nome;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute \nSELECT g.id, g.nome, COUNT(gl.lojaId) as total_lojas\nFROM gestores g\nLEFT JOIN gestor_lojas gl ON gl.gestorId = g.id\nWHERE g.nome LIKE '%Fabio%' OR g.nome LIKE '%Fábio%'\nGROUP BY g.id, g.nome;\n",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 2: Unknown column 'g.nome' in 'group statement'"
+  ]
+}

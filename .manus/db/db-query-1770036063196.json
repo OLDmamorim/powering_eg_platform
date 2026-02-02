@@ -1,0 +1,62 @@
+{
+  "query": "\nSELECT l.id, l.nome\nFROM gestor_lojas gl\nJOIN lojas l ON l.id = gl.lojaId\nJOIN gestores g ON g.id = gl.gestorId\nJOIN users u ON u.id = g.userId\nWHERE u.name LIKE '%Fabio%'\nORDER BY l.nome;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute \nSELECT l.id, l.nome\nFROM gestor_lojas gl\nJOIN lojas l ON l.id = gl.lojaId\nJOIN gestores g ON g.id = gl.gestorId\nJOIN users u ON u.id = g.userId\nWHERE u.name LIKE '%Fabio%'\nORDER BY l.nome;\n",
+  "rows": [
+    {
+      "id": "180001",
+      "nome": "Abrantes"
+    },
+    {
+      "id": "180012",
+      "nome": "Caldas da rainha"
+    },
+    {
+      "id": "180013",
+      "nome": "Castanheira do ribatejo"
+    },
+    {
+      "id": "180018",
+      "nome": "Entroncamento"
+    },
+    {
+      "id": "180020",
+      "nome": "Faro"
+    },
+    {
+      "id": "180021",
+      "nome": "Faro sm"
+    },
+    {
+      "id": "180027",
+      "nome": "Leziria sm"
+    },
+    {
+      "id": "180034",
+      "nome": "Montijo"
+    },
+    {
+      "id": "180040",
+      "nome": "Portimão"
+    },
+    {
+      "id": "180043",
+      "nome": "Porto alto"
+    },
+    {
+      "id": "180049",
+      "nome": "Santarém"
+    },
+    {
+      "id": "180052",
+      "nome": "Sm caldas da rainha"
+    },
+    {
+      "id": "180056",
+      "nome": "Vale do tejo sm"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tnome\n180001\tAbrantes\n180012\tCaldas da rainha\n180013\tCastanheira do ribatejo\n180018\tEntroncamento\n180020\tFaro\n180021\tFaro sm\n180027\tLeziria sm\n180034\tMontijo\n180040\tPortimão\n180043\tPorto alto\n180049\tSantarém\n180052\tSm caldas da rainha\n180056\tVale do tejo sm\n",
+  "stderr": "",
+  "execution_time_ms": 64
+}

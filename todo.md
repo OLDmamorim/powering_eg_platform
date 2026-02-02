@@ -3887,3 +3887,20 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar link no menu lateral do admin (alterado show: isGestor para show: isGestor || isAdmin)
 - [x] Verificar rotas e permissões (rota já existia no App.tsx)
 - [x] Testar acesso do admin
+
+## Bug v3.8.3 - Análise de Fichas mostra dados incorretos
+- [ ] Investigar: 58 lojas analisadas em vez de 70 (faltam 12)
+- [ ] Investigar: Fábio Dias mostra 0 lojas quando deveria ter 13
+- [ ] Verificar associação de lojas ao gestor na base de dados
+- [ ] Verificar ficheiro Excel tem todas as 70 lojas
+- [ ] Corrigir lógica de contagem e associação
+
+
+## Correção v4.6 - Associação de Lojas na Análise de Fichas
+- [x] Corrigir lógica de associação de lojas no upload de fichas de serviço
+- [x] Guardar lojaId sempre que a loja é encontrada na BD (não apenas quando pertence ao gestor)
+- [x] Melhorar mapeamento de aliases para lojas com nomes diferentes (Excel vs BD)
+- [x] Adicionar aliases para: Aveiro SM -> Costa de Prata SM, Guarda SM -> Beira Baixa SM
+- [x] Corrigir erros de TypeScript (lojaDoGestor -> lojaId)
+- [x] Atualizar registos existentes na BD com lojaId correto (961 registos atualizados)
+- [x] Verificar que filtro por gestor mostra apenas as suas lojas (Fábio Dias: 12 lojas)

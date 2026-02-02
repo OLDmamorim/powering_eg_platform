@@ -1,0 +1,130 @@
+{
+  "query": "\nSELECT r.id, r.nomeLoja, r.lojaId, l.nome as loja_nome_bd\nFROM relatorios_analise_loja r\nLEFT JOIN lojas l ON l.id = r.lojaId\nWHERE r.analiseId = (SELECT MAX(id) FROM analises_fichas_servico)\nORDER BY r.lojaId IS NULL, r.nomeLoja\nLIMIT 20;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute \nSELECT r.id, r.nomeLoja, r.lojaId, l.nome as loja_nome_bd\nFROM relatorios_analise_loja r\nLEFT JOIN lojas l ON l.id = r.lojaId\nWHERE r.analiseId = (SELECT MAX(id) FROM analises_fichas_servico)\nORDER BY r.lojaId IS NULL, r.nomeLoja\nLIMIT 20;\n",
+  "rows": [
+    {
+      "id": "120060",
+      "nomeLoja": "Agueda",
+      "lojaId": "180003",
+      "loja_nome_bd": "Águeda"
+    },
+    {
+      "id": "120064",
+      "nomeLoja": "Aveiro",
+      "lojaId": "180008",
+      "loja_nome_bd": "Aveiro"
+    },
+    {
+      "id": "120065",
+      "nomeLoja": "Aveiro SM",
+      "lojaId": "180017",
+      "loja_nome_bd": "Costa de prata sm"
+    },
+    {
+      "id": "120072",
+      "nomeLoja": "Coimbra",
+      "lojaId": "180014",
+      "loja_nome_bd": "Coimbra"
+    },
+    {
+      "id": "120073",
+      "nomeLoja": "Coimbra SM",
+      "lojaId": "180015",
+      "loja_nome_bd": "Coimbra sm"
+    },
+    {
+      "id": "120082",
+      "nomeLoja": "Guarda",
+      "lojaId": "180023",
+      "loja_nome_bd": "Guarda"
+    },
+    {
+      "id": "120083",
+      "nomeLoja": "Guarda SM",
+      "lojaId": "180009",
+      "loja_nome_bd": "Beira baixa sm"
+    },
+    {
+      "id": "120085",
+      "nomeLoja": "Leiria SM",
+      "lojaId": "180026",
+      "loja_nome_bd": "Leiria sm"
+    },
+    {
+      "id": "120098",
+      "nomeLoja": "Pombal",
+      "lojaId": "180039",
+      "loja_nome_bd": "Pombal"
+    },
+    {
+      "id": "120107",
+      "nomeLoja": "Seia",
+      "lojaId": "180050",
+      "loja_nome_bd": "Seia"
+    },
+    {
+      "id": "120108",
+      "nomeLoja": "Seia SM",
+      "lojaId": "180051",
+      "loja_nome_bd": "Seia sm"
+    },
+    {
+      "id": "120115",
+      "nomeLoja": "Viseu",
+      "lojaId": "180060",
+      "loja_nome_bd": "Viseu"
+    },
+    {
+      "id": "120116",
+      "nomeLoja": "Viseu SM",
+      "lojaId": "180061",
+      "loja_nome_bd": "Viseu sm"
+    },
+    {
+      "id": "120059",
+      "nomeLoja": "Abrantes",
+      "lojaId": "NULL",
+      "loja_nome_bd": "NULL"
+    },
+    {
+      "id": "120061",
+      "nomeLoja": "Algés",
+      "lojaId": "NULL",
+      "loja_nome_bd": "NULL"
+    },
+    {
+      "id": "120062",
+      "nomeLoja": "Almada",
+      "lojaId": "NULL",
+      "loja_nome_bd": "NULL"
+    },
+    {
+      "id": "120063",
+      "nomeLoja": "Amadora",
+      "lojaId": "NULL",
+      "loja_nome_bd": "NULL"
+    },
+    {
+      "id": "120066",
+      "nomeLoja": "Barcelos",
+      "lojaId": "NULL",
+      "loja_nome_bd": "NULL"
+    },
+    {
+      "id": "120067",
+      "nomeLoja": "Braga",
+      "lojaId": "NULL",
+      "loja_nome_bd": "NULL"
+    },
+    {
+      "id": "120068",
+      "nomeLoja": "Braga SM",
+      "lojaId": "NULL",
+      "loja_nome_bd": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tnomeLoja\tlojaId\tloja_nome_bd\n120060\tAgueda\t180003\tÁgueda\n120064\tAveiro\t180008\tAveiro\n120065\tAveiro SM\t180017\tCosta de prata sm\n120072\tCoimbra\t180014\tCoimbra\n120073\tCoimbra SM\t180015\tCoimbra sm\n120082\tGuarda\t180023\tGuarda\n120083\tGuarda SM\t180009\tBeira baixa sm\n120085\tLeiria SM\t180026\tLeiria sm\n120098\tPombal\t180039\tPombal\n120107\tSeia\t180050\tSeia\n120108\tSeia SM\t180051\tSeia sm\n120115\tViseu\t180060\tViseu\n120116\tViseu SM\t180061\tViseu sm\n120059\tAbrantes\tNULL\tNULL\n120061\tAlgés\tNULL\tNULL\n120062\tAlmada\tNULL\tNULL\n120063\tAmadora\tNULL\tNULL\n120066\tBarcelos\tNULL\tNULL\n120067\tBraga\tNULL\tNULL\n120068\tBraga SM\tNULL\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 64
+}

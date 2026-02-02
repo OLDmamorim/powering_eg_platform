@@ -1,0 +1,45 @@
+{
+  "query": "\nSELECT \n  a.id as analise_id,\n  a.createdAt,\n  COUNT(*) as total_relatorios,\n  SUM(CASE WHEN r.lojaId IS NOT NULL THEN 1 ELSE 0 END) as com_loja_id,\n  SUM(CASE WHEN r.lojaId IS NULL THEN 1 ELSE 0 END) as sem_loja_id\nFROM analises_fichas_servico a\nJOIN relatorios_analise_loja r ON r.analiseId = a.id\nGROUP BY a.id, a.createdAt\nORDER BY a.createdAt DESC\nLIMIT 5;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute \nSELECT \n  a.id as analise_id,\n  a.createdAt,\n  COUNT(*) as total_relatorios,\n  SUM(CASE WHEN r.lojaId IS NOT NULL THEN 1 ELSE 0 END) as com_loja_id,\n  SUM(CASE WHEN r.lojaId IS NULL THEN 1 ELSE 0 END) as sem_loja_id\nFROM analises_fichas_servico a\nJOIN relatorios_analise_loja r ON r.analiseId = a.id\nGROUP BY a.id, a.createdAt\nORDER BY a.createdAt DESC\nLIMIT 5;\n",
+  "rows": [
+    {
+      "analise_id": "120002",
+      "createdAt": "2026-02-02 10:41:20",
+      "total_relatorios": "58",
+      "com_loja_id": "13",
+      "sem_loja_id": "45"
+    },
+    {
+      "analise_id": "120001",
+      "createdAt": "2026-02-02 10:27:14",
+      "total_relatorios": "58",
+      "com_loja_id": "12",
+      "sem_loja_id": "46"
+    },
+    {
+      "analise_id": "90003",
+      "createdAt": "2026-01-30 15:58:18",
+      "total_relatorios": "57",
+      "com_loja_id": "11",
+      "sem_loja_id": "46"
+    },
+    {
+      "analise_id": "90002",
+      "createdAt": "2026-01-30 15:53:13",
+      "total_relatorios": "57",
+      "com_loja_id": "11",
+      "sem_loja_id": "46"
+    },
+    {
+      "analise_id": "90001",
+      "createdAt": "2026-01-30 15:46:16",
+      "total_relatorios": "57",
+      "com_loja_id": "10",
+      "sem_loja_id": "47"
+    }
+  ],
+  "messages": [],
+  "stdout": "analise_id\tcreatedAt\ttotal_relatorios\tcom_loja_id\tsem_loja_id\n120002\t2026-02-02 10:41:20\t58\t13\t45\n120001\t2026-02-02 10:27:14\t58\t12\t46\n90003\t2026-01-30 15:58:18\t57\t11\t46\n90002\t2026-01-30 15:53:13\t57\t11\t46\n90001\t2026-01-30 15:46:16\t57\t10\t47\n",
+  "stderr": "",
+  "execution_time_ms": 1111
+}

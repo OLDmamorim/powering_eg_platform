@@ -1,0 +1,15 @@
+{
+  "query": "\nSELECT g.id as gestor_id, u.name as nome, COUNT(gl.lojaId) as total_lojas\nFROM gestores g\nJOIN users u ON u.id = g.userId\nLEFT JOIN gestor_lojas gl ON gl.gestorId = g.id\nWHERE u.name LIKE '%Fabio%' OR u.name LIKE '%Fábio%'\nGROUP BY g.id, u.name;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute \nSELECT g.id as gestor_id, u.name as nome, COUNT(gl.lojaId) as total_lojas\nFROM gestores g\nJOIN users u ON u.id = g.userId\nLEFT JOIN gestor_lojas gl ON gl.gestorId = g.id\nWHERE u.name LIKE '%Fabio%' OR u.name LIKE '%Fábio%'\nGROUP BY g.id, u.name;\n",
+  "rows": [
+    {
+      "gestor_id": "1350001",
+      "nome": "Fabio Dias",
+      "total_lojas": "13"
+    }
+  ],
+  "messages": [],
+  "stdout": "gestor_id\tnome\ttotal_lojas\n1350001\tFabio Dias\t13\n",
+  "stderr": "",
+  "execution_time_ms": 56
+}

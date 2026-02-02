@@ -8712,12 +8712,12 @@ IMPORTANTE:
             }
           }
           
-          // Verificar se a loja pertence ao gestor
-          const lojaDoGestor = lojaId ? lojasGestor.find(l => l.id === lojaId) : null;
+          // Guardar lojaId sempre que encontrado (não restringir ao gestor)
+          // A filtragem por gestor é feita na visualização, não no armazenamento
           
           const relatorioGuardado = await db.createRelatorioAnaliseLoja({
             analiseId: analise.id,
-            lojaId: lojaDoGestor ? lojaId : null,
+            lojaId: lojaId,
             nomeLoja: relatorio.nomeLoja,
             numeroLoja: (typeof relatorio.numeroLoja === 'number' && Number.isFinite(relatorio.numeroLoja)) ? relatorio.numeroLoja : null,
             totalFichas: relatorio.totalFichas,
@@ -8840,7 +8840,7 @@ IMPORTANTE:
           
           relatoriosGuardados.push({
             ...relatorioGuardado,
-            pertenceAoGestor: !!lojaDoGestor,
+            pertenceAoGestor: !!lojaId,
             processosRepetidos: numProcessosRepetidos,
           });
           
@@ -8871,7 +8871,7 @@ IMPORTANTE:
             await db.createEvolucaoAnalise({
               analiseAtualId: analise.id,
               analiseAnteriorId: relatorioAnterior.analiseId,
-              lojaId: lojaDoGestor ? lojaId : null,
+              lojaId: lojaId,
               nomeLoja: relatorio.nomeLoja,
               variacaoFichasAbertas5Dias: variacaoAbertas,
               variacaoFichasAposAgendamento: variacaoApos,

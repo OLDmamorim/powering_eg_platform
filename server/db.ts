@@ -9530,12 +9530,134 @@ export async function getLojaByNumero(numeroLoja: number) {
 }
 
 /**
- * Encontrar loja por nome (aproximado)
+ * Normalizar nome de loja para comparação
+ * Remove acentos, converte para minúsculas, remove espaços extras
+ */
+function normalizarNomeLoja(nome: string): string {
+  return nome
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // Remove acentos
+    .replace(/\s+/g, ' ') // Normaliza espaços
+    .trim();
+}
+
+/**
+ * Mapeamento de aliases para lojas com nomes diferentes no Excel vs BD
+ * Chave: nome normalizado no Excel, Valor: nome normalizado na BD
+ */
+const ALIASES_LOJAS: Record<string, string[]> = {
+  // Lojas com nomes diferentes no Excel vs BD
+  'caldas': ['caldas da rainha', 'sm caldas da rainha'],
+  'leziria do tejo sm': ['leziria sm'],
+  'lisboa': ['lisboa sm', 'lisboa smr'],
+  'lisboa sm': ['lisboa sm', 'lisboa smr'],
+  'braga': ['braga - minho center', 'braga sm'],
+  'braga sm': ['braga sm'],
+  'maia': ['maia - maiashopping', 'maia - moreira', 'maia sm'],
+  'maia sm': ['maia sm'],
+  'porto': ['porto - marques', 'porto - zona industrial', 'porto sul sm'],
+  'gaia': ['vila nova de gaia', 'vila nova de gaia - canelas'],
+  'canelas': ['vila nova de gaia - canelas'],
+  'feira': ['santa maria da feira'],
+  'loures': ['odivelas - loures'],
+  'povoa de sta iria': ['povoa de santa iria'],
+  'povoa de staa iria': ['povoa de santa iria'],
+  'povoa de sta a iria': ['povoa de santa iria'],
+  'guimaraes': ['guimaraes shopping'],
+  'famalicao': ['famalicao', 'famalicao sm'],
+  'famalicao sm': ['famalicao sm'],
+  'faro': ['faro'],
+  'faro sm': ['faro sm'],
+  'viana': ['viana do castelo', 'viana do castelo sm'],
+  'viana sm': ['viana do castelo sm'],
+  'paredes': ['paredes'],
+  'paredes sm': ['paredes sm'],
+  'coimbra': ['coimbra', 'coimbra sul'],
+  'coimbra sm': ['coimbra sm'],
+  'viseu': ['viseu'],
+  'viseu sm': ['viseu sm', 'sm viseu2'],
+  'leiria': ['leiria'],
+  'leiria sm': ['leiria sm'],
+  'barcelos': ['barcelos'],
+  'mycarcenter': ['mycarcenter'],
+  'sacavem': ['sacavem'],
+  'telheiras': ['telheiras'],
+  'algues': ['alges'],
+  'alges': ['alges'],
+  'almada': ['almada'],
+  'amadora': ['amadora'],
+  'gondomar': ['gondomar'],
+  'matosinhos': ['matosinhos'],
+  'montijo': ['montijo'],
+  'portimao': ['portimao'],
+  'porto alto': ['porto alto'],
+  'santarem': ['santarem'],
+  'entroncamento': ['entroncamento'],
+  'castanheira do ribatejo': ['castanheira do ribatejo', 'sm castanheira do ribatejo'],
+  'vale do tejo sm': ['vale do tejo sm'],
+  'pacos de ferreira': ['pacos de ferreira'],
+  'vila verde': ['vila verde'],
+  'povoa de varzim': ['povoa de varzim'],
+  // Lojas que não existem na BD (ignorar)
+  // 'trucks service beiras' - não existe
+  // 'recalibra minho' - não existe
+  // Lojas com nomes semelhantes que precisam de mapeamento explícito
+  'abrantes': ['abrantes'],
+  'agueda': ['agueda'],
+  'aveiro sm': ['costa de prata sm'], // Aveiro SM = Costa de Prata SM
+  'guarda sm': ['beira baixa sm'], // Guarda SM = Beira Baixa SM
+};
+
+/**
+ * Encontrar loja por nome (aproximado) com múltiplas estratégias
  */
 export async function getLojaByNomeAproximado(nome: string) {
   const db = await getDb();
   if (!db) return null;
   
+  const nomeNormalizado = normalizarNomeLoja(nome);
+  
+  // Obter todas as lojas para comparação
+  const todasLojas = await db.select().from(lojas);
+  
+  // 1. Primeiro tentar match exato (normalizado)
+  for (const loja of todasLojas) {
+    if (normalizarNomeLoja(loja.nome) === nomeNormalizado) {
+      return loja;
+    }
+  }
+  
+  // 2. Tentar aliases
+  const possiveisNomes = ALIASES_LOJAS[nomeNormalizado] || [];
+  for (const possivel of possiveisNomes) {
+    for (const loja of todasLojas) {
+      if (normalizarNomeLoja(loja.nome) === possivel) {
+        return loja;
+      }
+    }
+  }
+  
+  // 3. Tentar match parcial (nome do Excel contém nome da BD ou vice-versa)
+  for (const loja of todasLojas) {
+    const lojaNomalizada = normalizarNomeLoja(loja.nome);
+    if (lojaNomalizada.includes(nomeNormalizado) || nomeNormalizado.includes(lojaNomalizada)) {
+      return loja;
+    }
+  }
+  
+  // 4. Tentar match por palavras-chave principais (primeira palavra)
+  const primeiraPalavra = nomeNormalizado.split(' ')[0];
+  if (primeiraPalavra.length >= 4) { // Só se a palavra tiver pelo menos 4 caracteres
+    for (const loja of todasLojas) {
+      const lojaNomalizada = normalizarNomeLoja(loja.nome);
+      if (lojaNomalizada.startsWith(primeiraPalavra)) {
+        return loja;
+      }
+    }
+  }
+  
+  // 5. Fallback: LIKE original
   const result = await db.select().from(lojas)
     .where(like(lojas.nome, `%${nome}%`))
     .limit(1);
