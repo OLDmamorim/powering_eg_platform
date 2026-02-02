@@ -1,0 +1,70 @@
+{
+  "query": "SELECT l.id, l.nome, l.numeroLoja\nFROM users u\nJOIN gestores g ON u.id = g.userId\nJOIN gestor_lojas gl ON g.id = gl.gestorId\nJOIN lojas l ON gl.lojaId = l.id\nWHERE u.name LIKE '%Marco Vilar%'\nORDER BY l.nome;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT l.id, l.nome, l.numeroLoja\nFROM users u\nJOIN gestores g ON u.id = g.userId\nJOIN gestor_lojas gl ON g.id = gl.gestorId\nJOIN lojas l ON gl.lojaId = l.id\nWHERE u.name LIKE '%Marco Vilar%'\nORDER BY l.nome;",
+  "rows": [
+    {
+      "id": "180002",
+      "nome": "Aeroporto porto",
+      "numeroLoja": "71"
+    },
+    {
+      "id": "180022",
+      "nome": "Gondomar",
+      "numeroLoja": "17"
+    },
+    {
+      "id": "180030",
+      "nome": "Maia - maiashopping",
+      "numeroLoja": "29"
+    },
+    {
+      "id": "180031",
+      "nome": "Maia - moreira",
+      "numeroLoja": "3"
+    },
+    {
+      "id": "180032",
+      "nome": "Maia sm",
+      "numeroLoja": "87"
+    },
+    {
+      "id": "180033",
+      "nome": "Matosinhos",
+      "numeroLoja": "2"
+    },
+    {
+      "id": "180041",
+      "nome": "Porto - marquês",
+      "numeroLoja": "12"
+    },
+    {
+      "id": "180042",
+      "nome": "Porto - zona industrial",
+      "numeroLoja": "30"
+    },
+    {
+      "id": "180044",
+      "nome": "Porto sul sm",
+      "numeroLoja": "80"
+    },
+    {
+      "id": "180048",
+      "nome": "Santa maria da feira",
+      "numeroLoja": "6"
+    },
+    {
+      "id": "180058",
+      "nome": "Vila nova de gaia",
+      "numeroLoja": "4"
+    },
+    {
+      "id": "180059",
+      "nome": "Vila nova de gaia - canelas",
+      "numeroLoja": "65"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tnome\tnumeroLoja\n180002\tAeroporto porto\t71\n180022\tGondomar\t17\n180030\tMaia - maiashopping\t29\n180031\tMaia - moreira\t3\n180032\tMaia sm\t87\n180033\tMatosinhos\t2\n180041\tPorto - marquês\t12\n180042\tPorto - zona industrial\t30\n180044\tPorto sul sm\t80\n180048\tSanta maria da feira\t6\n180058\tVila nova de gaia\t4\n180059\tVila nova de gaia - canelas\t65\n",
+  "stderr": "",
+  "execution_time_ms": 133
+}

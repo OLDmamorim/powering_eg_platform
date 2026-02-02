@@ -1,0 +1,22 @@
+{
+  "query": "SELECT l.id, l.nome\nFROM users u\nJOIN gestores g ON u.id = g.userId\nJOIN gestor_lojas gl ON g.id = gl.gestorId\nJOIN lojas l ON gl.lojaId = l.id\nWHERE u.name LIKE '%Carlos Eduardo%'\nAND l.id NOT IN (\n  SELECT COALESCE(lojaId, 0) FROM relatorios_analise_loja \n  WHERE analiseId = (SELECT MAX(id) FROM analises_fichas_servico)\n)\nORDER BY l.nome;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT l.id, l.nome\nFROM users u\nJOIN gestores g ON u.id = g.userId\nJOIN gestor_lojas gl ON g.id = gl.gestorId\nJOIN lojas l ON gl.lojaId = l.id\nWHERE u.name LIKE '%Carlos Eduardo%'\nAND l.id NOT IN (\n  SELECT COALESCE(lojaId, 0) FROM relatorios_analise_loja \n  WHERE analiseId = (SELECT MAX(id) FROM analises_fichas_servico)\n)\nORDER BY l.nome;",
+  "rows": [
+    {
+      "id": "180029",
+      "nome": "Lisboa smr"
+    },
+    {
+      "id": "180035",
+      "nome": "Movida"
+    },
+    {
+      "id": "180046",
+      "nome": "Rotunda do relógio"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tnome\n180029\tLisboa smr\n180035\tMovida\n180046\tRotunda do relógio\n",
+  "stderr": "",
+  "execution_time_ms": 56
+}

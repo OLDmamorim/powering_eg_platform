@@ -3912,3 +3912,18 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar reparações e para-brisas na formatação do contexto dos resultados mensais
 - [x] Adicionar menção explícita aos dados de reparações no prompt do sistema
 - [x] Testar perguntas sobre total de reparações por loja (Top 5 Novembro 2025 funciona)
+
+
+## Correção v4.8 - Mapeamento de Lojas na Análise de Fichas
+- [x] Investigar lojas em falta para Carlos Eduardo (12 lojas, não 13 - Águeda foi para Mónica)
+- [x] Adicionar mapeamentos no analiseFichasService.ts:
+  - Lisboa Amoreiras -> Lisboa (Amoreiras #20)
+  - Lisboa Relogio -> Lisboa Relogio (Rotunda do relógio #21)
+  - Aeroporto -> Aeroporto (Aeroporto porto #71)
+  - MaiaShopping -> MaiaShopping (Maia - maiashopping #29)
+  - Maia Zona Industrial -> Maia Zona Industrial (Maia - moreira #3)
+  - Coimbra Sul -> Coimbra Sul (separar de Coimbra #14)
+- [x] Adicionar aliases correspondentes no db.ts para associação de lojaId
+- [ ] Fazer novo upload do ficheiro Excel para aplicar as correções
+
+**Nota:** As correções só terão efeito após novo upload do ficheiro Excel

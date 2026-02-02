@@ -1,0 +1,62 @@
+{
+  "query": "SELECT u.name as gestorNome, l.nome as lojaNome\nFROM users u\nJOIN gestores g ON u.id = g.userId\nJOIN gestor_lojas gl ON g.id = gl.gestorId\nJOIN lojas l ON gl.lojaId = l.id\nWHERE u.name LIKE '%Carlos Eduardo%'\nORDER BY l.nome;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT u.name as gestorNome, l.nome as lojaNome\nFROM users u\nJOIN gestores g ON u.id = g.userId\nJOIN gestor_lojas gl ON g.id = gl.gestorId\nJOIN lojas l ON gl.lojaId = l.id\nWHERE u.name LIKE '%Carlos Eduardo%'\nORDER BY l.nome;",
+  "rows": [
+    {
+      "gestorNome": "Carlos Eduardo",
+      "lojaNome": "Águeda"
+    },
+    {
+      "gestorNome": "Carlos Eduardo",
+      "lojaNome": "Algés"
+    },
+    {
+      "gestorNome": "Carlos Eduardo",
+      "lojaNome": "Almada"
+    },
+    {
+      "gestorNome": "Carlos Eduardo",
+      "lojaNome": "Amadora"
+    },
+    {
+      "gestorNome": "Carlos Eduardo",
+      "lojaNome": "Amoreiras"
+    },
+    {
+      "gestorNome": "Carlos Eduardo",
+      "lojaNome": "Lisboa sm"
+    },
+    {
+      "gestorNome": "Carlos Eduardo",
+      "lojaNome": "Lisboa smr"
+    },
+    {
+      "gestorNome": "Carlos Eduardo",
+      "lojaNome": "Movida"
+    },
+    {
+      "gestorNome": "Carlos Eduardo",
+      "lojaNome": "Odivelas - loures"
+    },
+    {
+      "gestorNome": "Carlos Eduardo",
+      "lojaNome": "Póvoa de santa iria"
+    },
+    {
+      "gestorNome": "Carlos Eduardo",
+      "lojaNome": "Rotunda do relógio"
+    },
+    {
+      "gestorNome": "Carlos Eduardo",
+      "lojaNome": "Sacavém"
+    },
+    {
+      "gestorNome": "Carlos Eduardo",
+      "lojaNome": "Telheiras"
+    }
+  ],
+  "messages": [],
+  "stdout": "gestorNome\tlojaNome\nCarlos Eduardo\tÁgueda\nCarlos Eduardo\tAlgés\nCarlos Eduardo\tAlmada\nCarlos Eduardo\tAmadora\nCarlos Eduardo\tAmoreiras\nCarlos Eduardo\tLisboa sm\nCarlos Eduardo\tLisboa smr\nCarlos Eduardo\tMovida\nCarlos Eduardo\tOdivelas - loures\nCarlos Eduardo\tPóvoa de santa iria\nCarlos Eduardo\tRotunda do relógio\nCarlos Eduardo\tSacavém\nCarlos Eduardo\tTelheiras\n",
+  "stderr": "",
+  "execution_time_ms": 59
+}

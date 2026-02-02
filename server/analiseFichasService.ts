@@ -97,6 +97,17 @@ const MAPEAMENTO_NOMES_LOJAS: Record<string, string> = {
   'paredes ii': 'Mycarcenter',
   'porto alto': 'Porto alto',
   'portoalto': 'Porto alto',
+  // Lojas de Lisboa com nomes específicos
+  'lisboa amoreiras': 'Lisboa',  // Amoreiras = Lisboa #20
+  'lisboa relogio': 'Lisboa Relogio',  // Rotunda do relógio = Lisboa Relogio #21
+  'lisboa relógio': 'Lisboa Relogio',
+  // Lojas do Marco Vilar com nomes específicos
+  'aeroporto': 'Aeroporto',  // Aeroporto porto #71
+  'maiashopping': 'MaiaShopping',  // Maia - maiashopping #29
+  'maia shopping': 'MaiaShopping',
+  'maia zona industrial': 'Maia Zona Industrial',  // Maia - moreira #3
+  // Lojas da Mónica Correia com nomes específicos
+  'coimbra sul': 'Coimbra Sul',  // Coimbra sul #59 (separar de Coimbra #14)
 };
 
 // Mapeamento de cidades conhecidas para normalização

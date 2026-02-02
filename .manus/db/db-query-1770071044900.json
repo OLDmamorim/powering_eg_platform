@@ -1,0 +1,22 @@
+{
+  "query": "SHOW TABLES LIKE '%analise%';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SHOW TABLES LIKE '%analise%';",
+  "rows": [
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH (%analise%)": "analises_fichas_servico"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH (%analise%)": "evolucao_analises"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH (%analise%)": "fichas_identificadas_analise"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH (%analise%)": "relatorios_analise_loja"
+    }
+  ],
+  "messages": [],
+  "stdout": "Tables_in_3c9MozLH35e233uWy5WDtH (%analise%)\nanalises_fichas_servico\nevolucao_analises\nfichas_identificadas_analise\nrelatorios_analise_loja\n",
+  "stderr": "",
+  "execution_time_ms": 57
+}

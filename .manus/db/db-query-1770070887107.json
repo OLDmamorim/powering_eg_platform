@@ -1,0 +1,49 @@
+{
+  "query": "SELECT l.nome FROM users u JOIN gestores g ON u.id = g.userId JOIN gestor_lojas gl ON g.id = gl.gestorId JOIN lojas l ON gl.lojaId = l.id WHERE u.name LIKE '%Carlos Eduardo%' ORDER BY l.nome;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT l.nome FROM users u JOIN gestores g ON u.id = g.userId JOIN gestor_lojas gl ON g.id = gl.gestorId JOIN lojas l ON gl.lojaId = l.id WHERE u.name LIKE '%Carlos Eduardo%' ORDER BY l.nome;",
+  "rows": [
+    {
+      "nome": "Águeda"
+    },
+    {
+      "nome": "Algés"
+    },
+    {
+      "nome": "Almada"
+    },
+    {
+      "nome": "Amadora"
+    },
+    {
+      "nome": "Amoreiras"
+    },
+    {
+      "nome": "Lisboa sm"
+    },
+    {
+      "nome": "Lisboa smr"
+    },
+    {
+      "nome": "Movida"
+    },
+    {
+      "nome": "Odivelas - loures"
+    },
+    {
+      "nome": "Póvoa de santa iria"
+    },
+    {
+      "nome": "Rotunda do relógio"
+    },
+    {
+      "nome": "Sacavém"
+    },
+    {
+      "nome": "Telheiras"
+    }
+  ],
+  "messages": [],
+  "stdout": "nome\nÁgueda\nAlgés\nAlmada\nAmadora\nAmoreiras\nLisboa sm\nLisboa smr\nMovida\nOdivelas - loures\nPóvoa de santa iria\nRotunda do relógio\nSacavém\nTelheiras\n",
+  "stderr": "",
+  "execution_time_ms": 73
+}

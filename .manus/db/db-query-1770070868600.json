@@ -1,0 +1,75 @@
+{
+  "query": "SELECT l.id, l.nome, l.numeroLoja\nFROM users u\nJOIN gestores g ON u.id = g.userId\nJOIN gestor_lojas gl ON g.id = gl.gestorId\nJOIN lojas l ON gl.lojaId = l.id\nWHERE u.name LIKE '%Carlos Eduardo%'\nORDER BY l.nome;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT l.id, l.nome, l.numeroLoja\nFROM users u\nJOIN gestores g ON u.id = g.userId\nJOIN gestor_lojas gl ON g.id = gl.gestorId\nJOIN lojas l ON gl.lojaId = l.id\nWHERE u.name LIKE '%Carlos Eduardo%'\nORDER BY l.nome;",
+  "rows": [
+    {
+      "id": "180003",
+      "nome": "Águeda",
+      "numeroLoja": "39"
+    },
+    {
+      "id": "180004",
+      "nome": "Algés",
+      "numeroLoja": "63"
+    },
+    {
+      "id": "180005",
+      "nome": "Almada",
+      "numeroLoja": "62"
+    },
+    {
+      "id": "180006",
+      "nome": "Amadora",
+      "numeroLoja": "22"
+    },
+    {
+      "id": "180007",
+      "nome": "Amoreiras",
+      "numeroLoja": "20"
+    },
+    {
+      "id": "180028",
+      "nome": "Lisboa sm",
+      "numeroLoja": "53"
+    },
+    {
+      "id": "180029",
+      "nome": "Lisboa smr",
+      "numeroLoja": "82"
+    },
+    {
+      "id": "180035",
+      "nome": "Movida",
+      "numeroLoja": "50"
+    },
+    {
+      "id": "180037",
+      "nome": "Odivelas - loures",
+      "numeroLoja": "92"
+    },
+    {
+      "id": "180045",
+      "nome": "Póvoa de santa iria",
+      "numeroLoja": "96"
+    },
+    {
+      "id": "180046",
+      "nome": "Rotunda do relógio",
+      "numeroLoja": "21"
+    },
+    {
+      "id": "180047",
+      "nome": "Sacavém",
+      "numeroLoja": "25"
+    },
+    {
+      "id": "180055",
+      "nome": "Telheiras",
+      "numeroLoja": "48"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tnome\tnumeroLoja\n180003\tÁgueda\t39\n180004\tAlgés\t63\n180005\tAlmada\t62\n180006\tAmadora\t22\n180007\tAmoreiras\t20\n180028\tLisboa sm\t53\n180029\tLisboa smr\t82\n180035\tMovida\t50\n180037\tOdivelas - loures\t92\n180045\tPóvoa de santa iria\t96\n180046\tRotunda do relógio\t21\n180047\tSacavém\t25\n180055\tTelheiras\t48\n",
+  "stderr": "",
+  "execution_time_ms": 51
+}

@@ -1,0 +1,90 @@
+{
+  "query": "SELECT l.id, l.nome, l.numeroLoja\nFROM users u\nJOIN gestores g ON u.id = g.userId\nJOIN gestor_lojas gl ON g.id = gl.gestorId\nJOIN lojas l ON gl.lojaId = l.id\nWHERE u.name LIKE '%Mónica%' OR u.name LIKE '%Monica%'\nORDER BY l.nome;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT l.id, l.nome, l.numeroLoja\nFROM users u\nJOIN gestores g ON u.id = g.userId\nJOIN gestor_lojas gl ON g.id = gl.gestorId\nJOIN lojas l ON gl.lojaId = l.id\nWHERE u.name LIKE '%Mónica%' OR u.name LIKE '%Monica%'\nORDER BY l.nome;",
+  "rows": [
+    {
+      "id": "180003",
+      "nome": "Águeda",
+      "numeroLoja": "39"
+    },
+    {
+      "id": "180008",
+      "nome": "Aveiro",
+      "numeroLoja": "40"
+    },
+    {
+      "id": "180009",
+      "nome": "Beira baixa sm",
+      "numeroLoja": "68"
+    },
+    {
+      "id": "180014",
+      "nome": "Coimbra",
+      "numeroLoja": "14"
+    },
+    {
+      "id": "180015",
+      "nome": "Coimbra sm",
+      "numeroLoja": "56"
+    },
+    {
+      "id": "180016",
+      "nome": "Coimbra sul",
+      "numeroLoja": "59"
+    },
+    {
+      "id": "180017",
+      "nome": "Costa de prata sm",
+      "numeroLoja": "69"
+    },
+    {
+      "id": "180023",
+      "nome": "Guarda",
+      "numeroLoja": "44"
+    },
+    {
+      "id": "180025",
+      "nome": "Leiria",
+      "numeroLoja": "31"
+    },
+    {
+      "id": "180026",
+      "nome": "Leiria sm",
+      "numeroLoja": "57"
+    },
+    {
+      "id": "180039",
+      "nome": "Pombal",
+      "numeroLoja": "32"
+    },
+    {
+      "id": "180050",
+      "nome": "Seia",
+      "numeroLoja": "45"
+    },
+    {
+      "id": "180051",
+      "nome": "Seia sm",
+      "numeroLoja": "91"
+    },
+    {
+      "id": "180054",
+      "nome": "Sm viseu2",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "180060",
+      "nome": "Viseu",
+      "numeroLoja": "46"
+    },
+    {
+      "id": "180061",
+      "nome": "Viseu sm",
+      "numeroLoja": "66"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tnome\tnumeroLoja\n180003\tÁgueda\t39\n180008\tAveiro\t40\n180009\tBeira baixa sm\t68\n180014\tCoimbra\t14\n180015\tCoimbra sm\t56\n180016\tCoimbra sul\t59\n180017\tCosta de prata sm\t69\n180023\tGuarda\t44\n180025\tLeiria\t31\n180026\tLeiria sm\t57\n180039\tPombal\t32\n180050\tSeia\t45\n180051\tSeia sm\t91\n180054\tSm viseu2\tNULL\n180060\tViseu\t46\n180061\tViseu sm\t66\n",
+  "stderr": "",
+  "execution_time_ms": 71
+}

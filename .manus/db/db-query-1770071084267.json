@@ -1,0 +1,60 @@
+{
+  "query": "SELECT r.nomeLoja, r.lojaId, l.nome as lojaBD\nFROM relatorios_analise_loja r\nLEFT JOIN lojas l ON r.lojaId = l.id\nWHERE r.analiseId = (SELECT MAX(id) FROM analises_fichas_servico)\nAND r.lojaId IN (\n  SELECT l.id FROM users u\n  JOIN gestores g ON u.id = g.userId\n  JOIN gestor_lojas gl ON g.id = gl.gestorId\n  JOIN lojas l ON gl.lojaId = l.id\n  WHERE u.name LIKE '%Carlos Eduardo%'\n)\nORDER BY r.nomeLoja;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT r.nomeLoja, r.lojaId, l.nome as lojaBD\nFROM relatorios_analise_loja r\nLEFT JOIN lojas l ON r.lojaId = l.id\nWHERE r.analiseId = (SELECT MAX(id) FROM analises_fichas_servico)\nAND r.lojaId IN (\n  SELECT l.id FROM users u\n  JOIN gestores g ON u.id = g.userId\n  JOIN gestor_lojas gl ON g.id = gl.gestorId\n  JOIN lojas l ON gl.lojaId = l.id\n  WHERE u.name LIKE '%Carlos Eduardo%'\n)\nORDER BY r.nomeLoja;",
+  "rows": [
+    {
+      "nomeLoja": "Agueda",
+      "lojaId": "180003",
+      "lojaBD": "Águeda"
+    },
+    {
+      "nomeLoja": "Algés",
+      "lojaId": "180004",
+      "lojaBD": "Algés"
+    },
+    {
+      "nomeLoja": "Almada",
+      "lojaId": "180005",
+      "lojaBD": "Almada"
+    },
+    {
+      "nomeLoja": "Amadora",
+      "lojaId": "180006",
+      "lojaBD": "Amadora"
+    },
+    {
+      "nomeLoja": "Lisboa",
+      "lojaId": "180007",
+      "lojaBD": "Amoreiras"
+    },
+    {
+      "nomeLoja": "Lisboa SM",
+      "lojaId": "180028",
+      "lojaBD": "Lisboa sm"
+    },
+    {
+      "nomeLoja": "Loures",
+      "lojaId": "180037",
+      "lojaBD": "Odivelas - loures"
+    },
+    {
+      "nomeLoja": "Póvoa de Stªa Iria",
+      "lojaId": "180045",
+      "lojaBD": "Póvoa de santa iria"
+    },
+    {
+      "nomeLoja": "Sacavém",
+      "lojaId": "180047",
+      "lojaBD": "Sacavém"
+    },
+    {
+      "nomeLoja": "Telheiras",
+      "lojaId": "180055",
+      "lojaBD": "Telheiras"
+    }
+  ],
+  "messages": [],
+  "stdout": "nomeLoja\tlojaId\tlojaBD\nAgueda\t180003\tÁgueda\nAlgés\t180004\tAlgés\nAlmada\t180005\tAlmada\nAmadora\t180006\tAmadora\nLisboa\t180007\tAmoreiras\nLisboa SM\t180028\tLisboa sm\nLoures\t180037\tOdivelas - loures\nPóvoa de Stªa Iria\t180045\tPóvoa de santa iria\nSacavém\t180047\tSacavém\nTelheiras\t180055\tTelheiras\n",
+  "stderr": "",
+  "execution_time_ms": 68
+}

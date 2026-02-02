@@ -1,0 +1,22 @@
+{
+  "query": "SELECT id, nomeLoja, numeroLoja, lojaId \nFROM relatorios_analise_loja \nWHERE analiseId = (SELECT MAX(id) FROM analises_fichas_servico)\nAND nomeLoja LIKE '%Lisboa%'\nORDER BY nomeLoja;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT id, nomeLoja, numeroLoja, lojaId \nFROM relatorios_analise_loja \nWHERE analiseId = (SELECT MAX(id) FROM analises_fichas_servico)\nAND nomeLoja LIKE '%Lisboa%'\nORDER BY nomeLoja;",
+  "rows": [
+    {
+      "id": "150029",
+      "nomeLoja": "Lisboa",
+      "numeroLoja": "20",
+      "lojaId": "180007"
+    },
+    {
+      "id": "150030",
+      "nomeLoja": "Lisboa SM",
+      "numeroLoja": "NULL",
+      "lojaId": "180028"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tnomeLoja\tnumeroLoja\tlojaId\n150029\tLisboa\t20\t180007\n150030\tLisboa SM\tNULL\t180028\n",
+  "stderr": "",
+  "execution_time_ms": 58
+}

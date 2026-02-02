@@ -1,0 +1,416 @@
+{
+  "query": "SELECT id, nomeLoja, numeroLoja, lojaId, totalFichas\nFROM relatorios_analise_loja \nWHERE analiseId = (SELECT MAX(id) FROM analises_fichas_servico)\nORDER BY nomeLoja;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT id, nomeLoja, numeroLoja, lojaId, totalFichas\nFROM relatorios_analise_loja \nWHERE analiseId = (SELECT MAX(id) FROM analises_fichas_servico)\nORDER BY nomeLoja;",
+  "rows": [
+    {
+      "id": "150059",
+      "nomeLoja": "Abrantes",
+      "numeroLoja": "38",
+      "lojaId": "180001",
+      "totalFichas": "24"
+    },
+    {
+      "id": "150060",
+      "nomeLoja": "Agueda",
+      "numeroLoja": "39",
+      "lojaId": "180003",
+      "totalFichas": "24"
+    },
+    {
+      "id": "150061",
+      "nomeLoja": "Algés",
+      "numeroLoja": "63",
+      "lojaId": "180004",
+      "totalFichas": "24"
+    },
+    {
+      "id": "150062",
+      "nomeLoja": "Almada",
+      "numeroLoja": "62",
+      "lojaId": "180005",
+      "totalFichas": "51"
+    },
+    {
+      "id": "150063",
+      "nomeLoja": "Amadora",
+      "numeroLoja": "22",
+      "lojaId": "180006",
+      "totalFichas": "62"
+    },
+    {
+      "id": "150064",
+      "nomeLoja": "Aveiro",
+      "numeroLoja": "40",
+      "lojaId": "180008",
+      "totalFichas": "35"
+    },
+    {
+      "id": "150065",
+      "nomeLoja": "Aveiro SM",
+      "numeroLoja": "69",
+      "lojaId": "180017",
+      "totalFichas": "24"
+    },
+    {
+      "id": "150066",
+      "nomeLoja": "Barcelos",
+      "numeroLoja": "23",
+      "lojaId": "60002",
+      "totalFichas": "14"
+    },
+    {
+      "id": "150067",
+      "nomeLoja": "Braga",
+      "numeroLoja": "18",
+      "lojaId": "180010",
+      "totalFichas": "45"
+    },
+    {
+      "id": "150068",
+      "nomeLoja": "Braga SM",
+      "numeroLoja": "NULL",
+      "lojaId": "180011",
+      "totalFichas": "12"
+    },
+    {
+      "id": "150069",
+      "nomeLoja": "Caldas",
+      "numeroLoja": "10",
+      "lojaId": "180012",
+      "totalFichas": "74"
+    },
+    {
+      "id": "150070",
+      "nomeLoja": "Canelas",
+      "numeroLoja": "65",
+      "lojaId": "180059",
+      "totalFichas": "67"
+    },
+    {
+      "id": "150071",
+      "nomeLoja": "Castanheira do Ribatejo",
+      "numeroLoja": "13",
+      "lojaId": "180013",
+      "totalFichas": "20"
+    },
+    {
+      "id": "150072",
+      "nomeLoja": "Coimbra",
+      "numeroLoja": "73",
+      "lojaId": "180014",
+      "totalFichas": "67"
+    },
+    {
+      "id": "150073",
+      "nomeLoja": "Coimbra SM",
+      "numeroLoja": "NULL",
+      "lojaId": "180015",
+      "totalFichas": "17"
+    },
+    {
+      "id": "150074",
+      "nomeLoja": "Entroncamento",
+      "numeroLoja": "43",
+      "lojaId": "180018",
+      "totalFichas": "24"
+    },
+    {
+      "id": "150075",
+      "nomeLoja": "Famalicão",
+      "numeroLoja": "9",
+      "lojaId": "60001",
+      "totalFichas": "60"
+    },
+    {
+      "id": "150076",
+      "nomeLoja": "Famalicão SM",
+      "numeroLoja": "61",
+      "lojaId": "180019",
+      "totalFichas": "41"
+    },
+    {
+      "id": "150077",
+      "nomeLoja": "Faro",
+      "numeroLoja": "37",
+      "lojaId": "180020",
+      "totalFichas": "39"
+    },
+    {
+      "id": "150078",
+      "nomeLoja": "Faro SM",
+      "numeroLoja": "86",
+      "lojaId": "180021",
+      "totalFichas": "37"
+    },
+    {
+      "id": "150079",
+      "nomeLoja": "Feira",
+      "numeroLoja": "6",
+      "lojaId": "180048",
+      "totalFichas": "26"
+    },
+    {
+      "id": "150080",
+      "nomeLoja": "Gaia",
+      "numeroLoja": "4",
+      "lojaId": "180058",
+      "totalFichas": "25"
+    },
+    {
+      "id": "150081",
+      "nomeLoja": "Gondomar",
+      "numeroLoja": "17",
+      "lojaId": "180022",
+      "totalFichas": "19"
+    },
+    {
+      "id": "150082",
+      "nomeLoja": "Guarda",
+      "numeroLoja": "44",
+      "lojaId": "180023",
+      "totalFichas": "12"
+    },
+    {
+      "id": "150083",
+      "nomeLoja": "Guarda SM",
+      "numeroLoja": "68",
+      "lojaId": "180009",
+      "totalFichas": "16"
+    },
+    {
+      "id": "150084",
+      "nomeLoja": "Guimarães",
+      "numeroLoja": "7",
+      "lojaId": "180024",
+      "totalFichas": "35"
+    },
+    {
+      "id": "150085",
+      "nomeLoja": "Leiria SM",
+      "numeroLoja": "NULL",
+      "lojaId": "180026",
+      "totalFichas": "73"
+    },
+    {
+      "id": "150086",
+      "nomeLoja": "Leziria do Tejo SM",
+      "numeroLoja": "97",
+      "lojaId": "180027",
+      "totalFichas": "35"
+    },
+    {
+      "id": "150087",
+      "nomeLoja": "Lisboa",
+      "numeroLoja": "20",
+      "lojaId": "180007",
+      "totalFichas": "113"
+    },
+    {
+      "id": "150088",
+      "nomeLoja": "Lisboa SM",
+      "numeroLoja": "NULL",
+      "lojaId": "180028",
+      "totalFichas": "117"
+    },
+    {
+      "id": "150089",
+      "nomeLoja": "Loures",
+      "numeroLoja": "92",
+      "lojaId": "180037",
+      "totalFichas": "25"
+    },
+    {
+      "id": "150090",
+      "nomeLoja": "Maia",
+      "numeroLoja": "3",
+      "lojaId": "180031",
+      "totalFichas": "60"
+    },
+    {
+      "id": "150091",
+      "nomeLoja": "Maia SM",
+      "numeroLoja": "NULL",
+      "lojaId": "180032",
+      "totalFichas": "49"
+    },
+    {
+      "id": "150092",
+      "nomeLoja": "Matosinhos",
+      "numeroLoja": "2",
+      "lojaId": "180033",
+      "totalFichas": "55"
+    },
+    {
+      "id": "150093",
+      "nomeLoja": "Montijo",
+      "numeroLoja": "95",
+      "lojaId": "180034",
+      "totalFichas": "29"
+    },
+    {
+      "id": "150094",
+      "nomeLoja": "Mycarcenter",
+      "numeroLoja": "8",
+      "lojaId": "180036",
+      "totalFichas": "87"
+    },
+    {
+      "id": "150095",
+      "nomeLoja": "Paços de Ferreira",
+      "numeroLoja": "15",
+      "lojaId": "60007",
+      "totalFichas": "15"
+    },
+    {
+      "id": "150096",
+      "nomeLoja": "Paredes",
+      "numeroLoja": "5",
+      "lojaId": "60006",
+      "totalFichas": "32"
+    },
+    {
+      "id": "150097",
+      "nomeLoja": "Paredes SM",
+      "numeroLoja": "84",
+      "lojaId": "180038",
+      "totalFichas": "35"
+    },
+    {
+      "id": "150098",
+      "nomeLoja": "Pombal",
+      "numeroLoja": "32",
+      "lojaId": "180039",
+      "totalFichas": "38"
+    },
+    {
+      "id": "150099",
+      "nomeLoja": "Portimão",
+      "numeroLoja": "36",
+      "lojaId": "180040",
+      "totalFichas": "35"
+    },
+    {
+      "id": "150100",
+      "nomeLoja": "Porto",
+      "numeroLoja": "54",
+      "lojaId": "180063",
+      "totalFichas": "207"
+    },
+    {
+      "id": "150101",
+      "nomeLoja": "Porto alto",
+      "numeroLoja": "94",
+      "lojaId": "180043",
+      "totalFichas": "17"
+    },
+    {
+      "id": "150102",
+      "nomeLoja": "Póvoa de Stªa Iria",
+      "numeroLoja": "96",
+      "lojaId": "180045",
+      "totalFichas": "13"
+    },
+    {
+      "id": "150103",
+      "nomeLoja": "Póvoa de Varzim",
+      "numeroLoja": "11",
+      "lojaId": "60005",
+      "totalFichas": "21"
+    },
+    {
+      "id": "150104",
+      "nomeLoja": "Recalibra Minho",
+      "numeroLoja": "60",
+      "lojaId": "NULL",
+      "totalFichas": "12"
+    },
+    {
+      "id": "150105",
+      "nomeLoja": "Sacavém",
+      "numeroLoja": "25",
+      "lojaId": "180047",
+      "totalFichas": "71"
+    },
+    {
+      "id": "150106",
+      "nomeLoja": "Santarém",
+      "numeroLoja": "72",
+      "lojaId": "180049",
+      "totalFichas": "30"
+    },
+    {
+      "id": "150107",
+      "nomeLoja": "Seia",
+      "numeroLoja": "45",
+      "lojaId": "180050",
+      "totalFichas": "12"
+    },
+    {
+      "id": "150108",
+      "nomeLoja": "Seia SM",
+      "numeroLoja": "91",
+      "lojaId": "180051",
+      "totalFichas": "12"
+    },
+    {
+      "id": "150109",
+      "nomeLoja": "Telheiras",
+      "numeroLoja": "48",
+      "lojaId": "180055",
+      "totalFichas": "25"
+    },
+    {
+      "id": "150110",
+      "nomeLoja": "Trucks Service Beiras",
+      "numeroLoja": "67",
+      "lojaId": "180062",
+      "totalFichas": "31"
+    },
+    {
+      "id": "150111",
+      "nomeLoja": "Vale do Tejo SM",
+      "numeroLoja": "64",
+      "lojaId": "180056",
+      "totalFichas": "12"
+    },
+    {
+      "id": "150112",
+      "nomeLoja": "Viana",
+      "numeroLoja": "34",
+      "lojaId": "60004",
+      "totalFichas": "38"
+    },
+    {
+      "id": "150113",
+      "nomeLoja": "Viana SM",
+      "numeroLoja": "85",
+      "lojaId": "180057",
+      "totalFichas": "34"
+    },
+    {
+      "id": "150114",
+      "nomeLoja": "Vila Verde",
+      "numeroLoja": "49",
+      "lojaId": "60003",
+      "totalFichas": "20"
+    },
+    {
+      "id": "150115",
+      "nomeLoja": "Viseu",
+      "numeroLoja": "46",
+      "lojaId": "180060",
+      "totalFichas": "58"
+    },
+    {
+      "id": "150116",
+      "nomeLoja": "Viseu SM",
+      "numeroLoja": "66",
+      "lojaId": "180061",
+      "totalFichas": "39"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tnomeLoja\tnumeroLoja\tlojaId\ttotalFichas\n150059\tAbrantes\t38\t180001\t24\n150060\tAgueda\t39\t180003\t24\n150061\tAlgés\t63\t180004\t24\n150062\tAlmada\t62\t180005\t51\n150063\tAmadora\t22\t180006\t62\n150064\tAveiro\t40\t180008\t35\n150065\tAveiro SM\t69\t180017\t24\n150066\tBarcelos\t23\t60002\t14\n150067\tBraga\t18\t180010\t45\n150068\tBraga SM\tNULL\t180011\t12\n150069\tCaldas\t10\t180012\t74\n150070\tCanelas\t65\t180059\t67\n150071\tCastanheira do Ribatejo\t13\t180013\t20\n150072\tCoimbra\t73\t180014\t67\n150073\tCoimbra SM\tNULL\t180015\t17\n150074\tEntroncamento\t43\t180018\t24\n150075\tFamalicão\t9\t60001\t60\n150076\tFamalicão SM\t61\t180019\t41\n150077\tFaro\t37\t180020\t39\n150078\tFaro SM\t86\t180021\t37\n150079\tFeira\t6\t180048\t26\n150080\tGaia\t4\t180058\t25\n150081\tGondomar\t17\t180022\t19\n150082\tGuarda\t44\t180023\t12\n150083\tGuarda SM\t68\t180009\t16\n150084\tGuimarães\t7\t180024\t35\n150085\tLeiria SM\tNULL\t180026\t73\n150086\tLeziria do Tejo SM\t97\t180027\t35\n150087\tLisboa\t20\t180007\t113\n150088\tLisboa SM\tNULL\t180028\t117\n150089\tLoures\t92\t180037\t25\n150090\tMaia\t3\t180031\t60\n150091\tMaia SM\tNULL\t180032\t49\n150092\tMatosinhos\t2\t180033\t55\n150093\tMontijo\t95\t180034\t29\n150094\tMycarcenter\t8\t180036\t87\n150095\tPaços de Ferreira\t15\t60007\t15\n150096\tParedes\t5\t60006\t32\n150097\tParedes SM\t84\t180038\t35\n150098\tPombal\t32\t180039\t38\n150099\tPortimão\t36\t180040\t35\n150100\tPorto\t54\t180063\t207\n150101\tPorto alto\t94\t180043\t17\n150102\tPóvoa de Stªa Iria\t96\t180045\t13\n150103\tPóvoa de Varzim\t11\t60005\t21\n150104\tRecalibra Minho\t60\tNULL\t12\n150105\tSacavém\t25\t180047\t71\n150106\tSantarém\t72\t180049\t30\n150107\tSeia\t45\t180050\t12\n150108\tSeia SM\t91\t180051\t12\n150109\tTelheiras\t48\t180055\t25\n150110\tTrucks Service Beiras\t67\t180062\t31\n150111\tVale do Tejo SM\t64\t180056\t12\n150112\tViana\t34\t60004\t38\n150113\tViana SM\t85\t180057\t34\n150114\tVila Verde\t49\t60003\t20\n150115\tViseu\t46\t180060\t58\n150116\tViseu SM\t66\t180061\t39\n",
+  "stderr": "",
+  "execution_time_ms": 55
+}

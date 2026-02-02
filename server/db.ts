@@ -9607,6 +9607,18 @@ const ALIASES_LOJAS: Record<string, string[]> = {
   'agueda': ['agueda'],
   'aveiro sm': ['costa de prata sm'], // Aveiro SM = Costa de Prata SM
   'guarda sm': ['beira baixa sm'], // Guarda SM = Beira Baixa SM
+  // Lojas do Carlos Eduardo com nomes diferentes no Excel
+  'lisboa amoreiras': ['amoreiras'], // Lisboa Amoreiras = Amoreiras
+  'lisboa relogio': ['rotunda do relogio'], // Lisboa Relogio = Rotunda do relógio
+  'servico movel lisboa': ['lisboa sm'], // Serviço Móvel Lisboa = Lisboa sm
+  'sm lisboa': ['lisboa sm'], // SM Lisboa = Lisboa sm
+  // Lojas do Marco Vilar com nomes diferentes no Excel
+  'aeroporto': ['aeroporto porto'], // Aeroporto = Aeroporto porto #71
+  'maiashopping': ['maia - maiashopping'], // MaiaShopping = Maia - maiashopping #29
+  'maia shopping': ['maia - maiashopping'],
+  'maia zona industrial': ['maia - moreira'], // Maia Zona Industrial = Maia - moreira #3
+  // Lojas da Mónica Correia com nomes diferentes no Excel
+  'coimbra sul': ['coimbra sul'], // Coimbra Sul = Coimbra sul #59
 };
 
 /**

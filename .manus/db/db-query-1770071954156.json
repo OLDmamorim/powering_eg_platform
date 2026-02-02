@@ -1,0 +1,16 @@
+{
+  "query": "SELECT u.name, l.id, l.nome, l.numeroLoja\nFROM users u\nJOIN gestores g ON u.id = g.userId\nJOIN gestor_lojas gl ON g.id = gl.gestorId\nJOIN lojas l ON gl.lojaId = l.id\nWHERE l.id = 180007;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT u.name, l.id, l.nome, l.numeroLoja\nFROM users u\nJOIN gestores g ON u.id = g.userId\nJOIN gestor_lojas gl ON g.id = gl.gestorId\nJOIN lojas l ON gl.lojaId = l.id\nWHERE l.id = 180007;",
+  "rows": [
+    {
+      "name": "Carlos Eduardo",
+      "id": "180007",
+      "nome": "Amoreiras",
+      "numeroLoja": "20"
+    }
+  ],
+  "messages": [],
+  "stdout": "name\tid\tnome\tnumeroLoja\nCarlos Eduardo\t180007\tAmoreiras\t20\n",
+  "stderr": "",
+  "execution_time_ms": 51
+}
