@@ -862,6 +862,82 @@ Tens acesso a todos os dados da plataforma e podes responder a perguntas sobre:
 - Vendas complementares
 - HISTÓRICO DE VISITAS POR GESTOR: Podes responder a perguntas como "Quando foi a última visita do gestor X à loja Y?" ou "Quantas visitas fez o gestor X este mês?"
 - COMPARAÇÃO DE VENDAS ENTRE PERÍODOS: Podes analisar a evolução das vendas complementares entre meses, identificar tendências de crescimento ou queda, e comparar performance entre lojas
+- POLÍTICA DE COMISSIONAMENTO 2026: Conheces toda a política de prémios e comissões da ExpressGlass. Podes responder a perguntas sobre cálculos de comissões, regras, penalizações e fazer simulações
+
+=== POLÍTICA DE COMISSIONAMENTO 2026 - EXPRESSGLASS ===
+
+**ÂMBITO:** Normas de atribuição de prémios para 2026, por cumprimento de objetivos nas Lojas e Serviços Móveis.
+
+**DESTINATÁRIOS:** Responsáveis de Loja e Serviço Móvel, Coordenadores de Serviço Móvel e Técnicos Colocadores de Vidros.
+Período de carência: 2 meses para novos colaboradores.
+Não aplicável a trabalhadores em regime de Trabalho Temporário.
+
+**REGRA CRÍTICA:** Mínimo 35 serviços por colaborador para ter direito a prémios.
+
+**1. COMISSÕES POR SERVIÇOS LIGEIROS (por colaborador):**
+- < 35 serviços: 0€
+- 35 serviços: 25€ (base)
+- 36-39 serviços: +3,5€ por serviço adicional
+- 40-44 serviços: +5€ por serviço adicional (40=44€, 44=64€)
+- 45-49 serviços: +7€ por serviço adicional (45=71€, 49=99€)
+- 50-60+ serviços: +9€ por serviço adicional (50=108€, 55=153€, 60=198€)
+
+**FÓRMULA DE CÁLCULO SERVIÇOS LIGEIROS:**
+Para calcular a comissão de serviços ligeiros:
+- Se serviços < 35: comissão = 0€
+- Se serviços = 35: comissão = 25€
+- Se serviços 36-39: comissão = 25 + (serviços - 35) * 3.5€
+- Se serviços 40-44: comissão = 39 + (serviços - 39) * 5€
+- Se serviços 45-49: comissão = 64 + (serviços - 44) * 7€
+- Se serviços >= 50: comissão = 99 + (serviços - 49) * 9€
+
+**1.1 COMISSÕES POR SERVIÇOS PESADOS:**
+- Se < 35 serviços ligeiros: 12€ por pesado (0-9) ou 18€ por pesado (10+)
+- Se >= 35 serviços ligeiros: 15€ por pesado (0-9) ou 18€ por pesado (10+)
+
+**2. CALIBRAÇÃO:** Mesmo valor dos serviços ligeiros por cada calibragem (se atingir mínimo 35 serviços).
+
+**3. TAXA DE REPARAÇÃO (QIV) - Valor por cada reparação:**
+- < 22%: 0€
+- 22% a 25%: 5€
+- 25% a 30%: 10€
+- 30% a 40%: 12€
+- > 40%: 15€
+
+**4. VENDAS COMPLEMENTARES:**
+- Escovas: 10% do valor faturado
+- Películas: 2,5% do valor faturado (5% para Coimbra Sul)
+- Outros serviços (polimentos, lavagens, etc.): 30% do valor faturado (apenas serviços, não peças)
+
+**5. CRITÉRIOS MÍNIMOS OBRIGATÓRIOS:**
+- NPS >= 80% (obrigatório para receber prémio)
+- Taxa de Resposta >= 7,5% (obrigatório para receber prémio)
+
+**6. PENALIZAÇÕES TRIMESTRAIS:**
+Quebras e Danos em Montagem:
+- < 2%: 0% penalização
+- 2% a 3%: -10%
+- 3% a 4%: -20%
+- 4% a 5%: -30%
+- > 5%: -50%
+
+Faturas PP Pendentes:
+- 0: 0% penalização
+- 1 a 2: -10%
+- 3 a 5: -20%
+- 6 a 10: -30%
+- > 10: -50%
+
+**PAGAMENTO:** Trimestral (ex: Jan-Fev-Mar pagos em Abril).
+
+**EXEMPLO DE CÁLCULO (1 colaborador, 45 serviços, 28% taxa reparação, 12 reparações, 5 pesados, 15 escovas a 150€):**
+- Serviços Ligeiros: 71€
+- Serviços Pesados: 5 x 15€ = 75€
+- Reparações (28% = 10€/rep): 12 x 10€ = 120€
+- Escovas (10%): 150€ x 10% = 15€
+- **TOTAL: 281€**
+
+USA ESTAS REGRAS PARA FAZER CÁLCULOS DE COMISSÕES QUANDO O UTILIZADOR PERGUNTAR.
 
 === IMPORTANTE: CONTEXTO PESSOAL VS NACIONAL ===
 ${infoUtilizador}
@@ -1121,6 +1197,11 @@ export async function getSugestoesPergunta(language: string = 'pt'): Promise<str
       "Quais são os meus relatórios este mês?",
       "Como está a performance das minhas lojas?",
       "Quantas visitas fiz esta semana?",
+      // Perguntas sobre comissões
+      "Qual a comissão para 45 serviços por colaborador?",
+      "Se uma loja fizer 50 serviços e 15 reparações com taxa de 30%, quanto ganha?",
+      "Quais são as penalizações por quebras acima de 3%?",
+      "Qual o mínimo de serviços para ter direito a prémio?",
     ];
   } catch (error) {
     if (language === 'en') {

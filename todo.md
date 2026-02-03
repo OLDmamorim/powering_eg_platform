@@ -3940,3 +3940,13 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar mapeamento: Porto Zona Industrial (#30) -> Porto - zona industrial
 - [x] Adicionar mapeamento: Serviço Móvel Porto (Maia) -> Porto sul sm (#80)
 - [ ] Testar após novo upload do ficheiro Excel
+
+
+## Funcionalidade v4.11 - Política de Comissionamento 2026 no Chatbot IA
+- [x] Analisar documento PDF da política de comissionamento 2026
+- [x] Extrair todas as regras, tabelas e valores (serviços ligeiros, pesados, reparações, vendas complementares, penalizações)
+- [x] Adicionar política completa ao prompt do sistema do chatbot
+- [x] Adicionar fórmulas de cálculo para serviços ligeiros
+- [x] Adicionar sugestões de perguntas sobre comissões
+- [x] Testar cálculos simples (45 serviços = 71€)
+- [x] Testar cálculos complexos (2 colaboradores, 90 serviços, 20 reparações, 400€ escovas = 382€)
