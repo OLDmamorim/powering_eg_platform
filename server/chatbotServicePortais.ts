@@ -73,6 +73,98 @@ A data atual está indicada no contexto. Quando perguntam sobre "este mês", "m�
 - Quando perguntam sobre "taxa de reparação", "estamos a cumprir reparações" - compara com o mínimo de 22%
 - Indica claramente se a loja está ACIMA ou ABAIXO do mínimo exigido
 
+=== POLÍTICA DE COMISSIONAMENTO 2025 ===
+**REGRA CRÍTICA - FTE (Full Time Equivalent):**
+- Mínimo 35 serviços por colaborador para ter direito a QUALQUER prémio
+- Se a loja NÃO cumprir o FTE mínimo, NÃO TEM DIREITO A NENHUM PRÉMIO (0€ em TODAS as categorias)
+- Para calcular serviços por colaborador: Total de Serviços da Loja ÷ Número de Colaboradores
+
+**TABELA DE SERVIÇOS MÍNIMOS (FTE):**
+| Colaboradores | Serviços Mínimos Totais |
+| 1 | 35 |
+| 2 | 70 |
+| 3 | 105 |
+| 4 | 140 |
+
+**1. COMISSÕES POR SERVIÇOS LIGEIROS (por colaborador):**
+A tabela mostra o valor da comissão POR COLABORADOR. Para obter o TOTAL da loja, multiplicar pelo número de colaboradores.
+
+| Serviços/Colab | Comissão/Colaborador |
+|----------------|----------------------|
+| < 35           | 0€                   |
+| 35             | 25€                  |
+| 36             | 28,50€               |
+| 37             | 32€                  |
+| 38             | 35,50€               |
+| 39             | 39€                  |
+| 40             | 44€                  |
+| 41             | 49€                  |
+| 42             | 54€                  |
+| 43             | 59€                  |
+| 44             | 64€                  |
+| 45             | 71€                  |
+| 46             | 78€                  |
+| 47             | 85€                  |
+| 48             | 92€                  |
+| 49             | 99€                  |
+| 50             | 108€                 |
+| 51             | 117€                 |
+| 52             | 126€                 |
+| 53             | 135€                 |
+| 54             | 144€                 |
+| 55             | 153€                 |
+| 56             | 162€                 |
+| 57             | 171€                 |
+| 58             | 180€                 |
+| 59             | 189€                 |
+| 60             | 198€                 |
+| 60+            | 198€ + (n-60)*9€     |
+
+**COMO CALCULAR COMISSÃO DE SERVIÇOS LIGEIROS:**
+1. Calcular serviços por colaborador: Total Serviços ÷ Nº Colaboradores
+2. Verificar se atinge o FTE mínimo (>= 35 serviços/colaborador)
+3. Se sim, consultar a tabela para obter a comissão POR COLABORADOR
+4. Multiplicar pelo número de colaboradores para obter a comissão TOTAL da loja
+
+Exemplo: Loja com 2 colaboradores e 82 serviços totais:
+- Serviços/colaborador: 82 ÷ 2 = 41 (cumpre FTE >= 35)
+- Comissão por colaborador (tabela, 41 serv/colab): 49€
+- Comissão TOTAL da loja: 49€ × 2 = 98€
+
+**2. COMISSÕES POR SERVIÇOS PESADOS:**
+- Se < 35 serviços ligeiros: 12€ por pesado (0-9) ou 18€ por pesado (10+)
+- Se >= 35 serviços ligeiros: 15€ por pesado (0-9) ou 18€ por pesado (10+)
+
+**3. CALIBRAÇÃO:** Mesmo valor dos serviços ligeiros por cada calibragem (se atingir mínimo 35 serviços).
+
+**4. TAXA DE REPARAÇÃO (QIV) - Valor por cada reparação (APENAS SE CUMPRIR FTE):**
+- < 22%: 0€
+- 22% a 25%: 5€
+- 25% a 30%: 10€
+- 30% a 40%: 12€
+- > 40%: 15€
+
+**5. VENDAS COMPLEMENTARES (APENAS SE CUMPRIR FTE):**
+- Escovas: 10% do valor faturado
+- Películas: 2,5% do valor faturado
+- Outros serviços (polimentos, lavagens, etc.): 30% do valor faturado
+
+**6. CRITÉRIOS MÍNIMOS OBRIGATÓRIOS:**
+- NPS >= 80% (obrigatório para receber prémio)
+- Taxa de Resposta >= 7,5% (obrigatório para receber prémio)
+
+**7. PENALIZAÇÕES TRIMESTRAIS:**
+Quebras e Danos em Montagem:
+- < 2%: 0% penalização
+- 2% a 3%: -10%
+- 3% a 4%: -20%
+- 4% a 5%: -30%
+- > 5%: -50%
+
+**PAGAMENTO:** Trimestral (ex: Jan-Fev-Mar pagos em Abril).
+
+USA ESTAS REGRAS PARA FAZER CÁLCULOS DE COMISSÕES QUANDO O UTILIZADOR PERGUNTAR.
+
 Sê prestável, claro e objetivo. Usa emojis para tornar as respostas mais amigáveis.`;
 
     // 4. Formatar contexto para o prompt

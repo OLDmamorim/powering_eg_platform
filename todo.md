@@ -3987,3 +3987,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Exemplo correto: 2 colab, 80 serv → 40 serv/colab → 44€ × 2 = 88€ TOTAL
 - [x] A terceira coluna é meramente indicativa dos cálculos feitos
 - [x] Testar cenários de cálculo com a interpretação correta (Braga 2 colab, 82 serv = 98€)
+
+
+## v4.17 - Adicionar Cálculo de Comissões ao Chatbot do Portal da Loja
+- [x] Adicionar a política de comissões completa ao chatbot do Portal da Loja
+- [x] Incluir tabela de serviços ligeiros, pesados, calibração, QIV e vendas complementares
+- [x] Permitir simulação de comissões com base nos dados da loja
+- [x] Testar o chatbot do Portal da Loja com cenários de cálculo

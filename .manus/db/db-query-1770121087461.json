@@ -1,0 +1,16 @@
+{
+  "query": "SELECT table_name FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name LIKE '%portal%' OR table_name LIKE '%token%';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT table_name FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name LIKE '%portal%' OR table_name LIKE '%token%';",
+  "rows": [
+    {
+      "table_name": "tokens_loja"
+    },
+    {
+      "table_name": "tokens_volante"
+    }
+  ],
+  "messages": [],
+  "stdout": "table_name\ntokens_loja\ntokens_volante\n",
+  "stderr": "",
+  "execution_time_ms": 72
+}

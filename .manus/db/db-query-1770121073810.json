@@ -1,0 +1,16 @@
+{
+  "query": "SHOW TABLES LIKE '%token%';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SHOW TABLES LIKE '%token%';",
+  "rows": [
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH (%token%)": "tokens_loja"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH (%token%)": "tokens_volante"
+    }
+  ],
+  "messages": [],
+  "stdout": "Tables_in_3c9MozLH35e233uWy5WDtH (%token%)\ntokens_loja\ntokens_volante\n",
+  "stderr": "",
+  "execution_time_ms": 53
+}
