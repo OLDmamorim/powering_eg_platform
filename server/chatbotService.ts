@@ -897,7 +897,7 @@ A terceira coluna (€/serviço adicional) mostra quanto se ganha por cada servi
 | Serviços/Colab | Comissão TOTAL Loja | €/Serv Adicional |
 |----------------|---------------------|-------------------|
 | < 35           | 0€                  | 0€                |
-| 35             | 25€                 | 25€               |
+| 35             | 25€                 | 2,5€              |
 | 36             | 28,50€              | 3,5€              |
 | 37             | 32€                 | 3,5€              |
 | 38             | 35,50€              | 3,5€              |
