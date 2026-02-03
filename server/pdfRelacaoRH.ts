@@ -263,15 +263,22 @@ export async function gerarPDFRelacaoRH(dados: DadosRelacaoRH): Promise<Buffer> 
       }
 
       // ========== RODAPÉ ==========
-      const totalPages = doc.bufferedPageRange().count;
+      // Obter o número real de páginas antes de adicionar rodapés
+      const range = doc.bufferedPageRange();
+      const totalPages = range.start + range.count;
+      
+      // Adicionar rodapé a cada página existente
       for (let i = 0; i < totalPages; i++) {
         doc.switchToPage(i);
+        // Posicionar no final da página sem criar nova página
+        const footerY = doc.page.height - 30;
         doc.fontSize(8).fillColor(cinza).font('Helvetica');
+        // Usar text com lineBreak: false para evitar criar novas páginas
         doc.text(
           `PoweringEG Platform - Pagina ${i + 1} de ${totalPages}`,
           40,
-          doc.page.height - 30,
-          { align: 'center', width: pageWidth }
+          footerY,
+          { align: 'center', width: pageWidth, lineBreak: false }
         );
       }
 

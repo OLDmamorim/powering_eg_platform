@@ -4152,3 +4152,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Corrigir logo no PDF (usar fetch da URL em vez de base64)
 - [x] Adicionar título "Relação de Colaboradores" no email debaixo do logo
 - [x] Adicionar mês no cabeçalho do email
+
+## v4.35 - Corrigir páginas em branco no PDF
+- [x] Remover páginas em branco no final do PDF
+- [x] Corrigir lógica do rodapé que está a criar páginas extras
+- [x] Usar lineBreak: false no texto do rodapé
