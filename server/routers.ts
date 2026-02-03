@@ -1555,7 +1555,8 @@ IMPORTANTE:
   <div class="container">
     <div class="header">
       <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663088836799/YrkmGCRDVqYgFnZO.png" alt="ExpressGlass" style="max-width: 200px; height: auto; margin-bottom: 10px;" />
-      <p style="margin: 10px 0 0 0; color: #6b7280;">PoweringEG Platform</p>
+      <h2 style="margin: 15px 0 5px 0; color: #059669; font-size: 18px;">Relacao de Colaboradores</h2>
+      <p style="margin: 5px 0 0 0; color: #6b7280;">${mesCapitalizado}</p>
     </div>
     
     <div class="content">

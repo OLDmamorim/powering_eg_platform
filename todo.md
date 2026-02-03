@@ -4147,3 +4147,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar logo ExpressGlass no PDF
 - [x] Remover emojis do PDF (não renderizam corretamente)
 - [x] Remover acentos problemáticos do PDF (Relação -> Relacao)
+
+## v4.34 - Correções Logo PDF e Título Email
+- [x] Corrigir logo no PDF (usar fetch da URL em vez de base64)
+- [x] Adicionar título "Relação de Colaboradores" no email debaixo do logo
+- [x] Adicionar mês no cabeçalho do email
