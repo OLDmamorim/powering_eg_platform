@@ -1,5 +1,6 @@
 import * as db from './db';
 import { sendEmail } from './emailService';
+import { notificarGestorLembreteRH } from './pushService';
 
 /**
  * Serviço de lembrete automático para envio de relação de colaboradores para RH
@@ -64,37 +65,39 @@ function gerarHTMLLembrete(gestorNome: string, mes: string): string {
 
 /**
  * Envia lembrete para todos os gestores que ainda não enviaram a relação este mês
+ * Envia email E notificação push
  */
-export async function enviarLembretesRH(): Promise<{ enviados: number; erros: number }> {
+export async function enviarLembretesRH(): Promise<{ 
+  emailsEnviados: number; 
+  emailsErros: number;
+  pushEnviados: number;
+  pushErros: number;
+}> {
   // Verificar se é dia 20
   if (!isDia20()) {
     console.log('[LembreteRH] Hoje não é dia 20, ignorando...');
-    return { enviados: 0, erros: 0 };
+    return { emailsEnviados: 0, emailsErros: 0, pushEnviados: 0, pushErros: 0 };
   }
 
-  console.log('[LembreteRH] Iniciando envio de lembretes...');
+  console.log('[LembreteRH] Iniciando envio de lembretes (email + push)...');
   
   // Obter todos os gestores
   const gestores = await db.getAllGestores();
   
   if (!gestores || gestores.length === 0) {
     console.log('[LembreteRH] Nenhum gestor encontrado');
-    return { enviados: 0, erros: 0 };
+    return { emailsEnviados: 0, emailsErros: 0, pushEnviados: 0, pushErros: 0 };
   }
 
   // Obter mês atual em português
   const mesAtual = new Date().toLocaleDateString('pt-PT', { month: 'long', year: 'numeric' });
   
-  let enviados = 0;
-  let erros = 0;
+  let emailsEnviados = 0;
+  let emailsErros = 0;
+  let pushEnviados = 0;
+  let pushErros = 0;
 
   for (const gestor of gestores) {
-    // Verificar se o gestor tem email
-    if (!gestor.email) {
-      console.log(`[LembreteRH] Gestor ${gestor.nome} não tem email configurado`);
-      continue;
-    }
-
     // Verificar se já enviou este mês (usando a função existente)
     const gestorCompleto = await db.getGestorByUserId(gestor.userId);
     if (gestorCompleto?.lastEnvioRH) {
@@ -109,29 +112,46 @@ export async function enviarLembretesRH(): Promise<{ enviados: number; erros: nu
       }
     }
 
-    // Gerar e enviar email de lembrete
-    const html = gerarHTMLLembrete(gestor.nome || 'Gestor', mesAtual);
-    
+    // 1. Enviar notificação push
     try {
-      const enviado = await sendEmail({
-        to: gestor.email,
-        subject: `🔔 Lembrete: Enviar Relação de Colaboradores - ${mesAtual}`,
-        html
-      });
-
-      if (enviado) {
-        enviados++;
-        console.log(`[LembreteRH] Lembrete enviado para ${gestor.nome} (${gestor.email})`);
-      } else {
-        erros++;
-        console.error(`[LembreteRH] Falha ao enviar lembrete para ${gestor.nome}`);
+      const pushResult = await notificarGestorLembreteRH(gestor.userId, mesAtual);
+      pushEnviados += pushResult.success;
+      pushErros += pushResult.failed;
+      if (pushResult.success > 0) {
+        console.log(`[LembreteRH] Push enviado para ${gestor.nome}`);
       }
     } catch (error) {
-      erros++;
-      console.error(`[LembreteRH] Erro ao enviar lembrete para ${gestor.nome}:`, error);
+      pushErros++;
+      console.error(`[LembreteRH] Erro ao enviar push para ${gestor.nome}:`, error);
+    }
+
+    // 2. Enviar email (se tiver email configurado)
+    if (gestor.email) {
+      const html = gerarHTMLLembrete(gestor.nome || 'Gestor', mesAtual);
+      
+      try {
+        const enviado = await sendEmail({
+          to: gestor.email,
+          subject: `🔔 Lembrete: Enviar Relação de Colaboradores - ${mesAtual}`,
+          html
+        });
+
+        if (enviado) {
+          emailsEnviados++;
+          console.log(`[LembreteRH] Email enviado para ${gestor.nome} (${gestor.email})`);
+        } else {
+          emailsErros++;
+          console.error(`[LembreteRH] Falha ao enviar email para ${gestor.nome}`);
+        }
+      } catch (error) {
+        emailsErros++;
+        console.error(`[LembreteRH] Erro ao enviar email para ${gestor.nome}:`, error);
+      }
+    } else {
+      console.log(`[LembreteRH] Gestor ${gestor.nome} não tem email configurado`);
     }
   }
 
-  console.log(`[LembreteRH] Concluído: ${enviados} enviados, ${erros} erros`);
-  return { enviados, erros };
+  console.log(`[LembreteRH] Concluído: ${emailsEnviados} emails enviados, ${emailsErros} erros | ${pushEnviados} push enviados, ${pushErros} erros`);
+  return { emailsEnviados, emailsErros, pushEnviados, pushErros };
 }

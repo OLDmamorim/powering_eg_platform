@@ -194,3 +194,15 @@ export async function notificarLojaRespostaGestor(lojaId: number, tarefaTitulo: 
     url: '/portal-loja'
   });
 }
+
+/**
+ * Notificar gestor sobre lembrete de envio de relação RH (dia 20)
+ */
+export async function notificarGestorLembreteRH(gestorUserId: number, mes: string): Promise<{ success: number; failed: number }> {
+  return await sendPushToUser(gestorUserId, {
+    title: '📝 Lembrete: Relação de Colaboradores',
+    body: `Hoje é dia 20! Envie a relação de colaboradores de ${mes} para os RH.`,
+    tag: 'lembrete-rh',
+    url: '/rh'
+  });
+}

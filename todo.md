@@ -4163,3 +4163,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Criar serviço de lembrete automático (lembreteRHService.ts)
 - [x] Endpoint executarLembretesRH para cron job
 - [x] Email de lembrete enviado no dia 20 para gestores que ainda não enviaram
+
+## v4.37 - Notificação Push no Dia 20
+- [x] Adicionar notificação push no dia 20 para gestores
+- [x] Criar função notificarGestorLembreteRH no pushService
+- [x] Integrar com serviço de lembrete existente
+- [x] Enviar push apenas para gestores que ainda não enviaram a relação
+- [x] Retornar estatísticas separadas de email e push
