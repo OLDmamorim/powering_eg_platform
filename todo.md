@@ -4059,3 +4059,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Para "Loja Específica", mostrar dropdown com lojas disponíveis
 - [x] Filtrar dados do relatório conforme âmbito selecionado
 - [x] Manter compatibilidade com roles (gestor vê só suas lojas, admin vê todas)
+
+
+## v4.24 - Integrar Chatbot com Sistema de RH (Colaboradores)
+- [x] Modificar função de cálculo de comissões no chatbot para obter número de colaboradores automaticamente
+- [x] Usar dados da tabela colaboradores para contar colaboradores por loja
+- [x] Adicionar número de colaboradores no contexto das lojas (pessoal e nacional)
+- [x] Chatbot agora sabe quantos colaboradores tem cada loja para cálculos de comissões

@@ -215,14 +215,14 @@ async function obterContextoPlataforma(userId: number, userRole: string): Promis
   const lojas = await db.getAllLojas();
   const gestores = await db.getAllGestores();
   
-  // Obter associação gestor-loja para cada gestor
+  // Obter associação gestor-loja para cada gestor (com número de colaboradores)
   const gestorLojas: any[] = [];
   for (const gestor of gestores) {
     const lojasDoGestor = await db.getLojasByGestorId(gestor.id);
     gestorLojas.push({
       gestorId: gestor.id,
       gestorNome: gestor.user?.name || 'Desconhecido',
-      lojas: lojasDoGestor.map(l => ({ id: l.id, nome: l.nome }))
+      lojas: lojasDoGestor.map(l => ({ id: l.id, nome: l.nome, numColaboradores: l.numColaboradores }))
     });
   }
   
@@ -431,10 +431,11 @@ function formatarContextoPessoal(contexto: ContextoPlataforma): string {
   texto += `👤 DADOS PESSOAIS DO GESTOR LOGADO: ${gestor.nome}\n`;
   texto += `========================================\n\n`;
   
-  // Lojas associadas
+  // Lojas associadas com número de colaboradores
   texto += `🏪 MINHAS LOJAS (${gestor.lojasAssociadas.length}):\n`;
-  gestor.lojasAssociadas.forEach(l => {
-    texto += `- ${l.nome} (ID: ${l.id})\n`;
+  gestor.lojasAssociadas.forEach((l: any) => {
+    const numColab = l.numColaboradores !== undefined ? l.numColaboradores : 'N/A';
+    texto += `- ${l.nome} (ID: ${l.id}) - ${numColab} colaborador${numColab !== 1 ? 'es' : ''}\n`;
   });
   texto += '\n';
   
@@ -554,17 +555,18 @@ function formatarContextoParaPrompt(contexto: ContextoPlataforma): string {
   texto += `📊 DADOS DA PLATAFORMA (VISÃO NACIONAL/GERAL)\n`;
   texto += `========================================\n\n`;
   
-  // Lojas
+  // Lojas com número de colaboradores
   texto += `🏪 LOJAS (${contexto.lojas.length}):\n`;
-  contexto.lojas.forEach(l => {
-    texto += `- ${l.nome} (ID: ${l.id})${l.email ? ` - Email: ${l.email}` : ''}\n`;
+  contexto.lojas.forEach((l: any) => {
+    const numColab = l.numColaboradores !== undefined ? l.numColaboradores : 'N/A';
+    texto += `- ${l.nome} (ID: ${l.id}) - ${numColab} colaborador${numColab !== 1 ? 'es' : ''}${l.email ? ` - Email: ${l.email}` : ''}\n`;
   });
   texto += '\n';
   
-  // Gestores e suas lojas
+  // Gestores e suas lojas (com número de colaboradores)
   texto += `👥 GESTORES E SUAS LOJAS:\n`;
   contexto.gestorLojas.forEach(g => {
-    const lojas = g.lojas.map((l: any) => l.nome).join(', ') || 'Nenhuma';
+    const lojas = g.lojas.map((l: any) => `${l.nome} (${l.numColaboradores || 0} colab.)`).join(', ') || 'Nenhuma';
     texto += `- ${g.gestorNome}: ${lojas}\n`;
   });
   texto += '\n';
