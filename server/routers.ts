@@ -1554,12 +1554,12 @@ IMPORTANTE:
 <body>
   <div class="container">
     <div class="header">
-      <div class="logo">EXPRESSGLASS</div>
+      <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663088836799/YrkmGCRDVqYgFnZO.png" alt="ExpressGlass" style="max-width: 200px; height: auto; margin-bottom: 10px;" />
       <p style="margin: 10px 0 0 0; color: #6b7280;">PoweringEG Platform</p>
     </div>
     
     <div class="content">
-      <p>Exmos. Senhores,</p>
+      <p>Exmos(as). Senhores(as),</p>
       
       <p>Serve o presente email para enviar a <strong>Relação de Colaboradores</strong> referente ao mês de <strong>${mesCapitalizado}</strong>.</p>
       

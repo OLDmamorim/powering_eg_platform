@@ -4140,3 +4140,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Enviar PDF como anexo no email
 - [x] Email com saudação formal e informações resumidas
 - [x] PDF com layout profissional organizado por lojas
+
+## v4.33 - Correções Email e PDF RH
+- [x] Corrigir saudação para incluir referência feminina (Exmos/as Senhores/as)
+- [x] Adicionar logo ExpressGlass no email
+- [x] Adicionar logo ExpressGlass no PDF
+- [x] Remover emojis do PDF (não renderizam corretamente)
+- [x] Remover acentos problemáticos do PDF (Relação -> Relacao)
