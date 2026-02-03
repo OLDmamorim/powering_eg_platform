@@ -4066,3 +4066,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Usar dados da tabela colaboradores para contar colaboradores por loja
 - [x] Adicionar número de colaboradores no contexto das lojas (pessoal e nacional)
 - [x] Chatbot agora sabe quantos colaboradores tem cada loja para cálculos de comissões
+
+
+## v4.25 - Corrigir Cálculo de Comissões no Chatbot
+- [x] Corrigir lógica: valor fixo de 198€ a partir de 60 serviços (não há valor adicional por serviço)
+- [x] A tabela de escalões define valores FIXOS - consulta-se a tabela e obtém-se o valor direto
+- [x] Clarificar que a coluna "€/serviço adicional" é APENAS informativa, NÃO se aplica ao cálculo
+- [x] Valor por colaborador × número de colaboradores = total da loja

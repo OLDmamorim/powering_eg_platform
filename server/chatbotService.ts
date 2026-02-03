@@ -891,9 +891,12 @@ Não aplicável a trabalhadores em regime de Trabalho Temporário.
 | 4 | 140 |
 
 **1. COMISSÕES POR SERVIÇOS LIGEIROS (por colaborador):**
-A tabela abaixo mostra o valor da comissão POR COLABORADOR para cada número de serviços por colaborador.
-A terceira coluna (€/serviço adicional) é meramente indicativa dos cálculos feitos.
-Para calcular a comissão TOTAL da loja, MULTIPLICAR o valor da tabela pelo número de colaboradores.
+A tabela abaixo mostra o valor FIXO da comissão POR COLABORADOR para cada número de serviços.
+IMPORTANTE: Os valores são FIXOS - consulta-se a tabela e obtém-se o valor direto.
+A terceira coluna (€/serviço adicional) é APENAS INFORMATIVA de como os valores foram calculados internamente, NÃO SE APLICA ao cálculo real de comissões.
+NÃO EXISTE valor adicional por serviço - o valor da comissão é o que está na tabela, ponto final.
+Para calcular a comissão TOTAL da loja: consultar tabela + multiplicar pelo número de colaboradores.
+A partir de 60 serviços/colaborador, o valor é SEMPRE 198€ (máximo).
 
 | Serviços/Colab | Comissão/Colaborador | €/Serv Adicional |
 |----------------|----------------------|-------------------|
@@ -924,7 +927,7 @@ Para calcular a comissão TOTAL da loja, MULTIPLICAR o valor da tabela pelo núm
 | 58             | 180€                 | 9€                |
 | 59             | 189€                 | 9€                |
 | 60             | 198€                 | 9€                |
-| 60+            | 198€ + (n-60)*9€     | 9€                |
+| 60+            | 198€ (valor fixo)    | N/A               |
 
 **COMO CALCULAR COMISSÃO DE SERVIÇOS LIGEIROS:**
 1. Calcular serviços por colaborador: Total Serviços ÷ Nº Colaboradores
@@ -941,6 +944,11 @@ Exemplo 2: Loja com 2 colaboradores e 80 serviços totais:
 - Serviços/colaborador: 80 ÷ 2 = 40 (cumpre FTE >= 35)
 - Comissão por colaborador (tabela, 40 serv/colab): 44€
 - Comissão TOTAL da loja: 44€ × 2 = 88€
+
+Exemplo 3: Loja com 1 colaborador e 70 serviços totais:
+- Serviços/colaborador: 70 ÷ 1 = 70 (cumpre FTE >= 35)
+- Comissão por colaborador: 198€ (valor FIXO da tabela para 60+ serviços)
+- Comissão TOTAL da loja: 198€ × 1 = 198€
 
 **1.1 COMISSÕES POR SERVIÇOS PESADOS:**
 - Se < 35 serviços ligeiros: 12€ por pesado (0-9) ou 18€ por pesado (10+)
