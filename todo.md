@@ -3963,3 +3963,11 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Corrigir o prompt do chatbot para aplicar FTE a TODAS as categorias de comissões
 - [x] Remover a informação incorreta de que QIV e Vendas Complementares são independentes do FTE
 - [x] Testar cenário: loja com FTE não cumprido deve ter 0€ em TODAS as categorias (3 colab, 82 serv = 0€ total)
+
+
+## Correção v4.14 - Interpretação Correta da Tabela de Comissões
+- [x] Corrigir o prompt: a coluna "Comissão de Serviços Ligeiros" já tem valores ACUMULADOS (usar diretamente)
+- [x] A terceira coluna "Valor por Serviço Adicional" é apenas informativa, não para cálculos
+- [x] Exemplos corretos: 40 serv/colab = 44€, 45 serv/colab = 71€, 50 serv/colab = 108€
+- [x] Comissão total da loja = Comissão por colaborador × Número de colaboradores
+- [x] Testar cenários de cálculo de comissões com a nova interpretação (2 colab/90 serv = 142€, 3 colab/120 serv = 132€)

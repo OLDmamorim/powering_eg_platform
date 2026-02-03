@@ -889,21 +889,50 @@ Não aplicável a trabalhadores em regime de Trabalho Temporário.
 | 4 | 140 |
 
 **1. COMISSÕES POR SERVIÇOS LIGEIROS (por colaborador):
-- < 35 serviços: 0€
-- 35 serviços: 25€ (base)
-- 36-39 serviços: +3,5€ por serviço adicional
-- 40-44 serviços: +5€ por serviço adicional (40=44€, 44=64€)
-- 45-49 serviços: +7€ por serviço adicional (45=71€, 49=99€)
-- 50-60+ serviços: +9€ por serviço adicional (50=108€, 55=153€, 60=198€)
+A tabela abaixo mostra o valor TOTAL da comissão para cada número de serviços por colaborador.
+A terceira coluna (€/serviço adicional) é apenas informativa - mostra quanto se ganha por cada serviço adicional naquele escalão.
+Para calcular, basta consultar diretamente o valor da segunda coluna.
 
-**FÓRMULA DE CÁLCULO SERVIÇOS LIGEIROS:**
-Para calcular a comissão de serviços ligeiros:
-- Se serviços < 35: comissão = 0€
-- Se serviços = 35: comissão = 25€
-- Se serviços 36-39: comissão = 25 + (serviços - 35) * 3.5€
-- Se serviços 40-44: comissão = 39 + (serviços - 39) * 5€
-- Se serviços 45-49: comissão = 64 + (serviços - 44) * 7€
-- Se serviços >= 50: comissão = 99 + (serviços - 49) * 9€
+| Serviços/Colab | Comissão Total | €/Serv Adicional |
+|----------------|----------------|-------------------|
+| < 35           | 0€             | 0€                |
+| 35             | 25€            | 25€               |
+| 36             | 28,50€         | 3,5€              |
+| 37             | 32€            | 3,5€              |
+| 38             | 35,50€         | 3,5€              |
+| 39             | 39€            | 3,5€              |
+| 40             | 44€            | 5€                |
+| 41             | 49€            | 5€                |
+| 42             | 54€            | 5€                |
+| 43             | 59€            | 5€                |
+| 44             | 64€            | 5€                |
+| 45             | 71€            | 7€                |
+| 46             | 78€            | 7€                |
+| 47             | 85€            | 7€                |
+| 48             | 92€            | 7€                |
+| 49             | 99€            | 7€                |
+| 50             | 108€           | 9€                |
+| 51             | 117€           | 9€                |
+| 52             | 126€           | 9€                |
+| 53             | 135€           | 9€                |
+| 54             | 144€           | 9€                |
+| 55             | 153€           | 9€                |
+| 56             | 162€           | 9€                |
+| 57             | 171€           | 9€                |
+| 58             | 180€           | 9€                |
+| 59             | 189€           | 9€                |
+| 60             | 198€           | 9€                |
+| 60+            | 198€ + (n-60)*9€ | 9€              |
+
+**COMO CALCULAR COMISSÃO DE SERVIÇOS LIGEIROS:**
+1. Calcular serviços por colaborador: Total Serviços ÷ Nº Colaboradores
+2. Consultar a tabela acima para obter o valor da comissão por colaborador
+3. Multiplicar pelo número de colaboradores para obter o total da loja
+
+Exemplo: Loja com 2 colaboradores e 90 serviços totais:
+- Serviços/colaborador: 90 ÷ 2 = 45
+- Comissão por colaborador (tabela): 71€
+- Comissão total da loja: 71€ × 2 = 142€
 
 **1.1 COMISSÕES POR SERVIÇOS PESADOS:**
 - Se < 35 serviços ligeiros: 12€ por pesado (0-9) ou 18€ por pesado (10+)
@@ -961,7 +990,7 @@ Faturas PP Pendentes:
 **EXEMPLO COM 2 COLABORADORES (82 serviços totais):**
 - Serviços por colaborador: 82 ÷ 2 = 41 serviços
 - Como 41 >= 35, tem direito a prémio
-- Comissão por colaborador: 39€ + (41-39) × 5€ = 39€ + 10€ = 49€
+- Comissão por colaborador (consultar tabela, 41 serviços): 49€
 - **TOTAL para a loja (2 colaboradores): 49€ × 2 = 98€**
 
 USA ESTAS REGRAS PARA FAZER CÁLCULOS DE COMISSÕES QUANDO O UTILIZADOR PERGUNTAR.
