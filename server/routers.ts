@@ -1401,6 +1401,307 @@ IMPORTANTE:
     lojasComColaboradores: gestorProcedure.query(async () => {
       return await db.getLojasComColaboradores();
     }),
+    
+    // Gerar pré-visualização da relação de colaboradores para RH
+    previewRelacaoRH: gestorProcedure.query(async ({ ctx }) => {
+      let lojasGestor: Awaited<ReturnType<typeof db.getLojasByGestorId>>;
+      let volantes: Awaited<ReturnType<typeof db.getColaboradoresVolantesByGestorId>>;
+      let recalbras: Awaited<ReturnType<typeof db.getAllColaboradoresByGestorId>>;
+      
+      // Se for admin, obter todas as lojas; se for gestor, obter apenas as suas lojas
+      if (ctx.user.role === 'admin') {
+        lojasGestor = await db.getAllLojas();
+        // Admin não tem volantes/recalbras associados diretamente
+        volantes = [];
+        recalbras = [];
+      } else {
+        const gestor = await db.getGestorByUserId(ctx.user.id);
+        if (!gestor) throw new TRPCError({ code: 'FORBIDDEN', message: 'Gestor não encontrado' });
+        
+        lojasGestor = await db.getLojasByGestorId(gestor.id);
+        volantes = await db.getColaboradoresVolantesByGestorId(gestor.id, true);
+        recalbras = await db.getAllColaboradoresByGestorId(gestor.id, true);
+      }
+      
+      // Obter colaboradores de cada loja
+      const colaboradoresPorLoja: Array<{
+        loja: { id: number; nome: string; numeroLoja?: number | null };
+        colaboradores: Array<{ nome: string; codigoColaborador?: string | null; cargo: string; tipo: string }>;
+      }> = [];
+      
+      for (const loja of lojasGestor) {
+        const colabs = await db.getColaboradoresByLojaId(loja.id, true);
+        colaboradoresPorLoja.push({
+          loja: { id: loja.id, nome: loja.nome, numeroLoja: loja.numeroLoja },
+          colaboradores: colabs.map(c => ({
+            nome: c.nome,
+            codigoColaborador: c.codigoColaborador,
+            cargo: c.cargo,
+            tipo: c.tipo
+          }))
+        });
+      }
+      
+      const recalbrasList = recalbras.filter(c => c.tipo === 'recalbra');
+      
+      return {
+        gestorNome: ctx.user.name || 'Gestor',
+        gestorEmail: ctx.user.email || '',
+        mes: new Date().toLocaleDateString('pt-PT', { month: 'long', year: 'numeric' }),
+        colaboradoresPorLoja,
+        volantes: volantes.map(v => ({
+          nome: v.nome,
+          codigoColaborador: v.codigoColaborador,
+          cargo: v.cargo
+        })),
+        recalbras: recalbrasList.map(r => ({
+          nome: r.nome,
+          codigoColaborador: r.codigoColaborador,
+          cargo: r.cargo
+        })),
+        totalColaboradores: colaboradoresPorLoja.reduce((acc, l) => acc + l.colaboradores.length, 0) + volantes.length + recalbrasList.length
+      };
+    }),
+    
+    // Enviar relação de colaboradores para RH
+    enviarRelacaoRH: gestorProcedure
+      .input(z.object({
+        observacoes: z.string().optional()
+      }).optional())
+      .mutation(async ({ input, ctx }) => {
+        const gestor = await db.getGestorByUserId(ctx.user.id);
+        if (!gestor) throw new TRPCError({ code: 'FORBIDDEN', message: 'Gestor não encontrado' });
+        
+        // Obter lojas do gestor
+        const lojasGestor = await db.getLojasByGestorId(gestor.id);
+        
+        // Obter colaboradores de cada loja
+        const colaboradoresPorLoja: Array<{
+          loja: { id: number; nome: string; numeroLoja?: number | null };
+          colaboradores: Array<{ nome: string; codigoColaborador?: string | null; cargo: string; tipo: string }>;
+        }> = [];
+        
+        for (const loja of lojasGestor) {
+          const colabs = await db.getColaboradoresByLojaId(loja.id, true);
+          colaboradoresPorLoja.push({
+            loja: { id: loja.id, nome: loja.nome, numeroLoja: loja.numeroLoja },
+            colaboradores: colabs.map(c => ({
+              nome: c.nome,
+              codigoColaborador: c.codigoColaborador,
+              cargo: c.cargo,
+              tipo: c.tipo
+            }))
+          });
+        }
+        
+        // Obter volantes e recalbra do gestor
+        const volantes = await db.getColaboradoresVolantesByGestorId(gestor.id, true);
+        const recalbras = await db.getAllColaboradoresByGestorId(gestor.id, true);
+        const recalbrasList = recalbras.filter(c => c.tipo === 'recalbra');
+        
+        const gestorNome = ctx.user.name || 'Gestor';
+        const mes = new Date().toLocaleDateString('pt-PT', { month: 'long', year: 'numeric' });
+        const totalColaboradores = colaboradoresPorLoja.reduce((acc, l) => acc + l.colaboradores.length, 0) + volantes.length + recalbrasList.length;
+        
+        // Gerar HTML do email
+        const cargoNomes: Record<string, string> = {
+          'responsavel_loja': 'Responsável de Loja',
+          'tecnico': 'Técnico',
+          'administrativo': 'Administrativo'
+        };
+        
+        const html = `
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body { font-family: Arial, sans-serif; margin: 40px; color: #333; line-height: 1.5; }
+    .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #10b981; padding-bottom: 20px; }
+    .logo { font-size: 24px; font-weight: bold; color: #10b981; }
+    .title { font-size: 20px; margin-top: 10px; }
+    .info-box { background: #f3f4f6; padding: 15px; border-radius: 8px; margin-bottom: 25px; }
+    .info-row { margin-bottom: 8px; }
+    .info-label { font-weight: bold; }
+    .section { margin-bottom: 25px; }
+    .section-title { font-size: 16px; font-weight: bold; color: #10b981; margin-bottom: 10px; border-bottom: 1px solid #e5e7eb; padding-bottom: 5px; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+    th { background: #10b981; color: white; padding: 10px; text-align: left; }
+    td { padding: 10px; border-bottom: 1px solid #e5e7eb; }
+    tr:nth-child(even) { background: #f9fafb; }
+    .loja-header { background: #f3f4f6; padding: 10px; font-weight: bold; margin-top: 20px; margin-bottom: 10px; border-radius: 6px; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 12px; }
+    .badge-volante { background: #dbeafe; color: #1d4ed8; }
+    .badge-recalbra { background: #fed7aa; color: #c2410c; }
+    .footer { margin-top: 40px; text-align: center; font-size: 12px; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 20px; }
+    .observacoes { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin-top: 20px; border-radius: 0 8px 8px 0; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663088836799/YrkmGCRDVqYgFnZO.png" alt="ExpressGlass" style="max-width: 200px; height: auto; margin-bottom: 10px;" />
+    <div class="logo">PoweringEG Platform</div>
+    <div class="title">Relação de Colaboradores - ${mes}</div>
+  </div>
+  
+  <div class="info-box">
+    <div class="info-row"><span class="info-label">Gestor:</span> ${gestorNome}</div>
+    <div class="info-row"><span class="info-label">Zona:</span> ${lojasGestor.map(l => l.nome).join(', ')}</div>
+    <div class="info-row"><span class="info-label">Total de Colaboradores:</span> ${totalColaboradores}</div>
+    <div class="info-row"><span class="info-label">Data de Envio:</span> ${new Date().toLocaleDateString('pt-PT', { day: '2-digit', month: 'long', year: 'numeric' })} às ${new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })}</div>
+  </div>
+  
+  ${colaboradoresPorLoja.map(({ loja, colaboradores }) => `
+    <div class="section">
+      <div class="loja-header">🏪 ${loja.nome}${loja.numeroLoja ? ` (Loja ${loja.numeroLoja})` : ''}</div>
+      ${colaboradores.length > 0 ? `
+        <table>
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Código</th>
+              <th>Cargo</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${colaboradores.map(c => `
+              <tr>
+                <td>${c.nome}</td>
+                <td>${c.codigoColaborador || '-'}</td>
+                <td>${cargoNomes[c.cargo] || c.cargo}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      ` : '<p style="color: #9ca3af; font-style: italic;">Sem colaboradores registados nesta loja</p>'}
+    </div>
+  `).join('')}
+  
+  ${volantes.length > 0 ? `
+    <div class="section">
+      <div class="section-title">🚗 Volantes da Zona</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Código</th>
+            <th>Cargo</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${volantes.map(v => `
+            <tr>
+              <td>${v.nome} <span class="badge badge-volante">Volante</span></td>
+              <td>${v.codigoColaborador || '-'}</td>
+              <td>${cargoNomes[v.cargo] || v.cargo}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  ` : ''}
+  
+  ${recalbrasList.length > 0 ? `
+    <div class="section">
+      <div class="section-title">🔧 Recalbra</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Código</th>
+            <th>Cargo</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${recalbrasList.map(r => `
+            <tr>
+              <td>${r.nome} <span class="badge badge-recalbra">Recalbra</span></td>
+              <td>${r.codigoColaborador || '-'}</td>
+              <td>${cargoNomes[r.cargo] || r.cargo}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  ` : ''}
+  
+  ${input?.observacoes ? `
+    <div class="observacoes">
+      <strong>📝 Observações do Gestor:</strong><br>
+      ${input.observacoes}
+    </div>
+  ` : ''}
+  
+  <div class="footer">
+    Relação enviada por <strong>${gestorNome}</strong> via PoweringEG Platform<br>
+    ${new Date().toLocaleDateString('pt-PT')} às ${new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })}
+  </div>
+</body>
+</html>
+        `;
+        
+        // Enviar email para RH (temporariamente para mamorim@expressglass.pt para testes)
+        const emailDestino = 'mamorim@expressglass.pt'; // TODO: Alterar para recursoshumanos@expressglass.pt após testes
+        const enviado = await sendEmail({
+          to: emailDestino,
+          subject: `Relação de Colaboradores - ${gestorNome} - ${mes}`,
+          html
+        });
+        
+        if (!enviado) {
+          throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Erro ao enviar email para RH' });
+        }
+        
+        // Registar data de envio
+        await db.updateGestorEnvioRH(gestor.id);
+        
+        return { 
+          success: true, 
+          message: `Relação de ${totalColaboradores} colaboradores enviada com sucesso para ${emailDestino}` 
+        };
+      }),
+    
+    // Verificar se deve mostrar lembrete de envio para RH (dia 20 ou posterior)
+    verificarLembreteRH: gestorProcedure.query(async ({ ctx }) => {
+      const gestor = await db.getGestorByUserId(ctx.user.id);
+      if (!gestor) return { mostrarLembrete: false };
+      
+      const hoje = new Date();
+      const diaAtual = hoje.getDate();
+      const mesAtual = hoje.getMonth();
+      const anoAtual = hoje.getFullYear();
+      
+      // Só mostrar lembrete a partir do dia 20
+      if (diaAtual < 20) {
+        return { mostrarLembrete: false, diaAtual };
+      }
+      
+      // Verificar se já enviou este mês
+      const lastEnvio = gestor.lastEnvioRH;
+      if (lastEnvio) {
+        const envioDate = new Date(lastEnvio);
+        const mesEnvio = envioDate.getMonth();
+        const anoEnvio = envioDate.getFullYear();
+        
+        // Se já enviou este mês, não mostrar lembrete
+        if (mesEnvio === mesAtual && anoEnvio === anoAtual) {
+          return { 
+            mostrarLembrete: false, 
+            diaAtual,
+            jaEnviouEsteMes: true,
+            dataUltimoEnvio: lastEnvio
+          };
+        }
+      }
+      
+      // Mostrar lembrete - dia 20 ou posterior e ainda não enviou este mês
+      return { 
+        mostrarLembrete: true, 
+        diaAtual,
+        diasRestantes: new Date(anoAtual, mesAtual + 1, 0).getDate() - diaAtual,
+        mesReferencia: hoje.toLocaleDateString('pt-PT', { month: 'long', year: 'numeric' })
+      };
+    }),
   }),
 
   // ==================== GESTORES ====================

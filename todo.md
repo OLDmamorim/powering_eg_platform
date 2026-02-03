@@ -4112,3 +4112,21 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Reordenar condições: verificar "nacional" antes de "minhas" para evitar override
 - [x] Garantir que gestores podem ver dados nacionais para comparação
 - [x] Filtro aplicado mostra "Nacional" corretamente quando selecionado
+
+
+## v4.29 - Envio de Relação de Colaboradores para RH
+- [x] Criar botão "Enviar para RH" na página de RH
+- [x] Gerar relatório HTML com lista de colaboradores das lojas do gestor
+- [x] Pré-visualização do layout antes de enviar
+- [x] Enviar email para recursoshumanos@expressglass.pt
+- [x] Implementar lembrete automático no dia 20 de cada mês (alerta na página RH)
+- [x] Registar data do último envio por gestor
+- [x] Mostrar confirmação quando já enviou este mês
+
+## v4.30 - Download PDF da Relação de Colaboradores
+- [x] Adicionar botão "Download PDF" na pré-visualização da relação RH
+- [x] Gerar PDF com layout profissional da relação de colaboradores
+- [x] Incluir cabeçalho com logo ExpressGlass, data e gestor
+- [x] Organização por lojas com colaboradores
+- [x] Seções separadas para Volantes e Recalbra
+- [x] Abrir janela de impressão para guardar como PDF

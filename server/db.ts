@@ -568,6 +568,18 @@ export async function deleteGestor(id: number): Promise<void> {
   await db.delete(gestores).where(eq(gestores.id, id));
 }
 
+/**
+ * Atualiza a data do último envio de relação de colaboradores para RH
+ */
+export async function updateGestorEnvioRH(gestorId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.update(gestores)
+    .set({ lastEnvioRH: new Date() })
+    .where(eq(gestores.id, gestorId));
+}
+
 export async function promoteGestorToAdmin(gestorId: number): Promise<void> {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
@@ -674,6 +686,7 @@ export async function getGestoresByLojaId(lojaId: number): Promise<Array<Gestor 
       gestorId: gestores.id,
       gestorUserId: gestores.userId,
       gestorLastReminderDate: gestores.lastReminderDate,
+      gestorLastEnvioRH: gestores.lastEnvioRH,
       gestorCreatedAt: gestores.createdAt,
       gestorUpdatedAt: gestores.updatedAt,
       userId: users.id,
@@ -695,6 +708,7 @@ export async function getGestoresByLojaId(lojaId: number): Promise<Array<Gestor 
     id: r.gestorId,
     userId: r.gestorUserId,
     lastReminderDate: r.gestorLastReminderDate,
+    lastEnvioRH: r.gestorLastEnvioRH,
     createdAt: r.gestorCreatedAt,
     updatedAt: r.gestorUpdatedAt,
     user: {

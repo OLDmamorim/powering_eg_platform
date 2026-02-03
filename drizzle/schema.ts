@@ -50,6 +50,7 @@ export const gestores = mysqlTable("gestores", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(), // FK para users.id
   lastReminderDate: timestamp("lastReminderDate"), // Última vez que viu o lembrete de relatório IA
+  lastEnvioRH: timestamp("lastEnvioRH"), // Última vez que enviou relação de colaboradores para RH
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
