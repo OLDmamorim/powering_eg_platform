@@ -3971,3 +3971,11 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Exemplos corretos: 40 serv/colab = 44€, 45 serv/colab = 71€, 50 serv/colab = 108€
 - [x] Comissão total da loja = Comissão por colaborador × Número de colaboradores
 - [x] Testar cenários de cálculo de comissões com a nova interpretação (2 colab/90 serv = 142€, 3 colab/120 serv = 132€)
+
+
+## Correção v4.15 - Valor da Tabela é TOTAL, Não Por Colaborador
+- [x] Corrigir o prompt: o valor da tabela é o TOTAL para a loja, NÃO por colaborador
+- [x] O cálculo de serviços por colaborador serve apenas para verificar se atinge o FTE mínimo (35)
+- [x] Exemplo correto: 3 colab, 120 serv → 40 serv/colab → comissão TOTAL = 44€ (não 44€ × 3) ✅
+- [x] Exemplo correto: 2 colab, 90 serv → 45 serv/colab → comissão TOTAL = 71€ (não 71€ × 2) ✅
+- [x] Testar cenários de cálculo com a interpretação correta
