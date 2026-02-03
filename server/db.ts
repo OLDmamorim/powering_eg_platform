@@ -636,7 +636,7 @@ export async function removeGestorLoja(gestorId: number, lojaId: number): Promis
   );
 }
 
-export async function getLojasByGestorId(gestorId: number): Promise<Loja[]> {
+export async function getLojasByGestorId(gestorId: number): Promise<Array<Loja & { numColaboradores: number }>> {
   const db = await getDb();
   if (!db) return [];
   
@@ -647,7 +647,22 @@ export async function getLojasByGestorId(gestorId: number): Promise<Loja[]> {
     .where(eq(gestorLojas.gestorId, gestorId))
     .orderBy(lojas.nome);
   
-  return lojasGestorResult.map(r => r.loja);
+  // Para cada loja, buscar contagem de colaboradores
+  const lojasComColaboradores = await Promise.all(
+    lojasGestorResult.map(async (r) => {
+      const colaboradoresCount = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(colaboradores)
+        .where(eq(colaboradores.lojaId, r.loja.id));
+      
+      return {
+        ...r.loja,
+        numColaboradores: Number(colaboradoresCount[0]?.count || 0),
+      };
+    })
+  );
+  
+  return lojasComColaboradores;
 }
 
 export async function getGestoresByLojaId(lojaId: number): Promise<Array<Gestor & { user: typeof users.$inferSelect }>> {

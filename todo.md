@@ -4039,3 +4039,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Gerar análise IA baseada nos dados reais de resultados
 - [x] Garantir que gestores veem os mesmos dados que a página de Resultados (filtrados pelas suas lojas)
 - [x] Corrigir parsing do período meses_X/YYYY para interpretar corretamente o mês selecionado
+
+
+## v4.21 - Integração RH-Lojas (Número de Colaboradores nos Cards)
+- [x] Corrigir função getLojasByGestorId para retornar numColaboradores
+- [x] Frontend MinhasLojas.tsx já tem código para mostrar colaboradores (linhas 225-231)
+- [x] Colaborador Pedro Barranco associado à Póvoa de Varzim (lojaId: 60005)
+- [x] Loja Póvoa de Varzim associada ao gestor Marco Amorim
