@@ -888,55 +888,57 @@ Não aplicável a trabalhadores em regime de Trabalho Temporário.
 | 3 | 105 |
 | 4 | 140 |
 
-**1. COMISSÕES POR SERVIÇOS LIGEIROS:**
-IMPORTANTE: O cálculo de serviços por colaborador serve APENAS para verificar se a loja atinge o FTE mínimo (35 serviços/colaborador).
-O valor da tabela é o TOTAL para a loja, NÃO é por colaborador!
+**1. COMISSÕES POR SERVIÇOS LIGEIROS (por colaborador):**
+A tabela abaixo mostra o valor da comissão POR COLABORADOR para cada número de serviços por colaborador.
+A terceira coluna (€/serviço adicional) é meramente indicativa dos cálculos feitos.
+Para calcular a comissão TOTAL da loja, MULTIPLICAR o valor da tabela pelo número de colaboradores.
 
-A terceira coluna (€/serviço adicional) mostra quanto se ganha por cada serviço adicional naquele escalão.
-
-| Serviços/Colab | Comissão TOTAL Loja | €/Serv Adicional |
-|----------------|---------------------|-------------------|
-| < 35           | 0€                  | 0€                |
-| 35             | 25€                 | 2,5€              |
-| 36             | 28,50€              | 3,5€              |
-| 37             | 32€                 | 3,5€              |
-| 38             | 35,50€              | 3,5€              |
-| 39             | 39€                 | 3,5€              |
-| 40             | 44€                 | 5€                |
-| 41             | 49€                 | 5€                |
-| 42             | 54€                 | 5€                |
-| 43             | 59€                 | 5€                |
-| 44             | 64€                 | 5€                |
-| 45             | 71€                 | 7€                |
-| 46             | 78€                 | 7€                |
-| 47             | 85€                 | 7€                |
-| 48             | 92€                 | 7€                |
-| 49             | 99€                 | 7€                |
-| 50             | 108€                | 9€                |
-| 51             | 117€                | 9€                |
-| 52             | 126€                | 9€                |
-| 53             | 135€                | 9€                |
-| 54             | 144€                | 9€                |
-| 55             | 153€                | 9€                |
-| 56             | 162€                | 9€                |
-| 57             | 171€                | 9€                |
-| 58             | 180€                | 9€                |
-| 59             | 189€                | 9€                |
-| 60             | 198€                | 9€                |
-| 60+            | 198€ + (n-60)*9€    | 9€                |
+| Serviços/Colab | Comissão/Colaborador | €/Serv Adicional |
+|----------------|----------------------|-------------------|
+| < 35           | 0€                   | 0€                |
+| 35             | 25€                  | 2,5€              |
+| 36             | 28,50€               | 3,5€              |
+| 37             | 32€                  | 3,5€              |
+| 38             | 35,50€               | 3,5€              |
+| 39             | 39€                  | 3,5€              |
+| 40             | 44€                  | 5€                |
+| 41             | 49€                  | 5€                |
+| 42             | 54€                  | 5€                |
+| 43             | 59€                  | 5€                |
+| 44             | 64€                  | 5€                |
+| 45             | 71€                  | 7€                |
+| 46             | 78€                  | 7€                |
+| 47             | 85€                  | 7€                |
+| 48             | 92€                  | 7€                |
+| 49             | 99€                  | 7€                |
+| 50             | 108€                 | 9€                |
+| 51             | 117€                 | 9€                |
+| 52             | 126€                 | 9€                |
+| 53             | 135€                 | 9€                |
+| 54             | 144€                 | 9€                |
+| 55             | 153€                 | 9€                |
+| 56             | 162€                 | 9€                |
+| 57             | 171€                 | 9€                |
+| 58             | 180€                 | 9€                |
+| 59             | 189€                 | 9€                |
+| 60             | 198€                 | 9€                |
+| 60+            | 198€ + (n-60)*9€     | 9€                |
 
 **COMO CALCULAR COMISSÃO DE SERVIÇOS LIGEIROS:**
 1. Calcular serviços por colaborador: Total Serviços ÷ Nº Colaboradores
 2. Verificar se atinge o FTE mínimo (>= 35 serviços/colaborador)
-3. Se sim, consultar a tabela para obter a comissão TOTAL da loja (NÃO multiplicar pelo número de colaboradores!)
+3. Se sim, consultar a tabela para obter a comissão POR COLABORADOR
+4. Multiplicar pelo número de colaboradores para obter a comissão TOTAL da loja
 
-Exemplo 1: Loja com 2 colaboradores e 90 serviços totais:
-- Serviços/colaborador: 90 ÷ 2 = 45 (cumpre FTE >= 35)
-- Comissão TOTAL da loja (tabela, 45 serv/colab): 71€
+Exemplo 1: Loja com 2 colaboradores e 82 serviços totais (Braga):
+- Serviços/colaborador: 82 ÷ 2 = 41 (cumpre FTE >= 35)
+- Comissão por colaborador (tabela, 41 serv/colab): 49€
+- Comissão TOTAL da loja: 49€ × 2 = 98€
 
-Exemplo 2: Loja com 3 colaboradores e 120 serviços totais:
-- Serviços/colaborador: 120 ÷ 3 = 40 (cumpre FTE >= 35)
-- Comissão TOTAL da loja (tabela, 40 serv/colab): 44€
+Exemplo 2: Loja com 2 colaboradores e 80 serviços totais:
+- Serviços/colaborador: 80 ÷ 2 = 40 (cumpre FTE >= 35)
+- Comissão por colaborador (tabela, 40 serv/colab): 44€
+- Comissão TOTAL da loja: 44€ × 2 = 88€
 
 **1.1 COMISSÕES POR SERVIÇOS PESADOS:**
 - Se < 35 serviços ligeiros: 12€ por pesado (0-9) ou 18€ por pesado (10+)
@@ -994,8 +996,8 @@ Faturas PP Pendentes:
 **EXEMPLO COM 2 COLABORADORES (82 serviços totais):**
 - Serviços por colaborador: 82 ÷ 2 = 41 serviços
 - Como 41 >= 35, tem direito a prémio
-- Comissão TOTAL da loja (consultar tabela, 41 serv/colab): **49€**
-- NOTA: O valor da tabela já é o total, NÃO multiplicar pelo número de colaboradores!
+- Comissão por colaborador (tabela, 41 serv/colab): 49€
+- Comissão TOTAL da loja: 49€ × 2 = **98€**
 
 USA ESTAS REGRAS PARA FAZER CÁLCULOS DE COMISSÕES QUANDO O UTILIZADOR PERGUNTAR.
 

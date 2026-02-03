@@ -3979,3 +3979,11 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Exemplo correto: 3 colab, 120 serv → 40 serv/colab → comissão TOTAL = 44€ (não 44€ × 3) ✅
 - [x] Exemplo correto: 2 colab, 90 serv → 45 serv/colab → comissão TOTAL = 71€ (não 71€ × 2) ✅
 - [x] Testar cenários de cálculo com a interpretação correta
+
+
+## Correção v4.16 - Valor da Tabela é POR COLABORADOR (Voltar à v4.14)
+- [x] Corrigir o prompt: o valor da tabela é POR COLABORADOR, multiplicar pelo nº de colaboradores
+- [x] Exemplo correto: 2 colab, 82 serv → 41 serv/colab → 49€ × 2 = 98€ TOTAL ✅
+- [x] Exemplo correto: 2 colab, 80 serv → 40 serv/colab → 44€ × 2 = 88€ TOTAL
+- [x] A terceira coluna é meramente indicativa dos cálculos feitos
+- [x] Testar cenários de cálculo com a interpretação correta (Braga 2 colab, 82 serv = 98€)
