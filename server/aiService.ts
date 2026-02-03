@@ -369,6 +369,7 @@ export async function gerarRelatorioComIA(
       objetivoMensal: number;
       qtdReparacoes: number;
       qtdParaBrisas: number;
+      taxaReparacao: number;
       mesesContados: number;
     }>();
     
@@ -396,6 +397,8 @@ export async function gerarRelatorioComIA(
         if (existing) {
           existing.totalServicos += loja.totalServicos || 0;
           existing.objetivoMensal += loja.objetivoMensal || 0;
+          // Acumular taxa de reparação para média
+          existing.taxaReparacao += loja.taxaReparacao || 0;
           existing.mesesContados++;
         } else {
           lojaAgregado.set(loja.lojaId, {
@@ -406,6 +409,7 @@ export async function gerarRelatorioComIA(
             objetivoMensal: loja.objetivoMensal || 0,
             qtdReparacoes: 0,
             qtdParaBrisas: 0,
+            taxaReparacao: loja.taxaReparacao || 0,
             mesesContados: 1,
           });
         }
@@ -429,6 +433,8 @@ export async function gerarRelatorioComIA(
       const desvio = loja.objetivoMensal > 0 
         ? (loja.totalServicos - loja.objetivoMensal) / loja.objetivoMensal 
         : 0;
+      // Calcular média da taxa de reparação (se houver múltiplos meses)
+      const taxaReparacaoMedia = loja.mesesContados > 0 ? loja.taxaReparacao / loja.mesesContados : 0;
       return {
         lojaId: loja.lojaId,
         lojaNome: loja.lojaNome,
@@ -436,6 +442,7 @@ export async function gerarRelatorioComIA(
         totalServicos: loja.totalServicos,
         objetivoMensal: loja.objetivoMensal,
         desvioPercentualMes: desvio,
+        taxaReparacao: taxaReparacaoMedia,
         valor: loja.totalServicos,
       };
     }).sort((a, b) => b.totalServicos - a.totalServicos);

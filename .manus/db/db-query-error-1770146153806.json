@@ -1,0 +1,8 @@
+{
+  "query": "SELECT lojaId, lojaNome, taxaReparacao, qtdReparacoes, qtdParaBrisas, totalServicos \nFROM resultados_mensais \nWHERE mes = 1 AND ano = 2026 \nAND taxaReparacao IS NOT NULL \nLIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT lojaId, lojaNome, taxaReparacao, qtdReparacoes, qtdParaBrisas, totalServicos \nFROM resultados_mensais \nWHERE mes = 1 AND ano = 2026 \nAND taxaReparacao IS NOT NULL \nLIMIT 10;",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 'lojanome' in 'field list'"
+  ]
+}

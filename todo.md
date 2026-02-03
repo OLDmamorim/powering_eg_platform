@@ -4073,3 +4073,16 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] A tabela de escalões define valores FIXOS - consulta-se a tabela e obtém-se o valor direto
 - [x] Clarificar que a coluna "€/serviço adicional" é APENAS informativa, NÃO se aplica ao cálculo
 - [x] Valor por colaborador × número de colaboradores = total da loja
+
+
+## v4.26 - Corrigir Taxa de Reparação N/A no Relatório IA Resultados
+- [ ] Investigar porque a Taxa de Reparação aparece como N/A
+- [ ] Corrigir cálculo da Taxa Rep. Média geral
+- [ ] Corrigir exibição da Taxa Rep. nos cards de Líder e Menor Performance
+
+
+## v4.26 - Corrigir Taxa de Reparação N/A no Relatório IA de Resultados
+- [x] Investigar porque a taxa de reparação aparece como N/A
+- [x] Corrigir agregação de taxa de reparação no aiService.ts
+- [x] Incluir taxaReparacao no mapa de agregação por loja
+- [x] Calcular média da taxa de reparação para múltiplos meses

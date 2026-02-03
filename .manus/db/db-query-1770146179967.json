@@ -1,0 +1,80 @@
+{
+  "query": "SELECT lojaId, taxaReparacao, qtdReparacoes, qtdParaBrisas, totalServicos \nFROM resultados_mensais \nWHERE mes = 1 AND ano = 2026 \nAND taxaReparacao > 0\nLIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT lojaId, taxaReparacao, qtdReparacoes, qtdParaBrisas, totalServicos \nFROM resultados_mensais \nWHERE mes = 1 AND ano = 2026 \nAND taxaReparacao > 0\nLIMIT 10;",
+  "rows": [
+    {
+      "lojaId": "180001",
+      "taxaReparacao": "0.3214",
+      "qtdReparacoes": "18",
+      "qtdParaBrisas": "38",
+      "totalServicos": "65"
+    },
+    {
+      "lojaId": "180002",
+      "taxaReparacao": "0.2143",
+      "qtdReparacoes": "3",
+      "qtdParaBrisas": "11",
+      "totalServicos": "131"
+    },
+    {
+      "lojaId": "180003",
+      "taxaReparacao": "0.3091",
+      "qtdReparacoes": "17",
+      "qtdParaBrisas": "38",
+      "totalServicos": "67"
+    },
+    {
+      "lojaId": "180004",
+      "taxaReparacao": "0.1481",
+      "qtdReparacoes": "4",
+      "qtdParaBrisas": "23",
+      "totalServicos": "47"
+    },
+    {
+      "lojaId": "180005",
+      "taxaReparacao": "0.2576",
+      "qtdReparacoes": "17",
+      "qtdParaBrisas": "49",
+      "totalServicos": "102"
+    },
+    {
+      "lojaId": "180006",
+      "taxaReparacao": "0.3023",
+      "qtdReparacoes": "13",
+      "qtdParaBrisas": "30",
+      "totalServicos": "82"
+    },
+    {
+      "lojaId": "180007",
+      "taxaReparacao": "0.1892",
+      "qtdReparacoes": "7",
+      "qtdParaBrisas": "30",
+      "totalServicos": "72"
+    },
+    {
+      "lojaId": "180008",
+      "taxaReparacao": "0.2623",
+      "qtdReparacoes": "16",
+      "qtdParaBrisas": "45",
+      "totalServicos": "86"
+    },
+    {
+      "lojaId": "60002",
+      "taxaReparacao": "0.3774",
+      "qtdReparacoes": "20",
+      "qtdParaBrisas": "33",
+      "totalServicos": "64"
+    },
+    {
+      "lojaId": "180009",
+      "taxaReparacao": "0.3256",
+      "qtdReparacoes": "14",
+      "qtdParaBrisas": "29",
+      "totalServicos": "47"
+    }
+  ],
+  "messages": [],
+  "stdout": "lojaId\ttaxaReparacao\tqtdReparacoes\tqtdParaBrisas\ttotalServicos\n180001\t0.3214\t18\t38\t65\n180002\t0.2143\t3\t11\t131\n180003\t0.3091\t17\t38\t67\n180004\t0.1481\t4\t23\t47\n180005\t0.2576\t17\t49\t102\n180006\t0.3023\t13\t30\t82\n180007\t0.1892\t7\t30\t72\n180008\t0.2623\t16\t45\t86\n60002\t0.3774\t20\t33\t64\n180009\t0.3256\t14\t29\t47\n",
+  "stderr": "",
+  "execution_time_ms": 65
+}
