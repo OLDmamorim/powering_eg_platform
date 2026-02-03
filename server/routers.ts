@@ -18,6 +18,7 @@ import { vapidPublicKey, notificarGestorNovaTarefa, notificarLojaNovaTarefa, not
 import { notificarNovoPedidoApoio, notificarPedidoAnulado, notificarPedidoEditado, notificarAgendamentoCriado } from "./telegramService";
 import { processarAnalise, ResultadoAnalise, RelatorioLoja, gerarHTMLEmailAnalise } from "./analiseFichasService";
 import { gerarPDFRelacaoRH } from "./pdfRelacaoRH";
+import { enviarLembretesRH, isDia20 } from "./lembreteRHService";
 
 // Função auxiliar para gerar alerta de processos repetidos
 // diasDesdeIdentificacao: número de dias desde a primeira identificação do processo
@@ -1597,7 +1598,7 @@ IMPORTANTE:
         const nomeArquivo = `Relacao_Colaboradores_${gestorNome.replace(/\s+/g, '_')}_${mesCapitalizado.replace(/\s+/g, '_')}.pdf`;
         
         // Enviar email para RH com PDF em anexo
-        const emailDestino = 'mamorim@expressglass.pt'; // TODO: Alterar para recursoshumanos@expressglass.pt após testes
+        const emailDestino = 'recursoshumanos@expressglass.pt';
         const enviado = await sendEmail({
           to: emailDestino,
           subject: `Relação de Colaboradores - ${gestorNome} - ${mesCapitalizado}`,
@@ -1621,6 +1622,12 @@ IMPORTANTE:
           message: `Relação de ${totalColaboradores} colaboradores enviada com sucesso para ${emailDestino} (PDF em anexo)` 
         };
       }),
+    
+    // Executar envio de lembretes RH (para cron job ou execução manual)
+    executarLembretesRH: adminProcedure.mutation(async () => {
+      const resultado = await enviarLembretesRH();
+      return resultado;
+    }),
     
     // Verificar se deve mostrar lembrete de envio para RH (dia 20 ou posterior)
     verificarLembreteRH: gestorProcedure.query(async ({ ctx }) => {

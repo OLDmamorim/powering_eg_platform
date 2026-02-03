@@ -4157,3 +4157,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Remover páginas em branco no final do PDF
 - [x] Corrigir lógica do rodapé que está a criar páginas extras
 - [x] Usar lineBreak: false no texto do rodapé
+
+## v4.36 - Email Final e Lembrete Automático
+- [x] Alterar email de destino para recursoshumanos@expressglass.pt
+- [x] Criar serviço de lembrete automático (lembreteRHService.ts)
+- [x] Endpoint executarLembretesRH para cron job
+- [x] Email de lembrete enviado no dia 20 para gestores que ainda não enviaram
