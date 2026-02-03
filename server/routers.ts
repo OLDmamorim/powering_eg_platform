@@ -1316,18 +1316,21 @@ IMPORTANTE:
         return await db.getColaboradorById(input.id);
       }),
     
-    // Criar colaborador (loja ou volante)
+    // Criar colaborador (loja, volante ou recalbra)
     create: gestorProcedure
       .input(z.object({
         lojaId: z.number().optional().nullable(),
         gestorId: z.number().optional().nullable(),
         nome: z.string().min(1),
         codigoColaborador: z.string().optional().nullable(),
-        isVolante: z.boolean().optional(),
+        cargo: z.enum(["responsavel_loja", "tecnico", "administrativo"]).optional(),
+        tipo: z.enum(["loja", "volante", "recalbra"]).optional(),
       }))
       .mutation(async ({ input, ctx }) => {
-        // Se não é volante, verificar acesso à loja
-        if (!input.isVolante && input.lojaId) {
+        const tipo = input.tipo || "loja";
+        
+        // Se é tipo loja, verificar acesso à loja
+        if (tipo === "loja" && input.lojaId) {
           if (ctx.user.role !== 'admin') {
             const gestor = await db.getGestorByUserId(ctx.user.id);
             if (!gestor) throw new TRPCError({ code: 'FORBIDDEN', message: 'Gestor não encontrado' });
@@ -1338,9 +1341,9 @@ IMPORTANTE:
           }
         }
         
-        // Se é volante, associar ao gestor
+        // Se é volante ou recalbra, associar ao gestor
         let gestorId = input.gestorId;
-        if (input.isVolante && !gestorId) {
+        if ((tipo === "volante" || tipo === "recalbra") && !gestorId) {
           const gestor = await db.getGestorByUserId(ctx.user.id);
           if (gestor) gestorId = gestor.id;
         }
@@ -1348,8 +1351,9 @@ IMPORTANTE:
         return await db.createColaborador({
           ...input,
           gestorId: gestorId || undefined,
-          lojaId: input.isVolante ? undefined : input.lojaId || undefined,
-          isVolante: input.isVolante || false,
+          lojaId: tipo === "loja" ? input.lojaId || undefined : undefined,
+          tipo: tipo,
+          cargo: input.cargo || "tecnico",
         });
       }),
     
@@ -1361,7 +1365,8 @@ IMPORTANTE:
         gestorId: z.number().optional().nullable(),
         nome: z.string().min(1).optional(),
         codigoColaborador: z.string().optional().nullable(),
-        isVolante: z.boolean().optional(),
+        cargo: z.enum(["responsavel_loja", "tecnico", "administrativo"]).optional(),
+        tipo: z.enum(["loja", "volante", "recalbra"]).optional(),
         ativo: z.boolean().optional(),
       }))
       .mutation(async ({ input }) => {

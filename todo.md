@@ -4086,3 +4086,22 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Corrigir agregação de taxa de reparação no aiService.ts
 - [x] Incluir taxaReparacao no mapa de agregação por loja
 - [x] Calcular média da taxa de reparação para múltiplos meses
+
+
+## v4.27 - Adicionar Campo Cargo aos Colaboradores
+- [ ] Adicionar campo cargo ao schema de colaboradores (enum: responsavel_loja, tecnico, administrativo)
+- [ ] Migrar base de dados com novo campo
+- [ ] Atualizar formulário de criação de colaborador com seletor de cargo
+- [ ] Atualizar formulário de edição de colaborador
+- [ ] Mostrar cargo na listagem de colaboradores
+- [ ] Mostrar cargo nos cards das lojas (Minhas Lojas)
+
+
+## v4.27 - Adicionar Campo Cargo e Tipo Recalbra aos Colaboradores
+- [x] Adicionar enum cargo ao schema (responsavel_loja, tecnico, administrativo)
+- [x] Adicionar tipo recalbra ao enum tipo (loja, volante, recalbra)
+- [x] Migrar base de dados com novos campos
+- [x] Atualizar formulário de criação com campos cargo e tipo
+- [x] Atualizar formulário de edição com campos cargo e tipo
+- [x] Atualizar listagem para mostrar tipo recalbra com badge laranja
+- [x] Atualizar routers para aceitar novos campos

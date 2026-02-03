@@ -43,7 +43,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Users, UserPlus, Store, Car, Pencil, Trash2, Search } from "lucide-react";
+import { Users, UserPlus, Store, Car, Pencil, Trash2, Search, Wrench } from "lucide-react";
 
 export default function RH() {
   const { user } = useAuth();
@@ -59,8 +59,9 @@ export default function RH() {
     id: 0,
     nome: "",
     codigoColaborador: "",
+    cargo: "tecnico" as "responsavel_loja" | "tecnico" | "administrativo",
+    tipo: "loja" as "loja" | "volante" | "recalbra",
     lojaId: null as number | null,
-    isVolante: false,
   });
 
   // Queries
@@ -108,8 +109,9 @@ export default function RH() {
       id: 0,
       nome: "",
       codigoColaborador: "",
+      cargo: "tecnico",
+      tipo: "loja",
       lojaId: null,
-      isVolante: false,
     });
   };
 
@@ -118,16 +120,17 @@ export default function RH() {
       toast.error("O nome é obrigatório");
       return;
     }
-    if (!formData.isVolante && !formData.lojaId) {
-      toast.error("Selecione uma loja ou marque como volante");
+    if (formData.tipo === "loja" && !formData.lojaId) {
+      toast.error("Selecione uma loja");
       return;
     }
     
     createMutation.mutate({
       nome: formData.nome.trim(),
       codigoColaborador: formData.codigoColaborador.trim() || null,
-      lojaId: formData.isVolante ? null : formData.lojaId,
-      isVolante: formData.isVolante,
+      cargo: formData.cargo,
+      tipo: formData.tipo,
+      lojaId: formData.tipo === "loja" ? formData.lojaId : null,
     });
   };
 
@@ -141,8 +144,9 @@ export default function RH() {
       id: formData.id,
       nome: formData.nome.trim(),
       codigoColaborador: formData.codigoColaborador.trim() || null,
-      lojaId: formData.isVolante ? null : formData.lojaId,
-      isVolante: formData.isVolante,
+      cargo: formData.cargo,
+      tipo: formData.tipo,
+      lojaId: formData.tipo === "loja" ? formData.lojaId : null,
     });
   };
 
@@ -151,8 +155,9 @@ export default function RH() {
       id: colaborador.id,
       nome: colaborador.nome,
       codigoColaborador: colaborador.codigoColaborador || "",
+      cargo: colaborador.cargo || "tecnico",
+      tipo: colaborador.tipo || "loja",
       lojaId: colaborador.lojaId,
-      isVolante: colaborador.isVolante,
     });
     setIsEditOpen(true);
   };
@@ -164,20 +169,21 @@ export default function RH() {
       (c.codigoColaborador?.toLowerCase().includes(searchTerm.toLowerCase()));
     
     const matchesLoja = filterLoja === "all" || 
-      (filterLoja === "volante" && c.isVolante) ||
+      (filterLoja === "volante" && c.tipo === "volante") ||
+      (filterLoja === "recalbra" && c.tipo === "recalbra") ||
       (c.lojaId?.toString() === filterLoja);
     
     const matchesTipo = filterTipo === "all" ||
-      (filterTipo === "loja" && !c.isVolante) ||
-      (filterTipo === "volante" && c.isVolante);
+      c.tipo === filterTipo;
     
     return matchesSearch && matchesLoja && matchesTipo;
   }) || [];
 
   // Stats
   const totalColaboradores = colaboradores?.length || 0;
-  const totalVolantes = colaboradores?.filter(c => c.isVolante).length || 0;
-  const totalLojas = colaboradores?.filter(c => !c.isVolante).length || 0;
+  const totalVolantes = colaboradores?.filter(c => c.tipo === "volante").length || 0;
+  const totalRecalbra = colaboradores?.filter(c => c.tipo === "recalbra").length || 0;
+  const totalLojas = colaboradores?.filter(c => c.tipo === "loja").length || 0;
 
   return (
     <DashboardLayout>
@@ -226,14 +232,14 @@ export default function RH() {
               <div className="grid gap-2">
                 <Label>Tipo</Label>
                 <Tabs 
-                  value={formData.isVolante ? "volante" : "loja"} 
+                  value={formData.tipo} 
                   onValueChange={(v) => setFormData({ 
                     ...formData, 
-                    isVolante: v === "volante",
-                    lojaId: v === "volante" ? null : formData.lojaId
+                    tipo: v as "loja" | "volante" | "recalbra",
+                    lojaId: v !== "loja" ? null : formData.lojaId
                   })}
                 >
-                  <TabsList className="grid w-full grid-cols-2">
+                  <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger value="loja">
                       <Store className="mr-2 h-4 w-4" />
                       Loja
@@ -242,10 +248,14 @@ export default function RH() {
                       <Car className="mr-2 h-4 w-4" />
                       Volante
                     </TabsTrigger>
+                    <TabsTrigger value="recalbra">
+                      <Wrench className="mr-2 h-4 w-4" />
+                      Recalbra
+                    </TabsTrigger>
                   </TabsList>
                 </Tabs>
               </div>
-              {!formData.isVolante && (
+              {formData.tipo === "loja" && (
                 <div className="grid gap-2">
                   <Label htmlFor="loja">Loja *</Label>
                   <Select
@@ -265,11 +275,32 @@ export default function RH() {
                   </Select>
                 </div>
               )}
-              {formData.isVolante && (
+              {formData.tipo === "volante" && (
                 <p className="text-sm text-muted-foreground">
                   O colaborador volante ficará associado à sua zona de gestão e poderá ser alocado a qualquer loja conforme necessário.
                 </p>
               )}
+              {formData.tipo === "recalbra" && (
+                <p className="text-sm text-muted-foreground">
+                  O colaborador Recalbra ficará associado à sua zona de gestão.
+                </p>
+              )}
+              <div className="grid gap-2">
+                <Label>Cargo</Label>
+                <Select
+                  value={formData.cargo}
+                  onValueChange={(v) => setFormData({ ...formData, cargo: v as "responsavel_loja" | "tecnico" | "administrativo" })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o cargo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="responsavel_loja">Responsável de Loja</SelectItem>
+                    <SelectItem value="tecnico">Técnico</SelectItem>
+                    <SelectItem value="administrativo">Administrativo</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsCreateOpen(false)}>
@@ -386,10 +417,15 @@ export default function RH() {
                       <TableCell className="font-medium">{colaborador.nome}</TableCell>
                       <TableCell>{colaborador.codigoColaborador || "-"}</TableCell>
                       <TableCell>
-                        {colaborador.isVolante ? (
+                        {colaborador.tipo === "volante" ? (
                           <Badge variant="secondary">
                             <Car className="mr-1 h-3 w-3" />
                             Volante
+                          </Badge>
+                        ) : colaborador.tipo === "recalbra" ? (
+                          <Badge variant="default" className="bg-orange-500">
+                            <Wrench className="mr-1 h-3 w-3" />
+                            Recalbra
                           </Badge>
                         ) : (
                           <Badge variant="outline">
@@ -399,7 +435,7 @@ export default function RH() {
                         )}
                       </TableCell>
                       <TableCell>
-                        {colaborador.isVolante 
+                        {colaborador.tipo !== "loja" 
                           ? (colaborador as any).gestorNome || "Zona do Gestor"
                           : (colaborador as any).lojaNome || "-"}
                       </TableCell>
@@ -461,14 +497,14 @@ export default function RH() {
             <div className="grid gap-2">
               <Label>Tipo</Label>
               <Tabs 
-                value={formData.isVolante ? "volante" : "loja"} 
+                value={formData.tipo} 
                 onValueChange={(v) => setFormData({ 
                   ...formData, 
-                  isVolante: v === "volante",
-                  lojaId: v === "volante" ? null : formData.lojaId
+                  tipo: v as "loja" | "volante" | "recalbra",
+                  lojaId: v !== "loja" ? null : formData.lojaId
                 })}
               >
-                <TabsList className="grid w-full grid-cols-2">
+                <TabsList className="grid w-full grid-cols-3">
                   <TabsTrigger value="loja">
                     <Store className="mr-2 h-4 w-4" />
                     Loja
@@ -477,10 +513,14 @@ export default function RH() {
                     <Car className="mr-2 h-4 w-4" />
                     Volante
                   </TabsTrigger>
+                  <TabsTrigger value="recalbra">
+                    <Wrench className="mr-2 h-4 w-4" />
+                    Recalbra
+                  </TabsTrigger>
                 </TabsList>
               </Tabs>
             </div>
-            {!formData.isVolante && (
+            {formData.tipo === "loja" && (
               <div className="grid gap-2">
                 <Label htmlFor="edit-loja">Loja *</Label>
                 <Select
@@ -500,6 +540,22 @@ export default function RH() {
                 </Select>
               </div>
             )}
+            <div className="grid gap-2">
+              <Label>Cargo</Label>
+              <Select
+                value={formData.cargo}
+                onValueChange={(v) => setFormData({ ...formData, cargo: v as "responsavel_loja" | "tecnico" | "administrativo" })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o cargo" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="responsavel_loja">Responsável de Loja</SelectItem>
+                  <SelectItem value="tecnico">Técnico</SelectItem>
+                  <SelectItem value="administrativo">Administrativo</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsEditOpen(false)}>

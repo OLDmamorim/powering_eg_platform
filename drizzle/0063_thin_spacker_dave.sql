@@ -1,0 +1,1 @@
+ALTER TABLE `colaboradores` ADD `cargo` enum('responsavel_loja','tecnico','administrativo') DEFAULT 'tecnico' NOT NULL;

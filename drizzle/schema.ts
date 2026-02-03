@@ -1250,7 +1250,8 @@ export const colaboradores = mysqlTable("colaboradores", {
   gestorId: int("gestorId"), // FK para gestores.id (para volantes - associados à zona)
   nome: varchar("nome", { length: 255 }).notNull(),
   codigoColaborador: varchar("codigoColaborador", { length: 50 }), // Código do colaborador (opcional)
-  isVolante: boolean("isVolante").default(false).notNull(), // Se é volante (não fixo numa loja)
+  cargo: mysqlEnum("cargo", ["responsavel_loja", "tecnico", "administrativo"]).default("tecnico").notNull(), // Cargo do colaborador
+  tipo: mysqlEnum("tipo", ["loja", "volante", "recalbra"]).default("loja").notNull(), // Tipo: loja (fixo), volante (móvel), recalbra
   ativo: boolean("ativo").default(true).notNull(), // Se o colaborador está ativo
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),

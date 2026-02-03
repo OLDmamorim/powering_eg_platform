@@ -9825,7 +9825,7 @@ export async function getColaboradoresByLojaId(lojaId: number, apenasAtivos: boo
   const db = await getDb();
   if (!db) return [];
   
-  const conditions = [eq(colaboradores.lojaId, lojaId), eq(colaboradores.isVolante, false)];
+  const conditions = [eq(colaboradores.lojaId, lojaId), eq(colaboradores.tipo, "loja")];
   if (apenasAtivos) {
     conditions.push(eq(colaboradores.ativo, true));
   }
@@ -9843,7 +9843,7 @@ export async function getColaboradoresVolantesByGestorId(gestorId: number, apena
   const db = await getDb();
   if (!db) return [];
   
-  const conditions = [eq(colaboradores.gestorId, gestorId), eq(colaboradores.isVolante, true)];
+  const conditions = [eq(colaboradores.gestorId, gestorId), eq(colaboradores.tipo, "volante")];
   if (apenasAtivos) {
     conditions.push(eq(colaboradores.ativo, true));
   }
@@ -9876,9 +9876,9 @@ export async function getAllColaboradoresByGestorId(gestorId: number, apenasAtiv
     .where(apenasAtivos ? eq(colaboradores.ativo, true) : undefined)
     .orderBy(colaboradores.nome);
   
-  // Filtrar: colaboradores das lojas do gestor OU volantes do gestor
+  // Filtrar: colaboradores das lojas do gestor OU volantes/recalbra do gestor
   const filtered = result.filter(c => {
-    if (c.isVolante) {
+    if (c.tipo === "volante" || c.tipo === "recalbra") {
       return c.gestorId === gestorId;
     } else {
       return c.lojaId && lojasIds.includes(c.lojaId);
@@ -9972,7 +9972,7 @@ export async function countColaboradoresAtivos(lojaId: number): Promise<number> 
     .from(colaboradores)
     .where(and(
       eq(colaboradores.lojaId, lojaId),
-      eq(colaboradores.isVolante, false),
+      eq(colaboradores.tipo, "loja"),
       eq(colaboradores.ativo, true)
     ));
   
@@ -9993,7 +9993,7 @@ export async function getColaboradoresCountByLoja(): Promise<Map<number, number>
     .from(colaboradores)
     .where(and(
       eq(colaboradores.ativo, true),
-      eq(colaboradores.isVolante, false)
+      eq(colaboradores.tipo, "loja")
     ))
     .groupBy(colaboradores.lojaId);
   
@@ -10033,7 +10033,7 @@ export async function countVolantesAtivosByGestor(gestorId: number): Promise<num
     .from(colaboradores)
     .where(and(
       eq(colaboradores.gestorId, gestorId),
-      eq(colaboradores.isVolante, true),
+      eq(colaboradores.tipo, "volante"),
       eq(colaboradores.ativo, true)
     ));
   
