@@ -4105,3 +4105,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Atualizar formulário de edição com campos cargo e tipo
 - [x] Atualizar listagem para mostrar tipo recalbra com badge laranja
 - [x] Atualizar routers para aceitar novos campos
+
+
+## v4.28 - Corrigir Filtro de Âmbito Nacional no Relatório IA de Resultados
+- [x] Corrigir lógica no backend para que âmbito "Nacional" busque todas as lojas da rede
+- [x] Reordenar condições: verificar "nacional" antes de "minhas" para evitar override
+- [x] Garantir que gestores podem ver dados nacionais para comparação
+- [x] Filtro aplicado mostra "Nacional" corretamente quando selecionado

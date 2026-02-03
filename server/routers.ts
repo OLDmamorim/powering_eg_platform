@@ -2153,7 +2153,12 @@ IMPORTANTE:
           lojasIds = [input.lojaIdFiltro];
           const lojaInfo = await db.getLojaById(input.lojaIdFiltro);
           filtroDescricao = `Loja: ${lojaInfo?.nome || 'N/A'}`;
-        } else if (input.ambitoRelatorio === 'minhas' || ctx.user.role !== "admin") {
+        } else if (input.ambitoRelatorio === 'nacional') {
+          // Nacional - mostrar todas as lojas (sem filtro de gestor)
+          // Gestores também podem ver dados nacionais para comparação
+          lojasIds = undefined;
+          filtroDescricao = "Nacional";
+        } else if (input.ambitoRelatorio === 'minhas') {
           // Filtrar pelas lojas do gestor
           gestorId = ctx.gestor?.id;
           if (gestorId) {
@@ -2161,10 +2166,16 @@ IMPORTANTE:
             lojasIds = lojasDoGestor.map(l => l.id);
             filtroDescricao = "Minhas Lojas";
           }
-        } else if (input.ambitoRelatorio === 'nacional') {
-          // Nacional - mostrar todas as lojas (sem filtro de gestor)
-          lojasIds = undefined;
-          filtroDescricao = "Nacional";
+        } else {
+          // Default: se não especificado, gestores veem suas lojas, admins veem tudo
+          if (ctx.user.role !== "admin" && ctx.gestor?.id) {
+            const lojasDoGestor = await db.getLojasByGestorId(ctx.gestor.id);
+            lojasIds = lojasDoGestor.map(l => l.id);
+            filtroDescricao = "Minhas Lojas";
+          } else {
+            lojasIds = undefined;
+            filtroDescricao = "Nacional";
+          }
         }
         
         // Se admin e âmbito nacional, aplicar filtros adicionais de admin
