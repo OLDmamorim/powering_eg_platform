@@ -4130,3 +4130,6 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Organização por lojas com colaboradores
 - [x] Seções separadas para Volantes e Recalbra
 - [x] Abrir janela de impressão para guardar como PDF
+
+## v4.31 - Correção Cards RH
+- [ ] Adicionar card de Recalbra nos estatísticas da página RH
