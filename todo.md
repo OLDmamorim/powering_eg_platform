@@ -4013,3 +4013,20 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Mostrar colaboradores na página de Lojas (coluna com contagem)
 - [x] Volantes associados à zona do gestor (não a uma loja específica)
 - [ ] Integrar número de colaboradores no cálculo de FTE para comissões (próxima fase)
+
+
+## v4.19 - Reformulação Completa do Relatório IA de Resultados
+- [x] Corrigir erros de tradução (common.criadosNoPeriodo, common.resolvidosNoPeriodo, etc.)
+- [x] Gestores agora veem análise de RESULTADOS (igual ao admin, filtrado pelas suas lojas)
+- [x] Focar exclusivamente nos dados de RESULTADOS (Excel carregado)
+- [ ] Adicionar gráficos profissionais:
+  - [ ] Gráfico de barras: Serviços por loja (ligeiros, pesados, calibração)
+  - [ ] Gráfico de linha: Evolução mensal de serviços
+  - [ ] Gráfico de pizza: Distribuição de tipos de serviço
+  - [ ] Gráfico de barras: QIV e taxa de reparação por loja
+  - [ ] Gráfico de barras: Vendas complementares (escovas) vs meta 7.5%
+- [ ] KPIs visuais com indicadores de meta (verde/vermelho)
+- [ ] Rankings de lojas por performance
+- [ ] Análise IA focada apenas em resultados de serviços
+- [ ] Comparação com mês anterior (tendências)
+- [ ] Testar funcionalidade completa

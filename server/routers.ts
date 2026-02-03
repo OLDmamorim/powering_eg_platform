@@ -2141,26 +2141,15 @@ IMPORTANTE:
         let filtroDescricao = "Todo o País";
         
         if (ctx.user.role !== "admin") {
-          // Gestores usam função específica com análise qualitativa
+          // Gestores usam análise de RESULTADOS das suas lojas (não relatórios/pendentes)
           gestorId = ctx.gestor?.id;
           if (gestorId) {
-            const analiseGestor = await gerarRelatorioIAGestor(input.periodo, gestorId, input.dataInicio, input.dataFim);
-            
-            // Salvar relatório IA na base de dados
-            try {
-              await db.createRelatorioIA({
-                periodo: input.periodo,
-                conteudo: JSON.stringify(analiseGestor),
-                geradoPor: ctx.user.id,
-              });
-              console.log('[RelatoriosIA] Relatório de gestor salvo com sucesso na BD');
-            } catch (error) {
-              console.error('[RelatoriosIA] Erro ao salvar relatório de gestor:', error);
-            }
-            
-            return analiseGestor;
+            // Buscar lojas do gestor para filtrar resultados
+            const lojasDoGestor = await db.getLojasByGestorId(gestorId);
+            lojasIds = lojasDoGestor.map(l => l.id);
+            filtroDescricao = "Minhas Lojas";
+            // Continua para usar gerarRelatorioComIA com filtro de lojas
           }
-          filtroDescricao = "Minhas Lojas";
         } else {
           // Admin pode filtrar
           if (input.filtro === "gestor" && input.gestorIdFiltro) {
@@ -2244,39 +2233,22 @@ IMPORTANTE:
         console.log('[RelatoriosIA DEBUG] Gestor context:', ctx.gestor?.id);
         
         if (ctx.user.role !== "admin") {
-          // Gestores usam função específica com análise qualitativa
+          // Gestores usam análise de RESULTADOS das suas lojas (não relatórios/pendentes)
           gestorId = ctx.gestor?.id;
           
           // Fallback: buscar gestor diretamente se não estiver no contexto
           if (!gestorId) {
-            console.log('[RelatoriosIA DEBUG] Gestor não no contexto, a buscar diretamente...');
             const gestorDireto = await db.getGestorByUserId(ctx.user.id);
             gestorId = gestorDireto?.id;
-            console.log('[RelatoriosIA DEBUG] Gestor encontrado diretamente:', gestorId);
           }
           
-          console.log('[RelatoriosIA DEBUG] Gestor ID final:', gestorId);
           if (gestorId) {
-            console.log('[RelatoriosIA DEBUG] A chamar gerarRelatorioIAGestorMultiplosMeses...');
-            const analiseGestor = await gerarRelatorioIAGestorMultiplosMeses(input.mesesSelecionados, gestorId);
-            console.log('[RelatoriosIA DEBUG] Resultado tipoRelatorio:', analiseGestor?.tipoRelatorio);
-            
-            // Salvar relatório IA na base de dados
-            try {
-              const labelMeses = input.mesesSelecionados.map(m => `${m.mes}/${m.ano}`).join(', ');
-              await db.createRelatorioIA({
-                periodo: `meses_${labelMeses}`,
-                conteudo: JSON.stringify(analiseGestor),
-                geradoPor: ctx.user.id,
-              });
-              console.log('[RelatoriosIA] Relatório de gestor (múltiplos meses) salvo com sucesso na BD');
-            } catch (error) {
-              console.error('[RelatoriosIA] Erro ao salvar relatório de gestor:', error);
-            }
-            
-            return analiseGestor;
+            // Buscar lojas do gestor para filtrar resultados
+            const lojasDoGestor = await db.getLojasByGestorId(gestorId);
+            lojasIds = lojasDoGestor.map(l => l.id);
+            filtroDescricao = "Minhas Lojas";
+            // Continua para usar gerarRelatorioComIAMultiplosMeses com filtro de lojas
           }
-          filtroDescricao = "Minhas Lojas";
         } else {
           if (input.filtro === "gestor" && input.gestorIdFiltro) {
             const lojasDoGestor = await db.getLojasByGestorId(input.gestorIdFiltro);

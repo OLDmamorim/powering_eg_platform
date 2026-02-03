@@ -159,7 +159,16 @@
     "opcional": "Opcional",
     "aGuardar": "A guardar...",
     "mes": "Mês",
-    "ano": "Ano"
+    "ano": "Ano",
+    "periodo": "Período",
+    "criadosNoPeriodo": "Criados no Período",
+    "resolvidosNoPeriodo": "Resolvidos no Período",
+    "nenhumRelatorioGerado": "Nenhum relatório gerado",
+    "selecionePeriodoFiltros": "Selecione o período e filtros para gerar o relatório",
+    "selecioneZonas": "Selecione zona(s)",
+    "selecioneGestor": "Selecione gestor",
+    "todoOPais": "Todo o País",
+    "filtrarPor": "Filtrar por"
   },
   "menu": {
     "groups": {
@@ -177,6 +186,7 @@
       "assistenteIA": "PoweringEG",
       "dashboard": "Dashboard",
       "lojas": "Lojas",
+      "rh": "RH",
       "gestores": "Gestores",
       "utilizadores": "Utilizadores",
       "minhasLojas": "Minhas Lojas",
