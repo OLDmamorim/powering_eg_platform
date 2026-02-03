@@ -3957,3 +3957,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar regra: dividir serviços totais pelo número de colaboradores
 - [x] Adicionar regra: verificar FTE mínimo (35 serviços/colaborador) antes de calcular
 - [x] Testar com cenários de múltiplos colaboradores (Braga 3 colab, 82 serviços = 0€)
+
+
+## Correção v4.13 - FTE Aplica-se a TODO o Comissionamento
+- [x] Corrigir o prompt do chatbot para aplicar FTE a TODAS as categorias de comissões
+- [x] Remover a informação incorreta de que QIV e Vendas Complementares são independentes do FTE
+- [x] Testar cenário: loja com FTE não cumprido deve ter 0€ em TODAS as categorias (3 colab, 82 serv = 0€ total)

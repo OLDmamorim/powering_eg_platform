@@ -872,12 +872,14 @@ Tens acesso a todos os dados da plataforma e podes responder a perguntas sobre:
 Período de carência: 2 meses para novos colaboradores.
 Não aplicável a trabalhadores em regime de Trabalho Temporário.
 
-**REGRA CRÍTICA - FTE (Full Time Equivalent):** 
+**REGRA CRÍTICA - FTE (Full Time Equivalent) - APLICA-SE A TODO O COMISSIONAMENTO:** 
+- O FTE é o critério base para QUALQUER prémio (serviços, reparações QIV, vendas complementares, etc.)
+- Se a loja NÃO cumprir o FTE mínimo, NÃO TEM DIREITO A NENHUM PRÉMIO (0€ em TODAS as categorias)
 - O cálculo de comissões é SEMPRE por colaborador, NÃO pelo total de serviços da loja
 - Para calcular serviços por colaborador: Total de Serviços da Loja ÷ Número de Colaboradores
-- Mínimo 35 serviços por colaborador para ter direito a prémios
-- Se uma loja com 3 colaboradores fizer 82 serviços: 82 ÷ 3 = 27,3 serviços/colaborador → SEM DIREITO A PRÉMIO (< 35)
-- Se uma loja com 2 colaboradores fizer 82 serviços: 82 ÷ 2 = 41 serviços/colaborador → Com direito a prémio
+- Mínimo 35 serviços por colaborador para ter direito a QUALQUER prémio
+- Se uma loja com 3 colaboradores fizer 82 serviços: 82 ÷ 3 = 27,3 serviços/colaborador → SEM DIREITO A NENHUM PRÉMIO (0€ em tudo: serviços, QIV, vendas)
+- Se uma loja com 2 colaboradores fizer 82 serviços: 82 ÷ 2 = 41 serviços/colaborador → Com direito a todos os prémios
 
 **TABELA DE SERVIÇOS MÍNIMOS (FTE):**
 | Colaboradores | Serviços Mínimos Totais |
@@ -909,18 +911,19 @@ Para calcular a comissão de serviços ligeiros:
 
 **2. CALIBRAÇÃO:** Mesmo valor dos serviços ligeiros por cada calibragem (se atingir mínimo 35 serviços).
 
-**3. TAXA DE REPARAÇÃO (QIV) - Valor por cada reparação:**
+**3. TAXA DE REPARAÇÃO (QIV) - Valor por cada reparação (APENAS SE CUMPRIR FTE):**
 - < 22%: 0€
 - 22% a 25%: 5€
 - 25% a 30%: 10€
 - 30% a 40%: 12€
 - > 40%: 15€
+NOTA: Se a loja não cumprir o FTE mínimo (35 serviços/colaborador), a comissão QIV é 0€.
 
-**4. VENDAS COMPLEMENTARES:**
+**4. VENDAS COMPLEMENTARES (APENAS SE CUMPRIR FTE):**
 - Escovas: 10% do valor faturado
 - Películas: 2,5% do valor faturado (5% para Coimbra Sul)
 - Outros serviços (polimentos, lavagens, etc.): 30% do valor faturado (apenas serviços, não peças)
-
+NOTA: Se a loja não cumprir o FTE mínimo (35 serviços/colaborador), a comissão de vendas complementares é 0€.
 **5. CRITÉRIOS MÍNIMOS OBRIGATÓRIOS:**
 - NPS >= 80% (obrigatório para receber prémio)
 - Taxa de Resposta >= 7,5% (obrigatório para receber prémio)
