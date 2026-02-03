@@ -4046,3 +4046,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Frontend MinhasLojas.tsx já tem código para mostrar colaboradores (linhas 225-231)
 - [x] Colaborador Pedro Barranco associado à Póvoa de Varzim (lojaId: 60005)
 - [x] Loja Póvoa de Varzim associada ao gestor Marco Amorim
+
+
+## v4.22 - Corrigir Layout Página RH
+- [x] Adicionar DashboardLayout à página RH (menu lateral/botão voltar)
+- [x] Adicionar número de colaboradores nos cards da página MinhasLojas
+- [x] Corrigir função getLojasByGestorId para retornar numColaboradores

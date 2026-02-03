@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { trpc } from "@/lib/trpc";
-import { Building2, Mail, MapPin, Phone, Edit, CheckCircle2, AlertCircle } from "lucide-react";
+import { Building2, Mail, MapPin, Phone, Edit, CheckCircle2, AlertCircle, Users } from "lucide-react";
 import { useLocation } from "wouter";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -221,6 +221,14 @@ export default function MinhasLojas() {
                       <span className="text-muted-foreground">{loja.email}</span>
                     </div>
                   )}
+
+                  {/* Número de Colaboradores */}
+                  <div className="flex items-center gap-2 text-sm">
+                    <Users className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-muted-foreground">
+                      {(loja as any).numColaboradores || 0} {((loja as any).numColaboradores || 0) === 1 ? 'colaborador' : 'colaboradores'}
+                    </span>
+                  </div>
 
                   {/* Relatórios Mínimos com Badges de Cumprimento */}
                   <div className="pt-3 border-t space-y-3">
