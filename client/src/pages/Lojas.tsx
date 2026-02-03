@@ -314,6 +314,7 @@ export default function Lojas() {
                   <TableHead>{t('lojas.nome')}</TableHead>
                   <TableHead>{t('lojas.email')}</TableHead>
                   <TableHead>{t('lojas.gestor')}</TableHead>
+                  <TableHead className="text-center">Colaboradores</TableHead>
                   <TableHead className="text-right">{t('lojas.acoes')}</TableHead>
                 </TableRow>
               </TableHeader>
@@ -339,6 +340,11 @@ export default function Lojas() {
                       </TableCell>
                       <TableCell>{loja.email || "-"}</TableCell>
                       <TableCell>{loja.gestorNome || ""}</TableCell>
+                      <TableCell className="text-center">
+                        <span className="inline-flex items-center justify-center rounded-full bg-primary/10 px-2.5 py-0.5 text-sm font-medium text-primary">
+                          {loja.numColaboradores || 0}
+                        </span>
+                      </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
                           <Button
@@ -361,7 +367,7 @@ export default function Lojas() {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8">
+                    <TableCell colSpan={7} className="text-center py-8">
                       <p className="text-muted-foreground">
                         {t('lojas.semLojas')}
                       </p>

@@ -91,6 +91,7 @@ const getMenuGroups = (userRole?: string, t?: (key: string) => string): MenuGrou
       color: 'bg-blue-100/80 dark:bg-blue-900/30',
       items: [
         { icon: Building2, label: tr('menu.items.lojas', 'Lojas'), path: "/lojas", show: isAdmin, showBadge: false },
+        { icon: Users, label: tr('menu.items.rh', 'RH'), path: "/rh", show: true, showBadge: false },
         { icon: Users, label: tr('menu.items.gestores', 'Gestores'), path: "/gestores", show: isAdmin, showBadge: false },
         { icon: UserCog, label: tr('menu.items.utilizadores', 'Utilizadores'), path: "/utilizadores", show: isAdmin, showBadge: false },
         { icon: Eye, label: tr('menu.items.portalGestor', 'Portal Gestor'), path: "/portal-gestor", show: isGestor, showBadge: false },

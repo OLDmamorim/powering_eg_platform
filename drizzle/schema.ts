@@ -1237,3 +1237,24 @@ export const fichasIdentificadasAnalise = mysqlTable("fichas_identificadas_anali
 
 export type FichaIdentificadaAnalise = typeof fichasIdentificadasAnalise.$inferSelect;
 export type InsertFichaIdentificadaAnalise = typeof fichasIdentificadasAnalise.$inferInsert;
+
+
+
+/**
+ * Colaboradores - Colaboradores de cada loja para cálculo de FTE
+ * Podem estar associados a uma loja específica OU ser volantes (associados à zona do gestor)
+ */
+export const colaboradores = mysqlTable("colaboradores", {
+  id: int("id").autoincrement().primaryKey(),
+  lojaId: int("lojaId"), // FK para lojas.id (null para volantes)
+  gestorId: int("gestorId"), // FK para gestores.id (para volantes - associados à zona)
+  nome: varchar("nome", { length: 255 }).notNull(),
+  codigoColaborador: varchar("codigoColaborador", { length: 50 }), // Código do colaborador (opcional)
+  isVolante: boolean("isVolante").default(false).notNull(), // Se é volante (não fixo numa loja)
+  ativo: boolean("ativo").default(true).notNull(), // Se o colaborador está ativo
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Colaborador = typeof colaboradores.$inferSelect;
+export type InsertColaborador = typeof colaboradores.$inferInsert;

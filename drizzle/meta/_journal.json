@@ -428,6 +428,20 @@
       "when": 1769784982646,
       "tag": "0060_lush_hairball",
       "breakpoints": true
+    },
+    {
+      "idx": 61,
+      "version": "5",
+      "when": 1770131374364,
+      "tag": "0061_sharp_magik",
+      "breakpoints": true
+    },
+    {
+      "idx": 62,
+      "version": "5",
+      "when": 1770132130990,
+      "tag": "0062_ancient_dreaming_celestial",
+      "breakpoints": true
     }
   ]
 }

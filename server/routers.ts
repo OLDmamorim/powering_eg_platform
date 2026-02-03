@@ -1267,6 +1267,137 @@ IMPORTANTE:
       }),
   }),
 
+  // ==================== COLABORADORES ====================
+  colaboradores: router({
+    // Listar todos os colaboradores (admin vê todos, gestor vê os seus)
+    list: gestorProcedure
+      .input(z.object({ apenasAtivos: z.boolean().optional() }).optional())
+      .query(async ({ input, ctx }) => {
+        if (ctx.user.role === 'admin') {
+          return await db.getAllColaboradores(input?.apenasAtivos ?? true);
+        }
+        const gestor = await db.getGestorByUserId(ctx.user.id);
+        if (!gestor) return [];
+        return await db.getAllColaboradoresByGestorId(gestor.id, input?.apenasAtivos ?? true);
+      }),
+    
+    // Listar colaboradores de uma loja
+    byLoja: gestorProcedure
+      .input(z.object({ 
+        lojaId: z.number(),
+        apenasAtivos: z.boolean().optional()
+      }))
+      .query(async ({ input, ctx }) => {
+        // Verificar se gestor tem acesso à loja
+        if (ctx.user.role !== 'admin') {
+          const gestor = await db.getGestorByUserId(ctx.user.id);
+          if (!gestor) throw new TRPCError({ code: 'FORBIDDEN', message: 'Gestor não encontrado' });
+          const lojasGestor = await db.getLojasByGestorId(gestor.id);
+          if (!lojasGestor.some(l => l.id === input.lojaId)) {
+            throw new TRPCError({ code: 'FORBIDDEN', message: 'Não tem acesso a esta loja' });
+          }
+        }
+        return await db.getColaboradoresByLojaId(input.lojaId, input.apenasAtivos ?? true);
+      }),
+    
+    // Listar volantes de um gestor
+    volantes: gestorProcedure
+      .input(z.object({ apenasAtivos: z.boolean().optional() }).optional())
+      .query(async ({ input, ctx }) => {
+        const gestor = await db.getGestorByUserId(ctx.user.id);
+        if (!gestor) return [];
+        return await db.getColaboradoresVolantesByGestorId(gestor.id, input?.apenasAtivos ?? true);
+      }),
+    
+    // Obter colaborador por ID
+    byId: gestorProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        return await db.getColaboradorById(input.id);
+      }),
+    
+    // Criar colaborador (loja ou volante)
+    create: gestorProcedure
+      .input(z.object({
+        lojaId: z.number().optional().nullable(),
+        gestorId: z.number().optional().nullable(),
+        nome: z.string().min(1),
+        codigoColaborador: z.string().optional().nullable(),
+        isVolante: z.boolean().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        // Se não é volante, verificar acesso à loja
+        if (!input.isVolante && input.lojaId) {
+          if (ctx.user.role !== 'admin') {
+            const gestor = await db.getGestorByUserId(ctx.user.id);
+            if (!gestor) throw new TRPCError({ code: 'FORBIDDEN', message: 'Gestor não encontrado' });
+            const lojasGestor = await db.getLojasByGestorId(gestor.id);
+            if (!lojasGestor.some(l => l.id === input.lojaId)) {
+              throw new TRPCError({ code: 'FORBIDDEN', message: 'Não tem acesso a esta loja' });
+            }
+          }
+        }
+        
+        // Se é volante, associar ao gestor
+        let gestorId = input.gestorId;
+        if (input.isVolante && !gestorId) {
+          const gestor = await db.getGestorByUserId(ctx.user.id);
+          if (gestor) gestorId = gestor.id;
+        }
+        
+        return await db.createColaborador({
+          ...input,
+          gestorId: gestorId || undefined,
+          lojaId: input.isVolante ? undefined : input.lojaId || undefined,
+          isVolante: input.isVolante || false,
+        });
+      }),
+    
+    // Atualizar colaborador
+    update: gestorProcedure
+      .input(z.object({
+        id: z.number(),
+        lojaId: z.number().optional().nullable(),
+        gestorId: z.number().optional().nullable(),
+        nome: z.string().min(1).optional(),
+        codigoColaborador: z.string().optional().nullable(),
+        isVolante: z.boolean().optional(),
+        ativo: z.boolean().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        await db.updateColaborador(id, data);
+        return { success: true };
+      }),
+    
+    // Eliminar colaborador (soft delete)
+    delete: gestorProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await db.deleteColaborador(input.id);
+        return { success: true };
+      }),
+    
+    // Contar colaboradores ativos de uma loja
+    count: gestorProcedure
+      .input(z.object({ lojaId: z.number() }))
+      .query(async ({ input }) => {
+        return await db.countColaboradoresAtivos(input.lojaId);
+      }),
+    
+    // Contar volantes ativos do gestor
+    countVolantes: gestorProcedure.query(async ({ ctx }) => {
+      const gestor = await db.getGestorByUserId(ctx.user.id);
+      if (!gestor) return 0;
+      return await db.countVolantesAtivosByGestor(gestor.id);
+    }),
+    
+    // Obter lojas com contagem de colaboradores
+    lojasComColaboradores: gestorProcedure.query(async () => {
+      return await db.getLojasComColaboradores();
+    }),
+  }),
+
   // ==================== GESTORES ====================
   gestores: router({
     // Endpoint para gestor obter os seus próprios dados (acessível por gestores)

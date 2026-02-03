@@ -126,7 +126,10 @@ import {
   InsertEvolucaoAnalise,
   fichasIdentificadasAnalise,
   FichaIdentificadaAnalise,
-  InsertFichaIdentificadaAnalise
+  InsertFichaIdentificadaAnalise,
+  colaboradores,
+  Colaborador,
+  InsertColaborador
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -320,10 +323,17 @@ export async function getAllLojas() {
         .orderBy(desc(gestorLojas.createdAt))
         .limit(1);
       
+      // Contar colaboradores da loja
+      const colaboradoresCount = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(colaboradores)
+        .where(eq(colaboradores.lojaId, loja.id));
+      
       return {
         ...loja,
         gestorId: gestorLoja[0]?.gestorId || null,
         gestorNome: gestorLoja[0]?.gestorNome || null,
+        numColaboradores: Number(colaboradoresCount[0]?.count || 0),
       };
     })
   );
@@ -9774,4 +9784,243 @@ export async function updateRelatorioResumo(relatorioId: number, novoResumo: str
   await db.update(relatoriosAnaliseLoja)
     .set({ resumo: novoResumo, updatedAt: new Date() })
     .where(eq(relatoriosAnaliseLoja.id, relatorioId));
+}
+
+
+// ==================== COLABORADORES ====================
+
+/**
+ * Criar um novo colaborador (pode ser de loja ou volante)
+ */
+export async function createColaborador(data: InsertColaborador): Promise<Colaborador | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const result = await db.insert(colaboradores).values(data);
+  const insertId = result[0].insertId;
+  
+  const created = await db.select().from(colaboradores).where(eq(colaboradores.id, insertId));
+  return created[0] || null;
+}
+
+/**
+ * Obter todos os colaboradores de uma loja
+ */
+export async function getColaboradoresByLojaId(lojaId: number, apenasAtivos: boolean = true): Promise<Colaborador[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const conditions = [eq(colaboradores.lojaId, lojaId), eq(colaboradores.isVolante, false)];
+  if (apenasAtivos) {
+    conditions.push(eq(colaboradores.ativo, true));
+  }
+  
+  return await db.select()
+    .from(colaboradores)
+    .where(and(...conditions))
+    .orderBy(colaboradores.nome);
+}
+
+/**
+ * Obter todos os colaboradores volantes de um gestor (zona)
+ */
+export async function getColaboradoresVolantesByGestorId(gestorId: number, apenasAtivos: boolean = true): Promise<Colaborador[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const conditions = [eq(colaboradores.gestorId, gestorId), eq(colaboradores.isVolante, true)];
+  if (apenasAtivos) {
+    conditions.push(eq(colaboradores.ativo, true));
+  }
+  
+  return await db.select()
+    .from(colaboradores)
+    .where(and(...conditions))
+    .orderBy(colaboradores.nome);
+}
+
+/**
+ * Obter todos os colaboradores (lojas + volantes) de um gestor
+ */
+export async function getAllColaboradoresByGestorId(gestorId: number, apenasAtivos: boolean = true): Promise<Array<Colaborador & { lojaNome?: string }>> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  // Obter lojas do gestor
+  const lojasGestor = await getLojasByGestorId(gestorId);
+  const lojasIds = lojasGestor.map(l => l.id);
+  
+  // Buscar colaboradores das lojas do gestor + volantes do gestor
+  let conditions: any[] = [];
+  if (apenasAtivos) {
+    conditions.push(eq(colaboradores.ativo, true));
+  }
+  
+  const result = await db.select()
+    .from(colaboradores)
+    .where(apenasAtivos ? eq(colaboradores.ativo, true) : undefined)
+    .orderBy(colaboradores.nome);
+  
+  // Filtrar: colaboradores das lojas do gestor OU volantes do gestor
+  const filtered = result.filter(c => {
+    if (c.isVolante) {
+      return c.gestorId === gestorId;
+    } else {
+      return c.lojaId && lojasIds.includes(c.lojaId);
+    }
+  });
+  
+  // Adicionar nome da loja
+  const lojasMap = new Map(lojasGestor.map(l => [l.id, l.nome]));
+  return filtered.map(c => ({
+    ...c,
+    lojaNome: c.lojaId ? lojasMap.get(c.lojaId) : undefined
+  }));
+}
+
+/**
+ * Obter todos os colaboradores (admin - todas as lojas)
+ */
+export async function getAllColaboradores(apenasAtivos: boolean = true): Promise<Array<Colaborador & { lojaNome?: string; gestorNome?: string }>> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const conditions = apenasAtivos ? [eq(colaboradores.ativo, true)] : [];
+  
+  const result = await db.select()
+    .from(colaboradores)
+    .where(conditions.length > 0 ? and(...conditions) : undefined)
+    .orderBy(colaboradores.nome);
+  
+  // Buscar lojas e gestores para enriquecer dados
+  const lojasResult = await db.select().from(lojas);
+  const lojasMap = new Map(lojasResult.map(l => [l.id, l.nome]));
+  
+  // Buscar gestores com nome do user
+  const gestoresResult = await db.select({
+    id: gestores.id,
+    nome: users.name
+  }).from(gestores)
+    .leftJoin(users, eq(gestores.userId, users.id));
+  const gestoresMap = new Map(gestoresResult.map(g => [g.id, g.nome || 'Gestor']));
+  
+  return result.map(c => ({
+    ...c,
+    lojaNome: c.lojaId ? lojasMap.get(c.lojaId) : undefined,
+    gestorNome: c.gestorId ? gestoresMap.get(c.gestorId) : undefined
+  }));
+}
+
+/**
+ * Obter colaborador por ID
+ */
+export async function getColaboradorById(id: number): Promise<Colaborador | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const result = await db.select().from(colaboradores).where(eq(colaboradores.id, id));
+  return result[0] || null;
+}
+
+/**
+ * Atualizar colaborador
+ */
+export async function updateColaborador(id: number, data: Partial<InsertColaborador>): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  
+  await db.update(colaboradores)
+    .set({ ...data, updatedAt: new Date() })
+    .where(eq(colaboradores.id, id));
+}
+
+/**
+ * Eliminar colaborador (soft delete - marcar como inativo)
+ */
+export async function deleteColaborador(id: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  
+  await db.update(colaboradores)
+    .set({ ativo: false, updatedAt: new Date() })
+    .where(eq(colaboradores.id, id));
+}
+
+/**
+ * Contar colaboradores ativos de uma loja
+ */
+export async function countColaboradoresAtivos(lojaId: number): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  
+  const result = await db.select({ count: sql<number>`count(*)` })
+    .from(colaboradores)
+    .where(and(
+      eq(colaboradores.lojaId, lojaId),
+      eq(colaboradores.isVolante, false),
+      eq(colaboradores.ativo, true)
+    ));
+  
+  return result[0]?.count || 0;
+}
+
+/**
+ * Obter número de colaboradores por loja (para todas as lojas)
+ */
+export async function getColaboradoresCountByLoja(): Promise<Map<number, number>> {
+  const db = await getDb();
+  if (!db) return new Map();
+  
+  const result = await db.select({
+    lojaId: colaboradores.lojaId,
+    count: sql<number>`count(*)`
+  })
+    .from(colaboradores)
+    .where(and(
+      eq(colaboradores.ativo, true),
+      eq(colaboradores.isVolante, false)
+    ))
+    .groupBy(colaboradores.lojaId);
+  
+  const map = new Map<number, number>();
+  for (const row of result) {
+    if (row.lojaId) {
+      map.set(row.lojaId, row.count);
+    }
+  }
+  return map;
+}
+
+/**
+ * Obter todas as lojas com contagem de colaboradores
+ */
+export async function getLojasComColaboradores(): Promise<Array<Loja & { numColaboradores: number }>> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const lojasResult = await db.select().from(lojas).orderBy(lojas.nome);
+  const countMap = await getColaboradoresCountByLoja();
+  
+  return lojasResult.map(loja => ({
+    ...loja,
+    numColaboradores: countMap.get(loja.id) || 0
+  }));
+}
+
+/**
+ * Contar volantes ativos de um gestor
+ */
+export async function countVolantesAtivosByGestor(gestorId: number): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  
+  const result = await db.select({ count: sql<number>`count(*)` })
+    .from(colaboradores)
+    .where(and(
+      eq(colaboradores.gestorId, gestorId),
+      eq(colaboradores.isVolante, true),
+      eq(colaboradores.ativo, true)
+    ));
+  
+  return result[0]?.count || 0;
 }

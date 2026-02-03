@@ -3994,3 +3994,22 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Incluir tabela de serviços ligeiros, pesados, calibração, QIV e vendas complementares
 - [x] Permitir simulação de comissões com base nos dados da loja
 - [x] Testar o chatbot do Portal da Loja com cenários de cálculo
+
+
+## v4.18 - Gestão de Colaboradores por Loja
+- [ ] Criar tabela de colaboradores na base de dados (nome, código, lojaId)
+- [ ] Criar procedures tRPC para CRUD de colaboradores
+- [ ] Criar interface de gestão de colaboradores no dashboard (por loja)
+- [ ] Mostrar número de colaboradores na lista de lojas
+- [ ] Integrar colaboradores no cálculo de FTE para comissões
+- [ ] Testar funcionalidade completa
+
+
+## v4.18 - Sistema RH - Gestão de Colaboradores
+- [x] Atualizar schema: lojaId opcional (null para volantes), adicionar campo gestorId para volantes
+- [x] Criar página RH no menu lateral (junto às Lojas)
+- [x] Formulário de criação: Nome, Código, Loja OU Volante (zona do gestor)
+- [x] Listar colaboradores com filtro por loja/volante
+- [x] Mostrar colaboradores na página de Lojas (coluna com contagem)
+- [x] Volantes associados à zona do gestor (não a uma loja específica)
+- [ ] Integrar número de colaboradores no cálculo de FTE para comissões (próxima fase)

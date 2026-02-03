@@ -48,6 +48,7 @@ import RelacoesLojas from "./pages/RelacoesLojas";
 import Volantes from "./pages/Volantes";
 import PortalGestor from "./pages/PortalGestor";
 import AnaliseFichas from "./pages/AnaliseFichas";
+import RH from "./pages/RH";
 import MenuInicial from "./pages/MenuInicial";
 import { DemoBanner } from "./components/DemoBanner";
 import { LanguageProvider } from "./contexts/LanguageContext";
@@ -63,6 +64,7 @@ function Router() {
       
       {/* Admin routes */}
       <Route path={"/lojas"} component={Lojas} />
+      <Route path={"/rh"} component={RH} />
       <Route path={"/gestores"} component={Gestores} />
       <Route path={"/utilizadores"} component={GestaoUtilizadores} />
       <Route path={"/relatorios"} component={Relatorios} />
