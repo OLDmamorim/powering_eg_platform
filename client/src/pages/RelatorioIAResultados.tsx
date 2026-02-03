@@ -42,6 +42,13 @@ export function RelatorioIAResultados() {
   const [zonasSeleccionadas, setZonasSeleccionadas] = useState<string[]>([]);
   const [gestorSeleccionado, setGestorSeleccionado] = useState<number | undefined>(undefined);
   
+  // Estado para âmbito do relatório (visível para todos)
+  // 'nacional' = todas as lojas, 'minhas' = apenas lojas do gestor, 'loja' = loja específica
+  const [ambitoRelatorio, setAmbitoRelatorio] = useState<'nacional' | 'minhas' | 'loja'>(
+    user?.role === 'admin' ? 'nacional' : 'minhas'
+  );
+  const [lojaEspecificaId, setLojaEspecificaId] = useState<number | undefined>(undefined);
+  
   // Estados para secções colapsáveis
   const [seccoesAbertas, setSeccoesAbertas] = useState({
     resumoExecutivo: true,
@@ -103,11 +110,23 @@ export function RelatorioIAResultados() {
     enabled: !isAdmin, // Apenas para gestores
   });
   
+  // Query para obter todas as lojas (para filtro "Loja Específica")
+  const { data: todasLojas } = trpc.lojas.list.useQuery();
+  
   // Query para obter lojas do gestor selecionado (para admin filtrar por gestor na análise loja a loja)
   const { data: lojasDoGestorSelecionado } = trpc.gestores.getLojas.useQuery(
     { gestorId: gestorFiltroLojas! },
     { enabled: isAdmin && filtroAnaliseLojas === 'gestor' && !!gestorFiltroLojas }
   );
+  
+  // Obter lista de lojas disponíveis para o filtro "Loja Específica"
+  // Gestores veem apenas suas lojas, Admins veem todas
+  const lojasDisponiveis = useMemo(() => {
+    if (isAdmin) {
+      return todasLojas || [];
+    }
+    return minhasLojas || [];
+  }, [isAdmin, todasLojas, minhasLojas]);
   
   // Construir parâmetros da query baseado nos filtros
   const queryParams = useMemo(() => {
@@ -119,13 +138,21 @@ export function RelatorioIAResultados() {
       filtro?: 'pais' | 'zona' | 'gestor';
       zonasIds?: string[];
       gestorIdFiltro?: number;
+      lojaIdFiltro?: number;
+      ambitoRelatorio?: 'nacional' | 'minhas' | 'loja';
       dataInicio?: Date;
       dataFim?: Date;
     } = {
       periodo: `meses_${mesesSelecionados.map(m => `${m.mes}/${m.ano}`).join(', ')}`,
       dataInicio: datas?.dataInicio,
       dataFim: datas?.dataFim,
+      ambitoRelatorio: ambitoRelatorio,
     };
+    
+    // Adicionar filtro de loja específica se selecionado
+    if (ambitoRelatorio === 'loja' && lojaEspecificaId) {
+      params.lojaIdFiltro = lojaEspecificaId;
+    }
     
     if (isAdmin) {
       params.filtro = tipoFiltro;
@@ -137,7 +164,7 @@ export function RelatorioIAResultados() {
     }
     
     return params;
-  }, [mesesSelecionados, tipoFiltro, zonasSeleccionadas, gestorSeleccionado, isAdmin]);
+  }, [mesesSelecionados, tipoFiltro, zonasSeleccionadas, gestorSeleccionado, isAdmin, ambitoRelatorio, lojaEspecificaId]);
   
   // Query para Relatório IA
   const { data: analiseIA, isLoading: loadingAnaliseIA, refetch: refetchAnaliseIA } = trpc.relatoriosIA.gerar.useQuery(
@@ -146,7 +173,13 @@ export function RelatorioIAResultados() {
   );
 
   const handleGerarRelatorio = async () => {
-    // Validar filtros
+    // Validar filtro de âmbito
+    if (ambitoRelatorio === 'loja' && !lojaEspecificaId) {
+      toast.error(language === 'pt' ? 'Selecione uma loja' : 'Select a store');
+      return;
+    }
+    
+    // Validar filtros de admin
     if (isAdmin) {
       if (tipoFiltro === 'zona' && zonasSeleccionadas.length === 0) {
         toast.error(t('relatorioIA.selecionePeloMenosUmaZona') || 'Selecione pelo menos uma zona');
@@ -189,18 +222,30 @@ export function RelatorioIAResultados() {
   
   const { t, language } = useLanguage();
   
-  // Obter label do filtro actual
+  // Obter label do filtro actual (baseado no âmbito)
   const getFiltroLabel = () => {
-    if (!isAdmin) return t('relatorioIA.minhasLojas') || 'Minhas Lojas';
-    if (tipoFiltro === 'pais') return t('relatorioIA.todoOPais') || 'Todo o País';
-    if (tipoFiltro === 'zona') {
-      if (zonasSeleccionadas.length === 0) return t('relatorioIA.selecioneZonas') || 'Selecione zona(s)';
-      if (zonasSeleccionadas.length === 1) return `${t('relatorioIA.zona') || 'Zona'}: ${zonasSeleccionadas[0]}`;
-      return `${zonasSeleccionadas.length} ${t('relatorioIA.zonasSelecionadas') || 'zonas selecionadas'}`;
+    // Primeiro, verificar o âmbito do relatório
+    if (ambitoRelatorio === 'loja' && lojaEspecificaId) {
+      const loja = lojasDisponiveis.find(l => l.id === lojaEspecificaId);
+      return loja ? `Loja: ${loja.nome}` : 'Loja Específica';
     }
-    if (tipoFiltro === 'gestor') {
-      const gestor = gestores?.find(g => g.id === gestorSeleccionado);
-      return gestor ? `${t('relatorioIA.gestor') || 'Gestor'}: ${gestor.nome}` : t('relatorioIA.selecioneGestor') || 'Selecione gestor';
+    if (ambitoRelatorio === 'minhas') {
+      return language === 'pt' ? 'Minhas Lojas' : 'My Stores';
+    }
+    if (ambitoRelatorio === 'nacional') {
+      // Se admin, pode ter filtros adicionais
+      if (isAdmin) {
+        if (tipoFiltro === 'zona') {
+          if (zonasSeleccionadas.length === 0) return t('relatorioIA.selecioneZonas') || 'Selecione zona(s)';
+          if (zonasSeleccionadas.length === 1) return `${t('relatorioIA.zona') || 'Zona'}: ${zonasSeleccionadas[0]}`;
+          return `${zonasSeleccionadas.length} ${t('relatorioIA.zonasSelecionadas') || 'zonas selecionadas'}`;
+        }
+        if (tipoFiltro === 'gestor') {
+          const gestor = gestores?.find(g => g.id === gestorSeleccionado);
+          return gestor ? `${t('relatorioIA.gestor') || 'Gestor'}: ${gestor.nome}` : t('relatorioIA.selecioneGestor') || 'Selecione gestor';
+        }
+      }
+      return language === 'pt' ? 'Nacional' : 'National';
     }
     return '';
   };
@@ -255,6 +300,66 @@ export function RelatorioIAResultados() {
               
               {/* Filtros */}
               <div className="flex flex-wrap items-end gap-3">
+                {/* Âmbito do Relatório */}
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                    <Globe className="h-3 w-3" />
+                    {language === 'pt' ? 'Âmbito' : 'Scope'}
+                  </label>
+                  <Select value={ambitoRelatorio} onValueChange={(v) => {
+                    setAmbitoRelatorio(v as typeof ambitoRelatorio);
+                    if (v !== 'loja') setLojaEspecificaId(undefined);
+                  }}>
+                    <SelectTrigger className="w-[160px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="nacional">
+                        <div className="flex items-center gap-2">
+                          <Globe className="h-4 w-4" />
+                          {language === 'pt' ? 'Nacional' : 'National'}
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="minhas">
+                        <div className="flex items-center gap-2">
+                          <Building2 className="h-4 w-4" />
+                          {language === 'pt' ? 'Minhas Lojas' : 'My Stores'}
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="loja">
+                        <div className="flex items-center gap-2">
+                          <Store className="h-4 w-4" />
+                          {language === 'pt' ? 'Loja Específica' : 'Specific Store'}
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                {/* Seleção de Loja Específica */}
+                {ambitoRelatorio === 'loja' && (
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-muted-foreground">
+                      {language === 'pt' ? 'Loja' : 'Store'}
+                    </label>
+                    <Select 
+                      value={lojaEspecificaId?.toString() || ''} 
+                      onValueChange={(v) => setLojaEspecificaId(v ? parseInt(v) : undefined)}
+                    >
+                      <SelectTrigger className="w-[200px]">
+                        <SelectValue placeholder={language === 'pt' ? 'Selecione a loja' : 'Select store'} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {lojasDisponiveis.map((loja) => (
+                          <SelectItem key={loja.id} value={loja.id.toString()}>
+                            {loja.nome}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+                
                 {/* Período */}
                 <div className="space-y-1">
                   <label className="text-xs font-medium text-muted-foreground">{t('common.periodo')} ({language === 'pt' ? 'selecione meses' : 'select months'})</label>

@@ -2131,6 +2131,8 @@ IMPORTANTE:
         zonaId: z.string().optional(),
         zonasIds: z.array(z.string()).optional(), // Novo: múltiplas zonas
         gestorIdFiltro: z.number().optional(),
+        lojaIdFiltro: z.number().optional(), // Novo: filtrar por loja específica
+        ambitoRelatorio: z.enum(["nacional", "minhas", "loja"]).optional().default("minhas"), // Novo: âmbito do relatório
         dataInicio: z.date().optional(), // Novo: data de início do período
         dataFim: z.date().optional(), // Novo: data de fim do período
       }))
@@ -2140,17 +2142,28 @@ IMPORTANTE:
         let lojasIds: number[] | undefined;
         let filtroDescricao = "Todo o País";
         
-        if (ctx.user.role !== "admin") {
-          // Gestores usam análise de RESULTADOS das suas lojas (não relatórios/pendentes)
+        // Primeiro, verificar o âmbito do relatório
+        if (input.ambitoRelatorio === 'loja' && input.lojaIdFiltro) {
+          // Filtrar por loja específica
+          lojasIds = [input.lojaIdFiltro];
+          const lojaInfo = await db.getLojaById(input.lojaIdFiltro);
+          filtroDescricao = `Loja: ${lojaInfo?.nome || 'N/A'}`;
+        } else if (input.ambitoRelatorio === 'minhas' || ctx.user.role !== "admin") {
+          // Filtrar pelas lojas do gestor
           gestorId = ctx.gestor?.id;
           if (gestorId) {
-            // Buscar lojas do gestor para filtrar resultados
             const lojasDoGestor = await db.getLojasByGestorId(gestorId);
             lojasIds = lojasDoGestor.map(l => l.id);
             filtroDescricao = "Minhas Lojas";
-            // Continua para usar gerarRelatorioComIA com filtro de lojas
           }
-        } else {
+        } else if (input.ambitoRelatorio === 'nacional') {
+          // Nacional - mostrar todas as lojas (sem filtro de gestor)
+          lojasIds = undefined;
+          filtroDescricao = "Nacional";
+        }
+        
+        // Se admin e âmbito nacional, aplicar filtros adicionais de admin
+        if (ctx.user.role === "admin" && input.ambitoRelatorio === 'nacional') {
           // Admin pode filtrar
           if (input.filtro === "gestor" && input.gestorIdFiltro) {
             // Filtrar por gestor específico

@@ -4052,3 +4052,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar DashboardLayout à página RH (menu lateral/botão voltar)
 - [x] Adicionar número de colaboradores nos cards da página MinhasLojas
 - [x] Corrigir função getLojasByGestorId para retornar numColaboradores
+
+
+## v4.23 - Filtro de Âmbito no Relatório IA de Resultados
+- [x] Adicionar filtro de âmbito antes do período (Nacional/Minhas Lojas/Loja Específica)
+- [x] Para "Loja Específica", mostrar dropdown com lojas disponíveis
+- [x] Filtrar dados do relatório conforme âmbito selecionado
+- [x] Manter compatibilidade com roles (gestor vê só suas lojas, admin vê todas)
