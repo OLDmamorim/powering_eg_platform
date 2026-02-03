@@ -1,0 +1,17 @@
+{
+  "query": "SELECT mes, ano, COUNT(*) as total_lojas, SUM(totalServicos) as soma_servicos, AVG(taxaReparacao) as media_taxa FROM resultados_mensais WHERE mes = 1 AND ano = 2026 GROUP BY mes, ano;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT mes, ano, COUNT(*) as total_lojas, SUM(totalServicos) as soma_servicos, AVG(taxaReparacao) as media_taxa FROM resultados_mensais WHERE mes = 1 AND ano = 2026 GROUP BY mes, ano;",
+  "rows": [
+    {
+      "mes": "1",
+      "ano": "2026",
+      "total_lojas": "70",
+      "soma_servicos": "5230",
+      "media_taxa": "0.23626143"
+    }
+  ],
+  "messages": [],
+  "stdout": "mes\tano\ttotal_lojas\tsoma_servicos\tmedia_taxa\n1\t2026\t70\t5230\t0.23626143\n",
+  "stderr": "",
+  "execution_time_ms": 52
+}

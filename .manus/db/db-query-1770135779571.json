@@ -1,0 +1,40 @@
+{
+  "query": "SELECT rm.lojaId, l.nome as lojaNome, rm.taxaReparacao, rm.totalServicos FROM resultados_mensais rm INNER JOIN lojas l ON rm.lojaId = l.id WHERE rm.mes = 1 AND rm.ano = 2026 AND rm.taxaReparacao IS NOT NULL ORDER BY rm.taxaReparacao DESC LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT rm.lojaId, l.nome as lojaNome, rm.taxaReparacao, rm.totalServicos FROM resultados_mensais rm INNER JOIN lojas l ON rm.lojaId = l.id WHERE rm.mes = 1 AND rm.ano = 2026 AND rm.taxaReparacao IS NOT NULL ORDER BY rm.taxaReparacao DESC LIMIT 5;",
+  "rows": [
+    {
+      "lojaId": "60005",
+      "lojaNome": "Póvoa de Varzim",
+      "taxaReparacao": "0.5283",
+      "totalServicos": "70"
+    },
+    {
+      "lojaId": "180049",
+      "lojaNome": "Santarém",
+      "taxaReparacao": "0.5068",
+      "totalServicos": "101"
+    },
+    {
+      "lojaId": "180056",
+      "lojaNome": "Vale do tejo sm",
+      "taxaReparacao": "0.5000",
+      "totalServicos": "81"
+    },
+    {
+      "lojaId": "180046",
+      "lojaNome": "Rotunda do relógio",
+      "taxaReparacao": "0.4921",
+      "totalServicos": "86"
+    },
+    {
+      "lojaId": "60001",
+      "lojaNome": "Famalicão",
+      "taxaReparacao": "0.4752",
+      "totalServicos": "140"
+    }
+  ],
+  "messages": [],
+  "stdout": "lojaId\tlojaNome\ttaxaReparacao\ttotalServicos\n60005\tPóvoa de Varzim\t0.5283\t70\n180049\tSantarém\t0.5068\t101\n180056\tVale do tejo sm\t0.5000\t81\n180046\tRotunda do relógio\t0.4921\t86\n60001\tFamalicão\t0.4752\t140\n",
+  "stderr": "",
+  "execution_time_ms": 61
+}

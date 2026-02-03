@@ -1,0 +1,8 @@
+{
+  "query": "SELECT mes, ano, COUNT(*) as total_lojas, SUM(total_servicos) as total_servicos, AVG(taxa_reparacao) as media_taxa_reparacao FROM resultados_mensais WHERE mes = 1 AND ano = 2026 GROUP BY mes, ano;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT mes, ano, COUNT(*) as total_lojas, SUM(total_servicos) as total_servicos, AVG(taxa_reparacao) as media_taxa_reparacao FROM resultados_mensais WHERE mes = 1 AND ano = 2026 GROUP BY mes, ano;",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 'total_servicos' in 'where clause'"
+  ]
+}

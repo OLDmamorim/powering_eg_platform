@@ -4030,3 +4030,12 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [ ] Análise IA focada apenas em resultados de serviços
 - [ ] Comparação com mês anterior (tendências)
 - [ ] Testar funcionalidade completa
+
+
+## v4.20 - Corrigir Relatório IA de Resultados - Usar Dados Reais
+- [x] Corrigir função de geração para usar dados de resultados reais (5230 serviços, 23.63% reparação, €11126 vendas)
+- [x] Preencher rankings TOP 5 e BOTTOM 5 com dados reais das lojas (Movida +102.50%, Sacavém +73.84%, etc.)
+- [x] Mostrar KPIs e gráficos com valores corretos (70 lojas, 62.9% cumprimento)
+- [x] Gerar análise IA baseada nos dados reais de resultados
+- [x] Garantir que gestores veem os mesmos dados que a página de Resultados (filtrados pelas suas lojas)
+- [x] Corrigir parsing do período meses_X/YYYY para interpretar corretamente o mês selecionado

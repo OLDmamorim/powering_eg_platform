@@ -321,6 +321,21 @@ export async function gerarRelatorioComIA(
     for (let i = 1; i <= 12; i++) {
       mesesParaBuscar.push({ mes: i, ano: anoAnterior });
     }
+  } else if (periodo.startsWith('meses_')) {
+    // Formato personalizado: meses_1/2026 ou meses_1/2026_2/2026
+    const partes = periodo.replace('meses_', '').split('_');
+    for (const parte of partes) {
+      const [mesStr, anoStr] = parte.split('/');
+      const mes = parseInt(mesStr, 10);
+      const ano = parseInt(anoStr, 10);
+      if (!isNaN(mes) && !isNaN(ano) && mes >= 1 && mes <= 12) {
+        mesesParaBuscar.push({ mes, ano });
+      }
+    }
+    // Se não conseguiu parsear nenhum mês, usar mês atual como fallback
+    if (mesesParaBuscar.length === 0) {
+      mesesParaBuscar.push({ mes: agora.getMonth() + 1, ano: agora.getFullYear() });
+    }
   } else {
     // Fallback para mês atual
     mesesParaBuscar.push({ mes: agora.getMonth() + 1, ano: agora.getFullYear() });
