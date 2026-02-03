@@ -17,6 +17,7 @@ import { processarPergunta, getSugestoesPergunta } from "./chatbotService";
 import { vapidPublicKey, notificarGestorNovaTarefa, notificarLojaNovaTarefa, notificarGestorRespostaLoja, notificarLojaRespostaGestor } from "./pushService";
 import { notificarNovoPedidoApoio, notificarPedidoAnulado, notificarPedidoEditado, notificarAgendamentoCriado } from "./telegramService";
 import { processarAnalise, ResultadoAnalise, RelatorioLoja, gerarHTMLEmailAnalise } from "./analiseFichasService";
+import { gerarPDFRelacaoRH } from "./pdfRelacaoRH";
 
 // Função auxiliar para gerar alerta de processos repetidos
 // diasDesdeIdentificacao: número de dias desde a primeira identificação do processo
@@ -1501,14 +1502,36 @@ IMPORTANTE:
         
         const gestorNome = ctx.user.name || 'Gestor';
         const mes = new Date().toLocaleDateString('pt-PT', { month: 'long', year: 'numeric' });
+        const mesCapitalizado = mes.charAt(0).toUpperCase() + mes.slice(1);
         const totalColaboradores = colaboradoresPorLoja.reduce((acc, l) => acc + l.colaboradores.length, 0) + volantes.length + recalbrasList.length;
         
-        // Gerar HTML do email
-        const cargoNomes: Record<string, string> = {
-          'responsavel_loja': 'Responsável de Loja',
-          'tecnico': 'Técnico',
-          'administrativo': 'Administrativo'
-        };
+        // Gerar PDF da relação de colaboradores
+        const pdfBuffer = await gerarPDFRelacaoRH({
+          gestorNome,
+          mes,
+          totalColaboradores,
+          colaboradoresPorLoja,
+          volantes: volantes.map(v => ({
+            nome: v.nome,
+            codigoColaborador: v.codigoColaborador,
+            cargo: v.cargo,
+            tipo: v.tipo
+          })),
+          recalbras: recalbrasList.map(r => ({
+            nome: r.nome,
+            codigoColaborador: r.codigoColaborador,
+            cargo: r.cargo,
+            tipo: r.tipo
+          })),
+          observacoes: input?.observacoes
+        });
+        
+        // Gerar HTML do email (texto de introdução simples)
+        const dataEnvio = new Date().toLocaleDateString('pt-PT', { 
+          day: '2-digit', 
+          month: 'long', 
+          year: 'numeric'
+        });
         
         const html = `
 <!DOCTYPE html>
@@ -1516,136 +1539,73 @@ IMPORTANTE:
 <head>
   <meta charset="UTF-8">
   <style>
-    body { font-family: Arial, sans-serif; margin: 40px; color: #333; line-height: 1.5; }
-    .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #10b981; padding-bottom: 20px; }
-    .logo { font-size: 24px; font-weight: bold; color: #10b981; }
-    .title { font-size: 20px; margin-top: 10px; }
-    .info-box { background: #f3f4f6; padding: 15px; border-radius: 8px; margin-bottom: 25px; }
-    .info-row { margin-bottom: 8px; }
-    .info-label { font-weight: bold; }
-    .section { margin-bottom: 25px; }
-    .section-title { font-size: 16px; font-weight: bold; color: #10b981; margin-bottom: 10px; border-bottom: 1px solid #e5e7eb; padding-bottom: 5px; }
-    table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-    th { background: #10b981; color: white; padding: 10px; text-align: left; }
-    td { padding: 10px; border-bottom: 1px solid #e5e7eb; }
-    tr:nth-child(even) { background: #f9fafb; }
-    .loja-header { background: #f3f4f6; padding: 10px; font-weight: bold; margin-top: 20px; margin-bottom: 10px; border-radius: 6px; }
-    .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 12px; }
-    .badge-volante { background: #dbeafe; color: #1d4ed8; }
-    .badge-recalbra { background: #fed7aa; color: #c2410c; }
-    .footer { margin-top: 40px; text-align: center; font-size: 12px; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 20px; }
-    .observacoes { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin-top: 20px; border-radius: 0 8px 8px 0; }
+    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; color: #333; line-height: 1.6; }
+    .container { max-width: 600px; margin: 0 auto; }
+    .header { text-align: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #059669; }
+    .logo { font-size: 24px; font-weight: bold; color: #059669; }
+    .content { padding: 20px 0; }
+    .info-box { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 20px; margin: 20px 0; }
+    .info-row { margin-bottom: 10px; }
+    .info-label { font-weight: bold; color: #166534; }
+    .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; text-align: center; font-size: 12px; color: #6b7280; }
+    .attachment-note { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0; border-radius: 0 8px 8px 0; }
   </style>
 </head>
 <body>
-  <div class="header">
-    <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663088836799/YrkmGCRDVqYgFnZO.png" alt="ExpressGlass" style="max-width: 200px; height: auto; margin-bottom: 10px;" />
-    <div class="logo">PoweringEG Platform</div>
-    <div class="title">Relação de Colaboradores - ${mes}</div>
-  </div>
-  
-  <div class="info-box">
-    <div class="info-row"><span class="info-label">Gestor:</span> ${gestorNome}</div>
-    <div class="info-row"><span class="info-label">Zona:</span> ${lojasGestor.map(l => l.nome).join(', ')}</div>
-    <div class="info-row"><span class="info-label">Total de Colaboradores:</span> ${totalColaboradores}</div>
-    <div class="info-row"><span class="info-label">Data de Envio:</span> ${new Date().toLocaleDateString('pt-PT', { day: '2-digit', month: 'long', year: 'numeric' })} às ${new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })}</div>
-  </div>
-  
-  ${colaboradoresPorLoja.map(({ loja, colaboradores }) => `
-    <div class="section">
-      <div class="loja-header">🏪 ${loja.nome}${loja.numeroLoja ? ` (Loja ${loja.numeroLoja})` : ''}</div>
-      ${colaboradores.length > 0 ? `
-        <table>
-          <thead>
-            <tr>
-              <th>Nome</th>
-              <th>Código</th>
-              <th>Cargo</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${colaboradores.map(c => `
-              <tr>
-                <td>${c.nome}</td>
-                <td>${c.codigoColaborador || '-'}</td>
-                <td>${cargoNomes[c.cargo] || c.cargo}</td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-      ` : '<p style="color: #9ca3af; font-style: italic;">Sem colaboradores registados nesta loja</p>'}
+  <div class="container">
+    <div class="header">
+      <div class="logo">EXPRESSGLASS</div>
+      <p style="margin: 10px 0 0 0; color: #6b7280;">PoweringEG Platform</p>
     </div>
-  `).join('')}
-  
-  ${volantes.length > 0 ? `
-    <div class="section">
-      <div class="section-title">🚗 Volantes da Zona</div>
-      <table>
-        <thead>
-          <tr>
-            <th>Nome</th>
-            <th>Código</th>
-            <th>Cargo</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${volantes.map(v => `
-            <tr>
-              <td>${v.nome} <span class="badge badge-volante">Volante</span></td>
-              <td>${v.codigoColaborador || '-'}</td>
-              <td>${cargoNomes[v.cargo] || v.cargo}</td>
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>
+    
+    <div class="content">
+      <p>Exmos. Senhores,</p>
+      
+      <p>Serve o presente email para enviar a <strong>Relação de Colaboradores</strong> referente ao mês de <strong>${mesCapitalizado}</strong>.</p>
+      
+      <div class="info-box">
+        <div class="info-row"><span class="info-label">Gestor:</span> ${gestorNome}</div>
+        <div class="info-row"><span class="info-label">Total de Colaboradores:</span> ${totalColaboradores}</div>
+        <div class="info-row"><span class="info-label">Data de Envio:</span> ${dataEnvio}</div>
+      </div>
+      
+      <div class="attachment-note">
+        <strong>📎 Anexo:</strong> Em anexo segue o ficheiro PDF com a relação completa de colaboradores.
+      </div>
+      
+      ${input?.observacoes ? `
+      <p><strong>Observações:</strong></p>
+      <p style="background: #f9fafb; padding: 15px; border-radius: 8px;">${input.observacoes}</p>
+      ` : ''}
+      
+      <p>Com os melhores cumprimentos,</p>
+      <p><strong>${gestorNome}</strong><br>
+      Gestor de Zona</p>
     </div>
-  ` : ''}
-  
-  ${recalbrasList.length > 0 ? `
-    <div class="section">
-      <div class="section-title">🔧 Recalbra</div>
-      <table>
-        <thead>
-          <tr>
-            <th>Nome</th>
-            <th>Código</th>
-            <th>Cargo</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${recalbrasList.map(r => `
-            <tr>
-              <td>${r.nome} <span class="badge badge-recalbra">Recalbra</span></td>
-              <td>${r.codigoColaborador || '-'}</td>
-              <td>${cargoNomes[r.cargo] || r.cargo}</td>
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>
+    
+    <div class="footer">
+      Este email foi enviado automaticamente através da plataforma PoweringEG.<br>
+      ExpressGlass - Especialistas em Vidro Automóvel
     </div>
-  ` : ''}
-  
-  ${input?.observacoes ? `
-    <div class="observacoes">
-      <strong>📝 Observações do Gestor:</strong><br>
-      ${input.observacoes}
-    </div>
-  ` : ''}
-  
-  <div class="footer">
-    Relação enviada por <strong>${gestorNome}</strong> via PoweringEG Platform<br>
-    ${new Date().toLocaleDateString('pt-PT')} às ${new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })}
   </div>
 </body>
 </html>
         `;
         
-        // Enviar email para RH (temporariamente para mamorim@expressglass.pt para testes)
+        // Nome do ficheiro PDF
+        const nomeArquivo = `Relacao_Colaboradores_${gestorNome.replace(/\s+/g, '_')}_${mesCapitalizado.replace(/\s+/g, '_')}.pdf`;
+        
+        // Enviar email para RH com PDF em anexo
         const emailDestino = 'mamorim@expressglass.pt'; // TODO: Alterar para recursoshumanos@expressglass.pt após testes
         const enviado = await sendEmail({
           to: emailDestino,
-          subject: `Relação de Colaboradores - ${gestorNome} - ${mes}`,
-          html
+          subject: `Relação de Colaboradores - ${gestorNome} - ${mesCapitalizado}`,
+          html,
+          attachments: [{
+            filename: nomeArquivo,
+            content: pdfBuffer.toString('base64'),
+            contentType: 'application/pdf'
+          }]
         });
         
         if (!enviado) {
@@ -1657,7 +1617,7 @@ IMPORTANTE:
         
         return { 
           success: true, 
-          message: `Relação de ${totalColaboradores} colaboradores enviada com sucesso para ${emailDestino}` 
+          message: `Relação de ${totalColaboradores} colaboradores enviada com sucesso para ${emailDestino} (PDF em anexo)` 
         };
       }),
     

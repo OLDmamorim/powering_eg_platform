@@ -4133,3 +4133,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 
 ## v4.31 - Correção Cards RH
 - [ ] Adicionar card de Recalbra nos estatísticas da página RH
+
+## v4.32 - Email RH com PDF em Anexo
+- [x] Alterar envio de email para incluir texto de introdução simples
+- [x] Gerar PDF da relação de colaboradores com PDFKit
+- [x] Enviar PDF como anexo no email
+- [x] Email com saudação formal e informações resumidas
+- [x] PDF com layout profissional organizado por lojas
