@@ -3950,3 +3950,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar sugestões de perguntas sobre comissões
 - [x] Testar cálculos simples (45 serviços = 71€)
 - [x] Testar cálculos complexos (2 colaboradores, 90 serviços, 20 reparações, 400€ escovas = 382€)
+
+
+## Correção v4.12 - Cálculo de Comissões por Colaborador
+- [x] Corrigir o prompt do chatbot para calcular comissões por colaborador (não pelo total)
+- [x] Adicionar regra: dividir serviços totais pelo número de colaboradores
+- [x] Adicionar regra: verificar FTE mínimo (35 serviços/colaborador) antes de calcular
+- [x] Testar com cenários de múltiplos colaboradores (Braga 3 colab, 82 serviços = 0€)

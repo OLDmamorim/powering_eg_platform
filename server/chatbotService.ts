@@ -872,9 +872,21 @@ Tens acesso a todos os dados da plataforma e podes responder a perguntas sobre:
 Período de carência: 2 meses para novos colaboradores.
 Não aplicável a trabalhadores em regime de Trabalho Temporário.
 
-**REGRA CRÍTICA:** Mínimo 35 serviços por colaborador para ter direito a prémios.
+**REGRA CRÍTICA - FTE (Full Time Equivalent):** 
+- O cálculo de comissões é SEMPRE por colaborador, NÃO pelo total de serviços da loja
+- Para calcular serviços por colaborador: Total de Serviços da Loja ÷ Número de Colaboradores
+- Mínimo 35 serviços por colaborador para ter direito a prémios
+- Se uma loja com 3 colaboradores fizer 82 serviços: 82 ÷ 3 = 27,3 serviços/colaborador → SEM DIREITO A PRÉMIO (< 35)
+- Se uma loja com 2 colaboradores fizer 82 serviços: 82 ÷ 2 = 41 serviços/colaborador → Com direito a prémio
 
-**1. COMISSÕES POR SERVIÇOS LIGEIROS (por colaborador):**
+**TABELA DE SERVIÇOS MÍNIMOS (FTE):**
+| Colaboradores | Serviços Mínimos Totais |
+| 1 | 35 |
+| 2 | 70 |
+| 3 | 105 |
+| 4 | 140 |
+
+**1. COMISSÕES POR SERVIÇOS LIGEIROS (por colaborador):
 - < 35 serviços: 0€
 - 35 serviços: 25€ (base)
 - 36-39 serviços: +3,5€ por serviço adicional
@@ -931,11 +943,23 @@ Faturas PP Pendentes:
 **PAGAMENTO:** Trimestral (ex: Jan-Fev-Mar pagos em Abril).
 
 **EXEMPLO DE CÁLCULO (1 colaborador, 45 serviços, 28% taxa reparação, 12 reparações, 5 pesados, 15 escovas a 150€):**
+- Serviços por colaborador: 45 ÷ 1 = 45 (>= 35, tem direito a prémio)
 - Serviços Ligeiros: 71€
 - Serviços Pesados: 5 x 15€ = 75€
 - Reparações (28% = 10€/rep): 12 x 10€ = 120€
 - Escovas (10%): 150€ x 10% = 15€
 - **TOTAL: 281€**
+
+**EXEMPLO COM MÚLTIPLOS COLABORADORES (Braga com 3 colaboradores, 82 serviços totais):**
+- Serviços por colaborador: 82 ÷ 3 = 27,3 serviços
+- Como 27,3 < 35, a loja NÃO TEM DIREITO A PRÉMIO de serviços ligeiros!
+- Comissão de Serviços Ligeiros: 0€
+
+**EXEMPLO COM 2 COLABORADORES (82 serviços totais):**
+- Serviços por colaborador: 82 ÷ 2 = 41 serviços
+- Como 41 >= 35, tem direito a prémio
+- Comissão por colaborador: 39€ + (41-39) × 5€ = 39€ + 10€ = 49€
+- **TOTAL para a loja (2 colaboradores): 49€ × 2 = 98€**
 
 USA ESTAS REGRAS PARA FAZER CÁLCULOS DE COMISSÕES QUANDO O UTILIZADOR PERGUNTAR.
 
