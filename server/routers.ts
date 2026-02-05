@@ -4245,6 +4245,67 @@ IMPORTANTE:
         return { success: true };
       }),
     
+    // Finalizar reunião completa: marcar tópicos + gerar relatório + libertar não discutidos
+    finalizarReuniaoCompleta: adminProcedure
+      .input(z.object({
+        reuniaoId: z.number(),
+        topicos: z.array(z.object({
+          id: z.number(),
+          discutido: z.boolean(),
+          resultadoDiscussao: z.string().optional(),
+        })),
+      }))
+      .mutation(async ({ input }) => {
+        // 1. Marcar tópicos como discutidos/não discutidos
+        for (const topico of input.topicos) {
+          if (topico.discutido) {
+            await db.marcarTopicoDiscutido(topico.id, topico.resultadoDiscussao);
+          } else {
+            await db.marcarTopicoNaoDiscutido(topico.id);
+          }
+        }
+        
+        // 2. Libertar automaticamente tópicos não discutidos (voltam a pendente)
+        await db.libertarTopicosNaoDiscutidos(input.reuniaoId);
+        
+        // 3. Gerar relatório com IA
+        const reuniao = await db.getReuniaoGestoresById(input.reuniaoId);
+        if (!reuniao) throw new TRPCError({ code: 'NOT_FOUND', message: 'Reunião não encontrada' });
+        
+        const topicos = await db.getTopicosReuniaoComGestor(input.reuniaoId);
+        const topicosDiscutidos = topicos.filter(t => t.estado === 'discutido');
+        
+        const { gerarRelatorioReuniaoComIA } = await import('./reuniaoService');
+        const relatorio = await gerarRelatorioReuniaoComIA(reuniao, topicosDiscutidos);
+        
+        // 4. Guardar relatório
+        const existente = await db.getRelatorioByReuniaoId(input.reuniaoId);
+        
+        if (existente) {
+          await db.updateRelatorioReuniao(existente.id, {
+            resumoExecutivo: relatorio.resumoExecutivo,
+            topicosDiscutidos: JSON.stringify(relatorio.topicosDiscutidos),
+            decisoesTomadas: relatorio.decisoesTomadas,
+            acoesDefinidas: JSON.stringify(relatorio.acoesDefinidas),
+          });
+        } else {
+          await db.createRelatorioReuniao({
+            reuniaoId: input.reuniaoId,
+            resumoExecutivo: relatorio.resumoExecutivo,
+            topicosDiscutidos: JSON.stringify(relatorio.topicosDiscutidos),
+            decisoesTomadas: relatorio.decisoesTomadas,
+            acoesDefinidas: JSON.stringify(relatorio.acoesDefinidas),
+          });
+        }
+        
+        return {
+          success: true,
+          relatorio,
+          topicosDiscutidosCount: topicosDiscutidos.length,
+          topicosLibertadosCount: input.topicos.filter(t => !t.discutido).length,
+        };
+      }),
+    
     // Gerar relatório da reunião com IA
     gerarRelatorioReuniao: adminProcedure
       .input(z.object({ reuniaoId: z.number() }))

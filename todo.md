@@ -4184,3 +4184,12 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Mostrar nome do gestor que criou cada tópico
 - [x] Bloquear edição/eliminação de tópicos de outros gestores
 - [x] Cards com cores diferentes (azul para próprios, cinza para outros)
+
+## v4.40 - Revisão Fluxo Reuniões de Gestores
+- [x] Analisar código atual das reuniões de gestores
+- [x] Verificar se há botões duplicados desnecessários
+- [x] Criar botão único "Finalizar Reunião" que unifica todo o fluxo
+- [x] Modal de finalização: perguntar se cada tópico foi discutido
+- [x] Gerar relatório automaticamente ao finalizar
+- [x] Libertar automaticamente tópicos não discutidos para próxima reunião
+- [x] Simplificar botões (Finalizar Reunião principal, Ver Relatório secundário)

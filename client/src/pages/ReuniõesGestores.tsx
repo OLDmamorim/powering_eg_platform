@@ -66,6 +66,7 @@ export default function ReuniõesGestores() {
   const finalizarTopicosMutation = trpc.reunioesGestores.finalizarTopicos.useMutation();
   const libertarTopicosMutation = trpc.reunioesGestores.libertarTopicosNaoDiscutidos.useMutation();
   const gerarRelatorioMutation = trpc.reunioesGestores.gerarRelatorioReuniao.useMutation();
+  const finalizarReuniaoCompletaMutation = trpc.reunioesGestores.finalizarReuniaoCompleta.useMutation();
   const criarPendentesMutation = trpc.reunioesGestores.criarPendentesDeAcoes.useMutation();
   const enviarRelatorioEmailMutation = trpc.reunioesGestores.enviarRelatorioEmail.useMutation();
   const utils = trpc.useUtils();
@@ -172,13 +173,23 @@ export default function ReuniõesGestores() {
     if (!reuniaoParaFinalizar) return;
     
     try {
-      await finalizarTopicosMutation.mutateAsync({
+      // Usar o novo endpoint que faz tudo de uma vez
+      const result = await finalizarReuniaoCompletaMutation.mutateAsync({
         reuniaoId: reuniaoParaFinalizar,
         topicos: topicosFinalizacao,
       });
       
-      toast.success(t('reunioesGestores.topicosFinalizados'));
+      const discutidos = result.topicosDiscutidosCount || 0;
+      const libertados = result.topicosLibertadosCount || 0;
+      
+      toast.success(
+        `Reunião finalizada! ${discutidos} tópico(s) discutido(s)${libertados > 0 ? `, ${libertados} libertado(s) para próxima reunião` : ''}`
+      );
+      
+      // Abrir modal de relatório automaticamente
+      setReuniaoRelatorio(reuniaoParaFinalizar);
       setModalFinalizarTopicos(false);
+      setModalRelatorio(true);
       setReuniaoParaFinalizar(null);
       refetch();
       refetchTopicos();
@@ -642,26 +653,31 @@ export default function ReuniõesGestores() {
                       {/* Ações (apenas admin) */}
                       {isAdmin && (
                         <div className="flex flex-wrap gap-2 pt-2 border-t">
+                          {/* Botão principal: Finalizar Reunião (faz tudo de uma vez) */}
                           <Button
-                            variant="outline"
+                            variant="default"
                             size="sm"
                             onClick={() => handleAbrirFinalizacao(reuniao.id)}
+                            disabled={finalizarReuniaoCompletaMutation.isPending}
                           >
-                            <ListChecks className="h-4 w-4 mr-2" />
-                            {t('reunioesGestores.finalizarTopicos')}
+                            {finalizarReuniaoCompletaMutation.isPending ? (
+                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            ) : (
+                              <ListChecks className="h-4 w-4 mr-2" />
+                            )}
+                            Finalizar Reunião
                           </Button>
+                          {/* Botões secundários */}
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => handleGerarRelatorio(reuniao.id)}
-                            disabled={gerandoRelatorio}
+                            onClick={() => {
+                              setReuniaoRelatorio(reuniao.id);
+                              setModalRelatorio(true);
+                            }}
                           >
-                            {gerandoRelatorio && reuniaoRelatorio === reuniao.id ? (
-                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                            ) : (
-                              <FileText className="h-4 w-4 mr-2" />
-                            )}
-                            {t('reunioesGestores.gerarRelatorio') || "Gerar Relatório"}
+                            <FileText className="h-4 w-4 mr-2" />
+                            Ver Relatório
                           </Button>
                           <Button
                             variant="outline"
@@ -706,13 +722,13 @@ export default function ReuniõesGestores() {
         </CardContent>
       </Card>
 
-      {/* Modal Finalizar Tópicos */}
+      {/* Modal Finalizar Reunião */}
       <Dialog open={modalFinalizarTopicos} onOpenChange={setModalFinalizarTopicos}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{t('reunioesGestores.finalizarTopicosTitle') || "Finalizar Tópicos da Reunião"}</DialogTitle>
+            <DialogTitle>Finalizar Reunião</DialogTitle>
             <DialogDescription>
-              {t('reunioesGestores.finalizarTopicosDesc') || "Marque quais tópicos foram efetivamente discutidos e adicione o resultado da discussão. Tópicos não discutidos serão libertados para a próxima reunião."}
+              Marque quais tópicos foram discutidos nesta reunião. Ao finalizar, o relatório será gerado automaticamente e os tópicos não discutidos voltarão para pendentes.
             </DialogDescription>
           </DialogHeader>
           
@@ -778,11 +794,11 @@ export default function ReuniõesGestores() {
             <Button variant="outline" onClick={() => setModalFinalizarTopicos(false)}>
               {t('common.cancelar')}
             </Button>
-            <Button onClick={handleFinalizarTopicos} disabled={finalizarTopicosMutation.isPending}>
-              {finalizarTopicosMutation.isPending && (
+            <Button onClick={handleFinalizarTopicos} disabled={finalizarReuniaoCompletaMutation.isPending}>
+              {finalizarReuniaoCompletaMutation.isPending && (
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
               )}
-              {t('reunioesGestores.finalizarTopicos')}
+              Finalizar e Gerar Relatório
             </Button>
           </DialogFooter>
         </DialogContent>
