@@ -476,7 +476,7 @@ export default function Dashboard() {
           {isAdmin ? (
             <Button onClick={() => setLocation('/relatorios-ia')} variant="outline" size="sm" className="gap-1.5 flex-1">
               <Sparkles className="h-4 w-4" />
-              <span className="text-xs">{language === 'pt' ? 'Relatórios IA' : 'AI Reports'}</span>
+              <span className="text-xs">{language === 'pt' ? 'Relatórios' : 'Reports'}</span>
             </Button>
           ) : (
             <Button onClick={gerarRelatorioMensal} variant="outline" size="sm" className="gap-1.5 flex-1">
@@ -537,7 +537,7 @@ export default function Dashboard() {
           <div className="hidden md:flex flex-col gap-2">
             {isAdmin ? (
               <Button onClick={() => setLocation('/relatorios-ia')} variant="outline" className="gap-2">
-                <Sparkles className="h-4 w-4" />{language === 'pt' ? 'Relatórios IA' : 'AI Reports'}
+                <Sparkles className="h-4 w-4" />{language === 'pt' ? 'Relatórios' : 'Reports'}
               </Button>
             ) : (
               <Button onClick={gerarRelatorioMensal} variant="outline" className="gap-2">
@@ -571,8 +571,8 @@ export default function Dashboard() {
           </Alert>
         )}
         
-        {/* Lembretes de Resumos Globais */}
-        <LembretesResumosGlobais isAdmin={isAdmin} isGestor={isGestor} setLocation={setLocation} />
+        {/* Lembretes de Resumos Globais - Removido a pedido do utilizador */}
+        {/* <LembretesResumosGlobais isAdmin={isAdmin} isGestor={isGestor} setLocation={setLocation} /> */}
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {isAdmin && (

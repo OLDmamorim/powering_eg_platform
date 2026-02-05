@@ -4208,3 +4208,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Ordem: Data → Presenças → Outros → Tópicos → Conteúdo → Tags → Anexos
 - [x] Manter apenas um botão "Criar Reunião" no final do formulário
 - [x] Tópicos pendentes só aparecem se existirem
+
+## v4.43 - Remover Aviso Resumo Global
+- [x] Remover aviso "Lembrete: Resumo Global Mês Anterior" do dashboard
+- [x] Corrigir botão "Relatórios IA" para "Relatórios"
