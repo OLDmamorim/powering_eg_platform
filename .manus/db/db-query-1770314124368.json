@@ -1,0 +1,186 @@
+{
+  "query": "SELECT t.id, t.titulo, t.estado, t.reuniaoId, r.data as dataReuniao, t.createdAt \nFROM topicos_reuniao_gestores t \nLEFT JOIN reunioes_gestores r ON t.reuniaoId = r.id \nWHERE t.estado IN ('analisado', 'pendente') \nORDER BY t.createdAt DESC;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT t.id, t.titulo, t.estado, t.reuniaoId, r.data as dataReuniao, t.createdAt \nFROM topicos_reuniao_gestores t \nLEFT JOIN reunioes_gestores r ON t.reuniaoId = r.id \nWHERE t.estado IN ('analisado', 'pendente') \nORDER BY t.createdAt DESC;",
+  "rows": [
+    {
+      "id": "390002",
+      "titulo": "Nps",
+      "estado": "pendente",
+      "reuniaoId": "NULL",
+      "dataReuniao": "NULL",
+      "createdAt": "2026-02-05 17:53:47"
+    },
+    {
+      "id": "390001",
+      "titulo": "Política comissionamento",
+      "estado": "pendente",
+      "reuniaoId": "NULL",
+      "dataReuniao": "NULL",
+      "createdAt": "2026-02-05 17:52:01"
+    },
+    {
+      "id": "360001",
+      "titulo": "Tópico Atualizado 1770140045975",
+      "estado": "pendente",
+      "reuniaoId": "NULL",
+      "dataReuniao": "NULL",
+      "createdAt": "2026-02-03 17:34:06"
+    },
+    {
+      "id": "330001",
+      "titulo": "Orçamentos 2026",
+      "estado": "analisado",
+      "reuniaoId": "60001",
+      "dataReuniao": "2026-01-27 00:00:00",
+      "createdAt": "2026-01-26 16:08:04"
+    },
+    {
+      "id": "300002",
+      "titulo": "Circular com o comissionamento de 2026",
+      "estado": "analisado",
+      "reuniaoId": "60001",
+      "dataReuniao": "2026-01-27 00:00:00",
+      "createdAt": "2026-01-26 12:29:54"
+    },
+    {
+      "id": "300001",
+      "titulo": "Rutura de stock fardamento",
+      "estado": "analisado",
+      "reuniaoId": "60001",
+      "dataReuniao": "2026-01-27 00:00:00",
+      "createdAt": "2026-01-26 12:25:19"
+    },
+    {
+      "id": "270001",
+      "titulo": "Stocks, dev #,",
+      "estado": "analisado",
+      "reuniaoId": "60001",
+      "dataReuniao": "2026-01-27 00:00:00",
+      "createdAt": "2026-01-26 08:57:13"
+    },
+    {
+      "id": "240002",
+      "titulo": "Novo orçamento 2026",
+      "estado": "analisado",
+      "reuniaoId": "60001",
+      "dataReuniao": "2026-01-27 00:00:00",
+      "createdAt": "2026-01-23 10:19:25"
+    },
+    {
+      "id": "210001",
+      "titulo": "Tópico Atualizado 1768866010406",
+      "estado": "pendente",
+      "reuniaoId": "NULL",
+      "dataReuniao": "NULL",
+      "createdAt": "2026-01-19 23:40:11"
+    },
+    {
+      "id": "180001",
+      "titulo": "Tópico Atualizado 1768859192335",
+      "estado": "pendente",
+      "reuniaoId": "NULL",
+      "dataReuniao": "NULL",
+      "createdAt": "2026-01-19 21:46:33"
+    },
+    {
+      "id": "150007",
+      "titulo": "Tópico Atualizado 1768779088977",
+      "estado": "pendente",
+      "reuniaoId": "NULL",
+      "dataReuniao": "NULL",
+      "createdAt": "2026-01-18 23:31:29"
+    },
+    {
+      "id": "150005",
+      "titulo": "Tópico Atualizado 1768779001728",
+      "estado": "pendente",
+      "reuniaoId": "NULL",
+      "dataReuniao": "NULL",
+      "createdAt": "2026-01-18 23:30:01"
+    },
+    {
+      "id": "150003",
+      "titulo": "Tópico Atualizado 1768778220144",
+      "estado": "pendente",
+      "reuniaoId": "NULL",
+      "dataReuniao": "NULL",
+      "createdAt": "2026-01-18 23:17:00"
+    },
+    {
+      "id": "150001",
+      "titulo": "Tópico Atualizado 1768778134594",
+      "estado": "pendente",
+      "reuniaoId": "NULL",
+      "dataReuniao": "NULL",
+      "createdAt": "2026-01-18 23:15:34"
+    },
+    {
+      "id": "120005",
+      "titulo": "Tópico Atualizado 1768775577066",
+      "estado": "pendente",
+      "reuniaoId": "NULL",
+      "dataReuniao": "NULL",
+      "createdAt": "2026-01-18 22:32:57"
+    },
+    {
+      "id": "120003",
+      "titulo": "Tópico Atualizado 1768775492300",
+      "estado": "pendente",
+      "reuniaoId": "NULL",
+      "dataReuniao": "NULL",
+      "createdAt": "2026-01-18 22:31:32"
+    },
+    {
+      "id": "120001",
+      "titulo": "Tópico Atualizado 1768775405407",
+      "estado": "pendente",
+      "reuniaoId": "NULL",
+      "dataReuniao": "NULL",
+      "createdAt": "2026-01-18 22:30:05"
+    },
+    {
+      "id": "90001",
+      "titulo": "Tópico Atualizado 1768085538232",
+      "estado": "pendente",
+      "reuniaoId": "NULL",
+      "dataReuniao": "NULL",
+      "createdAt": "2026-01-10 22:52:19"
+    },
+    {
+      "id": "60001",
+      "titulo": "Tópico Atualizado 1767997113467",
+      "estado": "pendente",
+      "reuniaoId": "NULL",
+      "dataReuniao": "NULL",
+      "createdAt": "2026-01-09 22:18:34"
+    },
+    {
+      "id": "30001",
+      "titulo": "Tópico Atualizado 1767981297265",
+      "estado": "pendente",
+      "reuniaoId": "NULL",
+      "dataReuniao": "NULL",
+      "createdAt": "2026-01-09 17:54:58"
+    },
+    {
+      "id": "3",
+      "titulo": "Tópico Atualizado 1767975904359",
+      "estado": "pendente",
+      "reuniaoId": "NULL",
+      "dataReuniao": "NULL",
+      "createdAt": "2026-01-09 16:25:05"
+    },
+    {
+      "id": "1",
+      "titulo": "Tópico Atualizado 1767975870406",
+      "estado": "pendente",
+      "reuniaoId": "NULL",
+      "dataReuniao": "NULL",
+      "createdAt": "2026-01-09 16:24:31"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitulo\testado\treuniaoId\tdataReuniao\tcreatedAt\n390002\tNps\tpendente\tNULL\tNULL\t2026-02-05 17:53:47\n390001\tPolítica comissionamento\tpendente\tNULL\tNULL\t2026-02-05 17:52:01\n360001\tTópico Atualizado 1770140045975\tpendente\tNULL\tNULL\t2026-02-03 17:34:06\n330001\tOrçamentos 2026\tanalisado\t60001\t2026-01-27 00:00:00\t2026-01-26 16:08:04\n300002\tCircular com o comissionamento de 2026\tanalisado\t60001\t2026-01-27 00:00:00\t2026-01-26 12:29:54\n300001\tRutura de stock fardamento\tanalisado\t60001\t2026-01-27 00:00:00\t2026-01-26 12:25:19\n270001\tStocks, dev #,\tanalisado\t60001\t2026-01-27 00:00:00\t2026-01-26 08:57:13\n240002\tNovo orçamento 2026\tanalisado\t60001\t2026-01-27 00:00:00\t2026-01-23 10:19:25\n210001\tTópico Atualizado 1768866010406\tpendente\tNULL\tNULL\t2026-01-19 23:40:11\n180001\tTópico Atualizado 1768859192335\tpendente\tNULL\tNULL\t2026-01-19 21:46:33\n150007\tTópico Atualizado 1768779088977\tpendente\tNULL\tNULL\t2026-01-18 23:31:29\n150005\tTópico Atualizado 1768779001728\tpendente\tNULL\tNULL\t2026-01-18 23:30:01\n150003\tTópico Atualizado 1768778220144\tpendente\tNULL\tNULL\t2026-01-18 23:17:00\n150001\tTópico Atualizado 1768778134594\tpendente\tNULL\tNULL\t2026-01-18 23:15:34\n120005\tTópico Atualizado 1768775577066\tpendente\tNULL\tNULL\t2026-01-18 22:32:57\n120003\tTópico Atualizado 1768775492300\tpendente\tNULL\tNULL\t2026-01-18 22:31:32\n120001\tTópico Atualizado 1768775405407\tpendente\tNULL\tNULL\t2026-01-18 22:30:05\n90001\tTópico Atualizado 1768085538232\tpendente\tNULL\tNULL\t2026-01-10 22:52:19\n60001\tTópico Atualizado 1767997113467\tpendente\tNULL\tNULL\t2026-01-09 22:18:34\n30001\tTópico Atualizado 1767981297265\tpendente\tNULL\tNULL\t2026-01-09 17:54:58\n3\tTópico Atualizado 1767975904359\tpendente\tNULL\tNULL\t2026-01-09 16:25:05\n1\tTópico Atualizado 1767975870406\tpendente\tNULL\tNULL\t2026-01-09 16:24:31\n",
+  "stderr": "",
+  "execution_time_ms": 64
+}

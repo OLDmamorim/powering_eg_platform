@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Loader2, Plus, Pencil, Trash2, MessageSquare, Clock, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, MessageSquare, Clock, CheckCircle2, XCircle, AlertCircle, User, Users } from "lucide-react";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import { toast } from "sonner";
@@ -30,6 +30,16 @@ export default function TopicosReuniao() {
   const criarMutation = trpc.reunioesGestores.criarTopico.useMutation();
   const atualizarMutation = trpc.reunioesGestores.atualizarTopico.useMutation();
   const eliminarMutation = trpc.reunioesGestores.eliminarTopico.useMutation();
+
+  // Separar tópicos próprios e de outros gestores
+  const { meusTopicos, outrosTopicos } = useMemo(() => {
+    if (!topicos) return { meusTopicos: [], outrosTopicos: [] };
+    
+    const meus = topicos.filter((t: any) => t.isOwner);
+    const outros = topicos.filter((t: any) => !t.isOwner);
+    
+    return { meusTopicos: meus, outrosTopicos: outros };
+  }, [topicos]);
 
   const handleSubmit = async () => {
     if (!titulo.trim()) {
@@ -96,6 +106,69 @@ export default function TopicosReuniao() {
     }
   };
 
+  const renderTopicoCard = (topico: any, canEdit: boolean) => (
+    <Card key={topico.id} className={`border-l-4 ${canEdit ? 'border-l-primary' : 'border-l-gray-300'}`}>
+      <CardContent className="pt-4">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-2">
+              <h3 className="font-semibold">{topico.titulo}</h3>
+              {getEstadoBadge(topico.estado)}
+            </div>
+            {topico.descricao && (
+              <p className="text-sm text-muted-foreground mb-2">
+                {topico.descricao}
+              </p>
+            )}
+            <div className="flex items-center gap-4 text-xs text-muted-foreground">
+              {topico.gestorNome && (
+                <span className="flex items-center gap-1">
+                  <User className="h-3 w-3" />
+                  <strong>{topico.gestorNome}</strong>
+                </span>
+              )}
+              <span>
+                {format(new Date(topico.createdAt), "dd/MM/yyyy 'às' HH:mm", { locale: pt })}
+              </span>
+            </div>
+            {topico.resultadoDiscussao && (
+              <div className="mt-3 p-3 bg-green-50 rounded-md border border-green-200">
+                <p className="text-sm font-medium text-green-800">Resultado da Discussão:</p>
+                <p className="text-sm text-green-700">{topico.resultadoDiscussao}</p>
+              </div>
+            )}
+            {topico.notasAdmin && (
+              <div className="mt-3 p-3 bg-blue-50 rounded-md border border-blue-200">
+                <p className="text-sm font-medium text-blue-800">Notas do Admin:</p>
+                <p className="text-sm text-blue-700">{topico.notasAdmin}</p>
+              </div>
+            )}
+          </div>
+          {/* Ações apenas para tópicos pendentes do próprio gestor */}
+          {canEdit && topico.estado === "pendente" && (
+            <div className="flex gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => handleEditar(topico)}
+              >
+                <Pencil className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-destructive hover:text-destructive"
+                onClick={() => setConfirmDelete(topico.id)}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+
   if (!user) return null;
 
   return (
@@ -134,7 +207,7 @@ export default function TopicosReuniao() {
                   <p className="text-sm text-blue-700 mt-1">
                     Submeta tópicos que gostaria de ver discutidos na próxima reunião de gestores. 
                     O administrador irá analisar os tópicos e incluí-los na agenda da reunião. 
-                    Após a reunião, será informado se o seu tópico foi discutido e qual foi o resultado.
+                    Pode ver os tópicos submetidos por outros gestores para evitar repetições.
                   </p>
                 </div>
               </div>
@@ -142,107 +215,83 @@ export default function TopicosReuniao() {
           </Card>
         )}
 
-        {/* Lista de Tópicos */}
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              {isAdmin ? "Tópicos Pendentes de Análise" : "Meus Tópicos"}
-            </CardTitle>
-            <CardDescription>
-              {isAdmin 
-                ? "Tópicos submetidos pelos gestores aguardando inclusão em reunião"
-                : "Tópicos que submeteu para discussão"}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="flex justify-center py-8">
-                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-              </div>
-            ) : !topicos || topicos.length === 0 ? (
-              <div className="text-center py-8">
-                <MessageSquare className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
-                <p className="text-muted-foreground">
+        {isLoading ? (
+          <div className="flex justify-center py-8">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          </div>
+        ) : (
+          <>
+            {/* Meus Tópicos - Editáveis */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <User className="h-5 w-5" />
+                  {isAdmin ? "Todos os Tópicos Pendentes" : "Meus Tópicos"}
+                </CardTitle>
+                <CardDescription>
                   {isAdmin 
-                    ? "Nenhum tópico pendente de análise"
-                    : "Ainda não submeteu nenhum tópico"}
-                </p>
-                {!isAdmin && (
-                  <Button 
-                    variant="outline" 
-                    className="mt-4"
-                    onClick={() => setModalAberto(true)}
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Submeter Primeiro Tópico
-                  </Button>
+                    ? "Tópicos submetidos pelos gestores aguardando inclusão em reunião"
+                    : "Tópicos que submeteu para discussão - pode editar ou eliminar"}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {meusTopicos.length === 0 ? (
+                  <div className="text-center py-8">
+                    <MessageSquare className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
+                    <p className="text-muted-foreground">
+                      {isAdmin 
+                        ? "Nenhum tópico pendente de análise"
+                        : "Ainda não submeteu nenhum tópico"}
+                    </p>
+                    {!isAdmin && (
+                      <Button 
+                        variant="outline" 
+                        className="mt-4"
+                        onClick={() => setModalAberto(true)}
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Submeter Primeiro Tópico
+                      </Button>
+                    )}
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {meusTopicos.map((topico: any) => renderTopicoCard(topico, true))}
+                  </div>
                 )}
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {topicos.map((topico: any) => (
-                  <Card key={topico.id} className="border-l-4 border-l-primary">
-                    <CardContent className="pt-4">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <h3 className="font-semibold">{topico.titulo}</h3>
-                            {getEstadoBadge(topico.estado)}
-                          </div>
-                          {topico.descricao && (
-                            <p className="text-sm text-muted-foreground mb-2">
-                              {topico.descricao}
-                            </p>
-                          )}
-                          <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                            {isAdmin && topico.gestorNome && (
-                              <span>Submetido por: <strong>{topico.gestorNome}</strong></span>
-                            )}
-                            <span>
-                              {format(new Date(topico.createdAt), "dd/MM/yyyy 'às' HH:mm", { locale: pt })}
-                            </span>
-                          </div>
-                          {topico.resultadoDiscussao && (
-                            <div className="mt-3 p-3 bg-green-50 rounded-md border border-green-200">
-                              <p className="text-sm font-medium text-green-800">Resultado da Discussão:</p>
-                              <p className="text-sm text-green-700">{topico.resultadoDiscussao}</p>
-                            </div>
-                          )}
-                          {topico.notasAdmin && (
-                            <div className="mt-3 p-3 bg-blue-50 rounded-md border border-blue-200">
-                              <p className="text-sm font-medium text-blue-800">Notas do Admin:</p>
-                              <p className="text-sm text-blue-700">{topico.notasAdmin}</p>
-                            </div>
-                          )}
-                        </div>
-                        {/* Ações apenas para tópicos pendentes do próprio gestor */}
-                        {!isAdmin && topico.estado === "pendente" && (
-                          <div className="flex gap-2">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleEditar(topico)}
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="text-destructive hover:text-destructive"
-                              onClick={() => setConfirmDelete(topico.id)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+              </CardContent>
+            </Card>
+
+            {/* Tópicos de Outros Gestores - Apenas Visualização (só para gestores) */}
+            {!isAdmin && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Users className="h-5 w-5" />
+                    Tópicos de Outros Gestores
+                  </CardTitle>
+                  <CardDescription>
+                    Tópicos submetidos por outros colegas - apenas visualização para evitar repetições
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {outrosTopicos.length === 0 ? (
+                    <div className="text-center py-8">
+                      <Users className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
+                      <p className="text-muted-foreground">
+                        Nenhum tópico submetido por outros gestores
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {outrosTopicos.map((topico: any) => renderTopicoCard(topico, false))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             )}
-          </CardContent>
-        </Card>
+          </>
+        )}
 
         {/* Modal de Criar/Editar */}
         <Dialog open={modalAberto} onOpenChange={setModalAberto}>

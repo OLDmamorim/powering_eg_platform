@@ -1,0 +1,50 @@
+{
+  "query": "SELECT t.id, t.titulo, t.estado, t.reuniaoId, DATE(r.data) as dataReuniao, DATE(t.createdAt) as criado\nFROM topicos_reuniao_gestores t \nLEFT JOIN reunioes_gestores r ON t.reuniaoId = r.id \nWHERE t.estado = 'analisado' AND t.reuniaoId IS NOT NULL\nORDER BY r.data DESC;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT t.id, t.titulo, t.estado, t.reuniaoId, DATE(r.data) as dataReuniao, DATE(t.createdAt) as criado\nFROM topicos_reuniao_gestores t \nLEFT JOIN reunioes_gestores r ON t.reuniaoId = r.id \nWHERE t.estado = 'analisado' AND t.reuniaoId IS NOT NULL\nORDER BY r.data DESC;",
+  "rows": [
+    {
+      "id": "240002",
+      "titulo": "Novo orçamento 2026",
+      "estado": "analisado",
+      "reuniaoId": "60001",
+      "dataReuniao": "2026-01-27",
+      "criado": "2026-01-23"
+    },
+    {
+      "id": "270001",
+      "titulo": "Stocks, dev #,",
+      "estado": "analisado",
+      "reuniaoId": "60001",
+      "dataReuniao": "2026-01-27",
+      "criado": "2026-01-26"
+    },
+    {
+      "id": "300001",
+      "titulo": "Rutura de stock fardamento",
+      "estado": "analisado",
+      "reuniaoId": "60001",
+      "dataReuniao": "2026-01-27",
+      "criado": "2026-01-26"
+    },
+    {
+      "id": "300002",
+      "titulo": "Circular com o comissionamento de 2026",
+      "estado": "analisado",
+      "reuniaoId": "60001",
+      "dataReuniao": "2026-01-27",
+      "criado": "2026-01-26"
+    },
+    {
+      "id": "330001",
+      "titulo": "Orçamentos 2026",
+      "estado": "analisado",
+      "reuniaoId": "60001",
+      "dataReuniao": "2026-01-27",
+      "criado": "2026-01-26"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitulo\testado\treuniaoId\tdataReuniao\tcriado\n240002\tNovo orçamento 2026\tanalisado\t60001\t2026-01-27\t2026-01-23\n270001\tStocks, dev #,\tanalisado\t60001\t2026-01-27\t2026-01-26\n300001\tRutura de stock fardamento\tanalisado\t60001\t2026-01-27\t2026-01-26\n300002\tCircular com o comissionamento de 2026\tanalisado\t60001\t2026-01-27\t2026-01-26\n330001\tOrçamentos 2026\tanalisado\t60001\t2026-01-27\t2026-01-26\n",
+  "stderr": "",
+  "execution_time_ms": 62
+}

@@ -4090,16 +4090,24 @@ IMPORTANTE:
     
     // ==================== TÓPICOS DE REUNIÃO ====================
     
-    // Listar tópicos pendentes (admin vê todos, gestor vê os seus)
+    // Listar tópicos pendentes (admin e gestor vêem todos, com indicação de quem criou)
     listarTopicosPendentes: protectedProcedure
       .query(async ({ ctx }) => {
-        if (ctx.user.role === 'admin') {
-          return await db.getTopicosPendentesComGestor();
-        } else {
+        // Todos vêem todos os tópicos pendentes com informação do gestor
+        const topicos = await db.getTopicosPendentesComGestor();
+        
+        // Para gestores, adicionar flag indicando se é dono do tópico
+        if (ctx.user.role !== 'admin') {
           const gestor = await db.getGestorByUserId(ctx.user.id);
-          if (!gestor) return [];
-          return await db.getTopicosByGestorId(gestor.id);
+          const gestorId = gestor?.id || 0;
+          return topicos.map(t => ({
+            ...t,
+            isOwner: t.gestorId === gestorId,
+          }));
         }
+        
+        // Admin pode editar todos
+        return topicos.map(t => ({ ...t, isOwner: true }));
       }),
     
     // Criar tópico (gestor submete para discussão)

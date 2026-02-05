@@ -4170,3 +4170,17 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Integrar com serviço de lembrete existente
 - [x] Enviar push apenas para gestores que ainda não enviaram a relação
 - [x] Retornar estatísticas separadas de email e push
+
+## v4.38 - Correção Tópicos Reunião Gestores
+- [ ] Analisar código das reuniões e tópicos para identificar o problema
+- [ ] Marcar tópicos anteriores à data de hoje como concluídos na base de dados
+- [ ] Corrigir código para que tópicos selecionados fiquem concluídos ao gravar reunião
+- [ ] Testar funcionalidade corrigida
+
+## v4.39 - Visualização de Tópicos de Outros Gestores
+- [x] Atualizar endpoint para retornar todos os tópicos pendentes com nome do gestor
+- [x] Adicionar flag isOwner para identificar tópicos próprios
+- [x] Separar UI em "Meus Tópicos" (editável) e "Tópicos de Outros Gestores" (apenas visualização)
+- [x] Mostrar nome do gestor que criou cada tópico
+- [x] Bloquear edição/eliminação de tópicos de outros gestores
+- [x] Cards com cores diferentes (azul para próprios, cinza para outros)
