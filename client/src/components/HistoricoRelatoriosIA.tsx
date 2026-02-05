@@ -123,7 +123,7 @@ export function HistoricoRelatoriosIA() {
       // Título
       doc.setFontSize(18);
       doc.setFont('helvetica', 'bold');
-      doc.text('Relatório IA - PoweringEG', pageWidth / 2, yPos, { align: 'center' });
+      doc.text('Relatório - PoweringEG', pageWidth / 2, yPos, { align: 'center' });
       yPos += 10;
       
       // Data do relatório
@@ -256,7 +256,7 @@ export function HistoricoRelatoriosIA() {
   // Abrir diálogo de email
   const handleOpenEmailDialog = (relatorio: RelatorioIA) => {
     setRelatorioParaEmail(relatorio);
-    setAssuntoEmail(`Relatório IA - ${new Date(relatorio.createdAt).toLocaleDateString('pt-PT')}`);
+    setAssuntoEmail(`Relatório - ${new Date(relatorio.createdAt).toLocaleDateString('pt-PT')}`);
     setShowEmailDialog(true);
   };
   
@@ -543,7 +543,7 @@ export function HistoricoRelatoriosIA() {
             <div className="flex items-center justify-between">
               <div>
                 <DialogTitle className="text-xl">
-                  Relatório IA - {selectedRelatorio && new Date(selectedRelatorio.createdAt).toLocaleDateString("pt-PT", {
+                  Relatório - {selectedRelatorio && new Date(selectedRelatorio.createdAt).toLocaleDateString("pt-PT", {
                     day: "2-digit",
                     month: "long",
                     year: "numeric",
@@ -701,7 +701,7 @@ export function HistoricoRelatoriosIA() {
               <Label htmlFor="assunto">Assunto (opcional)</Label>
               <Input
                 id="assunto"
-                placeholder="Relatório IA - Análise Executiva"
+                placeholder="Relatório - Análise Executiva"
                 value={assuntoEmail}
                 onChange={(e) => setAssuntoEmail(e.target.value)}
               />

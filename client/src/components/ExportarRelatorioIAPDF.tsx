@@ -256,7 +256,7 @@ export function ExportarRelatorioIAPDF({ analiseIA, periodo }: Props) {
       doc.setTextColor(30, 41, 59);
       doc.setFontSize(22);
       doc.setFont('helvetica', 'bold');
-      doc.text('Relatório IA de Resultados', pageWidth / 2, 20, { align: 'center' });
+      doc.text('Relatório de Resultados', pageWidth / 2, 20, { align: 'center' });
       
       // Subtítulo
       doc.setFontSize(11);
@@ -282,7 +282,7 @@ export function ExportarRelatorioIAPDF({ analiseIA, periodo }: Props) {
         doc.setTextColor(30, 41, 59);
         doc.setFontSize(22);
         doc.setFont('helvetica', 'bold');
-        doc.text('Relatório IA - Minhas Lojas', pageWidth / 2, 20, { align: 'center' });
+        doc.text('Relatório - Minhas Lojas', pageWidth / 2, 20, { align: 'center' });
         
         // Resumo Geral
         yPos = drawSectionHeader(doc, yPos, 'Resumo Geral', COLORS.primary, pageWidth);
@@ -1004,7 +1004,7 @@ export function ExportarRelatorioIAPDF({ analiseIA, periodo }: Props) {
       }
 
       // Download
-      const fileName = `RelatorioIA_${periodoLabels[periodo]?.replace(/ /g, '') || periodo}_${new Date().toISOString().split('T')[0]}.pdf`;
+      const fileName = `Relatorio_${periodoLabels[periodo]?.replace(/ /g, '') || periodo}_${new Date().toISOString().split('T')[0]}.pdf`;
       doc.save(fileName);
       toast.success('PDF exportado com sucesso!');
     } catch (error) {

@@ -35,10 +35,10 @@ export function ReminderDialog({ open, onDismiss }: ReminderDialogProps) {
             <div className="p-3 bg-emerald-100 rounded-full">
               <Sparkles className="h-6 w-6 text-emerald-600" />
             </div>
-            <DialogTitle className="text-2xl">Lembrete de Relatório IA</DialogTitle>
+            <DialogTitle className="text-2xl">Lembrete de Relatório</DialogTitle>
           </div>
           <DialogDescription className="text-base pt-2">
-            Já passaram <strong>15 dias</strong> desde o seu último relatório com análise de IA. 
+            Já passaram <strong>15 dias</strong> desde o seu último relatório. 
             Gerar relatórios regulares ajuda a:
           </DialogDescription>
         </DialogHeader>
@@ -84,7 +84,7 @@ export function ReminderDialog({ open, onDismiss }: ReminderDialogProps) {
             className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700"
           >
             <Sparkles className="mr-2 h-4 w-4" />
-            Gerar Relatório IA
+            Gerar Relatório
           </Button>
         </DialogFooter>
       </DialogContent>

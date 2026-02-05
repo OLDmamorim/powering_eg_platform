@@ -210,7 +210,7 @@
       "portalLoja": "Portal da Loja",
       "uploadResultados": "Upload Resultados",
       "dashboardResultados": "Dashboard Resultados",
-      "relatorioIAResultados": "Relatório IA Resultados",
+      "relatorioIAResultados": "Relatório de Resultados",
       "comparacaoLojas": "Comparação Lojas",
       "historicoLoja": "Histórico da Loja",
       "relatorioBoard": "Relatório Board",
@@ -766,8 +766,8 @@
     "dashboardSubtitle": "Visualizar métricas e KPIs",
     "comparacaoTitle": "Comparação de Lojas",
     "comparacaoSubtitle": "Comparar desempenho entre lojas",
-    "relatorioIATitle": "Relatório IA de Resultados",
-    "relatorioIASubtitle": "Análise automática de resultados com IA",
+    "relatorioIATitle": "Relatório de Resultados",
+    "relatorioIASubtitle": "Análise automática de resultados",
     "mes": "Mês",
     "ano": "Ano",
     "loja": "Loja",
@@ -1085,8 +1085,8 @@
     "semDados": "Selecione duas lojas para comparar"
   },
   "relatorioIAResultados": {
-    "title": "Relatório IA de Resultados",
-    "subtitle": "Análise automática de resultados com IA",
+    "title": "Relatório de Resultados",
+    "subtitle": "Análise automática de resultados",
     "gerarRelatorio": "Gerar Relatório",
     "gerando": "A gerar relatório com IA...",
     "periodo": "Período",
@@ -1197,7 +1197,7 @@
     "iaSemProblemas": "IA não identificou problemas nas fotos"
   },
   "pdf": {
-    "relatorioIA": "Relatório IA - PoweringEG Platform 2.0",
+    "relatorioIA": "Relatório - PoweringEG Platform 2.0",
     "erroGerar": "Não foi possível gerar o PDF."
   },
   "clipboard": {
@@ -1306,7 +1306,7 @@
     "dadosAtualizadosEm": "Dados atualizados em"
   },
   "relatorioIA": {
-    "titulo": "Relatório IA de Resultados",
+    "titulo": "Relatório de Resultados",
     "descricao": "Análise quantitativa profunda dos resultados de serviços com métricas detalhadas e rankings completos",
     "gerarAnalise": "Gerar Análise Quantitativa",
     "analiseBaseada": "Análise baseada em dados numéricos: serviços, objetivos, taxas e tendências",

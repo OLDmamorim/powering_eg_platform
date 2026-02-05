@@ -4193,3 +4193,12 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Gerar relatório automaticamente ao finalizar
 - [x] Libertar automaticamente tópicos não discutidos para próxima reunião
 - [x] Simplificar botões (Finalizar Reunião principal, Ver Relatório secundário)
+
+## v4.41 - Renomear Relatório IA para Relatório
+- [x] Procurar todas as ocorrências de "Relatório IA" ou "Relatório de IA" no código
+- [x] Alterar traduções PT (menu, títulos, subtítulos)
+- [x] Alterar componente ExportarRelatorioIAPDF (títulos e nome do ficheiro)
+- [x] Alterar componente HistoricoRelatoriosIA (títulos, assuntos de email)
+- [x] Alterar componente RelatorioIACategorias (títulos e toasts)
+- [x] Alterar componente ReminderDialog (títulos e botões)
+- [x] Alterar DashboardLayout (fallback do menu)

@@ -25,10 +25,10 @@ export function RelatorioIACategorias({ open, onOpenChange }: RelatorioIACategor
       setRelatorioIA(data.relatorio);
       setDadosGraficos(data.dadosGraficos);
       setIsGenerating(false);
-      toast.success(language === 'pt' ? "Relatório IA gerado com sucesso!" : "AI Report generated successfully!");
+      toast.success(language === 'pt' ? "Relatório gerado com sucesso!" : "Report generated successfully!");
     },
     onError: (error) => {
-      toast.error(error.message || "Erro ao gerar relatório IA");
+      toast.error(error.message || "Erro ao gerar relatório");
       setIsGenerating(false);
     },
   });
@@ -69,7 +69,7 @@ export function RelatorioIACategorias({ open, onOpenChange }: RelatorioIACategor
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <BarChart3 className="h-5 w-5 text-primary" />
-            Relatório IA por Categorias - Reunião de Board
+            Relatório por Categorias - Reunião de Board
           </DialogTitle>
         </DialogHeader>
 
