@@ -4202,3 +4202,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Alterar componente RelatorioIACategorias (títulos e toasts)
 - [x] Alterar componente ReminderDialog (títulos e botões)
 - [x] Alterar DashboardLayout (fallback do menu)
+
+## v4.42 - Simplificar Interface Criação de Reuniões
+- [x] Remover tabs e criar interface sequencial única
+- [x] Ordem: Data → Presenças → Outros → Tópicos → Conteúdo → Tags → Anexos
+- [x] Manter apenas um botão "Criar Reunião" no final do formulário
+- [x] Tópicos pendentes só aparecem se existirem

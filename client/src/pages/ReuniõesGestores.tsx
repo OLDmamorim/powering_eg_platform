@@ -308,187 +308,159 @@ export default function ReuniõesGestores() {
             <CardTitle>{t('reunioesGestores.novaReuniao')}</CardTitle>
             <CardDescription>{t('reunioesGestores.subtitle')}</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <Tabs defaultValue="detalhes" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="detalhes">{t('reunioesGestores.detalhesReuniao') || "Detalhes da Reunião"}</TabsTrigger>
-                <TabsTrigger value="topicos">
-                  {t('reunioesGestores.topicosPendentes')}
-                  {topicosPendentes && topicosPendentes.length > 0 && (
-                    <Badge variant="secondary" className="ml-2">{topicosPendentes.length}</Badge>
-                  )}
-                </TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="detalhes" className="space-y-4 mt-4">
-                {/* Data */}
-                <div className="space-y-2">
-                  <Label>{t('reunioesGestores.data')}</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full justify-start text-left font-normal",
-                          !data && "text-muted-foreground"
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {data ? format(data, "PPP", { locale: dateLocale }) : t('reuniao.dataReuniaoPlaceholder')}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                      <Calendar mode="single" selected={data} onSelect={(d) => d && setData(d)} locale={dateLocale} />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-
-                {/* Presenças */}
-                <div className="space-y-2">
-                  <Label>{t('reunioesGestores.presencasGestores') || "Presenças (Gestores)"}</Label>
-                  <div className="border rounded-md p-4 space-y-2 max-h-48 overflow-y-auto">
-                    {gestores?.map((gestor: any) => (
-                      <div key={gestor.id} className="flex items-center space-x-2">
-                        <Checkbox
-                          checked={gestoresSelecionados.includes(gestor.id)}
-                          onCheckedChange={(checked) => {
-                            if (checked) {
-                              setGestoresSelecionados([...gestoresSelecionados, gestor.id]);
-                            } else {
-                              setGestoresSelecionados(gestoresSelecionados.filter((id) => id !== gestor.id));
-                            }
-                          }}
-                        />
-                        <label className="text-sm cursor-pointer">{gestor.user?.name || gestor.nome || t('common.semNome') || 'Sem nome'}</label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Outros Presentes */}
-                <div className="space-y-2">
-                  <Label htmlFor="outros">{t('reunioesGestores.outrosPresentes') || "Outros Presentes (opcional)"}</Label>
-                  <Input
-                    id="outros"
-                    placeholder={t('reunioesGestores.outrosPresentesPlaceholder') || "Ex: João Silva, Maria Costa..."}
-                    value={outrosPresentes}
-                    onChange={(e) => setOutrosPresentes(e.target.value)}
-                  />
-                </div>
-
-                {/* Conteúdo */}
-                <div className="space-y-2">
-                  <Label htmlFor="conteudo">{t('reunioesGestores.conteudoReuniao') || "Conteúdo da Reunião"}</Label>
-                  <Textarea
-                    id="conteudo"
-                    placeholder={t('reunioesGestores.conteudoPlaceholder') || "Descreva os tópicos discutidos, decisões tomadas, etc..."}
-                    value={conteudo}
-                    onChange={(e) => setConteudo(e.target.value)}
-                    rows={15}
-                    className="min-h-[300px]"
-                  />
-                </div>
-
-                {/* Tags */}
-                <div className="space-y-2">
-                  <Label>{t('reunioesGestores.tagsOpcional') || "Tags (opcional)"}</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder={t('reunioesGestores.tagsPlaceholder') || "Ex: Vendas, Estratégia..."}
-                      value={novaTag}
-                      onChange={(e) => setNovaTag(e.target.value)}
-                      onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), adicionarTag())}
-                    />
-                    <Button type="button" variant="outline" onClick={adicionarTag}>
-                      <Plus className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  {tags.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {tags.map((tag) => (
-                        <Badge key={tag} variant="secondary" className="gap-1">
-                          {tag}
-                          <X className="h-3 w-3 cursor-pointer" onClick={() => removerTag(tag)} />
-                        </Badge>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* Anexos */}
-                <AnexosUpload
-                  anexos={anexos}
-                  onChange={setAnexos}
-                  maxFiles={10}
-                />
-              </TabsContent>
-              
-              <TabsContent value="topicos" className="space-y-4 mt-4">
-                {/* Tópicos Pendentes */}
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label className="flex items-center gap-2">
-                      <MessageSquare className="h-4 w-4" />
-                      {t('reunioesGestores.topicosSubmetidos')}
-                    </Label>
-                    {topicosIncluidos.length > 0 && (
-                      <Badge variant="default">{topicosIncluidos.length} {t('reunioesGestores.selecionados') || "selecionado(s)"}</Badge>
+          <CardContent className="space-y-6">
+            {/* 1. Data */}
+            <div className="space-y-2">
+              <Label>{t('reunioesGestores.data')}</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !data && "text-muted-foreground"
                     )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {data ? format(data, "PPP", { locale: dateLocale }) : t('reuniao.dataReuniaoPlaceholder')}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar mode="single" selected={data} onSelect={(d) => d && setData(d)} locale={dateLocale} />
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            {/* 2. Presenças */}
+            <div className="space-y-2">
+              <Label>{t('reunioesGestores.presencasGestores') || "Presenças (Gestores)"}</Label>
+              <div className="border rounded-md p-4 space-y-2 max-h-48 overflow-y-auto">
+                {gestores?.map((gestor: any) => (
+                  <div key={gestor.id} className="flex items-center space-x-2">
+                    <Checkbox
+                      checked={gestoresSelecionados.includes(gestor.id)}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setGestoresSelecionados([...gestoresSelecionados, gestor.id]);
+                        } else {
+                          setGestoresSelecionados(gestoresSelecionados.filter((id) => id !== gestor.id));
+                        }
+                      }}
+                    />
+                    <label className="text-sm cursor-pointer">{gestor.user?.name || gestor.nome || t('common.semNome') || 'Sem nome'}</label>
                   </div>
-                  
-                  {!topicosPendentes || topicosPendentes.length === 0 ? (
-                    <div className="border rounded-md p-8 text-center text-muted-foreground">
-                      <MessageSquare className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                      <p>{t('reunioesGestores.nenhumTopicoPendente')}</p>
-                      <p className="text-sm">{t('reunioesGestores.gestoresPodemSubmeter')}</p>
-                    </div>
-                  ) : (
-                    <div className="border rounded-md divide-y max-h-[400px] overflow-y-auto">
-                      {topicosPendentes.map((topico: any) => (
-                        <div 
-                          key={topico.id} 
-                          className={cn(
-                            "p-4 cursor-pointer transition-colors",
-                            topicosIncluidos.includes(topico.id) 
-                              ? "bg-primary/10 border-l-4 border-l-primary" 
-                              : "hover:bg-muted/50"
-                          )}
-                          onClick={() => handleIncluirTopico(topico.id)}
-                        >
-                          <div className="flex items-start gap-3">
-                            <Checkbox
-                              checked={topicosIncluidos.includes(topico.id)}
-                              onCheckedChange={() => handleIncluirTopico(topico.id)}
-                            />
-                            <div className="flex-1">
-                              <h4 className="font-medium">{topico.titulo}</h4>
-                              {topico.descricao && (
-                                <p className="text-sm text-muted-foreground mt-1">{topico.descricao}</p>
-                              )}
-                              <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
-                                <span>{t('reunioesGestores.submetidoPor') || "Submetido por"}: <strong>{topico.gestorNome}</strong></span>
-                                <span>•</span>
-                                <span>{format(new Date(topico.createdAt), "dd/MM/yyyy", { locale: dateLocale })}</span>
-                              </div>
-                            </div>
+                ))}
+              </div>
+            </div>
+
+            {/* 3. Outros Presentes */}
+            <div className="space-y-2">
+              <Label htmlFor="outros">{t('reunioesGestores.outrosPresentes') || "Outros Presentes (opcional)"}</Label>
+              <Input
+                id="outros"
+                placeholder={t('reunioesGestores.outrosPresentesPlaceholder') || "Ex: João Silva, Maria Costa..."}
+                value={outrosPresentes}
+                onChange={(e) => setOutrosPresentes(e.target.value)}
+              />
+            </div>
+
+            {/* 4. Tópicos Pendentes */}
+            {topicosPendentes && topicosPendentes.length > 0 && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label className="flex items-center gap-2">
+                    <MessageSquare className="h-4 w-4" />
+                    {t('reunioesGestores.topicosPendentes')} ({topicosPendentes.length})
+                  </Label>
+                  {topicosIncluidos.length > 0 && (
+                    <Badge variant="default">{topicosIncluidos.length} {t('reunioesGestores.selecionados') || "selecionado(s)"}</Badge>
+                  )}
+                </div>
+                <div className="border rounded-md divide-y max-h-[250px] overflow-y-auto">
+                  {topicosPendentes.map((topico: any) => (
+                    <div 
+                      key={topico.id} 
+                      className={cn(
+                        "p-3 cursor-pointer transition-colors",
+                        topicosIncluidos.includes(topico.id) 
+                          ? "bg-primary/10 border-l-4 border-l-primary" 
+                          : "hover:bg-muted/50"
+                      )}
+                      onClick={() => handleIncluirTopico(topico.id)}
+                    >
+                      <div className="flex items-start gap-3">
+                        <Checkbox
+                          checked={topicosIncluidos.includes(topico.id)}
+                          onCheckedChange={() => handleIncluirTopico(topico.id)}
+                        />
+                        <div className="flex-1">
+                          <h4 className="font-medium text-sm">{topico.titulo}</h4>
+                          <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+                            <span>{topico.gestorNome}</span>
+                            <span>•</span>
+                            <span>{format(new Date(topico.createdAt), "dd/MM/yyyy", { locale: dateLocale })}</span>
                           </div>
                         </div>
-                      ))}
+                      </div>
                     </div>
-                  )}
-                  
-                  {topicosIncluidos.length > 0 && (
-                    <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md p-3">
-                      <p className="text-sm text-blue-700 dark:text-blue-300">
-                        <strong>{topicosIncluidos.length}</strong> {t('reunioesGestores.topicosSeraoIncluidos') || "tópico(s) serão incluídos nesta reunião. Após criar a reunião, poderá marcar quais foram efetivamente discutidos."}
-                      </p>
-                    </div>
-                  )}
+                  ))}
                 </div>
-              </TabsContent>
-            </Tabs>
+                {topicosIncluidos.length > 0 && (
+                  <p className="text-xs text-blue-600 dark:text-blue-400">
+                    {topicosIncluidos.length} tópico(s) serão incluídos nesta reunião
+                  </p>
+                )}
+              </div>
+            )}
 
-            <Button onClick={handleSubmit} disabled={criarMutation.isPending} className="w-full">
+            {/* 5. Conteúdo */}
+            <div className="space-y-2">
+              <Label htmlFor="conteudo">{t('reunioesGestores.conteudoReuniao') || "Conteúdo da Reunião"}</Label>
+              <Textarea
+                id="conteudo"
+                placeholder={t('reunioesGestores.conteudoPlaceholder') || "Descreva os tópicos discutidos, decisões tomadas, etc..."}
+                value={conteudo}
+                onChange={(e) => setConteudo(e.target.value)}
+                rows={10}
+                className="min-h-[200px]"
+              />
+            </div>
+
+            {/* 6. Tags */}
+            <div className="space-y-2">
+              <Label>{t('reunioesGestores.tagsOpcional') || "Tags (opcional)"}</Label>
+              <div className="flex gap-2">
+                <Input
+                  placeholder={t('reunioesGestores.tagsPlaceholder') || "Ex: Vendas, Estratégia..."}
+                  value={novaTag}
+                  onChange={(e) => setNovaTag(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), adicionarTag())}
+                />
+                <Button type="button" variant="outline" onClick={adicionarTag}>
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+              {tags.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {tags.map((tag) => (
+                    <Badge key={tag} variant="secondary" className="gap-1">
+                      {tag}
+                      <X className="h-3 w-3 cursor-pointer" onClick={() => removerTag(tag)} />
+                    </Badge>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* 7. Anexos */}
+            <AnexosUpload
+              anexos={anexos}
+              onChange={setAnexos}
+              maxFiles={10}
+            />
+
+            {/* Botão Criar Reunião */}
+            <Button onClick={handleSubmit} disabled={criarMutation.isPending} className="w-full" size="lg">
               {criarMutation.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -498,7 +470,7 @@ export default function ReuniõesGestores() {
                 <>
                   <Save className="mr-2 h-4 w-4" />
                   {t('reunioesGestores.criarReuniao') || "Criar Reunião"}
-                  {topicosIncluidos.length > 0 && ` (${t('reunioesGestores.comTopicos') || "com"} ${topicosIncluidos.length} ${t('reunioesGestores.topicos') || "tópico(s)"})`}
+                  {topicosIncluidos.length > 0 && ` (com ${topicosIncluidos.length} tópico(s))`}
                 </>
               )}
             </Button>
