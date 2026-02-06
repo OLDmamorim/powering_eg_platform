@@ -129,7 +129,10 @@ import {
   InsertFichaIdentificadaAnalise,
   colaboradores,
   Colaborador,
-  InsertColaborador
+  InsertColaborador,
+  enviosRH,
+  EnvioRH,
+  InsertEnvioRH
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -578,6 +581,84 @@ export async function updateGestorEnvioRH(gestorId: number): Promise<void> {
   await db.update(gestores)
     .set({ lastEnvioRH: new Date() })
     .where(eq(gestores.id, gestorId));
+}
+
+/**
+ * Regista um envio de relação de colaboradores para RH
+ */
+export async function registarEnvioRH(data: {
+  gestorId: number;
+  mesReferencia: string;
+  totalColaboradores: number;
+  totalEmLojas: number;
+  totalVolantes: number;
+  totalRecalbra: number;
+  emailDestino: string;
+  emailEnviado: boolean;
+}): Promise<EnvioRH> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.insert(enviosRH).values({
+    gestorId: data.gestorId,
+    mesReferencia: data.mesReferencia,
+    totalColaboradores: data.totalColaboradores,
+    totalEmLojas: data.totalEmLojas,
+    totalVolantes: data.totalVolantes,
+    totalRecalbra: data.totalRecalbra,
+    emailDestino: data.emailDestino,
+    emailEnviado: data.emailEnviado
+  });
+  
+  const insertId = result[0].insertId;
+  const envioResult = await db.select().from(enviosRH).where(eq(enviosRH.id, insertId)).limit(1);
+  return envioResult[0];
+}
+
+/**
+ * Obtém histórico de envios RH de um gestor
+ */
+export async function getEnviosRHByGestorId(gestorId: number): Promise<EnvioRH[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const result = await db.select()
+    .from(enviosRH)
+    .where(eq(enviosRH.gestorId, gestorId))
+    .orderBy(desc(enviosRH.createdAt));
+  
+  return result;
+}
+
+/**
+ * Obtém todos os envios RH (para admin)
+ */
+export async function getAllEnviosRH(): Promise<Array<EnvioRH & { gestorNome: string }>> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const result = await db.select({
+    id: enviosRH.id,
+    gestorId: enviosRH.gestorId,
+    mesReferencia: enviosRH.mesReferencia,
+    totalColaboradores: enviosRH.totalColaboradores,
+    totalEmLojas: enviosRH.totalEmLojas,
+    totalVolantes: enviosRH.totalVolantes,
+    totalRecalbra: enviosRH.totalRecalbra,
+    emailDestino: enviosRH.emailDestino,
+    emailEnviado: enviosRH.emailEnviado,
+    createdAt: enviosRH.createdAt,
+    gestorNome: users.name
+  })
+    .from(enviosRH)
+    .leftJoin(gestores, eq(enviosRH.gestorId, gestores.id))
+    .leftJoin(users, eq(gestores.userId, users.id))
+    .orderBy(desc(enviosRH.createdAt));
+  
+  return result.map(r => ({
+    ...r,
+    gestorNome: r.gestorNome || 'Desconhecido'
+  }));
 }
 
 export async function promoteGestorToAdmin(gestorId: number): Promise<void> {

@@ -1260,3 +1260,23 @@ export const colaboradores = mysqlTable("colaboradores", {
 
 export type Colaborador = typeof colaboradores.$inferSelect;
 export type InsertColaborador = typeof colaboradores.$inferInsert;
+
+
+/**
+ * Envios RH - Histórico de envios de relação de colaboradores para RH
+ */
+export const enviosRH = mysqlTable("envios_rh", {
+  id: int("id").autoincrement().primaryKey(),
+  gestorId: int("gestorId").notNull(), // FK para gestores.id
+  mesReferencia: varchar("mesReferencia", { length: 20 }).notNull(), // Ex: "Janeiro 2026"
+  totalColaboradores: int("totalColaboradores").notNull(), // Total de colaboradores enviados
+  totalEmLojas: int("totalEmLojas").notNull(), // Colaboradores em lojas
+  totalVolantes: int("totalVolantes").notNull(), // Colaboradores volantes
+  totalRecalbra: int("totalRecalbra").notNull(), // Colaboradores Recalbra
+  emailDestino: varchar("emailDestino", { length: 320 }).notNull(), // Email de destino
+  emailEnviado: boolean("emailEnviado").default(true).notNull(), // Se o email foi enviado com sucesso
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type EnvioRH = typeof enviosRH.$inferSelect;
+export type InsertEnvioRH = typeof enviosRH.$inferInsert;

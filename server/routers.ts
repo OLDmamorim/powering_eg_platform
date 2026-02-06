@@ -1614,7 +1614,24 @@ IMPORTANTE:
           throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Erro ao enviar email para RH' });
         }
         
-        // Registar data de envio
+        // Calcular totais por tipo
+        const totalEmLojas = colaboradoresPorLoja.reduce((acc, l) => acc + l.colaboradores.length, 0);
+        const totalVolantes = volantes.length;
+        const totalRecalbra = recalbrasList.length;
+        
+        // Registar envio no histórico
+        await db.registarEnvioRH({
+          gestorId: gestor.id,
+          mesReferencia: mesCapitalizado,
+          totalColaboradores,
+          totalEmLojas,
+          totalVolantes,
+          totalRecalbra,
+          emailDestino,
+          emailEnviado: true
+        });
+        
+        // Registar data de envio no gestor
         await db.updateGestorEnvioRH(gestor.id);
         
         return { 
@@ -1669,6 +1686,19 @@ IMPORTANTE:
         diasRestantes: new Date(anoAtual, mesAtual + 1, 0).getDate() - diaAtual,
         mesReferencia: hoje.toLocaleDateString('pt-PT', { month: 'long', year: 'numeric' })
       };
+    }),
+    
+    // Obter histórico de envios RH do gestor atual
+    historicoEnviosRH: gestorProcedure.query(async ({ ctx }) => {
+      const gestor = await db.getGestorByUserId(ctx.user.id);
+      if (!gestor) return [];
+      
+      return await db.getEnviosRHByGestorId(gestor.id);
+    }),
+    
+    // Obter todos os envios RH (para admin)
+    todosEnviosRH: adminProcedure.query(async () => {
+      return await db.getAllEnviosRH();
     }),
   }),
 

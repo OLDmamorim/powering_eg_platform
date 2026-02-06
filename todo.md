@@ -4212,3 +4212,11 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## v4.43 - Remover Aviso Resumo Global
 - [x] Remover aviso "Lembrete: Resumo Global Mês Anterior" do dashboard
 - [x] Corrigir botão "Relatórios IA" para "Relatórios"
+
+## Funcionalidades v4.44 - Histórico de Envios RH
+- [x] Criar tabela envios_rh no schema para guardar histórico de envios
+- [x] Implementar backend para registar envio quando email é enviado
+- [x] Implementar endpoint para consultar histórico de envios
+- [x] Adicionar secção de histórico na página RH
+- [x] Mostrar data, hora e detalhes de cada envio
+- [x] Testar funcionalidade completa

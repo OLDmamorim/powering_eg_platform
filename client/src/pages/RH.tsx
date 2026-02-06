@@ -44,7 +44,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Users, UserPlus, Store, Car, Pencil, Trash2, Search, Wrench, Send, Mail, Eye, Loader2, AlertTriangle, Bell, CheckCircle, Download } from "lucide-react";
+import { Users, UserPlus, Store, Car, Pencil, Trash2, Search, Wrench, Send, Mail, Eye, Loader2, AlertTriangle, Bell, CheckCircle, Download, History, Clock, Calendar } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function RH() {
@@ -112,12 +112,15 @@ export default function RH() {
     },
   });
 
+  const { data: historicoEnvios, isLoading: isLoadingHistorico, refetch: refetchHistorico } = trpc.colaboradores.historicoEnviosRH.useQuery();
+  
   const enviarRHMutation = trpc.colaboradores.enviarRelacaoRH.useMutation({
     onSuccess: (data) => {
       toast.success(data.message);
       setIsPreviewOpen(false);
       setObservacoes("");
       refetchLembrete(); // Atualizar estado do lembrete
+      refetchHistorico(); // Atualizar histórico de envios
     },
     onError: (error) => {
       toast.error(`Erro ao enviar: ${error.message}`);
@@ -663,6 +666,94 @@ export default function RH() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Histórico de Envios RH */}
+        {historicoEnvios && historicoEnvios.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <History className="h-5 w-5" />
+                Histórico de Envios para RH
+              </CardTitle>
+              <CardDescription>
+                Registo de todas as relações de colaboradores enviadas para os Recursos Humanos
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Data de Envio</TableHead>
+                      <TableHead>Mês de Referência</TableHead>
+                      <TableHead className="text-center">Total</TableHead>
+                      <TableHead className="text-center">Em Lojas</TableHead>
+                      <TableHead className="text-center">Volantes</TableHead>
+                      <TableHead className="text-center">Recalbra</TableHead>
+                      <TableHead>Destino</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {historicoEnvios.map((envio) => (
+                      <TableRow key={envio.id}>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Calendar className="h-4 w-4 text-muted-foreground" />
+                            <span>
+                              {new Date(envio.createdAt).toLocaleDateString('pt-PT', {
+                                day: '2-digit',
+                                month: 'short',
+                                year: 'numeric'
+                              })}
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              {new Date(envio.createdAt).toLocaleTimeString('pt-PT', {
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <span className="capitalize font-medium">{envio.mesReferencia}</span>
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Badge variant="secondary" className="font-bold">
+                            {envio.totalColaboradores}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Badge variant="outline" className="border-emerald-500 text-emerald-700">
+                            {envio.totalEmLojas}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Badge variant="outline" className="border-blue-500 text-blue-700">
+                            {envio.totalVolantes}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Badge variant="outline" className="border-orange-500 text-orange-700">
+                            {envio.totalRecalbra}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <Mail className="h-3 w-3" />
+                            {envio.emailDestino}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+              <p className="text-xs text-muted-foreground mt-3 text-center">
+                Total de {historicoEnvios.length} envio{historicoEnvios.length !== 1 ? 's' : ''} registado{historicoEnvios.length !== 1 ? 's' : ''}
+              </p>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Main Content */}
         <Card>
