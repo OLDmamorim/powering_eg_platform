@@ -668,92 +668,106 @@ export default function RH() {
         </div>
 
         {/* Histórico de Envios RH */}
-        {historicoEnvios && historicoEnvios.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <History className="h-5 w-5" />
-                Histórico de Envios para RH
-              </CardTitle>
-              <CardDescription>
-                Registo de todas as relações de colaboradores enviadas para os Recursos Humanos
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Data de Envio</TableHead>
-                      <TableHead>Mês de Referência</TableHead>
-                      <TableHead className="text-center">Total</TableHead>
-                      <TableHead className="text-center">Em Lojas</TableHead>
-                      <TableHead className="text-center">Volantes</TableHead>
-                      <TableHead className="text-center">Recalbra</TableHead>
-                      <TableHead>Destino</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {historicoEnvios.map((envio) => (
-                      <TableRow key={envio.id}>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Calendar className="h-4 w-4 text-muted-foreground" />
-                            <span>
-                              {new Date(envio.createdAt).toLocaleDateString('pt-PT', {
-                                day: '2-digit',
-                                month: 'short',
-                                year: 'numeric'
-                              })}
-                            </span>
-                            <span className="text-xs text-muted-foreground">
-                              {new Date(envio.createdAt).toLocaleTimeString('pt-PT', {
-                                hour: '2-digit',
-                                minute: '2-digit'
-                              })}
-                            </span>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <span className="capitalize font-medium">{envio.mesReferencia}</span>
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <Badge variant="secondary" className="font-bold">
-                            {envio.totalColaboradores}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <Badge variant="outline" className="border-emerald-500 text-emerald-700">
-                            {envio.totalEmLojas}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <Badge variant="outline" className="border-blue-500 text-blue-700">
-                            {envio.totalVolantes}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <Badge variant="outline" className="border-orange-500 text-orange-700">
-                            {envio.totalRecalbra}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <Mail className="h-3 w-3" />
-                            {envio.emailDestino}
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <History className="h-5 w-5" />
+              Histórico de Envios para RH
+            </CardTitle>
+            <CardDescription>
+              Registo de todas as relações de colaboradores enviadas para os Recursos Humanos
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {isLoadingHistorico ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
               </div>
-              <p className="text-xs text-muted-foreground mt-3 text-center">
-                Total de {historicoEnvios.length} envio{historicoEnvios.length !== 1 ? 's' : ''} registado{historicoEnvios.length !== 1 ? 's' : ''}
-              </p>
-            </CardContent>
-          </Card>
-        )}
+            ) : !historicoEnvios || historicoEnvios.length === 0 ? (
+              <div className="text-center py-8">
+                <Mail className="h-12 w-12 text-muted-foreground/30 mx-auto mb-3" />
+                <p className="text-muted-foreground font-medium">Nenhum envio registado</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  O histórico aparecerá aqui após enviar a relação de colaboradores para os RH.
+                </p>
+              </div>
+            ) : (
+              <>
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Data de Envio</TableHead>
+                        <TableHead>Mês de Referência</TableHead>
+                        <TableHead className="text-center">Total</TableHead>
+                        <TableHead className="text-center">Em Lojas</TableHead>
+                        <TableHead className="text-center">Volantes</TableHead>
+                        <TableHead className="text-center">Recalbra</TableHead>
+                        <TableHead>Destino</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {historicoEnvios.map((envio) => (
+                        <TableRow key={envio.id}>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Calendar className="h-4 w-4 text-muted-foreground" />
+                              <span>
+                                {new Date(envio.createdAt).toLocaleDateString('pt-PT', {
+                                  day: '2-digit',
+                                  month: 'short',
+                                  year: 'numeric'
+                                })}
+                              </span>
+                              <span className="text-xs text-muted-foreground">
+                                {new Date(envio.createdAt).toLocaleTimeString('pt-PT', {
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <span className="capitalize font-medium">{envio.mesReferencia}</span>
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <Badge variant="secondary" className="font-bold">
+                              {envio.totalColaboradores}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <Badge variant="outline" className="border-emerald-500 text-emerald-700">
+                              {envio.totalEmLojas}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <Badge variant="outline" className="border-blue-500 text-blue-700">
+                              {envio.totalVolantes}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <Badge variant="outline" className="border-orange-500 text-orange-700">
+                              {envio.totalRecalbra}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                              <Mail className="h-3 w-3" />
+                              {envio.emailDestino}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+                <p className="text-xs text-muted-foreground mt-3 text-center">
+                  Total de {historicoEnvios.length} envio{historicoEnvios.length !== 1 ? 's' : ''} registado{historicoEnvios.length !== 1 ? 's' : ''}
+                </p>
+              </>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Main Content */}
         <Card>

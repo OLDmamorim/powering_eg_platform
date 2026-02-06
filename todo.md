@@ -4220,3 +4220,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar secção de histórico na página RH
 - [x] Mostrar data, hora e detalhes de cada envio
 - [x] Testar funcionalidade completa
+
+## v4.45 - Histórico RH Sempre Visível
+- [x] Mostrar secção de histórico de envios RH sempre visível (mesmo sem envios)
+- [x] Adicionar mensagem "Nenhum envio registado" quando vazio
