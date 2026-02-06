@@ -4224,3 +4224,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## v4.45 - Histórico RH Sempre Visível
 - [x] Mostrar secção de histórico de envios RH sempre visível (mesmo sem envios)
 - [x] Adicionar mensagem "Nenhum envio registado" quando vazio
+
+## v4.46 - Corrigir PDF Relatórios IA
+- [x] PDF de exportação dos Relatórios IA deve incluir toda a informação do ecrã (não apenas resultados)
+- [x] Incluir no PDF: resumo geral, pontos positivos, pontos negativos, tendências, recomendações, frequência de visitas
+- [x] Incluir no PDF: análise dos pontos destacados pelos gestores
+- [x] PDF deve ser representação fiel do que aparece no ecrã

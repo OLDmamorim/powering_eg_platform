@@ -44,6 +44,9 @@ interface AnaliseIA {
   };
   sugestoesGestor?: string[];
   mensagemMotivacional?: string;
+  frequenciaVisitas?: Record<string, number>;
+  lojaMaisVisitada?: { nome: string; visitas: number };
+  lojaMenosVisitada?: { nome: string; visitas: number };
   analisePontosDestacados?: {
     positivos: string[];
     negativos: string[];
@@ -256,13 +259,13 @@ export function ExportarRelatorioIAPDF({ analiseIA, periodo }: Props) {
       doc.setTextColor(30, 41, 59);
       doc.setFontSize(22);
       doc.setFont('helvetica', 'bold');
-      doc.text('Relatório de Resultados', pageWidth / 2, 20, { align: 'center' });
+      doc.text('Relat\u00f3rio IA', pageWidth / 2, 20, { align: 'center' });
       
-      // Subtítulo
+      // Subt\u00edtulo
       doc.setFontSize(11);
       doc.setTextColor(100, 116, 139);
       doc.setFont('helvetica', 'normal');
-      doc.text(`Período: ${periodoLabels[periodo] || periodo}  |  Gerado em: ${new Date().toLocaleString('pt-PT')}`, pageWidth / 2, 28, { align: 'center' });
+      doc.text(`Per\u00edodo: ${periodoLabels[periodo] || periodo}  |  Gerado em: ${new Date().toLocaleString('pt-PT')}`, pageWidth / 2, 28, { align: 'center' });
       
       // Linha separadora
       doc.setDrawColor(200, 200, 200);
@@ -981,6 +984,372 @@ export function ExportarRelatorioIAPDF({ analiseIA, periodo }: Props) {
       }
       
       } // Fechar o else do isGestor
+
+      // ==================== SECÇÕES COMUNS (ambos os tipos) ====================
+      
+      // Loja Mais Visitada / Loja Menos Visitada
+      if (analiseIA.lojaMaisVisitada || analiseIA.lojaMenosVisitada) {
+        if (yPos > 220) {
+          doc.addPage();
+          yPos = 20;
+        }
+        
+        const cardWidth = (pageWidth - 32) / 2;
+        
+        if (analiseIA.lojaMaisVisitada) {
+          drawHighlightCard(doc, 14, yPos, cardWidth, 'Loja Mais Visitada', 
+            analiseIA.lojaMaisVisitada.nome,
+            [{ label: 'Visitas', value: analiseIA.lojaMaisVisitada.visitas.toString() }],
+            COLORS.success
+          );
+        }
+        
+        if (analiseIA.lojaMenosVisitada) {
+          drawHighlightCard(doc, 14 + cardWidth + 4, yPos, cardWidth, 'Loja Menos Visitada', 
+            analiseIA.lojaMenosVisitada.nome,
+            [{ label: 'Visitas', value: analiseIA.lojaMenosVisitada.visitas.toString() }],
+            COLORS.warning
+          );
+        }
+        
+        yPos += 42;
+      }
+
+      // Pontos Positivos (lista geral - se não foram já mostrados no branch)
+      if (!isGestor && analiseIA.pontosPositivos && analiseIA.pontosPositivos.length > 0) {
+        // Já incluídos no branch admin
+      } else if (isGestor) {
+        // Para gestores, mostrar pontos positivos gerais se existirem
+        const pontosPos = analiseIA.pontosPositivos || (analiseIA.pontosDestacados?.positivos?.map(p => `${p.loja}: ${p.descricao}`));
+        if (pontosPos && pontosPos.length > 0 && !analiseIA.pontosPositivos) {
+          // Já foram mostrados como pontosDestacados no branch gestor
+        }
+      }
+
+      // Análise dos Pontos Destacados pelos Gestores
+      if (analiseIA.analisePontosDestacados || analiseIA.pontosDestacados?.analise) {
+        if (yPos > 200) {
+          doc.addPage();
+          yPos = 20;
+        }
+        
+        yPos = drawSectionHeader(doc, yPos, 'Análise dos Pontos Destacados pelos Gestores', COLORS.primary, pageWidth);
+        
+        // Tendências
+        const tendencias = analiseIA.analisePontosDestacados?.tendencias || analiseIA.pontosDestacados?.analise;
+        if (tendencias) {
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'bold');
+          doc.text('Tendências Observadas:', 14, yPos);
+          yPos += 5;
+          doc.setFont('helvetica', 'normal');
+          const tendLines = doc.splitTextToSize(tendencias, pageWidth - 28);
+          doc.text(tendLines, 14, yPos);
+          yPos += tendLines.length * 5 + 8;
+        }
+        
+        // Pontos Positivos Destacados (análise IA)
+        const posDestacados = analiseIA.analisePontosDestacados?.positivos;
+        if (posDestacados && posDestacados.length > 0) {
+          if (yPos > 240) {
+            doc.addPage();
+            yPos = 20;
+          }
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'bold');
+          doc.setTextColor(COLORS.success[0], COLORS.success[1], COLORS.success[2]);
+          doc.text('Pontos Positivos Destacados:', 14, yPos);
+          yPos += 6;
+          doc.setFont('helvetica', 'normal');
+          doc.setTextColor(0, 0, 0);
+          posDestacados.forEach(ponto => {
+            if (yPos > 270) {
+              doc.addPage();
+              yPos = 20;
+            }
+            const lines = doc.splitTextToSize(`• ${typeof ponto === 'string' ? ponto : ponto}`, pageWidth - 32);
+            doc.text(lines, 18, yPos);
+            yPos += lines.length * 4.5 + 2;
+          });
+          yPos += 5;
+        }
+        
+        // Pontos Negativos Destacados (análise IA)
+        const negDestacados = analiseIA.analisePontosDestacados?.negativos;
+        if (negDestacados && negDestacados.length > 0) {
+          if (yPos > 240) {
+            doc.addPage();
+            yPos = 20;
+          }
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'bold');
+          doc.setTextColor(COLORS.danger[0], COLORS.danger[1], COLORS.danger[2]);
+          doc.text('Pontos Negativos Destacados:', 14, yPos);
+          yPos += 6;
+          doc.setFont('helvetica', 'normal');
+          doc.setTextColor(0, 0, 0);
+          negDestacados.forEach(ponto => {
+            if (yPos > 270) {
+              doc.addPage();
+              yPos = 20;
+            }
+            const lines = doc.splitTextToSize(`• ${typeof ponto === 'string' ? ponto : ponto}`, pageWidth - 32);
+            doc.text(lines, 18, yPos);
+            yPos += lines.length * 4.5 + 2;
+          });
+          yPos += 5;
+        }
+      }
+
+      // Análise de Performance (Resultados) - para gestores que não tinham
+      if (isGestor && analiseIA.analiseResultados) {
+        if (yPos > 200) {
+          doc.addPage();
+          yPos = 20;
+        }
+        
+        yPos = drawSectionHeader(doc, yPos, 'Análise de Performance (Resultados)', COLORS.warning, pageWidth);
+        
+        // Resumo de Performance
+        if (analiseIA.analiseResultados.resumoPerformance) {
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'bold');
+          doc.text('Resumo de Performance:', 14, yPos);
+          yPos += 5;
+          doc.setFont('helvetica', 'normal');
+          const perfLines = doc.splitTextToSize(analiseIA.analiseResultados.resumoPerformance, pageWidth - 28);
+          doc.text(perfLines, 14, yPos);
+          yPos += perfLines.length * 5 + 6;
+        }
+        
+        // Tendências de Serviços
+        if (analiseIA.analiseResultados.tendenciasServicos) {
+          if (yPos > 250) {
+            doc.addPage();
+            yPos = 20;
+          }
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'bold');
+          doc.text('Tendências de Serviços:', 14, yPos);
+          yPos += 5;
+          doc.setFont('helvetica', 'normal');
+          const tendLines = doc.splitTextToSize(analiseIA.analiseResultados.tendenciasServicos, pageWidth - 28);
+          doc.text(tendLines, 14, yPos);
+          yPos += tendLines.length * 5 + 6;
+        }
+        
+        // Lojas em Destaque
+        if (analiseIA.analiseResultados.lojasDestaque && analiseIA.analiseResultados.lojasDestaque.length > 0) {
+          if (yPos > 240) {
+            doc.addPage();
+            yPos = 20;
+          }
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'bold');
+          doc.setTextColor(COLORS.success[0], COLORS.success[1], COLORS.success[2]);
+          doc.text('Lojas em Destaque:', 14, yPos);
+          yPos += 6;
+          doc.setFont('helvetica', 'normal');
+          doc.setTextColor(0, 0, 0);
+          analiseIA.analiseResultados.lojasDestaque.forEach(loja => {
+            if (yPos > 270) {
+              doc.addPage();
+              yPos = 20;
+            }
+            const lines = doc.splitTextToSize(`• ${loja}`, pageWidth - 32);
+            doc.text(lines, 18, yPos);
+            yPos += lines.length * 4.5 + 2;
+          });
+          yPos += 5;
+        }
+        
+        // Lojas que Precisam Atenção
+        if (analiseIA.analiseResultados.lojasAtencao && analiseIA.analiseResultados.lojasAtencao.length > 0) {
+          if (yPos > 240) {
+            doc.addPage();
+            yPos = 20;
+          }
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'bold');
+          doc.setTextColor(COLORS.warning[0], COLORS.warning[1], COLORS.warning[2]);
+          doc.text('Lojas que Precisam Atenção:', 14, yPos);
+          yPos += 6;
+          doc.setFont('helvetica', 'normal');
+          doc.setTextColor(0, 0, 0);
+          analiseIA.analiseResultados.lojasAtencao.forEach(loja => {
+            if (yPos > 270) {
+              doc.addPage();
+              yPos = 20;
+            }
+            const lines = doc.splitTextToSize(`• ${loja}`, pageWidth - 32);
+            doc.text(lines, 18, yPos);
+            yPos += lines.length * 4.5 + 2;
+          });
+          yPos += 5;
+        }
+        
+        // Recomendações de Performance
+        if (analiseIA.analiseResultados.recomendacoes && analiseIA.analiseResultados.recomendacoes.length > 0) {
+          if (yPos > 220) {
+            doc.addPage();
+            yPos = 20;
+          }
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'bold');
+          doc.setTextColor(COLORS.secondary[0], COLORS.secondary[1], COLORS.secondary[2]);
+          doc.text('Recomendações de Performance:', 14, yPos);
+          yPos += 6;
+          doc.setFont('helvetica', 'normal');
+          doc.setTextColor(0, 0, 0);
+          analiseIA.analiseResultados.recomendacoes.forEach((rec, idx) => {
+            if (yPos > 270) {
+              doc.addPage();
+              yPos = 20;
+            }
+            const lines = doc.splitTextToSize(`${idx + 1}. ${rec}`, pageWidth - 32);
+            doc.text(lines, 18, yPos);
+            yPos += lines.length * 4.5 + 2;
+          });
+          yPos += 5;
+        }
+      }
+
+      // Comparação de Lojas - para gestores que não tinham
+      if (isGestor && analiseIA.comparacaoLojas) {
+        if (yPos > 200) {
+          doc.addPage();
+          yPos = 20;
+        }
+        
+        yPos = drawSectionHeader(doc, yPos, 'Comparação de Lojas - Resultados', COLORS.primary, pageWidth);
+        
+        const boxWidth = (pageWidth - 38) / 4;
+        const boxHeight = 24;
+        
+        drawColoredBox(doc, 14, yPos, boxWidth, boxHeight, COLORS.muted, 
+          'Lojas Analisadas', 
+          analiseIA.comparacaoLojas.totalLojas.toString()
+        );
+        
+        const taxaCumprimento = analiseIA.comparacaoLojas.totalLojas > 0 
+          ? ((analiseIA.comparacaoLojas.lojasAcimaMedia / analiseIA.comparacaoLojas.totalLojas) * 100).toFixed(1)
+          : '0';
+        drawColoredBox(doc, 14 + boxWidth + 3, yPos, boxWidth, boxHeight, COLORS.secondary, 
+          'Taxa Cumprimento', 
+          `${taxaCumprimento}%`
+        );
+        
+        drawColoredBox(doc, 14 + (boxWidth + 3) * 2, yPos, boxWidth, boxHeight, COLORS.success, 
+          'Acima Objetivo', 
+          analiseIA.comparacaoLojas.lojasAcimaMedia.toString()
+        );
+        
+        const abaixoObj = analiseIA.comparacaoLojas.lojasAbaixoMedia || 
+          (analiseIA.comparacaoLojas.totalLojas - analiseIA.comparacaoLojas.lojasAcimaMedia);
+        drawColoredBox(doc, 14 + (boxWidth + 3) * 3, yPos, boxWidth, boxHeight, COLORS.danger, 
+          'Abaixo Objetivo', 
+          abaixoObj.toString()
+        );
+        
+        yPos += boxHeight + 8;
+        
+        // Cards melhor/pior loja
+        if (analiseIA.comparacaoLojas.melhorLoja || analiseIA.comparacaoLojas.piorLoja) {
+          const cardWidth = (pageWidth - 32) / 2;
+          
+          if (analiseIA.comparacaoLojas.melhorLoja) {
+            drawHighlightCard(doc, 14, yPos, cardWidth, 'Melhor Loja', 
+              analiseIA.comparacaoLojas.melhorLoja.nome,
+              [
+                { label: 'Serviços', value: analiseIA.comparacaoLojas.melhorLoja.servicos.toString() },
+                { label: 'Desvio', value: formatPercent(analiseIA.comparacaoLojas.melhorLoja.desvio, 100) },
+              ],
+              COLORS.success
+            );
+          }
+          
+          if (analiseIA.comparacaoLojas.piorLoja) {
+            drawHighlightCard(doc, 14 + cardWidth + 4, yPos, cardWidth, 'Menor Performance', 
+              analiseIA.comparacaoLojas.piorLoja.nome,
+              [
+                { label: 'Serviços', value: analiseIA.comparacaoLojas.piorLoja.servicos.toString() },
+                { label: 'Desvio', value: formatPercent(analiseIA.comparacaoLojas.piorLoja.desvio, 100) },
+              ],
+              COLORS.danger
+            );
+          }
+          
+          yPos += 42;
+        }
+      }
+
+      // Sugestões de Melhoria - para gestores que não tinham
+      if (isGestor && analiseIA.sugestoes && analiseIA.sugestoes.length > 0) {
+        if (yPos > 200) {
+          doc.addPage();
+          yPos = 20;
+        }
+        
+        yPos = drawSectionHeader(doc, yPos, 'Sugestões de Melhoria', COLORS.warning, pageWidth);
+        
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(0, 0, 0);
+        analiseIA.sugestoes.forEach((sugestao, idx) => {
+          if (yPos > 270) {
+            doc.addPage();
+            yPos = 20;
+          }
+          const lines = doc.splitTextToSize(`${idx + 1}. ${sugestao}`, pageWidth - 32);
+          doc.text(lines, 18, yPos);
+          yPos += lines.length * 4.5 + 2;
+        });
+        yPos += 5;
+      }
+
+      // Frequência de Visitas por Loja (comum a ambos)
+      if (analiseIA.frequenciaVisitas && Object.keys(analiseIA.frequenciaVisitas).length > 0) {
+        if (yPos > 200) {
+          doc.addPage();
+          yPos = 20;
+        }
+        
+        yPos = drawSectionHeader(doc, yPos, 'Frequência de Visitas por Loja', COLORS.secondary, pageWidth);
+        
+        const visitasEntries = Object.entries(analiseIA.frequenciaVisitas)
+          .sort((a, b) => (b[1] as number) - (a[1] as number));
+        const maxVisitas = Math.max(...visitasEntries.map(([, v]) => v as number));
+        
+        const visitasData = visitasEntries.map(([loja, visitas]) => [
+          loja,
+          (visitas as number).toString(),
+          '█'.repeat(Math.round(((visitas as number) / maxVisitas) * 10))
+        ]);
+        
+        autoTable(doc, {
+          startY: yPos,
+          head: [['Loja', 'Visitas', 'Frequência']],
+          body: visitasData,
+          theme: 'striped',
+          headStyles: { 
+            fillColor: COLORS.secondary,
+            textColor: [255, 255, 255],
+            fontStyle: 'bold',
+            fontSize: 10
+          },
+          bodyStyles: { fontSize: 9 },
+          alternateRowStyles: { fillColor: [248, 250, 252] },
+          styles: { cellPadding: 3 },
+          margin: { left: 14, right: 14 },
+          columnStyles: {
+            0: { cellWidth: 70 },
+            1: { cellWidth: 25, halign: 'center' },
+            2: { cellWidth: 60, textColor: COLORS.secondary },
+          },
+        });
+        
+        yPos = (doc as any).lastAutoTable.finalY + 10;
+      }
 
       // ==================== RODAPÉ EM TODAS AS PÁGINAS ====================
       const pageCount = doc.getNumberOfPages();
