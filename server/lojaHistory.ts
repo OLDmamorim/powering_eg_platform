@@ -1035,3 +1035,123 @@ Fornece uma análise comparativa em 3-4 parágrafos destacando:
     throw new Error("Falha ao comparar períodos. Tente novamente.");
   }
 }
+
+
+/**
+ * Compara dois meses individuais para uma loja (ex: Dezembro 2025 vs Janeiro 2026)
+ */
+export async function compararMesesIndividuais(
+  lojaId: number,
+  mes1: number,
+  ano1: number,
+  mes2: number,
+  ano2: number
+): Promise<ComparacaoResult> {
+  try {
+    const loja = await db.getLojaById(lojaId);
+    if (!loja) {
+      throw new Error("Loja não encontrada");
+    }
+
+    const nomeMeses = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+      'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+
+    const periodo1 = {
+      dataInicio: new Date(ano1, mes1 - 1, 1),
+      dataFim: new Date(ano1, mes1, 0, 23, 59, 59),
+      label: `${nomeMeses[mes1]} ${ano1}`
+    };
+
+    const periodo2 = {
+      dataInicio: new Date(ano2, mes2 - 1, 1),
+      dataFim: new Date(ano2, mes2, 0, 23, 59, 59),
+      label: `${nomeMeses[mes2]} ${ano2}`
+    };
+
+    // Buscar dados de ambos os períodos
+    const [dados1, dados2] = await Promise.all([
+      buscarDadosPeriodo(lojaId, periodo1.dataInicio, periodo1.dataFim),
+      buscarDadosPeriodo(lojaId, periodo2.dataInicio, periodo2.dataFim)
+    ]);
+
+    // Calcular variações
+    const variacoes = {
+      visitas: calcularVariacao(dados2.totalVisitas, dados1.totalVisitas),
+      servicos: calcularVariacao(dados2.totalServicos, dados1.totalServicos),
+      pendentes: calcularVariacao(dados2.totalPendentes, dados1.totalPendentes),
+      taxaResolucao: calcularVariacao(dados2.taxaResolucao, dados1.taxaResolucao),
+      desvioMedio: calcularVariacao(dados2.desvioMedio, dados1.desvioMedio),
+      taxaReparacao: calcularVariacao(dados2.taxaReparacaoMedia, dados1.taxaReparacaoMedia),
+      vendasComplementares: calcularVariacao(dados2.totalVendasComplementares, dados1.totalVendasComplementares),
+    };
+
+    // Gerar análise com IA
+    const response = await invokeLLM({
+      messages: [
+        {
+          role: "system",
+          content: `És um analista especializado em comparação de performance de lojas Express Glass.
+Analisa a evolução entre dois meses e fornece insights estratégicos.
+Sê conciso mas informativo. Usa linguagem profissional em português de Portugal.`
+        },
+        {
+          role: "user",
+          content: `Compara a performance da loja "${loja.nome}" entre ${periodo1.label} e ${periodo2.label}:
+
+PERÍODO 1 (${periodo1.label}):
+- Visitas: ${dados1.totalVisitas}
+- Serviços: ${dados1.totalServicos}
+- Objetivo: ${dados1.objetivoTotal}
+- Desvio Médio: ${dados1.desvioMedio}%
+- Taxa Reparação: ${dados1.taxaReparacaoMedia}%
+- Pendentes: ${dados1.totalPendentes} (${dados1.taxaResolucao}% resolvidos)
+- Vendas Complementares: €${dados1.totalVendasComplementares}
+
+PERÍODO 2 (${periodo2.label}):
+- Visitas: ${dados2.totalVisitas}
+- Serviços: ${dados2.totalServicos}
+- Objetivo: ${dados2.objetivoTotal}
+- Desvio Médio: ${dados2.desvioMedio}%
+- Taxa Reparação: ${dados2.taxaReparacaoMedia}%
+- Pendentes: ${dados2.totalPendentes} (${dados2.taxaResolucao}% resolvidos)
+- Vendas Complementares: €${dados2.totalVendasComplementares}
+
+VARIAÇÕES:
+- Visitas: ${variacoes.visitas.percentual > 0 ? '+' : ''}${variacoes.visitas.percentual}%
+- Serviços: ${variacoes.servicos.percentual > 0 ? '+' : ''}${variacoes.servicos.percentual}%
+- Desvio: ${variacoes.desvioMedio.percentual > 0 ? '+' : ''}${variacoes.desvioMedio.percentual}%
+- Taxa Reparação: ${variacoes.taxaReparacao.percentual > 0 ? '+' : ''}${variacoes.taxaReparacao.percentual}%
+- Vendas Complementares: ${variacoes.vendasComplementares.percentual > 0 ? '+' : ''}${variacoes.vendasComplementares.percentual}%
+
+Fornece uma análise comparativa em 3-4 parágrafos destacando:
+1. Evolução geral da performance
+2. Pontos de melhoria e pontos de atenção
+3. Recomendações estratégicas`
+        }
+      ]
+    });
+
+    const analiseIA = response.choices[0]?.message?.content || 
+      "Não foi possível gerar análise comparativa. Verifique os dados disponíveis.";
+
+    return {
+      lojaNome: loja.nome,
+      tipoComparacao: `mes_${mes1}_${ano1}_vs_${mes2}_${ano2}`,
+      periodoFuturo: false,
+      periodo1: {
+        label: periodo1.label,
+        dados: dados1
+      },
+      periodo2: {
+        label: periodo2.label,
+        dados: dados2
+      },
+      variacoes,
+      analiseIA: typeof analiseIA === 'string' ? analiseIA : JSON.stringify(analiseIA)
+    };
+
+  } catch (error) {
+    console.error("Erro ao comparar meses individuais:", error);
+    throw new Error("Falha ao comparar meses. Tente novamente.");
+  }
+}

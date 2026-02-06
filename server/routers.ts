@@ -3807,6 +3807,21 @@ IMPORTANTE:
         return result;
       }),
     
+    // Comparar meses individuais (ex: Dezembro 2025 vs Janeiro 2026)
+    compararMeses: protectedProcedure
+      .input(z.object({
+        lojaId: z.number(),
+        mes1: z.number().min(1).max(12),
+        ano1: z.number().min(2020).max(2030),
+        mes2: z.number().min(1).max(12),
+        ano2: z.number().min(2020).max(2030),
+      }))
+      .query(async ({ input }) => {
+        const { compararMesesIndividuais } = await import('./lojaHistory');
+        const result = await compararMesesIndividuais(input.lojaId, input.mes1, input.ano1, input.mes2, input.ano2);
+        return result;
+      }),
+
     // Gerar histórico com múltiplos meses selecionados
     generateMultiplosMeses: protectedProcedure
       .input(z.object({

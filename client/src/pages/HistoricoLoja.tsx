@@ -38,7 +38,7 @@ import {
   Cell,
 } from "recharts";
 
-type PeriodoComparacao = 'q1_ano_anterior_vs_atual' | 'q2_ano_anterior_vs_atual' | 'q3_ano_anterior_vs_atual' | 'q4_ano_anterior_vs_atual' | 's1_ano_anterior_vs_atual' | 's2_ano_anterior_vs_atual' | 'ano_completo';
+type PeriodoComparacao = 'q1_ano_anterior_vs_atual' | 'q2_ano_anterior_vs_atual' | 'q3_ano_anterior_vs_atual' | 'q4_ano_anterior_vs_atual' | 's1_ano_anterior_vs_atual' | 's2_ano_anterior_vs_atual' | 'ano_completo' | 'meses_individuais';
 
 export default function HistoricoLoja() {
   const { language, t } = useLanguage();
@@ -57,6 +57,15 @@ export default function HistoricoLoja() {
   const [periodoComparacao, setPeriodoComparacao] = useState<PeriodoComparacao>('q4_ano_anterior_vs_atual');
   const [comparacaoData, setComparacaoData] = useState<any>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  // Estados para comparação de meses individuais
+  const [compMes1, setCompMes1] = useState(() => {
+    const d = new Date(); d.setMonth(d.getMonth() - 2);
+    return { mes: d.getMonth() + 1, ano: d.getFullYear() };
+  });
+  const [compMes2, setCompMes2] = useState(() => {
+    const d = new Date(); d.setMonth(d.getMonth() - 1);
+    return { mes: d.getMonth() + 1, ano: d.getFullYear() };
+  });
 
   const { data: lojasGestor } = trpc.lojas.getByGestor.useQuery(undefined, { enabled: user?.role === 'gestor' });
   const { data: lojasAdmin } = trpc.lojas.list.useQuery(undefined, { enabled: user?.role === 'admin' });
@@ -129,6 +138,9 @@ export default function HistoricoLoja() {
 
 
 
+  const nomeMeses = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+
   const comparacaoLabels: Record<PeriodoComparacao, string> = {
     'q1_ano_anterior_vs_atual': 'Q1 (Jan-Mar) Ano Anterior vs Atual',
     'q2_ano_anterior_vs_atual': 'Q2 (Abr-Jun) Ano Anterior vs Atual',
@@ -137,11 +149,18 @@ export default function HistoricoLoja() {
     's1_ano_anterior_vs_atual': '1º Semestre Ano Anterior vs Atual',
     's2_ano_anterior_vs_atual': '2º Semestre Ano Anterior vs Atual',
     'ano_completo': 'Ano Completo Anterior vs Atual',
+    'meses_individuais': 'Meses Individuais',
   };
 
-  // Query para comparação
+  // Query para comparação por períodos predefinidos
   const comparacaoQuery = trpc.lojaHistory.comparar.useQuery(
-    { lojaId: parseInt(lojaId), tipoComparacao: periodoComparacao },
+    { lojaId: parseInt(lojaId), tipoComparacao: periodoComparacao as any },
+    { enabled: false }
+  );
+
+  // Query para comparação de meses individuais
+  const comparacaoMesesQuery = trpc.lojaHistory.compararMeses.useQuery(
+    { lojaId: parseInt(lojaId), mes1: compMes1.mes, ano1: compMes1.ano, mes2: compMes2.mes, ano2: compMes2.ano },
     { enabled: false }
   );
 
@@ -154,10 +173,21 @@ export default function HistoricoLoja() {
 
     try {
       toast.info(t('historicoLoja.gerandoComparacao'));
-      const result = await comparacaoQuery.refetch();
-      if (result.data) {
-        setComparacaoData(result.data as any);
-        toast.success(t('comparacaoRelatoriosIA.comparacaoSucesso'));
+      
+      if (periodoComparacao === 'meses_individuais') {
+        // Comparação de meses individuais
+        const result = await comparacaoMesesQuery.refetch();
+        if (result.data) {
+          setComparacaoData(result.data as any);
+          toast.success(t('comparacaoRelatoriosIA.comparacaoSucesso'));
+        }
+      } else {
+        // Comparação por períodos predefinidos
+        const result = await comparacaoQuery.refetch();
+        if (result.data) {
+          setComparacaoData(result.data as any);
+          toast.success(t('comparacaoRelatoriosIA.comparacaoSucesso'));
+        }
       }
     } catch (error) {
       console.error("Erro ao gerar comparação:", error);
@@ -1114,30 +1144,113 @@ export default function HistoricoLoja() {
                       <SelectItem value="s1_ano_anterior_vs_atual">{t('historicoLoja.s1AnoAnteriorVsAtual')}</SelectItem>
                       <SelectItem value="s2_ano_anterior_vs_atual">{t('historicoLoja.s2AnoAnteriorVsAtual')}</SelectItem>
                       <SelectItem value="ano_completo">{t('historicoLoja.anoCompleto')}</SelectItem>
+                      <SelectItem value="meses_individuais">↔️ Meses Individuais</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
-                <Button 
-                  onClick={handleGerarComparacao}
-                  disabled={!lojaId || comparacaoQuery.isFetching}
-                >
-                  {comparacaoQuery.isFetching ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      {t('historicoLoja.aComparar')}
-                    </>
-                  ) : (
-                    <>
-                      <GitCompare className="h-4 w-4 mr-2" />
-                      {t('historicoLoja.gerarComparacao')}
-                    </>
-                  )}
-                </Button>
+                {periodoComparacao !== 'meses_individuais' && (
+                  <Button 
+                    onClick={handleGerarComparacao}
+                    disabled={!lojaId || comparacaoQuery.isFetching}
+                  >
+                    {comparacaoQuery.isFetching ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        {t('historicoLoja.aComparar')}
+                      </>
+                    ) : (
+                      <>
+                        <GitCompare className="h-4 w-4 mr-2" />
+                        {t('historicoLoja.gerarComparacao')}
+                      </>
+                    )}
+                  </Button>
+                )}
               </div>
 
-              <p className="text-sm text-muted-foreground">
-                💡 {t('historicoLoja.dicaComparacao')}
-              </p>
+              {/* Seletores de meses individuais */}
+              {periodoComparacao === 'meses_individuais' && (
+                <div className="space-y-3">
+                  <div className="flex flex-wrap gap-4 items-end">
+                    <div className="flex-1 min-w-[180px] space-y-2">
+                      <Label className="text-blue-700 font-semibold">Período 1</Label>
+                      <div className="flex gap-2">
+                        <Select value={compMes1.mes.toString()} onValueChange={(v) => setCompMes1(prev => ({ ...prev, mes: parseInt(v) }))}>
+                          <SelectTrigger className="flex-1">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {nomeMeses.slice(1).map((nome, idx) => (
+                              <SelectItem key={idx + 1} value={(idx + 1).toString()}>{nome}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Select value={compMes1.ano.toString()} onValueChange={(v) => setCompMes1(prev => ({ ...prev, ano: parseInt(v) }))}>
+                          <SelectTrigger className="w-[100px]">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {[2024, 2025, 2026].map(ano => (
+                              <SelectItem key={ano} value={ano.toString()}>{ano}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-center px-2 text-blue-500 font-bold text-lg">vs</div>
+                    <div className="flex-1 min-w-[180px] space-y-2">
+                      <Label className="text-blue-700 font-semibold">Período 2</Label>
+                      <div className="flex gap-2">
+                        <Select value={compMes2.mes.toString()} onValueChange={(v) => setCompMes2(prev => ({ ...prev, mes: parseInt(v) }))}>
+                          <SelectTrigger className="flex-1">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {nomeMeses.slice(1).map((nome, idx) => (
+                              <SelectItem key={idx + 1} value={(idx + 1).toString()}>{nome}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Select value={compMes2.ano.toString()} onValueChange={(v) => setCompMes2(prev => ({ ...prev, ano: parseInt(v) }))}>
+                          <SelectTrigger className="w-[100px]">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {[2024, 2025, 2026].map(ano => (
+                              <SelectItem key={ano} value={ano.toString()}>{ano}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <Button 
+                      onClick={handleGerarComparacao}
+                      disabled={!lojaId || comparacaoMesesQuery.isFetching}
+                    >
+                      {comparacaoMesesQuery.isFetching ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          {t('historicoLoja.aComparar')}
+                        </>
+                      ) : (
+                        <>
+                          <GitCompare className="h-4 w-4 mr-2" />
+                          {t('historicoLoja.gerarComparacao')}
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                  <p className="text-sm text-blue-600">
+                    Selecione dois meses para comparar a performance da loja entre períodos específicos.
+                  </p>
+                </div>
+              )}
+
+              {periodoComparacao !== 'meses_individuais' && (
+                <p className="text-sm text-muted-foreground">
+                  💡 {t('historicoLoja.dicaComparacao')}
+                </p>
+              )}
             </CardContent>
           </Card>
         )}

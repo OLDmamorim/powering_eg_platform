@@ -4230,3 +4230,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Incluir no PDF: resumo geral, pontos positivos, pontos negativos, tendências, recomendações, frequência de visitas
 - [x] Incluir no PDF: análise dos pontos destacados pelos gestores
 - [x] PDF deve ser representação fiel do que aparece no ecrã
+
+## v4.47 - Meses Individuais no Filtro de Comparação do Histórico da Loja
+- [x] Adicionar meses individuais ao seletor de comparação entre períodos
+- [x] Permitir comparar meses isolados (ex: Dezembro 2025 vs Janeiro 2026)
+- [x] Manter opções existentes e adicionar meses como opções adicionais
