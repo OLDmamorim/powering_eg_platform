@@ -259,7 +259,7 @@ export function ExportarRelatorioIAPDF({ analiseIA, periodo }: Props) {
       doc.setTextColor(30, 41, 59);
       doc.setFontSize(22);
       doc.setFont('helvetica', 'bold');
-      doc.text('Relat\u00f3rio IA', pageWidth / 2, 20, { align: 'center' });
+      doc.text('Relat\u00f3rio', pageWidth / 2, 20, { align: 'center' });
       
       // Subt\u00edtulo
       doc.setFontSize(11);

@@ -2522,6 +2522,7 @@ IMPORTANTE:
         const analiseComFiltro = {
           ...analise,
           filtroAplicado: filtroDescricao,
+          tipoRelatorio: ctx.user.role !== 'admin' ? 'gestor' as const : 'admin' as const,
         };
         
         // Salvar relatório IA na base de dados
@@ -2597,6 +2598,7 @@ IMPORTANTE:
         const analiseComFiltro = {
           ...analise,
           filtroAplicado: filtroDescricao,
+          tipoRelatorio: ctx.user.role !== 'admin' ? 'gestor' as const : 'admin' as const,
         };
         
         // Salvar relatório IA na base de dados

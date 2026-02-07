@@ -123,7 +123,7 @@ export default function ComparacaoRelatoriosIA() {
       // Título
       doc.setFontSize(16);
       doc.setFont("helvetica", "bold");
-      doc.text("Comparação de Relatórios IA", margin, 20);
+      doc.text("Comparação de Relatórios", margin, 20);
 
       // Informações dos relatórios
       doc.setFontSize(10);
@@ -208,7 +208,7 @@ export default function ComparacaoRelatoriosIA() {
     <DashboardLayout>
     <div className="container py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Comparação de Relatórios IA</h1>
+        <h1 className="text-3xl font-bold mb-2">Comparação de Relatórios</h1>
         <p className="text-muted-foreground">
           Compare dois relatórios lado-a-lado para identificar mudanças de tendências
         </p>

@@ -304,7 +304,7 @@ export function HistoricoRelatoriosIA() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <FileText className="h-5 w-5" />
-            Histórico de Relatórios IA
+            Histórico de Relatórios
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -330,7 +330,7 @@ export function HistoricoRelatoriosIA() {
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">
               <FileText className="h-5 w-5" />
-              Histórico de Relatórios IA ({historico.length})
+              Histórico de Relatórios ({historico.length})
             </CardTitle>
             <div className="flex items-center gap-2">
               <Button

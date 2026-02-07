@@ -467,9 +467,7 @@ export default function RelatoriosIA() {
               </>
             )}
 
-            {/* Secções de Admin (esconder para gestores) */}
-            {analise.tipoRelatorio !== 'gestor' && (
-              <>
+            {/* Secções comuns (visíveis para todos) */}
             <div className="grid gap-4 md:grid-cols-2">
               <Card>
                 <CardHeader>
@@ -964,8 +962,6 @@ export default function RelatoriosIA() {
                 </div>
               </CardContent>
             </Card>
-              </>
-            )}
           </div>
         )}
       </div>

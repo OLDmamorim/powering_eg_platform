@@ -194,8 +194,8 @@
       "relatorioLivre": "Relatório Livre",
       "relatorioCompleto": "Relatório Completo",
       "meusRelatorios": "Meus Relatórios",
-      "relatoriosIA": "Relatórios IA",
-      "historicoIA": "Histórico IA",
+      "relatoriosIA": "Relatórios",
+      "historicoIA": "Histórico",
       "resumosGlobais": "Resumos Globais",
       "novaOcorrencia": "Nova Ocorrência",
       "historicoOcorrencias": "Histórico Ocorrências",
@@ -260,7 +260,7 @@
     "novo": "novo",
     "gerarDica": "A gerar dica...",
     "dicaPadrao": "Tudo em ordem! Continua o bom trabalho.",
-    "relatoriosIA": "Relatórios IA",
+    "relatoriosIA": "Relatórios",
     "relatorioMensal": "Relatório Mensal",
     "minhasTarefas": "Minhas Tarefas",
     "tarefas": "Tarefas",
@@ -495,7 +495,7 @@
     "semRelatorios": "Ainda não criou nenhum relatório"
   },
   "relatoriosIA": {
-    "title": "Relatórios IA",
+    "title": "Relatórios",
     "subtitle": "Gerar relatórios automáticos com inteligência artificial",
     "tipoRelatorio": "Tipo de Relatório",
     "diario": "Diário",
@@ -533,8 +533,8 @@
     "semResumoDisponivel": "Sem resumo disponível"
   },
   "historicoIA": {
-    "title": "Histórico IA",
-    "subtitle": "Histórico de relatórios gerados por IA",
+    "title": "Histórico",
+    "subtitle": "Histórico de relatórios gerados",
     "semHistorico": "Nenhum relatório IA gerado",
     "tipo": "Tipo",
     "data": "Data",

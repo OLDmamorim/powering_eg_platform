@@ -266,7 +266,7 @@ export default function Categorias() {
 
         </div>
 
-        {/* Histórico de Relatórios IA */}
+        {/* Histórico de Relatórios */}
         <HistoricoRelatoriosIA />
         
         {/* Estatísticas */}

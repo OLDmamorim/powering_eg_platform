@@ -4235,3 +4235,17 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar meses individuais ao seletor de comparação entre períodos
 - [x] Permitir comparar meses isolados (ex: Dezembro 2025 vs Janeiro 2026)
 - [x] Manter opções existentes e adicionar meses como opções adicionais
+
+## v4.48 - Corrigir PDF Relatórios IA (Bug Persistente)
+- [x] Remover "IA" do título do PDF - deve ser apenas "Relatório" (não "Relatório IA")
+- [x] PDF deve incluir TODA a informação operacional visível no ecrã
+- [x] Incluir: Resumo Geral, Loja Mais/Menos Visitada
+- [x] Incluir: Pontos Positivos e Pontos Negativos
+- [x] Incluir: Análise dos Pontos Destacados pelos Gestores (Tendências, Positivos, Negativos)
+- [x] Incluir: Sugestões/Recomendações
+- [x] Incluir: Frequência de Visitas por Loja
+- [x] Incluir: Análise de Performance (Resultados) - que já existe
+- [x] Corrigir erro de sintaxe (semicolon em falta) no ficheiro
+- [x] Remover 'IA' de todos os menus laterais, breadcrumbs e títulos de páginas
+- [x] Corrigir isGestor no PDF para usar tipoRelatorio real do backend
+- [x] Adicionar tipoRelatorio ao retorno do backend para gestores

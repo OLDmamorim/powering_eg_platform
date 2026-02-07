@@ -201,8 +201,8 @@
       "relatorioLivre": "Free Report",
       "relatorioCompleto": "Complete Report",
       "meusRelatorios": "My Reports",
-      "relatoriosIA": "AI Reports",
-      "historicoIA": "AI History",
+      "relatoriosIA": "Reports",
+      "historicoIA": "History",
       "resumosGlobais": "Global Summaries",
       "novaOcorrencia": "New Occurrence",
       "historicoOcorrencias": "Occurrence History",
@@ -267,7 +267,7 @@
     "novo": "new",
     "gerarDica": "Generating tip...",
     "dicaPadrao": "Everything is in order! Keep up the good work.",
-    "relatoriosIA": "AI Reports",
+    "relatoriosIA": "Reports",
     "relatorioMensal": "Monthly Report",
     "minhasTarefas": "My Tasks",
     "tarefas": "Tasks",
@@ -502,7 +502,7 @@
     "semRelatorios": "You haven't created any reports yet"
   },
   "relatoriosIA": {
-    "title": "AI Reports",
+    "title": "Reports",
     "subtitle": "Automatic supervision analysis with artificial intelligence",
     "configuracaoRelatorio": "Report Configuration",
     "periodoSelecioneMeses": "Period (select months)",
@@ -512,7 +512,7 @@
     "relatorioPersonalizado": "Personalized report for your stores",
     "resumoGeral": "General Summary",
     "semResumoDisponivel": "No summary available",
-    "title": "AI Reports",
+    "title": "Reports",
     "subtitle": "Generate automatic reports with artificial intelligence",
     "tipoRelatorio": "Report Type",
     "diario": "Daily",
@@ -544,8 +544,8 @@
     "comeceCategorizarRelatorios": "Start by categorizing reports on the Reports page"
   },
   "historicoIA": {
-    "title": "AI History",
-    "subtitle": "History of AI-generated reports",
+    "title": "History",
+    "subtitle": "History of generated reports",
     "semHistorico": "No AI reports generated",
     "tipo": "Type",
     "data": "Date",

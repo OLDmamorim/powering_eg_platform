@@ -17,7 +17,7 @@ const routeNames: Record<string, { pt: string; en: string }> = {
   "lojas": { pt: "Lojas", en: "Stores" },
   "gestores": { pt: "Gestores", en: "Managers" },
   "relatorios": { pt: "Relatórios", en: "Reports" },
-  "relatorios-ia": { pt: "Relatórios IA", en: "AI Reports" },
+  "relatorios-ia": { pt: "Relatórios", en: "Reports" },
   "relatorio-livre": { pt: "Relatório Livre", en: "Free Report" },
   "relatorio-completo": { pt: "Relatório Completo", en: "Complete Report" },
   "historico-pontos": { pt: "Histórico de Pontos", en: "Points History" },
