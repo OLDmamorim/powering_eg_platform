@@ -4311,3 +4311,11 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Causa: Contexto do chatbot não tinha resumo mensal de visitas
 - [x] Corrigir RelatoriosIA.tsx para iniciar com mês anterior por defeito
 - [x] Melhorar contexto do chatbot com resumo mensal de lojas visitadas/não visitadas
+
+## v4.56 - Bug CRÍTICO: Chatbot e Dashboard RelatoriosIA continuam errados
+- [x] Chatbot diz que não visitou lojas que foram visitadas em Janeiro
+- [x] Dashboard RelatoriosIA mostra 0 lojas visitadas, 0 relatórios livres, 0 relatórios completos
+- [x] Causa confirmada: utilizador estava na versão publicada antiga (sem as correções v4.55)
+- [x] BD confirmada: 13 relatórios livres + 5 completos em Janeiro 2026 para gestorId=30001
+- [x] Removidos logs de debug do aiService.ts
+- [ ] PENDENTE: Publicar nova versão para que correções entrem em produção

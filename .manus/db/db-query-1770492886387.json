@@ -1,0 +1,70 @@
+{
+  "query": "SELECT id, lojaId, dataVisita, DATE_FORMAT(dataVisita, '%Y-%m-%d %H:%i:%s') as formatted_date FROM relatorios_livres WHERE YEAR(dataVisita) = 2026 AND MONTH(dataVisita) = 1 ORDER BY dataVisita DESC LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT id, lojaId, dataVisita, DATE_FORMAT(dataVisita, '%Y-%m-%d %H:%i:%s') as formatted_date FROM relatorios_livres WHERE YEAR(dataVisita) = 2026 AND MONTH(dataVisita) = 1 ORDER BY dataVisita DESC LIMIT 10;",
+  "rows": [
+    {
+      "id": "1800002",
+      "lojaId": "180057",
+      "dataVisita": "2026-01-30 17:46:28",
+      "formatted_date": "2026-01-30 17:46:28"
+    },
+    {
+      "id": "1800001",
+      "lojaId": "60004",
+      "dataVisita": "2026-01-30 17:46:28",
+      "formatted_date": "2026-01-30 17:46:28"
+    },
+    {
+      "id": "1830003",
+      "lojaId": "180012",
+      "dataVisita": "2026-01-30 07:49:00",
+      "formatted_date": "2026-01-30 07:49:00"
+    },
+    {
+      "id": "1770015",
+      "lojaId": "1260006",
+      "dataVisita": "2026-01-29 10:27:00",
+      "formatted_date": "2026-01-29 10:27:00"
+    },
+    {
+      "id": "1770014",
+      "lojaId": "1260005",
+      "dataVisita": "2026-01-29 10:27:00",
+      "formatted_date": "2026-01-29 10:27:00"
+    },
+    {
+      "id": "1770013",
+      "lojaId": "1260005",
+      "dataVisita": "2026-01-29 10:26:59",
+      "formatted_date": "2026-01-29 10:26:59"
+    },
+    {
+      "id": "1770011",
+      "lojaId": "1260006",
+      "dataVisita": "2026-01-29 10:26:56",
+      "formatted_date": "2026-01-29 10:26:56"
+    },
+    {
+      "id": "1770010",
+      "lojaId": "1260005",
+      "dataVisita": "2026-01-29 10:26:56",
+      "formatted_date": "2026-01-29 10:26:56"
+    },
+    {
+      "id": "1770012",
+      "lojaId": "1260007",
+      "dataVisita": "2026-01-29 10:26:56",
+      "formatted_date": "2026-01-29 10:26:56"
+    },
+    {
+      "id": "1770006",
+      "lojaId": "1260001",
+      "dataVisita": "2026-01-29 10:24:08",
+      "formatted_date": "2026-01-29 10:24:08"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tlojaId\tdataVisita\tformatted_date\n1800002\t180057\t2026-01-30 17:46:28\t2026-01-30 17:46:28\n1800001\t60004\t2026-01-30 17:46:28\t2026-01-30 17:46:28\n1830003\t180012\t2026-01-30 07:49:00\t2026-01-30 07:49:00\n1770015\t1260006\t2026-01-29 10:27:00\t2026-01-29 10:27:00\n1770014\t1260005\t2026-01-29 10:27:00\t2026-01-29 10:27:00\n1770013\t1260005\t2026-01-29 10:26:59\t2026-01-29 10:26:59\n1770011\t1260006\t2026-01-29 10:26:56\t2026-01-29 10:26:56\n1770010\t1260005\t2026-01-29 10:26:56\t2026-01-29 10:26:56\n1770012\t1260007\t2026-01-29 10:26:56\t2026-01-29 10:26:56\n1770006\t1260001\t2026-01-29 10:24:08\t2026-01-29 10:24:08\n",
+  "stderr": "",
+  "execution_time_ms": 346
+}
