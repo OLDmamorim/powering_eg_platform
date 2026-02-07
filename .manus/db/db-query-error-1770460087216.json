@@ -1,0 +1,8 @@
+{
+  "query": "SELECT g.id, g.nome, g.zona, l.id as loja_id, l.nome as loja_nome, l.numero as loja_numero FROM gestores g LEFT JOIN lojas l ON l.gestorId = g.id WHERE g.nome LIKE '%F%bio%' OR g.nome LIKE '%Fabio%' ORDER BY l.nome;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT g.id, g.nome, g.zona, l.id as loja_id, l.nome as loja_nome, l.numero as loja_numero FROM gestores g LEFT JOIN lojas l ON l.gestorId = g.id WHERE g.nome LIKE '%F%bio%' OR g.nome LIKE '%Fabio%' ORDER BY l.nome;",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 'l.gestorid' in 'on clause'"
+  ]
+}

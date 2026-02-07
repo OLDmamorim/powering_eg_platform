@@ -9209,15 +9209,23 @@ IMPORTANTE:
         
         // Guardar relatórios por loja
         const relatoriosGuardados = [];
+        console.log('[analiseFichas] === INÍCIO MATCHING DE LOJAS ===');
+        console.log('[analiseFichas] Total lojas no resultado:', resultado.relatoriosPorLoja.length);
+        console.log('[analiseFichas] Lojas encontradas:', resultado.relatoriosPorLoja.map(r => `${r.nomeLoja} (num: ${r.numeroLoja})`).join(', '));
+        
         for (const relatorio of resultado.relatoriosPorLoja) {
           // Tentar encontrar a loja no sistema
           let lojaId: number | null = null;
+          let matchMethod = 'none';
           
           // Primeiro tentar por número
           if (relatorio.numeroLoja) {
             const lojaPorNumero = await db.getLojaByNumero(relatorio.numeroLoja);
             if (lojaPorNumero) {
               lojaId = lojaPorNumero.id;
+              matchMethod = `numero(${relatorio.numeroLoja})->${lojaPorNumero.nome}`;
+            } else {
+              console.log(`[analiseFichas] FALHA por número: ${relatorio.nomeLoja} (num: ${relatorio.numeroLoja}) - número não encontrado na BD`);
             }
           }
           
@@ -9226,8 +9234,13 @@ IMPORTANTE:
             const lojaPorNome = await db.getLojaByNomeAproximado(relatorio.nomeLoja);
             if (lojaPorNome) {
               lojaId = lojaPorNome.id;
+              matchMethod = `nome(${relatorio.nomeLoja})->${lojaPorNome.nome}`;
+            } else {
+              console.log(`[analiseFichas] FALHA por nome: "${relatorio.nomeLoja}" - nome não encontrado na BD`);
             }
           }
+          
+          console.log(`[analiseFichas] Loja: "${relatorio.nomeLoja}" | Num: ${relatorio.numeroLoja} | Match: ${matchMethod} | lojaId: ${lojaId}`);
           
           // Guardar lojaId sempre que encontrado (não restringir ao gestor)
           // A filtragem por gestor é feita na visualização, não no armazenamento
@@ -9355,9 +9368,14 @@ IMPORTANTE:
             console.error('[analiseFichas] Erro ao guardar/comparar fichas identificadas:', fichasError);
           }
           
+          // Verificar se a loja pertence ao gestor
+          const lojasGestorIds = lojasGestor.map(l => l.id);
+          const pertenceAoGestor = lojaId ? lojasGestorIds.includes(lojaId) : false;
+          console.log(`[analiseFichas] pertenceAoGestor: ${pertenceAoGestor} (lojaId: ${lojaId}, lojasGestorIds: [${lojasGestorIds.join(',')}])`);
+          
           relatoriosGuardados.push({
             ...relatorioGuardado,
-            pertenceAoGestor: !!lojaId,
+            pertenceAoGestor,
             processosRepetidos: numProcessosRepetidos,
           });
           

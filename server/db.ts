@@ -9669,7 +9669,12 @@ function normalizarNomeLoja(nome: string): string {
 const ALIASES_LOJAS: Record<string, string[]> = {
   // Lojas com nomes diferentes no Excel vs BD
   'caldas': ['caldas da rainha', 'sm caldas da rainha'],
+  'caldas da rainha': ['caldas da rainha'],
+  'caldas rainha': ['caldas da rainha'],
   'leziria do tejo sm': ['leziria sm'],
+  'leziria sm': ['leziria sm'],
+  'lezíria sm': ['leziria sm'],
+  'lezíria do tejo sm': ['leziria sm'],
   'lisboa': ['lisboa sm', 'lisboa smr'],
   'lisboa sm': ['lisboa sm', 'lisboa smr'],
   'braga': ['braga - minho center', 'braga sm'],
@@ -9689,6 +9694,7 @@ const ALIASES_LOJAS: Record<string, string[]> = {
   'famalicao sm': ['famalicao sm'],
   'faro': ['faro'],
   'faro sm': ['faro sm'],
+  'sm faro': ['faro sm'],
   'viana': ['viana do castelo', 'viana do castelo sm'],
   'viana sm': ['viana do castelo sm'],
   'paredes': ['paredes'],
@@ -9715,7 +9721,10 @@ const ALIASES_LOJAS: Record<string, string[]> = {
   'santarem': ['santarem'],
   'entroncamento': ['entroncamento'],
   'castanheira do ribatejo': ['castanheira do ribatejo', 'sm castanheira do ribatejo'],
+  'castanheira': ['castanheira do ribatejo'],
+  'castanheira ribatejo': ['castanheira do ribatejo'],
   'vale do tejo sm': ['vale do tejo sm'],
+  'sm vale do tejo': ['vale do tejo sm'],
   'pacos de ferreira': ['pacos de ferreira'],
   'vila verde': ['vila verde'],
   'povoa de varzim': ['povoa de varzim'],
@@ -9762,6 +9771,7 @@ export async function getLojaByNomeAproximado(nome: string) {
   if (!db) return null;
   
   const nomeNormalizado = normalizarNomeLoja(nome);
+  console.log(`[getLojaByNomeAproximado] Input: "${nome}" -> Normalizado: "${nomeNormalizado}"`);
   
   // Obter todas as lojas para comparação
   const todasLojas = await db.select().from(lojas);
@@ -9769,34 +9779,56 @@ export async function getLojaByNomeAproximado(nome: string) {
   // 1. Primeiro tentar match exato (normalizado)
   for (const loja of todasLojas) {
     if (normalizarNomeLoja(loja.nome) === nomeNormalizado) {
+      console.log(`[getLojaByNomeAproximado] Match exato: "${loja.nome}" (id: ${loja.id})`);
       return loja;
     }
   }
   
   // 2. Tentar aliases
   const possiveisNomes = ALIASES_LOJAS[nomeNormalizado] || [];
+  console.log(`[getLojaByNomeAproximado] Aliases para "${nomeNormalizado}": [${possiveisNomes.join(', ')}]`);
   for (const possivel of possiveisNomes) {
     for (const loja of todasLojas) {
       if (normalizarNomeLoja(loja.nome) === possivel) {
+        console.log(`[getLojaByNomeAproximado] Match por alias: "${loja.nome}" (id: ${loja.id}) via alias "${possivel}"`);
         return loja;
       }
     }
   }
   
-  // 3. Tentar match parcial (nome do Excel contém nome da BD ou vice-versa)
-  for (const loja of todasLojas) {
-    const lojaNomalizada = normalizarNomeLoja(loja.nome);
-    if (lojaNomalizada.includes(nomeNormalizado) || nomeNormalizado.includes(lojaNomalizada)) {
-      return loja;
+  // 2.5. Tentar aliases reversos (verificar se algum alias da BD aponta para este nome)
+  for (const [aliasKey, aliasValues] of Object.entries(ALIASES_LOJAS)) {
+    if (aliasValues.includes(nomeNormalizado)) {
+      // O nome normalizado é um valor de alias, tentar encontrar pela chave
+      for (const loja of todasLojas) {
+        if (normalizarNomeLoja(loja.nome) === aliasKey) {
+          console.log(`[getLojaByNomeAproximado] Match por alias reverso: "${loja.nome}" (id: ${loja.id}) via chave "${aliasKey}"`);
+          return loja;
+        }
+      }
     }
   }
   
-  // 4. Tentar match por palavras-chave principais (primeira palavra)
-  const primeiraPalavra = nomeNormalizado.split(' ')[0];
-  if (primeiraPalavra.length >= 4) { // Só se a palavra tiver pelo menos 4 caracteres
+  // 3. Tentar match parcial (nome do Excel contém nome da BD ou vice-versa)
+  // Mas evitar matches muito curtos que podem ser falsos positivos
+  for (const loja of todasLojas) {
+    const lojaNomalizada = normalizarNomeLoja(loja.nome);
+    if (lojaNomalizada.length >= 4 && nomeNormalizado.length >= 4) {
+      if (lojaNomalizada.includes(nomeNormalizado) || nomeNormalizado.includes(lojaNomalizada)) {
+        console.log(`[getLojaByNomeAproximado] Match parcial: "${loja.nome}" (id: ${loja.id})`);
+        return loja;
+      }
+    }
+  }
+  
+  // 4. Tentar match por palavras-chave principais (primeira palavra significativa)
+  const palavras = nomeNormalizado.split(' ').filter(p => p.length >= 4 && !['sm', 'do', 'da', 'de', 'dos', 'das'].includes(p));
+  if (palavras.length > 0) {
+    const primeiraPalavra = palavras[0];
     for (const loja of todasLojas) {
       const lojaNomalizada = normalizarNomeLoja(loja.nome);
-      if (lojaNomalizada.startsWith(primeiraPalavra)) {
+      if (lojaNomalizada.startsWith(primeiraPalavra) || lojaNomalizada.includes(primeiraPalavra)) {
+        console.log(`[getLojaByNomeAproximado] Match por palavra-chave "${primeiraPalavra}": "${loja.nome}" (id: ${loja.id})`);
         return loja;
       }
     }
@@ -9806,6 +9838,11 @@ export async function getLojaByNomeAproximado(nome: string) {
   const result = await db.select().from(lojas)
     .where(like(lojas.nome, `%${nome}%`))
     .limit(1);
+  if (result[0]) {
+    console.log(`[getLojaByNomeAproximado] Match por LIKE: "${result[0].nome}" (id: ${result[0].id})`);
+  } else {
+    console.log(`[getLojaByNomeAproximado] NENHUM MATCH para: "${nome}" (normalizado: "${nomeNormalizado}")`);
+  }
   return result[0] || null;
 }
 

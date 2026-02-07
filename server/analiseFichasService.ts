@@ -95,8 +95,8 @@ const STATUS_ALERTA = ['FALTA DOCUMENTOS', 'RECUSADO', 'INCIDÊNCIA'];
 // As chaves devem estar em minúsculas para comparação case-insensitive
 const MAPEAMENTO_NOMES_LOJAS: Record<string, string> = {
   'paredes ii': 'Mycarcenter',
-  'porto alto': 'Porto alto',
-  'portoalto': 'Porto alto',
+  'porto alto': 'Porto Alto',
+  'portoalto': 'Porto Alto',
   // Lojas de Lisboa com nomes específicos
   'lisboa amoreiras': 'Lisboa',  // Amoreiras = Lisboa #20
   'lisboa relogio': 'Lisboa Relogio',  // Rotunda do relógio = Lisboa Relogio #21
@@ -121,16 +121,47 @@ const MAPEAMENTO_NOMES_LOJAS: Record<string, string> = {
   'serviço móvel porto (maia)': 'SM Porto Maia',  // Porto sul sm #80
   'servico movel porto (maia)': 'SM Porto Maia',
   'servico movel porto': 'SM Porto Maia',
+  // Lojas do Fábio Dias com nomes específicos
+  'caldas da rainha': 'Caldas da Rainha',
+  'caldas rainha': 'Caldas da Rainha',
+  'caldas': 'Caldas da Rainha',
+  'castanheira do ribatejo': 'Castanheira do Ribatejo',
+  'castanheira': 'Castanheira do Ribatejo',
+  'castanheira ribatejo': 'Castanheira do Ribatejo',
+  'faro sm': 'Faro SM',
+  'sm faro': 'Faro SM',
+  'serviço móvel faro': 'Faro SM',
+  'servico movel faro': 'Faro SM',
+  'leziria sm': 'Lezíria SM',
+  'lezíria sm': 'Lezíria SM',
+  'leziria do tejo sm': 'Lezíria SM',
+  'lezíria do tejo sm': 'Lezíria SM',
+  'sm leziria': 'Lezíria SM',
+  'sm caldas da rainha': 'SM Caldas da Rainha',
+  'sm caldas': 'SM Caldas da Rainha',
+  'serviço móvel caldas': 'SM Caldas da Rainha',
+  'servico movel caldas': 'SM Caldas da Rainha',
+  'serviço móvel caldas da rainha': 'SM Caldas da Rainha',
+  'servico movel caldas da rainha': 'SM Caldas da Rainha',
+  'vale do tejo sm': 'Vale do Tejo SM',
+  'sm vale do tejo': 'Vale do Tejo SM',
+  'serviço móvel vale do tejo': 'Vale do Tejo SM',
+  'servico movel vale do tejo': 'Vale do Tejo SM',
+  'portimão': 'Portimão',
+  'portimao': 'Portimão',
+  'santarém': 'Santarém',
+  'santarem': 'Santarém',
 };
 
 // Mapeamento de cidades conhecidas para normalização
 const CIDADES_CONHECIDAS = [
   'Abrantes', 'Albufeira', 'Almada', 'Amadora', 'Aveiro', 'Barcelos', 'Braga', 'Bragança',
-  'Caldas', 'Cascais', 'Castelo Branco', 'Chaves', 'Coimbra', 'Covilhã', 'Évora',
+  'Caldas da Rainha', 'Caldas', 'Cascais', 'Castanheira do Ribatejo', 'Castanheira', 'Castelo Branco', 'Chaves', 'Coimbra', 'Covilhã',
+  'Évora', 'Entroncamento',
   'Famalicão', 'Faro', 'Figueira', 'Funchal', 'Gondomar', 'Guarda', 'Guimarães',
-  'Leiria', 'Lisboa', 'Loures', 'Maia', 'Matosinhos', 'Montijo', 'Odivelas', 'Oeiras',
-  'Olhão', 'Paredes', 'Peniche', 'Pombal', 'Ponte Lima', 'Portalegre', 'Portimão', 'Porto',
-  'Santarém', 'Seixal', 'Setúbal', 'Sintra', 'Tomar', 'Torres Vedras', 'Viana', 'Vila Franca',
+  'Leiria', 'Lezíria', 'Lisboa', 'Loures', 'Maia', 'Matosinhos', 'Montijo', 'Odivelas', 'Oeiras',
+  'Olhão', 'Paredes', 'Peniche', 'Pombal', 'Ponte Lima', 'Portalegre', 'Portimão', 'Porto', 'Porto Alto',
+  'Santarém', 'Seixal', 'Setúbal', 'Sintra', 'Tomar', 'Torres Vedras', 'Vale do Tejo', 'Viana', 'Vila Franca',
   'Vila Nova Gaia', 'Vila Real', 'Viseu'
 ];
 
@@ -152,9 +183,24 @@ function isServicoMovel(nmdos: string, nomeLoja: string): boolean {
 function extrairCidade(nmdos: string, nomeLoja: string): string | null {
   const textoCompleto = `${nmdos} ${nomeLoja}`;
   
+  // Ordenar cidades por comprimento decrescente para priorizar matches mais específicos
+  // Ex: "Porto Alto" deve ser encontrado antes de "Porto"
+  const cidadesOrdenadas = [...CIDADES_CONHECIDAS].sort((a, b) => b.length - a.length);
+  
   // Procurar cidades conhecidas no texto
-  for (const cidade of CIDADES_CONHECIDAS) {
-    const regex = new RegExp(cidade.replace(/\s+/g, '\\s*'), 'i');
+  for (const cidade of cidadesOrdenadas) {
+    // Usar word boundary para evitar matches parciais (ex: "Porto" não deve match "Portimão")
+    const escapedCidade = cidade.replace(/\s+/g, '\\s*');
+    const regex = new RegExp(`(?:^|\\s|-)${escapedCidade}(?:\\s|$|-)`, 'i');
+    if (regex.test(textoCompleto)) {
+      return cidade;
+    }
+  }
+  
+  // Fallback: tentar sem word boundary para cidades que podem estar no início/fim
+  for (const cidade of cidadesOrdenadas) {
+    const escapedCidade = cidade.replace(/\s+/g, '\\s*');
+    const regex = new RegExp(escapedCidade, 'i');
     if (regex.test(textoCompleto)) {
       return cidade;
     }
@@ -222,13 +268,24 @@ export function normalizarNomeLoja(nmdos: string, nomeLoja: string): string {
 /**
  * Extrai número da loja do campo nmdos
  * Ex: "Ficha Servico 23" -> 23
- * Ex: "Ficha S.Movel 7-Leiria" -> null (servico movel nao tem numero de loja tradicional)
+ * Ex: "Ficha S.Movel 86-Faro" -> 86 (o número do SM corresponde ao numeroLoja na BD)
+ * Ex: "Ficha S.Movel 7-Leiria" -> 7
  */
 function extrairNumeroLoja(nmdos: string): number | null {
   if (!nmdos || typeof nmdos !== 'string') return null;
   
-  // Se for servico movel, nao extrair numero (o numero e do servico, nao da loja)
-  if (nmdos.toLowerCase().includes('s.movel') || nmdos.toLowerCase().includes('smovel') || nmdos.toLowerCase().includes('movel')) {
+  // Para Serviço Móvel: extrair o número que vem antes do hífen
+  // Padrão: "Ficha S.Movel XX-Cidade" ou "Ficha S.Movel XX"
+  const isSM = nmdos.toLowerCase().includes('s.movel') || nmdos.toLowerCase().includes('smovel') || nmdos.toLowerCase().includes('movel');
+  if (isSM) {
+    // Tentar padrão "S.Movel XX-Cidade" ou "S.Movel XX"
+    const matchSM = nmdos.match(/(?:s\.?movel|smovel|movel)\s*(\d+)/i);
+    if (matchSM && matchSM[1]) {
+      const num = parseInt(matchSM[1], 10);
+      if (Number.isFinite(num) && num > 0) {
+        return num;
+      }
+    }
     return null;
   }
   

@@ -1,0 +1,2410 @@
+{
+  "query": "SELECT * FROM gestores;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT * FROM gestores;",
+  "rows": [
+    {
+      "id": "2",
+      "userId": "240006",
+      "createdAt": "2025-12-15 01:00:03",
+      "updatedAt": "2025-12-15 01:00:03",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "30001",
+      "userId": "420030",
+      "createdAt": "2025-12-15 12:32:47",
+      "updatedAt": "2026-02-03 23:16:16",
+      "lastReminderDate": "2026-01-31 18:00:39",
+      "lastEnvioRH": "2026-02-03 23:16:16"
+    },
+    {
+      "id": "120001",
+      "userId": "2160121",
+      "createdAt": "2025-12-17 22:44:52",
+      "updatedAt": "2026-01-09 12:35:57",
+      "lastReminderDate": "2026-01-09 12:35:58",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "120002",
+      "userId": "2160125",
+      "createdAt": "2025-12-17 22:45:16",
+      "updatedAt": "2026-01-25 14:18:13",
+      "lastReminderDate": "2026-01-25 14:18:13",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "210001",
+      "userId": "240006",
+      "createdAt": "2025-12-19 16:50:02",
+      "updatedAt": "2025-12-19 16:50:02",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "240001",
+      "userId": "4020003",
+      "createdAt": "2025-12-20 01:41:43",
+      "updatedAt": "2025-12-20 01:41:43",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "240003",
+      "userId": "4020003",
+      "createdAt": "2025-12-20 01:42:56",
+      "updatedAt": "2025-12-20 01:42:56",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "240005",
+      "userId": "4020003",
+      "createdAt": "2025-12-20 01:43:19",
+      "updatedAt": "2025-12-20 01:43:19",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "270001",
+      "userId": "4050001",
+      "createdAt": "2025-12-20 01:53:50",
+      "updatedAt": "2025-12-20 01:53:50",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "270003",
+      "userId": "4050001",
+      "createdAt": "2025-12-20 01:54:19",
+      "updatedAt": "2025-12-20 01:54:19",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "300001",
+      "userId": "4080004",
+      "createdAt": "2025-12-20 02:06:10",
+      "updatedAt": "2025-12-20 02:06:10",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "300003",
+      "userId": "4080004",
+      "createdAt": "2025-12-20 02:06:31",
+      "updatedAt": "2025-12-20 02:06:31",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "300005",
+      "userId": "4080052",
+      "createdAt": "2025-12-20 02:17:00",
+      "updatedAt": "2025-12-20 02:17:00",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "330001",
+      "userId": "4080052",
+      "createdAt": "2025-12-20 13:16:12",
+      "updatedAt": "2025-12-20 13:16:12",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "390002",
+      "userId": "4500005",
+      "createdAt": "2025-12-20 16:57:28",
+      "updatedAt": "2025-12-20 16:57:28",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "390004",
+      "userId": "4500007",
+      "createdAt": "2025-12-20 16:58:47",
+      "updatedAt": "2025-12-20 16:58:47",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "390006",
+      "userId": "4500009",
+      "createdAt": "2025-12-20 17:00:18",
+      "updatedAt": "2025-12-20 17:00:18",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "420001",
+      "userId": "6030026",
+      "createdAt": "2025-12-29 08:32:35",
+      "updatedAt": "2025-12-29 08:32:35",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "420002",
+      "userId": "6030026",
+      "createdAt": "2025-12-29 08:33:01",
+      "updatedAt": "2025-12-29 08:33:01",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "420004",
+      "userId": "6030026",
+      "createdAt": "2025-12-29 08:33:35",
+      "updatedAt": "2025-12-29 08:33:35",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "420006",
+      "userId": "6030026",
+      "createdAt": "2025-12-29 08:34:03",
+      "updatedAt": "2025-12-29 08:34:03",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "450001",
+      "userId": "4080004",
+      "createdAt": "2025-12-29 18:15:28",
+      "updatedAt": "2025-12-29 18:15:28",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "450002",
+      "userId": "4050001",
+      "createdAt": "2025-12-29 18:15:28",
+      "updatedAt": "2025-12-29 18:15:28",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "450003",
+      "userId": "4020003",
+      "createdAt": "2025-12-29 18:15:28",
+      "updatedAt": "2025-12-29 18:15:28",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "450010",
+      "userId": "4020003",
+      "createdAt": "2025-12-29 18:15:37",
+      "updatedAt": "2025-12-29 18:15:37",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "450011",
+      "userId": "4080004",
+      "createdAt": "2025-12-29 18:15:37",
+      "updatedAt": "2025-12-29 18:15:37",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "450015",
+      "userId": "4050001",
+      "createdAt": "2025-12-29 18:15:38",
+      "updatedAt": "2025-12-29 18:15:38",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "450017",
+      "userId": "4080004",
+      "createdAt": "2025-12-29 18:15:49",
+      "updatedAt": "2025-12-29 18:15:49",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "450018",
+      "userId": "4020003",
+      "createdAt": "2025-12-29 18:15:49",
+      "updatedAt": "2025-12-29 18:15:49",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "450023",
+      "userId": "4050001",
+      "createdAt": "2025-12-29 18:15:50",
+      "updatedAt": "2025-12-29 18:15:50",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "450026",
+      "userId": "6300015",
+      "createdAt": "2025-12-29 18:15:55",
+      "updatedAt": "2025-12-29 18:15:55",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "450027",
+      "userId": "4080052",
+      "createdAt": "2025-12-29 18:16:01",
+      "updatedAt": "2025-12-29 18:16:01",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "450028",
+      "userId": "6030026",
+      "createdAt": "2025-12-29 18:21:01",
+      "updatedAt": "2025-12-29 18:21:01",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "450032",
+      "userId": "4020003",
+      "createdAt": "2025-12-29 18:24:15",
+      "updatedAt": "2025-12-29 18:24:15",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "450033",
+      "userId": "4080004",
+      "createdAt": "2025-12-29 18:24:15",
+      "updatedAt": "2025-12-29 18:24:15",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "450034",
+      "userId": "4050001",
+      "createdAt": "2025-12-29 18:24:15",
+      "updatedAt": "2025-12-29 18:24:15",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "450040",
+      "userId": "6300019",
+      "createdAt": "2025-12-29 18:24:16",
+      "updatedAt": "2025-12-29 18:24:16",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "450041",
+      "userId": "4080052",
+      "createdAt": "2025-12-29 18:24:17",
+      "updatedAt": "2025-12-29 18:24:17",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "450043",
+      "userId": "6030026",
+      "createdAt": "2025-12-29 18:24:17",
+      "updatedAt": "2025-12-29 18:24:17",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "480003",
+      "userId": "4050001",
+      "createdAt": "2025-12-29 19:39:19",
+      "updatedAt": "2025-12-29 19:39:19",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "480004",
+      "userId": "4020003",
+      "createdAt": "2025-12-29 19:39:19",
+      "updatedAt": "2025-12-29 19:39:19",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "480006",
+      "userId": "4080004",
+      "createdAt": "2025-12-29 19:39:19",
+      "updatedAt": "2025-12-29 19:39:19",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "480011",
+      "userId": "6360261",
+      "createdAt": "2025-12-29 19:39:21",
+      "updatedAt": "2025-12-29 19:39:21",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "480012",
+      "userId": "4080052",
+      "createdAt": "2025-12-29 19:39:22",
+      "updatedAt": "2025-12-29 19:39:22",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "480014",
+      "userId": "6030026",
+      "createdAt": "2025-12-29 19:39:22",
+      "updatedAt": "2025-12-29 19:39:22",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "480018",
+      "userId": "4080004",
+      "createdAt": "2025-12-29 19:41:28",
+      "updatedAt": "2025-12-29 19:41:28",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "480019",
+      "userId": "4050001",
+      "createdAt": "2025-12-29 19:41:28",
+      "updatedAt": "2025-12-29 19:41:28",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "480020",
+      "userId": "4020003",
+      "createdAt": "2025-12-29 19:41:28",
+      "updatedAt": "2025-12-29 19:41:28",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "480026",
+      "userId": "6360268",
+      "createdAt": "2025-12-29 19:41:32",
+      "updatedAt": "2025-12-29 19:41:32",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "480027",
+      "userId": "4080052",
+      "createdAt": "2025-12-29 19:41:32",
+      "updatedAt": "2025-12-29 19:41:32",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "480029",
+      "userId": "6030026",
+      "createdAt": "2025-12-29 19:41:39",
+      "updatedAt": "2025-12-29 19:41:39",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "480033",
+      "userId": "4080004",
+      "createdAt": "2025-12-29 19:43:11",
+      "updatedAt": "2025-12-29 19:43:11",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "480034",
+      "userId": "4050001",
+      "createdAt": "2025-12-29 19:43:11",
+      "updatedAt": "2025-12-29 19:43:11",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "480035",
+      "userId": "4020003",
+      "createdAt": "2025-12-29 19:43:11",
+      "updatedAt": "2025-12-29 19:43:11",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "480041",
+      "userId": "6360278",
+      "createdAt": "2025-12-29 19:43:12",
+      "updatedAt": "2025-12-29 19:43:12",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "480042",
+      "userId": "4080052",
+      "createdAt": "2025-12-29 19:43:13",
+      "updatedAt": "2025-12-29 19:43:13",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "480044",
+      "userId": "6030026",
+      "createdAt": "2025-12-29 19:43:13",
+      "updatedAt": "2025-12-29 19:43:13",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "480050",
+      "userId": "4050001",
+      "createdAt": "2025-12-29 22:03:34",
+      "updatedAt": "2025-12-29 22:03:34",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "480052",
+      "userId": "4080004",
+      "createdAt": "2025-12-29 22:03:34",
+      "updatedAt": "2025-12-29 22:03:34",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "480053",
+      "userId": "4020003",
+      "createdAt": "2025-12-29 22:03:34",
+      "updatedAt": "2025-12-29 22:03:34",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "480057",
+      "userId": "4080004",
+      "createdAt": "2025-12-29 22:03:42",
+      "updatedAt": "2025-12-29 22:03:42",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "480058",
+      "userId": "4050001",
+      "createdAt": "2025-12-29 22:03:42",
+      "updatedAt": "2025-12-29 22:03:42",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "480061",
+      "userId": "4020003",
+      "createdAt": "2025-12-29 22:03:42",
+      "updatedAt": "2025-12-29 22:03:42",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "480066",
+      "userId": "6361034",
+      "createdAt": "2025-12-29 22:03:47",
+      "updatedAt": "2025-12-29 22:03:47",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "480067",
+      "userId": "4080052",
+      "createdAt": "2025-12-29 22:03:47",
+      "updatedAt": "2025-12-29 22:03:47",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "570001",
+      "userId": "6600014",
+      "createdAt": "2025-12-30 15:06:42",
+      "updatedAt": "2025-12-30 19:28:43",
+      "lastReminderDate": "2025-12-30 19:28:44",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "570003",
+      "userId": "6600028",
+      "createdAt": "2025-12-30 15:08:51",
+      "updatedAt": "2026-01-29 12:46:12",
+      "lastReminderDate": "2026-01-29 12:46:13",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "660013",
+      "userId": "7290150",
+      "createdAt": "2026-01-01 19:44:47",
+      "updatedAt": "2026-01-01 19:44:47",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "720030",
+      "userId": "7290150",
+      "createdAt": "2026-01-02 12:55:47",
+      "updatedAt": "2026-01-02 12:55:47",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "720053",
+      "userId": "7290150",
+      "createdAt": "2026-01-02 14:15:40",
+      "updatedAt": "2026-01-02 14:15:40",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "720086",
+      "userId": "7290150",
+      "createdAt": "2026-01-02 15:04:35",
+      "updatedAt": "2026-01-02 15:04:35",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "750001",
+      "userId": "7410262",
+      "createdAt": "2026-01-02 16:47:56",
+      "updatedAt": "2026-01-02 16:47:56",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "750002",
+      "userId": "7410263",
+      "createdAt": "2026-01-02 16:47:56",
+      "updatedAt": "2026-01-02 16:47:56",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "750003",
+      "userId": "7410264",
+      "createdAt": "2026-01-02 16:47:56",
+      "updatedAt": "2026-01-02 16:47:56",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "750014",
+      "userId": "7410273",
+      "createdAt": "2026-01-02 16:48:03",
+      "updatedAt": "2026-01-02 16:48:03",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "750015",
+      "userId": "7410274",
+      "createdAt": "2026-01-02 16:48:06",
+      "updatedAt": "2026-01-02 16:48:06",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "750017",
+      "userId": "7290150",
+      "createdAt": "2026-01-02 16:48:11",
+      "updatedAt": "2026-01-02 16:48:11",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "780001",
+      "userId": "7470026",
+      "createdAt": "2026-01-04 23:03:57",
+      "updatedAt": "2026-01-04 23:03:57",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "780002",
+      "userId": "6960011",
+      "createdAt": "2026-01-04 23:04:06",
+      "updatedAt": "2026-01-04 23:04:06",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "810002",
+      "userId": "7410264",
+      "createdAt": "2026-01-05 18:28:36",
+      "updatedAt": "2026-01-05 18:28:36",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "810003",
+      "userId": "7410263",
+      "createdAt": "2026-01-05 18:28:36",
+      "updatedAt": "2026-01-05 18:28:36",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "810004",
+      "userId": "7410262",
+      "createdAt": "2026-01-05 18:28:36",
+      "updatedAt": "2026-01-05 18:28:36",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "810014",
+      "userId": "7890173",
+      "createdAt": "2026-01-05 18:28:43",
+      "updatedAt": "2026-01-05 18:28:43",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "810015",
+      "userId": "7410274",
+      "createdAt": "2026-01-05 18:28:46",
+      "updatedAt": "2026-01-05 18:28:46",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "810017",
+      "userId": "7290150",
+      "createdAt": "2026-01-05 18:28:50",
+      "updatedAt": "2026-01-05 18:28:50",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "840001",
+      "userId": "7410264",
+      "createdAt": "2026-01-06 08:30:36",
+      "updatedAt": "2026-01-06 08:30:36",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "840003",
+      "userId": "7410263",
+      "createdAt": "2026-01-06 08:30:36",
+      "updatedAt": "2026-01-06 08:30:36",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "840004",
+      "userId": "7410262",
+      "createdAt": "2026-01-06 08:30:36",
+      "updatedAt": "2026-01-06 08:30:36",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "840010",
+      "userId": "7410263",
+      "createdAt": "2026-01-06 08:35:03",
+      "updatedAt": "2026-01-06 08:35:03",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "840018",
+      "userId": "7920133",
+      "createdAt": "2026-01-06 08:35:10",
+      "updatedAt": "2026-01-06 08:35:10",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "840019",
+      "userId": "7410274",
+      "createdAt": "2026-01-06 08:35:11",
+      "updatedAt": "2026-01-06 08:35:11",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "840021",
+      "userId": "7290150",
+      "createdAt": "2026-01-06 08:35:15",
+      "updatedAt": "2026-01-06 08:35:15",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "870001",
+      "userId": "7410264",
+      "createdAt": "2026-01-06 09:19:24",
+      "updatedAt": "2026-01-06 09:19:24",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "870005",
+      "userId": "7410262",
+      "createdAt": "2026-01-06 09:19:24",
+      "updatedAt": "2026-01-06 09:19:24",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "870006",
+      "userId": "7410263",
+      "createdAt": "2026-01-06 09:19:24",
+      "updatedAt": "2026-01-06 09:19:24",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "870014",
+      "userId": "7950039",
+      "createdAt": "2026-01-06 09:19:28",
+      "updatedAt": "2026-01-06 09:19:28",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "870015",
+      "userId": "7410274",
+      "createdAt": "2026-01-06 09:19:34",
+      "updatedAt": "2026-01-06 09:19:34",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "870017",
+      "userId": "7290150",
+      "createdAt": "2026-01-06 09:19:38",
+      "updatedAt": "2026-01-06 09:19:38",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "930002",
+      "userId": "7410263",
+      "createdAt": "2026-01-08 09:20:52",
+      "updatedAt": "2026-01-08 09:20:52",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "930003",
+      "userId": "7410264",
+      "createdAt": "2026-01-08 09:20:52",
+      "updatedAt": "2026-01-08 09:20:52",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "930007",
+      "userId": "7410262",
+      "createdAt": "2026-01-08 09:20:52",
+      "updatedAt": "2026-01-08 09:20:52",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "930013",
+      "userId": "7410263",
+      "createdAt": "2026-01-08 09:22:34",
+      "updatedAt": "2026-01-08 09:22:34",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "930014",
+      "userId": "7410262",
+      "createdAt": "2026-01-08 09:22:34",
+      "updatedAt": "2026-01-08 09:22:34",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "930017",
+      "userId": "7410264",
+      "createdAt": "2026-01-08 09:22:34",
+      "updatedAt": "2026-01-08 09:22:34",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "930025",
+      "userId": "8370016",
+      "createdAt": "2026-01-08 09:22:54",
+      "updatedAt": "2026-01-08 09:22:54",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "930026",
+      "userId": "7410274",
+      "createdAt": "2026-01-08 09:23:34",
+      "updatedAt": "2026-01-08 09:23:34",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "930028",
+      "userId": "7290150",
+      "createdAt": "2026-01-08 09:23:55",
+      "updatedAt": "2026-01-08 09:23:55",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "930030",
+      "userId": "8370017",
+      "createdAt": "2026-01-08 09:39:53",
+      "updatedAt": "2026-01-08 09:39:53",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "930031",
+      "userId": "7410262",
+      "createdAt": "2026-01-08 10:05:56",
+      "updatedAt": "2026-01-08 10:05:56",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "930033",
+      "userId": "7410264",
+      "createdAt": "2026-01-08 10:05:56",
+      "updatedAt": "2026-01-08 10:05:56",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "930034",
+      "userId": "7410263",
+      "createdAt": "2026-01-08 10:05:56",
+      "updatedAt": "2026-01-08 10:05:56",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "930044",
+      "userId": "8370025",
+      "createdAt": "2026-01-08 10:06:04",
+      "updatedAt": "2026-01-08 10:06:04",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "930045",
+      "userId": "7410274",
+      "createdAt": "2026-01-08 10:06:10",
+      "updatedAt": "2026-01-08 10:06:10",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "930047",
+      "userId": "7290150",
+      "createdAt": "2026-01-08 10:06:14",
+      "updatedAt": "2026-01-08 10:06:14",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "930050",
+      "userId": "7410262",
+      "createdAt": "2026-01-08 10:27:18",
+      "updatedAt": "2026-01-08 10:27:18",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "930051",
+      "userId": "7410263",
+      "createdAt": "2026-01-08 10:27:18",
+      "updatedAt": "2026-01-08 10:27:18",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "930052",
+      "userId": "7410264",
+      "createdAt": "2026-01-08 10:27:18",
+      "updatedAt": "2026-01-08 10:27:18",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "930063",
+      "userId": "8370044",
+      "createdAt": "2026-01-08 10:27:26",
+      "updatedAt": "2026-01-08 10:27:26",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "930064",
+      "userId": "7410274",
+      "createdAt": "2026-01-08 10:27:32",
+      "updatedAt": "2026-01-08 10:27:32",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "930066",
+      "userId": "7290150",
+      "createdAt": "2026-01-08 10:27:36",
+      "updatedAt": "2026-01-08 10:27:36",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "930069",
+      "userId": "7410263",
+      "createdAt": "2026-01-08 10:29:28",
+      "updatedAt": "2026-01-08 10:29:28",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "930070",
+      "userId": "7410262",
+      "createdAt": "2026-01-08 10:29:28",
+      "updatedAt": "2026-01-08 10:29:28",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "930072",
+      "userId": "7410264",
+      "createdAt": "2026-01-08 10:29:28",
+      "updatedAt": "2026-01-08 10:29:28",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "930082",
+      "userId": "8370048",
+      "createdAt": "2026-01-08 10:29:33",
+      "updatedAt": "2026-01-08 10:29:33",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "930083",
+      "userId": "7410274",
+      "createdAt": "2026-01-08 10:29:34",
+      "updatedAt": "2026-01-08 10:29:34",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "930085",
+      "userId": "7290150",
+      "createdAt": "2026-01-08 10:29:35",
+      "updatedAt": "2026-01-08 10:29:35",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "930088",
+      "userId": "7410263",
+      "createdAt": "2026-01-08 10:30:07",
+      "updatedAt": "2026-01-08 10:30:07",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "930089",
+      "userId": "7410264",
+      "createdAt": "2026-01-08 10:30:07",
+      "updatedAt": "2026-01-08 10:30:07",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "930091",
+      "userId": "7410262",
+      "createdAt": "2026-01-08 10:30:07",
+      "updatedAt": "2026-01-08 10:30:07",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "930101",
+      "userId": "8370052",
+      "createdAt": "2026-01-08 10:30:16",
+      "updatedAt": "2026-01-08 10:30:16",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "930102",
+      "userId": "7410274",
+      "createdAt": "2026-01-08 10:30:21",
+      "updatedAt": "2026-01-08 10:30:21",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "930104",
+      "userId": "7290150",
+      "createdAt": "2026-01-08 10:30:26",
+      "updatedAt": "2026-01-08 10:30:26",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "930107",
+      "userId": "7410263",
+      "createdAt": "2026-01-08 10:32:51",
+      "updatedAt": "2026-01-08 10:32:51",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "930108",
+      "userId": "7410262",
+      "createdAt": "2026-01-08 10:32:51",
+      "updatedAt": "2026-01-08 10:32:51",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "930109",
+      "userId": "7410264",
+      "createdAt": "2026-01-08 10:32:51",
+      "updatedAt": "2026-01-08 10:32:51",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "930119",
+      "userId": "7410262",
+      "createdAt": "2026-01-08 10:33:31",
+      "updatedAt": "2026-01-08 10:33:31",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "930120",
+      "userId": "7410263",
+      "createdAt": "2026-01-08 10:33:31",
+      "updatedAt": "2026-01-08 10:33:31",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "930122",
+      "userId": "7410264",
+      "createdAt": "2026-01-08 10:33:31",
+      "updatedAt": "2026-01-08 10:33:31",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "960001",
+      "userId": "7410263",
+      "createdAt": "2026-01-08 10:52:51",
+      "updatedAt": "2026-01-08 10:52:51",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "960003",
+      "userId": "7410262",
+      "createdAt": "2026-01-08 10:52:51",
+      "updatedAt": "2026-01-08 10:52:51",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "960005",
+      "userId": "7410264",
+      "createdAt": "2026-01-08 10:52:51",
+      "updatedAt": "2026-01-08 10:52:51",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "960014",
+      "userId": "8400019",
+      "createdAt": "2026-01-08 10:52:53",
+      "updatedAt": "2026-01-08 10:52:53",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "960015",
+      "userId": "7410274",
+      "createdAt": "2026-01-08 10:52:54",
+      "updatedAt": "2026-01-08 10:52:54",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "960017",
+      "userId": "7290150",
+      "createdAt": "2026-01-08 10:52:56",
+      "updatedAt": "2026-01-08 10:52:56",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "990002",
+      "userId": "7410264",
+      "createdAt": "2026-01-08 16:59:37",
+      "updatedAt": "2026-01-08 16:59:37",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "990003",
+      "userId": "7410262",
+      "createdAt": "2026-01-08 16:59:37",
+      "updatedAt": "2026-01-08 16:59:37",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "990005",
+      "userId": "7410263",
+      "createdAt": "2026-01-08 16:59:37",
+      "updatedAt": "2026-01-08 16:59:37",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "990014",
+      "userId": "8640005",
+      "createdAt": "2026-01-08 16:59:41",
+      "updatedAt": "2026-01-08 16:59:41",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "990015",
+      "userId": "7410274",
+      "createdAt": "2026-01-08 16:59:48",
+      "updatedAt": "2026-01-08 16:59:48",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "990017",
+      "userId": "7290150",
+      "createdAt": "2026-01-08 16:59:51",
+      "updatedAt": "2026-01-08 16:59:51",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "990021",
+      "userId": "7410262",
+      "createdAt": "2026-01-08 19:00:21",
+      "updatedAt": "2026-01-08 19:00:21",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "990022",
+      "userId": "7410263",
+      "createdAt": "2026-01-08 19:00:21",
+      "updatedAt": "2026-01-08 19:00:21",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "990024",
+      "userId": "7410264",
+      "createdAt": "2026-01-08 19:00:21",
+      "updatedAt": "2026-01-08 19:00:21",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "990033",
+      "userId": "8640330",
+      "createdAt": "2026-01-08 19:00:23",
+      "updatedAt": "2026-01-08 19:00:23",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "990034",
+      "userId": "7410274",
+      "createdAt": "2026-01-08 19:00:24",
+      "updatedAt": "2026-01-08 19:00:24",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "990036",
+      "userId": "7290150",
+      "createdAt": "2026-01-08 19:00:25",
+      "updatedAt": "2026-01-08 19:00:25",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1020002",
+      "userId": "8700033",
+      "createdAt": "2026-01-08 20:21:40",
+      "updatedAt": "2026-01-08 20:21:40",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1050001",
+      "userId": "7410264",
+      "createdAt": "2026-01-09 13:29:07",
+      "updatedAt": "2026-01-09 13:29:07",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1050002",
+      "userId": "7410262",
+      "createdAt": "2026-01-09 13:29:07",
+      "updatedAt": "2026-01-09 13:29:07",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1050003",
+      "userId": "7410263",
+      "createdAt": "2026-01-09 13:29:07",
+      "updatedAt": "2026-01-09 13:29:07",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1080001",
+      "userId": "7410262",
+      "createdAt": "2026-01-09 13:52:23",
+      "updatedAt": "2026-01-09 13:52:23",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1080003",
+      "userId": "7410263",
+      "createdAt": "2026-01-09 13:52:23",
+      "updatedAt": "2026-01-09 13:52:23",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1080004",
+      "userId": "7410264",
+      "createdAt": "2026-01-09 13:52:23",
+      "updatedAt": "2026-01-09 13:52:23",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1080014",
+      "userId": "8940005",
+      "createdAt": "2026-01-09 13:52:29",
+      "updatedAt": "2026-01-09 13:52:29",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1080015",
+      "userId": "7410274",
+      "createdAt": "2026-01-09 13:52:29",
+      "updatedAt": "2026-01-09 13:52:29",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1080017",
+      "userId": "7290150",
+      "createdAt": "2026-01-09 13:52:30",
+      "updatedAt": "2026-01-09 13:52:30",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1080020",
+      "userId": "8940679",
+      "createdAt": "2026-01-09 16:14:26",
+      "updatedAt": "2026-01-26 16:07:10",
+      "lastReminderDate": "2026-01-26 16:07:10",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1080022",
+      "userId": "7410262",
+      "createdAt": "2026-01-09 16:21:07",
+      "updatedAt": "2026-01-09 16:21:07",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1080023",
+      "userId": "7410263",
+      "createdAt": "2026-01-09 16:21:07",
+      "updatedAt": "2026-01-09 16:21:07",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1080024",
+      "userId": "7410264",
+      "createdAt": "2026-01-09 16:21:07",
+      "updatedAt": "2026-01-09 16:21:07",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1080034",
+      "userId": "8940825",
+      "createdAt": "2026-01-09 16:21:19",
+      "updatedAt": "2026-01-09 16:21:19",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1080035",
+      "userId": "7410274",
+      "createdAt": "2026-01-09 16:21:21",
+      "updatedAt": "2026-01-09 16:21:21",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1080037",
+      "userId": "7290150",
+      "createdAt": "2026-01-09 16:21:25",
+      "updatedAt": "2026-01-09 16:21:25",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1080040",
+      "userId": "8940851",
+      "createdAt": "2026-01-09 16:24:31",
+      "updatedAt": "2026-01-09 16:24:31",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1080042",
+      "userId": "8940859",
+      "createdAt": "2026-01-09 16:25:05",
+      "updatedAt": "2026-01-09 16:25:05",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1080045",
+      "userId": "7410262",
+      "createdAt": "2026-01-09 16:58:24",
+      "updatedAt": "2026-01-09 16:58:24",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1080046",
+      "userId": "7410263",
+      "createdAt": "2026-01-09 16:58:24",
+      "updatedAt": "2026-01-09 16:58:24",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1080048",
+      "userId": "7410264",
+      "createdAt": "2026-01-09 16:58:24",
+      "updatedAt": "2026-01-09 16:58:24",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1110002",
+      "userId": "7410262",
+      "createdAt": "2026-01-09 17:54:50",
+      "updatedAt": "2026-01-09 17:54:50",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1110003",
+      "userId": "7410263",
+      "createdAt": "2026-01-09 17:54:50",
+      "updatedAt": "2026-01-09 17:54:50",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1110004",
+      "userId": "7410264",
+      "createdAt": "2026-01-09 17:54:50",
+      "updatedAt": "2026-01-09 17:54:50",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1110013",
+      "userId": "9000004",
+      "createdAt": "2026-01-09 17:54:58",
+      "updatedAt": "2026-01-09 17:54:58",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1110016",
+      "userId": "9000007",
+      "createdAt": "2026-01-09 17:55:02",
+      "updatedAt": "2026-01-09 17:55:02",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1110017",
+      "userId": "7410274",
+      "createdAt": "2026-01-09 17:55:08",
+      "updatedAt": "2026-01-09 17:55:08",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1110018",
+      "userId": "7290150",
+      "createdAt": "2026-01-09 17:55:08",
+      "updatedAt": "2026-01-09 17:55:08",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1170001",
+      "userId": "7410262",
+      "createdAt": "2026-01-09 22:18:30",
+      "updatedAt": "2026-01-09 22:18:30",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1170003",
+      "userId": "7410263",
+      "createdAt": "2026-01-09 22:18:30",
+      "updatedAt": "2026-01-09 22:18:30",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1170004",
+      "userId": "7410264",
+      "createdAt": "2026-01-09 22:18:30",
+      "updatedAt": "2026-01-09 22:18:30",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1170013",
+      "userId": "9090002",
+      "createdAt": "2026-01-09 22:18:34",
+      "updatedAt": "2026-01-09 22:18:34",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1170016",
+      "userId": "7410274",
+      "createdAt": "2026-01-09 22:18:36",
+      "updatedAt": "2026-01-09 22:18:36",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1170018",
+      "userId": "9090005",
+      "createdAt": "2026-01-09 22:18:36",
+      "updatedAt": "2026-01-09 22:18:36",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1170019",
+      "userId": "7290150",
+      "createdAt": "2026-01-09 22:18:38",
+      "updatedAt": "2026-01-09 22:18:38",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1230001",
+      "userId": "9540028",
+      "createdAt": "2026-01-10 22:52:12",
+      "updatedAt": "2026-01-10 22:52:12",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1230003",
+      "userId": "9540030",
+      "createdAt": "2026-01-10 22:52:12",
+      "updatedAt": "2026-01-10 22:52:12",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1230004",
+      "userId": "9540031",
+      "createdAt": "2026-01-10 22:52:12",
+      "updatedAt": "2026-01-10 22:52:12",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1230013",
+      "userId": "9540038",
+      "createdAt": "2026-01-10 22:52:19",
+      "updatedAt": "2026-01-10 22:52:19",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1230016",
+      "userId": "9540041",
+      "createdAt": "2026-01-10 22:52:23",
+      "updatedAt": "2026-01-10 22:52:23",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1230017",
+      "userId": "9540042",
+      "createdAt": "2026-01-10 22:52:29",
+      "updatedAt": "2026-01-10 22:52:29",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1230018",
+      "userId": "9540043",
+      "createdAt": "2026-01-10 22:52:29",
+      "updatedAt": "2026-01-10 22:52:29",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1290002",
+      "userId": "10380018",
+      "createdAt": "2026-01-13 20:08:02",
+      "updatedAt": "2026-01-13 20:08:02",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1290003",
+      "userId": "10380019",
+      "createdAt": "2026-01-13 20:08:02",
+      "updatedAt": "2026-01-13 20:08:02",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1290004",
+      "userId": "10380020",
+      "createdAt": "2026-01-13 20:08:02",
+      "updatedAt": "2026-01-13 20:08:02",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1320001",
+      "userId": "10380018",
+      "createdAt": "2026-01-16 18:43:57",
+      "updatedAt": "2026-01-16 18:43:57",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1320003",
+      "userId": "10380020",
+      "createdAt": "2026-01-16 18:43:58",
+      "updatedAt": "2026-01-16 18:43:58",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1320004",
+      "userId": "10380019",
+      "createdAt": "2026-01-16 18:43:58",
+      "updatedAt": "2026-01-16 18:43:58",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1320012",
+      "userId": "10380020",
+      "createdAt": "2026-01-16 18:44:17",
+      "updatedAt": "2026-01-16 18:44:17",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1320014",
+      "userId": "10380018",
+      "createdAt": "2026-01-16 18:44:17",
+      "updatedAt": "2026-01-16 18:44:17",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1320015",
+      "userId": "10380019",
+      "createdAt": "2026-01-16 18:44:17",
+      "updatedAt": "2026-01-16 18:44:17",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1350001",
+      "userId": "7980023",
+      "createdAt": "2026-01-16 23:07:57",
+      "updatedAt": "2026-02-05 17:09:33",
+      "lastReminderDate": "2026-02-05 17:09:34",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1380001",
+      "userId": "1",
+      "createdAt": "2026-01-18 12:18:04",
+      "updatedAt": "2026-01-18 12:18:04",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1410001",
+      "userId": "11550044",
+      "createdAt": "2026-01-18 22:30:04",
+      "updatedAt": "2026-01-18 22:30:04",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1410002",
+      "userId": "11550045",
+      "createdAt": "2026-01-18 22:30:04",
+      "updatedAt": "2026-01-18 22:30:04",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1410005",
+      "userId": "11550048",
+      "createdAt": "2026-01-18 22:30:04",
+      "updatedAt": "2026-01-18 22:30:04",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1410007",
+      "userId": "11550050",
+      "createdAt": "2026-01-18 22:30:04",
+      "updatedAt": "2026-01-18 22:30:04",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1410013",
+      "userId": "11550054",
+      "createdAt": "2026-01-18 22:30:06",
+      "updatedAt": "2026-01-18 22:30:06",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1410016",
+      "userId": "11550057",
+      "createdAt": "2026-01-18 22:30:07",
+      "updatedAt": "2026-01-18 22:30:07",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1410017",
+      "userId": "11550058",
+      "createdAt": "2026-01-18 22:30:07",
+      "updatedAt": "2026-01-18 22:30:07",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1410019",
+      "userId": "11550060",
+      "createdAt": "2026-01-18 22:30:08",
+      "updatedAt": "2026-01-18 22:30:08",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1410023",
+      "userId": "11550048",
+      "createdAt": "2026-01-18 22:31:31",
+      "updatedAt": "2026-01-18 22:31:31",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1410024",
+      "userId": "11550045",
+      "createdAt": "2026-01-18 22:31:31",
+      "updatedAt": "2026-01-18 22:31:31",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1410026",
+      "userId": "11550044",
+      "createdAt": "2026-01-18 22:31:31",
+      "updatedAt": "2026-01-18 22:31:31",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1410028",
+      "userId": "11550050",
+      "createdAt": "2026-01-18 22:31:31",
+      "updatedAt": "2026-01-18 22:31:31",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1410034",
+      "userId": "11550064",
+      "createdAt": "2026-01-18 22:31:32",
+      "updatedAt": "2026-01-18 22:31:32",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1410037",
+      "userId": "11550067",
+      "createdAt": "2026-01-18 22:31:34",
+      "updatedAt": "2026-01-18 22:31:34",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1410038",
+      "userId": "11550058",
+      "createdAt": "2026-01-18 22:31:34",
+      "updatedAt": "2026-01-18 22:31:34",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1410040",
+      "userId": "11550060",
+      "createdAt": "2026-01-18 22:31:35",
+      "updatedAt": "2026-01-18 22:31:35",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1410044",
+      "userId": "11550045",
+      "createdAt": "2026-01-18 22:32:55",
+      "updatedAt": "2026-01-18 22:32:55",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1410046",
+      "userId": "11550048",
+      "createdAt": "2026-01-18 22:32:55",
+      "updatedAt": "2026-01-18 22:32:55",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1410047",
+      "userId": "11550044",
+      "createdAt": "2026-01-18 22:32:55",
+      "updatedAt": "2026-01-18 22:32:55",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1410048",
+      "userId": "11550050",
+      "createdAt": "2026-01-18 22:32:55",
+      "updatedAt": "2026-01-18 22:32:55",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1410055",
+      "userId": "11550070",
+      "createdAt": "2026-01-18 22:32:57",
+      "updatedAt": "2026-01-18 22:32:57",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1410058",
+      "userId": "11550073",
+      "createdAt": "2026-01-18 22:32:58",
+      "updatedAt": "2026-01-18 22:32:58",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1410059",
+      "userId": "11550058",
+      "createdAt": "2026-01-18 22:32:59",
+      "updatedAt": "2026-01-18 22:32:59",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1410061",
+      "userId": "11550060",
+      "createdAt": "2026-01-18 22:33:00",
+      "updatedAt": "2026-01-18 22:33:00",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1440001",
+      "userId": "11550045",
+      "createdAt": "2026-01-18 23:15:33",
+      "updatedAt": "2026-01-18 23:15:33",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1440003",
+      "userId": "11550048",
+      "createdAt": "2026-01-18 23:15:33",
+      "updatedAt": "2026-01-18 23:15:33",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1440004",
+      "userId": "11550044",
+      "createdAt": "2026-01-18 23:15:33",
+      "updatedAt": "2026-01-18 23:15:33",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1440006",
+      "userId": "11550050",
+      "createdAt": "2026-01-18 23:15:33",
+      "updatedAt": "2026-01-18 23:15:33",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1440013",
+      "userId": "11580019",
+      "createdAt": "2026-01-18 23:15:35",
+      "updatedAt": "2026-01-18 23:15:35",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1440016",
+      "userId": "11580022",
+      "createdAt": "2026-01-18 23:15:36",
+      "updatedAt": "2026-01-18 23:15:36",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1440017",
+      "userId": "11550058",
+      "createdAt": "2026-01-18 23:15:37",
+      "updatedAt": "2026-01-18 23:15:37",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1440019",
+      "userId": "11550060",
+      "createdAt": "2026-01-18 23:15:37",
+      "updatedAt": "2026-01-18 23:15:37",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1440022",
+      "userId": "11550045",
+      "createdAt": "2026-01-18 23:16:58",
+      "updatedAt": "2026-01-18 23:16:58",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1440023",
+      "userId": "11550044",
+      "createdAt": "2026-01-18 23:16:58",
+      "updatedAt": "2026-01-18 23:16:58",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1440026",
+      "userId": "11550048",
+      "createdAt": "2026-01-18 23:16:58",
+      "updatedAt": "2026-01-18 23:16:58",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1440027",
+      "userId": "11550050",
+      "createdAt": "2026-01-18 23:16:58",
+      "updatedAt": "2026-01-18 23:16:58",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1440034",
+      "userId": "11580025",
+      "createdAt": "2026-01-18 23:17:00",
+      "updatedAt": "2026-01-18 23:17:00",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1440037",
+      "userId": "11580028",
+      "createdAt": "2026-01-18 23:17:01",
+      "updatedAt": "2026-01-18 23:17:01",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1440038",
+      "userId": "11550058",
+      "createdAt": "2026-01-18 23:17:02",
+      "updatedAt": "2026-01-18 23:17:02",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1440040",
+      "userId": "11550060",
+      "createdAt": "2026-01-18 23:17:03",
+      "updatedAt": "2026-01-18 23:17:03",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1440044",
+      "userId": "11550044",
+      "createdAt": "2026-01-18 23:30:00",
+      "updatedAt": "2026-01-18 23:30:00",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1440045",
+      "userId": "11550045",
+      "createdAt": "2026-01-18 23:30:00",
+      "updatedAt": "2026-01-18 23:30:00",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1440046",
+      "userId": "11550048",
+      "createdAt": "2026-01-18 23:30:00",
+      "updatedAt": "2026-01-18 23:30:00",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1440049",
+      "userId": "11550050",
+      "createdAt": "2026-01-18 23:30:00",
+      "updatedAt": "2026-01-18 23:30:00",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1440055",
+      "userId": "11580055",
+      "createdAt": "2026-01-18 23:30:02",
+      "updatedAt": "2026-01-18 23:30:02",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1440058",
+      "userId": "11580058",
+      "createdAt": "2026-01-18 23:30:03",
+      "updatedAt": "2026-01-18 23:30:03",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1440059",
+      "userId": "11550058",
+      "createdAt": "2026-01-18 23:30:03",
+      "updatedAt": "2026-01-18 23:30:03",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1440061",
+      "userId": "11550060",
+      "createdAt": "2026-01-18 23:30:04",
+      "updatedAt": "2026-01-18 23:30:04",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1440064",
+      "userId": "11550048",
+      "createdAt": "2026-01-18 23:31:27",
+      "updatedAt": "2026-01-18 23:31:27",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1440065",
+      "userId": "11550045",
+      "createdAt": "2026-01-18 23:31:27",
+      "updatedAt": "2026-01-18 23:31:27",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1440069",
+      "userId": "11550044",
+      "createdAt": "2026-01-18 23:31:27",
+      "updatedAt": "2026-01-18 23:31:27",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1440070",
+      "userId": "11550050",
+      "createdAt": "2026-01-18 23:31:27",
+      "updatedAt": "2026-01-18 23:31:27",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1440076",
+      "userId": "11580061",
+      "createdAt": "2026-01-18 23:31:29",
+      "updatedAt": "2026-01-18 23:31:29",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1440079",
+      "userId": "11580064",
+      "createdAt": "2026-01-18 23:31:30",
+      "updatedAt": "2026-01-18 23:31:30",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1440080",
+      "userId": "11550058",
+      "createdAt": "2026-01-18 23:31:31",
+      "updatedAt": "2026-01-18 23:31:31",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1440082",
+      "userId": "11550060",
+      "createdAt": "2026-01-18 23:31:32",
+      "updatedAt": "2026-01-18 23:31:32",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1470001",
+      "userId": "11550045",
+      "createdAt": "2026-01-19 21:46:25",
+      "updatedAt": "2026-01-19 21:46:25",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1470002",
+      "userId": "11550044",
+      "createdAt": "2026-01-19 21:46:25",
+      "updatedAt": "2026-01-19 21:46:25",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1470003",
+      "userId": "11550048",
+      "createdAt": "2026-01-19 21:46:25",
+      "updatedAt": "2026-01-19 21:46:25",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1470007",
+      "userId": "11550050",
+      "createdAt": "2026-01-19 21:46:26",
+      "updatedAt": "2026-01-19 21:46:26",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1470013",
+      "userId": "11880023",
+      "createdAt": "2026-01-19 21:46:33",
+      "updatedAt": "2026-01-19 21:46:33",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1470016",
+      "userId": "11550058",
+      "createdAt": "2026-01-19 21:46:39",
+      "updatedAt": "2026-01-19 21:46:39",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1470018",
+      "userId": "11880026",
+      "createdAt": "2026-01-19 21:46:40",
+      "updatedAt": "2026-01-19 21:46:40",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1470019",
+      "userId": "11550060",
+      "createdAt": "2026-01-19 21:46:51",
+      "updatedAt": "2026-01-19 21:46:51",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1500002",
+      "userId": "11550048",
+      "createdAt": "2026-01-19 23:40:07",
+      "updatedAt": "2026-01-19 23:40:07",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1500003",
+      "userId": "11550045",
+      "createdAt": "2026-01-19 23:40:07",
+      "updatedAt": "2026-01-19 23:40:07",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1500004",
+      "userId": "11550044",
+      "createdAt": "2026-01-19 23:40:07",
+      "updatedAt": "2026-01-19 23:40:07",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1500007",
+      "userId": "11550050",
+      "createdAt": "2026-01-19 23:40:07",
+      "updatedAt": "2026-01-19 23:40:07",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1500013",
+      "userId": "11940121",
+      "createdAt": "2026-01-19 23:40:11",
+      "updatedAt": "2026-01-19 23:40:11",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1500016",
+      "userId": "11550058",
+      "createdAt": "2026-01-19 23:40:13",
+      "updatedAt": "2026-01-19 23:40:13",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1500017",
+      "userId": "11940124",
+      "createdAt": "2026-01-19 23:40:13",
+      "updatedAt": "2026-01-19 23:40:13",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1500019",
+      "userId": "11550060",
+      "createdAt": "2026-01-19 23:40:15",
+      "updatedAt": "2026-01-19 23:40:15",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1560001",
+      "userId": "14490011",
+      "createdAt": "2026-01-29 10:24:05",
+      "updatedAt": "2026-01-29 10:24:05",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1560002",
+      "userId": "14490012",
+      "createdAt": "2026-01-29 10:24:05",
+      "updatedAt": "2026-01-29 10:24:05",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1560004",
+      "userId": "14490014",
+      "createdAt": "2026-01-29 10:24:05",
+      "updatedAt": "2026-01-29 10:24:05",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1590001",
+      "userId": "14490012",
+      "createdAt": "2026-02-03 17:34:03",
+      "updatedAt": "2026-02-03 17:34:03",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1590002",
+      "userId": "14490014",
+      "createdAt": "2026-02-03 17:34:03",
+      "updatedAt": "2026-02-03 17:34:03",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1590004",
+      "userId": "14490011",
+      "createdAt": "2026-02-03 17:34:03",
+      "updatedAt": "2026-02-03 17:34:03",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1590013",
+      "userId": "15960001",
+      "createdAt": "2026-02-03 17:34:06",
+      "updatedAt": "2026-02-03 17:34:06",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1590016",
+      "userId": "15960004",
+      "createdAt": "2026-02-03 17:34:07",
+      "updatedAt": "2026-02-03 17:34:07",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1590017",
+      "userId": "15960005",
+      "createdAt": "2026-02-03 17:34:08",
+      "updatedAt": "2026-02-03 17:34:08",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1590019",
+      "userId": "15960007",
+      "createdAt": "2026-02-03 17:34:09",
+      "updatedAt": "2026-02-03 17:34:09",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1650001",
+      "userId": "14490014",
+      "createdAt": "2026-02-06 00:06:03",
+      "updatedAt": "2026-02-06 00:06:03",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1650002",
+      "userId": "14490011",
+      "createdAt": "2026-02-06 00:06:04",
+      "updatedAt": "2026-02-06 00:06:04",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1650003",
+      "userId": "14490012",
+      "createdAt": "2026-02-06 00:06:04",
+      "updatedAt": "2026-02-06 00:06:04",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1650013",
+      "userId": "16830002",
+      "createdAt": "2026-02-06 00:06:18",
+      "updatedAt": "2026-02-06 00:06:18",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1650016",
+      "userId": "16830005",
+      "createdAt": "2026-02-06 00:06:18",
+      "updatedAt": "2026-02-06 00:06:18",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1650017",
+      "userId": "15960005",
+      "createdAt": "2026-02-06 00:06:27",
+      "updatedAt": "2026-02-06 00:06:27",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1650019",
+      "userId": "15960007",
+      "createdAt": "2026-02-06 00:06:32",
+      "updatedAt": "2026-02-06 00:06:32",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "1680001",
+      "userId": "16920143",
+      "createdAt": "2026-02-06 09:40:18",
+      "updatedAt": "2026-02-06 09:40:18",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tuserId\tcreatedAt\tupdatedAt\tlastReminderDate\tlastEnvioRH\n2\t240006\t2025-12-15 01:00:03\t2025-12-15 01:00:03\tNULL\tNULL\n30001\t420030\t2025-12-15 12:32:47\t2026-02-03 23:16:16\t2026-01-31 18:00:39\t2026-02-03 23:16:16\n120001\t2160121\t2025-12-17 22:44:52\t2026-01-09 12:35:57\t2026-01-09 12:35:58\tNULL\n120002\t2160125\t2025-12-17 22:45:16\t2026-01-25 14:18:13\t2026-01-25 14:18:13\tNULL\n210001\t240006\t2025-12-19 16:50:02\t2025-12-19 16:50:02\tNULL\tNULL\n240001\t4020003\t2025-12-20 01:41:43\t2025-12-20 01:41:43\tNULL\tNULL\n240003\t4020003\t2025-12-20 01:42:56\t2025-12-20 01:42:56\tNULL\tNULL\n240005\t4020003\t2025-12-20 01:43:19\t2025-12-20 01:43:19\tNULL\tNULL\n270001\t4050001\t2025-12-20 01:53:50\t2025-12-20 01:53:50\tNULL\tNULL\n270003\t4050001\t2025-12-20 01:54:19\t2025-12-20 01:54:19\tNULL\tNULL\n300001\t4080004\t2025-12-20 02:06:10\t2025-12-20 02:06:10\tNULL\tNULL\n300003\t4080004\t2025-12-20 02:06:31\t2025-12-20 02:06:31\tNULL\tNULL\n300005\t4080052\t2025-12-20 02:17:00\t2025-12-20 02:17:00\tNULL\tNULL\n330001\t4080052\t2025-12-20 13:16:12\t2025-12-20 13:16:12\tNULL\tNULL\n390002\t4500005\t2025-12-20 16:57:28\t2025-12-20 16:57:28\tNULL\tNULL\n390004\t4500007\t2025-12-20 16:58:47\t2025-12-20 16:58:47\tNULL\tNULL\n390006\t4500009\t2025-12-20 17:00:18\t2025-12-20 17:00:18\tNULL\tNULL\n420001\t6030026\t2025-12-29 08:32:35\t2025-12-29 08:32:35\tNULL\tNULL\n420002\t6030026\t2025-12-29 08:33:01\t2025-12-29 08:33:01\tNULL\tNULL\n420004\t6030026\t2025-12-29 08:33:35\t2025-12-29 08:33:35\tNULL\tNULL\n420006\t6030026\t2025-12-29 08:34:03\t2025-12-29 08:34:03\tNULL\tNULL\n450001\t4080004\t2025-12-29 18:15:28\t2025-12-29 18:15:28\tNULL\tNULL\n450002\t4050001\t2025-12-29 18:15:28\t2025-12-29 18:15:28\tNULL\tNULL\n450003\t4020003\t2025-12-29 18:15:28\t2025-12-29 18:15:28\tNULL\tNULL\n450010\t4020003\t2025-12-29 18:15:37\t2025-12-29 18:15:37\tNULL\tNULL\n450011\t4080004\t2025-12-29 18:15:37\t2025-12-29 18:15:37\tNULL\tNULL\n450015\t4050001\t2025-12-29 18:15:38\t2025-12-29 18:15:38\tNULL\tNULL\n450017\t4080004\t2025-12-29 18:15:49\t2025-12-29 18:15:49\tNULL\tNULL\n450018\t4020003\t2025-12-29 18:15:49\t2025-12-29 18:15:49\tNULL\tNULL\n450023\t4050001\t2025-12-29 18:15:50\t2025-12-29 18:15:50\tNULL\tNULL\n450026\t6300015\t2025-12-29 18:15:55\t2025-12-29 18:15:55\tNULL\tNULL\n450027\t4080052\t2025-12-29 18:16:01\t2025-12-29 18:16:01\tNULL\tNULL\n450028\t6030026\t2025-12-29 18:21:01\t2025-12-29 18:21:01\tNULL\tNULL\n450032\t4020003\t2025-12-29 18:24:15\t2025-12-29 18:24:15\tNULL\tNULL\n450033\t4080004\t2025-12-29 18:24:15\t2025-12-29 18:24:15\tNULL\tNULL\n450034\t4050001\t2025-12-29 18:24:15\t2025-12-29 18:24:15\tNULL\tNULL\n450040\t6300019\t2025-12-29 18:24:16\t2025-12-29 18:24:16\tNULL\tNULL\n450041\t4080052\t2025-12-29 18:24:17\t2025-12-29 18:24:17\tNULL\tNULL\n450043\t6030026\t2025-12-29 18:24:17\t2025-12-29 18:24:17\tNULL\tNULL\n480003\t4050001\t2025-12-29 19:39:19\t2025-12-29 19:39:19\tNULL\tNULL\n480004\t4020003\t2025-12-29 19:39:19\t2025-12-29 19:39:19\tNULL\tNULL\n480006\t4080004\t2025-12-29 19:39:19\t2025-12-29 19:39:19\tNULL\tNULL\n480011\t6360261\t2025-12-29 19:39:21\t2025-12-29 19:39:21\tNULL\tNULL\n480012\t4080052\t2025-12-29 19:39:22\t2025-12-29 19:39:22\tNULL\tNULL\n480014\t6030026\t2025-12-29 19:39:22\t2025-12-29 19:39:22\tNULL\tNULL\n480018\t4080004\t2025-12-29 19:41:28\t2025-12-29 19:41:28\tNULL\tNULL\n480019\t4050001\t2025-12-29 19:41:28\t2025-12-29 19:41:28\tNULL\tNULL\n480020\t4020003\t2025-12-29 19:41:28\t2025-12-29 19:41:28\tNULL\tNULL\n480026\t6360268\t2025-12-29 19:41:32\t2025-12-29 19:41:32\tNULL\tNULL\n480027\t4080052\t2025-12-29 19:41:32\t2025-12-29 19:41:32\tNULL\tNULL\n480029\t6030026\t2025-12-29 19:41:39\t2025-12-29 19:41:39\tNULL\tNULL\n480033\t4080004\t2025-12-29 19:43:11\t2025-12-29 19:43:11\tNULL\tNULL\n480034\t4050001\t2025-12-29 19:43:11\t2025-12-29 19:43:11\tNULL\tNULL\n480035\t4020003\t2025-12-29 19:43:11\t2025-12-29 19:43:11\tNULL\tNULL\n480041\t6360278\t2025-12-29 19:43:12\t2025-12-29 19:43:12\tNULL\tNULL\n480042\t4080052\t2025-12-29 19:43:13\t2025-12-29 19:43:13\tNULL\tNULL\n480044\t6030026\t2025-12-29 19:43:13\t2025-12-29 19:43:13\tNULL\tNULL\n480050\t4050001\t2025-12-29 22:03:34\t2025-12-29 22:03:34\tNULL\tNULL\n480052\t4080004\t2025-12-29 22:03:34\t2025-12-29 22:03:34\tNULL\tNULL\n480053\t4020003\t2025-12-29 22:03:34\t2025-12-29 22:03:34\tNULL\tNULL\n480057\t4080004\t2025-12-29 22:03:42\t2025-12-29 22:03:42\tNULL\tNULL\n480058\t4050001\t2025-12-29 22:03:42\t2025-12-29 22:03:42\tNULL\tNULL\n480061\t4020003\t2025-12-29 22:03:42\t2025-12-29 22:03:42\tNULL\tNULL\n480066\t6361034\t2025-12-29 22:03:47\t2025-12-29 22:03:47\tNULL\tNULL\n480067\t4080052\t2025-12-29 22:03:47\t2025-12-29 22:03:47\tNULL\tNULL\n570001\t6600014\t2025-12-30 15:06:42\t2025-12-30 19:28:43\t2025-12-30 19:28:44\tNULL\n570003\t6600028\t2025-12-30 15:08:51\t2026-01-29 12:46:12\t2026-01-29 12:46:13\tNULL\n660013\t7290150\t2026-01-01 19:44:47\t2026-01-01 19:44:47\tNULL\tNULL\n720030\t7290150\t2026-01-02 12:55:47\t2026-01-02 12:55:47\tNULL\tNULL\n720053\t7290150\t2026-01-02 14:15:40\t2026-01-02 14:15:40\tNULL\tNULL\n720086\t7290150\t2026-01-02 15:04:35\t2026-01-02 15:04:35\tNULL\tNULL\n750001\t7410262\t2026-01-02 16:47:56\t2026-01-02 16:47:56\tNULL\tNULL\n750002\t7410263\t2026-01-02 16:47:56\t2026-01-02 16:47:56\tNULL\tNULL\n750003\t7410264\t2026-01-02 16:47:56\t2026-01-02 16:47:56\tNULL\tNULL\n750014\t7410273\t2026-01-02 16:48:03\t2026-01-02 16:48:03\tNULL\tNULL\n750015\t7410274\t2026-01-02 16:48:06\t2026-01-02 16:48:06\tNULL\tNULL\n750017\t7290150\t2026-01-02 16:48:11\t2026-01-02 16:48:11\tNULL\tNULL\n780001\t7470026\t2026-01-04 23:03:57\t2026-01-04 23:03:57\tNULL\tNULL\n780002\t6960011\t2026-01-04 23:04:06\t2026-01-04 23:04:06\tNULL\tNULL\n810002\t7410264\t2026-01-05 18:28:36\t2026-01-05 18:28:36\tNULL\tNULL\n810003\t7410263\t2026-01-05 18:28:36\t2026-01-05 18:28:36\tNULL\tNULL\n810004\t7410262\t2026-01-05 18:28:36\t2026-01-05 18:28:36\tNULL\tNULL\n810014\t7890173\t2026-01-05 18:28:43\t2026-01-05 18:28:43\tNULL\tNULL\n810015\t7410274\t2026-01-05 18:28:46\t2026-01-05 18:28:46\tNULL\tNULL\n810017\t7290150\t2026-01-05 18:28:50\t2026-01-05 18:28:50\tNULL\tNULL\n840001\t7410264\t2026-01-06 08:30:36\t2026-01-06 08:30:36\tNULL\tNULL\n840003\t7410263\t2026-01-06 08:30:36\t2026-01-06 08:30:36\tNULL\tNULL\n840004\t7410262\t2026-01-06 08:30:36\t2026-01-06 08:30:36\tNULL\tNULL\n840010\t7410263\t2026-01-06 08:35:03\t2026-01-06 08:35:03\tNULL\tNULL\n840018\t7920133\t2026-01-06 08:35:10\t2026-01-06 08:35:10\tNULL\tNULL\n840019\t7410274\t2026-01-06 08:35:11\t2026-01-06 08:35:11\tNULL\tNULL\n840021\t7290150\t2026-01-06 08:35:15\t2026-01-06 08:35:15\tNULL\tNULL\n870001\t7410264\t2026-01-06 09:19:24\t2026-01-06 09:19:24\tNULL\tNULL\n870005\t7410262\t2026-01-06 09:19:24\t2026-01-06 09:19:24\tNULL\tNULL\n870006\t7410263\t2026-01-06 09:19:24\t2026-01-06 09:19:24\tNULL\tNULL\n870014\t7950039\t2026-01-06 09:19:28\t2026-01-06 09:19:28\tNULL\tNULL\n870015\t7410274\t2026-01-06 09:19:34\t2026-01-06 09:19:34\tNULL\tNULL\n870017\t7290150\t2026-01-06 09:19:38\t2026-01-06 09:19:38\tNULL\tNULL\n930002\t7410263\t2026-01-08 09:20:52\t2026-01-08 09:20:52\tNULL\tNULL\n930003\t7410264\t2026-01-08 09:20:52\t2026-01-08 09:20:52\tNULL\tNULL\n930007\t7410262\t2026-01-08 09:20:52\t2026-01-08 09:20:52\tNULL\tNULL\n930013\t7410263\t2026-01-08 09:22:34\t2026-01-08 09:22:34\tNULL\tNULL\n930014\t7410262\t2026-01-08 09:22:34\t2026-01-08 09:22:34\tNULL\tNULL\n930017\t7410264\t2026-01-08 09:22:34\t2026-01-08 09:22:34\tNULL\tNULL\n930025\t8370016\t2026-01-08 09:22:54\t2026-01-08 09:22:54\tNULL\tNULL\n930026\t7410274\t2026-01-08 09:23:34\t2026-01-08 09:23:34\tNULL\tNULL\n930028\t7290150\t2026-01-08 09:23:55\t2026-01-08 09:23:55\tNULL\tNULL\n930030\t8370017\t2026-01-08 09:39:53\t2026-01-08 09:39:53\tNULL\tNULL\n930031\t7410262\t2026-01-08 10:05:56\t2026-01-08 10:05:56\tNULL\tNULL\n930033\t7410264\t2026-01-08 10:05:56\t2026-01-08 10:05:56\tNULL\tNULL\n930034\t7410263\t2026-01-08 10:05:56\t2026-01-08 10:05:56\tNULL\tNULL\n930044\t8370025\t2026-01-08 10:06:04\t2026-01-08 10:06:04\tNULL\tNULL\n930045\t7410274\t2026-01-08 10:06:10\t2026-01-08 10:06:10\tNULL\tNULL\n930047\t7290150\t2026-01-08 10:06:14\t2026-01-08 10:06:14\tNULL\tNULL\n930050\t7410262\t2026-01-08 10:27:18\t2026-01-08 10:27:18\tNULL\tNULL\n930051\t7410263\t2026-01-08 10:27:18\t2026-01-08 10:27:18\tNULL\tNULL\n930052\t7410264\t2026-01-08 10:27:18\t2026-01-08 10:27:18\tNULL\tNULL\n930063\t8370044\t2026-01-08 10:27:26\t2026-01-08 10:27:26\tNULL\tNULL\n930064\t7410274\t2026-01-08 10:27:32\t2026-01-08 10:27:32\tNULL\tNULL\n930066\t7290150\t2026-01-08 10:27:36\t2026-01-08 10:27:36\tNULL\tNULL\n930069\t7410263\t2026-01-08 10:29:28\t2026-01-08 10:29:28\tNULL\tNULL\n930070\t7410262\t2026-01-08 10:29:28\t2026-01-08 10:29:28\tNULL\tNULL\n930072\t7410264\t2026-01-08 10:29:28\t2026-01-08 10:29:28\tNULL\tNULL\n930082\t8370048\t2026-01-08 10:29:33\t2026-01-08 10:29:33\tNULL\tNULL\n930083\t7410274\t2026-01-08 10:29:34\t2026-01-08 10:29:34\tNULL\tNULL\n930085\t7290150\t2026-01-08 10:29:35\t2026-01-08 10:29:35\tNULL\tNULL\n930088\t7410263\t2026-01-08 10:30:07\t2026-01-08 10:30:07\tNULL\tNULL\n930089\t7410264\t2026-01-08 10:30:07\t2026-01-08 10:30:07\tNULL\tNULL\n930091\t7410262\t2026-01-08 10:30:07\t2026-01-08 10:30:07\tNULL\tNULL\n930101\t8370052\t2026-01-08 10:30:16\t2026-01-08 10:30:16\tNULL\tNULL\n930102\t7410274\t2026-01-08 10:30:21\t2026-01-08 10:30:21\tNULL\tNULL\n930104\t7290150\t2026-01-08 10:30:26\t2026-01-08 10:30:26\tNULL\tNULL\n930107\t7410263\t2026-01-08 10:32:51\t2026-01-08 10:32:51\tNULL\tNULL\n930108\t7410262\t2026-01-08 10:32:51\t2026-01-08 10:32:51\tNULL\tNULL\n930109\t7410264\t2026-01-08 10:32:51\t2026-01-08 10:32:51\tNULL\tNULL\n930119\t7410262\t2026-01-08 10:33:31\t2026-01-08 10:33:31\tNULL\tNULL\n930120\t7410263\t2026-01-08 10:33:31\t2026-01-08 10:33:31\tNULL\tNULL\n930122\t7410264\t2026-01-08 10:33:31\t2026-01-08 10:33:31\tNULL\tNULL\n960001\t7410263\t2026-01-08 10:52:51\t2026-01-08 10:52:51\tNULL\tNULL\n960003\t7410262\t2026-01-08 10:52:51\t2026-01-08 10:52:51\tNULL\tNULL\n960005\t7410264\t2026-01-08 10:52:51\t2026-01-08 10:52:51\tNULL\tNULL\n960014\t8400019\t2026-01-08 10:52:53\t2026-01-08 10:52:53\tNULL\tNULL\n960015\t7410274\t2026-01-08 10:52:54\t2026-01-08 10:52:54\tNULL\tNULL\n960017\t7290150\t2026-01-08 10:52:56\t2026-01-08 10:52:56\tNULL\tNULL\n990002\t7410264\t2026-01-08 16:59:37\t2026-01-08 16:59:37\tNULL\tNULL\n990003\t7410262\t2026-01-08 16:59:37\t2026-01-08 16:59:37\tNULL\tNULL\n990005\t7410263\t2026-01-08 16:59:37\t2026-01-08 16:59:37\tNULL\tNULL\n990014\t8640005\t2026-01-08 16:59:41\t2026-01-08 16:59:41\tNULL\tNULL\n990015\t7410274\t2026-01-08 16:59:48\t2026-01-08 16:59:48\tNULL\tNULL\n990017\t7290150\t2026-01-08 16:59:51\t2026-01-08 16:59:51\tNULL\tNULL\n990021\t7410262\t2026-01-08 19:00:21\t2026-01-08 19:00:21\tNULL\tNULL\n990022\t7410263\t2026-01-08 19:00:21\t2026-01-08 19:00:21\tNULL\tNULL\n990024\t7410264\t2026-01-08 19:00:21\t2026-01-08 19:00:21\tNULL\tNULL\n990033\t8640330\t2026-01-08 19:00:23\t2026-01-08 19:00:23\tNULL\tNULL\n990034\t7410274\t2026-01-08 19:00:24\t2026-01-08 19:00:24\tNULL\tNULL\n990036\t7290150\t2026-01-08 19:00:25\t2026-01-08 19:00:25\tNULL\tNULL\n1020002\t8700033\t2026-01-08 20:21:40\t2026-01-08 20:21:40\tNULL\tNULL\n1050001\t7410264\t2026-01-09 13:29:07\t2026-01-09 13:29:07\tNULL\tNULL\n1050002\t7410262\t2026-01-09 13:29:07\t2026-01-09 13:29:07\tNULL\tNULL\n1050003\t7410263\t2026-01-09 13:29:07\t2026-01-09 13:29:07\tNULL\tNULL\n1080001\t7410262\t2026-01-09 13:52:23\t2026-01-09 13:52:23\tNULL\tNULL\n1080003\t7410263\t2026-01-09 13:52:23\t2026-01-09 13:52:23\tNULL\tNULL\n1080004\t7410264\t2026-01-09 13:52:23\t2026-01-09 13:52:23\tNULL\tNULL\n1080014\t8940005\t2026-01-09 13:52:29\t2026-01-09 13:52:29\tNULL\tNULL\n1080015\t7410274\t2026-01-09 13:52:29\t2026-01-09 13:52:29\tNULL\tNULL\n1080017\t7290150\t2026-01-09 13:52:30\t2026-01-09 13:52:30\tNULL\tNULL\n1080020\t8940679\t2026-01-09 16:14:26\t2026-01-26 16:07:10\t2026-01-26 16:07:10\tNULL\n1080022\t7410262\t2026-01-09 16:21:07\t2026-01-09 16:21:07\tNULL\tNULL\n1080023\t7410263\t2026-01-09 16:21:07\t2026-01-09 16:21:07\tNULL\tNULL\n1080024\t7410264\t2026-01-09 16:21:07\t2026-01-09 16:21:07\tNULL\tNULL\n1080034\t8940825\t2026-01-09 16:21:19\t2026-01-09 16:21:19\tNULL\tNULL\n1080035\t7410274\t2026-01-09 16:21:21\t2026-01-09 16:21:21\tNULL\tNULL\n1080037\t7290150\t2026-01-09 16:21:25\t2026-01-09 16:21:25\tNULL\tNULL\n1080040\t8940851\t2026-01-09 16:24:31\t2026-01-09 16:24:31\tNULL\tNULL\n1080042\t8940859\t2026-01-09 16:25:05\t2026-01-09 16:25:05\tNULL\tNULL\n1080045\t7410262\t2026-01-09 16:58:24\t2026-01-09 16:58:24\tNULL\tNULL\n1080046\t7410263\t2026-01-09 16:58:24\t2026-01-09 16:58:24\tNULL\tNULL\n1080048\t7410264\t2026-01-09 16:58:24\t2026-01-09 16:58:24\tNULL\tNULL\n1110002\t7410262\t2026-01-09 17:54:50\t2026-01-09 17:54:50\tNULL\tNULL\n1110003\t7410263\t2026-01-09 17:54:50\t2026-01-09 17:54:50\tNULL\tNULL\n1110004\t7410264\t2026-01-09 17:54:50\t2026-01-09 17:54:50\tNULL\tNULL\n1110013\t9000004\t2026-01-09 17:54:58\t2026-01-09 17:54:58\tNULL\tNULL\n1110016\t9000007\t2026-01-09 17:55:02\t2026-01-09 17:55:02\tNULL\tNULL\n1110017\t7410274\t2026-01-09 17:55:08\t2026-01-09 17:55:08\tNULL\tNULL\n1110018\t7290150\t2026-01-09 17:55:08\t2026-01-09 17:55:08\tNULL\tNULL\n1170001\t7410262\t2026-01-09 22:18:30\t2026-01-09 22:18:30\tNULL\tNULL\n1170003\t7410263\t2026-01-09 22:18:30\t2026-01-09 22:18:30\tNULL\tNULL\n1170004\t7410264\t2026-01-09 22:18:30\t2026-01-09 22:18:30\tNULL\tNULL\n1170013\t9090002\t2026-01-09 22:18:34\t2026-01-09 22:18:34\tNULL\tNULL\n1170016\t7410274\t2026-01-09 22:18:36\t2026-01-09 22:18:36\tNULL\tNULL\n1170018\t9090005\t2026-01-09 22:18:36\t2026-01-09 22:18:36\tNULL\tNULL\n1170019\t7290150\t2026-01-09 22:18:38\t2026-01-09 22:18:38\tNULL\tNULL\n1230001\t9540028\t2026-01-10 22:52:12\t2026-01-10 22:52:12\tNULL\tNULL\n1230003\t9540030\t2026-01-10 22:52:12\t2026-01-10 22:52:12\tNULL\tNULL\n1230004\t9540031\t2026-01-10 22:52:12\t2026-01-10 22:52:12\tNULL\tNULL\n1230013\t9540038\t2026-01-10 22:52:19\t2026-01-10 22:52:19\tNULL\tNULL\n1230016\t9540041\t2026-01-10 22:52:23\t2026-01-10 22:52:23\tNULL\tNULL\n1230017\t9540042\t2026-01-10 22:52:29\t2026-01-10 22:52:29\tNULL\tNULL\n1230018\t9540043\t2026-01-10 22:52:29\t2026-01-10 22:52:29\tNULL\tNULL\n1290002\t10380018\t2026-01-13 20:08:02\t2026-01-13 20:08:02\tNULL\tNULL\n1290003\t10380019\t2026-01-13 20:08:02\t2026-01-13 20:08:02\tNULL\tNULL\n1290004\t10380020\t2026-01-13 20:08:02\t2026-01-13 20:08:02\tNULL\tNULL\n1320001\t10380018\t2026-01-16 18:43:57\t2026-01-16 18:43:57\tNULL\tNULL\n1320003\t10380020\t2026-01-16 18:43:58\t2026-01-16 18:43:58\tNULL\tNULL\n1320004\t10380019\t2026-01-16 18:43:58\t2026-01-16 18:43:58\tNULL\tNULL\n1320012\t10380020\t2026-01-16 18:44:17\t2026-01-16 18:44:17\tNULL\tNULL\n1320014\t10380018\t2026-01-16 18:44:17\t2026-01-16 18:44:17\tNULL\tNULL\n1320015\t10380019\t2026-01-16 18:44:17\t2026-01-16 18:44:17\tNULL\tNULL\n1350001\t7980023\t2026-01-16 23:07:57\t2026-02-05 17:09:33\t2026-02-05 17:09:34\tNULL\n1380001\t1\t2026-01-18 12:18:04\t2026-01-18 12:18:04\tNULL\tNULL\n1410001\t11550044\t2026-01-18 22:30:04\t2026-01-18 22:30:04\tNULL\tNULL\n1410002\t11550045\t2026-01-18 22:30:04\t2026-01-18 22:30:04\tNULL\tNULL\n1410005\t11550048\t2026-01-18 22:30:04\t2026-01-18 22:30:04\tNULL\tNULL\n1410007\t11550050\t2026-01-18 22:30:04\t2026-01-18 22:30:04\tNULL\tNULL\n1410013\t11550054\t2026-01-18 22:30:06\t2026-01-18 22:30:06\tNULL\tNULL\n1410016\t11550057\t2026-01-18 22:30:07\t2026-01-18 22:30:07\tNULL\tNULL\n1410017\t11550058\t2026-01-18 22:30:07\t2026-01-18 22:30:07\tNULL\tNULL\n1410019\t11550060\t2026-01-18 22:30:08\t2026-01-18 22:30:08\tNULL\tNULL\n1410023\t11550048\t2026-01-18 22:31:31\t2026-01-18 22:31:31\tNULL\tNULL\n1410024\t11550045\t2026-01-18 22:31:31\t2026-01-18 22:31:31\tNULL\tNULL\n1410026\t11550044\t2026-01-18 22:31:31\t2026-01-18 22:31:31\tNULL\tNULL\n1410028\t11550050\t2026-01-18 22:31:31\t2026-01-18 22:31:31\tNULL\tNULL\n1410034\t11550064\t2026-01-18 22:31:32\t2026-01-18 22:31:32\tNULL\tNULL\n1410037\t11550067\t2026-01-18 22:31:34\t2026-01-18 22:31:34\tNULL\tNULL\n1410038\t11550058\t2026-01-18 22:31:34\t2026-01-18 22:31:34\tNULL\tNULL\n1410040\t11550060\t2026-01-18 22:31:35\t2026-01-18 22:31:35\tNULL\tNULL\n1410044\t11550045\t2026-01-18 22:32:55\t2026-01-18 22:32:55\tNULL\tNULL\n1410046\t11550048\t2026-01-18 22:32:55\t2026-01-18 22:32:55\tNULL\tNULL\n1410047\t11550044\t2026-01-18 22:32:55\t2026-01-18 22:32:55\tNULL\tNULL\n1410048\t11550050\t2026-01-18 22:32:55\t2026-01-18 22:32:55\tNULL\tNULL\n1410055\t11550070\t2026-01-18 22:32:57\t2026-01-18 22:32:57\tNULL\tNULL\n1410058\t11550073\t2026-01-18 22:32:58\t2026-01-18 22:32:58\tNULL\tNULL\n1410059\t11550058\t2026-01-18 22:32:59\t2026-01-18 22:32:59\tNULL\tNULL\n1410061\t11550060\t2026-01-18 22:33:00\t2026-01-18 22:33:00\tNULL\tNULL\n1440001\t11550045\t2026-01-18 23:15:33\t2026-01-18 23:15:33\tNULL\tNULL\n1440003\t11550048\t2026-01-18 23:15:33\t2026-01-18 23:15:33\tNULL\tNULL\n1440004\t11550044\t2026-01-18 23:15:33\t2026-01-18 23:15:33\tNULL\tNULL\n1440006\t11550050\t2026-01-18 23:15:33\t2026-01-18 23:15:33\tNULL\tNULL\n1440013\t11580019\t2026-01-18 23:15:35\t2026-01-18 23:15:35\tNULL\tNULL\n1440016\t11580022\t2026-01-18 23:15:36\t2026-01-18 23:15:36\tNULL\tNULL\n1440017\t11550058\t2026-01-18 23:15:37\t2026-01-18 23:15:37\tNULL\tNULL\n1440019\t11550060\t2026-01-18 23:15:37\t2026-01-18 23:15:37\tNULL\tNULL\n1440022\t11550045\t2026-01-18 23:16:58\t2026-01-18 23:16:58\tNULL\tNULL\n1440023\t11550044\t2026-01-18 23:16:58\t2026-01-18 23:16:58\tNULL\tNULL\n1440026\t11550048\t2026-01-18 23:16:58\t2026-01-18 23:16:58\tNULL\tNULL\n1440027\t11550050\t2026-01-18 23:16:58\t2026-01-18 23:16:58\tNULL\tNULL\n1440034\t11580025\t2026-01-18 23:17:00\t2026-01-18 23:17:00\tNULL\tNULL\n1440037\t11580028\t2026-01-18 23:17:01\t2026-01-18 23:17:01\tNULL\tNULL\n1440038\t11550058\t2026-01-18 23:17:02\t2026-01-18 23:17:02\tNULL\tNULL\n1440040\t11550060\t2026-01-18 23:17:03\t2026-01-18 23:17:03\tNULL\tNULL\n1440044\t11550044\t2026-01-18 23:30:00\t2026-01-18 23:30:00\tNULL\tNULL\n1440045\t11550045\t2026-01-18 23:30:00\t2026-01-18 23:30:00\tNULL\tNULL\n1440046\t11550048\t2026-01-18 23:30:00\t2026-01-18 23:30:00\tNULL\tNULL\n1440049\t11550050\t2026-01-18 23:30:00\t2026-01-18 23:30:00\tNULL\tNULL\n1440055\t11580055\t2026-01-18 23:30:02\t2026-01-18 23:30:02\tNULL\tNULL\n1440058\t11580058\t2026-01-18 23:30:03\t2026-01-18 23:30:03\tNULL\tNULL\n1440059\t11550058\t2026-01-18 23:30:03\t2026-01-18 23:30:03\tNULL\tNULL\n1440061\t11550060\t2026-01-18 23:30:04\t2026-01-18 23:30:04\tNULL\tNULL\n1440064\t11550048\t2026-01-18 23:31:27\t2026-01-18 23:31:27\tNULL\tNULL\n1440065\t11550045\t2026-01-18 23:31:27\t2026-01-18 23:31:27\tNULL\tNULL\n1440069\t11550044\t2026-01-18 23:31:27\t2026-01-18 23:31:27\tNULL\tNULL\n1440070\t11550050\t2026-01-18 23:31:27\t2026-01-18 23:31:27\tNULL\tNULL\n1440076\t11580061\t2026-01-18 23:31:29\t2026-01-18 23:31:29\tNULL\tNULL\n1440079\t11580064\t2026-01-18 23:31:30\t2026-01-18 23:31:30\tNULL\tNULL\n1440080\t11550058\t2026-01-18 23:31:31\t2026-01-18 23:31:31\tNULL\tNULL\n1440082\t11550060\t2026-01-18 23:31:32\t2026-01-18 23:31:32\tNULL\tNULL\n1470001\t11550045\t2026-01-19 21:46:25\t2026-01-19 21:46:25\tNULL\tNULL\n1470002\t11550044\t2026-01-19 21:46:25\t2026-01-19 21:46:25\tNULL\tNULL\n1470003\t11550048\t2026-01-19 21:46:25\t2026-01-19 21:46:25\tNULL\tNULL\n1470007\t11550050\t2026-01-19 21:46:26\t2026-01-19 21:46:26\tNULL\tNULL\n1470013\t11880023\t2026-01-19 21:46:33\t2026-01-19 21:46:33\tNULL\tNULL\n1470016\t11550058\t2026-01-19 21:46:39\t2026-01-19 21:46:39\tNULL\tNULL\n1470018\t11880026\t2026-01-19 21:46:40\t2026-01-19 21:46:40\tNULL\tNULL\n1470019\t11550060\t2026-01-19 21:46:51\t2026-01-19 21:46:51\tNULL\tNULL\n1500002\t11550048\t2026-01-19 23:40:07\t2026-01-19 23:40:07\tNULL\tNULL\n1500003\t11550045\t2026-01-19 23:40:07\t2026-01-19 23:40:07\tNULL\tNULL\n1500004\t11550044\t2026-01-19 23:40:07\t2026-01-19 23:40:07\tNULL\tNULL\n1500007\t11550050\t2026-01-19 23:40:07\t2026-01-19 23:40:07\tNULL\tNULL\n1500013\t11940121\t2026-01-19 23:40:11\t2026-01-19 23:40:11\tNULL\tNULL\n1500016\t11550058\t2026-01-19 23:40:13\t2026-01-19 23:40:13\tNULL\tNULL\n1500017\t11940124\t2026-01-19 23:40:13\t2026-01-19 23:40:13\tNULL\tNULL\n1500019\t11550060\t2026-01-19 23:40:15\t2026-01-19 23:40:15\tNULL\tNULL\n1560001\t14490011\t2026-01-29 10:24:05\t2026-01-29 10:24:05\tNULL\tNULL\n1560002\t14490012\t2026-01-29 10:24:05\t2026-01-29 10:24:05\tNULL\tNULL\n1560004\t14490014\t2026-01-29 10:24:05\t2026-01-29 10:24:05\tNULL\tNULL\n1590001\t14490012\t2026-02-03 17:34:03\t2026-02-03 17:34:03\tNULL\tNULL\n1590002\t14490014\t2026-02-03 17:34:03\t2026-02-03 17:34:03\tNULL\tNULL\n1590004\t14490011\t2026-02-03 17:34:03\t2026-02-03 17:34:03\tNULL\tNULL\n1590013\t15960001\t2026-02-03 17:34:06\t2026-02-03 17:34:06\tNULL\tNULL\n1590016\t15960004\t2026-02-03 17:34:07\t2026-02-03 17:34:07\tNULL\tNULL\n1590017\t15960005\t2026-02-03 17:34:08\t2026-02-03 17:34:08\tNULL\tNULL\n1590019\t15960007\t2026-02-03 17:34:09\t2026-02-03 17:34:09\tNULL\tNULL\n1650001\t14490014\t2026-02-06 00:06:03\t2026-02-06 00:06:03\tNULL\tNULL\n1650002\t14490011\t2026-02-06 00:06:04\t2026-02-06 00:06:04\tNULL\tNULL\n1650003\t14490012\t2026-02-06 00:06:04\t2026-02-06 00:06:04\tNULL\tNULL\n1650013\t16830002\t2026-02-06 00:06:18\t2026-02-06 00:06:18\tNULL\tNULL\n1650016\t16830005\t2026-02-06 00:06:18\t2026-02-06 00:06:18\tNULL\tNULL\n1650017\t15960005\t2026-02-06 00:06:27\t2026-02-06 00:06:27\tNULL\tNULL\n1650019\t15960007\t2026-02-06 00:06:32\t2026-02-06 00:06:32\tNULL\tNULL\n1680001\t16920143\t2026-02-06 09:40:18\t2026-02-06 09:40:18\tNULL\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 397
+}

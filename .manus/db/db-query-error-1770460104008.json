@@ -1,0 +1,8 @@
+{
+  "query": "SELECT g.id as gestor_id, g.nome as gestor_nome, g.zona, l.id as loja_id, l.nome as loja_nome, l.numeroLoja FROM gestores g JOIN gestor_lojas gl ON gl.gestorId = g.id JOIN lojas l ON l.id = gl.lojaId WHERE g.nome LIKE '%bio%' OR g.nome LIKE '%Fabio%' ORDER BY l.nome;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT g.id as gestor_id, g.nome as gestor_nome, g.zona, l.id as loja_id, l.nome as loja_nome, l.numeroLoja FROM gestores g JOIN gestor_lojas gl ON gl.gestorId = g.id JOIN lojas l ON l.id = gl.lojaId WHERE g.nome LIKE '%bio%' OR g.nome LIKE '%Fabio%' ORDER BY l.nome;",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 'g.nome' in 'where clause'"
+  ]
+}

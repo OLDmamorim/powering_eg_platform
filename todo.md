@@ -4249,3 +4249,17 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Remover 'IA' de todos os menus laterais, breadcrumbs e títulos de páginas
 - [x] Corrigir isGestor no PDF para usar tipoRelatorio real do backend
 - [x] Adicionar tipoRelatorio ao retorno do backend para gestores
+
+## v4.49 - Bug: Ficheiro Fichas de Serviço só reconhece 3 lojas do Fábio Dias
+- [x] Investigar parsing do ficheiro de monitorização de análise de fichas de serviço
+- [x] Identificar causa raiz: extrairNumeroLoja retornava null para Serviço Móvel
+- [x] Corrigir extrairNumeroLoja para extrair números de fichas SM (ex: "Ficha S.Movel 86-Faro" -> 86)
+- [x] Melhorar CIDADES_CONHECIDAS com cidades em falta (Entroncamento, Castanheira, Porto Alto, etc.)
+- [x] Melhorar MAPEAMENTO_NOMES_LOJAS com variações das lojas do Fábio
+- [x] Melhorar ALIASES_LOJAS no db.ts com mais variações (Lezíria SM, Castanheira, SM Faro, etc.)
+- [x] Corrigir extrairCidade para priorizar cidades mais longas (Porto Alto antes de Porto)
+- [x] Melhorar getLojaByNomeAproximado com aliases reversos e matching mais robusto
+- [x] Corrigir pertenceAoGestor para verificar se lojaId está nas lojas do gestor
+- [x] Adicionar logs de debug para rastreamento de matching
+- [x] Criar testes unitários (12 testes passam)
+- [x] Verificar matching de todas as 13 lojas: 13/13 encontradas com sucesso
