@@ -1,0 +1,210 @@
+{
+  "query": "SELECT a.id, a.nomeArquivo, a.dataUpload, a.totalFichas, a.totalLojas, a.gestorId,\n  (SELECT COUNT(*) FROM fichas_identificadas_analise WHERE analiseId = a.id) as fichasGuardadas,\n  (SELECT COUNT(*) FROM relatorios_analise_loja WHERE analiseId = a.id) as relatoriosGuardados\nFROM analises_fichas_servico a\nORDER BY a.dataUpload DESC\nLIMIT 20;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT a.id, a.nomeArquivo, a.dataUpload, a.totalFichas, a.totalLojas, a.gestorId,\n  (SELECT COUNT(*) FROM fichas_identificadas_analise WHERE analiseId = a.id) as fichasGuardadas,\n  (SELECT COUNT(*) FROM relatorios_analise_loja WHERE analiseId = a.id) as relatoriosGuardados\nFROM analises_fichas_servico a\nORDER BY a.dataUpload DESC\nLIMIT 20;",
+  "rows": [
+    {
+      "id": "210012",
+      "nomeArquivo": "Monotorização_2025.v46hh.xlsm",
+      "dataUpload": "2026-02-07 12:32:23",
+      "totalFichas": "4634",
+      "totalLojas": "71",
+      "gestorId": "30001",
+      "fichasGuardadas": "0",
+      "relatoriosGuardados": "70"
+    },
+    {
+      "id": "210011",
+      "nomeArquivo": "Monotorização_2025.v46hh.xlsm",
+      "dataUpload": "2026-02-07 11:57:50",
+      "totalFichas": "4634",
+      "totalLojas": "71",
+      "gestorId": "30001",
+      "fichasGuardadas": "0",
+      "relatoriosGuardados": "71"
+    },
+    {
+      "id": "210010",
+      "nomeArquivo": "Monotorização_2025.v46hh.xlsm",
+      "dataUpload": "2026-02-07 11:49:59",
+      "totalFichas": "4634",
+      "totalLojas": "71",
+      "gestorId": "30001",
+      "fichasGuardadas": "0",
+      "relatoriosGuardados": "71"
+    },
+    {
+      "id": "210009",
+      "nomeArquivo": "Monotorização_2025.v46hh.xlsm",
+      "dataUpload": "2026-02-07 11:33:15",
+      "totalFichas": "4634",
+      "totalLojas": "71",
+      "gestorId": "1350001",
+      "fichasGuardadas": "0",
+      "relatoriosGuardados": "71"
+    },
+    {
+      "id": "210008",
+      "nomeArquivo": "Monotorização_2025.v46hh.xlsm",
+      "dataUpload": "2026-02-07 11:31:14",
+      "totalFichas": "4634",
+      "totalLojas": "71",
+      "gestorId": "30001",
+      "fichasGuardadas": "0",
+      "relatoriosGuardados": "71"
+    },
+    {
+      "id": "210007",
+      "nomeArquivo": "Monotorização_2025.v46hh.xlsm",
+      "dataUpload": "2026-02-07 11:19:20",
+      "totalFichas": "4634",
+      "totalLojas": "71",
+      "gestorId": "30001",
+      "fichasGuardadas": "0",
+      "relatoriosGuardados": "17"
+    },
+    {
+      "id": "210006",
+      "nomeArquivo": "Monotorização_2025.v46hh.xlsm",
+      "dataUpload": "2026-02-07 11:19:03",
+      "totalFichas": "4634",
+      "totalLojas": "71",
+      "gestorId": "30001",
+      "fichasGuardadas": "0",
+      "relatoriosGuardados": "17"
+    },
+    {
+      "id": "210005",
+      "nomeArquivo": "Monotorização_2025.v46hh.xlsm",
+      "dataUpload": "2026-02-07 11:18:05",
+      "totalFichas": "4634",
+      "totalLojas": "71",
+      "gestorId": "120001",
+      "fichasGuardadas": "0",
+      "relatoriosGuardados": "17"
+    },
+    {
+      "id": "210004",
+      "nomeArquivo": "Monotorização_2025.v46hh.xlsm",
+      "dataUpload": "2026-02-07 11:08:14",
+      "totalFichas": "4634",
+      "totalLojas": "71",
+      "gestorId": "1350001",
+      "fichasGuardadas": "0",
+      "relatoriosGuardados": "17"
+    },
+    {
+      "id": "210003",
+      "nomeArquivo": "Monotorização_2025.v46hh.xlsm",
+      "dataUpload": "2026-02-07 11:04:30",
+      "totalFichas": "4634",
+      "totalLojas": "71",
+      "gestorId": "30001",
+      "fichasGuardadas": "0",
+      "relatoriosGuardados": "17"
+    },
+    {
+      "id": "210002",
+      "nomeArquivo": "Monotorização_2025.v46hh.xlsm",
+      "dataUpload": "2026-02-07 11:00:14",
+      "totalFichas": "4634",
+      "totalLojas": "71",
+      "gestorId": "1350001",
+      "fichasGuardadas": "0",
+      "relatoriosGuardados": "17"
+    },
+    {
+      "id": "210001",
+      "nomeArquivo": "Monotorização_2025.v46hh.xlsm",
+      "dataUpload": "2026-02-07 10:27:45",
+      "totalFichas": "4634",
+      "totalLojas": "71",
+      "gestorId": "1350001",
+      "fichasGuardadas": "0",
+      "relatoriosGuardados": "17"
+    },
+    {
+      "id": "180005",
+      "nomeArquivo": "Monotorização_2025.v46hh.xlsm",
+      "dataUpload": "2026-02-07 10:00:54",
+      "totalFichas": "4634",
+      "totalLojas": "71",
+      "gestorId": "1350001",
+      "fichasGuardadas": "0",
+      "relatoriosGuardados": "17"
+    },
+    {
+      "id": "180004",
+      "nomeArquivo": "Monotorização_2025.v46hh.xlsm",
+      "dataUpload": "2026-02-07 09:58:42",
+      "totalFichas": "4634",
+      "totalLojas": "71",
+      "gestorId": "1350001",
+      "fichasGuardadas": "0",
+      "relatoriosGuardados": "17"
+    },
+    {
+      "id": "180003",
+      "nomeArquivo": "Monotorização_2025.v46hh.xlsm",
+      "dataUpload": "2026-02-07 09:58:18",
+      "totalFichas": "4634",
+      "totalLojas": "71",
+      "gestorId": "1350001",
+      "fichasGuardadas": "0",
+      "relatoriosGuardados": "17"
+    },
+    {
+      "id": "180002",
+      "nomeArquivo": "Monotorização_2025.v46hh.xlsm",
+      "dataUpload": "2026-02-07 09:57:58",
+      "totalFichas": "4634",
+      "totalLojas": "71",
+      "gestorId": "1350001",
+      "fichasGuardadas": "0",
+      "relatoriosGuardados": "17"
+    },
+    {
+      "id": "180001",
+      "nomeArquivo": "Monotorização_2025.v46hh.xlsm",
+      "dataUpload": "2026-02-07 09:57:01",
+      "totalFichas": "4634",
+      "totalLojas": "71",
+      "gestorId": "1350001",
+      "fichasGuardadas": "0",
+      "relatoriosGuardados": "17"
+    },
+    {
+      "id": "150007",
+      "nomeArquivo": "Monotorização_2025.v4_29012026.xlsm",
+      "dataUpload": "2026-02-02 23:21:21",
+      "totalFichas": "2344",
+      "totalLojas": "66",
+      "gestorId": "1080020",
+      "fichasGuardadas": "0",
+      "relatoriosGuardados": "66"
+    },
+    {
+      "id": "150006",
+      "nomeArquivo": "Monotorização_2025.v4_29012026.xlsm",
+      "dataUpload": "2026-02-02 23:14:58",
+      "totalFichas": "2344",
+      "totalLojas": "66",
+      "gestorId": "120002",
+      "fichasGuardadas": "0",
+      "relatoriosGuardados": "66"
+    },
+    {
+      "id": "150005",
+      "nomeArquivo": "Monotorização_2025.v4_29012026.xlsm",
+      "dataUpload": "2026-02-02 23:08:15",
+      "totalFichas": "2344",
+      "totalLojas": "62",
+      "gestorId": "120001",
+      "fichasGuardadas": "0",
+      "relatoriosGuardados": "62"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tnomeArquivo\tdataUpload\ttotalFichas\ttotalLojas\tgestorId\tfichasGuardadas\trelatoriosGuardados\n210012\tMonotorização_2025.v46hh.xlsm\t2026-02-07 12:32:23\t4634\t71\t30001\t0\t70\n210011\tMonotorização_2025.v46hh.xlsm\t2026-02-07 11:57:50\t4634\t71\t30001\t0\t71\n210010\tMonotorização_2025.v46hh.xlsm\t2026-02-07 11:49:59\t4634\t71\t30001\t0\t71\n210009\tMonotorização_2025.v46hh.xlsm\t2026-02-07 11:33:15\t4634\t71\t1350001\t0\t71\n210008\tMonotorização_2025.v46hh.xlsm\t2026-02-07 11:31:14\t4634\t71\t30001\t0\t71\n210007\tMonotorização_2025.v46hh.xlsm\t2026-02-07 11:19:20\t4634\t71\t30001\t0\t17\n210006\tMonotorização_2025.v46hh.xlsm\t2026-02-07 11:19:03\t4634\t71\t30001\t0\t17\n210005\tMonotorização_2025.v46hh.xlsm\t2026-02-07 11:18:05\t4634\t71\t120001\t0\t17\n210004\tMonotorização_2025.v46hh.xlsm\t2026-02-07 11:08:14\t4634\t71\t1350001\t0\t17\n210003\tMonotorização_2025.v46hh.xlsm\t2026-02-07 11:04:30\t4634\t71\t30001\t0\t17\n210002\tMonotorização_2025.v46hh.xlsm\t2026-02-07 11:00:14\t4634\t71\t1350001\t0\t17\n210001\tMonotorização_2025.v46hh.xlsm\t2026-02-07 10:27:45\t4634\t71\t1350001\t0\t17\n180005\tMonotorização_2025.v46hh.xlsm\t2026-02-07 10:00:54\t4634\t71\t1350001\t0\t17\n180004\tMonotorização_2025.v46hh.xlsm\t2026-02-07 09:58:42\t4634\t71\t1350001\t0\t17\n180003\tMonotorização_2025.v46hh.xlsm\t2026-02-07 09:58:18\t4634\t71\t1350001\t0\t17\n180002\tMonotorização_2025.v46hh.xlsm\t2026-02-07 09:57:58\t4634\t71\t1350001\t0\t17\n180001\tMonotorização_2025.v46hh.xlsm\t2026-02-07 09:57:01\t4634\t71\t1350001\t0\t17\n150007\tMonotorização_2025.v4_29012026.xlsm\t2026-02-02 23:21:21\t2344\t66\t1080020\t0\t66\n150006\tMonotorização_2025.v4_29012026.xlsm\t2026-02-02 23:14:58\t2344\t66\t120002\t0\t66\n150005\tMonotorização_2025.v4_29012026.xlsm\t2026-02-02 23:08:15\t2344\t62\t120001\t0\t62\n",
+  "stderr": "",
+  "execution_time_ms": 445
+}

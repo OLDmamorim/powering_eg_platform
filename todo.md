@@ -4303,3 +4303,11 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Mostrar fichas guardadas por loja com categorias
 - [x] Corrigir filtro obrano >= 0 (antes era > 0, excluía fichas com obrano 0)
 - [ ] Testar funcionalidade completa após publicar
+
+## v4.55 - Bug: Dashboard mostra 0 lojas visitadas, 0 relatórios + Chatbot IA errado
+- [x] Investigar porque o dashboard mostra 0 lojas visitadas, 0 relatórios livres e 0 relatórios completos
+- [x] Causa: RelatoriosIA.tsx iniciava com mês atual (Fevereiro) mas relatórios são de Janeiro
+- [x] Chatbot IA também dá respostas erradas sobre lojas visitadas
+- [x] Causa: Contexto do chatbot não tinha resumo mensal de visitas
+- [x] Corrigir RelatoriosIA.tsx para iniciar com mês anterior por defeito
+- [x] Melhorar contexto do chatbot com resumo mensal de lojas visitadas/não visitadas

@@ -36,10 +36,13 @@ import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function RelatoriosIA() {
   const { language, t } = useLanguage();
-  // Novo estado para múltiplos meses - por defeito o mês atual
+  // Novo estado para múltiplos meses - por defeito o mês anterior
   const [mesesSelecionados, setMesesSelecionados] = useState<MesSelecionado[]>(() => {
     const hoje = new Date();
-    return [{ mes: hoje.getMonth() + 1, ano: hoje.getFullYear() }];
+    const mesAnterior = hoje.getMonth(); // getMonth() é 0-indexed, então getMonth() sem +1 = mês anterior
+    const anoMesAnterior = mesAnterior === 0 ? hoje.getFullYear() - 1 : hoje.getFullYear();
+    const mesCorrigido = mesAnterior === 0 ? 12 : mesAnterior;
+    return [{ mes: mesCorrigido, ano: anoMesAnterior }];
   });
   const relatorioRef = useRef<HTMLDivElement>(null);
   const [isGenerating, setIsGenerating] = useState(false);

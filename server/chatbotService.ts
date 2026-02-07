@@ -457,28 +457,60 @@ function formatarContextoPessoal(contexto: ContextoPlataforma): string {
   }
   texto += '\n';
   
-  // Meus relatórios
-  texto += `📝 MEUS RELATÓRIOS:\n`;
-  texto += `- Relatórios Livres: ${cp.meusRelatoriosLivres.length}\n`;
-  texto += `- Relatórios Completos: ${cp.meusRelatoriosCompletos.length}\n`;
+  // Meus relat\u00f3rios
+  texto += `\ud83d\udcdd MEUS RELAT\u00d3RIOS:\n`;
+  texto += `- Relat\u00f3rios Livres: ${cp.meusRelatoriosLivres.length}\n`;
+  texto += `- Relat\u00f3rios Completos: ${cp.meusRelatoriosCompletos.length}\n`;
   texto += `- Total: ${cp.meusRelatoriosLivres.length + cp.meusRelatoriosCompletos.length}\n`;
   
-  // Últimos relatórios
+  // Todos os relat\u00f3rios ordenados por data
   const todosRelatorios = [
     ...cp.meusRelatoriosLivres.map(r => ({ ...r, tipo: 'livre' })),
     ...cp.meusRelatoriosCompletos.map(r => ({ ...r, tipo: 'completo' }))
   ].sort((a, b) => new Date(b.dataVisita).getTime() - new Date(a.dataVisita).getTime());
   
+  // Resumo mensal de lojas visitadas (para responder corretamente a perguntas sobre per\u00edodos)
+  const visitasPorMes = new Map<string, Set<string>>();
+  todosRelatorios.forEach(r => {
+    const d = new Date(r.dataVisita);
+    const chave = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    if (!visitasPorMes.has(chave)) visitasPorMes.set(chave, new Set());
+    visitasPorMes.get(chave)!.add(r.loja?.nome || 'N/A');
+  });
+  
+  const NOMES_MESES_PT = ['Janeiro', 'Fevereiro', 'Mar\u00e7o', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+  
+  if (visitasPorMes.size > 0) {
+    texto += `\nLOJAS VISITADAS POR M\u00caS (com base nos relat\u00f3rios):\n`;
+    // Ordenar por m\u00eas mais recente
+    const mesesOrdenados = Array.from(visitasPorMes.entries()).sort((a, b) => b[0].localeCompare(a[0]));
+    mesesOrdenados.slice(0, 6).forEach(([chave, lojas]) => {
+      const [ano, mes] = chave.split('-');
+      const nomeMes = NOMES_MESES_PT[parseInt(mes) - 1];
+      const lojasArray = Array.from(lojas);
+      // Identificar lojas N\u00c3O visitadas neste m\u00eas
+      const lojasNaoVisitadas = gestor.lojasAssociadas
+        .filter((l: any) => !lojas.has(l.nome))
+        .map((l: any) => l.nome);
+      texto += `  ${nomeMes} ${ano}: Visitadas (${lojasArray.length}): ${lojasArray.join(', ')}\n`;
+      if (lojasNaoVisitadas.length > 0) {
+        texto += `    N\u00e3o visitadas (${lojasNaoVisitadas.length}): ${lojasNaoVisitadas.join(', ')}\n`;
+      } else {
+        texto += `    Todas as lojas foram visitadas!\n`;
+      }
+    });
+  }
+  texto += '\n';
+  
   if (todosRelatorios.length > 0) {
-    texto += `\nÚltimos 5 relatórios:\n`;
-    todosRelatorios.slice(0, 5).forEach(r => {
+    texto += `\u00daltimos 10 relat\u00f3rios:\n`;
+    todosRelatorios.slice(0, 10).forEach(r => {
       const data = new Date(r.dataVisita).toLocaleDateString('pt-PT');
       const lojaNome = r.loja?.nome || 'N/A';
       texto += `  - [${data}] ${lojaNome} - ${r.tipo}\n`;
     });
   }
   texto += '\n';
-  
   // Meus alertas
   const alertasPendentes = cp.meusAlertas.filter(a => a.estado === 'pendente');
   texto += `🚨 MEUS ALERTAS:\n`;
