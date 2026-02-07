@@ -43,6 +43,7 @@ export interface FichaServico {
 export interface RelatorioLoja {
   numeroLoja: number | null;
   nomeLoja: string;
+  isServicoMovel: boolean; // Indica se é Serviço Móvel (SM)
   totalFichas: number;
   
   // Categorias de análise
@@ -737,8 +738,13 @@ export function analisarFichas(fichas: FichaServico[], nomeArquivo: string): Res
   };
   
   for (const [nomeLoja, fichasLoja] of Array.from(grupos.entries())) {
-    // Extrair número da loja da primeira ficha
-    const numeroLoja = fichasLoja.length > 0 ? extrairNumeroLoja(fichasLoja[0].nmdos) : null;
+    // Verificar se é Serviço Móvel
+    const primeiraFicha = fichasLoja[0];
+    const isSM = primeiraFicha ? isServicoMovel(primeiraFicha.nmdos, primeiraFicha.loja) : false;
+    
+    // Para SM: NÃO usar o número do nmdos (é enganador - ex: "Ficha S.Movel 7-Leiria" tem 7 mas Leiria SM é 57 na BD)
+    // Para FS normais: usar o número do nmdos (ex: "Ficha Servico 7" -> 7 = Guimarães)
+    const numeroLoja = (!isSM && fichasLoja.length > 0) ? extrairNumeroLoja(fichasLoja[0].nmdos) : null;
     
     // Filtrar por categorias
     const fichasAbertas5Dias = fichasLoja.filter((f: FichaServico) => f.diasAberto >= 5);
@@ -766,6 +772,7 @@ export function analisarFichas(fichas: FichaServico[], nomeArquivo: string): Res
     const relatorio: RelatorioLoja = {
       numeroLoja,
       nomeLoja,
+      isServicoMovel: isSM,
       totalFichas: fichasLoja.length,
       fichasAbertas5Dias,
       fichasAposAgendamento,

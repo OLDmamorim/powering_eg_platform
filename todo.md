@@ -4275,3 +4275,11 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Truncar error.message no onError do analisarMutation para evitar toasts enormes com HTML
 - [x] Adicionar overflow-hidden ao container principal para evitar transbordo visual
 - [x] Adicionar console.error para debug de erros completos
+
+## v4.52 - Reestruturar matching de lojas na Análise de Fichas
+- [x] Problema: lojas com mesmo número confundem-se (ex: Guimarães #7 vs Leiria SM #7)
+- [x] Adicionar campo isServicoMovel ao RelatorioLoja
+- [x] Para SM: NÃO usar número do nmdos (enganador) - usar apenas nome para matching
+- [x] Para FS normais: usar número do nmdos como critério principal
+- [x] Reestruturar matching no routers.ts: SM usa nome primeiro, FS usa número primeiro
+- [x] Testes unitários: 12/12 passam (incluindo novo teste Guimarães vs Leiria SM)

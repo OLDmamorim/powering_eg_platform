@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { normalizarNomeLoja } from './analiseFichasService';
+import { normalizarNomeLoja, processarFicheiroExcel, analisarFichas } from './analiseFichasService';
 
 describe('normalizarNomeLoja', () => {
   it('deve normalizar lojas normais pelo nome', () => {
@@ -36,20 +36,16 @@ describe('normalizarNomeLoja', () => {
   });
 
   it('deve normalizar Porto Alto', () => {
-    // Porto Alto com P maiúsculo retorna como está (cidade conhecida)
     expect(normalizarNomeLoja('Ficha Servico 94', 'Porto Alto')).toBe('Porto Alto');
-    // Porto alto com a minúsculo - mapeamento especial converte para 'Porto Alto'
     expect(normalizarNomeLoja('Ficha Servico 94', 'Porto alto')).toBe('Porto Alto');
   });
 
   it('deve normalizar Portimão', () => {
-    const result = normalizarNomeLoja('Ficha Servico 36', 'Portimão');
-    expect(result).toBe('Portimão');
+    expect(normalizarNomeLoja('Ficha Servico 36', 'Portimão')).toBe('Portimão');
   });
 
   it('deve normalizar Santarém', () => {
-    const result = normalizarNomeLoja('Ficha Servico 72', 'Santarém');
-    expect(result).toBe('Santarém');
+    expect(normalizarNomeLoja('Ficha Servico 72', 'Santarém')).toBe('Santarém');
   });
 
   it('deve usar mapeamento especial para nomes conhecidos', () => {
@@ -57,19 +53,59 @@ describe('normalizarNomeLoja', () => {
     expect(normalizarNomeLoja('Ficha Servico 13', 'castanheira do ribatejo')).toBe('Castanheira do Ribatejo');
     expect(normalizarNomeLoja('Ficha S.Movel 86', 'faro sm')).toBe('Faro SM');
   });
+
+  // NOVO: Teste para o caso Guimarães #7 vs Leiria SM #7
+  it('deve diferenciar Guimarães (FS normal) de Leiria SM (Serviço Móvel) mesmo com mesmo número', () => {
+    // "Ficha Servico 7" + "Guimarães" → Guimarães (FS normal)
+    expect(normalizarNomeLoja('Ficha Servico 7', 'Guimarães')).toBe('Guimarães');
+    
+    // "Ficha S.Movel 7-Leiria" + "Serviço Móvel Leiria" → Leiria SM (Serviço Móvel)
+    expect(normalizarNomeLoja('Ficha S.Movel 7-Leiria', 'Serviço Móvel Leiria')).toBe('Leiria SM');
+    
+    // São nomes diferentes, logo serão agrupados separadamente
+    const nomeGuimaraes = normalizarNomeLoja('Ficha Servico 7', 'Guimarães');
+    const nomeLeiria = normalizarNomeLoja('Ficha S.Movel 7-Leiria', 'Serviço Móvel Leiria');
+    expect(nomeGuimaraes).not.toBe(nomeLeiria);
+  });
 });
 
-// Test extrairNumeroLoja indirectly through the module
-describe('extrairNumeroLoja (via processarAnalise)', () => {
-  it('deve extrair números de fichas normais', () => {
-    // We can't directly test extrairNumeroLoja as it's not exported,
-    // but we test the normalization behavior which depends on it
-    const result = normalizarNomeLoja('Ficha Servico 38', 'Abrantes');
-    expect(result).toBe('Abrantes');
-  });
-
-  it('deve lidar com Serviço Móvel corretamente', () => {
-    const result = normalizarNomeLoja('Ficha S.Movel 86-Faro', 'Faro');
-    expect(result).toBe('Faro SM');
+describe('analisarFichas - isServicoMovel flag', () => {
+  it('deve marcar relatórios SM com isServicoMovel=true e FS normais com false', () => {
+    // Simular fichas para testar
+    const fichaGuimaraes = {
+      bostamp: '1', nmdos: 'Ficha Servico 7', loja: 'Guimarães', gestor: 'Fábio',
+      coordenador: '', obrano: 1001, matricula: 'AA-00-BB', dataObra: null,
+      diasAberto: 10, dataServico: null, diasExecutado: 0, horaInicio: '', horaFim: '',
+      status: 'Em Curso', dataNota: null, diasNota: 0, obs: '', email: '',
+      segurado: '', marca: '', modelo: '', ref: '', eurocode: '', nrFactura: 0,
+      serieFactura: '', nrSinistro: '', armazem: 0, fechado: false, detalheDanos: '',
+      contactoSegurado: '', nome: '',
+    };
+    
+    const fichaLeiria = {
+      ...fichaGuimaraes,
+      bostamp: '2', nmdos: 'Ficha S.Movel 7-Leiria', loja: 'Serviço Móvel Leiria',
+      obrano: 1002,
+    };
+    
+    const resultado = analisarFichas([fichaGuimaraes, fichaLeiria], 'test.xlsx');
+    
+    // Deve ter 2 relatórios (Guimarães e Leiria SM)
+    expect(resultado.relatoriosPorLoja.length).toBe(2);
+    
+    // Encontrar cada relatório
+    const relGuimaraes = resultado.relatoriosPorLoja.find(r => r.nomeLoja === 'Guimarães');
+    const relLeiria = resultado.relatoriosPorLoja.find(r => r.nomeLoja === 'Leiria SM');
+    
+    expect(relGuimaraes).toBeDefined();
+    expect(relLeiria).toBeDefined();
+    
+    // Guimarães é FS normal → isServicoMovel=false, numeroLoja=7
+    expect(relGuimaraes!.isServicoMovel).toBe(false);
+    expect(relGuimaraes!.numeroLoja).toBe(7);
+    
+    // Leiria SM é Serviço Móvel → isServicoMovel=true, numeroLoja=null (não usar número de SM)
+    expect(relLeiria!.isServicoMovel).toBe(true);
+    expect(relLeiria!.numeroLoja).toBeNull();
   });
 });

@@ -1,0 +1,16 @@
+{
+  "query": "SELECT id, nome, numeroLoja, email FROM lojas WHERE numeroLoja = 7 ORDER BY nome",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT id, nome, numeroLoja, email FROM lojas WHERE numeroLoja = 7 ORDER BY nome",
+  "rows": [
+    {
+      "id": "180024",
+      "nome": "Guimarães shopping",
+      "numeroLoja": "7",
+      "email": "guimaraes@expressglass.pt"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tnome\tnumeroLoja\temail\n180024\tGuimarães shopping\t7\tguimaraes@expressglass.pt\n",
+  "stderr": "",
+  "execution_time_ms": 428
+}

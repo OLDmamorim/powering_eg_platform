@@ -9211,36 +9211,53 @@ IMPORTANTE:
         const relatoriosGuardados = [];
         console.log('[analiseFichas] === INÍCIO MATCHING DE LOJAS ===');
         console.log('[analiseFichas] Total lojas no resultado:', resultado.relatoriosPorLoja.length);
-        console.log('[analiseFichas] Lojas encontradas:', resultado.relatoriosPorLoja.map(r => `${r.nomeLoja} (num: ${r.numeroLoja})`).join(', '));
+        console.log('[analiseFichas] Lojas encontradas:', resultado.relatoriosPorLoja.map(r => `${r.nomeLoja} (num: ${r.numeroLoja}, SM: ${r.isServicoMovel})`).join(', '));
         
         for (const relatorio of resultado.relatoriosPorLoja) {
           // Tentar encontrar a loja no sistema
+          // NOVA LÓGICA DE MATCHING:
+          // 1. Para Serviço Móvel (SM): usar NOME primeiro (o número no nmdos é enganador)
+          //    Ex: "Ficha S.Movel 7-Leiria" tem número 7 mas Leiria SM é 57 na BD (7 = Guimarães)
+          // 2. Para FS normais: usar NÚMERO primeiro (ex: "Ficha Servico 7" -> 7 = Guimarães)
+          // 3. Fallback: usar nome aproximado
           let lojaId: number | null = null;
           let matchMethod = 'none';
           
-          // Primeiro tentar por número
-          if (relatorio.numeroLoja) {
-            const lojaPorNumero = await db.getLojaByNumero(relatorio.numeroLoja);
-            if (lojaPorNumero) {
-              lojaId = lojaPorNumero.id;
-              matchMethod = `numero(${relatorio.numeroLoja})->${lojaPorNumero.nome}`;
-            } else {
-              console.log(`[analiseFichas] FALHA por número: ${relatorio.nomeLoja} (num: ${relatorio.numeroLoja}) - número não encontrado na BD`);
-            }
-          }
-          
-          // Se não encontrou por número, tentar por nome aproximado
-          if (!lojaId) {
+          if (relatorio.isServicoMovel) {
+            // SM: Priorizar NOME (o número no nmdos de SM não corresponde ao numeroLoja na BD)
+            console.log(`[analiseFichas] SM detectado: "${relatorio.nomeLoja}" - usar nome para matching`);
             const lojaPorNome = await db.getLojaByNomeAproximado(relatorio.nomeLoja);
             if (lojaPorNome) {
               lojaId = lojaPorNome.id;
-              matchMethod = `nome(${relatorio.nomeLoja})->${lojaPorNome.nome}`;
+              matchMethod = `SM-nome(${relatorio.nomeLoja})->${lojaPorNome.nome}`;
             } else {
-              console.log(`[analiseFichas] FALHA por nome: "${relatorio.nomeLoja}" - nome não encontrado na BD`);
+              console.log(`[analiseFichas] FALHA SM por nome: "${relatorio.nomeLoja}" - nome não encontrado na BD`);
+            }
+          } else {
+            // FS normal: Priorizar NÚMERO (ex: "Ficha Servico 7" -> 7 = Guimarães)
+            if (relatorio.numeroLoja) {
+              const lojaPorNumero = await db.getLojaByNumero(relatorio.numeroLoja);
+              if (lojaPorNumero) {
+                lojaId = lojaPorNumero.id;
+                matchMethod = `FS-numero(${relatorio.numeroLoja})->${lojaPorNumero.nome}`;
+              } else {
+                console.log(`[analiseFichas] FALHA FS por número: ${relatorio.nomeLoja} (num: ${relatorio.numeroLoja}) - número não encontrado na BD`);
+              }
+            }
+            
+            // Fallback: tentar por nome aproximado
+            if (!lojaId) {
+              const lojaPorNome = await db.getLojaByNomeAproximado(relatorio.nomeLoja);
+              if (lojaPorNome) {
+                lojaId = lojaPorNome.id;
+                matchMethod = `FS-nome(${relatorio.nomeLoja})->${lojaPorNome.nome}`;
+              } else {
+                console.log(`[analiseFichas] FALHA FS por nome: "${relatorio.nomeLoja}" - nome não encontrado na BD`);
+              }
             }
           }
           
-          console.log(`[analiseFichas] Loja: "${relatorio.nomeLoja}" | Num: ${relatorio.numeroLoja} | Match: ${matchMethod} | lojaId: ${lojaId}`);
+          console.log(`[analiseFichas] Loja: "${relatorio.nomeLoja}" | Num: ${relatorio.numeroLoja} | SM: ${relatorio.isServicoMovel} | Match: ${matchMethod} | lojaId: ${lojaId}`);
           
           // Guardar lojaId sempre que encontrado (não restringir ao gestor)
           // A filtragem por gestor é feita na visualização, não no armazenamento
