@@ -255,13 +255,16 @@ export function ExportarRelatorioIAPDF({ analiseIA, periodo }: Props) {
       doc.setFillColor(59, 130, 246);
       doc.rect(0, 0, pageWidth, 3, 'F');
       
-      // Título principal
+      // ==================== VERIFICAR TIPO DE RELATÓRIO ====================
+      const isGestor = analiseIA.tipoRelatorio === 'gestor';
+      
+      // Título principal (diferente para gestor e admin)
       doc.setTextColor(30, 41, 59);
       doc.setFontSize(22);
       doc.setFont('helvetica', 'bold');
-      doc.text('Relat\u00f3rio', pageWidth / 2, 20, { align: 'center' });
+      doc.text(isGestor ? 'Relatório - Minhas Lojas' : 'Relatório', pageWidth / 2, 20, { align: 'center' });
       
-      // Subt\u00edtulo
+      // Subtítulo
       doc.setFontSize(11);
       doc.setTextColor(100, 116, 139);
       doc.setFont('helvetica', 'normal');
@@ -275,17 +278,8 @@ export function ExportarRelatorioIAPDF({ analiseIA, periodo }: Props) {
       doc.setTextColor(0, 0, 0);
       yPos = 42;
 
-      // ==================== VERIFICAR TIPO DE RELATÓRIO ====================
-      const isGestor = analiseIA.tipoRelatorio === 'gestor';
-      
       if (isGestor) {
         // ==================== PDF PARA GESTORES ====================
-        
-        // Título específico
-        doc.setTextColor(30, 41, 59);
-        doc.setFontSize(22);
-        doc.setFont('helvetica', 'bold');
-        doc.text('Relatório - Minhas Lojas', pageWidth / 2, 20, { align: 'center' });
         
         // Resumo Geral
         yPos = drawSectionHeader(doc, yPos, 'Resumo Geral', COLORS.primary, pageWidth);
@@ -1323,7 +1317,7 @@ export function ExportarRelatorioIAPDF({ analiseIA, periodo }: Props) {
         const visitasData = visitasEntries.map(([loja, visitas]) => [
           loja,
           (visitas as number).toString(),
-          '█'.repeat(Math.round(((visitas as number) / maxVisitas) * 10))
+          '' // Placeholder - barra visual será desenhada manualmente
         ]);
         
         autoTable(doc, {
@@ -1344,7 +1338,30 @@ export function ExportarRelatorioIAPDF({ analiseIA, periodo }: Props) {
           columnStyles: {
             0: { cellWidth: 70 },
             1: { cellWidth: 25, halign: 'center' },
-            2: { cellWidth: 60, textColor: COLORS.secondary },
+            2: { cellWidth: 60 },
+          },
+          didDrawCell: (data: any) => {
+            // Desenhar barra de progresso visual na coluna Frequência (coluna 2)
+            if (data.section === 'body' && data.column.index === 2) {
+              const rowIndex = data.row.index;
+              const visitas = visitasEntries[rowIndex] ? (visitasEntries[rowIndex][1] as number) : 0;
+              const ratio = maxVisitas > 0 ? visitas / maxVisitas : 0;
+              const barMaxWidth = data.cell.width - 6;
+              const barWidth = barMaxWidth * ratio;
+              const barHeight = 6;
+              const barX = data.cell.x + 3;
+              const barY = data.cell.y + (data.cell.height - barHeight) / 2;
+              
+              // Fundo da barra (cinza claro)
+              doc.setFillColor(226, 232, 240);
+              doc.roundedRect(barX, barY, barMaxWidth, barHeight, 1, 1, 'F');
+              
+              // Barra de progresso (cor secundária)
+              if (barWidth > 0) {
+                doc.setFillColor(COLORS.secondary[0], COLORS.secondary[1], COLORS.secondary[2]);
+                doc.roundedRect(barX, barY, Math.max(barWidth, 2), barHeight, 1, 1, 'F');
+              }
+            }
           },
         });
         

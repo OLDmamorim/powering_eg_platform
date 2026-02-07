@@ -4263,3 +4263,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar logs de debug para rastreamento de matching
 - [x] Criar testes unitários (12 testes passam)
 - [x] Verificar matching de todas as 13 lojas: 13/13 encontradas com sucesso
+
+## v4.50 - Bugs no PDF de Relatório
+- [x] Corrigir título corrompido no PDF: "RelatóriRelatórias Lojas" - causa: título genérico e título gestor escritos na mesma posição y=20
+- [x] Corrigir coluna Frequência na tabela de Visitas por Loja: substituir caractere █ (Unicode) por barras de progresso desenhadas com rectângulos
