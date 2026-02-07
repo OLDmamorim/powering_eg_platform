@@ -9326,15 +9326,31 @@ IMPORTANTE:
             // Validar que analise.id é válido antes de guardar
             if (Number.isFinite(analise.id) && analise.id > 0) {
               // Filtrar fichas com obrano válido
+              console.log(`[analiseFichas] fichasParaGuardar total: ${fichasParaGuardar.length} para ${relatorio.nomeLoja}`);
+              if (fichasParaGuardar.length > 0) {
+                const amostra = fichasParaGuardar[0];
+                console.log(`[analiseFichas] Amostra ficha: obrano=${amostra.obrano} (${typeof amostra.obrano}), relatorioId=${amostra.relatorioId} (${typeof amostra.relatorioId}), analiseId=${amostra.analiseId} (${typeof amostra.analiseId})`);
+                console.log(`[analiseFichas] isFinite obrano: ${Number.isFinite(amostra.obrano)}, >0: ${amostra.obrano > 0}`);
+                console.log(`[analiseFichas] isFinite relatorioId: ${Number.isFinite(amostra.relatorioId)}, >0: ${amostra.relatorioId > 0}`);
+                console.log(`[analiseFichas] isFinite analiseId: ${Number.isFinite(amostra.analiseId)}, >0: ${amostra.analiseId > 0}`);
+              }
               const fichasValidas = fichasParaGuardar.filter(f => 
                 Number.isFinite(f.obrano) && f.obrano > 0 &&
                 Number.isFinite(f.relatorioId) && f.relatorioId > 0 &&
                 Number.isFinite(f.analiseId) && f.analiseId > 0
               );
+              console.log(`[analiseFichas] fichasValidas: ${fichasValidas.length} de ${fichasParaGuardar.length} para ${relatorio.nomeLoja}`);
               
               if (fichasValidas.length > 0) {
-                await db.saveFichasIdentificadas(fichasValidas);
-                console.log(`[analiseFichas] Guardadas ${fichasValidas.length} fichas identificadas para ${relatorio.nomeLoja}`);
+                // Inserir em batches de 100 para evitar queries SQL demasiado grandes
+                const BATCH_SIZE = 100;
+                for (let i = 0; i < fichasValidas.length; i += BATCH_SIZE) {
+                  const batch = fichasValidas.slice(i, i + BATCH_SIZE);
+                  await db.saveFichasIdentificadas(batch);
+                }
+                console.log(`[analiseFichas] Guardadas ${fichasValidas.length} fichas identificadas para ${relatorio.nomeLoja} (em batches de ${BATCH_SIZE})`);
+              } else {
+                console.warn(`[analiseFichas] NENHUMA ficha válida para guardar em ${relatorio.nomeLoja}! Total antes do filtro: ${fichasParaGuardar.length}`);
               }
               
               // Buscar fichas da analise anterior para comparacao

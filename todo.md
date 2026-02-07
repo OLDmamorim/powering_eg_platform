@@ -4283,3 +4283,14 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Para FS normais: usar número do nmdos como critério principal
 - [x] Reestruturar matching no routers.ts: SM usa nome primeiro, FS usa número primeiro
 - [x] Testes unitários: 12/12 passam (incluindo novo teste Guimarães vs Leiria SM)
+
+## v4.53 - Verificar comparação com análise anterior (processos repetidos)
+- [x] Investigar lógica de comparação com análise anterior no endpoint analisar
+- [x] Causa: tabela fichas_identificadas_analise tinha 0 registos (saveFichasIdentificadas falhava)
+- [x] Causa provavel: INSERT sem batching excedia max_allowed_packet do MySQL
+- [x] Confirmar que INSERT via drizzle funciona com dados válidos (teste manual OK)
+- [x] Batching de 100 fichas por INSERT já implementado no código
+- [x] Logs detalhados adicionados para diagnóstico
+- [x] Validação de fichas (obrano > 0, relatorioId > 0, analiseId > 0)
+- [ ] PENDENTE: Publicar nova versão para que correções entrem em produção
+- [ ] PENDENTE: Testar comparativo após 2º upload (1º guarda fichas, 2º compara)
