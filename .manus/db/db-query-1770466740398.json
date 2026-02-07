@@ -1,0 +1,55 @@
+{
+  "query": "SELECT a.id, a.nomeArquivo, a.totalFichas, a.totalLojas, a.createdAt, \n  (SELECT COUNT(*) FROM fichas_identificadas_analise f WHERE f.analiseId = a.id) as fichasGuardadas,\n  (SELECT COUNT(*) FROM relatorios_analise_loja r WHERE r.analiseId = a.id) as totalRelatorios\nFROM analises_fichas_servico a \nORDER BY a.id DESC \nLIMIT 5",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT a.id, a.nomeArquivo, a.totalFichas, a.totalLojas, a.createdAt, \n  (SELECT COUNT(*) FROM fichas_identificadas_analise f WHERE f.analiseId = a.id) as fichasGuardadas,\n  (SELECT COUNT(*) FROM relatorios_analise_loja r WHERE r.analiseId = a.id) as totalRelatorios\nFROM analises_fichas_servico a \nORDER BY a.id DESC \nLIMIT 5",
+  "rows": [
+    {
+      "id": "210011",
+      "nomeArquivo": "Monotorização_2025.v46hh.xlsm",
+      "totalFichas": "4634",
+      "totalLojas": "71",
+      "createdAt": "2026-02-07 11:57:50",
+      "fichasGuardadas": "0",
+      "totalRelatorios": "71"
+    },
+    {
+      "id": "210010",
+      "nomeArquivo": "Monotorização_2025.v46hh.xlsm",
+      "totalFichas": "4634",
+      "totalLojas": "71",
+      "createdAt": "2026-02-07 11:49:59",
+      "fichasGuardadas": "0",
+      "totalRelatorios": "71"
+    },
+    {
+      "id": "210009",
+      "nomeArquivo": "Monotorização_2025.v46hh.xlsm",
+      "totalFichas": "4634",
+      "totalLojas": "71",
+      "createdAt": "2026-02-07 11:33:15",
+      "fichasGuardadas": "0",
+      "totalRelatorios": "71"
+    },
+    {
+      "id": "210008",
+      "nomeArquivo": "Monotorização_2025.v46hh.xlsm",
+      "totalFichas": "4634",
+      "totalLojas": "71",
+      "createdAt": "2026-02-07 11:31:14",
+      "fichasGuardadas": "0",
+      "totalRelatorios": "71"
+    },
+    {
+      "id": "210007",
+      "nomeArquivo": "Monotorização_2025.v46hh.xlsm",
+      "totalFichas": "4634",
+      "totalLojas": "71",
+      "createdAt": "2026-02-07 11:19:20",
+      "fichasGuardadas": "0",
+      "totalRelatorios": "17"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tnomeArquivo\ttotalFichas\ttotalLojas\tcreatedAt\tfichasGuardadas\ttotalRelatorios\n210011\tMonotorização_2025.v46hh.xlsm\t4634\t71\t2026-02-07 11:57:50\t0\t71\n210010\tMonotorização_2025.v46hh.xlsm\t4634\t71\t2026-02-07 11:49:59\t0\t71\n210009\tMonotorização_2025.v46hh.xlsm\t4634\t71\t2026-02-07 11:33:15\t0\t71\n210008\tMonotorização_2025.v46hh.xlsm\t4634\t71\t2026-02-07 11:31:14\t0\t71\n210007\tMonotorização_2025.v46hh.xlsm\t4634\t71\t2026-02-07 11:19:20\t0\t17\n",
+  "stderr": "",
+  "execution_time_ms": 432
+}

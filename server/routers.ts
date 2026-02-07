@@ -9214,6 +9214,12 @@ IMPORTANTE:
         console.log('[analiseFichas] Lojas encontradas:', resultado.relatoriosPorLoja.map(r => `${r.nomeLoja} (num: ${r.numeroLoja}, SM: ${r.isServicoMovel})`).join(', '));
         
         for (const relatorio of resultado.relatoriosPorLoja) {
+          // Ignorar fichas da loja "Desconhecida" (fichas sem loja identificada)
+          if (relatorio.nomeLoja === 'Desconhecida' || relatorio.nomeLoja.toLowerCase() === 'desconhecida') {
+            console.log(`[analiseFichas] Ignorando loja "Desconhecida" com ${relatorio.totalFichas} fichas`);
+            continue;
+          }
+          
           // Tentar encontrar a loja no sistema
           // NOVA LÓGICA DE MATCHING:
           // 1. Para Serviço Móvel (SM): usar NOME primeiro (o número no nmdos é enganador)
@@ -9335,7 +9341,7 @@ IMPORTANTE:
                 console.log(`[analiseFichas] isFinite analiseId: ${Number.isFinite(amostra.analiseId)}, >0: ${amostra.analiseId > 0}`);
               }
               const fichasValidas = fichasParaGuardar.filter(f => 
-                Number.isFinite(f.obrano) && f.obrano > 0 &&
+                Number.isFinite(f.obrano) && f.obrano >= 0 &&
                 Number.isFinite(f.relatorioId) && f.relatorioId > 0 &&
                 Number.isFinite(f.analiseId) && f.analiseId > 0
               );
@@ -9396,9 +9402,11 @@ IMPORTANTE:
             } else {
               console.warn(`[analiseFichas] analise.id inválido: ${analise.id}, não guardando fichas identificadas`);
             }
-          } catch (fichasError) {
+          } catch (fichasError: any) {
             // Log do erro mas continua a análise
-            console.error('[analiseFichas] Erro ao guardar/comparar fichas identificadas:', fichasError);
+            console.error('[analiseFichas] Erro ao guardar/comparar fichas identificadas:', fichasError?.message || fichasError);
+            console.error('[analiseFichas] Error details - code:', fichasError?.code, 'sqlState:', fichasError?.sqlState, 'errno:', fichasError?.errno);
+            console.error('[analiseFichas] Stack:', fichasError?.stack?.substring(0, 500));
           }
           
           // Verificar se a loja pertence ao gestor
@@ -9524,7 +9532,12 @@ IMPORTANTE:
           lojasGestorIds = lojasGestor.map(l => l.id);
         }
         
-        const relatoriosComInfo = relatorios.map(r => ({
+        // Filtrar fichas da loja "Desconhecida" (fichas sem loja identificada)
+        const relatoriosFiltrados = relatorios.filter(r => 
+          r.nomeLoja !== 'Desconhecida' && r.nomeLoja.toLowerCase() !== 'desconhecida'
+        );
+        
+        const relatoriosComInfo = relatoriosFiltrados.map(r => ({
           ...r,
           pertenceAoGestor: r.lojaId ? lojasGestorIds.includes(r.lojaId) : (ctx.user.role === 'admin' && !input.gestorIdFiltro),
           evolucao: evolucao.find(e => e.nomeLoja === r.nomeLoja) || null,
@@ -9869,6 +9882,45 @@ IMPORTANTE:
         }
         
         return { resultados, copiaEnviada: gestorUser?.email };
+      }),
+    
+    // Diagnóstico da análise - mostra estado das fichas guardadas e comparação
+    diagnostico: gestorProcedure
+      .input(z.object({ analiseId: z.number() }))
+      .query(async ({ input, ctx }) => {
+        const analise = await db.getAnaliseById(input.analiseId);
+        if (!analise) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Análise não encontrada' });
+        }
+        
+        // Verificar permissão (admin ou dono da análise)
+        if (ctx.user.role !== 'admin') {
+          if (!ctx.gestor || analise.gestorId !== ctx.gestor.id) {
+            throw new TRPCError({ code: 'FORBIDDEN', message: 'Sem permissão' });
+          }
+        }
+        
+        const diagnostico = await db.getDiagnosticoAnalise(input.analiseId);
+        
+        // Obter relatórios desta análise para contar fichas esperadas
+        const relatorios = await db.getRelatoriosByAnaliseId(input.analiseId);
+        const totalFichasEsperadas = relatorios.reduce((acc, r) => {
+          return acc + (r.fichasAbertas5Dias || 0) + (r.fichasAposAgendamento || 0) + 
+            (r.fichasStatusAlerta || 0) + (r.fichasSemNotas || 0) + 
+            (r.fichasNotasAntigas || 0) + (r.fichasDevolverVidro || 0) + 
+            (r.fichasSemEmailCliente || 0);
+        }, 0);
+        
+        return {
+          analiseId: input.analiseId,
+          dataAnalise: analise.createdAt,
+          totalRelatorios: relatorios.length,
+          totalFichasEsperadas,
+          ...diagnostico,
+          percentagemGuardada: totalFichasEsperadas > 0 
+            ? Math.round((diagnostico.totalFichasGuardadas / totalFichasEsperadas) * 100) 
+            : 0,
+        };
       }),
   }),
 });

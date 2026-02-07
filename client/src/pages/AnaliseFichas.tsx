@@ -29,7 +29,8 @@ import {
   Send,
   History,
   RefreshCw,
-  Download
+  Download,
+  Activity
 } from 'lucide-react';
 
 export default function AnaliseFichas() {
@@ -290,6 +291,12 @@ export default function AnaliseFichas() {
               <History className="mr-2 h-4 w-4" />
               Histórico
             </TabsTrigger>
+            {isAdmin && (
+              <TabsTrigger value="diagnostico">
+                <Activity className="mr-2 h-4 w-4" />
+                Diagnóstico
+              </TabsTrigger>
+            )}
           </TabsList>
           
           {/* Tab: Análise Atual */}
@@ -734,6 +741,13 @@ export default function AnaliseFichas() {
               </div>
             )}
           </TabsContent>
+          
+          {/* Tab: Diagnóstico (apenas Admin) */}
+          {isAdmin && (
+            <TabsContent value="diagnostico" className="space-y-4">
+              <DiagnosticoPanel analises={analises || []} />
+            </TabsContent>
+          )}
         </Tabs>
         
         {/* Dialog: Ver Relatório */}
@@ -933,5 +947,168 @@ export default function AnaliseFichas() {
         </DialogContent>
       </Dialog>
     </DashboardLayout>
+  );
+}
+
+// Componente de Diagnóstico (apenas Admin)
+function DiagnosticoPanel({ analises }: { analises: Array<{ id: number; nomeArquivo: string; dataUpload: Date; totalFichas: number; totalLojas: number }> }) {
+  const [selectedDiagAnalise, setSelectedDiagAnalise] = useState<number | null>(
+    analises.length > 0 ? analises[0].id : null
+  );
+  
+  const { data: diagnostico, isLoading, error } = trpc.analiseFichas.diagnostico.useQuery(
+    { analiseId: selectedDiagAnalise! },
+    { enabled: !!selectedDiagAnalise }
+  );
+  
+  return (
+    <div className="space-y-4">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Activity className="h-5 w-5" />
+            Diagnóstico de Fichas Identificadas
+          </CardTitle>
+          <CardDescription>
+            Verifica se as fichas individuais estão a ser guardadas corretamente na base de dados
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Seletor de análise */}
+          <div className="flex items-center gap-4">
+            <Label>Análise:</Label>
+            <Select
+              value={selectedDiagAnalise?.toString() || ''}
+              onValueChange={(v) => setSelectedDiagAnalise(parseInt(v))}
+            >
+              <SelectTrigger className="w-[400px]">
+                <SelectValue placeholder="Selecione uma análise..." />
+              </SelectTrigger>
+              <SelectContent>
+                {analises.map((a) => (
+                  <SelectItem key={a.id} value={a.id.toString()}>
+                    {a.nomeArquivo} - {new Date(a.dataUpload).toLocaleString('pt-PT')} ({a.totalFichas} fichas)
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          
+          {isLoading && (
+            <div className="flex items-center justify-center py-8">
+              <RefreshCw className="h-6 w-6 animate-spin text-muted-foreground" />
+              <span className="ml-2 text-muted-foreground">A carregar diagnóstico...</span>
+            </div>
+          )}
+          
+          {error && (
+            <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+              <div className="flex items-center gap-2 text-red-600">
+                <AlertTriangle className="h-5 w-5" />
+                <span className="font-medium">Erro ao carregar diagnóstico</span>
+              </div>
+              <p className="mt-1 text-sm text-red-500">{error.message}</p>
+            </div>
+          )}
+          
+          {diagnostico && (
+            <div className="space-y-4">
+              {/* Resumo geral */}
+              <div className="grid gap-4 md:grid-cols-4">
+                <div className="rounded-lg border p-3">
+                  <div className="text-2xl font-bold">{diagnostico.totalRelatorios}</div>
+                  <div className="text-sm text-muted-foreground">Relatórios Guardados</div>
+                </div>
+                <div className="rounded-lg border p-3">
+                  <div className="text-2xl font-bold">{diagnostico.totalFichasEsperadas}</div>
+                  <div className="text-sm text-muted-foreground">Fichas Esperadas (soma categorias)</div>
+                </div>
+                <div className={`rounded-lg border p-3 ${diagnostico.totalFichasGuardadas === 0 ? 'border-red-300 bg-red-50' : 'border-green-300 bg-green-50'}`}>
+                  <div className={`text-2xl font-bold ${diagnostico.totalFichasGuardadas === 0 ? 'text-red-600' : 'text-green-600'}`}>
+                    {diagnostico.totalFichasGuardadas}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Fichas Guardadas na BD</div>
+                </div>
+                <div className={`rounded-lg border p-3 ${diagnostico.percentagemGuardada < 50 ? 'border-red-300 bg-red-50' : diagnostico.percentagemGuardada < 90 ? 'border-yellow-300 bg-yellow-50' : 'border-green-300 bg-green-50'}`}>
+                  <div className={`text-2xl font-bold ${diagnostico.percentagemGuardada < 50 ? 'text-red-600' : diagnostico.percentagemGuardada < 90 ? 'text-yellow-600' : 'text-green-600'}`}>
+                    {diagnostico.percentagemGuardada}%
+                  </div>
+                  <div className="text-sm text-muted-foreground">Taxa de Salvamento</div>
+                </div>
+              </div>
+              
+              {/* Alerta se 0 fichas */}
+              {diagnostico.totalFichasGuardadas === 0 && (
+                <div className="rounded-lg border border-red-300 bg-red-50 p-4">
+                  <div className="flex items-center gap-2 text-red-700 font-medium">
+                    <AlertTriangle className="h-5 w-5" />
+                    PROBLEMA: Nenhuma ficha individual foi guardada!
+                  </div>
+                  <p className="mt-2 text-sm text-red-600">
+                    Os relatórios por loja foram criados ({diagnostico.totalRelatorios}), mas as fichas individuais 
+                    não foram guardadas na tabela <code>fichas_identificadas_analise</code>. 
+                    Isto impede a comparação entre análises (processos repetidos).
+                  </p>
+                  <p className="mt-1 text-sm text-red-600">
+                    Possíveis causas: obrano=0 (filtrado), erro SQL silencioso, ou código antigo sem esta funcionalidade.
+                  </p>
+                </div>
+              )}
+              
+              {/* Detalhes por loja */}
+              {diagnostico.fichasPorLoja.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-medium mb-2">Fichas guardadas por loja:</h3>
+                  <div className="max-h-[400px] overflow-y-auto rounded-lg border">
+                    <table className="w-full text-sm">
+                      <thead className="bg-muted/50 sticky top-0">
+                        <tr>
+                          <th className="text-left p-2">Loja</th>
+                          <th className="text-right p-2">Total</th>
+                          <th className="text-right p-2">Abertas 5d</th>
+                          <th className="text-right p-2">Após Agend.</th>
+                          <th className="text-right p-2">Alerta</th>
+                          <th className="text-right p-2">Sem Notas</th>
+                          <th className="text-right p-2">Notas Ant.</th>
+                          <th className="text-right p-2">Dev. Vidro</th>
+                          <th className="text-right p-2">Sem Email</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {diagnostico.fichasPorLoja.map((loja, i) => (
+                          <tr key={i} className={i % 2 === 0 ? 'bg-background' : 'bg-muted/20'}>
+                            <td className="p-2 font-medium">{loja.nomeLoja}</td>
+                            <td className="text-right p-2">{loja.totalFichas}</td>
+                            <td className="text-right p-2">{loja.categorias['abertas5Dias'] || 0}</td>
+                            <td className="text-right p-2">{loja.categorias['aposAgendamento'] || 0}</td>
+                            <td className="text-right p-2">{loja.categorias['statusAlerta'] || 0}</td>
+                            <td className="text-right p-2">{loja.categorias['semNotas'] || 0}</td>
+                            <td className="text-right p-2">{loja.categorias['notasAntigas'] || 0}</td>
+                            <td className="text-right p-2">{loja.categorias['devolverVidro'] || 0}</td>
+                            <td className="text-right p-2">{loja.categorias['semEmailCliente'] || 0}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+              
+              {/* Info sobre análise anterior */}
+              <div className="rounded-lg border p-3 text-sm">
+                <span className="font-medium">Análise anterior: </span>
+                {diagnostico.temAnaliseAnterior ? (
+                  <span className="text-green-600">
+                    Sim (de {diagnostico.dataAnaliseAnterior ? new Date(diagnostico.dataAnaliseAnterior).toLocaleString('pt-PT') : 'data desconhecida'})
+                  </span>
+                ) : (
+                  <span className="text-muted-foreground">Não encontrada (primeira análise ou mesma data)</span>
+                )}
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 }

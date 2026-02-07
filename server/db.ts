@@ -9854,9 +9854,23 @@ export async function getLojaByNomeAproximado(nome: string) {
  */
 export async function saveFichasIdentificadas(fichas: InsertFichaIdentificadaAnalise[]) {
   const db = await getDb();
-  if (!db || fichas.length === 0) return;
+  if (!db || fichas.length === 0) {
+    console.log(`[saveFichasIdentificadas] Skipping: db=${!!db}, fichas.length=${fichas.length}`);
+    return;
+  }
   
-  await db.insert(fichasIdentificadasAnalise).values(fichas);
+  try {
+    console.log(`[saveFichasIdentificadas] Inserting ${fichas.length} fichas. Sample:`, JSON.stringify(fichas[0]));
+    await db.insert(fichasIdentificadasAnalise).values(fichas);
+    console.log(`[saveFichasIdentificadas] Successfully inserted ${fichas.length} fichas`);
+  } catch (err: any) {
+    console.error(`[saveFichasIdentificadas] INSERT FAILED for ${fichas.length} fichas:`, err?.message || err);
+    console.error(`[saveFichasIdentificadas] SQL State:`, err?.sqlState, 'Code:', err?.code, 'errno:', err?.errno);
+    if (fichas.length > 0) {
+      console.error(`[saveFichasIdentificadas] First ficha:`, JSON.stringify(fichas[0]));
+    }
+    throw err; // Re-throw so the caller's catch block also logs it
+  }
 }
 
 /**
@@ -9920,6 +9934,61 @@ export async function getFichasIdentificadasByRelatorioId(relatorioId: number): 
     .where(eq(fichasIdentificadasAnalise.relatorioId, relatorioId));
 }
 
+
+/**
+ * Obter diagnóstico de fichas identificadas por análise
+ * Retorna contagem de fichas guardadas por loja e total
+ */
+export async function getDiagnosticoAnalise(analiseId: number): Promise<{
+  totalFichasGuardadas: number;
+  fichasPorLoja: Array<{ nomeLoja: string; totalFichas: number; categorias: Record<string, number> }>;
+  temAnaliseAnterior: boolean;
+  dataAnaliseAnterior: Date | null;
+}> {
+  const db = await getDb();
+  if (!db) return { totalFichasGuardadas: 0, fichasPorLoja: [], temAnaliseAnterior: false, dataAnaliseAnterior: null };
+  
+  // Contar fichas guardadas por loja
+  const fichas = await db.select()
+    .from(fichasIdentificadasAnalise)
+    .where(eq(fichasIdentificadasAnalise.analiseId, analiseId));
+  
+  const porLoja = new Map<string, { total: number; categorias: Record<string, number> }>();
+  for (const f of fichas) {
+    const loja = f.nomeLoja || 'Desconhecida';
+    if (!porLoja.has(loja)) {
+      porLoja.set(loja, { total: 0, categorias: {} });
+    }
+    const entry = porLoja.get(loja)!;
+    entry.total++;
+    const cat = f.categoria || 'outra';
+    entry.categorias[cat] = (entry.categorias[cat] || 0) + 1;
+  }
+  
+  // Verificar se existe análise anterior
+  const hoje = new Date();
+  hoje.setHours(0, 0, 0, 0);
+  const analisesAnteriores = await db.select()
+    .from(analisesFichasServico)
+    .where(
+      and(
+        lt(analisesFichasServico.id, analiseId),
+      )
+    )
+    .orderBy(desc(analisesFichasServico.createdAt))
+    .limit(1);
+  
+  return {
+    totalFichasGuardadas: fichas.length,
+    fichasPorLoja: Array.from(porLoja.entries()).map(([nomeLoja, data]) => ({
+      nomeLoja,
+      totalFichas: data.total,
+      categorias: data.categorias,
+    })).sort((a, b) => b.totalFichas - a.totalFichas),
+    temAnaliseAnterior: analisesAnteriores.length > 0,
+    dataAnaliseAnterior: analisesAnteriores.length > 0 ? analisesAnteriores[0].createdAt : null,
+  };
+}
 
 /**
  * Atualizar o resumo de um relatório de análise

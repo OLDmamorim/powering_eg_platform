@@ -1,0 +1,50 @@
+{
+  "query": "SELECT id, gestorId, nomeArquivo, totalFichas, totalLojas, createdAt FROM analises_fichas_servico ORDER BY id DESC LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT id, gestorId, nomeArquivo, totalFichas, totalLojas, createdAt FROM analises_fichas_servico ORDER BY id DESC LIMIT 5;",
+  "rows": [
+    {
+      "id": "210011",
+      "gestorId": "30001",
+      "nomeArquivo": "Monotorização_2025.v46hh.xlsm",
+      "totalFichas": "4634",
+      "totalLojas": "71",
+      "createdAt": "2026-02-07 11:57:50"
+    },
+    {
+      "id": "210010",
+      "gestorId": "30001",
+      "nomeArquivo": "Monotorização_2025.v46hh.xlsm",
+      "totalFichas": "4634",
+      "totalLojas": "71",
+      "createdAt": "2026-02-07 11:49:59"
+    },
+    {
+      "id": "210009",
+      "gestorId": "1350001",
+      "nomeArquivo": "Monotorização_2025.v46hh.xlsm",
+      "totalFichas": "4634",
+      "totalLojas": "71",
+      "createdAt": "2026-02-07 11:33:15"
+    },
+    {
+      "id": "210008",
+      "gestorId": "30001",
+      "nomeArquivo": "Monotorização_2025.v46hh.xlsm",
+      "totalFichas": "4634",
+      "totalLojas": "71",
+      "createdAt": "2026-02-07 11:31:14"
+    },
+    {
+      "id": "210007",
+      "gestorId": "30001",
+      "nomeArquivo": "Monotorização_2025.v46hh.xlsm",
+      "totalFichas": "4634",
+      "totalLojas": "71",
+      "createdAt": "2026-02-07 11:19:20"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tgestorId\tnomeArquivo\ttotalFichas\ttotalLojas\tcreatedAt\n210011\t30001\tMonotorização_2025.v46hh.xlsm\t4634\t71\t2026-02-07 11:57:50\n210010\t30001\tMonotorização_2025.v46hh.xlsm\t4634\t71\t2026-02-07 11:49:59\n210009\t1350001\tMonotorização_2025.v46hh.xlsm\t4634\t71\t2026-02-07 11:33:15\n210008\t30001\tMonotorização_2025.v46hh.xlsm\t4634\t71\t2026-02-07 11:31:14\n210007\t30001\tMonotorização_2025.v46hh.xlsm\t4634\t71\t2026-02-07 11:19:20\n",
+  "stderr": "",
+  "execution_time_ms": 377
+}

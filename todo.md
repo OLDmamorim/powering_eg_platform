@@ -4294,3 +4294,12 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Validação de fichas (obrano > 0, relatorioId > 0, analiseId > 0)
 - [ ] PENDENTE: Publicar nova versão para que correções entrem em produção
 - [ ] PENDENTE: Testar comparativo após 2º upload (1º guarda fichas, 2º compara)
+
+## v4.54 - Ignorar loja Desconhecida + Painel de Diagnóstico
+- [x] Ignorar fichas da loja "Desconhecida" no endpoint de análise (não guardar relatório) - já implementado no router
+- [x] Filtrar loja "Desconhecida" do endpoint detalhes (não mostrar no frontend)
+- [x] Criar endpoint diagnostico no router analiseFichas
+- [x] Criar painel de diagnóstico no frontend (tab Diagnóstico, apenas Admin)
+- [x] Mostrar fichas guardadas por loja com categorias
+- [x] Corrigir filtro obrano >= 0 (antes era > 0, excluía fichas com obrano 0)
+- [ ] Testar funcionalidade completa após publicar
