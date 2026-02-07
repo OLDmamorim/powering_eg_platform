@@ -4267,3 +4267,11 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## v4.50 - Bugs no PDF de Relatório
 - [x] Corrigir título corrompido no PDF: "RelatóriRelatórias Lojas" - causa: título genérico e título gestor escritos na mesma posição y=20
 - [x] Corrigir coluna Frequência na tabela de Visitas por Loja: substituir caractere █ (Unicode) por barras de progresso desenhadas com rectângulos
+
+## v4.51 - Bug: HTML raw a aparecer na página Análise de Fichas + Erro 500
+- [x] Investigar causa: colunas TEXT (65KB) insuficientes para relatórios com 1636+ fichas
+- [x] Alterar conteudoRelatorio e resumo de TEXT para MEDIUMTEXT (16MB) no schema
+- [x] Executar migração 0067_lazy_blur.sql com sucesso
+- [x] Truncar error.message no onError do analisarMutation para evitar toasts enormes com HTML
+- [x] Adicionar overflow-hidden ao container principal para evitar transbordo visual
+- [x] Adicionar console.error para debug de erros completos

@@ -1,4 +1,4 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, boolean, decimal } from "drizzle-orm/mysql-core";
+import { int, mysqlEnum, mysqlTable, text, mediumtext, timestamp, varchar, boolean, decimal } from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -1159,11 +1159,11 @@ export const relatoriosAnaliseLoja = mysqlTable("relatorios_analise_loja", {
   fichasDevolverVidro: int("fichasDevolverVidro").default(0).notNull(),
   fichasSemEmailCliente: int("fichasSemEmailCliente").default(0).notNull(),
   
-  // Conteúdo do relatório (HTML formatado)
-  conteudoRelatorio: text("conteudoRelatorio").notNull(),
+  // Conteúdo do relatório (HTML formatado) - mediumtext para suportar relatórios grandes (até 16MB)
+  conteudoRelatorio: mediumtext("conteudoRelatorio").notNull(),
   
-  // Resumo em texto
-  resumo: text("resumo"),
+  // Resumo em texto - mediumtext para suportar resumos grandes
+  resumo: mediumtext("resumo"),
   
   // Estado de envio
   emailEnviado: boolean("emailEnviado").default(false).notNull(),

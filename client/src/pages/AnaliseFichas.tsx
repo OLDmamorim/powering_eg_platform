@@ -84,7 +84,10 @@ export default function AnaliseFichas() {
       setSelectedAnalise(data.analiseId);
     },
     onError: (error) => {
-      toast.error(`Erro na análise: ${error.message}`);
+      // Truncar mensagem de erro para evitar toasts enormes com HTML
+      const msg = error.message?.substring(0, 200) || 'Erro desconhecido';
+      toast.error(`Erro na análise: ${msg}`);
+      console.error('[AnaliseFichas] Erro completo:', error);
     },
   });
   
@@ -240,7 +243,7 @@ export default function AnaliseFichas() {
   
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <div className="space-y-6 overflow-hidden">
         {/* Header */}
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
