@@ -352,6 +352,13 @@ export async function getLojaById(id: number): Promise<Loja | undefined> {
   return lojasResult[0];
 }
 
+export async function getLojasByIds(ids: number[]): Promise<Loja[]> {
+  const db = await getDb();
+  if (!db || ids.length === 0) return [];
+  
+  return await db.select().from(lojas).where(inArray(lojas.id, ids));
+}
+
 export async function updateLoja(id: number, data: Partial<InsertLoja>): Promise<void> {
   const db = await getDb();
   if (!db) throw new Error("Database not available");

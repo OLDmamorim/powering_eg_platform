@@ -141,6 +141,14 @@ interface AnaliseIA {
     relatoriosCompletos: number;
   }>;
   resumoConteudoRelatorios?: string;
+  relatorios?: {
+    totalLivres: number;
+    totalCompletos: number;
+    lojasVisitadas: string[];
+    lojasNaoVisitadas: string[];
+    visitasPorLoja: Array<{ loja: string; visitas: number; ultimaVisita: string | null }>;
+    resumoConteudo: string;
+  };
 }
 
 /**
@@ -1701,6 +1709,42 @@ Respondes sempre em português europeu e em formato JSON válido.`,
       },
     } : undefined;
 
+    // Calcular lojasVisitadas e lojasNaoVisitadas
+    const lojasVisitadasSet = new Set<string>();
+    todosRelatorios.forEach(r => lojasVisitadasSet.add(r.lojaNome));
+    const lojasVisitadasArr = Array.from(lojasVisitadasSet);
+    
+    // Calcular visitasPorLoja com última visita
+    const visitasPorLojaMap = new Map<string, { loja: string; visitas: number; ultimaVisita: Date | null }>();
+    todosRelatorios.forEach(r => {
+      const existing = visitasPorLojaMap.get(r.lojaNome);
+      if (existing) {
+        existing.visitas++;
+        if (!existing.ultimaVisita || r.dataVisita > existing.ultimaVisita) {
+          existing.ultimaVisita = r.dataVisita;
+        }
+      } else {
+        visitasPorLojaMap.set(r.lojaNome, { loja: r.lojaNome, visitas: 1, ultimaVisita: r.dataVisita });
+      }
+    });
+    const visitasPorLoja = Array.from(visitasPorLojaMap.values())
+      .sort((a, b) => b.visitas - a.visitas)
+      .map(v => ({ ...v, ultimaVisita: v.ultimaVisita?.toISOString() || null }));
+    
+    // Calcular lojas não visitadas (se temos lojasIds, comparar)
+    let lojasNaoVisitadas: string[] = [];
+    if (lojasIds && lojasIds.length > 0) {
+      try {
+        const todasLojas = await db.getLojasByIds(lojasIds);
+        const lojasVisitadasNomes = new Set(lojasVisitadasArr.map((n: string) => n.toLowerCase().trim()));
+        lojasNaoVisitadas = todasLojas
+          .filter((l: any) => !lojasVisitadasNomes.has((l.nome || '').toLowerCase().trim()))
+          .map((l: any) => l.nome || 'Desconhecida');
+      } catch (e) {
+        console.log('[RelatoriosIA] Erro ao calcular lojas não visitadas:', e);
+      }
+    }
+
     return {
       lojaMaisVisitada,
       lojaMenosVisitada,
@@ -1719,6 +1763,14 @@ Respondes sempre em português europeu e em formato JSON válido.`,
       insightsIA: analise.insightsIA,
       relatoriosPorLoja,
       resumoConteudoRelatorios: `Período: ${labelMeses}. Total de ${todosRelatorios.length} relatórios analisados (${relatoriosLivres.length} livres, ${relatoriosCompletos.length} completos) de ${relatoriosPorLoja.length} lojas.`,
+      relatorios: {
+        totalLivres: relatoriosLivres.length,
+        totalCompletos: relatoriosCompletos.length,
+        lojasVisitadas: lojasVisitadasArr,
+        lojasNaoVisitadas,
+        visitasPorLoja,
+        resumoConteudo: `Período: ${labelMeses}. Total de ${todosRelatorios.length} relatórios analisados (${relatoriosLivres.length} livres, ${relatoriosCompletos.length} completos) de ${relatoriosPorLoja.length} lojas.`,
+      },
     };
   } catch (error) {
     console.error("Erro ao gerar análise com IA:", error);
@@ -1754,6 +1806,14 @@ Respondes sempre em português europeu e em formato JSON válido.`,
       },
       relatoriosPorLoja,
       resumoConteudoRelatorios: `Período: ${labelMeses}. Total de ${todosRelatorios.length} relatórios.`,
+      relatorios: {
+        totalLivres: relatoriosLivres.length,
+        totalCompletos: relatoriosCompletos.length,
+        lojasVisitadas: Array.from(new Set(todosRelatorios.map(r => r.lojaNome))),
+        lojasNaoVisitadas: [] as string[],
+        visitasPorLoja: [] as Array<{ loja: string; visitas: number; ultimaVisita: string | null }>,
+        resumoConteudo: `Período: ${labelMeses}. Total de ${todosRelatorios.length} relatórios.`,
+      },
     };
   }
 }

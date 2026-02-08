@@ -4319,3 +4319,11 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] BD confirmada: 13 relatórios livres + 5 completos em Janeiro 2026 para gestorId=30001
 - [x] Removidos logs de debug do aiService.ts
 - [ ] PENDENTE: Publicar nova versão para que correções entrem em produção
+
+## v4.57 - Bug CRÍTICO RESOLVIDO: RelatoriosIA mostra 0 mesmo após publicar v4.56
+- [x] Dashboard RelatoriosIA mostrava 0 lojas visitadas, 0 relatórios livres, 0 relatórios completos
+- [x] Causa raíz: gerarRelatorioComIAMultiplosMeses não retornava campo 'relatorios' usado pelo frontend
+- [x] Frontend esperava analise.relatorios.lojasVisitadas mas campo não existia no retorno
+- [x] Adicionado campo 'relatorios' ao retorno com: totalLivres, totalCompletos, lojasVisitadas, lojasNaoVisitadas, visitasPorLoja
+- [x] Adicionada função getLojasByIds ao db.ts
+- [x] Atualizada interface AnaliseIA para incluir campo relatorios
