@@ -3943,6 +3943,7 @@ IMPORTANTE:
   reunioesGestores: router({
     criar: adminProcedure
       .input(z.object({
+        titulo: z.string().optional(),
         data: z.date(),
         presencas: z.array(z.number()), // IDs dos gestores presentes
         outrosPresentes: z.string().optional(),
@@ -3978,6 +3979,7 @@ IMPORTANTE:
     editar: adminProcedure
       .input(z.object({
         id: z.number(),
+        titulo: z.string().optional(),
         data: z.date().optional(),
         presencas: z.array(z.number()).optional(),
         outrosPresentes: z.string().optional(),
@@ -4500,7 +4502,7 @@ IMPORTANTE:
             try {
               await sendEmail({
                 to: gestor.email,
-                subject: `Relatório Reunião de Gestores - ${new Date(reuniao.data).toLocaleDateString('pt-PT')}`,
+                subject: reuniao.titulo || `Relatório Reunião de Gestores - ${new Date(reuniao.data).toLocaleDateString('pt-PT')}`,
                 html: htmlContent,
               });
               emailsEnviados.push(gestor.email);
@@ -4517,7 +4519,7 @@ IMPORTANTE:
             try {
               await sendEmail({
                 to: adminCriador.email,
-                subject: `Relatório Reunião de Gestores - ${new Date(reuniao.data).toLocaleDateString('pt-PT')}`,
+                subject: reuniao.titulo || `Relatório Reunião de Gestores - ${new Date(reuniao.data).toLocaleDateString('pt-PT')}`,
                 html: htmlContent,
               });
               emailsEnviados.push(adminCriador.email);

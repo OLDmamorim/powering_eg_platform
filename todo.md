@@ -4409,3 +4409,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Corrigir para não mostrar tópicos com estado "analisado" (filtro aplicado)
 - [x] Mostrar conteúdo completo dos tópicos: titulo + "Proposto por: {gestor}"
 - [x] TypeScript sem erros
+
+## v4.71 - Adicionar título da reunião no email do relatório
+- [ ] Investigar geração do HTML do email (reuniaoService.ts)
+- [ ] Adicionar título da reunião acima da data no email
+- [ ] Testar envio de email com título visível

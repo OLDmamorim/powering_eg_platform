@@ -338,6 +338,7 @@ export type InsertResumoGlobal = typeof resumosGlobais.$inferInsert;
  */
 export const reunioesGestores = mysqlTable("reunioes_gestores", {
   id: int("id").autoincrement().primaryKey(),
+  titulo: varchar("titulo", { length: 255 }), // Título da reunião (ex: "Reunião Gestão Operacional 06/02/2026")
   data: timestamp("data").notNull(), // Data da reunião
   presencas: text("presencas").notNull(), // JSON array de IDs de gestores presentes
   outrosPresentes: text("outrosPresentes"), // Nomes de outros presentes (texto livre)

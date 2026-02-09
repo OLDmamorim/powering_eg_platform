@@ -31,6 +31,7 @@ export default function ReuniõesGestores() {
   const isAdmin = user?.role === "admin";
   
   // Todos os useState devem vir antes de qualquer return condicional
+  const [titulo, setTitulo] = useState("");
   const [data, setData] = useState<Date>(new Date());
   const [gestoresSelecionados, setGestoresSelecionados] = useState<number[]>([]);
   const [outrosPresentes, setOutrosPresentes] = useState("");
@@ -57,6 +58,7 @@ export default function ReuniõesGestores() {
   // Estados para edição de reunião
   const [modalEditar, setModalEditar] = useState(false);
   const [editarReuniaoId, setEditarReuniaoId] = useState<number | null>(null);
+  const [editarTitulo, setEditarTitulo] = useState("");
   const [editarData, setEditarData] = useState<Date>(new Date());
   const [editarPresencas, setEditarPresencas] = useState<number[]>([]);
   const [editarOutrosPresentes, setEditarOutrosPresentes] = useState("");
@@ -104,6 +106,7 @@ export default function ReuniõesGestores() {
 
   const handleAbrirEditar = (reuniao: any) => {
     setEditarReuniaoId(reuniao.id);
+    setEditarTitulo(reuniao.titulo || '');
     setEditarData(new Date(reuniao.data));
     const presencasIds = JSON.parse(reuniao.presencas || '[]');
     setEditarPresencas(presencasIds);
@@ -120,6 +123,7 @@ export default function ReuniõesGestores() {
     try {
       await editarMutation.mutateAsync({
         id: editarReuniaoId,
+        titulo: editarTitulo.trim() || undefined,
         data: editarData,
         presencas: editarPresencas,
         outrosPresentes: editarOutrosPresentes.trim() || undefined,
@@ -142,6 +146,7 @@ export default function ReuniõesGestores() {
 
     try {
       const result = await criarMutation.mutateAsync({
+        titulo: titulo.trim() || undefined,
         data,
         presencas: gestoresSelecionados,
         outrosPresentes: outrosPresentes.trim() || undefined,
@@ -163,6 +168,7 @@ export default function ReuniõesGestores() {
       toast.success(t('reunioesGestores.reuniaoCriada'));
       
       // Limpar formulário
+      setTitulo("");
       setData(new Date());
       setGestoresSelecionados(gestores?.map(g => g.id) || []);
       setOutrosPresentes("");
@@ -374,6 +380,17 @@ export default function ReuniõesGestores() {
                   <Calendar mode="single" selected={data} onSelect={(d) => d && setData(d)} locale={dateLocale} />
                 </PopoverContent>
               </Popover>
+            </div>
+
+            {/* 1.5 Título */}
+            <div className="space-y-2">
+              <Label htmlFor="titulo">Título (opcional)</Label>
+              <Input
+                id="titulo"
+                placeholder="Ex: Reunião Gestão Operacional 06/02/2026"
+                value={titulo}
+                onChange={(e) => setTitulo(e.target.value)}
+              />
             </div>
 
             {/* 2. Presenças */}
@@ -1051,6 +1068,17 @@ export default function ReuniõesGestores() {
                   />
                 </PopoverContent>
               </Popover>
+            </div>
+
+            {/* Título */}
+            <div className="space-y-2">
+              <Label htmlFor="editar-titulo">Título (opcional)</Label>
+              <Input
+                id="editar-titulo"
+                placeholder="Ex: Reunião Gestão Operacional 06/02/2026"
+                value={editarTitulo}
+                onChange={(e) => setEditarTitulo(e.target.value)}
+              />
             </div>
 
             {/* Presenças */}

@@ -1,0 +1,1 @@
+ALTER TABLE `reunioes_gestores` ADD `titulo` varchar(255);

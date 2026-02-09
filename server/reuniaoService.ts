@@ -463,7 +463,7 @@ export function gerarHTMLRelatorioReuniao(
           <!-- Header -->
           <tr>
             <td style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); padding: 30px; text-align: center;">
-              <h1 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 600;">Relatório de Reunião de Gestores</h1>
+              <h1 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 600;">${reuniao.titulo || `Reunião de ${new Date(reuniao.data).toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit', year: 'numeric' })}`}</h1>
               <p style="margin: 10px 0 0; color: #bfdbfe; font-size: 16px;">
                 ${new Date(reuniao.data).toLocaleDateString('pt-PT', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
               </p>

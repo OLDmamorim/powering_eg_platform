@@ -3019,6 +3019,7 @@ export async function getHistoricoReuniõesGestores(filtros?: {
   const result = await db
     .select({
       id: reunioesGestores.id,
+      titulo: reunioesGestores.titulo,
       data: reunioesGestores.data,
       presencas: reunioesGestores.presencas,
       outrosPresentes: reunioesGestores.outrosPresentes,
