@@ -109,3 +109,149 @@ describe('analisarFichas - isServicoMovel flag', () => {
     expect(relLeiria!.numeroLoja).toBeNull();
   });
 });
+
+describe('formatarFichaParaTabela - novo formato com marca, modelo e ultima nota', () => {
+  
+  it('deve formatar ficha com marca, modelo e nota completa', () => {
+    // A função formatarFichaParaTabela é privada, mas podemos testar através do HTML gerado
+    const ficha = {
+      bostamp: '1',
+      nmdos: 'Ficha Servico 64',
+      loja: 'Teste',
+      gestor: 'Marco',
+      coordenador: '',
+      obrano: 96,
+      matricula: '88-ZV-95',
+      dataObra: null,
+      diasAberto: 5,
+      dataServico: null,
+      diasExecutado: 0,
+      horaInicio: '',
+      horaFim: '',
+      status: 'Pedido Autorização',
+      dataNota: null,
+      diasNota: 0,
+      obs: 'Nota inserida no Sinistro pelo utilizador : Tatiana Moreira conf apolice/ matricula/ cia',
+      email: 'cliente@example.com',
+      segurado: 'Cliente Teste',
+      marca: 'TOYOTA',
+      modelo: 'YARIS',
+      ref: '',
+      eurocode: '',
+      nrFactura: 0,
+      serieFactura: '',
+      nrSinistro: '',
+      armazem: 0,
+      fechado: false,
+      detalheDanos: '',
+      contactoSegurado: '',
+      nome: '',
+    };
+    
+    const resultado = analisarFichas([ficha], 'test.xlsx');
+    const relatorio = resultado.relatoriosPorLoja[0];
+    
+    // Verificar se o HTML contém os elementos esperados
+    expect(relatorio.conteudoHTML).toContain('FS 96');
+    expect(relatorio.conteudoHTML).toContain('88-ZV-95');
+    expect(relatorio.conteudoHTML).toContain('TOYOTA YARIS');
+    expect(relatorio.conteudoHTML).toContain('<b>Pedido Autorização</b>');
+    expect(relatorio.conteudoHTML).toContain('Nota inserida no Sinistro pelo utilizador :');
+    expect(relatorio.conteudoHTML).toContain('<b>Tatiana Moreira conf apolice/ matricula/ cia</b>');
+  });
+  
+  it('deve formatar ficha sem marca/modelo mas com nota', () => {
+    const ficha = {
+      bostamp: '2',
+      nmdos: 'Ficha Servico 64',
+      loja: 'Teste',
+      gestor: 'Marco',
+      coordenador: '',
+      obrano: 78,
+      matricula: '89-UA-63',
+      dataObra: null,
+      diasAberto: 6, // Alterado para 6 para entrar na categoria "abertas 5+ dias"
+      dataServico: null,
+      diasExecutado: 0,
+      horaInicio: '',
+      horaFim: '',
+      status: 'AUTORIZADO',
+      dataNota: null,
+      diasNota: 0,
+      obs: 'Aguardar peça : Peça encomendada',
+      email: 'cliente@example.com',
+      segurado: 'Cliente Teste',
+      marca: '',
+      modelo: '',
+      ref: '',
+      eurocode: '',
+      nrFactura: 0,
+      serieFactura: '',
+      nrSinistro: '',
+      armazem: 0,
+      fechado: false,
+      detalheDanos: '',
+      contactoSegurado: '',
+      nome: '',
+    };
+    
+    const resultado = analisarFichas([ficha], 'test.xlsx');
+    const relatorio = resultado.relatoriosPorLoja[0];
+    
+    // Verificar formato sem marca/modelo
+    expect(relatorio.conteudoHTML).toContain('FS 78');
+    expect(relatorio.conteudoHTML).toContain('89-UA-63');
+    expect(relatorio.conteudoHTML).toContain('<b>AUTORIZADO</b>');
+    expect(relatorio.conteudoHTML).toContain('Aguardar peça :');
+    expect(relatorio.conteudoHTML).toContain('<b>Peça encomendada</b>');
+    // Não deve conter marca/modelo vazios
+    expect(relatorio.conteudoHTML).not.toContain('// //');
+  });
+  
+  it('deve formatar ficha sem nota (obs vazio)', () => {
+    const ficha = {
+      bostamp: '3',
+      nmdos: 'Ficha Servico 64',
+      loja: 'Teste',
+      gestor: 'Marco',
+      coordenador: '',
+      obrano: 251,
+      matricula: 'AE-66-XM',
+      dataObra: null,
+      diasAberto: 2,
+      dataServico: null,
+      diasExecutado: 0,
+      horaInicio: '',
+      horaFim: '',
+      status: 'ORÇAMENTO - ENVIADO',
+      dataNota: null,
+      diasNota: 0,
+      obs: '',
+      email: 'cliente@example.com',
+      segurado: 'Cliente Teste',
+      marca: 'RENAULT',
+      modelo: 'CLIO',
+      ref: '',
+      eurocode: '',
+      nrFactura: 0,
+      serieFactura: '',
+      nrSinistro: '',
+      armazem: 0,
+      fechado: false,
+      detalheDanos: '',
+      contactoSegurado: '',
+      nome: '',
+    };
+    
+    const resultado = analisarFichas([ficha], 'test.xlsx');
+    const relatorio = resultado.relatoriosPorLoja[0];
+    
+    // Verificar formato sem nota
+    expect(relatorio.conteudoHTML).toContain('FS 251');
+    expect(relatorio.conteudoHTML).toContain('AE-66-XM');
+    expect(relatorio.conteudoHTML).toContain('RENAULT CLIO');
+    expect(relatorio.conteudoHTML).toContain('<b>ORÇAMENTO - ENVIADO</b>');
+    // Não deve ter linha de nota
+    expect(relatorio.conteudoHTML).not.toContain('<br/><span style="font-size: 0.9em');
+  });
+});

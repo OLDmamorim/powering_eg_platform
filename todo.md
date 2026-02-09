@@ -4332,3 +4332,13 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] O resumo aparece corretamente no ecrã mas não no PDF exportado
 - [x] Causa: PDF para gestores procurava apenas resumoGeral (linha 288) mas o backend retorna resumo
 - [x] Corrigido ExportarRelatorioIAPDF.tsx linha 288: usar resumo || resumoGeral || fallback
+
+## v4.59 - Melhorar apresentação de fichas no relatório de Análise de Fichas
+- [x] Adicionar parsing de Marca (coluna T) e Modelo (coluna U) no analiseFichasService.ts
+- [x] Adicionar parsing de Última Nota (coluna Q) no analiseFichasService.ts
+- [x] Atualizar interface FichaServico para incluir marca, modelo e ultimaNota
+- [x] Atualizar frontend (AnaliseFichas.tsx ou componente de relatório) para mostrar:
+  * Linha 1: FS {numero} // {matricula} // {marca} {modelo} // **{status}**
+  * Linha 2: Nota inserida no Sinistro pelo utilizador : {parte antes dos :} **{parte depois dos :}**
+- [x] Aplicar formatação: status a negrito, parte da nota após ":" a negrito
+- [x] Testar com ficheiro real de monitorização (15 testes passaram)
