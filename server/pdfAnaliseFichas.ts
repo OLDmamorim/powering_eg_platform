@@ -555,15 +555,31 @@ function extrairSeccoesDoHTML(html: string): SeccaoExtraida[] {
       // Extrair o bloco entre este h3 e o próximo
       const blocoHTML = html.substring(h3.index, nextH3Index);
       
-      // Extrair itens da tabela
+      // Extrair itens da tabela (agrupar células por linha)
       const itens: string[] = [];
-      const tdRegex = /<td[^>]*>([\s\S]*?)<\/td>/gi;
-      let tdMatch;
+      const trRegex = /<tr[^>]*>([\s\S]*?)<\/tr>/gi;
+      let trMatch;
       
-      while ((tdMatch = tdRegex.exec(blocoHTML)) !== null) {
-        const itemLimpo = limparHTML(tdMatch[1]).trim();
-        if (itemLimpo && itemLimpo.length > 3) {
-          itens.push(itemLimpo);
+      while ((trMatch = trRegex.exec(blocoHTML)) !== null) {
+        const linhaHTML = trMatch[1];
+        const tdRegex = /<td[^>]*>([\s\S]*?)<\/td>/gi;
+        const celulas: string[] = [];
+        let tdMatch;
+        
+        while ((tdMatch = tdRegex.exec(linhaHTML)) !== null) {
+          const celulaLimpa = limparHTML(tdMatch[1]).trim();
+          if (celulaLimpa) {
+            celulas.push(celulaLimpa);
+          }
+        }
+        
+        // Se temos células, juntar numa linha
+        if (celulas.length > 0) {
+          // Formato: FS XX | Matrícula | Marca/Modelo | Status
+          const linhaFormatada = celulas.join(' | ');
+          if (linhaFormatada.length > 3) {
+            itens.push(linhaFormatada);
+          }
         }
       }
       

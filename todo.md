@@ -4361,3 +4361,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar white-space: nowrap nas células para evitar quebra
 - [x] Garantir que cada ficha fica numa única linha horizontal
 - [x] Testar visualização no portal (15 testes passaram)
+
+## v4.63 - Corrigir exportação para PDF (aparece em lista em vez de tabela)
+- [x] Investigar função de exportação para PDF do relatório de Análise de Fichas
+- [x] Verificar como o HTML está a ser processado para PDF (extrairSeccoesDoHTML)
+- [x] Corrigir para que a tabela HTML seja renderizada corretamente no PDF (agrupar células por linha)
+- [x] Testar exportação para PDF (cada ficha numa linha com | separador)
