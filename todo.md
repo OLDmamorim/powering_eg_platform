@@ -4385,3 +4385,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Manter doc.y fixo durante renderização das 4 colunas (resetar após cada coluna)
 - [x] Restaurar doc.y após renderizar todas as colunas de uma linha
 - [x] Testar com PDF real para garantir que não há páginas vazias
+
+## v4.67 - Corrigir quebra de página no meio da linha da tabela no PDF
+- [x] Adicionar verificação de espaço (pageBottom) antes de renderizar cada linha
+- [x] Forçar doc.addPage() se não houver 20px de espaço para a linha
+- [x] Evitar que PDFKit faça auto page break entre colunas da mesma linha

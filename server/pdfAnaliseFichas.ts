@@ -295,8 +295,6 @@ export async function gerarPDFAnaliseFichas(relatorio: {
             };
             
             for (const item of seccao.itens) {
-              // PDFKit gere automaticamente as quebras de página
-              
               // Separar o item nas 4 colunas (formato: "FS XX | Matrícula | Marca/Modelo | Status")
               const partes = item.split(' | ').map(p => p.trim());
               
@@ -304,6 +302,13 @@ export async function gerarPDFAnaliseFichas(relatorio: {
               const matricula = partes[1] || '';
               const marca = partes[2] || '-';
               const status = partes[3] || '';
+              
+              // Verificar se há espaço suficiente para a linha (20px)
+              // Se não houver, forçar nova página ANTES de começar a renderizar
+              const pageBottom = doc.page.height - doc.page.margins.bottom;
+              if (doc.y + 20 > pageBottom) {
+                doc.addPage();
+              }
               
               const rowY = doc.y;
               
