@@ -11,7 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, CalendarIcon, Plus, X, Save, Users, FileText, Tag, Download, Mail, UserPlus, Image as ImageIcon, MessageSquare, CheckCircle2, XCircle, Clock, AlertCircle, FileDown, Send, ListChecks } from "lucide-react";
+import { Loader2, CalendarIcon, Plus, X, Save, Users, FileText, Tag, Download, Mail, UserPlus, Image as ImageIcon, MessageSquare, CheckCircle2, XCircle, Clock, AlertCircle, FileDown, Send, ListChecks, Pencil } from "lucide-react";
 import { format } from "date-fns";
 import { pt, enUS } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -54,6 +54,16 @@ export default function ReuniõesGestores() {
   const [gerandoRelatorio, setGerandoRelatorio] = useState(false);
   const [modalEnviarRelatorio, setModalEnviarRelatorio] = useState(false);
 
+  // Estados para edição de reunião
+  const [modalEditar, setModalEditar] = useState(false);
+  const [editarReuniaoId, setEditarReuniaoId] = useState<number | null>(null);
+  const [editarData, setEditarData] = useState<Date>(new Date());
+  const [editarPresencas, setEditarPresencas] = useState<number[]>([]);
+  const [editarOutrosPresentes, setEditarOutrosPresentes] = useState("");
+  const [editarConteudo, setEditarConteudo] = useState("");
+  const [editarTags, setEditarTags] = useState<string[]>([]);
+  const [editarNovaTag, setEditarNovaTag] = useState("");
+
   // Todas as queries e mutations devem vir antes de qualquer return condicional
   const { data: gestores } = trpc.gestores.list.useQuery();
   const { data: historico, refetch } = trpc.reunioesGestores.listar.useQuery(filtros);
@@ -69,6 +79,7 @@ export default function ReuniõesGestores() {
   const finalizarReuniaoCompletaMutation = trpc.reunioesGestores.finalizarReuniaoCompleta.useMutation();
   const criarPendentesMutation = trpc.reunioesGestores.criarPendentesDeAcoes.useMutation();
   const enviarRelatorioEmailMutation = trpc.reunioesGestores.enviarRelatorioEmail.useMutation();
+  const editarMutation = trpc.reunioesGestores.editar.useMutation();
   const utils = trpc.useUtils();
 
   const { data: relatorioReuniao } = trpc.reunioesGestores.getRelatorioReuniao.useQuery(
@@ -90,6 +101,38 @@ export default function ReuniõesGestores() {
 
   // Verificação de user após todos os hooks
   if (!user) return null;
+
+  const handleAbrirEditar = (reuniao: any) => {
+    setEditarReuniaoId(reuniao.id);
+    setEditarData(new Date(reuniao.data));
+    const presencasIds = JSON.parse(reuniao.presencas || '[]');
+    setEditarPresencas(presencasIds);
+    setEditarOutrosPresentes(reuniao.outrosPresentes || '');
+    setEditarConteudo(reuniao.conteudo || '');
+    const tagsArr = reuniao.tags ? JSON.parse(reuniao.tags) : [];
+    setEditarTags(tagsArr);
+    setEditarNovaTag('');
+    setModalEditar(true);
+  };
+
+  const handleSalvarEditar = async () => {
+    if (!editarReuniaoId) return;
+    try {
+      await editarMutation.mutateAsync({
+        id: editarReuniaoId,
+        data: editarData,
+        presencas: editarPresencas,
+        outrosPresentes: editarOutrosPresentes.trim() || undefined,
+        conteudo: editarConteudo,
+        tags: editarTags.length > 0 ? editarTags : undefined,
+      });
+      toast.success('Reunião atualizada com sucesso!');
+      setModalEditar(false);
+      refetch();
+    } catch (error: any) {
+      toast.error(error.message || 'Erro ao atualizar reunião');
+    }
+  };
 
   const handleSubmit = async () => {
     if (!conteudo.trim()) {
@@ -625,6 +668,15 @@ export default function ReuniõesGestores() {
                       {/* Ações (apenas admin) */}
                       {isAdmin && (
                         <div className="flex flex-wrap gap-2 pt-2 border-t">
+                          {/* Botão Editar */}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleAbrirEditar(reuniao)}
+                          >
+                            <Pencil className="h-4 w-4 mr-2" />
+                            Editar
+                          </Button>
                           {/* Botão principal: Finalizar Reunião (faz tudo de uma vez) */}
                           <Button
                             variant="default"
@@ -960,6 +1012,140 @@ export default function ReuniõesGestores() {
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
               )}
               {t('reunioesGestores.enviarRelatorio') || "Enviar Relatório"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal Editar Reunião */}
+      <Dialog open={modalEditar} onOpenChange={setModalEditar}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Editar Reunião</DialogTitle>
+            <DialogDescription>
+              Edite os dados da reunião. Se alterar o conteúdo, o resumo automático será regenerado.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            {/* Data */}
+            <div className="space-y-2">
+              <Label>Data da Reunião</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !editarData && "text-muted-foreground")}>
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {editarData ? format(editarData, "PPP", { locale: dateLocale }) : "Selecione a data"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={editarData}
+                    onSelect={(d) => d && setEditarData(d)}
+                    locale={dateLocale}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            {/* Presenças */}
+            <div className="space-y-2">
+              <Label>Presenças</Label>
+              <div className="border rounded-md p-3 space-y-2 max-h-48 overflow-y-auto">
+                {gestores?.sort((a: any, b: any) => (a.nome || '').localeCompare(b.nome || '')).map((gestor: any) => (
+                  <div key={gestor.id} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`editar-gestor-${gestor.id}`}
+                      checked={editarPresencas.includes(gestor.id)}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setEditarPresencas([...editarPresencas, gestor.id]);
+                        } else {
+                          setEditarPresencas(editarPresencas.filter(id => id !== gestor.id));
+                        }
+                      }}
+                    />
+                    <label htmlFor={`editar-gestor-${gestor.id}`} className="text-sm cursor-pointer">
+                      {gestor.nome}
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Outros Presentes */}
+            <div className="space-y-2">
+              <Label>Outros Presentes</Label>
+              <Input
+                value={editarOutrosPresentes}
+                onChange={(e) => setEditarOutrosPresentes(e.target.value)}
+                placeholder="Ex: Diretor Comercial, RH..."
+              />
+            </div>
+
+            {/* Conteúdo */}
+            <div className="space-y-2">
+              <Label>Conteúdo da Reunião</Label>
+              <Textarea
+                value={editarConteudo}
+                onChange={(e) => setEditarConteudo(e.target.value)}
+                rows={8}
+                placeholder="Descreva o conteúdo da reunião..."
+              />
+            </div>
+
+            {/* Tags */}
+            <div className="space-y-2">
+              <Label>Tags</Label>
+              <div className="flex gap-2">
+                <Input
+                  value={editarNovaTag}
+                  onChange={(e) => setEditarNovaTag(e.target.value)}
+                  placeholder="Adicionar tag..."
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      if (editarNovaTag.trim() && !editarTags.includes(editarNovaTag.trim())) {
+                        setEditarTags([...editarTags, editarNovaTag.trim()]);
+                        setEditarNovaTag('');
+                      }
+                    }
+                  }}
+                />
+                <Button type="button" variant="outline" size="sm" onClick={() => {
+                  if (editarNovaTag.trim() && !editarTags.includes(editarNovaTag.trim())) {
+                    setEditarTags([...editarTags, editarNovaTag.trim()]);
+                    setEditarNovaTag('');
+                  }
+                }}>
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+              {editarTags.length > 0 && (
+                <div className="flex flex-wrap gap-1">
+                  {editarTags.map((tag) => (
+                    <Badge key={tag} variant="secondary" className="cursor-pointer" onClick={() => setEditarTags(editarTags.filter(t => t !== tag))}>
+                      {tag}
+                      <X className="h-3 w-3 ml-1" />
+                    </Badge>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setModalEditar(false)}>
+              {t('common.cancelar')}
+            </Button>
+            <Button onClick={handleSalvarEditar} disabled={editarMutation.isPending}>
+              {editarMutation.isPending && (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              )}
+              <Save className="h-4 w-4 mr-2" />
+              Guardar Alterações
             </Button>
           </DialogFooter>
         </DialogContent>

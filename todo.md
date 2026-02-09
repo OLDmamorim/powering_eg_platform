@@ -4390,3 +4390,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar verificação de espaço (pageBottom) antes de renderizar cada linha
 - [x] Forçar doc.addPage() se não houver 20px de espaço para a linha
 - [x] Evitar que PDFKit faça auto page break entre colunas da mesma linha
+
+## v4.68 - Corrigir email vazio + Edição de reunião pelo admin
+- [x] Gerar relatório automaticamente com IA se não existir antes de enviar email
+- [x] Adicionar botão "Editar" na card de cada reunião (apenas admin)
+- [x] Criar modal de edição com: data, presenças, outros presentes, conteúdo, tags
+- [x] Regenerar resumo IA automaticamente se conteúdo for alterado
+- [x] TypeScript sem erros

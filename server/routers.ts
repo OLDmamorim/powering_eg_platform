@@ -4461,8 +4461,30 @@ IMPORTANTE:
         const reuniao = await db.getReuniaoGestoresById(input.reuniaoId);
         if (!reuniao) throw new TRPCError({ code: 'NOT_FOUND', message: 'Reunião não encontrada' });
         
-        const relatorio = await db.getRelatorioByReuniaoId(input.reuniaoId);
+        let relatorio = await db.getRelatorioByReuniaoId(input.reuniaoId);
         const topicos = await db.getTopicosReuniaoComGestor(input.reuniaoId);
+        
+        // Se o relatório não existe, gerar automaticamente com IA antes de enviar
+        if (!relatorio) {
+          try {
+            const topicosDiscutidos = topicos.filter(t => t.estado === 'discutido');
+            const { gerarRelatorioReuniaoComIA } = await import('./reuniaoService');
+            const relatorioGerado = await gerarRelatorioReuniaoComIA(reuniao, topicosDiscutidos);
+            
+            // Guardar relatório na base de dados
+            relatorio = await db.createRelatorioReuniao({
+              reuniaoId: input.reuniaoId,
+              resumoExecutivo: relatorioGerado.resumoExecutivo,
+              topicosDiscutidos: JSON.stringify(relatorioGerado.topicosDiscutidos),
+              decisoesTomadas: relatorioGerado.decisoesTomadas,
+              acoesDefinidas: JSON.stringify(relatorioGerado.acoesDefinidas),
+            });
+            console.log(`Relatório gerado automaticamente para reunião ${input.reuniaoId}`);
+          } catch (error) {
+            console.error('Erro ao gerar relatório automaticamente:', error);
+            // Continua com relatorio = null, o HTML mostrará fallbacks
+          }
+        }
         
         const gestores = await db.getAllGestores();
         const gestoresSelecionados = gestores.filter(g => input.gestorIds.includes(g.id));
