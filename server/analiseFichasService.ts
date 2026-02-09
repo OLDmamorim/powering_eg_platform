@@ -485,8 +485,8 @@ function formatarFichaParaTabela(ficha: FichaServico, incluirDias: boolean = fal
     }
   }
   
-  // Retornar células de tabela sem bordas, com espaçamento
-  return `<td style="padding: 6px 12px; vertical-align: top;">${colFS}</td><td style="padding: 6px 12px; vertical-align: top;">${colMatricula}</td><td style="padding: 6px 12px; vertical-align: top;">${colMarcaModelo}</td><td style="padding: 6px 12px; vertical-align: top;">${colStatus}</td>`;
+  // Retornar células de tabela sem bordas, com espaçamento, sem quebra de linha
+  return `<td style="padding: 6px 12px; vertical-align: top; white-space: nowrap;">${colFS}</td><td style="padding: 6px 12px; vertical-align: top; white-space: nowrap;">${colMatricula}</td><td style="padding: 6px 12px; vertical-align: top;">${colMarcaModelo}</td><td style="padding: 6px 12px; vertical-align: top;">${colStatus}</td>`;
 }
 
 /**

@@ -4356,3 +4356,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Colocar status a negrito
 - [x] Alinhar todas as colunas para melhor legibilidade
 - [x] Atualizar testes (15 testes passaram)
+
+## v4.62 - Corrigir quebra de linha nas colunas da tabela
+- [x] Adicionar white-space: nowrap nas células para evitar quebra
+- [x] Garantir que cada ficha fica numa única linha horizontal
+- [x] Testar visualização no portal (15 testes passaram)
