@@ -9304,7 +9304,7 @@ IMPORTANTE:
             fichasSemNotas: relatorio.fichasSemNotas.length,
             fichasNotasAntigas: relatorio.fichasNotasAntigas.length,
             fichasDevolverVidro: relatorio.fichasDevolverVidro.length,
-            fichasSemEmailCliente: relatorio.fichasSemEmailCliente.length,
+            fichasSemEmailCliente: 0, // REMOVIDO da análise
             conteudoRelatorio: relatorio.conteudoHTML,
             resumo: relatorio.resumo,
           });
@@ -9322,14 +9322,14 @@ IMPORTANTE:
           }> = [];
           
           // Mapear fichas por categoria
-          const categoriasMap: Array<{ fichas: typeof relatorio.fichasAbertas5Dias; categoria: 'abertas5Dias' | 'aposAgendamento' | 'statusAlerta' | 'semNotas' | 'notasAntigas' | 'devolverVidro' | 'semEmailCliente' }> = [
+          const categoriasMap: Array<{ fichas: typeof relatorio.fichasAbertas5Dias; categoria: 'abertas5Dias' | 'aposAgendamento' | 'statusAlerta' | 'semNotas' | 'notasAntigas' | 'devolverVidro' }> = [
             { fichas: relatorio.fichasAbertas5Dias, categoria: 'abertas5Dias' },
             { fichas: relatorio.fichasAposAgendamento, categoria: 'aposAgendamento' },
             { fichas: relatorio.fichasStatusAlerta, categoria: 'statusAlerta' },
             { fichas: relatorio.fichasSemNotas, categoria: 'semNotas' },
             { fichas: relatorio.fichasNotasAntigas, categoria: 'notasAntigas' },
             { fichas: relatorio.fichasDevolverVidro, categoria: 'devolverVidro' },
-            { fichas: relatorio.fichasSemEmailCliente, categoria: 'semEmailCliente' },
+            // { fichas: relatorio.fichasSemEmailCliente, categoria: 'semEmailCliente' }, // REMOVIDO
           ];
           
           for (const { fichas, categoria } of categoriasMap) {

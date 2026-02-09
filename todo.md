@@ -4414,3 +4414,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [ ] Investigar geração do HTML do email (reuniaoService.ts)
 - [ ] Adicionar título da reunião acima da data no email
 - [ ] Testar envio de email com título visível
+
+## v4.72 (CORRIGIDO) - Ajustar Critérios de Análise de Fichas
+- [x] Mudar critério "FS Abertas" de 5 para 10 dias (diasAberto >= 10)
+- [x] Remover categoria "FS Sem Email do Cliente" da análise
+- [x] Atualizar backend (analiseFichasService.ts)
+- [x] Testar análise com novos critérios

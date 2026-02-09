@@ -53,7 +53,7 @@ export interface RelatorioLoja {
   fichasSemNotas: FichaServico[];
   fichasNotasAntigas: FichaServico[]; // Notas > 5 dias
   fichasDevolverVidro: FichaServico[];
-  fichasSemEmailCliente: FichaServico[];
+  // fichasSemEmailCliente: FichaServico[]; // REMOVIDO da análise
   
   // Estatísticas por status
   statusCount: Record<string, number>;
@@ -510,11 +510,11 @@ function gerarHTMLRelatorio(relatorio: RelatorioLoja): string {
     html += `</table></div>`;
   }
   
-  // FS abertas a 5 ou mais dias
+  // FS abertas a 10 ou mais dias
   if (relatorio.fichasAbertas5Dias.length > 0) {
     const fichasOrdenadas = [...relatorio.fichasAbertas5Dias].sort((a, b) => b.diasAberto - a.diasAberto);
     html += `<div style="margin: 20px 0; padding: 15px; background: #fff5f5; border-radius: 8px; border-left: 4px solid #c53030;">`;
-    html += `<h3 style="margin: 0 0 10px 0; color: #c53030; text-transform: uppercase; font-weight: bold;">FS ABERTAS A 5 OU MAIS DIAS QUE NÃO ESTÃO FINALIZADOS</h3>`;
+    html += `<h3 style="margin: 0 0 10px 0; color: #c53030; text-transform: uppercase; font-weight: bold;">FS ABERTAS A 10 OU MAIS DIAS QUE NÃO ESTÃO FINALIZADOS</h3>`;
     html += `<table style="width: 100%; border-collapse: collapse; border: none;">`;
     for (const ficha of fichasOrdenadas) {
       html += `<tr style="border-bottom: 1px solid #fed7d7;">${formatarFichaParaTabela(ficha, true, 'aberto')}</tr>`;
@@ -603,19 +603,7 @@ function gerarHTMLRelatorio(relatorio: RelatorioLoja): string {
     html += `</table></div>`;
   }
   
-  // FS sem email de cliente
-  if (relatorio.fichasSemEmailCliente.length > 0) {
-    html += `<div style="margin: 20px 0; padding: 15px; background: #f0f9ff; border-radius: 8px; border-left: 4px solid #0284c7;">`;
-    html += `<h3 style="margin: 0 0 10px 0; color: #0284c7; text-transform: uppercase; font-weight: bold;">FS SEM EMAIL DE CLIENTE</h3>`;
-    html += `<table style="width: 100%; border-collapse: collapse; border: none;">`;
-    for (const ficha of relatorio.fichasSemEmailCliente) {
-      html += `<tr style="border-bottom: 1px solid #bae6fd;">${formatarFichaParaTabela(ficha)}</tr>`;
-    }
-    html += `</table>`;
-    html += `<p style="margin: 10px 0 0 0; font-weight: bold; color: #0284c7;">Total: ${relatorio.fichasSemEmailCliente.length} processos</p>`;
-    html += `<p style="margin: 10px 0 0 0; font-weight: bold; color: #0284c7; text-transform: uppercase;">FORAM PEDIDOS OS EMAILS AOS CLIENTES??</p>`;
-    html += `</div>`;
-  }
+  // FS sem email de cliente - REMOVIDO da análise
   
   // Nota: O resumo é mostrado separadamente no modal, não incluir aqui para evitar duplicação
   
@@ -661,7 +649,7 @@ function gerarResumo(relatorio: RelatorioLoja): string {
   linhas.push(``);
   
   if (relatorio.fichasAbertas5Dias.length > 0) {
-    linhas.push(`<strong>1. FICHAS ABERTAS HA MAIS DE 5 DIAS (${relatorio.fichasAbertas5Dias.length} processos)</strong>`);
+    linhas.push(`<strong>1. FICHAS ABERTAS HA MAIS DE 10 DIAS (${relatorio.fichasAbertas5Dias.length} processos)</strong>`);
     linhas.push(`   - Verificar o motivo do atraso em cada processo`);
     linhas.push(`   - Contactar o cliente para confirmar disponibilidade`);
     linhas.push(`   - Agendar servico ou encerrar processo se nao houver resposta`);
@@ -711,13 +699,7 @@ function gerarResumo(relatorio: RelatorioLoja): string {
     linhas.push(``);
   }
   
-  if (relatorio.fichasSemEmailCliente.length > 0) {
-    linhas.push(`<strong>7. FICHAS SEM EMAIL DE CLIENTE (${relatorio.fichasSemEmailCliente.length} processos)</strong>`);
-    linhas.push(`   - Solicitar email ao cliente no proximo contacto`);
-    linhas.push(`   - Registar email no sistema para comunicacoes futuras`);
-    linhas.push(`   - Importante para envio de orcamentos e confirmacoes`);
-    linhas.push(``);
-  }
+  // Categoria "Fichas Sem Email Cliente" foi removida da análise
   
   if (totalProblemas === 0) {
     linhas.push(`<strong style="color: #16a34a;">PARABENS!</strong> A loja nao apresenta problemas significativos.`);
@@ -762,13 +744,13 @@ export function analisarFichas(fichas: FichaServico[], nomeArquivo: string): Res
     const numeroLoja = (!isSM && fichasLoja.length > 0) ? extrairNumeroLoja(fichasLoja[0].nmdos) : null;
     
     // Filtrar por categorias
-    const fichasAbertas5Dias = fichasLoja.filter((f: FichaServico) => f.diasAberto >= 5);
+    const fichasAbertas5Dias = fichasLoja.filter((f: FichaServico) => f.diasAberto >= 10);
     const fichasAposAgendamento = fichasLoja.filter((f: FichaServico) => f.diasExecutado >= 2);
     const fichasStatusAlerta = fichasLoja.filter((f: FichaServico) => STATUS_ALERTA.includes(f.status));
     const fichasSemNotas = fichasLoja.filter((f: FichaServico) => !fichaTemNotas(f.obs));
     const fichasNotasAntigas = fichasLoja.filter((f: FichaServico) => f.diasNota >= 5 && fichaTemNotas(f.obs));
     const fichasDevolverVidro = fichasLoja.filter((f: FichaServico) => f.status === 'Devolve Vidro e Encerra!');
-    const fichasSemEmailCliente = fichasLoja.filter((f: FichaServico) => isEmailExpressGlass(f.email));
+    // const fichasSemEmailCliente = fichasLoja.filter((f: FichaServico) => isEmailExpressGlass(f.email)); // REMOVIDO
     
     // Contar status
     const statusCount: Record<string, number> = {};
@@ -795,7 +777,7 @@ export function analisarFichas(fichas: FichaServico[], nomeArquivo: string): Res
       fichasSemNotas,
       fichasNotasAntigas,
       fichasDevolverVidro,
-      fichasSemEmailCliente,
+      // fichasSemEmailCliente, // REMOVIDO
       statusCount,
       referenciasDevolucao,
       resumo: '',
@@ -815,7 +797,7 @@ export function analisarFichas(fichas: FichaServico[], nomeArquivo: string): Res
     resumoGeral.totalFichasSemNotas += fichasSemNotas.length;
     resumoGeral.totalFichasNotasAntigas += fichasNotasAntigas.length;
     resumoGeral.totalFichasDevolverVidro += fichasDevolverVidro.length;
-    resumoGeral.totalFichasSemEmailCliente += fichasSemEmailCliente.length;
+    // resumoGeral.totalFichasSemEmailCliente += fichasSemEmailCliente.length; // REMOVIDO
   }
   
   // Ordenar relatórios por nome da loja
@@ -854,7 +836,7 @@ export function gerarHTMLEmailAnalise(relatorio: {
   fichasSemNotas: number;
   fichasNotasAntigas: number;
   fichasDevolverVidro: number;
-  fichasSemEmailCliente: number;
+  fichasSemEmailCliente?: number; // DEPRECATED - mantido para compatibilidade
   resumo: string;
   conteudoRelatorio: string;
 }, dataAnalise: Date): string {
@@ -932,7 +914,7 @@ export function gerarHTMLEmailAnalise(relatorio: {
                   </td>
                   <td align="center" width="25%" style="padding: 10px;">
                     <div style="font-size: 28px; font-weight: 500; color: ${corAbertas5Dias};">${relatorio.fichasAbertas5Dias}</div>
-                    <div style="font-size: 11px; color: #6b7280; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Abertas +5 dias</div>
+                    <div style="font-size: 11px; color: #6b7280; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Abertas +10 dias</div>
                   </td>
                   <td align="center" width="25%" style="padding: 10px;">
                     <div style="font-size: 28px; font-weight: 500; color: ${corStatusAlerta};">${relatorio.fichasStatusAlerta}</div>

@@ -23,7 +23,7 @@ export async function gerarPDFAnaliseFichas(relatorio: {
   fichasSemNotas: number;
   fichasNotasAntigas: number;
   fichasDevolverVidro: number;
-  fichasSemEmailCliente: number;
+  fichasSemEmailCliente?: number; // DEPRECATED - mantido para compatibilidade
   resumo: string;
   conteudoRelatorio: string;
   statusCount?: Record<string, number>;
