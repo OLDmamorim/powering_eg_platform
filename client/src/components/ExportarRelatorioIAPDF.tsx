@@ -285,7 +285,7 @@ export function ExportarRelatorioIAPDF({ analiseIA, periodo }: Props) {
         yPos = drawSectionHeader(doc, yPos, 'Resumo Geral', COLORS.primary, pageWidth);
         doc.setFontSize(10);
         doc.setFont('helvetica', 'normal');
-        const resumoGestorLines = doc.splitTextToSize(analiseIA.resumoGeral || 'Sem resumo disponível', pageWidth - 28);
+        const resumoGestorLines = doc.splitTextToSize(analiseIA.resumo || analiseIA.resumoGeral || 'Sem resumo disponível', pageWidth - 28);
         doc.text(resumoGestorLines, 14, yPos);
         yPos += resumoGestorLines.length * 5 + 8;
         

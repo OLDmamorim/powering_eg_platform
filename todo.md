@@ -4327,3 +4327,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionado campo 'relatorios' ao retorno com: totalLivres, totalCompletos, lojasVisitadas, lojasNaoVisitadas, visitasPorLoja
 - [x] Adicionada função getLojasByIds ao db.ts
 - [x] Atualizada interface AnaliseIA para incluir campo relatorios
+
+## v4.58 - Bug RESOLVIDO: Resumo do Relatório IA não aparece no PDF exportado
+- [x] O resumo aparece corretamente no ecrã mas não no PDF exportado
+- [x] Causa: PDF para gestores procurava apenas resumoGeral (linha 288) mas o backend retorna resumo
+- [x] Corrigido ExportarRelatorioIAPDF.tsx linha 288: usar resumo || resumoGeral || fallback
