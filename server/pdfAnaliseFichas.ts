@@ -312,24 +312,28 @@ export async function gerarPDFAnaliseFichas(relatorio: {
                  .font('Helvetica')
                  .fillColor('#333333')
                  .text(fs, leftMargin + 10, rowY, { width: colWidths.fs, lineBreak: false, ellipsis: true, continued: false });
+              doc.y = rowY; // Resetar Y para manter na mesma linha
               
               // Coluna 2: Matrícula (negrito)
               doc.fontSize(10)
                  .font('Helvetica-Bold')
                  .fillColor('#1a365d')
                  .text(matricula, leftMargin + 10 + colWidths.fs, rowY, { width: colWidths.matricula, lineBreak: false, ellipsis: true, continued: false });
+              doc.y = rowY; // Resetar Y para manter na mesma linha
               
               // Coluna 3: Marca/Modelo
               doc.fontSize(10)
                  .font('Helvetica')
                  .fillColor('#333333')
                  .text(marca, leftMargin + 10 + colWidths.fs + colWidths.matricula, rowY, { width: colWidths.marca, lineBreak: false, ellipsis: true, continued: false });
+              doc.y = rowY; // Resetar Y para manter na mesma linha
               
               // Coluna 4: Status (negrito)
               doc.fontSize(10)
                  .font('Helvetica-Bold')
                  .fillColor('#333333')
                  .text(status, leftMargin + 10 + colWidths.fs + colWidths.matricula + colWidths.marca, rowY, { width: colWidths.status, lineBreak: false, ellipsis: true, continued: false });
+              doc.y = rowY; // Resetar Y para manter na mesma linha
               
               // Avançar para próxima linha
               doc.y = rowY + 16;

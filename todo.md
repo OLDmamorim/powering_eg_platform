@@ -4380,3 +4380,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Ajustar larguras das colunas se necessário
 - [x] Truncar texto longo com ellipsis (...) se não couber
 - [x] Testar com fichas com nomes longos
+
+## v4.66 - Corrigir quebra de página entre colunas no PDF
+- [x] Manter doc.y fixo durante renderização das 4 colunas (resetar após cada coluna)
+- [x] Restaurar doc.y após renderizar todas as colunas de uma linha
+- [x] Testar com PDF real para garantir que não há páginas vazias
