@@ -4420,3 +4420,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Remover categoria "FS Sem Email do Cliente" da análise
 - [x] Atualizar backend (analiseFichasService.ts)
 - [x] Testar análise com novos critérios
+
+## v4.73 - Corrigir Inconsistências no Relatório de Análise
+- [x] Atualizar label do email de "Abertas +5 dias" para "Abertas +10 dias"
+- [x] Verificar e corrigir ordem das secções no PDF (deve ser igual ao HTML)
+- [x] Garantir que PDF e HTML mostram as mesmas fichas na mesma ordem

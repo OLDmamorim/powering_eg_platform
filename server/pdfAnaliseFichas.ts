@@ -536,8 +536,8 @@ function extrairSeccoesDoHTML(html: string): SeccaoExtraida[] {
   // Configuração das secções com cores
   const seccoesConfig: { regex: RegExp; titulo: string; cor: string; bgColor: string }[] = [
     { 
-      regex: /FS ABERTAS A 5 OU MAIS DIAS/i,
-      titulo: 'FS ABERTAS A 5 OU MAIS DIAS QUE NÃO ESTÃO FINALIZADOS',
+      regex: /FS ABERTAS A 10 OU MAIS DIAS/i,
+      titulo: 'FS ABERTAS A 10 OU MAIS DIAS QUE NÃO ESTÃO FINALIZADOS',
       cor: '#c53030',
       bgColor: '#fff5f5'
     },
