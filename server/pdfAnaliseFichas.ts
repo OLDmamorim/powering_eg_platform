@@ -592,6 +592,9 @@ function extrairSeccoesDoHTML(html: string): SeccaoExtraida[] {
     });
   }
   
+  // DEBUG: Log all h3 titles found
+  console.log('[PDF] H3 titles found:', h3Matches.map(h => h.titulo));
+  
   // Para cada h3, encontrar o conteúdo até ao próximo h3 ou fim do HTML
   for (let i = 0; i < h3Matches.length; i++) {
     const h3 = h3Matches[i];
@@ -599,6 +602,7 @@ function extrairSeccoesDoHTML(html: string): SeccaoExtraida[] {
     
     // Encontrar a configuração correspondente
     const config = seccoesConfig.find(c => c.regex.test(h3.titulo));
+    console.log(`[PDF] H3 "${h3.titulo}" -> config found:`, !!config);
     
     if (config) {
       // Extrair o bloco entre este h3 e o próximo
