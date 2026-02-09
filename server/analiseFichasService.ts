@@ -457,47 +457,28 @@ function agruparPorLoja(fichas: FichaServico[]): Map<string, FichaServico[]> {
 
 /**
  * Formata uma ficha para exibição na tabela
- * Formato:
- * Linha 1: FS {numero} // {matricula} // {marca} {modelo} // **{status}**
- * Linha 2: Nota inserida no Sinistro pelo utilizador : {parte antes dos :} **{parte depois dos :}**
+ * Formato: FS {numero} // {matricula} // {marca} {modelo} // **{status}**
  */
 function formatarFichaParaTabela(ficha: FichaServico, incluirDias: boolean = false, tipoDias: 'aberto' | 'nota' | 'executado' = 'aberto'): string {
-  // Linha 1: FS numero // matricula // marca modelo // status (negrito)
+  // FS numero // matricula // marca modelo // status (negrito)
   let marcaModelo = '';
   if (ficha.marca || ficha.modelo) {
     marcaModelo = `${ficha.marca || ''} ${ficha.modelo || ''}`.trim();
   }
   
-  let linha1 = `FS ${ficha.obrano} // ${ficha.matricula}`;
+  let texto = `FS ${ficha.obrano} // ${ficha.matricula}`;
   if (marcaModelo) {
-    linha1 += ` // ${marcaModelo}`;
+    texto += ` // ${marcaModelo}`;
   }
-  linha1 += ` // <b>${ficha.status}</b>`;
+  texto += ` // <b>${ficha.status}</b>`;
   
   if (incluirDias) {
     if (tipoDias === 'aberto') {
-      linha1 += ` (${ficha.diasAberto} dias aberto)`;
+      texto += ` (${ficha.diasAberto} dias aberto)`;
     } else if (tipoDias === 'nota') {
-      linha1 += ` (${ficha.diasNota} dias sem notas)`;
+      texto += ` (${ficha.diasNota} dias sem notas)`;
     } else if (tipoDias === 'executado') {
-      linha1 += ` (${ficha.diasExecutado} dias após agendamento)`;
-    }
-  }
-  
-  // Linha 2: Última nota (se existir)
-  let texto = linha1;
-  if (ficha.obs && ficha.obs.trim()) {
-    // Separar a nota em duas partes: antes e depois dos ":"
-    const obs = ficha.obs.trim();
-    const colonIndex = obs.indexOf(':');
-    
-    if (colonIndex > -1) {
-      const antesColon = obs.substring(0, colonIndex + 1); // Inclui o ":"
-      const depoisColon = obs.substring(colonIndex + 1).trim();
-      texto += `<br/><span style="font-size: 0.9em; color: #4a5568;">${antesColon} <b>${depoisColon}</b></span>`;
-    } else {
-      // Se não houver ":", mostrar a nota completa sem negrito
-      texto += `<br/><span style="font-size: 0.9em; color: #4a5568;">${obs}</span>`;
+      texto += ` (${ficha.diasExecutado} dias após agendamento)`;
     }
   }
   

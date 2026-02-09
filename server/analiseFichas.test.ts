@@ -112,7 +112,7 @@ describe('analisarFichas - isServicoMovel flag', () => {
 
 describe('formatarFichaParaTabela - novo formato com marca, modelo e ultima nota', () => {
   
-  it('deve formatar ficha com marca, modelo e nota completa', () => {
+  it('deve formatar ficha com marca, modelo e status', () => {
     // A função formatarFichaParaTabela é privada, mas podemos testar através do HTML gerado
     const ficha = {
       bostamp: '1',
@@ -151,16 +151,14 @@ describe('formatarFichaParaTabela - novo formato com marca, modelo e ultima nota
     const resultado = analisarFichas([ficha], 'test.xlsx');
     const relatorio = resultado.relatoriosPorLoja[0];
     
-    // Verificar se o HTML contém os elementos esperados
+    // Verificar se o HTML contém os elementos esperados (sem a nota)
     expect(relatorio.conteudoHTML).toContain('FS 96');
     expect(relatorio.conteudoHTML).toContain('88-ZV-95');
     expect(relatorio.conteudoHTML).toContain('TOYOTA YARIS');
     expect(relatorio.conteudoHTML).toContain('<b>Pedido Autorização</b>');
-    expect(relatorio.conteudoHTML).toContain('Nota inserida no Sinistro pelo utilizador :');
-    expect(relatorio.conteudoHTML).toContain('<b>Tatiana Moreira conf apolice/ matricula/ cia</b>');
   });
   
-  it('deve formatar ficha sem marca/modelo mas com nota', () => {
+  it('deve formatar ficha sem marca/modelo', () => {
     const ficha = {
       bostamp: '2',
       nmdos: 'Ficha Servico 64',
@@ -202,13 +200,11 @@ describe('formatarFichaParaTabela - novo formato com marca, modelo e ultima nota
     expect(relatorio.conteudoHTML).toContain('FS 78');
     expect(relatorio.conteudoHTML).toContain('89-UA-63');
     expect(relatorio.conteudoHTML).toContain('<b>AUTORIZADO</b>');
-    expect(relatorio.conteudoHTML).toContain('Aguardar peça :');
-    expect(relatorio.conteudoHTML).toContain('<b>Peça encomendada</b>');
     // Não deve conter marca/modelo vazios
     expect(relatorio.conteudoHTML).not.toContain('// //');
   });
   
-  it('deve formatar ficha sem nota (obs vazio)', () => {
+  it('deve formatar ficha com marca e modelo', () => {
     const ficha = {
       bostamp: '3',
       nmdos: 'Ficha Servico 64',
@@ -246,12 +242,10 @@ describe('formatarFichaParaTabela - novo formato com marca, modelo e ultima nota
     const resultado = analisarFichas([ficha], 'test.xlsx');
     const relatorio = resultado.relatoriosPorLoja[0];
     
-    // Verificar formato sem nota
+    // Verificar formato com marca e modelo
     expect(relatorio.conteudoHTML).toContain('FS 251');
     expect(relatorio.conteudoHTML).toContain('AE-66-XM');
     expect(relatorio.conteudoHTML).toContain('RENAULT CLIO');
     expect(relatorio.conteudoHTML).toContain('<b>ORÇAMENTO - ENVIADO</b>');
-    // Não deve ter linha de nota
-    expect(relatorio.conteudoHTML).not.toContain('<br/><span style="font-size: 0.9em');
   });
 });

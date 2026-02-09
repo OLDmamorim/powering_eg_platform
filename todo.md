@@ -4342,3 +4342,9 @@ NOTA: Sistema de email requer configuração externa no deployment
   * Linha 2: Nota inserida no Sinistro pelo utilizador : {parte antes dos :} **{parte depois dos :}**
 - [x] Aplicar formatação: status a negrito, parte da nota após ":" a negrito
 - [x] Testar com ficheiro real de monitorização (15 testes passaram)
+
+## v4.60 - Remover última nota da apresentação de fichas (simplificar)
+- [x] Remover a linha 2 (última nota) da função formatarFichaParaTabela
+- [x] Manter apenas: FS {numero} // {matricula} // {marca} {modelo} // **{status}**
+- [x] Atualizar testes para refletir o novo formato
+- [x] Testar com ficheiro real (15 testes passaram)
