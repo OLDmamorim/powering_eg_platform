@@ -48,7 +48,7 @@ export default function ReuniõesGestores() {
   const [topicosIncluidos, setTopicosIncluidos] = useState<number[]>([]);
   const [modalFinalizarTopicos, setModalFinalizarTopicos] = useState(false);
   const [reuniaoParaFinalizar, setReuniaoParaFinalizar] = useState<number | null>(null);
-  const [topicosFinalizacao, setTopicosFinalizacao] = useState<Array<{ id: number; discutido: boolean; resultadoDiscussao: string }>>([]);
+  const [topicosFinalizacao, setTopicosFinalizacao] = useState<Array<{ id: number; titulo: string; discutido: boolean; resultadoDiscussao: string }>>([]);
   const [modalRelatorio, setModalRelatorio] = useState(false);
   const [reuniaoRelatorio, setReuniaoRelatorio] = useState<number | null>(null);
   const [gerandoRelatorio, setGerandoRelatorio] = useState(false);
@@ -201,10 +201,12 @@ export default function ReuniõesGestores() {
   const handleAbrirFinalizacao = async (reuniaoId: number) => {
     setReuniaoParaFinalizar(reuniaoId);
     
-    // Buscar tópicos da reunião
+    // Buscar tópicos da reunião (excluir os que já foram marcados como 'analisado' ao criar)
     const topicos = await utils.client.reunioesGestores.getTopicosReuniao.query({ reuniaoId });
-    setTopicosFinalizacao(topicos.map((t: any) => ({
+    const topicosFiltrados = topicos.filter((t: any) => t.estado !== 'analisado');
+    setTopicosFinalizacao(topicosFiltrados.map((t: any) => ({
       id: t.id,
+      titulo: t.titulo || t.conteudo || `Tópico #${t.id}`,
       discutido: t.estado === 'discutido',
       resultadoDiscussao: t.resultadoDiscussao || '',
     })));
@@ -778,7 +780,8 @@ export default function ReuniõesGestores() {
                         }}
                       />
                       <div className="flex-1">
-                        <p className="font-medium">{t('reunioesGestores.topico') || "Tópico"} #{topico.id}</p>
+                        <p className="font-medium">{topico.titulo}</p>
+                        <p className="text-xs text-muted-foreground">Proposto por: {(topico as any).gestorNome || 'Desconhecido'}</p>
                       </div>
                       {topico.discutido ? (
                         <Badge variant="outline" className="bg-green-100 text-green-700">

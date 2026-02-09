@@ -4403,3 +4403,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Investigar porque os tópicos discutidos não aparecem (estado 'analisado' vs 'discutido')
 - [x] Corrigir filtro para incluir tópicos com estado 'analisado' e 'discutido'
 - [x] Corrigir filtro de não discutidos para incluir 'pendente' e 'nao_discutido'
+
+## v4.70 - BUG: Modal "Finalizar Reunião" mostra tópicos já selecionados como "Não Discutidos"
+- [x] Investigar modal "Finalizar Reunião" e lógica de filtro de tópicos
+- [x] Corrigir para não mostrar tópicos com estado "analisado" (filtro aplicado)
+- [x] Mostrar conteúdo completo dos tópicos: titulo + "Proposto por: {gestor}"
+- [x] TypeScript sem erros
