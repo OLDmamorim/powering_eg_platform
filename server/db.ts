@@ -9605,7 +9605,7 @@ export async function createEvolucaoAnalise(data: {
   variacaoFichasAposAgendamento: number;
   variacaoFichasStatusAlerta: number;
   variacaoFichasSemNotas: number;
-  variacaoFichasNotasAntigas: number;
+  variacaoFichasNotasAntigas?: number; // DEPRECATED - mantido para compatibilidade
   variacaoFichasDevolverVidro: number;
   evolucaoGeral: 'melhorou' | 'piorou' | 'estavel';
   comentario: string;
@@ -9622,7 +9622,7 @@ export async function createEvolucaoAnalise(data: {
     variacaoFichasAposAgendamento: data.variacaoFichasAposAgendamento,
     variacaoFichasStatusAlerta: data.variacaoFichasStatusAlerta,
     variacaoFichasSemNotas: data.variacaoFichasSemNotas,
-    variacaoFichasNotasAntigas: data.variacaoFichasNotasAntigas,
+    variacaoFichasNotasAntigas: data.variacaoFichasNotasAntigas || 0, // DEPRECATED
     variacaoFichasDevolverVidro: data.variacaoFichasDevolverVidro,
     evolucaoGeral: data.evolucaoGeral,
     comentario: data.comentario,

@@ -9302,7 +9302,7 @@ IMPORTANTE:
             fichasAposAgendamento: relatorio.fichasAposAgendamento.length,
             fichasStatusAlerta: relatorio.fichasStatusAlerta.length,
             fichasSemNotas: relatorio.fichasSemNotas.length,
-            fichasNotasAntigas: relatorio.fichasNotasAntigas.length,
+            fichasNotasAntigas: 0, // REMOVIDO da análise
             fichasDevolverVidro: relatorio.fichasDevolverVidro.length,
             fichasSemEmailCliente: relatorio.fichasSemEmailCliente.length,
             conteudoRelatorio: relatorio.conteudoHTML,
@@ -9322,12 +9322,12 @@ IMPORTANTE:
           }> = [];
           
           // Mapear fichas por categoria
-          const categoriasMap: Array<{ fichas: typeof relatorio.fichasAbertas5Dias; categoria: 'abertas5Dias' | 'aposAgendamento' | 'statusAlerta' | 'semNotas' | 'notasAntigas' | 'devolverVidro' | 'semEmailCliente' }> = [
+          const categoriasMap: Array<{ fichas: typeof relatorio.fichasAbertas5Dias; categoria: 'abertas5Dias' | 'aposAgendamento' | 'statusAlerta' | 'semNotas' | 'devolverVidro' | 'semEmailCliente' }> = [
             { fichas: relatorio.fichasAbertas5Dias, categoria: 'abertas5Dias' },
             { fichas: relatorio.fichasAposAgendamento, categoria: 'aposAgendamento' },
             { fichas: relatorio.fichasStatusAlerta, categoria: 'statusAlerta' },
             { fichas: relatorio.fichasSemNotas, categoria: 'semNotas' },
-            { fichas: relatorio.fichasNotasAntigas, categoria: 'notasAntigas' },
+            // { fichas: relatorio.fichasNotasAntigas, categoria: 'notasAntigas' }, // REMOVIDO
             { fichas: relatorio.fichasDevolverVidro, categoria: 'devolverVidro' },
             { fichas: relatorio.fichasSemEmailCliente, categoria: 'semEmailCliente' },
           ];
@@ -9451,10 +9451,10 @@ IMPORTANTE:
             const variacaoApos = relatorio.fichasAposAgendamento.length - relatorioAnterior.fichasAposAgendamento;
             const variacaoAlerta = relatorio.fichasStatusAlerta.length - relatorioAnterior.fichasStatusAlerta;
             const variacaoSemNotas = relatorio.fichasSemNotas.length - relatorioAnterior.fichasSemNotas;
-            const variacaoNotasAntigas = relatorio.fichasNotasAntigas.length - relatorioAnterior.fichasNotasAntigas;
+            // const variacaoNotasAntigas = relatorio.fichasNotasAntigas.length - relatorioAnterior.fichasNotasAntigas; // REMOVIDO
             const variacaoDevolver = relatorio.fichasDevolverVidro.length - relatorioAnterior.fichasDevolverVidro;
             
-            const totalVariacao = variacaoAbertas + variacaoApos + variacaoAlerta + variacaoSemNotas + variacaoNotasAntigas + variacaoDevolver;
+            const totalVariacao = variacaoAbertas + variacaoApos + variacaoAlerta + variacaoSemNotas + variacaoDevolver;
             let evolucaoGeral: 'melhorou' | 'piorou' | 'estavel' = 'estavel';
             let comentario = '';
             
@@ -9477,7 +9477,7 @@ IMPORTANTE:
               variacaoFichasAposAgendamento: variacaoApos,
               variacaoFichasStatusAlerta: variacaoAlerta,
               variacaoFichasSemNotas: variacaoSemNotas,
-              variacaoFichasNotasAntigas: variacaoNotasAntigas,
+              // variacaoFichasNotasAntigas: variacaoNotasAntigas, // REMOVIDO
               variacaoFichasDevolverVidro: variacaoDevolver,
               evolucaoGeral,
               comentario,

@@ -51,7 +51,7 @@ export interface RelatorioLoja {
   fichasAposAgendamento: FichaServico[];
   fichasStatusAlerta: FichaServico[]; // FALTA DOCUMENTOS, RECUSADO, INCIDÊNCIA
   fichasSemNotas: FichaServico[];
-  fichasNotasAntigas: FichaServico[]; // Notas > 5 dias
+  // fichasNotasAntigas: FichaServico[]; // REMOVIDO - não é mais usado na análise
   fichasDevolverVidro: FichaServico[];
   fichasSemEmailCliente: FichaServico[];
   
@@ -510,11 +510,11 @@ function gerarHTMLRelatorio(relatorio: RelatorioLoja): string {
     html += `</table></div>`;
   }
   
-  // FS abertas a 5 ou mais dias
+  // FS abertas a 10 ou mais dias
   if (relatorio.fichasAbertas5Dias.length > 0) {
     const fichasOrdenadas = [...relatorio.fichasAbertas5Dias].sort((a, b) => b.diasAberto - a.diasAberto);
     html += `<div style="margin: 20px 0; padding: 15px; background: #fff5f5; border-radius: 8px; border-left: 4px solid #c53030;">`;
-    html += `<h3 style="margin: 0 0 10px 0; color: #c53030; text-transform: uppercase; font-weight: bold;">FS ABERTAS A 5 OU MAIS DIAS QUE NÃO ESTÃO FINALIZADOS</h3>`;
+    html += `<h3 style="margin: 0 0 10px 0; color: #c53030; text-transform: uppercase; font-weight: bold;">FS ABERTAS A 10 OU MAIS DIAS QUE NÃO ESTÃO FINALIZADOS</h3>`;
     html += `<table style="width: 100%; border-collapse: collapse; border: none;">`;
     for (const ficha of fichasOrdenadas) {
       html += `<tr style="border-bottom: 1px solid #fed7d7;">${formatarFichaParaTabela(ficha, true, 'aberto')}</tr>`;
@@ -564,19 +564,7 @@ function gerarHTMLRelatorio(relatorio: RelatorioLoja): string {
     html += `</div>`;
   }
   
-  // FS com notas antigas
-  if (relatorio.fichasNotasAntigas.length > 0) {
-    const fichasOrdenadas = [...relatorio.fichasNotasAntigas].sort((a, b) => b.diasNota - a.diasNota);
-    html += `<div style="margin: 20px 0; padding: 15px; background: #f0fdf4; border-radius: 8px; border-left: 4px solid #16a34a;">`;
-    html += `<h3 style="margin: 0 0 10px 0; color: #16a34a; text-transform: uppercase; font-weight: bold;">FS ABERTAS CUJAS NOTAS NÃO SÃO ATUALIZADAS A 5 OU MAIS DIAS</h3>`;
-    html += `<table style="width: 100%; border-collapse: collapse; border: none;">`;
-    for (const ficha of fichasOrdenadas) {
-      html += `<tr style="border-bottom: 1px solid #bbf7d0;">${formatarFichaParaTabela(ficha, true, 'nota')}</tr>`;
-    }
-    html += `</table>`;
-    html += `<p style="margin: 10px 0 0 0; font-weight: bold; color: #16a34a;">Total: ${relatorio.fichasNotasAntigas.length} processos</p>`;
-    html += `</div>`;
-  }
+  // FS com notas antigas - REMOVIDO da análise
   
   // FS Devolve Vidro e Encerra
   if (relatorio.fichasDevolverVidro.length > 0) {
@@ -638,7 +626,7 @@ function gerarResumo(relatorio: RelatorioLoja): string {
   
   // Calcular nivel de urgencia
   const totalProblemas = relatorio.fichasAbertas5Dias.length + relatorio.fichasAposAgendamento.length + 
-    relatorio.fichasStatusAlerta.length + relatorio.fichasSemNotas.length + relatorio.fichasNotasAntigas.length;
+    relatorio.fichasStatusAlerta.length + relatorio.fichasSemNotas.length;
   
   let nivelUrgencia = 'BAIXO';
   let corUrgencia = '#16a34a';
@@ -661,7 +649,7 @@ function gerarResumo(relatorio: RelatorioLoja): string {
   linhas.push(``);
   
   if (relatorio.fichasAbertas5Dias.length > 0) {
-    linhas.push(`<strong>1. FICHAS ABERTAS HA MAIS DE 5 DIAS (${relatorio.fichasAbertas5Dias.length} processos)</strong>`);
+    linhas.push(`<strong>1. FICHAS ABERTAS HA MAIS DE 10 DIAS (${relatorio.fichasAbertas5Dias.length} processos)</strong>`);
     linhas.push(`   - Verificar o motivo do atraso em cada processo`);
     linhas.push(`   - Contactar o cliente para confirmar disponibilidade`);
     linhas.push(`   - Agendar servico ou encerrar processo se nao houver resposta`);
@@ -695,13 +683,7 @@ function gerarResumo(relatorio: RelatorioLoja): string {
     linhas.push(``);
   }
   
-  if (relatorio.fichasNotasAntigas.length > 0) {
-    linhas.push(`<strong>5. FICHAS COM NOTAS DESATUALIZADAS (${relatorio.fichasNotasAntigas.length} processos)</strong>`);
-    linhas.push(`   - Atualizar notas com informacao atual do processo`);
-    linhas.push(`   - Indicar se houve contacto com cliente nos ultimos dias`);
-    linhas.push(`   - Registar evolucao ou bloqueios encontrados`);
-    linhas.push(``);
-  }
+  // Categoria "Fichas com Notas Antigas" foi removida da análise
   
   if (relatorio.fichasDevolverVidro.length > 0) {
     linhas.push(`<strong>6. VIDROS PARA DEVOLVER (${relatorio.fichasDevolverVidro.length} processos)</strong>`);
@@ -762,11 +744,11 @@ export function analisarFichas(fichas: FichaServico[], nomeArquivo: string): Res
     const numeroLoja = (!isSM && fichasLoja.length > 0) ? extrairNumeroLoja(fichasLoja[0].nmdos) : null;
     
     // Filtrar por categorias
-    const fichasAbertas5Dias = fichasLoja.filter((f: FichaServico) => f.diasAberto >= 5);
+    const fichasAbertas5Dias = fichasLoja.filter((f: FichaServico) => f.diasAberto >= 10);
     const fichasAposAgendamento = fichasLoja.filter((f: FichaServico) => f.diasExecutado >= 2);
     const fichasStatusAlerta = fichasLoja.filter((f: FichaServico) => STATUS_ALERTA.includes(f.status));
     const fichasSemNotas = fichasLoja.filter((f: FichaServico) => !fichaTemNotas(f.obs));
-    const fichasNotasAntigas = fichasLoja.filter((f: FichaServico) => f.diasNota >= 5 && fichaTemNotas(f.obs));
+    // const fichasNotasAntigas = fichasLoja.filter((f: FichaServico) => f.diasNota >= 5 && fichaTemNotas(f.obs)); // REMOVIDO
     const fichasDevolverVidro = fichasLoja.filter((f: FichaServico) => f.status === 'Devolve Vidro e Encerra!');
     const fichasSemEmailCliente = fichasLoja.filter((f: FichaServico) => isEmailExpressGlass(f.email));
     
@@ -793,7 +775,7 @@ export function analisarFichas(fichas: FichaServico[], nomeArquivo: string): Res
       fichasAposAgendamento,
       fichasStatusAlerta,
       fichasSemNotas,
-      fichasNotasAntigas,
+      // fichasNotasAntigas, // REMOVIDO
       fichasDevolverVidro,
       fichasSemEmailCliente,
       statusCount,
@@ -813,7 +795,7 @@ export function analisarFichas(fichas: FichaServico[], nomeArquivo: string): Res
     resumoGeral.totalFichasAposAgendamento += fichasAposAgendamento.length;
     resumoGeral.totalFichasStatusAlerta += fichasStatusAlerta.length;
     resumoGeral.totalFichasSemNotas += fichasSemNotas.length;
-    resumoGeral.totalFichasNotasAntigas += fichasNotasAntigas.length;
+    // resumoGeral.totalFichasNotasAntigas += fichasNotasAntigas.length; // REMOVIDO
     resumoGeral.totalFichasDevolverVidro += fichasDevolverVidro.length;
     resumoGeral.totalFichasSemEmailCliente += fichasSemEmailCliente.length;
   }
@@ -852,7 +834,7 @@ export function gerarHTMLEmailAnalise(relatorio: {
   fichasAposAgendamento: number;
   fichasStatusAlerta: number;
   fichasSemNotas: number;
-  fichasNotasAntigas: number;
+  fichasNotasAntigas?: number; // DEPRECATED - mantido para compatibilidade
   fichasDevolverVidro: number;
   fichasSemEmailCliente: number;
   resumo: string;
@@ -932,7 +914,7 @@ export function gerarHTMLEmailAnalise(relatorio: {
                   </td>
                   <td align="center" width="25%" style="padding: 10px;">
                     <div style="font-size: 28px; font-weight: 500; color: ${corAbertas5Dias};">${relatorio.fichasAbertas5Dias}</div>
-                    <div style="font-size: 11px; color: #6b7280; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Abertas +5 dias</div>
+                    <div style="font-size: 11px; color: #6b7280; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Abertas +10 dias</div>
                   </td>
                   <td align="center" width="25%" style="padding: 10px;">
                     <div style="font-size: 28px; font-weight: 500; color: ${corStatusAlerta};">${relatorio.fichasStatusAlerta}</div>

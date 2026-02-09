@@ -21,7 +21,7 @@ export async function gerarPDFAnaliseFichas(relatorio: {
   fichasAposAgendamento: number;
   fichasStatusAlerta: number;
   fichasSemNotas: number;
-  fichasNotasAntigas: number;
+  fichasNotasAntigas?: number; // DEPRECATED - mantido para compatibilidade
   fichasDevolverVidro: number;
   fichasSemEmailCliente: number;
   resumo: string;
