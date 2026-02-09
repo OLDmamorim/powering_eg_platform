@@ -1,0 +1,8 @@
+{
+  "query": "SELECT trg.id, trg.titulo, trg.estado, trg.reuniao_id, trg.resultado_discussao, u.name as gestor_nome FROM topicos_reuniao_gestores trg LEFT JOIN gestores g ON trg.gestor_id = g.id LEFT JOIN users u ON g.user_id = u.id ORDER BY trg.reuniao_id DESC LIMIT 20;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT trg.id, trg.titulo, trg.estado, trg.reuniao_id, trg.resultado_discussao, u.name as gestor_nome FROM topicos_reuniao_gestores trg LEFT JOIN gestores g ON trg.gestor_id = g.id LEFT JOIN users u ON g.user_id = u.id ORDER BY trg.reuniao_id DESC LIMIT 20;",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 'trg.gestor_id' in 'on clause'"
+  ]
+}

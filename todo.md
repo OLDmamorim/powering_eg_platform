@@ -4397,3 +4397,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Criar modal de edição com: data, presenças, outros presentes, conteúdo, tags
 - [x] Regenerar resumo IA automaticamente se conteúdo for alterado
 - [x] TypeScript sem erros
+
+## v4.69 - Corrigir email reunião: falta título e tópicos discutidos
+- [x] Título já existe no header azul do email ("Relatório de Reunião de Gestores")
+- [x] Investigar porque os tópicos discutidos não aparecem (estado 'analisado' vs 'discutido')
+- [x] Corrigir filtro para incluir tópicos com estado 'analisado' e 'discutido'
+- [x] Corrigir filtro de não discutidos para incluir 'pendente' e 'nao_discutido'

@@ -1,0 +1,150 @@
+{
+  "query": "SELECT id, titulo, estado, reuniaoId, resultadoDiscussao FROM topicos_reuniao_gestores ORDER BY reuniaoId DESC LIMIT 20;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT id, titulo, estado, reuniaoId, resultadoDiscussao FROM topicos_reuniao_gestores ORDER BY reuniaoId DESC LIMIT 20;",
+  "rows": [
+    {
+      "id": "390001",
+      "titulo": "Política comissionamento",
+      "estado": "analisado",
+      "reuniaoId": "90001",
+      "resultadoDiscussao": "NULL"
+    },
+    {
+      "id": "390006",
+      "titulo": "Férias 2026 Recursos Humanos",
+      "estado": "analisado",
+      "reuniaoId": "90001",
+      "resultadoDiscussao": "NULL"
+    },
+    {
+      "id": "390005",
+      "titulo": "Contratação Recursos Humanos",
+      "estado": "analisado",
+      "reuniaoId": "90001",
+      "resultadoDiscussao": "NULL"
+    },
+    {
+      "id": "390002",
+      "titulo": "Nps",
+      "estado": "analisado",
+      "reuniaoId": "90001",
+      "resultadoDiscussao": "NULL"
+    },
+    {
+      "id": "390004",
+      "titulo": "Erros Política de Comissionamento Lojas",
+      "estado": "analisado",
+      "reuniaoId": "90001",
+      "resultadoDiscussao": "NULL"
+    },
+    {
+      "id": "390003",
+      "titulo": "Revisão Orçamental 2026",
+      "estado": "analisado",
+      "reuniaoId": "90001",
+      "resultadoDiscussao": "NULL"
+    },
+    {
+      "id": "300001",
+      "titulo": "Rutura de stock fardamento",
+      "estado": "discutido",
+      "reuniaoId": "60001",
+      "resultadoDiscussao": "NULL"
+    },
+    {
+      "id": "300002",
+      "titulo": "Circular com o comissionamento de 2026",
+      "estado": "discutido",
+      "reuniaoId": "60001",
+      "resultadoDiscussao": "NULL"
+    },
+    {
+      "id": "330001",
+      "titulo": "Orçamentos 2026",
+      "estado": "discutido",
+      "reuniaoId": "60001",
+      "resultadoDiscussao": "NULL"
+    },
+    {
+      "id": "270001",
+      "titulo": "Stocks, dev #,",
+      "estado": "discutido",
+      "reuniaoId": "60001",
+      "resultadoDiscussao": "NULL"
+    },
+    {
+      "id": "240002",
+      "titulo": "Novo orçamento 2026",
+      "estado": "discutido",
+      "reuniaoId": "60001",
+      "resultadoDiscussao": "NULL"
+    },
+    {
+      "id": "5",
+      "titulo": "Teste",
+      "estado": "discutido",
+      "reuniaoId": "1",
+      "resultadoDiscussao": ""
+    },
+    {
+      "id": "150001",
+      "titulo": "Tópico Atualizado 1768778134594",
+      "estado": "pendente",
+      "reuniaoId": "NULL",
+      "resultadoDiscussao": "NULL"
+    },
+    {
+      "id": "120005",
+      "titulo": "Tópico Atualizado 1768775577066",
+      "estado": "pendente",
+      "reuniaoId": "NULL",
+      "resultadoDiscussao": "NULL"
+    },
+    {
+      "id": "30001",
+      "titulo": "Tópico Atualizado 1767981297265",
+      "estado": "pendente",
+      "reuniaoId": "NULL",
+      "resultadoDiscussao": "NULL"
+    },
+    {
+      "id": "150007",
+      "titulo": "Tópico Atualizado 1768779088977",
+      "estado": "pendente",
+      "reuniaoId": "NULL",
+      "resultadoDiscussao": "NULL"
+    },
+    {
+      "id": "60001",
+      "titulo": "Tópico Atualizado 1767997113467",
+      "estado": "pendente",
+      "reuniaoId": "NULL",
+      "resultadoDiscussao": "NULL"
+    },
+    {
+      "id": "3",
+      "titulo": "Tópico Atualizado 1767975904359",
+      "estado": "pendente",
+      "reuniaoId": "NULL",
+      "resultadoDiscussao": "NULL"
+    },
+    {
+      "id": "120003",
+      "titulo": "Tópico Atualizado 1768775492300",
+      "estado": "pendente",
+      "reuniaoId": "NULL",
+      "resultadoDiscussao": "NULL"
+    },
+    {
+      "id": "150003",
+      "titulo": "Tópico Atualizado 1768778220144",
+      "estado": "pendente",
+      "reuniaoId": "NULL",
+      "resultadoDiscussao": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitulo\testado\treuniaoId\tresultadoDiscussao\n390001\tPolítica comissionamento\tanalisado\t90001\tNULL\n390006\tFérias 2026 Recursos Humanos\tanalisado\t90001\tNULL\n390005\tContratação Recursos Humanos\tanalisado\t90001\tNULL\n390002\tNps\tanalisado\t90001\tNULL\n390004\tErros Política de Comissionamento Lojas\tanalisado\t90001\tNULL\n390003\tRevisão Orçamental 2026\tanalisado\t90001\tNULL\n300001\tRutura de stock fardamento\tdiscutido\t60001\tNULL\n300002\tCircular com o comissionamento de 2026\tdiscutido\t60001\tNULL\n330001\tOrçamentos 2026\tdiscutido\t60001\tNULL\n270001\tStocks, dev #,\tdiscutido\t60001\tNULL\n240002\tNovo orçamento 2026\tdiscutido\t60001\tNULL\n5\tTeste\tdiscutido\t1\t\n150001\tTópico Atualizado 1768778134594\tpendente\tNULL\tNULL\n120005\tTópico Atualizado 1768775577066\tpendente\tNULL\tNULL\n30001\tTópico Atualizado 1767981297265\tpendente\tNULL\tNULL\n150007\tTópico Atualizado 1768779088977\tpendente\tNULL\tNULL\n60001\tTópico Atualizado 1767997113467\tpendente\tNULL\tNULL\n3\tTópico Atualizado 1767975904359\tpendente\tNULL\tNULL\n120003\tTópico Atualizado 1768775492300\tpendente\tNULL\tNULL\n150003\tTópico Atualizado 1768778220144\tpendente\tNULL\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 349
+}

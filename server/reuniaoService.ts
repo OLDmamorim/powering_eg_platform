@@ -427,8 +427,8 @@ export function gerarHTMLRelatorioReuniao(
   relatorio: any,
   topicos: Array<any>
 ): string {
-  const topicosDiscutidos = topicos.filter(t => t.estado === 'discutido');
-  const topicosNaoDiscutidos = topicos.filter(t => t.estado === 'nao_discutido');
+  const topicosDiscutidos = topicos.filter(t => t.estado === 'discutido' || t.estado === 'analisado');
+  const topicosNaoDiscutidos = topicos.filter(t => t.estado === 'nao_discutido' || t.estado === 'pendente');
   
   let acoesHTML = '';
   if (relatorio?.acoesDefinidas) {
