@@ -92,6 +92,37 @@ const STATUS_EXCLUIR = ['Serviço Pronto', 'REVISAR'];
 // Status de alerta
 const STATUS_ALERTA = ['FALTA DOCUMENTOS', 'RECUSADO', 'INCIDÊNCIA'];
 
+/**
+ * Verifica se uma ficha tem agendamento futuro válido
+ * (data futura + horário dentro de 09:00-18:00)
+ */
+function temAgendamentoFuturoValido(ficha: FichaServico, dataAnalise: Date): boolean {
+  // Se não tem data de serviço, não tem agendamento
+  if (!ficha.dataServico) return false;
+  
+  // Verificar se a data é futura (depois da data da análise)
+  const dataServicoSemHora = new Date(ficha.dataServico);
+  dataServicoSemHora.setHours(0, 0, 0, 0);
+  
+  const dataAnaliseSemHora = new Date(dataAnalise);
+  dataAnaliseSemHora.setHours(0, 0, 0, 0);
+  
+  if (dataServicoSemHora <= dataAnaliseSemHora) return false;
+  
+  // Verificar se o horário está dentro de 09:00-18:00
+  const horaInicio = ficha.horaInicio?.trim();
+  if (!horaInicio) return false;
+  
+  // Extrair hora (formato esperado: "HH:MM" ou "HH:MM:SS")
+  const [horaStr] = horaInicio.split(':');
+  const hora = parseInt(horaStr, 10);
+  
+  if (isNaN(hora)) return false;
+  
+  // Horário de serviço: 09:00 - 18:00
+  return hora >= 9 && hora < 18;
+}
+
 // Mapeamento de nomes especiais de lojas (nome no Excel -> nome no sistema)
 // As chaves devem estar em minúsculas para comparação case-insensitive
 const MAPEAMENTO_NOMES_LOJAS: Record<string, string> = {
@@ -720,6 +751,7 @@ function gerarResumo(relatorio: RelatorioLoja): string {
  * Analisa as fichas e gera relatórios por loja
  */
 export function analisarFichas(fichas: FichaServico[], nomeArquivo: string): ResultadoAnalise {
+  const dataAnalise = new Date();
   const grupos = agruparPorLoja(fichas);
   const relatorios: RelatorioLoja[] = [];
   
@@ -744,7 +776,10 @@ export function analisarFichas(fichas: FichaServico[], nomeArquivo: string): Res
     const numeroLoja = (!isSM && fichasLoja.length > 0) ? extrairNumeroLoja(fichasLoja[0].nmdos) : null;
     
     // Filtrar por categorias
-    const fichasAbertas5Dias = fichasLoja.filter((f: FichaServico) => f.diasAberto >= 10);
+    // FS ABERTAS A 10 OU MAIS DIAS: excluir fichas com agendamento futuro válido
+    const fichasAbertas5Dias = fichasLoja.filter((f: FichaServico) => 
+      f.diasAberto >= 10 && !temAgendamentoFuturoValido(f, dataAnalise)
+    );
     const fichasAposAgendamento = fichasLoja.filter((f: FichaServico) => f.diasExecutado >= 2);
     const fichasStatusAlerta = fichasLoja.filter((f: FichaServico) => STATUS_ALERTA.includes(f.status));
     const fichasSemNotas = fichasLoja.filter((f: FichaServico) => !fichaTemNotas(f.obs));
@@ -804,7 +839,7 @@ export function analisarFichas(fichas: FichaServico[], nomeArquivo: string): Res
   relatorios.sort((a, b) => a.nomeLoja.localeCompare(b.nomeLoja));
   
   return {
-    dataAnalise: new Date(),
+    dataAnalise,
     nomeArquivo,
     totalFichas: fichas.length,
     totalLojas: grupos.size,

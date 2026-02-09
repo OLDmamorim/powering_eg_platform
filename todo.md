@@ -4425,3 +4425,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Atualizar label do email de "Abertas +5 dias" para "Abertas +10 dias"
 - [x] Verificar e corrigir ordem das secções no PDF (deve ser igual ao HTML)
 - [x] Garantir que PDF e HTML mostram as mesmas fichas na mesma ordem
+
+## v4.74 - Filtrar FS com Agendamento Futuro Válido
+- [x] Excluir da categoria "FS ABERTAS A 10 OU MAIS DIAS" as fichas que têm:
+  - Data de agendamento futura (depois da data da análise)
+  - Horário dentro do horário de serviço (09:00 - 18:00)
+- [x] Atualizar lógica de filtro em analiseFichasService.ts
+- [x] Testar com casos reais (FS 996 deve sair do relatório se agendada para 16/02)
