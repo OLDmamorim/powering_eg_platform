@@ -4348,3 +4348,11 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Manter apenas: FS {numero} // {matricula} // {marca} {modelo} // **{status}**
 - [x] Atualizar testes para refletir o novo formato
 - [x] Testar com ficheiro real (15 testes passaram)
+
+## v4.61 - Melhorar formatação das fichas: tabela sem bordas com colunas alinhadas
+- [x] Alterar gerarHTMLRelatorio para usar tabela HTML (sem bordas) em vez de lista
+- [x] Criar colunas: FS | Matrícula | Marca/Modelo | Status
+- [x] Colocar matrícula a negrito
+- [x] Colocar status a negrito
+- [x] Alinhar todas as colunas para melhor legibilidade
+- [x] Atualizar testes (15 testes passaram)

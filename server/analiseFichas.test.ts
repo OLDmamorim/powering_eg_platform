@@ -151,11 +151,11 @@ describe('formatarFichaParaTabela - novo formato com marca, modelo e ultima nota
     const resultado = analisarFichas([ficha], 'test.xlsx');
     const relatorio = resultado.relatoriosPorLoja[0];
     
-    // Verificar se o HTML contém os elementos esperados (sem a nota)
+    // Verificar se o HTML contém os elementos esperados (formato tabela)
     expect(relatorio.conteudoHTML).toContain('FS 96');
-    expect(relatorio.conteudoHTML).toContain('88-ZV-95');
+    expect(relatorio.conteudoHTML).toContain('<b>88-ZV-95</b>'); // Matrícula a negrito
     expect(relatorio.conteudoHTML).toContain('TOYOTA YARIS');
-    expect(relatorio.conteudoHTML).toContain('<b>Pedido Autorização</b>');
+    expect(relatorio.conteudoHTML).toContain('<b>Pedido Autorização</b>'); // Status a negrito
   });
   
   it('deve formatar ficha sem marca/modelo', () => {
@@ -196,12 +196,10 @@ describe('formatarFichaParaTabela - novo formato com marca, modelo e ultima nota
     const resultado = analisarFichas([ficha], 'test.xlsx');
     const relatorio = resultado.relatoriosPorLoja[0];
     
-    // Verificar formato sem marca/modelo
+    // Verificar formato sem marca/modelo (deve mostrar "-")
     expect(relatorio.conteudoHTML).toContain('FS 78');
-    expect(relatorio.conteudoHTML).toContain('89-UA-63');
-    expect(relatorio.conteudoHTML).toContain('<b>AUTORIZADO</b>');
-    // Não deve conter marca/modelo vazios
-    expect(relatorio.conteudoHTML).not.toContain('// //');
+    expect(relatorio.conteudoHTML).toContain('<b>89-UA-63</b>'); // Matrícula a negrito
+    expect(relatorio.conteudoHTML).toContain('<b>AUTORIZADO</b>'); // Status a negrito
   });
   
   it('deve formatar ficha com marca e modelo', () => {
@@ -244,8 +242,8 @@ describe('formatarFichaParaTabela - novo formato com marca, modelo e ultima nota
     
     // Verificar formato com marca e modelo
     expect(relatorio.conteudoHTML).toContain('FS 251');
-    expect(relatorio.conteudoHTML).toContain('AE-66-XM');
+    expect(relatorio.conteudoHTML).toContain('<b>AE-66-XM</b>'); // Matrícula a negrito
     expect(relatorio.conteudoHTML).toContain('RENAULT CLIO');
-    expect(relatorio.conteudoHTML).toContain('<b>ORÇAMENTO - ENVIADO</b>');
+    expect(relatorio.conteudoHTML).toContain('<b>ORÇAMENTO - ENVIADO</b>'); // Status a negrito
   });
 });

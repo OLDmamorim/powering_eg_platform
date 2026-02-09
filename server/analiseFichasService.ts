@@ -456,33 +456,37 @@ function agruparPorLoja(fichas: FichaServico[]): Map<string, FichaServico[]> {
 }
 
 /**
- * Formata uma ficha para exibição na tabela
- * Formato: FS {numero} // {matricula} // {marca} {modelo} // **{status}**
+ * Formata uma ficha para exibição na tabela com colunas alinhadas
+ * Retorna células de tabela: FS | Matrícula | Marca/Modelo | Status
  */
 function formatarFichaParaTabela(ficha: FichaServico, incluirDias: boolean = false, tipoDias: 'aberto' | 'nota' | 'executado' = 'aberto'): string {
-  // FS numero // matricula // marca modelo // status (negrito)
+  // Coluna 1: FS numero
+  let colFS = `FS ${ficha.obrano}`;
+  
+  // Coluna 2: Matrícula (negrito)
+  let colMatricula = `<b>${ficha.matricula}</b>`;
+  
+  // Coluna 3: Marca/Modelo
   let marcaModelo = '';
   if (ficha.marca || ficha.modelo) {
     marcaModelo = `${ficha.marca || ''} ${ficha.modelo || ''}`.trim();
   }
+  let colMarcaModelo = marcaModelo || '-';
   
-  let texto = `FS ${ficha.obrano} // ${ficha.matricula}`;
-  if (marcaModelo) {
-    texto += ` // ${marcaModelo}`;
-  }
-  texto += ` // <b>${ficha.status}</b>`;
-  
+  // Coluna 4: Status (negrito)
+  let colStatus = `<b>${ficha.status}</b>`;
   if (incluirDias) {
     if (tipoDias === 'aberto') {
-      texto += ` (${ficha.diasAberto} dias aberto)`;
+      colStatus += ` <span style="font-size: 0.9em;">(${ficha.diasAberto} dias)</span>`;
     } else if (tipoDias === 'nota') {
-      texto += ` (${ficha.diasNota} dias sem notas)`;
+      colStatus += ` <span style="font-size: 0.9em;">(${ficha.diasNota} dias)</span>`;
     } else if (tipoDias === 'executado') {
-      texto += ` (${ficha.diasExecutado} dias após agendamento)`;
+      colStatus += ` <span style="font-size: 0.9em;">(${ficha.diasExecutado} dias)</span>`;
     }
   }
   
-  return texto;
+  // Retornar células de tabela sem bordas, com espaçamento
+  return `<td style="padding: 6px 12px; vertical-align: top;">${colFS}</td><td style="padding: 6px 12px; vertical-align: top;">${colMatricula}</td><td style="padding: 6px 12px; vertical-align: top;">${colMarcaModelo}</td><td style="padding: 6px 12px; vertical-align: top;">${colStatus}</td>`;
 }
 
 /**
@@ -511,9 +515,9 @@ function gerarHTMLRelatorio(relatorio: RelatorioLoja): string {
     const fichasOrdenadas = [...relatorio.fichasAbertas5Dias].sort((a, b) => b.diasAberto - a.diasAberto);
     html += `<div style="margin: 20px 0; padding: 15px; background: #fff5f5; border-radius: 8px; border-left: 4px solid #c53030;">`;
     html += `<h3 style="margin: 0 0 10px 0; color: #c53030; text-transform: uppercase; font-weight: bold;">FS ABERTAS A 5 OU MAIS DIAS QUE NÃO ESTÃO FINALIZADOS</h3>`;
-    html += `<table style="width: 100%; border-collapse: collapse;">`;
+    html += `<table style="width: 100%; border-collapse: collapse; border: none;">`;
     for (const ficha of fichasOrdenadas) {
-      html += `<tr><td style="padding: 6px; border-bottom: 1px solid #fed7d7;">${formatarFichaParaTabela(ficha, true, 'aberto')}</td></tr>`;
+      html += `<tr style="border-bottom: 1px solid #fed7d7;">${formatarFichaParaTabela(ficha, true, 'aberto')}</tr>`;
     }
     html += `</table>`;
     html += `<p style="margin: 10px 0 0 0; font-weight: bold; color: #c53030;">Total: ${relatorio.fichasAbertas5Dias.length} processos</p>`;
@@ -525,9 +529,9 @@ function gerarHTMLRelatorio(relatorio: RelatorioLoja): string {
     const fichasOrdenadas = [...relatorio.fichasAposAgendamento].sort((a, b) => b.diasExecutado - a.diasExecutado);
     html += `<div style="margin: 20px 0; padding: 15px; background: #fffaf0; border-radius: 8px; border-left: 4px solid #dd6b20;">`;
     html += `<h3 style="margin: 0 0 10px 0; color: #dd6b20; text-transform: uppercase; font-weight: bold;">FS ABERTAS QUE PASSARAM 2 OU MAIS DIAS DO AGENDAMENTO E NÃO ESTÃO CONCLUÍDOS</h3>`;
-    html += `<table style="width: 100%; border-collapse: collapse;">`;
+    html += `<table style="width: 100%; border-collapse: collapse; border: none;">`;
     for (const ficha of fichasOrdenadas) {
-      html += `<tr><td style="padding: 6px; border-bottom: 1px solid #feebc8;">${formatarFichaParaTabela(ficha, true, 'executado')}</td></tr>`;
+      html += `<tr style="border-bottom: 1px solid #feebc8;">${formatarFichaParaTabela(ficha, true, 'executado')}</tr>`;
     }
     html += `</table>`;
     html += `<p style="margin: 10px 0 0 0; font-weight: bold; color: #dd6b20;">Total: ${relatorio.fichasAposAgendamento.length} processos</p>`;
@@ -538,9 +542,9 @@ function gerarHTMLRelatorio(relatorio: RelatorioLoja): string {
   if (relatorio.fichasStatusAlerta.length > 0) {
     html += `<div style="margin: 20px 0; padding: 15px; background: #fef2f2; border-radius: 8px; border-left: 4px solid #dc2626;">`;
     html += `<h3 style="margin: 0 0 10px 0; color: #dc2626; text-transform: uppercase; font-weight: bold;">FS EM STATUS DE ALERTA (FALTA DOCUMENTOS, RECUSADO OU INCIDÊNCIA)</h3>`;
-    html += `<table style="width: 100%; border-collapse: collapse;">`;
+    html += `<table style="width: 100%; border-collapse: collapse; border: none;">`;
     for (const ficha of relatorio.fichasStatusAlerta) {
-      html += `<tr><td style="padding: 6px; border-bottom: 1px solid #fecaca;">${formatarFichaParaTabela(ficha)}</td></tr>`;
+      html += `<tr style="border-bottom: 1px solid #fecaca;">${formatarFichaParaTabela(ficha)}</tr>`;
     }
     html += `</table>`;
     html += `<p style="margin: 10px 0 0 0; font-weight: bold; color: #dc2626;">Total: ${relatorio.fichasStatusAlerta.length} processos</p>`;
@@ -551,9 +555,9 @@ function gerarHTMLRelatorio(relatorio: RelatorioLoja): string {
   if (relatorio.fichasSemNotas.length > 0) {
     html += `<div style="margin: 20px 0; padding: 15px; background: #fefce8; border-radius: 8px; border-left: 4px solid #ca8a04;">`;
     html += `<h3 style="margin: 0 0 10px 0; color: #ca8a04; text-transform: uppercase; font-weight: bold;">FS SEM NOTAS</h3>`;
-    html += `<table style="width: 100%; border-collapse: collapse;">`;
+    html += `<table style="width: 100%; border-collapse: collapse; border: none;">`;
     for (const ficha of relatorio.fichasSemNotas) {
-      html += `<tr><td style="padding: 6px; border-bottom: 1px solid #fef08a;">${formatarFichaParaTabela(ficha)}</td></tr>`;
+      html += `<tr style="border-bottom: 1px solid #fef08a;">${formatarFichaParaTabela(ficha)}</tr>`;
     }
     html += `</table>`;
     html += `<p style="margin: 10px 0 0 0; font-weight: bold; color: #ca8a04;">Total: ${relatorio.fichasSemNotas.length} processos</p>`;
@@ -565,9 +569,9 @@ function gerarHTMLRelatorio(relatorio: RelatorioLoja): string {
     const fichasOrdenadas = [...relatorio.fichasNotasAntigas].sort((a, b) => b.diasNota - a.diasNota);
     html += `<div style="margin: 20px 0; padding: 15px; background: #f0fdf4; border-radius: 8px; border-left: 4px solid #16a34a;">`;
     html += `<h3 style="margin: 0 0 10px 0; color: #16a34a; text-transform: uppercase; font-weight: bold;">FS ABERTAS CUJAS NOTAS NÃO SÃO ATUALIZADAS A 5 OU MAIS DIAS</h3>`;
-    html += `<table style="width: 100%; border-collapse: collapse;">`;
+    html += `<table style="width: 100%; border-collapse: collapse; border: none;">`;
     for (const ficha of fichasOrdenadas) {
-      html += `<tr><td style="padding: 6px; border-bottom: 1px solid #bbf7d0;">${formatarFichaParaTabela(ficha, true, 'nota')}</td></tr>`;
+      html += `<tr style="border-bottom: 1px solid #bbf7d0;">${formatarFichaParaTabela(ficha, true, 'nota')}</tr>`;
     }
     html += `</table>`;
     html += `<p style="margin: 10px 0 0 0; font-weight: bold; color: #16a34a;">Total: ${relatorio.fichasNotasAntigas.length} processos</p>`;
@@ -578,9 +582,9 @@ function gerarHTMLRelatorio(relatorio: RelatorioLoja): string {
   if (relatorio.fichasDevolverVidro.length > 0) {
     html += `<div style="margin: 20px 0; padding: 15px; background: #faf5ff; border-radius: 8px; border-left: 4px solid #7c3aed;">`;
     html += `<h3 style="margin: 0 0 10px 0; color: #7c3aed; text-transform: uppercase; font-weight: bold;">FS COM STATUS: DEVOLVE VIDRO E ENCERRA!</h3>`;
-    html += `<table style="width: 100%; border-collapse: collapse;">`;
+    html += `<table style="width: 100%; border-collapse: collapse; border: none;">`;
     for (const ficha of relatorio.fichasDevolverVidro) {
-      html += `<tr><td style="padding: 6px; border-bottom: 1px solid #e9d5ff;">${formatarFichaParaTabela(ficha)}</td></tr>`;
+      html += `<tr style="border-bottom: 1px solid #e9d5ff;">${formatarFichaParaTabela(ficha)}</tr>`;
     }
     html += `</table>`;
     html += `<p style="margin: 10px 0 0 0; font-weight: bold; color: #7c3aed;">Total: ${relatorio.fichasDevolverVidro.length} processos</p>`;
@@ -603,9 +607,9 @@ function gerarHTMLRelatorio(relatorio: RelatorioLoja): string {
   if (relatorio.fichasSemEmailCliente.length > 0) {
     html += `<div style="margin: 20px 0; padding: 15px; background: #f0f9ff; border-radius: 8px; border-left: 4px solid #0284c7;">`;
     html += `<h3 style="margin: 0 0 10px 0; color: #0284c7; text-transform: uppercase; font-weight: bold;">FS SEM EMAIL DE CLIENTE</h3>`;
-    html += `<table style="width: 100%; border-collapse: collapse;">`;
+    html += `<table style="width: 100%; border-collapse: collapse; border: none;">`;
     for (const ficha of relatorio.fichasSemEmailCliente) {
-      html += `<tr><td style="padding: 6px; border-bottom: 1px solid #bae6fd;">${formatarFichaParaTabela(ficha)}</td></tr>`;
+      html += `<tr style="border-bottom: 1px solid #bae6fd;">${formatarFichaParaTabela(ficha)}</tr>`;
     }
     html += `</table>`;
     html += `<p style="margin: 10px 0 0 0; font-weight: bold; color: #0284c7;">Total: ${relatorio.fichasSemEmailCliente.length} processos</p>`;
