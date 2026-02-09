@@ -284,15 +284,55 @@ export async function gerarPDFAnaliseFichas(relatorio: {
           
           doc.y = tituloY + 28;
           
-          // Itens da secção
+          // Itens da secção (renderizar como tabela)
           if (seccao.itens.length > 0) {
+            // Definir larguras das colunas
+            const colWidths = {
+              fs: 60,        // FS 1234
+              matricula: 80, // AB-12-CD
+              marca: 140,    // MARCA MODELO
+              status: 200    // Status + dias
+            };
+            
             for (const item of seccao.itens) {
               // PDFKit gere automaticamente as quebras de página
               
-              doc.fontSize(9)
+              // Separar o item nas 4 colunas (formato: "FS XX | Matrícula | Marca/Modelo | Status")
+              const partes = item.split(' | ').map(p => p.trim());
+              
+              const fs = partes[0] || '';
+              const matricula = partes[1] || '';
+              const marca = partes[2] || '-';
+              const status = partes[3] || '';
+              
+              const rowY = doc.y;
+              
+              // Coluna 1: FS
+              doc.fontSize(10)
                  .font('Helvetica')
                  .fillColor('#333333')
-                 .text(`• ${item}`, leftMargin + 10, doc.y, { width: pageWidth - 20, lineGap: 2 });
+                 .text(fs, leftMargin + 10, rowY, { width: colWidths.fs, continued: false });
+              
+              // Coluna 2: Matrícula (negrito)
+              doc.fontSize(10)
+                 .font('Helvetica-Bold')
+                 .fillColor('#1a365d')
+                 .text(matricula, leftMargin + 10 + colWidths.fs, rowY, { width: colWidths.matricula, continued: false });
+              
+              // Coluna 3: Marca/Modelo
+              doc.fontSize(10)
+                 .font('Helvetica')
+                 .fillColor('#333333')
+                 .text(marca, leftMargin + 10 + colWidths.fs + colWidths.matricula, rowY, { width: colWidths.marca, continued: false });
+              
+              // Coluna 4: Status (negrito)
+              doc.fontSize(10)
+                 .font('Helvetica-Bold')
+                 .fillColor('#333333')
+                 .text(status, leftMargin + 10 + colWidths.fs + colWidths.matricula + colWidths.marca, rowY, { width: colWidths.status, continued: false });
+              
+              // Avançar para próxima linha
+              doc.y = rowY + 16;
             }
             
             // Total da secção

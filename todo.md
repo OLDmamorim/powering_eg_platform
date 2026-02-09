@@ -4367,3 +4367,16 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Verificar como o HTML está a ser processado para PDF (extrairSeccoesDoHTML)
 - [x] Corrigir para que a tabela HTML seja renderizada corretamente no PDF (agrupar células por linha)
 - [x] Testar exportação para PDF (cada ficha numa linha com | separador)
+
+## v4.64 - Alterar PDF para usar tabela com colunas alinhadas (igual ao ecrã)
+- [x] Modificar pdfAnaliseFichas.ts para renderizar tabelas em vez de listas
+- [x] Criar colunas alinhadas: FS | Matrícula | Marca/Modelo | Status
+- [x] Remover bullet points (•)
+- [x] Aumentar tamanho da fonte para melhor legibilidade (9pt -> 10pt)
+- [x] Testar exportação para PDF
+
+## v4.65 - Garantir que cada FS fica numa única linha no PDF (sem quebras)
+- [ ] Adicionar lineBreak: false nas colunas para evitar quebra de texto
+- [ ] Ajustar larguras das colunas se necessário
+- [ ] Truncar texto longo com ellipsis (...) se não couber
+- [ ] Testar com fichas com nomes longos
