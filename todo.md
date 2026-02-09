@@ -4376,7 +4376,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Testar exportação para PDF
 
 ## v4.65 - Garantir que cada FS fica numa única linha no PDF (sem quebras)
-- [ ] Adicionar lineBreak: false nas colunas para evitar quebra de texto
-- [ ] Ajustar larguras das colunas se necessário
-- [ ] Truncar texto longo com ellipsis (...) se não couber
-- [ ] Testar com fichas com nomes longos
+- [x] Adicionar lineBreak: false nas colunas para evitar quebra de texto
+- [x] Ajustar larguras das colunas se necessário
+- [x] Truncar texto longo com ellipsis (...) se não couber
+- [x] Testar com fichas com nomes longos

@@ -311,25 +311,25 @@ export async function gerarPDFAnaliseFichas(relatorio: {
               doc.fontSize(10)
                  .font('Helvetica')
                  .fillColor('#333333')
-                 .text(fs, leftMargin + 10, rowY, { width: colWidths.fs, continued: false });
+                 .text(fs, leftMargin + 10, rowY, { width: colWidths.fs, lineBreak: false, ellipsis: true, continued: false });
               
               // Coluna 2: Matrícula (negrito)
               doc.fontSize(10)
                  .font('Helvetica-Bold')
                  .fillColor('#1a365d')
-                 .text(matricula, leftMargin + 10 + colWidths.fs, rowY, { width: colWidths.matricula, continued: false });
+                 .text(matricula, leftMargin + 10 + colWidths.fs, rowY, { width: colWidths.matricula, lineBreak: false, ellipsis: true, continued: false });
               
               // Coluna 3: Marca/Modelo
               doc.fontSize(10)
                  .font('Helvetica')
                  .fillColor('#333333')
-                 .text(marca, leftMargin + 10 + colWidths.fs + colWidths.matricula, rowY, { width: colWidths.marca, continued: false });
+                 .text(marca, leftMargin + 10 + colWidths.fs + colWidths.matricula, rowY, { width: colWidths.marca, lineBreak: false, ellipsis: true, continued: false });
               
               // Coluna 4: Status (negrito)
               doc.fontSize(10)
                  .font('Helvetica-Bold')
                  .fillColor('#333333')
-                 .text(status, leftMargin + 10 + colWidths.fs + colWidths.matricula + colWidths.marca, rowY, { width: colWidths.status, continued: false });
+                 .text(status, leftMargin + 10 + colWidths.fs + colWidths.matricula + colWidths.marca, rowY, { width: colWidths.status, lineBreak: false, ellipsis: true, continued: false });
               
               // Avançar para próxima linha
               doc.y = rowY + 16;
