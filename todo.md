@@ -4478,3 +4478,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Mover secção "PRAZO PARA RESOLUÇÃO" do PDF para corpo do email
 - [x] Corrigir label "ABERTAS +5 DIAS" para "ABERTAS +10 DIAS" no PDF
 - [x] Testar email e PDF gerados
+
+## v6.11.6 - Remover texto residual do PDF
+- [x] Remover completamente "Indicar se houve contacto com cliente nos ultimos dias"
+- [x] Remover completamente "Registar evolucao ou bloqueios encontrados"
+- [x] Testar PDF gerado

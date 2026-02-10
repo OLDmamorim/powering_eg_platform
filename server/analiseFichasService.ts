@@ -715,9 +715,6 @@ function gerarResumo(relatorio: RelatorioLoja): string {
   if (totalProblemas === 0) {
     linhas.push(`<strong style="color: #16a34a;">PARABENS!</strong> A loja nao apresenta problemas significativos.`);
     linhas.push(`Continuar o bom trabalho e manter os processos atualizados.`);
-  } else {
-    linhas.push(`Indicar se houve contacto com cliente nos ultimos dias.`);
-    linhas.push(`Registar evolucao ou bloqueios encontrados.`);
   }
   
   return linhas.join('<br>');
