@@ -711,60 +711,10 @@ function gerarResumo(relatorio: RelatorioLoja): string {
   linhas.push(`<strong style="color: ${corUrgencia};">NIVEL DE URGENCIA: ${nivelUrgencia}</strong>`);
   linhas.push(``);
   
-  // Detalhes e instrucoes por categoria
-  linhas.push(`<strong>ACOES NECESSARIAS:</strong>`);
+  // Instruções de acompanhamento (mantidas conforme solicitação)
+  linhas.push(`   - Indicar se houve contacto com cliente nos ultimos dias`);
+  linhas.push(`   - Registar evolucao ou bloqueios encontrados`);
   linhas.push(``);
-  
-  if (relatorio.fichasAbertas5Dias.length > 0) {
-    linhas.push(`<strong>1. FICHAS ABERTAS HA MAIS DE 10 DIAS (${relatorio.fichasAbertas5Dias.length} processos)</strong>`);
-    linhas.push(`   - Verificar o motivo do atraso em cada processo`);
-    linhas.push(`   - Contactar o cliente para confirmar disponibilidade`);
-    linhas.push(`   - Agendar servico ou encerrar processo se nao houver resposta`);
-    linhas.push(`   - Prioridade: Processos com mais de 30 dias devem ser tratados HOJE`);
-    linhas.push(``);
-  }
-  
-  if (relatorio.fichasAposAgendamento.length > 0) {
-    linhas.push(`<strong>2. FICHAS APOS DATA DE AGENDAMENTO (${relatorio.fichasAposAgendamento.length} processos)</strong>`);
-    linhas.push(`   - Contactar IMEDIATAMENTE o cliente para reagendar`);
-    linhas.push(`   - Verificar se o vidro esta disponivel em stock`);
-    linhas.push(`   - Atualizar a data de agendamento no sistema`);
-    linhas.push(`   - Se cliente nao atender, registar tentativa nas notas`);
-    linhas.push(``);
-  }
-  
-  if (relatorio.fichasStatusAlerta.length > 0) {
-    linhas.push(`<strong>3. FICHAS EM STATUS DE ALERTA (${relatorio.fichasStatusAlerta.length} processos)</strong>`);
-    linhas.push(`   - RECUSADO: Verificar o que solicitam imediatamente`);
-    linhas.push(`   - FALTA DOCUMENTOS: Verificar o que falta para finalizar processo`);
-    linhas.push(`   - INCIDENCIA: Resolver problema e atualizar status`);
-    linhas.push(`   - Documentar todas as acoes tomadas nas notas`);
-    linhas.push(``);
-  }
-  
-  if (relatorio.fichasSemNotas.length > 0) {
-    linhas.push(`<strong>4. FICHAS SEM NOTAS (${relatorio.fichasSemNotas.length} processos)</strong>`);
-    linhas.push(`   - OBRIGATORIO: Adicionar nota com ponto de situacao atual`);
-    linhas.push(`   - Indicar proxima acao prevista e data`);
-    linhas.push(`   - Registar contactos realizados com cliente/seguradora`);
-    linhas.push(``);
-  }
-  
-  if (relatorio.fichasNotasAntigas.length > 0) {
-    linhas.push(`<strong>5. FICHAS COM NOTAS DESATUALIZADAS (${relatorio.fichasNotasAntigas.length} processos)</strong>`);
-    linhas.push(`   - Atualizar notas com informacao atual do processo`);
-    linhas.push(`   - Indicar se houve contacto com cliente nos ultimos dias`);
-    linhas.push(`   - Registar evolucao ou bloqueios encontrados`);
-    linhas.push(``);
-  }
-  
-  if (relatorio.fichasDevolverVidro.length > 0) {
-    linhas.push(`<strong>6. VIDROS PARA DEVOLVER (${relatorio.fichasDevolverVidro.length} processos)</strong>`);
-    linhas.push(`   - Preparar vidros para recolha pelo fornecedor`);
-    linhas.push(`   - Verificar se guia de devolucao esta emitida`);
-    linhas.push(`   - Contactar fornecedor para agendar recolha`);
-    linhas.push(``);
-  }
   
   // Categoria "Fichas Sem Email Cliente" foi removida da análise
   

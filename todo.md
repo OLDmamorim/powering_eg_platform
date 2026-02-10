@@ -4449,3 +4449,9 @@ NOTA: Sistema de email requer configuração externa no deployment
   - FS com Notas Antigas
 - [x] Testar: FS 996 agendada 16/02 status "Pedido Autorização" deve sair de TODAS as categorias
 - [x] Testar: FS com status "INCIDÊNCIA" mesmo agendada deve PERMANECER
+
+## v4.77 - Remover Secção "AÇÕES NECESSÁRIAS" do PDF
+- [x] Localizar onde a secção "ACOES NECESSARIAS:" é gerada no PDF
+- [x] Remover toda a lista numerada (1. FICHAS ABERTAS... até 5. FICHAS COM NOTAS DESATUALIZADAS)
+- [x] Manter apenas instruções de acompanhamento (contacto cliente, evolução/bloqueios)
+- [x] Testar PDF gerado para confirmar remoção
