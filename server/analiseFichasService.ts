@@ -125,25 +125,26 @@ function recalcularDiasExecutado(ficha: FichaServico, dataAnalise: Date): number
 }
 
 /**
- * Verifica se uma ficha tem agendamento futuro válido
- * (data futura + horário dentro de 09:00-18:00 + status NÃO é de alerta)
- * Fichas com agendamento futuro válido são excluídas do relatório porque estão encaminhadas
+ * Verifica se uma ficha tem agendamento válido (hoje ou futuro)
+ * (data >= hoje + horário dentro de 09:00-18:00 + status NÃO é de alerta)
+ * Fichas com agendamento válido são excluídas do relatório porque estão encaminhadas
  */
 function temAgendamentoFuturoValido(ficha: FichaServico, dataAnalise: Date): boolean {
   // Se não tem data de serviço, não tem agendamento
   if (!ficha.dataServico) return false;
   
-  // Se tem status de alerta, SEMPRE incluir no relatório (mesmo com agendamento futuro)
+  // Se tem status de alerta, SEMPRE incluir no relatório (mesmo com agendamento)
   if (STATUS_ALERTA.includes(ficha.status)) return false;
   
-  // Verificar se a data é futura (depois da data da análise)
+  // Verificar se a data é hoje ou futura (>= data da análise)
   const dataServicoSemHora = new Date(ficha.dataServico);
   dataServicoSemHora.setHours(0, 0, 0, 0);
   
   const dataAnaliseSemHora = new Date(dataAnalise);
   dataAnaliseSemHora.setHours(0, 0, 0, 0);
   
-  if (dataServicoSemHora <= dataAnaliseSemHora) return false;
+  // Excluir se data < hoje (passado)
+  if (dataServicoSemHora < dataAnaliseSemHora) return false;
   
   // Verificar se o horário está dentro de 09:00-18:00
   const horaInicio = ficha.horaInicio?.trim();

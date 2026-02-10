@@ -4455,3 +4455,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Remover toda a lista numerada (1. FICHAS ABERTAS... até 5. FICHAS COM NOTAS DESATUALIZADAS)
 - [x] Manter apenas instruções de acompanhamento (contacto cliente, evolução/bloqueios)
 - [x] Testar PDF gerado para confirmar remoção
+
+## v4.78 - Excluir Fichas Agendadas no Próprio Dia
+- [x] Atualizar temAgendamentoFuturoValido() para incluir dia atual (>= em vez de >)
+- [x] Testar: FS agendada para hoje 09/02 deve ser excluída
+- [x] Testar: FS agendada para amanhã 10/02 continua excluída
