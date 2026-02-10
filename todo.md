@@ -4432,3 +4432,10 @@ NOTA: Sistema de email requer configuração externa no deployment
   - Horário dentro do horário de serviço (09:00 - 18:00)
 - [x] Atualizar lógica de filtro em analiseFichasService.ts
 - [x] Testar com casos reais (FS 996 deve sair do relatório se agendada para 16/02)
+
+## v4.75 - Recalcular diasExecutado Dinamicamente
+- [x] Criar função para recalcular diasExecutado baseado em dataAnalise vs dataServico
+- [x] Verificar se horário estava dentro de 09:00-18:00
+- [x] Substituir valor estático do Excel por cálculo dinâmico
+- [x] Atualizar filtro fichasAposAgendamento para usar novo cálculo
+- [x] Testar com FS 114 (agendada 06/02, análise 09/02 = 3 dias)

@@ -93,6 +93,38 @@ const STATUS_EXCLUIR = ['Serviço Pronto', 'REVISAR'];
 const STATUS_ALERTA = ['FALTA DOCUMENTOS', 'RECUSADO', 'INCIDÊNCIA'];
 
 /**
+ * Recalcula diasExecutado baseado na data da análise
+ * Retorna quantos dias passaram desde o agendamento (se passou)
+ * Retorna 0 se não tem agendamento, se é futuro, ou se fora de horário de serviço
+ */
+function recalcularDiasExecutado(ficha: FichaServico, dataAnalise: Date): number {
+  // Se não tem data de serviço, retorna 0
+  if (!ficha.dataServico) return 0;
+  
+  // Verificar se o horário estava dentro de 09:00-18:00
+  const horaInicio = ficha.horaInicio?.trim();
+  if (!horaInicio) return 0;
+  
+  const [horaStr] = horaInicio.split(':');
+  const hora = parseInt(horaStr, 10);
+  
+  if (isNaN(hora) || hora < 9 || hora >= 18) return 0;
+  
+  // Calcular diferença em dias
+  const dataServicoSemHora = new Date(ficha.dataServico);
+  dataServicoSemHora.setHours(0, 0, 0, 0);
+  
+  const dataAnaliseSemHora = new Date(dataAnalise);
+  dataAnaliseSemHora.setHours(0, 0, 0, 0);
+  
+  const diffMs = dataAnaliseSemHora.getTime() - dataServicoSemHora.getTime();
+  const diffDias = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  
+  // Se é negativo (futuro), retorna 0
+  return diffDias > 0 ? diffDias : 0;
+}
+
+/**
  * Verifica se uma ficha tem agendamento futuro válido
  * (data futura + horário dentro de 09:00-18:00)
  */
@@ -780,7 +812,13 @@ export function analisarFichas(fichas: FichaServico[], nomeArquivo: string): Res
     const fichasAbertas5Dias = fichasLoja.filter((f: FichaServico) => 
       f.diasAberto >= 10 && !temAgendamentoFuturoValido(f, dataAnalise)
     );
-    const fichasAposAgendamento = fichasLoja.filter((f: FichaServico) => f.diasExecutado >= 2);
+    // FS APÓS AGENDAMENTO: recalcular dinamicamente baseado na data da análise
+    const fichasAposAgendamento = fichasLoja
+      .map((f: FichaServico) => ({
+        ...f,
+        diasExecutado: recalcularDiasExecutado(f, dataAnalise) // Sobrescrever com valor recalculado
+      }))
+      .filter((f: FichaServico) => f.diasExecutado >= 2);
     const fichasStatusAlerta = fichasLoja.filter((f: FichaServico) => STATUS_ALERTA.includes(f.status));
     const fichasSemNotas = fichasLoja.filter((f: FichaServico) => !fichaTemNotas(f.obs));
     const fichasNotasAntigas = fichasLoja.filter((f: FichaServico) => f.diasNota >= 5 && fichaTemNotas(f.obs));
