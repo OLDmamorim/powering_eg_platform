@@ -716,12 +716,8 @@ function gerarResumo(relatorio: RelatorioLoja): string {
     linhas.push(`<strong style="color: #16a34a;">PARABENS!</strong> A loja nao apresenta problemas significativos.`);
     linhas.push(`Continuar o bom trabalho e manter os processos atualizados.`);
   } else {
-    linhas.push(`<strong>PRAZO PARA RESOLUCAO:</strong>`);
-    linhas.push(`- Processos CRITICOS (>30 dias): Resolver HOJE`);
-    linhas.push(`- Processos URGENTES (>15 dias): Resolver em 24 horas`);
-    linhas.push(`- Demais processos: Resolver em 48 horas`);
-    linhas.push(``);
-    linhas.push(`<em>Este relatorio deve ser revisto diariamente ate que todos os pontos estejam resolvidos.</em>`);
+    linhas.push(`Indicar se houve contacto com cliente nos ultimos dias.`);
+    linhas.push(`Registar evolucao ou bloqueios encontrados.`);
   }
   
   return linhas.join('<br>');
@@ -980,6 +976,21 @@ export function gerarHTMLEmailAnalise(relatorio: {
               </div>
             </td>
           </tr>
+          
+          <!-- Prazo para Resolução -->
+          ${(relatorio.fichasAbertas5Dias + relatorio.fichasAposAgendamento + relatorio.fichasStatusAlerta + relatorio.fichasSemNotas + relatorio.fichasNotasAntigas) > 0 ? `
+          <tr>
+            <td style="padding: 25px 30px; border-bottom: 1px solid #e5e7eb; background: #fef3c7;">
+              <h3 style="color: #92400e; margin: 0 0 15px 0; font-size: 15px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">⏱️ Prazo para Resolução</h3>
+              <div style="line-height: 1.8; font-size: 14px; color: #78350f;">
+                <p style="margin: 0 0 8px 0;"><strong>• Processos CRÍTICOS (&gt;30 dias):</strong> Resolver HOJE</p>
+                <p style="margin: 0 0 8px 0;"><strong>• Processos URGENTES (&gt;15 dias):</strong> Resolver em 24 horas</p>
+                <p style="margin: 0 0 12px 0;"><strong>• Demais processos:</strong> Resolver em 48 horas</p>
+                <p style="margin: 0; font-style: italic; font-size: 13px;">Este relatório deve ser revisto diariamente até que todos os pontos estejam resolvidos.</p>
+              </div>
+            </td>
+          </tr>
+          ` : ''}
           
           <!-- Fichas a Intervir -->
           <tr>

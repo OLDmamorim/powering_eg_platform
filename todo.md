@@ -4468,3 +4468,13 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## v6.11.4 - Corrigir Estrutura do Resumo do PDF
 - [x] Remover linhas soltas antes de "PRAZO PARA RESOLUÇÃO"
 - [x] Reorganizar estrutura do resumo para ficar limpo
+
+## v6.11.5 - Ajustar PDF e Email de Análise
+- [ ] Mover secção "PRAZO PARA RESOLUÇÃO" do PDF para corpo do email
+- [ ] Corrigir label "ABERTAS +5 DIAS" para "ABERTAS +10 DIAS" no PDF
+- [ ] Testar email e PDF gerados
+
+## v6.11.5 - Ajustar PDF e Email de Análise
+- [x] Mover secção "PRAZO PARA RESOLUÇÃO" do PDF para corpo do email
+- [x] Corrigir label "ABERTAS +5 DIAS" para "ABERTAS +10 DIAS" no PDF
+- [x] Testar email e PDF gerados

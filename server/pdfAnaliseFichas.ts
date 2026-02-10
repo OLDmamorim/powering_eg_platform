@@ -184,7 +184,7 @@ export async function gerarPDFAnaliseFichas(relatorio: {
       
       const metricas = [
         { label: 'TOTAL FICHAS', valor: relatorio.totalFichas, cor: '#1a365d' },
-        { label: 'ABERTAS +5 DIAS', valor: relatorio.fichasAbertas5Dias, cor: relatorio.fichasAbertas5Dias > 0 ? '#dc2626' : '#059669' },
+        { label: 'ABERTAS +10 DIAS', valor: relatorio.fichasAbertas5Dias, cor: relatorio.fichasAbertas5Dias > 0 ? '#dc2626' : '#059669' },
         { label: 'STATUS ALERTA', valor: relatorio.fichasStatusAlerta, cor: relatorio.fichasStatusAlerta > 0 ? '#ea580c' : '#059669' },
         { label: 'SEM NOTAS', valor: relatorio.fichasSemNotas, cor: relatorio.fichasSemNotas > 0 ? '#d97706' : '#059669' },
       ];
