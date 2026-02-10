@@ -4464,3 +4464,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## v6.11.3 - Atualizar Versão do Portal
 - [x] Localizar onde a versão v6.11.2 está definida
 - [x] Atualizar para v6.11.3
+
+## v6.11.4 - Corrigir Estrutura do Resumo do PDF
+- [x] Remover linhas soltas antes de "PRAZO PARA RESOLUÇÃO"
+- [x] Reorganizar estrutura do resumo para ficar limpo

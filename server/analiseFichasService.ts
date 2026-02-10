@@ -712,13 +712,6 @@ function gerarResumo(relatorio: RelatorioLoja): string {
   linhas.push(`<strong style="color: ${corUrgencia};">NIVEL DE URGENCIA: ${nivelUrgencia}</strong>`);
   linhas.push(``);
   
-  // Instruções de acompanhamento (mantidas conforme solicitação)
-  linhas.push(`   - Indicar se houve contacto com cliente nos ultimos dias`);
-  linhas.push(`   - Registar evolucao ou bloqueios encontrados`);
-  linhas.push(``);
-  
-  // Categoria "Fichas Sem Email Cliente" foi removida da análise
-  
   if (totalProblemas === 0) {
     linhas.push(`<strong style="color: #16a34a;">PARABENS!</strong> A loja nao apresenta problemas significativos.`);
     linhas.push(`Continuar o bom trabalho e manter os processos atualizados.`);
