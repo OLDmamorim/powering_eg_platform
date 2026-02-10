@@ -4439,3 +4439,13 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Substituir valor estático do Excel por cálculo dinâmico
 - [x] Atualizar filtro fichasAposAgendamento para usar novo cálculo
 - [x] Testar com FS 114 (agendada 06/02, análise 09/02 = 3 dias)
+
+## v4.76 - Filtro Global de Agendamento Futuro Válido
+- [x] Atualizar função temAgendamentoFuturoValido() para verificar também status de alerta
+- [x] Aplicar filtro em TODAS as categorias (não só "FS ABERTAS A 10+ DIAS"):
+  - FS Após Agendamento
+  - FS Status Alerta (não aplicar - são sempre incluídas)
+  - FS Sem Notas
+  - FS com Notas Antigas
+- [x] Testar: FS 996 agendada 16/02 status "Pedido Autorização" deve sair de TODAS as categorias
+- [x] Testar: FS com status "INCIDÊNCIA" mesmo agendada deve PERMANECER

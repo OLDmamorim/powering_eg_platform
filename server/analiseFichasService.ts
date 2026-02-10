@@ -126,11 +126,15 @@ function recalcularDiasExecutado(ficha: FichaServico, dataAnalise: Date): number
 
 /**
  * Verifica se uma ficha tem agendamento futuro válido
- * (data futura + horário dentro de 09:00-18:00)
+ * (data futura + horário dentro de 09:00-18:00 + status NÃO é de alerta)
+ * Fichas com agendamento futuro válido são excluídas do relatório porque estão encaminhadas
  */
 function temAgendamentoFuturoValido(ficha: FichaServico, dataAnalise: Date): boolean {
   // Se não tem data de serviço, não tem agendamento
   if (!ficha.dataServico) return false;
+  
+  // Se tem status de alerta, SEMPRE incluir no relatório (mesmo com agendamento futuro)
+  if (STATUS_ALERTA.includes(ficha.status)) return false;
   
   // Verificar se a data é futura (depois da data da análise)
   const dataServicoSemHora = new Date(ficha.dataServico);
@@ -808,21 +812,42 @@ export function analisarFichas(fichas: FichaServico[], nomeArquivo: string): Res
     const numeroLoja = (!isSM && fichasLoja.length > 0) ? extrairNumeroLoja(fichasLoja[0].nmdos) : null;
     
     // Filtrar por categorias
-    // FS ABERTAS A 10 OU MAIS DIAS: excluir fichas com agendamento futuro válido
+    // REGRA GLOBAL: Excluir fichas com agendamento futuro válido (data futura + horário 09:00-18:00 + status NÃO alerta)
+    // Estas fichas estão encaminhadas e não precisam de intervenção
+    
+    // FS ABERTAS A 10 OU MAIS DIAS
     const fichasAbertas5Dias = fichasLoja.filter((f: FichaServico) => 
       f.diasAberto >= 10 && !temAgendamentoFuturoValido(f, dataAnalise)
     );
-    // FS APÓS AGENDAMENTO: recalcular dinamicamente baseado na data da análise
+    
+    // FS APÓS AGENDAMENTO: recalcular dinamicamente + excluir agendamento futuro válido
     const fichasAposAgendamento = fichasLoja
       .map((f: FichaServico) => ({
         ...f,
-        diasExecutado: recalcularDiasExecutado(f, dataAnalise) // Sobrescrever com valor recalculado
+        diasExecutado: recalcularDiasExecutado(f, dataAnalise)
       }))
-      .filter((f: FichaServico) => f.diasExecutado >= 2);
+      .filter((f: FichaServico) => 
+        f.diasExecutado >= 2 && !temAgendamentoFuturoValido(f, dataAnalise)
+      );
+    
+    // FS STATUS ALERTA: SEMPRE incluir (mesmo com agendamento futuro)
     const fichasStatusAlerta = fichasLoja.filter((f: FichaServico) => STATUS_ALERTA.includes(f.status));
-    const fichasSemNotas = fichasLoja.filter((f: FichaServico) => !fichaTemNotas(f.obs));
-    const fichasNotasAntigas = fichasLoja.filter((f: FichaServico) => f.diasNota >= 5 && fichaTemNotas(f.obs));
-    const fichasDevolverVidro = fichasLoja.filter((f: FichaServico) => f.status === 'Devolve Vidro e Encerra!');
+    
+    // FS SEM NOTAS: excluir agendamento futuro válido
+    const fichasSemNotas = fichasLoja.filter((f: FichaServico) => 
+      !fichaTemNotas(f.obs) && !temAgendamentoFuturoValido(f, dataAnalise)
+    );
+    
+    // FS COM NOTAS ANTIGAS: excluir agendamento futuro válido
+    const fichasNotasAntigas = fichasLoja.filter((f: FichaServico) => 
+      f.diasNota >= 5 && fichaTemNotas(f.obs) && !temAgendamentoFuturoValido(f, dataAnalise)
+    );
+    
+    // FS DEVOLVE VIDRO: excluir agendamento futuro válido
+    const fichasDevolverVidro = fichasLoja.filter((f: FichaServico) => 
+      f.status === 'Devolve Vidro e Encerra!' && !temAgendamentoFuturoValido(f, dataAnalise)
+    );
+    
     // const fichasSemEmailCliente = fichasLoja.filter((f: FichaServico) => isEmailExpressGlass(f.email)); // REMOVIDO
     
     // Contar status
