@@ -4460,3 +4460,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Atualizar temAgendamentoFuturoValido() para incluir dia atual (>= em vez de >)
 - [x] Testar: FS agendada para hoje 09/02 deve ser excluída
 - [x] Testar: FS agendada para amanhã 10/02 continua excluída
+
+## v6.11.3 - Atualizar Versão do Portal
+- [x] Localizar onde a versão v6.11.2 está definida
+- [x] Atualizar para v6.11.3
