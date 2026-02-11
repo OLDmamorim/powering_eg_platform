@@ -50,6 +50,7 @@ import PortalGestor from "./pages/PortalGestor";
 import AnaliseFichas from "./pages/AnaliseFichas";
 import RH from "./pages/RH";
 import MenuInicial from "./pages/MenuInicial";
+import DashboardVolante from "./pages/DashboardVolante";
 import { DemoBanner } from "./components/DemoBanner";
 import { LanguageProvider } from "./contexts/LanguageContext";
 
@@ -60,6 +61,7 @@ function Router() {
       <Route path={"/"} component={MenuInicial} />
       <Route path={"/menu"} component={MenuInicial} />
       <Route path={"/dashboard"} component={Dashboard} />
+      <Route path={"/dashboard-volante"} component={DashboardVolante} />
       <Route path={"/assistente-ia"} component={AssistenteIA} />
       
       {/* Admin routes */}

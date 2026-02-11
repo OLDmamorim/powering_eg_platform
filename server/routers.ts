@@ -9947,6 +9947,264 @@ IMPORTANTE:
         };
       }),
   }),
+  
+  // ==================== DASHBOARD VOLANTE ====================
+  dashboardVolante: router({
+    // Estatísticas avançadas com filtros temporais
+    estatisticasAvancadas: protectedProcedure
+      .input(z.object({
+        dataInicio: z.string().optional(), // ISO date
+        dataFim: z.string().optional(), // ISO date
+        gestorId: z.number().optional(), // Para admin filtrar por gestor
+      }))
+      .query(async ({ ctx, input }) => {
+        const isAdmin = ctx.user.role === 'admin';
+        const isGestor = ctx.user.role === 'gestor';
+        
+        if (!isAdmin && !isGestor) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Acesso negado' });
+        }
+        
+        // Se é gestor, buscar suas lojas
+        let lojasIds: number[] = [];
+        if (isGestor) {
+          const gestor = await db.getGestorByUserId(ctx.user.id);
+          if (gestor) {
+            const lojas = await db.getLojasByGestorId(gestor.id);
+            lojasIds = lojas.map(l => l.id);
+          }
+        }
+        
+        // Definir período padrão (últimos 30 dias)
+        const dataFim = input.dataFim ? new Date(input.dataFim) : new Date();
+        const dataInicio = input.dataInicio ? new Date(input.dataInicio) : new Date(dataFim.getTime() - 30 * 24 * 60 * 60 * 1000);
+        
+        // Buscar todos os relatórios do período
+        const relatoriosLivres = await db.getAllRelatoriosLivres();
+        const relatoriosCompletos = await db.getAllRelatoriosCompletos();
+        const pendentes = await db.getAllPendentes();
+        
+        // Filtrar por data e lojas (se gestor)
+        const relLivresFiltrados = relatoriosLivres.filter(r => {
+          const data = new Date(r.createdAt);
+          const dentroData = data >= dataInicio && data <= dataFim;
+          const dentrLojas = isAdmin || lojasIds.includes(r.lojaId);
+          return dentroData && dentrLojas;
+        });
+        
+        const relCompletosFiltrados = relatoriosCompletos.filter(r => {
+          const data = new Date(r.createdAt);
+          const dentroData = data >= dataInicio && data <= dataFim;
+          const dentrLojas = isAdmin || lojasIds.includes(r.lojaId);
+          return dentroData && dentrLojas;
+        });
+        
+        const pendentesFiltrados = pendentes.filter(p => {
+          const data = new Date(p.createdAt);
+          const dentroData = data >= dataInicio && data <= dataFim;
+          const dentrLojas = isAdmin || lojasIds.includes(p.lojaId);
+          return dentroData && dentrLojas;
+        });
+        
+        // Calcular estatísticas
+        const totalVisitas = relLivresFiltrados.length + relCompletosFiltrados.length;
+        const totalPendentes = pendentesFiltrados.length;
+        const pendentesResolvidos = pendentesFiltrados.filter(p => p.resolvido).length;
+        const pendentesPendentes = totalPendentes - pendentesResolvidos;
+        const taxaResolucao = totalPendentes > 0 ? (pendentesResolvidos / totalPendentes) * 100 : 0;
+        
+        // Agrupar visitas por loja
+        const visitasPorLoja: Record<number, { lojaId: number; lojaNome: string; visitas: number }> = {};
+        for (const rel of relLivresFiltrados) {
+          if (!visitasPorLoja[rel.lojaId]) {
+            const loja = await db.getLojaById(rel.lojaId);
+            visitasPorLoja[rel.lojaId] = { lojaId: rel.lojaId, lojaNome: loja?.nome || 'Desconhecida', visitas: 0 };
+          }
+          visitasPorLoja[rel.lojaId].visitas++;
+        }
+        for (const rel of relCompletosFiltrados) {
+          if (!visitasPorLoja[rel.lojaId]) {
+            const loja = await db.getLojaById(rel.lojaId);
+            visitasPorLoja[rel.lojaId] = { lojaId: rel.lojaId, lojaNome: loja?.nome || 'Desconhecida', visitas: 0 };
+          }
+          visitasPorLoja[rel.lojaId].visitas++;
+        }
+        
+        // Agrupar pendentes por loja
+        const pendentesPorLoja: Record<number, { lojaId: number; lojaNome: string; pendentes: number; resolvidos: number }> = {};
+        for (const pend of pendentesFiltrados) {
+          if (!pendentesPorLoja[pend.lojaId]) {
+            const loja = await db.getLojaById(pend.lojaId);
+            pendentesPorLoja[pend.lojaId] = { lojaId: pend.lojaId, lojaNome: loja?.nome || 'Desconhecida', pendentes: 0, resolvidos: 0 };
+          }
+          pendentesPorLoja[pend.lojaId].pendentes++;
+          if (pend.resolvido) pendentesPorLoja[pend.lojaId].resolvidos++;
+        }
+        
+        // Top 5 lojas mais visitadas
+        const topLojasVisitadas = Object.values(visitasPorLoja)
+          .sort((a, b) => b.visitas - a.visitas)
+          .slice(0, 5);
+        
+        // Top 5 lojas com mais pendentes
+        const topLojasPendentes = Object.values(pendentesPorLoja)
+          .sort((a, b) => (b.pendentes - b.resolvidos) - (a.pendentes - a.resolvidos))
+          .slice(0, 5)
+          .map(l => ({ ...l, pendentesPendentes: l.pendentes - l.resolvidos }));
+        
+        // Evolução temporal (por semana)
+        const semanas: Record<string, { semana: string; visitas: number; pendentes: number }> = {};
+        const getWeekKey = (date: Date) => {
+          const year = date.getFullYear();
+          const week = Math.ceil((date.getDate() + new Date(year, date.getMonth(), 1).getDay()) / 7);
+          return `${year}-${String(date.getMonth() + 1).padStart(2, '0')}-S${week}`;
+        };
+        
+        for (const rel of [...relLivresFiltrados, ...relCompletosFiltrados]) {
+          const key = getWeekKey(new Date(rel.createdAt));
+          if (!semanas[key]) semanas[key] = { semana: key, visitas: 0, pendentes: 0 };
+          semanas[key].visitas++;
+        }
+        
+        for (const pend of pendentesFiltrados) {
+          const key = getWeekKey(new Date(pend.createdAt));
+          if (!semanas[key]) semanas[key] = { semana: key, visitas: 0, pendentes: 0 };
+          semanas[key].pendentes++;
+        }
+        
+        const evolucaoTemporal = Object.values(semanas).sort((a, b) => a.semana.localeCompare(b.semana));
+        
+        // Distribuição de tipos de relatórios
+        const tiposRelatorios = {
+          livres: relLivresFiltrados.length,
+          completos: relCompletosFiltrados.length,
+        };
+        
+        return {
+          periodo: { dataInicio: dataInicio.toISOString(), dataFim: dataFim.toISOString() },
+          resumo: {
+            totalVisitas,
+            totalPendentes,
+            pendentesResolvidos,
+            pendentesPendentes,
+            taxaResolucao: Math.round(taxaResolucao * 10) / 10,
+          },
+          rankings: {
+            topLojasVisitadas,
+            topLojasPendentes,
+          },
+          graficos: {
+            evolucaoTemporal,
+            tiposRelatorios,
+            visitasPorLoja: Object.values(visitasPorLoja),
+            pendentesPorLoja: Object.values(pendentesPorLoja),
+          },
+        };
+      }),
+    
+    // Exportar dashboard para PDF
+    exportarPDF: protectedProcedure
+      .input(z.object({
+        dataInicio: z.string().optional(),
+        dataFim: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const isAdmin = ctx.user.role === 'admin';
+        const isGestor = ctx.user.role === 'gestor';
+        
+        if (!isAdmin && !isGestor) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Acesso negado' });
+        }
+        
+        // Buscar estatísticas (reutilizar lógica)
+        let lojasIds: number[] = [];
+        if (isGestor) {
+          const gestor = await db.getGestorByUserId(ctx.user.id);
+          if (gestor) {
+            const lojas = await db.getLojasByGestorId(gestor.id);
+            lojasIds = lojas.map(l => l.id);
+          }
+        }
+        
+        const dataFim = input.dataFim ? new Date(input.dataFim) : new Date();
+        const dataInicio = input.dataInicio ? new Date(input.dataInicio) : new Date(dataFim.getTime() - 30 * 24 * 60 * 60 * 1000);
+        
+        const relatoriosLivres = await db.getAllRelatoriosLivres();
+        const relatoriosCompletos = await db.getAllRelatoriosCompletos();
+        const pendentes = await db.getAllPendentes();
+        
+        const relLivresFiltrados = relatoriosLivres.filter(r => {
+          const data = new Date(r.createdAt);
+          return data >= dataInicio && data <= dataFim && (isAdmin || lojasIds.includes(r.lojaId));
+        });
+        
+        const relCompletosFiltrados = relatoriosCompletos.filter(r => {
+          const data = new Date(r.createdAt);
+          return data >= dataInicio && data <= dataFim && (isAdmin || lojasIds.includes(r.lojaId));
+        });
+        
+        const pendentesFiltrados = pendentes.filter(p => {
+          const data = new Date(p.createdAt);
+          return data >= dataInicio && data <= dataFim && (isAdmin || lojasIds.includes(p.lojaId));
+        });
+        
+        const totalVisitas = relLivresFiltrados.length + relCompletosFiltrados.length;
+        const totalPendentes = pendentesFiltrados.length;
+        const pendentesResolvidos = pendentesFiltrados.filter(p => p.resolvido).length;
+        const pendentesPendentes = totalPendentes - pendentesResolvidos;
+        const taxaResolucao = totalPendentes > 0 ? (pendentesResolvidos / totalPendentes) * 100 : 0;
+        
+        const visitasPorLoja: Record<number, { lojaId: number; lojaNome: string; visitas: number }> = {};
+        for (const rel of [...relLivresFiltrados, ...relCompletosFiltrados]) {
+          if (!visitasPorLoja[rel.lojaId]) {
+            const loja = await db.getLojaById(rel.lojaId);
+            visitasPorLoja[rel.lojaId] = { lojaId: rel.lojaId, lojaNome: loja?.nome || 'Desconhecida', visitas: 0 };
+          }
+          visitasPorLoja[rel.lojaId].visitas++;
+        }
+        
+        const pendentesPorLoja: Record<number, { lojaId: number; lojaNome: string; pendentes: number; resolvidos: number }> = {};
+        for (const pend of pendentesFiltrados) {
+          if (!pendentesPorLoja[pend.lojaId]) {
+            const loja = await db.getLojaById(pend.lojaId);
+            pendentesPorLoja[pend.lojaId] = { lojaId: pend.lojaId, lojaNome: loja?.nome || 'Desconhecida', pendentes: 0, resolvidos: 0 };
+          }
+          pendentesPorLoja[pend.lojaId].pendentes++;
+          if (pend.resolvido) pendentesPorLoja[pend.lojaId].resolvidos++;
+        }
+        
+        const topLojasVisitadas = Object.values(visitasPorLoja)
+          .sort((a, b) => b.visitas - a.visitas)
+          .slice(0, 5);
+        
+        const topLojasPendentes = Object.values(pendentesPorLoja)
+          .sort((a, b) => (b.pendentes - b.resolvidos) - (a.pendentes - a.resolvidos))
+          .slice(0, 5)
+          .map(l => ({ ...l, pendentesPendentes: l.pendentes - l.resolvidos }));
+        
+        // Gerar PDF
+        const { gerarPDFDashboardVolante } = await import('./pdfDashboardVolante');
+        const pdfBuffer = await gerarPDFDashboardVolante({
+          periodo: { dataInicio: dataInicio.toISOString(), dataFim: dataFim.toISOString() },
+          resumo: {
+            totalVisitas,
+            totalPendentes,
+            pendentesResolvidos,
+            pendentesPendentes,
+            taxaResolucao: Math.round(taxaResolucao * 10) / 10,
+          },
+          rankings: {
+            topLojasVisitadas,
+            topLojasPendentes,
+          },
+        });
+        
+        return {
+          pdf: pdfBuffer.toString('base64'),
+          filename: `dashboard_volante_${dataInicio.toISOString().split('T')[0]}_${dataFim.toISOString().split('T')[0]}.pdf`,
+        };
+      }),
+  }),
 });
 
 // Função auxiliar para gerar HTML do email de reunião quinzenal

@@ -4483,3 +4483,15 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Remover completamente "Indicar se houve contacto com cliente nos ultimos dias"
 - [x] Remover completamente "Registar evolucao ou bloqueios encontrados"
 - [x] Testar PDF gerado
+
+## v6.12.0 - Melhorias no Dashboard do Volante
+- [x] Adicionar filtros temporais (última semana, mês, trimestre, ano, personalizado)
+- [x] Criar gráfico de evolução de visitas ao longo do tempo (linha)
+- [x] Criar gráfico de distribuição de pendentes por loja (barras)
+- [x] Criar gráfico de tipos de relatórios (pizza)
+- [x] Implementar ranking de lojas mais visitadas
+- [x] Implementar ranking de lojas com mais pendentes
+- [x] Adicionar métricas de performance (média de visitas/mês, taxa de resolução)
+- [x] Criar cards com estatísticas comparativas (vs período anterior)
+- [x] Implementar exportação do dashboard para PDF
+- [x] Testar todas as funcionalidades
