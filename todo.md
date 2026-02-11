@@ -4538,3 +4538,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Reescrever pdfPortalVolanteDashboard.ts sem gráficos renderizados
 - [x] Usar apenas tabelas e estatísticas formatadas (como outros relatórios)
 - [x] Testar deployment sem erros de canvas
+
+## v6.13.6 - Corrigir PDF Dashboard Volante Definitivamente
+- [x] Remover páginas 2 e 3 vazias (manter apenas 1 página)
+- [x] Corrigir caracteres estranhos nas medalhas (Ø>YG, Ø>YH, Ø>YI)
+- [x] Adicionar logo ExpressGlass no topo
+- [x] Garantir que todo o conteúdo cabe numa única página
+- [x] Testar PDF gerado
