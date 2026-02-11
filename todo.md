@@ -4526,3 +4526,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Melhorar formatação de tabelas e rankings
 - [x] Garantir que todo o conteúdo cabe numa única página bem estruturada
 - [x] Testar geração do PDF
+
+## v6.13.4 - Corrigir Erro Exportação PDF Dashboard Volante
+- [x] Investigar logs do servidor para identificar erro
+- [x] Verificar se chartjs-node-canvas está a funcionar corretamente
+- [x] Corrigir problema de geração do PDF
+- [x] Testar exportação completa
