@@ -1,5 +1,4 @@
 import PDFDocument from 'pdfkit';
-import { ChartJSNodeCanvas } from 'chartjs-node-canvas';
 
 interface DashboardData {
   volanteNome: string;
@@ -13,7 +12,7 @@ interface DashboardData {
 }
 
 export async function gerarPDFPortalVolanteDashboard(data: DashboardData): Promise<Buffer> {
-  return new Promise(async (resolve, reject) => {
+  return new Promise((resolve, reject) => {
     try {
       const doc = new PDFDocument({ size: 'A4', margin: 50 });
       const chunks: Buffer[] = [];
@@ -103,84 +102,58 @@ export async function gerarPDFPortalVolanteDashboard(data: DashboardData): Promi
            .text(card.value.toString(), card.x + 10, yPos + 28, { width: cardWidth - 20, align: 'center' });
       }
 
-      yPos += cardHeight + 25;
+      yPos += cardHeight + 30;
 
-      // ===== GRÁFICOS =====
-      const chartWidth = 220;
-      const chartHeight = 180;
+      // ===== DISTRIBUIÇÃO POR TIPO =====
+      doc.fontSize(14)
+         .font('Helvetica-Bold')
+         .fillColor('#333333')
+         .text('Distribuição por Tipo de Apoio', leftMargin, yPos);
 
-      // Gráfico de pizza
-      const chartJSNodeCanvas = new ChartJSNodeCanvas({ width: chartWidth, height: chartHeight, backgroundColour: 'white' });
-      
-      const total = data.coberturaFerias + data.substituicoes + data.outro;
-      
-      const pieChartConfig = {
-        type: 'doughnut' as const,
-        data: {
-          labels: ['Cobertura Férias', 'Substituição Vidros', 'Outro'],
-          datasets: [{
-            data: [data.coberturaFerias, data.substituicoes, data.outro],
-            backgroundColor: ['#10B981', '#F59E0B', '#6B7280'],
-            borderWidth: 0
-          }]
-        },
-        options: {
-          responsive: false,
-          plugins: {
-            legend: {
-              position: 'bottom' as const,
-              labels: { font: { size: 10 }, padding: 8 }
-            },
-            title: {
-              display: true,
-              text: 'Tipos de Apoio',
-              font: { size: 12, weight: 'bold' as const }
-            }
-          }
-        }
-      };
+      yPos += 20;
 
-      const pieChartBuffer = await chartJSNodeCanvas.renderToBuffer(pieChartConfig as any);
+      const total = data.totalApoios || 1;
+      const tipos = [
+        { nome: 'Cobertura Férias', valor: data.coberturaFerias, cor: '#10B981' },
+        { nome: 'Substituição Vidros', valor: data.substituicoes, cor: '#F59E0B' },
+        { nome: 'Outro', valor: data.outro, cor: '#6B7280' }
+      ];
 
-      // Gráfico de barras
-      const barChartConfig = {
-        type: 'bar' as const,
-        data: {
-          labels: data.rankingLojas.slice(0, 5).map(r => r.nome.length > 12 ? r.nome.substring(0, 12) + '...' : r.nome),
-          datasets: [{
-            label: 'Apoios',
-            data: data.rankingLojas.slice(0, 5).map(r => r.count),
-            backgroundColor: '#3B82F6',
-            borderWidth: 0
-          }]
-        },
-        options: {
-          responsive: false,
-          indexAxis: 'y' as const,
-          plugins: {
-            legend: { display: false },
-            title: {
-              display: true,
-              text: 'Top 5 Lojas',
-              font: { size: 12, weight: 'bold' as const }
-            }
-          },
-          scales: {
-            x: { beginAtZero: true, ticks: { stepSize: 1 } }
-          }
-        }
-      };
+      tipos.forEach(tipo => {
+        const percentage = ((tipo.valor / total) * 100).toFixed(1);
+        doc.fontSize(10)
+           .fillColor(tipo.cor)
+           .font('Helvetica-Bold')
+           .text('• ', leftMargin + 10, yPos, { continued: true })
+           .fillColor('#333333')
+           .font('Helvetica')
+           .text(`${tipo.nome}: ${tipo.valor} (${percentage}%)`);
+        yPos += 20;
+      });
 
-      const barChartBuffer = await chartJSNodeCanvas.renderToBuffer(barChartConfig as any);
+      yPos += 15;
 
-      // Posicionar gráficos
-      const pieX = leftMargin + 20;
-      const barX = leftMargin + pageWidth - chartWidth - 20;
+      // ===== TOP 5 LOJAS =====
+      doc.fontSize(14)
+         .font('Helvetica-Bold')
+         .fillColor('#333333')
+         .text('Top 5 Lojas Mais Apoiadas', leftMargin, yPos);
 
-      doc.image(pieChartBuffer, pieX, yPos, { width: chartWidth, height: chartHeight });
-      doc.image(barChartBuffer, barX, yPos, { width: chartWidth, height: chartHeight });
+      yPos += 20;
 
-      yPos += chartHeight + 25;
+      const top5 = data.rankingLojas.slice(0, 5);
+      top5.forEach((loja, index) => {
+        const medal = index < 3 ? ['🥇', '🥈', '🥉'][index] : `${index + 1}.`;
+        doc.fontSize(10)
+           .fillColor('#333333')
+           .font('Helvetica')
+           .text(`${medal} ${loja.nome}`, leftMargin + 10, yPos, { continued: true })
+           .font('Helvetica-Bold')
+           .text(` - ${loja.count} apoios`);
+        yPos += 20;
+      });
+
+      yPos += 15;
 
       // ===== RANKING COMPLETO =====
       doc.fontSize(14)

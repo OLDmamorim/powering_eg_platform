@@ -4532,3 +4532,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Verificar se chartjs-node-canvas está a funcionar corretamente
 - [x] Corrigir problema de geração do PDF
 - [x] Testar exportação completa
+
+## v6.13.5 - Remover chartjs-node-canvas e Simplificar PDF Dashboard
+- [x] Remover chartjs-node-canvas do package.json
+- [x] Reescrever pdfPortalVolanteDashboard.ts sem gráficos renderizados
+- [x] Usar apenas tabelas e estatísticas formatadas (como outros relatórios)
+- [x] Testar deployment sem erros de canvas
