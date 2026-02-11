@@ -9182,6 +9182,77 @@ IMPORTANTE:
         );
         return resultado;
       }),
+    
+    // Exportar Dashboard para PDF
+    exportarDashboardPDF: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        meses: z.array(z.object({ mes: z.number(), ano: z.number() })),
+      }))
+      .mutation(async ({ input }) => {
+        const tokenData = await db.validateTokenVolante(input.token);
+        if (!tokenData) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        
+        // Buscar todos os pedidos aprovados do volante
+        const pedidos = await db.getPedidosApoioByVolanteId(tokenData.volante.id);
+        const pedidosAprovados = pedidos.filter(p => p.estado === 'aprovado');
+        
+        // Filtrar por meses selecionados
+        const pedidosFiltrados = pedidosAprovados.filter(p => {
+          const data = new Date(p.data);
+          return input.meses.some(m => 
+            data.getMonth() + 1 === m.mes && data.getFullYear() === m.ano
+          );
+        });
+        
+        // Calcular estatísticas
+        const totalApoios = pedidosFiltrados.length;
+        const lojasApoiadas = new Set(pedidosFiltrados.map(p => p.lojaId)).size;
+        const coberturaFerias = pedidosFiltrados.filter(p => p.tipoApoio === 'cobertura_ferias').length;
+        const substituicoes = pedidosFiltrados.filter(p => p.tipoApoio === 'substituicao_vidros').length;
+        const outro = pedidosFiltrados.filter(p => p.tipoApoio === 'outro').length;
+        
+        // Agrupar por loja para ranking
+        const apoiosPorLoja: Record<number, { nome: string; count: number }> = {};
+        for (const pedido of pedidosFiltrados) {
+          if (!apoiosPorLoja[pedido.lojaId]) {
+            const loja = await db.getLojaById(pedido.lojaId);
+            apoiosPorLoja[pedido.lojaId] = { nome: loja?.nome || 'Loja', count: 0 };
+          }
+          apoiosPorLoja[pedido.lojaId].count++;
+        }
+        
+        const rankingLojas = Object.values(apoiosPorLoja)
+          .sort((a, b) => b.count - a.count);
+        
+        // Formatar período
+        const mesesOrdenados = [...input.meses].sort((a, b) => 
+          a.ano !== b.ano ? a.ano - b.ano : a.mes - b.mes
+        );
+        const periodoTexto = mesesOrdenados.length === 1
+          ? `${mesesOrdenados[0].mes}/${mesesOrdenados[0].ano}`
+          : `${mesesOrdenados[0].mes}/${mesesOrdenados[0].ano} - ${mesesOrdenados[mesesOrdenados.length - 1].mes}/${mesesOrdenados[mesesOrdenados.length - 1].ano}`;
+        
+        // Gerar PDF
+        const { gerarPDFPortalVolanteDashboard } = await import('./pdfPortalVolanteDashboard');
+        const pdfBuffer = await gerarPDFPortalVolanteDashboard({
+          volanteNome: tokenData.volante.nome,
+          periodo: periodoTexto,
+          totalApoios,
+          lojasApoiadas,
+          coberturaFerias,
+          substituicoes,
+          outro,
+          rankingLojas,
+        });
+        
+        return {
+          pdf: pdfBuffer.toString('base64'),
+          filename: `dashboard_volante_${tokenData.volante.nome.replace(/\s+/g, '_')}_${periodoTexto.replace(/\//g, '-')}.pdf`,
+        };
+      }),
   }),
   
   // ==================== ANÁLISE DE FICHAS DE SERVIÇO ====================

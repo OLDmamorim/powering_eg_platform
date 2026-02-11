@@ -4491,7 +4491,7 @@ function VolanteInterface({
   t: (key: string) => string;
 }) {
   const { theme, toggleTheme } = useTheme();
-  const [activeView, setActiveView] = useState<"menu" | "agenda" | "resultados" | "historico" | "configuracoes">("menu");
+  const [activeView, setActiveView] = useState<"menu" | "agenda" | "resultados" | "historico" | "dashboard" | "configuracoes">("menu");
   const [activeTab, setActiveTab] = useState<"agenda" | "resultados">("agenda");
   const [mesSelecionado, setMesSelecionado] = useState(() => {
     const hoje = new Date();
@@ -4572,6 +4572,32 @@ function VolanteInterface({
     { token },
     { enabled: !!token && activeView === "configuracoes" }
   );
+  
+  // Mutation para exportar dashboard para PDF
+  const exportarDashboardPDFMutation = trpc.portalVolante.exportarDashboardPDF.useMutation({
+    onSuccess: (data) => {
+      const byteCharacters = atob(data.pdf);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = data.filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      toast.success(language === 'pt' ? 'PDF exportado com sucesso!' : 'PDF exported successfully!');
+    },
+    onError: (error) => {
+      console.error('Erro ao exportar PDF:', error);
+      toast.error(language === 'pt' ? 'Erro ao exportar PDF' : 'Error exporting PDF');
+    },
+  });
 
   // Atualizar estados quando telegramConfig mudar
   useEffect(() => {
@@ -5038,6 +5064,24 @@ END:VCALENDAR`;
               </div>
             </Card>
 
+            {/* Card Dashboard */}
+            <Card 
+              className="p-8 cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-105 bg-white dark:bg-gray-800 border-2 border-transparent hover:border-purple-400 group"
+              onClick={() => setActiveView("dashboard")}
+            >
+              <div className="text-center">
+                <div className="w-24 h-24 bg-purple-100 dark:bg-purple-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-purple-200 dark:group-hover:bg-purple-900/50 transition-colors">
+                  <BarChart3 className="h-12 w-12 text-purple-600" />
+                </div>
+                <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">
+                  {language === 'pt' ? 'Dashboard' : 'Dashboard'}
+                </h2>
+                <p className="text-gray-500 dark:text-gray-400 text-sm">
+                  {language === 'pt' ? 'Estatísticas e gráficos de atividade' : 'Activity statistics and charts'}
+                </p>
+              </div>
+            </Card>
+
             {/* Card Configurações */}
             <Card 
               className="p-8 cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-105 bg-white dark:bg-gray-800 border-2 border-transparent hover:border-gray-400 group"
@@ -5091,9 +5135,11 @@ END:VCALENDAR`;
                     ? (language === 'pt' ? 'Calendário de Apoios' : 'Support Calendar')
                     : activeView === "historico"
                       ? (language === 'pt' ? 'Histórico de Apoios' : 'Support History')
-                      : activeView === "configuracoes"
-                        ? (language === 'pt' ? 'Configurações' : 'Settings')
-                        : (language === 'pt' ? 'Resultados das Lojas' : 'Store Results')}
+                      : activeView === "dashboard"
+                        ? (language === 'pt' ? 'Dashboard de Estatísticas' : 'Statistics Dashboard')
+                        : activeView === "configuracoes"
+                          ? (language === 'pt' ? 'Configurações' : 'Settings')
+                          : (language === 'pt' ? 'Resultados das Lojas' : 'Store Results')}
                 </p>
               </div>
             </div>
@@ -6100,6 +6146,246 @@ END:VCALENDAR`;
                 </div>
               );
             })()}
+          </div>
+        )}
+
+        {/* Vista Dashboard */}
+        {activeView === "dashboard" && (
+          <div className="container mx-auto px-4 py-6 space-y-6">
+            {/* Filtros e Botão Exportar */}
+            <Card>
+              <CardContent className="py-4">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                    <h3 className="font-medium dark:text-gray-100">{language === 'pt' ? 'Período' : 'Period'}</h3>
+                    <FiltroMesesCheckbox
+                      mesesSelecionados={mesesSelecionadosVolante}
+                      onMesesChange={setMesesSelecionadosVolante}
+                    />
+                  </div>
+                  <Button
+                    onClick={() => {
+                      if (mesesSelecionadosVolante.length === 0) {
+                        toast.error(language === 'pt' ? 'Selecione pelo menos um mês' : 'Select at least one month');
+                        return;
+                      }
+                      exportarDashboardPDFMutation.mutate({ token, meses: mesesSelecionadosVolante });
+                    }}
+                    disabled={exportarDashboardPDFMutation.isPending}
+                    className="bg-purple-600 hover:bg-purple-700"
+                  >
+                    {exportarDashboardPDFMutation.isPending ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    ) : (
+                      <Download className="h-4 w-4 mr-2" />
+                    )}
+                    {language === 'pt' ? 'Exportar PDF' : 'Export PDF'}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Cards de Estatísticas */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <Card className="bg-gradient-to-br from-purple-500 to-purple-600 text-white border-0">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm opacity-80 mb-1">{language === 'pt' ? 'Total Apoios' : 'Total Support'}</p>
+                      <p className="text-3xl font-bold">{pedidosAprovados.length}</p>
+                    </div>
+                    <CheckCircle2 className="h-10 w-10 opacity-60" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white border-0">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm opacity-80 mb-1">{language === 'pt' ? 'Lojas Apoiadas' : 'Stores Supported'}</p>
+                      <p className="text-3xl font-bold">{new Set(pedidosAprovados.map((p: any) => p.lojaId)).size}</p>
+                    </div>
+                    <Store className="h-10 w-10 opacity-60" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gradient-to-br from-teal-500 to-teal-600 text-white border-0">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm opacity-80 mb-1">{language === 'pt' ? 'Coberturas Férias' : 'Holiday Coverage'}</p>
+                      <p className="text-3xl font-bold">{pedidosAprovados.filter((p: any) => p.tipoApoio === 'cobertura_ferias').length}</p>
+                    </div>
+                    <Calendar className="h-10 w-10 opacity-60" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gradient-to-br from-orange-500 to-orange-600 text-white border-0">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm opacity-80 mb-1">{language === 'pt' ? 'Substituições' : 'Replacements'}</p>
+                      <p className="text-3xl font-bold">{pedidosAprovados.filter((p: any) => p.tipoApoio === 'substituicao_vidros').length}</p>
+                    </div>
+                    <Wrench className="h-10 w-10 opacity-60" />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Gráficos */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Gráfico de Tipos de Apoio */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <BarChart3 className="h-5 w-5 text-purple-600" />
+                    {language === 'pt' ? 'Tipos de Apoio' : 'Support Types'}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-64">
+                    <Doughnut
+                      data={{
+                        labels: [
+                          language === 'pt' ? 'Cobertura Férias' : 'Holiday Coverage',
+                          language === 'pt' ? 'Substituição Vidros' : 'Glass Replacement',
+                          language === 'pt' ? 'Outro' : 'Other'
+                        ],
+                        datasets: [{
+                          data: [
+                            pedidosAprovados.filter((p: any) => p.tipoApoio === 'cobertura_ferias').length,
+                            pedidosAprovados.filter((p: any) => p.tipoApoio === 'substituicao_vidros').length,
+                            pedidosAprovados.filter((p: any) => p.tipoApoio === 'outro').length,
+                          ],
+                          backgroundColor: ['#14b8a6', '#3b82f6', '#f97316'],
+                          borderWidth: 0,
+                        }]
+                      }}
+                      options={{
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                          legend: {
+                            position: 'bottom',
+                          },
+                        },
+                      }}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Gráfico de Lojas Mais Apoiadas */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5 text-blue-600" />
+                    {language === 'pt' ? 'Top 5 Lojas Mais Apoiadas' : 'Top 5 Most Supported Stores'}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-64">
+                    <Bar
+                      data={{
+                        labels: Object.values(
+                          pedidosAprovados.reduce((acc: any, p: any) => {
+                            const lojaId = p.lojaId;
+                            if (!acc[lojaId]) {
+                              acc[lojaId] = { nome: p.loja?.nome || 'Loja', count: 0 };
+                            }
+                            acc[lojaId].count++;
+                            return acc;
+                          }, {})
+                        )
+                          .sort((a: any, b: any) => b.count - a.count)
+                          .slice(0, 5)
+                          .map((l: any) => l.nome),
+                        datasets: [{
+                          label: language === 'pt' ? 'Apoios' : 'Support',
+                          data: Object.values(
+                            pedidosAprovados.reduce((acc: any, p: any) => {
+                              const lojaId = p.lojaId;
+                              if (!acc[lojaId]) {
+                                acc[lojaId] = { nome: p.loja?.nome || 'Loja', count: 0 };
+                              }
+                              acc[lojaId].count++;
+                              return acc;
+                            }, {})
+                          )
+                            .sort((a: any, b: any) => b.count - a.count)
+                            .slice(0, 5)
+                            .map((l: any) => l.count),
+                          backgroundColor: '#8b5cf6',
+                        }]
+                      }}
+                      options={{
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                          legend: {
+                            display: false,
+                          },
+                        },
+                        scales: {
+                          y: {
+                            beginAtZero: true,
+                            ticks: {
+                              stepSize: 1,
+                            },
+                          },
+                        },
+                      }}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Ranking de Lojas */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Award className="h-5 w-5 text-yellow-600" />
+                  {language === 'pt' ? 'Ranking de Lojas' : 'Store Ranking'}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {Object.values(
+                    pedidosAprovados.reduce((acc: any, p: any) => {
+                      const lojaId = p.lojaId;
+                      if (!acc[lojaId]) {
+                        acc[lojaId] = { nome: p.loja?.nome || 'Loja', count: 0 };
+                      }
+                      acc[lojaId].count++;
+                      return acc;
+                    }, {})
+                  )
+                    .sort((a: any, b: any) => b.count - a.count)
+                    .slice(0, 10)
+                    .map((loja: any, index: number) => (
+                      <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
+                            index === 0 ? 'bg-yellow-100 text-yellow-800' :
+                            index === 1 ? 'bg-gray-200 text-gray-700' :
+                            index === 2 ? 'bg-orange-100 text-orange-700' :
+                            'bg-gray-100 text-gray-600'
+                          }`}>
+                            {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : index + 1}
+                          </div>
+                          <p className="font-medium">{loja.nome}</p>
+                        </div>
+                        <Badge variant="outline">{loja.count} {language === 'pt' ? 'apoios' : 'support'}</Badge>
+                      </div>
+                    ))}
+                </div>
+              </CardContent>
+            </Card>
           </div>
         )}
 

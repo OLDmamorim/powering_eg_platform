@@ -4495,3 +4495,13 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Criar cards com estatísticas comparativas (vs período anterior)
 - [x] Implementar exportação do dashboard para PDF
 - [x] Testar todas as funcionalidades
+
+## v6.13.0 - Dashboard de Estatísticas no Portal do Volante
+- [x] Remover dashboard volante criado erradamente no menu principal
+- [x] Adicionar nova opção "Dashboard" no portal do volante (como Calendário, Resultados, Histórico)
+- [x] Criar componente de dashboard com estatísticas de apoios realizados
+- [x] Adicionar gráficos de atividade (apoios por loja, evolução temporal)
+- [x] Implementar ranking de lojas mais apoiadas
+- [x] Adicionar filtros temporais
+- [x] Implementar exportação para PDF
+- [x] Testar no portal do volante
