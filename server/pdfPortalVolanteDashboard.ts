@@ -1,4 +1,5 @@
 import PDFDocument from 'pdfkit';
+import { ChartJSNodeCanvas } from 'chartjs-node-canvas';
 
 interface DashboardData {
   volanteNome: string;
@@ -13,179 +14,230 @@ interface DashboardData {
 
 export async function gerarPDFPortalVolanteDashboard(data: DashboardData): Promise<Buffer> {
   return new Promise(async (resolve, reject) => {
-    const doc = new PDFDocument({ size: 'A4', margin: 50 });
-    const chunks: Buffer[] = [];
+    try {
+      const doc = new PDFDocument({ size: 'A4', margin: 50 });
+      const chunks: Buffer[] = [];
 
-    doc.on('data', (chunk) => chunks.push(chunk));
-    doc.on('end', () => resolve(Buffer.concat(chunks)));
-    doc.on('error', reject);
+      doc.on('data', (chunk) => chunks.push(chunk));
+      doc.on('end', () => resolve(Buffer.concat(chunks)));
+      doc.on('error', reject);
 
-    // Cores padrão ExpressGlass
-    const primaryColor = '#1a365d'; // azul ExpressGlass
-    const purpleColor = '#8b5cf6';
-    const blueColor = '#3b82f6';
-    const tealColor = '#14b8a6';
-    const orangeColor = '#f97316';
-    const grayColor = '#666666';
-    
-    const leftMargin = 50;
-    const pageWidth = doc.page.width - 100;
+      const primaryColor = '#0066CC';
+      const leftMargin = 50;
+      const pageWidth = doc.page.width - 100;
 
-    // ============================================
-    // CABEÇALHO COM LOGO
-    // ============================================
-    const path = await import('path');
-    const fs = await import('fs');
-    const logoPath = path.join(process.cwd(), 'server', 'assets', 'eglass-logo.png');
-    if (fs.existsSync(logoPath)) {
-      doc.image(logoPath, leftMargin, 35, { width: 150 });
-    } else {
-      // Fallback para texto se imagem não existir
-      doc.fontSize(22)
+      // Logo ExpressGlass
+      try {
+        doc.image('/home/ubuntu/powering_eg_platform/server/assets/expressglass-logo.png', leftMargin, 35, { width: 150 });
+      } catch (e) {
+        console.warn('Logo não encontrado');
+      }
+
+      // Título
+      doc.fontSize(20)
          .font('Helvetica-Bold')
-         .fillColor('#e53935')
-         .text('EXPRESS', leftMargin, 40, { continued: true })
-         .fillColor('#1a365d')
+         .fillColor(primaryColor)
+         .text('Dashboard do Volante', leftMargin, 75, { align: 'center', width: pageWidth });
+
+      doc.fontSize(11)
          .font('Helvetica')
-         .text('GLASS');
-    }
-    
-    doc.y = 70;
-    
-    // Título do relatório
-    doc.fontSize(18)
-       .font('Helvetica-Bold')
-       .fillColor(primaryColor)
-       .text('Dashboard do Volante', leftMargin, doc.y, { align: 'center', width: pageWidth });
-    
-    doc.fontSize(11)
-       .font('Helvetica')
-       .fillColor(grayColor)
-       .text(data.volanteNome, leftMargin, doc.y + 5, { align: 'center', width: pageWidth });
-    
-    doc.fontSize(10)
-       .fillColor(grayColor)
-       .text(`Período: ${data.periodo}`, leftMargin, doc.y + 5, { align: 'center', width: pageWidth });
-    
-    doc.moveDown(1.5);
-    
-    // Linha separadora
-    doc.strokeColor(primaryColor)
-       .lineWidth(2)
-       .moveTo(leftMargin, doc.y)
-       .lineTo(leftMargin + pageWidth, doc.y)
-       .stroke();
-    
-    doc.moveDown(1);
-
-    // ============================================
-    // RESUMO DE ATIVIDADE
-    // ============================================
-    doc.fontSize(14)
-       .font('Helvetica-Bold')
-       .fillColor(primaryColor)
-       .text('Resumo de Atividade', leftMargin);
-    
-    doc.moveDown(0.5);
-
-    const resumoY = doc.y;
-    const boxWidth = 115;
-    const boxHeight = 75;
-    const boxSpacing = 10;
-
-    // Card 1: Total Apoios
-    doc.rect(leftMargin, resumoY, boxWidth, boxHeight).fillAndStroke('#f3e8ff', purpleColor);
-    doc.fontSize(9).fillColor(purpleColor).text('Total de Apoios', leftMargin + 5, resumoY + 10, { width: boxWidth - 10 });
-    doc.fontSize(22).fillColor(purpleColor).text(data.totalApoios.toString(), leftMargin + 5, resumoY + 35, { width: boxWidth - 10, align: 'center' });
-
-    // Card 2: Lojas Apoiadas
-    doc.rect(leftMargin + boxWidth + boxSpacing, resumoY, boxWidth, boxHeight).fillAndStroke('#dbeafe', blueColor);
-    doc.fontSize(9).fillColor(blueColor).text('Lojas Apoiadas', leftMargin + boxWidth + boxSpacing + 5, resumoY + 10, { width: boxWidth - 10 });
-    doc.fontSize(22).fillColor(blueColor).text(data.lojasApoiadas.toString(), leftMargin + boxWidth + boxSpacing + 5, resumoY + 35, { width: boxWidth - 10, align: 'center' });
-
-    // Card 3: Coberturas Férias
-    doc.rect(leftMargin + (boxWidth + boxSpacing) * 2, resumoY, boxWidth, boxHeight).fillAndStroke('#ccfbf1', tealColor);
-    doc.fontSize(9).fillColor(tealColor).text('Coberturas Férias', leftMargin + (boxWidth + boxSpacing) * 2 + 5, resumoY + 10, { width: boxWidth - 10 });
-    doc.fontSize(22).fillColor(tealColor).text(data.coberturaFerias.toString(), leftMargin + (boxWidth + boxSpacing) * 2 + 5, resumoY + 35, { width: boxWidth - 10, align: 'center' });
-
-    // Card 4: Substituições
-    doc.rect(leftMargin + (boxWidth + boxSpacing) * 3, resumoY, boxWidth, boxHeight).fillAndStroke('#fed7aa', orangeColor);
-    doc.fontSize(9).fillColor(orangeColor).text('Substituições', leftMargin + (boxWidth + boxSpacing) * 3 + 5, resumoY + 10, { width: boxWidth - 10 });
-    doc.fontSize(22).fillColor(orangeColor).text(data.substituicoes.toString(), leftMargin + (boxWidth + boxSpacing) * 3 + 5, resumoY + 35, { width: boxWidth - 10, align: 'center' });
-
-    doc.y = resumoY + boxHeight + 25;
-
-    // Linha separadora
-    doc.strokeColor(primaryColor).lineWidth(1);
-    doc.moveTo(leftMargin, doc.y).lineTo(leftMargin + pageWidth, doc.y).stroke();
-    doc.moveDown(1);
-
-    // ============================================
-    // DISTRIBUIÇÃO DE TIPOS DE APOIO
-    // ============================================
-    doc.fontSize(14)
-       .font('Helvetica-Bold')
-       .fillColor(primaryColor)
-       .text('Distribuição de Tipos de Apoio', leftMargin);
-    
-    doc.moveDown(0.5);
-
-    const total = data.coberturaFerias + data.substituicoes + data.outro;
-    if (total > 0) {
-      const percentFerias = ((data.coberturaFerias / total) * 100).toFixed(1);
-      const percentSubst = ((data.substituicoes / total) * 100).toFixed(1);
-      const percentOutro = ((data.outro / total) * 100).toFixed(1);
+         .fillColor('#666666')
+         .text(data.volanteNome, leftMargin, 100, { align: 'center', width: pageWidth });
 
       doc.fontSize(10)
+         .text(`Período: ${data.periodo}`, leftMargin, 115, { align: 'center', width: pageWidth });
+
+      // Linha separadora
+      doc.strokeColor(primaryColor).lineWidth(2);
+      doc.moveTo(leftMargin, 135).lineTo(leftMargin + pageWidth, 135).stroke();
+
+      let yPos = 155;
+
+      // ===== RESUMO DE ATIVIDADE =====
+      doc.fontSize(14)
+         .font('Helvetica-Bold')
+         .fillColor('#333333')
+         .text('Resumo de Atividade', leftMargin, yPos);
+
+      yPos += 25;
+
+      // Cards de métricas em grid 2x2
+      const cardWidth = (pageWidth - 15) / 2;
+      const cardHeight = 55;
+      const cardSpacing = 15;
+
+      const cards = [
+        { label: 'Total de Apoios', value: data.totalApoios, color: '#8B5CF6', x: leftMargin },
+        { label: 'Lojas Apoiadas', value: data.lojasApoiadas, color: '#3B82F6', x: leftMargin + cardWidth + cardSpacing },
+        { label: 'Coberturas Férias', value: data.coberturaFerias, color: '#10B981', x: leftMargin },
+        { label: 'Substituições', value: data.substituicoes, color: '#F59E0B', x: leftMargin + cardWidth + cardSpacing }
+      ];
+
+      // Primeira linha
+      for (let i = 0; i < 2; i++) {
+        const card = cards[i];
+        doc.rect(card.x, yPos, cardWidth, cardHeight).lineWidth(2).strokeColor(card.color).stroke();
+        
+        doc.fontSize(9)
+           .fillColor(card.color)
+           .font('Helvetica-Bold')
+           .text(card.label, card.x + 10, yPos + 12, { width: cardWidth - 20 });
+        
+        doc.fontSize(20)
+           .text(card.value.toString(), card.x + 10, yPos + 28, { width: cardWidth - 20, align: 'center' });
+      }
+
+      yPos += cardHeight + 10;
+
+      // Segunda linha
+      for (let i = 2; i < 4; i++) {
+        const card = cards[i];
+        doc.rect(card.x, yPos, cardWidth, cardHeight).lineWidth(2).strokeColor(card.color).stroke();
+        
+        doc.fontSize(9)
+           .fillColor(card.color)
+           .font('Helvetica-Bold')
+           .text(card.label, card.x + 10, yPos + 12, { width: cardWidth - 20 });
+        
+        doc.fontSize(20)
+           .text(card.value.toString(), card.x + 10, yPos + 28, { width: cardWidth - 20, align: 'center' });
+      }
+
+      yPos += cardHeight + 25;
+
+      // ===== GRÁFICOS =====
+      const chartWidth = 220;
+      const chartHeight = 180;
+
+      // Gráfico de pizza
+      const chartJSNodeCanvas = new ChartJSNodeCanvas({ width: chartWidth, height: chartHeight, backgroundColour: 'white' });
+      
+      const total = data.coberturaFerias + data.substituicoes + data.outro;
+      
+      const pieChartConfig = {
+        type: 'doughnut' as const,
+        data: {
+          labels: ['Cobertura Férias', 'Substituição Vidros', 'Outro'],
+          datasets: [{
+            data: [data.coberturaFerias, data.substituicoes, data.outro],
+            backgroundColor: ['#10B981', '#F59E0B', '#6B7280'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: false,
+          plugins: {
+            legend: {
+              position: 'bottom' as const,
+              labels: { font: { size: 10 }, padding: 8 }
+            },
+            title: {
+              display: true,
+              text: 'Tipos de Apoio',
+              font: { size: 12, weight: 'bold' as const }
+            }
+          }
+        }
+      };
+
+      const pieChartBuffer = await chartJSNodeCanvas.renderToBuffer(pieChartConfig as any);
+
+      // Gráfico de barras
+      const barChartConfig = {
+        type: 'bar' as const,
+        data: {
+          labels: data.rankingLojas.slice(0, 5).map(r => r.nome.length > 12 ? r.nome.substring(0, 12) + '...' : r.nome),
+          datasets: [{
+            label: 'Apoios',
+            data: data.rankingLojas.slice(0, 5).map(r => r.count),
+            backgroundColor: '#3B82F6',
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: false,
+          indexAxis: 'y' as const,
+          plugins: {
+            legend: { display: false },
+            title: {
+              display: true,
+              text: 'Top 5 Lojas',
+              font: { size: 12, weight: 'bold' as const }
+            }
+          },
+          scales: {
+            x: { beginAtZero: true, ticks: { stepSize: 1 } }
+          }
+        }
+      };
+
+      const barChartBuffer = await chartJSNodeCanvas.renderToBuffer(barChartConfig as any);
+
+      // Posicionar gráficos
+      const pieX = leftMargin + 20;
+      const barX = leftMargin + pageWidth - chartWidth - 20;
+
+      doc.image(pieChartBuffer, pieX, yPos, { width: chartWidth, height: chartHeight });
+      doc.image(barChartBuffer, barX, yPos, { width: chartWidth, height: chartHeight });
+
+      yPos += chartHeight + 25;
+
+      // ===== RANKING COMPLETO =====
+      doc.fontSize(14)
+         .font('Helvetica-Bold')
+         .fillColor('#333333')
+         .text('Ranking Completo', leftMargin, yPos);
+
+      yPos += 20;
+
+      const tableTop = yPos;
+      const colWidths = [35, pageWidth - 100, 65];
+      const rowHeight = 18;
+
+      // Cabeçalho
+      doc.rect(leftMargin, tableTop, pageWidth, rowHeight).fillAndStroke('#E5E7EB', '#E5E7EB');
+      
+      doc.fontSize(9)
+         .fillColor('#333333')
+         .font('Helvetica-Bold')
+         .text('#', leftMargin + 5, tableTop + 5, { width: colWidths[0] - 10 })
+         .text('Loja', leftMargin + colWidths[0] + 5, tableTop + 5, { width: colWidths[1] - 10 })
+         .text('Apoios', leftMargin + colWidths[0] + colWidths[1] + 5, tableTop + 5, { width: colWidths[2] - 10, align: 'right' });
+
+      yPos = tableTop + rowHeight;
+
+      // Linhas
+      data.rankingLojas.slice(0, 10).forEach((item, index) => {
+        const bgColor = index % 2 === 0 ? '#F9FAFB' : '#FFFFFF';
+        doc.rect(leftMargin, yPos, pageWidth, rowHeight).fillAndStroke(bgColor, bgColor);
+
+        const medal = index < 3 ? ['🥇', '🥈', '🥉'][index] : `${index + 1}.`;
+        
+        doc.fontSize(8)
+           .fillColor('#666666')
+           .font('Helvetica')
+           .text(medal, leftMargin + 5, yPos + 5, { width: colWidths[0] - 10 })
+           .text(item.nome, leftMargin + colWidths[0] + 5, yPos + 5, { width: colWidths[1] - 10 })
+           .text(item.count.toString(), leftMargin + colWidths[0] + colWidths[1] + 5, yPos + 5, { width: colWidths[2] - 10, align: 'right' });
+
+        yPos += rowHeight;
+      });
+
+      // Rodapé
+      const footerY = doc.page.height - 40;
+      doc.fontSize(8)
+         .fillColor('#999999')
          .font('Helvetica')
-         .fillColor('#000000');
-      doc.text(`• Cobertura Férias: ${data.coberturaFerias} (${percentFerias}%)`, leftMargin + 10);
-      doc.text(`• Substituição Vidros: ${data.substituicoes} (${percentSubst}%)`, leftMargin + 10);
-      doc.text(`• Outro: ${data.outro} (${percentOutro}%)`, leftMargin + 10);
+         .text('PoweringEG Platform 2.0 - a IA ao serviço da Expressglass', leftMargin, footerY, { align: 'center', width: pageWidth });
+
+      const now = new Date();
+      const dataFormatada = `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()} às ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+      doc.fontSize(7).text(`Gerado em ${dataFormatada}`, leftMargin, footerY + 12, { align: 'center', width: pageWidth });
+
+      doc.end();
+    } catch (error) {
+      console.error('Erro ao gerar PDF:', error);
+      reject(error);
     }
-
-    doc.moveDown(1);
-
-    // Linha separadora
-    doc.strokeColor(primaryColor).lineWidth(1);
-    doc.moveTo(leftMargin, doc.y).lineTo(leftMargin + pageWidth, doc.y).stroke();
-    doc.moveDown(1);
-
-    // ============================================
-    // RANKING DE LOJAS
-    // ============================================
-    doc.fontSize(14)
-       .font('Helvetica-Bold')
-       .fillColor(primaryColor)
-       .text('🏆 Ranking de Lojas Mais Apoiadas', leftMargin);
-    
-    doc.moveDown(0.5);
-
-    data.rankingLojas.slice(0, 10).forEach((loja, index) => {
-      const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`;
-      doc.fontSize(10)
-         .font('Helvetica')
-         .fillColor('#000000')
-         .text(`${medal} ${loja.nome}`, leftMargin + 10, doc.y, { continued: true });
-      doc.fillColor(primaryColor).text(`${loja.count} apoios`, { align: 'right' });
-      doc.moveDown(0.3);
-    });
-
-    // ============================================
-    // RODAPÉ
-    // ============================================
-    const bottomMargin = 50;
-    const footerY = doc.page.height - bottomMargin;
-    
-    doc.fontSize(8)
-       .font('Helvetica')
-       .fillColor(grayColor)
-       .text('PoweringEG Platform 2.0 - a IA ao serviço da Expressglass', leftMargin, footerY, { align: 'center', width: pageWidth });
-    
-    doc.fontSize(7)
-       .fillColor(grayColor)
-       .text(`Gerado em ${new Date().toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit', year: 'numeric' })} às ${new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })}`, leftMargin, footerY + 10, { align: 'center', width: pageWidth });
-
-    doc.end();
   });
 }

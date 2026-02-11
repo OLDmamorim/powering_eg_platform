@@ -4517,3 +4517,12 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Investigar query do dashboard para entender filtros aplicados
 - [x] Corrigir problema se houver dados mas não aparecem
 - [x] Testar visualização com dados de janeiro
+
+## v6.13.3 - Reescrever PDF Dashboard Volante Profissionalmente
+- [x] Analisar PDFs de referência do sistema (análise fichas, relatórios gestor)
+- [x] Identificar todos os problemas do PDF atual (páginas vazias, falta de gráficos, layout pobre)
+- [x] Reescrever completamente o PDF com layout profissional
+- [x] Adicionar gráficos visuais (pizza, barras) ao PDF
+- [x] Melhorar formatação de tabelas e rankings
+- [x] Garantir que todo o conteúdo cabe numa única página bem estruturada
+- [x] Testar geração do PDF
