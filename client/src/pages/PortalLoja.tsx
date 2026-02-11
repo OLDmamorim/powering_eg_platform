@@ -6150,7 +6150,19 @@ END:VCALENDAR`;
         )}
 
         {/* Vista Dashboard */}
-        {activeView === "dashboard" && (
+        {activeView === "dashboard" && (() => {
+          // Filtrar pedidos pelos meses selecionados
+          const pedidosFiltrados = mesesSelecionadosVolante.length === 0 ? pedidosAprovados : pedidosAprovados.filter((p: any) => {
+            const dataPedido = new Date(p.data);
+            const mesPedido = dataPedido.getMonth() + 1;
+            const anoPedido = dataPedido.getFullYear();
+            return mesesSelecionadosVolante.some(m => m.mes === mesPedido && m.ano === anoPedido);
+          });
+          
+          // Calcular lojas únicas
+          const lojasUnicas = new Set(pedidosFiltrados.map((p: any) => p.lojaId));
+          
+          return (
           <div className="container mx-auto px-4 py-6 space-y-6">
             {/* Filtros e Botão Exportar */}
             <Card>
@@ -6192,7 +6204,7 @@ END:VCALENDAR`;
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm opacity-80 mb-1">{language === 'pt' ? 'Total Apoios' : 'Total Support'}</p>
-                      <p className="text-3xl font-bold">{pedidosAprovados.length}</p>
+                      <p className="text-3xl font-bold">{pedidosFiltrados.length}</p>
                     </div>
                     <CheckCircle2 className="h-10 w-10 opacity-60" />
                   </div>
@@ -6204,7 +6216,7 @@ END:VCALENDAR`;
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm opacity-80 mb-1">{language === 'pt' ? 'Lojas Apoiadas' : 'Stores Supported'}</p>
-                      <p className="text-3xl font-bold">{new Set(pedidosAprovados.map((p: any) => p.lojaId)).size}</p>
+                      <p className="text-3xl font-bold">{lojasUnicas.size}</p>
                     </div>
                     <Store className="h-10 w-10 opacity-60" />
                   </div>
@@ -6216,7 +6228,7 @@ END:VCALENDAR`;
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm opacity-80 mb-1">{language === 'pt' ? 'Coberturas Férias' : 'Holiday Coverage'}</p>
-                      <p className="text-3xl font-bold">{pedidosAprovados.filter((p: any) => p.tipoApoio === 'cobertura_ferias').length}</p>
+                      <p className="text-3xl font-bold">{pedidosFiltrados.filter((p: any) => p.tipoApoio === 'cobertura_ferias').length}</p>
                     </div>
                     <Calendar className="h-10 w-10 opacity-60" />
                   </div>
@@ -6228,7 +6240,7 @@ END:VCALENDAR`;
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm opacity-80 mb-1">{language === 'pt' ? 'Substituições' : 'Replacements'}</p>
-                      <p className="text-3xl font-bold">{pedidosAprovados.filter((p: any) => p.tipoApoio === 'substituicao_vidros').length}</p>
+                      <p className="text-3xl font-bold">{pedidosFiltrados.filter((p: any) => p.tipoApoio === 'substituicao_vidros').length}</p>
                     </div>
                     <Wrench className="h-10 w-10 opacity-60" />
                   </div>
@@ -6257,9 +6269,9 @@ END:VCALENDAR`;
                         ],
                         datasets: [{
                           data: [
-                            pedidosAprovados.filter((p: any) => p.tipoApoio === 'cobertura_ferias').length,
-                            pedidosAprovados.filter((p: any) => p.tipoApoio === 'substituicao_vidros').length,
-                            pedidosAprovados.filter((p: any) => p.tipoApoio === 'outro').length,
+                            pedidosFiltrados.filter((p: any) => p.tipoApoio === 'cobertura_ferias').length,
+                            pedidosFiltrados.filter((p: any) => p.tipoApoio === 'substituicao_vidros').length,
+                            pedidosFiltrados.filter((p: any) => p.tipoApoio === 'outro').length,
                           ],
                           backgroundColor: ['#14b8a6', '#3b82f6', '#f97316'],
                           borderWidth: 0,
@@ -6290,9 +6302,8 @@ END:VCALENDAR`;
                 <CardContent>
                   <div className="h-64">
                     <Bar
-                      data={{
-                        labels: Object.values(
-                          pedidosAprovados.reduce((acc: any, p: any) => {
+                      data={{                        labels: Object.values(
+                          pedidosFiltrados.reduce((acc: any, p: any) => {
                             const lojaId = p.lojaId;
                             if (!acc[lojaId]) {
                               acc[lojaId] = { nome: p.loja?.nome || 'Loja', count: 0 };
@@ -6307,7 +6318,7 @@ END:VCALENDAR`;
                         datasets: [{
                           label: language === 'pt' ? 'Apoios' : 'Support',
                           data: Object.values(
-                            pedidosAprovados.reduce((acc: any, p: any) => {
+                            pedidosFiltrados.reduce((acc: any, p: any) => {
                               const lojaId = p.lojaId;
                               if (!acc[lojaId]) {
                                 acc[lojaId] = { nome: p.loja?.nome || 'Loja', count: 0 };
@@ -6356,7 +6367,7 @@ END:VCALENDAR`;
               <CardContent>
                 <div className="space-y-3">
                   {Object.values(
-                    pedidosAprovados.reduce((acc: any, p: any) => {
+                    pedidosFiltrados.reduce((acc: any, p: any) => {
                       const lojaId = p.lojaId;
                       if (!acc[lojaId]) {
                         acc[lojaId] = { nome: p.loja?.nome || 'Loja', count: 0 };
@@ -6387,7 +6398,8 @@ END:VCALENDAR`;
               </CardContent>
             </Card>
           </div>
-        )}
+          );
+        })()}
 
         {/* Vista Configurações */}
         {activeView === "configuracoes" && (

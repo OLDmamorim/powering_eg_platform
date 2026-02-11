@@ -4505,3 +4505,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar filtros temporais
 - [x] Implementar exportação para PDF
 - [x] Testar no portal do volante
+
+## v6.13.1 - Correções Dashboard Volante
+- [x] Remover item "menu.items.dashboardVolante" do menu principal (DashboardLayout)
+- [x] Corrigir layout do PDF para seguir padrão dos relatórios (logo ExpressGlass, cabeçalho profissional)
+- [x] Corrigir filtro de meses que não está a funcionar no dashboard
+- [x] Testar todas as correções
