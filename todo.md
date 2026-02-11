@@ -4511,3 +4511,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Corrigir layout do PDF para seguir padrão dos relatórios (logo ExpressGlass, cabeçalho profissional)
 - [x] Corrigir filtro de meses que não está a funcionar no dashboard
 - [x] Testar todas as correções
+
+## v6.13.2 - Investigar Dados Janeiro Dashboard Volante
+- [x] Verificar se existem apoios registados em janeiro na base de dados
+- [x] Investigar query do dashboard para entender filtros aplicados
+- [x] Corrigir problema se houver dados mas não aparecem
+- [x] Testar visualização com dados de janeiro

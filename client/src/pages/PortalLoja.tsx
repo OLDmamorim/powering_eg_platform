@@ -4758,6 +4758,11 @@ function VolanteInterface({
   // Próximos apoios: apenas aprovados com data >= hoje
   const hoje = new Date();
   hoje.setHours(0, 0, 0, 0);
+  
+  // Todos os pedidos aprovados (incluindo históricos) para dashboard
+  const todosAprovados = pedidosApoio?.filter((p: any) => p.estado === 'aprovado').sort((a: any, b: any) => new Date(a.data).getTime() - new Date(b.data).getTime()) || [];
+  
+  // Pedidos aprovados futuros para calendário
   const pedidosAprovados = pedidosApoio?.filter((p: any) => {
     if (p.estado !== 'aprovado') return false;
     const dataPedido = new Date(p.data);
@@ -6152,7 +6157,7 @@ END:VCALENDAR`;
         {/* Vista Dashboard */}
         {activeView === "dashboard" && (() => {
           // Filtrar pedidos pelos meses selecionados
-          const pedidosFiltrados = mesesSelecionadosVolante.length === 0 ? pedidosAprovados : pedidosAprovados.filter((p: any) => {
+          const pedidosFiltrados = mesesSelecionadosVolante.length === 0 ? todosAprovados : todosAprovados.filter((p: any) => {
             const dataPedido = new Date(p.data);
             const mesPedido = dataPedido.getMonth() + 1;
             const anoPedido = dataPedido.getFullYear();
