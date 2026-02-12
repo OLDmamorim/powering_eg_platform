@@ -4722,3 +4722,16 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Atualizar getTopLojasComMaisVisitas para contar TODAS as visitas agendadas
 - [x] Atualizar getAnaliseRentabilidade para usar TODAS as visitas no cálculo (não só as com serviços)
 - [x] Testar métricas corrigidas
+
+## v6.22.2 - Correção: Incluir agendamentos "Aprovado" nas métricas
+
+- [x] Investigar porque agendamentos com status "Aprovado" não são contados
+- [x] Verificar se existe filtro de status na query getTopLojasComMaisVisitas
+- [x] Corrigir query para incluir todos os agendamentos (Aprovado, Agendamento, Pendente)
+- [x] Testar com dados de Braga em Fevereiro
+
+## v6.22.3 - Debug: Braga não aparece no Dashboard
+
+- [x] Verificar se FiltroMesesCheckbox está a usar mesesSelecionadosDashboard
+- [x] Adicionar logs para debug das queries
+- [x] Testar queries diretamente no backend

@@ -4670,26 +4670,25 @@ function VolanteInterface({
   );
   
   // Queries para Dashboard de Estatísticas (com filtro de meses)
-  const { data: estatisticasDetalhadas, isLoading: loadingEstatisticas } = trpc.portalVolante.getEstatisticasDetalhadasPorMeses.useQuery(
-    { token, meses: mesesSelecionadosVolante },
-    { enabled: !!token && activeView === "dashboard" && mesesSelecionadosVolante.length > 0 }
+  const { data: estatisticasDetalhadas, isLoading: loadingEstatisticasDetalhadas } = trpc.portalVolante.getEstatisticasDetalhadasPorMes.useQuery(
+    { token, meses: mesesSelecionadosDashboard },
+    { enabled: !!token && activeView === "dashboard" && mesesSelecionadosDashboard.length > 0 }
   );
   
-  const { data: topLojasServicos, isLoading: loadingTopLojasServicos } = trpc.portalVolante.getTopLojasComMaisServicosPorMeses.useQuery(
-    { token, meses: mesesSelecionadosVolante, limite: 5 },
-    { enabled: !!token && activeView === "dashboard" && mesesSelecionadosVolante.length > 0 }
+  const { data: topLojasServicos, isLoading: loadingTopLojasServicos } = trpc.portalVolante.getTopLojasComMaisServicos.useQuery(
+    { token, meses: mesesSelecionadosDashboard, limite: 5 },
+    { enabled: !!token && activeView === "dashboard" && mesesSelecionadosDashboard.length > 0 }
   );
   
   const { data: topLojasVisitas, isLoading: loadingTopLojasVisitas } = trpc.portalVolante.getTopLojasComMaisVisitas.useQuery(
-    { token, meses: mesesSelecionadosVolante, limite: 5 },
-    { enabled: !!token && activeView === "dashboard" && mesesSelecionadosVolante.length > 0 }
+    { token, meses: mesesSelecionadosDashboard, limite: 5 },
+    { enabled: !!token && activeView === "dashboard" && mesesSelecionadosDashboard.length > 0 }
   );
   
-  const { data: analiseRentabilidade, isLoading: loadingRentabilidade } = trpc.portalVolante.getAnaliseRentabilidade.useQuery(
-    { token, meses: mesesSelecionadosVolante, limite: 10 },
-    { enabled: !!token && activeView === "dashboard" && mesesSelecionadosVolante.length > 0 }
+  const { data: analiseRentabilidade, isLoading: loadingAnaliseRentabilidade } = trpc.portalVolante.getAnaliseRentabilidade.useQuery(
+    { token, meses: mesesSelecionadosDashboard, limite: 5 },
+    { enabled: !!token && activeView === "dashboard" && mesesSelecionadosDashboard.length > 0 }
   );
-  
   const { data: evolucaoServicos, isLoading: loadingEvolucao } = trpc.portalVolante.getEvolucaoServicos.useQuery(
     { token, periodo: 'mes' },
     { enabled: !!token && activeView === "dashboard" }
@@ -6390,17 +6389,17 @@ END:VCALENDAR`;
                   <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                     <h3 className="font-medium dark:text-gray-100">{language === 'pt' ? 'Período' : 'Period'}</h3>
                     <FiltroMesesCheckbox
-                      mesesSelecionados={mesesSelecionadosVolante}
-                      onMesesChange={setMesesSelecionadosVolante}
+                      mesesSelecionados={mesesSelecionadosDashboard}
+                      onMesesChange={setMesesSelecionadosDashboard}
                     />
                   </div>
                   <Button
                     onClick={() => {
-                      if (mesesSelecionadosVolante.length === 0) {
+                      if (mesesSelecionadosDashboard.length === 0) {
                         toast.error(language === 'pt' ? 'Selecione pelo menos um mês' : 'Select at least one month');
                         return;
                       }
-                      exportarDashboardPDFMutation.mutate({ token, meses: mesesSelecionadosVolante });
+                      exportarDashboardPDFMutation.mutate({ token, meses: mesesSelecionadosDashboard });
                     }}
                     disabled={exportarDashboardPDFMutation.isPending}
                     className="bg-purple-600 hover:bg-purple-700"

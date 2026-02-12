@@ -1,0 +1,46 @@
+{
+  "query": "SELECT \n  a.id,\n  a.volanteId,\n  a.lojaId,\n  l.nome AS lojaNome,\n  a.data,\n  a.agendamento_volante_periodo,\n  a.agendamento_volante_tipo\nFROM agendamentos_volante a\nLEFT JOIN lojas l ON a.lojaId = l.id\nWHERE a.data >= '2026-02-01' \n  AND a.data < '2026-03-01'\n  AND a.lojaId IS NOT NULL\nORDER BY a.data, l.nome;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT \n  a.id,\n  a.volanteId,\n  a.lojaId,\n  l.nome AS lojaNome,\n  a.data,\n  a.agendamento_volante_periodo,\n  a.agendamento_volante_tipo\nFROM agendamentos_volante a\nLEFT JOIN lojas l ON a.lojaId = l.id\nWHERE a.data >= '2026-02-01' \n  AND a.data < '2026-03-01'\n  AND a.lojaId IS NOT NULL\nORDER BY a.data, l.nome;",
+  "rows": [
+    {
+      "id": "330001",
+      "volanteId": "2",
+      "lojaId": "60003",
+      "lojaNome": "Vila Verde",
+      "data": "2026-02-03 00:00:00",
+      "agendamento_volante_periodo": "manha",
+      "agendamento_volante_tipo": "cobertura_ferias"
+    },
+    {
+      "id": "360001",
+      "volanteId": "2",
+      "lojaId": "60002",
+      "lojaNome": "Barcelos",
+      "data": "2026-02-05 00:00:00",
+      "agendamento_volante_periodo": "manha",
+      "agendamento_volante_tipo": "substituicao_vidros"
+    },
+    {
+      "id": "510001",
+      "volanteId": "2",
+      "lojaId": "60003",
+      "lojaNome": "Vila Verde",
+      "data": "2026-02-10 00:00:00",
+      "agendamento_volante_periodo": "tarde",
+      "agendamento_volante_tipo": "substituicao_vidros"
+    },
+    {
+      "id": "540001",
+      "volanteId": "2",
+      "lojaId": "60001",
+      "lojaNome": "Famalicão",
+      "data": "2026-02-12 00:00:00",
+      "agendamento_volante_periodo": "manha",
+      "agendamento_volante_tipo": "substituicao_vidros"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tvolanteId\tlojaId\tlojaNome\tdata\tagendamento_volante_periodo\tagendamento_volante_tipo\n330001\t2\t60003\tVila Verde\t2026-02-03 00:00:00\tmanha\tcobertura_ferias\n360001\t2\t60002\tBarcelos\t2026-02-05 00:00:00\tmanha\tsubstituicao_vidros\n510001\t2\t60003\tVila Verde\t2026-02-10 00:00:00\ttarde\tsubstituicao_vidros\n540001\t2\t60001\tFamalicão\t2026-02-12 00:00:00\tmanha\tsubstituicao_vidros\n",
+  "stderr": "",
+  "execution_time_ms": 106
+}
