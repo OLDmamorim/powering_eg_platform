@@ -4668,6 +4668,22 @@ function VolanteInterface({
     { enabled: !!token && activeView === "configuracoes" }
   );
   
+  // Queries para Dashboard de Estatísticas
+  const { data: estatisticasDetalhadas, isLoading: loadingEstatisticas } = trpc.portalVolante.getEstatisticasDetalhadas.useQuery(
+    { token, periodo: 'mes' },
+    { enabled: !!token && activeView === "dashboard" }
+  );
+  
+  const { data: topLojas, isLoading: loadingTopLojas } = trpc.portalVolante.getTopLojas.useQuery(
+    { token, limite: 5 },
+    { enabled: !!token && activeView === "dashboard" }
+  );
+  
+  const { data: evolucaoServicos, isLoading: loadingEvolucao } = trpc.portalVolante.getEvolucaoServicos.useQuery(
+    { token, periodo: 'mes' },
+    { enabled: !!token && activeView === "dashboard" }
+  );
+  
   // Mutation para exportar dashboard para PDF
   const exportarDashboardPDFMutation = trpc.portalVolante.exportarDashboardPDF.useMutation({
     onSuccess: (data) => {
@@ -6350,24 +6366,6 @@ END:VCALENDAR`;
 
         {/* Vista Dashboard */}
         {activeView === "dashboard" && (() => {
-          // Buscar estatísticas detalhadas de serviços
-          const { data: estatisticasDetalhadas, isLoading: loadingEstatisticas } = trpc.portalVolante.getEstatisticasDetalhadas.useQuery(
-            { token, periodo: 'mes' },
-            { enabled: !!token && !!volanteAuth }
-          );
-          
-          // Buscar top lojas
-          const { data: topLojas, isLoading: loadingTopLojas } = trpc.portalVolante.getTopLojas.useQuery(
-            { token, limite: 5 },
-            { enabled: !!token && !!volanteAuth }
-          );
-          
-          // Buscar evolução de serviços
-          const { data: evolucaoServicos, isLoading: loadingEvolucao } = trpc.portalVolante.getEvolucaoServicos.useQuery(
-            { token, periodo: 'mes' },
-            { enabled: !!token && !!volanteAuth }
-          );
-          
           if (loadingEstatisticas || loadingTopLojas || loadingEvolucao) {
             return (
               <div className="flex items-center justify-center py-12">
