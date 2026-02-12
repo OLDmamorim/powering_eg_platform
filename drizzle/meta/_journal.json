@@ -491,6 +491,41 @@
       "when": 1770895169795,
       "tag": "0069_unusual_skreet",
       "breakpoints": true
+    },
+    {
+      "idx": 70,
+      "version": "5",
+      "when": 1770909005965,
+      "tag": "0070_simple_madripoor",
+      "breakpoints": true
+    },
+    {
+      "idx": 71,
+      "version": "5",
+      "when": 1770909820597,
+      "tag": "0071_heavy_cassandra_nova",
+      "breakpoints": true
+    },
+    {
+      "idx": 72,
+      "version": "5",
+      "when": 1770910684908,
+      "tag": "0072_classy_imperial_guard",
+      "breakpoints": true
+    },
+    {
+      "idx": 73,
+      "version": "5",
+      "when": 1770912556379,
+      "tag": "0073_cloudy_deadpool",
+      "breakpoints": true
+    },
+    {
+      "idx": 74,
+      "version": "5",
+      "when": 1770914206973,
+      "tag": "0074_omniscient_blindfold",
+      "breakpoints": true
     }
   ]
 }

@@ -1,0 +1,1 @@
+ALTER TABLE `servicos_volante` MODIFY COLUMN `data` varchar(10) NOT NULL;
