@@ -526,6 +526,13 @@
       "when": 1770914206973,
       "tag": "0074_omniscient_blindfold",
       "breakpoints": true
+    },
+    {
+      "idx": 75,
+      "version": "5",
+      "when": 1770915753631,
+      "tag": "0075_next_dragon_lord",
+      "breakpoints": true
     }
   ]
 }

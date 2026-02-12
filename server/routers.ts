@@ -9253,6 +9253,59 @@ IMPORTANTE:
           filename: `dashboard_volante_${tokenData.volante.nome.replace(/\s+/g, '_')}_${periodoTexto.replace(/\//g, '-')}.pdf`,
         };
       }),
+    
+    // Registar serviços realizados numa loja
+    registarServicos: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        lojaId: z.number(),
+        data: z.string(), // formato YYYY-MM-DD
+        substituicaoLigeiro: z.number().min(0).max(20),
+        reparacao: z.number().min(0).max(20),
+        calibragem: z.number().min(0).max(20),
+        outros: z.number().min(0).max(20),
+      }))
+      .mutation(async ({ input }) => {
+        const tokenData = await db.validateTokenVolante(input.token);
+        if (!tokenData) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        
+        // Verificar se o volante tem acesso a esta loja
+        const lojas = await db.getLojasByVolanteId(tokenData.volante.id);
+        const temAcesso = lojas.some(l => l.id === input.lojaId);
+        if (!temAcesso) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Não tem acesso a esta loja' });
+        }
+        
+        const servico = await db.registarServicosVolante({
+          volanteId: tokenData.volante.id,
+          lojaId: input.lojaId,
+          data: input.data,
+          substituicaoLigeiro: input.substituicaoLigeiro,
+          reparacao: input.reparacao,
+          calibragem: input.calibragem,
+          outros: input.outros,
+        });
+        
+        return servico;
+      }),
+    
+    // Obter serviços do dia
+    getServicosDia: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        data: z.string(), // formato YYYY-MM-DD
+      }))
+      .query(async ({ input }) => {
+        const tokenData = await db.validateTokenVolante(input.token);
+        if (!tokenData) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        
+        const servicos = await db.getServicosVolanteByData(tokenData.volante.id, input.data);
+        return servicos;
+      }),
   }),
   
   // ==================== ANÁLISE DE FICHAS DE SERVIÇO ====================

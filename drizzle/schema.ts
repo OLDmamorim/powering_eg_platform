@@ -1301,3 +1301,22 @@ export const documentos = mysqlTable("documentos", {
 
 export type Documento = typeof documentos.$inferSelect;
 export type InsertDocumento = typeof documentos.$inferInsert;
+
+/**
+ * Serviços Volante - Registo diário de serviços realizados pelos volantes em cada loja
+ */
+export const servicosVolante = mysqlTable("servicos_volante", {
+  id: int("id").autoincrement().primaryKey(),
+  volanteId: int("volanteId").notNull(), // FK para volantes.id
+  lojaId: int("lojaId").notNull(), // FK para lojas.id
+  data: varchar("data", { length: 10 }).notNull(), // Data no formato YYYY-MM-DD
+  substituicaoLigeiro: int("substituicaoLigeiro").default(0).notNull(), // Quantidade de substituições ligeiro
+  reparacao: int("reparacao").default(0).notNull(), // Quantidade de reparações
+  calibragem: int("calibragem").default(0).notNull(), // Quantidade de calibragens
+  outros: int("outros").default(0).notNull(), // Quantidade de outros serviços
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type ServicoVolante = typeof servicosVolante.$inferSelect;
+export type InsertServicoVolante = typeof servicosVolante.$inferInsert;

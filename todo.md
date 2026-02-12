@@ -4580,3 +4580,35 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Corrigir uso incorreto de hooks (useQuery) dentro de função anónima
 - [x] Mover query para nível de componente
 - [x] Testar Portal da Loja
+
+## v6.14.6 - CRÍTICO: Corrigir Erro 500 no OAuth Callback
+- [x] Investigar logs do servidor para identificar causa do erro 500
+- [x] Corrigir erro no OAuth callback (era cache do browser)
+- [x] Testar login via OAuth
+
+## v6.15.0 - Sistema de Serviços do Volante (Fase 1: Backend)
+- [ ] Limpar código órfão do routers.ts
+- [ ] Criar tabela servicos_volante no schema
+- [ ] Adicionar funções de backend em db.ts
+- [ ] Criar procedimentos tRPC em routers.ts
+- [ ] Testar backend via tRPC
+
+## v6.16.0 - Sistema de Serviços do Volante (Fase 2: Interface)
+- [ ] Adicionar interface de registo na agenda do volante
+- [ ] Modal com 4 tipos de serviço + dropdowns numéricos
+- [ ] Lista de lojas agendadas hoje
+- [ ] Testar registo de serviços
+
+## v6.17.0 - Sistema de Serviços do Volante (Fase 3: Dashboard)
+- [ ] Criar página ProdutividadeVolante.tsx
+- [ ] Adicionar gráficos Chart.js (evolução + ranking)
+- [ ] Cards com totais por tipo
+- [ ] Filtros por período
+- [ ] Testar dashboard
+
+## v6.18.0 - Sistema de Serviços do Volante (Fase 4: Automações)
+- [ ] Notificação Telegram diária às 18:00
+- [ ] Geração de PDF de relatórios mensais
+- [ ] Envio automático no fim do mês
+- [ ] Histórico de envios
+- [ ] Testar automatismos
