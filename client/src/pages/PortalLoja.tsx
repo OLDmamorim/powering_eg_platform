@@ -4708,8 +4708,42 @@ function VolanteInterface({
       toast.success(language === 'pt' ? 'Telegram configurado com sucesso!' : 'Telegram configured successfully!');
       refetchTelegramConfig();
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast.error(error.message);
+    },
+  });
+
+  // Mutation para testar notificações
+  const testarNotificacoesMutation = trpc.portalVolante.testarNotificacoes.useMutation({
+    onSuccess: (data) => {
+      if (data.enviados > 0) {
+        toast.success(
+          language === 'pt' 
+            ? `Notificações enviadas com sucesso! (${data.enviados}/${data.total})` 
+            : `Notifications sent successfully! (${data.enviados}/${data.total})`
+        );
+      } else {
+        toast.info(
+          language === 'pt' 
+            ? data.mensagem || 'Nenhuma notificação enviada' 
+            : data.mensagem || 'No notifications sent'
+        );
+      }
+      
+      if (data.erros && data.erros.length > 0) {
+        toast.warning(
+          language === 'pt' 
+            ? `Alguns erros: ${data.erros.join(', ')}` 
+            : `Some errors: ${data.erros.join(', ')}`
+        );
+      }
+    },
+    onError: (error: any) => {
+      toast.error(
+        language === 'pt' 
+          ? `Erro ao enviar notificações: ${error.message}` 
+          : `Error sending notifications: ${error.message}`
+      );
     },
   });
 
@@ -6864,18 +6898,36 @@ END:VCALENDAR`;
 
                 {/* Estado Atual */}
                 {telegramConfig && telegramConfig.telegramChatId && (
-                  <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
+                  <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg space-y-3">
                     <div className="flex items-center gap-2 text-green-700 dark:text-green-300">
                       <CheckCircle2 className="h-5 w-5" />
                       <span className="font-medium">
                         {language === 'pt' ? 'Telegram configurado!' : 'Telegram configured!'}
                       </span>
                     </div>
-                    <p className="text-sm text-green-600 dark:text-green-400 mt-1">
+                    <p className="text-sm text-green-600 dark:text-green-400">
                       {language === 'pt' 
                         ? `Irá receber notificações no(s) Chat ID(s): ${telegramConfig.telegramChatId}` 
                         : `You will receive notifications on Chat ID(s): ${telegramConfig.telegramChatId}`}
                     </p>
+                    <div className="pt-2 border-t border-green-200 dark:border-green-800">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          testarNotificacoesMutation.mutate({ token });
+                        }}
+                        disabled={testarNotificacoesMutation.isPending}
+                        className="text-green-700 border-green-300 hover:bg-green-100 dark:text-green-300 dark:border-green-700 dark:hover:bg-green-900/30"
+                      >
+                        {testarNotificacoesMutation.isPending ? (
+                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                        ) : (
+                          <Send className="h-4 w-4 mr-2" />
+                        )}
+                        {language === 'pt' ? 'Testar Notificações' : 'Test Notifications'}
+                      </Button>
+                    </div>
                   </div>
                 )}
               </CardContent>

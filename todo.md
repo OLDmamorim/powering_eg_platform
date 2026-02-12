@@ -4645,3 +4645,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Criar endpoint de teste manual para notificações
 - [x] Integrar scheduler no servidor
 - [ ] Testar envio de notificação Telegram com link direto para calendário
+
+
+## v6.19.0 - Botão de Teste de Notificações
+- [x] Adicionar botão "Testar Notificações" no Portal do Volante
+- [x] Implementar chamada ao endpoint testarNotificacoes
+- [x] Mostrar feedback visual com resultado (toast)
+- [ ] Testar funcionalidade manualmente
