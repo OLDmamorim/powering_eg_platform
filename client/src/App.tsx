@@ -51,6 +51,7 @@ import AnaliseFichas from "./pages/AnaliseFichas";
 import RH from "./pages/RH";
 import MenuInicial from "./pages/MenuInicial";
 import DashboardVolante from "./pages/DashboardVolante";
+import Documentos from "./pages/Documentos";
 import { DemoBanner } from "./components/DemoBanner";
 import { LanguageProvider } from "./contexts/LanguageContext";
 
@@ -78,6 +79,7 @@ function Router() {
       <Route path={"/volantes"} component={Volantes} />
       <Route path={"/portal-gestor"} component={PortalGestor} />
       <Route path={"/analise-fichas"} component={AnaliseFichas} />
+      <Route path={"/documentos"} component={Documentos} />
       <Route path={"/relatorio-livre"} component={RelatorioLivre} />
       <Route path={"/relatorio-completo"} component={RelatorioCompleto} />
       <Route path={"/meus-relatorios"} component={MeusRelatorios} />

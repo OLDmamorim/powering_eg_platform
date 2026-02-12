@@ -4491,7 +4491,7 @@ function VolanteInterface({
   t: (key: string) => string;
 }) {
   const { theme, toggleTheme } = useTheme();
-  const [activeView, setActiveView] = useState<"menu" | "agenda" | "resultados" | "historico" | "dashboard" | "configuracoes">("menu");
+  const [activeView, setActiveView] = useState<"menu" | "agenda" | "resultados" | "historico" | "dashboard" | "circulares" | "configuracoes">("menu");
   const [activeTab, setActiveTab] = useState<"agenda" | "resultados">("agenda");
   const [mesSelecionado, setMesSelecionado] = useState(() => {
     const hoje = new Date();
@@ -5087,6 +5087,24 @@ END:VCALENDAR`;
               </div>
             </Card>
 
+            {/* Card Circulares */}
+            <Card 
+              className="p-8 cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-105 bg-white dark:bg-gray-800 border-2 border-transparent hover:border-green-400 group"
+              onClick={() => setActiveView("circulares")}
+            >
+              <div className="text-center">
+                <div className="w-24 h-24 bg-green-100 dark:bg-green-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-green-200 dark:group-hover:bg-green-900/50 transition-colors">
+                  <FileText className="h-12 w-12 text-green-600" />
+                </div>
+                <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">
+                  {language === 'pt' ? 'Circulares' : 'Circulars'}
+                </h2>
+                <p className="text-gray-500 dark:text-gray-400 text-sm">
+                  {language === 'pt' ? 'Documentos e informações importantes' : 'Important documents and information'}
+                </p>
+              </div>
+            </Card>
+
             {/* Card Configurações */}
             <Card 
               className="p-8 cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-105 bg-white dark:bg-gray-800 border-2 border-transparent hover:border-gray-400 group"
@@ -5142,9 +5160,11 @@ END:VCALENDAR`;
                       ? (language === 'pt' ? 'Histórico de Apoios' : 'Support History')
                       : activeView === "dashboard"
                         ? (language === 'pt' ? 'Dashboard de Estatísticas' : 'Statistics Dashboard')
-                        : activeView === "configuracoes"
-                          ? (language === 'pt' ? 'Configurações' : 'Settings')
-                          : (language === 'pt' ? 'Resultados das Lojas' : 'Store Results')}
+                        : activeView === "circulares"
+                          ? (language === 'pt' ? 'Circulares e Documentos' : 'Circulars and Documents')
+                          : activeView === "configuracoes"
+                            ? (language === 'pt' ? 'Configurações' : 'Settings')
+                            : (language === 'pt' ? 'Resultados das Lojas' : 'Store Results')}
                 </p>
               </div>
             </div>
@@ -6403,6 +6423,71 @@ END:VCALENDAR`;
               </CardContent>
             </Card>
           </div>
+          );
+        })()}
+
+        {/* Vista Circulares */}
+        {activeView === "circulares" && (() => {
+          const { data: documentos, isLoading } = trpc.documentos.listar.useQuery();
+          
+          return (
+            <div className="container mx-auto px-4 py-6 space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <FileText className="h-5 w-5 text-green-500" />
+                    {language === 'pt' ? 'Circulares e Documentos' : 'Circulars and Documents'}
+                  </CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    {language === 'pt' ? 'Documentos importantes partilhados pelo gestor' : 'Important documents shared by the manager'}
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  {isLoading ? (
+                    <div className="text-center py-8">
+                      <p className="text-muted-foreground">{language === 'pt' ? 'A carregar documentos...' : 'Loading documents...'}</p>
+                    </div>
+                  ) : !documentos || documentos.length === 0 ? (
+                    <div className="text-center py-12">
+                      <FileText className="h-16 w-16 text-muted-foreground/30 mx-auto mb-4" />
+                      <p className="text-muted-foreground">{language === 'pt' ? 'Nenhum documento disponível' : 'No documents available'}</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {documentos.map((doc: any) => (
+                        <Card key={doc.id} className="hover:shadow-md transition-shadow">
+                          <CardContent className="p-4">
+                            <div className="flex items-start justify-between gap-4">
+                              <div className="flex-1">
+                                <h3 className="font-semibold text-lg mb-1">{doc.titulo}</h3>
+                                {doc.descricao && (
+                                  <p className="text-sm text-muted-foreground mb-2">{doc.descricao}</p>
+                                )}
+                                <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                                  <span className="flex items-center gap-1">
+                                    <Calendar className="h-3 w-3" />
+                                    {new Date(doc.createdAt).toLocaleDateString(language === 'pt' ? 'pt-PT' : 'en-US')}
+                                  </span>
+                                </div>
+                              </div>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => window.open(doc.fileUrl, '_blank')}
+                                className="flex items-center gap-2"
+                              >
+                                <Download className="h-4 w-4" />
+                                {language === 'pt' ? 'Abrir' : 'Open'}
+                              </Button>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
           );
         })()}
 

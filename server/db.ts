@@ -130,6 +130,9 @@ import {
   colaboradores,
   Colaborador,
   InsertColaborador,
+  documentos,
+  Documento,
+  InsertDocumento,
   enviosRH,
   EnvioRH,
   InsertEnvioRH
@@ -10247,4 +10250,78 @@ export async function countVolantesAtivosByGestor(gestorId: number): Promise<num
     ));
   
   return result[0]?.count || 0;
+}
+
+// ==================== DOCUMENTOS/CIRCULARES ====================
+
+/**
+ * Obter documentos (gestores veem os seus, lojas veem os atribuídos)
+ */
+export async function getDocumentos(userId: number, role: string): Promise<Documento[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  if (role === 'admin') {
+    // Admin vê todos
+    return await db.select().from(documentos).orderBy(desc(documentos.createdAt));
+  } else if (role === 'gestor') {
+    // Gestor vê apenas os seus
+    return await db.select().from(documentos)
+      .where(eq(documentos.createdBy, userId))
+      .orderBy(desc(documentos.createdAt));
+  } else {
+    // Loja vê documentos atribuídos a ela ou a todas
+    // Obter loja do utilizador através do gestor (simplificado: retornar todos os documentos públicos)
+    // TODO: Implementar lógica de associação loja-utilizador quando schema estiver completo
+    const allDocs = await db.select().from(documentos).orderBy(desc(documentos.createdAt));
+    // Por enquanto, retornar apenas documentos públicos (targetLojas = null)
+    return allDocs.filter(doc => !doc.targetLojas);
+  }
+}
+
+/**
+ * Criar documento
+ */
+export async function createDocumento(data: InsertDocumento): Promise<Documento> {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  
+  const result = await db.insert(documentos).values(data);
+  const id = Number(result[0].insertId);
+  
+  const created = await db.select().from(documentos).where(eq(documentos.id, id));
+  return created[0];
+}
+
+/**
+ * Obter documento por ID
+ */
+export async function getDocumentoById(id: number): Promise<Documento | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const result = await db.select().from(documentos).where(eq(documentos.id, id));
+  return result[0] || null;
+}
+
+/**
+ * Atualizar documento
+ */
+export async function updateDocumento(id: number, data: Partial<InsertDocumento>): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  
+  await db.update(documentos)
+    .set({ ...data, updatedAt: new Date() })
+    .where(eq(documentos.id, id));
+}
+
+/**
+ * Eliminar documento
+ */
+export async function deleteDocumento(id: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  
+  await db.delete(documentos).where(eq(documentos.id, id));
 }

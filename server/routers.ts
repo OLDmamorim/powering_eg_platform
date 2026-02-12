@@ -10276,6 +10276,102 @@ IMPORTANTE:
         };
       }),
   }),
+
+  // ==================== DOCUMENTOS/CIRCULARES ====================
+  documentos: router({
+    // Listar documentos (gestores veem todos os seus, lojas veem os que lhes foram atribuídos)
+    listar: protectedProcedure.query(async ({ ctx }) => {
+      const documentos = await db.getDocumentos(ctx.user.id, ctx.user.role);
+      return documentos;
+    }),
+
+    // Upload de documento (apenas gestores)
+    upload: gestorProcedure
+      .input(z.object({
+        titulo: z.string().min(1),
+        descricao: z.string().optional(),
+        fileData: z.string(), // Base64
+        fileName: z.string(),
+        fileSize: z.number(),
+        targetLojas: z.array(z.number()).optional(), // null = todas as lojas
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const { storagePut } = await import('./storage');
+        
+        // Upload para S3
+        const fileBuffer = Buffer.from(input.fileData, 'base64');
+        const randomSuffix = Math.random().toString(36).substring(7);
+        const fileKey = `documentos/${ctx.gestor!.id}/${randomSuffix}-${input.fileName}`;
+        
+        const { url } = await storagePut(fileKey, fileBuffer, 'application/pdf');
+        
+        // Guardar na BD
+        const documento = await db.createDocumento({
+          titulo: input.titulo,
+          descricao: input.descricao || null,
+          fileUrl: url,
+          fileKey,
+          fileName: input.fileName,
+          fileSize: input.fileSize,
+          createdBy: ctx.user.id,
+          targetLojas: input.targetLojas ? JSON.stringify(input.targetLojas) : null,
+        });
+        
+        return documento;
+      }),
+
+    // Editar documento (apenas gestor que criou)
+    editar: gestorProcedure
+      .input(z.object({
+        id: z.number(),
+        titulo: z.string().min(1),
+        descricao: z.string().optional(),
+        targetLojas: z.array(z.number()).optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const documento = await db.getDocumentoById(input.id);
+        if (!documento) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Documento não encontrado' });
+        }
+        
+        if (documento.createdBy !== ctx.user.id && ctx.user.role !== 'admin') {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Sem permissão' });
+        }
+        
+        await db.updateDocumento(input.id, {
+          titulo: input.titulo,
+          descricao: input.descricao || null,
+          targetLojas: input.targetLojas ? JSON.stringify(input.targetLojas) : null,
+        });
+        
+        return { success: true };
+      }),
+
+    // Eliminar documento (apenas gestor que criou)
+    eliminar: gestorProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input, ctx }) => {
+        const documento = await db.getDocumentoById(input.id);
+        if (!documento) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Documento não encontrado' });
+        }
+        
+        if (documento.createdBy !== ctx.user.id && ctx.user.role !== 'admin') {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Sem permissão' });
+        }
+        
+        // Eliminar do S3 (opcional, pode falhar silenciosamente)
+        try {
+          const { storageDelete } = await import('./storage');
+          await storageDelete(documento.fileKey);
+        } catch (e) {
+          console.warn('Erro ao eliminar ficheiro do S3:', e);
+        }
+        
+        await db.deleteDocumento(input.id);
+        return { success: true };
+      }),
+  }),
 });
 
 // Função auxiliar para gerar HTML do email de reunião quinzenal

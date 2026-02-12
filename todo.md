@@ -4545,3 +4545,12 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar logo ExpressGlass no topo
 - [x] Garantir que todo o conteúdo cabe numa única página
 - [x] Testar PDF gerado
+
+## v6.14.0 - Sistema de Documentos/Circulares
+- [x] Criar tabela `documentos` na base de dados (título, descrição, fileUrl, fileKey, createdBy, targetLojas)
+- [x] Implementar backend: upload para S3, CRUD de documentos
+- [x] Criar página "Documentos" para gestores (upload, listagem, edição, eliminação)
+- [x] Adicionar menu "Documentos" no DashboardLayout para gestores
+- [x] Adicionar card "Circulares" no Portal da Loja
+- [x] Implementar visualização de documentos no portal da loja
+- [x] Testar upload, gestão e visualização

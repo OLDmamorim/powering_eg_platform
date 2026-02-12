@@ -1281,3 +1281,23 @@ export const enviosRH = mysqlTable("envios_rh", {
 
 export type EnvioRH = typeof enviosRH.$inferSelect;
 export type InsertEnvioRH = typeof enviosRH.$inferInsert;
+
+/**
+ * Documentos/Circulares - Documentos PDF partilhados pelos gestores com as lojas
+ */
+export const documentos = mysqlTable("documentos", {
+  id: int("id").autoincrement().primaryKey(),
+  titulo: varchar("titulo", { length: 255 }).notNull(),
+  descricao: text("descricao"),
+  fileUrl: text("fileUrl").notNull(), // URL do ficheiro no S3
+  fileKey: text("fileKey").notNull(), // Chave do ficheiro no S3 para eliminação
+  fileName: varchar("fileName", { length: 255 }).notNull(), // Nome original do ficheiro
+  fileSize: int("fileSize").notNull(), // Tamanho do ficheiro em bytes
+  createdBy: int("createdBy").notNull(), // FK para users.id (gestor que criou)
+  targetLojas: text("targetLojas"), // JSON array de IDs das lojas [1,2,3] ou null para todas
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Documento = typeof documentos.$inferSelect;
+export type InsertDocumento = typeof documentos.$inferInsert;
