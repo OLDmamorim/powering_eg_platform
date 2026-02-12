@@ -115,6 +115,8 @@ import {
   Trash2,
   MapPin,
   Bot,
+  Filter,
+  ClipboardList,
 } from "lucide-react";
 
 interface LojaAuth {
@@ -5198,6 +5200,24 @@ END:VCALENDAR`;
               </div>
             </Card>
 
+            {/* Card Histórico de Serviços */}
+            <Card 
+              className="p-8 cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-105 bg-white dark:bg-gray-800 border-2 border-transparent hover:border-blue-400 group"
+              onClick={() => setActiveView("historico-servicos")}
+            >
+              <div className="text-center">
+                <div className="w-24 h-24 bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-200 dark:group-hover:bg-blue-900/50 transition-colors">
+                  <ClipboardList className="h-12 w-12 text-blue-600" />
+                </div>
+                <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">
+                  {language === 'pt' ? 'Histórico de Serviços' : 'Service History'}
+                </h2>
+                <p className="text-gray-500 dark:text-gray-400 text-sm">
+                  {language === 'pt' ? 'Consultar e exportar serviços registados' : 'View and export registered services'}
+                </p>
+              </div>
+            </Card>
+
             {/* Card Configurações */}
             <Card 
               className="p-8 cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-105 bg-white dark:bg-gray-800 border-2 border-transparent hover:border-gray-400 group"
@@ -5255,9 +5275,11 @@ END:VCALENDAR`;
                         ? (language === 'pt' ? 'Dashboard de Estatísticas' : 'Statistics Dashboard')
                         : activeView === "circulares"
                           ? (language === 'pt' ? 'Circulares e Documentos' : 'Circulars and Documents')
-                          : activeView === "configuracoes"
-                            ? (language === 'pt' ? 'Configurações' : 'Settings')
-                            : (language === 'pt' ? 'Resultados das Lojas' : 'Store Results')}
+                          : activeView === "historico-servicos"
+                            ? (language === 'pt' ? 'Histórico de Serviços' : 'Service History')
+                            : activeView === "configuracoes"
+                              ? (language === 'pt' ? 'Configurações' : 'Settings')
+                              : (language === 'pt' ? 'Resultados das Lojas' : 'Store Results')}
                 </p>
               </div>
             </div>
@@ -6583,6 +6605,172 @@ END:VCALENDAR`;
                           </CardContent>
                         </Card>
                       ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          );
+        })()}
+
+        {/* Vista Histórico de Serviços */}
+        {activeView === "historico-servicos" && (() => {
+          const [dataInicio, setDataInicio] = React.useState<string>('');
+          const [dataFim, setDataFim] = React.useState<string>('');
+          const [lojaFiltro, setLojaFiltro] = React.useState<number | undefined>(undefined);
+          
+          const { data: historico, isLoading } = trpc.portalVolante.getHistoricoServicos.useQuery({
+            token: volanteAuth.token,
+            dataInicio: dataInicio || undefined,
+            dataFim: dataFim || undefined,
+            lojaId: lojaFiltro,
+          });
+          
+          const exportarPDF = trpc.portalVolante.exportarRelatorioMensal.useMutation({
+            onSuccess: (data) => {
+              const link = document.createElement('a');
+              link.href = `data:application/pdf;base64,${data.pdf}`;
+              link.download = data.filename;
+              link.click();
+              toast.success('Relatório exportado com sucesso!');
+            },
+            onError: () => {
+              toast.error('Erro ao exportar relatório');
+            },
+          });
+          
+          const handleExportarMes = () => {
+            const hoje = new Date();
+            exportarPDF.mutate({
+              token: volanteAuth.token,
+              ano: hoje.getFullYear(),
+              mes: hoje.getMonth() + 1,
+            });
+          };
+          
+          return (
+            <div className="container mx-auto px-4 py-6 space-y-6">
+              {/* Filtros */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Filter className="h-5 w-5 text-blue-500" />
+                    {language === 'pt' ? 'Filtros' : 'Filters'}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">
+                        {language === 'pt' ? 'Data Início' : 'Start Date'}
+                      </label>
+                      <input
+                        type="date"
+                        value={dataInicio}
+                        onChange={(e) => setDataInicio(e.target.value)}
+                        className="w-full px-3 py-2 border rounded-lg"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">
+                        {language === 'pt' ? 'Data Fim' : 'End Date'}
+                      </label>
+                      <input
+                        type="date"
+                        value={dataFim}
+                        onChange={(e) => setDataFim(e.target.value)}
+                        className="w-full px-3 py-2 border rounded-lg"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">
+                        {language === 'pt' ? 'Loja' : 'Store'}
+                      </label>
+                      <select
+                        value={lojaFiltro || ''}
+                        onChange={(e) => setLojaFiltro(e.target.value ? Number(e.target.value) : undefined)}
+                        className="w-full px-3 py-2 border rounded-lg"
+                      >
+                        <option value="">{language === 'pt' ? 'Todas' : 'All'}</option>
+                        {volanteAuth.lojas.map(loja => (
+                          <option key={loja.id} value={loja.id}>{loja.nome}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setDataInicio('');
+                        setDataFim('');
+                        setLojaFiltro(undefined);
+                      }}
+                    >
+                      {language === 'pt' ? 'Limpar Filtros' : 'Clear Filters'}
+                    </Button>
+                    <Button
+                      onClick={handleExportarMes}
+                      disabled={exportarPDF.isPending}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      {language === 'pt' ? 'Exportar Mês Atual' : 'Export Current Month'}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              {/* Tabela de Histórico */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <ClipboardList className="h-5 w-5 text-blue-500" />
+                    {language === 'pt' ? 'Serviços Registados' : 'Registered Services'}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {isLoading ? (
+                    <div className="text-center py-8">
+                      <p className="text-gray-500">{language === 'pt' ? 'A carregar...' : 'Loading...'}</p>
+                    </div>
+                  ) : !historico || historico.length === 0 ? (
+                    <div className="text-center py-8">
+                      <p className="text-gray-500">{language === 'pt' ? 'Sem serviços registados' : 'No services registered'}</p>
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full">
+                        <thead>
+                          <tr className="border-b">
+                            <th className="text-left py-3 px-4 font-semibold">{language === 'pt' ? 'Data' : 'Date'}</th>
+                            <th className="text-left py-3 px-4 font-semibold">{language === 'pt' ? 'Loja' : 'Store'}</th>
+                            <th className="text-center py-3 px-4 font-semibold">{language === 'pt' ? 'Subst. Ligeiro' : 'Light Repl.'}</th>
+                            <th className="text-center py-3 px-4 font-semibold">{language === 'pt' ? 'Reparação' : 'Repair'}</th>
+                            <th className="text-center py-3 px-4 font-semibold">{language === 'pt' ? 'Calibragem' : 'Calibration'}</th>
+                            <th className="text-center py-3 px-4 font-semibold">{language === 'pt' ? 'Outros' : 'Others'}</th>
+                            <th className="text-center py-3 px-4 font-semibold">{language === 'pt' ? 'Total' : 'Total'}</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {historico.map((servico) => {
+                            const total = servico.substituicaoLigeiro + servico.reparacao + servico.calibragem + servico.outros;
+                            return (
+                              <tr key={servico.id} className="border-b hover:bg-gray-50 dark:hover:bg-gray-800">
+                                <td className="py-3 px-4">
+                                  {new Date(servico.data).toLocaleDateString('pt-PT')}
+                                </td>
+                                <td className="py-3 px-4">{servico.lojaNome}</td>
+                                <td className="py-3 px-4 text-center">{servico.substituicaoLigeiro}</td>
+                                <td className="py-3 px-4 text-center">{servico.reparacao}</td>
+                                <td className="py-3 px-4 text-center">{servico.calibragem}</td>
+                                <td className="py-3 px-4 text-center">{servico.outros}</td>
+                                <td className="py-3 px-4 text-center font-semibold">{total}</td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
                     </div>
                   )}
                 </CardContent>

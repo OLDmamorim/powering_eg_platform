@@ -10511,3 +10511,201 @@ export async function getServicosVolantePorLojaAgrupado(volanteId: number, dataI
   // Ordenar por total decrescente
   return agrupado.sort((a, b) => b.total - a.total);
 }
+
+
+/**
+ * Verificar volantes que não registaram serviços hoje e têm agendamentos
+ * Retorna lista de volantes com lojas agendadas não registadas
+ */
+export async function getVolantesSemRegistoHoje() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const hoje = new Date().toISOString().split('T')[0];
+  
+  // Buscar todos os volantes com agendamentos hoje
+  const agendamentosHoje = await db.select({
+    volanteId: agendamentosVolante.volanteId,
+    volante: volantes,
+    lojaId: agendamentosVolante.lojaId,
+    loja: lojas,
+    periodo: agendamentosVolante.periodo
+  })
+    .from(agendamentosVolante)
+    .leftJoin(volantes, eq(agendamentosVolante.volanteId, volantes.id))
+    .leftJoin(lojas, eq(agendamentosVolante.lojaId, lojas.id))
+    .where(sql`DATE(${agendamentosVolante.data}) = ${hoje}`);
+  
+  // Buscar serviços já registados hoje
+  const servicosHoje = await db.select()
+    .from(servicosVolante)
+    .where(eq(servicosVolante.data, hoje));
+  
+  // Agrupar por volante e verificar quais lojas não têm registo
+  const volantesMap = new Map<number, any>();
+  
+  for (const agendamento of agendamentosHoje) {
+    if (!agendamento.volanteId || !agendamento.volante) continue;
+    
+    const volanteId = agendamento.volanteId;
+    const lojaId = agendamento.lojaId;
+    
+    // Verificar se já tem registo para esta loja
+    const temRegisto = servicosHoje.some(s => s.volanteId === volanteId && s.lojaId === lojaId);
+    
+    if (!temRegisto) {
+      if (!volantesMap.has(volanteId)) {
+        volantesMap.set(volanteId, {
+          volanteId,
+          volanteNome: agendamento.volante.nome,
+          telegramChatId: agendamento.volante.telegramChatId,
+          lojasNaoRegistadas: []
+        });
+      }
+      
+      volantesMap.get(volanteId)!.lojasNaoRegistadas.push({
+        lojaId,
+        lojaNome: agendamento.loja?.nome || 'Loja',
+        periodo: agendamento.periodo
+      });
+    }
+  }
+  
+  return Array.from(volantesMap.values()).filter(v => v.lojasNaoRegistadas.length > 0);
+}
+
+/**
+ * Obter histórico de serviços com filtros
+ */
+export async function getHistoricoServicosVolante(
+  volanteId: number,
+  dataInicio?: string,
+  dataFim?: string,
+  lojaId?: number
+) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const conditions = [eq(servicosVolante.volanteId, volanteId)];
+  
+  if (dataInicio) {
+    conditions.push(gte(servicosVolante.data, dataInicio));
+  }
+  if (dataFim) {
+    conditions.push(lte(servicosVolante.data, dataFim));
+  }
+  if (lojaId) {
+    conditions.push(eq(servicosVolante.lojaId, lojaId));
+  }
+  
+  const servicos = await db.select({
+    id: servicosVolante.id,
+    data: servicosVolante.data,
+    lojaId: servicosVolante.lojaId,
+    lojaNome: lojas.nome,
+    substituicaoLigeiro: servicosVolante.substituicaoLigeiro,
+    reparacao: servicosVolante.reparacao,
+    calibragem: servicosVolante.calibragem,
+    outros: servicosVolante.outros,
+    createdAt: servicosVolante.createdAt
+  })
+    .from(servicosVolante)
+    .leftJoin(lojas, eq(servicosVolante.lojaId, lojas.id))
+    .where(and(...conditions))
+    .orderBy(desc(servicosVolante.data));
+  
+  return servicos;
+}
+
+/**
+ * Obter estatísticas mensais de serviços para relatório
+ */
+export async function getEstatisticasMensaisServicos(volanteId: number, ano: number, mes: number) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  // Calcular primeiro e último dia do mês
+  const primeiroDia = new Date(ano, mes - 1, 1).toISOString().split('T')[0];
+  const ultimoDia = new Date(ano, mes, 0).toISOString().split('T')[0];
+  
+  const servicos = await db.select()
+    .from(servicosVolante)
+    .where(and(
+      eq(servicosVolante.volanteId, volanteId),
+      gte(servicosVolante.data, primeiroDia),
+      lte(servicosVolante.data, ultimoDia)
+    ));
+  
+  // Calcular totais
+  const totais = {
+    substituicaoLigeiro: 0,
+    reparacao: 0,
+    calibragem: 0,
+    outros: 0,
+    total: 0,
+    diasTrabalhados: new Set<string>(),
+    lojas: new Set<number>()
+  };
+  
+  for (const s of servicos) {
+    totais.substituicaoLigeiro += s.substituicaoLigeiro;
+    totais.reparacao += s.reparacao;
+    totais.calibragem += s.calibragem;
+    totais.outros += s.outros;
+    totais.total += s.substituicaoLigeiro + s.reparacao + s.calibragem + s.outros;
+    totais.diasTrabalhados.add(s.data);
+    totais.lojas.add(s.lojaId);
+  }
+  
+  // Agrupar por loja
+  const porLoja = servicos.reduce((acc: any[], s) => {
+    const existente = acc.find(item => item.lojaId === s.lojaId);
+    if (existente) {
+      existente.substituicaoLigeiro += s.substituicaoLigeiro;
+      existente.reparacao += s.reparacao;
+      existente.calibragem += s.calibragem;
+      existente.outros += s.outros;
+      existente.total += s.substituicaoLigeiro + s.reparacao + s.calibragem + s.outros;
+      existente.visitas += 1;
+    } else {
+      acc.push({
+        lojaId: s.lojaId,
+        substituicaoLigeiro: s.substituicaoLigeiro,
+        reparacao: s.reparacao,
+        calibragem: s.calibragem,
+        outros: s.outros,
+        total: s.substituicaoLigeiro + s.reparacao + s.calibragem + s.outros,
+        visitas: 1
+      });
+    }
+    return acc;
+  }, []);
+  
+  // Buscar nomes das lojas
+  if (porLoja.length > 0) {
+    const lojasInfo = await db.select({
+      id: lojas.id,
+      nome: lojas.nome
+    })
+      .from(lojas)
+      .where(inArray(lojas.id, porLoja.map(l => l.lojaId)));
+    
+    for (const item of porLoja) {
+      const lojaInfo = lojasInfo.find(l => l.id === item.lojaId);
+      item.lojaNome = lojaInfo?.nome || 'Loja';
+    }
+  }
+  
+  return {
+    totais: {
+      substituicaoLigeiro: totais.substituicaoLigeiro,
+      reparacao: totais.reparacao,
+      calibragem: totais.calibragem,
+      outros: totais.outros,
+      total: totais.total,
+      diasTrabalhados: totais.diasTrabalhados.size,
+      lojasVisitadas: totais.lojas.size
+    },
+    porLoja: porLoja.sort((a, b) => b.total - a.total)
+  };
+}

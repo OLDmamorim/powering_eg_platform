@@ -4612,3 +4612,17 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [ ] Envio automático no fim do mês
 - [ ] Histórico de envios
 - [ ] Testar automatismos
+
+
+## v6.17.0 - Notificações Telegram e Histórico (Opções 2 e 3)
+- [x] Backend: Função para verificar serviços não registados do dia
+- [x] Backend: Funções Telegram para lembretes e resumos semanais
+- [x] Backend: Endpoint para histórico de serviços com filtros
+- [x] Backend: Geração de relatório mensal em PDF
+- [x] Backend: Estatísticas agregadas por loja e tipo
+- [x] Frontend: Secção "Histórico de Serviços" no Portal do Volante
+- [x] Frontend: Filtros por data (range picker) e loja
+- [x] Frontend: Tabela com serviços registados
+- [x] Frontend: Botão de exportação para PDF
+- [ ] Agendamento automático de notificações (requer cron job)
+- [ ] Testar notificações manuais via endpoint

@@ -533,3 +533,102 @@ ${agendamento.portalUrl ? `
   const result = await sendTelegramMessageToMultiple(chatIds, message);
   return result.success > 0;
 }
+
+
+/**
+ * Envia lembrete diário para volante registar serviços
+ */
+export async function enviarLembreteRegistoServicos(
+  chatId: string,
+  dados: {
+    volanteNome: string;
+    lojasNaoRegistadas: Array<{
+      lojaId: number;
+      lojaNome: string;
+      periodo: 'manha' | 'tarde' | 'dia_todo';
+    }>;
+  }
+): Promise<boolean> {
+  const periodoTexto = (periodo: string) => {
+    switch (periodo) {
+      case 'manha': return 'Manhã (9h-13h)';
+      case 'tarde': return 'Tarde (14h-18h)';
+      case 'dia_todo': return 'Dia Todo';
+      default: return periodo;
+    }
+  };
+
+  const lojasTexto = dados.lojasNaoRegistadas
+    .map(l => `  • ${l.lojaNome} - ${periodoTexto(l.periodo)}`)
+    .join('\n');
+
+  const mensagem = `
+🔔 <b>Lembrete de Registo de Serviços</b>
+
+Olá ${dados.volanteNome},
+
+Ainda não registaste os serviços realizados hoje nas seguintes lojas:
+
+${lojasTexto}
+
+Por favor, acede ao Portal do Volante e regista os serviços antes do final do dia.
+
+<i>PoweringEG Platform 2.0</i>
+  `.trim();
+
+  return await sendTelegramMessage(chatId, mensagem, 'HTML');
+}
+
+/**
+ * Envia resumo semanal de produtividade para gestores
+ */
+export async function enviarResumoSemanalServicos(
+  chatIds: string,
+  dados: {
+    volanteNome: string;
+    semana: string;
+    totais: {
+      substituicaoLigeiro: number;
+      reparacao: number;
+      calibragem: number;
+      outros: number;
+      total: number;
+      diasTrabalhados: number;
+      lojasVisitadas: number;
+    };
+    topLojas: Array<{
+      lojaNome: string;
+      total: number;
+    }>;
+  }
+): Promise<{ success: number; failed: number }> {
+  const topLojasTexto = dados.topLojas
+    .slice(0, 5)
+    .map((l, i) => `  ${i + 1}. ${l.lojaNome} - ${l.total} serviços`)
+    .join('\n');
+
+  const mensagem = `
+📊 <b>Resumo Semanal de Serviços</b>
+
+<b>Volante:</b> ${dados.volanteNome}
+<b>Semana:</b> ${dados.semana}
+
+<b>📈 Totais da Semana:</b>
+  • Total de Serviços: ${dados.totais.total}
+  • Substituição Ligeiro: ${dados.totais.substituicaoLigeiro}
+  • Reparação: ${dados.totais.reparacao}
+  • Calibragem: ${dados.totais.calibragem}
+  • Outros: ${dados.totais.outros}
+
+<b>📅 Atividade:</b>
+  • Dias Trabalhados: ${dados.totais.diasTrabalhados}
+  • Lojas Visitadas: ${dados.totais.lojasVisitadas}
+
+<b>🏆 Top 5 Lojas:</b>
+${topLojasTexto}
+
+<i>PoweringEG Platform 2.0 - a IA ao serviço da ExpressGlass</i>
+  `.trim();
+
+  return await sendTelegramMessageToMultiple(chatIds, mensagem, 'HTML');
+}

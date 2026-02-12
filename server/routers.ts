@@ -9306,6 +9306,89 @@ IMPORTANTE:
         const servicos = await db.getServicosVolanteByData(tokenData.volante.id, input.data);
         return servicos;
       }),
+    
+    // Obter histórico de serviços com filtros
+    getHistoricoServicos: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        dataInicio: z.string().optional(),
+        dataFim: z.string().optional(),
+        lojaId: z.number().optional(),
+      }))
+      .query(async ({ input }) => {
+        const tokenData = await db.validateTokenVolante(input.token);
+        if (!tokenData) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        
+        const historico = await db.getHistoricoServicosVolante(
+          tokenData.volante.id,
+          input.dataInicio,
+          input.dataFim,
+          input.lojaId
+        );
+        return historico;
+      }),
+    
+    // Obter estatísticas mensais
+    getEstatisticasMensais: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        ano: z.number(),
+        mes: z.number(),
+      }))
+      .query(async ({ input }) => {
+        const tokenData = await db.validateTokenVolante(input.token);
+        if (!tokenData) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        
+        const estatisticas = await db.getEstatisticasMensaisServicos(
+          tokenData.volante.id,
+          input.ano,
+          input.mes
+        );
+        return estatisticas;
+      }),
+    
+    // Exportar relatório mensal em PDF
+    exportarRelatorioMensal: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        ano: z.number(),
+        mes: z.number(),
+      }))
+      .mutation(async ({ input }) => {
+        const tokenData = await db.validateTokenVolante(input.token);
+        if (!tokenData) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        
+        const estatisticas = await db.getEstatisticasMensaisServicos(
+          tokenData.volante.id,
+          input.ano,
+          input.mes
+        );
+        
+        if (!estatisticas) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Sem dados para este período' });
+        }
+        
+        // Gerar PDF (implementar depois)
+        const { gerarPDFRelatorioMensalServicos } = await import('./pdfRelatorioMensalServicos');
+        const pdfBuffer = await gerarPDFRelatorioMensalServicos({
+          volanteNome: tokenData.volante.nome,
+          ano: input.ano,
+          mes: input.mes,
+          totais: estatisticas.totais,
+          porLoja: estatisticas.porLoja,
+        });
+        
+        return {
+          pdf: pdfBuffer.toString('base64'),
+          filename: `relatorio_servicos_${input.ano}_${String(input.mes).padStart(2, '0')}.pdf`,
+        };
+      }),
   }),
   
   // ==================== ANÁLISE DE FICHAS DE SERVIÇO ====================
