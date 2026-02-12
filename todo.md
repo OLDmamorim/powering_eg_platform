@@ -4683,3 +4683,14 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Sistema 100% funcional - mensagens confirmadas no Telegram
 - [x] Logs de debug removidos
 - [x] Testes realizados com sucesso (message_id: 502)
+
+## v6.21.0 - Dashboard de Estatísticas Melhorado
+- [x] Backend: Criar função getEstatisticasDetalhadasVolante() com totais por tipo de serviço
+- [x] Backend: Criar função getTopLojasComMaisServicos() para ranking de lojas
+- [x] Backend: Criar função getEvolucaoServicos() para dados de gráfico temporal
+- [x] Backend: Adicionar endpoint tRPC getEstatisticasDetalhadas
+- [x] Frontend: Adicionar cards com totais de cada tipo (Substituição, Reparação, Calibragem, Outros)
+- [x] Frontend: Adicionar tabela/card com Top 5 lojas mais atendidas
+- [x] Frontend: Adicionar gráfico Chart.js de evolução semanal/mensal
+- [x] Frontend: Adicionar estatísticas adicionais (média por dia, etc)
+- [x] Testar todas as métricas no Dashboard

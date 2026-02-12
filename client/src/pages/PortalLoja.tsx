@@ -6350,16 +6350,31 @@ END:VCALENDAR`;
 
         {/* Vista Dashboard */}
         {activeView === "dashboard" && (() => {
-          // Filtrar pedidos pelos meses selecionados
-          const pedidosFiltrados = mesesSelecionadosVolante.length === 0 ? todosAprovados : todosAprovados.filter((p: any) => {
-            const dataPedido = new Date(p.data);
-            const mesPedido = dataPedido.getMonth() + 1;
-            const anoPedido = dataPedido.getFullYear();
-            return mesesSelecionadosVolante.some(m => m.mes === mesPedido && m.ano === anoPedido);
-          });
+          // Buscar estatísticas detalhadas de serviços
+          const { data: estatisticasDetalhadas, isLoading: loadingEstatisticas } = trpc.portalVolante.getEstatisticasDetalhadas.useQuery(
+            { token, periodo: 'mes' },
+            { enabled: !!token && !!volanteAuth }
+          );
           
-          // Calcular lojas únicas
-          const lojasUnicas = new Set(pedidosFiltrados.map((p: any) => p.lojaId));
+          // Buscar top lojas
+          const { data: topLojas, isLoading: loadingTopLojas } = trpc.portalVolante.getTopLojas.useQuery(
+            { token, limite: 5 },
+            { enabled: !!token && !!volanteAuth }
+          );
+          
+          // Buscar evolução de serviços
+          const { data: evolucaoServicos, isLoading: loadingEvolucao } = trpc.portalVolante.getEvolucaoServicos.useQuery(
+            { token, periodo: 'mes' },
+            { enabled: !!token && !!volanteAuth }
+          );
+          
+          if (loadingEstatisticas || loadingTopLojas || loadingEvolucao) {
+            return (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-teal-600" />
+              </div>
+            );
+          }
           
           return (
           <div className="container mx-auto px-4 py-6 space-y-6">
@@ -6396,40 +6411,16 @@ END:VCALENDAR`;
               </CardContent>
             </Card>
 
-            {/* Cards de Estatísticas */}
+            {/* Cards de Estatísticas de Serviços */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <Card className="bg-gradient-to-br from-purple-500 to-purple-600 text-white border-0">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm opacity-80 mb-1">{language === 'pt' ? 'Total Apoios' : 'Total Support'}</p>
-                      <p className="text-3xl font-bold">{pedidosFiltrados.length}</p>
+                      <p className="text-sm opacity-80 mb-1">{language === 'pt' ? 'Total Serviços' : 'Total Services'}</p>
+                      <p className="text-3xl font-bold">{estatisticasDetalhadas?.totalServicos || 0}</p>
                     </div>
                     <CheckCircle2 className="h-10 w-10 opacity-60" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white border-0">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm opacity-80 mb-1">{language === 'pt' ? 'Lojas Apoiadas' : 'Stores Supported'}</p>
-                      <p className="text-3xl font-bold">{lojasUnicas.size}</p>
-                    </div>
-                    <Store className="h-10 w-10 opacity-60" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-gradient-to-br from-teal-500 to-teal-600 text-white border-0">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm opacity-80 mb-1">{language === 'pt' ? 'Coberturas Férias' : 'Holiday Coverage'}</p>
-                      <p className="text-3xl font-bold">{pedidosFiltrados.filter((p: any) => p.tipoApoio === 'cobertura_ferias').length}</p>
-                    </div>
-                    <Calendar className="h-10 w-10 opacity-60" />
                   </div>
                 </CardContent>
               </Card>
@@ -6438,23 +6429,63 @@ END:VCALENDAR`;
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm opacity-80 mb-1">{language === 'pt' ? 'Substituições' : 'Replacements'}</p>
-                      <p className="text-3xl font-bold">{pedidosFiltrados.filter((p: any) => p.tipoApoio === 'substituicao_vidros').length}</p>
+                      <p className="text-sm opacity-80 mb-1">{language === 'pt' ? 'Substituições Ligeiro' : 'Light Replacements'}</p>
+                      <p className="text-3xl font-bold">{estatisticasDetalhadas?.totaisPorTipo.substituicaoLigeiro || 0}</p>
                     </div>
                     <Wrench className="h-10 w-10 opacity-60" />
                   </div>
                 </CardContent>
               </Card>
+
+              <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white border-0">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm opacity-80 mb-1">{language === 'pt' ? 'Reparações' : 'Repairs'}</p>
+                      <p className="text-3xl font-bold">{estatisticasDetalhadas?.totaisPorTipo.reparacao || 0}</p>
+                    </div>
+                    <Wrench className="h-10 w-10 opacity-60" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gradient-to-br from-teal-500 to-teal-600 text-white border-0">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm opacity-80 mb-1">{language === 'pt' ? 'Calibragens' : 'Calibrations'}</p>
+                      <p className="text-3xl font-bold">{estatisticasDetalhadas?.totaisPorTipo.calibragem || 0}</p>
+                    </div>
+                    <Activity className="h-10 w-10 opacity-60" />
+                  </div>
+                </CardContent>
+              </Card>
             </div>
+            
+            {/* Card de Média */}
+            <Card className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-200 dark:border-green-800">
+              <CardContent className="py-4">
+                <div className="grid grid-cols-2 gap-4 text-center">
+                  <div>
+                    <p className="text-2xl font-bold text-green-600">{estatisticasDetalhadas?.mediaPorDia || 0}</p>
+                    <p className="text-xs text-gray-500">{language === 'pt' ? 'Média de Serviços/Dia' : 'Avg Services/Day'}</p>
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-emerald-600">{estatisticasDetalhadas?.diasTrabalhados || 0}</p>
+                    <p className="text-xs text-gray-500">{language === 'pt' ? 'Dias Trabalhados' : 'Days Worked'}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Gráficos */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Gráfico de Tipos de Apoio */}
+              {/* Gráfico de Tipos de Serviço */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <BarChart3 className="h-5 w-5 text-purple-600" />
-                    {language === 'pt' ? 'Tipos de Apoio' : 'Support Types'}
+                    {language === 'pt' ? 'Tipos de Serviço' : 'Service Types'}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -6462,17 +6493,19 @@ END:VCALENDAR`;
                     <Doughnut
                       data={{
                         labels: [
-                          language === 'pt' ? 'Cobertura Férias' : 'Holiday Coverage',
-                          language === 'pt' ? 'Substituição Vidros' : 'Glass Replacement',
-                          language === 'pt' ? 'Outro' : 'Other'
+                          language === 'pt' ? 'Substituição Ligeiro' : 'Light Replacement',
+                          language === 'pt' ? 'Reparação' : 'Repair',
+                          language === 'pt' ? 'Calibragem' : 'Calibration',
+                          language === 'pt' ? 'Outros' : 'Others'
                         ],
                         datasets: [{
                           data: [
-                            pedidosFiltrados.filter((p: any) => p.tipoApoio === 'cobertura_ferias').length,
-                            pedidosFiltrados.filter((p: any) => p.tipoApoio === 'substituicao_vidros').length,
-                            pedidosFiltrados.filter((p: any) => p.tipoApoio === 'outro').length,
+                            estatisticasDetalhadas?.totaisPorTipo.substituicaoLigeiro || 0,
+                            estatisticasDetalhadas?.totaisPorTipo.reparacao || 0,
+                            estatisticasDetalhadas?.totaisPorTipo.calibragem || 0,
+                            estatisticasDetalhadas?.totaisPorTipo.outros || 0,
                           ],
-                          backgroundColor: ['#14b8a6', '#3b82f6', '#f97316'],
+                          backgroundColor: ['#f97316', '#3b82f6', '#14b8a6', '#8b5cf6'],
                           borderWidth: 0,
                         }]
                       }}
@@ -6490,45 +6523,22 @@ END:VCALENDAR`;
                 </CardContent>
               </Card>
 
-              {/* Gráfico de Lojas Mais Apoiadas */}
+              {/* Gráfico de Top 5 Lojas */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <TrendingUp className="h-5 w-5 text-blue-600" />
-                    {language === 'pt' ? 'Top 5 Lojas Mais Apoiadas' : 'Top 5 Most Supported Stores'}
+                    {language === 'pt' ? 'Top 5 Lojas com Mais Serviços' : 'Top 5 Stores by Services'}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="h-64">
                     <Bar
-                      data={{                        labels: Object.values(
-                          pedidosFiltrados.reduce((acc: any, p: any) => {
-                            const lojaId = p.lojaId;
-                            if (!acc[lojaId]) {
-                              acc[lojaId] = { nome: p.loja?.nome || 'Loja', count: 0 };
-                            }
-                            acc[lojaId].count++;
-                            return acc;
-                          }, {})
-                        )
-                          .sort((a: any, b: any) => b.count - a.count)
-                          .slice(0, 5)
-                          .map((l: any) => l.nome),
+                      data={{
+                        labels: topLojas?.map((l: any) => l.lojaNome) || [],
                         datasets: [{
-                          label: language === 'pt' ? 'Apoios' : 'Support',
-                          data: Object.values(
-                            pedidosFiltrados.reduce((acc: any, p: any) => {
-                              const lojaId = p.lojaId;
-                              if (!acc[lojaId]) {
-                                acc[lojaId] = { nome: p.loja?.nome || 'Loja', count: 0 };
-                              }
-                              acc[lojaId].count++;
-                              return acc;
-                            }, {})
-                          )
-                            .sort((a: any, b: any) => b.count - a.count)
-                            .slice(0, 5)
-                            .map((l: any) => l.count),
+                          label: language === 'pt' ? 'Serviços' : 'Services',
+                          data: topLojas?.map((l: any) => l.total) || [],
                           backgroundColor: '#8b5cf6',
                         }]
                       }}
@@ -6555,29 +6565,18 @@ END:VCALENDAR`;
               </Card>
             </div>
 
-            {/* Ranking de Lojas */}
+            {/* Ranking de Lojas por Serviços */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Award className="h-5 w-5 text-yellow-600" />
-                  {language === 'pt' ? 'Ranking de Lojas' : 'Store Ranking'}
+                  {language === 'pt' ? 'Ranking de Lojas por Serviços' : 'Store Ranking by Services'}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {Object.values(
-                    pedidosFiltrados.reduce((acc: any, p: any) => {
-                      const lojaId = p.lojaId;
-                      if (!acc[lojaId]) {
-                        acc[lojaId] = { nome: p.loja?.nome || 'Loja', count: 0 };
-                      }
-                      acc[lojaId].count++;
-                      return acc;
-                    }, {})
-                  )
-                    .sort((a: any, b: any) => b.count - a.count)
-                    .slice(0, 10)
-                    .map((loja: any, index: number) => (
+                  {topLojas && topLojas.length > 0 ? (
+                    topLojas.map((loja: any, index: number) => (
                       <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                         <div className="flex items-center gap-3">
                           <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
@@ -6588,11 +6587,27 @@ END:VCALENDAR`;
                           }`}>
                             {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : index + 1}
                           </div>
-                          <p className="font-medium">{loja.nome}</p>
+                          <div>
+                            <p className="font-medium">{loja.lojaNome}</p>
+                            <p className="text-xs text-gray-500">{loja.visitas} {language === 'pt' ? 'visitas' : 'visits'}</p>
+                          </div>
                         </div>
-                        <Badge variant="outline">{loja.count} {language === 'pt' ? 'apoios' : 'support'}</Badge>
+                        <div className="text-right">
+                          <Badge variant="outline" className="mb-1">{loja.total} {language === 'pt' ? 'serviços' : 'services'}</Badge>
+                          <div className="text-xs text-gray-400 space-x-1">
+                            <span>🔧{loja.substituicaoLigeiro}</span>
+                            <span>🔧{loja.reparacao}</span>
+                            <span>⚖️{loja.calibragem}</span>
+                            <span>➕{loja.outros}</span>
+                          </div>
+                        </div>
                       </div>
-                    ))}
+                    ))
+                  ) : (
+                    <p className="text-center text-gray-500 py-4">
+                      {language === 'pt' ? 'Sem dados de serviços' : 'No service data'}
+                    </p>
+                  )}
                 </div>
               </CardContent>
             </Card>

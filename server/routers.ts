@@ -9390,6 +9390,63 @@ IMPORTANTE:
         };
       }),
 
+    // Obter estatísticas detalhadas para o dashboard
+    getEstatisticasDetalhadas: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        periodo: z.enum(['semana', 'mes', 'trimestre', 'ano']).optional(),
+      }))
+      .query(async ({ input }) => {
+        const tokenData = await db.validateTokenVolante(input.token);
+        if (!tokenData) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        
+        const estatisticas = await db.getEstatisticasDetalhadasVolante(
+          tokenData.volante.id,
+          input.periodo
+        );
+        return estatisticas;
+      }),
+
+    // Obter top lojas com mais serviços
+    getTopLojas: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        limite: z.number().optional(),
+      }))
+      .query(async ({ input }) => {
+        const tokenData = await db.validateTokenVolante(input.token);
+        if (!tokenData) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        
+        const topLojas = await db.getTopLojasComMaisServicos(
+          tokenData.volante.id,
+          input.limite || 5
+        );
+        return topLojas;
+      }),
+
+    // Obter evolução de serviços para gráficos
+    getEvolucaoServicos: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        periodo: z.enum(['semana', 'mes']).optional(),
+      }))
+      .query(async ({ input }) => {
+        const tokenData = await db.validateTokenVolante(input.token);
+        if (!tokenData) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        
+        const evolucao = await db.getEvolucaoServicos(
+          tokenData.volante.id,
+          input.periodo || 'mes'
+        );
+        return evolucao;
+      }),
+
     // Endpoint de teste para enviar notificações manualmente
     testarNotificacoes: publicProcedure
       .input(z.object({
