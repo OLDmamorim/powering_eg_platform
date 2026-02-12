@@ -4570,3 +4570,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Alterar modal de max-w-6xl para max-w-7xl (quase ecrã completo)
 - [x] Aumentar ainda mais os espaçamentos e tamanhos de fonte
 - [x] Testar visualização
+
+## v6.14.4 - Adicionar Card Circulares no Portal da Loja
+- [x] Adicionar card "Circulares" no PortalLoja.tsx
+- [x] Implementar visualização de documentos partilhados
+- [x] Testar funcionalidade

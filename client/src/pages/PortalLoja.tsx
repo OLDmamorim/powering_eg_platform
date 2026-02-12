@@ -171,7 +171,7 @@ export default function PortalLoja() {
     }
     return null;
   });
-  const [activeTab, setActiveTab] = useState<"home" | "reuniao" | "pendentes" | "historico" | "tarefas" | "resultados" | "volante" | "agenda" | "chatbot">("home");
+  const [activeTab, setActiveTab] = useState<"home" | "reuniao" | "pendentes" | "historico" | "tarefas" | "resultados" | "volante" | "agenda" | "chatbot" | "circulares">("home");
   const [filtroTarefas, setFiltroTarefas] = useState<"todas" | "recebidas" | "enviadas" | "internas">("todas");
   // Estado para o filtro de meses do dashboard
   const [mesesSelecionadosDashboard, setMesesSelecionadosDashboard] = useState<MesSelecionado[]>(() => {
@@ -1166,6 +1166,20 @@ export default function PortalLoja() {
                 </CardContent>
               </Card>
             )}
+
+            {/* Card Circulares - Disponível para todos */}
+            <Card 
+              className="cursor-pointer hover:shadow-lg transition-all hover:scale-[1.02] bg-gradient-to-br from-pink-500 to-rose-600 text-white border-0"
+              onClick={() => setActiveTab("circulares")}
+            >
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <FileText className="h-10 w-10 opacity-80" />
+                </div>
+                <h3 className="text-xl font-bold mb-2">{language === 'pt' ? 'Circulares' : 'Circulars'}</h3>
+                <p className="text-sm opacity-80">{language === 'pt' ? 'Documentos partilhados pelos gestores' : 'Documents shared by managers'}</p>
+              </CardContent>
+            </Card>
 
             {/* Card Mapa de KLM - Disponível para todos */}
             <Card 
@@ -3611,8 +3625,95 @@ export default function PortalLoja() {
         </div>
       )}
 
+      {/* Tab Circulares */}
+      {activeTab === "circulares" && (
+        <div className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5" />
+                {language === 'pt' ? 'Circulares e Documentos' : 'Circulars and Documents'}
+              </CardTitle>
+              <CardDescription>
+                {language === 'pt' ? 'Documentos partilhados pelos gestores' : 'Documents shared by managers'}
+              </CardDescription>
+            </CardHeader>
+          </Card>
+
+          {/* Lista de Circulares */}
+          {(() => {
+            // Query para obter documentos da loja
+            const { data: circulares, isLoading } = trpc.documentos.listarPorLoja.useQuery(
+              { lojaId: lojaAuth?.lojaId || 0 },
+              { enabled: !!lojaAuth?.lojaId }
+            );
+
+            if (isLoading) {
+              return (
+                <Card>
+                  <CardContent className="py-12 text-center">
+                    <Loader2 className="h-8 w-8 animate-spin mx-auto text-gray-400 mb-2" />
+                    <p className="text-muted-foreground">{language === 'pt' ? 'A carregar...' : 'Loading...'}</p>
+                  </CardContent>
+                </Card>
+              );
+            }
+
+            if (!circulares || circulares.length === 0) {
+              return (
+                <Card>
+                  <CardContent className="py-12 text-center">
+                    <FileText className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">{language === 'pt' ? 'Sem documentos' : 'No documents'}</h3>
+                    <p className="text-muted-foreground">
+                      {language === 'pt' ? 'Não existem circulares partilhadas.' : 'No circulars shared.'}
+                    </p>
+                  </CardContent>
+                </Card>
+              );
+            }
+
+            return circulares.map((doc: any) => (
+              <Card key={doc.id}>
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-start gap-3 flex-1">
+                      <div className="bg-pink-100 dark:bg-pink-900/30 p-3 rounded-lg">
+                        <FileText className="h-6 w-6 text-pink-600" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-lg mb-1">{doc.titulo}</h3>
+                        {doc.descricao && (
+                          <p className="text-sm text-muted-foreground mb-2">{doc.descricao}</p>
+                        )}
+                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                          <span className="flex items-center gap-1">
+                            <Calendar className="h-3 w-3" />
+                            {new Date(doc.createdAt).toLocaleDateString('pt-PT')}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => window.open(doc.fileUrl, '_blank')}
+                      >
+                        <Download className="h-4 w-4 mr-2" />
+                        {language === 'pt' ? 'Ver PDF' : 'View PDF'}
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ));
+          })()}
+        </div>
+      )}
+
       {/* Botão Flutuante de Acesso Rápido às Tarefas - Pulsa quando há NOVAS */}
-      {activeTab !== 'tarefas' && activeTab !== 'chatbot' && (
+      {activeTab !== 'tarefas' && activeTab !== 'chatbot' && activeTab !== 'circulares' && (
         <button
           onClick={() => {
             setActiveTab('tarefas');

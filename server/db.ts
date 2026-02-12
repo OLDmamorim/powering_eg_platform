@@ -10294,6 +10294,29 @@ export async function createDocumento(data: InsertDocumento): Promise<Documento>
 }
 
 /**
+ * Obter documentos por loja (para Portal da Loja)
+ */
+export async function getDocumentosPorLoja(lojaId: number): Promise<Documento[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const allDocs = await db.select().from(documentos).orderBy(desc(documentos.createdAt));
+  
+  // Retornar documentos que:
+  // 1. Não têm targetLojas (públicos para todas as lojas)
+  // 2. Têm a lojaId na lista de targetLojas
+  return allDocs.filter(doc => {
+    if (!doc.targetLojas) return true; // Documento público
+    try {
+      const targetList = JSON.parse(doc.targetLojas) as number[];
+      return targetList.includes(lojaId);
+    } catch {
+      return false;
+    }
+  });
+}
+
+/**
  * Obter documento por ID
  */
 export async function getDocumentoById(id: number): Promise<Documento | null> {

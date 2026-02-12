@@ -10285,6 +10285,14 @@ IMPORTANTE:
       return documentos;
     }),
 
+    // Listar documentos por loja (para Portal da Loja)
+    listarPorLoja: publicProcedure
+      .input(z.object({ lojaId: z.number() }))
+      .query(async ({ input }) => {
+        const documentos = await db.getDocumentosPorLoja(input.lojaId);
+        return documentos;
+      }),
+
     // Upload de documento (apenas gestores)
     upload: gestorProcedure
       .input(z.object({
