@@ -10356,40 +10356,6 @@ IMPORTANTE:
         const totais = await db.getTotaisServicosVolante(tokenData.volante.id, input.dataInicio, input.dataFim);
         return totais;
       }),
-
-    // Obter evolução de serviços por tipo (gráfico de linha)
-    getEvolucaoServicos: publicProcedure
-      .input(z.object({
-        token: z.string(),
-        dataInicio: z.string(),
-        dataFim: z.string(),
-      }))
-      .query(async ({ input }) => {
-        const tokenData = await db.validateTokenVolante(input.token);
-        if (!tokenData) {
-          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
-        }
-        
-        const evolucao = await db.getEvolucaoServicosPorTipo(tokenData.volante.id, input.dataInicio, input.dataFim);
-        return evolucao;
-      }),
-
-    // Obter ranking de lojas por total de serviços (gráfico de barras)
-    getRankingLojas: publicProcedure
-      .input(z.object({
-        token: z.string(),
-        dataInicio: z.string(),
-        dataFim: z.string(),
-      }))
-      .query(async ({ input }) => {
-        const tokenData = await db.validateTokenVolante(input.token);
-        if (!tokenData) {
-          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
-        }
-        
-        const ranking = await db.getRankingLojasPorServicos(tokenData.volante.id, input.dataInicio, input.dataFim);
-        return ranking;
-      }),
   }),
 
   // ==================== DOCUMENTOS/CIRCULARES ====================
