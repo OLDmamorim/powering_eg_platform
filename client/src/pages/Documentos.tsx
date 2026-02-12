@@ -7,10 +7,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 // Toast functionality
-import { Upload, FileText, Trash2, Edit, Download, Calendar, User } from 'lucide-react';
+import { Upload, FileText, Trash2, Edit, Download, Calendar, User, ArrowLeft } from 'lucide-react';
+import { useLocation } from 'wouter';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export default function Documentos() {
+  const [, navigate] = useLocation();
   const toast = (opts: { title: string; description?: string; variant?: string }) => {
     if (opts.variant === 'destructive') {
       alert('Erro: ' + opts.title + (opts.description ? '\n' + opts.description : ''));
@@ -144,13 +146,28 @@ export default function Documentos() {
   };
 
   return (
-    <div className="container py-8">
-      <div className="flex items-center justify-between mb-6">
+    <div className="container mx-auto py-8 px-4">
+      {/* Breadcrumb e Botão Voltar */}
+      <div className="mb-6 flex items-center gap-4">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => navigate('/dashboard')}
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Voltar
+        </Button>
+        <div className="text-sm text-muted-foreground">
+          Dashboard &gt; Documentos
+        </div>
+      </div>
+
+      <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Documentos e Circulares</h1>
           <p className="text-muted-foreground mt-1">Gerir documentos partilhados com as lojas</p>
         </div>
-
         <Dialog open={isUploadOpen} onOpenChange={setIsUploadOpen}>
           <DialogTrigger asChild>
             <Button onClick={() => { resetForm(); setIsUploadOpen(true); }}>
@@ -250,6 +267,7 @@ export default function Documentos() {
         </Dialog>
       </div>
 
+      <div className="mt-8">
       {isLoading ? (
         <div className="text-center py-12">A carregar documentos...</div>
       ) : documentos && documentos.length > 0 ? (
@@ -320,6 +338,8 @@ export default function Documentos() {
           </Button>
         </Card>
       )}
+
+      </div>
 
       {/* Dialog de Edição */}
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>

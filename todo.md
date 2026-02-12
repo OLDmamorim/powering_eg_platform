@@ -4560,3 +4560,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Aumentar largura do modal (de max-w-5xl para max-w-6xl)
 - [x] Melhorar espaçamento interno para melhor visualização (cards maiores, números maiores)
 - [x] Testar visualização
+
+## v6.14.2 - Corrigir Interface de Documentos
+- [x] Remover "menu.items.documentos" do menu lateral (DashboardLayout.tsx)
+- [x] Adicionar breadcrumb e botão de voltar na página Documentos.tsx
+- [x] Testar navegação
