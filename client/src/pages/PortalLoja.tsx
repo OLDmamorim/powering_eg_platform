@@ -7882,7 +7882,7 @@ function RegistarServicosHoje({
   }, []);
 
   // Buscar agendamentos de hoje
-  const { data: estadoMes, refetch: refetchEstadoMes } = trpc.pedidosApoio.getEstadoMes.useQuery(
+  const { data: estadoMes, refetch: refetchEstadoMes } = trpc.pedidosApoio.estadoCompletoMes.useQuery(
     {
       token,
       ano: new Date().getFullYear(),
@@ -7916,9 +7916,9 @@ function RegistarServicosHoje({
 
   // Filtrar agendamentos de hoje
   const agendamentosHoje = useMemo(() => {
-    if (!estadoMes?.dias) return [];
-    const diaHoje = estadoMes.dias.find((d: any) => d.data === hoje);
-    return diaHoje?.agendamentos || [];
+    if (!estadoMes) return [];
+    const estadoDia = estadoMes[hoje];
+    return estadoDia?.agendamentos || [];
   }, [estadoMes, hoje]);
 
   // Verificar se já tem serviços registados para uma loja
