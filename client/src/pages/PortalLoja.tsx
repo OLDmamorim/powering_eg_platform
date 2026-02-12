@@ -117,6 +117,7 @@ import {
   Bot,
   Filter,
   ClipboardList,
+  Activity,
 } from "lucide-react";
 
 interface LojaAuth {
@@ -6365,16 +6366,12 @@ END:VCALENDAR`;
         )}
 
         {/* Vista Dashboard */}
-        {activeView === "dashboard" && (() => {
-          if (loadingEstatisticas || loadingTopLojas || loadingEvolucao) {
-            return (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="h-8 w-8 animate-spin text-teal-600" />
-              </div>
-            );
-          }
-          
-          return (
+        {activeView === "dashboard" && (
+          loadingEstatisticas || loadingTopLojas || loadingEvolucao ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-teal-600" />
+            </div>
+          ) : (
           <div className="container mx-auto px-4 py-6 space-y-6">
             {/* Filtros e Botão Exportar */}
             <Card>
@@ -6610,8 +6607,8 @@ END:VCALENDAR`;
               </CardContent>
             </Card>
           </div>
-          );
-        })()}
+          )
+        )}
 
         {/* Vista Circulares */}
         {activeView === "circulares" && (() => {

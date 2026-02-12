@@ -4699,3 +4699,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 
 - [x] Mover queries tRPC para fora do bloco condicional
 - [x] Testar Dashboard sem erros React
+
+## v6.21.2 - Investigação e Correção Completa de React Hook Error
+
+- [x] Encontrar TODAS as violações de hooks condicionais no Dashboard
+- [x] Corrigir todas as violações identificadas
+- [x] Testar Dashboard completamente funcional
