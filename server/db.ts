@@ -10891,3 +10891,265 @@ export async function getEvolucaoServicos(volanteId: number, periodo: 'semana' |
   
   return evolucao;
 }
+
+/**
+ * Obter estatísticas detalhadas com filtro de meses específicos
+ */
+export async function getEstatisticasDetalhadasVolantePorMeses(
+  volanteId: number, 
+  meses: Array<{ mes: number; ano: number }>
+) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  if (meses.length === 0) {
+    // Se não houver meses selecionados, retornar dados vazios
+    return {
+      totaisPorTipo: {
+        substituicaoLigeiro: 0,
+        reparacao: 0,
+        calibragem: 0,
+        outros: 0,
+        total: 0
+      },
+      mediaPorDia: 0,
+      diasTrabalhados: 0,
+      totalServicos: 0
+    };
+  }
+  
+  // Construir condições OR para cada mês
+  const condicoesMeses = meses.map(m => {
+    const primeiroDia = new Date(m.ano, m.mes - 1, 1).toISOString().split('T')[0];
+    const ultimoDia = new Date(m.ano, m.mes, 0).toISOString().split('T')[0];
+    return and(
+      eq(servicosVolante.volanteId, volanteId),
+      gte(servicosVolante.data, primeiroDia),
+      lte(servicosVolante.data, ultimoDia)
+    );
+  });
+  
+  // Buscar serviços de todos os meses
+  const servicos = await db.select()
+    .from(servicosVolante)
+    .where(or(...condicoesMeses));
+  
+  // Calcular totais por tipo
+  const totaisPorTipo = {
+    substituicaoLigeiro: 0,
+    reparacao: 0,
+    calibragem: 0,
+    outros: 0,
+    total: 0
+  };
+  
+  for (const s of servicos) {
+    totaisPorTipo.substituicaoLigeiro += s.substituicaoLigeiro;
+    totaisPorTipo.reparacao += s.reparacao;
+    totaisPorTipo.calibragem += s.calibragem;
+    totaisPorTipo.outros += s.outros;
+    totaisPorTipo.total += s.substituicaoLigeiro + s.reparacao + s.calibragem + s.outros;
+  }
+  
+  // Calcular média por dia
+  const diasUnicos = new Set(servicos.map(s => s.data)).size;
+  const mediaPorDia = diasUnicos > 0 ? Math.round(totaisPorTipo.total / diasUnicos) : 0;
+  
+  return {
+    totaisPorTipo,
+    mediaPorDia,
+    diasTrabalhados: diasUnicos,
+    totalServicos: totaisPorTipo.total
+  };
+}
+
+/**
+ * Obter top lojas com mais visitas (frequência)
+ */
+export async function getTopLojasComMaisVisitas(
+  volanteId: number, 
+  meses: Array<{ mes: number; ano: number }>,
+  limite: number = 5
+) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  if (meses.length === 0) return [];
+  
+  // Construir condições OR para cada mês
+  const condicoesMeses = meses.map(m => {
+    const primeiroDia = new Date(m.ano, m.mes - 1, 1).toISOString().split('T')[0];
+    const ultimoDia = new Date(m.ano, m.mes, 0).toISOString().split('T')[0];
+    return and(
+      eq(servicosVolante.volanteId, volanteId),
+      gte(servicosVolante.data, primeiroDia),
+      lte(servicosVolante.data, ultimoDia)
+    );
+  });
+  
+  const servicos = await db.select({
+    lojaId: servicosVolante.lojaId,
+    lojaNome: lojas.nome,
+    data: servicosVolante.data
+  })
+    .from(servicosVolante)
+    .leftJoin(lojas, eq(servicosVolante.lojaId, lojas.id))
+    .where(or(...condicoesMeses));
+  
+  // Agrupar por loja e contar visitas
+  const lojasAgrupadas = servicos.reduce((acc: any[], s) => {
+    const existente = acc.find(item => item.lojaId === s.lojaId);
+    
+    if (existente) {
+      existente.visitas += 1;
+    } else {
+      acc.push({
+        lojaId: s.lojaId,
+        lojaNome: s.lojaNome || 'Loja',
+        visitas: 1
+      });
+    }
+    return acc;
+  }, []);
+  
+  // Ordenar por visitas e retornar top N
+  return lojasAgrupadas
+    .sort((a, b) => b.visitas - a.visitas)
+    .slice(0, limite);
+}
+
+/**
+ * Obter top lojas com mais serviços realizados (com filtro de meses)
+ */
+export async function getTopLojasComMaisServicosPorMeses(
+  volanteId: number,
+  meses: Array<{ mes: number; ano: number }>,
+  limite: number = 5
+) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  if (meses.length === 0) return [];
+  
+  // Construir condições OR para cada mês
+  const condicoesMeses = meses.map(m => {
+    const primeiroDia = new Date(m.ano, m.mes - 1, 1).toISOString().split('T')[0];
+    const ultimoDia = new Date(m.ano, m.mes, 0).toISOString().split('T')[0];
+    return and(
+      eq(servicosVolante.volanteId, volanteId),
+      gte(servicosVolante.data, primeiroDia),
+      lte(servicosVolante.data, ultimoDia)
+    );
+  });
+  
+  const servicos = await db.select({
+    lojaId: servicosVolante.lojaId,
+    lojaNome: lojas.nome,
+    substituicaoLigeiro: servicosVolante.substituicaoLigeiro,
+    reparacao: servicosVolante.reparacao,
+    calibragem: servicosVolante.calibragem,
+    outros: servicosVolante.outros
+  })
+    .from(servicosVolante)
+    .leftJoin(lojas, eq(servicosVolante.lojaId, lojas.id))
+    .where(or(...condicoesMeses));
+  
+  // Agrupar por loja e somar totais
+  const lojasAgrupadas = servicos.reduce((acc: any[], s) => {
+    const existente = acc.find(item => item.lojaId === s.lojaId);
+    const totalServico = s.substituicaoLigeiro + s.reparacao + s.calibragem + s.outros;
+    
+    if (existente) {
+      existente.substituicaoLigeiro += s.substituicaoLigeiro;
+      existente.reparacao += s.reparacao;
+      existente.calibragem += s.calibragem;
+      existente.outros += s.outros;
+      existente.total += totalServico;
+      existente.visitas += 1;
+    } else {
+      acc.push({
+        lojaId: s.lojaId,
+        lojaNome: s.lojaNome || 'Loja',
+        substituicaoLigeiro: s.substituicaoLigeiro,
+        reparacao: s.reparacao,
+        calibragem: s.calibragem,
+        outros: s.outros,
+        total: totalServico,
+        visitas: 1
+      });
+    }
+    return acc;
+  }, []);
+  
+  // Ordenar por total e retornar top N
+  return lojasAgrupadas
+    .sort((a, b) => b.total - a.total)
+    .slice(0, limite);
+}
+
+/**
+ * Obter análise de rentabilidade (serviços por visita)
+ */
+export async function getAnaliseRentabilidade(
+  volanteId: number,
+  meses: Array<{ mes: number; ano: number }>,
+  limite: number = 10
+) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  if (meses.length === 0) return [];
+  
+  // Construir condições OR para cada mês
+  const condicoesMeses = meses.map(m => {
+    const primeiroDia = new Date(m.ano, m.mes - 1, 1).toISOString().split('T')[0];
+    const ultimoDia = new Date(m.ano, m.mes, 0).toISOString().split('T')[0];
+    return and(
+      eq(servicosVolante.volanteId, volanteId),
+      gte(servicosVolante.data, primeiroDia),
+      lte(servicosVolante.data, ultimoDia)
+    );
+  });
+  
+  const servicos = await db.select({
+    lojaId: servicosVolante.lojaId,
+    lojaNome: lojas.nome,
+    substituicaoLigeiro: servicosVolante.substituicaoLigeiro,
+    reparacao: servicosVolante.reparacao,
+    calibragem: servicosVolante.calibragem,
+    outros: servicosVolante.outros
+  })
+    .from(servicosVolante)
+    .leftJoin(lojas, eq(servicosVolante.lojaId, lojas.id))
+    .where(or(...condicoesMeses));
+  
+  // Agrupar por loja e calcular rentabilidade
+  const lojasAgrupadas = servicos.reduce((acc: any[], s) => {
+    const existente = acc.find(item => item.lojaId === s.lojaId);
+    const totalServico = s.substituicaoLigeiro + s.reparacao + s.calibragem + s.outros;
+    
+    if (existente) {
+      existente.totalServicos += totalServico;
+      existente.visitas += 1;
+    } else {
+      acc.push({
+        lojaId: s.lojaId,
+        lojaNome: s.lojaNome || 'Loja',
+        totalServicos: totalServico,
+        visitas: 1
+      });
+    }
+    return acc;
+  }, []);
+  
+  // Calcular rentabilidade (serviços por visita) e ordenar
+  const lojasComRentabilidade = lojasAgrupadas.map(loja => ({
+    ...loja,
+    servicosPorVisita: loja.visitas > 0 ? (loja.totalServicos / loja.visitas).toFixed(1) : '0.0'
+  }));
+  
+  // Ordenar por rentabilidade (maior para menor)
+  return lojasComRentabilidade
+    .sort((a, b) => parseFloat(b.servicosPorVisita) - parseFloat(a.servicosPorVisita))
+    .slice(0, limite);
+}

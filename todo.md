@@ -4705,3 +4705,13 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Encontrar TODAS as violações de hooks condicionais no Dashboard
 - [x] Corrigir todas as violações identificadas
 - [x] Testar Dashboard completamente funcional
+
+## v6.22.0 - Dashboard com Análise de Rentabilidade e Filtros de Período
+
+- [x] Backend: Adicionar endpoint para análise de visitas por loja
+- [x] Backend: Adicionar endpoint para análise de rentabilidade (serviços/visita)
+- [x] Frontend: Substituir filtro de data por seletor de meses (Janeiro, Fevereiro, etc.)
+- [x] Frontend: Adicionar card "Lojas Mais Visitadas" com ranking
+- [x] Frontend: Adicionar card "Lojas Mais Produtivas" (total serviços)
+- [x] Frontend: Adicionar gráfico de rentabilidade (serviços por visita)
+- [x] Testar Dashboard com novos filtros e métricas
