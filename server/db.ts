@@ -135,7 +135,10 @@ import {
   InsertDocumento,
   enviosRH,
   EnvioRH,
-  InsertEnvioRH
+  InsertEnvioRH,
+  servicosVolante,
+  ServicoVolante,
+  InsertServicoVolante
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -8483,6 +8486,19 @@ export async function getVolantesByGestorId(gestorId: number): Promise<Volante[]
 }
 
 /**
+ * Obter todos os volantes (para notificações)
+ */
+export async function getAllVolantes(): Promise<Volante[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db
+    .select()
+    .from(volantes)
+    .orderBy(volantes.nome);
+}
+
+/**
  * Obter volante por ID
  */
 export async function getVolanteById(id: number): Promise<Volante | null> {
@@ -10347,4 +10363,147 @@ export async function deleteDocumento(id: number): Promise<void> {
   if (!db) return;
   
   await db.delete(documentos).where(eq(documentos.id, id));
+}
+
+
+// ==================== SERVIÇOS VOLANTE ====================
+
+/**
+ * Registar ou atualizar serviços do volante para uma loja numa data
+ */
+export async function registarServicosVolante(data: {
+  data: string; // YYYY-MM-DD
+  volanteId: number;
+  lojaId: number;
+  substituicaoLigeiro: number;
+  reparacao: number;
+  calibragem: number;
+  outros: number;
+  observacoes?: string;
+}): Promise<ServicoVolante> {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  
+  // Verificar se já existe registo para esta data/volante/loja
+  const existing = await db.select().from(servicosVolante)
+    .where(
+      and(
+        eq(servicosVolante.data, data.data),
+        eq(servicosVolante.volanteId, data.volanteId),
+        eq(servicosVolante.lojaId, data.lojaId)
+      )
+    );
+  
+  if (existing.length > 0) {
+    // Atualizar registo existente
+    await db.update(servicosVolante)
+      .set({
+        substituicaoLigeiro: data.substituicaoLigeiro,
+        reparacao: data.reparacao,
+        calibragem: data.calibragem,
+        outros: data.outros,
+        observacoes: data.observacoes || null,
+        updatedAt: new Date(),
+      })
+      .where(eq(servicosVolante.id, existing[0].id));
+    
+    const updated = await db.select().from(servicosVolante).where(eq(servicosVolante.id, existing[0].id));
+    return updated[0];
+  } else {
+    // Criar novo registo
+    const result = await db.insert(servicosVolante).values({
+      data: data.data,
+      volanteId: data.volanteId,
+      lojaId: data.lojaId,
+      substituicaoLigeiro: data.substituicaoLigeiro,
+      reparacao: data.reparacao,
+      calibragem: data.calibragem,
+      outros: data.outros,
+      observacoes: data.observacoes || null,
+    });
+    
+    const id = Number(result[0].insertId);
+    const created = await db.select().from(servicosVolante).where(eq(servicosVolante.id, id));
+    return created[0];
+  }
+}
+
+/**
+ * Obter serviços do volante para uma data específica
+ */
+export async function getServicosVolanteByData(volanteId: number, data: string): Promise<ServicoVolante[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.select().from(servicosVolante)
+    .where(
+      and(
+        eq(servicosVolante.volanteId, volanteId),
+        eq(servicosVolante.data, data)
+      )
+    )
+    .orderBy(servicosVolante.lojaId);
+}
+
+/**
+ * Obter histórico de serviços por loja
+ */
+export async function getServicosVolantePorLoja(volanteId: number, lojaId: number, limite: number = 30): Promise<ServicoVolante[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.select().from(servicosVolante)
+    .where(
+      and(
+        eq(servicosVolante.volanteId, volanteId),
+        eq(servicosVolante.lojaId, lojaId)
+      )
+    )
+    .orderBy(desc(servicosVolante.data))
+    .limit(limite);
+}
+
+/**
+ * Obter totais de serviços do volante por período
+ */
+export async function getTotaisServicosVolante(volanteId: number, dataInicio: string, dataFim: string): Promise<{
+  totalSubstituicaoLigeiro: number;
+  totalReparacao: number;
+  totalCalibragem: number;
+  totalOutros: number;
+  totalGeral: number;
+}> {
+  const db = await getDb();
+  if (!db) return {
+    totalSubstituicaoLigeiro: 0,
+    totalReparacao: 0,
+    totalCalibragem: 0,
+    totalOutros: 0,
+    totalGeral: 0,
+  };
+  
+  const servicos = await db.select().from(servicosVolante)
+    .where(
+      and(
+        eq(servicosVolante.volanteId, volanteId),
+        gte(servicosVolante.data, dataInicio),
+        lte(servicosVolante.data, dataFim)
+      )
+    );
+  
+  const totais = servicos.reduce((acc, s) => ({
+    totalSubstituicaoLigeiro: acc.totalSubstituicaoLigeiro + s.substituicaoLigeiro,
+    totalReparacao: acc.totalReparacao + s.reparacao,
+    totalCalibragem: acc.totalCalibragem + s.calibragem,
+    totalOutros: acc.totalOutros + s.outros,
+    totalGeral: acc.totalGeral + s.substituicaoLigeiro + s.reparacao + s.calibragem + s.outros,
+  }), {
+    totalSubstituicaoLigeiro: 0,
+    totalReparacao: 0,
+    totalCalibragem: 0,
+    totalOutros: 0,
+    totalGeral: 0,
+  });
+  
+  return totais;
 }

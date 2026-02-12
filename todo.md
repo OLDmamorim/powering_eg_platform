@@ -4580,3 +4580,21 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Corrigir uso incorreto de hooks (useQuery) dentro de função anónima
 - [x] Mover query para nível de componente
 - [x] Testar Portal da Loja
+
+## v6.15.0 - Sistema de Registo de Serviços do Volante
+- [ ] Criar tabela `servicosVolante` no schema (data, volanteId, lojaId, substituicaoLigeiro, reparacao, calibragem, outros)
+- [ ] Criar procedimentos backend: registarServicos, listarServicosPorLoja, listarServicosHoje
+- [ ] Adicionar modal de registo na agenda do volante com 4 tipos de serviço + dropdowns
+- [ ] Mostrar lojas visitadas hoje na agenda com botão "Registar Serviços"
+- [ ] Implementar notificação Telegram diária às 18:00 com link para portal
+- [ ] Adicionar visualização de histórico de serviços por loja
+- [ ] Testar funcionalidade completa
+
+## v6.15.0 - Sistema de Registo de Serviços do Volante
+- [x] Criar tabela servicos_volante no schema
+- [x] Adicionar funções de backend (registarServicosVolante, getServicosVolanteByData)
+- [x] Criar procedimentos tRPC (registarServicos, getServicosDia)
+- [x] Adicionar interface na agenda do volante (lista de lojas + modal)
+- [x] Criar script de notificação Telegram diária (às 18:00)
+- [x] Configurar agendamento cron
+- [x] Testar funcionalidade completa
