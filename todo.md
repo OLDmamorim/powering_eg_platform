@@ -4565,3 +4565,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Remover "menu.items.documentos" do menu lateral (DashboardLayout.tsx)
 - [x] Adicionar breadcrumb e botão de voltar na página Documentos.tsx
 - [x] Testar navegação
+
+## v6.14.3 - Aumentar Modal de Análise de Fichas (MUITO MAIOR)
+- [x] Alterar modal de max-w-6xl para max-w-7xl (quase ecrã completo)
+- [x] Aumentar ainda mais os espaçamentos e tamanhos de fonte
+- [x] Testar visualização

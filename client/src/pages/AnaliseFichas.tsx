@@ -752,7 +752,7 @@ export default function AnaliseFichas() {
         
         {/* Dialog: Ver Relatório */}
         <Dialog open={showRelatorioDialog} onOpenChange={setShowRelatorioDialog}>
-          <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-7xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <Store className="h-5 w-5" />
@@ -767,7 +767,7 @@ export default function AnaliseFichas() {
             </DialogHeader>
             
             {selectedRelatorio && (
-              <div className="space-y-6">
+              <div className="space-y-8">
                 {/* Evolução */}
                 {selectedRelatorio.evolucao && (
                   <Card className={`${
@@ -775,7 +775,7 @@ export default function AnaliseFichas() {
                     selectedRelatorio.evolucao.evolucaoGeral === 'piorou' ? 'border-red-200 bg-red-50' :
                     'border-gray-200 bg-gray-50'
                   }`}>
-                    <CardContent className="p-4">
+                    <CardContent className="p-6">
                       <div className="flex items-center gap-2 mb-2">
                         {getEvolucaoIcon(selectedRelatorio.evolucao.evolucaoGeral)}
                         <span className="font-medium">Evolução desde última análise</span>
@@ -789,28 +789,28 @@ export default function AnaliseFichas() {
                 )}
                 
                 {/* Métricas */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                  <div className="rounded-lg border p-5 text-center">
-                    <div className="text-3xl font-bold">{selectedRelatorio.totalFichas}</div>
-                    <div className="text-sm text-muted-foreground mt-1">Total Fichas</div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+                  <div className="rounded-lg border p-8 text-center">
+                    <div className="text-5xl font-bold">{selectedRelatorio.totalFichas}</div>
+                    <div className="text-base text-muted-foreground mt-2">Total Fichas</div>
                   </div>
-                  <div className="rounded-lg border p-5 text-center">
-                    <div className={`text-3xl font-bold ${selectedRelatorio.fichasAbertas5Dias > 0 ? 'text-red-500' : 'text-green-500'}`}>
+                  <div className="rounded-lg border p-8 text-center">
+                    <div className={`text-5xl font-bold ${selectedRelatorio.fichasAbertas5Dias > 0 ? 'text-red-500' : 'text-green-500'}`}>
                       {selectedRelatorio.fichasAbertas5Dias}
                     </div>
-                    <div className="text-sm text-muted-foreground mt-1">Abertas +5 dias</div>
+                    <div className="text-base text-muted-foreground mt-2">Abertas +5 dias</div>
                   </div>
-                  <div className="rounded-lg border p-5 text-center">
-                    <div className={`text-3xl font-bold ${selectedRelatorio.fichasStatusAlerta > 0 ? 'text-orange-500' : 'text-green-500'}`}>
+                  <div className="rounded-lg border p-8 text-center">
+                    <div className={`text-5xl font-bold ${selectedRelatorio.fichasStatusAlerta > 0 ? 'text-orange-500' : 'text-green-500'}`}>
                       {selectedRelatorio.fichasStatusAlerta}
                     </div>
-                    <div className="text-sm text-muted-foreground mt-1">Status Alerta</div>
+                    <div className="text-base text-muted-foreground mt-2">Status Alerta</div>
                   </div>
-                  <div className="rounded-lg border p-5 text-center">
-                    <div className={`text-3xl font-bold ${selectedRelatorio.fichasSemNotas > 0 ? 'text-yellow-500' : 'text-green-500'}`}>
+                  <div className="rounded-lg border p-8 text-center">
+                    <div className={`text-5xl font-bold ${selectedRelatorio.fichasSemNotas > 0 ? 'text-yellow-500' : 'text-green-500'}`}>
                       {selectedRelatorio.fichasSemNotas}
                     </div>
-                    <div className="text-sm text-muted-foreground mt-1">Sem Notas</div>
+                    <div className="text-base text-muted-foreground mt-2">Sem Notas</div>
                   </div>
                 </div>
                 
