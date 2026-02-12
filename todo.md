@@ -4575,3 +4575,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar card "Circulares" no PortalLoja.tsx
 - [x] Implementar visualização de documentos partilhados
 - [x] Testar funcionalidade
+
+## v6.14.5 - Corrigir Erro React no Portal da Loja
+- [x] Corrigir uso incorreto de hooks (useQuery) dentro de função anónima
+- [x] Mover query para nível de componente
+- [x] Testar Portal da Loja
