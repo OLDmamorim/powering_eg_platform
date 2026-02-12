@@ -9389,6 +9389,62 @@ IMPORTANTE:
           filename: `relatorio_servicos_${input.ano}_${String(input.mes).padStart(2, '0')}.pdf`,
         };
       }),
+
+    // Endpoint de teste para enviar notificações manualmente
+    testarNotificacoes: publicProcedure
+      .input(z.object({
+        token: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        const tokenData = await db.validateTokenVolante(input.token);
+        if (!tokenData) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        
+        // Buscar volantes com agendamentos pendentes de registo
+        const volantesPendentes = await db.getVolantesSemRegistoHoje();
+        
+        if (volantesPendentes.length === 0) {
+          return {
+            sucesso: true,
+            mensagem: 'Nenhum volante com agendamentos pendentes de registo hoje',
+            enviados: 0,
+          };
+        }
+        
+        let sucessos = 0;
+        const erros: string[] = [];
+        
+        for (const volante of volantesPendentes) {
+          if (!volante.telegramChatId) {
+            erros.push(`Volante ${volante.nome} não tem Telegram configurado`);
+            continue;
+          }
+          
+          const { enviarLembreteRegistoServicos } = await import('./telegramService');
+          const resultado = await enviarLembreteRegistoServicos(
+            volante.telegramChatId,
+            {
+              volanteNome: volante.nome,
+              lojasNaoRegistadas: volante.lojasNaoRegistadas,
+            }
+          );
+          
+          if (resultado) {
+            sucessos++;
+          } else {
+            erros.push(`Falha ao enviar para ${volante.nome}`);
+          }
+        }
+        
+        return {
+          sucesso: true,
+          mensagem: `Notificações enviadas: ${sucessos}/${volantesPendentes.length}`,
+          enviados: sucessos,
+          total: volantesPendentes.length,
+          erros: erros.length > 0 ? erros : undefined,
+        };
+      }),
   }),
   
   // ==================== ANÁLISE DE FICHAS DE SERVIÇO ====================

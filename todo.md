@@ -4633,3 +4633,15 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Corrigir lógica de busca de agendamentos para mostrar todas as lojas do dia
 - [x] Incluir pedidos de apoio aprovados na lista de serviços a registar
 - [ ] Testar com múltiplos agendamentos no mesmo dia
+
+## v6.17.2 - Debug Registo de Serviços
+- [x] Adicionar logs temporários para diagnosticar dados retornados
+- [x] Verificar se pedidos aprovados estão a ser incluídos
+- [x] Corrigir problema identificado
+- [x] Remover logs temporários
+
+## v6.18.0 - Notificações Telegram Automáticas
+- [x] Implementar cron job para notificações diárias às 18:00
+- [x] Criar endpoint de teste manual para notificações
+- [x] Integrar scheduler no servidor
+- [ ] Testar envio de notificação Telegram com link direto para calendário
