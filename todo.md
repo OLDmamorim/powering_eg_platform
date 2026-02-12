@@ -4715,3 +4715,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Frontend: Adicionar card "Lojas Mais Produtivas" (total serviços)
 - [x] Frontend: Adicionar gráfico de rentabilidade (serviços por visita)
 - [x] Testar Dashboard com novos filtros e métricas
+
+## v6.22.1 - Correção: Incluir Todas as Visitas nas Métricas
+
+- [x] Identificar tabela de agendamentos/visitas
+- [x] Atualizar getTopLojasComMaisVisitas para contar TODAS as visitas agendadas
+- [x] Atualizar getAnaliseRentabilidade para usar TODAS as visitas no cálculo (não só as com serviços)
+- [x] Testar métricas corrigidas

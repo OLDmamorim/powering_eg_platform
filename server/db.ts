@@ -1,4 +1,4 @@
-import { eq, and, desc, asc, sql, inArray, gte, lte, or, gt, lt, isNull, not, like } from "drizzle-orm";
+import { eq, and, desc, asc, sql, inArray, gte, lte, or, gt, lt, isNull, isNotNull, not, like } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { 
   InsertUser, 
@@ -10976,28 +10976,29 @@ export async function getTopLojasComMaisVisitas(
   
   if (meses.length === 0) return [];
   
-  // Construir condições OR para cada mês
+  // Construir condições OR para cada mês (usar agendamentosVolante para contar TODAS as visitas)
   const condicoesMeses = meses.map(m => {
-    const primeiroDia = new Date(m.ano, m.mes - 1, 1).toISOString().split('T')[0];
-    const ultimoDia = new Date(m.ano, m.mes, 0).toISOString().split('T')[0];
+    const primeiroDia = new Date(m.ano, m.mes - 1, 1);
+    const ultimoDia = new Date(m.ano, m.mes, 0);
     return and(
-      eq(servicosVolante.volanteId, volanteId),
-      gte(servicosVolante.data, primeiroDia),
-      lte(servicosVolante.data, ultimoDia)
+      eq(agendamentosVolante.volanteId, volanteId),
+      gte(agendamentosVolante.data, primeiroDia),
+      lte(agendamentosVolante.data, ultimoDia),
+      isNotNull(agendamentosVolante.lojaId) // Apenas agendamentos com loja (excluir compromissos pessoais)
     );
   });
   
-  const servicos = await db.select({
-    lojaId: servicosVolante.lojaId,
+  const agendamentos = await db.select({
+    lojaId: agendamentosVolante.lojaId,
     lojaNome: lojas.nome,
-    data: servicosVolante.data
+    data: agendamentosVolante.data
   })
-    .from(servicosVolante)
-    .leftJoin(lojas, eq(servicosVolante.lojaId, lojas.id))
+    .from(agendamentosVolante)
+    .leftJoin(lojas, eq(agendamentosVolante.lojaId, lojas.id))
     .where(or(...condicoesMeses));
   
   // Agrupar por loja e contar visitas
-  const lojasAgrupadas = servicos.reduce((acc: any[], s) => {
+  const lojasAgrupadas = agendamentos.reduce((acc: any[], s) => {
     const existente = acc.find(item => item.lojaId === s.lojaId);
     
     if (existente) {
@@ -11101,7 +11102,7 @@ export async function getAnaliseRentabilidade(
   if (meses.length === 0) return [];
   
   // Construir condições OR para cada mês
-  const condicoesMeses = meses.map(m => {
+  const condicoesMesesServicos = meses.map(m => {
     const primeiroDia = new Date(m.ano, m.mes - 1, 1).toISOString().split('T')[0];
     const ultimoDia = new Date(m.ano, m.mes, 0).toISOString().split('T')[0];
     return and(
@@ -11111,6 +11112,18 @@ export async function getAnaliseRentabilidade(
     );
   });
   
+  const condicoesMesesAgendamentos = meses.map(m => {
+    const primeiroDia = new Date(m.ano, m.mes - 1, 1);
+    const ultimoDia = new Date(m.ano, m.mes, 0);
+    return and(
+      eq(agendamentosVolante.volanteId, volanteId),
+      gte(agendamentosVolante.data, primeiroDia),
+      lte(agendamentosVolante.data, ultimoDia),
+      isNotNull(agendamentosVolante.lojaId)
+    );
+  });
+  
+  // Buscar serviços realizados
   const servicos = await db.select({
     lojaId: servicosVolante.lojaId,
     lojaNome: lojas.nome,
@@ -11121,26 +11134,56 @@ export async function getAnaliseRentabilidade(
   })
     .from(servicosVolante)
     .leftJoin(lojas, eq(servicosVolante.lojaId, lojas.id))
-    .where(or(...condicoesMeses));
+    .where(or(...condicoesMesesServicos));
   
-  // Agrupar por loja e calcular rentabilidade
-  const lojasAgrupadas = servicos.reduce((acc: any[], s) => {
-    const existente = acc.find(item => item.lojaId === s.lojaId);
-    const totalServico = s.substituicaoLigeiro + s.reparacao + s.calibragem + s.outros;
-    
+  // Buscar TODAS as visitas agendadas (incluindo as sem serviços)
+  const agendamentos = await db.select({
+    lojaId: agendamentosVolante.lojaId,
+    lojaNome: lojas.nome
+  })
+    .from(agendamentosVolante)
+    .leftJoin(lojas, eq(agendamentosVolante.lojaId, lojas.id))
+    .where(or(...condicoesMesesAgendamentos));
+  
+  // Primeiro, contar visitas por loja (de agendamentos)
+  const visitasPorLoja = agendamentos.reduce((acc: Map<number, { lojaNome: string; visitas: number }>, a) => {
+    const lojaId = a.lojaId!;
+    const existente = acc.get(lojaId);
     if (existente) {
-      existente.totalServicos += totalServico;
       existente.visitas += 1;
     } else {
-      acc.push({
-        lojaId: s.lojaId,
-        lojaNome: s.lojaNome || 'Loja',
-        totalServicos: totalServico,
+      acc.set(lojaId, {
+        lojaNome: a.lojaNome || 'Loja',
         visitas: 1
       });
     }
     return acc;
-  }, []);
+  }, new Map());
+  
+  // Depois, somar serviços por loja
+  const servicosPorLoja = servicos.reduce((acc: Map<number, number>, s) => {
+    const lojaId = s.lojaId;
+    const totalServico = s.substituicaoLigeiro + s.reparacao + s.calibragem + s.outros;
+    const existente = acc.get(lojaId);
+    if (existente) {
+      acc.set(lojaId, existente + totalServico);
+    } else {
+      acc.set(lojaId, totalServico);
+    }
+    return acc;
+  }, new Map());
+  
+  // Combinar: para cada loja com visitas, calcular rentabilidade
+  const lojasAgrupadas: any[] = [];
+  visitasPorLoja.forEach((visitaInfo, lojaId) => {
+    const totalServicos = servicosPorLoja.get(lojaId) || 0;
+    lojasAgrupadas.push({
+      lojaId,
+      lojaNome: visitaInfo.lojaNome,
+      totalServicos,
+      visitas: visitaInfo.visitas
+    });
+  });
   
   // Calcular rentabilidade (serviços por visita) e ordenar
   const lojasComRentabilidade = lojasAgrupadas.map(loja => ({
