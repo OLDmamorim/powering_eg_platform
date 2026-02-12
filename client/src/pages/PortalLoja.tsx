@@ -8102,11 +8102,25 @@ function RegistarServicosHoje({
     },
   });
 
-  // Filtrar agendamentos de hoje
+  // Filtrar agendamentos e pedidos aprovados de hoje
   const agendamentosHoje = useMemo(() => {
     if (!estadoMes) return [];
     const estadoDia = estadoMes[hoje];
-    return estadoDia?.agendamentos || [];
+    
+    // Combinar agendamentos próprios e pedidos aprovados
+    const agendamentos = estadoDia?.agendamentos || [];
+    const pedidosAprovados = (estadoDia?.pedidos || []).filter((p: any) => p.estado === 'aprovado');
+    
+    // Mapear pedidos aprovados para formato de agendamento
+    const pedidosMapeados = pedidosAprovados.map((p: any) => ({
+      id: `pedido-${p.id}`,
+      lojaId: p.lojaId,
+      loja: p.loja,
+      agendamento_volante_periodo: p.periodo,
+      periodo: p.periodo,
+    }));
+    
+    return [...agendamentos, ...pedidosMapeados];
   }, [estadoMes, hoje]);
 
   // Verificar se já tem serviços registados para uma loja

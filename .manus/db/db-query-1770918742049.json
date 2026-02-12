@@ -1,0 +1,19 @@
+{
+  "query": "SELECT \n  av.id,\n  av.volanteId,\n  av.lojaId,\n  l.nome as loja_nome,\n  av.data,\n  av.agendamento_volante_periodo,\n  av.agendamento_volante_tipo\nFROM agendamentos_volante av\nLEFT JOIN lojas l ON av.lojaId = l.id\nWHERE DATE(av.data) = '2026-02-12'\nORDER BY av.id;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT \n  av.id,\n  av.volanteId,\n  av.lojaId,\n  l.nome as loja_nome,\n  av.data,\n  av.agendamento_volante_periodo,\n  av.agendamento_volante_tipo\nFROM agendamentos_volante av\nLEFT JOIN lojas l ON av.lojaId = l.id\nWHERE DATE(av.data) = '2026-02-12'\nORDER BY av.id;",
+  "rows": [
+    {
+      "id": "540001",
+      "volanteId": "2",
+      "lojaId": "60001",
+      "loja_nome": "Famalicão",
+      "data": "2026-02-12 00:00:00",
+      "agendamento_volante_periodo": "manha",
+      "agendamento_volante_tipo": "substituicao_vidros"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tvolanteId\tlojaId\tloja_nome\tdata\tagendamento_volante_periodo\tagendamento_volante_tipo\n540001\t2\t60001\tFamalicão\t2026-02-12 00:00:00\tmanha\tsubstituicao_vidros\n",
+  "stderr": "",
+  "execution_time_ms": 121
+}

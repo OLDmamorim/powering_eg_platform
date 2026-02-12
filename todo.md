@@ -4626,3 +4626,10 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Frontend: Botão de exportação para PDF
 - [ ] Agendamento automático de notificações (requer cron job)
 - [ ] Testar notificações manuais via endpoint
+
+
+## v6.17.1 - Correção Bug Registo de Serviços
+- [x] Investigar por que "Registar Serviços de Hoje" mostra apenas 1 loja quando há 2 agendamentos
+- [x] Corrigir lógica de busca de agendamentos para mostrar todas as lojas do dia
+- [x] Incluir pedidos de apoio aprovados na lista de serviços a registar
+- [ ] Testar com múltiplos agendamentos no mesmo dia

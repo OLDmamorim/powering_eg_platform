@@ -9330,7 +9330,13 @@ export async function getEstadoCompletoDoMes(volanteId: number, year: number, mo
       resultado.set(dataStr, { estado: 'livre', pedidos: [], bloqueios: [], agendamentos: [] });
     }
     
-    resultado.get(dataStr)!.agendamentos.push({ ...agendamento, loja } as any);
+    // Mapear campos para formato esperado pelo frontend
+    resultado.get(dataStr)!.agendamentos.push({ 
+      ...agendamento, 
+      periodo: agendamento.agendamento_volante_periodo, // Adicionar campo 'periodo' para compatibilidade
+      tipo: agendamento.agendamento_volante_tipo,
+      loja 
+    } as any);
   }
   
   // Calcular estado de cada dia
