@@ -4747,6 +4747,24 @@ function VolanteInterface({
     },
   });
 
+  // Mutation para testar notificação forçada
+  const testarNotificacaoForcadaMutation = trpc.portalVolante.testarNotificacaoForcada.useMutation({
+    onSuccess: (data) => {
+      toast.success(
+        language === 'pt' 
+          ? `🎉 ${data.mensagem}` 
+          : `🎉 ${data.mensagem}`
+      );
+    },
+    onError: (error: any) => {
+      toast.error(
+        language === 'pt' 
+          ? `Erro ao enviar teste: ${error.message}` 
+          : `Error sending test: ${error.message}`
+      );
+    },
+  });
+
   // Mutation para aprovar pedido
   const aprovarMutation = trpc.pedidosApoio.aprovar.useMutation({
     onSuccess: () => {
@@ -6910,7 +6928,7 @@ END:VCALENDAR`;
                         ? `Irá receber notificações no(s) Chat ID(s): ${telegramConfig.telegramChatId}` 
                         : `You will receive notifications on Chat ID(s): ${telegramConfig.telegramChatId}`}
                     </p>
-                    <div className="pt-2 border-t border-green-200 dark:border-green-800">
+                    <div className="pt-2 border-t border-green-200 dark:border-green-800 flex gap-2 flex-wrap">
                       <Button
                         variant="outline"
                         size="sm"
@@ -6926,6 +6944,23 @@ END:VCALENDAR`;
                           <Send className="h-4 w-4 mr-2" />
                         )}
                         {language === 'pt' ? 'Testar Notificações' : 'Test Notifications'}
+                      </Button>
+                      
+                      <Button
+                        variant="default"
+                        size="sm"
+                        onClick={() => {
+                          testarNotificacaoForcadaMutation.mutate({ token });
+                        }}
+                        disabled={testarNotificacaoForcadaMutation.isPending}
+                        className="bg-green-600 hover:bg-green-700 text-white"
+                      >
+                        {testarNotificacaoForcadaMutation.isPending ? (
+                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                        ) : (
+                          <Send className="h-4 w-4 mr-2" />
+                        )}
+                        {language === 'pt' ? 'Enviar Teste Telegram' : 'Send Telegram Test'}
                       </Button>
                     </div>
                   </div>

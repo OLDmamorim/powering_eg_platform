@@ -9417,7 +9417,7 @@ IMPORTANTE:
         
         for (const volante of volantesPendentes) {
           if (!volante.telegramChatId) {
-            erros.push(`Volante ${volante.nome} não tem Telegram configurado`);
+            erros.push(`Volante ${volante.volanteNome} não tem Telegram configurado`);
             continue;
           }
           
@@ -9425,7 +9425,7 @@ IMPORTANTE:
           const resultado = await enviarLembreteRegistoServicos(
             volante.telegramChatId,
             {
-              volanteNome: volante.nome,
+              volanteNome: volante.volanteNome,
               lojasNaoRegistadas: volante.lojasNaoRegistadas,
             }
           );
@@ -9443,6 +9443,62 @@ IMPORTANTE:
           enviados: sucessos,
           total: volantesPendentes.length,
           erros: erros.length > 0 ? erros : undefined,
+        };
+      }),
+
+    // Endpoint de teste forçado - envia notificação independentemente de ter serviços registados
+    testarNotificacaoForcada: publicProcedure
+      .input(z.object({
+        token: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        const tokenData = await db.validateTokenVolante(input.token);
+        if (!tokenData) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        
+        const volante = tokenData.volante;
+        
+        if (!volante.telegramChatId) {
+          throw new TRPCError({ 
+            code: 'BAD_REQUEST', 
+            message: 'Telegram não configurado para este volante' 
+          });
+        }
+        
+        // Enviar mensagem de teste
+        const { sendTelegramMessage } = await import('./telegramService');
+        
+        const mensagemTeste = `
+🧪 <b>Teste de Notificação - PoweringEG</b>
+
+Olá ${volante.nome},
+
+Esta é uma mensagem de teste do sistema de notificações automáticas.
+
+✅ O seu Telegram está configurado corretamente!
+✅ Irá receber lembretes diários às 18:00 para registar serviços
+
+<i>Enviado em ${new Date().toLocaleString('pt-PT', { timeZone: 'Europe/Lisbon' })}</i>
+        `.trim();
+        
+        const resultado = await sendTelegramMessage(
+          volante.telegramChatId,
+          mensagemTeste,
+          'HTML'
+        );
+        
+        if (!resultado) {
+          throw new TRPCError({ 
+            code: 'INTERNAL_SERVER_ERROR', 
+            message: 'Falha ao enviar mensagem Telegram' 
+          });
+        }
+        
+        return {
+          sucesso: true,
+          mensagem: 'Mensagem de teste enviada com sucesso!',
+          chatId: volante.telegramChatId,
         };
       }),
   }),

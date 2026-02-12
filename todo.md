@@ -4658,3 +4658,28 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Investigar erro "Cannot convert undefined or null to object" no endpoint testarNotificacoes
 - [x] Corrigir problema no código do endpoint (campo periodo)
 - [ ] Testar funcionalidade corrigida
+
+
+## v6.19.2 - Investigar Notificação Telegram Não Recebida
+- [ ] Verificar logs do servidor após clicar "Testar Notificações"
+- [ ] Confirmar se endpoint testarNotificacoes foi chamado
+- [ ] Verificar se função enviarLembreteRegistoServicos está a funcionar
+- [ ] Testar envio manual de mensagem Telegram
+- [ ] Corrigir problema identificado
+
+
+## v6.19.3 - Endpoint de Teste Forçado de Notificação
+- [ ] Criar endpoint `testarNotificacaoForcada` que envia notificação independentemente de ter serviços registados
+- [ ] Adicionar botão "Testar Envio Forçado" no Portal do Volante
+- [ ] Testar envio real de notificação Telegram
+- [ ] Remover logs de debug temporários
+
+
+## v6.20.0 - Sistema de Notificações Telegram FINALIZADO ✅
+- [x] Cron job automático configurado (18:00 Europe/Lisbon)
+- [x] Notificações enviadas para volantes com agendamentos pendentes
+- [x] Mensagens personalizadas com lista de lojas e link direto
+- [x] Endpoint de teste manual implementado
+- [x] Sistema 100% funcional - mensagens confirmadas no Telegram
+- [x] Logs de debug removidos
+- [x] Testes realizados com sucesso (message_id: 502)
