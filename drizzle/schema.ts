@@ -1321,3 +1321,24 @@ export const servicosVolante = mysqlTable("servicos_volante", {
 
 export type ServicoVolante = typeof servicosVolante.$inferSelect;
 export type InsertServicoVolante = typeof servicosVolante.$inferInsert;
+
+/**
+ * Envios de Relatórios de Serviços - Histórico de envios mensais automáticos
+ */
+export const enviosRelatoriosServicos = mysqlTable("envios_relatorios_servicos", {
+  id: int("id").autoincrement().primaryKey(),
+  mesReferencia: varchar("mesReferencia", { length: 7 }).notNull(), // Mês de referência (YYYY-MM)
+  tipoRelatorio: varchar("tipoRelatorio", { length: 20 }).notNull(), // 'gestor' ou 'loja'
+  destinatarioId: int("destinatarioId"), // FK para users.id (gestor) ou lojas.id (loja)
+  destinatarioEmail: varchar("destinatarioEmail", { length: 255 }).notNull(), // Email do destinatário
+  destinatarioNome: varchar("destinatarioNome", { length: 255 }).notNull(), // Nome do destinatário
+  volanteId: int("volanteId").notNull(), // FK para volantes.id
+  volanteNome: varchar("volanteNome", { length: 255 }).notNull(), // Nome do volante
+  pdfUrl: text("pdfUrl").notNull(), // URL do PDF gerado
+  status: varchar("status", { length: 20 }).default('enviado').notNull(), // 'enviado', 'erro', 'reenviado'
+  dataEnvio: timestamp("dataEnvio").defaultNow().notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type EnvioRelatorioServico = typeof enviosRelatoriosServicos.$inferSelect;
+export type InsertEnvioRelatorioServico = typeof enviosRelatoriosServicos.$inferInsert;

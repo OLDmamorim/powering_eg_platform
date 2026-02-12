@@ -135,9 +135,18 @@ interface VolanteAuth {
 
 export default function PortalLoja() {
   const { language, setLanguage, t } = useLanguage();
-  // Inicializar token do localStorage se existir
+  // Inicializar token do URL ou localStorage
   const [token, setToken] = useState<string>(() => {
     if (typeof window !== 'undefined') {
+      // Primeiro tentar ler do URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlToken = urlParams.get('token');
+      if (urlToken) {
+        // Guardar no localStorage para próximas visitas
+        localStorage.setItem('loja_token', urlToken);
+        return urlToken;
+      }
+      // Se não houver no URL, tentar ler do localStorage
       return localStorage.getItem('loja_token') || '';
     }
     return '';
@@ -1187,6 +1196,22 @@ export default function PortalLoja() {
                 <p className="text-sm opacity-80">{language === 'pt' ? 'Documentos partilhados pelos gestores' : 'Documents shared by managers'}</p>
               </CardContent>
             </Card>
+
+            {/* Card Produtividade - Apenas para volantes */}
+            {volanteAuth && (
+              <Card 
+                className="cursor-pointer hover:shadow-lg transition-all hover:scale-[1.02] bg-gradient-to-br from-cyan-500 to-blue-600 text-white border-0"
+                onClick={() => window.location.hash = `/produtividade-volante?token=${token}`}
+              >
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <TrendingUp className="h-10 w-10 opacity-80" />
+                  </div>
+                  <h3 className="text-xl font-bold mb-2">{language === 'pt' ? 'Produtividade' : 'Productivity'}</h3>
+                  <p className="text-sm opacity-80">{language === 'pt' ? 'Estatísticas e desempenho' : 'Statistics and performance'}</p>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Card Mapa de KLM - Disponível para todos */}
             <Card 

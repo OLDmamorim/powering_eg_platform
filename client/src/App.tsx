@@ -129,6 +129,7 @@ function Router() {
       
       {/* Portal do Volante (acesso público via token) */}
       <Route path={"/portal-volante"} component={PortalLoja} />
+      <Route path={"/produtividade-volante"} component={lazy(() => import("@/pages/ProdutividadeVolante"))} />
       
       <Route path={"/login-nao-autorizado"} component={LoginNaoAutorizado} />
       <Route path={"/404"} component={NotFound} />

@@ -505,6 +505,13 @@
       "when": 1770909820597,
       "tag": "0071_heavy_cassandra_nova",
       "breakpoints": true
+    },
+    {
+      "idx": 72,
+      "version": "5",
+      "when": 1770910684908,
+      "tag": "0072_classy_imperial_guard",
+      "breakpoints": true
     }
   ]
 }

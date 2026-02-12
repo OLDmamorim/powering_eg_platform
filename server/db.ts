@@ -138,7 +138,10 @@ import {
   InsertEnvioRH,
   servicosVolante,
   ServicoVolante,
-  InsertServicoVolante
+  InsertServicoVolante,
+  enviosRelatoriosServicos,
+  EnvioRelatorioServico,
+  InsertEnvioRelatorioServico
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -10506,4 +10509,170 @@ export async function getTotaisServicosVolante(volanteId: number, dataInicio: st
   });
   
   return totais;
+}
+
+/**
+ * Obter evolução de serviços por tipo (para gráfico de linha)
+ */
+export async function getEvolucaoServicosPorTipo(volanteId: number, dataInicio: string, dataFim: string): Promise<{
+  data: string;
+  substituicaoLigeiro: number;
+  reparacao: number;
+  calibragem: number;
+  outros: number;
+}[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const servicos = await db.select().from(servicosVolante)
+    .where(
+      and(
+        eq(servicosVolante.volanteId, volanteId),
+        gte(servicosVolante.data, dataInicio),
+        lte(servicosVolante.data, dataFim)
+      )
+    )
+    .orderBy(servicosVolante.data);
+  
+  // Agrupar por data
+  const agrupado = servicos.reduce((acc, s) => {
+    if (!acc[s.data]) {
+      acc[s.data] = {
+        data: s.data,
+        substituicaoLigeiro: 0,
+        reparacao: 0,
+        calibragem: 0,
+        outros: 0,
+      };
+    }
+    acc[s.data].substituicaoLigeiro += s.substituicaoLigeiro;
+    acc[s.data].reparacao += s.reparacao;
+    acc[s.data].calibragem += s.calibragem;
+    acc[s.data].outros += s.outros;
+    return acc;
+  }, {} as Record<string, any>);
+  
+  return Object.values(agrupado);
+}
+
+/**
+ * Obter ranking de lojas por total de serviços (para gráfico de barras)
+ */
+export async function getRankingLojasPorServicos(volanteId: number, dataInicio: string, dataFim: string): Promise<{
+  lojaNome: string;
+  totalServicos: number;
+}[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const servicos = await db
+    .select({
+      lojaId: servicosVolante.lojaId,
+      lojaNome: lojas.nome,
+      totalServicos: sql<number>`SUM(${servicosVolante.substituicaoLigeiro} + ${servicosVolante.reparacao} + ${servicosVolante.calibragem} + ${servicosVolante.outros})`,
+    })
+    .from(servicosVolante)
+    .leftJoin(lojas, eq(servicosVolante.lojaId, lojas.id))
+    .where(
+      and(
+        eq(servicosVolante.volanteId, volanteId),
+        gte(servicosVolante.data, dataInicio),
+        lte(servicosVolante.data, dataFim)
+      )
+    )
+    .groupBy(servicosVolante.lojaId, lojas.nome)
+    .orderBy(desc(sql`SUM(${servicosVolante.substituicaoLigeiro} + ${servicosVolante.reparacao} + ${servicosVolante.calibragem} + ${servicosVolante.outros})`))
+    .limit(10);
+  
+  return servicos.map(s => ({
+    lojaNome: s.lojaNome || 'Desconhecida',
+    totalServicos: Number(s.totalServicos) || 0,
+  }));
+}
+
+/**
+ * Obter serviços do volante por período (com nome da loja)
+ */
+export async function getServicosVolantePorPeriodo(volanteId: number, dataInicio: string, dataFim: string): Promise<{
+  id: number;
+  data: string;
+  volanteId: number;
+  lojaId: number;
+  lojaNome: string | null;
+  substituicaoLigeiro: number;
+  reparacao: number;
+  calibragem: number;
+  outros: number;
+}[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const servicos = await db
+    .select({
+      id: servicosVolante.id,
+      data: servicosVolante.data,
+      volanteId: servicosVolante.volanteId,
+      lojaId: servicosVolante.lojaId,
+      lojaNome: lojas.nome,
+      substituicaoLigeiro: servicosVolante.substituicaoLigeiro,
+      reparacao: servicosVolante.reparacao,
+      calibragem: servicosVolante.calibragem,
+      outros: servicosVolante.outros,
+    })
+    .from(servicosVolante)
+    .leftJoin(lojas, eq(servicosVolante.lojaId, lojas.id))
+    .where(
+      and(
+        eq(servicosVolante.volanteId, volanteId),
+        gte(servicosVolante.data, dataInicio),
+        lte(servicosVolante.data, dataFim)
+      )
+    )
+    .orderBy(servicosVolante.data);
+  
+  return servicos;
+}
+
+/**
+ * Registar envio de relatório de serviços
+ */
+export async function registarEnvioRelatorioServico(dados: {
+  mesReferencia: string;
+  tipoRelatorio: string;
+  destinatarioId: number | null;
+  destinatarioEmail: string;
+  destinatarioNome: string;
+  volanteId: number;
+  volanteNome: string;
+  pdfUrl: string;
+  status: string;
+}): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  
+  await db.insert(enviosRelatoriosServicos).values({
+    mesReferencia: dados.mesReferencia,
+    tipoRelatorio: dados.tipoRelatorio,
+    destinatarioId: dados.destinatarioId,
+    destinatarioEmail: dados.destinatarioEmail,
+    destinatarioNome: dados.destinatarioNome,
+    volanteId: dados.volanteId,
+    volanteNome: dados.volanteNome,
+    pdfUrl: dados.pdfUrl,
+    status: dados.status,
+  });
+}
+
+/**
+ * Obter histórico de envios de relatórios de serviços
+ */
+export async function getHistoricoEnviosRelatorios(limite: number = 50): Promise<EnvioRelatorioServico[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return db
+    .select()
+    .from(enviosRelatoriosServicos)
+    .orderBy(desc(enviosRelatoriosServicos.dataEnvio))
+    .limit(limite);
 }
