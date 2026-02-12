@@ -115,7 +115,6 @@ import {
   Trash2,
   MapPin,
   Bot,
-  ClipboardList,
 } from "lucide-react";
 
 interface LojaAuth {
@@ -4637,15 +4636,6 @@ function VolanteInterface({
   const [bloqueioTipo, setBloqueioTipo] = useState<'ferias' | 'falta' | 'formacao' | 'pessoal' | 'outro'>('ferias');
   const [bloqueioMotivo, setBloqueioMotivo] = useState('');
 
-  // Estados para registar serviços
-  const [registarServicosOpen, setRegistarServicosOpen] = useState(false);
-  const [lojaServicos, setLojaServicos] = useState<any>(null);
-  const [servicoSubstituicaoLigeiro, setServicoSubstituicaoLigeiro] = useState(0);
-  const [servicoReparacao, setServicoReparacao] = useState(0);
-  const [servicoCalibragem, setServicoCalibragem] = useState(0);
-  const [servicoOutros, setServicoOutros] = useState(0);
-  const [servicoObservacoes, setServicoObservacoes] = useState('');
-
   // Query para obter pedidos de apoio do volante
   const { data: pedidosApoio, refetch: refetchPedidos, isLoading: loadingPedidos } = trpc.pedidosApoio.listarPorVolante.useQuery(
     { token },
@@ -4653,35 +4643,10 @@ function VolanteInterface({
   );
 
   // Query para obter estado dos dias do mês (calendário)
-  const { data: estadoMes, refetch: refetchEstadoMes } = trpc.portalVolante.estadoCompletoMes.useQuery(
+  const { data: estadoMes, refetch: refetchEstadoMes } = trpc.pedidosApoio.estadoCompletoMes.useQuery(
     { token, ano: mesSelecionado.ano, mes: mesSelecionado.mes },
     { enabled: !!token }
   );
-
-  // Query para obter serviços do dia
-  const hojeStr = new Date().toISOString().split('T')[0];
-  const { data: servicosDia, refetch: refetchServicosDia } = trpc.portalVolante.getServicosDia.useQuery(
-    { token, data: hojeStr },
-    { enabled: !!token && activeView === "agenda" }
-  );
-
-  // Mutation para registar serviços
-  const registarServicosMutation = trpc.portalVolante.registarServicos.useMutation({
-    onSuccess: () => {
-      toast.success(language === 'pt' ? 'Serviços registados com sucesso!' : 'Services registered successfully!');
-      refetchServicosDia();
-      setRegistarServicosOpen(false);
-      // Limpar formulário
-      setServicoSubstituicaoLigeiro(0);
-      setServicoReparacao(0);
-      setServicoCalibragem(0);
-      setServicoOutros(0);
-      setServicoObservacoes('');
-    },
-    onError: (error) => {
-      toast.error(error.message || (language === 'pt' ? 'Erro ao registar serviços' : 'Error registering services'));
-    },
-  });
 
   // Query para obter resultados das lojas (lista simples)
   const { data: resultadosLojas, isLoading: loadingResultados } = trpc.portalVolante.resultadosLojas.useQuery(
@@ -4883,9 +4848,9 @@ function VolanteInterface({
 
   // Agrupar pedidos por estado
   const pedidosPendentes = pedidosApoio?.filter((p: any) => p.estado === 'pendente') || [];
-  // Próximos apoios: apenas aprovados com data >= hojeDate
-  const hojeDate = new Date();
-  hojeDate.setHours(0, 0, 0, 0);
+  // Próximos apoios: apenas aprovados com data >= hoje
+  const hoje = new Date();
+  hoje.setHours(0, 0, 0, 0);
   
   // Todos os pedidos aprovados (incluindo históricos) para dashboard
   const todosAprovados = pedidosApoio?.filter((p: any) => p.estado === 'aprovado').sort((a: any, b: any) => new Date(a.data).getTime() - new Date(b.data).getTime()) || [];
@@ -4895,7 +4860,7 @@ function VolanteInterface({
     if (p.estado !== 'aprovado') return false;
     const dataPedido = new Date(p.data);
     dataPedido.setHours(0, 0, 0, 0);
-    return dataPedido >= hojeDate;
+    return dataPedido >= hoje;
   }).sort((a: any, b: any) => new Date(a.data).getTime() - new Date(b.data).getTime()) || [];
   const pedidosReprovados = pedidosApoio?.filter((p: any) => p.estado === 'reprovado') || [];
 
@@ -5402,104 +5367,6 @@ END:VCALENDAR`;
                 </CardContent>
               </Card>
             )}
-
-            {/* Registar Serviços de Hoje */}
-            {(() => {
-              // Obter lojas agendadas para hoje (aprovadas)
-              const lojasHoje = pedidosApoio?.filter((p: any) => {
-                const pedidoData = new Date(p.data);
-                pedidoData.setHours(0, 0, 0, 0);
-                const hoje = new Date();
-                hoje.setHours(0, 0, 0, 0);
-                return p.estado === 'aprovado' && pedidoData.getTime() === hoje.getTime();
-              }).map((p: any) => p.loja) || [];
-
-              // Remover duplicados
-              const lojasUnicas = lojasHoje.filter((loja: any, index: number, self: any[]) => 
-                index === self.findIndex((l: any) => l.id === loja.id)
-              );
-
-              if (lojasUnicas.length === 0) return null;
-
-              return (
-                <Card className="border-teal-300 bg-teal-50">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-teal-800">
-                      <ClipboardList className="h-5 w-5" />
-                      {language === 'pt' ? 'Registar Serviços de Hoje' : 'Register Today\'s Services'} ({lojasUnicas.length})
-                    </CardTitle>
-                    <CardDescription className="text-teal-700">
-                      {language === 'pt' ? 'Registe os serviços realizados em cada loja' : 'Register services performed at each store'}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      {lojasUnicas.map((loja: any) => {
-                        // Verificar se já tem serviços registados hoje
-                        const servicoRegistado = servicosDia?.find((s: any) => s.lojaId === loja.id);
-                        const totalServicos = servicoRegistado 
-                          ? servicoRegistado.substituicaoLigeiro + servicoRegistado.reparacao + servicoRegistado.calibragem + servicoRegistado.outros
-                          : 0;
-
-                        return (
-                          <div 
-                            key={loja.id} 
-                            className="bg-white p-4 rounded-lg border border-teal-200 shadow-sm"
-                          >
-                            <div className="flex items-center justify-between">
-                              <div className="flex-1">
-                                <div className="flex items-center gap-2">
-                                  <h4 className="font-medium">{loja.nome}</h4>
-                                  {servicoRegistado && (
-                                    <Badge className="bg-green-500 text-white">
-                                      <Check className="h-3 w-3 mr-1" />
-                                      {language === 'pt' ? 'Registado' : 'Registered'}
-                                    </Badge>
-                                  )}
-                                </div>
-                                {servicoRegistado && (
-                                  <p className="text-sm text-gray-600 mt-1">
-                                    {totalServicos} {language === 'pt' ? 'serviços registados' : 'services registered'}
-                                  </p>
-                                )}
-                              </div>
-                              <Button
-                                size="sm"
-                                className="bg-teal-600 hover:bg-teal-700 text-white"
-                                onClick={() => {
-                                  setLojaServicos(loja);
-                                  // Se já tem serviços, pré-preencher
-                                  if (servicoRegistado) {
-                                    setServicoSubstituicaoLigeiro(servicoRegistado.substituicaoLigeiro);
-                                    setServicoReparacao(servicoRegistado.reparacao);
-                                    setServicoCalibragem(servicoRegistado.calibragem);
-                                    setServicoOutros(servicoRegistado.outros);
-                                    setServicoObservacoes(servicoRegistado.observacoes || '');
-                                  } else {
-                                    setServicoSubstituicaoLigeiro(0);
-                                    setServicoReparacao(0);
-                                    setServicoCalibragem(0);
-                                    setServicoOutros(0);
-                                    setServicoObservacoes('');
-                                  }
-                                  setRegistarServicosOpen(true);
-                                }}
-                              >
-                                <ClipboardList className="h-4 w-4 mr-1" />
-                                {servicoRegistado 
-                                  ? (language === 'pt' ? 'Editar' : 'Edit')
-                                  : (language === 'pt' ? 'Registar' : 'Register')
-                                }
-                              </Button>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })()}
 
             {/* Calendário */}
             <Card>
@@ -7975,169 +7842,6 @@ END:VCALENDAR`;
                 <Ban className="h-4 w-4 mr-1" />
               )}
               {language === 'pt' ? 'Bloquear' : 'Block'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Modal: Registar Serviços */}
-      <Dialog open={registarServicosOpen} onOpenChange={setRegistarServicosOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <ClipboardList className="h-5 w-5" />
-              {language === 'pt' ? 'Registar Serviços' : 'Register Services'}
-            </DialogTitle>
-            <DialogDescription>
-              {lojaServicos?.nome} - {new Date().toLocaleDateString('pt-PT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            {/* Substituição Ligeiro */}
-            <div className="space-y-2">
-              <Label htmlFor="substituicao">
-                {language === 'pt' ? 'Substituição Ligeiro' : 'Light Vehicle Replacement'}
-              </Label>
-              <Select
-                value={servicoSubstituicaoLigeiro.toString()}
-                onValueChange={(value) => setServicoSubstituicaoLigeiro(Number(value))}
-              >
-                <SelectTrigger id="substituicao">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {Array.from({ length: 21 }, (_, i) => i).map((num) => (
-                    <SelectItem key={num} value={num.toString()}>
-                      {num}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Reparação */}
-            <div className="space-y-2">
-              <Label htmlFor="reparacao">
-                {language === 'pt' ? 'Reparação' : 'Repair'}
-              </Label>
-              <Select
-                value={servicoReparacao.toString()}
-                onValueChange={(value) => setServicoReparacao(Number(value))}
-              >
-                <SelectTrigger id="reparacao">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {Array.from({ length: 21 }, (_, i) => i).map((num) => (
-                    <SelectItem key={num} value={num.toString()}>
-                      {num}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Calibragem */}
-            <div className="space-y-2">
-              <Label htmlFor="calibragem">
-                {language === 'pt' ? 'Calibragem' : 'Calibration'}
-              </Label>
-              <Select
-                value={servicoCalibragem.toString()}
-                onValueChange={(value) => setServicoCalibragem(Number(value))}
-              >
-                <SelectTrigger id="calibragem">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {Array.from({ length: 21 }, (_, i) => i).map((num) => (
-                    <SelectItem key={num} value={num.toString()}>
-                      {num}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Outros */}
-            <div className="space-y-2">
-              <Label htmlFor="outros">
-                {language === 'pt' ? 'Outros' : 'Others'}
-              </Label>
-              <Select
-                value={servicoOutros.toString()}
-                onValueChange={(value) => setServicoOutros(Number(value))}
-              >
-                <SelectTrigger id="outros">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {Array.from({ length: 21 }, (_, i) => i).map((num) => (
-                    <SelectItem key={num} value={num.toString()}>
-                      {num}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Observações */}
-            <div className="space-y-2">
-              <Label htmlFor="observacoes">
-                {language === 'pt' ? 'Observações (opcional)' : 'Notes (optional)'}
-              </Label>
-              <Textarea
-                id="observacoes"
-                value={servicoObservacoes}
-                onChange={(e) => setServicoObservacoes(e.target.value)}
-                placeholder={language === 'pt' ? 'Observações adicionais...' : 'Additional notes...'}
-                rows={3}
-              />
-            </div>
-
-            {/* Resumo */}
-            <div className="bg-teal-50 dark:bg-teal-900/20 p-4 rounded-lg border border-teal-200">
-              <h4 className="font-semibold text-teal-800 dark:text-teal-300 mb-2">
-                {language === 'pt' ? 'Resumo' : 'Summary'}
-              </h4>
-              <p className="text-sm text-teal-700 dark:text-teal-400">
-                {language === 'pt' ? 'Total de serviços: ' : 'Total services: '}
-                <span className="font-bold text-lg">
-                  {servicoSubstituicaoLigeiro + servicoReparacao + servicoCalibragem + servicoOutros}
-                </span>
-              </p>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setRegistarServicosOpen(false)}
-            >
-              {language === 'pt' ? 'Cancelar' : 'Cancel'}
-            </Button>
-            <Button
-              className="bg-teal-600 hover:bg-teal-700"
-              onClick={() => {
-                if (!lojaServicos) return;
-                registarServicosMutation.mutate({
-                  token,
-                  data: hojeStr,
-                  lojaId: lojaServicos.id,
-                  substituicaoLigeiro: servicoSubstituicaoLigeiro,
-                  reparacao: servicoReparacao,
-                  calibragem: servicoCalibragem,
-                  outros: servicoOutros,
-                  observacoes: servicoObservacoes || undefined,
-                });
-              }}
-              disabled={registarServicosMutation.isPending}
-            >
-              {registarServicosMutation.isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-1" />
-              ) : (
-                <Check className="h-4 w-4 mr-1" />
-              )}
-              {language === 'pt' ? 'Guardar' : 'Save'}
             </Button>
           </DialogFooter>
         </DialogContent>

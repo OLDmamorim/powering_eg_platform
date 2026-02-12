@@ -1,4 +1,4 @@
-import { int, mysqlEnum, mysqlTable, text, mediumtext, timestamp, varchar, boolean, decimal, date } from "drizzle-orm/mysql-core";
+import { int, mysqlEnum, mysqlTable, text, mediumtext, timestamp, varchar, boolean, decimal } from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -1301,23 +1301,3 @@ export const documentos = mysqlTable("documentos", {
 
 export type Documento = typeof documentos.$inferSelect;
 export type InsertDocumento = typeof documentos.$inferInsert;
-
-/**
- * Serviços Volante - Registo diário de serviços realizados pelo volante em cada loja
- */
-export const servicosVolante = mysqlTable("servicos_volante", {
-  id: int("id").autoincrement().primaryKey(),
-  data: varchar("data", { length: 10 }).notNull(), // Data do registo (YYYY-MM-DD)
-  volanteId: int("volanteId").notNull(), // FK para volantes.id
-  lojaId: int("lojaId").notNull(), // FK para lojas.id
-  substituicaoLigeiro: int("substituicaoLigeiro").default(0).notNull(), // Quantidade de substituições em ligeiros
-  reparacao: int("reparacao").default(0).notNull(), // Quantidade de reparações
-  calibragem: int("calibragem").default(0).notNull(), // Quantidade de calibragens
-  outros: int("outros").default(0).notNull(), // Outros serviços
-  observacoes: text("observacoes"), // Observações opcionais
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
-
-export type ServicoVolante = typeof servicosVolante.$inferSelect;
-export type InsertServicoVolante = typeof servicosVolante.$inferInsert;
