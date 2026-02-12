@@ -10535,7 +10535,7 @@ export async function getVolantesSemRegistoHoje() {
     volante: volantes,
     lojaId: agendamentosVolante.lojaId,
     loja: lojas,
-    periodo: agendamentosVolante.periodo
+    periodo: agendamentosVolante.agendamento_volante_periodo
   })
     .from(agendamentosVolante)
     .leftJoin(volantes, eq(agendamentosVolante.volanteId, volantes.id))
@@ -10572,7 +10572,7 @@ export async function getVolantesSemRegistoHoje() {
       volantesMap.get(volanteId)!.lojasNaoRegistadas.push({
         lojaId,
         lojaNome: agendamento.loja?.nome || 'Loja',
-        periodo: agendamento.periodo
+        periodo: agendamento.periodo || 'Dia Todo'
       });
     }
   }

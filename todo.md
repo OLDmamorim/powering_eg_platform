@@ -4652,3 +4652,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Implementar chamada ao endpoint testarNotificacoes
 - [x] Mostrar feedback visual com resultado (toast)
 - [ ] Testar funcionalidade manualmente
+
+
+## v6.19.1 - Correção Erro Testar Notificações
+- [x] Investigar erro "Cannot convert undefined or null to object" no endpoint testarNotificacoes
+- [x] Corrigir problema no código do endpoint (campo periodo)
+- [ ] Testar funcionalidade corrigida
