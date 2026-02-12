@@ -4554,3 +4554,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar card "Circulares" no Portal da Loja
 - [x] Implementar visualização de documentos no portal da loja
 - [x] Testar upload, gestão e visualização
+
+## v6.14.1 - Aumentar Modal de Detalhes da Análise de Fichas
+- [x] Localizar modal de detalhes da análise de fichas
+- [x] Aumentar largura do modal (de max-w-5xl para max-w-6xl)
+- [x] Melhorar espaçamento interno para melhor visualização (cards maiores, números maiores)
+- [x] Testar visualização
