@@ -117,7 +117,6 @@ import {
   Bot,
   Filter,
   ClipboardList,
-  Activity,
 } from "lucide-react";
 
 interface LojaAuth {
@@ -4669,26 +4668,17 @@ function VolanteInterface({
     { enabled: !!token && activeView === "configuracoes" }
   );
   
-  // Queries para Dashboard de Estatísticas (com filtro de meses)
-  const { data: estatisticasDetalhadas, isLoading: loadingEstatisticasDetalhadas } = trpc.portalVolante.getEstatisticasDetalhadasPorMes.useQuery(
-    { token, meses: mesesSelecionadosDashboard },
-    { enabled: !!token && activeView === "dashboard" && mesesSelecionadosDashboard.length > 0 }
+  // Queries para Dashboard de Estatísticas
+  const { data: estatisticasDetalhadas, isLoading: loadingEstatisticas } = trpc.portalVolante.getEstatisticasDetalhadas.useQuery(
+    { token, periodo: 'mes' },
+    { enabled: !!token && activeView === "dashboard" }
   );
   
-  const { data: topLojasServicos, isLoading: loadingTopLojasServicos } = trpc.portalVolante.getTopLojasComMaisServicos.useQuery(
-    { token, meses: mesesSelecionadosDashboard, limite: 5 },
-    { enabled: !!token && activeView === "dashboard" && mesesSelecionadosDashboard.length > 0 }
+  const { data: topLojas, isLoading: loadingTopLojas } = trpc.portalVolante.getTopLojas.useQuery(
+    { token, limite: 5 },
+    { enabled: !!token && activeView === "dashboard" }
   );
   
-  const { data: topLojasVisitas, isLoading: loadingTopLojasVisitas } = trpc.portalVolante.getTopLojasComMaisVisitas.useQuery(
-    { token, meses: mesesSelecionadosDashboard, limite: 5 },
-    { enabled: !!token && activeView === "dashboard" && mesesSelecionadosDashboard.length > 0 }
-  );
-  
-  const { data: analiseRentabilidade, isLoading: loadingAnaliseRentabilidade } = trpc.portalVolante.getAnaliseRentabilidade.useQuery(
-    { token, meses: mesesSelecionadosDashboard, limite: 5 },
-    { enabled: !!token && activeView === "dashboard" && mesesSelecionadosDashboard.length > 0 }
-  );
   const { data: evolucaoServicos, isLoading: loadingEvolucao } = trpc.portalVolante.getEvolucaoServicos.useQuery(
     { token, periodo: 'mes' },
     { enabled: !!token && activeView === "dashboard" }
@@ -6375,12 +6365,16 @@ END:VCALENDAR`;
         )}
 
         {/* Vista Dashboard */}
-        {activeView === "dashboard" && (
-          loadingEstatisticas || loadingTopLojasServicos || loadingTopLojasVisitas || loadingRentabilidade || loadingEvolucao ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-teal-600" />
-            </div>
-          ) : (
+        {activeView === "dashboard" && (() => {
+          if (loadingEstatisticas || loadingTopLojas || loadingEvolucao) {
+            return (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-teal-600" />
+              </div>
+            );
+          }
+          
+          return (
           <div className="container mx-auto px-4 py-6 space-y-6">
             {/* Filtros e Botão Exportar */}
             <Card>
@@ -6389,17 +6383,17 @@ END:VCALENDAR`;
                   <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                     <h3 className="font-medium dark:text-gray-100">{language === 'pt' ? 'Período' : 'Period'}</h3>
                     <FiltroMesesCheckbox
-                      mesesSelecionados={mesesSelecionadosDashboard}
-                      onMesesChange={setMesesSelecionadosDashboard}
+                      mesesSelecionados={mesesSelecionadosVolante}
+                      onMesesChange={setMesesSelecionadosVolante}
                     />
                   </div>
                   <Button
                     onClick={() => {
-                      if (mesesSelecionadosDashboard.length === 0) {
+                      if (mesesSelecionadosVolante.length === 0) {
                         toast.error(language === 'pt' ? 'Selecione pelo menos um mês' : 'Select at least one month');
                         return;
                       }
-                      exportarDashboardPDFMutation.mutate({ token, meses: mesesSelecionadosDashboard });
+                      exportarDashboardPDFMutation.mutate({ token, meses: mesesSelecionadosVolante });
                     }}
                     disabled={exportarDashboardPDFMutation.isPending}
                     className="bg-purple-600 hover:bg-purple-700"
@@ -6539,10 +6533,10 @@ END:VCALENDAR`;
                   <div className="h-64">
                     <Bar
                       data={{
-                        labels: topLojasServicos?.map((l: any) => l.lojaNome) || [],
+                        labels: topLojas?.map((l: any) => l.lojaNome) || [],
                         datasets: [{
                           label: language === 'pt' ? 'Serviços' : 'Services',
-                          data: topLojasServicos?.map((l: any) => l.total) || [],
+                          data: topLojas?.map((l: any) => l.total) || [],
                           backgroundColor: '#8b5cf6',
                         }]
                       }}
@@ -6579,8 +6573,8 @@ END:VCALENDAR`;
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {topLojasServicos && topLojasServicos.length > 0 ? (
-                    topLojasServicos.map((loja: any, index: number) => (
+                  {topLojas && topLojas.length > 0 ? (
+                    topLojas.map((loja: any, index: number) => (
                       <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                         <div className="flex items-center gap-3">
                           <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
@@ -6615,95 +6609,9 @@ END:VCALENDAR`;
                 </div>
               </CardContent>
             </Card>
-
-            {/* Ranking de Lojas Mais Visitadas */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MapPin className="h-5 w-5 text-teal-600" />
-                  {language === 'pt' ? 'Top 5 Lojas Mais Visitadas' : 'Top 5 Most Visited Stores'}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {topLojasVisitas && topLojasVisitas.length > 0 ? (
-                    topLojasVisitas.map((loja: any, index: number) => (
-                      <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
-                            index === 0 ? 'bg-teal-100 text-teal-800' :
-                            index === 1 ? 'bg-blue-100 text-blue-700' :
-                            index === 2 ? 'bg-green-100 text-green-700' :
-                            'bg-gray-100 text-gray-600'
-                          }`}>
-                            {index + 1}
-                          </div>
-                          <div>
-                            <p className="font-medium">{loja.lojaNome}</p>
-                          </div>
-                        </div>
-                        <Badge variant="outline" className="bg-teal-50 text-teal-700 border-teal-300">
-                          {loja.visitas} {language === 'pt' ? 'visitas' : 'visits'}
-                        </Badge>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-center text-gray-500 py-4">
-                      {language === 'pt' ? 'Sem dados de visitas' : 'No visit data'}
-                    </p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Análise de Rentabilidade (Serviços por Visita) */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Activity className="h-5 w-5 text-green-600" />
-                  {language === 'pt' ? 'Análise de Rentabilidade (Serviços/Visita)' : 'Profitability Analysis (Services/Visit)'}
-                </CardTitle>
-                <CardDescription>
-                  {language === 'pt' ? 'Lojas ordenadas por média de serviços realizados por visita' : 'Stores ranked by average services per visit'}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {analiseRentabilidade && analiseRentabilidade.length > 0 ? (
-                    analiseRentabilidade.map((loja: any, index: number) => (
-                      <div key={index} className="flex items-center justify-between p-3 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-lg border border-green-200 dark:border-green-800">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-100 flex items-center justify-center font-bold text-sm">
-                            {index + 1}
-                          </div>
-                          <div>
-                            <p className="font-medium text-gray-900 dark:text-gray-100">{loja.lojaNome}</p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">
-                              {loja.totalServicos} {language === 'pt' ? 'serviços' : 'services'} · {loja.visitas} {language === 'pt' ? 'visitas' : 'visits'}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <Badge className="bg-green-600 hover:bg-green-700 text-white text-lg px-3 py-1">
-                            {loja.servicosPorVisita}
-                          </Badge>
-                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                            {language === 'pt' ? 'serv/visita' : 'serv/visit'}
-                          </p>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-center text-gray-500 py-4">
-                      {language === 'pt' ? 'Sem dados de rentabilidade' : 'No profitability data'}
-                    </p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
           </div>
-          )
-        )}
+          );
+        })()}
 
         {/* Vista Circulares */}
         {activeView === "circulares" && (() => {
