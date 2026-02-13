@@ -4669,13 +4669,15 @@ function VolanteInterface({
   );
   
   // Queries para estatísticas de serviços realizados (Dashboard)
+  const mesesFormatados = mesesSelecionadosVolante.map(m => `${m.ano}-${String(m.mes).padStart(2, '0')}`);
+  
   const { data: estatisticasServicos, isLoading: loadingServicos } = trpc.portalVolante.getEstatisticasServicos.useQuery(
-    { token, mesesSelecionados: mesesSelecionadosDashboard },
+    { token, mesesSelecionados: mesesFormatados },
     { enabled: !!token && activeView === "dashboard" }
   );
   
   const { data: topLojasServicos } = trpc.portalVolante.getTopLojasServicos.useQuery(
-    { token, limit: 5, mesesSelecionados: mesesSelecionadosDashboard },
+    { token, limit: 5, mesesSelecionados: mesesFormatados },
     { enabled: !!token && activeView === "dashboard" }
   );
   

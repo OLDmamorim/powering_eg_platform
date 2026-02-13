@@ -4684,3 +4684,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Modificar getTopLojasServicos para aceitar array de meses selecionados
 - [x] Atualizar queries frontend para enviar mesesSelecionados aos endpoints de serviços
 - [x] Testar filtro (Janeiro deve mostrar 0 serviços)
+
+## Corrigir Erro mesesSelecionadosDashboard
+- [x] Identificar nome correto da variável de meses selecionados no Dashboard (mesesSelecionadosVolante)
+- [x] Corrigir nome da variável nas queries getEstatisticasServicos e getTopLojasServicos
