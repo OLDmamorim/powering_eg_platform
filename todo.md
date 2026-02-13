@@ -4652,8 +4652,3 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Implementar chamada ao endpoint testarNotificacoes
 - [x] Mostrar feedback visual com resultado (toast)
 - [ ] Testar funcionalidade manualmente
-
-## Dashboard Portal do Volante - Serviços R## Dashboard Portal do Volante
-- [x] Adicionar contadores de serviços realizados (Total, Substituições, Reparações, Calibragens, Média/Dia, Dias Trabalhados)
-- [ ] Adicionar gráficos Chart.js (pizza para distribuição, barras para Top 5 lojas)
-- [ ] Manter contadores de pedidos de apoio existentes

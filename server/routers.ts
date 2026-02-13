@@ -9390,60 +9390,6 @@ IMPORTANTE:
         };
       }),
 
-    // Obter estatísticas de serviços para o Dashboard
-    getEstatisticasServicos: publicProcedure
-      .input(z.object({
-        token: z.string(),
-        mesInicio: z.number().optional(),
-        anoInicio: z.number().optional(),
-        mesFim: z.number().optional(),
-        anoFim: z.number().optional(),
-      }))
-      .query(async ({ input }) => {
-        const tokenData = await db.validateTokenVolante(input.token);
-        if (!tokenData) {
-          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
-        }
-        
-        const estatisticas = await db.getEstatisticasServicos(
-          tokenData.volante.id,
-          input.mesInicio,
-          input.anoInicio,
-          input.mesFim,
-          input.anoFim
-        );
-        
-        return estatisticas;
-      }),
-    
-    // Obter Top N lojas com mais serviços
-    getTopLojasServicos: publicProcedure
-      .input(z.object({
-        token: z.string(),
-        limit: z.number().default(5),
-        mesInicio: z.number().optional(),
-        anoInicio: z.number().optional(),
-        mesFim: z.number().optional(),
-        anoFim: z.number().optional(),
-      }))
-      .query(async ({ input }) => {
-        const tokenData = await db.validateTokenVolante(input.token);
-        if (!tokenData) {
-          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
-        }
-        
-        const topLojas = await db.getTopLojasServicos(
-          tokenData.volante.id,
-          input.limit,
-          input.mesInicio,
-          input.anoInicio,
-          input.mesFim,
-          input.anoFim
-        );
-        
-        return topLojas;
-      }),
-
     // Endpoint de teste para enviar notificações manualmente
     testarNotificacoes: publicProcedure
       .input(z.object({
