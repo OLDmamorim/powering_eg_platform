@@ -1,0 +1,802 @@
+[
+  {
+    "mes": "FEBRUARY",
+    "unidade": "Recalibra Minho",
+    "data": "2026-02-12",
+    "marca": "Peugeot",
+    "matricula": "BF-42-UN",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "DINÂMICA",
+    "localidade": "Guimarães"
+  },
+  {
+    "mes": "FEBRUARY",
+    "unidade": "Recalibra Minho",
+    "data": "2026-02-12",
+    "marca": "Mini",
+    "matricula": "79-ZS-47",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "DINÂMICA",
+    "localidade": "Póvoa de Varzim"
+  },
+  {
+    "mes": "FEBRUARY",
+    "unidade": "Recalibra Minho",
+    "data": "2026-02-11",
+    "marca": "Hyundai",
+    "matricula": "AD-69-PN",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "ESTÁTICA",
+    "localidade": "Guimarães"
+  },
+  {
+    "mes": "FEBRUARY",
+    "unidade": "Recalibra Minho",
+    "data": "2026-02-11",
+    "marca": "MG",
+    "matricula": "BM-88-NC",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "CORE",
+    "localidade": "Braga"
+  },
+  {
+    "mes": "FEBRUARY",
+    "unidade": "Recalibra Minho",
+    "data": "2026-02-09",
+    "marca": "Renault",
+    "matricula": "BV-53-PJ",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "DINÂMICA",
+    "localidade": "Barcelos"
+  },
+  {
+    "mes": "FEBRUARY",
+    "unidade": "Recalibra Minho",
+    "data": "2026-02-09",
+    "marca": "Opel",
+    "matricula": "BO-89-DL",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "DINÂMICA",
+    "localidade": "Barcelos"
+  },
+  {
+    "mes": "FEBRUARY",
+    "unidade": "Recalibra Minho",
+    "data": "2026-02-09",
+    "marca": "Land Rover",
+    "matricula": "AZ-19-AQ",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "DINÂMICA",
+    "localidade": "Viana do Castelo"
+  },
+  {
+    "mes": "FEBRUARY",
+    "unidade": "Recalibra Minho",
+    "data": "2026-02-09",
+    "marca": "BMW",
+    "matricula": "BV-86-CX",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "DINÂMICA",
+    "localidade": "Póvoa de Varzim"
+  },
+  {
+    "mes": "FEBRUARY",
+    "unidade": "Recalibra Minho",
+    "data": "2026-02-07",
+    "marca": "Mercedes-Benz",
+    "matricula": "60-RZ-96",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "ESTÁTICA",
+    "localidade": "Guimarães"
+  },
+  {
+    "mes": "FEBRUARY",
+    "unidade": "Recalibra Minho",
+    "data": "2026-02-06",
+    "marca": "Audi",
+    "matricula": "AE-73-QI",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "ESTÁTICA",
+    "localidade": "Outro"
+  },
+  {
+    "mes": "FEBRUARY",
+    "unidade": "Recalibra Minho",
+    "data": "2026-02-06",
+    "marca": "Renault",
+    "matricula": "AV-25-OZ",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "ESTÁTICA",
+    "localidade": "Outro"
+  },
+  {
+    "mes": "FEBRUARY",
+    "unidade": "Recalibra Minho",
+    "data": "2026-02-05",
+    "marca": "Kia",
+    "matricula": "AH-12-ZU",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "ESTÁTICA",
+    "localidade": "Braga"
+  },
+  {
+    "mes": "FEBRUARY",
+    "unidade": "Recalibra Minho",
+    "data": "2026-02-05",
+    "marca": "Citroen",
+    "matricula": "AL-87-CR",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "DINÂMICA",
+    "localidade": "Braga"
+  },
+  {
+    "mes": "FEBRUARY",
+    "unidade": "Recalibra Minho",
+    "data": "2026-02-05",
+    "marca": "Opel",
+    "matricula": "BO-00-VL",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "DINÂMICA",
+    "localidade": "Guimarães"
+  },
+  {
+    "mes": "FEBRUARY",
+    "unidade": "Recalibra Minho",
+    "data": "2026-02-04",
+    "marca": "Toyota",
+    "matricula": "BP-97-OA",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "ESTÁTICA",
+    "localidade": "Guimarães"
+  },
+  {
+    "mes": "FEBRUARY",
+    "unidade": "Recalibra Minho",
+    "data": "2026-02-04",
+    "marca": "Renault",
+    "matricula": "BR-41-JG",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "DINÂMICA",
+    "localidade": "Guimarães"
+  },
+  {
+    "mes": "FEBRUARY",
+    "unidade": "Recalibra Minho",
+    "data": "2026-02-03",
+    "marca": "Hyundai",
+    "matricula": "BN-54-BC",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "CORE",
+    "localidade": "Viana do Castelo"
+  },
+  {
+    "mes": "FEBRUARY",
+    "unidade": "Recalibra Minho",
+    "data": "2026-02-03",
+    "marca": "BMW",
+    "matricula": "AJ-19-ZX",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "DINÂMICA",
+    "localidade": "Póvoa de Varzim"
+  },
+  {
+    "mes": "JANUARY",
+    "unidade": "Recalibra Minho",
+    "data": "2026-01-30",
+    "marca": "Mercedes-Benz",
+    "matricula": "50-ZZ-92",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "ESTÁTICA",
+    "localidade": "Guimarães"
+  },
+  {
+    "mes": "JANUARY",
+    "unidade": "Recalibra Minho",
+    "data": "2026-01-30",
+    "marca": "Jeep",
+    "matricula": "83-VB-70",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "ESTÁTICA",
+    "localidade": "Póvoa de Varzim"
+  },
+  {
+    "mes": "JANUARY",
+    "unidade": "Recalibra Minho",
+    "data": "2026-01-30",
+    "marca": "BMW",
+    "matricula": "BM-12-QV",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "DINÂMICA",
+    "localidade": "Póvoa de Varzim"
+  },
+  {
+    "mes": "JANUARY",
+    "unidade": "Recalibra Minho",
+    "data": "2026-01-29",
+    "marca": "Volkswagen",
+    "matricula": "BP-62-EV",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "ESTÁTICA",
+    "localidade": "Braga"
+  },
+  {
+    "mes": "JANUARY",
+    "unidade": "Recalibra Minho",
+    "data": "2026-01-28",
+    "marca": "Porsche",
+    "matricula": "BJ-29-QA",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "ESTÁTICA",
+    "localidade": "Guimarães"
+  },
+  {
+    "mes": "JANUARY",
+    "unidade": "Recalibra Minho",
+    "data": "2026-01-28",
+    "marca": "Porsche",
+    "matricula": "BJ-07-FS",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "ESTÁTICA",
+    "localidade": "Guimarães"
+  },
+  {
+    "mes": "JANUARY",
+    "unidade": "Recalibra Minho",
+    "data": "2026-01-27",
+    "marca": "BMW",
+    "matricula": "25-ZM-69",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "DINÂMICA",
+    "localidade": "Póvoa de Varzim"
+  },
+  {
+    "mes": "JANUARY",
+    "unidade": "Recalibra Minho",
+    "data": "2026-01-26",
+    "marca": "",
+    "matricula": "BH-12-VL",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "ESTÁTICA",
+    "localidade": "Outro"
+  },
+  {
+    "mes": "JANUARY",
+    "unidade": "Recalibra Minho",
+    "data": "2026-01-26",
+    "marca": "",
+    "matricula": "AN-74-RN",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "ESTÁTICA",
+    "localidade": "Outro"
+  },
+  {
+    "mes": "JANUARY",
+    "unidade": "Recalibra Minho",
+    "data": "2026-01-23",
+    "marca": "Peugeot",
+    "matricula": "BR-77-MI",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "DINÂMICA",
+    "localidade": "Braga"
+  },
+  {
+    "mes": "JANUARY",
+    "unidade": "Recalibra Minho",
+    "data": "2026-01-23",
+    "marca": "Peugeot",
+    "matricula": "AN-19-BF",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "DINÂMICA",
+    "localidade": "Póvoa de Varzim"
+  },
+  {
+    "mes": "JANUARY",
+    "unidade": "Recalibra Minho",
+    "data": "2026-01-23",
+    "marca": "BMW",
+    "matricula": "36-ZT-33",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "DINÂMICA",
+    "localidade": "Póvoa de Varzim"
+  },
+  {
+    "mes": "JANUARY",
+    "unidade": "Recalibra Minho",
+    "data": "2026-01-21",
+    "marca": "Peugeot",
+    "matricula": "BQ-96-PM",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "DINÂMICA",
+    "localidade": "Braga"
+  },
+  {
+    "mes": "JANUARY",
+    "unidade": "Recalibra Minho",
+    "data": "2026-01-21",
+    "marca": "Renault",
+    "matricula": "BZ-25-CL",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "DINÂMICA",
+    "localidade": "Barcelos"
+  },
+  {
+    "mes": "JANUARY",
+    "unidade": "Recalibra Minho",
+    "data": "2026-01-20",
+    "marca": "Ford",
+    "matricula": "BI-22-UB",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "DINÂMICA",
+    "localidade": "Guimarães"
+  },
+  {
+    "mes": "JANUARY",
+    "unidade": "Recalibra Minho",
+    "data": "2026-01-20",
+    "marca": "BMW",
+    "matricula": "BZ-63-NU",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "DINÂMICA",
+    "localidade": "Braga"
+  },
+  {
+    "mes": "DECEMBER",
+    "unidade": "Recalibra Minho",
+    "data": "2025-12-23",
+    "marca": "Porsche",
+    "matricula": "BC-10-GF",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "ESTÁTICA",
+    "localidade": "Barcelos"
+  },
+  {
+    "mes": "DECEMBER",
+    "unidade": "Recalibra Minho",
+    "data": "2025-12-22",
+    "marca": "Mitsubishi",
+    "matricula": "AJ-55-CB",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "ESTÁTICA",
+    "localidade": "Braga"
+  },
+  {
+    "mes": "DECEMBER",
+    "unidade": "Recalibra Minho",
+    "data": "2025-12-19",
+    "marca": "MG",
+    "matricula": "BM-88-NC",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "CORE",
+    "localidade": "Póvoa de Lanhoso"
+  },
+  {
+    "mes": "DECEMBER",
+    "unidade": "Recalibra Minho",
+    "data": "2025-12-19",
+    "marca": "Peugeot",
+    "matricula": "BE-89-UG",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "DINÂMICA",
+    "localidade": "Póvoa de Varzim"
+  },
+  {
+    "mes": "DECEMBER",
+    "unidade": "Recalibra Minho",
+    "data": "2025-12-18",
+    "marca": "Toyota",
+    "matricula": "87-SU-92",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "ESTÁTICA",
+    "localidade": "Vieira do Minho"
+  },
+  {
+    "mes": "DECEMBER",
+    "unidade": "Recalibra Minho",
+    "data": "2025-12-17",
+    "marca": "Hyundai",
+    "matricula": "AC-41-MH",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "ESTÁTICA",
+    "localidade": "Vila Verde"
+  },
+  {
+    "mes": "DECEMBER",
+    "unidade": "Recalibra Minho",
+    "data": "2025-12-16",
+    "marca": "Renault",
+    "matricula": "AB-81-SE",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "ESTÁTICA",
+    "localidade": "Guimarães"
+  },
+  {
+    "mes": "DECEMBER",
+    "unidade": "Recalibra Minho",
+    "data": "2025-12-16",
+    "marca": "Volvo",
+    "matricula": "BV-06-SQ",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "CORE",
+    "localidade": "Vila Nova de Famalicão"
+  },
+  {
+    "mes": "DECEMBER",
+    "unidade": "Recalibra Minho",
+    "data": "2025-12-16",
+    "marca": "Opel",
+    "matricula": "55-VH-09",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "DINÂMICA",
+    "localidade": "Póvoa de Varzim"
+  },
+  {
+    "mes": "DECEMBER",
+    "unidade": "Recalibra Minho",
+    "data": "2025-12-16",
+    "marca": "Peugeot",
+    "matricula": "BB-43-XE",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "DINÂMICA",
+    "localidade": "Póvoa de Varzim"
+  },
+  {
+    "mes": "DECEMBER",
+    "unidade": "Recalibra Minho",
+    "data": "2025-12-15",
+    "marca": "Skoda",
+    "matricula": "BP-62-IV",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "ESTÁTICA",
+    "localidade": "Póvoa de Varzim"
+  },
+  {
+    "mes": "DECEMBER",
+    "unidade": "Recalibra Minho",
+    "data": "2025-12-12",
+    "marca": "BMW",
+    "matricula": "AA-38-VX",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "DINÂMICA",
+    "localidade": "Guimarães"
+  },
+  {
+    "mes": "DECEMBER",
+    "unidade": "Recalibra Minho",
+    "data": "2025-12-11",
+    "marca": "Seat",
+    "matricula": "AI-03-ND",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "ESTÁTICA",
+    "localidade": "Póvoa de Varzim"
+  },
+  {
+    "mes": "DECEMBER",
+    "unidade": "Recalibra Minho",
+    "data": "2025-12-10",
+    "marca": "Peugeot",
+    "matricula": "AL-08-PV",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "DINÂMICA",
+    "localidade": "Barcelos"
+  },
+  {
+    "mes": "DECEMBER",
+    "unidade": "Recalibra Minho",
+    "data": "2025-12-10",
+    "marca": "Mercedes-Benz",
+    "matricula": "46-ZD-89",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "ESTÁTICA",
+    "localidade": "Póvoa de Varzim"
+  },
+  {
+    "mes": "DECEMBER",
+    "unidade": "Recalibra Minho",
+    "data": "2025-12-09",
+    "marca": "Tesla",
+    "matricula": "BN-27-UL",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "DINÂMICA",
+    "localidade": "Guimarães"
+  },
+  {
+    "mes": "DECEMBER",
+    "unidade": "Recalibra Minho",
+    "data": "2025-12-09",
+    "marca": "Mercedes-Benz",
+    "matricula": "11-ZS-19",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "ESTÁTICA",
+    "localidade": "Braga"
+  },
+  {
+    "mes": "DECEMBER",
+    "unidade": "Recalibra Minho",
+    "data": "2025-12-04",
+    "marca": "Mercedes-Benz",
+    "matricula": "AX-32-IU",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "ESTÁTICA",
+    "localidade": "Outro"
+  },
+  {
+    "mes": "DECEMBER",
+    "unidade": "Recalibra Minho",
+    "data": "2025-12-04",
+    "marca": "Peugeot",
+    "matricula": "BN-11-GZ",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "DINÂMICA",
+    "localidade": "Outro"
+  },
+  {
+    "mes": "DECEMBER",
+    "unidade": "Recalibra Minho",
+    "data": "2025-12-03",
+    "marca": "",
+    "matricula": "AL-31-JV",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "DINÂMICA",
+    "localidade": "Braga"
+  },
+  {
+    "mes": "DECEMBER",
+    "unidade": "Recalibra Minho",
+    "data": "2025-12-03",
+    "marca": "BMW",
+    "matricula": "AV-89-TS",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "DINÂMICA",
+    "localidade": "Póvoa de Varzim"
+  },
+  {
+    "mes": "DECEMBER",
+    "unidade": "Recalibra Minho",
+    "data": "2025-12-02",
+    "marca": "",
+    "matricula": "36-SA-28",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "DINÂMICA",
+    "localidade": "Vila do Conde"
+  },
+  {
+    "mes": "DECEMBER",
+    "unidade": "Recalibra Minho",
+    "data": "2025-12-02",
+    "marca": "Mercedes-Benz",
+    "matricula": "BZ-92-ZX",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "ESTÁTICA",
+    "localidade": "Outro"
+  },
+  {
+    "mes": "DECEMBER",
+    "unidade": "Recalibra Minho",
+    "data": "2025-12-02",
+    "marca": "Volkswagen",
+    "matricula": "03-TR-06",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "ESTÁTICA",
+    "localidade": "Outro"
+  },
+  {
+    "mes": "NOVEMBER",
+    "unidade": "Recalibra Minho",
+    "data": "2025-11-29",
+    "marca": "Peugeot",
+    "matricula": "BR-18-XZ",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "DINÂMICA",
+    "localidade": "Vila Verde"
+  },
+  {
+    "mes": "NOVEMBER",
+    "unidade": "Recalibra Minho",
+    "data": "2025-11-28",
+    "marca": "Renault",
+    "matricula": "32-RD-37",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "ESTÁTICA",
+    "localidade": "Guimarães"
+  },
+  {
+    "mes": "NOVEMBER",
+    "unidade": "Recalibra Minho",
+    "data": "2025-11-28",
+    "marca": "Nissan",
+    "matricula": "AN-51-CD",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "ESTÁTICA",
+    "localidade": "Guimarães"
+  },
+  {
+    "mes": "NOVEMBER",
+    "unidade": "Recalibra Minho",
+    "data": "2025-11-27",
+    "marca": "Mercedes-Benz",
+    "matricula": "AO-10-JS",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "DINÂMICA",
+    "localidade": "Vila Nova de Famalicão"
+  },
+  {
+    "mes": "NOVEMBER",
+    "unidade": "Recalibra Minho",
+    "data": "2025-11-27",
+    "marca": "Peugeot",
+    "matricula": "BJ-04-VE",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "DINÂMICA",
+    "localidade": "Guimarães"
+  },
+  {
+    "mes": "NOVEMBER",
+    "unidade": "Recalibra Minho",
+    "data": "2025-11-26",
+    "marca": "Volkswagen",
+    "matricula": "06-UN-03",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "ESTÁTICA",
+    "localidade": "Vila do Conde"
+  },
+  {
+    "mes": "NOVEMBER",
+    "unidade": "Recalibra Minho",
+    "data": "2025-11-26",
+    "marca": "Audi",
+    "matricula": "85-VJ-15",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "ESTÁTICA",
+    "localidade": "Barcelos"
+  },
+  {
+    "mes": "NOVEMBER",
+    "unidade": "Recalibra Minho",
+    "data": "2025-11-26",
+    "marca": "Volvo",
+    "matricula": "BV-48-IV",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "CORE",
+    "localidade": "Guimarães"
+  },
+  {
+    "mes": "NOVEMBER",
+    "unidade": "Recalibra Minho",
+    "data": "2025-11-25",
+    "marca": "Mercedes-Benz",
+    "matricula": "BZ-78-GH",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "ESTÁTICA",
+    "localidade": "Braga"
+  },
+  {
+    "mes": "NOVEMBER",
+    "unidade": "Recalibra Minho",
+    "data": "2025-11-25",
+    "marca": "Renault",
+    "matricula": "BX-79-SN",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "ESTÁTICA",
+    "localidade": "Vila Verde"
+  },
+  {
+    "mes": "NOVEMBER",
+    "unidade": "Recalibra Minho",
+    "data": "2025-11-24",
+    "marca": "",
+    "matricula": "BQ-64-AZ",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "CORE",
+    "localidade": "Braga"
+  },
+  {
+    "mes": "NOVEMBER",
+    "unidade": "Recalibra Minho",
+    "data": "2025-11-21",
+    "marca": "Nissan",
+    "matricula": "08-XN-12",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "ESTÁTICA",
+    "localidade": "Guimarães"
+  },
+  {
+    "mes": "NOVEMBER",
+    "unidade": "Recalibra Minho",
+    "data": "2025-11-18",
+    "marca": "Mercedes-Benz",
+    "matricula": "AU-15-NB",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "ESTÁTICA",
+    "localidade": "Póvoa de Varzim"
+  },
+  {
+    "mes": "NOVEMBER",
+    "unidade": "Recalibra Minho",
+    "data": "2025-11-18",
+    "marca": "Peugeot",
+    "matricula": "AT-49-XD",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "DINÂMICA",
+    "localidade": "Póvoa de Varzim"
+  },
+  {
+    "mes": "NOVEMBER",
+    "unidade": "Recalibra Minho",
+    "data": "2025-11-17",
+    "marca": "Jaguar",
+    "matricula": "AL-31-PB",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "DINÂMICA",
+    "localidade": "Vila do Conde"
+  },
+  {
+    "mes": "NOVEMBER",
+    "unidade": "Recalibra Minho",
+    "data": "2025-11-14",
+    "marca": "Mercedes-Benz",
+    "matricula": "BI-70-OP",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "ESTÁTICA",
+    "localidade": "Póvoa de Varzim"
+  },
+  {
+    "mes": "NOVEMBER",
+    "unidade": "Recalibra Minho",
+    "data": "2025-11-13",
+    "marca": "Mercedes-Benz",
+    "matricula": "AR-04-DD",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "ESTÁTICA",
+    "localidade": "Guimarães"
+  },
+  {
+    "mes": "NOVEMBER",
+    "unidade": "Recalibra Minho",
+    "data": "2025-11-13",
+    "marca": "Tesla",
+    "matricula": "BR-17-VT",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "DINÂMICA",
+    "localidade": "Guimarães"
+  },
+  {
+    "mes": "NOVEMBER",
+    "unidade": "Recalibra Minho",
+    "data": "2025-11-13",
+    "marca": "Citroen",
+    "matricula": "BS-25-ES",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "DINÂMICA",
+    "localidade": "Guimarães"
+  },
+  {
+    "mes": "NOVEMBER",
+    "unidade": "Recalibra Minho",
+    "data": "2025-11-13",
+    "marca": "Audi",
+    "matricula": "BA-85-CX",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "DINÂMICA",
+    "localidade": "Guimarães"
+  },
+  {
+    "mes": "NOVEMBER",
+    "unidade": "Recalibra Minho",
+    "data": "2025-11-12",
+    "marca": "BMW",
+    "matricula": "BC-42-GH",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "DINÂMICA",
+    "localidade": "Braga"
+  },
+  {
+    "mes": "NOVEMBER",
+    "unidade": "Recalibra Minho",
+    "data": "2025-11-12",
+    "marca": "Citroen",
+    "matricula": "BF-49-RP",
+    "tipologiaViatura": "LIGEIRO",
+    "tipoCalibragem": "DINÂMICA",
+    "localidade": "Guimarães"
+  }
+]

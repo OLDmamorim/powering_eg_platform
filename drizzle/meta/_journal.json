@@ -533,6 +533,13 @@
       "when": 1770915753631,
       "tag": "0075_next_dragon_lord",
       "breakpoints": true
+    },
+    {
+      "idx": 76,
+      "version": "5",
+      "when": 1771007069754,
+      "tag": "0076_jittery_vulcan",
+      "breakpoints": true
     }
   ]
 }

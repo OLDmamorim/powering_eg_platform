@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { trpc } from "@/lib/trpc";
 // Imports removidos - PDF agora gerado via servidor
 // import html2canvas from 'html2canvas';

@@ -1320,3 +1320,84 @@ export const servicosVolante = mysqlTable("servicos_volante", {
 
 export type ServicoVolante = typeof servicosVolante.$inferSelect;
 export type InsertServicoVolante = typeof servicosVolante.$inferInsert;
+
+/**
+ * ========================================
+ * RECALIBRA - Sistema de Gestão de Calibragens
+ * ========================================
+ */
+
+/**
+ * Unidades Recalibra - Informação sobre unidades de calibragem
+ * Similar à tabela volantes, mas para unidades de calibragem
+ */
+export const unidadesRecalibra = mysqlTable("unidades_recalibra", {
+  id: int("id").autoincrement().primaryKey(),
+  nome: varchar("nome", { length: 255 }).notNull(),
+  email: varchar("email", { length: 320 }),
+  telefone: varchar("telefone", { length: 50 }),
+  gestorId: int("gestorId").notNull(), // FK para gestores.id - gestor responsável pela unidade
+  ativo: boolean("ativo").default(true).notNull(),
+  telegramChatId: varchar("telegramChatId", { length: 100 }), // Chat ID do Telegram para notificações
+  telegramUsername: varchar("telegramUsername", { length: 100 }), // Username do Telegram (opcional)
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type UnidadeRecalibra = typeof unidadesRecalibra.$inferSelect;
+export type InsertUnidadeRecalibra = typeof unidadesRecalibra.$inferInsert;
+
+
+/**
+ * Unidade-Lojas - Associação many-to-many entre unidades recalibra e lojas
+ * Define quais lojas cada unidade pode atender
+ */
+export const unidadeLojas = mysqlTable("unidade_lojas", {
+  id: int("id").autoincrement().primaryKey(),
+  unidadeId: int("unidadeId").notNull(), // FK para unidades_recalibra.id
+  lojaId: int("lojaId").notNull(), // FK para lojas.id
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type UnidadeLoja = typeof unidadeLojas.$inferSelect;
+export type InsertUnidadeLoja = typeof unidadeLojas.$inferInsert;
+
+
+/**
+ * Tokens de Acesso de Unidade Recalibra - Tokens para unidades acederem ao Portal Recalibra
+ */
+export const tokensRecalibra = mysqlTable("tokens_recalibra", {
+  id: int("id").autoincrement().primaryKey(),
+  unidadeId: int("unidadeId").notNull(), // FK para unidades_recalibra.id
+  token: varchar("token", { length: 64 }).notNull().unique(), // Token único de acesso
+  ativo: boolean("ativo").default(true).notNull(),
+  ultimoAcesso: timestamp("ultimoAcesso"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type TokenRecalibra = typeof tokensRecalibra.$inferSelect;
+export type InsertTokenRecalibra = typeof tokensRecalibra.$inferInsert;
+
+
+/**
+ * Calibragens - Registo de calibragens realizadas
+ * Armazena informação detalhada sobre cada calibragem
+ */
+export const calibragens = mysqlTable("calibragens", {
+  id: int("id").autoincrement().primaryKey(),
+  unidadeId: int("unidadeId").notNull(), // FK para unidades_recalibra.id
+  lojaId: int("lojaId").notNull(), // FK para lojas.id
+  data: varchar("data", { length: 10 }).notNull(), // Data no formato YYYY-MM-DD
+  marca: varchar("marca", { length: 100 }), // Marca do veículo (Peugeot, BMW, etc.)
+  matricula: varchar("matricula", { length: 20 }).notNull(), // Matrícula do veículo
+  tipologiaViatura: mysqlEnum("tipologiaViatura", ["LIGEIRO", "PESADO"]).default("LIGEIRO").notNull(),
+  tipoCalibragem: mysqlEnum("tipoCalibragem", ["DINÂMICA", "ESTÁTICA", "CORE"]).notNull(),
+  localidade: varchar("localidade", { length: 255 }), // Localidade onde foi realizada a calibragem
+  observacoes: text("observacoes"), // Observações adicionais
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Calibragem = typeof calibragens.$inferSelect;
+export type InsertCalibragem = typeof calibragens.$inferInsert;

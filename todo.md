@@ -4697,7 +4697,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Corrigir query getTopLojasServicos para usar and() corretamente
 
 ## Portal Recalibra - Implementação Completa v6.31
-- [ ] Extrair dados completos do Notion para ficheiro JSON
+- [x] Extrair dados completos do Notion para ficheiro JSON (78 registos)
 - [ ] Criar estrutura de base de dados (tabelas: unidades_recalibra, calibragens, lojas_recalibra)
 - [ ] Criar página de Configuração do Recalibra (nome, email, token, seleção de lojas)
 - [ ] Criar endpoints backend para Recalibra (CRUD calibragens, estatísticas)
