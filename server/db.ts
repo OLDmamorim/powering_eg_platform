@@ -10535,7 +10535,7 @@ export async function getVolantesSemRegistoHoje() {
     volante: volantes,
     lojaId: agendamentosVolante.lojaId,
     loja: lojas,
-    periodo: agendamentosVolante.agendamento_volante_periodo
+    periodo: agendamentosVolante.periodo
   })
     .from(agendamentosVolante)
     .leftJoin(volantes, eq(agendamentosVolante.volanteId, volantes.id))
@@ -10572,7 +10572,7 @@ export async function getVolantesSemRegistoHoje() {
       volantesMap.get(volanteId)!.lojasNaoRegistadas.push({
         lojaId,
         lojaNome: agendamento.loja?.nome || 'Loja',
-        periodo: agendamento.periodo || 'Dia Todo'
+        periodo: agendamento.periodo
       });
     }
   }
@@ -10714,180 +10714,4 @@ export async function getEstatisticasMensaisServicos(volanteId: number, ano: num
     },
     porLoja: porLoja.sort((a, b) => b.total - a.total)
   };
-}
-
-/**
- * Obter estatísticas detalhadas para o dashboard do volante
- */
-export async function getEstatisticasDetalhadasVolante(volanteId: number, periodo?: 'semana' | 'mes' | 'trimestre' | 'ano') {
-  const db = await getDb();
-  if (!db) return null;
-  
-  // Calcular data de início baseado no período
-  const hoje = new Date();
-  let dataInicio: Date;
-  
-  switch (periodo) {
-    case 'semana':
-      dataInicio = new Date(hoje);
-      dataInicio.setDate(hoje.getDate() - 7);
-      break;
-    case 'mes':
-      dataInicio = new Date(hoje);
-      dataInicio.setMonth(hoje.getMonth() - 1);
-      break;
-    case 'trimestre':
-      dataInicio = new Date(hoje);
-      dataInicio.setMonth(hoje.getMonth() - 3);
-      break;
-    case 'ano':
-      dataInicio = new Date(hoje);
-      dataInicio.setFullYear(hoje.getFullYear() - 1);
-      break;
-    default:
-      // Sem filtro de data - pegar tudo
-      dataInicio = new Date(2020, 0, 1);
-  }
-  
-  const dataInicioStr = dataInicio.toISOString().split('T')[0];
-  
-  const servicos = await db.select()
-    .from(servicosVolante)
-    .where(and(
-      eq(servicosVolante.volanteId, volanteId),
-      gte(servicosVolante.data, dataInicioStr)
-    ));
-  
-  // Calcular totais por tipo
-  const totaisPorTipo = {
-    substituicaoLigeiro: 0,
-    reparacao: 0,
-    calibragem: 0,
-    outros: 0,
-    total: 0
-  };
-  
-  for (const s of servicos) {
-    totaisPorTipo.substituicaoLigeiro += s.substituicaoLigeiro;
-    totaisPorTipo.reparacao += s.reparacao;
-    totaisPorTipo.calibragem += s.calibragem;
-    totaisPorTipo.outros += s.outros;
-    totaisPorTipo.total += s.substituicaoLigeiro + s.reparacao + s.calibragem + s.outros;
-  }
-  
-  // Calcular média por dia
-  const diasUnicos = new Set(servicos.map(s => s.data)).size;
-  const mediaPorDia = diasUnicos > 0 ? Math.round(totaisPorTipo.total / diasUnicos) : 0;
-  
-  return {
-    totaisPorTipo,
-    mediaPorDia,
-    diasTrabalhados: diasUnicos,
-    totalServicos: totaisPorTipo.total
-  };
-}
-
-/**
- * Obter top lojas com mais serviços realizados
- */
-export async function getTopLojasComMaisServicos(volanteId: number, limite: number = 5) {
-  const db = await getDb();
-  if (!db) return [];
-  
-  const servicos = await db.select({
-    lojaId: servicosVolante.lojaId,
-    lojaNome: lojas.nome,
-    substituicaoLigeiro: servicosVolante.substituicaoLigeiro,
-    reparacao: servicosVolante.reparacao,
-    calibragem: servicosVolante.calibragem,
-    outros: servicosVolante.outros
-  })
-    .from(servicosVolante)
-    .leftJoin(lojas, eq(servicosVolante.lojaId, lojas.id))
-    .where(eq(servicosVolante.volanteId, volanteId));
-  
-  // Agrupar por loja e somar totais
-  const lojasAgrupadas = servicos.reduce((acc: any[], s) => {
-    const existente = acc.find(item => item.lojaId === s.lojaId);
-    const totalServico = s.substituicaoLigeiro + s.reparacao + s.calibragem + s.outros;
-    
-    if (existente) {
-      existente.substituicaoLigeiro += s.substituicaoLigeiro;
-      existente.reparacao += s.reparacao;
-      existente.calibragem += s.calibragem;
-      existente.outros += s.outros;
-      existente.total += totalServico;
-      existente.visitas += 1;
-    } else {
-      acc.push({
-        lojaId: s.lojaId,
-        lojaNome: s.lojaNome || 'Loja',
-        substituicaoLigeiro: s.substituicaoLigeiro,
-        reparacao: s.reparacao,
-        calibragem: s.calibragem,
-        outros: s.outros,
-        total: totalServico,
-        visitas: 1
-      });
-    }
-    return acc;
-  }, []);
-  
-  // Ordenar por total e retornar top N
-  return lojasAgrupadas
-    .sort((a, b) => b.total - a.total)
-    .slice(0, limite);
-}
-
-/**
- * Obter evolução de serviços ao longo do tempo (para gráficos)
- */
-export async function getEvolucaoServicos(volanteId: number, periodo: 'semana' | 'mes' = 'mes') {
-  const db = await getDb();
-  if (!db) return [];
-  
-  // Calcular data de início
-  const hoje = new Date();
-  const dataInicio = new Date(hoje);
-  
-  if (periodo === 'semana') {
-    dataInicio.setDate(hoje.getDate() - 7);
-  } else {
-    dataInicio.setDate(hoje.getDate() - 30);
-  }
-  
-  const dataInicioStr = dataInicio.toISOString().split('T')[0];
-  
-  const servicos = await db.select()
-    .from(servicosVolante)
-    .where(and(
-      eq(servicosVolante.volanteId, volanteId),
-      gte(servicosVolante.data, dataInicioStr)
-    ))
-    .orderBy(servicosVolante.data);
-  
-  // Agrupar por data
-  const evolucao = servicos.reduce((acc: any[], s) => {
-    const existente = acc.find(item => item.data === s.data);
-    
-    if (existente) {
-      existente.substituicaoLigeiro += s.substituicaoLigeiro;
-      existente.reparacao += s.reparacao;
-      existente.calibragem += s.calibragem;
-      existente.outros += s.outros;
-      existente.total += s.substituicaoLigeiro + s.reparacao + s.calibragem + s.outros;
-    } else {
-      acc.push({
-        data: s.data,
-        substituicaoLigeiro: s.substituicaoLigeiro,
-        reparacao: s.reparacao,
-        calibragem: s.calibragem,
-        outros: s.outros,
-        total: s.substituicaoLigeiro + s.reparacao + s.calibragem + s.outros
-      });
-    }
-    return acc;
-  }, []);
-  
-  return evolucao;
 }
