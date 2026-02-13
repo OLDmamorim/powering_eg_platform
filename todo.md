@@ -4673,3 +4673,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## Melhorar Layout Ranking de Lojas
 - [x] Adicionar badge verde para destacar média de serviços por visita
 - [x] Ajustar layout para ficar mais visual e profissional
+
+## Redesenhar Layout Ranking de Lojas
+- [x] Reestruturar layout vertical (nome → serviços/visitas → badge média centralizado)
+- [x] Garantir que badge verde fica dentro da caixa sem sair
+- [x] Melhorar alinhamento e espaçamento

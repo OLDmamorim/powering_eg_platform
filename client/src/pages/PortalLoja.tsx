@@ -6589,23 +6589,22 @@ END:VCALENDAR`;
                       <CardContent>
                         <div className="space-y-4">
                           {topLojasServicos.map((loja: any, index: number) => (
-                            <div key={loja.lojaId} className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
-                              <div className="flex-shrink-0">
+                            <div key={loja.lojaId} className="flex items-start gap-4 p-4 bg-gray-50 rounded-lg">
+                              <div className="flex-shrink-0 mt-1">
                                 {index === 0 && <span className="text-3xl">🥇</span>}
                                 {index === 1 && <span className="text-3xl">🥈</span>}
                                 {index === 2 && <span className="text-3xl">🥉</span>}
                                 {index > 2 && <span className="text-2xl font-bold text-gray-400">{index + 1}</span>}
                               </div>
                               <div className="flex-1">
-                                <h4 className="font-semibold text-lg">{loja.lojaNome}</h4>
-                                <div className="flex items-center gap-4 mt-1 text-sm text-gray-600">
+                                <h4 className="font-semibold text-lg mb-2">{loja.lojaNome}</h4>
+                                <div className="flex items-center gap-4 text-sm text-gray-600 mb-2">
                                   <span>{loja.totalServicos} {language === 'pt' ? 'serviços' : 'services'}</span>
                                   <span>•</span>
                                   <span>{loja.visitas} {language === 'pt' ? 'visitas' : 'visits'}</span>
-                                  <span>•</span>
-                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-100 text-emerald-700 rounded-md font-medium">
-                                    {language === 'pt' ? 'Média' : 'Avg'}: {loja.mediaPorVisita.toFixed(1)} {language === 'pt' ? 'serv/visita' : 'serv/visit'}
-                                  </span>
+                                </div>
+                                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-100 text-emerald-700 rounded-md font-medium text-sm">
+                                  {language === 'pt' ? 'Média' : 'Avg'}: {loja.mediaPorVisita.toFixed(1)} {language === 'pt' ? 'serv/visita' : 'serv/visit'}
                                 </div>
                               </div>
                             </div>
