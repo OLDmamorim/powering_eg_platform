@@ -10715,3 +10715,140 @@ export async function getEstatisticasMensaisServicos(volanteId: number, ano: num
     porLoja: porLoja.sort((a, b) => b.total - a.total)
   };
 }
+
+
+/**
+ * Obter estatísticas de serviços realizados para o Dashboard
+ */
+export async function getEstatisticasServicos(volanteId: number, mesInicio?: number, anoInicio?: number, mesFim?: number, anoFim?: number) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  let query = db.select()
+    .from(servicosVolante)
+    .where(eq(servicosVolante.volanteId, volanteId));
+  
+  // Se tiver filtro de período
+  if (mesInicio && anoInicio) {
+    const dataInicio = new Date(anoInicio, mesInicio - 1, 1).toISOString().split('T')[0];
+    const dataFim = mesFim && anoFim 
+      ? new Date(anoFim, mesFim, 0).toISOString().split('T')[0]
+      : new Date(anoInicio, mesInicio, 0).toISOString().split('T')[0];
+    
+    query = db.select()
+      .from(servicosVolante)
+      .where(and(
+        eq(servicosVolante.volanteId, volanteId),
+        gte(servicosVolante.data, dataInicio),
+        lte(servicosVolante.data, dataFim)
+      ));
+  }
+  
+  const servicos = await query;
+  
+  // Calcular totais
+  const totais = {
+    substituicaoLigeiro: 0,
+    reparacao: 0,
+    calibragem: 0,
+    outros: 0,
+    total: 0,
+    diasTrabalhados: new Set<string>()
+  };
+  
+  for (const s of servicos) {
+    totais.substituicaoLigeiro += s.substituicaoLigeiro;
+    totais.reparacao += s.reparacao;
+    totais.calibragem += s.calibragem;
+    totais.outros += s.outros;
+    totais.total += s.substituicaoLigeiro + s.reparacao + s.calibragem + s.outros;
+    totais.diasTrabalhados.add(s.data);
+  }
+  
+  const diasTrabalhados = totais.diasTrabalhados.size;
+  const mediaPorDia = diasTrabalhados > 0 ? totais.total / diasTrabalhados : 0;
+  
+  return {
+    totalServicos: totais.total,
+    substituicaoLigeiro: totais.substituicaoLigeiro,
+    reparacao: totais.reparacao,
+    calibragem: totais.calibragem,
+    outros: totais.outros,
+    diasTrabalhados,
+    mediaPorDia: Math.round(mediaPorDia * 10) / 10
+  };
+}
+
+/**
+ * Obter Top N lojas com mais serviços realizados
+ */
+export async function getTopLojasServicos(volanteId: number, limit: number = 5, mesInicio?: number, anoInicio?: number, mesFim?: number, anoFim?: number) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  let query = db.select()
+    .from(servicosVolante)
+    .where(eq(servicosVolante.volanteId, volanteId));
+  
+  // Se tiver filtro de período
+  if (mesInicio && anoInicio) {
+    const dataInicio = new Date(anoInicio, mesInicio - 1, 1).toISOString().split('T')[0];
+    const dataFim = mesFim && anoFim 
+      ? new Date(anoFim, mesFim, 0).toISOString().split('T')[0]
+      : new Date(anoInicio, mesInicio, 0).toISOString().split('T')[0];
+    
+    query = db.select()
+      .from(servicosVolante)
+      .where(and(
+        eq(servicosVolante.volanteId, volanteId),
+        gte(servicosVolante.data, dataInicio),
+        lte(servicosVolante.data, dataFim)
+      ));
+  }
+  
+  const servicos = await query;
+  
+  // Agrupar por loja
+  const porLoja = servicos.reduce((acc: any[], s) => {
+    const existente = acc.find(item => item.lojaId === s.lojaId);
+    const total = s.substituicaoLigeiro + s.reparacao + s.calibragem + s.outros;
+    
+    if (existente) {
+      existente.substituicaoLigeiro += s.substituicaoLigeiro;
+      existente.reparacao += s.reparacao;
+      existente.calibragem += s.calibragem;
+      existente.outros += s.outros;
+      existente.total += total;
+    } else {
+      acc.push({
+        lojaId: s.lojaId,
+        substituicaoLigeiro: s.substituicaoLigeiro,
+        reparacao: s.reparacao,
+        calibragem: s.calibragem,
+        outros: s.outros,
+        total
+      });
+    }
+    return acc;
+  }, []);
+  
+  // Buscar nomes das lojas
+  if (porLoja.length > 0) {
+    const lojasInfo = await db.select({
+      id: lojas.id,
+      nome: lojas.nome
+    })
+      .from(lojas)
+      .where(inArray(lojas.id, porLoja.map(l => l.lojaId)));
+    
+    for (const item of porLoja) {
+      const lojaInfo = lojasInfo.find(l => l.id === item.lojaId);
+      item.lojaNome = lojaInfo?.nome || 'Loja';
+    }
+  }
+  
+  // Ordenar e limitar
+  return porLoja
+    .sort((a, b) => b.total - a.total)
+    .slice(0, limit);
+}
