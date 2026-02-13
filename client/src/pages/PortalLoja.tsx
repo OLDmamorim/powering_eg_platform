@@ -6576,6 +6576,42 @@ END:VCALENDAR`;
                       </CardContent>
                     </Card>
                   )}
+                  
+                  {/* Ranking de Lojas - Serviços Realizados */}
+                  {topLojasServicos && topLojasServicos.length > 0 && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Award className="h-5 w-5 text-amber-600" />
+                          {language === 'pt' ? 'Ranking de Lojas - Serviços Realizados' : 'Store Ranking - Services Performed'}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          {topLojasServicos.map((loja: any, index: number) => (
+                            <div key={loja.lojaId} className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
+                              <div className="flex-shrink-0">
+                                {index === 0 && <span className="text-3xl">🥇</span>}
+                                {index === 1 && <span className="text-3xl">🥈</span>}
+                                {index === 2 && <span className="text-3xl">🥉</span>}
+                                {index > 2 && <span className="text-2xl font-bold text-gray-400">{index + 1}</span>}
+                              </div>
+                              <div className="flex-1">
+                                <h4 className="font-semibold text-lg">{loja.lojaNome}</h4>
+                                <div className="flex gap-4 mt-1 text-sm text-gray-600">
+                                  <span>{loja.totalServicos} {language === 'pt' ? 'serviços' : 'services'}</span>
+                                  <span>•</span>
+                                  <span>{loja.visitas} {language === 'pt' ? 'visitas' : 'visits'}</span>
+                                  <span>•</span>
+                                  <span>{language === 'pt' ? 'Média' : 'Average'}: {loja.mediaPorVisita.toFixed(1)} {language === 'pt' ? 'serv/visita' : 'serv/visit'}</span>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
                 </>
               )}
             </div>

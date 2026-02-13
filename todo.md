@@ -4663,4 +4663,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Verificar dados na tabela servicos_volante (2 registos encontrados)
 - [x] Adicionar funções getEstatisticasServicos e getTopLojasServicos em db.ts
 - [x] Adicionar endpoints no router portalVolante
-- [ ] Testar endpoint e confirmar dados no Dashboard
+- [x] Testar endpoint e confirmar dados no Dashboard
+
+## Ranking de Lojas por Serviços Realizados
+- [x] Modificar getTopLojasServicos para incluir número de visitas e média de serviços por visita
+- [x] Adicionar secção "Ranking de Lojas - Serviços Realizados" no Dashboard
+- [x] Incluir medalhas (🥇🥈🥉) e detalhes por loja (total serviços, visitas, média)

@@ -10792,14 +10792,21 @@ export async function getTopLojasServicos(volanteId: number, limit: number = 5) 
     
     if (existente) {
       existente.totalServicos += totalServico;
+      existente.visitas += 1;
     } else {
       acc.push({
         lojaId: s.lojaId,
-        totalServicos: totalServico
+        totalServicos: totalServico,
+        visitas: 1
       });
     }
     return acc;
   }, []);
+  
+  // Calcular média de serviços por visita
+  for (const item of porLoja) {
+    item.mediaPorVisita = item.visitas > 0 ? item.totalServicos / item.visitas : 0;
+  }
   
   // Ordenar por total de serviços (descendente) e pegar top N
   const topLojas = porLoja.sort((a, b) => b.totalServicos - a.totalServicos).slice(0, limit);
