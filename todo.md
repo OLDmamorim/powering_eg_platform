@@ -4694,8 +4694,3 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Frontend: Adicionar gráfico Chart.js de evolução semanal/mensal
 - [x] Frontend: Adicionar estatísticas adicionais (média por dia, etc)
 - [x] Testar todas as métricas no Dashboard
-
-## v6.21.1 - Correção de Bug React Hook no Dashboard
-
-- [x] Mover queries tRPC para fora do bloco condicional
-- [x] Testar Dashboard sem erros React
