@@ -4688,3 +4688,20 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## Corrigir Erro mesesSelecionadosDashboard
 - [x] Identificar nome correto da variável de meses selecionados no Dashboard (mesesSelecionadosVolante)
 - [x] Corrigir nome da variável nas queries getEstatisticasServicos e getTopLojasServicos
+
+
+## Correções TypeScript v6.30.1
+- [x] Corrigir tipo implícito 'any' em PortalLoja.tsx linha 6919
+- [x] Corrigir campo 'periodo' em db.ts linha 10538 (agendamento_volante_periodo)
+- [x] Corrigir query getEstatisticasServicos para usar and() corretamente
+- [x] Corrigir query getTopLojasServicos para usar and() corretamente
+
+## Portal Recalibra - Implementação Completa v6.31
+- [ ] Extrair dados completos do Notion para ficheiro JSON
+- [ ] Criar estrutura de base de dados (tabelas: unidades_recalibra, calibragens, lojas_recalibra)
+- [ ] Criar página de Configuração do Recalibra (nome, email, token, seleção de lojas)
+- [ ] Criar endpoints backend para Recalibra (CRUD calibragens, estatísticas)
+- [ ] Criar Portal Recalibra com formulário de registo de calibragens
+- [ ] Criar Dashboard de estatísticas do Recalibra
+- [ ] Importar dados históricos do Notion para base de dados
+- [ ] Testar funcionalidade completa

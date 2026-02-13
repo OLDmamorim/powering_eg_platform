@@ -10535,7 +10535,7 @@ export async function getVolantesSemRegistoHoje() {
     volante: volantes,
     lojaId: agendamentosVolante.lojaId,
     loja: lojas,
-    periodo: agendamentosVolante.periodo
+    periodo: agendamentosVolante.agendamento_volante_periodo
   })
     .from(agendamentosVolante)
     .leftJoin(volantes, eq(agendamentosVolante.volanteId, volantes.id))
@@ -10723,20 +10723,21 @@ export async function getEstatisticasServicos(volanteId: number, mesesSelecionad
   const db = await getDb();
   if (!db) return null;
   
-  let query = db.select()
-    .from(servicosVolante)
-    .where(eq(servicosVolante.volanteId, volanteId));
+  // Construir condições de filtro
+  const conditions = [eq(servicosVolante.volanteId, volanteId)];
   
   // Aplicar filtro de meses se fornecido
   if (mesesSelecionados && mesesSelecionados.length > 0) {
-    const conditions = mesesSelecionados.map(mes => {
+    const mesesConditions = mesesSelecionados.map(mes => {
       const [ano, mesNum] = mes.split('-');
       return sql`YEAR(${servicosVolante.data}) = ${ano} AND MONTH(${servicosVolante.data}) = ${mesNum}`;
     });
-    query = query.where(or(...conditions)) as any;
+    conditions.push(or(...mesesConditions)!);
   }
   
-  const servicos = await query;
+  const servicos = await db.select()
+    .from(servicosVolante)
+    .where(and(...conditions));
   
   if (servicos.length === 0) {
     return {
@@ -10788,20 +10789,21 @@ export async function getTopLojasServicos(volanteId: number, limit: number = 5, 
   const db = await getDb();
   if (!db) return [];
   
-  let query = db.select()
-    .from(servicosVolante)
-    .where(eq(servicosVolante.volanteId, volanteId));
+  // Construir condições de filtro
+  const conditions = [eq(servicosVolante.volanteId, volanteId)];
   
   // Aplicar filtro de meses se fornecido
   if (mesesSelecionados && mesesSelecionados.length > 0) {
-    const conditions = mesesSelecionados.map(mes => {
+    const mesesConditions = mesesSelecionados.map(mes => {
       const [ano, mesNum] = mes.split('-');
       return sql`YEAR(${servicosVolante.data}) = ${ano} AND MONTH(${servicosVolante.data}) = ${mesNum}`;
     });
-    query = query.where(or(...conditions)) as any;
+    conditions.push(or(...mesesConditions)!);
   }
   
-  const servicos = await query;
+  const servicos = await db.select()
+    .from(servicosVolante)
+    .where(and(...conditions));
   
   if (servicos.length === 0) {
     return [];

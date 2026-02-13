@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { trpc } from "@/lib/trpc";
 // Imports removidos - PDF agora gerado via servidor
 // import html2canvas from 'html2canvas';
@@ -132,6 +132,8 @@ interface VolanteAuth {
   volanteNome: string;
   volanteEmail: string | null;
   lojasAtribuidas: Array<{ id: number; nome: string }>;
+  token: string;
+  lojas: Array<{ id: number; nome: string }>;
 }
 
 export default function PortalLoja() {
@@ -6916,7 +6918,7 @@ END:VCALENDAR`;
                         className="w-full px-3 py-2 border rounded-lg"
                       >
                         <option value="">{language === 'pt' ? 'Todas' : 'All'}</option>
-                        {volanteAuth.lojas.map(loja => (
+                        {volanteAuth.lojas.map((loja: any) => (
                           <option key={loja.id} value={loja.id}>{loja.nome}</option>
                         ))}
                       </select>
