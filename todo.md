@@ -4669,3 +4669,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Modificar getTopLojasServicos para incluir número de visitas e média de serviços por visita
 - [x] Adicionar secção "Ranking de Lojas - Serviços Realizados" no Dashboard
 - [x] Incluir medalhas (🥇🥈🥉) e detalhes por loja (total serviços, visitas, média)
+
+## Melhorar Layout Ranking de Lojas
+- [x] Adicionar badge verde para destacar média de serviços por visita
+- [x] Ajustar layout para ficar mais visual e profissional

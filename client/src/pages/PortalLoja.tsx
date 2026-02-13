@@ -6598,12 +6598,14 @@ END:VCALENDAR`;
                               </div>
                               <div className="flex-1">
                                 <h4 className="font-semibold text-lg">{loja.lojaNome}</h4>
-                                <div className="flex gap-4 mt-1 text-sm text-gray-600">
+                                <div className="flex items-center gap-4 mt-1 text-sm text-gray-600">
                                   <span>{loja.totalServicos} {language === 'pt' ? 'serviços' : 'services'}</span>
                                   <span>•</span>
                                   <span>{loja.visitas} {language === 'pt' ? 'visitas' : 'visits'}</span>
                                   <span>•</span>
-                                  <span>{language === 'pt' ? 'Média' : 'Average'}: {loja.mediaPorVisita.toFixed(1)} {language === 'pt' ? 'serv/visita' : 'serv/visit'}</span>
+                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-100 text-emerald-700 rounded-md font-medium">
+                                    {language === 'pt' ? 'Média' : 'Avg'}: {loja.mediaPorVisita.toFixed(1)} {language === 'pt' ? 'serv/visita' : 'serv/visit'}
+                                  </span>
                                 </div>
                               </div>
                             </div>
