@@ -4678,3 +4678,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Reestruturar layout vertical (nome → serviços/visitas → badge média centralizado)
 - [x] Garantir que badge verde fica dentro da caixa sem sair
 - [x] Melhorar alinhamento e espaçamento
+
+## Filtro de Meses nos Serviços Realizados
+- [x] Modificar getEstatisticasServicos para aceitar array de meses selecionados
+- [x] Modificar getTopLojasServicos para aceitar array de meses selecionados
+- [x] Atualizar queries frontend para enviar mesesSelecionados aos endpoints de serviços
+- [x] Testar filtro (Janeiro deve mostrar 0 serviços)

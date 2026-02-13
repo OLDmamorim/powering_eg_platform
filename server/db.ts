@@ -10719,13 +10719,24 @@ export async function getEstatisticasMensaisServicos(volanteId: number, ano: num
 /**
  * Obter estatísticas gerais de serviços realizados (para Dashboard)
  */
-export async function getEstatisticasServicos(volanteId: number) {
+export async function getEstatisticasServicos(volanteId: number, mesesSelecionados?: string[]) {
   const db = await getDb();
   if (!db) return null;
   
-  const servicos = await db.select()
+  let query = db.select()
     .from(servicosVolante)
     .where(eq(servicosVolante.volanteId, volanteId));
+  
+  // Aplicar filtro de meses se fornecido
+  if (mesesSelecionados && mesesSelecionados.length > 0) {
+    const conditions = mesesSelecionados.map(mes => {
+      const [ano, mesNum] = mes.split('-');
+      return sql`YEAR(${servicosVolante.data}) = ${ano} AND MONTH(${servicosVolante.data}) = ${mesNum}`;
+    });
+    query = query.where(or(...conditions)) as any;
+  }
+  
+  const servicos = await query;
   
   if (servicos.length === 0) {
     return {
@@ -10773,13 +10784,24 @@ export async function getEstatisticasServicos(volanteId: number) {
 /**
  * Obter Top N lojas com mais serviços realizados (para Dashboard)
  */
-export async function getTopLojasServicos(volanteId: number, limit: number = 5) {
+export async function getTopLojasServicos(volanteId: number, limit: number = 5, mesesSelecionados?: string[]) {
   const db = await getDb();
   if (!db) return [];
   
-  const servicos = await db.select()
+  let query = db.select()
     .from(servicosVolante)
     .where(eq(servicosVolante.volanteId, volanteId));
+  
+  // Aplicar filtro de meses se fornecido
+  if (mesesSelecionados && mesesSelecionados.length > 0) {
+    const conditions = mesesSelecionados.map(mes => {
+      const [ano, mesNum] = mes.split('-');
+      return sql`YEAR(${servicosVolante.data}) = ${ano} AND MONTH(${servicosVolante.data}) = ${mesNum}`;
+    });
+    query = query.where(or(...conditions)) as any;
+  }
+  
+  const servicos = await query;
   
   if (servicos.length === 0) {
     return [];

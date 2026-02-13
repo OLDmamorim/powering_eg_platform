@@ -9394,6 +9394,7 @@ IMPORTANTE:
     getEstatisticasServicos: publicProcedure
       .input(z.object({
         token: z.string(),
+        mesesSelecionados: z.array(z.string()).optional(),
       }))
       .query(async ({ input }) => {
         const tokenData = await db.validateTokenVolante(input.token);
@@ -9401,7 +9402,7 @@ IMPORTANTE:
           throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
         }
         
-        const estatisticas = await db.getEstatisticasServicos(tokenData.volante.id);
+        const estatisticas = await db.getEstatisticasServicos(tokenData.volante.id, input.mesesSelecionados);
         return estatisticas;
       }),
     
@@ -9410,6 +9411,7 @@ IMPORTANTE:
       .input(z.object({
         token: z.string(),
         limit: z.number().optional(),
+        mesesSelecionados: z.array(z.string()).optional(),
       }))
       .query(async ({ input }) => {
         const tokenData = await db.validateTokenVolante(input.token);
@@ -9417,7 +9419,7 @@ IMPORTANTE:
           throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
         }
         
-        const topLojas = await db.getTopLojasServicos(tokenData.volante.id, input.limit || 5);
+        const topLojas = await db.getTopLojasServicos(tokenData.volante.id, input.limit || 5, input.mesesSelecionados);
         return topLojas;
       }),
 

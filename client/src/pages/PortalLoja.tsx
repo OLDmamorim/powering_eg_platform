@@ -4670,12 +4670,12 @@ function VolanteInterface({
   
   // Queries para estatísticas de serviços realizados (Dashboard)
   const { data: estatisticasServicos, isLoading: loadingServicos } = trpc.portalVolante.getEstatisticasServicos.useQuery(
-    { token },
+    { token, mesesSelecionados: mesesSelecionadosDashboard },
     { enabled: !!token && activeView === "dashboard" }
   );
   
   const { data: topLojasServicos } = trpc.portalVolante.getTopLojasServicos.useQuery(
-    { token, limit: 5 },
+    { token, limit: 5, mesesSelecionados: mesesSelecionadosDashboard },
     { enabled: !!token && activeView === "dashboard" }
   );
   
