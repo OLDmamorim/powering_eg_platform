@@ -4735,9 +4735,3 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Verificar se FiltroMesesCheckbox está a usar mesesSelecionadosDashboard
 - [x] Adicionar logs para debug das queries
 - [x] Testar queries diretamente no backend
-
-## v6.22.4 - CRÍTICO: ReferenceError mesesSelecionadosDashboard
-
-- [x] Verificar se useState de mesesSelecionadosDashboard existe
-- [x] Garantir que está no scope correto do componente
-- [x] Testar Dashboard sem erros

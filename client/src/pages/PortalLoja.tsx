@@ -4610,10 +4610,6 @@ function VolanteInterface({
     const hoje = new Date();
     return [{ mes: hoje.getMonth() + 1, ano: hoje.getFullYear() }];
   });
-  const [mesesSelecionadosDashboard, setMesesSelecionadosDashboard] = useState<Array<{mes: number; ano: number}>>(() => {
-    const hoje = new Date();
-    return [{ mes: hoje.getMonth() + 1, ano: hoje.getFullYear() }];
-  });
   const [diaDetalheOpen, setDiaDetalheOpen] = useState(false);
   const [diaDetalheSelecionado, setDiaDetalheSelecionado] = useState<{data: string; pedidos: any[]; bloqueios?: any[]; agendamentos?: any[]}>({ data: '', pedidos: [], bloqueios: [], agendamentos: [] });
   
