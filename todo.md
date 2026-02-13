@@ -4652,3 +4652,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Implementar chamada ao endpoint testarNotificacoes
 - [x] Mostrar feedback visual com resultado (toast)
 - [ ] Testar funcionalidade manualmente
+
+## Dashboard Portal do Volante - Serviços Realizados v6.24
+- [x] Adicionar queries de estatísticas de serviços no topo do componente PortalLoja
+- [x] Adicionar cards de serviços realizados (Total, Substituições, Reparações, Calibragens, Média/Dia, Dias Trabalhados)
+- [x] Adicionar gráfico Top 5 Lojas com Mais Serviços
+- [x] Testar funcionalidade sem erros React Hook

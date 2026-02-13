@@ -4668,6 +4668,17 @@ function VolanteInterface({
     { enabled: !!token && activeView === "configuracoes" }
   );
   
+  // Queries para estatísticas de serviços realizados (Dashboard)
+  const { data: estatisticasServicos, isLoading: loadingServicos } = trpc.portalVolante.getEstatisticasServicos.useQuery(
+    { token },
+    { enabled: !!token && activeView === "dashboard" }
+  );
+  
+  const { data: topLojasServicos } = trpc.portalVolante.getTopLojasServicos.useQuery(
+    { token, limit: 5 },
+    { enabled: !!token && activeView === "dashboard" }
+  );
+  
   // Mutation para exportar dashboard para PDF
   const exportarDashboardPDFMutation = trpc.portalVolante.exportarDashboardPDF.useMutation({
     onSuccess: (data) => {
@@ -6427,6 +6438,146 @@ END:VCALENDAR`;
                   </div>
                 </CardContent>
               </Card>
+            </div>
+
+            {/* Seção de Serviços Realizados */}
+            <div className="mt-8">
+              <h2 className="text-2xl font-bold mb-4 dark:text-gray-100">{language === 'pt' ? 'Serviços Realizados' : 'Services Performed'}</h2>
+              
+              {loadingServicos ? (
+                <div className="text-center py-8">
+                  <Loader2 className="h-8 w-8 animate-spin mx-auto text-gray-400" />
+                  <p className="text-muted-foreground mt-2">{language === 'pt' ? 'A carregar estatísticas...' : 'Loading statistics...'}</p>
+                </div>
+              ) : !estatisticasServicos ? (
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground">{language === 'pt' ? 'Sem dados de serviços' : 'No service data'}</p>
+                </div>
+              ) : (
+                <>
+                  {/* Cards de Estatísticas de Serviços */}
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+                    <Card className="bg-gradient-to-br from-indigo-500 to-indigo-600 text-white border-0">
+                      <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm opacity-80 mb-1">{language === 'pt' ? 'Total Serviços' : 'Total Services'}</p>
+                            <p className="text-3xl font-bold">{estatisticasServicos.totalServicos || 0}</p>
+                          </div>
+                          <Wrench className="h-10 w-10 opacity-60" />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-gradient-to-br from-pink-500 to-pink-600 text-white border-0">
+                      <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm opacity-80 mb-1">{language === 'pt' ? 'Substituições' : 'Replacements'}</p>
+                            <p className="text-3xl font-bold">{estatisticasServicos.substituicoes || 0}</p>
+                          </div>
+                          <Wrench className="h-10 w-10 opacity-60" />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-gradient-to-br from-green-500 to-green-600 text-white border-0">
+                      <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm opacity-80 mb-1">{language === 'pt' ? 'Reparações' : 'Repairs'}</p>
+                            <p className="text-3xl font-bold">{estatisticasServicos.reparacoes || 0}</p>
+                          </div>
+                          <Wrench className="h-10 w-10 opacity-60" />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-gradient-to-br from-yellow-500 to-yellow-600 text-white border-0">
+                      <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm opacity-80 mb-1">{language === 'pt' ? 'Calibragens' : 'Calibrations'}</p>
+                            <p className="text-3xl font-bold">{estatisticasServicos.calibragens || 0}</p>
+                          </div>
+                          <Target className="h-10 w-10 opacity-60" />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-gradient-to-br from-cyan-500 to-cyan-600 text-white border-0">
+                      <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm opacity-80 mb-1">{language === 'pt' ? 'Média/Dia' : 'Avg/Day'}</p>
+                            <p className="text-3xl font-bold">{estatisticasServicos.mediaPorDia?.toFixed(1) || '0.0'}</p>
+                          </div>
+                          <TrendingUp className="h-10 w-10 opacity-60" />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-gradient-to-br from-violet-500 to-violet-600 text-white border-0">
+                      <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm opacity-80 mb-1">{language === 'pt' ? 'Dias Trabalhados' : 'Days Worked'}</p>
+                            <p className="text-3xl font-bold">{estatisticasServicos.diasTrabalhados || 0}</p>
+                          </div>
+                          <Calendar className="h-10 w-10 opacity-60" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Gráfico Top 5 Lojas com Mais Serviços */}
+                  {topLojasServicos && topLojasServicos.length > 0 && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Award className="h-5 w-5 text-indigo-600" />
+                          {language === 'pt' ? 'Top 5 Lojas com Mais Serviços' : 'Top 5 Stores with Most Services'}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div style={{ height: '300px' }}>
+                          <Bar
+                            data={{
+                              labels: topLojasServicos.map((l: any) => l.lojaNome),
+                              datasets: [
+                                {
+                                  label: language === 'pt' ? 'Serviços' : 'Services',
+                                  data: topLojasServicos.map((l: any) => l.totalServicos),
+                                  backgroundColor: 'rgba(99, 102, 241, 0.8)',
+                                  borderColor: 'rgba(99, 102, 241, 1)',
+                                  borderWidth: 1,
+                                },
+                              ],
+                            }}
+                            options={{
+                              responsive: true,
+                              maintainAspectRatio: false,
+                              plugins: {
+                                legend: {
+                                  display: false,
+                                },
+                              },
+                              scales: {
+                                y: {
+                                  beginAtZero: true,
+                                  ticks: {
+                                    stepSize: 1,
+                                  },
+                                },
+                              },
+                            }}
+                          />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                </>
+              )}
             </div>
 
             {/* Gráficos */}
