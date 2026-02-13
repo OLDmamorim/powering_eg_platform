@@ -4658,3 +4658,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar cards de serviços realizados (Total, Substituições, Reparações, Calibragens, Média/Dia, Dias Trabalhados)
 - [x] Adicionar gráfico Top 5 Lojas com Mais Serviços
 - [x] Testar funcionalidade sem erros React Hook
+
+## Correção Dashboard Serviços Realizados
+- [x] Verificar dados na tabela servicos_volante (2 registos encontrados)
+- [x] Adicionar funções getEstatisticasServicos e getTopLojasServicos em db.ts
+- [x] Adicionar endpoints no router portalVolante
+- [ ] Testar endpoint e confirmar dados no Dashboard

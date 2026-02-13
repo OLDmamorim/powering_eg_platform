@@ -1,0 +1,34 @@
+{
+  "query": "SELECT * FROM servicos_volante LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT * FROM servicos_volante LIMIT 5;",
+  "rows": [
+    {
+      "id": "1",
+      "volanteId": "2",
+      "lojaId": "60001",
+      "data": "2026-02-12",
+      "substituicaoLigeiro": "4",
+      "reparacao": "0",
+      "calibragem": "0",
+      "outros": "0",
+      "createdAt": "2026-02-12 19:47:34",
+      "updatedAt": "2026-02-12 19:47:41"
+    },
+    {
+      "id": "2",
+      "volanteId": "2",
+      "lojaId": "60003",
+      "data": "2026-02-12",
+      "substituicaoLigeiro": "2",
+      "reparacao": "1",
+      "calibragem": "0",
+      "outros": "0",
+      "createdAt": "2026-02-12 19:47:50",
+      "updatedAt": "2026-02-12 19:47:54"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tvolanteId\tlojaId\tdata\tsubstituicaoLigeiro\treparacao\tcalibragem\toutros\tcreatedAt\tupdatedAt\n1\t2\t60001\t2026-02-12\t4\t0\t0\t0\t2026-02-12 19:47:34\t2026-02-12 19:47:41\n2\t2\t60003\t2026-02-12\t2\t1\t0\t0\t2026-02-12 19:47:50\t2026-02-12 19:47:54\n",
+  "stderr": "",
+  "execution_time_ms": 57
+}

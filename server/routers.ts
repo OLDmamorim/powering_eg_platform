@@ -9390,6 +9390,37 @@ IMPORTANTE:
         };
       }),
 
+    // Obter estatísticas gerais de serviços (Dashboard)
+    getEstatisticasServicos: publicProcedure
+      .input(z.object({
+        token: z.string(),
+      }))
+      .query(async ({ input }) => {
+        const tokenData = await db.validateTokenVolante(input.token);
+        if (!tokenData) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        
+        const estatisticas = await db.getEstatisticasServicos(tokenData.volante.id);
+        return estatisticas;
+      }),
+    
+    // Obter Top N lojas com mais serviços (Dashboard)
+    getTopLojasServicos: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        limit: z.number().optional(),
+      }))
+      .query(async ({ input }) => {
+        const tokenData = await db.validateTokenVolante(input.token);
+        if (!tokenData) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        
+        const topLojas = await db.getTopLojasServicos(tokenData.volante.id, input.limit || 5);
+        return topLojas;
+      }),
+
     // Endpoint de teste para enviar notificações manualmente
     testarNotificacoes: publicProcedure
       .input(z.object({

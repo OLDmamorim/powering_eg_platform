@@ -10715,3 +10715,109 @@ export async function getEstatisticasMensaisServicos(volanteId: number, ano: num
     porLoja: porLoja.sort((a, b) => b.total - a.total)
   };
 }
+
+/**
+ * Obter estatísticas gerais de serviços realizados (para Dashboard)
+ */
+export async function getEstatisticasServicos(volanteId: number) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const servicos = await db.select()
+    .from(servicosVolante)
+    .where(eq(servicosVolante.volanteId, volanteId));
+  
+  if (servicos.length === 0) {
+    return {
+      totalServicos: 0,
+      substituicoes: 0,
+      reparacoes: 0,
+      calibragens: 0,
+      outros: 0,
+      mediaPorDia: 0,
+      diasTrabalhados: 0
+    };
+  }
+  
+  // Calcular totais
+  let totalServicos = 0;
+  let substituicoes = 0;
+  let reparacoes = 0;
+  let calibragens = 0;
+  let outros = 0;
+  const diasUnicos = new Set<string>();
+  
+  for (const s of servicos) {
+    substituicoes += s.substituicaoLigeiro;
+    reparacoes += s.reparacao;
+    calibragens += s.calibragem;
+    outros += s.outros;
+    totalServicos += s.substituicaoLigeiro + s.reparacao + s.calibragem + s.outros;
+    diasUnicos.add(s.data);
+  }
+  
+  const diasTrabalhados = diasUnicos.size;
+  const mediaPorDia = diasTrabalhados > 0 ? totalServicos / diasTrabalhados : 0;
+  
+  return {
+    totalServicos,
+    substituicoes,
+    reparacoes,
+    calibragens,
+    outros,
+    mediaPorDia,
+    diasTrabalhados
+  };
+}
+
+/**
+ * Obter Top N lojas com mais serviços realizados (para Dashboard)
+ */
+export async function getTopLojasServicos(volanteId: number, limit: number = 5) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const servicos = await db.select()
+    .from(servicosVolante)
+    .where(eq(servicosVolante.volanteId, volanteId));
+  
+  if (servicos.length === 0) {
+    return [];
+  }
+  
+  // Agrupar por loja
+  const porLoja = servicos.reduce((acc: any[], s) => {
+    const existente = acc.find(item => item.lojaId === s.lojaId);
+    const totalServico = s.substituicaoLigeiro + s.reparacao + s.calibragem + s.outros;
+    
+    if (existente) {
+      existente.totalServicos += totalServico;
+    } else {
+      acc.push({
+        lojaId: s.lojaId,
+        totalServicos: totalServico
+      });
+    }
+    return acc;
+  }, []);
+  
+  // Ordenar por total de serviços (descendente) e pegar top N
+  const topLojas = porLoja.sort((a, b) => b.totalServicos - a.totalServicos).slice(0, limit);
+  
+  // Buscar nomes das lojas
+  if (topLojas.length > 0) {
+    const lojasInfo = await db.select({
+      id: lojas.id,
+      nome: lojas.nome
+    })
+      .from(lojas)
+      .where(inArray(lojas.id, topLojas.map(l => l.lojaId)));
+    
+    for (const item of topLojas) {
+      const lojaInfo = lojasInfo.find(l => l.id === item.lojaId);
+      item.lojaNome = lojaInfo?.nome || 'Loja';
+    }
+  }
+  
+  return topLojas;
+}
