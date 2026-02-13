@@ -6331,7 +6331,23 @@ END:VCALENDAR`;
         )}
 
         {/* Vista Dashboard */}
-        {activeView === "dashboard" && (() => {
+        {(() => {
+          // MOVER QUERIES PARA FORA DO BLOCO CONDICIONAL (React Hook Rule)
+          const { data: estatisticasServicos, isLoading: loadingServicos } = trpc.portalVolante.getEstatisticasServicos.useQuery({
+            token,
+          }, {
+            enabled: activeView === "dashboard"
+          });
+          
+          const { data: topLojasServicos } = trpc.portalVolante.getTopLojasServicos.useQuery({
+            token,
+            limit: 5,
+          }, {
+            enabled: activeView === "dashboard"
+          });
+          
+          if (activeView !== "dashboard") return null;
+          
           // Filtrar pedidos pelos meses selecionados
           const pedidosFiltrados = mesesSelecionadosVolante.length === 0 ? todosAprovados : todosAprovados.filter((p: any) => {
             const dataPedido = new Date(p.data);
@@ -6433,34 +6449,16 @@ END:VCALENDAR`;
             <div className="mt-8">
               <h2 className="text-2xl font-bold mb-4 dark:text-gray-100">{language === 'pt' ? 'Serviços Realizados' : 'Services Performed'}</h2>
               
-              {(() => {
-                const { data: estatisticasServicos, isLoading: loadingServicos } = trpc.portalVolante.getEstatisticasServicos.useQuery({
-                  token,
-                });
-                
-                const { data: topLojasServicos } = trpc.portalVolante.getTopLojasServicos.useQuery({
-                  token,
-                  limit: 5,
-                });
-                
-                if (loadingServicos) {
-                  return (
-                    <div className="text-center py-8">
-                      <Loader2 className="h-8 w-8 animate-spin mx-auto text-gray-400" />
-                      <p className="text-muted-foreground mt-2">{language === 'pt' ? 'A carregar estatísticas...' : 'Loading statistics...'}</p>
-                    </div>
-                  );
-                }
-                
-                if (!estatisticasServicos) {
-                  return (
-                    <div className="text-center py-8">
-                      <p className="text-muted-foreground">{language === 'pt' ? 'Sem dados de serviços' : 'No service data'}</p>
-                    </div>
-                  );
-                }
-                
-                return (
+              {loadingServicos ? (
+                <div className="text-center py-8">
+                  <Loader2 className="h-8 w-8 animate-spin mx-auto text-gray-400" />
+                  <p className="text-muted-foreground mt-2">{language === 'pt' ? 'A carregar estatísticas...' : 'Loading statistics...'}</p>
+                </div>
+              ) : !estatisticasServicos ? (
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground">{language === 'pt' ? 'Sem dados de serviços' : 'No service data'}</p>
+                </div>
+              ) : (
                   <>
                     {/* Cards de Estatísticas de Serviços */}
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
@@ -6580,8 +6578,7 @@ END:VCALENDAR`;
                       </Card>
                     )}
                   </>
-                );
-              })()}
+              )}
             </div>
 
             {/* Gráficos */}
