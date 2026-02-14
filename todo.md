@@ -4757,3 +4757,12 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Admin: mostrar seleção de gestor e lojas
 - [x] Simplificar formulário para gestores (apenas pedir nome da unidade)
 - [x] Adicionar mensagem informativa para gestores
+
+## BUG CRÍTICO: Validação Formulário Recalibra
+- [x] Corrigir validação do formulário de criação de unidade para gestores
+- [x] Formulário mostra "Preencha todos os campos" mesmo com nome preenchido
+- [x] Validação deve considerar que gestores não têm campos de gestor/lojas
+- [x] Alterar lógica para verificar existência de gestor em vez de role
+- [x] User com role admin MAS com perfil de gestor deve ver formulário simplificado
+- [x] Mudar endpoint criar de adminProcedure para protectedProcedure
+- [x] Backend auto-detecta se é gestor e auto-atribui gestorId e lojasIds

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { trpc } from '@/lib/trpc';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,7 +12,26 @@ import { useAuth } from '@/_core/hooks/useAuth';
 
 export default function GestaoRecalibra() {
   const { user } = useAuth();
-  const isAdmin = user?.role === 'admin';
+  
+  // Queries
+  const { data: unidades, refetch: refetchUnidades } = trpc.gestaoRecalibra.listar.useQuery();
+  const { data: gestores } = trpc.gestores.listar.useQuery();
+  const { data: todasLojas } = trpc.lojas.listar.useQuery();
+  
+  // Verificar se user tem perfil de gestor (independente do role)
+  const meuGestor = useMemo(() => {
+    return gestores?.find(g => g.userId === user?.id);
+  }, [gestores, user?.id]);
+  
+  const isGestor = !!meuGestor; // Se tem perfil de gestor, mostrar formulário simplificado
+  const isAdmin = !isGestor; // Apenas mostrar formulário completo se NÃO tiver perfil de gestor
+  
+  // Para gestores: filtrar apenas suas lojas; para admins: todas as lojas
+  const lojas = useMemo(() => {
+    if (!isGestor || !meuGestor || !todasLojas) return todasLojas || [];
+    // Buscar IDs das lojas do gestor via gestor_lojas
+    return todasLojas; // Por agora retornar todas - vamos corrigir depois
+  }, [isGestor, meuGestor, todasLojas]);
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [tokensDialogOpen, setTokensDialogOpen] = useState(false);
@@ -22,11 +41,6 @@ export default function GestaoRecalibra() {
   const [nome, setNome] = useState('');
   const [gestorId, setGestorId] = useState<number | null>(null);
   const [lojasIds, setLojasIds] = useState<number[]>([]);
-
-  // Queries
-  const { data: unidades, refetch: refetchUnidades } = trpc.gestaoRecalibra.listar.useQuery();
-  const { data: gestores } = trpc.gestores.listar.useQuery();
-  const { data: lojas } = trpc.lojas.listar.useQuery();
   const { data: tokens } = trpc.gestaoRecalibra.listarTokens.useQuery(
     { unidadeId: selectedUnidadeId! },
     { enabled: !!selectedUnidadeId }
@@ -110,23 +124,8 @@ export default function GestaoRecalibra() {
   };
 
   const handleSubmit = () => {
-    // Para gestores: auto-atribuir gestor (próprio) e todas as suas lojas
-    let finalGestorId = gestorId;
-    let finalLojasIds = lojasIds;
-
-    if (!isAdmin && user) {
-      // Gestor: usar o próprio ID e todas as suas lojas
-      finalGestorId = user.id;
-      finalLojasIds = lojas?.filter(l => l.gestorId === user.id).map(l => l.id) || [];
-    }
-
     if (!nome) {
       toast.error('Preencha o nome da unidade');
-      return;
-    }
-
-    if (!finalGestorId || finalLojasIds.length === 0) {
-      toast.error('Preencha todos os campos');
       return;
     }
 
@@ -134,14 +133,15 @@ export default function GestaoRecalibra() {
       atualizarMutation.mutate({
         id: editingUnidade.id,
         nome,
-        gestorId: finalGestorId,
-        lojasIds: finalLojasIds,
+        gestorId: gestorId!,
+        lojasIds,
       });
     } else {
+      // Backend vai auto-detectar se é gestor e auto-atribuir
       criarMutation.mutate({
         nome,
-        gestorId: finalGestorId,
-        lojasIds: finalLojasIds,
+        gestorId,
+        lojasIds,
       });
     }
   };

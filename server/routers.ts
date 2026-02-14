@@ -226,6 +226,12 @@ export const appRouter = router({
       return await db.getAllLojas();
     }),
     
+    listByGestor: protectedProcedure.query(async ({ ctx }) => {
+      const gestor = await db.getGestorByUserId(ctx.user.id);
+      if (!gestor) return [];
+      return await db.getLojasByGestorId(gestor.id);
+    }),
+    
     getById: protectedProcedure
       .input(z.object({ id: z.number() }))
       .query(async ({ input }) => {
@@ -10619,16 +10625,33 @@ IMPORTANTE:
       }),
 
     // Criar unidade
-    criar: adminProcedure
+    criar: protectedProcedure
       .input(z.object({
         nome: z.string().min(1),
-        gestorId: z.number(),
-        lojasIds: z.array(z.number()),
+        gestorId: z.number().optional(),
+        lojasIds: z.array(z.number()).optional(),
       }))
-      .mutation(async ({ input }) => {
+      .mutation(async ({ input, ctx }) => {
+        // Auto-detectar se é gestor e auto-atribuir
+        let finalGestorId = input.gestorId;
+        let finalLojasIds = input.lojasIds || [];
+        
+        // Buscar perfil de gestor do user logado
+        const meuGestor = await db.getGestorByUserId(ctx.user.id);
+        
+        if (meuGestor) {
+          // É gestor: auto-atribuir próprio ID e todas as suas lojas
+          finalGestorId = meuGestor.id;
+          const minhasLojas = await db.getLojasByGestorId(meuGestor.id);
+          finalLojasIds = minhasLojas.map(l => l.id);
+        } else if (!finalGestorId || !finalLojasIds.length) {
+          // Não é gestor e não forneceu dados: erro
+          throw new TRPCError({ code: 'BAD_REQUEST', message: 'Dados incompletos' });
+        }
+        
         const unidade = await db.createUnidadeRecalibra({
           nome: input.nome,
-          gestorId: input.gestorId,
+          gestorId: finalGestorId,
         });
         
         if (!unidade) {
@@ -10636,7 +10659,7 @@ IMPORTANTE:
         }
         
         // Associar lojas
-        await db.associarLojasUnidadeRecalibra(unidade.id, input.lojasIds);
+        await db.associarLojasUnidadeRecalibra(unidade.id, finalLojasIds);
         
         return unidade;
       }),
