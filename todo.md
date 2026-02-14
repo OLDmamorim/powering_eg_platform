@@ -4719,3 +4719,21 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Corrigir função enviarLembreteRegistoServicos para suportar múltiplos Chat IDs
 - [x] Adicionar link do Portal do Volante nas notificações de lembrete
 - [x] Testar notificações Telegram com dados corrigidos
+
+## Módulo Recalibra - Sistema de Gestão de Calibragens
+- [ ] Criar schema da base de dados (unidades_recalibra, calibragens)
+- [ ] Adicionar item "Recalibra" no menu lateral do dashboard admin
+- [ ] Criar página de configuração de unidades Recalibra (multi-gestor)
+- [ ] Implementar geração de tokens para Portal Recalibra
+- [ ] Criar interface Portal Recalibra (acesso via token)
+- [ ] Implementar formulário de registo de calibrações
+- [ ] Criar dashboard com estatísticas de calibrações
+- [ ] Implementar histórico de calibrações com filtros
+- [ ] Importar 78 registos históricos do ficheiro notion_calibragens_data.json
+- [ ] Testar fluxo completo de registo de calibrações
+
+## Bug - Calendário mostra dias bloqueados como disponíveis
+- [x] Corrigir query de disponibilidade para excluir dias bloqueados pelo volante
+- [x] Adicionar validação no formulário de pedido de apoio para rejeitar dias bloqueados
+- [x] Corrigir lógica de cores do calendário para mostrar bloqueios sempre em cinza
+- [x] Reorganizar prioridades de cores (bloqueios > ocupações > pendentes)

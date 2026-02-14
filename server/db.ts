@@ -138,7 +138,19 @@ import {
   InsertEnvioRH,
   servicosVolante,
   ServicoVolante,
-  InsertServicoVolante
+  InsertServicoVolante,
+  unidadesRecalibra,
+  UnidadeRecalibra,
+  InsertUnidadeRecalibra,
+  tokensRecalibra,
+  TokenRecalibra,
+  InsertTokenRecalibra,
+  calibragens,
+  Calibragem,
+  InsertCalibragem,
+  unidadeLojas,
+  UnidadeLoja,
+  InsertUnidadeLoja
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -10851,4 +10863,386 @@ export async function getTopLojasServicos(volanteId: number, limit: number = 5, 
   }
   
   return topLojas;
+}
+
+
+// ==================== RECALIBRA - UNIDADES ====================
+
+/**
+ * Criar unidade Recalibra
+ */
+export async function createUnidadeRecalibra(data: InsertUnidadeRecalibra): Promise<UnidadeRecalibra | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const result = await db.insert(unidadesRecalibra).values(data);
+  const insertId = result[0]?.insertId;
+  if (!insertId) return null;
+  
+  const created = await db.select().from(unidadesRecalibra).where(eq(unidadesRecalibra.id, insertId));
+  return created[0] || null;
+}
+
+/**
+ * Obter todas as unidades Recalibra
+ */
+export async function getAllUnidadesRecalibra(): Promise<UnidadeRecalibra[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return db.select().from(unidadesRecalibra).orderBy(unidadesRecalibra.nome);
+}
+
+/**
+ * Obter unidades Recalibra por gestor
+ */
+export async function getUnidadesRecalibraByGestorId(gestorId: number): Promise<UnidadeRecalibra[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return db.select().from(unidadesRecalibra).where(eq(unidadesRecalibra.gestorId, gestorId));
+}
+
+/**
+ * Obter unidade Recalibra por ID
+ */
+export async function getUnidadeRecalibraById(id: number): Promise<UnidadeRecalibra | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const result = await db.select().from(unidadesRecalibra).where(eq(unidadesRecalibra.id, id));
+  return result[0] || null;
+}
+
+/**
+ * Atualizar unidade Recalibra
+ */
+export async function updateUnidadeRecalibra(id: number, data: Partial<InsertUnidadeRecalibra>): Promise<boolean> {
+  const db = await getDb();
+  if (!db) return false;
+  
+  await db.update(unidadesRecalibra).set(data).where(eq(unidadesRecalibra.id, id));
+  return true;
+}
+
+/**
+ * Eliminar unidade Recalibra
+ */
+export async function deleteUnidadeRecalibra(id: number): Promise<boolean> {
+  const db = await getDb();
+  if (!db) return false;
+  
+  // Eliminar associações com lojas
+  await db.delete(unidadeLojas).where(eq(unidadeLojas.unidadeId, id));
+  
+  // Eliminar tokens
+  await db.delete(tokensRecalibra).where(eq(tokensRecalibra.unidadeId, id));
+  
+  // Eliminar unidade
+  await db.delete(unidadesRecalibra).where(eq(unidadesRecalibra.id, id));
+  
+  return true;
+}
+
+// ==================== RECALIBRA - ASSOCIAÇÕES UNIDADE-LOJAS ====================
+
+/**
+ * Associar lojas a uma unidade Recalibra
+ */
+export async function associarLojasUnidadeRecalibra(unidadeId: number, lojaIds: number[]): Promise<boolean> {
+  const db = await getDb();
+  if (!db) return false;
+  
+  // Remover associações antigas
+  await db.delete(unidadeLojas).where(eq(unidadeLojas.unidadeId, unidadeId));
+  
+  // Criar novas associações
+  if (lojaIds.length > 0) {
+    await db.insert(unidadeLojas).values(
+      lojaIds.map(lojaId => ({ unidadeId, lojaId }))
+    );
+  }
+  
+  return true;
+}
+
+/**
+ * Obter lojas associadas a uma unidade Recalibra
+ */
+export async function getLojasByUnidadeRecalibraId(unidadeId: number): Promise<Loja[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const result = await db
+    .select({ loja: lojas })
+    .from(unidadeLojas)
+    .leftJoin(lojas, eq(unidadeLojas.lojaId, lojas.id))
+    .where(eq(unidadeLojas.unidadeId, unidadeId));
+  
+  return result.map(r => r.loja).filter((l): l is Loja => l !== null);
+}
+
+// ==================== RECALIBRA - TOKENS ====================
+
+/**
+ * Gerar token para unidade Recalibra
+ */
+export async function generateTokenRecalibra(unidadeId: number): Promise<string> {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  
+  // Verificar se já existe token ativo
+  const existingTokens = await db.select()
+    .from(tokensRecalibra)
+    .where(and(
+      eq(tokensRecalibra.unidadeId, unidadeId),
+      eq(tokensRecalibra.ativo, true)
+    ));
+  
+  if (existingTokens.length > 0) {
+    return existingTokens[0].token;
+  }
+  
+  // Gerar novo token
+  const token = crypto.randomBytes(32).toString('hex');
+  
+  await db.insert(tokensRecalibra).values({
+    unidadeId,
+    token,
+    ativo: true,
+  });
+  
+  return token;
+}
+
+/**
+ * Validar token de unidade Recalibra
+ */
+export async function validateTokenRecalibra(token: string): Promise<{ unidade: UnidadeRecalibra; lojas: Loja[] } | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const result = await db.select()
+    .from(tokensRecalibra)
+    .where(and(
+      eq(tokensRecalibra.token, token),
+      eq(tokensRecalibra.ativo, true)
+    ));
+  
+  if (result.length === 0) return null;
+  
+  const tokenData = result[0];
+  
+  // Atualizar último acesso
+  await db.update(tokensRecalibra)
+    .set({ ultimoAcesso: new Date() })
+    .where(eq(tokensRecalibra.id, tokenData.id));
+  
+  // Buscar unidade
+  const unidade = await getUnidadeRecalibraById(tokenData.unidadeId);
+  if (!unidade) return null;
+  
+  // Buscar lojas associadas
+  const lojas = await getLojasByUnidadeRecalibraId(unidade.id);
+  
+  return { unidade, lojas };
+}
+
+/**
+ * Revogar token de unidade Recalibra
+ */
+export async function revokeTokenRecalibra(unidadeId: number): Promise<boolean> {
+  const db = await getDb();
+  if (!db) return false;
+  
+  await db.update(tokensRecalibra)
+    .set({ ativo: false })
+    .where(eq(tokensRecalibra.unidadeId, unidadeId));
+  
+  return true;
+}
+
+// ==================== RECALIBRA - CALIBRAGENS ====================
+
+/**
+ * Criar registo de calibragem
+ */
+export async function createCalibragem(data: InsertCalibragem): Promise<Calibragem | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const result = await db.insert(calibragens).values(data);
+  const insertId = result[0]?.insertId;
+  if (!insertId) return null;
+  
+  const created = await db.select().from(calibragens).where(eq(calibragens.id, insertId));
+  return created[0] || null;
+}
+
+/**
+ * Obter histórico de calibragens de uma unidade
+ */
+export async function getHistoricoCalibragens(
+  unidadeId: number,
+  dataInicio?: string,
+  dataFim?: string,
+  lojaId?: number
+): Promise<(Calibragem & { loja?: Loja })[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const conditions = [eq(calibragens.unidadeId, unidadeId)];
+  
+  if (dataInicio) {
+    conditions.push(gte(calibragens.data, dataInicio));
+  }
+  if (dataFim) {
+    conditions.push(lte(calibragens.data, dataFim));
+  }
+  if (lojaId) {
+    conditions.push(eq(calibragens.lojaId, lojaId));
+  }
+  
+  const result = await db
+    .select({ calibragem: calibragens, loja: lojas })
+    .from(calibragens)
+    .leftJoin(lojas, eq(calibragens.lojaId, lojas.id))
+    .where(and(...conditions))
+    .orderBy(desc(calibragens.data));
+  
+  return result.map(r => ({ ...r.calibragem, loja: r.loja || undefined }));
+}
+
+/**
+ * Obter estatísticas de calibragens
+ */
+export async function getEstatisticasCalibragens(unidadeId: number, mesesSelecionados?: string[]) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const conditions = [eq(calibragens.unidadeId, unidadeId)];
+  
+  // Aplicar filtro de meses se fornecido
+  if (mesesSelecionados && mesesSelecionados.length > 0) {
+    const mesesConditions = mesesSelecionados.map(mes => {
+      const [ano, mesNum] = mes.split('-');
+      return sql`YEAR(${calibragens.data}) = ${ano} AND MONTH(${calibragens.data}) = ${mesNum}`;
+    });
+    conditions.push(or(...mesesConditions)!);
+  }
+  
+  const calibs = await db.select()
+    .from(calibragens)
+    .where(and(...conditions));
+  
+  if (calibs.length === 0) {
+    return {
+      totalCalibragens: 0,
+      dinamicas: 0,
+      estaticas: 0,
+      core: 0,
+      ligeiros: 0,
+      pesados: 0,
+      lojasAtendidas: 0,
+      diasTrabalhados: 0,
+      mediaPorDia: 0
+    };
+  }
+  
+  // Contar por tipo
+  const dinamicas = calibs.filter(c => c.tipoCalibragem === 'DINÂMICA').length;
+  const estaticas = calibs.filter(c => c.tipoCalibragem === 'ESTÁTICA').length;
+  const core = calibs.filter(c => c.tipoCalibragem === 'CORE').length;
+  
+  // Contar por tipologia
+  const ligeiros = calibs.filter(c => c.tipologiaViatura === 'LIGEIRO').length;
+  const pesados = calibs.filter(c => c.tipologiaViatura === 'PESADO').length;
+  
+  // Lojas únicas atendidas
+  const lojasUnicas = new Set(calibs.map(c => c.lojaId));
+  
+  // Dias únicos trabalhados
+  const diasUnicos = new Set(calibs.map(c => c.data));
+  
+  const diasTrabalhados = diasUnicos.size;
+  const mediaPorDia = diasTrabalhados > 0 ? calibs.length / diasTrabalhados : 0;
+  
+  return {
+    totalCalibragens: calibs.length,
+    dinamicas,
+    estaticas,
+    core,
+    ligeiros,
+    pesados,
+    lojasAtendidas: lojasUnicas.size,
+    diasTrabalhados,
+    mediaPorDia: Math.round(mediaPorDia * 10) / 10
+  };
+}
+
+/**
+ * Obter top lojas por calibragens
+ */
+export async function getTopLojasCalibragens(unidadeId: number, mesesSelecionados?: string[], limit: number = 5) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const conditions = [eq(calibragens.unidadeId, unidadeId)];
+  
+  // Aplicar filtro de meses se fornecido
+  if (mesesSelecionados && mesesSelecionados.length > 0) {
+    const mesesConditions = mesesSelecionados.map(mes => {
+      const [ano, mesNum] = mes.split('-');
+      return sql`YEAR(${calibragens.data}) = ${ano} AND MONTH(${calibragens.data}) = ${mesNum}`;
+    });
+    conditions.push(or(...mesesConditions)!);
+  }
+  
+  const calibs = await db
+    .select({ calibragem: calibragens, loja: lojas })
+    .from(calibragens)
+    .leftJoin(lojas, eq(calibragens.lojaId, lojas.id))
+    .where(and(...conditions));
+  
+  // Agrupar por loja
+  const porLoja = new Map<number, { lojaId: number; lojaNome: string; total: number; visitas: number }>();
+  
+  for (const item of calibs) {
+    const lojaId = item.calibragem.lojaId;
+    const lojaNome = item.loja?.nome || 'Loja';
+    
+    if (!porLoja.has(lojaId)) {
+      porLoja.set(lojaId, { lojaId, lojaNome, total: 0, visitas: 0 });
+    }
+    
+    porLoja.get(lojaId)!.total++;
+  }
+  
+  // Contar visitas (dias únicos por loja)
+  const visitasPorLoja = new Map<number, Set<string>>();
+  for (const item of calibs) {
+    const lojaId = item.calibragem.lojaId;
+    if (!visitasPorLoja.has(lojaId)) {
+      visitasPorLoja.set(lojaId, new Set());
+    }
+    visitasPorLoja.get(lojaId)!.add(item.calibragem.data);
+  }
+  
+  // Adicionar contagem de visitas
+  for (const [lojaId, dias] of visitasPorLoja.entries()) {
+    if (porLoja.has(lojaId)) {
+      porLoja.get(lojaId)!.visitas = dias.size;
+    }
+  }
+  
+  // Ordenar e limitar
+  const resultado = Array.from(porLoja.values())
+    .sort((a, b) => b.total - a.total)
+    .slice(0, limit)
+    .map(item => ({
+      ...item,
+      mediaPorVisita: item.visitas > 0 ? Math.round((item.total / item.visitas) * 10) / 10 : 0
+    }));
+  
+  return resultado;
 }

@@ -4542,6 +4542,24 @@ function VolanteTab({
                   <Button
                     onClick={() => {
                       if (diaSelecionado) {
+                        // Verificar se o dia está bloqueado
+                        const dataStr = diaSelecionado.toISOString().split('T')[0];
+                        const estadoDia = estadoDias?.[dataStr];
+                        const bloqueiosDia = estadoDia?.bloqueios || [];
+                        
+                        // Verificar se o período está bloqueado
+                        const periodoBloqueado = bloqueiosDia.some((b: any) => 
+                          b.periodo === periodoSelecionado || b.periodo === 'dia_todo' || periodoSelecionado === 'dia_todo'
+                        );
+                        
+                        if (periodoBloqueado) {
+                          toast.error(language === 'pt' 
+                            ? 'Este dia/período está bloqueado pelo volante. Por favor, escolha outro dia.'
+                            : 'This day/period is blocked by the mobile unit. Please choose another day.'
+                          );
+                          return;
+                        }
+                        
                         criarPedidoMutation.mutate({
                           token,
                           data: diaSelecionado.toISOString(),
@@ -5002,27 +5020,48 @@ END:VCALENDAR`;
       const diaTodoBloqueado = bloqueiosDia.some((b: any) => b.periodo === 'dia_todo');
       
       // Determinar cor de fundo baseado no estado
+      // PRIORIDADE 1: Bloqueios (sempre cinza)
       if (diaTodoBloqueado || (manhaBloqueada && tardeBloqueada)) {
+        bgColor = 'bg-gray-300';
+        borderColor = 'border-gray-500';
+      } else if (manhaBloqueada && !tardeAprovada && !tardeAgendada) {
+        // Manhã bloqueada, tarde livre
         bgColor = 'bg-gray-200';
         borderColor = 'border-gray-400';
-      } else if (diaTodoAprovado || diaTodoAgendado || (manhaAprovada && tardeAprovada) || (manhaAgendada && tardeAgendada) || 
-                 (manhaAprovada && tardeAgendada) || (manhaAgendada && tardeAprovada) ||
-                 (manhaBloqueada && (tardeAprovada || tardeAgendada)) || (tardeBloqueada && (manhaAprovada || manhaAgendada))) {
+      } else if (tardeBloqueada && !manhaAprovada && !manhaAgendada) {
+        // Tarde bloqueada, manhã livre
+        bgColor = 'bg-gray-200';
+        borderColor = 'border-gray-400';
+      }
+      // PRIORIDADE 2: Dia completo ocupado (pedidos + agendamentos)
+      else if (diaTodoAprovado || diaTodoAgendado || (manhaAprovada && tardeAprovada) || (manhaAgendada && tardeAgendada) || 
+               (manhaAprovada && tardeAgendada) || (manhaAgendada && tardeAprovada)) {
         bgColor = 'bg-red-100';
         borderColor = 'border-red-300';
-      } else if (manhaAprovada || manhaBloqueada) {
+      }
+      // PRIORIDADE 3: Bloqueio parcial + ocupação parcial
+      else if ((manhaBloqueada && (tardeAprovada || tardeAgendada)) || (tardeBloqueada && (manhaAprovada || manhaAgendada))) {
+        bgColor = 'bg-orange-100';
+        borderColor = 'border-orange-300';
+      }
+      // PRIORIDADE 4: Períodos individuais aprovados
+      else if (manhaAprovada) {
         bgColor = 'bg-purple-100';
         borderColor = 'border-purple-300';
-      } else if (tardeAprovada || tardeBloqueada) {
+      } else if (tardeAprovada) {
         bgColor = 'bg-blue-100';
         borderColor = 'border-blue-300';
-      } else if (manhaAgendada) {
+      }
+      // PRIORIDADE 5: Períodos individuais agendados
+      else if (manhaAgendada) {
         bgColor = 'bg-teal-100';
         borderColor = 'border-teal-300';
       } else if (tardeAgendada) {
         bgColor = 'bg-teal-100';
         borderColor = 'border-teal-300';
-      } else if (temPendente) {
+      }
+      // PRIORIDADE 6: Pendentes
+      else if (temPendente) {
         bgColor = 'bg-yellow-100';
         borderColor = 'border-yellow-300';
       }
