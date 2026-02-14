@@ -1,0 +1,18 @@
+{
+  "query": "-- Inserir agendamento de teste para hoje\nINSERT INTO agendamentos_volante (volanteId, lojaId, data, agendamento_volante_periodo, agendamento_volante_tipo, titulo, descricao)\nVALUES (2, 180024, '2026-02-13', 'manha', 'outro', 'Teste Notificação', 'Agendamento de teste para verificar notificações Telegram');\n\n-- Ver o agendamento criado\nSELECT id, volanteId, lojaId, DATE(data) as data_apenas, data as data_completa, agendamento_volante_periodo\nFROM agendamentos_volante \nWHERE DATE(data) = '2026-02-13';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute -- Inserir agendamento de teste para hoje\nINSERT INTO agendamentos_volante (volanteId, lojaId, data, agendamento_volante_periodo, agendamento_volante_tipo, titulo, descricao)\nVALUES (2, 180024, '2026-02-13', 'manha', 'outro', 'Teste Notificação', 'Agendamento de teste para verificar notificações Telegram');\n\n-- Ver o agendamento criado\nSELECT id, volanteId, lojaId, DATE(data) as data_apenas, data as data_completa, agendamento_volante_periodo\nFROM agendamentos_volante \nWHERE DATE(data) = '2026-02-13';",
+  "rows": [
+    {
+      "id": "600001",
+      "volanteId": "2",
+      "lojaId": "180024",
+      "data_apenas": "2026-02-13",
+      "data_completa": "2026-02-13 00:00:00",
+      "agendamento_volante_periodo": "manha"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tvolanteId\tlojaId\tdata_apenas\tdata_completa\tagendamento_volante_periodo\n600001\t2\t180024\t2026-02-13\t2026-02-13 00:00:00\tmanha\n",
+  "stderr": "",
+  "execution_time_ms": 87
+}

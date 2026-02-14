@@ -8487,7 +8487,10 @@ IMPORTANTE:
         }
         
         const volanteId = tokenData.volante.id;
-        const dataAgendamento = new Date(input.data);
+        // Normalizar data para UTC (apenas data, sem horas)
+        // input.data vem como "2026-02-13" do frontend
+        const [year, month, day] = input.data.split('-').map(Number);
+        const dataAgendamento = new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0));
         
         // Verificar se o dia/período está bloqueado
         const bloqueio = await db.verificarBloqueio(volanteId, dataAgendamento, input.periodo);

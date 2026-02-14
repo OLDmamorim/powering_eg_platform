@@ -4705,3 +4705,17 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [ ] Criar Dashboard de estatísticas do Recalibra
 - [ ] Importar dados históricos do Notion para base de dados
 - [ ] Testar funcionalidade completa
+
+
+## Investigar Notificações Telegram Volante
+- [ ] Verificar configuração do cron job de notificações (18:00 diariamente)
+- [ ] Verificar logs do servidor para ver se o cron job executou
+- [ ] Testar envio manual de notificação Telegram
+- [ ] Corrigir problema identificado
+
+## Bug - Notificações Telegram não enviadas às 18:00
+- [x] Corrigir timezone handling ao guardar agendamentos (usar UTC em vez de EST)
+- [x] Atualizar função de criação de agendamentos para normalizar datas
+- [x] Corrigir função enviarLembreteRegistoServicos para suportar múltiplos Chat IDs
+- [x] Adicionar link do Portal do Volante nas notificações de lembrete
+- [x] Testar notificações Telegram com dados corrigidos

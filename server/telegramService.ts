@@ -537,9 +537,10 @@ ${agendamento.portalUrl ? `
 
 /**
  * Envia lembrete diário para volante registar serviços
+ * Suporta múltiplos Chat IDs separados por vírgula
  */
 export async function enviarLembreteRegistoServicos(
-  chatId: string,
+  chatIds: string,
   dados: {
     volanteNome: string;
     lojasNaoRegistadas: Array<{
@@ -547,6 +548,7 @@ export async function enviarLembreteRegistoServicos(
       lojaNome: string;
       periodo: 'manha' | 'tarde' | 'dia_todo';
     }>;
+    portalUrl?: string;
   }
 ): Promise<boolean> {
   const periodoTexto = (periodo: string) => {
@@ -562,6 +564,10 @@ export async function enviarLembreteRegistoServicos(
     .map(l => `  • ${l.lojaNome} - ${periodoTexto(l.periodo)}`)
     .join('\n');
 
+  // URL do portal do volante
+  const baseUrl = process.env.VITE_APP_URL || 'https://poweringeg-3c9mozlh.manus.space';
+  const portalLink = dados.portalUrl || baseUrl;
+
   const mensagem = `
 🔔 <b>Lembrete de Registo de Serviços</b>
 
@@ -573,10 +579,13 @@ ${lojasTexto}
 
 Por favor, acede ao Portal do Volante e regista os serviços antes do final do dia.
 
+🔗 <a href="${portalLink}">Abrir Portal do Volante</a>
+
 <i>PoweringEG Platform 2.0</i>
   `.trim();
 
-  return await sendTelegramMessage(chatId, mensagem, 'HTML');
+  const result = await sendTelegramMessageToMultiple(chatIds, mensagem, 'HTML');
+  return result.success > 0;
 }
 
 /**

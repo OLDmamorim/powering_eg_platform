@@ -1,0 +1,60 @@
+{
+  "query": "SELECT a.id, a.volanteId, a.lojaId, a.data, a.agendamento_volante_periodo, a.createdAt, \nv.nome as volante_nome, l.nome as loja_nome\nFROM agendamentos_volante a\nLEFT JOIN volantes v ON a.volanteId = v.id  \nLEFT JOIN lojas l ON a.lojaId = l.id\nORDER BY a.createdAt DESC LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT a.id, a.volanteId, a.lojaId, a.data, a.agendamento_volante_periodo, a.createdAt, \nv.nome as volante_nome, l.nome as loja_nome\nFROM agendamentos_volante a\nLEFT JOIN volantes v ON a.volanteId = v.id  \nLEFT JOIN lojas l ON a.lojaId = l.id\nORDER BY a.createdAt DESC LIMIT 5;",
+  "rows": [
+    {
+      "id": "570004",
+      "volanteId": "2",
+      "lojaId": "NULL",
+      "data": "2026-02-26 00:00:00",
+      "agendamento_volante_periodo": "dia_todo",
+      "createdAt": "2026-02-13 11:24:53",
+      "volante_nome": "Volante Minho ",
+      "loja_nome": "NULL"
+    },
+    {
+      "id": "570003",
+      "volanteId": "2",
+      "lojaId": "NULL",
+      "data": "2026-02-25 00:00:00",
+      "agendamento_volante_periodo": "dia_todo",
+      "createdAt": "2026-02-13 11:24:40",
+      "volante_nome": "Volante Minho ",
+      "loja_nome": "NULL"
+    },
+    {
+      "id": "570002",
+      "volanteId": "2",
+      "lojaId": "NULL",
+      "data": "2026-02-24 00:00:00",
+      "agendamento_volante_periodo": "dia_todo",
+      "createdAt": "2026-02-13 11:24:27",
+      "volante_nome": "Volante Minho ",
+      "loja_nome": "NULL"
+    },
+    {
+      "id": "570001",
+      "volanteId": "2",
+      "lojaId": "NULL",
+      "data": "2026-02-23 00:00:00",
+      "agendamento_volante_periodo": "dia_todo",
+      "createdAt": "2026-02-13 11:24:12",
+      "volante_nome": "Volante Minho ",
+      "loja_nome": "NULL"
+    },
+    {
+      "id": "540001",
+      "volanteId": "2",
+      "lojaId": "60001",
+      "data": "2026-02-12 00:00:00",
+      "agendamento_volante_periodo": "manha",
+      "createdAt": "2026-02-12 10:57:37",
+      "volante_nome": "Volante Minho ",
+      "loja_nome": "Famalicão"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tvolanteId\tlojaId\tdata\tagendamento_volante_periodo\tcreatedAt\tvolante_nome\tloja_nome\n570004\t2\tNULL\t2026-02-26 00:00:00\tdia_todo\t2026-02-13 11:24:53\tVolante Minho \tNULL\n570003\t2\tNULL\t2026-02-25 00:00:00\tdia_todo\t2026-02-13 11:24:40\tVolante Minho \tNULL\n570002\t2\tNULL\t2026-02-24 00:00:00\tdia_todo\t2026-02-13 11:24:27\tVolante Minho \tNULL\n570001\t2\tNULL\t2026-02-23 00:00:00\tdia_todo\t2026-02-13 11:24:12\tVolante Minho \tNULL\n540001\t2\t60001\t2026-02-12 00:00:00\tmanha\t2026-02-12 10:57:37\tVolante Minho \tFamalicão\n",
+  "stderr": "",
+  "execution_time_ms": 63
+}

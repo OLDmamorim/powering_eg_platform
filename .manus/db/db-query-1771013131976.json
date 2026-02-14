@@ -1,0 +1,90 @@
+{
+  "query": "-- Ver todos os agendamentos\nSELECT id, volanteId, lojaId, data, DATE(data) as data_apenas, agendamento_volante_periodo\nFROM agendamentos_volante \nORDER BY id DESC LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute -- Ver todos os agendamentos\nSELECT id, volanteId, lojaId, data, DATE(data) as data_apenas, agendamento_volante_periodo\nFROM agendamentos_volante \nORDER BY id DESC LIMIT 10;",
+  "rows": [
+    {
+      "id": "570004",
+      "volanteId": "2",
+      "lojaId": "NULL",
+      "data": "2026-02-26 00:00:00",
+      "data_apenas": "2026-02-26",
+      "agendamento_volante_periodo": "dia_todo"
+    },
+    {
+      "id": "570003",
+      "volanteId": "2",
+      "lojaId": "NULL",
+      "data": "2026-02-25 00:00:00",
+      "data_apenas": "2026-02-25",
+      "agendamento_volante_periodo": "dia_todo"
+    },
+    {
+      "id": "570002",
+      "volanteId": "2",
+      "lojaId": "NULL",
+      "data": "2026-02-24 00:00:00",
+      "data_apenas": "2026-02-24",
+      "agendamento_volante_periodo": "dia_todo"
+    },
+    {
+      "id": "570001",
+      "volanteId": "2",
+      "lojaId": "NULL",
+      "data": "2026-02-23 00:00:00",
+      "data_apenas": "2026-02-23",
+      "agendamento_volante_periodo": "dia_todo"
+    },
+    {
+      "id": "540001",
+      "volanteId": "2",
+      "lojaId": "60001",
+      "data": "2026-02-12 00:00:00",
+      "data_apenas": "2026-02-12",
+      "agendamento_volante_periodo": "manha"
+    },
+    {
+      "id": "510001",
+      "volanteId": "2",
+      "lojaId": "60003",
+      "data": "2026-02-10 00:00:00",
+      "data_apenas": "2026-02-10",
+      "agendamento_volante_periodo": "tarde"
+    },
+    {
+      "id": "450001",
+      "volanteId": "2",
+      "lojaId": "NULL",
+      "data": "2026-02-17 00:00:00",
+      "data_apenas": "2026-02-17",
+      "agendamento_volante_periodo": "dia_todo"
+    },
+    {
+      "id": "360001",
+      "volanteId": "2",
+      "lojaId": "60002",
+      "data": "2026-02-05 00:00:00",
+      "data_apenas": "2026-02-05",
+      "agendamento_volante_periodo": "manha"
+    },
+    {
+      "id": "330001",
+      "volanteId": "2",
+      "lojaId": "60003",
+      "data": "2026-02-03 00:00:00",
+      "data_apenas": "2026-02-03",
+      "agendamento_volante_periodo": "manha"
+    },
+    {
+      "id": "300001",
+      "volanteId": "2",
+      "lojaId": "180024",
+      "data": "2026-01-31 00:00:00",
+      "data_apenas": "2026-01-31",
+      "agendamento_volante_periodo": "manha"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tvolanteId\tlojaId\tdata\tdata_apenas\tagendamento_volante_periodo\n570004\t2\tNULL\t2026-02-26 00:00:00\t2026-02-26\tdia_todo\n570003\t2\tNULL\t2026-02-25 00:00:00\t2026-02-25\tdia_todo\n570002\t2\tNULL\t2026-02-24 00:00:00\t2026-02-24\tdia_todo\n570001\t2\tNULL\t2026-02-23 00:00:00\t2026-02-23\tdia_todo\n540001\t2\t60001\t2026-02-12 00:00:00\t2026-02-12\tmanha\n510001\t2\t60003\t2026-02-10 00:00:00\t2026-02-10\ttarde\n450001\t2\tNULL\t2026-02-17 00:00:00\t2026-02-17\tdia_todo\n360001\t2\t60002\t2026-02-05 00:00:00\t2026-02-05\tmanha\n330001\t2\t60003\t2026-02-03 00:00:00\t2026-02-03\tmanha\n300001\t2\t180024\t2026-01-31 00:00:00\t2026-01-31\tmanha\n",
+  "stderr": "",
+  "execution_time_ms": 72
+}

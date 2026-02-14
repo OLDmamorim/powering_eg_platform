@@ -1,0 +1,45 @@
+{
+  "query": "-- Primeiro, ver o que temos\nSELECT id, volanteId, lojaId, DATE(data) as data_apenas, data as data_completa \nFROM agendamentos_volante \nORDER BY id DESC LIMIT 5;\n\n-- Atualizar todos os agendamentos para normalizar as datas\n-- Vamos extrair apenas a parte da data e reconstruir como UTC midnight\nUPDATE agendamentos_volante \nSET data = DATE(data)\nWHERE id > 0;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute -- Primeiro, ver o que temos\nSELECT id, volanteId, lojaId, DATE(data) as data_apenas, data as data_completa \nFROM agendamentos_volante \nORDER BY id DESC LIMIT 5;\n\n-- Atualizar todos os agendamentos para normalizar as datas\n-- Vamos extrair apenas a parte da data e reconstruir como UTC midnight\nUPDATE agendamentos_volante \nSET data = DATE(data)\nWHERE id > 0;",
+  "rows": [
+    {
+      "id": "570004",
+      "volanteId": "2",
+      "lojaId": "NULL",
+      "data_apenas": "2026-02-26",
+      "data_completa": "2026-02-26 00:00:00"
+    },
+    {
+      "id": "570003",
+      "volanteId": "2",
+      "lojaId": "NULL",
+      "data_apenas": "2026-02-25",
+      "data_completa": "2026-02-25 00:00:00"
+    },
+    {
+      "id": "570002",
+      "volanteId": "2",
+      "lojaId": "NULL",
+      "data_apenas": "2026-02-24",
+      "data_completa": "2026-02-24 00:00:00"
+    },
+    {
+      "id": "570001",
+      "volanteId": "2",
+      "lojaId": "NULL",
+      "data_apenas": "2026-02-23",
+      "data_completa": "2026-02-23 00:00:00"
+    },
+    {
+      "id": "540001",
+      "volanteId": "2",
+      "lojaId": "60001",
+      "data_apenas": "2026-02-12",
+      "data_completa": "2026-02-12 00:00:00"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tvolanteId\tlojaId\tdata_apenas\tdata_completa\n570004\t2\tNULL\t2026-02-26\t2026-02-26 00:00:00\n570003\t2\tNULL\t2026-02-25\t2026-02-25 00:00:00\n570002\t2\tNULL\t2026-02-24\t2026-02-24 00:00:00\n570001\t2\tNULL\t2026-02-23\t2026-02-23 00:00:00\n540001\t2\t60001\t2026-02-12\t2026-02-12 00:00:00\n",
+  "stderr": "",
+  "execution_time_ms": 60
+}
