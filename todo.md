@@ -4740,3 +4740,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar validação no formulário de pedido de apoio para rejeitar dias bloqueados
 - [x] Corrigir lógica de cores do calendário para mostrar bloqueios sempre em cinza
 - [x] Reorganizar prioridades de cores (bloqueios > ocupações > pendentes)
+
+## Adicionar Menu Recalibra
+- [x] Adicionar item "Recalibra" no menu lateral do DashboardLayout
+- [ ] Testar navegação para /gestao-recalibra
