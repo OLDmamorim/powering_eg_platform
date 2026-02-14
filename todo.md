@@ -4744,3 +4744,6 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## Adicionar Menu Recalibra
 - [x] Adicionar item "Recalibra" no menu lateral do DashboardLayout
 - [ ] Testar navegação para /gestao-recalibra
+
+## Corrigir Permissões Menu Recalibra
+- [x] Alterar visibilidade do menu Recalibra para gestores e admins (não apenas admins)
