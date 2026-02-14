@@ -4747,3 +4747,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 
 ## Corrigir Permissões Menu Recalibra
 - [x] Alterar visibilidade do menu Recalibra para gestores e admins (não apenas admins)
+
+## Adicionar Botão de Voltar em GestaoRecalibra
+- [x] Adicionar botão de voltar no topo da página GestaoRecalibra
+- [x] Imports de toast já corretos (sonner)

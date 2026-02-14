@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { Loader2, Plus, Pencil, Trash2, Key, Copy } from 'lucide-react';
+import { Loader2, Plus, Pencil, Trash2, Key, Copy, ArrowLeft } from 'lucide-react';
 
 export default function GestaoRecalibra() {
 
@@ -156,6 +156,10 @@ export default function GestaoRecalibra() {
 
   return (
     <div className="container mx-auto py-8">
+      <Button variant="ghost" onClick={() => window.history.back()} className="mb-4">
+        <ArrowLeft className="mr-2 h-4 w-4" />
+        Voltar
+      </Button>
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-3xl font-bold">Gestão Recalibra</h1>
