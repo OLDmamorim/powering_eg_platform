@@ -52,6 +52,8 @@ import RH from "./pages/RH";
 import MenuInicial from "./pages/MenuInicial";
 import DashboardVolante from "./pages/DashboardVolante";
 import Documentos from "./pages/Documentos";
+import GestaoRecalibra from "./pages/GestaoRecalibra";
+import PortalRecalibra from "./pages/PortalRecalibra";
 import { DemoBanner } from "./components/DemoBanner";
 import { LanguageProvider } from "./contexts/LanguageContext";
 
@@ -129,6 +131,10 @@ function Router() {
       
       {/* Portal do Volante (acesso público via token) */}
       <Route path={"/portal-volante"} component={PortalLoja} />
+      
+      {/* Recalibra */}
+      <Route path={"/gestao-recalibra"} component={GestaoRecalibra} />
+      <Route path={"/portal-recalibra"} component={PortalRecalibra} />
       
       <Route path={"/login-nao-autorizado"} component={LoginNaoAutorizado} />
       <Route path={"/404"} component={NotFound} />

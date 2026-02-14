@@ -8647,7 +8647,7 @@ IMPORTANTE:
         
         const bloqueio = await db.criarBloqueioVolante({
           volanteId: tokenData.volante.id,
-          data: new Date(input.data),
+          data: input.data,
           periodo: input.periodo,
           tipo: input.tipo,
           motivo: input.motivo,
@@ -10606,6 +10606,160 @@ IMPORTANTE:
         
         await db.deleteDocumento(input.id);
         return { success: true };
+      }),
+  }),
+
+  // ==================== GESTÃO RECALIBRA ====================
+  gestaoRecalibra: router({
+    // Listar todas as unidades (admin)
+    listar: adminProcedure
+      .query(async () => {
+        const unidades = await db.getAllUnidadesRecalibra();
+        return unidades;
+      }),
+
+    // Criar unidade
+    criar: adminProcedure
+      .input(z.object({
+        nome: z.string().min(1),
+        gestorId: z.number(),
+        lojasIds: z.array(z.number()),
+      }))
+      .mutation(async ({ input }) => {
+        const unidade = await db.createUnidadeRecalibra({
+          nome: input.nome,
+          gestorId: input.gestorId,
+        });
+        
+        if (!unidade) {
+          throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Erro ao criar unidade' });
+        }
+        
+        // Associar lojas
+        await db.associarLojasUnidadeRecalibra(unidade.id, input.lojasIds);
+        
+        return unidade;
+      }),
+
+    // Atualizar unidade
+    atualizar: adminProcedure
+      .input(z.object({
+        id: z.number(),
+        nome: z.string().min(1),
+        gestorId: z.number(),
+        lojasIds: z.array(z.number()),
+      }))
+      .mutation(async ({ input }) => {
+        await db.updateUnidadeRecalibra(input.id, {
+          nome: input.nome,
+          gestorId: input.gestorId,
+        });
+        
+        // Atualizar associações de lojas
+        await db.associarLojasUnidadeRecalibra(input.id, input.lojasIds);
+        
+        return { success: true };
+      }),
+
+    // Eliminar unidade
+    eliminar: adminProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await db.deleteUnidadeRecalibra(input.id);
+        return { success: true };
+      }),
+
+    // Gerar token
+    gerarToken: adminProcedure
+      .input(z.object({ unidadeId: z.number() }))
+      .mutation(async ({ input }) => {
+        const tokenStr = await db.generateTokenRecalibra(input.unidadeId);
+        const token = { token: tokenStr };
+        return token;
+      }),
+
+    // Listar tokens
+    listarTokens: adminProcedure
+      .input(z.object({ unidadeId: z.number() }))
+      .query(async ({ input }) => {
+        // TODO: Implementar listagem de tokens
+        const tokens: any[] = [];
+        return tokens;
+      }),
+
+    // Revogar token
+    revogarToken: adminProcedure
+      .input(z.object({ tokenId: z.number() }))
+      .mutation(async ({ input }) => {
+        await db.revokeTokenRecalibra(input.tokenId);
+        return { success: true };
+      }),
+  }),
+
+  // ==================== PORTAL RECALIBRA ====================
+  portalRecalibra: router({
+    // Validar token e obter informações da unidade
+    validarToken: publicProcedure
+      .input(z.object({ token: z.string() }))
+      .query(async ({ input }) => {
+        const tokenData = await db.validateTokenRecalibra(input.token);
+        if (!tokenData) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        return tokenData;
+      }),
+
+    // Registar calibragem
+    registarCalibragem: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        lojaId: z.number(),
+        data: z.string(),
+        matricula: z.string(),
+        tipoCalibragem: z.enum(['DINÂMICA', 'ESTÁTICA', 'CORE']),
+        marca: z.string().optional(),
+        tipologiaViatura: z.enum(['LIGEIRO', 'PESADO']).default('LIGEIRO'),
+        localidade: z.string().optional(),
+        observacoes: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const tokenData = await db.validateTokenRecalibra(input.token);
+        if (!tokenData) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        
+        const calibragem = await db.createCalibragem({
+          unidadeId: tokenData.unidade.id,
+          lojaId: input.lojaId,
+          data: input.data,
+          matricula: input.matricula,
+          tipoCalibragem: input.tipoCalibragem,
+          marca: input.marca,
+          tipologiaViatura: input.tipologiaViatura,
+          localidade: input.localidade,
+          observacoes: input.observacoes,
+        });
+        
+        return calibragem;
+      }),
+
+    // Listar calibragens da unidade
+    listarCalibragens: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        mes: z.number().optional(),
+        ano: z.number().optional(),
+      }))
+      .query(async ({ input }) => {
+        const tokenData = await db.validateTokenRecalibra(input.token);
+        if (!tokenData) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        
+        // TODO: Implementar listagem de calibragens
+        const calibragens: any[] = [];
+        
+        return calibragens;
       }),
   }),
 });

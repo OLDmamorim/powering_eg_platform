@@ -4721,12 +4721,15 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Testar notificações Telegram com dados corrigidos
 
 ## Módulo Recalibra - Sistema de Gestão de Calibragens
-- [ ] Criar schema da base de dados (unidades_recalibra, calibragens)
+- [x] Criar schema da base de dados (unidades_recalibra, calibragens, tokens_recalibra, unidade_lojas)
+- [x] Implementar funções de base de dados (CRUD completo)
+- [x] Criar routers tRPC (gestaoRecalibra + portalRecalibra)
+- [x] Criar página de gestão de Unidades Recalibra (GestaoRecalibra.tsx)
+- [x] Criar Portal Recalibra com formulário completo (PortalRecalibra.tsx)
+- [x] Adicionar rotas de navegação (/gestao-recalibra e /portal-recalibra)
 - [ ] Adicionar item "Recalibra" no menu lateral do dashboard admin
-- [ ] Criar página de configuração de unidades Recalibra (multi-gestor)
-- [ ] Implementar geração de tokens para Portal Recalibra
-- [ ] Criar interface Portal Recalibra (acesso via token)
-- [ ] Implementar formulário de registo de calibrações
+- [x] Corrigir imports de useToast nas páginas Recalibra
+- [ ] Corrigir erros TypeScript restantes nos routers (funções HTML antigas)
 - [ ] Criar dashboard com estatísticas de calibrações
 - [ ] Implementar histórico de calibrações com filtros
 - [ ] Importar 78 registos históricos do ficheiro notion_calibragens_data.json
