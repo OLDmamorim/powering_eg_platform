@@ -8310,7 +8310,7 @@ IMPORTANTE:
           throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido ou nenhum volante atribuído' });
         }
         
-        const estadoDias = await db.getEstadoDiasDoMes(volanteId, input.ano, input.mes);
+        const estadoDias = await db.getEstadoCompletoDoMes(volanteId, input.ano, input.mes);
         
         // Converter Map para objeto
         const resultado: Record<string, { estado: string; pedidos: any[] }> = {};

@@ -4733,7 +4733,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [ ] Testar fluxo completo de registo de calibrações
 
 ## Bug - Calendário mostra dias bloqueados como disponíveis
-- [x] Corrigir query de disponibilidade para excluir dias bloqueados pelo volante
+- [x] CRÍTICO: Corrigido endpoint estadoMes para usar getEstadoCompletoDoMes (incluir bloqueios)
 - [x] Adicionar validação no formulário de pedido de apoio para rejeitar dias bloqueados
 - [x] Corrigir lógica de cores do calendário para mostrar bloqueios sempre em cinza
 - [x] Reorganizar prioridades de cores (bloqueios > ocupações > pendentes)
