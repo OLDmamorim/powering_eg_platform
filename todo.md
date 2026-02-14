@@ -4751,3 +4751,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## Adicionar Botão de Voltar em GestaoRecalibra
 - [x] Adicionar botão de voltar no topo da página GestaoRecalibra
 - [x] Imports de toast já corretos (sonner)
+
+## Corrigir Formulário de Criação de Unidade Recalibra
+- [x] Gestor: auto-atribuir gestor (próprio) e todas as suas lojas (sem mostrar campos)
+- [x] Admin: mostrar seleção de gestor e lojas
+- [x] Simplificar formulário para gestores (apenas pedir nome da unidade)
+- [x] Adicionar mensagem informativa para gestores

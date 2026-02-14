@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { trpc } from '@/lib/trpc';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,8 +8,11 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { Loader2, Plus, Pencil, Trash2, Key, Copy, ArrowLeft } from 'lucide-react';
+import { useAuth } from '@/_core/hooks/useAuth';
 
 export default function GestaoRecalibra() {
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [tokensDialogOpen, setTokensDialogOpen] = useState(false);
@@ -107,8 +110,23 @@ export default function GestaoRecalibra() {
   };
 
   const handleSubmit = () => {
-    if (!nome || !gestorId || lojasIds.length === 0) {
-      toast({ title: 'Preencha todos os campos', variant: 'destructive' });
+    // Para gestores: auto-atribuir gestor (próprio) e todas as suas lojas
+    let finalGestorId = gestorId;
+    let finalLojasIds = lojasIds;
+
+    if (!isAdmin && user) {
+      // Gestor: usar o próprio ID e todas as suas lojas
+      finalGestorId = user.id;
+      finalLojasIds = lojas?.filter(l => l.gestorId === user.id).map(l => l.id) || [];
+    }
+
+    if (!nome) {
+      toast.error('Preencha o nome da unidade');
+      return;
+    }
+
+    if (!finalGestorId || finalLojasIds.length === 0) {
+      toast.error('Preencha todos os campos');
       return;
     }
 
@@ -116,14 +134,14 @@ export default function GestaoRecalibra() {
       atualizarMutation.mutate({
         id: editingUnidade.id,
         nome,
-        gestorId,
-        lojasIds,
+        gestorId: finalGestorId,
+        lojasIds: finalLojasIds,
       });
     } else {
       criarMutation.mutate({
         nome,
-        gestorId,
-        lojasIds,
+        gestorId: finalGestorId,
+        lojasIds: finalLojasIds,
       });
     }
   };
@@ -211,7 +229,7 @@ export default function GestaoRecalibra() {
           <DialogHeader>
             <DialogTitle>{editingUnidade ? 'Editar Unidade' : 'Nova Unidade'}</DialogTitle>
             <DialogDescription>
-              Configure a unidade de calibragem e atribua um gestor responsável
+              {isAdmin ? 'Configure a unidade de calibragem e atribua um gestor responsável' : 'Crie uma nova unidade de calibragem para as suas lojas'}
             </DialogDescription>
           </DialogHeader>
 
@@ -226,43 +244,53 @@ export default function GestaoRecalibra() {
               />
             </div>
 
-            <div>
-              <Label htmlFor="gestor">Gestor Responsável</Label>
-              <Select value={gestorId?.toString()} onValueChange={(v) => setGestorId(parseInt(v))}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione um gestor" />
-                </SelectTrigger>
-                <SelectContent>
-                  {gestores?.map((gestor) => (
-                    <SelectItem key={gestor.id} value={gestor.id.toString()}>
-                      {gestor.nome}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <Label>Lojas Associadas</Label>
-              <div className="border rounded-md p-4 max-h-48 overflow-y-auto space-y-2">
-                {lojas?.map((loja) => (
-                  <label key={loja.id} className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      checked={lojasIds.includes(loja.id)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setLojasIds([...lojasIds, loja.id]);
-                        } else {
-                          setLojasIds(lojasIds.filter((id) => id !== loja.id));
-                        }
-                      }}
-                    />
-                    <span>{loja.nome}</span>
-                  </label>
-                ))}
+            {isAdmin && (
+              <div>
+                <Label htmlFor="gestor">Gestor Responsável</Label>
+                <Select value={gestorId?.toString()} onValueChange={(v) => setGestorId(parseInt(v))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione um gestor" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {gestores?.map((gestor) => (
+                      <SelectItem key={gestor.id} value={gestor.id.toString()}>
+                        {gestor.nome}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-            </div>
+            )}
+
+            {isAdmin && (
+              <div>
+                <Label>Lojas Associadas</Label>
+                <div className="border rounded-md p-4 max-h-48 overflow-y-auto space-y-2">
+                  {lojas?.map((loja) => (
+                    <label key={loja.id} className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        checked={lojasIds.includes(loja.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setLojasIds([...lojasIds, loja.id]);
+                          } else {
+                            setLojasIds(lojasIds.filter((id) => id !== loja.id));
+                          }
+                        }}
+                      />
+                      <span>{loja.nome}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {!isAdmin && (
+              <p className="text-sm text-muted-foreground">
+                Esta unidade será criada para si e incluirá automaticamente todas as suas lojas.
+              </p>
+            )}
           </div>
 
           <DialogFooter>
