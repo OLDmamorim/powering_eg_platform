@@ -1,0 +1,360 @@
+{
+  "query": "SELECT id, nome, email FROM lojas ORDER BY nome;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT id, nome, email FROM lojas ORDER BY nome;",
+  "rows": [
+    {
+      "id": "180001",
+      "nome": "Abrantes",
+      "email": "abrantes@expressglass.pt"
+    },
+    {
+      "id": "180002",
+      "nome": "Aeroporto porto",
+      "email": "aeroporto@expressglass.pt"
+    },
+    {
+      "id": "180003",
+      "nome": "Águeda",
+      "email": "agueda@expressglass.pt"
+    },
+    {
+      "id": "180004",
+      "nome": "Algés",
+      "email": "alges@expressglass.pt"
+    },
+    {
+      "id": "180005",
+      "nome": "Almada",
+      "email": "almada@expressglass.pt"
+    },
+    {
+      "id": "180006",
+      "nome": "Amadora",
+      "email": "amadora@expressglass.pt"
+    },
+    {
+      "id": "180007",
+      "nome": "Amoreiras",
+      "email": "amoreiras@expressglass.pt"
+    },
+    {
+      "id": "180008",
+      "nome": "Aveiro",
+      "email": "aveiro@expressglass.pt"
+    },
+    {
+      "id": "60002",
+      "nome": "Barcelos",
+      "email": "barcelos@expressglass.pt"
+    },
+    {
+      "id": "180009",
+      "nome": "Beira baixa sm",
+      "email": "beirabaixa@expressglass.pt"
+    },
+    {
+      "id": "180010",
+      "nome": "Braga - minho center",
+      "email": "braga@expressglass.pt"
+    },
+    {
+      "id": "180011",
+      "nome": "Braga sm",
+      "email": "braga@expressglass.pt"
+    },
+    {
+      "id": "180012",
+      "nome": "Caldas da rainha",
+      "email": "caldasdarainha@expressglass.pt"
+    },
+    {
+      "id": "180013",
+      "nome": "Castanheira do ribatejo",
+      "email": "castanheiraribatejo@expressglass.pt"
+    },
+    {
+      "id": "180014",
+      "nome": "Coimbra",
+      "email": "coimbra@expressglass.pt"
+    },
+    {
+      "id": "180015",
+      "nome": "Coimbra sm",
+      "email": "coimbra@expressglass.pt"
+    },
+    {
+      "id": "180016",
+      "nome": "Coimbra sul",
+      "email": "coimbra@expressglass.pt"
+    },
+    {
+      "id": "180017",
+      "nome": "Costa de prata sm",
+      "email": "costadeprata@expressglass.pt"
+    },
+    {
+      "id": "180018",
+      "nome": "Entroncamento",
+      "email": "entroncamento@expressglass.pt"
+    },
+    {
+      "id": "60001",
+      "nome": "Famalicão",
+      "email": "famalicao@expressglass.pt"
+    },
+    {
+      "id": "180019",
+      "nome": "Famalicão sm",
+      "email": "famalicao@expressglass.pt"
+    },
+    {
+      "id": "180020",
+      "nome": "Faro",
+      "email": "faro@expressglass.pt"
+    },
+    {
+      "id": "180021",
+      "nome": "Faro sm",
+      "email": "calibragensfaro@expressglass.pt"
+    },
+    {
+      "id": "180022",
+      "nome": "Gondomar",
+      "email": "gondomar@expressglass.pt"
+    },
+    {
+      "id": "180023",
+      "nome": "Guarda",
+      "email": "guarda@expressglass.pt"
+    },
+    {
+      "id": "180024",
+      "nome": "Guimarães shopping",
+      "email": "guimaraes@expressglass.pt"
+    },
+    {
+      "id": "180025",
+      "nome": "Leiria",
+      "email": "leiria@expressglass.pt"
+    },
+    {
+      "id": "180026",
+      "nome": "Leiria sm",
+      "email": "leiria@expressglass.pt"
+    },
+    {
+      "id": "180027",
+      "nome": "Leziria sm",
+      "email": "leziria@expressglass.pt"
+    },
+    {
+      "id": "180028",
+      "nome": "Lisboa sm",
+      "email": "lisboa@expressglass.pt"
+    },
+    {
+      "id": "180029",
+      "nome": "Lisboa smr",
+      "email": "lisboa@expressglass.pt"
+    },
+    {
+      "id": "180030",
+      "nome": "Maia - maiashopping",
+      "email": "maiashopping@expressglass.pt"
+    },
+    {
+      "id": "180031",
+      "nome": "Maia - moreira",
+      "email": "maiazi@expressglass.pt"
+    },
+    {
+      "id": "180032",
+      "nome": "Maia sm",
+      "email": "maiazi@expressglass.pt"
+    },
+    {
+      "id": "180033",
+      "nome": "Matosinhos",
+      "email": "matosinhos@expressglass.pt"
+    },
+    {
+      "id": "180034",
+      "nome": "Montijo",
+      "email": "montijo@expressglass.pt"
+    },
+    {
+      "id": "180035",
+      "nome": "Movida",
+      "email": "movida@expressglass.pt"
+    },
+    {
+      "id": "180036",
+      "nome": "Mycarcenter",
+      "email": "paredes@expressglass.pt"
+    },
+    {
+      "id": "180037",
+      "nome": "Odivelas - loures",
+      "email": "odivelas@expressglass.pt"
+    },
+    {
+      "id": "60007",
+      "nome": "Paços de Ferreira ",
+      "email": "pferreira@expressglass.pt"
+    },
+    {
+      "id": "60006",
+      "nome": "Paredes",
+      "email": "paredes@expressglass.pt"
+    },
+    {
+      "id": "180038",
+      "nome": "Paredes sm",
+      "email": "paredes@expressglass.pt"
+    },
+    {
+      "id": "180039",
+      "nome": "Pombal",
+      "email": "pombal@expressglass.pt"
+    },
+    {
+      "id": "180040",
+      "nome": "Portimão",
+      "email": "portimao@expressglass.pt"
+    },
+    {
+      "id": "180041",
+      "nome": "Porto - marquês",
+      "email": "marques@expressglass.pt"
+    },
+    {
+      "id": "180042",
+      "nome": "Porto - zona industrial",
+      "email": "portozi@expressglass.pt"
+    },
+    {
+      "id": "180043",
+      "nome": "Porto alto",
+      "email": "portoalto@expressglass.pt"
+    },
+    {
+      "id": "180044",
+      "nome": "Porto sul sm",
+      "email": "porto@expressglass.pt"
+    },
+    {
+      "id": "180045",
+      "nome": "Póvoa de santa iria",
+      "email": "povoasantairia@expressglass.pt"
+    },
+    {
+      "id": "60005",
+      "nome": "Póvoa de Varzim",
+      "email": "povoa@expressglass.pt"
+    },
+    {
+      "id": "180046",
+      "nome": "Rotunda do relógio",
+      "email": "relogio@expressglass.pt"
+    },
+    {
+      "id": "180047",
+      "nome": "Sacavém",
+      "email": "sacavem@expressglass.pt"
+    },
+    {
+      "id": "180048",
+      "nome": "Santa maria da feira",
+      "email": "feira@expressglass.pt"
+    },
+    {
+      "id": "180049",
+      "nome": "Santarém",
+      "email": "santarem@expressglass.pt"
+    },
+    {
+      "id": "180050",
+      "nome": "Seia",
+      "email": "seia@expressglass.pt"
+    },
+    {
+      "id": "180051",
+      "nome": "Seia sm",
+      "email": "seia@expressglass.pt"
+    },
+    {
+      "id": "180052",
+      "nome": "Sm caldas da rainha",
+      "email": "caldasdarainha@expressglass.pt"
+    },
+    {
+      "id": "180053",
+      "nome": "Sm castanheira do ribatejo",
+      "email": "smcribatejo@expressglass.pt"
+    },
+    {
+      "id": "180063",
+      "nome": "Sm pesados porto",
+      "email": "truckservice@expressglass.pt"
+    },
+    {
+      "id": "180054",
+      "nome": "Sm viseu2",
+      "email": "viseu@expressglass.pt"
+    },
+    {
+      "id": "180055",
+      "nome": "Telheiras",
+      "email": "telheiras@expressglass.pt"
+    },
+    {
+      "id": "180056",
+      "nome": "Vale do tejo sm",
+      "email": "valedotejo@expressglass.pt"
+    },
+    {
+      "id": "60004",
+      "nome": "Viana do Castelo ",
+      "email": "vianacastelo@expressglass.pt"
+    },
+    {
+      "id": "180057",
+      "nome": "Viana do castelo sm",
+      "email": "vianacastelo@expressglass.pt"
+    },
+    {
+      "id": "180058",
+      "nome": "Vila nova de gaia",
+      "email": "gaia@expressglass.pt"
+    },
+    {
+      "id": "180059",
+      "nome": "Vila nova de gaia - canelas",
+      "email": "canelas@expressglass.pt"
+    },
+    {
+      "id": "60003",
+      "nome": "Vila Verde",
+      "email": "vilaverde@expressglass.pt"
+    },
+    {
+      "id": "180060",
+      "nome": "Viseu",
+      "email": "viseu@expressglass.pt"
+    },
+    {
+      "id": "180061",
+      "nome": "Viseu sm",
+      "email": "viseu@expressglass.pt"
+    },
+    {
+      "id": "180062",
+      "nome": "Viseu smr",
+      "email": "viseu@expressglass.pt"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tnome\temail\n180001\tAbrantes\tabrantes@expressglass.pt\n180002\tAeroporto porto\taeroporto@expressglass.pt\n180003\tÁgueda\tagueda@expressglass.pt\n180004\tAlgés\talges@expressglass.pt\n180005\tAlmada\talmada@expressglass.pt\n180006\tAmadora\tamadora@expressglass.pt\n180007\tAmoreiras\tamoreiras@expressglass.pt\n180008\tAveiro\taveiro@expressglass.pt\n60002\tBarcelos\tbarcelos@expressglass.pt\n180009\tBeira baixa sm\tbeirabaixa@expressglass.pt\n180010\tBraga - minho center\tbraga@expressglass.pt\n180011\tBraga sm\tbraga@expressglass.pt\n180012\tCaldas da rainha\tcaldasdarainha@expressglass.pt\n180013\tCastanheira do ribatejo\tcastanheiraribatejo@expressglass.pt\n180014\tCoimbra\tcoimbra@expressglass.pt\n180015\tCoimbra sm\tcoimbra@expressglass.pt\n180016\tCoimbra sul\tcoimbra@expressglass.pt\n180017\tCosta de prata sm\tcostadeprata@expressglass.pt\n180018\tEntroncamento\tentroncamento@expressglass.pt\n60001\tFamalicão\tfamalicao@expressglass.pt\n180019\tFamalicão sm\tfamalicao@expressglass.pt\n180020\tFaro\tfaro@expressglass.pt\n180021\tFaro sm\tcalibragensfaro@expressglass.pt\n180022\tGondomar\tgondomar@expressglass.pt\n180023\tGuarda\tguarda@expressglass.pt\n180024\tGuimarães shopping\tguimaraes@expressglass.pt\n180025\tLeiria\tleiria@expressglass.pt\n180026\tLeiria sm\tleiria@expressglass.pt\n180027\tLeziria sm\tleziria@expressglass.pt\n180028\tLisboa sm\tlisboa@expressglass.pt\n180029\tLisboa smr\tlisboa@expressglass.pt\n180030\tMaia - maiashopping\tmaiashopping@expressglass.pt\n180031\tMaia - moreira\tmaiazi@expressglass.pt\n180032\tMaia sm\tmaiazi@expressglass.pt\n180033\tMatosinhos\tmatosinhos@expressglass.pt\n180034\tMontijo\tmontijo@expressglass.pt\n180035\tMovida\tmovida@expressglass.pt\n180036\tMycarcenter\tparedes@expressglass.pt\n180037\tOdivelas - loures\todivelas@expressglass.pt\n60007\tPaços de Ferreira \tpferreira@expressglass.pt\n60006\tParedes\tparedes@expressglass.pt\n180038\tParedes sm\tparedes@expressglass.pt\n180039\tPombal\tpombal@expressglass.pt\n180040\tPortimão\tportimao@expressglass.pt\n180041\tPorto - marquês\tmarques@expressglass.pt\n180042\tPorto - zona industrial\tportozi@expressglass.pt\n180043\tPorto alto\tportoalto@expressglass.pt\n180044\tPorto sul sm\tporto@expressglass.pt\n180045\tPóvoa de santa iria\tpovoasantairia@expressglass.pt\n60005\tPóvoa de Varzim\tpovoa@expressglass.pt\n180046\tRotunda do relógio\trelogio@expressglass.pt\n180047\tSacavém\tsacavem@expressglass.pt\n180048\tSanta maria da feira\tfeira@expressglass.pt\n180049\tSantarém\tsantarem@expressglass.pt\n180050\tSeia\tseia@expressglass.pt\n180051\tSeia sm\tseia@expressglass.pt\n180052\tSm caldas da rainha\tcaldasdarainha@expressglass.pt\n180053\tSm castanheira do ribatejo\tsmcribatejo@expressglass.pt\n180063\tSm pesados porto\ttruckservice@expressglass.pt\n180054\tSm viseu2\tviseu@expressglass.pt\n180055\tTelheiras\ttelheiras@expressglass.pt\n180056\tVale do tejo sm\tvaledotejo@expressglass.pt\n60004\tViana do Castelo \tvianacastelo@expressglass.pt\n180057\tViana do castelo sm\tvianacastelo@expressglass.pt\n180058\tVila nova de gaia\tgaia@expressglass.pt\n180059\tVila nova de gaia - canelas\tcanelas@expressglass.pt\n60003\tVila Verde\tvilaverde@expressglass.pt\n180060\tViseu\tviseu@expressglass.pt\n180061\tViseu sm\tviseu@expressglass.pt\n180062\tViseu smr\tviseu@expressglass.pt\n",
+  "stderr": "",
+  "execution_time_ms": 374
+}

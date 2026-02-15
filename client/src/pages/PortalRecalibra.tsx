@@ -491,7 +491,19 @@ export default function PortalRecalibra() {
               {/* Loja */}
               <div>
                 <Label htmlFor="loja">Loja *</Label>
-                <Select value={lojaId} onValueChange={(v) => { setLojaId(v); if (v !== 'outros') setOutrosLoja(''); }}>
+                <Select value={lojaId} onValueChange={(v) => {
+                  setLojaId(v);
+                  if (v !== 'outros') {
+                    setOutrosLoja('');
+                    // Auto-preencher localidade com a localidade padrão da loja
+                    const lojaSelecionada = lojasDisponiveis.find((l: any) => l.id.toString() === v);
+                    if (lojaSelecionada?.localidadePadrao) {
+                      setLocalidade(lojaSelecionada.localidadePadrao);
+                    }
+                  } else {
+                    setLocalidade('');
+                  }
+                }}>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione a loja" />
                   </SelectTrigger>
@@ -803,7 +815,16 @@ export default function PortalRecalibra() {
               {/* Loja */}
               <div>
                 <Label>Loja</Label>
-                <Select value={editLojaId} onValueChange={setEditLojaId}>
+                <Select value={editLojaId} onValueChange={(v) => {
+                  setEditLojaId(v);
+                  // Auto-preencher localidade com a localidade padrão da loja
+                  if (v !== 'none') {
+                    const lojaSelecionada = lojasDisponiveis.find((l: any) => l.id.toString() === v);
+                    if (lojaSelecionada?.localidadePadrao) {
+                      setEditLocalidade(lojaSelecionada.localidadePadrao);
+                    }
+                  }
+                }}>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione a loja" />
                   </SelectTrigger>

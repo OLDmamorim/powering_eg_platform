@@ -4821,3 +4821,12 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Uniformizar filtro de mês no DashboardRecalibra com FiltroMesesCheckbox padrão
 - [x] Adicionar endpoint de editar calibragem no backend
 - [x] Adicionar UI de edição de calibragens no portal (Dialog com formulário pré-preenchido)
+
+## Recalibra - Localidade Indexada à Loja
+- [x] Mapear localidade padrão para cada loja (Braga Minho Center → Braga, Póvoa de Varzim → Póvoa, Mycarcenter → Paredes, etc.)
+- [x] Auto-preencher localidade ao selecionar loja no formulário de registo
+- [x] Manter localidade editável (o user pode alterar se justificável)
+- [x] Corrigir Mycarcenter: associar a Paredes
+- [x] Aplicar mesma lógica no formulário de edição de calibragens
+- [x] Adicionar coluna localidadePadrao à tabela lojas no schema
+- [x] Preencher localidadePadrao para 70 lojas na BD
