@@ -3,7 +3,9 @@ import { trpc } from '@/lib/trpc';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { ArrowLeft, BarChart3, TrendingUp, Car, MapPin, Loader2, Activity, Store, Target } from 'lucide-react';
+import { ArrowLeft, BarChart3, TrendingUp, Car, MapPin, Loader2, Activity, Store, Target, Moon, Sun, Globe, LogOut } from 'lucide-react';
+import { useTheme } from '@/contexts/ThemeContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend, LineChart, Line,
@@ -26,6 +28,8 @@ const CORES_GRAFICO = [
 export default function DashboardRecalibra() {
   const [token, setToken] = useState('');
   const [mesesSelecionados, setMesesSelecionados] = useState<MesSelecionado[]>([]);
+  const { theme, toggleTheme } = useTheme();
+  const { language, setLanguage } = useLanguage();
 
   useEffect(() => {
     const savedToken = localStorage.getItem('recalibra_token');
@@ -171,31 +175,53 @@ export default function DashboardRecalibra() {
     );
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('recalibra_token');
+    window.location.href = '/portal-recalibra';
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-50 to-cyan-50 p-4">
-      <div className="container mx-auto max-w-6xl">
-        {/* Header */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <div className="flex items-center justify-between flex-wrap gap-3">
+    <div className="min-h-screen bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-gray-900 dark:to-gray-800 p-0">
+      {/* Header verde igual ao Volante */}
+      <header className="bg-gradient-to-r from-teal-600 to-emerald-600 text-white shadow-lg">
+        <div className="container mx-auto px-4 py-3">
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Button variant="ghost" size="sm" onClick={handleVoltar}>
+              <Button variant="ghost" size="sm" onClick={handleVoltar} className="text-white hover:bg-white/20 -ml-2">
                 <ArrowLeft className="h-4 w-4" />
               </Button>
+              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                <BarChart3 className="h-5 w-5 text-white" />
+              </div>
               <div>
-                <h1 className="text-2xl md:text-3xl font-bold text-teal-900 flex items-center gap-2">
-                  <BarChart3 className="h-7 w-7 text-teal-600" />
-                  Dashboard Calibragens
-                </h1>
-                <p className="text-muted-foreground">{stats.unidadeNome}</p>
+                <h1 className="font-bold text-lg">{stats.unidadeNome}</h1>
+                <p className="text-xs text-teal-100">{language === 'pt' ? 'Dashboard de Calibragens' : 'Calibration Dashboard'}</p>
               </div>
             </div>
-            <FiltroMesesCheckbox
-              mesesDisponiveis={mesesDisponiveis}
-              mesesSelecionados={mesesSelecionados}
-              onMesesChange={setMesesSelecionados}
-              placeholder="Selecionar meses"
-            />
+            <div className="flex items-center gap-1">
+              <Button variant="ghost" size="sm" onClick={toggleTheme} className="h-8 w-8 p-0 text-white hover:bg-white/20" title={theme === 'light' ? (language === 'pt' ? 'Modo Escuro' : 'Dark Mode') : (language === 'pt' ? 'Modo Claro' : 'Light Mode')}>
+                {theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+              </Button>
+              <Button variant="ghost" size="sm" onClick={() => setLanguage(language === 'pt' ? 'en' : 'pt')} className="h-8 w-8 p-0 text-white hover:bg-white/20" title={language === 'pt' ? 'English' : 'Português'}>
+                <Globe className="h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="sm" onClick={handleLogout} className="h-8 w-8 p-0 text-white hover:bg-white/20" title={language === 'pt' ? 'Sair' : 'Logout'}>
+                <LogOut className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
+        </div>
+      </header>
+
+      <div className="container mx-auto max-w-6xl p-4">
+        {/* Filtro de Meses */}
+        <div className="mb-4 flex justify-end">
+          <FiltroMesesCheckbox
+            mesesDisponiveis={mesesDisponiveis}
+            mesesSelecionados={mesesSelecionados}
+            onMesesChange={setMesesSelecionados}
+            placeholder={language === 'pt' ? 'Selecionar meses' : 'Select months'}
+          />
         </div>
 
         {/* Cards de Resumo */}

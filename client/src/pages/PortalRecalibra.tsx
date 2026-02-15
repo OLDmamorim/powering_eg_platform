@@ -8,7 +8,9 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
-import { Loader2, CheckCircle2, ChevronDown, BarChart3, Trash2, Pencil, Search, Filter } from 'lucide-react';
+import { Loader2, CheckCircle2, ChevronDown, BarChart3, Trash2, Pencil, Search, Filter, Moon, Sun, Globe, LogOut, ArrowLeft } from 'lucide-react';
+import { useTheme } from '@/contexts/ThemeContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
@@ -459,28 +461,44 @@ export default function PortalRecalibra() {
   // Lojas disponíveis (com opção Outros)
   const lojasDisponiveis = tokenData?.lojas || [];
 
+  const { theme, toggleTheme } = useTheme();
+  const { language, setLanguage } = useLanguage();
+
   // Portal principal (após validação)
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-50 to-cyan-50 p-4">
-      <div className="container mx-auto max-w-4xl">
-        {/* Header */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <div className="flex items-center justify-between flex-wrap gap-3">
-            <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-teal-900">{tokenData?.unidade.nome}</h1>
-              <p className="text-muted-foreground">Portal de Registo de Calibragens</p>
+    <div className="min-h-screen bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-gray-900 dark:to-gray-800 p-0">
+      {/* Header verde igual ao Volante */}
+      <header className="bg-gradient-to-r from-teal-600 to-emerald-600 text-white shadow-lg">
+        <div className="container mx-auto px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                <BarChart3 className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <h1 className="font-bold text-lg">{tokenData?.unidade.nome}</h1>
+                <p className="text-xs text-teal-100">{language === 'pt' ? 'Portal de Calibragens' : 'Calibration Portal'}</p>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" onClick={() => setLocation('/dashboard-recalibra')}>
-                <BarChart3 className="mr-1 h-4 w-4" />
-                Dashboard
+            <div className="flex items-center gap-1">
+              <Button variant="ghost" size="sm" onClick={() => setLocation('/dashboard-recalibra')} className="h-8 w-8 p-0 text-white hover:bg-white/20" title={language === 'pt' ? 'Dashboard' : 'Dashboard'}>
+                <BarChart3 className="h-4 w-4" />
               </Button>
-              <Button variant="outline" onClick={handleLogout}>
-                Sair
+              <Button variant="ghost" size="sm" onClick={toggleTheme} className="h-8 w-8 p-0 text-white hover:bg-white/20" title={theme === 'light' ? (language === 'pt' ? 'Modo Escuro' : 'Dark Mode') : (language === 'pt' ? 'Modo Claro' : 'Light Mode')}>
+                {theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+              </Button>
+              <Button variant="ghost" size="sm" onClick={() => setLanguage(language === 'pt' ? 'en' : 'pt')} className="h-8 w-8 p-0 text-white hover:bg-white/20" title={language === 'pt' ? 'English' : 'Português'}>
+                <Globe className="h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="sm" onClick={handleLogout} className="h-8 w-8 p-0 text-white hover:bg-white/20" title={language === 'pt' ? 'Sair' : 'Logout'}>
+                <LogOut className="h-4 w-4" />
               </Button>
             </div>
           </div>
         </div>
+      </header>
+
+      <div className="container mx-auto max-w-4xl p-4">
 
         {/* Formulário de Registo */}
         <Card>

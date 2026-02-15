@@ -6432,57 +6432,6 @@ END:VCALENDAR`;
               </CardContent>
             </Card>
 
-            {/* Cards de Estatísticas */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <Card className="bg-gradient-to-br from-purple-500 to-purple-600 text-white border-0">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm opacity-80 mb-1">{language === 'pt' ? 'Total Apoios' : 'Total Support'}</p>
-                      <p className="text-3xl font-bold">{pedidosFiltrados.length}</p>
-                    </div>
-                    <CheckCircle2 className="h-10 w-10 opacity-60" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white border-0">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm opacity-80 mb-1">{language === 'pt' ? 'Lojas Apoiadas' : 'Stores Supported'}</p>
-                      <p className="text-3xl font-bold">{lojasUnicas.size}</p>
-                    </div>
-                    <Store className="h-10 w-10 opacity-60" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-gradient-to-br from-teal-500 to-teal-600 text-white border-0">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm opacity-80 mb-1">{language === 'pt' ? 'Coberturas Férias' : 'Holiday Coverage'}</p>
-                      <p className="text-3xl font-bold">{pedidosFiltrados.filter((p: any) => p.tipoApoio === 'cobertura_ferias').length}</p>
-                    </div>
-                    <Calendar className="h-10 w-10 opacity-60" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-gradient-to-br from-orange-500 to-orange-600 text-white border-0">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm opacity-80 mb-1">{language === 'pt' ? 'Substituições' : 'Replacements'}</p>
-                      <p className="text-3xl font-bold">{pedidosFiltrados.filter((p: any) => p.tipoApoio === 'substituicao_vidros').length}</p>
-                    </div>
-                    <Wrench className="h-10 w-10 opacity-60" />
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
             {/* Seção de Serviços Realizados */}
             <div className="mt-8">
               <h2 className="text-2xl font-bold mb-4 dark:text-gray-100">{language === 'pt' ? 'Serviços Realizados' : 'Services Performed'}</h2>

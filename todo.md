@@ -4834,3 +4834,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## Recalibra - Filtros no Histórico
 - [x] Adicionar filtro por loja no histórico de calibragens
 - [x] Adicionar campo de pesquisa por matrícula no histórico
+
+## Recalibra Header e Volante Cards
+- [x] Adicionar header ao portal Recalibra com modo claro/escuro, idioma PT/EN e botão sair (igual ao Volante)
+- [x] Adicionar header ao DashboardRecalibra com modo claro/escuro, idioma PT/EN e botão sair
+- [x] Remover cards iniciais do Volante (Total Apoios, Lojas Apoiadas, Coberturas Férias, Substituições)
+- [x] Manter apenas os cards de Serviços Realizados no Volante
