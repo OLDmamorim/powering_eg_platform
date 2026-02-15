@@ -1,4 +1,5 @@
 import { eq, and, desc, asc, sql, inArray, gte, lte, or, gt, lt, isNull, not, like } from "drizzle-orm";
+import crypto from 'crypto';
 import { drizzle } from "drizzle-orm/mysql2";
 import { 
   InsertUser, 

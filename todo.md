@@ -4774,3 +4774,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Reescrito formulário do zero - apenas campo Nome (como Volante)
 - [x] Todos endpoints gestaoRecalibra mudados de adminProcedure para protectedProcedure
 - [x] Backend auto-detecta gestor e auto-atribui lojas
+
+## Bug Recalibra - 0 lojas associadas e erro token
+- [x] Backend auto-atribui lojas (problema era gestor falso criado com userId errado)
+- [x] Erro "crypto.randomBytes is not a function" - adicionado import crypto no db.ts
+- [x] Corrigido import useState em falta no GestaoRecalibra.tsx
+- [x] Eliminado gestor falso (id=1740001) e unidade de teste
