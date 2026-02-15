@@ -10830,5 +10830,97 @@ IMPORTANTE:
       .mutation(async ({ input }) => {
         return db.criarMarca(input.nome);
       }),
+
+    // Estatísticas de calibragens para dashboard
+    estatisticas: publicProcedure
+      .input(z.object({ token: z.string() }))
+      .query(async ({ input }) => {
+        const tokenData = await db.validateTokenRecalibra(input.token);
+        if (!tokenData) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        
+        const todasCalibragens = await db.getHistoricoCalibragens(
+          tokenData.unidade.id,
+          undefined,
+          undefined,
+          undefined
+        );
+
+        const total = todasCalibragens.length;
+
+        // Por tipo
+        const porTipo: Record<string, number> = {};
+        todasCalibragens.forEach((c: any) => {
+          const tipo = c.tipoCalibragem || 'Sem tipo';
+          porTipo[tipo] = (porTipo[tipo] || 0) + 1;
+        });
+
+        // Por marca
+        const porMarca: Record<string, number> = {};
+        todasCalibragens.forEach((c: any) => {
+          const marca = c.marca || 'Sem marca';
+          porMarca[marca] = (porMarca[marca] || 0) + 1;
+        });
+
+        // Por localidade
+        const porLocalidade: Record<string, number> = {};
+        todasCalibragens.forEach((c: any) => {
+          const loc = c.localidade || 'Sem localidade';
+          porLocalidade[loc] = (porLocalidade[loc] || 0) + 1;
+        });
+
+        // Por loja
+        const porLoja: Record<string, number> = {};
+        todasCalibragens.forEach((c: any) => {
+          const loja = c.loja?.nome || 'Outros';
+          porLoja[loja] = (porLoja[loja] || 0) + 1;
+        });
+
+        // Evolução diária (últimos 30 dias)
+        const evolucaoDiaria: Record<string, number> = {};
+        todasCalibragens.forEach((c: any) => {
+          if (c.data) {
+            evolucaoDiaria[c.data] = (evolucaoDiaria[c.data] || 0) + 1;
+          }
+        });
+
+        // Evolução semanal
+        const evolucaoSemanal: Record<string, number> = {};
+        todasCalibragens.forEach((c: any) => {
+          if (c.data) {
+            const d = new Date(c.data);
+            const weekStart = new Date(d);
+            weekStart.setDate(d.getDate() - d.getDay() + 1); // Monday
+            const key = weekStart.toISOString().split('T')[0];
+            evolucaoSemanal[key] = (evolucaoSemanal[key] || 0) + 1;
+          }
+        });
+
+        // Tipologia (Ligeiro/Pesado)
+        const porTipologia: Record<string, number> = {};
+        todasCalibragens.forEach((c: any) => {
+          const tip = c.tipologiaViatura || 'LIGEIRO';
+          porTipologia[tip] = (porTipologia[tip] || 0) + 1;
+        });
+
+        // Média diária
+        const datasUnicas = new Set(todasCalibragens.map((c: any) => c.data).filter(Boolean));
+        const mediaDiaria = datasUnicas.size > 0 ? (total / datasUnicas.size) : 0;
+
+        return {
+          total,
+          porTipo,
+          porMarca,
+          porLocalidade,
+          porLoja,
+          evolucaoDiaria,
+          evolucaoSemanal,
+          porTipologia,
+          mediaDiaria: Math.round(mediaDiaria * 10) / 10,
+          totalDias: datasUnicas.size,
+          unidadeNome: tokenData.unidade.nome,
+        };
+      }),
   }),
 });

@@ -4793,3 +4793,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Autocomplete funcional com filtro e opção "Adicionar" nova marca/localidade
 - [x] Formatação automática de matrícula (ab12cd → AB-12-CD)
 - [x] Badges coloridos para tipos de calibragem (DINÂMICA/ESTÁTICA/CORE)
+
+## Recalibra - Paginação e Dashboard
+- [x] Adicionar paginação/carregar mais no histórico de calibragens (ver todos os 80 registos)
+- [x] Criar endpoint de estatísticas de calibragens no backend
+- [x] Criar página DashboardRecalibra com gráficos (por tipo, marca, localidade, evolução temporal)
+- [x] Registar rota no App.tsx e adicionar link no portal

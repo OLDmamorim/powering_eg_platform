@@ -54,6 +54,7 @@ import DashboardVolante from "./pages/DashboardVolante";
 import Documentos from "./pages/Documentos";
 import GestaoRecalibra from "./pages/GestaoRecalibra";
 import PortalRecalibra from "./pages/PortalRecalibra";
+import DashboardRecalibra from "./pages/DashboardRecalibra";
 import { DemoBanner } from "./components/DemoBanner";
 import { LanguageProvider } from "./contexts/LanguageContext";
 
@@ -135,6 +136,7 @@ function Router() {
       {/* Recalibra */}
       <Route path={"/gestao-recalibra"} component={GestaoRecalibra} />
       <Route path={"/portal-recalibra"} component={PortalRecalibra} />
+      <Route path={"/dashboard-recalibra"} component={DashboardRecalibra} />
       
       <Route path={"/login-nao-autorizado"} component={LoginNaoAutorizado} />
       <Route path={"/404"} component={NotFound} />

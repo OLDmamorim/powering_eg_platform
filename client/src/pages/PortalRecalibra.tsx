@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
-import { Loader2, CheckCircle2, ChevronDown } from 'lucide-react';
+import { Loader2, CheckCircle2, ChevronDown, BarChart3 } from 'lucide-react';
 
 // ==========================================
 // Componente Autocomplete reutilizável
@@ -175,6 +175,8 @@ export default function PortalRecalibra() {
   const [localidade, setLocalidade] = useState('');
   const [observacoes, setObservacoes] = useState('');
   const [outrosLoja, setOutrosLoja] = useState('');
+  const [paginaHistorico, setPaginaHistorico] = useState(1);
+  const ITEMS_POR_PAGINA = 20;
 
   // Carregar token do localStorage
   useEffect(() => {
@@ -366,14 +368,20 @@ export default function PortalRecalibra() {
       <div className="container mx-auto max-w-4xl">
         {/* Header */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-3">
             <div>
-              <h1 className="text-3xl font-bold text-teal-900">{tokenData?.unidade.nome}</h1>
+              <h1 className="text-2xl md:text-3xl font-bold text-teal-900">{tokenData?.unidade.nome}</h1>
               <p className="text-muted-foreground">Portal de Registo de Calibragens</p>
             </div>
-            <Button variant="outline" onClick={handleLogout}>
-              Sair
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" onClick={() => setLocation('/dashboard-recalibra')}>
+                <BarChart3 className="mr-1 h-4 w-4" />
+                Dashboard
+              </Button>
+              <Button variant="outline" onClick={handleLogout}>
+                Sair
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -546,7 +554,7 @@ export default function PortalRecalibra() {
                     </tr>
                   </thead>
                   <tbody>
-                    {calibragensData.slice(0, 20).map((item: any, idx: number) => (
+                    {calibragensData.slice(0, paginaHistorico * ITEMS_POR_PAGINA).map((item: any, idx: number) => (
                       <tr key={idx} className="border-b hover:bg-muted/30">
                         <td className="p-2">{item.data || '-'}</td>
                         <td className="p-2 font-mono">{item.matricula || '-'}</td>
@@ -566,11 +574,21 @@ export default function PortalRecalibra() {
                     ))}
                   </tbody>
                 </table>
-                {calibragensData.length > 20 && (
-                  <p className="text-center text-muted-foreground text-sm mt-4">
-                    Mostrando 20 de {calibragensData.length} registos
+                <div className="flex flex-col items-center gap-2 mt-4">
+                  <p className="text-muted-foreground text-sm">
+                    Mostrando {Math.min(paginaHistorico * ITEMS_POR_PAGINA, calibragensData.length)} de {calibragensData.length} registos
                   </p>
-                )}
+                  {paginaHistorico * ITEMS_POR_PAGINA < calibragensData.length && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setPaginaHistorico(p => p + 1)}
+                    >
+                      <ChevronDown className="mr-1 h-4 w-4" />
+                      Carregar mais
+                    </Button>
+                  )}
+                </div>
               </div>
             )}
           </CardContent>
