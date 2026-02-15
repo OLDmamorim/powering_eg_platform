@@ -10622,113 +10622,113 @@ IMPORTANTE:
 
   // ==================== GESTÃO RECALIBRA ====================
   gestaoRecalibra: router({
-    // Listar unidades (gestores veem apenas as suas)
-    listar: protectedProcedure
-      .query(async ({ ctx }) => {
-        // Verificar se é gestor
-        const meuGestor = await db.getGestorByUserId(ctx.user.id);
-        
-        if (meuGestor) {
-          // É gestor: retornar apenas unidades onde ele é o gestor
-          const todasUnidades = await db.getAllUnidadesRecalibra();
-          return todasUnidades.filter(u => u.gestorId === meuGestor.id);
-        }
-        
-        // Admin: retornar todas
-        return await db.getAllUnidadesRecalibra();
-      }),
+    // Listar unidades com lojas e token (como Volante)
+    listar: gestorProcedure.query(async ({ ctx }) => {
+      let unidades;
+      if (ctx.gestor) {
+        unidades = await db.getUnidadesRecalibraByGestorId(ctx.gestor.id);
+      } else if (ctx.user.role === 'admin') {
+        unidades = await db.getAllUnidadesRecalibra();
+      } else {
+        return [];
+      }
+      
+      // Para cada unidade, buscar lojas e token (como Volante faz)
+      const unidadesCompletas = await Promise.all(
+        unidades.map(async (unidade) => {
+          const lojas = await db.getLojasByUnidadeRecalibraId(unidade.id);
+          const tokenData = await db.getTokenRecalibra(unidade.id);
+          return { ...unidade, lojas, token: tokenData?.token || null };
+        })
+      );
+      
+      return unidadesCompletas;
+    }),
 
-    // Criar unidade
-    criar: protectedProcedure
+    // Criar unidade (como Volante - gestor cria para si)
+    criar: gestorProcedure
       .input(z.object({
         nome: z.string().min(1),
-        gestorId: z.number().optional(),
-        lojasIds: z.array(z.number()).optional(),
       }))
       .mutation(async ({ input, ctx }) => {
-        // Auto-detectar se é gestor e auto-atribuir
-        let finalGestorId = input.gestorId;
-        let finalLojasIds = input.lojasIds || [];
-        
-        // Buscar perfil de gestor do user logado
-        const meuGestor = await db.getGestorByUserId(ctx.user.id);
-        
-        if (meuGestor) {
-          // É gestor: auto-atribuir próprio ID e todas as suas lojas
-          finalGestorId = meuGestor.id;
-          const minhasLojas = await db.getLojasByGestorId(meuGestor.id);
-          finalLojasIds = minhasLojas.map(l => l.id);
-        } else if (!finalGestorId || !finalLojasIds.length) {
-          // Não é gestor e não forneceu dados: erro
-          throw new TRPCError({ code: 'BAD_REQUEST', message: 'Dados incompletos' });
+        if (!ctx.gestor) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Gestor não encontrado' });
         }
         
+        // Criar unidade para o gestor logado
         const unidade = await db.createUnidadeRecalibra({
           nome: input.nome,
-          gestorId: finalGestorId,
+          gestorId: ctx.gestor.id,
         });
         
         if (!unidade) {
           throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Erro ao criar unidade' });
         }
         
-        // Associar lojas
-        await db.associarLojasUnidadeRecalibra(unidade.id, finalLojasIds);
+        // Auto-atribuir todas as lojas do gestor
+        const minhasLojas = await db.getLojasByGestorId(ctx.gestor.id);
+        const lojasIds = minhasLojas.map(l => l.id);
+        await db.associarLojasUnidadeRecalibra(unidade.id, lojasIds);
         
         return unidade;
       }),
 
-    // Atualizar unidade
-    atualizar: protectedProcedure
+    // Atualizar unidade (nome e lojas)
+    atualizar: gestorProcedure
       .input(z.object({
         id: z.number(),
-        nome: z.string().min(1),
-        gestorId: z.number(),
-        lojasIds: z.array(z.number()),
+        nome: z.string().min(1).optional(),
+        lojasIds: z.array(z.number()).optional(),
       }))
-      .mutation(async ({ input }) => {
-        await db.updateUnidadeRecalibra(input.id, {
-          nome: input.nome,
-          gestorId: input.gestorId,
-        });
+      .mutation(async ({ input, ctx }) => {
+        if (!ctx.gestor) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Gestor não encontrado' });
+        }
         
-        // Atualizar associações de lojas
-        await db.associarLojasUnidadeRecalibra(input.id, input.lojasIds);
+        if (input.nome) {
+          await db.updateUnidadeRecalibra(input.id, {
+            nome: input.nome,
+            gestorId: ctx.gestor.id,
+          });
+        }
+        
+        if (input.lojasIds) {
+          await db.associarLojasUnidadeRecalibra(input.id, input.lojasIds);
+        }
         
         return { success: true };
       }),
 
     // Eliminar unidade
-    eliminar: protectedProcedure
+    eliminar: gestorProcedure
       .input(z.object({ id: z.number() }))
-      .mutation(async ({ input }) => {
+      .mutation(async ({ input, ctx }) => {
+        if (!ctx.gestor) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Gestor não encontrado' });
+        }
         await db.deleteUnidadeRecalibra(input.id);
         return { success: true };
       }),
 
     // Gerar token
-    gerarToken: protectedProcedure
+    gerarToken: gestorProcedure
       .input(z.object({ unidadeId: z.number() }))
-      .mutation(async ({ input }) => {
+      .mutation(async ({ input, ctx }) => {
+        if (!ctx.gestor) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Gestor não encontrado' });
+        }
         const tokenStr = await db.generateTokenRecalibra(input.unidadeId);
-        const token = { token: tokenStr };
-        return token;
-      }),
-
-    // Listar tokens
-    listarTokens: protectedProcedure
-      .input(z.object({ unidadeId: z.number() }))
-      .query(async ({ input }) => {
-        // TODO: Implementar listagem de tokens
-        const tokens: any[] = [];
-        return tokens;
+        return { token: tokenStr };
       }),
 
     // Revogar token
-    revogarToken: protectedProcedure
-      .input(z.object({ tokenId: z.number() }))
-      .mutation(async ({ input }) => {
-        await db.revokeTokenRecalibra(input.tokenId);
+    revogarToken: gestorProcedure
+      .input(z.object({ unidadeId: z.number() }))
+      .mutation(async ({ input, ctx }) => {
+        if (!ctx.gestor) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Gestor não encontrado' });
+        }
+        await db.revokeTokenRecalibra(input.unidadeId);
         return { success: true };
       }),
   }),

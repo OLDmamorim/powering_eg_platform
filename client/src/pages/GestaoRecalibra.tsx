@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { trpc } from '@/lib/trpc';
+import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -8,29 +9,28 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { Plus, Pencil, Trash2, Key, Copy, ArrowLeft, Store, Send, Check } from 'lucide-react';
+import { Plus, Pencil, Trash2, Key, Copy, ArrowLeft, Store, Check } from 'lucide-react';
 
 export default function GestaoRecalibra() {
+  const [, navigate] = useLocation();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingUnidade, setEditingUnidade] = useState<any>(null);
   const [lojasDialogOpen, setLojasDialogOpen] = useState(false);
-  const [selectedUnidadeForLojas, setSelectedUnidadeForLojas] = useState<any>(null);
+  const [selectedUnidade, setSelectedUnidade] = useState<any>(null);
   const [selectedLojaIds, setSelectedLojaIds] = useState<number[]>([]);
   const [copiedToken, setCopiedToken] = useState<number | null>(null);
-
-  // Form state - apenas nome, como no Volante
   const [nome, setNome] = useState('');
 
-  // Queries
+  // Queries - como Volante
   const { data: unidades, isLoading, refetch } = trpc.gestaoRecalibra.listar.useQuery();
-  const { data: lojasDisponiveis } = trpc.lojas.listar.useQuery();
+  const { data: minhasLojas } = trpc.lojas.listByGestor.useQuery();
 
   // Mutations
   const criarUnidade = trpc.gestaoRecalibra.criar.useMutation({
     onSuccess: () => {
       toast.success('Unidade criada com sucesso!');
       setDialogOpen(false);
-      resetForm();
+      setNome('');
       refetch();
     },
     onError: (error: any) => {
@@ -43,21 +43,23 @@ export default function GestaoRecalibra() {
       toast.success('Unidade atualizada com sucesso!');
       setDialogOpen(false);
       setEditingUnidade(null);
-      resetForm();
+      setNome('');
+      setLojasDialogOpen(false);
+      setSelectedUnidade(null);
       refetch();
     },
     onError: (error: any) => {
-      toast.error('Erro ao atualizar unidade', { description: error.message });
+      toast.error('Erro ao atualizar', { description: error.message });
     },
   });
 
   const eliminarUnidade = trpc.gestaoRecalibra.eliminar.useMutation({
     onSuccess: () => {
-      toast.success('Unidade eliminada com sucesso!');
+      toast.success('Unidade eliminada!');
       refetch();
     },
     onError: (error: any) => {
-      toast.error('Erro ao eliminar unidade', { description: error.message });
+      toast.error('Erro ao eliminar', { description: error.message });
     },
   });
 
@@ -71,57 +73,42 @@ export default function GestaoRecalibra() {
     },
   });
 
-  const resetForm = () => {
-    setNome('');
-  };
-
   const handleOpenDialog = (unidade?: any) => {
     if (unidade) {
       setEditingUnidade(unidade);
       setNome(unidade.nome);
     } else {
       setEditingUnidade(null);
-      resetForm();
+      setNome('');
     }
     setDialogOpen(true);
   };
 
   const handleSubmit = () => {
-    if (!nome) {
+    if (!nome.trim()) {
       toast.error('Preencha o nome da unidade');
       return;
     }
 
     if (editingUnidade) {
-      atualizarUnidade.mutate({
-        id: editingUnidade.id,
-        nome,
-        gestorId: editingUnidade.gestorId,
-        lojasIds: editingUnidade.lojas?.map((l: any) => l.id) || [],
-      });
+      atualizarUnidade.mutate({ id: editingUnidade.id, nome });
     } else {
-      // Backend auto-detecta gestor e auto-atribui lojas
       criarUnidade.mutate({ nome });
     }
   };
 
   const handleOpenLojasDialog = (unidade: any) => {
-    setSelectedUnidadeForLojas(unidade);
+    setSelectedUnidade(unidade);
     setSelectedLojaIds(unidade.lojas?.map((l: any) => l.id) || []);
     setLojasDialogOpen(true);
   };
 
-  const handleAtribuirLojas = () => {
-    if (selectedUnidadeForLojas) {
+  const handleSaveLojas = () => {
+    if (selectedUnidade) {
       atualizarUnidade.mutate({
-        id: selectedUnidadeForLojas.id,
-        nome: selectedUnidadeForLojas.nome,
-        gestorId: selectedUnidadeForLojas.gestorId,
+        id: selectedUnidade.id,
         lojasIds: selectedLojaIds,
       });
-      setLojasDialogOpen(false);
-      setSelectedUnidadeForLojas(null);
-      setSelectedLojaIds([]);
     }
   };
 
@@ -135,8 +122,8 @@ export default function GestaoRecalibra() {
   };
 
   return (
-    <div className="container mx-auto py-8">
-      <Button variant="ghost" onClick={() => window.history.back()} className="mb-4">
+    <div className="container mx-auto py-8 px-4">
+      <Button variant="ghost" onClick={() => navigate('/')} className="mb-4">
         <ArrowLeft className="mr-2 h-4 w-4" />
         Voltar
       </Button>
@@ -152,13 +139,13 @@ export default function GestaoRecalibra() {
         </Button>
       </div>
 
-      {/* Dialog Criar/Editar - Apenas nome, como no Volante */}
+      {/* Dialog Criar/Editar - Apenas nome */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{editingUnidade ? 'Editar Unidade' : 'Nova Unidade'}</DialogTitle>
             <DialogDescription>
-              {editingUnidade ? 'Atualize os dados da unidade' : 'Preencha o nome da nova unidade de calibragem'}
+              {editingUnidade ? 'Atualize o nome da unidade' : 'Crie uma nova unidade de calibragem. As suas lojas serão associadas automaticamente.'}
             </DialogDescription>
           </DialogHeader>
 
@@ -177,10 +164,10 @@ export default function GestaoRecalibra() {
           <DialogFooter className="flex flex-col gap-2 sm:flex-row">
             <Button
               onClick={handleSubmit}
-              disabled={!nome || criarUnidade.isPending || atualizarUnidade.isPending}
+              disabled={!nome.trim() || criarUnidade.isPending || atualizarUnidade.isPending}
               className="w-full sm:w-auto"
             >
-              {editingUnidade ? 'Guardar' : 'Criar'}
+              {criarUnidade.isPending || atualizarUnidade.isPending ? 'A guardar...' : editingUnidade ? 'Guardar' : 'Criar'}
             </Button>
             <Button variant="outline" onClick={() => setDialogOpen(false)} className="w-full sm:w-auto">
               Cancelar
@@ -197,16 +184,12 @@ export default function GestaoRecalibra() {
       ) : unidades && unidades.length > 0 ? (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {unidades.map((unidade: any) => (
-            <Card key={unidade.id} className="relative">
+            <Card key={unidade.id}>
               <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <CardTitle className="text-lg">{unidade.nome}</CardTitle>
-                    <CardDescription className="mt-1">
-                      {unidade.lojas?.length || 0} lojas associadas
-                    </CardDescription>
-                  </div>
-                </div>
+                <CardTitle className="text-lg">{unidade.nome}</CardTitle>
+                <CardDescription>
+                  {unidade.lojas?.length || 0} lojas associadas
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 {/* Lojas badges */}
@@ -226,7 +209,7 @@ export default function GestaoRecalibra() {
                 )}
 
                 {/* Token / Link */}
-                {unidade.token && (
+                {unidade.token ? (
                   <div className="mb-3 p-2 bg-muted rounded-md">
                     <div className="flex items-center justify-between">
                       <span className="text-xs text-muted-foreground font-mono truncate flex-1 mr-2">
@@ -245,6 +228,19 @@ export default function GestaoRecalibra() {
                       </Button>
                     </div>
                   </div>
+                ) : (
+                  <div className="mb-3">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full"
+                      onClick={() => gerarToken.mutate({ unidadeId: unidade.id })}
+                      disabled={gerarToken.isPending}
+                    >
+                      <Key className="h-4 w-4 mr-1" />
+                      {gerarToken.isPending ? 'A gerar...' : 'Gerar Token de Acesso'}
+                    </Button>
+                  </div>
                 )}
 
                 {/* Ações */}
@@ -257,10 +253,20 @@ export default function GestaoRecalibra() {
                     <Store className="h-4 w-4 mr-1" />
                     Lojas
                   </Button>
-                  <Button variant="outline" size="sm" onClick={() => gerarToken.mutate({ unidadeId: unidade.id })}>
-                    <Key className="h-4 w-4 mr-1" />
-                    Token
-                  </Button>
+                  {unidade.token && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleCopyToken(unidade.token, unidade.id)}
+                    >
+                      {copiedToken === unidade.id ? (
+                        <Check className="h-4 w-4 mr-1 text-green-500" />
+                      ) : (
+                        <Copy className="h-4 w-4 mr-1" />
+                      )}
+                      Copiar Link
+                    </Button>
+                  )}
                   <Button
                     variant="outline"
                     size="sm"
@@ -294,43 +300,49 @@ export default function GestaoRecalibra() {
         </Card>
       )}
 
-      {/* Dialog Atribuir Lojas - como no Volante */}
+      {/* Dialog Atribuir Lojas */}
       <Dialog open={lojasDialogOpen} onOpenChange={setLojasDialogOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Lojas Associadas</DialogTitle>
             <DialogDescription>
-              Selecione as lojas que a unidade "{selectedUnidadeForLojas?.nome}" irá cobrir
+              Selecione as lojas para a unidade &quot;{selectedUnidade?.nome}&quot;
             </DialogDescription>
           </DialogHeader>
 
           <div className="max-h-[400px] overflow-y-auto space-y-2">
-            {lojasDisponiveis?.map((loja: any) => (
-              <label
-                key={loja.id}
-                className="flex items-center space-x-3 p-2 rounded-lg hover:bg-muted cursor-pointer"
-              >
-                <Checkbox
-                  checked={selectedLojaIds.includes(loja.id)}
-                  onCheckedChange={(checked) => {
-                    if (checked) {
-                      setSelectedLojaIds([...selectedLojaIds, loja.id]);
-                    } else {
-                      setSelectedLojaIds(selectedLojaIds.filter((id) => id !== loja.id));
-                    }
-                  }}
-                />
-                <span className="text-sm">{loja.nome}</span>
-              </label>
-            ))}
+            {minhasLojas && minhasLojas.length > 0 ? (
+              minhasLojas.map((loja: any) => (
+                <label
+                  key={loja.id}
+                  className="flex items-center space-x-3 p-2 rounded-lg hover:bg-muted cursor-pointer"
+                >
+                  <Checkbox
+                    checked={selectedLojaIds.includes(loja.id)}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setSelectedLojaIds([...selectedLojaIds, loja.id]);
+                      } else {
+                        setSelectedLojaIds(selectedLojaIds.filter((id) => id !== loja.id));
+                      }
+                    }}
+                  />
+                  <span className="text-sm">{loja.nome}</span>
+                </label>
+              ))
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-4">
+                Nenhuma loja disponível
+              </p>
+            )}
           </div>
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setLojasDialogOpen(false)}>
               Cancelar
             </Button>
-            <Button onClick={handleAtribuirLojas} disabled={atualizarUnidade.isPending}>
-              Guardar Lojas
+            <Button onClick={handleSaveLojas} disabled={atualizarUnidade.isPending}>
+              {atualizarUnidade.isPending ? 'A guardar...' : 'Guardar Lojas'}
             </Button>
           </DialogFooter>
         </DialogContent>

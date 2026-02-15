@@ -11050,6 +11050,24 @@ export async function validateTokenRecalibra(token: string): Promise<{ unidade: 
 }
 
 /**
+ * Obter token ativo de uma unidade Recalibra
+ */
+export async function getTokenRecalibra(unidadeId: number): Promise<TokenRecalibra | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const result = await db
+    .select()
+    .from(tokensRecalibra)
+    .where(and(
+      eq(tokensRecalibra.unidadeId, unidadeId),
+      eq(tokensRecalibra.ativo, true)
+    ));
+  
+  return result[0] || null;
+}
+
+/**
  * Revogar token de unidade Recalibra
  */
 export async function revokeTokenRecalibra(unidadeId: number): Promise<boolean> {
