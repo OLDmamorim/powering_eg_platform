@@ -8,11 +8,14 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
-import { Loader2, CheckCircle2, ChevronDown, BarChart3, Trash2 } from 'lucide-react';
+import { Loader2, CheckCircle2, ChevronDown, BarChart3, Trash2, Pencil } from 'lucide-react';
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import {
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+} from '@/components/ui/dialog';
 
 // ==========================================
 // Componente Autocomplete reutilizável
@@ -45,7 +48,6 @@ function AutocompleteInput({
     function handleClickOutside(event: MouseEvent) {
       if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
         setIsOpen(false);
-        // Se o utilizador escreveu algo novo, aceitar como novo valor
         if (inputValue.trim() && inputValue !== value) {
           onChange(inputValue.trim());
         }
@@ -142,10 +144,7 @@ function AutocompleteInput({
 // Formatação de matrícula XX-XX-XX
 // ==========================================
 function formatarMatricula(valor: string): string {
-  // Remover tudo que não seja letra ou número
   const limpo = valor.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
-  
-  // Aplicar formato XX-XX-XX
   let resultado = '';
   for (let i = 0; i < Math.min(limpo.length, 6); i++) {
     if (i > 0 && i % 2 === 0) {
@@ -153,12 +152,10 @@ function formatarMatricula(valor: string): string {
     }
     resultado += limpo[i];
   }
-  
   return resultado;
 }
 
 function validarMatricula(matricula: string): boolean {
-  // Formato XX-XX-XX onde X pode ser letra ou número
   return /^[A-Z0-9]{2}-[A-Z0-9]{2}-[A-Z0-9]{2}$/.test(matricula);
 }
 
@@ -181,6 +178,18 @@ export default function PortalRecalibra() {
   const [outrosLoja, setOutrosLoja] = useState('');
   const [paginaHistorico, setPaginaHistorico] = useState(1);
   const ITEMS_POR_PAGINA = 20;
+
+  // Estado para edição
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editItem, setEditItem] = useState<any>(null);
+  const [editData, setEditData] = useState('');
+  const [editMatricula, setEditMatricula] = useState('');
+  const [editTipoCalibragem, setEditTipoCalibragem] = useState<'DINÂMICA' | 'ESTÁTICA' | 'CORE'>('DINÂMICA');
+  const [editMarca, setEditMarca] = useState('');
+  const [editTipologiaViatura, setEditTipologiaViatura] = useState<'LIGEIRO' | 'PESADO'>('LIGEIRO');
+  const [editLocalidade, setEditLocalidade] = useState('');
+  const [editObservacoes, setEditObservacoes] = useState('');
+  const [editLojaId, setEditLojaId] = useState<string>('');
 
   // Carregar token do localStorage
   useEffect(() => {
@@ -218,10 +227,10 @@ export default function PortalRecalibra() {
   const criarMarcaMutation = trpc.portalRecalibra.criarMarca.useMutation();
 
   // Mutation para registar calibragem
+  const utils = trpc.useUtils();
   const registarMutation = trpc.portalRecalibra.registarCalibragem.useMutation({
     onSuccess: () => {
       toast.success('Calibragem registada com sucesso!');
-      // Limpar formulário
       setLojaId('');
       setData('');
       setMatricula('');
@@ -231,6 +240,8 @@ export default function PortalRecalibra() {
       setLocalidade('');
       setObservacoes('');
       setOutrosLoja('');
+      utils.portalRecalibra.listarCalibragens.invalidate();
+      utils.portalRecalibra.estatisticas.invalidate();
     },
     onError: (error: any) => {
       toast.error('Erro ao registar calibragem', { description: error.message });
@@ -238,7 +249,6 @@ export default function PortalRecalibra() {
   });
 
   // Carregar calibragens para histórico
-  const utils = trpc.useUtils();
   const { data: calibragensData } = trpc.portalRecalibra.listarCalibragens.useQuery(
     { token },
     { enabled: tokenValidado && !!token }
@@ -256,13 +266,26 @@ export default function PortalRecalibra() {
     },
   });
 
+  // Mutation para editar calibragem
+  const editarMutation = trpc.portalRecalibra.editarCalibragem.useMutation({
+    onSuccess: () => {
+      toast.success('Calibragem atualizada com sucesso');
+      setEditDialogOpen(false);
+      setEditItem(null);
+      utils.portalRecalibra.listarCalibragens.invalidate();
+      utils.portalRecalibra.estatisticas.invalidate();
+    },
+    onError: (error: any) => {
+      toast.error('Erro ao editar calibragem', { description: error.message });
+    },
+  });
+
   const handleValidarToken = () => {
     if (!token) {
       toast.error('Insira um token');
       return;
     }
-    // A validação acontece automaticamente via query
-    setTokenValidado(false); // Reset para re-trigger
+    setTokenValidado(false);
   };
 
   const handleMatriculaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -270,8 +293,12 @@ export default function PortalRecalibra() {
     setMatricula(formatted);
   };
 
+  const handleEditMatriculaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatarMatricula(e.target.value);
+    setEditMatricula(formatted);
+  };
+
   const handleRegistar = async () => {
-    // Validações
     if (!lojaId || !data || !matricula || !tipoCalibragem) {
       toast.error('Preencha todos os campos obrigatórios');
       return;
@@ -288,7 +315,6 @@ export default function PortalRecalibra() {
     }
 
     // Se localidade é nova, criar primeiro
-    let localidadeFinal = localidade;
     if (localidade && localidadesData && !localidadesData.some(l => l.nome === localidade)) {
       try {
         await criarLocalidadeMutation.mutateAsync({ nome: localidade });
@@ -306,7 +332,6 @@ export default function PortalRecalibra() {
       }
     }
 
-    // Preparar dados
     const lojaIdFinal = lojaId === 'outros' ? 0 : parseInt(lojaId);
     const observacoesFinal = lojaId === 'outros' 
       ? `[Loja Externa: ${outrosLoja.trim()}]${observacoes ? ' ' + observacoes : ''}`
@@ -320,7 +345,7 @@ export default function PortalRecalibra() {
       tipoCalibragem: tipoCalibragem as 'DINÂMICA' | 'ESTÁTICA' | 'CORE',
       marca: marca || undefined,
       tipologiaViatura,
-      localidade: localidadeFinal || undefined,
+      localidade: localidade || undefined,
       observacoes: observacoesFinal || undefined,
     });
   };
@@ -330,6 +355,57 @@ export default function PortalRecalibra() {
     setToken('');
     setTokenValidado(false);
     setLocation('/');
+  };
+
+  // Abrir dialog de edição
+  const handleOpenEdit = (item: any) => {
+    setEditItem(item);
+    setEditData(item.data || '');
+    setEditMatricula(item.matricula || '');
+    setEditTipoCalibragem(item.tipoCalibragem || 'DINÂMICA');
+    setEditMarca(item.marca || '');
+    setEditTipologiaViatura(item.tipologiaViatura || 'LIGEIRO');
+    setEditLocalidade(item.localidade || '');
+    setEditObservacoes(item.observacoes || '');
+    setEditLojaId(item.lojaId ? item.lojaId.toString() : '');
+    setEditDialogOpen(true);
+  };
+
+  // Guardar edição
+  const handleSaveEdit = async () => {
+    if (!editItem) return;
+
+    if (editMatricula && !validarMatricula(editMatricula)) {
+      toast.error('Matrícula inválida', { description: 'Formato correto: XX-XX-XX (ex: AA-00-BB)' });
+      return;
+    }
+
+    // Se localidade é nova, criar primeiro
+    if (editLocalidade && localidadesData && !localidadesData.some(l => l.nome === editLocalidade)) {
+      try {
+        await criarLocalidadeMutation.mutateAsync({ nome: editLocalidade });
+      } catch (e) { /* Ignorar */ }
+    }
+
+    // Se marca é nova, criar primeiro
+    if (editMarca && marcasData && !marcasData.some(m => m.nome === editMarca)) {
+      try {
+        await criarMarcaMutation.mutateAsync({ nome: editMarca });
+      } catch (e) { /* Ignorar */ }
+    }
+
+    editarMutation.mutate({
+      token,
+      calibragemId: editItem.id,
+      data: editData || undefined,
+      matricula: editMatricula ? editMatricula.toUpperCase() : undefined,
+      tipoCalibragem: editTipoCalibragem,
+      marca: editMarca || undefined,
+      tipologiaViatura: editTipologiaViatura,
+      localidade: editLocalidade || undefined,
+      observacoes: editObservacoes || undefined,
+      lojaId: editLojaId ? parseInt(editLojaId) : undefined,
+    });
   };
 
   // Se ainda não validou o token, mostrar formulário de login
@@ -432,7 +508,7 @@ export default function PortalRecalibra() {
                 </Select>
               </div>
 
-              {/* Campo de loja externa (quando "Outros" selecionado) */}
+              {/* Campo de loja externa */}
               {lojaId === 'outros' && (
                 <div>
                   <Label htmlFor="outrosLoja">Nome da Loja Externa *</Label>
@@ -456,7 +532,7 @@ export default function PortalRecalibra() {
                 />
               </div>
 
-              {/* Matrícula com formatação automática */}
+              {/* Matrícula */}
               <div>
                 <Label htmlFor="matricula">Matrícula *</Label>
                 <Input
@@ -568,7 +644,7 @@ export default function PortalRecalibra() {
                       <th className="text-left p-2">Marca</th>
                       <th className="text-left p-2">Loja</th>
                       <th className="text-left p-2">Localidade</th>
-                      <th className="text-center p-2 w-10"></th>
+                      <th className="text-center p-2 w-20">Ações</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -578,45 +654,57 @@ export default function PortalRecalibra() {
                         <td className="p-2 font-mono">{item.matricula || '-'}</td>
                         <td className="p-2">
                           <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                            item.tipoCalibragem === 'DIN\u00c2MICA' ? 'bg-blue-100 text-blue-800' :
-                            item.tipoCalibragem === 'EST\u00c1TICA' ? 'bg-green-100 text-green-800' :
+                            item.tipoCalibragem === 'DINÂMICA' ? 'bg-blue-100 text-blue-800' :
+                            item.tipoCalibragem === 'ESTÁTICA' ? 'bg-green-100 text-green-800' :
                             'bg-purple-100 text-purple-800'
                           }`}>
                             {item.tipoCalibragem || '-'}
                           </span>
                         </td>
                         <td className="p-2">{item.marca || '-'}</td>
-                        <td className="p-2">{item.loja?.nome || 'Outros'}</td>
+                        <td className="p-2">{item.loja?.nome || '-'}</td>
                         <td className="p-2">{item.localidade || '-'}</td>
                         <td className="p-2 text-center">
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-red-400 hover:text-red-600 hover:bg-red-50">
-                                <Trash2 className="h-3.5 w-3.5" />
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>Apagar calibragem?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  Tem a certeza que deseja apagar esta calibragem?
-                                  <br />
-                                  <strong>{item.data}</strong> — {item.matricula || 'Sem matrícula'} — {item.tipoCalibragem || 'Sem tipo'}
-                                  <br />
-                                  Esta ação não pode ser revertida.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                <AlertDialogAction
-                                  className="bg-red-600 hover:bg-red-700"
-                                  onClick={() => apagarMutation.mutate({ token, calibragemId: item.id })}
-                                >
-                                  Apagar
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
+                          <div className="flex items-center justify-center gap-1">
+                            {/* Botão Editar */}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-7 w-7 p-0 text-blue-400 hover:text-blue-600 hover:bg-blue-50"
+                              onClick={() => handleOpenEdit(item)}
+                            >
+                              <Pencil className="h-3.5 w-3.5" />
+                            </Button>
+                            {/* Botão Apagar */}
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-red-400 hover:text-red-600 hover:bg-red-50">
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Apagar calibragem?</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Tem a certeza que deseja apagar esta calibragem?
+                                    <br />
+                                    <strong>{item.data}</strong> — {item.matricula || 'Sem matrícula'} — {item.tipoCalibragem || 'Sem tipo'}
+                                    <br />
+                                    Esta ação não pode ser revertida.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    className="bg-red-600 hover:bg-red-700"
+                                    onClick={() => apagarMutation.mutate({ token, calibragemId: item.id })}
+                                  >
+                                    Apagar
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -641,6 +729,130 @@ export default function PortalRecalibra() {
             )}
           </CardContent>
         </Card>
+
+        {/* Dialog de Edição */}
+        <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+          <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Editar Calibragem</DialogTitle>
+              <DialogDescription>
+                Altere os campos que pretende atualizar.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-2">
+              {/* Data */}
+              <div>
+                <Label>Data</Label>
+                <Input
+                  type="date"
+                  value={editData}
+                  onChange={(e) => setEditData(e.target.value)}
+                />
+              </div>
+
+              {/* Matrícula */}
+              <div>
+                <Label>Matrícula</Label>
+                <Input
+                  value={editMatricula}
+                  onChange={handleEditMatriculaChange}
+                  placeholder="XX-XX-XX"
+                  maxLength={8}
+                  className="uppercase font-mono text-lg tracking-wider"
+                />
+              </div>
+
+              {/* Tipo de Calibragem */}
+              <div>
+                <Label>Tipo de Calibragem</Label>
+                <Select value={editTipoCalibragem} onValueChange={(v: any) => setEditTipoCalibragem(v)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="DINÂMICA">Dinâmica</SelectItem>
+                    <SelectItem value="ESTÁTICA">Estática</SelectItem>
+                    <SelectItem value="CORE">CORE</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Marca */}
+              <AutocompleteInput
+                label="Marca do Veículo"
+                value={editMarca}
+                onChange={setEditMarca}
+                options={marcasData || []}
+                placeholder="Escreva para pesquisar"
+              />
+
+              {/* Tipologia */}
+              <div>
+                <Label>Tipologia</Label>
+                <Select value={editTipologiaViatura} onValueChange={(v: any) => setEditTipologiaViatura(v)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="LIGEIRO">Ligeiro</SelectItem>
+                    <SelectItem value="PESADO">Pesado</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Loja */}
+              <div>
+                <Label>Loja</Label>
+                <Select value={editLojaId} onValueChange={setEditLojaId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione a loja" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Sem loja</SelectItem>
+                    {lojasDisponiveis.map((loja: any) => (
+                      <SelectItem key={loja.id} value={loja.id.toString()}>
+                        {loja.nome}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Localidade */}
+              <AutocompleteInput
+                label="Localidade"
+                value={editLocalidade}
+                onChange={setEditLocalidade}
+                options={localidadesData || []}
+                placeholder="Escreva para pesquisar"
+              />
+
+              {/* Observações */}
+              <div>
+                <Label>Observações</Label>
+                <Textarea
+                  value={editObservacoes}
+                  onChange={(e) => setEditObservacoes(e.target.value)}
+                  placeholder="Notas adicionais..."
+                  rows={3}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
+                Cancelar
+              </Button>
+              <Button
+                className="bg-teal-600 hover:bg-teal-700"
+                onClick={handleSaveEdit}
+                disabled={editarMutation.isPending}
+              >
+                {editarMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Guardar Alterações
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

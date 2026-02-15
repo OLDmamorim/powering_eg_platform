@@ -10831,6 +10831,56 @@ IMPORTANTE:
         return db.criarMarca(input.nome);
       }),
 
+    // Editar calibragem
+    editarCalibragem: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        calibragemId: z.number(),
+        data: z.string().optional(),
+        matricula: z.string().optional(),
+        tipoCalibragem: z.enum(['DINÂMICA', 'ESTÁTICA', 'CORE']).optional(),
+        marca: z.string().optional(),
+        tipologiaViatura: z.enum(['LIGEIRO', 'PESADO']).optional(),
+        localidade: z.string().optional(),
+        observacoes: z.string().optional(),
+        lojaId: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const tokenData = await db.validateTokenRecalibra(input.token);
+        if (!tokenData) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        // Verificar se a calibragem pertence à unidade
+        const calibragens = await db.getHistoricoCalibragens(
+          tokenData.unidade.id, undefined, undefined, undefined
+        );
+        const calibragem = calibragens.find((c: any) => c.id === input.calibragemId);
+        if (!calibragem) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Calibragem não encontrada' });
+        }
+        // Atualizar usando getDb()
+        const { getDb } = await import('./db');
+        const { calibragens: calibragensTable } = await import('../drizzle/schema');
+        const { eq } = await import('drizzle-orm');
+        const drizzleDb = await getDb();
+        if (!drizzleDb) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'DB indisponível' });
+        
+        const updateData: Record<string, any> = {};
+        if (input.data !== undefined) updateData.data = input.data;
+        if (input.matricula !== undefined) updateData.matricula = input.matricula;
+        if (input.tipoCalibragem !== undefined) updateData.tipoCalibragem = input.tipoCalibragem;
+        if (input.marca !== undefined) updateData.marca = input.marca;
+        if (input.tipologiaViatura !== undefined) updateData.tipologiaViatura = input.tipologiaViatura;
+        if (input.localidade !== undefined) updateData.localidade = input.localidade;
+        if (input.observacoes !== undefined) updateData.observacoes = input.observacoes;
+        if (input.lojaId !== undefined) updateData.lojaId = input.lojaId;
+        
+        if (Object.keys(updateData).length > 0) {
+          await drizzleDb.update(calibragensTable).set(updateData).where(eq(calibragensTable.id, input.calibragemId));
+        }
+        return { success: true };
+      }),
+
     // Apagar calibragem
     apagarCalibragem: publicProcedure
       .input(z.object({ token: z.string(), calibragemId: z.number() }))

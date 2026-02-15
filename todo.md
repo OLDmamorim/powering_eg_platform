@@ -4816,3 +4816,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Atualizar endpoint estatísticas para aceitar filtro temporal (meses selecionados)
 - [x] Adicionar opção de apagar calibragens registadas no portal (com confirmação AlertDialog)
 - [x] Criar endpoint de eliminar calibragem no backend
+
+## Recalibra - Uniformizar Filtro e Editar Calibragens
+- [x] Uniformizar filtro de mês no DashboardRecalibra com FiltroMesesCheckbox padrão
+- [x] Adicionar endpoint de editar calibragem no backend
+- [x] Adicionar UI de edição de calibragens no portal (Dialog com formulário pré-preenchido)
