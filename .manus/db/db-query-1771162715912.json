@@ -1,0 +1,15 @@
+{
+  "query": "SELECT t.token, t.ativo, u.nome as unidade_nome FROM tokens_recalibra t JOIN unidades_recalibra u ON t.unidadeId = u.id WHERE t.ativo = 1 LIMIT 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT t.token, t.ativo, u.nome as unidade_nome FROM tokens_recalibra t JOIN unidades_recalibra u ON t.unidadeId = u.id WHERE t.ativo = 1 LIMIT 1;",
+  "rows": [
+    {
+      "token": "0e4b42057547e341b2993cb297892be7f38bb152dda5c3f41f915ed356dfbad4",
+      "ativo": "1",
+      "unidade_nome": "Recalibra Minho "
+    }
+  ],
+  "messages": [],
+  "stdout": "token\tativo\tunidade_nome\n0e4b42057547e341b2993cb297892be7f38bb152dda5c3f41f915ed356dfbad4\t1\tRecalibra Minho \n",
+  "stderr": "",
+  "execution_time_ms": 131
+}

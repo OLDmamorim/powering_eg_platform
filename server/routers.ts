@@ -10793,10 +10793,42 @@ IMPORTANTE:
           throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
         }
         
-        // TODO: Implementar listagem de calibragens
-        const calibragens: any[] = [];
+        const calibragens = await db.getHistoricoCalibragens(
+          tokenData.unidade.id,
+          undefined,
+          undefined,
+          undefined
+        );
         
         return calibragens;
+      }),
+
+    // Autocomplete de localidades
+    pesquisarLocalidades: publicProcedure
+      .input(z.object({ termo: z.string().default('') }))
+      .query(async ({ input }) => {
+        return db.pesquisarLocalidades(input.termo);
+      }),
+
+    // Autocomplete de marcas
+    pesquisarMarcas: publicProcedure
+      .input(z.object({ termo: z.string().default('') }))
+      .query(async ({ input }) => {
+        return db.pesquisarMarcas(input.termo);
+      }),
+
+    // Criar nova localidade (quando utilizador escreve nome completo novo)
+    criarLocalidade: publicProcedure
+      .input(z.object({ nome: z.string().min(2) }))
+      .mutation(async ({ input }) => {
+        return db.criarLocalidade(input.nome);
+      }),
+
+    // Criar nova marca (quando utilizador escreve nome completo novo)
+    criarMarca: publicProcedure
+      .input(z.object({ nome: z.string().min(1) }))
+      .mutation(async ({ input }) => {
+        return db.criarMarca(input.nome);
       }),
   }),
 });

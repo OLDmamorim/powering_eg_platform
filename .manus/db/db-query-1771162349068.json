@@ -1,0 +1,15 @@
+{
+  "query": "SELECT id, nome, gestorId FROM unidades_recalibra WHERE nome LIKE '%Minho%';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT id, nome, gestorId FROM unidades_recalibra WHERE nome LIKE '%Minho%';",
+  "rows": [
+    {
+      "id": "30002",
+      "nome": "Recalibra Minho ",
+      "gestorId": "30001"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tnome\tgestorId\n30002\tRecalibra Minho \t30001\n",
+  "stderr": "",
+  "execution_time_ms": 198
+}

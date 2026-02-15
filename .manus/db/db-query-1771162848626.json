@@ -1,0 +1,55 @@
+{
+  "query": "SELECT id, data, matricula, tipoCalibragem, marca, localidade, lojaId FROM calibragens LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT id, data, matricula, tipoCalibragem, marca, localidade, lojaId FROM calibragens LIMIT 5;",
+  "rows": [
+    {
+      "id": "1",
+      "data": "2026-02-12",
+      "matricula": "BF-42-UN",
+      "tipoCalibragem": "DINÂMICA",
+      "marca": "Peugeot",
+      "localidade": "Guimarães",
+      "lojaId": "60001"
+    },
+    {
+      "id": "2",
+      "data": "2026-02-12",
+      "matricula": "79-ZS-47",
+      "tipoCalibragem": "DINÂMICA",
+      "marca": "Mini",
+      "localidade": "Póvoa de Varzim",
+      "lojaId": "60001"
+    },
+    {
+      "id": "3",
+      "data": "2026-02-11",
+      "matricula": "AD-69-PN",
+      "tipoCalibragem": "ESTÁTICA",
+      "marca": "Hyundai",
+      "localidade": "Guimarães",
+      "lojaId": "60001"
+    },
+    {
+      "id": "4",
+      "data": "2026-02-11",
+      "matricula": "BM-88-NC",
+      "tipoCalibragem": "CORE",
+      "marca": "MG",
+      "localidade": "Braga",
+      "lojaId": "60001"
+    },
+    {
+      "id": "5",
+      "data": "2026-02-09",
+      "matricula": "BV-53-PJ",
+      "tipoCalibragem": "DINÂMICA",
+      "marca": "Renault",
+      "localidade": "Barcelos",
+      "lojaId": "60001"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tdata\tmatricula\ttipoCalibragem\tmarca\tlocalidade\tlojaId\n1\t2026-02-12\tBF-42-UN\tDINÂMICA\tPeugeot\tGuimarães\t60001\n2\t2026-02-12\t79-ZS-47\tDINÂMICA\tMini\tPóvoa de Varzim\t60001\n3\t2026-02-11\tAD-69-PN\tESTÁTICA\tHyundai\tGuimarães\t60001\n4\t2026-02-11\tBM-88-NC\tCORE\tMG\tBraga\t60001\n5\t2026-02-09\tBV-53-PJ\tDINÂMICA\tRenault\tBarcelos\t60001\n",
+  "stderr": "",
+  "execution_time_ms": 141
+}

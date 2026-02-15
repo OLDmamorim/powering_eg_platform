@@ -151,7 +151,13 @@ import {
   InsertCalibragem,
   unidadeLojas,
   UnidadeLoja,
-  InsertUnidadeLoja
+  InsertUnidadeLoja,
+  localidadesRecalibra,
+  LocalidadeRecalibra,
+  InsertLocalidadeRecalibra,
+  marcasRecalibra,
+  MarcaRecalibra,
+  InsertMarcaRecalibra
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -11264,4 +11270,108 @@ export async function getTopLojasCalibragens(unidadeId: number, mesesSelecionado
     }));
   
   return resultado;
+}
+
+// =============================================
+// RECALIBRA - LOCALIDADES (Autocomplete)
+// =============================================
+
+/**
+ * Pesquisar localidades por nome (autocomplete)
+ */
+export async function pesquisarLocalidades(termo: string): Promise<LocalidadeRecalibra[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  if (!termo || termo.trim().length === 0) {
+    return db.select().from(localidadesRecalibra).orderBy(localidadesRecalibra.nome);
+  }
+  
+  return db.select().from(localidadesRecalibra)
+    .where(like(localidadesRecalibra.nome, `%${termo}%`))
+    .orderBy(localidadesRecalibra.nome);
+}
+
+/**
+ * Obter todas as localidades
+ */
+export async function getTodasLocalidades(): Promise<LocalidadeRecalibra[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return db.select().from(localidadesRecalibra).orderBy(localidadesRecalibra.nome);
+}
+
+/**
+ * Criar nova localidade (se não existir)
+ */
+export async function criarLocalidade(nome: string): Promise<LocalidadeRecalibra | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  // Verificar se já existe
+  const existente = await db.select().from(localidadesRecalibra)
+    .where(eq(localidadesRecalibra.nome, nome.trim()));
+  
+  if (existente.length > 0) {
+    return existente[0];
+  }
+  
+  const result = await db.insert(localidadesRecalibra).values({ nome: nome.trim() });
+  const insertId = Number((result as any)[0].insertId);
+  
+  const created = await db.select().from(localidadesRecalibra).where(eq(localidadesRecalibra.id, insertId));
+  return created[0] || null;
+}
+
+// =============================================
+// RECALIBRA - MARCAS (Autocomplete)
+// =============================================
+
+/**
+ * Pesquisar marcas por nome (autocomplete)
+ */
+export async function pesquisarMarcas(termo: string): Promise<MarcaRecalibra[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  if (!termo || termo.trim().length === 0) {
+    return db.select().from(marcasRecalibra).orderBy(marcasRecalibra.nome);
+  }
+  
+  return db.select().from(marcasRecalibra)
+    .where(like(marcasRecalibra.nome, `%${termo}%`))
+    .orderBy(marcasRecalibra.nome);
+}
+
+/**
+ * Obter todas as marcas
+ */
+export async function getTodasMarcas(): Promise<MarcaRecalibra[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return db.select().from(marcasRecalibra).orderBy(marcasRecalibra.nome);
+}
+
+/**
+ * Criar nova marca (se não existir)
+ */
+export async function criarMarca(nome: string): Promise<MarcaRecalibra | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  // Verificar se já existe
+  const existente = await db.select().from(marcasRecalibra)
+    .where(eq(marcasRecalibra.nome, nome.trim()));
+  
+  if (existente.length > 0) {
+    return existente[0];
+  }
+  
+  const result = await db.insert(marcasRecalibra).values({ nome: nome.trim() });
+  const insertId = Number((result as any)[0].insertId);
+  
+  const created = await db.select().from(marcasRecalibra).where(eq(marcasRecalibra.id, insertId));
+  return created[0] || null;
 }

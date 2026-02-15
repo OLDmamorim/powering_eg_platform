@@ -1401,3 +1401,28 @@ export const calibragens = mysqlTable("calibragens", {
 
 export type Calibragem = typeof calibragens.$inferSelect;
 export type InsertCalibragem = typeof calibragens.$inferInsert;
+
+
+/**
+ * Localidades Recalibra - Lista de localidades para autocomplete
+ */
+export const localidadesRecalibra = mysqlTable("localidades_recalibra", {
+  id: int("id").autoincrement().primaryKey(),
+  nome: varchar("nome", { length: 255 }).notNull().unique(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type LocalidadeRecalibra = typeof localidadesRecalibra.$inferSelect;
+export type InsertLocalidadeRecalibra = typeof localidadesRecalibra.$inferInsert;
+
+/**
+ * Marcas Recalibra - Lista de marcas de veículos para autocomplete
+ */
+export const marcasRecalibra = mysqlTable("marcas_recalibra", {
+  id: int("id").autoincrement().primaryKey(),
+  nome: varchar("nome", { length: 255 }).notNull().unique(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type MarcaRecalibra = typeof marcasRecalibra.$inferSelect;
+export type InsertMarcaRecalibra = typeof marcasRecalibra.$inferInsert;

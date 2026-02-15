@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useLocation } from 'wouter';
 import { trpc } from '@/lib/trpc';
 import { Button } from '@/components/ui/button';
@@ -8,14 +8,165 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
-import { Loader2, CheckCircle2 } from 'lucide-react';
+import { Loader2, CheckCircle2, ChevronDown } from 'lucide-react';
 
+// ==========================================
+// Componente Autocomplete reutilizável
+// ==========================================
+function AutocompleteInput({
+  label,
+  value,
+  onChange,
+  options,
+  placeholder,
+  required = false,
+}: {
+  label: string;
+  value: string;
+  onChange: (val: string) => void;
+  options: { id: number; nome: string }[];
+  placeholder: string;
+  required?: boolean;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [inputValue, setInputValue] = useState(value);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setInputValue(value);
+  }, [value]);
+
+  // Fechar dropdown ao clicar fora
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+        // Se o utilizador escreveu algo novo, aceitar como novo valor
+        if (inputValue.trim() && inputValue !== value) {
+          onChange(inputValue.trim());
+        }
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [inputValue, value, onChange]);
+
+  const filteredOptions = useMemo(() => {
+    if (!inputValue.trim()) return options;
+    const termo = inputValue.toLowerCase();
+    return options.filter(o => o.nome.toLowerCase().includes(termo));
+  }, [inputValue, options]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setInputValue(val);
+    setIsOpen(true);
+  };
+
+  const handleSelect = (nome: string) => {
+    setInputValue(nome);
+    onChange(nome);
+    setIsOpen(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (inputValue.trim()) {
+        onChange(inputValue.trim());
+        setIsOpen(false);
+      }
+    }
+    if (e.key === 'Escape') {
+      setIsOpen(false);
+    }
+  };
+
+  return (
+    <div ref={wrapperRef} className="relative">
+      <Label>{label} {required && '*'}</Label>
+      <div className="relative">
+        <Input
+          value={inputValue}
+          onChange={handleInputChange}
+          onFocus={() => setIsOpen(true)}
+          onKeyDown={handleKeyDown}
+          placeholder={placeholder}
+          className="pr-8"
+        />
+        <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+      </div>
+      {isOpen && filteredOptions.length > 0 && (
+        <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-48 overflow-y-auto">
+          {filteredOptions.map((option) => (
+            <button
+              key={option.id}
+              type="button"
+              className="w-full text-left px-3 py-2 hover:bg-teal-50 text-sm transition-colors"
+              onClick={() => handleSelect(option.nome)}
+            >
+              {option.nome}
+            </button>
+          ))}
+          {inputValue.trim() && !filteredOptions.some(o => o.nome.toLowerCase() === inputValue.toLowerCase()) && (
+            <button
+              type="button"
+              className="w-full text-left px-3 py-2 hover:bg-teal-50 text-sm text-teal-700 font-medium border-t"
+              onClick={() => handleSelect(inputValue.trim())}
+            >
+              + Adicionar "{inputValue.trim()}"
+            </button>
+          )}
+        </div>
+      )}
+      {isOpen && filteredOptions.length === 0 && inputValue.trim() && (
+        <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg">
+          <button
+            type="button"
+            className="w-full text-left px-3 py-2 hover:bg-teal-50 text-sm text-teal-700 font-medium"
+            onClick={() => handleSelect(inputValue.trim())}
+          >
+            + Adicionar "{inputValue.trim()}"
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ==========================================
+// Formatação de matrícula XX-XX-XX
+// ==========================================
+function formatarMatricula(valor: string): string {
+  // Remover tudo que não seja letra ou número
+  const limpo = valor.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+  
+  // Aplicar formato XX-XX-XX
+  let resultado = '';
+  for (let i = 0; i < Math.min(limpo.length, 6); i++) {
+    if (i > 0 && i % 2 === 0) {
+      resultado += '-';
+    }
+    resultado += limpo[i];
+  }
+  
+  return resultado;
+}
+
+function validarMatricula(matricula: string): boolean {
+  // Formato XX-XX-XX onde X pode ser letra ou número
+  return /^[A-Z0-9]{2}-[A-Z0-9]{2}-[A-Z0-9]{2}$/.test(matricula);
+}
+
+// ==========================================
+// Componente Principal
+// ==========================================
 export default function PortalRecalibra() {
   const [, setLocation] = useLocation();
 
   const [token, setToken] = useState('');
   const [tokenValidado, setTokenValidado] = useState(false);
-  const [lojaId, setLojaId] = useState<number | null>(null);
+  const [lojaId, setLojaId] = useState<string>('');
   const [data, setData] = useState('');
   const [matricula, setMatricula] = useState('');
   const [tipoCalibragem, setTipoCalibragem] = useState<'DINÂMICA' | 'ESTÁTICA' | 'CORE' | ''>('');
@@ -23,6 +174,7 @@ export default function PortalRecalibra() {
   const [tipologiaViatura, setTipologiaViatura] = useState<'LIGEIRO' | 'PESADO'>('LIGEIRO');
   const [localidade, setLocalidade] = useState('');
   const [observacoes, setObservacoes] = useState('');
+  const [outrosLoja, setOutrosLoja] = useState('');
 
   // Carregar token do localStorage
   useEffect(() => {
@@ -45,12 +197,26 @@ export default function PortalRecalibra() {
     }
   }, [tokenData, token]);
 
+  // Carregar localidades e marcas para autocomplete
+  const { data: localidadesData } = trpc.portalRecalibra.pesquisarLocalidades.useQuery(
+    { termo: '' },
+    { enabled: tokenValidado }
+  );
+  const { data: marcasData } = trpc.portalRecalibra.pesquisarMarcas.useQuery(
+    { termo: '' },
+    { enabled: tokenValidado }
+  );
+
+  // Mutations para criar localidade/marca novas
+  const criarLocalidadeMutation = trpc.portalRecalibra.criarLocalidade.useMutation();
+  const criarMarcaMutation = trpc.portalRecalibra.criarMarca.useMutation();
+
   // Mutation para registar calibragem
   const registarMutation = trpc.portalRecalibra.registarCalibragem.useMutation({
     onSuccess: () => {
-      toast({ title: 'Calibragem registada com sucesso!' });
+      toast.success('Calibragem registada com sucesso!');
       // Limpar formulário
-      setLojaId(null);
+      setLojaId('');
       setData('');
       setMatricula('');
       setTipoCalibragem('');
@@ -58,36 +224,85 @@ export default function PortalRecalibra() {
       setTipologiaViatura('LIGEIRO');
       setLocalidade('');
       setObservacoes('');
+      setOutrosLoja('');
     },
-    onError: (error) => {
-      toast({ title: 'Erro ao registar calibragem', description: error.message, variant: 'destructive' });
+    onError: (error: any) => {
+      toast.error('Erro ao registar calibragem', { description: error.message });
     },
   });
 
+  // Carregar calibragens para histórico
+  const { data: calibragensData } = trpc.portalRecalibra.listarCalibragens.useQuery(
+    { token },
+    { enabled: tokenValidado && !!token }
+  );
+
   const handleValidarToken = () => {
     if (!token) {
-      toast({ title: 'Insira um token', variant: 'destructive' });
+      toast.error('Insira um token');
       return;
     }
     // A validação acontece automaticamente via query
+    setTokenValidado(false); // Reset para re-trigger
   };
 
-  const handleRegistar = () => {
+  const handleMatriculaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatarMatricula(e.target.value);
+    setMatricula(formatted);
+  };
+
+  const handleRegistar = async () => {
+    // Validações
     if (!lojaId || !data || !matricula || !tipoCalibragem) {
-      toast({ title: 'Preencha todos os campos obrigatórios', variant: 'destructive' });
+      toast.error('Preencha todos os campos obrigatórios');
       return;
     }
 
+    if (!validarMatricula(matricula)) {
+      toast.error('Matrícula inválida', { description: 'Formato correto: XX-XX-XX (ex: AA-00-BB)' });
+      return;
+    }
+
+    if (lojaId === 'outros' && !outrosLoja.trim()) {
+      toast.error('Indique o nome da loja externa');
+      return;
+    }
+
+    // Se localidade é nova, criar primeiro
+    let localidadeFinal = localidade;
+    if (localidade && localidadesData && !localidadesData.some(l => l.nome === localidade)) {
+      try {
+        await criarLocalidadeMutation.mutateAsync({ nome: localidade });
+      } catch (e) {
+        // Ignorar se já existe
+      }
+    }
+
+    // Se marca é nova, criar primeiro
+    if (marca && marcasData && !marcasData.some(m => m.nome === marca)) {
+      try {
+        await criarMarcaMutation.mutateAsync({ nome: marca });
+      } catch (e) {
+        // Ignorar se já existe
+      }
+    }
+
+    // Preparar dados
+    const lojaIdFinal = lojaId === 'outros' ? 0 : parseInt(lojaId);
+    const observacoesFinal = lojaId === 'outros' 
+      ? `[Loja Externa: ${outrosLoja.trim()}]${observacoes ? ' ' + observacoes : ''}`
+      : observacoes;
+
     registarMutation.mutate({
       token,
-      lojaId,
+      lojaId: lojaIdFinal,
       data,
-      matricula,
-      tipoCalibragem,
-      marca,
+      matricula: matricula.toUpperCase(),
+      tipoCalibragem: tipoCalibragem as 'DINÂMICA' | 'ESTÁTICA' | 'CORE',
+      marca: marca || undefined,
       tipologiaViatura,
-      localidade,
-      observacoes,
+      localidade: localidadeFinal || undefined,
+      observacoes: observacoesFinal || undefined,
     });
   };
 
@@ -142,6 +357,9 @@ export default function PortalRecalibra() {
     );
   }
 
+  // Lojas disponíveis (com opção Outros)
+  const lojasDisponiveis = tokenData?.lojas || [];
+
   // Portal principal (após validação)
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 to-cyan-50 p-4">
@@ -164,27 +382,45 @@ export default function PortalRecalibra() {
           <CardHeader>
             <CardTitle>Registar Nova Calibragem</CardTitle>
             <CardDescription>
-              Preencha os dados da calibragem realizada
+              Preencha os dados da calibragem realizada. Campos com * são obrigatórios.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
+              {/* Loja */}
               <div>
                 <Label htmlFor="loja">Loja *</Label>
-                <Select value={lojaId?.toString()} onValueChange={(v) => setLojaId(parseInt(v))}>
+                <Select value={lojaId} onValueChange={(v) => { setLojaId(v); if (v !== 'outros') setOutrosLoja(''); }}>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione a loja" />
                   </SelectTrigger>
                   <SelectContent>
-                    {tokenData?.lojas.map((loja) => (
+                    {lojasDisponiveis.map((loja: any) => (
                       <SelectItem key={loja.id} value={loja.id.toString()}>
                         {loja.nome}
                       </SelectItem>
                     ))}
+                    <SelectItem value="outros">
+                      🏪 Outros (Loja externa)
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
+              {/* Campo de loja externa (quando "Outros" selecionado) */}
+              {lojaId === 'outros' && (
+                <div>
+                  <Label htmlFor="outrosLoja">Nome da Loja Externa *</Label>
+                  <Input
+                    id="outrosLoja"
+                    value={outrosLoja}
+                    onChange={(e) => setOutrosLoja(e.target.value)}
+                    placeholder="Ex: ExpressGlass Lisboa, Loja parceira..."
+                  />
+                </div>
+              )}
+
+              {/* Data */}
               <div>
                 <Label htmlFor="data">Data *</Label>
                 <Input
@@ -195,16 +431,23 @@ export default function PortalRecalibra() {
                 />
               </div>
 
+              {/* Matrícula com formatação automática */}
               <div>
                 <Label htmlFor="matricula">Matrícula *</Label>
                 <Input
                   id="matricula"
                   value={matricula}
-                  onChange={(e) => setMatricula(e.target.value.toUpperCase())}
-                  placeholder="Ex: AA-00-BB"
+                  onChange={handleMatriculaChange}
+                  placeholder="XX-XX-XX"
+                  maxLength={8}
+                  className="uppercase font-mono text-lg tracking-wider"
                 />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Formato: XX-XX-XX (letras e números, ex: AA-00-BB)
+                </p>
               </div>
 
+              {/* Tipo de Calibragem */}
               <div>
                 <Label htmlFor="tipoCalibragem">Tipo de Calibragem *</Label>
                 <Select value={tipoCalibragem} onValueChange={(v: any) => setTipoCalibragem(v)}>
@@ -219,16 +462,16 @@ export default function PortalRecalibra() {
                 </Select>
               </div>
 
-              <div>
-                <Label htmlFor="marca">Marca do Veículo</Label>
-                <Input
-                  id="marca"
-                  value={marca}
-                  onChange={(e) => setMarca(e.target.value)}
-                  placeholder="Ex: Peugeot, BMW, Mercedes"
-                />
-              </div>
+              {/* Marca com autocomplete */}
+              <AutocompleteInput
+                label="Marca do Veículo"
+                value={marca}
+                onChange={setMarca}
+                options={marcasData || []}
+                placeholder="Escreva para pesquisar ou adicionar nova marca"
+              />
 
+              {/* Tipologia */}
               <div>
                 <Label htmlFor="tipologiaViatura">Tipologia</Label>
                 <Select value={tipologiaViatura} onValueChange={(v: any) => setTipologiaViatura(v)}>
@@ -242,16 +485,16 @@ export default function PortalRecalibra() {
                 </Select>
               </div>
 
-              <div>
-                <Label htmlFor="localidade">Localidade</Label>
-                <Input
-                  id="localidade"
-                  value={localidade}
-                  onChange={(e) => setLocalidade(e.target.value)}
-                  placeholder="Onde foi realizada a calibragem"
-                />
-              </div>
+              {/* Localidade com autocomplete */}
+              <AutocompleteInput
+                label="Localidade"
+                value={localidade}
+                onChange={setLocalidade}
+                options={localidadesData || []}
+                placeholder="Escreva para pesquisar ou adicionar nova localidade"
+              />
 
+              {/* Observações */}
               <div>
                 <Label htmlFor="observacoes">Observações</Label>
                 <Textarea
@@ -259,12 +502,12 @@ export default function PortalRecalibra() {
                   value={observacoes}
                   onChange={(e) => setObservacoes(e.target.value)}
                   placeholder="Notas adicionais sobre a calibragem..."
-                  rows={4}
+                  rows={3}
                 />
               </div>
 
               <Button 
-                className="w-full" 
+                className="w-full bg-teal-600 hover:bg-teal-700" 
                 onClick={handleRegistar}
                 disabled={registarMutation.isPending}
               >
@@ -276,7 +519,7 @@ export default function PortalRecalibra() {
           </CardContent>
         </Card>
 
-        {/* Histórico (placeholder) */}
+        {/* Histórico de Calibragens */}
         <Card className="mt-6">
           <CardHeader>
             <CardTitle>Histórico de Calibragens</CardTitle>
@@ -285,9 +528,51 @@ export default function PortalRecalibra() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-center text-muted-foreground py-8">
-              Histórico em desenvolvimento
-            </p>
+            {!calibragensData || calibragensData.length === 0 ? (
+              <p className="text-center text-muted-foreground py-8">
+                Nenhuma calibragem registada ainda
+              </p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b bg-muted/50">
+                      <th className="text-left p-2">Data</th>
+                      <th className="text-left p-2">Matrícula</th>
+                      <th className="text-left p-2">Tipo</th>
+                      <th className="text-left p-2">Marca</th>
+                      <th className="text-left p-2">Loja</th>
+                      <th className="text-left p-2">Localidade</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {calibragensData.slice(0, 20).map((item: any, idx: number) => (
+                      <tr key={idx} className="border-b hover:bg-muted/30">
+                        <td className="p-2">{item.data || '-'}</td>
+                        <td className="p-2 font-mono">{item.matricula || '-'}</td>
+                        <td className="p-2">
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                            item.tipoCalibragem === 'DIN\u00c2MICA' ? 'bg-blue-100 text-blue-800' :
+                            item.tipoCalibragem === 'EST\u00c1TICA' ? 'bg-green-100 text-green-800' :
+                            'bg-purple-100 text-purple-800'
+                          }`}>
+                            {item.tipoCalibragem || '-'}
+                          </span>
+                        </td>
+                        <td className="p-2">{item.marca || '-'}</td>
+                        <td className="p-2">{item.loja?.nome || 'Outros'}</td>
+                        <td className="p-2">{item.localidade || '-'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {calibragensData.length > 20 && (
+                  <p className="text-center text-muted-foreground text-sm mt-4">
+                    Mostrando 20 de {calibragensData.length} registos
+                  </p>
+                )}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

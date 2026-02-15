@@ -4780,3 +4780,16 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Erro "crypto.randomBytes is not a function" - adicionado import crypto no db.ts
 - [x] Corrigido import useState em falta no GestaoRecalibra.tsx
 - [x] Eliminado gestor falso (id=1740001) e unidade de teste
+
+## Recalibra - Importação e Melhorias
+- [x] Importar calibragens históricas do Notion para a base de dados
+- [x] Padronizar matrícula: XX-XX-XX (maiúsculas, formato 2-2-2 com traços)
+- [x] Criar tabela localidades com autocomplete + possibilidade de criar novas
+- [x] Criar tabela marcas com autocomplete + possibilidade de criar novas
+- [x] Importar localidades existentes do Notion
+- [x] Importar marcas existentes do Notion
+- [x] Adicionar opção "Outros" nas lojas para lojas externas
+- [x] Corrigir histórico de calibragens (dados flat, não nested)
+- [x] Autocomplete funcional com filtro e opção "Adicionar" nova marca/localidade
+- [x] Formatação automática de matrícula (ab12cd → AB-12-CD)
+- [x] Badges coloridos para tipos de calibragem (DINÂMICA/ESTÁTICA/CORE)
