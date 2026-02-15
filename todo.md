@@ -4810,9 +4810,3 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Limpar lojaId das calibragens históricas na BD (não há registo real de loja)
 - [x] Atualizar endpoint estatísticas para incluir loja mais visitada
 - [x] Tornar lojaId nullable no schema (calibragens históricas sem loja)
-
-## Recalibra - Filtro Mês e Apagar Calibragens
-- [x] Adicionar filtro por mês no dashboard de calibragens (seleção múltipla de meses)
-- [x] Atualizar endpoint estatísticas para aceitar filtro temporal (meses selecionados)
-- [x] Adicionar opção de apagar calibragens registadas no portal (com confirmação AlertDialog)
-- [x] Criar endpoint de eliminar calibragem no backend

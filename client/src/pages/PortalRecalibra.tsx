@@ -8,11 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
-import { Loader2, CheckCircle2, ChevronDown, BarChart3, Trash2 } from 'lucide-react';
-import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
-  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
+import { Loader2, CheckCircle2, ChevronDown, BarChart3 } from 'lucide-react';
 
 // ==========================================
 // Componente Autocomplete reutilizável
@@ -238,23 +234,10 @@ export default function PortalRecalibra() {
   });
 
   // Carregar calibragens para histórico
-  const utils = trpc.useUtils();
   const { data: calibragensData } = trpc.portalRecalibra.listarCalibragens.useQuery(
     { token },
     { enabled: tokenValidado && !!token }
   );
-
-  // Mutation para apagar calibragem
-  const apagarMutation = trpc.portalRecalibra.apagarCalibragem.useMutation({
-    onSuccess: () => {
-      toast.success('Calibragem apagada com sucesso');
-      utils.portalRecalibra.listarCalibragens.invalidate();
-      utils.portalRecalibra.estatisticas.invalidate();
-    },
-    onError: (error: any) => {
-      toast.error('Erro ao apagar calibragem', { description: error.message });
-    },
-  });
 
   const handleValidarToken = () => {
     if (!token) {
@@ -568,7 +551,6 @@ export default function PortalRecalibra() {
                       <th className="text-left p-2">Marca</th>
                       <th className="text-left p-2">Loja</th>
                       <th className="text-left p-2">Localidade</th>
-                      <th className="text-center p-2 w-10"></th>
                     </tr>
                   </thead>
                   <tbody>
@@ -588,36 +570,6 @@ export default function PortalRecalibra() {
                         <td className="p-2">{item.marca || '-'}</td>
                         <td className="p-2">{item.loja?.nome || 'Outros'}</td>
                         <td className="p-2">{item.localidade || '-'}</td>
-                        <td className="p-2 text-center">
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-red-400 hover:text-red-600 hover:bg-red-50">
-                                <Trash2 className="h-3.5 w-3.5" />
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>Apagar calibragem?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  Tem a certeza que deseja apagar esta calibragem?
-                                  <br />
-                                  <strong>{item.data}</strong> — {item.matricula || 'Sem matrícula'} — {item.tipoCalibragem || 'Sem tipo'}
-                                  <br />
-                                  Esta ação não pode ser revertida.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                <AlertDialogAction
-                                  className="bg-red-600 hover:bg-red-700"
-                                  onClick={() => apagarMutation.mutate({ token, calibragemId: item.id })}
-                                >
-                                  Apagar
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        </td>
                       </tr>
                     ))}
                   </tbody>
