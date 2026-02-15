@@ -3,7 +3,7 @@ import { trpc } from '@/lib/trpc';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { ArrowLeft, BarChart3, TrendingUp, Car, MapPin, Loader2, Activity, Store, Target } from 'lucide-react';
+import { ArrowLeft, BarChart3, TrendingUp, Car, MapPin, Loader2, Activity, Store, Target, CalendarDays, Filter, Check, X } from 'lucide-react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend, LineChart, Line,
@@ -22,8 +22,16 @@ const CORES_GRAFICO = [
   '#06b6d4', '#0ea5e9', '#2563eb', '#4f46e5', '#7c3aed',
 ];
 
+const MESES_NOMES: Record<string, string> = {
+  '01': 'Janeiro', '02': 'Fevereiro', '03': 'Março', '04': 'Abril',
+  '05': 'Maio', '06': 'Junho', '07': 'Julho', '08': 'Agosto',
+  '09': 'Setembro', '10': 'Outubro', '11': 'Novembro', '12': 'Dezembro',
+};
+
 export default function DashboardRecalibra() {
   const [token, setToken] = useState('');
+  const [mesesSelecionados, setMesesSelecionados] = useState<string[]>([]);
+  const [mostrarFiltro, setMostrarFiltro] = useState(false);
 
   useEffect(() => {
     const savedToken = localStorage.getItem('recalibra_token');
@@ -32,13 +40,52 @@ export default function DashboardRecalibra() {
     }
   }, []);
 
-  const { data: stats, isLoading } = trpc.portalRecalibra.estatisticas.useQuery(
+  // Primeiro, buscar todas as calibragens para extrair meses disponíveis
+  const { data: calibragens } = trpc.portalRecalibra.listarCalibragens.useQuery(
     { token },
+    { enabled: !!token }
+  );
+
+  // Extrair meses disponíveis das calibragens
+  const mesesDisponiveis = useMemo(() => {
+    if (!calibragens) return [];
+    const mesesSet = new Set<string>();
+    calibragens.forEach((c: any) => {
+      if (c.data) {
+        const mesAno = c.data.substring(0, 7); // 'YYYY-MM'
+        mesesSet.add(mesAno);
+      }
+    });
+    return Array.from(mesesSet).sort().reverse(); // Mais recente primeiro
+  }, [calibragens]);
+
+  // Estabilizar o array para evitar re-renders infinitos
+  const mesesParam = useMemo(() => {
+    return mesesSelecionados.length > 0 ? mesesSelecionados : undefined;
+  }, [mesesSelecionados]);
+
+  const { data: stats, isLoading } = trpc.portalRecalibra.estatisticas.useQuery(
+    { token, mesesSelecionados: mesesParam },
     { enabled: !!token }
   );
 
   const handleVoltar = () => {
     window.history.back();
+  };
+
+  const toggleMes = (mes: string) => {
+    setMesesSelecionados(prev => 
+      prev.includes(mes) ? prev.filter(m => m !== mes) : [...prev, mes]
+    );
+  };
+
+  const limparFiltro = () => {
+    setMesesSelecionados([]);
+  };
+
+  const formatMesLabel = (mesAno: string) => {
+    const [ano, mes] = mesAno.split('-');
+    return `${MESES_NOMES[mes] || mes} ${ano}`;
   };
 
   // Dados para gráficos
@@ -117,8 +164,8 @@ export default function DashboardRecalibra() {
   // Marca mais frequente
   const marcaTop = dadosMarca.length > 0 ? dadosMarca[0] : null;
 
-  // Custom label para o donut - mostra nome e valor fora do gráfico
-  const renderCustomLabel = ({ cx, cy, midAngle, outerRadius, nome, valor, percent }: any) => {
+  // Custom label para o donut
+  const renderCustomLabel = ({ cx, cy, midAngle, outerRadius, nome, valor }: any) => {
     const RADIAN = Math.PI / 180;
     const radius = outerRadius + 25;
     const x = cx + radius * Math.cos(-midAngle * RADIAN);
@@ -156,7 +203,68 @@ export default function DashboardRecalibra() {
                 <p className="text-muted-foreground">{stats.unidadeNome}</p>
               </div>
             </div>
+            <Button
+              variant={mostrarFiltro ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setMostrarFiltro(!mostrarFiltro)}
+              className="gap-1"
+            >
+              <Filter className="h-4 w-4" />
+              Filtrar Mês
+              {mesesSelecionados.length > 0 && (
+                <span className="ml-1 bg-white text-teal-700 rounded-full px-1.5 py-0.5 text-xs font-bold">
+                  {mesesSelecionados.length}
+                </span>
+              )}
+            </Button>
           </div>
+
+          {/* Filtro de meses */}
+          {mostrarFiltro && (
+            <div className="mt-4 pt-4 border-t">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-sm font-medium text-gray-700 flex items-center gap-1">
+                  <CalendarDays className="h-4 w-4" />
+                  Selecionar meses:
+                </p>
+                {mesesSelecionados.length > 0 && (
+                  <Button variant="ghost" size="sm" onClick={limparFiltro} className="text-xs gap-1 h-7">
+                    <X className="h-3 w-3" />
+                    Limpar filtro
+                  </Button>
+                )}
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {mesesDisponiveis.map(mes => {
+                  const selecionado = mesesSelecionados.includes(mes);
+                  return (
+                    <button
+                      key={mes}
+                      onClick={() => toggleMes(mes)}
+                      className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors flex items-center gap-1 ${
+                        selecionado
+                          ? 'bg-teal-600 text-white border-teal-600'
+                          : 'bg-white text-gray-700 border-gray-300 hover:border-teal-400 hover:bg-teal-50'
+                      }`}
+                    >
+                      {selecionado && <Check className="h-3 w-3" />}
+                      {formatMesLabel(mes)}
+                    </button>
+                  );
+                })}
+              </div>
+              {mesesSelecionados.length > 0 && (
+                <p className="text-xs text-muted-foreground mt-2">
+                  A mostrar dados de: {mesesSelecionados.sort().map(formatMesLabel).join(', ')}
+                </p>
+              )}
+              {mesesSelecionados.length === 0 && (
+                <p className="text-xs text-muted-foreground mt-2">
+                  Nenhum filtro aplicado — a mostrar todos os dados
+                </p>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Cards de Resumo */}
@@ -218,7 +326,7 @@ export default function DashboardRecalibra() {
           </Card>
         </div>
 
-        {/* Gráficos - Linha 1: Tipo (grande, centrado) */}
+        {/* Gráficos - Tipo (grande, centrado) */}
         <Card className="bg-white mb-6">
           <CardHeader className="pb-2">
             <CardTitle className="text-lg">Distribuição por Tipo</CardTitle>
@@ -258,9 +366,8 @@ export default function DashboardRecalibra() {
           </CardContent>
         </Card>
 
-        {/* Gráficos - Linha 2: Marcas + Localidades */}
+        {/* Gráficos - Marcas + Localidades */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          {/* Top Marcas */}
           <Card className="bg-white">
             <CardHeader className="pb-2">
               <CardTitle className="text-lg">Top Marcas</CardTitle>
@@ -285,7 +392,6 @@ export default function DashboardRecalibra() {
             </CardContent>
           </Card>
 
-          {/* Calibragens por Localidade */}
           <Card className="bg-white">
             <CardHeader className="pb-2">
               <CardTitle className="text-lg">Por Localidade</CardTitle>
@@ -311,7 +417,7 @@ export default function DashboardRecalibra() {
           </Card>
         </div>
 
-        {/* Gráfico - Evolução Semanal (largura total) */}
+        {/* Evolução Semanal */}
         <Card className="bg-white mb-6">
           <CardHeader className="pb-2">
             <CardTitle className="text-lg">Evolução Semanal</CardTitle>

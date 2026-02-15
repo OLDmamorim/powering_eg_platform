@@ -10831,21 +10831,59 @@ IMPORTANTE:
         return db.criarMarca(input.nome);
       }),
 
+    // Apagar calibragem
+    apagarCalibragem: publicProcedure
+      .input(z.object({ token: z.string(), calibragemId: z.number() }))
+      .mutation(async ({ input }) => {
+        const tokenData = await db.validateTokenRecalibra(input.token);
+        if (!tokenData) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        // Buscar a calibragem e verificar se pertence à unidade
+        const calibragens = await db.getHistoricoCalibragens(
+          tokenData.unidade.id, undefined, undefined, undefined
+        );
+        const calibragem = calibragens.find((c: any) => c.id === input.calibragemId);
+        if (!calibragem) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Calibragem não encontrada' });
+        }
+        // Apagar usando getDb()
+        const { getDb } = await import('./db');
+        const { calibragens: calibragensTable } = await import('../drizzle/schema');
+        const { eq } = await import('drizzle-orm');
+        const drizzleDb = await getDb();
+        if (!drizzleDb) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'DB indisponível' });
+        await drizzleDb.delete(calibragensTable).where(eq(calibragensTable.id, input.calibragemId));
+        return { success: true };
+      }),
+
     // Estatísticas de calibragens para dashboard
     estatisticas: publicProcedure
-      .input(z.object({ token: z.string() }))
+      .input(z.object({ 
+        token: z.string(),
+        mesesSelecionados: z.array(z.string()).optional(), // formato 'YYYY-MM'
+      }))
       .query(async ({ input }) => {
         const tokenData = await db.validateTokenRecalibra(input.token);
         if (!tokenData) {
           throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
         }
         
-        const todasCalibragens = await db.getHistoricoCalibragens(
+        let todasCalibragens = await db.getHistoricoCalibragens(
           tokenData.unidade.id,
           undefined,
           undefined,
           undefined
         );
+
+        // Filtrar por meses selecionados
+        if (input.mesesSelecionados && input.mesesSelecionados.length > 0) {
+          todasCalibragens = todasCalibragens.filter((c: any) => {
+            if (!c.data) return false;
+            const mesAno = c.data.substring(0, 7); // 'YYYY-MM'
+            return input.mesesSelecionados!.includes(mesAno);
+          });
+        }
 
         const total = todasCalibragens.length;
 
