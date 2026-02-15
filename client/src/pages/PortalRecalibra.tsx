@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
-import { Loader2, CheckCircle2, ChevronDown, BarChart3, Trash2, Pencil } from 'lucide-react';
+import { Loader2, CheckCircle2, ChevronDown, BarChart3, Trash2, Pencil, Search, Filter } from 'lucide-react';
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
@@ -178,6 +178,10 @@ export default function PortalRecalibra() {
   const [outrosLoja, setOutrosLoja] = useState('');
   const [paginaHistorico, setPaginaHistorico] = useState(1);
   const ITEMS_POR_PAGINA = 20;
+
+  // Filtros do histórico
+  const [filtroLoja, setFiltroLoja] = useState<string>('todas');
+  const [pesquisaMatricula, setPesquisaMatricula] = useState('');
 
   // Estado para edição
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -641,9 +645,45 @@ export default function PortalRecalibra() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {!calibragensData || calibragensData.length === 0 ? (
+            {/* Filtros */}
+            <div className="flex flex-col sm:flex-row gap-3 mb-4">
+              <div className="flex-1">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Pesquisar por matrícula..."
+                    value={pesquisaMatricula}
+                    onChange={(e) => { setPesquisaMatricula(e.target.value); setPaginaHistorico(1); }}
+                    className="pl-9"
+                  />
+                </div>
+              </div>
+              <div className="w-full sm:w-48">
+                <Select value={filtroLoja} onValueChange={(v) => { setFiltroLoja(v); setPaginaHistorico(1); }}>
+                  <SelectTrigger>
+                    <Filter className="h-4 w-4 mr-2 text-muted-foreground" />
+                    <SelectValue placeholder="Filtrar por loja" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="todas">Todas as lojas</SelectItem>
+                    {lojasDisponiveis.map((loja: any) => (
+                      <SelectItem key={loja.id} value={loja.id.toString()}>
+                        {loja.nome}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            {(() => {
+              const dadosFiltrados = (calibragensData || []).filter((item: any) => {
+                const matchLoja = filtroLoja === 'todas' || (item.loja?.id?.toString() === filtroLoja) || (item.lojaId?.toString() === filtroLoja);
+                const matchMatricula = !pesquisaMatricula || (item.matricula || '').toUpperCase().includes(pesquisaMatricula.toUpperCase().replace(/-/g, '').replace(/[^A-Z0-9]/g, '')) || (item.matricula || '').toUpperCase().replace(/-/g, '').includes(pesquisaMatricula.toUpperCase().replace(/-/g, ''));
+                return matchLoja && matchMatricula;
+              });
+              return dadosFiltrados.length === 0 ? (
               <p className="text-center text-muted-foreground py-8">
-                Nenhuma calibragem registada ainda
+                {(pesquisaMatricula || filtroLoja !== 'todas') ? 'Nenhum resultado encontrado para os filtros aplicados' : 'Nenhuma calibragem registada ainda'}
               </p>
             ) : (
               <div className="overflow-x-auto">
@@ -660,7 +700,7 @@ export default function PortalRecalibra() {
                     </tr>
                   </thead>
                   <tbody>
-                    {calibragensData.slice(0, paginaHistorico * ITEMS_POR_PAGINA).map((item: any, idx: number) => (
+                    {dadosFiltrados.slice(0, paginaHistorico * ITEMS_POR_PAGINA).map((item: any, idx: number) => (
                       <tr key={idx} className="border-b hover:bg-muted/30">
                         <td className="p-2">{item.data || '-'}</td>
                         <td className="p-2 font-mono">{item.matricula || '-'}</td>
@@ -724,9 +764,9 @@ export default function PortalRecalibra() {
                 </table>
                 <div className="flex flex-col items-center gap-2 mt-4">
                   <p className="text-muted-foreground text-sm">
-                    Mostrando {Math.min(paginaHistorico * ITEMS_POR_PAGINA, calibragensData.length)} de {calibragensData.length} registos
+                    Mostrando {Math.min(paginaHistorico * ITEMS_POR_PAGINA, dadosFiltrados.length)} de {dadosFiltrados.length} registos{(pesquisaMatricula || filtroLoja !== 'todas') ? ' (filtrado)' : ''}
                   </p>
-                  {paginaHistorico * ITEMS_POR_PAGINA < calibragensData.length && (
+                  {paginaHistorico * ITEMS_POR_PAGINA < dadosFiltrados.length && (
                     <Button
                       variant="outline"
                       size="sm"
@@ -738,7 +778,8 @@ export default function PortalRecalibra() {
                   )}
                 </div>
               </div>
-            )}
+            );
+            })()}
           </CardContent>
         </Card>
 

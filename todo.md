@@ -4830,3 +4830,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Aplicar mesma lógica no formulário de edição de calibragens
 - [x] Adicionar coluna localidadePadrao à tabela lojas no schema
 - [x] Preencher localidadePadrao para 70 lojas na BD
+
+## Recalibra - Filtros no Histórico
+- [x] Adicionar filtro por loja no histórico de calibragens
+- [x] Adicionar campo de pesquisa por matrícula no histórico
