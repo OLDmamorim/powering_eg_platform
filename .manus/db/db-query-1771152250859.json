@@ -1,0 +1,18 @@
+{
+  "query": "SELECT * FROM gestores WHERE userId IN (1, 2) LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT * FROM gestores WHERE userId IN (1, 2) LIMIT 5;",
+  "rows": [
+    {
+      "id": "1380001",
+      "userId": "1",
+      "createdAt": "2026-01-18 12:18:04",
+      "updatedAt": "2026-01-18 12:18:04",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tuserId\tcreatedAt\tupdatedAt\tlastReminderDate\tlastEnvioRH\n1380001\t1\t2026-01-18 12:18:04\t2026-01-18 12:18:04\tNULL\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 56
+}

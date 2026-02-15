@@ -1,123 +1,86 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { trpc } from '@/lib/trpc';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { Loader2, Plus, Pencil, Trash2, Key, Copy, ArrowLeft } from 'lucide-react';
-import { useAuth } from '@/_core/hooks/useAuth';
+import { Plus, Pencil, Trash2, Key, Copy, ArrowLeft, Store, Send, Check } from 'lucide-react';
 
 export default function GestaoRecalibra() {
-  const { user } = useAuth();
-  
-  // Queries
-  const { data: unidades, refetch: refetchUnidades } = trpc.gestaoRecalibra.listar.useQuery();
-  const { data: gestores } = trpc.gestores.listar.useQuery();
-  const { data: todasLojas } = trpc.lojas.listar.useQuery();
-  
-  // Verificar se user tem perfil de gestor (independente do role)
-  const meuGestor = useMemo(() => {
-    return gestores?.find(g => g.userId === user?.id);
-  }, [gestores, user?.id]);
-  
-  const isGestor = !!meuGestor; // Se tem perfil de gestor, mostrar formulário simplificado
-  const isAdmin = !isGestor; // Apenas mostrar formulário completo se NÃO tiver perfil de gestor
-  
-  // Para gestores: filtrar apenas suas lojas; para admins: todas as lojas
-  const lojas = useMemo(() => {
-    if (!isGestor || !meuGestor || !todasLojas) return todasLojas || [];
-    // Buscar IDs das lojas do gestor via gestor_lojas
-    return todasLojas; // Por agora retornar todas - vamos corrigir depois
-  }, [isGestor, meuGestor, todasLojas]);
-
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [tokensDialogOpen, setTokensDialogOpen] = useState(false);
   const [editingUnidade, setEditingUnidade] = useState<any>(null);
-  const [selectedUnidadeId, setSelectedUnidadeId] = useState<number | null>(null);
-  
+  const [lojasDialogOpen, setLojasDialogOpen] = useState(false);
+  const [selectedUnidadeForLojas, setSelectedUnidadeForLojas] = useState<any>(null);
+  const [selectedLojaIds, setSelectedLojaIds] = useState<number[]>([]);
+  const [copiedToken, setCopiedToken] = useState<number | null>(null);
+
+  // Form state - apenas nome, como no Volante
   const [nome, setNome] = useState('');
-  const [gestorId, setGestorId] = useState<number | null>(null);
-  const [lojasIds, setLojasIds] = useState<number[]>([]);
-  const { data: tokens } = trpc.gestaoRecalibra.listarTokens.useQuery(
-    { unidadeId: selectedUnidadeId! },
-    { enabled: !!selectedUnidadeId }
-  );
+
+  // Queries
+  const { data: unidades, isLoading, refetch } = trpc.gestaoRecalibra.listar.useQuery();
+  const { data: lojasDisponiveis } = trpc.lojas.listar.useQuery();
 
   // Mutations
-  const criarMutation = trpc.gestaoRecalibra.criar.useMutation({
+  const criarUnidade = trpc.gestaoRecalibra.criar.useMutation({
     onSuccess: () => {
-      toast({ title: 'Unidade criada com sucesso!' });
-      refetchUnidades();
-      resetForm();
+      toast.success('Unidade criada com sucesso!');
       setDialogOpen(false);
-    },
-    onError: (error) => {
-      toast({ title: 'Erro ao criar unidade', description: error.message, variant: 'destructive' });
-    },
-  });
-
-  const atualizarMutation = trpc.gestaoRecalibra.atualizar.useMutation({
-    onSuccess: () => {
-      toast({ title: 'Unidade atualizada com sucesso!' });
-      refetchUnidades();
       resetForm();
+      refetch();
+    },
+    onError: (error: any) => {
+      toast.error('Erro ao criar unidade', { description: error.message });
+    },
+  });
+
+  const atualizarUnidade = trpc.gestaoRecalibra.atualizar.useMutation({
+    onSuccess: () => {
+      toast.success('Unidade atualizada com sucesso!');
       setDialogOpen(false);
+      setEditingUnidade(null);
+      resetForm();
+      refetch();
     },
-    onError: (error) => {
-      toast({ title: 'Erro ao atualizar unidade', description: error.message, variant: 'destructive' });
+    onError: (error: any) => {
+      toast.error('Erro ao atualizar unidade', { description: error.message });
     },
   });
 
-  const eliminarMutation = trpc.gestaoRecalibra.eliminar.useMutation({
+  const eliminarUnidade = trpc.gestaoRecalibra.eliminar.useMutation({
     onSuccess: () => {
-      toast({ title: 'Unidade eliminada com sucesso!' });
-      refetchUnidades();
+      toast.success('Unidade eliminada com sucesso!');
+      refetch();
     },
-    onError: (error) => {
-      toast({ title: 'Erro ao eliminar unidade', description: error.message, variant: 'destructive' });
-    },
-  });
-
-  const gerarTokenMutation = trpc.gestaoRecalibra.gerarToken.useMutation({
-    onSuccess: (token) => {
-      toast({ title: 'Token gerado com sucesso!' });
-      // Copiar token para clipboard
-      navigator.clipboard.writeText(token.token);
-      refetchUnidades();
-    },
-    onError: (error) => {
-      toast({ title: 'Erro ao gerar token', description: error.message, variant: 'destructive' });
+    onError: (error: any) => {
+      toast.error('Erro ao eliminar unidade', { description: error.message });
     },
   });
 
-  const revogarTokenMutation = trpc.gestaoRecalibra.revogarToken.useMutation({
+  const gerarToken = trpc.gestaoRecalibra.gerarToken.useMutation({
     onSuccess: () => {
-      toast({ title: 'Token revogado com sucesso!' });
-      refetchUnidades();
+      toast.success('Token gerado com sucesso!');
+      refetch();
     },
-    onError: (error) => {
-      toast({ title: 'Erro ao revogar token', description: error.message, variant: 'destructive' });
+    onError: (error: any) => {
+      toast.error('Erro ao gerar token', { description: error.message });
     },
   });
 
   const resetForm = () => {
     setNome('');
-    setGestorId(null);
-    setLojasIds([]);
-    setEditingUnidade(null);
   };
 
   const handleOpenDialog = (unidade?: any) => {
     if (unidade) {
       setEditingUnidade(unidade);
       setNome(unidade.nome);
-      setGestorId(unidade.gestorId);
-      // TODO: Carregar lojas associadas
-      setLojasIds([]);
     } else {
+      setEditingUnidade(null);
       resetForm();
     }
     setDialogOpen(true);
@@ -130,46 +93,45 @@ export default function GestaoRecalibra() {
     }
 
     if (editingUnidade) {
-      atualizarMutation.mutate({
+      atualizarUnidade.mutate({
         id: editingUnidade.id,
         nome,
-        gestorId: gestorId!,
-        lojasIds,
+        gestorId: editingUnidade.gestorId,
+        lojasIds: editingUnidade.lojas?.map((l: any) => l.id) || [],
       });
     } else {
-      // Backend vai auto-detectar se é gestor e auto-atribuir
-      criarMutation.mutate({
-        nome,
-        gestorId,
-        lojasIds,
+      // Backend auto-detecta gestor e auto-atribui lojas
+      criarUnidade.mutate({ nome });
+    }
+  };
+
+  const handleOpenLojasDialog = (unidade: any) => {
+    setSelectedUnidadeForLojas(unidade);
+    setSelectedLojaIds(unidade.lojas?.map((l: any) => l.id) || []);
+    setLojasDialogOpen(true);
+  };
+
+  const handleAtribuirLojas = () => {
+    if (selectedUnidadeForLojas) {
+      atualizarUnidade.mutate({
+        id: selectedUnidadeForLojas.id,
+        nome: selectedUnidadeForLojas.nome,
+        gestorId: selectedUnidadeForLojas.gestorId,
+        lojasIds: selectedLojaIds,
       });
+      setLojasDialogOpen(false);
+      setSelectedUnidadeForLojas(null);
+      setSelectedLojaIds([]);
     }
   };
 
-  const handleEliminar = (id: number) => {
-    if (confirm('Tem a certeza que deseja eliminar esta unidade?')) {
-      eliminarMutation.mutate({ id });
-    }
-  };
-
-  const handleGerarToken = (unidadeId: number) => {
-    gerarTokenMutation.mutate({ unidadeId });
-  };
-
-  const handleVerTokens = (unidadeId: number) => {
-    setSelectedUnidadeId(unidadeId);
-    setTokensDialogOpen(true);
-  };
-
-  const handleRevogarToken = (tokenId: number) => {
-    if (confirm('Tem a certeza que deseja revogar este token?')) {
-      revogarTokenMutation.mutate({ tokenId });
-    }
-  };
-
-  const handleCopyToken = (token: string) => {
-    navigator.clipboard.writeText(token);
-    toast({ title: 'Token copiado para a área de transferência!' });
+  const handleCopyToken = async (token: string, unidadeId: number) => {
+    const baseUrl = window.location.origin;
+    const url = `${baseUrl}/portal-recalibra?token=${token}`;
+    await navigator.clipboard.writeText(url);
+    setCopiedToken(unidadeId);
+    toast.success('Link copiado!');
+    setTimeout(() => setCopiedToken(null), 2000);
   };
 
   return (
@@ -178,10 +140,11 @@ export default function GestaoRecalibra() {
         <ArrowLeft className="mr-2 h-4 w-4" />
         Voltar
       </Button>
+
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-3xl font-bold">Gestão Recalibra</h1>
-          <p className="text-muted-foreground">Gerir unidades de calibragem e gestores responsáveis</p>
+          <p className="text-muted-foreground">Gerir unidades de calibragem</p>
         </div>
         <Button onClick={() => handleOpenDialog()}>
           <Plus className="mr-2 h-4 w-4" />
@@ -189,47 +152,13 @@ export default function GestaoRecalibra() {
         </Button>
       </div>
 
-      {/* Lista de Unidades */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {unidades?.map((unidade) => {
-          const gestor = gestores?.find((g) => g.id === unidade.gestorId);
-          
-          return (
-            <Card key={unidade.id}>
-              <CardHeader>
-                <CardTitle>{unidade.nome}</CardTitle>
-                <CardDescription>
-                  Gestor: {gestor?.nome || 'Não atribuído'}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={() => handleOpenDialog(unidade)}>
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={() => handleEliminar(unidade.id)}>
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={() => handleGerarToken(unidade.id)}>
-                    <Key className="h-4 w-4" />
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={() => handleVerTokens(unidade.id)}>
-                    Tokens
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
-
-      {/* Dialog Criar/Editar Unidade */}
+      {/* Dialog Criar/Editar - Apenas nome, como no Volante */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{editingUnidade ? 'Editar Unidade' : 'Nova Unidade'}</DialogTitle>
             <DialogDescription>
-              {isAdmin ? 'Configure a unidade de calibragem e atribua um gestor responsável' : 'Crie uma nova unidade de calibragem para as suas lojas'}
+              {editingUnidade ? 'Atualize os dados da unidade' : 'Preencha o nome da nova unidade de calibragem'}
             </DialogDescription>
           </DialogHeader>
 
@@ -243,112 +172,166 @@ export default function GestaoRecalibra() {
                 placeholder="Ex: Recalibra Minho"
               />
             </div>
-
-            {isAdmin && (
-              <div>
-                <Label htmlFor="gestor">Gestor Responsável</Label>
-                <Select value={gestorId?.toString()} onValueChange={(v) => setGestorId(parseInt(v))}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione um gestor" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {gestores?.map((gestor) => (
-                      <SelectItem key={gestor.id} value={gestor.id.toString()}>
-                        {gestor.nome}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-
-            {isAdmin && (
-              <div>
-                <Label>Lojas Associadas</Label>
-                <div className="border rounded-md p-4 max-h-48 overflow-y-auto space-y-2">
-                  {lojas?.map((loja) => (
-                    <label key={loja.id} className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        checked={lojasIds.includes(loja.id)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setLojasIds([...lojasIds, loja.id]);
-                          } else {
-                            setLojasIds(lojasIds.filter((id) => id !== loja.id));
-                          }
-                        }}
-                      />
-                      <span>{loja.nome}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {!isAdmin && (
-              <p className="text-sm text-muted-foreground">
-                Esta unidade será criada para si e incluirá automaticamente todas as suas lojas.
-              </p>
-            )}
           </div>
 
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>
-              Cancelar
+          <DialogFooter className="flex flex-col gap-2 sm:flex-row">
+            <Button
+              onClick={handleSubmit}
+              disabled={!nome || criarUnidade.isPending || atualizarUnidade.isPending}
+              className="w-full sm:w-auto"
+            >
+              {editingUnidade ? 'Guardar' : 'Criar'}
             </Button>
-            <Button onClick={handleSubmit} disabled={criarMutation.isPending || atualizarMutation.isPending}>
-              {(criarMutation.isPending || atualizarMutation.isPending) && (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              )}
-              {editingUnidade ? 'Atualizar' : 'Criar'}
+            <Button variant="outline" onClick={() => setDialogOpen(false)} className="w-full sm:w-auto">
+              Cancelar
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Dialog Tokens */}
-      <Dialog open={tokensDialogOpen} onOpenChange={setTokensDialogOpen}>
-        <DialogContent className="max-w-2xl">
+      {/* Lista de Unidades */}
+      {isLoading ? (
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+        </div>
+      ) : unidades && unidades.length > 0 ? (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {unidades.map((unidade: any) => (
+            <Card key={unidade.id} className="relative">
+              <CardHeader className="pb-3">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <CardTitle className="text-lg">{unidade.nome}</CardTitle>
+                    <CardDescription className="mt-1">
+                      {unidade.lojas?.length || 0} lojas associadas
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {/* Lojas badges */}
+                {unidade.lojas && unidade.lojas.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mb-3">
+                    {unidade.lojas.slice(0, 5).map((loja: any) => (
+                      <Badge key={loja.id} variant="secondary" className="text-xs">
+                        {loja.nome}
+                      </Badge>
+                    ))}
+                    {unidade.lojas.length > 5 && (
+                      <Badge variant="outline" className="text-xs">
+                        +{unidade.lojas.length - 5}
+                      </Badge>
+                    )}
+                  </div>
+                )}
+
+                {/* Token / Link */}
+                {unidade.token && (
+                  <div className="mb-3 p-2 bg-muted rounded-md">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-muted-foreground font-mono truncate flex-1 mr-2">
+                        {unidade.token.substring(0, 20)}...
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleCopyToken(unidade.token, unidade.id)}
+                      >
+                        {copiedToken === unidade.id ? (
+                          <Check className="h-4 w-4 text-green-500" />
+                        ) : (
+                          <Copy className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Ações */}
+                <div className="flex gap-2 flex-wrap">
+                  <Button variant="outline" size="sm" onClick={() => handleOpenDialog(unidade)}>
+                    <Pencil className="h-4 w-4 mr-1" />
+                    Editar
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => handleOpenLojasDialog(unidade)}>
+                    <Store className="h-4 w-4 mr-1" />
+                    Lojas
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => gerarToken.mutate({ unidadeId: unidade.id })}>
+                    <Key className="h-4 w-4 mr-1" />
+                    Token
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-destructive hover:text-destructive"
+                    onClick={() => {
+                      if (confirm('Tem a certeza que deseja eliminar esta unidade?')) {
+                        eliminarUnidade.mutate({ id: unidade.id });
+                      }
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <Key className="h-12 w-12 text-muted-foreground mb-4" />
+            <h3 className="text-lg font-semibold mb-2">Nenhuma unidade criada</h3>
+            <p className="text-muted-foreground mb-4 text-center">
+              Crie a sua primeira unidade de calibragem para começar
+            </p>
+            <Button onClick={() => handleOpenDialog()}>
+              <Plus className="mr-2 h-4 w-4" />
+              Criar Primeira Unidade
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Dialog Atribuir Lojas - como no Volante */}
+      <Dialog open={lojasDialogOpen} onOpenChange={setLojasDialogOpen}>
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle>Tokens de Acesso</DialogTitle>
+            <DialogTitle>Lojas Associadas</DialogTitle>
             <DialogDescription>
-              Tokens ativos para acesso ao Portal Recalibra
+              Selecione as lojas que a unidade "{selectedUnidadeForLojas?.nome}" irá cobrir
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4">
-            {tokens?.map((token) => (
-              <Card key={token.id}>
-                <CardContent className="pt-6">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1 font-mono text-sm truncate mr-4">
-                      {token.token}
-                    </div>
-                    <div className="flex gap-2">
-                      <Button variant="outline" size="sm" onClick={() => handleCopyToken(token.token)}>
-                        <Copy className="h-4 w-4" />
-                      </Button>
-                      <Button variant="outline" size="sm" onClick={() => handleRevogarToken(token.id)}>
-                        Revogar
-                      </Button>
-                    </div>
-                  </div>
-                  <div className="text-xs text-muted-foreground mt-2">
-                    Criado: {new Date(token.createdAt).toLocaleString('pt-PT')}
-                  </div>
-                </CardContent>
-              </Card>
+          <div className="max-h-[400px] overflow-y-auto space-y-2">
+            {lojasDisponiveis?.map((loja: any) => (
+              <label
+                key={loja.id}
+                className="flex items-center space-x-3 p-2 rounded-lg hover:bg-muted cursor-pointer"
+              >
+                <Checkbox
+                  checked={selectedLojaIds.includes(loja.id)}
+                  onCheckedChange={(checked) => {
+                    if (checked) {
+                      setSelectedLojaIds([...selectedLojaIds, loja.id]);
+                    } else {
+                      setSelectedLojaIds(selectedLojaIds.filter((id) => id !== loja.id));
+                    }
+                  }}
+                />
+                <span className="text-sm">{loja.nome}</span>
+              </label>
             ))}
-            {tokens?.length === 0 && (
-              <p className="text-center text-muted-foreground py-8">
-                Nenhum token ativo
-              </p>
-            )}
           </div>
 
           <DialogFooter>
-            <Button onClick={() => setTokensDialogOpen(false)}>Fechar</Button>
+            <Button variant="outline" onClick={() => setLojasDialogOpen(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleAtribuirLojas} disabled={atualizarUnidade.isPending}>
+              Guardar Lojas
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -1732,6 +1732,11 @@ IMPORTANTE:
       return await db.getAllGestores();
     }),
     
+    // Alias para listar (acessível por todos os users autenticados)
+    listar: protectedProcedure.query(async () => {
+      return await db.getAllGestores();
+    }),
+    
     // Listar utilizadores para atribuição de tarefas (acessível por gestores e admins)
     listarParaTodos: gestorProcedure.query(async () => {
       return await db.getAllUsersParaTodos();
@@ -10617,11 +10622,20 @@ IMPORTANTE:
 
   // ==================== GESTÃO RECALIBRA ====================
   gestaoRecalibra: router({
-    // Listar todas as unidades (admin)
-    listar: adminProcedure
-      .query(async () => {
-        const unidades = await db.getAllUnidadesRecalibra();
-        return unidades;
+    // Listar unidades (gestores veem apenas as suas)
+    listar: protectedProcedure
+      .query(async ({ ctx }) => {
+        // Verificar se é gestor
+        const meuGestor = await db.getGestorByUserId(ctx.user.id);
+        
+        if (meuGestor) {
+          // É gestor: retornar apenas unidades onde ele é o gestor
+          const todasUnidades = await db.getAllUnidadesRecalibra();
+          return todasUnidades.filter(u => u.gestorId === meuGestor.id);
+        }
+        
+        // Admin: retornar todas
+        return await db.getAllUnidadesRecalibra();
       }),
 
     // Criar unidade
@@ -10665,7 +10679,7 @@ IMPORTANTE:
       }),
 
     // Atualizar unidade
-    atualizar: adminProcedure
+    atualizar: protectedProcedure
       .input(z.object({
         id: z.number(),
         nome: z.string().min(1),
@@ -10685,7 +10699,7 @@ IMPORTANTE:
       }),
 
     // Eliminar unidade
-    eliminar: adminProcedure
+    eliminar: protectedProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input }) => {
         await db.deleteUnidadeRecalibra(input.id);
@@ -10693,7 +10707,7 @@ IMPORTANTE:
       }),
 
     // Gerar token
-    gerarToken: adminProcedure
+    gerarToken: protectedProcedure
       .input(z.object({ unidadeId: z.number() }))
       .mutation(async ({ input }) => {
         const tokenStr = await db.generateTokenRecalibra(input.unidadeId);
@@ -10702,7 +10716,7 @@ IMPORTANTE:
       }),
 
     // Listar tokens
-    listarTokens: adminProcedure
+    listarTokens: protectedProcedure
       .input(z.object({ unidadeId: z.number() }))
       .query(async ({ input }) => {
         // TODO: Implementar listagem de tokens
@@ -10711,7 +10725,7 @@ IMPORTANTE:
       }),
 
     // Revogar token
-    revogarToken: adminProcedure
+    revogarToken: protectedProcedure
       .input(z.object({ tokenId: z.number() }))
       .mutation(async ({ input }) => {
         await db.revokeTokenRecalibra(input.tokenId);

@@ -1,0 +1,90 @@
+{
+  "query": "SELECT * FROM gestores LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT * FROM gestores LIMIT 10;",
+  "rows": [
+    {
+      "id": "2",
+      "userId": "240006",
+      "createdAt": "2025-12-15 01:00:03",
+      "updatedAt": "2025-12-15 01:00:03",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "30001",
+      "userId": "420030",
+      "createdAt": "2025-12-15 12:32:47",
+      "updatedAt": "2026-02-11 17:03:09",
+      "lastReminderDate": "2026-01-31 18:00:39",
+      "lastEnvioRH": "2026-02-11 17:03:09"
+    },
+    {
+      "id": "120001",
+      "userId": "2160121",
+      "createdAt": "2025-12-17 22:44:52",
+      "updatedAt": "2026-01-09 12:35:57",
+      "lastReminderDate": "2026-01-09 12:35:58",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "210001",
+      "userId": "240006",
+      "createdAt": "2025-12-19 16:50:02",
+      "updatedAt": "2025-12-19 16:50:02",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "240001",
+      "userId": "4020003",
+      "createdAt": "2025-12-20 01:41:43",
+      "updatedAt": "2025-12-20 01:41:43",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "240003",
+      "userId": "4020003",
+      "createdAt": "2025-12-20 01:42:56",
+      "updatedAt": "2025-12-20 01:42:56",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "240005",
+      "userId": "4020003",
+      "createdAt": "2025-12-20 01:43:19",
+      "updatedAt": "2025-12-20 01:43:19",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "270001",
+      "userId": "4050001",
+      "createdAt": "2025-12-20 01:53:50",
+      "updatedAt": "2025-12-20 01:53:50",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "270003",
+      "userId": "4050001",
+      "createdAt": "2025-12-20 01:54:19",
+      "updatedAt": "2025-12-20 01:54:19",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "300001",
+      "userId": "4080004",
+      "createdAt": "2025-12-20 02:06:10",
+      "updatedAt": "2025-12-20 02:06:10",
+      "lastReminderDate": "NULL",
+      "lastEnvioRH": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tuserId\tcreatedAt\tupdatedAt\tlastReminderDate\tlastEnvioRH\n2\t240006\t2025-12-15 01:00:03\t2025-12-15 01:00:03\tNULL\tNULL\n30001\t420030\t2025-12-15 12:32:47\t2026-02-11 17:03:09\t2026-01-31 18:00:39\t2026-02-11 17:03:09\n120001\t2160121\t2025-12-17 22:44:52\t2026-01-09 12:35:57\t2026-01-09 12:35:58\tNULL\n210001\t240006\t2025-12-19 16:50:02\t2025-12-19 16:50:02\tNULL\tNULL\n240001\t4020003\t2025-12-20 01:41:43\t2025-12-20 01:41:43\tNULL\tNULL\n240003\t4020003\t2025-12-20 01:42:56\t2025-12-20 01:42:56\tNULL\tNULL\n240005\t4020003\t2025-12-20 01:43:19\t2025-12-20 01:43:19\tNULL\tNULL\n270001\t4050001\t2025-12-20 01:53:50\t2025-12-20 01:53:50\tNULL\tNULL\n270003\t4050001\t2025-12-20 01:54:19\t2025-12-20 01:54:19\tNULL\tNULL\n300001\t4080004\t2025-12-20 02:06:10\t2025-12-20 02:06:10\tNULL\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 51
+}

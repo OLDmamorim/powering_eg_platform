@@ -4766,3 +4766,11 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] User com role admin MAS com perfil de gestor deve ver formulário simplificado
 - [x] Mudar endpoint criar de adminProcedure para protectedProcedure
 - [x] Backend auto-detecta se é gestor e auto-atribui gestorId e lojasIds
+
+## BUG URGENTE: Formulário Recalibra ainda mostra campos para gestor
+- [x] Formulário continua a mostrar "Gestor Responsável" e "Lojas Associadas" 
+- [x] Erro React: Minified React error #31
+- [x] isGestor/isAdmin não está a funcionar corretamente
+- [x] Reescrito formulário do zero - apenas campo Nome (como Volante)
+- [x] Todos endpoints gestaoRecalibra mudados de adminProcedure para protectedProcedure
+- [x] Backend auto-detecta gestor e auto-atribui lojas
