@@ -4799,3 +4799,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Criar endpoint de estatísticas de calibragens no backend
 - [x] Criar página DashboardRecalibra com gráficos (por tipo, marca, localidade, evolução temporal)
 - [x] Registar rota no App.tsx e adicionar link no portal
+
+## Recalibra Dashboard - Correções
+- [x] Remover gráfico "Evolução Diária" (não necessário)
+- [x] Remover/zerar gráfico "Por Loja" (dados históricos não têm registo por loja, é enganador)
+- [x] Corrigir gráfico "Distribuição por Tipo" (donut com labels corrigidas, nome+valor fora do gráfico)

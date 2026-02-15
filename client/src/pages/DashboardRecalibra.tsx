@@ -6,10 +6,10 @@ import { toast } from 'sonner';
 import { ArrowLeft, BarChart3, TrendingUp, Car, MapPin, Loader2, Activity, Calendar, Target } from 'lucide-react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell, Legend, LineChart, Line, Area, AreaChart,
+  PieChart, Pie, Cell, Legend, LineChart, Line,
 } from 'recharts';
 
-const CORES_TIPO = {
+const CORES_TIPO: Record<string, string> = {
   'DINÂMICA': '#3b82f6',
   'ESTÁTICA': '#22c55e',
   'CORE': '#a855f7',
@@ -45,7 +45,7 @@ export default function DashboardRecalibra() {
   const dadosTipo = useMemo(() => {
     if (!stats?.porTipo) return [];
     return Object.entries(stats.porTipo)
-      .map(([nome, valor]) => ({ nome, valor, fill: (CORES_TIPO as any)[nome] || '#6b7280' }))
+      .map(([nome, valor]) => ({ nome, valor, fill: CORES_TIPO[nome] || '#6b7280' }))
       .sort((a, b) => b.valor - a.valor);
   }, [stats]);
 
@@ -64,17 +64,6 @@ export default function DashboardRecalibra() {
       .sort((a, b) => b.valor - a.valor);
   }, [stats]);
 
-  const dadosEvolucao = useMemo(() => {
-    if (!stats?.evolucaoDiaria) return [];
-    return Object.entries(stats.evolucaoDiaria)
-      .map(([data, valor]) => ({
-        data,
-        dataFormatada: new Date(data + 'T00:00:00').toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit' }),
-        valor,
-      }))
-      .sort((a, b) => a.data.localeCompare(b.data));
-  }, [stats]);
-
   const dadosSemanal = useMemo(() => {
     if (!stats?.evolucaoSemanal) return [];
     return Object.entries(stats.evolucaoSemanal)
@@ -84,13 +73,6 @@ export default function DashboardRecalibra() {
         valor,
       }))
       .sort((a, b) => a.data.localeCompare(b.data));
-  }, [stats]);
-
-  const dadosLoja = useMemo(() => {
-    if (!stats?.porLoja) return [];
-    return Object.entries(stats.porLoja)
-      .map(([nome, valor]) => ({ nome, valor }))
-      .sort((a, b) => b.valor - a.valor);
   }, [stats]);
 
   if (!token) {
@@ -134,8 +116,27 @@ export default function DashboardRecalibra() {
 
   // Marca mais frequente
   const marcaTop = dadosMarca.length > 0 ? dadosMarca[0] : null;
-  // Localidade mais frequente
-  const localidadeTop = dadosLocalidade.length > 0 ? dadosLocalidade[0] : null;
+
+  // Custom label para o donut - mostra nome e valor fora do gráfico
+  const renderCustomLabel = ({ cx, cy, midAngle, outerRadius, nome, valor, percent }: any) => {
+    const RADIAN = Math.PI / 180;
+    const radius = outerRadius + 25;
+    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+    return (
+      <text
+        x={x}
+        y={y}
+        fill="#374151"
+        textAnchor={x > cx ? 'start' : 'end'}
+        dominantBaseline="central"
+        fontSize={12}
+        fontWeight={600}
+      >
+        {`${nome} (${valor})`}
+      </text>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 to-cyan-50 p-4">
@@ -217,71 +218,45 @@ export default function DashboardRecalibra() {
           </Card>
         </div>
 
-        {/* Gráficos - Linha 1: Tipo + Evolução Diária */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          {/* Distribuição por Tipo */}
-          <Card className="bg-white">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg">Distribuição por Tipo</CardTitle>
-              <CardDescription>Calibragens por tipo de calibragem</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[280px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={dadosTipo}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={100}
-                      paddingAngle={3}
-                      dataKey="valor"
-                      nameKey="nome"
-                      label={({ nome, valor, percent }) => `${nome} (${valor})`}
-                    >
-                      {dadosTipo.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.fill} />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(value: number) => [value, 'Calibragens']} />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Evolução Diária */}
-          <Card className="bg-white">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg">Evolução Diária</CardTitle>
-              <CardDescription>Calibragens por dia</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[280px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={dadosEvolucao}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                    <XAxis dataKey="dataFormatada" tick={{ fontSize: 11 }} />
-                    <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
-                    <Tooltip
-                      formatter={(value: number) => [value, 'Calibragens']}
-                      labelFormatter={(label) => `Data: ${label}`}
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="valor"
-                      stroke="#0d9488"
-                      fill="#ccfbf1"
-                      strokeWidth={2}
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        {/* Gráficos - Linha 1: Tipo (grande, centrado) */}
+        <Card className="bg-white mb-6">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">Distribuição por Tipo</CardTitle>
+            <CardDescription>Calibragens por tipo de calibragem</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={dadosTipo}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={55}
+                    outerRadius={95}
+                    paddingAngle={4}
+                    dataKey="valor"
+                    nameKey="nome"
+                    label={renderCustomLabel}
+                    labelLine={false}
+                  >
+                    {dadosTipo.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.fill} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value: number) => [value, 'Calibragens']} />
+                  <Legend
+                    verticalAlign="bottom"
+                    formatter={(value: string) => {
+                      const item = dadosTipo.find(d => d.nome === value);
+                      return `${value} (${item?.valor || 0})`;
+                    }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Gráficos - Linha 2: Marcas + Localidades */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
@@ -336,68 +311,33 @@ export default function DashboardRecalibra() {
           </Card>
         </div>
 
-        {/* Gráficos - Linha 3: Evolução Semanal + Por Loja */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          {/* Evolução Semanal */}
-          <Card className="bg-white">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg">Evolução Semanal</CardTitle>
-              <CardDescription>Calibragens por semana</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[280px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={dadosSemanal}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                    <XAxis dataKey="semana" tick={{ fontSize: 11 }} />
-                    <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
-                    <Tooltip formatter={(value: number) => [value, 'Calibragens']} />
-                    <Line
-                      type="monotone"
-                      dataKey="valor"
-                      stroke="#6366f1"
-                      strokeWidth={2}
-                      dot={{ fill: '#6366f1', r: 4 }}
-                      activeDot={{ r: 6 }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Por Loja */}
-          <Card className="bg-white">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg">Por Loja</CardTitle>
-              <CardDescription>Calibragens por loja de origem</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[280px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={dadosLoja}
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={100}
-                      paddingAngle={2}
-                      dataKey="valor"
-                      nameKey="nome"
-                      label={({ nome, valor }) => `${nome} (${valor})`}
-                    >
-                      {dadosLoja.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={CORES_GRAFICO[index % CORES_GRAFICO.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(value: number) => [value, 'Calibragens']} />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        {/* Gráfico - Evolução Semanal (largura total) */}
+        <Card className="bg-white mb-6">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">Evolução Semanal</CardTitle>
+            <CardDescription>Calibragens por semana</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[280px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={dadosSemanal}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <XAxis dataKey="semana" tick={{ fontSize: 11 }} />
+                  <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+                  <Tooltip formatter={(value: number) => [value, 'Calibragens']} />
+                  <Line
+                    type="monotone"
+                    dataKey="valor"
+                    stroke="#6366f1"
+                    strokeWidth={2}
+                    dot={{ fill: '#6366f1', r: 4 }}
+                    activeDot={{ r: 6 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Tabela Resumo por Marca */}
         <Card className="bg-white mb-6">
