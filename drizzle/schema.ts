@@ -1387,7 +1387,7 @@ export type InsertTokenRecalibra = typeof tokensRecalibra.$inferInsert;
 export const calibragens = mysqlTable("calibragens", {
   id: int("id").autoincrement().primaryKey(),
   unidadeId: int("unidadeId").notNull(), // FK para unidades_recalibra.id
-  lojaId: int("lojaId").notNull(), // FK para lojas.id
+  lojaId: int("lojaId"), // FK para lojas.id (nullable - calibragens históricas não têm loja)
   data: varchar("data", { length: 10 }).notNull(), // Data no formato YYYY-MM-DD
   marca: varchar("marca", { length: 100 }), // Marca do veículo (Peugeot, BMW, etc.)
   matricula: varchar("matricula", { length: 20 }).notNull(), // Matrícula do veículo

@@ -1,0 +1,1 @@
+ALTER TABLE `calibragens` MODIFY COLUMN `lojaId` int;

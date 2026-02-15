@@ -4804,3 +4804,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Remover gráfico "Evolução Diária" (não necessário)
 - [x] Remover/zerar gráfico "Por Loja" (dados históricos não têm registo por loja, é enganador)
 - [x] Corrigir gráfico "Distribuição por Tipo" (donut com labels corrigidas, nome+valor fora do gráfico)
+
+## Recalibra Dashboard - Card Loja + Visitada
+- [x] Substituir card "Dias com Registo" por "Loja + Visitada" no dashboard
+- [x] Limpar lojaId das calibragens históricas na BD (não há registo real de loja)
+- [x] Atualizar endpoint estatísticas para incluir loja mais visitada
+- [x] Tornar lojaId nullable no schema (calibragens históricas sem loja)

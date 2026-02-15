@@ -3,7 +3,7 @@ import { trpc } from '@/lib/trpc';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { ArrowLeft, BarChart3, TrendingUp, Car, MapPin, Loader2, Activity, Calendar, Target } from 'lucide-react';
+import { ArrowLeft, BarChart3, TrendingUp, Car, MapPin, Loader2, Activity, Store, Target } from 'lucide-react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend, LineChart, Line,
@@ -193,11 +193,11 @@ export default function DashboardRecalibra() {
             <CardContent className="pt-6">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-green-100">
-                  <Calendar className="h-5 w-5 text-green-700" />
+                  <Store className="h-5 w-5 text-green-700" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-green-900">{stats.totalDias}</p>
-                  <p className="text-xs text-muted-foreground">Dias com Registo</p>
+                  <p className="text-2xl font-bold text-green-900 text-sm">{stats.lojaTopVisitada?.nome || 'Sem dados'}</p>
+                  <p className="text-xs text-muted-foreground">Loja + Visitada {stats.lojaTopVisitada ? `(${stats.lojaTopVisitada.count})` : ''}</p>
                 </div>
               </div>
             </CardContent>

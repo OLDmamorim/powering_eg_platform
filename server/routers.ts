@@ -10870,20 +10870,16 @@ IMPORTANTE:
           porLocalidade[loc] = (porLocalidade[loc] || 0) + 1;
         });
 
-        // Por loja
+        // Loja mais visitada (apenas calibragens com loja associada)
         const porLoja: Record<string, number> = {};
         todasCalibragens.forEach((c: any) => {
-          const loja = c.loja?.nome || 'Outros';
-          porLoja[loja] = (porLoja[loja] || 0) + 1;
-        });
-
-        // Evolução diária (últimos 30 dias)
-        const evolucaoDiaria: Record<string, number> = {};
-        todasCalibragens.forEach((c: any) => {
-          if (c.data) {
-            evolucaoDiaria[c.data] = (evolucaoDiaria[c.data] || 0) + 1;
+          if (c.lojaId && c.loja?.nome) {
+            const loja = c.loja.nome;
+            porLoja[loja] = (porLoja[loja] || 0) + 1;
           }
         });
+        const lojaEntries = Object.entries(porLoja).sort((a, b) => b[1] - a[1]);
+        const lojaTopVisitada = lojaEntries.length > 0 ? { nome: lojaEntries[0][0], count: lojaEntries[0][1] } : null;
 
         // Evolução semanal
         const evolucaoSemanal: Record<string, number> = {};
@@ -10913,8 +10909,7 @@ IMPORTANTE:
           porTipo,
           porMarca,
           porLocalidade,
-          porLoja,
-          evolucaoDiaria,
+          lojaTopVisitada,
           evolucaoSemanal,
           porTipologia,
           mediaDiaria: Math.round(mediaDiaria * 10) / 10,
