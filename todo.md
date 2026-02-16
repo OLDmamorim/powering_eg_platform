@@ -4845,3 +4845,4 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Permitir registar serviços realizados mesmo depois de bloquear o dia (serviços de hoje sempre visíveis, seletor de loja editável)
 - [x] Adicionar opção "Outros (Loja externa)" no dropdown de lojas do Volante
 - [x] Volante: No registo de serviços, adicionar seletor de loja editável. Com loja agendada: essa loja por defeito. Sem agendamento/dia bloqueado: 'Outros (Loja externa)' por defeito. Sempre pode mudar para qualquer loja da zona.
+- [x] Remover card "Histórico de Serviços" da página inicial do Volante (serviços agora registados no Calendário)

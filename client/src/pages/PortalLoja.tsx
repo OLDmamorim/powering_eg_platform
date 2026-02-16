@@ -5302,24 +5302,6 @@ END:VCALENDAR`;
               </div>
             </Card>
 
-            {/* Card Histórico de Serviços */}
-            <Card 
-              className="p-8 cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-105 bg-white dark:bg-gray-800 border-2 border-transparent hover:border-blue-400 group"
-              onClick={() => setActiveView("historico-servicos")}
-            >
-              <div className="text-center">
-                <div className="w-24 h-24 bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-200 dark:group-hover:bg-blue-900/50 transition-colors">
-                  <ClipboardList className="h-12 w-12 text-blue-600" />
-                </div>
-                <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">
-                  {language === 'pt' ? 'Histórico de Serviços' : 'Service History'}
-                </h2>
-                <p className="text-gray-500 dark:text-gray-400 text-sm">
-                  {language === 'pt' ? 'Consultar e exportar serviços registados' : 'View and export registered services'}
-                </p>
-              </div>
-            </Card>
-
             {/* Card Configurações */}
             <Card 
               className="p-8 cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-105 bg-white dark:bg-gray-800 border-2 border-transparent hover:border-gray-400 group"
