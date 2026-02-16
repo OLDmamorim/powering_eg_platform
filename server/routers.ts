@@ -8658,7 +8658,7 @@ IMPORTANTE:
         
         const bloqueio = await db.criarBloqueioVolante({
           volanteId: tokenData.volante.id,
-          data: input.data,
+          data: new Date(input.data),
           periodo: input.periodo,
           tipo: input.tipo,
           motivo: input.motivo,
@@ -9272,7 +9272,7 @@ IMPORTANTE:
     registarServicos: publicProcedure
       .input(z.object({
         token: z.string(),
-        lojaId: z.number(),
+        lojaId: z.number().nullable(), // null = Outros (Loja externa)
         data: z.string(), // formato YYYY-MM-DD
         substituicaoLigeiro: z.number().min(0).max(20),
         reparacao: z.number().min(0).max(20),
@@ -9285,11 +9285,13 @@ IMPORTANTE:
           throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
         }
         
-        // Verificar se o volante tem acesso a esta loja
-        const lojas = await db.getLojasByVolanteId(tokenData.volante.id);
-        const temAcesso = lojas.some(l => l.id === input.lojaId);
-        if (!temAcesso) {
-          throw new TRPCError({ code: 'FORBIDDEN', message: 'Não tem acesso a esta loja' });
+        // Se lojaId não é null, verificar se o volante tem acesso a esta loja
+        if (input.lojaId !== null) {
+          const lojas = await db.getLojasByVolanteId(tokenData.volante.id);
+          const temAcesso = lojas.some(l => l.id === input.lojaId);
+          if (!temAcesso) {
+            throw new TRPCError({ code: 'FORBIDDEN', message: 'Não tem acesso a esta loja' });
+          }
         }
         
         const servico = await db.registarServicosVolante({

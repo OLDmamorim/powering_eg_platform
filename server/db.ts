@@ -10390,12 +10390,17 @@ export async function registarServicosVolante(data: InsertServicoVolante): Promi
   if (!db) throw new Error("Database not available");
   
   // Verificar se já existe registo para este volante/loja/data
+  const conditions = [
+    eq(servicosVolante.volanteId, data.volanteId),
+    eq(servicosVolante.data, data.data)
+  ];
+  if (data.lojaId !== null && data.lojaId !== undefined) {
+    conditions.push(eq(servicosVolante.lojaId, data.lojaId));
+  } else {
+    conditions.push(isNull(servicosVolante.lojaId));
+  }
   const existente = await db.select().from(servicosVolante)
-    .where(and(
-      eq(servicosVolante.volanteId, data.volanteId),
-      eq(servicosVolante.lojaId, data.lojaId),
-      eq(servicosVolante.data, data.data)
-    ));
+    .where(and(...conditions));
   
   if (existente.length > 0) {
     // Atualizar registo existente

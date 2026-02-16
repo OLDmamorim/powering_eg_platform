@@ -4840,3 +4840,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar header ao DashboardRecalibra com modo claro/escuro, idioma PT/EN e botão sair
 - [x] Remover cards iniciais do Volante (Total Apoios, Lojas Apoiadas, Coberturas Férias, Substituições)
 - [x] Manter apenas os cards de Serviços Realizados no Volante
+
+## Volante - Serviços no Dia Bloqueado e Loja Externa
+- [x] Permitir registar serviços realizados mesmo depois de bloquear o dia (serviços de hoje sempre visíveis, seletor de loja editável)
+- [x] Adicionar opção "Outros (Loja externa)" no dropdown de lojas do Volante
+- [x] Volante: No registo de serviços, adicionar seletor de loja editável. Com loja agendada: essa loja por defeito. Sem agendamento/dia bloqueado: 'Outros (Loja externa)' por defeito. Sempre pode mudar para qualquer loja da zona.

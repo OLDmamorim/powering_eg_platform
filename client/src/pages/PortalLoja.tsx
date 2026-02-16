@@ -4433,9 +4433,23 @@ function VolanteTab({
                     </div>
                   </div>
 
-                  <DialogFooter>
+                  <DialogFooter className="gap-2">
                     <Button variant="outline" onClick={() => setDialogOpen(false)}>
                       {language === 'pt' ? 'Fechar' : 'Close'}
+                    </Button>
+                    <Button 
+                      className="bg-blue-600 hover:bg-blue-700 text-white"
+                      onClick={() => {
+                        setDialogOpen(false);
+                        // Scroll para a secção de serviços
+                        setTimeout(() => {
+                          const el = document.getElementById('registar-servicos-hoje');
+                          if (el) el.scrollIntoView({ behavior: 'smooth' });
+                        }, 300);
+                      }}
+                    >
+                      <Wrench className="h-4 w-4 mr-1" />
+                      {language === 'pt' ? 'Registar Serviços' : 'Register Services'}
                     </Button>
                   </DialogFooter>
                 </>
@@ -5479,11 +5493,13 @@ END:VCALENDAR`;
             )}
 
             {/* Registar Serviços de Hoje */}
+            <div id="registar-servicos-hoje">
             <RegistarServicosHoje 
               token={token}
               volanteAuth={volanteAuth}
               language={language}
             />
+            </div>
 
             {/* Calendário */}
             <Card>
@@ -8360,6 +8376,12 @@ function RegistarServicosHoje({
     return servicosHoje?.some((s: any) => s.lojaId === lojaId);
   };
 
+  // Lista de todas as lojas disponíveis para o seletor (ordenadas alfabeticamente)
+  const todasAsLojas = useMemo(() => {
+    const lojas = (volanteAuth.lojasAtribuidas || []).slice().sort((a, b) => a.nome.localeCompare(b.nome));
+    return lojas;
+  }, [volanteAuth.lojasAtribuidas]);
+
   // Abrir modal com dados existentes se já registou
   const abrirModal = (loja: { id: number; nome: string }) => {
     setLojaSelecionada(loja);
@@ -8378,11 +8400,83 @@ function RegistarServicosHoje({
     setRegistarDialogOpen(true);
   };
 
+  // Quando muda a loja no seletor do modal, carregar dados existentes se houver
+  const handleLojaChange = (lojaIdStr: string) => {
+    if (lojaIdStr === '0') {
+      setLojaSelecionada({ id: 0, nome: language === 'pt' ? 'Outros (Loja externa)' : 'Others (External store)' });
+      const outrosServico = servicosHoje?.find((s: any) => s.lojaId === null);
+      if (outrosServico) {
+        setSubstituicaoLigeiro(outrosServico.substituicaoLigeiro || 0);
+        setReparacao(outrosServico.reparacao || 0);
+        setCalibragem(outrosServico.calibragem || 0);
+        setOutros(outrosServico.outros || 0);
+      } else {
+        setSubstituicaoLigeiro(0);
+        setReparacao(0);
+        setCalibragem(0);
+        setOutros(0);
+      }
+    } else {
+      const lojaId = parseInt(lojaIdStr);
+      const loja = todasAsLojas.find(l => l.id === lojaId);
+      if (loja) {
+        setLojaSelecionada(loja);
+        const servicoExistente = servicosHoje?.find((s: any) => s.lojaId === lojaId);
+        if (servicoExistente) {
+          setSubstituicaoLigeiro(servicoExistente.substituicaoLigeiro || 0);
+          setReparacao(servicoExistente.reparacao || 0);
+          setCalibragem(servicoExistente.calibragem || 0);
+          setOutros(servicoExistente.outros || 0);
+        } else {
+          setSubstituicaoLigeiro(0);
+          setReparacao(0);
+          setCalibragem(0);
+          setOutros(0);
+        }
+      }
+    }
+  };
+
   const totalServicos = substituicaoLigeiro + reparacao + calibragem + outros;
 
-  if (agendamentosHoje.length === 0) {
-    return null; // Não mostrar nada se não há agendamentos hoje
-  }
+  // Serviços registados em lojas NÃO agendadas (excluindo Outros/null)
+  const lojasNaoAgendadasComServicos = useMemo(() => {
+    if (!servicosHoje) return [];
+    const agendadasIds = new Set(agendamentosHoje.map((a: any) => a.lojaId));
+    return servicosHoje
+      .filter((s: any) => s.lojaId !== null && !agendadasIds.has(s.lojaId))
+      .map((s: any) => {
+        const loja = todasAsLojas.find(l => l.id === s.lojaId);
+        return {
+          ...s,
+          lojaNome: loja?.nome || `Loja #${s.lojaId}`,
+          total: (s.substituicaoLigeiro || 0) + (s.reparacao || 0) + (s.calibragem || 0) + (s.outros || 0),
+        };
+      });
+  }, [servicosHoje, agendamentosHoje, todasAsLojas]);
+
+  // Verificar se já registou em "Outros (Loja externa)"
+  const outrosRegistado = servicosHoje?.some((s: any) => s.lojaId === null);
+  const outrosServico = servicosHoje?.find((s: any) => s.lojaId === null);
+  const totalOutros = outrosServico 
+    ? (outrosServico.substituicaoLigeiro + outrosServico.reparacao + outrosServico.calibragem + outrosServico.outros)
+    : 0;
+
+  const abrirModalOutros = () => {
+    setLojaSelecionada({ id: 0, nome: language === 'pt' ? 'Outros (Loja externa)' : 'Others (External store)' });
+    if (outrosServico) {
+      setSubstituicaoLigeiro(outrosServico.substituicaoLigeiro || 0);
+      setReparacao(outrosServico.reparacao || 0);
+      setCalibragem(outrosServico.calibragem || 0);
+      setOutros(outrosServico.outros || 0);
+    } else {
+      setSubstituicaoLigeiro(0);
+      setReparacao(0);
+      setCalibragem(0);
+      setOutros(0);
+    }
+    setRegistarDialogOpen(true);
+  };
 
   return (
     <>
@@ -8393,9 +8487,11 @@ function RegistarServicosHoje({
             {language === 'pt' ? 'Registar Serviços de Hoje' : 'Register Today\'s Services'}
           </CardTitle>
           <CardDescription className="text-blue-700 dark:text-blue-300">
-            {language === 'pt' 
-              ? `${agendamentosHoje.length} ${agendamentosHoje.length === 1 ? 'loja agendada' : 'lojas agendadas'} para hoje`
-              : `${agendamentosHoje.length} ${agendamentosHoje.length === 1 ? 'store scheduled' : 'stores scheduled'} for today`}
+            {agendamentosHoje.length > 0 
+              ? (language === 'pt' 
+                ? `${agendamentosHoje.length} ${agendamentosHoje.length === 1 ? 'loja agendada' : 'lojas agendadas'} para hoje`
+                : `${agendamentosHoje.length} ${agendamentosHoje.length === 1 ? 'store scheduled' : 'stores scheduled'} for today`)
+              : (language === 'pt' ? 'Sem agendamentos para hoje' : 'No schedules for today')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -8457,6 +8553,87 @@ function RegistarServicosHoje({
                 </div>
               );
             })}
+
+            {/* Lojas não agendadas com serviços registados */}
+            {lojasNaoAgendadasComServicos.map((servico: any) => {
+              const loja = { id: servico.lojaId, nome: servico.lojaNome };
+              return (
+                <div 
+                  key={`extra-${servico.lojaId}`} 
+                  className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-dashed border-purple-300 dark:border-purple-700 shadow-sm"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <h4 className="font-medium text-purple-700 dark:text-purple-300">{loja.nome}</h4>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        {language === 'pt' ? 'Loja não agendada' : 'Unscheduled store'}
+                      </p>
+                      <div className="flex items-center gap-2 mt-2">
+                        <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300 dark:bg-green-900 dark:text-green-200">
+                          <CheckCircle2 className="h-3 w-3 mr-1" />
+                          {language === 'pt' ? 'Registado' : 'Registered'}
+                        </Badge>
+                        <span className="text-sm text-gray-600 dark:text-gray-400">
+                          {servico.total} {language === 'pt' ? 'serviços' : 'services'}
+                        </span>
+                      </div>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="border-purple-300 text-purple-700"
+                      onClick={() => abrirModal(loja)}
+                    >
+                      <Pencil className="h-4 w-4 mr-1" />
+                      {language === 'pt' ? 'Editar' : 'Edit'}
+                    </Button>
+                  </div>
+                </div>
+              );
+            })}
+
+            {/* Opção Outros (Loja externa) */}
+            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-dashed border-orange-300 dark:border-orange-700 shadow-sm">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <h4 className="font-medium text-orange-700 dark:text-orange-300">
+                    {language === 'pt' ? 'Outros (Loja externa)' : 'Others (External store)'}
+                  </h4>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    {language === 'pt' ? 'Serviços em lojas não agendadas' : 'Services at unscheduled stores'}
+                  </p>
+                  {outrosRegistado && (
+                    <div className="flex items-center gap-2 mt-2">
+                      <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300 dark:bg-green-900 dark:text-green-200">
+                        <CheckCircle2 className="h-3 w-3 mr-1" />
+                        {language === 'pt' ? 'Registado' : 'Registered'}
+                      </Badge>
+                      <span className="text-sm text-gray-600 dark:text-gray-400">
+                        {totalOutros} {language === 'pt' ? 'serviços' : 'services'}
+                      </span>
+                    </div>
+                  )}
+                </div>
+                <Button
+                  size="sm"
+                  variant={outrosRegistado ? "outline" : "default"}
+                  className={outrosRegistado ? "border-orange-300 text-orange-700" : "bg-orange-500 hover:bg-orange-600 text-white"}
+                  onClick={abrirModalOutros}
+                >
+                  {outrosRegistado ? (
+                    <>
+                      <Pencil className="h-4 w-4 mr-1" />
+                      {language === 'pt' ? 'Editar' : 'Edit'}
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="h-4 w-4 mr-1" />
+                      {language === 'pt' ? 'Registar' : 'Register'}
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -8469,7 +8646,7 @@ function RegistarServicosHoje({
               {language === 'pt' ? 'Registar Serviços' : 'Register Services'}
             </DialogTitle>
             <DialogDescription>
-              {lojaSelecionada?.nome} - {new Date().toLocaleDateString(language === 'pt' ? 'pt-PT' : 'en-US', { 
+              {new Date().toLocaleDateString(language === 'pt' ? 'pt-PT' : 'en-US', { 
                 weekday: 'long', 
                 day: 'numeric', 
                 month: 'long' 
@@ -8478,6 +8655,38 @@ function RegistarServicosHoje({
           </DialogHeader>
           
           <div className="space-y-4 py-4">
+            {/* Seletor de Loja - editável */}
+            <div className="space-y-2">
+              <Label>
+                {language === 'pt' ? 'Loja' : 'Store'}
+              </Label>
+              <Select 
+                value={lojaSelecionada ? lojaSelecionada.id.toString() : '0'} 
+                onValueChange={handleLojaChange}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="0">
+                    <span className="text-orange-600 font-medium">
+                      {language === 'pt' ? 'Outros (Loja externa)' : 'Others (External store)'}
+                    </span>
+                  </SelectItem>
+                  {todasAsLojas.map((loja) => (
+                    <SelectItem key={loja.id} value={loja.id.toString()}>
+                      {loja.nome}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-gray-500">
+                {language === 'pt' 
+                  ? 'Pode alterar a loja se necessário' 
+                  : 'You can change the store if needed'}
+              </p>
+            </div>
+
             {/* Substituição Ligeiro */}
             <div className="space-y-2">
               <Label htmlFor="substituicao">
@@ -8585,7 +8794,7 @@ function RegistarServicosHoje({
                 if (!lojaSelecionada) return;
                 registarMutation.mutate({
                   token,
-                  lojaId: lojaSelecionada.id,
+                  lojaId: lojaSelecionada.id === 0 ? null : lojaSelecionada.id,
                   data: hoje,
                   substituicaoLigeiro,
                   reparacao,

@@ -1309,7 +1309,7 @@ export type InsertDocumento = typeof documentos.$inferInsert;
 export const servicosVolante = mysqlTable("servicos_volante", {
   id: int("id").autoincrement().primaryKey(),
   volanteId: int("volanteId").notNull(), // FK para volantes.id
-  lojaId: int("lojaId").notNull(), // FK para lojas.id
+  lojaId: int("lojaId"), // FK para lojas.id (null = Outros/Loja externa)
   data: varchar("data", { length: 10 }).notNull(), // Data no formato YYYY-MM-DD
   substituicaoLigeiro: int("substituicaoLigeiro").default(0).notNull(), // Quantidade de substituições ligeiro
   reparacao: int("reparacao").default(0).notNull(), // Quantidade de reparações
