@@ -214,6 +214,26 @@ export async function enviarRelatoriosMensaisVolante() {
     console.log(`  - Emails para gestores: ${emailsEnviadosGestores}`);
     console.log(`  - Erros: ${erros}`);
     
+    // Guardar log do envio no histórico
+    try {
+      await db.criarHistoricoEnvioRelatorio({
+        tipo: 'volante',
+        mesReferencia: mesRelatorio,
+        anoReferencia: anoAnterior,
+        dataEnvio: new Date(),
+        emailsEnviadosUnidades: emailsEnviadosLojas,
+        emailsEnviadosGestores: emailsEnviadosGestores,
+        emailsErro: erros,
+        detalhes: {
+          mesNome,
+          totalVolantes: volantes.length,
+        },
+      });
+      console.log('[Relatório Mensal Volante] Histórico de envio registado com sucesso');
+    } catch (error) {
+      console.error('[Relatório Mensal Volante] Erro ao registar histórico:', error);
+    }
+    
   } catch (error) {
     console.error('[Relatório Mensal Volante] Erro geral:', error);
   }

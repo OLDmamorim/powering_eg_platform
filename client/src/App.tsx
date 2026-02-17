@@ -55,6 +55,7 @@ import Documentos from "./pages/Documentos";
 import GestaoRecalibra from "./pages/GestaoRecalibra";
 import PortalRecalibra from "./pages/PortalRecalibra";
 import DashboardRecalibra from "./pages/DashboardRecalibra";
+import HistoricoEnviosRelatorios from "./pages/HistoricoEnviosRelatorios";
 import { DemoBanner } from "./components/DemoBanner";
 import { LanguageProvider } from "./contexts/LanguageContext";
 
@@ -71,6 +72,7 @@ function Router() {
       {/* Admin routes */}
       <Route path={"/lojas"} component={Lojas} />
       <Route path={"/rh"} component={RH} />
+      <Route path={"/historico-envios-relatorios"} component={HistoricoEnviosRelatorios} />
       <Route path={"/gestores"} component={Gestores} />
       <Route path={"/utilizadores"} component={GestaoUtilizadores} />
       <Route path={"/relatorios"} component={Relatorios} />

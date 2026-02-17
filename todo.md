@@ -4918,3 +4918,15 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Verificar se a função está definida e exportada corretamente (não estava definida)
 - [x] Definir a função obterFeriadosPortugueses com feriados portugueses (fixos + móveis)
 - [x] Testar funcionalidade de Projeção de Visitas (servidor reiniciado com sucesso)
+
+## Histórico de Envios de Relatórios Mensais (Volante + Recalibra)
+- [x] Criar tabela historico_envios_relatorios na base de dados (migration 0084_typical_ultron.sql)
+- [x] Adicionar campos: id, tipo, mesReferencia, anoReferencia, dataEnvio, emailsEnviadosUnidades, emailsEnviadosGestores, emailsErro, detalhes (JSON)
+- [x] Atualizar relatorioMensalVolante.ts para guardar log após envio (linha 217-235)
+- [x] Atualizar relatorioMensalRecalibra.ts para guardar log após envio (linha 198-216)
+- [x] Criar função no db.ts para obter histórico de envios (criarHistoricoEnvioRelatorio, getHistoricoEnviosRelatorios)
+- [x] Criar página/componente de Histórico de Envios no dashboard (HistoricoEnviosRelatorios.tsx)
+- [x] Adicionar filtros por tipo (Todos/Volante/Recalibra) e mês
+- [x] Adicionar rota /historico-envios-relatorios no App.tsx
+- [x] Criar procedure getHistoricoEnvios no routers.ts
+- [x] Testar funcionalidade completa (servidor reiniciado com sucesso)

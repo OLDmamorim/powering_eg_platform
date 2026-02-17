@@ -195,6 +195,26 @@ export async function enviarRelatoriosMensaisRecalibra() {
     console.log(`  - Emails para gestores: ${emailsEnviadosGestores}`);
     console.log(`  - Erros: ${erros}`);
     
+    // Guardar log do envio no histórico
+    try {
+      await db.criarHistoricoEnvioRelatorio({
+        tipo: 'recalibra',
+        mesReferencia: mesRelatorio,
+        anoReferencia: anoAnterior,
+        dataEnvio: new Date(),
+        emailsEnviadosUnidades: emailsEnviadosUnidades,
+        emailsEnviadosGestores: emailsEnviadosGestores,
+        emailsErro: erros,
+        detalhes: {
+          mesNome,
+          totalUnidades: unidades.length,
+        },
+      });
+      console.log('[Relatório Mensal Recalibra] Histórico de envio registado com sucesso');
+    } catch (error) {
+      console.error('[Relatório Mensal Recalibra] Erro ao registar histórico:', error);
+    }
+    
   } catch (error) {
     console.error('[Relatório Mensal Recalibra] Erro geral:', error);
   }

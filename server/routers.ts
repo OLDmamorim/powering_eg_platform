@@ -11061,4 +11061,18 @@ IMPORTANTE:
         };
       }),
   }),
+
+  // Relatórios - Histórico de Envios
+  relatorios: router({
+    getHistoricoEnvios: protectedProcedure
+      .input(z.object({
+        tipo: z.enum(['volante', 'recalibra']).optional(),
+        anoReferencia: z.number().optional(),
+        mesReferencia: z.number().optional(),
+      }).optional())
+      .query(async ({ input }) => {
+        const historico = await db.getHistoricoEnviosRelatorios(input);
+        return historico;
+      }),
+  }),
 });

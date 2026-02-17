@@ -1,4 +1,4 @@
-import { int, mysqlEnum, mysqlTable, text, mediumtext, timestamp, varchar, boolean, decimal } from "drizzle-orm/mysql-core";
+import { int, mysqlEnum, mysqlTable, text, mediumtext, timestamp, varchar, boolean, decimal, json } from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -1428,3 +1428,22 @@ export const marcasRecalibra = mysqlTable("marcas_recalibra", {
 
 export type MarcaRecalibra = typeof marcasRecalibra.$inferSelect;
 export type InsertMarcaRecalibra = typeof marcasRecalibra.$inferInsert;
+
+/**
+ * Histórico de Envios de Relatórios Mensais (Volante + Recalibra)
+ */
+export const historicoEnviosRelatorios = mysqlTable("historico_envios_relatorios", {
+  id: int("id").autoincrement().primaryKey(),
+  tipo: mysqlEnum("tipo", ["volante", "recalibra"]).notNull(), // Tipo de relatório
+  mesReferencia: int("mesReferencia").notNull(), // Mês de referência (1-12)
+  anoReferencia: int("anoReferencia").notNull(), // Ano de referência (ex: 2026)
+  dataEnvio: timestamp("dataEnvio").notNull(), // Data e hora do envio
+  emailsEnviadosUnidades: int("emailsEnviadosUnidades").default(0).notNull(), // Emails enviados para unidades/lojas
+  emailsEnviadosGestores: int("emailsEnviadosGestores").default(0).notNull(), // Emails enviados para gestores
+  emailsErro: int("emailsErro").default(0).notNull(), // Emails com erro
+  detalhes: json("detalhes"), // JSON com detalhes do envio (destinatários, erros, etc.)
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type HistoricoEnvioRelatorio = typeof historicoEnviosRelatorios.$inferSelect;
+export type InsertHistoricoEnvioRelatorio = typeof historicoEnviosRelatorios.$inferInsert;

@@ -157,7 +157,10 @@ import {
   InsertLocalidadeRecalibra,
   marcasRecalibra,
   MarcaRecalibra,
-  InsertMarcaRecalibra
+  InsertMarcaRecalibra,
+  historicoEnviosRelatorios,
+  HistoricoEnvioRelatorio,
+  InsertHistoricoEnvioRelatorio
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -11403,4 +11406,66 @@ export async function getServicosVolantePorMes(volanteId: number, mes: number, a
       lte(servicosVolante.data, ultimoDia)
     ))
     .orderBy(desc(servicosVolante.data));
+}
+
+
+// ============================================
+// HISTÓRICO DE ENVIOS DE RELATÓRIOS MENSAIS
+// ============================================
+
+export async function criarHistoricoEnvioRelatorio(data: {
+  tipo: 'volante' | 'recalibra';
+  mesReferencia: number;
+  anoReferencia: number;
+  dataEnvio: Date;
+  emailsEnviadosUnidades: number;
+  emailsEnviadosGestores: number;
+  emailsErro: number;
+  detalhes?: any;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const [result] = await db.insert(historicoEnviosRelatorios).values({
+    tipo: data.tipo,
+    mesReferencia: data.mesReferencia,
+    anoReferencia: data.anoReferencia,
+    dataEnvio: data.dataEnvio,
+    emailsEnviadosUnidades: data.emailsEnviadosUnidades,
+    emailsEnviadosGestores: data.emailsEnviadosGestores,
+    emailsErro: data.emailsErro,
+    detalhes: data.detalhes ? JSON.stringify(data.detalhes) : null,
+  });
+  return Number((result as any).insertId);
+}
+
+export async function getHistoricoEnviosRelatorios(filtros?: {
+  tipo?: 'volante' | 'recalibra';
+  anoReferencia?: number;
+  mesReferencia?: number;
+}) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  let conditions = [];
+  
+  if (filtros?.tipo) {
+    conditions.push(eq(historicoEnviosRelatorios.tipo, filtros.tipo));
+  }
+  
+  if (filtros?.anoReferencia) {
+    conditions.push(eq(historicoEnviosRelatorios.anoReferencia, filtros.anoReferencia));
+  }
+  
+  if (filtros?.mesReferencia) {
+    conditions.push(eq(historicoEnviosRelatorios.mesReferencia, filtros.mesReferencia));
+  }
+  
+  const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+  
+  const result = whereClause 
+    ? await db.select().from(historicoEnviosRelatorios).where(whereClause).orderBy(desc(historicoEnviosRelatorios.dataEnvio))
+    : await db.select().from(historicoEnviosRelatorios).orderBy(desc(historicoEnviosRelatorios.dataEnvio));
+  
+  return result;
 }
