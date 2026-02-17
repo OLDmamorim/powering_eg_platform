@@ -568,6 +568,13 @@
       "when": 1771197377901,
       "tag": "0080_opposite_mephistopheles",
       "breakpoints": true
+    },
+    {
+      "idx": 81,
+      "version": "5",
+      "when": 1771331606192,
+      "tag": "0081_equal_the_stranger",
+      "breakpoints": true
     }
   ]
 }

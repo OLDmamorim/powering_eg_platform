@@ -36,6 +36,7 @@ export const lojas = mysqlTable("lojas", {
   email: varchar("email", { length: 320 }),
   minimoRelatoriosLivres: int("minimoRelatoriosLivres").default(0).notNull(), // Mínimo mensal de relatórios livres (0 = sem mínimo)
   minimoRelatoriosCompletos: int("minimoRelatoriosCompletos").default(0).notNull(), // Mínimo mensal de relatórios completos (0 = sem mínimo)
+  objetivoDiario: int("objetivoDiario"), // Objetivo diário de serviços para a loja
   localidadePadrao: varchar("localidadePadrao", { length: 255 }), // Localidade padrão associada à loja (para auto-preencher no Recalibra)
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
