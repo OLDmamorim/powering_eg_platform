@@ -11383,3 +11383,24 @@ export async function criarMarca(nome: string): Promise<MarcaRecalibra | null> {
   const created = await db.select().from(marcasRecalibra).where(eq(marcasRecalibra.id, insertId));
   return created[0] || null;
 }
+
+/**
+ * Obter todos os serviços de um volante num mês específico
+ * Usado para relatório mensal automático
+ */
+export async function getServicosVolantePorMes(volanteId: number, mes: number, ano: number): Promise<ServicoVolante[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  // Calcular primeiro e último dia do mês
+  const primeiroDia = `${ano}-${String(mes).padStart(2, '0')}-01`;
+  const ultimoDia = new Date(ano, mes, 0).toISOString().split('T')[0]; // Último dia do mês
+  
+  return await db.select().from(servicosVolante)
+    .where(and(
+      eq(servicosVolante.volanteId, volanteId),
+      gte(servicosVolante.data, primeiroDia),
+      lte(servicosVolante.data, ultimoDia)
+    ))
+    .orderBy(desc(servicosVolante.data));
+}

@@ -4869,3 +4869,14 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Aplicar correção nos resultados mensais da loja (linhas 648-656)
 - [x] Reiniciar servidor para aplicar alterações
 - [ ] Testar com utilizador no telemóvel
+
+## Email Mensal Automático - Resumo Atividade Volante (Fevereiro 2026)
+- [x] Planear estrutura do email com resumo de atividade do volante
+- [x] Criar função para obter serviços do volante por loja no mês anterior (getServicosVolantePorMes)
+- [x] Criar template HTML do email para lojas com estatísticas (gerarHTMLRelatorioMensalVolante)
+- [x] Criar template HTML do email para gestores com resumo consolidado (gerarHTMLRelatorioMensalVolanteGestor)
+- [x] Implementar função de envio de email para cada loja (enviarRelatoriosMensaisVolante)
+- [x] Implementar função de envio de email para cada gestor (enviarRelatoriosMensaisVolante)
+- [x] Criar cron job para disparar dia 20 de cada mês às 09:00 (scheduler.ts)
+- [x] Criar teste manual do relatório (relatorioMensalVolante.test.ts)
+- [x] Verificar que emails são enviados apenas para lojas onde volante interveio

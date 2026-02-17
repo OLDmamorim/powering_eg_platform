@@ -334,3 +334,169 @@ export function gerarHTMLRelatorioCompleto(relatorio: {
 </html>
   `;
 }
+
+/**
+ * Gera HTML do relatório mensal de atividade do volante para uma loja específica
+ */
+export function gerarHTMLRelatorioMensalVolante(dados: {
+  lojaNome: string;
+  volanteNome: string;
+  mes: number;
+  ano: number;
+  servicos: Array<{
+    data: string;
+    substituicaoLigeiro: number;
+    reparacao: number;
+    calibragem: number;
+    outros: number;
+  }>;
+  totalSubstituicaoLigeiro: number;
+  totalReparacao: number;
+  totalCalibragem: number;
+  totalOutros: number;
+  totalGeral: number;
+  diasAtivos: number;
+}): string {
+  const { 
+    lojaNome, volanteNome, mes, ano, servicos,
+    totalSubstituicaoLigeiro, totalReparacao, totalCalibragem, totalOutros, totalGeral, diasAtivos
+  } = dados;
+
+  const mesesNomes = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+  const mesNome = mesesNomes[mes - 1];
+
+  // Ordenar serviços por data (mais recente primeiro)
+  const servicosOrdenados = [...servicos].sort((a, b) => b.data.localeCompare(a.data));
+
+  return `
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body { font-family: Arial, sans-serif; margin: 40px; color: #333; line-height: 1.6; }
+    .header { text-align: center; margin-bottom: 30px; border-bottom: 3px solid #3b82f6; padding-bottom: 20px; }
+    .logo { font-size: 24px; font-weight: bold; color: #3b82f6; }
+    .title { font-size: 20px; margin-top: 10px; color: #1e40af; }
+    .subtitle { font-size: 14px; color: #6b7280; margin-top: 5px; }
+    .info-box { background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); color: white; padding: 20px; border-radius: 12px; margin-bottom: 30px; }
+    .info-row { display: flex; margin-bottom: 10px; font-size: 16px; }
+    .info-label { font-weight: bold; width: 150px; }
+    .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
+    .summary-card { background: #f3f4f6; padding: 20px; border-radius: 10px; text-align: center; border-left: 4px solid #3b82f6; }
+    .summary-card.highlight { background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border-left-color: #1e40af; }
+    .summary-number { font-size: 32px; font-weight: bold; color: #1e40af; margin-bottom: 5px; }
+    .summary-label { font-size: 14px; color: #6b7280; text-transform: uppercase; }
+    .section { margin-bottom: 30px; }
+    .section-title { font-size: 18px; font-weight: bold; color: #1e40af; margin-bottom: 15px; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px; }
+    .table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .table th { background: #3b82f6; color: white; padding: 12px; text-align: left; font-weight: bold; }
+    .table td { padding: 12px; border-bottom: 1px solid #e5e7eb; }
+    .table tr:last-child td { border-bottom: none; }
+    .table tr:hover { background: #f9fafb; }
+    .total-row { background: #dbeafe !important; font-weight: bold; }
+    .footer { margin-top: 40px; text-align: center; font-size: 12px; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 20px; }
+    .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+    .badge-success { background: #d1fae5; color: #059669; }
+    .no-data { text-align: center; padding: 40px; color: #9ca3af; font-style: italic; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663088836799/YrkmGCRDVqYgFnZO.png" alt="ExpressGlass" style="max-width: 200px; height: auto; margin-bottom: 10px;" />
+    <div class="logo">PoweringEG Platform 2.0</div>
+    <div class="title">Relatório Mensal de Atividade do Volante</div>
+    <div class="subtitle">Resumo de Serviços Realizados</div>
+  </div>
+  
+  <div class="info-box">
+    <div class="info-row"><span class="info-label">🏪 Loja:</span> <strong>${lojaNome}</strong></div>
+    <div class="info-row"><span class="info-label">🚗 Volante:</span> <strong>${volanteNome}</strong></div>
+    <div class="info-row"><span class="info-label">📅 Período:</span> <strong>${mesNome} de ${ano}</strong></div>
+    <div class="info-row"><span class="info-label">📊 Dias Ativos:</span> <strong>${diasAtivos} ${diasAtivos === 1 ? 'dia' : 'dias'}</strong></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📊 Resumo Total do Mês</div>
+    <div class="summary-grid">
+      <div class="summary-card">
+        <div class="summary-number">${totalSubstituicaoLigeiro}</div>
+        <div class="summary-label">Substituições Ligeiro</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-number">${totalReparacao}</div>
+        <div class="summary-label">Reparações</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-number">${totalCalibragem}</div>
+        <div class="summary-label">Calibragens</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-number">${totalOutros}</div>
+        <div class="summary-label">Outros Serviços</div>
+      </div>
+      <div class="summary-card highlight">
+        <div class="summary-number">${totalGeral}</div>
+        <div class="summary-label">Total Geral</div>
+      </div>
+    </div>
+  </div>
+
+  ${servicosOrdenados.length > 0 ? `
+  <div class="section">
+    <div class="section-title">📋 Detalhes por Dia</div>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th style="text-align: center;">Substituições Ligeiro</th>
+          <th style="text-align: center;">Reparações</th>
+          <th style="text-align: center;">Calibragens</th>
+          <th style="text-align: center;">Outros</th>
+          <th style="text-align: center;">Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${servicosOrdenados.map(s => {
+          const dataFormatada = new Date(s.data + 'T00:00:00').toLocaleDateString('pt-PT', { day: '2-digit', month: 'short', year: 'numeric' });
+          const totalDia = s.substituicaoLigeiro + s.reparacao + s.calibragem + s.outros;
+          return `
+          <tr>
+            <td><strong>${dataFormatada}</strong></td>
+            <td style="text-align: center;">${s.substituicaoLigeiro}</td>
+            <td style="text-align: center;">${s.reparacao}</td>
+            <td style="text-align: center;">${s.calibragem}</td>
+            <td style="text-align: center;">${s.outros}</td>
+            <td style="text-align: center;"><strong>${totalDia}</strong></td>
+          </tr>
+          `;
+        }).join('')}
+        <tr class="total-row">
+          <td><strong>TOTAL</strong></td>
+          <td style="text-align: center;"><strong>${totalSubstituicaoLigeiro}</strong></td>
+          <td style="text-align: center;"><strong>${totalReparacao}</strong></td>
+          <td style="text-align: center;"><strong>${totalCalibragem}</strong></td>
+          <td style="text-align: center;"><strong>${totalOutros}</strong></td>
+          <td style="text-align: center;"><strong>${totalGeral}</strong></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  ` : `
+  <div class="no-data">
+    Não foram registados serviços neste período.
+  </div>
+  `}
+
+  <div class="footer">
+    <p>Relatório gerado automaticamente pela <strong>PoweringEG Platform</strong></p>
+    <p>Data de geração: ${new Date().toLocaleDateString('pt-PT')} às ${new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })}</p>
+    <p style="margin-top: 10px; font-size: 11px;">
+      Este email foi enviado automaticamente no dia 20 do mês.<br>
+      Para mais informações, contacte a gestão da ExpressGlass.
+    </p>
+  </div>
+</body>
+</html>
+  `;
+}
