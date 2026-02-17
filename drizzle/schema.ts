@@ -1334,9 +1334,10 @@ export type InsertServicoVolante = typeof servicosVolante.$inferInsert;
  */
 export const unidadesRecalibra = mysqlTable("unidades_recalibra", {
   id: int("id").autoincrement().primaryKey(),
-  nome: varchar("nome", { length: 255 }).notNull(),
-  email: varchar("email", { length: 320 }),
-  telefone: varchar("telefone", { length: 50 }),
+  nome: varchar("nome", { length: 255 }).notNull(), // Nome do serviço (ex: "Recalibra Minho")
+  nomeProfissional: varchar("nome_profissional", { length: 255 }), // Nome do profissional responsável
+  email: varchar("email", { length: 320 }), // Email para envio de relatórios
+  telefone: varchar("telefone", { length: 50 }), // Contacto telefónico
   gestorId: int("gestorId").notNull(), // FK para gestores.id - gestor responsável pela unidade
   ativo: boolean("ativo").default(true).notNull(),
   telegramChatId: varchar("telegramChatId", { length: 100 }), // Chat ID do Telegram para notificações

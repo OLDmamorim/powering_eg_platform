@@ -1,0 +1,1 @@
+ALTER TABLE `unidades_recalibra` ADD `nome_profissional` varchar(255);

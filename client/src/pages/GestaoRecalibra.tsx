@@ -20,6 +20,9 @@ export default function GestaoRecalibra() {
   const [selectedLojaIds, setSelectedLojaIds] = useState<number[]>([]);
   const [copiedToken, setCopiedToken] = useState<number | null>(null);
   const [nome, setNome] = useState('');
+  const [nomeProfissional, setNomeProfissional] = useState('');
+  const [email, setEmail] = useState('');
+  const [telefone, setTelefone] = useState('');
 
   // Queries - como Volante
   const { data: unidades, isLoading, refetch } = trpc.gestaoRecalibra.listar.useQuery();
@@ -31,6 +34,9 @@ export default function GestaoRecalibra() {
       toast.success('Unidade criada com sucesso!');
       setDialogOpen(false);
       setNome('');
+      setNomeProfissional('');
+      setEmail('');
+      setTelefone('');
       refetch();
     },
     onError: (error: any) => {
@@ -44,6 +50,9 @@ export default function GestaoRecalibra() {
       setDialogOpen(false);
       setEditingUnidade(null);
       setNome('');
+      setNomeProfissional('');
+      setEmail('');
+      setTelefone('');
       setLojasDialogOpen(false);
       setSelectedUnidade(null);
       refetch();
@@ -77,23 +86,36 @@ export default function GestaoRecalibra() {
     if (unidade) {
       setEditingUnidade(unidade);
       setNome(unidade.nome);
+      setNomeProfissional(unidade.nomeProfissional || '');
+      setEmail(unidade.email || '');
+      setTelefone(unidade.telefone || '');
     } else {
       setEditingUnidade(null);
       setNome('');
+      setNomeProfissional('');
+      setEmail('');
+      setTelefone('');
     }
     setDialogOpen(true);
   };
 
   const handleSubmit = () => {
     if (!nome.trim()) {
-      toast.error('Preencha o nome da unidade');
+      toast.error('Preencha o nome do serviço');
       return;
     }
 
+    const dados = {
+      nome,
+      nomeProfissional: nomeProfissional.trim() || undefined,
+      email: email.trim() || undefined,
+      telefone: telefone.trim() || undefined,
+    };
+
     if (editingUnidade) {
-      atualizarUnidade.mutate({ id: editingUnidade.id, nome });
+      atualizarUnidade.mutate({ id: editingUnidade.id, ...dados });
     } else {
-      criarUnidade.mutate({ nome });
+      criarUnidade.mutate(dados);
     }
   };
 
@@ -151,12 +173,41 @@ export default function GestaoRecalibra() {
 
           <div className="space-y-4">
             <div>
-              <Label htmlFor="nome">Nome da Unidade</Label>
+              <Label htmlFor="nome">Nome do Serviço *</Label>
               <Input
                 id="nome"
                 value={nome}
                 onChange={(e) => setNome(e.target.value)}
                 placeholder="Ex: Recalibra Minho"
+              />
+            </div>
+            <div>
+              <Label htmlFor="nomeProfissional">Nome do Profissional</Label>
+              <Input
+                id="nomeProfissional"
+                value={nomeProfissional}
+                onChange={(e) => setNomeProfissional(e.target.value)}
+                placeholder="Ex: João Silva"
+              />
+            </div>
+            <div>
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Ex: recalibra.minho@expressglass.pt"
+              />
+              <p className="text-xs text-muted-foreground mt-1">Email para envio de relatórios mensais</p>
+            </div>
+            <div>
+              <Label htmlFor="telefone">Contacto</Label>
+              <Input
+                id="telefone"
+                value={telefone}
+                onChange={(e) => setTelefone(e.target.value)}
+                placeholder="Ex: 912 345 678"
               />
             </div>
           </div>

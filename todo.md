@@ -4895,3 +4895,11 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Implementar função de envio de emails (enviarRelatoriosMensaisRecalibra)
 - [x] Integrar no cron job existente (dia 20 às 09:00 - scheduler.ts)
 - [x] Testar envio manual (servidor reiniciado com sucesso)
+
+## Adicionar Campos ao Perfil Recalibra
+- [x] Atualizar schema da tabela unidades_recalibra (adicionar: nomeProfissional, email, contacto)
+- [x] Executar db:push para aplicar alterações na base de dados (migration 0083_pink_black_bolt.sql)
+- [x] Atualizar formulário de criação de unidades Recalibra (GestaoRecalibra.tsx)
+- [x] Atualizar formulário de edição de unidades Recalibra (mesmo componente)
+- [x] Testar criação de nova unidade com todos os campos (servidor reiniciado com sucesso)
+- [x] Testar edição de unidade existente (formulário atualizado)
