@@ -4907,3 +4907,8 @@ NOTA: Sistema de email requer configuração externa no deployment
 ## Enviar Relatório Consolidado para Técnico Recalibra
 - [x] Atualizar relatorioMensalRecalibra.ts para enviar relatório consolidado também para o email do técnico
 - [x] Testar envio de email para técnico (servidor reiniciado com sucesso)
+
+## Reverter Envio de Relatório Consolidado para Técnicos
+- [x] Remover código que envia relatório consolidado para técnicos
+- [x] Manter apenas envio de relatório individual para técnicos (email da unidade)
+- [x] Manter envio de relatório consolidado apenas para gestores
