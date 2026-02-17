@@ -1,0 +1,45 @@
+{
+  "query": "SELECT lojaId, mes, ano, objetivoMensal, objetivoDiaAtual FROM resultados_mensais WHERE mes = 2 AND ano = 2026 LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT lojaId, mes, ano, objetivoMensal, objetivoDiaAtual FROM resultados_mensais WHERE mes = 2 AND ano = 2026 LIMIT 5;",
+  "rows": [
+    {
+      "lojaId": "180001",
+      "mes": "2",
+      "ano": "2026",
+      "objetivoMensal": "55",
+      "objetivoDiaAtual": "28.95"
+    },
+    {
+      "lojaId": "180002",
+      "mes": "2",
+      "ano": "2026",
+      "objetivoMensal": "139",
+      "objetivoDiaAtual": "73.16"
+    },
+    {
+      "lojaId": "180003",
+      "mes": "2",
+      "ano": "2026",
+      "objetivoMensal": "61",
+      "objetivoDiaAtual": "32.11"
+    },
+    {
+      "lojaId": "180004",
+      "mes": "2",
+      "ano": "2026",
+      "objetivoMensal": "46",
+      "objetivoDiaAtual": "24.21"
+    },
+    {
+      "lojaId": "180005",
+      "mes": "2",
+      "ano": "2026",
+      "objetivoMensal": "124",
+      "objetivoDiaAtual": "65.26"
+    }
+  ],
+  "messages": [],
+  "stdout": "lojaId\tmes\tano\tobjetivoMensal\tobjetivoDiaAtual\n180001\t2\t2026\t55\t28.95\n180002\t2\t2026\t139\t73.16\n180003\t2\t2026\t61\t32.11\n180004\t2\t2026\t46\t24.21\n180005\t2\t2026\t124\t65.26\n",
+  "stderr": "",
+  "execution_time_ms": 343
+}

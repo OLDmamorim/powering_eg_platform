@@ -575,6 +575,13 @@
       "when": 1771331606192,
       "tag": "0081_equal_the_stranger",
       "breakpoints": true
+    },
+    {
+      "idx": 82,
+      "version": "5",
+      "when": 1771332099317,
+      "tag": "0082_jittery_sister_grimm",
+      "breakpoints": true
     }
   ]
 }

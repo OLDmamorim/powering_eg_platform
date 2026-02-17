@@ -4849,4 +4849,4 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] RH: Adicionar botão para descarregar em PDF a listagem de colaboradores (mesma que vai para RH via email) - Já estava implementado e funcional
 - [x] Volante: Corrigir notificação diária às 18h que não está a ser enviada - Corrigido timezone do cron (agora usa UTC)
 - [x] Volante: Corrigir link na notificação do Telegram para usar portal-loja com token em vez do portal normal
-- [x] Chatbot IA: Adicionar acesso aos objetivos diários das lojas no contexto do chatbot (principal e portal da loja) - Adicionada coluna objetivoDiario à tabela lojas
+- [x] Chatbot IA: Adicionar acesso aos objetivos mensais das lojas no contexto do chatbot (principal e portal da loja) - Usa objetivoMensal da tabela resultados_mensais

@@ -587,12 +587,38 @@ function formatarContextoParaPrompt(contexto: ContextoPlataforma): string {
   texto += `📊 DADOS DA PLATAFORMA (VISÃO NACIONAL/GERAL)\n`;
   texto += `========================================\n\n`;
   
-  // Lojas com número de colaboradores e objetivo diário
+  // Lojas com número de colaboradores e objetivo mensal (do período mais recente)
   texto += `🏪 LOJAS (${contexto.lojas.length}):\n`;
+  
+  // Criar mapa de objetivos mensais mais recentes por loja
+  const objetivosPorLoja = new Map<number, number>();
+  if (contexto.resultadosMensais && contexto.resultadosMensais.length > 0) {
+    // Agrupar por loja e pegar o mais recente
+    const resultadosPorLoja = new Map<number, any[]>();
+    contexto.resultadosMensais.forEach((r: any) => {
+      if (!resultadosPorLoja.has(r.lojaId)) {
+        resultadosPorLoja.set(r.lojaId, []);
+      }
+      resultadosPorLoja.get(r.lojaId)!.push(r);
+    });
+    
+    // Para cada loja, pegar o resultado mais recente
+    resultadosPorLoja.forEach((resultados, lojaId) => {
+      const maisRecente = resultados.sort((a, b) => {
+        if (a.ano !== b.ano) return b.ano - a.ano;
+        return b.mes - a.mes;
+      })[0];
+      if (maisRecente.objetivoMensal) {
+        objetivosPorLoja.set(lojaId, maisRecente.objetivoMensal);
+      }
+    });
+  }
+  
   contexto.lojas.forEach((l: any) => {
     const numColab = l.numColaboradores !== undefined ? l.numColaboradores : 'N/A';
-    const objDiario = l.objetivoDiario ? ` - 🎯 Obj. Diário: ${l.objetivoDiario} serv/dia` : '';
-    texto += `- ${l.nome} (ID: ${l.id}) - ${numColab} colaborador${numColab !== 1 ? 'es' : ''}${objDiario}${l.email ? ` - Email: ${l.email}` : ''}\n`;
+    const objMensal = objetivosPorLoja.get(l.id);
+    const objInfo = objMensal ? ` - 🎯 Obj. Mensal: ${objMensal} serviços` : '';
+    texto += `- ${l.nome} (ID: ${l.id}) - ${numColab} colaborador${numColab !== 1 ? 'es' : ''}${objInfo}${l.email ? ` - Email: ${l.email}` : ''}\n`;
   });
   texto += '\n';
   
