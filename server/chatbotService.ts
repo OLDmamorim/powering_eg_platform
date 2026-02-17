@@ -587,11 +587,12 @@ function formatarContextoParaPrompt(contexto: ContextoPlataforma): string {
   texto += `📊 DADOS DA PLATAFORMA (VISÃO NACIONAL/GERAL)\n`;
   texto += `========================================\n\n`;
   
-  // Lojas com número de colaboradores
+  // Lojas com número de colaboradores e objetivo diário
   texto += `🏪 LOJAS (${contexto.lojas.length}):\n`;
   contexto.lojas.forEach((l: any) => {
     const numColab = l.numColaboradores !== undefined ? l.numColaboradores : 'N/A';
-    texto += `- ${l.nome} (ID: ${l.id}) - ${numColab} colaborador${numColab !== 1 ? 'es' : ''}${l.email ? ` - Email: ${l.email}` : ''}\n`;
+    const objDiario = l.objetivoDiario ? ` - 🎯 Obj. Diário: ${l.objetivoDiario} serv/dia` : '';
+    texto += `- ${l.nome} (ID: ${l.id}) - ${numColab} colaborador${numColab !== 1 ? 'es' : ''}${objDiario}${l.email ? ` - Email: ${l.email}` : ''}\n`;
   });
   texto += '\n';
   

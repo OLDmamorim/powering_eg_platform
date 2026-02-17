@@ -595,6 +595,17 @@ function formatarContextoParaLoja(contextoNacional: any, dadosLoja: any, lojaNom
   texto += `🏪 DADOS DA LOJA: ${lojaNome}\n`;
   texto += `========================================\n\n`;
   
+  // Informações básicas da loja
+  if (dadosLoja.loja) {
+    texto += `📊 INFORMAÇÕES BÁSICAS:\n`;
+    texto += `- Nome: ${dadosLoja.loja.nome}\n`;
+    texto += `- Zona: ${dadosLoja.loja.zona || 'N/A'}\n`;
+    if (dadosLoja.loja.objetivoDiario) {
+      texto += `- 🎯 OBJETIVO DIÁRIO: ${dadosLoja.loja.objetivoDiario} serviços/dia\n`;
+    }
+    texto += `\n`;
+  }
+  
   texto += `📋 PENDENTES:\n`;
   const pendentesAtivos = dadosLoja.pendentes.filter((p: any) => !p.resolvido);
   texto += `- Total: ${dadosLoja.pendentes.length} (${pendentesAtivos.length} ativos, ${dadosLoja.pendentes.length - pendentesAtivos.length} resolvidos)\n`;
