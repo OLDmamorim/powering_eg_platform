@@ -743,7 +743,11 @@ function formatarContextoParaPrompt(contexto: ContextoPlataforma): string {
           : 'N/A';
         const qtdReparacoes = r.qtdReparacoes || 0;
         const qtdParaBrisas = r.qtdParaBrisas || 0;
-        texto += `- ${r.lojaNome}: ${r.totalServicos || 0} serviços, objetivo: ${r.objetivoMensal || 'N/A'}, desvio: ${desvio}, taxa reparação: ${taxaRep}, reparações: ${qtdReparacoes}, para-brisas: ${qtdParaBrisas}\n`;
+        const objetivoDia = r.objetivoDiaAtual != null ? parseFloat(r.objetivoDiaAtual).toFixed(1) : 'N/A';
+        const desvioDia = r.desvioPercentualDia != null
+          ? (typeof r.desvioPercentualDia === 'number' ? r.desvioPercentualDia * 100 : parseFloat(r.desvioPercentualDia) * 100).toFixed(1) + '%'
+          : 'N/A';
+        texto += `- ${r.lojaNome}: ${r.totalServicos || 0} serviços, objetivo mensal: ${r.objetivoMensal || 'N/A'}, objetivo ao dia: ${objetivoDia}, desvio mensal: ${desvio}, desvio diário: ${desvioDia}, taxa reparação: ${taxaRep}, reparações: ${qtdReparacoes}, para-brisas: ${qtdParaBrisas}\n`;
       });
       texto += '\n';
     });

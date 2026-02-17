@@ -4850,3 +4850,4 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Volante: Corrigir notificação diária às 18h que não está a ser enviada - Corrigido timezone do cron (agora usa UTC)
 - [x] Volante: Corrigir link na notificação do Telegram para usar portal-loja com token em vez do portal normal
 - [x] Chatbot IA: Adicionar acesso aos objetivos mensais das lojas no contexto do chatbot (principal e portal da loja) - Usa objetivoMensal da tabela resultados_mensais
+- [x] Chatbot IA: Adicionar objetivo ao dia (objetivoDiaAtual) e desvio percentual diário (desvioPercentualDia) ao contexto do chatbot
