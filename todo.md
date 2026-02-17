@@ -4846,3 +4846,6 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Adicionar opção "Outros (Loja externa)" no dropdown de lojas do Volante
 - [x] Volante: No registo de serviços, adicionar seletor de loja editável. Com loja agendada: essa loja por defeito. Sem agendamento/dia bloqueado: 'Outros (Loja externa)' por defeito. Sempre pode mudar para qualquer loja da zona.
 - [x] Remover card "Histórico de Serviços" da página inicial do Volante (serviços agora registados no Calendário)
+- [x] RH: Adicionar botão para descarregar em PDF a listagem de colaboradores (mesma que vai para RH via email) - Já estava implementado e funcional
+- [x] Volante: Corrigir notificação diária às 18h que não está a ser enviada - Corrigido timezone do cron (agora usa UTC)
+- [x] Volante: Corrigir link na notificação do Telegram para usar portal-loja com token em vez do portal normal

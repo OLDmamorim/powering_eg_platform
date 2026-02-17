@@ -10553,16 +10553,18 @@ export async function getVolantesSemRegistoHoje() {
   
   const hoje = new Date().toISOString().split('T')[0];
   
-  // Buscar todos os volantes com agendamentos hoje
+  // Buscar todos os volantes com agendamentos hoje (incluindo token)
   const agendamentosHoje = await db.select({
     volanteId: agendamentosVolante.volanteId,
     volante: volantes,
     lojaId: agendamentosVolante.lojaId,
     loja: lojas,
-    periodo: agendamentosVolante.agendamento_volante_periodo
+    periodo: agendamentosVolante.agendamento_volante_periodo,
+    token: tokensVolante
   })
     .from(agendamentosVolante)
     .leftJoin(volantes, eq(agendamentosVolante.volanteId, volantes.id))
+    .leftJoin(tokensVolante, eq(volantes.id, tokensVolante.volanteId))
     .leftJoin(lojas, eq(agendamentosVolante.lojaId, lojas.id))
     .where(sql`DATE(${agendamentosVolante.data}) = ${hoje}`);
   
@@ -10589,6 +10591,7 @@ export async function getVolantesSemRegistoHoje() {
           volanteId,
           volanteNome: agendamento.volante.nome,
           telegramChatId: agendamento.volante.telegramChatId,
+          token: agendamento.token?.token || null,
           lojasNaoRegistadas: []
         });
       }
