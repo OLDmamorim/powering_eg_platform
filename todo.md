@@ -4903,3 +4903,7 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Atualizar formulário de edição de unidades Recalibra (mesmo componente)
 - [x] Testar criação de nova unidade com todos os campos (servidor reiniciado com sucesso)
 - [x] Testar edição de unidade existente (formulário atualizado)
+
+## Enviar Relatório Consolidado para Técnico Recalibra
+- [x] Atualizar relatorioMensalRecalibra.ts para enviar relatório consolidado também para o email do técnico
+- [x] Testar envio de email para técnico (servidor reiniciado com sucesso)

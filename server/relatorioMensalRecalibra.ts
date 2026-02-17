@@ -150,7 +150,7 @@ export async function enviarRelatoriosMensaisRecalibra() {
       }
     }
     
-    // Enviar relatórios consolidados para gestores
+    // Enviar relatórios consolidados para gestores E técnicos das unidades
     for (const [gestorId, dadosUnidades] of calibragensPorGestor.entries()) {
       try {
         const gestor = await db.getGestorById(gestorId);
@@ -159,21 +159,22 @@ export async function enviarRelatoriosMensaisRecalibra() {
           continue;
         }
         
-        // Gerar HTML do relatório consolidado para gestor
-        const htmlGestor = gerarHTMLRelatorioMensalRecalibraGestor({
+        // Gerar HTML do relatório consolidado
+        const htmlConsolidado = gerarHTMLRelatorioMensalRecalibraGestor({
           gestorNome: gestor.user.name || 'Gestor',
           mes: mesRelatorio,
           ano: anoAnterior,
           unidades: dadosUnidades,
         });
         
-        const enviado = await sendEmail({
+        // 1. Enviar para o gestor
+        const enviadoGestor = await sendEmail({
           to: gestor.user.email,
           subject: `Relatório Mensal Consolidado - Calibragens Recalibra - ${mesNome} ${anoAnterior}`,
-          html: htmlGestor,
+          html: htmlConsolidado,
         });
         
-        if (enviado) {
+        if (enviadoGestor) {
           console.log(`[Relatório Mensal Recalibra] Email consolidado enviado para gestor ${gestor.user.name} (${gestor.user.email})`);
           emailsEnviadosGestores++;
         } else {
@@ -181,8 +182,33 @@ export async function enviarRelatoriosMensaisRecalibra() {
           erros++;
         }
         
-        // Aguardar 1 segundo entre emails
+        // Aguardar 1 segundo
         await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // 2. Enviar o mesmo relatório consolidado para os técnicos das unidades (se tiverem email)
+        for (const dadosUnidade of dadosUnidades) {
+          // Obter dados completos da unidade para aceder ao email
+          const unidadeCompleta = unidades.find(u => u.id === dadosUnidade.unidadeId);
+          
+          if (unidadeCompleta?.email) {
+            const enviadoTecnico = await sendEmail({
+              to: unidadeCompleta.email,
+              subject: `Relatório Mensal Consolidado - Calibragens Recalibra - ${mesNome} ${anoAnterior}`,
+              html: htmlConsolidado,
+            });
+            
+            if (enviadoTecnico) {
+              console.log(`[Relatório Mensal Recalibra] Email consolidado enviado para técnico ${unidadeCompleta.nome} (${unidadeCompleta.email})`);
+              emailsEnviadosGestores++; // Conta como email consolidado
+            } else {
+              console.error(`[Relatório Mensal Recalibra] Erro ao enviar email consolidado para técnico ${unidadeCompleta.nome}`);
+              erros++;
+            }
+            
+            // Aguardar 1 segundo entre emails
+            await new Promise(resolve => setTimeout(resolve, 1000));
+          }
+        }
         
       } catch (error) {
         console.error(`[Relatório Mensal Recalibra] Erro ao processar gestor ${gestorId}:`, error);
