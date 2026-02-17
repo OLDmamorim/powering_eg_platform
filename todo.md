@@ -4912,3 +4912,9 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Remover código que envia relatório consolidado para técnicos
 - [x] Manter apenas envio de relatório individual para técnicos (email da unidade)
 - [x] Manter envio de relatório consolidado apenas para gestores
+
+## Corrigir Erro "obterFeriadosPortugueses is not defined"
+- [x] Localizar onde a função obterFeriadosPortugueses é chamada (linha 3148 routers.ts)
+- [x] Verificar se a função está definida e exportada corretamente (não estava definida)
+- [x] Definir a função obterFeriadosPortugueses com feriados portugueses (fixos + móveis)
+- [x] Testar funcionalidade de Projeção de Visitas (servidor reiniciado com sucesso)

@@ -20,6 +20,59 @@ import { processarAnalise, ResultadoAnalise, RelatorioLoja, gerarHTMLEmailAnalis
 import { gerarPDFRelacaoRH } from "./pdfRelacaoRH";
 import { enviarLembretesRH, isDia20 } from "./lembreteRHService";
 
+// Função para obter feriados portugueses de um ano específico
+function obterFeriadosPortugueses(ano: number): string[] {
+  const feriados: string[] = [];
+  
+  // Feriados fixos
+  feriados.push(`${ano}-01-01`); // Ano Novo
+  feriados.push(`${ano}-04-25`); // 25 de Abril
+  feriados.push(`${ano}-05-01`); // Dia do Trabalhador
+  feriados.push(`${ano}-06-10`); // Dia de Portugal
+  feriados.push(`${ano}-08-15`); // Assunção de Nossa Senhora
+  feriados.push(`${ano}-10-05`); // Implantação da República
+  feriados.push(`${ano}-11-01`); // Todos os Santos
+  feriados.push(`${ano}-12-01`); // Restauração da Independência
+  feriados.push(`${ano}-12-08`); // Imaculada Conceição
+  feriados.push(`${ano}-12-25`); // Natal
+  
+  // Feriados móveis (Páscoa e Carnaval)
+  // Cálculo simplificado da Páscoa usando o algoritmo de Meeus/Jones/Butcher
+  const a = ano % 19;
+  const b = Math.floor(ano / 100);
+  const c = ano % 100;
+  const d = Math.floor(b / 4);
+  const e = b % 4;
+  const f = Math.floor((b + 8) / 25);
+  const g = Math.floor((b - f + 1) / 3);
+  const h = (19 * a + b - d - g + 15) % 30;
+  const i = Math.floor(c / 4);
+  const k = c % 4;
+  const l = (32 + 2 * e + 2 * i - h - k) % 7;
+  const m = Math.floor((a + 11 * h + 22 * l) / 451);
+  const mes = Math.floor((h + l - 7 * m + 114) / 31);
+  const dia = ((h + l - 7 * m + 114) % 31) + 1;
+  
+  const pascoa = new Date(ano, mes - 1, dia);
+  
+  // Carnaval (47 dias antes da Páscoa)
+  const carnaval = new Date(pascoa);
+  carnaval.setDate(pascoa.getDate() - 47);
+  feriados.push(carnaval.toISOString().split('T')[0]);
+  
+  // Sexta-feira Santa (2 dias antes da Páscoa)
+  const sextaSanta = new Date(pascoa);
+  sextaSanta.setDate(pascoa.getDate() - 2);
+  feriados.push(sextaSanta.toISOString().split('T')[0]);
+  
+  // Corpo de Deus (60 dias depois da Páscoa)
+  const corpoDeus = new Date(pascoa);
+  corpoDeus.setDate(pascoa.getDate() + 60);
+  feriados.push(corpoDeus.toISOString().split('T')[0]);
+  
+  return feriados;
+}
+
 // Função auxiliar para gerar alerta de processos repetidos
 // diasDesdeIdentificacao: número de dias desde a primeira identificação do processo
 function gerarAlertaProcessosRepetidos(
