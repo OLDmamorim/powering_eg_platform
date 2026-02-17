@@ -4880,3 +4880,18 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Criar cron job para disparar dia 20 de cada mês às 09:00 (scheduler.ts)
 - [x] Criar teste manual do relatório (relatorioMensalVolante.test.ts)
 - [x] Verificar que emails são enviados apenas para lojas onde volante interveio
+
+## Teste de Emails de Relatório Mensal do Volante
+- [x] Criar função de teste com dados de exemplo (testeEmailRelatorioVolante.ts)
+- [x] Enviar email de exemplo tipo "loja" para o utilizador (marco.amorim@expressglass.pt)
+- [x] Enviar email de exemplo tipo "gestor" para o utilizador (marco.amorim@expressglass.pt)
+- [ ] Aguardar validação do utilizador
+
+## Email Mensal Automático - Resumo Calibragens Recalibra (Fevereiro 2026)
+- [x] Analisar estrutura de dados das unidades Recalibra e calibragens
+- [x] Criar template HTML do email para unidades Recalibra (gerarHTMLRelatorioMensalRecalibra)
+- [x] Criar template HTML do email para gestores (gerarHTMLRelatorioMensalRecalibraGestor)
+- [x] Implementar função para obter calibragens por unidade no mês anterior (usa getHistoricoCalibragens)
+- [x] Implementar função de envio de emails (enviarRelatoriosMensaisRecalibra)
+- [x] Integrar no cron job existente (dia 20 às 09:00 - scheduler.ts)
+- [x] Testar envio manual (servidor reiniciado com sucesso)

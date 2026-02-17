@@ -500,3 +500,339 @@ export function gerarHTMLRelatorioMensalVolante(dados: {
 </html>
   `;
 }
+
+/**
+ * Gera HTML do relatório mensal de calibragens para uma unidade Recalibra específica
+ */
+export function gerarHTMLRelatorioMensalRecalibra(dados: {
+  unidadeNome: string;
+  mes: number;
+  ano: number;
+  calibragens: Array<{
+    data: string;
+    marca: string | null;
+    matricula: string;
+    tipologiaViatura: string;
+    tipoCalibragem: string;
+    localidade: string | null;
+    lojaNome?: string;
+  }>;
+  totalDinamicas: number;
+  totalEstaticas: number;
+  totalCore: number;
+  totalLigeiros: number;
+  totalPesados: number;
+  totalGeral: number;
+  diasAtivos: number;
+}): string {
+  const { 
+    unidadeNome, mes, ano, calibragens,
+    totalDinamicas, totalEstaticas, totalCore,
+    totalLigeiros, totalPesados, totalGeral, diasAtivos
+  } = dados;
+
+  const mesesNomes = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+  const mesNome = mesesNomes[mes - 1];
+
+  // Ordenar calibragens por data (mais recente primeiro)
+  const calibragensOrdenadas = [...calibragens].sort((a, b) => b.data.localeCompare(a.data));
+
+  return `
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body { font-family: Arial, sans-serif; margin: 40px; color: #333; line-height: 1.6; }
+    .header { text-align: center; margin-bottom: 30px; border-bottom: 3px solid #f59e0b; padding-bottom: 20px; }
+    .logo { font-size: 24px; font-weight: bold; color: #f59e0b; }
+    .title { font-size: 20px; margin-top: 10px; color: #d97706; }
+    .subtitle { font-size: 14px; color: #6b7280; margin-top: 5px; }
+    .info-box { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; padding: 20px; border-radius: 12px; margin-bottom: 30px; }
+    .info-row { display: flex; margin-bottom: 10px; font-size: 16px; }
+    .info-label { font-weight: bold; width: 150px; }
+    .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 30px; }
+    .summary-card { background: #f3f4f6; padding: 20px; border-radius: 10px; text-align: center; border-left: 4px solid #f59e0b; }
+    .summary-card.highlight { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-left-color: #d97706; }
+    .summary-number { font-size: 32px; font-weight: bold; color: #d97706; margin-bottom: 5px; }
+    .summary-label { font-size: 13px; color: #6b7280; text-transform: uppercase; }
+    .section { margin-bottom: 30px; }
+    .section-title { font-size: 18px; font-weight: bold; color: #d97706; margin-bottom: 15px; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px; }
+    .table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .table th { background: #f59e0b; color: white; padding: 10px; text-align: left; font-weight: bold; font-size: 13px; }
+    .table td { padding: 10px; border-bottom: 1px solid #e5e7eb; font-size: 13px; }
+    .table tr:last-child td { border-bottom: none; }
+    .table tr:hover { background: #f9fafb; }
+    .badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; }
+    .badge-dinamica { background: #dbeafe; color: #1e40af; }
+    .badge-estatica { background: #d1fae5; color: #059669; }
+    .badge-core { background: #fef3c7; color: #d97706; }
+    .badge-ligeiro { background: #e0e7ff; color: #4338ca; }
+    .badge-pesado { background: #fce7f3; color: #be123c; }
+    .footer { margin-top: 40px; text-align: center; font-size: 12px; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 20px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663088836799/YrkmGCRDVqYgFnZO.png" alt="ExpressGlass" style="max-width: 200px; height: auto; margin-bottom: 10px;" />
+    <div class="logo">PoweringEG Platform 2.0 - Recalibra</div>
+    <div class="title">Relatório Mensal de Calibragens</div>
+    <div class="subtitle">Resumo de Atividade</div>
+  </div>
+  
+  <div class="info-box">
+    <div class="info-row"><span class="info-label">🔧 Unidade:</span> <strong>${unidadeNome}</strong></div>
+    <div class="info-row"><span class="info-label">📅 Período:</span> <strong>${mesNome} de ${ano}</strong></div>
+    <div class="info-row"><span class="info-label">📊 Dias Ativos:</span> <strong>${diasAtivos} ${diasAtivos === 1 ? 'dia' : 'dias'}</strong></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📊 Resumo Total do Mês</div>
+    <div class="summary-grid">
+      <div class="summary-card">
+        <div class="summary-number">${totalDinamicas}</div>
+        <div class="summary-label">Dinâmicas</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-number">${totalEstaticas}</div>
+        <div class="summary-label">Estáticas</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-number">${totalCore}</div>
+        <div class="summary-label">Core</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-number">${totalLigeiros}</div>
+        <div class="summary-label">Ligeiros</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-number">${totalPesados}</div>
+        <div class="summary-label">Pesados</div>
+      </div>
+      <div class="summary-card highlight">
+        <div class="summary-number">${totalGeral}</div>
+        <div class="summary-label">Total Geral</div>
+      </div>
+    </div>
+  </div>
+
+  ${calibragensOrdenadas.length > 0 ? `
+  <div class="section">
+    <div class="section-title">📋 Detalhes das Calibragens</div>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th>Matrícula</th>
+          <th>Marca</th>
+          <th>Tipo</th>
+          <th>Tipologia</th>
+          <th>Loja</th>
+          <th>Localidade</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${calibragensOrdenadas.map(c => {
+          const dataFormatada = new Date(c.data + 'T00:00:00').toLocaleDateString('pt-PT', { day: '2-digit', month: 'short' });
+          const tipoBadgeClass = c.tipoCalibragem === 'DINÂMICA' ? 'badge-dinamica' : c.tipoCalibragem === 'ESTÁTICA' ? 'badge-estatica' : 'badge-core';
+          const tipologiaBadgeClass = c.tipologiaViatura === 'LIGEIRO' ? 'badge-ligeiro' : 'badge-pesado';
+          return `
+          <tr>
+            <td><strong>${dataFormatada}</strong></td>
+            <td>${c.matricula}</td>
+            <td>${c.marca || '-'}</td>
+            <td><span class="badge ${tipoBadgeClass}">${c.tipoCalibragem}</span></td>
+            <td><span class="badge ${tipologiaBadgeClass}">${c.tipologiaViatura}</span></td>
+            <td>${c.lojaNome || '-'}</td>
+            <td>${c.localidade || '-'}</td>
+          </tr>
+          `;
+        }).join('')}
+      </tbody>
+    </table>
+  </div>
+  ` : `
+  <div style="text-align: center; padding: 40px; color: #9ca3af; font-style: italic;">
+    Não foram registadas calibragens neste período.
+  </div>
+  `}
+
+  <div class="footer">
+    <p>Relatório gerado automaticamente pela <strong>PoweringEG Platform</strong></p>
+    <p>Data de geração: ${new Date().toLocaleDateString('pt-PT')} às ${new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })}</p>
+    <p style="margin-top: 10px; font-size: 11px;">
+      PoweringEG Platform 2.0 - a IA ao serviço da ExpressGlass
+    </p>
+  </div>
+</body>
+</html>
+  `;
+}
+
+/**
+ * Gera HTML do relatório consolidado de calibragens para gestor
+ */
+export function gerarHTMLRelatorioMensalRecalibraGestor(dados: {
+  gestorNome: string;
+  mes: number;
+  ano: number;
+  unidades: Array<{
+    unidadeNome: string;
+    unidadeId: number;
+    totais: {
+      dinamicas: number;
+      estaticas: number;
+      core: number;
+      ligeiros: number;
+      pesados: number;
+      geral: number;
+      diasAtivos: number;
+    };
+  }>;
+}): string {
+  const { gestorNome, mes, ano, unidades } = dados;
+  
+  const mesesNomes = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+  const mesNome = mesesNomes[mes - 1];
+  
+  // Calcular totais gerais
+  const totaisGerais = unidades.reduce((acc, unidade) => ({
+    dinamicas: acc.dinamicas + unidade.totais.dinamicas,
+    estaticas: acc.estaticas + unidade.totais.estaticas,
+    core: acc.core + unidade.totais.core,
+    ligeiros: acc.ligeiros + unidade.totais.ligeiros,
+    pesados: acc.pesados + unidade.totais.pesados,
+    geral: acc.geral + unidade.totais.geral,
+  }), { dinamicas: 0, estaticas: 0, core: 0, ligeiros: 0, pesados: 0, geral: 0 });
+  
+  // Ordenar unidades por total de calibragens (maior primeiro)
+  const unidadesOrdenadas = [...unidades].sort((a, b) => b.totais.geral - a.totais.geral);
+  
+  return `
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body { font-family: Arial, sans-serif; margin: 40px; color: #333; line-height: 1.6; }
+    .header { text-align: center; margin-bottom: 30px; border-bottom: 3px solid #f59e0b; padding-bottom: 20px; }
+    .logo { font-size: 24px; font-weight: bold; color: #f59e0b; }
+    .title { font-size: 20px; margin-top: 10px; color: #d97706; }
+    .subtitle { font-size: 14px; color: #6b7280; margin-top: 5px; }
+    .info-box { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; padding: 20px; border-radius: 12px; margin-bottom: 30px; }
+    .info-row { display: flex; margin-bottom: 10px; font-size: 16px; }
+    .info-label { font-weight: bold; width: 150px; }
+    .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 30px; }
+    .summary-card { background: #f3f4f6; padding: 20px; border-radius: 10px; text-align: center; border-left: 4px solid #f59e0b; }
+    .summary-card.highlight { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-left-color: #d97706; }
+    .summary-number { font-size: 32px; font-weight: bold; color: #d97706; margin-bottom: 5px; }
+    .summary-label { font-size: 13px; color: #6b7280; text-transform: uppercase; }
+    .section { margin-bottom: 30px; }
+    .section-title { font-size: 18px; font-weight: bold; color: #d97706; margin-bottom: 15px; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px; }
+    .table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .table th { background: #f59e0b; color: white; padding: 12px; text-align: left; font-weight: bold; font-size: 14px; }
+    .table td { padding: 12px; border-bottom: 1px solid #e5e7eb; font-size: 14px; }
+    .table tr:last-child td { border-bottom: none; }
+    .table tr:hover { background: #f9fafb; }
+    .total-row { background: #fef3c7 !important; font-weight: bold; }
+    .unidade-nome { font-weight: bold; color: #d97706; }
+    .footer { margin-top: 40px; text-align: center; font-size: 12px; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 20px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663088836799/YrkmGCRDVqYgFnZO.png" alt="ExpressGlass" style="max-width: 200px; height: auto; margin-bottom: 10px;" />
+    <div class="logo">PoweringEG Platform 2.0 - Recalibra</div>
+    <div class="title">Relatório Mensal Consolidado - Calibragens</div>
+    <div class="subtitle">Resumo por Zona</div>
+  </div>
+  
+  <div class="info-box">
+    <div class="info-row"><span class="info-label">👤 Gestor:</span> <strong>${gestorNome}</strong></div>
+    <div class="info-row"><span class="info-label">📅 Período:</span> <strong>${mesNome} de ${ano}</strong></div>
+    <div class="info-row"><span class="info-label">🔧 Unidades com Atividade:</span> <strong>${unidades.length} ${unidades.length === 1 ? 'unidade' : 'unidades'}</strong></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📊 Resumo Total da Zona</div>
+    <div class="summary-grid">
+      <div class="summary-card">
+        <div class="summary-number">${totaisGerais.dinamicas}</div>
+        <div class="summary-label">Dinâmicas</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-number">${totaisGerais.estaticas}</div>
+        <div class="summary-label">Estáticas</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-number">${totaisGerais.core}</div>
+        <div class="summary-label">Core</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-number">${totaisGerais.ligeiros}</div>
+        <div class="summary-label">Ligeiros</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-number">${totaisGerais.pesados}</div>
+        <div class="summary-label">Pesados</div>
+      </div>
+      <div class="summary-card highlight">
+        <div class="summary-number">${totaisGerais.geral}</div>
+        <div class="summary-label">Total Geral</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔧 Detalhes por Unidade</div>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Unidade</th>
+          <th style="text-align: center;">Dias Ativos</th>
+          <th style="text-align: center;">Dinâmicas</th>
+          <th style="text-align: center;">Estáticas</th>
+          <th style="text-align: center;">Core</th>
+          <th style="text-align: center;">Ligeiros</th>
+          <th style="text-align: center;">Pesados</th>
+          <th style="text-align: center;">Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${unidadesOrdenadas.map(unidade => `
+        <tr>
+          <td class="unidade-nome">${unidade.unidadeNome}</td>
+          <td style="text-align: center;">${unidade.totais.diasAtivos}</td>
+          <td style="text-align: center;">${unidade.totais.dinamicas}</td>
+          <td style="text-align: center;">${unidade.totais.estaticas}</td>
+          <td style="text-align: center;">${unidade.totais.core}</td>
+          <td style="text-align: center;">${unidade.totais.ligeiros}</td>
+          <td style="text-align: center;">${unidade.totais.pesados}</td>
+          <td style="text-align: center;"><strong>${unidade.totais.geral}</strong></td>
+        </tr>
+        `).join('')}
+        <tr class="total-row">
+          <td><strong>TOTAL ZONA</strong></td>
+          <td style="text-align: center;"><strong>-</strong></td>
+          <td style="text-align: center;"><strong>${totaisGerais.dinamicas}</strong></td>
+          <td style="text-align: center;"><strong>${totaisGerais.estaticas}</strong></td>
+          <td style="text-align: center;"><strong>${totaisGerais.core}</strong></td>
+          <td style="text-align: center;"><strong>${totaisGerais.ligeiros}</strong></td>
+          <td style="text-align: center;"><strong>${totaisGerais.pesados}</strong></td>
+          <td style="text-align: center;"><strong>${totaisGerais.geral}</strong></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="footer">
+    <p>Relatório gerado automaticamente pela <strong>PoweringEG Platform</strong></p>
+    <p>Data de geração: ${new Date().toLocaleDateString('pt-PT')} às ${new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })}</p>
+    <p style="margin-top: 10px; font-size: 11px;">
+      PoweringEG Platform 2.0 - a IA ao serviço da ExpressGlass
+    </p>
+  </div>
+</body>
+</html>
+  `;
+}

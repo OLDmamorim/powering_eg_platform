@@ -2,6 +2,7 @@ import cron from 'node-cron';
 import { getVolantesSemRegistoHoje } from './db';
 import { enviarLembreteRegistoServicos } from './telegramService';
 import { enviarRelatoriosMensaisVolante } from './relatorioMensalVolante';
+import { enviarRelatoriosMensaisRecalibra } from './relatorioMensalRecalibra';
 
 /**
  * Configura os cron jobs do sistema
@@ -57,15 +58,24 @@ export function setupScheduler() {
     }
   });
 
-  // Relatório mensal do volante - dia 20 de cada mês às 09:00 Lisboa (UTC+0)
+  // Relatórios mensais - dia 20 de cada mês às 09:00 Lisboa (UTC+0)
   // 09:00 Lisboa = 09:00 UTC (inverno) ou 08:00 UTC (verão)
+  // Envia relatórios do volante E do Recalibra
   cron.schedule('0 9 20 * *', async () => {
     const agora = new Date();
     const horaLisboa = agora.toLocaleString('pt-PT', { timeZone: 'Europe/Lisbon', hour: '2-digit', minute: '2-digit' });
-    console.log(`[CRON] Executando envio de relatórios mensais do volante - Hora Lisboa: ${horaLisboa}`);
+    console.log(`[CRON] Executando envio de relatórios mensais - Hora Lisboa: ${horaLisboa}`);
     try {
+      // Enviar relatórios do volante
       await enviarRelatoriosMensaisVolante();
-      console.log('[CRON] Relatórios mensais enviados com sucesso');
+      console.log('[CRON] Relatórios mensais do volante enviados com sucesso');
+      
+      // Aguardar 2 segundos entre os dois sistemas
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Enviar relatórios do Recalibra
+      await enviarRelatoriosMensaisRecalibra();
+      console.log('[CRON] Relatórios mensais do Recalibra enviados com sucesso');
     } catch (error) {
       console.error('[CRON] Erro ao enviar relatórios mensais:', error);
     }
@@ -73,5 +83,5 @@ export function setupScheduler() {
 
   console.log('[SCHEDULER] Cron jobs configurados:');
   console.log('  - Lembrete diário de serviços: 18:00 UTC (= 18:00 Lisboa no inverno, 19:00 Lisboa no verão)');
-  console.log('  - Relatório mensal do volante: 09:00 UTC dia 20 (= 09:00 Lisboa no inverno, 10:00 Lisboa no verão)');
+  console.log('  - Relatórios mensais (Volante + Recalibra): 09:00 UTC dia 20 (= 09:00 Lisboa no inverno, 10:00 Lisboa no verão)');
 }
