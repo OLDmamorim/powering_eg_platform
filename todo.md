@@ -4851,3 +4851,21 @@ NOTA: Sistema de email requer configuração externa no deployment
 - [x] Volante: Corrigir link na notificação do Telegram para usar portal-loja com token em vez do portal normal
 - [x] Chatbot IA: Adicionar acesso aos objetivos mensais das lojas no contexto do chatbot (principal e portal da loja) - Usa objetivoMensal da tabela resultados_mensais
 - [x] Chatbot IA: Adicionar objetivo ao dia (objetivoDiaAtual) e desvio percentual diário (desvioPercentualDia) ao contexto do chatbot
+- [ ] Chatbot IA: Adicionar serviços realizados (totalServicos), serviços em falta, e média diária necessária ao contexto para responder perguntas sobre performance atual e projeções
+
+## Chatbot IA - Métricas Operacionais Completas (Fevereiro 2026)
+- [x] Adicionar servicosRealizados ao contexto do chatbot
+- [x] Calcular serviços em falta (objetivoMensal - servicosRealizados)
+- [x] Calcular média diária necessária (serviços em falta / dias restantes)
+- [x] Testar com pergunta real do Marco sobre Barcelos
+- [x] Verificar resposta completa com todas as métricas
+
+## Chatbot IA - Correção Urgente Portal da Loja (Fevereiro 2026)
+- [x] Diagnosticar problema: chatbot do portal da loja não tinha os cálculos
+- [x] Adicionar servicosRealizados ao contexto do chatbot do portal
+- [x] Adicionar cálculo de servicosEmFalta (objetivo - realizados)
+- [x] Adicionar cálculo de mediaDiariaNecessaria (falta / dias restantes)
+- [x] Aplicar correção em formatarContextoParaLoja (linhas 489-509)
+- [x] Aplicar correção nos resultados mensais da loja (linhas 648-656)
+- [x] Reiniciar servidor para aplicar alterações
+- [ ] Testar com utilizador no telemóvel

@@ -486,8 +486,17 @@ function formatarContextoParaLoja(contextoNacional: any, dadosLoja: any, lojaNom
     resultadosPeriodo.forEach((r: any) => {
       texto += `\n    🏢 ${r.lojaNome}:\n`;
       texto += `      - Zona: ${r.zona || 'N/A'}\n`;
-      texto += `      - Total Serviços: ${r.totalServicos || 0}\n`;
-      texto += `      - Objetivo Mensal: ${r.objetivoMensal || 'N/A'}\n`;
+      const servicosRealizados = r.totalServicos || 0;
+      const objetivoMensalNum = r.objetivoMensal || 0;
+      const servicosEmFalta = Math.max(0, objetivoMensalNum - servicosRealizados);
+      const hoje = new Date();
+      const ultimoDiaMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0).getDate();
+      const diasRestantes = Math.max(1, ultimoDiaMes - hoje.getDate());
+      const mediaDiariaNecessaria = servicosEmFalta > 0 ? (servicosEmFalta / diasRestantes).toFixed(1) : '0';
+      texto += `      - Serviços Realizados: ${servicosRealizados}\n`;
+      texto += `      - Objetivo Mensal: ${objetivoMensalNum}\n`;
+      texto += `      - Serviços em Falta: ${servicosEmFalta}\n`;
+      texto += `      - Média Diária Necessária: ${mediaDiariaNecessaria} serviços/dia (faltam ${diasRestantes} dias)\n`;
       texto += `      - Objetivo ao Dia: ${r.objetivoDiaAtual || 'N/A'}\n`;
       texto += `      - Desvio vs Obj Dia: ${r.desvioPercentualDia ? `${(parseFloat(r.desvioPercentualDia) * 100).toFixed(1)}%` : 'N/A'}\n`;
       texto += `      - Desvio vs Obj Mês: ${r.desvioPercentualMes ? `${(parseFloat(r.desvioPercentualMes) * 100).toFixed(1)}%` : 'N/A'}\n`;
@@ -636,10 +645,15 @@ function formatarContextoParaLoja(contextoNacional: any, dadosLoja: any, lojaNom
   texto += `📊 RESULTADOS MENSAIS (todos os períodos disponíveis):\n`;
   if (dadosLoja.resultadosMensais.length > 0) {
     dadosLoja.resultadosMensais.forEach((r: any) => {
-      const objetivo = r.objetivoMensal || 'N/A';
-      const realizado = r.totalServicos || 'N/A';
+      const servicosRealizados = r.totalServicos || 0;
+      const objetivoMensalNum = r.objetivoMensal || 0;
+      const servicosEmFalta = Math.max(0, objetivoMensalNum - servicosRealizados);
+      const hoje = new Date();
+      const ultimoDiaMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0).getDate();
+      const diasRestantes = Math.max(1, ultimoDiaMes - hoje.getDate());
+      const mediaDiariaNecessaria = servicosEmFalta > 0 ? (servicosEmFalta / diasRestantes).toFixed(1) : '0';
       const desvio = r.desvioPercentualDia ? `${(parseFloat(r.desvioPercentualDia) * 100).toFixed(1)}%` : 'N/A';
-      texto += `  - ${r.mes}/${r.ano}: Objetivo ${objetivo}, Realizado ${realizado}, Desvio ${desvio}\n`;
+      texto += `  - ${r.mes}/${r.ano}: Realizados ${servicosRealizados}, Objetivo ${objetivoMensalNum}, Em falta ${servicosEmFalta}, Média diária necessária ${mediaDiariaNecessaria} serv/dia, Desvio ${desvio}\n`;
     });
   } else {
     texto += `  - Sem dados disponíveis\n`;

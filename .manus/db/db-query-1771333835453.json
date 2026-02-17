@@ -1,0 +1,33 @@
+{
+  "query": "SELECT * FROM resultados_mensais LIMIT 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT * FROM resultados_mensais LIMIT 1;",
+  "rows": [
+    {
+      "id": "1",
+      "lojaId": "180001",
+      "mes": "12",
+      "ano": "2025",
+      "zona": "ZONA MEDIO TEJO",
+      "totalServicos": "47",
+      "servicosPorColaborador": "1.3056",
+      "numColaboradores": "2",
+      "objetivoDiaAtual": "59.00",
+      "objetivoMensal": "59",
+      "desvioObjetivoAcumulado": "-12.00",
+      "desvioPercentualDia": "-0.2034",
+      "desvioPercentualMes": "-0.2034",
+      "taxaReparacao": "0.2973",
+      "qtdReparacoes": "11",
+      "qtdParaBrisas": "26",
+      "gapReparacoes22": "0",
+      "nomeArquivo": "Mapa Serviços Diários e Vendas Complementares_Dezembro 2025 (1).xlsx",
+      "uploadedBy": "1",
+      "createdAt": "2025-12-29 11:25:08",
+      "updatedAt": "2026-01-05 14:56:57"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tlojaId\tmes\tano\tzona\ttotalServicos\tservicosPorColaborador\tnumColaboradores\tobjetivoDiaAtual\tobjetivoMensal\tdesvioObjetivoAcumulado\tdesvioPercentualDia\tdesvioPercentualMes\ttaxaReparacao\tqtdReparacoes\tqtdParaBrisas\tgapReparacoes22\tnomeArquivo\tuploadedBy\tcreatedAt\tupdatedAt\n1\t180001\t12\t2025\tZONA MEDIO TEJO\t47\t1.3056\t2\t59.00\t59\t-12.00\t-0.2034\t-0.2034\t0.2973\t11\t26\t0\tMapa Serviços Diários e Vendas Complementares_Dezembro 2025 (1).xlsx\t1\t2025-12-29 11:25:08\t2026-01-05 14:56:57\n",
+  "stderr": "",
+  "execution_time_ms": 404
+}

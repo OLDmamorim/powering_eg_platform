@@ -747,7 +747,16 @@ function formatarContextoParaPrompt(contexto: ContextoPlataforma): string {
         const desvioDia = r.desvioPercentualDia != null
           ? (typeof r.desvioPercentualDia === 'number' ? r.desvioPercentualDia * 100 : parseFloat(r.desvioPercentualDia) * 100).toFixed(1) + '%'
           : 'N/A';
-        texto += `- ${r.lojaNome}: ${r.totalServicos || 0} serviços, objetivo mensal: ${r.objetivoMensal || 'N/A'}, objetivo ao dia: ${objetivoDia}, desvio mensal: ${desvio}, desvio diário: ${desvioDia}, taxa reparação: ${taxaRep}, reparações: ${qtdReparacoes}, para-brisas: ${qtdParaBrisas}\n`;
+        const servicosRealizados = r.totalServicos || 0;
+        const objetivoMensalNum = r.objetivoMensal || 0;
+        const objetivoDiaNum = r.objetivoDiaAtual != null ? parseFloat(r.objetivoDiaAtual) : 0;
+        const servicosEmFalta = Math.max(0, objetivoMensalNum - servicosRealizados);
+        // Calcular dias restantes do mês (assumindo que estamos no dia 17 de Fevereiro 2026, faltam 11 dias)
+        const hoje = new Date();
+        const ultimoDiaMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0).getDate();
+        const diasRestantes = Math.max(1, ultimoDiaMes - hoje.getDate());
+        const mediaDiariaNecessaria = servicosEmFalta > 0 ? (servicosEmFalta / diasRestantes).toFixed(1) : '0';
+        texto += `- ${r.lojaNome}: ${servicosRealizados} serviços realizados, objetivo mensal: ${objetivoMensalNum}, objetivo ao dia: ${objetivoDia}, serviços em falta: ${servicosEmFalta}, média diária necessária: ${mediaDiariaNecessaria} serviços/dia, desvio mensal: ${desvio}, desvio diário: ${desvioDia}, taxa reparação: ${taxaRep}, reparações: ${qtdReparacoes}, para-brisas: ${qtdParaBrisas}\n`;
       });
       texto += '\n';
     });
