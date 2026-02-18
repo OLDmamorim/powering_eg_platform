@@ -22,3 +22,16 @@
 ## Dashboard Recalibra - Remover Filtro de Mês das Marcas
 - [x] Modificar backend para calcular porMarca com todas as calibragens (sem filtro)
 - [x] Testar que gráfico e tabela de marcas mostram histórico completo
+
+## Exportação PDF Dashboard Volante e Recalibra
+- [ ] Criar endpoint backend para gerar PDF do dashboard Recalibra (com dados filtrados)
+- [ ] Adicionar botão "Exportar PDF" no frontend do Recalibra
+- [ ] Criar endpoint backend para gerar PDF do dashboard Volante (com dados filtrados)
+- [ ] Adicionar botão "Exportar PDF" no frontend do Volante
+- [ ] Testar exportação com filtros diferentes
+
+## Ajustar Cores dos Relatórios Email (Volante e Recalibra)
+- [x] Verificar e ajustar cores no template HTML do relatório Volante
+- [x] Verificar e ajustar cores no template HTML do relatório Recalibra
+- [x] Garantir contraste adequado (letra branca sobre fundo colorido no info-box)
+- [x] Testar visualização em diferentes clientes de email

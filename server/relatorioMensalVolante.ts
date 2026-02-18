@@ -318,9 +318,9 @@ function gerarHTMLRelatorioMensalVolanteGestor(dados: {
   </div>
   
   <div class="info-box">
-    <div class="info-row"><span class="info-label">👤 Gestor:</span> <strong>${gestorNome}</strong></div>
-    <div class="info-row"><span class="info-label">📅 Período:</span> <strong>${mesNome} de ${ano}</strong></div>
-    <div class="info-row"><span class="info-label">🏪 Lojas com Atividade:</span> <strong>${lojas.length} ${lojas.length === 1 ? 'loja' : 'lojas'}</strong></div>
+    <div class="info-row"><span class="info-label" style="color: white;">👤 Gestor:</span> <strong style="color: white;">${gestorNome}</strong></div>
+    <div class="info-row"><span class="info-label" style="color: white;">📅 Período:</span> <strong style="color: white;">${mesNome} de ${ano}</strong></div>
+    <div class="info-row"><span class="info-label" style="color: white;">🏪 Lojas com Atividade:</span> <strong style="color: white;">${lojas.length} ${lojas.length === 1 ? 'loja' : 'lojas'}</strong></div>
   </div>
 
   <div class="section">

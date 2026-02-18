@@ -410,10 +410,10 @@ export function gerarHTMLRelatorioMensalVolante(dados: {
   </div>
   
   <div class="info-box">
-    <div class="info-row"><span class="info-label">🏪 Loja:</span> <strong>${lojaNome}</strong></div>
-    <div class="info-row"><span class="info-label">🚗 Volante:</span> <strong>${volanteNome}</strong></div>
-    <div class="info-row"><span class="info-label">📅 Período:</span> <strong>${mesNome} de ${ano}</strong></div>
-    <div class="info-row"><span class="info-label">📊 Dias Ativos:</span> <strong>${diasAtivos} ${diasAtivos === 1 ? 'dia' : 'dias'}</strong></div>
+    <div class="info-row"><span class="info-label" style="color: white;">🏪 Loja:</span> <strong style="color: white;">${lojaNome}</strong></div>
+    <div class="info-row"><span class="info-label" style="color: white;">🚗 Volante:</span> <strong style="color: white;">${volanteNome}</strong></div>
+    <div class="info-row"><span class="info-label" style="color: white;">📅 Período:</span> <strong style="color: white;">${mesNome} de ${ano}</strong></div>
+    <div class="info-row"><span class="info-label" style="color: white;">📊 Dias Ativos:</span> <strong style="color: white;">${diasAtivos} ${diasAtivos === 1 ? 'dia' : 'dias'}</strong></div>
   </div>
 
   <div class="section">
@@ -581,9 +581,9 @@ export function gerarHTMLRelatorioMensalRecalibra(dados: {
   </div>
   
   <div class="info-box">
-    <div class="info-row"><span class="info-label">🔧 Unidade:</span> <strong>${unidadeNome}</strong></div>
-    <div class="info-row"><span class="info-label">📅 Período:</span> <strong>${mesNome} de ${ano}</strong></div>
-    <div class="info-row"><span class="info-label">📊 Dias Ativos:</span> <strong>${diasAtivos} ${diasAtivos === 1 ? 'dia' : 'dias'}</strong></div>
+    <div class="info-row"><span class="info-label" style="color: white;">🔧 Unidade:</span> <strong style="color: white;">${unidadeNome}</strong></div>
+    <div class="info-row"><span class="info-label" style="color: white;">📅 Período:</span> <strong style="color: white;">${mesNome} de ${ano}</strong></div>
+    <div class="info-row"><span class="info-label" style="color: white;">📊 Dias Ativos:</span> <strong style="color: white;">${diasAtivos} ${diasAtivos === 1 ? 'dia' : 'dias'}</strong></div>
   </div>
 
   <div class="section">
@@ -748,9 +748,9 @@ export function gerarHTMLRelatorioMensalRecalibraGestor(dados: {
   </div>
   
   <div class="info-box">
-    <div class="info-row"><span class="info-label">👤 Gestor:</span> <strong>${gestorNome}</strong></div>
-    <div class="info-row"><span class="info-label">📅 Período:</span> <strong>${mesNome} de ${ano}</strong></div>
-    <div class="info-row"><span class="info-label">🔧 Unidades com Atividade:</span> <strong>${unidades.length} ${unidades.length === 1 ? 'unidade' : 'unidades'}</strong></div>
+    <div class="info-row"><span class="info-label" style="color: white;">👤 Gestor:</span> <strong style="color: white;">${gestorNome}</strong></div>
+    <div class="info-row"><span class="info-label" style="color: white;">📅 Período:</span> <strong style="color: white;">${mesNome} de ${ano}</strong></div>
+    <div class="info-row"><span class="info-label" style="color: white;">🔧 Unidades com Atividade:</span> <strong style="color: white;">${unidades.length} ${unidades.length === 1 ? 'unidade' : 'unidades'}</strong></div>
   </div>
 
   <div class="section">
