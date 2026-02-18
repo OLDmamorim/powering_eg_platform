@@ -3,7 +3,8 @@ import { trpc } from '@/lib/trpc';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { ArrowLeft, BarChart3, TrendingUp, Car, MapPin, Loader2, Activity, Store, Target, Moon, Sun, Globe, LogOut } from 'lucide-react';
+import { ArrowLeft, BarChart3, TrendingUp, Car, MapPin, Loader2, Activity, Store, Target, Moon, Sun, Globe, LogOut, History } from 'lucide-react';
+import { HistoricoEnviosRecalibra } from '@/components/HistoricoEnviosRecalibra';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import {
@@ -445,6 +446,19 @@ export default function DashboardRecalibra() {
                 </tbody>
               </table>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Histórico de Envios de Relatórios Mensais */}
+        <Card className="col-span-full">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <History className="h-5 w-5" />
+              Histórico de Envios de Relatórios Mensais do Recalibra
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <HistoricoEnviosRecalibra />
           </CardContent>
         </Card>
       </div>

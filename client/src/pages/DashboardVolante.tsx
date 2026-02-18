@@ -4,7 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { trpc } from "@/lib/trpc";
-import { Download, Calendar, TrendingUp, TrendingDown, Users, CheckCircle, XCircle, BarChart3, PieChart, Activity } from "lucide-react";
+import { Download, Calendar, TrendingUp, TrendingDown, Users, CheckCircle, XCircle, BarChart3, PieChart, Activity, History } from "lucide-react";
+import { HistoricoEnviosVolante } from "@/components/HistoricoEnviosVolante";
 import { Line, Bar, Pie } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -469,6 +470,19 @@ export default function DashboardVolante() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Histórico de Envios de Relatórios Mensais */}
+        <Card className="col-span-full">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <History className="h-5 w-5" />
+              Histórico de Envios de Relatórios Mensais do Volante
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <HistoricoEnviosVolante />
+          </CardContent>
+        </Card>
       </div>
     </DashboardLayout>
   );
