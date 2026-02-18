@@ -1,7 +1,7 @@
 # PoweringEG Platform - TODO
 
-## Integrar Histórico de Envios nos Dashboards Volante e Recalibra
-- [x] Remover link "Histórico Envios" do menu lateral do DashboardLayout (linha 95 removida)
-- [x] Adicionar secção de histórico de envios no DashboardVolante (filtrado por tipo='volante') - componente HistoricoEnviosVolante criado
-- [x] Adicionar secção de histórico de envios no DashboardRecalibra (filtrado por tipo='recalibra') - componente HistoricoEnviosRecalibra criado
-- [x] Testar visualização em ambos os dashboards (servidor a correr, componentes integrados)
+## Mover Histórico de Envios Volante para Página de Resultados
+- [x] Encontrar página de Resultados do Volante (PortalLoja.tsx - activeTab === "resultados")
+- [x] Adicionar histórico na página de Resultados do Volante (linha 3586-3599)
+- [x] Adicionar import de HistoricoEnviosVolante (linha 60)
+- [x] Testar no telemóvel (servidor a correr, componente adicionado na secção de resultados)

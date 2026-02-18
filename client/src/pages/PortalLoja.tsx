@@ -57,6 +57,7 @@ import {
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { ChatbotPortalLoja } from "@/components/ChatbotPortalLoja";
+import { HistoricoEnviosVolante } from "@/components/HistoricoEnviosVolante";
 import { useTheme } from "@/contexts/ThemeContext";
 import { setAppBadge } from "@/hooks/useAppBadge";
 import { usePushNotificationsLoja } from "@/hooks/usePushNotifications";
@@ -3582,6 +3583,21 @@ export default function PortalLoja() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* Histórico de Envios de Relatórios Mensais do Volante */}
+        {volanteAtribuido && (
+          <Card className="mt-8">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <History className="h-5 w-5 text-teal-600" />
+                <CardTitle>{language === 'pt' ? 'Histórico de Envios de Relatórios Mensais do Volante' : 'Monthly Volante Reports Sending History'}</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <HistoricoEnviosVolante />
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       {/* Tab Volante - Calendário de Requisições */}
