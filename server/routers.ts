@@ -10981,7 +10981,10 @@ IMPORTANTE:
           undefined
         );
 
-        // Filtrar por meses selecionados
+        // Guardar todas as calibragens para evolução mensal (sem filtro)
+        const todasCalibragensCompleto = [...todasCalibragens];
+
+        // Filtrar por meses selecionados (apenas para stats gerais, não para evolução)
         if (input.mesesSelecionados && input.mesesSelecionados.length > 0) {
           todasCalibragens = todasCalibragens.filter((c: any) => {
             if (!c.data) return false;
@@ -11024,9 +11027,9 @@ IMPORTANTE:
         const lojaEntries = Object.entries(porLoja).sort((a, b) => b[1] - a[1]);
         const lojaTopVisitada = lojaEntries.length > 0 ? { nome: lojaEntries[0][0], count: lojaEntries[0][1] } : null;
 
-        // Evolução mensal
+        // Evolução mensal (usa TODAS as calibragens, sem filtro)
         const evolucaoMensal: Record<string, number> = {};
-        todasCalibragens.forEach((c: any) => {
+        todasCalibragensCompleto.forEach((c: any) => {
           if (c.data) {
             const d = new Date(c.data);
             const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`; // YYYY-MM

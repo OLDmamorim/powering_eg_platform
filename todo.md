@@ -13,3 +13,8 @@
 - [x] Modificar DashboardRecalibra.tsx para mostrar evolução mensal em vez de semanal
 - [x] Atualizar backend para calcular dados mensais
 - [x] Testar gráfico mensal
+
+## Dashboard Recalibra - Gráfico Evolução Mensal Sem Filtro
+- [x] Criar query separada no backend para evolução mensal (sem filtro de meses)
+- [x] Atualizar frontend para usar query sem filtro apenas no gráfico de evolução
+- [x] Testar que gráfico mostra todos os meses enquanto resto mantém filtro
