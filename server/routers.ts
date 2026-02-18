@@ -11024,15 +11024,13 @@ IMPORTANTE:
         const lojaEntries = Object.entries(porLoja).sort((a, b) => b[1] - a[1]);
         const lojaTopVisitada = lojaEntries.length > 0 ? { nome: lojaEntries[0][0], count: lojaEntries[0][1] } : null;
 
-        // Evolução semanal
-        const evolucaoSemanal: Record<string, number> = {};
+        // Evolução mensal
+        const evolucaoMensal: Record<string, number> = {};
         todasCalibragens.forEach((c: any) => {
           if (c.data) {
             const d = new Date(c.data);
-            const weekStart = new Date(d);
-            weekStart.setDate(d.getDate() - d.getDay() + 1); // Monday
-            const key = weekStart.toISOString().split('T')[0];
-            evolucaoSemanal[key] = (evolucaoSemanal[key] || 0) + 1;
+            const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`; // YYYY-MM
+            evolucaoMensal[key] = (evolucaoMensal[key] || 0) + 1;
           }
         });
 
@@ -11053,7 +11051,7 @@ IMPORTANTE:
           porMarca,
           porLocalidade,
           lojaTopVisitada,
-          evolucaoSemanal,
+          evolucaoMensal,
           porTipologia,
           mediaDiaria: Math.round(mediaDiaria * 10) / 10,
           totalDias: datasUnicas.size,

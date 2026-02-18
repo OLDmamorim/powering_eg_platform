@@ -8,3 +8,8 @@
 ## Dashboard Recalibra - Filtro por Mês Atual por Defeito
 - [x] Modificar DashboardRecalibra.tsx para inicializar com mês atual selecionado
 - [x] Testar que mostra apenas dados de Fevereiro 2026 por defeito
+
+## Dashboard Recalibra - Trocar Evolução Semanal por Mensal
+- [x] Modificar DashboardRecalibra.tsx para mostrar evolução mensal em vez de semanal
+- [x] Atualizar backend para calcular dados mensais
+- [x] Testar gráfico mensal

@@ -107,14 +107,18 @@ export default function DashboardRecalibra() {
       .sort((a, b) => b.valor - a.valor);
   }, [stats]);
 
-  const dadosSemanal = useMemo(() => {
-    if (!stats?.evolucaoSemanal) return [];
-    return Object.entries(stats.evolucaoSemanal)
-      .map(([data, valor]) => ({
-        data,
-        semana: `Sem. ${new Date(data + 'T00:00:00').toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit' })}`,
-        valor,
-      }))
+  const dadosMensal = useMemo(() => {
+    if (!stats?.evolucaoMensal) return [];
+    return Object.entries(stats.evolucaoMensal)
+      .map(([data, valor]) => {
+        const [ano, mes] = data.split('-');
+        const nomeMes = new Date(parseInt(ano), parseInt(mes) - 1, 1).toLocaleDateString('pt-PT', { month: 'short', year: '2-digit' });
+        return {
+          data,
+          mes: nomeMes.charAt(0).toUpperCase() + nomeMes.slice(1),
+          valor,
+        };
+      })
       .sort((a, b) => a.data.localeCompare(b.data));
   }, [stats]);
 
@@ -380,18 +384,18 @@ export default function DashboardRecalibra() {
           </Card>
         </div>
 
-        {/* Evolução Semanal */}
+        {/* Evolução Mensal */}
         <Card className="bg-white mb-6">
           <CardHeader className="pb-2">
-            <CardTitle className="text-lg">Evolução Semanal</CardTitle>
-            <CardDescription>Calibragens por semana</CardDescription>
+            <CardTitle className="text-lg">Evolução Mensal</CardTitle>
+            <CardDescription>Calibragens por mês</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="h-[280px]">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={dadosSemanal}>
+                <LineChart data={dadosMensal}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                  <XAxis dataKey="semana" tick={{ fontSize: 11 }} />
+                  <XAxis dataKey="mes" tick={{ fontSize: 11 }} />
                   <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
                   <Tooltip formatter={(value: number) => [value, 'Calibragens']} />
                   <Line
