@@ -3584,20 +3584,7 @@ export default function PortalLoja() {
           </DialogContent>
         </Dialog>
 
-        {/* Histórico de Envios de Relatórios Mensais do Volante */}
-        {volanteAtribuido && (
-          <Card className="mt-8">
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <History className="h-5 w-5 text-teal-600" />
-                <CardTitle>{language === 'pt' ? 'Histórico de Envios de Relatórios Mensais do Volante' : 'Monthly Volante Reports Sending History'}</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <HistoricoEnviosVolante />
-            </CardContent>
-          </Card>
-        )}
+
       </div>
 
       {/* Tab Volante - Calendário de Requisições */}
@@ -6770,6 +6757,19 @@ END:VCALENDAR`;
                       </div>
                     ))}
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* Histórico de Envios de Relatórios Mensais */}
+            <Card className="col-span-full">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <History className="h-5 w-5" />
+                  {language === 'pt' ? 'Histórico de Envios de Relatórios Mensais do Volante' : 'Monthly Report Sending History - Volante'}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <HistoricoEnviosVolante />
               </CardContent>
             </Card>
           </div>
