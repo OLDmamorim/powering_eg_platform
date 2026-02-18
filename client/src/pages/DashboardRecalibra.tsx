@@ -28,7 +28,12 @@ const CORES_GRAFICO = [
 
 export default function DashboardRecalibra() {
   const [token, setToken] = useState('');
-  const [mesesSelecionados, setMesesSelecionados] = useState<MesSelecionado[]>([]);
+  // Inicializar com o mês atual por defeito
+  const mesAtual = new Date().getMonth() + 1; // 1-12
+  const anoAtual = new Date().getFullYear();
+  const [mesesSelecionados, setMesesSelecionados] = useState<MesSelecionado[]>([
+    { mes: mesAtual, ano: anoAtual }
+  ]);
   const { theme, toggleTheme } = useTheme();
   const { language, setLanguage } = useLanguage();
 
