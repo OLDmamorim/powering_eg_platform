@@ -11002,9 +11002,9 @@ IMPORTANTE:
           porTipo[tipo] = (porTipo[tipo] || 0) + 1;
         });
 
-        // Por marca
+        // Por marca (usa TODAS as calibragens, sem filtro)
         const porMarca: Record<string, number> = {};
-        todasCalibragens.forEach((c: any) => {
+        todasCalibragensCompleto.forEach((c: any) => {
           const marca = c.marca || 'Sem marca';
           porMarca[marca] = (porMarca[marca] || 0) + 1;
         });

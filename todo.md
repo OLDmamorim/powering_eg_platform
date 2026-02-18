@@ -18,3 +18,7 @@
 - [x] Criar query separada no backend para evolução mensal (sem filtro de meses)
 - [x] Atualizar frontend para usar query sem filtro apenas no gráfico de evolução
 - [x] Testar que gráfico mostra todos os meses enquanto resto mantém filtro
+
+## Dashboard Recalibra - Remover Filtro de Mês das Marcas
+- [x] Modificar backend para calcular porMarca com todas as calibragens (sem filtro)
+- [x] Testar que gráfico e tabela de marcas mostram histórico completo
