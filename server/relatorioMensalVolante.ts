@@ -289,9 +289,9 @@ function gerarHTMLRelatorioMensalVolanteGestor(dados: {
     .logo { font-size: 24px; font-weight: bold; color: #10b981; }
     .title { font-size: 20px; margin-top: 10px; color: #059669; }
     .subtitle { font-size: 14px; color: #6b7280; margin-top: 5px; }
-    .info-box { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 20px; border-radius: 12px; margin-bottom: 30px; }
-    .info-row { display: flex; margin-bottom: 10px; font-size: 16px; }
-    .info-label { font-weight: bold; width: 150px; }
+    .info-box { background: #f3f4f6; padding: 15px; border-radius: 8px; margin-bottom: 25px; }
+    .info-row { display: flex; margin-bottom: 8px; }
+    .info-label { font-weight: bold; width: 120px; }
     .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 30px; }
     .summary-card { background: #f3f4f6; padding: 20px; border-radius: 10px; text-align: center; border-left: 4px solid #10b981; }
     .summary-card.highlight { background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); border-left-color: #059669; }
@@ -318,9 +318,9 @@ function gerarHTMLRelatorioMensalVolanteGestor(dados: {
   </div>
   
   <div class="info-box">
-    <div class="info-row"><span class="info-label" style="color: white;">👤 Gestor:</span> <strong style="color: white;">${gestorNome}</strong></div>
-    <div class="info-row"><span class="info-label" style="color: white;">📅 Período:</span> <strong style="color: white;">${mesNome} de ${ano}</strong></div>
-    <div class="info-row"><span class="info-label" style="color: white;">🏪 Lojas com Atividade:</span> <strong style="color: white;">${lojas.length} ${lojas.length === 1 ? 'loja' : 'lojas'}</strong></div>
+    <div class="info-row"><span class="info-label">Gestor:</span> ${gestorNome}</div>
+    <div class="info-row"><span class="info-label">Período:</span> ${mesNome} de ${ano}</div>
+    <div class="info-row"><span class="info-label">Lojas com Atividade:</span> ${lojas.length} ${lojas.length === 1 ? 'loja' : 'lojas'}</div>
   </div>
 
   <div class="section">

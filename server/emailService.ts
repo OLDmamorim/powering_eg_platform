@@ -379,9 +379,9 @@ export function gerarHTMLRelatorioMensalVolante(dados: {
     .logo { font-size: 24px; font-weight: bold; color: #3b82f6; }
     .title { font-size: 20px; margin-top: 10px; color: #1e40af; }
     .subtitle { font-size: 14px; color: #6b7280; margin-top: 5px; }
-    .info-box { background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); color: white; padding: 20px; border-radius: 12px; margin-bottom: 30px; }
-    .info-row { display: flex; margin-bottom: 10px; font-size: 16px; }
-    .info-label { font-weight: bold; width: 150px; }
+    .info-box { background: #f3f4f6; padding: 15px; border-radius: 8px; margin-bottom: 25px; }
+    .info-row { display: flex; margin-bottom: 8px; }
+    .info-label { font-weight: bold; width: 120px; }
     .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
     .summary-card { background: #f3f4f6; padding: 20px; border-radius: 10px; text-align: center; border-left: 4px solid #3b82f6; }
     .summary-card.highlight { background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border-left-color: #1e40af; }
@@ -410,10 +410,10 @@ export function gerarHTMLRelatorioMensalVolante(dados: {
   </div>
   
   <div class="info-box">
-    <div class="info-row"><span class="info-label" style="color: white;">🏪 Loja:</span> <strong style="color: white;">${lojaNome}</strong></div>
-    <div class="info-row"><span class="info-label" style="color: white;">🚗 Volante:</span> <strong style="color: white;">${volanteNome}</strong></div>
-    <div class="info-row"><span class="info-label" style="color: white;">📅 Período:</span> <strong style="color: white;">${mesNome} de ${ano}</strong></div>
-    <div class="info-row"><span class="info-label" style="color: white;">📊 Dias Ativos:</span> <strong style="color: white;">${diasAtivos} ${diasAtivos === 1 ? 'dia' : 'dias'}</strong></div>
+    <div class="info-row"><span class="info-label">Loja:</span> ${lojaNome}</div>
+    <div class="info-row"><span class="info-label">Volante:</span> ${volanteNome}</div>
+    <div class="info-row"><span class="info-label">Período:</span> ${mesNome} de ${ano}</div>
+    <div class="info-row"><span class="info-label">Dias Ativos:</span> ${diasAtivos} ${diasAtivos === 1 ? 'dia' : 'dias'}</div>
   </div>
 
   <div class="section">
@@ -548,9 +548,9 @@ export function gerarHTMLRelatorioMensalRecalibra(dados: {
     .logo { font-size: 24px; font-weight: bold; color: #f59e0b; }
     .title { font-size: 20px; margin-top: 10px; color: #d97706; }
     .subtitle { font-size: 14px; color: #6b7280; margin-top: 5px; }
-    .info-box { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; padding: 20px; border-radius: 12px; margin-bottom: 30px; }
-    .info-row { display: flex; margin-bottom: 10px; font-size: 16px; }
-    .info-label { font-weight: bold; width: 150px; }
+    .info-box { background: #f3f4f6; padding: 15px; border-radius: 8px; margin-bottom: 25px; }
+    .info-row { display: flex; margin-bottom: 8px; }
+    .info-label { font-weight: bold; width: 120px; }
     .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 30px; }
     .summary-card { background: #f3f4f6; padding: 20px; border-radius: 10px; text-align: center; border-left: 4px solid #f59e0b; }
     .summary-card.highlight { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-left-color: #d97706; }
@@ -581,9 +581,9 @@ export function gerarHTMLRelatorioMensalRecalibra(dados: {
   </div>
   
   <div class="info-box">
-    <div class="info-row"><span class="info-label" style="color: white;">🔧 Unidade:</span> <strong style="color: white;">${unidadeNome}</strong></div>
-    <div class="info-row"><span class="info-label" style="color: white;">📅 Período:</span> <strong style="color: white;">${mesNome} de ${ano}</strong></div>
-    <div class="info-row"><span class="info-label" style="color: white;">📊 Dias Ativos:</span> <strong style="color: white;">${diasAtivos} ${diasAtivos === 1 ? 'dia' : 'dias'}</strong></div>
+    <div class="info-row"><span class="info-label">Unidade:</span> ${unidadeNome}</div>
+    <div class="info-row"><span class="info-label">Período:</span> ${mesNome} de ${ano}</div>
+    <div class="info-row"><span class="info-label">Dias Ativos:</span> ${diasAtivos} ${diasAtivos === 1 ? 'dia' : 'dias'}</div>
   </div>
 
   <div class="section">
@@ -719,9 +719,9 @@ export function gerarHTMLRelatorioMensalRecalibraGestor(dados: {
     .logo { font-size: 24px; font-weight: bold; color: #f59e0b; }
     .title { font-size: 20px; margin-top: 10px; color: #d97706; }
     .subtitle { font-size: 14px; color: #6b7280; margin-top: 5px; }
-    .info-box { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; padding: 20px; border-radius: 12px; margin-bottom: 30px; }
-    .info-row { display: flex; margin-bottom: 10px; font-size: 16px; }
-    .info-label { font-weight: bold; width: 150px; }
+    .info-box { background: #f3f4f6; padding: 15px; border-radius: 8px; margin-bottom: 25px; }
+    .info-row { display: flex; margin-bottom: 8px; }
+    .info-label { font-weight: bold; width: 120px; }
     .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 30px; }
     .summary-card { background: #f3f4f6; padding: 20px; border-radius: 10px; text-align: center; border-left: 4px solid #f59e0b; }
     .summary-card.highlight { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-left-color: #d97706; }
@@ -748,9 +748,9 @@ export function gerarHTMLRelatorioMensalRecalibraGestor(dados: {
   </div>
   
   <div class="info-box">
-    <div class="info-row"><span class="info-label" style="color: white;">👤 Gestor:</span> <strong style="color: white;">${gestorNome}</strong></div>
-    <div class="info-row"><span class="info-label" style="color: white;">📅 Período:</span> <strong style="color: white;">${mesNome} de ${ano}</strong></div>
-    <div class="info-row"><span class="info-label" style="color: white;">🔧 Unidades com Atividade:</span> <strong style="color: white;">${unidades.length} ${unidades.length === 1 ? 'unidade' : 'unidades'}</strong></div>
+    <div class="info-row"><span class="info-label">Gestor:</span> ${gestorNome}</div>
+    <div class="info-row"><span class="info-label">Período:</span> ${mesNome} de ${ano}</div>
+    <div class="info-row"><span class="info-label">Unidades com Atividade:</span> ${unidades.length} ${unidades.length === 1 ? 'unidade' : 'unidades'}</div>
   </div>
 
   <div class="section">

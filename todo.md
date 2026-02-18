@@ -31,7 +31,7 @@
 - [ ] Testar exportação com filtros diferentes
 
 ## Ajustar Cores dos Relatórios Email (Volante e Recalibra)
-- [x] Verificar e ajustar cores no template HTML do relatório Volante
-- [x] Verificar e ajustar cores no template HTML do relatório Recalibra
-- [x] Garantir contraste adequado (letra branca sobre fundo colorido no info-box)
-- [x] Testar visualização em diferentes clientes de email
+- [x] Alterar info-box para fundo cinzento claro (#f3f4f6) com texto preto
+- [x] Remover gradientes coloridos do info-box
+- [x] Usar formato igual aos outros emails que funcionam no Outlook
+- [x] Testar visualização no Outlook
