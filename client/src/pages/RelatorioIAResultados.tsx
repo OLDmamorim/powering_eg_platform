@@ -226,7 +226,7 @@ export function RelatorioIAResultados() {
   const getFiltroLabel = () => {
     // Primeiro, verificar o âmbito do relatório
     if (ambitoRelatorio === 'loja' && lojaEspecificaId) {
-      const loja = lojasDisponiveis.find(l => l.id === lojaEspecificaId);
+      const loja = lojasDisponiveis?.find(l => l.id === lojaEspecificaId);
       return loja ? `Loja: ${loja.nome}` : 'Loja Específica';
     }
     if (ambitoRelatorio === 'minhas') {
@@ -350,7 +350,7 @@ export function RelatorioIAResultados() {
                         <SelectValue placeholder={language === 'pt' ? 'Selecione a loja' : 'Select store'} />
                       </SelectTrigger>
                       <SelectContent>
-                        {lojasDisponiveis.map((loja) => (
+                        {lojasDisponiveis?.map((loja) => (
                           <SelectItem key={loja.id} value={loja.id.toString()}>
                             {loja.nome}
                           </SelectItem>

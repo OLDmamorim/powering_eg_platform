@@ -46,8 +46,9 @@
 - [x] Endpoints backend para consulta de dados NPS (getDadosLoja/Lojas/TodasLojas)
 - [ ] Exibir coluna NPS no dashboard de resultados (ResultadosDashboard.tsx)
 
-## Bug: Relatório de IA de Resultados Vazio
+## Bug: Relatório de IA de Resultados Vazio - RESOLVIDO ✅
 - [x] Investigar query do Relatório IA Resultados (RelatorioIAResultados.tsx)
 - [x] Corrigir filtro que não está a mostrar os 50 relatórios livres + 8 completos de Fevereiro 2026
 - [x] Adicionar logs para debug no aiService.ts
-- [x] Testar com dados reais do gestor Marco Amorim (Minhas Lojas + Fevereiro 2026) - SUCESSO!
+- [x] Verificar logs do servidor para identificar o problema real
+- [x] Testar novamente após correção - SUCESSO! Relatório gerado com todos os dados
