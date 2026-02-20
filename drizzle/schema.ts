@@ -1447,3 +1447,64 @@ export const historicoEnviosRelatorios = mysqlTable("historico_envios_relatorios
 
 export type HistoricoEnvioRelatorio = typeof historicoEnviosRelatorios.$inferSelect;
 export type InsertHistoricoEnvioRelatorio = typeof historicoEnviosRelatorios.$inferInsert;
+
+
+/**
+ * ========================================
+ * NPS - Net Promoter Score
+ * ========================================
+ */
+
+/**
+ * Dados NPS por Loja - Dados extraídos do ficheiro Excel NPS
+ * Sheet: Por Loja
+ * Estrutura: Uma linha por loja com NPS mensal (Jan, Fev, Mar...) e taxa de resposta
+ */
+export const npsDados = mysqlTable("nps_dados", {
+  id: int("id").autoincrement().primaryKey(),
+  lojaId: int("lojaId").notNull(), // FK para lojas.id
+  ano: int("ano").notNull(), // 2024, 2025, 2026, etc.
+  
+  // NPS Score mensal (valores de 0.0 a 1.0, representando 0% a 100%)
+  npsJan: decimal("npsJan", { precision: 5, scale: 4 }),
+  npsFev: decimal("npsFev", { precision: 5, scale: 4 }),
+  npsMar: decimal("npsMar", { precision: 5, scale: 4 }),
+  npsAbr: decimal("npsAbr", { precision: 5, scale: 4 }),
+  npsMai: decimal("npsMai", { precision: 5, scale: 4 }),
+  npsJun: decimal("npsJun", { precision: 5, scale: 4 }),
+  npsJul: decimal("npsJul", { precision: 5, scale: 4 }),
+  npsAgo: decimal("npsAgo", { precision: 5, scale: 4 }),
+  npsSet: decimal("npsSet", { precision: 5, scale: 4 }),
+  npsOut: decimal("npsOut", { precision: 5, scale: 4 }),
+  npsNov: decimal("npsNov", { precision: 5, scale: 4 }),
+  npsDez: decimal("npsDez", { precision: 5, scale: 4 }),
+  
+  // NPS Total do ano
+  npsAnoTotal: decimal("npsAnoTotal", { precision: 5, scale: 4 }),
+  
+  // Taxa de Resposta mensal (% Respostas - valores de 0.0 a 1.0)
+  taxaRespostaJan: decimal("taxaRespostaJan", { precision: 5, scale: 4 }),
+  taxaRespostaFev: decimal("taxaRespostaFev", { precision: 5, scale: 4 }),
+  taxaRespostaMar: decimal("taxaRespostaMar", { precision: 5, scale: 4 }),
+  taxaRespostaAbr: decimal("taxaRespostaAbr", { precision: 5, scale: 4 }),
+  taxaRespostaMai: decimal("taxaRespostaMai", { precision: 5, scale: 4 }),
+  taxaRespostaJun: decimal("taxaRespostaJun", { precision: 5, scale: 4 }),
+  taxaRespostaJul: decimal("taxaRespostaJul", { precision: 5, scale: 4 }),
+  taxaRespostaAgo: decimal("taxaRespostaAgo", { precision: 5, scale: 4 }),
+  taxaRespostaSet: decimal("taxaRespostaSet", { precision: 5, scale: 4 }),
+  taxaRespostaOut: decimal("taxaRespostaOut", { precision: 5, scale: 4 }),
+  taxaRespostaNov: decimal("taxaRespostaNov", { precision: 5, scale: 4 }),
+  taxaRespostaDez: decimal("taxaRespostaDez", { precision: 5, scale: 4 }),
+  
+  // Taxa de Resposta Total do ano
+  taxaRespostaAnoTotal: decimal("taxaRespostaAnoTotal", { precision: 5, scale: 4 }),
+  
+  // Metadados
+  nomeArquivo: varchar("nomeArquivo", { length: 255 }), // Nome do arquivo Excel original
+  uploadedBy: int("uploadedBy").notNull(), // FK para users.id (admin que fez upload)
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type NpsDado = typeof npsDados.$inferSelect;
+export type InsertNpsDado = typeof npsDados.$inferInsert;

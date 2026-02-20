@@ -5170,6 +5170,62 @@ IMPORTANTE:
       }),
   }),
 
+  // ==================== NPS - NET PROMOTER SCORE ====================
+  nps: router({
+    // Upload de ficheiro Excel NPS
+    upload: adminProcedure
+      .input(z.object({
+        fileBase64: z.string(),
+        fileName: z.string(),
+        ano: z.number(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const { processarExcelNPS } = await import('./excelProcessor');
+        
+        // Converter base64 para buffer
+        const fileBuffer = Buffer.from(input.fileBase64, 'base64');
+        
+        // Processar ficheiro
+        const resultado = await processarExcelNPS(
+          fileBuffer,
+          input.ano,
+          ctx.user.id,
+          input.fileName
+        );
+        
+        return resultado;
+      }),
+    
+    // Obter dados NPS de uma loja específica
+    getDadosLoja: protectedProcedure
+      .input(z.object({
+        lojaId: z.number(),
+        ano: z.number(),
+      }))
+      .query(async ({ input }) => {
+        return await db.getNPSDadosLoja(input.lojaId, input.ano);
+      }),
+    
+    // Obter dados NPS de múltiplas lojas (para gestor)
+    getDadosLojas: protectedProcedure
+      .input(z.object({
+        lojasIds: z.array(z.number()),
+        ano: z.number(),
+      }))
+      .query(async ({ input }) => {
+        return await db.getNPSDadosLojas(input.lojasIds, input.ano);
+      }),
+    
+    // Obter dados NPS de todas as lojas (para admin)
+    getDadosTodasLojas: adminProcedure
+      .input(z.object({
+        ano: z.number(),
+      }))
+      .query(async ({ input }) => {
+        return await db.getNPSDadosTodasLojas(input.ano);
+      }),
+  }),
+
   // ==================== VENDAS COMPLEMENTARES ====================
   complementares: router({
     // Listar vendas complementares

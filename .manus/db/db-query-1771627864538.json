@@ -1,0 +1,13 @@
+{
+  "query": "SELECT COUNT(*) as total_relatorios\nFROM relatorios_livres rl\nINNER JOIN gestor_lojas gl ON rl.lojaId = gl.lojaId\nWHERE gl.gestorId = 5 \nAND MONTH(rl.dataVisita) = 2 \nAND YEAR(rl.dataVisita) = 2026;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT COUNT(*) as total_relatorios\nFROM relatorios_livres rl\nINNER JOIN gestor_lojas gl ON rl.lojaId = gl.lojaId\nWHERE gl.gestorId = 5 \nAND MONTH(rl.dataVisita) = 2 \nAND YEAR(rl.dataVisita) = 2026;",
+  "rows": [
+    {
+      "total_relatorios": "0"
+    }
+  ],
+  "messages": [],
+  "stdout": "total_relatorios\n0\n",
+  "stderr": "",
+  "execution_time_ms": 370
+}

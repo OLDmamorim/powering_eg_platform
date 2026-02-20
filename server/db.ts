@@ -160,7 +160,10 @@ import {
   InsertMarcaRecalibra,
   historicoEnviosRelatorios,
   HistoricoEnvioRelatorio,
-  InsertHistoricoEnvioRelatorio
+  InsertHistoricoEnvioRelatorio,
+  npsDados,
+  NpsDado,
+  InsertNpsDado
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -11468,4 +11471,70 @@ export async function getHistoricoEnviosRelatorios(filtros?: {
     : await db.select().from(historicoEnviosRelatorios).orderBy(desc(historicoEnviosRelatorios.dataEnvio));
   
   return result;
+}
+
+
+/**
+ * ========================================
+ * NPS - Net Promoter Score
+ * ========================================
+ */
+
+/**
+ * Obter dados NPS de uma loja específica para um ano
+ */
+export async function getNPSDadosLoja(lojaId: number, ano: number) {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  
+  const resultado = await db
+    .select()
+    .from(npsDados)
+    .where(and(eq(npsDados.lojaId, lojaId), eq(npsDados.ano, ano)))
+    .limit(1);
+  
+  return resultado[0] || null;
+}
+
+/**
+ * Obter dados NPS de múltiplas lojas para um ano
+ */
+export async function getNPSDadosLojas(lojasIds: number[], ano: number) {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  
+  if (lojasIds.length === 0) return [];
+  
+  const resultado = await db
+    .select({
+      nps: npsDados,
+      loja: lojas,
+    })
+    .from(npsDados)
+    .innerJoin(lojas, eq(npsDados.lojaId, lojas.id))
+    .where(and(
+      inArray(npsDados.lojaId, lojasIds),
+      eq(npsDados.ano, ano)
+    ));
+  
+  return resultado;
+}
+
+/**
+ * Obter dados NPS de todas as lojas para um ano
+ */
+export async function getNPSDadosTodasLojas(ano: number) {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  
+  const resultado = await db
+    .select({
+      nps: npsDados,
+      loja: lojas,
+    })
+    .from(npsDados)
+    .innerJoin(lojas, eq(npsDados.lojaId, lojas.id))
+    .where(eq(npsDados.ano, ano));
+  
+  return resultado;
 }

@@ -28,6 +28,7 @@ import GestaoUtilizadores from "./pages/GestaoUtilizadores";
 import ReuniõesGestores from "./pages/ReuniõesGestores";
 import ReuniõesLojas from "./pages/ReuniõesLojas";
 import ResultadosUpload from "./pages/ResultadosUpload";
+import NPSUpload from "./pages/NPSUpload";
 import { ResultadosDashboard } from "./pages/ResultadosDashboard";
 import { ComparacaoLojas } from "./pages/ComparacaoLojas";
 import PortalLoja from "./pages/PortalLoja";
@@ -103,6 +104,7 @@ function Router() {
       <Route path={"/topicos-reuniao"} component={TopicosReuniao} />
       <Route path={"/reunioes-lojas"} component={ReuniõesLojas} />
       <Route path={"/resultados-upload"} component={ResultadosUpload} />
+      <Route path={"/nps-upload"} component={NPSUpload} />
       <Route path={"/resultados-dashboard"} component={ResultadosDashboard} />
       <Route path={"/comparacao-lojas"} component={ComparacaoLojas} />
       <Route path={"/relatorio-ia-resultados"} component={RelatorioIAResultados} />

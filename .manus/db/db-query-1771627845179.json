@@ -1,0 +1,15 @@
+{
+  "query": "SELECT COUNT(*) as total, MIN(dataVisita) as primeira_data, MAX(dataVisita) as ultima_data \nFROM relatorios_livres \nWHERE MONTH(dataVisita) = 2 AND YEAR(dataVisita) = 2026;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT COUNT(*) as total, MIN(dataVisita) as primeira_data, MAX(dataVisita) as ultima_data \nFROM relatorios_livres \nWHERE MONTH(dataVisita) = 2 AND YEAR(dataVisita) = 2026;",
+  "rows": [
+    {
+      "total": "92",
+      "primeira_data": "2026-02-02 11:33:46",
+      "ultima_data": "2026-02-20 15:17:14"
+    }
+  ],
+  "messages": [],
+  "stdout": "total\tprimeira_data\tultima_data\n92\t2026-02-02 11:33:46\t2026-02-20 15:17:14\n",
+  "stderr": "",
+  "execution_time_ms": 655
+}

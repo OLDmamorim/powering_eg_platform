@@ -1,6 +1,6 @@
 import * as XLSX from 'xlsx';
 import { getDb } from './db';
-import { resultadosMensais, lojas, totaisMensais, vendasComplementares } from '../drizzle/schema';
+import { resultadosMensais, lojas, totaisMensais, vendasComplementares, npsDados } from '../drizzle/schema';
 import { eq, and } from 'drizzle-orm';
 
 export interface ResultadoExcel {
@@ -488,4 +488,190 @@ export async function processarExcelComplementares(
   } catch (error: any) {
     throw new Error(`Erro ao processar folha Complementares: ${error.message}`);
   }
+}
+
+
+/**
+ * Processa ficheiro Excel NPS e extrai dados da folha "Por Loja"
+ * Guarda NPS mensal e taxa de resposta por loja
+ */
+export async function processarExcelNPS(
+  fileBuffer: Buffer,
+  ano: number,
+  uploadedBy: number,
+  nomeArquivo: string
+): Promise<{ sucesso: number; erros: string[] }> {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+
+  const erros: string[] = [];
+  let sucesso = 0;
+
+  try {
+    // Ler ficheiro Excel
+    const workbook = XLSX.read(fileBuffer, { type: 'buffer' });
+
+    // Verificar se folha "Por Loja" existe
+    const porLojaSheet = workbook.SheetNames.find(name => 
+      name.trim().toLowerCase() === 'por loja'
+    );
+    
+    if (!porLojaSheet) {
+      throw new Error('Folha "Por Loja" não encontrada no ficheiro Excel NPS');
+    }
+
+    const worksheet = workbook.Sheets[porLojaSheet];
+    
+    // Converter para JSON (linhas como arrays)
+    const data: any[][] = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+    // Buscar todas as lojas da base de dados para matching
+    const todasLojas = await db.select().from(lojas);
+    const lojasMap = new Map<string, number>();
+    todasLojas.forEach(loja => {
+      lojasMap.set(normalizeName(loja.nome), loja.id);
+    });
+
+    // Encontrar a linha de cabeçalhos (procurar por "Loja" na coluna 2)
+    let linhaInicio = -1;
+    for (let i = 0; i < Math.min(data.length, 20); i++) {
+      const primeiraColuna = String(data[i][1] || '').trim().toLowerCase();
+      if (primeiraColuna === 'loja') {
+        linhaInicio = i + 1; // Dados começam na linha seguinte
+        break;
+      }
+    }
+
+    if (linhaInicio === -1) {
+      throw new Error('Não foi possível encontrar o cabeçalho "Loja" na folha "Por Loja"');
+    }
+
+    // Processar cada linha de dados (a partir de linhaInicio)
+    for (let i = linhaInicio; i < data.length; i++) {
+      const linha = data[i];
+      
+      // Coluna B (índice 1): Nome da loja
+      const nomeLoja = String(linha[1] || '').trim();
+      
+      // Parar se encontrar linha vazia ou totais
+      if (!nomeLoja || nomeLoja === '' || nomeLoja.toLowerCase().includes('total')) {
+        continue;
+      }
+
+      // Procurar loja na base de dados
+      const lojaId = lojasMap.get(normalizeName(nomeLoja));
+      
+      if (!lojaId) {
+        erros.push(`Loja "${nomeLoja}" não encontrada na base de dados`);
+        continue;
+      }
+
+      try {
+        // Extrair dados NPS e Taxa de Resposta
+        // Estrutura esperada (baseada na imagem):
+        // Coluna C (índice 2): NPS Jan
+        // Coluna D (índice 3): NPS Fev
+        // ... até Coluna N (índice 13): NPS Dez
+        // Coluna O (índice 14): NPS 2026 Total
+        // Coluna P (índice 15): Taxa Resposta Jan
+        // Coluna Q (índice 16): Taxa Resposta Fev
+        // ... até Coluna AA (índice 26): Taxa Resposta Dez
+        // Coluna AB (índice 27): Taxa Resposta 2026 Total
+
+        const dadosNPS = {
+          lojaId,
+          ano,
+          // NPS mensal (colunas C-N, índices 2-13)
+          npsJan: parseDecimal(linha[2]),
+          npsFev: parseDecimal(linha[3]),
+          npsMar: parseDecimal(linha[4]),
+          npsAbr: parseDecimal(linha[5]),
+          npsMai: parseDecimal(linha[6]),
+          npsJun: parseDecimal(linha[7]),
+          npsJul: parseDecimal(linha[8]),
+          npsAgo: parseDecimal(linha[9]),
+          npsSet: parseDecimal(linha[10]),
+          npsOut: parseDecimal(linha[11]),
+          npsNov: parseDecimal(linha[12]),
+          npsDez: parseDecimal(linha[13]),
+          // NPS Total (coluna O, índice 14)
+          npsAnoTotal: parseDecimal(linha[14]),
+          // Taxa de Resposta mensal (colunas P-AA, índices 15-26)
+          taxaRespostaJan: parseDecimal(linha[15]),
+          taxaRespostaFev: parseDecimal(linha[16]),
+          taxaRespostaMar: parseDecimal(linha[17]),
+          taxaRespostaAbr: parseDecimal(linha[18]),
+          taxaRespostaMai: parseDecimal(linha[19]),
+          taxaRespostaJun: parseDecimal(linha[20]),
+          taxaRespostaJul: parseDecimal(linha[21]),
+          taxaRespostaAgo: parseDecimal(linha[22]),
+          taxaRespostaSet: parseDecimal(linha[23]),
+          taxaRespostaOut: parseDecimal(linha[24]),
+          taxaRespostaNov: parseDecimal(linha[25]),
+          taxaRespostaDez: parseDecimal(linha[26]),
+          // Taxa de Resposta Total (coluna AB, índice 27)
+          taxaRespostaAnoTotal: parseDecimal(linha[27]),
+          // Metadados
+          nomeArquivo,
+          uploadedBy,
+        };
+
+        // Verificar se já existe registo para esta loja e ano
+        const existente = await db
+          .select()
+          .from(npsDados)
+          .where(and(eq(npsDados.lojaId, lojaId), eq(npsDados.ano, ano)))
+          .limit(1);
+
+        if (existente.length > 0) {
+          // Atualizar registo existente
+          await db
+            .update(npsDados)
+            .set({
+              ...dadosNPS,
+              updatedAt: new Date(),
+            })
+            .where(and(eq(npsDados.lojaId, lojaId), eq(npsDados.ano, ano)));
+        } else {
+          // Inserir novo registo
+          await db.insert(npsDados).values(dadosNPS);
+        }
+
+        sucesso++;
+      } catch (error: any) {
+        erros.push(`Erro ao processar loja "${nomeLoja}": ${error.message}`);
+      }
+    }
+
+    return { sucesso, erros };
+  } catch (error: any) {
+    throw new Error(`Erro ao processar ficheiro NPS: ${error.message}`);
+  }
+}
+
+/**
+ * Helper para converter valor para decimal (aceita percentagens e números)
+ */
+function parseDecimal(value: any): number | null {
+  if (value === null || value === undefined || value === '') return null;
+  
+  const str = String(value).trim();
+  
+  // Se for percentagem (ex: "100,0%"), remover % e converter
+  if (str.includes('%')) {
+    const num = parseFloat(str.replace('%', '').replace(',', '.'));
+    if (isNaN(num)) return null;
+    return num / 100; // Converter para decimal (0.0 a 1.0)
+  }
+  
+  // Se for número decimal (ex: "0.85" ou "0,85")
+  const num = parseFloat(str.replace(',', '.'));
+  if (isNaN(num)) return null;
+  
+  // Se o número for maior que 1, assumir que é percentagem sem %
+  if (num > 1) {
+    return num / 100;
+  }
+  
+  return num;
 }

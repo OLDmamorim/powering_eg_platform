@@ -165,8 +165,13 @@ export async function gerarRelatorioComIA(
   dataFimParam?: Date
 ): Promise<AnaliseIA> {
   // Buscar relatórios do período
+  // IMPORTANTE: Priorizar dataInicio/dataFim se fornecidos (para períodos personalizados com múltiplos meses)
   const dataInicio = dataInicioParam || calcularDataInicio(periodo);
   const dataFim = dataFimParam || calcularDataFim(periodo);
+  
+  console.log('[gerarRelatorioComIA] Período:', periodo);
+  console.log('[gerarRelatorioComIA] Data Início:', dataInicio);
+  console.log('[gerarRelatorioComIA] Data Fim:', dataFim);
 
   let relatoriosLivresFiltrados: any[];
   let relatoriosCompletosFiltrados: any[];

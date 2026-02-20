@@ -155,6 +155,7 @@ const getMenuGroups = (userRole?: string, t?: (key: string) => string): MenuGrou
       color: 'bg-orange-100/80 dark:bg-orange-900/30',
       items: [
         { icon: TrendingUp, label: tr('menu.items.uploadResultados', 'Upload Resultados'), path: "/resultados-upload", show: isAdmin, showBadge: false },
+        { icon: TrendingUp, label: tr('menu.items.uploadNPS', 'Upload NPS'), path: "/nps-upload", show: isAdmin, showBadge: false },
         { icon: BarChart3, label: tr('menu.items.dashboardResultados', 'Dashboard Resultados'), path: "/resultados-dashboard", show: true, showBadge: false },
         { icon: Sparkles, label: tr('menu.items.relatorioIAResultados', 'Relatório de Resultados'), path: "/relatorio-ia-resultados", show: true, showBadge: false },
         { icon: GitCompare, label: tr('menu.items.comparacaoLojas', 'Comparação Lojas'), path: "/comparacao-lojas", show: true, showBadge: false },

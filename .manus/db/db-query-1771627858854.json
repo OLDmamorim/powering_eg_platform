@@ -1,0 +1,20 @@
+{
+  "query": "SELECT g.id, u.name, u.email \nFROM gestores g \nINNER JOIN users u ON g.userId = u.id \nWHERE u.email LIKE '%mamorim%' OR u.name LIKE '%Marco%';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT g.id, u.name, u.email \nFROM gestores g \nINNER JOIN users u ON g.userId = u.id \nWHERE u.email LIKE '%mamorim%' OR u.name LIKE '%Marco%';",
+  "rows": [
+    {
+      "id": "30001",
+      "name": "Marco Amorim",
+      "email": "mamorim@expressglass.pt"
+    },
+    {
+      "id": "120001",
+      "name": "Marco Vilar",
+      "email": "mvilar@expressglass.pt"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\temail\n30001\tMarco Amorim\tmamorim@expressglass.pt\n120001\tMarco Vilar\tmvilar@expressglass.pt\n",
+  "stderr": "",
+  "execution_time_ms": 369
+}

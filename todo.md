@@ -35,3 +35,19 @@
 - [x] Remover gradientes coloridos do info-box
 - [x] Usar formato igual aos outros emails que funcionam no Outlook
 - [x] Testar visualização no Outlook
+
+## Sistema NPS - Upload e Dashboard
+- [x] Criar tabela nps_dados na BD para dados NPS por loja/ano/mês
+- [x] Implementar parsing do Excel NPS (sheet Por Loja) no excelProcessor.ts
+- [x] Criar página NPSUpload.tsx para upload de ficheiro NPS
+- [x] Adicionar rota /nps-upload no App.tsx
+- [x] Adicionar link "Upload NPS" no menu DashboardLayout
+- [x] Endpoint backend nps.upload para upload e processamento do ficheiro
+- [x] Endpoints backend para consulta de dados NPS (getDadosLoja/Lojas/TodasLojas)
+- [ ] Exibir coluna NPS no dashboard de resultados (ResultadosDashboard.tsx)
+
+## Bug: Relatório de IA de Resultados Vazio
+- [x] Investigar query do Relatório IA Resultados (RelatorioIAResultados.tsx)
+- [x] Corrigir filtro que não está a mostrar os 50 relatórios livres + 8 completos de Fevereiro 2026
+- [x] Adicionar logs para debug no aiService.ts
+- [x] Testar com dados reais do gestor Marco Amorim (Minhas Lojas + Fevereiro 2026) - SUCESSO!
