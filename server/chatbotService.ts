@@ -436,6 +436,24 @@ function formatarContextoPessoal(contexto: ContextoPlataforma): string {
   gestor.lojasAssociadas.forEach((l: any) => {
     const numColab = l.numColaboradores !== undefined ? l.numColaboradores : 'N/A';
     texto += `- ${l.nome} (ID: ${l.id}) - ${numColab} colaborador${numColab !== 1 ? 'es' : ''}\n`;
+    // Informações complementares da loja (se existirem)
+    const infoComplementar: string[] = [];
+    if (l.telefone) infoComplementar.push(`Tel: ${l.telefone}`);
+    if (l.telemovel) infoComplementar.push(`Tlm: ${l.telemovel}`);
+    if (l.morada) {
+      let moradaCompleta = l.morada;
+      if (l.codigoPostal) moradaCompleta += `, ${l.codigoPostal}`;
+      if (l.localidade) moradaCompleta += ` ${l.localidade}`;
+      infoComplementar.push(`Morada: ${moradaCompleta}`);
+    }
+    if (l.areaM2) infoComplementar.push(`Área: ${l.areaM2} m²`);
+    if (l.renda) infoComplementar.push(`Renda: ${l.renda}`);
+    if (l.senhorio) infoComplementar.push(`Senhorio: ${l.senhorio}`);
+    if (l.contactoSenhorio) infoComplementar.push(`Contacto Senhorio: ${l.contactoSenhorio}`);
+    if (l.observacoesImovel) infoComplementar.push(`Obs. Imóvel: ${l.observacoesImovel}`);
+    if (infoComplementar.length > 0) {
+      texto += `  📍 ${infoComplementar.join(' | ')}\n`;
+    }
   });
   texto += '\n';
   
@@ -619,6 +637,24 @@ function formatarContextoParaPrompt(contexto: ContextoPlataforma): string {
     const objMensal = objetivosPorLoja.get(l.id);
     const objInfo = objMensal ? ` - 🎯 Obj. Mensal: ${objMensal} serviços` : '';
     texto += `- ${l.nome} (ID: ${l.id}) - ${numColab} colaborador${numColab !== 1 ? 'es' : ''}${objInfo}${l.email ? ` - Email: ${l.email}` : ''}\n`;
+    // Informações complementares da loja (se existirem)
+    const infoComplementar: string[] = [];
+    if (l.telefone) infoComplementar.push(`Tel: ${l.telefone}`);
+    if (l.telemovel) infoComplementar.push(`Tlm: ${l.telemovel}`);
+    if (l.morada) {
+      let moradaCompleta = l.morada;
+      if (l.codigoPostal) moradaCompleta += `, ${l.codigoPostal}`;
+      if (l.localidade) moradaCompleta += ` ${l.localidade}`;
+      infoComplementar.push(`Morada: ${moradaCompleta}`);
+    }
+    if (l.areaM2) infoComplementar.push(`Área: ${l.areaM2} m²`);
+    if (l.renda) infoComplementar.push(`Renda: ${l.renda}`);
+    if (l.senhorio) infoComplementar.push(`Senhorio: ${l.senhorio}`);
+    if (l.contactoSenhorio) infoComplementar.push(`Contacto Senhorio: ${l.contactoSenhorio}`);
+    if (l.observacoesImovel) infoComplementar.push(`Obs. Imóvel: ${l.observacoesImovel}`);
+    if (infoComplementar.length > 0) {
+      texto += `  📍 ${infoComplementar.join(' | ')}\n`;
+    }
   });
   texto += '\n';
   
@@ -1156,6 +1192,12 @@ Ajudas os utilizadores a usar a plataforma, explicando onde encontrar funcionali
 2. Clicar no botão "Nova Loja" (canto superior direito)
 3. Preencher: Nome da loja e Email (opcional)
 4. Clicar em "Guardar"
+
+🏢 INFORMAÇÕES COMPLEMENTARES DAS LOJAS:
+Cada loja pode ter informações complementares (facultativas): telefone, telemóvel, morada, código postal, localidade, área (m²), renda mensal, senhorio, contacto do senhorio e observações do imóvel.
+Estas informações estão disponíveis nos dados de contexto de cada loja.
+Quando o utilizador perguntar sobre telefone, morada, renda, senhorio, área ou qualquer informação complementar de uma loja, consulta os dados fornecidos no contexto.
+Se a informação não estiver preenchida, informa que ainda não foi registada e sugere que vá à página de Lojas para a adicionar (botão de Info na tabela).
 
 👤 COMO ADICIONAR UM GESTOR:
 1. Ir ao menu "Gestores" no menu lateral

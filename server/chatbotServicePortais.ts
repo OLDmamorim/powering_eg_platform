@@ -612,6 +612,21 @@ function formatarContextoParaLoja(contextoNacional: any, dadosLoja: any, lojaNom
     if (dadosLoja.loja.objetivoDiario) {
       texto += `- 🎯 OBJETIVO DIÁRIO: ${dadosLoja.loja.objetivoDiario} serviços/dia\n`;
     }
+    // Informações complementares da loja
+    const l = dadosLoja.loja;
+    if (l.telefone) texto += `- 📞 Telefone: ${l.telefone}\n`;
+    if (l.telemovel) texto += `- 📱 Telemóvel: ${l.telemovel}\n`;
+    if (l.morada) {
+      let moradaCompleta = l.morada;
+      if (l.codigoPostal) moradaCompleta += `, ${l.codigoPostal}`;
+      if (l.localidade) moradaCompleta += ` ${l.localidade}`;
+      texto += `- 📍 Morada: ${moradaCompleta}\n`;
+    }
+    if (l.areaM2) texto += `- 📐 Área: ${l.areaM2} m²\n`;
+    if (l.renda) texto += `- 💰 Renda Mensal: ${l.renda}\n`;
+    if (l.senhorio) texto += `- 🏠 Senhorio: ${l.senhorio}\n`;
+    if (l.contactoSenhorio) texto += `- 📞 Contacto Senhorio: ${l.contactoSenhorio}\n`;
+    if (l.observacoesImovel) texto += `- 📝 Observações Imóvel: ${l.observacoesImovel}\n`;
     texto += `\n`;
   }
   

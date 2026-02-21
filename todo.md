@@ -70,3 +70,10 @@
 - [x] Implementar UI na ficha da loja com secção de informações complementares
 - [x] Testar edição e visualização dos novos campos
 - [ ] Guardar checkpoint
+
+## Chatbot - Integrar Informações Complementares das Lojas
+- [x] Analisar código do chatbot para entender como funciona o contexto
+- [x] Adicionar informações complementares das lojas ao contexto do chatbot (chatbotService.ts + chatbotServicePortais.ts)
+- [x] Adicionar instrução ao system prompt sobre informações complementares
+- [x] Testar chatbot com perguntas sobre lojas (telefone, morada, renda, etc.) - SUCESSO!
+- [x] Guardar checkpoint
