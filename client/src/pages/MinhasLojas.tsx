@@ -1,5 +1,6 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import DashboardLayout from "@/components/DashboardLayout";
+import LojaInfoComplementar from "@/components/LojaInfoComplementar";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,8 +8,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { trpc } from "@/lib/trpc";
-import { Building2, Mail, MapPin, Phone, Edit, CheckCircle2, AlertCircle, Users } from "lucide-react";
+import { Building2, Mail, MapPin, Phone, Edit, CheckCircle2, AlertCircle, Users, ChevronDown, Info } from "lucide-react";
 import { useLocation } from "wouter";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -45,6 +47,7 @@ export default function MinhasLojas() {
   const [, setLocation] = useLocation();
   const [editingLoja, setEditingLoja] = useState<any>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [expandedInfoId, setExpandedInfoId] = useState<number | null>(null);
   const [formData, setFormData] = useState({
     nome: "",
     numeroLoja: null as number | null,
@@ -72,8 +75,6 @@ export default function MinhasLojas() {
     setLocation("/dashboard");
     return null;
   }
-
-  // Lojas já vêm ordenadas do backend
 
   const handleEdit = (loja: any) => {
     setEditingLoja(loja);
@@ -164,15 +165,7 @@ export default function MinhasLojas() {
                             </div>
                           </div>
                           <div>
-                            <Label htmlFor="morada">{t('common.descricao')}</Label>
-                            <Input
-                              id="morada"
-                              value={formData.morada}
-                              onChange={(e) => setFormData({ ...formData, morada: e.target.value })}
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="contacto">{t('common.nome')}</Label>
+                            <Label htmlFor="contacto">Contacto</Label>
                             <Input
                               id="contacto"
                               value={formData.contacto}
@@ -197,15 +190,6 @@ export default function MinhasLojas() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {loja.morada && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <MapPin className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-muted-foreground">
-                        {loja.morada}
-                      </span>
-                    </div>
-                  )}
-
                   {loja.contacto && (
                     <div className="flex items-center gap-2 text-sm">
                       <Phone className="h-4 w-4 text-muted-foreground" />
@@ -267,6 +251,33 @@ export default function MinhasLojas() {
                     <p className="text-xs text-muted-foreground italic">
                       (Apenas admin pode editar mínimos)
                     </p>
+                  </div>
+
+                  {/* Informações Complementares - Expansível */}
+                  <div className="pt-3 border-t">
+                    <Collapsible
+                      open={expandedInfoId === loja.id}
+                      onOpenChange={(open) => setExpandedInfoId(open ? loja.id : null)}
+                    >
+                      <CollapsibleTrigger asChild>
+                        <Button variant="ghost" size="sm" className="w-full justify-between gap-2 text-muted-foreground hover:text-foreground">
+                          <div className="flex items-center gap-2">
+                            <Info className="h-3.5 w-3.5" />
+                            <span className="text-xs">Informações Complementares</span>
+                          </div>
+                          <ChevronDown className={`h-3.5 w-3.5 transition-transform ${expandedInfoId === loja.id ? 'rotate-180' : ''}`} />
+                        </Button>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent className="pt-2">
+                        <LojaInfoComplementar
+                          loja={loja}
+                          isAdmin={false}
+                          onSaved={() => {
+                            utils.lojas.getByGestor.invalidate();
+                          }}
+                        />
+                      </CollapsibleContent>
+                    </Collapsible>
                   </div>
                 </CardContent>
               </Card>

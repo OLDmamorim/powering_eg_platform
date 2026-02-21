@@ -1,0 +1,24 @@
+{
+  "query": "SELECT id, nome, telefone, telemovel, morada, codigoPostal, localidade, areaM2, renda, senhorio, contactoSenhorio, observacoesImovel FROM lojas WHERE telefone IS NOT NULL LIMIT 5",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT id, nome, telefone, telemovel, morada, codigoPostal, localidade, areaM2, renda, senhorio, contactoSenhorio, observacoesImovel FROM lojas WHERE telefone IS NOT NULL LIMIT 5",
+  "rows": [
+    {
+      "id": "180009",
+      "nome": "Beira baixa sm",
+      "telefone": "275 123 456",
+      "telemovel": "912 345 678",
+      "morada": "NULL",
+      "codigoPostal": "NULL",
+      "localidade": "NULL",
+      "areaM2": "NULL",
+      "renda": "NULL",
+      "senhorio": "NULL",
+      "contactoSenhorio": "NULL",
+      "observacoesImovel": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tnome\ttelefone\ttelemovel\tmorada\tcodigoPostal\tlocalidade\tareaM2\trenda\tsenhorio\tcontactoSenhorio\tobservacoesImovel\n180009\tBeira baixa sm\t275 123 456\t912 345 678\tNULL\tNULL\tNULL\tNULL\tNULL\tNULL\tNULL\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 617
+}

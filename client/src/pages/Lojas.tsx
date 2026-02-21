@@ -1,5 +1,6 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import DashboardLayout from "@/components/DashboardLayout";
+import LojaInfoComplementar from "@/components/LojaInfoComplementar";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -22,8 +23,8 @@ import {
 } from "@/components/ui/table";
 import { trpc } from "@/lib/trpc";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Building2, Edit, Plus, Trash2, Upload, Download } from "lucide-react";
-import { useState, useRef } from "react";
+import { Building2, Edit, Plus, Trash2, Upload, Download, Info, ChevronDown, ChevronUp } from "lucide-react";
+import React, { useState, useRef } from "react";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
 import * as XLSX from 'xlsx';
@@ -52,6 +53,9 @@ export default function Lojas() {
   // Estado para seleção múltipla
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  
+  // Estado para painel de informações complementares
+  const [expandedLojaId, setExpandedLojaId] = useState<number | null>(null);
 
   const utils = trpc.useUtils();
   const { data: lojasReais, isLoading } = trpc.lojas.list.useQuery(undefined, { enabled: !isDemo });
@@ -233,7 +237,6 @@ export default function Lojas() {
 
     setImportFile(file);
 
-    // Ler ficheiro e mostrar preview
     const reader = new FileReader();
     reader.onload = (event) => {
       const data = event.target?.result;
@@ -241,8 +244,6 @@ export default function Lojas() {
       const sheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[sheetName];
       const jsonData = XLSX.utils.sheet_to_json(worksheet);
-      
-      // Mostrar apenas primeiras 10 linhas no preview
       setImportPreview(jsonData.slice(0, 10));
     };
     reader.readAsBinaryString(file);
@@ -257,12 +258,21 @@ export default function Lojas() {
     const reader = new FileReader();
     reader.onload = async (event) => {
       const base64Data = event.target?.result as string;
-      // Remover prefixo data:application/...;base64,
       const base64 = base64Data.split(',')[1];
-      
       importMutation.mutate({ base64Data: base64 });
     };
     reader.readAsDataURL(importFile);
+  };
+
+  const toggleExpanded = (lojaId: number) => {
+    setExpandedLojaId(expandedLojaId === lojaId ? null : lojaId);
+  };
+
+  // Verificar se uma loja tem informações complementares
+  const hasComplementaryInfo = (loja: any) => {
+    return loja.telefone || loja.telemovel || loja.morada || loja.codigoPostal || 
+           loja.localidade || loja.renda || loja.senhorio || loja.contactoSenhorio || 
+           loja.areaM2 || loja.observacoesImovel;
   };
 
   return (
@@ -315,59 +325,96 @@ export default function Lojas() {
                   <TableHead>{t('lojas.email')}</TableHead>
                   <TableHead>{t('lojas.gestor')}</TableHead>
                   <TableHead className="text-center">Colaboradores</TableHead>
+                  <TableHead className="text-center">Info</TableHead>
                   <TableHead className="text-right">{t('lojas.acoes')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {lojas && lojas.length > 0 ? (
                   lojas.map((loja: any) => (
-                    <TableRow key={loja.id} className={selectedIds.includes(loja.id) ? "bg-muted/50" : ""}>
-                      <TableCell>
-                        <Checkbox
-                          checked={selectedIds.includes(loja.id)}
-                          onCheckedChange={(checked) => handleSelectOne(loja.id, !!checked)}
-                          aria-label={`${t('common.selecionarTodos')} ${loja.nome}`}
-                        />
-                      </TableCell>
-                      <TableCell className="text-center font-mono text-sm">
-                        {loja.numeroLoja || "-"}
-                      </TableCell>
-                      <TableCell className="font-medium">
-                        <div className="flex items-center gap-2">
-                          <Building2 className="h-4 w-4 text-muted-foreground" />
-                          {loja.nome}
-                        </div>
-                      </TableCell>
-                      <TableCell>{loja.email || "-"}</TableCell>
-                      <TableCell>{loja.gestorNome || ""}</TableCell>
-                      <TableCell className="text-center">
-                        <span className="inline-flex items-center justify-center rounded-full bg-primary/10 px-2.5 py-0.5 text-sm font-medium text-primary">
-                          {loja.numColaboradores || 0}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
+                    <React.Fragment key={loja.id}>
+                      <TableRow className={selectedIds.includes(loja.id) ? "bg-muted/50" : ""}>
+                        <TableCell>
+                          <Checkbox
+                            checked={selectedIds.includes(loja.id)}
+                            onCheckedChange={(checked) => handleSelectOne(loja.id, !!checked)}
+                            aria-label={`${t('common.selecionarTodos')} ${loja.nome}`}
+                          />
+                        </TableCell>
+                        <TableCell className="text-center font-mono text-sm">
+                          {loja.numeroLoja || "-"}
+                        </TableCell>
+                        <TableCell className="font-medium">
+                          <div className="flex items-center gap-2">
+                            <Building2 className="h-4 w-4 text-muted-foreground" />
+                            {loja.nome}
+                          </div>
+                        </TableCell>
+                        <TableCell>{loja.email || "-"}</TableCell>
+                        <TableCell>{loja.gestorNome || ""}</TableCell>
+                        <TableCell className="text-center">
+                          <span className="inline-flex items-center justify-center rounded-full bg-primary/10 px-2.5 py-0.5 text-sm font-medium text-primary">
+                            {loja.numColaboradores || 0}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-center">
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => handleOpenDialog(loja)}
+                            onClick={() => toggleExpanded(loja.id)}
+                            className="relative"
+                            title="Informações complementares"
                           >
-                            <Edit className="h-4 w-4" />
+                            {expandedLojaId === loja.id ? (
+                              <ChevronUp className="h-4 w-4" />
+                            ) : (
+                              <Info className="h-4 w-4" />
+                            )}
+                            {hasComplementaryInfo(loja) && expandedLojaId !== loja.id && (
+                              <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-blue-500" />
+                            )}
                           </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleDelete(loja.id)}
-                          >
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleOpenDialog(loja)}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleDelete(loja.id)}
+                            >
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                      {/* Painel expandível de informações complementares */}
+                      {expandedLojaId === loja.id && (
+                        <TableRow>
+                          <TableCell colSpan={8} className="p-0">
+                            <div className="p-4 bg-muted/20">
+                              <LojaInfoComplementar
+                                loja={loja}
+                                isAdmin={true}
+                                onSaved={() => {
+                                  utils.lojas.list.invalidate();
+                                }}
+                              />
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </React.Fragment>
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8">
+                    <TableCell colSpan={8} className="text-center py-8">
                       <p className="text-muted-foreground">
                         {t('lojas.semLojas')}
                       </p>

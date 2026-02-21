@@ -37,6 +37,17 @@ export const lojas = mysqlTable("lojas", {
   minimoRelatoriosLivres: int("minimoRelatoriosLivres").default(0).notNull(), // Mínimo mensal de relatórios livres (0 = sem mínimo)
   minimoRelatoriosCompletos: int("minimoRelatoriosCompletos").default(0).notNull(), // Mínimo mensal de relatórios completos (0 = sem mínimo)
   localidadePadrao: varchar("localidadePadrao", { length: 255 }), // Localidade padrão associada à loja (para auto-preencher no Recalibra)
+  // Informações complementares (facultativas)
+  telefone: varchar("telefone", { length: 50 }),
+  telemovel: varchar("telemovel", { length: 50 }),
+  morada: text("morada"),
+  codigoPostal: varchar("codigoPostal", { length: 20 }),
+  localidade: varchar("localidade", { length: 255 }),
+  renda: varchar("renda", { length: 100 }), // Valor da renda mensal (texto para flexibilidade)
+  senhorio: varchar("senhorio", { length: 255 }),
+  contactoSenhorio: varchar("contactoSenhorio", { length: 255 }),
+  areaM2: varchar("areaM2", { length: 50 }), // Área em m²
+  observacoesImovel: text("observacoesImovel"), // Notas adicionais sobre o imóvel
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

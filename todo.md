@@ -61,4 +61,12 @@
 - [x] Corrigir router gerar: usar gerarRelatorioIAGestor() quando role !== admin e âmbito === minhas
 - [x] Corrigir router gerarMultiplosMeses: usar gerarRelatorioIAGestorMultiplosMeses() para gestores
 - [x] Testar relatório gestor com dados reais (Marco: 27 livres, 1 completo, 52 pendentes)
-- [ ] Guardar checkpoint e entregar ao utilizador (em progresso)
+- [x] Guardar checkpoint e entregar ao utilizador
+
+## Informações Complementares das Lojas (campos facultativos)
+- [x] Adicionar colunas ao schema: telefone, telemovel, morada, renda, senhorio, contactoSenhorio, areaM2, observacoesImovel
+- [x] Migrar BD com pnpm db:push
+- [x] Criar endpoints tRPC para ler/atualizar informações complementares
+- [x] Implementar UI na ficha da loja com secção de informações complementares
+- [x] Testar edição e visualização dos novos campos
+- [ ] Guardar checkpoint

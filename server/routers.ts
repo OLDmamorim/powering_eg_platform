@@ -314,9 +314,23 @@ export const appRouter = router({
         longitude: z.string().optional(),
         minimoRelatoriosLivres: z.number().min(0).optional(),
         minimoRelatoriosCompletos: z.number().min(0).optional(),
+        // Informações complementares (facultativas)
+        telefone: z.string().optional().nullable(),
+        telemovel: z.string().optional().nullable(),
+        morada: z.string().optional().nullable(),
+        codigoPostal: z.string().optional().nullable(),
+        localidade: z.string().optional().nullable(),
+        renda: z.string().optional().nullable(),
+        senhorio: z.string().optional().nullable(),
+        contactoSenhorio: z.string().optional().nullable(),
+        areaM2: z.string().optional().nullable(),
+        observacoesImovel: z.string().optional().nullable(),
       }))
       .mutation(async ({ input, ctx }) => {
         const { id, ...data } = input;
+        
+        // Campos complementares que gestores também podem editar
+        const camposComplementares = ['telefone', 'telemovel', 'morada', 'codigoPostal', 'localidade', 'renda', 'senhorio', 'contactoSenhorio', 'areaM2', 'observacoesImovel'] as const;
         
         // Verificar se gestor tem acesso à loja
         if (ctx.user.role !== 'admin') {
@@ -326,11 +340,14 @@ export const appRouter = router({
           if (!lojasGestor.some(l => l.id === id)) {
             throw new TRPCError({ code: 'FORBIDDEN', message: 'Não tem acesso a esta loja' });
           }
-          // Gestor pode editar email, contacto e numeroLoja, não nome ou mínimos
+          // Gestor pode editar email, contacto, numeroLoja e campos complementares
           const gestorData: any = {};
           if (data.email !== undefined) gestorData.email = data.email;
           if (data.contacto !== undefined) gestorData.contacto = data.contacto;
           if (data.numeroLoja !== undefined) gestorData.numeroLoja = data.numeroLoja;
+          for (const campo of camposComplementares) {
+            if ((data as any)[campo] !== undefined) gestorData[campo] = (data as any)[campo];
+          }
           await db.updateLoja(id, gestorData);
         } else {
           // Admin pode editar tudo
