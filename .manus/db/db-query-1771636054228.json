@@ -1,0 +1,24 @@
+{
+  "query": "SELECT id, gestorId, lojaId, dataVisita, createdAt FROM relatorios_livres LIMIT 2;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT id, gestorId, lojaId, dataVisita, createdAt FROM relatorios_livres LIMIT 2;",
+  "rows": [
+    {
+      "id": "120001",
+      "gestorId": "30001",
+      "lojaId": "60001",
+      "dataVisita": "2025-12-16 08:03:15",
+      "createdAt": "2025-12-16 08:03:16"
+    },
+    {
+      "id": "150001",
+      "gestorId": "30001",
+      "lojaId": "60004",
+      "dataVisita": "2025-12-16 14:33:07",
+      "createdAt": "2025-12-16 14:33:07"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tgestorId\tlojaId\tdataVisita\tcreatedAt\n120001\t30001\t60001\t2025-12-16 08:03:15\t2025-12-16 08:03:16\n150001\t30001\t60004\t2025-12-16 14:33:07\t2025-12-16 14:33:07\n",
+  "stderr": "",
+  "execution_time_ms": 398
+}

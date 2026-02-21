@@ -54,3 +54,11 @@
 - [x] Adicionar verificações de segurança no frontend (RelatorioIAResultados.tsx)
 - [x] Testar com dados reais (50 relatórios livres + 8 completos Fev 2026) - SUCESSO!
 - [x] Relatório gerado com 69 lojas, KPIs, rankings, análises e gráficos completos
+
+## Bug: Relatório IA Gestor mostra 0 em todas as métricas
+- [x] Diagnosticar causa raiz: router usava gerarRelatorioComIA() (admin) para gestores
+- [x] Corrigir r.data → r.dataVisita no aiService.ts (filtro de período)
+- [x] Corrigir router gerar: usar gerarRelatorioIAGestor() quando role !== admin e âmbito === minhas
+- [x] Corrigir router gerarMultiplosMeses: usar gerarRelatorioIAGestorMultiplosMeses() para gestores
+- [x] Testar relatório gestor com dados reais (Marco: 27 livres, 1 completo, 52 pendentes)
+- [ ] Guardar checkpoint e entregar ao utilizador (em progresso)

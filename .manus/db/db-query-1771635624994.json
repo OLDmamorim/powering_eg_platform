@@ -1,0 +1,30 @@
+{
+  "query": "SELECT COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'relatorios_ia';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'relatorios_ia';",
+  "rows": [
+    {
+      "COLUMN_NAME": "id",
+      "DATA_TYPE": "int"
+    },
+    {
+      "COLUMN_NAME": "periodo",
+      "DATA_TYPE": "varchar"
+    },
+    {
+      "COLUMN_NAME": "conteudo",
+      "DATA_TYPE": "text"
+    },
+    {
+      "COLUMN_NAME": "geradoPor",
+      "DATA_TYPE": "int"
+    },
+    {
+      "COLUMN_NAME": "createdAt",
+      "DATA_TYPE": "timestamp"
+    }
+  ],
+  "messages": [],
+  "stdout": "COLUMN_NAME\tDATA_TYPE\nid\tint\nperiodo\tvarchar\nconteudo\ttext\ngeradoPor\tint\ncreatedAt\ttimestamp\n",
+  "stderr": "",
+  "execution_time_ms": 376
+}

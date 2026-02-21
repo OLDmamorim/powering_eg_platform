@@ -191,15 +191,24 @@ export async function gerarRelatorioComIA(
   }
   
   // Filtrar por período
+  console.log('[gerarRelatorioComIA] Total livres antes filtro:', relatoriosLivresFiltrados.length);
+  console.log('[gerarRelatorioComIA] Total completos antes filtro:', relatoriosCompletosFiltrados.length);
+  if (relatoriosLivresFiltrados.length > 0) {
+    console.log('[gerarRelatorioComIA] Exemplo campo livre:', Object.keys(relatoriosLivresFiltrados[0]).filter(k => k.includes('data') || k.includes('Data')));
+  }
+  
   relatoriosLivresFiltrados = relatoriosLivresFiltrados.filter((r: any) => {
-    const data = new Date(r.data);
+    const data = new Date(r.dataVisita);
     return data >= dataInicio && data <= dataFim;
   });
   
   relatoriosCompletosFiltrados = relatoriosCompletosFiltrados.filter((r: any) => {
-    const data = new Date(r.data);
+    const data = new Date(r.dataVisita);
     return data >= dataInicio && data <= dataFim;
   });
+  
+  console.log('[gerarRelatorioComIA] Total livres APÓS filtro:', relatoriosLivresFiltrados.length);
+  console.log('[gerarRelatorioComIA] Total completos APÓS filtro:', relatoriosCompletosFiltrados.length);
 
   // ========== BUSCAR REUNIÕES DE LOJAS ==========
   const reunioesLojas = await db.getHistoricoReuniõesLojas(gestorId, {

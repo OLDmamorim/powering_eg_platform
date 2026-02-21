@@ -1,0 +1,18 @@
+{
+  "query": "SELECT 'livres' as tipo, COUNT(*) as total FROM relatorios_livres WHERE dataVisita >= '2026-02-01' AND dataVisita < '2026-03-01' UNION ALL SELECT 'completos' as tipo, COUNT(*) as total FROM relatorios_completos WHERE dataVisita >= '2026-02-01' AND dataVisita < '2026-03-01';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT 'livres' as tipo, COUNT(*) as total FROM relatorios_livres WHERE dataVisita >= '2026-02-01' AND dataVisita < '2026-03-01' UNION ALL SELECT 'completos' as tipo, COUNT(*) as total FROM relatorios_completos WHERE dataVisita >= '2026-02-01' AND dataVisita < '2026-03-01';",
+  "rows": [
+    {
+      "tipo": "completos",
+      "total": "19"
+    },
+    {
+      "tipo": "livres",
+      "total": "92"
+    }
+  ],
+  "messages": [],
+  "stdout": "tipo\ttotal\ncompletos\t19\nlivres\t92\n",
+  "stderr": "",
+  "execution_time_ms": 358
+}

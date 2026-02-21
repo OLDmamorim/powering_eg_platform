@@ -2580,14 +2580,32 @@ IMPORTANTE:
           // filtro === "pais" → sem filtro, todas as lojas
         }
         
-        const analise = await gerarRelatorioComIA(input.periodo, gestorId, lojasIds, input.dataInicio, input.dataFim);
+        // CORREÇÃO: Gestores com "Minhas Lojas" devem usar gerarRelatorioIAGestor
+        // que retorna a estrutura correcta (relatorios.totalLivres, pontosDestacados, pendentes, etc.)
+        const isGestor = ctx.user.role !== 'admin';
+        const usarRelatorioGestor = isGestor && (input.ambitoRelatorio === 'minhas' || (!input.ambitoRelatorio));
         
-        // Adicionar informação do filtro ao resultado
-        const analiseComFiltro = {
-          ...analise,
-          filtroAplicado: filtroDescricao,
-          tipoRelatorio: ctx.user.role !== 'admin' ? 'gestor' as const : 'admin' as const,
-        };
+        let analiseComFiltro: any;
+        
+        if (usarRelatorioGestor && gestorId) {
+          // Usar função específica para gestores que retorna estrutura com relatorios, pendentes, etc.
+          console.log('[RelatoriosIA] Usando gerarRelatorioIAGestor para gestorId:', gestorId);
+          const analiseGestor = await gerarRelatorioIAGestor(input.periodo, gestorId, input.dataInicio, input.dataFim);
+          analiseComFiltro = {
+            ...analiseGestor,
+            filtroAplicado: filtroDescricao,
+            tipoRelatorio: 'gestor' as const,
+          };
+        } else {
+          // Usar função genérica para admin/nacional
+          console.log('[RelatoriosIA] Usando gerarRelatorioComIA, gestorId:', gestorId, 'lojasIds:', lojasIds?.length);
+          const analise = await gerarRelatorioComIA(input.periodo, gestorId, lojasIds, input.dataInicio, input.dataFim);
+          analiseComFiltro = {
+            ...analise,
+            filtroAplicado: filtroDescricao,
+            tipoRelatorio: isGestor ? 'gestor' as const : 'admin' as const,
+          };
+        }
         
         // Salvar relatório IA na base de dados
         try {
@@ -2655,15 +2673,30 @@ IMPORTANTE:
           }
         }
         
-        // Importar função de gerar relatório com múltiplos meses
-        const { gerarRelatorioComIAMultiplosMeses } = await import('./aiService');
-        const analise = await gerarRelatorioComIAMultiplosMeses(input.mesesSelecionados, gestorId, lojasIds);
+        // CORREÇÃO: Gestores devem usar gerarRelatorioIAGestorMultiplosMeses
+        const isGestor = ctx.user.role !== 'admin';
         
-        const analiseComFiltro = {
-          ...analise,
-          filtroAplicado: filtroDescricao,
-          tipoRelatorio: ctx.user.role !== 'admin' ? 'gestor' as const : 'admin' as const,
-        };
+        let analiseComFiltro: any;
+        
+        if (isGestor && gestorId) {
+          // Usar função específica para gestores
+          console.log('[RelatoriosIA] Usando gerarRelatorioIAGestorMultiplosMeses para gestorId:', gestorId);
+          const analiseGestor = await gerarRelatorioIAGestorMultiplosMeses(input.mesesSelecionados, gestorId);
+          analiseComFiltro = {
+            ...analiseGestor,
+            filtroAplicado: filtroDescricao,
+            tipoRelatorio: 'gestor' as const,
+          };
+        } else {
+          // Usar função genérica para admin/nacional
+          const { gerarRelatorioComIAMultiplosMeses } = await import('./aiService');
+          const analise = await gerarRelatorioComIAMultiplosMeses(input.mesesSelecionados, gestorId, lojasIds);
+          analiseComFiltro = {
+            ...analise,
+            filtroAplicado: filtroDescricao,
+            tipoRelatorio: isGestor ? 'gestor' as const : 'admin' as const,
+          };
+        }
         
         // Salvar relatório IA na base de dados
         try {
