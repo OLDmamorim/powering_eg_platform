@@ -192,13 +192,13 @@ export async function gerarRelatorioComIA(
   
   // Filtrar por período
   relatoriosLivresFiltrados = relatoriosLivresFiltrados.filter((r: any) => {
-    const dataVisita = new Date(r.dataVisita);
-    return dataVisita >= dataInicio && dataVisita <= dataFim;
+    const data = new Date(r.data);
+    return data >= dataInicio && data <= dataFim;
   });
   
   relatoriosCompletosFiltrados = relatoriosCompletosFiltrados.filter((r: any) => {
-    const dataVisita = new Date(r.dataVisita);
-    return dataVisita >= dataInicio && dataVisita <= dataFim;
+    const data = new Date(r.data);
+    return data >= dataInicio && data <= dataFim;
   });
 
   // ========== BUSCAR REUNIÕES DE LOJAS ==========

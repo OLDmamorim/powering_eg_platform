@@ -1,0 +1,8 @@
+{
+  "query": "SELECT id, gestor_id, periodo, ambito, JSON_LENGTH(relatorio_json, '$.relatoriosSubmetidos') as num_relatorios, JSON_LENGTH(relatorio_json, '$.pontosDestacados.positivos') as num_positivos, JSON_LENGTH(relatorio_json, '$.gestaoPendentes.criadosNoPeriodo') as num_pendentes, created_at FROM relatorios_ia ORDER BY created_at DESC LIMIT 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT id, gestor_id, periodo, ambito, JSON_LENGTH(relatorio_json, '$.relatoriosSubmetidos') as num_relatorios, JSON_LENGTH(relatorio_json, '$.pontosDestacados.positivos') as num_positivos, JSON_LENGTH(relatorio_json, '$.gestaoPendentes.criadosNoPeriodo') as num_pendentes, created_at FROM relatorios_ia ORDER BY created_at DESC LIMIT 1;",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 'gestor_id' in 'field list'"
+  ]
+}

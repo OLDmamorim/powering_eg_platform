@@ -48,7 +48,9 @@
 
 ## Bug: Relatório de IA de Resultados Vazio - RESOLVIDO ✅
 - [x] Investigar query do Relatório IA Resultados (RelatorioIAResultados.tsx)
-- [x] Corrigir filtro que não está a mostrar os 50 relatórios livres + 8 completos de Fevereiro 2026
-- [x] Adicionar logs para debug no aiService.ts
-- [x] Verificar logs do servidor para identificar o problema real
-- [x] Testar novamente após correção - SUCESSO! Relatório gerado com todos os dados
+- [x] Verificar BD - relatório guardado mas JSON vazio (relatorio_json: {})
+- [x] Identificar problema: código usava r.dataVisita mas campo BD é r.data
+- [x] Corrigir lógica de filtragem de relatórios por data no aiService.ts (linhas 195, 200)
+- [x] Adicionar verificações de segurança no frontend (RelatorioIAResultados.tsx)
+- [x] Testar com dados reais (50 relatórios livres + 8 completos Fev 2026) - SUCESSO!
+- [x] Relatório gerado com 69 lojas, KPIs, rankings, análises e gráficos completos
