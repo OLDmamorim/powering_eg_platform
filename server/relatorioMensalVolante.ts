@@ -173,30 +173,30 @@ export async function enviarRelatoriosMensaisVolante() {
     for (const [gestorId, dadosLojas] of servicosPorGestor.entries()) {
       try {
         const gestor = await db.getGestorById(gestorId);
-        if (!gestor || !gestor.user?.email) {
+        if (!gestor || !gestor.email) {
           console.log(`[Relatório Mensal Volante] Gestor ${gestorId} não encontrado ou sem email`);
           continue;
         }
         
         // Gerar HTML do relatório consolidado para gestor
         const htmlGestor = gerarHTMLRelatorioMensalVolanteGestor({
-          gestorNome: gestor.user.name || 'Gestor',
+          gestorNome: gestor.nome || 'Gestor',
           mes: mesRelatorio,
           ano: anoAnterior,
           lojas: dadosLojas,
         });
         
         const enviado = await sendEmail({
-          to: gestor.user.email,
+          to: gestor.email,
           subject: `Relatório Mensal Consolidado - Atividade dos Volantes - ${mesNome} ${anoAnterior}`,
           html: htmlGestor,
         });
         
         if (enviado) {
-          console.log(`[Relatório Mensal Volante] Email consolidado enviado para gestor ${gestor.user.name} (${gestor.user.email})`);
+          console.log(`[Relatório Mensal Volante] Email consolidado enviado para gestor ${gestor.nome} (${gestor.email})`);
           emailsEnviadosGestores++;
         } else {
-          console.error(`[Relatório Mensal Volante] Erro ao enviar email para gestor ${gestor.user.name}`);
+          console.error(`[Relatório Mensal Volante] Erro ao enviar email para gestor ${gestor.nome}`);
           erros++;
         }
         

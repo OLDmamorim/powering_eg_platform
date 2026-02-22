@@ -105,3 +105,10 @@
 - [x] Esta era a razão pela qual NÃO foram enviados relatórios no dia 20 de Fevereiro
 - [ ] Reiniciar servidor para aplicar correção
 - [ ] Guardar checkpoint
+
+## Envio Manual de Relatórios Volante - Fevereiro 2026
+- [x] Modificar código temporariamente para enviar dados de Fevereiro/2026
+- [x] Executar envio manual dos relatórios do Volante - 7 emails para lojas + 1 email consolidado para gestor
+- [x] Corrigir bug gestor.user.email no relatorioMensalVolante.ts (mesmo bug do Recalibra)
+- [x] Reverter alterações temporárias
+- [x] Emails enviados com sucesso para: Vila Verde, Braga, Famalicão (2x), Barcelos (2x), Guimarães, Marco Amorim
