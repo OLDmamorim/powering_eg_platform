@@ -1,0 +1,23 @@
+{
+  "query": "SELECT * FROM unidades_recalibra WHERE id = 30002;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT * FROM unidades_recalibra WHERE id = 30002;",
+  "rows": [
+    {
+      "id": "30002",
+      "nome": "Recalibra Minho ",
+      "email": "NULL",
+      "telefone": "NULL",
+      "gestorId": "30001",
+      "ativo": "1",
+      "telegramChatId": "NULL",
+      "telegramUsername": "NULL",
+      "createdAt": "2026-02-15 12:53:54",
+      "updatedAt": "2026-02-15 12:53:54",
+      "nome_profissional": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tnome\temail\ttelefone\tgestorId\tativo\ttelegramChatId\ttelegramUsername\tcreatedAt\tupdatedAt\tnome_profissional\n30002\tRecalibra Minho \tNULL\tNULL\t30001\t1\tNULL\tNULL\t2026-02-15 12:53:54\t2026-02-15 12:53:54\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 50
+}

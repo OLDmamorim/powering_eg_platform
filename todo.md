@@ -77,3 +77,24 @@
 - [x] Adicionar instrução ao system prompt sobre informações complementares
 - [x] Testar chatbot com perguntas sobre lojas (telefone, morada, renda, etc.) - SUCESSO!
 - [x] Guardar checkpoint
+
+## Envio Automático de Relatórios Mensais (Volante + Recalibra)
+- [x] Verificar se o scheduler está a ser inicializado no arranque do servidor (OK - linha 78 de _core/index.ts)
+- [x] Investigar por que 0 emails foram enviados no relatório do Recalibra (email da unidade estava a null)
+- [x] BUG: Endpoint de atualização da unidade Recalibra não guarda o campo email (só aceitava nome e lojasIds)
+- [x] Corrigir o endpoint para incluir email, profissionalNome e contacto na atualização
+- [ ] Testar que o email é guardado correctamente
+- [ ] Confirmar que o sistema de envio automático está pronto
+- [ ] Guardar checkpoint
+
+## Investigar Envio Automático de Relatórios Mensais
+- [ ] Verificar se o cron job está a ser executado no dia 20 às 09:00
+- [ ] Verificar logs do servidor para identificar erros no envio automático
+- [ ] Identificar por que "Nenhum envio registado" aparece no dashboard do Volante
+- [x] Testar envio manual dos relatórios mensais (Volante + Recalibra) - BUGS ENCONTRADOS
+- [x] BUG 1: Função getAllVolantes() não existe no db.ts
+- [x] BUG 2: Código do relatorioMensalRecalibra.ts esperava gestor.user.email mas getGestorById() retorna gestor.email
+- [x] Criar função getAllVolantes() no db.ts (linhas 8527-8535)
+- [x] Corrigir relatorioMensalRecalibra.ts para usar gestor.email em vez de gestor.user.email
+- [x] Testar novamente o envio manual após correções - SUCESSO! Email Recalibra enviado para mamorim@expressglass.pt
+- [ ] Guardar checkpoint

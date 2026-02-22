@@ -1,0 +1,190 @@
+{
+  "query": "SHOW TABLES",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SHOW TABLES",
+  "rows": [
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "__drizzle_migrations"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "acoes_reunioes"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "agendamentos_volante"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "alertas"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "analises_fichas_servico"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "atividades"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "bloqueios_volante"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "calibragens"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "colaboradores"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "configuracoes_alertas"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "documentos"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "envios_rh"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "evolucao_analises"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "fichas_identificadas_analise"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "gestor_lojas"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "gestores"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "historico_envios_relatorios"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "localidades_recalibra"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "loja_volante"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "lojas"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "marcas_recalibra"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "nps_dados"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "ocorrencias_estruturais"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "pedidos_apoio"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "pendentes"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "pendentes_loja"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "planos_visitas"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "previsoes"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "projecoes_visitas"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "push_subscriptions"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "relacoes_lojas"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "relatoriosIACategorias"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "relatorios_analise_loja"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "relatorios_completos"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "relatorios_ia"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "relatorios_livres"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "relatorios_reuniao_gestores"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "resultados_mensais"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "resumos_globais"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "reunioes_gestores"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "reunioes_lojas"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "reunioes_quinzenais"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "servicos_volante"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "sugestoes_melhoria"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "temas_ocorrencias"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "todo_categories"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "todo_mensagens"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "todos"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "tokens_loja"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "tokens_recalibra"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "tokens_volante"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "topicos_reuniao_gestores"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "totais_mensais"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "unidade_lojas"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "unidades_recalibra"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "users"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "vendas_complementares"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "visitas_planeadas"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "volante_lojas"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH": "volantes"
+    }
+  ],
+  "messages": [],
+  "stdout": "Tables_in_3c9MozLH35e233uWy5WDtH\n__drizzle_migrations\nacoes_reunioes\nagendamentos_volante\nalertas\nanalises_fichas_servico\natividades\nbloqueios_volante\ncalibragens\ncolaboradores\nconfiguracoes_alertas\ndocumentos\nenvios_rh\nevolucao_analises\nfichas_identificadas_analise\ngestor_lojas\ngestores\nhistorico_envios_relatorios\nlocalidades_recalibra\nloja_volante\nlojas\nmarcas_recalibra\nnps_dados\nocorrencias_estruturais\npedidos_apoio\npendentes\npendentes_loja\nplanos_visitas\nprevisoes\nprojecoes_visitas\npush_subscriptions\nrelacoes_lojas\nrelatoriosIACategorias\nrelatorios_analise_loja\nrelatorios_completos\nrelatorios_ia\nrelatorios_livres\nrelatorios_reuniao_gestores\nresultados_mensais\nresumos_globais\nreunioes_gestores\nreunioes_lojas\nreunioes_quinzenais\nservicos_volante\nsugestoes_melhoria\ntemas_ocorrencias\ntodo_categories\ntodo_mensagens\ntodos\ntokens_loja\ntokens_recalibra\ntokens_volante\ntopicos_reuniao_gestores\ntotais_mensais\nunidade_lojas\nunidades_recalibra\nusers\nvendas_complementares\nvisitas_planeadas\nvolante_lojas\nvolantes\n",
+  "stderr": "",
+  "execution_time_ms": 53
+}

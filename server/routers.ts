@@ -10834,11 +10834,14 @@ IMPORTANTE:
         return unidade;
       }),
 
-    // Atualizar unidade (nome e lojas)
+    // Atualizar unidade (nome, email, profissional, contacto e lojas)
     atualizar: gestorProcedure
       .input(z.object({
         id: z.number(),
         nome: z.string().min(1).optional(),
+        email: z.string().email().optional().nullable(),
+        profissionalNome: z.string().optional().nullable(),
+        contacto: z.string().optional().nullable(),
         lojasIds: z.array(z.number()).optional(),
       }))
       .mutation(async ({ input, ctx }) => {
@@ -10846,12 +10849,17 @@ IMPORTANTE:
           throw new TRPCError({ code: 'NOT_FOUND', message: 'Gestor não encontrado' });
         }
         
-        if (input.nome) {
-          await db.updateUnidadeRecalibra(input.id, {
-            nome: input.nome,
-            gestorId: ctx.gestor.id,
-          });
-        }
+        // Atualizar campos da unidade
+        const updateData: Partial<InsertUnidadeRecalibra> = {
+          gestorId: ctx.gestor.id,
+        };
+        
+        if (input.nome !== undefined) updateData.nome = input.nome;
+        if (input.email !== undefined) updateData.email = input.email;
+        if (input.profissionalNome !== undefined) updateData.profissionalNome = input.profissionalNome;
+        if (input.contacto !== undefined) updateData.contacto = input.contacto;
+        
+        await db.updateUnidadeRecalibra(input.id, updateData);
         
         if (input.lojasIds) {
           await db.associarLojasUnidadeRecalibra(input.id, input.lojasIds);
@@ -11180,6 +11188,21 @@ IMPORTANTE:
       .query(async ({ input }) => {
         const historico = await db.getHistoricoEnviosRelatorios(input);
         return historico;
+      }),
+    
+    // Endpoints de teste para executar manualmente os relatórios mensais
+    executarRelatorioMensalVolante: adminProcedure
+      .mutation(async () => {
+        const { enviarRelatoriosMensaisVolante } = await import('./relatorioMensalVolante.js');
+        const resultado = await enviarRelatoriosMensaisVolante();
+        return resultado;
+      }),
+    
+    executarRelatorioMensalRecalibra: adminProcedure
+      .mutation(async () => {
+        const { enviarRelatoriosMensaisRecalibra } = await import('./relatorioMensalRecalibra.js');
+        const resultado = await enviarRelatoriosMensaisRecalibra();
+        return resultado;
       }),
   }),
 });

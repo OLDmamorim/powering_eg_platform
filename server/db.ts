@@ -8522,6 +8522,19 @@ export async function getVolanteById(id: number): Promise<Volante | null> {
 }
 
 /**
+ * Obter todos os volantes
+ */
+export async function getAllVolantes(): Promise<Volante[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db
+    .select()
+    .from(volantes)
+    .orderBy(volantes.nome);
+}
+
+/**
  * Atualizar volante
  */
 export async function updateVolante(id: number, data: { nome?: string; email?: string; telefone?: string; ativo?: boolean }): Promise<Volante | null> {

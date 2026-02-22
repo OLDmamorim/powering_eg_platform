@@ -1,0 +1,34 @@
+{
+  "query": "SELECT * FROM envios_rh ORDER BY id DESC LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT * FROM envios_rh ORDER BY id DESC LIMIT 10;",
+  "rows": [
+    {
+      "id": "30001",
+      "gestorId": "30001",
+      "mesReferencia": "Fevereiro de 2026",
+      "totalColaboradores": "26",
+      "totalEmLojas": "24",
+      "totalVolantes": "1",
+      "totalRecalbra": "1",
+      "emailDestino": "recursoshumanos@expressglass.pt",
+      "emailEnviado": "1",
+      "createdAt": "2026-02-20 18:15:13"
+    },
+    {
+      "id": "1",
+      "gestorId": "30001",
+      "mesReferencia": "Fevereiro de 2026",
+      "totalColaboradores": "26",
+      "totalEmLojas": "24",
+      "totalVolantes": "1",
+      "totalRecalbra": "1",
+      "emailDestino": "recursoshumanos@expressglass.pt",
+      "emailEnviado": "1",
+      "createdAt": "2026-02-11 17:03:09"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tgestorId\tmesReferencia\ttotalColaboradores\ttotalEmLojas\ttotalVolantes\ttotalRecalbra\temailDestino\temailEnviado\tcreatedAt\n30001\t30001\tFevereiro de 2026\t26\t24\t1\t1\trecursoshumanos@expressglass.pt\t1\t2026-02-20 18:15:13\n1\t30001\tFevereiro de 2026\t26\t24\t1\t1\trecursoshumanos@expressglass.pt\t1\t2026-02-11 17:03:09\n",
+  "stderr": "",
+  "execution_time_ms": 55
+}

@@ -154,30 +154,30 @@ export async function enviarRelatoriosMensaisRecalibra() {
     for (const [gestorId, dadosUnidades] of calibragensPorGestor.entries()) {
       try {
         const gestor = await db.getGestorById(gestorId);
-        if (!gestor || !gestor.user?.email) {
+        if (!gestor || !gestor.email) {
           console.log(`[Relatório Mensal Recalibra] Gestor ${gestorId} não encontrado ou sem email`);
           continue;
         }
         
         // Gerar HTML do relatório consolidado para gestor
         const htmlGestor = gerarHTMLRelatorioMensalRecalibraGestor({
-          gestorNome: gestor.user.name || 'Gestor',
+          gestorNome: gestor.nome || 'Gestor',
           mes: mesRelatorio,
           ano: anoAnterior,
           unidades: dadosUnidades,
         });
         
         const enviado = await sendEmail({
-          to: gestor.user.email,
+          to: gestor.email,
           subject: `Relatório Mensal Consolidado - Calibragens Recalibra - ${mesNome} ${anoAnterior}`,
           html: htmlGestor,
         });
         
         if (enviado) {
-          console.log(`[Relatório Mensal Recalibra] Email consolidado enviado para gestor ${gestor.user.name} (${gestor.user.email})`);
+          console.log(`[Relatório Mensal Recalibra] Email consolidado enviado para gestor ${gestor.nome} (${gestor.email})`);
           emailsEnviadosGestores++;
         } else {
-          console.error(`[Relatório Mensal Recalibra] Erro ao enviar email para gestor ${gestor.user.name}`);
+          console.error(`[Relatório Mensal Recalibra] Erro ao enviar email para gestor ${gestor.nome}`);
           erros++;
         }
         
