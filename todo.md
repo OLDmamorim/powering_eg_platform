@@ -98,3 +98,10 @@
 - [x] Corrigir relatorioMensalRecalibra.ts para usar gestor.email em vez de gestor.user.email
 - [x] Testar novamente o envio manual após correções - SUCESSO! Email Recalibra enviado para mamorim@expressglass.pt
 - [ ] Guardar checkpoint
+
+## BUG CRÍTICO: Cron de Relatórios Mensais com Formato Inválido
+- [x] Identificar que cron '0 9 20 * *' tem apenas 5 campos (formato inválido)
+- [x] Corrigir para '0 0 9 20 * *' (6 campos: segundo minuto hora dia mês dia-semana)
+- [x] Esta era a razão pela qual NÃO foram enviados relatórios no dia 20 de Fevereiro
+- [ ] Reiniciar servidor para aplicar correção
+- [ ] Guardar checkpoint

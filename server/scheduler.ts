@@ -61,7 +61,7 @@ export function setupScheduler() {
   // Relatórios mensais - dia 20 de cada mês às 09:00 Lisboa (UTC+0)
   // 09:00 Lisboa = 09:00 UTC (inverno) ou 08:00 UTC (verão)
   // Envia relatórios do volante E do Recalibra
-  cron.schedule('0 9 20 * *', async () => {
+  cron.schedule('0 0 9 20 * *', async () => {
     const agora = new Date();
     const horaLisboa = agora.toLocaleString('pt-PT', { timeZone: 'Europe/Lisbon', hour: '2-digit', minute: '2-digit' });
     console.log(`[CRON] Executando envio de relatórios mensais - Hora Lisboa: ${horaLisboa}`);
