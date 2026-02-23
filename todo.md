@@ -148,3 +148,17 @@
 - [x] Corrigir código: procurar "Loja" em col A e B, ajustar offsets dinâmicos
 - [ ] Testar upload
 - [ ] Guardar checkpoint
+
+## Adicionar Coluna NPS ao Dashboard de Resultados
+- [x] Verificar endpoints NPS existentes no backend
+- [x] Adicionar dados NPS à tabela do Dashboard de Resultados
+- [x] Mostrar NPS e Taxa de Resposta por loja/mês
+
+## Criar Dashboard NPS Dedicado
+- [x] Criar página NPSDashboard.tsx com gráficos e comparações
+- [x] Adicionar KPIs: NPS médio, melhor/pior loja, evolução mensal
+- [x] Gráfico de evolução NPS por mês (todas as lojas)
+- [x] Tabela comparativa NPS por loja com taxa de resposta
+- [x] Filtros: por gestor/zona, por período
+- [x] Adicionar rota e link no menu lateral
+- [ ] Guardar checkpoint

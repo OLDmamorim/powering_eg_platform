@@ -1,0 +1,110 @@
+{
+  "query": "SELECT nd.id, l.nome as loja, nd.ano, nd.npsJan, nd.npsFev, nd.npsAnoTotal, nd.taxaRespostaJan, nd.taxaRespostaFev FROM nps_dados nd JOIN lojas l ON nd.lojaId = l.id ORDER BY l.nome LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT nd.id, l.nome as loja, nd.ano, nd.npsJan, nd.npsFev, nd.npsAnoTotal, nd.taxaRespostaJan, nd.taxaRespostaFev FROM nps_dados nd JOIN lojas l ON nd.lojaId = l.id ORDER BY l.nome LIMIT 10;",
+  "rows": [
+    {
+      "id": "1",
+      "loja": "Abrantes",
+      "ano": "2026",
+      "npsJan": "1.0000",
+      "npsFev": "1.0000",
+      "npsAnoTotal": "1.0000",
+      "taxaRespostaJan": "0.1846",
+      "taxaRespostaFev": "0.0286"
+    },
+    {
+      "id": "2",
+      "loja": "Aeroporto porto",
+      "ano": "2026",
+      "npsJan": "NULL",
+      "npsFev": "1.0000",
+      "npsAnoTotal": "0.6667",
+      "taxaRespostaJan": "0.0076",
+      "taxaRespostaFev": "0.0377"
+    },
+    {
+      "id": "3",
+      "loja": "Águeda",
+      "ano": "2026",
+      "npsJan": "1.0000",
+      "npsFev": "0.7500",
+      "npsAnoTotal": "0.9167",
+      "taxaRespostaJan": "0.1194",
+      "taxaRespostaFev": "0.1290"
+    },
+    {
+      "id": "4",
+      "loja": "Algés",
+      "ano": "2026",
+      "npsJan": "1.0000",
+      "npsFev": "1.0000",
+      "npsAnoTotal": "1.0000",
+      "taxaRespostaJan": "0.1489",
+      "taxaRespostaFev": "0.1364"
+    },
+    {
+      "id": "5",
+      "loja": "Almada",
+      "ano": "2026",
+      "npsJan": "0.8667",
+      "npsFev": "0.7778",
+      "npsAnoTotal": "0.8333",
+      "taxaRespostaJan": "0.1471",
+      "taxaRespostaFev": "0.1343"
+    },
+    {
+      "id": "6",
+      "loja": "Amadora",
+      "ano": "2026",
+      "npsJan": "-1.0000",
+      "npsFev": "0.6667",
+      "npsAnoTotal": "0.3636",
+      "taxaRespostaJan": "0.0244",
+      "taxaRespostaFev": "0.2368"
+    },
+    {
+      "id": "7",
+      "loja": "Amoreiras",
+      "ano": "2026",
+      "npsJan": "0.7143",
+      "npsFev": "0.6667",
+      "npsAnoTotal": "0.6875",
+      "taxaRespostaJan": "0.0972",
+      "taxaRespostaFev": "0.2813"
+    },
+    {
+      "id": "8",
+      "loja": "Aveiro",
+      "ano": "2026",
+      "npsJan": "1.0000",
+      "npsFev": "0.2500",
+      "npsAnoTotal": "0.7273",
+      "taxaRespostaJan": "0.0814",
+      "taxaRespostaFev": "0.1176"
+    },
+    {
+      "id": "9",
+      "loja": "Barcelos",
+      "ano": "2026",
+      "npsJan": "1.0000",
+      "npsFev": "1.0000",
+      "npsAnoTotal": "1.0000",
+      "taxaRespostaJan": "0.0625",
+      "taxaRespostaFev": "0.2000"
+    },
+    {
+      "id": "10",
+      "loja": "Beira baixa sm",
+      "ano": "2026",
+      "npsJan": "1.0000",
+      "npsFev": "1.0000",
+      "npsAnoTotal": "1.0000",
+      "taxaRespostaJan": "0.0213",
+      "taxaRespostaFev": "0.0588"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tloja\tano\tnpsJan\tnpsFev\tnpsAnoTotal\ttaxaRespostaJan\ttaxaRespostaFev\n1\tAbrantes\t2026\t1.0000\t1.0000\t1.0000\t0.1846\t0.0286\n2\tAeroporto porto\t2026\tNULL\t1.0000\t0.6667\t0.0076\t0.0377\n3\tÁgueda\t2026\t1.0000\t0.7500\t0.9167\t0.1194\t0.1290\n4\tAlgés\t2026\t1.0000\t1.0000\t1.0000\t0.1489\t0.1364\n5\tAlmada\t2026\t0.8667\t0.7778\t0.8333\t0.1471\t0.1343\n6\tAmadora\t2026\t-1.0000\t0.6667\t0.3636\t0.0244\t0.2368\n7\tAmoreiras\t2026\t0.7143\t0.6667\t0.6875\t0.0972\t0.2813\n8\tAveiro\t2026\t1.0000\t0.2500\t0.7273\t0.0814\t0.1176\n9\tBarcelos\t2026\t1.0000\t1.0000\t1.0000\t0.0625\t0.2000\n10\tBeira baixa sm\t2026\t1.0000\t1.0000\t1.0000\t0.0213\t0.0588\n",
+  "stderr": "",
+  "execution_time_ms": 56
+}

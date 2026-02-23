@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
-import { Loader2, TrendingUp, TrendingDown, Target, Award, BarChart3, LineChart, MapPin, Download, ShoppingBag, Package } from 'lucide-react';
+import { Loader2, TrendingUp, TrendingDown, Target, Award, BarChart3, LineChart, MapPin, Download, ShoppingBag, Package, SmilePlus } from 'lucide-react';
 import { useAuth } from '../_core/hooks/useAuth';
 import { toast } from 'sonner';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
@@ -200,6 +200,56 @@ export function ResultadosDashboard() {
     { enabled: !!periodoSelecionado && !!temDadosComplementares }
   );
   
+  // Query NPS - dados de todas as lojas para o ano selecionado
+  const anoNPS = periodoSelecionado?.ano || new Date().getFullYear();
+  const { data: dadosNPS, isLoading: loadingNPS } = trpc.nps.getDadosTodasLojas.useQuery(
+    { ano: anoNPS },
+    { enabled: !!periodoSelecionado && user?.role === 'admin' }
+  );
+  
+  // Query NPS para gestores (apenas as suas lojas)
+  const lojasIdsGestor = useMemo(() => lojas?.map(l => l.id) || [], [lojas]);
+  const { data: dadosNPSGestor } = trpc.nps.getDadosLojas.useQuery(
+    { lojasIds: lojasIdsGestor, ano: anoNPS },
+    { enabled: !!periodoSelecionado && user?.role === 'gestor' && lojasIdsGestor.length > 0 }
+  );
+  
+  // Combinar dados NPS (admin vs gestor)
+  const npsData = user?.role === 'admin' ? dadosNPS : dadosNPSGestor;
+  
+  // Mapear NPS por lojaId para acesso rápido
+  const npsPorLoja = useMemo(() => {
+    const map = new Map<number, any>();
+    if (npsData) {
+      npsData.forEach((item: any) => {
+        const lojaId = item.nps?.lojaId || item.lojaId;
+        map.set(lojaId, item.nps || item);
+      });
+    }
+    return map;
+  }, [npsData]);
+  
+  // Obter NPS do mês selecionado para uma loja
+  const getNPSMes = (lojaId: number) => {
+    const nps = npsPorLoja.get(lojaId);
+    if (!nps) return null;
+    const mesKeys = ['npsJan', 'npsFev', 'npsMar', 'npsAbr', 'npsMai', 'npsJun', 'npsJul', 'npsAgo', 'npsSet', 'npsOut', 'npsNov', 'npsDez'];
+    if (!periodoSelecionado) return null;
+    const key = mesKeys[periodoSelecionado.mes - 1];
+    const val = nps[key];
+    return val !== null && val !== undefined ? parseFloat(val) : null;
+  };
+  
+  const getTaxaRespostaMes = (lojaId: number) => {
+    const nps = npsPorLoja.get(lojaId);
+    if (!nps) return null;
+    const mesKeys = ['taxaRespostaJan', 'taxaRespostaFev', 'taxaRespostaMar', 'taxaRespostaAbr', 'taxaRespostaMai', 'taxaRespostaJun', 'taxaRespostaJul', 'taxaRespostaAgo', 'taxaRespostaSet', 'taxaRespostaOut', 'taxaRespostaNov', 'taxaRespostaDez'];
+    if (!periodoSelecionado) return null;
+    const key = mesKeys[periodoSelecionado.mes - 1];
+    const val = nps[key];
+    return val !== null && val !== undefined ? parseFloat(val) : null;
+  };
+
   // Query de evolução individual
   const { data: evolucaoIndividual, isLoading: loadingEvolucaoIndividual } = trpc.resultados.evolucao.useQuery(
     { lojaId: typeof lojaSelecionada === 'number' ? lojaSelecionada : 0, mesesAtras: 6 },
@@ -897,6 +947,27 @@ export function ResultadosDashboard() {
                           <div className="text-xs text-muted-foreground">{item.totalServicos} serv.</div>
                         )}
                       </div>
+                      {/* Coluna NPS */}
+                      {npsPorLoja.size > 0 && (() => {
+                        const npsVal = getNPSMes(item.lojaId);
+                        const taxaVal = getTaxaRespostaMes(item.lojaId);
+                        return (
+                          <div className="text-right min-w-[70px] border-l pl-3">
+                            <div className={`font-bold text-sm ${
+                              npsVal !== null 
+                                ? npsVal >= 0.8 ? 'text-green-600' 
+                                  : npsVal >= 0.5 ? 'text-yellow-600' 
+                                  : 'text-red-600'
+                                : 'text-muted-foreground'
+                            }`}>
+                              {npsVal !== null ? `${(npsVal * 100).toFixed(0)}%` : '-'}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              {taxaVal !== null ? `${(taxaVal * 100).toFixed(0)}% resp.` : ''}
+                            </div>
+                          </div>
+                        );
+                      })()}
                     </div>
                   );
                 })}

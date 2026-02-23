@@ -50,6 +50,7 @@ import Volantes from "./pages/Volantes";
 import PortalGestor from "./pages/PortalGestor";
 import AnaliseFichas from "./pages/AnaliseFichas";
 import RH from "./pages/RH";
+import { NPSDashboard } from "./pages/NPSDashboard";
 import MenuInicial from "./pages/MenuInicial";
 import DashboardVolante from "./pages/DashboardVolante";
 import Documentos from "./pages/Documentos";
@@ -105,6 +106,7 @@ function Router() {
       <Route path={"/reunioes-lojas"} component={ReuniõesLojas} />
       <Route path={"/resultados-upload"} component={ResultadosUpload} />
       <Route path={"/nps-upload"} component={NPSUpload} />
+      <Route path={"/nps-dashboard"} component={NPSDashboard} />
       <Route path={"/resultados-dashboard"} component={ResultadosDashboard} />
       <Route path={"/comparacao-lojas"} component={ComparacaoLojas} />
       <Route path={"/relatorio-ia-resultados"} component={RelatorioIAResultados} />
