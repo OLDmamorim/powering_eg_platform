@@ -133,3 +133,8 @@
 - [x] Modificar query para usar tabela gestorLojas para obter lojaGestorId
 - [x] Testar filtro - Fabio Dias mostra 31 colaboradores correctamente (3 volantes + 28 lojas) ✅
 - [ ] Guardar checkpoint
+
+## BUG: Menu lateral mostra "menu.items.uploadNPS" em vez do nome correcto
+- [x] Localizar chave de tradução em falta - faltava em pt.json e en.json
+- [x] Corrigir para mostrar "Upload NPS" em PT e EN
+- [ ] Guardar checkpoint
