@@ -138,3 +138,7 @@
 - [x] Localizar chave de tradução em falta - faltava em pt.json e en.json
 - [x] Corrigir para mostrar "Upload NPS" em PT e EN
 - [ ] Guardar checkpoint
+
+## Alterar ícone do Upload NPS
+- [x] Mudar ícone de TrendingUp para SmilePlus (ícone de sorriso/satisfação, adequado para NPS)
+- [ ] Guardar checkpoint
