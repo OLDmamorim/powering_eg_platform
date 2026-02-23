@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import FiltroMesesCheckbox, { type MesSelecionado, mesesParaDatas, gerarLabelMeses } from '../components/FiltroMesesCheckbox';
 import { Button } from '../components/ui/button';
-import { Loader2, TrendingUp, TrendingDown, Target, Award, BarChart3, Sparkles, FileText, Trophy, Store, ArrowUpRight, ArrowDownRight, Globe, MapPin, User, Filter, AlertTriangle, CheckCircle2, XCircle, Percent, Activity, PieChart, X, Wrench, ShoppingBag, Zap, AlertCircle, ChevronDown, ChevronUp, Building2, Lightbulb, TrendingUpIcon, Calendar } from 'lucide-react';
+import { Loader2, TrendingUp, TrendingDown, Target, Award, BarChart3, Sparkles, FileText, Trophy, Store, ArrowUpRight, ArrowDownRight, Globe, MapPin, User, Filter, AlertTriangle, CheckCircle2, XCircle, Percent, Activity, PieChart, X, Wrench, ShoppingBag, Zap, AlertCircle, ChevronDown, ChevronUp, Building2, Lightbulb, TrendingUpIcon, Calendar, Star } from 'lucide-react';
 import { useAuth } from '../_core/hooks/useAuth';
 import { toast } from 'sonner';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement } from 'chart.js';
@@ -1698,6 +1698,17 @@ export function RelatorioIAResultados() {
                       </div>
                     )}
                     
+                    {/* Análise NPS */}
+                    {(analiseIA as any).insightsIA?.analiseNPS && (analiseIA as any).insightsIA.analiseNPS !== 'Sem dados NPS disponíveis para este período.' && (
+                      <div className="p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg border-l-4 border-indigo-500">
+                        <h4 className="font-medium mb-2 flex items-center gap-2 text-indigo-700 dark:text-indigo-400">
+                          <Star className="h-4 w-4" />
+                          Análise NPS - Elegibilidade para Prémio
+                        </h4>
+                        <p className="text-sm leading-relaxed">{(analiseIA as any).insightsIA.analiseNPS}</p>
+                      </div>
+                    )}
+                    
                     {/* Alertas Críticos */}
                     {(analiseIA as any).insightsIA.alertasCriticos && (analiseIA as any).insightsIA.alertasCriticos.length > 0 && (
                       <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border-l-4 border-red-500">
@@ -1879,6 +1890,97 @@ export function RelatorioIAResultados() {
                       </Card>
                     )}
                   </div>
+
+                  {/* Secção NPS - Elegibilidade para Prémio */}
+                  {(analiseIA as any).dadosNPS && (
+                    <Card className="mt-4 border-indigo-200 dark:border-indigo-800">
+                      <CardHeader className="pb-3 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20">
+                        <CardTitle className="text-base flex items-center gap-2 text-indigo-700 dark:text-indigo-400">
+                          <Star className="h-5 w-5" />
+                          Ranking NPS - Elegibilidade para Prémio
+                        </CardTitle>
+                        <CardDescription>
+                          NPS &ge; 80% e Taxa de Resposta &ge; 7,5% para ter direito a prémio
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="pt-4">
+                        {/* KPIs NPS */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                          <div className="p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg text-center">
+                            <p className="text-2xl font-bold text-indigo-600">{(analiseIA as any).dadosNPS.npsGlobal}%</p>
+                            <p className="text-xs text-muted-foreground">NPS Médio</p>
+                          </div>
+                          <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center">
+                            <p className="text-2xl font-bold text-blue-600">{(analiseIA as any).dadosNPS.taxaRespostaGlobal}%</p>
+                            <p className="text-xs text-muted-foreground">Taxa Resposta</p>
+                          </div>
+                          <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
+                            <p className="text-2xl font-bold text-green-600">{(analiseIA as any).dadosNPS.lojasElegiveis}</p>
+                            <p className="text-xs text-muted-foreground">Elegíveis</p>
+                          </div>
+                          <div className="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg text-center">
+                            <p className="text-2xl font-bold text-red-600">{(analiseIA as any).dadosNPS.lojasNaoElegiveis}</p>
+                            <p className="text-xs text-muted-foreground">Sem Prémio</p>
+                          </div>
+                        </div>
+                        
+                        {/* Tabela Ranking NPS */}
+                        {(analiseIA as any).dadosNPS.rankingNPS && (analiseIA as any).dadosNPS.rankingNPS.length > 0 && (
+                          <div className="max-h-[400px] overflow-y-auto">
+                            <Table>
+                              <TableHeader>
+                                <TableRow>
+                                  <TableHead className="w-10">#</TableHead>
+                                  <TableHead>Loja</TableHead>
+                                  <TableHead className="text-center">NPS</TableHead>
+                                  <TableHead className="text-center">Taxa Resp.</TableHead>
+                                  <TableHead className="text-center">Prémio</TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                {(analiseIA as any).dadosNPS.rankingNPS.map((loja: any, idx: number) => (
+                                  <TableRow key={idx} className={!loja.elegivel ? 'bg-red-50/50 dark:bg-red-900/10' : ''}>
+                                    <TableCell className="font-medium">{idx + 1}</TableCell>
+                                    <TableCell className="font-medium">{loja.loja}</TableCell>
+                                    <TableCell className="text-center">
+                                      <Badge variant={loja.nps >= 80 ? 'default' : 'destructive'} className="text-xs">
+                                        {loja.nps}%
+                                      </Badge>
+                                    </TableCell>
+                                    <TableCell className="text-center">
+                                      <Badge variant={loja.taxaResposta >= 7.5 ? 'outline' : 'destructive'} className="text-xs">
+                                        {loja.taxaResposta}%
+                                      </Badge>
+                                    </TableCell>
+                                    <TableCell className="text-center">
+                                      {loja.elegivel ? (
+                                        <span className="text-green-600 flex items-center justify-center gap-1">
+                                          <CheckCircle2 className="h-4 w-4" />
+                                          <span className="text-xs">Elegível</span>
+                                        </span>
+                                      ) : (
+                                        <span className="text-red-600 flex items-center justify-center gap-1">
+                                          <XCircle className="h-4 w-4" />
+                                          <span className="text-xs">{loja.motivo}</span>
+                                        </span>
+                                      )}
+                                    </TableCell>
+                                  </TableRow>
+                                ))}
+                              </TableBody>
+                            </Table>
+                          </div>
+                        )}
+                        
+                        {/* Legenda */}
+                        <div className="mt-3 flex flex-wrap gap-4 text-xs text-muted-foreground">
+                          <span className="flex items-center gap-1"><CheckCircle2 className="h-3 w-3 text-green-500" /> NPS &ge; 80% e Taxa &ge; 7,5%</span>
+                          <span className="flex items-center gap-1"><XCircle className="h-3 w-3 text-red-500" /> NPS &lt; 80%: {(analiseIA as any).dadosNPS.motivosInelegibilidade?.npsBaixo || 0} lojas</span>
+                          <span className="flex items-center gap-1"><XCircle className="h-3 w-3 text-orange-500" /> Taxa &lt; 7,5%: {(analiseIA as any).dadosNPS.motivosInelegibilidade?.taxaBaixa || 0} lojas</span>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
 
                   {/* Recomendações Estratégicas da IA */}
                   {(analiseIA as any).insightsIA?.recomendacoesEstrategicas && (analiseIA as any).insightsIA.recomendacoesEstrategicas.length > 0 && (

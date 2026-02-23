@@ -195,4 +195,14 @@
 - [x] Garantir acesso NPS para gestores (apenas suas lojas) e lojas (apenas a própria + ranking)
 - [x] Adicionar 4 sugestões de perguntas NPS ao chatbot
 - [x] Testar consultas NPS via Chatbot - 26 lojas elegíveis identificadas correctamente
-- [ ] Guardar checkpoint
+- [x] Guardar checkpoint
+
+## Incluir NPS no Relatório IA de Resultados
+- [x] Analisar aiService.ts para identificar onde inserir dados NPS
+- [x] Carregar dados NPS no contexto enviado à IA (gerarRelatorioResultadosComIA e versão MultiplosMeses)
+- [x] Actualizar prompt da IA para incluir análise NPS e elegibilidade por loja
+- [x] Adicionar campo analiseNPS ao JSON schema da resposta IA
+- [x] Incluir secção NPS nos Insights IA (Análise NPS - Elegibilidade para Prémio)
+- [x] Incluir secção NPS dedicada com KPIs + tabela ranking (elegíveis/não elegíveis)
+- [x] Testar geração de relatório IA com NPS - 28 elegíveis, 31 sem prémio
+- [x] Guardar checkpoint

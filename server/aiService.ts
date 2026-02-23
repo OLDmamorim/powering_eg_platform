@@ -129,8 +129,28 @@ interface AnaliseIA {
     analisePerformance: string;
     analiseVendasComplementares: string;
     analiseTendencias: string;
+    analiseNPS?: string;
     recomendacoesEstrategicas: string[];
     alertasCriticos: string[];
+  };
+  // Dados NPS para o relatório
+  dadosNPS?: {
+    npsGlobal: number;
+    taxaRespostaGlobal: number;
+    totalLojas: number;
+    lojasElegiveis: number;
+    lojasNaoElegiveis: number;
+    motivosInelegibilidade: {
+      npsBaixo: number;
+      taxaBaixa: number;
+    };
+    rankingNPS: Array<{
+      loja: string;
+      nps: number;
+      taxaResposta: number;
+      elegivel: boolean;
+      motivo?: string;
+    }>;
   };
   // Novos campos para relatórios detalhados
   relatoriosPorLoja?: Array<{
@@ -658,11 +678,152 @@ ${pontosNegativosRelatados.length > 0 ? pontosNegativosRelatados.join('\n') : 'N
     }
   }
 
+  // ========== BUSCAR DADOS NPS ==========
+  let dadosNPSTexto = '';
+  let dadosNPSFormatados: any = undefined;
+  
+  try {
+    const mesesNomes = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+    const camposNPS = ['npsJan', 'npsFev', 'npsMar', 'npsAbr', 'npsMai', 'npsJun', 'npsJul', 'npsAgo', 'npsSet', 'npsOut', 'npsNov', 'npsDez'];
+    const camposTaxa = ['taxaRespostaJan', 'taxaRespostaFev', 'taxaRespostaMar', 'taxaRespostaAbr', 'taxaRespostaMai', 'taxaRespostaJun', 'taxaRespostaJul', 'taxaRespostaAgo', 'taxaRespostaSet', 'taxaRespostaOut', 'taxaRespostaNov', 'taxaRespostaDez'];
+    
+    // Buscar dados NPS para os anos dos meses selecionados
+    const anosUnicos = [...new Set(mesesParaBuscar.map(m => m.ano))];
+    let todosNPS: any[] = [];
+    for (const ano of anosUnicos) {
+      const npsAno = await db.getNPSDadosTodasLojas(ano);
+      todosNPS = todosNPS.concat(npsAno.map((n: any) => ({ ...n, anoConsulta: ano })));
+    }
+    
+    // Filtrar por lojas se necessário
+    if (lojasIds && lojasIds.length > 0) {
+      todosNPS = todosNPS.filter((n: any) => lojasIds.includes(n.nps.lojaId));
+    }
+    
+    if (todosNPS.length > 0) {
+      // Calcular NPS por loja para os meses selecionados
+      const npsRanking: Array<{ loja: string; nps: number; taxaResposta: number; elegivel: boolean; motivo?: string }> = [];
+      let somaNPS = 0;
+      let somaTaxaResp = 0;
+      let contNPS = 0;
+      
+      for (const item of todosNPS) {
+        const lojaNome = item.loja?.nome || 'Desconhecida';
+        let npsTotal = 0;
+        let taxaTotal = 0;
+        let mesesComDados = 0;
+        
+        for (const { mes, ano } of mesesParaBuscar) {
+          if (item.anoConsulta !== ano) continue;
+          const idx = mes - 1;
+          const npsVal = item.nps[camposNPS[idx]];
+          const taxaVal = item.nps[camposTaxa[idx]];
+          
+          if (npsVal !== null && npsVal !== undefined) {
+            npsTotal += parseFloat(npsVal);
+            taxaTotal += taxaVal ? parseFloat(taxaVal) : 0;
+            mesesComDados++;
+          }
+        }
+        
+        if (mesesComDados > 0) {
+          const npsMedia = (npsTotal / mesesComDados) * 100;
+          const taxaMedia = (taxaTotal / mesesComDados) * 100;
+          const elegivel = npsMedia >= 80 && taxaMedia >= 7.5;
+          let motivo = '';
+          if (!elegivel) {
+            if (npsMedia < 80 && taxaMedia < 7.5) motivo = 'NPS < 80% e Taxa < 7.5%';
+            else if (npsMedia < 80) motivo = 'NPS < 80%';
+            else motivo = 'Taxa de Resposta < 7.5%';
+          }
+          
+          npsRanking.push({
+            loja: lojaNome,
+            nps: parseFloat(npsMedia.toFixed(1)),
+            taxaResposta: parseFloat(taxaMedia.toFixed(1)),
+            elegivel,
+            motivo: motivo || undefined,
+          });
+          
+          somaNPS += npsMedia;
+          somaTaxaResp += taxaMedia;
+          contNPS++;
+        }
+      }
+      
+      // Ordenar por NPS descendente
+      npsRanking.sort((a, b) => b.nps - a.nps);
+      
+      const npsGlobal = contNPS > 0 ? somaNPS / contNPS : 0;
+      const taxaRespostaGlobal = contNPS > 0 ? somaTaxaResp / contNPS : 0;
+      const lojasElegiveis = npsRanking.filter(l => l.elegivel).length;
+      const lojasNaoElegiveis = npsRanking.filter(l => !l.elegivel).length;
+      const npsBaixo = npsRanking.filter(l => l.nps < 80).length;
+      const taxaBaixa = npsRanking.filter(l => l.taxaResposta < 7.5).length;
+      
+      dadosNPSFormatados = {
+        npsGlobal: parseFloat(npsGlobal.toFixed(1)),
+        taxaRespostaGlobal: parseFloat(taxaRespostaGlobal.toFixed(1)),
+        totalLojas: contNPS,
+        lojasElegiveis,
+        lojasNaoElegiveis,
+        motivosInelegibilidade: { npsBaixo, taxaBaixa },
+        rankingNPS: npsRanking,
+      };
+      
+      // Preparar texto NPS para o prompt da IA
+      dadosNPSTexto = `
+═══ ANÁLISE NPS (NET PROMOTER SCORE) ═══
+• NPS Médio da Rede: ${npsGlobal.toFixed(1)}%
+• Taxa de Resposta Média: ${taxaRespostaGlobal.toFixed(1)}%
+• Total Lojas com Dados NPS: ${contNPS}
+• Lojas Elegíveis para Prémio: ${lojasElegiveis} (${contNPS > 0 ? ((lojasElegiveis / contNPS) * 100).toFixed(1) : 0}%)
+• Lojas SEM Direito a Prémio: ${lojasNaoElegiveis}
+  - Por NPS < 80%: ${npsBaixo} lojas
+  - Por Taxa de Resposta < 7.5%: ${taxaBaixa} lojas
+
+REGRAS DE ELEGIBILIDADE PARA PRÉMIO NPS:
+- NPS >= 80% E Taxa de Resposta >= 7.5% = Elegível
+- NPS < 80% OU Taxa de Resposta < 7.5% = SEM direito a prémio
+
+═══ TOP 10 - MELHOR NPS ═══
+`;
+      npsRanking.slice(0, 10).forEach((l, i) => {
+        dadosNPSTexto += `${i + 1}. ${l.loja} - NPS: ${l.nps}% | Taxa Resp: ${l.taxaResposta}% | ${l.elegivel ? '✅ Elegível' : `❌ ${l.motivo}`}
+`;
+      });
+      
+      const pioresNPS = [...npsRanking].sort((a, b) => a.nps - b.nps).slice(0, 10);
+      dadosNPSTexto += `
+═══ BOTTOM 10 - PIOR NPS ═══
+`;
+      pioresNPS.forEach((l, i) => {
+        dadosNPSTexto += `${i + 1}. ${l.loja} - NPS: ${l.nps}% | Taxa Resp: ${l.taxaResposta}% | ${l.elegivel ? '✅ Elegível' : `❌ ${l.motivo}`}
+`;
+      });
+      
+      // Lojas não elegíveis
+      const naoElegiveis = npsRanking.filter(l => !l.elegivel);
+      if (naoElegiveis.length > 0) {
+        dadosNPSTexto += `
+═══ LOJAS SEM DIREITO A PRÉMIO NPS (${naoElegiveis.length}) ═══
+`;
+        naoElegiveis.forEach((l, i) => {
+          dadosNPSTexto += `${i + 1}. ${l.loja} - NPS: ${l.nps}% | Taxa: ${l.taxaResposta}% | Motivo: ${l.motivo}
+`;
+        });
+      }
+    }
+  } catch (error) {
+    console.log('[RelatoriosIA] Erro ao buscar dados NPS:', error);
+  }
+
   // ========== PROMPT MELHORADO PARA IA ==========
   const prompt = `És um ANALISTA DE DADOS SÉNIOR especializado em performance de redes de retalho automóvel. 
 Analisa os dados quantitativos da rede Express Glass para o período ${periodo}.
 
 ${dadosAvancadosTexto}
+${dadosNPSTexto}
 
 CONTEXTO ADICIONAL DOS RELATÓRIOS DE SUPERVISÃO:
 ${relatoriosTexto ? relatoriosTexto.substring(0, 1500) : 'Sem relatórios de supervisão disponíveis.'}
@@ -695,6 +856,14 @@ Produz uma ANÁLISE EXECUTIVA PROFISSIONAL com os seguintes componentes:
    - Lojas em crescimento vs decréscimo
    - Padrões de sazonalidade
    - Evolução da rede como um todo
+
+4.5. ANÁLISE NPS (analiseNPS) - SE HOUVER DADOS NPS DISPONÍVEIS:
+   - NPS médio da rede e taxa de resposta
+   - Lojas elegíveis vs não elegíveis para prémio
+   - Identificar lojas com NPS crítico (< 80%) e baixa taxa de resposta (< 7.5%)
+   - Impacto do NPS no comissionamento das lojas
+   - Recomendar ações para melhorar NPS nas lojas não elegíveis
+   - Se não houver dados NPS, escrever "Sem dados NPS disponíveis para este período."
 
 5. RECOMENDAÇÕES ESTRATÉGICAS (recomendacoesEstrategicas):
    - 5-7 ações concretas e específicas
@@ -737,6 +906,7 @@ Responde em formato JSON:
     "analisePerformance": "Análise detalhada de performance",
     "analiseVendasComplementares": "Análise de vendas complementares",
     "analiseTendencias": "Análise de tendências",
+    "analiseNPS": "Análise NPS com elegibilidade para prémio",
     "recomendacoesEstrategicas": ["recomendação estratégica 1", ...],
     "alertasCriticos": ["alerta 1", ...]
   }
@@ -811,10 +981,11 @@ Respondes sempre em português europeu e em formato JSON válido.`,
                   analisePerformance: { type: "string" },
                   analiseVendasComplementares: { type: "string" },
                   analiseTendencias: { type: "string" },
+                  analiseNPS: { type: "string" },
                   recomendacoesEstrategicas: { type: "array", items: { type: "string" } },
                   alertasCriticos: { type: "array", items: { type: "string" } },
                 },
-                required: ["resumoExecutivo", "analisePerformance", "analiseVendasComplementares", "analiseTendencias", "recomendacoesEstrategicas", "alertasCriticos"],
+                required: ["resumoExecutivo", "analisePerformance", "analiseVendasComplementares", "analiseTendencias", "analiseNPS", "recomendacoesEstrategicas", "alertasCriticos"],
                 additionalProperties: false,
               },
             },
@@ -943,6 +1114,7 @@ Respondes sempre em português europeu e em formato JSON válido.`,
       analiseZonasDetalhada: dadosAvancados?.analiseZonas || [],
       estatisticasComplementares: dadosAvancados?.estatisticasComplementares || undefined,
       insightsIA: analise.insightsIA,
+      dadosNPS: dadosNPSFormatados,
     };
   } catch (error) {
     console.error("Erro ao gerar análise com IA:", error);
@@ -1535,11 +1707,130 @@ ${resumoRelatoriosPorLoja}
     }
   }
 
+  // ========== BUSCAR DADOS NPS (MÚLTIPLOS MESES) ==========
+  let dadosNPSTexto = '';
+  let dadosNPSFormatados: any = undefined;
+  
+  try {
+    const camposNPS = ['npsJan', 'npsFev', 'npsMar', 'npsAbr', 'npsMai', 'npsJun', 'npsJul', 'npsAgo', 'npsSet', 'npsOut', 'npsNov', 'npsDez'];
+    const camposTaxa = ['taxaRespostaJan', 'taxaRespostaFev', 'taxaRespostaMar', 'taxaRespostaAbr', 'taxaRespostaMai', 'taxaRespostaJun', 'taxaRespostaJul', 'taxaRespostaAgo', 'taxaRespostaSet', 'taxaRespostaOut', 'taxaRespostaNov', 'taxaRespostaDez'];
+    
+    const anosUnicos = [...new Set(mesesSelecionados.map(m => m.ano))];
+    let todosNPS: any[] = [];
+    for (const ano of anosUnicos) {
+      const npsAno = await db.getNPSDadosTodasLojas(ano);
+      todosNPS = todosNPS.concat(npsAno.map((n: any) => ({ ...n, anoConsulta: ano })));
+    }
+    
+    if (lojasIds && lojasIds.length > 0) {
+      todosNPS = todosNPS.filter((n: any) => lojasIds.includes(n.nps.lojaId));
+    }
+    
+    if (todosNPS.length > 0) {
+      const npsRanking: Array<{ loja: string; nps: number; taxaResposta: number; elegivel: boolean; motivo?: string }> = [];
+      let somaNPS = 0;
+      let somaTaxaResp = 0;
+      let contNPS = 0;
+      
+      for (const item of todosNPS) {
+        const lojaNome = item.loja?.nome || 'Desconhecida';
+        let npsTotal = 0;
+        let taxaTotal = 0;
+        let mesesComDados = 0;
+        
+        for (const { mes, ano } of mesesSelecionados) {
+          if (item.anoConsulta !== ano) continue;
+          const idx = mes - 1;
+          const npsVal = item.nps[camposNPS[idx]];
+          const taxaVal = item.nps[camposTaxa[idx]];
+          
+          if (npsVal !== null && npsVal !== undefined) {
+            npsTotal += parseFloat(npsVal);
+            taxaTotal += taxaVal ? parseFloat(taxaVal) : 0;
+            mesesComDados++;
+          }
+        }
+        
+        if (mesesComDados > 0) {
+          const npsMedia = (npsTotal / mesesComDados) * 100;
+          const taxaMedia = (taxaTotal / mesesComDados) * 100;
+          const elegivel = npsMedia >= 80 && taxaMedia >= 7.5;
+          let motivo = '';
+          if (!elegivel) {
+            if (npsMedia < 80 && taxaMedia < 7.5) motivo = 'NPS < 80% e Taxa < 7.5%';
+            else if (npsMedia < 80) motivo = 'NPS < 80%';
+            else motivo = 'Taxa de Resposta < 7.5%';
+          }
+          
+          npsRanking.push({
+            loja: lojaNome,
+            nps: parseFloat(npsMedia.toFixed(1)),
+            taxaResposta: parseFloat(taxaMedia.toFixed(1)),
+            elegivel,
+            motivo: motivo || undefined,
+          });
+          
+          somaNPS += npsMedia;
+          somaTaxaResp += taxaMedia;
+          contNPS++;
+        }
+      }
+      
+      npsRanking.sort((a, b) => b.nps - a.nps);
+      
+      const npsGlobal = contNPS > 0 ? somaNPS / contNPS : 0;
+      const taxaRespostaGlobal = contNPS > 0 ? somaTaxaResp / contNPS : 0;
+      const lojasElegiveis = npsRanking.filter(l => l.elegivel).length;
+      const lojasNaoElegiveis = npsRanking.filter(l => !l.elegivel).length;
+      const npsBaixo = npsRanking.filter(l => l.nps < 80).length;
+      const taxaBaixa = npsRanking.filter(l => l.taxaResposta < 7.5).length;
+      
+      dadosNPSFormatados = {
+        npsGlobal: parseFloat(npsGlobal.toFixed(1)),
+        taxaRespostaGlobal: parseFloat(taxaRespostaGlobal.toFixed(1)),
+        totalLojas: contNPS,
+        lojasElegiveis,
+        lojasNaoElegiveis,
+        motivosInelegibilidade: { npsBaixo, taxaBaixa },
+        rankingNPS: npsRanking,
+      };
+      
+      dadosNPSTexto = `
+\u2550\u2550\u2550 AN\u00c1LISE NPS (NET PROMOTER SCORE) \u2550\u2550\u2550
+\u2022 NPS M\u00e9dio da Rede: ${npsGlobal.toFixed(1)}%
+\u2022 Taxa de Resposta M\u00e9dia: ${taxaRespostaGlobal.toFixed(1)}%
+\u2022 Total Lojas com Dados NPS: ${contNPS}
+\u2022 Lojas Eleg\u00edveis para Pr\u00e9mio: ${lojasElegiveis} (${contNPS > 0 ? ((lojasElegiveis / contNPS) * 100).toFixed(1) : 0}%)
+\u2022 Lojas SEM Direito a Pr\u00e9mio: ${lojasNaoElegiveis}
+  - Por NPS < 80%: ${npsBaixo} lojas
+  - Por Taxa de Resposta < 7.5%: ${taxaBaixa} lojas
+
+REGRAS DE ELEGIBILIDADE PARA PR\u00c9MIO NPS:
+- NPS >= 80% E Taxa de Resposta >= 7.5% = Eleg\u00edvel
+- NPS < 80% OU Taxa de Resposta < 7.5% = SEM direito a pr\u00e9mio
+
+\u2550\u2550\u2550 TOP 10 - MELHOR NPS \u2550\u2550\u2550
+`;
+      npsRanking.slice(0, 10).forEach((l, i) => {
+        dadosNPSTexto += `${i + 1}. ${l.loja} - NPS: ${l.nps}% | Taxa Resp: ${l.taxaResposta}% | ${l.elegivel ? '\u2705 Eleg\u00edvel' : `\u274c ${l.motivo}`}\n`;
+      });
+      
+      const pioresNPS = [...npsRanking].sort((a, b) => a.nps - b.nps).slice(0, 10);
+      dadosNPSTexto += `\n\u2550\u2550\u2550 BOTTOM 10 - PIOR NPS \u2550\u2550\u2550\n`;
+      pioresNPS.forEach((l, i) => {
+        dadosNPSTexto += `${i + 1}. ${l.loja} - NPS: ${l.nps}% | Taxa Resp: ${l.taxaResposta}% | ${l.elegivel ? '\u2705 Eleg\u00edvel' : `\u274c ${l.motivo}`}\n`;
+      });
+    }
+  } catch (error) {
+    console.log('[RelatoriosIA] Erro ao buscar dados NPS (m\u00faltiplos meses):', error);
+  }
+
   // ========== PROMPT PARA IA ==========
-  const prompt = `És um ANALISTA DE DADOS SÉNIOR especializado em supervisão de redes de retalho automóvel.
-Analisa os dados de supervisão da rede Express Glass para o período: ${labelMeses}.
+  const prompt = `\u00c9s um ANALISTA DE DADOS S\u00c9NIOR especializado em supervis\u00e3o de redes de retalho autom\u00f3vel.
+Analisa os dados de supervis\u00e3o da rede Express Glass para o per\u00edodo: ${labelMeses}.
 
 ${dadosAvancadosTexto}
+${dadosNPSTexto}
 
 CONTEÚDO DOS RELATÓRIOS DE SUPERVISÃO:
 ${relatoriosTexto || 'Sem relatórios de supervisão disponíveis neste período.'}
@@ -1557,9 +1848,10 @@ Produz uma ANÁLISE EXECUTIVA PROFISSIONAL baseada nos relatórios de supervisã
 3. PONTOS NEGATIVOS: Problemas ou áreas de melhoria identificados (mínimo 3)
 4. ANÁLISE DOS PONTOS DESTACADOS: Análise dos pontos positivos e negativos reportados pelos gestores
 5. TENDÊNCIAS: Padrões observados nos relatórios
-6. SUGESTÕES: Recomendações práticas baseadas na análise (mínimo 5)
-7. LOJAS EM DESTAQUE: Lojas com bom desempenho
-8. LOJAS QUE PRECISAM ATENÇÃO: Lojas que necessitam de acompanhamento
+6. ANÁLISE NPS: Se houver dados NPS, analisar elegibilidade para prémio, lojas críticas, impacto no comissionamento. Se não houver, escrever "Sem dados NPS disponíveis."
+7. SUGESTÕES: Recomendações práticas baseadas na análise (mínimo 5)
+8. LOJAS EM DESTAQUE: Lojas com bom desempenho
+9. LOJAS QUE PRECISAM ATENÇÃO: Lojas que necessitam de acompanhamento
 
 Responde em formato JSON válido.`;
 
@@ -1620,10 +1912,11 @@ Respondes sempre em português europeu e em formato JSON válido.`,
                   analisePerformance: { type: "string" },
                   analiseVendasComplementares: { type: "string" },
                   analiseTendencias: { type: "string" },
+                  analiseNPS: { type: "string" },
                   recomendacoesEstrategicas: { type: "array", items: { type: "string" } },
                   alertasCriticos: { type: "array", items: { type: "string" } },
                 },
-                required: ["resumoExecutivo", "analisePerformance", "analiseVendasComplementares", "analiseTendencias", "recomendacoesEstrategicas", "alertasCriticos"],
+                required: ["resumoExecutivo", "analisePerformance", "analiseVendasComplementares", "analiseTendencias", "analiseNPS", "recomendacoesEstrategicas", "alertasCriticos"],
                 additionalProperties: false,
               },
             },
@@ -1775,6 +2068,7 @@ Respondes sempre em português europeu e em formato JSON válido.`,
       analiseZonasDetalhada: dadosAvancados?.analiseZonas || [],
       estatisticasComplementares: dadosAvancados?.estatisticasComplementares || undefined,
       insightsIA: analise.insightsIA,
+      dadosNPS: dadosNPSFormatados,
       relatoriosPorLoja,
       resumoConteudoRelatorios: `Período: ${labelMeses}. Total de ${todosRelatorios.length} relatórios analisados (${relatoriosLivres.length} livres, ${relatoriosCompletos.length} completos) de ${relatoriosPorLoja.length} lojas.`,
       relatorios: {
