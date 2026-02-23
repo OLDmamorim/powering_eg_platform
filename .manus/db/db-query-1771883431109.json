@@ -1,0 +1,25 @@
+{
+  "query": "SELECT id, periodo, SUBSTRING(conteudo, LOCATE('lojaMenos', conteudo) - 5, 200) as menos_visitada_json FROM relatorios_ia ORDER BY id DESC LIMIT 3",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT id, periodo, SUBSTRING(conteudo, LOCATE('lojaMenos', conteudo) - 5, 200) as menos_visitada_json FROM relatorios_ia ORDER BY id DESC LIMIT 3",
+  "rows": [
+    {
+      "id": "1830003",
+      "periodo": "meses_2/2026",
+      "menos_visitada_json": "to.\"}"
+    },
+    {
+      "id": "1830002",
+      "periodo": "meses_2/2026",
+      "menos_visitada_json": "ss.\"}"
+    },
+    {
+      "id": "1830001",
+      "periodo": "meses_1/2026, 2/2026",
+      "menos_visitada_json": "ss.\"}"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tperiodo\tmenos_visitada_json\n1830003\tmeses_2/2026\tto.\"}\n1830002\tmeses_2/2026\tss.\"}\n1830001\tmeses_1/2026, 2/2026\tss.\"}\n",
+  "stderr": "",
+  "execution_time_ms": 62
+}

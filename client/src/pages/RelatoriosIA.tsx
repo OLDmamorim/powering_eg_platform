@@ -480,29 +480,22 @@ export default function RelatoriosIA() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {analise.lojaMaisVisitada ? (
-                    <div>
-                      <p className="text-2xl font-bold">
-                        {analise.lojaMaisVisitada.nome}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {analise.lojaMaisVisitada.visitas} visitas
-                      </p>
-                    </div>
-                  ) : analise.relatorios?.lojasVisitadas?.length > 0 ? (
-                    <div>
-                      <p className="text-2xl font-bold">
-                        {analise.relatorios.lojasVisitadas[0]}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {analise.relatorios.lojasVisitadas.length} lojas visitadas no total
-                      </p>
-                    </div>
-                  ) : (
-                    <p className="text-muted-foreground">
-                      Sem dados suficientes
-                    </p>
-                  )}
+                  {(() => {
+                    // Tentar obter de lojaMaisVisitada directo, ou calcular de visitasPorLoja
+                    const mais = analise.lojaMaisVisitada 
+                      || (analise.relatorios?.visitasPorLoja?.length > 0 
+                        ? { nome: analise.relatorios.visitasPorLoja[0].loja, visitas: analise.relatorios.visitasPorLoja[0].visitas }
+                        : null);
+                    if (mais) {
+                      return (
+                        <div>
+                          <p className="text-2xl font-bold">{mais.nome}</p>
+                          <p className="text-sm text-muted-foreground">{mais.visitas} visitas</p>
+                        </div>
+                      );
+                    }
+                    return <p className="text-muted-foreground">Sem dados suficientes</p>;
+                  })()}
                 </CardContent>
               </Card>
 
@@ -514,29 +507,23 @@ export default function RelatoriosIA() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {analise.lojaMenosVisitada ? (
-                    <div>
-                      <p className="text-2xl font-bold">
-                        {analise.lojaMenosVisitada.nome}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {analise.lojaMenosVisitada.visitas} visitas
-                      </p>
-                    </div>
-                  ) : analise.relatorios?.totalLivres !== undefined ? (
-                    <div>
-                      <p className="text-2xl font-bold">
-                        {analise.relatorios.totalLivres + analise.relatorios.totalCompletos}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        Relatórios ({analise.relatorios.totalLivres} livres, {analise.relatorios.totalCompletos} completos)
-                      </p>
-                    </div>
-                  ) : (
-                    <p className="text-muted-foreground">
-                      Sem dados suficientes
-                    </p>
-                  )}
+                  {(() => {
+                    // Tentar obter de lojaMenosVisitada directo, ou calcular de visitasPorLoja
+                    const visitasPorLoja = analise.relatorios?.visitasPorLoja;
+                    const menos = analise.lojaMenosVisitada 
+                      || (visitasPorLoja?.length > 0 
+                        ? { nome: visitasPorLoja[visitasPorLoja.length - 1].loja, visitas: visitasPorLoja[visitasPorLoja.length - 1].visitas }
+                        : null);
+                    if (menos) {
+                      return (
+                        <div>
+                          <p className="text-2xl font-bold">{menos.nome}</p>
+                          <p className="text-sm text-muted-foreground">{menos.visitas} visitas</p>
+                        </div>
+                      );
+                    }
+                    return <p className="text-muted-foreground">Sem dados suficientes</p>;
+                  })()}
                 </CardContent>
               </Card>
             </div>

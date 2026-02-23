@@ -1,0 +1,15 @@
+{
+  "query": "SELECT id, periodo, SUBSTRING(conteudo, 1, 1000) as json_start FROM relatorios_ia ORDER BY createdAt DESC LIMIT 1",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT id, periodo, SUBSTRING(conteudo, 1, 1000) as json_start FROM relatorios_ia ORDER BY createdAt DESC LIMIT 1",
+  "rows": [
+    {
+      "id": "1830003",
+      "periodo": "meses_2/2026",
+      "json_start": "{\"filtroAplicado\":\"Minhas Lojas\",\"tipoRelatorio\":\"gestor\",\"resumoGeral\":\"No período de meses_2/2026, o gestor demonstrou um bom nível de atividade em termos de contacto com as lojas, visitando ou contactando doze unidades. Foram submetidos 27 Relatórios Livres e 1 Relatório Completo, indicando um acompanhamento regular das operações. Contudo, não foram registadas reuniões de lojas neste período.\",\"pontosDestacados\":{\"positivos\":[{\"loja\":\"Paços de Ferreira \",\"descricao\":\"Organizado, limpo, tanto a parte técnica como administrativo. \",\"data\":\"02/02/2026\"}],\"negativos\":[{\"loja\":\"Paços de Ferreira \",\"descricao\":\"Continua pendente a instalação do novo portão. \",\"data\":\"02/02/2026\"}],\"analise\":\"A loja de Paços de Ferreira destaca-se positivamente pela sua organização e limpeza, tanto na área técnica como administrativa, o que é um excelente exemplo a replicar. No entanto, o ponto negativo assinalado para Paços de Ferreira, a pendência da instalação do novo portão, é uma questão que requer at"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tperiodo\tjson_start\n1830003\tmeses_2/2026\t{\"filtroAplicado\":\"Minhas Lojas\",\"tipoRelatorio\":\"gestor\",\"resumoGeral\":\"No período de meses_2/2026, o gestor demonstrou um bom nível de atividade em termos de contacto com as lojas, visitando ou contactando doze unidades. Foram submetidos 27 Relatórios Livres e 1 Relatório Completo, indicando um acompanhamento regular das operações. Contudo, não foram registadas reuniões de lojas neste período.\",\"pontosDestacados\":{\"positivos\":[{\"loja\":\"Paços de Ferreira \",\"descricao\":\"Organizado, limpo, tanto a parte técnica como administrativo. \",\"data\":\"02/02/2026\"}],\"negativos\":[{\"loja\":\"Paços de Ferreira \",\"descricao\":\"Continua pendente a instalação do novo portão. \",\"data\":\"02/02/2026\"}],\"analise\":\"A loja de Paços de Ferreira destaca-se positivamente pela sua organização e limpeza, tanto na área técnica como administrativa, o que é um excelente exemplo a replicar. No entanto, o ponto negativo assinalado para Paços de Ferreira, a pendência da instalação do novo portão, é uma questão que requer at\n",
+  "stderr": "",
+  "execution_time_ms": 66
+}

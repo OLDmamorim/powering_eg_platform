@@ -162,3 +162,9 @@
 - [x] Filtros: por gestor/zona, por período
 - [x] Adicionar rota e link no menu lateral
 - [ ] Guardar checkpoint
+
+## BUG: Card "Loja Menos Visitada" não mostra o nome da loja
+- [x] Localizar o card na página RelatoriosIA.tsx
+- [x] Problema: JSON guardado na BD não tem lojaMaisVisitada/lojaMenosVisitada, mas tem visitasPorLoja
+- [x] Corrigido: ambos os cards agora extraem dados de visitasPorLoja como fallback
+- [x] Guardar checkpoint
