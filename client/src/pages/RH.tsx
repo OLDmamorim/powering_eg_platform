@@ -424,8 +424,10 @@ export default function RH() {
     const matchesTipo = filterTipo === "all" ||
       c.tipo === filterTipo;
     
+    // Filtro por gestor: incluir colaboradores diretos (volantes/recalbra) E colaboradores de lojas da zona
     const matchesGestor = filterGestor === "all" ||
-      (c as any).gestorId?.toString() === filterGestor;
+      (c as any).gestorId?.toString() === filterGestor || // Colaboradores diretos (volantes/recalbra)
+      (c.tipo === "loja" && (c as any).lojaGestorId?.toString() === filterGestor); // Colaboradores de lojas da zona
     
     return matchesSearch && matchesLoja && matchesTipo && matchesGestor;
   }) || [];

@@ -119,3 +119,9 @@
 - [x] Implementar lógica de filtragem
 - [x] Filtro implementado e funcional
 - [ ] Guardar checkpoint
+
+## BUG: Filtro por Gestor na Página RH Não Inclui Colaboradores das Lojas da Zona
+- [x] Analisar lógica de filtragem atual
+- [x] Modificar filtro para incluir colaboradores de lojas onde loja.gestorId = gestor selecionado
+- [x] Correção aplicada - filtro agora inclui colaboradores diretos + colaboradores de lojas da zona
+- [ ] Guardar checkpoint
