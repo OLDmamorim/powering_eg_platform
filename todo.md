@@ -125,3 +125,11 @@
 - [x] Modificar filtro para incluir colaboradores de lojas onde loja.gestorId = gestor selecionado
 - [x] Correção aplicada - filtro agora inclui colaboradores diretos + colaboradores de lojas da zona
 - [ ] Guardar checkpoint
+
+## PROBLEMA: Filtro por Gestor Não Inclui Colaboradores de Lojas (Query Incompleta)
+- [x] Site está acessível - não era erro 404, era filtro incompleto
+- [x] Identificar query tRPC que carrega colaboradores - getAllColaboradores no db.ts
+- [x] Descoberto: relação loja-gestor é many-to-many via tabela gestor_lojas (não lojas.gestorId)
+- [x] Modificar query para usar tabela gestorLojas para obter lojaGestorId
+- [x] Testar filtro - Fabio Dias mostra 31 colaboradores correctamente (3 volantes + 28 lojas) ✅
+- [ ] Guardar checkpoint

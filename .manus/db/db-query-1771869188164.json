@@ -1,0 +1,90 @@
+{
+  "query": "SHOW COLUMNS FROM colaboradores;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SHOW COLUMNS FROM colaboradores;",
+  "rows": [
+    {
+      "Field": "id",
+      "Type": "int(11)",
+      "Null": "NO",
+      "Key": "PRI",
+      "Default": "NULL",
+      "Extra": "auto_increment"
+    },
+    {
+      "Field": "lojaId",
+      "Type": "int(11)",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "nome",
+      "Type": "varchar(255)",
+      "Null": "NO",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "codigoColaborador",
+      "Type": "varchar(50)",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "ativo",
+      "Type": "tinyint(1)",
+      "Null": "NO",
+      "Key": "",
+      "Default": "1",
+      "Extra": ""
+    },
+    {
+      "Field": "createdAt",
+      "Type": "timestamp",
+      "Null": "NO",
+      "Key": "",
+      "Default": "CURRENT_TIMESTAMP",
+      "Extra": ""
+    },
+    {
+      "Field": "updatedAt",
+      "Type": "timestamp",
+      "Null": "NO",
+      "Key": "",
+      "Default": "CURRENT_TIMESTAMP",
+      "Extra": "DEFAULT_GENERATED on update CURRENT_TIMESTAMP"
+    },
+    {
+      "Field": "gestorId",
+      "Type": "int(11)",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "cargo",
+      "Type": "enum('responsavel_loja','tecnico','administrativo')",
+      "Null": "NO",
+      "Key": "",
+      "Default": "tecnico",
+      "Extra": ""
+    },
+    {
+      "Field": "tipo",
+      "Type": "enum('loja','volante','recalbra')",
+      "Null": "NO",
+      "Key": "",
+      "Default": "loja",
+      "Extra": ""
+    }
+  ],
+  "messages": [],
+  "stdout": "Field\tType\tNull\tKey\tDefault\tExtra\nid\tint(11)\tNO\tPRI\tNULL\tauto_increment\nlojaId\tint(11)\tYES\t\tNULL\t\nnome\tvarchar(255)\tNO\t\tNULL\t\ncodigoColaborador\tvarchar(50)\tYES\t\tNULL\t\nativo\ttinyint(1)\tNO\t\t1\t\ncreatedAt\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\t\nupdatedAt\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED on update CURRENT_TIMESTAMP\ngestorId\tint(11)\tYES\t\tNULL\t\ncargo\tenum('responsavel_loja','tecnico','administrativo')\tNO\t\ttecnico\t\ntipo\tenum('loja','volante','recalbra')\tNO\t\tloja\t\n",
+  "stderr": "",
+  "execution_time_ms": 51
+}

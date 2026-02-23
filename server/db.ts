@@ -10155,7 +10155,7 @@ export async function getAllColaboradoresByGestorId(gestorId: number, apenasAtiv
 /**
  * Obter todos os colaboradores (admin - todas as lojas)
  */
-export async function getAllColaboradores(apenasAtivos: boolean = true): Promise<Array<Colaborador & { lojaNome?: string; gestorNome?: string }>> {
+export async function getAllColaboradores(apenasAtivos: boolean = true): Promise<Array<Colaborador & { lojaNome?: string; gestorNome?: string; lojaGestorId?: number | null }>> {
   const db = await getDb();
   if (!db) return [];
   
@@ -10166,9 +10166,16 @@ export async function getAllColaboradores(apenasAtivos: boolean = true): Promise
     .where(conditions.length > 0 ? and(...conditions) : undefined)
     .orderBy(colaboradores.nome);
   
-  // Buscar lojas e gestores para enriquecer dados
+  // Buscar lojas para nomes
   const lojasResult = await db.select().from(lojas);
   const lojasMap = new Map(lojasResult.map(l => [l.id, l.nome]));
+  
+  // Buscar associações gestor-loja (many-to-many) para saber qual gestor gere cada loja
+  const gestorLojasResult = await db.select().from(gestorLojas);
+  const lojaToGestorMap = new Map<number, number>(); // lojaId -> gestorId
+  for (const gl of gestorLojasResult) {
+    lojaToGestorMap.set(gl.lojaId, gl.gestorId);
+  }
   
   // Buscar gestores com nome do user
   const gestoresResult = await db.select({
@@ -10178,11 +10185,15 @@ export async function getAllColaboradores(apenasAtivos: boolean = true): Promise
     .leftJoin(users, eq(gestores.userId, users.id));
   const gestoresMap = new Map(gestoresResult.map(g => [g.id, g.nome || 'Gestor']));
   
-  return result.map(c => ({
-    ...c,
-    lojaNome: c.lojaId ? lojasMap.get(c.lojaId) : undefined,
-    gestorNome: c.gestorId ? gestoresMap.get(c.gestorId) : undefined
-  }));
+  return result.map(c => {
+    const lojaGestorId = c.lojaId ? lojaToGestorMap.get(c.lojaId) ?? null : null;
+    return {
+      ...c,
+      lojaNome: c.lojaId ? lojasMap.get(c.lojaId) : undefined,
+      lojaGestorId,
+      gestorNome: c.gestorId ? gestoresMap.get(c.gestorId) : (lojaGestorId ? gestoresMap.get(lojaGestorId) : undefined)
+    };
+  });
 }
 
 /**

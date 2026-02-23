@@ -1,0 +1,8 @@
+{
+  "query": "SELECT c.id, c.nome, c.tipo, c.gestor_id, c.loja_id, l.gestor_id as loja_gestor_id, l.nome as loja_nome FROM colaboradores c LEFT JOIN lojas l ON c.loja_id = l.id WHERE c.ativo = true ORDER BY c.tipo, c.nome LIMIT 20;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT c.id, c.nome, c.tipo, c.gestor_id, c.loja_id, l.gestor_id as loja_gestor_id, l.nome as loja_nome FROM colaboradores c LEFT JOIN lojas l ON c.loja_id = l.id WHERE c.ativo = true ORDER BY c.tipo, c.nome LIMIT 20;",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 'c.loja_id' in 'on clause'"
+  ]
+}
