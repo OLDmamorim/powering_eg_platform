@@ -472,85 +472,150 @@ export function NPSDashboard() {
               </Card>
             )}
             
-            {/* Tabela detalhada */}
+            {/* Tabela detalhada com Elegibilidade Prémio */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Award className="h-5 w-5" />
-                  Ranking Detalhado - {mesLabel} {anoSelecionado}
+                  Ranking NPS - Elegibilidade para Prémio - {mesLabel} {anoSelecionado}
                 </CardTitle>
-                <CardDescription>
-                  {rankingLojas.length} lojas com dados NPS
-                  {filtroZona !== 'todas' && ` na zona ${filtroZona}`}
+                <CardDescription className="space-y-1">
+                  <span>{rankingLojas.length} lojas com dados NPS{filtroZona !== 'todas' && ` na zona ${filtroZona}`}</span>
+                  <span className="block text-xs">
+                    Regras: NPS {'>='}  80% <strong>e</strong> Taxa de Resposta {'>='} 7,5% para ter direito a prémio
+                  </span>
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {rankingLojas.length > 0 ? (
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                      <thead>
-                        <tr className="border-b">
-                          <th className="text-left py-3 px-2">#</th>
-                          <th className="text-left py-3 px-2">Loja</th>
-                          <th className="text-left py-3 px-2">Zona</th>
-                          <th className="text-right py-3 px-2">NPS Mês</th>
-                          <th className="text-right py-3 px-2">Taxa Resposta</th>
-                          <th className="text-right py-3 px-2">NPS Anual</th>
-                          <th className="text-center py-3 px-2">Estado</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {rankingLojas.map((item: any, idx: number) => (
-                          <tr key={item.lojaId} className="border-b hover:bg-muted/50">
-                            <td className="py-3 px-2">
-                              <div className={`
-                                flex items-center justify-center w-7 h-7 rounded-full font-bold text-xs
-                                ${idx === 0 ? 'bg-yellow-500 text-white' : ''}
-                                ${idx === 1 ? 'bg-gray-400 text-white' : ''}
-                                ${idx === 2 ? 'bg-orange-600 text-white' : ''}
-                                ${idx > 2 ? 'bg-secondary text-foreground' : ''}
-                              `}>
-                                {idx + 1}
-                              </div>
-                            </td>
-                            <td className="py-3 px-2 font-medium">{item.lojaNome}</td>
-                            <td className="py-3 px-2 text-muted-foreground">{item.zona}</td>
-                            <td className="py-3 px-2 text-right">
-                              <span className={`font-bold ${
-                                item.nps >= 0.8 ? 'text-green-600' :
-                                item.nps >= 0.5 ? 'text-yellow-600' : 'text-red-600'
-                              }`}>
-                                {(item.nps * 100).toFixed(1)}%
-                              </span>
-                            </td>
-                            <td className="py-3 px-2 text-right">
-                              {item.taxaResposta !== null ? `${(item.taxaResposta * 100).toFixed(1)}%` : '-'}
-                            </td>
-                            <td className="py-3 px-2 text-right">
-                              {item.npsAnual !== null ? `${(item.npsAnual * 100).toFixed(1)}%` : '-'}
-                            </td>
-                            <td className="py-3 px-2 text-center">
-                              <Badge variant={
-                                item.nps >= 0.8 ? 'default' :
-                                item.nps >= 0.5 ? 'secondary' : 'destructive'
-                              } className={
-                                item.nps >= 0.8 ? 'bg-green-100 text-green-800 hover:bg-green-100' :
-                                item.nps >= 0.5 ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100' : ''
-                              }>
-                                {item.nps >= 0.8 ? 'Excelente' :
-                                 item.nps >= 0.5 ? 'Bom' : 'Atenção'}
-                              </Badge>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                ) : (
-                  <p className="text-center text-muted-foreground py-8">
-                    Sem dados NPS para este período
-                  </p>
-                )}
+                {(() => {
+                  // Ordenar: elegíveis primeiro (por NPS desc), depois inelegíveis (por NPS desc)
+                  const sortedRanking = [...rankingLojas].sort((a: any, b: any) => {
+                    const aElegivel = a.nps >= 0.8 && a.taxaResposta !== null && a.taxaResposta >= 0.075;
+                    const bElegivel = b.nps >= 0.8 && b.taxaResposta !== null && b.taxaResposta >= 0.075;
+                    if (aElegivel && !bElegivel) return -1;
+                    if (!aElegivel && bElegivel) return 1;
+                    return (b.nps || 0) - (a.nps || 0);
+                  });
+                  const totalElegivel = sortedRanking.filter((i: any) => i.nps >= 0.8 && i.taxaResposta !== null && i.taxaResposta >= 0.075).length;
+                  const totalInelegivel = sortedRanking.length - totalElegivel;
+                  
+                  return sortedRanking.length > 0 ? (
+                    <>
+                      {/* Resumo elegibilidade */}
+                      <div className="grid grid-cols-3 gap-4 mb-6">
+                        <div className="bg-green-50 dark:bg-green-950 rounded-lg p-3 text-center">
+                          <div className="text-2xl font-bold text-green-600">{totalElegivel}</div>
+                          <div className="text-xs text-muted-foreground">Elegíveis</div>
+                        </div>
+                        <div className="bg-red-50 dark:bg-red-950 rounded-lg p-3 text-center">
+                          <div className="text-2xl font-bold text-red-600">{totalInelegivel}</div>
+                          <div className="text-xs text-muted-foreground">Sem Prémio</div>
+                        </div>
+                        <div className="bg-blue-50 dark:bg-blue-950 rounded-lg p-3 text-center">
+                          <div className="text-2xl font-bold text-blue-600">{sortedRanking.length > 0 ? ((totalElegivel / sortedRanking.length) * 100).toFixed(0) : 0}%</div>
+                          <div className="text-xs text-muted-foreground">Taxa Elegibilidade</div>
+                        </div>
+                      </div>
+                      
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                          <thead>
+                            <tr className="border-b">
+                              <th className="text-left py-3 px-2 w-10">#</th>
+                              <th className="text-left py-3 px-2">Loja</th>
+                              <th className="text-left py-3 px-2">Zona</th>
+                              <th className="text-right py-3 px-2">NPS Mês</th>
+                              <th className="text-right py-3 px-2">Taxa Resp.</th>
+                              <th className="text-right py-3 px-2">NPS Anual</th>
+                              <th className="text-center py-3 px-2">Prémio</th>
+                              <th className="text-left py-3 px-2">Motivo</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {sortedRanking.map((item: any, idx: number) => {
+                              const elegivelPremio = item.nps >= 0.8 && item.taxaResposta !== null && item.taxaResposta >= 0.075;
+                              const npsAbaixo = item.nps < 0.8;
+                              const taxaAbaixo = item.taxaResposta !== null && item.taxaResposta < 0.075;
+                              const motivo = !elegivelPremio ? (
+                                npsAbaixo && taxaAbaixo ? 'NPS < 80% e Taxa < 7.5%' :
+                                npsAbaixo ? 'NPS < 80%' :
+                                taxaAbaixo ? 'Taxa resposta < 7.5%' : ''
+                              ) : '';
+                              
+                              return (
+                                <tr key={item.lojaId} className={`border-b hover:bg-muted/50 ${!elegivelPremio ? 'opacity-70' : ''}`}>
+                                  <td className="py-2 px-2">
+                                    <div className={`
+                                      flex items-center justify-center w-7 h-7 rounded-full font-bold text-xs
+                                      ${elegivelPremio && idx === 0 ? 'bg-yellow-500 text-white' : ''}
+                                      ${elegivelPremio && idx === 1 ? 'bg-gray-400 text-white' : ''}
+                                      ${elegivelPremio && idx === 2 ? 'bg-orange-600 text-white' : ''}
+                                      ${!elegivelPremio || idx > 2 ? 'bg-secondary text-foreground' : ''}
+                                    `}>
+                                      {idx + 1}
+                                    </div>
+                                  </td>
+                                  <td className="py-2 px-2 font-medium">{item.lojaNome}</td>
+                                  <td className="py-2 px-2 text-muted-foreground text-xs">{item.zona}</td>
+                                  <td className="py-2 px-2 text-right">
+                                    <span className={`font-bold ${
+                                      item.nps >= 0.8 ? 'text-green-600' :
+                                      item.nps >= 0.5 ? 'text-yellow-600' : 'text-red-600'
+                                    }`}>
+                                      {(item.nps * 100).toFixed(1)}%
+                                    </span>
+                                  </td>
+                                  <td className="py-2 px-2 text-right">
+                                    <span className={`font-medium ${taxaAbaixo ? 'text-red-500' : ''}`}>
+                                      {item.taxaResposta !== null ? `${(item.taxaResposta * 100).toFixed(1)}%` : '-'}
+                                    </span>
+                                  </td>
+                                  <td className="py-2 px-2 text-right">
+                                    {item.npsAnual !== null ? `${(item.npsAnual * 100).toFixed(1)}%` : '-'}
+                                  </td>
+                                  <td className="py-2 px-2 text-center">
+                                    {elegivelPremio ? (
+                                      <Badge className="bg-green-100 text-green-800 hover:bg-green-100 dark:bg-green-900 dark:text-green-200">
+                                        ✓ Elegível
+                                      </Badge>
+                                    ) : (
+                                      <Badge variant="destructive" className="text-xs">
+                                        Sem Prémio
+                                      </Badge>
+                                    )}
+                                  </td>
+                                  <td className="py-2 px-2 text-xs text-red-500">
+                                    {motivo}
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                      
+                      {/* Legenda */}
+                      <div className="mt-4 pt-4 border-t flex flex-wrap gap-4 text-xs text-muted-foreground">
+                        <div className="flex items-center gap-1">
+                          <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                          NPS ≥ 80% e Taxa ≥ 7,5% = Elegível
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                          NPS {'<'} 80% = Sem prémio
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <div className="w-3 h-3 rounded-full bg-orange-500"></div>
+                          Taxa resposta {'<'} 7,5% = Sem prémio
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <p className="text-center text-muted-foreground py-8">
+                      Sem dados NPS para este período
+                    </p>
+                  );
+                })()}
               </CardContent>
             </Card>
           </>

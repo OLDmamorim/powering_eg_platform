@@ -947,12 +947,15 @@ export function ResultadosDashboard() {
                           <div className="text-xs text-muted-foreground">{item.totalServicos} serv.</div>
                         )}
                       </div>
-                      {/* Coluna NPS */}
+                      {/* Coluna NPS com elegibilidade prémio */}
                       {npsPorLoja.size > 0 && (() => {
                         const npsVal = getNPSMes(item.lojaId);
                         const taxaVal = getTaxaRespostaMes(item.lojaId);
+                        const elegivelPremio = npsVal !== null && taxaVal !== null && npsVal >= 0.8 && taxaVal >= 0.075;
+                        const npsAbaixo = npsVal !== null && npsVal < 0.8;
+                        const taxaAbaixo = taxaVal !== null && taxaVal < 0.075;
                         return (
-                          <div className="text-right min-w-[70px] border-l pl-3">
+                          <div className="text-right min-w-[85px] border-l pl-3">
                             <div className={`font-bold text-sm ${
                               npsVal !== null 
                                 ? npsVal >= 0.8 ? 'text-green-600' 
@@ -961,10 +964,14 @@ export function ResultadosDashboard() {
                                 : 'text-muted-foreground'
                             }`}>
                               {npsVal !== null ? `${(npsVal * 100).toFixed(0)}%` : '-'}
+                              {npsVal !== null && elegivelPremio && <span className="ml-1">✓</span>}
                             </div>
-                            <div className="text-xs text-muted-foreground">
-                              {taxaVal !== null ? `${(taxaVal * 100).toFixed(0)}% resp.` : ''}
+                            <div className={`text-xs ${taxaAbaixo ? 'text-red-500' : 'text-muted-foreground'}`}>
+                              {taxaVal !== null ? `${(taxaVal * 100).toFixed(1)}% resp.` : ''}
                             </div>
+                            {npsVal !== null && !elegivelPremio && (npsAbaixo || taxaAbaixo) && (
+                              <div className="text-[10px] text-red-500 font-medium">s/ prémio</div>
+                            )}
                           </div>
                         );
                       })()}
@@ -979,6 +986,154 @@ export function ResultadosDashboard() {
             )}
           </CardContent>
         </Card>
+        
+        {/* Ranking NPS - Elegibilidade para Prémio */}
+        {npsPorLoja.size > 0 && periodoSelecionado && (() => {
+          // Construir ranking NPS com dados de todas as lojas
+          const npsRankingData = (ranking || []).map((item: any) => {
+            const npsVal = getNPSMes(item.lojaId);
+            const taxaVal = getTaxaRespostaMes(item.lojaId);
+            return {
+              lojaId: item.lojaId,
+              lojaNome: item.lojaNome,
+              zona: item.zona,
+              nps: npsVal,
+              taxaResposta: taxaVal,
+              elegivelPremio: npsVal !== null && taxaVal !== null && npsVal >= 0.8 && taxaVal >= 0.075,
+              motivoInelegivel: npsVal !== null ? (
+                npsVal < 0.8 && taxaVal !== null && taxaVal < 0.075 ? 'NPS < 80% e Taxa < 7.5%' :
+                npsVal < 0.8 ? 'NPS < 80%' :
+                taxaVal !== null && taxaVal < 0.075 ? 'Taxa resposta < 7.5%' : null
+              ) : null,
+            };
+          }).filter((item: any) => item.nps !== null)
+           .sort((a: any, b: any) => {
+             // Ordenar: elegíveis primeiro (por NPS desc), depois inelegíveis (por NPS desc)
+             if (a.elegivelPremio && !b.elegivelPremio) return -1;
+             if (!a.elegivelPremio && b.elegivelPremio) return 1;
+             return (b.nps || 0) - (a.nps || 0);
+           });
+          
+          const totalElegivel = npsRankingData.filter((i: any) => i.elegivelPremio).length;
+          const totalInelegivel = npsRankingData.filter((i: any) => !i.elegivelPremio).length;
+          
+          if (npsRankingData.length === 0) return null;
+          
+          return (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <SmilePlus className="h-5 w-5 text-primary" />
+                  Ranking NPS - Elegibilidade para Prémio
+                </CardTitle>
+                <CardDescription className="space-y-1">
+                  <span>{periodoSelecionado && periodos.find((p: any) => p.mes === periodoSelecionado.mes && p.ano === periodoSelecionado.ano)?.label}</span>
+                  <span className="block text-xs">
+                    Regras: NPS {'>'}= 80% <strong>e</strong> Taxa de Resposta {'>'}= 7,5% para ter direito a prémio
+                  </span>
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {/* Resumo */}
+                <div className="grid grid-cols-3 gap-4 mb-6">
+                  <div className="bg-green-50 dark:bg-green-950 rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold text-green-600">{totalElegivel}</div>
+                    <div className="text-xs text-muted-foreground">Elegíveis</div>
+                  </div>
+                  <div className="bg-red-50 dark:bg-red-950 rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold text-red-600">{totalInelegivel}</div>
+                    <div className="text-xs text-muted-foreground">Sem Prémio</div>
+                  </div>
+                  <div className="bg-blue-50 dark:bg-blue-950 rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold text-blue-600">{npsRankingData.length > 0 ? ((totalElegivel / npsRankingData.length) * 100).toFixed(0) : 0}%</div>
+                    <div className="text-xs text-muted-foreground">Taxa Elegibilidade</div>
+                  </div>
+                </div>
+                
+                {/* Tabela */}
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="text-left py-3 px-2 w-10">#</th>
+                        <th className="text-left py-3 px-2">Loja</th>
+                        <th className="text-left py-3 px-2">Zona</th>
+                        <th className="text-right py-3 px-2">NPS</th>
+                        <th className="text-right py-3 px-2">Taxa Resp.</th>
+                        <th className="text-center py-3 px-2">Prémio</th>
+                        <th className="text-left py-3 px-2">Motivo</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {npsRankingData.map((item: any, idx: number) => (
+                        <tr key={item.lojaId} className={`border-b hover:bg-muted/50 ${!item.elegivelPremio ? 'opacity-70' : ''}`}>
+                          <td className="py-2 px-2">
+                            <div className={`
+                              flex items-center justify-center w-7 h-7 rounded-full font-bold text-xs
+                              ${item.elegivelPremio && idx === 0 ? 'bg-yellow-500 text-white' : ''}
+                              ${item.elegivelPremio && idx === 1 ? 'bg-gray-400 text-white' : ''}
+                              ${item.elegivelPremio && idx === 2 ? 'bg-orange-600 text-white' : ''}
+                              ${!item.elegivelPremio || idx > 2 ? 'bg-secondary text-foreground' : ''}
+                            `}>
+                              {idx + 1}
+                            </div>
+                          </td>
+                          <td className="py-2 px-2 font-medium">{item.lojaNome}</td>
+                          <td className="py-2 px-2 text-muted-foreground text-xs">{item.zona}</td>
+                          <td className="py-2 px-2 text-right">
+                            <span className={`font-bold ${
+                              item.nps >= 0.8 ? 'text-green-600' :
+                              item.nps >= 0.5 ? 'text-yellow-600' : 'text-red-600'
+                            }`}>
+                              {(item.nps * 100).toFixed(1)}%
+                            </span>
+                          </td>
+                          <td className="py-2 px-2 text-right">
+                            <span className={`font-medium ${
+                              item.taxaResposta !== null && item.taxaResposta < 0.075 ? 'text-red-500' : ''
+                            }`}>
+                              {item.taxaResposta !== null ? `${(item.taxaResposta * 100).toFixed(1)}%` : '-'}
+                            </span>
+                          </td>
+                          <td className="py-2 px-2 text-center">
+                            {item.elegivelPremio ? (
+                              <Badge className="bg-green-100 text-green-800 hover:bg-green-100 dark:bg-green-900 dark:text-green-200">
+                                ✓ Elegível
+                              </Badge>
+                            ) : (
+                              <Badge variant="destructive" className="text-xs">
+                                Sem Prémio
+                              </Badge>
+                            )}
+                          </td>
+                          <td className="py-2 px-2 text-xs text-red-500">
+                            {item.motivoInelegivel || ''}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                
+                {/* Legenda */}
+                <div className="mt-4 pt-4 border-t flex flex-wrap gap-4 text-xs text-muted-foreground">
+                  <div className="flex items-center gap-1">
+                    <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                    NPS ≥ 80% e Taxa ≥ 7,5% = Elegível
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                    NPS {'<'} 80% = Sem prémio
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="w-3 h-3 rounded-full bg-orange-500"></div>
+                    Taxa resposta {'<'} 7,5% = Sem prémio
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })()}
         
         {/* Vendas Complementares */}
         {temDadosComplementares && (

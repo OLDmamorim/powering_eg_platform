@@ -168,3 +168,19 @@
 - [x] Problema: JSON guardado na BD não tem lojaMaisVisitada/lojaMenosVisitada, mas tem visitasPorLoja
 - [x] Corrigido: ambos os cards agora extraem dados de visitasPorLoja como fallback
 - [x] Guardar checkpoint
+
+## NPS Junto aos Resultados das Lojas
+- [x] Integrar dados NPS na tabela do Dashboard de Resultados (junto aos dados de cada loja)
+- [x] Mostrar NPS e taxa de resposta por loja/mês na mesma vista dos resultados
+- [x] Coluna NPS melhorada com indicação de elegibilidade (✓ ou s/ prémio)
+- [ ] Guardar checkpoint
+
+## Ranking NPS com Regras de Elegibilidade para Prémio
+- [x] Criar ranking NPS nivelado pela taxa de resposta
+- [x] Regra: NPS < 80% → sem direito a prémio (destacar visualmente)
+- [x] Regra: Taxa de resposta < 7,5% → sem direito a prémio (destacar visualmente)
+- [x] Adicionar indicação visual clara de elegibilidade/inelegibilidade
+- [x] Secção dedicada no Dashboard de Resultados com resumo (elegíveis/sem prémio/taxa)
+- [x] Dashboard NPS actualizado com mesmas regras e tabela completa
+- [x] Legenda com 3 cores: verde (elegível), vermelho (NPS<80%), laranja (taxa<7.5%)
+- [ ] Guardar checkpoint
