@@ -118,6 +118,7 @@ import {
   Bot,
   Filter,
   ClipboardList,
+  Star,
 } from "lucide-react";
 
 interface LojaAuth {
@@ -2882,6 +2883,135 @@ export default function PortalLoja() {
                     </>
                   );
                 })()}
+
+                {/* ==================== Secção NPS ==================== */}
+                {dashboardData?.nps && dashboardData.nps.npsMedio !== null && (
+                  <Card className={`border-2 ${
+                    dashboardData.nps.elegivel 
+                      ? 'border-green-200 bg-gradient-to-br from-green-50 to-emerald-50' 
+                      : 'border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50'
+                  }`}>
+                    <CardHeader>
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <Star className={`h-5 w-5 ${dashboardData.nps.elegivel ? 'text-green-600' : 'text-amber-600'}`} />
+                        {language === 'pt' ? 'NPS - Elegibilidade para Prémio' : 'NPS - Prize Eligibility'}
+                      </CardTitle>
+                      <CardDescription>
+                        {language === 'pt' 
+                          ? 'NPS ≥ 80% e Taxa de Resposta ≥ 7,5% para ter direito a prémio'
+                          : 'NPS ≥ 80% and Response Rate ≥ 7.5% for prize eligibility'}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        {/* KPIs NPS */}
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                          <div className={`rounded-xl p-3 text-center ${
+                            (dashboardData.nps.npsMedio * 100) >= 80 
+                              ? 'bg-green-100 text-green-800' 
+                              : 'bg-red-100 text-red-800'
+                          }`}>
+                            <p className="text-2xl font-bold">{(dashboardData.nps.npsMedio * 100).toFixed(0)}%</p>
+                            <p className="text-xs">NPS</p>
+                          </div>
+                          <div className={`rounded-xl p-3 text-center ${
+                            ((dashboardData.nps.taxaRespostaNPS || 0) * 100) >= 7.5 
+                              ? 'bg-green-100 text-green-800' 
+                              : 'bg-amber-100 text-amber-800'
+                          }`}>
+                            <p className="text-2xl font-bold">{((dashboardData.nps.taxaRespostaNPS || 0) * 100).toFixed(1)}%</p>
+                            <p className="text-xs">{language === 'pt' ? 'Taxa Resposta' : 'Response Rate'}</p>
+                          </div>
+                          <div className="rounded-xl p-3 text-center bg-blue-100 text-blue-800">
+                            <p className="text-2xl font-bold">
+                              {dashboardData.nps.dadosMensais.reduce((sum: number, d: any) => sum + (d.totalRespostas || 0), 0)}
+                            </p>
+                            <p className="text-xs">{language === 'pt' ? 'Respostas' : 'Responses'}</p>
+                          </div>
+                          <div className={`rounded-xl p-3 text-center ${
+                            dashboardData.nps.elegivel 
+                              ? 'bg-green-500 text-white' 
+                              : 'bg-red-500 text-white'
+                          }`}>
+                            <p className="text-lg font-bold">
+                              {dashboardData.nps.elegivel 
+                                ? (language === 'pt' ? '✓ Elegível' : '✓ Eligible')
+                                : (language === 'pt' ? '✗ S/ Prémio' : '✗ No Prize')}
+                            </p>
+                            <p className="text-xs opacity-90">{language === 'pt' ? 'Prémio' : 'Prize'}</p>
+                          </div>
+                        </div>
+                        
+                        {/* Motivo de inelegibilidade */}
+                        {!dashboardData.nps.elegivel && dashboardData.nps.motivoInelegibilidade && (
+                          <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                            <p className="text-sm text-red-700 flex items-center gap-2">
+                              <AlertTriangle className="h-4 w-4 flex-shrink-0" />
+                              <span><strong>{language === 'pt' ? 'Motivo:' : 'Reason:'}</strong> {dashboardData.nps.motivoInelegibilidade}</span>
+                            </p>
+                          </div>
+                        )}
+                        
+                        {/* Dados mensais NPS */}
+                        {dashboardData.nps.dadosMensais.length > 1 && (
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-sm">
+                              <thead>
+                                <tr className="border-b">
+                                  <th className="text-left py-2 font-medium">{language === 'pt' ? 'Mês' : 'Month'}</th>
+                                  <th className="text-right py-2 font-medium">NPS</th>
+                                  <th className="text-right py-2 font-medium">{language === 'pt' ? 'Taxa Resp.' : 'Resp. Rate'}</th>
+                                  <th className="text-right py-2 font-medium">{language === 'pt' ? 'Respostas' : 'Responses'}</th>
+                                  <th className="text-right py-2 font-medium">{language === 'pt' ? 'Prémio' : 'Prize'}</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {dashboardData.nps.dadosMensais.map((d: any, i: number) => {
+                                  const npsVal = d.nps !== null ? d.nps * 100 : null;
+                                  const taxaVal = d.taxaResposta !== null ? d.taxaResposta * 100 : null;
+                                  const elegMes = npsVal !== null && npsVal >= 80 && taxaVal !== null && taxaVal >= 7.5;
+                                  return (
+                                    <tr key={i} className="border-b border-gray-100">
+                                      <td className="py-2">
+                                        {new Date(d.ano, d.mes - 1).toLocaleDateString(language === 'pt' ? 'pt-PT' : 'en-US', { month: 'short', year: 'numeric' })}
+                                      </td>
+                                      <td className={`text-right py-2 font-medium ${npsVal !== null && npsVal >= 80 ? 'text-green-600' : 'text-red-600'}`}>
+                                        {npsVal !== null ? `${npsVal.toFixed(0)}%` : '-'}
+                                      </td>
+                                      <td className={`text-right py-2 font-medium ${taxaVal !== null && taxaVal >= 7.5 ? 'text-green-600' : 'text-amber-600'}`}>
+                                        {taxaVal !== null ? `${taxaVal.toFixed(1)}%` : '-'}
+                                      </td>
+                                      <td className="text-right py-2">{d.totalRespostas || 0}</td>
+                                      <td className="text-right py-2">
+                                        {elegMes 
+                                          ? <span className="inline-flex items-center gap-1 text-green-600 font-medium"><CheckCircle2 className="h-3 w-3" /> {language === 'pt' ? 'Elegível' : 'Eligible'}</span>
+                                          : <span className="text-red-600 text-xs">{language === 'pt' ? 'S/ Prémio' : 'No Prize'}</span>
+                                        }
+                                      </td>
+                                    </tr>
+                                  );
+                                })}
+                              </tbody>
+                            </table>
+                          </div>
+                        )}
+                        
+                        {/* Mensagem motivacional */}
+                        {dashboardData.nps.elegivel && (
+                          <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                            <p className="text-sm text-green-700 flex items-center gap-2">
+                              <CheckCircle2 className="h-4 w-4 flex-shrink-0" />
+                              <span>{language === 'pt' 
+                                ? 'Parabéns! A sua loja cumpre os critérios de NPS e taxa de resposta para prémio.'
+                                : 'Congratulations! Your store meets the NPS and response rate criteria for the prize.'}
+                              </span>
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
 
                 {/* Secção de Análise IA */}
                 <Card className="border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-indigo-50">

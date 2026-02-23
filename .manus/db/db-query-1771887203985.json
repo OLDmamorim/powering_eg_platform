@@ -1,0 +1,25 @@
+{
+  "query": "SELECT t.token, t.lojaId, l.nome as lojaNome FROM tokens_loja t JOIN lojas l ON t.lojaId = l.id WHERE t.ativo = 1 AND t.token_loja_type = 'responsavel' LIMIT 3",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT t.token, t.lojaId, l.nome as lojaNome FROM tokens_loja t JOIN lojas l ON t.lojaId = l.id WHERE t.ativo = 1 AND t.token_loja_type = 'responsavel' LIMIT 3",
+  "rows": [
+    {
+      "token": "orDS39K11dng0sf59ZviCzvf1S9lFVOmsGWdae0CSWBnfTajpVym5sUzYbBdnQ1Q",
+      "lojaId": "60001",
+      "lojaNome": "Famalicão"
+    },
+    {
+      "token": "Xq3LEVVdNyoTNbmm4TFZwPGEG88FHUQkJf0xtumq5n0iS98yUL0GZ1AbQKzrUeGl",
+      "lojaId": "60002",
+      "lojaNome": "Barcelos"
+    },
+    {
+      "token": "VXyML0kJfaFsiC8B6ymkHWHr1h8QveM5NBVcJndydClQyMTs14Az4q1GzCE5gKV2",
+      "lojaId": "60003",
+      "lojaNome": "Vila Verde"
+    }
+  ],
+  "messages": [],
+  "stdout": "token\tlojaId\tlojaNome\norDS39K11dng0sf59ZviCzvf1S9lFVOmsGWdae0CSWBnfTajpVym5sUzYbBdnQ1Q\t60001\tFamalicão\nXq3LEVVdNyoTNbmm4TFZwPGEG88FHUQkJf0xtumq5n0iS98yUL0GZ1AbQKzrUeGl\t60002\tBarcelos\nVXyML0kJfaFsiC8B6ymkHWHr1h8QveM5NBVcJndydClQyMTs14Az4q1GzCE5gKV2\t60003\tVila Verde\n",
+  "stderr": "",
+  "execution_time_ms": 71
+}

@@ -206,3 +206,12 @@
 - [x] Incluir secção NPS dedicada com KPIs + tabela ranking (elegíveis/não elegíveis)
 - [x] Testar geração de relatório IA com NPS - 28 elegíveis, 31 sem prémio
 - [x] Guardar checkpoint
+
+## NPS no Dashboard de Resultados do Portal da Loja
+- [x] Adicionar dados NPS ao backend (dashboardCompleto do portal da loja)
+- [x] Corrigir mapeamento de colunas NPS (npsJan, npsFev, etc. em vez de linhas separadas)
+- [x] Adicionar card/secção NPS no frontend do Portal da Loja (tab resultados)
+- [x] Mostrar NPS, taxa de resposta e elegibilidade para prémio (4 KPIs)
+- [x] Adicionar alerta NPS nos alertas do dashboard (verde/vermelho)
+- [x] Testar no browser - Barcelos: NPS 100%, Taxa 20%, Elegível
+- [ ] Guardar checkpoint

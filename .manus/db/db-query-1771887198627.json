@@ -1,0 +1,25 @@
+{
+  "query": "SELECT token, lojaId, token_loja_type FROM tokens_loja WHERE ativo = 1 LIMIT 3",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT token, lojaId, token_loja_type FROM tokens_loja WHERE ativo = 1 LIMIT 3",
+  "rows": [
+    {
+      "token": "5BpPlYSDdV1bfOJcykKF5HzCTTebpSMyEKe85XVI0XjC8MEtHsmDSMAuVYqHCc0s",
+      "lojaId": "180010",
+      "token_loja_type": "responsavel"
+    },
+    {
+      "token": "eAcXYAMppgALCp7KkYhdgBYCUw1izlBwDHmlmL6GVpPpgiKPtR9EIheyrbsdNHbY",
+      "lojaId": "180010",
+      "token_loja_type": "colaborador"
+    },
+    {
+      "token": "VXyML0kJfaFsiC8B6ymkHWHr1h8QveM5NBVcJndydClQyMTs14Az4q1GzCE5gKV2",
+      "lojaId": "60003",
+      "token_loja_type": "responsavel"
+    }
+  ],
+  "messages": [],
+  "stdout": "token\tlojaId\ttoken_loja_type\n5BpPlYSDdV1bfOJcykKF5HzCTTebpSMyEKe85XVI0XjC8MEtHsmDSMAuVYqHCc0s\t180010\tresponsavel\neAcXYAMppgALCp7KkYhdgBYCUw1izlBwDHmlmL6GVpPpgiKPtR9EIheyrbsdNHbY\t180010\tcolaborador\nVXyML0kJfaFsiC8B6ymkHWHr1h8QveM5NBVcJndydClQyMTs14Az4q1GzCE5gKV2\t60003\tresponsavel\n",
+  "stderr": "",
+  "execution_time_ms": 52
+}
