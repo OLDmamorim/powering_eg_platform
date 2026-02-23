@@ -149,9 +149,11 @@ Exemplo: Loja com 2 colaboradores e 82 serviços totais:
 - Películas: 2,5% do valor faturado
 - Outros serviços (polimentos, lavagens, etc.): 30% do valor faturado
 
-**6. CRITÉRIOS MÍNIMOS OBRIGATÓRIOS:**
+**6. CRITÉRIOS MÍNIMOS OBRIGATÓRIOS (NPS):**
 - NPS >= 80% (obrigatório para receber prémio)
 - Taxa de Resposta >= 7,5% (obrigatório para receber prémio)
+- Se NPS < 80% OU Taxa de Resposta < 7,5% -> A LOJA NÃO TEM DIREITO A NENHUM PRÉMIO
+- Os dados NPS da loja estão disponíveis no contexto. Consulta-os para responder sobre elegibilidade.
 
 **7. PENALIZAÇÕES TRIMESTRAIS:**
 Quebras e Danos em Montagem:
@@ -314,6 +316,21 @@ async function obterContextoPlataformaNacional(): Promise<any> {
     }
   }
   
+  // NPS - Net Promoter Score (dados nacionais)
+  let dadosNPS: any[] = [];
+  try {
+    const npsResult = await db.getNPSDadosTodasLojas(anoAtual);
+    dadosNPS = npsResult || [];
+    if (mesAtual <= 2) {
+      const npsAnoAnterior = await db.getNPSDadosTodasLojas(anoAtual - 1);
+      if (npsAnoAnterior && npsAnoAnterior.length > 0) {
+        dadosNPS = [...dadosNPS, ...npsAnoAnterior];
+      }
+    }
+  } catch (e) {
+    console.error('Erro ao carregar dados NPS para chatbot portais:', e);
+  }
+  
   return {
     lojas,
     gestores,
@@ -324,7 +341,8 @@ async function obterContextoPlataformaNacional(): Promise<any> {
     todos,
     reunioesLojas,
     resultadosMensais,
-    vendasComplementaresNacionais
+    vendasComplementaresNacionais,
+    dadosNPS
   };
 }
 
@@ -377,6 +395,15 @@ async function obterDadosLoja(lojaId: number): Promise<any> {
     }
   }
   
+  // NPS da loja
+  let npsLoja = null;
+  try {
+    const anoAtual = new Date().getFullYear();
+    npsLoja = await db.getNPSDadosLoja(lojaId, anoAtual);
+  } catch (e) {
+    // Ignorar erro
+  }
+  
   return {
     loja,
     pendentes,
@@ -386,7 +413,8 @@ async function obterDadosLoja(lojaId: number): Promise<any> {
     todos,
     reunioes,
     resultadosMensais,
-    vendasComplementares
+    vendasComplementares,
+    npsLoja
   };
 }
 
@@ -699,6 +727,91 @@ function formatarContextoParaLoja(contextoNacional: any, dadosLoja: any, lojaNom
     });
   } else {
     texto += `  - Sem dados disponíveis\n`;
+  }
+  
+  // NPS da Loja
+  texto += `\n🌟 NPS - NET PROMOTER SCORE:\n`;
+  if (dadosLoja.npsLoja) {
+    const nps = dadosLoja.npsLoja;
+    const mesesNPS = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+    const camposNPS = ['npsJan', 'npsFev', 'npsMar', 'npsAbr', 'npsMai', 'npsJun', 'npsJul', 'npsAgo', 'npsSet', 'npsOut', 'npsNov', 'npsDez'];
+    const camposTaxa = ['taxaRespostaJan', 'taxaRespostaFev', 'taxaRespostaMar', 'taxaRespostaAbr', 'taxaRespostaMai', 'taxaRespostaJun', 'taxaRespostaJul', 'taxaRespostaAgo', 'taxaRespostaSet', 'taxaRespostaOut', 'taxaRespostaNov', 'taxaRespostaDez'];
+    
+    texto += `  Regras: NPS >= 80% E Taxa de Resposta >= 7,5% para ter direito a prémio\n\n`;
+    
+    for (let i = 0; i < 12; i++) {
+      const npsVal = nps[camposNPS[i]];
+      const taxaVal = nps[camposTaxa[i]];
+      if (npsVal != null) {
+        const npsPercent = (parseFloat(npsVal) * 100).toFixed(1);
+        const taxaPercent = taxaVal ? (parseFloat(taxaVal) * 100).toFixed(1) : 'N/A';
+        const npsOk = parseFloat(npsVal) >= 0.80;
+        const taxaOk = taxaVal ? parseFloat(taxaVal) >= 0.075 : false;
+        const elegivel = npsOk && taxaOk;
+        const status = elegivel ? '✅ Elegível para prémio' : '❌ Sem direito a prémio';
+        let motivo = '';
+        if (!elegivel) {
+          const motivos: string[] = [];
+          if (!npsOk) motivos.push(`NPS ${npsPercent}% < 80%`);
+          if (!taxaOk) motivos.push(`Taxa ${taxaPercent}% < 7,5%`);
+          motivo = ` (${motivos.join(', ')})`;
+        }
+        texto += `  ${mesesNPS[i]}: NPS ${npsPercent}% | Taxa Resp: ${taxaPercent}% | ${status}${motivo}\n`;
+      }
+    }
+    
+    if (nps.npsAnoTotal) {
+      const npsAnual = (parseFloat(nps.npsAnoTotal) * 100).toFixed(1);
+      const taxaAnual = nps.taxaRespostaAnoTotal ? (parseFloat(nps.taxaRespostaAnoTotal) * 100).toFixed(1) : 'N/A';
+      texto += `\n  TOTAL ANO: NPS ${npsAnual}% | Taxa Resp: ${taxaAnual}%\n`;
+    }
+  } else {
+    texto += `  - Sem dados NPS disponíveis\n`;
+  }
+  
+  // Ranking NPS Nacional (para comparação)
+  if (contextoNacional.dadosNPS && contextoNacional.dadosNPS.length > 0) {
+    const mesesNPS = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+    const camposNPS = ['npsJan', 'npsFev', 'npsMar', 'npsAbr', 'npsMai', 'npsJun', 'npsJul', 'npsAgo', 'npsSet', 'npsOut', 'npsNov', 'npsDez'];
+    const camposTaxa = ['taxaRespostaJan', 'taxaRespostaFev', 'taxaRespostaMar', 'taxaRespostaAbr', 'taxaRespostaMai', 'taxaRespostaJun', 'taxaRespostaJul', 'taxaRespostaAgo', 'taxaRespostaSet', 'taxaRespostaOut', 'taxaRespostaNov', 'taxaRespostaDez'];
+    
+    // Encontrar o mês mais recente com dados
+    let mesRecente = -1;
+    for (let i = 11; i >= 0; i--) {
+      const temDados = contextoNacional.dadosNPS.some((item: any) => {
+        const nps = item.nps || item;
+        return nps[camposNPS[i]] != null;
+      });
+      if (temDados) { mesRecente = i; break; }
+    }
+    
+    if (mesRecente >= 0) {
+      texto += `\n🏆 RANKING NPS NACIONAL (${mesesNPS[mesRecente]}):\n`;
+      const ranking = contextoNacional.dadosNPS
+        .filter((item: any) => {
+          const nps = item.nps || item;
+          return nps[camposNPS[mesRecente]] != null;
+        })
+        .map((item: any) => {
+          const nps = item.nps || item;
+          const loja = item.loja || { nome: 'N/A' };
+          return {
+            nome: loja.nome,
+            nps: parseFloat(nps[camposNPS[mesRecente]]),
+            taxa: nps[camposTaxa[mesRecente]] ? parseFloat(nps[camposTaxa[mesRecente]]) : 0
+          };
+        })
+        .sort((a: any, b: any) => b.nps - a.nps);
+      
+      ranking.forEach((r: any, i: number) => {
+        const npsOk = r.nps >= 0.80;
+        const taxaOk = r.taxa >= 0.075;
+        const elegivel = npsOk && taxaOk;
+        const status = elegivel ? '✅' : '❌';
+        const isLoja = r.nome === lojaNome ? ' ← A TUA LOJA' : '';
+        texto += `  ${i + 1}º ${r.nome}: NPS ${(r.nps * 100).toFixed(1)}% | Taxa ${(r.taxa * 100).toFixed(1)}% ${status}${isLoja}\n`;
+      });
+    }
   }
   
   return texto;

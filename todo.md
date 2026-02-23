@@ -173,7 +173,7 @@
 - [x] Integrar dados NPS na tabela do Dashboard de Resultados (junto aos dados de cada loja)
 - [x] Mostrar NPS e taxa de resposta por loja/mês na mesma vista dos resultados
 - [x] Coluna NPS melhorada com indicação de elegibilidade (✓ ou s/ prémio)
-- [ ] Guardar checkpoint
+- [x] Guardar checkpoint
 
 ## Ranking NPS com Regras de Elegibilidade para Prémio
 - [x] Criar ranking NPS nivelado pela taxa de resposta
@@ -183,4 +183,16 @@
 - [x] Secção dedicada no Dashboard de Resultados com resumo (elegíveis/sem prémio/taxa)
 - [x] Dashboard NPS actualizado com mesmas regras e tabela completa
 - [x] Legenda com 3 cores: verde (elegível), vermelho (NPS<80%), laranja (taxa<7.5%)
+- [x] Guardar checkpoint
+
+## Integração NPS no Chatbot IA
+- [x] Verificar se o Chatbot já tem acesso aos dados NPS (não tinha - só regras no prompt)
+- [x] Integrar dados NPS no contexto do Chatbot principal (gestores e admin)
+- [x] Integrar dados NPS no Chatbot do Portal da Loja (NPS próprio + ranking nacional)
+- [x] Integrar dados NPS no Chatbot do Portal do Volante (dados nacionais)
+- [x] Incluir taxa de resposta e elegibilidade para prémio no contexto
+- [x] Actualizar system prompt para incluir NPS, regras de comissionamento e elegibilidade
+- [x] Garantir acesso NPS para gestores (apenas suas lojas) e lojas (apenas a própria + ranking)
+- [x] Adicionar 4 sugestões de perguntas NPS ao chatbot
+- [x] Testar consultas NPS via Chatbot - 26 lojas elegíveis identificadas correctamente
 - [ ] Guardar checkpoint

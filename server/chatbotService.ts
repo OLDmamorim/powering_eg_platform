@@ -142,6 +142,7 @@ interface ContextoPlataforma {
   historicoVisitasPorGestor: any[]; // Histórico de visitas por gestor
   comparacaoVendas: any; // Comparação de vendas entre períodos
   estatisticasGerais: any;
+  dadosNPS: any[]; // Dados NPS de todas as lojas
   // Novos campos para contexto pessoal
   gestorAtual?: {
     id: number;
@@ -159,6 +160,7 @@ interface ContextoPlataforma {
     meusTodos: any[];
     minhasVendasComplementares: any[];
     meusResultadosMensais: any[];
+    meusNPS: any[]; // NPS das lojas do gestor
   };
 }
 
@@ -339,6 +341,23 @@ async function obterContextoPlataforma(userId: number, userRole: string): Promis
   // Comparação de vendas entre períodos
   const comparacaoVendas = calcularComparacaoVendas(vendasComplementares);
   
+  // ========== NPS - Net Promoter Score ==========
+  const anoNPS = agora.getFullYear();
+  let dadosNPS: any[] = [];
+  try {
+    const npsResult = await db.getNPSDadosTodasLojas(anoNPS);
+    dadosNPS = npsResult || [];
+    // Tentar também o ano anterior se estamos no início do ano
+    if (mesAtual <= 2) {
+      const npsAnoAnterior = await db.getNPSDadosTodasLojas(anoNPS - 1);
+      if (npsAnoAnterior && npsAnoAnterior.length > 0) {
+        dadosNPS = [...dadosNPS, ...npsAnoAnterior];
+      }
+    }
+  } catch (e) {
+    console.error('Erro ao carregar dados NPS para chatbot:', e);
+  }
+  
   // ========== NOVO: Contexto pessoal para gestores ==========
   let gestorAtual: ContextoPlataforma['gestorAtual'] = undefined;
   let contextoPessoal: ContextoPlataforma['contextoPessoal'] = undefined;
@@ -389,7 +408,8 @@ async function obterContextoPlataforma(userId: number, userRole: string): Promis
         // Todos: filtrar por quem criou ou por loja atribuída
         meusTodos: todos.filter(t => t.criadoPorId === userId || lojaIdsDoGestor.includes(t.atribuidoLojaId || 0)),
         minhasVendasComplementares: vendasComplementares.filter(v => lojaIdsDoGestor.includes(v.lojaId)),
-        meusResultadosMensais: resultadosMensais.filter(r => lojaIdsDoGestor.includes(r.lojaId))
+        meusResultadosMensais: resultadosMensais.filter(r => lojaIdsDoGestor.includes(r.lojaId)),
+        meusNPS: dadosNPS.filter((n: any) => lojaIdsDoGestor.includes(n.nps?.lojaId || n.lojaId))
       };
     }
   }
@@ -411,6 +431,7 @@ async function obterContextoPlataforma(userId: number, userRole: string): Promis
     historicoVisitasPorGestor,
     comparacaoVendas,
     estatisticasGerais,
+    dadosNPS,
     gestorAtual,
     contextoPessoal
   };
@@ -563,6 +584,55 @@ function formatarContextoPessoal(contexto: ContextoPlataforma): string {
     texto += `\nTarefas pendentes:\n`;
     todosPendentes.slice(0, 5).forEach(t => {
       texto += `  - ${t.titulo || 'Sem título'}\n`;
+    });
+  }
+  texto += '\n';
+  
+  // NPS das minhas lojas
+  if (cp.meusNPS && cp.meusNPS.length > 0) {
+    const mesesNPS = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+    const camposNPS = ['npsJan', 'npsFev', 'npsMar', 'npsAbr', 'npsMai', 'npsJun', 'npsJul', 'npsAgo', 'npsSet', 'npsOut', 'npsNov', 'npsDez'];
+    const camposTaxa = ['taxaRespostaJan', 'taxaRespostaFev', 'taxaRespostaMar', 'taxaRespostaAbr', 'taxaRespostaMai', 'taxaRespostaJun', 'taxaRespostaJul', 'taxaRespostaAgo', 'taxaRespostaSet', 'taxaRespostaOut', 'taxaRespostaNov', 'taxaRespostaDez'];
+    
+    texto += `📊 NPS DAS MINHAS LOJAS (ELEGIBILIDADE PARA PRÉMIO):\n`;
+    texto += `Regras: NPS >= 80% E Taxa de Resposta >= 7,5% para ter direito a prémio\n\n`;
+    
+    cp.meusNPS.forEach((item: any) => {
+      const nps = item.nps || item;
+      const loja = item.loja || { nome: 'N/A' };
+      const lojaNome = loja.nome || 'N/A';
+      const ano = nps.ano || 'N/A';
+      
+      texto += `  🏪 ${lojaNome} (${ano}):\n`;
+      
+      for (let i = 0; i < 12; i++) {
+        const npsVal = nps[camposNPS[i]];
+        const taxaVal = nps[camposTaxa[i]];
+        if (npsVal != null) {
+          const npsPercent = (parseFloat(npsVal) * 100).toFixed(1);
+          const taxaPercent = taxaVal ? (parseFloat(taxaVal) * 100).toFixed(1) : 'N/A';
+          const npsOk = parseFloat(npsVal) >= 0.80;
+          const taxaOk = taxaVal ? parseFloat(taxaVal) >= 0.075 : false;
+          const elegivel = npsOk && taxaOk;
+          const status = elegivel ? '✅ Elegível' : '❌ Sem prémio';
+          let motivo = '';
+          if (!elegivel) {
+            const motivos: string[] = [];
+            if (!npsOk) motivos.push(`NPS ${npsPercent}% < 80%`);
+            if (!taxaOk) motivos.push(`Taxa ${taxaPercent}% < 7,5%`);
+            motivo = ` (${motivos.join(', ')})`;
+          }
+          texto += `    ${mesesNPS[i]}: NPS ${npsPercent}% | Taxa Resp: ${taxaPercent}% | ${status}${motivo}\n`;
+        }
+      }
+      
+      // NPS e taxa anual
+      if (nps.npsAnoTotal) {
+        const npsAnual = (parseFloat(nps.npsAnoTotal) * 100).toFixed(1);
+        const taxaAnual = nps.taxaRespostaAnoTotal ? (parseFloat(nps.taxaRespostaAnoTotal) * 100).toFixed(1) : 'N/A';
+        texto += `    📊 TOTAL ANO: NPS ${npsAnual}% | Taxa Resp: ${taxaAnual}%\n`;
+      }
+      texto += '\n';
     });
   }
   texto += '\n';
@@ -921,6 +991,85 @@ function formatarContextoParaPrompt(contexto: ContextoPlataforma): string {
     }
   }
   
+  // ========== DADOS NPS - NET PROMOTER SCORE ==========
+  if (contexto.dadosNPS && contexto.dadosNPS.length > 0) {
+    const mesesNPS = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+    const camposNPS = ['npsJan', 'npsFev', 'npsMar', 'npsAbr', 'npsMai', 'npsJun', 'npsJul', 'npsAgo', 'npsSet', 'npsOut', 'npsNov', 'npsDez'];
+    const camposTaxa = ['taxaRespostaJan', 'taxaRespostaFev', 'taxaRespostaMar', 'taxaRespostaAbr', 'taxaRespostaMai', 'taxaRespostaJun', 'taxaRespostaJul', 'taxaRespostaAgo', 'taxaRespostaSet', 'taxaRespostaOut', 'taxaRespostaNov', 'taxaRespostaDez'];
+    
+    texto += `\n🌟 DADOS NPS - NET PROMOTER SCORE (ELEGIBILIDADE PARA PRÉMIO):\n`;
+    texto += `========================================\n`;
+    texto += `REGRAS DE ELEGIBILIDADE: NPS >= 80% E Taxa de Resposta >= 7,5% para ter direito a prémio\n`;
+    texto += `Se NPS < 80% OU Taxa de Resposta < 7,5% -> SEM DIREITO A PRÉMIO (aplica-se a TODAS as comissões)\n\n`;
+    
+    // Agrupar por ano
+    const npsPorAno: Record<number, any[]> = {};
+    contexto.dadosNPS.forEach((item: any) => {
+      const nps = item.nps || item;
+      const ano = nps.ano;
+      if (!npsPorAno[ano]) npsPorAno[ano] = [];
+      npsPorAno[ano].push(item);
+    });
+    
+    // Ordenar anos (mais recente primeiro)
+    const anosOrdenados = Object.keys(npsPorAno).map(Number).sort((a, b) => b - a);
+    
+    for (const ano of anosOrdenados) {
+      const items = npsPorAno[ano];
+      texto += `=== ANO ${ano} (${items.length} lojas com dados NPS) ===\n\n`;
+      
+      // Resumo de elegibilidade por mês
+      for (let mesIdx = 0; mesIdx < 12; mesIdx++) {
+        const lojasComDados = items.filter((item: any) => {
+          const nps = item.nps || item;
+          return nps[camposNPS[mesIdx]] != null;
+        });
+        
+        if (lojasComDados.length > 0) {
+          const elegiveis = lojasComDados.filter((item: any) => {
+            const nps = item.nps || item;
+            const npsVal = parseFloat(nps[camposNPS[mesIdx]]);
+            const taxaVal = nps[camposTaxa[mesIdx]] ? parseFloat(nps[camposTaxa[mesIdx]]) : 0;
+            return npsVal >= 0.80 && taxaVal >= 0.075;
+          });
+          
+          texto += `  📅 ${mesesNPS[mesIdx]} ${ano}: ${elegiveis.length}/${lojasComDados.length} lojas elegíveis para prémio\n`;
+        }
+      }
+      texto += '\n';
+      
+      // Detalhes por loja
+      items.forEach((item: any) => {
+        const nps = item.nps || item;
+        const loja = item.loja || { nome: 'N/A' };
+        const lojaNome = loja.nome || 'N/A';
+        
+        texto += `  🏪 ${lojaNome}:\n`;
+        
+        for (let i = 0; i < 12; i++) {
+          const npsVal = nps[camposNPS[i]];
+          const taxaVal = nps[camposTaxa[i]];
+          if (npsVal != null) {
+            const npsPercent = (parseFloat(npsVal) * 100).toFixed(1);
+            const taxaPercent = taxaVal ? (parseFloat(taxaVal) * 100).toFixed(1) : 'N/A';
+            const npsOk = parseFloat(npsVal) >= 0.80;
+            const taxaOk = taxaVal ? parseFloat(taxaVal) >= 0.075 : false;
+            const elegivel = npsOk && taxaOk;
+            const status = elegivel ? '✅' : '❌';
+            texto += `    ${mesesNPS[i]}: NPS ${npsPercent}% | Taxa ${taxaPercent}% ${status}\n`;
+          }
+        }
+        
+        if (nps.npsAnoTotal) {
+          const npsAnual = (parseFloat(nps.npsAnoTotal) * 100).toFixed(1);
+          const taxaAnual = nps.taxaRespostaAnoTotal ? (parseFloat(nps.taxaRespostaAnoTotal) * 100).toFixed(1) : 'N/A';
+          texto += `    TOTAL ANO: NPS ${npsAnual}% | Taxa ${taxaAnual}%\n`;
+        }
+        texto += '\n';
+      });
+    }
+  }
+  
   return texto;
 }
 
@@ -970,6 +1119,7 @@ Tens acesso a todos os dados da plataforma e podes responder a perguntas sobre:
 - Reuniões (de gestores e de lojas)
 - Resultados mensais e estatísticas de performance (total de serviços, objetivos, desvios, REPARAÇÕES, para-brisas, taxa de reparação)
 - Vendas complementares
+- DADOS NPS (Net Promoter Score): NPS mensal por loja, taxa de resposta, elegibilidade para prémio
 - HISTÓRICO DE VISITAS POR GESTOR: Podes responder a perguntas como "Quando foi a última visita do gestor X à loja Y?" ou "Quantas visitas fez o gestor X este mês?"
 - COMPARAÇÃO DE VENDAS ENTRE PERÍODOS: Podes analisar a evolução das vendas complementares entre meses, identificar tendências de crescimento ou queda, e comparar performance entre lojas
 - POLÍTICA DE COMISSIONAMENTO 2026: Conheces toda a política de prémios e comissões da ExpressGlass. Podes responder a perguntas sobre cálculos de comissões, regras, penalizações e fazer simulações
@@ -1077,9 +1227,13 @@ NOTA: Se a loja não cumprir o FTE mínimo (35 serviços/colaborador), a comiss�
 - Películas: 2,5% do valor faturado (5% para Coimbra Sul)
 - Outros serviços (polimentos, lavagens, etc.): 30% do valor faturado (apenas serviços, não peças)
 NOTA: Se a loja não cumprir o FTE mínimo (35 serviços/colaborador), a comissão de vendas complementares é 0€.
-**5. CRITÉRIOS MÍNIMOS OBRIGATÓRIOS:**
+**5. CRITÉRIOS MÍNIMOS OBRIGATÓRIOS (NPS):**
 - NPS >= 80% (obrigatório para receber prémio)
 - Taxa de Resposta >= 7,5% (obrigatório para receber prémio)
+- Se NPS < 80% OU Taxa de Resposta < 7,5% -> A LOJA NÃO TEM DIREITO A NENHUM PRÉMIO
+- Os dados NPS estão disponíveis na secção "DADOS NPS" do contexto
+- Quando o utilizador perguntar sobre NPS, elegibilidade ou prémios, consulta essa secção
+- Podes cruzar dados NPS com dados de serviços para calcular comissões completas
 
 **6. PENALIZAÇÕES TRIMESTRAIS:**
 Quebras e Danos em Montagem:
@@ -1285,6 +1439,8 @@ Se a informação não estiver preenchida, informa que ainda não foi registada 
 11. Quando o utilizador perguntar COMO fazer algo ou ONDE encontrar algo, usa a secção "ASSISTENTE DE NAVEGAÇÃO E AJUDA" para guiá-lo passo a passo
 12. Sê proativo em sugerir funcionalidades relacionadas que possam ser úteis
 13. **MUITO IMPORTANTE**: Respeita sempre a distinção entre perguntas pessoais e gerais. Se a pergunta for pessoal, usa APENAS os dados pessoais do gestor.
+14. Para perguntas sobre NPS, elegibilidade para prémio, ou cálculos de comissionamento que envolvam NPS, consulta a secção "DADOS NPS" no contexto
+15. Quando calculares comissões, verifica SEMPRE se a loja cumpre os critérios NPS (>= 80%) e Taxa de Resposta (>= 7,5%) - se não cumprir, a comissão é 0€
 
 ${contextoPessoalFormatado}
 ${contextoNacional}`;
@@ -1388,6 +1544,11 @@ export async function getSugestoesPergunta(language: string = 'pt'): Promise<str
       "Se uma loja fizer 50 serviços e 15 reparações com taxa de 30%, quanto ganha?",
       "Quais são as penalizações por quebras acima de 3%?",
       "Qual o mínimo de serviços para ter direito a prémio?",
+      // Perguntas sobre NPS
+      "Qual o NPS das minhas lojas este mês?",
+      "Quais lojas são elegíveis para prémio com base no NPS?",
+      "Quais lojas têm NPS abaixo de 80%?",
+      "Qual a taxa de resposta NPS das lojas da minha zona?",
     ];
   } catch (error) {
     if (language === 'en') {
