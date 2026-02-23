@@ -532,12 +532,22 @@ export async function processarExcelNPS(
       lojasMap.set(normalizeName(loja.nome), loja.id);
     });
 
-    // Encontrar a linha de cabeçalhos (procurar por "Loja" na coluna 2)
+    // Encontrar a linha de cabeçalhos (procurar por "Loja" na coluna A ou B)
     let linhaInicio = -1;
+    let lojaColIndex = -1; // Índice da coluna onde está "Loja"
     for (let i = 0; i < Math.min(data.length, 20); i++) {
-      const primeiraColuna = String(data[i][1] || '').trim().toLowerCase();
-      if (primeiraColuna === 'loja') {
-        linhaInicio = i + 1; // Dados começam na linha seguinte
+      // Verificar coluna A (índice 0)
+      const colA = String(data[i][0] || '').trim().toLowerCase();
+      if (colA === 'loja') {
+        linhaInicio = i + 1;
+        lojaColIndex = 0;
+        break;
+      }
+      // Verificar coluna B (índice 1)
+      const colB = String(data[i][1] || '').trim().toLowerCase();
+      if (colB === 'loja') {
+        linhaInicio = i + 1;
+        lojaColIndex = 1;
         break;
       }
     }
@@ -546,12 +556,18 @@ export async function processarExcelNPS(
       throw new Error('Não foi possível encontrar o cabeçalho "Loja" na folha "Por Loja"');
     }
 
+    // Determinar offset das colunas de dados baseado na posição de "Loja"
+    // Se Loja está na col A (0): dados NPS começam na col B (1), taxa resposta na col O (14)
+    // Se Loja está na col B (1): dados NPS começam na col C (2), taxa resposta na col P (15)
+    const dataOffset = lojaColIndex === 0 ? 1 : 2;
+    const taxaOffset = lojaColIndex === 0 ? 14 : 15;
+
     // Processar cada linha de dados (a partir de linhaInicio)
     for (let i = linhaInicio; i < data.length; i++) {
       const linha = data[i];
       
-      // Coluna B (índice 1): Nome da loja
-      const nomeLoja = String(linha[1] || '').trim();
+      // Nome da loja (coluna A ou B dependendo do offset)
+      const nomeLoja = String(linha[lojaColIndex] || '').trim();
       
       // Parar se encontrar linha vazia ou totais
       if (!nomeLoja || nomeLoja === '' || nomeLoja.toLowerCase().includes('total')) {
@@ -581,36 +597,36 @@ export async function processarExcelNPS(
         const dadosNPS = {
           lojaId,
           ano,
-          // NPS mensal (colunas C-N, índices 2-13)
-          npsJan: parseDecimal(linha[2]),
-          npsFev: parseDecimal(linha[3]),
-          npsMar: parseDecimal(linha[4]),
-          npsAbr: parseDecimal(linha[5]),
-          npsMai: parseDecimal(linha[6]),
-          npsJun: parseDecimal(linha[7]),
-          npsJul: parseDecimal(linha[8]),
-          npsAgo: parseDecimal(linha[9]),
-          npsSet: parseDecimal(linha[10]),
-          npsOut: parseDecimal(linha[11]),
-          npsNov: parseDecimal(linha[12]),
-          npsDez: parseDecimal(linha[13]),
-          // NPS Total (coluna O, índice 14)
-          npsAnoTotal: parseDecimal(linha[14]),
-          // Taxa de Resposta mensal (colunas P-AA, índices 15-26)
-          taxaRespostaJan: parseDecimal(linha[15]),
-          taxaRespostaFev: parseDecimal(linha[16]),
-          taxaRespostaMar: parseDecimal(linha[17]),
-          taxaRespostaAbr: parseDecimal(linha[18]),
-          taxaRespostaMai: parseDecimal(linha[19]),
-          taxaRespostaJun: parseDecimal(linha[20]),
-          taxaRespostaJul: parseDecimal(linha[21]),
-          taxaRespostaAgo: parseDecimal(linha[22]),
-          taxaRespostaSet: parseDecimal(linha[23]),
-          taxaRespostaOut: parseDecimal(linha[24]),
-          taxaRespostaNov: parseDecimal(linha[25]),
-          taxaRespostaDez: parseDecimal(linha[26]),
-          // Taxa de Resposta Total (coluna AB, índice 27)
-          taxaRespostaAnoTotal: parseDecimal(linha[27]),
+          // NPS mensal (12 meses a partir do dataOffset)
+          npsJan: parseDecimal(linha[dataOffset]),
+          npsFev: parseDecimal(linha[dataOffset + 1]),
+          npsMar: parseDecimal(linha[dataOffset + 2]),
+          npsAbr: parseDecimal(linha[dataOffset + 3]),
+          npsMai: parseDecimal(linha[dataOffset + 4]),
+          npsJun: parseDecimal(linha[dataOffset + 5]),
+          npsJul: parseDecimal(linha[dataOffset + 6]),
+          npsAgo: parseDecimal(linha[dataOffset + 7]),
+          npsSet: parseDecimal(linha[dataOffset + 8]),
+          npsOut: parseDecimal(linha[dataOffset + 9]),
+          npsNov: parseDecimal(linha[dataOffset + 10]),
+          npsDez: parseDecimal(linha[dataOffset + 11]),
+          // NPS Total (coluna após os 12 meses)
+          npsAnoTotal: parseDecimal(linha[dataOffset + 12]),
+          // Taxa de Resposta mensal (a partir do taxaOffset)
+          taxaRespostaJan: parseDecimal(linha[taxaOffset]),
+          taxaRespostaFev: parseDecimal(linha[taxaOffset + 1]),
+          taxaRespostaMar: parseDecimal(linha[taxaOffset + 2]),
+          taxaRespostaAbr: parseDecimal(linha[taxaOffset + 3]),
+          taxaRespostaMai: parseDecimal(linha[taxaOffset + 4]),
+          taxaRespostaJun: parseDecimal(linha[taxaOffset + 5]),
+          taxaRespostaJul: parseDecimal(linha[taxaOffset + 6]),
+          taxaRespostaAgo: parseDecimal(linha[taxaOffset + 7]),
+          taxaRespostaSet: parseDecimal(linha[taxaOffset + 8]),
+          taxaRespostaOut: parseDecimal(linha[taxaOffset + 9]),
+          taxaRespostaNov: parseDecimal(linha[taxaOffset + 10]),
+          taxaRespostaDez: parseDecimal(linha[taxaOffset + 11]),
+          // Taxa de Resposta Total
+          taxaRespostaAnoTotal: parseDecimal(linha[taxaOffset + 12]),
           // Metadados
           nomeArquivo,
           uploadedBy,

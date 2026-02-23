@@ -142,3 +142,9 @@
 ## Alterar ícone do Upload NPS
 - [x] Mudar ícone de TrendingUp para SmilePlus (ícone de sorriso/satisfação, adequado para NPS)
 - [ ] Guardar checkpoint
+
+## BUG: Upload NPS não reconhece cabeçalho 'Loja' na folha 'Por Loja'
+- [x] Analisar estrutura - "Loja" está na col A (índice 0), não col B (índice 1)
+- [x] Corrigir código: procurar "Loja" em col A e B, ajustar offsets dinâmicos
+- [ ] Testar upload
+- [ ] Guardar checkpoint
