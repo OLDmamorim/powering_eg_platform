@@ -112,3 +112,10 @@
 - [x] Corrigir bug gestor.user.email no relatorioMensalVolante.ts (mesmo bug do Recalibra)
 - [x] Reverter alterações temporárias
 - [x] Emails enviados com sucesso para: Vila Verde, Braga, Famalicão (2x), Barcelos (2x), Guimarães, Marco Amorim
+
+## Adicionar Filtro por Gestor na Página de RH (Admin)
+- [x] Localizar página de RH do painel admin
+- [x] Adicionar dropdown de filtro por gestor
+- [x] Implementar lógica de filtragem
+- [x] Filtro implementado e funcional
+- [ ] Guardar checkpoint

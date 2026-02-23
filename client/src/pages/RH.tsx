@@ -55,6 +55,7 @@ export default function RH() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterLoja, setFilterLoja] = useState<string>("all");
   const [filterTipo, setFilterTipo] = useState<string>("all");
+  const [filterGestor, setFilterGestor] = useState<string>("all");
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [observacoes, setObservacoes] = useState("");
   
@@ -71,6 +72,7 @@ export default function RH() {
   // Queries
   const { data: colaboradores, isLoading, refetch } = trpc.colaboradores.list.useQuery();
   const { data: lojas } = trpc.lojas.list.useQuery();
+  const { data: gestores } = trpc.gestores.list.useQuery();
   const { data: previewData, isLoading: isLoadingPreview, refetch: refetchPreview } = trpc.colaboradores.previewRelacaoRH.useQuery(undefined, {
     enabled: isPreviewOpen,
   });
@@ -422,7 +424,10 @@ export default function RH() {
     const matchesTipo = filterTipo === "all" ||
       c.tipo === filterTipo;
     
-    return matchesSearch && matchesLoja && matchesTipo;
+    const matchesGestor = filterGestor === "all" ||
+      (c as any).gestorId?.toString() === filterGestor;
+    
+    return matchesSearch && matchesLoja && matchesTipo && matchesGestor;
   }) || [];
 
   // Stats
@@ -800,6 +805,19 @@ export default function RH() {
                   {lojas?.map((loja) => (
                     <SelectItem key={loja.id} value={loja.id.toString()}>
                       {loja.nome}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={filterGestor} onValueChange={setFilterGestor}>
+                <SelectTrigger className="w-full md:w-[200px]">
+                  <SelectValue placeholder="Filtrar por gestor" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos os gestores</SelectItem>
+                  {gestores?.map((gestor) => (
+                    <SelectItem key={gestor.id} value={gestor.id.toString()}>
+                      {gestor.nome}
                     </SelectItem>
                   ))}
                 </SelectContent>
