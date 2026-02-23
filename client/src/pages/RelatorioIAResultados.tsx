@@ -737,6 +737,250 @@ export function RelatorioIAResultados() {
                     </CardContent>
                   </Card>
 
+                  {/* ==================== RESULTADOS DAS LOJAS ==================== */}
+                  {(analiseIA as any).comparacaoLojas && (
+                    <Card className="border-2 border-blue-200 dark:border-blue-800">
+                      <CardHeader className="bg-blue-50 dark:bg-blue-900/20">
+                        <CardTitle className="flex items-center gap-2">
+                          <BarChart3 className="h-5 w-5 text-blue-600" />
+                          {language === 'pt' ? 'Resultados das Lojas - KPIs' : 'Store Results - KPIs'}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="pt-4">
+                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+                          <div className="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-lg text-center">
+                            <Store className="h-4 w-4 text-slate-600 mx-auto mb-1" />
+                            <p className="text-2xl font-bold">{(analiseIA as any).comparacaoLojas.totalLojas}</p>
+                            <p className="text-xs text-muted-foreground">Lojas Analisadas</p>
+                          </div>
+                          <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center">
+                            <Percent className="h-4 w-4 text-blue-600 mx-auto mb-1" />
+                            <p className="text-2xl font-bold text-blue-600">
+                              {(analiseIA as any).comparacaoLojas.totalLojas > 0
+                                ? `${(((analiseIA as any).comparacaoLojas.lojasAcimaMedia / (analiseIA as any).comparacaoLojas.totalLojas) * 100).toFixed(0)}%`
+                                : '0%'}
+                            </p>
+                            <p className="text-xs text-muted-foreground">Taxa Cumprimento</p>
+                          </div>
+                          <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
+                            <CheckCircle2 className="h-4 w-4 text-green-600 mx-auto mb-1" />
+                            <p className="text-2xl font-bold text-green-600">{(analiseIA as any).comparacaoLojas.lojasAcimaMedia}</p>
+                            <p className="text-xs text-muted-foreground">Acima Objetivo</p>
+                          </div>
+                          <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg text-center">
+                            <XCircle className="h-4 w-4 text-red-600 mx-auto mb-1" />
+                            <p className="text-2xl font-bold text-red-600">{(analiseIA as any).comparacaoLojas.lojasAbaixoMedia || ((analiseIA as any).comparacaoLojas.totalLojas - (analiseIA as any).comparacaoLojas.lojasAcimaMedia)}</p>
+                            <p className="text-xs text-muted-foreground">Abaixo Objetivo</p>
+                          </div>
+                          <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg text-center">
+                            <Wrench className="h-4 w-4 text-purple-600 mx-auto mb-1" />
+                            <p className="text-2xl font-bold text-purple-600">
+                              {(analiseIA as any).comparacaoLojas.mediaTaxaReparacao
+                                ? `${((analiseIA as any).comparacaoLojas.mediaTaxaReparacao * 100).toFixed(2)}%`
+                                : 'N/A'}
+                            </p>
+                            <p className="text-xs text-muted-foreground">Taxa Rep. Média</p>
+                          </div>
+                        </div>
+
+                        {/* Destaques */}
+                        <div className="grid gap-4 md:grid-cols-2 mt-4">
+                          <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border-l-4 border-green-500">
+                            <h4 className="font-medium flex items-center gap-2 text-green-700 dark:text-green-400 mb-2">
+                              <Trophy className="h-4 w-4" /> Líder de Performance
+                            </h4>
+                            <p className="text-lg font-bold">{(analiseIA as any).comparacaoLojas.melhorLoja?.nome || 'N/A'}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {(analiseIA as any).comparacaoLojas.melhorLoja?.servicos || 0} serviços | Desvio: {(analiseIA as any).comparacaoLojas.melhorLoja?.desvio !== undefined ? `${((analiseIA as any).comparacaoLojas.melhorLoja.desvio * 100).toFixed(1)}%` : 'N/A'}
+                            </p>
+                          </div>
+                          <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border-l-4 border-red-500">
+                            <h4 className="font-medium flex items-center gap-2 text-red-700 dark:text-red-400 mb-2">
+                              <AlertTriangle className="h-4 w-4" /> Necessita Atenção
+                            </h4>
+                            <p className="text-lg font-bold">{(analiseIA as any).comparacaoLojas.piorLoja?.nome || 'N/A'}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {(analiseIA as any).comparacaoLojas.piorLoja?.servicos || 0} serviços | Desvio: {(analiseIA as any).comparacaoLojas.piorLoja?.desvio !== undefined ? `${((analiseIA as any).comparacaoLojas.piorLoja.desvio * 100).toFixed(1)}%` : 'N/A'}
+                            </p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {/* Ranking das Lojas */}
+                  {(analiseIA as any).dadosGraficos?.rankingServicos && (analiseIA as any).dadosGraficos.rankingServicos.length > 0 && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Trophy className="h-5 w-5 text-amber-600" />
+                          {language === 'pt' ? 'Ranking das Minhas Lojas' : 'My Stores Ranking'}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead className="w-12">#</TableHead>
+                              <TableHead>Loja</TableHead>
+                              <TableHead className="text-right">Serviços</TableHead>
+                              <TableHead className="text-right">Objetivo</TableHead>
+                              <TableHead className="text-right">Desvio</TableHead>
+                              <TableHead className="text-right">Taxa Rep.</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {(analiseIA as any).dadosGraficos.rankingServicos.map((loja: any, idx: number) => (
+                              <TableRow key={idx}>
+                                <TableCell className="font-medium">{idx + 1}</TableCell>
+                                <TableCell className="font-medium">{loja.loja}</TableCell>
+                                <TableCell className="text-right font-bold">{loja.servicos}</TableCell>
+                                <TableCell className="text-right">{loja.objetivo || '-'}</TableCell>
+                                <TableCell className={`text-right font-medium ${(loja.desvio || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                  {loja.desvio !== undefined ? `${(loja.desvio * 100).toFixed(1)}%` : '-'}
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  {loja.taxaReparacao ? `${(loja.taxaReparacao * 100).toFixed(1)}%` : '-'}
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {/* Insights IA - Análise de Resultados */}
+                  {(analiseIA as any).insightsIA && (
+                    <Card className="border-2 border-purple-200 dark:border-purple-800">
+                      <CardHeader className="bg-purple-50 dark:bg-purple-900/20">
+                        <CardTitle className="flex items-center gap-2">
+                          <Sparkles className="h-5 w-5 text-purple-600" />
+                          {language === 'pt' ? 'Insights IA - Análise de Resultados' : 'AI Insights - Results Analysis'}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="pt-4 space-y-4">
+                        {(analiseIA as any).insightsIA.resumoExecutivo && (
+                          <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border-l-4 border-purple-500">
+                            <h4 className="font-medium mb-2 text-purple-700 dark:text-purple-400">Resumo Executivo</h4>
+                            <p className="text-sm leading-relaxed">{(analiseIA as any).insightsIA.resumoExecutivo}</p>
+                          </div>
+                        )}
+                        {(analiseIA as any).insightsIA.analisePerformance && (
+                          <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border-l-4 border-blue-500">
+                            <h4 className="font-medium mb-2 text-blue-700 dark:text-blue-400">Análise de Performance</h4>
+                            <p className="text-sm leading-relaxed">{(analiseIA as any).insightsIA.analisePerformance}</p>
+                          </div>
+                        )}
+                        {(analiseIA as any).insightsIA.analiseVendasComplementares && (
+                          <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg border-l-4 border-amber-500">
+                            <h4 className="font-medium mb-2 text-amber-700 dark:text-amber-400">Vendas Complementares</h4>
+                            <p className="text-sm leading-relaxed">{(analiseIA as any).insightsIA.analiseVendasComplementares}</p>
+                          </div>
+                        )}
+                        {(analiseIA as any).insightsIA.analiseNPS && (
+                          <div className="p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg border-l-4 border-indigo-500">
+                            <h4 className="font-medium mb-2 text-indigo-700 dark:text-indigo-400">Análise NPS</h4>
+                            <p className="text-sm leading-relaxed">{(analiseIA as any).insightsIA.analiseNPS}</p>
+                          </div>
+                        )}
+                        {(analiseIA as any).insightsIA.alertasCriticos && (analiseIA as any).insightsIA.alertasCriticos.length > 0 && (
+                          <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border-l-4 border-red-500">
+                            <h4 className="font-medium mb-2 text-red-700 dark:text-red-400 flex items-center gap-2">
+                              <AlertTriangle className="h-4 w-4" /> Alertas Críticos
+                            </h4>
+                            <ul className="space-y-1">
+                              {(analiseIA as any).insightsIA.alertasCriticos.map((alerta: string, idx: number) => (
+                                <li key={idx} className="text-sm flex items-start gap-2">
+                                  <span className="text-red-500 mt-1">•</span> {alerta}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        {(analiseIA as any).insightsIA.recomendacoesEstrategicas && (analiseIA as any).insightsIA.recomendacoesEstrategicas.length > 0 && (
+                          <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border-l-4 border-green-500">
+                            <h4 className="font-medium mb-2 text-green-700 dark:text-green-400 flex items-center gap-2">
+                              <Lightbulb className="h-4 w-4" /> Recomendações Estratégicas
+                            </h4>
+                            <ul className="space-y-1">
+                              {(analiseIA as any).insightsIA.recomendacoesEstrategicas.map((rec: string, idx: number) => (
+                                <li key={idx} className="text-sm flex items-start gap-2">
+                                  <span className="text-green-500 mt-1">•</span> {rec}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {/* NPS - Elegibilidade para Prémio */}
+                  {(analiseIA as any).dadosNPS && (
+                    <Card className="border-2 border-indigo-200 dark:border-indigo-800">
+                      <CardHeader className="bg-indigo-50 dark:bg-indigo-900/20">
+                        <CardTitle className="flex items-center gap-2">
+                          <Star className="h-5 w-5 text-indigo-600" />
+                          {language === 'pt' ? 'NPS - Elegibilidade para Prémio' : 'NPS - Prize Eligibility'}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="pt-4">
+                        <div className="grid gap-4 md:grid-cols-4 mb-4">
+                          <div className="p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg text-center">
+                            <p className="text-2xl font-bold text-indigo-600">{(analiseIA as any).dadosNPS.npsGlobal}%</p>
+                            <p className="text-xs text-muted-foreground">NPS Médio</p>
+                          </div>
+                          <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center">
+                            <p className="text-2xl font-bold text-blue-600">{(analiseIA as any).dadosNPS.taxaRespostaGlobal}%</p>
+                            <p className="text-xs text-muted-foreground">Taxa Resposta</p>
+                          </div>
+                          <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
+                            <p className="text-2xl font-bold text-green-600">{(analiseIA as any).dadosNPS.lojasElegiveis}</p>
+                            <p className="text-xs text-muted-foreground">Elegíveis</p>
+                          </div>
+                          <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg text-center">
+                            <p className="text-2xl font-bold text-red-600">{(analiseIA as any).dadosNPS.lojasNaoElegiveis}</p>
+                            <p className="text-xs text-muted-foreground">Sem Prémio</p>
+                          </div>
+                        </div>
+                        {(analiseIA as any).dadosNPS.rankingNPS && (analiseIA as any).dadosNPS.rankingNPS.length > 0 && (
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHead className="w-12">#</TableHead>
+                                <TableHead>Loja</TableHead>
+                                <TableHead className="text-right">NPS</TableHead>
+                                <TableHead className="text-right">Taxa Resp.</TableHead>
+                                <TableHead className="text-center">Elegível</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {(analiseIA as any).dadosNPS.rankingNPS.map((loja: any, idx: number) => (
+                                <TableRow key={idx} className={loja.elegivel ? '' : 'bg-red-50/50 dark:bg-red-900/10'}>
+                                  <TableCell>{idx + 1}</TableCell>
+                                  <TableCell className="font-medium">{loja.loja}</TableCell>
+                                  <TableCell className={`text-right font-bold ${loja.nps >= 80 ? 'text-green-600' : 'text-red-600'}`}>{loja.nps}%</TableCell>
+                                  <TableCell className={`text-right ${loja.taxaResposta >= 7.5 ? 'text-green-600' : 'text-red-600'}`}>{loja.taxaResposta}%</TableCell>
+                                  <TableCell className="text-center">
+                                    {loja.elegivel
+                                      ? <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">✓ Elegível</Badge>
+                                      : <Badge variant="destructive" className="text-xs">{loja.motivo || 's/ prémio'}</Badge>
+                                    }
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        )}
+                        <div className="mt-3 flex gap-4 text-xs text-muted-foreground">
+                          <span>✅ NPS ≥ 80% E Taxa ≥ 7.5% = Elegível</span>
+                          <span>❌ NPS &lt; 80% ou Taxa &lt; 7.5% = Sem Prémio</span>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
                   {/* Sugestões e Motivação */}
                   <div className="grid gap-4 md:grid-cols-2">
                     {/* Sugestões */}

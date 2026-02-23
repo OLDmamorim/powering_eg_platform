@@ -214,4 +214,13 @@
 - [x] Mostrar NPS, taxa de resposta e elegibilidade para prémio (4 KPIs)
 - [x] Adicionar alerta NPS nos alertas do dashboard (verde/vermelho)
 - [x] Testar no browser - Barcelos: NPS 100%, Taxa 20%, Elegível
+- [x] Guardar checkpoint
+
+## Bug: Relatório IA Resultados foca em relatórios de visitas em vez de resultados (CORRIGIDO)
+- [x] Analisar aiService.ts - versão gestor não tinha dados de resultados, versão admin dava peso excessivo a relatórios
+- [x] Corrigir versão gestor: adicionar busca de resultados mensais, vendas complementares, NPS
+- [x] Reformular prompt gestor para focar em resultados (serviços, objectivos, desvios, NPS)
+- [x] Adicionar campos analiseResultados, insightsIA, dadosGraficos, comparacaoLojas, dadosNPS ao retorno gestor
+- [x] Actualizar frontend: adicionar secções KPIs, Ranking, Insights IA, NPS ao relatório gestor
+- [x] Testar - relatório agora mostra 69 lojas, KPIs, rankings, análise por zonas, NPS, insights IA
 - [ ] Guardar checkpoint

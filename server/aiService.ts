@@ -2146,7 +2146,6 @@ interface RelatorioIAGestorResult {
     resolvidos: Array<{ loja: string; descricao: string; dataResolucao: string }>;
     ativos: number;
     analise: string;
-    // NOVOS CAMPOS v6.3.1
     totalResolvidos: number;
     totalPorResolver: number;
     porLoja: Array<{ loja: string; resolvidos: number; porResolver: number }>;
@@ -2157,12 +2156,63 @@ interface RelatorioIAGestorResult {
     totalCompletos: number;
     lojasVisitadas: string[];
     resumoConteudo: string;
-    // NOVOS CAMPOS v6.3.1
     visitasPorLoja: Array<{ loja: string; visitas: number; ultimaVisita: string | null }>;
     lojasNaoVisitadas: string[];
   };
   sugestoesGestor: string[];
   mensagemMotivacional: string;
+  // NOVOS CAMPOS - Dados de Resultados (serviços, objectivos, desvios, vendas, NPS)
+  analiseResultados?: {
+    resumoPerformance: string;
+    lojasDestaque: string[];
+    lojasAtencao: string[];
+    tendenciasServicos: string;
+    recomendacoes: string[];
+  };
+  insightsIA?: {
+    resumoExecutivo: string;
+    analisePerformance: string;
+    analiseVendasComplementares: string;
+    analiseTendencias: string;
+    analiseNPS?: string;
+    recomendacoesEstrategicas: string[];
+    alertasCriticos: string[];
+  };
+  dadosGraficos?: {
+    rankingServicos: Array<{ lojaId?: number; loja: string; zona?: string | null; servicos: number; desvio: number; objetivo?: number; taxaReparacao?: number }>;
+    evolucaoMensal: Array<{ mes: string; servicos: number; objetivo: number }>;
+    distribuicaoDesvios: Array<{ faixa: string; count: number }>;
+  };
+  comparacaoLojas?: {
+    melhorLoja: { nome: string; servicos: number; desvio: number; taxaReparacao?: number; objetivo?: number } | null;
+    piorLoja: { nome: string; servicos: number; desvio: number; taxaReparacao?: number; objetivo?: number } | null;
+    maiorEvolucao: { nome: string; variacao: number; servicosAtuais?: number; servicosAnteriores?: number } | null;
+    menorEvolucao: { nome: string; variacao: number; servicosAtuais?: number; servicosAnteriores?: number } | null;
+    totalLojas: number;
+    lojasAcimaMedia: number;
+    lojasAbaixoMedia: number;
+    mediaServicos: number;
+    mediaTaxaReparacao: number;
+  };
+  estatisticasComplementares?: {
+    totalLojas: number;
+    lojasComVendas: number;
+    lojasSemVendas: number;
+    somaVendas: number;
+    somaEscovas: number;
+    totalEscovasQtd: number;
+    mediaEscovasPercent: number;
+    percentLojasComEscovas: number;
+  };
+  dadosNPS?: {
+    npsGlobal: number;
+    taxaRespostaGlobal: number;
+    totalLojas: number;
+    lojasElegiveis: number;
+    lojasNaoElegiveis: number;
+    motivosInelegibilidade: { npsBaixo: number; taxaBaixa: number };
+    rankingNPS: Array<{ loja: string; nps: number; taxaResposta: number; elegivel: boolean; motivo?: string }>;
+  };
 }
 
 /**
@@ -2391,6 +2441,306 @@ export async function gerarRelatorioIAGestor(
     }
   }).filter(Boolean);
   
+  // ========== BUSCAR DADOS DE RESULTADOS DAS LOJAS DO GESTOR ==========
+  const lojasIdsGestor = lojasDoGestor.map((l: any) => l.id);
+  
+  // Calcular meses a buscar baseado no período
+  const mesesParaBuscarGestor: Array<{ mes: number; ano: number }> = [];
+  const agoraGestor = new Date();
+  
+  // Tentar parsear período como meses específicos
+  if (periodo.includes(',') || /[A-Za-z]/.test(periodo)) {
+    // Período é label de múltiplos meses (ex: "Fevereiro 2026, Março 2026")
+    const NOMES_MESES_MAP: Record<string, number> = {
+      'janeiro': 1, 'fevereiro': 2, 'março': 3, 'abril': 4, 'maio': 5, 'junho': 6,
+      'julho': 7, 'agosto': 8, 'setembro': 9, 'outubro': 10, 'novembro': 11, 'dezembro': 12
+    };
+    const partes = periodo.split(',').map(p => p.trim());
+    for (const parte of partes) {
+      const match = parte.match(/(\w+)\s+(\d{4})/);
+      if (match) {
+        const mesNome = match[1].toLowerCase();
+        const ano = parseInt(match[2]);
+        const mes = NOMES_MESES_MAP[mesNome];
+        if (mes && ano) mesesParaBuscarGestor.push({ mes, ano });
+      }
+    }
+  }
+  
+  if (periodo.startsWith('meses_')) {
+    const partes = periodo.replace('meses_', '').split('_');
+    for (const parte of partes) {
+      const [mesStr, anoStr] = parte.split('/');
+      const mes = parseInt(mesStr, 10);
+      const ano = parseInt(anoStr, 10);
+      if (!isNaN(mes) && !isNaN(ano)) mesesParaBuscarGestor.push({ mes, ano });
+    }
+  }
+  
+  if (periodo === 'mes_anterior') {
+    let mesAnt = agoraGestor.getMonth();
+    let anoAnt = agoraGestor.getFullYear();
+    if (mesAnt === 0) { mesAnt = 12; anoAnt--; }
+    mesesParaBuscarGestor.push({ mes: mesAnt, ano: anoAnt });
+  } else if (periodo === 'mes_atual') {
+    mesesParaBuscarGestor.push({ mes: agoraGestor.getMonth() + 1, ano: agoraGestor.getFullYear() });
+  }
+  
+  // Se não conseguiu parsear, tentar extrair do dataInicio/dataFim
+  if (mesesParaBuscarGestor.length === 0) {
+    const mesI = inicio.getMonth() + 1;
+    const anoI = inicio.getFullYear();
+    const mesF = fim.getMonth() + 1;
+    const anoF = fim.getFullYear();
+    let m = mesI, a = anoI;
+    while (a < anoF || (a === anoF && m <= mesF)) {
+      mesesParaBuscarGestor.push({ mes: m, ano: a });
+      m++;
+      if (m > 12) { m = 1; a++; }
+    }
+  }
+  
+  console.log('[gerarRelatorioIAGestor] Meses para buscar resultados:', mesesParaBuscarGestor);
+  
+  // Buscar dados de resultados (serviços, objectivos, desvios)
+  let rankingLojasGestor: any[] = [];
+  let statsResultadosGestor: any = null;
+  let comparacaoLojasGestor: any = null;
+  let dadosGraficosGestor: any = undefined;
+  let estatisticasComplementaresGestor: any = undefined;
+  let dadosNPSGestor: any = undefined;
+  
+  try {
+    const lojaAgregadoG = new Map<number, {
+      lojaId: number; lojaNome: string; zona: string | null;
+      totalServicos: number; objetivoMensal: number;
+      taxaReparacao: number; mesesContados: number;
+    }>();
+    let somaServG = 0, somaObjG = 0, contLojasG = 0, somaDesvioG = 0, somaTaxaRepG = 0, lojasAcimaObjG = 0;
+    
+    for (const { mes, ano } of mesesParaBuscarGestor) {
+      const dadosMes = await db.getDadosAnaliseAvancada(mes, ano, lojasIdsGestor);
+      const rankingMes = await db.getRankingLojas('totalServicos', mes, ano, 100, lojasIdsGestor) || [];
+      
+      if (dadosMes?.estatisticas) {
+        const stats = dadosMes.estatisticas;
+        somaServG += stats.somaServicos || 0;
+        somaObjG += stats.somaObjetivos || 0;
+        if (stats.totalLojas > 0) {
+          contLojasG += stats.totalLojas;
+          somaDesvioG += (stats.mediaDesvioPercentual || 0) * stats.totalLojas;
+          somaTaxaRepG += (stats.mediaTaxaReparacao || 0) * stats.totalLojas;
+          lojasAcimaObjG += stats.lojasAcimaObjetivo || 0;
+        }
+      }
+      
+      for (const loja of rankingMes) {
+        const existing = lojaAgregadoG.get(loja.lojaId);
+        if (existing) {
+          existing.totalServicos += loja.totalServicos || 0;
+          existing.objetivoMensal += loja.objetivoMensal || 0;
+          existing.taxaReparacao += loja.taxaReparacao || 0;
+          existing.mesesContados++;
+        } else {
+          lojaAgregadoG.set(loja.lojaId, {
+            lojaId: loja.lojaId, lojaNome: loja.lojaNome, zona: loja.zona,
+            totalServicos: loja.totalServicos || 0, objetivoMensal: loja.objetivoMensal || 0,
+            taxaReparacao: loja.taxaReparacao || 0, mesesContados: 1,
+          });
+        }
+      }
+    }
+    
+    const totalLojasUnicasG = lojaAgregadoG.size;
+    statsResultadosGestor = {
+      totalLojas: totalLojasUnicasG,
+      somaServicos: somaServG,
+      somaObjetivos: somaObjG,
+      mediaDesvioPercentual: contLojasG > 0 ? somaDesvioG / contLojasG : 0,
+      mediaTaxaReparacao: contLojasG > 0 ? somaTaxaRepG / contLojasG : 0,
+      lojasAcimaObjetivo: Math.round(lojasAcimaObjG / Math.max(mesesParaBuscarGestor.length, 1)),
+    };
+    
+    rankingLojasGestor = Array.from(lojaAgregadoG.values()).map(loja => {
+      const desvio = loja.objetivoMensal > 0 ? (loja.totalServicos - loja.objetivoMensal) / loja.objetivoMensal : 0;
+      const taxaRepMedia = loja.mesesContados > 0 ? loja.taxaReparacao / loja.mesesContados : 0;
+      return {
+        lojaId: loja.lojaId, lojaNome: loja.lojaNome, zona: loja.zona,
+        totalServicos: loja.totalServicos, objetivoMensal: loja.objetivoMensal,
+        desvioPercentualMes: desvio, taxaReparacao: taxaRepMedia,
+        valor: loja.totalServicos,
+      };
+    }).sort((a, b) => b.totalServicos - a.totalServicos);
+    
+    // Comparação de lojas
+    if (rankingLojasGestor.length > 0) {
+      const mediaServG = rankingLojasGestor.reduce((s: number, l: any) => s + l.totalServicos, 0) / rankingLojasGestor.length;
+      const mediaTaxaRepG = rankingLojasGestor.reduce((s: number, l: any) => s + l.taxaReparacao, 0) / rankingLojasGestor.length;
+      comparacaoLojasGestor = {
+        melhorLoja: { nome: rankingLojasGestor[0].lojaNome, servicos: rankingLojasGestor[0].totalServicos, desvio: rankingLojasGestor[0].desvioPercentualMes, taxaReparacao: rankingLojasGestor[0].taxaReparacao, objetivo: rankingLojasGestor[0].objetivoMensal },
+        piorLoja: { nome: rankingLojasGestor[rankingLojasGestor.length - 1].lojaNome, servicos: rankingLojasGestor[rankingLojasGestor.length - 1].totalServicos, desvio: rankingLojasGestor[rankingLojasGestor.length - 1].desvioPercentualMes, taxaReparacao: rankingLojasGestor[rankingLojasGestor.length - 1].taxaReparacao, objetivo: rankingLojasGestor[rankingLojasGestor.length - 1].objetivoMensal },
+        maiorEvolucao: null, menorEvolucao: null,
+        totalLojas: rankingLojasGestor.length,
+        lojasAcimaMedia: rankingLojasGestor.filter((l: any) => l.desvioPercentualMes >= 0).length,
+        lojasAbaixoMedia: rankingLojasGestor.filter((l: any) => l.desvioPercentualMes < 0).length,
+        mediaServicos: Math.round(mediaServG),
+        mediaTaxaReparacao: parseFloat(mediaTaxaRepG.toFixed(4)),
+      };
+    }
+    
+    // Dados gráficos
+    const distribuicaoDesviosG: Array<{ faixa: string; count: number }> = [];
+    const faixasG = [
+      { min: -Infinity, max: -20, label: '< -20%' }, { min: -20, max: -10, label: '-20% a -10%' },
+      { min: -10, max: 0, label: '-10% a 0%' }, { min: 0, max: 10, label: '0% a +10%' },
+      { min: 10, max: 20, label: '+10% a +20%' }, { min: 20, max: Infinity, label: '> +20%' },
+    ];
+    faixasG.forEach(faixa => {
+      const count = rankingLojasGestor.filter((l: any) => {
+        const d = (l.desvioPercentualMes || 0) * 100;
+        return d > faixa.min && d <= faixa.max;
+      }).length;
+      distribuicaoDesviosG.push({ faixa: faixa.label, count });
+    });
+    
+    dadosGraficosGestor = {
+      rankingServicos: rankingLojasGestor.map((l: any) => ({
+        lojaId: l.lojaId, loja: l.lojaNome, zona: l.zona,
+        servicos: l.totalServicos, desvio: l.desvioPercentualMes,
+        objetivo: l.objetivoMensal, taxaReparacao: l.taxaReparacao,
+      })),
+      evolucaoMensal: [] as Array<{ mes: string; servicos: number; objetivo: number }>,
+      distribuicaoDesvios: distribuicaoDesviosG,
+    };
+    
+    // Buscar vendas complementares
+    const primeiroMesG = mesesParaBuscarGestor[0];
+    if (primeiroMesG) {
+      const dadosAvG = await db.getDadosAnaliseAvancada(primeiroMesG.mes, primeiroMesG.ano, lojasIdsGestor);
+      if (dadosAvG?.estatisticasComplementares) {
+        estatisticasComplementaresGestor = dadosAvG.estatisticasComplementares;
+      }
+    }
+  } catch (error) {
+    console.log('[gerarRelatorioIAGestor] Erro ao buscar dados de resultados:', error);
+  }
+  
+  // ========== BUSCAR DADOS NPS DAS LOJAS DO GESTOR ==========
+  try {
+    const camposNPS = ['npsJan', 'npsFev', 'npsMar', 'npsAbr', 'npsMai', 'npsJun', 'npsJul', 'npsAgo', 'npsSet', 'npsOut', 'npsNov', 'npsDez'];
+    const camposTaxa = ['taxaRespostaJan', 'taxaRespostaFev', 'taxaRespostaMar', 'taxaRespostaAbr', 'taxaRespostaMai', 'taxaRespostaJun', 'taxaRespostaJul', 'taxaRespostaAgo', 'taxaRespostaSet', 'taxaRespostaOut', 'taxaRespostaNov', 'taxaRespostaDez'];
+    
+    const anosUnicosG = [...new Set(mesesParaBuscarGestor.map(m => m.ano))];
+    let todosNPSG: any[] = [];
+    for (const ano of anosUnicosG) {
+      const npsAno = await db.getNPSDadosTodasLojas(ano);
+      todosNPSG = todosNPSG.concat(npsAno.map((n: any) => ({ ...n, anoConsulta: ano })));
+    }
+    
+    // Filtrar por lojas do gestor
+    todosNPSG = todosNPSG.filter((n: any) => lojasIdsGestor.includes(n.nps.lojaId));
+    
+    if (todosNPSG.length > 0) {
+      const npsRankingG: Array<{ loja: string; nps: number; taxaResposta: number; elegivel: boolean; motivo?: string }> = [];
+      let somaNPSG = 0, somaTaxaRespG = 0, contNPSG = 0;
+      
+      for (const item of todosNPSG) {
+        const lojaNome = item.loja?.nome || 'Desconhecida';
+        let npsTotal = 0, taxaTotal = 0, mesesComDados = 0;
+        
+        for (const { mes, ano } of mesesParaBuscarGestor) {
+          if (item.anoConsulta !== ano) continue;
+          const idx = mes - 1;
+          const npsVal = item.nps[camposNPS[idx]];
+          const taxaVal = item.nps[camposTaxa[idx]];
+          if (npsVal !== null && npsVal !== undefined) {
+            npsTotal += parseFloat(npsVal);
+            taxaTotal += taxaVal ? parseFloat(taxaVal) : 0;
+            mesesComDados++;
+          }
+        }
+        
+        if (mesesComDados > 0) {
+          const npsMedia = (npsTotal / mesesComDados) * 100;
+          const taxaMedia = (taxaTotal / mesesComDados) * 100;
+          const elegivel = npsMedia >= 80 && taxaMedia >= 7.5;
+          let motivo = '';
+          if (!elegivel) {
+            if (npsMedia < 80 && taxaMedia < 7.5) motivo = 'NPS < 80% e Taxa < 7.5%';
+            else if (npsMedia < 80) motivo = 'NPS < 80%';
+            else motivo = 'Taxa de Resposta < 7.5%';
+          }
+          npsRankingG.push({ loja: lojaNome, nps: parseFloat(npsMedia.toFixed(1)), taxaResposta: parseFloat(taxaMedia.toFixed(1)), elegivel, motivo: motivo || undefined });
+          somaNPSG += npsMedia; somaTaxaRespG += taxaMedia; contNPSG++;
+        }
+      }
+      
+      npsRankingG.sort((a, b) => b.nps - a.nps);
+      
+      dadosNPSGestor = {
+        npsGlobal: parseFloat((contNPSG > 0 ? somaNPSG / contNPSG : 0).toFixed(1)),
+        taxaRespostaGlobal: parseFloat((contNPSG > 0 ? somaTaxaRespG / contNPSG : 0).toFixed(1)),
+        totalLojas: contNPSG,
+        lojasElegiveis: npsRankingG.filter(l => l.elegivel).length,
+        lojasNaoElegiveis: npsRankingG.filter(l => !l.elegivel).length,
+        motivosInelegibilidade: { npsBaixo: npsRankingG.filter(l => l.nps < 80).length, taxaBaixa: npsRankingG.filter(l => l.taxaResposta < 7.5).length },
+        rankingNPS: npsRankingG,
+      };
+    }
+  } catch (error) {
+    console.log('[gerarRelatorioIAGestor] Erro ao buscar dados NPS:', error);
+  }
+  
+  // ========== PREPARAR TEXTO DE RESULTADOS PARA IA ==========
+  let resultadosTexto = '';
+  if (statsResultadosGestor) {
+    const { somaServicos, somaObjetivos, mediaDesvioPercentual, mediaTaxaReparacao, lojasAcimaObjetivo, totalLojas } = statsResultadosGestor;
+    const taxaCumprimento = totalLojas > 0 ? ((lojasAcimaObjetivo || 0) / totalLojas * 100).toFixed(1) : '0';
+    resultadosTexto = `
+═══ MÉTRICAS DE RESULTADOS DAS MINHAS LOJAS ═══
+• Total de Serviços Realizados: ${somaServicos || 0}
+• Objetivo Mensal Total: ${somaObjetivos || 0}
+• Desvio Médio vs Objetivo: ${mediaDesvioPercentual >= 0 ? '+' : ''}${(mediaDesvioPercentual * 100)?.toFixed(2) || 0}%
+• Taxa de Reparação Média: ${(mediaTaxaReparacao * 100)?.toFixed(2) || 0}%
+• Lojas ACIMA do objetivo: ${lojasAcimaObjetivo || 0} de ${totalLojas} (${taxaCumprimento}%)
+
+═══ RANKING DAS MINHAS LOJAS (por serviços) ═══
+`;
+    rankingLojasGestor.forEach((l: any, i: number) => {
+      resultadosTexto += `${i + 1}. ${l.lojaNome} - Serviços: ${l.totalServicos}/${l.objetivoMensal} | Desvio: ${l.desvioPercentualMes >= 0 ? '+' : ''}${(l.desvioPercentualMes * 100).toFixed(1)}% | Taxa Rep: ${(l.taxaReparacao * 100).toFixed(1)}%\n`;
+    });
+  }
+  
+  // Vendas complementares texto
+  let vendasTexto = '';
+  if (estatisticasComplementaresGestor) {
+    const ec = estatisticasComplementaresGestor;
+    vendasTexto = `
+═══ VENDAS COMPLEMENTARES ═══
+• Total Vendas: €${ec.somaVendas?.toFixed(2) || 0}
+• Lojas com Vendas: ${ec.lojasComVendas}/${ec.totalLojas}
+• Total Escovas: ${ec.totalEscovasQtd} unidades
+• Média % Escovas/Serviços: ${(ec.mediaEscovasPercent * 100).toFixed(2)}%
+`;
+  }
+  
+  // NPS texto
+  let npsTextoGestor = '';
+  if (dadosNPSGestor) {
+    npsTextoGestor = `
+═══ NPS - ELEGIBILIDADE PARA PRÉMIO ═══
+• NPS Médio: ${dadosNPSGestor.npsGlobal}%
+• Taxa de Resposta Média: ${dadosNPSGestor.taxaRespostaGlobal}%
+• Lojas Elegíveis: ${dadosNPSGestor.lojasElegiveis} de ${dadosNPSGestor.totalLojas}
+• Lojas SEM Prémio: ${dadosNPSGestor.lojasNaoElegiveis}
+
+DETALHE POR LOJA:
+`;
+    dadosNPSGestor.rankingNPS.forEach((l: any, i: number) => {
+      npsTextoGestor += `${i + 1}. ${l.loja} - NPS: ${l.nps}% | Taxa: ${l.taxaResposta}% | ${l.elegivel ? '✅ Elegível' : `❌ ${l.motivo}`}\n`;
+    });
+  }
+
   // Preparar dados para análise IA
   const dadosParaIA = {
     periodo,
@@ -2410,13 +2760,16 @@ export async function gerarRelatorioIAGestor(
     resumoReunioes
   };
   
-  // Chamar IA para análise qualitativa
-  let analiseIA = {
+  // Chamar IA para análise FOCADA EM RESULTADOS
+  let analiseIA: any = {
     resumoGeral: '',
     analisePontosDestacados: '',
     analisePendentes: '',
     sugestoesGestor: [] as string[],
-    mensagemMotivacional: ''
+    mensagemMotivacional: '',
+    // Novos campos de resultados
+    analiseResultados: { resumoPerformance: '', lojasDestaque: [], lojasAtencao: [], tendenciasServicos: '', recomendacoes: [] },
+    insightsIA: { resumoExecutivo: '', analisePerformance: '', analiseVendasComplementares: '', analiseTendencias: '', analiseNPS: '', recomendacoesEstrategicas: [], alertasCriticos: [] },
   };
   
   try {
@@ -2424,50 +2777,44 @@ export async function gerarRelatorioIAGestor(
       messages: [
         {
           role: "system",
-          content: `És um assistente de gestão para supervisores de lojas Express Glass.
-Analisa os dados do gestor e fornece feedback qualitativo e construtivo.
-Responde SEMPRE em português europeu.
-Sê específico, menciona lojas e situações concretas quando possível.
-O tom deve ser profissional mas motivador.`
+          content: `És um ANALISTA DE DADOS SÉNIOR especializado em performance de redes de retalho automóvel.
+A tua análise deve ser QUANTITATIVA, baseada em números e métricas concretas.
+Foca-te nos RESULTADOS das lojas (serviços, objectivos, desvios, vendas complementares, NPS).
+Os relatórios de visitas são CONTEXTO SECUNDÁRIO - a prioridade são os dados de resultados.
+Responde SEMPRE em português europeu e em formato JSON válido.
+Tom: profissional, direto, orientado para ação.`
         },
         {
           role: "user",
-          content: `Analisa os seguintes dados do gestor no período ${periodo}:
+          content: `Analisa os RESULTADOS das lojas do gestor no período ${periodo}:
 
-RELATÓRIOS E REUNIÕES SUBMETIDOS:
-- Relatórios Livres: ${dadosParaIA.totalRelatoriosLivres}
-- Relatórios Completos: ${dadosParaIA.totalRelatoriosCompletos}
-- Reuniões de Lojas: ${dadosParaIA.totalReunioes}
-- Lojas visitadas/contactadas: ${dadosParaIA.lojasVisitadas.join(', ') || 'Nenhuma'}
+${resultadosTexto || 'Sem dados de resultados disponíveis para este período.'}
+${vendasTexto}
+${npsTextoGestor}
 
-RESUMO DAS REUNIÕES:
-${dadosParaIA.resumoReunioes.length > 0 ? dadosParaIA.resumoReunioes.map((r: any) => `- ${r.lojas} (${r.data}): ${r.conteudo || r.resumoIA || 'Sem conteúdo'}`).join('\n') : 'Nenhuma reunião registada'}
+CONTEXTO ADICIONAL (relatórios de supervisão):
+- Relatórios Livres: ${dadosParaIA.totalRelatoriosLivres} | Completos: ${dadosParaIA.totalRelatoriosCompletos} | Reuniões: ${dadosParaIA.totalReunioes}
+- Lojas visitadas: ${dadosParaIA.lojasVisitadas.join(', ') || 'Nenhuma'}
+- Pontos Positivos: ${dadosParaIA.pontosPositivos.length > 0 ? dadosParaIA.pontosPositivos.slice(0, 3).join('; ') : 'Nenhum'}
+- Pontos Negativos: ${dadosParaIA.pontosNegativos.length > 0 ? dadosParaIA.pontosNegativos.slice(0, 3).join('; ') : 'Nenhum'}
+- Pendentes: ${dadosParaIA.pendentesCriados} criados, ${dadosParaIA.pendentesResolvidos} resolvidos, ${totalPendentesAtivos} ativos
 
-PONTOS POSITIVOS DESTACADOS:
-${dadosParaIA.pontosPositivos.length > 0 ? dadosParaIA.pontosPositivos.join('\n') : 'Nenhum ponto positivo registado'}
+Produz uma ANÁLISE EXECUTIVA focada nos RESULTADOS com:
+1. resumoGeral: Resumo executivo da performance das lojas (3-4 frases, focado em serviços/objectivos/desvios)
+2. analisePontosDestacados: Análise dos pontos positivos e negativos (2-3 frases)
+3. analisePendentes: Análise da gestão de pendentes (2-3 frases)
+4. sugestoesGestor: 5-7 sugestões concretas baseadas nos RESULTADOS
+5. mensagemMotivacional: Mensagem motivacional (1-2 frases)
+6. analiseResultados: { resumoPerformance, lojasDestaque ("[Loja] (+X% vs obj, Y serviços)"), lojasAtencao, tendenciasServicos, recomendacoes }
+7. insightsIA: { resumoExecutivo, analisePerformance, analiseVendasComplementares, analiseTendencias, analiseNPS, recomendacoesEstrategicas, alertasCriticos }
 
-PONTOS NEGATIVOS DESTACADOS:
-${dadosParaIA.pontosNegativos.length > 0 ? dadosParaIA.pontosNegativos.join('\n') : 'Nenhum ponto negativo registado'}
-
-PENDENTES:
-- Criados no período: ${dadosParaIA.pendentesCriados}
-- Resolvidos no período: ${dadosParaIA.pendentesResolvidos}
-- Ativos (total): ${dadosParaIA.pendentesAtivos}
-
-Fornece uma análise em formato JSON com:
-{
-  "resumoGeral": "Resumo geral do trabalho do gestor no período (2-3 frases)",
-  "analisePontosDestacados": "Análise dos pontos positivos e negativos registados (2-3 frases)",
-  "analisePendentes": "Análise da gestão de pendentes (2-3 frases)",
-  "sugestoesGestor": ["Sugestão 1", "Sugestão 2", "Sugestão 3"],
-  "mensagemMotivacional": "Mensagem motivacional personalizada (1-2 frases)"
-}`
+Responde em JSON válido.`
         }
       ],
       response_format: {
         type: "json_schema",
         json_schema: {
-          name: "analise_gestor",
+          name: "analise_resultados_gestor",
           strict: true,
           schema: {
             type: "object",
@@ -2476,9 +2823,35 @@ Fornece uma análise em formato JSON com:
               analisePontosDestacados: { type: "string" },
               analisePendentes: { type: "string" },
               sugestoesGestor: { type: "array", items: { type: "string" } },
-              mensagemMotivacional: { type: "string" }
+              mensagemMotivacional: { type: "string" },
+              analiseResultados: {
+                type: "object",
+                properties: {
+                  resumoPerformance: { type: "string" },
+                  lojasDestaque: { type: "array", items: { type: "string" } },
+                  lojasAtencao: { type: "array", items: { type: "string" } },
+                  tendenciasServicos: { type: "string" },
+                  recomendacoes: { type: "array", items: { type: "string" } },
+                },
+                required: ["resumoPerformance", "lojasDestaque", "lojasAtencao", "tendenciasServicos", "recomendacoes"],
+                additionalProperties: false,
+              },
+              insightsIA: {
+                type: "object",
+                properties: {
+                  resumoExecutivo: { type: "string" },
+                  analisePerformance: { type: "string" },
+                  analiseVendasComplementares: { type: "string" },
+                  analiseTendencias: { type: "string" },
+                  analiseNPS: { type: "string" },
+                  recomendacoesEstrategicas: { type: "array", items: { type: "string" } },
+                  alertasCriticos: { type: "array", items: { type: "string" } },
+                },
+                required: ["resumoExecutivo", "analisePerformance", "analiseVendasComplementares", "analiseTendencias", "analiseNPS", "recomendacoesEstrategicas", "alertasCriticos"],
+                additionalProperties: false,
+              },
             },
-            required: ["resumoGeral", "analisePontosDestacados", "analisePendentes", "sugestoesGestor", "mensagemMotivacional"],
+            required: ["resumoGeral", "analisePontosDestacados", "analisePendentes", "sugestoesGestor", "mensagemMotivacional", "analiseResultados", "insightsIA"],
             additionalProperties: false
           }
         }
@@ -2491,9 +2864,8 @@ Fornece uma análise em formato JSON com:
     }
   } catch (error) {
     console.error('Erro ao gerar análise IA para gestor:', error);
-    // Fallback com análise básica
     analiseIA = {
-      resumoGeral: `No período selecionado, foram submetidos ${livresFiltrados.length} relatórios livres e ${completosFiltrados.length} relatórios completos, visitando ${lojasVisitadas.size} lojas.`,
+      resumoGeral: `No período selecionado, as lojas realizaram ${statsResultadosGestor?.somaServicos || 0} serviços contra um objectivo de ${statsResultadosGestor?.somaObjetivos || 0}.`,
       analisePontosDestacados: pontosPositivos.length > pontosNegativos.length 
         ? 'Foram registados mais pontos positivos que negativos, indicando uma tendência positiva.'
         : 'Foram identificados alguns pontos de melhoria que merecem atenção.',
@@ -2501,11 +2873,13 @@ Fornece uma análise em formato JSON com:
         ? 'Boa gestão de pendentes - foram resolvidos tantos ou mais pendentes do que os criados.'
         : 'Existem pendentes acumulados que devem ser priorizados.',
       sugestoesGestor: [
-        'Continue a documentar os pontos positivos e negativos em cada visita',
-        'Priorize a resolução dos pendentes mais antigos',
-        'Mantenha uma frequência regular de visitas a todas as lojas'
+        'Focar nas lojas abaixo do objectivo para melhorar a taxa de cumprimento',
+        'Priorizar a resolução dos pendentes mais antigos',
+        'Incentivar vendas complementares nas lojas com menor penetração'
       ],
-      mensagemMotivacional: 'O seu trabalho de supervisão é fundamental para o sucesso da rede. Continue assim!'
+      mensagemMotivacional: 'O seu trabalho de supervisão é fundamental para o sucesso da rede. Continue assim!',
+      analiseResultados: { resumoPerformance: 'Análise de IA temporariamente indisponível', lojasDestaque: [], lojasAtencao: [], tendenciasServicos: '', recomendacoes: [] },
+      insightsIA: { resumoExecutivo: 'Análise de IA temporariamente indisponível', analisePerformance: '', analiseVendasComplementares: '', analiseTendencias: '', analiseNPS: '', recomendacoesEstrategicas: [], alertasCriticos: [] },
     };
   }
   
@@ -2545,7 +2919,6 @@ Fornece uma análise em formato JSON com:
       resolvidos: pendentesResolvidosFormatados,
       ativos: totalPendentesAtivos,
       analise: analiseIA.analisePendentes,
-      // NOVOS CAMPOS v6.3.1
       totalResolvidos: totalPendentesResolvidos,
       totalPorResolver: totalPendentesAtivos,
       porLoja: pendentesPorLojaArray,
@@ -2556,12 +2929,18 @@ Fornece uma análise em formato JSON com:
       totalCompletos: completosFiltrados.length,
       lojasVisitadas: Array.from(lojasVisitadas),
       resumoConteudo: `${livresFiltrados.length + completosFiltrados.length} relatórios submetidos no período`,
-      // NOVOS CAMPOS v6.3.1
       visitasPorLoja,
       lojasNaoVisitadas
     },
     sugestoesGestor: analiseIA.sugestoesGestor,
-    mensagemMotivacional: analiseIA.mensagemMotivacional
+    mensagemMotivacional: analiseIA.mensagemMotivacional,
+    // NOVOS CAMPOS - Dados de Resultados
+    analiseResultados: analiseIA.analiseResultados || undefined,
+    insightsIA: analiseIA.insightsIA || undefined,
+    dadosGraficos: dadosGraficosGestor,
+    comparacaoLojas: comparacaoLojasGestor,
+    estatisticasComplementares: estatisticasComplementaresGestor,
+    dadosNPS: dadosNPSGestor,
   };
 }
 
