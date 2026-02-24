@@ -1,0 +1,40 @@
+{
+  "query": "SELECT tl.token, tl.ativo, tl.lojaId, l.nome FROM tokens_loja tl JOIN lojas l ON tl.lojaId = l.id WHERE tl.ativo = 1 LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT tl.token, tl.ativo, tl.lojaId, l.nome FROM tokens_loja tl JOIN lojas l ON tl.lojaId = l.id WHERE tl.ativo = 1 LIMIT 5;",
+  "rows": [
+    {
+      "token": "qqhN6gb8Yj2bJJ5vs8ff2HUeMWQQghl4cKZWycdHU5AvJT78Q9PsHxRGHUj5TYMw",
+      "ativo": "1",
+      "lojaId": "60001",
+      "nome": "Famalicão"
+    },
+    {
+      "token": "orDS39K11dng0sf59ZviCzvf1S9lFVOmsGWdae0CSWBnfTajpVym5sUzYbBdnQ1Q",
+      "ativo": "1",
+      "lojaId": "60001",
+      "nome": "Famalicão"
+    },
+    {
+      "token": "eJxGRx0j2dGI00GFo3d9uFD83rxxBcI3vywVlJOvhUUPOK6yxYE1MTAe8n9Wxmfv",
+      "ativo": "1",
+      "lojaId": "60002",
+      "nome": "Barcelos"
+    },
+    {
+      "token": "Xq3LEVVdNyoTNbmm4TFZwPGEG88FHUQkJf0xtumq5n0iS98yUL0GZ1AbQKzrUeGl",
+      "ativo": "1",
+      "lojaId": "60002",
+      "nome": "Barcelos"
+    },
+    {
+      "token": "L1XNjUetrKiqMFyEbuzmH4I2aQT4EUE0jiwHx0r1Zv5eeBzMzRqGdNBQrx2F1L6R",
+      "ativo": "1",
+      "lojaId": "60003",
+      "nome": "Vila Verde"
+    }
+  ],
+  "messages": [],
+  "stdout": "token\tativo\tlojaId\tnome\nqqhN6gb8Yj2bJJ5vs8ff2HUeMWQQghl4cKZWycdHU5AvJT78Q9PsHxRGHUj5TYMw\t1\t60001\tFamalicão\norDS39K11dng0sf59ZviCzvf1S9lFVOmsGWdae0CSWBnfTajpVym5sUzYbBdnQ1Q\t1\t60001\tFamalicão\neJxGRx0j2dGI00GFo3d9uFD83rxxBcI3vywVlJOvhUUPOK6yxYE1MTAe8n9Wxmfv\t1\t60002\tBarcelos\nXq3LEVVdNyoTNbmm4TFZwPGEG88FHUQkJf0xtumq5n0iS98yUL0GZ1AbQKzrUeGl\t1\t60002\tBarcelos\nL1XNjUetrKiqMFyEbuzmH4I2aQT4EUE0jiwHx0r1Zv5eeBzMzRqGdNBQrx2F1L6R\t1\t60003\tVila Verde\n",
+  "stderr": "",
+  "execution_time_ms": 60
+}

@@ -2374,9 +2374,119 @@ export default function PortalLoja() {
                           </div>
                         )}
                         
-                        {/* Dados mensais NPS */}
+                        {/* Gráfico Evolução NPS Mensal - Histórico Completo */}
+                        {((dashboardData.nps.historicoCompleto || dashboardData.nps.dadosMensais)?.length > 1) && (() => {
+                          const mesesPT = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+                          const mesesEN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                          const mesesLabels = language === 'pt' ? mesesPT : mesesEN;
+                          
+                          // Usar histórico completo se disponível, senão usar dadosMensais
+                          const dadosHistorico = dashboardData.nps.historicoCompleto || dashboardData.nps.dadosMensais;
+                          const sortedData = [...dadosHistorico].sort((a: any, b: any) => {
+                            if (a.ano !== b.ano) return a.ano - b.ano;
+                            return a.mes - b.mes;
+                          });
+                          
+                          const labels = sortedData.map((d: any) => `${mesesLabels[d.mes - 1]} ${d.ano}`);
+                          const npsValues = sortedData.map((d: any) => d.nps !== null ? d.nps * 100 : null);
+                          const taxaValues = sortedData.map((d: any) => d.taxaResposta !== null ? d.taxaResposta * 100 : null);
+                          const limiteNPS = sortedData.map(() => 80);
+                          const limiteTaxa = sortedData.map(() => 7.5);
+                          
+                          return (
+                            <div>
+                              <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
+                                <TrendingUp className="h-4 w-4 text-indigo-600" />
+                                {language === 'pt' ? 'Evolução NPS Mensal' : 'Monthly NPS Evolution'}
+                              </h4>
+                              <div style={{ height: '250px' }}>
+                                <Line
+                                  data={{
+                                    labels,
+                                    datasets: [
+                                      {
+                                        label: 'NPS (%)',
+                                        data: npsValues,
+                                        borderColor: 'rgb(99, 102, 241)',
+                                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                                        fill: true,
+                                        tension: 0.3,
+                                        pointRadius: 5,
+                                        pointHoverRadius: 7,
+                                        pointBackgroundColor: npsValues.map((v: any) => v !== null && v >= 80 ? 'rgb(34, 197, 94)' : 'rgb(239, 68, 68)'),
+                                        pointBorderColor: npsValues.map((v: any) => v !== null && v >= 80 ? 'rgb(34, 197, 94)' : 'rgb(239, 68, 68)'),
+                                        borderWidth: 2,
+                                      },
+                                      {
+                                        label: language === 'pt' ? 'Taxa Resposta (%)' : 'Response Rate (%)',
+                                        data: taxaValues,
+                                        borderColor: 'rgb(234, 179, 8)',
+                                        backgroundColor: 'transparent',
+                                        fill: false,
+                                        tension: 0.3,
+                                        pointRadius: 4,
+                                        pointHoverRadius: 6,
+                                        borderDash: [5, 5],
+                                        borderWidth: 2,
+                                      },
+                                      {
+                                        label: language === 'pt' ? 'Mínimo NPS (80%)' : 'Min NPS (80%)',
+                                        data: limiteNPS,
+                                        borderColor: 'rgba(239, 68, 68, 0.5)',
+                                        backgroundColor: 'transparent',
+                                        borderDash: [10, 5],
+                                        borderWidth: 1,
+                                        pointRadius: 0,
+                                        fill: false,
+                                      },
+                                      {
+                                        label: language === 'pt' ? 'Mínimo Taxa (7.5%)' : 'Min Rate (7.5%)',
+                                        data: limiteTaxa,
+                                        borderColor: 'rgba(234, 179, 8, 0.4)',
+                                        backgroundColor: 'transparent',
+                                        borderDash: [10, 5],
+                                        borderWidth: 1,
+                                        pointRadius: 0,
+                                        fill: false,
+                                      },
+                                    ],
+                                  }}
+                                  options={{
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    plugins: {
+                                      legend: { position: 'bottom', labels: { usePointStyle: true, padding: 15, font: { size: 11 } } },
+                                      tooltip: {
+                                        callbacks: {
+                                          label: (ctx: any) => `${ctx.dataset.label}: ${ctx.parsed.y?.toFixed(1)}%`,
+                                        },
+                                      },
+                                    },
+                                    scales: {
+                                      y: {
+                                        beginAtZero: true,
+                                        max: 105,
+                                        ticks: { callback: (v: any) => `${v}%` },
+                                        grid: { color: 'rgba(0,0,0,0.05)' },
+                                      },
+                                      x: {
+                                        grid: { display: false },
+                                      },
+                                    },
+                                  }}
+                                />
+                              </div>
+                            </div>
+                          );
+                        })()}
+                        
+                        {/* Dados mensais NPS - Tabela */}
                         {dashboardData.nps.dadosMensais.length > 1 && (
                           <div className="overflow-x-auto">
+                            <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
+                              <BarChart3 className="h-4 w-4 text-indigo-600" />
+                              {language === 'pt' ? 'Detalhe Mensal' : 'Monthly Detail'}
+                            </h4>
                             <table className="w-full text-sm">
                               <thead>
                                 <tr className="border-b">

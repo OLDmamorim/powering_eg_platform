@@ -238,3 +238,12 @@
 - [x] Mover NPS para posição de destaque: logo após alertas, antes de vendas complementares
 - [x] Testar no browser - Barcelos: NPS 100%, Taxa 20%, Elegível, em destaque
 - [x] Guardar checkpoint
+
+## Histórico NPS Mensal no Portal da Loja (CONCLUÍDO)
+- [x] Analisar dados NPS disponíveis no backend do portal da loja
+- [x] Adicionar historicoNPS ao backend (todos os 12 meses do ano, independente do filtro)
+- [x] Adicionar gráfico de evolução NPS mensal (linha) com NPS e Taxa de Resposta
+- [x] Incluir linhas de referência: Mínimo NPS (80%) e Mínimo Taxa (7.5%)
+- [x] Adicionar título "Histórico NPS Mensal" à tabela de dados
+- [x] Testar no browser - Barcelos: gráfico Jan-Fev 2026, NPS 100%, Taxa ~20%
+- [ ] Guardar checkpoint

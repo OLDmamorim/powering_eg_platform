@@ -7102,8 +7102,9 @@ IMPORTANTE:
         }
         
         // ==================== NPS ====================
-        // Buscar dados NPS da loja para os meses selecionados
+        // Buscar dados NPS da loja - todos os 12 meses do ano para histórico + meses selecionados para KPIs
         let dadosNPS: { mes: number; ano: number; nps: number | null; taxaResposta: number | null; totalRespostas: number | null; totalConvites: number | null }[] = [];
+        let historicoNPS: { mes: number; ano: number; nps: number | null; taxaResposta: number | null; totalRespostas: number | null; totalConvites: number | null }[] = [];
         let npsElegivel = false;
         let npsMedio: number | null = null;
         let taxaRespostaNPS: number | null = null;
@@ -7126,11 +7127,33 @@ IMPORTANTE:
             12: { nps: 'npsDez', taxa: 'taxaRespostaDez' },
           };
           
-          const anosConsulta = [...new Set(mesesConsulta.map(m => m.ano))];
+          // Buscar TODOS os meses do ano actual e anterior para histórico completo
+          const anoActual = new Date().getFullYear();
+          const anosHistorico = [anoActual - 1, anoActual];
+          const anosConsulta = [...new Set([...mesesConsulta.map(m => m.ano), ...anosHistorico])];
+          
           for (const ano of anosConsulta) {
             const npsLoja = await db.getNPSDadosLoja(lojaIdParaConsulta, ano);
             if (npsLoja) {
-              // npsLoja é um único objecto com colunas por mês (npsJan, npsFev, etc.)
+              // Carregar TODOS os 12 meses para o histórico
+              for (let mes = 1; mes <= 12; mes++) {
+                const fields = npsFieldMap[mes];
+                if (!fields) continue;
+                const npsVal = (npsLoja as any)[fields.nps];
+                const taxaVal = (npsLoja as any)[fields.taxa];
+                if (npsVal !== null && npsVal !== undefined) {
+                  historicoNPS.push({
+                    mes,
+                    ano,
+                    nps: parseFloat(String(npsVal)),
+                    taxaResposta: taxaVal !== null && taxaVal !== undefined ? parseFloat(String(taxaVal)) : null,
+                    totalRespostas: null,
+                    totalConvites: null,
+                  });
+                }
+              }
+              
+              // Carregar apenas os meses selecionados para KPIs
               for (const mesInfo of mesesConsulta) {
                 if (mesInfo.ano !== ano) continue;
                 const fields = npsFieldMap[mesInfo.mes];
@@ -7151,7 +7174,10 @@ IMPORTANTE:
             }
           }
           
-          // Calcular NPS médio e taxa de resposta média
+          // Ordenar histórico por data
+          historicoNPS.sort((a, b) => a.ano !== b.ano ? a.ano - b.ano : a.mes - b.mes);
+          
+          // Calcular NPS médio e taxa de resposta média (dos meses selecionados)
           const npsValidos = dadosNPS.filter(d => d.nps !== null);
           if (npsValidos.length > 0) {
             npsMedio = npsValidos.reduce((sum, d) => sum + (d.nps || 0), 0) / npsValidos.length;
@@ -7206,6 +7232,7 @@ IMPORTANTE:
           comparativoMesAnterior,
           nps: {
             dadosMensais: dadosNPS,
+            historicoCompleto: historicoNPS,
             npsMedio,
             taxaRespostaNPS,
             elegivel: npsElegivel,
