@@ -846,6 +846,115 @@ export const appRouter = router({
           ? parseFloat(String(resultados.desvioPercentualDia)) * 100
           : 0;
         
+        // ==================== NPS ====================
+        let dadosNPS: { mes: number; ano: number; nps: number | null; taxaResposta: number | null; totalRespostas: number | null; totalConvites: number | null }[] = [];
+        let historicoNPS: { mes: number; ano: number; nps: number | null; taxaResposta: number | null; totalRespostas: number | null; totalConvites: number | null }[] = [];
+        let npsElegivel = false;
+        let npsMedio: number | null = null;
+        let taxaRespostaNPS: number | null = null;
+        let motivoInelegibilidade: string | null = null;
+        
+        try {
+          const npsFieldMap: Record<number, { nps: string; taxa: string }> = {
+            1: { nps: 'npsJan', taxa: 'taxaRespostaJan' },
+            2: { nps: 'npsFev', taxa: 'taxaRespostaFev' },
+            3: { nps: 'npsMar', taxa: 'taxaRespostaMar' },
+            4: { nps: 'npsAbr', taxa: 'taxaRespostaAbr' },
+            5: { nps: 'npsMai', taxa: 'taxaRespostaMai' },
+            6: { nps: 'npsJun', taxa: 'taxaRespostaJun' },
+            7: { nps: 'npsJul', taxa: 'taxaRespostaJul' },
+            8: { nps: 'npsAgo', taxa: 'taxaRespostaAgo' },
+            9: { nps: 'npsSet', taxa: 'taxaRespostaSet' },
+            10: { nps: 'npsOut', taxa: 'taxaRespostaOut' },
+            11: { nps: 'npsNov', taxa: 'taxaRespostaNov' },
+            12: { nps: 'npsDez', taxa: 'taxaRespostaDez' },
+          };
+          
+          const anoActual = new Date().getFullYear();
+          const anosHistorico = [anoActual - 1, anoActual];
+          const anosConsulta = [...new Set([...mesesConsulta.map(m => m.ano), ...anosHistorico])];
+          
+          for (const ano of anosConsulta) {
+            const npsLoja = await db.getNPSDadosLoja(input.lojaId, ano);
+            if (npsLoja) {
+              for (let mes = 1; mes <= 12; mes++) {
+                const fields = npsFieldMap[mes];
+                if (!fields) continue;
+                const npsVal = (npsLoja as any)[fields.nps];
+                const taxaVal = (npsLoja as any)[fields.taxa];
+                if (npsVal !== null && npsVal !== undefined) {
+                  historicoNPS.push({
+                    mes,
+                    ano,
+                    nps: parseFloat(String(npsVal)),
+                    taxaResposta: taxaVal !== null && taxaVal !== undefined ? parseFloat(String(taxaVal)) : null,
+                    totalRespostas: null,
+                    totalConvites: null,
+                  });
+                }
+              }
+              
+              for (const mesInfo of mesesConsulta) {
+                if (mesInfo.ano !== ano) continue;
+                const fields = npsFieldMap[mesInfo.mes];
+                if (!fields) continue;
+                const npsVal = (npsLoja as any)[fields.nps];
+                const taxaVal = (npsLoja as any)[fields.taxa];
+                if (npsVal !== null && npsVal !== undefined) {
+                  dadosNPS.push({
+                    mes: mesInfo.mes,
+                    ano: mesInfo.ano,
+                    nps: parseFloat(String(npsVal)),
+                    taxaResposta: taxaVal !== null && taxaVal !== undefined ? parseFloat(String(taxaVal)) : null,
+                    totalRespostas: null,
+                    totalConvites: null,
+                  });
+                }
+              }
+            }
+          }
+          
+          historicoNPS.sort((a, b) => a.ano !== b.ano ? a.ano - b.ano : a.mes - b.mes);
+          
+          const npsValidos = dadosNPS.filter(d => d.nps !== null);
+          if (npsValidos.length > 0) {
+            npsMedio = npsValidos.reduce((sum, d) => sum + (d.nps || 0), 0) / npsValidos.length;
+            const taxasValidas = npsValidos.filter(d => d.taxaResposta !== null);
+            if (taxasValidas.length > 0) {
+              taxaRespostaNPS = taxasValidas.reduce((sum, d) => sum + (d.taxaResposta || 0), 0) / taxasValidas.length;
+            }
+            
+            const npsPercent = npsMedio * 100;
+            const taxaPercent = (taxaRespostaNPS || 0) * 100;
+            
+            if (npsPercent >= 80 && taxaPercent >= 7.5) {
+              npsElegivel = true;
+            } else {
+              if (npsPercent < 80 && taxaPercent < 7.5) {
+                motivoInelegibilidade = `NPS (${npsPercent.toFixed(0)}%) abaixo de 80% e Taxa de Resposta (${taxaPercent.toFixed(1)}%) abaixo de 7,5%`;
+              } else if (npsPercent < 80) {
+                motivoInelegibilidade = `NPS (${npsPercent.toFixed(0)}%) abaixo de 80%`;
+              } else {
+                motivoInelegibilidade = `Taxa de Resposta (${taxaPercent.toFixed(1)}%) abaixo de 7,5%`;
+              }
+            }
+            
+            if (!npsElegivel && motivoInelegibilidade) {
+              alertas.push({
+                tipo: 'danger',
+                mensagem: `Sem direito a prémio NPS: ${motivoInelegibilidade}`
+              });
+            } else if (npsElegivel) {
+              alertas.push({
+                tipo: 'success',
+                mensagem: `Elegível para prémio NPS! (NPS: ${(npsMedio * 100).toFixed(0)}%, Taxa Resposta: ${((taxaRespostaNPS || 0) * 100).toFixed(1)}%)`
+              });
+            }
+          }
+        } catch (e) {
+          console.error('[Portal Gestor] Erro ao buscar NPS:', e);
+        }
+        
         return {
           kpis: {
             servicosRealizados: totalServicos,
@@ -864,6 +973,14 @@ export const appRouter = router({
           dataAtualizacao: dataUltimaAtualizacao?.toISOString() || null,
           comparativoMesAnterior,
           mesesConsultados: mesesConsulta,
+          nps: {
+            dadosMensais: dadosNPS,
+            historicoCompleto: historicoNPS,
+            npsMedio,
+            taxaRespostaNPS,
+            elegivel: npsElegivel,
+            motivoInelegibilidade,
+          },
         };
       }),
     

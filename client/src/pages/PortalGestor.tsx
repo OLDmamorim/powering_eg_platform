@@ -578,6 +578,42 @@ export default function PortalGestor() {
                         </div>
                       </CardContent>
                     </Card>
+
+                    {/* NPS Card */}
+                    {dashboardData.nps && dashboardData.nps.npsMedio !== null && (
+                      <Card className={`${dashboardData.nps.elegivel ? 'bg-cyan-500' : 'bg-rose-500'} text-white border-0`}>
+                        <CardContent className="p-4">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="text-white/80 text-sm">NPS</p>
+                              <p className="text-3xl font-bold">
+                                {(dashboardData.nps.npsMedio * 100).toFixed(0)}%
+                              </p>
+                            </div>
+                            <ThumbsUp className="h-8 w-8 opacity-60" />
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+
+                    {/* Taxa Resposta NPS Card */}
+                    {dashboardData.nps && dashboardData.nps.taxaRespostaNPS !== null && (
+                      <Card className={`${((dashboardData.nps.taxaRespostaNPS || 0) * 100) >= 7.5 ? 'bg-teal-500' : 'bg-amber-500'} text-white border-0`}>
+                        <CardContent className="p-4">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="text-white/80 text-sm">
+                                {language === 'pt' ? 'Taxa Resp. NPS' : 'NPS Resp. Rate'}
+                              </p>
+                              <p className="text-3xl font-bold">
+                                {((dashboardData.nps.taxaRespostaNPS || 0) * 100).toFixed(1)}%
+                              </p>
+                            </div>
+                            <Users className="h-8 w-8 opacity-60" />
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
                   </div>
 
                   {/* Alertas */}

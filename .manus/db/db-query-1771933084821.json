@@ -1,0 +1,55 @@
+{
+  "query": "SELECT n.lojaId, l.nome, n.ano, n.npsJan, n.npsFev, n.taxaRespostaJan, n.taxaRespostaFev FROM nps_dados n JOIN lojas l ON n.lojaId = l.id WHERE n.ano = 2026 LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT n.lojaId, l.nome, n.ano, n.npsJan, n.npsFev, n.taxaRespostaJan, n.taxaRespostaFev FROM nps_dados n JOIN lojas l ON n.lojaId = l.id WHERE n.ano = 2026 LIMIT 5;",
+  "rows": [
+    {
+      "lojaId": "180001",
+      "nome": "Abrantes",
+      "ano": "2026",
+      "npsJan": "1.0000",
+      "npsFev": "1.0000",
+      "taxaRespostaJan": "0.1846",
+      "taxaRespostaFev": "0.0286"
+    },
+    {
+      "lojaId": "180002",
+      "nome": "Aeroporto porto",
+      "ano": "2026",
+      "npsJan": "NULL",
+      "npsFev": "1.0000",
+      "taxaRespostaJan": "0.0076",
+      "taxaRespostaFev": "0.0377"
+    },
+    {
+      "lojaId": "180003",
+      "nome": "Águeda",
+      "ano": "2026",
+      "npsJan": "1.0000",
+      "npsFev": "0.7500",
+      "taxaRespostaJan": "0.1194",
+      "taxaRespostaFev": "0.1290"
+    },
+    {
+      "lojaId": "180004",
+      "nome": "Algés",
+      "ano": "2026",
+      "npsJan": "1.0000",
+      "npsFev": "1.0000",
+      "taxaRespostaJan": "0.1489",
+      "taxaRespostaFev": "0.1364"
+    },
+    {
+      "lojaId": "180005",
+      "nome": "Almada",
+      "ano": "2026",
+      "npsJan": "0.8667",
+      "npsFev": "0.7778",
+      "taxaRespostaJan": "0.1471",
+      "taxaRespostaFev": "0.1343"
+    }
+  ],
+  "messages": [],
+  "stdout": "lojaId\tnome\tano\tnpsJan\tnpsFev\ttaxaRespostaJan\ttaxaRespostaFev\n180001\tAbrantes\t2026\t1.0000\t1.0000\t0.1846\t0.0286\n180002\tAeroporto porto\t2026\tNULL\t1.0000\t0.0076\t0.0377\n180003\tÁgueda\t2026\t1.0000\t0.7500\t0.1194\t0.1290\n180004\tAlgés\t2026\t1.0000\t1.0000\t0.1489\t0.1364\n180005\tAlmada\t2026\t0.8667\t0.7778\t0.1471\t0.1343\n",
+  "stderr": "",
+  "execution_time_ms": 63
+}

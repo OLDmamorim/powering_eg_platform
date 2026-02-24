@@ -1,0 +1,25 @@
+{
+  "query": "SHOW TABLES LIKE '%gestor%';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SHOW TABLES LIKE '%gestor%';",
+  "rows": [
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH (%gestor%)": "gestor_lojas"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH (%gestor%)": "gestores"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH (%gestor%)": "relatorios_reuniao_gestores"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH (%gestor%)": "reunioes_gestores"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH (%gestor%)": "topicos_reuniao_gestores"
+    }
+  ],
+  "messages": [],
+  "stdout": "Tables_in_3c9MozLH35e233uWy5WDtH (%gestor%)\ngestor_lojas\ngestores\nrelatorios_reuniao_gestores\nreunioes_gestores\ntopicos_reuniao_gestores\n",
+  "stderr": "",
+  "execution_time_ms": 99
+}

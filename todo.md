@@ -265,3 +265,9 @@
 - [x] Configurar tRPC client para não usar cache do browser
 - [x] Verificar service worker e garantir que não faz cache de dados da API (corrigido sw-portal-gestor.js)
 - [x] Testar que dados novos aparecem imediatamente sem hard refresh
+
+## Bug: Dados NPS não aparecem nos resultados das lojas no Portal Gestor
+- [x] Investigar código do Portal Gestor (página de resultados por loja)
+- [x] Verificar se dados NPS existem na BD para as lojas (confirmado: Barcelos tem NPS 100% Jan/Fev)
+- [x] Adicionar card NPS + Taxa Resposta NPS aos resultados da loja no Portal Gestor
+- [x] Testar e publicar
