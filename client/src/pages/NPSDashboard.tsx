@@ -28,6 +28,7 @@ export function NPSDashboard() {
   const [anoSelecionado, setAnoSelecionado] = useState(currentYear);
   const [mesSelecionado, setMesSelecionado] = useState<number | 'todos'>('todos');
   const [filtroZona, setFiltroZona] = useState<string>('todas');
+  const [filtroLoja, setFiltroLoja] = useState<string>('todas');
   
   // Buscar lojas do gestor
   const { data: lojas } = trpc.lojas.getByGestor.useQuery();
@@ -61,15 +62,36 @@ export function NPSDashboard() {
     return Array.from(zonasSet).sort();
   }, [dadosNPS]);
   
-  // Filtrar dados por zona
+  // Extrair lista de lojas para filtro
+  const listaLojas = useMemo(() => {
+    if (!dadosNPS) return [];
+    return dadosNPS
+      .map((item: any) => ({
+        id: item.loja?.id || item.lojaId,
+        nome: item.loja?.nome || 'Desconhecida',
+      }))
+      .filter((l: any) => l.nome !== 'Desconhecida')
+      .sort((a: any, b: any) => a.nome.localeCompare(b.nome));
+  }, [dadosNPS]);
+  
+  // Filtrar dados por zona e loja
   const dadosFiltrados = useMemo(() => {
     if (!dadosNPS) return [];
-    if (filtroZona === 'todas') return dadosNPS;
-    return dadosNPS.filter((item: any) => {
-      const zona = item.loja?.zona || item.zona;
-      return zona === filtroZona;
-    });
-  }, [dadosNPS, filtroZona]);
+    let filtrados = dadosNPS;
+    if (filtroZona !== 'todas') {
+      filtrados = filtrados.filter((item: any) => {
+        const zona = item.loja?.zona || item.zona;
+        return zona === filtroZona;
+      });
+    }
+    if (filtroLoja !== 'todas') {
+      filtrados = filtrados.filter((item: any) => {
+        const lojaId = item.loja?.id || item.lojaId;
+        return String(lojaId) === filtroLoja;
+      });
+    }
+    return filtrados;
+  }, [dadosNPS, filtroZona, filtroLoja]);
   
   // Calcular estatísticas NPS
   const estatisticas = useMemo(() => {
@@ -220,7 +242,7 @@ export function NPSDashboard() {
       labels: meses,
       datasets: [
         {
-          label: 'NPS Médio (%)',
+          label: t('npsDashboard.npsMedioPercent'),
           data: evolucaoMensal.npsMedias,
           borderColor: 'rgb(99, 102, 241)',
           backgroundColor: 'rgba(99, 102, 241, 0.1)',
@@ -230,7 +252,7 @@ export function NPSDashboard() {
           pointHoverRadius: 6,
         },
         {
-          label: 'Taxa Resposta (%)',
+          label: t('npsDashboard.taxaRespostaPercent'),
           data: evolucaoMensal.taxaMedias,
           borderColor: 'rgb(234, 179, 8)',
           backgroundColor: 'rgba(234, 179, 8, 0.1)',
@@ -242,9 +264,9 @@ export function NPSDashboard() {
         },
       ],
     };
-  }, [evolucaoMensal, meses]);
+  }, [evolucaoMensal, meses, t]);
   
-  const mesLabel = typeof mesSelecionado === 'number' ? meses[mesSelecionado] : 'Último mês disponível';
+  const mesLabel = typeof mesSelecionado === 'number' ? meses[mesSelecionado] : t('npsDashboard.ultimoMesDisponivel');
   
   return (
     <DashboardLayout>
@@ -254,10 +276,10 @@ export function NPSDashboard() {
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
               <SmilePlus className="h-7 w-7 text-primary" />
-              Dashboard NPS
+              {t('npsDashboard.title')}
             </h1>
             <p className="text-muted-foreground">
-              Net Promoter Score - Satisfação do Cliente
+              {t('npsDashboard.subtitle')}
             </p>
           </div>
           
@@ -279,7 +301,7 @@ export function NPSDashboard() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="todos">Último mês</SelectItem>
+                <SelectItem value="todos">{t('npsDashboard.ultimoMes')}</SelectItem>
                 {meses.map((mes, idx) => (
                   <SelectItem key={idx} value={idx.toString()}>{mes}</SelectItem>
                 ))}
@@ -287,14 +309,29 @@ export function NPSDashboard() {
             </Select>
             
             {user?.role === 'admin' && zonas.length > 0 && (
-              <Select value={filtroZona} onValueChange={setFiltroZona}>
+              <Select value={filtroZona} onValueChange={(v) => { setFiltroZona(v); setFiltroLoja('todas'); }}>
                 <SelectTrigger className="w-[160px]">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="todas">Todas as zonas</SelectItem>
+                  <SelectItem value="todas">{t('npsDashboard.todasZonas')}</SelectItem>
                   {zonas.map((zona) => (
                     <SelectItem key={zona} value={zona}>{zona}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+            
+            {/* Filtro por Loja */}
+            {listaLojas.length > 0 && (
+              <Select value={filtroLoja} onValueChange={setFiltroLoja}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder={t('npsDashboard.todasLojas')} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todas">{t('npsDashboard.todasLojas')}</SelectItem>
+                  {listaLojas.map((loja: any) => (
+                    <SelectItem key={loja.id} value={String(loja.id)}>{loja.nome}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -310,9 +347,9 @@ export function NPSDashboard() {
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-16">
               <SmilePlus className="h-12 w-12 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-medium mb-2">Sem dados NPS</h3>
+              <h3 className="text-lg font-medium mb-2">{t('npsDashboard.semDadosNPS')}</h3>
               <p className="text-muted-foreground text-center">
-                Não existem dados NPS para {anoSelecionado}. Faça upload do ficheiro Excel na página Upload NPS.
+                {t('npsDashboard.semDadosNPSDesc').replace('{ano}', anoSelecionado.toString())}
               </p>
             </CardContent>
           </Card>
@@ -325,7 +362,7 @@ export function NPSDashboard() {
                   <CardContent className="pt-6">
                     <div className="flex items-center gap-2 mb-2">
                       <SmilePlus className="h-4 w-4 text-primary" />
-                      <span className="text-sm text-muted-foreground">NPS Médio ({mesLabel})</span>
+                      <span className="text-sm text-muted-foreground">{t('npsDashboard.npsMedio')} ({mesLabel})</span>
                     </div>
                     <div className={`text-3xl font-bold ${
                       estatisticas.mediaNPS >= 0.8 ? 'text-green-600' :
@@ -334,7 +371,7 @@ export function NPSDashboard() {
                       {(estatisticas.mediaNPS * 100).toFixed(1)}%
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
-                      {estatisticas.lojasComDados} de {estatisticas.totalLojas} lojas com dados
+                      {estatisticas.lojasComDados} {t('npsDashboard.de')} {estatisticas.totalLojas} {t('npsDashboard.lojasComDados')}
                     </p>
                   </CardContent>
                 </Card>
@@ -343,13 +380,13 @@ export function NPSDashboard() {
                   <CardContent className="pt-6">
                     <div className="flex items-center gap-2 mb-2">
                       <Target className="h-4 w-4 text-yellow-500" />
-                      <span className="text-sm text-muted-foreground">Taxa Resposta Média</span>
+                      <span className="text-sm text-muted-foreground">{t('npsDashboard.taxaRespostaMedia')}</span>
                     </div>
                     <div className="text-3xl font-bold">
                       {(estatisticas.mediaTaxa * 100).toFixed(1)}%
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Percentagem média de respostas
+                      {t('npsDashboard.percentagemMediaRespostas')}
                     </p>
                   </CardContent>
                 </Card>
@@ -358,13 +395,13 @@ export function NPSDashboard() {
                   <CardContent className="pt-6">
                     <div className="flex items-center gap-2 mb-2">
                       <Award className="h-4 w-4 text-green-500" />
-                      <span className="text-sm text-muted-foreground">Excelência (≥80%)</span>
+                      <span className="text-sm text-muted-foreground">{t('npsDashboard.excelencia')}</span>
                     </div>
                     <div className="text-3xl font-bold text-green-600">
                       {estatisticas.lojasAcima80}
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
-                      {estatisticas.melhorLoja.nome && `Melhor: ${estatisticas.melhorLoja.nome}`}
+                      {estatisticas.melhorLoja.nome && `${t('npsDashboard.melhor')}: ${estatisticas.melhorLoja.nome}`}
                     </p>
                   </CardContent>
                 </Card>
@@ -373,13 +410,13 @@ export function NPSDashboard() {
                   <CardContent className="pt-6">
                     <div className="flex items-center gap-2 mb-2">
                       <AlertTriangle className="h-4 w-4 text-red-500" />
-                      <span className="text-sm text-muted-foreground">Atenção (&lt;50%)</span>
+                      <span className="text-sm text-muted-foreground">{t('npsDashboard.atencao')}</span>
                     </div>
                     <div className="text-3xl font-bold text-red-600">
                       {estatisticas.lojasAbaixo50}
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
-                      {estatisticas.piorLoja.nome && `Pior: ${estatisticas.piorLoja.nome}`}
+                      {estatisticas.piorLoja.nome && `${t('npsDashboard.pior')}: ${estatisticas.piorLoja.nome}`}
                     </p>
                   </CardContent>
                 </Card>
@@ -392,11 +429,11 @@ export function NPSDashboard() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <TrendingUp className="h-5 w-5" />
-                    Evolução NPS Mensal - {anoSelecionado}
+                    {t('npsDashboard.evolucaoNPSMensal')} - {anoSelecionado}
                   </CardTitle>
                   <CardDescription>
-                    Média do NPS e Taxa de Resposta ao longo do ano
-                    {filtroZona !== 'todas' && ` (Zona: ${filtroZona})`}
+                    {t('npsDashboard.mediaNPSTaxaResposta')}
+                    {filtroZona !== 'todas' && ` (${t('npsDashboard.zona')}: ${filtroZona})`}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -435,11 +472,11 @@ export function NPSDashboard() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <BarChart3 className="h-5 w-5" />
-                    NPS por Loja - {mesLabel} {anoSelecionado}
+                    {t('npsDashboard.npsPorLoja')} - {mesLabel} {anoSelecionado}
                   </CardTitle>
                   <CardDescription>
-                    Top {Math.min(rankingLojas.length, 20)} lojas ordenadas por NPS
-                    {filtroZona !== 'todas' && ` (Zona: ${filtroZona})`}
+                    {t('npsDashboard.topLojasOrdenadas').replace('{count}', String(Math.min(rankingLojas.length, 20)))}
+                    {filtroZona !== 'todas' && ` (${t('npsDashboard.zona')}: ${filtroZona})`}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -477,12 +514,12 @@ export function NPSDashboard() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Award className="h-5 w-5" />
-                  Ranking NPS - Elegibilidade para Prémio - {mesLabel} {anoSelecionado}
+                  {t('npsDashboard.rankingNPSElegibilidade')} - {mesLabel} {anoSelecionado}
                 </CardTitle>
                 <CardDescription className="space-y-1">
-                  <span>{rankingLojas.length} lojas com dados NPS{filtroZona !== 'todas' && ` na zona ${filtroZona}`}</span>
+                  <span>{t('npsDashboard.lojasComDadosNPS').replace('{count}', String(rankingLojas.length))}{filtroZona !== 'todas' ? ` ${t('npsDashboard.naZona').replace('{zona}', filtroZona)}` : ''}</span>
                   <span className="block text-xs">
-                    Regras: NPS {'>='}  80% <strong>e</strong> Taxa de Resposta {'>='} 7,5% para ter direito a prémio
+                    {t('npsDashboard.regrasElegibilidade')}
                   </span>
                 </CardDescription>
               </CardHeader>
@@ -505,15 +542,15 @@ export function NPSDashboard() {
                       <div className="grid grid-cols-3 gap-4 mb-6">
                         <div className="bg-green-50 dark:bg-green-950 rounded-lg p-3 text-center">
                           <div className="text-2xl font-bold text-green-600">{totalElegivel}</div>
-                          <div className="text-xs text-muted-foreground">Elegíveis</div>
+                          <div className="text-xs text-muted-foreground">{t('npsDashboard.elegiveis')}</div>
                         </div>
                         <div className="bg-red-50 dark:bg-red-950 rounded-lg p-3 text-center">
                           <div className="text-2xl font-bold text-red-600">{totalInelegivel}</div>
-                          <div className="text-xs text-muted-foreground">Sem Prémio</div>
+                          <div className="text-xs text-muted-foreground">{t('npsDashboard.semPremio')}</div>
                         </div>
                         <div className="bg-blue-50 dark:bg-blue-950 rounded-lg p-3 text-center">
                           <div className="text-2xl font-bold text-blue-600">{sortedRanking.length > 0 ? ((totalElegivel / sortedRanking.length) * 100).toFixed(0) : 0}%</div>
-                          <div className="text-xs text-muted-foreground">Taxa Elegibilidade</div>
+                          <div className="text-xs text-muted-foreground">{t('npsDashboard.taxaElegibilidade')}</div>
                         </div>
                       </div>
                       
@@ -522,13 +559,13 @@ export function NPSDashboard() {
                           <thead>
                             <tr className="border-b">
                               <th className="text-left py-3 px-2 w-10">#</th>
-                              <th className="text-left py-3 px-2">Loja</th>
-                              <th className="text-left py-3 px-2">Zona</th>
-                              <th className="text-right py-3 px-2">NPS Mês</th>
-                              <th className="text-right py-3 px-2">Taxa Resp.</th>
-                              <th className="text-right py-3 px-2">NPS Anual</th>
-                              <th className="text-center py-3 px-2">Prémio</th>
-                              <th className="text-left py-3 px-2">Motivo</th>
+                              <th className="text-left py-3 px-2">{t('npsDashboard.loja')}</th>
+                              <th className="text-left py-3 px-2">{t('npsDashboard.zona')}</th>
+                              <th className="text-right py-3 px-2">{t('npsDashboard.npsMes')}</th>
+                              <th className="text-right py-3 px-2">{t('npsDashboard.taxaResp')}</th>
+                              <th className="text-right py-3 px-2">{t('npsDashboard.npsAnual')}</th>
+                              <th className="text-center py-3 px-2">{t('npsDashboard.premio')}</th>
+                              <th className="text-left py-3 px-2">{t('npsDashboard.motivo')}</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -537,9 +574,9 @@ export function NPSDashboard() {
                               const npsAbaixo = item.nps < 0.8;
                               const taxaAbaixo = item.taxaResposta !== null && item.taxaResposta < 0.075;
                               const motivo = !elegivelPremio ? (
-                                npsAbaixo && taxaAbaixo ? 'NPS < 80% e Taxa < 7.5%' :
-                                npsAbaixo ? 'NPS < 80%' :
-                                taxaAbaixo ? 'Taxa resposta < 7.5%' : ''
+                                npsAbaixo && taxaAbaixo ? t('npsDashboard.npsETaxaAbaixo') :
+                                npsAbaixo ? t('npsDashboard.npsAbaixo80') :
+                                taxaAbaixo ? t('npsDashboard.taxaAbaixo75') : ''
                               ) : '';
                               
                               return (
@@ -576,11 +613,11 @@ export function NPSDashboard() {
                                   <td className="py-2 px-2 text-center">
                                     {elegivelPremio ? (
                                       <Badge className="bg-green-100 text-green-800 hover:bg-green-100 dark:bg-green-900 dark:text-green-200">
-                                        ✓ Elegível
+                                        ✓ {t('npsDashboard.elegivel')}
                                       </Badge>
                                     ) : (
                                       <Badge variant="destructive" className="text-xs">
-                                        Sem Prémio
+                                        {t('npsDashboard.semPremio')}
                                       </Badge>
                                     )}
                                   </td>
@@ -598,21 +635,21 @@ export function NPSDashboard() {
                       <div className="mt-4 pt-4 border-t flex flex-wrap gap-4 text-xs text-muted-foreground">
                         <div className="flex items-center gap-1">
                           <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                          NPS ≥ 80% e Taxa ≥ 7,5% = Elegível
+                          {t('npsDashboard.legendaElegivel')}
                         </div>
                         <div className="flex items-center gap-1">
                           <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                          NPS {'<'} 80% = Sem prémio
+                          {t('npsDashboard.legendaNPSAbaixo')}
                         </div>
                         <div className="flex items-center gap-1">
                           <div className="w-3 h-3 rounded-full bg-orange-500"></div>
-                          Taxa resposta {'<'} 7,5% = Sem prémio
+                          {t('npsDashboard.legendaTaxaAbaixo')}
                         </div>
                       </div>
                     </>
                   ) : (
                     <p className="text-center text-muted-foreground py-8">
-                      Sem dados NPS para este período
+                      {t('npsDashboard.semDadosPeriodo')}
                     </p>
                   );
                 })()}
