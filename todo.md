@@ -231,10 +231,10 @@
 - [x] Adicionar filtro por loja específica ao Dashboard NPS (dropdown com 62 lojas)
 - [x] Testar traduções PT e EN - ambas funcionam correctamente
 - [x] Testar filtro por loja - Beira baixa sm: NPS 100%, Taxa 5.9%
-- [ ] Guardar checkpoint
+- [x] Guardar checkpoint
 
 ## Portal da Loja - NPS não aparece nos Resultados (CORRIGIDO)
 - [x] Investigar - secção NPS existia mas estava demasiado abaixo na página
 - [x] Mover NPS para posição de destaque: logo após alertas, antes de vendas complementares
 - [x] Testar no browser - Barcelos: NPS 100%, Taxa 20%, Elegível, em destaque
-- [ ] Guardar checkpoint
+- [x] Guardar checkpoint
