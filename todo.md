@@ -250,6 +250,6 @@
 
 ## Bug: NPS Respostas mostra 0 quando Taxa Resposta é > 0% (CORRIGIDO)
 - [x] Investigar - tabela nps_dados não tem coluna de total de respostas, só NPS e Taxa
-- [x] Substituído card "Respostas" por "Meses c/ Dados" (informação útil e correcta)
+- [x] Removido card "Respostas"/"Meses c/ Dados" - agora só 3 KPIs: NPS, Taxa Resposta, Elegibilidade
 - [x] Removida coluna "Respostas" da tabela de histórico mensal
-- [ ] Guardar checkpoint
+- [x] Guardar checkpoint

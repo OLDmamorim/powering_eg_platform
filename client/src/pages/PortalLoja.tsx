@@ -2327,7 +2327,7 @@ export default function PortalLoja() {
                     <CardContent>
                       <div className="space-y-4">
                         {/* KPIs NPS */}
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <div className="grid grid-cols-3 gap-3">
                           <div className={`rounded-xl p-3 text-center ${
                             (dashboardData.nps.npsMedio * 100) >= 80 
                               ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
@@ -2343,12 +2343,6 @@ export default function PortalLoja() {
                           }`}>
                             <p className="text-2xl font-bold">{((dashboardData.nps.taxaRespostaNPS || 0) * 100).toFixed(1)}%</p>
                             <p className="text-xs">{language === 'pt' ? 'Taxa Resposta' : 'Response Rate'}</p>
-                          </div>
-                          <div className="rounded-xl p-3 text-center bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                            <p className="text-2xl font-bold">
-                              {dashboardData.nps.dadosMensais.length}
-                            </p>
-                            <p className="text-xs">{language === 'pt' ? 'Meses c/ Dados' : 'Months w/ Data'}</p>
                           </div>
                           <div className={`rounded-xl p-3 text-center ${
                             dashboardData.nps.elegivel 
