@@ -1,4 +1,4 @@
-const CACHE_NAME = 'poweringeg-platform-v2';
+const CACHE_NAME = 'poweringeg-platform-v3';
 const urlsToCache = [
   '/portal-loja/widget',
   '/pwa-icon-192.png',

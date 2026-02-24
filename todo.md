@@ -253,3 +253,15 @@
 - [x] Removido card "Respostas"/"Meses c/ Dados" - agora só 3 KPIs: NPS, Taxa Resposta, Elegibilidade
 - [x] Removida coluna "Respostas" da tabela de histórico mensal
 - [x] Guardar checkpoint
+
+- [x] Bug: Tópico de reunião "Garland" gravado mas não aparece na listagem (era cache do browser)[ ] Investigar na BD se o tópico foi gravado
+- [ ] Analisar código de listagem de tópicos
+- [ ] Corrigir o bug
+- [ ] Testar
+
+## Resolver Problemas Recorrentes de Cache no Browser
+- [x] Analisar configuração actual de cache (headers HTTP, service worker, tRPC)
+- [x] Adicionar headers anti-cache nas respostas da API (/api/trpc)
+- [x] Configurar tRPC client para não usar cache do browser
+- [x] Verificar service worker e garantir que não faz cache de dados da API (corrigido sw-portal-gestor.js)
+- [x] Testar que dados novos aparecem imediatamente sem hard refresh

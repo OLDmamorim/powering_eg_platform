@@ -1,4 +1,4 @@
-const CACHE_NAME = 'poweringeg-portal-gestor-v1';
+const CACHE_NAME = 'poweringeg-portal-gestor-v2';
 const urlsToCache = [
   '/portal-gestor',
   '/poweringeg-ai-icon-192.png',
@@ -22,28 +22,36 @@ self.addEventListener('install', (event) => {
   self.skipWaiting();
 });
 
-// Fetch event - serve from cache, fallback to network
+// Estratégia: Network First, Cache Fallback
 self.addEventListener('fetch', (event) => {
+  // Ignorar requests não-GET
+  if (event.request.method !== 'GET') return;
+  
+  // Ignorar requests de API (sempre ir à rede, nunca cache)
+  if (event.request.url.includes('/api/')) {
+    return;
+  }
+  
+  // Ignorar requests externos
+  if (!event.request.url.startsWith(self.location.origin)) {
+    return;
+  }
+
   event.respondWith(
-    caches.match(event.request)
+    fetch(event.request)
       .then((response) => {
-        // Return cached version or fetch from network
-        if (response) {
-          return response;
+        // Se a resposta for válida, guardar em cache
+        if (response && response.status === 200) {
+          const responseClone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseClone);
+          });
         }
-        return fetch(event.request).then((response) => {
-          // Don't cache non-successful responses or non-GET requests
-          if (!response || response.status !== 200 || response.type !== 'basic' || event.request.method !== 'GET') {
-            return response;
-          }
-          // Clone the response
-          const responseToCache = response.clone();
-          caches.open(CACHE_NAME)
-            .then((cache) => {
-              cache.put(event.request, responseToCache);
-            });
-          return response;
-        });
+        return response;
+      })
+      .catch(() => {
+        // Se falhar, tentar cache
+        return caches.match(event.request);
       })
   );
 });

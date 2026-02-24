@@ -1,0 +1,90 @@
+{
+  "query": "SELECT id, gestorId, titulo, descricao, estado, createdAt FROM topicos_reuniao_gestores ORDER BY createdAt DESC LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT id, gestorId, titulo, descricao, estado, createdAt FROM topicos_reuniao_gestores ORDER BY createdAt DESC LIMIT 10;",
+  "rows": [
+    {
+      "id": "630002",
+      "gestorId": "30001",
+      "titulo": "Garland",
+      "descricao": "NULL",
+      "estado": "pendente",
+      "createdAt": "2026-02-24 09:58:31"
+    },
+    {
+      "id": "630001",
+      "gestorId": "30001",
+      "titulo": "Garland",
+      "descricao": "NULL",
+      "estado": "pendente",
+      "createdAt": "2026-02-24 09:58:14"
+    },
+    {
+      "id": "600002",
+      "gestorId": "30001",
+      "titulo": "Politica recrutamento",
+      "descricao": "NULL",
+      "estado": "pendente",
+      "createdAt": "2026-02-23 21:35:39"
+    },
+    {
+      "id": "600001",
+      "gestorId": "30001",
+      "titulo": "FTE no mapa de serviços",
+      "descricao": "NULL",
+      "estado": "pendente",
+      "createdAt": "2026-02-23 21:34:46"
+    },
+    {
+      "id": "570001",
+      "gestorId": "30001",
+      "titulo": "Paynest",
+      "descricao": "NULL",
+      "estado": "pendente",
+      "createdAt": "2026-02-20 16:12:45"
+    },
+    {
+      "id": "540001",
+      "gestorId": "30001",
+      "titulo": "Prioridade Sm ou Pesados?",
+      "descricao": "NULL",
+      "estado": "pendente",
+      "createdAt": "2026-02-19 19:11:43"
+    },
+    {
+      "id": "450001",
+      "gestorId": "1710014",
+      "titulo": "Tópico Atualizado 1770461081605",
+      "descricao": "Descrição atualizada",
+      "estado": "pendente",
+      "createdAt": "2026-02-07 10:44:42"
+    },
+    {
+      "id": "420001",
+      "gestorId": "1650015",
+      "titulo": "Tópico Atualizado 1770336378052",
+      "descricao": "Descrição atualizada",
+      "estado": "pendente",
+      "createdAt": "2026-02-06 00:06:18"
+    },
+    {
+      "id": "390006",
+      "gestorId": "1350001",
+      "titulo": "Férias 2026 Recursos Humanos",
+      "descricao": "NULL",
+      "estado": "analisado",
+      "createdAt": "2026-02-05 18:00:24"
+    },
+    {
+      "id": "390005",
+      "gestorId": "1350001",
+      "titulo": "Contratação Recursos Humanos",
+      "descricao": "NULL",
+      "estado": "analisado",
+      "createdAt": "2026-02-05 17:59:55"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tgestorId\ttitulo\tdescricao\testado\tcreatedAt\n630002\t30001\tGarland\tNULL\tpendente\t2026-02-24 09:58:31\n630001\t30001\tGarland\tNULL\tpendente\t2026-02-24 09:58:14\n600002\t30001\tPolitica recrutamento\tNULL\tpendente\t2026-02-23 21:35:39\n600001\t30001\tFTE no mapa de serviços\tNULL\tpendente\t2026-02-23 21:34:46\n570001\t30001\tPaynest\tNULL\tpendente\t2026-02-20 16:12:45\n540001\t30001\tPrioridade Sm ou Pesados?\tNULL\tpendente\t2026-02-19 19:11:43\n450001\t1710014\tTópico Atualizado 1770461081605\tDescrição atualizada\tpendente\t2026-02-07 10:44:42\n420001\t1650015\tTópico Atualizado 1770336378052\tDescrição atualizada\tpendente\t2026-02-06 00:06:18\n390006\t1350001\tFérias 2026 Recursos Humanos\tNULL\tanalisado\t2026-02-05 18:00:24\n390005\t1350001\tContratação Recursos Humanos\tNULL\tanalisado\t2026-02-05 17:59:55\n",
+  "stderr": "",
+  "execution_time_ms": 54
+}

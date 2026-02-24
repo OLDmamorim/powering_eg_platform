@@ -10,7 +10,17 @@ import "./index.css";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { DemoProvider } from "./contexts/DemoContext";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 0,
+      gcTime: 1000 * 60 * 5, // 5 minutos
+      refetchOnWindowFocus: true,
+      refetchOnReconnect: true,
+      retry: 1,
+    },
+  },
+});
 
 const redirectToLoginIfUnauthorized = (error: unknown) => {
   if (!(error instanceof TRPCClientError)) return;
@@ -48,6 +58,11 @@ const trpcClient = trpc.createClient({
         return globalThis.fetch(input, {
           ...(init ?? {}),
           credentials: "include",
+          cache: "no-store",
+          headers: {
+            ...(init?.headers ?? {}),
+            'Cache-Control': 'no-cache, no-store',
+          },
         });
       },
     }),
