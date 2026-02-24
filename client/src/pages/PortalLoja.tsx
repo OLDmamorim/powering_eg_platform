@@ -2346,9 +2346,9 @@ export default function PortalLoja() {
                           </div>
                           <div className="rounded-xl p-3 text-center bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
                             <p className="text-2xl font-bold">
-                              {dashboardData.nps.dadosMensais.reduce((sum: number, d: any) => sum + (d.totalRespostas || 0), 0)}
+                              {dashboardData.nps.dadosMensais.length}
                             </p>
-                            <p className="text-xs">{language === 'pt' ? 'Respostas' : 'Responses'}</p>
+                            <p className="text-xs">{language === 'pt' ? 'Meses c/ Dados' : 'Months w/ Data'}</p>
                           </div>
                           <div className={`rounded-xl p-3 text-center ${
                             dashboardData.nps.elegivel 
@@ -2493,7 +2493,6 @@ export default function PortalLoja() {
                                   <th className="text-left py-2 font-medium">{language === 'pt' ? 'Mês' : 'Month'}</th>
                                   <th className="text-right py-2 font-medium">NPS</th>
                                   <th className="text-right py-2 font-medium">{language === 'pt' ? 'Taxa Resp.' : 'Resp. Rate'}</th>
-                                  <th className="text-right py-2 font-medium">{language === 'pt' ? 'Respostas' : 'Responses'}</th>
                                   <th className="text-right py-2 font-medium">{language === 'pt' ? 'Prémio' : 'Prize'}</th>
                                 </tr>
                               </thead>
@@ -2513,7 +2512,6 @@ export default function PortalLoja() {
                                       <td className={`text-right py-2 font-medium ${taxaVal !== null && taxaVal >= 7.5 ? 'text-green-600' : 'text-amber-600'}`}>
                                         {taxaVal !== null ? `${taxaVal.toFixed(1)}%` : '-'}
                                       </td>
-                                      <td className="text-right py-2">{d.totalRespostas || 0}</td>
                                       <td className="text-right py-2">
                                         {elegMes 
                                           ? <span className="inline-flex items-center gap-1 text-green-600 font-medium"><CheckCircle2 className="h-3 w-3" /> {language === 'pt' ? 'Elegível' : 'Eligible'}</span>

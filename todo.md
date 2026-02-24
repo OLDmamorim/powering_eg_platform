@@ -246,4 +246,10 @@
 - [x] Incluir linhas de referência: Mínimo NPS (80%) e Mínimo Taxa (7.5%)
 - [x] Adicionar título "Histórico NPS Mensal" à tabela de dados
 - [x] Testar no browser - Barcelos: gráfico Jan-Fev 2026, NPS 100%, Taxa ~20%
+- [x] Guardar checkpoint
+
+## Bug: NPS Respostas mostra 0 quando Taxa Resposta é > 0% (CORRIGIDO)
+- [x] Investigar - tabela nps_dados não tem coluna de total de respostas, só NPS e Taxa
+- [x] Substituído card "Respostas" por "Meses c/ Dados" (informação útil e correcta)
+- [x] Removida coluna "Respostas" da tabela de histórico mensal
 - [ ] Guardar checkpoint
