@@ -119,6 +119,7 @@ import {
   Filter,
   ClipboardList,
   Star,
+  CalendarDays,
 } from "lucide-react";
 
 interface LojaAuth {
@@ -1204,6 +1205,20 @@ export default function PortalLoja() {
                 </div>
                 <h3 className="text-xl font-bold mb-2">{language === 'pt' ? 'Mapa de KLM' : 'KLM Map'}</h3>
                 <p className="text-sm opacity-80">{language === 'pt' ? 'Consultar distâncias entre lojas' : 'Check distances between stores'}</p>
+              </CardContent>
+            </Card>
+
+            {/* Card Agenda SM - Disponível para todos */}
+            <Card 
+              className="cursor-pointer hover:shadow-lg transition-all hover:scale-[1.02] bg-gradient-to-br from-teal-500 to-emerald-600 text-white border-0"
+              onClick={() => window.open('https://agendamentosm.netlify.app/index.html', '_blank')}
+            >
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <CalendarDays className="h-10 w-10 opacity-80" />
+                </div>
+                <h3 className="text-xl font-bold mb-2">{language === 'pt' ? 'Agenda SM' : 'SM Schedule'}</h3>
+                <p className="text-sm opacity-80">{language === 'pt' ? 'Consultar agenda de serviços SM' : 'Check SM services schedule'}</p>
               </CardContent>
             </Card>
           </div>

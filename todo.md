@@ -271,3 +271,6 @@
 - [x] Verificar se dados NPS existem na BD para as lojas (confirmado: Barcelos tem NPS 100% Jan/Fev)
 - [x] Adicionar card NPS + Taxa Resposta NPS aos resultados da loja no Portal Gestor
 - [x] Testar e publicar
+
+## Novo Card: Agenda SM no Portal da Loja
+- [x] Adicionar card "Agenda SM" com link externo https://agendamentosm.netlify.app/index.html
