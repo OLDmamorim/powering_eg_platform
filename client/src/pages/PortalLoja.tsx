@@ -4406,9 +4406,10 @@ function VolanteTab({
     
     switch (estado.estado) {
       case 'pendente': return 'bg-yellow-200 hover:bg-yellow-300'; // Amarelo - pedido pendente
-      case 'manha_aprovada': return 'bg-purple-300 hover:bg-purple-400'; // Roxo - manhã aprovada
-      case 'tarde_aprovada': return 'bg-blue-300 hover:bg-blue-400'; // Azul - tarde aprovada
+      case 'manha_aprovada': case 'manha_ocupada': return 'bg-purple-300 hover:bg-purple-400'; // Roxo - manhã aprovada/ocupada
+      case 'tarde_aprovada': case 'tarde_ocupada': return 'bg-blue-300 hover:bg-blue-400'; // Azul - tarde aprovada/ocupada
       case 'dia_completo': return 'bg-red-400 text-white cursor-not-allowed'; // Vermelho - dia completo
+      case 'bloqueado': return 'bg-gray-400 text-white cursor-not-allowed'; // Cinza - bloqueado
       default: return 'bg-white hover:bg-gray-100';
     }
   };
@@ -4421,7 +4422,7 @@ function VolanteTab({
     const dataStr = data.toISOString().split('T')[0];
     const estado = estadoDias?.[dataStr];
     
-    return !estado || estado.estado !== 'dia_completo';
+    return !estado || (estado.estado !== 'dia_completo' && estado.estado !== 'bloqueado');
   };
 
   // Navegar entre meses
