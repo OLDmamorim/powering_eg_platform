@@ -8728,54 +8728,11 @@ IMPORTANTE:
         
         const estadoDias = await db.getEstadoCompletoDoMes(volanteId, input.ano, input.mes);
         
-        // Se chamado com token de loja, filtrar apenas pedidos e agendamentos desta loja
+        // Mostrar ocupação GLOBAL do volante para que as lojas saibam quando está disponível
+        // Não filtrar por lojaId - todas as lojas precisam ver todos os agendamentos
         const resultado: Record<string, { estado: string; pedidos: any[]; bloqueios?: any[]; agendamentos?: any[] }> = {};
         estadoDias.forEach((value, key) => {
-          if (lojaId) {
-            // Filtrar pedidos e agendamentos apenas desta loja
-            const pedidosLoja = value.pedidos.filter((p: any) => p.lojaId === lojaId);
-            const agendamentosLoja = (value.agendamentos || []).filter((a: any) => a.lojaId === lojaId);
-            const bloqueiosLoja = value.bloqueios || [];
-            
-            // Só incluir o dia se tiver algo relevante para esta loja
-            if (pedidosLoja.length > 0 || agendamentosLoja.length > 0 || bloqueiosLoja.length > 0) {
-              // Recalcular estado para esta loja específica
-              const pedidosAprovados = pedidosLoja.filter((p: any) => p.estado === 'aprovado');
-              const manhaAprovada = pedidosAprovados.some((p: any) => p.periodo === 'manha' || p.periodo === 'dia_todo');
-              const tardeAprovada = pedidosAprovados.some((p: any) => p.periodo === 'tarde' || p.periodo === 'dia_todo');
-              const diaTodoAprovado = pedidosAprovados.some((p: any) => p.periodo === 'dia_todo');
-              const temPendente = pedidosLoja.some((p: any) => p.estado === 'pendente');
-              
-              // Verificar agendamentos do volante para esta loja
-              const manhaAgendada = agendamentosLoja.some((a: any) => a.agendamento_volante_periodo === 'manha' || a.agendamento_volante_periodo === 'dia_todo');
-              const tardeAgendada = agendamentosLoja.some((a: any) => a.agendamento_volante_periodo === 'tarde' || a.agendamento_volante_periodo === 'dia_todo');
-              const diaTodoAgendado = agendamentosLoja.some((a: any) => a.agendamento_volante_periodo === 'dia_todo');
-              
-              // Verificar bloqueios (afectam todas as lojas)
-              const manhaBloqueada = bloqueiosLoja.some((b: any) => b.periodo === 'manha' || b.periodo === 'dia_todo');
-              const tardeBloqueada = bloqueiosLoja.some((b: any) => b.periodo === 'tarde' || b.periodo === 'dia_todo');
-              const diaTodoBloqueado = bloqueiosLoja.some((b: any) => b.periodo === 'dia_todo');
-              
-              let estado = 'livre';
-              if (diaTodoBloqueado || (manhaBloqueada && tardeBloqueada)) {
-                estado = 'bloqueado';
-              } else if (diaTodoAprovado || diaTodoAgendado || (manhaAprovada && tardeAprovada) || (manhaAgendada && tardeAgendada) ||
-                         (manhaAprovada && tardeAgendada) || (manhaAgendada && tardeAprovada)) {
-                estado = 'dia_completo';
-              } else if (manhaAprovada || manhaAgendada) {
-                estado = 'manha_aprovada';
-              } else if (tardeAprovada || tardeAgendada) {
-                estado = 'tarde_aprovada';
-              } else if (temPendente) {
-                estado = 'pendente';
-              }
-              
-              resultado[key] = { estado, pedidos: pedidosLoja, bloqueios: bloqueiosLoja, agendamentos: agendamentosLoja };
-            }
-          } else {
-            // Token de volante - mostrar tudo
-            resultado[key] = value;
-          }
+          resultado[key] = value;
         });
         
         return resultado;

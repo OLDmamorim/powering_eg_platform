@@ -278,5 +278,5 @@
 ## Bug: Agendamentos do volante aprovados não aparecem no calendário do Portal da Loja
 - [x] Investigar como o calendário do Portal da Loja carrega agendamentos
 - [x] Verificar query backend que retorna agendamentos para o portal da loja
-- [x] Corrigir sincronização entre agendamentos do volante e portal da loja (filtrar por lojaId)
+- [x] REVERTIDO: filtro por lojaId estava errado - calendário deve mostrar ocupação GLOBAL do volante para lojas saberem disponibilidade
 - [ ] Testar

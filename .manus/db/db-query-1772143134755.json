@@ -1,0 +1,91 @@
+{
+  "query": "SELECT pa.id, pa.data, pa.pedido_apoio_periodo AS periodo, pa.pedido_apoio_estado AS estado, pa.lojaId, l.nome AS loja_nome, pa.volanteId FROM pedidos_apoio pa LEFT JOIN lojas l ON pa.lojaId = l.id WHERE pa.data IN ('2026-03-02', '2026-03-03', '2026-03-04', '2026-03-09') ORDER BY pa.data, pa.pedido_apoio_periodo;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT pa.id, pa.data, pa.pedido_apoio_periodo AS periodo, pa.pedido_apoio_estado AS estado, pa.lojaId, l.nome AS loja_nome, pa.volanteId FROM pedidos_apoio pa LEFT JOIN lojas l ON pa.lojaId = l.id WHERE pa.data IN ('2026-03-02', '2026-03-03', '2026-03-04', '2026-03-09') ORDER BY pa.data, pa.pedido_apoio_periodo;",
+  "rows": [
+    {
+      "id": "810001",
+      "data": "2026-03-02 00:00:00",
+      "periodo": "manha",
+      "estado": "aprovado",
+      "lojaId": "180010",
+      "loja_nome": "Braga - minho center",
+      "volanteId": "2"
+    },
+    {
+      "id": "870001",
+      "data": "2026-03-02 00:00:00",
+      "periodo": "tarde",
+      "estado": "aprovado",
+      "lojaId": "60003",
+      "loja_nome": "Vila Verde",
+      "volanteId": "2"
+    },
+    {
+      "id": "900001",
+      "data": "2026-03-03 00:00:00",
+      "periodo": "manha",
+      "estado": "aprovado",
+      "lojaId": "60002",
+      "loja_nome": "Barcelos",
+      "volanteId": "2"
+    },
+    {
+      "id": "870002",
+      "data": "2026-03-03 00:00:00",
+      "periodo": "tarde",
+      "estado": "aprovado",
+      "lojaId": "60003",
+      "loja_nome": "Vila Verde",
+      "volanteId": "2"
+    },
+    {
+      "id": "840001",
+      "data": "2026-03-03 00:00:00",
+      "periodo": "dia_todo",
+      "estado": "reprovado",
+      "lojaId": "60003",
+      "loja_nome": "Vila Verde",
+      "volanteId": "2"
+    },
+    {
+      "id": "810002",
+      "data": "2026-03-04 00:00:00",
+      "periodo": "manha",
+      "estado": "aprovado",
+      "lojaId": "180010",
+      "loja_nome": "Braga - minho center",
+      "volanteId": "2"
+    },
+    {
+      "id": "840003",
+      "data": "2026-03-04 00:00:00",
+      "periodo": "tarde",
+      "estado": "aprovado",
+      "lojaId": "60003",
+      "loja_nome": "Vila Verde",
+      "volanteId": "2"
+    },
+    {
+      "id": "300008",
+      "data": "2026-03-09 00:00:00",
+      "periodo": "dia_todo",
+      "estado": "aprovado",
+      "lojaId": "60001",
+      "loja_nome": "Famalicão",
+      "volanteId": "2"
+    },
+    {
+      "id": "300006",
+      "data": "2026-03-09 00:00:00",
+      "periodo": "dia_todo",
+      "estado": "cancelado",
+      "lojaId": "60001",
+      "loja_nome": "Famalicão",
+      "volanteId": "2"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tdata\tperiodo\testado\tlojaId\tloja_nome\tvolanteId\n810001\t2026-03-02 00:00:00\tmanha\taprovado\t180010\tBraga - minho center\t2\n870001\t2026-03-02 00:00:00\ttarde\taprovado\t60003\tVila Verde\t2\n900001\t2026-03-03 00:00:00\tmanha\taprovado\t60002\tBarcelos\t2\n870002\t2026-03-03 00:00:00\ttarde\taprovado\t60003\tVila Verde\t2\n840001\t2026-03-03 00:00:00\tdia_todo\treprovado\t60003\tVila Verde\t2\n810002\t2026-03-04 00:00:00\tmanha\taprovado\t180010\tBraga - minho center\t2\n840003\t2026-03-04 00:00:00\ttarde\taprovado\t60003\tVila Verde\t2\n300008\t2026-03-09 00:00:00\tdia_todo\taprovado\t60001\tFamalicão\t2\n300006\t2026-03-09 00:00:00\tdia_todo\tcancelado\t60001\tFamalicão\t2\n",
+  "stderr": "",
+  "execution_time_ms": 517
+}
