@@ -274,3 +274,9 @@
 
 ## Novo Card: Agenda SM no Portal da Loja
 - [x] Adicionar card "Agenda SM" com link externo https://agendamentosm.netlify.app/index.html
+
+## Bug: Agendamentos do volante aprovados não aparecem no calendário do Portal da Loja
+- [x] Investigar como o calendário do Portal da Loja carrega agendamentos
+- [x] Verificar query backend que retorna agendamentos para o portal da loja
+- [x] Corrigir sincronização entre agendamentos do volante e portal da loja (filtrar por lojaId)
+- [ ] Testar

@@ -8705,6 +8705,7 @@ IMPORTANTE:
       .query(async ({ input }) => {
         // Tentar validar como token de volante primeiro
         let volanteId: number | null = null;
+        let lojaId: number | null = null;
         
         const tokenVolante = await db.validateTokenVolante(input.token);
         if (tokenVolante) {
@@ -8713,6 +8714,7 @@ IMPORTANTE:
           // Tentar como token de loja
           const tokenLoja = await db.validarTokenLoja(input.token);
           if (tokenLoja) {
+            lojaId = tokenLoja.loja.id;
             const volante = await db.getVolanteByLojaId(tokenLoja.loja.id);
             if (volante) {
               volanteId = volante.id;
@@ -8721,15 +8723,59 @@ IMPORTANTE:
         }
         
         if (!volanteId) {
-          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido ou nenhum volante atribuído' });
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inv\u00e1lido ou nenhum volante atribu\u00eddo' });
         }
         
         const estadoDias = await db.getEstadoCompletoDoMes(volanteId, input.ano, input.mes);
         
-        // Converter Map para objeto
-        const resultado: Record<string, { estado: string; pedidos: any[] }> = {};
+        // Se chamado com token de loja, filtrar apenas pedidos e agendamentos desta loja
+        const resultado: Record<string, { estado: string; pedidos: any[]; bloqueios?: any[]; agendamentos?: any[] }> = {};
         estadoDias.forEach((value, key) => {
-          resultado[key] = value;
+          if (lojaId) {
+            // Filtrar pedidos e agendamentos apenas desta loja
+            const pedidosLoja = value.pedidos.filter((p: any) => p.lojaId === lojaId);
+            const agendamentosLoja = (value.agendamentos || []).filter((a: any) => a.lojaId === lojaId);
+            const bloqueiosLoja = value.bloqueios || [];
+            
+            // Só incluir o dia se tiver algo relevante para esta loja
+            if (pedidosLoja.length > 0 || agendamentosLoja.length > 0 || bloqueiosLoja.length > 0) {
+              // Recalcular estado para esta loja específica
+              const pedidosAprovados = pedidosLoja.filter((p: any) => p.estado === 'aprovado');
+              const manhaAprovada = pedidosAprovados.some((p: any) => p.periodo === 'manha' || p.periodo === 'dia_todo');
+              const tardeAprovada = pedidosAprovados.some((p: any) => p.periodo === 'tarde' || p.periodo === 'dia_todo');
+              const diaTodoAprovado = pedidosAprovados.some((p: any) => p.periodo === 'dia_todo');
+              const temPendente = pedidosLoja.some((p: any) => p.estado === 'pendente');
+              
+              // Verificar agendamentos do volante para esta loja
+              const manhaAgendada = agendamentosLoja.some((a: any) => a.agendamento_volante_periodo === 'manha' || a.agendamento_volante_periodo === 'dia_todo');
+              const tardeAgendada = agendamentosLoja.some((a: any) => a.agendamento_volante_periodo === 'tarde' || a.agendamento_volante_periodo === 'dia_todo');
+              const diaTodoAgendado = agendamentosLoja.some((a: any) => a.agendamento_volante_periodo === 'dia_todo');
+              
+              // Verificar bloqueios (afectam todas as lojas)
+              const manhaBloqueada = bloqueiosLoja.some((b: any) => b.periodo === 'manha' || b.periodo === 'dia_todo');
+              const tardeBloqueada = bloqueiosLoja.some((b: any) => b.periodo === 'tarde' || b.periodo === 'dia_todo');
+              const diaTodoBloqueado = bloqueiosLoja.some((b: any) => b.periodo === 'dia_todo');
+              
+              let estado = 'livre';
+              if (diaTodoBloqueado || (manhaBloqueada && tardeBloqueada)) {
+                estado = 'bloqueado';
+              } else if (diaTodoAprovado || diaTodoAgendado || (manhaAprovada && tardeAprovada) || (manhaAgendada && tardeAgendada) ||
+                         (manhaAprovada && tardeAgendada) || (manhaAgendada && tardeAprovada)) {
+                estado = 'dia_completo';
+              } else if (manhaAprovada || manhaAgendada) {
+                estado = 'manha_aprovada';
+              } else if (tardeAprovada || tardeAgendada) {
+                estado = 'tarde_aprovada';
+              } else if (temPendente) {
+                estado = 'pendente';
+              }
+              
+              resultado[key] = { estado, pedidos: pedidosLoja, bloqueios: bloqueiosLoja, agendamentos: agendamentosLoja };
+            }
+          } else {
+            // Token de volante - mostrar tudo
+            resultado[key] = value;
+          }
         });
         
         return resultado;

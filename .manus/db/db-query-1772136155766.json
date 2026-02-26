@@ -1,0 +1,9 @@
+{
+  "query": "SELECT av.id, av.volanteId, av.lojaId, av.data, av.agendamento_volante_periodo, av.agendamento_volante_tipo, l.nome as loja_nome FROM agendamentos_volante av LEFT JOIN lojas l ON av.lojaId = l.id WHERE av.data >= '2026-03-01' AND av.data <= '2026-03-31' ORDER BY av.data;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT av.id, av.volanteId, av.lojaId, av.data, av.agendamento_volante_periodo, av.agendamento_volante_tipo, l.nome as loja_nome FROM agendamentos_volante av LEFT JOIN lojas l ON av.lojaId = l.id WHERE av.data >= '2026-03-01' AND av.data <= '2026-03-31' ORDER BY av.data;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 424
+}

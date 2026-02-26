@@ -1,0 +1,8 @@
+{
+  "query": "SELECT pa.id, pa.volanteId, pa.lojaId, pa.data, pa.periodo, pa.estado, pa.tipoApoio, l.nome as loja_nome FROM pedidos_apoio pa LEFT JOIN lojas l ON pa.lojaId = l.id WHERE pa.data >= '2026-03-01' AND pa.data <= '2026-03-31' ORDER BY pa.data;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT pa.id, pa.volanteId, pa.lojaId, pa.data, pa.periodo, pa.estado, pa.tipoApoio, l.nome as loja_nome FROM pedidos_apoio pa LEFT JOIN lojas l ON pa.lojaId = l.id WHERE pa.data >= '2026-03-01' AND pa.data <= '2026-03-31' ORDER BY pa.data;",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 'pa.periodo' in 'field list'"
+  ]
+}
