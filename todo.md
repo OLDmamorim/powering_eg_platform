@@ -288,3 +288,7 @@
 ## Melhoria: Cabeçalhos dinâmicos na tabela de ranking conforme métrica
 - [x] Adaptar cabeçalho da coluna de valor para mudar conforme métrica (Serviços, Taxa Rep., Desvio %, Serv./Colab.)
 - [x] Quando métrica não é Total Serviços, mostra coluna extra de Serviços para contexto
+
+## Melhoria: Valor médio em destaque na tabela de ranking
+- [x] Calcular média de todas as lojas para cada métrica
+- [x] Mostrar barra de destaque com valor médio por cima da tabela (com média serviços e objetivo)

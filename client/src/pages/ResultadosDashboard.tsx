@@ -914,6 +914,64 @@ export function ResultadosDashboard() {
               </div>
             ) : ranking && ranking.length > 0 ? (
               <div className="space-y-3">
+                {/* Valor médio em destaque */}
+                {(() => {
+                  const totalLojas = ranking.length;
+                  if (totalLojas === 0) return null;
+                  
+                  let mediaValor = 0;
+                  let mediaLabel = '';
+                  let mediaSuffix = '';
+                  
+                  if (metricaRanking === 'totalServicos') {
+                    const soma = ranking.reduce((acc, r) => acc + (r.totalServicos || 0), 0);
+                    mediaValor = soma / totalLojas;
+                    mediaLabel = 'Média Serviços';
+                    mediaSuffix = '';
+                  } else if (metricaRanking === 'taxaReparacao') {
+                    const soma = ranking.reduce((acc, r) => acc + (r.taxaReparacao || 0), 0);
+                    mediaValor = (soma / totalLojas) * 100;
+                    mediaLabel = 'Média Taxa Reparação';
+                    mediaSuffix = '%';
+                  } else if (metricaRanking === 'desvioPercentualMes') {
+                    const soma = ranking.reduce((acc, r) => acc + (r.desvioPercentualMes || 0), 0);
+                    mediaValor = (soma / totalLojas) * 100;
+                    mediaLabel = 'Média Desvio vs Objetivo';
+                    mediaSuffix = '%';
+                  } else {
+                    const soma = ranking.reduce((acc, r) => acc + (r.valor || 0), 0);
+                    mediaValor = soma / totalLojas;
+                    mediaLabel = 'Média Serv./Colab.';
+                    mediaSuffix = '';
+                  }
+                  
+                  const mediaServicos = ranking.reduce((acc, r) => acc + (r.totalServicos || 0), 0) / totalLojas;
+                  const mediaObjetivo = ranking.reduce((acc, r) => acc + (r.objetivoMensal || 0), 0) / totalLojas;
+                  
+                  return (
+                    <div className="bg-gradient-to-r from-primary/10 to-primary/5 rounded-lg p-4 mb-2 flex items-center justify-between">
+                      <div>
+                        <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{mediaLabel}</div>
+                        <div className="text-2xl font-bold text-primary">
+                          {mediaSuffix === '%' ? mediaValor.toFixed(1) : mediaValor.toFixed(metricaRanking === 'servicosPorColaborador' ? 2 : 0)}{mediaSuffix}
+                        </div>
+                        <div className="text-xs text-muted-foreground">{totalLojas} lojas</div>
+                      </div>
+                      <div className="flex gap-6">
+                        {metricaRanking !== 'totalServicos' && (
+                          <div className="text-center">
+                            <div className="text-xs font-medium text-muted-foreground">Méd. Serviços</div>
+                            <div className="text-lg font-bold">{mediaServicos.toFixed(0)}</div>
+                          </div>
+                        )}
+                        <div className="text-center">
+                          <div className="text-xs font-medium text-muted-foreground">Méd. Objetivo</div>
+                          <div className="text-lg font-bold">{mediaObjetivo.toFixed(0)}</div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
                 {/* Cabeçalhos de coluna - dinâmicos conforme métrica */}
                 <div className="flex items-center gap-3 pb-2 border-b text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                   <div className="w-8 text-center">#</div>
