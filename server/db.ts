@@ -3883,7 +3883,9 @@ export async function getRankingLojasMultiplosMeses(
   return ranking.map((r, index) => ({
     ...r,
     posicao: index + 1,
-    valor: metrica === 'totalServicos' ? r.totalServicos :
+    totalServicos: Number(r.totalServicos) || 0,
+    objetivoMensal: Number(r.objetivoMensal) || 0,
+    valor: metrica === 'totalServicos' ? Number(r.totalServicos) || 0 :
            metrica === 'taxaReparacao' ? (r.taxaReparacao ? parseFloat(r.taxaReparacao.toString()) : null) :
            metrica === 'desvioPercentualMes' ? (r.desvioPercentualMes ? parseFloat(r.desvioPercentualMes.toString()) : null) :
            (r.servicosPorColaborador ? parseFloat(r.servicosPorColaborador.toString()) : null),

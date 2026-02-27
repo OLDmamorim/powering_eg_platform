@@ -924,29 +924,29 @@ export function ResultadosDashboard() {
                   let mediaSuffix = '';
                   
                   if (metricaRanking === 'totalServicos') {
-                    const soma = ranking.reduce((acc, r) => acc + (r.totalServicos || 0), 0);
+                    const soma = ranking.reduce((acc, r) => acc + Number(r.totalServicos || 0), 0);
                     mediaValor = soma / totalLojas;
                     mediaLabel = 'Média Serviços';
                     mediaSuffix = '';
                   } else if (metricaRanking === 'taxaReparacao') {
-                    const soma = ranking.reduce((acc, r) => acc + (r.taxaReparacao || 0), 0);
+                    const soma = ranking.reduce((acc, r) => acc + Number(r.taxaReparacao || 0), 0);
                     mediaValor = (soma / totalLojas) * 100;
                     mediaLabel = 'Média Taxa Reparação';
                     mediaSuffix = '%';
                   } else if (metricaRanking === 'desvioPercentualMes') {
-                    const soma = ranking.reduce((acc, r) => acc + (r.desvioPercentualMes || 0), 0);
+                    const soma = ranking.reduce((acc, r) => acc + Number(r.desvioPercentualMes || 0), 0);
                     mediaValor = (soma / totalLojas) * 100;
                     mediaLabel = 'Média Desvio vs Objetivo';
                     mediaSuffix = '%';
                   } else {
-                    const soma = ranking.reduce((acc, r) => acc + (r.valor || 0), 0);
+                    const soma = ranking.reduce((acc, r) => acc + Number(r.valor || 0), 0);
                     mediaValor = soma / totalLojas;
                     mediaLabel = 'Média Serv./Colab.';
                     mediaSuffix = '';
                   }
                   
-                  const mediaServicos = ranking.reduce((acc, r) => acc + (r.totalServicos || 0), 0) / totalLojas;
-                  const mediaObjetivo = ranking.reduce((acc, r) => acc + (r.objetivoMensal || 0), 0) / totalLojas;
+                  const mediaServicos = ranking.reduce((acc, r) => acc + Number(r.totalServicos || 0), 0) / totalLojas;
+                  const mediaObjetivo = ranking.reduce((acc, r) => acc + Number(r.objetivoMensal || 0), 0) / totalLojas;
                   
                   return (
                     <div className="bg-gradient-to-r from-primary/10 to-primary/5 rounded-lg p-4 mb-2 flex items-center justify-between">

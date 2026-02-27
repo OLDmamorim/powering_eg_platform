@@ -292,3 +292,9 @@
 ## Melhoria: Valor médio em destaque na tabela de ranking
 - [x] Calcular média de todas as lojas para cada métrica
 - [x] Mostrar barra de destaque com valor médio por cima da tabela (com média serviços e objetivo)
+
+## Bug: Média de Serviços mostra valores absurdos (e+25/e+26) na barra de destaque
+- [x] Diagnosticar cálculo da média no ResultadosDashboard.tsx
+- [x] Corrigir fórmula de cálculo para mostrar valores correctos
+- [x] Testar todas as 4 métricas (Total Serviços, Taxa Reparação, Desvio %, Serv./Colab.)
+- [ ] Guardar checkpoint
