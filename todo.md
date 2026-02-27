@@ -284,3 +284,7 @@
 ## Melhoria: Tabela Minhas Lojas no Portal Gestor
 - [x] Adicionar títulos de colunas (cabeçalhos) à tabela (#, Loja, Serviços, Objetivo, NPS)
 - [x] Adicionar coluna de Objetivo do mês após número de serviços
+
+## Melhoria: Cabeçalhos dinâmicos na tabela de ranking conforme métrica
+- [x] Adaptar cabeçalho da coluna de valor para mudar conforme métrica (Serviços, Taxa Rep., Desvio %, Serv./Colab.)
+- [x] Quando métrica não é Total Serviços, mostra coluna extra de Serviços para contexto

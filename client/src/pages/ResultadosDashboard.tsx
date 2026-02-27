@@ -914,11 +914,19 @@ export function ResultadosDashboard() {
               </div>
             ) : ranking && ranking.length > 0 ? (
               <div className="space-y-3">
-                {/* Cabeçalhos de coluna */}
+                {/* Cabeçalhos de coluna - dinâmicos conforme métrica */}
                 <div className="flex items-center gap-3 pb-2 border-b text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                   <div className="w-8 text-center">#</div>
                   <div className="flex-1">Loja</div>
-                  <div className="text-right min-w-[60px]">Serviços</div>
+                  <div className="text-right min-w-[60px]">
+                    {metricaRanking === 'totalServicos' ? 'Serviços' :
+                     metricaRanking === 'taxaReparacao' ? 'Taxa Rep.' :
+                     metricaRanking === 'desvioPercentualMes' ? 'Desvio %' :
+                     'Serv./Colab.'}
+                  </div>
+                  {metricaRanking !== 'totalServicos' && (
+                    <div className="text-right min-w-[60px]">Serviços</div>
+                  )}
                   <div className="text-right min-w-[60px]">Objetivo</div>
                   {npsPorLoja.size > 0 && <div className="text-right min-w-[85px] border-l pl-3">NPS</div>}
                 </div>
@@ -951,10 +959,12 @@ export function ResultadosDashboard() {
                       </div>
                       <div className="text-right min-w-[60px]">
                         <div className="font-bold">{valorDisplay}</div>
-                        {metricaRanking !== 'totalServicos' && item.totalServicos && (
-                          <div className="text-xs text-muted-foreground">{item.totalServicos} serv.</div>
-                        )}
                       </div>
+                      {metricaRanking !== 'totalServicos' && (
+                        <div className="text-right min-w-[60px]">
+                          <div className="font-bold text-muted-foreground">{item.totalServicos || '-'}</div>
+                        </div>
+                      )}
                       <div className="text-right min-w-[60px]">
                         <div className="font-bold text-muted-foreground">{item.objetivoMensal || '-'}</div>
                       </div>
