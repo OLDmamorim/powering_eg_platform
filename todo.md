@@ -280,3 +280,7 @@
 - [x] Verificar query backend que retorna agendamentos para o portal da loja
 - [x] REVERTIDO: filtro por lojaId estava errado - calendário deve mostrar ocupação GLOBAL do volante para lojas saberem disponibilidade
 - [ ] Testar
+
+## Melhoria: Tabela Minhas Lojas no Portal Gestor
+- [x] Adicionar títulos de colunas (cabeçalhos) à tabela (#, Loja, Serviços, Objetivo, NPS)
+- [x] Adicionar coluna de Objetivo do mês após número de serviços
