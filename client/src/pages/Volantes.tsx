@@ -303,8 +303,25 @@ export default function Volantes() {
                     </div>
                     
                     <div className="flex items-center gap-2">
-                      <Badge variant={volante.ativo ? "default" : "secondary"}>
-                        {volante.ativo ? "Ativo" : "Inativo"}
+                      <Badge 
+                        variant={volante.ativo ? "default" : "secondary"}
+                        className={`cursor-pointer select-none transition-colors ${
+                          volante.ativo 
+                            ? 'bg-emerald-600 hover:bg-amber-600 text-white' 
+                            : 'bg-amber-500 hover:bg-emerald-600 text-white'
+                        }`}
+                        onClick={() => {
+                          const novoEstado = !volante.ativo;
+                          const msg = novoEstado 
+                            ? `Activar ${volante.nome}? Ficará disponível para atribuição de serviços.`
+                            : `Suspender ${volante.nome}? Deixará de receber novos pedidos de apoio.`;
+                          if (confirm(msg)) {
+                            atualizarVolante.mutate({ id: volante.id, ativo: novoEstado });
+                          }
+                        }}
+                        title={volante.ativo ? 'Clique para suspender' : 'Clique para activar'}
+                      >
+                        {volante.ativo ? "Ativo" : "Suspenso"}
                       </Badge>
                       {volante.token && (
                         <Button

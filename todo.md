@@ -331,4 +331,10 @@
 - [x] Criar página frontend com tabela de log de atribuições
 - [x] Mostrar score detalhado (disponibilidade, carga, proximidade, histórico)
 - [x] Mostrar info de redireccionamento quando aplicável
+- [x] Guardar checkpoint
+
+## Suspender/Activar Volantes
+- [x] Verificar se campo 'ativo' já existe no schema dos volantes (SIM, linha 972)
+- [x] Actualizar algoritmo de atribuição para ignorar volantes com ativo=false (já estava implementado)
+- [x] Adicionar botão suspender/activar na UI de gestão de volantes (badge clicável)
 - [ ] Guardar checkpoint
