@@ -22,7 +22,8 @@ import {
   Copy,
   Check,
   Car,
-  Calendar
+  Calendar,
+  Star
 } from "lucide-react";
 
 export default function Volantes() {
@@ -108,6 +109,15 @@ export default function Volantes() {
     },
     onError: (error) => {
       toast.error("Erro ao enviar email", { description: error.message });
+    },
+  });
+  
+  const actualizarPreferencial = trpc.volantes.actualizarPreferencial.useMutation({
+    onSuccess: () => {
+      refetch();
+    },
+    onError: (error) => {
+      toast.error("Erro ao actualizar preferencial", { description: error.message });
     },
   });
   
@@ -353,13 +363,34 @@ export default function Volantes() {
                       {volante.lojas && volante.lojas.length > 0 ? (
                         <div className="flex flex-wrap gap-1">
                           {volante.lojas.map((loja: any) => (
-                            <Badge key={loja.id} variant="outline" className="text-xs">
+                            <Badge 
+                              key={loja.id} 
+                              variant={loja.preferencial ? "default" : "outline"} 
+                              className={`text-xs cursor-pointer transition-all ${
+                                loja.preferencial 
+                                  ? 'bg-amber-100 text-amber-800 border-amber-300 hover:bg-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-700' 
+                                  : 'hover:bg-gray-100 dark:hover:bg-gray-800'
+                              }`}
+                              onClick={() => actualizarPreferencial.mutate({
+                                volanteId: volante.id,
+                                lojaId: loja.id,
+                                preferencial: !loja.preferencial,
+                              })}
+                              title={loja.preferencial ? 'Loja preferencial (clique para remover)' : 'Clique para marcar como preferencial'}
+                            >
+                              {loja.preferencial && <Star className="h-3 w-3 mr-1 fill-amber-500 text-amber-500" />}
                               {loja.nome}
                             </Badge>
                           ))}
                         </div>
                       ) : (
                         <p className="text-sm text-gray-500">Nenhuma loja atribuída</p>
+                      )}
+                      {volante.lojas && volante.lojas.length > 0 && (
+                        <p className="text-xs text-gray-400 mt-1 flex items-center gap-1">
+                          <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                          Clique numa loja para marcar/desmarcar como preferencial
+                        </p>
                       )}
                     </div>
                     

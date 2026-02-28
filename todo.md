@@ -319,3 +319,9 @@
 - [~] Permitir configurar sub-zonas das lojas no painel do gestor (IGNORADO - a pedido do Marco)
 - [x] Testar fluxo completo com 2 volantes (15 testes vitest passaram)
 - [ ] Guardar checkpoint
+
+## Lojas Preferenciais por Volante
+- [x] Adicionar campo 'preferencial' (boolean) à tabela loja_volante
+- [x] Actualizar algoritmo de proximidade para usar preferencial em vez de sub-zonas
+- [x] Actualizar UI de gestão de volantes para marcar lojas preferenciais
+- [ ] Guardar checkpoint

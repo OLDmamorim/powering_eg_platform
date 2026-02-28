@@ -1,0 +1,1 @@
+ALTER TABLE `loja_volante` ADD `preferencial` boolean DEFAULT false NOT NULL;

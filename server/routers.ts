@@ -8360,10 +8360,10 @@ IMPORTANTE:
       }
       const volantes = await db.getVolantesByGestorId(ctx.gestor.id);
       
-      // Para cada volante, buscar as lojas atribuídas e o token
+      // Para cada volante, buscar as lojas atribuídas (com preferencial) e o token
       const volantesComLojas = await Promise.all(
         volantes.map(async (volante) => {
-          const lojas = await db.getLojasByVolanteId(volante.id);
+          const lojas = await db.getLojasComPreferencialByVolanteId(volante.id);
           const token = await db.getTokenVolante(volante.id);
           return { ...volante, lojas, token };
         })
@@ -8456,6 +8456,23 @@ IMPORTANTE:
           await db.assignVolanteToLoja(lojaId, input.volanteId);
         }
         
+        return { success: true };
+      }),
+    
+    // Actualizar preferencial de uma loja para um volante
+    actualizarPreferencial: gestorProcedure
+      .input(z.object({
+        volanteId: z.number(),
+        lojaId: z.number(),
+        preferencial: z.boolean(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const volante = await db.getVolanteById(input.volanteId);
+        if (!volante || (ctx.gestor && volante.gestorId !== ctx.gestor.id)) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Volante não encontrado' });
+        }
+        
+        await db.updateLojaPreferencial(input.volanteId, input.lojaId, input.preferencial);
         return { success: true };
       }),
     

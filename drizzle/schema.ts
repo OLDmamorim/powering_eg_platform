@@ -1069,6 +1069,7 @@ export const lojaVolante = mysqlTable("loja_volante", {
   lojaId: int("lojaId").notNull(), // FK para lojas.id - Já não é UNIQUE, permite múltiplos volantes
   volanteId: int("volanteId").notNull(), // FK para volantes.id
   prioridade: int("prioridade").default(1).notNull(), // 1 = principal, 2 = secundário, etc.
+  preferencial: boolean("preferencial").default(false).notNull(), // true = loja preferencial deste volante (para algoritmo de proximidade)
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

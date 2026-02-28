@@ -8619,13 +8619,42 @@ export async function getLojasByVolanteId(volanteId: number): Promise<Loja[]> {
   return result.map(r => r.loja);
 }
 
+/**
+ * Obter lojas atribuídas a um volante com info de preferencial (via loja_volante)
+ */
+export async function getLojasComPreferencialByVolanteId(volanteId: number): Promise<(Loja & { preferencial: boolean })[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const result = await db
+    .select({ loja: lojas, preferencial: lojaVolante.preferencial })
+    .from(lojaVolante)
+    .innerJoin(lojas, eq(lojaVolante.lojaId, lojas.id))
+    .where(eq(lojaVolante.volanteId, volanteId))
+    .orderBy(lojas.nome);
+  
+  return result.map(r => ({ ...r.loja, preferencial: r.preferencial }));
+}
+
+/**
+ * Actualizar o estado preferencial de uma loja para um volante
+ */
+export async function updateLojaPreferencial(volanteId: number, lojaId: number, preferencial: boolean): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  
+  await db.update(lojaVolante).set({ preferencial }).where(
+    and(eq(lojaVolante.volanteId, volanteId), eq(lojaVolante.lojaId, lojaId))
+  );
+}
+
 // ==================== LOJA-VOLANTE (Volantes atribuídos a cada loja) ====================
 
 /**
  * Atribuir volante a uma loja (suporta múltiplos volantes com prioridade)
  * Se o volante já está atribuído a esta loja, actualiza a prioridade
  */
-export async function assignVolanteToLoja(lojaId: number, volanteId: number, prioridade: number = 1): Promise<void> {
+export async function assignVolanteToLoja(lojaId: number, volanteId: number, prioridade: number = 1, preferencial: boolean = false): Promise<void> {
   const db = await getDb();
   if (!db) return;
   
@@ -8635,13 +8664,13 @@ export async function assignVolanteToLoja(lojaId: number, volanteId: number, pri
   );
   
   if (existing.length > 0) {
-    // Atualizar prioridade
-    await db.update(lojaVolante).set({ prioridade }).where(
+    // Atualizar prioridade e preferencial
+    await db.update(lojaVolante).set({ prioridade, preferencial }).where(
       and(eq(lojaVolante.lojaId, lojaId), eq(lojaVolante.volanteId, volanteId))
     );
   } else {
     // Inserir nova atribuição
-    await db.insert(lojaVolante).values({ lojaId, volanteId, prioridade });
+    await db.insert(lojaVolante).values({ lojaId, volanteId, prioridade, preferencial });
   }
 }
 
@@ -8805,22 +8834,16 @@ export async function getProximidadeScore(volanteId: number, lojaId: number): Pr
   const db = await getDb();
   if (!db) return 0.5; // Score neutro se não há DB
   
-  const volante = await db.select().from(volantes).where(eq(volantes.id, volanteId));
-  const loja = await db.select().from(lojas).where(eq(lojas.id, lojaId));
+  // Verificar se a loja é preferencial para este volante
+  const relacao = await db.select().from(lojaVolante).where(and(
+    eq(lojaVolante.volanteId, volanteId),
+    eq(lojaVolante.lojaId, lojaId)
+  ));
   
-  if (!volante[0] || !loja[0]) return 0.5;
+  if (!relacao[0]) return 0.3; // Loja não atribuída a este volante
   
-  const subZonaVolante = volante[0].subZonaPreferencial?.toLowerCase().trim();
-  const subZonaLoja = loja[0].subZona?.toLowerCase().trim();
-  
-  // Se não há sub-zonas configuradas, score neutro
-  if (!subZonaVolante || !subZonaLoja) return 0.5;
-  
-  // Match exacto = score máximo
-  if (subZonaVolante === subZonaLoja) return 1.0;
-  
-  // Sub-zonas diferentes = score baixo
-  return 0.2;
+  // Loja preferencial = score máximo, não preferencial = score baixo
+  return relacao[0].preferencial ? 1.0 : 0.2;
 }
 
 /**
