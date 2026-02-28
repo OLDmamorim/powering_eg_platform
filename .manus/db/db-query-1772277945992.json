@@ -1,0 +1,22 @@
+{
+  "query": "SELECT v.id, v.nome, v.gestorId, v.ativo FROM volantes v;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT v.id, v.nome, v.gestorId, v.ativo FROM volantes v;",
+  "rows": [
+    {
+      "id": "1",
+      "nome": "Volante Minho Teste",
+      "gestorId": "1",
+      "ativo": "1"
+    },
+    {
+      "id": "2",
+      "nome": "Volante Minho ",
+      "gestorId": "30001",
+      "ativo": "1"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tnome\tgestorId\tativo\n1\tVolante Minho Teste\t1\t1\n2\tVolante Minho \t30001\t1\n",
+  "stderr": "",
+  "execution_time_ms": 349
+}

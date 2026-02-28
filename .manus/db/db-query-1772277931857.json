@@ -1,0 +1,30 @@
+{
+  "query": "SELECT v.id, v.nome, v.gestorId, v.ativo, (SELECT COUNT(*) FROM loja_volante lv WHERE lv.volanteId = v.id) as lojasAtribuidas, (SELECT COUNT(*) FROM volante_lojas vl WHERE vl.volanteId = v.id) as lojasDisponiveis, (SELECT COUNT(*) FROM pedidos_apoio pa WHERE pa.volanteId = v.id AND pa.pedido_apoio_estado = 'aprovado') as pedidosAprovados, (SELECT COUNT(*) FROM servicos_volante sv WHERE sv.volanteId = v.id) as totalServicosRegistados FROM volantes v;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT v.id, v.nome, v.gestorId, v.ativo, (SELECT COUNT(*) FROM loja_volante lv WHERE lv.volanteId = v.id) as lojasAtribuidas, (SELECT COUNT(*) FROM volante_lojas vl WHERE vl.volanteId = v.id) as lojasDisponiveis, (SELECT COUNT(*) FROM pedidos_apoio pa WHERE pa.volanteId = v.id AND pa.pedido_apoio_estado = 'aprovado') as pedidosAprovados, (SELECT COUNT(*) FROM servicos_volante sv WHERE sv.volanteId = v.id) as totalServicosRegistados FROM volantes v;",
+  "rows": [
+    {
+      "id": "2",
+      "nome": "Volante Minho ",
+      "gestorId": "30001",
+      "ativo": "1",
+      "lojasAtribuidas": "14",
+      "lojasDisponiveis": "14",
+      "pedidosAprovados": "47",
+      "totalServicosRegistados": "15"
+    },
+    {
+      "id": "1",
+      "nome": "Volante Minho Teste",
+      "gestorId": "1",
+      "ativo": "1",
+      "lojasAtribuidas": "0",
+      "lojasDisponiveis": "3",
+      "pedidosAprovados": "0",
+      "totalServicosRegistados": "3"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tnome\tgestorId\tativo\tlojasAtribuidas\tlojasDisponiveis\tpedidosAprovados\ttotalServicosRegistados\n2\tVolante Minho \t30001\t1\t14\t14\t47\t15\n1\tVolante Minho Teste\t1\t1\t0\t3\t0\t3\n",
+  "stderr": "",
+  "execution_time_ms": 356
+}

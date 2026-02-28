@@ -8567,7 +8567,7 @@ IMPORTANTE:
   
   // ==================== PEDIDOS DE APOIO (VOLANTES) ====================
   pedidosApoio: router({
-    // Criar pedido de apoio (pela loja)
+    // Criar pedido de apoio (pela loja) - com atribuição inteligente de volante
     criar: publicProcedure
       .input(z.object({
         token: z.string(),
@@ -8583,31 +8583,29 @@ IMPORTANTE:
           throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
         }
         
-        // Obter volante atribuído à loja
-        const volante = await db.getVolanteByLojaId(tokenData.loja.id);
-        if (!volante) {
-          throw new TRPCError({ code: 'NOT_FOUND', message: 'Nenhum volante atribuído a esta loja' });
-        }
-        
-        // Verificar disponibilidade do dia
         const dataApoio = new Date(input.data);
-        const disponibilidade = await db.verificarDisponibilidadeDia(volante.id, dataApoio);
         
-        if (disponibilidade === 'dia_completo') {
-          throw new TRPCError({ code: 'BAD_REQUEST', message: 'Este dia já está completamente ocupado' });
-        }
-        // Se pedir dia_todo, verificar se ambos os períodos estão livres
-        if (input.periodo === 'dia_todo' && disponibilidade !== 'livre') {
-          throw new TRPCError({ code: 'BAD_REQUEST', message: 'Para pedir o dia todo, ambos os períodos precisam estar livres' });
-        }
-        if (disponibilidade === 'manha_ocupada' && input.periodo === 'manha') {
-          throw new TRPCError({ code: 'BAD_REQUEST', message: 'A manhã deste dia já está ocupada' });
-        }
-        if (disponibilidade === 'tarde_ocupada' && input.periodo === 'tarde') {
-          throw new TRPCError({ code: 'BAD_REQUEST', message: 'A tarde deste dia já está ocupada' });
+        // ATRIBUIÇÃO INTELIGENTE: Usar algoritmo de scoring para escolher o melhor volante
+        const resultado = await db.atribuirVolanteInteligente(
+          tokenData.loja.id,
+          dataApoio,
+          input.periodo,
+          input.tipoApoio
+        );
+        
+        if (!resultado) {
+          // Nenhum volante disponível - verificar se existem volantes atribuídos
+          const volantesLoja = await db.getVolantesByLojaId(tokenData.loja.id);
+          if (volantesLoja.length === 0) {
+            throw new TRPCError({ code: 'NOT_FOUND', message: 'Nenhum volante atribuído a esta loja' });
+          }
+          throw new TRPCError({ code: 'BAD_REQUEST', message: 'Nenhum volante disponível para este dia/período. Todos os volantes estão ocupados.' });
         }
         
-        // Criar pedido
+        const volante = resultado.volante;
+        console.log(`[Atribuição Inteligente] Loja ${tokenData.loja.nome} -> Volante ${volante.nome} (score: ${resultado.score})`);
+        
+        // Criar pedido com informação de atribuição inteligente
         const pedido = await db.createPedidoApoio({
           lojaId: tokenData.loja.id,
           volanteId: volante.id,
@@ -8615,6 +8613,8 @@ IMPORTANTE:
           periodo: input.periodo,
           tipoApoio: input.tipoApoio,
           observacoes: input.observacoes,
+          atribuidoPorIA: true,
+          scoreAtribuicao: resultado.score.toString(),
         });
         
         // Enviar email ao volante sobre novo pedido
@@ -8839,18 +8839,108 @@ IMPORTANTE:
         
         const pedido = await db.reprovarPedidoApoio(input.pedidoId, input.motivo);
         
-        // Enviar email à loja sobre reprovação
         const loja = await db.getLojaById(pedidoExistente.lojaId);
+        
+        // REDIRECCIONAMENTO AUTOMÁTICO: Tentar atribuir a outro volante
+        let pedidoRedireccionado = null;
+        const volantesLoja = await db.getVolantesByLojaId(pedidoExistente.lojaId);
+        
+        // Só redireccionar se há mais de 1 volante atribuído
+        if (volantesLoja.length > 1) {
+          // Filtrar o volante que reprovou
+          const outrosVolantes = volantesLoja.filter(v => v.id !== tokenData.volante.id);
+          
+          // Verificar disponibilidade dos outros volantes
+          for (const outroVolante of outrosVolantes) {
+            const disponivel = await db.verificarDisponibilidadeCompleta(
+              outroVolante.id, 
+              new Date(pedidoExistente.data), 
+              pedidoExistente.periodo as 'manha' | 'tarde' | 'dia_todo'
+            );
+            
+            if (disponivel) {
+              // Criar novo pedido redireccionado
+              pedidoRedireccionado = await db.createPedidoApoio({
+                lojaId: pedidoExistente.lojaId,
+                volanteId: outroVolante.id,
+                data: new Date(pedidoExistente.data),
+                periodo: pedidoExistente.periodo as 'manha' | 'tarde' | 'dia_todo',
+                tipoApoio: pedidoExistente.tipoApoio as 'cobertura_ferias' | 'substituicao_vidros' | 'outro',
+                observacoes: pedidoExistente.observacoes || undefined,
+                atribuidoPorIA: true,
+                scoreAtribuicao: '1.00',
+                redireccionadoDe: pedidoExistente.id,
+              });
+              
+              console.log(`[Redireccionamento] Pedido ${pedidoExistente.id} reprovado por ${tokenData.volante.nome} -> Redireccionado para ${outroVolante.nome} (pedido ${pedidoRedireccionado?.id})`);
+              
+              // Notificar o novo volante por email
+              if (outroVolante.email) {
+                const tipoApoioTexto = pedidoExistente.tipoApoio === 'cobertura_ferias' ? 'Cobertura de Férias' : 
+                                      pedidoExistente.tipoApoio === 'substituicao_vidros' ? 'Substituição de Vidros' : 'Outro';
+                const periodoTexto = pedidoExistente.periodo === 'manha' ? 'Manhã (9h-13h)' : pedidoExistente.periodo === 'tarde' ? 'Tarde (14h-18h)' : 'Dia Todo (9h-18h)';
+                const dataFormatada = new Date(pedidoExistente.data).toLocaleDateString('pt-PT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+                
+                try {
+                  await sendEmail({
+                    to: outroVolante.email,
+                    subject: `Pedido de Apoio Redireccionado - ${loja?.nome || 'Loja'}`,
+                    html: gerarHTMLNovoPedidoApoio({
+                      volanteNome: outroVolante.nome,
+                      lojaNome: loja?.nome || 'Loja',
+                      data: dataFormatada,
+                      periodo: periodoTexto,
+                      tipoApoio: tipoApoioTexto,
+                      observacoes: `[REDIRECCIONADO - ${tokenData.volante.nome} não disponível] ${pedidoExistente.observacoes || ''}`,
+                    }),
+                  });
+                } catch (e) {
+                  console.error('[Email] Erro ao enviar notificação de redireccionamento:', e);
+                }
+              }
+              
+              // Notificar o novo volante por Telegram
+              if (outroVolante.telegramChatId) {
+                try {
+                  const tokenVolante = await db.getOrCreateTokenVolante(outroVolante.id);
+                  const baseUrl = process.env.VITE_APP_URL || 'https://poweringeg-3c9mozlh.manus.space';
+                  const portalUrl = tokenVolante ? `${baseUrl}/portal-volante?token=${tokenVolante.token}` : baseUrl;
+                  
+                  await notificarNovoPedidoApoio(outroVolante.telegramChatId, {
+                    lojaNome: `${loja?.nome || 'Loja'} (Redireccionado)`,
+                    data: new Date(pedidoExistente.data),
+                    periodo: pedidoExistente.periodo as 'manha' | 'tarde' | 'dia_todo',
+                    tipoApoio: pedidoExistente.tipoApoio as 'cobertura_ferias' | 'substituicao_vidros' | 'outro',
+                    observacoes: `Redireccionado de ${tokenData.volante.nome}. ${pedidoExistente.observacoes || ''}`,
+                    portalUrl: portalUrl,
+                  });
+                } catch (e) {
+                  console.error('[Telegram] Erro ao enviar notificação de redireccionamento:', e);
+                }
+              }
+              
+              break; // Atribuído com sucesso, sair do loop
+            }
+          }
+        }
+        
+        // Enviar email à loja sobre reprovação (com info de redireccionamento se aplicável)
         if (loja?.email) {
           const tipoApoioTexto = pedidoExistente.tipoApoio === 'cobertura_ferias' ? 'Cobertura de Férias' : 
                                 pedidoExistente.tipoApoio === 'substituicao_vidros' ? 'Substituição de Vidros' : 'Outro';
           const periodoTexto = pedidoExistente.periodo === 'manha' ? 'Manhã (9h-13h)' : 'Tarde (14h-18h)';
           const dataFormatada = new Date(pedidoExistente.data).toLocaleDateString('pt-PT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
           
+          const motivoComRedireccao = pedidoRedireccionado 
+            ? `${input.motivo || 'Sem motivo indicado'}\n\n\u2705 O pedido foi automaticamente redireccionado para outro volante.`
+            : input.motivo;
+          
           try {
             await sendEmail({
               to: loja.email,
-              subject: `Pedido de Apoio Reprovado - ${dataFormatada}`,
+              subject: pedidoRedireccionado 
+                ? `Pedido de Apoio Redireccionado - ${dataFormatada}`
+                : `Pedido de Apoio Reprovado - ${dataFormatada}`,
               html: gerarHTMLPedidoReprovado({
                 lojaNome: loja.nome,
                 volanteNome: tokenData.volante.nome,
@@ -8858,16 +8948,20 @@ IMPORTANTE:
                 periodo: periodoTexto,
                 tipoApoio: tipoApoioTexto,
                 observacoes: pedidoExistente.observacoes,
-                motivo: input.motivo,
+                motivo: motivoComRedireccao,
               }),
             });
-            console.log(`[Email] Notificação de reprovação enviada para loja: ${loja.email}`);
+            console.log(`[Email] Notificação de reprovação${pedidoRedireccionado ? ' + redireccionamento' : ''} enviada para loja: ${loja.email}`);
           } catch (e) {
             console.error('[Email] Erro ao enviar notificação à loja:', e);
           }
         }
         
-        return pedido;
+        return { 
+          ...pedido, 
+          redireccionado: !!pedidoRedireccionado,
+          novoPedidoId: pedidoRedireccionado?.id || null 
+        };
       }),
     
     // Cancelar pedido de apoio (pela loja)

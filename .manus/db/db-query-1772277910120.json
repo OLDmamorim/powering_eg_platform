@@ -1,0 +1,26 @@
+{
+  "query": "SELECT v.id, v.nome, v.gestorId, v.ativo, g.userId, u.name as gestorNome FROM volantes v LEFT JOIN gestores g ON v.gestorId = g.id LEFT JOIN users u ON g.userId = u.id ORDER BY v.gestorId, v.nome;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT v.id, v.nome, v.gestorId, v.ativo, g.userId, u.name as gestorNome FROM volantes v LEFT JOIN gestores g ON v.gestorId = g.id LEFT JOIN users u ON g.userId = u.id ORDER BY v.gestorId, v.nome;",
+  "rows": [
+    {
+      "id": "1",
+      "nome": "Volante Minho Teste",
+      "gestorId": "1",
+      "ativo": "1",
+      "userId": "NULL",
+      "gestorNome": "NULL"
+    },
+    {
+      "id": "2",
+      "nome": "Volante Minho ",
+      "gestorId": "30001",
+      "ativo": "1",
+      "userId": "420030",
+      "gestorNome": "Marco Amorim"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tnome\tgestorId\tativo\tuserId\tgestorNome\n1\tVolante Minho Teste\t1\t1\tNULL\tNULL\n2\tVolante Minho \t30001\t1\t420030\tMarco Amorim\n",
+  "stderr": "",
+  "execution_time_ms": 816
+}

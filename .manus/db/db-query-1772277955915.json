@@ -1,0 +1,108 @@
+{
+  "query": "SELECT l.id, l.nome, l.localidade, lv.volanteId, v.nome as volanteNome FROM lojas l LEFT JOIN loja_volante lv ON l.id = lv.lojaId LEFT JOIN volantes v ON lv.volanteId = v.id INNER JOIN gestor_lojas gl ON l.id = gl.lojaId INNER JOIN gestores g ON gl.gestorId = g.id INNER JOIN users u ON g.userId = u.id WHERE u.name LIKE '%Amorim%' ORDER BY l.nome;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT l.id, l.nome, l.localidade, lv.volanteId, v.nome as volanteNome FROM lojas l LEFT JOIN loja_volante lv ON l.id = lv.lojaId LEFT JOIN volantes v ON lv.volanteId = v.id INNER JOIN gestor_lojas gl ON l.id = gl.lojaId INNER JOIN gestores g ON gl.gestorId = g.id INNER JOIN users u ON g.userId = u.id WHERE u.name LIKE '%Amorim%' ORDER BY l.nome;",
+  "rows": [
+    {
+      "id": "60002",
+      "nome": "Barcelos",
+      "localidade": "NULL",
+      "volanteId": "2",
+      "volanteNome": "Volante Minho "
+    },
+    {
+      "id": "180010",
+      "nome": "Braga - minho center",
+      "localidade": "NULL",
+      "volanteId": "2",
+      "volanteNome": "Volante Minho "
+    },
+    {
+      "id": "180011",
+      "nome": "Braga sm",
+      "localidade": "NULL",
+      "volanteId": "2",
+      "volanteNome": "Volante Minho "
+    },
+    {
+      "id": "60001",
+      "nome": "Famalicão",
+      "localidade": "NULL",
+      "volanteId": "2",
+      "volanteNome": "Volante Minho "
+    },
+    {
+      "id": "180019",
+      "nome": "Famalicão sm",
+      "localidade": "NULL",
+      "volanteId": "2",
+      "volanteNome": "Volante Minho "
+    },
+    {
+      "id": "180024",
+      "nome": "Guimarães shopping",
+      "localidade": "NULL",
+      "volanteId": "2",
+      "volanteNome": "Volante Minho "
+    },
+    {
+      "id": "180036",
+      "nome": "Mycarcenter",
+      "localidade": "NULL",
+      "volanteId": "2",
+      "volanteNome": "Volante Minho "
+    },
+    {
+      "id": "60007",
+      "nome": "Paços de Ferreira ",
+      "localidade": "NULL",
+      "volanteId": "2",
+      "volanteNome": "Volante Minho "
+    },
+    {
+      "id": "60006",
+      "nome": "Paredes",
+      "localidade": "NULL",
+      "volanteId": "2",
+      "volanteNome": "Volante Minho "
+    },
+    {
+      "id": "180038",
+      "nome": "Paredes sm",
+      "localidade": "NULL",
+      "volanteId": "2",
+      "volanteNome": "Volante Minho "
+    },
+    {
+      "id": "60005",
+      "nome": "Póvoa de Varzim",
+      "localidade": "NULL",
+      "volanteId": "2",
+      "volanteNome": "Volante Minho "
+    },
+    {
+      "id": "60004",
+      "nome": "Viana do Castelo ",
+      "localidade": "NULL",
+      "volanteId": "2",
+      "volanteNome": "Volante Minho "
+    },
+    {
+      "id": "180057",
+      "nome": "Viana do castelo sm",
+      "localidade": "NULL",
+      "volanteId": "2",
+      "volanteNome": "Volante Minho "
+    },
+    {
+      "id": "60003",
+      "nome": "Vila Verde",
+      "localidade": "NULL",
+      "volanteId": "2",
+      "volanteNome": "Volante Minho "
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tnome\tlocalidade\tvolanteId\tvolanteNome\n60002\tBarcelos\tNULL\t2\tVolante Minho \n180010\tBraga - minho center\tNULL\t2\tVolante Minho \n180011\tBraga sm\tNULL\t2\tVolante Minho \n60001\tFamalicão\tNULL\t2\tVolante Minho \n180019\tFamalicão sm\tNULL\t2\tVolante Minho \n180024\tGuimarães shopping\tNULL\t2\tVolante Minho \n180036\tMycarcenter\tNULL\t2\tVolante Minho \n60007\tPaços de Ferreira \tNULL\t2\tVolante Minho \n60006\tParedes\tNULL\t2\tVolante Minho \n180038\tParedes sm\tNULL\t2\tVolante Minho \n60005\tPóvoa de Varzim\tNULL\t2\tVolante Minho \n60004\tViana do Castelo \tNULL\t2\tVolante Minho \n180057\tViana do castelo sm\tNULL\t2\tVolante Minho \n60003\tVila Verde\tNULL\t2\tVolante Minho \n",
+  "stderr": "",
+  "execution_time_ms": 442
+}

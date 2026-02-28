@@ -8619,51 +8619,352 @@ export async function getLojasByVolanteId(volanteId: number): Promise<Loja[]> {
   return result.map(r => r.loja);
 }
 
-// ==================== LOJA-VOLANTE (Volante atribuído a cada loja) ====================
+// ==================== LOJA-VOLANTE (Volantes atribuídos a cada loja) ====================
 
 /**
- * Atribuir volante a uma loja (cada loja só pode ter 1 volante)
+ * Atribuir volante a uma loja (suporta múltiplos volantes com prioridade)
+ * Se o volante já está atribuído a esta loja, actualiza a prioridade
  */
-export async function assignVolanteToLoja(lojaId: number, volanteId: number): Promise<void> {
+export async function assignVolanteToLoja(lojaId: number, volanteId: number, prioridade: number = 1): Promise<void> {
   const db = await getDb();
   if (!db) return;
   
-  // Verificar se já existe atribuição
-  const existing = await db.select().from(lojaVolante).where(eq(lojaVolante.lojaId, lojaId));
+  // Verificar se já existe atribuição deste volante a esta loja
+  const existing = await db.select().from(lojaVolante).where(
+    and(eq(lojaVolante.lojaId, lojaId), eq(lojaVolante.volanteId, volanteId))
+  );
   
   if (existing.length > 0) {
-    // Atualizar
-    await db.update(lojaVolante).set({ volanteId }).where(eq(lojaVolante.lojaId, lojaId));
+    // Atualizar prioridade
+    await db.update(lojaVolante).set({ prioridade }).where(
+      and(eq(lojaVolante.lojaId, lojaId), eq(lojaVolante.volanteId, volanteId))
+    );
   } else {
-    // Inserir
-    await db.insert(lojaVolante).values({ lojaId, volanteId });
+    // Inserir nova atribuição
+    await db.insert(lojaVolante).values({ lojaId, volanteId, prioridade });
   }
 }
 
 /**
- * Remover volante de uma loja
+ * Remover um volante específico de uma loja
  */
-export async function removeVolanteFromLoja(lojaId: number): Promise<void> {
+export async function removeVolanteFromLoja(lojaId: number, volanteId?: number): Promise<void> {
   const db = await getDb();
   if (!db) return;
   
-  await db.delete(lojaVolante).where(eq(lojaVolante.lojaId, lojaId));
+  if (volanteId) {
+    // Remover volante específico
+    await db.delete(lojaVolante).where(
+      and(eq(lojaVolante.lojaId, lojaId), eq(lojaVolante.volanteId, volanteId))
+    );
+  } else {
+    // Remover todos os volantes da loja (retrocompatível)
+    await db.delete(lojaVolante).where(eq(lojaVolante.lojaId, lojaId));
+  }
 }
 
 /**
- * Obter volante atribuído a uma loja
+ * Obter volante principal atribuído a uma loja (retrocompatível - retorna o de maior prioridade)
  */
 export async function getVolanteByLojaId(lojaId: number): Promise<Volante | null> {
   const db = await getDb();
   if (!db) return null;
   
   const result = await db
-    .select({ volante: volantes })
+    .select({ volante: volantes, prioridade: lojaVolante.prioridade })
     .from(lojaVolante)
     .innerJoin(volantes, eq(lojaVolante.volanteId, volantes.id))
-    .where(eq(lojaVolante.lojaId, lojaId));
+    .where(and(eq(lojaVolante.lojaId, lojaId), eq(volantes.ativo, true)))
+    .orderBy(lojaVolante.prioridade);
   
   return result[0]?.volante || null;
+}
+
+/**
+ * Obter TODOS os volantes atribuídos a uma loja (ordenados por prioridade)
+ */
+export async function getVolantesByLojaId(lojaId: number): Promise<(Volante & { prioridade: number })[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const result = await db
+    .select({ volante: volantes, prioridade: lojaVolante.prioridade })
+    .from(lojaVolante)
+    .innerJoin(volantes, eq(lojaVolante.volanteId, volantes.id))
+    .where(and(eq(lojaVolante.lojaId, lojaId), eq(volantes.ativo, true)))
+    .orderBy(lojaVolante.prioridade);
+  
+  return result.map(r => ({ ...r.volante, prioridade: r.prioridade }));
+}
+
+// ==================== ATRIBUIÇÃO INTELIGENTE DE VOLANTES ====================
+
+/**
+ * Verificar disponibilidade completa de um volante para um dia/período específico
+ * Considera pedidos aprovados, pendentes, bloqueios e agendamentos
+ */
+export async function verificarDisponibilidadeCompleta(
+  volanteId: number, 
+  data: Date, 
+  periodo: 'manha' | 'tarde' | 'dia_todo'
+): Promise<boolean> {
+  const db = await getDb();
+  if (!db) return false;
+  
+  const startOfDay = new Date(data);
+  startOfDay.setHours(0, 0, 0, 0);
+  const endOfDay = new Date(data);
+  endOfDay.setHours(23, 59, 59, 999);
+  
+  // Verificar pedidos aprovados ou pendentes
+  const pedidos = await db.select().from(pedidosApoio).where(and(
+    eq(pedidosApoio.volanteId, volanteId),
+    gte(pedidosApoio.data, startOfDay),
+    lte(pedidosApoio.data, endOfDay),
+    sql`${pedidosApoio.estado} IN ('aprovado', 'pendente')`
+  ));
+  
+  // Verificar bloqueios
+  const bloqueios = await db.select().from(bloqueiosVolante).where(and(
+    eq(bloqueiosVolante.volanteId, volanteId),
+    gte(bloqueiosVolante.data, startOfDay),
+    lte(bloqueiosVolante.data, endOfDay)
+  ));
+  
+  // Verificar agendamentos
+  const agendamentos = await db.select().from(agendamentosVolante).where(and(
+    eq(agendamentosVolante.volanteId, volanteId),
+    gte(agendamentosVolante.data, startOfDay),
+    lte(agendamentosVolante.data, endOfDay)
+  ));
+  
+  // Combinar todas as ocupações
+  const ocupacoes = [
+    ...pedidos.map(p => p.periodo),
+    ...bloqueios.map(b => b.periodo),
+    ...agendamentos.map(a => a.agendamento_volante_periodo)
+  ];
+  
+  const temDiaTodo = ocupacoes.includes('dia_todo');
+  const temManha = ocupacoes.includes('manha');
+  const temTarde = ocupacoes.includes('tarde');
+  
+  if (temDiaTodo) return false; // Dia completo ocupado
+  if (periodo === 'dia_todo') return !temManha && !temTarde;
+  if (periodo === 'manha') return !temManha;
+  if (periodo === 'tarde') return !temTarde;
+  return false;
+}
+
+/**
+ * Calcular carga semanal de um volante (número de períodos ocupados na semana)
+ */
+export async function getCargaSemanal(volanteId: number, dataReferencia: Date): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  
+  // Calcular início e fim da semana (segunda a domingo)
+  const dia = dataReferencia.getDay();
+  const diffSegunda = dia === 0 ? -6 : 1 - dia;
+  const inicioSemana = new Date(dataReferencia);
+  inicioSemana.setDate(dataReferencia.getDate() + diffSegunda);
+  inicioSemana.setHours(0, 0, 0, 0);
+  const fimSemana = new Date(inicioSemana);
+  fimSemana.setDate(inicioSemana.getDate() + 6);
+  fimSemana.setHours(23, 59, 59, 999);
+  
+  // Contar pedidos aprovados + pendentes na semana
+  const pedidos = await db.select().from(pedidosApoio).where(and(
+    eq(pedidosApoio.volanteId, volanteId),
+    gte(pedidosApoio.data, inicioSemana),
+    lte(pedidosApoio.data, fimSemana),
+    sql`${pedidosApoio.estado} IN ('aprovado', 'pendente')`
+  ));
+  
+  // Contar agendamentos na semana
+  const agendamentos = await db.select().from(agendamentosVolante).where(and(
+    eq(agendamentosVolante.volanteId, volanteId),
+    gte(agendamentosVolante.data, inicioSemana),
+    lte(agendamentosVolante.data, fimSemana)
+  ));
+  
+  // dia_todo conta como 2 períodos
+  let carga = 0;
+  pedidos.forEach(p => { carga += p.periodo === 'dia_todo' ? 2 : 1; });
+  agendamentos.forEach(a => { carga += a.agendamento_volante_periodo === 'dia_todo' ? 2 : 1; });
+  
+  return carga;
+}
+
+/**
+ * Calcular score de proximidade geográfica entre volante e loja
+ * Baseado na sub-zona preferencial do volante vs sub-zona da loja
+ * Retorna 0.0 a 1.0
+ */
+export async function getProximidadeScore(volanteId: number, lojaId: number): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0.5; // Score neutro se não há DB
+  
+  const volante = await db.select().from(volantes).where(eq(volantes.id, volanteId));
+  const loja = await db.select().from(lojas).where(eq(lojas.id, lojaId));
+  
+  if (!volante[0] || !loja[0]) return 0.5;
+  
+  const subZonaVolante = volante[0].subZonaPreferencial?.toLowerCase().trim();
+  const subZonaLoja = loja[0].subZona?.toLowerCase().trim();
+  
+  // Se não há sub-zonas configuradas, score neutro
+  if (!subZonaVolante || !subZonaLoja) return 0.5;
+  
+  // Match exacto = score máximo
+  if (subZonaVolante === subZonaLoja) return 1.0;
+  
+  // Sub-zonas diferentes = score baixo
+  return 0.2;
+}
+
+/**
+ * Calcular score de histórico entre volante e loja (continuidade)
+ * Baseado no número de serviços realizados nos últimos 3 meses
+ * Retorna 0.0 a 1.0
+ */
+export async function getHistoricoScore(volanteId: number, lojaId: number): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  
+  const tresMesesAtras = new Date();
+  tresMesesAtras.setMonth(tresMesesAtras.getMonth() - 3);
+  const dataInicio = tresMesesAtras.toISOString().split('T')[0];
+  const dataFim = new Date().toISOString().split('T')[0];
+  
+  // Contar serviços do volante nesta loja
+  const servicos = await db.select().from(servicosVolante).where(and(
+    eq(servicosVolante.volanteId, volanteId),
+    eq(servicosVolante.lojaId, lojaId),
+    gte(servicosVolante.data, dataInicio),
+    lte(servicosVolante.data, dataFim)
+  ));
+  
+  // Contar pedidos aprovados
+  const pedidos = await db.select().from(pedidosApoio).where(and(
+    eq(pedidosApoio.volanteId, volanteId),
+    eq(pedidosApoio.lojaId, lojaId),
+    eq(pedidosApoio.estado, 'aprovado'),
+    gte(pedidosApoio.data, tresMesesAtras)
+  ));
+  
+  const totalInteracoes = servicos.length + pedidos.length;
+  
+  // Normalizar: 0 interações = 0, 10+ interações = 1.0
+  return Math.min(totalInteracoes / 10, 1.0);
+}
+
+/**
+ * Score de especialização - DESACTIVADO
+ * Ambos os volantes são especialistas em tudo, portanto retorna sempre score neutro.
+ * Mantido para futura activação se necessário.
+ */
+export async function getEspecializacaoScore(_volanteId: number, _tipoApoio: string): Promise<number> {
+  return 0.5; // Score neutro - ambos os volantes são especialistas iguais
+}
+
+/**
+ * ALGORITMO PRINCIPAL: Atribuir volante inteligentemente a um pedido de apoio
+ * 
+ * Critérios ponderados:
+ * 1. Disponibilidade (40%) - Volante está livre no dia/período?
+ * 2. Carga semanal (25%) - Equilibrar serviços entre volantes
+ * 3. Proximidade geográfica (20%) - Sub-zona preferencial
+ * 4. Histórico com a loja (10%) - Continuidade
+ * 5. Especialização (5%) - Tipo de serviço
+ * 
+ * Retorna o volante com melhor score, ou null se nenhum disponível
+ */
+export async function atribuirVolanteInteligente(
+  lojaId: number,
+  data: Date,
+  periodo: 'manha' | 'tarde' | 'dia_todo',
+  tipoApoio: string
+): Promise<{ volante: Volante; score: number; detalhes: Record<string, number> } | null> {
+  
+  // 1. Buscar todos os volantes atribuídos a esta loja
+  const volantesLoja = await getVolantesByLojaId(lojaId);
+  
+  if (volantesLoja.length === 0) return null;
+  
+  // Se só tem 1 volante, verificar disponibilidade e retornar
+  if (volantesLoja.length === 1) {
+    const disponivel = await verificarDisponibilidadeCompleta(volantesLoja[0].id, data, periodo);
+    if (!disponivel) return null;
+    return { 
+      volante: volantesLoja[0], 
+      score: 1.0, 
+      detalhes: { disponibilidade: 1, carga: 1, proximidade: 1, historico: 1, especializacao: 1 } 
+    };
+  }
+  
+  // 2. Filtrar por disponibilidade
+  const volantesDisponiveis: (Volante & { prioridade: number })[] = [];
+  for (const v of volantesLoja) {
+    const disponivel = await verificarDisponibilidadeCompleta(v.id, data, periodo);
+    if (disponivel) {
+      volantesDisponiveis.push(v);
+    }
+  }
+  
+  if (volantesDisponiveis.length === 0) return null;
+  if (volantesDisponiveis.length === 1) {
+    return { 
+      volante: volantesDisponiveis[0], 
+      score: 1.0, 
+      detalhes: { disponibilidade: 1, carga: 0, proximidade: 0, historico: 0, especializacao: 0 } 
+    };
+  }
+  
+  // 3. Calcular scores para cada volante disponível
+  const MAX_CARGA_SEMANAL = 10; // Máximo de períodos por semana
+  
+  const scores = await Promise.all(volantesDisponiveis.map(async (v) => {
+    const cargaSemanal = await getCargaSemanal(v.id, data);
+    const proximidade = await getProximidadeScore(v.id, lojaId);
+    const historico = await getHistoricoScore(v.id, lojaId);
+    const especializacao = await getEspecializacaoScore(v.id, tipoApoio);
+    
+    // Normalizar carga: menos carga = melhor score
+    const cargaScore = Math.max(0, 1 - (cargaSemanal / MAX_CARGA_SEMANAL));
+    
+    // Score final ponderado
+    const scoreFinal = 
+      1.0 * 0.40 + // Disponibilidade já verificada (= 1.0)
+      cargaScore * 0.25 +
+      proximidade * 0.20 +
+      historico * 0.10 +
+      especializacao * 0.05;
+    
+    return {
+      volante: v,
+      score: Math.round(scoreFinal * 100) / 100,
+      detalhes: {
+        disponibilidade: 1.0,
+        carga: Math.round(cargaScore * 100) / 100,
+        proximidade: Math.round(proximidade * 100) / 100,
+        historico: Math.round(historico * 100) / 100,
+        especializacao: Math.round(especializacao * 100) / 100
+      }
+    };
+  }));
+  
+  // 4. Ordenar por score (maior primeiro), desempate por prioridade
+  scores.sort((a, b) => {
+    if (b.score !== a.score) return b.score - a.score;
+    return (a.volante as any).prioridade - (b.volante as any).prioridade;
+  });
+  
+  console.log(`[Atribuição Inteligente] Loja ${lojaId} - Scores:`, 
+    scores.map(s => `${s.volante.nome}: ${s.score} (carga:${s.detalhes.carga}, prox:${s.detalhes.proximidade}, hist:${s.detalhes.historico}, esp:${s.detalhes.especializacao})`)
+  );
+  
+  return scores[0];
 }
 
 // ==================== TOKENS VOLANTE ====================

@@ -610,6 +610,13 @@
       "when": 1771707973806,
       "tag": "0086_sleepy_the_stranger",
       "breakpoints": true
+    },
+    {
+      "idx": 87,
+      "version": "5",
+      "when": 1772278438807,
+      "tag": "0087_narrow_whiplash",
+      "breakpoints": true
     }
   ]
 }

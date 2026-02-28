@@ -1,0 +1,8 @@
+{
+  "query": "SELECT v.id, v.nome, v.gestorId, v.ativo, (SELECT COUNT(*) FROM loja_volante lv WHERE lv.volanteId = v.id) as lojasAtribuidas, (SELECT COUNT(*) FROM volante_lojas vl WHERE vl.volanteId = v.id) as lojasDisponiveis, (SELECT COUNT(*) FROM pedidos_apoio pa WHERE pa.volanteId = v.id AND pa.estado = 'aprovado') as pedidosAprovados FROM volantes v;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT v.id, v.nome, v.gestorId, v.ativo, (SELECT COUNT(*) FROM loja_volante lv WHERE lv.volanteId = v.id) as lojasAtribuidas, (SELECT COUNT(*) FROM volante_lojas vl WHERE vl.volanteId = v.id) as lojasDisponiveis, (SELECT COUNT(*) FROM pedidos_apoio pa WHERE pa.volanteId = v.id AND pa.estado = 'aprovado') as pedidosAprovados FROM volantes v;",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 'pa.estado' in 'where clause'"
+  ]
+}

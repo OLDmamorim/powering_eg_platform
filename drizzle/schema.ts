@@ -48,6 +48,7 @@ export const lojas = mysqlTable("lojas", {
   contactoSenhorio: varchar("contactoSenhorio", { length: 255 }),
   areaM2: varchar("areaM2", { length: 50 }), // Área em m²
   observacoesImovel: text("observacoesImovel"), // Notas adicionais sobre o imóvel
+  subZona: varchar("subZona", { length: 100 }), // Sub-zona geográfica para atribuição inteligente de volantes (ex: "Minho Norte", "Vale do Sousa")
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
@@ -969,6 +970,7 @@ export const volantes = mysqlTable("volantes", {
   telefone: varchar("telefone", { length: 50 }),
   gestorId: int("gestorId").notNull(), // FK para gestores.id - gestor responsável pelo volante
   ativo: boolean("ativo").default(true).notNull(),
+  subZonaPreferencial: varchar("subZonaPreferencial", { length: 100 }), // Sub-zona preferencial do volante (ex: "Minho Norte", "Vale do Sousa")
   telegramChatId: varchar("telegramChatId", { length: 100 }), // Chat ID do Telegram para notificações
   telegramUsername: varchar("telegramUsername", { length: 100 }), // Username do Telegram (opcional)
   createdAt: timestamp("createdAt").defaultNow().notNull(),
@@ -1045,6 +1047,11 @@ export const pedidosApoio = mysqlTable("pedidos_apoio", {
   linkOutlook: text("linkOutlook"),
   linkICS: text("linkICS"), // Apple Calendar
   
+  // Atribuição inteligente
+  atribuidoPorIA: boolean("atribuidoPorIA").default(false).notNull(), // Se foi atribuído pelo algoritmo de scoring
+  scoreAtribuicao: varchar("scoreAtribuicao", { length: 10 }), // Score do volante quando atribuído (ex: "0.85")
+  redireccionadoDe: int("redireccionadoDe"), // ID do pedido original se foi redireccionado após reprovação
+  
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
@@ -1054,13 +1061,14 @@ export type InsertPedidoApoio = typeof pedidosApoio.$inferInsert;
 
 
 /**
- * Loja-Volante - Associação de qual volante está atribuído a cada loja
- * Cada loja só pode ter um volante atribuído
+ * Loja-Volante - Associação de quais volantes estão atribuídos a cada loja
+ * Cada loja pode ter múltiplos volantes atribuídos (com prioridade)
  */
 export const lojaVolante = mysqlTable("loja_volante", {
   id: int("id").autoincrement().primaryKey(),
-  lojaId: int("lojaId").notNull().unique(), // FK para lojas.id - UNIQUE porque cada loja só pode ter 1 volante
+  lojaId: int("lojaId").notNull(), // FK para lojas.id - Já não é UNIQUE, permite múltiplos volantes
   volanteId: int("volanteId").notNull(), // FK para volantes.id
+  prioridade: int("prioridade").default(1).notNull(), // 1 = principal, 2 = secundário, etc.
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

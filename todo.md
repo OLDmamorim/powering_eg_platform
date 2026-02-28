@@ -306,4 +306,16 @@
 - [x] Funciona também quando loja individual é seleccionada (mostra comparação com nacional)
 - [x] Badge de diferença percentual (verde/vermelho) vs Nacional
 - [x] Testar com diferentes métricas e filtros
+- [x] Guardar checkpoint
+
+## Sistema de Múltiplos Volantes com Atribuição Inteligente
+- [x] Actualizar schema: remover UNIQUE de lojaId em loja_volante, adicionar prioridade e subZona
+- [x] Adicionar campo subZona às lojas para agrupamento geográfico
+- [x] Criar função getVolantesByLojaId (retorna array em vez de único)
+- [x] Implementar algoritmo de scoring (disponibilidade 40%, carga 25%, proximidade 20%, histórico 10%, especialização 5%)
+- [x] Actualizar fluxo de criação de pedidos para usar atribuição inteligente
+- [x] Implementar redireccionamento automático quando volante reprova pedido
+- [~] Actualizar frontend do gestor para gerir múltiplos volantes por loja (IGNORADO - a pedido do Marco)
+- [~] Permitir configurar sub-zonas das lojas no painel do gestor (IGNORADO - a pedido do Marco)
+- [x] Testar fluxo completo com 2 volantes (15 testes vitest passaram)
 - [ ] Guardar checkpoint
