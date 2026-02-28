@@ -297,4 +297,13 @@
 - [x] Diagnosticar cálculo da média no ResultadosDashboard.tsx
 - [x] Corrigir fórmula de cálculo para mostrar valores correctos
 - [x] Testar todas as 4 métricas (Total Serviços, Taxa Reparação, Desvio %, Serv./Colab.)
+- [x] Guardar checkpoint
+
+## Funcionalidade: Média nacional vs Minhas Lojas no Dashboard de Resultados
+- [x] Analisar filtro de lojas actual e cálculo da média
+- [x] Quando filtro "Minhas Lojas" está activo, mostrar média nacional para comparação
+- [x] Mostrar diferença visual entre média das lojas do gestor e média nacional
+- [x] Funciona também quando loja individual é seleccionada (mostra comparação com nacional)
+- [x] Badge de diferença percentual (verde/vermelho) vs Nacional
+- [x] Testar com diferentes métricas e filtros
 - [ ] Guardar checkpoint

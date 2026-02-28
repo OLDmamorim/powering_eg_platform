@@ -168,6 +168,20 @@ export function ResultadosDashboard() {
   // Ranking já vem filtrado do backend, apenas usar diretamente
   const ranking = rankingCompleto;
   
+  // Query de ranking NACIONAL (sem filtro de lojas) - para comparação quando não está em "Todas as Lojas"
+  // Mostra comparação nacional quando: gestor com "Minhas Lojas", ou qualquer user com loja individual
+  const isMinhasLojas = lojaSelecionada === 'minhas' && user?.role === 'gestor';
+  const mostrarComparacaoNacional = isMinhasLojas || typeof lojaSelecionada === 'number';
+  const { data: rankingNacional } = trpc.resultados.rankingMultiplosMeses.useQuery(
+    { 
+      metrica: metricaRanking, 
+      periodos: mesesSelecionados,
+      limit: 200, // buscar todas as lojas para calcular média nacional
+      lojasIds: undefined // sem filtro = nacional
+    },
+    { enabled: mesesSelecionados.length > 0 && mostrarComparacaoNacional }
+  );
+  
   const { data: porZona, isLoading: loadingZona } = trpc.resultados.porZona.useQuery(
     { mes: periodoSelecionado?.mes || 1, ano: periodoSelecionado?.ano || 2025 },
     { enabled: !!periodoSelecionado }
@@ -919,56 +933,110 @@ export function ResultadosDashboard() {
                   const totalLojas = ranking.length;
                   if (totalLojas === 0) return null;
                   
-                  let mediaValor = 0;
+                  // Função auxiliar para calcular média de um ranking
+                  const calcularMedia = (data: typeof ranking) => {
+                    const n = data.length;
+                    if (n === 0) return { mediaValor: 0, mediaServicos: 0, mediaObjetivo: 0 };
+                    let mediaValor = 0;
+                    if (metricaRanking === 'totalServicos') {
+                      mediaValor = data.reduce((acc, r) => acc + Number(r.totalServicos || 0), 0) / n;
+                    } else if (metricaRanking === 'taxaReparacao') {
+                      mediaValor = (data.reduce((acc, r) => acc + Number(r.taxaReparacao || 0), 0) / n) * 100;
+                    } else if (metricaRanking === 'desvioPercentualMes') {
+                      mediaValor = (data.reduce((acc, r) => acc + Number(r.desvioPercentualMes || 0), 0) / n) * 100;
+                    } else {
+                      mediaValor = data.reduce((acc, r) => acc + Number(r.valor || 0), 0) / n;
+                    }
+                    const mediaServicos = data.reduce((acc, r) => acc + Number(r.totalServicos || 0), 0) / n;
+                    const mediaObjetivo = data.reduce((acc, r) => acc + Number(r.objetivoMensal || 0), 0) / n;
+                    return { mediaValor, mediaServicos, mediaObjetivo };
+                  };
+                  
+                  const minhas = calcularMedia(ranking);
+                  const nacional = rankingNacional && rankingNacional.length > 0 ? calcularMedia(rankingNacional) : null;
+                  
                   let mediaLabel = '';
                   let mediaSuffix = '';
+                  if (metricaRanking === 'totalServicos') { mediaLabel = 'Média Serviços'; mediaSuffix = ''; }
+                  else if (metricaRanking === 'taxaReparacao') { mediaLabel = 'Média Taxa Reparação'; mediaSuffix = '%'; }
+                  else if (metricaRanking === 'desvioPercentualMes') { mediaLabel = 'Média Desvio vs Objetivo'; mediaSuffix = '%'; }
+                  else { mediaLabel = 'Média Serv./Colab.'; mediaSuffix = ''; }
                   
-                  if (metricaRanking === 'totalServicos') {
-                    const soma = ranking.reduce((acc, r) => acc + Number(r.totalServicos || 0), 0);
-                    mediaValor = soma / totalLojas;
-                    mediaLabel = 'Média Serviços';
-                    mediaSuffix = '';
-                  } else if (metricaRanking === 'taxaReparacao') {
-                    const soma = ranking.reduce((acc, r) => acc + Number(r.taxaReparacao || 0), 0);
-                    mediaValor = (soma / totalLojas) * 100;
-                    mediaLabel = 'Média Taxa Reparação';
-                    mediaSuffix = '%';
-                  } else if (metricaRanking === 'desvioPercentualMes') {
-                    const soma = ranking.reduce((acc, r) => acc + Number(r.desvioPercentualMes || 0), 0);
-                    mediaValor = (soma / totalLojas) * 100;
-                    mediaLabel = 'Média Desvio vs Objetivo';
-                    mediaSuffix = '%';
-                  } else {
-                    const soma = ranking.reduce((acc, r) => acc + Number(r.valor || 0), 0);
-                    mediaValor = soma / totalLojas;
-                    mediaLabel = 'Média Serv./Colab.';
-                    mediaSuffix = '';
-                  }
+                  const formatVal = (v: number) => mediaSuffix === '%' ? v.toFixed(1) : v.toFixed(metricaRanking === 'servicosPorColaborador' ? 2 : 0);
                   
-                  const mediaServicos = ranking.reduce((acc, r) => acc + Number(r.totalServicos || 0), 0) / totalLojas;
-                  const mediaObjetivo = ranking.reduce((acc, r) => acc + Number(r.objetivoMensal || 0), 0) / totalLojas;
+                  // Calcular diferença percentual entre minhas lojas e nacional
+                  const diffPercent = nacional && nacional.mediaValor !== 0 
+                    ? ((minhas.mediaValor - nacional.mediaValor) / Math.abs(nacional.mediaValor)) * 100 
+                    : null;
                   
                   return (
-                    <div className="bg-gradient-to-r from-primary/10 to-primary/5 rounded-lg p-4 mb-2 flex items-center justify-between">
-                      <div>
-                        <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{mediaLabel}</div>
-                        <div className="text-2xl font-bold text-primary">
-                          {mediaSuffix === '%' ? mediaValor.toFixed(1) : mediaValor.toFixed(metricaRanking === 'servicosPorColaborador' ? 2 : 0)}{mediaSuffix}
-                        </div>
-                        <div className="text-xs text-muted-foreground">{totalLojas} lojas</div>
-                      </div>
-                      <div className="flex gap-6">
-                        {metricaRanking !== 'totalServicos' && (
-                          <div className="text-center">
-                            <div className="text-xs font-medium text-muted-foreground">Méd. Serviços</div>
-                            <div className="text-lg font-bold">{mediaServicos.toFixed(0)}</div>
+                    <div className="space-y-2 mb-2">
+                      {/* Barra principal - Média das lojas filtradas */}
+                      <div className="bg-gradient-to-r from-primary/10 to-primary/5 rounded-lg p-4 flex items-center justify-between">
+                        <div>
+                          <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                            {mostrarComparacaoNacional ? `${mediaLabel} (${isMinhasLojas ? 'Minhas Lojas' : 'Loja Selecionada'})` : mediaLabel}
                           </div>
-                        )}
-                        <div className="text-center">
-                          <div className="text-xs font-medium text-muted-foreground">Méd. Objetivo</div>
-                          <div className="text-lg font-bold">{mediaObjetivo.toFixed(0)}</div>
+                          <div className="text-2xl font-bold text-primary">
+                            {formatVal(minhas.mediaValor)}{mediaSuffix}
+                          </div>
+                          <div className="text-xs text-muted-foreground">{totalLojas} lojas</div>
+                        </div>
+                        <div className="flex gap-6">
+                          {metricaRanking !== 'totalServicos' && (
+                            <div className="text-center">
+                              <div className="text-xs font-medium text-muted-foreground">Méd. Serviços</div>
+                              <div className="text-lg font-bold">{minhas.mediaServicos.toFixed(0)}</div>
+                            </div>
+                          )}
+                          <div className="text-center">
+                            <div className="text-xs font-medium text-muted-foreground">Méd. Objetivo</div>
+                            <div className="text-lg font-bold">{minhas.mediaObjetivo.toFixed(0)}</div>
+                          </div>
                         </div>
                       </div>
+                      
+                      {/* Barra de comparação nacional - só aparece quando "Minhas Lojas" está activo */}
+                      {mostrarComparacaoNacional && nacional && (
+                        <div className="bg-gradient-to-r from-blue-500/10 to-blue-400/5 border border-blue-200/50 dark:border-blue-800/50 rounded-lg p-3 flex items-center justify-between">
+                          <div>
+                            <div className="text-xs font-medium text-blue-600 dark:text-blue-400 uppercase tracking-wider flex items-center gap-1">
+                              <MapPin className="h-3 w-3" />
+                              Média Nacional
+                            </div>
+                            <div className="text-xl font-bold text-blue-700 dark:text-blue-300">
+                              {formatVal(nacional.mediaValor)}{mediaSuffix}
+                            </div>
+                            <div className="text-xs text-blue-500/70 dark:text-blue-400/70">{rankingNacional?.length || 0} lojas</div>
+                          </div>
+                          <div className="flex gap-6 items-center">
+                            {metricaRanking !== 'totalServicos' && (
+                              <div className="text-center">
+                                <div className="text-xs font-medium text-blue-500/70 dark:text-blue-400/70">Méd. Serviços</div>
+                                <div className="text-lg font-bold text-blue-700 dark:text-blue-300">{nacional.mediaServicos.toFixed(0)}</div>
+                              </div>
+                            )}
+                            <div className="text-center">
+                              <div className="text-xs font-medium text-blue-500/70 dark:text-blue-400/70">Méd. Objetivo</div>
+                              <div className="text-lg font-bold text-blue-700 dark:text-blue-300">{nacional.mediaObjetivo.toFixed(0)}</div>
+                            </div>
+                            {/* Badge de diferença */}
+                            {diffPercent !== null && (
+                              <div className={`text-center px-3 py-1 rounded-full text-xs font-bold ${
+                                diffPercent >= 0 
+                                  ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' 
+                                  : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                              }`}>
+                                <div className="flex items-center gap-1">
+                                  {diffPercent >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                                  {diffPercent >= 0 ? '+' : ''}{diffPercent.toFixed(1)}%
+                                </div>
+                                <div className="text-[10px] opacity-70">vs Nacional</div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   );
                 })()}
