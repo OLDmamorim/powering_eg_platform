@@ -1050,6 +1050,7 @@ export const pedidosApoio = mysqlTable("pedidos_apoio", {
   // Atribuição inteligente
   atribuidoPorIA: boolean("atribuidoPorIA").default(false).notNull(), // Se foi atribuído pelo algoritmo de scoring
   scoreAtribuicao: varchar("scoreAtribuicao", { length: 10 }), // Score do volante quando atribuído (ex: "0.85")
+  scoreDetalhes: text("scoreDetalhes"), // JSON com detalhes do scoring: {disponibilidade, carga, proximidade, historico, volantesAvaliados}
   redireccionadoDe: int("redireccionadoDe"), // ID do pedido original se foi redireccionado após reprovação
   
   createdAt: timestamp("createdAt").defaultNow().notNull(),

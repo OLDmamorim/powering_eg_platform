@@ -8476,6 +8476,19 @@ IMPORTANTE:
         return { success: true };
       }),
     
+    // Log de atribuições inteligentes
+    logAtribuicoes: gestorProcedure
+      .input(z.object({
+        limit: z.number().min(1).max(200).optional().default(50),
+      }).optional())
+      .query(async ({ ctx, input }) => {
+        if (!ctx.gestor) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Gestor não encontrado' });
+        }
+        
+        return await db.getLogAtribuicoes(ctx.gestor.id, input?.limit || 50);
+      }),
+    
     // Obter lojas disponíveis para atribuir (lojas do gestor)
     lojasDisponiveis: gestorProcedure.query(async ({ ctx }) => {
       if (!ctx.gestor) {
@@ -8632,6 +8645,7 @@ IMPORTANTE:
           observacoes: input.observacoes,
           atribuidoPorIA: true,
           scoreAtribuicao: resultado.score.toString(),
+          scoreDetalhes: JSON.stringify(resultado.detalhes),
         });
         
         // Enviar email ao volante sobre novo pedido
@@ -8886,6 +8900,7 @@ IMPORTANTE:
                 observacoes: pedidoExistente.observacoes || undefined,
                 atribuidoPorIA: true,
                 scoreAtribuicao: '1.00',
+                scoreDetalhes: JSON.stringify({ disponibilidade: 1.0, carga: 1.0, proximidade: 1.0, historico: 1.0, redireccionado: true }),
                 redireccionadoDe: pedidoExistente.id,
               });
               

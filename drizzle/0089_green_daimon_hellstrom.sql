@@ -1,0 +1,1 @@
+ALTER TABLE `pedidos_apoio` ADD `scoreDetalhes` text;

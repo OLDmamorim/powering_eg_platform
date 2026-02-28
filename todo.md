@@ -325,3 +325,10 @@
 - [x] Actualizar algoritmo de proximidade para usar preferencial em vez de sub-zonas
 - [x] Actualizar UI de gestão de volantes para marcar lojas preferenciais
 - [ ] Guardar checkpoint
+
+## Painel de Log de Atribuições Inteligentes
+- [x] Criar procedure backend para listar pedidos com dados de atribuição IA
+- [x] Criar página frontend com tabela de log de atribuições
+- [x] Mostrar score detalhado (disponibilidade, carga, proximidade, histórico)
+- [x] Mostrar info de redireccionamento quando aplicável
+- [ ] Guardar checkpoint

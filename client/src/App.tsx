@@ -47,6 +47,7 @@ import TopicosReuniao from "./pages/TopicosReuniao";
 import ProjecaoVisitasPage from "./pages/ProjecaoVisitasPage";
 import RelacoesLojas from "./pages/RelacoesLojas";
 import Volantes from "./pages/Volantes";
+import LogAtribuicoes from "./pages/LogAtribuicoes";
 import PortalGestor from "./pages/PortalGestor";
 import AnaliseFichas from "./pages/AnaliseFichas";
 import RH from "./pages/RH";
@@ -84,6 +85,7 @@ function Router() {
       <Route path={"/minhas-lojas"} component={MinhasLojas} />
       <Route path={"/relacoes-lojas"} component={RelacoesLojas} />
       <Route path={"/volantes"} component={Volantes} />
+      <Route path={"/log-atribuicoes"} component={LogAtribuicoes} />
       <Route path={"/portal-gestor"} component={PortalGestor} />
       <Route path={"/analise-fichas"} component={AnaliseFichas} />
       <Route path={"/documentos"} component={Documentos} />

@@ -9191,6 +9191,48 @@ export async function getPedidosApoioByVolanteIdAndMonth(volanteId: number, year
 }
 
 /**
+ * Obter log de atribuições inteligentes (pedidos com atribuidoPorIA = true)
+ * Retorna pedidos com dados da loja e do volante
+ */
+export async function getLogAtribuicoes(gestorId: number, limit: number = 50): Promise<any[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const result = await db
+    .select({
+      pedido: pedidosApoio,
+      loja: lojas,
+      volante: volantes,
+    })
+    .from(pedidosApoio)
+    .innerJoin(lojas, eq(pedidosApoio.lojaId, lojas.id))
+    .innerJoin(volantes, eq(pedidosApoio.volanteId, volantes.id))
+    .where(eq(volantes.gestorId, gestorId))
+    .orderBy(desc(pedidosApoio.createdAt))
+    .limit(limit);
+  
+  return result.map(r => ({
+    id: r.pedido.id,
+    lojaId: r.pedido.lojaId,
+    lojaNome: r.loja.nome,
+    volanteId: r.pedido.volanteId,
+    volanteNome: r.volante.nome,
+    data: r.pedido.data,
+    periodo: r.pedido.periodo,
+    tipoApoio: r.pedido.tipoApoio,
+    estado: r.pedido.estado,
+    atribuidoPorIA: r.pedido.atribuidoPorIA,
+    scoreAtribuicao: r.pedido.scoreAtribuicao ? Number(r.pedido.scoreAtribuicao) : null,
+    scoreDetalhes: r.pedido.scoreDetalhes ? JSON.parse(r.pedido.scoreDetalhes) : null,
+    redireccionadoDe: r.pedido.redireccionadoDe,
+    observacoes: r.pedido.observacoes,
+    createdAt: r.pedido.createdAt,
+    dataResposta: r.pedido.dataResposta,
+    motivoReprovacao: r.pedido.motivoReprovacao,
+  }));
+}
+
+/**
  * Aprovar pedido de apoio
  */
 export async function aprovarPedidoApoio(pedidoId: number, links: { google?: string; outlook?: string; ics?: string }): Promise<PedidoApoio | null> {
