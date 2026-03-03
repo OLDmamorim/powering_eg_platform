@@ -338,3 +338,12 @@
 - [x] Actualizar algoritmo de atribuição para ignorar volantes com ativo=false (já estava implementado)
 - [x] Adicionar botão suspender/activar na UI de gestão de volantes (badge clicável)
 - [ ] Guardar checkpoint
+
+## Upload NPS com suporte a PDF
+- [x] Tabela nps_dados já existia no schema
+- [x] Criar parser de PDF NPS (pdfNpsProcessor.ts)
+- [x] Actualizar procedure de upload para aceitar PDF e Excel (auto-detecta formato)
+- [x] Actualizar frontend NPSUpload.tsx para aceitar ambos os formatos (.xlsx, .xls, .pdf)
+- [x] Dashboard NPS já existia
+- [x] 12 testes vitest passaram para o parser de PDF
+- [ ] Guardar checkpoint

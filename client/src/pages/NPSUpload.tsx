@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Upload, FileSpreadsheet, CheckCircle, AlertCircle } from 'lucide-react';
+import { Upload, FileSpreadsheet, FileText, CheckCircle, AlertCircle } from 'lucide-react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -19,13 +19,18 @@ export default function NPSUpload() {
 
   const anos = [2023, 2024, 2025, 2026, 2027];
 
+  const isPdf = file?.name.toLowerCase().endsWith('.pdf');
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0];
       
-      // Validar tipo de arquivo
-      if (!selectedFile.name.endsWith('.xlsx') && !selectedFile.name.endsWith('.xls')) {
-        alert('Por favor, selecione um ficheiro Excel (.xlsx ou .xls)');
+      // Validar tipo de arquivo (Excel ou PDF)
+      const validExtensions = ['.xlsx', '.xls', '.pdf'];
+      const isValid = validExtensions.some(ext => selectedFile.name.toLowerCase().endsWith(ext));
+      
+      if (!isValid) {
+        alert('Por favor, selecione um ficheiro Excel (.xlsx, .xls) ou PDF (.pdf)');
         return;
       }
       
@@ -51,11 +56,15 @@ export default function NPSUpload() {
           const base64 = e.target?.result as string;
           const base64Data = base64.split(',')[1]; // Remover prefixo "data:..."
 
+          // Determinar tipo de ficheiro
+          const fileType = file.name.toLowerCase().endsWith('.pdf') ? 'pdf' as const : 'excel' as const;
+
           // Enviar para o backend
           const result = await uploadMutation.mutateAsync({
             fileBase64: base64Data,
             fileName: file.name,
             ano: parseInt(ano),
+            fileType,
           });
 
           setResultado(result);
@@ -95,16 +104,16 @@ export default function NPSUpload() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold">Upload de NPS</h1>
           <p className="text-muted-foreground mt-2">
-            Faça upload do ficheiro Excel com os dados NPS (Net Promoter Score) das lojas
+            Faça upload do ficheiro NPS (Excel ou PDF) com os dados Net Promoter Score das lojas
           </p>
         </div>
 
         <div className="grid gap-6 max-w-2xl">
           <Card>
             <CardHeader>
-              <CardTitle>Ficheiro Excel NPS</CardTitle>
+              <CardTitle>Ficheiro NPS</CardTitle>
               <CardDescription>
-                Selecione o ficheiro Excel com a folha "Por Loja" contendo os dados NPS mensais
+                Selecione o ficheiro Excel (.xlsx) ou PDF (.pdf) com os dados NPS mensais por loja
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -118,20 +127,31 @@ export default function NPSUpload() {
                     className="w-full"
                   >
                     <Upload className="mr-2 h-4 w-4" />
-                    {file ? file.name : 'Selecionar ficheiro Excel NPS'}
+                    {file ? file.name : 'Selecionar ficheiro NPS (Excel ou PDF)'}
                   </Button>
                   <input
                     id="file-upload"
                     type="file"
-                    accept=".xlsx,.xls"
+                    accept=".xlsx,.xls,.pdf"
                     onChange={handleFileChange}
                     className="hidden"
                   />
                 </div>
                 {file && (
                   <p className="text-sm text-muted-foreground flex items-center gap-2">
-                    <FileSpreadsheet className="h-4 w-4" />
+                    {isPdf ? (
+                      <FileText className="h-4 w-4 text-red-500" />
+                    ) : (
+                      <FileSpreadsheet className="h-4 w-4 text-green-600" />
+                    )}
                     {file.name} ({(file.size / 1024).toFixed(2)} KB)
+                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                      isPdf 
+                        ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' 
+                        : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                    }`}>
+                      {isPdf ? 'PDF' : 'Excel'}
+                    </span>
                   </p>
                 )}
               </div>
@@ -160,7 +180,7 @@ export default function NPSUpload() {
                 {uploading ? (
                   <>
                     <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-background border-t-foreground" />
-                    A processar...
+                    A processar {isPdf ? 'PDF' : 'Excel'}...
                   </>
                 ) : (
                   <>
@@ -211,7 +231,7 @@ export default function NPSUpload() {
 
                 <div className="pt-4 border-t">
                   <p className="text-sm text-muted-foreground">
-                    Os dados NPS foram importados e estão disponíveis no dashboard de resultados.
+                    Os dados NPS foram importados e estão disponíveis no Dashboard NPS.
                   </p>
                 </div>
               </CardContent>
@@ -222,11 +242,22 @@ export default function NPSUpload() {
             <CardHeader>
               <CardTitle>Instruções</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2 text-sm text-muted-foreground">
-              <p>• O ficheiro Excel deve conter uma folha chamada <strong>"Por Loja"</strong></p>
-              <p>• A folha deve ter os dados NPS mensais (Jan, Fev, Mar... Dez) e a taxa de resposta</p>
-              <p>• Os nomes das lojas no Excel devem corresponder aos nomes cadastrados no sistema</p>
-              <p>• Se uma loja já tiver dados NPS para o ano selecionado, os dados serão atualizados</p>
+            <CardContent className="space-y-4 text-sm text-muted-foreground">
+              <div>
+                <p className="font-semibold text-foreground mb-1 flex items-center gap-2">
+                  <FileSpreadsheet className="h-4 w-4 text-green-600" /> Ficheiro Excel
+                </p>
+                <p>O ficheiro deve conter uma folha chamada <strong>"Por Loja"</strong> com os dados NPS mensais (Jan a Dez) e a taxa de resposta. Os nomes das lojas devem corresponder aos nomes cadastrados no sistema.</p>
+              </div>
+              <div>
+                <p className="font-semibold text-foreground mb-1 flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-red-500" /> Ficheiro PDF
+                </p>
+                <p>O PDF deve ser o relatório NPS oficial da ExpressGlass com a secção <strong>"Análise por Loja"</strong>. O sistema extrai automaticamente os dados NPS e taxa de resposta de cada loja. Suporta relatórios com qualquer número de meses.</p>
+              </div>
+              <div className="pt-2 border-t">
+                <p>Se uma loja já tiver dados NPS para o ano selecionado, os dados serão atualizados (não duplicados).</p>
+              </div>
             </CardContent>
           </Card>
         </div>

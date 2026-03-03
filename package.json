@@ -72,6 +72,7 @@
     "node-cron": "^4.2.1",
     "nodemailer": "^7.0.11",
     "pdf-lib": "^1.17.1",
+    "pdf-parse": "^2.4.5",
     "pdfkit": "^0.17.2",
     "react": "^19.2.1",
     "react-chartjs-2": "^5.3.1",

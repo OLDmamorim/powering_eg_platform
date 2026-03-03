@@ -5339,28 +5339,38 @@ IMPORTANTE:
 
   // ==================== NPS - NET PROMOTER SCORE ====================
   nps: router({
-    // Upload de ficheiro Excel NPS
+    // Upload de ficheiro NPS (Excel ou PDF)
     upload: adminProcedure
       .input(z.object({
         fileBase64: z.string(),
         fileName: z.string(),
         ano: z.number(),
+        fileType: z.enum(['excel', 'pdf']).default('excel'),
       }))
       .mutation(async ({ ctx, input }) => {
-        const { processarExcelNPS } = await import('./excelProcessor');
-        
-        // Converter base64 para buffer
         const fileBuffer = Buffer.from(input.fileBase64, 'base64');
         
-        // Processar ficheiro
-        const resultado = await processarExcelNPS(
-          fileBuffer,
-          input.ano,
-          ctx.user.id,
-          input.fileName
-        );
-        
-        return resultado;
+        if (input.fileType === 'pdf' || input.fileName.toLowerCase().endsWith('.pdf')) {
+          // Processar PDF
+          const { processarPdfNPS } = await import('./pdfNpsProcessor');
+          const resultado = await processarPdfNPS(
+            fileBuffer,
+            input.ano,
+            ctx.user.id,
+            input.fileName
+          );
+          return resultado;
+        } else {
+          // Processar Excel
+          const { processarExcelNPS } = await import('./excelProcessor');
+          const resultado = await processarExcelNPS(
+            fileBuffer,
+            input.ano,
+            ctx.user.id,
+            input.fileName
+          );
+          return resultado;
+        }
       }),
     
     // Obter dados NPS de uma loja específica
