@@ -30,6 +30,15 @@ export interface LojaHistoryResult {
     polimentoQtdTotal: number;
     tendenciaVendas: 'subida' | 'descida' | 'estavel';
   };
+  analiseNPS?: {
+    npsAtual: number | null;
+    taxaRespostaAtual: number | null;
+    npsAnual: number | null;
+    taxaRespostaAnual: number | null;
+    evolucaoMensal: Array<{ mes: string; nps: number | null; taxaResposta: number | null }>;
+    tendenciaNPS: 'subida' | 'descida' | 'estavel';
+    classificacao: 'excelente' | 'bom' | 'medio' | 'critico';
+  };
   // Dados para gráficos de evolução mensal
   dadosMensais?: {
     resultados: Array<{ mes: string; servicos: number; objetivo: number; taxaReparacao: number }>;
@@ -298,6 +307,75 @@ async function generateLojaHistoryInterno(
       console.log('[LojaHistory] Sem dados de vendas complementares');
     }
 
+    // Buscar dados NPS da loja
+    let dadosNPS: any = null;
+    try {
+      // Buscar NPS para os anos do período
+      const anosUnicos = [...new Set([dataInicio.getFullYear(), dataFim.getFullYear()])];
+      for (const ano of anosUnicos) {
+        const npsAno = await db.getNPSDadosLoja(lojaId, ano);
+        if (npsAno) {
+          dadosNPS = npsAno;
+          break; // Usar o mais recente
+        }
+      }
+    } catch (e) {
+      console.log('[LojaHistory] Sem dados de NPS');
+    }
+
+    // Calcular análise NPS
+    let analiseNPS: any = null;
+    if (dadosNPS) {
+      const CAMPOS_NPS = ['npsJan','npsFev','npsMar','npsAbr','npsMai','npsJun','npsJul','npsAgo','npsSet','npsOut','npsNov','npsDez'];
+      const CAMPOS_TAXA = ['taxaRespostaJan','taxaRespostaFev','taxaRespostaMar','taxaRespostaAbr','taxaRespostaMai','taxaRespostaJun','taxaRespostaJul','taxaRespostaAgo','taxaRespostaSet','taxaRespostaOut','taxaRespostaNov','taxaRespostaDez'];
+      const NOMES_M = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+      
+      const evolucaoMensal: Array<{ mes: string; nps: number | null; taxaResposta: number | null }> = [];
+      let ultimoNPS: number | null = null;
+      let primeiroNPS: number | null = null;
+      
+      for (let i = 0; i < 12; i++) {
+        const npsVal = dadosNPS[CAMPOS_NPS[i]] ? parseFloat(dadosNPS[CAMPOS_NPS[i]]) * 100 : null;
+        const taxaVal = dadosNPS[CAMPOS_TAXA[i]] ? parseFloat(dadosNPS[CAMPOS_TAXA[i]]) * 100 : null;
+        evolucaoMensal.push({ mes: `${NOMES_M[i]} ${dadosNPS.ano}`, nps: npsVal !== null ? parseFloat(npsVal.toFixed(1)) : null, taxaResposta: taxaVal !== null ? parseFloat(taxaVal.toFixed(1)) : null });
+        if (npsVal !== null) {
+          ultimoNPS = npsVal;
+          if (primeiroNPS === null) primeiroNPS = npsVal;
+        }
+      }
+      
+      // Determinar NPS do último mês do período
+      const mesFimIdx = dataFim.getMonth();
+      const npsAtual = dadosNPS[CAMPOS_NPS[mesFimIdx]] ? parseFloat(dadosNPS[CAMPOS_NPS[mesFimIdx]]) * 100 : ultimoNPS;
+      const taxaRespostaAtual = dadosNPS[CAMPOS_TAXA[mesFimIdx]] ? parseFloat(dadosNPS[CAMPOS_TAXA[mesFimIdx]]) * 100 : null;
+      const npsAnual = dadosNPS.npsAnoTotal ? parseFloat(dadosNPS.npsAnoTotal) * 100 : null;
+      const taxaRespostaAnual = dadosNPS.taxaRespostaAnoTotal ? parseFloat(dadosNPS.taxaRespostaAnoTotal) * 100 : null;
+      
+      // Tendência
+      let tendenciaNPS: 'subida' | 'descida' | 'estavel' = 'estavel';
+      if (primeiroNPS !== null && ultimoNPS !== null) {
+        if (ultimoNPS > primeiroNPS + 2) tendenciaNPS = 'subida';
+        else if (ultimoNPS < primeiroNPS - 2) tendenciaNPS = 'descida';
+      }
+      
+      // Classificação
+      const npsRef = npsAtual || npsAnual || 0;
+      let classificacao: 'excelente' | 'bom' | 'medio' | 'critico' = 'critico';
+      if (npsRef >= 80) classificacao = 'excelente';
+      else if (npsRef >= 60) classificacao = 'bom';
+      else if (npsRef >= 40) classificacao = 'medio';
+      
+      analiseNPS = {
+        npsAtual: npsAtual !== null ? parseFloat(npsAtual.toFixed(1)) : null,
+        taxaRespostaAtual: taxaRespostaAtual !== null ? parseFloat(taxaRespostaAtual.toFixed(1)) : null,
+        npsAnual: npsAnual !== null ? parseFloat(npsAnual.toFixed(1)) : null,
+        taxaRespostaAnual: taxaRespostaAnual !== null ? parseFloat(taxaRespostaAnual.toFixed(1)) : null,
+        evolucaoMensal: evolucaoMensal.filter(e => e.nps !== null),
+        tendenciaNPS,
+        classificacao,
+      };
+    }
+
     // Calcular métricas
     const totalPendentes = pendentes.length;
     const pendentesResolvidos = pendentes.filter((p: any) => p.resolvido).length;
@@ -422,6 +500,12 @@ async function generateLojaHistoryInterno(
       },
       analiseResultados,
       analiseComercial,
+      analiseNPS: analiseNPS ? {
+        npsAtual: analiseNPS.npsAtual,
+        npsAnual: analiseNPS.npsAnual,
+        classificacao: analiseNPS.classificacao,
+        tendencia: analiseNPS.tendenciaNPS,
+      } : null,
     };
 
     // Se não há dados suficientes, retornar resultado vazio estruturado
@@ -452,6 +536,7 @@ Analisa APENAS a performance operacional e comercial da loja para o período esp
 FOCA-TE EXCLUSIVAMENTE EM:
 - Performance de resultados (serviços realizados, objetivos atingidos, taxas de reparação)
 - Performance comercial (vendas complementares: escovas, polimento, tratamentos)
+- **NPS (Net Promoter Score)** - Este é um indicador CRÍTICO de satisfação do cliente. Analisa o NPS da loja, a sua evolução mensal, a taxa de resposta e compara com os benchmarks (>80% excelente, 60-80% bom, 40-60% médio, <40% crítico). O NPS tem impacto direto na reputação e fidelização de clientes. Se o NPS estiver baixo, deve ser um ALERTA PRIORITÁRIO. Se a taxa de resposta for baixa (<30%), recomenda ações para aumentar as respostas dos clientes.
 - Evolução dos indicadores de negócio ao longo do tempo
 - Pendêntes operacionais e taxa de resolução
 - Ocorrências estruturais reportadas
@@ -468,8 +553,8 @@ ALÉM DAS RECOMENDAÇÕES POR TÓPICOS, gera também um texto de recomendações
 - Ser escrito de forma motivadora e prática
 - Usar linguagem direta e acessível (tutear os colegas)
 - Explicar onde se devem focar nos próximos tempos para melhorar a performance
-- Basear-se nos dados de resultados e vendas analisados
-- Dar prioridade às áreas mais críticas de performance
+- Basear-se nos dados de resultados, vendas e NPS analisados
+- Dar prioridade às áreas mais críticas de performance (incluindo NPS se estiver abaixo de 80%)
 - NÃO mencionar relatórios ou visitas do gestor
 - Terminar com uma nota de encorajamento`
         },
@@ -625,6 +710,7 @@ Gera uma análise completa incluindo evolução, problemas, pontos fortes, alert
       metricas: dadosCompletos.metricas,
       analiseResultados: analiseResultados || undefined,
       analiseComercial: analiseComercial || undefined,
+      analiseNPS: analiseNPS || undefined,
       dadosMensais,
     };
 

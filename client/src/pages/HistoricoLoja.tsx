@@ -1732,6 +1732,131 @@ export default function HistoricoLoja() {
               </Card>
             )}
 
+            {/* Análise NPS */}
+            {historyData.analiseNPS && (
+              <Card className="border-amber-200 bg-amber-50/30">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-amber-900">
+                    <BarChart3 className="h-5 w-5" />
+                    NPS - Satisfação do Cliente
+                    <span className={`ml-2 px-2 py-0.5 rounded-full text-xs font-semibold ${
+                      historyData.analiseNPS.classificacao === 'excelente' ? 'bg-green-100 text-green-800' :
+                      historyData.analiseNPS.classificacao === 'bom' ? 'bg-blue-100 text-blue-800' :
+                      historyData.analiseNPS.classificacao === 'medio' ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-red-100 text-red-800'
+                    }`}>
+                      {historyData.analiseNPS.classificacao === 'excelente' ? 'Excelente' :
+                       historyData.analiseNPS.classificacao === 'bom' ? 'Bom' :
+                       historyData.analiseNPS.classificacao === 'medio' ? 'Médio' : 'Crítico'}
+                    </span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                    <div className="text-center p-3 bg-white rounded-lg">
+                      <p className={`text-2xl font-bold ${
+                        (historyData.analiseNPS.npsAtual || 0) >= 80 ? 'text-green-700' :
+                        (historyData.analiseNPS.npsAtual || 0) >= 60 ? 'text-blue-700' :
+                        (historyData.analiseNPS.npsAtual || 0) >= 40 ? 'text-yellow-700' : 'text-red-700'
+                      }`}>
+                        {historyData.analiseNPS.npsAtual !== null ? `${historyData.analiseNPS.npsAtual}%` : 'N/D'}
+                      </p>
+                      <p className="text-xs text-amber-600">NPS Actual</p>
+                    </div>
+                    <div className="text-center p-3 bg-white rounded-lg">
+                      <p className="text-2xl font-bold text-amber-700">
+                        {historyData.analiseNPS.taxaRespostaAtual !== null ? `${historyData.analiseNPS.taxaRespostaAtual}%` : 'N/D'}
+                      </p>
+                      <p className="text-xs text-amber-600">Taxa Resposta</p>
+                    </div>
+                    <div className="text-center p-3 bg-white rounded-lg">
+                      <p className={`text-2xl font-bold ${
+                        (historyData.analiseNPS.npsAnual || 0) >= 80 ? 'text-green-700' :
+                        (historyData.analiseNPS.npsAnual || 0) >= 60 ? 'text-blue-700' :
+                        (historyData.analiseNPS.npsAnual || 0) >= 40 ? 'text-yellow-700' : 'text-red-700'
+                      }`}>
+                        {historyData.analiseNPS.npsAnual !== null ? `${historyData.analiseNPS.npsAnual}%` : 'N/D'}
+                      </p>
+                      <p className="text-xs text-amber-600">NPS Anual</p>
+                    </div>
+                    <div className="text-center p-3 bg-white rounded-lg">
+                      <p className="text-2xl font-bold text-amber-700">
+                        {historyData.analiseNPS.taxaRespostaAnual !== null ? `${historyData.analiseNPS.taxaRespostaAnual}%` : 'N/D'}
+                      </p>
+                      <p className="text-xs text-amber-600">Taxa Resposta Anual</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm mb-4">
+                    <span className="text-muted-foreground">Tendência:</span>
+                    {historyData.analiseNPS.tendenciaNPS === 'subida' ? <ArrowUp className="h-4 w-4 text-green-600" /> :
+                     historyData.analiseNPS.tendenciaNPS === 'descida' ? <ArrowDown className="h-4 w-4 text-red-600" /> :
+                     <Minus className="h-4 w-4 text-gray-500" />}
+                    <span className="capitalize">{historyData.analiseNPS.tendenciaNPS}</span>
+                  </div>
+                  {/* Gráfico de evolução NPS */}
+                  {historyData.analiseNPS.evolucaoMensal && historyData.analiseNPS.evolucaoMensal.length > 1 && (
+                    <div className="h-[280px]">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={historyData.analiseNPS.evolucaoMensal}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+                          <XAxis dataKey="mes" tick={{ fontSize: 11 }} stroke="#d97706" />
+                          <YAxis 
+                            yAxisId="left" 
+                            tick={{ fontSize: 11 }} 
+                            stroke="#d97706" 
+                            domain={[0, 100]}
+                            tickFormatter={(v) => `${v}%`}
+                          />
+                          <YAxis 
+                            yAxisId="right" 
+                            orientation="right" 
+                            tick={{ fontSize: 11 }} 
+                            stroke="#6366f1" 
+                            domain={[0, 100]}
+                            tickFormatter={(v) => `${v}%`}
+                          />
+                          <Tooltip 
+                            formatter={(value: number, name: string) => [`${value}%`, name]}
+                            contentStyle={{ backgroundColor: '#fffbeb', borderColor: '#d97706' }}
+                          />
+                          <Legend />
+                          <ReferenceLine yAxisId="left" y={80} stroke="#22c55e" strokeDasharray="5 5" label={{ value: 'Excelente (80%)', position: 'right', fill: '#22c55e', fontSize: 10 }} />
+                          <ReferenceLine yAxisId="left" y={60} stroke="#3b82f6" strokeDasharray="5 5" label={{ value: 'Bom (60%)', position: 'right', fill: '#3b82f6', fontSize: 10 }} />
+                          <Line 
+                            yAxisId="left" 
+                            type="monotone" 
+                            dataKey="nps" 
+                            name="NPS" 
+                            stroke="#d97706" 
+                            strokeWidth={3} 
+                            dot={{ fill: '#d97706', r: 5 }}
+                            activeDot={{ r: 7 }}
+                          />
+                          <Line 
+                            yAxisId="right" 
+                            type="monotone" 
+                            dataKey="taxaResposta" 
+                            name="Taxa Resposta" 
+                            stroke="#6366f1" 
+                            strokeWidth={2} 
+                            strokeDasharray="5 5"
+                            dot={{ fill: '#6366f1', r: 4 }}
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+                  )}
+                  <div className="mt-3 p-3 bg-amber-100/50 rounded-lg">
+                    <p className="text-xs text-amber-800">
+                      <strong>Importância do NPS:</strong> O Net Promoter Score mede a satisfação e lealdade dos clientes. 
+                      Um NPS acima de 80% indica excelência no serviço. Abaixo de 60% requer ação imediata. 
+                      A taxa de resposta deve ser superior a 30% para que os dados sejam representativos.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Resumo Geral */}
             <Card className="border-sky-200 bg-sky-50/50">
               <CardHeader>

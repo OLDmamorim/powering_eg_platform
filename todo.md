@@ -353,4 +353,11 @@
 - [x] Mostrar data de upload no Dashboard NPS (header com ícone Calendar + nome ficheiro)
 - [x] Mostrar data de upload no Portal da Loja (secção NPS - "Dados até")
 - [x] Mostrar data de upload no Portal do Gestor (card NPS - mês/ano)
+- [x] Guardar checkpoint
+
+## NPS Gráfico no Histórico da Loja (Análise IA)
+- [x] Adicionar secção NPS com KPIs (NPS score, taxa resposta, classificação) na página Histórico da Loja
+- [x] Adicionar gráfico de evolução NPS mensal da loja (com linhas de referência 60%/80%)
+- [x] Dar destaque à importância do NPS no prompt da IA (alerta prioritário se <60%)
+- [x] Actualizar prompt IA para incluir NPS como factor crítico na análise
 - [ ] Guardar checkpoint
