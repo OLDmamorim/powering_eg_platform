@@ -347,3 +347,10 @@
 - [x] Dashboard NPS já existia
 - [x] 12 testes vitest passaram para o parser de PDF
 - [ ] Guardar checkpoint
+
+## Data de Upload nos Registos NPS
+- [x] Verificar se campo dataUpload já existe na tabela nps_dados (createdAt já existia)
+- [x] Mostrar data de upload no Dashboard NPS (header com ícone Calendar + nome ficheiro)
+- [x] Mostrar data de upload no Portal da Loja (secção NPS - "Dados até")
+- [x] Mostrar data de upload no Portal do Gestor (card NPS - mês/ano)
+- [ ] Guardar checkpoint

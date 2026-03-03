@@ -2338,6 +2338,18 @@ export default function PortalLoja() {
                           ? 'NPS ≥ 80% e Taxa de Resposta ≥ 7,5% para ter direito a prémio'
                           : 'NPS ≥ 80% and Response Rate ≥ 7.5% for prize eligibility'}
                       </CardDescription>
+                      {dashboardData.nps.dadosMensais?.length > 0 && (() => {
+                        const ultimoMes = dashboardData.nps.dadosMensais[dashboardData.nps.dadosMensais.length - 1];
+                        const mesesPTShort = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+                        const mesesENShort = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                        const mLabels = language === 'pt' ? mesesPTShort : mesesENShort;
+                        return (
+                          <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                            <Calendar className="h-3 w-3" />
+                            {language === 'pt' ? 'Dados até' : 'Data up to'}: {mLabels[ultimoMes.mes - 1]} {ultimoMes.ano}
+                          </p>
+                        );
+                      })()}
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">

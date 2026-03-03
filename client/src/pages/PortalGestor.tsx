@@ -589,6 +589,15 @@ export default function PortalGestor() {
                               <p className="text-3xl font-bold">
                                 {(dashboardData.nps.npsMedio * 100).toFixed(0)}%
                               </p>
+                              {dashboardData.nps.dadosMensais?.length > 0 && (
+                                <p className="text-white/60 text-xs mt-1">
+                                  {(() => {
+                                    const ultimo = dashboardData.nps.dadosMensais[dashboardData.nps.dadosMensais.length - 1];
+                                    const mLabels = language === 'pt' ? ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'] : ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                                    return `${mLabels[ultimo.mes - 1]} ${ultimo.ano}`;
+                                  })()}
+                                </p>
+                              )}
                             </div>
                             <ThumbsUp className="h-8 w-8 opacity-60" />
                           </div>

@@ -4,7 +4,7 @@ import DashboardLayout from '../components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Badge } from '../components/ui/badge';
-import { Loader2, SmilePlus, TrendingUp, TrendingDown, Target, BarChart3, Award, AlertTriangle } from 'lucide-react';
+import { Loader2, SmilePlus, TrendingUp, TrendingDown, Target, BarChart3, Award, AlertTriangle, Calendar } from 'lucide-react';
 import { useAuth } from '../_core/hooks/useAuth';
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend, Filler } from 'chart.js';
@@ -268,6 +268,29 @@ export function NPSDashboard() {
   
   const mesLabel = typeof mesSelecionado === 'number' ? meses[mesSelecionado] : t('npsDashboard.ultimoMesDisponivel');
   
+  // Calcular data de upload mais recente dos dados NPS
+  const dataUploadInfo = useMemo(() => {
+    if (!dadosFiltrados || dadosFiltrados.length === 0) return null;
+    let maisRecente: Date | null = null;
+    let nomeArquivo: string | null = null;
+    dadosFiltrados.forEach((item: any) => {
+      const nps = item.nps || item;
+      const created = nps.createdAt || nps.updatedAt;
+      if (created) {
+        const d = new Date(created);
+        if (!maisRecente || d > maisRecente) {
+          maisRecente = d;
+          nomeArquivo = nps.nomeArquivo || null;
+        }
+      }
+    });
+    return maisRecente ? {
+      data: maisRecente,
+      dataFormatada: maisRecente.toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+      nomeArquivo,
+    } : null;
+  }, [dadosFiltrados]);
+  
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -281,6 +304,15 @@ export function NPSDashboard() {
             <p className="text-muted-foreground">
               {t('npsDashboard.subtitle')}
             </p>
+            {dataUploadInfo && (
+              <div className="flex items-center gap-1.5 mt-1 text-xs text-muted-foreground">
+                <Calendar className="h-3 w-3" />
+                <span>Último upload: {dataUploadInfo.dataFormatada}</span>
+                {dataUploadInfo.nomeArquivo && (
+                  <span className="text-muted-foreground/60">({dataUploadInfo.nomeArquivo})</span>
+                )}
+              </div>
+            )}
           </div>
           
           {/* Filtros */}
