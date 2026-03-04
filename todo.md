@@ -360,4 +360,4 @@
 - [x] Adicionar gráfico de evolução NPS mensal da loja (com linhas de referência 60%/80%)
 - [x] Dar destaque à importância do NPS no prompt da IA (alerta prioritário se <60%)
 - [x] Actualizar prompt IA para incluir NPS como factor crítico na análise
-- [ ] Guardar checkpoint
+- [x] Guardar checkpoint

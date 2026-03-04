@@ -946,10 +946,10 @@ export default function HistoricoLoja() {
         }
       }
 
-      // ========== RECOMENDAÇÕES IA PARA A EQUIPA (TEXTO) ==========
+      // ========== RECOMENDAÇÕES PARA A EQUIPA (TEXTO) ==========
       if (historyData.recomendacoesTexto) {
         checkPageSpace(80);
-        drawSectionHeader('Recomendações IA para a Equipa', COLORS.indigo);
+        drawSectionHeader('Recomendações para a Equipa', COLORS.indigo);
         
         // Fundo do card
         const paragrafos = historyData.recomendacoesTexto.split('\n').filter((p: string) => p.trim());
@@ -1406,12 +1406,12 @@ export default function HistoricoLoja() {
                 </table>
               </div>
 
-              {/* Análise IA */}
+              {/* Análise Comparativa */}
               {comparacaoData.analiseIA && (
                 <div className="mt-6 p-4 bg-white rounded-lg border border-indigo-200">
                   <h4 className="font-semibold text-indigo-900 mb-3 flex items-center gap-2">
                     <Lightbulb className="h-4 w-4" />
-                    Análise Comparativa IA
+                    Análise Comparativa
                   </h4>
                   <div className="prose prose-sm max-w-none text-gray-700 whitespace-pre-wrap">
                     {comparacaoData.analiseIA}
@@ -2037,13 +2037,13 @@ export default function HistoricoLoja() {
               </Card>
             )}
 
-            {/* Recomendações IA - Texto para a Equipa */}
+            {/* Recomendações - Texto para a Equipa */}
             {historyData.recomendacoesTexto && (
               <Card className="border-indigo-300 bg-gradient-to-br from-indigo-50 to-purple-50">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-indigo-900">
                     <Target className="h-5 w-5" />
-                    Recomendações IA para a Equipa
+                    Recomendações para a Equipa
                   </CardTitle>
                   <p className="text-sm text-indigo-600 mt-1">
                     Sugestões personalizadas sobre onde a equipa se deve focar nos próximos tempos
