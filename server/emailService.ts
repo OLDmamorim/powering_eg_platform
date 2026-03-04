@@ -836,3 +836,189 @@ export function gerarHTMLRelatorioMensalRecalibraGestor(dados: {
 </html>
   `;
 }
+
+
+// ========== FUNÇÕES DE EMAIL PARA PEDIDOS DE APOIO ==========
+
+export function gerarHTMLPedidoAprovado(dados: {
+  lojaNome: string;
+  volanteNome: string;
+  data: string;
+  periodo: string;
+  tipoApoio: string;
+  observacoes: string | null;
+}): string {
+  return `
+<!DOCTYPE html>
+<html lang="pt">
+<head><meta charset="UTF-8"></head>
+<body style="font-family: Arial, sans-serif; margin: 40px; color: #333;">
+  <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #10b981; padding-bottom: 20px;">
+    <div style="font-size: 24px; font-weight: bold; color: #10b981;">PoweringEG</div>
+    <div style="font-size: 18px; margin-top: 10px; color: #059669;">✅ Pedido de Apoio Aprovado</div>
+  </div>
+  <div style="background: #d1fae5; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #10b981;">
+    <p style="margin: 0; font-weight: bold; color: #065f46;">O seu pedido de apoio foi aprovado!</p>
+  </div>
+  <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+    <p><strong>Loja:</strong> ${dados.lojaNome}</p>
+    <p><strong>Volante:</strong> ${dados.volanteNome}</p>
+    <p><strong>Data:</strong> ${dados.data}</p>
+    <p><strong>Período:</strong> ${dados.periodo}</p>
+    <p><strong>Tipo de Apoio:</strong> ${dados.tipoApoio}</p>
+    ${dados.observacoes ? `<p><strong>Observações:</strong> ${dados.observacoes}</p>` : ''}
+  </div>
+  <div style="margin-top: 40px; text-align: center; font-size: 11px; color: #9ca3af;">
+    PoweringEG Platform 2.0 - a IA ao serviço da ExpressGlass
+  </div>
+</body>
+</html>
+  `;
+}
+
+export function gerarHTMLPedidoReprovado(dados: {
+  lojaNome: string;
+  volanteNome: string;
+  data: string;
+  periodo: string;
+  tipoApoio: string;
+  observacoes: string | null;
+  motivo: string;
+}): string {
+  return `
+<!DOCTYPE html>
+<html lang="pt">
+<head><meta charset="UTF-8"></head>
+<body style="font-family: Arial, sans-serif; margin: 40px; color: #333;">
+  <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #ef4444; padding-bottom: 20px;">
+    <div style="font-size: 24px; font-weight: bold; color: #10b981;">PoweringEG</div>
+    <div style="font-size: 18px; margin-top: 10px; color: #dc2626;">❌ Pedido de Apoio Reprovado</div>
+  </div>
+  <div style="background: #fee2e2; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #ef4444;">
+    <p style="margin: 0; font-weight: bold; color: #991b1b;">O seu pedido de apoio foi reprovado.</p>
+    <p style="margin: 5px 0 0 0; color: #991b1b;"><strong>Motivo:</strong> ${dados.motivo}</p>
+  </div>
+  <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+    <p><strong>Loja:</strong> ${dados.lojaNome}</p>
+    <p><strong>Volante:</strong> ${dados.volanteNome}</p>
+    <p><strong>Data:</strong> ${dados.data}</p>
+    <p><strong>Período:</strong> ${dados.periodo}</p>
+    <p><strong>Tipo de Apoio:</strong> ${dados.tipoApoio}</p>
+    ${dados.observacoes ? `<p><strong>Observações:</strong> ${dados.observacoes}</p>` : ''}
+  </div>
+  <div style="margin-top: 40px; text-align: center; font-size: 11px; color: #9ca3af;">
+    PoweringEG Platform 2.0 - a IA ao serviço da ExpressGlass
+  </div>
+</body>
+</html>
+  `;
+}
+
+export function gerarHTMLPedidoAnulado(dados: {
+  lojaNome: string;
+  volanteNome: string;
+  data: string;
+  periodo: string;
+  tipoApoio: string;
+  motivo: string;
+}): string {
+  return `
+<!DOCTYPE html>
+<html lang="pt">
+<head><meta charset="UTF-8"></head>
+<body style="font-family: Arial, sans-serif; margin: 40px; color: #333;">
+  <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #f59e0b; padding-bottom: 20px;">
+    <div style="font-size: 24px; font-weight: bold; color: #10b981;">PoweringEG</div>
+    <div style="font-size: 18px; margin-top: 10px; color: #d97706;">⚠️ Apoio Anulado</div>
+  </div>
+  <div style="background: #fef3c7; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #f59e0b;">
+    <p style="margin: 0; font-weight: bold; color: #92400e;">O pedido de apoio foi anulado.</p>
+    <p style="margin: 5px 0 0 0; color: #92400e;"><strong>Motivo:</strong> ${dados.motivo}</p>
+  </div>
+  <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+    <p><strong>Loja:</strong> ${dados.lojaNome}</p>
+    <p><strong>Volante:</strong> ${dados.volanteNome}</p>
+    <p><strong>Data:</strong> ${dados.data}</p>
+    <p><strong>Período:</strong> ${dados.periodo}</p>
+    <p><strong>Tipo de Apoio:</strong> ${dados.tipoApoio}</p>
+  </div>
+  <div style="margin-top: 40px; text-align: center; font-size: 11px; color: #9ca3af;">
+    PoweringEG Platform 2.0 - a IA ao serviço da ExpressGlass
+  </div>
+</body>
+</html>
+  `;
+}
+
+export function gerarHTMLPedidoEditado(dados: {
+  lojaNome: string;
+  volanteNome: string;
+  data: string;
+  periodo: string;
+  tipoApoio: string;
+  observacoes: string | null;
+}): string {
+  return `
+<!DOCTYPE html>
+<html lang="pt">
+<head><meta charset="UTF-8"></head>
+<body style="font-family: Arial, sans-serif; margin: 40px; color: #333;">
+  <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #3b82f6; padding-bottom: 20px;">
+    <div style="font-size: 24px; font-weight: bold; color: #10b981;">PoweringEG</div>
+    <div style="font-size: 18px; margin-top: 10px; color: #2563eb;">✏️ Apoio Alterado</div>
+  </div>
+  <div style="background: #dbeafe; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #3b82f6;">
+    <p style="margin: 0; font-weight: bold; color: #1e40af;">O pedido de apoio foi alterado com os seguintes dados:</p>
+  </div>
+  <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+    <p><strong>Loja:</strong> ${dados.lojaNome}</p>
+    <p><strong>Volante:</strong> ${dados.volanteNome}</p>
+    <p><strong>Data:</strong> ${dados.data}</p>
+    <p><strong>Período:</strong> ${dados.periodo}</p>
+    <p><strong>Tipo de Apoio:</strong> ${dados.tipoApoio}</p>
+    ${dados.observacoes ? `<p><strong>Observações:</strong> ${dados.observacoes}</p>` : ''}
+  </div>
+  <div style="margin-top: 40px; text-align: center; font-size: 11px; color: #9ca3af;">
+    PoweringEG Platform 2.0 - a IA ao serviço da ExpressGlass
+  </div>
+</body>
+</html>
+  `;
+}
+
+
+export function gerarHTMLNovoPedidoApoio(dados: {
+  volanteNome: string;
+  lojaNome: string;
+  data: string;
+  periodo: string;
+  tipoApoio: string;
+  observacoes?: string | null;
+}): string {
+  return `
+<!DOCTYPE html>
+<html lang="pt">
+<head><meta charset="UTF-8"></head>
+<body style="font-family: Arial, sans-serif; margin: 40px; color: #333;">
+  <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #10b981; padding-bottom: 20px;">
+    <div style="font-size: 24px; font-weight: bold; color: #10b981;">PoweringEG</div>
+    <div style="font-size: 18px; margin-top: 10px; color: #059669;">📋 Novo Pedido de Apoio</div>
+  </div>
+  <div style="background: #ecfdf5; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #10b981;">
+    <p style="margin: 0; font-weight: bold; color: #065f46;">Olá ${dados.volanteNome}, tem um novo pedido de apoio!</p>
+  </div>
+  <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+    <p><strong>Loja:</strong> ${dados.lojaNome}</p>
+    <p><strong>Data:</strong> ${dados.data}</p>
+    <p><strong>Período:</strong> ${dados.periodo}</p>
+    <p><strong>Tipo de Apoio:</strong> ${dados.tipoApoio}</p>
+    ${dados.observacoes ? `<p><strong>Observações:</strong> ${dados.observacoes}</p>` : ''}
+  </div>
+  <p style="color: #6b7280;">Por favor, aceda ao portal do volante para aprovar ou rejeitar este pedido.</p>
+  <div style="margin-top: 40px; text-align: center; font-size: 11px; color: #9ca3af;">
+    PoweringEG Platform 2.0 - a IA ao serviço da ExpressGlass
+  </div>
+</body>
+</html>
+  `;
+}

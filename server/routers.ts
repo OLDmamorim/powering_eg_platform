@@ -5,8 +5,9 @@ import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import * as db from "./db";
+
 import { gerarRelatorioComIA, gerarDicaDashboard, gerarRelatorioIAGestor, gerarRelatorioIAGestorMultiplosMeses } from "./aiService";
-import { sendEmail, gerarHTMLRelatorioLivre, gerarHTMLRelatorioCompleto } from "./emailService";
+import { sendEmail, gerarHTMLRelatorioLivre, gerarHTMLRelatorioCompleto, gerarHTMLPedidoAprovado, gerarHTMLPedidoReprovado, gerarHTMLPedidoAnulado, gerarHTMLPedidoEditado, gerarHTMLNovoPedidoApoio } from "./emailService";
 import { enviarResumoSemanal, verificarENotificarAlertas } from "./weeklyReport";
 import { gerarPrevisoes, gerarEGuardarPrevisoes } from "./previsaoService";
 import { gerarSugestoesMelhoria, formatarRelatorioLivre, formatarRelatorioCompleto } from "./sugestaoService";
@@ -8990,7 +8991,7 @@ IMPORTANTE:
                 periodo: periodoTexto,
                 tipoApoio: tipoApoioTexto,
                 observacoes: pedidoExistente.observacoes,
-                motivo: motivoComRedireccao,
+                motivo: motivoComRedireccao || 'Sem motivo indicado',
               }),
             });
             console.log(`[Email] Notificação de reprovação${pedidoRedireccionado ? ' + redireccionamento' : ''} enviada para loja: ${loja.email}`);
@@ -9602,7 +9603,7 @@ IMPORTANTE:
                 data: dataFormatada,
                 periodo: periodoTexto,
                 tipoApoio: tipoApoioTexto,
-                motivo: input.motivo,
+                motivo: input.motivo || 'Sem motivo indicado',
               }),
             });
           } catch (emailError) {
@@ -11233,7 +11234,7 @@ IMPORTANTE:
         }
         
         // Atualizar campos da unidade
-        const updateData: Partial<InsertUnidadeRecalibra> = {
+        const updateData: Record<string, any> = {
           gestorId: ctx.gestor.id,
         };
         
