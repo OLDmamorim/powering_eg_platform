@@ -388,3 +388,8 @@
 - [x] Incluir análise IA sobre NPS na secção dedicada
 - [x] Remover NPS duplicado de dentro das Recomendações
 - [ ] Guardar checkpoint
+## Bug: Lembrete ao fim do dia para volantes registarem serviços não funciona
+- [x] Investigar scheduler/cron de lembretes para volantes
+- [x] Corrigir formato cron de 5 campos ('0 18 * * *') para 6 campos ('0 0 18 * * 1-5')
+- [x] Adicionar restrição a dias úteis (seg-sex)
+- [ ] Guardar checkpoint

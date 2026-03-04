@@ -8,10 +8,10 @@ import { enviarRelatoriosMensaisRecalibra } from './relatorioMensalRecalibra';
  * Configura os cron jobs do sistema
  */
 export function setupScheduler() {
-  // Lembrete diário às 18:00 Lisboa (UTC+0 no inverno, UTC+1 no verão)
-  // Usando UTC porque o timezone do node-cron não está a funcionar corretamente
-  // 18:00 Lisboa = 18:00 UTC (inverno) ou 17:00 UTC (verão)
-  cron.schedule('0 18 * * *', async () => {
+  // Lembrete diário às 18:00 Lisboa (hora local)
+  // Formato: segundo minuto hora dia mês dia-semana
+  // Apenas dias úteis (segunda a sexta: 1-5)
+  cron.schedule('0 0 18 * * 1-5', async () => {
     const agora = new Date();
     const horaLisboa = agora.toLocaleString('pt-PT', { timeZone: 'Europe/Lisbon', hour: '2-digit', minute: '2-digit' });
     console.log(`[CRON] Executando lembrete diário de registo de serviços - Hora Lisboa: ${horaLisboa}`);
@@ -82,6 +82,6 @@ export function setupScheduler() {
   });
 
   console.log('[SCHEDULER] Cron jobs configurados:');
-  console.log('  - Lembrete diário de serviços: 18:00 UTC (= 18:00 Lisboa no inverno, 19:00 Lisboa no verão)');
-  console.log('  - Relatórios mensais (Volante + Recalibra): 09:00 UTC dia 20 (= 09:00 Lisboa no inverno, 10:00 Lisboa no verão)');
+  console.log('  - Lembrete diário de serviços: 18:00 UTC dias úteis (seg-sex)');
+  console.log('  - Relatórios mensais (Volante + Recalibra): 09:00 UTC dia 20');
 }
