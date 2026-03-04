@@ -401,3 +401,14 @@
 - [x] Corrigir caracteres especiais no PDF (≥ aparece como "e) - substituido por >=
 - [x] Corrigir espaçamento estranho na coluna Elegível do ranking - removido checkmark Unicode
 - [x] Melhorar layout visual geral da secção NPS no PDF - caixa criterios, barra lateral analise, sanitize texto
+
+## Cron Volantes - Notificação 18:00 não funciona (URGENTE)
+- [x] Investigar scheduler.ts e logs do servidor
+- [x] Verificar se o cron está a ser inicializado correctamente
+- [x] Verificar lógica de envio de notificações aos volantes
+- [x] Corrigir: timezone Europe/Lisbon adicionado ao cron
+- [x] Corrigir: função getVolantesSemRegistoHoje agora resolve titulos como nomes de lojas
+- [x] Corrigir: logging detalhado para diagnóstico
+- [x] Corrigir: endpoint admin para executar lembrete manualmente
+- [x] Testado com sucesso: lembrete enviado para Telegram (615966323 + 228613920)
+- [ ] Guardar checkpoint

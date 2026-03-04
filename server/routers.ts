@@ -11588,5 +11588,13 @@ IMPORTANTE:
         const resultado = await enviarRelatoriosMensaisRecalibra();
         return resultado;
       }),
+    
+    // Executar lembrete diário de volantes manualmente
+    executarLembreteVolantes: adminProcedure
+      .mutation(async () => {
+        const { executarLembreteVolantes } = await import('./scheduler.js');
+        const resultado = await executarLembreteVolantes();
+        return resultado;
+      }),
   }),
 });

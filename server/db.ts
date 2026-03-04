@@ -10944,20 +10944,27 @@ export async function getServicosVolantePorLojaAgrupado(volanteId: number, dataI
 /**
  * Verificar volantes que não registaram serviços hoje e têm agendamentos
  * Retorna lista de volantes com lojas agendadas não registadas
+ * Inclui agendamentos com lojaId E agendamentos pessoais com titulo que corresponde a uma loja
  */
 export async function getVolantesSemRegistoHoje() {
   const db = await getDb();
-  if (!db) return [];
+  if (!db) {
+    console.log('[getVolantesSemRegistoHoje] DB não disponível');
+    return [];
+  }
   
-  const hoje = new Date().toISOString().split('T')[0];
+  // Usar timezone de Lisboa para calcular a data de "hoje"
+  const hoje = new Date().toLocaleDateString('en-CA', { timeZone: 'Europe/Lisbon' });
+  console.log(`[getVolantesSemRegistoHoje] Data hoje (Lisboa): ${hoje}`);
   
-  // Buscar todos os volantes com agendamentos hoje (incluindo token)
+  // Buscar TODOS os agendamentos de hoje (com e sem lojaId)
   const agendamentosHoje = await db.select({
     volanteId: agendamentosVolante.volanteId,
     volante: volantes,
     lojaId: agendamentosVolante.lojaId,
     loja: lojas,
     periodo: agendamentosVolante.agendamento_volante_periodo,
+    titulo: agendamentosVolante.titulo,
     token: tokensVolante
   })
     .from(agendamentosVolante)
@@ -10966,10 +10973,25 @@ export async function getVolantesSemRegistoHoje() {
     .leftJoin(lojas, eq(agendamentosVolante.lojaId, lojas.id))
     .where(sql`DATE(${agendamentosVolante.data}) = ${hoje}`);
   
+  console.log(`[getVolantesSemRegistoHoje] Agendamentos encontrados: ${agendamentosHoje.length}`);
+  
+  if (agendamentosHoje.length === 0) {
+    // Se não há agendamentos com lojaId, verificar se há volantes activos com qualquer agendamento
+    // Buscar todos os volantes activos que têm agendamentos hoje (incluindo pessoais)
+    console.log('[getVolantesSemRegistoHoje] Nenhum agendamento encontrado para hoje');
+    return [];
+  }
+  
   // Buscar serviços já registados hoje
   const servicosHoje = await db.select()
     .from(servicosVolante)
     .where(eq(servicosVolante.data, hoje));
+  
+  console.log(`[getVolantesSemRegistoHoje] Serviços registados hoje: ${servicosHoje.length}`);
+  
+  // Buscar todas as lojas para resolver títulos de agendamentos sem lojaId
+  const todasLojas = await db.select({ id: lojas.id, nome: lojas.nome }).from(lojas);
+  const lojasMap = new Map(todasLojas.map(l => [l.nome.trim().toLowerCase(), l]));
   
   // Agrupar por volante e verificar quais lojas não têm registo
   const volantesMap = new Map<number, any>();
@@ -10978,10 +11000,34 @@ export async function getVolantesSemRegistoHoje() {
     if (!agendamento.volanteId || !agendamento.volante) continue;
     
     const volanteId = agendamento.volanteId;
-    const lojaId = agendamento.lojaId;
+    let lojaId = agendamento.lojaId;
+    let lojaNome = agendamento.loja?.nome || null;
+    
+    // Se não tem lojaId mas tem titulo, tentar resolver o titulo como nome de loja
+    if (!lojaId && agendamento.titulo) {
+      const tituloLimpo = agendamento.titulo.trim().toLowerCase();
+      const lojaEncontrada = lojasMap.get(tituloLimpo);
+      if (lojaEncontrada) {
+        lojaId = lojaEncontrada.id;
+        lojaNome = lojaEncontrada.nome;
+        console.log(`[getVolantesSemRegistoHoje] Titulo '${agendamento.titulo}' resolvido para loja ${lojaNome} (id: ${lojaId})`);
+      } else {
+        // Titulo não corresponde a nenhuma loja - é um compromisso pessoal, ignorar
+        console.log(`[getVolantesSemRegistoHoje] Titulo '${agendamento.titulo}' não é uma loja - ignorado`);
+        continue;
+      }
+    }
+    
+    // Se ainda não tem lojaId (nem por campo nem por titulo), ignorar
+    if (!lojaId) {
+      console.log(`[getVolantesSemRegistoHoje] Agendamento sem loja identificável - ignorado`);
+      continue;
+    }
     
     // Verificar se já tem registo para esta loja
     const temRegisto = servicosHoje.some(s => s.volanteId === volanteId && s.lojaId === lojaId);
+    
+    console.log(`[getVolantesSemRegistoHoje] ${agendamento.volante.nome} @ ${lojaNome} - Registo: ${temRegisto ? 'SIM' : 'NÃO'}`);
     
     if (!temRegisto) {
       if (!volantesMap.has(volanteId)) {
@@ -10994,15 +11040,24 @@ export async function getVolantesSemRegistoHoje() {
         });
       }
       
-      volantesMap.get(volanteId)!.lojasNaoRegistadas.push({
-        lojaId,
-        lojaNome: agendamento.loja?.nome || 'Loja',
-        periodo: agendamento.periodo
-      });
+      // Evitar duplicados (mesmo volante + mesma loja)
+      const jaAdicionada = volantesMap.get(volanteId)!.lojasNaoRegistadas.some(
+        (l: any) => l.lojaId === lojaId
+      );
+      
+      if (!jaAdicionada) {
+        volantesMap.get(volanteId)!.lojasNaoRegistadas.push({
+          lojaId,
+          lojaNome: lojaNome || 'Loja',
+          periodo: agendamento.periodo
+        });
+      }
     }
   }
   
-  return Array.from(volantesMap.values()).filter(v => v.lojasNaoRegistadas.length > 0);
+  const resultado = Array.from(volantesMap.values()).filter(v => v.lojasNaoRegistadas.length > 0);
+  console.log(`[getVolantesSemRegistoHoje] Resultado final: ${resultado.length} volante(s) com pendências`);
+  return resultado;
 }
 
 /**
