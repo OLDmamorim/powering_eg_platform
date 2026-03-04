@@ -419,3 +419,10 @@
 - [x] Reescrito scheduler.ts: busca volantes activos com Telegram, envia lembrete genérico
 - [x] Testado: lembrete enviado com sucesso para 615966323 + 228613920
 - [ ] Publicar
+
+## BUG: Volante expulso do dashboard - pede login
+- [x] Investigar fluxo de autenticação do volante no dashboard
+- [x] Verificar se token do volante é validado correctamente (API retorna valid:true)
+- [x] Corrigir: volanteData agora inclui token e lojas no objecto guardado no localStorage
+- [x] Problema principal: versão publicada desactualizada - precisa de Publish
+- [ ] Publicar

@@ -400,6 +400,8 @@ export default function PortalLoja() {
           volanteNome: volante.nome,
           volanteEmail: volante.email,
           lojasAtribuidas: lojas.map((l: any) => ({ id: l.id, nome: l.nome })),
+          token: token,
+          lojas: lojas.map((l: any) => ({ id: l.id, nome: l.nome })),
         };
         setVolanteAuth(volanteData);
         setLojaAuth(null);
@@ -430,6 +432,8 @@ export default function PortalLoja() {
         volanteNome: volante.nome,
         volanteEmail: volante.email,
         lojasAtribuidas: lojas.map((l: any) => ({ id: l.id, nome: l.nome })),
+        token: token,
+        lojas: lojas.map((l: any) => ({ id: l.id, nome: l.nome })),
       };
       setVolanteAuth(volanteData);
       localStorage.setItem("loja_token", token);
