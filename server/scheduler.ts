@@ -1,12 +1,42 @@
 import cron from 'node-cron';
-import { getVolantesSemRegistoHoje } from './db';
-import { enviarLembreteRegistoServicos } from './telegramService';
+import { sendTelegramMessageToMultiple } from './telegramService';
 import { enviarRelatoriosMensaisVolante } from './relatorioMensalVolante';
 import { enviarRelatoriosMensaisRecalibra } from './relatorioMensalRecalibra';
 
 /**
- * Executa o lembrete diário de registo de serviços para volantes
- * Pode ser chamado pelo cron job ou manualmente via endpoint admin
+ * Busca todos os volantes activos com Telegram configurado
+ */
+async function getVolantesActivosComTelegram() {
+  const { getDb } = await import('./db.js');
+  const { volantes, tokensVolante } = await import('../drizzle/schema.js');
+  const { eq, and, isNotNull } = await import('drizzle-orm');
+  
+  const db = await getDb();
+  if (!db) return [];
+  
+  const resultado = await db.select({
+    id: volantes.id,
+    nome: volantes.nome,
+    telegramChatId: volantes.telegramChatId,
+    token: tokensVolante.token,
+  })
+    .from(volantes)
+    .leftJoin(tokensVolante, eq(volantes.id, tokensVolante.volanteId))
+    .where(
+      and(
+        eq(volantes.ativo, true),
+        isNotNull(volantes.telegramChatId)
+      )
+    );
+  
+  // Filtrar os que realmente têm telegramChatId preenchido (não vazio)
+  return resultado.filter(v => v.telegramChatId && v.telegramChatId.trim() !== '');
+}
+
+/**
+ * Executa o lembrete diário de registo de serviços para TODOS os volantes activos
+ * Enviado todos os dias úteis às 18:00 Lisboa
+ * NÃO depende de agendamentos - é um lembrete genérico para registar serviços do dia
  */
 export async function executarLembreteVolantes(): Promise<{
   total: number;
@@ -19,59 +49,60 @@ export async function executarLembreteVolantes(): Promise<{
   const resultado = { total: 0, enviados: 0, erros: [] as string[], detalhes: [] as string[] };
   
   console.log(`[CRON-LEMBRETE] ========================================`);
-  console.log(`[CRON-LEMBRETE] Executando lembrete diário - ${horaLisboa}`);
+  console.log(`[CRON-LEMBRETE] Lembrete diário de registo de serviços`);
+  console.log(`[CRON-LEMBRETE] Hora Lisboa: ${horaLisboa}`);
   console.log(`[CRON-LEMBRETE] ========================================`);
   
   try {
-    const volantesPendentes = await getVolantesSemRegistoHoje();
-    resultado.total = volantesPendentes.length;
+    const volantesActivos = await getVolantesActivosComTelegram();
+    resultado.total = volantesActivos.length;
     
-    console.log(`[CRON-LEMBRETE] Volantes com agendamentos pendentes: ${volantesPendentes.length}`);
+    console.log(`[CRON-LEMBRETE] Volantes activos com Telegram: ${volantesActivos.length}`);
     
-    if (volantesPendentes.length === 0) {
-      resultado.detalhes.push('Nenhum volante com agendamentos pendentes de registo hoje');
-      console.log('[CRON-LEMBRETE] Nenhum volante com agendamentos pendentes de registo');
+    if (volantesActivos.length === 0) {
+      resultado.detalhes.push('Nenhum volante activo com Telegram configurado');
+      console.log('[CRON-LEMBRETE] Nenhum volante activo com Telegram configurado');
       return resultado;
     }
 
-    for (const volante of volantesPendentes) {
-      console.log(`[CRON-LEMBRETE] Processando: ${volante.volanteNome} - ${volante.lojasNaoRegistadas.length} loja(s) pendente(s)`);
-      
-      if (!volante.telegramChatId) {
-        const msg = `Volante ${volante.volanteNome} não tem Telegram configurado`;
-        console.log(`[CRON-LEMBRETE] SKIP: ${msg}`);
-        resultado.erros.push(msg);
-        continue;
-      }
+    const baseUrl = process.env.VITE_APP_URL || 'https://poweringeg-3c9mozlh.manus.space';
 
-      // Construir URL do portal do volante com token
-      const baseUrl = process.env.VITE_APP_URL || 'https://poweringeg-3c9mozlh.manus.space';
+    for (const volante of volantesActivos) {
+      console.log(`[CRON-LEMBRETE] Enviando para: ${volante.nome} (${volante.telegramChatId})`);
+      
       const portalUrl = volante.token 
         ? `${baseUrl}/portal-loja?token=${volante.token}`
         : baseUrl;
       
-      try {
-        const enviado = await enviarLembreteRegistoServicos(
-          volante.telegramChatId,
-          {
-            volanteNome: volante.volanteNome,
-            lojasNaoRegistadas: volante.lojasNaoRegistadas,
-            portalUrl
-          }
-        );
+      const mensagem = `
+🔔 <b>Lembrete - Registo de Serviços</b>
 
-        if (enviado) {
+Olá ${volante.nome?.trim() || 'Volante'},
+
+Já registaste os serviços realizados hoje?
+
+Por favor, acede ao Portal do Volante e regista os serviços antes do final do dia.
+
+🔗 <a href="${portalUrl}">Abrir Portal do Volante</a>
+
+<i>PoweringEG Platform 2.0</i>
+      `.trim();
+      
+      try {
+        const { sendTelegramMessageToMultiple } = await import('./telegramService.js');
+        const envioResult = await sendTelegramMessageToMultiple(volante.telegramChatId!, mensagem, 'HTML');
+        
+        if (envioResult.success > 0) {
           resultado.enviados++;
-          const lojas = volante.lojasNaoRegistadas.map((l: any) => l.lojaNome).join(', ');
-          resultado.detalhes.push(`${volante.volanteNome}: lembrete enviado (${lojas})`);
-          console.log(`[CRON-LEMBRETE] OK: ${volante.volanteNome} - lembrete enviado`);
+          resultado.detalhes.push(`${volante.nome}: lembrete enviado`);
+          console.log(`[CRON-LEMBRETE] OK: ${volante.nome} - enviado`);
         } else {
-          resultado.erros.push(`${volante.volanteNome}: falha no envio Telegram`);
-          console.log(`[CRON-LEMBRETE] FALHA: ${volante.volanteNome} - envio Telegram falhou`);
+          resultado.erros.push(`${volante.nome}: falha no envio Telegram`);
+          console.log(`[CRON-LEMBRETE] FALHA: ${volante.nome} - envio falhou`);
         }
       } catch (err: any) {
-        resultado.erros.push(`${volante.volanteNome}: ${err.message}`);
-        console.error(`[CRON-LEMBRETE] ERRO: ${volante.volanteNome}:`, err.message);
+        resultado.erros.push(`${volante.nome}: ${err.message}`);
+        console.error(`[CRON-LEMBRETE] ERRO: ${volante.nome}:`, err.message);
       }
     }
 
@@ -90,50 +121,41 @@ export async function executarLembreteVolantes(): Promise<{
 export function setupScheduler() {
   console.log('[SCHEDULER] ========================================');
   console.log('[SCHEDULER] Inicializando cron jobs...');
-  console.log('[SCHEDULER] Hora actual UTC:', new Date().toISOString());
-  console.log('[SCHEDULER] Hora actual Lisboa:', new Date().toLocaleString('pt-PT', { timeZone: 'Europe/Lisbon' }));
+  console.log('[SCHEDULER] Hora UTC:', new Date().toISOString());
+  console.log('[SCHEDULER] Hora Lisboa:', new Date().toLocaleString('pt-PT', { timeZone: 'Europe/Lisbon' }));
   console.log('[SCHEDULER] ========================================');
 
-  // Lembrete diário às 18:00 Lisboa (hora local)
-  // Formato: segundo minuto hora dia mês dia-semana
-  // Apenas dias úteis (segunda a sexta: 1-5)
-  // IMPORTANTE: timezone Europe/Lisbon para garantir hora correcta
-  const lembreteTask = cron.schedule('0 0 18 * * 1-5', async () => {
+  // Lembrete diário às 18:00 Lisboa
+  // Enviado a TODOS os volantes activos com Telegram, TODOS os dias úteis
+  // Não depende de agendamentos - é um lembrete genérico para registar serviços
+  cron.schedule('0 0 18 * * 1-5', async () => {
     await executarLembreteVolantes();
   }, {
     timezone: 'Europe/Lisbon'
   });
 
-  console.log('[SCHEDULER] Cron lembrete diário configurado: 18:00 Lisboa, Seg-Sex');
-  console.log('[SCHEDULER] Lembrete task timezone:', (lembreteTask as any).timezone || 'default');
+  console.log('[SCHEDULER] Cron lembrete diário: 18:00 Lisboa, Seg-Sex (todos volantes activos)');
 
   // Relatórios mensais - dia 20 de cada mês às 09:00 Lisboa
-  // IMPORTANTE: timezone Europe/Lisbon para garantir hora correcta
-  const relatoriosTask = cron.schedule('0 0 9 20 * *', async () => {
-    const agora = new Date();
-    const horaLisboa = agora.toLocaleString('pt-PT', { timeZone: 'Europe/Lisbon' });
-    console.log(`[CRON-RELATORIOS] Executando envio de relatórios mensais - ${horaLisboa}`);
+  cron.schedule('0 0 9 20 * *', async () => {
+    const horaLisboa = new Date().toLocaleString('pt-PT', { timeZone: 'Europe/Lisbon' });
+    console.log(`[CRON-RELATORIOS] Envio de relatórios mensais - ${horaLisboa}`);
     try {
-      // Enviar relatórios do volante
       await enviarRelatoriosMensaisVolante();
-      console.log('[CRON-RELATORIOS] Relatórios mensais do volante enviados com sucesso');
+      console.log('[CRON-RELATORIOS] Relatórios volante enviados');
       
-      // Aguardar 2 segundos entre os dois sistemas
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // Enviar relatórios do Recalibra
       await enviarRelatoriosMensaisRecalibra();
-      console.log('[CRON-RELATORIOS] Relatórios mensais do Recalibra enviados com sucesso');
+      console.log('[CRON-RELATORIOS] Relatórios Recalibra enviados');
     } catch (error) {
-      console.error('[CRON-RELATORIOS] Erro ao enviar relatórios mensais:', error);
+      console.error('[CRON-RELATORIOS] Erro:', error);
     }
   }, {
     timezone: 'Europe/Lisbon'
   });
 
-  console.log('[SCHEDULER] Cron relatórios mensais configurado: 09:00 Lisboa, dia 20');
-  console.log('[SCHEDULER] Relatórios task timezone:', (relatoriosTask as any).timezone || 'default');
-  console.log('[SCHEDULER] ========================================');
-  console.log('[SCHEDULER] Todos os cron jobs configurados com sucesso!');
+  console.log('[SCHEDULER] Cron relatórios mensais: 09:00 Lisboa, dia 20');
+  console.log('[SCHEDULER] Todos os cron jobs configurados!');
   console.log('[SCHEDULER] ========================================');
 }

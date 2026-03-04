@@ -412,3 +412,10 @@
 - [x] Corrigir: endpoint admin para executar lembrete manualmente
 - [x] Testado com sucesso: lembrete enviado para Telegram (615966323 + 228613920)
 - [ ] Guardar checkpoint
+
+## Cron 18h - Lembrete para registar serviços (NÃO depende de agendamentos!)
+- [x] O lembrete das 18h deve ser enviado a TODOS os volantes activos com Telegram, TODOS os dias úteis
+- [x] Não depende de agendamentos - é simplesmente "já registaste os serviços de hoje?"
+- [x] Reescrito scheduler.ts: busca volantes activos com Telegram, envia lembrete genérico
+- [x] Testado: lembrete enviado com sucesso para 615966323 + 228613920
+- [ ] Publicar
