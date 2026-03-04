@@ -263,10 +263,13 @@ async function generateLojaHistoryInterno(
       console.log('[LojaHistory] Sem dados de ocorrências estruturais');
     }
     
-    // Buscar resultados mensais da loja
+    // Buscar resultados mensais da loja (TODOS para gráficos evolutivos)
+    let todosResultadosMensais: any[] = [];
     let resultadosMensais: any[] = [];
     try {
-      const evolucao = await db.getEvolucaoMensal(lojaId, 12);
+      const evolucao = await db.getEvolucaoMensal(lojaId, 24); // Buscar até 24 meses para gráficos
+      todosResultadosMensais = evolucao;
+      // Filtrar pelo período seleccionado para KPIs e análise IA
       resultadosMensais = evolucao.filter((r: any) => {
         const dataResultado = new Date(r.ano, r.mes - 1, 1);
         return dataResultado >= dataInicio && dataResultado <= dataFim;
@@ -275,34 +278,47 @@ async function generateLojaHistoryInterno(
       console.log('[LojaHistory] Sem dados de resultados mensais');
     }
     
-    // Buscar vendas complementares da loja para cada mês do período
+    // Buscar vendas complementares da loja - TODAS para gráficos evolutivos
+    let todasVendasComplementares: any[] = [];
     let vendasComplementares: any[] = [];
     try {
-      // Iterar pelos meses do período
-      const mesInicio = dataInicio.getMonth() + 1;
-      const anoInicio = dataInicio.getFullYear();
-      const mesFim = dataFim.getMonth() + 1;
-      const anoFim = dataFim.getFullYear();
+      // Buscar todos os meses disponíveis (últimos 24 meses)
+      const agora = new Date();
+      let mesIter = agora.getMonth() + 1;
+      let anoIter = agora.getFullYear();
+      // Recuar 24 meses
+      for (let i = 0; i < 24; i++) {
+        mesIter--;
+        if (mesIter < 1) { mesIter = 12; anoIter--; }
+      }
+      mesIter++; // Voltar ao primeiro mês do intervalo
+      if (mesIter > 12) { mesIter = 1; anoIter++; }
       
-      let mesAtual = mesInicio;
-      let anoAtual = anoInicio;
+      const mesLimiteInicio = mesIter;
+      const anoLimiteInicio = anoIter;
+      let mesAt = mesLimiteInicio;
+      let anoAt = anoLimiteInicio;
+      const mesFimAtual = agora.getMonth() + 1;
+      const anoFimAtual = agora.getFullYear();
       
-      while (anoAtual < anoFim || (anoAtual === anoFim && mesAtual <= mesFim)) {
+      while (anoAt < anoFimAtual || (anoAt === anoFimAtual && mesAt <= mesFimAtual)) {
         try {
-          const vendasMes = await db.getVendasComplementares(mesAtual, anoAtual, lojaId);
+          const vendasMes = await db.getVendasComplementares(mesAt, anoAt, lojaId);
           if (vendasMes && vendasMes.length > 0) {
-            vendasComplementares.push(...vendasMes);
+            todasVendasComplementares.push(...vendasMes);
           }
         } catch (e) {
           // Continuar para o próximo mês
         }
-        
-        mesAtual++;
-        if (mesAtual > 12) {
-          mesAtual = 1;
-          anoAtual++;
-        }
+        mesAt++;
+        if (mesAt > 12) { mesAt = 1; anoAt++; }
       }
+      
+      // Filtrar pelo período seleccionado para KPIs e análise IA
+      vendasComplementares = todasVendasComplementares.filter((v: any) => {
+        const dataVenda = new Date(v.ano, v.mes - 1, 1);
+        return dataVenda >= dataInicio && dataVenda <= dataFim;
+      });
     } catch (e) {
       console.log('[LojaHistory] Sem dados de vendas complementares');
     }
@@ -666,17 +682,17 @@ Gera uma análise completa incluindo evolução, problemas, pontos fortes, alert
     const contentStr = typeof content === 'string' ? content : JSON.stringify(content);
     const iaResult = JSON.parse(contentStr);
     
-    // Preparar dados mensais para gráficos
+    // Preparar dados mensais para gráficos - usar TODOS os dados disponíveis (não filtrados)
     const NOMES_MESES_CURTOS = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
     
     const dadosMensais = {
-      resultados: resultadosMensais.map((r: any) => ({
+      resultados: todosResultadosMensais.map((r: any) => ({
         mes: `${NOMES_MESES_CURTOS[r.mes - 1]} ${r.ano}`,
         servicos: r.totalServicos || 0,
         objetivo: r.objetivoMensal || 0,
         taxaReparacao: parseFloat(((r.taxaReparacao || 0) * 100).toFixed(1)),
       })),
-      vendas: vendasComplementares.map((v: any) => ({
+      vendas: todasVendasComplementares.map((v: any) => ({
         mes: `${NOMES_MESES_CURTOS[v.mes - 1]} ${v.ano}`,
         total: parseFloat(v.totalVendas) || 0,
         escovas: parseFloat(v.escovasVendas) || 0,

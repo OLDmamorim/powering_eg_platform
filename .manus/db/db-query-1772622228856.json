@@ -1,0 +1,75 @@
+{
+  "query": "SELECT vc.mes, vc.ano, vc.totalVendas, vc.escovasVendas, vc.escovasQtd, vc.escovasPercent, vc.polimentoVendas, vc.polimentoQtd, vc.tratamentoVendas, vc.outrosVendas, l.nome FROM vendas_complementares vc INNER JOIN lojas l ON vc.lojaId = l.id WHERE l.nome LIKE '%voa%' AND vc.ano = 2026 ORDER BY vc.ano, vc.mes LIMIT 5",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT vc.mes, vc.ano, vc.totalVendas, vc.escovasVendas, vc.escovasQtd, vc.escovasPercent, vc.polimentoVendas, vc.polimentoQtd, vc.tratamentoVendas, vc.outrosVendas, l.nome FROM vendas_complementares vc INNER JOIN lojas l ON vc.lojaId = l.id WHERE l.nome LIKE '%voa%' AND vc.ano = 2026 ORDER BY vc.ano, vc.mes LIMIT 5",
+  "rows": [
+    {
+      "mes": "1",
+      "ano": "2026",
+      "totalVendas": "115.53",
+      "escovasVendas": "33.74",
+      "escovasQtd": "4",
+      "escovasPercent": "0.0952",
+      "polimentoVendas": "34.55",
+      "polimentoQtd": "1",
+      "tratamentoVendas": "0.00",
+      "outrosVendas": "47.24",
+      "nome": "Póvoa de santa iria"
+    },
+    {
+      "mes": "1",
+      "ano": "2026",
+      "totalVendas": "115.18",
+      "escovasVendas": "115.18",
+      "escovasQtd": "8",
+      "escovasPercent": "0.1143",
+      "polimentoVendas": "0.00",
+      "polimentoQtd": "0",
+      "tratamentoVendas": "0.00",
+      "outrosVendas": "0.00",
+      "nome": "Póvoa de Varzim"
+    },
+    {
+      "mes": "2",
+      "ano": "2026",
+      "totalVendas": "82.50",
+      "escovasVendas": "82.50",
+      "escovasQtd": "6",
+      "escovasPercent": "0.0923",
+      "polimentoVendas": "0.00",
+      "polimentoQtd": "0",
+      "tratamentoVendas": "0.00",
+      "outrosVendas": "0.00",
+      "nome": "Póvoa de Varzim"
+    },
+    {
+      "mes": "2",
+      "ano": "2026",
+      "totalVendas": "41.25",
+      "escovasVendas": "41.25",
+      "escovasQtd": "3",
+      "escovasPercent": "0.0732",
+      "polimentoVendas": "0.00",
+      "polimentoQtd": "0",
+      "tratamentoVendas": "0.00",
+      "outrosVendas": "0.00",
+      "nome": "Póvoa de santa iria"
+    },
+    {
+      "mes": "3",
+      "ano": "2026",
+      "totalVendas": "27.50",
+      "escovasVendas": "27.50",
+      "escovasQtd": "2",
+      "escovasPercent": "0.6667",
+      "polimentoVendas": "0.00",
+      "polimentoQtd": "0",
+      "tratamentoVendas": "0.00",
+      "outrosVendas": "0.00",
+      "nome": "Póvoa de santa iria"
+    }
+  ],
+  "messages": [],
+  "stdout": "mes\tano\ttotalVendas\tescovasVendas\tescovasQtd\tescovasPercent\tpolimentoVendas\tpolimentoQtd\ttratamentoVendas\toutrosVendas\tnome\n1\t2026\t115.53\t33.74\t4\t0.0952\t34.55\t1\t0.00\t47.24\tPóvoa de santa iria\n1\t2026\t115.18\t115.18\t8\t0.1143\t0.00\t0\t0.00\t0.00\tPóvoa de Varzim\n2\t2026\t82.50\t82.50\t6\t0.0923\t0.00\t0\t0.00\t0.00\tPóvoa de Varzim\n2\t2026\t41.25\t41.25\t3\t0.0732\t0.00\t0\t0.00\t0.00\tPóvoa de santa iria\n3\t2026\t27.50\t27.50\t2\t0.6667\t0.00\t0\t0.00\t0.00\tPóvoa de santa iria\n",
+  "stderr": "",
+  "execution_time_ms": 350
+}

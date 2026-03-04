@@ -1,0 +1,18 @@
+{
+  "query": "SELECT l.id, l.nome FROM lojas l WHERE l.nome LIKE '%voa%' OR l.nome LIKE '%Póvoa%' LIMIT 5",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT l.id, l.nome FROM lojas l WHERE l.nome LIKE '%voa%' OR l.nome LIKE '%Póvoa%' LIMIT 5",
+  "rows": [
+    {
+      "id": "60005",
+      "nome": "Póvoa de Varzim"
+    },
+    {
+      "id": "180045",
+      "nome": "Póvoa de santa iria"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tnome\n60005\tPóvoa de Varzim\n180045\tPóvoa de santa iria\n",
+  "stderr": "",
+  "execution_time_ms": 810
+}

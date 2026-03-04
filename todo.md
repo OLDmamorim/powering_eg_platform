@@ -361,3 +361,12 @@
 - [x] Dar destaque à importância do NPS no prompt da IA (alerta prioritário se <60%)
 - [x] Actualizar prompt IA para incluir NPS como factor crítico na análise
 - [x] Guardar checkpoint
+
+### Bug Fix: KPIs Vendas Complementares no Histórico da Loja
+- [x] Média Mensal mostra mesmo valor que Total Vendas - VERIFICADO: correcto quando 1 mês seleccionado (82.5/1=82.5)
+- [x] Escovas mostra €82.5 - VERIFICADO: correcto, a loja Póvoa de Varzim só vende escovas (totalVendas=escovasVendas na BD)
+- [ ] Guardar checkpoint
+## Gráficos Evolutivos no Histórico da Loja
+- [x] Gráfico de Evolução da Taxa de Reparação deve mostrar TODOS os meses disponíveis (não apenas o mês seleccionado)
+- [x] Gráfico de Evolução de Vendas Complementares deve mostrar TODOS os meses disponíveis
+- [ ] Guardar checkpoint
