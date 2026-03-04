@@ -393,3 +393,7 @@
 - [x] Corrigir formato cron de 5 campos ('0 18 * * *') para 6 campos ('0 0 18 * * 1-5')
 - [x] Adicionar restrição a dias úteis (seg-sex)
 - [ ] Guardar checkpoint
+## Relatório de Resultados Admin - NPS no PDF e Ranking Ordenado
+- [x] Ordenar ranking NPS por NPS desc + Taxa Resposta desc (elegíveis em cima)
+- [x] Adicionar secção NPS completa à exportação PDF (KPIs, análise IA, tabela ranking com cores)
+- [ ] Guardar checkpoint

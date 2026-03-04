@@ -91,6 +91,17 @@ interface AnaliseIA {
     analisePerformance?: string;
     tendenciasIdentificadas?: string;
     recomendacoesEstrategicas?: string[];
+    analiseNPS?: string;
+    alertasCriticos?: string[];
+  };
+  dadosNPS?: {
+    npsGlobal: number;
+    taxaRespostaGlobal: number;
+    totalLojas: number;
+    lojasElegiveis: number;
+    lojasNaoElegiveis: number;
+    motivosInelegibilidade: { npsBaixo: number; taxaBaixa: number };
+    rankingNPS: Array<{ loja: string; nps: number; taxaResposta: number; elegivel: boolean; motivo?: string }>;
   };
   analiseZonasDetalhada?: Array<{
     zona: string;
@@ -1366,6 +1377,126 @@ export function ExportarRelatorioIAPDF({ analiseIA, periodo }: Props) {
         });
         
         yPos = (doc as any).lastAutoTable.finalY + 10;
+      }
+
+      // ==================== SECÇÃO NPS ====================
+      if (analiseIA.dadosNPS) {
+        const npsData = analiseIA.dadosNPS;
+        
+        // Nova página para NPS
+        doc.addPage();
+        yPos = 20;
+        
+        yPos = drawSectionHeader(doc, yPos, 'Análise NPS (Net Promoter Score)', [99, 102, 241], pageWidth);
+        
+        // KPIs NPS
+        const kpiWidth = (pageWidth - 28 - 12) / 4;
+        const npsColor: [number, number, number] = npsData.npsGlobal >= 80 ? COLORS.success : COLORS.danger;
+        const taxaColor: [number, number, number] = npsData.taxaRespostaGlobal >= 7.5 ? COLORS.success : COLORS.danger;
+        
+        drawColoredBox(doc, 14, yPos, kpiWidth, 24, npsColor, 'NPS Médio Global', `${npsData.npsGlobal}%`);
+        drawColoredBox(doc, 14 + kpiWidth + 4, yPos, kpiWidth, 24, taxaColor, 'Taxa Resposta Global', `${npsData.taxaRespostaGlobal}%`);
+        drawColoredBox(doc, 14 + (kpiWidth + 4) * 2, yPos, kpiWidth, 24, COLORS.success, 'Lojas Elegíveis', `${npsData.lojasElegiveis}`);
+        drawColoredBox(doc, 14 + (kpiWidth + 4) * 3, yPos, kpiWidth, 24, COLORS.danger, 'Sem Prémio', `${npsData.lojasNaoElegiveis}`);
+        yPos += 30;
+        
+        // Critérios
+        doc.setFontSize(8);
+        doc.setTextColor(100, 116, 139);
+        doc.text('Critérios: NPS ≥ 80% e Taxa de Resposta ≥ 7.5% para ter direito a prémio', 14, yPos);
+        yPos += 8;
+        
+        // Análise IA do NPS
+        if (analiseIA.insightsIA?.analiseNPS && analiseIA.insightsIA.analiseNPS !== 'Sem dados NPS disponíveis para este período.') {
+          doc.setFillColor(238, 242, 255);
+          doc.roundedRect(14, yPos, pageWidth - 28, 4, 1, 1, 'F');
+          
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'bold');
+          doc.setTextColor(99, 102, 241);
+          doc.text('Análise IA do NPS', 18, yPos + 3);
+          yPos += 8;
+          
+          doc.setFontSize(9);
+          doc.setFont('helvetica', 'normal');
+          doc.setTextColor(0, 0, 0);
+          const npsAnaliseLines = doc.splitTextToSize(analiseIA.insightsIA.analiseNPS, pageWidth - 36);
+          doc.text(npsAnaliseLines, 18, yPos);
+          yPos += npsAnaliseLines.length * 4.5 + 8;
+        }
+        
+        // Tabela de ranking NPS
+        if (npsData.rankingNPS && npsData.rankingNPS.length > 0) {
+          if (yPos > 200) {
+            doc.addPage();
+            yPos = 20;
+          }
+          
+          doc.setFontSize(11);
+          doc.setFont('helvetica', 'bold');
+          doc.setTextColor(99, 102, 241);
+          doc.text('Ranking Completo NPS', 14, yPos);
+          yPos += 6;
+          
+          const npsTableData = npsData.rankingNPS.map((loja, idx) => [
+            (idx + 1).toString(),
+            loja.loja,
+            `${loja.nps}%`,
+            `${loja.taxaResposta}%`,
+            loja.elegivel ? '✓ Elegível' : (loja.motivo || 'Não elegível')
+          ]);
+          
+          autoTable(doc, {
+            startY: yPos,
+            head: [['#', 'Loja', 'NPS', 'Taxa Resp.', 'Elegível']],
+            body: npsTableData,
+            theme: 'striped',
+            headStyles: { 
+              fillColor: [99, 102, 241],
+              textColor: [255, 255, 255],
+              fontStyle: 'bold',
+              fontSize: 9
+            },
+            bodyStyles: { fontSize: 8 },
+            alternateRowStyles: { fillColor: [248, 250, 252] },
+            styles: { cellPadding: 2 },
+            margin: { left: 14, right: 14 },
+            columnStyles: {
+              0: { cellWidth: 12, halign: 'center' },
+              1: { cellWidth: 55 },
+              2: { cellWidth: 25, halign: 'center' },
+              3: { cellWidth: 25, halign: 'center' },
+              4: { cellWidth: 45 },
+            },
+            didParseCell: (data: any) => {
+              if (data.section === 'body' && data.column.index === 4) {
+                const rowIdx = data.row.index;
+                const loja = npsData.rankingNPS[rowIdx];
+                if (loja && !loja.elegivel) {
+                  data.cell.styles.textColor = [239, 68, 68];
+                  data.cell.styles.fontStyle = 'bold';
+                } else if (loja && loja.elegivel) {
+                  data.cell.styles.textColor = [34, 197, 94];
+                  data.cell.styles.fontStyle = 'bold';
+                }
+              }
+              // Colorir NPS
+              if (data.section === 'body' && data.column.index === 2) {
+                const rowIdx = data.row.index;
+                const loja = npsData.rankingNPS[rowIdx];
+                if (loja && loja.nps >= 80) {
+                  data.cell.styles.textColor = [34, 197, 94];
+                  data.cell.styles.fontStyle = 'bold';
+                } else if (loja) {
+                  data.cell.styles.textColor = [239, 68, 68];
+                  data.cell.styles.fontStyle = 'bold';
+                }
+              }
+            },
+          });
+          
+          yPos = (doc as any).lastAutoTable.finalY + 10;
+        }
       }
 
       // ==================== RODAPÉ EM TODAS AS PÁGINAS ====================

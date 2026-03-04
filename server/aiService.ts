@@ -751,8 +751,15 @@ ${pontosNegativosRelatados.length > 0 ? pontosNegativosRelatados.join('\n') : 'N
         }
       }
       
-      // Ordenar por NPS descendente
-      npsRanking.sort((a, b) => b.nps - a.nps);
+      // Ordenar: elegíveis primeiro, depois por NPS desc, depois por taxa resposta desc
+      npsRanking.sort((a, b) => {
+        // Elegíveis primeiro
+        if (a.elegivel !== b.elegivel) return a.elegivel ? -1 : 1;
+        // Dentro do mesmo grupo, ordenar por NPS desc
+        if (b.nps !== a.nps) return b.nps - a.nps;
+        // Se NPS igual, ordenar por taxa resposta desc
+        return b.taxaResposta - a.taxaResposta;
+      });
       
       const npsGlobal = contNPS > 0 ? somaNPS / contNPS : 0;
       const taxaRespostaGlobal = contNPS > 0 ? somaTaxaResp / contNPS : 0;
@@ -1776,7 +1783,12 @@ ${resumoRelatoriosPorLoja}
         }
       }
       
-      npsRanking.sort((a, b) => b.nps - a.nps);
+      // Ordenar: elegíveis primeiro, depois por NPS desc, depois por taxa resposta desc
+      npsRanking.sort((a, b) => {
+        if (a.elegivel !== b.elegivel) return a.elegivel ? -1 : 1;
+        if (b.nps !== a.nps) return b.nps - a.nps;
+        return b.taxaResposta - a.taxaResposta;
+      });
       
       const npsGlobal = contNPS > 0 ? somaNPS / contNPS : 0;
       const taxaRespostaGlobal = contNPS > 0 ? somaTaxaResp / contNPS : 0;
