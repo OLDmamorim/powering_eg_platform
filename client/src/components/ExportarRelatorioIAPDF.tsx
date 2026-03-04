@@ -1387,42 +1387,65 @@ export function ExportarRelatorioIAPDF({ analiseIA, periodo }: Props) {
         doc.addPage();
         yPos = 20;
         
-        yPos = drawSectionHeader(doc, yPos, 'Análise NPS (Net Promoter Score)', [99, 102, 241], pageWidth);
+        yPos = drawSectionHeader(doc, yPos, 'Analise NPS (Net Promoter Score)', [99, 102, 241], pageWidth);
         
         // KPIs NPS
         const kpiWidth = (pageWidth - 28 - 12) / 4;
         const npsColor: [number, number, number] = npsData.npsGlobal >= 80 ? COLORS.success : COLORS.danger;
         const taxaColor: [number, number, number] = npsData.taxaRespostaGlobal >= 7.5 ? COLORS.success : COLORS.danger;
         
-        drawColoredBox(doc, 14, yPos, kpiWidth, 24, npsColor, 'NPS Médio Global', `${npsData.npsGlobal}%`);
+        drawColoredBox(doc, 14, yPos, kpiWidth, 24, npsColor, 'NPS Medio Global', `${npsData.npsGlobal}%`);
         drawColoredBox(doc, 14 + kpiWidth + 4, yPos, kpiWidth, 24, taxaColor, 'Taxa Resposta Global', `${npsData.taxaRespostaGlobal}%`);
-        drawColoredBox(doc, 14 + (kpiWidth + 4) * 2, yPos, kpiWidth, 24, COLORS.success, 'Lojas Elegíveis', `${npsData.lojasElegiveis}`);
-        drawColoredBox(doc, 14 + (kpiWidth + 4) * 3, yPos, kpiWidth, 24, COLORS.danger, 'Sem Prémio', `${npsData.lojasNaoElegiveis}`);
-        yPos += 30;
+        drawColoredBox(doc, 14 + (kpiWidth + 4) * 2, yPos, kpiWidth, 24, COLORS.success, 'Lojas Elegiveis', `${npsData.lojasElegiveis}`);
+        drawColoredBox(doc, 14 + (kpiWidth + 4) * 3, yPos, kpiWidth, 24, COLORS.danger, 'Sem Premio', `${npsData.lojasNaoElegiveis}`);
+        yPos += 28;
         
-        // Critérios
+        // Criterios - com caixa de fundo
+        doc.setFillColor(245, 245, 250);
+        doc.roundedRect(14, yPos - 2, pageWidth - 28, 8, 1, 1, 'F');
         doc.setFontSize(8);
-        doc.setTextColor(100, 116, 139);
-        doc.text('Critérios: NPS ≥ 80% e Taxa de Resposta ≥ 7.5% para ter direito a prémio', 14, yPos);
-        yPos += 8;
+        doc.setTextColor(80, 80, 100);
+        doc.setFont('helvetica', 'italic');
+        doc.text('Criterios: NPS >= 80% e Taxa de Resposta >= 7.5% para ter direito a premio', pageWidth / 2, yPos + 3, { align: 'center' });
+        doc.setFont('helvetica', 'normal');
+        yPos += 12;
         
-        // Análise IA do NPS
-        if (analiseIA.insightsIA?.analiseNPS && analiseIA.insightsIA.analiseNPS !== 'Sem dados NPS disponíveis para este período.') {
+        // Analise IA do NPS
+        if (analiseIA.insightsIA?.analiseNPS && analiseIA.insightsIA.analiseNPS !== 'Sem dados NPS dispon\u00edveis para este per\u00edodo.') {
+          // Caixa de fundo para a analise
+          const npsAnaliseText = analiseIA.insightsIA.analiseNPS
+            .replace(/[\u00e0\u00e1\u00e2\u00e3]/g, 'a')
+            .replace(/[\u00e9\u00ea]/g, 'e')
+            .replace(/[\u00ed]/g, 'i')
+            .replace(/[\u00f3\u00f4\u00f5]/g, 'o')
+            .replace(/[\u00fa]/g, 'u')
+            .replace(/[\u00e7]/g, 'c')
+            .replace(/[\u00c0\u00c1\u00c2\u00c3]/g, 'A')
+            .replace(/[\u00c9\u00ca]/g, 'E')
+            .replace(/[\u00cd]/g, 'I')
+            .replace(/[\u00d3\u00d4\u00d5]/g, 'O')
+            .replace(/[\u00da]/g, 'U')
+            .replace(/[\u00c7]/g, 'C');
+          const npsAnaliseLines = doc.splitTextToSize(npsAnaliseText, pageWidth - 40);
+          const boxHeight = npsAnaliseLines.length * 4.5 + 14;
+          
           doc.setFillColor(238, 242, 255);
-          doc.roundedRect(14, yPos, pageWidth - 28, 4, 1, 1, 'F');
+          doc.roundedRect(14, yPos, pageWidth - 28, boxHeight, 2, 2, 'F');
+          
+          // Barra lateral decorativa
+          doc.setFillColor(99, 102, 241);
+          doc.rect(14, yPos, 3, boxHeight, 'F');
           
           doc.setFontSize(10);
           doc.setFont('helvetica', 'bold');
           doc.setTextColor(99, 102, 241);
-          doc.text('Análise IA do NPS', 18, yPos + 3);
-          yPos += 8;
+          doc.text('Analise IA do NPS', 22, yPos + 8);
           
-          doc.setFontSize(9);
+          doc.setFontSize(8.5);
           doc.setFont('helvetica', 'normal');
-          doc.setTextColor(0, 0, 0);
-          const npsAnaliseLines = doc.splitTextToSize(analiseIA.insightsIA.analiseNPS, pageWidth - 36);
-          doc.text(npsAnaliseLines, 18, yPos);
-          yPos += npsAnaliseLines.length * 4.5 + 8;
+          doc.setTextColor(30, 41, 59);
+          doc.text(npsAnaliseLines, 22, yPos + 14);
+          yPos += boxHeight + 8;
         }
         
         // Tabela de ranking NPS
@@ -1438,17 +1461,24 @@ export function ExportarRelatorioIAPDF({ analiseIA, periodo }: Props) {
           doc.text('Ranking Completo NPS', 14, yPos);
           yPos += 6;
           
+          // Sanitizar texto para jsPDF (remover caracteres Unicode problematicos)
+          const sanitizeForPDF = (text: string) => text
+            .replace(/\u2265/g, '>=')
+            .replace(/\u2264/g, '<=')
+            .replace(/\u2713/g, 'V')
+            .replace(/\u2714/g, 'V');
+          
           const npsTableData = npsData.rankingNPS.map((loja, idx) => [
             (idx + 1).toString(),
             loja.loja,
             `${loja.nps}%`,
             `${loja.taxaResposta}%`,
-            loja.elegivel ? '✓ Elegível' : (loja.motivo || 'Não elegível')
+            loja.elegivel ? 'Elegivel' : sanitizeForPDF(loja.motivo || 'Nao elegivel')
           ]);
           
           autoTable(doc, {
             startY: yPos,
-            head: [['#', 'Loja', 'NPS', 'Taxa Resp.', 'Elegível']],
+            head: [['#', 'Loja', 'NPS', 'Taxa Resp.', 'Estado']],
             body: npsTableData,
             theme: 'striped',
             headStyles: { 

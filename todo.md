@@ -397,3 +397,7 @@
 - [x] Ordenar ranking NPS por NPS desc + Taxa Resposta desc (elegíveis em cima)
 - [x] Adicionar secção NPS completa à exportação PDF (KPIs, análise IA, tabela ranking com cores)
 - [ ] Guardar checkpoint
+## PDF NPS - Corrigir apresentação
+- [x] Corrigir caracteres especiais no PDF (≥ aparece como "e) - substituido por >=
+- [x] Corrigir espaçamento estranho na coluna Elegível do ranking - removido checkmark Unicode
+- [x] Melhorar layout visual geral da secção NPS no PDF - caixa criterios, barra lateral analise, sanitize texto
