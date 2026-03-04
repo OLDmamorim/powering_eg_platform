@@ -376,3 +376,5 @@
 ## KPI Escovas - Mostrar % escovas vs serviços
 - [x] Alterar KPI de Escovas na Análise Comercial para mostrar % escovas vs serviços em vez de valor absoluto em euros
 - [ ] Guardar checkpoint
+## Bug: Traduções em falta no filtro do Relatório de Resultados
+- [x] Corrigir 'common.porZona' → 'Por Zona' e 'common.porGestor' → 'Por Gestor' nos ficheiros de tradução

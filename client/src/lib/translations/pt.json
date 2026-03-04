@@ -168,7 +168,9 @@
     "selecioneZonas": "Selecione zona(s)",
     "selecioneGestor": "Selecione gestor",
     "todoOPais": "Todo o País",
-    "filtrarPor": "Filtrar por"
+    "filtrarPor": "Filtrar por",
+    "porZona": "Por Zona",
+    "porGestor": "Por Gestor"
   },
   "menu": {
     "groups": {
