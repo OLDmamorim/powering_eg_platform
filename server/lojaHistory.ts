@@ -448,11 +448,18 @@ async function generateLojaHistoryInterno(
         else if (ultimo < primeiro * 0.95) tendenciaVendas = 'descida';
       }
       
+      // Calcular % média de escovas vs serviços (média das percentagens mensais)
+      const escovasPercentMedia = vendasComplementares.reduce((sum, v) => {
+        const pct = v.escovasPercent ? parseFloat(String(v.escovasPercent)) : 0;
+        return sum + pct;
+      }, 0) / vendasComplementares.length;
+      
       analiseComercial = {
         totalVendasComplementares: parseFloat(totalVendasComplementares.toFixed(2)),
         mediaVendasMensal: parseFloat((totalVendasComplementares / vendasComplementares.length).toFixed(2)),
         escovasTotal: parseFloat(escovasTotal.toFixed(2)),
         escovasQtdTotal,
+        escovasPercentMedia: parseFloat((escovasPercentMedia * 100).toFixed(2)),
         polimentoTotal: parseFloat(polimentoTotal.toFixed(2)),
         polimentoQtdTotal,
         tendenciaVendas,

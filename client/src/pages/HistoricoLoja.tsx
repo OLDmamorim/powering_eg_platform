@@ -473,7 +473,7 @@ export default function HistoricoLoja() {
         const comercialMetrics = [
           { value: `€${historyData.analiseComercial.totalVendasComplementares}`, label: 'Total Vendas' },
           { value: `€${historyData.analiseComercial.mediaVendasMensal}`, label: 'Média Mensal' },
-          { value: `€${historyData.analiseComercial.escovasTotal}`, label: `Escovas (${historyData.analiseComercial.escovasQtdTotal || 0} un.)` },
+          { value: `${historyData.analiseComercial.escovasPercentMedia || 0}%`, label: `% Escovas (${historyData.analiseComercial.escovasQtdTotal || 0} un.)` },
           { value: `€${historyData.analiseComercial.polimentoTotal}`, label: `Polimento (${historyData.analiseComercial.polimentoQtdTotal || 0} un.)` },
         ];
         
@@ -1595,8 +1595,10 @@ export default function HistoricoLoja() {
                       <p className="text-xs text-emerald-600">Média Mensal</p>
                     </div>
                     <div className="text-center p-3 bg-white rounded-lg">
-                      <p className="text-2xl font-bold text-emerald-700">€{historyData.analiseComercial.escovasTotal}</p>
-                      <p className="text-xs text-emerald-600 font-semibold">Escovas ({historyData.analiseComercial.escovasQtdTotal || 0} un.)</p>
+                      <p className={`text-2xl font-bold ${(historyData.analiseComercial.escovasPercentMedia || 0) < 7.5 ? 'text-red-600' : 'text-emerald-700'}`}>
+                        {historyData.analiseComercial.escovasPercentMedia || 0}%
+                      </p>
+                      <p className="text-xs text-emerald-600 font-semibold">% Escovas ({historyData.analiseComercial.escovasQtdTotal || 0} un.)</p>
                     </div>
                     <div className="text-center p-3 bg-white rounded-lg">
                       <p className="text-2xl font-bold text-emerald-700">€{historyData.analiseComercial.polimentoTotal}</p>

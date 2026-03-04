@@ -373,3 +373,6 @@
 ## Gráficos Evolutivos - Limitar até ao mês analisado
 - [x] Gráficos evolutivos devem mostrar dados apenas ATÉ o último mês do período seleccionado (não incluir meses posteriores)
 - [ ] Guardar checkpoint
+## KPI Escovas - Mostrar % escovas vs serviços
+- [x] Alterar KPI de Escovas na Análise Comercial para mostrar % escovas vs serviços em vez de valor absoluto em euros
+- [ ] Guardar checkpoint
