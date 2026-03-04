@@ -682,17 +682,27 @@ Gera uma análise completa incluindo evolução, problemas, pontos fortes, alert
     const contentStr = typeof content === 'string' ? content : JSON.stringify(content);
     const iaResult = JSON.parse(contentStr);
     
-    // Preparar dados mensais para gráficos - usar TODOS os dados disponíveis (não filtrados)
+    // Preparar dados mensais para gráficos - usar todos os dados disponíveis ATÉ ao último mês do período seleccionado
     const NOMES_MESES_CURTOS = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
     
+    // Filtrar dados evolutivos: mostrar todos os meses disponíveis ATÉ ao último mês do período seleccionado
+    const resultadosAteDataFim = todosResultadosMensais.filter((r: any) => {
+      const dataResultado = new Date(r.ano, r.mes - 1, 1);
+      return dataResultado <= dataFim;
+    });
+    const vendasAteDataFim = todasVendasComplementares.filter((v: any) => {
+      const dataVenda = new Date(v.ano, v.mes - 1, 1);
+      return dataVenda <= dataFim;
+    });
+    
     const dadosMensais = {
-      resultados: todosResultadosMensais.map((r: any) => ({
+      resultados: resultadosAteDataFim.map((r: any) => ({
         mes: `${NOMES_MESES_CURTOS[r.mes - 1]} ${r.ano}`,
         servicos: r.totalServicos || 0,
         objetivo: r.objetivoMensal || 0,
         taxaReparacao: parseFloat(((r.taxaReparacao || 0) * 100).toFixed(1)),
       })),
-      vendas: todasVendasComplementares.map((v: any) => ({
+      vendas: vendasAteDataFim.map((v: any) => ({
         mes: `${NOMES_MESES_CURTOS[v.mes - 1]} ${v.ano}`,
         total: parseFloat(v.totalVendas) || 0,
         escovas: parseFloat(v.escovasVendas) || 0,

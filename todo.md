@@ -370,3 +370,6 @@
 - [x] Gráfico de Evolução da Taxa de Reparação deve mostrar TODOS os meses disponíveis (não apenas o mês seleccionado)
 - [x] Gráfico de Evolução de Vendas Complementares deve mostrar TODOS os meses disponíveis
 - [ ] Guardar checkpoint
+## Gráficos Evolutivos - Limitar até ao mês analisado
+- [x] Gráficos evolutivos devem mostrar dados apenas ATÉ o último mês do período seleccionado (não incluir meses posteriores)
+- [ ] Guardar checkpoint
