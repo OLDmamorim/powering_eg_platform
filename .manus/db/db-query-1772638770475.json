@@ -1,0 +1,80 @@
+{
+  "query": "SELECT id, lojaId, ano, npsFev, taxaRespostaFev FROM nps_dados WHERE ano = 2026 LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT id, lojaId, ano, npsFev, taxaRespostaFev FROM nps_dados WHERE ano = 2026 LIMIT 10;",
+  "rows": [
+    {
+      "id": "1",
+      "lojaId": "180001",
+      "ano": "2026",
+      "npsFev": "1.0000",
+      "taxaRespostaFev": "0.0830"
+    },
+    {
+      "id": "2",
+      "lojaId": "180002",
+      "ano": "2026",
+      "npsFev": "0.8000",
+      "taxaRespostaFev": "0.0200"
+    },
+    {
+      "id": "3",
+      "lojaId": "180003",
+      "ano": "2026",
+      "npsFev": "0.6670",
+      "taxaRespostaFev": "0.0920"
+    },
+    {
+      "id": "4",
+      "lojaId": "180004",
+      "ano": "2026",
+      "npsFev": "0.7780",
+      "taxaRespostaFev": "0.1800"
+    },
+    {
+      "id": "5",
+      "lojaId": "180005",
+      "ano": "2026",
+      "npsFev": "0.7690",
+      "taxaRespostaFev": "0.1100"
+    },
+    {
+      "id": "6",
+      "lojaId": "180006",
+      "ano": "2026",
+      "npsFev": "0.6670",
+      "taxaRespostaFev": "0.1670"
+    },
+    {
+      "id": "7",
+      "lojaId": "180007",
+      "ano": "2026",
+      "npsFev": "0.7860",
+      "taxaRespostaFev": "0.2260"
+    },
+    {
+      "id": "8",
+      "lojaId": "180008",
+      "ano": "2026",
+      "npsFev": "0.2860",
+      "taxaRespostaFev": "0.0810"
+    },
+    {
+      "id": "9",
+      "lojaId": "60002",
+      "ano": "2026",
+      "npsFev": "0.8670",
+      "taxaRespostaFev": "0.2080"
+    },
+    {
+      "id": "10",
+      "lojaId": "180009",
+      "ano": "2026",
+      "npsFev": "0.5000",
+      "taxaRespostaFev": "0.0930"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tlojaId\tano\tnpsFev\ttaxaRespostaFev\n1\t180001\t2026\t1.0000\t0.0830\n2\t180002\t2026\t0.8000\t0.0200\n3\t180003\t2026\t0.6670\t0.0920\n4\t180004\t2026\t0.7780\t0.1800\n5\t180005\t2026\t0.7690\t0.1100\n6\t180006\t2026\t0.6670\t0.1670\n7\t180007\t2026\t0.7860\t0.2260\n8\t180008\t2026\t0.2860\t0.0810\n9\t60002\t2026\t0.8670\t0.2080\n10\t180009\t2026\t0.5000\t0.0930\n",
+  "stderr": "",
+  "execution_time_ms": 575
+}

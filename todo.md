@@ -380,3 +380,11 @@
 - [x] Corrigir 'common.porZona' → 'Por Zona' e 'common.porGestor' → 'Por Gestor' nos ficheiros de tradução
 ## Bug: Média Mensal de Vendas Complementares igual ao Total Vendas
 - [x] Corrigir cálculo da Média Mensal para dividir pelo número de meses do ano até ao mês analisado
+## NPS no Relatório de Resultados (Admin)
+- [x] Adicionar dados NPS ao backend do relatório de resultados (já existia no aiService.ts)
+- [x] Incluir NPS no prompt da IA para análise (já existia)
+- [x] Adicionar secção NPS dedicada no frontend com KPIs (NPS médio, elegibilidade, taxa resposta)
+- [x] Adicionar gráficos NPS (barras horizontais por loja + doughnut elegíveis vs não elegíveis)
+- [x] Incluir análise IA sobre NPS na secção dedicada
+- [x] Remover NPS duplicado de dentro das Recomendações
+- [ ] Guardar checkpoint

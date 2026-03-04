@@ -59,6 +59,7 @@ export function RelatorioIAResultados() {
     insights: true,
     graficos: true,
     recomendacoes: true,
+    nps: true,
   });
   
   // Estado para ordenar a análise loja a loja
@@ -2077,6 +2078,216 @@ export function RelatorioIAResultados() {
                 </CollapsibleContent>
               </Collapsible>
 
+              {/* ==================== SECÇÃO NPS - ELEGIBILIDADE PARA PRÉMIO ==================== */}
+              {(analiseIA as any).dadosNPS && (
+                <Collapsible open={seccoesAbertas.nps} onOpenChange={() => toggleSeccao('nps')}>
+                  <CollapsibleTrigger asChild>
+                    <div className="flex items-center justify-between p-4 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-lg border border-indigo-200 dark:border-indigo-800 cursor-pointer hover:from-indigo-100 hover:to-purple-100 dark:hover:from-indigo-900/30 dark:hover:to-purple-900/30 transition-colors">
+                      <div className="flex items-center gap-2">
+                        <Star className="h-5 w-5 text-indigo-600" />
+                        <h3 className="font-semibold text-lg">NPS - Elegibilidade para Prémio</h3>
+                        <Badge variant="outline" className="ml-2 border-indigo-300 text-indigo-700">
+                          {(analiseIA as any).dadosNPS.lojasElegiveis} elegíveis de {((analiseIA as any).dadosNPS.lojasElegiveis || 0) + ((analiseIA as any).dadosNPS.lojasNaoElegiveis || 0)}
+                        </Badge>
+                      </div>
+                      {seccoesAbertas.nps ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+                    </div>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="pt-4 space-y-4">
+                    {/* KPIs NPS */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      <div className="p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg text-center">
+                        <p className={`text-3xl font-bold ${(analiseIA as any).dadosNPS.npsGlobal >= 80 ? 'text-green-600' : 'text-red-600'}`}>{(analiseIA as any).dadosNPS.npsGlobal}%</p>
+                        <p className="text-xs text-muted-foreground mt-1">NPS Médio Global</p>
+                        <p className="text-xs text-muted-foreground">Objetivo: ≥ 80%</p>
+                      </div>
+                      <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center">
+                        <p className={`text-3xl font-bold ${(analiseIA as any).dadosNPS.taxaRespostaGlobal >= 7.5 ? 'text-green-600' : 'text-red-600'}`}>{(analiseIA as any).dadosNPS.taxaRespostaGlobal}%</p>
+                        <p className="text-xs text-muted-foreground mt-1">Taxa Resposta Global</p>
+                        <p className="text-xs text-muted-foreground">Objetivo: ≥ 7.5%</p>
+                      </div>
+                      <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
+                        <p className="text-3xl font-bold text-green-600">{(analiseIA as any).dadosNPS.lojasElegiveis}</p>
+                        <p className="text-xs text-muted-foreground mt-1">Lojas Elegíveis</p>
+                        <p className="text-xs text-green-600">Com direito a prémio</p>
+                      </div>
+                      <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg text-center">
+                        <p className="text-3xl font-bold text-red-600">{(analiseIA as any).dadosNPS.lojasNaoElegiveis}</p>
+                        <p className="text-xs text-muted-foreground mt-1">Sem Prémio</p>
+                        <p className="text-xs text-red-600">Não cumprem critérios</p>
+                      </div>
+                    </div>
+
+                    {/* Gráfico NPS - Distribuição */}
+                    {(analiseIA as any).dadosNPS.rankingNPS && (analiseIA as any).dadosNPS.rankingNPS.length > 0 && (
+                      <div className="grid gap-4 lg:grid-cols-2">
+                        {/* Gráfico de barras NPS por loja */}
+                        <Card>
+                          <CardHeader className="pb-2">
+                            <CardTitle className="text-base flex items-center gap-2">
+                              <BarChart3 className="h-4 w-4 text-indigo-600" />
+                              NPS por Loja
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <div style={{ height: '350px' }}>
+                              <Bar
+                                data={{
+                                  labels: (analiseIA as any).dadosNPS.rankingNPS.slice(0, 15).map((l: any) => l.loja.length > 12 ? l.loja.substring(0, 12) + '...' : l.loja),
+                                  datasets: [{
+                                    label: 'NPS (%)',
+                                    data: (analiseIA as any).dadosNPS.rankingNPS.slice(0, 15).map((l: any) => l.nps),
+                                    backgroundColor: (analiseIA as any).dadosNPS.rankingNPS.slice(0, 15).map((l: any) => 
+                                      l.elegivel ? 'rgba(34, 197, 94, 0.7)' : 'rgba(239, 68, 68, 0.7)'
+                                    ),
+                                    borderColor: (analiseIA as any).dadosNPS.rankingNPS.slice(0, 15).map((l: any) => 
+                                      l.elegivel ? 'rgb(34, 197, 94)' : 'rgb(239, 68, 68)'
+                                    ),
+                                    borderWidth: 1,
+                                  }]
+                                }}
+                                options={{
+                                  responsive: true,
+                                  maintainAspectRatio: false,
+                                  indexAxis: 'y',
+                                  plugins: {
+                                    legend: { display: false },
+                                    annotation: {
+                                      annotations: {
+                                        line1: {
+                                          type: 'line',
+                                          xMin: 80,
+                                          xMax: 80,
+                                          borderColor: 'rgba(99, 102, 241, 0.8)',
+                                          borderWidth: 2,
+                                          borderDash: [5, 5],
+                                          label: {
+                                            content: 'Obj. 80%',
+                                            display: true,
+                                            position: 'start'
+                                          }
+                                        }
+                                      }
+                                    }
+                                  },
+                                  scales: {
+                                    x: { beginAtZero: true, max: 100, title: { display: true, text: 'NPS (%)' } },
+                                  }
+                                }}
+                              />
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-2 text-center">
+                              🟢 Elegível (NPS ≥ 80% + Taxa ≥ 7.5%) | 🔴 Sem Prémio
+                            </p>
+                          </CardContent>
+                        </Card>
+
+                        {/* Gráfico Doughnut - Elegíveis vs Não Elegíveis */}
+                        <Card>
+                          <CardHeader className="pb-2">
+                            <CardTitle className="text-base flex items-center gap-2">
+                              <PieChart className="h-4 w-4 text-indigo-600" />
+                              Distribuição de Elegibilidade
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <div style={{ height: '300px' }}>
+                              <Doughnut
+                                data={{
+                                  labels: ['Elegíveis', 'Sem Prémio'],
+                                  datasets: [{
+                                    data: [
+                                      (analiseIA as any).dadosNPS.lojasElegiveis || 0,
+                                      (analiseIA as any).dadosNPS.lojasNaoElegiveis || 0
+                                    ],
+                                    backgroundColor: [
+                                      'rgba(34, 197, 94, 0.8)',
+                                      'rgba(239, 68, 68, 0.8)',
+                                    ],
+                                    borderWidth: 2,
+                                  }]
+                                }}
+                                options={{
+                                  responsive: true,
+                                  maintainAspectRatio: false,
+                                  plugins: {
+                                    legend: {
+                                      position: 'bottom',
+                                      labels: { boxWidth: 14, font: { size: 12 } }
+                                    }
+                                  }
+                                }}
+                              />
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </div>
+                    )}
+
+                    {/* Análise IA do NPS */}
+                    {(analiseIA as any).insightsIA?.analiseNPS && (analiseIA as any).insightsIA.analiseNPS !== 'Sem dados NPS disponíveis para este período.' && (
+                      <div className="p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg border-l-4 border-indigo-500">
+                        <h4 className="font-medium mb-2 flex items-center gap-2 text-indigo-700 dark:text-indigo-400">
+                          <Sparkles className="h-4 w-4" />
+                          Análise IA do NPS
+                        </h4>
+                        <p className="text-sm leading-relaxed">{(analiseIA as any).insightsIA.analiseNPS}</p>
+                      </div>
+                    )}
+
+                    {/* Tabela de Ranking NPS */}
+                    {(analiseIA as any).dadosNPS.rankingNPS && (analiseIA as any).dadosNPS.rankingNPS.length > 0 && (
+                      <Card>
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-base flex items-center gap-2 text-indigo-700 dark:text-indigo-400">
+                            <Trophy className="h-4 w-4" />
+                            Ranking Completo NPS
+                          </CardTitle>
+                          <CardDescription>
+                            NPS ≥ 80% e Taxa de Resposta ≥ 7,5% para ter direito a prémio
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="overflow-x-auto">
+                            <Table>
+                              <TableHeader>
+                                <TableRow>
+                                  <TableHead className="w-12">#</TableHead>
+                                  <TableHead>Loja</TableHead>
+                                  <TableHead className="text-right">NPS</TableHead>
+                                  <TableHead className="text-right">Taxa Resp.</TableHead>
+                                  <TableHead className="text-center">Elegível</TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                {(analiseIA as any).dadosNPS.rankingNPS.map((loja: any, idx: number) => (
+                                  <TableRow key={idx} className={loja.elegivel ? '' : 'bg-red-50/50 dark:bg-red-900/10'}>
+                                    <TableCell className="font-medium">{idx + 1}</TableCell>
+                                    <TableCell className="font-medium">{loja.loja}</TableCell>
+                                    <TableCell className={`text-right font-bold ${loja.nps >= 80 ? 'text-green-600' : 'text-red-600'}`}>{loja.nps}%</TableCell>
+                                    <TableCell className={`text-right ${loja.taxaResposta >= 7.5 ? 'text-green-600' : 'text-red-600'}`}>{loja.taxaResposta}%</TableCell>
+                                    <TableCell className="text-center">
+                                      {loja.elegivel
+                                        ? <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">✓ Elegível</Badge>
+                                        : <Badge variant="destructive" className="text-xs">{loja.motivo || 's/ prémio'}</Badge>
+                                      }
+                                    </TableCell>
+                                  </TableRow>
+                                ))}
+                              </TableBody>
+                            </Table>
+                          </div>
+                          <div className="mt-3 flex gap-4 text-xs text-muted-foreground">
+                            <span>✅ NPS ≥ 80% E Taxa ≥ 7.5% = Elegível</span>
+                            <span>❌ NPS &lt; 80% ou Taxa &lt; 7.5% = Sem Prémio</span>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </CollapsibleContent>
+                </Collapsible>
+              )}
+
               {/* ==================== SECÇÃO 7: RECOMENDAÇÕES ==================== */}
               <Collapsible open={seccoesAbertas.recomendacoes} onOpenChange={() => toggleSeccao('recomendacoes')}>
                 <CollapsibleTrigger asChild>
@@ -2134,97 +2345,6 @@ export function RelatorioIAResultados() {
                       </Card>
                     )}
                   </div>
-
-                  {/* Secção NPS - Elegibilidade para Prémio */}
-                  {(analiseIA as any).dadosNPS && (
-                    <Card className="mt-4 border-indigo-200 dark:border-indigo-800">
-                      <CardHeader className="pb-3 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20">
-                        <CardTitle className="text-base flex items-center gap-2 text-indigo-700 dark:text-indigo-400">
-                          <Star className="h-5 w-5" />
-                          Ranking NPS - Elegibilidade para Prémio
-                        </CardTitle>
-                        <CardDescription>
-                          NPS &ge; 80% e Taxa de Resposta &ge; 7,5% para ter direito a prémio
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent className="pt-4">
-                        {/* KPIs NPS */}
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-                          <div className="p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg text-center">
-                            <p className="text-2xl font-bold text-indigo-600">{(analiseIA as any).dadosNPS.npsGlobal}%</p>
-                            <p className="text-xs text-muted-foreground">NPS Médio</p>
-                          </div>
-                          <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center">
-                            <p className="text-2xl font-bold text-blue-600">{(analiseIA as any).dadosNPS.taxaRespostaGlobal}%</p>
-                            <p className="text-xs text-muted-foreground">Taxa Resposta</p>
-                          </div>
-                          <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
-                            <p className="text-2xl font-bold text-green-600">{(analiseIA as any).dadosNPS.lojasElegiveis}</p>
-                            <p className="text-xs text-muted-foreground">Elegíveis</p>
-                          </div>
-                          <div className="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg text-center">
-                            <p className="text-2xl font-bold text-red-600">{(analiseIA as any).dadosNPS.lojasNaoElegiveis}</p>
-                            <p className="text-xs text-muted-foreground">Sem Prémio</p>
-                          </div>
-                        </div>
-                        
-                        {/* Tabela Ranking NPS */}
-                        {(analiseIA as any).dadosNPS.rankingNPS && (analiseIA as any).dadosNPS.rankingNPS.length > 0 && (
-                          <div className="max-h-[400px] overflow-y-auto">
-                            <Table>
-                              <TableHeader>
-                                <TableRow>
-                                  <TableHead className="w-10">#</TableHead>
-                                  <TableHead>Loja</TableHead>
-                                  <TableHead className="text-center">NPS</TableHead>
-                                  <TableHead className="text-center">Taxa Resp.</TableHead>
-                                  <TableHead className="text-center">Prémio</TableHead>
-                                </TableRow>
-                              </TableHeader>
-                              <TableBody>
-                                {(analiseIA as any).dadosNPS.rankingNPS.map((loja: any, idx: number) => (
-                                  <TableRow key={idx} className={!loja.elegivel ? 'bg-red-50/50 dark:bg-red-900/10' : ''}>
-                                    <TableCell className="font-medium">{idx + 1}</TableCell>
-                                    <TableCell className="font-medium">{loja.loja}</TableCell>
-                                    <TableCell className="text-center">
-                                      <Badge variant={loja.nps >= 80 ? 'default' : 'destructive'} className="text-xs">
-                                        {loja.nps}%
-                                      </Badge>
-                                    </TableCell>
-                                    <TableCell className="text-center">
-                                      <Badge variant={loja.taxaResposta >= 7.5 ? 'outline' : 'destructive'} className="text-xs">
-                                        {loja.taxaResposta}%
-                                      </Badge>
-                                    </TableCell>
-                                    <TableCell className="text-center">
-                                      {loja.elegivel ? (
-                                        <span className="text-green-600 flex items-center justify-center gap-1">
-                                          <CheckCircle2 className="h-4 w-4" />
-                                          <span className="text-xs">Elegível</span>
-                                        </span>
-                                      ) : (
-                                        <span className="text-red-600 flex items-center justify-center gap-1">
-                                          <XCircle className="h-4 w-4" />
-                                          <span className="text-xs">{loja.motivo}</span>
-                                        </span>
-                                      )}
-                                    </TableCell>
-                                  </TableRow>
-                                ))}
-                              </TableBody>
-                            </Table>
-                          </div>
-                        )}
-                        
-                        {/* Legenda */}
-                        <div className="mt-3 flex flex-wrap gap-4 text-xs text-muted-foreground">
-                          <span className="flex items-center gap-1"><CheckCircle2 className="h-3 w-3 text-green-500" /> NPS &ge; 80% e Taxa &ge; 7,5%</span>
-                          <span className="flex items-center gap-1"><XCircle className="h-3 w-3 text-red-500" /> NPS &lt; 80%: {(analiseIA as any).dadosNPS.motivosInelegibilidade?.npsBaixo || 0} lojas</span>
-                          <span className="flex items-center gap-1"><XCircle className="h-3 w-3 text-orange-500" /> Taxa &lt; 7,5%: {(analiseIA as any).dadosNPS.motivosInelegibilidade?.taxaBaixa || 0} lojas</span>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )}
 
                   {/* Recomendações Estratégicas da IA */}
                   {(analiseIA as any).insightsIA?.recomendacoesEstrategicas && (analiseIA as any).insightsIA.recomendacoesEstrategicas.length > 0 && (
