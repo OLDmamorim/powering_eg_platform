@@ -454,9 +454,20 @@ async function generateLojaHistoryInterno(
         return sum + pct;
       }, 0) / vendasComplementares.length;
       
+      // Calcular número de meses do ano até ao último mês analisado
+      // Ex: se analisa Fevereiro 2026, conta Janeiro + Fevereiro = 2 meses
+      const ultimoMesAnalisado = dataFim.getMonth() + 1; // 1-12
+      const anoAnalisado = dataFim.getFullYear();
+      // Buscar vendas do ano inteiro até ao mês analisado para calcular média
+      const vendasDoAnoAteAoMes = todasVendasComplementares.filter((v: any) => {
+        return v.ano === anoAnalisado && v.mes <= ultimoMesAnalisado;
+      });
+      const totalVendasAnoAteAoMes = vendasDoAnoAteAoMes.reduce((sum: number, v: any) => sum + (parseFloat(v.totalVendas) || 0), 0);
+      const numMesesAno = ultimoMesAnalisado; // Janeiro=1, Fevereiro=2, etc.
+      
       analiseComercial = {
-        totalVendasComplementares: parseFloat(totalVendasComplementares.toFixed(2)),
-        mediaVendasMensal: parseFloat((totalVendasComplementares / vendasComplementares.length).toFixed(2)),
+        totalVendasComplementares: parseFloat(totalVendasAnoAteAoMes.toFixed(2)),
+        mediaVendasMensal: parseFloat((totalVendasAnoAteAoMes / numMesesAno).toFixed(2)),
         escovasTotal: parseFloat(escovasTotal.toFixed(2)),
         escovasQtdTotal,
         escovasPercentMedia: parseFloat((escovasPercentMedia * 100).toFixed(2)),

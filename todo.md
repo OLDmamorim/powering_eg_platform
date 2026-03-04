@@ -378,3 +378,5 @@
 - [ ] Guardar checkpoint
 ## Bug: Traduções em falta no filtro do Relatório de Resultados
 - [x] Corrigir 'common.porZona' → 'Por Zona' e 'common.porGestor' → 'Por Gestor' nos ficheiros de tradução
+## Bug: Média Mensal de Vendas Complementares igual ao Total Vendas
+- [x] Corrigir cálculo da Média Mensal para dividir pelo número de meses do ano até ao mês analisado
