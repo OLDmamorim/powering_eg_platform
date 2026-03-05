@@ -478,3 +478,10 @@
 - [x] Estilizar checkboxes no editor (interactivos, riscado quando concluído, suporte nested)
 - [x] TaskItem configurado com nested: true para sub-tarefas
 - [ ] Guardar checkpoint
+
+## Bug: Auto-save não funciona em notas novas
+- [x] Criar nota automaticamente na BD quando utilizador começa a escrever (título ou conteúdo)
+- [x] Depois de criada automaticamente, activar auto-save normal com debounce 2s
+- [x] Botão muda de "Criar Nota" para "Guardar e Fechar" após auto-criação
+- [x] Upload de imagens funciona após auto-criação
+- [ ] Guardar checkpoint

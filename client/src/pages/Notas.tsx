@@ -370,6 +370,7 @@ function NotaEditor({
   tags: any[];
   onSave: (data: any) => void;
   onUploadImage: (notaId: number, file: File) => Promise<string | null>;
+  onAutoCreate?: (data: any) => Promise<number | null>;
 }) {
   const [titulo, setTitulo] = useState(nota?.titulo || "");
   const [lojaId, setLojaId] = useState<string>(nota?.lojaId?.toString() || "none");
@@ -381,6 +382,8 @@ function NotaEditor({
   const [showTagManager, setShowTagManager] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [autoSaveStatus, setAutoSaveStatus] = useState<"saved" | "saving" | "unsaved" | "">(nota?.id ? "saved" : "");
+  const [localNotaId, setLocalNotaId] = useState<number | null>(nota?.id || null);
+  const autoCreatingRef = useRef(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastSavedRef = useRef<string>("");
@@ -443,9 +446,43 @@ function NotaEditor({
     }
   }, [nota, editor]);
 
+  // Actualizar localNotaId quando nota muda (ex: após criação)
+  useEffect(() => {
+    if (nota?.id && !localNotaId) setLocalNotaId(nota.id);
+  }, [nota?.id]);
+
+  // Auto-criar nota quando utilizador começa a escrever (título ou conteúdo)
+  const autoCreateNota = useCallback(async () => {
+    if (localNotaId || autoCreatingRef.current || !onAutoCreate) return;
+    const tituloActual = titulo.trim();
+    const conteudoActual = editor?.getHTML() || "";
+    const temConteudo = conteudoActual && conteudoActual !== "<p></p>" && conteudoActual.length > 7;
+    if (!tituloActual && !temConteudo) return;
+    autoCreatingRef.current = true;
+    setAutoSaveStatus("saving");
+    try {
+      const novoId = await onAutoCreate({
+        titulo: tituloActual || "Sem título",
+        conteudo: conteudoActual,
+        lojaId: lojaId === "none" ? null : parseInt(lojaId),
+        estado,
+        cor: corActual,
+        tagIds: selectedTagIds,
+      });
+      if (novoId) {
+        setLocalNotaId(novoId);
+        setAutoSaveStatus("saved");
+      }
+    } catch {
+      setAutoSaveStatus("");
+    } finally {
+      autoCreatingRef.current = false;
+    }
+  }, [localNotaId, titulo, editor, lojaId, estado, corActual, selectedTagIds, onAutoCreate]);
+
   // Auto-save: debounce de 2 segundos após qualquer alteração
   const triggerAutoSave = useCallback(() => {
-    if (!nota?.id) return; // Só auto-save em notas já criadas
+    if (!localNotaId) { autoCreateNota(); return; } // Auto-criar se não tem ID
     if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
     setAutoSaveStatus("unsaved");
     autoSaveTimerRef.current = setTimeout(() => {
@@ -460,7 +497,7 @@ function NotaEditor({
       lastSavedRef.current = currentState;
       setAutoSaveStatus("saving");
       onSave({
-        id: nota.id,
+        id: localNotaId,
         titulo: titulo.trim(),
         conteudo: editor?.getHTML() || "",
         lojaId: lojaId === "none" ? null : parseInt(lojaId),
@@ -471,20 +508,20 @@ function NotaEditor({
       });
       setTimeout(() => setAutoSaveStatus("saved"), 800);
     }, 2000);
-  }, [nota?.id, titulo, lojaId, estado, selectedTagIds, corActual, editor, onSave]);
+  }, [localNotaId, titulo, lojaId, estado, selectedTagIds, corActual, editor, onSave, autoCreateNota]);
 
   // Trigger auto-save quando titulo, estado, loja ou tags mudam
   useEffect(() => {
-    if (nota?.id) triggerAutoSave();
+    triggerAutoSave();
   }, [titulo, lojaId, estado, selectedTagIds]);
 
   // Trigger auto-save quando o conteúdo do editor muda
   useEffect(() => {
-    if (!editor || !nota?.id) return;
+    if (!editor) return;
     const handler = () => triggerAutoSave();
     editor.on("update", handler);
     return () => { editor.off("update", handler); };
-  }, [editor, nota?.id, triggerAutoSave]);
+  }, [editor, triggerAutoSave]);
 
   // Limpar timer ao desmontar
   useEffect(() => {
@@ -501,7 +538,7 @@ function NotaEditor({
     // Cancelar auto-save pendente
     if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
     onSave({
-      id: nota?.id,
+      id: localNotaId || nota?.id,
       titulo: titulo.trim(),
       conteudo: editor?.getHTML() || "",
       lojaId: lojaId === "none" ? null : parseInt(lojaId),
@@ -514,13 +551,13 @@ function NotaEditor({
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (!nota?.id) {
+    if (!localNotaId && !nota?.id) {
       toast.error("Guarda a nota primeiro antes de adicionar imagens");
       return;
     }
     setUploading(true);
     try {
-      const url = await onUploadImage(nota.id, file);
+      const url = await onUploadImage(localNotaId || nota?.id, file);
       if (url && editor) {
         editor.chain().focus().setImage({ src: url }).run();
       }
@@ -719,7 +756,7 @@ function NotaEditor({
                 Fechar
               </Button>
               <Button onClick={handleSave}>
-                {nota?.id ? "Guardar e Fechar" : "Criar Nota"}
+                {(localNotaId || nota?.id) ? "Guardar e Fechar" : "Criar Nota"}
               </Button>
             </div>
           </div>
@@ -875,9 +912,19 @@ export default function Notas() {
       utils.notas.listar.invalidate();
       // Reabrir com o ID para permitir upload de imagens
       setNotaAtual({ id: data.id });
-      toast.success("Nota criada");
     },
   });
+
+  // Auto-criar nota silenciosamente e retornar o ID
+  const handleAutoCreate = async (data: any): Promise<number | null> => {
+    try {
+      const result = await criarMutation.mutateAsync(data);
+      return result.id;
+    } catch {
+      toast.error("Erro ao criar nota automaticamente");
+      return null;
+    }
+  };
 
   const actualizarMutation = trpc.notas.actualizar.useMutation({
     onSuccess: (_data, variables) => {
@@ -1150,6 +1197,7 @@ export default function Notas() {
             tags={tags || []}
             onSave={handleSave}
             onUploadImage={handleUploadImage}
+            onAutoCreate={handleAutoCreate}
           />
         )}
       </div>
