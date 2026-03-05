@@ -20,6 +20,7 @@ import { notificarNovoPedidoApoio, notificarPedidoAnulado, notificarPedidoEditad
 import { processarAnalise, ResultadoAnalise, RelatorioLoja, gerarHTMLEmailAnalise } from "./analiseFichasService";
 import { gerarPDFRelacaoRH } from "./pdfRelacaoRH";
 import { enviarLembretesRH, isDia20 } from "./lembreteRHService";
+import { storagePut } from "./storage";
 
 // Função para obter feriados portugueses de um ano específico
 function obterFeriadosPortugueses(ano: number): string[] {
@@ -11595,6 +11596,144 @@ IMPORTANTE:
         const { executarLembreteVolantes } = await import('./scheduler.js');
         const resultado = await executarLembreteVolantes();
         return resultado;
+      }),
+  }),
+
+  // ==================== NOTAS / DOSSIERS ====================
+  notas: router({
+    // Listar notas do utilizador
+    listar: protectedProcedure
+      .input(z.object({
+        estado: z.string().optional(),
+        lojaId: z.number().optional(),
+        tagId: z.number().optional(),
+        arquivada: z.boolean().optional(),
+        pesquisa: z.string().optional(),
+      }).optional())
+      .query(async ({ ctx, input }) => {
+        return db.listarNotas(ctx.user.id, input || {});
+      }),
+
+    // Obter nota por ID
+    getById: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ ctx, input }) => {
+        return db.getNotaById(input.id, ctx.user.id);
+      }),
+
+    // Criar nota
+    criar: protectedProcedure
+      .input(z.object({
+        titulo: z.string().min(1),
+        conteudo: z.string().optional(),
+        lojaId: z.number().nullable().optional(),
+        estado: z.string().optional(),
+        cor: z.string().optional(),
+        tagIds: z.array(z.number()).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const notaId = await db.criarNota({
+          titulo: input.titulo,
+          conteudo: input.conteudo,
+          lojaId: input.lojaId,
+          userId: ctx.user.id,
+          estado: input.estado,
+          cor: input.cor,
+        });
+        if (notaId && input.tagIds && input.tagIds.length > 0) {
+          await db.definirTagsNota(notaId, input.tagIds);
+        }
+        return { id: notaId };
+      }),
+
+    // Actualizar nota
+    actualizar: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        titulo: z.string().optional(),
+        conteudo: z.string().optional(),
+        lojaId: z.number().nullable().optional(),
+        estado: z.string().optional(),
+        cor: z.string().optional(),
+        fixada: z.boolean().optional(),
+        arquivada: z.boolean().optional(),
+        tagIds: z.array(z.number()).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const { id, tagIds, ...data } = input;
+        await db.actualizarNota(id, ctx.user.id, data);
+        if (tagIds !== undefined) {
+          await db.definirTagsNota(id, tagIds);
+        }
+        return { success: true };
+      }),
+
+    // Eliminar nota
+    eliminar: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        await db.eliminarNota(input.id, ctx.user.id);
+        return { success: true };
+      }),
+
+    // Upload de imagem para nota
+    uploadImagem: protectedProcedure
+      .input(z.object({
+        notaId: z.number(),
+        base64: z.string(),
+        filename: z.string(),
+        mimeType: z.string(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const buffer = Buffer.from(input.base64, 'base64');
+        const randomSuffix = Math.random().toString(36).substring(2, 10);
+        const fileKey = `notas/${ctx.user.id}/${input.notaId}/${randomSuffix}-${input.filename}`;
+        const { url } = await storagePut(fileKey, buffer, input.mimeType);
+        const imagemId = await db.adicionarImagemNota({
+          notaId: input.notaId,
+          url,
+          fileKey,
+          filename: input.filename,
+          mimeType: input.mimeType,
+        });
+        return { id: imagemId, url };
+      }),
+
+    // Remover imagem de nota
+    removerImagem: protectedProcedure
+      .input(z.object({ imagemId: z.number() }))
+      .mutation(async ({ input }) => {
+        await db.removerImagemNota(input.imagemId);
+        return { success: true };
+      }),
+
+    // Listar tags do utilizador
+    listarTags: protectedProcedure
+      .query(async ({ ctx }) => {
+        return db.listarTags(ctx.user.id);
+      }),
+
+    // Criar tag
+    criarTag: protectedProcedure
+      .input(z.object({
+        nome: z.string().min(1),
+        cor: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const tagId = await db.criarTag({
+          nome: input.nome,
+          cor: input.cor,
+          userId: ctx.user.id,
+        });
+        return { id: tagId };
+      }),
+
+    // Eliminar tag
+    eliminarTag: protectedProcedure
+      .input(z.object({ tagId: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        await db.eliminarTag(input.tagId, ctx.user.id);
+        return { success: true };
       }),
   }),
 });

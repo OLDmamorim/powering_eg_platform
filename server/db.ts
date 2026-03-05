@@ -163,7 +163,19 @@ import {
   InsertHistoricoEnvioRelatorio,
   npsDados,
   NpsDado,
-  InsertNpsDado
+  InsertNpsDado,
+  notas,
+  Nota,
+  InsertNota,
+  notasImagens,
+  NotaImagem,
+  InsertNotaImagem,
+  notasTags,
+  NotaTag,
+  InsertNotaTag,
+  notasTagsRelacao,
+  NotaTagRelacao,
+  InsertNotaTagRelacao
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -11984,4 +11996,296 @@ export async function getNPSDadosTodasLojas(ano: number) {
     .where(eq(npsDados.ano, ano));
   
   return resultado;
+}
+
+
+// ==========================================
+// NOTAS / DOSSIERS
+// ==========================================
+
+/**
+ * Criar uma nova nota
+ */
+export async function criarNota(data: {
+  titulo: string;
+  conteudo?: string;
+  lojaId?: number | null;
+  userId: number;
+  estado?: string;
+  cor?: string;
+}) {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.insert(notas).values({
+    titulo: data.titulo,
+    conteudo: data.conteudo || '',
+    lojaId: data.lojaId || null,
+    userId: data.userId,
+    estado: (data.estado as any) || 'rascunho',
+    cor: data.cor || '#ffffff',
+  });
+  return result[0].insertId;
+}
+
+/**
+ * Listar notas do utilizador (com tags e imagens)
+ */
+export async function listarNotas(userId: number, filtros?: {
+  estado?: string;
+  lojaId?: number;
+  tagId?: number;
+  arquivada?: boolean;
+  pesquisa?: string;
+}) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const conditions: any[] = [eq(notas.userId, userId)];
+  
+  if (filtros?.estado && filtros.estado !== 'todos') {
+    conditions.push(eq(notas.estado, filtros.estado as any));
+  }
+  if (filtros?.lojaId) {
+    conditions.push(eq(notas.lojaId, filtros.lojaId));
+  }
+  if (filtros?.arquivada !== undefined) {
+    conditions.push(eq(notas.arquivada, filtros.arquivada));
+  } else {
+    conditions.push(eq(notas.arquivada, false));
+  }
+  if (filtros?.pesquisa) {
+    conditions.push(
+      or(
+        like(notas.titulo, `%${filtros.pesquisa}%`),
+        like(notas.conteudo, `%${filtros.pesquisa}%`)
+      )
+    );
+  }
+  
+  const resultado = await db.select({
+    nota: notas,
+    loja: lojas,
+  })
+    .from(notas)
+    .leftJoin(lojas, eq(notas.lojaId, lojas.id))
+    .where(and(...conditions))
+    .orderBy(desc(notas.fixada), desc(notas.updatedAt));
+  
+  // Buscar tags e imagens para cada nota
+  const notaIds = resultado.map(r => r.nota.id);
+  
+  let tagsMap: Record<number, any[]> = {};
+  let imagensMap: Record<number, any[]> = {};
+  
+  if (notaIds.length > 0) {
+    const tagsResult = await db.select({
+      relacao: notasTagsRelacao,
+      tag: notasTags,
+    })
+      .from(notasTagsRelacao)
+      .innerJoin(notasTags, eq(notasTagsRelacao.tagId, notasTags.id))
+      .where(inArray(notasTagsRelacao.notaId, notaIds));
+    
+    for (const r of tagsResult) {
+      if (!tagsMap[r.relacao.notaId]) tagsMap[r.relacao.notaId] = [];
+      tagsMap[r.relacao.notaId].push(r.tag);
+    }
+    
+    const imagensResult = await db.select()
+      .from(notasImagens)
+      .where(inArray(notasImagens.notaId, notaIds))
+      .orderBy(notasImagens.ordem);
+    
+    for (const img of imagensResult) {
+      if (!imagensMap[img.notaId]) imagensMap[img.notaId] = [];
+      imagensMap[img.notaId].push(img);
+    }
+  }
+  
+  // Se filtro por tag, filtrar após busca
+  let resultadoFinal = resultado;
+  if (filtros?.tagId) {
+    const notaIdsComTag = new Set(
+      Object.entries(tagsMap)
+        .filter(([_, tags]) => tags.some(t => t.id === filtros.tagId))
+        .map(([notaId]) => parseInt(notaId))
+    );
+    resultadoFinal = resultado.filter(r => notaIdsComTag.has(r.nota.id));
+  }
+  
+  return resultadoFinal.map(r => ({
+    ...r.nota,
+    loja: r.loja,
+    tags: tagsMap[r.nota.id] || [],
+    imagens: imagensMap[r.nota.id] || [],
+  }));
+}
+
+/**
+ * Obter uma nota por ID
+ */
+export async function getNotaById(id: number, userId: number) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const resultado = await db.select({
+    nota: notas,
+    loja: lojas,
+  })
+    .from(notas)
+    .leftJoin(lojas, eq(notas.lojaId, lojas.id))
+    .where(and(eq(notas.id, id), eq(notas.userId, userId)));
+  
+  if (resultado.length === 0) return null;
+  
+  const r = resultado[0];
+  
+  // Buscar tags
+  const tags = await db.select({
+    tag: notasTags,
+  })
+    .from(notasTagsRelacao)
+    .innerJoin(notasTags, eq(notasTagsRelacao.tagId, notasTags.id))
+    .where(eq(notasTagsRelacao.notaId, id));
+  
+  // Buscar imagens
+  const imagens = await db.select()
+    .from(notasImagens)
+    .where(eq(notasImagens.notaId, id))
+    .orderBy(notasImagens.ordem);
+  
+  return {
+    ...r.nota,
+    loja: r.loja,
+    tags: tags.map(t => t.tag),
+    imagens,
+  };
+}
+
+/**
+ * Actualizar uma nota
+ */
+export async function actualizarNota(id: number, userId: number, data: {
+  titulo?: string;
+  conteudo?: string;
+  lojaId?: number | null;
+  estado?: string;
+  cor?: string;
+  fixada?: boolean;
+  arquivada?: boolean;
+}) {
+  const db = await getDb();
+  if (!db) return false;
+  
+  const updateData: any = {};
+  if (data.titulo !== undefined) updateData.titulo = data.titulo;
+  if (data.conteudo !== undefined) updateData.conteudo = data.conteudo;
+  if (data.lojaId !== undefined) updateData.lojaId = data.lojaId;
+  if (data.estado !== undefined) updateData.estado = data.estado;
+  if (data.cor !== undefined) updateData.cor = data.cor;
+  if (data.fixada !== undefined) updateData.fixada = data.fixada;
+  if (data.arquivada !== undefined) updateData.arquivada = data.arquivada;
+  
+  await db.update(notas).set(updateData).where(and(eq(notas.id, id), eq(notas.userId, userId)));
+  return true;
+}
+
+/**
+ * Eliminar uma nota
+ */
+export async function eliminarNota(id: number, userId: number) {
+  const db = await getDb();
+  if (!db) return false;
+  
+  // Eliminar relações de tags
+  await db.delete(notasTagsRelacao).where(eq(notasTagsRelacao.notaId, id));
+  // Eliminar imagens
+  await db.delete(notasImagens).where(eq(notasImagens.notaId, id));
+  // Eliminar nota
+  await db.delete(notas).where(and(eq(notas.id, id), eq(notas.userId, userId)));
+  return true;
+}
+
+/**
+ * Adicionar imagem a uma nota
+ */
+export async function adicionarImagemNota(data: {
+  notaId: number;
+  url: string;
+  fileKey: string;
+  filename?: string;
+  mimeType?: string;
+  ordem?: number;
+}) {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.insert(notasImagens).values(data);
+  return result[0].insertId;
+}
+
+/**
+ * Remover imagem de uma nota
+ */
+export async function removerImagemNota(imagemId: number) {
+  const db = await getDb();
+  if (!db) return false;
+  await db.delete(notasImagens).where(eq(notasImagens.id, imagemId));
+  return true;
+}
+
+// ==========================================
+// TAGS DAS NOTAS
+// ==========================================
+
+/**
+ * Listar tags do utilizador
+ */
+export async function listarTags(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(notasTags).where(eq(notasTags.userId, userId)).orderBy(notasTags.nome);
+}
+
+/**
+ * Criar tag
+ */
+export async function criarTag(data: { nome: string; cor?: string; userId: number }) {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.insert(notasTags).values({
+    nome: data.nome,
+    cor: data.cor || '#6366f1',
+    userId: data.userId,
+  });
+  return result[0].insertId;
+}
+
+/**
+ * Eliminar tag
+ */
+export async function eliminarTag(tagId: number, userId: number) {
+  const db = await getDb();
+  if (!db) return false;
+  await db.delete(notasTagsRelacao).where(eq(notasTagsRelacao.tagId, tagId));
+  await db.delete(notasTags).where(and(eq(notasTags.id, tagId), eq(notasTags.userId, userId)));
+  return true;
+}
+
+/**
+ * Associar tags a uma nota (substitui todas as tags existentes)
+ */
+export async function definirTagsNota(notaId: number, tagIds: number[]) {
+  const db = await getDb();
+  if (!db) return false;
+  
+  // Remover tags existentes
+  await db.delete(notasTagsRelacao).where(eq(notasTagsRelacao.notaId, notaId));
+  
+  // Adicionar novas tags
+  if (tagIds.length > 0) {
+    await db.insert(notasTagsRelacao).values(
+      tagIds.map(tagId => ({ notaId, tagId }))
+    );
+  }
+  return true;
 }

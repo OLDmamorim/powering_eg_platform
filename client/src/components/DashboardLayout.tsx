@@ -43,7 +43,7 @@ import {
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { Button } from "./ui/button";
 
-import { Building2, ClipboardList, FileText, ListTodo, Sparkles, History, Bell, Settings, Tag, BarChart3, UserCog, CalendarDays, Store, TrendingUp, GitCompare, Users2, AlertTriangle, Bot, MessageSquarePlus, Route, Link2, Eye, Car, FileSpreadsheet, SmilePlus } from "lucide-react";
+import { Building2, ClipboardList, FileText, ListTodo, Sparkles, History, Bell, Settings, Tag, BarChart3, UserCog, CalendarDays, Store, TrendingUp, GitCompare, Users2, AlertTriangle, Bot, MessageSquarePlus, Route, Link2, Eye, Car, FileSpreadsheet, SmilePlus, StickyNote } from "lucide-react";
 
 // Grupos de menu com cores
 type MenuGroup = {
@@ -166,6 +166,14 @@ const getMenuGroups = (userRole?: string, t?: (key: string) => string): MenuGrou
       ]
     },
 
+    {
+      id: 'notes',
+      label: tr('menu.groups.notes', 'Notas'),
+      color: 'bg-yellow-100/80 dark:bg-yellow-900/30',
+      items: [
+        { icon: StickyNote, label: tr('menu.items.notas', 'Notas'), path: "/notas", show: true, showBadge: false },
+      ]
+    },
     {
       id: 'pending',
       label: tr('menu.groups.pending', 'Tarefas'),

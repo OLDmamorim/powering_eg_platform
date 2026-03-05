@@ -1529,3 +1529,63 @@ export const npsDados = mysqlTable("nps_dados", {
 
 export type NpsDado = typeof npsDados.$inferSelect;
 export type InsertNpsDado = typeof npsDados.$inferInsert;
+
+
+/**
+ * Notas/Dossiers - Sistema de notas estilo Google Keep para reuniões e gestão
+ */
+export const notas = mysqlTable("notas", {
+  id: int("id").autoincrement().primaryKey(),
+  titulo: varchar("titulo", { length: 500 }).notNull(),
+  conteudo: mediumtext("conteudo"), // Conteúdo rich text (HTML do editor)
+  lojaId: int("lojaId"), // FK opcional para lojas.id (associar a uma loja)
+  userId: int("userId").notNull(), // FK para users.id (quem criou)
+  estado: mysqlEnum("estado", ["rascunho", "pendente", "discutido", "aprovado", "adiado", "em_analise", "concluido"]).default("rascunho").notNull(),
+  cor: varchar("cor", { length: 20 }).default("#ffffff"), // Cor de fundo do card
+  fixada: boolean("fixada").default(false).notNull(),
+  arquivada: boolean("arquivada").default(false).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type Nota = typeof notas.$inferSelect;
+export type InsertNota = typeof notas.$inferInsert;
+
+/**
+ * Imagens das Notas - Imagens associadas a cada nota
+ */
+export const notasImagens = mysqlTable("notas_imagens", {
+  id: int("id").autoincrement().primaryKey(),
+  notaId: int("notaId").notNull(), // FK para notas.id
+  url: text("url").notNull(), // URL S3 da imagem
+  fileKey: varchar("fileKey", { length: 500 }).notNull(), // Chave S3
+  filename: varchar("filename", { length: 255 }),
+  mimeType: varchar("mimeType", { length: 100 }),
+  ordem: int("ordem").default(0), // Ordem da imagem na nota
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type NotaImagem = typeof notasImagens.$inferSelect;
+export type InsertNotaImagem = typeof notasImagens.$inferInsert;
+
+/**
+ * Tags das Notas - Tags reutilizáveis para categorizar notas
+ */
+export const notasTags = mysqlTable("notas_tags", {
+  id: int("id").autoincrement().primaryKey(),
+  nome: varchar("nome", { length: 100 }).notNull(),
+  cor: varchar("cor", { length: 20 }).default("#6366f1"), // Cor da tag
+  userId: int("userId").notNull(), // FK para users.id (quem criou a tag)
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type NotaTag = typeof notasTags.$inferSelect;
+export type InsertNotaTag = typeof notasTags.$inferInsert;
+
+/**
+ * Relação many-to-many entre Notas e Tags
+ */
+export const notasTagsRelacao = mysqlTable("notas_tags_relacao", {
+  id: int("id").autoincrement().primaryKey(),
+  notaId: int("notaId").notNull(), // FK para notas.id
+  tagId: int("tagId").notNull(), // FK para notas_tags.id
+});
+export type NotaTagRelacao = typeof notasTagsRelacao.$inferSelect;
+export type InsertNotaTagRelacao = typeof notasTagsRelacao.$inferInsert;

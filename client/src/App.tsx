@@ -58,6 +58,7 @@ import Documentos from "./pages/Documentos";
 import GestaoRecalibra from "./pages/GestaoRecalibra";
 import PortalRecalibra from "./pages/PortalRecalibra";
 import DashboardRecalibra from "./pages/DashboardRecalibra";
+import Notas from "./pages/Notas";
 import HistoricoEnviosRelatorios from "./pages/HistoricoEnviosRelatorios";
 import { DemoBanner } from "./components/DemoBanner";
 import { LanguageProvider } from "./contexts/LanguageContext";
@@ -123,6 +124,9 @@ function Router() {
       {/* Ocorrências Estruturais */}
       <Route path={"/ocorrencias-estruturais/nova"} component={OcorrenciaEstrutural} />
       <Route path={"/ocorrencias-estruturais/historico"} component={HistoricoOcorrencias} />
+      
+      {/* Notas / Dossiers */}
+      <Route path={"/notas"} component={Notas} />
       
       {/* To-Do */}
       <Route path={"/todos"} component={Todos} />

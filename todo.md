@@ -426,3 +426,19 @@
 - [x] Corrigir: volanteData agora inclui token e lojas no objecto guardado no localStorage
 - [x] Problema principal: versão publicada desactualizada - precisa de Publish
 - [ ] Publicar
+
+## Módulo de Notas/Dossiers (estilo Google Keep)
+- [x] Schema BD: tabela notas com título, conteúdo rich text, tags, lojaId opcional, estado, fixada, cor
+- [x] Schema BD: tabela notas_imagens para upload de imagens nas notas
+- [x] Schema BD: tabela notas_tags para tags reutilizáveis
+- [x] Endpoints tRPC: CRUD notas (criar, listar, editar, eliminar, mudar estado, fixar)
+- [x] Endpoints tRPC: upload de imagens para notas (com compressão automática)
+- [x] Endpoints tRPC: gestão de tags (criar, listar, eliminar)
+- [x] Frontend: página Notas com grid de cards estilo Google Keep
+- [x] Frontend: editor rich text TipTap (bold, italic, underline, highlight, headings, listas, imagens)
+- [x] Frontend: filtros por tag, loja, estado, pesquisa
+- [x] Frontend: mudar estado (rascunho, pendente, em análise, discutido, aprovado, adiado, concluído)
+- [x] Frontend: fixar notas no topo, arquivar, cores de fundo
+- [x] Integrar no menu lateral do dashboard (grupo Notas com ícone StickyNote)
+- [x] 10 testes vitest passaram
+- [ ] Publicar
