@@ -471,3 +471,10 @@
 - [x] Botão mudou de "Guardar" para "Guardar e Fechar" (auto-save não fecha editor)
 - [x] Auto-save só activo em notas já criadas (novas precisam de clicar "Criar Nota")
 - [ ] Guardar checkpoint
+
+## Checklists dentro das Notas
+- [x] Instalar extensões TipTap TaskList e TaskItem
+- [x] Adicionar botão checklist na toolbar do editor (com ícone ListChecks)
+- [x] Estilizar checkboxes no editor (interactivos, riscado quando concluído, suporte nested)
+- [x] TaskItem configurado com nested: true para sub-tarefas
+- [ ] Guardar checkpoint

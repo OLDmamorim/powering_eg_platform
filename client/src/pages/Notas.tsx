@@ -55,6 +55,7 @@ import {
   HelpCircle,
   FileCheck,
   FileDown,
+  ListChecks,
 } from "lucide-react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
@@ -62,6 +63,8 @@ import ImageExtension from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
 import UnderlineExtension from "@tiptap/extension-underline";
 import Highlight from "@tiptap/extension-highlight";
+import TaskList from "@tiptap/extension-task-list";
+import TaskItem from "@tiptap/extension-task-item";
 
 // Paleta de cores para lojas (gera cor determinística por lojaId)
 const LOJA_CORES = [
@@ -306,6 +309,18 @@ function EditorToolbar({ editor }: { editor: any }) {
       >
         <ListOrdered className="h-3.5 w-3.5" />
       </Button>
+      <div className="w-px bg-border mx-1" />
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        className={`h-7 p-0 px-1.5 gap-1 text-xs ${editor.isActive("taskList") ? "bg-muted" : ""}`}
+        onClick={() => editor.chain().focus().toggleTaskList().run()}
+        title="Checklist"
+      >
+        <ListChecks className="h-3.5 w-3.5" />
+        Checklist
+      </Button>
     </div>
   );
 }
@@ -384,6 +399,8 @@ function NotaEditor({
       Placeholder.configure({ placeholder: "Escreve aqui o conteúdo da nota..." }),
       UnderlineExtension,
       Highlight.configure({ multicolor: false }),
+      TaskList,
+      TaskItem.configure({ nested: true }),
     ],
     content: nota?.conteudo || "",
     editorProps: {
