@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { trpc } from "@/lib/trpc";
+import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -53,6 +54,7 @@ import {
   Pause,
   HelpCircle,
   FileCheck,
+  FileDown,
 } from "lucide-react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
@@ -61,7 +63,27 @@ import Placeholder from "@tiptap/extension-placeholder";
 import UnderlineExtension from "@tiptap/extension-underline";
 import Highlight from "@tiptap/extension-highlight";
 
-// Cores disponíveis para notas
+// Paleta de cores para lojas (gera cor determinística por lojaId)
+const LOJA_CORES = [
+  "#dbeafe", // azul claro
+  "#d1fae5", // verde claro
+  "#fce7f3", // rosa claro
+  "#ede9fe", // roxo claro
+  "#fed7aa", // laranja claro
+  "#fef3c7", // amarelo claro
+  "#ccfbf1", // teal claro
+  "#fae8ff", // fuchsia claro
+  "#e0e7ff", // indigo claro
+  "#fecaca", // vermelho claro
+  "#d9f99d", // lima claro
+  "#a5f3fc", // cyan claro
+];
+
+function getCorPorLoja(lojaId: number): string {
+  return LOJA_CORES[lojaId % LOJA_CORES.length];
+}
+
+// Cores disponíveis para notas (manual override)
 const CORES_NOTAS = [
   { value: "#ffffff", label: "Branco", class: "bg-white border" },
   { value: "#fef3c7", label: "Amarelo", class: "bg-amber-100" },
@@ -92,6 +114,73 @@ const CORES_TAGS = [
 
 function getEstadoInfo(estado: string) {
   return ESTADOS_NOTAS.find(e => e.value === estado) || ESTADOS_NOTAS[0];
+}
+
+// Exportar nota para PDF
+async function exportarNotaPDF(nota: any) {
+  const estadoInfo = getEstadoInfo(nota.estado);
+  const dataFormatada = new Date(nota.criadoEm).toLocaleDateString("pt-PT", {
+    day: "2-digit", month: "long", year: "numeric"
+  });
+  
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <style>
+        @page { margin: 2cm; size: A4; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; color: #1a1a1a; line-height: 1.6; }
+        .header { border-bottom: 3px solid #6366f1; padding-bottom: 16px; margin-bottom: 24px; }
+        .header h1 { font-size: 24px; margin: 0 0 8px 0; color: #1e293b; }
+        .meta { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 8px; }
+        .meta-item { font-size: 12px; color: #64748b; padding: 4px 10px; border-radius: 4px; background: #f1f5f9; }
+        .meta-item.estado { background: #ede9fe; color: #6d28d9; font-weight: 600; }
+        .meta-item.loja { background: #dbeafe; color: #1d4ed8; font-weight: 600; }
+        .content { font-size: 14px; }
+        .content h1, .content h2, .content h3 { color: #1e293b; margin-top: 20px; }
+        .content img { max-width: 100%; border-radius: 8px; margin: 12px 0; }
+        .content ul, .content ol { padding-left: 24px; }
+        .content mark { background-color: #fef08a; padding: 2px 4px; border-radius: 2px; }
+        .tags { margin-top: 16px; padding-top: 12px; border-top: 1px solid #e2e8f0; }
+        .tag { display: inline-block; font-size: 11px; color: white; padding: 3px 8px; border-radius: 4px; margin-right: 6px; }
+        .footer { margin-top: 32px; padding-top: 12px; border-top: 1px solid #e2e8f0; font-size: 11px; color: #94a3b8; text-align: center; }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <h1>${nota.titulo || "Sem título"}</h1>
+        <div class="meta">
+          <span class="meta-item estado">${estadoInfo.label}</span>
+          ${nota.loja ? `<span class="meta-item loja">${nota.loja.nome}</span>` : ""}
+          <span class="meta-item">${dataFormatada}</span>
+        </div>
+      </div>
+      <div class="content">
+        ${nota.conteudo || "<p>Sem conteúdo</p>"}
+      </div>
+      ${nota.tags && nota.tags.length > 0 ? `
+        <div class="tags">
+          ${nota.tags.map((t: any) => `<span class="tag" style="background-color:${t.cor}">${t.nome}</span>`).join("")}
+        </div>
+      ` : ""}
+      <div class="footer">
+        PoweringEG Platform - Nota exportada em ${new Date().toLocaleDateString("pt-PT")}
+      </div>
+    </body>
+    </html>
+  `;
+
+  const blob = new Blob([html], { type: "text/html" });
+  const url = URL.createObjectURL(blob);
+  const printWindow = window.open(url, "_blank");
+  if (printWindow) {
+    printWindow.onload = () => {
+      setTimeout(() => {
+        printWindow.print();
+      }, 500);
+    };
+  }
 }
 
 // Componente de barra de ferramentas do editor
@@ -217,13 +306,20 @@ function NotaEditor({
   const [titulo, setTitulo] = useState(nota?.titulo || "");
   const [lojaId, setLojaId] = useState<string>(nota?.lojaId?.toString() || "none");
   const [estado, setEstado] = useState(nota?.estado || "rascunho");
-  const [cor, setCor] = useState(nota?.cor || "#ffffff");
+  const [corManual, setCorManual] = useState<string | null>(null);
   const [selectedTagIds, setSelectedTagIds] = useState<number[]>(
     nota?.tags?.map((t: any) => t.id) || []
   );
   const [showTagManager, setShowTagManager] = useState(false);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Cor determinada: se tem loja, usa cor da loja; senão branco; manual override
+  const corActual = useMemo(() => {
+    if (corManual) return corManual;
+    if (lojaId !== "none") return getCorPorLoja(parseInt(lojaId));
+    return nota?.cor || "#ffffff";
+  }, [lojaId, corManual, nota?.cor]);
 
   const editor = useEditor({
     extensions: [
@@ -236,7 +332,7 @@ function NotaEditor({
     content: nota?.conteudo || "",
     editorProps: {
       attributes: {
-        class: "prose prose-sm max-w-none focus:outline-none min-h-[200px] px-1",
+        class: "prose prose-sm max-w-none focus:outline-none min-h-[300px] px-1",
       },
     },
   });
@@ -247,7 +343,7 @@ function NotaEditor({
       setTitulo(nota.titulo || "");
       setLojaId(nota.lojaId?.toString() || "none");
       setEstado(nota.estado || "rascunho");
-      setCor(nota.cor || "#ffffff");
+      setCorManual(null);
       setSelectedTagIds(nota.tags?.map((t: any) => t.id) || []);
       if (editor) {
         editor.commands.setContent(nota.conteudo || "");
@@ -256,7 +352,7 @@ function NotaEditor({
       setTitulo("");
       setLojaId("none");
       setEstado("rascunho");
-      setCor("#ffffff");
+      setCorManual(null);
       setSelectedTagIds([]);
       if (editor) {
         editor.commands.setContent("");
@@ -275,7 +371,7 @@ function NotaEditor({
       conteudo: editor?.getHTML() || "",
       lojaId: lojaId === "none" ? null : parseInt(lojaId),
       estado,
-      cor,
+      cor: corActual,
       tagIds: selectedTagIds,
     });
   };
@@ -307,9 +403,15 @@ function NotaEditor({
     );
   };
 
+  const handleLojaChange = (value: string) => {
+    setLojaId(value);
+    // Reset cor manual quando muda loja (usa cor automática)
+    setCorManual(null);
+  };
+
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-5xl w-[95vw] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="sr-only">
             {nota?.id ? "Editar Nota" : "Nova Nota"}
@@ -344,9 +446,9 @@ function NotaEditor({
               </SelectContent>
             </Select>
 
-            {/* Loja */}
-            <Select value={lojaId} onValueChange={setLojaId}>
-              <SelectTrigger className="w-[180px] h-8 text-xs">
+            {/* Loja (filtrada por gestor) */}
+            <Select value={lojaId} onValueChange={handleLojaChange}>
+              <SelectTrigger className="w-[200px] h-8 text-xs">
                 <SelectValue placeholder="Sem loja" />
               </SelectTrigger>
               <SelectContent>
@@ -356,21 +458,27 @@ function NotaEditor({
                     Sem loja associada
                   </span>
                 </SelectItem>
-                {lojas.map(l => (
+                {lojas.sort((a: any, b: any) => a.nome.localeCompare(b.nome)).map((l: any) => (
                   <SelectItem key={l.id} value={l.id.toString()}>
-                    {l.nome}
+                    <span className="flex items-center gap-1.5">
+                      <span
+                        className="w-3 h-3 rounded-full inline-block flex-shrink-0"
+                        style={{ backgroundColor: getCorPorLoja(l.id) }}
+                      />
+                      {l.nome}
+                    </span>
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
 
-            {/* Cor */}
+            {/* Cor manual (override) */}
             <div className="flex gap-1 items-center">
               {CORES_NOTAS.map(c => (
                 <button
                   key={c.value}
-                  className={`w-5 h-5 rounded-full ${c.class} ${cor === c.value ? "ring-2 ring-primary ring-offset-1" : ""}`}
-                  onClick={() => setCor(c.value)}
+                  className={`w-5 h-5 rounded-full ${c.class} ${corActual === c.value ? "ring-2 ring-primary ring-offset-1" : ""}`}
+                  onClick={() => setCorManual(c.value)}
                   title={c.label}
                 />
               ))}
@@ -395,6 +503,20 @@ function NotaEditor({
               className="hidden"
               onChange={handleImageUpload}
             />
+
+            {/* Exportar PDF */}
+            {nota?.id && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-8"
+                onClick={() => exportarNotaPDF(nota)}
+              >
+                <FileDown className="h-3.5 w-3.5 mr-1" />
+                PDF
+              </Button>
+            )}
           </div>
 
           {/* Tags */}
@@ -423,7 +545,7 @@ function NotaEditor({
           </div>
 
           {/* Editor */}
-          <div className="border rounded-lg p-3" style={{ backgroundColor: cor }}>
+          <div className="border rounded-lg p-4" style={{ backgroundColor: corActual }}>
             <EditorToolbar editor={editor} />
             <EditorContent editor={editor} />
           </div>
@@ -564,6 +686,8 @@ function TagManager({
 
 // Componente principal
 export default function Notas() {
+  const { user } = useAuth();
+  const isAdmin = user?.role === "admin";
   const [pesquisa, setPesquisa] = useState("");
   const [filtroEstado, setFiltroEstado] = useState("todos");
   const [filtroLoja, setFiltroLoja] = useState("todos");
@@ -583,7 +707,11 @@ export default function Notas() {
     pesquisa: pesquisa || undefined,
   });
 
-  const { data: lojas } = trpc.lojas.list.useQuery();
+  // Usar lojas do gestor (não todas)
+  const { data: minhasLojas } = trpc.lojas.getByGestor.useQuery();
+  const { data: todasLojas } = trpc.lojas.list.useQuery(undefined, { enabled: isAdmin });
+  const lojas = isAdmin ? todasLojas : minhasLojas;
+
   const { data: tags } = trpc.notas.listarTags.useQuery();
 
   // Nota completa para edição
@@ -685,7 +813,7 @@ export default function Notas() {
 
   return (
     <DashboardLayout>
-      <div className="p-4 md:p-6 space-y-6 max-w-7xl mx-auto">
+      <div className="p-4 md:p-6 space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
@@ -740,7 +868,13 @@ export default function Notas() {
               <SelectItem value="todos">Todas as lojas</SelectItem>
               {(lojas || []).sort((a: any, b: any) => a.nome.localeCompare(b.nome)).map((l: any) => (
                 <SelectItem key={l.id} value={l.id.toString()}>
-                  {l.nome}
+                  <span className="flex items-center gap-1.5">
+                    <span
+                      className="w-3 h-3 rounded-full inline-block flex-shrink-0"
+                      style={{ backgroundColor: getCorPorLoja(l.id) }}
+                    />
+                    {l.nome}
+                  </span>
                 </SelectItem>
               ))}
             </SelectContent>
@@ -786,7 +920,7 @@ export default function Notas() {
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
               Fixadas
             </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {notasFixadas.map((nota: any) => (
                 <NotaCard
                   key={nota.id}
@@ -796,6 +930,7 @@ export default function Notas() {
                   onArquivar={() => handleArquivar(nota)}
                   onEliminar={() => eliminarMutation.mutate({ id: nota.id })}
                   onMudarEstado={(estado) => handleMudarEstado(nota, estado)}
+                  onExportarPDF={() => exportarNotaPDF(nota)}
                 />
               ))}
             </div>
@@ -810,7 +945,7 @@ export default function Notas() {
                 Outras
               </p>
             )}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {notasNormais.map((nota: any) => (
                 <NotaCard
                   key={nota.id}
@@ -820,6 +955,7 @@ export default function Notas() {
                   onArquivar={() => handleArquivar(nota)}
                   onEliminar={() => eliminarMutation.mutate({ id: nota.id })}
                   onMudarEstado={(estado) => handleMudarEstado(nota, estado)}
+                  onExportarPDF={() => exportarNotaPDF(nota)}
                 />
               ))}
             </div>
@@ -875,6 +1011,7 @@ function NotaCard({
   onArquivar,
   onEliminar,
   onMudarEstado,
+  onExportarPDF,
 }: {
   nota: any;
   onEdit: () => void;
@@ -882,9 +1019,17 @@ function NotaCard({
   onArquivar: () => void;
   onEliminar: () => void;
   onMudarEstado: (estado: string) => void;
+  onExportarPDF: () => void;
 }) {
   const estadoInfo = getEstadoInfo(nota.estado);
   const EstadoIcon = estadoInfo.icon;
+
+  // Cor do card: se tem loja e cor é branco, usa cor da loja
+  const cardCor = useMemo(() => {
+    if (nota.cor && nota.cor !== "#ffffff") return nota.cor;
+    if (nota.lojaId) return getCorPorLoja(nota.lojaId);
+    return "#ffffff";
+  }, [nota.cor, nota.lojaId]);
 
   // Extrair texto simples do HTML para preview
   const textoPreview = useMemo(() => {
@@ -900,7 +1045,7 @@ function NotaCard({
   return (
     <Card
       className="group cursor-pointer hover:shadow-md transition-shadow overflow-hidden"
-      style={{ backgroundColor: nota.cor || "#ffffff" }}
+      style={{ backgroundColor: cardCor }}
       onClick={onEdit}
     >
       {/* Imagem preview */}
@@ -953,6 +1098,11 @@ function NotaCard({
                     {e.label}
                   </DropdownMenuItem>
                 ))}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={onExportarPDF}>
+                  <FileDown className="h-3.5 w-3.5 mr-2" />
+                  Exportar PDF
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={onArquivar}>
                   {nota.arquivada ? (

@@ -446,3 +446,12 @@
 ## Bug: Notas - tradução em falta e posição errada no menu
 - [x] Corrigir tradução "menu.items.notas" → "Notas" nos ficheiros de tradução PT e EN
 - [x] Mover Notas para o grupo azul (Gestão - junto a Lojas, RH, Volantes, etc.)
+
+## Melhorias Notas - Dialog, Lojas, Cores, PDF
+- [x] Dialog/editor mais largo (max-w-5xl / 95vw)
+- [x] Filtrar lojas apenas do gestor autenticado (usa trpc.lojas.getByGestor)
+- [x] Cor automática por loja ao associar nota (paleta de 12 cores por lojaId)
+- [x] Card branco por defeito, muda cor ao associar loja
+- [x] Exportação PDF da nota (abre janela de impressão com HTML formatado)
+- [x] Indicador de cor da loja no dropdown
+- [x] Grid de 3 colunas (cards maiores)
