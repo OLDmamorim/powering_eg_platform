@@ -141,17 +141,35 @@ interface VolanteAuth {
 
 export default function PortalLoja() {
   const { language, setLanguage, t } = useLanguage();
-  // Inicializar token do localStorage se existir
+  // Inicializar token da URL ou localStorage IMEDIATAMENTE (sem esperar useEffect)
   const [token, setToken] = useState<string>(() => {
     if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlToken = urlParams.get('token');
+      if (urlToken) {
+        // Token na URL - limpar sessão anterior e usar este
+        localStorage.removeItem('lojaAuth');
+        localStorage.removeItem('volanteAuth');
+        localStorage.setItem('loja_token', urlToken);
+        return urlToken;
+      }
       return localStorage.getItem('loja_token') || '';
     }
     return '';
   });
+  // Flag para saber se o token veio da URL (login fresco)
+  const [tokenFromUrl] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return !!new URLSearchParams(window.location.search).get('token');
+    }
+    return false;
+  });
   const [inputToken, setInputToken] = useState<string>("");
-  // Inicializar lojaAuth do localStorage se existir
+  // Inicializar lojaAuth do localStorage (mas NÃO se token veio da URL)
   const [lojaAuth, setLojaAuth] = useState<LojaAuth | null>(() => {
     if (typeof window !== 'undefined') {
+      const urlToken = new URLSearchParams(window.location.search).get('token');
+      if (urlToken) return null;
       try {
         const saved = localStorage.getItem('lojaAuth');
         if (saved) {
@@ -164,9 +182,11 @@ export default function PortalLoja() {
     return null;
   });
   const [lojaAtualId, setLojaAtualId] = useState<number | null>(null);
-  // Estado para autenticação de volante
+  // Estado para autenticação de volante (mas NÃO se token veio da URL)
   const [volanteAuth, setVolanteAuth] = useState<VolanteAuth | null>(() => {
     if (typeof window !== 'undefined') {
+      const urlToken = new URLSearchParams(window.location.search).get('token');
+      if (urlToken) return null;
       try {
         const saved = localStorage.getItem('volanteAuth');
         if (saved) {
@@ -356,26 +376,23 @@ export default function PortalLoja() {
     }
   }, [lojaAuth]);
 
-  // Verificar token na URL ou localStorage
+  // Token já é inicializado no useState acima (URL ou localStorage)
+  // Este useEffect só serve para limpar o ?token da URL após processar
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const urlToken = urlParams.get("token");
-    const savedToken = localStorage.getItem("loja_token");
-    
-    if (urlToken) {
-      setToken(urlToken);
-      localStorage.setItem("loja_token", urlToken);
-    } else if (savedToken) {
-      setToken(savedToken);
+    if (tokenFromUrl && token) {
+      const url = new URL(window.location.href);
+      url.searchParams.delete('token');
+      window.history.replaceState({}, '', url.toString());
     }
-  }, []);
+  }, [tokenFromUrl, token]);
 
-  // Query para validar token de volante
+  // Query para validar token de volante - SEMPRE validar quando há token
   const { data: volanteValidation, isLoading: isValidatingVolante } = trpc.portalVolante.validarToken.useQuery(
     { token },
     { 
-      enabled: !!token && !lojaAuth && !volanteAuth,
+      enabled: !!token,
       retry: false,
+      staleTime: 5 * 60 * 1000,
     }
   );
 
@@ -424,7 +441,12 @@ export default function PortalLoja() {
 
   // Efeito para processar validação de volante quando a query retorna
   useEffect(() => {
-    if (volanteValidation?.valid && volanteValidation.volante && !lojaAuth && !volanteAuth) {
+    if (isValidatingVolante || !token) return;
+    
+    // Se é um token de volante válido
+    if (volanteValidation?.valid && volanteValidation.volante) {
+      if (volanteAuth && volanteAuth.volanteId === volanteValidation.volante.id) return;
+      
       const volante = volanteValidation.volante;
       const lojas = volanteValidation.lojas || [];
       const volanteData: VolanteAuth = {
@@ -436,35 +458,24 @@ export default function PortalLoja() {
         lojas: lojas.map((l: any) => ({ id: l.id, nome: l.nome })),
       };
       setVolanteAuth(volanteData);
+      setLojaAuth(null);
       localStorage.setItem("loja_token", token);
       localStorage.setItem("volanteAuth", JSON.stringify(volanteData));
-      setActiveTab("agenda");
-      toast.success(`Bem-vindo, ${volante.nome}!`);
-    }
-  }, [volanteValidation, lojaAuth, volanteAuth, token]);
-
-  // Autenticar quando token muda (ou validar sessão existente)
-  useEffect(() => {
-    // Se já temos volanteAuth do localStorage, não tentar autenticar como loja
-    if (volanteAuth) {
+      localStorage.removeItem("lojaAuth");
+      if (!volanteAuth) {
+        setActiveTab("agenda");
+        toast.success(`Bem-vindo, ${volante.nome}!`);
+      }
       return;
     }
-    // Se a validação de volante ainda está a carregar, esperar
-    if (isValidatingVolante) {
-      return;
-    }
-    // Se é um token de volante válido, não tentar autenticar como loja
-    if (volanteValidation?.valid) {
-      return;
-    }
-    if (token && !lojaAuth) {
+    
+    // Não é volante - tentar autenticar como loja
+    if (!volanteValidation?.valid && !lojaAuth && !autenticarMutation.isPending) {
       autenticarMutation.mutate({ token });
-    } else if (token && lojaAuth) {
-      // Se já temos lojaAuth do localStorage, validar se o token ainda é válido
-      // fazendo uma autenticação silenciosa em background
+    } else if (!volanteValidation?.valid && lojaAuth) {
       autenticarMutation.mutate({ token });
     }
-  }, [isValidatingVolante, volanteValidation]);  // Executar quando a validação de volante terminar
+  }, [isValidatingVolante, volanteValidation, token]);
 
   // Queries
   // Usar lojaAtualId para queries quando disponível
@@ -843,6 +854,30 @@ export default function PortalLoja() {
       lojaId: lojaIdAtiva,
     });
   }, [dashboardData, token, mesesSelecionadosDashboard, analiseIA, lojaIdAtiva, language]);
+
+  // Se tem token mas ainda está a validar, mostrar loading em vez de tela de login
+  if (token && isValidatingVolante) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">{language === 'pt' ? 'A verificar acesso...' : 'Verifying access...'}</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Se tem token e a mutação de autenticação está a correr, mostrar loading
+  if (token && autenticarMutation.isPending) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">{language === 'pt' ? 'A autenticar...' : 'Authenticating...'}</p>
+        </div>
+      </div>
+    );
+  }
 
   // Tela de login - mostrar se não tiver lojaAuth NEM volanteAuth
   if (!lojaAuth && !volanteAuth) {
