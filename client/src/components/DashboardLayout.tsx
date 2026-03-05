@@ -102,6 +102,7 @@ const getMenuGroups = (userRole?: string, t?: (key: string) => string): MenuGrou
         { icon: Settings, label: 'Recalibra', path: "/gestao-recalibra", show: isGestor || isAdmin, showBadge: false },
         { icon: FileText, label: 'Documentos', path: "/documentos", show: isGestor || isAdmin, showBadge: false },
         { icon: FileSpreadsheet, label: tr('menu.items.analiseFichas', 'Análise Fichas'), path: "/analise-fichas", show: isGestor || isAdmin, showBadge: false },
+        { icon: StickyNote, label: tr('menu.items.notas', 'Notas'), path: "/notas", show: true, showBadge: false },
       ]
     },
     {
@@ -166,14 +167,6 @@ const getMenuGroups = (userRole?: string, t?: (key: string) => string): MenuGrou
       ]
     },
 
-    {
-      id: 'notes',
-      label: tr('menu.groups.notes', 'Notas'),
-      color: 'bg-yellow-100/80 dark:bg-yellow-900/30',
-      items: [
-        { icon: StickyNote, label: tr('menu.items.notas', 'Notas'), path: "/notas", show: true, showBadge: false },
-      ]
-    },
     {
       id: 'pending',
       label: tr('menu.groups.pending', 'Tarefas'),

@@ -442,3 +442,7 @@
 - [x] Integrar no menu lateral do dashboard (grupo Notas com ícone StickyNote)
 - [x] 10 testes vitest passaram
 - [ ] Publicar
+
+## Bug: Notas - tradução em falta e posição errada no menu
+- [x] Corrigir tradução "menu.items.notas" → "Notas" nos ficheiros de tradução PT e EN
+- [x] Mover Notas para o grupo azul (Gestão - junto a Lojas, RH, Volantes, etc.)

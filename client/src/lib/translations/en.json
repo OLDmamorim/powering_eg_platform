@@ -229,7 +229,8 @@
       "relacoesLojas": "Store Relations",
       "portalGestor": "Manager Portal",
       "volantes": "Mobile Staff",
-      "analiseFichas": "Service Sheets Analysis"
+      "analiseFichas": "Service Sheets Analysis",
+      "notas": "Notes"
     }
   },
   "dashboard": {
