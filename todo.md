@@ -463,3 +463,11 @@
 - [x] Data de criação e actualização no PDF
 - [x] Data adicionada ao footer do card
 - [ ] Guardar checkpoint
+
+## Auto-save nas Notas
+- [x] Implementar auto-save com debounce (2 segundos de inactividade)
+- [x] Guardar no backend automaticamente sem precisar de clicar "Guardar"
+- [x] Indicador visual: "Guardado automaticamente" / "A guardar..." / "Alterações por guardar"
+- [x] Botão mudou de "Guardar" para "Guardar e Fechar" (auto-save não fecha editor)
+- [x] Auto-save só activo em notas já criadas (novas precisam de clicar "Criar Nota")
+- [ ] Guardar checkpoint

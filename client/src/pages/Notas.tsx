@@ -365,7 +365,10 @@ function NotaEditor({
   );
   const [showTagManager, setShowTagManager] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [autoSaveStatus, setAutoSaveStatus] = useState<"saved" | "saving" | "unsaved" | "">(nota?.id ? "saved" : "");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastSavedRef = useRef<string>("");
 
   // Cor determinada: se tem loja, usa cor da loja; senão branco; manual override
   const corActual = useMemo(() => {
@@ -398,6 +401,14 @@ function NotaEditor({
       setEstado(nota.estado || "rascunho");
       setCorManual(null);
       setSelectedTagIds(nota.tags?.map((t: any) => t.id) || []);
+      setAutoSaveStatus(nota.id ? "saved" : "");
+      lastSavedRef.current = JSON.stringify({
+        titulo: nota.titulo || "",
+        conteudo: nota.conteudo || "",
+        lojaId: nota.lojaId?.toString() || "none",
+        estado: nota.estado || "rascunho",
+        tagIds: nota.tags?.map((t: any) => t.id) || [],
+      });
       if (editor) {
         editor.commands.setContent(nota.conteudo || "");
       }
@@ -407,17 +418,71 @@ function NotaEditor({
       setEstado("rascunho");
       setCorManual(null);
       setSelectedTagIds([]);
+      setAutoSaveStatus("");
+      lastSavedRef.current = "";
       if (editor) {
         editor.commands.setContent("");
       }
     }
   }, [nota, editor]);
 
+  // Auto-save: debounce de 2 segundos após qualquer alteração
+  const triggerAutoSave = useCallback(() => {
+    if (!nota?.id) return; // Só auto-save em notas já criadas
+    if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+    setAutoSaveStatus("unsaved");
+    autoSaveTimerRef.current = setTimeout(() => {
+      const currentState = JSON.stringify({
+        titulo: titulo.trim(),
+        conteudo: editor?.getHTML() || "",
+        lojaId,
+        estado,
+        tagIds: selectedTagIds,
+      });
+      if (currentState === lastSavedRef.current) return; // Sem alterações
+      lastSavedRef.current = currentState;
+      setAutoSaveStatus("saving");
+      onSave({
+        id: nota.id,
+        titulo: titulo.trim(),
+        conteudo: editor?.getHTML() || "",
+        lojaId: lojaId === "none" ? null : parseInt(lojaId),
+        estado,
+        cor: corActual,
+        tagIds: selectedTagIds,
+        _autoSave: true, // Flag para não fechar o editor
+      });
+      setTimeout(() => setAutoSaveStatus("saved"), 800);
+    }, 2000);
+  }, [nota?.id, titulo, lojaId, estado, selectedTagIds, corActual, editor, onSave]);
+
+  // Trigger auto-save quando titulo, estado, loja ou tags mudam
+  useEffect(() => {
+    if (nota?.id) triggerAutoSave();
+  }, [titulo, lojaId, estado, selectedTagIds]);
+
+  // Trigger auto-save quando o conteúdo do editor muda
+  useEffect(() => {
+    if (!editor || !nota?.id) return;
+    const handler = () => triggerAutoSave();
+    editor.on("update", handler);
+    return () => { editor.off("update", handler); };
+  }, [editor, nota?.id, triggerAutoSave]);
+
+  // Limpar timer ao desmontar
+  useEffect(() => {
+    return () => {
+      if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+    };
+  }, []);
+
   const handleSave = () => {
     if (!titulo.trim()) {
       toast.error("O título é obrigatório");
       return;
     }
+    // Cancelar auto-save pendente
+    if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
     onSave({
       id: nota?.id,
       titulo: titulo.trim(),
@@ -619,13 +684,27 @@ function NotaEditor({
           )}
 
           {/* Botões */}
-          <div className="flex justify-end gap-2 pt-2">
-            <Button variant="outline" onClick={onClose}>
-              Cancelar
-            </Button>
-            <Button onClick={handleSave}>
-              {nota?.id ? "Guardar" : "Criar Nota"}
-            </Button>
+          <div className="flex justify-between items-center pt-2">
+            {/* Indicador de auto-save */}
+            <div className="text-xs text-muted-foreground flex items-center gap-1.5">
+              {autoSaveStatus === "saved" && (
+                <><Check className="h-3.5 w-3.5 text-green-500" /> Guardado automaticamente</>
+              )}
+              {autoSaveStatus === "saving" && (
+                <><Clock className="h-3.5 w-3.5 text-blue-500 animate-pulse" /> A guardar...</>
+              )}
+              {autoSaveStatus === "unsaved" && (
+                <><Clock className="h-3.5 w-3.5 text-amber-500" /> Alterações por guardar</>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={onClose}>
+                Fechar
+              </Button>
+              <Button onClick={handleSave}>
+                {nota?.id ? "Guardar e Fechar" : "Criar Nota"}
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -784,8 +863,10 @@ export default function Notas() {
   });
 
   const actualizarMutation = trpc.notas.actualizar.useMutation({
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       utils.notas.listar.invalidate();
+      // Se é auto-save, não fechar o editor nem mostrar toast
+      if ((variables as any)._autoSave) return;
       setEditorOpen(false);
       setNotaAtual(null);
       toast.success("Nota guardada");
@@ -814,9 +895,12 @@ export default function Notas() {
 
   const handleSave = (data: any) => {
     if (data.id) {
-      actualizarMutation.mutate(data);
+      // Remover _autoSave do payload antes de enviar ao backend
+      const { _autoSave, ...payload } = data;
+      actualizarMutation.mutate({ ...payload, _autoSave } as any);
     } else {
-      criarMutation.mutate(data);
+      const { _autoSave, ...payload } = data;
+      criarMutation.mutate(payload);
     }
   };
 
