@@ -119,53 +119,106 @@ function getEstadoInfo(estado: string) {
 // Exportar nota para PDF
 async function exportarNotaPDF(nota: any) {
   const estadoInfo = getEstadoInfo(nota.estado);
-  const dataFormatada = new Date(nota.criadoEm).toLocaleDateString("pt-PT", {
-    day: "2-digit", month: "long", year: "numeric"
-  });
+  
+  // Formatar data de criacao
+  let dataFormatada = "";
+  try {
+    const d = nota.createdAt ? new Date(nota.createdAt) : null;
+    if (d && !isNaN(d.getTime())) {
+      dataFormatada = d.toLocaleDateString("pt-PT", {
+        day: "2-digit", month: "long", year: "numeric"
+      });
+    } else {
+      dataFormatada = new Date().toLocaleDateString("pt-PT", {
+        day: "2-digit", month: "long", year: "numeric"
+      });
+    }
+  } catch {
+    dataFormatada = new Date().toLocaleDateString("pt-PT", {
+      day: "2-digit", month: "long", year: "numeric"
+    });
+  }
+
+  // Data de ultima actualizacao
+  let dataActualizada = "";
+  try {
+    const d = nota.updatedAt ? new Date(nota.updatedAt) : null;
+    if (d && !isNaN(d.getTime())) {
+      dataActualizada = d.toLocaleDateString("pt-PT", {
+        day: "2-digit", month: "long", year: "numeric"
+      });
+    }
+  } catch { /* ignore */ }
   
   const html = `
     <!DOCTYPE html>
     <html>
     <head>
       <meta charset="utf-8">
+      <title>${nota.titulo || "Nota"}</title>
       <style>
         @page { margin: 2cm; size: A4; }
-        body { font-family: 'Segoe UI', Arial, sans-serif; color: #1a1a1a; line-height: 1.6; }
-        .header { border-bottom: 3px solid #6366f1; padding-bottom: 16px; margin-bottom: 24px; }
-        .header h1 { font-size: 24px; margin: 0 0 8px 0; color: #1e293b; }
-        .meta { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 8px; }
-        .meta-item { font-size: 12px; color: #64748b; padding: 4px 10px; border-radius: 4px; background: #f1f5f9; }
+        * { box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; color: #1a1a1a; line-height: 1.6; margin: 0; padding: 0; }
+        .page { padding: 40px; min-height: 100vh; display: flex; flex-direction: column; }
+        /* Cabeçalho padrao PoweringEG */
+        .top-bar { height: 4px; background: #3b82f6; width: 100%; }
+        .header { text-align: center; padding: 20px 0 16px 0; border-bottom: 1px solid #e2e8f0; margin-bottom: 24px; }
+        .header h1 { font-size: 22px; margin: 0 0 8px 0; color: #1e293b; font-weight: 700; }
+        .header .subtitle { font-size: 11px; color: #64748b; }
+        .meta { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 12px; }
+        .meta-item { font-size: 11px; color: #64748b; padding: 4px 12px; border-radius: 4px; background: #f1f5f9; }
         .meta-item.estado { background: #ede9fe; color: #6d28d9; font-weight: 600; }
         .meta-item.loja { background: #dbeafe; color: #1d4ed8; font-weight: 600; }
-        .content { font-size: 14px; }
+        .meta-item.data { background: #f0fdf4; color: #166534; }
+        /* Conteudo */
+        .content { font-size: 13px; flex: 1; padding: 8px 0; }
         .content h1, .content h2, .content h3 { color: #1e293b; margin-top: 20px; }
+        .content h2 { font-size: 16px; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; }
         .content img { max-width: 100%; border-radius: 8px; margin: 12px 0; }
         .content ul, .content ol { padding-left: 24px; }
         .content mark { background-color: #fef08a; padding: 2px 4px; border-radius: 2px; }
+        .content p { margin: 8px 0; }
+        /* Tags */
         .tags { margin-top: 16px; padding-top: 12px; border-top: 1px solid #e2e8f0; }
-        .tag { display: inline-block; font-size: 11px; color: white; padding: 3px 8px; border-radius: 4px; margin-right: 6px; }
-        .footer { margin-top: 32px; padding-top: 12px; border-top: 1px solid #e2e8f0; font-size: 11px; color: #94a3b8; text-align: center; }
+        .tags-label { font-size: 10px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+        .tag { display: inline-block; font-size: 10px; color: white; padding: 3px 10px; border-radius: 4px; margin-right: 6px; margin-bottom: 4px; }
+        /* Rodape padrao PoweringEG */
+        .footer { margin-top: auto; padding-top: 16px; border-top: 1px solid #e2e8f0; text-align: center; }
+        .footer .brand { font-size: 10px; color: #94a3b8; font-style: italic; }
+        .footer .page-info { font-size: 9px; color: #cbd5e1; margin-top: 4px; }
+        @media print {
+          .page { padding: 0; }
+          .top-bar { position: fixed; top: 0; left: 0; right: 0; }
+        }
       </style>
     </head>
     <body>
-      <div class="header">
-        <h1>${nota.titulo || "Sem título"}</h1>
-        <div class="meta">
-          <span class="meta-item estado">${estadoInfo.label}</span>
-          ${nota.loja ? `<span class="meta-item loja">${nota.loja.nome}</span>` : ""}
-          <span class="meta-item">${dataFormatada}</span>
+      <div class="top-bar"></div>
+      <div class="page">
+        <div class="header">
+          <h1>${nota.titulo || "Sem titulo"}</h1>
+          <div class="subtitle">Nota / Dossier</div>
+          <div class="meta">
+            <span class="meta-item estado">${estadoInfo.label}</span>
+            ${nota.loja ? `<span class="meta-item loja">${nota.loja.nome}</span>` : ""}
+            <span class="meta-item data">Criado: ${dataFormatada}</span>
+            ${dataActualizada && dataActualizada !== dataFormatada ? `<span class="meta-item">Atualizado: ${dataActualizada}</span>` : ""}
+          </div>
         </div>
-      </div>
-      <div class="content">
-        ${nota.conteudo || "<p>Sem conteúdo</p>"}
-      </div>
-      ${nota.tags && nota.tags.length > 0 ? `
-        <div class="tags">
-          ${nota.tags.map((t: any) => `<span class="tag" style="background-color:${t.cor}">${t.nome}</span>`).join("")}
+        <div class="content">
+          ${nota.conteudo || "<p>Sem conteudo</p>"}
         </div>
-      ` : ""}
-      <div class="footer">
-        PoweringEG Platform - Nota exportada em ${new Date().toLocaleDateString("pt-PT")}
+        ${nota.tags && nota.tags.length > 0 ? `
+          <div class="tags">
+            <div class="tags-label">Tags</div>
+            ${nota.tags.map((t: any) => `<span class="tag" style="background-color:${t.cor}">${t.nome}</span>`).join("")}
+          </div>
+        ` : ""}
+        <div class="footer">
+          <div class="brand">PoweringEG Platform 2.0 - a IA ao servico da ExpressGlass</div>
+          <div class="page-info">Exportado em ${new Date().toLocaleDateString("pt-PT", { day: "2-digit", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" })}</div>
+        </div>
       </div>
     </body>
     </html>
@@ -1151,18 +1204,31 @@ function NotaCard({
           </div>
         )}
 
-        {/* Footer: estado + loja */}
+        {/* Footer: estado + loja + data */}
         <div className="flex items-center justify-between pt-1">
           <Badge variant="secondary" className={`text-[10px] h-5 ${estadoInfo.color}`}>
             <EstadoIcon className="h-3 w-3 mr-1" />
             {estadoInfo.label}
           </Badge>
-          {nota.loja && (
-            <span className="text-[10px] text-muted-foreground flex items-center gap-1">
-              <Building2 className="h-3 w-3" />
-              {nota.loja.nome}
+          <div className="flex items-center gap-2">
+            {nota.loja && (
+              <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                <Building2 className="h-3 w-3" />
+                {nota.loja.nome}
+              </span>
+            )}
+            <span className="text-[10px] text-muted-foreground">
+              {(() => {
+                try {
+                  const d = nota.createdAt ? new Date(nota.createdAt) : null;
+                  if (d && !isNaN(d.getTime())) {
+                    return d.toLocaleDateString("pt-PT", { day: "2-digit", month: "2-digit", year: "2-digit" });
+                  }
+                  return "";
+                } catch { return ""; }
+              })()}
             </span>
-          )}
+          </div>
         </div>
       </div>
     </Card>

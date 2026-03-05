@@ -455,3 +455,11 @@
 - [x] Exportação PDF da nota (abre janela de impressão com HTML formatado)
 - [x] Indicador de cor da loja no dropdown
 - [x] Grid de 3 colunas (cards maiores)
+
+## Bug: Exportação PDF Notas - Data, Cabeçalho, Rodapé
+- [x] Corrigir "Invalid Date" - campo era criadoEm mas schema usa createdAt
+- [x] Cabeçalho padronizado PoweringEG (barra azul topo + título centrado + meta dados)
+- [x] Rodapé com "PoweringEG Platform 2.0 - a IA ao servico da ExpressGlass"
+- [x] Data de criação e actualização no PDF
+- [x] Data adicionada ao footer do card
+- [ ] Guardar checkpoint
