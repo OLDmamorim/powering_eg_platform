@@ -9184,22 +9184,33 @@ function RecepcaoVidrosSection({ token, language, lojaAuth }: { token: string; l
     },
   });
 
+  const [cameraReady, setCameraReady] = useState(false);
+
   const iniciarCamera = async () => {
     try {
+      setCameraReady(false);
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } }
+        video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
       });
       streamRef.current = stream;
       if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.play();
+        const video = videoRef.current;
+        video.setAttribute('autoplay', '');
+        video.setAttribute('playsinline', '');
+        video.setAttribute('muted', '');
+        video.srcObject = stream;
+        video.onloadedmetadata = () => {
+          video.play().then(() => {
+            setCameraReady(true);
+          }).catch(console.error);
+        };
       }
       setScanning(true);
       setResultado(null);
       setFotoPreview(null);
     } catch (err) {
       console.error('Erro ao aceder à câmara:', err);
-      toast.error(language === 'pt' ? 'Não foi possível aceder à câmara. Verifique as permissões.' : 'Could not access camera. Check permissions.');
+      toast.error(language === 'pt' ? 'Não foi possível aceder à câmara. Use o botão "Escolher Foto" em alternativa.' : 'Could not access camera. Use "Choose Photo" instead.');
     }
   };
 
@@ -9215,11 +9226,25 @@ function RecepcaoVidrosSection({ token, language, lojaAuth }: { token: string; l
     if (!videoRef.current || !canvasRef.current) return;
     const video = videoRef.current;
     const canvas = canvasRef.current;
+    
+    if (video.videoWidth === 0 || video.videoHeight === 0) {
+      toast.error(language === 'pt' ? 'Câmara ainda não está pronta. Aguarde um momento.' : 'Camera not ready yet. Please wait.');
+      return;
+    }
+    
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     ctx.drawImage(video, 0, 0);
+    
+    const imageData = ctx.getImageData(0, 0, Math.min(100, canvas.width), Math.min(100, canvas.height));
+    const hasContent = imageData.data.some((val, idx) => idx % 4 !== 3 && val > 10);
+    if (!hasContent) {
+      toast.error(language === 'pt' ? 'A imagem parece estar vazia. Tente novamente ou use "Escolher Foto".' : 'Image appears empty. Try again or use "Choose Photo".');
+      return;
+    }
+    
     const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
     setFotoPreview(dataUrl);
     pararCamera();
@@ -9229,11 +9254,22 @@ function RecepcaoVidrosSection({ token, language, lojaAuth }: { token: string; l
   const processarFoto = (dataUrl: string) => {
     setProcessing(true);
     const base64 = dataUrl.split(',')[1];
+    
+    if (!base64 || base64.length < 100) {
+      toast.error(language === 'pt' ? 'Erro ao capturar foto. Tente novamente.' : 'Error capturing photo. Try again.');
+      setProcessing(false);
+      return;
+    }
+    
+    const mimeMatch = dataUrl.match(/^data:(image\/\w+);/);
+    const mimeType = mimeMatch ? mimeMatch[1] : 'image/jpeg';
+    const ext = mimeType === 'image/png' ? 'png' : 'jpg';
+    
     scanMutation.mutate({
       token,
       base64Foto: base64,
-      filename: `etiqueta_${Date.now()}.jpg`,
-      mimeType: 'image/jpeg',
+      filename: `etiqueta_${Date.now()}.${ext}`,
+      mimeType,
     });
   };
 
@@ -9283,12 +9319,28 @@ function RecepcaoVidrosSection({ token, language, lojaAuth }: { token: string; l
         <div className="space-y-4">
           {scanning ? (
             <div className="relative rounded-lg overflow-hidden bg-black">
-              <video ref={videoRef} className="w-full max-h-[60vh] object-contain" autoPlay playsInline muted />
+              <video 
+                ref={videoRef} 
+                className="w-full max-h-[60vh] object-contain" 
+                autoPlay 
+                playsInline 
+                muted 
+                style={{ minHeight: '200px' }}
+              />
+              {!cameraReady && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/80">
+                  <div className="text-center text-white">
+                    <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2" />
+                    <p>{language === 'pt' ? 'A iniciar câmara...' : 'Starting camera...'}</p>
+                  </div>
+                </div>
+              )}
               <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-4">
                 <Button 
                   size="lg" 
                   className="bg-white text-black hover:bg-gray-100 rounded-full h-16 w-16 p-0"
                   onClick={tirarFoto}
+                  disabled={!cameraReady}
                 >
                   <Camera className="h-8 w-8" />
                 </Button>
@@ -9328,7 +9380,6 @@ function RecepcaoVidrosSection({ token, language, lojaAuth }: { token: string; l
                 ref={fileInputRef}
                 type="file"
                 accept="image/*"
-                capture="environment"
                 className="hidden"
                 onChange={handleFileUpload}
               />

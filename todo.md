@@ -498,3 +498,10 @@
 - [x] Mapeamento automático: quando destinatário já está mapeado, associar loja automaticamente
 - [x] Destinatários novos ficam "pendente de associação" até admin mapear
 - [x] Testes vitest para funções de BD e parsing OCR (15 testes passam)
+
+## Bug Fix: Câmara preta no mobile e dados OCR não extraídos
+- [x] Diagnóstico: fotos com 0 bytes no S3, dados todos NULL, câmara preta no mobile
+- [x] Corrigir câmara mobile: playsinline, loadedmetadata, cameraReady state
+- [x] Validar foto não-vazia antes de enviar (buffer > 100 bytes)
+- [x] Simplificar chamada LLM (remover json_schema strict, suporte markdown code blocks)
+- [x] Remover capture=environment do input file (forçava câmara em vez de galeria)

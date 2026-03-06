@@ -11755,56 +11755,71 @@ IMPORTANTE:
         }
 
         // 1. Upload da foto para S3
+        console.log('[Vidros] base64Foto length:', input.base64Foto?.length);
         const buffer = Buffer.from(input.base64Foto, 'base64');
+        console.log('[Vidros] Buffer length after decode:', buffer.length);
+        if (buffer.length < 100) {
+          throw new TRPCError({ code: 'BAD_REQUEST', message: 'A foto capturada está vazia. Tente novamente ou use "Escolher Foto".' });
+        }
         const randomSuffix = Math.random().toString(36).substring(2, 10);
         const fileKey = `vidros/${auth.loja.id}/${Date.now()}-${randomSuffix}-${input.filename}`;
         const { url: fotoUrl } = await storagePut(fileKey, buffer, input.mimeType);
 
         // 2. Enviar foto para IA para OCR
         const { invokeLLM } = await import('./_core/llm');
-        const ocrResult = await invokeLLM({
-          messages: [
-            {
-              role: 'system',
-              content: `Analisa a etiqueta de transporte de vidro automóvel nesta imagem. Extrai APENAS os seguintes campos em formato JSON:\n- destinatario: nome completo do destinatário (campo DESTINATÁRIO da etiqueta)\n- eurocode: código Eurocode do vidro (normalmente 4 dígitos, encontrado no campo LEIT após a barra, ex: em "1018/3733AGN" o eurocode é "3733")\n- numeroPedido: número do pedido (campo PEDIDO)\n- codAT: código AT (campo COD AT)\n- encomenda: referência da encomenda do cliente (campo OBS/Encomendas, incluir número e data)\n- leitRef: referência LEIT completa (ex: "1018/3733AGN")\n- observacoesCompletas: texto completo do campo Observações\n\nResponde APENAS com JSON válido, sem markdown. Se não conseguires ler algum campo, coloca null.`
-            },
-            {
-              role: 'user',
-              content: [
-                { type: 'text', text: 'Analisa esta etiqueta de transporte de vidro e extrai os dados.' },
-                { type: 'image_url', image_url: { url: fotoUrl, detail: 'high' } }
-              ]
-            }
-          ],
-          response_format: {
-            type: 'json_schema',
-            json_schema: {
-              name: 'etiqueta_vidro',
-              strict: true,
-              schema: {
-                type: 'object',
-                properties: {
-                  destinatario: { type: ['string', 'null'], description: 'Nome do destinatário' },
-                  eurocode: { type: ['string', 'null'], description: 'Eurocode do vidro' },
-                  numeroPedido: { type: ['string', 'null'], description: 'Número do pedido' },
-                  codAT: { type: ['string', 'null'], description: 'Código AT' },
-                  encomenda: { type: ['string', 'null'], description: 'Referência da encomenda' },
-                  leitRef: { type: ['string', 'null'], description: 'Referência LEIT completa' },
-                  observacoesCompletas: { type: ['string', 'null'], description: 'Texto completo das observações' },
-                },
-                required: ['destinatario', 'eurocode', 'numeroPedido', 'codAT', 'encomenda', 'leitRef', 'observacoesCompletas'],
-                additionalProperties: false,
+        console.log('[Vidros] A enviar foto para IA, URL:', fotoUrl);
+        
+        let ocrResult: any;
+        try {
+          ocrResult = await invokeLLM({
+            messages: [
+              {
+                role: 'user',
+                content: [
+                  { 
+                    type: 'text', 
+                    text: `Analisa esta etiqueta de transporte de vidro automóvel. Extrai os seguintes dados e responde APENAS com JSON válido (sem markdown, sem \`\`\`):
+
+{
+  "destinatario": "nome completo do destinatário",
+  "eurocode": "código Eurocode (4 dígitos após a barra no campo LEIT, ex: em 1018/3733AGN o eurocode é 3733)",
+  "numeroPedido": "número do pedido",
+  "codAT": "código AT",
+  "encomenda": "referência da encomenda com número e data",
+  "leitRef": "referência LEIT completa",
+  "observacoesCompletas": "texto completo das observações"
+}
+
+Se não conseguires ler algum campo, coloca uma string vazia "".` 
+                  },
+                  { type: 'image_url', image_url: { url: fotoUrl, detail: 'high' } }
+                ]
               }
-            }
-          }
-        });
+            ],
+          });
+        } catch (llmError) {
+          console.error('[Vidros] Erro na chamada LLM:', llmError);
+          ocrResult = { choices: [{ message: { content: '{}' } }] };
+        }
 
         let dadosExtraidos: any = {};
         try {
-          const rawContent = ocrResult.choices[0]?.message?.content;
-          dadosExtraidos = JSON.parse(typeof rawContent === 'string' ? rawContent : '{}');
+          let rawContent = ocrResult.choices[0]?.message?.content;
+          console.log('[Vidros] OCR raw content:', rawContent);
+          
+          if (typeof rawContent === 'string') {
+            rawContent = rawContent.trim();
+            // Limpar markdown code blocks se existirem
+            if (rawContent.startsWith('```')) {
+              rawContent = rawContent.replace(/^```(?:json)?\s*/, '').replace(/\s*```$/, '');
+            }
+            rawContent = rawContent.trim();
+            dadosExtraidos = JSON.parse(rawContent);
+          }
+          console.log('[Vidros] Dados extraidos:', JSON.stringify(dadosExtraidos));
         } catch (e) {
-          console.error('Erro ao parsear resposta OCR:', e);
+          console.error('[Vidros] Erro ao parsear resposta OCR:', e);
+          console.error('[Vidros] Raw content was:', ocrResult?.choices?.[0]?.message?.content);
         }
 
         // 3. Procurar mapeamento de destinatário
