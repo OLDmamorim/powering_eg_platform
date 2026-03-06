@@ -551,3 +551,6 @@
 - [x] Botões de exportação PDF e Excel no header do Monitor
 - [x] Exportação Excel (CSV) com dados filtrados (separador ; para PT)
 - [x] Exportação PDF com tabela formatada profissional (jsPDF + autoTable)
+
+## Monitor Recepção - Layout Mobile
+- [x] Fix Monitor Recepção mobile layout: show Eurocode, Pedido, Destinatário and Reporte button on small screens
