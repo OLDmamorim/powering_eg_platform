@@ -536,3 +536,8 @@
 - [x] Repor cards de contadores (Total Registos e Hoje) como blocos visuais com bordas coloridas
 - [x] Corrigir texto cinza claro para preto/escuro legível (text-gray-900, text-gray-800)
 - [x] Título e cabeçalhos com contraste adequado (uppercase, bold, text-gray-700)
+
+## Bug: Cards contadores não clicáveis no Monitor Recepção
+- [x] Tornar card "Total Registos" clicável (limpa filtros)
+- [x] Tornar card "Hoje" clicável (filtra por data de hoje)
+- [x] Feedback visual: card activo com borda mais forte, ring e fundo colorido

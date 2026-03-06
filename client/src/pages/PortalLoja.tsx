@@ -9436,6 +9436,7 @@ function RecepcaoVidrosSection({ token, language, lojaAuth }: { token: string; l
 function MonitorVidrosSection({ token, language }: { token: string; language: string }) {
   const [busca, setBusca] = useState('');
   const [filtroData, setFiltroData] = useState('');
+  const [filtroCard, setFiltroCard] = useState<'todos' | 'hoje' | null>(null);
   const [confirmarEliminar, setConfirmarEliminar] = useState<number | null>(null);
 
   const { data: vidros, isLoading, refetch } = trpc.vidros.listarPorLoja.useQuery(
@@ -9509,16 +9510,44 @@ function MonitorVidrosSection({ token, language }: { token: string; language: st
         </Button>
       </div>
 
-      {/* Cards Contadores */}
+      {/* Cards Contadores - Clicáveis como filtros */}
       {contagem && (
         <div className="grid grid-cols-2 gap-3">
-          <Card className="bg-white border-2 border-blue-200">
+          <Card 
+            className={`cursor-pointer transition-all hover:shadow-md ${
+              filtroCard === 'todos' || (!filtroCard && !filtroData)
+                ? 'bg-blue-50 border-2 border-blue-500 shadow-md ring-2 ring-blue-200'
+                : 'bg-white border-2 border-blue-200 hover:border-blue-400'
+            }`}
+            onClick={() => {
+              setFiltroCard(filtroCard === 'todos' ? null : 'todos');
+              setFiltroData('');
+              setBusca('');
+            }}
+          >
             <CardContent className="p-4 text-center">
               <p className="text-3xl font-bold text-blue-700">{contagem.total}</p>
               <p className="text-sm font-medium text-gray-700">{language === 'pt' ? 'Total Registos' : 'Total Records'}</p>
             </CardContent>
           </Card>
-          <Card className="bg-white border-2 border-green-200">
+          <Card 
+            className={`cursor-pointer transition-all hover:shadow-md ${
+              filtroCard === 'hoje'
+                ? 'bg-green-50 border-2 border-green-500 shadow-md ring-2 ring-green-200'
+                : 'bg-white border-2 border-green-200 hover:border-green-400'
+            }`}
+            onClick={() => {
+              if (filtroCard === 'hoje') {
+                setFiltroCard(null);
+                setFiltroData('');
+              } else {
+                setFiltroCard('hoje');
+                const hoje = new Date().toISOString().split('T')[0];
+                setFiltroData(hoje);
+                setBusca('');
+              }
+            }}
+          >
             <CardContent className="p-4 text-center">
               <p className="text-3xl font-bold text-green-700">{contagem.hoje}</p>
               <p className="text-sm font-medium text-gray-700">{language === 'pt' ? 'Hoje' : 'Today'}</p>
