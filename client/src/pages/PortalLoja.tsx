@@ -9438,6 +9438,8 @@ function MonitorVidrosSection({ token, language }: { token: string; language: st
   const [filtroData, setFiltroData] = useState('');
   const [filtroCard, setFiltroCard] = useState<'todos' | 'hoje' | null>(null);
   const [confirmarEliminar, setConfirmarEliminar] = useState<number | null>(null);
+  const [reporteVidro, setReporteVidro] = useState<any>(null);
+  const [copiado, setCopiado] = useState(false);
 
   const { data: vidros, isLoading, refetch } = trpc.vidros.listarPorLoja.useQuery(
     { token, limite: 200 },
@@ -9496,6 +9498,67 @@ function MonitorVidrosSection({ token, language }: { token: string; language: st
     });
   }, [vidros, busca, filtroData]);
 
+  // Exportar para Excel (CSV)
+  const exportarExcel = () => {
+    if (!vidrosFiltrados || vidrosFiltrados.length === 0) return;
+    const headers = ['Eurocode', 'Pedido', 'Encomenda', 'Destinat\u00e1rio', 'Data', 'Estado'];
+    const rows = vidrosFiltrados.map((v: any) => [
+      v.eurocode || '-',
+      v.numeroPedido || '-',
+      v.encomenda || '-',
+      v.destinatarioRaw || '-',
+      formatDate(v.createdAt) + ' ' + formatTime(v.createdAt),
+      v.estado || '-',
+    ]);
+    const csvContent = [headers.join(';'), ...rows.map((r: string[]) => r.join(';'))].join('\n');
+    const BOM = '\uFEFF';
+    const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `recepcao_vidros_${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success(language === 'pt' ? 'Excel exportado!' : 'Excel exported!');
+  };
+
+  // Exportar para PDF
+  const exportarPDF = async () => {
+    if (!vidrosFiltrados || vidrosFiltrados.length === 0) return;
+    try {
+      const { default: jsPDF } = await import('jspdf');
+      const { default: autoTable } = await import('jspdf-autotable');
+      const doc = new jsPDF({ orientation: 'landscape' });
+      doc.setFontSize(16);
+      doc.text('Monitor de Recep\u00e7\u00e3o de Vidros', 14, 15);
+      doc.setFontSize(9);
+      doc.text(`Exportado em ${new Date().toLocaleDateString('pt-PT')} \u00e0s ${new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })}`, 14, 22);
+      if (busca) doc.text(`Filtro: ${busca}`, 14, 27);
+      if (filtroData) doc.text(`Data: ${filtroData}`, busca ? 100 : 14, 27);
+      const tableData = vidrosFiltrados.map((v: any) => [
+        v.eurocode || '-',
+        v.numeroPedido || '-',
+        v.encomenda || '-',
+        v.destinatarioRaw || '-',
+        formatDate(v.createdAt) + ' ' + formatTime(v.createdAt),
+        v.estado || '-',
+      ]);
+      autoTable(doc, {
+        startY: (busca || filtroData) ? 32 : 27,
+        head: [['Eurocode', 'Pedido', 'Encomenda', 'Destinat\u00e1rio', 'Data', 'Estado']],
+        body: tableData,
+        styles: { fontSize: 8, cellPadding: 2 },
+        headStyles: { fillColor: [37, 99, 235], textColor: 255, fontStyle: 'bold' },
+        alternateRowStyles: { fillColor: [245, 247, 250] },
+        columnStyles: { 0: { fontStyle: 'bold', textColor: [37, 99, 235] } },
+      });
+      doc.save(`recepcao_vidros_${new Date().toISOString().split('T')[0]}.pdf`);
+      toast.success(language === 'pt' ? 'PDF exportado!' : 'PDF exported!');
+    } catch (e) {
+      toast.error('Erro ao gerar PDF');
+    }
+  };
+
   return (
     <div className="space-y-4">
       {/* Header */}
@@ -9504,10 +9567,20 @@ function MonitorVidrosSection({ token, language }: { token: string; language: st
           <Package className="h-6 w-6 text-emerald-600" />
           {language === 'pt' ? 'Monitor de Recepção' : 'Reception Monitor'}
         </h2>
-        <Button variant="outline" size="sm" onClick={() => refetch()}>
-          <RefreshCw className="h-4 w-4 mr-1" />
-          {language === 'pt' ? 'Actualizar' : 'Refresh'}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={exportarExcel} disabled={!vidrosFiltrados || vidrosFiltrados.length === 0} title="Exportar Excel">
+            <Download className="h-4 w-4 mr-1" />
+            Excel
+          </Button>
+          <Button variant="outline" size="sm" onClick={exportarPDF} disabled={!vidrosFiltrados || vidrosFiltrados.length === 0} title="Exportar PDF">
+            <FileText className="h-4 w-4 mr-1" />
+            PDF
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => refetch()}>
+            <RefreshCw className="h-4 w-4 mr-1" />
+            {language === 'pt' ? 'Actualizar' : 'Refresh'}
+          </Button>
+        </div>
       </div>
 
       {/* Cards Contadores - Clicáveis como filtros */}

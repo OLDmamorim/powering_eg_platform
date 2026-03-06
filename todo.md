@@ -546,3 +546,8 @@
 - [x] Adicionar botão Reporte (ícone FileText laranja) na coluna Acções
 - [x] Ao clicar, abrir dialog com frase pré-preenchida com dados da linha
 - [x] Botão "Copiar Texto" para copiar a frase para o clipboard com feedback visual
+
+## Funcionalidade: Exportar lista Monitor Recepção para PDF e Excel
+- [x] Botões de exportação PDF e Excel no header do Monitor
+- [x] Exportação Excel (CSV) com dados filtrados (separador ; para PT)
+- [x] Exportação PDF com tabela formatada profissional (jsPDF + autoTable)
