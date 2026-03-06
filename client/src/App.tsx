@@ -59,6 +59,7 @@ import GestaoRecalibra from "./pages/GestaoRecalibra";
 import PortalRecalibra from "./pages/PortalRecalibra";
 import DashboardRecalibra from "./pages/DashboardRecalibra";
 import Notas from "./pages/Notas";
+import RecepcaoVidros from "./pages/RecepcaoVidros";
 import HistoricoEnviosRelatorios from "./pages/HistoricoEnviosRelatorios";
 import { DemoBanner } from "./components/DemoBanner";
 import { LanguageProvider } from "./contexts/LanguageContext";
@@ -127,6 +128,7 @@ function Router() {
       
       {/* Notas / Dossiers */}
       <Route path={"/notas"} component={Notas} />
+      <Route path={"/recepcao-vidros"} component={RecepcaoVidros} />
       
       {/* To-Do */}
       <Route path={"/todos"} component={Todos} />

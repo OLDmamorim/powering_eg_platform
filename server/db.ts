@@ -175,7 +175,13 @@ import {
   InsertNotaTag,
   notasTagsRelacao,
   NotaTagRelacao,
-  InsertNotaTagRelacao
+  InsertNotaTagRelacao,
+  vidrosDestinatarios,
+  VidroDestinatario,
+  InsertVidroDestinatario,
+  vidrosRecepcao,
+  VidroRecepcao,
+  InsertVidroRecepcao
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -12288,4 +12294,243 @@ export async function definirTagsNota(notaId: number, tagIds: number[]) {
     );
   }
   return true;
+}
+
+
+// ========================================
+// RECEPÇÃO DE VIDROS
+// ========================================
+
+/**
+ * Listar todos os mapeamentos de destinatários
+ */
+export async function listarDestinatariosVidros() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(vidrosDestinatarios).orderBy(desc(vidrosDestinatarios.createdAt));
+}
+
+/**
+ * Procurar destinatário pelo nome da etiqueta (match parcial)
+ */
+export async function procurarDestinatarioVidro(nomeEtiqueta: string) {
+  const db = await getDb();
+  if (!db) return null;
+  // Procurar match exacto primeiro
+  const exacto = await db.select().from(vidrosDestinatarios)
+    .where(and(
+      eq(vidrosDestinatarios.nomeEtiqueta, nomeEtiqueta),
+      eq(vidrosDestinatarios.ativo, true)
+    ))
+    .limit(1);
+  if (exacto.length > 0) return exacto[0];
+  
+  // Procurar match parcial (nome da etiqueta contém ou é contido)
+  const todos = await db.select().from(vidrosDestinatarios)
+    .where(eq(vidrosDestinatarios.ativo, true));
+  
+  const nomeNorm = nomeEtiqueta.toLowerCase().trim();
+  for (const d of todos) {
+    const dNorm = d.nomeEtiqueta.toLowerCase().trim();
+    if (nomeNorm.includes(dNorm) || dNorm.includes(nomeNorm)) {
+      return d;
+    }
+  }
+  return null;
+}
+
+/**
+ * Criar novo mapeamento de destinatário
+ */
+export async function criarDestinatarioVidro(data: { nomeEtiqueta: string; lojaId?: number | null }) {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.insert(vidrosDestinatarios).values({
+    nomeEtiqueta: data.nomeEtiqueta,
+    lojaId: data.lojaId || null,
+  });
+  return result[0].insertId;
+}
+
+/**
+ * Actualizar mapeamento de destinatário (associar loja)
+ */
+export async function actualizarDestinatarioVidro(id: number, lojaId: number | null) {
+  const db = await getDb();
+  if (!db) return false;
+  await db.update(vidrosDestinatarios)
+    .set({ lojaId })
+    .where(eq(vidrosDestinatarios.id, id));
+  return true;
+}
+
+/**
+ * Eliminar mapeamento de destinatário
+ */
+export async function eliminarDestinatarioVidro(id: number) {
+  const db = await getDb();
+  if (!db) return false;
+  await db.delete(vidrosDestinatarios).where(eq(vidrosDestinatarios.id, id));
+  return true;
+}
+
+/**
+ * Registar recepção de vidro
+ */
+export async function registarVidro(data: {
+  destinatarioRaw?: string;
+  eurocode?: string;
+  numeroPedido?: string;
+  codAT?: string;
+  encomenda?: string;
+  leitRef?: string;
+  observacoesEtiqueta?: string;
+  fotoUrl?: string;
+  fotoKey?: string;
+  destinatarioId?: number;
+  lojaScanId?: number;
+  lojaDestinoId?: number;
+  estado?: string;
+  registadoPorToken?: string;
+}) {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.insert(vidrosRecepcao).values({
+    destinatarioRaw: data.destinatarioRaw || null,
+    eurocode: data.eurocode || null,
+    numeroPedido: data.numeroPedido || null,
+    codAT: data.codAT || null,
+    encomenda: data.encomenda || null,
+    leitRef: data.leitRef || null,
+    observacoesEtiqueta: data.observacoesEtiqueta || null,
+    fotoUrl: data.fotoUrl || null,
+    fotoKey: data.fotoKey || null,
+    destinatarioId: data.destinatarioId || null,
+    lojaScanId: data.lojaScanId || null,
+    lojaDestinoId: data.lojaDestinoId || null,
+    estado: (data.estado as any) || 'recebido',
+    registadoPorToken: data.registadoPorToken || null,
+  });
+  return result[0].insertId;
+}
+
+/**
+ * Listar vidros recepcionados por loja destino
+ */
+export async function listarVidrosPorLoja(lojaId: number, limite?: number) {
+  const db = await getDb();
+  if (!db) return [];
+  const query = db.select().from(vidrosRecepcao)
+    .where(eq(vidrosRecepcao.lojaDestinoId, lojaId))
+    .orderBy(desc(vidrosRecepcao.createdAt));
+  if (limite) {
+    return query.limit(limite);
+  }
+  return query;
+}
+
+/**
+ * Listar todos os vidros (admin) com filtros opcionais
+ */
+export async function listarTodosVidros(filtros?: { lojaId?: number; estado?: string; limite?: number }) {
+  const db = await getDb();
+  if (!db) return [];
+  const conditions = [];
+  if (filtros?.lojaId) {
+    conditions.push(eq(vidrosRecepcao.lojaDestinoId, filtros.lojaId));
+  }
+  if (filtros?.estado) {
+    conditions.push(eq(vidrosRecepcao.estado, filtros.estado as any));
+  }
+  const query = db.select().from(vidrosRecepcao)
+    .where(conditions.length > 0 ? and(...conditions) : undefined)
+    .orderBy(desc(vidrosRecepcao.createdAt));
+  if (filtros?.limite) {
+    return query.limit(filtros.limite);
+  }
+  return query;
+}
+
+/**
+ * Listar vidros pendentes de associação (sem loja destino)
+ */
+export async function listarVidrosPendentesAssociacao() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(vidrosRecepcao)
+    .where(eq(vidrosRecepcao.estado, 'pendente_associacao'))
+    .orderBy(desc(vidrosRecepcao.createdAt));
+}
+
+/**
+ * Actualizar vidro (estado, loja destino, etc.)
+ */
+export async function actualizarVidro(id: number, data: {
+  lojaDestinoId?: number | null;
+  destinatarioId?: number | null;
+  estado?: string;
+  eurocode?: string;
+  numeroPedido?: string;
+  codAT?: string;
+  encomenda?: string;
+  leitRef?: string;
+}) {
+  const db = await getDb();
+  if (!db) return false;
+  const updateData: any = {};
+  if (data.lojaDestinoId !== undefined) updateData.lojaDestinoId = data.lojaDestinoId;
+  if (data.destinatarioId !== undefined) updateData.destinatarioId = data.destinatarioId;
+  if (data.estado !== undefined) updateData.estado = data.estado;
+  if (data.eurocode !== undefined) updateData.eurocode = data.eurocode;
+  if (data.numeroPedido !== undefined) updateData.numeroPedido = data.numeroPedido;
+  if (data.codAT !== undefined) updateData.codAT = data.codAT;
+  if (data.encomenda !== undefined) updateData.encomenda = data.encomenda;
+  if (data.leitRef !== undefined) updateData.leitRef = data.leitRef;
+  
+  await db.update(vidrosRecepcao)
+    .set(updateData)
+    .where(eq(vidrosRecepcao.id, id));
+  return true;
+}
+
+/**
+ * Actualizar vidros pendentes quando um destinatário é mapeado a uma loja
+ */
+export async function actualizarVidrosPendentesDestinatario(destinatarioId: number, lojaId: number) {
+  const db = await getDb();
+  if (!db) return 0;
+  const result = await db.update(vidrosRecepcao)
+    .set({ 
+      lojaDestinoId: lojaId, 
+      estado: 'recebido' as any 
+    })
+    .where(and(
+      eq(vidrosRecepcao.destinatarioId, destinatarioId),
+      eq(vidrosRecepcao.estado, 'pendente_associacao')
+    ));
+  return (result as any)[0]?.affectedRows || 0;
+}
+
+/**
+ * Contar vidros por loja (para badge no monitor)
+ */
+export async function contarVidrosPorLoja(lojaId: number) {
+  const db = await getDb();
+  if (!db) return { total: 0, hoje: 0 };
+  
+  const hoje = new Date();
+  hoje.setHours(0, 0, 0, 0);
+  
+  const [totalResult] = await db.select({ count: sql<number>`count(*)` })
+    .from(vidrosRecepcao)
+    .where(eq(vidrosRecepcao.lojaDestinoId, lojaId));
+  
+  const [hojeResult] = await db.select({ count: sql<number>`count(*)` })
+    .from(vidrosRecepcao)
+    .where(and(
+      eq(vidrosRecepcao.lojaDestinoId, lojaId),
+      gte(vidrosRecepcao.createdAt, hoje)
+    ));
+  
+  return { total: totalResult?.count || 0, hoje: hojeResult?.count || 0 };
 }

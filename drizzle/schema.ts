@@ -1589,3 +1589,65 @@ export const notasTagsRelacao = mysqlTable("notas_tags_relacao", {
 });
 export type NotaTagRelacao = typeof notasTagsRelacao.$inferSelect;
 export type InsertNotaTagRelacao = typeof notasTagsRelacao.$inferInsert;
+
+
+/**
+ * ========================================
+ * RECEPÇÃO DE VIDROS - Scan de etiquetas
+ * ========================================
+ */
+
+/**
+ * Mapeamento de Destinatários - Associa nomes das etiquetas a lojas do sistema
+ * Quando a IA identifica um nome novo, cria registo aqui. Admin associa a loja(s).
+ */
+export const vidrosDestinatarios = mysqlTable("vidros_destinatarios", {
+  id: int("id").autoincrement().primaryKey(),
+  nomeEtiqueta: varchar("nomeEtiqueta", { length: 500 }).notNull(), // Nome exacto como aparece na etiqueta (ex: "EXPRESSGLASS – SM PESADOS PORTO")
+  lojaId: int("lojaId"), // FK para lojas.id - NULL até o admin associar
+  ativo: boolean("ativo").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type VidroDestinatario = typeof vidrosDestinatarios.$inferSelect;
+export type InsertVidroDestinatario = typeof vidrosDestinatarios.$inferInsert;
+
+/**
+ * Recepção de Vidros - Registo de cada vidro recebido via scan de etiqueta
+ */
+export const vidrosRecepcao = mysqlTable("vidros_recepcao", {
+  id: int("id").autoincrement().primaryKey(),
+  
+  // Dados extraídos da etiqueta (OCR/IA)
+  destinatarioRaw: varchar("destinatarioRaw", { length: 500 }), // Nome do destinatário como aparece na etiqueta
+  eurocode: varchar("eurocode", { length: 100 }), // Eurocode do vidro (ex: "3733")
+  numeroPedido: varchar("numeroPedido", { length: 100 }), // Número do pedido (ex: "30452")
+  codAT: varchar("codAT", { length: 100 }), // Código AT (ex: "18728608955")
+  encomenda: varchar("encomenda", { length: 255 }), // Referência da encomenda (ex: "19330 de 04.03.2026")
+  leitRef: varchar("leitRef", { length: 100 }), // Referência LEIT completa (ex: "1018/3733AGN")
+  observacoesEtiqueta: text("observacoesEtiqueta"), // Texto completo das observações da etiqueta
+  
+  // Foto da etiqueta
+  fotoUrl: text("fotoUrl"), // URL S3 da foto da etiqueta
+  fotoKey: varchar("fotoKey", { length: 500 }), // Chave S3 da foto
+  
+  // Mapeamento
+  destinatarioId: int("destinatarioId"), // FK para vidros_destinatarios.id (mapeamento automático ou manual)
+  lojaScanId: int("lojaScanId"), // FK para lojas.id - loja que fez o scan
+  lojaDestinoId: int("lojaDestinoId"), // FK para lojas.id - loja destinatária (resolvida via mapeamento)
+  
+  // Estado
+  estado: mysqlEnum("estado", [
+    "pendente_associacao", // Destinatário novo, aguarda admin mapear
+    "recebido",           // Vidro registado e destinatário identificado
+    "confirmado",         // Loja destino confirmou recepção
+  ]).default("recebido").notNull(),
+  
+  // Quem registou
+  registadoPorToken: varchar("registadoPorToken", { length: 64 }), // Token da loja que fez o scan
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type VidroRecepcao = typeof vidrosRecepcao.$inferSelect;
+export type InsertVidroRecepcao = typeof vidrosRecepcao.$inferInsert;

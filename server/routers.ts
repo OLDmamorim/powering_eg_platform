@@ -11736,4 +11736,230 @@ IMPORTANTE:
         return { success: true };
       }),
   }),
+
+  // ==================== RECEPÇÃO DE VIDROS ====================
+  vidros: router({
+    // Scan de etiqueta: upload foto + OCR via IA
+    scanEtiqueta: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        base64Foto: z.string(),
+        filename: z.string(),
+        mimeType: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        // Validar token da loja
+        const auth = await db.validarTokenLoja(input.token);
+        if (!auth) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+
+        // 1. Upload da foto para S3
+        const buffer = Buffer.from(input.base64Foto, 'base64');
+        const randomSuffix = Math.random().toString(36).substring(2, 10);
+        const fileKey = `vidros/${auth.loja.id}/${Date.now()}-${randomSuffix}-${input.filename}`;
+        const { url: fotoUrl } = await storagePut(fileKey, buffer, input.mimeType);
+
+        // 2. Enviar foto para IA para OCR
+        const { invokeLLM } = await import('./_core/llm');
+        const ocrResult = await invokeLLM({
+          messages: [
+            {
+              role: 'system',
+              content: `Analisa a etiqueta de transporte de vidro automóvel nesta imagem. Extrai APENAS os seguintes campos em formato JSON:\n- destinatario: nome completo do destinatário (campo DESTINATÁRIO da etiqueta)\n- eurocode: código Eurocode do vidro (normalmente 4 dígitos, encontrado no campo LEIT após a barra, ex: em "1018/3733AGN" o eurocode é "3733")\n- numeroPedido: número do pedido (campo PEDIDO)\n- codAT: código AT (campo COD AT)\n- encomenda: referência da encomenda do cliente (campo OBS/Encomendas, incluir número e data)\n- leitRef: referência LEIT completa (ex: "1018/3733AGN")\n- observacoesCompletas: texto completo do campo Observações\n\nResponde APENAS com JSON válido, sem markdown. Se não conseguires ler algum campo, coloca null.`
+            },
+            {
+              role: 'user',
+              content: [
+                { type: 'text', text: 'Analisa esta etiqueta de transporte de vidro e extrai os dados.' },
+                { type: 'image_url', image_url: { url: fotoUrl, detail: 'high' } }
+              ]
+            }
+          ],
+          response_format: {
+            type: 'json_schema',
+            json_schema: {
+              name: 'etiqueta_vidro',
+              strict: true,
+              schema: {
+                type: 'object',
+                properties: {
+                  destinatario: { type: ['string', 'null'], description: 'Nome do destinatário' },
+                  eurocode: { type: ['string', 'null'], description: 'Eurocode do vidro' },
+                  numeroPedido: { type: ['string', 'null'], description: 'Número do pedido' },
+                  codAT: { type: ['string', 'null'], description: 'Código AT' },
+                  encomenda: { type: ['string', 'null'], description: 'Referência da encomenda' },
+                  leitRef: { type: ['string', 'null'], description: 'Referência LEIT completa' },
+                  observacoesCompletas: { type: ['string', 'null'], description: 'Texto completo das observações' },
+                },
+                required: ['destinatario', 'eurocode', 'numeroPedido', 'codAT', 'encomenda', 'leitRef', 'observacoesCompletas'],
+                additionalProperties: false,
+              }
+            }
+          }
+        });
+
+        let dadosExtraidos: any = {};
+        try {
+          const rawContent = ocrResult.choices[0]?.message?.content;
+          dadosExtraidos = JSON.parse(typeof rawContent === 'string' ? rawContent : '{}');
+        } catch (e) {
+          console.error('Erro ao parsear resposta OCR:', e);
+        }
+
+        // 3. Procurar mapeamento de destinatário
+        let destinatarioId: number | null = null;
+        let lojaDestinoId: number | null = null;
+        let estado: string = 'recebido';
+
+        if (dadosExtraidos.destinatario) {
+          const destinatario = await db.procurarDestinatarioVidro(dadosExtraidos.destinatario);
+          if (destinatario) {
+            destinatarioId = destinatario.id;
+            lojaDestinoId = destinatario.lojaId;
+            if (!lojaDestinoId) {
+              estado = 'pendente_associacao';
+            }
+          } else {
+            // Criar novo registo de destinatário (sem loja associada)
+            destinatarioId = await db.criarDestinatarioVidro({
+              nomeEtiqueta: dadosExtraidos.destinatario,
+            });
+            estado = 'pendente_associacao';
+          }
+        }
+
+        // 4. Registar vidro na BD
+        const vidroId = await db.registarVidro({
+          destinatarioRaw: dadosExtraidos.destinatario || null,
+          eurocode: dadosExtraidos.eurocode || null,
+          numeroPedido: dadosExtraidos.numeroPedido || null,
+          codAT: dadosExtraidos.codAT || null,
+          encomenda: dadosExtraidos.encomenda || null,
+          leitRef: dadosExtraidos.leitRef || null,
+          observacoesEtiqueta: dadosExtraidos.observacoesCompletas || null,
+          fotoUrl,
+          fotoKey: fileKey,
+          destinatarioId: destinatarioId ?? undefined,
+          lojaScanId: auth.loja.id,
+          lojaDestinoId: lojaDestinoId ?? undefined,
+          estado,
+          registadoPorToken: input.token,
+        });
+
+        return {
+          id: vidroId,
+          dadosExtraidos,
+          fotoUrl,
+          destinatarioMapeado: !!lojaDestinoId,
+          lojaDestinoId,
+          estado,
+        };
+      }),
+
+    // Listar vidros da loja (Portal da Loja via token)
+    listarPorLoja: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        limite: z.number().optional(),
+      }))
+      .query(async ({ input }) => {
+        const auth = await db.validarTokenLoja(input.token);
+        if (!auth) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        return db.listarVidrosPorLoja(auth.loja.id, input.limite);
+      }),
+
+    // Contar vidros da loja (para badge)
+    contarPorLoja: publicProcedure
+      .input(z.object({ token: z.string() }))
+      .query(async ({ input }) => {
+        const auth = await db.validarTokenLoja(input.token);
+        if (!auth) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        return db.contarVidrosPorLoja(auth.loja.id);
+      }),
+
+    // Confirmar recepção de vidro (loja destino confirma)
+    confirmarRecepcao: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        vidroId: z.number(),
+      }))
+      .mutation(async ({ input }) => {
+        const auth = await db.validarTokenLoja(input.token);
+        if (!auth) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        await db.actualizarVidro(input.vidroId, { estado: 'confirmado' });
+        return { success: true };
+      }),
+
+    // === ADMIN: Gestão de mapeamentos ===
+    
+    // Listar todos os destinatários mapeados
+    listarDestinatarios: protectedProcedure
+      .query(async () => {
+        return db.listarDestinatariosVidros();
+      }),
+
+    // Associar destinatário a loja
+    associarDestinatario: protectedProcedure
+      .input(z.object({
+        destinatarioId: z.number(),
+        lojaId: z.number(),
+      }))
+      .mutation(async ({ input }) => {
+        await db.actualizarDestinatarioVidro(input.destinatarioId, input.lojaId);
+        // Actualizar vidros pendentes deste destinatário
+        const actualizados = await db.actualizarVidrosPendentesDestinatario(input.destinatarioId, input.lojaId);
+        return { success: true, vidrosActualizados: actualizados };
+      }),
+
+    // Eliminar mapeamento de destinatário
+    eliminarDestinatario: adminProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await db.eliminarDestinatarioVidro(input.id);
+        return { success: true };
+      }),
+
+    // Listar todos os vidros (admin)
+    listarTodos: protectedProcedure
+      .input(z.object({
+        lojaId: z.number().optional(),
+        estado: z.string().optional(),
+        limite: z.number().optional(),
+      }).optional())
+      .query(async ({ input }) => {
+        return db.listarTodosVidros(input || {});
+      }),
+
+    // Listar vidros pendentes de associação
+    listarPendentes: protectedProcedure
+      .query(async () => {
+        return db.listarVidrosPendentesAssociacao();
+      }),
+
+    // Actualizar vidro (admin - corrigir dados, associar loja)
+    actualizar: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        lojaDestinoId: z.number().nullable().optional(),
+        destinatarioId: z.number().nullable().optional(),
+        estado: z.string().optional(),
+        eurocode: z.string().optional(),
+        numeroPedido: z.string().optional(),
+        codAT: z.string().optional(),
+        encomenda: z.string().optional(),
+        leitRef: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        await db.actualizarVidro(id, data);
+        return { success: true };
+      }),
+  }),
 });

@@ -120,6 +120,11 @@ import {
   ClipboardList,
   Star,
   CalendarDays,
+  Camera,
+  ScanLine,
+  Package,
+  Eye,
+  CheckCircle,
 } from "lucide-react";
 
 interface LojaAuth {
@@ -198,7 +203,7 @@ export default function PortalLoja() {
     }
     return null;
   });
-  const [activeTab, setActiveTab] = useState<"home" | "reuniao" | "pendentes" | "historico" | "tarefas" | "resultados" | "volante" | "agenda" | "chatbot" | "circulares">("home");
+  const [activeTab, setActiveTab] = useState<"home" | "reuniao" | "pendentes" | "historico" | "tarefas" | "resultados" | "volante" | "agenda" | "chatbot" | "circulares" | "recepcao_vidros" | "monitor_vidros">("home");
   const [filtroTarefas, setFiltroTarefas] = useState<"todas" | "recebidas" | "enviadas" | "internas">("todas");
   // Estado para o filtro de meses do dashboard
   const [mesesSelecionadosDashboard, setMesesSelecionadosDashboard] = useState<MesSelecionado[]>(() => {
@@ -1258,6 +1263,36 @@ export default function PortalLoja() {
                 </div>
                 <h3 className="text-xl font-bold mb-2">{language === 'pt' ? 'Agenda SM' : 'SM Schedule'}</h3>
                 <p className="text-sm opacity-80">{language === 'pt' ? 'Consultar agenda de serviços SM' : 'Check SM services schedule'}</p>
+              </CardContent>
+            </Card>
+
+            {/* Card Recepção Vidros - Disponível para todos */}
+            <Card 
+              className="cursor-pointer hover:shadow-lg transition-all hover:scale-[1.02] bg-gradient-to-br from-sky-500 to-blue-600 text-white border-0"
+              onClick={() => setActiveTab("recepcao_vidros")}
+            >
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <Camera className="h-10 w-10 opacity-80" />
+                  <ScanLine className="h-6 w-6 opacity-60" />
+                </div>
+                <h3 className="text-xl font-bold mb-2">{language === 'pt' ? 'Recepção Vidros' : 'Glass Reception'}</h3>
+                <p className="text-sm opacity-80">{language === 'pt' ? 'Fotografar etiqueta de vidro' : 'Photograph glass label'}</p>
+              </CardContent>
+            </Card>
+
+            {/* Card Monitor Recepção - Disponível para todos */}
+            <Card 
+              className="cursor-pointer hover:shadow-lg transition-all hover:scale-[1.02] bg-gradient-to-br from-emerald-500 to-green-600 text-white border-0"
+              onClick={() => setActiveTab("monitor_vidros")}
+            >
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <Package className="h-10 w-10 opacity-80" />
+                  <Eye className="h-6 w-6 opacity-60" />
+                </div>
+                <h3 className="text-xl font-bold mb-2">{language === 'pt' ? 'Monitor Recepção' : 'Reception Monitor'}</h3>
+                <p className="text-sm opacity-80">{language === 'pt' ? 'Ver vidros recebidos na loja' : 'View received glasses'}</p>
               </CardContent>
             </Card>
           </div>
@@ -4009,8 +4044,18 @@ export default function PortalLoja() {
         </div>
       )}
 
+      {/* ==================== RECEPÇÃO DE VIDROS ==================== */}
+      {activeTab === "recepcao_vidros" && (
+        <RecepcaoVidrosSection token={token} language={language} lojaAuth={lojaAuth} />
+      )}
+
+      {/* ==================== MONITOR RECEPÇÃO ==================== */}
+      {activeTab === "monitor_vidros" && (
+        <MonitorVidrosSection token={token} language={language} />
+      )}
+
       {/* Botão Flutuante de Acesso Rápido às Tarefas - Pulsa quando há NOVAS */}
-      {activeTab !== 'tarefas' && activeTab !== 'chatbot' && activeTab !== 'circulares' && (
+      {activeTab !== 'tarefas' && activeTab !== 'chatbot' && activeTab !== 'circulares' && activeTab !== 'recepcao_vidros' && (
         <button
           onClick={() => {
             setActiveTab('tarefas');
@@ -9112,5 +9157,481 @@ function RegistarServicosHoje({
         </DialogContent>
       </Dialog>
     </>
+  );
+}
+
+
+// ==================== RECEPÇÃO DE VIDROS ====================
+function RecepcaoVidrosSection({ token, language, lojaAuth }: { token: string; language: string; lojaAuth: LojaAuth | null }) {
+  const [scanning, setScanning] = useState(false);
+  const [processing, setProcessing] = useState(false);
+  const [resultado, setResultado] = useState<any>(null);
+  const [fotoPreview, setFotoPreview] = useState<string | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const scanMutation = trpc.vidros.scanEtiqueta.useMutation({
+    onSuccess: (data) => {
+      setResultado(data);
+      setProcessing(false);
+      toast.success(language === 'pt' ? 'Etiqueta processada com sucesso!' : 'Label processed successfully!');
+    },
+    onError: (err) => {
+      setProcessing(false);
+      toast.error(language === 'pt' ? `Erro: ${err.message}` : `Error: ${err.message}`);
+    },
+  });
+
+  const iniciarCamera = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } }
+      });
+      streamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        videoRef.current.play();
+      }
+      setScanning(true);
+      setResultado(null);
+      setFotoPreview(null);
+    } catch (err) {
+      console.error('Erro ao aceder à câmara:', err);
+      toast.error(language === 'pt' ? 'Não foi possível aceder à câmara. Verifique as permissões.' : 'Could not access camera. Check permissions.');
+    }
+  };
+
+  const pararCamera = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+    setScanning(false);
+  };
+
+  const tirarFoto = () => {
+    if (!videoRef.current || !canvasRef.current) return;
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    ctx.drawImage(video, 0, 0);
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+    setFotoPreview(dataUrl);
+    pararCamera();
+    processarFoto(dataUrl);
+  };
+
+  const processarFoto = (dataUrl: string) => {
+    setProcessing(true);
+    const base64 = dataUrl.split(',')[1];
+    scanMutation.mutate({
+      token,
+      base64Foto: base64,
+      filename: `etiqueta_${Date.now()}.jpg`,
+      mimeType: 'image/jpeg',
+    });
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result as string;
+      setFotoPreview(dataUrl);
+      setResultado(null);
+      processarFoto(dataUrl);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const resetar = () => {
+    setResultado(null);
+    setFotoPreview(null);
+    setProcessing(false);
+    pararCamera();
+  };
+
+  // Cleanup ao desmontar
+  useEffect(() => {
+    return () => {
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, []);
+
+  return (
+    <div className="space-y-4">
+      <h2 className="text-2xl font-bold flex items-center gap-2">
+        <Camera className="h-7 w-7 text-blue-600" />
+        {language === 'pt' ? 'Recepção de Vidros' : 'Glass Reception'}
+      </h2>
+      <p className="text-muted-foreground">
+        {language === 'pt' 
+          ? 'Fotografe a etiqueta do vidro recebido. O sistema irá extrair automaticamente os dados.' 
+          : 'Photograph the received glass label. The system will automatically extract the data.'}
+      </p>
+
+      {/* Área da câmara / foto */}
+      {!resultado && !processing && (
+        <div className="space-y-4">
+          {scanning ? (
+            <div className="relative rounded-lg overflow-hidden bg-black">
+              <video ref={videoRef} className="w-full max-h-[60vh] object-contain" autoPlay playsInline muted />
+              <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-4">
+                <Button 
+                  size="lg" 
+                  className="bg-white text-black hover:bg-gray-100 rounded-full h-16 w-16 p-0"
+                  onClick={tirarFoto}
+                >
+                  <Camera className="h-8 w-8" />
+                </Button>
+                <Button 
+                  size="lg" 
+                  variant="destructive" 
+                  className="rounded-full h-16 w-16 p-0"
+                  onClick={pararCamera}
+                >
+                  <X className="h-8 w-8" />
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-4">
+              <Button 
+                size="lg" 
+                className="w-full h-32 text-lg bg-gradient-to-br from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700"
+                onClick={iniciarCamera}
+              >
+                <Camera className="h-8 w-8 mr-3" />
+                {language === 'pt' ? 'Abrir Câmara' : 'Open Camera'}
+              </Button>
+              <div className="text-center text-muted-foreground text-sm">
+                {language === 'pt' ? 'ou' : 'or'}
+              </div>
+              <Button 
+                variant="outline" 
+                size="lg" 
+                className="w-full h-16"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <Upload className="h-5 w-5 mr-2" />
+                {language === 'pt' ? 'Escolher Foto da Galeria' : 'Choose Photo from Gallery'}
+              </Button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                className="hidden"
+                onChange={handleFileUpload}
+              />
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* A processar */}
+      {processing && (
+        <Card className="border-blue-200 bg-blue-50">
+          <CardContent className="p-8 flex flex-col items-center gap-4">
+            {fotoPreview && (
+              <img src={fotoPreview} alt="Etiqueta" className="w-full max-h-48 object-contain rounded-lg" />
+            )}
+            <Loader2 className="h-10 w-10 animate-spin text-blue-600" />
+            <p className="text-lg font-medium text-blue-800">
+              {language === 'pt' ? 'A analisar etiqueta com IA...' : 'Analyzing label with AI...'}
+            </p>
+            <p className="text-sm text-blue-600">
+              {language === 'pt' ? 'Isto pode demorar alguns segundos' : 'This may take a few seconds'}
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Resultado do scan */}
+      {resultado && (
+        <div className="space-y-4">
+          {/* Foto da etiqueta */}
+          {(fotoPreview || resultado.fotoUrl) && (
+            <Card>
+              <CardContent className="p-4">
+                <img 
+                  src={fotoPreview || resultado.fotoUrl} 
+                  alt="Etiqueta" 
+                  className="w-full max-h-48 object-contain rounded-lg" 
+                />
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Dados extraídos */}
+          <Card className={resultado.destinatarioMapeado ? 'border-green-300 bg-green-50' : 'border-amber-300 bg-amber-50'}>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg flex items-center gap-2">
+                {resultado.destinatarioMapeado ? (
+                  <>
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                    <span className="text-green-800">{language === 'pt' ? 'Vidro Registado' : 'Glass Registered'}</span>
+                  </>
+                ) : (
+                  <>
+                    <AlertCircle className="h-5 w-5 text-amber-600" />
+                    <span className="text-amber-800">{language === 'pt' ? 'Pendente de Associação' : 'Pending Association'}</span>
+                  </>
+                )}
+              </CardTitle>
+              {!resultado.destinatarioMapeado && (
+                <CardDescription className="text-amber-700">
+                  {language === 'pt' 
+                    ? 'O destinatário ainda não está associado a uma loja. O administrador irá fazer a associação.' 
+                    : 'The recipient is not yet associated with a store. The administrator will make the association.'}
+                </CardDescription>
+              )}
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="grid grid-cols-1 gap-3">
+                {resultado.dadosExtraidos?.destinatario && (
+                  <div className="bg-white/80 rounded-lg p-3">
+                    <p className="text-xs font-medium text-muted-foreground uppercase">{language === 'pt' ? 'Destinatário' : 'Recipient'}</p>
+                    <p className="font-semibold text-base">{resultado.dadosExtraidos.destinatario}</p>
+                  </div>
+                )}
+                <div className="grid grid-cols-2 gap-3">
+                  {resultado.dadosExtraidos?.eurocode && (
+                    <div className="bg-white/80 rounded-lg p-3">
+                      <p className="text-xs font-medium text-muted-foreground uppercase">Eurocode</p>
+                      <p className="font-bold text-xl text-blue-700">{resultado.dadosExtraidos.eurocode}</p>
+                    </div>
+                  )}
+                  {resultado.dadosExtraidos?.numeroPedido && (
+                    <div className="bg-white/80 rounded-lg p-3">
+                      <p className="text-xs font-medium text-muted-foreground uppercase">{language === 'pt' ? 'Pedido' : 'Order'}</p>
+                      <p className="font-semibold text-lg">{resultado.dadosExtraidos.numeroPedido}</p>
+                    </div>
+                  )}
+                </div>
+                {resultado.dadosExtraidos?.codAT && (
+                  <div className="bg-white/80 rounded-lg p-3">
+                    <p className="text-xs font-medium text-muted-foreground uppercase">COD AT</p>
+                    <p className="font-mono text-sm">{resultado.dadosExtraidos.codAT}</p>
+                  </div>
+                )}
+                {resultado.dadosExtraidos?.encomenda && (
+                  <div className="bg-white/80 rounded-lg p-3">
+                    <p className="text-xs font-medium text-muted-foreground uppercase">{language === 'pt' ? 'Encomenda' : 'Order Ref'}</p>
+                    <p className="font-semibold">{resultado.dadosExtraidos.encomenda}</p>
+                  </div>
+                )}
+                {resultado.dadosExtraidos?.leitRef && (
+                  <div className="bg-white/80 rounded-lg p-3">
+                    <p className="text-xs font-medium text-muted-foreground uppercase">LEIT</p>
+                    <p className="font-mono">{resultado.dadosExtraidos.leitRef}</p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Botão para novo scan */}
+          <Button 
+            size="lg" 
+            className="w-full h-14 text-lg bg-gradient-to-br from-sky-500 to-blue-600"
+            onClick={resetar}
+          >
+            <Camera className="h-6 w-6 mr-2" />
+            {language === 'pt' ? 'Fotografar Outra Etiqueta' : 'Photograph Another Label'}
+          </Button>
+        </div>
+      )}
+
+      <canvas ref={canvasRef} className="hidden" />
+    </div>
+  );
+}
+
+// ==================== MONITOR RECEPÇÃO ====================
+function MonitorVidrosSection({ token, language }: { token: string; language: string }) {
+  const { data: vidros, isLoading, refetch } = trpc.vidros.listarPorLoja.useQuery(
+    { token, limite: 100 },
+    { enabled: !!token }
+  );
+  const { data: contagem } = trpc.vidros.contarPorLoja.useQuery(
+    { token },
+    { enabled: !!token }
+  );
+
+  const confirmarMutation = trpc.vidros.confirmarRecepcao.useMutation({
+    onSuccess: () => {
+      refetch();
+      toast.success(language === 'pt' ? 'Recepção confirmada!' : 'Reception confirmed!');
+    },
+  });
+
+  const formatDate = (date: any) => {
+    if (!date) return '-';
+    const d = new Date(date);
+    return d.toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  };
+
+  const getEstadoBadge = (estado: string) => {
+    switch (estado) {
+      case 'recebido':
+        return <Badge className="bg-blue-100 text-blue-800 border-blue-200">{language === 'pt' ? 'Recebido' : 'Received'}</Badge>;
+      case 'confirmado':
+        return <Badge className="bg-green-100 text-green-800 border-green-200">{language === 'pt' ? 'Confirmado' : 'Confirmed'}</Badge>;
+      case 'pendente_associacao':
+        return <Badge className="bg-amber-100 text-amber-800 border-amber-200">{language === 'pt' ? 'Pendente' : 'Pending'}</Badge>;
+      default:
+        return <Badge variant="outline">{estado}</Badge>;
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold flex items-center gap-2">
+          <Package className="h-7 w-7 text-emerald-600" />
+          {language === 'pt' ? 'Monitor de Recepção' : 'Reception Monitor'}
+        </h2>
+        <Button variant="outline" size="sm" onClick={() => refetch()}>
+          <RefreshCw className="h-4 w-4 mr-1" />
+          {language === 'pt' ? 'Actualizar' : 'Refresh'}
+        </Button>
+      </div>
+
+      {/* Contadores */}
+      {contagem && (
+        <div className="grid grid-cols-2 gap-3">
+          <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
+            <CardContent className="p-4 text-center">
+              <p className="text-3xl font-bold text-blue-700">{contagem.total}</p>
+              <p className="text-sm text-blue-600">{language === 'pt' ? 'Total Vidros' : 'Total Glasses'}</p>
+            </CardContent>
+          </Card>
+          <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
+            <CardContent className="p-4 text-center">
+              <p className="text-3xl font-bold text-green-700">{contagem.hoje}</p>
+              <p className="text-sm text-green-600">{language === 'pt' ? 'Hoje' : 'Today'}</p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Lista de vidros */}
+      {isLoading ? (
+        <div className="flex justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      ) : !vidros || vidros.length === 0 ? (
+        <Card className="border-dashed">
+          <CardContent className="p-8 text-center">
+            <Package className="h-12 w-12 mx-auto text-muted-foreground/30 mb-3" />
+            <p className="text-lg font-medium text-muted-foreground">
+              {language === 'pt' ? 'Nenhum vidro registado' : 'No glasses registered'}
+            </p>
+            <p className="text-sm text-muted-foreground/70">
+              {language === 'pt' ? 'Os vidros recebidos aparecerão aqui' : 'Received glasses will appear here'}
+            </p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-3">
+          {vidros.map((vidro: any) => (
+            <Card key={vidro.id} className="overflow-hidden">
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 space-y-2">
+                    {/* Eurocode em destaque */}
+                    <div className="flex items-center gap-3">
+                      {vidro.eurocode && (
+                        <span className="text-2xl font-bold text-blue-700">
+                          EC: {vidro.eurocode}
+                        </span>
+                      )}
+                      {getEstadoBadge(vidro.estado)}
+                    </div>
+                    
+                    {/* Destinatário */}
+                    {vidro.destinatarioRaw && (
+                      <p className="text-sm text-muted-foreground">
+                        <span className="font-medium">{language === 'pt' ? 'De:' : 'From:'}</span> {vidro.destinatarioRaw}
+                      </p>
+                    )}
+                    
+                    {/* Dados da etiqueta */}
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      {vidro.numeroPedido && (
+                        <div>
+                          <span className="text-muted-foreground">{language === 'pt' ? 'Pedido:' : 'Order:'}</span>{' '}
+                          <span className="font-medium">{vidro.numeroPedido}</span>
+                        </div>
+                      )}
+                      {vidro.encomenda && (
+                        <div>
+                          <span className="text-muted-foreground">{language === 'pt' ? 'Enc.:' : 'Ref:'}</span>{' '}
+                          <span className="font-medium">{vidro.encomenda}</span>
+                        </div>
+                      )}
+                      {vidro.codAT && (
+                        <div>
+                          <span className="text-muted-foreground">COD AT:</span>{' '}
+                          <span className="font-mono text-xs">{vidro.codAT}</span>
+                        </div>
+                      )}
+                      {vidro.leitRef && (
+                        <div>
+                          <span className="text-muted-foreground">LEIT:</span>{' '}
+                          <span className="font-mono text-xs">{vidro.leitRef}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Data */}
+                    <p className="text-xs text-muted-foreground">
+                      <Clock className="h-3 w-3 inline mr-1" />
+                      {formatDate(vidro.createdAt)}
+                    </p>
+                  </div>
+
+                  {/* Foto miniatura */}
+                  {vidro.fotoUrl && (
+                    <img 
+                      src={vidro.fotoUrl} 
+                      alt="Etiqueta" 
+                      className="w-16 h-16 object-cover rounded-lg cursor-pointer hover:opacity-80"
+                      onClick={() => window.open(vidro.fotoUrl, '_blank')}
+                    />
+                  )}
+                </div>
+
+                {/* Botão confirmar */}
+                {vidro.estado === 'recebido' && (
+                  <Button
+                    size="sm"
+                    className="w-full mt-3 bg-green-600 hover:bg-green-700"
+                    onClick={() => confirmarMutation.mutate({ token, vidroId: vidro.id })}
+                    disabled={confirmarMutation.isPending}
+                  >
+                    {confirmarMutation.isPending ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                    ) : (
+                      <CheckCircle className="h-4 w-4 mr-1" />
+                    )}
+                    {language === 'pt' ? 'Confirmar Recepção' : 'Confirm Reception'}
+                  </Button>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }

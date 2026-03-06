@@ -485,3 +485,16 @@
 - [x] Botão muda de "Criar Nota" para "Guardar e Fechar" após auto-criação
 - [x] Upload de imagens funciona após auto-criação
 - [ ] Guardar checkpoint
+
+## Módulo Recepção de Vidros
+- [x] Schema BD: tabela vidros_recepcao (id, foto, destinatario_raw, eurocode, pedido, cod_at, encomenda, loja_scan_id, loja_destino_id, estado, timestamps)
+- [x] Schema BD: tabela vidros_mapeamento_destinatarios (id, nome_etiqueta, loja_ids associadas)
+- [x] Endpoint tRPC: upload foto etiqueta + OCR via IA (extrair dados)
+- [x] Endpoint tRPC: CRUD vidros recepcionados
+- [x] Endpoint tRPC: CRUD mapeamentos destinatários (admin)
+- [x] Card "Recepção Vidros" no Portal da Loja (câmara + scan + confirmação)
+- [x] Card "Monitor Recepção" no Portal da Loja (lista vidros da loja)
+- [x] Gestão de Mapeamentos no Dashboard Admin (associar nomes a lojas)
+- [x] Mapeamento automático: quando destinatário já está mapeado, associar loja automaticamente
+- [x] Destinatários novos ficam "pendente de associação" até admin mapear
+- [x] Testes vitest para funções de BD e parsing OCR (15 testes passam)
