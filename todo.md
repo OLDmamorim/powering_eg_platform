@@ -517,3 +517,7 @@
 - [x] Actualizar frontend para mostrar lista de Eurocodes como badges
 - [x] Actualizar vista admin para mostrar múltiplos Eurocodes
 - [x] Corrigir terminologia: não são só vidros, podem ser frisos e outros materiais
+
+## Bug: Dropdown de lojas vazio no dialog de associação de destinatários
+- [x] Investigar: frontend chamava trpc.lojas.getAll que não existe, correcto é trpc.lojas.list
+- [x] Corrigido para usar trpc.lojas.list

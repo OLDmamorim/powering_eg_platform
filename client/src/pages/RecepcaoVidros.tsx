@@ -43,7 +43,7 @@ export default function RecepcaoVidros() {
       : {}
   );
   const { data: pendentes, refetch: refetchPendentes } = trpc.vidros.listarPendentes.useQuery();
-  const { data: lojasData } = trpc.lojas.getAll.useQuery();
+  const { data: lojasData } = trpc.lojas.list.useQuery();
 
   // Mutations
   const associarMutation = trpc.vidros.associarDestinatario.useMutation({
