@@ -9163,14 +9163,12 @@ function RegistarServicosHoje({
 
 // ==================== RECEPÇÃO DE VIDROS ====================
 function RecepcaoVidrosSection({ token, language, lojaAuth }: { token: string; language: string; lojaAuth: LojaAuth | null }) {
-  const [scanning, setScanning] = useState(false);
   const [processing, setProcessing] = useState(false);
   const [resultado, setResultado] = useState<any>(null);
   const [fotoPreview, setFotoPreview] = useState<string | null>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const streamRef = useRef<MediaStream | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const scanMutation = trpc.vidros.scanEtiqueta.useMutation({
     onSuccess: (data) => {
@@ -9184,123 +9182,76 @@ function RecepcaoVidrosSection({ token, language, lojaAuth }: { token: string; l
     },
   });
 
-  const [cameraReady, setCameraReady] = useState(false);
-
-  const iniciarCamera = async () => {
-    try {
-      setCameraReady(false);
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
-      });
-      streamRef.current = stream;
-      if (videoRef.current) {
-        const video = videoRef.current;
-        video.setAttribute('autoplay', '');
-        video.setAttribute('playsinline', '');
-        video.setAttribute('muted', '');
-        video.srcObject = stream;
-        video.onloadedmetadata = () => {
-          video.play().then(() => {
-            setCameraReady(true);
-          }).catch(console.error);
-        };
-      }
-      setScanning(true);
-      setResultado(null);
-      setFotoPreview(null);
-    } catch (err) {
-      console.error('Erro ao aceder à câmara:', err);
-      toast.error(language === 'pt' ? 'Não foi possível aceder à câmara. Use o botão "Escolher Foto" em alternativa.' : 'Could not access camera. Use "Choose Photo" instead.');
-    }
-  };
-
-  const pararCamera = () => {
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
-      streamRef.current = null;
-    }
-    setScanning(false);
-  };
-
-  const tirarFoto = () => {
-    if (!videoRef.current || !canvasRef.current) return;
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-    
-    if (video.videoWidth === 0 || video.videoHeight === 0) {
-      toast.error(language === 'pt' ? 'Câmara ainda não está pronta. Aguarde um momento.' : 'Camera not ready yet. Please wait.');
-      return;
-    }
-    
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    ctx.drawImage(video, 0, 0);
-    
-    const imageData = ctx.getImageData(0, 0, Math.min(100, canvas.width), Math.min(100, canvas.height));
-    const hasContent = imageData.data.some((val, idx) => idx % 4 !== 3 && val > 10);
-    if (!hasContent) {
-      toast.error(language === 'pt' ? 'A imagem parece estar vazia. Tente novamente ou use "Escolher Foto".' : 'Image appears empty. Try again or use "Choose Photo".');
-      return;
-    }
-    
-    const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
-    setFotoPreview(dataUrl);
-    pararCamera();
-    processarFoto(dataUrl);
-  };
-
-  const processarFoto = (dataUrl: string) => {
+  const comprimirEEnviar = (file: File) => {
     setProcessing(true);
-    const base64 = dataUrl.split(',')[1];
+    setResultado(null);
     
-    if (!base64 || base64.length < 100) {
-      toast.error(language === 'pt' ? 'Erro ao capturar foto. Tente novamente.' : 'Error capturing photo. Try again.');
-      setProcessing(false);
-      return;
-    }
-    
-    const mimeMatch = dataUrl.match(/^data:(image\/\w+);/);
-    const mimeType = mimeMatch ? mimeMatch[1] : 'image/jpeg';
-    const ext = mimeType === 'image/png' ? 'png' : 'jpg';
-    
-    scanMutation.mutate({
-      token,
-      base64Foto: base64,
-      filename: `etiqueta_${Date.now()}.${ext}`,
-      mimeType,
-    });
-  };
-
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const img = new Image();
     const reader = new FileReader();
+    
     reader.onload = () => {
-      const dataUrl = reader.result as string;
-      setFotoPreview(dataUrl);
-      setResultado(null);
-      processarFoto(dataUrl);
+      img.onload = () => {
+        const canvas = canvasRef.current;
+        if (!canvas) { setProcessing(false); return; }
+        
+        // Redimensionar para max 1600px mantendo proporção
+        const MAX = 1600;
+        let w = img.width;
+        let h = img.height;
+        if (w > MAX || h > MAX) {
+          if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
+          else { w = Math.round(w * MAX / h); h = MAX; }
+        }
+        
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) { setProcessing(false); return; }
+        ctx.drawImage(img, 0, 0, w, h);
+        
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.80);
+        setFotoPreview(dataUrl);
+        
+        const base64 = dataUrl.split(',')[1];
+        if (!base64 || base64.length < 100) {
+          toast.error(language === 'pt' ? 'Erro ao processar foto. Tente novamente.' : 'Error processing photo. Try again.');
+          setProcessing(false);
+          return;
+        }
+        
+        scanMutation.mutate({
+          token,
+          base64Foto: base64,
+          filename: `etiqueta_${Date.now()}.jpg`,
+          mimeType: 'image/jpeg',
+        });
+      };
+      img.onerror = () => {
+        toast.error(language === 'pt' ? 'Erro ao carregar imagem.' : 'Error loading image.');
+        setProcessing(false);
+      };
+      img.src = reader.result as string;
+    };
+    reader.onerror = () => {
+      toast.error(language === 'pt' ? 'Erro ao ler ficheiro.' : 'Error reading file.');
+      setProcessing(false);
     };
     reader.readAsDataURL(file);
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    // Reset input para permitir seleccionar o mesmo ficheiro novamente
+    e.target.value = '';
+    comprimirEEnviar(file);
   };
 
   const resetar = () => {
     setResultado(null);
     setFotoPreview(null);
     setProcessing(false);
-    pararCamera();
   };
-
-  // Cleanup ao desmontar
-  useEffect(() => {
-    return () => {
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => track.stop());
-      }
-    };
-  }, []);
 
   return (
     <div className="space-y-4">
@@ -9314,77 +9265,46 @@ function RecepcaoVidrosSection({ token, language, lojaAuth }: { token: string; l
           : 'Photograph the received glass label. The system will automatically extract the data.'}
       </p>
 
-      {/* Área da câmara / foto */}
+      {/* Botões de captura */}
       {!resultado && !processing && (
-        <div className="space-y-4">
-          {scanning ? (
-            <div className="relative rounded-lg overflow-hidden bg-black">
-              <video 
-                ref={videoRef} 
-                className="w-full max-h-[60vh] object-contain" 
-                autoPlay 
-                playsInline 
-                muted 
-                style={{ minHeight: '200px' }}
-              />
-              {!cameraReady && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/80">
-                  <div className="text-center text-white">
-                    <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2" />
-                    <p>{language === 'pt' ? 'A iniciar câmara...' : 'Starting camera...'}</p>
-                  </div>
-                </div>
-              )}
-              <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-4">
-                <Button 
-                  size="lg" 
-                  className="bg-white text-black hover:bg-gray-100 rounded-full h-16 w-16 p-0"
-                  onClick={tirarFoto}
-                  disabled={!cameraReady}
-                >
-                  <Camera className="h-8 w-8" />
-                </Button>
-                <Button 
-                  size="lg" 
-                  variant="destructive" 
-                  className="rounded-full h-16 w-16 p-0"
-                  onClick={pararCamera}
-                >
-                  <X className="h-8 w-8" />
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <div className="flex flex-col gap-4">
-              <Button 
-                size="lg" 
-                className="w-full h-32 text-lg bg-gradient-to-br from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700"
-                onClick={iniciarCamera}
-              >
-                <Camera className="h-8 w-8 mr-3" />
-                {language === 'pt' ? 'Abrir Câmara' : 'Open Camera'}
-              </Button>
-              <div className="text-center text-muted-foreground text-sm">
-                {language === 'pt' ? 'ou' : 'or'}
-              </div>
-              <Button 
-                variant="outline" 
-                size="lg" 
-                className="w-full h-16"
-                onClick={() => fileInputRef.current?.click()}
-              >
-                <Upload className="h-5 w-5 mr-2" />
-                {language === 'pt' ? 'Escolher Foto da Galeria' : 'Choose Photo from Gallery'}
-              </Button>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleFileUpload}
-              />
-            </div>
-          )}
+        <div className="flex flex-col gap-4">
+          <Button 
+            size="lg" 
+            className="w-full h-32 text-lg bg-gradient-to-br from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700"
+            onClick={() => cameraInputRef.current?.click()}
+          >
+            <Camera className="h-8 w-8 mr-3" />
+            {language === 'pt' ? 'Tirar Foto' : 'Take Photo'}
+          </Button>
+          <div className="text-center text-muted-foreground text-sm">
+            {language === 'pt' ? 'ou' : 'or'}
+          </div>
+          <Button 
+            variant="outline" 
+            size="lg" 
+            className="w-full h-16"
+            onClick={() => galleryInputRef.current?.click()}
+          >
+            <Upload className="h-5 w-5 mr-2" />
+            {language === 'pt' ? 'Escolher Foto da Galeria' : 'Choose Photo from Gallery'}
+          </Button>
+          {/* Input para câmara nativa (abre app de câmara do telemóvel) */}
+          <input
+            ref={cameraInputRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            className="hidden"
+            onChange={handleFileSelect}
+          />
+          {/* Input para galeria (abre galeria de fotos) */}
+          <input
+            ref={galleryInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleFileSelect}
+          />
         </div>
       )}
 

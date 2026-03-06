@@ -505,3 +505,8 @@
 - [x] Validar foto não-vazia antes de enviar (buffer > 100 bytes)
 - [x] Simplificar chamada LLM (remover json_schema strict, suporte markdown code blocks)
 - [x] Remover capture=environment do input file (forçava câmara em vez de galeria)
+
+## Bug Fix: Câmara getUserMedia não funciona em mobile - substituir por input nativo
+- [x] Remover getUserMedia e usar input type=file com capture=environment
+- [x] Dois botões: "Tirar Foto" (abre câmara nativa) e "Escolher da Galeria"
+- [x] Comprimir imagem antes de enviar (canvas resize max 1600px)
