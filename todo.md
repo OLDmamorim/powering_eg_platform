@@ -531,3 +531,8 @@
 - [x] Linhas compactas, informação condensada em tabela
 - [x] Endpoint backend para eliminar registo de vidro
 - [x] Botão ver foto e confirmar recepção na coluna acções
+
+## Bug: Monitor Recepção - Layout PC
+- [x] Repor cards de contadores (Total Registos e Hoje) como blocos visuais com bordas coloridas
+- [x] Corrigir texto cinza claro para preto/escuro legível (text-gray-900, text-gray-800)
+- [x] Título e cabeçalhos com contraste adequado (uppercase, bold, text-gray-700)

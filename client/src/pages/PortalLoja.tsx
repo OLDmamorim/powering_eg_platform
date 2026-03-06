@@ -9496,25 +9496,36 @@ function MonitorVidrosSection({ token, language }: { token: string; language: st
   }, [vidros, busca, filtroData]);
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold flex items-center gap-2">
-          <Package className="h-5 w-5 text-emerald-600" />
+        <h2 className="text-2xl font-bold flex items-center gap-2 text-gray-900">
+          <Package className="h-6 w-6 text-emerald-600" />
           {language === 'pt' ? 'Monitor de Recepção' : 'Reception Monitor'}
         </h2>
-        <div className="flex items-center gap-2">
-          {contagem && (
-            <div className="flex items-center gap-3 text-sm">
-              <span className="font-semibold text-blue-700">{contagem.total} total</span>
-              <span className="font-semibold text-green-700">{contagem.hoje} hoje</span>
-            </div>
-          )}
-          <Button variant="outline" size="sm" onClick={() => refetch()}>
-            <RefreshCw className="h-3.5 w-3.5" />
-          </Button>
-        </div>
+        <Button variant="outline" size="sm" onClick={() => refetch()}>
+          <RefreshCw className="h-4 w-4 mr-1" />
+          {language === 'pt' ? 'Actualizar' : 'Refresh'}
+        </Button>
       </div>
+
+      {/* Cards Contadores */}
+      {contagem && (
+        <div className="grid grid-cols-2 gap-3">
+          <Card className="bg-white border-2 border-blue-200">
+            <CardContent className="p-4 text-center">
+              <p className="text-3xl font-bold text-blue-700">{contagem.total}</p>
+              <p className="text-sm font-medium text-gray-700">{language === 'pt' ? 'Total Registos' : 'Total Records'}</p>
+            </CardContent>
+          </Card>
+          <Card className="bg-white border-2 border-green-200">
+            <CardContent className="p-4 text-center">
+              <p className="text-3xl font-bold text-green-700">{contagem.hoje}</p>
+              <p className="text-sm font-medium text-gray-700">{language === 'pt' ? 'Hoje' : 'Today'}</p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* Filtros */}
       <div className="flex gap-2 flex-wrap">
@@ -9523,17 +9534,17 @@ function MonitorVidrosSection({ token, language }: { token: string; language: st
             placeholder={language === 'pt' ? 'Buscar eurocode, pedido, destinatário...' : 'Search eurocode, order...'}
             value={busca}
             onChange={(e: any) => setBusca(e.target.value)}
-            className="h-8 text-sm bg-white"
+            className="h-9 text-sm bg-white text-gray-900 border-gray-300"
           />
         </div>
         <Input
           type="date"
           value={filtroData}
           onChange={(e: any) => setFiltroData(e.target.value)}
-          className="h-8 text-sm w-[140px] bg-white"
+          className="h-9 text-sm w-[160px] bg-white text-gray-900 border-gray-300"
         />
         {(busca || filtroData) && (
-          <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={() => { setBusca(''); setFiltroData(''); }}>
+          <Button variant="outline" size="sm" className="h-9 text-xs" onClick={() => { setBusca(''); setFiltroData(''); }}>
             Limpar
           </Button>
         )}
@@ -9542,82 +9553,82 @@ function MonitorVidrosSection({ token, language }: { token: string; language: st
       {/* Tabela */}
       {isLoading ? (
         <div className="flex justify-center py-8">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          <Loader2 className="h-6 w-6 animate-spin text-gray-500" />
         </div>
       ) : !vidrosFiltrados || vidrosFiltrados.length === 0 ? (
-        <div className="text-center py-8 text-muted-foreground text-sm">
+        <div className="text-center py-8 text-gray-500 text-sm">
           <Package className="h-8 w-8 mx-auto mb-2 opacity-30" />
           {busca || filtroData ? 'Nenhum resultado para os filtros aplicados' : 'Nenhum registo encontrado'}
         </div>
       ) : (
-        <div className="bg-white rounded-lg border overflow-x-auto">
+        <div className="bg-white rounded-lg border border-gray-200 overflow-x-auto shadow-sm">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b bg-gray-50/80">
-                <th className="text-left py-2 px-3 font-semibold text-blue-800">Eurocode</th>
-                <th className="text-left py-2 px-2 font-semibold">Pedido</th>
-                <th className="text-left py-2 px-2 font-semibold">Encomenda</th>
-                <th className="text-left py-2 px-2 font-semibold">Destinatário</th>
-                <th className="text-left py-2 px-2 font-semibold">Data</th>
-                <th className="text-left py-2 px-2 font-semibold">Estado</th>
-                <th className="text-center py-2 px-2 font-semibold">Acções</th>
+              <tr className="border-b-2 border-gray-200 bg-gray-50">
+                <th className="text-left py-2.5 px-3 font-bold text-blue-800 text-xs uppercase tracking-wide">Eurocode</th>
+                <th className="text-left py-2.5 px-3 font-bold text-gray-700 text-xs uppercase tracking-wide">Pedido</th>
+                <th className="text-left py-2.5 px-3 font-bold text-gray-700 text-xs uppercase tracking-wide">Encomenda</th>
+                <th className="text-left py-2.5 px-3 font-bold text-gray-700 text-xs uppercase tracking-wide">Destinatário</th>
+                <th className="text-left py-2.5 px-3 font-bold text-gray-700 text-xs uppercase tracking-wide">Data</th>
+                <th className="text-left py-2.5 px-3 font-bold text-gray-700 text-xs uppercase tracking-wide">Estado</th>
+                <th className="text-center py-2.5 px-3 font-bold text-gray-700 text-xs uppercase tracking-wide">Acções</th>
               </tr>
             </thead>
             <tbody>
               {vidrosFiltrados.map((vidro: any) => (
-                <tr key={vidro.id} className="border-b last:border-0 hover:bg-gray-50/50">
+                <tr key={vidro.id} className="border-b border-gray-100 hover:bg-blue-50/30">
                   {/* Eurocode - destaque */}
-                  <td className="py-1.5 px-3">
+                  <td className="py-2 px-3">
                     <div className="flex flex-wrap gap-1">
                       {vidro.eurocode ? vidro.eurocode.split(',').map((ec: string, i: number) => (
-                        <span key={i} className="inline-block bg-blue-600 text-white font-bold text-xs px-2 py-0.5 rounded">
+                        <span key={i} className="inline-block bg-blue-600 text-white font-bold text-xs px-2.5 py-1 rounded">
                           {ec.trim()}
                         </span>
-                      )) : <span className="text-muted-foreground text-xs">-</span>}
+                      )) : <span className="text-gray-400 text-xs">-</span>}
                     </div>
                   </td>
                   {/* Pedido */}
-                  <td className="py-1.5 px-2 font-medium">{vidro.numeroPedido || '-'}</td>
+                  <td className="py-2 px-3 font-semibold text-gray-900">{vidro.numeroPedido || '-'}</td>
                   {/* Encomenda */}
-                  <td className="py-1.5 px-2 text-xs">{vidro.encomenda || '-'}</td>
+                  <td className="py-2 px-3 text-gray-800">{vidro.encomenda || '-'}</td>
                   {/* Destinatário */}
-                  <td className="py-1.5 px-2 text-xs max-w-[150px] truncate" title={vidro.destinatarioRaw || ''}>
+                  <td className="py-2 px-3 text-gray-800 max-w-[200px] truncate" title={vidro.destinatarioRaw || ''}>
                     {vidro.destinatarioRaw || '-'}
                   </td>
                   {/* Data */}
-                  <td className="py-1.5 px-2 text-xs text-muted-foreground whitespace-nowrap">
-                    {formatDate(vidro.createdAt)}<br/>
-                    <span className="text-[10px]">{formatTime(vidro.createdAt)}</span>
+                  <td className="py-2 px-3 text-gray-700 whitespace-nowrap">
+                    {formatDate(vidro.createdAt)}
+                    <span className="text-gray-500 text-xs ml-1">{formatTime(vidro.createdAt)}</span>
                   </td>
                   {/* Estado */}
-                  <td className="py-1.5 px-2">
-                    {vidro.estado === 'recebido' && <Badge className="bg-blue-100 text-blue-800 border-blue-200 text-[10px] px-1.5">Recebido</Badge>}
-                    {vidro.estado === 'confirmado' && <Badge className="bg-green-100 text-green-800 border-green-200 text-[10px] px-1.5">Confirmado</Badge>}
-                    {vidro.estado === 'pendente_associacao' && <Badge className="bg-amber-100 text-amber-800 border-amber-200 text-[10px] px-1.5">Pendente</Badge>}
+                  <td className="py-2 px-3">
+                    {vidro.estado === 'recebido' && <Badge className="bg-blue-100 text-blue-800 border-blue-200 text-xs px-2">Recebido</Badge>}
+                    {vidro.estado === 'confirmado' && <Badge className="bg-green-100 text-green-800 border-green-200 text-xs px-2">Confirmado</Badge>}
+                    {vidro.estado === 'pendente_associacao' && <Badge className="bg-amber-100 text-amber-800 border-amber-200 text-xs px-2">Pendente</Badge>}
                   </td>
                   {/* Acções */}
-                  <td className="py-1.5 px-2">
+                  <td className="py-2 px-3">
                     <div className="flex items-center justify-center gap-1">
                       {vidro.fotoUrl && (
-                        <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => window.open(vidro.fotoUrl, '_blank')} title="Ver foto">
-                          <Eye className="h-3.5 w-3.5 text-gray-500" />
+                        <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => window.open(vidro.fotoUrl, '_blank')} title="Ver foto">
+                          <Eye className="h-4 w-4 text-blue-600" />
                         </Button>
                       )}
                       {vidro.estado === 'recebido' && (
-                        <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => confirmarMutation.mutate({ token, vidroId: vidro.id })} title="Confirmar" disabled={confirmarMutation.isPending}>
-                          <CheckCircle className="h-3.5 w-3.5 text-green-600" />
+                        <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => confirmarMutation.mutate({ token, vidroId: vidro.id })} title="Confirmar recepção" disabled={confirmarMutation.isPending}>
+                          <CheckCircle className="h-4 w-4 text-green-600" />
                         </Button>
                       )}
                       {confirmarEliminar === vidro.id ? (
-                        <div className="flex items-center gap-0.5">
-                          <Button variant="ghost" size="sm" className="h-6 px-1 text-[10px] text-red-600" onClick={() => eliminarMutation.mutate({ token, vidroId: vidro.id })} disabled={eliminarMutation.isPending}>
+                        <div className="flex items-center gap-1">
+                          <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-red-600 font-semibold" onClick={() => eliminarMutation.mutate({ token, vidroId: vidro.id })} disabled={eliminarMutation.isPending}>
                             {eliminarMutation.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Sim'}
                           </Button>
-                          <Button variant="ghost" size="sm" className="h-6 px-1 text-[10px]" onClick={() => setConfirmarEliminar(null)}>Não</Button>
+                          <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-gray-600" onClick={() => setConfirmarEliminar(null)}>Não</Button>
                         </div>
                       ) : (
-                        <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => setConfirmarEliminar(vidro.id)} title="Eliminar">
-                          <Trash2 className="h-3.5 w-3.5 text-red-400" />
+                        <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => setConfirmarEliminar(vidro.id)} title="Eliminar">
+                          <Trash2 className="h-4 w-4 text-red-500" />
                         </Button>
                       )}
                     </div>
