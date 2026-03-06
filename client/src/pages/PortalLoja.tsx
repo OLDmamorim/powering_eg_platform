@@ -9668,6 +9668,46 @@ function MonitorVidrosSection({ token, language }: { token: string; language: st
           </table>
         </div>
       )}
+
+      {/* Dialog Reporte */}
+      <Dialog open={!!reporteVidro} onOpenChange={(open) => { if (!open) { setReporteVidro(null); setCopiado(false); } }}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="text-gray-900">Reporte de Problema</DialogTitle>
+            <DialogDescription>Copie o texto abaixo e cole no corpo do email de reporte.</DialogDescription>
+          </DialogHeader>
+          {reporteVidro && (() => {
+            const dataFormatada = formatDate(reporteVidro.createdAt);
+            const eurocodes = reporteVidro.eurocode || '-';
+            const pedido = reporteVidro.pedido || '-';
+            const encomenda = reporteVidro.encomenda || '-';
+            const textoReporte = `Vidro faturado no dia ${dataFormatada} com o eurocode ${eurocodes}, relativo ao nosso pedido ${pedido}, encomenda ${encomenda}, está `;
+            return (
+              <div className="space-y-4">
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                  <p className="text-gray-900 text-sm leading-relaxed whitespace-pre-wrap">{textoReporte}</p>
+                </div>
+                <Button
+                  className={`w-full ${copiado ? 'bg-green-600 hover:bg-green-700' : 'bg-blue-600 hover:bg-blue-700'} text-white`}
+                  onClick={() => {
+                    navigator.clipboard.writeText(textoReporte).then(() => {
+                      setCopiado(true);
+                      toast.success(language === 'pt' ? 'Texto copiado!' : 'Text copied!');
+                      setTimeout(() => setCopiado(false), 3000);
+                    });
+                  }}
+                >
+                  {copiado ? (
+                    <><CheckCircle className="h-4 w-4 mr-2" /> {language === 'pt' ? 'Copiado!' : 'Copied!'}</>
+                  ) : (
+                    <>{language === 'pt' ? 'Copiar Texto' : 'Copy Text'}</>
+                  )}
+                </Button>
+              </div>
+            );
+          })()}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

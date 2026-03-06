@@ -541,3 +541,8 @@
 - [x] Tornar card "Total Registos" clicável (limpa filtros)
 - [x] Tornar card "Hoje" clicável (filtra por data de hoje)
 - [x] Feedback visual: card activo com borda mais forte, ring e fundo colorido
+
+## Funcionalidade: Botão Reporte nas acções do Monitor Recepção
+- [x] Adicionar botão Reporte (ícone FileText laranja) na coluna Acções
+- [x] Ao clicar, abrir dialog com frase pré-preenchida com dados da linha
+- [x] Botão "Copiar Texto" para copiar a frase para o clipboard com feedback visual
