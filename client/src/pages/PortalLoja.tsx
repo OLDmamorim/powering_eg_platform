@@ -9652,7 +9652,7 @@ function MonitorVidrosSection({ token, language }: { token: string; language: st
         )}
       </div>
 
-      {/* Lista de Registos */}
+      {/* Tabela */}
       {isLoading ? (
         <div className="flex justify-center py-8">
           <Loader2 className="h-6 w-6 animate-spin text-gray-500" />
@@ -9663,74 +9663,86 @@ function MonitorVidrosSection({ token, language }: { token: string; language: st
           {busca || filtroData ? 'Nenhum resultado para os filtros aplicados' : 'Nenhum registo encontrado'}
         </div>
       ) : (
-        <div className="space-y-3">
-          {vidrosFiltrados.map((vidro: any) => (
-            <div key={vidro.id} className="bg-white rounded-lg border border-gray-200 shadow-sm p-3">
-              {/* Linha 1: Eurocodes em destaque */}
-              <div className="flex flex-wrap gap-1.5 mb-2">
-                {vidro.eurocode ? vidro.eurocode.split(',').map((ec: string, i: number) => (
-                  <span key={i} className="inline-block bg-blue-600 text-white font-bold text-xs px-2.5 py-1 rounded">
-                    {ec.trim()}
-                  </span>
-                )) : <span className="text-gray-400 text-xs">Sem eurocode</span>}
-                {/* Estado badge */}
-                <span className="ml-auto">
-                  {vidro.estado === 'recebido' && <Badge className="bg-blue-100 text-blue-800 border-blue-200 text-xs px-2">Recebido</Badge>}
-                  {vidro.estado === 'confirmado' && <Badge className="bg-green-100 text-green-800 border-green-200 text-xs px-2">Confirmado</Badge>}
-                  {vidro.estado === 'pendente_associacao' && <Badge className="bg-amber-100 text-amber-800 border-amber-200 text-xs px-2">Pendente</Badge>}
-                </span>
-              </div>
-              {/* Linha 2: Dados principais em grid */}
-              <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm mb-2">
-                <div>
-                  <span className="text-gray-500 text-xs">Pedido:</span>
-                  <span className="ml-1 font-semibold text-gray-900">{vidro.numeroPedido || '-'}</span>
-                </div>
-                <div>
-                  <span className="text-gray-500 text-xs">Encomenda:</span>
-                  <span className="ml-1 text-gray-800">{vidro.encomenda || '-'}</span>
-                </div>
-                <div className="col-span-2">
-                  <span className="text-gray-500 text-xs">Destinatário:</span>
-                  <span className="ml-1 text-gray-800">{vidro.destinatarioRaw || '-'}</span>
-                </div>
-              </div>
-              {/* Linha 3: Data + Acções */}
-              <div className="flex items-center justify-between border-t border-gray-100 pt-2">
-                <span className="text-xs text-gray-600">
-                  {formatDate(vidro.createdAt)} <span className="text-gray-400">{formatTime(vidro.createdAt)}</span>
-                </span>
-                <div className="flex items-center gap-1">
-                  {vidro.fotoUrl && (
-                    <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => window.open(vidro.fotoUrl, '_blank')} title="Ver foto">
-                      <Eye className="h-4 w-4 text-blue-600" />
-                    </Button>
-                  )}
-                  {vidro.estado === 'recebido' && (
-                    <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => confirmarMutation.mutate({ token, vidroId: vidro.id })} title="Confirmar recepção" disabled={confirmarMutation.isPending}>
-                      <CheckCircle className="h-4 w-4 text-green-600" />
-                    </Button>
-                  )}
-                  {/* Botão Reporte */}
-                  <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => setReporteVidro(vidro)} title="Reporte de problema">
-                    <AlertTriangle className="h-4 w-4 text-orange-500" />
-                  </Button>
-                  {confirmarEliminar === vidro.id ? (
-                    <div className="flex items-center gap-1">
-                      <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-red-600 font-semibold" onClick={() => eliminarMutation.mutate({ token, vidroId: vidro.id })} disabled={eliminarMutation.isPending}>
-                        {eliminarMutation.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Sim'}
-                      </Button>
-                      <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-gray-600" onClick={() => setConfirmarEliminar(null)}>Não</Button>
+        <div className="bg-white rounded-lg border border-gray-200 overflow-x-auto shadow-sm">
+          <table className="w-full text-sm" style={{ minWidth: '700px' }}>
+            <thead>
+              <tr className="border-b-2 border-gray-200 bg-gray-50">
+                <th className="text-left py-2.5 px-3 font-bold text-blue-800 text-xs uppercase tracking-wide">Eurocode</th>
+                <th className="text-left py-2.5 px-3 font-bold text-gray-700 text-xs uppercase tracking-wide">Pedido</th>
+                <th className="text-left py-2.5 px-3 font-bold text-gray-700 text-xs uppercase tracking-wide">Encomenda</th>
+                <th className="text-left py-2.5 px-3 font-bold text-gray-700 text-xs uppercase tracking-wide">Destinat\u00e1rio</th>
+                <th className="text-left py-2.5 px-3 font-bold text-gray-700 text-xs uppercase tracking-wide">Data</th>
+                <th className="text-left py-2.5 px-3 font-bold text-gray-700 text-xs uppercase tracking-wide">Estado</th>
+                <th className="text-center py-2.5 px-3 font-bold text-gray-700 text-xs uppercase tracking-wide">Ac\u00e7\u00f5es</th>
+              </tr>
+            </thead>
+            <tbody>
+              {vidrosFiltrados.map((vidro: any) => (
+                <tr key={vidro.id} className="border-b border-gray-100 hover:bg-blue-50/30">
+                  {/* Eurocode - destaque */}
+                  <td className="py-2 px-3">
+                    <div className="flex flex-wrap gap-1">
+                      {vidro.eurocode ? vidro.eurocode.split(',').map((ec: string, i: number) => (
+                        <span key={i} className="inline-block bg-blue-600 text-white font-bold text-xs px-2.5 py-1 rounded">
+                          {ec.trim()}
+                        </span>
+                      )) : <span className="text-gray-400 text-xs">-</span>}
                     </div>
-                  ) : (
-                    <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => setConfirmarEliminar(vidro.id)} title="Eliminar">
-                      <Trash2 className="h-4 w-4 text-red-500" />
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </div>
-          ))}
+                  </td>
+                  {/* Pedido */}
+                  <td className="py-2 px-3 font-semibold text-gray-900">{vidro.numeroPedido || '-'}</td>
+                  {/* Encomenda */}
+                  <td className="py-2 px-3 text-gray-800">{vidro.encomenda || '-'}</td>
+                  {/* Destinat\u00e1rio */}
+                  <td className="py-2 px-3 text-gray-800 max-w-[200px] truncate" title={vidro.destinatarioRaw || ''}>
+                    {vidro.destinatarioRaw || '-'}
+                  </td>
+                  {/* Data */}
+                  <td className="py-2 px-3 text-gray-700 whitespace-nowrap">
+                    {formatDate(vidro.createdAt)}
+                    <span className="text-gray-500 text-xs ml-1">{formatTime(vidro.createdAt)}</span>
+                  </td>
+                  {/* Estado */}
+                  <td className="py-2 px-3">
+                    {vidro.estado === 'recebido' && <Badge className="bg-blue-100 text-blue-800 border-blue-200 text-xs px-2">Recebido</Badge>}
+                    {vidro.estado === 'confirmado' && <Badge className="bg-green-100 text-green-800 border-green-200 text-xs px-2">Confirmado</Badge>}
+                    {vidro.estado === 'pendente_associacao' && <Badge className="bg-amber-100 text-amber-800 border-amber-200 text-xs px-2">Pendente</Badge>}
+                  </td>
+                  {/* Ac\u00e7\u00f5es */}
+                  <td className="py-2 px-3">
+                    <div className="flex items-center justify-center gap-1">
+                      {vidro.fotoUrl && (
+                        <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => window.open(vidro.fotoUrl, '_blank')} title="Ver foto">
+                          <Eye className="h-4 w-4 text-blue-600" />
+                        </Button>
+                      )}
+                      {vidro.estado === 'recebido' && (
+                        <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => confirmarMutation.mutate({ token, vidroId: vidro.id })} title="Confirmar recep\u00e7\u00e3o" disabled={confirmarMutation.isPending}>
+                          <CheckCircle className="h-4 w-4 text-green-600" />
+                        </Button>
+                      )}
+                      {/* Bot\u00e3o Reporte */}
+                      <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => setReporteVidro(vidro)} title="Reporte de problema">
+                        <AlertTriangle className="h-4 w-4 text-orange-500" />
+                      </Button>
+                      {confirmarEliminar === vidro.id ? (
+                        <div className="flex items-center gap-1">
+                          <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-red-600 font-semibold" onClick={() => eliminarMutation.mutate({ token, vidroId: vidro.id })} disabled={eliminarMutation.isPending}>
+                            {eliminarMutation.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Sim'}
+                          </Button>
+                          <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-gray-600" onClick={() => setConfirmarEliminar(null)}>N\u00e3o</Button>
+                        </div>
+                      ) : (
+                        <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => setConfirmarEliminar(vidro.id)} title="Eliminar">
+                          <Trash2 className="h-4 w-4 text-red-500" />
+                        </Button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
 

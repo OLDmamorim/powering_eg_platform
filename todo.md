@@ -554,3 +554,4 @@
 
 ## Monitor Recepção - Layout Mobile
 - [x] Fix Monitor Recepção mobile layout: show Eurocode, Pedido, Destinatário and Reporte button on small screens
+- [x] Reverter Monitor Recepção para layout tabela em linha (não cards), mas com botão Reporte incluído nas acções
