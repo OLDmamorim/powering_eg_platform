@@ -9374,13 +9374,18 @@ function RecepcaoVidrosSection({ token, language, lojaAuth }: { token: string; l
                     <p className="font-semibold text-base">{resultado.dadosExtraidos.destinatario}</p>
                   </div>
                 )}
-                <div className="grid grid-cols-2 gap-3">
-                  {resultado.dadosExtraidos?.eurocode && (
-                    <div className="bg-white/80 rounded-lg p-3">
-                      <p className="text-xs font-medium text-muted-foreground uppercase">Eurocode</p>
-                      <p className="font-bold text-xl text-blue-700">{resultado.dadosExtraidos.eurocode}</p>
+                {/* Eurocodes - suporta array ou string */}
+                {(resultado.dadosExtraidos?.eurocodes?.length > 0 || resultado.dadosExtraidos?.eurocode) && (
+                  <div className="bg-white/80 rounded-lg p-3">
+                    <p className="text-xs font-medium text-muted-foreground uppercase">Eurocodes</p>
+                    <div className="flex flex-wrap gap-2 mt-1">
+                      {(Array.isArray(resultado.dadosExtraidos.eurocodes) ? resultado.dadosExtraidos.eurocodes : [resultado.dadosExtraidos.eurocode]).filter(Boolean).map((ec: string, i: number) => (
+                        <span key={i} className="inline-block bg-blue-100 text-blue-800 font-bold text-lg px-3 py-1 rounded-md">{ec}</span>
+                      ))}
                     </div>
-                  )}
+                  </div>
+                )}
+                <div className="grid grid-cols-2 gap-3">
                   {resultado.dadosExtraidos?.numeroPedido && (
                     <div className="bg-white/80 rounded-lg p-3">
                       <p className="text-xs font-medium text-muted-foreground uppercase">{language === 'pt' ? 'Pedido' : 'Order'}</p>
@@ -9483,7 +9488,7 @@ function MonitorVidrosSection({ token, language }: { token: string; language: st
           <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
             <CardContent className="p-4 text-center">
               <p className="text-3xl font-bold text-blue-700">{contagem.total}</p>
-              <p className="text-sm text-blue-600">{language === 'pt' ? 'Total Vidros' : 'Total Glasses'}</p>
+              <p className="text-sm text-blue-600">{language === 'pt' ? 'Total Registos' : 'Total Records'}</p>
             </CardContent>
           </Card>
           <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
@@ -9505,10 +9510,10 @@ function MonitorVidrosSection({ token, language }: { token: string; language: st
           <CardContent className="p-8 text-center">
             <Package className="h-12 w-12 mx-auto text-muted-foreground/30 mb-3" />
             <p className="text-lg font-medium text-muted-foreground">
-              {language === 'pt' ? 'Nenhum vidro registado' : 'No glasses registered'}
+              {language === 'pt' ? 'Nenhum registo encontrado' : 'No records found'}
             </p>
             <p className="text-sm text-muted-foreground/70">
-              {language === 'pt' ? 'Os vidros recebidos aparecerão aqui' : 'Received glasses will appear here'}
+              {language === 'pt' ? 'Os materiais recebidos aparecerão aqui' : 'Received materials will appear here'}
             </p>
           </CardContent>
         </Card>
@@ -9519,13 +9524,13 @@ function MonitorVidrosSection({ token, language }: { token: string; language: st
               <CardContent className="p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 space-y-2">
-                    {/* Eurocode em destaque */}
-                    <div className="flex items-center gap-3">
-                      {vidro.eurocode && (
-                        <span className="text-2xl font-bold text-blue-700">
-                          EC: {vidro.eurocode}
+                    {/* Eurocodes em destaque */}
+                    <div className="flex items-center gap-3 flex-wrap">
+                      {vidro.eurocode && vidro.eurocode.split(',').map((ec: string, i: number) => (
+                        <span key={i} className="inline-block bg-blue-100 text-blue-800 font-bold text-base px-2 py-0.5 rounded-md">
+                          {ec.trim()}
                         </span>
-                      )}
+                      ))}
                       {getEstadoBadge(vidro.estado)}
                     </div>
                     

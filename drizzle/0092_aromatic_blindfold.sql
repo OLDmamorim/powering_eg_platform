@@ -1,0 +1,1 @@
+ALTER TABLE `vidros_recepcao` MODIFY COLUMN `eurocode` varchar(500);

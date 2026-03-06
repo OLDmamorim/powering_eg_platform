@@ -11778,19 +11778,27 @@ IMPORTANTE:
                 content: [
                   { 
                     type: 'text', 
-                    text: `Analisa esta etiqueta de transporte de vidro automóvel. Extrai os seguintes dados e responde APENAS com JSON válido (sem markdown, sem \`\`\`):
+                    text: `Analisa esta etiqueta de transporte de materiais automóvel (vidros, frisos, acessórios). Extrai os seguintes dados e responde APENAS com JSON válido (sem markdown, sem \`\`\`):
 
 {
-  "destinatario": "nome completo do destinatário",
-  "eurocode": "código Eurocode (4 dígitos após a barra no campo LEIT, ex: em 1018/3733AGN o eurocode é 3733)",
-  "numeroPedido": "número do pedido",
-  "codAT": "código AT",
-  "encomenda": "referência da encomenda com número e data",
-  "leitRef": "referência LEIT completa",
+  "destinatario": "nome completo do destinatário (campo DESTINATÁRIO)",
+  "eurocodes": ["lista de todos os Eurocodes encontrados"],
+  "numeroPedido": "número do pedido (campo PEDIDO)",
+  "codAT": "código AT (campo COD AT nas observações)",
+  "encomenda": "referência da encomenda com número e data (campo Encomendas Cliente ou OBS:Encomendas)",
+  "leitRef": "referência LEIT completa se existir",
+  "pickLabels": "PICK_LABELS completo se existir",
   "observacoesCompletas": "texto completo das observações"
 }
 
-Se não conseguires ler algum campo, coloca uma string vazia "".` 
+REGRAS PARA EUROCODES:
+- Os Eurocodes são códigos alfanuméricos que identificam peças (vidros, frisos, etc.)
+- Podem aparecer em vários locais: campo LEIT (ex: 1018/3733AGN → eurocode é 3733AGN), campo PICK_LABELS (ex: 0526/2488ASGRT → eurocode é 2488ASGRT), ou noutros campos
+- O formato típico é: números seguidos de letras (ex: 3733AGN, 2488ASGRT, 2488AGACMVZ)
+- Extrai TODOS os eurocodes encontrados na etiqueta como array
+- Se houver PICK_LABELS com formato XXXX/YYYYZZZ, o eurocode é a parte YYYYZZZ (após a barra)
+
+Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].` 
                   },
                   { type: 'image_url', image_url: { url: fotoUrl, detail: 'high' } }
                 ]
@@ -11847,7 +11855,9 @@ Se não conseguires ler algum campo, coloca uma string vazia "".`
         // 4. Registar vidro na BD
         const vidroId = await db.registarVidro({
           destinatarioRaw: dadosExtraidos.destinatario || null,
-          eurocode: dadosExtraidos.eurocode || null,
+          eurocode: Array.isArray(dadosExtraidos.eurocodes) && dadosExtraidos.eurocodes.length > 0
+            ? dadosExtraidos.eurocodes.join(', ')
+            : (dadosExtraidos.eurocode || null),
           numeroPedido: dadosExtraidos.numeroPedido || null,
           codAT: dadosExtraidos.codAT || null,
           encomenda: dadosExtraidos.encomenda || null,

@@ -309,9 +309,11 @@ export default function RecepcaoVidros() {
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1 space-y-2">
                         <div className="flex items-center gap-3 flex-wrap">
-                          {v.eurocode && (
-                            <span className="text-xl font-bold text-blue-700">EC: {v.eurocode}</span>
-                          )}
+                          {v.eurocode && v.eurocode.split(',').map((ec: string, i: number) => (
+                            <span key={i} className="inline-block bg-blue-100 text-blue-800 font-bold text-base px-2 py-0.5 rounded-md">
+                              {ec.trim()}
+                            </span>
+                          ))}
                           {getEstadoBadge(v.estado)}
                         </div>
                         

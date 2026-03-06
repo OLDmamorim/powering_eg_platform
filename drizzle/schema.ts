@@ -1620,7 +1620,7 @@ export const vidrosRecepcao = mysqlTable("vidros_recepcao", {
   
   // Dados extraídos da etiqueta (OCR/IA)
   destinatarioRaw: varchar("destinatarioRaw", { length: 500 }), // Nome do destinatário como aparece na etiqueta
-  eurocode: varchar("eurocode", { length: 100 }), // Eurocode do vidro (ex: "3733")
+  eurocode: varchar("eurocode", { length: 500 }), // Eurocodes do vidro separados por vírgula (ex: "3733AGN" ou "2488ASGRT, 2488AGACMVZ")
   numeroPedido: varchar("numeroPedido", { length: 100 }), // Número do pedido (ex: "30452")
   codAT: varchar("codAT", { length: 100 }), // Código AT (ex: "18728608955")
   encomenda: varchar("encomenda", { length: 255 }), // Referência da encomenda (ex: "19330 de 04.03.2026")

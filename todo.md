@@ -510,3 +510,10 @@
 - [x] Remover getUserMedia e usar input type=file com capture=environment
 - [x] Dois botões: "Tirar Foto" (abre câmara nativa) e "Escolher da Galeria"
 - [x] Comprimir imagem antes de enviar (canvas resize max 1600px)
+
+## Melhoria: Extracção de múltiplos Eurocodes por etiqueta
+- [x] Melhorar prompt IA para identificar Eurocodes nos PICK_LABELS (ex: 0526/2488ASGRT → Eurocode 2488ASGRT)
+- [x] Suportar múltiplos Eurocodes por etiqueta (campo eurocodes como array, guardado separado por vírgula)
+- [x] Actualizar frontend para mostrar lista de Eurocodes como badges
+- [x] Actualizar vista admin para mostrar múltiplos Eurocodes
+- [x] Corrigir terminologia: não são só vidros, podem ser frisos e outros materiais
