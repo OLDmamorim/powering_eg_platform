@@ -12534,3 +12534,13 @@ export async function contarVidrosPorLoja(lojaId: number) {
   
   return { total: totalResult?.count || 0, hoje: hojeResult?.count || 0 };
 }
+
+
+/**
+ * Eliminar registo de vidro/material recepcionado
+ */
+export async function eliminarVidro(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(vidrosRecepcao).where(eq(vidrosRecepcao.id, id));
+}

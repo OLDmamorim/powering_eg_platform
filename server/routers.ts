@@ -11986,5 +11986,14 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
         await db.actualizarVidro(id, data);
         return { success: true };
       }),
+
+    eliminar: publicProcedure
+      .input(z.object({ token: z.string(), vidroId: z.number() }))
+      .mutation(async ({ input }) => {
+        const auth = await db.validarTokenLoja(input.token);
+        if (!auth) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        await db.eliminarVidro(input.vidroId);
+        return { success: true };
+      }),
   }),
 });

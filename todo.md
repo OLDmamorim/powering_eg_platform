@@ -521,3 +521,13 @@
 ## Bug: Dropdown de lojas vazio no dialog de associação de destinatários
 - [x] Investigar: frontend chamava trpc.lojas.getAll que não existe, correcto é trpc.lojas.list
 - [x] Corrigido para usar trpc.lojas.list
+
+## Redesenho Monitor Recepção - Layout tabela compacta
+- [x] Layout tipo tabela com colunas e cabeçalhos (fundo branco)
+- [x] Ênfase no Eurocode (coluna principal, badges azuis)
+- [x] Campo de busca por Eurocode, pedido, destinatário
+- [x] Filtro por data (input date)
+- [x] Opção de apagar entradas (com confirmação inline Sim/Não)
+- [x] Linhas compactas, informação condensada em tabela
+- [x] Endpoint backend para eliminar registo de vidro
+- [x] Botão ver foto e confirmar recepção na coluna acções

@@ -9434,8 +9434,12 @@ function RecepcaoVidrosSection({ token, language, lojaAuth }: { token: string; l
 
 // ==================== MONITOR RECEPÇÃO ====================
 function MonitorVidrosSection({ token, language }: { token: string; language: string }) {
+  const [busca, setBusca] = useState('');
+  const [filtroData, setFiltroData] = useState('');
+  const [confirmarEliminar, setConfirmarEliminar] = useState<number | null>(null);
+
   const { data: vidros, isLoading, refetch } = trpc.vidros.listarPorLoja.useQuery(
-    { token, limite: 100 },
+    { token, limite: 200 },
     { enabled: !!token }
   );
   const { data: contagem } = trpc.vidros.contarPorLoja.useQuery(
@@ -9450,162 +9454,178 @@ function MonitorVidrosSection({ token, language }: { token: string; language: st
     },
   });
 
+  const eliminarMutation = trpc.vidros.eliminar.useMutation({
+    onSuccess: () => {
+      refetch();
+      setConfirmarEliminar(null);
+      toast.success(language === 'pt' ? 'Registo eliminado' : 'Record deleted');
+    },
+  });
+
   const formatDate = (date: any) => {
     if (!date) return '-';
     const d = new Date(date);
-    return d.toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    return d.toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  };
+  const formatTime = (date: any) => {
+    if (!date) return '';
+    const d = new Date(date);
+    return d.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
   };
 
-  const getEstadoBadge = (estado: string) => {
-    switch (estado) {
-      case 'recebido':
-        return <Badge className="bg-blue-100 text-blue-800 border-blue-200">{language === 'pt' ? 'Recebido' : 'Received'}</Badge>;
-      case 'confirmado':
-        return <Badge className="bg-green-100 text-green-800 border-green-200">{language === 'pt' ? 'Confirmado' : 'Confirmed'}</Badge>;
-      case 'pendente_associacao':
-        return <Badge className="bg-amber-100 text-amber-800 border-amber-200">{language === 'pt' ? 'Pendente' : 'Pending'}</Badge>;
-      default:
-        return <Badge variant="outline">{estado}</Badge>;
-    }
-  };
+  // Filtrar vidros
+  const vidrosFiltrados = useMemo(() => {
+    if (!vidros) return [];
+    return vidros.filter((v: any) => {
+      // Filtro busca por eurocode
+      if (busca) {
+        const term = busca.toLowerCase();
+        const matchEurocode = v.eurocode?.toLowerCase().includes(term);
+        const matchPedido = v.numeroPedido?.toLowerCase().includes(term);
+        const matchDest = v.destinatarioRaw?.toLowerCase().includes(term);
+        const matchEnc = v.encomenda?.toLowerCase().includes(term);
+        if (!matchEurocode && !matchPedido && !matchDest && !matchEnc) return false;
+      }
+      // Filtro por data
+      if (filtroData) {
+        const dataVidro = new Date(v.createdAt).toISOString().split('T')[0];
+        if (dataVidro !== filtroData) return false;
+      }
+      return true;
+    });
+  }, [vidros, busca, filtroData]);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
+      {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold flex items-center gap-2">
-          <Package className="h-7 w-7 text-emerald-600" />
+        <h2 className="text-xl font-bold flex items-center gap-2">
+          <Package className="h-5 w-5 text-emerald-600" />
           {language === 'pt' ? 'Monitor de Recepção' : 'Reception Monitor'}
         </h2>
-        <Button variant="outline" size="sm" onClick={() => refetch()}>
-          <RefreshCw className="h-4 w-4 mr-1" />
-          {language === 'pt' ? 'Actualizar' : 'Refresh'}
-        </Button>
+        <div className="flex items-center gap-2">
+          {contagem && (
+            <div className="flex items-center gap-3 text-sm">
+              <span className="font-semibold text-blue-700">{contagem.total} total</span>
+              <span className="font-semibold text-green-700">{contagem.hoje} hoje</span>
+            </div>
+          )}
+          <Button variant="outline" size="sm" onClick={() => refetch()}>
+            <RefreshCw className="h-3.5 w-3.5" />
+          </Button>
+        </div>
       </div>
 
-      {/* Contadores */}
-      {contagem && (
-        <div className="grid grid-cols-2 gap-3">
-          <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
-            <CardContent className="p-4 text-center">
-              <p className="text-3xl font-bold text-blue-700">{contagem.total}</p>
-              <p className="text-sm text-blue-600">{language === 'pt' ? 'Total Registos' : 'Total Records'}</p>
-            </CardContent>
-          </Card>
-          <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
-            <CardContent className="p-4 text-center">
-              <p className="text-3xl font-bold text-green-700">{contagem.hoje}</p>
-              <p className="text-sm text-green-600">{language === 'pt' ? 'Hoje' : 'Today'}</p>
-            </CardContent>
-          </Card>
+      {/* Filtros */}
+      <div className="flex gap-2 flex-wrap">
+        <div className="flex-1 min-w-[180px]">
+          <Input
+            placeholder={language === 'pt' ? 'Buscar eurocode, pedido, destinatário...' : 'Search eurocode, order...'}
+            value={busca}
+            onChange={(e: any) => setBusca(e.target.value)}
+            className="h-8 text-sm bg-white"
+          />
         </div>
-      )}
+        <Input
+          type="date"
+          value={filtroData}
+          onChange={(e: any) => setFiltroData(e.target.value)}
+          className="h-8 text-sm w-[140px] bg-white"
+        />
+        {(busca || filtroData) && (
+          <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={() => { setBusca(''); setFiltroData(''); }}>
+            Limpar
+          </Button>
+        )}
+      </div>
 
-      {/* Lista de vidros */}
+      {/* Tabela */}
       {isLoading ? (
-        <div className="flex justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <div className="flex justify-center py-8">
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
         </div>
-      ) : !vidros || vidros.length === 0 ? (
-        <Card className="border-dashed">
-          <CardContent className="p-8 text-center">
-            <Package className="h-12 w-12 mx-auto text-muted-foreground/30 mb-3" />
-            <p className="text-lg font-medium text-muted-foreground">
-              {language === 'pt' ? 'Nenhum registo encontrado' : 'No records found'}
-            </p>
-            <p className="text-sm text-muted-foreground/70">
-              {language === 'pt' ? 'Os materiais recebidos aparecerão aqui' : 'Received materials will appear here'}
-            </p>
-          </CardContent>
-        </Card>
+      ) : !vidrosFiltrados || vidrosFiltrados.length === 0 ? (
+        <div className="text-center py-8 text-muted-foreground text-sm">
+          <Package className="h-8 w-8 mx-auto mb-2 opacity-30" />
+          {busca || filtroData ? 'Nenhum resultado para os filtros aplicados' : 'Nenhum registo encontrado'}
+        </div>
       ) : (
-        <div className="space-y-3">
-          {vidros.map((vidro: any) => (
-            <Card key={vidro.id} className="overflow-hidden">
-              <CardContent className="p-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex-1 space-y-2">
-                    {/* Eurocodes em destaque */}
-                    <div className="flex items-center gap-3 flex-wrap">
-                      {vidro.eurocode && vidro.eurocode.split(',').map((ec: string, i: number) => (
-                        <span key={i} className="inline-block bg-blue-100 text-blue-800 font-bold text-base px-2 py-0.5 rounded-md">
+        <div className="bg-white rounded-lg border overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b bg-gray-50/80">
+                <th className="text-left py-2 px-3 font-semibold text-blue-800">Eurocode</th>
+                <th className="text-left py-2 px-2 font-semibold">Pedido</th>
+                <th className="text-left py-2 px-2 font-semibold">Encomenda</th>
+                <th className="text-left py-2 px-2 font-semibold">Destinatário</th>
+                <th className="text-left py-2 px-2 font-semibold">Data</th>
+                <th className="text-left py-2 px-2 font-semibold">Estado</th>
+                <th className="text-center py-2 px-2 font-semibold">Acções</th>
+              </tr>
+            </thead>
+            <tbody>
+              {vidrosFiltrados.map((vidro: any) => (
+                <tr key={vidro.id} className="border-b last:border-0 hover:bg-gray-50/50">
+                  {/* Eurocode - destaque */}
+                  <td className="py-1.5 px-3">
+                    <div className="flex flex-wrap gap-1">
+                      {vidro.eurocode ? vidro.eurocode.split(',').map((ec: string, i: number) => (
+                        <span key={i} className="inline-block bg-blue-600 text-white font-bold text-xs px-2 py-0.5 rounded">
                           {ec.trim()}
                         </span>
-                      ))}
-                      {getEstadoBadge(vidro.estado)}
+                      )) : <span className="text-muted-foreground text-xs">-</span>}
                     </div>
-                    
-                    {/* Destinatário */}
-                    {vidro.destinatarioRaw && (
-                      <p className="text-sm text-muted-foreground">
-                        <span className="font-medium">{language === 'pt' ? 'De:' : 'From:'}</span> {vidro.destinatarioRaw}
-                      </p>
-                    )}
-                    
-                    {/* Dados da etiqueta */}
-                    <div className="grid grid-cols-2 gap-2 text-sm">
-                      {vidro.numeroPedido && (
-                        <div>
-                          <span className="text-muted-foreground">{language === 'pt' ? 'Pedido:' : 'Order:'}</span>{' '}
-                          <span className="font-medium">{vidro.numeroPedido}</span>
-                        </div>
+                  </td>
+                  {/* Pedido */}
+                  <td className="py-1.5 px-2 font-medium">{vidro.numeroPedido || '-'}</td>
+                  {/* Encomenda */}
+                  <td className="py-1.5 px-2 text-xs">{vidro.encomenda || '-'}</td>
+                  {/* Destinatário */}
+                  <td className="py-1.5 px-2 text-xs max-w-[150px] truncate" title={vidro.destinatarioRaw || ''}>
+                    {vidro.destinatarioRaw || '-'}
+                  </td>
+                  {/* Data */}
+                  <td className="py-1.5 px-2 text-xs text-muted-foreground whitespace-nowrap">
+                    {formatDate(vidro.createdAt)}<br/>
+                    <span className="text-[10px]">{formatTime(vidro.createdAt)}</span>
+                  </td>
+                  {/* Estado */}
+                  <td className="py-1.5 px-2">
+                    {vidro.estado === 'recebido' && <Badge className="bg-blue-100 text-blue-800 border-blue-200 text-[10px] px-1.5">Recebido</Badge>}
+                    {vidro.estado === 'confirmado' && <Badge className="bg-green-100 text-green-800 border-green-200 text-[10px] px-1.5">Confirmado</Badge>}
+                    {vidro.estado === 'pendente_associacao' && <Badge className="bg-amber-100 text-amber-800 border-amber-200 text-[10px] px-1.5">Pendente</Badge>}
+                  </td>
+                  {/* Acções */}
+                  <td className="py-1.5 px-2">
+                    <div className="flex items-center justify-center gap-1">
+                      {vidro.fotoUrl && (
+                        <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => window.open(vidro.fotoUrl, '_blank')} title="Ver foto">
+                          <Eye className="h-3.5 w-3.5 text-gray-500" />
+                        </Button>
                       )}
-                      {vidro.encomenda && (
-                        <div>
-                          <span className="text-muted-foreground">{language === 'pt' ? 'Enc.:' : 'Ref:'}</span>{' '}
-                          <span className="font-medium">{vidro.encomenda}</span>
-                        </div>
+                      {vidro.estado === 'recebido' && (
+                        <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => confirmarMutation.mutate({ token, vidroId: vidro.id })} title="Confirmar" disabled={confirmarMutation.isPending}>
+                          <CheckCircle className="h-3.5 w-3.5 text-green-600" />
+                        </Button>
                       )}
-                      {vidro.codAT && (
-                        <div>
-                          <span className="text-muted-foreground">COD AT:</span>{' '}
-                          <span className="font-mono text-xs">{vidro.codAT}</span>
+                      {confirmarEliminar === vidro.id ? (
+                        <div className="flex items-center gap-0.5">
+                          <Button variant="ghost" size="sm" className="h-6 px-1 text-[10px] text-red-600" onClick={() => eliminarMutation.mutate({ token, vidroId: vidro.id })} disabled={eliminarMutation.isPending}>
+                            {eliminarMutation.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Sim'}
+                          </Button>
+                          <Button variant="ghost" size="sm" className="h-6 px-1 text-[10px]" onClick={() => setConfirmarEliminar(null)}>Não</Button>
                         </div>
-                      )}
-                      {vidro.leitRef && (
-                        <div>
-                          <span className="text-muted-foreground">LEIT:</span>{' '}
-                          <span className="font-mono text-xs">{vidro.leitRef}</span>
-                        </div>
+                      ) : (
+                        <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => setConfirmarEliminar(vidro.id)} title="Eliminar">
+                          <Trash2 className="h-3.5 w-3.5 text-red-400" />
+                        </Button>
                       )}
                     </div>
-
-                    {/* Data */}
-                    <p className="text-xs text-muted-foreground">
-                      <Clock className="h-3 w-3 inline mr-1" />
-                      {formatDate(vidro.createdAt)}
-                    </p>
-                  </div>
-
-                  {/* Foto miniatura */}
-                  {vidro.fotoUrl && (
-                    <img 
-                      src={vidro.fotoUrl} 
-                      alt="Etiqueta" 
-                      className="w-16 h-16 object-cover rounded-lg cursor-pointer hover:opacity-80"
-                      onClick={() => window.open(vidro.fotoUrl, '_blank')}
-                    />
-                  )}
-                </div>
-
-                {/* Botão confirmar */}
-                {vidro.estado === 'recebido' && (
-                  <Button
-                    size="sm"
-                    className="w-full mt-3 bg-green-600 hover:bg-green-700"
-                    onClick={() => confirmarMutation.mutate({ token, vidroId: vidro.id })}
-                    disabled={confirmarMutation.isPending}
-                  >
-                    {confirmarMutation.isPending ? (
-                      <Loader2 className="h-4 w-4 animate-spin mr-1" />
-                    ) : (
-                      <CheckCircle className="h-4 w-4 mr-1" />
-                    )}
-                    {language === 'pt' ? 'Confirmar Recepção' : 'Confirm Reception'}
-                  </Button>
-                )}
-              </CardContent>
-            </Card>
-          ))}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
     </div>
