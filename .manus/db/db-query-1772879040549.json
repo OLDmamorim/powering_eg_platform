@@ -1,0 +1,25 @@
+{
+  "query": "SELECT lojaDestinoId, COUNT(*) as total, l.nome FROM vidros_recepcao vr LEFT JOIN lojas l ON vr.lojaDestinoId = l.id GROUP BY lojaDestinoId, l.nome;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT lojaDestinoId, COUNT(*) as total, l.nome FROM vidros_recepcao vr LEFT JOIN lojas l ON vr.lojaDestinoId = l.id GROUP BY lojaDestinoId, l.nome;",
+  "rows": [
+    {
+      "lojaDestinoId": "180010",
+      "total": "3",
+      "nome": "Braga - minho center"
+    },
+    {
+      "lojaDestinoId": "NULL",
+      "total": "3",
+      "nome": "NULL"
+    },
+    {
+      "lojaDestinoId": "180024",
+      "total": "8",
+      "nome": "Guimarães shopping"
+    }
+  ],
+  "messages": [],
+  "stdout": "lojaDestinoId\ttotal\tnome\n180010\t3\tBraga - minho center\nNULL\t3\tNULL\n180024\t8\tGuimarães shopping\n",
+  "stderr": "",
+  "execution_time_ms": 56
+}

@@ -9450,16 +9450,18 @@ function MonitorVidrosSection({ token, language }: { token: string; language: st
     { enabled: !!token }
   );
 
+  const utils = trpc.useUtils();
   const confirmarMutation = trpc.vidros.confirmarRecepcao.useMutation({
     onSuccess: () => {
       refetch();
+      utils.vidros.contarPorLoja.invalidate({ token });
       toast.success(language === 'pt' ? 'Recepção confirmada!' : 'Reception confirmed!');
     },
   });
-
   const eliminarMutation = trpc.vidros.eliminar.useMutation({
     onSuccess: () => {
       refetch();
+      utils.vidros.contarPorLoja.invalidate({ token });
       setConfirmarEliminar(null);
       toast.success(language === 'pt' ? 'Registo eliminado' : 'Record deleted');
     },

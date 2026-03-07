@@ -1,0 +1,136 @@
+{
+  "query": "SELECT vr.id, vr.lojaDestinoId, vr.lojaScanId, vr.destinatarioRaw, vr.estado, vr.createdAt, l.nome as lojaNome FROM vidros_recepcao vr LEFT JOIN lojas l ON vr.lojaDestinoId = l.id ORDER BY vr.createdAt DESC;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT vr.id, vr.lojaDestinoId, vr.lojaScanId, vr.destinatarioRaw, vr.estado, vr.createdAt, l.nome as lojaNome FROM vidros_recepcao vr LEFT JOIN lojas l ON vr.lojaDestinoId = l.id ORDER BY vr.createdAt DESC;",
+  "rows": [
+    {
+      "id": "60002",
+      "lojaDestinoId": "180010",
+      "lojaScanId": "180010",
+      "destinatarioRaw": "EXPRESSGLASS - LOJA BRAGA",
+      "estado": "confirmado",
+      "createdAt": "2026-03-07 09:46:19",
+      "lojaNome": "Braga - minho center"
+    },
+    {
+      "id": "60001",
+      "lojaDestinoId": "180010",
+      "lojaScanId": "180010",
+      "destinatarioRaw": "EXPRESSGLASS - LOJA BRAGA AVENIDA ROBERT SMITH 59A, 4715-249 | BRAGA",
+      "estado": "confirmado",
+      "createdAt": "2026-03-07 09:45:50",
+      "lojaNome": "Braga - minho center"
+    },
+    {
+      "id": "30012",
+      "lojaDestinoId": "180010",
+      "lojaScanId": "180010",
+      "destinatarioRaw": "EXPRESSGLASS - LOJA BRAGA",
+      "estado": "recebido",
+      "createdAt": "2026-03-06 17:35:50",
+      "lojaNome": "Braga - minho center"
+    },
+    {
+      "id": "30011",
+      "lojaDestinoId": "180024",
+      "lojaScanId": "180010",
+      "destinatarioRaw": "EXPRESSGLASS VIDROS VIATURAS SA",
+      "estado": "recebido",
+      "createdAt": "2026-03-06 17:24:10",
+      "lojaNome": "Guimarães shopping"
+    },
+    {
+      "id": "30010",
+      "lojaDestinoId": "180024",
+      "lojaScanId": "180010",
+      "destinatarioRaw": "EXPRESSGLASS VIDROS VIATURAS SA",
+      "estado": "recebido",
+      "createdAt": "2026-03-06 17:23:31",
+      "lojaNome": "Guimarães shopping"
+    },
+    {
+      "id": "30009",
+      "lojaDestinoId": "180024",
+      "lojaScanId": "180010",
+      "destinatarioRaw": "EXPRESSGLASS VIDROS VIATURAS SA ALAMEDA DR. MARIANO FELGUEIRAS PISO 1, 4835-017 | GUIMARAES",
+      "estado": "recebido",
+      "createdAt": "2026-03-06 17:23:02",
+      "lojaNome": "Guimarães shopping"
+    },
+    {
+      "id": "30008",
+      "lojaDestinoId": "180024",
+      "lojaScanId": "180010",
+      "destinatarioRaw": "EXPRESSGLASS VIDROS VIATURAS SA",
+      "estado": "recebido",
+      "createdAt": "2026-03-06 17:22:46",
+      "lojaNome": "Guimarães shopping"
+    },
+    {
+      "id": "30007",
+      "lojaDestinoId": "180024",
+      "lojaScanId": "180010",
+      "destinatarioRaw": "EXPRESSGLASS VIDROS VIATURAS SA",
+      "estado": "recebido",
+      "createdAt": "2026-03-06 17:22:16",
+      "lojaNome": "Guimarães shopping"
+    },
+    {
+      "id": "30005",
+      "lojaDestinoId": "NULL",
+      "lojaScanId": "180010",
+      "destinatarioRaw": "NULL",
+      "estado": "recebido",
+      "createdAt": "2026-03-06 17:08:58",
+      "lojaNome": "NULL"
+    },
+    {
+      "id": "30003",
+      "lojaDestinoId": "180024",
+      "lojaScanId": "180010",
+      "destinatarioRaw": "EXPRESSGLASS VIDROS VIATURAS SA",
+      "estado": "recebido",
+      "createdAt": "2026-03-06 17:07:16",
+      "lojaNome": "Guimarães shopping"
+    },
+    {
+      "id": "30002",
+      "lojaDestinoId": "180024",
+      "lojaScanId": "180010",
+      "destinatarioRaw": "EXPRESSGLASS VIDROS VIATURAS SA",
+      "estado": "recebido",
+      "createdAt": "2026-03-06 17:06:04",
+      "lojaNome": "Guimarães shopping"
+    },
+    {
+      "id": "30001",
+      "lojaDestinoId": "180024",
+      "lojaScanId": "180010",
+      "destinatarioRaw": "EXPRESSGLASS VIDROS VIATURAS SA ALAMEDA DR. MARIANO FELGUEIRAS PISO 1, 4835-017 | GUIMARAES",
+      "estado": "recebido",
+      "createdAt": "2026-03-06 17:05:24",
+      "lojaNome": "Guimarães shopping"
+    },
+    {
+      "id": "2",
+      "lojaDestinoId": "NULL",
+      "lojaScanId": "180010",
+      "destinatarioRaw": "NULL",
+      "estado": "recebido",
+      "createdAt": "2026-03-06 15:04:51",
+      "lojaNome": "NULL"
+    },
+    {
+      "id": "1",
+      "lojaDestinoId": "NULL",
+      "lojaScanId": "180010",
+      "destinatarioRaw": "NULL",
+      "estado": "recebido",
+      "createdAt": "2026-03-06 15:04:16",
+      "lojaNome": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tlojaDestinoId\tlojaScanId\tdestinatarioRaw\testado\tcreatedAt\tlojaNome\n60002\t180010\t180010\tEXPRESSGLASS - LOJA BRAGA\tconfirmado\t2026-03-07 09:46:19\tBraga - minho center\n60001\t180010\t180010\tEXPRESSGLASS - LOJA BRAGA AVENIDA ROBERT SMITH 59A, 4715-249 | BRAGA\tconfirmado\t2026-03-07 09:45:50\tBraga - minho center\n30012\t180010\t180010\tEXPRESSGLASS - LOJA BRAGA\trecebido\t2026-03-06 17:35:50\tBraga - minho center\n30011\t180024\t180010\tEXPRESSGLASS VIDROS VIATURAS SA\trecebido\t2026-03-06 17:24:10\tGuimarães shopping\n30010\t180024\t180010\tEXPRESSGLASS VIDROS VIATURAS SA\trecebido\t2026-03-06 17:23:31\tGuimarães shopping\n30009\t180024\t180010\tEXPRESSGLASS VIDROS VIATURAS SA ALAMEDA DR. MARIANO FELGUEIRAS PISO 1, 4835-017 | GUIMARAES\trecebido\t2026-03-06 17:23:02\tGuimarães shopping\n30008\t180024\t180010\tEXPRESSGLASS VIDROS VIATURAS SA\trecebido\t2026-03-06 17:22:46\tGuimarães shopping\n30007\t180024\t180010\tEXPRESSGLASS VIDROS VIATURAS SA\trecebido\t2026-03-06 17:22:16\tGuimarães shopping\n30005\tNULL\t180010\tNULL\trecebido\t2026-03-06 17:08:58\tNULL\n30003\t180024\t180010\tEXPRESSGLASS VIDROS VIATURAS SA\trecebido\t2026-03-06 17:07:16\tGuimarães shopping\n30002\t180024\t180010\tEXPRESSGLASS VIDROS VIATURAS SA\trecebido\t2026-03-06 17:06:04\tGuimarães shopping\n30001\t180024\t180010\tEXPRESSGLASS VIDROS VIATURAS SA ALAMEDA DR. MARIANO FELGUEIRAS PISO 1, 4835-017 | GUIMARAES\trecebido\t2026-03-06 17:05:24\tGuimarães shopping\n2\tNULL\t180010\tNULL\trecebido\t2026-03-06 15:04:51\tNULL\n1\tNULL\t180010\tNULL\trecebido\t2026-03-06 15:04:16\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 65
+}

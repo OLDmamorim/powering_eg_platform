@@ -1,0 +1,108 @@
+{
+  "query": "SELECT id, destinatarioRaw, lojaDestinoId, estado, createdAt FROM vidros_recepcao ORDER BY createdAt DESC LIMIT 20;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT id, destinatarioRaw, lojaDestinoId, estado, createdAt FROM vidros_recepcao ORDER BY createdAt DESC LIMIT 20;",
+  "rows": [
+    {
+      "id": "60002",
+      "destinatarioRaw": "EXPRESSGLASS - LOJA BRAGA",
+      "lojaDestinoId": "180010",
+      "estado": "confirmado",
+      "createdAt": "2026-03-07 09:46:19"
+    },
+    {
+      "id": "60001",
+      "destinatarioRaw": "EXPRESSGLASS - LOJA BRAGA AVENIDA ROBERT SMITH 59A, 4715-249 | BRAGA",
+      "lojaDestinoId": "180010",
+      "estado": "confirmado",
+      "createdAt": "2026-03-07 09:45:50"
+    },
+    {
+      "id": "30012",
+      "destinatarioRaw": "EXPRESSGLASS - LOJA BRAGA",
+      "lojaDestinoId": "180010",
+      "estado": "recebido",
+      "createdAt": "2026-03-06 17:35:50"
+    },
+    {
+      "id": "30011",
+      "destinatarioRaw": "EXPRESSGLASS VIDROS VIATURAS SA",
+      "lojaDestinoId": "180024",
+      "estado": "recebido",
+      "createdAt": "2026-03-06 17:24:10"
+    },
+    {
+      "id": "30010",
+      "destinatarioRaw": "EXPRESSGLASS VIDROS VIATURAS SA",
+      "lojaDestinoId": "180024",
+      "estado": "recebido",
+      "createdAt": "2026-03-06 17:23:31"
+    },
+    {
+      "id": "30009",
+      "destinatarioRaw": "EXPRESSGLASS VIDROS VIATURAS SA ALAMEDA DR. MARIANO FELGUEIRAS PISO 1, 4835-017 | GUIMARAES",
+      "lojaDestinoId": "180024",
+      "estado": "recebido",
+      "createdAt": "2026-03-06 17:23:02"
+    },
+    {
+      "id": "30008",
+      "destinatarioRaw": "EXPRESSGLASS VIDROS VIATURAS SA",
+      "lojaDestinoId": "180024",
+      "estado": "recebido",
+      "createdAt": "2026-03-06 17:22:46"
+    },
+    {
+      "id": "30007",
+      "destinatarioRaw": "EXPRESSGLASS VIDROS VIATURAS SA",
+      "lojaDestinoId": "180024",
+      "estado": "recebido",
+      "createdAt": "2026-03-06 17:22:16"
+    },
+    {
+      "id": "30005",
+      "destinatarioRaw": "NULL",
+      "lojaDestinoId": "NULL",
+      "estado": "recebido",
+      "createdAt": "2026-03-06 17:08:58"
+    },
+    {
+      "id": "30003",
+      "destinatarioRaw": "EXPRESSGLASS VIDROS VIATURAS SA",
+      "lojaDestinoId": "180024",
+      "estado": "recebido",
+      "createdAt": "2026-03-06 17:07:16"
+    },
+    {
+      "id": "30002",
+      "destinatarioRaw": "EXPRESSGLASS VIDROS VIATURAS SA",
+      "lojaDestinoId": "180024",
+      "estado": "recebido",
+      "createdAt": "2026-03-06 17:06:04"
+    },
+    {
+      "id": "30001",
+      "destinatarioRaw": "EXPRESSGLASS VIDROS VIATURAS SA ALAMEDA DR. MARIANO FELGUEIRAS PISO 1, 4835-017 | GUIMARAES",
+      "lojaDestinoId": "180024",
+      "estado": "recebido",
+      "createdAt": "2026-03-06 17:05:24"
+    },
+    {
+      "id": "2",
+      "destinatarioRaw": "NULL",
+      "lojaDestinoId": "NULL",
+      "estado": "recebido",
+      "createdAt": "2026-03-06 15:04:51"
+    },
+    {
+      "id": "1",
+      "destinatarioRaw": "NULL",
+      "lojaDestinoId": "NULL",
+      "estado": "recebido",
+      "createdAt": "2026-03-06 15:04:16"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tdestinatarioRaw\tlojaDestinoId\testado\tcreatedAt\n60002\tEXPRESSGLASS - LOJA BRAGA\t180010\tconfirmado\t2026-03-07 09:46:19\n60001\tEXPRESSGLASS - LOJA BRAGA AVENIDA ROBERT SMITH 59A, 4715-249 | BRAGA\t180010\tconfirmado\t2026-03-07 09:45:50\n30012\tEXPRESSGLASS - LOJA BRAGA\t180010\trecebido\t2026-03-06 17:35:50\n30011\tEXPRESSGLASS VIDROS VIATURAS SA\t180024\trecebido\t2026-03-06 17:24:10\n30010\tEXPRESSGLASS VIDROS VIATURAS SA\t180024\trecebido\t2026-03-06 17:23:31\n30009\tEXPRESSGLASS VIDROS VIATURAS SA ALAMEDA DR. MARIANO FELGUEIRAS PISO 1, 4835-017 | GUIMARAES\t180024\trecebido\t2026-03-06 17:23:02\n30008\tEXPRESSGLASS VIDROS VIATURAS SA\t180024\trecebido\t2026-03-06 17:22:46\n30007\tEXPRESSGLASS VIDROS VIATURAS SA\t180024\trecebido\t2026-03-06 17:22:16\n30005\tNULL\tNULL\trecebido\t2026-03-06 17:08:58\n30003\tEXPRESSGLASS VIDROS VIATURAS SA\t180024\trecebido\t2026-03-06 17:07:16\n30002\tEXPRESSGLASS VIDROS VIATURAS SA\t180024\trecebido\t2026-03-06 17:06:04\n30001\tEXPRESSGLASS VIDROS VIATURAS SA ALAMEDA DR. MARIANO FELGUEIRAS PISO 1, 4835-017 | GUIMARAES\t180024\trecebido\t2026-03-06 17:05:24\n2\tNULL\tNULL\trecebido\t2026-03-06 15:04:51\n1\tNULL\tNULL\trecebido\t2026-03-06 15:04:16\n",
+  "stderr": "",
+  "execution_time_ms": 456
+}
