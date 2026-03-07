@@ -558,3 +558,4 @@
 - [x] BUG: Fix ReferenceError 'onAutoCreate is not defined' when creating or viewing notes on mobile
 - [x] Monitor Recepção: Destinatário deve mostrar nome da loja conectada pelo admin em vez do texto raw da etiqueta
 - [x] BUG: Monitor Recepção cards (Total Registos / Hoje) contam registos eliminados - devem usar mesmos dados da lista
+- [x] BUG: Monitor Recepção cards count mismatch with table - query crashed due to non-existent confirmadoEm field in select

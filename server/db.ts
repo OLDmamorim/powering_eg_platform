@@ -12434,7 +12434,6 @@ export async function listarVidrosPorLoja(lojaId: number, limite?: number) {
     lojaScanId: vidrosRecepcao.lojaScanId,
     lojaDestinoId: vidrosRecepcao.lojaDestinoId,
     estado: vidrosRecepcao.estado,
-    confirmadoEm: vidrosRecepcao.confirmadoEm,
     registadoPorToken: vidrosRecepcao.registadoPorToken,
     createdAt: vidrosRecepcao.createdAt,
     updatedAt: vidrosRecepcao.updatedAt,
