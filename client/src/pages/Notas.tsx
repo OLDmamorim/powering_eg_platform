@@ -362,6 +362,7 @@ function NotaEditor({
   tags,
   onSave,
   onUploadImage,
+  onAutoCreate,
 }: {
   open: boolean;
   onClose: () => void;
