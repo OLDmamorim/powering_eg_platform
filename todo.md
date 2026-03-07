@@ -575,3 +575,4 @@
 - [x] Update frontend textarea placeholder to match real data format
 - [x] Ref column contains the eurocode for cross-referencing with fichas (# and * are part of the eurocode, do NOT strip)
 - [x] Controlo Stock: Exportação PDF/Excel por status (Com Fichas, Sem Fichas, Fichas s/ Stock) com seleção de qual status exportar
+- [x] Controlo Stock: Botão eliminar análises do histórico com confirmação

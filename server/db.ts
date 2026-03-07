@@ -12709,3 +12709,13 @@ export async function getUltimaAnaliseFichas(gestorId: number) {
   
   return result || null;
 }
+
+/**
+ * Eliminar uma análise de stock
+ */
+export async function eliminarAnaliseStock(id: number) {
+  const db = await getDb();
+  if (!db) return;
+  
+  await db.delete(analisesStock).where(eq(analisesStock.id, id));
+}

@@ -25,6 +25,7 @@ import {
   FileText,
   Info,
   Download,
+  Trash2,
 } from 'lucide-react';
 
 interface ItemComFichas {
@@ -160,6 +161,16 @@ export default function ControloStock() {
     },
     onError: (error) => {
       toast.error(error.message || 'Erro ao analisar stock');
+    },
+  });
+
+  const eliminarMutation = trpc.stock.eliminar.useMutation({
+    onSuccess: () => {
+      toast.success('Análise eliminada com sucesso');
+      utils.stock.historico.invalidate();
+    },
+    onError: (error) => {
+      toast.error(error.message || 'Erro ao eliminar análise');
     },
   });
 
@@ -669,11 +680,26 @@ export default function ControloStock() {
                           {new Date(analise.createdAt).toLocaleDateString('pt-PT')} às {new Date(analise.createdAt).toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })}
                         </p>
                       </div>
-                      <div className="flex gap-3 text-xs">
-                        <span className="text-blue-600 font-medium">{analise.totalItensStock} itens</span>
-                        <span className="text-green-600">{analise.totalComFichas} c/ fichas</span>
-                        <span className="text-amber-600">{analise.totalSemFichas} s/ fichas</span>
-                        <span className="text-red-600">{analise.totalFichasSemStock} fichas s/ stock</span>
+                      <div className="flex items-center gap-3">
+                        <div className="flex gap-3 text-xs">
+                          <span className="text-blue-600 font-medium">{analise.totalItensStock} itens</span>
+                          <span className="text-green-600">{analise.totalComFichas} c/ fichas</span>
+                          <span className="text-amber-600">{analise.totalSemFichas} s/ fichas</span>
+                          <span className="text-red-600">{analise.totalFichasSemStock} fichas s/ stock</span>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50 shrink-0"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (window.confirm('Tem a certeza que deseja eliminar esta análise?')) {
+                              eliminarMutation.mutate({ id: analise.id });
+                            }
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
                   </CardContent>

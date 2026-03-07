@@ -12282,5 +12282,13 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
           dadosStock: analise.dadosStock ? JSON.parse(analise.dadosStock) : null,
         };
       }),
+
+    // Eliminar uma análise de stock
+    eliminar: gestorProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await db.eliminarAnaliseStock(input.id);
+        return { success: true };
+      }),
   }),
 });
