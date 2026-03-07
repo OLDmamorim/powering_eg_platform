@@ -26,6 +26,8 @@ import {
   Info,
   Download,
   Trash2,
+  Mail,
+  Send,
 } from 'lucide-react';
 
 interface ItemComFichas {
@@ -79,42 +81,6 @@ function exportToExcel(data: any[], columns: { header: string; key: string }[], 
   }).catch(() => toast.error('Erro ao exportar Excel'));
 }
 
-function exportToPDF(data: any[], columns: { header: string; key: string }[], title: string, filename: string) {
-  Promise.all([
-    import('jspdf'),
-    import('jspdf-autotable'),
-  ]).then(([jsPDFModule]) => {
-    const doc = new jsPDFModule.jsPDF({ orientation: 'landscape' });
-    
-    // Header
-    doc.setFontSize(16);
-    doc.setTextColor(30, 64, 175);
-    doc.text('PoweringEG - Controlo de Stock', 14, 15);
-    doc.setFontSize(12);
-    doc.setTextColor(60, 60, 60);
-    doc.text(title, 14, 23);
-    doc.setFontSize(9);
-    doc.setTextColor(120, 120, 120);
-    doc.text(`Exportado em: ${new Date().toLocaleDateString('pt-PT')} ${new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })}`, 14, 29);
-    doc.text(`Total: ${data.length} registos`, 14, 34);
-    
-    // Table
-    const tableData = data.map(row => columns.map(c => row[c.key] ?? ''));
-    (doc as any).autoTable({
-      head: [columns.map(c => c.header)],
-      body: tableData,
-      startY: 38,
-      styles: { fontSize: 8, cellPadding: 2 },
-      headStyles: { fillColor: [30, 64, 175], textColor: 255, fontStyle: 'bold' },
-      alternateRowStyles: { fillColor: [245, 247, 250] },
-      margin: { left: 14, right: 14 },
-    });
-    
-    doc.save(`${filename}.pdf`);
-    toast.success('PDF exportado com sucesso!');
-  }).catch(() => toast.error('Erro ao exportar PDF'));
-}
-
 export default function ControloStock() {
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
@@ -151,7 +117,7 @@ export default function ControloStock() {
     { enabled: !!detalheId && view === 'detalhe' }
   );
 
-  // Mutation
+  // Mutations
   const analisarMutation = trpc.stock.analisar.useMutation({
     onSuccess: (data) => {
       setResultadoAtual(data as any);
@@ -171,6 +137,15 @@ export default function ControloStock() {
     },
     onError: (error) => {
       toast.error(error.message || 'Erro ao eliminar análise');
+    },
+  });
+
+  const enviarEmailMutation = trpc.stock.enviarEmail.useMutation({
+    onSuccess: (data) => {
+      toast.success(`Email enviado para ${data.email}${data.copiaEnviada ? ` (cópia para ${data.copiaEnviada})` : ''}`);
+    },
+    onError: (error) => {
+      toast.error(error.message || 'Erro ao enviar email');
     },
   });
 
@@ -221,13 +196,16 @@ export default function ControloStock() {
   // Dados activos (resultado actual ou detalhe do histórico)
   const dadosActivos = view === 'resultado' ? resultadoAtual : view === 'detalhe' ? detalheResultado : null;
 
+  // Loja ID activa (da análise actual ou do detalhe)
+  const lojaIdActiva = view === 'resultado' ? lojaId : (detalheAnalise as any)?.lojaId || null;
+
   // Nome da loja para exportação
   const nomeLoja = view === 'resultado'
     ? ((lojaSelecionada as any)?.nome || 'Loja')
     : (detalheAnalise?.nomeLoja || 'Loja');
 
   // --- Export handlers ---
-  const handleExportComFichas = (format: 'pdf' | 'excel') => {
+  const handleExportComFichas = () => {
     if (!dadosActivos?.comFichas) return;
     const data = filtrarItens(dadosActivos.comFichas).map((item: any) => ({
       ref: item.ref,
@@ -245,13 +223,11 @@ export default function ControloStock() {
       { header: 'N.º Fichas', key: 'totalFichas' },
       { header: 'Fichas Associadas', key: 'fichasDetalhe' },
     ];
-    const title = `Stock COM Fichas - ${nomeLoja}`;
     const filename = `stock_com_fichas_${nomeLoja.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}`;
-    if (format === 'excel') exportToExcel(data, columns, filename);
-    else exportToPDF(data, columns, title, filename);
+    exportToExcel(data, columns, filename);
   };
 
-  const handleExportSemFichas = (format: 'pdf' | 'excel') => {
+  const handleExportSemFichas = () => {
     if (!dadosActivos?.semFichas) return;
     const data = filtrarItens(dadosActivos.semFichas).map((item: any) => ({
       ref: item.ref,
@@ -265,13 +241,11 @@ export default function ControloStock() {
       { header: 'Descrição', key: 'descricao' },
       { header: 'Qtd', key: 'quantidade' },
     ];
-    const title = `Stock SEM Fichas (Stock Parado) - ${nomeLoja}`;
     const filename = `stock_sem_fichas_${nomeLoja.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}`;
-    if (format === 'excel') exportToExcel(data, columns, filename);
-    else exportToPDF(data, columns, title, filename);
+    exportToExcel(data, columns, filename);
   };
 
-  const handleExportFichasSemStock = (format: 'pdf' | 'excel') => {
+  const handleExportFichasSemStock = () => {
     if (!dadosActivos?.fichasSemStock) return;
     const data = filtrarItens(dadosActivos.fichasSemStock).map((item: any) => ({
       eurocode: item.eurocode,
@@ -291,22 +265,59 @@ export default function ControloStock() {
       { header: 'Estado', key: 'status' },
       { header: 'Dias Aberto', key: 'diasAberto' },
     ];
-    const title = `Fichas SEM Stock - ${nomeLoja}`;
     const filename = `fichas_sem_stock_${nomeLoja.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}`;
-    if (format === 'excel') exportToExcel(data, columns, filename);
-    else exportToPDF(data, columns, title, filename);
+    exportToExcel(data, columns, filename);
   };
 
-  // Export button component for each tab
-  const ExportButtons = ({ onExport }: { onExport: (format: 'pdf' | 'excel') => void }) => (
+  // --- Email handlers ---
+  const handleEmailTab = (status: 'comFichas' | 'semFichas' | 'fichasSemStock') => {
+    if (!lojaIdActiva) {
+      toast.error('Loja não identificada para envio de email');
+      return;
+    }
+
+    let itens: any[] = [];
+    if (status === 'comFichas' && dadosActivos?.comFichas) {
+      itens = filtrarItens(dadosActivos.comFichas);
+    } else if (status === 'semFichas' && dadosActivos?.semFichas) {
+      itens = filtrarItens(dadosActivos.semFichas);
+    } else if (status === 'fichasSemStock' && dadosActivos?.fichasSemStock) {
+      itens = filtrarItens(dadosActivos.fichasSemStock);
+    }
+
+    if (itens.length === 0) {
+      toast.error('Sem itens para enviar');
+      return;
+    }
+
+    enviarEmailMutation.mutate({
+      lojaId: lojaIdActiva,
+      nomeLoja,
+      status,
+      itens,
+    });
+  };
+
+  // Export + Email buttons component for each tab
+  const ActionButtons = ({ onExport, onEmail, status }: { onExport: () => void; onEmail: () => void; status: 'comFichas' | 'semFichas' | 'fichasSemStock' }) => (
     <div className="flex gap-2 justify-end mb-2">
-      <Button variant="outline" size="sm" onClick={() => onExport('excel')}>
+      <Button variant="outline" size="sm" onClick={onExport}>
         <Download className="h-3 w-3 mr-1" />
         Excel
       </Button>
-      <Button variant="outline" size="sm" onClick={() => onExport('pdf')}>
-        <Download className="h-3 w-3 mr-1" />
-        PDF
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={onEmail}
+        disabled={enviarEmailMutation.isPending}
+        className="text-green-700 border-green-300 hover:bg-green-50"
+      >
+        {enviarEmailMutation.isPending ? (
+          <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+        ) : (
+          <Send className="h-3 w-3 mr-1" />
+        )}
+        Enviar Email
       </Button>
     </div>
   );
@@ -527,7 +538,11 @@ export default function ControloStock() {
 
               {/* Tab: Com Fichas */}
               <TabsContent value="comFichas" className="space-y-2 mt-4">
-                <ExportButtons onExport={handleExportComFichas} />
+                <ActionButtons
+                  onExport={handleExportComFichas}
+                  onEmail={() => handleEmailTab('comFichas')}
+                  status="comFichas"
+                />
                 {dadosActivos.comFichas && filtrarItens(dadosActivos.comFichas).length === 0 ? (
                   <p className="text-center text-muted-foreground py-8">Nenhum item encontrado</p>
                 ) : (
@@ -580,7 +595,11 @@ export default function ControloStock() {
 
               {/* Tab: Sem Fichas */}
               <TabsContent value="semFichas" className="space-y-2 mt-4">
-                <ExportButtons onExport={handleExportSemFichas} />
+                <ActionButtons
+                  onExport={handleExportSemFichas}
+                  onEmail={() => handleEmailTab('semFichas')}
+                  status="semFichas"
+                />
                 {dadosActivos.semFichas && filtrarItens(dadosActivos.semFichas).length === 0 ? (
                   <p className="text-center text-muted-foreground py-8">Nenhum item encontrado</p>
                 ) : (
@@ -615,7 +634,11 @@ export default function ControloStock() {
 
               {/* Tab: Fichas sem Stock */}
               <TabsContent value="fichasSemStock" className="space-y-2 mt-4">
-                <ExportButtons onExport={handleExportFichasSemStock} />
+                <ActionButtons
+                  onExport={handleExportFichasSemStock}
+                  onEmail={() => handleEmailTab('fichasSemStock')}
+                  status="fichasSemStock"
+                />
                 {dadosActivos.fichasSemStock && filtrarItens(dadosActivos.fichasSemStock).length === 0 ? (
                   <p className="text-center text-muted-foreground py-8">Nenhum item encontrado</p>
                 ) : (

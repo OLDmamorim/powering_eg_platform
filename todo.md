@@ -576,3 +576,6 @@
 - [x] Ref column contains the eurocode for cross-referencing with fichas (# and * are part of the eurocode, do NOT strip)
 - [x] Controlo Stock: Exportação PDF/Excel por status (Com Fichas, Sem Fichas, Fichas s/ Stock) com seleção de qual status exportar
 - [x] Controlo Stock: Botão eliminar análises do histórico com confirmação
+- [x] Controlo Stock: Remover exportação PDF, manter apenas Excel
+- [x] Controlo Stock: Adicionar botão enviar email para loja (CC gestor) por status
+- [ ] Controlo Stock: Comparação entre duas análises de stock (evolução)

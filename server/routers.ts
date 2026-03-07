@@ -12290,5 +12290,134 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
         await db.eliminarAnaliseStock(input.id);
         return { success: true };
       }),
+
+    // Enviar análise de stock por email para a loja (com cópia para o gestor)
+    enviarEmail: gestorProcedure
+      .input(z.object({
+        lojaId: z.number(),
+        nomeLoja: z.string(),
+        status: z.enum(['comFichas', 'semFichas', 'fichasSemStock']),
+        itens: z.array(z.any()),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const loja = await db.getLojaById(input.lojaId);
+        if (!loja) throw new TRPCError({ code: 'NOT_FOUND', message: 'Loja não encontrada' });
+        if (!loja.email) throw new TRPCError({ code: 'BAD_REQUEST', message: 'Loja não tem email configurado' });
+
+        const statusLabels: Record<string, string> = {
+          comFichas: 'Em Stock COM Fichas de Serviço',
+          semFichas: 'Em Stock SEM Fichas de Serviço',
+          fichasSemStock: 'Fichas de Serviço SEM Stock',
+        };
+        const statusLabel = statusLabels[input.status] || input.status;
+        const dataFormatada = new Date().toLocaleDateString('pt-PT');
+
+        // Gerar tabela HTML
+        let tabelaHTML = '';
+        if (input.status === 'fichasSemStock') {
+          tabelaHTML = `
+            <table style="width:100%;border-collapse:collapse;font-size:13px;">
+              <thead>
+                <tr style="background:#f1f5f9;">
+                  <th style="padding:8px 12px;text-align:left;border:1px solid #e2e8f0;">Eurocode</th>
+                  <th style="padding:8px 12px;text-align:left;border:1px solid #e2e8f0;">Obra</th>
+                  <th style="padding:8px 12px;text-align:left;border:1px solid #e2e8f0;">Matrícula</th>
+                  <th style="padding:8px 12px;text-align:left;border:1px solid #e2e8f0;">Marca/Modelo</th>
+                  <th style="padding:8px 12px;text-align:left;border:1px solid #e2e8f0;">Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${input.itens.map((item: any, idx: number) => `
+                  <tr style="background:${idx % 2 === 0 ? '#fff' : '#f8fafc'};">
+                    <td style="padding:8px 12px;border:1px solid #e2e8f0;font-family:monospace;font-weight:bold;">${item.eurocode || '-'}</td>
+                    <td style="padding:8px 12px;border:1px solid #e2e8f0;">${item.obrano || '-'}</td>
+                    <td style="padding:8px 12px;border:1px solid #e2e8f0;">${item.matricula || '-'}</td>
+                    <td style="padding:8px 12px;border:1px solid #e2e8f0;">${item.marca || ''} ${item.modelo || ''}</td>
+                    <td style="padding:8px 12px;border:1px solid #e2e8f0;">${item.status || '-'} ${item.diasAberto > 0 ? `(${item.diasAberto}d)` : ''}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>`;
+        } else {
+          tabelaHTML = `
+            <table style="width:100%;border-collapse:collapse;font-size:13px;">
+              <thead>
+                <tr style="background:#f1f5f9;">
+                  <th style="padding:8px 12px;text-align:left;border:1px solid #e2e8f0;">Referência</th>
+                  <th style="padding:8px 12px;text-align:left;border:1px solid #e2e8f0;">Família</th>
+                  <th style="padding:8px 12px;text-align:left;border:1px solid #e2e8f0;">Descrição</th>
+                  <th style="padding:8px 12px;text-align:right;border:1px solid #e2e8f0;">Qtd</th>
+                  ${input.status === 'comFichas' ? '<th style="padding:8px 12px;text-align:right;border:1px solid #e2e8f0;">N.º Fichas</th>' : ''}
+                </tr>
+              </thead>
+              <tbody>
+                ${input.itens.map((item: any, idx: number) => `
+                  <tr style="background:${idx % 2 === 0 ? '#fff' : '#f8fafc'};">
+                    <td style="padding:8px 12px;border:1px solid #e2e8f0;font-family:monospace;font-weight:bold;">${item.ref || '-'}</td>
+                    <td style="padding:8px 12px;border:1px solid #e2e8f0;">${item.familia || '-'}</td>
+                    <td style="padding:8px 12px;border:1px solid #e2e8f0;">${item.descricao || '-'}</td>
+                    <td style="padding:8px 12px;border:1px solid #e2e8f0;text-align:right;">${item.quantidade || 0}</td>
+                    ${input.status === 'comFichas' ? `<td style="padding:8px 12px;border:1px solid #e2e8f0;text-align:right;">${item.totalFichas || 0}</td>` : ''}
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>`;
+        }
+
+        const htmlEmail = `
+          <div style="font-family:Arial,sans-serif;max-width:800px;margin:0 auto;">
+            <div style="background:#16a34a;padding:20px;border-radius:8px 8px 0 0;">
+              <h1 style="color:#fff;margin:0;font-size:20px;">Controlo de Stock</h1>
+              <p style="color:#dcfce7;margin:5px 0 0;font-size:14px;">${statusLabel}</p>
+            </div>
+            <div style="padding:20px;background:#fff;border:1px solid #e2e8f0;">
+              <div style="margin-bottom:15px;">
+                <p style="margin:5px 0;"><strong>Loja:</strong> ${input.nomeLoja}</p>
+                <p style="margin:5px 0;"><strong>Data:</strong> ${dataFormatada}</p>
+                <p style="margin:5px 0;"><strong>Total de itens:</strong> ${input.itens.length}</p>
+              </div>
+              ${tabelaHTML}
+            </div>
+            <div style="padding:15px;background:#f8fafc;border:1px solid #e2e8f0;border-top:0;border-radius:0 0 8px 8px;text-align:center;">
+              <p style="margin:0;color:#64748b;font-size:12px;">PoweringEG Platform - Controlo de Stock</p>
+            </div>
+          </div>`;
+
+        const assunto = `Controlo de Stock - ${statusLabel} - ${input.nomeLoja} - ${dataFormatada}`;
+
+        const enviado = await sendEmail({
+          to: loja.email,
+          subject: assunto,
+          html: htmlEmail,
+        });
+
+        if (!enviado) {
+          throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Erro ao enviar email' });
+        }
+
+        // Enviar cópia para o gestor
+        let copiaEnviada: string | null = null;
+        const gestor = ctx.gestor ? await db.getGestorById(ctx.gestor.id) : null;
+        if (gestor?.email && gestor.email !== loja.email) {
+          try {
+            const htmlCopia = htmlEmail.replace(
+              '</div>\n            <div style="padding:15px',
+              `<div style="margin-top:15px;padding:12px;background:#f0f9ff;border-left:4px solid #0ea5e9;border-radius:4px;">
+                <p style="margin:0;color:#0369a1;font-size:13px;">Esta é uma cópia do email enviado para <strong>${loja.email}</strong>.</p>
+              </div>\n            </div>\n            <div style="padding:15px`
+            );
+            await sendEmail({
+              to: gestor.email,
+              subject: `[Cópia] ${assunto}`,
+              html: htmlCopia,
+            });
+            copiaEnviada = gestor.email;
+          } catch (e) {
+            console.error('[Stock Email] Erro ao enviar cópia ao gestor:', e);
+          }
+        }
+
+        return { success: true, email: loja.email, copiaEnviada };
+      }),
   }),
 });
