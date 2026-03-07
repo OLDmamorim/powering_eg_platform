@@ -9694,8 +9694,8 @@ function MonitorVidrosSection({ token, language }: { token: string; language: st
                   {/* Encomenda */}
                   <td className="py-2 px-3 text-gray-800">{vidro.encomenda || '-'}</td>
                   {/* Destinat\u00e1rio */}
-                  <td className="py-2 px-3 text-gray-800 max-w-[200px] truncate" title={vidro.destinatarioRaw || ''}>
-                    {vidro.destinatarioRaw || '-'}
+                  <td className="py-2 px-3 text-gray-800 max-w-[200px] truncate" title={vidro.lojaDestinoNome || vidro.destinatarioRaw || ''}>
+                    {vidro.lojaDestinoNome || vidro.destinatarioRaw || '-'}
                   </td>
                   {/* Data */}
                   <td className="py-2 px-3 text-gray-700 whitespace-nowrap">

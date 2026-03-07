@@ -556,3 +556,4 @@
 - [x] Fix Monitor Recepção mobile layout: show Eurocode, Pedido, Destinatário and Reporte button on small screens
 - [x] Reverter Monitor Recepção para layout tabela em linha (não cards), mas com botão Reporte incluído nas acções
 - [x] BUG: Fix ReferenceError 'onAutoCreate is not defined' when creating or viewing notes on mobile
+- [x] Monitor Recepção: Destinatário deve mostrar nome da loja conectada pelo admin em vez do texto raw da etiqueta

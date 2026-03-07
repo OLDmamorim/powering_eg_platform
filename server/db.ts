@@ -12420,7 +12420,27 @@ export async function registarVidro(data: {
 export async function listarVidrosPorLoja(lojaId: number, limite?: number) {
   const db = await getDb();
   if (!db) return [];
-  const query = db.select().from(vidrosRecepcao)
+  const query = db.select({
+    id: vidrosRecepcao.id,
+    destinatarioRaw: vidrosRecepcao.destinatarioRaw,
+    eurocode: vidrosRecepcao.eurocode,
+    numeroPedido: vidrosRecepcao.numeroPedido,
+    codAT: vidrosRecepcao.codAT,
+    encomenda: vidrosRecepcao.encomenda,
+    leitRef: vidrosRecepcao.leitRef,
+    fotoUrl: vidrosRecepcao.fotoUrl,
+    fotoKey: vidrosRecepcao.fotoKey,
+    destinatarioId: vidrosRecepcao.destinatarioId,
+    lojaScanId: vidrosRecepcao.lojaScanId,
+    lojaDestinoId: vidrosRecepcao.lojaDestinoId,
+    estado: vidrosRecepcao.estado,
+    confirmadoEm: vidrosRecepcao.confirmadoEm,
+    registadoPorToken: vidrosRecepcao.registadoPorToken,
+    createdAt: vidrosRecepcao.createdAt,
+    updatedAt: vidrosRecepcao.updatedAt,
+    lojaDestinoNome: lojas.nome,
+  }).from(vidrosRecepcao)
+    .leftJoin(lojas, eq(vidrosRecepcao.lojaDestinoId, lojas.id))
     .where(eq(vidrosRecepcao.lojaDestinoId, lojaId))
     .orderBy(desc(vidrosRecepcao.createdAt));
   if (limite) {
