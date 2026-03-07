@@ -12110,8 +12110,13 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
         if (!gestorId) throw new TRPCError({ code: 'FORBIDDEN', message: 'Gestor não encontrado' });
         
         // 1. Parsear o texto colado do stock
-        const linhas = input.textoStock.split('\n').filter(l => l.trim());
+        let linhas = input.textoStock.split('\n').filter(l => l.trim());
         const categoriasPermitidas = ['OC', 'PB', 'TE', 'VL', 'VP'];
+        
+        // Ignorar header se presente
+        if (linhas.length > 0 && /^\s*(Familia|Ref|Design|Stock)/i.test(linhas[0])) {
+          linhas = linhas.slice(1);
+        }
         
         interface ItemStock {
           ref: string;

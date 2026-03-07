@@ -571,3 +571,6 @@
 - [x] Frontend: Filtro automático por família (OC, PB, TE, VL, VP) e quantidade >= 1
 - [x] Frontend: Análise cruzada - em stock COM fichas, em stock SEM fichas, nas fichas SEM stock
 - [x] Frontend: Guardar análise para consulta no próprio dia
+- [x] Update stock parser: 5 columns (Familia, Ref, Design, Stock, Epcpond) tab-separated, decimal comma format
+- [x] Update frontend textarea placeholder to match real data format
+- [x] Ref column contains the eurocode for cross-referencing with fichas (# and * are part of the eurocode, do NOT strip)

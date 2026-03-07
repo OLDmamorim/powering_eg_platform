@@ -264,7 +264,7 @@ export default function ControloStock() {
                 <div>
                   <label className="text-sm font-medium mb-1 block">Listagem de Stock</label>
                   <Textarea
-                    placeholder="Cole aqui a listagem de stock...&#10;&#10;Exemplo:&#10;PB&#9;2763AGSVZ&#9;PB RENAULT CLIO V 19-&#9;3&#10;VL&#9;3567RGNE&#9;VL RENAULT CLIO V 19-&#9;1"
+                    placeholder="Cole aqui a listagem de stock exportada do sistema...&#10;&#10;Formato: Familia  Ref  Design  Stock  Epcpond (separado por tabs)&#10;&#10;Exemplo:&#10;OC&#9;3341BGSH&#9;OCL FIAT PUNTO 93> VRD&#9;1,000&#9;88,500000&#10;PB&#9;2763AGSVZ&#9;PBL RENAULT CLIO V 19-&#9;3,000&#9;125,000000"
                     value={textoStock}
                     onChange={(e) => setTextoStock(e.target.value)}
                     className="min-h-[200px] font-mono text-sm"
