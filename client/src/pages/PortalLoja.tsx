@@ -9503,7 +9503,7 @@ function MonitorVidrosSection({ token, language }: { token: string; language: st
   // Exportar para Excel (CSV)
   const exportarExcel = () => {
     if (!vidrosFiltrados || vidrosFiltrados.length === 0) return;
-    const headers = ['Eurocode', 'Pedido', 'Encomenda', 'Destinat\u00e1rio', 'Data', 'Estado'];
+    const headers = ['Eurocode', 'Pedido', 'Encomenda', 'Destinatário', 'Data', 'Estado'];
     const rows = vidrosFiltrados.map((v: any) => [
       v.eurocode || '-',
       v.numeroPedido || '-',
@@ -9532,9 +9532,9 @@ function MonitorVidrosSection({ token, language }: { token: string; language: st
       const { default: autoTable } = await import('jspdf-autotable');
       const doc = new jsPDF({ orientation: 'landscape' });
       doc.setFontSize(16);
-      doc.text('Monitor de Recep\u00e7\u00e3o de Vidros', 14, 15);
+      doc.text('Monitor de Recepção de Vidros', 14, 15);
       doc.setFontSize(9);
-      doc.text(`Exportado em ${new Date().toLocaleDateString('pt-PT')} \u00e0s ${new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })}`, 14, 22);
+      doc.text(`Exportado em ${new Date().toLocaleDateString('pt-PT')} às ${new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })}`, 14, 22);
       if (busca) doc.text(`Filtro: ${busca}`, 14, 27);
       if (filtroData) doc.text(`Data: ${filtroData}`, busca ? 100 : 14, 27);
       const tableData = vidrosFiltrados.map((v: any) => [
@@ -9547,7 +9547,7 @@ function MonitorVidrosSection({ token, language }: { token: string; language: st
       ]);
       autoTable(doc, {
         startY: (busca || filtroData) ? 32 : 27,
-        head: [['Eurocode', 'Pedido', 'Encomenda', 'Destinat\u00e1rio', 'Data', 'Estado']],
+        head: [['Eurocode', 'Pedido', 'Encomenda', 'Destinatário', 'Data', 'Estado']],
         body: tableData,
         styles: { fontSize: 8, cellPadding: 2 },
         headStyles: { fillColor: [37, 99, 235], textColor: 255, fontStyle: 'bold' },
@@ -9672,10 +9672,10 @@ function MonitorVidrosSection({ token, language }: { token: string; language: st
                 <th className="text-left py-2.5 px-3 font-bold text-blue-800 text-xs uppercase tracking-wide">Eurocode</th>
                 <th className="text-left py-2.5 px-3 font-bold text-gray-700 text-xs uppercase tracking-wide">Pedido</th>
                 <th className="text-left py-2.5 px-3 font-bold text-gray-700 text-xs uppercase tracking-wide">Encomenda</th>
-                <th className="text-left py-2.5 px-3 font-bold text-gray-700 text-xs uppercase tracking-wide">Destinat\u00e1rio</th>
+                <th className="text-left py-2.5 px-3 font-bold text-gray-700 text-xs uppercase tracking-wide">Destinatário</th>
                 <th className="text-left py-2.5 px-3 font-bold text-gray-700 text-xs uppercase tracking-wide">Data</th>
                 <th className="text-left py-2.5 px-3 font-bold text-gray-700 text-xs uppercase tracking-wide">Estado</th>
-                <th className="text-center py-2.5 px-3 font-bold text-gray-700 text-xs uppercase tracking-wide">Ac\u00e7\u00f5es</th>
+                <th className="text-center py-2.5 px-3 font-bold text-gray-700 text-xs uppercase tracking-wide">Acções</th>
               </tr>
             </thead>
             <tbody>
@@ -9695,7 +9695,7 @@ function MonitorVidrosSection({ token, language }: { token: string; language: st
                   <td className="py-2 px-3 font-semibold text-gray-900">{vidro.numeroPedido || '-'}</td>
                   {/* Encomenda */}
                   <td className="py-2 px-3 text-gray-800">{vidro.encomenda || '-'}</td>
-                  {/* Destinat\u00e1rio */}
+                  {/* Destinatário */}
                   <td className="py-2 px-3 text-gray-800 max-w-[200px] truncate" title={vidro.lojaDestinoNome || vidro.destinatarioRaw || ''}>
                     {vidro.lojaDestinoNome || vidro.destinatarioRaw || '-'}
                   </td>
@@ -9710,7 +9710,7 @@ function MonitorVidrosSection({ token, language }: { token: string; language: st
                     {vidro.estado === 'confirmado' && <Badge className="bg-green-100 text-green-800 border-green-200 text-xs px-2">Confirmado</Badge>}
                     {vidro.estado === 'pendente_associacao' && <Badge className="bg-amber-100 text-amber-800 border-amber-200 text-xs px-2">Pendente</Badge>}
                   </td>
-                  {/* Ac\u00e7\u00f5es */}
+                  {/* Acções */}
                   <td className="py-2 px-3">
                     <div className="flex items-center justify-center gap-1">
                       {vidro.fotoUrl && (
@@ -9719,11 +9719,11 @@ function MonitorVidrosSection({ token, language }: { token: string; language: st
                         </Button>
                       )}
                       {vidro.estado === 'recebido' && (
-                        <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => confirmarMutation.mutate({ token, vidroId: vidro.id })} title="Confirmar recep\u00e7\u00e3o" disabled={confirmarMutation.isPending}>
+                        <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => confirmarMutation.mutate({ token, vidroId: vidro.id })} title="Confirmar recepção" disabled={confirmarMutation.isPending}>
                           <CheckCircle className="h-4 w-4 text-green-600" />
                         </Button>
                       )}
-                      {/* Bot\u00e3o Reporte */}
+                      {/* Botão Reporte */}
                       <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => setReporteVidro(vidro)} title="Reporte de problema">
                         <AlertTriangle className="h-4 w-4 text-orange-500" />
                       </Button>
@@ -9732,7 +9732,7 @@ function MonitorVidrosSection({ token, language }: { token: string; language: st
                           <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-red-600 font-semibold" onClick={() => eliminarMutation.mutate({ token, vidroId: vidro.id })} disabled={eliminarMutation.isPending}>
                             {eliminarMutation.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Sim'}
                           </Button>
-                          <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-gray-600" onClick={() => setConfirmarEliminar(null)}>N\u00e3o</Button>
+                          <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-gray-600" onClick={() => setConfirmarEliminar(null)}>Não</Button>
                         </div>
                       ) : (
                         <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => setConfirmarEliminar(vidro.id)} title="Eliminar">
