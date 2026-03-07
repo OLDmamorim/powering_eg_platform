@@ -345,6 +345,9 @@ export default function ControloStock() {
               <h1 className="text-2xl font-bold flex items-center gap-2">
                 <Warehouse className="h-6 w-6 text-blue-600" />
                 Controlo de Stock
+                {(view === 'resultado' || view === 'detalhe') && nomeLoja && (
+                  <span className="text-lg font-semibold text-muted-foreground">— {nomeLoja}</span>
+                )}
               </h1>
               <p className="text-sm text-muted-foreground">
                 Cruzamento de stock com fichas de serviço

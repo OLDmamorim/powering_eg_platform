@@ -579,3 +579,4 @@
 - [x] Controlo Stock: Remover exportação PDF, manter apenas Excel
 - [x] Controlo Stock: Adicionar botão enviar email para loja (CC gestor) por status
 - [ ] Controlo Stock: Comparação entre duas análises de stock (evolução)
+- [x] Controlo Stock: Mostrar nome da loja analisada no cabeçalho da página de resultados
