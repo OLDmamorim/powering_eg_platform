@@ -24,6 +24,7 @@ import {
   Loader2,
   FileText,
   Info,
+  Download,
 } from 'lucide-react';
 
 interface ItemComFichas {
@@ -59,6 +60,60 @@ interface FichaSemStock {
   diasAberto: number;
 }
 
+// --- Export helpers ---
+
+function exportToExcel(data: any[], columns: { header: string; key: string }[], filename: string) {
+  import('xlsx').then((XLSX) => {
+    const wsData = [columns.map(c => c.header)];
+    for (const row of data) {
+      wsData.push(columns.map(c => row[c.key] ?? ''));
+    }
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+    // Auto-size columns
+    ws['!cols'] = columns.map(c => ({ wch: Math.max(c.header.length, 15) }));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Stock');
+    XLSX.writeFile(wb, `${filename}.xlsx`);
+    toast.success('Excel exportado com sucesso!');
+  }).catch(() => toast.error('Erro ao exportar Excel'));
+}
+
+function exportToPDF(data: any[], columns: { header: string; key: string }[], title: string, filename: string) {
+  Promise.all([
+    import('jspdf'),
+    import('jspdf-autotable'),
+  ]).then(([jsPDFModule]) => {
+    const doc = new jsPDFModule.jsPDF({ orientation: 'landscape' });
+    
+    // Header
+    doc.setFontSize(16);
+    doc.setTextColor(30, 64, 175);
+    doc.text('PoweringEG - Controlo de Stock', 14, 15);
+    doc.setFontSize(12);
+    doc.setTextColor(60, 60, 60);
+    doc.text(title, 14, 23);
+    doc.setFontSize(9);
+    doc.setTextColor(120, 120, 120);
+    doc.text(`Exportado em: ${new Date().toLocaleDateString('pt-PT')} ${new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })}`, 14, 29);
+    doc.text(`Total: ${data.length} registos`, 14, 34);
+    
+    // Table
+    const tableData = data.map(row => columns.map(c => row[c.key] ?? ''));
+    (doc as any).autoTable({
+      head: [columns.map(c => c.header)],
+      body: tableData,
+      startY: 38,
+      styles: { fontSize: 8, cellPadding: 2 },
+      headStyles: { fillColor: [30, 64, 175], textColor: 255, fontStyle: 'bold' },
+      alternateRowStyles: { fillColor: [245, 247, 250] },
+      margin: { left: 14, right: 14 },
+    });
+    
+    doc.save(`${filename}.pdf`);
+    toast.success('PDF exportado com sucesso!');
+  }).catch(() => toast.error('Erro ao exportar PDF'));
+}
+
 export default function ControloStock() {
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
@@ -68,7 +123,7 @@ export default function ControloStock() {
   const [lojaId, setLojaId] = useState<number | null>(null);
   const [view, setView] = useState<'input' | 'resultado' | 'historico' | 'detalhe'>('input');
   const [searchTerm, setSearchTerm] = useState('');
-  const [activeResultTab, setActiveResultTab] = useState('resumo');
+  const [activeResultTab, setActiveResultTab] = useState('comFichas');
 
   // Resultado da análise atual
   const [resultadoAtual, setResultadoAtual] = useState<{
@@ -155,6 +210,96 @@ export default function ControloStock() {
   // Dados activos (resultado actual ou detalhe do histórico)
   const dadosActivos = view === 'resultado' ? resultadoAtual : view === 'detalhe' ? detalheResultado : null;
 
+  // Nome da loja para exportação
+  const nomeLoja = view === 'resultado'
+    ? ((lojaSelecionada as any)?.nome || 'Loja')
+    : (detalheAnalise?.nomeLoja || 'Loja');
+
+  // --- Export handlers ---
+  const handleExportComFichas = (format: 'pdf' | 'excel') => {
+    if (!dadosActivos?.comFichas) return;
+    const data = filtrarItens(dadosActivos.comFichas).map((item: any) => ({
+      ref: item.ref,
+      familia: item.familia || '-',
+      descricao: item.descricao,
+      quantidade: item.quantidade,
+      totalFichas: item.totalFichas,
+      fichasDetalhe: item.fichas?.map((f: any) => `${f.obrano} (${f.matricula} - ${f.marca} ${f.modelo})`).join('; ') || '',
+    }));
+    const columns = [
+      { header: 'Referência', key: 'ref' },
+      { header: 'Família', key: 'familia' },
+      { header: 'Descrição', key: 'descricao' },
+      { header: 'Qtd', key: 'quantidade' },
+      { header: 'N.º Fichas', key: 'totalFichas' },
+      { header: 'Fichas Associadas', key: 'fichasDetalhe' },
+    ];
+    const title = `Stock COM Fichas - ${nomeLoja}`;
+    const filename = `stock_com_fichas_${nomeLoja.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}`;
+    if (format === 'excel') exportToExcel(data, columns, filename);
+    else exportToPDF(data, columns, title, filename);
+  };
+
+  const handleExportSemFichas = (format: 'pdf' | 'excel') => {
+    if (!dadosActivos?.semFichas) return;
+    const data = filtrarItens(dadosActivos.semFichas).map((item: any) => ({
+      ref: item.ref,
+      familia: item.familia || '-',
+      descricao: item.descricao,
+      quantidade: item.quantidade,
+    }));
+    const columns = [
+      { header: 'Referência', key: 'ref' },
+      { header: 'Família', key: 'familia' },
+      { header: 'Descrição', key: 'descricao' },
+      { header: 'Qtd', key: 'quantidade' },
+    ];
+    const title = `Stock SEM Fichas (Stock Parado) - ${nomeLoja}`;
+    const filename = `stock_sem_fichas_${nomeLoja.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}`;
+    if (format === 'excel') exportToExcel(data, columns, filename);
+    else exportToPDF(data, columns, title, filename);
+  };
+
+  const handleExportFichasSemStock = (format: 'pdf' | 'excel') => {
+    if (!dadosActivos?.fichasSemStock) return;
+    const data = filtrarItens(dadosActivos.fichasSemStock).map((item: any) => ({
+      eurocode: item.eurocode,
+      obrano: item.obrano,
+      matricula: item.matricula,
+      marca: item.marca,
+      modelo: item.modelo,
+      status: item.status,
+      diasAberto: item.diasAberto > 0 ? `${item.diasAberto} dias` : '-',
+    }));
+    const columns = [
+      { header: 'Eurocode', key: 'eurocode' },
+      { header: 'Obra N.º', key: 'obrano' },
+      { header: 'Matrícula', key: 'matricula' },
+      { header: 'Marca', key: 'marca' },
+      { header: 'Modelo', key: 'modelo' },
+      { header: 'Estado', key: 'status' },
+      { header: 'Dias Aberto', key: 'diasAberto' },
+    ];
+    const title = `Fichas SEM Stock - ${nomeLoja}`;
+    const filename = `fichas_sem_stock_${nomeLoja.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}`;
+    if (format === 'excel') exportToExcel(data, columns, filename);
+    else exportToPDF(data, columns, title, filename);
+  };
+
+  // Export button component for each tab
+  const ExportButtons = ({ onExport }: { onExport: (format: 'pdf' | 'excel') => void }) => (
+    <div className="flex gap-2 justify-end mb-2">
+      <Button variant="outline" size="sm" onClick={() => onExport('excel')}>
+        <Download className="h-3 w-3 mr-1" />
+        Excel
+      </Button>
+      <Button variant="outline" size="sm" onClick={() => onExport('pdf')}>
+        <Download className="h-3 w-3 mr-1" />
+        PDF
+      </Button>
+    </div>
+  );
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -235,8 +380,8 @@ export default function ControloStock() {
                   Colar Listagem de Stock
                 </CardTitle>
                 <CardDescription>
-                  Cole a listagem de stock exportada do sistema. Formato: colunas separadas por tab (Ref, Descrição, Quantidade ou Família, Ref, Descrição, Quantidade).
-                  Apenas categorias OC, PB, TE, VL, VP com quantidade {'>='} 1 serão consideradas.
+                  Cole a listagem de stock exportada do sistema. Formato: colunas separadas por tab (Família, Ref, Descrição, Stock, Epcpond).
+                  Apenas categorias OC, PB, TE, VL, VP com quantidade {'>='}  1 serão consideradas.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -264,7 +409,7 @@ export default function ControloStock() {
                 <div>
                   <label className="text-sm font-medium mb-1 block">Listagem de Stock</label>
                   <Textarea
-                    placeholder="Cole aqui a listagem de stock exportada do sistema...&#10;&#10;Formato: Familia  Ref  Design  Stock  Epcpond (separado por tabs)&#10;&#10;Exemplo:&#10;OC&#9;3341BGSH&#9;OCL FIAT PUNTO 93> VRD&#9;1,000&#9;88,500000&#10;PB&#9;2763AGSVZ&#9;PBL RENAULT CLIO V 19-&#9;3,000&#9;125,000000"
+                    placeholder={"Cole aqui a listagem de stock exportada do sistema...\n\nFormato: Familia  Ref  Design  Stock  Epcpond (separado por tabs)\n\nExemplo:\nOC\t3341BGSH\tOCL FIAT PUNTO 93> VRD\t1,000\t88,500000\nPB\t2763AGSVZ\tPBL RENAULT CLIO V 19-\t3,000\t125,000000"}
                     value={textoStock}
                     onChange={(e) => setTextoStock(e.target.value)}
                     className="min-h-[200px] font-mono text-sm"
@@ -307,7 +452,7 @@ export default function ControloStock() {
                 <CardContent className="pt-4 pb-4 text-center">
                   <Package className="h-6 w-6 mx-auto text-blue-600 mb-1" />
                   <div className="text-2xl font-bold text-blue-700">
-                    {dadosActivos.totalItensStock ?? dadosActivos.comFichas?.length + dadosActivos.semFichas?.length}
+                    {dadosActivos.totalItensStock ?? (dadosActivos.comFichas?.length || 0) + (dadosActivos.semFichas?.length || 0)}
                   </div>
                   <div className="text-xs text-muted-foreground">Total Stock</div>
                 </CardContent>
@@ -371,6 +516,7 @@ export default function ControloStock() {
 
               {/* Tab: Com Fichas */}
               <TabsContent value="comFichas" className="space-y-2 mt-4">
+                <ExportButtons onExport={handleExportComFichas} />
                 {dadosActivos.comFichas && filtrarItens(dadosActivos.comFichas).length === 0 ? (
                   <p className="text-center text-muted-foreground py-8">Nenhum item encontrado</p>
                 ) : (
@@ -423,6 +569,7 @@ export default function ControloStock() {
 
               {/* Tab: Sem Fichas */}
               <TabsContent value="semFichas" className="space-y-2 mt-4">
+                <ExportButtons onExport={handleExportSemFichas} />
                 {dadosActivos.semFichas && filtrarItens(dadosActivos.semFichas).length === 0 ? (
                   <p className="text-center text-muted-foreground py-8">Nenhum item encontrado</p>
                 ) : (
@@ -457,6 +604,7 @@ export default function ControloStock() {
 
               {/* Tab: Fichas sem Stock */}
               <TabsContent value="fichasSemStock" className="space-y-2 mt-4">
+                <ExportButtons onExport={handleExportFichasSemStock} />
                 {dadosActivos.fichasSemStock && filtrarItens(dadosActivos.fichasSemStock).length === 0 ? (
                   <p className="text-center text-muted-foreground py-8">Nenhum item encontrado</p>
                 ) : (
