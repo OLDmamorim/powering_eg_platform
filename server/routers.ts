@@ -10289,6 +10289,61 @@ IMPORTANTE:
             console.error('[analiseFichas] Stack:', fichasError?.stack?.substring(0, 500));
           }
           
+          // === GUARDAR EUROCODES DE TODAS AS FICHAS PARA CRUZAMENTO COM STOCK ===
+          try {
+            if (relatorio.fichasCompletas && relatorio.fichasCompletas.length > 0) {
+              const eurocodesParaGuardar: Array<{
+                analiseId: number;
+                lojaId: number | null;
+                nomeLoja: string;
+                obrano: number;
+                matricula: string | null;
+                eurocode: string;
+                ref: string | null;
+                marca: string | null;
+                modelo: string | null;
+                status: string | null;
+                diasAberto: number | null;
+              }> = [];
+              
+              for (const ficha of relatorio.fichasCompletas) {
+                // Extrair eurocode do campo eurocode ou ref
+                const eurocodeValue = (ficha.eurocode || '').trim();
+                const refValue = (ficha.ref || '').trim();
+                
+                // Usar eurocode se disponível, senão usar ref
+                const codigoFinal = eurocodeValue || refValue;
+                if (!codigoFinal) continue;
+                
+                // Pode haver múltiplos eurocodes separados por vírgula
+                const codigos = codigoFinal.split(/[,;]/).map(c => c.trim()).filter(c => c.length > 0);
+                
+                for (const codigo of codigos) {
+                  eurocodesParaGuardar.push({
+                    analiseId: analise.id,
+                    lojaId: lojaId,
+                    nomeLoja: relatorio.nomeLoja,
+                    obrano: ficha.obrano,
+                    matricula: ficha.matricula || null,
+                    eurocode: codigo,
+                    ref: ficha.ref || null,
+                    marca: ficha.marca || null,
+                    modelo: ficha.modelo || null,
+                    status: ficha.status || null,
+                    diasAberto: ficha.diasAberto || null,
+                  });
+                }
+              }
+              
+              if (eurocodesParaGuardar.length > 0) {
+                await db.saveEurocodesFichas(eurocodesParaGuardar);
+                console.log(`[analiseFichas] Guardados ${eurocodesParaGuardar.length} eurocodes para ${relatorio.nomeLoja}`);
+              }
+            }
+          } catch (euroErr: any) {
+            console.error('[analiseFichas] Erro ao guardar eurocodes:', euroErr?.message || euroErr);
+          }
+          
           // Verificar se a loja pertence ao gestor
           const lojasGestorIds = lojasGestor.map(l => l.id);
           const pertenceAoGestor = lojaId ? lojasGestorIds.includes(lojaId) : false;
@@ -11994,6 +12049,233 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
         if (!auth) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
         await db.eliminarVidro(input.vidroId);
         return { success: true };
+      }),
+  }),
+
+  // ==================== CONTROLO DE STOCK ====================
+  stock: router({
+    // Obter info da última análise de fichas (para saber se há eurocodes disponíveis)
+    infoAnalise: gestorProcedure
+      .input(z.object({
+        gestorIdSelecionado: z.number().optional(),
+      }))
+      .query(async ({ ctx, input }) => {
+        let gestorId = ctx.gestor?.id;
+        if (ctx.user.role === 'admin' && input.gestorIdSelecionado) {
+          gestorId = input.gestorIdSelecionado;
+        }
+        if (!gestorId) throw new TRPCError({ code: 'FORBIDDEN', message: 'Gestor não encontrado' });
+        
+        const ultimaAnalise = await db.getUltimaAnaliseFichas(gestorId);
+        if (!ultimaAnalise) return { temAnalise: false, dataAnalise: null, totalEurocodes: 0, analiseId: null };
+        
+        const eurocodes = await db.getEurocodesUltimaAnalise(gestorId);
+        return {
+          temAnalise: true,
+          dataAnalise: ultimaAnalise.createdAt,
+          totalEurocodes: eurocodes.length,
+          analiseId: ultimaAnalise.id,
+        };
+      }),
+
+    // Obter eurocodes por loja da última análise
+    eurocodesPorLoja: gestorProcedure
+      .input(z.object({
+        lojaId: z.number(),
+        gestorIdSelecionado: z.number().optional(),
+      }))
+      .query(async ({ ctx, input }) => {
+        let gestorId = ctx.gestor?.id;
+        if (ctx.user.role === 'admin' && input.gestorIdSelecionado) {
+          gestorId = input.gestorIdSelecionado;
+        }
+        if (!gestorId) throw new TRPCError({ code: 'FORBIDDEN', message: 'Gestor não encontrado' });
+        
+        return db.getEurocodesUltimaAnalisePorLoja(gestorId, input.lojaId);
+      }),
+
+    // Analisar stock: recebe texto colado, parseia, cruza com eurocodes das fichas
+    analisar: gestorProcedure
+      .input(z.object({
+        textoStock: z.string(),
+        lojaId: z.number(),
+        nomeLoja: z.string(),
+        gestorIdSelecionado: z.number().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        let gestorId = ctx.gestor?.id;
+        if (ctx.user.role === 'admin' && input.gestorIdSelecionado) {
+          gestorId = input.gestorIdSelecionado;
+        }
+        if (!gestorId) throw new TRPCError({ code: 'FORBIDDEN', message: 'Gestor não encontrado' });
+        
+        // 1. Parsear o texto colado do stock
+        const linhas = input.textoStock.split('\n').filter(l => l.trim());
+        const categoriasPermitidas = ['OC', 'PB', 'TE', 'VL', 'VP'];
+        
+        interface ItemStock {
+          ref: string;
+          descricao: string;
+          quantidade: number;
+          familia?: string;
+        }
+        
+        const itensStock: ItemStock[] = [];
+        
+        for (const linha of linhas) {
+          // Tentar parsear: pode ter 3 colunas (Ref, Design, Exp) ou 4 (Familia, Ref, Design, Exp)
+          const partes = linha.split('\t');
+          
+          if (partes.length >= 3) {
+            let ref: string, descricao: string, qtdStr: string, familia: string | undefined;
+            
+            if (partes.length >= 4) {
+              // 4+ colunas: Familia, Ref, Design, Exp
+              familia = partes[0].trim().toUpperCase();
+              ref = partes[1].trim();
+              descricao = partes[2].trim();
+              qtdStr = partes[3].trim();
+            } else {
+              // 3 colunas: Ref, Design, Exp
+              ref = partes[0].trim();
+              descricao = partes[1].trim();
+              qtdStr = partes[2].trim();
+            }
+            
+            // Parsear quantidade (pode ter vírgula decimal)
+            const quantidade = parseFloat(qtdStr.replace(',', '.')) || 0;
+            if (quantidade < 1) continue; // Excluir quantidade < 1
+            
+            // Se tem família, filtrar
+            if (familia && !categoriasPermitidas.includes(familia)) continue;
+            
+            // Se não tem família, tentar inferir pelo código
+            if (!familia) {
+              // Inferir família pelo padrão do código
+              const refUpper = ref.toUpperCase();
+              if (/AGS|AGAC|AGN|AGSM|AGSH|AGST|AGSV|AGSMVZ|AGACMVZ/.test(refUpper)) familia = 'PB';
+              else if (/BGS|OCL|OC/.test(refUpper)) familia = 'OC';
+              else if (/RGS|LGS|VVL|VL/.test(refUpper)) familia = 'VL';
+              else if (/VPL|VQL|VP/.test(refUpper)) familia = 'VP';
+              else if (/TET|TE/.test(refUpper)) familia = 'TE';
+              // Se não conseguiu inferir, incluir mesmo assim
+            }
+            
+            itensStock.push({ ref, descricao, quantidade, familia });
+          }
+        }
+        
+        if (itensStock.length === 0) {
+          throw new TRPCError({ code: 'BAD_REQUEST', message: 'Não foi possível extrair itens de stock do texto colado. Verifique o formato.' });
+        }
+        
+        // 2. Obter eurocodes das fichas para a loja
+        const eurocodesFichasLoja = await db.getEurocodesUltimaAnalisePorLoja(gestorId, input.lojaId);
+        const ultimaAnalise = await db.getUltimaAnaliseFichas(gestorId);
+        
+        // Criar set de eurocodes das fichas (normalizado para maiúsculas)
+        const eurocodesSet = new Set(eurocodesFichasLoja.map(e => e.eurocode.toUpperCase().trim()));
+        
+        // 3. Cruzar stock com fichas
+        const comFichas: Array<ItemStock & { fichasAssociadas: typeof eurocodesFichasLoja }> = [];
+        const semFichas: ItemStock[] = [];
+        
+        for (const item of itensStock) {
+          const refNorm = item.ref.toUpperCase().trim();
+          if (eurocodesSet.has(refNorm)) {
+            const fichasAssociadas = eurocodesFichasLoja.filter(e => e.eurocode.toUpperCase().trim() === refNorm);
+            comFichas.push({ ...item, fichasAssociadas });
+          } else {
+            semFichas.push(item);
+          }
+        }
+        
+        // 4. Eurocodes das fichas que não estão em stock
+        const refsStockSet = new Set(itensStock.map(i => i.ref.toUpperCase().trim()));
+        const fichasSemStock = eurocodesFichasLoja.filter(e => !refsStockSet.has(e.eurocode.toUpperCase().trim()));
+        
+        // 5. Guardar análise na BD
+        const resultado = {
+          itensStock,
+          comFichas: comFichas.map(i => ({
+            ref: i.ref,
+            descricao: i.descricao,
+            quantidade: i.quantidade,
+            familia: i.familia,
+            totalFichas: i.fichasAssociadas.length,
+            fichas: i.fichasAssociadas.map(f => ({
+              obrano: f.obrano,
+              matricula: f.matricula,
+              marca: f.marca,
+              modelo: f.modelo,
+              status: f.status,
+              diasAberto: f.diasAberto,
+            })),
+          })),
+          semFichas,
+          fichasSemStock: fichasSemStock.map(f => ({
+            eurocode: f.eurocode,
+            obrano: f.obrano,
+            matricula: f.matricula,
+            marca: f.marca,
+            modelo: f.modelo,
+            status: f.status,
+            diasAberto: f.diasAberto,
+          })),
+        };
+        
+        const analiseGuardada = await db.createAnaliseStock({
+          gestorId,
+          lojaId: input.lojaId,
+          nomeLoja: input.nomeLoja,
+          totalItensStock: itensStock.length,
+          totalComFichas: comFichas.length,
+          totalSemFichas: semFichas.length,
+          totalFichasSemStock: fichasSemStock.length,
+          dadosStock: JSON.stringify(itensStock),
+          resultadoAnalise: JSON.stringify(resultado),
+          analiseIdFichas: ultimaAnalise?.id || null,
+        });
+        
+        return {
+          id: analiseGuardada.id,
+          totalItensStock: itensStock.length,
+          totalComFichas: comFichas.length,
+          totalSemFichas: semFichas.length,
+          totalFichasSemStock: fichasSemStock.length,
+          comFichas: resultado.comFichas,
+          semFichas: resultado.semFichas,
+          fichasSemStock: resultado.fichasSemStock,
+          dataAnaliseFichas: ultimaAnalise?.createdAt || null,
+        };
+      }),
+
+    // Obter histórico de análises de stock
+    historico: gestorProcedure
+      .input(z.object({
+        gestorIdSelecionado: z.number().optional(),
+      }))
+      .query(async ({ ctx, input }) => {
+        let gestorId = ctx.gestor?.id;
+        if (ctx.user.role === 'admin' && input.gestorIdSelecionado) {
+          gestorId = input.gestorIdSelecionado;
+        }
+        if (!gestorId) throw new TRPCError({ code: 'FORBIDDEN', message: 'Gestor não encontrado' });
+        
+        return db.getAnalisesStock(gestorId, 20);
+      }),
+
+    // Obter detalhe de uma análise de stock
+    detalhe: gestorProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        const analise = await db.getAnaliseStockById(input.id);
+        if (!analise) throw new TRPCError({ code: 'NOT_FOUND', message: 'Análise não encontrada' });
+        return {
+          ...analise,
+          resultadoAnalise: analise.resultadoAnalise ? JSON.parse(analise.resultadoAnalise) : null,
+          dadosStock: analise.dadosStock ? JSON.parse(analise.dadosStock) : null,
+        };
       }),
   }),
 });

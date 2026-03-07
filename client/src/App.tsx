@@ -50,6 +50,7 @@ import Volantes from "./pages/Volantes";
 import LogAtribuicoes from "./pages/LogAtribuicoes";
 import PortalGestor from "./pages/PortalGestor";
 import AnaliseFichas from "./pages/AnaliseFichas";
+import ControloStock from "./pages/ControloStock";
 import RH from "./pages/RH";
 import { NPSDashboard } from "./pages/NPSDashboard";
 import MenuInicial from "./pages/MenuInicial";
@@ -90,6 +91,7 @@ function Router() {
       <Route path={"/log-atribuicoes"} component={LogAtribuicoes} />
       <Route path={"/portal-gestor"} component={PortalGestor} />
       <Route path={"/analise-fichas"} component={AnaliseFichas} />
+      <Route path={"/controlo-stock"} component={ControloStock} />
       <Route path={"/documentos"} component={Documentos} />
       <Route path={"/relatorio-livre"} component={RelatorioLivre} />
       <Route path={"/relatorio-completo"} component={RelatorioCompleto} />

@@ -181,7 +181,13 @@ import {
   InsertVidroDestinatario,
   vidrosRecepcao,
   VidroRecepcao,
-  InsertVidroRecepcao
+  InsertVidroRecepcao,
+  eurocodesFichas,
+  EurocodeFicha,
+  InsertEurocodeFicha,
+  analisesStock,
+  AnaliseStock,
+  InsertAnaliseStock
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -12562,4 +12568,144 @@ export async function eliminarVidro(id: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   await db.delete(vidrosRecepcao).where(eq(vidrosRecepcao.id, id));
+}
+
+
+// ==================== EUROCODES FICHAS ====================
+
+/**
+ * Guardar eurocodes extraídos das fichas de serviço
+ */
+export async function saveEurocodesFichas(eurocodes: InsertEurocodeFicha[]) {
+  const db = await getDb();
+  if (!db || eurocodes.length === 0) return;
+  
+  try {
+    const BATCH_SIZE = 100;
+    for (let i = 0; i < eurocodes.length; i += BATCH_SIZE) {
+      const batch = eurocodes.slice(i, i + BATCH_SIZE);
+      await db.insert(eurocodesFichas).values(batch);
+    }
+    console.log(`[saveEurocodesFichas] Guardados ${eurocodes.length} eurocodes`);
+  } catch (err: any) {
+    console.error(`[saveEurocodesFichas] ERRO:`, err?.message || err);
+    throw err;
+  }
+}
+
+/**
+ * Obter eurocodes da última análise de fichas para um gestor
+ */
+export async function getEurocodesUltimaAnalise(gestorId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  // Buscar a última análise do gestor
+  const [ultimaAnalise] = await db.select()
+    .from(analisesFichasServico)
+    .where(eq(analisesFichasServico.gestorId, gestorId))
+    .orderBy(desc(analisesFichasServico.createdAt))
+    .limit(1);
+  
+  if (!ultimaAnalise) return [];
+  
+  // Buscar eurocodes dessa análise
+  const result = await db.select()
+    .from(eurocodesFichas)
+    .where(eq(eurocodesFichas.analiseId, ultimaAnalise.id));
+  
+  return result;
+}
+
+/**
+ * Obter eurocodes da última análise para uma loja específica
+ */
+export async function getEurocodesUltimaAnalisePorLoja(gestorId: number, lojaId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  // Buscar a última análise do gestor
+  const [ultimaAnalise] = await db.select()
+    .from(analisesFichasServico)
+    .where(eq(analisesFichasServico.gestorId, gestorId))
+    .orderBy(desc(analisesFichasServico.createdAt))
+    .limit(1);
+  
+  if (!ultimaAnalise) return [];
+  
+  // Buscar eurocodes dessa análise para a loja
+  const result = await db.select()
+    .from(eurocodesFichas)
+    .where(and(
+      eq(eurocodesFichas.analiseId, ultimaAnalise.id),
+      eq(eurocodesFichas.lojaId, lojaId)
+    ));
+  
+  return result;
+}
+
+/**
+ * Limpar eurocodes de uma análise (para re-processamento)
+ */
+export async function limparEurocodesAnalise(analiseId: number) {
+  const db = await getDb();
+  if (!db) return;
+  await db.delete(eurocodesFichas).where(eq(eurocodesFichas.analiseId, analiseId));
+}
+
+// ==================== ANÁLISES DE STOCK ====================
+
+/**
+ * Criar uma análise de stock
+ */
+export async function createAnaliseStock(data: InsertAnaliseStock) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const [result] = await db.insert(analisesStock).values(data).$returningId();
+  return { id: result.id, ...data };
+}
+
+/**
+ * Obter análises de stock de um gestor
+ */
+export async function getAnalisesStock(gestorId: number, limit = 10) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return db.select()
+    .from(analisesStock)
+    .where(eq(analisesStock.gestorId, gestorId))
+    .orderBy(desc(analisesStock.createdAt))
+    .limit(limit);
+}
+
+/**
+ * Obter uma análise de stock por ID
+ */
+export async function getAnaliseStockById(id: number) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const [result] = await db.select()
+    .from(analisesStock)
+    .where(eq(analisesStock.id, id));
+  
+  return result || null;
+}
+
+/**
+ * Obter a última análise de fichas para um gestor (para info de data)
+ */
+export async function getUltimaAnaliseFichas(gestorId: number) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const [result] = await db.select()
+    .from(analisesFichasServico)
+    .where(eq(analisesFichasServico.gestorId, gestorId))
+    .orderBy(desc(analisesFichasServico.createdAt))
+    .limit(1);
+  
+  return result || null;
 }

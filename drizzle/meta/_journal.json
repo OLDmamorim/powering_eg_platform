@@ -652,6 +652,13 @@
       "when": 1772817213442,
       "tag": "0092_aromatic_blindfold",
       "breakpoints": true
+    },
+    {
+      "idx": 93,
+      "version": "5",
+      "when": 1772918894316,
+      "tag": "0093_perpetual_maverick",
+      "breakpoints": true
     }
   ]
 }

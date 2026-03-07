@@ -560,3 +560,14 @@
 - [x] BUG: Monitor Recepção cards (Total Registos / Hoje) contam registos eliminados - devem usar mesmos dados da lista
 - [x] BUG: Monitor Recepção cards count mismatch with table - query crashed due to non-existent confirmadoEm field in select
 - [x] BUG: Monitor Recepção - Unicode characters showing raw in table headers (ACÇÕES) and delete confirmation (Não) after production build
+
+## Controlo de Stock (novo módulo)
+- [x] DB: Criar tabela para guardar eurocodes extraídos das fichas de serviço (loja, eurocode, ficha, data)
+- [x] DB: Criar tabela para guardar análises de stock (loja, data, dados)
+- [x] Backend: Guardar eurocodes das fichas quando análise é feita
+- [x] Backend: Procedure para receber listagem de stock colada, parsear e cruzar com eurocodes das fichas
+- [x] Frontend: Página Controlo de Stock no Portal do Gestor (após Análise de Fichas)
+- [x] Frontend: Área para colar listagem de stock (textarea)
+- [x] Frontend: Filtro automático por família (OC, PB, TE, VL, VP) e quantidade >= 1
+- [x] Frontend: Análise cruzada - em stock COM fichas, em stock SEM fichas, nas fichas SEM stock
+- [x] Frontend: Guardar análise para consulta no próprio dia

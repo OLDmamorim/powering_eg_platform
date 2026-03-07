@@ -1651,3 +1651,55 @@ export const vidrosRecepcao = mysqlTable("vidros_recepcao", {
 });
 export type VidroRecepcao = typeof vidrosRecepcao.$inferSelect;
 export type InsertVidroRecepcao = typeof vidrosRecepcao.$inferInsert;
+
+
+/**
+ * Eurocodes extraídos das fichas de serviço
+ * Guardados durante a análise de fichas para cruzamento com stock
+ */
+export const eurocodesFichas = mysqlTable("eurocodes_fichas", {
+  id: int("id").autoincrement().primaryKey(),
+  analiseId: int("analiseId").notNull(), // FK para analises_fichas_servico.id
+  lojaId: int("lojaId"), // FK para lojas.id (pode ser null se loja não identificada)
+  nomeLoja: varchar("nomeLoja", { length: 255 }).notNull(),
+  
+  // Dados da ficha
+  obrano: int("obrano").notNull(), // Número da obra/ficha
+  matricula: varchar("matricula", { length: 20 }),
+  eurocode: varchar("eurocode", { length: 100 }).notNull(), // Eurocode individual (1 por linha)
+  ref: varchar("ref", { length: 100 }), // Referência original do vidro
+  marca: varchar("marca", { length: 100 }), // Marca do veículo
+  modelo: varchar("modelo", { length: 100 }), // Modelo do veículo
+  status: varchar("status", { length: 100 }), // Status da ficha
+  diasAberto: int("diasAberto"), // Dias em aberto
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type EurocodeFicha = typeof eurocodesFichas.$inferSelect;
+export type InsertEurocodeFicha = typeof eurocodesFichas.$inferInsert;
+
+/**
+ * Análises de Stock - Registo de cada análise de stock feita
+ */
+export const analisesStock = mysqlTable("analises_stock", {
+  id: int("id").autoincrement().primaryKey(),
+  gestorId: int("gestorId").notNull(), // FK para gestores.id
+  lojaId: int("lojaId"), // FK para lojas.id (pode ser null se análise geral)
+  nomeLoja: varchar("nomeLoja", { length: 255 }),
+  
+  // Dados da análise
+  totalItensStock: int("totalItensStock").notNull().default(0),
+  totalComFichas: int("totalComFichas").notNull().default(0), // Itens em stock com fichas associadas
+  totalSemFichas: int("totalSemFichas").notNull().default(0), // Itens em stock sem fichas
+  totalFichasSemStock: int("totalFichasSemStock").notNull().default(0), // Eurocodes das fichas sem stock
+  
+  // Dados raw para consulta
+  dadosStock: text("dadosStock"), // JSON com a listagem de stock parseada
+  resultadoAnalise: text("resultadoAnalise"), // JSON com resultado completo da análise
+  
+  analiseIdFichas: int("analiseIdFichas"), // FK para analises_fichas_servico.id (análise de fichas usada)
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type AnaliseStock = typeof analisesStock.$inferSelect;
+export type InsertAnaliseStock = typeof analisesStock.$inferInsert;

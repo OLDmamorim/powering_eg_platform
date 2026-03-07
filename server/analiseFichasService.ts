@@ -61,6 +61,9 @@ export interface RelatorioLoja {
   // Referências para devolução
   referenciasDevolucao: string[];
   
+  // Todas as fichas da loja (para extração de eurocodes)
+  fichasCompletas: FichaServico[];
+  
   // Resumo
   resumo: string;
   
@@ -815,6 +818,7 @@ export function analisarFichas(fichas: FichaServico[], nomeArquivo: string): Res
       // fichasSemEmailCliente, // REMOVIDO
       statusCount,
       referenciasDevolucao,
+      fichasCompletas: fichasLoja,
       resumo: '',
       conteudoHTML: '',
     };
