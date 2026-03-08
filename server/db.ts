@@ -12723,6 +12723,30 @@ export async function eliminarAnaliseStock(id: number) {
   await db.delete(analisesStock).where(eq(analisesStock.id, id));
 }
 
+/**
+ * Obter análises de stock por lojaId (para o portal da loja)
+ */
+export async function getAnalisesStockPorLoja(lojaId: number, limit = 10) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return db.select({
+    id: analisesStock.id,
+    gestorId: analisesStock.gestorId,
+    lojaId: analisesStock.lojaId,
+    nomeLoja: analisesStock.nomeLoja,
+    totalItensStock: analisesStock.totalItensStock,
+    totalComFichas: analisesStock.totalComFichas,
+    totalSemFichas: analisesStock.totalSemFichas,
+    totalFichasSemStock: analisesStock.totalFichasSemStock,
+    createdAt: analisesStock.createdAt,
+  })
+    .from(analisesStock)
+    .where(eq(analisesStock.lojaId, lojaId))
+    .orderBy(desc(analisesStock.createdAt))
+    .limit(limit);
+}
+
 // =============================================
 // Classificações de Eurocodes Sem Ficha
 // =============================================

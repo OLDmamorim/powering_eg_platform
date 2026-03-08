@@ -5765,6 +5765,32 @@ IMPORTANTE:
           gestorNome: gestor?.nome || null,
         };
       }),
+
+    // Obter últimas análises de stock da loja
+    analisesStock: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        lojaId: z.number().optional(),
+        limite: z.number().optional(),
+      }))
+      .query(async ({ input }) => {
+        const auth = await db.validarTokenLoja(input.token);
+        if (!auth) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        
+        let lojaIdParaConsulta = auth.loja.id;
+        
+        if (input.lojaId && input.lojaId !== auth.loja.id) {
+          const lojasRelacionadas = await db.getLojasRelacionadas(auth.loja.id);
+          const lojaRelacionada = lojasRelacionadas.find(l => l.lojaId === input.lojaId);
+          if (lojaRelacionada) {
+            lojaIdParaConsulta = input.lojaId;
+          }
+        }
+        
+        return await db.getAnalisesStockPorLoja(lojaIdParaConsulta, input.limite || 5);
+      }),
   }),
   
   // ==================== GESTÃO DE TOKENS DE LOJA (ADMIN/GESTOR) ====================

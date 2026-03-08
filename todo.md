@@ -594,3 +594,4 @@
 - [x] Controlo Stock: Classificação independente por unidade (DB suporta índice por eurocode)
 - [x] Controlo Stock: Adaptar Excel e email consolidado para reflectir desmultiplicação
 - [x] BUG: ReferenceError: Cannot access 'X' before initialization — referência circular no ControloStock.tsx (movido dadosActivos antes de semFichasDesmultiplicados)
+- [x] Portal Loja: Adicionar card "Análise Stock" com últimas análises de stock feitas pelo gestor

@@ -125,6 +125,7 @@ import {
   Package,
   Eye,
   CheckCircle,
+  Boxes,
 } from "lucide-react";
 
 interface LojaAuth {
@@ -203,7 +204,7 @@ export default function PortalLoja() {
     }
     return null;
   });
-  const [activeTab, setActiveTab] = useState<"home" | "reuniao" | "pendentes" | "historico" | "tarefas" | "resultados" | "volante" | "agenda" | "chatbot" | "circulares" | "recepcao_vidros" | "monitor_vidros">("home");
+  const [activeTab, setActiveTab] = useState<"home" | "reuniao" | "pendentes" | "historico" | "tarefas" | "resultados" | "volante" | "agenda" | "chatbot" | "circulares" | "recepcao_vidros" | "monitor_vidros" | "analise_stock">("home");
   const [filtroTarefas, setFiltroTarefas] = useState<"todas" | "recebidas" | "enviadas" | "internas">("todas");
   // Estado para o filtro de meses do dashboard
   const [mesesSelecionadosDashboard, setMesesSelecionadosDashboard] = useState<MesSelecionado[]>(() => {
@@ -589,6 +590,12 @@ export default function PortalLoja() {
   const { data: circulares, isLoading: circularesLoading } = trpc.documentos.listarPorLoja.useQuery(
     { lojaId: lojaAuth?.lojaId || 0 },
     { enabled: !!lojaAuth?.lojaId && activeTab === 'circulares' }
+  );
+
+  // Análises de stock da loja
+  const { data: analisesStock, isLoading: analisesStockLoading } = trpc.reunioesQuinzenais.analisesStock.useQuery(
+    { token, lojaId: lojaIdAtiva, limite: 5 },
+    { enabled: !!token && !!lojaAuth && (activeTab === 'analise_stock' || activeTab === 'home') }
   );
 
   // Mutation para Análise IA
@@ -1293,6 +1300,30 @@ export default function PortalLoja() {
                 </div>
                 <h3 className="text-xl font-bold mb-2">{language === 'pt' ? 'Monitor Recepção' : 'Reception Monitor'}</h3>
                 <p className="text-sm opacity-80">{language === 'pt' ? 'Ver vidros recebidos na loja' : 'View received glasses'}</p>
+              </CardContent>
+            </Card>
+
+            {/* Card Análise Stock */}
+            <Card 
+              className="cursor-pointer hover:shadow-lg transition-all hover:scale-[1.02] bg-gradient-to-br from-slate-600 to-slate-800 text-white border-0"
+              onClick={() => setActiveTab("analise_stock")}
+            >
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <Boxes className="h-10 w-10 opacity-80" />
+                  {analisesStock && analisesStock.length > 0 && (
+                    <Badge className="bg-white/20 text-white border-0 text-lg px-3">
+                      {analisesStock.length}
+                    </Badge>
+                  )}
+                </div>
+                <h3 className="text-xl font-bold mb-2">{language === 'pt' ? 'Análise Stock' : 'Stock Analysis'}</h3>
+                <p className="text-sm opacity-80">
+                  {analisesStock && analisesStock.length > 0
+                    ? (language === 'pt' ? `Última: ${new Date(analisesStock[0].createdAt).toLocaleDateString('pt-PT')}` : `Last: ${new Date(analisesStock[0].createdAt).toLocaleDateString('en-GB')}`)
+                    : (language === 'pt' ? 'Consultar análises de stock' : 'View stock analyses')
+                  }
+                </p>
               </CardContent>
             </Card>
           </div>
@@ -4052,6 +4083,105 @@ export default function PortalLoja() {
       {/* ==================== MONITOR RECEPÇÃO ==================== */}
       {activeTab === "monitor_vidros" && (
         <MonitorVidrosSection token={token} language={language} />
+      )}
+
+      {/* ==================== ANÁLISE STOCK ==================== */}
+      {activeTab === "analise_stock" && (
+        <div className="space-y-4">
+          <div className="flex items-center gap-3 mb-2">
+            <Boxes className="h-6 w-6 text-slate-600" />
+            <div>
+              <h2 className="text-xl font-bold text-gray-800">{language === 'pt' ? 'Análise de Stock' : 'Stock Analysis'}</h2>
+              <p className="text-sm text-gray-500">{language === 'pt' ? 'Análises de stock realizadas pelo gestor' : 'Stock analyses performed by the manager'}</p>
+            </div>
+          </div>
+
+          {analisesStockLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-slate-500" />
+            </div>
+          ) : !analisesStock || analisesStock.length === 0 ? (
+            <Card>
+              <CardContent className="py-12 text-center">
+                <Boxes className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+                <h3 className="text-lg font-semibold mb-2">{language === 'pt' ? 'Sem análises' : 'No analyses'}</h3>
+                <p className="text-muted-foreground">
+                  {language === 'pt' 
+                    ? 'Ainda não foram realizadas análises de stock para esta loja.' 
+                    : 'No stock analyses have been performed for this store yet.'}
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-3">
+              {analisesStock.map((analise: any) => {
+                const percentComFichas = analise.totalItensStock > 0 
+                  ? Math.round((analise.totalComFichas / analise.totalItensStock) * 100) 
+                  : 0;
+                const percentSemFichas = analise.totalItensStock > 0 
+                  ? Math.round((analise.totalSemFichas / analise.totalItensStock) * 100) 
+                  : 0;
+                
+                return (
+                  <Card key={analise.id} className="overflow-hidden">
+                    <CardContent className="p-4">
+                      {/* Data e nome da loja */}
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <Calendar className="h-4 w-4 text-gray-400" />
+                          <span className="font-semibold text-sm">
+                            {new Date(analise.createdAt).toLocaleDateString('pt-PT', { day: '2-digit', month: 'short', year: 'numeric' })}
+                          </span>
+                        </div>
+                        <Badge variant="outline" className="text-xs">
+                          {analise.nomeLoja}
+                        </Badge>
+                      </div>
+                      
+                      {/* Resumo em grid */}
+                      <div className="grid grid-cols-4 gap-2 mb-3">
+                        <div className="text-center p-2 bg-blue-50 rounded-lg">
+                          <div className="text-lg font-bold text-blue-700">{analise.totalItensStock}</div>
+                          <div className="text-[10px] text-blue-600">{language === 'pt' ? 'Total' : 'Total'}</div>
+                        </div>
+                        <div className="text-center p-2 bg-green-50 rounded-lg">
+                          <div className="text-lg font-bold text-green-700">{analise.totalComFichas}</div>
+                          <div className="text-[10px] text-green-600">{language === 'pt' ? 'C/ Fichas' : 'W/ Records'}</div>
+                        </div>
+                        <div className="text-center p-2 bg-amber-50 rounded-lg">
+                          <div className="text-lg font-bold text-amber-700">{analise.totalSemFichas}</div>
+                          <div className="text-[10px] text-amber-600">{language === 'pt' ? 'S/ Fichas' : 'No Records'}</div>
+                        </div>
+                        <div className="text-center p-2 bg-red-50 rounded-lg">
+                          <div className="text-lg font-bold text-red-700">{analise.totalFichasSemStock}</div>
+                          <div className="text-[10px] text-red-600">{language === 'pt' ? 'Fichas s/ Stock' : 'Records No Stock'}</div>
+                        </div>
+                      </div>
+                      
+                      {/* Barra de progresso */}
+                      <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden flex">
+                        <div 
+                          className="h-full bg-green-500" 
+                          style={{ width: `${percentComFichas}%` }}
+                          title={`${language === 'pt' ? 'Com fichas' : 'With records'}: ${percentComFichas}%`}
+                        />
+                        <div 
+                          className="h-full bg-amber-400" 
+                          style={{ width: `${percentSemFichas}%` }}
+                          title={`${language === 'pt' ? 'Sem fichas' : 'No records'}: ${percentSemFichas}%`}
+                        />
+                      </div>
+                      <div className="flex justify-between mt-1">
+                        <span className="text-[10px] text-green-600">{percentComFichas}% {language === 'pt' ? 'com fichas' : 'with records'}</span>
+                        <span className="text-[10px] text-amber-600">{percentSemFichas}% {language === 'pt' ? 'sem fichas' : 'no records'}</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+        </div>
       )}
 
       {/* Botão Flutuante de Acesso Rápido às Tarefas - Pulsa quando há NOVAS */}
