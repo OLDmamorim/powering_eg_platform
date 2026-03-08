@@ -327,24 +327,6 @@ export default function ControloStock() {
     return map;
   }, [recorrencia]);
 
-  // Desmultiplicar itens sem fichas: cada unidade numa alínea separada
-  const semFichasDesmultiplicados = useMemo(() => {
-    if (!dadosActivos?.semFichas) return [];
-    const resultado: Array<any & { unitIndex: number; totalUnidades: number }> = [];
-    for (const item of dadosActivos.semFichas) {
-      const qty = item.quantidade || 1;
-      for (let i = 1; i <= qty; i++) {
-        resultado.push({
-          ...item,
-          quantidade: 1,
-          unitIndex: i,
-          totalUnidades: qty,
-        });
-      }
-    }
-    return resultado;
-  }, [dadosActivos?.semFichas]);
-
   const handleAnalisar = () => {
     if (!textoStock.trim()) {
       toast.error('Cole a listagem de stock na área de texto');
@@ -408,6 +390,24 @@ export default function ControloStock() {
 
   // Dados activos (resultado actual ou detalhe do histórico)
   const dadosActivos = view === 'resultado' ? resultadoAtual : view === 'detalhe' ? detalheResultado : null;
+
+  // Desmultiplicar itens sem fichas: cada unidade numa alínea separada
+  const semFichasDesmultiplicados = useMemo(() => {
+    if (!dadosActivos?.semFichas) return [];
+    const resultado: Array<any & { unitIndex: number; totalUnidades: number }> = [];
+    for (const item of dadosActivos.semFichas) {
+      const qty = item.quantidade || 1;
+      for (let i = 1; i <= qty; i++) {
+        resultado.push({
+          ...item,
+          quantidade: 1,
+          unitIndex: i,
+          totalUnidades: qty,
+        });
+      }
+    }
+    return resultado;
+  }, [dadosActivos?.semFichas]);
 
   const lojaIdActiva = lojaIdActivaEarly;
 
