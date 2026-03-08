@@ -28,7 +28,12 @@ import {
   Trash2,
   Mail,
   Send,
+  Tag,
+  Clock,
+  FileSpreadsheet,
 } from 'lucide-react';
+import ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
 
 interface ItemComFichas {
   ref: string;
@@ -65,20 +70,113 @@ interface FichaSemStock {
 
 // --- Export helpers ---
 
-function exportToExcel(data: any[], columns: { header: string; key: string }[], filename: string) {
-  import('xlsx').then((XLSX) => {
-    const wsData = [columns.map(c => c.header)];
-    for (const row of data) {
-      wsData.push(columns.map(c => row[c.key] ?? ''));
+const CLASSIFICACAO_LABELS: Record<string, string> = {
+  devolucao_rejeitada: 'Devolução Rejeitada',
+  usado: 'Usado',
+  com_danos: 'Com Danos',
+  para_devolver: 'Para Devolver',
+};
+
+const CLASSIFICACAO_COLORS: Record<string, string> = {
+  devolucao_rejeitada: 'bg-purple-100 text-purple-700',
+  usado: 'bg-gray-100 text-gray-700',
+  com_danos: 'bg-orange-100 text-orange-700',
+  para_devolver: 'bg-cyan-100 text-cyan-700',
+};
+
+async function exportConsolidatedExcel(
+  nomeLoja: string,
+  comFichas: any[],
+  semFichas: any[],
+  fichasSemStock: any[],
+  classificacoesMap: Map<string, string>,
+  recorrenciaMap: Map<string, number>,
+) {
+  try {
+    const wb = new ExcelJS.Workbook();
+    const dataStr = new Date().toLocaleDateString('pt-PT');
+
+    // --- Sheet 1: Com Fichas ---
+    const ws1 = wb.addWorksheet('Com Fichas');
+    ws1.columns = [
+      { header: 'Referência', key: 'ref', width: 18 },
+      { header: 'Família', key: 'familia', width: 10 },
+      { header: 'Descrição', key: 'descricao', width: 40 },
+      { header: 'Qtd', key: 'quantidade', width: 8 },
+      { header: 'N.º Fichas', key: 'totalFichas', width: 12 },
+      { header: 'Fichas Associadas', key: 'fichasDetalhe', width: 50 },
+    ];
+    ws1.getRow(1).font = { bold: true };
+    ws1.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF16A34A' } };
+    ws1.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    for (const item of comFichas) {
+      ws1.addRow({
+        ref: item.ref,
+        familia: item.familia || '-',
+        descricao: item.descricao,
+        quantidade: item.quantidade,
+        totalFichas: item.totalFichas,
+        fichasDetalhe: item.fichas?.map((f: any) => `${f.obrano} (${f.matricula} - ${f.marca} ${f.modelo})`).join('; ') || '',
+      });
     }
-    const ws = XLSX.utils.aoa_to_sheet(wsData);
-    // Auto-size columns
-    ws['!cols'] = columns.map(c => ({ wch: Math.max(c.header.length, 15) }));
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Stock');
-    XLSX.writeFile(wb, `${filename}.xlsx`);
-    toast.success('Excel exportado com sucesso!');
-  }).catch(() => toast.error('Erro ao exportar Excel'));
+
+    // --- Sheet 2: Sem Fichas ---
+    const ws2 = wb.addWorksheet('Sem Fichas');
+    ws2.columns = [
+      { header: 'Referência', key: 'ref', width: 18 },
+      { header: 'Família', key: 'familia', width: 10 },
+      { header: 'Descrição', key: 'descricao', width: 40 },
+      { header: 'Qtd', key: 'quantidade', width: 8 },
+      { header: 'Classificação', key: 'classificacao', width: 20 },
+      { header: 'Análises Consecutivas', key: 'recorrencia', width: 22 },
+    ];
+    ws2.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    ws2.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD97706' } };
+    for (const item of semFichas) {
+      const classif = classificacoesMap.get(item.ref?.toUpperCase()?.trim());
+      const recorr = recorrenciaMap.get(item.ref?.toUpperCase()?.trim());
+      ws2.addRow({
+        ref: item.ref,
+        familia: item.familia || '-',
+        descricao: item.descricao,
+        quantidade: item.quantidade,
+        classificacao: classif ? CLASSIFICACAO_LABELS[classif] || classif : '-',
+        recorrencia: recorr && recorr > 1 ? `${recorr} análises` : '-',
+      });
+    }
+
+    // --- Sheet 3: Fichas s/ Stock ---
+    const ws3 = wb.addWorksheet('Fichas sem Stock');
+    ws3.columns = [
+      { header: 'Eurocode', key: 'eurocode', width: 18 },
+      { header: 'Obra N.º', key: 'obrano', width: 12 },
+      { header: 'Matrícula', key: 'matricula', width: 14 },
+      { header: 'Marca', key: 'marca', width: 14 },
+      { header: 'Modelo', key: 'modelo', width: 20 },
+      { header: 'Estado', key: 'status', width: 14 },
+      { header: 'Dias Aberto', key: 'diasAberto', width: 14 },
+    ];
+    ws3.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    ws3.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFDC2626' } };
+    for (const item of fichasSemStock) {
+      ws3.addRow({
+        eurocode: item.eurocode,
+        obrano: item.obrano,
+        matricula: item.matricula,
+        marca: item.marca,
+        modelo: item.modelo,
+        status: item.status,
+        diasAberto: item.diasAberto > 0 ? `${item.diasAberto} dias` : '-',
+      });
+    }
+
+    const buffer = await wb.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    saveAs(blob, `controlo_stock_${nomeLoja.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}.xlsx`);
+    toast.success('Excel consolidado exportado com sucesso!');
+  } catch {
+    toast.error('Erro ao exportar Excel consolidado');
+  }
 }
 
 export default function ControloStock() {
@@ -149,10 +247,57 @@ export default function ControloStock() {
     },
   });
 
+  const classificarMutation = trpc.stock.classificar.useMutation({
+    onSuccess: () => {
+      toast.success('Classificação guardada');
+      if (lojaIdActiva) {
+        utils.stock.classificacoes.invalidate({ lojaId: lojaIdActiva });
+        utils.stock.recorrencia.invalidate({ lojaId: lojaIdActiva });
+      }
+    },
+    onError: (error) => {
+      toast.error(error.message || 'Erro ao classificar');
+    },
+  });
+
   const lojaSelecionada = useMemo(() => {
     if (!lojaId || !lojas) return null;
     return lojas.find((l: any) => l.id === lojaId);
   }, [lojaId, lojas]);
+
+  // Loja ID activa (da análise actual ou do detalhe)
+  const lojaIdActivaEarly = view === 'resultado' ? lojaId : (detalheAnalise as any)?.lojaId || null;
+
+  // Queries de classificações e recorrência
+  const { data: classificacoes } = trpc.stock.classificacoes.useQuery(
+    { lojaId: lojaIdActivaEarly! },
+    { enabled: !!lojaIdActivaEarly && (view === 'resultado' || view === 'detalhe') }
+  );
+  const { data: recorrencia } = trpc.stock.recorrencia.useQuery(
+    { lojaId: lojaIdActivaEarly! },
+    { enabled: !!lojaIdActivaEarly && (view === 'resultado' || view === 'detalhe') }
+  );
+
+  // Maps para lookup rápido
+  const classificacoesMap = useMemo(() => {
+    const map = new Map<string, { id: number; classificacao: string }>();
+    if (classificacoes) {
+      for (const c of classificacoes) {
+        map.set(c.eurocode.toUpperCase().trim(), { id: c.id, classificacao: c.classificacao });
+      }
+    }
+    return map;
+  }, [classificacoes]);
+
+  const recorrenciaMap = useMemo(() => {
+    const map = new Map<string, number>();
+    if (recorrencia) {
+      for (const r of recorrencia) {
+        map.set(r.eurocode.toUpperCase().trim(), r.analisesConsecutivas);
+      }
+    }
+    return map;
+  }, [recorrencia]);
 
   const handleAnalisar = () => {
     if (!textoStock.trim()) {
@@ -196,77 +341,39 @@ export default function ControloStock() {
   // Dados activos (resultado actual ou detalhe do histórico)
   const dadosActivos = view === 'resultado' ? resultadoAtual : view === 'detalhe' ? detalheResultado : null;
 
-  // Loja ID activa (da análise actual ou do detalhe)
-  const lojaIdActiva = view === 'resultado' ? lojaId : (detalheAnalise as any)?.lojaId || null;
+  const lojaIdActiva = lojaIdActivaEarly;
 
   // Nome da loja para exportação
   const nomeLoja = view === 'resultado'
     ? ((lojaSelecionada as any)?.nome || 'Loja')
     : (detalheAnalise?.nomeLoja || 'Loja');
 
-  // --- Export handlers ---
-  const handleExportComFichas = () => {
-    if (!dadosActivos?.comFichas) return;
-    const data = filtrarItens(dadosActivos.comFichas).map((item: any) => ({
-      ref: item.ref,
-      familia: item.familia || '-',
-      descricao: item.descricao,
-      quantidade: item.quantidade,
-      totalFichas: item.totalFichas,
-      fichasDetalhe: item.fichas?.map((f: any) => `${f.obrano} (${f.matricula} - ${f.marca} ${f.modelo})`).join('; ') || '',
-    }));
-    const columns = [
-      { header: 'Referência', key: 'ref' },
-      { header: 'Família', key: 'familia' },
-      { header: 'Descrição', key: 'descricao' },
-      { header: 'Qtd', key: 'quantidade' },
-      { header: 'N.º Fichas', key: 'totalFichas' },
-      { header: 'Fichas Associadas', key: 'fichasDetalhe' },
-    ];
-    const filename = `stock_com_fichas_${nomeLoja.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}`;
-    exportToExcel(data, columns, filename);
+  // --- Export handler (consolidated) ---
+  const handleExportConsolidado = () => {
+    if (!dadosActivos) return;
+    const classifMapSimple = new Map<string, string>();
+    classificacoesMap.forEach((v, k) => classifMapSimple.set(k, v.classificacao));
+    exportConsolidatedExcel(
+      nomeLoja,
+      dadosActivos.comFichas || [],
+      dadosActivos.semFichas || [],
+      dadosActivos.fichasSemStock || [],
+      classifMapSimple,
+      recorrenciaMap,
+    );
   };
 
-  const handleExportSemFichas = () => {
-    if (!dadosActivos?.semFichas) return;
-    const data = filtrarItens(dadosActivos.semFichas).map((item: any) => ({
-      ref: item.ref,
-      familia: item.familia || '-',
-      descricao: item.descricao,
-      quantidade: item.quantidade,
-    }));
-    const columns = [
-      { header: 'Referência', key: 'ref' },
-      { header: 'Família', key: 'familia' },
-      { header: 'Descrição', key: 'descricao' },
-      { header: 'Qtd', key: 'quantidade' },
-    ];
-    const filename = `stock_sem_fichas_${nomeLoja.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}`;
-    exportToExcel(data, columns, filename);
-  };
-
-  const handleExportFichasSemStock = () => {
-    if (!dadosActivos?.fichasSemStock) return;
-    const data = filtrarItens(dadosActivos.fichasSemStock).map((item: any) => ({
-      eurocode: item.eurocode,
-      obrano: item.obrano,
-      matricula: item.matricula,
-      marca: item.marca,
-      modelo: item.modelo,
-      status: item.status,
-      diasAberto: item.diasAberto > 0 ? `${item.diasAberto} dias` : '-',
-    }));
-    const columns = [
-      { header: 'Eurocode', key: 'eurocode' },
-      { header: 'Obra N.º', key: 'obrano' },
-      { header: 'Matrícula', key: 'matricula' },
-      { header: 'Marca', key: 'marca' },
-      { header: 'Modelo', key: 'modelo' },
-      { header: 'Estado', key: 'status' },
-      { header: 'Dias Aberto', key: 'diasAberto' },
-    ];
-    const filename = `fichas_sem_stock_${nomeLoja.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}`;
-    exportToExcel(data, columns, filename);
+  // Handler para classificar eurocode
+  const handleClassificar = (eurocode: string, classificacao: string) => {
+    if (!lojaIdActiva) return;
+    const analiseId = view === 'resultado' ? resultadoAtual?.id : detalheId;
+    if (!analiseId) return;
+    classificarMutation.mutate({
+      lojaId: lojaIdActiva,
+      eurocode,
+      classificacao: classificacao as any,
+      analiseId,
+    });
   };
 
   // --- Email handlers ---
@@ -298,18 +405,14 @@ export default function ControloStock() {
     });
   };
 
-  // Export + Email buttons component for each tab
-  const ActionButtons = ({ onExport, onEmail, status }: { onExport: () => void; onEmail: () => void; status: 'comFichas' | 'semFichas' | 'fichasSemStock' }) => (
+  // Email-only buttons for individual tabs
+  const EmailButton = ({ status }: { status: 'comFichas' | 'semFichas' | 'fichasSemStock' }) => (
     <div className="flex gap-1.5 sm:gap-2 justify-end mb-2">
-      <Button variant="outline" size="sm" className="text-xs px-2 sm:text-sm sm:px-3" onClick={onExport}>
-        <Download className="h-3 w-3 mr-1" />
-        Excel
-      </Button>
       <Button
         variant="outline"
         size="sm"
         className="text-xs px-2 sm:text-sm sm:px-3 text-green-700 border-green-300 hover:bg-green-50"
-        onClick={onEmail}
+        onClick={() => handleEmailTab(status)}
         disabled={enviarEmailMutation.isPending}
       >
         {enviarEmailMutation.isPending ? (
@@ -514,15 +617,27 @@ export default function ControloStock() {
               </Card>
             </div>
 
-            {/* Pesquisa */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Pesquisar por referência, descrição ou eurocode..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
+            {/* Pesquisa + Botão Excel Consolidado */}
+            <div className="flex gap-2 items-center">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Pesquisar por referência, descrição ou eurocode..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-xs sm:text-sm px-2 sm:px-3 shrink-0 text-blue-700 border-blue-300 hover:bg-blue-50"
+                onClick={handleExportConsolidado}
+              >
+                <FileSpreadsheet className="h-3.5 w-3.5 mr-1" />
+                <span className="hidden sm:inline">Excel Consolidado</span>
+                <span className="sm:hidden">Excel</span>
+              </Button>
             </div>
 
             {/* Tabs de resultado */}
@@ -544,11 +659,7 @@ export default function ControloStock() {
 
               {/* Tab: Com Fichas */}
               <TabsContent value="comFichas" className="space-y-1.5 mt-3">
-                <ActionButtons
-                  onExport={handleExportComFichas}
-                  onEmail={() => handleEmailTab('comFichas')}
-                  status="comFichas"
-                />
+                <EmailButton status="comFichas" />
                 {dadosActivos.comFichas && filtrarItens(dadosActivos.comFichas).length === 0 ? (
                   <p className="text-center text-muted-foreground py-6 text-sm">Nenhum item encontrado</p>
                 ) : (
@@ -601,50 +712,75 @@ export default function ControloStock() {
 
               {/* Tab: Sem Fichas */}
               <TabsContent value="semFichas" className="space-y-1.5 mt-3">
-                <ActionButtons
-                  onExport={handleExportSemFichas}
-                  onEmail={() => handleEmailTab('semFichas')}
-                  status="semFichas"
-                />
+                <EmailButton status="semFichas" />
                 {dadosActivos.semFichas && filtrarItens(dadosActivos.semFichas).length === 0 ? (
                   <p className="text-center text-muted-foreground py-6 text-sm">Nenhum item encontrado</p>
                 ) : (
-                  filtrarItens(dadosActivos.semFichas || []).map((item: any, idx: number) => (
-                    <Card key={idx} className="border-amber-100">
-                      <CardContent className="px-3 py-2">
-                        <div className="flex items-center justify-between gap-2">
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-1.5 flex-wrap">
-                              <Badge variant="outline" className="bg-blue-50 text-blue-700 font-mono text-[11px] px-1.5 py-0">
-                                {item.ref}
-                              </Badge>
-                              {item.familia && (
-                                <Badge variant="secondary" className="text-[10px] px-1.5 py-0">{item.familia}</Badge>
-                              )}
-                              <Badge className="bg-amber-100 text-amber-700 text-[10px] px-1.5 py-0">
-                                Sem fichas
-                              </Badge>
+                  filtrarItens(dadosActivos.semFichas || []).map((item: any, idx: number) => {
+                    const refKey = item.ref?.toUpperCase()?.trim();
+                    const classifData = classificacoesMap.get(refKey);
+                    const recorr = recorrenciaMap.get(refKey);
+                    return (
+                      <Card key={idx} className={`border-amber-100 ${recorr && recorr >= 3 ? 'ring-1 ring-red-300' : recorr && recorr >= 2 ? 'ring-1 ring-amber-300' : ''}`}>
+                        <CardContent className="px-3 py-2">
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <Badge variant="outline" className="bg-blue-50 text-blue-700 font-mono text-[11px] px-1.5 py-0">
+                                  {item.ref}
+                                </Badge>
+                                {item.familia && (
+                                  <Badge variant="secondary" className="text-[10px] px-1.5 py-0">{item.familia}</Badge>
+                                )}
+                                <Badge className="bg-amber-100 text-amber-700 text-[10px] px-1.5 py-0">
+                                  Sem fichas
+                                </Badge>
+                                {recorr && recorr >= 2 && (
+                                  <Badge className={`text-[10px] px-1.5 py-0 ${recorr >= 3 ? 'bg-red-100 text-red-700' : 'bg-amber-200 text-amber-800'}`}>
+                                    <Clock className="h-2.5 w-2.5 mr-0.5" />
+                                    {recorr}x
+                                  </Badge>
+                                )}
+                              </div>
+                              <p className="text-xs text-muted-foreground mt-0.5 truncate">{item.descricao}</p>
+                              {/* Classificação */}
+                              <div className="flex items-center gap-1 mt-1 flex-wrap">
+                                {classifData ? (
+                                  <Badge className={`text-[10px] px-1.5 py-0 ${CLASSIFICACAO_COLORS[classifData.classificacao] || 'bg-gray-100 text-gray-700'}`}>
+                                    <Tag className="h-2.5 w-2.5 mr-0.5" />
+                                    {CLASSIFICACAO_LABELS[classifData.classificacao] || classifData.classificacao}
+                                  </Badge>
+                                ) : null}
+                                <select
+                                  className="text-[10px] border rounded px-1 py-0.5 bg-transparent cursor-pointer"
+                                  value={classifData?.classificacao || ''}
+                                  onChange={(e) => {
+                                    if (e.target.value) handleClassificar(item.ref, e.target.value);
+                                  }}
+                                >
+                                  <option value="">{classifData ? 'Alterar...' : 'Classificar...'}</option>
+                                  <option value="devolucao_rejeitada">Devolução Rejeitada</option>
+                                  <option value="usado">Usado</option>
+                                  <option value="com_danos">Com Danos</option>
+                                  <option value="para_devolver">Para Devolver</option>
+                                </select>
+                              </div>
                             </div>
-                            <p className="text-xs text-muted-foreground mt-0.5 truncate">{item.descricao}</p>
+                            <div className="text-right shrink-0">
+                              <span className="text-sm font-bold">{item.quantidade}</span>
+                              <span className="text-[10px] text-muted-foreground ml-0.5">un.</span>
+                            </div>
                           </div>
-                          <div className="text-right shrink-0">
-                            <span className="text-sm font-bold">{item.quantidade}</span>
-                            <span className="text-[10px] text-muted-foreground ml-0.5">un.</span>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))
+                        </CardContent>
+                      </Card>
+                    );
+                  })
                 )}
               </TabsContent>
 
               {/* Tab: Fichas sem Stock */}
               <TabsContent value="fichasSemStock" className="space-y-1.5 mt-3">
-                <ActionButtons
-                  onExport={handleExportFichasSemStock}
-                  onEmail={() => handleEmailTab('fichasSemStock')}
-                  status="fichasSemStock"
-                />
+                <EmailButton status="fichasSemStock" />
                 {dadosActivos.fichasSemStock && filtrarItens(dadosActivos.fichasSemStock).length === 0 ? (
                   <p className="text-center text-muted-foreground py-6 text-sm">Nenhum item encontrado</p>
                 ) : (

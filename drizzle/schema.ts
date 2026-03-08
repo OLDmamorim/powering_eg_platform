@@ -1703,3 +1703,32 @@ export const analisesStock = mysqlTable("analises_stock", {
 });
 export type AnaliseStock = typeof analisesStock.$inferSelect;
 export type InsertAnaliseStock = typeof analisesStock.$inferInsert;
+
+
+/**
+ * Classificações de Eurocodes Sem Ficha - Classificação manual de itens sem ficha de serviço
+ * A classificação persiste enquanto o eurocode aparecer em análises consecutivas da mesma loja.
+ * Quando o eurocode desaparece de uma análise, a classificação é limpa automaticamente.
+ * Se voltar a aparecer, precisa de nova classificação (é considerado um novo vidro).
+ */
+export const classificacoesEurocode = mysqlTable("classificacoes_eurocode", {
+  id: int("id").autoincrement().primaryKey(),
+  lojaId: int("lojaId").notNull(), // FK para lojas.id
+  eurocode: varchar("eurocode", { length: 100 }).notNull(), // Referência do eurocode
+  classificacao: mysqlEnum("classificacao", [
+    "devolucao_rejeitada",
+    "usado",
+    "com_danos",
+    "para_devolver"
+  ]).notNull(),
+  // Tracking de recorrência
+  primeiraAnaliseId: int("primeiraAnaliseId").notNull(), // FK para analises_stock.id - primeira vez que apareceu
+  ultimaAnaliseId: int("ultimaAnaliseId").notNull(), // FK para analises_stock.id - última análise onde apareceu
+  analisesConsecutivas: int("analisesConsecutivas").notNull().default(1), // Quantas análises consecutivas apareceu
+  activo: boolean("activo").default(true).notNull(), // Se está activo (apareceu na última análise)
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type ClassificacaoEurocode = typeof classificacoesEurocode.$inferSelect;
+export type InsertClassificacaoEurocode = typeof classificacoesEurocode.$inferInsert;

@@ -582,3 +582,8 @@
 - [x] Controlo Stock: Mostrar nome da loja analisada no cabeçalho da página de resultados
 - [x] Controlo Stock: Optimizar layout mobile (cabeçalho compacto, nome loja em linha separada, cards menores, botões adaptados)
 - [x] Controlo Stock: Compactar cards de eurocodes no mobile (menos padding, texto menor, linhas mais densas)
+- [x] Controlo Stock: Excel consolidado com 3 separadores (Com Fichas, Sem Fichas, Fichas s/ Stock) num único ficheiro
+- [x] Controlo Stock: Tabela DB para classificação de eurocodes sem ficha (devolução rejeitada, usado, com danos, para devolver)
+- [x] Controlo Stock: Persistência inteligente de classificações (limpa quando eurocode desaparece da listagem)
+- [x] Controlo Stock: Alerta de longevidade para eurocodes sem ficha recorrentes (quantas análises consecutivas)
+- [x] Controlo Stock: UI para classificar eurocodes sem ficha inline nos cards

@@ -12242,6 +12242,14 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
           analiseIdFichas: ultimaAnalise?.id || null,
         });
         
+        // 6. Actualizar classificações de eurocodes: manter as que continuam, limpar as que desapareceram
+        try {
+          const eurocodesPresentes = semFichas.map(i => i.ref);
+          await db.actualizarClassificacoesAposAnalise(input.lojaId, analiseGuardada.id, eurocodesPresentes);
+        } catch (err) {
+          console.error('[Stock] Erro ao actualizar classificações:', err);
+        }
+        
         return {
           id: analiseGuardada.id,
           totalItensStock: itensStock.length,
@@ -12418,6 +12426,66 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
         }
 
         return { success: true, email: loja.email, copiaEnviada };
+      }),
+
+    // Obter classificações activas de eurocodes sem ficha para uma loja
+    classificacoes: gestorProcedure
+      .input(z.object({ lojaId: z.number() }))
+      .query(async ({ input }) => {
+        return db.getClassificacoesEurocode(input.lojaId);
+      }),
+
+    // Obter recorrência (longevidade) de eurocodes sem ficha
+    recorrencia: gestorProcedure
+      .input(z.object({ lojaId: z.number() }))
+      .query(async ({ input }) => {
+        return db.getRecorrenciaEurocodes(input.lojaId);
+      }),
+
+    // Classificar um eurocode sem ficha
+    classificar: gestorProcedure
+      .input(z.object({
+        lojaId: z.number(),
+        eurocode: z.string(),
+        classificacao: z.enum(['devolucao_rejeitada', 'usado', 'com_danos', 'para_devolver']),
+        analiseId: z.number(),
+      }))
+      .mutation(async ({ input }) => {
+        return db.classificarEurocode(input);
+      }),
+
+    // Remover classificação de um eurocode
+    removerClassificacao: gestorProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await db.removerClassificacaoEurocode(input.id);
+        return { success: true };
+      }),
+
+    // Exportar Excel consolidado (gera no servidor e devolve URL)
+    exportarExcelConsolidado: gestorProcedure
+      .input(z.object({
+        analiseId: z.number(),
+      }))
+      .mutation(async ({ input }) => {
+        const analise = await db.getAnaliseStockById(input.analiseId);
+        if (!analise) throw new TRPCError({ code: 'NOT_FOUND', message: 'Análise não encontrada' });
+        
+        const resultado = analise.resultadoAnalise ? JSON.parse(analise.resultadoAnalise) : null;
+        if (!resultado) throw new TRPCError({ code: 'BAD_REQUEST', message: 'Análise sem dados de resultado' });
+        
+        // Retornar os dados para o frontend gerar o Excel com ExcelJS
+        return {
+          nomeLoja: analise.nomeLoja || 'Loja',
+          data: analise.createdAt,
+          comFichas: resultado.comFichas || [],
+          semFichas: resultado.semFichas || [],
+          fichasSemStock: resultado.fichasSemStock || [],
+          totalItensStock: analise.totalItensStock,
+          totalComFichas: analise.totalComFichas,
+          totalSemFichas: analise.totalSemFichas,
+          totalFichasSemStock: analise.totalFichasSemStock,
+        };
       }),
   }),
 });

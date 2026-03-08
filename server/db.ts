@@ -187,7 +187,10 @@ import {
   InsertEurocodeFicha,
   analisesStock,
   AnaliseStock,
-  InsertAnaliseStock
+  InsertAnaliseStock,
+  classificacoesEurocode,
+  ClassificacaoEurocode,
+  InsertClassificacaoEurocode
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -12718,4 +12721,141 @@ export async function eliminarAnaliseStock(id: number) {
   if (!db) return;
   
   await db.delete(analisesStock).where(eq(analisesStock.id, id));
+}
+
+// =============================================
+// Classificações de Eurocodes Sem Ficha
+// =============================================
+
+/**
+ * Obter classificações activas para uma loja
+ */
+export async function getClassificacoesEurocode(lojaId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return db.select()
+    .from(classificacoesEurocode)
+    .where(and(
+      eq(classificacoesEurocode.lojaId, lojaId),
+      eq(classificacoesEurocode.activo, true)
+    ));
+}
+
+/**
+ * Classificar um eurocode sem ficha
+ */
+export async function classificarEurocode(data: {
+  lojaId: number;
+  eurocode: string;
+  classificacao: 'devolucao_rejeitada' | 'usado' | 'com_danos' | 'para_devolver';
+  analiseId: number;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  // Verificar se já existe classificação activa para este eurocode nesta loja
+  const [existente] = await db.select()
+    .from(classificacoesEurocode)
+    .where(and(
+      eq(classificacoesEurocode.lojaId, data.lojaId),
+      eq(classificacoesEurocode.eurocode, data.eurocode),
+      eq(classificacoesEurocode.activo, true)
+    ))
+    .limit(1);
+  
+  if (existente) {
+    // Actualizar classificação existente
+    await db.update(classificacoesEurocode)
+      .set({ 
+        classificacao: data.classificacao,
+        ultimaAnaliseId: data.analiseId,
+      })
+      .where(eq(classificacoesEurocode.id, existente.id));
+    return { id: existente.id, updated: true };
+  } else {
+    // Criar nova classificação
+    const [result] = await db.insert(classificacoesEurocode).values({
+      lojaId: data.lojaId,
+      eurocode: data.eurocode,
+      classificacao: data.classificacao,
+      primeiraAnaliseId: data.analiseId,
+      ultimaAnaliseId: data.analiseId,
+      analisesConsecutivas: 1,
+      activo: true,
+    }).$returningId();
+    return { id: result.id, updated: false };
+  }
+}
+
+/**
+ * Actualizar classificações após nova análise de stock:
+ * - Incrementar analisesConsecutivas para eurocodes que continuam presentes
+ * - Desactivar classificações de eurocodes que desapareceram da listagem
+ */
+export async function actualizarClassificacoesAposAnalise(
+  lojaId: number,
+  analiseId: number,
+  eurocodesPresentes: string[] // Lista de eurocodes sem ficha na nova análise
+) {
+  const db = await getDb();
+  if (!db) return;
+  
+  // Obter todas as classificações activas desta loja
+  const classificacoesActivas = await db.select()
+    .from(classificacoesEurocode)
+    .where(and(
+      eq(classificacoesEurocode.lojaId, lojaId),
+      eq(classificacoesEurocode.activo, true)
+    ));
+  
+  const eurocodesSet = new Set(eurocodesPresentes.map(e => e.toUpperCase().trim()));
+  
+  for (const classif of classificacoesActivas) {
+    if (eurocodesSet.has(classif.eurocode.toUpperCase().trim())) {
+      // Eurocode ainda presente → incrementar contador e actualizar última análise
+      await db.update(classificacoesEurocode)
+        .set({
+          analisesConsecutivas: classif.analisesConsecutivas + 1,
+          ultimaAnaliseId: analiseId,
+        })
+        .where(eq(classificacoesEurocode.id, classif.id));
+    } else {
+      // Eurocode desapareceu → desactivar classificação (vidro resolvido)
+      await db.update(classificacoesEurocode)
+        .set({ activo: false })
+        .where(eq(classificacoesEurocode.id, classif.id));
+    }
+  }
+}
+
+/**
+ * Obter contagem de análises consecutivas para eurocodes sem ficha de uma loja
+ * (para mostrar alerta de longevidade)
+ */
+export async function getRecorrenciaEurocodes(lojaId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return db.select({
+    eurocode: classificacoesEurocode.eurocode,
+    classificacao: classificacoesEurocode.classificacao,
+    analisesConsecutivas: classificacoesEurocode.analisesConsecutivas,
+    primeiraAnaliseId: classificacoesEurocode.primeiraAnaliseId,
+  })
+    .from(classificacoesEurocode)
+    .where(and(
+      eq(classificacoesEurocode.lojaId, lojaId),
+      eq(classificacoesEurocode.activo, true)
+    ));
+}
+
+/**
+ * Remover classificação de um eurocode
+ */
+export async function removerClassificacaoEurocode(id: number) {
+  const db = await getDb();
+  if (!db) return;
+  
+  await db.delete(classificacoesEurocode).where(eq(classificacoesEurocode.id, id));
 }
