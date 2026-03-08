@@ -21,6 +21,7 @@ import { processarAnalise, ResultadoAnalise, RelatorioLoja, gerarHTMLEmailAnalis
 import { gerarPDFRelacaoRH } from "./pdfRelacaoRH";
 import { enviarLembretesRH, isDia20 } from "./lembreteRHService";
 import { storagePut } from "./storage";
+import { gerarExcelControloStock } from "./stockExcelService";
 
 // Função para obter feriados portugueses de um ano específico
 function obterFeriadosPortugueses(ano: number): string[] {
@@ -12746,10 +12747,32 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
 
         const assunto = `Controlo de Stock — Relatório Consolidado — ${input.nomeLoja} — ${dataFormatada}`;
 
+        // Gerar Excel consolidado para anexar ao email
+        let excelAttachment: { filename: string; content: string; contentType: string } | undefined;
+        try {
+          const { base64, filename } = await gerarExcelControloStock({
+            nomeLoja: input.nomeLoja,
+            lojaId: input.lojaId,
+            comFichas: input.comFichas,
+            semFichas: input.semFichas,
+            fichasSemStock: input.fichasSemStock,
+          });
+          excelAttachment = {
+            filename,
+            content: base64,
+            contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          };
+          console.log(`[Stock Email] Excel gerado: ${filename} (${Math.round(base64.length * 0.75 / 1024)}KB)`);
+        } catch (excelError) {
+          console.error('[Stock Email] Erro ao gerar Excel:', excelError);
+          // Continuar sem anexo se falhar
+        }
+
         const enviado = await sendEmail({
           to: loja.email,
           subject: assunto,
           html: htmlEmail,
+          attachments: excelAttachment ? [excelAttachment] : undefined,
         });
 
         if (!enviado) {
@@ -12771,6 +12794,7 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
               to: gestor.email,
               subject: `[Cópia] ${assunto}`,
               html: htmlCopia,
+              attachments: excelAttachment ? [excelAttachment] : undefined,
             });
             copiaEnviada = gestor.email;
           } catch (e) {

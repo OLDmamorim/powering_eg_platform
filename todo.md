@@ -603,3 +603,12 @@
 - [x] Portal Loja Stock: Classificação só aparece nos eurocodes sem ficha
 - [x] Portal Loja Stock: Adicionar campo de pesquisa por referência, descrição ou eurocode na vista de detalhe
 - [x] BUG Portal Loja Stock: TypeError obrano?.toLowerCase is not a function — campo numérico na pesquisa (corrigido: String(v) antes de toLowerCase)
+
+## Controlo de Stock: Excel em Anexo no Email Consolidado
+- [x] Criar stockExcelService.ts no servidor para gerar Excel com ExcelJS (3 separadores: Com Fichas, Sem Fichas, Fichas sem Stock)
+- [x] Incluir classificações e recorrência nos itens sem fichas (busca automática da BD)
+- [x] Desmultiplicação de itens no Excel (cada unidade numa linha separada)
+- [x] Integrar geração do Excel no enviarEmailConsolidado (routers.ts)
+- [x] Anexar Excel ao email da loja e à cópia do gestor
+- [x] Teste unitário criado e passado com sucesso
+- [x] Guardar checkpoint
