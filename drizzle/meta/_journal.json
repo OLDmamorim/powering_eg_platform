@@ -666,6 +666,13 @@
       "when": 1772936770518,
       "tag": "0094_careful_chimera",
       "breakpoints": true
+    },
+    {
+      "idx": 95,
+      "version": "5",
+      "when": 1772964667608,
+      "tag": "0095_yummy_squadron_supreme",
+      "breakpoints": true
     }
   ]
 }

@@ -590,3 +590,6 @@
 - [x] Controlo Stock: Comparação entre duas análises de stock (seleccionar 2 do histórico, ver itens que entraram/saíram)
 - [x] Controlo Stock: Filtro por classificação na tab Sem Fichas (dropdown para filtrar por devolução rejeitada, usado, com danos, para devolver)
 - [x] Controlo Stock: Email consolidado com os 3 status (Com Fichas, Sem Fichas, Fichas s/ Stock) num único email
+- [x] Controlo Stock: Desmultiplicar eurocodes sem ficha — cada unidade numa alínea separada (qty sempre 1)
+- [x] Controlo Stock: Classificação independente por unidade (DB suporta índice por eurocode)
+- [x] Controlo Stock: Adaptar Excel e email consolidado para reflectir desmultiplicação

@@ -127,29 +127,33 @@ async function exportConsolidatedExcel(
       });
     }
 
-    // --- Sheet 2: Sem Fichas ---
+    // --- Sheet 2: Sem Fichas (desmultiplicado: 1 linha por unidade) ---
     const ws2 = wb.addWorksheet('Sem Fichas');
     ws2.columns = [
       { header: 'Referência', key: 'ref', width: 18 },
+      { header: 'Unidade', key: 'unidade', width: 10 },
       { header: 'Família', key: 'familia', width: 10 },
       { header: 'Descrição', key: 'descricao', width: 40 },
-      { header: 'Qtd', key: 'quantidade', width: 8 },
       { header: 'Classificação', key: 'classificacao', width: 20 },
       { header: 'Análises Consecutivas', key: 'recorrencia', width: 22 },
     ];
     ws2.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
     ws2.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD97706' } };
     for (const item of semFichas) {
-      const classif = classificacoesMap.get(item.ref?.toUpperCase()?.trim());
-      const recorr = recorrenciaMap.get(item.ref?.toUpperCase()?.trim());
-      ws2.addRow({
-        ref: item.ref,
-        familia: item.familia || '-',
-        descricao: item.descricao,
-        quantidade: item.quantidade,
-        classificacao: classif ? CLASSIFICACAO_LABELS[classif] || classif : '-',
-        recorrencia: recorr && recorr > 1 ? `${recorr} análises` : '-',
-      });
+      const qty = item.quantidade || 1;
+      for (let unitIdx = 1; unitIdx <= qty; unitIdx++) {
+        const unitKey = `${item.ref?.toUpperCase()?.trim()}|${unitIdx}`;
+        const classif = classificacoesMap.get(unitKey);
+        const recorr = recorrenciaMap.get(unitKey);
+        ws2.addRow({
+          ref: item.ref,
+          unidade: qty > 1 ? `${unitIdx}/${qty}` : '-',
+          familia: item.familia || '-',
+          descricao: item.descricao,
+          classificacao: classif ? CLASSIFICACAO_LABELS[classif] || classif : '-',
+          recorrencia: recorr && recorr > 1 ? `${recorr} análises` : '-',
+        });
+      }
     }
 
     // --- Sheet 3: Fichas s/ Stock ---
@@ -299,12 +303,13 @@ export default function ControloStock() {
     { enabled: !!lojaIdActivaEarly && (view === 'resultado' || view === 'detalhe') }
   );
 
-  // Maps para lookup rápido
+  // Maps para lookup rápido (chave: eurocode|unitIndex)
   const classificacoesMap = useMemo(() => {
     const map = new Map<string, { id: number; classificacao: string }>();
     if (classificacoes) {
       for (const c of classificacoes) {
-        map.set(c.eurocode.toUpperCase().trim(), { id: c.id, classificacao: c.classificacao });
+        const key = `${c.eurocode.toUpperCase().trim()}|${(c as any).unitIndex || 1}`;
+        map.set(key, { id: c.id, classificacao: c.classificacao });
       }
     }
     return map;
@@ -314,11 +319,31 @@ export default function ControloStock() {
     const map = new Map<string, number>();
     if (recorrencia) {
       for (const r of recorrencia) {
-        map.set(r.eurocode.toUpperCase().trim(), r.analisesConsecutivas);
+        // Para recorrência, usar a mesma chave eurocode|unitIndex
+        const key = `${r.eurocode.toUpperCase().trim()}|${(r as any).unitIndex || 1}`;
+        map.set(key, r.analisesConsecutivas);
       }
     }
     return map;
   }, [recorrencia]);
+
+  // Desmultiplicar itens sem fichas: cada unidade numa alínea separada
+  const semFichasDesmultiplicados = useMemo(() => {
+    if (!dadosActivos?.semFichas) return [];
+    const resultado: Array<any & { unitIndex: number; totalUnidades: number }> = [];
+    for (const item of dadosActivos.semFichas) {
+      const qty = item.quantidade || 1;
+      for (let i = 1; i <= qty; i++) {
+        resultado.push({
+          ...item,
+          quantidade: 1,
+          unitIndex: i,
+          totalUnidades: qty,
+        });
+      }
+    }
+    return resultado;
+  }, [dadosActivos?.semFichas]);
 
   const handleAnalisar = () => {
     if (!textoStock.trim()) {
@@ -365,18 +390,18 @@ export default function ControloStock() {
     );
   };
 
-  // Filtrar itens sem fichas por classificação
+  // Filtrar itens sem fichas por classificação (usa chave eurocode|unitIndex)
   const filtrarSemFichasPorClassificacao = (itens: any[]): any[] => {
     if (filtroClassificacao === 'todas') return itens;
     if (filtroClassificacao === 'sem_classificacao') {
       return itens.filter((item: any) => {
-        const refKey = item.ref?.toUpperCase()?.trim();
-        return !classificacoesMap.get(refKey);
+        const key = `${item.ref?.toUpperCase()?.trim()}|${item.unitIndex || 1}`;
+        return !classificacoesMap.get(key);
       });
     }
     return itens.filter((item: any) => {
-      const refKey = item.ref?.toUpperCase()?.trim();
-      const classifData = classificacoesMap.get(refKey);
+      const key = `${item.ref?.toUpperCase()?.trim()}|${item.unitIndex || 1}`;
+      const classifData = classificacoesMap.get(key);
       return classifData?.classificacao === filtroClassificacao;
     });
   };
@@ -406,14 +431,15 @@ export default function ControloStock() {
     );
   };
 
-  // Handler para classificar eurocode
-  const handleClassificar = (eurocode: string, classificacao: string) => {
+  // Handler para classificar eurocode (por unidade individual)
+  const handleClassificar = (eurocode: string, unitIndex: number, classificacao: string) => {
     if (!lojaIdActiva) return;
     const analiseId = view === 'resultado' ? resultadoAtual?.id : detalheId;
     if (!analiseId) return;
     classificarMutation.mutate({
       lojaId: lojaIdActiva,
       eurocode,
+      unitIndex,
       classificacao: classificacao as any,
       analiseId,
     });
@@ -664,7 +690,7 @@ export default function ControloStock() {
                 <CardContent className="pt-3 pb-3 md:pt-4 md:pb-4 text-center px-1 md:px-4">
                   <XCircle className="h-4 w-4 md:h-6 md:w-6 mx-auto text-amber-600 mb-0.5" />
                   <div className="text-lg md:text-2xl font-bold text-amber-700">
-                    {dadosActivos.totalSemFichas ?? dadosActivos.semFichas?.length}
+                    {semFichasDesmultiplicados.length}
                   </div>
                   <div className="text-[10px] md:text-xs text-muted-foreground leading-tight">Sem Fichas</div>
                 </CardContent>
@@ -729,7 +755,7 @@ export default function ControloStock() {
                 </TabsTrigger>
                 <TabsTrigger value="semFichas" className="text-[10px] sm:text-sm px-1 py-1.5 sm:px-3 sm:py-2">
                   <XCircle className="h-3 w-3 mr-0.5 sm:mr-1 shrink-0" />
-                  <span className="hidden sm:inline">Sem Fichas</span><span className="sm:hidden">S/ Fichas</span> ({dadosActivos.semFichas?.length || 0})
+                  <span className="hidden sm:inline">Sem Fichas</span><span className="sm:hidden">S/ Fichas</span> ({semFichasDesmultiplicados.length})
                 </TabsTrigger>
                 <TabsTrigger value="fichasSemStock" className="text-[10px] sm:text-sm px-1 py-1.5 sm:px-3 sm:py-2">
                   <AlertTriangle className="h-3 w-3 mr-0.5 sm:mr-1 shrink-0" />
@@ -789,7 +815,7 @@ export default function ControloStock() {
                 )}
               </TabsContent>
 
-              {/* Tab: Sem Fichas */}
+              {/* Tab: Sem Fichas (desmultiplicado: 1 alínea por unidade) */}
               <TabsContent value="semFichas" className="space-y-1.5 mt-3">
                 {/* Filtro por classificação */}
                 <div className="flex items-center gap-2 mb-2">
@@ -799,7 +825,7 @@ export default function ControloStock() {
                     value={filtroClassificacao}
                     onChange={(e) => setFiltroClassificacao(e.target.value)}
                   >
-                    <option value="todas">Todas ({dadosActivos.semFichas?.length || 0})</option>
+                    <option value="todas">Todas ({semFichasDesmultiplicados.length})</option>
                     <option value="sem_classificacao">Sem Classificação</option>
                     <option value="devolucao_rejeitada">Devolução Rejeitada</option>
                     <option value="usado">Usado</option>
@@ -807,15 +833,15 @@ export default function ControloStock() {
                     <option value="para_devolver">Para Devolver</option>
                   </select>
                 </div>
-                {dadosActivos.semFichas && filtrarSemFichasPorClassificacao(filtrarItens(dadosActivos.semFichas)).length === 0 ? (
+                {filtrarSemFichasPorClassificacao(filtrarItens(semFichasDesmultiplicados)).length === 0 ? (
                   <p className="text-center text-muted-foreground py-6 text-sm">Nenhum item encontrado</p>
                 ) : (
-                  filtrarSemFichasPorClassificacao(filtrarItens(dadosActivos.semFichas || [])).map((item: any, idx: number) => {
-                    const refKey = item.ref?.toUpperCase()?.trim();
-                    const classifData = classificacoesMap.get(refKey);
-                    const recorr = recorrenciaMap.get(refKey);
+                  filtrarSemFichasPorClassificacao(filtrarItens(semFichasDesmultiplicados)).map((item: any, idx: number) => {
+                    const unitKey = `${item.ref?.toUpperCase()?.trim()}|${item.unitIndex}`;
+                    const classifData = classificacoesMap.get(unitKey);
+                    const recorr = recorrenciaMap.get(unitKey);
                     return (
-                      <Card key={idx} className={`border-amber-100 ${recorr && recorr >= 3 ? 'ring-1 ring-red-300' : recorr && recorr >= 2 ? 'ring-1 ring-amber-300' : ''}`}>
+                      <Card key={`${item.ref}-${item.unitIndex}`} className={`border-amber-100 ${recorr && recorr >= 3 ? 'ring-1 ring-red-300' : recorr && recorr >= 2 ? 'ring-1 ring-amber-300' : ''}`}>
                         <CardContent className="px-3 py-2">
                           <div className="flex items-center justify-between gap-2">
                             <div className="flex-1 min-w-0">
@@ -823,6 +849,11 @@ export default function ControloStock() {
                                 <Badge variant="outline" className="bg-blue-50 text-blue-700 font-mono text-[11px] px-1.5 py-0">
                                   {item.ref}
                                 </Badge>
+                                {item.totalUnidades > 1 && (
+                                  <Badge variant="secondary" className="text-[10px] px-1.5 py-0 font-mono">
+                                    {item.unitIndex}/{item.totalUnidades}
+                                  </Badge>
+                                )}
                                 {item.familia && (
                                   <Badge variant="secondary" className="text-[10px] px-1.5 py-0">{item.familia}</Badge>
                                 )}
@@ -837,7 +868,7 @@ export default function ControloStock() {
                                 )}
                               </div>
                               <p className="text-xs text-muted-foreground mt-0.5 truncate">{item.descricao}</p>
-                              {/* Classificação */}
+                              {/* Classificação por unidade */}
                               <div className="flex items-center gap-1 mt-1 flex-wrap">
                                 {classifData ? (
                                   <Badge className={`text-[10px] px-1.5 py-0 ${CLASSIFICACAO_COLORS[classifData.classificacao] || 'bg-gray-100 text-gray-700'}`}>
@@ -849,7 +880,7 @@ export default function ControloStock() {
                                   className="text-[10px] border rounded px-1 py-0.5 bg-transparent cursor-pointer"
                                   value={classifData?.classificacao || ''}
                                   onChange={(e) => {
-                                    if (e.target.value) handleClassificar(item.ref, e.target.value);
+                                    if (e.target.value) handleClassificar(item.ref, item.unitIndex, e.target.value);
                                   }}
                                 >
                                   <option value="">{classifData ? 'Alterar...' : 'Classificar...'}</option>
@@ -861,7 +892,7 @@ export default function ControloStock() {
                               </div>
                             </div>
                             <div className="text-right shrink-0">
-                              <span className="text-sm font-bold">{item.quantidade}</span>
+                              <span className="text-sm font-bold">1</span>
                               <span className="text-[10px] text-muted-foreground ml-0.5">un.</span>
                             </div>
                           </div>

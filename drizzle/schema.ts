@@ -1715,6 +1715,7 @@ export const classificacoesEurocode = mysqlTable("classificacoes_eurocode", {
   id: int("id").autoincrement().primaryKey(),
   lojaId: int("lojaId").notNull(), // FK para lojas.id
   eurocode: varchar("eurocode", { length: 100 }).notNull(), // Referência do eurocode
+  unitIndex: int("unitIndex").notNull().default(1), // Índice da unidade (1, 2, 3...) para desmultiplicação
   classificacao: mysqlEnum("classificacao", [
     "devolucao_rejeitada",
     "usado",

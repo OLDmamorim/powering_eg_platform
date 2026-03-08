@@ -12442,11 +12442,12 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
         return db.getRecorrenciaEurocodes(input.lojaId);
       }),
 
-    // Classificar um eurocode sem ficha
+    // Classificar um eurocode sem ficha (por unidade individual)
     classificar: gestorProcedure
       .input(z.object({
         lojaId: z.number(),
         eurocode: z.string(),
+        unitIndex: z.number().default(1), // Índice da unidade (1, 2, 3...)
         classificacao: z.enum(['devolucao_rejeitada', 'usado', 'com_danos', 'para_devolver']),
         analiseId: z.number(),
       }))

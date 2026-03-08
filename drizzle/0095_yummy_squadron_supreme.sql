@@ -1,0 +1,1 @@
+ALTER TABLE `classificacoes_eurocode` ADD `unitIndex` int DEFAULT 1 NOT NULL;

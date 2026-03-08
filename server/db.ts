@@ -12743,23 +12743,25 @@ export async function getClassificacoesEurocode(lojaId: number) {
 }
 
 /**
- * Classificar um eurocode sem ficha
+ * Classificar um eurocode sem ficha (por unidade individual)
  */
 export async function classificarEurocode(data: {
   lojaId: number;
   eurocode: string;
+  unitIndex: number; // 1, 2, 3... para cada unidade individual
   classificacao: 'devolucao_rejeitada' | 'usado' | 'com_danos' | 'para_devolver';
   analiseId: number;
 }) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
-  // Verificar se já existe classificação activa para este eurocode nesta loja
+  // Verificar se já existe classificação activa para este eurocode+unitIndex nesta loja
   const [existente] = await db.select()
     .from(classificacoesEurocode)
     .where(and(
       eq(classificacoesEurocode.lojaId, data.lojaId),
       eq(classificacoesEurocode.eurocode, data.eurocode),
+      eq(classificacoesEurocode.unitIndex, data.unitIndex),
       eq(classificacoesEurocode.activo, true)
     ))
     .limit(1);
@@ -12778,6 +12780,7 @@ export async function classificarEurocode(data: {
     const [result] = await db.insert(classificacoesEurocode).values({
       lojaId: data.lojaId,
       eurocode: data.eurocode,
+      unitIndex: data.unitIndex,
       classificacao: data.classificacao,
       primeiraAnaliseId: data.analiseId,
       ultimaAnaliseId: data.analiseId,
@@ -12839,6 +12842,7 @@ export async function getRecorrenciaEurocodes(lojaId: number) {
   
   return db.select({
     eurocode: classificacoesEurocode.eurocode,
+    unitIndex: classificacoesEurocode.unitIndex,
     classificacao: classificacoesEurocode.classificacao,
     analisesConsecutivas: classificacoesEurocode.analisesConsecutivas,
     primeiraAnaliseId: classificacoesEurocode.primeiraAnaliseId,
