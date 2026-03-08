@@ -31,6 +31,13 @@ import {
   Tag,
   Clock,
   FileSpreadsheet,
+  GitCompareArrows,
+  Filter,
+  TrendingUp,
+  TrendingDown,
+  Minus,
+  Plus,
+  ArrowRight,
 } from 'lucide-react';
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
@@ -189,6 +196,11 @@ export default function ControloStock() {
   const [view, setView] = useState<'input' | 'resultado' | 'historico' | 'detalhe'>('input');
   const [searchTerm, setSearchTerm] = useState('');
   const [activeResultTab, setActiveResultTab] = useState('comFichas');
+  const [filtroClassificacao, setFiltroClassificacao] = useState<string>('todas');
+
+  // Comparação
+  const [comparacaoIds, setComparacaoIds] = useState<number[]>([]);
+  const [viewComparacao, setViewComparacao] = useState(false);
 
   // Resultado da análise atual
   const [resultadoAtual, setResultadoAtual] = useState<{
@@ -235,6 +247,15 @@ export default function ControloStock() {
     },
     onError: (error) => {
       toast.error(error.message || 'Erro ao eliminar análise');
+    },
+  });
+
+  const enviarEmailConsolidadoMutation = trpc.stock.enviarEmailConsolidado.useMutation({
+    onSuccess: (data) => {
+      toast.success(`Email consolidado enviado para ${data.email}${data.copiaEnviada ? ` (cópia para ${data.copiaEnviada})` : ''}`);
+    },
+    onError: (error) => {
+      toast.error(error.message || 'Erro ao enviar email consolidado');
     },
   });
 
@@ -327,6 +348,12 @@ export default function ControloStock() {
     return detalheAnalise.resultadoAnalise;
   }, [detalheAnalise]);
 
+  // Query de comparação
+  const { data: comparacaoData, isLoading: comparacaoLoading } = trpc.stock.comparar.useQuery(
+    { analiseId1: comparacaoIds[0]!, analiseId2: comparacaoIds[1]! },
+    { enabled: comparacaoIds.length === 2 && viewComparacao }
+  );
+
   // Filtrar itens por pesquisa
   const filtrarItens = <T extends { ref?: string; descricao?: string; eurocode?: string }>(itens: T[]): T[] => {
     if (!searchTerm) return itens;
@@ -336,6 +363,22 @@ export default function ControloStock() {
       (i.descricao && i.descricao.toLowerCase().includes(term)) ||
       (i.eurocode && i.eurocode.toLowerCase().includes(term))
     );
+  };
+
+  // Filtrar itens sem fichas por classificação
+  const filtrarSemFichasPorClassificacao = (itens: any[]): any[] => {
+    if (filtroClassificacao === 'todas') return itens;
+    if (filtroClassificacao === 'sem_classificacao') {
+      return itens.filter((item: any) => {
+        const refKey = item.ref?.toUpperCase()?.trim();
+        return !classificacoesMap.get(refKey);
+      });
+    }
+    return itens.filter((item: any) => {
+      const refKey = item.ref?.toUpperCase()?.trim();
+      const classifData = classificacoesMap.get(refKey);
+      return classifData?.classificacao === filtroClassificacao;
+    });
   };
 
   // Dados activos (resultado actual ou detalhe do histórico)
@@ -376,6 +419,39 @@ export default function ControloStock() {
     });
   };
 
+  // --- Email consolidado handler ---
+  const handleEmailConsolidado = () => {
+    if (!lojaIdActiva || !dadosActivos) {
+      toast.error('Dados insuficientes para enviar email');
+      return;
+    }
+    enviarEmailConsolidadoMutation.mutate({
+      lojaId: lojaIdActiva,
+      nomeLoja,
+      comFichas: dadosActivos.comFichas || [],
+      semFichas: dadosActivos.semFichas || [],
+      fichasSemStock: dadosActivos.fichasSemStock || [],
+      totalItensStock: dadosActivos.totalItensStock,
+    });
+  };
+
+  // --- Comparação handlers ---
+  const toggleComparacao = (analiseId: number) => {
+    setComparacaoIds(prev => {
+      if (prev.includes(analiseId)) return prev.filter(id => id !== analiseId);
+      if (prev.length >= 2) return [prev[1], analiseId];
+      return [...prev, analiseId];
+    });
+  };
+
+  const handleIniciarComparacao = () => {
+    if (comparacaoIds.length === 2) {
+      setViewComparacao(true);
+    } else {
+      toast.error('Seleccione 2 análises para comparar');
+    }
+  };
+
   // --- Email handlers ---
   const handleEmailTab = (status: 'comFichas' | 'semFichas' | 'fichasSemStock') => {
     if (!lojaIdActiva) {
@@ -405,25 +481,12 @@ export default function ControloStock() {
     });
   };
 
-  // Email-only buttons for individual tabs
-  const EmailButton = ({ status }: { status: 'comFichas' | 'semFichas' | 'fichasSemStock' }) => (
-    <div className="flex gap-1.5 sm:gap-2 justify-end mb-2">
-      <Button
-        variant="outline"
-        size="sm"
-        className="text-xs px-2 sm:text-sm sm:px-3 text-green-700 border-green-300 hover:bg-green-50"
-        onClick={() => handleEmailTab(status)}
-        disabled={enviarEmailMutation.isPending}
-      >
-        {enviarEmailMutation.isPending ? (
-          <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-        ) : (
-          <Send className="h-3 w-3 mr-1" />
-        )}
-        <span className="hidden sm:inline">Enviar </span>Email
-      </Button>
-    </div>
-  );
+  // Variação helper
+  const VariacaoDisplay = ({ valor }: { valor: number }) => {
+    if (valor === 0) return <span className="text-muted-foreground flex items-center gap-0.5"><Minus className="h-3 w-3" /> 0</span>;
+    if (valor > 0) return <span className="text-red-600 flex items-center gap-0.5"><TrendingUp className="h-3 w-3" /> +{valor}</span>;
+    return <span className="text-green-600 flex items-center gap-0.5"><TrendingDown className="h-3 w-3" /> {valor}</span>;
+  };
 
   return (
     <DashboardLayout>
@@ -617,26 +680,43 @@ export default function ControloStock() {
               </Card>
             </div>
 
-            {/* Pesquisa + Botão Excel Consolidado */}
-            <div className="flex gap-2 items-center">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Pesquisar por referência, descrição ou eurocode..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
+            {/* Pesquisa */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Pesquisar por referência, descrição ou eurocode..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+
+            {/* Botões de acção consolidados */}
+            <div className="flex gap-1.5 sm:gap-2 justify-end flex-wrap">
               <Button
                 variant="outline"
                 size="sm"
-                className="text-xs sm:text-sm px-2 sm:px-3 shrink-0 text-blue-700 border-blue-300 hover:bg-blue-50"
+                className="text-xs px-2 sm:text-sm sm:px-3 text-blue-700 border-blue-300 hover:bg-blue-50"
                 onClick={handleExportConsolidado}
               >
                 <FileSpreadsheet className="h-3.5 w-3.5 mr-1" />
                 <span className="hidden sm:inline">Excel Consolidado</span>
                 <span className="sm:hidden">Excel</span>
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-xs px-2 sm:text-sm sm:px-3 text-green-700 border-green-300 hover:bg-green-50"
+                onClick={handleEmailConsolidado}
+                disabled={enviarEmailConsolidadoMutation.isPending}
+              >
+                {enviarEmailConsolidadoMutation.isPending ? (
+                  <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" />
+                ) : (
+                  <Mail className="h-3.5 w-3.5 mr-1" />
+                )}
+                <span className="hidden sm:inline">Email Consolidado</span>
+                <span className="sm:hidden">Email</span>
               </Button>
             </div>
 
@@ -659,7 +739,6 @@ export default function ControloStock() {
 
               {/* Tab: Com Fichas */}
               <TabsContent value="comFichas" className="space-y-1.5 mt-3">
-                <EmailButton status="comFichas" />
                 {dadosActivos.comFichas && filtrarItens(dadosActivos.comFichas).length === 0 ? (
                   <p className="text-center text-muted-foreground py-6 text-sm">Nenhum item encontrado</p>
                 ) : (
@@ -712,11 +791,26 @@ export default function ControloStock() {
 
               {/* Tab: Sem Fichas */}
               <TabsContent value="semFichas" className="space-y-1.5 mt-3">
-                <EmailButton status="semFichas" />
-                {dadosActivos.semFichas && filtrarItens(dadosActivos.semFichas).length === 0 ? (
+                {/* Filtro por classificação */}
+                <div className="flex items-center gap-2 mb-2">
+                  <Filter className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                  <select
+                    className="text-xs sm:text-sm border rounded px-2 py-1 bg-transparent cursor-pointer flex-1 max-w-[220px]"
+                    value={filtroClassificacao}
+                    onChange={(e) => setFiltroClassificacao(e.target.value)}
+                  >
+                    <option value="todas">Todas ({dadosActivos.semFichas?.length || 0})</option>
+                    <option value="sem_classificacao">Sem Classificação</option>
+                    <option value="devolucao_rejeitada">Devolução Rejeitada</option>
+                    <option value="usado">Usado</option>
+                    <option value="com_danos">Com Danos</option>
+                    <option value="para_devolver">Para Devolver</option>
+                  </select>
+                </div>
+                {dadosActivos.semFichas && filtrarSemFichasPorClassificacao(filtrarItens(dadosActivos.semFichas)).length === 0 ? (
                   <p className="text-center text-muted-foreground py-6 text-sm">Nenhum item encontrado</p>
                 ) : (
-                  filtrarItens(dadosActivos.semFichas || []).map((item: any, idx: number) => {
+                  filtrarSemFichasPorClassificacao(filtrarItens(dadosActivos.semFichas || [])).map((item: any, idx: number) => {
                     const refKey = item.ref?.toUpperCase()?.trim();
                     const classifData = classificacoesMap.get(refKey);
                     const recorr = recorrenciaMap.get(refKey);
@@ -780,7 +874,6 @@ export default function ControloStock() {
 
               {/* Tab: Fichas sem Stock */}
               <TabsContent value="fichasSemStock" className="space-y-1.5 mt-3">
-                <EmailButton status="fichasSemStock" />
                 {dadosActivos.fichasSemStock && filtrarItens(dadosActivos.fichasSemStock).length === 0 ? (
                   <p className="text-center text-muted-foreground py-6 text-sm">Nenhum item encontrado</p>
                 ) : (
@@ -819,12 +912,29 @@ export default function ControloStock() {
         )}
 
         {/* VIEW: Histórico */}
-        {view === 'historico' && (
+        {view === 'historico' && !viewComparacao && (
           <div className="space-y-3">
-            <h2 className="text-lg font-semibold flex items-center gap-2">
-              <History className="h-5 w-5" />
-              Histórico de Análises
-            </h2>
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold flex items-center gap-2">
+                <History className="h-5 w-5" />
+                Histórico de Análises
+              </h2>
+              {comparacaoIds.length === 2 && (
+                <Button
+                  size="sm"
+                  className="text-xs sm:text-sm"
+                  onClick={handleIniciarComparacao}
+                >
+                  <GitCompareArrows className="h-3.5 w-3.5 mr-1" />
+                  Comparar ({comparacaoIds.length})
+                </Button>
+              )}
+            </div>
+            {comparacaoIds.length > 0 && comparacaoIds.length < 2 && (
+              <p className="text-xs text-amber-600 bg-amber-50 px-3 py-1.5 rounded">
+                Seleccione mais 1 análise para comparar (total: 2)
+              </p>
+            )}
             {!historico || historico.length === 0 ? (
               <Card>
                 <CardContent className="py-8 text-center text-muted-foreground">
@@ -833,19 +943,40 @@ export default function ControloStock() {
               </Card>
             ) : (
               historico.map((analise: any) => (
-                <Card key={analise.id} className="cursor-pointer hover:border-blue-300 transition-colors" onClick={() => handleVerDetalhe(analise.id)}>
+                <Card
+                  key={analise.id}
+                  className={`cursor-pointer transition-colors ${
+                    comparacaoIds.includes(analise.id)
+                      ? 'border-blue-400 bg-blue-50/50 ring-1 ring-blue-300'
+                      : 'hover:border-blue-300'
+                  }`}
+                  onClick={() => handleVerDetalhe(analise.id)}
+                >
                   <CardContent className="pt-4 pb-4">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <FileText className="h-4 w-4 text-blue-600" />
-                          <span className="font-medium">{analise.nomeLoja}</span>
+                      <div className="flex items-start gap-2">
+                        <input
+                          type="checkbox"
+                          checked={comparacaoIds.includes(analise.id)}
+                          onChange={(e) => {
+                            e.stopPropagation();
+                            toggleComparacao(analise.id);
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                          className="mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 cursor-pointer shrink-0"
+                          title="Seleccionar para comparação"
+                        />
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <FileText className="h-4 w-4 text-blue-600" />
+                            <span className="font-medium">{analise.nomeLoja}</span>
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {new Date(analise.createdAt).toLocaleDateString('pt-PT')} às {new Date(analise.createdAt).toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })}
+                          </p>
                         </div>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {new Date(analise.createdAt).toLocaleDateString('pt-PT')} às {new Date(analise.createdAt).toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })}
-                        </p>
                       </div>
-                        <div className="flex items-center gap-2 sm:gap-3">
+                      <div className="flex items-center gap-2 sm:gap-3">
                         <div className="flex flex-wrap gap-x-2 gap-y-0.5 sm:gap-3 text-[10px] sm:text-xs">
                           <span className="text-blue-600 font-medium">{analise.totalItensStock} itens</span>
                           <span className="text-green-600">{analise.totalComFichas} c/ fichas</span>
@@ -870,6 +1001,182 @@ export default function ControloStock() {
                   </CardContent>
                 </Card>
               ))
+            )}
+          </div>
+        )}
+
+        {/* VIEW: Comparação */}
+        {view === 'historico' && viewComparacao && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold flex items-center gap-2">
+                <GitCompareArrows className="h-5 w-5" />
+                Comparação de Análises
+              </h2>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => { setViewComparacao(false); setComparacaoIds([]); }}
+              >
+                <ArrowLeft className="h-3.5 w-3.5 mr-1" />
+                Voltar
+              </Button>
+            </div>
+
+            {comparacaoLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+              </div>
+            ) : comparacaoData ? (
+              <>
+                {/* Resumo das duas análises */}
+                <div className="grid grid-cols-2 gap-3">
+                  <Card className="border-gray-300">
+                    <CardContent className="pt-3 pb-3 text-center">
+                      <p className="text-[10px] sm:text-xs text-muted-foreground">Análise Anterior</p>
+                      <p className="text-xs sm:text-sm font-semibold">{comparacaoData.analiseAntiga.nomeLoja}</p>
+                      <p className="text-[10px] sm:text-xs text-muted-foreground">
+                        {new Date(comparacaoData.analiseAntiga.data).toLocaleDateString('pt-PT')}
+                      </p>
+                      <div className="flex justify-center gap-2 mt-1 text-[10px] sm:text-xs">
+                        <span className="text-blue-600 font-medium">{comparacaoData.analiseAntiga.totalStock}</span>
+                        <span className="text-green-600">{comparacaoData.analiseAntiga.totalComFichas}</span>
+                        <span className="text-amber-600">{comparacaoData.analiseAntiga.totalSemFichas}</span>
+                        <span className="text-red-600">{comparacaoData.analiseAntiga.totalFichasSemStock}</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Card className="border-blue-300">
+                    <CardContent className="pt-3 pb-3 text-center">
+                      <p className="text-[10px] sm:text-xs text-muted-foreground">Análise Recente</p>
+                      <p className="text-xs sm:text-sm font-semibold">{comparacaoData.analiseRecente.nomeLoja}</p>
+                      <p className="text-[10px] sm:text-xs text-muted-foreground">
+                        {new Date(comparacaoData.analiseRecente.data).toLocaleDateString('pt-PT')}
+                      </p>
+                      <div className="flex justify-center gap-2 mt-1 text-[10px] sm:text-xs">
+                        <span className="text-blue-600 font-medium">{comparacaoData.analiseRecente.totalStock}</span>
+                        <span className="text-green-600">{comparacaoData.analiseRecente.totalComFichas}</span>
+                        <span className="text-amber-600">{comparacaoData.analiseRecente.totalSemFichas}</span>
+                        <span className="text-red-600">{comparacaoData.analiseRecente.totalFichasSemStock}</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Variações */}
+                <Card>
+                  <CardContent className="pt-3 pb-3">
+                    <h3 className="text-sm font-semibold mb-2">Variações</h3>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs sm:text-sm">
+                      <div className="flex items-center justify-between bg-blue-50 rounded px-2 py-1.5">
+                        <span className="text-muted-foreground">Stock</span>
+                        <VariacaoDisplay valor={comparacaoData.variacoes.totalStock} />
+                      </div>
+                      <div className="flex items-center justify-between bg-green-50 rounded px-2 py-1.5">
+                        <span className="text-muted-foreground">C/ Fichas</span>
+                        <VariacaoDisplay valor={comparacaoData.variacoes.comFichas} />
+                      </div>
+                      <div className="flex items-center justify-between bg-amber-50 rounded px-2 py-1.5">
+                        <span className="text-muted-foreground">S/ Fichas</span>
+                        <VariacaoDisplay valor={comparacaoData.variacoes.semFichas} />
+                      </div>
+                      <div className="flex items-center justify-between bg-red-50 rounded px-2 py-1.5">
+                        <span className="text-muted-foreground">s/ Stock</span>
+                        <VariacaoDisplay valor={comparacaoData.variacoes.fichasSemStock} />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Itens Sem Fichas: Novos, Resolvidos, Mantidos */}
+                <div className="space-y-3">
+                  {/* Resolvidos */}
+                  {comparacaoData.semFichas.resolvidos.length > 0 && (
+                    <Card className="border-green-200">
+                      <CardContent className="pt-3 pb-3">
+                        <h3 className="text-sm font-semibold text-green-700 flex items-center gap-1.5 mb-2">
+                          <CheckCircle2 className="h-4 w-4" />
+                          Resolvidos ({comparacaoData.semFichas.resolvidos.length})
+                          <span className="text-[10px] font-normal text-muted-foreground ml-1">Já não estão sem ficha</span>
+                        </h3>
+                        <div className="space-y-1">
+                          {comparacaoData.semFichas.resolvidos.map((item: any, idx: number) => (
+                            <div key={idx} className="flex items-center justify-between bg-green-50 rounded px-2 py-1 text-xs">
+                              <div className="flex items-center gap-1.5 min-w-0">
+                                <span className="font-mono font-medium text-blue-700">{item.ref}</span>
+                                <span className="truncate text-muted-foreground">{item.descricao}</span>
+                              </div>
+                              <span className="shrink-0 font-medium">{item.quantidade} un.</span>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {/* Novos */}
+                  {comparacaoData.semFichas.novos.length > 0 && (
+                    <Card className="border-red-200">
+                      <CardContent className="pt-3 pb-3">
+                        <h3 className="text-sm font-semibold text-red-700 flex items-center gap-1.5 mb-2">
+                          <AlertTriangle className="h-4 w-4" />
+                          Novos sem ficha ({comparacaoData.semFichas.novos.length})
+                          <span className="text-[10px] font-normal text-muted-foreground ml-1">Apareceram na análise recente</span>
+                        </h3>
+                        <div className="space-y-1">
+                          {comparacaoData.semFichas.novos.map((item: any, idx: number) => (
+                            <div key={idx} className="flex items-center justify-between bg-red-50 rounded px-2 py-1 text-xs">
+                              <div className="flex items-center gap-1.5 min-w-0">
+                                <span className="font-mono font-medium text-blue-700">{item.ref}</span>
+                                <span className="truncate text-muted-foreground">{item.descricao}</span>
+                              </div>
+                              <span className="shrink-0 font-medium">{item.quantidade} un.</span>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {/* Mantidos */}
+                  {comparacaoData.semFichas.mantidos.length > 0 && (
+                    <Card className="border-amber-200">
+                      <CardContent className="pt-3 pb-3">
+                        <h3 className="text-sm font-semibold text-amber-700 flex items-center gap-1.5 mb-2">
+                          <Clock className="h-4 w-4" />
+                          Mantidos sem ficha ({comparacaoData.semFichas.mantidos.length})
+                          <span className="text-[10px] font-normal text-muted-foreground ml-1">Continuam em ambas as análises</span>
+                        </h3>
+                        <div className="space-y-1">
+                          {comparacaoData.semFichas.mantidos.map((item: any, idx: number) => (
+                            <div key={idx} className="flex items-center justify-between bg-amber-50 rounded px-2 py-1 text-xs">
+                              <div className="flex items-center gap-1.5 min-w-0">
+                                <span className="font-mono font-medium text-blue-700">{item.ref}</span>
+                                <span className="truncate text-muted-foreground">{item.descricao}</span>
+                              </div>
+                              <span className="shrink-0 font-medium">{item.quantidade} un.</span>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {comparacaoData.semFichas.novos.length === 0 && comparacaoData.semFichas.resolvidos.length === 0 && comparacaoData.semFichas.mantidos.length === 0 && (
+                    <Card>
+                      <CardContent className="py-6 text-center text-muted-foreground text-sm">
+                        Sem diferenças nos itens sem fichas entre as duas análises.
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
+              </>
+            ) : (
+              <Card>
+                <CardContent className="py-8 text-center text-muted-foreground">
+                  Erro ao carregar comparação.
+                </CardContent>
+              </Card>
             )}
           </div>
         )}

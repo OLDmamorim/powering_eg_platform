@@ -12462,6 +12462,212 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
         return { success: true };
       }),
 
+    // Comparar duas análises de stock
+    comparar: gestorProcedure
+      .input(z.object({
+        analiseId1: z.number(),
+        analiseId2: z.number(),
+      }))
+      .query(async ({ input }) => {
+        const a1 = await db.getAnaliseStockById(input.analiseId1);
+        const a2 = await db.getAnaliseStockById(input.analiseId2);
+        if (!a1 || !a2) throw new TRPCError({ code: 'NOT_FOUND', message: 'Análise não encontrada' });
+
+        const r1 = a1.resultadoAnalise ? JSON.parse(a1.resultadoAnalise) : { comFichas: [], semFichas: [], fichasSemStock: [] };
+        const r2 = a2.resultadoAnalise ? JSON.parse(a2.resultadoAnalise) : { comFichas: [], semFichas: [], fichasSemStock: [] };
+
+        // Análise 1 = mais antiga, Análise 2 = mais recente
+        const [antiga, recente, aInfo, rInfo] = new Date(a1.createdAt) < new Date(a2.createdAt)
+          ? [r1, r2, a1, a2] : [r2, r1, a2, a1];
+
+        // Refs sem fichas
+        const semFichasAntigas = new Set((antiga.semFichas || []).map((i: any) => i.ref?.toUpperCase()?.trim()));
+        const semFichasRecentes = new Set((recente.semFichas || []).map((i: any) => i.ref?.toUpperCase()?.trim()));
+
+        const novos: any[] = []; // estão na recente mas não na antiga
+        const resolvidos: any[] = []; // estavam na antiga mas não na recente
+        const mantidos: any[] = []; // estão em ambas
+
+        for (const item of (recente.semFichas || [])) {
+          const key = item.ref?.toUpperCase()?.trim();
+          if (semFichasAntigas.has(key)) {
+            mantidos.push(item);
+          } else {
+            novos.push(item);
+          }
+        }
+        for (const item of (antiga.semFichas || [])) {
+          const key = item.ref?.toUpperCase()?.trim();
+          if (!semFichasRecentes.has(key)) {
+            resolvidos.push(item);
+          }
+        }
+
+        return {
+          analiseAntiga: {
+            id: aInfo.id,
+            nomeLoja: aInfo.nomeLoja,
+            data: aInfo.createdAt,
+            totalStock: aInfo.totalItensStock,
+            totalComFichas: aInfo.totalComFichas,
+            totalSemFichas: aInfo.totalSemFichas,
+            totalFichasSemStock: aInfo.totalFichasSemStock,
+          },
+          analiseRecente: {
+            id: rInfo.id,
+            nomeLoja: rInfo.nomeLoja,
+            data: rInfo.createdAt,
+            totalStock: rInfo.totalItensStock,
+            totalComFichas: rInfo.totalComFichas,
+            totalSemFichas: rInfo.totalSemFichas,
+            totalFichasSemStock: rInfo.totalFichasSemStock,
+          },
+          semFichas: {
+            novos,
+            resolvidos,
+            mantidos,
+          },
+          variacoes: {
+            totalStock: (rInfo.totalItensStock || 0) - (aInfo.totalItensStock || 0),
+            comFichas: (rInfo.totalComFichas || 0) - (aInfo.totalComFichas || 0),
+            semFichas: (rInfo.totalSemFichas || 0) - (aInfo.totalSemFichas || 0),
+            fichasSemStock: (rInfo.totalFichasSemStock || 0) - (aInfo.totalFichasSemStock || 0),
+          },
+        };
+      }),
+
+    // Enviar email consolidado com os 3 status
+    enviarEmailConsolidado: gestorProcedure
+      .input(z.object({
+        lojaId: z.number(),
+        nomeLoja: z.string(),
+        comFichas: z.array(z.any()),
+        semFichas: z.array(z.any()),
+        fichasSemStock: z.array(z.any()),
+        totalItensStock: z.number().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const loja = await db.getLojaById(input.lojaId);
+        if (!loja) throw new TRPCError({ code: 'NOT_FOUND', message: 'Loja não encontrada' });
+        if (!loja.email) throw new TRPCError({ code: 'BAD_REQUEST', message: 'Loja não tem email configurado' });
+
+        const dataFormatada = new Date().toLocaleDateString('pt-PT');
+        const totalStock = input.totalItensStock || (input.comFichas.length + input.semFichas.length);
+
+        const gerarTabela = (titulo: string, cor: string, itens: any[], tipo: string) => {
+          if (itens.length === 0) return '';
+          let headers = '';
+          let rows = '';
+          if (tipo === 'fichasSemStock') {
+            headers = `<th style="padding:8px 10px;text-align:left;border:1px solid #e2e8f0;">Eurocode</th>
+              <th style="padding:8px 10px;text-align:left;border:1px solid #e2e8f0;">Obra</th>
+              <th style="padding:8px 10px;text-align:left;border:1px solid #e2e8f0;">Matrícula</th>
+              <th style="padding:8px 10px;text-align:left;border:1px solid #e2e8f0;">Marca/Modelo</th>
+              <th style="padding:8px 10px;text-align:left;border:1px solid #e2e8f0;">Estado</th>`;
+            rows = itens.map((item: any, idx: number) => `
+              <tr style="background:${idx % 2 === 0 ? '#fff' : '#f8fafc'};">
+                <td style="padding:6px 10px;border:1px solid #e2e8f0;font-family:monospace;font-weight:bold;">${item.eurocode || '-'}</td>
+                <td style="padding:6px 10px;border:1px solid #e2e8f0;">${item.obrano || '-'}</td>
+                <td style="padding:6px 10px;border:1px solid #e2e8f0;">${item.matricula || '-'}</td>
+                <td style="padding:6px 10px;border:1px solid #e2e8f0;">${item.marca || ''} ${item.modelo || ''}</td>
+                <td style="padding:6px 10px;border:1px solid #e2e8f0;">${item.status || '-'} ${item.diasAberto > 0 ? `(${item.diasAberto}d)` : ''}</td>
+              </tr>`).join('');
+          } else {
+            headers = `<th style="padding:8px 10px;text-align:left;border:1px solid #e2e8f0;">Referência</th>
+              <th style="padding:8px 10px;text-align:left;border:1px solid #e2e8f0;">Família</th>
+              <th style="padding:8px 10px;text-align:left;border:1px solid #e2e8f0;">Descrição</th>
+              <th style="padding:8px 10px;text-align:right;border:1px solid #e2e8f0;">Qtd</th>
+              ${tipo === 'comFichas' ? '<th style="padding:8px 10px;text-align:right;border:1px solid #e2e8f0;">Fichas</th>' : ''}`;
+            rows = itens.map((item: any, idx: number) => `
+              <tr style="background:${idx % 2 === 0 ? '#fff' : '#f8fafc'};">
+                <td style="padding:6px 10px;border:1px solid #e2e8f0;font-family:monospace;font-weight:bold;">${item.ref || '-'}</td>
+                <td style="padding:6px 10px;border:1px solid #e2e8f0;">${item.familia || '-'}</td>
+                <td style="padding:6px 10px;border:1px solid #e2e8f0;">${item.descricao || '-'}</td>
+                <td style="padding:6px 10px;border:1px solid #e2e8f0;text-align:right;">${item.quantidade || 0}</td>
+                ${tipo === 'comFichas' ? `<td style="padding:6px 10px;border:1px solid #e2e8f0;text-align:right;">${item.totalFichas || 0}</td>` : ''}
+              </tr>`).join('');
+          }
+          return `
+            <div style="margin-bottom:20px;">
+              <h2 style="color:${cor};font-size:16px;margin:0 0 8px;border-bottom:2px solid ${cor};padding-bottom:4px;">${titulo} (${itens.length})</h2>
+              <table style="width:100%;border-collapse:collapse;font-size:12px;">
+                <thead><tr style="background:#f1f5f9;">${headers}</tr></thead>
+                <tbody>${rows}</tbody>
+              </table>
+            </div>`;
+        };
+
+        const htmlEmail = `
+          <div style="font-family:Arial,sans-serif;max-width:900px;margin:0 auto;">
+            <div style="background:#16a34a;padding:20px;border-radius:8px 8px 0 0;">
+              <h1 style="color:#fff;margin:0;font-size:20px;">Controlo de Stock — Relatório Consolidado</h1>
+              <p style="color:#dcfce7;margin:5px 0 0;font-size:14px;">${input.nomeLoja} — ${dataFormatada}</p>
+            </div>
+            <div style="padding:20px;background:#fff;border:1px solid #e2e8f0;">
+              <div style="display:flex;gap:15px;margin-bottom:20px;flex-wrap:wrap;">
+                <div style="background:#eff6ff;padding:10px 15px;border-radius:6px;flex:1;min-width:120px;text-align:center;">
+                  <div style="font-size:22px;font-weight:bold;color:#1d4ed8;">${totalStock}</div>
+                  <div style="font-size:11px;color:#64748b;">Total Stock</div>
+                </div>
+                <div style="background:#f0fdf4;padding:10px 15px;border-radius:6px;flex:1;min-width:120px;text-align:center;">
+                  <div style="font-size:22px;font-weight:bold;color:#16a34a;">${input.comFichas.length}</div>
+                  <div style="font-size:11px;color:#64748b;">Com Fichas</div>
+                </div>
+                <div style="background:#fffbeb;padding:10px 15px;border-radius:6px;flex:1;min-width:120px;text-align:center;">
+                  <div style="font-size:22px;font-weight:bold;color:#d97706;">${input.semFichas.length}</div>
+                  <div style="font-size:11px;color:#64748b;">Sem Fichas</div>
+                </div>
+                <div style="background:#fef2f2;padding:10px 15px;border-radius:6px;flex:1;min-width:120px;text-align:center;">
+                  <div style="font-size:22px;font-weight:bold;color:#dc2626;">${input.fichasSemStock.length}</div>
+                  <div style="font-size:11px;color:#64748b;">Fichas s/ Stock</div>
+                </div>
+              </div>
+              ${gerarTabela('Em Stock COM Fichas de Serviço', '#16a34a', input.comFichas, 'comFichas')}
+              ${gerarTabela('Em Stock SEM Fichas de Serviço', '#d97706', input.semFichas, 'semFichas')}
+              ${gerarTabela('Fichas de Serviço SEM Stock', '#dc2626', input.fichasSemStock, 'fichasSemStock')}
+            </div>
+            <div style="padding:15px;background:#f8fafc;border:1px solid #e2e8f0;border-top:0;border-radius:0 0 8px 8px;text-align:center;">
+              <p style="margin:0;color:#64748b;font-size:12px;">PoweringEG Platform — Controlo de Stock</p>
+            </div>
+          </div>`;
+
+        const assunto = `Controlo de Stock — Relatório Consolidado — ${input.nomeLoja} — ${dataFormatada}`;
+
+        const enviado = await sendEmail({
+          to: loja.email,
+          subject: assunto,
+          html: htmlEmail,
+        });
+
+        if (!enviado) {
+          throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Erro ao enviar email' });
+        }
+
+        // Cópia para o gestor
+        let copiaEnviada: string | null = null;
+        const gestor = ctx.gestor ? await db.getGestorById(ctx.gestor.id) : null;
+        if (gestor?.email && gestor.email !== loja.email) {
+          try {
+            const htmlCopia = htmlEmail.replace(
+              '</div>\n            <div style="padding:15px',
+              `<div style="margin-top:15px;padding:12px;background:#f0f9ff;border-left:4px solid #0ea5e9;border-radius:4px;">
+                <p style="margin:0;color:#0369a1;font-size:13px;">Esta é uma cópia do email enviado para <strong>${loja.email}</strong>.</p>
+              </div>\n            </div>\n            <div style="padding:15px`
+            );
+            await sendEmail({
+              to: gestor.email,
+              subject: `[Cópia] ${assunto}`,
+              html: htmlCopia,
+            });
+            copiaEnviada = gestor.email;
+          } catch (e) {
+            console.error('[Stock Email Consolidado] Erro ao enviar cópia ao gestor:', e);
+          }
+        }
+
+        return { success: true, email: loja.email, copiaEnviada };
+      }),
+
     // Exportar Excel consolidado (gera no servidor e devolve URL)
     exportarExcelConsolidado: gestorProcedure
       .input(z.object({

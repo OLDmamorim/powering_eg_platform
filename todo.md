@@ -578,7 +578,7 @@
 - [x] Controlo Stock: Botão eliminar análises do histórico com confirmação
 - [x] Controlo Stock: Remover exportação PDF, manter apenas Excel
 - [x] Controlo Stock: Adicionar botão enviar email para loja (CC gestor) por status
-- [ ] Controlo Stock: Comparação entre duas análises de stock (evolução)
+- [x] Controlo Stock: Comparação entre duas análises de stock (evolução)
 - [x] Controlo Stock: Mostrar nome da loja analisada no cabeçalho da página de resultados
 - [x] Controlo Stock: Optimizar layout mobile (cabeçalho compacto, nome loja em linha separada, cards menores, botões adaptados)
 - [x] Controlo Stock: Compactar cards de eurocodes no mobile (menos padding, texto menor, linhas mais densas)
@@ -587,3 +587,6 @@
 - [x] Controlo Stock: Persistência inteligente de classificações (limpa quando eurocode desaparece da listagem)
 - [x] Controlo Stock: Alerta de longevidade para eurocodes sem ficha recorrentes (quantas análises consecutivas)
 - [x] Controlo Stock: UI para classificar eurocodes sem ficha inline nos cards
+- [x] Controlo Stock: Comparação entre duas análises de stock (seleccionar 2 do histórico, ver itens que entraram/saíram)
+- [x] Controlo Stock: Filtro por classificação na tab Sem Fichas (dropdown para filtrar por devolução rejeitada, usado, com danos, para devolver)
+- [x] Controlo Stock: Email consolidado com os 3 status (Com Fichas, Sem Fichas, Fichas s/ Stock) num único email
