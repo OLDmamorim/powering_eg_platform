@@ -580,3 +580,4 @@
 - [x] Controlo Stock: Adicionar botão enviar email para loja (CC gestor) por status
 - [ ] Controlo Stock: Comparação entre duas análises de stock (evolução)
 - [x] Controlo Stock: Mostrar nome da loja analisada no cabeçalho da página de resultados
+- [x] Controlo Stock: Optimizar layout mobile (cabeçalho compacto, nome loja em linha separada, cards menores, botões adaptados)

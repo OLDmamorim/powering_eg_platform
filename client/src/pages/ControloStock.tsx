@@ -300,24 +300,24 @@ export default function ControloStock() {
 
   // Export + Email buttons component for each tab
   const ActionButtons = ({ onExport, onEmail, status }: { onExport: () => void; onEmail: () => void; status: 'comFichas' | 'semFichas' | 'fichasSemStock' }) => (
-    <div className="flex gap-2 justify-end mb-2">
-      <Button variant="outline" size="sm" onClick={onExport}>
+    <div className="flex gap-1.5 sm:gap-2 justify-end mb-2">
+      <Button variant="outline" size="sm" className="text-xs px-2 sm:text-sm sm:px-3" onClick={onExport}>
         <Download className="h-3 w-3 mr-1" />
         Excel
       </Button>
       <Button
         variant="outline"
         size="sm"
+        className="text-xs px-2 sm:text-sm sm:px-3 text-green-700 border-green-300 hover:bg-green-50"
         onClick={onEmail}
         disabled={enviarEmailMutation.isPending}
-        className="text-green-700 border-green-300 hover:bg-green-50"
       >
         {enviarEmailMutation.isPending ? (
           <Loader2 className="h-3 w-3 mr-1 animate-spin" />
         ) : (
           <Send className="h-3 w-3 mr-1" />
         )}
-        Enviar Email
+        <span className="hidden sm:inline">Enviar </span>Email
       </Button>
     </div>
   );
@@ -326,52 +326,55 @@ export default function ControloStock() {
     <DashboardLayout>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div className="flex items-center gap-3">
-            {(view === 'resultado' || view === 'historico' || view === 'detalhe') && (
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 min-w-0">
+              {(view === 'resultado' || view === 'historico' || view === 'detalhe') && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 shrink-0"
+                  onClick={() => {
+                    if (view === 'detalhe') setView('historico');
+                    else setView('input');
+                  }}
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                </Button>
+              )}
+              <div className="min-w-0">
+                <h1 className="text-lg md:text-2xl font-bold flex items-center gap-2">
+                  <Warehouse className="h-5 w-5 md:h-6 md:w-6 text-blue-600 shrink-0" />
+                  <span className="truncate">Controlo de Stock</span>
+                </h1>
+              </div>
+            </div>
+            <div className="flex gap-1.5 shrink-0">
               <Button
-                variant="ghost"
+                variant={view === 'input' ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => {
-                  if (view === 'detalhe') setView('historico');
-                  else setView('input');
-                }}
+                className="text-xs px-2 md:text-sm md:px-3"
+                onClick={() => setView('input')}
               >
-                <ArrowLeft className="h-4 w-4 mr-1" />
-                Voltar
+                <ClipboardPaste className="h-3.5 w-3.5 mr-1" />
+                <span className="hidden sm:inline">Nova </span>Análise
               </Button>
-            )}
-            <div>
-              <h1 className="text-2xl font-bold flex items-center gap-2">
-                <Warehouse className="h-6 w-6 text-blue-600" />
-                Controlo de Stock
-                {(view === 'resultado' || view === 'detalhe') && nomeLoja && (
-                  <span className="text-lg font-semibold text-muted-foreground">— {nomeLoja}</span>
-                )}
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                Cruzamento de stock com fichas de serviço
-              </p>
+              <Button
+                variant={view === 'historico' ? 'default' : 'outline'}
+                size="sm"
+                className="text-xs px-2 md:text-sm md:px-3"
+                onClick={() => setView('historico')}
+              >
+                <History className="h-3.5 w-3.5 mr-1" />
+                Histórico
+              </Button>
             </div>
           </div>
-          <div className="flex gap-2">
-            <Button
-              variant={view === 'input' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setView('input')}
-            >
-              <ClipboardPaste className="h-4 w-4 mr-1" />
-              Nova Análise
-            </Button>
-            <Button
-              variant={view === 'historico' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setView('historico')}
-            >
-              <History className="h-4 w-4 mr-1" />
-              Histórico
-            </Button>
-          </div>
+          {(view === 'resultado' || view === 'detalhe') && nomeLoja && (
+            <p className="text-sm md:text-base font-semibold text-muted-foreground pl-1">
+              {nomeLoja}
+            </p>
+          )}
         </div>
 
         {/* Info da última análise de fichas */}
@@ -472,41 +475,41 @@ export default function ControloStock() {
         {(view === 'resultado' || view === 'detalhe') && dadosActivos && (
           <div className="space-y-4">
             {/* Cards de resumo */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="grid grid-cols-4 gap-2 md:gap-3">
               <Card className="border-blue-200 bg-blue-50/50">
-                <CardContent className="pt-4 pb-4 text-center">
-                  <Package className="h-6 w-6 mx-auto text-blue-600 mb-1" />
-                  <div className="text-2xl font-bold text-blue-700">
+                <CardContent className="pt-3 pb-3 md:pt-4 md:pb-4 text-center px-1 md:px-4">
+                  <Package className="h-4 w-4 md:h-6 md:w-6 mx-auto text-blue-600 mb-0.5" />
+                  <div className="text-lg md:text-2xl font-bold text-blue-700">
                     {dadosActivos.totalItensStock ?? (dadosActivos.comFichas?.length || 0) + (dadosActivos.semFichas?.length || 0)}
                   </div>
-                  <div className="text-xs text-muted-foreground">Total Stock</div>
+                  <div className="text-[10px] md:text-xs text-muted-foreground leading-tight">Total Stock</div>
                 </CardContent>
               </Card>
               <Card className="border-green-200 bg-green-50/50">
-                <CardContent className="pt-4 pb-4 text-center">
-                  <CheckCircle2 className="h-6 w-6 mx-auto text-green-600 mb-1" />
-                  <div className="text-2xl font-bold text-green-700">
+                <CardContent className="pt-3 pb-3 md:pt-4 md:pb-4 text-center px-1 md:px-4">
+                  <CheckCircle2 className="h-4 w-4 md:h-6 md:w-6 mx-auto text-green-600 mb-0.5" />
+                  <div className="text-lg md:text-2xl font-bold text-green-700">
                     {dadosActivos.totalComFichas ?? dadosActivos.comFichas?.length}
                   </div>
-                  <div className="text-xs text-muted-foreground">Com Fichas</div>
+                  <div className="text-[10px] md:text-xs text-muted-foreground leading-tight">Com Fichas</div>
                 </CardContent>
               </Card>
               <Card className="border-amber-200 bg-amber-50/50">
-                <CardContent className="pt-4 pb-4 text-center">
-                  <XCircle className="h-6 w-6 mx-auto text-amber-600 mb-1" />
-                  <div className="text-2xl font-bold text-amber-700">
+                <CardContent className="pt-3 pb-3 md:pt-4 md:pb-4 text-center px-1 md:px-4">
+                  <XCircle className="h-4 w-4 md:h-6 md:w-6 mx-auto text-amber-600 mb-0.5" />
+                  <div className="text-lg md:text-2xl font-bold text-amber-700">
                     {dadosActivos.totalSemFichas ?? dadosActivos.semFichas?.length}
                   </div>
-                  <div className="text-xs text-muted-foreground">Sem Fichas</div>
+                  <div className="text-[10px] md:text-xs text-muted-foreground leading-tight">Sem Fichas</div>
                 </CardContent>
               </Card>
               <Card className="border-red-200 bg-red-50/50">
-                <CardContent className="pt-4 pb-4 text-center">
-                  <AlertTriangle className="h-6 w-6 mx-auto text-red-600 mb-1" />
-                  <div className="text-2xl font-bold text-red-700">
+                <CardContent className="pt-3 pb-3 md:pt-4 md:pb-4 text-center px-1 md:px-4">
+                  <AlertTriangle className="h-4 w-4 md:h-6 md:w-6 mx-auto text-red-600 mb-0.5" />
+                  <div className="text-lg md:text-2xl font-bold text-red-700">
                     {dadosActivos.totalFichasSemStock ?? dadosActivos.fichasSemStock?.length}
                   </div>
-                  <div className="text-xs text-muted-foreground">Fichas s/ Stock</div>
+                  <div className="text-[10px] md:text-xs text-muted-foreground leading-tight">Fichas s/ Stock</div>
                 </CardContent>
               </Card>
             </div>
@@ -524,18 +527,18 @@ export default function ControloStock() {
 
             {/* Tabs de resultado */}
             <Tabs value={activeResultTab} onValueChange={setActiveResultTab}>
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="comFichas" className="text-xs sm:text-sm">
-                  <CheckCircle2 className="h-3 w-3 mr-1" />
-                  Com Fichas ({dadosActivos.comFichas?.length || 0})
+              <TabsList className="grid w-full grid-cols-3 h-auto">
+                <TabsTrigger value="comFichas" className="text-[10px] sm:text-sm px-1 py-1.5 sm:px-3 sm:py-2">
+                  <CheckCircle2 className="h-3 w-3 mr-0.5 sm:mr-1 shrink-0" />
+                  <span className="hidden sm:inline">Com Fichas</span><span className="sm:hidden">C/ Fichas</span> ({dadosActivos.comFichas?.length || 0})
                 </TabsTrigger>
-                <TabsTrigger value="semFichas" className="text-xs sm:text-sm">
-                  <XCircle className="h-3 w-3 mr-1" />
-                  Sem Fichas ({dadosActivos.semFichas?.length || 0})
+                <TabsTrigger value="semFichas" className="text-[10px] sm:text-sm px-1 py-1.5 sm:px-3 sm:py-2">
+                  <XCircle className="h-3 w-3 mr-0.5 sm:mr-1 shrink-0" />
+                  <span className="hidden sm:inline">Sem Fichas</span><span className="sm:hidden">S/ Fichas</span> ({dadosActivos.semFichas?.length || 0})
                 </TabsTrigger>
-                <TabsTrigger value="fichasSemStock" className="text-xs sm:text-sm">
-                  <AlertTriangle className="h-3 w-3 mr-1" />
-                  Fichas s/ Stock ({dadosActivos.fichasSemStock?.length || 0})
+                <TabsTrigger value="fichasSemStock" className="text-[10px] sm:text-sm px-1 py-1.5 sm:px-3 sm:py-2">
+                  <AlertTriangle className="h-3 w-3 mr-0.5 sm:mr-1 shrink-0" />
+                  <span className="hidden sm:inline">Fichas s/ Stock</span><span className="sm:hidden">s/ Stock</span> ({dadosActivos.fichasSemStock?.length || 0})
                 </TabsTrigger>
               </TabsList>
 
@@ -706,12 +709,12 @@ export default function ControloStock() {
                           {new Date(analise.createdAt).toLocaleDateString('pt-PT')} às {new Date(analise.createdAt).toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })}
                         </p>
                       </div>
-                      <div className="flex items-center gap-3">
-                        <div className="flex gap-3 text-xs">
+                        <div className="flex items-center gap-2 sm:gap-3">
+                        <div className="flex flex-wrap gap-x-2 gap-y-0.5 sm:gap-3 text-[10px] sm:text-xs">
                           <span className="text-blue-600 font-medium">{analise.totalItensStock} itens</span>
                           <span className="text-green-600">{analise.totalComFichas} c/ fichas</span>
                           <span className="text-amber-600">{analise.totalSemFichas} s/ fichas</span>
-                          <span className="text-red-600">{analise.totalFichasSemStock} fichas s/ stock</span>
+                          <span className="text-red-600">{analise.totalFichasSemStock} s/ stock</span>
                         </div>
                         <Button
                           variant="ghost"
