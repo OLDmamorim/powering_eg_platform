@@ -598,3 +598,6 @@
 - [x] Portal Loja: Permitir à loja ver detalhe da análise de stock (lista de eurocodes sem ficha desmultiplicados)
 - [x] Portal Loja: Permitir à loja classificar eurocodes sem ficha directamente no portal (dropdown inline)
 - [x] Portal Loja: Backend - procedimento para classificar via token de loja
+- [x] BUG Portal Loja Stock: Eurocodes mostram "undefined" em vez da referência (corrigido: usar item.ref em vez de item.eurocode)
+- [x] Portal Loja Stock: Mostrar TODOS os eurocodes (com ficha, sem ficha, fichas s/ stock) com cards como filtro
+- [x] Portal Loja Stock: Classificação só aparece nos eurocodes sem ficha

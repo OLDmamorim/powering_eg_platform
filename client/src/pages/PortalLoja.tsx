@@ -246,6 +246,7 @@ export default function PortalLoja() {
   const [exportandoPDF, setExportandoPDF] = useState(false);
   const [analiseStockSelecionada, setAnaliseStockSelecionada] = useState<number | null>(null);
   const [filtroClassificacaoStock, setFiltroClassificacaoStock] = useState<string>('todas');
+  const [stockTabFilter, setStockTabFilter] = useState<'todos' | 'comFichas' | 'semFichas' | 'fichasSemStock'>('todos');
   const [analiseIA, setAnaliseIA] = useState<any>(null);
   const [gerandoAnaliseIA, setGerandoAnaliseIA] = useState(false);
   const dashboardRef = useRef<HTMLDivElement>(null);
@@ -4120,7 +4121,7 @@ export default function PortalLoja() {
           {/* Cabeçalho */}
           <div className="flex items-center gap-3 mb-2">
             {analiseStockSelecionada && (
-              <Button variant="ghost" size="sm" onClick={() => { setAnaliseStockSelecionada(null); setFiltroClassificacaoStock('todas'); }}>
+              <Button variant="ghost" size="sm" onClick={() => { setAnaliseStockSelecionada(null); setFiltroClassificacaoStock('todas'); setStockTabFilter('todos'); }}>
                 <ArrowLeft className="h-4 w-4" />
               </Button>
             )}
@@ -4160,8 +4161,11 @@ export default function PortalLoja() {
                 });
               }
 
+              const comFichasItems = resultado?.comFichas || [];
               const semFichasItems = resultado?.semFichas || [];
-              // Desmultiplicar
+              const fichasSemStockItems = resultado?.fichasSemStock || [];
+
+              // Desmultiplicar sem fichas
               const desmultiplicados: Array<{item: any; unitIndex: number; totalUnits: number}> = [];
               semFichasItems.forEach((item: any) => {
                 const qty = item.quantidade || 1;
@@ -4183,46 +4187,46 @@ export default function PortalLoja() {
                 para_devolver: 'bg-blue-100 text-blue-700',
               };
 
-              // Filtrar por classificação
-              const itensFiltrados = filtroClassificacaoStock === 'todas' ? desmultiplicados
+              // Filtrar sem fichas por classificacao
+              const semFichasFiltrados = filtroClassificacaoStock === 'todas' ? desmultiplicados
                 : filtroClassificacaoStock === 'sem_classificacao' 
-                  ? desmultiplicados.filter(d => !classificacoesMap.has(`${d.item.eurocode}_${d.unitIndex}`))
+                  ? desmultiplicados.filter(d => !classificacoesMap.has(`${d.item.ref?.toUpperCase()?.trim()}_${d.unitIndex}`))
                   : desmultiplicados.filter(d => {
-                      const c = classificacoesMap.get(`${d.item.eurocode}_${d.unitIndex}`);
+                      const c = classificacoesMap.get(`${d.item.ref?.toUpperCase()?.trim()}_${d.unitIndex}`);
                       return c && c.classificacao === filtroClassificacaoStock;
                     });
 
               // Contadores
-              const totalClassificados = desmultiplicados.filter(d => classificacoesMap.has(`${d.item.eurocode}_${d.unitIndex}`)).length;
+              const totalClassificados = desmultiplicados.filter(d => classificacoesMap.has(`${d.item.ref?.toUpperCase()?.trim()}_${d.unitIndex}`)).length;
 
               return (
                 <div className="space-y-3">
-                  {/* Resumo em grid */}
+                  {/* Cards resumo clicaveis como filtro */}
                   <div className="grid grid-cols-4 gap-2">
-                    <div className="text-center p-2 bg-blue-50 rounded-lg">
+                    <div onClick={() => setStockTabFilter('todos')} className={`text-center p-2 rounded-lg cursor-pointer transition-all ${stockTabFilter === 'todos' ? 'bg-blue-100 ring-2 ring-blue-400' : 'bg-blue-50 hover:bg-blue-100'}`}>
                       <div className="text-lg font-bold text-blue-700">{detalheStock.totalItensStock}</div>
                       <div className="text-[10px] text-blue-600">Total</div>
                     </div>
-                    <div className="text-center p-2 bg-green-50 rounded-lg">
-                      <div className="text-lg font-bold text-green-700">{detalheStock.totalComFichas}</div>
+                    <div onClick={() => setStockTabFilter('comFichas')} className={`text-center p-2 rounded-lg cursor-pointer transition-all ${stockTabFilter === 'comFichas' ? 'bg-green-100 ring-2 ring-green-400' : 'bg-green-50 hover:bg-green-100'}`}>
+                      <div className="text-lg font-bold text-green-700">{comFichasItems.length}</div>
                       <div className="text-[10px] text-green-600">C/ Fichas</div>
                     </div>
-                    <div className="text-center p-2 bg-amber-50 rounded-lg">
+                    <div onClick={() => setStockTabFilter('semFichas')} className={`text-center p-2 rounded-lg cursor-pointer transition-all ${stockTabFilter === 'semFichas' ? 'bg-amber-100 ring-2 ring-amber-400' : 'bg-amber-50 hover:bg-amber-100'}`}>
                       <div className="text-lg font-bold text-amber-700">{desmultiplicados.length}</div>
                       <div className="text-[10px] text-amber-600">S/ Fichas</div>
                     </div>
-                    <div className="text-center p-2 bg-red-50 rounded-lg">
-                      <div className="text-lg font-bold text-red-700">{detalheStock.totalFichasSemStock}</div>
+                    <div onClick={() => setStockTabFilter('fichasSemStock')} className={`text-center p-2 rounded-lg cursor-pointer transition-all ${stockTabFilter === 'fichasSemStock' ? 'bg-red-100 ring-2 ring-red-400' : 'bg-red-50 hover:bg-red-100'}`}>
+                      <div className="text-lg font-bold text-red-700">{fichasSemStockItems.length}</div>
                       <div className="text-[10px] text-red-600">Fichas s/ Stock</div>
                     </div>
                   </div>
 
-                  {/* Progresso classificação */}
-                  {desmultiplicados.length > 0 && (
+                  {/* Progresso classificacao (so quando mostra sem fichas) */}
+                  {(stockTabFilter === 'todos' || stockTabFilter === 'semFichas') && desmultiplicados.length > 0 && (
                     <div className="bg-slate-50 rounded-lg p-3">
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-xs font-medium text-slate-600">
-                          {language === 'pt' ? 'Classificação' : 'Classification'}: {totalClassificados}/{desmultiplicados.length}
+                          {language === 'pt' ? 'Classificação S/ Fichas' : 'Classification'}: {totalClassificados}/{desmultiplicados.length}
                         </span>
                         <span className="text-xs font-bold text-slate-700">
                           {desmultiplicados.length > 0 ? Math.round((totalClassificados / desmultiplicados.length) * 100) : 0}%
@@ -4234,102 +4238,162 @@ export default function PortalLoja() {
                     </div>
                   )}
 
-                  {/* Título secção Sem Fichas + Filtro */}
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-sm text-amber-700">
-                      {language === 'pt' ? 'Vidros Sem Ficha de Serviço' : 'Glasses Without Service Records'} ({itensFiltrados.length})
-                    </h3>
-                    <select
-                      className="text-xs border rounded px-2 py-1 bg-white"
-                      value={filtroClassificacaoStock}
-                      onChange={e => setFiltroClassificacaoStock(e.target.value)}
-                    >
-                      <option value="todas">{language === 'pt' ? 'Todas' : 'All'}</option>
-                      <option value="sem_classificacao">{language === 'pt' ? 'Sem classif.' : 'Unclassified'}</option>
-                      <option value="devolucao_rejeitada">{classifLabels.devolucao_rejeitada}</option>
-                      <option value="usado">{classifLabels.usado}</option>
-                      <option value="com_danos">{classifLabels.com_danos}</option>
-                      <option value="para_devolver">{classifLabels.para_devolver}</option>
-                    </select>
-                  </div>
-
-                  {/* Lista de itens desmultiplicados */}
-                  {itensFiltrados.length === 0 ? (
-                    <Card>
-                      <CardContent className="py-8 text-center">
-                        <CheckCircle2 className="h-8 w-8 mx-auto text-green-400 mb-2" />
-                        <p className="text-sm text-muted-foreground">
-                          {filtroClassificacaoStock !== 'todas'
-                            ? (language === 'pt' ? 'Nenhum item com este filtro' : 'No items with this filter')
-                            : (language === 'pt' ? 'Todos os vidros têm ficha de serviço' : 'All glasses have service records')}
-                        </p>
-                      </CardContent>
-                    </Card>
-                  ) : (
-                    <div className="space-y-1.5">
-                      {itensFiltrados.map((d, idx) => {
-                        const key = `${d.item.eurocode}_${d.unitIndex}`;
-                        const classif = classificacoesMap.get(key);
-                        const recorrencia = recorrenciaMap.get(d.item.eurocode) || 0;
-                        const euroLabel = d.totalUnits > 1 ? `${d.item.eurocode} (${d.unitIndex}/${d.totalUnits})` : d.item.eurocode;
-
-                        return (
-                          <div key={`${key}_${idx}`} className={`border rounded-lg p-2.5 bg-white ${
-                            recorrencia >= 3 ? 'ring-2 ring-red-300' : recorrencia >= 2 ? 'ring-1 ring-amber-300' : ''
-                          }`}>
-                            {/* Linha 1: Badges */}
+                  {/* === COM FICHAS === */}
+                  {(stockTabFilter === 'todos' || stockTabFilter === 'comFichas') && comFichasItems.length > 0 && (
+                    <div>
+                      <h3 className="font-semibold text-sm text-green-700 mb-2 flex items-center gap-1.5">
+                        <CheckCircle2 className="h-4 w-4" />
+                        {language === 'pt' ? 'Com Fichas de Serviço' : 'With Service Records'} ({comFichasItems.length})
+                      </h3>
+                      <div className="space-y-1.5">
+                        {comFichasItems.map((item: any, idx: number) => (
+                          <div key={`cf_${idx}`} className="border border-green-100 rounded-lg p-2.5 bg-white">
                             <div className="flex items-center gap-1.5 flex-wrap mb-1">
-                              <Badge className="bg-amber-100 text-amber-800 text-[10px] px-1.5 py-0">{euroLabel}</Badge>
-                              <Badge variant="outline" className="text-[10px] px-1.5 py-0">{d.item.familia || 'OC'}</Badge>
-                              {recorrencia >= 2 && (
-                                <Badge className={`text-[10px] px-1.5 py-0 ${recorrencia >= 3 ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>
-                                  {recorrencia}x
-                                </Badge>
-                              )}
-                              {classif && (
-                                <Badge className={`text-[10px] px-1.5 py-0 ${classifColors[classif.classificacao] || ''}`}>
-                                  {classifLabels[classif.classificacao] || classif.classificacao}
-                                </Badge>
-                              )}
+                              <Badge className="bg-green-100 text-green-800 text-[10px] px-1.5 py-0">{item.ref}</Badge>
+                              <Badge variant="outline" className="text-[10px] px-1.5 py-0">{item.familia || 'OC'}</Badge>
+                              <Badge className="bg-green-50 text-green-600 text-[10px] px-1.5 py-0">
+                                {item.totalFichas} {language === 'pt' ? 'ficha(s)' : 'record(s)'}
+                              </Badge>
                             </div>
-                            {/* Linha 2: Descrição */}
-                            <p className="text-[11px] text-gray-600 mb-1.5 truncate">{d.item.descricao}</p>
-                            {/* Linha 3: Dropdown classificação */}
-                            <div className="flex items-center gap-2">
-                              <select
-                                className="flex-1 text-[11px] border rounded px-2 py-1 bg-white"
-                                value={classif?.classificacao || ''}
-                                onChange={e => {
-                                  const val = e.target.value;
-                                  if (!val && classif) {
-                                    removerClassificacaoStockMutation.mutate({ token, id: classif.id });
-                                  } else if (val) {
-                                    classificarStockMutation.mutate({
-                                      token,
-                                      lojaId: detalheStock.lojaId,
-                                      eurocode: d.item.eurocode,
-                                      unitIndex: d.unitIndex,
-                                      classificacao: val as any,
-                                      analiseId: analiseStockSelecionada!,
-                                    });
-                                  }
-                                }}
-                              >
-                                <option value="">{language === 'pt' ? '-- Classificar --' : '-- Classify --'}</option>
-                                <option value="devolucao_rejeitada">{classifLabels.devolucao_rejeitada}</option>
-                                <option value="usado">{classifLabels.usado}</option>
-                                <option value="com_danos">{classifLabels.com_danos}</option>
-                                <option value="para_devolver">{classifLabels.para_devolver}</option>
-                              </select>
-                            </div>
+                            <p className="text-[11px] text-gray-600 truncate">{item.descricao}</p>
+                            <div className="text-[10px] text-gray-500 text-right">{item.quantidade} un.</div>
                           </div>
-                        );
-                      })}
+                        ))}
+                      </div>
                     </div>
+                  )}
+
+                  {/* === SEM FICHAS (desmultiplicado) === */}
+                  {(stockTabFilter === 'todos' || stockTabFilter === 'semFichas') && (
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="font-semibold text-sm text-amber-700 flex items-center gap-1.5">
+                          <XCircle className="h-4 w-4" />
+                          {language === 'pt' ? 'Sem Ficha de Serviço' : 'Without Service Records'} ({semFichasFiltrados.length})
+                        </h3>
+                        <select
+                          className="text-xs border rounded px-2 py-1 bg-white"
+                          value={filtroClassificacaoStock}
+                          onChange={e => setFiltroClassificacaoStock(e.target.value)}
+                        >
+                          <option value="todas">{language === 'pt' ? 'Todas' : 'All'}</option>
+                          <option value="sem_classificacao">{language === 'pt' ? 'Sem classif.' : 'Unclassified'}</option>
+                          <option value="devolucao_rejeitada">{classifLabels.devolucao_rejeitada}</option>
+                          <option value="usado">{classifLabels.usado}</option>
+                          <option value="com_danos">{classifLabels.com_danos}</option>
+                          <option value="para_devolver">{classifLabels.para_devolver}</option>
+                        </select>
+                      </div>
+                      {semFichasFiltrados.length === 0 ? (
+                        <Card>
+                          <CardContent className="py-6 text-center">
+                            <CheckCircle2 className="h-8 w-8 mx-auto text-green-400 mb-2" />
+                            <p className="text-sm text-muted-foreground">
+                              {filtroClassificacaoStock !== 'todas'
+                                ? (language === 'pt' ? 'Nenhum item com este filtro' : 'No items with this filter')
+                                : (language === 'pt' ? 'Todos os vidros têm ficha de serviço' : 'All glasses have service records')}
+                            </p>
+                          </CardContent>
+                        </Card>
+                      ) : (
+                        <div className="space-y-1.5">
+                          {semFichasFiltrados.map((d, idx) => {
+                            const refKey = d.item.ref?.toUpperCase()?.trim();
+                            const key = `${refKey}_${d.unitIndex}`;
+                            const classif = classificacoesMap.get(key);
+                            const recorrencia = recorrenciaMap.get(refKey) || 0;
+                            const euroLabel = d.totalUnits > 1 ? `${d.item.ref} (${d.unitIndex}/${d.totalUnits})` : d.item.ref;
+
+                            return (
+                              <div key={`sf_${key}_${idx}`} className={`border rounded-lg p-2.5 bg-white ${
+                                recorrencia >= 3 ? 'ring-2 ring-red-300' : recorrencia >= 2 ? 'ring-1 ring-amber-300' : 'border-amber-100'
+                              }`}>
+                                <div className="flex items-center gap-1.5 flex-wrap mb-1">
+                                  <Badge className="bg-amber-100 text-amber-800 text-[10px] px-1.5 py-0">{euroLabel}</Badge>
+                                  <Badge variant="outline" className="text-[10px] px-1.5 py-0">{d.item.familia || 'OC'}</Badge>
+                                  {recorrencia >= 2 && (
+                                    <Badge className={`text-[10px] px-1.5 py-0 ${recorrencia >= 3 ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>
+                                      {recorrencia}x
+                                    </Badge>
+                                  )}
+                                  {classif && (
+                                    <Badge className={`text-[10px] px-1.5 py-0 ${classifColors[classif.classificacao] || ''}`}>
+                                      {classifLabels[classif.classificacao] || classif.classificacao}
+                                    </Badge>
+                                  )}
+                                </div>
+                                <p className="text-[11px] text-gray-600 mb-1.5 truncate">{d.item.descricao}</p>
+                                <div className="flex items-center gap-2">
+                                  <select
+                                    className="flex-1 text-[11px] border rounded px-2 py-1 bg-white"
+                                    value={classif?.classificacao || ''}
+                                    onChange={e => {
+                                      const val = e.target.value;
+                                      if (!val && classif) {
+                                        removerClassificacaoStockMutation.mutate({ token, id: classif.id });
+                                      } else if (val) {
+                                        classificarStockMutation.mutate({
+                                          token,
+                                          lojaId: detalheStock.lojaId,
+                                          eurocode: refKey,
+                                          unitIndex: d.unitIndex,
+                                          classificacao: val as any,
+                                          analiseId: analiseStockSelecionada!,
+                                        });
+                                      }
+                                    }}
+                                  >
+                                    <option value="">{language === 'pt' ? '-- Classificar --' : '-- Classify --'}</option>
+                                    <option value="devolucao_rejeitada">{classifLabels.devolucao_rejeitada}</option>
+                                    <option value="usado">{classifLabels.usado}</option>
+                                    <option value="com_danos">{classifLabels.com_danos}</option>
+                                    <option value="para_devolver">{classifLabels.para_devolver}</option>
+                                  </select>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* === FICHAS SEM STOCK === */}
+                  {(stockTabFilter === 'todos' || stockTabFilter === 'fichasSemStock') && fichasSemStockItems.length > 0 && (
+                    <div>
+                      <h3 className="font-semibold text-sm text-red-700 mb-2 flex items-center gap-1.5">
+                        <AlertTriangle className="h-4 w-4" />
+                        {language === 'pt' ? 'Fichas de Serviço Sem Stock' : 'Service Records Without Stock'} ({fichasSemStockItems.length})
+                      </h3>
+                      <div className="space-y-1.5">
+                        {fichasSemStockItems.map((item: any, idx: number) => (
+                          <div key={`fss_${idx}`} className="border border-red-100 rounded-lg p-2.5 bg-white">
+                            <div className="flex items-center gap-1.5 flex-wrap mb-1">
+                              <Badge className="bg-red-100 text-red-800 text-[10px] px-1.5 py-0">{item.eurocode}</Badge>
+                              <Badge variant="outline" className="text-[10px] px-1.5 py-0">{item.obrano}</Badge>
+                              <Badge className="bg-gray-100 text-gray-600 text-[10px] px-1.5 py-0">{item.status}</Badge>
+                            </div>
+                            <p className="text-[11px] text-gray-600 truncate">
+                              {item.marca} {item.modelo} — {item.matricula}
+                            </p>
+                            <div className="text-[10px] text-gray-500 text-right">{item.diasAberto} dias</div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Mensagem quando filtro vazio */}
+                  {stockTabFilter === 'comFichas' && comFichasItems.length === 0 && (
+                    <Card><CardContent className="py-6 text-center text-sm text-muted-foreground">{language === 'pt' ? 'Nenhum item com fichas de serviço' : 'No items with service records'}</CardContent></Card>
+                  )}
+                  {stockTabFilter === 'fichasSemStock' && fichasSemStockItems.length === 0 && (
+                    <Card><CardContent className="py-6 text-center text-sm text-muted-foreground">{language === 'pt' ? 'Nenhuma ficha sem stock' : 'No records without stock'}</CardContent></Card>
                   )}
                 </div>
               );
             })() : null
+
           ) : (
             /* VISTA LISTA DE ANÁLISES */
             <>
