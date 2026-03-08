@@ -4166,7 +4166,8 @@ export default function PortalLoja() {
               const sq = searchStockQuery.toLowerCase().trim();
               const matchSearch = (item: any) => {
                 if (!sq) return true;
-                return (item.ref?.toLowerCase()?.includes(sq) || item.descricao?.toLowerCase()?.includes(sq) || item.eurocode?.toLowerCase()?.includes(sq) || item.marca?.toLowerCase()?.includes(sq) || item.modelo?.toLowerCase()?.includes(sq) || item.matricula?.toLowerCase()?.includes(sq) || item.obrano?.toLowerCase()?.includes(sq));
+                const s = (v: any) => (v != null ? String(v).toLowerCase() : '');
+                return (s(item.ref).includes(sq) || s(item.descricao).includes(sq) || s(item.eurocode).includes(sq) || s(item.marca).includes(sq) || s(item.modelo).includes(sq) || s(item.matricula).includes(sq) || s(item.obrano).includes(sq));
               };
               const comFichasItems = (resultado?.comFichas || []).filter(matchSearch);
               const semFichasItems = (resultado?.semFichas || []).filter(matchSearch);

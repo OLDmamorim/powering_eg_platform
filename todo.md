@@ -602,3 +602,4 @@
 - [x] Portal Loja Stock: Mostrar TODOS os eurocodes (com ficha, sem ficha, fichas s/ stock) com cards como filtro
 - [x] Portal Loja Stock: Classificação só aparece nos eurocodes sem ficha
 - [x] Portal Loja Stock: Adicionar campo de pesquisa por referência, descrição ou eurocode na vista de detalhe
+- [x] BUG Portal Loja Stock: TypeError obrano?.toLowerCase is not a function — campo numérico na pesquisa (corrigido: String(v) antes de toLowerCase)
