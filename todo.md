@@ -601,3 +601,4 @@
 - [x] BUG Portal Loja Stock: Eurocodes mostram "undefined" em vez da referência (corrigido: usar item.ref em vez de item.eurocode)
 - [x] Portal Loja Stock: Mostrar TODOS os eurocodes (com ficha, sem ficha, fichas s/ stock) com cards como filtro
 - [x] Portal Loja Stock: Classificação só aparece nos eurocodes sem ficha
+- [x] Portal Loja Stock: Adicionar campo de pesquisa por referência, descrição ou eurocode na vista de detalhe

@@ -126,6 +126,7 @@ import {
   Eye,
   CheckCircle,
   Boxes,
+  Search,
 } from "lucide-react";
 
 interface LojaAuth {
@@ -247,6 +248,7 @@ export default function PortalLoja() {
   const [analiseStockSelecionada, setAnaliseStockSelecionada] = useState<number | null>(null);
   const [filtroClassificacaoStock, setFiltroClassificacaoStock] = useState<string>('todas');
   const [stockTabFilter, setStockTabFilter] = useState<'todos' | 'comFichas' | 'semFichas' | 'fichasSemStock'>('todos');
+  const [searchStockQuery, setSearchStockQuery] = useState('');
   const [analiseIA, setAnaliseIA] = useState<any>(null);
   const [gerandoAnaliseIA, setGerandoAnaliseIA] = useState(false);
   const dashboardRef = useRef<HTMLDivElement>(null);
@@ -4121,7 +4123,7 @@ export default function PortalLoja() {
           {/* Cabeçalho */}
           <div className="flex items-center gap-3 mb-2">
             {analiseStockSelecionada && (
-              <Button variant="ghost" size="sm" onClick={() => { setAnaliseStockSelecionada(null); setFiltroClassificacaoStock('todas'); setStockTabFilter('todos'); }}>
+              <Button variant="ghost" size="sm" onClick={() => { setAnaliseStockSelecionada(null); setFiltroClassificacaoStock('todas'); setStockTabFilter('todos'); setSearchStockQuery(''); }}>
                 <ArrowLeft className="h-4 w-4" />
               </Button>
             )}
@@ -4161,9 +4163,14 @@ export default function PortalLoja() {
                 });
               }
 
-              const comFichasItems = resultado?.comFichas || [];
-              const semFichasItems = resultado?.semFichas || [];
-              const fichasSemStockItems = resultado?.fichasSemStock || [];
+              const sq = searchStockQuery.toLowerCase().trim();
+              const matchSearch = (item: any) => {
+                if (!sq) return true;
+                return (item.ref?.toLowerCase()?.includes(sq) || item.descricao?.toLowerCase()?.includes(sq) || item.eurocode?.toLowerCase()?.includes(sq) || item.marca?.toLowerCase()?.includes(sq) || item.modelo?.toLowerCase()?.includes(sq) || item.matricula?.toLowerCase()?.includes(sq) || item.obrano?.toLowerCase()?.includes(sq));
+              };
+              const comFichasItems = (resultado?.comFichas || []).filter(matchSearch);
+              const semFichasItems = (resultado?.semFichas || []).filter(matchSearch);
+              const fichasSemStockItems = (resultado?.fichasSemStock || []).filter(matchSearch);
 
               // Desmultiplicar sem fichas
               const desmultiplicados: Array<{item: any; unitIndex: number; totalUnits: number}> = [];
@@ -4219,6 +4226,18 @@ export default function PortalLoja() {
                       <div className="text-lg font-bold text-red-700">{fichasSemStockItems.length}</div>
                       <div className="text-[10px] text-red-600">Fichas s/ Stock</div>
                     </div>
+                  </div>
+
+                  {/* Campo de pesquisa */}
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <input
+                      type="text"
+                      placeholder={language === 'pt' ? 'Pesquisar por referência, descrição ou eurocode...' : 'Search by reference, description or eurocode...'}
+                      value={searchStockQuery}
+                      onChange={e => setSearchStockQuery(e.target.value)}
+                      className="w-full pl-9 pr-3 py-2 text-sm border rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-300"
+                    />
                   </div>
 
                   {/* Progresso classificacao (so quando mostra sem fichas) */}
