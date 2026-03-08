@@ -612,3 +612,9 @@
 - [x] Anexar Excel ao email da loja e à cópia do gestor
 - [x] Teste unitário criado e passado com sucesso
 - [x] Guardar checkpoint
+
+## Simplificar Email Consolidado de Stock (só introdução + Excel anexo)
+- [x] Remover tabelas detalhadas do corpo HTML do email
+- [x] Manter apenas introdução/resumo com números principais
+- [x] Excel continua em anexo como único detalhe
+- [ ] Guardar checkpoint
