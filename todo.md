@@ -595,3 +595,6 @@
 - [x] Controlo Stock: Adaptar Excel e email consolidado para reflectir desmultiplicação
 - [x] BUG: ReferenceError: Cannot access 'X' before initialization — referência circular no ControloStock.tsx (movido dadosActivos antes de semFichasDesmultiplicados)
 - [x] Portal Loja: Adicionar card "Análise Stock" com últimas análises de stock feitas pelo gestor
+- [x] Portal Loja: Permitir à loja ver detalhe da análise de stock (lista de eurocodes sem ficha desmultiplicados)
+- [x] Portal Loja: Permitir à loja classificar eurocodes sem ficha directamente no portal (dropdown inline)
+- [x] Portal Loja: Backend - procedimento para classificar via token de loja

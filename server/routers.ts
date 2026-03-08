@@ -5791,6 +5791,92 @@ IMPORTANTE:
         
         return await db.getAnalisesStockPorLoja(lojaIdParaConsulta, input.limite || 5);
       }),
+
+    // Obter detalhe de uma análise de stock (para o portal da loja)
+    detalheStock: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        analiseId: z.number(),
+      }))
+      .query(async ({ input }) => {
+        const auth = await db.validarTokenLoja(input.token);
+        if (!auth) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        
+        const analise = await db.getAnaliseStockById(input.analiseId);
+        if (!analise) throw new TRPCError({ code: 'NOT_FOUND', message: 'Análise não encontrada' });
+        
+        // Verificar que a análise pertence à loja
+        if (analise.lojaId !== auth.loja.id) {
+          // Verificar lojas relacionadas
+          const lojasRelacionadas = await db.getLojasRelacionadas(auth.loja.id);
+          const lojaRelacionada = lojasRelacionadas.find(l => l.lojaId === analise.lojaId);
+          if (!lojaRelacionada) {
+            throw new TRPCError({ code: 'FORBIDDEN', message: 'Sem permissão para ver esta análise' });
+          }
+        }
+        
+        // Obter classificações e recorrências
+        const classificacoes = await db.getClassificacoesEurocode(analise.lojaId);
+        const recorrencias = await db.getRecorrenciaEurocodes(analise.lojaId);
+        
+        return {
+          ...analise,
+          resultadoAnalise: analise.resultadoAnalise ? JSON.parse(analise.resultadoAnalise) : null,
+          dadosStock: analise.dadosStock ? JSON.parse(analise.dadosStock) : null,
+          classificacoes,
+          recorrencias,
+        };
+      }),
+
+    // Classificar um eurocode sem ficha (via portal da loja)
+    classificarStock: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        lojaId: z.number(),
+        eurocode: z.string(),
+        unitIndex: z.number().default(1),
+        classificacao: z.enum(['devolucao_rejeitada', 'usado', 'com_danos', 'para_devolver']),
+        analiseId: z.number(),
+      }))
+      .mutation(async ({ input }) => {
+        const auth = await db.validarTokenLoja(input.token);
+        if (!auth) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        
+        // Verificar que a loja tem acesso
+        if (input.lojaId !== auth.loja.id) {
+          const lojasRelacionadas = await db.getLojasRelacionadas(auth.loja.id);
+          const lojaRelacionada = lojasRelacionadas.find(l => l.lojaId === input.lojaId);
+          if (!lojaRelacionada) {
+            throw new TRPCError({ code: 'FORBIDDEN', message: 'Sem permissão' });
+          }
+        }
+        
+        return db.classificarEurocode({
+          lojaId: input.lojaId,
+          eurocode: input.eurocode,
+          unitIndex: input.unitIndex,
+          classificacao: input.classificacao,
+          analiseId: input.analiseId,
+        });
+      }),
+
+    // Remover classificação de um eurocode (via portal da loja)
+    removerClassificacaoStock: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        id: z.number(),
+      }))
+      .mutation(async ({ input }) => {
+        const auth = await db.validarTokenLoja(input.token);
+        if (!auth) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        return db.removerClassificacaoEurocode(input.id);
+      }),
   }),
   
   // ==================== GESTÃO DE TOKENS DE LOJA (ADMIN/GESTOR) ====================

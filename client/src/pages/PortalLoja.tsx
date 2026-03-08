@@ -244,6 +244,8 @@ export default function PortalLoja() {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [showInstallBanner, setShowInstallBanner] = useState(false);
   const [exportandoPDF, setExportandoPDF] = useState(false);
+  const [analiseStockSelecionada, setAnaliseStockSelecionada] = useState<number | null>(null);
+  const [filtroClassificacaoStock, setFiltroClassificacaoStock] = useState<string>('todas');
   const [analiseIA, setAnaliseIA] = useState<any>(null);
   const [gerandoAnaliseIA, setGerandoAnaliseIA] = useState(false);
   const dashboardRef = useRef<HTMLDivElement>(null);
@@ -597,6 +599,33 @@ export default function PortalLoja() {
     { token, lojaId: lojaIdAtiva, limite: 5 },
     { enabled: !!token && !!lojaAuth && (activeTab === 'analise_stock' || activeTab === 'home') }
   );
+
+  // Detalhe de uma análise de stock selecionada
+  const { data: detalheStock, isLoading: detalheStockLoading } = trpc.reunioesQuinzenais.detalheStock.useQuery(
+    { token, analiseId: analiseStockSelecionada! },
+    { enabled: !!token && !!lojaAuth && !!analiseStockSelecionada }
+  );
+
+  const trpcUtils = trpc.useUtils();
+
+  // Mutation para classificar eurocode via portal da loja
+  const classificarStockMutation = trpc.reunioesQuinzenais.classificarStock.useMutation({
+    onSuccess: () => {
+      trpcUtils.reunioesQuinzenais.detalheStock.invalidate();
+      toast.success(language === 'pt' ? 'Classificação guardada' : 'Classification saved');
+    },
+    onError: (err: any) => {
+      toast.error(err.message || (language === 'pt' ? 'Erro ao classificar' : 'Error classifying'));
+    },
+  });
+
+  // Mutation para remover classificação
+  const removerClassificacaoStockMutation = trpc.reunioesQuinzenais.removerClassificacaoStock.useMutation({
+    onSuccess: () => {
+      trpcUtils.reunioesQuinzenais.detalheStock.invalidate();
+      toast.success(language === 'pt' ? 'Classificação removida' : 'Classification removed');
+    },
+  });
 
   // Mutation para Análise IA
   const analiseIAMutation = trpc.analiseIALoja.gerar.useMutation({
@@ -4088,98 +4117,309 @@ export default function PortalLoja() {
       {/* ==================== ANÁLISE STOCK ==================== */}
       {activeTab === "analise_stock" && (
         <div className="space-y-4">
+          {/* Cabeçalho */}
           <div className="flex items-center gap-3 mb-2">
+            {analiseStockSelecionada && (
+              <Button variant="ghost" size="sm" onClick={() => { setAnaliseStockSelecionada(null); setFiltroClassificacaoStock('todas'); }}>
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+            )}
             <Boxes className="h-6 w-6 text-slate-600" />
             <div>
-              <h2 className="text-xl font-bold text-gray-800">{language === 'pt' ? 'Análise de Stock' : 'Stock Analysis'}</h2>
-              <p className="text-sm text-gray-500">{language === 'pt' ? 'Análises de stock realizadas pelo gestor' : 'Stock analyses performed by the manager'}</p>
+              <h2 className="text-xl font-bold text-gray-800">
+                {analiseStockSelecionada 
+                  ? (language === 'pt' ? 'Detalhe da Análise' : 'Analysis Detail')
+                  : (language === 'pt' ? 'Análise de Stock' : 'Stock Analysis')}
+              </h2>
+              <p className="text-sm text-gray-500">
+                {analiseStockSelecionada
+                  ? (language === 'pt' ? 'Classifique os vidros sem ficha de serviço' : 'Classify glasses without service records')
+                  : (language === 'pt' ? 'Análises de stock realizadas pelo gestor' : 'Stock analyses performed by the manager')}
+              </p>
             </div>
           </div>
 
-          {analisesStockLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-slate-500" />
-            </div>
-          ) : !analisesStock || analisesStock.length === 0 ? (
-            <Card>
-              <CardContent className="py-12 text-center">
-                <Boxes className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                <h3 className="text-lg font-semibold mb-2">{language === 'pt' ? 'Sem análises' : 'No analyses'}</h3>
-                <p className="text-muted-foreground">
-                  {language === 'pt' 
-                    ? 'Ainda não foram realizadas análises de stock para esta loja.' 
-                    : 'No stock analyses have been performed for this store yet.'}
-                </p>
-              </CardContent>
-            </Card>
+          {/* VISTA DETALHE */}
+          {analiseStockSelecionada ? (
+            detalheStockLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-slate-500" />
+              </div>
+            ) : detalheStock ? (() => {
+              const resultado = detalheStock.resultadoAnalise;
+              const classificacoesMap = new Map<string, any>();
+              if (detalheStock.classificacoes) {
+                (detalheStock.classificacoes as any[]).forEach((c: any) => {
+                  classificacoesMap.set(`${c.eurocode}_${c.unitIndex || 1}`, c);
+                });
+              }
+              const recorrenciaMap = new Map<string, number>();
+              if (detalheStock.recorrencias) {
+                (detalheStock.recorrencias as any[]).forEach((r: any) => {
+                  recorrenciaMap.set(r.eurocode, r.analisesConsecutivas);
+                });
+              }
+
+              const semFichasItems = resultado?.semFichas || [];
+              // Desmultiplicar
+              const desmultiplicados: Array<{item: any; unitIndex: number; totalUnits: number}> = [];
+              semFichasItems.forEach((item: any) => {
+                const qty = item.quantidade || 1;
+                for (let i = 1; i <= qty; i++) {
+                  desmultiplicados.push({ item, unitIndex: i, totalUnits: qty });
+                }
+              });
+
+              const classifLabels: Record<string, string> = {
+                devolucao_rejeitada: language === 'pt' ? 'Devolução Rejeitada' : 'Return Rejected',
+                usado: language === 'pt' ? 'Usado' : 'Used',
+                com_danos: language === 'pt' ? 'Com Danos' : 'Damaged',
+                para_devolver: language === 'pt' ? 'Para Devolver' : 'To Return',
+              };
+              const classifColors: Record<string, string> = {
+                devolucao_rejeitada: 'bg-red-100 text-red-700',
+                usado: 'bg-gray-100 text-gray-700',
+                com_danos: 'bg-orange-100 text-orange-700',
+                para_devolver: 'bg-blue-100 text-blue-700',
+              };
+
+              // Filtrar por classificação
+              const itensFiltrados = filtroClassificacaoStock === 'todas' ? desmultiplicados
+                : filtroClassificacaoStock === 'sem_classificacao' 
+                  ? desmultiplicados.filter(d => !classificacoesMap.has(`${d.item.eurocode}_${d.unitIndex}`))
+                  : desmultiplicados.filter(d => {
+                      const c = classificacoesMap.get(`${d.item.eurocode}_${d.unitIndex}`);
+                      return c && c.classificacao === filtroClassificacaoStock;
+                    });
+
+              // Contadores
+              const totalClassificados = desmultiplicados.filter(d => classificacoesMap.has(`${d.item.eurocode}_${d.unitIndex}`)).length;
+
+              return (
+                <div className="space-y-3">
+                  {/* Resumo em grid */}
+                  <div className="grid grid-cols-4 gap-2">
+                    <div className="text-center p-2 bg-blue-50 rounded-lg">
+                      <div className="text-lg font-bold text-blue-700">{detalheStock.totalItensStock}</div>
+                      <div className="text-[10px] text-blue-600">Total</div>
+                    </div>
+                    <div className="text-center p-2 bg-green-50 rounded-lg">
+                      <div className="text-lg font-bold text-green-700">{detalheStock.totalComFichas}</div>
+                      <div className="text-[10px] text-green-600">C/ Fichas</div>
+                    </div>
+                    <div className="text-center p-2 bg-amber-50 rounded-lg">
+                      <div className="text-lg font-bold text-amber-700">{desmultiplicados.length}</div>
+                      <div className="text-[10px] text-amber-600">S/ Fichas</div>
+                    </div>
+                    <div className="text-center p-2 bg-red-50 rounded-lg">
+                      <div className="text-lg font-bold text-red-700">{detalheStock.totalFichasSemStock}</div>
+                      <div className="text-[10px] text-red-600">Fichas s/ Stock</div>
+                    </div>
+                  </div>
+
+                  {/* Progresso classificação */}
+                  {desmultiplicados.length > 0 && (
+                    <div className="bg-slate-50 rounded-lg p-3">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs font-medium text-slate-600">
+                          {language === 'pt' ? 'Classificação' : 'Classification'}: {totalClassificados}/{desmultiplicados.length}
+                        </span>
+                        <span className="text-xs font-bold text-slate-700">
+                          {desmultiplicados.length > 0 ? Math.round((totalClassificados / desmultiplicados.length) * 100) : 0}%
+                        </span>
+                      </div>
+                      <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${desmultiplicados.length > 0 ? (totalClassificados / desmultiplicados.length) * 100 : 0}%` }} />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Título secção Sem Fichas + Filtro */}
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold text-sm text-amber-700">
+                      {language === 'pt' ? 'Vidros Sem Ficha de Serviço' : 'Glasses Without Service Records'} ({itensFiltrados.length})
+                    </h3>
+                    <select
+                      className="text-xs border rounded px-2 py-1 bg-white"
+                      value={filtroClassificacaoStock}
+                      onChange={e => setFiltroClassificacaoStock(e.target.value)}
+                    >
+                      <option value="todas">{language === 'pt' ? 'Todas' : 'All'}</option>
+                      <option value="sem_classificacao">{language === 'pt' ? 'Sem classif.' : 'Unclassified'}</option>
+                      <option value="devolucao_rejeitada">{classifLabels.devolucao_rejeitada}</option>
+                      <option value="usado">{classifLabels.usado}</option>
+                      <option value="com_danos">{classifLabels.com_danos}</option>
+                      <option value="para_devolver">{classifLabels.para_devolver}</option>
+                    </select>
+                  </div>
+
+                  {/* Lista de itens desmultiplicados */}
+                  {itensFiltrados.length === 0 ? (
+                    <Card>
+                      <CardContent className="py-8 text-center">
+                        <CheckCircle2 className="h-8 w-8 mx-auto text-green-400 mb-2" />
+                        <p className="text-sm text-muted-foreground">
+                          {filtroClassificacaoStock !== 'todas'
+                            ? (language === 'pt' ? 'Nenhum item com este filtro' : 'No items with this filter')
+                            : (language === 'pt' ? 'Todos os vidros têm ficha de serviço' : 'All glasses have service records')}
+                        </p>
+                      </CardContent>
+                    </Card>
+                  ) : (
+                    <div className="space-y-1.5">
+                      {itensFiltrados.map((d, idx) => {
+                        const key = `${d.item.eurocode}_${d.unitIndex}`;
+                        const classif = classificacoesMap.get(key);
+                        const recorrencia = recorrenciaMap.get(d.item.eurocode) || 0;
+                        const euroLabel = d.totalUnits > 1 ? `${d.item.eurocode} (${d.unitIndex}/${d.totalUnits})` : d.item.eurocode;
+
+                        return (
+                          <div key={`${key}_${idx}`} className={`border rounded-lg p-2.5 bg-white ${
+                            recorrencia >= 3 ? 'ring-2 ring-red-300' : recorrencia >= 2 ? 'ring-1 ring-amber-300' : ''
+                          }`}>
+                            {/* Linha 1: Badges */}
+                            <div className="flex items-center gap-1.5 flex-wrap mb-1">
+                              <Badge className="bg-amber-100 text-amber-800 text-[10px] px-1.5 py-0">{euroLabel}</Badge>
+                              <Badge variant="outline" className="text-[10px] px-1.5 py-0">{d.item.familia || 'OC'}</Badge>
+                              {recorrencia >= 2 && (
+                                <Badge className={`text-[10px] px-1.5 py-0 ${recorrencia >= 3 ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>
+                                  {recorrencia}x
+                                </Badge>
+                              )}
+                              {classif && (
+                                <Badge className={`text-[10px] px-1.5 py-0 ${classifColors[classif.classificacao] || ''}`}>
+                                  {classifLabels[classif.classificacao] || classif.classificacao}
+                                </Badge>
+                              )}
+                            </div>
+                            {/* Linha 2: Descrição */}
+                            <p className="text-[11px] text-gray-600 mb-1.5 truncate">{d.item.descricao}</p>
+                            {/* Linha 3: Dropdown classificação */}
+                            <div className="flex items-center gap-2">
+                              <select
+                                className="flex-1 text-[11px] border rounded px-2 py-1 bg-white"
+                                value={classif?.classificacao || ''}
+                                onChange={e => {
+                                  const val = e.target.value;
+                                  if (!val && classif) {
+                                    removerClassificacaoStockMutation.mutate({ token, id: classif.id });
+                                  } else if (val) {
+                                    classificarStockMutation.mutate({
+                                      token,
+                                      lojaId: detalheStock.lojaId,
+                                      eurocode: d.item.eurocode,
+                                      unitIndex: d.unitIndex,
+                                      classificacao: val as any,
+                                      analiseId: analiseStockSelecionada!,
+                                    });
+                                  }
+                                }}
+                              >
+                                <option value="">{language === 'pt' ? '-- Classificar --' : '-- Classify --'}</option>
+                                <option value="devolucao_rejeitada">{classifLabels.devolucao_rejeitada}</option>
+                                <option value="usado">{classifLabels.usado}</option>
+                                <option value="com_danos">{classifLabels.com_danos}</option>
+                                <option value="para_devolver">{classifLabels.para_devolver}</option>
+                              </select>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            })() : null
           ) : (
-            <div className="space-y-3">
-              {analisesStock.map((analise: any) => {
-                const percentComFichas = analise.totalItensStock > 0 
-                  ? Math.round((analise.totalComFichas / analise.totalItensStock) * 100) 
-                  : 0;
-                const percentSemFichas = analise.totalItensStock > 0 
-                  ? Math.round((analise.totalSemFichas / analise.totalItensStock) * 100) 
-                  : 0;
-                
-                return (
-                  <Card key={analise.id} className="overflow-hidden">
-                    <CardContent className="p-4">
-                      {/* Data e nome da loja */}
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-2">
-                          <Calendar className="h-4 w-4 text-gray-400" />
-                          <span className="font-semibold text-sm">
-                            {new Date(analise.createdAt).toLocaleDateString('pt-PT', { day: '2-digit', month: 'short', year: 'numeric' })}
-                          </span>
-                        </div>
-                        <Badge variant="outline" className="text-xs">
-                          {analise.nomeLoja}
-                        </Badge>
-                      </div>
-                      
-                      {/* Resumo em grid */}
-                      <div className="grid grid-cols-4 gap-2 mb-3">
-                        <div className="text-center p-2 bg-blue-50 rounded-lg">
-                          <div className="text-lg font-bold text-blue-700">{analise.totalItensStock}</div>
-                          <div className="text-[10px] text-blue-600">{language === 'pt' ? 'Total' : 'Total'}</div>
-                        </div>
-                        <div className="text-center p-2 bg-green-50 rounded-lg">
-                          <div className="text-lg font-bold text-green-700">{analise.totalComFichas}</div>
-                          <div className="text-[10px] text-green-600">{language === 'pt' ? 'C/ Fichas' : 'W/ Records'}</div>
-                        </div>
-                        <div className="text-center p-2 bg-amber-50 rounded-lg">
-                          <div className="text-lg font-bold text-amber-700">{analise.totalSemFichas}</div>
-                          <div className="text-[10px] text-amber-600">{language === 'pt' ? 'S/ Fichas' : 'No Records'}</div>
-                        </div>
-                        <div className="text-center p-2 bg-red-50 rounded-lg">
-                          <div className="text-lg font-bold text-red-700">{analise.totalFichasSemStock}</div>
-                          <div className="text-[10px] text-red-600">{language === 'pt' ? 'Fichas s/ Stock' : 'Records No Stock'}</div>
-                        </div>
-                      </div>
-                      
-                      {/* Barra de progresso */}
-                      <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden flex">
-                        <div 
-                          className="h-full bg-green-500" 
-                          style={{ width: `${percentComFichas}%` }}
-                          title={`${language === 'pt' ? 'Com fichas' : 'With records'}: ${percentComFichas}%`}
-                        />
-                        <div 
-                          className="h-full bg-amber-400" 
-                          style={{ width: `${percentSemFichas}%` }}
-                          title={`${language === 'pt' ? 'Sem fichas' : 'No records'}: ${percentSemFichas}%`}
-                        />
-                      </div>
-                      <div className="flex justify-between mt-1">
-                        <span className="text-[10px] text-green-600">{percentComFichas}% {language === 'pt' ? 'com fichas' : 'with records'}</span>
-                        <span className="text-[10px] text-amber-600">{percentSemFichas}% {language === 'pt' ? 'sem fichas' : 'no records'}</span>
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
+            /* VISTA LISTA DE ANÁLISES */
+            <>
+              {analisesStockLoading ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="h-8 w-8 animate-spin text-slate-500" />
+                </div>
+              ) : !analisesStock || analisesStock.length === 0 ? (
+                <Card>
+                  <CardContent className="py-12 text-center">
+                    <Boxes className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">{language === 'pt' ? 'Sem análises' : 'No analyses'}</h3>
+                    <p className="text-muted-foreground">
+                      {language === 'pt' 
+                        ? 'Ainda não foram realizadas análises de stock para esta loja.' 
+                        : 'No stock analyses have been performed for this store yet.'}
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="space-y-3">
+                  {analisesStock.map((analise: any) => {
+                    const percentComFichas = analise.totalItensStock > 0 
+                      ? Math.round((analise.totalComFichas / analise.totalItensStock) * 100) 
+                      : 0;
+                    const percentSemFichas = analise.totalItensStock > 0 
+                      ? Math.round((analise.totalSemFichas / analise.totalItensStock) * 100) 
+                      : 0;
+                    
+                    return (
+                      <Card key={analise.id} className="overflow-hidden cursor-pointer hover:shadow-md transition-shadow" onClick={() => setAnaliseStockSelecionada(analise.id)}>
+                        <CardContent className="p-4">
+                          {/* Data e nome da loja */}
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-2">
+                              <Calendar className="h-4 w-4 text-gray-400" />
+                              <span className="font-semibold text-sm">
+                                {new Date(analise.createdAt).toLocaleDateString('pt-PT', { day: '2-digit', month: 'short', year: 'numeric' })}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Badge variant="outline" className="text-xs">
+                                {analise.nomeLoja}
+                              </Badge>
+                              <ChevronRight className="h-4 w-4 text-gray-400" />
+                            </div>
+                          </div>
+                          
+                          {/* Resumo em grid */}
+                          <div className="grid grid-cols-4 gap-2 mb-3">
+                            <div className="text-center p-2 bg-blue-50 rounded-lg">
+                              <div className="text-lg font-bold text-blue-700">{analise.totalItensStock}</div>
+                              <div className="text-[10px] text-blue-600">Total</div>
+                            </div>
+                            <div className="text-center p-2 bg-green-50 rounded-lg">
+                              <div className="text-lg font-bold text-green-700">{analise.totalComFichas}</div>
+                              <div className="text-[10px] text-green-600">C/ Fichas</div>
+                            </div>
+                            <div className="text-center p-2 bg-amber-50 rounded-lg">
+                              <div className="text-lg font-bold text-amber-700">{analise.totalSemFichas}</div>
+                              <div className="text-[10px] text-amber-600">S/ Fichas</div>
+                            </div>
+                            <div className="text-center p-2 bg-red-50 rounded-lg">
+                              <div className="text-lg font-bold text-red-700">{analise.totalFichasSemStock}</div>
+                              <div className="text-[10px] text-red-600">Fichas s/ Stock</div>
+                            </div>
+                          </div>
+                          
+                          {/* Barra de progresso */}
+                          <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden flex">
+                            <div 
+                              className="h-full bg-green-500" 
+                              style={{ width: `${percentComFichas}%` }}
+                            />
+                            <div 
+                              className="h-full bg-amber-400" 
+                              style={{ width: `${percentSemFichas}%` }}
+                            />
+                          </div>
+                          <div className="flex justify-between mt-1">
+                            <span className="text-[10px] text-green-600">{percentComFichas}% com fichas</span>
+                            <span className="text-[10px] text-amber-600">{percentSemFichas}% sem fichas</span>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              )}
+            </>
           )}
         </div>
       )}
