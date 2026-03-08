@@ -581,3 +581,4 @@
 - [ ] Controlo Stock: Comparação entre duas análises de stock (evolução)
 - [x] Controlo Stock: Mostrar nome da loja analisada no cabeçalho da página de resultados
 - [x] Controlo Stock: Optimizar layout mobile (cabeçalho compacto, nome loja em linha separada, cards menores, botões adaptados)
+- [x] Controlo Stock: Compactar cards de eurocodes no mobile (menos padding, texto menor, linhas mais densas)

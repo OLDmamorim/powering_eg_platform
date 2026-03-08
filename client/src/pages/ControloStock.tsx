@@ -543,49 +543,49 @@ export default function ControloStock() {
               </TabsList>
 
               {/* Tab: Com Fichas */}
-              <TabsContent value="comFichas" className="space-y-2 mt-4">
+              <TabsContent value="comFichas" className="space-y-1.5 mt-3">
                 <ActionButtons
                   onExport={handleExportComFichas}
                   onEmail={() => handleEmailTab('comFichas')}
                   status="comFichas"
                 />
                 {dadosActivos.comFichas && filtrarItens(dadosActivos.comFichas).length === 0 ? (
-                  <p className="text-center text-muted-foreground py-8">Nenhum item encontrado</p>
+                  <p className="text-center text-muted-foreground py-6 text-sm">Nenhum item encontrado</p>
                 ) : (
                   filtrarItens(dadosActivos.comFichas || []).map((item: any, idx: number) => (
                     <Card key={idx} className="border-green-100">
-                      <CardContent className="pt-3 pb-3">
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                      <CardContent className="px-3 py-2">
+                        <div className="flex items-center justify-between gap-2">
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <Badge variant="outline" className="bg-blue-50 text-blue-700 font-mono text-xs">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <Badge variant="outline" className="bg-blue-50 text-blue-700 font-mono text-[11px] px-1.5 py-0">
                                 {item.ref}
                               </Badge>
                               {item.familia && (
-                                <Badge variant="secondary" className="text-xs">{item.familia}</Badge>
+                                <Badge variant="secondary" className="text-[10px] px-1.5 py-0">{item.familia}</Badge>
                               )}
-                              <Badge className="bg-green-100 text-green-700 text-xs">
+                              <Badge className="bg-green-100 text-green-700 text-[10px] px-1.5 py-0">
                                 {item.totalFichas} ficha{item.totalFichas !== 1 ? 's' : ''}
                               </Badge>
                             </div>
-                            <p className="text-sm text-muted-foreground mt-1 truncate">{item.descricao}</p>
+                            <p className="text-xs text-muted-foreground mt-0.5 truncate">{item.descricao}</p>
                           </div>
-                          <div className="text-right">
-                            <span className="text-lg font-bold">{item.quantidade}</span>
-                            <span className="text-xs text-muted-foreground ml-1">un.</span>
+                          <div className="text-right shrink-0">
+                            <span className="text-sm font-bold">{item.quantidade}</span>
+                            <span className="text-[10px] text-muted-foreground ml-0.5">un.</span>
                           </div>
                         </div>
                         {/* Fichas associadas */}
                         {item.fichas && item.fichas.length > 0 && (
-                          <div className="mt-2 border-t pt-2">
-                            <p className="text-xs font-medium text-muted-foreground mb-1">Fichas associadas:</p>
-                            <div className="space-y-1">
+                          <div className="mt-1.5 border-t pt-1.5">
+                            <p className="text-[10px] font-medium text-muted-foreground mb-0.5">Fichas associadas:</p>
+                            <div className="space-y-0.5">
                               {item.fichas.map((f: any, fIdx: number) => (
-                                <div key={fIdx} className="flex items-center gap-2 text-xs bg-gray-50 rounded px-2 py-1">
+                                <div key={fIdx} className="flex items-center gap-1.5 text-[10px] bg-gray-50 rounded px-1.5 py-0.5">
                                   <span className="font-mono font-medium">{f.obrano}</span>
                                   <span className="text-muted-foreground">{f.matricula}</span>
-                                  <span>{f.marca} {f.modelo}</span>
-                                  <Badge variant="outline" className="text-[10px] ml-auto">
+                                  <span className="truncate">{f.marca} {f.modelo}</span>
+                                  <Badge variant="outline" className="text-[9px] px-1 py-0 ml-auto shrink-0">
                                     {f.status} {f.diasAberto > 0 ? `(${f.diasAberto}d)` : ''}
                                   </Badge>
                                 </div>
@@ -600,36 +600,36 @@ export default function ControloStock() {
               </TabsContent>
 
               {/* Tab: Sem Fichas */}
-              <TabsContent value="semFichas" className="space-y-2 mt-4">
+              <TabsContent value="semFichas" className="space-y-1.5 mt-3">
                 <ActionButtons
                   onExport={handleExportSemFichas}
                   onEmail={() => handleEmailTab('semFichas')}
                   status="semFichas"
                 />
                 {dadosActivos.semFichas && filtrarItens(dadosActivos.semFichas).length === 0 ? (
-                  <p className="text-center text-muted-foreground py-8">Nenhum item encontrado</p>
+                  <p className="text-center text-muted-foreground py-6 text-sm">Nenhum item encontrado</p>
                 ) : (
                   filtrarItens(dadosActivos.semFichas || []).map((item: any, idx: number) => (
                     <Card key={idx} className="border-amber-100">
-                      <CardContent className="pt-3 pb-3">
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                      <CardContent className="px-3 py-2">
+                        <div className="flex items-center justify-between gap-2">
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <Badge variant="outline" className="bg-blue-50 text-blue-700 font-mono text-xs">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <Badge variant="outline" className="bg-blue-50 text-blue-700 font-mono text-[11px] px-1.5 py-0">
                                 {item.ref}
                               </Badge>
                               {item.familia && (
-                                <Badge variant="secondary" className="text-xs">{item.familia}</Badge>
+                                <Badge variant="secondary" className="text-[10px] px-1.5 py-0">{item.familia}</Badge>
                               )}
-                              <Badge className="bg-amber-100 text-amber-700 text-xs">
+                              <Badge className="bg-amber-100 text-amber-700 text-[10px] px-1.5 py-0">
                                 Sem fichas
                               </Badge>
                             </div>
-                            <p className="text-sm text-muted-foreground mt-1 truncate">{item.descricao}</p>
+                            <p className="text-xs text-muted-foreground mt-0.5 truncate">{item.descricao}</p>
                           </div>
-                          <div className="text-right">
-                            <span className="text-lg font-bold">{item.quantidade}</span>
-                            <span className="text-xs text-muted-foreground ml-1">un.</span>
+                          <div className="text-right shrink-0">
+                            <span className="text-sm font-bold">{item.quantidade}</span>
+                            <span className="text-[10px] text-muted-foreground ml-0.5">un.</span>
                           </div>
                         </div>
                       </CardContent>
@@ -639,36 +639,36 @@ export default function ControloStock() {
               </TabsContent>
 
               {/* Tab: Fichas sem Stock */}
-              <TabsContent value="fichasSemStock" className="space-y-2 mt-4">
+              <TabsContent value="fichasSemStock" className="space-y-1.5 mt-3">
                 <ActionButtons
                   onExport={handleExportFichasSemStock}
                   onEmail={() => handleEmailTab('fichasSemStock')}
                   status="fichasSemStock"
                 />
                 {dadosActivos.fichasSemStock && filtrarItens(dadosActivos.fichasSemStock).length === 0 ? (
-                  <p className="text-center text-muted-foreground py-8">Nenhum item encontrado</p>
+                  <p className="text-center text-muted-foreground py-6 text-sm">Nenhum item encontrado</p>
                 ) : (
                   filtrarItens(dadosActivos.fichasSemStock || []).map((item: any, idx: number) => (
                     <Card key={idx} className="border-red-100">
-                      <CardContent className="pt-3 pb-3">
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                      <CardContent className="px-3 py-2">
+                        <div className="flex items-center justify-between gap-2">
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <Badge variant="outline" className="bg-blue-50 text-blue-700 font-mono text-xs">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <Badge variant="outline" className="bg-blue-50 text-blue-700 font-mono text-[11px] px-1.5 py-0">
                                 {item.eurocode}
                               </Badge>
-                              <Badge className="bg-red-100 text-red-700 text-xs">
+                              <Badge className="bg-red-100 text-red-700 text-[10px] px-1.5 py-0">
                                 Sem stock
                               </Badge>
                             </div>
-                            <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
+                            <div className="flex items-center gap-1.5 mt-0.5 text-xs text-muted-foreground flex-wrap">
                               <span className="font-mono">{item.obrano}</span>
                               <span>{item.matricula}</span>
-                              <span>{item.marca} {item.modelo}</span>
+                              <span className="truncate">{item.marca} {item.modelo}</span>
                             </div>
                           </div>
-                          <div className="text-right">
-                            <Badge variant="outline" className="text-xs">
+                          <div className="text-right shrink-0">
+                            <Badge variant="outline" className="text-[10px] px-1.5 py-0">
                               {item.status} {item.diasAberto > 0 ? `(${item.diasAberto}d)` : ''}
                             </Badge>
                           </div>
