@@ -1239,7 +1239,7 @@ export default function ControloStock() {
 
             {/* Tabs de resultado */}
             <Tabs value={activeResultTab} onValueChange={setActiveResultTab}>
-              <TabsList className="grid w-full grid-cols-3 h-auto">
+              <TabsList className="grid w-full grid-cols-2 h-auto">
                 <TabsTrigger value="comFichas" className="text-[10px] sm:text-sm px-1 py-1.5 sm:px-3 sm:py-2">
                   <CheckCircle2 className="h-3 w-3 mr-0.5 sm:mr-1 shrink-0" />
                   <span className="hidden sm:inline">Com Fichas</span><span className="sm:hidden">C/ Fichas</span> ({dadosActivos.comFichas?.length || 0})
@@ -1247,10 +1247,6 @@ export default function ControloStock() {
                 <TabsTrigger value="semFichas" className="text-[10px] sm:text-sm px-1 py-1.5 sm:px-3 sm:py-2">
                   <XCircle className="h-3 w-3 mr-0.5 sm:mr-1 shrink-0" />
                   <span className="hidden sm:inline">Sem Fichas</span><span className="sm:hidden">S/ Fichas</span> ({semFichasDesmultiplicados.length})
-                </TabsTrigger>
-                <TabsTrigger value="fichasSemStock" className="text-[10px] sm:text-sm px-1 py-1.5 sm:px-3 sm:py-2">
-                  <AlertTriangle className="h-3 w-3 mr-0.5 sm:mr-1 shrink-0" />
-                  <span className="hidden sm:inline">Fichas s/ Stock</span><span className="sm:hidden">s/ Stock</span> ({dadosActivos.fichasSemStock?.length || 0})
                 </TabsTrigger>
               </TabsList>
 
@@ -1391,41 +1387,7 @@ export default function ControloStock() {
                 )}
               </TabsContent>
 
-              {/* Tab: Fichas sem Stock */}
-              <TabsContent value="fichasSemStock" className="space-y-1.5 mt-3">
-                {dadosActivos.fichasSemStock && filtrarItens(dadosActivos.fichasSemStock).length === 0 ? (
-                  <p className="text-center text-muted-foreground py-6 text-sm">Nenhum item encontrado</p>
-                ) : (
-                  filtrarItens(dadosActivos.fichasSemStock || []).map((item: any, idx: number) => (
-                    <Card key={idx} className="border-red-100">
-                      <CardContent className="px-3 py-2">
-                        <div className="flex items-center justify-between gap-2">
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-1.5 flex-wrap">
-                              <Badge variant="outline" className="bg-blue-50 text-blue-700 font-mono text-[11px] px-1.5 py-0">
-                                {item.eurocode}
-                              </Badge>
-                              <Badge className="bg-red-100 text-red-700 text-[10px] px-1.5 py-0">
-                                Sem stock
-                              </Badge>
-                            </div>
-                            <div className="flex items-center gap-1.5 mt-0.5 text-xs text-muted-foreground flex-wrap">
-                              <span className="font-mono">{item.obrano}</span>
-                              <span>{item.matricula}</span>
-                              <span className="truncate">{item.marca} {item.modelo}</span>
-                            </div>
-                          </div>
-                          <div className="text-right shrink-0">
-                            <Badge variant="outline" className="text-[10px] px-1.5 py-0">
-                              {item.status} {item.diasAberto > 0 ? `(${item.diasAberto}d)` : ''}
-                            </Badge>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))
-                )}
-              </TabsContent>
+
             </Tabs>
           </div>
         )}

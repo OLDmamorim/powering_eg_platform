@@ -711,3 +711,9 @@
 - [x] Remover o 4º card (Fichas s/ Stock) dos KPI cards na vista de detalhe da loja
 - [x] Alterar grid de 4 para 3 colunas
 - [ ] Guardar checkpoint
+
+## Remover Tab e Listagem "Fichas s/ Stock" da Vista de Detalhe
+- [x] Remover tab "Fichas s/ Stock" dos tabs de navegação
+- [x] Remover TabsContent da listagem de fichas sem stock
+- [x] Manter apenas tabs "Com Fichas" e "Sem Fichas" (grid 2 colunas)
+- [ ] Guardar checkpoint
