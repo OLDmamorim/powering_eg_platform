@@ -4215,13 +4215,13 @@ export default function PortalLoja() {
                       <div className="text-lg font-bold text-blue-700">{detalheStock.totalItensStock}</div>
                       <div className="text-[10px] text-blue-600">Total</div>
                     </div>
-                    <div onClick={() => setStockTabFilter('comFichas')} className={`text-center p-2 rounded-lg cursor-pointer transition-all ${stockTabFilter === 'comFichas' ? 'bg-green-100 ring-2 ring-green-400' : 'bg-green-50 hover:bg-green-100'}`}>
-                      <div className="text-lg font-bold text-green-700">{comFichasItems.length}</div>
-                      <div className="text-[10px] text-green-600">C/ Fichas</div>
-                    </div>
                     <div onClick={() => setStockTabFilter('semFichas')} className={`text-center p-2 rounded-lg cursor-pointer transition-all ${stockTabFilter === 'semFichas' ? 'bg-amber-100 ring-2 ring-amber-400' : 'bg-amber-50 hover:bg-amber-100'}`}>
                       <div className="text-lg font-bold text-amber-700">{desmultiplicados.length}</div>
                       <div className="text-[10px] text-amber-600">S/ Fichas</div>
+                    </div>
+                    <div onClick={() => setStockTabFilter('comFichas')} className={`text-center p-2 rounded-lg cursor-pointer transition-all ${stockTabFilter === 'comFichas' ? 'bg-green-100 ring-2 ring-green-400' : 'bg-green-50 hover:bg-green-100'}`}>
+                      <div className="text-lg font-bold text-green-700">{comFichasItems.length}</div>
+                      <div className="text-[10px] text-green-600">C/ Fichas</div>
                     </div>
 
                   </div>

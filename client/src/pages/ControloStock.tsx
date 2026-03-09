@@ -142,8 +142,8 @@ async function exportConsolidatedExcel(
   try {
     const wb = new ExcelJS.Workbook();
 
-    // Sheet 1: Com Fichas
-    const ws1 = wb.addWorksheet('Com Fichas');
+    // Sheet 1: Sem Fichas (desmultiplicado)
+    const ws1 = wb.addWorksheet('Sem Fichas');
     ws1.columns = [
       { header: 'Referência', key: 'ref', width: 18 },
       { header: 'Família', key: 'familia', width: 10 },
@@ -153,20 +153,26 @@ async function exportConsolidatedExcel(
       { header: 'Fichas Associadas', key: 'fichasDetalhe', width: 50 },
     ];
     ws1.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
-    ws1.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF16A34A' } };
-    for (const item of comFichas) {
-      ws1.addRow({
-        ref: item.ref,
-        familia: item.familia || '-',
-        descricao: item.descricao,
-        quantidade: item.quantidade,
-        totalFichas: item.totalFichas,
-        fichasDetalhe: item.fichas?.map((f: any) => `${f.obrano} (${f.matricula} - ${f.marca} ${f.modelo})`).join('; ') || '',
-      });
+    ws1.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD97706' } };
+    for (const item of semFichas) {
+      const qty = item.quantidade || 1;
+      for (let unitIdx = 1; unitIdx <= qty; unitIdx++) {
+        const unitKey = `${(item.ref || '').toUpperCase().trim()}|${unitIdx}`;
+        const classif = classificacoesMap.get(unitKey);
+        const recorr = recorrenciaMap.get(unitKey);
+        ws1.addRow({
+          ref: item.ref,
+          unidade: qty > 1 ? `${unitIdx}/${qty}` : '-',
+          familia: item.familia || '-',
+          descricao: item.descricao,
+          classificacao: classif ? CLASSIFICACAO_LABELS[classif] || classif : '-',
+          recorrencia: recorr && recorr > 1 ? `${recorr} análises` : '-',
+        });
+      }
     }
 
-    // Sheet 2: Sem Fichas (desmultiplicado)
-    const ws2 = wb.addWorksheet('Sem Fichas');
+    // Sheet 2: Com Fichas
+    const ws2 = wb.addWorksheet('Com Fichas');
     ws2.columns = [
       { header: 'Referência', key: 'ref', width: 18 },
       { header: 'Unidade', key: 'unidade', width: 10 },
@@ -176,22 +182,25 @@ async function exportConsolidatedExcel(
       { header: 'Análises Consecutivas', key: 'recorrencia', width: 22 },
     ];
     ws2.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
-    ws2.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD97706' } };
-    for (const item of semFichas) {
-      const qty = item.quantidade || 1;
-      for (let unitIdx = 1; unitIdx <= qty; unitIdx++) {
-        const unitKey = `${(item.ref || '').toUpperCase().trim()}|${unitIdx}`;
-        const classif = classificacoesMap.get(unitKey);
-        const recorr = recorrenciaMap.get(unitKey);
-        ws2.addRow({
-          ref: item.ref,
-          unidade: qty > 1 ? `${unitIdx}/${qty}` : '-',
-          familia: item.familia || '-',
-          descricao: item.descricao,
-          classificacao: classif ? CLASSIFICACAO_LABELS[classif] || classif : '-',
-          recorrencia: recorr && recorr > 1 ? `${recorr} análises` : '-',
-        });
-      }
+    ws2.columns = [
+      { header: 'Referência', key: 'ref', width: 18 },
+      { header: 'Família', key: 'familia', width: 10 },
+      { header: 'Descrição', key: 'descricao', width: 40 },
+      { header: 'Qtd', key: 'quantidade', width: 8 },
+      { header: 'N.º Fichas', key: 'totalFichas', width: 12 },
+      { header: 'Fichas Associadas', key: 'fichasDetalhe', width: 50 },
+    ];
+    ws2.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    ws2.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF16A34A' } };
+    for (const item of comFichas) {
+      ws2.addRow({
+        ref: item.ref,
+        familia: item.familia || '-',
+        descricao: item.descricao,
+        quantidade: item.quantidade,
+        totalFichas: item.totalFichas,
+        fichasDetalhe: item.fichas?.map((f: any) => `${f.obrano} (${f.matricula} - ${f.marca} ${f.modelo})`).join('; ') || '',
+      });
     }
 
 
@@ -215,7 +224,7 @@ export default function ControloStock() {
   // Views: 'dashboard' (stock overview), 'upload' (global upload), 'resultadoGlobal' (gestor-grouped cards), 'detalhe' (per-loja detail), 'historico'
   const [view, setView] = useState<'dashboard' | 'upload' | 'resultadoGlobal' | 'detalhe' | 'historico'>('dashboard');
   const [searchTerm, setSearchTerm] = useState('');
-  const [activeResultTab, setActiveResultTab] = useState('comFichas');
+  const [activeResultTab, setActiveResultTab] = useState('semFichas');
   const [filtroClassificacao, setFiltroClassificacao] = useState<string>('todas');
 
   // Upload state
@@ -298,6 +307,19 @@ export default function ControloStock() {
     },
     onError: (error) => {
       toast.error(error.message || 'Erro ao eliminar batch');
+    },
+  });
+
+  const enviarEmailBatchMutation = trpc.stock.enviarEmailBatch.useMutation({
+    onSuccess: (data) => {
+      toast.success(`Emails enviados: ${data.emailsEnviados}/${data.totalLojas} lojas`);
+      if (data.resultados.some((r: any) => !r.success)) {
+        const falhas = data.resultados.filter((r: any) => !r.success);
+        toast.error(`${falhas.length} email(s) falharam: ${falhas.map((f: any) => f.lojaNome).join(', ')}`);
+      }
+    },
+    onError: (error) => {
+      toast.error(error.message || 'Erro ao enviar emails');
     },
   });
 
@@ -451,7 +473,7 @@ export default function ControloStock() {
     setDetalheId(null);
     setView('detalhe');
     setSearchTerm('');
-    setActiveResultTab('comFichas');
+    setActiveResultTab('semFichas');
     setFiltroClassificacao('todas');
   };
 
@@ -462,7 +484,7 @@ export default function ControloStock() {
     setDetalheLojaNome('');
     setView('detalhe');
     setSearchTerm('');
-    setActiveResultTab('comFichas');
+    setActiveResultTab('semFichas');
     setFiltroClassificacao('todas');
   };
 
@@ -712,16 +734,16 @@ export default function ControloStock() {
                         <div className="text-[10px] sm:text-xs text-muted-foreground">Total em Stock</div>
                       </CardContent>
                     </Card>
-                    <Card className="border-green-200 bg-green-50/50">
-                      <CardContent className="pt-3 pb-3 text-center">
-                        <div className="text-xl md:text-2xl font-bold text-green-600">{totais.totalComFichas.toLocaleString('pt-PT')}</div>
-                        <div className="text-[10px] sm:text-xs text-muted-foreground">Com Fichas ({percentComFichas}%)</div>
-                      </CardContent>
-                    </Card>
                     <Card className="border-amber-200 bg-amber-50/50">
                       <CardContent className="pt-3 pb-3 text-center">
                         <div className="text-xl md:text-2xl font-bold text-amber-600">{totais.totalSemFichas.toLocaleString('pt-PT')}</div>
                         <div className="text-[10px] sm:text-xs text-muted-foreground">Sem Fichas ({percentSemFichas}%)</div>
+                      </CardContent>
+                    </Card>
+                    <Card className="border-green-200 bg-green-50/50">
+                      <CardContent className="pt-3 pb-3 text-center">
+                        <div className="text-xl md:text-2xl font-bold text-green-600">{totais.totalComFichas.toLocaleString('pt-PT')}</div>
+                        <div className="text-[10px] sm:text-xs text-muted-foreground">Com Fichas ({percentComFichas}%)</div>
                       </CardContent>
                     </Card>
 
@@ -782,7 +804,7 @@ export default function ControloStock() {
                               setDetalheLojaNome(loja.nomeLoja || 'Loja');
                               setView('detalhe');
                               setSearchTerm('');
-                              setActiveResultTab('comFichas');
+                              setActiveResultTab('semFichas');
                               setFiltroClassificacao('todas');
                             }}
                           >
@@ -802,12 +824,12 @@ export default function ControloStock() {
                                   <span className="font-bold text-blue-700">{loja.totalItensStock}</span>
                                 </div>
                                 <div className="flex items-center justify-between">
-                                  <span className="text-muted-foreground">Com Fichas:</span>
-                                  <span className="font-medium text-green-600">{loja.totalComFichas}</span>
-                                </div>
-                                <div className="flex items-center justify-between">
                                   <span className="text-muted-foreground">Sem Fichas:</span>
                                   <span className="font-medium text-amber-600">{loja.totalSemFichas}</span>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                  <span className="text-muted-foreground">Com Fichas:</span>
+                                  <span className="font-medium text-green-600">{loja.totalComFichas}</span>
                                 </div>
 
                               </div>
@@ -914,8 +936,8 @@ export default function ControloStock() {
                                 }}
                               />
                               <Line type="monotone" dataKey="totalItensStock" stroke="#3b82f6" strokeWidth={2} dot={{ r: 3 }} name="totalItensStock" />
-                              <Line type="monotone" dataKey="totalComFichas" stroke="#22c55e" strokeWidth={2} dot={{ r: 3 }} name="totalComFichas" />
                               <Line type="monotone" dataKey="totalSemFichas" stroke="#f59e0b" strokeWidth={2} dot={{ r: 3 }} name="totalSemFichas" />
+                              <Line type="monotone" dataKey="totalComFichas" stroke="#22c55e" strokeWidth={2} dot={{ r: 3 }} name="totalComFichas" />
 
                             </LineChart>
                           </ResponsiveContainer>
@@ -1079,7 +1101,6 @@ export default function ControloStock() {
                       <span className="text-blue-600 font-medium">{grupo.totais.totalItensStock} itens</span>
                       <span className="text-green-600">{grupo.totais.totalComFichas} c/fichas</span>
                       <span className="text-amber-600">{grupo.totais.totalSemFichas} s/fichas</span>
-                      <span className="text-red-600">{grupo.totais.totalFichasSemStock} s/stock</span>
                     </div>
                     {expandedGestores.has(grupo.gestorNome) ? (
                       <ChevronUp className="h-4 w-4 text-muted-foreground" />
@@ -1112,12 +1133,12 @@ export default function ControloStock() {
                               <span className="font-bold text-blue-700">{loja.totalItensStock}</span>
                             </div>
                             <div className="flex items-center justify-between">
-                              <span className="text-muted-foreground">Com Fichas:</span>
-                              <span className="font-medium text-green-600">{loja.totalComFichas}</span>
-                            </div>
-                            <div className="flex items-center justify-between">
                               <span className="text-muted-foreground">Sem Fichas:</span>
                               <span className="font-medium text-amber-600">{loja.totalSemFichas}</span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-muted-foreground">Com Fichas:</span>
+                              <span className="font-medium text-green-600">{loja.totalComFichas}</span>
                             </div>
 
                           </div>
@@ -1152,15 +1173,6 @@ export default function ControloStock() {
                   <div className="text-[10px] md:text-xs text-muted-foreground leading-tight">Total Stock</div>
                 </CardContent>
               </Card>
-              <Card className="border-green-200 bg-green-50/50">
-                <CardContent className="pt-3 pb-3 md:pt-4 md:pb-4 text-center px-1 md:px-4">
-                  <CheckCircle2 className="h-4 w-4 md:h-6 md:w-6 mx-auto text-green-600 mb-0.5" />
-                  <div className="text-lg md:text-2xl font-bold text-green-700">
-                    {dadosActivos.totalComFichas ?? dadosActivos.comFichas?.length}
-                  </div>
-                  <div className="text-[10px] md:text-xs text-muted-foreground leading-tight">Com Fichas</div>
-                </CardContent>
-              </Card>
               <Card className="border-amber-200 bg-amber-50/50">
                 <CardContent className="pt-3 pb-3 md:pt-4 md:pb-4 text-center px-1 md:px-4">
                   <XCircle className="h-4 w-4 md:h-6 md:w-6 mx-auto text-amber-600 mb-0.5" />
@@ -1168,6 +1180,15 @@ export default function ControloStock() {
                     {semFichasDesmultiplicados.length}
                   </div>
                   <div className="text-[10px] md:text-xs text-muted-foreground leading-tight">Sem Fichas</div>
+                </CardContent>
+              </Card>
+              <Card className="border-green-200 bg-green-50/50">
+                <CardContent className="pt-3 pb-3 md:pt-4 md:pb-4 text-center px-1 md:px-4">
+                  <CheckCircle2 className="h-4 w-4 md:h-6 md:w-6 mx-auto text-green-600 mb-0.5" />
+                  <div className="text-lg md:text-2xl font-bold text-green-700">
+                    {dadosActivos.totalComFichas ?? dadosActivos.comFichas?.length}
+                  </div>
+                  <div className="text-[10px] md:text-xs text-muted-foreground leading-tight">Com Fichas</div>
                 </CardContent>
               </Card>
             </div>
@@ -1215,66 +1236,15 @@ export default function ControloStock() {
             {/* Tabs de resultado */}
             <Tabs value={activeResultTab} onValueChange={setActiveResultTab}>
               <TabsList className="grid w-full grid-cols-2 h-auto">
-                <TabsTrigger value="comFichas" className="text-[10px] sm:text-sm px-1 py-1.5 sm:px-3 sm:py-2">
-                  <CheckCircle2 className="h-3 w-3 mr-0.5 sm:mr-1 shrink-0" />
-                  <span className="hidden sm:inline">Com Fichas</span><span className="sm:hidden">C/ Fichas</span> ({dadosActivos.comFichas?.length || 0})
-                </TabsTrigger>
                 <TabsTrigger value="semFichas" className="text-[10px] sm:text-sm px-1 py-1.5 sm:px-3 sm:py-2">
                   <XCircle className="h-3 w-3 mr-0.5 sm:mr-1 shrink-0" />
                   <span className="hidden sm:inline">Sem Fichas</span><span className="sm:hidden">S/ Fichas</span> ({semFichasDesmultiplicados.length})
                 </TabsTrigger>
+                <TabsTrigger value="comFichas" className="text-[10px] sm:text-sm px-1 py-1.5 sm:px-3 sm:py-2">
+                  <CheckCircle2 className="h-3 w-3 mr-0.5 sm:mr-1 shrink-0" />
+                  <span className="hidden sm:inline">Com Fichas</span><span className="sm:hidden">C/ Fichas</span> ({dadosActivos.comFichas?.length || 0})
+                </TabsTrigger>
               </TabsList>
-
-              {/* Tab: Com Fichas */}
-              <TabsContent value="comFichas" className="space-y-1.5 mt-3">
-                {dadosActivos.comFichas && filtrarItens(dadosActivos.comFichas).length === 0 ? (
-                  <p className="text-center text-muted-foreground py-6 text-sm">Nenhum item encontrado</p>
-                ) : (
-                  filtrarItens(dadosActivos.comFichas || []).map((item: any, idx: number) => (
-                    <Card key={idx} className="border-green-100">
-                      <CardContent className="px-3 py-2">
-                        <div className="flex items-center justify-between gap-2">
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-1.5 flex-wrap">
-                              <Badge variant="outline" className="bg-blue-50 text-blue-700 font-mono text-[11px] px-1.5 py-0">
-                                {item.ref}
-                              </Badge>
-                              {item.familia && (
-                                <Badge variant="secondary" className="text-[10px] px-1.5 py-0">{item.familia}</Badge>
-                              )}
-                              <Badge className="bg-green-100 text-green-700 text-[10px] px-1.5 py-0">
-                                {item.totalFichas} ficha{item.totalFichas !== 1 ? 's' : ''}
-                              </Badge>
-                            </div>
-                            <p className="text-xs text-muted-foreground mt-0.5 truncate">{item.descricao}</p>
-                          </div>
-                          <div className="text-right shrink-0">
-                            <span className="text-sm font-bold">{item.quantidade}</span>
-                            <span className="text-[10px] text-muted-foreground ml-0.5">un.</span>
-                          </div>
-                        </div>
-                        {item.fichas && item.fichas.length > 0 && (
-                          <div className="mt-1.5 border-t pt-1.5">
-                            <p className="text-[10px] font-medium text-muted-foreground mb-0.5">Fichas associadas:</p>
-                            <div className="space-y-0.5">
-                              {item.fichas.map((f: any, fIdx: number) => (
-                                <div key={fIdx} className="flex items-center gap-1.5 text-[10px] bg-gray-50 rounded px-1.5 py-0.5">
-                                  <span className="font-mono font-medium">{f.obrano}</span>
-                                  <span className="text-muted-foreground">{f.matricula}</span>
-                                  <span className="truncate">{f.marca} {f.modelo}</span>
-                                  <Badge variant="outline" className="text-[9px] px-1 py-0 ml-auto shrink-0">
-                                    {f.status} {f.diasAberto > 0 ? `(${f.diasAberto}d)` : ''}
-                                  </Badge>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  ))
-                )}
-              </TabsContent>
 
               {/* Tab: Sem Fichas (desmultiplicado) */}
               <TabsContent value="semFichas" className="space-y-1.5 mt-3">
@@ -1362,6 +1332,57 @@ export default function ControloStock() {
                 )}
               </TabsContent>
 
+              {/* Tab: Com Fichas */}
+              <TabsContent value="comFichas" className="space-y-1.5 mt-3">
+                {dadosActivos.comFichas && filtrarItens(dadosActivos.comFichas).length === 0 ? (
+                  <p className="text-center text-muted-foreground py-6 text-sm">Nenhum item encontrado</p>
+                ) : (
+                  filtrarItens(dadosActivos.comFichas || []).map((item: any, idx: number) => (
+                    <Card key={idx} className="border-green-100">
+                      <CardContent className="px-3 py-2">
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <Badge variant="outline" className="bg-blue-50 text-blue-700 font-mono text-[11px] px-1.5 py-0">
+                                {item.ref}
+                              </Badge>
+                              {item.familia && (
+                                <Badge variant="secondary" className="text-[10px] px-1.5 py-0">{item.familia}</Badge>
+                              )}
+                              <Badge className="bg-green-100 text-green-700 text-[10px] px-1.5 py-0">
+                                {item.totalFichas} ficha{item.totalFichas !== 1 ? 's' : ''}
+                              </Badge>
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-0.5 truncate">{item.descricao}</p>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <span className="text-sm font-bold">{item.quantidade}</span>
+                            <span className="text-[10px] text-muted-foreground ml-0.5">un.</span>
+                          </div>
+                        </div>
+                        {item.fichas && item.fichas.length > 0 && (
+                          <div className="mt-1.5 border-t pt-1.5">
+                            <p className="text-[10px] font-medium text-muted-foreground mb-0.5">Fichas associadas:</p>
+                            <div className="space-y-0.5">
+                              {item.fichas.map((f: any, fIdx: number) => (
+                                <div key={fIdx} className="flex items-center gap-1.5 text-[10px] bg-gray-50 rounded px-1.5 py-0.5">
+                                  <span className="font-mono font-medium">{f.obrano}</span>
+                                  <span className="text-muted-foreground">{f.matricula}</span>
+                                  <span className="truncate">{f.marca} {f.modelo}</span>
+                                  <Badge variant="outline" className="text-[9px] px-1 py-0 ml-auto shrink-0">
+                                    {f.status} {f.diasAberto > 0 ? `(${f.diasAberto}d)` : ''}
+                                  </Badge>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))
+                )}
+              </TabsContent>
+
 
             </Tabs>
           </div>
@@ -1410,8 +1431,8 @@ export default function ControloStock() {
                         <th className="text-left py-2 px-3 font-medium">Data / Hora</th>
                         <th className="text-center py-2 px-3 font-medium">Lojas</th>
                         <th className="text-center py-2 px-3 font-medium">Total Stock</th>
-                        <th className="text-center py-2 px-3 font-medium">Com Fichas</th>
                         <th className="text-center py-2 px-3 font-medium">Sem Fichas</th>
+                        <th className="text-center py-2 px-3 font-medium">Com Fichas</th>
                         <th className="text-center py-2 px-3 font-medium">% s/ Fichas</th>
                         <th className="text-right py-2 px-3 font-medium">Ação</th>
                       </tr>
@@ -1436,24 +1457,44 @@ export default function ControloStock() {
                             </td>
                             <td className="py-2 px-3 text-center font-medium">{Number(batch.totalLojas)}</td>
                             <td className="py-2 px-3 text-center">{totalStock}</td>
-                            <td className="py-2 px-3 text-center text-green-600">{Number(batch.totalComFichas)}</td>
                             <td className="py-2 px-3 text-center text-amber-600">{totalSemFichas}</td>
+                            <td className="py-2 px-3 text-center text-green-600">{Number(batch.totalComFichas)}</td>
                             <td className={`py-2 px-3 text-center ${percColor}`}>{percSemFichas}%</td>
                             <td className="py-2 px-3 text-right">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-7 text-red-500 hover:text-red-700 hover:bg-red-50 text-xs"
-                                disabled={eliminarBatchMutation.isPending}
-                                onClick={() => {
-                                  if (window.confirm(`Tem a certeza que deseja eliminar este upload?\n\nData: ${batchDate.toLocaleDateString('pt-PT')} ${batchDate.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })}\nLojas: ${batch.totalLojas}\nAnálises: ${batch.totalAnalises}\n\nEsta ação é irreversível e remove os dados das lojas.`)) {
-                                    eliminarBatchMutation.mutate({ batchTime: batch.batchTime });
-                                  }
-                                }}
-                              >
-                                <Trash2 className="h-3.5 w-3.5 mr-1" />
-                                Apagar
-                              </Button>
+                              <div className="flex items-center justify-end gap-1">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-7 text-green-600 hover:text-green-800 hover:bg-green-50 text-xs"
+                                  disabled={enviarEmailBatchMutation.isPending}
+                                  onClick={() => {
+                                    if (window.confirm(`Enviar emails para ${batch.totalLojas} lojas deste batch?\n\nData: ${batchDate.toLocaleDateString('pt-PT')} ${batchDate.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })}`)) {
+                                      enviarEmailBatchMutation.mutate({ batchTime: batch.batchTime });
+                                    }
+                                  }}
+                                >
+                                  {enviarEmailBatchMutation.isPending ? (
+                                    <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" />
+                                  ) : (
+                                    <Send className="h-3.5 w-3.5 mr-1" />
+                                  )}
+                                  <span className="hidden sm:inline">Enviar</span>
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-7 text-red-500 hover:text-red-700 hover:bg-red-50 text-xs"
+                                  disabled={eliminarBatchMutation.isPending}
+                                  onClick={() => {
+                                    if (window.confirm(`Tem a certeza que deseja eliminar este upload?\n\nData: ${batchDate.toLocaleDateString('pt-PT')} ${batchDate.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })}\nLojas: ${batch.totalLojas}\nAnálises: ${batch.totalAnalises}\n\nEsta ação é irreversível e remove os dados das lojas.`)) {
+                                      eliminarBatchMutation.mutate({ batchTime: batch.batchTime });
+                                    }
+                                  }}
+                                >
+                                  <Trash2 className="h-3.5 w-3.5 mr-1" />
+                                  <span className="hidden sm:inline">Apagar</span>
+                                </Button>
+                              </div>
                             </td>
                           </tr>
                         );
@@ -1535,12 +1576,12 @@ export default function ControloStock() {
                             <span className="font-bold text-blue-700">{analise.totalItensStock}</span>
                           </div>
                           <div className="flex items-center justify-between">
-                            <span className="text-muted-foreground">Com Fichas:</span>
-                            <span className="font-medium text-green-600">{analise.totalComFichas}</span>
-                          </div>
-                          <div className="flex items-center justify-between">
                             <span className="text-muted-foreground">Sem Fichas:</span>
                             <span className="font-medium text-amber-600">{analise.totalSemFichas}</span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-muted-foreground">Com Fichas:</span>
+                            <span className="font-medium text-green-600">{analise.totalComFichas}</span>
                           </div>
 
                         </div>
@@ -1605,7 +1646,6 @@ export default function ControloStock() {
                         <span className="text-blue-600 font-medium">{comparacaoData.analiseAntiga.totalStock}</span>
                         <span className="text-green-600">{comparacaoData.analiseAntiga.totalComFichas}</span>
                         <span className="text-amber-600">{comparacaoData.analiseAntiga.totalSemFichas}</span>
-                        <span className="text-red-600">{comparacaoData.analiseAntiga.totalFichasSemStock}</span>
                       </div>
                     </CardContent>
                   </Card>
@@ -1620,7 +1660,6 @@ export default function ControloStock() {
                         <span className="text-blue-600 font-medium">{comparacaoData.analiseRecente.totalStock}</span>
                         <span className="text-green-600">{comparacaoData.analiseRecente.totalComFichas}</span>
                         <span className="text-amber-600">{comparacaoData.analiseRecente.totalSemFichas}</span>
-                        <span className="text-red-600">{comparacaoData.analiseRecente.totalFichasSemStock}</span>
                       </div>
                     </CardContent>
                   </Card>
@@ -1634,13 +1673,13 @@ export default function ControloStock() {
                         <span className="text-muted-foreground">Stock</span>
                         <VariacaoDisplay valor={comparacaoData.variacoes.totalStock} />
                       </div>
-                      <div className="flex items-center justify-between bg-green-50 rounded px-2 py-1.5">
-                        <span className="text-muted-foreground">C/ Fichas</span>
-                        <VariacaoDisplay valor={comparacaoData.variacoes.comFichas} />
-                      </div>
                       <div className="flex items-center justify-between bg-amber-50 rounded px-2 py-1.5">
                         <span className="text-muted-foreground">S/ Fichas</span>
                         <VariacaoDisplay valor={comparacaoData.variacoes.semFichas} />
+                      </div>
+                      <div className="flex items-center justify-between bg-green-50 rounded px-2 py-1.5">
+                        <span className="text-muted-foreground">C/ Fichas</span>
+                        <VariacaoDisplay valor={comparacaoData.variacoes.comFichas} />
                       </div>
 
                     </div>

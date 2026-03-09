@@ -13124,3 +13124,21 @@ export async function eliminarBatchStock(batchTime: string, gestorId?: number) {
     return (result.rows || result[0] || { affectedRows: 0 }) as any;
   }
 }
+
+/**
+ * Obter análises de stock por batch time (para enviar emails de um batch específico)
+ */
+export async function getAnalisesByBatchTime(batchTime: string, gestorId?: number) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const condition = gestorId
+    ? sql`DATE_FORMAT(createdAt, '%Y-%m-%d %H:%i') = ${batchTime} AND gestorId = ${gestorId}`
+    : sql`DATE_FORMAT(createdAt, '%Y-%m-%d %H:%i') = ${batchTime}`;
+  
+  const result = await db.select()
+    .from(analisesStock)
+    .where(condition);
+  
+  return result;
+}

@@ -12979,14 +12979,13 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
                   <td style="padding:8px 12px;border:1px solid #e2e8f0;font-weight:bold;text-align:right;color:#1d4ed8;">${totalStock}</td>
                 </tr>
                 <tr>
-                  <td style="padding:8px 12px;border:1px solid #e2e8f0;color:#334155;">Com Fichas de Serviço</td>
-                  <td style="padding:8px 12px;border:1px solid #e2e8f0;font-weight:bold;text-align:right;color:#16a34a;">${input.comFichas.length}</td>
-                </tr>
-                <tr>
                   <td style="padding:8px 12px;border:1px solid #e2e8f0;color:#334155;">Sem Fichas de Serviço</td>
                   <td style="padding:8px 12px;border:1px solid #e2e8f0;font-weight:bold;text-align:right;color:#d97706;">${input.semFichas.length}</td>
                 </tr>
-
+                <tr>
+                  <td style="padding:8px 12px;border:1px solid #e2e8f0;color:#334155;">Com Fichas de Serviço</td>
+                  <td style="padding:8px 12px;border:1px solid #e2e8f0;font-weight:bold;text-align:right;color:#16a34a;">${input.comFichas.length}</td>
+                </tr>
               </table>
               <p style="margin:0 0 15px;color:#64748b;font-size:13px;line-height:1.5;">Consulte o ficheiro Excel em anexo para os dados completos.</p>
               <p style="margin:0;padding:12px 16px;background:#fffbeb;border:1px solid #fde68a;border-radius:6px;color:#92400e;font-size:13px;line-height:1.6;">📋 <strong>Ação necessária:</strong> Aceda à aplicação <strong>PoweringEG</strong> da sua loja, vá a <strong>Análise de Stock</strong>, selecione o separador <strong>"Stock sem Fichas"</strong> e classifique os eurocodes indicados.</p>
@@ -13193,14 +13192,13 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
                     <td style="padding:8px 12px;border:1px solid #e2e8f0;font-weight:bold;text-align:right;color:#1d4ed8;">${totalStock}</td>
                   </tr>
                   <tr>
-                    <td style="padding:8px 12px;border:1px solid #e2e8f0;color:#334155;">Com Fichas de Serviço</td>
-                    <td style="padding:8px 12px;border:1px solid #e2e8f0;font-weight:bold;text-align:right;color:#16a34a;">${comFichas.length}</td>
-                  </tr>
-                  <tr>
                     <td style="padding:8px 12px;border:1px solid #e2e8f0;color:#334155;">Sem Fichas de Serviço</td>
                     <td style="padding:8px 12px;border:1px solid #e2e8f0;font-weight:bold;text-align:right;color:#d97706;">${semFichas.length}</td>
                   </tr>
-
+                  <tr>
+                    <td style="padding:8px 12px;border:1px solid #e2e8f0;color:#334155;">Com Fichas de Serviço</td>
+                    <td style="padding:8px 12px;border:1px solid #e2e8f0;font-weight:bold;text-align:right;color:#16a34a;">${comFichas.length}</td>
+                  </tr>
                 </table>
                 <p style="margin:0 0 15px;color:#64748b;font-size:13px;line-height:1.5;">Consulte o ficheiro Excel em anexo para os dados completos.</p>
                 <p style="margin:0;padding:12px 16px;background:#fffbeb;border:1px solid #fde68a;border-radius:6px;color:#92400e;font-size:13px;line-height:1.6;">📋 <strong>Ação necessária:</strong> Aceda à aplicação <strong>PoweringEG</strong> da sua loja, vá a <strong>Análise de Stock</strong>, selecione o separador <strong>"Stock sem Fichas"</strong> e classifique os eurocodes indicados.</p>
@@ -13297,6 +13295,153 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
         }
 
         return { emailsEnviados, totalLojas: input.analiseIds.length, resultados };
+      }),
+
+    // Enviar emails para todas as lojas de um batch específico (histórico)
+    enviarEmailBatch: gestorProcedure
+      .input(z.object({
+        batchTime: z.string(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const gestorId = ctx.user.role === 'admin' ? undefined : ctx.gestor?.id;
+        if (!gestorId && ctx.user.role !== 'admin') {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Gestor não encontrado' });
+        }
+
+        // Buscar todas as análises deste batch
+        const analises = await db.getAnalisesByBatchTime(input.batchTime, gestorId);
+        if (!analises || analises.length === 0) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Nenhuma análise encontrada para este batch' });
+        }
+
+        // Construir array de analiseIds no formato esperado pelo envio
+        const analiseIds = analises.map(a => ({ lojaId: a.lojaId!, analiseId: a.id })).filter(a => a.lojaId);
+
+        const resultados: Array<{ lojaId: number; lojaNome: string; email: string; success: boolean; error?: string }> = [];
+        let emailsEnviados = 0;
+
+        for (const item of analiseIds) {
+          const analise = await db.getAnaliseStockById(item.analiseId);
+          if (!analise) {
+            resultados.push({ lojaId: item.lojaId, lojaNome: 'Desconhecida', email: '', success: false, error: 'Análise não encontrada' });
+            continue;
+          }
+
+          const loja = await db.getLojaById(item.lojaId);
+          if (!loja || !loja.email) {
+            resultados.push({ lojaId: item.lojaId, lojaNome: analise.nomeLoja || 'Desconhecida', email: '', success: false, error: 'Loja sem email' });
+            continue;
+          }
+
+          const resultado = analise.resultadoAnalise ? JSON.parse(analise.resultadoAnalise) : null;
+          if (!resultado) {
+            resultados.push({ lojaId: item.lojaId, lojaNome: loja.nome, email: loja.email, success: false, error: 'Sem dados de análise' });
+            continue;
+          }
+
+          const dataFormatada = new Date(analise.createdAt).toLocaleDateString('pt-PT');
+          const totalStock = analise.totalItensStock || 0;
+          const comFichas = resultado.comFichas || [];
+          const semFichas = resultado.semFichas || [];
+
+          const htmlEmail = `
+            <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">
+              <div style="background:#16a34a;padding:20px;border-radius:8px 8px 0 0;">
+                <h1 style="color:#fff;margin:0;font-size:20px;">Controlo de Stock</h1>
+                <p style="color:#dcfce7;margin:5px 0 0;font-size:14px;">${loja.nome} — ${dataFormatada}</p>
+              </div>
+              <div style="padding:25px;background:#fff;border:1px solid #e2e8f0;">
+                <p style="margin:0 0 15px;color:#334155;font-size:14px;line-height:1.6;">Foi realizada uma análise de controlo de stock na loja <strong>${loja.nome}</strong>.</p>
+                <table style="width:100%;border-collapse:collapse;font-size:14px;margin-bottom:20px;">
+                  <tr>
+                    <td style="padding:8px 12px;border:1px solid #e2e8f0;color:#334155;">Total em Stock</td>
+                    <td style="padding:8px 12px;border:1px solid #e2e8f0;font-weight:bold;text-align:right;color:#1d4ed8;">${totalStock}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:8px 12px;border:1px solid #e2e8f0;color:#334155;">Sem Fichas de Serviço</td>
+                    <td style="padding:8px 12px;border:1px solid #e2e8f0;font-weight:bold;text-align:right;color:#d97706;">${semFichas.length}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:8px 12px;border:1px solid #e2e8f0;color:#334155;">Com Fichas de Serviço</td>
+                    <td style="padding:8px 12px;border:1px solid #e2e8f0;font-weight:bold;text-align:right;color:#16a34a;">${comFichas.length}</td>
+                  </tr>
+                </table>
+                <p style="margin:0 0 15px;color:#64748b;font-size:13px;line-height:1.5;">Consulte o ficheiro Excel em anexo para os dados completos.</p>
+                <p style="margin:0;padding:12px 16px;background:#fffbeb;border:1px solid #fde68a;border-radius:6px;color:#92400e;font-size:13px;line-height:1.6;">📋 <strong>Ação necessária:</strong> Aceda à aplicação <strong>PoweringEG</strong> da sua loja, vá a <strong>Análise de Stock</strong>, selecione o separador <strong>"Stock sem Fichas"</strong> e classifique os eurocodes indicados.</p>
+              </div>
+              <div style="padding:15px;background:#f8fafc;border:1px solid #e2e8f0;border-top:0;border-radius:0 0 8px 8px;text-align:center;">
+                <p style="margin:0;color:#64748b;font-size:12px;">PoweringEG Platform 2.0 - a IA ao serviço da ExpressGlass</p>
+              </div>
+            </div>`;
+
+          let excelAttachment: { filename: string; content: string; contentType: string } | undefined;
+          try {
+            const { base64, filename } = await gerarExcelControloStock({
+              nomeLoja: loja.nome,
+              lojaId: item.lojaId,
+              comFichas,
+              semFichas,
+            });
+            excelAttachment = {
+              filename,
+              content: base64,
+              contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            };
+          } catch (excelError: any) {
+            console.error(`[Stock Email Batch] Erro Excel ${loja.nome}:`, excelError?.message);
+          }
+
+          const assunto = `Controlo de Stock — Relatório Consolidado — ${loja.nome} — ${dataFormatada}`;
+
+          try {
+            const enviado = await sendEmail({
+              to: loja.email,
+              subject: assunto,
+              html: htmlEmail,
+              attachments: excelAttachment ? [excelAttachment] : undefined,
+            });
+            if (enviado) {
+              emailsEnviados++;
+              resultados.push({ lojaId: item.lojaId, lojaNome: loja.nome, email: loja.email, success: true });
+            } else {
+              resultados.push({ lojaId: item.lojaId, lojaNome: loja.nome, email: loja.email, success: false, error: 'Falha no envio' });
+            }
+          } catch (e: any) {
+            resultados.push({ lojaId: item.lojaId, lojaNome: loja.nome, email: loja.email, success: false, error: e?.message || 'Erro desconhecido' });
+          }
+
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+
+        // Enviar resumo ao gestor
+        const gestor = gestorId ? await db.getGestorById(gestorId) : null;
+        if (gestor?.email) {
+          try {
+            const resumoHTML = `
+              <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">
+                <div style="background:#1d4ed8;padding:20px;border-radius:8px 8px 0 0;">
+                  <h1 style="color:#fff;margin:0;font-size:20px;">Resumo Envio Controlo de Stock</h1>
+                  <p style="color:#dbeafe;margin:5px 0 0;font-size:14px;">Batch: ${input.batchTime}</p>
+                </div>
+                <div style="padding:25px;background:#fff;border:1px solid #e2e8f0;">
+                  <p style="margin:0 0 15px;color:#334155;font-size:14px;">Foram enviados <strong>${emailsEnviados}</strong> de <strong>${analiseIds.length}</strong> emails de controlo de stock.</p>
+                  <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                    <tr style="background:#f1f5f9;"><th style="padding:6px 10px;text-align:left;">Loja</th><th style="padding:6px 10px;text-align:left;">Email</th><th style="padding:6px 10px;text-align:center;">Status</th></tr>
+                    ${resultados.map(r => `<tr><td style="padding:6px 10px;border-bottom:1px solid #e2e8f0;">${r.lojaNome}</td><td style="padding:6px 10px;border-bottom:1px solid #e2e8f0;">${r.email || '-'}</td><td style="padding:6px 10px;border-bottom:1px solid #e2e8f0;text-align:center;color:${r.success ? '#16a34a' : '#dc2626'};">${r.success ? '✅' : '❌ ' + (r.error || '')}</td></tr>`).join('')}
+                  </table>
+                </div>
+              </div>`;
+            await sendEmail({
+              to: gestor.email,
+              subject: `Resumo Envio Controlo de Stock (Batch ${input.batchTime}) — ${emailsEnviados}/${analiseIds.length} enviados`,
+              html: resumoHTML,
+            });
+          } catch (e) {
+            console.error('[Stock Email Batch] Erro ao enviar resumo ao gestor:', e);
+          }
+        }
+
+        return { emailsEnviados, totalLojas: analiseIds.length, resultados };
       }),
 
     // Exportar Excel consolidado (gera no servidor e devolve URL)

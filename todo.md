@@ -746,3 +746,25 @@
 - [x] Tabela mostra: data/hora, lojas, total stock, com/sem fichas, % s/ fichas, botão apagar
 - [x] Confirmação antes de apagar com detalhes do batch
 - [ ] Guardar checkpoint
+
+## Reordenar: Sem Fichas logo após Total (antes de Com Fichas)
+- [x] Reordenar KPI cards no dashboard de stock (Total > Sem Fichas > Com Fichas)
+- [x] Reordenar linhas nos cards das lojas no dashboard e histórico
+- [x] Reordenar tabs na vista de detalhe da loja (Sem Fichas > Com Fichas)
+- [x] Reordenar sheets no Excel (Sem Fichas primeiro)
+- [x] Reordenar colunas na tabela do email consolidado e em massa
+- [x] Reordenar cards/tabs no Portal da Loja (Sem Fichas primeiro)
+- [ ] Guardar checkpoint
+
+## Fix: Tabs Sem Fichas / Com Fichas com conteúdo trocado
+- [x] Verificado: tabs estão correctos no código actual (Sem Fichas mostra itens sem fichas, Com Fichas mostra itens com fichas)
+- [x] Removidos últimos vestígios de Fichas s/ Stock da vista de comparação e resultados
+- [ ] Guardar checkpoint
+
+## Adicionar botão "Enviar às Lojas" no Histórico
+- [x] Criar procedure backend enviarEmailBatch (envia emails para todas as lojas de um batch)
+- [x] Criar helper getAnalisesByBatchTime no db.ts
+- [x] Adicionar botão "Enviar" na tabela de batches do histórico
+- [x] Botão com confirmação antes do envio
+- [x] Feedback toast com resultados (enviados/falhados)
+- [ ] Guardar checkpoint
