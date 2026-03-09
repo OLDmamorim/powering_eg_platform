@@ -1,4 +1,3 @@
-import React, { Suspense } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
@@ -22,7 +21,7 @@ import DashboardAlertas from "./pages/DashboardAlertas";
 import ConfiguracoesAlertas from "./pages/ConfiguracoesAlertas";
 import Categorias from "./pages/Categorias";
 import PendentesAdmin from "./pages/PendentesAdmin";
-const HistoricoLoja = React.lazy(() => import("./pages/HistoricoLoja"));
+import HistoricoLoja from "./pages/HistoricoLoja";
 import HistoricoRelatoriosIA from "./pages/HistoricoRelatoriosIA";
 import ComparacaoRelatoriosIA from "./pages/ComparacaoRelatoriosIA";
 import GestaoUtilizadores from "./pages/GestaoUtilizadores";
@@ -30,9 +29,9 @@ import ReuniõesGestores from "./pages/ReuniõesGestores";
 import ReuniõesLojas from "./pages/ReuniõesLojas";
 import ResultadosUpload from "./pages/ResultadosUpload";
 import NPSUpload from "./pages/NPSUpload";
-const ResultadosDashboard = React.lazy(() => import("./pages/ResultadosDashboard").then(m => ({ default: m.ResultadosDashboard })));
+import { ResultadosDashboard } from "./pages/ResultadosDashboard";
 import { ComparacaoLojas } from "./pages/ComparacaoLojas";
-const PortalLoja = React.lazy(() => import("./pages/PortalLoja"));
+import PortalLoja from "./pages/PortalLoja";
 import PortalLojaWidget from "./pages/PortalLojaWidget";
 import ReunioesQuinzenais from "./pages/ReunioesQuinzenais";
 import Todos from "./pages/Todos";
@@ -40,7 +39,7 @@ import TodoWidget from "./pages/TodoWidget";
 import ResumosGlobais from "./pages/ResumosGlobais";
 import OcorrenciaEstrutural from "./pages/OcorrenciaEstrutural";
 import HistoricoOcorrencias from "./pages/HistoricoOcorrencias";
-const RelatorioIAResultados = React.lazy(() => import("./pages/RelatorioIAResultados").then(m => ({ default: m.RelatorioIAResultados })));
+import { RelatorioIAResultados } from "./pages/RelatorioIAResultados";
 import RelatorioBoard from "./pages/RelatorioBoard";
 import AssistenteIA from "./pages/AssistenteIA";
 import AssistenteWidget from "./pages/AssistenteWidget";
@@ -49,10 +48,10 @@ import ProjecaoVisitasPage from "./pages/ProjecaoVisitasPage";
 import RelacoesLojas from "./pages/RelacoesLojas";
 import Volantes from "./pages/Volantes";
 import LogAtribuicoes from "./pages/LogAtribuicoes";
-const PortalGestor = React.lazy(() => import("./pages/PortalGestor"));
-const AnaliseFichas = React.lazy(() => import("./pages/AnaliseFichas"));
-const ControloStock = React.lazy(() => import("./pages/ControloStock"));
-const RH = React.lazy(() => import("./pages/RH"));
+import PortalGestor from "./pages/PortalGestor";
+import AnaliseFichas from "./pages/AnaliseFichas";
+import ControloStock from "./pages/ControloStock";
+import RH from "./pages/RH";
 import { NPSDashboard } from "./pages/NPSDashboard";
 import MenuInicial from "./pages/MenuInicial";
 import DashboardVolante from "./pages/DashboardVolante";
@@ -170,9 +169,7 @@ function App() {
           <TooltipProvider>
             <Toaster />
             <DemoBanner />
-            <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
-              <Router />
-            </Suspense>
+            <Router />
           </TooltipProvider>
         </LanguageProvider>
       </ThemeProvider>

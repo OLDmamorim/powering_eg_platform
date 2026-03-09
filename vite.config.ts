@@ -24,26 +24,6 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
-    sourcemap: false,
-    minify: 'esbuild',
-    chunkSizeWarningLimit: 2000,
-    rollupOptions: {
-      output: {
-        manualChunks(id: string) {
-          if (id.includes('node_modules')) {
-            if (id.includes('chart.js') || id.includes('recharts')) return 'vendor-charts';
-            if (id.includes('xlsx') || id.includes('exceljs')) return 'vendor-excel';
-            if (id.includes('@radix-ui') || id.includes('lucide-react')) return 'vendor-ui';
-            if (id.includes('react-dom')) return 'vendor-react-dom';
-            if (id.includes('react')) return 'vendor-react';
-            return 'vendor';
-          }
-          if (id.includes('/pages/PortalLoja')) return 'page-portal-loja';
-          if (id.includes('/pages/ControloStock')) return 'page-controlo-stock';
-          if (id.includes('/pages/Relatorio')) return 'page-relatorios';
-        },
-      },
-    },
   },
   server: {
     host: true,
