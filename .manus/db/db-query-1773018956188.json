@@ -1,0 +1,58 @@
+{
+  "query": "SELECT g.id as gestorId, g.userId, u.name, u.email, u.role, u.openId FROM gestores g LEFT JOIN users u ON g.userId = u.id WHERE u.name IN ('Monica Correia', 'Carlos Eduardo', 'Marco Amorim', 'Marco Vilar', 'Fabio Dias', 'Rui Adrião') OR u.name LIKE '%Monica%' OR u.name LIKE '%Carlos Eduardo%' OR u.name LIKE '%Marco Amorim%' OR u.name LIKE '%Marco Vilar%' OR u.name LIKE '%Fabio%' OR u.name LIKE '%Rui Adri%' ORDER BY u.name;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT g.id as gestorId, g.userId, u.name, u.email, u.role, u.openId FROM gestores g LEFT JOIN users u ON g.userId = u.id WHERE u.name IN ('Monica Correia', 'Carlos Eduardo', 'Marco Amorim', 'Marco Vilar', 'Fabio Dias', 'Rui Adrião') OR u.name LIKE '%Monica%' OR u.name LIKE '%Carlos Eduardo%' OR u.name LIKE '%Marco Amorim%' OR u.name LIKE '%Marco Vilar%' OR u.name LIKE '%Fabio%' OR u.name LIKE '%Rui Adri%' ORDER BY u.name;",
+  "rows": [
+    {
+      "gestorId": "1800001",
+      "userId": "21960077",
+      "name": "Carlos Eduardo",
+      "email": "carlos.eduardo@expressglass.pt",
+      "role": "admin",
+      "openId": "pending-carlos.eduardo@expressglass.pt-1772491903550"
+    },
+    {
+      "gestorId": "1350001",
+      "userId": "7980023",
+      "name": "Fabio Dias",
+      "email": "fdias@expressglass.pt",
+      "role": "admin",
+      "openId": "YnuQiuMPy6oY4G5M59XGtS"
+    },
+    {
+      "gestorId": "30001",
+      "userId": "420030",
+      "name": "Marco Amorim",
+      "email": "mamorim@expressglass.pt",
+      "role": "gestor",
+      "openId": "M6W777U2ZPR3y5QVg75RaS"
+    },
+    {
+      "gestorId": "120001",
+      "userId": "2160121",
+      "name": "Marco Vilar",
+      "email": "mvilar@expressglass.pt",
+      "role": "gestor",
+      "openId": "igBQMFCS6UkKEVh443PrMC"
+    },
+    {
+      "gestorId": "1710023",
+      "userId": "2160125",
+      "name": "Mónica Correira",
+      "email": "mcorreia@expressglass.pt",
+      "role": "gestor",
+      "openId": "QVbi4rypFCMFjp9DQ6DWhf"
+    },
+    {
+      "gestorId": "570003",
+      "userId": "6600028",
+      "name": "Rui Adriao ",
+      "email": "rui.adriao@expressglass.pt",
+      "role": "gestor",
+      "openId": "CVRe2nSdyEquffduXg27jz"
+    }
+  ],
+  "messages": [],
+  "stdout": "gestorId\tuserId\tname\temail\trole\topenId\n1800001\t21960077\tCarlos Eduardo\tcarlos.eduardo@expressglass.pt\tadmin\tpending-carlos.eduardo@expressglass.pt-1772491903550\n1350001\t7980023\tFabio Dias\tfdias@expressglass.pt\tadmin\tYnuQiuMPy6oY4G5M59XGtS\n30001\t420030\tMarco Amorim\tmamorim@expressglass.pt\tgestor\tM6W777U2ZPR3y5QVg75RaS\n120001\t2160121\tMarco Vilar\tmvilar@expressglass.pt\tgestor\tigBQMFCS6UkKEVh443PrMC\n1710023\t2160125\tMónica Correira\tmcorreia@expressglass.pt\tgestor\tQVbi4rypFCMFjp9DQ6DWhf\n570003\t6600028\tRui Adriao \trui.adriao@expressglass.pt\tgestor\tCVRe2nSdyEquffduXg27jz\n",
+  "stderr": "",
+  "execution_time_ms": 54
+}

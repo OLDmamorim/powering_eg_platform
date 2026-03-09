@@ -623,4 +623,12 @@
 - [x] Investigar função sendEmail para verificar suporte a attachments
 - [x] Corrigir stockExcelService.ts com try/catch robusto nas queries DB
 - [x] Testar envio com Excel em anexo (teste completo OK no sandbox)
-- [ ] Guardar checkpoint e publicar
+- [x] Guardar checkpoint e publicar
+
+## Limpeza de dados de teste na base de dados
+- [x] Identificar lojas de teste (87 lojas de teste)
+- [x] Identificar gestores de teste (409 gestores de teste)
+- [x] Identificar relatórios de teste (950 livres + 319 completos)
+- [x] Remover todos os dados de teste (3523 registos removidos)
+- [x] Verificar integridade dos dados reais (6 gestores, 70 lojas, 108 rel. livres, 8 rel. completos)
+- [ ] Guardar checkpoint
