@@ -243,6 +243,7 @@ export default function ControloStock() {
   // Queries
   const { data: infoAnalise } = trpc.stock.infoAnalise.useQuery({});
   const { data: historico } = trpc.stock.historico.useQuery({}, { enabled: view === 'historico' });
+  const { data: batches } = trpc.stock.batches.useQuery(undefined, { enabled: view === 'historico' });
   const { data: stockDashboard, isLoading: dashboardLoading } = trpc.stock.dashboardStock.useQuery(undefined, {
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
@@ -279,9 +280,24 @@ export default function ControloStock() {
     onSuccess: () => {
       toast.success('Análise eliminada com sucesso');
       utils.stock.historico.invalidate();
+      utils.stock.batches.invalidate();
+      utils.stock.dashboardStock.invalidate();
     },
     onError: (error) => {
       toast.error(error.message || 'Erro ao eliminar análise');
+    },
+  });
+
+  const eliminarBatchMutation = trpc.stock.eliminarBatch.useMutation({
+    onSuccess: (data) => {
+      toast.success(`Batch eliminado: ${data.deleted} análises removidas`);
+      utils.stock.historico.invalidate();
+      utils.stock.batches.invalidate();
+      utils.stock.dashboardStock.invalidate();
+      utils.stock.evolucaoStock.invalidate();
+    },
+    onError: (error) => {
+      toast.error(error.message || 'Erro ao eliminar batch');
     },
   });
 
@@ -1360,7 +1376,7 @@ export default function ControloStock() {
 
         {/* VIEW: Histórico */}
         {view === 'historico' && !viewComparacao && (
-          <div className="space-y-3">
+          <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold flex items-center gap-2">
                 <History className="h-5 w-5" />
@@ -1382,6 +1398,74 @@ export default function ControloStock() {
                 Seleccione mais 1 análise para comparar (total: 2)
               </p>
             )}
+
+            {/* Batches - uploads anteriores */}
+            {batches && batches.length > 0 && (
+              <div className="space-y-3">
+                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Uploads Realizados</h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b bg-muted/50">
+                        <th className="text-left py-2 px-3 font-medium">Data / Hora</th>
+                        <th className="text-center py-2 px-3 font-medium">Lojas</th>
+                        <th className="text-center py-2 px-3 font-medium">Total Stock</th>
+                        <th className="text-center py-2 px-3 font-medium">Com Fichas</th>
+                        <th className="text-center py-2 px-3 font-medium">Sem Fichas</th>
+                        <th className="text-center py-2 px-3 font-medium">% s/ Fichas</th>
+                        <th className="text-right py-2 px-3 font-medium">Ação</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(batches as any[]).map((batch: any, idx: number) => {
+                        const totalStock = Number(batch.totalStock) || 0;
+                        const totalSemFichas = Number(batch.totalSemFichas) || 0;
+                        const percSemFichas = totalStock > 0 ? ((totalSemFichas / totalStock) * 100).toFixed(1) : '0';
+                        const percNum = parseFloat(percSemFichas);
+                        const percColor = percNum >= 60 ? 'text-red-600 font-bold' : percNum >= 40 ? 'text-amber-600 font-bold' : 'text-green-600 font-bold';
+                        const batchDate = new Date(batch.createdAt);
+                        return (
+                          <tr key={batch.batchTime} className={`border-b hover:bg-muted/30 ${idx === 0 ? 'bg-blue-50/50' : ''}`}>
+                            <td className="py-2 px-3">
+                              <div className="flex items-center gap-2">
+                                <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+                                <span className="font-medium">{batchDate.toLocaleDateString('pt-PT')}</span>
+                                <span className="text-muted-foreground">{batchDate.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })}</span>
+                                {idx === 0 && <Badge variant="outline" className="text-[10px] px-1.5 py-0 bg-blue-100 text-blue-700 border-blue-300">Mais recente</Badge>}
+                              </div>
+                            </td>
+                            <td className="py-2 px-3 text-center font-medium">{Number(batch.totalLojas)}</td>
+                            <td className="py-2 px-3 text-center">{totalStock}</td>
+                            <td className="py-2 px-3 text-center text-green-600">{Number(batch.totalComFichas)}</td>
+                            <td className="py-2 px-3 text-center text-amber-600">{totalSemFichas}</td>
+                            <td className={`py-2 px-3 text-center ${percColor}`}>{percSemFichas}%</td>
+                            <td className="py-2 px-3 text-right">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-7 text-red-500 hover:text-red-700 hover:bg-red-50 text-xs"
+                                disabled={eliminarBatchMutation.isPending}
+                                onClick={() => {
+                                  if (window.confirm(`Tem a certeza que deseja eliminar este upload?\n\nData: ${batchDate.toLocaleDateString('pt-PT')} ${batchDate.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })}\nLojas: ${batch.totalLojas}\nAnálises: ${batch.totalAnalises}\n\nEsta ação é irreversível e remove os dados das lojas.`)) {
+                                    eliminarBatchMutation.mutate({ batchTime: batch.batchTime });
+                                  }
+                                }}
+                              >
+                                <Trash2 className="h-3.5 w-3.5 mr-1" />
+                                Apagar
+                              </Button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {/* Store cards da análise mais recente */}
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mt-4">Análises por Loja (mais recente)</h3>
             {!historico || historico.length === 0 ? (
               <Card>
                 <CardContent className="py-8 text-center text-muted-foreground">

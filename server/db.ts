@@ -13029,3 +13029,98 @@ export async function getEvolucaoStockAdmin() {
   
   return analises;
 }
+
+
+/**
+ * Obter batches de análises de stock agrupados por minuto de upload (para um gestor)
+ */
+export async function getBatchesStock(gestorId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const result = await db.execute(sql`
+    SELECT 
+      DATE_FORMAT(createdAt, '%Y-%m-%d %H:%i') as batchTime,
+      MIN(createdAt) as createdAt,
+      COUNT(*) as totalAnalises,
+      COUNT(DISTINCT nomeLoja) as totalLojas,
+      SUM(totalItensStock) as totalStock,
+      SUM(totalComFichas) as totalComFichas,
+      SUM(totalSemFichas) as totalSemFichas,
+      GROUP_CONCAT(DISTINCT id ORDER BY id) as ids
+    FROM analises_stock
+    WHERE gestorId = ${gestorId}
+    GROUP BY DATE_FORMAT(createdAt, '%Y-%m-%d %H:%i')
+    ORDER BY batchTime DESC
+  `);
+  
+  return (result.rows || result[0] || []) as Array<{
+    batchTime: string;
+    createdAt: Date;
+    totalAnalises: number;
+    totalLojas: number;
+    totalStock: number;
+    totalComFichas: number;
+    totalSemFichas: number;
+    ids: string;
+  }>;
+}
+
+/**
+ * Obter batches de análises de stock para admin (todos os gestores)
+ */
+export async function getBatchesStockAdmin() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const result = await db.execute(sql`
+    SELECT 
+      DATE_FORMAT(createdAt, '%Y-%m-%d %H:%i') as batchTime,
+      MIN(createdAt) as createdAt,
+      COUNT(*) as totalAnalises,
+      COUNT(DISTINCT nomeLoja) as totalLojas,
+      SUM(totalItensStock) as totalStock,
+      SUM(totalComFichas) as totalComFichas,
+      SUM(totalSemFichas) as totalSemFichas,
+      GROUP_CONCAT(DISTINCT gestorId) as gestorIds,
+      GROUP_CONCAT(DISTINCT id ORDER BY id) as ids
+    FROM analises_stock
+    GROUP BY DATE_FORMAT(createdAt, '%Y-%m-%d %H:%i')
+    ORDER BY batchTime DESC
+  `);
+  
+  return (result.rows || result[0] || []) as Array<{
+    batchTime: string;
+    createdAt: Date;
+    totalAnalises: number;
+    totalLojas: number;
+    totalStock: number;
+    totalComFichas: number;
+    totalSemFichas: number;
+    gestorIds: string;
+    ids: string;
+  }>;
+}
+
+/**
+ * Eliminar um batch inteiro de análises de stock (por batchTime = minuto de upload)
+ */
+export async function eliminarBatchStock(batchTime: string, gestorId?: number) {
+  const db = await getDb();
+  if (!db) return 0;
+  
+  if (gestorId) {
+    const result = await db.execute(sql`
+      DELETE FROM analises_stock 
+      WHERE DATE_FORMAT(createdAt, '%Y-%m-%d %H:%i') = ${batchTime}
+      AND gestorId = ${gestorId}
+    `);
+    return (result.rows || result[0] || { affectedRows: 0 }) as any;
+  } else {
+    const result = await db.execute(sql`
+      DELETE FROM analises_stock 
+      WHERE DATE_FORMAT(createdAt, '%Y-%m-%d %H:%i') = ${batchTime}
+    `);
+    return (result.rows || result[0] || { affectedRows: 0 }) as any;
+  }
+}

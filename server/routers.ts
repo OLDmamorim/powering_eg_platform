@@ -12412,6 +12412,28 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
         return { success: true };
       }),
 
+    // Listar batches de análises de stock
+    batches: gestorProcedure
+      .query(async ({ ctx }) => {
+        if (ctx.user.role === 'admin') {
+          return db.getBatchesStockAdmin();
+        }
+        if (!ctx.gestor) throw new TRPCError({ code: 'FORBIDDEN', message: 'Gestor não encontrado' });
+        return db.getBatchesStock(ctx.gestor.id);
+      }),
+
+    // Eliminar um batch inteiro de análises de stock
+    eliminarBatch: gestorProcedure
+      .input(z.object({ batchTime: z.string() }))
+      .mutation(async ({ ctx, input }) => {
+        const gestorId = ctx.user.role === 'admin' ? undefined : ctx.gestor?.id;
+        if (!gestorId && ctx.user.role !== 'admin') {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Gestor não encontrado' });
+        }
+        const result = await db.eliminarBatchStock(input.batchTime, gestorId);
+        return { success: true, deleted: result?.affectedRows || 0 };
+      }),
+
     // Análise global de stock: recebe Excel com stock de todas as lojas, agrupa por armazém/loja
     analisarGlobal: gestorProcedure
       .input(z.object({

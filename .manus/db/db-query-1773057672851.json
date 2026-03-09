@@ -1,0 +1,65 @@
+{
+  "query": "SELECT id, lojaId, nomeLoja, gestorId, totalItensStock, totalComFichas, totalSemFichas, totalFichasSemStock, createdAt FROM analises_stock WHERE LOWER(nomeLoja) LIKE '%porto alto%' ORDER BY createdAt DESC LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT id, lojaId, nomeLoja, gestorId, totalItensStock, totalComFichas, totalSemFichas, totalFichasSemStock, createdAt FROM analises_stock WHERE LOWER(nomeLoja) LIKE '%porto alto%' ORDER BY createdAt DESC LIMIT 5;",
+  "rows": [
+    {
+      "id": "90181",
+      "lojaId": "180043",
+      "nomeLoja": "Porto alto",
+      "gestorId": "1350001",
+      "totalItensStock": "30",
+      "totalComFichas": "11",
+      "totalSemFichas": "19",
+      "totalFichasSemStock": "16",
+      "createdAt": "2026-03-09 11:57:46"
+    },
+    {
+      "id": "90115",
+      "lojaId": "180043",
+      "nomeLoja": "Porto alto",
+      "gestorId": "1350001",
+      "totalItensStock": "30",
+      "totalComFichas": "11",
+      "totalSemFichas": "19",
+      "totalFichasSemStock": "16",
+      "createdAt": "2026-03-09 11:31:57"
+    },
+    {
+      "id": "90049",
+      "lojaId": "180043",
+      "nomeLoja": "Porto alto",
+      "gestorId": "1350001",
+      "totalItensStock": "30",
+      "totalComFichas": "0",
+      "totalSemFichas": "30",
+      "totalFichasSemStock": "0",
+      "createdAt": "2026-03-09 10:50:11"
+    },
+    {
+      "id": "60049",
+      "lojaId": "180043",
+      "nomeLoja": "Porto alto",
+      "gestorId": "1350001",
+      "totalItensStock": "30",
+      "totalComFichas": "0",
+      "totalSemFichas": "30",
+      "totalFichasSemStock": "0",
+      "createdAt": "2026-03-09 07:24:13"
+    },
+    {
+      "id": "30251",
+      "lojaId": "180043",
+      "nomeLoja": "Porto alto",
+      "gestorId": "1350001",
+      "totalItensStock": "30",
+      "totalComFichas": "0",
+      "totalSemFichas": "30",
+      "totalFichasSemStock": "0",
+      "createdAt": "2026-03-09 02:22:44"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tlojaId\tnomeLoja\tgestorId\ttotalItensStock\ttotalComFichas\ttotalSemFichas\ttotalFichasSemStock\tcreatedAt\n90181\t180043\tPorto alto\t1350001\t30\t11\t19\t16\t2026-03-09 11:57:46\n90115\t180043\tPorto alto\t1350001\t30\t11\t19\t16\t2026-03-09 11:31:57\n90049\t180043\tPorto alto\t1350001\t30\t0\t30\t0\t2026-03-09 10:50:11\n60049\t180043\tPorto alto\t1350001\t30\t0\t30\t0\t2026-03-09 07:24:13\n30251\t180043\tPorto alto\t1350001\t30\t0\t30\t0\t2026-03-09 02:22:44\n",
+  "stderr": "",
+  "execution_time_ms": 58
+}

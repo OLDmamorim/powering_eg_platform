@@ -1,0 +1,43 @@
+{
+  "query": "SELECT a.id, a.lojaId, a.nomeLoja, a.totalItensStock, a.totalComFichas, a.totalSemFichas, a.totalFichasSemStock, LEFT(a.resultadoAnalise, 200) as resultado_preview, a.createdAt FROM analises_stock a WHERE LOWER(a.nomeLoja) LIKE '%porto%alto%' ORDER BY a.createdAt DESC LIMIT 3;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT a.id, a.lojaId, a.nomeLoja, a.totalItensStock, a.totalComFichas, a.totalSemFichas, a.totalFichasSemStock, LEFT(a.resultadoAnalise, 200) as resultado_preview, a.createdAt FROM analises_stock a WHERE LOWER(a.nomeLoja) LIKE '%porto%alto%' ORDER BY a.createdAt DESC LIMIT 3;",
+  "rows": [
+    {
+      "id": "90181",
+      "lojaId": "180043",
+      "nomeLoja": "Porto alto",
+      "totalItensStock": "30",
+      "totalComFichas": "11",
+      "totalSemFichas": "19",
+      "totalFichasSemStock": "16",
+      "resultado_preview": "{\"itensStock\":[{\"ref\":\"*8101BGSHAK\",\"descricao\":\"OCL TESLA S 5P HK 17- VRD ANT LAM\",\"armazem\":94,\"quantidade\":1,\"familia\":\"OC\"},{\"ref\":\"3739BGNVBL1H\",\"descricao\":\"OCL FORD TRANSIT 00> VRD ESQ FURO\",\"a",
+      "createdAt": "2026-03-09 11:57:46"
+    },
+    {
+      "id": "90115",
+      "lojaId": "180043",
+      "nomeLoja": "Porto alto",
+      "totalItensStock": "30",
+      "totalComFichas": "11",
+      "totalSemFichas": "19",
+      "totalFichasSemStock": "16",
+      "resultado_preview": "{\"itensStock\":[{\"ref\":\"*8101BGSHAK\",\"descricao\":\"OCL TESLA S 5P HK 17- VRD ANT LAM\",\"armazem\":94,\"quantidade\":1,\"familia\":\"OC\"},{\"ref\":\"3739BGNVBL1H\",\"descricao\":\"OCL FORD TRANSIT 00> VRD ESQ FURO\",\"a",
+      "createdAt": "2026-03-09 11:31:57"
+    },
+    {
+      "id": "90049",
+      "lojaId": "180043",
+      "nomeLoja": "Porto alto",
+      "totalItensStock": "30",
+      "totalComFichas": "0",
+      "totalSemFichas": "30",
+      "totalFichasSemStock": "0",
+      "resultado_preview": "{\"itensStock\":[{\"ref\":\"*8101BGSHAK\",\"descricao\":\"OCL TESLA S 5P HK 17- VRD ANT LAM\",\"armazem\":94,\"quantidade\":1,\"familia\":\"OC\"},{\"ref\":\"3739BGNVBL1H\",\"descricao\":\"OCL FORD TRANSIT 00> VRD ESQ FURO\",\"a",
+      "createdAt": "2026-03-09 10:50:11"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tlojaId\tnomeLoja\ttotalItensStock\ttotalComFichas\ttotalSemFichas\ttotalFichasSemStock\tresultado_preview\tcreatedAt\n90181\t180043\tPorto alto\t30\t11\t19\t16\t{\"itensStock\":[{\"ref\":\"*8101BGSHAK\",\"descricao\":\"OCL TESLA S 5P HK 17- VRD ANT LAM\",\"armazem\":94,\"quantidade\":1,\"familia\":\"OC\"},{\"ref\":\"3739BGNVBL1H\",\"descricao\":\"OCL FORD TRANSIT 00> VRD ESQ FURO\",\"a\t2026-03-09 11:57:46\n90115\t180043\tPorto alto\t30\t11\t19\t16\t{\"itensStock\":[{\"ref\":\"*8101BGSHAK\",\"descricao\":\"OCL TESLA S 5P HK 17- VRD ANT LAM\",\"armazem\":94,\"quantidade\":1,\"familia\":\"OC\"},{\"ref\":\"3739BGNVBL1H\",\"descricao\":\"OCL FORD TRANSIT 00> VRD ESQ FURO\",\"a\t2026-03-09 11:31:57\n90049\t180043\tPorto alto\t30\t0\t30\t0\t{\"itensStock\":[{\"ref\":\"*8101BGSHAK\",\"descricao\":\"OCL TESLA S 5P HK 17- VRD ANT LAM\",\"armazem\":94,\"quantidade\":1,\"familia\":\"OC\"},{\"ref\":\"3739BGNVBL1H\",\"descricao\":\"OCL FORD TRANSIT 00> VRD ESQ FURO\",\"a\t2026-03-09 10:50:11\n",
+  "stderr": "",
+  "execution_time_ms": 62
+}

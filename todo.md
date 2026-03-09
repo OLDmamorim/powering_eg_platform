@@ -732,3 +732,17 @@
 - [x] Remover da comparação de análises
 - [x] Remover "Fichas s/ Stock" do Portal da Loja (cards KPI, listagem, histórico)
 - [ ] Guardar checkpoint
+
+## BUG: Análise de Porto Alto a dar zero
+- [ ] Investigar dados na BD para a loja Porto Alto
+- [ ] Identificar e corrigir o problema
+- [ ] Guardar checkpoint
+
+## Apagar Análises em Massa no Histórico
+- [x] Verificar quantas análises existem na BD (486 total, 66 lojas x ~8 uploads)
+- [x] Criar procedures backend: batches (listar) e eliminarBatch (apagar batch inteiro)
+- [x] Criar helpers getBatchesStock, getBatchesStockAdmin, eliminarBatchStock no db.ts
+- [x] Redesenhar histórico com tabela de uploads + cards por loja
+- [x] Tabela mostra: data/hora, lojas, total stock, com/sem fichas, % s/ fichas, botão apagar
+- [x] Confirmação antes de apagar com detalhes do batch
+- [ ] Guardar checkpoint
