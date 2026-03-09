@@ -673,13 +673,6 @@
       "when": 1772964667608,
       "tag": "0095_yummy_squadron_supreme",
       "breakpoints": true
-    },
-    {
-      "idx": 96,
-      "version": "5",
-      "when": 1773083561154,
-      "tag": "0096_clear_silver_surfer",
-      "breakpoints": true
     }
   ]
 }

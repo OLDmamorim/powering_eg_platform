@@ -1733,18 +1733,3 @@ export const classificacoesEurocode = mysqlTable("classificacoes_eurocode", {
 
 export type ClassificacaoEurocode = typeof classificacoesEurocode.$inferSelect;
 export type InsertClassificacaoEurocode = typeof classificacoesEurocode.$inferInsert;
-
-
-/**
- * Background Jobs - Para processos longos (análise de stock, etc.)
- */
-export const backgroundJobs = mysqlTable("background_jobs", {
-  id: varchar("id", { length: 100 }).primaryKey(),
-  status: mysqlEnum("status", ["processing", "completed", "error"]).notNull().default("processing"),
-  progress: text("progress"),
-  result: mediumtext("result"),
-  error: text("error"),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
-export type BackgroundJob = typeof backgroundJobs.$inferSelect;

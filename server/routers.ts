@@ -178,9 +178,6 @@ const gestorProcedure = protectedProcedure.use(async ({ ctx, next }) => {
   });
 });
 
-// Clean up old background jobs every 10 minutes
-setInterval(() => { db.cleanOldBackgroundJobs().catch(() => {}); }, 10 * 60 * 1000);
-
 export const appRouter = router({
   system: systemRouter,
   
@@ -12437,7 +12434,7 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
         return { success: true, deleted: result?.affectedRows || 0 };
       }),
 
-    // Análise global de stock: inicia processamento em background e retorna jobId
+    // Análise global de stock: recebe Excel com stock de todas as lojas, agrupa por armazém/loja
     analisarGlobal: gestorProcedure
       .input(z.object({
         excelBase64: z.string(),
@@ -12446,310 +12443,270 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
       .mutation(async ({ ctx, input }) => {
         const gestorId = ctx.gestor?.id;
         if (!gestorId && ctx.user.role !== 'admin') throw new TRPCError({ code: 'FORBIDDEN', message: 'Gestor não encontrado' });
-        const isAdmin = ctx.user.role === 'admin';
 
-        // Gerar jobId e retornar imediatamente
-        const jobId = `stock_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-        await db.createBackgroundJob(jobId);
+        // 1. Ler Excel com ExcelJS
+        const ExcelJSModule = await import('exceljs');
+        const ExcelJS = ExcelJSModule.default || ExcelJSModule;
+        const wb = new ExcelJS.Workbook();
+        const buffer = Buffer.from(input.excelBase64, 'base64');
+        await wb.xlsx.load(buffer as any);
 
-        // Processar em background (não await)
-        (async () => {
+        const ws = wb.worksheets[0];
+        if (!ws) throw new TRPCError({ code: 'BAD_REQUEST', message: 'Ficheiro Excel sem folhas de dados' });
+
+        // 2. Detectar colunas pelo header
+        const headerRow = ws.getRow(1);
+        const colMap: Record<string, number> = {};
+        headerRow.eachCell((cell, colNumber) => {
+          const val = String(cell.value || '').trim().toLowerCase();
+          if (val.includes('ref')) colMap['ref'] = colNumber;
+          else if (val.includes('designa')) colMap['designacao'] = colNumber;
+          else if (val.includes('armaz')) colMap['armazem'] = colNumber;
+          else if (val.includes('quantid')) colMap['quantidade'] = colNumber;
+          else if (val.includes('unid')) colMap['unidade'] = colNumber;
+          else if (val.includes('prec') || val === 'preço' || val === 'preco') colMap['preco'] = colNumber;
+          else if (val === 'total') colMap['total'] = colNumber;
+          else if (val.includes('tipo')) colMap['tipo'] = colNumber;
+          else if (val.includes('famil') || val === 'familia') colMap['familia'] = colNumber;
+        });
+
+        if (!colMap['ref'] || !colMap['armazem']) {
+          throw new TRPCError({ code: 'BAD_REQUEST', message: 'Ficheiro Excel não tem as colunas obrigatórias (Ref_ e Armazem)' });
+        }
+
+        // 3. Ler todas as linhas
+        const categoriasPermitidas = ['OC', 'PB', 'TE', 'VL'];
+        interface ItemStockGlobal {
+          ref: string;
+          descricao: string;
+          armazem: number;
+          quantidade: number;
+          familia?: string;
+        }
+        const todosItens: ItemStockGlobal[] = [];
+
+        ws.eachRow((row, rowNumber) => {
+          if (rowNumber === 1) return;
+          const ref = String(row.getCell(colMap['ref']).value || '').trim();
+          if (!ref) return;
+
+          const armazemRaw = row.getCell(colMap['armazem']).value;
+          const armazem = typeof armazemRaw === 'number' ? armazemRaw : parseInt(String(armazemRaw || '0'));
+          if (!armazem || isNaN(armazem)) return;
+
+          const qtdRaw = colMap['quantidade'] ? row.getCell(colMap['quantidade']).value : 1;
+          const quantidade = typeof qtdRaw === 'number' ? qtdRaw : parseFloat(String(qtdRaw || '0').replace(',', '.')) || 0;
+          if (quantidade < 1) return;
+
+          const descricao = colMap['designacao'] ? String(row.getCell(colMap['designacao']).value || '').trim() : '';
+          let familia = colMap['familia'] ? String(row.getCell(colMap['familia']).value || '').trim().toUpperCase() : undefined;
+
+          if (familia && !categoriasPermitidas.includes(familia)) return;
+
+          if (!familia) {
+            const refUpper = ref.toUpperCase();
+            if (/AGS|AGAC|AGN|AGSM|AGSH|AGST|AGSV|AGSMVZ|AGACMVZ/.test(refUpper)) familia = 'PB';
+            else if (/BGS|OCL|OC/.test(refUpper)) familia = 'OC';
+            else if (/RGS|LGS|VVL|VL/.test(refUpper)) familia = 'VL';
+            else if (/TET|TE/.test(refUpper)) familia = 'TE';
+          }
+
+          todosItens.push({ ref, descricao, armazem, quantidade, familia });
+        });
+
+        if (todosItens.length === 0) {
+          throw new TRPCError({ code: 'BAD_REQUEST', message: 'Não foram encontrados artigos válidos no ficheiro Excel.' });
+        }
+
+        // 4. Agrupar por armazém
+        const porArmazem = new Map<number, ItemStockGlobal[]>();
+        for (const item of todosItens) {
+          if (!porArmazem.has(item.armazem)) porArmazem.set(item.armazem, []);
+          porArmazem.get(item.armazem)!.push(item);
+        }
+
+        // 5. Buscar todas as lojas e mapear por numeroLoja
+        const todasLojas = await db.getAllLojas();
+        const lojasPorNumero = new Map<number, typeof todasLojas[0]>();
+        for (const loja of todasLojas) {
+          if (loja.numeroLoja) lojasPorNumero.set(loja.numeroLoja, loja);
+        }
+
+        // 6. Buscar todos os gestores e suas lojas
+        const todosGestores = await db.getAllGestores();
+        const gestorLojaMap = new Map<number, Set<number>>();
+        const gestorNomeMap = new Map<number, string>();
+        for (const g of todosGestores) {
+          const lojasGestor = await db.getLojasByGestorId(g.id);
+          gestorLojaMap.set(g.id, new Set(lojasGestor.map(l => l.id)));
+          gestorNomeMap.set(g.id, g.nome || g.user?.name || 'Gestor');
+        }
+
+        // 7. Obter última análise de fichas
+        let ultimaAnaliseFichasId: number | null = null;
+        if (gestorId) {
+          const ultimaAnalise = await db.getUltimaAnaliseFichas(gestorId);
+          ultimaAnaliseFichasId = ultimaAnalise?.id || null;
+        }
+
+        // 8. Para cada armazém, cruzar com fichas e guardar análise
+        const resultadosPorLoja: Array<{
+          lojaId: number;
+          lojaNome: string;
+          lojaNumero: number;
+          gestorId: number | null;
+          gestorNome: string | null;
+          analiseId: number;
+          totalItensStock: number;
+          totalComFichas: number;
+          totalSemFichas: number;
+          totalFichasSemStock: number;
+        }> = [];
+
+        const armazensNaoMapeados: number[] = [];
+
+        for (const [armazem, itens] of Array.from(porArmazem)) {
+          const loja = lojasPorNumero.get(armazem);
+          if (!loja) {
+            armazensNaoMapeados.push(armazem);
+            continue;
+          }
+
+          let gestorDaLoja: number | null = null;
+          let gestorNomeDaLoja: string | null = null;
+          for (const [gId, lojaIds] of Array.from(gestorLojaMap)) {
+            if (lojaIds.has(loja.id)) {
+              gestorDaLoja = gId;
+              gestorNomeDaLoja = gestorNomeMap.get(gId) || null;
+              break;
+            }
+          }
+
+          let eurocodesFichasLoja: any[] = [];
           try {
-            await db.updateBackgroundJob(jobId, { progress: 'A ler ficheiro Excel...' });
-
-            // 1. Ler Excel com ExcelJS
-            const ExcelJSModule = await import('exceljs');
-            const ExcelJS = ExcelJSModule.default || ExcelJSModule;
-            const wb = new ExcelJS.Workbook();
-            const buffer = Buffer.from(input.excelBase64, 'base64');
-            await wb.xlsx.load(buffer as any);
-
-            const ws = wb.worksheets[0];
-            if (!ws) throw new Error('Ficheiro Excel sem folhas de dados');
-
-            // 2. Detectar colunas pelo header
-            const headerRow = ws.getRow(1);
-            const colMap: Record<string, number> = {};
-            headerRow.eachCell((cell, colNumber) => {
-              const val = String(cell.value || '').trim().toLowerCase();
-              if (val.includes('ref')) colMap['ref'] = colNumber;
-              else if (val.includes('designa')) colMap['designacao'] = colNumber;
-              else if (val.includes('armaz')) colMap['armazem'] = colNumber;
-              else if (val.includes('quantid')) colMap['quantidade'] = colNumber;
-              else if (val.includes('unid')) colMap['unidade'] = colNumber;
-              else if (val.includes('prec') || val === 'preço' || val === 'preco') colMap['preco'] = colNumber;
-              else if (val === 'total') colMap['total'] = colNumber;
-              else if (val.includes('tipo')) colMap['tipo'] = colNumber;
-              else if (val.includes('famil') || val === 'familia') colMap['familia'] = colNumber;
-            });
-
-            if (!colMap['ref'] || !colMap['armazem']) {
-              throw new Error('Ficheiro Excel não tem as colunas obrigatórias (Ref_ e Armazem)');
+            if (gestorDaLoja) {
+              eurocodesFichasLoja = await db.getEurocodesUltimaAnalisePorLoja(gestorDaLoja, loja.id);
             }
+          } catch (e) {
+            console.error(`[Stock Global] Erro ao obter eurocodes para loja ${loja.nome}:`, e);
+          }
 
-            // 3. Ler todas as linhas
-            await db.updateBackgroundJob(jobId, { progress: 'A processar linhas do Excel...' });
-            const categoriasPermitidas = ['OC', 'PB', 'TE', 'VL'];
-            interface ItemStockGlobal {
-              ref: string;
-              descricao: string;
-              armazem: number;
-              quantidade: number;
-              familia?: string;
-            }
-            const todosItens: ItemStockGlobal[] = [];
+          const eurocodesSet = new Set(eurocodesFichasLoja.map(e => e.eurocode.toUpperCase().trim()));
 
-            ws.eachRow((row, rowNumber) => {
-              if (rowNumber === 1) return;
-              const ref = String(row.getCell(colMap['ref']).value || '').trim();
-              if (!ref) return;
+          const comFichas: Array<any> = [];
+          const semFichas: Array<any> = [];
 
-              const armazemRaw = row.getCell(colMap['armazem']).value;
-              const armazem = typeof armazemRaw === 'number' ? armazemRaw : parseInt(String(armazemRaw || '0'));
-              if (!armazem || isNaN(armazem)) return;
-
-              const qtdRaw = colMap['quantidade'] ? row.getCell(colMap['quantidade']).value : 1;
-              const quantidade = typeof qtdRaw === 'number' ? qtdRaw : parseFloat(String(qtdRaw || '0').replace(',', '.')) || 0;
-              if (quantidade < 1) return;
-
-              const descricao = colMap['designacao'] ? String(row.getCell(colMap['designacao']).value || '').trim() : '';
-              let familia = colMap['familia'] ? String(row.getCell(colMap['familia']).value || '').trim().toUpperCase() : undefined;
-
-              if (familia && !categoriasPermitidas.includes(familia)) return;
-
-              if (!familia) {
-                const refUpper = ref.toUpperCase();
-                if (/AGS|AGAC|AGN|AGSM|AGSH|AGST|AGSV|AGSMVZ|AGACMVZ/.test(refUpper)) familia = 'PB';
-                else if (/BGS|OCL|OC/.test(refUpper)) familia = 'OC';
-                else if (/RGS|LGS|VVL|VL/.test(refUpper)) familia = 'VL';
-                else if (/TET|TE/.test(refUpper)) familia = 'TE';
-              }
-
-              todosItens.push({ ref, descricao, armazem, quantidade, familia });
-            });
-
-            if (todosItens.length === 0) {
-              throw new Error('Não foram encontrados artigos válidos no ficheiro Excel.');
-            }
-
-            // 4. Agrupar por armazém
-            const porArmazem = new Map<number, ItemStockGlobal[]>();
-            for (const item of todosItens) {
-              if (!porArmazem.has(item.armazem)) porArmazem.set(item.armazem, []);
-              porArmazem.get(item.armazem)!.push(item);
-            }
-
-            await db.updateBackgroundJob(jobId, { progress: `${todosItens.length} artigos lidos, ${porArmazem.size} armazéns. A buscar lojas...` });
-
-            // 5. Buscar todas as lojas e mapear por numeroLoja
-            const todasLojas = await db.getAllLojas();
-            const lojasPorNumero = new Map<number, typeof todasLojas[0]>();
-            for (const loja of todasLojas) {
-              if (loja.numeroLoja) lojasPorNumero.set(loja.numeroLoja, loja);
-            }
-
-            // 6. Buscar todos os gestores e suas lojas
-            const todosGestores = await db.getAllGestores();
-            const gestorLojaMap = new Map<number, Set<number>>();
-            const gestorNomeMap = new Map<number, string>();
-            for (const g of todosGestores) {
-              const lojasGestor = await db.getLojasByGestorId(g.id);
-              gestorLojaMap.set(g.id, new Set(lojasGestor.map(l => l.id)));
-              gestorNomeMap.set(g.id, g.nome || g.user?.name || 'Gestor');
-            }
-
-            // 7. Obter última análise de fichas
-            let ultimaAnaliseFichasId: number | null = null;
-            if (gestorId) {
-              const ultimaAnalise = await db.getUltimaAnaliseFichas(gestorId);
-              ultimaAnaliseFichasId = ultimaAnalise?.id || null;
-            }
-
-            // 8. Para cada armazém, cruzar com fichas e guardar análise
-            const resultadosPorLoja: Array<{
-              lojaId: number;
-              lojaNome: string;
-              lojaNumero: number;
-              gestorId: number | null;
-              gestorNome: string | null;
-              analiseId: number;
-              totalItensStock: number;
-              totalComFichas: number;
-              totalSemFichas: number;
-              totalFichasSemStock: number;
-            }> = [];
-
-            const armazensNaoMapeados: number[] = [];
-            const armazensArray = Array.from(porArmazem);
-            let processadas = 0;
-
-            for (const [armazem, itens] of armazensArray) {
-              const loja = lojasPorNumero.get(armazem);
-              if (!loja) {
-                armazensNaoMapeados.push(armazem);
-                processadas++;
-                continue;
-              }
-
-              await db.updateBackgroundJob(jobId, { progress: `A analisar loja ${loja.nome} (${processadas + 1}/${armazensArray.length})...` });
-
-              let gestorDaLoja: number | null = null;
-              let gestorNomeDaLoja: string | null = null;
-              for (const [gId, lojaIds] of Array.from(gestorLojaMap)) {
-                if (lojaIds.has(loja.id)) {
-                  gestorDaLoja = gId;
-                  gestorNomeDaLoja = gestorNomeMap.get(gId) || null;
-                  break;
-                }
-              }
-
-              let eurocodesFichasLoja: any[] = [];
-              try {
-                if (gestorDaLoja) {
-                  eurocodesFichasLoja = await db.getEurocodesUltimaAnalisePorLoja(gestorDaLoja, loja.id);
-                }
-              } catch (e) {
-                console.error(`[Stock Global] Erro ao obter eurocodes para loja ${loja.nome}:`, e);
-              }
-
-              const eurocodesSet = new Set(eurocodesFichasLoja.map(e => e.eurocode.toUpperCase().trim()));
-
-              const comFichas: Array<any> = [];
-              const semFichas: Array<any> = [];
-
-              for (const item of itens) {
-                const refNorm = item.ref.toUpperCase().trim();
-                if (eurocodesSet.has(refNorm)) {
-                  const fichasAssociadas = eurocodesFichasLoja.filter(e => e.eurocode.toUpperCase().trim() === refNorm);
-                  comFichas.push({
-                    ref: item.ref,
-                    descricao: item.descricao,
-                    quantidade: item.quantidade,
-                    familia: item.familia,
-                    totalFichas: fichasAssociadas.length,
-                    fichas: fichasAssociadas.map(f => ({
-                      obrano: f.obrano,
-                      matricula: f.matricula,
-                      marca: f.marca,
-                      modelo: f.modelo,
-                      status: f.status,
-                      diasAberto: f.diasAberto,
-                    })),
-                  });
-                } else {
-                  semFichas.push({
-                    ref: item.ref,
-                    descricao: item.descricao,
-                    quantidade: item.quantidade,
-                    familia: item.familia,
-                  });
-                }
-              }
-
-              const refsStockSet = new Set(itens.map((i: any) => i.ref.toUpperCase().trim()));
-              const fichasSemStock = eurocodesFichasLoja
-                .filter(e => !refsStockSet.has(e.eurocode.toUpperCase().trim()))
-                .map(f => ({
-                  eurocode: f.eurocode,
+          for (const item of itens) {
+            const refNorm = item.ref.toUpperCase().trim();
+            if (eurocodesSet.has(refNorm)) {
+              const fichasAssociadas = eurocodesFichasLoja.filter(e => e.eurocode.toUpperCase().trim() === refNorm);
+              comFichas.push({
+                ref: item.ref,
+                descricao: item.descricao,
+                quantidade: item.quantidade,
+                familia: item.familia,
+                totalFichas: fichasAssociadas.length,
+                fichas: fichasAssociadas.map(f => ({
                   obrano: f.obrano,
                   matricula: f.matricula,
                   marca: f.marca,
                   modelo: f.modelo,
                   status: f.status,
                   diasAberto: f.diasAberto,
-                }));
-
-              const resultado = { itensStock: itens, comFichas, semFichas, fichasSemStock };
-              const analiseGuardada = await db.createAnaliseStock({
-                gestorId: gestorDaLoja || gestorId || 0,
-                lojaId: loja.id,
-                nomeLoja: loja.nome,
-                totalItensStock: itens.length,
-                totalComFichas: comFichas.length,
-                totalSemFichas: semFichas.length,
-                totalFichasSemStock: fichasSemStock.length,
-                dadosStock: JSON.stringify(itens),
-                resultadoAnalise: JSON.stringify(resultado),
-                analiseIdFichas: ultimaAnaliseFichasId,
+                })),
               });
-
-              try {
-                const eurocodesPresentes = semFichas.map(i => i.ref);
-                await db.actualizarClassificacoesAposAnalise(loja.id, analiseGuardada.id, eurocodesPresentes);
-              } catch (err) {
-                console.error(`[Stock Global] Erro ao actualizar classificações loja ${loja.nome}:`, err);
-              }
-
-              resultadosPorLoja.push({
-                lojaId: loja.id,
-                lojaNome: loja.nome,
-                lojaNumero: armazem,
-                gestorId: gestorDaLoja,
-                gestorNome: gestorNomeDaLoja,
-                analiseId: analiseGuardada.id,
-                totalItensStock: itens.length,
-                totalComFichas: comFichas.length,
-                totalSemFichas: semFichas.length,
-                totalFichasSemStock: fichasSemStock.length,
+            } else {
+              semFichas.push({
+                ref: item.ref,
+                descricao: item.descricao,
+                quantidade: item.quantidade,
+                familia: item.familia,
               });
-              processadas++;
             }
-
-            // 9. Filtrar resultados por role
-            const resultadosFiltrados = isAdmin
-              ? resultadosPorLoja
-              : resultadosPorLoja.filter(r => r.gestorId === gestorId);
-
-            // 10. Agrupar resultados por gestor
-            const porGestor = new Map<string, typeof resultadosFiltrados>();
-            for (const r of resultadosFiltrados) {
-              const key = r.gestorNome || 'Sem Gestor';
-              if (!porGestor.has(key)) porGestor.set(key, []);
-              porGestor.get(key)!.push(r);
-            }
-
-            const resultadoAgrupado = Array.from(porGestor.entries()).map(([gestorNome, lojasResult]) => ({
-              gestorNome,
-              gestorId: lojasResult[0]?.gestorId || null,
-              lojas: lojasResult.sort((a, b) => a.lojaNome.localeCompare(b.lojaNome)),
-              totais: {
-                totalLojas: lojasResult.length,
-                totalItensStock: lojasResult.reduce((s, l) => s + l.totalItensStock, 0),
-                totalComFichas: lojasResult.reduce((s, l) => s + l.totalComFichas, 0),
-                totalSemFichas: lojasResult.reduce((s, l) => s + l.totalSemFichas, 0),
-                totalFichasSemStock: lojasResult.reduce((s, l) => s + l.totalFichasSemStock, 0),
-              },
-            })).sort((a, b) => a.gestorNome.localeCompare(b.gestorNome));
-
-            const resultData = {
-              totalArtigosProcessados: resultadosFiltrados.reduce((s, l) => s + l.totalItensStock, 0),
-              totalLojasAnalisadas: resultadosFiltrados.length,
-              totalArmazens: porArmazem.size,
-              armazensNaoMapeados,
-              nomeArquivo: input.nomeArquivo || 'stock_global.xlsx',
-              porGestor: resultadoAgrupado,
-            };
-            await db.updateBackgroundJob(jobId, { status: 'completed', progress: 'Análise concluída!', result: JSON.stringify(resultData) });
-          } catch (err: any) {
-            await db.updateBackgroundJob(jobId, { status: 'error', error: err.message || 'Erro desconhecido ao analisar stock' }).catch(() => {});
-            console.error('[Stock Global] Erro no processamento background:', err);
           }
-        })();
 
-        return { jobId };
-      }),
+          const refsStockSet = new Set(itens.map((i: any) => i.ref.toUpperCase().trim()));
+          const fichasSemStock = eurocodesFichasLoja
+            .filter(e => !refsStockSet.has(e.eurocode.toUpperCase().trim()))
+            .map(f => ({
+              eurocode: f.eurocode,
+              obrano: f.obrano,
+              matricula: f.matricula,
+              marca: f.marca,
+              modelo: f.modelo,
+              status: f.status,
+              diasAberto: f.diasAberto,
+            }));
 
-    // Polling para verificar o estado do job de análise
-    analisarGlobalStatus: gestorProcedure
-      .input(z.object({ jobId: z.string() }))
-      .query(async ({ input }) => {
-        const job = await db.getBackgroundJob(input.jobId);
-        if (!job) return { status: 'not_found' as const, progress: '', result: null, error: null };
+          const resultado = { itensStock: itens, comFichas, semFichas, fichasSemStock };
+          const analiseGuardada = await db.createAnaliseStock({
+            gestorId: gestorDaLoja || gestorId || 0,
+            lojaId: loja.id,
+            nomeLoja: loja.nome,
+            totalItensStock: itens.length,
+            totalComFichas: comFichas.length,
+            totalSemFichas: semFichas.length,
+            totalFichasSemStock: fichasSemStock.length,
+            dadosStock: JSON.stringify(itens),
+            resultadoAnalise: JSON.stringify(resultado),
+            analiseIdFichas: ultimaAnaliseFichasId,
+          });
+
+          try {
+            const eurocodesPresentes = semFichas.map(i => i.ref);
+            await db.actualizarClassificacoesAposAnalise(loja.id, analiseGuardada.id, eurocodesPresentes);
+          } catch (err) {
+            console.error(`[Stock Global] Erro ao actualizar classificações loja ${loja.nome}:`, err);
+          }
+
+          resultadosPorLoja.push({
+            lojaId: loja.id,
+            lojaNome: loja.nome,
+            lojaNumero: armazem,
+            gestorId: gestorDaLoja,
+            gestorNome: gestorNomeDaLoja,
+            analiseId: analiseGuardada.id,
+            totalItensStock: itens.length,
+            totalComFichas: comFichas.length,
+            totalSemFichas: semFichas.length,
+            totalFichasSemStock: fichasSemStock.length,
+          });
+        }
+
+        // 9. Filtrar resultados por role: gestor vê só as suas lojas, admin vê tudo
+        const isAdmin = ctx.user.role === 'admin';
+        const resultadosFiltrados = isAdmin
+          ? resultadosPorLoja
+          : resultadosPorLoja.filter(r => r.gestorId === gestorId);
+
+        // 10. Agrupar resultados por gestor
+        const porGestor = new Map<string, typeof resultadosFiltrados>();
+        for (const r of resultadosFiltrados) {
+          const key = r.gestorNome || 'Sem Gestor';
+          if (!porGestor.has(key)) porGestor.set(key, []);
+          porGestor.get(key)!.push(r);
+        }
+
+        const resultadoAgrupado = Array.from(porGestor.entries()).map(([gestorNome, lojasResult]) => ({
+          gestorNome,
+          gestorId: lojasResult[0]?.gestorId || null,
+          lojas: lojasResult.sort((a, b) => a.lojaNome.localeCompare(b.lojaNome)),
+          totais: {
+            totalLojas: lojasResult.length,
+            totalItensStock: lojasResult.reduce((s, l) => s + l.totalItensStock, 0),
+            totalComFichas: lojasResult.reduce((s, l) => s + l.totalComFichas, 0),
+            totalSemFichas: lojasResult.reduce((s, l) => s + l.totalSemFichas, 0),
+            totalFichasSemStock: lojasResult.reduce((s, l) => s + l.totalFichasSemStock, 0),
+          },
+        })).sort((a, b) => a.gestorNome.localeCompare(b.gestorNome));
+
         return {
-          status: job.status,
-          progress: job.progress || '',
-          result: job.status === 'completed' && job.result ? JSON.parse(job.result) : null,
-          error: job.status === 'error' ? job.error : null,
+          totalArtigosProcessados: resultadosFiltrados.reduce((s, l) => s + l.totalItensStock, 0),
+          totalLojasAnalisadas: resultadosFiltrados.length,
+          totalArmazens: porArmazem.size,
+          armazensNaoMapeados,
+          nomeArquivo: input.nomeArquivo || 'stock_global.xlsx',
+          porGestor: resultadoAgrupado,
         };
       }),
 
