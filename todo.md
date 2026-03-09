@@ -778,3 +778,12 @@
 - [x] Corrigido: agora usa Referência, Unidade, Família, Descrição, Classificação, Análises Consecutivas (igual ao email)
 - [x] Removida definição duplicada de colunas na sheet Com Fichas
 - [ ] Guardar checkpoint
+
+## Fix: Build Vite falha por falta de memória (Service Unavailable)
+- [x] Diagnosticado: Vite build era "Killed" por OOM ao compilar 69k+ linhas de TSX
+- [x] Adicionado lazy loading (React.lazy) para as 8 páginas maiores
+- [x] Adicionado Suspense wrapper no Router
+- [x] Configurado manual chunks no Vite (vendor, charts, excel, ui, react, pages)
+- [x] Desactivado sourcemaps no build de produção
+- [x] Build agora completa em ~38 segundos
+- [x] Guardar checkpoint
