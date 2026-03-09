@@ -1,0 +1,25 @@
+{
+  "query": "SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME LIKE '%gestor%'",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME LIKE '%gestor%'",
+  "rows": [
+    {
+      "TABLE_NAME": "topicos_reuniao_gestores"
+    },
+    {
+      "TABLE_NAME": "gestores"
+    },
+    {
+      "TABLE_NAME": "gestor_lojas"
+    },
+    {
+      "TABLE_NAME": "reunioes_gestores"
+    },
+    {
+      "TABLE_NAME": "relatorios_reuniao_gestores"
+    }
+  ],
+  "messages": [],
+  "stdout": "TABLE_NAME\ntopicos_reuniao_gestores\ngestores\ngestor_lojas\nreunioes_gestores\nrelatorios_reuniao_gestores\n",
+  "stderr": "",
+  "execution_time_ms": 121
+}

@@ -1,11 +1,10 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { trpc } from '@/lib/trpc';
 import { useAuth } from '@/_core/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
@@ -13,7 +12,6 @@ import { toast } from 'sonner';
 import {
   Warehouse,
   Search,
-  ClipboardPaste,
   BarChart3,
   CheckCircle2,
   XCircle,
@@ -24,7 +22,6 @@ import {
   Loader2,
   FileText,
   Info,
-  Download,
   Trash2,
   Mail,
   Send,
@@ -36,11 +33,17 @@ import {
   TrendingUp,
   TrendingDown,
   Minus,
-  Plus,
-  ArrowRight,
+  Upload,
+  Store,
+  Users,
+  Eye,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
+
+// --- Interfaces ---
 
 interface ItemComFichas {
   ref: string;
@@ -75,6 +78,41 @@ interface FichaSemStock {
   diasAberto: number;
 }
 
+interface LojaResultado {
+  lojaId: number;
+  lojaNome: string;
+  lojaNumero: number;
+  gestorId: number | null;
+  gestorNome: string | null;
+  analiseId: number;
+  totalItensStock: number;
+  totalComFichas: number;
+  totalSemFichas: number;
+  totalFichasSemStock: number;
+}
+
+interface GestorGrupo {
+  gestorNome: string;
+  gestorId: number | null;
+  lojas: LojaResultado[];
+  totais: {
+    totalLojas: number;
+    totalItensStock: number;
+    totalComFichas: number;
+    totalSemFichas: number;
+    totalFichasSemStock: number;
+  };
+}
+
+interface ResultadoGlobal {
+  totalArtigosProcessados: number;
+  totalLojasAnalisadas: number;
+  totalArmazens: number;
+  armazensNaoMapeados: number[];
+  nomeArquivo: string;
+  porGestor: GestorGrupo[];
+}
+
 // --- Export helpers ---
 
 const CLASSIFICACAO_LABELS: Record<string, string> = {
@@ -101,9 +139,8 @@ async function exportConsolidatedExcel(
 ) {
   try {
     const wb = new ExcelJS.Workbook();
-    const dataStr = new Date().toLocaleDateString('pt-PT');
 
-    // --- Sheet 1: Com Fichas ---
+    // Sheet 1: Com Fichas
     const ws1 = wb.addWorksheet('Com Fichas');
     ws1.columns = [
       { header: 'Referência', key: 'ref', width: 18 },
@@ -113,9 +150,8 @@ async function exportConsolidatedExcel(
       { header: 'N.º Fichas', key: 'totalFichas', width: 12 },
       { header: 'Fichas Associadas', key: 'fichasDetalhe', width: 50 },
     ];
-    ws1.getRow(1).font = { bold: true };
-    ws1.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF16A34A' } };
     ws1.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    ws1.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF16A34A' } };
     for (const item of comFichas) {
       ws1.addRow({
         ref: item.ref,
@@ -127,7 +163,7 @@ async function exportConsolidatedExcel(
       });
     }
 
-    // --- Sheet 2: Sem Fichas (desmultiplicado: 1 linha por unidade) ---
+    // Sheet 2: Sem Fichas (desmultiplicado)
     const ws2 = wb.addWorksheet('Sem Fichas');
     ws2.columns = [
       { header: 'Referência', key: 'ref', width: 18 },
@@ -142,7 +178,7 @@ async function exportConsolidatedExcel(
     for (const item of semFichas) {
       const qty = item.quantidade || 1;
       for (let unitIdx = 1; unitIdx <= qty; unitIdx++) {
-        const unitKey = `${item.ref?.toUpperCase()?.trim()}|${unitIdx}`;
+        const unitKey = `${(item.ref || '').toUpperCase().trim()}|${unitIdx}`;
         const classif = classificacoesMap.get(unitKey);
         const recorr = recorrenciaMap.get(unitKey);
         ws2.addRow({
@@ -156,7 +192,7 @@ async function exportConsolidatedExcel(
       }
     }
 
-    // --- Sheet 3: Fichas s/ Stock ---
+    // Sheet 3: Fichas sem Stock
     const ws3 = wb.addWorksheet('Fichas sem Stock');
     ws3.columns = [
       { header: 'Eurocode', key: 'eurocode', width: 18 },
@@ -190,57 +226,64 @@ async function exportConsolidatedExcel(
   }
 }
 
+// --- Main Component ---
+
 export default function ControloStock() {
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
   const utils = trpc.useUtils();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [textoStock, setTextoStock] = useState('');
-  const [lojaId, setLojaId] = useState<number | null>(null);
-  const [view, setView] = useState<'input' | 'resultado' | 'historico' | 'detalhe'>('input');
+  // Views: 'upload' (global upload), 'resultadoGlobal' (gestor-grouped cards), 'detalhe' (per-loja detail), 'historico'
+  const [view, setView] = useState<'upload' | 'resultadoGlobal' | 'detalhe' | 'historico'>('upload');
   const [searchTerm, setSearchTerm] = useState('');
   const [activeResultTab, setActiveResultTab] = useState('comFichas');
   const [filtroClassificacao, setFiltroClassificacao] = useState<string>('todas');
+
+  // Upload state
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+
+  // Global result
+  const [resultadoGlobal, setResultadoGlobal] = useState<ResultadoGlobal | null>(null);
+
+  // Gestor groups expanded state
+  const [expandedGestores, setExpandedGestores] = useState<Set<string>>(new Set());
+
+  // Per-loja detail
+  const [detalheLojaId, setDetalheLojaId] = useState<number | null>(null);
+  const [detalheLojaNome, setDetalheLojaNome] = useState<string>('');
+  const [detalheAnaliseId, setDetalheAnaliseId] = useState<number | null>(null);
+
+  // Historico detail
+  const [detalheId, setDetalheId] = useState<number | null>(null);
 
   // Comparação
   const [comparacaoIds, setComparacaoIds] = useState<number[]>([]);
   const [viewComparacao, setViewComparacao] = useState(false);
 
-  // Resultado da análise atual
-  const [resultadoAtual, setResultadoAtual] = useState<{
-    id: number;
-    totalItensStock: number;
-    totalComFichas: number;
-    totalSemFichas: number;
-    totalFichasSemStock: number;
-    comFichas: ItemComFichas[];
-    semFichas: ItemSemFichas[];
-    fichasSemStock: FichaSemStock[];
-    dataAnaliseFichas: string | null;
-  } | null>(null);
-
-  // Detalhe de análise do histórico
-  const [detalheId, setDetalheId] = useState<number | null>(null);
-
   // Queries
-  const { data: lojas } = trpc.lojas.getByGestor.useQuery();
   const { data: infoAnalise } = trpc.stock.infoAnalise.useQuery({});
   const { data: historico } = trpc.stock.historico.useQuery({}, { enabled: view === 'historico' });
   const { data: detalheAnalise } = trpc.stock.detalhe.useQuery(
-    { id: detalheId! },
-    { enabled: !!detalheId && view === 'detalhe' }
+    { id: detalheAnaliseId || detalheId! },
+    { enabled: !!(detalheAnaliseId || detalheId) && view === 'detalhe' }
   );
 
   // Mutations
-  const analisarMutation = trpc.stock.analisar.useMutation({
+  const analisarGlobalMutation = trpc.stock.analisarGlobal.useMutation({
     onSuccess: (data) => {
-      setResultadoAtual(data as any);
-      setView('resultado');
-      toast.success(`Análise concluída! ${data.totalItensStock} itens de stock analisados.`);
+      setResultadoGlobal(data as any);
+      // Expand all gestores by default
+      const allGestores = new Set((data as any).porGestor.map((g: any) => g.gestorNome));
+      setExpandedGestores(allGestores);
+      setView('resultadoGlobal');
+      toast.success(`Análise global concluída! ${data.totalArtigosProcessados} artigos em ${data.totalLojasAnalisadas} lojas.`);
       utils.stock.historico.invalidate();
     },
     onError: (error) => {
-      toast.error(error.message || 'Erro ao analisar stock');
+      toast.error(error.message || 'Erro ao analisar stock global');
+      setIsUploading(false);
     },
   });
 
@@ -275,9 +318,9 @@ export default function ControloStock() {
   const classificarMutation = trpc.stock.classificar.useMutation({
     onSuccess: () => {
       toast.success('Classificação guardada');
-      if (lojaIdActiva) {
-        utils.stock.classificacoes.invalidate({ lojaId: lojaIdActiva });
-        utils.stock.recorrencia.invalidate({ lojaId: lojaIdActiva });
+      if (detalheLojaId) {
+        utils.stock.classificacoes.invalidate({ lojaId: detalheLojaId });
+        utils.stock.recorrencia.invalidate({ lojaId: detalheLojaId });
       }
     },
     onError: (error) => {
@@ -285,25 +328,20 @@ export default function ControloStock() {
     },
   });
 
-  const lojaSelecionada = useMemo(() => {
-    if (!lojaId || !lojas) return null;
-    return lojas.find((l: any) => l.id === lojaId);
-  }, [lojaId, lojas]);
-
-  // Loja ID activa (da análise actual ou do detalhe)
-  const lojaIdActivaEarly = view === 'resultado' ? lojaId : (detalheAnalise as any)?.lojaId || null;
+  // Loja ID activa (do detalhe)
+  const lojaIdActiva = view === 'detalhe' ? (detalheLojaId || (detalheAnalise as any)?.lojaId || null) : null;
 
   // Queries de classificações e recorrência
   const { data: classificacoes } = trpc.stock.classificacoes.useQuery(
-    { lojaId: lojaIdActivaEarly! },
-    { enabled: !!lojaIdActivaEarly && (view === 'resultado' || view === 'detalhe') }
+    { lojaId: lojaIdActiva! },
+    { enabled: !!lojaIdActiva && view === 'detalhe' }
   );
   const { data: recorrencia } = trpc.stock.recorrencia.useQuery(
-    { lojaId: lojaIdActivaEarly! },
-    { enabled: !!lojaIdActivaEarly && (view === 'resultado' || view === 'detalhe') }
+    { lojaId: lojaIdActiva! },
+    { enabled: !!lojaIdActiva && view === 'detalhe' }
   );
 
-  // Maps para lookup rápido (chave: eurocode|unitIndex)
+  // Maps para lookup rápido
   const classificacoesMap = useMemo(() => {
     const map = new Map<string, { id: number; classificacao: string }>();
     if (classificacoes) {
@@ -319,7 +357,6 @@ export default function ControloStock() {
     const map = new Map<string, number>();
     if (recorrencia) {
       for (const r of recorrencia) {
-        // Para recorrência, usar a mesma chave eurocode|unitIndex
         const key = `${r.eurocode.toUpperCase().trim()}|${(r as any).unitIndex || 1}`;
         map.set(key, r.analisesConsecutivas);
       }
@@ -327,71 +364,13 @@ export default function ControloStock() {
     return map;
   }, [recorrencia]);
 
-  const handleAnalisar = () => {
-    if (!textoStock.trim()) {
-      toast.error('Cole a listagem de stock na área de texto');
-      return;
-    }
-    if (!lojaId || !lojaSelecionada) {
-      toast.error('Seleccione a loja');
-      return;
-    }
-
-    analisarMutation.mutate({
-      textoStock: textoStock.trim(),
-      lojaId,
-      nomeLoja: (lojaSelecionada as any).nome || 'Loja',
-    });
-  };
-
-  const handleVerDetalhe = (id: number) => {
-    setDetalheId(id);
-    setView('detalhe');
-  };
-
-  // Dados do detalhe parseados
-  const detalheResultado = useMemo(() => {
-    if (!detalheAnalise?.resultadoAnalise) return null;
+  // Dados activos para detalhe
+  const dadosActivos = useMemo(() => {
+    if (view !== 'detalhe' || !detalheAnalise?.resultadoAnalise) return null;
     return detalheAnalise.resultadoAnalise;
-  }, [detalheAnalise]);
+  }, [view, detalheAnalise]);
 
-  // Query de comparação
-  const { data: comparacaoData, isLoading: comparacaoLoading } = trpc.stock.comparar.useQuery(
-    { analiseId1: comparacaoIds[0]!, analiseId2: comparacaoIds[1]! },
-    { enabled: comparacaoIds.length === 2 && viewComparacao }
-  );
-
-  // Filtrar itens por pesquisa
-  const filtrarItens = <T extends { ref?: string; descricao?: string; eurocode?: string }>(itens: T[]): T[] => {
-    if (!searchTerm) return itens;
-    const term = searchTerm.toLowerCase();
-    return itens.filter(i =>
-      (i.ref && i.ref.toLowerCase().includes(term)) ||
-      (i.descricao && i.descricao.toLowerCase().includes(term)) ||
-      (i.eurocode && i.eurocode.toLowerCase().includes(term))
-    );
-  };
-
-  // Filtrar itens sem fichas por classificação (usa chave eurocode|unitIndex)
-  const filtrarSemFichasPorClassificacao = (itens: any[]): any[] => {
-    if (filtroClassificacao === 'todas') return itens;
-    if (filtroClassificacao === 'sem_classificacao') {
-      return itens.filter((item: any) => {
-        const key = `${item.ref?.toUpperCase()?.trim()}|${item.unitIndex || 1}`;
-        return !classificacoesMap.get(key);
-      });
-    }
-    return itens.filter((item: any) => {
-      const key = `${item.ref?.toUpperCase()?.trim()}|${item.unitIndex || 1}`;
-      const classifData = classificacoesMap.get(key);
-      return classifData?.classificacao === filtroClassificacao;
-    });
-  };
-
-  // Dados activos (resultado actual ou detalhe do histórico)
-  const dadosActivos = view === 'resultado' ? resultadoAtual : view === 'detalhe' ? detalheResultado : null;
-
-  // Desmultiplicar itens sem fichas: cada unidade numa alínea separada
+  // Desmultiplicar itens sem fichas
   const semFichasDesmultiplicados = useMemo(() => {
     if (!dadosActivos?.semFichas) return [];
     const resultado: Array<any & { unitIndex: number; totalUnidades: number }> = [];
@@ -409,14 +388,104 @@ export default function ControloStock() {
     return resultado;
   }, [dadosActivos?.semFichas]);
 
-  const lojaIdActiva = lojaIdActivaEarly;
-
   // Nome da loja para exportação
-  const nomeLoja = view === 'resultado'
-    ? ((lojaSelecionada as any)?.nome || 'Loja')
-    : (detalheAnalise?.nomeLoja || 'Loja');
+  const nomeLoja = detalheLojaNome || detalheAnalise?.nomeLoja || 'Loja';
 
-  // --- Export handler (consolidated) ---
+  // --- Handlers ---
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
+        toast.error('Por favor seleccione um ficheiro Excel (.xlsx ou .xls)');
+        return;
+      }
+      setSelectedFile(file);
+    }
+  };
+
+  const handleAnalisarGlobal = async () => {
+    if (!selectedFile) {
+      toast.error('Seleccione um ficheiro Excel');
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const buffer = await selectedFile.arrayBuffer();
+      const base64 = btoa(
+        new Uint8Array(buffer).reduce((data, byte) => data + String.fromCharCode(byte), '')
+      );
+
+      analisarGlobalMutation.mutate({
+        excelBase64: base64,
+        nomeArquivo: selectedFile.name,
+      });
+    } catch (err) {
+      toast.error('Erro ao ler o ficheiro');
+      setIsUploading(false);
+    }
+  };
+
+  const handleVerDetalheLoja = (loja: LojaResultado) => {
+    setDetalheLojaId(loja.lojaId);
+    setDetalheLojaNome(loja.lojaNome);
+    setDetalheAnaliseId(loja.analiseId);
+    setDetalheId(null);
+    setView('detalhe');
+    setSearchTerm('');
+    setActiveResultTab('comFichas');
+    setFiltroClassificacao('todas');
+  };
+
+  const handleVerDetalheHistorico = (id: number) => {
+    setDetalheId(id);
+    setDetalheAnaliseId(id);
+    setDetalheLojaId(null);
+    setDetalheLojaNome('');
+    setView('detalhe');
+    setSearchTerm('');
+    setActiveResultTab('comFichas');
+    setFiltroClassificacao('todas');
+  };
+
+  const toggleGestor = (gestorNome: string) => {
+    setExpandedGestores(prev => {
+      const next = new Set(prev);
+      if (next.has(gestorNome)) next.delete(gestorNome);
+      else next.add(gestorNome);
+      return next;
+    });
+  };
+
+  // Filtrar itens por pesquisa
+  const filtrarItens = <T extends { ref?: string; descricao?: string; eurocode?: string }>(itens: T[]): T[] => {
+    if (!searchTerm) return itens;
+    const term = searchTerm.toLowerCase();
+    return itens.filter(i =>
+      (i.ref && i.ref.toLowerCase().includes(term)) ||
+      (i.descricao && i.descricao.toLowerCase().includes(term)) ||
+      (i.eurocode && i.eurocode.toLowerCase().includes(term))
+    );
+  };
+
+  // Filtrar itens sem fichas por classificação
+  const filtrarSemFichasPorClassificacao = (itens: any[]): any[] => {
+    if (filtroClassificacao === 'todas') return itens;
+    if (filtroClassificacao === 'sem_classificacao') {
+      return itens.filter((item: any) => {
+        const key = `${item.ref?.toUpperCase()?.trim()}|${item.unitIndex || 1}`;
+        return !classificacoesMap.get(key);
+      });
+    }
+    return itens.filter((item: any) => {
+      const key = `${item.ref?.toUpperCase()?.trim()}|${item.unitIndex || 1}`;
+      const classifData = classificacoesMap.get(key);
+      return classifData?.classificacao === filtroClassificacao;
+    });
+  };
+
+  // Export handler
   const handleExportConsolidado = () => {
     if (!dadosActivos) return;
     const classifMapSimple = new Map<string, string>();
@@ -431,10 +500,10 @@ export default function ControloStock() {
     );
   };
 
-  // Handler para classificar eurocode (por unidade individual)
+  // Classificar handler
   const handleClassificar = (eurocode: string, unitIndex: number, classificacao: string) => {
     if (!lojaIdActiva) return;
-    const analiseId = view === 'resultado' ? resultadoAtual?.id : detalheId;
+    const analiseId = detalheAnaliseId || detalheId;
     if (!analiseId) return;
     classificarMutation.mutate({
       lojaId: lojaIdActiva,
@@ -445,7 +514,7 @@ export default function ControloStock() {
     });
   };
 
-  // --- Email consolidado handler ---
+  // Email consolidado handler
   const handleEmailConsolidado = () => {
     if (!lojaIdActiva || !dadosActivos) {
       toast.error('Dados insuficientes para enviar email');
@@ -461,7 +530,21 @@ export default function ControloStock() {
     });
   };
 
-  // --- Comparação handlers ---
+  // Email tab handler
+  const handleEmailTab = (status: 'comFichas' | 'semFichas' | 'fichasSemStock') => {
+    if (!lojaIdActiva) {
+      toast.error('Loja não identificada para envio de email');
+      return;
+    }
+    let itens: any[] = [];
+    if (status === 'comFichas' && dadosActivos?.comFichas) itens = filtrarItens(dadosActivos.comFichas);
+    else if (status === 'semFichas' && dadosActivos?.semFichas) itens = filtrarItens(dadosActivos.semFichas);
+    else if (status === 'fichasSemStock' && dadosActivos?.fichasSemStock) itens = filtrarItens(dadosActivos.fichasSemStock);
+    if (itens.length === 0) { toast.error('Sem itens para enviar'); return; }
+    enviarEmailMutation.mutate({ lojaId: lojaIdActiva, nomeLoja, status, itens });
+  };
+
+  // Comparação handlers
   const toggleComparacao = (analiseId: number) => {
     setComparacaoIds(prev => {
       if (prev.includes(analiseId)) return prev.filter(id => id !== analiseId);
@@ -471,41 +554,15 @@ export default function ControloStock() {
   };
 
   const handleIniciarComparacao = () => {
-    if (comparacaoIds.length === 2) {
-      setViewComparacao(true);
-    } else {
-      toast.error('Seleccione 2 análises para comparar');
-    }
+    if (comparacaoIds.length === 2) setViewComparacao(true);
+    else toast.error('Seleccione 2 análises para comparar');
   };
 
-  // --- Email handlers ---
-  const handleEmailTab = (status: 'comFichas' | 'semFichas' | 'fichasSemStock') => {
-    if (!lojaIdActiva) {
-      toast.error('Loja não identificada para envio de email');
-      return;
-    }
-
-    let itens: any[] = [];
-    if (status === 'comFichas' && dadosActivos?.comFichas) {
-      itens = filtrarItens(dadosActivos.comFichas);
-    } else if (status === 'semFichas' && dadosActivos?.semFichas) {
-      itens = filtrarItens(dadosActivos.semFichas);
-    } else if (status === 'fichasSemStock' && dadosActivos?.fichasSemStock) {
-      itens = filtrarItens(dadosActivos.fichasSemStock);
-    }
-
-    if (itens.length === 0) {
-      toast.error('Sem itens para enviar');
-      return;
-    }
-
-    enviarEmailMutation.mutate({
-      lojaId: lojaIdActiva,
-      nomeLoja,
-      status,
-      itens,
-    });
-  };
+  // Comparação query
+  const { data: comparacaoData, isLoading: comparacaoLoading } = trpc.stock.comparar.useQuery(
+    { analiseId1: comparacaoIds[0]!, analiseId2: comparacaoIds[1]! },
+    { enabled: comparacaoIds.length === 2 && viewComparacao }
+  );
 
   // Variação helper
   const VariacaoDisplay = ({ valor }: { valor: number }) => {
@@ -521,14 +578,15 @@ export default function ControloStock() {
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 min-w-0">
-              {(view === 'resultado' || view === 'historico' || view === 'detalhe') && (
+              {(view === 'resultadoGlobal' || view === 'detalhe' || view === 'historico') && (
                 <Button
                   variant="ghost"
                   size="icon"
                   className="h-8 w-8 shrink-0"
                   onClick={() => {
-                    if (view === 'detalhe') setView('historico');
-                    else setView('input');
+                    if (view === 'detalhe' && resultadoGlobal) setView('resultadoGlobal');
+                    else if (view === 'detalhe') setView('historico');
+                    else setView('upload');
                   }}
                 >
                   <ArrowLeft className="h-4 w-4" />
@@ -543,13 +601,13 @@ export default function ControloStock() {
             </div>
             <div className="flex gap-1.5 shrink-0">
               <Button
-                variant={view === 'input' ? 'default' : 'outline'}
+                variant={view === 'upload' || view === 'resultadoGlobal' ? 'default' : 'outline'}
                 size="sm"
                 className="text-xs px-2 md:text-sm md:px-3"
-                onClick={() => setView('input')}
+                onClick={() => setView('upload')}
               >
-                <ClipboardPaste className="h-3.5 w-3.5 mr-1" />
-                <span className="hidden sm:inline">Nova </span>Análise
+                <Upload className="h-3.5 w-3.5 mr-1" />
+                <span className="hidden sm:inline">Carregar </span>Ficheiro
               </Button>
               <Button
                 variant={view === 'historico' ? 'default' : 'outline'}
@@ -562,7 +620,7 @@ export default function ControloStock() {
               </Button>
             </div>
           </div>
-          {(view === 'resultado' || view === 'detalhe') && nomeLoja && (
+          {view === 'detalhe' && nomeLoja && (
             <p className="text-sm md:text-base font-semibold text-muted-foreground pl-1">
               {nomeLoja}
             </p>
@@ -570,7 +628,7 @@ export default function ControloStock() {
         </div>
 
         {/* Info da última análise de fichas */}
-        {infoAnalise && (
+        {infoAnalise && view !== 'resultadoGlobal' && (
           <Card className="border-blue-200 bg-blue-50/50">
             <CardContent className="pt-4 pb-4">
               <div className="flex items-center gap-2 text-sm">
@@ -590,71 +648,70 @@ export default function ControloStock() {
           </Card>
         )}
 
-        {/* VIEW: Input */}
-        {view === 'input' && (
+        {/* VIEW: Upload */}
+        {view === 'upload' && (
           <div className="space-y-4">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <ClipboardPaste className="h-5 w-5" />
-                  Colar Listagem de Stock
+                  <Upload className="h-5 w-5" />
+                  Carregar Listagem de Stock Global
                 </CardTitle>
                 <CardDescription>
-                  Cole a listagem de stock exportada do sistema. Formato: colunas separadas por tab (Família, Ref, Descrição, Stock, Epcpond).
-                  Apenas categorias OC, PB, TE, VL, VP com quantidade {'>='}  1 serão consideradas.
+                  Carregue o ficheiro Excel com a listagem de stock de todas as lojas.
+                  O sistema separa automaticamente por armazém/loja e cruza com as fichas de serviço.
+                  <br />
+                  <span className="text-xs text-muted-foreground mt-1 block">
+                    Colunas esperadas: Ref_, Designacao, Armazem, Quantidade, Unidade, Preco, Total, Tipo, Familia.
+                    Apenas famílias OC, PB, VL e TE são consideradas.
+                  </span>
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* Selecção da loja */}
-                <div>
-                  <label className="text-sm font-medium mb-1 block">Loja</label>
-                  <Select
-                    value={lojaId?.toString() || ''}
-                    onValueChange={(v) => setLojaId(Number(v))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccione a loja..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {lojas?.map((loja: any) => (
-                        <SelectItem key={loja.id} value={loja.id.toString()}>
-                          {loja.nome}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Área de texto para colar */}
-                <div>
-                  <label className="text-sm font-medium mb-1 block">Listagem de Stock</label>
-                  <Textarea
-                    placeholder={"Cole aqui a listagem de stock exportada do sistema...\n\nFormato: Familia  Ref  Design  Stock  Epcpond (separado por tabs)\n\nExemplo:\nOC\t3341BGSH\tOCL FIAT PUNTO 93> VRD\t1,000\t88,500000\nPB\t2763AGSVZ\tPBL RENAULT CLIO V 19-\t3,000\t125,000000"}
-                    value={textoStock}
-                    onChange={(e) => setTextoStock(e.target.value)}
-                    className="min-h-[200px] font-mono text-sm"
+                {/* File upload */}
+                <div
+                  className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:border-blue-400 hover:bg-blue-50/50 transition-colors"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".xlsx,.xls"
+                    onChange={handleFileSelect}
+                    className="hidden"
                   />
-                  {textoStock && (
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {textoStock.split('\n').filter(l => l.trim()).length} linhas detectadas
-                    </p>
+                  <FileSpreadsheet className="h-12 w-12 mx-auto text-blue-400 mb-3" />
+                  {selectedFile ? (
+                    <div>
+                      <p className="font-medium text-blue-700">{selectedFile.name}</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {(selectedFile.size / 1024).toFixed(1)} KB — Clique para alterar
+                      </p>
+                    </div>
+                  ) : (
+                    <div>
+                      <p className="font-medium">Clique para seleccionar o ficheiro Excel</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Formato: .xlsx ou .xls
+                      </p>
+                    </div>
                   )}
                 </div>
 
                 <Button
-                  onClick={handleAnalisar}
-                  disabled={analisarMutation.isPending || !textoStock.trim() || !lojaId}
+                  onClick={handleAnalisarGlobal}
+                  disabled={!selectedFile || isUploading || analisarGlobalMutation.isPending}
                   className="w-full"
                 >
-                  {analisarMutation.isPending ? (
+                  {(isUploading || analisarGlobalMutation.isPending) ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      A analisar...
+                      A analisar stock global...
                     </>
                   ) : (
                     <>
                       <BarChart3 className="h-4 w-4 mr-2" />
-                      Analisar Stock
+                      Analisar Stock Global
                     </>
                   )}
                 </Button>
@@ -663,8 +720,118 @@ export default function ControloStock() {
           </div>
         )}
 
-        {/* VIEW: Resultado ou Detalhe */}
-        {(view === 'resultado' || view === 'detalhe') && dadosActivos && (
+        {/* VIEW: Resultado Global (agrupado por gestor) */}
+        {view === 'resultadoGlobal' && resultadoGlobal && (
+          <div className="space-y-4">
+            {/* Summary card */}
+            <Card>
+              <CardContent className="pt-4 pb-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <FileSpreadsheet className="h-4 w-4 text-blue-600" />
+                  <span className="font-medium text-sm">{resultadoGlobal.nomeArquivo}</span>
+                  <span className="text-xs text-muted-foreground">
+                    Analisado em {new Date().toLocaleDateString('pt-PT')}, {new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  <div className="bg-blue-50 rounded-lg px-3 py-2 text-center">
+                    <div className="text-lg sm:text-xl font-bold text-blue-700">{resultadoGlobal.totalArtigosProcessados}</div>
+                    <div className="text-[10px] sm:text-xs text-muted-foreground">Total Artigos</div>
+                  </div>
+                  <div className="bg-green-50 rounded-lg px-3 py-2 text-center">
+                    <div className="text-lg sm:text-xl font-bold text-green-700">{resultadoGlobal.totalLojasAnalisadas}</div>
+                    <div className="text-[10px] sm:text-xs text-muted-foreground">Lojas Analisadas</div>
+                  </div>
+                  <div className="bg-purple-50 rounded-lg px-3 py-2 text-center">
+                    <div className="text-lg sm:text-xl font-bold text-purple-700">{resultadoGlobal.porGestor.length}</div>
+                    <div className="text-[10px] sm:text-xs text-muted-foreground">Gestores</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Gestor groups */}
+            {resultadoGlobal.porGestor.map((grupo) => (
+              <div key={grupo.gestorNome} className="space-y-2">
+                {/* Gestor header */}
+                <div
+                  className="flex items-center justify-between bg-gray-50 rounded-lg px-4 py-3 cursor-pointer hover:bg-gray-100 transition-colors"
+                  onClick={() => toggleGestor(grupo.gestorNome)}
+                >
+                  <div className="flex items-center gap-2">
+                    <Users className="h-4 w-4 text-blue-600" />
+                    <span className="font-semibold text-sm">{grupo.gestorNome}</span>
+                    <Badge variant="secondary" className="text-[10px]">{grupo.totais.totalLojas} lojas</Badge>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="hidden sm:flex items-center gap-2 text-xs">
+                      <span className="text-blue-600 font-medium">{grupo.totais.totalItensStock} itens</span>
+                      <span className="text-green-600">{grupo.totais.totalComFichas} c/fichas</span>
+                      <span className="text-amber-600">{grupo.totais.totalSemFichas} s/fichas</span>
+                      <span className="text-red-600">{grupo.totais.totalFichasSemStock} s/stock</span>
+                    </div>
+                    {expandedGestores.has(grupo.gestorNome) ? (
+                      <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                    )}
+                  </div>
+                </div>
+
+                {/* Loja cards */}
+                {expandedGestores.has(grupo.gestorNome) && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pl-2">
+                    {grupo.lojas.map((loja) => (
+                      <Card
+                        key={loja.lojaId}
+                        className="cursor-pointer hover:border-blue-300 transition-colors"
+                        onClick={() => handleVerDetalheLoja(loja)}
+                      >
+                        <CardContent className="pt-3 pb-3 px-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-1.5">
+                              <Store className="h-3.5 w-3.5 text-blue-600" />
+                              <span className="font-semibold text-sm">{loja.lojaNome}</span>
+                              <Badge variant="outline" className="text-[10px] px-1.5 py-0">#{loja.lojaNumero}</Badge>
+                            </div>
+                          </div>
+                          <div className="space-y-1 text-xs">
+                            <div className="flex items-center justify-between">
+                              <span className="text-muted-foreground">Total Stock:</span>
+                              <span className="font-bold text-blue-700">{loja.totalItensStock}</span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-muted-foreground">Com Fichas:</span>
+                              <span className="font-medium text-green-600">{loja.totalComFichas}</span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-muted-foreground">Sem Fichas:</span>
+                              <span className="font-medium text-amber-600">{loja.totalSemFichas}</span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-muted-foreground">Fichas s/ Stock:</span>
+                              <span className="font-medium text-red-600">{loja.totalFichasSemStock}</span>
+                            </div>
+                          </div>
+                          <div className="flex items-center justify-between mt-2 pt-2 border-t">
+                            <span className="text-[10px] text-muted-foreground">Pendente</span>
+                            <div className="flex items-center gap-1 text-xs text-blue-600">
+                              <Eye className="h-3 w-3" />
+                              Ver &gt;
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* VIEW: Detalhe por Loja */}
+        {view === 'detalhe' && dadosActivos && (
           <div className="space-y-4">
             {/* Cards de resumo */}
             <div className="grid grid-cols-4 gap-2 md:gap-3">
@@ -791,7 +958,6 @@ export default function ControloStock() {
                             <span className="text-[10px] text-muted-foreground ml-0.5">un.</span>
                           </div>
                         </div>
-                        {/* Fichas associadas */}
                         {item.fichas && item.fichas.length > 0 && (
                           <div className="mt-1.5 border-t pt-1.5">
                             <p className="text-[10px] font-medium text-muted-foreground mb-0.5">Fichas associadas:</p>
@@ -815,9 +981,8 @@ export default function ControloStock() {
                 )}
               </TabsContent>
 
-              {/* Tab: Sem Fichas (desmultiplicado: 1 alínea por unidade) */}
+              {/* Tab: Sem Fichas (desmultiplicado) */}
               <TabsContent value="semFichas" className="space-y-1.5 mt-3">
-                {/* Filtro por classificação */}
                 <div className="flex items-center gap-2 mb-2">
                   <Filter className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                   <select
@@ -868,7 +1033,6 @@ export default function ControloStock() {
                                 )}
                               </div>
                               <p className="text-xs text-muted-foreground mt-0.5 truncate">{item.descricao}</p>
-                              {/* Classificação por unidade */}
                               <div className="flex items-center gap-1 mt-1 flex-wrap">
                                 {classifData ? (
                                   <Badge className={`text-[10px] px-1.5 py-0 ${CLASSIFICACAO_COLORS[classifData.classificacao] || 'bg-gray-100 text-gray-700'}`}>
@@ -942,6 +1106,13 @@ export default function ControloStock() {
           </div>
         )}
 
+        {/* VIEW: Detalhe loading */}
+        {view === 'detalhe' && !dadosActivos && (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+          </div>
+        )}
+
         {/* VIEW: Histórico */}
         {view === 'historico' && !viewComparacao && (
           <div className="space-y-3">
@@ -981,7 +1152,7 @@ export default function ControloStock() {
                       ? 'border-blue-400 bg-blue-50/50 ring-1 ring-blue-300'
                       : 'hover:border-blue-300'
                   }`}
-                  onClick={() => handleVerDetalhe(analise.id)}
+                  onClick={() => handleVerDetalheHistorico(analise.id)}
                 >
                   <CardContent className="pt-4 pb-4">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
@@ -1060,7 +1231,6 @@ export default function ControloStock() {
               </div>
             ) : comparacaoData ? (
               <>
-                {/* Resumo das duas análises */}
                 <div className="grid grid-cols-2 gap-3">
                   <Card className="border-gray-300">
                     <CardContent className="pt-3 pb-3 text-center">
@@ -1094,7 +1264,6 @@ export default function ControloStock() {
                   </Card>
                 </div>
 
-                {/* Variações */}
                 <Card>
                   <CardContent className="pt-3 pb-3">
                     <h3 className="text-sm font-semibold mb-2">Variações</h3>
@@ -1119,16 +1288,13 @@ export default function ControloStock() {
                   </CardContent>
                 </Card>
 
-                {/* Itens Sem Fichas: Novos, Resolvidos, Mantidos */}
                 <div className="space-y-3">
-                  {/* Resolvidos */}
                   {comparacaoData.semFichas.resolvidos.length > 0 && (
                     <Card className="border-green-200">
                       <CardContent className="pt-3 pb-3">
                         <h3 className="text-sm font-semibold text-green-700 flex items-center gap-1.5 mb-2">
                           <CheckCircle2 className="h-4 w-4" />
                           Resolvidos ({comparacaoData.semFichas.resolvidos.length})
-                          <span className="text-[10px] font-normal text-muted-foreground ml-1">Já não estão sem ficha</span>
                         </h3>
                         <div className="space-y-1">
                           {comparacaoData.semFichas.resolvidos.map((item: any, idx: number) => (
@@ -1145,14 +1311,12 @@ export default function ControloStock() {
                     </Card>
                   )}
 
-                  {/* Novos */}
                   {comparacaoData.semFichas.novos.length > 0 && (
                     <Card className="border-red-200">
                       <CardContent className="pt-3 pb-3">
                         <h3 className="text-sm font-semibold text-red-700 flex items-center gap-1.5 mb-2">
                           <AlertTriangle className="h-4 w-4" />
                           Novos sem ficha ({comparacaoData.semFichas.novos.length})
-                          <span className="text-[10px] font-normal text-muted-foreground ml-1">Apareceram na análise recente</span>
                         </h3>
                         <div className="space-y-1">
                           {comparacaoData.semFichas.novos.map((item: any, idx: number) => (
@@ -1169,14 +1333,12 @@ export default function ControloStock() {
                     </Card>
                   )}
 
-                  {/* Mantidos */}
                   {comparacaoData.semFichas.mantidos.length > 0 && (
                     <Card className="border-amber-200">
                       <CardContent className="pt-3 pb-3">
                         <h3 className="text-sm font-semibold text-amber-700 flex items-center gap-1.5 mb-2">
                           <Clock className="h-4 w-4" />
                           Mantidos sem ficha ({comparacaoData.semFichas.mantidos.length})
-                          <span className="text-[10px] font-normal text-muted-foreground ml-1">Continuam em ambas as análises</span>
                         </h3>
                         <div className="space-y-1">
                           {comparacaoData.semFichas.mantidos.map((item: any, idx: number) => (

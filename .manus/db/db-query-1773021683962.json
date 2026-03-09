@@ -1,0 +1,40 @@
+{
+  "query": "SELECT * FROM gestor_lojas LIMIT 5",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT * FROM gestor_lojas LIMIT 5",
+  "rows": [
+    {
+      "id": "60001",
+      "gestorId": "30001",
+      "lojaId": "60002",
+      "createdAt": "2025-12-16 01:35:54"
+    },
+    {
+      "id": "60003",
+      "gestorId": "30001",
+      "lojaId": "60001",
+      "createdAt": "2025-12-16 01:35:56"
+    },
+    {
+      "id": "60004",
+      "gestorId": "30001",
+      "lojaId": "60007",
+      "createdAt": "2025-12-16 01:35:56"
+    },
+    {
+      "id": "60005",
+      "gestorId": "30001",
+      "lojaId": "60006",
+      "createdAt": "2025-12-16 01:35:57"
+    },
+    {
+      "id": "60006",
+      "gestorId": "30001",
+      "lojaId": "60005",
+      "createdAt": "2025-12-16 01:35:58"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tgestorId\tlojaId\tcreatedAt\n60001\t30001\t60002\t2025-12-16 01:35:54\n60003\t30001\t60001\t2025-12-16 01:35:56\n60004\t30001\t60007\t2025-12-16 01:35:56\n60005\t30001\t60006\t2025-12-16 01:35:57\n60006\t30001\t60005\t2025-12-16 01:35:58\n",
+  "stderr": "",
+  "execution_time_ms": 52
+}

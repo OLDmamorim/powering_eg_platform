@@ -126,7 +126,7 @@ export async function gerarExcelControloStock(params: {
 
   // Gerar buffer e converter para base64
   const buffer = await wb.xlsx.writeBuffer();
-  const base64 = Buffer.from(buffer as ArrayBuffer).toString('base64');
+  const base64 = Buffer.from(buffer as any).toString('base64');
   const filename = `controlo_stock_${nomeLoja.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}.xlsx`;
 
   console.log(`[StockExcel] Ficheiro gerado: ${filename}, base64 length: ${base64.length}`);

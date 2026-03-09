@@ -631,4 +631,14 @@
 - [x] Identificar relatórios de teste (950 livres + 319 completos)
 - [x] Remover todos os dados de teste (3523 registos removidos)
 - [x] Verificar integridade dos dados reais (6 gestores, 70 lojas, 108 rel. livres, 8 rel. completos)
+- [x] Guardar checkpoint
+
+## Refactor Controlo de Stock: Upload Global (todas as lojas de uma vez)
+- [x] Analisar código actual do Controlo de Stock (backend + frontend)
+- [x] Criar nova procedure backend para upload global (mapear Armazém → Nº loja)
+- [x] Filtrar apenas famílias OC, PB, VL e TE
+- [x] Criar nova UI com upload global e vista por gestor com quadros por loja (como Análise de Fichas)
+- [x] Manter vista de detalhe por loja (Total Stock, Com Fichas, Sem Fichas, Fichas s/ Stock)
+- [x] Remover mensagem de armazéns não mapeados
+- [x] Testar com 6 gestores: Carlos Eduardo, Fabio Dias, Marco Amorim, Marco Vilar, Mónica Correira, Rui Adrião
 - [ ] Guardar checkpoint

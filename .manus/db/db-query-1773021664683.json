@@ -1,0 +1,34 @@
+{
+  "query": "SELECT * FROM gestores LIMIT 3",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT * FROM gestores LIMIT 3",
+  "rows": [
+    {
+      "id": "30001",
+      "userId": "420030",
+      "createdAt": "2025-12-15 12:32:47",
+      "updatedAt": "2026-03-03 12:31:47",
+      "lastReminderDate": "2026-03-03 12:31:48",
+      "lastEnvioRH": "2026-02-24 09:42:18"
+    },
+    {
+      "id": "120001",
+      "userId": "2160121",
+      "createdAt": "2025-12-17 22:44:52",
+      "updatedAt": "2026-01-09 12:35:57",
+      "lastReminderDate": "2026-01-09 12:35:58",
+      "lastEnvioRH": "NULL"
+    },
+    {
+      "id": "570003",
+      "userId": "6600028",
+      "createdAt": "2025-12-30 15:08:51",
+      "updatedAt": "2026-02-24 10:11:04",
+      "lastReminderDate": "2026-02-24 10:11:04",
+      "lastEnvioRH": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tuserId\tcreatedAt\tupdatedAt\tlastReminderDate\tlastEnvioRH\n30001\t420030\t2025-12-15 12:32:47\t2026-03-03 12:31:47\t2026-03-03 12:31:48\t2026-02-24 09:42:18\n120001\t2160121\t2025-12-17 22:44:52\t2026-01-09 12:35:57\t2026-01-09 12:35:58\tNULL\n570003\t6600028\t2025-12-30 15:08:51\t2026-02-24 10:11:04\t2026-02-24 10:11:04\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 54
+}
