@@ -664,3 +664,10 @@
 - [x] Top 5 lojas com mais itens sem fichas
 - [x] Mostrar data da última análise
 - [x] Link para a página de Controlo de Stock
+
+## Mover Dashboard de Stock para dentro da página Controlo de Stock
+- [x] Remover widget StockDashboardWidget do Dashboard.tsx principal
+- [x] Adicionar dashboard de stock como vista inicial na página ControloStock.tsx (com cards por loja, barra de progresso, top sem fichas)
+- [x] Redesenhar histórico para mostrar lojas em cards/quadrados (como na análise)
+- [x] Adicionar tab "Dashboard" na navegação do Controlo de Stock
+- [x] Guardar checkpoint

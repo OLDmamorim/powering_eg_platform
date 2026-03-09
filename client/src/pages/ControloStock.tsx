@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef } from 'react';
+import { useMemo, useState, useRef } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { trpc } from '@/lib/trpc';
 import { useAuth } from '@/_core/hooks/useAuth';
@@ -39,6 +39,8 @@ import {
   Eye,
   ChevronDown,
   ChevronUp,
+  LayoutDashboard,
+  RefreshCw,
 } from 'lucide-react';
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
@@ -234,8 +236,8 @@ export default function ControloStock() {
   const utils = trpc.useUtils();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Views: 'upload' (global upload), 'resultadoGlobal' (gestor-grouped cards), 'detalhe' (per-loja detail), 'historico'
-  const [view, setView] = useState<'upload' | 'resultadoGlobal' | 'detalhe' | 'historico'>('upload');
+  // Views: 'dashboard' (stock overview), 'upload' (global upload), 'resultadoGlobal' (gestor-grouped cards), 'detalhe' (per-loja detail), 'historico'
+  const [view, setView] = useState<'dashboard' | 'upload' | 'resultadoGlobal' | 'detalhe' | 'historico'>('dashboard');
   const [searchTerm, setSearchTerm] = useState('');
   const [activeResultTab, setActiveResultTab] = useState('comFichas');
   const [filtroClassificacao, setFiltroClassificacao] = useState<string>('todas');
@@ -265,6 +267,11 @@ export default function ControloStock() {
   // Queries
   const { data: infoAnalise } = trpc.stock.infoAnalise.useQuery({});
   const { data: historico } = trpc.stock.historico.useQuery({}, { enabled: view === 'historico' });
+  const { data: stockDashboard, isLoading: dashboardLoading } = trpc.stock.dashboardStock.useQuery(undefined, {
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    enabled: view === 'dashboard',
+  });
   const { data: detalheAnalise } = trpc.stock.detalhe.useQuery(
     { id: detalheAnaliseId || detalheId! },
     { enabled: !!(detalheAnaliseId || detalheId) && view === 'detalhe' }
@@ -599,7 +606,7 @@ export default function ControloStock() {
                   onClick={() => {
                     if (view === 'detalhe' && resultadoGlobal) setView('resultadoGlobal');
                     else if (view === 'detalhe') setView('historico');
-                    else setView('upload');
+                    else setView('dashboard');
                   }}
                 >
                   <ArrowLeft className="h-4 w-4" />
@@ -613,6 +620,15 @@ export default function ControloStock() {
               </div>
             </div>
             <div className="flex gap-1.5 shrink-0">
+              <Button
+                variant={view === 'dashboard' ? 'default' : 'outline'}
+                size="sm"
+                className="text-xs px-2 md:text-sm md:px-3"
+                onClick={() => setView('dashboard')}
+              >
+                <LayoutDashboard className="h-3.5 w-3.5 mr-1" />
+                <span className="hidden sm:inline">Dashboard</span>
+              </Button>
               <Button
                 variant={view === 'upload' || view === 'resultadoGlobal' ? 'default' : 'outline'}
                 size="sm"
@@ -641,7 +657,7 @@ export default function ControloStock() {
         </div>
 
         {/* Info da última análise de fichas */}
-        {infoAnalise && view !== 'resultadoGlobal' && (
+        {infoAnalise && view !== 'resultadoGlobal' && view !== 'dashboard' && (
           <Card className="border-blue-200 bg-blue-50/50">
             <CardContent className="pt-4 pb-4">
               <div className="flex items-center gap-2 text-sm">
@@ -659,6 +675,214 @@ export default function ControloStock() {
               </div>
             </CardContent>
           </Card>
+        )}
+
+        {/* VIEW: Dashboard */}
+        {view === 'dashboard' && (
+          <div className="space-y-4">
+            {dashboardLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <RefreshCw className="h-8 w-8 animate-spin text-blue-600" />
+              </div>
+            ) : !stockDashboard || stockDashboard.totais.totalLojas === 0 ? (
+              <Card>
+                <CardContent className="py-12 text-center">
+                  <Warehouse className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">Sem dados de stock</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Ainda não existem análises de stock. Carregue um ficheiro Excel para começar.
+                  </p>
+                  <Button onClick={() => setView('upload')}>
+                    <Upload className="h-4 w-4 mr-2" />
+                    Carregar Ficheiro
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : (() => {
+              const { totais, topSemFichas, analises } = stockDashboard;
+              const percentComFichas = totais.totalItensStock > 0 ? ((totais.totalComFichas / totais.totalItensStock) * 100).toFixed(1) : '0';
+              const percentSemFichas = totais.totalItensStock > 0 ? ((totais.totalSemFichas / totais.totalItensStock) * 100).toFixed(1) : '0';
+              return (
+                <>
+                  {/* Summary cards */}
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                    <Card className="border-blue-200 bg-blue-50/50">
+                      <CardContent className="pt-3 pb-3 text-center">
+                        <div className="text-xl md:text-2xl font-bold text-blue-600">{totais.totalLojas}</div>
+                        <div className="text-[10px] sm:text-xs text-muted-foreground">Lojas Analisadas</div>
+                      </CardContent>
+                    </Card>
+                    <Card className="border-indigo-200 bg-indigo-50/50">
+                      <CardContent className="pt-3 pb-3 text-center">
+                        <div className="text-xl md:text-2xl font-bold text-indigo-600">{totais.totalItensStock.toLocaleString('pt-PT')}</div>
+                        <div className="text-[10px] sm:text-xs text-muted-foreground">Total em Stock</div>
+                      </CardContent>
+                    </Card>
+                    <Card className="border-green-200 bg-green-50/50">
+                      <CardContent className="pt-3 pb-3 text-center">
+                        <div className="text-xl md:text-2xl font-bold text-green-600">{totais.totalComFichas.toLocaleString('pt-PT')}</div>
+                        <div className="text-[10px] sm:text-xs text-muted-foreground">Com Fichas ({percentComFichas}%)</div>
+                      </CardContent>
+                    </Card>
+                    <Card className="border-amber-200 bg-amber-50/50">
+                      <CardContent className="pt-3 pb-3 text-center">
+                        <div className="text-xl md:text-2xl font-bold text-amber-600">{totais.totalSemFichas.toLocaleString('pt-PT')}</div>
+                        <div className="text-[10px] sm:text-xs text-muted-foreground">Sem Fichas ({percentSemFichas}%)</div>
+                      </CardContent>
+                    </Card>
+                    <Card className="border-red-200 bg-red-50/50">
+                      <CardContent className="pt-3 pb-3 text-center">
+                        <div className="text-xl md:text-2xl font-bold text-red-600">{totais.totalFichasSemStock.toLocaleString('pt-PT')}</div>
+                        <div className="text-[10px] sm:text-xs text-muted-foreground">Fichas s/ Stock</div>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Progress bar */}
+                  <div>
+                    <div className="h-3 rounded-full overflow-hidden flex bg-gray-200 dark:bg-gray-700">
+                      <div
+                        className="bg-green-500 transition-all"
+                        style={{ width: `${percentComFichas}%` }}
+                        title={`Com Fichas: ${percentComFichas}%`}
+                      />
+                      <div
+                        className="bg-amber-500 transition-all"
+                        style={{ width: `${percentSemFichas}%` }}
+                        title={`Sem Fichas: ${percentSemFichas}%`}
+                      />
+                    </div>
+                    <div className="flex justify-between mt-1 text-[10px] text-muted-foreground">
+                      <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-green-500 inline-block"></span> Com Fichas</span>
+                      <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-500 inline-block"></span> Sem Fichas</span>
+                    </div>
+                  </div>
+
+                  {/* Última análise info */}
+                  {totais.ultimaAnalise && (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Clock className="h-4 w-4" />
+                      <span>Última análise: <strong>{new Date(totais.ultimaAnalise).toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit', year: 'numeric' })}</strong></span>
+                    </div>
+                  )}
+
+                  {/* Lojas em cards/quadrados */}
+                  <div>
+                    <h2 className="text-base font-semibold flex items-center gap-2 mb-3">
+                      <Store className="h-4 w-4 text-blue-600" />
+                      Resumo por Loja
+                    </h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {analises && analises.map((loja: any) => {
+                        const lojaPercent = loja.totalItensStock > 0 ? ((loja.totalComFichas / loja.totalItensStock) * 100).toFixed(0) : '0';
+                        return (
+                          <Card
+                            key={loja.id}
+                            className="cursor-pointer hover:border-blue-300 transition-colors"
+                            onClick={() => {
+                              setDetalheId(loja.id);
+                              setDetalheAnaliseId(loja.id);
+                              setDetalheLojaId(loja.lojaId);
+                              setDetalheLojaNome(loja.nomeLoja || 'Loja');
+                              setView('detalhe');
+                              setSearchTerm('');
+                              setActiveResultTab('comFichas');
+                              setFiltroClassificacao('todas');
+                            }}
+                          >
+                            <CardContent className="pt-3 pb-3 px-4">
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center gap-1.5 min-w-0">
+                                  <Store className="h-3.5 w-3.5 text-blue-600 shrink-0" />
+                                  <span className="font-semibold text-sm truncate">{loja.nomeLoja || 'Loja'}</span>
+                                </div>
+                                <Badge variant="outline" className="text-[10px] px-1.5 py-0 shrink-0">
+                                  {lojaPercent}% c/ fichas
+                                </Badge>
+                              </div>
+                              <div className="space-y-1 text-xs">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-muted-foreground">Total Stock:</span>
+                                  <span className="font-bold text-blue-700">{loja.totalItensStock}</span>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                  <span className="text-muted-foreground">Com Fichas:</span>
+                                  <span className="font-medium text-green-600">{loja.totalComFichas}</span>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                  <span className="text-muted-foreground">Sem Fichas:</span>
+                                  <span className="font-medium text-amber-600">{loja.totalSemFichas}</span>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                  <span className="text-muted-foreground">Fichas s/ Stock:</span>
+                                  <span className="font-medium text-red-600">{loja.totalFichasSemStock}</span>
+                                </div>
+                              </div>
+                              {/* Mini progress bar */}
+                              <div className="mt-2">
+                                <div className="h-1.5 rounded-full overflow-hidden flex bg-gray-200">
+                                  <div className="bg-green-500" style={{ width: `${lojaPercent}%` }} />
+                                  <div className="bg-amber-500" style={{ width: `${loja.totalItensStock > 0 ? ((loja.totalSemFichas / loja.totalItensStock) * 100).toFixed(0) : 0}%` }} />
+                                </div>
+                              </div>
+                              <div className="flex items-center justify-between mt-2 pt-2 border-t">
+                                <span className="text-[10px] text-muted-foreground">
+                                  {new Date(loja.createdAt).toLocaleDateString('pt-PT')}
+                                </span>
+                                <div className="flex items-center gap-1 text-xs text-blue-600">
+                                  <Eye className="h-3 w-3" />
+                                  Ver &gt;
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Top lojas sem fichas */}
+                  {topSemFichas && topSemFichas.length > 0 && (
+                    <Card className="border-amber-200">
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm flex items-center gap-2 text-amber-700">
+                          <AlertTriangle className="h-4 w-4" />
+                          Top Lojas com Mais Itens Sem Fichas
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2">
+                          {topSemFichas.map((loja: any, idx: number) => (
+                            <div key={idx} className="flex items-center justify-between text-sm">
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs font-bold text-muted-foreground w-5">{idx + 1}.</span>
+                                <span className="truncate max-w-[250px]">{loja.nomeLoja}</span>
+                              </div>
+                              <Badge variant="outline" className="text-amber-600 border-amber-300">
+                                {loja.totalSemFichas} itens
+                              </Badge>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {/* Quick actions */}
+                  <div className="flex gap-2">
+                    <Button variant="outline" onClick={() => setView('upload')} className="flex-1">
+                      <Upload className="h-4 w-4 mr-2" />
+                      Nova Análise
+                    </Button>
+                    <Button variant="outline" onClick={() => setView('historico')} className="flex-1">
+                      <History className="h-4 w-4 mr-2" />
+                      Ver Histórico Completo
+                    </Button>
+                  </div>
+                </>
+              );
+            })()}
+          </div>
         )}
 
         {/* VIEW: Upload */}
@@ -1175,65 +1399,90 @@ export default function ControloStock() {
                 </CardContent>
               </Card>
             ) : (
-              historico.map((analise: any) => (
-                <Card
-                  key={analise.id}
-                  className={`cursor-pointer transition-colors ${
-                    comparacaoIds.includes(analise.id)
-                      ? 'border-blue-400 bg-blue-50/50 ring-1 ring-blue-300'
-                      : 'hover:border-blue-300'
-                  }`}
-                  onClick={() => handleVerDetalheHistorico(analise.id)}
-                >
-                  <CardContent className="pt-4 pb-4">
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                      <div className="flex items-start gap-2">
-                        <input
-                          type="checkbox"
-                          checked={comparacaoIds.includes(analise.id)}
-                          onChange={(e) => {
-                            e.stopPropagation();
-                            toggleComparacao(analise.id);
-                          }}
-                          onClick={(e) => e.stopPropagation()}
-                          className="mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 cursor-pointer shrink-0"
-                          title="Seleccionar para comparação"
-                        />
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <FileText className="h-4 w-4 text-blue-600" />
-                            <span className="font-medium">{analise.nomeLoja}</span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {historico.map((analise: any) => {
+                  const percentComFichas = analise.totalItensStock > 0 ? ((analise.totalComFichas / analise.totalItensStock) * 100).toFixed(0) : '0';
+                  const percentSemFichas = analise.totalItensStock > 0 ? ((analise.totalSemFichas / analise.totalItensStock) * 100).toFixed(0) : '0';
+                  return (
+                    <Card
+                      key={analise.id}
+                      className={`cursor-pointer transition-colors ${
+                        comparacaoIds.includes(analise.id)
+                          ? 'border-blue-400 bg-blue-50/50 ring-1 ring-blue-300'
+                          : 'hover:border-blue-300'
+                      }`}
+                      onClick={() => handleVerDetalheHistorico(analise.id)}
+                    >
+                      <CardContent className="pt-3 pb-3 px-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-1.5 min-w-0">
+                            <input
+                              type="checkbox"
+                              checked={comparacaoIds.includes(analise.id)}
+                              onChange={(e) => {
+                                e.stopPropagation();
+                                toggleComparacao(analise.id);
+                              }}
+                              onClick={(e) => e.stopPropagation()}
+                              className="h-4 w-4 rounded border-gray-300 text-blue-600 cursor-pointer shrink-0"
+                              title="Seleccionar para comparação"
+                            />
+                            <Store className="h-3.5 w-3.5 text-blue-600 shrink-0" />
+                            <span className="font-semibold text-sm truncate">{analise.nomeLoja}</span>
                           </div>
-                          <p className="text-xs text-muted-foreground mt-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 text-red-500 hover:text-red-700 hover:bg-red-50 shrink-0"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (window.confirm('Tem a certeza que deseja eliminar esta análise?')) {
+                                eliminarMutation.mutate({ id: analise.id });
+                              }
+                            }}
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                        <div className="space-y-1 text-xs">
+                          <div className="flex items-center justify-between">
+                            <span className="text-muted-foreground">Total Stock:</span>
+                            <span className="font-bold text-blue-700">{analise.totalItensStock}</span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-muted-foreground">Com Fichas:</span>
+                            <span className="font-medium text-green-600">{analise.totalComFichas}</span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-muted-foreground">Sem Fichas:</span>
+                            <span className="font-medium text-amber-600">{analise.totalSemFichas}</span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-muted-foreground">Fichas s/ Stock:</span>
+                            <span className="font-medium text-red-600">{analise.totalFichasSemStock}</span>
+                          </div>
+                        </div>
+                        {/* Mini progress bar */}
+                        <div className="mt-2">
+                          <div className="h-1.5 rounded-full overflow-hidden flex bg-gray-200">
+                            <div className="bg-green-500" style={{ width: `${percentComFichas}%` }} />
+                            <div className="bg-amber-500" style={{ width: `${percentSemFichas}%` }} />
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between mt-2 pt-2 border-t">
+                          <span className="text-[10px] text-muted-foreground">
                             {new Date(analise.createdAt).toLocaleDateString('pt-PT')} às {new Date(analise.createdAt).toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })}
-                          </p>
+                          </span>
+                          <div className="flex items-center gap-1 text-xs text-blue-600">
+                            <Eye className="h-3 w-3" />
+                            Ver &gt;
+                          </div>
                         </div>
-                      </div>
-                      <div className="flex items-center gap-2 sm:gap-3">
-                        <div className="flex flex-wrap gap-x-2 gap-y-0.5 sm:gap-3 text-[10px] sm:text-xs">
-                          <span className="text-blue-600 font-medium">{analise.totalItensStock} itens</span>
-                          <span className="text-green-600">{analise.totalComFichas} c/ fichas</span>
-                          <span className="text-amber-600">{analise.totalSemFichas} s/ fichas</span>
-                          <span className="text-red-600">{analise.totalFichasSemStock} s/ stock</span>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50 shrink-0"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (window.confirm('Tem a certeza que deseja eliminar esta análise?')) {
-                              eliminarMutation.mutate({ id: analise.id });
-                            }
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
             )}
           </div>
         )}

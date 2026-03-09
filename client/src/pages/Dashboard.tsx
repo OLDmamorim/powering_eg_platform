@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { trpc } from "@/lib/trpc";
-import { Building2, ClipboardList, FileText, ListTodo, AlertTriangle, TrendingUp, TrendingDown, Calendar, Download, Minus, Sparkles, RefreshCw, Activity, Eye, Zap, MapPin, Clock, CheckCircle, XCircle, CheckSquare, BarChart3, Warehouse, Package } from "lucide-react";
+import { Building2, ClipboardList, FileText, ListTodo, AlertTriangle, TrendingUp, TrendingDown, Calendar, Download, Minus, Sparkles, RefreshCw, Activity, Eye, Zap, MapPin, Clock, CheckCircle, XCircle, CheckSquare, BarChart3 } from "lucide-react";
 import { useMemo, useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -214,120 +214,6 @@ function LembretesResumosGlobais({ isAdmin, isGestor, setLocation }: { isAdmin: 
         </Alert>
       ))}
     </>
-  );
-}
-
-// Stock Dashboard Widget Component
-function StockDashboardWidget({ language, setLocation }: { language: string; setLocation: (path: string) => void }) {
-  const { data: stockDashboard, isLoading } = trpc.stock.dashboardStock.useQuery(undefined, {
-    staleTime: 5 * 60 * 1000,
-    refetchOnWindowFocus: false,
-  });
-
-  if (isLoading) {
-    return (
-      <Card className="border-green-200 dark:border-green-800">
-        <CardContent className="py-6 flex items-center justify-center">
-          <RefreshCw className="h-5 w-5 animate-spin text-muted-foreground" />
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (!stockDashboard || stockDashboard.totais.totalLojas === 0) {
-    return null; // Não mostrar se não há dados
-  }
-
-  const { totais, topSemFichas } = stockDashboard;
-  const percentComFichas = totais.totalItensStock > 0 ? ((totais.totalComFichas / totais.totalItensStock) * 100).toFixed(1) : '0';
-  const percentSemFichas = totais.totalItensStock > 0 ? ((totais.totalSemFichas / totais.totalItensStock) * 100).toFixed(1) : '0';
-
-  return (
-    <Card className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/50 dark:to-emerald-950/50 border-green-200 dark:border-green-800">
-      <CardHeader className="pb-2">
-        <CardTitle className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-green-700 dark:text-green-300">
-            <Warehouse className="h-4 w-4" />
-            <div className="flex flex-col">
-              <span>{language === 'pt' ? 'Controlo de Stock' : 'Stock Control'}</span>
-              {totais.ultimaAnalise && (
-                <span className="text-xs font-normal text-muted-foreground flex items-center gap-1">
-                  <Clock className="h-3 w-3" />
-                  {language === 'pt' ? 'Última análise:' : 'Last analysis:'} {new Date(totais.ultimaAnalise).toLocaleDateString(language === 'pt' ? 'pt-PT' : 'en-US', { day: '2-digit', month: '2-digit', year: 'numeric' })}
-                </span>
-              )}
-            </div>
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
-            className="border-green-300 text-green-700 hover:bg-green-100 dark:border-green-700 dark:text-green-300 dark:hover:bg-green-900/50"
-            onClick={() => setLocation('/controlo-stock')}
-          >
-            {language === 'pt' ? 'Ver Detalhe' : 'View Detail'}
-          </Button>
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-          <div className="bg-white/60 dark:bg-white/10 rounded-lg p-3 text-center">
-            <div className="text-xl font-bold text-blue-600 dark:text-blue-400">{totais.totalLojas}</div>
-            <div className="text-[10px] sm:text-xs text-muted-foreground">{language === 'pt' ? 'Lojas Analisadas' : 'Stores Analyzed'}</div>
-          </div>
-          <div className="bg-white/60 dark:bg-white/10 rounded-lg p-3 text-center">
-            <div className="text-xl font-bold text-indigo-600 dark:text-indigo-400">{totais.totalItensStock.toLocaleString('pt-PT')}</div>
-            <div className="text-[10px] sm:text-xs text-muted-foreground">{language === 'pt' ? 'Total em Stock' : 'Total in Stock'}</div>
-          </div>
-          <div className="bg-white/60 dark:bg-white/10 rounded-lg p-3 text-center">
-            <div className="text-xl font-bold text-green-600 dark:text-green-400">{totais.totalComFichas.toLocaleString('pt-PT')}</div>
-            <div className="text-[10px] sm:text-xs text-muted-foreground">{language === 'pt' ? 'Com Fichas' : 'With Records'} ({percentComFichas}%)</div>
-          </div>
-          <div className="bg-white/60 dark:bg-white/10 rounded-lg p-3 text-center">
-            <div className="text-xl font-bold text-amber-600 dark:text-amber-400">{totais.totalSemFichas.toLocaleString('pt-PT')}</div>
-            <div className="text-[10px] sm:text-xs text-muted-foreground">{language === 'pt' ? 'Sem Fichas' : 'Without Records'} ({percentSemFichas}%)</div>
-          </div>
-          <div className="bg-white/60 dark:bg-white/10 rounded-lg p-3 text-center">
-            <div className="text-xl font-bold text-red-600 dark:text-red-400">{totais.totalFichasSemStock.toLocaleString('pt-PT')}</div>
-            <div className="text-[10px] sm:text-xs text-muted-foreground">{language === 'pt' ? 'Fichas s/ Stock' : 'Records w/o Stock'}</div>
-          </div>
-        </div>
-
-        {/* Progress bar */}
-        <div className="mt-3">
-          <div className="h-3 rounded-full overflow-hidden flex bg-gray-200 dark:bg-gray-700">
-            <div
-              className="bg-green-500 transition-all"
-              style={{ width: `${percentComFichas}%` }}
-              title={`Com Fichas: ${percentComFichas}%`}
-            />
-            <div
-              className="bg-amber-500 transition-all"
-              style={{ width: `${percentSemFichas}%` }}
-              title={`Sem Fichas: ${percentSemFichas}%`}
-            />
-          </div>
-          <div className="flex justify-between mt-1 text-[10px] text-muted-foreground">
-            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-green-500 inline-block"></span> Com Fichas</span>
-            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-500 inline-block"></span> Sem Fichas</span>
-          </div>
-        </div>
-
-        {/* Top lojas sem fichas */}
-        {topSemFichas && topSemFichas.length > 0 && (
-          <div className="mt-3">
-            <p className="text-xs font-medium text-muted-foreground mb-2">{language === 'pt' ? 'Top lojas com mais itens sem fichas:' : 'Top stores with most items without records:'}</p>
-            <div className="space-y-1">
-              {topSemFichas.map((loja: any, idx: number) => (
-                <div key={idx} className="flex items-center justify-between text-xs">
-                  <span className="truncate max-w-[200px]">{loja.nomeLoja}</span>
-                  <span className="font-medium text-amber-600">{loja.totalSemFichas}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </CardContent>
-    </Card>
   );
 }
 
@@ -1198,9 +1084,6 @@ export default function Dashboard() {
             </Card>
           </div>
         )}
-
-        {/* Stock Dashboard Widget */}
-        <StockDashboardWidget language={language} setLocation={setLocation} />
 
         <div className="grid gap-4 md:grid-cols-2">
           <Card>
