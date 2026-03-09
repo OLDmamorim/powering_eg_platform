@@ -772,3 +772,9 @@
 ## Fix: Ordem das sheets no Excel enviado por email
 - [x] Sheet "Sem Fichas" agora é a primeira, "Com Fichas" a segunda no Excel (stockExcelService.ts)
 - [ ] Guardar checkpoint
+
+## Fix: Excel descarregado pela app - sheet Sem Fichas com colunas erradas
+- [x] Sheet "Sem Fichas" no download usava colunas de "Com Fichas" (Qtd, N.º Fichas, Fichas Associadas)
+- [x] Corrigido: agora usa Referência, Unidade, Família, Descrição, Classificação, Análises Consecutivas (igual ao email)
+- [x] Removida definição duplicada de colunas na sheet Com Fichas
+- [ ] Guardar checkpoint
