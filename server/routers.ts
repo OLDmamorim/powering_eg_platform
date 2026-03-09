@@ -13036,6 +13036,204 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
         return { success: true, email: loja.email, copiaEnviada };
       }),
 
+    // Dashboard de stock: resumo das últimas análises por loja
+    dashboardStock: gestorProcedure
+      .query(async ({ ctx }) => {
+        const isAdmin = ctx.user.role === 'admin';
+        
+        let analises;
+        if (isAdmin) {
+          analises = await db.getDashboardStockAdmin();
+        } else {
+          const gestorId = ctx.gestor?.id;
+          if (!gestorId) throw new TRPCError({ code: 'FORBIDDEN', message: 'Gestor não encontrado' });
+          analises = await db.getDashboardStock(gestorId);
+        }
+        
+        // Calcular totais
+        const totais = {
+          totalLojas: analises.length,
+          totalItensStock: analises.reduce((sum, a) => sum + (a.totalItensStock || 0), 0),
+          totalComFichas: analises.reduce((sum, a) => sum + (a.totalComFichas || 0), 0),
+          totalSemFichas: analises.reduce((sum, a) => sum + (a.totalSemFichas || 0), 0),
+          totalFichasSemStock: analises.reduce((sum, a) => sum + (a.totalFichasSemStock || 0), 0),
+          ultimaAnalise: analises.length > 0 ? analises.reduce((latest, a) => {
+            return new Date(a.createdAt) > new Date(latest.createdAt) ? a : latest;
+          }).createdAt : null,
+        };
+        
+        // Top 5 lojas com mais itens sem fichas
+        const topSemFichas = [...analises]
+          .sort((a, b) => (b.totalSemFichas || 0) - (a.totalSemFichas || 0))
+          .slice(0, 5)
+          .map(a => ({ nomeLoja: a.nomeLoja || 'Loja', totalSemFichas: a.totalSemFichas || 0 }));
+        
+        return { totais, analises, topSemFichas };
+      }),
+
+    // Enviar email consolidado a TODAS as lojas do gestor (com Excel em anexo)
+    enviarEmailTodasLojas: gestorProcedure
+      .input(z.object({
+        analiseIds: z.array(z.object({
+          lojaId: z.number(),
+          analiseId: z.number(),
+        })),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const gestorId = ctx.gestor?.id;
+        if (!gestorId) throw new TRPCError({ code: 'FORBIDDEN', message: 'Gestor não encontrado' });
+
+        const resultados: Array<{ lojaId: number; lojaNome: string; email: string; success: boolean; error?: string }> = [];
+        let emailsEnviados = 0;
+
+        for (const item of input.analiseIds) {
+          const analise = await db.getAnaliseStockById(item.analiseId);
+          if (!analise) {
+            resultados.push({ lojaId: item.lojaId, lojaNome: 'Desconhecida', email: '', success: false, error: 'Análise não encontrada' });
+            continue;
+          }
+
+          const loja = await db.getLojaById(item.lojaId);
+          if (!loja || !loja.email) {
+            resultados.push({ lojaId: item.lojaId, lojaNome: analise.nomeLoja || 'Desconhecida', email: '', success: false, error: 'Loja sem email' });
+            continue;
+          }
+
+          const resultado = analise.resultadoAnalise ? JSON.parse(analise.resultadoAnalise) : null;
+          if (!resultado) {
+            resultados.push({ lojaId: item.lojaId, lojaNome: loja.nome, email: loja.email, success: false, error: 'Sem dados de análise' });
+            continue;
+          }
+
+          const dataFormatada = new Date().toLocaleDateString('pt-PT');
+          const totalStock = analise.totalItensStock || 0;
+          const comFichas = resultado.comFichas || [];
+          const semFichas = resultado.semFichas || [];
+          const fichasSemStock = resultado.fichasSemStock || [];
+
+          const htmlEmail = `
+            <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">
+              <div style="background:#16a34a;padding:20px;border-radius:8px 8px 0 0;">
+                <h1 style="color:#fff;margin:0;font-size:20px;">Controlo de Stock</h1>
+                <p style="color:#dcfce7;margin:5px 0 0;font-size:14px;">${loja.nome} — ${dataFormatada}</p>
+              </div>
+              <div style="padding:25px;background:#fff;border:1px solid #e2e8f0;">
+                <p style="margin:0 0 15px;color:#334155;font-size:14px;line-height:1.6;">Foi realizada uma análise de controlo de stock na loja <strong>${loja.nome}</strong>.</p>
+                <table style="width:100%;border-collapse:collapse;font-size:14px;margin-bottom:20px;">
+                  <tr>
+                    <td style="padding:8px 12px;border:1px solid #e2e8f0;color:#334155;">Total em Stock</td>
+                    <td style="padding:8px 12px;border:1px solid #e2e8f0;font-weight:bold;text-align:right;color:#1d4ed8;">${totalStock}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:8px 12px;border:1px solid #e2e8f0;color:#334155;">Com Fichas de Serviço</td>
+                    <td style="padding:8px 12px;border:1px solid #e2e8f0;font-weight:bold;text-align:right;color:#16a34a;">${comFichas.length}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:8px 12px;border:1px solid #e2e8f0;color:#334155;">Sem Fichas de Serviço</td>
+                    <td style="padding:8px 12px;border:1px solid #e2e8f0;font-weight:bold;text-align:right;color:#d97706;">${semFichas.length}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:8px 12px;border:1px solid #e2e8f0;color:#334155;">Fichas sem Stock</td>
+                    <td style="padding:8px 12px;border:1px solid #e2e8f0;font-weight:bold;text-align:right;color:#dc2626;">${fichasSemStock.length}</td>
+                  </tr>
+                </table>
+                <p style="margin:0;color:#64748b;font-size:13px;line-height:1.5;">Consulte o ficheiro Excel em anexo para os dados completos.</p>
+              </div>
+              <div style="padding:15px;background:#f8fafc;border:1px solid #e2e8f0;border-top:0;border-radius:0 0 8px 8px;text-align:center;">
+                <p style="margin:0;color:#64748b;font-size:12px;">PoweringEG Platform 2.0 - a IA ao serviço da ExpressGlass</p>
+              </div>
+            </div>`;
+
+          // Gerar Excel em anexo
+          let excelAttachment: { filename: string; content: string; contentType: string } | undefined;
+          try {
+            const { base64, filename } = await gerarExcelControloStock({
+              nomeLoja: loja.nome,
+              lojaId: item.lojaId,
+              comFichas,
+              semFichas,
+              fichasSemStock,
+            });
+            excelAttachment = {
+              filename,
+              content: base64,
+              contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            };
+          } catch (excelError: any) {
+            console.error(`[Stock Email Todas] Erro Excel ${loja.nome}:`, excelError?.message);
+          }
+
+          const assunto = `Controlo de Stock — Relatório Consolidado — ${loja.nome} — ${dataFormatada}`;
+
+          try {
+            const enviado = await sendEmail({
+              to: loja.email,
+              subject: assunto,
+              html: htmlEmail,
+              attachments: excelAttachment ? [excelAttachment] : undefined,
+            });
+            if (enviado) {
+              emailsEnviados++;
+              resultados.push({ lojaId: item.lojaId, lojaNome: loja.nome, email: loja.email, success: true });
+            } else {
+              resultados.push({ lojaId: item.lojaId, lojaNome: loja.nome, email: loja.email, success: false, error: 'Falha no envio' });
+            }
+          } catch (e: any) {
+            resultados.push({ lojaId: item.lojaId, lojaNome: loja.nome, email: loja.email, success: false, error: e?.message || 'Erro desconhecido' });
+          }
+
+          // Pequena pausa entre emails para evitar rate limiting
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+
+        // Enviar resumo ao gestor
+        const gestor = await db.getGestorById(gestorId);
+        if (gestor?.email) {
+          try {
+            const resumoHTML = `
+              <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">
+                <div style="background:#1d4ed8;padding:20px;border-radius:8px 8px 0 0;">
+                  <h1 style="color:#fff;margin:0;font-size:20px;">Resumo de Envio — Controlo de Stock</h1>
+                  <p style="color:#dbeafe;margin:5px 0 0;font-size:14px;">${new Date().toLocaleDateString('pt-PT')}</p>
+                </div>
+                <div style="padding:25px;background:#fff;border:1px solid #e2e8f0;">
+                  <p style="margin:0 0 15px;color:#334155;font-size:14px;">Foram enviados <strong>${emailsEnviados}</strong> de <strong>${input.analiseIds.length}</strong> emails de controlo de stock.</p>
+                  <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                    <thead>
+                      <tr style="background:#f1f5f9;">
+                        <th style="padding:8px 12px;text-align:left;border:1px solid #e2e8f0;">Loja</th>
+                        <th style="padding:8px 12px;text-align:left;border:1px solid #e2e8f0;">Email</th>
+                        <th style="padding:8px 12px;text-align:center;border:1px solid #e2e8f0;">Estado</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${resultados.map((r, idx) => `
+                        <tr style="background:${idx % 2 === 0 ? '#fff' : '#f8fafc'};">
+                          <td style="padding:8px 12px;border:1px solid #e2e8f0;">${r.lojaNome}</td>
+                          <td style="padding:8px 12px;border:1px solid #e2e8f0;">${r.email || '-'}</td>
+                          <td style="padding:8px 12px;border:1px solid #e2e8f0;text-align:center;">${r.success ? '✅' : '❌ ' + (r.error || '')}</td>
+                        </tr>
+                      `).join('')}
+                    </tbody>
+                  </table>
+                </div>
+                <div style="padding:15px;background:#f8fafc;border:1px solid #e2e8f0;border-top:0;border-radius:0 0 8px 8px;text-align:center;">
+                  <p style="margin:0;color:#64748b;font-size:12px;">PoweringEG Platform 2.0 - a IA ao serviço da ExpressGlass</p>
+                </div>
+              </div>`;
+            await sendEmail({
+              to: gestor.email,
+              subject: `Resumo Envio Controlo de Stock — ${emailsEnviados}/${input.analiseIds.length} enviados`,
+              html: resumoHTML,
+            });
+          } catch (e) {
+            console.error('[Stock Email Todas] Erro ao enviar resumo ao gestor:', e);
+          }
+        }
+
+        return { emailsEnviados, totalLojas: input.analiseIds.length, resultados };
+      }),
+
     // Exportar Excel consolidado (gera no servidor e devolve URL)
     exportarExcelConsolidado: gestorProcedure
       .input(z.object({

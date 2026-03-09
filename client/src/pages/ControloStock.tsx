@@ -315,6 +315,19 @@ export default function ControloStock() {
     },
   });
 
+  const enviarEmailTodasLojasMutation = trpc.stock.enviarEmailTodasLojas.useMutation({
+    onSuccess: (data) => {
+      toast.success(`Emails enviados: ${data.emailsEnviados}/${data.totalLojas} lojas`);
+      if (data.resultados.some((r: any) => !r.success)) {
+        const falhas = data.resultados.filter((r: any) => !r.success);
+        toast.error(`${falhas.length} email(s) falharam: ${falhas.map((f: any) => f.lojaNome).join(', ')}`);
+      }
+    },
+    onError: (error) => {
+      toast.error(error.message || 'Erro ao enviar emails');
+    },
+  });
+
   const classificarMutation = trpc.stock.classificar.useMutation({
     onSuccess: () => {
       toast.success('Classificação guardada');
@@ -764,6 +777,24 @@ export default function ControloStock() {
                     <Badge variant="secondary" className="text-[10px]">{grupo.totais.totalLojas} lojas</Badge>
                   </div>
                   <div className="flex items-center gap-3">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-[10px] sm:text-xs h-7 px-2 bg-white border-green-300 text-green-700 hover:bg-green-50 hover:text-green-800"
+                      disabled={enviarEmailTodasLojasMutation.isPending}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const analiseIds = grupo.lojas.map(l => ({ lojaId: l.lojaId, analiseId: l.analiseId }));
+                        if (analiseIds.length === 0) { toast.error('Sem lojas para enviar'); return; }
+                        enviarEmailTodasLojasMutation.mutate({ analiseIds });
+                      }}
+                    >
+                      {enviarEmailTodasLojasMutation.isPending ? (
+                        <><Loader2 className="h-3 w-3 mr-1 animate-spin" />A enviar...</>
+                      ) : (
+                        <><Send className="h-3 w-3 mr-1" />Enviar às Lojas</>
+                      )}
+                    </Button>
                     <div className="hidden sm:flex items-center gap-2 text-xs">
                       <span className="text-blue-600 font-medium">{grupo.totais.totalItensStock} itens</span>
                       <span className="text-green-600">{grupo.totais.totalComFichas} c/fichas</span>

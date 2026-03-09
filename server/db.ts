@@ -12887,3 +12887,87 @@ export async function removerClassificacaoEurocode(id: number) {
   
   await db.delete(classificacoesEurocode).where(eq(classificacoesEurocode.id, id));
 }
+
+
+// =============================================
+// Dashboard de Stock
+// =============================================
+
+/**
+ * Obter resumo de stock para o dashboard do gestor
+ * Retorna a última análise de stock de cada loja do gestor
+ */
+export async function getDashboardStock(gestorId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  // Obter lojas do gestor
+  const lojasGestor = await db
+    .select({ lojaId: gestorLojas.lojaId })
+    .from(gestorLojas)
+    .where(eq(gestorLojas.gestorId, gestorId));
+  
+  if (lojasGestor.length === 0) return [];
+  
+  const lojaIds = lojasGestor.map(l => l.lojaId);
+  
+  // Para cada loja, obter a última análise de stock
+  const resultados = [];
+  for (const lojaId of lojaIds) {
+    const [ultimaAnalise] = await db.select({
+      id: analisesStock.id,
+      lojaId: analisesStock.lojaId,
+      nomeLoja: analisesStock.nomeLoja,
+      totalItensStock: analisesStock.totalItensStock,
+      totalComFichas: analisesStock.totalComFichas,
+      totalSemFichas: analisesStock.totalSemFichas,
+      totalFichasSemStock: analisesStock.totalFichasSemStock,
+      createdAt: analisesStock.createdAt,
+    })
+      .from(analisesStock)
+      .where(eq(analisesStock.lojaId, lojaId))
+      .orderBy(desc(analisesStock.createdAt))
+      .limit(1);
+    
+    if (ultimaAnalise) {
+      resultados.push(ultimaAnalise);
+    }
+  }
+  
+  return resultados;
+}
+
+/**
+ * Obter resumo de stock para o dashboard admin (todas as lojas)
+ */
+export async function getDashboardStockAdmin() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  // Obter todas as lojas que têm análise de stock
+  const todasLojas = await db.select({ id: lojas.id }).from(lojas);
+  
+  const resultados = [];
+  for (const loja of todasLojas) {
+    const [ultimaAnalise] = await db.select({
+      id: analisesStock.id,
+      lojaId: analisesStock.lojaId,
+      nomeLoja: analisesStock.nomeLoja,
+      totalItensStock: analisesStock.totalItensStock,
+      totalComFichas: analisesStock.totalComFichas,
+      totalSemFichas: analisesStock.totalSemFichas,
+      totalFichasSemStock: analisesStock.totalFichasSemStock,
+      createdAt: analisesStock.createdAt,
+    })
+      .from(analisesStock)
+      .where(eq(analisesStock.lojaId, loja.id))
+      .orderBy(desc(analisesStock.createdAt))
+      .limit(1);
+    
+    if (ultimaAnalise) {
+      resultados.push(ultimaAnalise);
+    }
+  }
+  
+  return resultados;
+}

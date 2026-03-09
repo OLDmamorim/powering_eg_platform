@@ -646,4 +646,21 @@
 ## BUG: Controlo de Stock mostra lojas de todos os gestores
 - [x] Gestor deve ver apenas as suas lojas, Admin vê tudo agrupado por gestor
 - [x] Corrigir backend para filtrar resultados por gestorId quando role é gestor
-- [ ] Guardar checkpoint
+- [x] Guardar checkpoint
+
+## Enviar às Minhas Lojas (email em massa com Excel anexo)
+- [x] Criar procedure backend enviarEmailTodasLojas para enviar email consolidado a todas as lojas do gestor
+- [x] Adicionar botão "Enviar às Lojas" na vista de resultados do Controlo de Stock (por gestor)
+- [x] Cada loja recebe email com introdução + Excel em anexo com os seus dados
+- [x] Gestor recebe email resumo com status de envio de cada loja
+- [x] Pausa de 500ms entre emails para evitar rate limiting
+
+## Dashboard de Stock (widget no dashboard principal)
+- [x] Criar procedure backend dashboardStock (resumo das últimas análises por loja)
+- [x] Criar helper getDashboardStock (gestor) e getDashboardStockAdmin (admin) no db.ts
+- [x] Criar widget StockDashboardWidget no Dashboard.tsx
+- [x] Mostrar totais: lojas analisadas, artigos em stock, com fichas, sem fichas, fichas sem stock
+- [x] Barra de progresso visual (verde=com fichas, âmbar=sem fichas)
+- [x] Top 5 lojas com mais itens sem fichas
+- [x] Mostrar data da última análise
+- [x] Link para a página de Controlo de Stock
