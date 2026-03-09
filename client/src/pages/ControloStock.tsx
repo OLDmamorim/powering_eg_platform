@@ -779,7 +779,11 @@ export default function ControloStock() {
                       Resumo por Loja
                     </h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                      {analises && analises.map((loja: any) => {
+                      {analises && [...analises].sort((a: any, b: any) => {
+                        const percA = a.totalItensStock > 0 ? (a.totalSemFichas / a.totalItensStock) : 0;
+                        const percB = b.totalItensStock > 0 ? (b.totalSemFichas / b.totalItensStock) : 0;
+                        return percB - percA;
+                      }).map((loja: any) => {
                         const lojaSemFichasPercent = loja.totalItensStock > 0 ? ((loja.totalSemFichas / loja.totalItensStock) * 100).toFixed(0) : '0';
                         const lojaPercent = loja.totalItensStock > 0 ? ((loja.totalComFichas / loja.totalItensStock) * 100).toFixed(0) : '0';
                         const semFichasNum = parseInt(lojaSemFichasPercent);
@@ -1474,7 +1478,11 @@ export default function ControloStock() {
               </Card>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {historico.map((analise: any) => {
+                {[...historico].sort((a: any, b: any) => {
+                  const percA = a.totalItensStock > 0 ? (a.totalSemFichas / a.totalItensStock) : 0;
+                  const percB = b.totalItensStock > 0 ? (b.totalSemFichas / b.totalItensStock) : 0;
+                  return percB - percA;
+                }).map((analise: any) => {
                   const percentComFichas = analise.totalItensStock > 0 ? ((analise.totalComFichas / analise.totalItensStock) * 100).toFixed(0) : '0';
                   const percentSemFichas = analise.totalItensStock > 0 ? ((analise.totalSemFichas / analise.totalItensStock) * 100).toFixed(0) : '0';
                   const semFichasNumH = parseInt(percentSemFichas);

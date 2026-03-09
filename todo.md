@@ -688,3 +688,8 @@
 - [x] Cores dinâmicas: verde (<40%), âmbar (40-59%), vermelho (>=60%)
 - [x] Aplicado no dashboard e no histórico
 - [x] Guardar checkpoint
+
+## Ordenar Lojas por % Sem Fichas (Pior para Melhor)
+- [x] Ordenar cards das lojas no dashboard por % sem fichas descendente
+- [x] Ordenar cards das lojas no histórico por % sem fichas descendente
+- [ ] Guardar checkpoint
