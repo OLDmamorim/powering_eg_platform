@@ -12651,9 +12651,15 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
           });
         }
 
-        // 9. Agrupar resultados por gestor
-        const porGestor = new Map<string, typeof resultadosPorLoja>();
-        for (const r of resultadosPorLoja) {
+        // 9. Filtrar resultados por role: gestor vê só as suas lojas, admin vê tudo
+        const isAdmin = ctx.user.role === 'admin';
+        const resultadosFiltrados = isAdmin
+          ? resultadosPorLoja
+          : resultadosPorLoja.filter(r => r.gestorId === gestorId);
+
+        // 10. Agrupar resultados por gestor
+        const porGestor = new Map<string, typeof resultadosFiltrados>();
+        for (const r of resultadosFiltrados) {
           const key = r.gestorNome || 'Sem Gestor';
           if (!porGestor.has(key)) porGestor.set(key, []);
           porGestor.get(key)!.push(r);
@@ -12673,8 +12679,8 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
         })).sort((a, b) => a.gestorNome.localeCompare(b.gestorNome));
 
         return {
-          totalArtigosProcessados: todosItens.length,
-          totalLojasAnalisadas: resultadosPorLoja.length,
+          totalArtigosProcessados: resultadosFiltrados.reduce((s, l) => s + l.totalItensStock, 0),
+          totalLojasAnalisadas: resultadosFiltrados.length,
           totalArmazens: porArmazem.size,
           armazensNaoMapeados,
           nomeArquivo: input.nomeArquivo || 'stock_global.xlsx',

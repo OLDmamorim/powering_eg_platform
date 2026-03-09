@@ -641,4 +641,9 @@
 - [x] Manter vista de detalhe por loja (Total Stock, Com Fichas, Sem Fichas, Fichas s/ Stock)
 - [x] Remover mensagem de armazéns não mapeados
 - [x] Testar com 6 gestores: Carlos Eduardo, Fabio Dias, Marco Amorim, Marco Vilar, Mónica Correira, Rui Adrião
+- [x] Guardar checkpoint
+
+## BUG: Controlo de Stock mostra lojas de todos os gestores
+- [x] Gestor deve ver apenas as suas lojas, Admin vê tudo agrupado por gestor
+- [x] Corrigir backend para filtrar resultados por gestorId quando role é gestor
 - [ ] Guardar checkpoint
