@@ -12933,7 +12933,6 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
         nomeLoja: z.string(),
         comFichas: z.array(z.any()),
         semFichas: z.array(z.any()),
-        fichasSemStock: z.array(z.any()),
         totalItensStock: z.number().optional(),
       }))
       .mutation(async ({ ctx, input }) => {
@@ -12965,10 +12964,7 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
                   <td style="padding:8px 12px;border:1px solid #e2e8f0;color:#334155;">Sem Fichas de Serviço</td>
                   <td style="padding:8px 12px;border:1px solid #e2e8f0;font-weight:bold;text-align:right;color:#d97706;">${input.semFichas.length}</td>
                 </tr>
-                <tr>
-                  <td style="padding:8px 12px;border:1px solid #e2e8f0;color:#334155;">Fichas sem Stock</td>
-                  <td style="padding:8px 12px;border:1px solid #e2e8f0;font-weight:bold;text-align:right;color:#dc2626;">${input.fichasSemStock.length}</td>
-                </tr>
+
               </table>
               <p style="margin:0 0 15px;color:#64748b;font-size:13px;line-height:1.5;">Consulte o ficheiro Excel em anexo para os dados completos.</p>
               <p style="margin:0;padding:12px 16px;background:#fffbeb;border:1px solid #fde68a;border-radius:6px;color:#92400e;font-size:13px;line-height:1.6;">📋 <strong>Ação necessária:</strong> Aceda à aplicação <strong>PoweringEG</strong> da sua loja, vá a <strong>Análise de Stock</strong>, selecione o separador <strong>"Stock sem Fichas"</strong> e classifique os eurocodes indicados.</p>
@@ -12984,13 +12980,12 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
         let excelAttachment: { filename: string; content: string; contentType: string };
         try {
           console.log(`[Stock Email] A gerar Excel para ${input.nomeLoja} (lojaId: ${input.lojaId})...`);
-          console.log(`[Stock Email] Dados: comFichas=${input.comFichas.length}, semFichas=${input.semFichas.length}, fichasSemStock=${input.fichasSemStock.length}`);
+          console.log(`[Stock Email] Dados: comFichas=${input.comFichas.length}, semFichas=${input.semFichas.length}`);
           const { base64, filename } = await gerarExcelControloStock({
             nomeLoja: input.nomeLoja,
             lojaId: input.lojaId,
             comFichas: input.comFichas,
             semFichas: input.semFichas,
-            fichasSemStock: input.fichasSemStock,
           });
           excelAttachment = {
             filename,
@@ -13161,7 +13156,6 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
           const totalStock = analise.totalItensStock || 0;
           const comFichas = resultado.comFichas || [];
           const semFichas = resultado.semFichas || [];
-          const fichasSemStock = resultado.fichasSemStock || [];
 
           const htmlEmail = `
             <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">
@@ -13184,10 +13178,7 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
                     <td style="padding:8px 12px;border:1px solid #e2e8f0;color:#334155;">Sem Fichas de Serviço</td>
                     <td style="padding:8px 12px;border:1px solid #e2e8f0;font-weight:bold;text-align:right;color:#d97706;">${semFichas.length}</td>
                   </tr>
-                  <tr>
-                    <td style="padding:8px 12px;border:1px solid #e2e8f0;color:#334155;">Fichas sem Stock</td>
-                    <td style="padding:8px 12px;border:1px solid #e2e8f0;font-weight:bold;text-align:right;color:#dc2626;">${fichasSemStock.length}</td>
-                  </tr>
+
                 </table>
                 <p style="margin:0 0 15px;color:#64748b;font-size:13px;line-height:1.5;">Consulte o ficheiro Excel em anexo para os dados completos.</p>
                 <p style="margin:0;padding:12px 16px;background:#fffbeb;border:1px solid #fde68a;border-radius:6px;color:#92400e;font-size:13px;line-height:1.6;">📋 <strong>Ação necessária:</strong> Aceda à aplicação <strong>PoweringEG</strong> da sua loja, vá a <strong>Análise de Stock</strong>, selecione o separador <strong>"Stock sem Fichas"</strong> e classifique os eurocodes indicados.</p>
@@ -13205,7 +13196,6 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
               lojaId: item.lojaId,
               comFichas,
               semFichas,
-              fichasSemStock,
             });
             excelAttachment = {
               filename,
@@ -13305,11 +13295,9 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
           data: analise.createdAt,
           comFichas: resultado.comFichas || [],
           semFichas: resultado.semFichas || [],
-          fichasSemStock: resultado.fichasSemStock || [],
           totalItensStock: analise.totalItensStock,
           totalComFichas: analise.totalComFichas,
           totalSemFichas: analise.totalSemFichas,
-          totalFichasSemStock: analise.totalFichasSemStock,
         };
       }),
   }),

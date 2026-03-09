@@ -247,7 +247,7 @@ export default function PortalLoja() {
   const [exportandoPDF, setExportandoPDF] = useState(false);
   const [analiseStockSelecionada, setAnaliseStockSelecionada] = useState<number | null>(null);
   const [filtroClassificacaoStock, setFiltroClassificacaoStock] = useState<string>('todas');
-  const [stockTabFilter, setStockTabFilter] = useState<'todos' | 'comFichas' | 'semFichas' | 'fichasSemStock'>('todos');
+  const [stockTabFilter, setStockTabFilter] = useState<'todos' | 'comFichas' | 'semFichas'>('todos');
   const [searchStockQuery, setSearchStockQuery] = useState('');
   const [analiseIA, setAnaliseIA] = useState<any>(null);
   const [gerandoAnaliseIA, setGerandoAnaliseIA] = useState(false);
@@ -4171,7 +4171,7 @@ export default function PortalLoja() {
               };
               const comFichasItems = (resultado?.comFichas || []).filter(matchSearch);
               const semFichasItems = (resultado?.semFichas || []).filter(matchSearch);
-              const fichasSemStockItems = (resultado?.fichasSemStock || []).filter(matchSearch);
+
 
               // Desmultiplicar sem fichas
               const desmultiplicados: Array<{item: any; unitIndex: number; totalUnits: number}> = [];
@@ -4210,7 +4210,7 @@ export default function PortalLoja() {
               return (
                 <div className="space-y-3">
                   {/* Cards resumo clicaveis como filtro */}
-                  <div className="grid grid-cols-4 gap-2">
+                  <div className="grid grid-cols-3 gap-2">
                     <div onClick={() => setStockTabFilter('todos')} className={`text-center p-2 rounded-lg cursor-pointer transition-all ${stockTabFilter === 'todos' ? 'bg-blue-100 ring-2 ring-blue-400' : 'bg-blue-50 hover:bg-blue-100'}`}>
                       <div className="text-lg font-bold text-blue-700">{detalheStock.totalItensStock}</div>
                       <div className="text-[10px] text-blue-600">Total</div>
@@ -4223,10 +4223,7 @@ export default function PortalLoja() {
                       <div className="text-lg font-bold text-amber-700">{desmultiplicados.length}</div>
                       <div className="text-[10px] text-amber-600">S/ Fichas</div>
                     </div>
-                    <div onClick={() => setStockTabFilter('fichasSemStock')} className={`text-center p-2 rounded-lg cursor-pointer transition-all ${stockTabFilter === 'fichasSemStock' ? 'bg-red-100 ring-2 ring-red-400' : 'bg-red-50 hover:bg-red-100'}`}>
-                      <div className="text-lg font-bold text-red-700">{fichasSemStockItems.length}</div>
-                      <div className="text-[10px] text-red-600">Fichas s/ Stock</div>
-                    </div>
+
                   </div>
 
                   {/* Campo de pesquisa */}
@@ -4378,38 +4375,11 @@ export default function PortalLoja() {
                     </div>
                   )}
 
-                  {/* === FICHAS SEM STOCK === */}
-                  {(stockTabFilter === 'todos' || stockTabFilter === 'fichasSemStock') && fichasSemStockItems.length > 0 && (
-                    <div>
-                      <h3 className="font-semibold text-sm text-red-700 mb-2 flex items-center gap-1.5">
-                        <AlertTriangle className="h-4 w-4" />
-                        {language === 'pt' ? 'Fichas de Serviço Sem Stock' : 'Service Records Without Stock'} ({fichasSemStockItems.length})
-                      </h3>
-                      <div className="space-y-1.5">
-                        {fichasSemStockItems.map((item: any, idx: number) => (
-                          <div key={`fss_${idx}`} className="border border-red-100 rounded-lg p-2.5 bg-white">
-                            <div className="flex items-center gap-1.5 flex-wrap mb-1">
-                              <Badge className="bg-red-100 text-red-800 text-[10px] px-1.5 py-0">{item.eurocode}</Badge>
-                              <Badge variant="outline" className="text-[10px] px-1.5 py-0">{item.obrano}</Badge>
-                              <Badge className="bg-gray-100 text-gray-600 text-[10px] px-1.5 py-0">{item.status}</Badge>
-                            </div>
-                            <p className="text-[11px] text-gray-600 truncate">
-                              {item.marca} {item.modelo} — {item.matricula}
-                            </p>
-                            <div className="text-[10px] text-gray-500 text-right">{item.diasAberto} dias</div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
                   {/* Mensagem quando filtro vazio */}
                   {stockTabFilter === 'comFichas' && comFichasItems.length === 0 && (
                     <Card><CardContent className="py-6 text-center text-sm text-muted-foreground">{language === 'pt' ? 'Nenhum item com fichas de serviço' : 'No items with service records'}</CardContent></Card>
                   )}
-                  {stockTabFilter === 'fichasSemStock' && fichasSemStockItems.length === 0 && (
-                    <Card><CardContent className="py-6 text-center text-sm text-muted-foreground">{language === 'pt' ? 'Nenhuma ficha sem stock' : 'No records without stock'}</CardContent></Card>
-                  )}
+
                 </div>
               );
             })() : null
@@ -4463,7 +4433,7 @@ export default function PortalLoja() {
                           </div>
                           
                           {/* Resumo em grid */}
-                          <div className="grid grid-cols-4 gap-2 mb-3">
+                          <div className="grid grid-cols-3 gap-2 mb-3">
                             <div className="text-center p-2 bg-blue-50 rounded-lg">
                               <div className="text-lg font-bold text-blue-700">{analise.totalItensStock}</div>
                               <div className="text-[10px] text-blue-600">Total</div>
@@ -4476,10 +4446,7 @@ export default function PortalLoja() {
                               <div className="text-lg font-bold text-amber-700">{analise.totalSemFichas}</div>
                               <div className="text-[10px] text-amber-600">S/ Fichas</div>
                             </div>
-                            <div className="text-center p-2 bg-red-50 rounded-lg">
-                              <div className="text-lg font-bold text-red-700">{analise.totalFichasSemStock}</div>
-                              <div className="text-[10px] text-red-600">Fichas s/ Stock</div>
-                            </div>
+
                           </div>
                           
                           {/* Barra de progresso */}

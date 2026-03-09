@@ -10,7 +10,7 @@ const CLASSIFICACAO_LABELS: Record<string, string> = {
 };
 
 /**
- * Gera um ficheiro Excel consolidado de controlo de stock com 3 separadores.
+ * Gera um ficheiro Excel consolidado de controlo de stock com 2 separadores.
  * Retorna o buffer em base64 para anexar ao email.
  */
 export async function gerarExcelControloStock(params: {
@@ -18,9 +18,8 @@ export async function gerarExcelControloStock(params: {
   lojaId: number;
   comFichas: any[];
   semFichas: any[];
-  fichasSemStock: any[];
 }): Promise<{ base64: string; filename: string }> {
-  const { nomeLoja, lojaId, comFichas, semFichas, fichasSemStock } = params;
+  const { nomeLoja, lojaId, comFichas, semFichas } = params;
 
   // Obter classificações e recorrência da loja (com fallback se falhar)
   let classificacoesMap = new Map<string, string>();
@@ -98,31 +97,6 @@ export async function gerarExcelControloStock(params: {
         recorrencia: recorr && recorr > 1 ? `${recorr} análises` : '-',
       });
     }
-  }
-
-  // --- Sheet 3: Fichas s/ Stock ---
-  const ws3 = wb.addWorksheet('Fichas sem Stock');
-  ws3.columns = [
-    { header: 'Eurocode', key: 'eurocode', width: 18 },
-    { header: 'Obra N.º', key: 'obrano', width: 12 },
-    { header: 'Matrícula', key: 'matricula', width: 14 },
-    { header: 'Marca', key: 'marca', width: 14 },
-    { header: 'Modelo', key: 'modelo', width: 20 },
-    { header: 'Estado', key: 'status', width: 14 },
-    { header: 'Dias Aberto', key: 'diasAberto', width: 14 },
-  ];
-  ws3.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
-  ws3.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFDC2626' } };
-  for (const item of fichasSemStock) {
-    ws3.addRow({
-      eurocode: item.eurocode,
-      obrano: item.obrano,
-      matricula: item.matricula,
-      marca: item.marca,
-      modelo: item.modelo,
-      status: item.status,
-      diasAberto: item.diasAberto > 0 ? `${item.diasAberto} dias` : '-',
-    });
   }
 
   // Gerar buffer e converter para base64

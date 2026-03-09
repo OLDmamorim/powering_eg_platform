@@ -136,7 +136,6 @@ async function exportConsolidatedExcel(
   nomeLoja: string,
   comFichas: any[],
   semFichas: any[],
-  fichasSemStock: any[],
   classificacoesMap: Map<string, string>,
   recorrenciaMap: Map<string, number>,
 ) {
@@ -195,30 +194,6 @@ async function exportConsolidatedExcel(
       }
     }
 
-    // Sheet 3: Fichas sem Stock
-    const ws3 = wb.addWorksheet('Fichas sem Stock');
-    ws3.columns = [
-      { header: 'Eurocode', key: 'eurocode', width: 18 },
-      { header: 'Obra N.º', key: 'obrano', width: 12 },
-      { header: 'Matrícula', key: 'matricula', width: 14 },
-      { header: 'Marca', key: 'marca', width: 14 },
-      { header: 'Modelo', key: 'modelo', width: 20 },
-      { header: 'Estado', key: 'status', width: 14 },
-      { header: 'Dias Aberto', key: 'diasAberto', width: 14 },
-    ];
-    ws3.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
-    ws3.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFDC2626' } };
-    for (const item of fichasSemStock) {
-      ws3.addRow({
-        eurocode: item.eurocode,
-        obrano: item.obrano,
-        matricula: item.matricula,
-        marca: item.marca,
-        modelo: item.modelo,
-        status: item.status,
-        diasAberto: item.diasAberto > 0 ? `${item.diasAberto} dias` : '-',
-      });
-    }
 
     const buffer = await wb.xlsx.writeBuffer();
     const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
@@ -520,7 +495,6 @@ export default function ControloStock() {
       nomeLoja,
       dadosActivos.comFichas || [],
       dadosActivos.semFichas || [],
-      dadosActivos.fichasSemStock || [],
       classifMapSimple,
       recorrenciaMap,
     );
@@ -551,13 +525,12 @@ export default function ControloStock() {
       nomeLoja,
       comFichas: dadosActivos.comFichas || [],
       semFichas: dadosActivos.semFichas || [],
-      fichasSemStock: dadosActivos.fichasSemStock || [],
       totalItensStock: dadosActivos.totalItensStock,
     });
   };
 
   // Email tab handler
-  const handleEmailTab = (status: 'comFichas' | 'semFichas' | 'fichasSemStock') => {
+  const handleEmailTab = (status: 'comFichas' | 'semFichas') => {
     if (!lojaIdActiva) {
       toast.error('Loja não identificada para envio de email');
       return;
@@ -565,7 +538,6 @@ export default function ControloStock() {
     let itens: any[] = [];
     if (status === 'comFichas' && dadosActivos?.comFichas) itens = filtrarItens(dadosActivos.comFichas);
     else if (status === 'semFichas' && dadosActivos?.semFichas) itens = filtrarItens(dadosActivos.semFichas);
-    else if (status === 'fichasSemStock' && dadosActivos?.fichasSemStock) itens = filtrarItens(dadosActivos.fichasSemStock);
     if (itens.length === 0) { toast.error('Sem itens para enviar'); return; }
     enviarEmailMutation.mutate({ lojaId: lojaIdActiva, nomeLoja, status, itens });
   };
@@ -711,7 +683,7 @@ export default function ControloStock() {
               return (
                 <>
                   {/* Summary cards */}
-                  <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     <Card className="border-blue-200 bg-blue-50/50">
                       <CardContent className="pt-3 pb-3 text-center">
                         <div className="text-xl md:text-2xl font-bold text-blue-600">{totais.totalLojas}</div>
@@ -736,12 +708,7 @@ export default function ControloStock() {
                         <div className="text-[10px] sm:text-xs text-muted-foreground">Sem Fichas ({percentSemFichas}%)</div>
                       </CardContent>
                     </Card>
-                    <Card className="border-red-200 bg-red-50/50">
-                      <CardContent className="pt-3 pb-3 text-center">
-                        <div className="text-xl md:text-2xl font-bold text-red-600">{totais.totalFichasSemStock.toLocaleString('pt-PT')}</div>
-                        <div className="text-[10px] sm:text-xs text-muted-foreground">Fichas s/ Stock</div>
-                      </CardContent>
-                    </Card>
+
                   </div>
 
                   {/* Progress bar */}
@@ -826,10 +793,7 @@ export default function ControloStock() {
                                   <span className="text-muted-foreground">Sem Fichas:</span>
                                   <span className="font-medium text-amber-600">{loja.totalSemFichas}</span>
                                 </div>
-                                <div className="flex items-center justify-between">
-                                  <span className="text-muted-foreground">Fichas s/ Stock:</span>
-                                  <span className="font-medium text-red-600">{loja.totalFichasSemStock}</span>
-                                </div>
+
                               </div>
                               {/* Mini progress bar */}
                               <div className="mt-2">
@@ -917,8 +881,7 @@ export default function ControloStock() {
                                     totalItensStock: 'Total Stock',
                                     totalComFichas: 'Com Fichas',
                                     totalSemFichas: 'Sem Fichas',
-                                    totalFichasSemStock: 'Fichas s/ Stock',
-                                  };
+                                                  };
                                   return [value.toLocaleString('pt-PT'), labels[name] || name];
                                 }}
                               />
@@ -930,7 +893,6 @@ export default function ControloStock() {
                                     totalItensStock: 'Total Stock',
                                     totalComFichas: 'Com Fichas',
                                     totalSemFichas: 'Sem Fichas',
-                                    totalFichasSemStock: 'Fichas s/ Stock',
                                   };
                                   return labels[value] || value;
                                 }}
@@ -938,7 +900,7 @@ export default function ControloStock() {
                               <Line type="monotone" dataKey="totalItensStock" stroke="#3b82f6" strokeWidth={2} dot={{ r: 3 }} name="totalItensStock" />
                               <Line type="monotone" dataKey="totalComFichas" stroke="#22c55e" strokeWidth={2} dot={{ r: 3 }} name="totalComFichas" />
                               <Line type="monotone" dataKey="totalSemFichas" stroke="#f59e0b" strokeWidth={2} dot={{ r: 3 }} name="totalSemFichas" />
-                              <Line type="monotone" dataKey="totalFichasSemStock" stroke="#ef4444" strokeWidth={2} dot={{ r: 3 }} name="totalFichasSemStock" />
+
                             </LineChart>
                           </ResponsiveContainer>
                         </div>
@@ -1141,10 +1103,7 @@ export default function ControloStock() {
                               <span className="text-muted-foreground">Sem Fichas:</span>
                               <span className="font-medium text-amber-600">{loja.totalSemFichas}</span>
                             </div>
-                            <div className="flex items-center justify-between">
-                              <span className="text-muted-foreground">Fichas s/ Stock:</span>
-                              <span className="font-medium text-red-600">{loja.totalFichasSemStock}</span>
-                            </div>
+
                           </div>
                           <div className="flex items-center justify-between mt-2 pt-2 border-t">
                             <span className="text-[10px] text-muted-foreground">Pendente</span>
@@ -1499,10 +1458,7 @@ export default function ControloStock() {
                             <span className="text-muted-foreground">Sem Fichas:</span>
                             <span className="font-medium text-amber-600">{analise.totalSemFichas}</span>
                           </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-muted-foreground">Fichas s/ Stock:</span>
-                            <span className="font-medium text-red-600">{analise.totalFichasSemStock}</span>
-                          </div>
+
                         </div>
                         {/* Mini progress bar */}
                         <div className="mt-2">
@@ -1602,10 +1558,7 @@ export default function ControloStock() {
                         <span className="text-muted-foreground">S/ Fichas</span>
                         <VariacaoDisplay valor={comparacaoData.variacoes.semFichas} />
                       </div>
-                      <div className="flex items-center justify-between bg-red-50 rounded px-2 py-1.5">
-                        <span className="text-muted-foreground">s/ Stock</span>
-                        <VariacaoDisplay valor={comparacaoData.variacoes.fichasSemStock} />
-                      </div>
+
                     </div>
                   </CardContent>
                 </Card>

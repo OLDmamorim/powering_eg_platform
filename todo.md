@@ -717,3 +717,18 @@
 - [x] Remover TabsContent da listagem de fichas sem stock
 - [x] Manter apenas tabs "Com Fichas" e "Sem Fichas" (grid 2 colunas)
 - [ ] Guardar checkpoint
+
+## Remover "Fichas s/ Stock" de TODOS os locais
+- [x] Remover 5º card KPI "Fichas s/ Stock" do dashboard de stock
+- [x] Remover linha "Fichas s/ Stock" dos cards das lojas no dashboard
+- [x] Remover linha "Fichas s/ Stock" dos cards das lojas no histórico
+- [x] Remover sheet "Fichas sem Stock" do Excel frontend (exportConsolidatedExcel)
+- [x] Remover sheet "Fichas sem Stock" do Excel backend (stockExcelService)
+- [x] Remover "Fichas sem Stock" da tabela do email consolidado
+- [x] Remover "Fichas sem Stock" da tabela do email em massa (enviarEmailTodasLojas)
+- [x] Remover fichasSemStock do input do enviarEmailConsolidado
+- [x] Remover fichasSemStock do exportarExcelConsolidado
+- [x] Remover linha do gráfico de evolução temporal
+- [x] Remover da comparação de análises
+- [x] Remover "Fichas s/ Stock" do Portal da Loja (cards KPI, listagem, histórico)
+- [ ] Guardar checkpoint
