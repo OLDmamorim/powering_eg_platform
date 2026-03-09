@@ -178,23 +178,8 @@ const gestorProcedure = protectedProcedure.use(async ({ ctx, next }) => {
   });
 });
 
-// In-memory job store for background stock analysis
-interface StockJob {
-  id: string;
-  status: 'processing' | 'completed' | 'error';
-  progress?: string;
-  result?: any;
-  error?: string;
-  createdAt: number;
-}
-const stockJobs = new Map<string, StockJob>();
-// Clean up old jobs every 10 minutes
-setInterval(() => {
-  const now = Date.now();
-  for (const [id, job] of stockJobs) {
-    if (now - job.createdAt > 30 * 60 * 1000) stockJobs.delete(id);
-  }
-}, 10 * 60 * 1000);
+// Clean up old background jobs every 10 minutes
+setInterval(() => { db.cleanOldBackgroundJobs().catch(() => {}); }, 10 * 60 * 1000);
 
 export const appRouter = router({
   system: systemRouter,
@@ -12465,13 +12450,12 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
 
         // Gerar jobId e retornar imediatamente
         const jobId = `stock_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-        stockJobs.set(jobId, { id: jobId, status: 'processing', progress: 'A iniciar análise...', createdAt: Date.now() });
+        await db.createBackgroundJob(jobId);
 
         // Processar em background (não await)
         (async () => {
           try {
-            const job = stockJobs.get(jobId)!;
-            job.progress = 'A ler ficheiro Excel...';
+            await db.updateBackgroundJob(jobId, { progress: 'A ler ficheiro Excel...' });
 
             // 1. Ler Excel com ExcelJS
             const ExcelJSModule = await import('exceljs');
@@ -12504,7 +12488,7 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
             }
 
             // 3. Ler todas as linhas
-            job.progress = 'A processar linhas do Excel...';
+            await db.updateBackgroundJob(jobId, { progress: 'A processar linhas do Excel...' });
             const categoriasPermitidas = ['OC', 'PB', 'TE', 'VL'];
             interface ItemStockGlobal {
               ref: string;
@@ -12555,7 +12539,7 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
               porArmazem.get(item.armazem)!.push(item);
             }
 
-            job.progress = `${todosItens.length} artigos lidos, ${porArmazem.size} armazéns. A buscar lojas...`;
+            await db.updateBackgroundJob(jobId, { progress: `${todosItens.length} artigos lidos, ${porArmazem.size} armazéns. A buscar lojas...` });
 
             // 5. Buscar todas as lojas e mapear por numeroLoja
             const todasLojas = await db.getAllLojas();
@@ -12607,7 +12591,7 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
                 continue;
               }
 
-              job.progress = `A analisar loja ${loja.nome} (${processadas + 1}/${armazensArray.length})...`;
+              await db.updateBackgroundJob(jobId, { progress: `A analisar loja ${loja.nome} (${processadas + 1}/${armazensArray.length})...` });
 
               let gestorDaLoja: number | null = null;
               let gestorNomeDaLoja: string | null = null;
@@ -12737,9 +12721,7 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
               },
             })).sort((a, b) => a.gestorNome.localeCompare(b.gestorNome));
 
-            job.status = 'completed';
-            job.progress = 'Análise concluída!';
-            job.result = {
+            const resultData = {
               totalArtigosProcessados: resultadosFiltrados.reduce((s, l) => s + l.totalItensStock, 0),
               totalLojasAnalisadas: resultadosFiltrados.length,
               totalArmazens: porArmazem.size,
@@ -12747,12 +12729,9 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
               nomeArquivo: input.nomeArquivo || 'stock_global.xlsx',
               porGestor: resultadoAgrupado,
             };
+            await db.updateBackgroundJob(jobId, { status: 'completed', progress: 'Análise concluída!', result: JSON.stringify(resultData) });
           } catch (err: any) {
-            const job = stockJobs.get(jobId);
-            if (job) {
-              job.status = 'error';
-              job.error = err.message || 'Erro desconhecido ao analisar stock';
-            }
+            await db.updateBackgroundJob(jobId, { status: 'error', error: err.message || 'Erro desconhecido ao analisar stock' }).catch(() => {});
             console.error('[Stock Global] Erro no processamento background:', err);
           }
         })();
@@ -12764,12 +12743,12 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
     analisarGlobalStatus: gestorProcedure
       .input(z.object({ jobId: z.string() }))
       .query(async ({ input }) => {
-        const job = stockJobs.get(input.jobId);
+        const job = await db.getBackgroundJob(input.jobId);
         if (!job) return { status: 'not_found' as const, progress: '', result: null, error: null };
         return {
           status: job.status,
           progress: job.progress || '',
-          result: job.status === 'completed' ? job.result : null,
+          result: job.status === 'completed' && job.result ? JSON.parse(job.result) : null,
           error: job.status === 'error' ? job.error : null,
         };
       }),

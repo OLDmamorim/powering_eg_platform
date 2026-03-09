@@ -798,4 +798,5 @@
 - [x] Investigar causa: proxy do Manus corta ligação por timeout antes do processo terminar
 - [x] Corrigido: convertido para processamento em background com polling (jobId + analisarGlobalStatus)
 - [x] Frontend actualizado: mostra progresso em tempo real (loja a loja)
+- [x] Migrado de memória para base de dados (tabela background_jobs) para funcionar com múltiplas instâncias
 - [ ] Guardar checkpoint
