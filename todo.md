@@ -800,3 +800,15 @@
 - [x] Frontend actualizado: mostra progresso em tempo real (loja a loja)
 - [x] Migrado de memória para base de dados (tabela background_jobs) para funcionar com múltiplas instâncias
 - [ ] Guardar checkpoint
+
+## Fix: Bundle demasiado grande impede deploy (timeout)
+- [x] Diagnosticado: bundle JS total era 19.5 MB (shiki 9.4MB, mermaid 2.2MB, index 5.1MB)
+- [x] Stub shiki (9.4 MB eliminados) - syntax highlighting não necessário
+- [x] Stub mermaid (2.2 MB eliminados) - diagramas não necessários
+- [x] Desactivar jsxLocPlugin em produção (data-loc attributes eliminados)
+- [x] Forçar NODE_ENV=production no build script (elimina jsxDEV, fileName, lineNumber)
+- [x] Separar chunks: lucide, react-dom, tanstack, trpc, date-fns, markdown
+- [x] Index chunk: 5.1 MB → 1.67 MB (redução de 67%)
+- [x] Total JS: 19.5 MB → 5.9 MB (redução de 70%)
+- [x] Total JS gzip: 1.61 MB
+- [ ] Guardar checkpoint e publicar
