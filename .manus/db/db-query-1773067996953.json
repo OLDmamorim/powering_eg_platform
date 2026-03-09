@@ -1,0 +1,19 @@
+{
+  "query": "SELECT a.id, a.lojaId, a.nomeLoja, a.totalItensStock, a.totalComFichas, a.totalSemFichas, a.createdAt\nFROM analises_stock a\nWHERE a.dadosStock LIKE '%6569BYPV%' OR a.resultadoAnalise LIKE '%6569BYPV%'\nORDER BY a.createdAt DESC;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT a.id, a.lojaId, a.nomeLoja, a.totalItensStock, a.totalComFichas, a.totalSemFichas, a.createdAt\nFROM analises_stock a\nWHERE a.dadosStock LIKE '%6569BYPV%' OR a.resultadoAnalise LIKE '%6569BYPV%'\nORDER BY a.createdAt DESC;",
+  "rows": [
+    {
+      "id": "90190",
+      "lojaId": "60006",
+      "nomeLoja": "Paredes",
+      "totalItensStock": "62",
+      "totalComFichas": "24",
+      "totalSemFichas": "38",
+      "createdAt": "2026-03-09 11:57:46"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tlojaId\tnomeLoja\ttotalItensStock\ttotalComFichas\ttotalSemFichas\tcreatedAt\n90190\t60006\tParedes\t62\t24\t38\t2026-03-09 11:57:46\n",
+  "stderr": "",
+  "execution_time_ms": 207
+}
