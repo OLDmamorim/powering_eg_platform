@@ -13188,7 +13188,8 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
                     <td style="padding:8px 12px;border:1px solid #e2e8f0;font-weight:bold;text-align:right;color:#dc2626;">${fichasSemStock.length}</td>
                   </tr>
                 </table>
-                <p style="margin:0;color:#64748b;font-size:13px;line-height:1.5;">Consulte o ficheiro Excel em anexo para os dados completos.</p>
+                <p style="margin:0 0 15px;color:#64748b;font-size:13px;line-height:1.5;">Consulte o ficheiro Excel em anexo para os dados completos.</p>
+                <p style="margin:0;padding:12px 16px;background:#fffbeb;border:1px solid #fde68a;border-radius:6px;color:#92400e;font-size:13px;line-height:1.6;">📋 <strong>Ação necessária:</strong> Aceda à aplicação <strong>PoweringEG</strong> da sua loja, vá a <strong>Análise de Stock</strong>, selecione o separador <strong>"Stock sem Fichas"</strong> e classifique os eurocodes indicados.</p>
               </div>
               <div style="padding:15px;background:#f8fafc;border:1px solid #e2e8f0;border-top:0;border-radius:0 0 8px 8px;text-align:center;">
                 <p style="margin:0;color:#64748b;font-size:12px;">PoweringEG Platform 2.0 - a IA ao serviço da ExpressGlass</p>

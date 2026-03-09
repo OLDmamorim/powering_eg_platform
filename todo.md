@@ -692,4 +692,8 @@
 ## Ordenar Lojas por % Sem Fichas (Pior para Melhor)
 - [x] Ordenar cards das lojas no dashboard por % sem fichas descendente
 - [x] Ordenar cards das lojas no histórico por % sem fichas descendente
+- [x] Guardar checkpoint
+
+## Adicionar Instrução no Email de Stock às Lojas
+- [x] Adicionar frase no corpo do email com indicação para aceder ao PoweringEG, ir à análise de stock, separador "Stock sem Fichas" e classificar os eurocodes
 - [ ] Guardar checkpoint
