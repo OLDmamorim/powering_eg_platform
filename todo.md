@@ -706,3 +706,8 @@
 - [x] Simplificar lógica de attachment (sempre obrigatório)
 - [x] Adicionar logs detalhados ao emailService.ts para diagnóstico
 - [ ] Guardar checkpoint e testar
+
+## Remover Card "Fichas s/ Stock" da Vista de Detalhe da Loja
+- [x] Remover o 4º card (Fichas s/ Stock) dos KPI cards na vista de detalhe da loja
+- [x] Alterar grid de 4 para 3 colunas
+- [ ] Guardar checkpoint

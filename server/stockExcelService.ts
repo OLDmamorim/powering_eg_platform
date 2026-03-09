@@ -1,4 +1,5 @@
-import * as ExcelJS from 'exceljs';
+import ExcelJSModule from 'exceljs';
+const ExcelJS = (ExcelJSModule as any).default || ExcelJSModule;
 import * as db from './db';
 
 const CLASSIFICACAO_LABELS: Record<string, string> = {

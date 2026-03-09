@@ -1167,7 +1167,7 @@ export default function ControloStock() {
         {view === 'detalhe' && dadosActivos && (
           <div className="space-y-4">
             {/* Cards de resumo */}
-            <div className="grid grid-cols-4 gap-2 md:gap-3">
+            <div className="grid grid-cols-3 gap-2 md:gap-3">
               <Card className="border-blue-200 bg-blue-50/50">
                 <CardContent className="pt-3 pb-3 md:pt-4 md:pb-4 text-center px-1 md:px-4">
                   <Package className="h-4 w-4 md:h-6 md:w-6 mx-auto text-blue-600 mb-0.5" />
@@ -1193,15 +1193,6 @@ export default function ControloStock() {
                     {semFichasDesmultiplicados.length}
                   </div>
                   <div className="text-[10px] md:text-xs text-muted-foreground leading-tight">Sem Fichas</div>
-                </CardContent>
-              </Card>
-              <Card className="border-red-200 bg-red-50/50">
-                <CardContent className="pt-3 pb-3 md:pt-4 md:pb-4 text-center px-1 md:px-4">
-                  <AlertTriangle className="h-4 w-4 md:h-6 md:w-6 mx-auto text-red-600 mb-0.5" />
-                  <div className="text-lg md:text-2xl font-bold text-red-700">
-                    {dadosActivos.totalFichasSemStock ?? dadosActivos.fichasSemStock?.length}
-                  </div>
-                  <div className="text-[10px] md:text-xs text-muted-foreground leading-tight">Fichas s/ Stock</div>
                 </CardContent>
               </Card>
             </div>
