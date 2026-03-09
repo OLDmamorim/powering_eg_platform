@@ -696,4 +696,13 @@
 
 ## Adicionar Instrução no Email de Stock às Lojas
 - [x] Adicionar frase no corpo do email com indicação para aceder ao PoweringEG, ir à análise de stock, separador "Stock sem Fichas" e classificar os eurocodes
-- [ ] Guardar checkpoint
+- [x] Guardar checkpoint
+
+## BUG: Emails de Stock enviados sem anexo Excel
+- [x] Investigar: Excel gera corretamente no sandbox (teste direto OK)
+- [x] Investigar: nodemailer envia com anexo corretamente (teste direto OK)
+- [x] Alterar enviarEmailConsolidado para lançar erro se Excel falhar (em vez de continuar sem anexo)
+- [x] Adicionar frase de instrução ao email consolidado (faltava)
+- [x] Simplificar lógica de attachment (sempre obrigatório)
+- [x] Adicionar logs detalhados ao emailService.ts para diagnóstico
+- [ ] Guardar checkpoint e testar

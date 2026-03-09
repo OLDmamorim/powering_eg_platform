@@ -19,6 +19,8 @@ export type EmailPayload = {
 export async function sendEmail(payload: EmailPayload): Promise<boolean> {
   const { to, subject, html, attachments } = payload;
 
+  console.log(`[Email] sendEmail chamado: to=${to}, subject=${subject?.substring(0, 50)}, attachments=${attachments ? attachments.length + ' ficheiro(s): ' + attachments.map(a => a.filename + ' (' + Math.round((a.content?.length || 0) * 0.75 / 1024) + 'KB)').join(', ') : 'NENHUM'}`);
+
   // Verificar se as credenciais SMTP estão configuradas
   const smtpEmail = process.env.SMTP_EMAIL;
   const smtpPassword = process.env.SMTP_PASSWORD;
@@ -41,20 +43,30 @@ export async function sendEmail(payload: EmailPayload): Promise<boolean> {
     });
 
     // Preparar anexos se existirem
-    const mailAttachments = attachments?.map(att => ({
-      filename: att.filename,
-      content: Buffer.from(att.content, 'base64'),
-      contentType: att.contentType,
-    }));
+    const mailAttachments = attachments?.map(att => {
+      const buf = Buffer.from(att.content, 'base64');
+      console.log(`[Email] Anexo preparado: ${att.filename}, buffer size: ${buf.length} bytes, contentType: ${att.contentType}`);
+      return {
+        filename: att.filename,
+        content: buf,
+        contentType: att.contentType,
+      };
+    });
+
+    console.log(`[Email] mailAttachments count: ${mailAttachments?.length || 0}`);
 
     // Enviar email
-    const info = await transporter.sendMail({
+    const mailOptions: any = {
       from: `"PoweringEG Platform" <${smtpEmail}>`,
       to,
       subject,
       html,
-      attachments: mailAttachments,
-    });
+    };
+    if (mailAttachments && mailAttachments.length > 0) {
+      mailOptions.attachments = mailAttachments;
+    }
+    console.log(`[Email] mailOptions keys: ${Object.keys(mailOptions).join(', ')}`);
+    const info = await transporter.sendMail(mailOptions);
 
     console.log(`[Email] Email enviado com sucesso: ${info.messageId}`);
     return true;
