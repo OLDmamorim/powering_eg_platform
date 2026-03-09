@@ -13071,6 +13071,57 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
         return { totais, analises, topSemFichas };
       }),
 
+    // Evolução temporal de stock (todas as análises agrupadas por data)
+    evolucaoStock: gestorProcedure
+      .query(async ({ ctx }) => {
+        const isAdmin = ctx.user.role === 'admin';
+        
+        let analises;
+        if (isAdmin) {
+          analises = await db.getEvolucaoStockAdmin();
+        } else {
+          const gestorId = ctx.gestor?.id;
+          if (!gestorId) throw new TRPCError({ code: 'FORBIDDEN', message: 'Gestor não encontrado' });
+          analises = await db.getEvolucaoStock(gestorId);
+        }
+        
+        // Agrupar por data (dia) e calcular totais agregados
+        const porData = new Map<string, {
+          data: string;
+          totalItensStock: number;
+          totalComFichas: number;
+          totalSemFichas: number;
+          totalFichasSemStock: number;
+          numLojas: number;
+        }>();
+        
+        for (const a of analises) {
+          const dataKey = new Date(a.createdAt).toISOString().split('T')[0]; // YYYY-MM-DD
+          const existing = porData.get(dataKey);
+          if (existing) {
+            existing.totalItensStock += a.totalItensStock || 0;
+            existing.totalComFichas += a.totalComFichas || 0;
+            existing.totalSemFichas += a.totalSemFichas || 0;
+            existing.totalFichasSemStock += a.totalFichasSemStock || 0;
+            existing.numLojas += 1;
+          } else {
+            porData.set(dataKey, {
+              data: dataKey,
+              totalItensStock: a.totalItensStock || 0,
+              totalComFichas: a.totalComFichas || 0,
+              totalSemFichas: a.totalSemFichas || 0,
+              totalFichasSemStock: a.totalFichasSemStock || 0,
+              numLojas: 1,
+            });
+          }
+        }
+        
+        // Ordenar por data e retornar
+        const evolucao = Array.from(porData.values()).sort((a, b) => a.data.localeCompare(b.data));
+        
+        return { evolucao };
+      }),
+
     // Enviar email consolidado a TODAS as lojas do gestor (com Excel em anexo)
     enviarEmailTodasLojas: gestorProcedure
       .input(z.object({

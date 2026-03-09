@@ -44,6 +44,7 @@ import {
 } from 'lucide-react';
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 // --- Interfaces ---
 
@@ -268,6 +269,11 @@ export default function ControloStock() {
   const { data: infoAnalise } = trpc.stock.infoAnalise.useQuery({});
   const { data: historico } = trpc.stock.historico.useQuery({}, { enabled: view === 'historico' });
   const { data: stockDashboard, isLoading: dashboardLoading } = trpc.stock.dashboardStock.useQuery(undefined, {
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    enabled: view === 'dashboard',
+  });
+  const { data: evolucaoData } = trpc.stock.evolucaoStock.useQuery(undefined, {
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
     enabled: view === 'dashboard',
@@ -774,7 +780,10 @@ export default function ControloStock() {
                     </h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                       {analises && analises.map((loja: any) => {
+                        const lojaSemFichasPercent = loja.totalItensStock > 0 ? ((loja.totalSemFichas / loja.totalItensStock) * 100).toFixed(0) : '0';
                         const lojaPercent = loja.totalItensStock > 0 ? ((loja.totalComFichas / loja.totalItensStock) * 100).toFixed(0) : '0';
+                        const semFichasNum = parseInt(lojaSemFichasPercent);
+                        const badgeColor = semFichasNum >= 60 ? 'bg-red-100 text-red-700 border-red-300' : semFichasNum >= 40 ? 'bg-amber-100 text-amber-700 border-amber-300' : 'bg-green-100 text-green-700 border-green-300';
                         return (
                           <Card
                             key={loja.id}
@@ -796,8 +805,8 @@ export default function ControloStock() {
                                   <Store className="h-3.5 w-3.5 text-blue-600 shrink-0" />
                                   <span className="font-semibold text-sm truncate">{loja.nomeLoja || 'Loja'}</span>
                                 </div>
-                                <Badge variant="outline" className="text-[10px] px-1.5 py-0 shrink-0">
-                                  {lojaPercent}% c/ fichas
+                                <Badge variant="outline" className={`text-[10px] px-1.5 py-0 shrink-0 font-bold ${badgeColor}`}>
+                                  {lojaSemFichasPercent}% s/ fichas
                                 </Badge>
                               </div>
                               <div className="space-y-1 text-xs">
@@ -863,6 +872,71 @@ export default function ControloStock() {
                               </Badge>
                             </div>
                           ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {/* Gráfico de evolução temporal */}
+                  {evolucaoData && evolucaoData.evolucao.length > 1 && (
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm flex items-center gap-2">
+                          <TrendingUp className="h-4 w-4 text-blue-600" />
+                          Evolução Temporal
+                        </CardTitle>
+                        <CardDescription className="text-xs">
+                          Evolução dos totais de stock ao longo das análises
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="h-[280px] w-full">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <LineChart data={evolucaoData.evolucao} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
+                              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                              <XAxis
+                                dataKey="data"
+                                tick={{ fontSize: 10 }}
+                                tickFormatter={(v: string) => {
+                                  const d = new Date(v);
+                                  return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}`;
+                                }}
+                              />
+                              <YAxis tick={{ fontSize: 10 }} />
+                              <Tooltip
+                                labelFormatter={(v: string) => {
+                                  const d = new Date(v);
+                                  return d.toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                                }}
+                                formatter={(value: number, name: string) => {
+                                  const labels: Record<string, string> = {
+                                    totalItensStock: 'Total Stock',
+                                    totalComFichas: 'Com Fichas',
+                                    totalSemFichas: 'Sem Fichas',
+                                    totalFichasSemStock: 'Fichas s/ Stock',
+                                  };
+                                  return [value.toLocaleString('pt-PT'), labels[name] || name];
+                                }}
+                              />
+                              <Legend
+                                iconSize={10}
+                                wrapperStyle={{ fontSize: '11px' }}
+                                formatter={(value: string) => {
+                                  const labels: Record<string, string> = {
+                                    totalItensStock: 'Total Stock',
+                                    totalComFichas: 'Com Fichas',
+                                    totalSemFichas: 'Sem Fichas',
+                                    totalFichasSemStock: 'Fichas s/ Stock',
+                                  };
+                                  return labels[value] || value;
+                                }}
+                              />
+                              <Line type="monotone" dataKey="totalItensStock" stroke="#3b82f6" strokeWidth={2} dot={{ r: 3 }} name="totalItensStock" />
+                              <Line type="monotone" dataKey="totalComFichas" stroke="#22c55e" strokeWidth={2} dot={{ r: 3 }} name="totalComFichas" />
+                              <Line type="monotone" dataKey="totalSemFichas" stroke="#f59e0b" strokeWidth={2} dot={{ r: 3 }} name="totalSemFichas" />
+                              <Line type="monotone" dataKey="totalFichasSemStock" stroke="#ef4444" strokeWidth={2} dot={{ r: 3 }} name="totalFichasSemStock" />
+                            </LineChart>
+                          </ResponsiveContainer>
                         </div>
                       </CardContent>
                     </Card>
@@ -1403,6 +1477,8 @@ export default function ControloStock() {
                 {historico.map((analise: any) => {
                   const percentComFichas = analise.totalItensStock > 0 ? ((analise.totalComFichas / analise.totalItensStock) * 100).toFixed(0) : '0';
                   const percentSemFichas = analise.totalItensStock > 0 ? ((analise.totalSemFichas / analise.totalItensStock) * 100).toFixed(0) : '0';
+                  const semFichasNumH = parseInt(percentSemFichas);
+                  const badgeColorH = semFichasNumH >= 60 ? 'bg-red-100 text-red-700 border-red-300' : semFichasNumH >= 40 ? 'bg-amber-100 text-amber-700 border-amber-300' : 'bg-green-100 text-green-700 border-green-300';
                   return (
                     <Card
                       key={analise.id}
@@ -1430,19 +1506,24 @@ export default function ControloStock() {
                             <Store className="h-3.5 w-3.5 text-blue-600 shrink-0" />
                             <span className="font-semibold text-sm truncate">{analise.nomeLoja}</span>
                           </div>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-7 w-7 text-red-500 hover:text-red-700 hover:bg-red-50 shrink-0"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (window.confirm('Tem a certeza que deseja eliminar esta análise?')) {
-                                eliminarMutation.mutate({ id: analise.id });
-                              }
-                            }}
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </Button>
+                          <div className="flex items-center gap-1 shrink-0">
+                            <Badge variant="outline" className={`text-[10px] px-1.5 py-0 font-bold ${badgeColorH}`}>
+                              {percentSemFichas}% s/ fichas
+                            </Badge>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7 text-red-500 hover:text-red-700 hover:bg-red-50 shrink-0"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (window.confirm('Tem a certeza que deseja eliminar esta análise?')) {
+                                  eliminarMutation.mutate({ id: analise.id });
+                                }
+                              }}
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
                         </div>
                         <div className="space-y-1 text-xs">
                           <div className="flex items-center justify-between">

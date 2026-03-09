@@ -12971,3 +12971,61 @@ export async function getDashboardStockAdmin() {
   
   return resultados;
 }
+
+/**
+ * Obter evolução temporal de stock para o gestor (todas as análises agrupadas por data)
+ */
+export async function getEvolucaoStock(gestorId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  // Obter lojas do gestor
+  const lojasGestor = await db
+    .select({ lojaId: gestorLojas.lojaId })
+    .from(gestorLojas)
+    .where(eq(gestorLojas.gestorId, gestorId));
+  
+  if (lojasGestor.length === 0) return [];
+  
+  const lojaIds = lojasGestor.map(l => l.lojaId);
+  
+  // Obter todas as análises dessas lojas, ordenadas por data
+  const analises = await db.select({
+    id: analisesStock.id,
+    lojaId: analisesStock.lojaId,
+    nomeLoja: analisesStock.nomeLoja,
+    totalItensStock: analisesStock.totalItensStock,
+    totalComFichas: analisesStock.totalComFichas,
+    totalSemFichas: analisesStock.totalSemFichas,
+    totalFichasSemStock: analisesStock.totalFichasSemStock,
+    createdAt: analisesStock.createdAt,
+  })
+    .from(analisesStock)
+    .where(inArray(analisesStock.lojaId, lojaIds))
+    .orderBy(asc(analisesStock.createdAt));
+  
+  return analises;
+}
+
+/**
+ * Obter evolução temporal de stock para admin (todas as lojas)
+ */
+export async function getEvolucaoStockAdmin() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const analises = await db.select({
+    id: analisesStock.id,
+    lojaId: analisesStock.lojaId,
+    nomeLoja: analisesStock.nomeLoja,
+    totalItensStock: analisesStock.totalItensStock,
+    totalComFichas: analisesStock.totalComFichas,
+    totalSemFichas: analisesStock.totalSemFichas,
+    totalFichasSemStock: analisesStock.totalFichasSemStock,
+    createdAt: analisesStock.createdAt,
+  })
+    .from(analisesStock)
+    .orderBy(asc(analisesStock.createdAt));
+  
+  return analises;
+}

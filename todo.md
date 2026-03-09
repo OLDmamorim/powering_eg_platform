@@ -671,3 +671,20 @@
 - [x] Redesenhar histórico para mostrar lojas em cards/quadrados (como na análise)
 - [x] Adicionar tab "Dashboard" na navegação do Controlo de Stock
 - [x] Guardar checkpoint
+
+## Gráfico de Evolução Temporal no Dashboard de Stock
+- [x] Criar procedure backend evolucaoStock (gestor + admin) no routers.ts
+- [x] Criar helpers getEvolucaoStock e getEvolucaoStockAdmin no db.ts
+- [x] Agrupar análises por data (dia) e calcular totais agregados
+- [x] Adicionar gráfico de linhas (Recharts) ao dashboard de stock
+- [x] Mostrar evolução de: total stock, com fichas, sem fichas, fichas sem stock
+- [x] Cores: azul (total), verde (com fichas), âmbar (sem fichas), vermelho (fichas s/ stock)
+- [x] Tooltip e legenda em português
+- [x] Guardar checkpoint
+
+## Destacar Percentagem Sem Fichas no Dashboard de Stock
+- [x] Alterar badge nos cards das lojas de "% c/ fichas" para "% s/ fichas" com cor âmbar/vermelha
+- [x] Destacar visualmente a percentagem sem fichas como métrica principal
+- [x] Cores dinâmicas: verde (<40%), âmbar (40-59%), vermelho (>=60%)
+- [x] Aplicado no dashboard e no histórico
+- [x] Guardar checkpoint
