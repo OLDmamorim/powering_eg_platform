@@ -787,3 +787,15 @@
 - [x] Desactivado sourcemaps no build de produção
 - [x] Build agora completa em ~38 segundos
 - [x] Guardar checkpoint
+
+## Fix: Lazy loading causa página em branco no site publicado
+- [x] Diagnosticado: manus-runtime embute app inline, import() dinâmico não funciona
+- [x] Revertido lazy loading e Suspense
+- [x] Revertido manual chunks no vite.config.ts
+- [x] Guardar checkpoint
+
+## Bug: Service Unavailable ao analisar stock global
+- [x] Investigar causa: proxy do Manus corta ligação por timeout antes do processo terminar
+- [x] Corrigido: convertido para processamento em background com polling (jobId + analisarGlobalStatus)
+- [x] Frontend actualizado: mostra progresso em tempo real (loja a loja)
+- [ ] Guardar checkpoint
