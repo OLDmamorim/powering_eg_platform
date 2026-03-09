@@ -617,4 +617,10 @@
 - [x] Remover tabelas detalhadas do corpo HTML do email
 - [x] Manter apenas introdução/resumo com números principais
 - [x] Excel continua em anexo como único detalhe
+- [x] Guardar checkpoint
+
+## BUG: Excel não aparece em anexo no email de Controlo de Stock
+- [ ] Investigar função sendEmail para verificar suporte a attachments
+- [ ] Corrigir envio de attachments no emailService.ts
+- [ ] Testar envio com Excel em anexo
 - [ ] Guardar checkpoint

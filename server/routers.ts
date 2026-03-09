@@ -12706,6 +12706,8 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
         // Gerar Excel consolidado para anexar ao email
         let excelAttachment: { filename: string; content: string; contentType: string } | undefined;
         try {
+          console.log(`[Stock Email] A gerar Excel para ${input.nomeLoja} (lojaId: ${input.lojaId})...`);
+          console.log(`[Stock Email] Dados: comFichas=${input.comFichas.length}, semFichas=${input.semFichas.length}, fichasSemStock=${input.fichasSemStock.length}`);
           const { base64, filename } = await gerarExcelControloStock({
             nomeLoja: input.nomeLoja,
             lojaId: input.lojaId,
@@ -12718,12 +12720,14 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
             content: base64,
             contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
           };
-          console.log(`[Stock Email] Excel gerado: ${filename} (${Math.round(base64.length * 0.75 / 1024)}KB)`);
-        } catch (excelError) {
-          console.error('[Stock Email] Erro ao gerar Excel:', excelError);
+          console.log(`[Stock Email] Excel gerado com sucesso: ${filename} (${Math.round(base64.length * 0.75 / 1024)}KB)`);
+        } catch (excelError: any) {
+          console.error('[Stock Email] ERRO ao gerar Excel:', excelError?.message || excelError);
+          console.error('[Stock Email] Stack:', excelError?.stack);
           // Continuar sem anexo se falhar
         }
 
+        console.log(`[Stock Email] A enviar email para ${loja.email} (anexo: ${excelAttachment ? 'SIM - ' + excelAttachment.filename : 'NÃO'})`);
         const enviado = await sendEmail({
           to: loja.email,
           subject: assunto,
