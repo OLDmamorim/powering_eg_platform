@@ -620,7 +620,7 @@
 - [x] Guardar checkpoint
 
 ## BUG: Excel não aparece em anexo no email de Controlo de Stock
-- [ ] Investigar função sendEmail para verificar suporte a attachments
-- [ ] Corrigir envio de attachments no emailService.ts
-- [ ] Testar envio com Excel em anexo
-- [ ] Guardar checkpoint
+- [x] Investigar função sendEmail para verificar suporte a attachments
+- [x] Corrigir stockExcelService.ts com try/catch robusto nas queries DB
+- [x] Testar envio com Excel em anexo (teste completo OK no sandbox)
+- [ ] Guardar checkpoint e publicar

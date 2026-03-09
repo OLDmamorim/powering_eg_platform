@@ -21,25 +21,31 @@ export async function gerarExcelControloStock(params: {
 }): Promise<{ base64: string; filename: string }> {
   const { nomeLoja, lojaId, comFichas, semFichas, fichasSemStock } = params;
 
-  // Obter classificações e recorrência da loja
-  const classificacoes = await db.getClassificacoesEurocode(lojaId);
-  const recorrencia = await db.getRecorrenciaEurocodes(lojaId);
+  // Obter classificações e recorrência da loja (com fallback se falhar)
+  let classificacoesMap = new Map<string, string>();
+  let recorrenciaMap = new Map<string, number>();
 
-  // Criar maps para lookup rápido
-  const classificacoesMap = new Map<string, string>();
-  for (const c of classificacoes) {
-    const key = `${c.eurocode.toUpperCase().trim()}|${(c as any).unitIndex || 1}`;
-    classificacoesMap.set(key, c.classificacao);
+  try {
+    const classificacoes = await db.getClassificacoesEurocode(lojaId);
+    for (const c of classificacoes) {
+      const key = `${c.eurocode.toUpperCase().trim()}|${(c as any).unitIndex || 1}`;
+      classificacoesMap.set(key, c.classificacao);
+    }
+  } catch (e) {
+    console.error('[StockExcel] Erro ao obter classificações, a continuar sem elas:', e);
   }
 
-  const recorrenciaMap = new Map<string, number>();
-  for (const r of recorrencia) {
-    const key = `${r.eurocode.toUpperCase().trim()}|${(r as any).unitIndex || 1}`;
-    recorrenciaMap.set(key, r.analisesConsecutivas);
+  try {
+    const recorrencia = await db.getRecorrenciaEurocodes(lojaId);
+    for (const r of recorrencia) {
+      const key = `${r.eurocode.toUpperCase().trim()}|${(r as any).unitIndex || 1}`;
+      recorrenciaMap.set(key, r.analisesConsecutivas);
+    }
+  } catch (e) {
+    console.error('[StockExcel] Erro ao obter recorrência, a continuar sem ela:', e);
   }
 
   const wb = new ExcelJS.Workbook();
-  const dataStr = new Date().toLocaleDateString('pt-PT');
 
   // --- Sheet 1: Com Fichas ---
   const ws1 = wb.addWorksheet('Com Fichas');
@@ -123,5 +129,6 @@ export async function gerarExcelControloStock(params: {
   const base64 = Buffer.from(buffer as ArrayBuffer).toString('base64');
   const filename = `controlo_stock_${nomeLoja.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}.xlsx`;
 
+  console.log(`[StockExcel] Ficheiro gerado: ${filename}, base64 length: ${base64.length}`);
   return { base64, filename };
 }
