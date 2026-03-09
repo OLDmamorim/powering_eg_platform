@@ -768,3 +768,7 @@
 - [x] Botão com confirmação antes do envio
 - [x] Feedback toast com resultados (enviados/falhados)
 - [ ] Guardar checkpoint
+
+## Fix: Ordem das sheets no Excel enviado por email
+- [x] Sheet "Sem Fichas" agora é a primeira, "Com Fichas" a segunda no Excel (stockExcelService.ts)
+- [ ] Guardar checkpoint

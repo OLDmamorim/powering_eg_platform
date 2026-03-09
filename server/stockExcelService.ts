@@ -47,32 +47,9 @@ export async function gerarExcelControloStock(params: {
 
   const wb = new ExcelJS.Workbook();
 
-  // --- Sheet 1: Com Fichas ---
-  const ws1 = wb.addWorksheet('Com Fichas');
+  // --- Sheet 1: Sem Fichas (desmultiplicado: 1 linha por unidade) ---
+  const ws1 = wb.addWorksheet('Sem Fichas');
   ws1.columns = [
-    { header: 'Referência', key: 'ref', width: 18 },
-    { header: 'Família', key: 'familia', width: 10 },
-    { header: 'Descrição', key: 'descricao', width: 40 },
-    { header: 'Qtd', key: 'quantidade', width: 8 },
-    { header: 'N.º Fichas', key: 'totalFichas', width: 12 },
-    { header: 'Fichas Associadas', key: 'fichasDetalhe', width: 50 },
-  ];
-  ws1.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
-  ws1.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF16A34A' } };
-  for (const item of comFichas) {
-    ws1.addRow({
-      ref: item.ref,
-      familia: item.familia || '-',
-      descricao: item.descricao,
-      quantidade: item.quantidade,
-      totalFichas: item.totalFichas,
-      fichasDetalhe: item.fichas?.map((f: any) => `${f.obrano} (${f.matricula} - ${f.marca} ${f.modelo})`).join('; ') || '',
-    });
-  }
-
-  // --- Sheet 2: Sem Fichas (desmultiplicado: 1 linha por unidade) ---
-  const ws2 = wb.addWorksheet('Sem Fichas');
-  ws2.columns = [
     { header: 'Referência', key: 'ref', width: 18 },
     { header: 'Unidade', key: 'unidade', width: 10 },
     { header: 'Família', key: 'familia', width: 10 },
@@ -80,15 +57,15 @@ export async function gerarExcelControloStock(params: {
     { header: 'Classificação', key: 'classificacao', width: 20 },
     { header: 'Análises Consecutivas', key: 'recorrencia', width: 22 },
   ];
-  ws2.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
-  ws2.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD97706' } };
+  ws1.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
+  ws1.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD97706' } };
   for (const item of semFichas) {
     const qty = item.quantidade || 1;
     for (let unitIdx = 1; unitIdx <= qty; unitIdx++) {
       const unitKey = `${(item.ref || '').toUpperCase().trim()}|${unitIdx}`;
       const classif = classificacoesMap.get(unitKey);
       const recorr = recorrenciaMap.get(unitKey);
-      ws2.addRow({
+      ws1.addRow({
         ref: item.ref,
         unidade: qty > 1 ? `${unitIdx}/${qty}` : '-',
         familia: item.familia || '-',
@@ -97,6 +74,29 @@ export async function gerarExcelControloStock(params: {
         recorrencia: recorr && recorr > 1 ? `${recorr} análises` : '-',
       });
     }
+  }
+
+  // --- Sheet 2: Com Fichas ---
+  const ws2 = wb.addWorksheet('Com Fichas');
+  ws2.columns = [
+    { header: 'Referência', key: 'ref', width: 18 },
+    { header: 'Família', key: 'familia', width: 10 },
+    { header: 'Descrição', key: 'descricao', width: 40 },
+    { header: 'Qtd', key: 'quantidade', width: 8 },
+    { header: 'N.º Fichas', key: 'totalFichas', width: 12 },
+    { header: 'Fichas Associadas', key: 'fichasDetalhe', width: 50 },
+  ];
+  ws2.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
+  ws2.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF16A34A' } };
+  for (const item of comFichas) {
+    ws2.addRow({
+      ref: item.ref,
+      familia: item.familia || '-',
+      descricao: item.descricao,
+      quantidade: item.quantidade,
+      totalFichas: item.totalFichas,
+      fichasDetalhe: item.fichas?.map((f: any) => `${f.obrano} (${f.matricula} - ${f.marca} ${f.modelo})`).join('; ') || '',
+    });
   }
 
   // Gerar buffer e converter para base64
