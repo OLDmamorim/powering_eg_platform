@@ -809,4 +809,6 @@
 ## Bug: Eurocode #8453AGACMVZ aparece como "Sem fichas" quando tem serviço pronto
 - [x] Investigar na BD se existe ficha para este eurocode
 - [x] Verificar lógica de matching entre stock e fichas
-- [x] Corrigir se necessário - normalização de eurocodes (remover # e * prefixos)
+- [x] Corrigir se necessário - REVERTIDO: # e * fazem parte do eurocode (vidros diferentes)
+- [x] Investigar extração de fichas do XUI - STATUS_EXCLUIR filtrava 'Serviço Pronto' antes de guardar eurocodes
+- [x] Bug: #8453AGACMVZ existe na análise de fichas mas não foi guardado - fichas excluídas agora guardadas separadamente para eurocodes

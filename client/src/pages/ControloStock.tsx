@@ -550,9 +550,7 @@ export default function ControloStock() {
           else if (/TET|TE/.test(refUpper)) familia = 'TE';
         }
 
-        // Normalizar ref: remover prefixos # e * para matching consistente
-        const refNorm = ref.replace(/^[#*]+/, '');
-        itens.push({ ref: refNorm, descricao, armazem, quantidade, familia });
+        itens.push({ ref, descricao, armazem, quantidade, familia });
       }
 
       if (itens.length === 0) {

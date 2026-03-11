@@ -10512,6 +10512,80 @@ IMPORTANTE:
           }
         }
         
+        // === GUARDAR EUROCODES DAS FICHAS EXCLUÍDAS (Serviço Pronto, REVISAR) PARA CRUZAMENTO COM STOCK ===
+        try {
+          if (resultado.fichasExcluidas && resultado.fichasExcluidas.length > 0) {
+            console.log(`[analiseFichas] Processando ${resultado.fichasExcluidas.length} fichas excluídas para extração de eurocodes`);
+            const gruposExcluidas = new Map<string, typeof resultado.fichasExcluidas>();
+            for (const ficha of resultado.fichasExcluidas) {
+              const nomeLoja = ficha.loja || 'Desconhecida';
+              if (!gruposExcluidas.has(nomeLoja)) gruposExcluidas.set(nomeLoja, []);
+              gruposExcluidas.get(nomeLoja)!.push(ficha);
+            }
+            
+            // Usar lojasGestor que já está no scope + buscar todas para matching completo
+            const todasLojasExcl = await db.getAllLojas();
+            
+            for (const [nomeLoja, fichasExcl] of Array.from(gruposExcluidas.entries())) {
+              if (nomeLoja === 'Desconhecida') continue;
+              
+              // Tentar encontrar o lojaId
+              let lojaIdExcl: number | null = null;
+              for (const loja of todasLojasExcl) {
+                if (loja.nome.toLowerCase() === nomeLoja.toLowerCase()) {
+                  lojaIdExcl = loja.id;
+                  break;
+                }
+              }
+              
+              const eurocodesExcl: Array<{
+                analiseId: number;
+                lojaId: number | null;
+                nomeLoja: string;
+                obrano: number;
+                matricula: string | null;
+                eurocode: string;
+                ref: string | null;
+                marca: string | null;
+                modelo: string | null;
+                status: string | null;
+                diasAberto: number | null;
+              }> = [];
+              
+              for (const ficha of fichasExcl) {
+                const eurocodeValue = (ficha.eurocode || '').trim();
+                const refValue = (ficha.ref || '').trim();
+                const codigoFinal = eurocodeValue || refValue;
+                if (!codigoFinal) continue;
+                
+                const codigos = codigoFinal.split(/[,;]/).map(c => c.trim()).filter(c => c.length > 0);
+                for (const codigo of codigos) {
+                  eurocodesExcl.push({
+                    analiseId: analise.id,
+                    lojaId: lojaIdExcl,
+                    nomeLoja,
+                    obrano: ficha.obrano,
+                    matricula: ficha.matricula || null,
+                    eurocode: codigo,
+                    ref: ficha.ref || null,
+                    marca: ficha.marca || null,
+                    modelo: ficha.modelo || null,
+                    status: ficha.status || null,
+                    diasAberto: ficha.diasAberto || null,
+                  });
+                }
+              }
+              
+              if (eurocodesExcl.length > 0) {
+                await db.saveEurocodesFichas(eurocodesExcl);
+                console.log(`[analiseFichas] Guardados ${eurocodesExcl.length} eurocodes de fichas excluídas para ${nomeLoja}`);
+              }
+            }
+          }
+        } catch (exclErr: any) {
+          console.error('[analiseFichas] Erro ao guardar eurocodes de fichas excluídas:', exclErr?.message || exclErr);
+        }
+        
         return {
           analiseId: analise.id,
           totalFichas: resultado.totalFichas,
@@ -12294,18 +12368,17 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
         const eurocodesFichasLoja = await db.getEurocodesUltimaAnalisePorLoja(gestorId, input.lojaId);
         const ultimaAnalise = await db.getUltimaAnaliseFichas(gestorId);
         
-        // Criar set de eurocodes das fichas (normalizado: maiúsculas, sem prefixos # e *)
-        const normEurocode = (s: string) => s.toUpperCase().trim().replace(/^[#*]+/, '');
-        const eurocodesSet = new Set(eurocodesFichasLoja.map(e => normEurocode(e.eurocode)));
+        // Criar set de eurocodes das fichas (normalizado para maiúsculas)
+        const eurocodesSet = new Set(eurocodesFichasLoja.map(e => e.eurocode.toUpperCase().trim()));
         
         // 3. Cruzar stock com fichas
         const comFichas: Array<ItemStock & { fichasAssociadas: typeof eurocodesFichasLoja }> = [];
         const semFichas: ItemStock[] = [];
         
         for (const item of itensStock) {
-          const refNorm = normEurocode(item.ref);
+          const refNorm = item.ref.toUpperCase().trim();
           if (eurocodesSet.has(refNorm)) {
-            const fichasAssociadas = eurocodesFichasLoja.filter(e => normEurocode(e.eurocode) === refNorm);
+            const fichasAssociadas = eurocodesFichasLoja.filter(e => e.eurocode.toUpperCase().trim() === refNorm);
             comFichas.push({ ...item, fichasAssociadas });
           } else {
             semFichas.push(item);
@@ -12313,8 +12386,8 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
         }
         
         // 4. Eurocodes das fichas que não estão em stock
-        const refsStockSet = new Set(itensStock.map(i => normEurocode(i.ref)));
-        const fichasSemStock = eurocodesFichasLoja.filter(e => !refsStockSet.has(normEurocode(e.eurocode)));
+        const refsStockSet = new Set(itensStock.map(i => i.ref.toUpperCase().trim()));
+        const fichasSemStock = eurocodesFichasLoja.filter(e => !refsStockSet.has(e.eurocode.toUpperCase().trim()));
         
         // 5. Guardar análise na BD
         const resultado = {
@@ -12552,16 +12625,15 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
                 console.error(`[Stock Global] Erro ao obter eurocodes para loja ${loja.nome}:`, e);
               }
 
-              const normEurocode = (s: string) => s.toUpperCase().trim().replace(/^[#*]+/, '');
-              const eurocodesSet = new Set(eurocodesFichasLoja.map(e => normEurocode(e.eurocode)));
+              const eurocodesSet = new Set(eurocodesFichasLoja.map(e => e.eurocode.toUpperCase().trim()));
 
               const comFichas: Array<any> = [];
               const semFichas: Array<any> = [];
 
               for (const item of itens) {
-                const refNorm = normEurocode(item.ref);
+                const refNorm = item.ref.toUpperCase().trim();
                 if (eurocodesSet.has(refNorm)) {
-                  const fichasAssociadas = eurocodesFichasLoja.filter(e => normEurocode(e.eurocode) === refNorm);
+                  const fichasAssociadas = eurocodesFichasLoja.filter(e => e.eurocode.toUpperCase().trim() === refNorm);
                   comFichas.push({
                     ref: item.ref,
                     descricao: item.descricao,
@@ -12587,9 +12659,9 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
                 }
               }
 
-              const refsStockSet = new Set(itens.map((i: any) => normEurocode(i.ref)));
+              const refsStockSet = new Set(itens.map((i: any) => i.ref.toUpperCase().trim()));
               const fichasSemStock = eurocodesFichasLoja
-                .filter(e => !refsStockSet.has(normEurocode(e.eurocode)))
+                .filter(e => !refsStockSet.has(e.eurocode.toUpperCase().trim()))
                 .map(f => ({
                   eurocode: f.eurocode,
                   obrano: f.obrano,

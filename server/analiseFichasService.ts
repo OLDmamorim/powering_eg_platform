@@ -77,6 +77,8 @@ export interface ResultadoAnalise {
   totalFichas: number;
   totalLojas: number;
   relatoriosPorLoja: RelatorioLoja[];
+  // Fichas excluídas da análise (Serviço Pronto, REVISAR) mas necessárias para cruzamento de eurocodes com stock
+  fichasExcluidas?: FichaServico[];
   resumoGeral: {
     totalFichasAbertas5Dias: number;
     totalFichasAposAgendamento: number;
@@ -413,8 +415,9 @@ function fichaTemNotas(obs: string): boolean {
 
 /**
  * Processa o ficheiro Excel e extrai as fichas de serviço
+ * Retorna fichas para análise + fichas excluídas (Serviço Pronto, etc.) para cruzamento de eurocodes
  */
-export function processarFicheiroExcel(buffer: Buffer): FichaServico[] {
+export function processarFicheiroExcel(buffer: Buffer): { fichas: FichaServico[]; fichasExcluidas: FichaServico[] } {
   const workbook = XLSX.read(buffer, { type: 'buffer', cellDates: true });
   
   // Procurar a folha "Base" ou usar a primeira
@@ -441,6 +444,7 @@ export function processarFicheiroExcel(buffer: Buffer): FichaServico[] {
   
   // Processar linhas de dados
   const fichas: FichaServico[] = [];
+  const fichasExcluidas: FichaServico[] = [];
   
   for (let i = 1; i < rows.length; i++) {
     const row = rows[i];
@@ -448,8 +452,8 @@ export function processarFicheiroExcel(buffer: Buffer): FichaServico[] {
     
     const status = String(row[colIndex['status']] || '').trim();
     
-    // Excluir status que não devem ser analisados
-    if (STATUS_EXCLUIR.includes(status)) continue;
+    // Status excluídos da análise mas guardados para cruzamento de eurocodes com stock
+    const isExcluido = STATUS_EXCLUIR.includes(status);
     
     const ficha: FichaServico = {
       bostamp: String(row[colIndex['bostamp']] || ''),
@@ -485,7 +489,11 @@ export function processarFicheiroExcel(buffer: Buffer): FichaServico[] {
       nome: String(row[colIndex['nome']] || ''),
     };
     
-    fichas.push(ficha);
+    if (isExcluido) {
+      fichasExcluidas.push(ficha);
+    } else {
+      fichas.push(ficha);
+    }
     
     // Debug: mostrar primeiras 3 fichas
     if (fichas.length <= 3) {
@@ -498,8 +506,8 @@ export function processarFicheiroExcel(buffer: Buffer): FichaServico[] {
     }
   }
   
-  console.log('[processarFicheiroExcel] Total fichas processadas:', fichas.length);
-  return fichas;
+  console.log('[processarFicheiroExcel] Total fichas processadas:', fichas.length, '| Excluídas (Serviço Pronto/REVISAR):', fichasExcluidas.length);
+  return { fichas, fichasExcluidas };
 }
 
 /**
@@ -856,8 +864,10 @@ export function analisarFichas(fichas: FichaServico[], nomeArquivo: string): Res
  * Função principal que processa o ficheiro e retorna o resultado da análise
  */
 export function processarAnalise(buffer: Buffer, nomeArquivo: string): ResultadoAnalise {
-  const fichas = processarFicheiroExcel(buffer);
-  return analisarFichas(fichas, nomeArquivo);
+  const { fichas, fichasExcluidas } = processarFicheiroExcel(buffer);
+  const resultado = analisarFichas(fichas, nomeArquivo);
+  resultado.fichasExcluidas = fichasExcluidas;
+  return resultado;
 }
 
 
