@@ -3,11 +3,36 @@ import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import fs from "node:fs";
 import path from "path";
-import { defineConfig } from "vite";
+import { defineConfig, Plugin } from "vite";
 import { vitePluginManusRuntime } from "vite-plugin-manus-runtime";
 
+// Plugin to stub heavy dependencies and reduce bundle size
+function stubHeavyDeps(): Plugin {
+  const stubDir = path.resolve(import.meta.dirname, "client/src/stubs");
+  const stubMap: Record<string, string> = {
+    "shiki": path.join(stubDir, "shiki.ts"),
+    "mermaid": path.join(stubDir, "mermaid.ts"),
+    "katex": path.join(stubDir, "katex.ts"),
+    "rehype-katex": path.join(stubDir, "rehype-katex.ts"),
+    "remark-math": path.join(stubDir, "remark-math.ts"),
+  };
 
-const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime()];
+  return {
+    name: "stub-heavy-deps",
+    enforce: "pre",
+    resolveId(source) {
+      // Match exact or subpath imports (e.g. "shiki" or "shiki/engine/javascript")
+      for (const [pkg, stubPath] of Object.entries(stubMap)) {
+        if (source === pkg || source.startsWith(pkg + "/")) {
+          return stubPath;
+        }
+      }
+      return null;
+    },
+  };
+}
+
+const plugins = [stubHeavyDeps(), react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime()];
 
 export default defineConfig({
   plugins,

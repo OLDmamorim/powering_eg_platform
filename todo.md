@@ -812,3 +812,9 @@
 - [x] Corrigir se necessário - REVERTIDO: # e * fazem parte do eurocode (vidros diferentes)
 - [x] Investigar extração de fichas do XUI - STATUS_EXCLUIR filtrava 'Serviço Pronto' antes de guardar eurocodes
 - [x] Bug: #8453AGACMVZ existe na análise de fichas mas não foi guardado - fichas excluídas agora guardadas separadamente para eurocodes
+
+## Fix: Deploy timeout (bundle demasiado grande)
+- [x] Reduzir bundle com lazy loading de todas as páginas (React.lazy + Suspense)
+- [x] Stubs para shiki, mermaid, katex via Vite plugin (dist 26MB → 12MB)
+- [x] Verificar que site funciona localmente após alterações
+- [ ] Guardar checkpoint e publicar (a fazer)
