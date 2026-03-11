@@ -12294,17 +12294,18 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
         const eurocodesFichasLoja = await db.getEurocodesUltimaAnalisePorLoja(gestorId, input.lojaId);
         const ultimaAnalise = await db.getUltimaAnaliseFichas(gestorId);
         
-        // Criar set de eurocodes das fichas (normalizado para maiúsculas)
-        const eurocodesSet = new Set(eurocodesFichasLoja.map(e => e.eurocode.toUpperCase().trim()));
+        // Criar set de eurocodes das fichas (normalizado: maiúsculas, sem prefixos # e *)
+        const normEurocode = (s: string) => s.toUpperCase().trim().replace(/^[#*]+/, '');
+        const eurocodesSet = new Set(eurocodesFichasLoja.map(e => normEurocode(e.eurocode)));
         
         // 3. Cruzar stock com fichas
         const comFichas: Array<ItemStock & { fichasAssociadas: typeof eurocodesFichasLoja }> = [];
         const semFichas: ItemStock[] = [];
         
         for (const item of itensStock) {
-          const refNorm = item.ref.toUpperCase().trim();
+          const refNorm = normEurocode(item.ref);
           if (eurocodesSet.has(refNorm)) {
-            const fichasAssociadas = eurocodesFichasLoja.filter(e => e.eurocode.toUpperCase().trim() === refNorm);
+            const fichasAssociadas = eurocodesFichasLoja.filter(e => normEurocode(e.eurocode) === refNorm);
             comFichas.push({ ...item, fichasAssociadas });
           } else {
             semFichas.push(item);
@@ -12312,8 +12313,8 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
         }
         
         // 4. Eurocodes das fichas que não estão em stock
-        const refsStockSet = new Set(itensStock.map(i => i.ref.toUpperCase().trim()));
-        const fichasSemStock = eurocodesFichasLoja.filter(e => !refsStockSet.has(e.eurocode.toUpperCase().trim()));
+        const refsStockSet = new Set(itensStock.map(i => normEurocode(i.ref)));
+        const fichasSemStock = eurocodesFichasLoja.filter(e => !refsStockSet.has(normEurocode(e.eurocode)));
         
         // 5. Guardar análise na BD
         const resultado = {
@@ -12551,15 +12552,16 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
                 console.error(`[Stock Global] Erro ao obter eurocodes para loja ${loja.nome}:`, e);
               }
 
-              const eurocodesSet = new Set(eurocodesFichasLoja.map(e => e.eurocode.toUpperCase().trim()));
+              const normEurocode = (s: string) => s.toUpperCase().trim().replace(/^[#*]+/, '');
+              const eurocodesSet = new Set(eurocodesFichasLoja.map(e => normEurocode(e.eurocode)));
 
               const comFichas: Array<any> = [];
               const semFichas: Array<any> = [];
 
               for (const item of itens) {
-                const refNorm = item.ref.toUpperCase().trim();
+                const refNorm = normEurocode(item.ref);
                 if (eurocodesSet.has(refNorm)) {
-                  const fichasAssociadas = eurocodesFichasLoja.filter(e => e.eurocode.toUpperCase().trim() === refNorm);
+                  const fichasAssociadas = eurocodesFichasLoja.filter(e => normEurocode(e.eurocode) === refNorm);
                   comFichas.push({
                     ref: item.ref,
                     descricao: item.descricao,
@@ -12585,9 +12587,9 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
                 }
               }
 
-              const refsStockSet = new Set(itens.map((i: any) => i.ref.toUpperCase().trim()));
+              const refsStockSet = new Set(itens.map((i: any) => normEurocode(i.ref)));
               const fichasSemStock = eurocodesFichasLoja
-                .filter(e => !refsStockSet.has(e.eurocode.toUpperCase().trim()))
+                .filter(e => !refsStockSet.has(normEurocode(e.eurocode)))
                 .map(f => ({
                   eurocode: f.eurocode,
                   obrano: f.obrano,

@@ -805,3 +805,8 @@
 - [x] Mover leitura do Excel para o frontend (browser) usando SheetJS/xlsx
 - [x] Backend recebe apenas dados JSON já processados (não base64 do ficheiro inteiro)
 - [x] Adicionar timeout no frontend para jobs presos (5 min max)
+
+## Bug: Eurocode #8453AGACMVZ aparece como "Sem fichas" quando tem serviço pronto
+- [x] Investigar na BD se existe ficha para este eurocode
+- [x] Verificar lógica de matching entre stock e fichas
+- [x] Corrigir se necessário - normalização de eurocodes (remover # e * prefixos)
