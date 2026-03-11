@@ -1,7 +1,7 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Route, Switch } from "wouter";
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { DemoBanner } from "./components/DemoBanner";
@@ -78,7 +78,81 @@ const LoginNaoAutorizado = lazy(() => import("./pages/LoginNaoAutorizado"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 
+// Prefetch all pages after initial load
+const allImports = [
+  () => import("./pages/MenuInicial"),
+  () => import("./pages/Home"),
+  () => import("./pages/Dashboard"),
+  () => import("./pages/DashboardVolante"),
+  () => import("./pages/AssistenteIA"),
+  () => import("./pages/Lojas"),
+  () => import("./pages/RH"),
+  () => import("./pages/HistoricoEnviosRelatorios"),
+  () => import("./pages/Gestores"),
+  () => import("./pages/GestaoUtilizadores"),
+  () => import("./pages/Relatorios"),
+  () => import("./pages/PendentesAdmin"),
+  () => import("./pages/MinhasLojas"),
+  () => import("./pages/RelacoesLojas"),
+  () => import("./pages/Volantes"),
+  () => import("./pages/LogAtribuicoes"),
+  () => import("./pages/PortalGestor"),
+  () => import("./pages/AnaliseFichas"),
+  () => import("./pages/ControloStock"),
+  () => import("./pages/Documentos"),
+  () => import("./pages/RelatorioLivre"),
+  () => import("./pages/RelatorioCompleto"),
+  () => import("./pages/MeusRelatorios"),
+  () => import("./pages/RelatoriosIA"),
+  () => import("./pages/HistoricoRelatoriosIA"),
+  () => import("./pages/ComparacaoRelatoriosIA"),
+  () => import("./pages/HistoricoLoja"),
+  () => import("./pages/Pendentes"),
+  () => import("./pages/HistoricoPontos"),
+  () => import("./pages/DashboardAlertas"),
+  () => import("./pages/ConfiguracoesAlertas"),
+  () => import("./pages/Categorias"),
+  () => import("./pages/Reuni\u00f5esGestores"),
+  () => import("./pages/TopicosReuniao"),
+  () => import("./pages/Reuni\u00f5esLojas"),
+  () => import("./pages/ResultadosUpload"),
+  () => import("./pages/NPSUpload"),
+  () => import("./pages/NPSDashboard"),
+  () => import("./pages/ResultadosDashboard"),
+  () => import("./pages/ComparacaoLojas"),
+  () => import("./pages/RelatorioIAResultados"),
+  () => import("./pages/RelatorioBoard"),
+  () => import("./pages/ReunioesQuinzenais"),
+  () => import("./pages/ResumosGlobais"),
+  () => import("./pages/OcorrenciaEstrutural"),
+  () => import("./pages/HistoricoOcorrencias"),
+  () => import("./pages/Notas"),
+  () => import("./pages/RecepcaoVidros"),
+  () => import("./pages/Todos"),
+  () => import("./pages/TodoWidget"),
+  () => import("./pages/ProjecaoVisitasPage"),
+  () => import("./pages/AssistenteWidget"),
+  () => import("./pages/PortalLoja"),
+  () => import("./pages/PortalLojaWidget"),
+  () => import("./pages/GestaoRecalibra"),
+  () => import("./pages/PortalRecalibra"),
+  () => import("./pages/DashboardRecalibra"),
+];
+
+function usePrefetchPages() {
+  useEffect(() => {
+    // Wait for initial page to load, then prefetch all others in background
+    const timer = setTimeout(() => {
+      allImports.forEach((importFn) => {
+        importFn().catch(() => {}); // Silently prefetch, ignore errors
+      });
+    }, 1500); // Start prefetching 1.5s after mount
+    return () => clearTimeout(timer);
+  }, []);
+}
+
 function Router() {
+  usePrefetchPages();
   return (
     <Suspense fallback={<PageLoader />}>
       <Switch>

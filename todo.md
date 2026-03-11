@@ -818,3 +818,6 @@
 - [x] Stubs para shiki, mermaid, katex via Vite plugin (dist 26MB → 12MB)
 - [x] Verificar que site funciona localmente após alterações
 - [ ] Guardar checkpoint e publicar (a fazer)
+
+## Fix: Site lento após lazy loading
+- [x] Adicionar prefetch de todas as páginas após carregamento inicial (1.5s delay)
