@@ -12440,7 +12440,7 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
     // Análise global de stock: inicia processamento em background e retorna jobId
     analisarGlobal: gestorProcedure
       .input(z.object({
-        excelBase64: z.string(),
+        itensJson: z.string(),
         nomeArquivo: z.string().optional(),
       }))
       .mutation(async ({ ctx, input }) => {
@@ -12455,41 +12455,9 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
         // Processar em background (não await)
         (async () => {
           try {
-            await db.updateBackgroundJob(jobId, { progress: 'A ler ficheiro Excel...' });
+            await db.updateBackgroundJob(jobId, { progress: 'A processar dados recebidos...' });
 
-            // 1. Ler Excel com ExcelJS
-            const ExcelJSModule = await import('exceljs');
-            const ExcelJS = ExcelJSModule.default || ExcelJSModule;
-            const wb = new ExcelJS.Workbook();
-            const buffer = Buffer.from(input.excelBase64, 'base64');
-            await wb.xlsx.load(buffer as any);
-
-            const ws = wb.worksheets[0];
-            if (!ws) throw new Error('Ficheiro Excel sem folhas de dados');
-
-            // 2. Detectar colunas pelo header
-            const headerRow = ws.getRow(1);
-            const colMap: Record<string, number> = {};
-            headerRow.eachCell((cell, colNumber) => {
-              const val = String(cell.value || '').trim().toLowerCase();
-              if (val.includes('ref')) colMap['ref'] = colNumber;
-              else if (val.includes('designa')) colMap['designacao'] = colNumber;
-              else if (val.includes('armaz')) colMap['armazem'] = colNumber;
-              else if (val.includes('quantid')) colMap['quantidade'] = colNumber;
-              else if (val.includes('unid')) colMap['unidade'] = colNumber;
-              else if (val.includes('prec') || val === 'preço' || val === 'preco') colMap['preco'] = colNumber;
-              else if (val === 'total') colMap['total'] = colNumber;
-              else if (val.includes('tipo')) colMap['tipo'] = colNumber;
-              else if (val.includes('famil') || val === 'familia') colMap['familia'] = colNumber;
-            });
-
-            if (!colMap['ref'] || !colMap['armazem']) {
-              throw new Error('Ficheiro Excel não tem as colunas obrigatórias (Ref_ e Armazem)');
-            }
-
-            // 3. Ler todas as linhas
-            await db.updateBackgroundJob(jobId, { progress: 'A processar linhas do Excel...' });
-            const categoriasPermitidas = ['OC', 'PB', 'TE', 'VL'];
+            // Dados já vêm processados do frontend (Excel lido no browser)
             interface ItemStockGlobal {
               ref: string;
               descricao: string;
@@ -12497,36 +12465,7 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
               quantidade: number;
               familia?: string;
             }
-            const todosItens: ItemStockGlobal[] = [];
-
-            ws.eachRow((row, rowNumber) => {
-              if (rowNumber === 1) return;
-              const ref = String(row.getCell(colMap['ref']).value || '').trim();
-              if (!ref) return;
-
-              const armazemRaw = row.getCell(colMap['armazem']).value;
-              const armazem = typeof armazemRaw === 'number' ? armazemRaw : parseInt(String(armazemRaw || '0'));
-              if (!armazem || isNaN(armazem)) return;
-
-              const qtdRaw = colMap['quantidade'] ? row.getCell(colMap['quantidade']).value : 1;
-              const quantidade = typeof qtdRaw === 'number' ? qtdRaw : parseFloat(String(qtdRaw || '0').replace(',', '.')) || 0;
-              if (quantidade < 1) return;
-
-              const descricao = colMap['designacao'] ? String(row.getCell(colMap['designacao']).value || '').trim() : '';
-              let familia = colMap['familia'] ? String(row.getCell(colMap['familia']).value || '').trim().toUpperCase() : undefined;
-
-              if (familia && !categoriasPermitidas.includes(familia)) return;
-
-              if (!familia) {
-                const refUpper = ref.toUpperCase();
-                if (/AGS|AGAC|AGN|AGSM|AGSH|AGST|AGSV|AGSMVZ|AGACMVZ/.test(refUpper)) familia = 'PB';
-                else if (/BGS|OCL|OC/.test(refUpper)) familia = 'OC';
-                else if (/RGS|LGS|VVL|VL/.test(refUpper)) familia = 'VL';
-                else if (/TET|TE/.test(refUpper)) familia = 'TE';
-              }
-
-              todosItens.push({ ref, descricao, armazem, quantidade, familia });
-            });
+            const todosItens: ItemStockGlobal[] = JSON.parse(input.itensJson);
 
             if (todosItens.length === 0) {
               throw new Error('Não foram encontrados artigos válidos no ficheiro Excel.');

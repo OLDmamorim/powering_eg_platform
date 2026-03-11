@@ -43,6 +43,7 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import ExcelJS from 'exceljs';
+import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
@@ -282,6 +283,18 @@ export default function ControloStock() {
     { enabled: !!stockJobId, refetchInterval: stockJobId ? 2000 : false }
   );
 
+  // Timeout for stuck jobs (5 minutes)
+  useEffect(() => {
+    if (!stockJobId) return;
+    const timeout = setTimeout(() => {
+      setStockJobId(null);
+      setStockJobProgress('');
+      setIsUploading(false);
+      toast.error('Timeout: a análise demorou demasiado tempo. Tente novamente.');
+    }, 5 * 60 * 1000);
+    return () => clearTimeout(timeout);
+  }, [stockJobId]);
+
   // Handle job status changes
   useEffect(() => {
     if (!jobStatus || !stockJobId) return;
@@ -475,19 +488,86 @@ export default function ControloStock() {
     }
 
     setIsUploading(true);
+    setStockJobProgress('A ler ficheiro Excel no browser...');
     try {
+      // Parse Excel no browser com SheetJS (muito mais leve que enviar base64 ao servidor)
       const buffer = await selectedFile.arrayBuffer();
-      const base64 = btoa(
-        new Uint8Array(buffer).reduce((data, byte) => data + String.fromCharCode(byte), '')
-      );
+      const wb = XLSX.read(buffer, { type: 'array' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      if (!ws) throw new Error('Ficheiro Excel sem folhas de dados');
 
+      const rows: any[][] = XLSX.utils.sheet_to_json(ws, { header: 1 });
+      if (rows.length < 2) throw new Error('Ficheiro Excel sem dados');
+
+      // Detectar colunas pelo header
+      const header = rows[0].map((h: any) => String(h || '').trim().toLowerCase());
+      const colMap: Record<string, number> = {};
+      header.forEach((val: string, idx: number) => {
+        if (val.includes('ref')) colMap['ref'] = idx;
+        else if (val.includes('designa')) colMap['designacao'] = idx;
+        else if (val.includes('armaz')) colMap['armazem'] = idx;
+        else if (val.includes('quantid')) colMap['quantidade'] = idx;
+        else if (val.includes('unid')) colMap['unidade'] = idx;
+        else if (val.includes('prec') || val === 'preço' || val === 'preco') colMap['preco'] = idx;
+        else if (val === 'total') colMap['total'] = idx;
+        else if (val.includes('tipo')) colMap['tipo'] = idx;
+        else if (val.includes('famil') || val === 'familia') colMap['familia'] = idx;
+      });
+
+      if (colMap['ref'] === undefined || colMap['armazem'] === undefined) {
+        throw new Error('Ficheiro Excel não tem as colunas obrigatórias (Ref_ e Armazem)');
+      }
+
+      // Processar linhas
+      setStockJobProgress('A processar linhas do Excel...');
+      const categoriasPermitidas = ['OC', 'PB', 'TE', 'VL'];
+      const itens: Array<{ ref: string; descricao: string; armazem: number; quantidade: number; familia?: string }> = [];
+
+      for (let i = 1; i < rows.length; i++) {
+        const row = rows[i];
+        if (!row) continue;
+        const ref = String(row[colMap['ref']] || '').trim();
+        if (!ref) continue;
+
+        const armazemRaw = row[colMap['armazem']];
+        const armazem = typeof armazemRaw === 'number' ? armazemRaw : parseInt(String(armazemRaw || '0'));
+        if (!armazem || isNaN(armazem)) continue;
+
+        const qtdRaw = colMap['quantidade'] !== undefined ? row[colMap['quantidade']] : 1;
+        const quantidade = typeof qtdRaw === 'number' ? qtdRaw : parseFloat(String(qtdRaw || '0').replace(',', '.')) || 0;
+        if (quantidade < 1) continue;
+
+        const descricao = colMap['designacao'] !== undefined ? String(row[colMap['designacao']] || '').trim() : '';
+        let familia = colMap['familia'] !== undefined ? String(row[colMap['familia']] || '').trim().toUpperCase() : undefined;
+
+        if (familia && !categoriasPermitidas.includes(familia)) continue;
+
+        if (!familia) {
+          const refUpper = ref.toUpperCase();
+          if (/AGS|AGAC|AGN|AGSM|AGSH|AGST|AGSV|AGSMVZ|AGACMVZ/.test(refUpper)) familia = 'PB';
+          else if (/BGS|OCL|OC/.test(refUpper)) familia = 'OC';
+          else if (/RGS|LGS|VVL|VL/.test(refUpper)) familia = 'VL';
+          else if (/TET|TE/.test(refUpper)) familia = 'TE';
+        }
+
+        itens.push({ ref, descricao, armazem, quantidade, familia });
+      }
+
+      if (itens.length === 0) {
+        throw new Error('Não foram encontrados artigos válidos no ficheiro Excel.');
+      }
+
+      setStockJobProgress(`${itens.length} artigos lidos. A enviar ao servidor...`);
+
+      // Enviar dados já processados ao servidor (muito mais leve que base64)
       analisarGlobalMutation.mutate({
-        excelBase64: base64,
+        itensJson: JSON.stringify(itens),
         nomeArquivo: selectedFile.name,
       });
-    } catch (err) {
-      toast.error('Erro ao ler o ficheiro');
+    } catch (err: any) {
+      toast.error(err.message || 'Erro ao ler o ficheiro');
       setIsUploading(false);
+      setStockJobProgress('');
     }
   };
 

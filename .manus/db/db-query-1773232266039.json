@@ -1,0 +1,26 @@
+{
+  "query": "SELECT id, status, LEFT(progress, 200) as progress, LEFT(error, 200) as error, createdAt, updatedAt FROM background_jobs ORDER BY createdAt DESC LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT id, status, LEFT(progress, 200) as progress, LEFT(error, 200) as error, createdAt, updatedAt FROM background_jobs ORDER BY createdAt DESC LIMIT 5;",
+  "rows": [
+    {
+      "id": "stock_1773231054312_boq86c",
+      "status": "processing",
+      "progress": "A ler ficheiro Excel...",
+      "error": "NULL",
+      "createdAt": "2026-03-11 12:10:54",
+      "updatedAt": "2026-03-11 12:10:54"
+    },
+    {
+      "id": "stock_1773230894606_7agzth",
+      "status": "processing",
+      "progress": "A ler ficheiro Excel...",
+      "error": "NULL",
+      "createdAt": "2026-03-11 12:08:14",
+      "updatedAt": "2026-03-11 12:08:14"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tstatus\tprogress\terror\tcreatedAt\tupdatedAt\nstock_1773231054312_boq86c\tprocessing\tA ler ficheiro Excel...\tNULL\t2026-03-11 12:10:54\t2026-03-11 12:10:54\nstock_1773230894606_7agzth\tprocessing\tA ler ficheiro Excel...\tNULL\t2026-03-11 12:08:14\t2026-03-11 12:08:14\n",
+  "stderr": "",
+  "execution_time_ms": 189
+}

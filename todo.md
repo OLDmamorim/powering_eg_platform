@@ -800,3 +800,8 @@
 - [x] Frontend actualizado: mostra progresso em tempo real (loja a loja)
 - [x] Migrado de memória para base de dados (tabela background_jobs) para funcionar com múltiplas instâncias
 - [ ] Guardar checkpoint
+
+## Fix: Stock analysis hangs on published site (OOM ao ler Excel no servidor)
+- [x] Mover leitura do Excel para o frontend (browser) usando SheetJS/xlsx
+- [x] Backend recebe apenas dados JSON já processados (não base64 do ficheiro inteiro)
+- [x] Adicionar timeout no frontend para jobs presos (5 min max)
