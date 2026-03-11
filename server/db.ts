@@ -190,7 +190,9 @@ import {
   InsertAnaliseStock,
   classificacoesEurocode,
   ClassificacaoEurocode,
-  InsertClassificacaoEurocode
+  InsertClassificacaoEurocode,
+  backgroundJobs,
+  BackgroundJob
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -13141,4 +13143,30 @@ export async function getAnalisesByBatchTime(batchTime: string, gestorId?: numbe
     .where(condition);
   
   return result;
+}
+
+
+// ==================== BACKGROUND JOBS ====================
+
+export async function createBackgroundJob(id: string) {
+  const db = await getDb();
+  await db.insert(backgroundJobs).values({ id, status: 'processing', progress: 'A iniciar...' });
+  return { id };
+}
+
+export async function updateBackgroundJob(id: string, data: { status?: 'processing' | 'completed' | 'error'; progress?: string; result?: string; error?: string }) {
+  const db = await getDb();
+  await db.update(backgroundJobs).set(data).where(eq(backgroundJobs.id, id));
+}
+
+export async function getBackgroundJob(id: string) {
+  const db = await getDb();
+  const [job] = await db.select().from(backgroundJobs).where(eq(backgroundJobs.id, id));
+  return job || null;
+}
+
+export async function cleanOldBackgroundJobs() {
+  const db = await getDb();
+  const thirtyMinAgo = new Date(Date.now() - 30 * 60 * 1000);
+  await db.delete(backgroundJobs).where(sql`${backgroundJobs.createdAt} < ${thirtyMinAgo}`);
 }

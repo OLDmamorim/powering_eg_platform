@@ -1,4 +1,4 @@
-import { useMemo, useState, useRef } from 'react';
+import { useMemo, useState, useRef, useEffect } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { trpc } from '@/lib/trpc';
 import { useAuth } from '@/_core/hooks/useAuth';
@@ -221,6 +221,8 @@ export default function ControloStock() {
   // Upload state
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [stockJobId, setStockJobId] = useState<string | null>(null);
+  const [stockJobProgress, setStockJobProgress] = useState<string>('');
 
   // Global result
   const [resultadoGlobal, setResultadoGlobal] = useState<ResultadoGlobal | null>(null);
@@ -262,19 +264,51 @@ export default function ControloStock() {
   // Mutations
   const analisarGlobalMutation = trpc.stock.analisarGlobal.useMutation({
     onSuccess: (data) => {
-      setResultadoGlobal(data as any);
-      // Expand all gestores by default
-      const allGestores = new Set((data as any).porGestor.map((g: any) => g.gestorNome));
-      setExpandedGestores(allGestores);
-      setView('resultadoGlobal');
-      toast.success(`Análise global concluída! ${data.totalArtigosProcessados} artigos em ${data.totalLojasAnalisadas} lojas.`);
-      utils.stock.historico.invalidate();
+      // Backend now returns { jobId } - start polling
+      if (data && 'jobId' in data) {
+        setStockJobId((data as any).jobId);
+        setStockJobProgress('A iniciar análise...');
+      }
     },
     onError: (error) => {
       toast.error(error.message || 'Erro ao analisar stock global');
       setIsUploading(false);
     },
   });
+
+  // Polling for stock analysis job status
+  const { data: jobStatus } = trpc.stock.analisarGlobalStatus.useQuery(
+    { jobId: stockJobId || '' },
+    { enabled: !!stockJobId, refetchInterval: stockJobId ? 2000 : false }
+  );
+
+  // Handle job status changes
+  useEffect(() => {
+    if (!jobStatus || !stockJobId) return;
+    if (jobStatus.status === 'processing') {
+      setStockJobProgress(jobStatus.progress || 'A processar...');
+    } else if (jobStatus.status === 'completed' && jobStatus.result) {
+      setStockJobId(null);
+      setStockJobProgress('');
+      setIsUploading(false);
+      const data = jobStatus.result as any;
+      setResultadoGlobal(data);
+      const allGestores = new Set(data.porGestor.map((g: any) => g.gestorNome));
+      setExpandedGestores(allGestores);
+      setView('resultadoGlobal');
+      toast.success(`Análise global concluída! ${data.totalArtigosProcessados} artigos em ${data.totalLojasAnalisadas} lojas.`);
+      utils.stock.historico.invalidate();
+    } else if (jobStatus.status === 'error') {
+      setStockJobId(null);
+      setStockJobProgress('');
+      setIsUploading(false);
+      toast.error(jobStatus.error || 'Erro ao analisar stock global');
+    } else if (jobStatus.status === 'not_found') {
+      setStockJobId(null);
+      setStockJobProgress('');
+      setIsUploading(false);
+    }
+  }, [jobStatus, stockJobId]);
 
   const eliminarMutation = trpc.stock.eliminar.useMutation({
     onSuccess: () => {
@@ -1006,13 +1040,13 @@ export default function ControloStock() {
 
                 <Button
                   onClick={handleAnalisarGlobal}
-                  disabled={!selectedFile || isUploading || analisarGlobalMutation.isPending}
+                  disabled={!selectedFile || isUploading || analisarGlobalMutation.isPending || !!stockJobId}
                   className="w-full"
                 >
-                  {(isUploading || analisarGlobalMutation.isPending) ? (
+                  {(isUploading || analisarGlobalMutation.isPending || !!stockJobId) ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      A analisar stock global...
+                      {stockJobProgress || 'A analisar stock global...'}
                     </>
                   ) : (
                     <>
