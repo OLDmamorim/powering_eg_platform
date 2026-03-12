@@ -1,0 +1,26 @@
+{
+  "query": "\nSELECT l.id, l.nome, l.senhorio, l.contactoSenhorio, g.id as gestor_id, u.name as gestor_nome\nFROM lojas l\nLEFT JOIN gestor_lojas gl ON l.id = gl.lojaId\nLEFT JOIN gestores g ON gl.gestorId = g.id\nLEFT JOIN users u ON g.userId = u.id\nWHERE l.id IN (60001, 180019)\nORDER BY l.id;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute \nSELECT l.id, l.nome, l.senhorio, l.contactoSenhorio, g.id as gestor_id, u.name as gestor_nome\nFROM lojas l\nLEFT JOIN gestor_lojas gl ON l.id = gl.lojaId\nLEFT JOIN gestores g ON gl.gestorId = g.id\nLEFT JOIN users u ON g.userId = u.id\nWHERE l.id IN (60001, 180019)\nORDER BY l.id;\n",
+  "rows": [
+    {
+      "id": "60001",
+      "nome": "Famalicão",
+      "senhorio": "Antero Moreira da Silva",
+      "contactoSenhorio": "938 333 550",
+      "gestor_id": "30001",
+      "gestor_nome": "Marco Amorim"
+    },
+    {
+      "id": "180019",
+      "nome": "Famalicão sm",
+      "senhorio": "Antero Moreira da Silva ",
+      "contactoSenhorio": "938 333 550",
+      "gestor_id": "30001",
+      "gestor_nome": "Marco Amorim"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tnome\tsenhorio\tcontactoSenhorio\tgestor_id\tgestor_nome\n60001\tFamalicão\tAntero Moreira da Silva\t938 333 550\t30001\tMarco Amorim\n180019\tFamalicão sm\tAntero Moreira da Silva \t938 333 550\t30001\tMarco Amorim\n",
+  "stderr": "",
+  "execution_time_ms": 2984
+}

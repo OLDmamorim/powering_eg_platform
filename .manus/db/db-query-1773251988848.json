@@ -1,0 +1,30 @@
+{
+  "query": "\nSELECT g.id as gestor_id, g.userId, u.name as user_nome, gl.lojaId, l.nome as loja_nome, l.id as loja_id, l.senhorio, l.contactoSenhorio\nFROM gestores g\nJOIN users u ON g.userId = u.id\nJOIN gestor_lojas gl ON g.id = gl.gestorId\nJOIN lojas l ON gl.lojaId = l.id\nWHERE l.nome LIKE '%amalicao%' OR l.nome LIKE '%amalicã%'\nORDER BY l.nome;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute \nSELECT g.id as gestor_id, g.userId, u.name as user_nome, gl.lojaId, l.nome as loja_nome, l.id as loja_id, l.senhorio, l.contactoSenhorio\nFROM gestores g\nJOIN users u ON g.userId = u.id\nJOIN gestor_lojas gl ON g.id = gl.gestorId\nJOIN lojas l ON gl.lojaId = l.id\nWHERE l.nome LIKE '%amalicao%' OR l.nome LIKE '%amalicã%'\nORDER BY l.nome;\n",
+  "rows": [
+    {
+      "gestor_id": "30001",
+      "userId": "420030",
+      "user_nome": "Marco Amorim",
+      "lojaId": "60001",
+      "loja_nome": "Famalicão",
+      "loja_id": "60001",
+      "senhorio": "NULL",
+      "contactoSenhorio": "NULL"
+    },
+    {
+      "gestor_id": "30001",
+      "userId": "420030",
+      "user_nome": "Marco Amorim",
+      "lojaId": "180019",
+      "loja_nome": "Famalicão sm",
+      "loja_id": "180019",
+      "senhorio": "Antero Moreira da Silva ",
+      "contactoSenhorio": "938 333 550"
+    }
+  ],
+  "messages": [],
+  "stdout": "gestor_id\tuserId\tuser_nome\tlojaId\tloja_nome\tloja_id\tsenhorio\tcontactoSenhorio\n30001\t420030\tMarco Amorim\t60001\tFamalicão\t60001\tNULL\tNULL\n30001\t420030\tMarco Amorim\t180019\tFamalicão sm\t180019\tAntero Moreira da Silva \t938 333 550\n",
+  "stderr": "",
+  "execution_time_ms": 55
+}

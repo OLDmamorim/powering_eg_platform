@@ -10512,79 +10512,9 @@ IMPORTANTE:
           }
         }
         
-        // === GUARDAR EUROCODES DAS FICHAS EXCLUÍDAS (Serviço Pronto, REVISAR) PARA CRUZAMENTO COM STOCK ===
-        try {
-          if (resultado.fichasExcluidas && resultado.fichasExcluidas.length > 0) {
-            console.log(`[analiseFichas] Processando ${resultado.fichasExcluidas.length} fichas excluídas para extração de eurocodes`);
-            const gruposExcluidas = new Map<string, typeof resultado.fichasExcluidas>();
-            for (const ficha of resultado.fichasExcluidas) {
-              const nomeLoja = ficha.loja || 'Desconhecida';
-              if (!gruposExcluidas.has(nomeLoja)) gruposExcluidas.set(nomeLoja, []);
-              gruposExcluidas.get(nomeLoja)!.push(ficha);
-            }
-            
-            // Usar lojasGestor que já está no scope + buscar todas para matching completo
-            const todasLojasExcl = await db.getAllLojas();
-            
-            for (const [nomeLoja, fichasExcl] of Array.from(gruposExcluidas.entries())) {
-              if (nomeLoja === 'Desconhecida') continue;
-              
-              // Tentar encontrar o lojaId
-              let lojaIdExcl: number | null = null;
-              for (const loja of todasLojasExcl) {
-                if (loja.nome.toLowerCase() === nomeLoja.toLowerCase()) {
-                  lojaIdExcl = loja.id;
-                  break;
-                }
-              }
-              
-              const eurocodesExcl: Array<{
-                analiseId: number;
-                lojaId: number | null;
-                nomeLoja: string;
-                obrano: number;
-                matricula: string | null;
-                eurocode: string;
-                ref: string | null;
-                marca: string | null;
-                modelo: string | null;
-                status: string | null;
-                diasAberto: number | null;
-              }> = [];
-              
-              for (const ficha of fichasExcl) {
-                const eurocodeValue = (ficha.eurocode || '').trim();
-                const refValue = (ficha.ref || '').trim();
-                const codigoFinal = eurocodeValue || refValue;
-                if (!codigoFinal) continue;
-                
-                const codigos = codigoFinal.split(/[,;]/).map(c => c.trim()).filter(c => c.length > 0);
-                for (const codigo of codigos) {
-                  eurocodesExcl.push({
-                    analiseId: analise.id,
-                    lojaId: lojaIdExcl,
-                    nomeLoja,
-                    obrano: ficha.obrano,
-                    matricula: ficha.matricula || null,
-                    eurocode: codigo,
-                    ref: ficha.ref || null,
-                    marca: ficha.marca || null,
-                    modelo: ficha.modelo || null,
-                    status: ficha.status || null,
-                    diasAberto: ficha.diasAberto || null,
-                  });
-                }
-              }
-              
-              if (eurocodesExcl.length > 0) {
-                await db.saveEurocodesFichas(eurocodesExcl);
-                console.log(`[analiseFichas] Guardados ${eurocodesExcl.length} eurocodes de fichas excluídas para ${nomeLoja}`);
-              }
-            }
-          }
-        } catch (exclErr: any) {
-          console.error('[analiseFichas] Erro ao guardar eurocodes de fichas excluídas:', exclErr?.message || exclErr);
-        }
+        // NOTA: Eurocodes de fichas excluídas (Serviço Pronto, REVISAR) agora são incluídos
+        // automaticamente em fichasCompletas de cada relatório pelo analisarFichas(),
+        // portanto são guardados pelo Bloco 1 acima com o matching correcto de lojas.
         
         return {
           analiseId: analise.id,

@@ -733,10 +733,15 @@ function gerarResumo(relatorio: RelatorioLoja): string {
 
 /**
  * Analisa as fichas e gera relatórios por loja
+ * @param fichasExcluidas - Fichas com status excluído (Serviço Pronto, REVISAR) que não entram na análise
+ *   mas cujos eurocodes devem ser incluídos em fichasCompletas para cruzamento com stock
  */
-export function analisarFichas(fichas: FichaServico[], nomeArquivo: string): ResultadoAnalise {
+export function analisarFichas(fichas: FichaServico[], nomeArquivo: string, fichasExcluidas?: FichaServico[]): ResultadoAnalise {
   const dataAnalise = new Date();
   const grupos = agruparPorLoja(fichas);
+  
+  // Agrupar fichas excluídas por loja também (para incluir eurocodes no fichasCompletas)
+  const gruposExcluidas = fichasExcluidas ? agruparPorLoja(fichasExcluidas) : new Map<string, FichaServico[]>();
   const relatorios: RelatorioLoja[] = [];
   
   const resumoGeral = {
@@ -826,7 +831,9 @@ export function analisarFichas(fichas: FichaServico[], nomeArquivo: string): Res
       // fichasSemEmailCliente, // REMOVIDO
       statusCount,
       referenciasDevolucao,
-      fichasCompletas: fichasLoja,
+      // fichasCompletas inclui TODAS as fichas (incluindo excluídas como Serviço Pronto, REVISAR)
+      // para que os eurocodes sejam guardados para cruzamento com stock
+      fichasCompletas: [...fichasLoja, ...(gruposExcluidas.get(nomeLoja) || [])],
       resumo: '',
       conteudoHTML: '',
     };
@@ -847,6 +854,37 @@ export function analisarFichas(fichas: FichaServico[], nomeArquivo: string): Res
     // resumoGeral.totalFichasSemEmailCliente += fichasSemEmailCliente.length; // REMOVIDO
   }
   
+  // Adicionar relatórios para lojas que SÓ têm fichas excluídas (sem fichas na análise principal)
+  // Estas lojas não aparecem nos grupos mas precisam de ter eurocodes guardados para stock
+  for (const [nomeLoja, fichasExcl] of Array.from(gruposExcluidas.entries())) {
+    if (!grupos.has(nomeLoja)) {
+      // Loja só tem fichas excluídas - criar relatório mínimo para guardar eurocodes
+      const primeiraFicha = fichasExcl[0];
+      const isSM = primeiraFicha ? isServicoMovel(primeiraFicha.nmdos, primeiraFicha.loja) : false;
+      const numeroLoja = (!isSM && fichasExcl.length > 0) ? extrairNumeroLoja(fichasExcl[0].nmdos) : null;
+      
+      const relatorio: RelatorioLoja = {
+        numeroLoja,
+        nomeLoja,
+        isServicoMovel: isSM,
+        totalFichas: 0, // Sem fichas na análise principal
+        fichasAbertas5Dias: [],
+        fichasAposAgendamento: [],
+        fichasStatusAlerta: [],
+        fichasSemNotas: [],
+        fichasNotasAntigas: [],
+        fichasDevolverVidro: [],
+        statusCount: {},
+        referenciasDevolucao: [],
+        fichasCompletas: fichasExcl, // Só fichas excluídas - para extração de eurocodes
+        resumo: '',
+        conteudoHTML: '',
+      };
+      relatorios.push(relatorio);
+      console.log(`[analisarFichas] Loja "${nomeLoja}" só tem fichas excluídas (${fichasExcl.length}) - adicionada para extração de eurocodes`);
+    }
+  }
+  
   // Ordenar relatórios por nome da loja
   relatorios.sort((a, b) => a.nomeLoja.localeCompare(b.nomeLoja));
   
@@ -865,7 +903,9 @@ export function analisarFichas(fichas: FichaServico[], nomeArquivo: string): Res
  */
 export function processarAnalise(buffer: Buffer, nomeArquivo: string): ResultadoAnalise {
   const { fichas, fichasExcluidas } = processarFicheiroExcel(buffer);
-  const resultado = analisarFichas(fichas, nomeArquivo);
+  // Passar fichasExcluidas para analisarFichas para que os eurocodes sejam incluídos
+  // em fichasCompletas de cada loja (para cruzamento com stock)
+  const resultado = analisarFichas(fichas, nomeArquivo, fichasExcluidas);
   resultado.fichasExcluidas = fichasExcluidas;
   return resultado;
 }

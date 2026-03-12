@@ -1,0 +1,8 @@
+{
+  "query": "\nSELECT g.id as gestor_id, g.nome as gestor_nome, u.email, gl.loja_id, l.nome as loja_nome, l.id as loja_id_real\nFROM gestores g\nJOIN users u ON g.user_id = u.id\nJOIN gestor_lojas gl ON g.id = gl.gestor_id\nJOIN lojas l ON gl.loja_id = l.id\nWHERE l.nome ILIKE '%famalicao%' OR l.nome ILIKE '%famalicão%' OR l.nome ILIKE '%famalicao%'\nORDER BY l.nome;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute \nSELECT g.id as gestor_id, g.nome as gestor_nome, u.email, gl.loja_id, l.nome as loja_nome, l.id as loja_id_real\nFROM gestores g\nJOIN users u ON g.user_id = u.id\nJOIN gestor_lojas gl ON g.id = gl.gestor_id\nJOIN lojas l ON gl.loja_id = l.id\nWHERE l.nome ILIKE '%famalicao%' OR l.nome ILIKE '%famalicão%' OR l.nome ILIKE '%famalicao%'\nORDER BY l.nome;\n",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 2: Unknown column 'g.user_id' in 'on clause'"
+  ]
+}

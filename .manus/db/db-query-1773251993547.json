@@ -1,0 +1,244 @@
+{
+  "query": "\nSELECT g.id as gestor_id, u.name as user_nome, gl.lojaId, l.nome as loja_nome, l.id as loja_id, l.senhorio, l.contactoSenhorio\nFROM gestores g\nJOIN users u ON g.userId = u.id\nJOIN gestor_lojas gl ON g.id = gl.gestorId\nJOIN lojas l ON gl.lojaId = l.id\nWHERE u.name LIKE '%Marco%' OR u.name LIKE '%marco%'\nORDER BY l.nome;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute \nSELECT g.id as gestor_id, u.name as user_nome, gl.lojaId, l.nome as loja_nome, l.id as loja_id, l.senhorio, l.contactoSenhorio\nFROM gestores g\nJOIN users u ON g.userId = u.id\nJOIN gestor_lojas gl ON g.id = gl.gestorId\nJOIN lojas l ON gl.lojaId = l.id\nWHERE u.name LIKE '%Marco%' OR u.name LIKE '%marco%'\nORDER BY l.nome;\n",
+  "rows": [
+    {
+      "gestor_id": "120001",
+      "user_nome": "Marco Vilar",
+      "lojaId": "180002",
+      "loja_nome": "Aeroporto porto",
+      "loja_id": "180002",
+      "senhorio": "NULL",
+      "contactoSenhorio": "NULL"
+    },
+    {
+      "gestor_id": "30001",
+      "user_nome": "Marco Amorim",
+      "lojaId": "60002",
+      "loja_nome": "Barcelos",
+      "loja_id": "60002",
+      "senhorio": "Sérgio chuvitex",
+      "contactoSenhorio": "253850000"
+    },
+    {
+      "gestor_id": "30001",
+      "user_nome": "Marco Amorim",
+      "lojaId": "180010",
+      "loja_nome": "Braga - minho center",
+      "loja_id": "180010",
+      "senhorio": "NULL",
+      "contactoSenhorio": "NULL"
+    },
+    {
+      "gestor_id": "30001",
+      "user_nome": "Marco Amorim",
+      "lojaId": "180011",
+      "loja_nome": "Braga sm",
+      "loja_id": "180011",
+      "senhorio": "NULL",
+      "contactoSenhorio": "NULL"
+    },
+    {
+      "gestor_id": "30001",
+      "user_nome": "Marco Amorim",
+      "lojaId": "60001",
+      "loja_nome": "Famalicão",
+      "loja_id": "60001",
+      "senhorio": "NULL",
+      "contactoSenhorio": "NULL"
+    },
+    {
+      "gestor_id": "30001",
+      "user_nome": "Marco Amorim",
+      "lojaId": "180019",
+      "loja_nome": "Famalicão sm",
+      "loja_id": "180019",
+      "senhorio": "Antero Moreira da Silva ",
+      "contactoSenhorio": "938 333 550"
+    },
+    {
+      "gestor_id": "120001",
+      "user_nome": "Marco Vilar",
+      "lojaId": "180022",
+      "loja_nome": "Gondomar",
+      "loja_id": "180022",
+      "senhorio": "NULL",
+      "contactoSenhorio": "NULL"
+    },
+    {
+      "gestor_id": "30001",
+      "user_nome": "Marco Amorim",
+      "lojaId": "180024",
+      "loja_nome": "Guimarães shopping",
+      "loja_id": "180024",
+      "senhorio": "NULL",
+      "contactoSenhorio": "NULL"
+    },
+    {
+      "gestor_id": "120001",
+      "user_nome": "Marco Vilar",
+      "lojaId": "180030",
+      "loja_nome": "Maia - maiashopping",
+      "loja_id": "180030",
+      "senhorio": "NULL",
+      "contactoSenhorio": "NULL"
+    },
+    {
+      "gestor_id": "120001",
+      "user_nome": "Marco Vilar",
+      "lojaId": "180031",
+      "loja_nome": "Maia - moreira",
+      "loja_id": "180031",
+      "senhorio": "NULL",
+      "contactoSenhorio": "NULL"
+    },
+    {
+      "gestor_id": "120001",
+      "user_nome": "Marco Vilar",
+      "lojaId": "180032",
+      "loja_nome": "Maia sm",
+      "loja_id": "180032",
+      "senhorio": "NULL",
+      "contactoSenhorio": "NULL"
+    },
+    {
+      "gestor_id": "120001",
+      "user_nome": "Marco Vilar",
+      "lojaId": "180033",
+      "loja_nome": "Matosinhos",
+      "loja_id": "180033",
+      "senhorio": "NULL",
+      "contactoSenhorio": "NULL"
+    },
+    {
+      "gestor_id": "30001",
+      "user_nome": "Marco Amorim",
+      "lojaId": "180036",
+      "loja_nome": "Mycarcenter",
+      "loja_id": "180036",
+      "senhorio": "NULL",
+      "contactoSenhorio": "NULL"
+    },
+    {
+      "gestor_id": "30001",
+      "user_nome": "Marco Amorim",
+      "lojaId": "60007",
+      "loja_nome": "Paços de Ferreira ",
+      "loja_id": "60007",
+      "senhorio": "NULL",
+      "contactoSenhorio": "NULL"
+    },
+    {
+      "gestor_id": "30001",
+      "user_nome": "Marco Amorim",
+      "lojaId": "60006",
+      "loja_nome": "Paredes",
+      "loja_id": "60006",
+      "senhorio": "NULL",
+      "contactoSenhorio": "NULL"
+    },
+    {
+      "gestor_id": "30001",
+      "user_nome": "Marco Amorim",
+      "lojaId": "180038",
+      "loja_nome": "Paredes sm",
+      "loja_id": "180038",
+      "senhorio": "NULL",
+      "contactoSenhorio": "NULL"
+    },
+    {
+      "gestor_id": "120001",
+      "user_nome": "Marco Vilar",
+      "lojaId": "180041",
+      "loja_nome": "Porto - marquês",
+      "loja_id": "180041",
+      "senhorio": "NULL",
+      "contactoSenhorio": "NULL"
+    },
+    {
+      "gestor_id": "120001",
+      "user_nome": "Marco Vilar",
+      "lojaId": "180042",
+      "loja_nome": "Porto - zona industrial",
+      "loja_id": "180042",
+      "senhorio": "NULL",
+      "contactoSenhorio": "NULL"
+    },
+    {
+      "gestor_id": "120001",
+      "user_nome": "Marco Vilar",
+      "lojaId": "180044",
+      "loja_nome": "Porto sul sm",
+      "loja_id": "180044",
+      "senhorio": "NULL",
+      "contactoSenhorio": "NULL"
+    },
+    {
+      "gestor_id": "30001",
+      "user_nome": "Marco Amorim",
+      "lojaId": "60005",
+      "loja_nome": "Póvoa de Varzim",
+      "loja_id": "60005",
+      "senhorio": "Antero Moreira da Silva",
+      "contactoSenhorio": "938333550"
+    },
+    {
+      "gestor_id": "120001",
+      "user_nome": "Marco Vilar",
+      "lojaId": "180048",
+      "loja_nome": "Santa maria da feira",
+      "loja_id": "180048",
+      "senhorio": "NULL",
+      "contactoSenhorio": "NULL"
+    },
+    {
+      "gestor_id": "30001",
+      "user_nome": "Marco Amorim",
+      "lojaId": "60004",
+      "loja_nome": "Viana do Castelo ",
+      "loja_id": "60004",
+      "senhorio": "NULL",
+      "contactoSenhorio": "NULL"
+    },
+    {
+      "gestor_id": "30001",
+      "user_nome": "Marco Amorim",
+      "lojaId": "180057",
+      "loja_nome": "Viana do castelo sm",
+      "loja_id": "180057",
+      "senhorio": "NULL",
+      "contactoSenhorio": "NULL"
+    },
+    {
+      "gestor_id": "120001",
+      "user_nome": "Marco Vilar",
+      "lojaId": "180058",
+      "loja_nome": "Vila nova de gaia",
+      "loja_id": "180058",
+      "senhorio": "NULL",
+      "contactoSenhorio": "NULL"
+    },
+    {
+      "gestor_id": "120001",
+      "user_nome": "Marco Vilar",
+      "lojaId": "180059",
+      "loja_nome": "Vila nova de gaia - canelas",
+      "loja_id": "180059",
+      "senhorio": "NULL",
+      "contactoSenhorio": "NULL"
+    },
+    {
+      "gestor_id": "30001",
+      "user_nome": "Marco Amorim",
+      "lojaId": "60003",
+      "loja_nome": "Vila Verde",
+      "loja_id": "60003",
+      "senhorio": "NULL",
+      "contactoSenhorio": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "gestor_id\tuser_nome\tlojaId\tloja_nome\tloja_id\tsenhorio\tcontactoSenhorio\n120001\tMarco Vilar\t180002\tAeroporto porto\t180002\tNULL\tNULL\n30001\tMarco Amorim\t60002\tBarcelos\t60002\tSérgio chuvitex\t253850000\n30001\tMarco Amorim\t180010\tBraga - minho center\t180010\tNULL\tNULL\n30001\tMarco Amorim\t180011\tBraga sm\t180011\tNULL\tNULL\n30001\tMarco Amorim\t60001\tFamalicão\t60001\tNULL\tNULL\n30001\tMarco Amorim\t180019\tFamalicão sm\t180019\tAntero Moreira da Silva \t938 333 550\n120001\tMarco Vilar\t180022\tGondomar\t180022\tNULL\tNULL\n30001\tMarco Amorim\t180024\tGuimarães shopping\t180024\tNULL\tNULL\n120001\tMarco Vilar\t180030\tMaia - maiashopping\t180030\tNULL\tNULL\n120001\tMarco Vilar\t180031\tMaia - moreira\t180031\tNULL\tNULL\n120001\tMarco Vilar\t180032\tMaia sm\t180032\tNULL\tNULL\n120001\tMarco Vilar\t180033\tMatosinhos\t180033\tNULL\tNULL\n30001\tMarco Amorim\t180036\tMycarcenter\t180036\tNULL\tNULL\n30001\tMarco Amorim\t60007\tPaços de Ferreira \t60007\tNULL\tNULL\n30001\tMarco Amorim\t60006\tParedes\t60006\tNULL\tNULL\n30001\tMarco Amorim\t180038\tParedes sm\t180038\tNULL\tNULL\n120001\tMarco Vilar\t180041\tPorto - marquês\t180041\tNULL\tNULL\n120001\tMarco Vilar\t180042\tPorto - zona industrial\t180042\tNULL\tNULL\n120001\tMarco Vilar\t180044\tPorto sul sm\t180044\tNULL\tNULL\n30001\tMarco Amorim\t60005\tPóvoa de Varzim\t60005\tAntero Moreira da Silva\t938333550\n120001\tMarco Vilar\t180048\tSanta maria da feira\t180048\tNULL\tNULL\n30001\tMarco Amorim\t60004\tViana do Castelo \t60004\tNULL\tNULL\n30001\tMarco Amorim\t180057\tViana do castelo sm\t180057\tNULL\tNULL\n120001\tMarco Vilar\t180058\tVila nova de gaia\t180058\tNULL\tNULL\n120001\tMarco Vilar\t180059\tVila nova de gaia - canelas\t180059\tNULL\tNULL\n30001\tMarco Amorim\t60003\tVila Verde\t60003\tNULL\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 55
+}

@@ -821,3 +821,8 @@
 
 ## Fix: Site lento após lazy loading
 - [x] Adicionar prefetch de todas as páginas após carregamento inicial (1.5s delay)
+
+## Bug: Dados do senhorio não são guardados
+- [ ] Investigar gravação de nome e contacto do senhorio na loja de Famalicão
+- [ ] Corrigir se necessário
+- [x] Análise de stock: garantir que eurocodes de TODAS as fichas (todos os status) são usados no cruzamento com stock

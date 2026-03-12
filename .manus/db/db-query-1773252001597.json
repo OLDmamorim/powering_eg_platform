@@ -1,0 +1,22 @@
+{
+  "query": "\nSELECT id, nome, senhorio, contactoSenhorio FROM lojas WHERE id IN (60001, 180019);\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute \nSELECT id, nome, senhorio, contactoSenhorio FROM lojas WHERE id IN (60001, 180019);\n",
+  "rows": [
+    {
+      "id": "60001",
+      "nome": "Famalicão",
+      "senhorio": "NULL",
+      "contactoSenhorio": "NULL"
+    },
+    {
+      "id": "180019",
+      "nome": "Famalicão sm",
+      "senhorio": "Antero Moreira da Silva ",
+      "contactoSenhorio": "938 333 550"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tnome\tsenhorio\tcontactoSenhorio\n60001\tFamalicão\tNULL\tNULL\n180019\tFamalicão sm\tAntero Moreira da Silva \t938 333 550\n",
+  "stderr": "",
+  "execution_time_ms": 49
+}
