@@ -124,11 +124,15 @@ const CLASSIFICACAO_LABELS: Record<string, string> = {
   usado: 'Usado',
   com_danos: 'Com Danos',
   para_devolver: 'Para Devolver',
+  para_realizar: 'P/Realizar',
+  com_ficha_servico: 'C/Ficha de Serviço',
 };
 
 const CLASSIFICACAO_COLORS: Record<string, string> = {
   devolucao_rejeitada: 'bg-purple-100 text-purple-700',
   usado: 'bg-gray-100 text-gray-700',
+  para_realizar: 'bg-sky-100 text-sky-700',
+  com_ficha_servico: 'bg-green-100 text-green-700',
   com_danos: 'bg-orange-100 text-orange-700',
   para_devolver: 'bg-cyan-100 text-cyan-700',
 };
@@ -447,13 +451,17 @@ export default function ControloStock() {
     return detalheAnalise.resultadoAnalise;
   }, [view, detalheAnalise]);
 
-  // Desmultiplicar itens sem fichas
+  // Desmultiplicar itens sem fichas (excluir os classificados como com_ficha_servico)
   const semFichasDesmultiplicados = useMemo(() => {
     if (!dadosActivos?.semFichas) return [];
     const resultado: Array<any & { unitIndex: number; totalUnidades: number }> = [];
     for (const item of dadosActivos.semFichas) {
       const qty = item.quantidade || 1;
       for (let i = 1; i <= qty; i++) {
+        // Excluir itens classificados como com_ficha_servico (passam para Com Fichas)
+        const key = `${item.ref?.toUpperCase()?.trim()}|${i}`;
+        const classif = classificacoesMap.get(key);
+        if (classif?.classificacao === 'com_ficha_servico') continue;
         resultado.push({
           ...item,
           quantidade: 1,
@@ -463,7 +471,30 @@ export default function ControloStock() {
       }
     }
     return resultado;
-  }, [dadosActivos?.semFichas]);
+  }, [dadosActivos?.semFichas, classificacoesMap]);
+
+  // Itens reclassificados como "C/Ficha de Serviço" (movidos de Sem Fichas para Com Fichas)
+  const itensComFichaServico = useMemo(() => {
+    if (!dadosActivos?.semFichas) return [];
+    const resultado: Array<any & { unitIndex: number; totalUnidades: number; reclassificado: boolean }> = [];
+    for (const item of dadosActivos.semFichas) {
+      const qty = item.quantidade || 1;
+      for (let i = 1; i <= qty; i++) {
+        const key = `${item.ref?.toUpperCase()?.trim()}|${i}`;
+        const classif = classificacoesMap.get(key);
+        if (classif?.classificacao === 'com_ficha_servico') {
+          resultado.push({
+            ...item,
+            quantidade: 1,
+            unitIndex: i,
+            totalUnidades: qty,
+            reclassificado: true,
+          });
+        }
+      }
+    }
+    return resultado;
+  }, [dadosActivos?.semFichas, classificacoesMap]);
 
   // Nome da loja para exportação
   const nomeLoja = detalheLojaNome || detalheAnalise?.nomeLoja || 'Loja';
@@ -1282,19 +1313,16 @@ export default function ControloStock() {
                 <CardContent className="pt-3 pb-3 md:pt-4 md:pb-4 text-center px-1 md:px-4">
                   <XCircle className="h-4 w-4 md:h-6 md:w-6 mx-auto text-amber-600 mb-0.5" />
                   <div className="text-lg md:text-2xl font-bold text-amber-700">
-                    {dadosActivos.totalSemFichas ?? dadosActivos.semFichas?.length}
+                    {(dadosActivos.totalSemFichas ?? dadosActivos.semFichas?.length ?? 0) - itensComFichaServico.length}
                   </div>
                   <div className="text-[10px] md:text-xs text-muted-foreground leading-tight">Sem Fichas</div>
-                  {semFichasDesmultiplicados.length !== (dadosActivos.totalSemFichas ?? dadosActivos.semFichas?.length) && (
-                    <div className="text-[9px] text-amber-500 mt-0.5">({semFichasDesmultiplicados.length} unid.)</div>
-                  )}
                 </CardContent>
               </Card>
               <Card className="border-green-200 bg-green-50/50">
                 <CardContent className="pt-3 pb-3 md:pt-4 md:pb-4 text-center px-1 md:px-4">
                   <CheckCircle2 className="h-4 w-4 md:h-6 md:w-6 mx-auto text-green-600 mb-0.5" />
                   <div className="text-lg md:text-2xl font-bold text-green-700">
-                    {dadosActivos.totalComFichas ?? dadosActivos.comFichas?.length}
+                    {(dadosActivos.totalComFichas ?? dadosActivos.comFichas?.length ?? 0) + itensComFichaServico.length}
                   </div>
                   <div className="text-[10px] md:text-xs text-muted-foreground leading-tight">Com Fichas</div>
                 </CardContent>
@@ -1350,7 +1378,7 @@ export default function ControloStock() {
                 </TabsTrigger>
                 <TabsTrigger value="comFichas" className="text-[10px] sm:text-sm px-1 py-1.5 sm:px-3 sm:py-2">
                   <CheckCircle2 className="h-3 w-3 mr-0.5 sm:mr-1 shrink-0" />
-                  <span className="hidden sm:inline">Com Fichas</span><span className="sm:hidden">C/ Fichas</span> ({dadosActivos.comFichas?.length || 0})
+                  <span className="hidden sm:inline">Com Fichas</span><span className="sm:hidden">C/ Fichas</span> ({(dadosActivos.comFichas?.length || 0) + itensComFichaServico.length})
                 </TabsTrigger>
               </TabsList>
 
@@ -1369,6 +1397,7 @@ export default function ControloStock() {
                     <option value="usado">Usado</option>
                     <option value="com_danos">Com Danos</option>
                     <option value="para_devolver">Para Devolver</option>
+                    <option value="para_realizar">P/Realizar</option>
                   </select>
                 </div>
                 {filtrarSemFichasPorClassificacao(filtrarItens(semFichasDesmultiplicados)).length === 0 ? (
@@ -1425,6 +1454,8 @@ export default function ControloStock() {
                                   <option value="usado">Usado</option>
                                   <option value="com_danos">Com Danos</option>
                                   <option value="para_devolver">Para Devolver</option>
+                                  <option value="para_realizar">P/Realizar</option>
+                                  <option value="com_ficha_servico">C/Ficha de Serviço</option>
                                 </select>
                               </div>
                             </div>
@@ -1442,7 +1473,58 @@ export default function ControloStock() {
 
               {/* Tab: Com Fichas */}
               <TabsContent value="comFichas" className="space-y-1.5 mt-3">
-                {dadosActivos.comFichas && filtrarItens(dadosActivos.comFichas).length === 0 ? (
+                {/* Itens reclassificados como C/Ficha de Serviço */}
+                {itensComFichaServico.length > 0 && (
+                  <div className="mb-2">
+                    <p className="text-xs font-medium text-green-700 mb-1 flex items-center gap-1">
+                      <CheckCircle2 className="h-3 w-3" />
+                      Reclassificados como C/Ficha de Serviço ({itensComFichaServico.length})
+                    </p>
+                    {filtrarItens(itensComFichaServico).map((item: any, idx: number) => (
+                      <Card key={`reclass-${idx}`} className="border-green-200 bg-green-50/30 mb-1.5">
+                        <CardContent className="px-3 py-2">
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <Badge variant="outline" className="bg-blue-50 text-blue-700 font-mono text-[11px] px-1.5 py-0">
+                                  {item.ref}
+                                </Badge>
+                                {item.familia && (
+                                  <Badge variant="secondary" className="text-[10px] px-1.5 py-0">{item.familia}</Badge>
+                                )}
+                                <Badge className="bg-green-100 text-green-700 text-[10px] px-1.5 py-0">
+                                  C/Ficha de Serviço
+                                </Badge>
+                                {item.totalUnidades > 1 && (
+                                  <Badge variant="outline" className="text-[9px] px-1 py-0">
+                                    {item.unitIndex}/{item.totalUnidades}
+                                  </Badge>
+                                )}
+                              </div>
+                              <p className="text-xs text-muted-foreground mt-0.5 truncate">{item.descricao}</p>
+                              <select
+                                className="text-[10px] border rounded px-1 py-0.5 bg-transparent cursor-pointer mt-1"
+                                value="com_ficha_servico"
+                                onChange={(e) => {
+                                  if (e.target.value) handleClassificar(item.ref, item.unitIndex, e.target.value);
+                                }}
+                              >
+                                <option value="">Alterar...</option>
+                                <option value="devolucao_rejeitada">Devolução Rejeitada</option>
+                                <option value="usado">Usado</option>
+                                <option value="com_danos">Com Danos</option>
+                                <option value="para_devolver">Para Devolver</option>
+                                <option value="para_realizar">P/Realizar</option>
+                                <option value="com_ficha_servico">C/Ficha de Serviço</option>
+                              </select>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+                {dadosActivos.comFichas && filtrarItens(dadosActivos.comFichas).length === 0 && itensComFichaServico.length === 0 ? (
                   <p className="text-center text-muted-foreground py-6 text-sm">Nenhum item encontrado</p>
                 ) : (
                   filtrarItens(dadosActivos.comFichas || []).map((item: any, idx: number) => (

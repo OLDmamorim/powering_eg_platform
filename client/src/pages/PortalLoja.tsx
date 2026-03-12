@@ -4173,26 +4173,38 @@ export default function PortalLoja() {
               const semFichasItems = (resultado?.semFichas || []).filter(matchSearch);
 
 
-              // Desmultiplicar sem fichas
-              const desmultiplicados: Array<{item: any; unitIndex: number; totalUnits: number}> = [];
+              // Desmultiplicar sem fichas (excluir com_ficha_servico)
+              const desmultiplicadosTodos: Array<{item: any; unitIndex: number; totalUnits: number}> = [];
+              const itensComFichaServico: Array<{item: any; unitIndex: number; totalUnits: number}> = [];
               semFichasItems.forEach((item: any) => {
                 const qty = item.quantidade || 1;
                 for (let i = 1; i <= qty; i++) {
-                  desmultiplicados.push({ item, unitIndex: i, totalUnits: qty });
+                  const key = `${item.ref?.toUpperCase()?.trim()}_${i}`;
+                  const classif = classificacoesMap.get(key);
+                  if (classif?.classificacao === 'com_ficha_servico') {
+                    itensComFichaServico.push({ item, unitIndex: i, totalUnits: qty });
+                  } else {
+                    desmultiplicadosTodos.push({ item, unitIndex: i, totalUnits: qty });
+                  }
                 }
               });
+              const desmultiplicados = desmultiplicadosTodos;
 
               const classifLabels: Record<string, string> = {
                 devolucao_rejeitada: language === 'pt' ? 'Devolução Rejeitada' : 'Return Rejected',
                 usado: language === 'pt' ? 'Usado' : 'Used',
                 com_danos: language === 'pt' ? 'Com Danos' : 'Damaged',
                 para_devolver: language === 'pt' ? 'Para Devolver' : 'To Return',
+                para_realizar: language === 'pt' ? 'P/Realizar' : 'To Perform',
+                com_ficha_servico: language === 'pt' ? 'C/Ficha de Serviço' : 'With Service Sheet',
               };
               const classifColors: Record<string, string> = {
                 devolucao_rejeitada: 'bg-red-100 text-red-700',
                 usado: 'bg-gray-100 text-gray-700',
                 com_danos: 'bg-orange-100 text-orange-700',
                 para_devolver: 'bg-blue-100 text-blue-700',
+                para_realizar: 'bg-sky-100 text-sky-700',
+                com_ficha_servico: 'bg-green-100 text-green-700',
               };
 
               // Filtrar sem fichas por classificacao
@@ -4220,7 +4232,7 @@ export default function PortalLoja() {
                       <div className="text-[10px] text-amber-600">S/ Fichas</div>
                     </div>
                     <div onClick={() => setStockTabFilter('comFichas')} className={`text-center p-2 rounded-lg cursor-pointer transition-all ${stockTabFilter === 'comFichas' ? 'bg-green-100 ring-2 ring-green-400' : 'bg-green-50 hover:bg-green-100'}`}>
-                      <div className="text-lg font-bold text-green-700">{comFichasItems.length}</div>
+                      <div className="text-lg font-bold text-green-700">{comFichasItems.length + itensComFichaServico.length}</div>
                       <div className="text-[10px] text-green-600">C/ Fichas</div>
                     </div>
 
@@ -4256,12 +4268,56 @@ export default function PortalLoja() {
                   )}
 
                   {/* === COM FICHAS === */}
-                  {(stockTabFilter === 'todos' || stockTabFilter === 'comFichas') && comFichasItems.length > 0 && (
+                  {(stockTabFilter === 'todos' || stockTabFilter === 'comFichas') && (comFichasItems.length > 0 || itensComFichaServico.length > 0) && (
                     <div>
                       <h3 className="font-semibold text-sm text-green-700 mb-2 flex items-center gap-1.5">
                         <CheckCircle2 className="h-4 w-4" />
-                        {language === 'pt' ? 'Com Fichas de Serviço' : 'With Service Records'} ({comFichasItems.length})
+                        {language === 'pt' ? 'Com Fichas de Serviço' : 'With Service Records'} ({comFichasItems.length + itensComFichaServico.length})
                       </h3>
+                      {/* Itens reclassificados como C/Ficha de Serviço */}
+                      {itensComFichaServico.length > 0 && (
+                        <div className="space-y-1.5 mb-2">
+                          {itensComFichaServico.map((d, idx) => {
+                            const refKey = d.item.ref?.toUpperCase()?.trim();
+                            const euroLabel = d.totalUnits > 1 ? `${d.item.ref} (${d.unitIndex}/${d.totalUnits})` : d.item.ref;
+                            return (
+                              <div key={`cfs_${idx}`} className="border border-green-200 rounded-lg p-2.5 bg-green-50/30">
+                                <div className="flex items-center gap-1.5 flex-wrap mb-1">
+                                  <Badge className="bg-green-100 text-green-800 text-[10px] px-1.5 py-0">{euroLabel}</Badge>
+                                  <Badge variant="outline" className="text-[10px] px-1.5 py-0">{d.item.familia || 'OC'}</Badge>
+                                  <Badge className="bg-green-100 text-green-700 text-[10px] px-1.5 py-0">C/Ficha de Serviço</Badge>
+                                </div>
+                                <p className="text-[11px] text-gray-600 truncate">{d.item.descricao}</p>
+                                <select
+                                  className="text-[11px] border rounded px-2 py-1 bg-white mt-1"
+                                  value="com_ficha_servico"
+                                  onChange={e => {
+                                    const val = e.target.value;
+                                    if (val && val !== 'com_ficha_servico') {
+                                      classificarStockMutation.mutate({
+                                        token,
+                                        lojaId: detalheStock.lojaId,
+                                        eurocode: refKey,
+                                        unitIndex: d.unitIndex,
+                                        classificacao: val as any,
+                                        analiseId: analiseStockSelecionada!,
+                                      });
+                                    }
+                                  }}
+                                >
+                                  <option value="">{language === 'pt' ? 'Alterar...' : 'Change...'}</option>
+                                  <option value="devolucao_rejeitada">{classifLabels.devolucao_rejeitada}</option>
+                                  <option value="usado">{classifLabels.usado}</option>
+                                  <option value="com_danos">{classifLabels.com_danos}</option>
+                                  <option value="para_devolver">{classifLabels.para_devolver}</option>
+                                  <option value="para_realizar">{classifLabels.para_realizar}</option>
+                                  <option value="com_ficha_servico">{classifLabels.com_ficha_servico}</option>
+                                </select>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
                       <div className="space-y-1.5">
                         {comFichasItems.map((item: any, idx: number) => (
                           <div key={`cf_${idx}`} className="border border-green-100 rounded-lg p-2.5 bg-white">
@@ -4299,6 +4355,7 @@ export default function PortalLoja() {
                           <option value="usado">{classifLabels.usado}</option>
                           <option value="com_danos">{classifLabels.com_danos}</option>
                           <option value="para_devolver">{classifLabels.para_devolver}</option>
+                          <option value="para_realizar">{classifLabels.para_realizar}</option>
                         </select>
                       </div>
                       {semFichasFiltrados.length === 0 ? (
@@ -4365,6 +4422,8 @@ export default function PortalLoja() {
                                     <option value="usado">{classifLabels.usado}</option>
                                     <option value="com_danos">{classifLabels.com_danos}</option>
                                     <option value="para_devolver">{classifLabels.para_devolver}</option>
+                                    <option value="para_realizar">{classifLabels.para_realizar}</option>
+                                    <option value="com_ficha_servico">{classifLabels.com_ficha_servico}</option>
                                   </select>
                                 </div>
                               </div>

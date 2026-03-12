@@ -12775,7 +12775,7 @@ export async function classificarEurocode(data: {
   lojaId: number;
   eurocode: string;
   unitIndex: number; // 1, 2, 3... para cada unidade individual
-  classificacao: 'devolucao_rejeitada' | 'usado' | 'com_danos' | 'para_devolver';
+  classificacao: 'devolucao_rejeitada' | 'usado' | 'com_danos' | 'para_devolver' | 'para_realizar' | 'com_ficha_servico';
   analiseId: number;
 }) {
   const db = await getDb();

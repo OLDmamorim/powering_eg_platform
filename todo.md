@@ -834,3 +834,8 @@
 ## Bug: Total Stock não bate com Sem Fichas + Com Fichas
 - [x] Investigar porque 40 + 31 = 71 mas Total Stock = 68 em Braga minho center - causa: KPI Sem Fichas usava itens desmultiplicados (unidades) mas Total Stock contava linhas
 - [x] Corrigir cálculo para que Total = Sem Fichas + Com Fichas - KPI agora usa totalSemFichas (linhas), com indicação de unidades quando diferente
+
+## Novas opções de classificação no Controlo de Stock
+- [x] Adicionar opção "P/Realizar" ao dropdown de classificação dos itens Sem Fichas
+- [x] Adicionar opção "C/Ficha de Serviço" ao dropdown - ao seleccionar, o eurocode passa para a listagem Com Fichas
+- [x] Actualizar portal da loja com as mesmas opções (incluindo lógica de mover para Com Fichas)

@@ -5841,11 +5841,11 @@ IMPORTANTE:
         lojaId: z.number(),
         eurocode: z.string(),
         unitIndex: z.number().default(1),
-        classificacao: z.enum(['devolucao_rejeitada', 'usado', 'com_danos', 'para_devolver']),
+        classificacao: z.enum(['devolucao_rejeitada', 'usado', 'com_danos', 'para_devolver', 'para_realizar', 'com_ficha_servico']),
         analiseId: z.number(),
       }))
       .mutation(async ({ input }) => {
-        const auth = await db.validarTokenLoja(input.token);
+        // Verificar token da lojadarTokenLoja(input.token);
         if (!auth) {
           throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
         }
@@ -12847,7 +12847,7 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
         lojaId: z.number(),
         eurocode: z.string(),
         unitIndex: z.number().default(1), // Índice da unidade (1, 2, 3...)
-        classificacao: z.enum(['devolucao_rejeitada', 'usado', 'com_danos', 'para_devolver']),
+        classificacao: z.enum(['devolucao_rejeitada', 'usado', 'com_danos', 'para_devolver', 'para_realizar', 'com_ficha_servico']),
         analiseId: z.number(),
       }))
       .mutation(async ({ input }) => {
