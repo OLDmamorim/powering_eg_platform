@@ -5845,7 +5845,8 @@ IMPORTANTE:
         analiseId: z.number(),
       }))
       .mutation(async ({ input }) => {
-        // Verificar token da lojadarTokenLoja(input.token);
+        // Verificar token da loja
+        const auth = await db.validarTokenLoja(input.token);
         if (!auth) {
           throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
         }

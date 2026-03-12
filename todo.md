@@ -839,3 +839,7 @@
 - [x] Adicionar opção "P/Realizar" ao dropdown de classificação dos itens Sem Fichas
 - [x] Adicionar opção "C/Ficha de Serviço" ao dropdown - ao seleccionar, o eurocode passa para a listagem Com Fichas
 - [x] Actualizar portal da loja com as mesmas opções (incluindo lógica de mover para Com Fichas)
+
+## Bug: "auth is not defined" ao classificar stock com novos status
+- [x] Investigar erro "auth is not defined" - causa: função validarTokenLoja não era chamada correctamente (resultado não guardado em variável auth)
+- [x] Corrigir: `const auth = await db.validarTokenLoja(input.token);`
