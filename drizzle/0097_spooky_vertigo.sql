@@ -1,0 +1,1 @@
+ALTER TABLE `analises_stock` ADD `batchId` varchar(100);

@@ -12452,8 +12452,9 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
         if (!gestorId && ctx.user.role !== 'admin') throw new TRPCError({ code: 'FORBIDDEN', message: 'Gestor não encontrado' });
         const isAdmin = ctx.user.role === 'admin';
 
-        // Gerar jobId e retornar imediatamente
+        // Gerar jobId e batchId e retornar imediatamente
         const jobId = `stock_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+        const batchId = `batch_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
         await db.createBackgroundJob(jobId);
 
         // Processar em background (não await)
@@ -12607,6 +12608,7 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
                 gestorId: gestorDaLoja || gestorId || 0,
                 lojaId: loja.id,
                 nomeLoja: loja.nome,
+                batchId,
                 totalItensStock: itens.length,
                 totalComFichas: comFichas.length,
                 totalSemFichas: semFichas.length,

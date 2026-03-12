@@ -13040,9 +13040,10 @@ export async function getBatchesStock(gestorId: number) {
   const db = await getDb();
   if (!db) return [];
   
+  // Agrupar por batchId se disponível, senão fallback para DATE_FORMAT por minuto
   const result = await db.execute(sql`
     SELECT 
-      DATE_FORMAT(createdAt, '%Y-%m-%d %H:%i') as batchTime,
+      COALESCE(batchId, DATE_FORMAT(createdAt, '%Y-%m-%d %H:%i')) as batchTime,
       MIN(createdAt) as createdAt,
       COUNT(*) as totalAnalises,
       COUNT(DISTINCT nomeLoja) as totalLojas,
@@ -13052,8 +13053,8 @@ export async function getBatchesStock(gestorId: number) {
       GROUP_CONCAT(DISTINCT id ORDER BY id) as ids
     FROM analises_stock
     WHERE gestorId = ${gestorId}
-    GROUP BY DATE_FORMAT(createdAt, '%Y-%m-%d %H:%i')
-    ORDER BY batchTime DESC
+    GROUP BY COALESCE(batchId, DATE_FORMAT(createdAt, '%Y-%m-%d %H:%i'))
+    ORDER BY createdAt DESC
   `);
   
   return (result.rows || result[0] || []) as Array<{
@@ -13075,9 +13076,10 @@ export async function getBatchesStockAdmin() {
   const db = await getDb();
   if (!db) return [];
   
+  // Agrupar por batchId se disponível, senão fallback para DATE_FORMAT por minuto
   const result = await db.execute(sql`
     SELECT 
-      DATE_FORMAT(createdAt, '%Y-%m-%d %H:%i') as batchTime,
+      COALESCE(batchId, DATE_FORMAT(createdAt, '%Y-%m-%d %H:%i')) as batchTime,
       MIN(createdAt) as createdAt,
       COUNT(*) as totalAnalises,
       COUNT(DISTINCT nomeLoja) as totalLojas,
@@ -13087,8 +13089,8 @@ export async function getBatchesStockAdmin() {
       GROUP_CONCAT(DISTINCT gestorId) as gestorIds,
       GROUP_CONCAT(DISTINCT id ORDER BY id) as ids
     FROM analises_stock
-    GROUP BY DATE_FORMAT(createdAt, '%Y-%m-%d %H:%i')
-    ORDER BY batchTime DESC
+    GROUP BY COALESCE(batchId, DATE_FORMAT(createdAt, '%Y-%m-%d %H:%i'))
+    ORDER BY createdAt DESC
   `);
   
   return (result.rows || result[0] || []) as Array<{
@@ -13111,17 +13113,18 @@ export async function eliminarBatchStock(batchTime: string, gestorId?: number) {
   const db = await getDb();
   if (!db) return 0;
   
+  // batchTime pode ser um batchId (batch_...) ou um timestamp formatado (fallback antigo)
   if (gestorId) {
     const result = await db.execute(sql`
       DELETE FROM analises_stock 
-      WHERE DATE_FORMAT(createdAt, '%Y-%m-%d %H:%i') = ${batchTime}
+      WHERE (batchId = ${batchTime} OR (batchId IS NULL AND DATE_FORMAT(createdAt, '%Y-%m-%d %H:%i') = ${batchTime}))
       AND gestorId = ${gestorId}
     `);
     return (result.rows || result[0] || { affectedRows: 0 }) as any;
   } else {
     const result = await db.execute(sql`
       DELETE FROM analises_stock 
-      WHERE DATE_FORMAT(createdAt, '%Y-%m-%d %H:%i') = ${batchTime}
+      WHERE (batchId = ${batchTime} OR (batchId IS NULL AND DATE_FORMAT(createdAt, '%Y-%m-%d %H:%i') = ${batchTime}))
     `);
     return (result.rows || result[0] || { affectedRows: 0 }) as any;
   }
@@ -13134,9 +13137,10 @@ export async function getAnalisesByBatchTime(batchTime: string, gestorId?: numbe
   const db = await getDb();
   if (!db) return [];
   
+  // batchTime pode ser um batchId (batch_...) ou um timestamp formatado (fallback antigo)
   const condition = gestorId
-    ? sql`DATE_FORMAT(createdAt, '%Y-%m-%d %H:%i') = ${batchTime} AND gestorId = ${gestorId}`
-    : sql`DATE_FORMAT(createdAt, '%Y-%m-%d %H:%i') = ${batchTime}`;
+    ? sql`(batchId = ${batchTime} OR (batchId IS NULL AND DATE_FORMAT(createdAt, '%Y-%m-%d %H:%i') = ${batchTime})) AND gestorId = ${gestorId}`
+    : sql`(batchId = ${batchTime} OR (batchId IS NULL AND DATE_FORMAT(createdAt, '%Y-%m-%d %H:%i') = ${batchTime}))`;
   
   const result = await db.select()
     .from(analisesStock)

@@ -1686,6 +1686,7 @@ export const analisesStock = mysqlTable("analises_stock", {
   gestorId: int("gestorId").notNull(), // FK para gestores.id
   lojaId: int("lojaId"), // FK para lojas.id (pode ser null se análise geral)
   nomeLoja: varchar("nomeLoja", { length: 255 }),
+  batchId: varchar("batchId", { length: 100 }), // Identificador único do upload/batch para agrupar análises do mesmo upload
   
   // Dados da análise
   totalItensStock: int("totalItensStock").notNull().default(0),

@@ -1,0 +1,46 @@
+{
+  "query": "SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'analises_stock' ORDER BY ORDINAL_POSITION;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'analises_stock' ORDER BY ORDINAL_POSITION;",
+  "rows": [
+    {
+      "COLUMN_NAME": "id"
+    },
+    {
+      "COLUMN_NAME": "gestorId"
+    },
+    {
+      "COLUMN_NAME": "lojaId"
+    },
+    {
+      "COLUMN_NAME": "nomeLoja"
+    },
+    {
+      "COLUMN_NAME": "totalItensStock"
+    },
+    {
+      "COLUMN_NAME": "totalComFichas"
+    },
+    {
+      "COLUMN_NAME": "totalSemFichas"
+    },
+    {
+      "COLUMN_NAME": "totalFichasSemStock"
+    },
+    {
+      "COLUMN_NAME": "dadosStock"
+    },
+    {
+      "COLUMN_NAME": "resultadoAnalise"
+    },
+    {
+      "COLUMN_NAME": "analiseIdFichas"
+    },
+    {
+      "COLUMN_NAME": "createdAt"
+    }
+  ],
+  "messages": [],
+  "stdout": "COLUMN_NAME\nid\ngestorId\nlojaId\nnomeLoja\ntotalItensStock\ntotalComFichas\ntotalSemFichas\ntotalFichasSemStock\ndadosStock\nresultadoAnalise\nanaliseIdFichas\ncreatedAt\n",
+  "stderr": "",
+  "execution_time_ms": 71
+}

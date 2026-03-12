@@ -826,3 +826,7 @@
 - [ ] Investigar gravação de nome e contacto do senhorio na loja de Famalicão
 - [ ] Corrigir se necessário
 - [x] Análise de stock: garantir que eurocodes de TODAS as fichas (todos os status) são usados no cruzamento com stock
+
+## Bug: Análise de stock só mostra 10 lojas em vez de 14
+- [x] Investigar porque a análise de stock de 12/03 só analisou 10 lojas (a anterior tinha 14) - causa: agrupamento por minuto (DATE_FORMAT) dividia uploads longos
+- [x] Corrigir o problema - adicionado campo batchId à tabela analises_stock + migração retroactiva de dados existentes
