@@ -4190,6 +4190,28 @@ export default function PortalLoja() {
               });
               const desmultiplicados = desmultiplicadosTodos;
 
+              // Contagem de LINHAS reclassificadas como com_ficha_servico (para KPIs consistentes)
+              let linhasComFichaServicoPortal = 0;
+              semFichasItems.forEach((item: any) => {
+                const ref = item.ref?.toUpperCase()?.trim();
+                const qty = item.quantidade || 1;
+                let algumReclassificado = false;
+                for (let i = 1; i <= qty; i++) {
+                  const key = `${ref}_${i}`;
+                  const classif = classificacoesMap.get(key);
+                  if (classif?.classificacao === 'com_ficha_servico') {
+                    algumReclassificado = true;
+                    break;
+                  }
+                }
+                if (algumReclassificado) linhasComFichaServicoPortal++;
+              });
+
+              // KPIs baseados em linhas (consistentes)
+              const kpiTotal = comFichasItems.length + semFichasItems.length;
+              const kpiSemFichas = semFichasItems.length - linhasComFichaServicoPortal;
+              const kpiComFichas = comFichasItems.length + linhasComFichaServicoPortal;
+
               const classifLabels: Record<string, string> = {
                 devolucao_rejeitada: language === 'pt' ? 'Devolução Rejeitada' : 'Return Rejected',
                 usado: language === 'pt' ? 'Usado' : 'Used',
@@ -4224,15 +4246,15 @@ export default function PortalLoja() {
                   {/* Cards resumo clicaveis como filtro */}
                   <div className="grid grid-cols-3 gap-2">
                     <div onClick={() => setStockTabFilter('todos')} className={`text-center p-2 rounded-lg cursor-pointer transition-all ${stockTabFilter === 'todos' ? 'bg-blue-100 ring-2 ring-blue-400' : 'bg-blue-50 hover:bg-blue-100'}`}>
-                      <div className="text-lg font-bold text-blue-700">{detalheStock.totalItensStock}</div>
+                      <div className="text-lg font-bold text-blue-700">{kpiTotal}</div>
                       <div className="text-[10px] text-blue-600">Total</div>
                     </div>
                     <div onClick={() => setStockTabFilter('semFichas')} className={`text-center p-2 rounded-lg cursor-pointer transition-all ${stockTabFilter === 'semFichas' ? 'bg-amber-100 ring-2 ring-amber-400' : 'bg-amber-50 hover:bg-amber-100'}`}>
-                      <div className="text-lg font-bold text-amber-700">{desmultiplicados.length}</div>
+                      <div className="text-lg font-bold text-amber-700">{kpiSemFichas}</div>
                       <div className="text-[10px] text-amber-600">S/ Fichas</div>
                     </div>
                     <div onClick={() => setStockTabFilter('comFichas')} className={`text-center p-2 rounded-lg cursor-pointer transition-all ${stockTabFilter === 'comFichas' ? 'bg-green-100 ring-2 ring-green-400' : 'bg-green-50 hover:bg-green-100'}`}>
-                      <div className="text-lg font-bold text-green-700">{comFichasItems.length + itensComFichaServico.length}</div>
+                      <div className="text-lg font-bold text-green-700">{kpiComFichas}</div>
                       <div className="text-[10px] text-green-600">C/ Fichas</div>
                     </div>
 

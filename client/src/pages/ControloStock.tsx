@@ -496,6 +496,28 @@ export default function ControloStock() {
     return resultado;
   }, [dadosActivos?.semFichas, classificacoesMap]);
 
+  // Contagem de LINHAS (referências) reclassificadas como com_ficha_servico (para KPIs consistentes)
+  // Uma linha é considerada reclassificada se QUALQUER unidade foi classificada como com_ficha_servico
+  const linhasComFichaServico = useMemo(() => {
+    if (!dadosActivos?.semFichas) return 0;
+    let count = 0;
+    for (const item of dadosActivos.semFichas) {
+      const ref = item.ref?.toUpperCase()?.trim();
+      const qty = item.quantidade || 1;
+      let algumReclassificado = false;
+      for (let i = 1; i <= qty; i++) {
+        const key = `${ref}|${i}`;
+        const classif = classificacoesMap.get(key);
+        if (classif?.classificacao === 'com_ficha_servico') {
+          algumReclassificado = true;
+          break;
+        }
+      }
+      if (algumReclassificado) count++;
+    }
+    return count;
+  }, [dadosActivos?.semFichas, classificacoesMap]);
+
   // Nome da loja para exportação
   const nomeLoja = detalheLojaNome || detalheAnalise?.nomeLoja || 'Loja';
 
@@ -1304,7 +1326,7 @@ export default function ControloStock() {
                 <CardContent className="pt-3 pb-3 md:pt-4 md:pb-4 text-center px-1 md:px-4">
                   <Package className="h-4 w-4 md:h-6 md:w-6 mx-auto text-blue-600 mb-0.5" />
                   <div className="text-lg md:text-2xl font-bold text-blue-700">
-                    {dadosActivos.totalItensStock ?? (dadosActivos.comFichas?.length || 0) + (dadosActivos.semFichas?.length || 0)}
+                    {(dadosActivos.comFichas?.length || 0) + (dadosActivos.semFichas?.length || 0)}
                   </div>
                   <div className="text-[10px] md:text-xs text-muted-foreground leading-tight">Total Stock</div>
                 </CardContent>
@@ -1313,7 +1335,7 @@ export default function ControloStock() {
                 <CardContent className="pt-3 pb-3 md:pt-4 md:pb-4 text-center px-1 md:px-4">
                   <XCircle className="h-4 w-4 md:h-6 md:w-6 mx-auto text-amber-600 mb-0.5" />
                   <div className="text-lg md:text-2xl font-bold text-amber-700">
-                    {(dadosActivos.totalSemFichas ?? dadosActivos.semFichas?.length ?? 0) - itensComFichaServico.length}
+                    {(dadosActivos.semFichas?.length ?? 0) - linhasComFichaServico}
                   </div>
                   <div className="text-[10px] md:text-xs text-muted-foreground leading-tight">Sem Fichas</div>
                 </CardContent>
@@ -1322,7 +1344,7 @@ export default function ControloStock() {
                 <CardContent className="pt-3 pb-3 md:pt-4 md:pb-4 text-center px-1 md:px-4">
                   <CheckCircle2 className="h-4 w-4 md:h-6 md:w-6 mx-auto text-green-600 mb-0.5" />
                   <div className="text-lg md:text-2xl font-bold text-green-700">
-                    {(dadosActivos.totalComFichas ?? dadosActivos.comFichas?.length ?? 0) + itensComFichaServico.length}
+                    {(dadosActivos.comFichas?.length ?? 0) + linhasComFichaServico}
                   </div>
                   <div className="text-[10px] md:text-xs text-muted-foreground leading-tight">Com Fichas</div>
                 </CardContent>
