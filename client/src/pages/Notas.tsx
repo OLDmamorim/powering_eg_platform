@@ -1109,9 +1109,9 @@ export default function Notas() {
 
         {/* Loading */}
         {isLoading && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {[1, 2, 3, 4].map(i => (
-              <div key={i} className="h-48 rounded-lg bg-muted animate-pulse" />
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+            {[1, 2, 3, 4, 5, 6].map(i => (
+              <div key={i} className="aspect-square rounded-lg bg-muted animate-pulse" />
             ))}
           </div>
         )}
@@ -1122,7 +1122,7 @@ export default function Notas() {
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
               Fixadas
             </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
               {notasFixadas.map((nota: any) => (
                 <NotaCard
                   key={nota.id}
@@ -1147,7 +1147,7 @@ export default function Notas() {
                 Outras
               </p>
             )}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
               {notasNormais.map((nota: any) => (
                 <NotaCard
                   key={nota.id}
@@ -1247,138 +1247,82 @@ function NotaCard({
 
   return (
     <Card
-      className="group cursor-pointer hover:shadow-md transition-shadow overflow-hidden"
+      className="group cursor-pointer hover:shadow-md transition-shadow overflow-hidden aspect-square flex flex-col justify-between relative"
       style={{ backgroundColor: cardCor }}
       onClick={onEdit}
     >
-      {/* Imagem preview */}
-      {primeiraImagem && (
-        <div className="h-32 overflow-hidden">
-          <img
-            src={primeiraImagem}
-            alt=""
-            className="w-full h-full object-cover"
-          />
+      {/* Ícone de fixada */}
+      {nota.fixada && (
+        <div className="absolute top-1.5 right-1.5">
+          <Pin className="h-3 w-3 text-foreground/50" />
         </div>
       )}
 
-      <div className="p-3 space-y-2">
-        {/* Header com pin e menu */}
-        <div className="flex items-start justify-between gap-2">
-          <h3 className="font-semibold text-sm line-clamp-2 flex-1 text-foreground">
-            {nota.titulo}
-          </h3>
-          <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-6 w-6 p-0"
-              onClick={(e) => {
-                e.stopPropagation();
-                onFixar();
-              }}
-            >
-              {nota.fixada ? (
-                <PinOff className="h-3.5 w-3.5" />
-              ) : (
-                <Pin className="h-3.5 w-3.5" />
-              )}
+      {/* Menu hover */}
+      <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+            <Button variant="ghost" size="sm" className="h-6 w-6 p-0 bg-white/60 hover:bg-white/80 rounded-full">
+              <MoreVertical className="h-3.5 w-3.5" />
             </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                  <MoreVertical className="h-3.5 w-3.5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
-                {ESTADOS_NOTAS.map(e => (
-                  <DropdownMenuItem
-                    key={e.value}
-                    onClick={() => onMudarEstado(e.value)}
-                    className={nota.estado === e.value ? "bg-muted" : ""}
-                  >
-                    <e.icon className="h-3.5 w-3.5 mr-2" />
-                    {e.label}
-                  </DropdownMenuItem>
-                ))}
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={onExportarPDF}>
-                  <FileDown className="h-3.5 w-3.5 mr-2" />
-                  Exportar PDF
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={onArquivar}>
-                  {nota.arquivada ? (
-                    <>
-                      <ArchiveRestore className="h-3.5 w-3.5 mr-2" />
-                      Desarquivar
-                    </>
-                  ) : (
-                    <>
-                      <Archive className="h-3.5 w-3.5 mr-2" />
-                      Arquivar
-                    </>
-                  )}
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={onEliminar}
-                  className="text-destructive focus:text-destructive"
-                >
-                  <Trash2 className="h-3.5 w-3.5 mr-2" />
-                  Eliminar
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
-
-        {/* Preview do conteúdo */}
-        {textoPreview && (
-          <p className="text-xs text-muted-foreground line-clamp-4">
-            {textoPreview}
-          </p>
-        )}
-
-        {/* Tags */}
-        {nota.tags && nota.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1">
-            {nota.tags.map((tag: any) => (
-              <Badge
-                key={tag.id}
-                className="text-[10px] h-5 px-1.5 text-white"
-                style={{ backgroundColor: tag.cor }}
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+            <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onFixar(); }}>
+              {nota.fixada ? <PinOff className="h-3.5 w-3.5 mr-2" /> : <Pin className="h-3.5 w-3.5 mr-2" />}
+              {nota.fixada ? "Desafixar" : "Fixar"}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            {ESTADOS_NOTAS.map(e => (
+              <DropdownMenuItem
+                key={e.value}
+                onClick={() => onMudarEstado(e.value)}
+                className={nota.estado === e.value ? "bg-muted" : ""}
               >
-                {tag.nome}
-              </Badge>
+                <e.icon className="h-3.5 w-3.5 mr-2" />
+                {e.label}
+              </DropdownMenuItem>
             ))}
-          </div>
-        )}
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={onExportarPDF}>
+              <FileDown className="h-3.5 w-3.5 mr-2" />
+              Exportar PDF
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={onArquivar}>
+              {nota.arquivada ? (
+                <><ArchiveRestore className="h-3.5 w-3.5 mr-2" />Desarquivar</>
+              ) : (
+                <><Archive className="h-3.5 w-3.5 mr-2" />Arquivar</>
+              )}
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={onEliminar}
+              className="text-destructive focus:text-destructive"
+            >
+              <Trash2 className="h-3.5 w-3.5 mr-2" />
+              Eliminar
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
 
-        {/* Footer: estado + loja + data */}
-        <div className="flex items-center justify-between pt-1">
-          <Badge variant="secondary" className={`text-[10px] h-5 ${estadoInfo.color}`}>
-            <EstadoIcon className="h-3 w-3 mr-1" />
+      <div className="p-3 flex flex-col justify-between h-full">
+        {/* Título */}
+        <h3 className="font-semibold text-sm line-clamp-3 text-foreground">
+          {nota.titulo}
+        </h3>
+
+        {/* Footer compacto: estado + loja */}
+        <div className="flex items-center justify-between mt-auto pt-2">
+          <Badge variant="secondary" className={`text-[9px] h-4 px-1 ${estadoInfo.color}`}>
+            <EstadoIcon className="h-2.5 w-2.5 mr-0.5" />
             {estadoInfo.label}
           </Badge>
-          <div className="flex items-center gap-2">
-            {nota.loja && (
-              <span className="text-[10px] text-muted-foreground flex items-center gap-1">
-                <Building2 className="h-3 w-3" />
-                {nota.loja.nome}
-              </span>
-            )}
-            <span className="text-[10px] text-muted-foreground">
-              {(() => {
-                try {
-                  const d = nota.createdAt ? new Date(nota.createdAt) : null;
-                  if (d && !isNaN(d.getTime())) {
-                    return d.toLocaleDateString("pt-PT", { day: "2-digit", month: "2-digit", year: "2-digit" });
-                  }
-                  return "";
-                } catch { return ""; }
-              })()}
+          {nota.loja && (
+            <span className="text-[9px] text-muted-foreground truncate max-w-[60%] text-right">
+              {nota.loja.nome}
             </span>
-          </div>
+          )}
         </div>
       </div>
     </Card>

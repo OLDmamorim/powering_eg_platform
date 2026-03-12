@@ -843,3 +843,7 @@
 ## Bug: "auth is not defined" ao classificar stock com novos status
 - [x] Investigar erro "auth is not defined" - causa: função validarTokenLoja não era chamada correctamente (resultado não guardado em variável auth)
 - [x] Corrigir: `const auth = await db.validarTokenLoja(input.token);`
+
+## Redesign: Cartões de notas compactos
+- [x] Redesenhar cartões de notas para formato quadrado compacto (só cor + título)
+- [x] Conteúdo completo só visível ao clicar/abrir o cartão
