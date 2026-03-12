@@ -830,3 +830,7 @@
 ## Bug: Análise de stock só mostra 10 lojas em vez de 14
 - [x] Investigar porque a análise de stock de 12/03 só analisou 10 lojas (a anterior tinha 14) - causa: agrupamento por minuto (DATE_FORMAT) dividia uploads longos
 - [x] Corrigir o problema - adicionado campo batchId à tabela analises_stock + migração retroactiva de dados existentes
+
+## Bug: Total Stock não bate com Sem Fichas + Com Fichas
+- [x] Investigar porque 40 + 31 = 71 mas Total Stock = 68 em Braga minho center - causa: KPI Sem Fichas usava itens desmultiplicados (unidades) mas Total Stock contava linhas
+- [x] Corrigir cálculo para que Total = Sem Fichas + Com Fichas - KPI agora usa totalSemFichas (linhas), com indicação de unidades quando diferente

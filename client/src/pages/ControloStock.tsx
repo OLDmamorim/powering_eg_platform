@@ -1282,9 +1282,12 @@ export default function ControloStock() {
                 <CardContent className="pt-3 pb-3 md:pt-4 md:pb-4 text-center px-1 md:px-4">
                   <XCircle className="h-4 w-4 md:h-6 md:w-6 mx-auto text-amber-600 mb-0.5" />
                   <div className="text-lg md:text-2xl font-bold text-amber-700">
-                    {semFichasDesmultiplicados.length}
+                    {dadosActivos.totalSemFichas ?? dadosActivos.semFichas?.length}
                   </div>
                   <div className="text-[10px] md:text-xs text-muted-foreground leading-tight">Sem Fichas</div>
+                  {semFichasDesmultiplicados.length !== (dadosActivos.totalSemFichas ?? dadosActivos.semFichas?.length) && (
+                    <div className="text-[9px] text-amber-500 mt-0.5">({semFichasDesmultiplicados.length} unid.)</div>
+                  )}
                 </CardContent>
               </Card>
               <Card className="border-green-200 bg-green-50/50">
