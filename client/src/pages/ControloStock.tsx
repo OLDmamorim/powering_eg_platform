@@ -247,6 +247,9 @@ export default function ControloStock() {
   const [comparacaoIds, setComparacaoIds] = useState<number[]>([]);
   const [viewComparacao, setViewComparacao] = useState(false);
 
+  // Batch seleccionado no histórico (por defeito o mais recente)
+  const [batchSelecionado, setBatchSelecionado] = useState<string | null>(null);
+
   // Queries
   const { data: infoAnalise } = trpc.stock.infoAnalise.useQuery({});
   const { data: historico } = trpc.stock.historico.useQuery({}, { enabled: view === 'historico' });
@@ -1658,7 +1661,15 @@ export default function ControloStock() {
                         const percColor = percNum >= 60 ? 'text-red-600 font-bold' : percNum >= 40 ? 'text-amber-600 font-bold' : 'text-green-600 font-bold';
                         const batchDate = new Date(batch.createdAt);
                         return (
-                          <tr key={batch.batchTime} className={`border-b hover:bg-muted/30 ${idx === 0 ? 'bg-blue-50/50' : ''}`}>
+                          <tr
+                            key={batch.batchTime}
+                            className={`border-b cursor-pointer transition-colors ${
+                              (batchSelecionado === batch.batchTime || (!batchSelecionado && idx === 0))
+                                ? 'bg-blue-100/70 ring-1 ring-inset ring-blue-300'
+                                : 'hover:bg-muted/30'
+                            }`}
+                            onClick={() => setBatchSelecionado(batch.batchTime)}
+                          >
                             <td className="py-2 px-3">
                               <div className="flex items-center gap-2">
                                 <Clock className="h-3.5 w-3.5 text-muted-foreground" />
@@ -1717,17 +1728,33 @@ export default function ControloStock() {
               </div>
             )}
 
-            {/* Store cards da análise mais recente */}
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mt-4">Análises por Loja (mais recente)</h3>
-            {!historico || historico.length === 0 ? (
-              <Card>
-                <CardContent className="py-8 text-center text-muted-foreground">
-                  Nenhuma análise de stock encontrada.
-                </CardContent>
-              </Card>
-            ) : (
+            {/* Store cards filtrados pelo batch seleccionado */}
+            {(() => {
+              const batchActivo = batchSelecionado || (batches && (batches as any[]).length > 0 ? (batches as any[])[0].batchTime : null);
+              const batchInfo = batches && batchActivo ? (batches as any[]).find((b: any) => b.batchTime === batchActivo) : null;
+              const batchDate = batchInfo ? new Date(batchInfo.createdAt) : null;
+              return (
+                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mt-4">
+                  Análises por Loja {batchDate ? `— ${batchDate.toLocaleDateString('pt-PT')} ${batchDate.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })}` : ''}
+                </h3>
+              );
+            })()}
+            {(() => {
+              const batchActivo = batchSelecionado || (batches && (batches as any[]).length > 0 ? (batches as any[])[0].batchTime : null);
+              const historicoFiltrado = historico ? (historico as any[]).filter((a: any) => {
+                if (!batchActivo) return true;
+                return a.batchId === batchActivo;
+              }) : [];
+              if (historicoFiltrado.length === 0) return (
+                <Card>
+                  <CardContent className="py-8 text-center text-muted-foreground">
+                    Nenhuma análise de stock encontrada para este upload.
+                  </CardContent>
+                </Card>
+              );
+              return (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {[...historico].sort((a: any, b: any) => {
+                {[...historicoFiltrado].sort((a: any, b: any) => {
                   const percA = a.totalItensStock > 0 ? (a.totalSemFichas / a.totalItensStock) : 0;
                   const percB = b.totalItensStock > 0 ? (b.totalSemFichas / b.totalItensStock) : 0;
                   return percB - percA;
@@ -1818,7 +1845,8 @@ export default function ControloStock() {
                   );
                 })}
               </div>
-            )}
+              );
+            })()}
           </div>
         )}
 

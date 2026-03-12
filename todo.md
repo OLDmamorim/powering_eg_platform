@@ -852,3 +852,8 @@
 - [x] No detalhe do gestor: Total=61, S/Fichas=31, C/Fichas=32 (31+32=63≡61) - corrigido: KPIs usam linhas (arrays .length)
 - [x] No portal loja: Total=61, C/Fichas=28, S/Fichas=33 - corrigido: KPIs usam linhas consistentes
 - [x] Corrigir para que Total = S/Fichas + C/Fichas em ambos os ecrãs - todos usam comFichas.length + semFichas.length como base
+
+## Melhoria: Histórico de stock como filtro para cards
+- [x] Ao clicar numa linha do histórico, os cards de lojas mostram apenas as análises desse batch
+- [x] Linha seleccionada fica destacada; por defeito selecciona o mais recente
+- [x] Remover cards duplicados de múltiplos batches
