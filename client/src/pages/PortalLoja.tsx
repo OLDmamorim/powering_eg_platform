@@ -4487,11 +4487,14 @@ export default function PortalLoja() {
               ) : (
                 <div className="space-y-3">
                   {analisesStock.map((analise: any) => {
-                    const percentComFichas = analise.totalItensStock > 0 
-                      ? Math.round((analise.totalComFichas / analise.totalItensStock) * 100) 
+                    const comFichasDisplay = analise.totalComFichasAjustado ?? analise.totalComFichas;
+                    const semFichasDisplay = analise.totalSemFichasAjustado ?? analise.totalSemFichas;
+                    const totalDisplay = comFichasDisplay + semFichasDisplay;
+                    const percentComFichas = totalDisplay > 0 
+                      ? Math.round((comFichasDisplay / totalDisplay) * 100) 
                       : 0;
-                    const percentSemFichas = analise.totalItensStock > 0 
-                      ? Math.round((analise.totalSemFichas / analise.totalItensStock) * 100) 
+                    const percentSemFichas = totalDisplay > 0 
+                      ? Math.round((semFichasDisplay / totalDisplay) * 100) 
                       : 0;
                     
                     return (
@@ -4516,15 +4519,15 @@ export default function PortalLoja() {
                           {/* Resumo em grid */}
                           <div className="grid grid-cols-3 gap-2 mb-3">
                             <div className="text-center p-2 bg-blue-50 rounded-lg">
-                              <div className="text-lg font-bold text-blue-700">{analise.totalItensStock}</div>
+                              <div className="text-lg font-bold text-blue-700">{totalDisplay}</div>
                               <div className="text-[10px] text-blue-600">Total</div>
                             </div>
                             <div className="text-center p-2 bg-green-50 rounded-lg">
-                              <div className="text-lg font-bold text-green-700">{analise.totalComFichas}</div>
+                              <div className="text-lg font-bold text-green-700">{comFichasDisplay}</div>
                               <div className="text-[10px] text-green-600">C/ Fichas</div>
                             </div>
                             <div className="text-center p-2 bg-amber-50 rounded-lg">
-                              <div className="text-lg font-bold text-amber-700">{analise.totalSemFichas}</div>
+                              <div className="text-lg font-bold text-amber-700">{semFichasDisplay}</div>
                               <div className="text-[10px] text-amber-600">S/ Fichas</div>
                             </div>
 

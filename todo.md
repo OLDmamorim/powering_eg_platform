@@ -857,3 +857,9 @@
 - [x] Ao clicar numa linha do histórico, os cards de lojas mostram apenas as análises desse batch
 - [x] Linha seleccionada fica destacada; por defeito selecciona o mais recente
 - [x] Remover cards duplicados de múltiplos batches
+
+## Bug: Inconsistência KPIs entre resumo e detalhe no portal loja
+- [x] Resumo mostra C/Fichas=28, S/Fichas=33 (valores BD) mas detalhe mostra S/Fichas=29, C/Fichas=32 (recalculado com reclassificações)
+- [x] Alinhar ambos os ecrãs para mostrar os mesmos valores (incluindo reclassificações C/Ficha de Serviço)
+- [x] Backend: getAnalisesStockPorLoja e historico agora retornam totalComFichasAjustado e totalSemFichasAjustado
+- [x] Frontend: ControloStock.tsx e PortalLoja.tsx usam valores ajustados em resumo, cards e barras de progresso

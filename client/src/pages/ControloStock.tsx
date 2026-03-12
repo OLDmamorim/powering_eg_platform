@@ -946,12 +946,14 @@ export default function ControloStock() {
                     </h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                       {analises && [...analises].sort((a: any, b: any) => {
-                        const percA = a.totalItensStock > 0 ? (a.totalSemFichas / a.totalItensStock) : 0;
-                        const percB = b.totalItensStock > 0 ? (b.totalSemFichas / b.totalItensStock) : 0;
+                        const percA = a.totalItensStock > 0 ? ((a.totalSemFichasAjustado ?? a.totalSemFichas) / a.totalItensStock) : 0;
+                        const percB = b.totalItensStock > 0 ? ((b.totalSemFichasAjustado ?? b.totalSemFichas) / b.totalItensStock) : 0;
                         return percB - percA;
                       }).map((loja: any) => {
-                        const lojaSemFichasPercent = loja.totalItensStock > 0 ? ((loja.totalSemFichas / loja.totalItensStock) * 100).toFixed(0) : '0';
-                        const lojaPercent = loja.totalItensStock > 0 ? ((loja.totalComFichas / loja.totalItensStock) * 100).toFixed(0) : '0';
+                        const semFichasVal = loja.totalSemFichasAjustado ?? loja.totalSemFichas;
+                        const comFichasVal = loja.totalComFichasAjustado ?? loja.totalComFichas;
+                        const lojaSemFichasPercent = loja.totalItensStock > 0 ? ((semFichasVal / loja.totalItensStock) * 100).toFixed(0) : '0';
+                        const lojaPercent = loja.totalItensStock > 0 ? ((comFichasVal / loja.totalItensStock) * 100).toFixed(0) : '0';
                         const semFichasNum = parseInt(lojaSemFichasPercent);
                         const badgeColor = semFichasNum >= 60 ? 'bg-red-100 text-red-700 border-red-300' : semFichasNum >= 40 ? 'bg-amber-100 text-amber-700 border-amber-300' : 'bg-green-100 text-green-700 border-green-300';
                         return (
@@ -986,11 +988,11 @@ export default function ControloStock() {
                                 </div>
                                 <div className="flex items-center justify-between">
                                   <span className="text-muted-foreground">Sem Fichas:</span>
-                                  <span className="font-medium text-amber-600">{loja.totalSemFichas}</span>
+                                  <span className="font-medium text-amber-600">{loja.totalSemFichasAjustado ?? loja.totalSemFichas}</span>
                                 </div>
                                 <div className="flex items-center justify-between">
                                   <span className="text-muted-foreground">Com Fichas:</span>
-                                  <span className="font-medium text-green-600">{loja.totalComFichas}</span>
+                                  <span className="font-medium text-green-600">{loja.totalComFichasAjustado ?? loja.totalComFichas}</span>
                                 </div>
 
                               </div>
@@ -998,7 +1000,7 @@ export default function ControloStock() {
                               <div className="mt-2">
                                 <div className="h-1.5 rounded-full overflow-hidden flex bg-gray-200">
                                   <div className="bg-green-500" style={{ width: `${lojaPercent}%` }} />
-                                  <div className="bg-amber-500" style={{ width: `${loja.totalItensStock > 0 ? ((loja.totalSemFichas / loja.totalItensStock) * 100).toFixed(0) : 0}%` }} />
+                                  <div className="bg-amber-500" style={{ width: `${loja.totalItensStock > 0 ? (((loja.totalSemFichasAjustado ?? loja.totalSemFichas) / loja.totalItensStock) * 100).toFixed(0) : 0}%` }} />
                                 </div>
                               </div>
                               <div className="flex items-center justify-between mt-2 pt-2 border-t">
@@ -1755,12 +1757,15 @@ export default function ControloStock() {
               return (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {[...historicoFiltrado].sort((a: any, b: any) => {
-                  const percA = a.totalItensStock > 0 ? (a.totalSemFichas / a.totalItensStock) : 0;
-                  const percB = b.totalItensStock > 0 ? (b.totalSemFichas / b.totalItensStock) : 0;
+                  const percA = a.totalItensStock > 0 ? ((a.totalSemFichasAjustado ?? a.totalSemFichas) / a.totalItensStock) : 0;
+                  const percB = b.totalItensStock > 0 ? ((b.totalSemFichasAjustado ?? b.totalSemFichas) / b.totalItensStock) : 0;
                   return percB - percA;
                 }).map((analise: any) => {
-                  const percentComFichas = analise.totalItensStock > 0 ? ((analise.totalComFichas / analise.totalItensStock) * 100).toFixed(0) : '0';
-                  const percentSemFichas = analise.totalItensStock > 0 ? ((analise.totalSemFichas / analise.totalItensStock) * 100).toFixed(0) : '0';
+                   const comFichasH = analise.totalComFichasAjustado ?? analise.totalComFichas;
+                   const semFichasH = analise.totalSemFichasAjustado ?? analise.totalSemFichas;
+                   const totalH = comFichasH + semFichasH;
+                   const percentComFichas = totalH > 0 ? ((comFichasH / totalH) * 100).toFixed(0) : '0';
+                   const percentSemFichas = totalH > 0 ? ((semFichasH / totalH) * 100).toFixed(0) : '0';
                   const semFichasNumH = parseInt(percentSemFichas);
                   const badgeColorH = semFichasNumH >= 60 ? 'bg-red-100 text-red-700 border-red-300' : semFichasNumH >= 40 ? 'bg-amber-100 text-amber-700 border-amber-300' : 'bg-green-100 text-green-700 border-green-300';
                   return (
@@ -1815,12 +1820,12 @@ export default function ControloStock() {
                             <span className="font-bold text-blue-700">{analise.totalItensStock}</span>
                           </div>
                           <div className="flex items-center justify-between">
-                            <span className="text-muted-foreground">Sem Fichas:</span>
-                            <span className="font-medium text-amber-600">{analise.totalSemFichas}</span>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-muted-foreground">Com Fichas:</span>
-                            <span className="font-medium text-green-600">{analise.totalComFichas}</span>
+                             <span className="text-muted-foreground">Sem Fichas:</span>
+                             <span className="font-medium text-amber-600">{semFichasH}</span>
+                           </div>
+                           <div className="flex items-center justify-between">
+                             <span className="text-muted-foreground">Com Fichas:</span>
+                             <span className="font-medium text-green-600">{comFichasH}</span>
                           </div>
 
                         </div>

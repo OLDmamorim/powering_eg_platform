@@ -5793,7 +5793,22 @@ IMPORTANTE:
           }
         }
         
-        return await db.getAnalisesStockPorLoja(lojaIdParaConsulta, input.limite || 5);
+        const analises = await db.getAnalisesStockPorLoja(lojaIdParaConsulta, input.limite || 5);
+        
+        // Obter classificações com_ficha_servico para ajustar KPIs
+        const classificacoes = await db.getClassificacoesEurocode(lojaIdParaConsulta);
+        const linhasComFichaServico = new Set(
+          classificacoes
+            .filter((c: any) => c.classificacao === 'com_ficha_servico')
+            .map((c: any) => c.eurocode)
+        ).size;
+        
+        return analises.map((a: any) => ({
+          ...a,
+          // Ajustar KPIs com reclassificações
+          totalComFichasAjustado: a.totalComFichas + linhasComFichaServico,
+          totalSemFichasAjustado: Math.max(0, a.totalSemFichas - linhasComFichaServico),
+        }));
       }),
 
     // Obter detalhe de uma análise de stock (para o portal da loja)
@@ -12396,7 +12411,28 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
         }
         if (!gestorId) throw new TRPCError({ code: 'FORBIDDEN', message: 'Gestor não encontrado' });
         
-        return db.getAnalisesStock(gestorId, 20);
+        const analises = await db.getAnalisesStock(gestorId, 20);
+        
+        // Obter reclassificações com_ficha_servico por loja para ajustar KPIs
+        const lojaIds = Array.from(new Set(analises.map((a: any) => a.lojaId)));
+        const reclassificacoesPorLoja: Record<number, number> = {};
+        for (const lojaId of lojaIds) {
+          const classificacoes = await db.getClassificacoesEurocode(lojaId as number);
+          reclassificacoesPorLoja[lojaId as number] = new Set(
+            classificacoes
+              .filter((c: any) => c.classificacao === 'com_ficha_servico')
+              .map((c: any) => c.eurocode)
+          ).size;
+        }
+        
+        return analises.map((a: any) => {
+          const reclassificadas = reclassificacoesPorLoja[a.lojaId] || 0;
+          return {
+            ...a,
+            totalComFichasAjustado: a.totalComFichas + reclassificadas,
+            totalSemFichasAjustado: Math.max(0, a.totalSemFichas - reclassificadas),
+          };
+        });
       }),
 
     // Obter detalhe de uma análise de stock
