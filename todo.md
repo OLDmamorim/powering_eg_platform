@@ -912,3 +912,7 @@
 - [x] Modal de detalhe da nota tem agora fundo colorido (igual ao post-it)
 - [x] Adicionada barra de formatação ao editor (bold, itálico, sublinhado, rasurado, lista pontos, lista numerada, remover formatação)
 - [x] Conteúdo renderiza HTML no modal de detalhe (dangerouslySetInnerHTML)
+
+## Bug: Notas — HTML em bruto nos cards e layout mobile
+- [ ] Cards de notas mostram HTML em bruto (tags <b>, <div>, &nbsp;) — usar dangerouslySetInnerHTML nos cards
+- [ ] Vista mobile mostra layout antigo em vez de post-its — verificar se o redesign foi aplicado correctamente
