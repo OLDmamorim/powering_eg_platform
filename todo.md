@@ -892,3 +892,7 @@
 
 ## Bug: Campo texto "Outros" aparece sempre visível
 - [x] Corrigir condição de visibilidade: o input só deve aparecer quando se selecciona "Outros" (modo de edição activo), não de forma permanente em itens já classificados
+
+## Bug: Campo "Outros" sem texto não abre input para editar
+- [x] Quando classificação é "outros" mas observacao está vazia, mostrar input automaticamente
+- [x] Quando observacao tem texto, mostrar apenas o badge com o texto personalizado

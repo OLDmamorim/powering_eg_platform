@@ -1511,7 +1511,8 @@ export default function ControloStock() {
                                 {/* Input inline para "Outros" - só mostra quando em modo de edição activo */}
                                 {(() => {
                                   const unitKey = `${item.ref?.toUpperCase()?.trim()}|${item.unitIndex}`;
-                                  return outrosPendingKey === unitKey ? (
+                                  // Mostra input quando: em modo edição activo OU classifé "outros" sem texto
+                                  return (outrosPendingKey === unitKey || (classifData?.classificacao === 'outros' && !classifData?.observacao)) ? (
                                     <div className="flex gap-1 items-center">
                                       <input
                                         type="text"
