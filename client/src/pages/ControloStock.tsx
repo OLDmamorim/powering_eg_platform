@@ -437,11 +437,11 @@ export default function ControloStock() {
 
   // Maps para lookup rápido
   const classificacoesMap = useMemo(() => {
-    const map = new Map<string, { id: number; classificacao: string }>();
+    const map = new Map<string, { id: number; classificacao: string; observacao?: string | null }>();
     if (classificacoes) {
       for (const c of classificacoes) {
         const key = `${c.eurocode.toUpperCase().trim()}|${(c as any).unitIndex || 1}`;
-        map.set(key, { id: c.id, classificacao: c.classificacao });
+        map.set(key, { id: c.id, classificacao: c.classificacao, observacao: (c as any).observacao ?? null });
       }
     }
     return map;

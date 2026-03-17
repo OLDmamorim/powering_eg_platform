@@ -885,3 +885,7 @@
 - [x] UI: ao seleccionar "Outros", mostrar input de texto inline para escrever descrição
 - [x] Exibir o texto personalizado como label da classificação no portal (em vez de "Outros")
 - [x] Actualizar export Excel para usar o texto personalizado quando classificação é "Outros"
+
+## Bug: Texto "Outros" não grava
+- [x] Corrigir lógica de gravação do texto personalizado ao clicar OK ou Enter no campo "Outros" (PortalLoja.tsx e ControloStock.tsx)
+- [x] Bug: classificacoesMap no ControloStock.tsx não incluía campo observacao — corrigido
