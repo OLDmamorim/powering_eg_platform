@@ -11950,7 +11950,8 @@ IMPORTANTE:
         token: z.string(),
         titulo: z.string().min(1),
         conteudo: z.string().optional(),
-        tema: z.enum(['stock', 'procedimentos', 'administrativo', 'recursos_humanos', 'ausencias', 'reunioes', 'clientes', 'geral']),
+        tema: z.enum(['stock', 'procedimentos', 'administrativo', 'recursos_humanos', 'ausencias', 'reunioes', 'clientes', 'geral']).optional(),
+        cor: z.string().max(20).optional(), // Cor hex livre
       }))
       .mutation(async ({ input }) => {
         const auth = await db.validarTokenLoja(input.token);
@@ -11959,7 +11960,8 @@ IMPORTANTE:
           lojaId: auth.loja.id,
           titulo: input.titulo,
           conteudo: input.conteudo,
-          tema: input.tema,
+          tema: input.tema || 'geral',
+          cor: input.cor,
           criadoPor: auth.loja.nome,
         });
         return { id };
@@ -11973,6 +11975,7 @@ IMPORTANTE:
         titulo: z.string().optional(),
         conteudo: z.string().optional(),
         tema: z.enum(['stock', 'procedimentos', 'administrativo', 'recursos_humanos', 'ausencias', 'reunioes', 'clientes', 'geral']).optional(),
+        cor: z.string().max(20).optional(), // Cor hex livre
         fixada: z.boolean().optional(),
         arquivada: z.boolean().optional(),
       }))

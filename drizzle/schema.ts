@@ -1774,6 +1774,7 @@ export const notasLoja = mysqlTable("notas_loja", {
     "clientes",
     "geral"
   ]).notNull().default("geral"),
+  cor: varchar("cor", { length: 20 }).default("#fbbf24"), // Cor hex livre escolhida pelo utilizador
   fixada: boolean("fixada").default(false).notNull(),
   arquivada: boolean("arquivada").default(false).notNull(),
   criadoPor: varchar("criadoPor", { length: 255 }), // Nome de quem criou (token da loja)

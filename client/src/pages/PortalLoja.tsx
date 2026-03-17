@@ -261,6 +261,8 @@ export default function PortalLoja() {
   const [notaTitulo, setNotaTitulo] = useState("");
   const [notaConteudo, setNotaConteudo] = useState("");
   const [notaTema, setNotaTema] = useState<'stock' | 'procedimentos' | 'administrativo' | 'recursos_humanos' | 'ausencias' | 'reunioes' | 'clientes' | 'geral'>('geral');
+  const [notaCor, setNotaCor] = useState<string>('#fbbf24'); // Cor hex livre
+  const [notaDetalheId, setNotaDetalheId] = useState<number | null>(null); // ID da nota aberta em detalhe
   const [notaEliminarId, setNotaEliminarId] = useState<number | null>(null);
   const [incluirNotasArquivadas, setIncluirNotasArquivadas] = useState(false);
   const dashboardRef = useRef<HTMLDivElement>(null);
@@ -4727,6 +4729,7 @@ export default function PortalLoja() {
                   setNotaTitulo('');
                   setNotaConteudo('');
                   setNotaTema('geral');
+                  setNotaCor('#fbbf24');
                   setNotaModalOpen(true);
                 }}
                 className="bg-amber-500 hover:bg-amber-600 text-white"
@@ -4738,94 +4741,118 @@ export default function PortalLoja() {
             </div>
           </div>
 
-          {/* Grid de notas */}
+          {/* Grelha de post-its */}
           {!notasLoja || notasLoja.length === 0 ? (
-            <Card className="p-8 text-center text-muted-foreground">
-              <FileText className="h-12 w-12 mx-auto mb-3 opacity-30" />
+            <div className="flex flex-col items-center justify-center py-16 text-center text-muted-foreground">
+              <FileText className="h-12 w-12 mb-3 opacity-30" />
               <p className="font-medium">{language === 'pt' ? 'Ainda não há notas' : 'No notes yet'}</p>
               <p className="text-sm mt-1">{language === 'pt' ? 'Crie a primeira nota para procedimentos, lembretes ou informações importantes.' : 'Create the first note for procedures, reminders or important information.'}</p>
-            </Card>
+            </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="flex flex-wrap gap-3">
               {notasLoja.map((nota: any) => {
-                const TEMAS: Record<string, { label: string; bg: string; border: string; badge: string }> = {
-                  stock:            { label: 'Stock',           bg: 'bg-slate-50',   border: 'border-l-slate-500',   badge: 'bg-slate-100 text-slate-700' },
-                  procedimentos:    { label: 'Procedimentos',  bg: 'bg-blue-50',    border: 'border-l-blue-500',    badge: 'bg-blue-100 text-blue-700' },
-                  administrativo:   { label: 'Administrativo', bg: 'bg-purple-50',  border: 'border-l-purple-500',  badge: 'bg-purple-100 text-purple-700' },
-                  recursos_humanos: { label: 'Recursos Humanos', bg: 'bg-green-50', border: 'border-l-green-500',   badge: 'bg-green-100 text-green-700' },
-                  ausencias:        { label: 'Ausências',       bg: 'bg-orange-50',  border: 'border-l-orange-500',  badge: 'bg-orange-100 text-orange-700' },
-                  reunioes:         { label: 'Reuniões',        bg: 'bg-indigo-50',  border: 'border-l-indigo-500',  badge: 'bg-indigo-100 text-indigo-700' },
-                  clientes:         { label: 'Clientes',        bg: 'bg-pink-50',    border: 'border-l-pink-500',    badge: 'bg-pink-100 text-pink-700' },
-                  geral:            { label: 'Geral',           bg: 'bg-amber-50',   border: 'border-l-amber-400',   badge: 'bg-amber-100 text-amber-700' },
+                const cor = nota.cor || '#fbbf24';
+                // Converter hex para rgba com opacidade para o fundo
+                const hexToRgba = (hex: string, alpha: number) => {
+                  const r = parseInt(hex.slice(1,3), 16);
+                  const g = parseInt(hex.slice(3,5), 16);
+                  const b = parseInt(hex.slice(5,7), 16);
+                  return `rgba(${r},${g},${b},${alpha})`;
                 };
-                const tema = TEMAS[nota.tema] || TEMAS.geral;
                 return (
-                  <Card
+                  <div
                     key={nota.id}
-                    className={`border-l-4 ${tema.border} ${tema.bg} ${nota.arquivada ? 'opacity-60' : ''} relative`}
+                    onClick={() => setNotaDetalheId(nota.id)}
+                    className={`relative cursor-pointer select-none rounded-lg shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all ${nota.arquivada ? 'opacity-50' : ''}`}
+                    style={{
+                      width: '140px',
+                      minHeight: '120px',
+                      backgroundColor: hexToRgba(cor, 0.85),
+                      borderTop: `4px solid ${cor}`,
+                    }}
                   >
-                    <CardContent className="p-4">
-                      {/* Header da nota */}
-                      <div className="flex items-start justify-between gap-2 mb-2">
-                        <div className="flex items-center gap-2 flex-1 min-w-0">
-                          {nota.fixada && <Star className="h-4 w-4 text-amber-500 flex-shrink-0" fill="currentColor" />}
-                          <h3 className="font-semibold text-sm leading-tight truncate">{nota.titulo}</h3>
-                        </div>
-                        <div className="flex items-center gap-1 flex-shrink-0">
-                          <button
-                            onClick={() => fixarNotaMutation.mutate({ token, id: nota.id, fixada: !nota.fixada })}
-                            className="p-1 rounded hover:bg-black/10 transition-colors"
-                            title={nota.fixada ? 'Desafixar' : 'Fixar'}
-                          >
-                            <Star className={`h-3.5 w-3.5 ${nota.fixada ? 'text-amber-500' : 'text-gray-400'}`} fill={nota.fixada ? 'currentColor' : 'none'} />
-                          </button>
-                          <button
-                            onClick={() => {
-                              setNotaEditando(nota);
-                              setNotaTitulo(nota.titulo);
-                              setNotaConteudo(nota.conteudo || '');
-                              setNotaTema(nota.tema);
-                              setNotaModalOpen(true);
-                            }}
-                            className="p-1 rounded hover:bg-black/10 transition-colors"
-                            title="Editar"
-                          >
-                            <Pencil className="h-3.5 w-3.5 text-gray-500" />
-                          </button>
-                          <button
-                            onClick={() => setNotaEliminarId(nota.id)}
-                            className="p-1 rounded hover:bg-red-100 transition-colors"
-                            title="Eliminar"
-                          >
-                            <Trash2 className="h-3.5 w-3.5 text-red-400" />
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Conteúdo */}
-                      {nota.conteudo && (
-                        <p className="text-sm text-gray-600 whitespace-pre-wrap leading-relaxed mb-3">{nota.conteudo}</p>
-                      )}
-
-                      {/* Footer: tema + data + arquivar */}
-                      <div className="flex items-center justify-between mt-2">
-                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${tema.badge}`}>{tema.label}</span>
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs text-gray-400">{new Date(nota.createdAt).toLocaleDateString('pt-PT')}</span>
-                          <button
-                            onClick={() => actualizarNotaMutation.mutate({ token, id: nota.id, arquivada: !nota.arquivada })}
-                            className="text-xs text-gray-400 hover:text-gray-600 underline"
-                          >
-                            {nota.arquivada ? (language === 'pt' ? 'Restaurar' : 'Restore') : (language === 'pt' ? 'Arquivar' : 'Archive')}
-                          </button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                    {/* Pin de fixada */}
+                    {nota.fixada && (
+                      <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full bg-gray-600 shadow" />
+                    )}
+                    <div className="p-3 pt-2">
+                      <p className="text-xs font-bold leading-tight text-gray-800 line-clamp-4 break-words">
+                        {nota.titulo}
+                      </p>
+                    </div>
+                    {/* Botões rápidos no hover */}
+                    <div className="absolute top-1 right-1 flex gap-0.5 opacity-0 hover:opacity-100 group-hover:opacity-100" style={{opacity: undefined}}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                    </div>
+                  </div>
                 );
               })}
             </div>
           )}
+
+          {/* Modal detalhe da nota */}
+          {notaDetalheId && (() => {
+            const nota = notasLoja?.find((n: any) => n.id === notaDetalheId);
+            if (!nota) return null;
+            const cor = nota.cor || '#fbbf24';
+            return (
+              <Dialog open={!!notaDetalheId} onOpenChange={(open) => { if (!open) setNotaDetalheId(null); }}>
+                <DialogContent className="max-w-md">
+                  <DialogHeader>
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 rounded-full flex-shrink-0" style={{ backgroundColor: cor }} />
+                      <DialogTitle className="text-base leading-tight">{nota.titulo}</DialogTitle>
+                      {nota.fixada && <Star className="h-4 w-4 text-amber-500 flex-shrink-0" fill="currentColor" />}
+                    </div>
+                  </DialogHeader>
+                  {nota.conteudo && (
+                    <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed mt-2">{nota.conteudo}</p>
+                  )}
+                  <div className="flex items-center justify-between mt-4 pt-3 border-t">
+                    <span className="text-xs text-gray-400">{new Date(nota.createdAt).toLocaleDateString('pt-PT')}</span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => { fixarNotaMutation.mutate({ token, id: nota.id, fixada: !nota.fixada }); setNotaDetalheId(null); }}
+                        className="p-1.5 rounded hover:bg-gray-100 transition-colors"
+                        title={nota.fixada ? 'Desafixar' : 'Fixar'}
+                      >
+                        <Star className={`h-4 w-4 ${nota.fixada ? 'text-amber-500' : 'text-gray-400'}`} fill={nota.fixada ? 'currentColor' : 'none'} />
+                      </button>
+                      <button
+                        onClick={() => {
+                          setNotaDetalheId(null);
+                          setNotaEditando(nota);
+                          setNotaTitulo(nota.titulo);
+                          setNotaConteudo(nota.conteudo || '');
+                          setNotaTema(nota.tema);
+                          setNotaCor(nota.cor || '#fbbf24');
+                          setNotaModalOpen(true);
+                        }}
+                        className="p-1.5 rounded hover:bg-gray-100 transition-colors"
+                        title="Editar"
+                      >
+                        <Pencil className="h-4 w-4 text-gray-500" />
+                      </button>
+                      <button
+                        onClick={() => { actualizarNotaMutation.mutate({ token, id: nota.id, arquivada: !nota.arquivada }); setNotaDetalheId(null); }}
+                        className="text-xs text-gray-400 hover:text-gray-600 underline px-1"
+                      >
+                        {nota.arquivada ? (language === 'pt' ? 'Restaurar' : 'Restore') : (language === 'pt' ? 'Arquivar' : 'Archive')}
+                      </button>
+                      <button
+                        onClick={() => { setNotaDetalheId(null); setNotaEliminarId(nota.id); }}
+                        className="p-1.5 rounded hover:bg-red-50 transition-colors"
+                        title="Eliminar"
+                      >
+                        <Trash2 className="h-4 w-4 text-red-400" />
+                      </button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            );
+          })()}
 
           {/* Modal criar/editar nota */}
           <Dialog open={notaModalOpen} onOpenChange={(open) => { if (!open) { setNotaModalOpen(false); setNotaEditando(null); } }}>
@@ -4844,22 +4871,34 @@ export default function PortalLoja() {
                   />
                 </div>
                 <div>
-                  <Label>{language === 'pt' ? 'Tema' : 'Theme'}</Label>
-                  <Select value={notaTema} onValueChange={(v: any) => setNotaTema(v)}>
-                    <SelectTrigger className="mt-1">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="stock">Stock</SelectItem>
-                      <SelectItem value="procedimentos">Procedimentos</SelectItem>
-                      <SelectItem value="administrativo">Administrativo</SelectItem>
-                      <SelectItem value="recursos_humanos">Recursos Humanos</SelectItem>
-                      <SelectItem value="ausencias">Ausências</SelectItem>
-                      <SelectItem value="reunioes">Reuniões</SelectItem>
-                      <SelectItem value="clientes">Clientes</SelectItem>
-                      <SelectItem value="geral">Geral</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label>{language === 'pt' ? 'Cor' : 'Color'}</Label>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {['#fbbf24','#f87171','#34d399','#60a5fa','#a78bfa','#f472b6','#fb923c','#4ade80','#38bdf8','#e879f9','#94a3b8','#ffffff'].map(c => (
+                      <button
+                        key={c}
+                        type="button"
+                        onClick={() => setNotaCor(c)}
+                        className={`w-7 h-7 rounded-full border-2 transition-transform hover:scale-110 ${notaCor === c ? 'border-gray-700 scale-110' : 'border-gray-300'}`}
+                        style={{ backgroundColor: c }}
+                        title={c}
+                      />
+                    ))}
+                    {/* Selector de cor personalizada */}
+                    <label className="w-7 h-7 rounded-full border-2 border-dashed border-gray-400 flex items-center justify-center cursor-pointer hover:scale-110 transition-transform" title="Cor personalizada">
+                      <span className="text-xs text-gray-500">+</span>
+                      <input type="color" value={notaCor} onChange={(e) => setNotaCor(e.target.value)} className="sr-only" />
+                    </label>
+                  </div>
+                  {/* Preview do post-it */}
+                  <div className="mt-3 flex items-center gap-3">
+                    <div
+                      className="rounded-lg shadow text-xs font-bold text-gray-800 px-3 py-2 max-w-[120px] truncate"
+                      style={{ backgroundColor: notaCor, borderTop: `3px solid ${notaCor}` }}
+                    >
+                      {notaTitulo || (language === 'pt' ? 'Pré-visualização' : 'Preview')}
+                    </div>
+                    <span className="text-xs text-gray-400">{language === 'pt' ? 'Pré-visualização' : 'Preview'}</span>
+                  </div>
                 </div>
                 <div>
                   <Label>{language === 'pt' ? 'Conteúdo' : 'Content'}</Label>
@@ -4880,9 +4919,9 @@ export default function PortalLoja() {
                   onClick={() => {
                     if (!notaTitulo.trim()) { toast.error('O título é obrigatório'); return; }
                     if (notaEditando) {
-                      actualizarNotaMutation.mutate({ token, id: notaEditando.id, titulo: notaTitulo, conteudo: notaConteudo, tema: notaTema });
+                      actualizarNotaMutation.mutate({ token, id: notaEditando.id, titulo: notaTitulo, conteudo: notaConteudo, tema: notaTema, cor: notaCor });
                     } else {
-                      criarNotaMutation.mutate({ token, titulo: notaTitulo, conteudo: notaConteudo, tema: notaTema });
+                      criarNotaMutation.mutate({ token, titulo: notaTitulo, conteudo: notaConteudo, tema: notaTema, cor: notaCor });
                     }
                   }}
                   disabled={criarNotaMutation.isPending || actualizarNotaMutation.isPending}

@@ -13212,6 +13212,7 @@ export async function criarNotaLoja(data: {
   titulo: string;
   conteudo?: string;
   tema: 'stock' | 'procedimentos' | 'administrativo' | 'recursos_humanos' | 'ausencias' | 'reunioes' | 'clientes' | 'geral';
+  cor?: string; // Cor hex livre
   criadoPor?: string;
 }) {
   const db = await getDb();
@@ -13222,6 +13223,7 @@ export async function criarNotaLoja(data: {
     titulo: data.titulo,
     conteudo: data.conteudo || null,
     tema: data.tema,
+    cor: data.cor || '#fbbf24',
     criadoPor: data.criadoPor || null,
     fixada: false,
     arquivada: false,
@@ -13236,6 +13238,7 @@ export async function actualizarNotaLoja(id: number, lojaId: number, data: {
   titulo?: string;
   conteudo?: string;
   tema?: 'stock' | 'procedimentos' | 'administrativo' | 'recursos_humanos' | 'ausencias' | 'reunioes' | 'clientes' | 'geral';
+  cor?: string; // Cor hex livre
   fixada?: boolean;
   arquivada?: boolean;
 }) {

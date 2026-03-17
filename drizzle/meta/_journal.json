@@ -715,6 +715,13 @@
       "when": 1773777164846,
       "tag": "0101_easy_mephisto",
       "breakpoints": true
+    },
+    {
+      "idx": 102,
+      "version": "5",
+      "when": 1773785760215,
+      "tag": "0102_aspiring_network",
+      "breakpoints": true
     }
   ]
 }

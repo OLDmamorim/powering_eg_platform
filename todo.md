@@ -899,3 +899,11 @@
 
 ## Bug: observacao não gravada pela loja
 - [x] Backend classificarStock (portal loja) não passava campo observacao para db.classificarEurocode — corrigido
+
+## Redesign: Notas da Loja — estilo post-it
+- [x] Adicionar campo cor (hex) à tabela notas_loja
+- [x] Migrar BD com novo campo cor
+- [x] Redesenhar UI: grelha de quadrados post-it coloridos, só título visível
+- [x] Ao clicar no quadrado, abre modal com detalhe completo
+- [x] Selector de cor livre (paleta + color picker) no formulário de criação/edição
+- [x] Preview do post-it em tempo real no formulário

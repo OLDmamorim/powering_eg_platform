@@ -1,0 +1,1 @@
+ALTER TABLE `notas_loja` ADD `cor` varchar(20) DEFAULT '#fbbf24';
