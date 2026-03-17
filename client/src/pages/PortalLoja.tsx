@@ -205,7 +205,7 @@ export default function PortalLoja() {
     }
     return null;
   });
-  const [activeTab, setActiveTab] = useState<"home" | "reuniao" | "pendentes" | "historico" | "tarefas" | "resultados" | "volante" | "agenda" | "chatbot" | "circulares" | "recepcao_vidros" | "monitor_vidros" | "analise_stock">("home");
+  const [activeTab, setActiveTab] = useState<"home" | "reuniao" | "pendentes" | "historico" | "tarefas" | "resultados" | "volante" | "agenda" | "chatbot" | "circulares" | "recepcao_vidros" | "monitor_vidros" | "analise_stock" | "notas">("home");
   const [filtroTarefas, setFiltroTarefas] = useState<"todas" | "recebidas" | "enviadas" | "internas">("todas");
   // Estado para o filtro de meses do dashboard
   const [mesesSelecionadosDashboard, setMesesSelecionadosDashboard] = useState<MesSelecionado[]>(() => {
@@ -251,6 +251,15 @@ export default function PortalLoja() {
   const [searchStockQuery, setSearchStockQuery] = useState('');
   const [analiseIA, setAnaliseIA] = useState<any>(null);
   const [gerandoAnaliseIA, setGerandoAnaliseIA] = useState(false);
+
+  // Estado para notas da loja
+  const [notaModalOpen, setNotaModalOpen] = useState(false);
+  const [notaEditando, setNotaEditando] = useState<any>(null);
+  const [notaTitulo, setNotaTitulo] = useState("");
+  const [notaConteudo, setNotaConteudo] = useState("");
+  const [notaTema, setNotaTema] = useState<'stock' | 'procedimentos' | 'administrativo' | 'recursos_humanos' | 'ausencias' | 'reunioes' | 'clientes' | 'geral'>('geral');
+  const [notaEliminarId, setNotaEliminarId] = useState<number | null>(null);
+  const [incluirNotasArquivadas, setIncluirNotasArquivadas] = useState(false);
   const dashboardRef = useRef<HTMLDivElement>(null);
   
   // Push Notifications para Loja
@@ -609,6 +618,12 @@ export default function PortalLoja() {
     { enabled: !!token && !!lojaAuth && !!analiseStockSelecionada }
   );
 
+  // Notas da loja
+  const { data: notasLoja, refetch: refetchNotasLoja } = trpc.notasLoja.listar.useQuery(
+    { token, incluirArquivadas: incluirNotasArquivadas },
+    { enabled: !!token && !!lojaAuth && activeTab === 'notas' }
+  );
+
   const trpcUtils = trpc.useUtils();
 
   // Mutation para classificar eurocode via portal da loja
@@ -628,6 +643,45 @@ export default function PortalLoja() {
       trpcUtils.reunioesQuinzenais.detalheStock.invalidate();
       toast.success(language === 'pt' ? 'Classificação removida' : 'Classification removed');
     },
+  });
+
+  // Mutations para notas da loja
+  const criarNotaMutation = trpc.notasLoja.criar.useMutation({
+    onSuccess: () => {
+      refetchNotasLoja();
+      setNotaModalOpen(false);
+      setNotaTitulo('');
+      setNotaConteudo('');
+      setNotaTema('geral');
+      toast.success('Nota criada com sucesso');
+    },
+    onError: (err: any) => toast.error(err.message || 'Erro ao criar nota'),
+  });
+
+  const actualizarNotaMutation = trpc.notasLoja.actualizar.useMutation({
+    onSuccess: () => {
+      refetchNotasLoja();
+      setNotaModalOpen(false);
+      setNotaEditando(null);
+      setNotaTitulo('');
+      setNotaConteudo('');
+      setNotaTema('geral');
+      toast.success('Nota actualizada');
+    },
+    onError: (err: any) => toast.error(err.message || 'Erro ao actualizar nota'),
+  });
+
+  const eliminarNotaMutation = trpc.notasLoja.eliminar.useMutation({
+    onSuccess: () => {
+      refetchNotasLoja();
+      setNotaEliminarId(null);
+      toast.success('Nota eliminada');
+    },
+    onError: (err: any) => toast.error(err.message || 'Erro ao eliminar nota'),
+  });
+
+  const fixarNotaMutation = trpc.notasLoja.actualizar.useMutation({
+    onSuccess: () => refetchNotasLoja(),
   });
 
   // Mutation para Análise IA
@@ -1356,6 +1410,21 @@ export default function PortalLoja() {
                     : (language === 'pt' ? 'Consultar análises de stock' : 'View stock analyses')
                   }
                 </p>
+              </CardContent>
+            </Card>
+
+            {/* Card Notas */}
+            <Card 
+              className="cursor-pointer hover:shadow-lg transition-all hover:scale-[1.02] bg-gradient-to-br from-yellow-500 to-amber-600 text-white border-0"
+              onClick={() => setActiveTab("notas")}
+            >
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <FileText className="h-10 w-10 opacity-80" />
+                  <Pencil className="h-6 w-6 opacity-60" />
+                </div>
+                <h3 className="text-xl font-bold mb-2">{language === 'pt' ? 'Notas' : 'Notes'}</h3>
+                <p className="text-sm opacity-80">{language === 'pt' ? 'Procedimentos, lembretes e notas internas' : 'Procedures, reminders and internal notes'}</p>
               </CardContent>
             </Card>
           </div>
@@ -4556,6 +4625,219 @@ export default function PortalLoja() {
               )}
             </>
           )}
+        </div>
+      )}
+
+      {/* ==================== NOTAS DA LOJA ==================== */}
+      {activeTab === "notas" && (
+        <div className="space-y-4">
+          {/* Cabeçalho */}
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-3">
+              <FileText className="h-6 w-6 text-amber-600" />
+              <h2 className="text-xl font-bold">{language === 'pt' ? 'Notas da Loja' : 'Store Notes'}</h2>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIncluirNotasArquivadas(!incluirNotasArquivadas)}
+                className={incluirNotasArquivadas ? 'bg-amber-100 border-amber-400' : ''}
+              >
+                {incluirNotasArquivadas ? (language === 'pt' ? 'Ocultar arquivadas' : 'Hide archived') : (language === 'pt' ? 'Ver arquivadas' : 'Show archived')}
+              </Button>
+              <Button
+                onClick={() => {
+                  setNotaEditando(null);
+                  setNotaTitulo('');
+                  setNotaConteudo('');
+                  setNotaTema('geral');
+                  setNotaModalOpen(true);
+                }}
+                className="bg-amber-500 hover:bg-amber-600 text-white"
+                size="sm"
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                {language === 'pt' ? 'Nova Nota' : 'New Note'}
+              </Button>
+            </div>
+          </div>
+
+          {/* Grid de notas */}
+          {!notasLoja || notasLoja.length === 0 ? (
+            <Card className="p-8 text-center text-muted-foreground">
+              <FileText className="h-12 w-12 mx-auto mb-3 opacity-30" />
+              <p className="font-medium">{language === 'pt' ? 'Ainda não há notas' : 'No notes yet'}</p>
+              <p className="text-sm mt-1">{language === 'pt' ? 'Crie a primeira nota para procedimentos, lembretes ou informações importantes.' : 'Create the first note for procedures, reminders or important information.'}</p>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {notasLoja.map((nota: any) => {
+                const TEMAS: Record<string, { label: string; bg: string; border: string; badge: string }> = {
+                  stock:            { label: 'Stock',           bg: 'bg-slate-50',   border: 'border-l-slate-500',   badge: 'bg-slate-100 text-slate-700' },
+                  procedimentos:    { label: 'Procedimentos',  bg: 'bg-blue-50',    border: 'border-l-blue-500',    badge: 'bg-blue-100 text-blue-700' },
+                  administrativo:   { label: 'Administrativo', bg: 'bg-purple-50',  border: 'border-l-purple-500',  badge: 'bg-purple-100 text-purple-700' },
+                  recursos_humanos: { label: 'Recursos Humanos', bg: 'bg-green-50', border: 'border-l-green-500',   badge: 'bg-green-100 text-green-700' },
+                  ausencias:        { label: 'Ausências',       bg: 'bg-orange-50',  border: 'border-l-orange-500',  badge: 'bg-orange-100 text-orange-700' },
+                  reunioes:         { label: 'Reuniões',        bg: 'bg-indigo-50',  border: 'border-l-indigo-500',  badge: 'bg-indigo-100 text-indigo-700' },
+                  clientes:         { label: 'Clientes',        bg: 'bg-pink-50',    border: 'border-l-pink-500',    badge: 'bg-pink-100 text-pink-700' },
+                  geral:            { label: 'Geral',           bg: 'bg-amber-50',   border: 'border-l-amber-400',   badge: 'bg-amber-100 text-amber-700' },
+                };
+                const tema = TEMAS[nota.tema] || TEMAS.geral;
+                return (
+                  <Card
+                    key={nota.id}
+                    className={`border-l-4 ${tema.border} ${tema.bg} ${nota.arquivada ? 'opacity-60' : ''} relative`}
+                  >
+                    <CardContent className="p-4">
+                      {/* Header da nota */}
+                      <div className="flex items-start justify-between gap-2 mb-2">
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                          {nota.fixada && <Star className="h-4 w-4 text-amber-500 flex-shrink-0" fill="currentColor" />}
+                          <h3 className="font-semibold text-sm leading-tight truncate">{nota.titulo}</h3>
+                        </div>
+                        <div className="flex items-center gap-1 flex-shrink-0">
+                          <button
+                            onClick={() => fixarNotaMutation.mutate({ token, id: nota.id, fixada: !nota.fixada })}
+                            className="p-1 rounded hover:bg-black/10 transition-colors"
+                            title={nota.fixada ? 'Desafixar' : 'Fixar'}
+                          >
+                            <Star className={`h-3.5 w-3.5 ${nota.fixada ? 'text-amber-500' : 'text-gray-400'}`} fill={nota.fixada ? 'currentColor' : 'none'} />
+                          </button>
+                          <button
+                            onClick={() => {
+                              setNotaEditando(nota);
+                              setNotaTitulo(nota.titulo);
+                              setNotaConteudo(nota.conteudo || '');
+                              setNotaTema(nota.tema);
+                              setNotaModalOpen(true);
+                            }}
+                            className="p-1 rounded hover:bg-black/10 transition-colors"
+                            title="Editar"
+                          >
+                            <Pencil className="h-3.5 w-3.5 text-gray-500" />
+                          </button>
+                          <button
+                            onClick={() => setNotaEliminarId(nota.id)}
+                            className="p-1 rounded hover:bg-red-100 transition-colors"
+                            title="Eliminar"
+                          >
+                            <Trash2 className="h-3.5 w-3.5 text-red-400" />
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Conteúdo */}
+                      {nota.conteudo && (
+                        <p className="text-sm text-gray-600 whitespace-pre-wrap leading-relaxed mb-3">{nota.conteudo}</p>
+                      )}
+
+                      {/* Footer: tema + data + arquivar */}
+                      <div className="flex items-center justify-between mt-2">
+                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${tema.badge}`}>{tema.label}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-gray-400">{new Date(nota.createdAt).toLocaleDateString('pt-PT')}</span>
+                          <button
+                            onClick={() => actualizarNotaMutation.mutate({ token, id: nota.id, arquivada: !nota.arquivada })}
+                            className="text-xs text-gray-400 hover:text-gray-600 underline"
+                          >
+                            {nota.arquivada ? (language === 'pt' ? 'Restaurar' : 'Restore') : (language === 'pt' ? 'Arquivar' : 'Archive')}
+                          </button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Modal criar/editar nota */}
+          <Dialog open={notaModalOpen} onOpenChange={(open) => { if (!open) { setNotaModalOpen(false); setNotaEditando(null); } }}>
+            <DialogContent className="max-w-lg">
+              <DialogHeader>
+                <DialogTitle>{notaEditando ? (language === 'pt' ? 'Editar Nota' : 'Edit Note') : (language === 'pt' ? 'Nova Nota' : 'New Note')}</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 pt-2">
+                <div>
+                  <Label>{language === 'pt' ? 'Título' : 'Title'} *</Label>
+                  <Input
+                    value={notaTitulo}
+                    onChange={(e) => setNotaTitulo(e.target.value)}
+                    placeholder={language === 'pt' ? 'Ex: Procedimento de abertura de caixa' : 'E.g.: Cash opening procedure'}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label>{language === 'pt' ? 'Tema' : 'Theme'}</Label>
+                  <Select value={notaTema} onValueChange={(v: any) => setNotaTema(v)}>
+                    <SelectTrigger className="mt-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="stock">Stock</SelectItem>
+                      <SelectItem value="procedimentos">Procedimentos</SelectItem>
+                      <SelectItem value="administrativo">Administrativo</SelectItem>
+                      <SelectItem value="recursos_humanos">Recursos Humanos</SelectItem>
+                      <SelectItem value="ausencias">Ausências</SelectItem>
+                      <SelectItem value="reunioes">Reuniões</SelectItem>
+                      <SelectItem value="clientes">Clientes</SelectItem>
+                      <SelectItem value="geral">Geral</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>{language === 'pt' ? 'Conteúdo' : 'Content'}</Label>
+                  <Textarea
+                    value={notaConteudo}
+                    onChange={(e) => setNotaConteudo(e.target.value)}
+                    placeholder={language === 'pt' ? 'Escreva o conteúdo da nota...' : 'Write the note content...'}
+                    rows={5}
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+              <DialogFooter className="mt-4">
+                <Button variant="outline" onClick={() => { setNotaModalOpen(false); setNotaEditando(null); }}>
+                  {language === 'pt' ? 'Cancelar' : 'Cancel'}
+                </Button>
+                <Button
+                  onClick={() => {
+                    if (!notaTitulo.trim()) { toast.error('O título é obrigatório'); return; }
+                    if (notaEditando) {
+                      actualizarNotaMutation.mutate({ token, id: notaEditando.id, titulo: notaTitulo, conteudo: notaConteudo, tema: notaTema });
+                    } else {
+                      criarNotaMutation.mutate({ token, titulo: notaTitulo, conteudo: notaConteudo, tema: notaTema });
+                    }
+                  }}
+                  disabled={criarNotaMutation.isPending || actualizarNotaMutation.isPending}
+                  className="bg-amber-500 hover:bg-amber-600 text-white"
+                >
+                  {criarNotaMutation.isPending || actualizarNotaMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : (notaEditando ? (language === 'pt' ? 'Guardar' : 'Save') : (language === 'pt' ? 'Criar' : 'Create'))}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
+          {/* Confirm eliminar */}
+          <Dialog open={!!notaEliminarId} onOpenChange={(open) => { if (!open) setNotaEliminarId(null); }}>
+            <DialogContent className="max-w-sm">
+              <DialogHeader>
+                <DialogTitle>{language === 'pt' ? 'Eliminar Nota' : 'Delete Note'}</DialogTitle>
+                <DialogDescription>{language === 'pt' ? 'Tem a certeza que quer eliminar esta nota? Esta acção não pode ser desfeita.' : 'Are you sure you want to delete this note? This action cannot be undone.'}</DialogDescription>
+              </DialogHeader>
+              <DialogFooter className="mt-4">
+                <Button variant="outline" onClick={() => setNotaEliminarId(null)}>{language === 'pt' ? 'Cancelar' : 'Cancel'}</Button>
+                <Button
+                  variant="destructive"
+                  onClick={() => notaEliminarId && eliminarNotaMutation.mutate({ token, id: notaEliminarId })}
+                  disabled={eliminarNotaMutation.isPending}
+                >
+                  {eliminarNotaMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : (language === 'pt' ? 'Eliminar' : 'Delete')}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
       )}
 

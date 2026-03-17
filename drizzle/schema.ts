@@ -1751,3 +1751,31 @@ export const backgroundJobs = mysqlTable("background_jobs", {
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 export type BackgroundJob = typeof backgroundJobs.$inferSelect;
+
+/**
+ * Notas da Loja - Sistema de notas/lembretes para o portal da loja
+ * Cada nota tem um tema (cor) para categorização visual
+ */
+export const notasLoja = mysqlTable("notas_loja", {
+  id: int("id").autoincrement().primaryKey(),
+  lojaId: int("lojaId").notNull(), // FK para lojas.id
+  titulo: varchar("titulo", { length: 500 }).notNull(),
+  conteudo: mediumtext("conteudo"), // Conteúdo da nota (texto)
+  tema: mysqlEnum("tema", [
+    "stock",
+    "procedimentos",
+    "administrativo",
+    "recursos_humanos",
+    "ausencias",
+    "reunioes",
+    "clientes",
+    "geral"
+  ]).notNull().default("geral"),
+  fixada: boolean("fixada").default(false).notNull(),
+  arquivada: boolean("arquivada").default(false).notNull(),
+  criadoPor: varchar("criadoPor", { length: 255 }), // Nome de quem criou (token da loja)
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type NotaLoja = typeof notasLoja.$inferSelect;
+export type InsertNotaLoja = typeof notasLoja.$inferInsert;

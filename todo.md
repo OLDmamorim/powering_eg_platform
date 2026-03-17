@@ -863,3 +863,12 @@
 - [x] Alinhar ambos os ecrãs para mostrar os mesmos valores (incluindo reclassificações C/Ficha de Serviço)
 - [x] Backend: getAnalisesStockPorLoja e historico agora retornam totalComFichasAjustado e totalSemFichasAjustado
 - [x] Frontend: ControloStock.tsx e PortalLoja.tsx usam valores ajustados em resumo, cards e barras de progresso
+
+## Funcionalidade: Notas no Portal da Loja
+- [x] Criar tabela notas_loja na BD (tema, titulo, conteudo, fixada, arquivada)
+- [x] Criar funções DB: listarNotasLoja, criarNotaLoja, actualizarNotaLoja, eliminarNotaLoja
+- [x] Criar endpoints tRPC: notasLoja.listar, criar, actualizar, eliminar
+- [x] Adicionar card "Notas" na página inicial do portal (amarelo/âmbar)
+- [x] Implementar tab de notas com grid de cards por tema (cor por tema)
+- [x] Temas: Stock (cinza), Procedimentos (azul), Administrativo (roxo), RH (verde), Ausências (laranja), Reuniões (índigo), Clientes (rosa), Geral (âmbar)
+- [x] Funcionalidades: criar, editar, fixar, arquivar, eliminar notas

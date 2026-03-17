@@ -694,6 +694,13 @@
       "when": 1773327684857,
       "tag": "0098_supreme_zuras",
       "breakpoints": true
+    },
+    {
+      "idx": 99,
+      "version": "5",
+      "when": 1773647857478,
+      "tag": "0099_perpetual_fenris",
+      "breakpoints": true
     }
   ]
 }

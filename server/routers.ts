@@ -11928,6 +11928,74 @@ IMPORTANTE:
       }),
   }),
 
+  // ==================== NOTAS DA LOJA ====================
+  notasLoja: router({
+    // Listar notas de uma loja
+    listar: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        incluirArquivadas: z.boolean().optional(),
+      }))
+      .query(async ({ input }) => {
+        const auth = await db.validarTokenLoja(input.token);
+        if (!auth) throw new TRPCError({ code: 'UNAUTHORIZED' });
+        return db.listarNotasLoja(auth.loja.id, input.incluirArquivadas || false);
+      }),
+
+    // Criar nota
+    criar: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        titulo: z.string().min(1),
+        conteudo: z.string().optional(),
+        tema: z.enum(['stock', 'procedimentos', 'administrativo', 'recursos_humanos', 'ausencias', 'reunioes', 'clientes', 'geral']),
+      }))
+      .mutation(async ({ input }) => {
+        const auth = await db.validarTokenLoja(input.token);
+        if (!auth) throw new TRPCError({ code: 'UNAUTHORIZED' });
+        const id = await db.criarNotaLoja({
+          lojaId: auth.loja.id,
+          titulo: input.titulo,
+          conteudo: input.conteudo,
+          tema: input.tema,
+          criadoPor: auth.loja.nome,
+        });
+        return { id };
+      }),
+
+    // Actualizar nota
+    actualizar: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        id: z.number(),
+        titulo: z.string().optional(),
+        conteudo: z.string().optional(),
+        tema: z.enum(['stock', 'procedimentos', 'administrativo', 'recursos_humanos', 'ausencias', 'reunioes', 'clientes', 'geral']).optional(),
+        fixada: z.boolean().optional(),
+        arquivada: z.boolean().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const auth = await db.validarTokenLoja(input.token);
+        if (!auth) throw new TRPCError({ code: 'UNAUTHORIZED' });
+        const { token, id, ...data } = input;
+        await db.actualizarNotaLoja(id, auth.loja.id, data);
+        return { success: true };
+      }),
+
+    // Eliminar nota
+    eliminar: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        id: z.number(),
+      }))
+      .mutation(async ({ input }) => {
+        const auth = await db.validarTokenLoja(input.token);
+        if (!auth) throw new TRPCError({ code: 'UNAUTHORIZED' });
+        await db.eliminarNotaLoja(input.id, auth.loja.id);
+        return { success: true };
+      }),
+  }),
+
   // ==================== RECEPÇÃO DE VIDROS ====================
   vidros: router({
     // Scan de etiqueta: upload foto + OCR via IA

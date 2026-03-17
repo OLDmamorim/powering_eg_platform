@@ -192,7 +192,10 @@ import {
   ClassificacaoEurocode,
   InsertClassificacaoEurocode,
   backgroundJobs,
-  BackgroundJob
+  BackgroundJob,
+  notasLoja,
+  NotaLoja,
+  InsertNotaLoja
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -13173,4 +13176,81 @@ export async function cleanOldBackgroundJobs() {
   const db = await getDb();
   const thirtyMinAgo = new Date(Date.now() - 30 * 60 * 1000);
   await db.delete(backgroundJobs).where(sql`${backgroundJobs.createdAt} < ${thirtyMinAgo}`);
+}
+
+
+// =============================================
+// Notas da Loja
+// =============================================
+
+/**
+ * Listar notas de uma loja (não arquivadas por defeito)
+ */
+export async function listarNotasLoja(lojaId: number, incluirArquivadas = false) {
+  const db = await getDb();
+  if (!db) return [];
+
+  const conditions = [eq(notasLoja.lojaId, lojaId)];
+  if (!incluirArquivadas) {
+    conditions.push(eq(notasLoja.arquivada, false));
+  }
+
+  return db.select()
+    .from(notasLoja)
+    .where(and(...conditions))
+    .orderBy(sql`${notasLoja.fixada} DESC, ${notasLoja.createdAt} DESC`);
+}
+
+/**
+ * Criar nota da loja
+ */
+export async function criarNotaLoja(data: {
+  lojaId: number;
+  titulo: string;
+  conteudo?: string;
+  tema: 'stock' | 'procedimentos' | 'administrativo' | 'recursos_humanos' | 'ausencias' | 'reunioes' | 'clientes' | 'geral';
+  criadoPor?: string;
+}) {
+  const db = await getDb();
+  if (!db) return null;
+
+  const [result] = await db.insert(notasLoja).values({
+    lojaId: data.lojaId,
+    titulo: data.titulo,
+    conteudo: data.conteudo || null,
+    tema: data.tema,
+    criadoPor: data.criadoPor || null,
+    fixada: false,
+    arquivada: false,
+  });
+  return (result as any).insertId as number;
+}
+
+/**
+ * Actualizar nota da loja
+ */
+export async function actualizarNotaLoja(id: number, lojaId: number, data: {
+  titulo?: string;
+  conteudo?: string;
+  tema?: 'stock' | 'procedimentos' | 'administrativo' | 'recursos_humanos' | 'ausencias' | 'reunioes' | 'clientes' | 'geral';
+  fixada?: boolean;
+  arquivada?: boolean;
+}) {
+  const db = await getDb();
+  if (!db) return;
+
+  await db.update(notasLoja)
+    .set({ ...data, updatedAt: new Date() })
+    .where(and(eq(notasLoja.id, id), eq(notasLoja.lojaId, lojaId)));
+}
+
+/**
+ * Eliminar nota da loja
+ */
+export async function eliminarNotaLoja(id: number, lojaId: number) {
+  const db = await getDb();
+  if (!db) return;
+
+  await db.delete(notasLoja)
+    .where(and(eq(notasLoja.id, id), eq(notasLoja.lojaId, lojaId)));
 }
