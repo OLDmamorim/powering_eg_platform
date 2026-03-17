@@ -1727,6 +1727,7 @@ export const classificacoesEurocode = mysqlTable("classificacoes_eurocode", {
     "nao_existe",
     "outros"
   ]).notNull(),
+  observacao: varchar("observacao", { length: 255 }), // Texto livre para classificação "outros"
   // Tracking de recorrência
   primeiraAnaliseId: int("primeiraAnaliseId").notNull(), // FK para analises_stock.id - primeira vez que apareceu
   ultimaAnaliseId: int("ultimaAnaliseId").notNull(), // FK para analises_stock.id - última análise onde apareceu

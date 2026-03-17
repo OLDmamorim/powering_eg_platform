@@ -1,0 +1,1 @@
+ALTER TABLE `classificacoes_eurocode` ADD `observacao` varchar(255);

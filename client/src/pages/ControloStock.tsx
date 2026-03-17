@@ -145,7 +145,7 @@ async function exportConsolidatedExcel(
   nomeLoja: string,
   comFichas: any[],
   semFichas: any[],
-  classificacoesMap: Map<string, string>,
+  classificacoesMap: Map<string, { classificacao: string; observacao?: string | null }>,
   recorrenciaMap: Map<string, number>,
 ) {
   try {
@@ -169,12 +169,15 @@ async function exportConsolidatedExcel(
         const unitKey = `${(item.ref || '').toUpperCase().trim()}|${unitIdx}`;
         const classif = classificacoesMap.get(unitKey);
         const recorr = recorrenciaMap.get(unitKey);
+        const classifLabel = classif
+          ? (classif.classificacao === 'outros' && classif.observacao ? classif.observacao : (CLASSIFICACAO_LABELS[classif.classificacao] || classif.classificacao))
+          : '-';
         ws1.addRow({
           ref: item.ref,
           unidade: qty > 1 ? `${unitIdx}/${qty}` : '-',
           familia: item.familia || '-',
           descricao: item.descricao,
-          classificacao: classif ? CLASSIFICACAO_LABELS[classif] || classif : '-',
+          classificacao: classifLabel,
           recorrencia: recorr && recorr > 1 ? `${recorr} análises` : '-',
         });
       }
@@ -253,6 +256,9 @@ export default function ControloStock() {
 
   // Batch seleccionado no histórico (por defeito o mais recente)
   const [batchSelecionado, setBatchSelecionado] = useState<string | null>(null);
+  // Estado para texto personalizado de classificação "Outros" (chave: ref|unitIndex)
+  const [outrosTextoMap, setOutrosTextoMap] = useState<Record<string, string>>({});
+  const [outrosPendingKey, setOutrosPendingKey] = useState<string | null>(null);
 
   // Queries
   const { data: infoAnalise } = trpc.stock.infoAnalise.useQuery({});
@@ -692,19 +698,20 @@ export default function ControloStock() {
   // Export handler
   const handleExportConsolidado = () => {
     if (!dadosActivos) return;
-    const classifMapSimple = new Map<string, string>();
-    classificacoesMap.forEach((v, k) => classifMapSimple.set(k, v.classificacao));
+    // Passar o mapa completo com classificacao + observacao
+    const classifMapFull = new Map<string, { classificacao: string; observacao?: string | null }>();
+    classificacoesMap.forEach((v, k) => classifMapFull.set(k, { classificacao: v.classificacao, observacao: v.observacao }));
     exportConsolidatedExcel(
       nomeLoja,
       dadosActivos.comFichas || [],
       dadosActivos.semFichas || [],
-      classifMapSimple,
+      classifMapFull,
       recorrenciaMap,
     );
   };
 
   // Classificar handler
-  const handleClassificar = (eurocode: string, unitIndex: number, classificacao: string) => {
+  const handleClassificar = (eurocode: string, unitIndex: number, classificacao: string, observacao?: string) => {
     if (!lojaIdActiva) return;
     const analiseId = detalheAnaliseId || detalheId;
     if (!analiseId) return;
@@ -713,6 +720,7 @@ export default function ControloStock() {
       eurocode,
       unitIndex,
       classificacao: classificacao as any,
+      observacao,
       analiseId,
     });
   };
@@ -1466,31 +1474,69 @@ export default function ControloStock() {
                                 )}
                               </div>
                               <p className="text-xs text-muted-foreground mt-0.5 truncate">{item.descricao}</p>
-                              <div className="flex items-center gap-1 mt-1 flex-wrap">
-                                {classifData ? (
-                                  <Badge className={`text-[10px] px-1.5 py-0 ${CLASSIFICACAO_COLORS[classifData.classificacao] || 'bg-gray-100 text-gray-700'}`}>
-                                    <Tag className="h-2.5 w-2.5 mr-0.5" />
-                                    {CLASSIFICACAO_LABELS[classifData.classificacao] || classifData.classificacao}
-                                  </Badge>
-                                ) : null}
-                                <select
-                                  className="text-[10px] border rounded px-1 py-0.5 bg-transparent cursor-pointer"
-                                  value={classifData?.classificacao || ''}
-                                  onChange={(e) => {
-                                    if (e.target.value) handleClassificar(item.ref, item.unitIndex, e.target.value);
-                                  }}
-                                >
-                                  <option value="">{classifData ? 'Alterar...' : 'Classificar...'}</option>
-                                  <option value="devolucao_rejeitada">Devolução Rejeitada</option>
-                                  <option value="usado">Usado</option>
-                                  <option value="com_danos">Com Danos</option>
-                                   <option value="para_devolver">Para Devolver</option>
-                                   <option value="para_realizar">P/Realizar</option>
-                                   <option value="com_ficha_servico">C/Ficha de Serviço</option>
-                                   <option value="nao_existe">Não Existe</option>
-                                   <option value="outros">Outros</option>
-                                 </select>
-                               </div>
+                              <div className="flex flex-col gap-1 mt-1">
+                                <div className="flex items-center gap-1 flex-wrap">
+                                  {classifData ? (
+                                    <Badge className={`text-[10px] px-1.5 py-0 ${CLASSIFICACAO_COLORS[classifData.classificacao] || 'bg-gray-100 text-gray-700'}`}>
+                                      <Tag className="h-2.5 w-2.5 mr-0.5" />
+                                      {classifData.classificacao === 'outros' && classifData.observacao ? classifData.observacao : (CLASSIFICACAO_LABELS[classifData.classificacao] || classifData.classificacao)}
+                                    </Badge>
+                                  ) : null}
+                                  <select
+                                    className="text-[10px] border rounded px-1 py-0.5 bg-transparent cursor-pointer"
+                                    value={classifData?.classificacao || ''}
+                                    onChange={(e) => {
+                                      const val = e.target.value;
+                                      if (val === 'outros') {
+                                        const unitKey = `${item.ref?.toUpperCase()?.trim()}|${item.unitIndex}`;
+                                        setOutrosPendingKey(unitKey);
+                                        setOutrosTextoMap(prev => ({ ...prev, [unitKey]: classifData?.observacao || '' }));
+                                      } else if (val) {
+                                        setOutrosPendingKey(null);
+                                        handleClassificar(item.ref, item.unitIndex, val);
+                                      }
+                                    }}
+                                  >
+                                    <option value="">{classifData ? 'Alterar...' : 'Classificar...'}</option>
+                                    <option value="devolucao_rejeitada">Devolução Rejeitada</option>
+                                    <option value="usado">Usado</option>
+                                    <option value="com_danos">Com Danos</option>
+                                    <option value="para_devolver">Para Devolver</option>
+                                    <option value="para_realizar">P/Realizar</option>
+                                    <option value="com_ficha_servico">C/Ficha de Serviço</option>
+                                    <option value="nao_existe">Não Existe</option>
+                                    <option value="outros">Outros</option>
+                                  </select>
+                                </div>
+                                {/* Input inline para "Outros" */}
+                                {(() => {
+                                  const unitKey = `${item.ref?.toUpperCase()?.trim()}|${item.unitIndex}`;
+                                  return (outrosPendingKey === unitKey || classifData?.classificacao === 'outros') ? (
+                                    <div className="flex gap-1 items-center">
+                                      <input
+                                        type="text"
+                                        className="flex-1 text-[10px] border border-yellow-300 rounded px-1.5 py-0.5 bg-yellow-50 focus:outline-none focus:ring-1 focus:ring-yellow-400"
+                                        placeholder="Descreva o motivo..."
+                                        value={outrosTextoMap[unitKey] ?? (classifData?.observacao || '')}
+                                        onChange={e => setOutrosTextoMap(prev => ({ ...prev, [unitKey]: e.target.value }))}
+                                        onKeyDown={e => {
+                                          if (e.key === 'Enter') {
+                                            const texto = (outrosTextoMap[unitKey] || '').trim();
+                                            if (texto) { handleClassificar(item.ref, item.unitIndex, 'outros', texto); setOutrosPendingKey(null); }
+                                          } else if (e.key === 'Escape') { setOutrosPendingKey(null); }
+                                        }}
+                                      />
+                                      <button
+                                        className="text-[9px] bg-yellow-500 text-white rounded px-1.5 py-0.5 hover:bg-yellow-600 shrink-0"
+                                        onClick={() => {
+                                          const texto = (outrosTextoMap[unitKey] || '').trim();
+                                          if (texto) { handleClassificar(item.ref, item.unitIndex, 'outros', texto); setOutrosPendingKey(null); }
+                                        }}
+                                      >OK</button>
+                                    </div>
+                                  ) : null;
+                                })()}
+                              </div>
                              </div>
                              <div className="text-right shrink-0">
                               <span className="text-sm font-bold">1</span>

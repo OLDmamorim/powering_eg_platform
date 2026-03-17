@@ -5857,6 +5857,7 @@ IMPORTANTE:
         eurocode: z.string(),
         unitIndex: z.number().default(1),
         classificacao: z.enum(['devolucao_rejeitada', 'usado', 'com_danos', 'para_devolver', 'para_realizar', 'com_ficha_servico', 'nao_existe', 'outros']),
+        observacao: z.string().max(255).optional(),
         analiseId: z.number(),
       }))
       .mutation(async ({ input }) => {
@@ -12953,6 +12954,7 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
         eurocode: z.string(),
         unitIndex: z.number().default(1), // Índice da unidade (1, 2, 3...)
         classificacao: z.enum(['devolucao_rejeitada', 'usado', 'com_danos', 'para_devolver', 'para_realizar', 'com_ficha_servico', 'nao_existe', 'outros']),
+        observacao: z.string().max(255).optional(),
         analiseId: z.number(),
       }))
       .mutation(async ({ input }) => {

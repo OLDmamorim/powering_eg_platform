@@ -878,3 +878,10 @@
 - [x] Actualizar backend (routers.ts) com os novos valores
 - [x] Actualizar frontend (ControloStock.tsx e PortalLoja.tsx) com os novos itens no dropdown
 - [x] Actualizar db.ts (classificarEurocode) com os novos tipos
+
+## Melhoria: Texto personalizado para classificação "Outros"
+- [x] Adicionar campo observacao (texto opcional) à tabela classificacoesEurocode
+- [x] Actualizar backend para guardar e retornar observacao
+- [x] UI: ao seleccionar "Outros", mostrar input de texto inline para escrever descrição
+- [x] Exibir o texto personalizado como label da classificação no portal (em vez de "Outros")
+- [x] Actualizar export Excel para usar o texto personalizado quando classificação é "Outros"

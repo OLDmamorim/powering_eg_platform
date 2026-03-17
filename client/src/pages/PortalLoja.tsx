@@ -251,6 +251,9 @@ export default function PortalLoja() {
   const [searchStockQuery, setSearchStockQuery] = useState('');
   const [analiseIA, setAnaliseIA] = useState<any>(null);
   const [gerandoAnaliseIA, setGerandoAnaliseIA] = useState(false);
+  // Estado para texto personalizado de classificação "Outros" (chave: eurocode_unitIndex)
+  const [outrosTextoMap, setOutrosTextoMap] = useState<Record<string, string>>({});
+  const [outrosPendingKey, setOutrosPendingKey] = useState<string | null>(null);
 
   // Estado para notas da loja
   const [notaModalOpen, setNotaModalOpen] = useState(false);
@@ -4489,20 +4492,26 @@ export default function PortalLoja() {
                                   )}
                                   {classif && (
                                     <Badge className={`text-[10px] px-1.5 py-0 ${classifColors[classif.classificacao] || ''}`}>
-                                      {classifLabels[classif.classificacao] || classif.classificacao}
+                                      {classif.classificacao === 'outros' && classif.observacao ? classif.observacao : (classifLabels[classif.classificacao] || classif.classificacao)}
                                     </Badge>
                                   )}
                                 </div>
                                 <p className="text-[11px] text-gray-600 mb-1.5 truncate">{d.item.descricao}</p>
-                                <div className="flex items-center gap-2">
+                                <div className="flex flex-col gap-1">
                                   <select
-                                    className="flex-1 text-[11px] border rounded px-2 py-1 bg-white"
+                                    className="w-full text-[11px] border rounded px-2 py-1 bg-white"
                                     value={classif?.classificacao || ''}
                                     onChange={e => {
                                       const val = e.target.value;
                                       if (!val && classif) {
                                         removerClassificacaoStockMutation.mutate({ token, id: classif.id });
+                                        setOutrosPendingKey(null);
+                                      } else if (val === 'outros') {
+                                        // Mostrar input inline, não guardar ainda
+                                        setOutrosPendingKey(key);
+                                        setOutrosTextoMap(prev => ({ ...prev, [key]: classif?.observacao || '' }));
                                       } else if (val) {
+                                        setOutrosPendingKey(null);
                                         classificarStockMutation.mutate({
                                           token,
                                           lojaId: detalheStock.lojaId,
@@ -4519,12 +4528,63 @@ export default function PortalLoja() {
                                     <option value="usado">{classifLabels.usado}</option>
                                     <option value="com_danos">{classifLabels.com_danos}</option>
                                     <option value="para_devolver">{classifLabels.para_devolver}</option>
-                                     <option value="para_realizar">{classifLabels.para_realizar}</option>
-                                     <option value="com_ficha_servico">{classifLabels.com_ficha_servico}</option>
-                                     <option value="nao_existe">{classifLabels.nao_existe}</option>
-                                     <option value="outros">{classifLabels.outros}</option>
-                                   </select>
-                                 </div>
+                                    <option value="para_realizar">{classifLabels.para_realizar}</option>
+                                    <option value="com_ficha_servico">{classifLabels.com_ficha_servico}</option>
+                                    <option value="nao_existe">{classifLabels.nao_existe}</option>
+                                    <option value="outros">{classifLabels.outros}</option>
+                                  </select>
+                                  {/* Input inline para "Outros" */}
+                                  {(outrosPendingKey === key || (classif?.classificacao === 'outros')) && (
+                                    <div className="flex gap-1 items-center">
+                                      <input
+                                        type="text"
+                                        className="flex-1 text-[11px] border border-yellow-300 rounded px-2 py-1 bg-yellow-50 focus:outline-none focus:ring-1 focus:ring-yellow-400"
+                                        placeholder={language === 'pt' ? 'Descreva o motivo...' : 'Describe the reason...'}
+                                        value={outrosTextoMap[key] ?? (classif?.observacao || '')}
+                                        onChange={e => setOutrosTextoMap(prev => ({ ...prev, [key]: e.target.value }))}
+                                        onKeyDown={e => {
+                                          if (e.key === 'Enter') {
+                                            const texto = (outrosTextoMap[key] || '').trim();
+                                            if (texto) {
+                                              classificarStockMutation.mutate({
+                                                token,
+                                                lojaId: detalheStock.lojaId,
+                                                eurocode: refKey,
+                                                unitIndex: d.unitIndex,
+                                                classificacao: 'outros',
+                                                observacao: texto,
+                                                analiseId: analiseStockSelecionada!,
+                                              });
+                                              setOutrosPendingKey(null);
+                                            }
+                                          } else if (e.key === 'Escape') {
+                                            setOutrosPendingKey(null);
+                                          }
+                                        }}
+                                      />
+                                      <button
+                                        className="text-[10px] bg-yellow-500 text-white rounded px-2 py-1 hover:bg-yellow-600 shrink-0"
+                                        onClick={() => {
+                                          const texto = (outrosTextoMap[key] || '').trim();
+                                          if (texto) {
+                                            classificarStockMutation.mutate({
+                                              token,
+                                              lojaId: detalheStock.lojaId,
+                                              eurocode: refKey,
+                                              unitIndex: d.unitIndex,
+                                              classificacao: 'outros',
+                                              observacao: texto,
+                                              analiseId: analiseStockSelecionada!,
+                                            });
+                                            setOutrosPendingKey(null);
+                                          }
+                                        }}
+                                      >
+                                        OK
+                                      </button>
+                                    </div>
+                                  )}
+                                </div>
                                </div>
                              );
                            })}

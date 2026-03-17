@@ -12779,6 +12779,7 @@ export async function classificarEurocode(data: {
   eurocode: string;
   unitIndex: number; // 1, 2, 3... para cada unidade individual
   classificacao: 'devolucao_rejeitada' | 'usado' | 'com_danos' | 'para_devolver' | 'para_realizar' | 'com_ficha_servico' | 'nao_existe' | 'outros';
+  observacao?: string; // Texto livre para classificação "outros"
   analiseId: number;
 }) {
   const db = await getDb();
@@ -12800,6 +12801,7 @@ export async function classificarEurocode(data: {
     await db.update(classificacoesEurocode)
       .set({ 
         classificacao: data.classificacao,
+        observacao: data.observacao ?? null,
         ultimaAnaliseId: data.analiseId,
       })
       .where(eq(classificacoesEurocode.id, existente.id));
@@ -12811,6 +12813,7 @@ export async function classificarEurocode(data: {
       eurocode: data.eurocode,
       unitIndex: data.unitIndex,
       classificacao: data.classificacao,
+      observacao: data.observacao ?? null,
       primeiraAnaliseId: data.analiseId,
       ultimaAnaliseId: data.analiseId,
       analisesConsecutivas: 1,
