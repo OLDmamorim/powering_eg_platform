@@ -4533,18 +4533,19 @@ export default function PortalLoja() {
                                     <option value="nao_existe">{classifLabels.nao_existe}</option>
                                     <option value="outros">{classifLabels.outros}</option>
                                   </select>
-                                  {/* Input inline para "Outros" */}
-                                  {(outrosPendingKey === key || (classif?.classificacao === 'outros')) && (
+                                  {/* Input inline para "Outros" - só mostra quando em modo de edição activo */}
+                                  {outrosPendingKey === key && (
                                     <div className="flex gap-1 items-center">
                                       <input
                                         type="text"
+                                        autoFocus
                                         className="flex-1 text-[11px] border border-yellow-300 rounded px-2 py-1 bg-yellow-50 focus:outline-none focus:ring-1 focus:ring-yellow-400"
                                         placeholder={language === 'pt' ? 'Descreva o motivo...' : 'Describe the reason...'}
                                         value={outrosTextoMap[key] ?? (classif?.observacao || '')}
                                         onChange={e => setOutrosTextoMap(prev => ({ ...prev, [key]: e.target.value }))}
                                         onKeyDown={e => {
                                           if (e.key === 'Enter') {
-                                            const texto = (outrosTextoMap[key] || '').trim();
+                                            const texto = (outrosTextoMap[key] ?? (classif?.observacao || '')).trim();
                                             if (texto) {
                                               classificarStockMutation.mutate({
                                                 token,
@@ -4565,7 +4566,7 @@ export default function PortalLoja() {
                                       <button
                                         className="text-[10px] bg-yellow-500 text-white rounded px-2 py-1 hover:bg-yellow-600 shrink-0"
                                         onClick={() => {
-                                          const texto = (outrosTextoMap[key] || '').trim();
+                                          const texto = (outrosTextoMap[key] ?? (classif?.observacao || '')).trim();
                                           if (texto) {
                                             classificarStockMutation.mutate({
                                               token,
@@ -4581,6 +4582,12 @@ export default function PortalLoja() {
                                         }}
                                       >
                                         OK
+                                      </button>
+                                      <button
+                                        className="text-[10px] text-gray-500 rounded px-1 py-1 hover:text-gray-700 shrink-0"
+                                        onClick={() => setOutrosPendingKey(null)}
+                                      >
+                                        ✕
                                       </button>
                                     </div>
                                   )}

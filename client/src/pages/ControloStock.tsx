@@ -1508,20 +1508,21 @@ export default function ControloStock() {
                                     <option value="outros">Outros</option>
                                   </select>
                                 </div>
-                                {/* Input inline para "Outros" */}
+                                {/* Input inline para "Outros" - só mostra quando em modo de edição activo */}
                                 {(() => {
                                   const unitKey = `${item.ref?.toUpperCase()?.trim()}|${item.unitIndex}`;
-                                  return (outrosPendingKey === unitKey || classifData?.classificacao === 'outros') ? (
+                                  return outrosPendingKey === unitKey ? (
                                     <div className="flex gap-1 items-center">
                                       <input
                                         type="text"
+                                        autoFocus
                                         className="flex-1 text-[10px] border border-yellow-300 rounded px-1.5 py-0.5 bg-yellow-50 focus:outline-none focus:ring-1 focus:ring-yellow-400"
                                         placeholder="Descreva o motivo..."
                                         value={outrosTextoMap[unitKey] ?? (classifData?.observacao || '')}
                                         onChange={e => setOutrosTextoMap(prev => ({ ...prev, [unitKey]: e.target.value }))}
                                         onKeyDown={e => {
                                           if (e.key === 'Enter') {
-                                            const texto = (outrosTextoMap[unitKey] || '').trim();
+                                            const texto = (outrosTextoMap[unitKey] ?? (classifData?.observacao || '')).trim();
                                             if (texto) { handleClassificar(item.ref, item.unitIndex, 'outros', texto); setOutrosPendingKey(null); }
                                           } else if (e.key === 'Escape') { setOutrosPendingKey(null); }
                                         }}
@@ -1529,10 +1530,14 @@ export default function ControloStock() {
                                       <button
                                         className="text-[9px] bg-yellow-500 text-white rounded px-1.5 py-0.5 hover:bg-yellow-600 shrink-0"
                                         onClick={() => {
-                                          const texto = (outrosTextoMap[unitKey] || '').trim();
+                                          const texto = (outrosTextoMap[unitKey] ?? (classifData?.observacao || '')).trim();
                                           if (texto) { handleClassificar(item.ref, item.unitIndex, 'outros', texto); setOutrosPendingKey(null); }
                                         }}
                                       >OK</button>
+                                      <button
+                                        className="text-[9px] text-gray-500 rounded px-1 py-0.5 hover:text-gray-700 shrink-0"
+                                        onClick={() => setOutrosPendingKey(null)}
+                                      >✕</button>
                                     </div>
                                   ) : null;
                                 })()}

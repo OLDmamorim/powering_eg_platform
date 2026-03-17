@@ -889,3 +889,6 @@
 ## Bug: Texto "Outros" não grava
 - [x] Corrigir lógica de gravação do texto personalizado ao clicar OK ou Enter no campo "Outros" (PortalLoja.tsx e ControloStock.tsx)
 - [x] Bug: classificacoesMap no ControloStock.tsx não incluía campo observacao — corrigido
+
+## Bug: Campo texto "Outros" aparece sempre visível
+- [x] Corrigir condição de visibilidade: o input só deve aparecer quando se selecciona "Outros" (modo de edição activo), não de forma permanente em itens já classificados
