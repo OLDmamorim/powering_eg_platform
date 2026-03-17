@@ -872,3 +872,9 @@
 - [x] Implementar tab de notas com grid de cards por tema (cor por tema)
 - [x] Temas: Stock (cinza), Procedimentos (azul), Administrativo (roxo), RH (verde), Ausências (laranja), Reuniões (índigo), Clientes (rosa), Geral (âmbar)
 - [x] Funcionalidades: criar, editar, fixar, arquivar, eliminar notas
+
+## Melhoria: Novos status de classificação de stock
+- [x] Adicionar "Não Existe" e "Outros" ao enum classificacao na BD
+- [x] Actualizar backend (routers.ts) com os novos valores
+- [x] Actualizar frontend (ControloStock.tsx e PortalLoja.tsx) com os novos itens no dropdown
+- [x] Actualizar db.ts (classificarEurocode) com os novos tipos

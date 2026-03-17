@@ -126,6 +126,8 @@ const CLASSIFICACAO_LABELS: Record<string, string> = {
   para_devolver: 'Para Devolver',
   para_realizar: 'P/Realizar',
   com_ficha_servico: 'C/Ficha de Serviço',
+  nao_existe: 'Não Existe',
+  outros: 'Outros',
 };
 
 const CLASSIFICACAO_COLORS: Record<string, string> = {
@@ -135,6 +137,8 @@ const CLASSIFICACAO_COLORS: Record<string, string> = {
   com_ficha_servico: 'bg-green-100 text-green-700',
   com_danos: 'bg-orange-100 text-orange-700',
   para_devolver: 'bg-cyan-100 text-cyan-700',
+  nao_existe: 'bg-rose-100 text-rose-700',
+  outros: 'bg-yellow-100 text-yellow-700',
 };
 
 async function exportConsolidatedExcel(
@@ -1480,13 +1484,15 @@ export default function ControloStock() {
                                   <option value="devolucao_rejeitada">Devolução Rejeitada</option>
                                   <option value="usado">Usado</option>
                                   <option value="com_danos">Com Danos</option>
-                                  <option value="para_devolver">Para Devolver</option>
-                                  <option value="para_realizar">P/Realizar</option>
-                                  <option value="com_ficha_servico">C/Ficha de Serviço</option>
-                                </select>
-                              </div>
-                            </div>
-                            <div className="text-right shrink-0">
+                                   <option value="para_devolver">Para Devolver</option>
+                                   <option value="para_realizar">P/Realizar</option>
+                                   <option value="com_ficha_servico">C/Ficha de Serviço</option>
+                                   <option value="nao_existe">Não Existe</option>
+                                   <option value="outros">Outros</option>
+                                 </select>
+                               </div>
+                             </div>
+                             <div className="text-right shrink-0">
                               <span className="text-sm font-bold">1</span>
                               <span className="text-[10px] text-muted-foreground ml-0.5">un.</span>
                             </div>
@@ -1540,15 +1546,17 @@ export default function ControloStock() {
                                 <option value="devolucao_rejeitada">Devolução Rejeitada</option>
                                 <option value="usado">Usado</option>
                                 <option value="com_danos">Com Danos</option>
-                                <option value="para_devolver">Para Devolver</option>
-                                <option value="para_realizar">P/Realizar</option>
-                                <option value="com_ficha_servico">C/Ficha de Serviço</option>
-                              </select>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
+                                 <option value="para_devolver">Para Devolver</option>
+                                 <option value="para_realizar">P/Realizar</option>
+                                 <option value="com_ficha_servico">C/Ficha de Serviço</option>
+                                 <option value="nao_existe">Não Existe</option>
+                                 <option value="outros">Outros</option>
+                               </select>
+                             </div>
+                           </div>
+                         </CardContent>
+                       </Card>
+                     ))}
                   </div>
                 )}
                 {dadosActivos.comFichas && filtrarItens(dadosActivos.comFichas).length === 0 && itensComFichaServico.length === 0 ? (

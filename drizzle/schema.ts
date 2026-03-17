@@ -1723,7 +1723,9 @@ export const classificacoesEurocode = mysqlTable("classificacoes_eurocode", {
     "com_danos",
     "para_devolver",
     "para_realizar",
-    "com_ficha_servico"
+    "com_ficha_servico",
+    "nao_existe",
+    "outros"
   ]).notNull(),
   // Tracking de recorrência
   primeiraAnaliseId: int("primeiraAnaliseId").notNull(), // FK para analises_stock.id - primeira vez que apareceu

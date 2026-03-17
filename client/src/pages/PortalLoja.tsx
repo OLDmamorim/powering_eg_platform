@@ -4288,6 +4288,8 @@ export default function PortalLoja() {
                 para_devolver: language === 'pt' ? 'Para Devolver' : 'To Return',
                 para_realizar: language === 'pt' ? 'P/Realizar' : 'To Perform',
                 com_ficha_servico: language === 'pt' ? 'C/Ficha de Serviço' : 'With Service Sheet',
+                nao_existe: language === 'pt' ? 'Não Existe' : 'Does Not Exist',
+                outros: language === 'pt' ? 'Outros' : 'Others',
               };
               const classifColors: Record<string, string> = {
                 devolucao_rejeitada: 'bg-red-100 text-red-700',
@@ -4296,6 +4298,8 @@ export default function PortalLoja() {
                 para_devolver: 'bg-blue-100 text-blue-700',
                 para_realizar: 'bg-sky-100 text-sky-700',
                 com_ficha_servico: 'bg-green-100 text-green-700',
+                nao_existe: 'bg-rose-100 text-rose-700',
+                outros: 'bg-yellow-100 text-yellow-700',
               };
 
               // Filtrar sem fichas por classificacao
@@ -4401,12 +4405,14 @@ export default function PortalLoja() {
                                   <option value="usado">{classifLabels.usado}</option>
                                   <option value="com_danos">{classifLabels.com_danos}</option>
                                   <option value="para_devolver">{classifLabels.para_devolver}</option>
-                                  <option value="para_realizar">{classifLabels.para_realizar}</option>
-                                  <option value="com_ficha_servico">{classifLabels.com_ficha_servico}</option>
-                                </select>
-                              </div>
-                            );
-                          })}
+                                   <option value="para_realizar">{classifLabels.para_realizar}</option>
+                                   <option value="com_ficha_servico">{classifLabels.com_ficha_servico}</option>
+                                   <option value="nao_existe">{classifLabels.nao_existe}</option>
+                                   <option value="outros">{classifLabels.outros}</option>
+                                 </select>
+                               </div>
+                             );
+                           })}
                         </div>
                       )}
                       <div className="space-y-1.5">
@@ -4513,13 +4519,15 @@ export default function PortalLoja() {
                                     <option value="usado">{classifLabels.usado}</option>
                                     <option value="com_danos">{classifLabels.com_danos}</option>
                                     <option value="para_devolver">{classifLabels.para_devolver}</option>
-                                    <option value="para_realizar">{classifLabels.para_realizar}</option>
-                                    <option value="com_ficha_servico">{classifLabels.com_ficha_servico}</option>
-                                  </select>
-                                </div>
-                              </div>
-                            );
-                          })}
+                                     <option value="para_realizar">{classifLabels.para_realizar}</option>
+                                     <option value="com_ficha_servico">{classifLabels.com_ficha_servico}</option>
+                                     <option value="nao_existe">{classifLabels.nao_existe}</option>
+                                     <option value="outros">{classifLabels.outros}</option>
+                                   </select>
+                                 </div>
+                               </div>
+                             );
+                           })}
                         </div>
                       )}
                     </div>

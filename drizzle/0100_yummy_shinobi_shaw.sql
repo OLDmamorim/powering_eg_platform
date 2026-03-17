@@ -1,0 +1,1 @@
+ALTER TABLE `classificacoes_eurocode` MODIFY COLUMN `classificacao` enum('devolucao_rejeitada','usado','com_danos','para_devolver','para_realizar','com_ficha_servico','nao_existe','outros') NOT NULL;
