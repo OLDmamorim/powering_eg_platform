@@ -4533,10 +4533,8 @@ export default function PortalLoja() {
                                     <option value="nao_existe">{classifLabels.nao_existe}</option>
                                     <option value="outros">{classifLabels.outros}</option>
                                   </select>
-                                  {/* Input inline para "Outros":
-                                     - Mostra quando em modo de edição activo (outrosPendingKey === key)
-                                     - Ou quando classificação é "outros" mas não tem texto gravado */}
-                                  {(outrosPendingKey === key || (classif?.classificacao === 'outros' && !classif?.observacao)) && (
+                                  {/* Input inline para "Outros" - APENAS quando utilizador selecciona activamente */}
+                                  {outrosPendingKey === key && (
                                     <div className="flex gap-1 items-center">
                                       <input
                                         type="text"

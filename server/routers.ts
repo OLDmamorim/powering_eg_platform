@@ -5881,6 +5881,7 @@ IMPORTANTE:
           eurocode: input.eurocode,
           unitIndex: input.unitIndex,
           classificacao: input.classificacao,
+          observacao: input.observacao,
           analiseId: input.analiseId,
         });
       }),
