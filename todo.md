@@ -907,3 +907,8 @@
 - [x] Ao clicar no quadrado, abre modal com detalhe completo
 - [x] Selector de cor livre (paleta + color picker) no formulário de criação/edição
 - [x] Preview do post-it em tempo real no formulário
+
+## Bug + Melhoria: Notas — modal colorido e rich text
+- [x] Modal de detalhe da nota tem agora fundo colorido (igual ao post-it)
+- [x] Adicionada barra de formatação ao editor (bold, itálico, sublinhado, rasurado, lista pontos, lista numerada, remover formatação)
+- [x] Conteúdo renderiza HTML no modal de detalhe (dangerouslySetInnerHTML)

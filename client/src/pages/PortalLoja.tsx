@@ -4798,23 +4798,32 @@ export default function PortalLoja() {
             const cor = nota.cor || '#fbbf24';
             return (
               <Dialog open={!!notaDetalheId} onOpenChange={(open) => { if (!open) setNotaDetalheId(null); }}>
-                <DialogContent className="max-w-md">
-                  <DialogHeader>
+                <DialogContent className="max-w-md p-0 overflow-hidden" style={{ borderTop: `5px solid ${cor}` }}>
+                  {/* Cabeçalho colorido */}
+                  <div className="px-5 pt-4 pb-3" style={{ backgroundColor: cor }}>
                     <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 rounded-full flex-shrink-0" style={{ backgroundColor: cor }} />
-                      <DialogTitle className="text-base leading-tight">{nota.titulo}</DialogTitle>
-                      {nota.fixada && <Star className="h-4 w-4 text-amber-500 flex-shrink-0" fill="currentColor" />}
+                      {nota.fixada && <Star className="h-4 w-4 text-gray-700 flex-shrink-0" fill="currentColor" />}
+                      <h2 className="text-base font-bold leading-tight text-gray-900">{nota.titulo}</h2>
                     </div>
-                  </DialogHeader>
-                  {nota.conteudo && (
-                    <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed mt-2">{nota.conteudo}</p>
-                  )}
-                  <div className="flex items-center justify-between mt-4 pt-3 border-t">
+                  </div>
+                  {/* Conteúdo */}
+                  <div className="px-5 py-4">
+                    {nota.conteudo ? (
+                      <div
+                        className="text-sm text-gray-700 leading-relaxed prose prose-sm max-w-none"
+                        dangerouslySetInnerHTML={{ __html: nota.conteudo }}
+                      />
+                    ) : (
+                      <p className="text-sm text-gray-400 italic">{language === 'pt' ? 'Sem conteúdo' : 'No content'}</p>
+                    )}
+                  </div>
+                  {/* Footer */}
+                  <div className="flex items-center justify-between px-5 py-3 border-t bg-gray-50">
                     <span className="text-xs text-gray-400">{new Date(nota.createdAt).toLocaleDateString('pt-PT')}</span>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
                       <button
                         onClick={() => { fixarNotaMutation.mutate({ token, id: nota.id, fixada: !nota.fixada }); setNotaDetalheId(null); }}
-                        className="p-1.5 rounded hover:bg-gray-100 transition-colors"
+                        className="p-1.5 rounded hover:bg-gray-200 transition-colors"
                         title={nota.fixada ? 'Desafixar' : 'Fixar'}
                       >
                         <Star className={`h-4 w-4 ${nota.fixada ? 'text-amber-500' : 'text-gray-400'}`} fill={nota.fixada ? 'currentColor' : 'none'} />
@@ -4829,7 +4838,7 @@ export default function PortalLoja() {
                           setNotaCor(nota.cor || '#fbbf24');
                           setNotaModalOpen(true);
                         }}
-                        className="p-1.5 rounded hover:bg-gray-100 transition-colors"
+                        className="p-1.5 rounded hover:bg-gray-200 transition-colors"
                         title="Editar"
                       >
                         <Pencil className="h-4 w-4 text-gray-500" />
@@ -4902,13 +4911,56 @@ export default function PortalLoja() {
                 </div>
                 <div>
                   <Label>{language === 'pt' ? 'Conteúdo' : 'Content'}</Label>
-                  <Textarea
-                    value={notaConteudo}
-                    onChange={(e) => setNotaConteudo(e.target.value)}
-                    placeholder={language === 'pt' ? 'Escreva o conteúdo da nota...' : 'Write the note content...'}
-                    rows={5}
-                    className="mt-1"
-                  />
+                  {/* Barra de formatação rich text */}
+                  <div className="mt-1 border rounded-md overflow-hidden">
+                    <div className="flex items-center gap-0.5 px-2 py-1.5 bg-gray-50 border-b">
+                      {[
+                        { cmd: 'bold', icon: 'B', title: 'Negrito', style: 'font-bold' },
+                        { cmd: 'italic', icon: 'I', title: 'Itálico', style: 'italic' },
+                        { cmd: 'underline', icon: 'U', title: 'Sublinhado', style: 'underline' },
+                        { cmd: 'strikeThrough', icon: 'S̶', title: 'Rasurado', style: 'line-through' },
+                      ].map(({ cmd, icon, title, style }) => (
+                        <button
+                          key={cmd}
+                          type="button"
+                          onMouseDown={(e) => { e.preventDefault(); document.execCommand(cmd); }}
+                          className={`w-7 h-7 rounded text-xs hover:bg-gray-200 transition-colors font-mono ${style}`}
+                          title={title}
+                        >{icon}</button>
+                      ))}
+                      <div className="w-px h-5 bg-gray-300 mx-1" />
+                      <button
+                        type="button"
+                        onMouseDown={(e) => { e.preventDefault(); document.execCommand('insertUnorderedList'); }}
+                        className="w-7 h-7 rounded text-xs hover:bg-gray-200 transition-colors"
+                        title="Lista com pontos"
+                      >•≡</button>
+                      <button
+                        type="button"
+                        onMouseDown={(e) => { e.preventDefault(); document.execCommand('insertOrderedList'); }}
+                        className="w-7 h-7 rounded text-xs hover:bg-gray-200 transition-colors"
+                        title="Lista numerada"
+                      >1≡</button>
+                      <div className="w-px h-5 bg-gray-300 mx-1" />
+                      <button
+                        type="button"
+                        onMouseDown={(e) => { e.preventDefault(); document.execCommand('removeFormat'); }}
+                        className="w-7 h-7 rounded text-xs hover:bg-gray-200 transition-colors text-gray-500"
+                        title="Remover formatação"
+                      >✕</button>
+                    </div>
+                    <div
+                      contentEditable
+                      suppressContentEditableWarning
+                      id="nota-editor"
+                      onInput={(e) => setNotaConteudo((e.target as HTMLDivElement).innerHTML)}
+                      dangerouslySetInnerHTML={{ __html: notaConteudo }}
+                      className="min-h-[120px] px-3 py-2 text-sm focus:outline-none"
+                      style={{ lineHeight: '1.6' }}
+                      data-placeholder={language === 'pt' ? 'Escreva o conteúdo da nota...' : 'Write the note content...'}
+                    />
+                  </div>
+                  <style>{`[contenteditable]:empty:before { content: attr(data-placeholder); color: #9ca3af; pointer-events: none; }`}</style>
                 </div>
               </div>
               <DialogFooter className="mt-4">
