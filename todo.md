@@ -926,3 +926,4 @@
 - [x] Mini barra de progresso de classificação em cada card de loja (ex: 12/16 classificados)
 - [x] Botão para ordenar lojas por S/ Classificação (priorizando as com mais trabalho pendente)
 - [x] Botão para exportar Excel com eurocodes sem classificação agrupados por loja
+- [ ] Bug fix: Campo de busca por eurocode não funciona

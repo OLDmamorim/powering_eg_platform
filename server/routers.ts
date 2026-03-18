@@ -13211,12 +13211,13 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
       }),
 
     // Pesquisar eurocode em todas as lojas (para o portal da loja - sem filtro de loja)
-    pesquisarEurocodeGlobal: protectedProcedure
+    pesquisarEurocodeGlobal: publicProcedure
       .input(z.object({
         eurocode: z.string().min(1),
+        token: z.string().optional(),
       }))
-      .query(async ({ ctx, input }) => {
-        // Qualquer utilizador autenticado pode pesquisar (loja ou gestor)
+      .query(async ({ input }) => {
+        // Acessível tanto por utilizadores autenticados (gestor) como por lojas via token
         const resultados = await db.pesquisarEurocode(input.eurocode);
         return resultados;
       }),

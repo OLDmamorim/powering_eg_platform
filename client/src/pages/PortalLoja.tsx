@@ -628,8 +628,8 @@ export default function PortalLoja() {
 
   // Pesquisa global de eurocode (todas as lojas)
   const { data: eurocodeGlobalResultados, isLoading: eurocodeGlobalLoading } = trpc.stock.pesquisarEurocodeGlobal.useQuery(
-    { eurocode: eurocodeGlobalSearch },
-    { enabled: !!token && eurocodeGlobalSearch.length >= 3, staleTime: 30 * 1000 }
+    { eurocode: eurocodeGlobalSearch, token },
+    { enabled: eurocodeGlobalSearch.length >= 3, staleTime: 30 * 1000 }
   );
 
   // Notas da loja
