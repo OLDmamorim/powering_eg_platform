@@ -916,3 +916,9 @@
 ## Bug: Notas — HTML em bruto nos cards e layout mobile
 - [ ] Cards de notas mostram HTML em bruto (tags <b>, <div>, &nbsp;) — usar dangerouslySetInnerHTML nos cards
 - [ ] Vista mobile mostra layout antigo em vez de post-its — verificar se o redesign foi aplicado correctamente
+
+## Melhorias Controlo de Stock - Março 2026
+- [x] Mostrar contagem de itens sem classificação no card global "Sem Fichas" (abaixo da percentagem)
+- [x] Mostrar contagem de itens sem classificação em cada card de loja no Controlo de Stock
+- [x] Campo de busca de eurocode no painel do gestor (mostra resultado por loja com status)
+- [x] Campo de busca de eurocode no portal da loja (busca em todas as lojas, mostra resultado global)

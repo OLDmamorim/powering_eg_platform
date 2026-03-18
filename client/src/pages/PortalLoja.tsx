@@ -249,6 +249,9 @@ export default function PortalLoja() {
   const [filtroClassificacaoStock, setFiltroClassificacaoStock] = useState<string>('todas');
   const [stockTabFilter, setStockTabFilter] = useState<'todos' | 'comFichas' | 'semFichas'>('todos');
   const [searchStockQuery, setSearchStockQuery] = useState('');
+  // Pesquisa global de eurocode (todas as lojas)
+  const [eurocodeGlobalInput, setEurocodeGlobalInput] = useState('');
+  const [eurocodeGlobalSearch, setEurocodeGlobalSearch] = useState('');
   const [analiseIA, setAnaliseIA] = useState<any>(null);
   const [gerandoAnaliseIA, setGerandoAnaliseIA] = useState(false);
   // Estado para texto personalizado de classificação "Outros" (chave: eurocode_unitIndex)
@@ -621,6 +624,12 @@ export default function PortalLoja() {
   const { data: detalheStock, isLoading: detalheStockLoading } = trpc.reunioesQuinzenais.detalheStock.useQuery(
     { token, analiseId: analiseStockSelecionada! },
     { enabled: !!token && !!lojaAuth && !!analiseStockSelecionada }
+  );
+
+  // Pesquisa global de eurocode (todas as lojas)
+  const { data: eurocodeGlobalResultados, isLoading: eurocodeGlobalLoading } = trpc.stock.pesquisarEurocodeGlobal.useQuery(
+    { eurocode: eurocodeGlobalSearch },
+    { enabled: !!token && eurocodeGlobalSearch.length >= 3, staleTime: 30 * 1000 }
   );
 
   // Notas da loja
@@ -4614,6 +4623,81 @@ export default function PortalLoja() {
           ) : (
             /* VISTA LISTA DE ANÁLISES */
             <>
+              {/* Pesquisa Global de Eurocode */}
+              <div className="bg-white border border-blue-200 rounded-xl p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <Search className="h-4 w-4 text-blue-600" />
+                  <span className="font-semibold text-sm text-blue-700">{language === 'pt' ? 'Pesquisar Eurocode (todas as lojas)' : 'Search Eurocode (all stores)'}</span>
+                </div>
+                <div className="flex gap-2 mb-3">
+                  <input
+                    type="text"
+                    placeholder={language === 'pt' ? 'Introduza um eurocode (mín. 3 caracteres)...' : 'Enter a eurocode (min. 3 chars)...'}
+                    value={eurocodeGlobalInput}
+                    onChange={e => setEurocodeGlobalInput(e.target.value)}
+                    onKeyDown={e => { if (e.key === 'Enter') setEurocodeGlobalSearch(eurocodeGlobalInput.trim()); }}
+                    className="flex-1 text-sm border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  />
+                  <button
+                    onClick={() => setEurocodeGlobalSearch(eurocodeGlobalInput.trim())}
+                    disabled={eurocodeGlobalInput.trim().length < 3}
+                    className="px-3 py-2 bg-blue-600 text-white rounded-lg text-sm disabled:opacity-50 hover:bg-blue-700"
+                  >
+                    <Search className="h-4 w-4" />
+                  </button>
+                  {eurocodeGlobalSearch && (
+                    <button
+                      onClick={() => { setEurocodeGlobalSearch(''); setEurocodeGlobalInput(''); }}
+                      className="px-3 py-2 border rounded-lg text-sm text-gray-600 hover:bg-gray-50"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+                {eurocodeGlobalLoading && (
+                  <div className="flex items-center gap-2 text-sm text-gray-500 py-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    {language === 'pt' ? 'A pesquisar...' : 'Searching...'}
+                  </div>
+                )}
+                {eurocodeGlobalSearch && !eurocodeGlobalLoading && eurocodeGlobalResultados && (
+                  eurocodeGlobalResultados.length === 0 ? (
+                    <p className="text-sm text-gray-500 py-2">{language === 'pt' ? `Nenhum resultado para “${eurocodeGlobalSearch}”.` : `No results for “${eurocodeGlobalSearch}”.`}</p>
+                  ) : (
+                    <div className="space-y-2">
+                      <p className="text-xs text-gray-500">{eurocodeGlobalResultados.length} {language === 'pt' ? 'loja(s) com este eurocode:' : 'store(s) with this eurocode:'}</p>
+                      {eurocodeGlobalResultados.map((r: any, idx: number) => (
+                        <div key={idx} className="border rounded-lg p-3 bg-slate-50">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="font-semibold text-sm">{r.nomeLoja}</span>
+                            <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${r.status === 'com_fichas' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
+                              {r.status === 'com_fichas' ? (language === 'pt' ? 'Com Fichas' : 'With Records') : (language === 'pt' ? 'Sem Fichas' : 'No Records')}
+                            </span>
+                          </div>
+                          <p className="text-xs text-gray-500 mb-1 truncate">{r.descricao}</p>
+                          <div className="flex items-center gap-3 text-xs">
+                            <span className="text-blue-600">{language === 'pt' ? 'Qtd' : 'Qty'}: <strong>{r.quantidade}</strong></span>
+                            {r.analiseData && <span className="text-gray-400">{new Date(r.analiseData).toLocaleDateString('pt-PT')}</span>}
+                          </div>
+                          {r.classificacoes && r.classificacoes.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-1.5">
+                              {r.classificacoes.map((c: any, ci: number) => (
+                                <span key={ci} className="text-[10px] border rounded px-1.5 py-0.5 bg-white">
+                                  {c.unitIndex > 1 ? `Un.${c.unitIndex}: ` : ''}{c.observacao || c.classificacao}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                          {r.status === 'sem_fichas' && (!r.classificacoes || r.classificacoes.length === 0) && (
+                            <p className="text-[10px] text-orange-600 mt-1">{language === 'pt' ? 'Sem classificação' : 'No classification'}</p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )
+                )}
+              </div>
+
               {analisesStockLoading ? (
                 <div className="flex items-center justify-center py-12">
                   <Loader2 className="h-8 w-8 animate-spin text-slate-500" />

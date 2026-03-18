@@ -260,6 +260,10 @@ export default function ControloStock() {
   const [outrosTextoMap, setOutrosTextoMap] = useState<Record<string, string>>({});
   const [outrosPendingKey, setOutrosPendingKey] = useState<string | null>(null);
 
+  // Pesquisa de eurocode
+  const [eurocodeSearch, setEurocodeSearch] = useState('');
+  const [eurocodeSearchInput, setEurocodeSearchInput] = useState('');
+
   // Queries
   const { data: infoAnalise } = trpc.stock.infoAnalise.useQuery({});
   const { data: historico } = trpc.stock.historico.useQuery({}, { enabled: view === 'historico' });
@@ -277,6 +281,11 @@ export default function ControloStock() {
   const { data: detalheAnalise } = trpc.stock.detalhe.useQuery(
     { id: detalheAnaliseId || detalheId! },
     { enabled: !!(detalheAnaliseId || detalheId) && view === 'detalhe' }
+  );
+
+  const { data: eurocodeResultados, isLoading: eurocodeLoading } = trpc.stock.pesquisarEurocode.useQuery(
+    { eurocode: eurocodeSearch },
+    { enabled: eurocodeSearch.length >= 3, staleTime: 30 * 1000 }
   );
 
   // Mutations
@@ -911,6 +920,11 @@ export default function ControloStock() {
                       <CardContent className="pt-3 pb-3 text-center">
                         <div className="text-xl md:text-2xl font-bold text-amber-600">{totais.totalSemFichas.toLocaleString('pt-PT')}</div>
                         <div className="text-[10px] sm:text-xs text-muted-foreground">Sem Fichas ({percentSemFichas}%)</div>
+                        {(totais as any).totalSemClassificacao !== undefined && (
+                          <div className="text-[10px] sm:text-xs text-orange-600 font-medium mt-0.5">
+                            {(totais as any).totalSemClassificacao} s/ classificação
+                          </div>
+                        )}
                       </CardContent>
                     </Card>
                     <Card className="border-green-200 bg-green-50/50">
@@ -1002,6 +1016,12 @@ export default function ControloStock() {
                                   <span className="text-muted-foreground">Sem Fichas:</span>
                                   <span className="font-medium text-amber-600">{loja.totalSemFichasAjustado ?? loja.totalSemFichas}</span>
                                 </div>
+                                {loja.semClassificacao > 0 && (
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-muted-foreground text-[10px]">S/ Classificação:</span>
+                                    <span className="font-medium text-orange-600 text-[10px]">{loja.semClassificacao}</span>
+                                  </div>
+                                )}
                                 <div className="flex items-center justify-between">
                                   <span className="text-muted-foreground">Com Fichas:</span>
                                   <span className="font-medium text-green-600">{loja.totalComFichasAjustado ?? loja.totalComFichas}</span>
@@ -1030,6 +1050,84 @@ export default function ControloStock() {
                       })}
                     </div>
                   </div>
+
+                  {/* Pesquisa de Eurocode */}
+                  <Card className="border-blue-200">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm flex items-center gap-2 text-blue-700">
+                        <Search className="h-4 w-4" />
+                        Pesquisar Eurocode
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex gap-2 mb-3">
+                        <Input
+                          placeholder="Introduza um eurocode (mín. 3 caracteres)..."
+                          value={eurocodeSearchInput}
+                          onChange={e => setEurocodeSearchInput(e.target.value)}
+                          onKeyDown={e => { if (e.key === 'Enter') setEurocodeSearch(eurocodeSearchInput.trim()); }}
+                          className="flex-1 text-sm"
+                        />
+                        <Button
+                          size="sm"
+                          onClick={() => setEurocodeSearch(eurocodeSearchInput.trim())}
+                          disabled={eurocodeSearchInput.trim().length < 3}
+                        >
+                          <Search className="h-4 w-4" />
+                        </Button>
+                        {eurocodeSearch && (
+                          <Button size="sm" variant="outline" onClick={() => { setEurocodeSearch(''); setEurocodeSearchInput(''); }}>
+                            ✕
+                          </Button>
+                        )}
+                      </div>
+                      {eurocodeLoading && (
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground py-2">
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          A pesquisar...
+                        </div>
+                      )}
+                      {eurocodeSearch && !eurocodeLoading && eurocodeResultados && (
+                        eurocodeResultados.length === 0 ? (
+                          <p className="text-sm text-muted-foreground py-2">Nenhum resultado encontrado para “{eurocodeSearch}”.</p>
+                        ) : (
+                          <div className="space-y-2">
+                            <p className="text-xs text-muted-foreground">{eurocodeResultados.length} loja(s) com este eurocode:</p>
+                            {eurocodeResultados.map((r: any, idx: number) => (
+                              <div key={idx} className="border rounded-lg p-3 bg-slate-50">
+                                <div className="flex items-center justify-between mb-1">
+                                  <div className="flex items-center gap-2">
+                                    <Store className="h-3.5 w-3.5 text-blue-600" />
+                                    <span className="font-semibold text-sm">{r.nomeLoja}</span>
+                                  </div>
+                                  <Badge className={r.status === 'com_fichas' ? 'bg-green-100 text-green-700 border-green-300' : 'bg-amber-100 text-amber-700 border-amber-300'}>
+                                    {r.status === 'com_fichas' ? 'Com Fichas' : 'Sem Fichas'}
+                                  </Badge>
+                                </div>
+                                <p className="text-xs text-muted-foreground mb-1 truncate">{r.descricao}</p>
+                                <div className="flex items-center gap-3 text-xs">
+                                  <span className="text-blue-600">Qtd: <strong>{r.quantidade}</strong></span>
+                                  {r.analiseData && <span className="text-muted-foreground">{new Date(r.analiseData).toLocaleDateString('pt-PT')}</span>}
+                                </div>
+                                {r.classificacoes && r.classificacoes.length > 0 && (
+                                  <div className="flex flex-wrap gap-1 mt-1.5">
+                                    {r.classificacoes.map((c: any, ci: number) => (
+                                      <Badge key={ci} variant="outline" className="text-[10px] px-1.5 py-0">
+                                        {c.unitIndex > 1 ? `Un.${c.unitIndex}: ` : ''}{c.observacao || c.classificacao}
+                                      </Badge>
+                                    ))}
+                                  </div>
+                                )}
+                                {r.status === 'sem_fichas' && (!r.classificacoes || r.classificacoes.length === 0) && (
+                                  <p className="text-[10px] text-orange-600 mt-1">Sem classificação</p>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )
+                      )}
+                    </CardContent>
+                  </Card>
 
                   {/* Top lojas sem fichas */}
                   {topSemFichas && topSemFichas.length > 0 && (

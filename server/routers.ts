@@ -13166,6 +13166,16 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
           analises = await db.getDashboardStock(gestorId);
         }
         
+        // Calcular contadores de itens sem classificação por loja
+        const lojaIdsAnalises = analises.map(a => a.lojaId).filter(Boolean) as number[];
+        const semClassificacaoMap = await db.getContadorSemClassificacao(lojaIdsAnalises);
+
+        // Enriquecer análises com semClassificacao
+        const analisesEnriquecidas = analises.map(a => ({
+          ...a,
+          semClassificacao: a.lojaId ? (semClassificacaoMap[a.lojaId] ?? 0) : 0,
+        }));
+
         // Calcular totais
         const totais = {
           totalLojas: analises.length,
@@ -13173,6 +13183,7 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
           totalComFichas: analises.reduce((sum, a) => sum + (a.totalComFichas || 0), 0),
           totalSemFichas: analises.reduce((sum, a) => sum + (a.totalSemFichas || 0), 0),
           totalFichasSemStock: analises.reduce((sum, a) => sum + (a.totalFichasSemStock || 0), 0),
+          totalSemClassificacao: Object.values(semClassificacaoMap).reduce((s, v) => s + v, 0),
           ultimaAnalise: analises.length > 0 ? analises.reduce((latest, a) => {
             return new Date(a.createdAt) > new Date(latest.createdAt) ? a : latest;
           }).createdAt : null,
@@ -13184,7 +13195,30 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
           .slice(0, 5)
           .map(a => ({ nomeLoja: a.nomeLoja || 'Loja', totalSemFichas: a.totalSemFichas || 0 }));
         
-        return { totais, analises, topSemFichas };
+        return { totais, analises: analisesEnriquecidas, topSemFichas };
+      }),
+
+    // Pesquisar eurocode em todas as lojas (ou nas lojas do gestor)
+    pesquisarEurocode: gestorProcedure
+      .input(z.object({
+        eurocode: z.string().min(1),
+      }))
+      .query(async ({ ctx, input }) => {
+        const isAdmin = ctx.user.role === 'admin';
+        const gestorId = isAdmin ? undefined : ctx.gestor?.id;
+        const resultados = await db.pesquisarEurocode(input.eurocode, gestorId);
+        return resultados;
+      }),
+
+    // Pesquisar eurocode em todas as lojas (para o portal da loja - sem filtro de loja)
+    pesquisarEurocodeGlobal: protectedProcedure
+      .input(z.object({
+        eurocode: z.string().min(1),
+      }))
+      .query(async ({ ctx, input }) => {
+        // Qualquer utilizador autenticado pode pesquisar (loja ou gestor)
+        const resultados = await db.pesquisarEurocode(input.eurocode);
+        return resultados;
       }),
 
     // Evolução temporal de stock (todas as análises agrupadas por data)

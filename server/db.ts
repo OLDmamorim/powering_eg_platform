@@ -13260,3 +13260,217 @@ export async function eliminarNotaLoja(id: number, lojaId: number) {
   await db.delete(notasLoja)
     .where(and(eq(notasLoja.id, id), eq(notasLoja.lojaId, lojaId)));
 }
+
+/**
+ * Contar itens sem classificação por loja (dos itens sem fichas, quantos não têm classificação)
+ * Retorna: para cada loja, o número de itens sem fichas que não têm classificação activa
+ */
+export async function getContadorSemClassificacao(lojaIds: number[]): Promise<Record<number, number>> {
+  const db = await getDb();
+  if (!db || lojaIds.length === 0) return {};
+
+  // Para cada loja, obter a última análise e as classificações activas
+  const resultado: Record<number, number> = {};
+
+  for (const lojaId of lojaIds) {
+    // Obter a última análise
+    const [ultimaAnalise] = await db.select({
+      id: analisesStock.id,
+      resultadoAnalise: analisesStock.resultadoAnalise,
+      totalSemFichas: analisesStock.totalSemFichas,
+    })
+      .from(analisesStock)
+      .where(eq(analisesStock.lojaId, lojaId))
+      .orderBy(desc(analisesStock.createdAt))
+      .limit(1);
+
+    if (!ultimaAnalise) {
+      resultado[lojaId] = 0;
+      continue;
+    }
+
+    // Obter eurocodes sem fichas da última análise
+    let semFichasRefs: string[] = [];
+    try {
+      const parsed = ultimaAnalise.resultadoAnalise ? JSON.parse(ultimaAnalise.resultadoAnalise) : null;
+      if (parsed?.semFichas) {
+        // semFichas é array de {ref, descricao, quantidade}
+        // Expandir por quantidade (cada unidade é um item)
+        for (const item of parsed.semFichas) {
+          const qty = item.quantidade || 1;
+          for (let i = 0; i < qty; i++) {
+            semFichasRefs.push(item.ref?.toUpperCase()?.trim() || '');
+          }
+        }
+      }
+    } catch {
+      resultado[lojaId] = 0;
+      continue;
+    }
+
+    if (semFichasRefs.length === 0) {
+      resultado[lojaId] = 0;
+      continue;
+    }
+
+    // Obter classificações activas desta loja
+    const classifs = await db.select({
+      eurocode: classificacoesEurocode.eurocode,
+      unitIndex: classificacoesEurocode.unitIndex,
+    })
+      .from(classificacoesEurocode)
+      .where(and(
+        eq(classificacoesEurocode.lojaId, lojaId),
+        eq(classificacoesEurocode.activo, true)
+      ));
+
+    // Criar set de chaves classificadas (eurocode_unitIndex)
+    const classificadasSet = new Set(classifs.map(c => `${c.eurocode.toUpperCase().trim()}_${c.unitIndex}`));
+
+    // Contar itens sem classificação
+    // Para cada ref, verificar se existe classificação para cada unitIndex (1, 2, ...)
+    // Reconstruir por ref e quantidade
+    let semClassificacao = 0;
+    try {
+      const parsed = ultimaAnalise.resultadoAnalise ? JSON.parse(ultimaAnalise.resultadoAnalise) : null;
+      if (parsed?.semFichas) {
+        for (const item of parsed.semFichas) {
+          const ref = item.ref?.toUpperCase()?.trim() || '';
+          const qty = item.quantidade || 1;
+          for (let i = 1; i <= qty; i++) {
+            const key = `${ref}_${i}`;
+            if (!classificadasSet.has(key)) {
+              semClassificacao++;
+            }
+          }
+        }
+      }
+    } catch {
+      semClassificacao = 0;
+    }
+
+    resultado[lojaId] = semClassificacao;
+  }
+
+  return resultado;
+}
+
+/**
+ * Pesquisar eurocode em todas as lojas (ou nas lojas de um gestor)
+ * Retorna: lista de lojas onde o eurocode aparece, com status e classificação
+ */
+export async function pesquisarEurocode(eurocode: string, gestorId?: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  const eurocodeNorm = eurocode.toUpperCase().trim();
+
+  // Obter lojas a pesquisar
+  let lojaIds: number[] = [];
+  if (gestorId) {
+    const lojasGestor = await db
+      .select({ lojaId: gestorLojas.lojaId })
+      .from(gestorLojas)
+      .where(eq(gestorLojas.gestorId, gestorId));
+    lojaIds = lojasGestor.map(l => l.lojaId);
+  } else {
+    const todasLojas = await db.select({ id: lojas.id, nome: lojas.nome }).from(lojas);
+    lojaIds = todasLojas.map(l => l.id);
+  }
+
+  if (lojaIds.length === 0) return [];
+
+  const resultados: Array<{
+    lojaId: number;
+    nomeLoja: string;
+    eurocode: string;
+    descricao: string;
+    quantidade: number;
+    status: 'com_fichas' | 'sem_fichas';
+    classificacoes: Array<{
+      unitIndex: number;
+      classificacao: string;
+      observacao?: string;
+    }>;
+    analiseData: Date | null;
+  }> = [];
+
+  for (const lojaId of lojaIds) {
+    // Obter a última análise desta loja
+    const [ultimaAnalise] = await db.select({
+      id: analisesStock.id,
+      nomeLoja: analisesStock.nomeLoja,
+      resultadoAnalise: analisesStock.resultadoAnalise,
+      createdAt: analisesStock.createdAt,
+    })
+      .from(analisesStock)
+      .where(eq(analisesStock.lojaId, lojaId))
+      .orderBy(desc(analisesStock.createdAt))
+      .limit(1);
+
+    if (!ultimaAnalise) continue;
+
+    let found = false;
+    let descricao = '';
+    let quantidade = 0;
+    let status: 'com_fichas' | 'sem_fichas' = 'sem_fichas';
+
+    try {
+      const parsed = ultimaAnalise.resultadoAnalise ? JSON.parse(ultimaAnalise.resultadoAnalise) : null;
+      if (parsed) {
+        // Verificar em semFichas
+        const semFichasItem = (parsed.semFichas || []).find((i: any) => i.ref?.toUpperCase()?.trim() === eurocodeNorm);
+        if (semFichasItem) {
+          found = true;
+          descricao = semFichasItem.descricao || '';
+          quantidade = semFichasItem.quantidade || 1;
+          status = 'sem_fichas';
+        }
+        // Verificar em comFichas
+        if (!found) {
+          const comFichasItem = (parsed.comFichas || []).find((i: any) => i.ref?.toUpperCase()?.trim() === eurocodeNorm);
+          if (comFichasItem) {
+            found = true;
+            descricao = comFichasItem.descricao || '';
+            quantidade = comFichasItem.quantidade || 1;
+            status = 'com_fichas';
+          }
+        }
+      }
+    } catch {
+      continue;
+    }
+
+    if (!found) continue;
+
+    // Obter classificações activas para este eurocode nesta loja
+    const classifs = await db.select({
+      unitIndex: classificacoesEurocode.unitIndex,
+      classificacao: classificacoesEurocode.classificacao,
+      observacao: classificacoesEurocode.observacao,
+    })
+      .from(classificacoesEurocode)
+      .where(and(
+        eq(classificacoesEurocode.lojaId, lojaId),
+        eq(classificacoesEurocode.eurocode, eurocodeNorm),
+        eq(classificacoesEurocode.activo, true)
+      ));
+
+    resultados.push({
+      lojaId,
+      nomeLoja: ultimaAnalise.nomeLoja || `Loja ${lojaId}`,
+      eurocode: eurocodeNorm,
+      descricao,
+      quantidade,
+      status,
+      classificacoes: classifs.map(c => ({
+        unitIndex: c.unitIndex,
+        classificacao: c.classificacao,
+        observacao: c.observacao || undefined,
+      })),
+      analiseData: ultimaAnalise.createdAt,
+    });
+  }
+
+  return resultados;
+}
