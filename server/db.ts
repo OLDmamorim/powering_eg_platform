@@ -13473,3 +13473,101 @@ export async function pesquisarEurocode(eurocode: string, gestorId?: number) {
 
   return resultados;
 }
+
+/**
+ * Obter lista detalhada de eurocodes sem classificação, agrupados por loja
+ * Para exportação Excel
+ */
+export async function getEurocodesSemClassificacao(lojaIds: number[]): Promise<{
+  lojaId: number;
+  nomeLoja: string;
+  eurocode: string;
+  descricao: string;
+  quantidade: number;
+}[]> {
+  const db = await getDb();
+  if (!db || lojaIds.length === 0) return [];
+
+  const resultados: {
+    lojaId: number;
+    nomeLoja: string;
+    eurocode: string;
+    descricao: string;
+    quantidade: number;
+  }[] = [];
+
+  for (const lojaId of lojaIds) {
+    // Obter a última análise
+    const [ultimaAnalise] = await db.select({
+      id: analisesStock.id,
+      nomeLoja: analisesStock.nomeLoja,
+      resultadoAnalise: analisesStock.resultadoAnalise,
+    })
+      .from(analisesStock)
+      .where(eq(analisesStock.lojaId, lojaId))
+      .orderBy(desc(analisesStock.createdAt))
+      .limit(1);
+
+    if (!ultimaAnalise) continue;
+
+    // Obter classificações activas desta loja
+    const classifs = await db.select({
+      eurocode: classificacoesEurocode.eurocode,
+      unitIndex: classificacoesEurocode.unitIndex,
+      classificacao: classificacoesEurocode.classificacao,
+    })
+      .from(classificacoesEurocode)
+      .where(and(
+        eq(classificacoesEurocode.lojaId, lojaId),
+        eq(classificacoesEurocode.activo, true)
+      ));
+
+    const classificadasSet = new Set(classifs.map(c => `${c.eurocode.toUpperCase().trim()}_${c.unitIndex}`));
+
+    try {
+      const parsed = ultimaAnalise.resultadoAnalise ? JSON.parse(ultimaAnalise.resultadoAnalise) : null;
+      if (parsed?.semFichas) {
+        for (const item of parsed.semFichas) {
+          const ref = item.ref?.toUpperCase()?.trim() || '';
+          const qty = item.quantidade || 1;
+
+          // Excluir linhas totalmente reclassificadas como com_ficha_servico
+          let todasComFichaServico = true;
+          for (let i = 1; i <= qty; i++) {
+            const key = `${ref}_${i}`;
+            const classif = classifs.find(c => `${c.eurocode.toUpperCase().trim()}_${c.unitIndex}` === key);
+            if (!classif || classif.classificacao !== 'com_ficha_servico') {
+              todasComFichaServico = false;
+              break;
+            }
+          }
+          if (todasComFichaServico) continue;
+
+          // Verificar se alguma unidade tem classificação
+          let temAlgumaClassificacao = false;
+          for (let i = 1; i <= qty; i++) {
+            const key = `${ref}_${i}`;
+            if (classificadasSet.has(key)) {
+              temAlgumaClassificacao = true;
+              break;
+            }
+          }
+
+          if (!temAlgumaClassificacao) {
+            resultados.push({
+              lojaId,
+              nomeLoja: ultimaAnalise.nomeLoja || `Loja ${lojaId}`,
+              eurocode: ref,
+              descricao: item.descricao || '',
+              quantidade: qty,
+            });
+          }
+        }
+      }
+    } catch {
+      continue;
+    }
+  }
+
+  return resultados;
+}

@@ -923,3 +923,6 @@
 - [x] Campo de busca de eurocode no painel do gestor (mostra resultado por loja com status)
 - [x] Campo de busca de eurocode no portal da loja (busca em todas as lojas, mostra resultado global)
 - [x] Bug fix: S/ Classificação contava por unidades expandidas em vez de por linhas (como Sem Fichas), causando valores superiores
+- [x] Mini barra de progresso de classificação em cada card de loja (ex: 12/16 classificados)
+- [x] Botão para ordenar lojas por S/ Classificação (priorizando as com mais trabalho pendente)
+- [x] Botão para exportar Excel com eurocodes sem classificação agrupados por loja

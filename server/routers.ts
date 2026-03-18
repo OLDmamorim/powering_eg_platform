@@ -13221,6 +13221,26 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
         return resultados;
       }),
 
+    // Exportar eurocodes sem classificação (para Excel)
+    exportarSemClassificacao: gestorProcedure
+      .query(async ({ ctx }) => {
+        const isAdmin = ctx.user.role === 'admin';
+        
+        let lojaIds: number[];
+        if (isAdmin) {
+          const analises = await db.getDashboardStockAdmin();
+          lojaIds = analises.map(a => a.lojaId).filter(Boolean) as number[];
+        } else {
+          const gestorId = ctx.gestor?.id;
+          if (!gestorId) throw new TRPCError({ code: 'FORBIDDEN', message: 'Gestor não encontrado' });
+          const analises = await db.getDashboardStock(gestorId);
+          lojaIds = analises.map(a => a.lojaId).filter(Boolean) as number[];
+        }
+        
+        const itens = await db.getEurocodesSemClassificacao(lojaIds);
+        return itens;
+      }),
+
     // Evolução temporal de stock (todas as análises agrupadas por data)
     evolucaoStock: gestorProcedure
       .query(async ({ ctx }) => {

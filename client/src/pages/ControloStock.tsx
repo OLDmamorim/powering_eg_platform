@@ -41,6 +41,8 @@ import {
   ChevronUp,
   LayoutDashboard,
   RefreshCw,
+  ArrowUpDown,
+  Download,
 } from 'lucide-react';
 import ExcelJS from 'exceljs';
 import * as XLSX from 'xlsx';
@@ -263,6 +265,9 @@ export default function ControloStock() {
   // Pesquisa de eurocode
   const [eurocodeSearch, setEurocodeSearch] = useState('');
   const [eurocodeSearchInput, setEurocodeSearchInput] = useState('');
+
+  // Ordenação das lojas
+  const [sortMode, setSortMode] = useState<'semFichas' | 'semClassificacao'>('semFichas');
 
   // Queries
   const { data: infoAnalise } = trpc.stock.infoAnalise.useQuery({});
@@ -966,12 +971,66 @@ export default function ControloStock() {
 
                   {/* Lojas em cards/quadrados */}
                   <div>
-                    <h2 className="text-base font-semibold flex items-center gap-2 mb-3">
-                      <Store className="h-4 w-4 text-blue-600" />
-                      Resumo por Loja
-                    </h2>
+                    <div className="flex items-center justify-between mb-3">
+                      <h2 className="text-base font-semibold flex items-center gap-2">
+                        <Store className="h-4 w-4 text-blue-600" />
+                        Resumo por Loja
+                      </h2>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-xs h-7 gap-1"
+                          onClick={() => setSortMode(sortMode === 'semFichas' ? 'semClassificacao' : 'semFichas')}
+                        >
+                          <ArrowUpDown className="h-3 w-3" />
+                          {sortMode === 'semFichas' ? '% S/ Fichas' : 'S/ Classif.'}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-xs h-7 gap-1"
+                          onClick={async () => {
+                            try {
+                              toast.info('A gerar Excel...');
+                              const dados = await utils.stock.exportarSemClassificacao.fetch();
+                              if (!dados || dados.length === 0) {
+                                toast.info('N\u00e3o h\u00e1 eurocodes sem classifica\u00e7\u00e3o.');
+                                return;
+                              }
+                              const wb = new ExcelJS.Workbook();
+                              const ws = wb.addWorksheet('Sem Classifica\u00e7\u00e3o');
+                              ws.columns = [
+                                { header: 'Loja', key: 'nomeLoja', width: 25 },
+                                { header: 'Eurocode', key: 'eurocode', width: 18 },
+                                { header: 'Descri\u00e7\u00e3o', key: 'descricao', width: 35 },
+                                { header: 'Quantidade', key: 'quantidade', width: 12 },
+                              ];
+                              // Header styling
+                              ws.getRow(1).eachCell(cell => {
+                                cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+                                cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF2563EB' } };
+                                cell.alignment = { horizontal: 'center' };
+                              });
+                              dados.forEach((item: any) => ws.addRow(item));
+                              const buffer = await wb.xlsx.writeBuffer();
+                              saveAs(new Blob([buffer]), `sem_classificacao_${new Date().toISOString().slice(0,10)}.xlsx`);
+                              toast.success('Excel exportado!');
+                            } catch (e) {
+                              toast.error('Erro ao exportar Excel');
+                            }
+                          }}
+                        >
+                          <Download className="h-3 w-3" />
+                          S/ Classif.
+                        </Button>
+                      </div>
+                    </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                       {analises && [...analises].sort((a: any, b: any) => {
+                        if (sortMode === 'semClassificacao') {
+                          return (b.semClassificacao || 0) - (a.semClassificacao || 0);
+                        }
                         const percA = a.totalItensStock > 0 ? ((a.totalSemFichasAjustado ?? a.totalSemFichas) / a.totalItensStock) : 0;
                         const percB = b.totalItensStock > 0 ? ((b.totalSemFichasAjustado ?? b.totalSemFichas) / b.totalItensStock) : 0;
                         return percB - percA;
@@ -1016,12 +1075,25 @@ export default function ControloStock() {
                                   <span className="text-muted-foreground">Sem Fichas:</span>
                                   <span className="font-medium text-amber-600">{loja.totalSemFichasAjustado ?? loja.totalSemFichas}</span>
                                 </div>
-                                {loja.semClassificacao > 0 && (
-                                  <div className="flex items-center justify-between">
-                                    <span className="text-muted-foreground text-[10px]">S/ Classificação:</span>
-                                    <span className="font-medium text-orange-600 text-[10px]">{loja.semClassificacao}</span>
-                                  </div>
-                                )}
+                                {(() => {
+                                  const semFichasVal = loja.totalSemFichasAjustado ?? loja.totalSemFichas;
+                                  const classificados = Math.max(0, semFichasVal - (loja.semClassificacao || 0));
+                                  const progresso = semFichasVal > 0 ? (classificados / semFichasVal) * 100 : 100;
+                                  const progressColor = progresso >= 80 ? 'bg-green-500' : progresso >= 50 ? 'bg-amber-500' : 'bg-red-500';
+                                  return (
+                                    <div className="mt-0.5">
+                                      <div className="flex items-center justify-between mb-0.5">
+                                        <span className="text-muted-foreground text-[10px]">Classificados:</span>
+                                        <span className={`font-medium text-[10px] ${progresso >= 80 ? 'text-green-600' : progresso >= 50 ? 'text-amber-600' : 'text-red-600'}`}>
+                                          {classificados}/{semFichasVal}
+                                        </span>
+                                      </div>
+                                      <div className="h-1 rounded-full overflow-hidden bg-gray-200">
+                                        <div className={`h-full ${progressColor} transition-all`} style={{ width: `${progresso}%` }} />
+                                      </div>
+                                    </div>
+                                  );
+                                })()}
                                 <div className="flex items-center justify-between">
                                   <span className="text-muted-foreground">Com Fichas:</span>
                                   <span className="font-medium text-green-600">{loja.totalComFichasAjustado ?? loja.totalComFichas}</span>
