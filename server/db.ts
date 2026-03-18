@@ -13313,7 +13313,8 @@ export async function getContadorSemClassificacao(lojaIds: number[]): Promise<Re
       continue;
     }
 
-    // Obter classificações activas desta loja
+    // Obter classificações activas desta loja PARA A ÚLTIMA ANÁLISE APENAS
+    // Filtrar por ultimaAnaliseId para não incluir classificações de análises antigas
     const classifs = await db.select({
       eurocode: classificacoesEurocode.eurocode,
       unitIndex: classificacoesEurocode.unitIndex,
@@ -13321,15 +13322,15 @@ export async function getContadorSemClassificacao(lojaIds: number[]): Promise<Re
       .from(classificacoesEurocode)
       .where(and(
         eq(classificacoesEurocode.lojaId, lojaId),
-        eq(classificacoesEurocode.activo, true)
+        eq(classificacoesEurocode.activo, true),
+        eq(classificacoesEurocode.ultimaAnaliseId, ultimaAnalise.id)
       ));
 
     // Criar set de chaves classificadas (eurocode_unitIndex)
     const classificadasSet = new Set(classifs.map(c => `${c.eurocode.toUpperCase().trim()}_${c.unitIndex}`));
 
-    // Contar itens sem classificação
+    // Contar itens sem classificação na última análise
     // Para cada ref, verificar se existe classificação para cada unitIndex (1, 2, ...)
-    // Reconstruir por ref e quantidade
     let semClassificacao = 0;
     try {
       const parsed = ultimaAnalise.resultadoAnalise ? JSON.parse(ultimaAnalise.resultadoAnalise) : null;
