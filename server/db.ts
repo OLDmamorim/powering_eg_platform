@@ -13289,48 +13289,24 @@ export async function getContadorSemClassificacao(lojaIds: number[]): Promise<Re
       continue;
     }
 
-    // Obter eurocodes sem fichas da última análise
-    let semFichasRefs: string[] = [];
-    try {
-      const parsed = ultimaAnalise.resultadoAnalise ? JSON.parse(ultimaAnalise.resultadoAnalise) : null;
-      if (parsed?.semFichas) {
-        // semFichas é array de {ref, descricao, quantidade}
-        // Expandir por quantidade (cada unidade é um item)
-        for (const item of parsed.semFichas) {
-          const qty = item.quantidade || 1;
-          for (let i = 0; i < qty; i++) {
-            semFichasRefs.push(item.ref?.toUpperCase()?.trim() || '');
-          }
-        }
-      }
-    } catch {
-      resultado[lojaId] = 0;
-      continue;
-    }
-
-    if (semFichasRefs.length === 0) {
-      resultado[lojaId] = 0;
-      continue;
-    }
-
-    // Obter classificações activas desta loja PARA A ÚLTIMA ANÁLISE APENAS
-    // Filtrar por ultimaAnaliseId para não incluir classificações de análises antigas
+    // Obter classificações activas desta loja (persistem entre análises)
     const classifs = await db.select({
       eurocode: classificacoesEurocode.eurocode,
       unitIndex: classificacoesEurocode.unitIndex,
+      classificacao: classificacoesEurocode.classificacao,
     })
       .from(classificacoesEurocode)
       .where(and(
         eq(classificacoesEurocode.lojaId, lojaId),
-        eq(classificacoesEurocode.activo, true),
-        eq(classificacoesEurocode.ultimaAnaliseId, ultimaAnalise.id)
+        eq(classificacoesEurocode.activo, true)
       ));
 
     // Criar set de chaves classificadas (eurocode_unitIndex)
     const classificadasSet = new Set(classifs.map(c => `${c.eurocode.toUpperCase().trim()}_${c.unitIndex}`));
 
-    // Contar itens sem classificação na última análise
-    // Para cada ref, verificar se existe classificação para cada unitIndex (1, 2, ...)
+    // Contar LINHAS sem classificação (consistente com "Sem Fichas" que conta linhas)
+    // Uma linha é "sem classificação" se NENHUMA das suas unidades tiver classificação
+    // Excluir linhas totalmente reclassificadas como com_ficha_servico (já não contam como "sem fichas")
     let semClassificacao = 0;
     try {
       const parsed = ultimaAnalise.resultadoAnalise ? JSON.parse(ultimaAnalise.resultadoAnalise) : null;
@@ -13338,11 +13314,33 @@ export async function getContadorSemClassificacao(lojaIds: number[]): Promise<Re
         for (const item of parsed.semFichas) {
           const ref = item.ref?.toUpperCase()?.trim() || '';
           const qty = item.quantidade || 1;
+          
+          // Verificar se TODAS as unidades estão reclassificadas como com_ficha_servico
+          let todasComFichaServico = true;
           for (let i = 1; i <= qty; i++) {
             const key = `${ref}_${i}`;
-            if (!classificadasSet.has(key)) {
-              semClassificacao++;
+            const classif = classifs.find(c => `${c.eurocode.toUpperCase().trim()}_${c.unitIndex}` === key);
+            if (!classif || classif.classificacao !== 'com_ficha_servico') {
+              todasComFichaServico = false;
+              break;
             }
+          }
+          
+          // Se todas as unidades são com_ficha_servico, esta linha já não conta como "sem fichas"
+          if (todasComFichaServico) continue;
+          
+          // Verificar se alguma unidade tem classificação (qualquer tipo)
+          let temAlgumaClassificacao = false;
+          for (let i = 1; i <= qty; i++) {
+            const key = `${ref}_${i}`;
+            if (classificadasSet.has(key)) {
+              temAlgumaClassificacao = true;
+              break;
+            }
+          }
+          
+          if (!temAlgumaClassificacao) {
+            semClassificacao++;
           }
         }
       }

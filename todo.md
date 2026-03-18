@@ -922,3 +922,4 @@
 - [x] Mostrar contagem de itens sem classificação em cada card de loja no Controlo de Stock
 - [x] Campo de busca de eurocode no painel do gestor (mostra resultado por loja com status)
 - [x] Campo de busca de eurocode no portal da loja (busca em todas as lojas, mostra resultado global)
+- [x] Bug fix: S/ Classificação contava por unidades expandidas em vez de por linhas (como Sem Fichas), causando valores superiores
