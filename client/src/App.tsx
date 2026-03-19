@@ -36,6 +36,7 @@ const LogAtribuicoes = lazy(() => import("./pages/LogAtribuicoes"));
 const PortalGestor = lazy(() => import("./pages/PortalGestor"));
 const AnaliseFichas = lazy(() => import("./pages/AnaliseFichas"));
 const ControloStock = lazy(() => import("./pages/ControloStock"));
+const AgendamentosGestor = lazy(() => import("./pages/AgendamentosGestor"));
 const Documentos = lazy(() => import("./pages/Documentos"));
 const RelatorioLivre = lazy(() => import("./pages/RelatorioLivre"));
 const RelatorioCompleto = lazy(() => import("./pages/RelatorioCompleto"));
@@ -179,6 +180,7 @@ function Router() {
         <Route path={"/portal-gestor"} component={PortalGestor} />
         <Route path={"/analise-fichas"} component={AnaliseFichas} />
         <Route path={"/controlo-stock"} component={ControloStock} />
+        <Route path={"/agendamentos-gestor"} component={AgendamentosGestor} />
         <Route path={"/documentos"} component={Documentos} />
         <Route path={"/relatorio-livre"} component={RelatorioLivre} />
         <Route path={"/relatorio-completo"} component={RelatorioCompleto} />

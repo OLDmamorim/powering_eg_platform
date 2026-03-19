@@ -1783,3 +1783,48 @@ export const notasLoja = mysqlTable("notas_loja", {
 });
 export type NotaLoja = typeof notasLoja.$inferSelect;
 export type InsertNotaLoja = typeof notasLoja.$inferInsert;
+
+/**
+ * Localidades de Agendamento - Localidades partilhadas para o módulo de agendamentos
+ * Geridas pelo gestor, visíveis por todas as lojas da zona
+ */
+export const localidadesAgendamento = mysqlTable("localidades_agendamento", {
+  id: int("id").autoincrement().primaryKey(),
+  gestorId: int("gestorId").notNull(),
+  nome: varchar("nome", { length: 100 }).notNull(),
+  cor: varchar("cor", { length: 20 }).notNull().default("#9CA3AF"),
+  activo: boolean("activo").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type LocalidadeAgendamento = typeof localidadesAgendamento.$inferSelect;
+export type InsertLocalidadeAgendamento = typeof localidadesAgendamento.$inferInsert;
+
+/**
+ * Agendamentos Loja - Serviços de vidro automóvel agendados por cada loja
+ */
+export const agendamentosLoja = mysqlTable("agendamentos_loja", {
+  id: int("id").autoincrement().primaryKey(),
+  lojaId: int("lojaId").notNull(),
+  gestorId: int("gestorId").notNull(),
+  matricula: varchar("matricula", { length: 20 }).notNull(),
+  viatura: varchar("viatura", { length: 150 }),
+  tipoServico: mysqlEnum("tipoServico", ["PB", "LT", "OC", "REP", "POL"]).notNull(),
+  localidade: varchar("localidade", { length: 100 }),
+  data: varchar("data", { length: 10 }),
+  periodo: mysqlEnum("periodo", ["manha", "tarde"]),
+  estadoVidro: mysqlEnum("estadoVidro", ["nao_encomendado", "encomendado", "terminado"]).notNull().default("nao_encomendado"),
+  morada: varchar("morada", { length: 500 }),
+  telefone: varchar("telefone", { length: 20 }),
+  notas: text("notas"),
+  extra: varchar("extra", { length: 255 }),
+  km: int("km"),
+  sortIndex: int("sortIndex").default(1).notNull(),
+  obraNo: int("obraNo"),
+  anulado: boolean("anulado").default(false).notNull(),
+  motivoAnulacao: varchar("motivoAnulacao", { length: 255 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type AgendamentoLoja = typeof agendamentosLoja.$inferSelect;
+export type InsertAgendamentoLoja = typeof agendamentosLoja.$inferInsert;

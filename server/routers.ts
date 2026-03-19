@@ -13622,4 +13622,131 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
         };
       }),
   }),
+
+  // ============================================================
+  // AGENDAMENTOS LOJA
+  // ============================================================
+  agendamentos: router({
+    // Listar localidades (via token loja ou gestor autenticado)
+    listarLocalidades: publicProcedure
+      .input(z.object({ token: z.string().optional() }))
+      .query(async ({ input, ctx }) => {
+        let gId: number | null = null;
+        if (input.token) {
+          const auth = await db.validarTokenLoja(input.token);
+          if (!auth) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+          const gestor = await db.getGestorByLojaId(auth.loja.id);
+          if (gestor) gId = gestor.id;
+        } else if (ctx.user) {
+          const gestor = await db.getGestorByUserId(ctx.user.id);
+          if (gestor) gId = gestor.id;
+        }
+        if (!gId) return [];
+        return await db.getLocalidadesAgendamento(gId);
+      }),
+
+    // Criar localidade (gestor)
+    criarLocalidade: gestorProcedure
+      .input(z.object({ nome: z.string().min(1).max(100), cor: z.string().min(4).max(20) }))
+      .mutation(async ({ input, ctx }) => {
+        const gestor = await db.getGestorByUserId(ctx.user.id);
+        if (!gestor) throw new TRPCError({ code: 'FORBIDDEN', message: 'Gestor não encontrado' });
+        return await db.criarLocalidadeAgendamento(gestor.id, input.nome, input.cor);
+      }),
+
+    // Apagar localidade (gestor)
+    apagarLocalidade: gestorProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input, ctx }) => {
+        const gestor = await db.getGestorByUserId(ctx.user.id);
+        if (!gestor) throw new TRPCError({ code: 'FORBIDDEN', message: 'Gestor não encontrado' });
+        await db.apagarLocalidadeAgendamento(input.id, gestor.id);
+        return { ok: true };
+      }),
+
+    // Listar agendamentos da loja (via token)
+    listarPorLoja: publicProcedure
+      .input(z.object({ token: z.string() }))
+      .query(async ({ input }) => {
+        const auth = await db.validarTokenLoja(input.token);
+        if (!auth) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        return await db.getAgendamentosLoja(auth.loja.id);
+      }),
+
+    // Listar agendamentos de todas as lojas (gestor)
+    listarTodos: gestorProcedure
+      .query(async ({ ctx }) => {
+        const gestor = await db.getGestorByUserId(ctx.user.id);
+        if (!gestor) throw new TRPCError({ code: 'FORBIDDEN', message: 'Gestor não encontrado' });
+        return await db.getAgendamentosGestor(gestor.id);
+      }),
+
+    // Criar agendamento (via token loja)
+    criar: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        matricula: z.string().min(1).max(20),
+        viatura: z.string().max(150).optional(),
+        tipoServico: z.enum(["PB", "LT", "OC", "REP", "POL"]),
+        localidade: z.string().max(100).optional(),
+        data: z.string().max(10).optional(),
+        periodo: z.enum(["manha", "tarde"]).optional(),
+        estadoVidro: z.enum(["nao_encomendado", "encomendado", "terminado"]).optional(),
+        morada: z.string().max(500).optional(),
+        telefone: z.string().max(20).optional(),
+        notas: z.string().optional(),
+        extra: z.string().max(255).optional(),
+        km: z.number().optional(),
+        obraNo: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { token, ...dados } = input;
+        const auth = await db.validarTokenLoja(token);
+        if (!auth) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        const gestor = await db.getGestorByLojaId(auth.loja.id);
+        if (!gestor) throw new TRPCError({ code: 'FORBIDDEN', message: 'Loja sem gestor associado' });
+        return await db.criarAgendamento({ ...dados, lojaId: auth.loja.id, gestorId: gestor.id });
+      }),
+
+    // Atualizar agendamento (via token loja)
+    atualizar: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        id: z.number(),
+        matricula: z.string().min(1).max(20).optional(),
+        viatura: z.string().max(150).optional(),
+        tipoServico: z.enum(["PB", "LT", "OC", "REP", "POL"]).optional(),
+        localidade: z.string().max(100).optional(),
+        data: z.string().max(10).nullable().optional(),
+        periodo: z.enum(["manha", "tarde"]).nullable().optional(),
+        estadoVidro: z.enum(["nao_encomendado", "encomendado", "terminado"]).optional(),
+        morada: z.string().max(500).optional(),
+        telefone: z.string().max(20).optional(),
+        notas: z.string().optional(),
+        extra: z.string().max(255).optional(),
+        km: z.number().optional(),
+        sortIndex: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { token, id, ...updates } = input;
+        const auth = await db.validarTokenLoja(token);
+        if (!auth) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        const filtered = Object.fromEntries(
+          Object.entries(updates).filter(([, v]) => v !== undefined)
+        ) as Parameters<typeof db.atualizarAgendamento>[2];
+        await db.atualizarAgendamento(id, auth.loja.id, filtered);
+        return { ok: true };
+      }),
+
+    // Anular agendamento (via token loja)
+    anular: publicProcedure
+      .input(z.object({ token: z.string(), id: z.number(), motivo: z.string().optional() }))
+      .mutation(async ({ input }) => {
+        const auth = await db.validarTokenLoja(input.token);
+        if (!auth) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        await db.anularAgendamento(input.id, auth.loja.id, input.motivo);
+        return { ok: true };
+      }),
+  }),
+
 });

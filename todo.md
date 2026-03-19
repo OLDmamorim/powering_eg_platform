@@ -927,3 +927,17 @@
 - [x] Botão para ordenar lojas por S/ Classificação (priorizando as com mais trabalho pendente)
 - [x] Botão para exportar Excel com eurocodes sem classificação agrupados por loja
 - [ ] Bug fix: Campo de busca por eurocode não funciona
+
+## Módulo de Agendamentos
+- [ ] Schema: tabela agendamentos_loja (matrícula, viatura, tipo, localidade, data, período, estado vidro, morada, tel, notas)
+- [ ] Schema: tabela localidades_agendamento (nome, cor, gestorId)
+- [ ] Backend: CRUD agendamentos por loja (token auth)
+- [ ] Backend: Gestão de localidades pelo gestor
+- [ ] Backend: Vista gestor - agendamentos de todas as lojas
+- [ ] Frontend Portal Loja: aba Agendamentos com calendário semanal
+- [ ] Frontend Portal Loja: lista de serviços por agendar (sem data)
+- [ ] Frontend Portal Loja: modal criar/editar serviço
+- [ ] Frontend Portal Loja: drag & drop entre dias/períodos
+- [ ] Frontend Portal Loja: estado do vidro (NE/VE/ST)
+- [ ] Frontend Gestor: vista calendário de todas as lojas
+- [ ] Frontend Gestor: gestão de localidades (adicionar/remover/cor)

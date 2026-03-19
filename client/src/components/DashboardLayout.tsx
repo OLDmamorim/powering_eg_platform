@@ -103,6 +103,7 @@ const getMenuGroups = (userRole?: string, t?: (key: string) => string): MenuGrou
         { icon: FileText, label: 'Documentos', path: "/documentos", show: isGestor || isAdmin, showBadge: false },
         { icon: FileSpreadsheet, label: tr('menu.items.analiseFichas', 'Análise Fichas'), path: "/analise-fichas", show: isGestor || isAdmin, showBadge: false },
         { icon: Warehouse, label: 'Controlo Stock', path: "/controlo-stock", show: isGestor || isAdmin, showBadge: false },
+        { icon: CalendarDays, label: 'Agendamentos', path: "/agendamentos-gestor", show: isGestor || isAdmin, showBadge: false },
         { icon: StickyNote, label: tr('menu.items.notas', 'Notas'), path: "/notas", show: true, showBadge: false },
         { icon: Package, label: 'Recepção Vidros', path: "/recepcao-vidros", show: isAdmin, showBadge: false },
       ]

@@ -13571,3 +13571,101 @@ export async function getEurocodesSemClassificacao(lojaIds: number[]): Promise<{
 
   return resultados;
 }
+
+// ============================================================
+// AGENDAMENTOS LOJA
+// ============================================================
+
+export async function getLocalidadesAgendamento(gestorId: number) {
+  const { localidadesAgendamento } = await import("../drizzle/schema");
+  const { eq, and } = await import("drizzle-orm");
+  const rows = await db.select().from(localidadesAgendamento)
+    .where(and(eq(localidadesAgendamento.gestorId, gestorId), eq(localidadesAgendamento.activo, true)))
+    .orderBy(localidadesAgendamento.nome);
+  return rows;
+}
+
+export async function criarLocalidadeAgendamento(gestorId: number, nome: string, cor: string) {
+  const { localidadesAgendamento } = await import("../drizzle/schema");
+  const [row] = await db.insert(localidadesAgendamento).values({ gestorId, nome, cor }).$returningId();
+  return row;
+}
+
+export async function apagarLocalidadeAgendamento(id: number, gestorId: number) {
+  const { localidadesAgendamento } = await import("../drizzle/schema");
+  const { eq, and } = await import("drizzle-orm");
+  await db.update(localidadesAgendamento)
+    .set({ activo: false })
+    .where(and(eq(localidadesAgendamento.id, id), eq(localidadesAgendamento.gestorId, gestorId)));
+}
+
+export async function getAgendamentosLoja(lojaId: number) {
+  const { agendamentosLoja } = await import("../drizzle/schema");
+  const { eq, and } = await import("drizzle-orm");
+  const rows = await db.select().from(agendamentosLoja)
+    .where(and(eq(agendamentosLoja.lojaId, lojaId), eq(agendamentosLoja.anulado, false)))
+    .orderBy(agendamentosLoja.data, agendamentosLoja.sortIndex, agendamentosLoja.createdAt);
+  return rows;
+}
+
+export async function getAgendamentosGestor(gestorId: number) {
+  const { agendamentosLoja, lojas } = await import("../drizzle/schema");
+  const { eq, and } = await import("drizzle-orm");
+  const rows = await db.select({
+    agendamento: agendamentosLoja,
+    nomeLoja: lojas.nome,
+  }).from(agendamentosLoja)
+    .leftJoin(lojas, eq(agendamentosLoja.lojaId, lojas.id))
+    .where(and(eq(agendamentosLoja.gestorId, gestorId), eq(agendamentosLoja.anulado, false)))
+    .orderBy(agendamentosLoja.data, agendamentosLoja.sortIndex);
+  return rows;
+}
+
+export async function criarAgendamento(data: {
+  lojaId: number; gestorId: number; matricula: string; viatura?: string;
+  tipoServico: "PB" | "LT" | "OC" | "REP" | "POL"; localidade?: string;
+  data?: string; periodo?: "manha" | "tarde";
+  estadoVidro?: "nao_encomendado" | "encomendado" | "terminado";
+  morada?: string; telefone?: string; notas?: string; extra?: string;
+  km?: number; sortIndex?: number; obraNo?: number;
+}) {
+  const { agendamentosLoja } = await import("../drizzle/schema");
+  const [row] = await db.insert(agendamentosLoja).values({
+    ...data,
+    estadoVidro: data.estadoVidro || "nao_encomendado",
+    sortIndex: data.sortIndex || 1,
+  }).$returningId();
+  return row;
+}
+
+export async function atualizarAgendamento(id: number, lojaId: number, updates: Partial<{
+  matricula: string; viatura: string; tipoServico: "PB" | "LT" | "OC" | "REP" | "POL";
+  localidade: string; data: string; periodo: "manha" | "tarde";
+  estadoVidro: "nao_encomendado" | "encomendado" | "terminado";
+  morada: string; telefone: string; notas: string; extra: string;
+  km: number; sortIndex: number; obraNo: number;
+}>) {
+  const { agendamentosLoja } = await import("../drizzle/schema");
+  const { eq, and } = await import("drizzle-orm");
+  await db.update(agendamentosLoja).set(updates)
+    .where(and(eq(agendamentosLoja.id, id), eq(agendamentosLoja.lojaId, lojaId)));
+}
+
+export async function anularAgendamento(id: number, lojaId: number, motivo?: string) {
+  const { agendamentosLoja } = await import("../drizzle/schema");
+  const { eq, and } = await import("drizzle-orm");
+  await db.update(agendamentosLoja)
+    .set({ anulado: true, motivoAnulacao: motivo || null })
+    .where(and(eq(agendamentosLoja.id, id), eq(agendamentosLoja.lojaId, lojaId)));
+}
+
+export async function getGestorByLojaId(lojaId: number): Promise<Gestor | undefined> {
+  const { gestorLojas, gestores } = await import("../drizzle/schema");
+  const { eq } = await import("drizzle-orm");
+  const rows = await db.select({ gestor: gestores })
+    .from(gestorLojas)
+    .innerJoin(gestores, eq(gestorLojas.gestorId, gestores.id))
+    .where(eq(gestorLojas.lojaId, lojaId))
+    .limit(1);
+  return rows[0]?.gestor;
+}
