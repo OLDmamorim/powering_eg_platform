@@ -307,10 +307,9 @@ function AgendamentosLoja({ token, language }: Props) {
       if (res.fichas && res.fichas.length > 0) {
         const ficha = res.fichas[0];
         setFichaEncontrada({ ...ficha, lojaActual: res.lojaActual });
-        // Auto-preencher campos
+        // Auto-preencher campos (manter matrícula formatada com hífens)
         setForm(f => ({
           ...f,
-          matricula: matNorm,
           viatura: ficha.marca && ficha.modelo ? `${ficha.marca} ${ficha.modelo}` : f.viatura,
           extra: ficha.eurocode || f.extra,
           obraNo: ficha.obrano?.toString() || f.obraNo,
@@ -325,13 +324,29 @@ function AgendamentosLoja({ token, language }: Props) {
     }
   };
 
+  // Formata matrícula portuguesa: XX-00-XX, 00-XX-00, 00-00-XX, XX-XX-00
+  const formatarMatricula = (raw: string): string => {
+    // Remover tudo excepto letras e números, uppercase
+    const clean = raw.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    if (clean.length <= 2) return clean;
+    if (clean.length <= 4) return `${clean.slice(0, 2)}-${clean.slice(2)}`;
+    return `${clean.slice(0, 2)}-${clean.slice(2, 4)}-${clean.slice(4, 6)}`;
+  };
+
   const handleMatriculaChange = (val: string) => {
-    const upper = val.toUpperCase();
-    setMatriculaPesquisa(upper);
-    setForm(f => ({ ...f, matricula: upper }));
+    // Se o utilizador está a apagar (val mais curto que o actual), deixar apagar livremente
+    const formatted = formatarMatricula(val);
+    setMatriculaPesquisa(formatted);
+    setForm(f => ({ ...f, matricula: formatted }));
     setFichaEncontrada(null);
     if (pesquisaTimeoutRef.current) clearTimeout(pesquisaTimeoutRef.current);
-    pesquisaTimeoutRef.current = setTimeout(() => pesquisarMatricula(upper), 600);
+    // Só pesquisa quando tiver pelo menos 6 caracteres (sem hífens = 6 chars alfanuméricos)
+    const cleanLen = formatted.replace(/-/g, '').length;
+    if (cleanLen >= 6) {
+      pesquisaTimeoutRef.current = setTimeout(() => pesquisarMatricula(formatted), 400);
+    } else if (cleanLen >= 4) {
+      pesquisaTimeoutRef.current = setTimeout(() => pesquisarMatricula(formatted), 600);
+    }
   };
 
   const handleSubmit = () => {

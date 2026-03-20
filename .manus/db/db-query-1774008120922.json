@@ -1,0 +1,55 @@
+{
+  "query": "SELECT matricula, marca, modelo, eurocode, obrano, nomeLoja, lojaId FROM eurocodes_fichas WHERE matricula LIKE '%BT%35%ZB%' OR matricula LIKE '%BT35ZB%' LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT matricula, marca, modelo, eurocode, obrano, nomeLoja, lojaId FROM eurocodes_fichas WHERE matricula LIKE '%BT%35%ZB%' OR matricula LIKE '%BT35ZB%' LIMIT 5;",
+  "rows": [
+    {
+      "matricula": "BT-35-ZB",
+      "marca": "TESLA",
+      "modelo": "3",
+      "eurocode": "#8104BGSSABKTZ1F",
+      "obrano": "244",
+      "nomeLoja": "Braga",
+      "lojaId": "180010"
+    },
+    {
+      "matricula": "BT-35-ZB",
+      "marca": "TESLA",
+      "modelo": "3",
+      "eurocode": "#8104BGSSABKTZ1F",
+      "obrano": "244",
+      "nomeLoja": "Braga",
+      "lojaId": "180010"
+    },
+    {
+      "matricula": "BT-35-ZB",
+      "marca": "TESLA",
+      "modelo": "3",
+      "eurocode": "#8104BGSSABKTZ1F",
+      "obrano": "244",
+      "nomeLoja": "Braga",
+      "lojaId": "180010"
+    },
+    {
+      "matricula": "BT-35-ZB",
+      "marca": "TESLA",
+      "modelo": "3",
+      "eurocode": "#8104BGSSABKTZ1F",
+      "obrano": "244",
+      "nomeLoja": "Braga",
+      "lojaId": "180010"
+    },
+    {
+      "matricula": "BT-35-ZB",
+      "marca": "TESLA",
+      "modelo": "3",
+      "eurocode": "#8104BGSSABKTZ1F",
+      "obrano": "244",
+      "nomeLoja": "Braga",
+      "lojaId": "180010"
+    }
+  ],
+  "messages": [],
+  "stdout": "matricula\tmarca\tmodelo\teurocode\tobrano\tnomeLoja\tlojaId\nBT-35-ZB\tTESLA\t3\t#8104BGSSABKTZ1F\t244\tBraga\t180010\nBT-35-ZB\tTESLA\t3\t#8104BGSSABKTZ1F\t244\tBraga\t180010\nBT-35-ZB\tTESLA\t3\t#8104BGSSABKTZ1F\t244\tBraga\t180010\nBT-35-ZB\tTESLA\t3\t#8104BGSSABKTZ1F\t244\tBraga\t180010\nBT-35-ZB\tTESLA\t3\t#8104BGSSABKTZ1F\t244\tBraga\t180010\n",
+  "stderr": "",
+  "execution_time_ms": 191
+}
