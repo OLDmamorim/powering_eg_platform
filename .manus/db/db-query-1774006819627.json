@@ -1,0 +1,118 @@
+{
+  "query": "SHOW COLUMNS FROM eurocodes_fichas; SELECT * FROM eurocodes_fichas LIMIT 2;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SHOW COLUMNS FROM eurocodes_fichas; SELECT * FROM eurocodes_fichas LIMIT 2;",
+  "rows": [
+    {
+      "Field": "id",
+      "Type": "int",
+      "Null": "NO",
+      "Key": "PRI",
+      "Default": "NULL",
+      "Extra": "auto_increment"
+    },
+    {
+      "Field": "analiseId",
+      "Type": "int",
+      "Null": "NO",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "lojaId",
+      "Type": "int",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "nomeLoja",
+      "Type": "varchar(255)",
+      "Null": "NO",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "obrano",
+      "Type": "int",
+      "Null": "NO",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "matricula",
+      "Type": "varchar(20)",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "eurocode",
+      "Type": "varchar(100)",
+      "Null": "NO",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "ref",
+      "Type": "varchar(100)",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "marca",
+      "Type": "varchar(100)",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "modelo",
+      "Type": "varchar(100)",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "status",
+      "Type": "varchar(100)",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "diasAberto",
+      "Type": "int",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "createdAt",
+      "Type": "timestamp",
+      "Null": "NO",
+      "Key": "",
+      "Default": "CURRENT_TIMESTAMP",
+      "Extra": ""
+    }
+  ],
+  "messages": [
+    "id\tanaliseId\tlojaId\tnomeLoja\tobrano\tmatricula\teurocode\tref\tmarca\tmodelo\tstatus\tdiasAberto\tcreatedAt",
+    "1\t540001\t180001\tAbrantes\t689\tBD-62-VB\t2467BGNHAJ\t2467BGNHAJ\tBMW\tSERIE 1\tConsulta / Orçamento\t82\t2026-03-07 23:13:32",
+    "2\t540001\t180001\tAbrantes\t35\t14-UM-41\tCODSOLIS90\tCODSOLIS90\tCATERPILLAR\tSOLIS\tRECUSADO\t50\t2026-03-07 23:13:32"
+  ],
+  "stdout": "Field\tType\tNull\tKey\tDefault\tExtra\nid\tint\tNO\tPRI\tNULL\tauto_increment\nanaliseId\tint\tNO\t\tNULL\t\nlojaId\tint\tYES\t\tNULL\t\nnomeLoja\tvarchar(255)\tNO\t\tNULL\t\nobrano\tint\tNO\t\tNULL\t\nmatricula\tvarchar(20)\tYES\t\tNULL\t\neurocode\tvarchar(100)\tNO\t\tNULL\t\nref\tvarchar(100)\tYES\t\tNULL\t\nmarca\tvarchar(100)\tYES\t\tNULL\t\nmodelo\tvarchar(100)\tYES\t\tNULL\t\nstatus\tvarchar(100)\tYES\t\tNULL\t\ndiasAberto\tint\tYES\t\tNULL\t\ncreatedAt\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\t\nid\tanaliseId\tlojaId\tnomeLoja\tobrano\tmatricula\teurocode\tref\tmarca\tmodelo\tstatus\tdiasAberto\tcreatedAt\n1\t540001\t180001\tAbrantes\t689\tBD-62-VB\t2467BGNHAJ\t2467BGNHAJ\tBMW\tSERIE 1\tConsulta / Orçamento\t82\t2026-03-07 23:13:32\n2\t540001\t180001\tAbrantes\t35\t14-UM-41\tCODSOLIS90\tCODSOLIS90\tCATERPILLAR\tSOLIS\tRECUSADO\t50\t2026-03-07 23:13:32\n",
+  "stderr": "",
+  "execution_time_ms": 65
+}

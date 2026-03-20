@@ -1,0 +1,28 @@
+{
+  "query": "SHOW TABLES LIKE '%ficha%'; SHOW TABLES LIKE '%servi%'; SHOW TABLES LIKE '%matricula%'; SHOW TABLES LIKE '%veiculo%';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SHOW TABLES LIKE '%ficha%'; SHOW TABLES LIKE '%servi%'; SHOW TABLES LIKE '%matricula%'; SHOW TABLES LIKE '%veiculo%';",
+  "rows": [
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH (%ficha%)": "analises_fichas_servico"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH (%ficha%)": "eurocodes_fichas"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH (%ficha%)": "fichas_identificadas_analise"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH (%ficha%)": "Tables_in_3c9MozLH35e233uWy5WDtH (%servi%)"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH (%ficha%)": "analises_fichas_servico"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH (%ficha%)": "servicos_volante"
+    }
+  ],
+  "messages": [],
+  "stdout": "Tables_in_3c9MozLH35e233uWy5WDtH (%ficha%)\nanalises_fichas_servico\neurocodes_fichas\nfichas_identificadas_analise\nTables_in_3c9MozLH35e233uWy5WDtH (%servi%)\nanalises_fichas_servico\nservicos_volante\n",
+  "stderr": "",
+  "execution_time_ms": 425
+}

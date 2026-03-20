@@ -1,0 +1,18 @@
+{
+  "query": "SHOW COLUMNS FROM analises_fichas_servico; SELECT id, matricula, marca, modelo, eurocode, nomeCliente, telCliente, emailCliente, tipoServico FROM analises_fichas_servico LIMIT 2;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SHOW COLUMNS FROM analises_fichas_servico; SELECT id, matricula, marca, modelo, eurocode, nomeCliente, telCliente, emailCliente, tipoServico FROM analises_fichas_servico LIMIT 2;",
+  "returncode": 1,
+  "logs": [
+    "Field\tType\tNull\tKey\tDefault\tExtra",
+    "id\tint\tNO\tPRI\tNULL\tauto_increment",
+    "gestorId\tint\tNO\t\tNULL\t",
+    "nomeArquivo\tvarchar(255)\tNO\t\tNULL\t",
+    "dataUpload\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\t",
+    "totalFichas\tint\tNO\t\t0\t",
+    "totalLojas\tint\tNO\t\t0\t",
+    "resumoGeral\ttext\tYES\t\tNULL\t",
+    "createdAt\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\t",
+    "updatedAt\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED on update CURRENT_TIMESTAMP",
+    "ERROR 1054 (42S22) at line 1: Unknown column 'matricula' in 'field list'"
+  ]
+}

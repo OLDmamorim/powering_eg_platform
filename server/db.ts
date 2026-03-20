@@ -13577,6 +13577,8 @@ export async function getEurocodesSemClassificacao(lojaIds: number[]): Promise<{
 // ============================================================
 
 export async function getLocalidadesAgendamento(gestorId: number) {
+  const db = await getDb();
+  if (!db) return [];
   const { localidadesAgendamento } = await import("../drizzle/schema");
   const { eq, and } = await import("drizzle-orm");
   const rows = await db.select().from(localidadesAgendamento)
@@ -13586,12 +13588,16 @@ export async function getLocalidadesAgendamento(gestorId: number) {
 }
 
 export async function criarLocalidadeAgendamento(gestorId: number, nome: string, cor: string) {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
   const { localidadesAgendamento } = await import("../drizzle/schema");
   const [row] = await db.insert(localidadesAgendamento).values({ gestorId, nome, cor }).$returningId();
   return row;
 }
 
 export async function apagarLocalidadeAgendamento(id: number, gestorId: number) {
+  const db = await getDb();
+  if (!db) return;
   const { localidadesAgendamento } = await import("../drizzle/schema");
   const { eq, and } = await import("drizzle-orm");
   await db.update(localidadesAgendamento)
@@ -13600,6 +13606,8 @@ export async function apagarLocalidadeAgendamento(id: number, gestorId: number) 
 }
 
 export async function getAgendamentosLoja(lojaId: number) {
+  const db = await getDb();
+  if (!db) return [];
   const { agendamentosLoja } = await import("../drizzle/schema");
   const { eq, and } = await import("drizzle-orm");
   const rows = await db.select().from(agendamentosLoja)
@@ -13609,6 +13617,8 @@ export async function getAgendamentosLoja(lojaId: number) {
 }
 
 export async function getAgendamentosGestor(gestorId: number) {
+  const db = await getDb();
+  if (!db) return [];
   const { agendamentosLoja, lojas } = await import("../drizzle/schema");
   const { eq, and } = await import("drizzle-orm");
   const rows = await db.select({
@@ -13629,6 +13639,8 @@ export async function criarAgendamento(data: {
   morada?: string; telefone?: string; notas?: string; extra?: string;
   km?: number; sortIndex?: number; obraNo?: number;
 }) {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
   const { agendamentosLoja } = await import("../drizzle/schema");
   const [row] = await db.insert(agendamentosLoja).values({
     ...data,
@@ -13645,6 +13657,8 @@ export async function atualizarAgendamento(id: number, lojaId: number, updates: 
   morada: string; telefone: string; notas: string; extra: string;
   km: number; sortIndex: number; obraNo: number;
 }>) {
+  const db = await getDb();
+  if (!db) return;
   const { agendamentosLoja } = await import("../drizzle/schema");
   const { eq, and } = await import("drizzle-orm");
   await db.update(agendamentosLoja).set(updates)
@@ -13652,6 +13666,8 @@ export async function atualizarAgendamento(id: number, lojaId: number, updates: 
 }
 
 export async function anularAgendamento(id: number, lojaId: number, motivo?: string) {
+  const db = await getDb();
+  if (!db) return;
   const { agendamentosLoja } = await import("../drizzle/schema");
   const { eq, and } = await import("drizzle-orm");
   await db.update(agendamentosLoja)
@@ -13660,6 +13676,8 @@ export async function anularAgendamento(id: number, lojaId: number, motivo?: str
 }
 
 export async function getGestorByLojaId(lojaId: number): Promise<Gestor | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
   const { gestorLojas, gestores } = await import("../drizzle/schema");
   const { eq } = await import("drizzle-orm");
   const rows = await db.select({ gestor: gestores })
@@ -13668,4 +13686,38 @@ export async function getGestorByLojaId(lojaId: number): Promise<Gestor | undefi
     .where(eq(gestorLojas.lojaId, lojaId))
     .limit(1);
   return rows[0]?.gestor;
+}
+
+export async function pesquisarMatriculaNasFichas(matricula: string, lojaId: number) {
+  const db = await getDb();
+  if (!db) return { fichas: [], lojaActual: false };
+  const { eurocodesFichas } = await import("../drizzle/schema");
+  const { eq, and, or, like, desc } = await import("drizzle-orm");
+  // Normalizar matrícula: uppercase, e gerar versão com e sem hífens
+  const matUpper = matricula.toUpperCase().trim();
+  const matSemHifens = matUpper.replace(/[-\s]/g, '');
+  // Formato com hífens: XX-00-XX -> inserir hífens se não tiver
+  let matComHifens = matUpper;
+  if (!matUpper.includes('-') && matUpper.length >= 6) {
+    matComHifens = `${matUpper.slice(0, 2)}-${matUpper.slice(2, 4)}-${matUpper.slice(4)}`;
+  }
+  const whereMatricula = or(
+    like(eurocodesFichas.matricula, matUpper),
+    like(eurocodesFichas.matricula, matComHifens),
+    like(eurocodesFichas.matricula, matSemHifens)
+  );
+  // Pesquisa na loja actual
+  const rows = await db.select().from(eurocodesFichas)
+    .where(and(whereMatricula, eq(eurocodesFichas.lojaId, lojaId)))
+    .orderBy(desc(eurocodesFichas.analiseId))
+    .limit(5);
+  if (rows.length > 0) {
+    return { fichas: rows, lojaActual: true };
+  }
+  // Se não encontrou na loja, pesquisa em todas as lojas
+  const rowsGlobal = await db.select().from(eurocodesFichas)
+    .where(whereMatricula)
+    .orderBy(desc(eurocodesFichas.analiseId))
+    .limit(5);
+  return { fichas: rowsGlobal, lojaActual: false };
 }

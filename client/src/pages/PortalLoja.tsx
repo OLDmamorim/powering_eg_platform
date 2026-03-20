@@ -254,6 +254,10 @@ function AgendamentosLoja({ token, language }: Props) {
   const [form, setForm] = useState({ ...emptyForm });
   const [draggedId, setDraggedId] = useState<number | null>(null);
   const [dropTarget, setDropTarget] = useState<{ data: string; periodo: Periodo } | null>(null);
+  const [matriculaPesquisa, setMatriculaPesquisa] = useState('');
+  const [fichaEncontrada, setFichaEncontrada] = useState<any>(null);
+  const [pesquisandoMatricula, setPesquisandoMatricula] = useState(false);
+  const pesquisaTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const weekDates = useMemo(() => getWeekDates(weekBase), [weekBase]);
 
@@ -292,6 +296,43 @@ function AgendamentosLoja({ token, language }: Props) {
     onSuccess: () => { refetch(); toast.success("Serviço anulado!"); },
     onError: (e) => toast.error(e.message),
   });
+
+  // Pesquisa de matrícula com debounce
+  const pesquisarMatricula = async (mat: string) => {
+    const matNorm = mat.trim().toUpperCase();
+    if (matNorm.length < 4) { setFichaEncontrada(null); return; }
+    setPesquisandoMatricula(true);
+    try {
+      const res = await trpc.agendamentos.pesquisarMatricula.query({ token, matricula: matNorm });
+      if (res.fichas && res.fichas.length > 0) {
+        const ficha = res.fichas[0];
+        setFichaEncontrada({ ...ficha, lojaActual: res.lojaActual });
+        // Auto-preencher campos
+        setForm(f => ({
+          ...f,
+          matricula: matNorm,
+          viatura: ficha.marca && ficha.modelo ? `${ficha.marca} ${ficha.modelo}` : f.viatura,
+          extra: ficha.eurocode || f.extra,
+          obraNo: ficha.obrano?.toString() || f.obraNo,
+        }));
+      } else {
+        setFichaEncontrada(null);
+      }
+    } catch {
+      setFichaEncontrada(null);
+    } finally {
+      setPesquisandoMatricula(false);
+    }
+  };
+
+  const handleMatriculaChange = (val: string) => {
+    const upper = val.toUpperCase();
+    setMatriculaPesquisa(upper);
+    setForm(f => ({ ...f, matricula: upper }));
+    setFichaEncontrada(null);
+    if (pesquisaTimeoutRef.current) clearTimeout(pesquisaTimeoutRef.current);
+    pesquisaTimeoutRef.current = setTimeout(() => pesquisarMatricula(upper), 600);
+  };
 
   const handleSubmit = () => {
     if (!form.matricula.trim()) return toast.error("Matrícula obrigatória");
@@ -540,7 +581,7 @@ function AgendamentosLoja({ token, language }: Props) {
 
       {/* Dialog criar/editar */}
       <Dialog open={showForm} onOpenChange={(open) => {
-        if (!open) { setShowForm(false); setEditingId(null); setForm({ ...emptyForm }); }
+        if (!open) { setShowForm(false); setEditingId(null); setForm({ ...emptyForm }); setFichaEncontrada(null); setMatriculaPesquisa(''); }
       }}>
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
@@ -550,11 +591,30 @@ function AgendamentosLoja({ token, language }: Props) {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label>Matrícula *</Label>
-                <Input
-                  value={form.matricula}
-                  onChange={e => setForm(f => ({ ...f, matricula: e.target.value.toUpperCase() }))}
-                  placeholder="AA-00-BB"
-                />
+                <div className="relative">
+                  <Input
+                    value={form.matricula}
+                    onChange={e => handleMatriculaChange(e.target.value)}
+                    placeholder="AA-00-BB"
+                    className={fichaEncontrada ? 'border-green-500 pr-8' : ''}
+                  />
+                  {pesquisandoMatricula && (
+                    <span className="absolute right-2 top-2 text-xs text-muted-foreground animate-pulse">...</span>
+                  )}
+                  {fichaEncontrada && !pesquisandoMatricula && (
+                    <span className="absolute right-2 top-2 text-green-600 text-xs">✓</span>
+                  )}
+                </div>
+                {fichaEncontrada && (
+                  <div className={`mt-1 p-2 rounded text-xs border ${fichaEncontrada.lojaActual ? 'bg-green-50 border-green-200 text-green-800' : 'bg-amber-50 border-amber-200 text-amber-800'}`}>
+                    <div className="font-semibold">{fichaEncontrada.lojaActual ? '✅ Ficha encontrada nesta loja' : '⚠️ Ficha encontrada noutra loja'}</div>
+                    <div><span className="font-medium">Viatura:</span> {fichaEncontrada.marca} {fichaEncontrada.modelo}</div>
+                    {fichaEncontrada.eurocode && <div><span className="font-medium">Eurocode:</span> {fichaEncontrada.eurocode}</div>}
+                    {fichaEncontrada.obrano && <div><span className="font-medium">FS:</span> {fichaEncontrada.obrano}</div>}
+                    {fichaEncontrada.status && <div><span className="font-medium">Estado:</span> {fichaEncontrada.status}</div>}
+                    {!fichaEncontrada.lojaActual && fichaEncontrada.nomeLoja && <div><span className="font-medium">Loja:</span> {fichaEncontrada.nomeLoja}</div>}
+                  </div>
+                )}
               </div>
               <div>
                 <Label>Tipo de Serviço *</Label>

@@ -1,0 +1,50 @@
+{
+  "query": "SELECT matricula, marca, modelo, eurocode, obrano, nomeLoja FROM eurocodes_fichas WHERE matricula IS NOT NULL AND matricula != '' LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT matricula, marca, modelo, eurocode, obrano, nomeLoja FROM eurocodes_fichas WHERE matricula IS NOT NULL AND matricula != '' LIMIT 5;",
+  "rows": [
+    {
+      "matricula": "BD-62-VB",
+      "marca": "BMW",
+      "modelo": "SERIE 1",
+      "eurocode": "2467BGNHAJ",
+      "obrano": "689",
+      "nomeLoja": "Abrantes"
+    },
+    {
+      "matricula": "14-UM-41",
+      "marca": "CATERPILLAR",
+      "modelo": "SOLIS",
+      "eurocode": "CODSOLIS90",
+      "obrano": "35",
+      "nomeLoja": "Abrantes"
+    },
+    {
+      "matricula": "AN-05-MR",
+      "marca": "PEUGEOT",
+      "modelo": "ION",
+      "eurocode": "*6563BYPH",
+      "obrano": "50",
+      "nomeLoja": "Abrantes"
+    },
+    {
+      "matricula": "00-00-00",
+      "marca": "VOLVO",
+      "modelo": "EC",
+      "eurocode": "56121H",
+      "obrano": "110",
+      "nomeLoja": "Abrantes"
+    },
+    {
+      "matricula": "91-33-OZ",
+      "marca": "AUDI",
+      "modelo": "A6",
+      "eurocode": "US8557OCL",
+      "obrano": "128",
+      "nomeLoja": "Abrantes"
+    }
+  ],
+  "messages": [],
+  "stdout": "matricula\tmarca\tmodelo\teurocode\tobrano\tnomeLoja\nBD-62-VB\tBMW\tSERIE 1\t2467BGNHAJ\t689\tAbrantes\n14-UM-41\tCATERPILLAR\tSOLIS\tCODSOLIS90\t35\tAbrantes\nAN-05-MR\tPEUGEOT\tION\t*6563BYPH\t50\tAbrantes\n00-00-00\tVOLVO\tEC\t56121H\t110\tAbrantes\n91-33-OZ\tAUDI\tA6\tUS8557OCL\t128\tAbrantes\n",
+  "stderr": "",
+  "execution_time_ms": 58
+}

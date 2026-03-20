@@ -13664,6 +13664,15 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
         return { ok: true };
       }),
 
+    // Pesquisar matrícula nas fichas de serviço (via token loja)
+    pesquisarMatricula: publicProcedure
+      .input(z.object({ token: z.string(), matricula: z.string().min(1) }))
+      .query(async ({ input }) => {
+        const auth = await db.validarTokenLoja(input.token);
+        if (!auth) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        return await db.pesquisarMatriculaNasFichas(input.matricula, auth.loja.id);
+      }),
+
     // Listar agendamentos da loja (via token)
     listarPorLoja: publicProcedure
       .input(z.object({ token: z.string() }))
