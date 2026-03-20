@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { trpc } from "@/lib/trpc";
 // Imports removidos - PDF agora gerado via servidor
+// v2026-03-20-pesquisa-matricula
 // import html2canvas from 'html2canvas';
 // import jsPDF from 'jspdf';
 import {
