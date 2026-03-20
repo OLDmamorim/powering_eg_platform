@@ -13750,3 +13750,4 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
   }),
 
 });
+export type AppRouter = typeof appRouter;

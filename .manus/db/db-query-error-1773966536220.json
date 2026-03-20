@@ -1,0 +1,8 @@
+{
+  "query": "\nINSERT INTO localidades_agendamento (nome, cor, created_at) VALUES\n('Outra', '#9CA3AF', NOW()),\n('Barcelos', '#F87171', NOW()),\n('Braga', '#34D399', NOW()),\n('Esposende', '#22D3EE', NOW()),\n('Famalicão', '#7E22CE', NOW()),\n('Guimarães', '#FACC15', NOW()),\n('Póvoa de Lanhoso', '#A78BFA', NOW()),\n('Póvoa de Varzim', '#6EE7B7', NOW()),\n('Riba D''Ave', '#FBBF24', NOW()),\n('Trofa', '#C084FC', NOW()),\n('Vieira do Minho', '#93C5FD', NOW()),\n('Vila do Conde', '#1E3A8A', NOW()),\n('Vila Verde', '#86EFAC', NOW());\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute \nINSERT INTO localidades_agendamento (nome, cor, created_at) VALUES\n('Outra', '#9CA3AF', NOW()),\n('Barcelos', '#F87171', NOW()),\n('Braga', '#34D399', NOW()),\n('Esposende', '#22D3EE', NOW()),\n('Famalicão', '#7E22CE', NOW()),\n('Guimarães', '#FACC15', NOW()),\n('Póvoa de Lanhoso', '#A78BFA', NOW()),\n('Póvoa de Varzim', '#6EE7B7', NOW()),\n('Riba D''Ave', '#FBBF24', NOW()),\n('Trofa', '#C084FC', NOW()),\n('Vieira do Minho', '#93C5FD', NOW()),\n('Vila do Conde', '#1E3A8A', NOW()),\n('Vila Verde', '#86EFAC', NOW());\n",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 2: Unknown column 'created_at' in 'field list'"
+  ]
+}

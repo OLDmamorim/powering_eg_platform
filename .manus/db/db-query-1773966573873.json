@@ -1,0 +1,9 @@
+{
+  "query": "\nINSERT INTO localidades_agendamento (gestorId, nome, cor) VALUES\n(30001, 'Outra', '#9CA3AF'),\n(30001, 'Barcelos', '#F87171'),\n(30001, 'Braga', '#34D399'),\n(30001, 'Esposende', '#22D3EE'),\n(30001, 'Famalicão', '#7E22CE'),\n(30001, 'Guimarães', '#FACC15'),\n(30001, 'Póvoa de Lanhoso', '#A78BFA'),\n(30001, 'Póvoa de Varzim', '#6EE7B7'),\n(30001, 'Riba D''Ave', '#FBBF24'),\n(30001, 'Trofa', '#C084FC'),\n(30001, 'Vieira do Minho', '#93C5FD'),\n(30001, 'Vila do Conde', '#1E3A8A'),\n(30001, 'Vila Verde', '#86EFAC');\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute \nINSERT INTO localidades_agendamento (gestorId, nome, cor) VALUES\n(30001, 'Outra', '#9CA3AF'),\n(30001, 'Barcelos', '#F87171'),\n(30001, 'Braga', '#34D399'),\n(30001, 'Esposende', '#22D3EE'),\n(30001, 'Famalicão', '#7E22CE'),\n(30001, 'Guimarães', '#FACC15'),\n(30001, 'Póvoa de Lanhoso', '#A78BFA'),\n(30001, 'Póvoa de Varzim', '#6EE7B7'),\n(30001, 'Riba D''Ave', '#FBBF24'),\n(30001, 'Trofa', '#C084FC'),\n(30001, 'Vieira do Minho', '#93C5FD'),\n(30001, 'Vila do Conde', '#1E3A8A'),\n(30001, 'Vila Verde', '#86EFAC');\n",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 365
+}
