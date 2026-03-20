@@ -6535,10 +6535,6 @@ function VolanteTab({
         </DialogContent>
       </Dialog>
 
-      {/* ===== AGENDAMENTOS ===== */}
-      {activeTab === "agendamentos" && token && (
-        <AgendamentosLoja token={token} language={language} />
-      )}
     </div>
   );
 }
@@ -10226,10 +10222,6 @@ END:VCALENDAR`;
         </DialogContent>
       </Dialog>
 
-      {/* ===== AGENDAMENTOS ===== */}
-      {activeTab === "agendamentos" && token && (
-        <AgendamentosLoja token={token} language={language} />
-      )}
     </div>
   );
 }
@@ -11387,10 +11379,6 @@ function MonitorVidrosSection({ token, language }: { token: string; language: st
         </DialogContent>
       </Dialog>
 
-      {/* ===== AGENDAMENTOS ===== */}
-      {activeTab === "agendamentos" && token && (
-        <AgendamentosLoja token={token} language={language} />
-      )}
     </div>
   );
 }
