@@ -1,0 +1,58 @@
+{
+  "query": "SHOW TABLES LIKE '%token%'; SHOW TABLES LIKE '%loja%';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SHOW TABLES LIKE '%token%'; SHOW TABLES LIKE '%loja%';",
+  "rows": [
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH (%token%)": "tokens_loja"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH (%token%)": "tokens_recalibra"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH (%token%)": "tokens_volante"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH (%token%)": "Tables_in_3c9MozLH35e233uWy5WDtH (%loja%)"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH (%token%)": "agendamentos_loja"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH (%token%)": "gestor_lojas"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH (%token%)": "loja_volante"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH (%token%)": "lojas"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH (%token%)": "notas_loja"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH (%token%)": "pendentes_loja"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH (%token%)": "relacoes_lojas"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH (%token%)": "relatorios_analise_loja"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH (%token%)": "reunioes_lojas"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH (%token%)": "tokens_loja"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH (%token%)": "unidade_lojas"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH (%token%)": "volante_lojas"
+    }
+  ],
+  "messages": [],
+  "stdout": "Tables_in_3c9MozLH35e233uWy5WDtH (%token%)\ntokens_loja\ntokens_recalibra\ntokens_volante\nTables_in_3c9MozLH35e233uWy5WDtH (%loja%)\nagendamentos_loja\ngestor_lojas\nloja_volante\nlojas\nnotas_loja\npendentes_loja\nrelacoes_lojas\nrelatorios_analise_loja\nreunioes_lojas\ntokens_loja\nunidade_lojas\nvolante_lojas\n",
+  "stderr": "",
+  "execution_time_ms": 442
+}

@@ -1,0 +1,22 @@
+{
+  "query": "SELECT l.nome, tl.token FROM lojas l JOIN tokens_loja tl ON l.id = tl.lojaId WHERE tl.ativo = 1 LIMIT 3;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT l.nome, tl.token FROM lojas l JOIN tokens_loja tl ON l.id = tl.lojaId WHERE tl.ativo = 1 LIMIT 3;",
+  "rows": [
+    {
+      "nome": "Famalicão",
+      "token": "qqhN6gb8Yj2bJJ5vs8ff2HUeMWQQghl4cKZWycdHU5AvJT78Q9PsHxRGHUj5TYMw"
+    },
+    {
+      "nome": "Famalicão",
+      "token": "orDS39K11dng0sf59ZviCzvf1S9lFVOmsGWdae0CSWBnfTajpVym5sUzYbBdnQ1Q"
+    },
+    {
+      "nome": "Barcelos",
+      "token": "eJxGRx0j2dGI00GFo3d9uFD83rxxBcI3vywVlJOvhUUPOK6yxYE1MTAe8n9Wxmfv"
+    }
+  ],
+  "messages": [],
+  "stdout": "nome\ttoken\nFamalicão\tqqhN6gb8Yj2bJJ5vs8ff2HUeMWQQghl4cKZWycdHU5AvJT78Q9PsHxRGHUj5TYMw\nFamalicão\torDS39K11dng0sf59ZviCzvf1S9lFVOmsGWdae0CSWBnfTajpVym5sUzYbBdnQ1Q\nBarcelos\teJxGRx0j2dGI00GFo3d9uFD83rxxBcI3vywVlJOvhUUPOK6yxYE1MTAe8n9Wxmfv\n",
+  "stderr": "",
+  "execution_time_ms": 360
+}

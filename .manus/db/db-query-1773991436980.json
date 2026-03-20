@@ -1,0 +1,19 @@
+{
+  "query": "SHOW TABLES LIKE 'agendamentos_loja'; SHOW TABLES LIKE 'localidades_agendamento';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SHOW TABLES LIKE 'agendamentos_loja'; SHOW TABLES LIKE 'localidades_agendamento';",
+  "rows": [
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH (agendamentos_loja)": "agendamentos_loja"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH (agendamentos_loja)": "Tables_in_3c9MozLH35e233uWy5WDtH (localidades_agendamento)"
+    },
+    {
+      "Tables_in_3c9MozLH35e233uWy5WDtH (agendamentos_loja)": "localidades_agendamento"
+    }
+  ],
+  "messages": [],
+  "stdout": "Tables_in_3c9MozLH35e233uWy5WDtH (agendamentos_loja)\nagendamentos_loja\nTables_in_3c9MozLH35e233uWy5WDtH (localidades_agendamento)\nlocalidades_agendamento\n",
+  "stderr": "",
+  "execution_time_ms": 1197
+}

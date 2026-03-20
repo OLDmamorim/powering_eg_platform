@@ -5638,6 +5638,11 @@ export default function PortalLoja() {
         </div>
       )}
 
+      {/* ===== AGENDAMENTOS ===== */}
+      {activeTab === "agendamentos" && token && (
+        <AgendamentosLoja token={token} language={language} />
+      )}
+
       {/* Botão Flutuante de Acesso Rápido às Tarefas - Pulsa quando há NOVAS */}
       {activeTab !== 'tarefas' && activeTab !== 'chatbot' && activeTab !== 'circulares' && activeTab !== 'recepcao_vidros' && (
         <button
