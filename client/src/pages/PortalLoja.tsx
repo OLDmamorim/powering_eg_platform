@@ -477,9 +477,6 @@ function AgendamentosLoja({ token, language }: Props) {
           <CalendarDays className="h-5 w-5 text-blue-500" />
           Agendamentos
         </h2>
-        <Button size="sm" onClick={() => { setForm({ ...emptyForm }); setEditingId(null); setShowForm(true); }}>
-          <Plus className="h-4 w-4 mr-1" /> Novo Serviço
-        </Button>
       </div>
 
       {/* Navegação semana */}
@@ -595,10 +592,8 @@ function AgendamentosLoja({ token, language }: Props) {
         </div>
       )}
 
-      {/* Dialog criar/editar */}
-      <Dialog open={showForm} onOpenChange={(open) => {
-        if (!open) { setShowForm(false); setEditingId(null); setForm({ ...emptyForm }); setFichaEncontrada(null); setMatriculaPesquisa(''); }
-      }}>
+      {/* Dialog criar/editar - REMOVIDO */}
+      <Dialog open={false} onOpenChange={() => {}}>
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingId ? "Editar Serviço" : "Novo Serviço"}</DialogTitle>
@@ -814,7 +809,7 @@ export default function PortalLoja() {
     }
     return null;
   });
-  const [activeTab, setActiveTab] = useState<"home" | "reuniao" | "pendentes" | "historico" | "tarefas" | "resultados" | "volante" | "agenda" | "chatbot" | "circulares" | "recepcao_vidros" | "monitor_vidros" | "analise_stock" | "notas" | "agendamentos">("home");
+  const [activeTab, setActiveTab] = useState<"home" | "reuniao" | "pendentes" | "historico" | "tarefas" | "resultados" | "volante" | "agenda" | "chatbot" | "circulares" | "recepcao_vidros" | "monitor_vidros" | "analise_stock" | "notas" >("home");
   const [filtroTarefas, setFiltroTarefas] = useState<"todas" | "recebidas" | "enviadas" | "internas">("todas");
   // Estado para o filtro de meses do dashboard
   const [mesesSelecionadosDashboard, setMesesSelecionadosDashboard] = useState<MesSelecionado[]>(() => {
@@ -2050,20 +2045,7 @@ export default function PortalLoja() {
                 <p className="text-sm opacity-80">{language === 'pt' ? 'Procedimentos, lembretes e notas internas' : 'Procedures, reminders and internal notes'}</p>
               </CardContent>
             </Card>
-            {/* Card Agendamentos */}
-            <Card 
-              className="cursor-pointer hover:shadow-lg transition-all hover:scale-[1.02] bg-gradient-to-br from-indigo-500 to-blue-700 text-white border-0"
-              onClick={() => setActiveTab("agendamentos")}
-            >
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <CalendarDays className="h-10 w-10 opacity-80" />
-                  <Car className="h-6 w-6 opacity-60" />
-                </div>
-                <h3 className="text-xl font-bold mb-2">{language === 'pt' ? 'Agendamentos' : 'Scheduling'}</h3>
-                <p className="text-sm opacity-80">{language === 'pt' ? 'Calendário semanal de serviços' : 'Weekly service calendar'}</p>
-              </CardContent>
-            </Card>
+
           </div>
         )}
 
@@ -5714,10 +5696,7 @@ export default function PortalLoja() {
         </div>
       )}
 
-      {/* ===== AGENDAMENTOS ===== */}
-      {activeTab === "agendamentos" && token && (
-        <AgendamentosLoja token={token} language={language} />
-      )}
+
 
       {/* Botão Flutuante de Acesso Rápido às Tarefas - Pulsa quando há NOVAS */}
       {activeTab !== 'tarefas' && activeTab !== 'chatbot' && activeTab !== 'circulares' && activeTab !== 'recepcao_vidros' && (
@@ -7536,22 +7515,7 @@ END:VCALENDAR`;
                 </div>
                 {/* Botões de Ação */}
                 <div className="flex flex-wrap gap-2 mt-3">
-                  <Button
-                    size="sm"
-                    className="bg-teal-600 hover:bg-teal-700 text-white"
-                    onClick={() => {
-                      setNovoAgendamentoData('');
-                      setNovoAgendamentoPeriodo('manha');
-                      setNovoAgendamentoLojaId(null);
-                      setNovoAgendamentoTipoApoio(null);
-                      setNovoAgendamentoTitulo('');
-                      setNovoAgendamentoDescricao('');
-                      setCriarAgendamentoOpen(true);
-                    }}
-                  >
-                    <Plus className="h-4 w-4 mr-1" />
-                    {language === 'pt' ? 'Criar Agendamento' : 'Create Appointment'}
-                  </Button>
+
                   <Button
                     size="sm"
                     variant="outline"
