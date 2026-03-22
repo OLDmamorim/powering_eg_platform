@@ -1972,7 +1972,7 @@ export default function PortalLoja() {
                 <div className="flex items-center justify-between mb-4">
                   <CalendarDays className="h-10 w-10 opacity-80" />
                 </div>
-                <h3 className="text-xl font-bold mb-2">{language === 'pt' ? 'Agenda SM' : 'SM Schedule'}</h3>
+                <h3 className="text-xl font-bold mb-2">{language === 'pt' ? 'Agenda' : 'Schedule'}</h3>
                 <p className="text-sm opacity-80">{language === 'pt' ? 'Consultar agenda de serviços SM' : 'Check SM services schedule'}</p>
               </CardContent>
             </Card>
