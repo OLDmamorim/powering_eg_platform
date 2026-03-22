@@ -151,7 +151,7 @@ export async function enviarRelatoriosMensaisRecalibra() {
     }
     
     // Enviar relatórios consolidados para gestores
-    for (const [gestorId, dadosUnidades] of calibragensPorGestor.entries()) {
+    for (const [gestorId, dadosUnidades] of Array.from(calibragensPorGestor.entries())) {
       try {
         const gestor = await db.getGestorById(gestorId);
         if (!gestor || !gestor.email) {

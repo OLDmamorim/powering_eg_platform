@@ -86,10 +86,10 @@ export async function enviarRelatoriosMensaisVolante() {
             }
             
             // Calcular totais
-            const totalSubstituicaoLigeiro = servicosLoja.reduce((acc, s) => acc + (s.substituicaoLigeiro || 0), 0);
-            const totalReparacao = servicosLoja.reduce((acc, s) => acc + (s.reparacao || 0), 0);
-            const totalCalibragem = servicosLoja.reduce((acc, s) => acc + (s.calibragem || 0), 0);
-            const totalOutros = servicosLoja.reduce((acc, s) => acc + (s.outros || 0), 0);
+            const totalSubstituicaoLigeiro = servicosLoja.reduce((acc: number, s: any) => acc + (s.substituicaoLigeiro || 0), 0);
+            const totalReparacao = servicosLoja.reduce((acc: number, s: any) => acc + (s.reparacao || 0), 0);
+            const totalCalibragem = servicosLoja.reduce((acc: number, s: any) => acc + (s.calibragem || 0), 0);
+            const totalOutros = servicosLoja.reduce((acc: number, s: any) => acc + (s.outros || 0), 0);
             const totalGeral = totalSubstituicaoLigeiro + totalReparacao + totalCalibragem + totalOutros;
             const diasAtivos = servicosLoja.length;
             
@@ -170,7 +170,7 @@ export async function enviarRelatoriosMensaisVolante() {
     }
     
     // Enviar relatórios consolidados para gestores
-    for (const [gestorId, dadosLojas] of servicosPorGestor.entries()) {
+    for (const [gestorId, dadosLojas] of Array.from(servicosPorGestor.entries())) {
       try {
         const gestor = await db.getGestorById(gestorId);
         if (!gestor || !gestor.email) {

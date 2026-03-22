@@ -327,7 +327,7 @@ async function generateLojaHistoryInterno(
     let dadosNPS: any = null;
     try {
       // Buscar NPS para os anos do período
-      const anosUnicos = [...new Set([dataInicio.getFullYear(), dataFim.getFullYear()])];
+      const anosUnicos = Array.from(new Set([dataInicio.getFullYear(), dataFim.getFullYear()]));
       for (const ano of anosUnicos) {
         const npsAno = await db.getNPSDadosLoja(lojaId, ano);
         if (npsAno) {

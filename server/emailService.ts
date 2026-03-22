@@ -1096,3 +1096,111 @@ export function gerarHTMLOcorrenciaEstrutural(dados: {
 </body>
 </html>`;
 }
+
+export function gerarHTMLNotificacaoTodo(dados: {
+  tipo: 'nova' | 'reatribuida' | 'status_atualizado' | 'resposta_gestor' | 'devolvida' | 'nova_da_loja' | 'resposta_loja' | 'observacao_loja';
+  titulo: string;
+  descricao: string;
+  prioridade: string;
+  criadoPor: string;
+  lojaNome: string;
+  novoEstado?: string;
+  comentario?: string;
+  resposta?: string;
+}): string {
+  const tipoConfig: Record<string, { label: string; cor: string; emoji: string }> = {
+    nova: { label: 'Nova Tarefa Atribuída', cor: '#3b82f6', emoji: '📋' },
+    reatribuida: { label: 'Tarefa Reatribuída', cor: '#8b5cf6', emoji: '🔄' },
+    status_atualizado: { label: 'Estado de Tarefa Atualizado', cor: '#f59e0b', emoji: '📊' },
+    resposta_gestor: { label: 'Resposta do Gestor', cor: '#10b981', emoji: '💬' },
+    devolvida: { label: 'Tarefa Devolvida', cor: '#ef4444', emoji: '↩️' },
+    nova_da_loja: { label: 'Nova Tarefa da Loja', cor: '#06b6d4', emoji: '🏪' },
+    resposta_loja: { label: 'Resposta da Loja', cor: '#10b981', emoji: '💬' },
+    observacao_loja: { label: 'Observação da Loja', cor: '#f59e0b', emoji: '📝' },
+  };
+
+  const prioridadeTexto: Record<string, string> = {
+    baixa: 'Baixa',
+    media: 'Média',
+    alta: 'Alta',
+    urgente: 'Urgente',
+  };
+
+  const cfg = tipoConfig[dados.tipo] || { label: dados.tipo, cor: '#6b7280', emoji: '📋' };
+
+  return `<!DOCTYPE html>
+<html lang="pt">
+<head><meta charset="UTF-8"></head>
+<body style="font-family: Arial, sans-serif; margin: 40px; color: #333;">
+  <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid ${cfg.cor}; padding-bottom: 20px;">
+    <div style="font-size: 24px; font-weight: bold; color: ${cfg.cor};">PoweringEG</div>
+    <div style="font-size: 18px; margin-top: 10px; color: ${cfg.cor};">${cfg.emoji} ${cfg.label}</div>
+  </div>
+  <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+    <p><strong>Tarefa:</strong> ${dados.titulo}</p>
+    <p><strong>Loja:</strong> ${dados.lojaNome}</p>
+    <p><strong>Prioridade:</strong> ${prioridadeTexto[dados.prioridade] || dados.prioridade}</p>
+    ${dados.descricao ? `<p><strong>Descrição:</strong> ${dados.descricao}</p>` : ''}
+    ${dados.novoEstado ? `<p><strong>Novo Estado:</strong> ${dados.novoEstado}</p>` : ''}
+    ${dados.comentario ? `<p><strong>Comentário:</strong> ${dados.comentario}</p>` : ''}
+    ${dados.resposta ? `<p><strong>Resposta:</strong> ${dados.resposta}</p>` : ''}
+  </div>
+  <p style="color: #6b7280; font-size: 13px;">Por favor, aceda ao portal para mais detalhes.</p>
+  <div style="margin-top: 40px; text-align: center; font-size: 11px; color: #9ca3af;">
+    PoweringEG Platform 2.0 - a IA ao serviço da ExpressGlass
+  </div>
+</body>
+</html>`;
+}
+
+export function gerarHTMLReuniaoQuinzenal(dados: {
+  lojaNome: string;
+  dataReuniao: string | Date;
+  participantes: string[];
+  temasDiscutidos: string;
+  decisoesTomadas: string;
+  observacoes?: string;
+  analiseResultados?: string;
+  planosAcao?: string;
+  pendentes?: any[];
+}): string {
+  const dataFormatada = new Date(dados.dataReuniao).toLocaleDateString('pt-PT', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+  });
+
+  const participantesHTML = dados.participantes.length > 0
+    ? dados.participantes.map(p => `<li style="margin: 4px 0;">${p}</li>`).join('')
+    : '<li style="margin: 4px 0; color: #6b7280;">Sem participantes registados</li>';
+
+  const pendentesHTML = dados.pendentes && dados.pendentes.length > 0
+    ? `<div style="background: #fef3c7; padding: 12px; border-radius: 6px; margin-top: 12px; border-left: 4px solid #f59e0b;">
+        <p style="margin: 0 0 8px; font-weight: bold; color: #92400e;">⚠️ Pendentes em aberto: ${dados.pendentes.length}</p>
+        ${dados.pendentes.slice(0, 5).map((p: any) => `<p style="margin: 2px 0; font-size: 13px; color: #78350f;">• ${p.descricao || p.titulo || 'Pendente'}</p>`).join('')}
+      </div>`
+    : '';
+
+  return `<!DOCTYPE html>
+<html lang="pt">
+<head><meta charset="UTF-8"></head>
+<body style="font-family: Arial, sans-serif; margin: 40px; color: #333;">
+  <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #3b82f6; padding-bottom: 20px;">
+    <div style="font-size: 24px; font-weight: bold; color: #3b82f6;">PoweringEG</div>
+    <div style="font-size: 18px; margin-top: 10px; color: #1d4ed8;">📋 Reunião Quinzenal — ${dados.lojaNome}</div>
+    <div style="font-size: 14px; margin-top: 6px; color: #6b7280;">${dataFormatada}</div>
+  </div>
+  <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+    <p><strong>Participantes:</strong></p>
+    <ul style="margin: 4px 0; padding-left: 20px;">${participantesHTML}</ul>
+  </div>
+  ${dados.temasDiscutidos ? `<div style="margin-bottom: 16px;"><p><strong>Temas Discutidos:</strong></p><p style="white-space: pre-wrap; color: #374151;">${dados.temasDiscutidos}</p></div>` : ''}
+  ${dados.decisoesTomadas ? `<div style="margin-bottom: 16px;"><p><strong>Decisões Tomadas:</strong></p><p style="white-space: pre-wrap; color: #374151;">${dados.decisoesTomadas}</p></div>` : ''}
+  ${dados.analiseResultados ? `<div style="margin-bottom: 16px;"><p><strong>Análise de Resultados:</strong></p><p style="white-space: pre-wrap; color: #374151;">${dados.analiseResultados}</p></div>` : ''}
+  ${dados.planosAcao ? `<div style="margin-bottom: 16px;"><p><strong>Planos de Ação:</strong></p><p style="white-space: pre-wrap; color: #374151;">${dados.planosAcao}</p></div>` : ''}
+  ${dados.observacoes ? `<div style="margin-bottom: 16px;"><p><strong>Observações:</strong></p><p style="white-space: pre-wrap; color: #374151;">${dados.observacoes}</p></div>` : ''}
+  ${pendentesHTML}
+  <div style="margin-top: 40px; text-align: center; font-size: 11px; color: #9ca3af;">
+    PoweringEG Platform 2.0 - a IA ao serviço da ExpressGlass
+  </div>
+</body>
+</html>`;
+}

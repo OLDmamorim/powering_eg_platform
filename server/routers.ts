@@ -7,7 +7,7 @@ import { z } from "zod";
 import * as db from "./db";
 
 import { gerarRelatorioComIA, gerarDicaDashboard, gerarRelatorioIAGestor, gerarRelatorioIAGestorMultiplosMeses } from "./aiService";
-import { sendEmail, gerarHTMLRelatorioLivre, gerarHTMLRelatorioCompleto, gerarHTMLPedidoAprovado, gerarHTMLPedidoReprovado, gerarHTMLPedidoAnulado, gerarHTMLPedidoEditado, gerarHTMLNovoPedidoApoio, gerarHTMLOcorrenciaEstrutural } from "./emailService";
+import { sendEmail, gerarHTMLRelatorioLivre, gerarHTMLRelatorioCompleto, gerarHTMLPedidoAprovado, gerarHTMLPedidoReprovado, gerarHTMLPedidoAnulado, gerarHTMLPedidoEditado, gerarHTMLNovoPedidoApoio, gerarHTMLOcorrenciaEstrutural, gerarHTMLNotificacaoTodo, gerarHTMLReuniaoQuinzenal } from "./emailService";
 import { enviarResumoSemanal, verificarENotificarAlertas } from "./weeklyReport";
 import { gerarPrevisoes, gerarEGuardarPrevisoes } from "./previsaoService";
 import { gerarSugestoesMelhoria, formatarRelatorioLivre, formatarRelatorioCompleto } from "./sugestaoService";
@@ -878,7 +878,8 @@ export const appRouter = router({
           
           const anoActual = new Date().getFullYear();
           const anosHistorico = [anoActual - 1, anoActual];
-          const anosConsulta = [...new Set([...mesesConsulta.map(m => m.ano), ...anosHistorico])];
+          const anosConsultaSet = new Set([...mesesConsulta.map(m => m.ano), ...anosHistorico]);
+          const anosConsulta = Array.from(anosConsultaSet);
           
           for (const ano of anosConsulta) {
             const npsLoja = await db.getNPSDadosLoja(input.lojaId, ano);
@@ -5837,8 +5838,9 @@ IMPORTANTE:
         }
         
         // Obter classificações e recorrências
-        const classificacoes = await db.getClassificacoesEurocode(analise.lojaId);
-        const recorrencias = await db.getRecorrenciaEurocodes(analise.lojaId);
+        const lojaIdParaAnalise = analise.lojaId ?? auth.loja.id;
+        const classificacoes = await db.getClassificacoesEurocode(lojaIdParaAnalise);
+        const recorrencias = await db.getRecorrenciaEurocodes(lojaIdParaAnalise);
         
         return {
           ...analise,
@@ -7393,7 +7395,8 @@ IMPORTANTE:
           // Buscar TODOS os meses do ano actual e anterior para histórico completo
           const anoActual = new Date().getFullYear();
           const anosHistorico = [anoActual - 1, anoActual];
-          const anosConsulta = [...new Set([...mesesConsulta.map(m => m.ano), ...anosHistorico])];
+          const anosConsultaSet = new Set([...mesesConsulta.map(m => m.ano), ...anosHistorico]);
+          const anosConsulta = Array.from(anosConsultaSet);
           
           for (const ano of anosConsulta) {
             const npsLoja = await db.getNPSDadosLoja(lojaIdParaConsulta, ano);
