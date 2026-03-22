@@ -11000,29 +11000,21 @@ IMPORTANTE:
   // ==================== DASHBOARD VOLANTE ====================
   dashboardVolante: router({
     // Estatísticas avançadas com filtros temporais
-    estatisticasAvancadas: protectedProcedure
+    estatisticasAvancadas: publicProcedure
       .input(z.object({
-        dataInicio: z.string().optional(), // ISO date
-        dataFim: z.string().optional(), // ISO date
-        gestorId: z.number().optional(), // Para admin filtrar por gestor
+        dataInicio: z.string().optional(),
+        dataFim: z.string().optional(),
+        token: z.string(),
       }))
-      .query(async ({ ctx, input }) => {
-        const isAdmin = ctx.user.role === 'admin';
-        const isGestor = ctx.user.role === 'gestor';
-        
-        if (!isAdmin && !isGestor) {
-          throw new TRPCError({ code: 'FORBIDDEN', message: 'Acesso negado' });
+      .query(async ({ input }) => {
+        // Autenticação por token do volante
+        const tokenData = await db.validateTokenVolante(input.token);
+        if (!tokenData) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
         }
-        
-        // Se é gestor, buscar suas lojas
-        let lojasIds: number[] = [];
-        if (isGestor) {
-          const gestor = await db.getGestorByUserId(ctx.user.id);
-          if (gestor) {
-            const lojas = await db.getLojasByGestorId(gestor.id);
-            lojasIds = lojas.map(l => l.id);
-          }
-        }
+        const lojas = await db.getLojasByVolanteId(tokenData.volante.id);
+        let lojasIds: number[] = lojas.map(l => l.id);
+        const isAdmin = false;
         
         // Definir período padrão (últimos 30 dias)
         const dataFim = input.dataFim ? new Date(input.dataFim) : new Date();
@@ -11152,28 +11144,21 @@ IMPORTANTE:
       }),
     
     // Exportar dashboard para PDF
-    exportarPDF: protectedProcedure
+    exportarPDF: publicProcedure
       .input(z.object({
         dataInicio: z.string().optional(),
         dataFim: z.string().optional(),
+        token: z.string(),
       }))
-      .mutation(async ({ ctx, input }) => {
-        const isAdmin = ctx.user.role === 'admin';
-        const isGestor = ctx.user.role === 'gestor';
-        
-        if (!isAdmin && !isGestor) {
-          throw new TRPCError({ code: 'FORBIDDEN', message: 'Acesso negado' });
+      .mutation(async ({ input }) => {
+        // Autenticação por token do volante
+        const tokenData = await db.validateTokenVolante(input.token);
+        if (!tokenData) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
         }
-        
-        // Buscar estatísticas (reutilizar lógica)
-        let lojasIds: number[] = [];
-        if (isGestor) {
-          const gestor = await db.getGestorByUserId(ctx.user.id);
-          if (gestor) {
-            const lojas = await db.getLojasByGestorId(gestor.id);
-            lojasIds = lojas.map(l => l.id);
-          }
-        }
+        const lojas = await db.getLojasByVolanteId(tokenData.volante.id);
+        let lojasIds: number[] = lojas.map(l => l.id);
+        const isAdmin = false;
         
         const dataFim = input.dataFim ? new Date(input.dataFim) : new Date();
         const dataInicio = input.dataInicio ? new Date(input.dataInicio) : new Date(dataFim.getTime() - 30 * 24 * 60 * 60 * 1000);

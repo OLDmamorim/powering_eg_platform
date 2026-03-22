@@ -1,10 +1,9 @@
-import { useState, useMemo } from "react";
-import DashboardLayout from "@/components/DashboardLayout";
+import { useState, useMemo, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { trpc } from "@/lib/trpc";
-import { Download, Calendar, TrendingUp, TrendingDown, Users, CheckCircle, XCircle, BarChart3, PieChart, Activity, History } from "lucide-react";
+import { Download, Calendar, TrendingUp, TrendingDown, Users, CheckCircle, XCircle, BarChart3, PieChart, Activity, History, ArrowLeft } from "lucide-react";
 import { HistoricoEnviosVolante } from "@/components/HistoricoEnviosVolante";
 import { Line, Bar, Pie } from "react-chartjs-2";
 import {
@@ -36,9 +35,30 @@ ChartJS.register(
 );
 
 export default function DashboardVolante() {
-  const [periodoSelecionado, setPeriodoSelecionado] = useState<string>("30"); // dias
+  const [token, setToken] = useState<string>("");
+  const [volanteNome, setVolanteNome] = useState<string>("");
+  const [periodoSelecionado, setPeriodoSelecionado] = useState<string>("30");
   const [dataPersonalizadaInicio, setDataPersonalizadaInicio] = useState<string>("");
   const [dataPersonalizadaFim, setDataPersonalizadaFim] = useState<string>("");
+
+  // Carregar token do localStorage (guardado pelo PortalLoja quando o volante faz login)
+  useEffect(() => {
+    const saved = localStorage.getItem("volanteAuth");
+    if (saved) {
+      try {
+        const auth = JSON.parse(saved);
+        if (auth.token) setToken(auth.token);
+        if (auth.volanteNome) setVolanteNome(auth.volanteNome);
+      } catch {
+        // ignore
+      }
+    }
+    // Também tentar loja_token como fallback
+    if (!token) {
+      const lojaToken = localStorage.getItem("loja_token");
+      if (lojaToken) setToken(lojaToken);
+    }
+  }, []);
 
   // Calcular datas baseado no período selecionado
   const { dataInicio, dataFim } = useMemo(() => {
@@ -48,22 +68,20 @@ export default function DashboardVolante() {
         dataFim: dataPersonalizadaFim,
       };
     }
-
     const fim = new Date();
     const dias = parseInt(periodoSelecionado);
     const inicio = new Date(fim.getTime() - dias * 24 * 60 * 60 * 1000);
-
     return {
       dataInicio: inicio.toISOString().split('T')[0],
       dataFim: fim.toISOString().split('T')[0],
     };
   }, [periodoSelecionado, dataPersonalizadaInicio, dataPersonalizadaFim]);
 
-  // Buscar estatísticas avançadas
-  const { data: stats, isLoading } = trpc.dashboardVolante.estatisticasAvancadas.useQuery({
-    dataInicio,
-    dataFim,
-  });
+  // Buscar estatísticas avançadas (só quando tiver token)
+  const { data: stats, isLoading } = trpc.dashboardVolante.estatisticasAvancadas.useQuery(
+    { dataInicio, dataFim, token },
+    { enabled: !!token }
+  );
 
   // Configuração dos gráficos
   const chartOptions = {
@@ -80,7 +98,6 @@ export default function DashboardVolante() {
   // Dados do gráfico de evolução temporal
   const evolucaoData = useMemo(() => {
     if (!stats?.graficos.evolucaoTemporal) return null;
-
     return {
       labels: stats.graficos.evolucaoTemporal.map(e => e.semana),
       datasets: [
@@ -104,10 +121,8 @@ export default function DashboardVolante() {
     };
   }, [stats]);
 
-  // Dados do gráfico de tipos de relatórios
   const tiposRelatoriosData = useMemo(() => {
     if (!stats?.graficos.tiposRelatorios) return null;
-
     return {
       labels: ['Relatórios Livres', 'Relatórios Completos'],
       datasets: [
@@ -121,14 +136,9 @@ export default function DashboardVolante() {
     };
   }, [stats]);
 
-  // Dados do gráfico de visitas por loja (top 10)
   const visitasPorLojaData = useMemo(() => {
     if (!stats?.graficos.visitasPorLoja) return null;
-
-    const top10 = [...stats.graficos.visitasPorLoja]
-      .sort((a, b) => b.visitas - a.visitas)
-      .slice(0, 10);
-
+    const top10 = [...stats.graficos.visitasPorLoja].sort((a, b) => b.visitas - a.visitas).slice(0, 10);
     return {
       labels: top10.map(v => v.lojaNome),
       datasets: [
@@ -143,14 +153,11 @@ export default function DashboardVolante() {
     };
   }, [stats]);
 
-  // Dados do gráfico de pendentes por loja (top 10)
   const pendentesPorLojaData = useMemo(() => {
     if (!stats?.graficos.pendentesPorLoja) return null;
-
     const top10 = [...stats.graficos.pendentesPorLoja]
       .sort((a, b) => (b.pendentes - b.resolvidos) - (a.pendentes - a.resolvidos))
       .slice(0, 10);
-
     return {
       labels: top10.map(p => p.lojaNome),
       datasets: [
@@ -176,12 +183,7 @@ export default function DashboardVolante() {
 
   const handleExportarPDF = async () => {
     try {
-      const result = await exportarPDFMutation.mutateAsync({
-        dataInicio,
-        dataFim,
-      });
-      
-      // Converter base64 para blob e fazer download
+      const result = await exportarPDFMutation.mutateAsync({ dataInicio, dataFim, token });
       const byteCharacters = atob(result.pdf);
       const byteNumbers = new Array(byteCharacters.length);
       for (let i = 0; i < byteCharacters.length; i++) {
@@ -189,7 +191,6 @@ export default function DashboardVolante() {
       }
       const byteArray = new Uint8Array(byteNumbers);
       const blob = new Blob([byteArray], { type: 'application/pdf' });
-      
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -204,40 +205,61 @@ export default function DashboardVolante() {
     }
   };
 
+  // Sem token — redirecionar para o portal
+  if (!token) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardContent className="py-12 text-center">
+            <Activity className="h-12 w-12 mx-auto mb-4 text-blue-400" />
+            <h2 className="text-xl font-semibold mb-2">Acesso Restrito</h2>
+            <p className="text-muted-foreground mb-6">Sessão não encontrada. Por favor, aceda através do portal do volante.</p>
+            <Button onClick={() => window.location.href = '/portal-loja'}>
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Ir para o Portal
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   if (isLoading) {
     return (
-      <DashboardLayout>
-        <div className="flex items-center justify-center h-96">
-          <div className="text-center">
-            <Activity className="h-12 w-12 animate-spin mx-auto mb-4 text-primary" />
-            <p className="text-muted-foreground">A carregar estatísticas...</p>
-          </div>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center">
+        <div className="text-center">
+          <Activity className="h-12 w-12 animate-spin mx-auto mb-4 text-blue-500" />
+          <p className="text-muted-foreground">A carregar estatísticas...</p>
         </div>
-      </DashboardLayout>
+      </div>
     );
   }
 
   return (
-    <DashboardLayout>
-      <div className="space-y-6">
-        {/* Cabeçalho */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">Dashboard do Volante</h1>
-            <p className="text-muted-foreground mt-1">
-              Análise detalhada de visitas e pendentes
-            </p>
-          </div>
-          <Button onClick={handleExportarPDF} variant="outline">
-            <Download className="h-4 w-4 mr-2" />
-            Exportar PDF
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white border-b px-6 py-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="sm" onClick={() => window.location.href = '/portal-loja'}>
+            <ArrowLeft className="h-4 w-4 mr-1" />
+            Voltar
           </Button>
+          <div>
+            <h1 className="text-xl font-bold text-gray-900">Dashboard do Volante</h1>
+            {volanteNome && <p className="text-sm text-muted-foreground">{volanteNome}</p>}
+          </div>
         </div>
+        <Button onClick={handleExportarPDF} variant="outline" size="sm">
+          <Download className="h-4 w-4 mr-2" />
+          Exportar PDF
+        </Button>
+      </div>
 
+      <div className="p-6 space-y-6">
         {/* Filtros */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-base">
               <Calendar className="h-5 w-5" />
               Filtros Temporais
             </CardTitle>
@@ -260,26 +282,15 @@ export default function DashboardVolante() {
                   </SelectContent>
                 </Select>
               </div>
-
               {periodoSelecionado === "personalizado" && (
                 <>
                   <div className="flex-1 min-w-[200px]">
                     <label className="text-sm font-medium mb-2 block">Data Início</label>
-                    <input
-                      type="date"
-                      value={dataPersonalizadaInicio}
-                      onChange={(e) => setDataPersonalizadaInicio(e.target.value)}
-                      className="w-full px-3 py-2 border rounded-md"
-                    />
+                    <input type="date" value={dataPersonalizadaInicio} onChange={(e) => setDataPersonalizadaInicio(e.target.value)} className="w-full px-3 py-2 border rounded-md" />
                   </div>
                   <div className="flex-1 min-w-[200px]">
                     <label className="text-sm font-medium mb-2 block">Data Fim</label>
-                    <input
-                      type="date"
-                      value={dataPersonalizadaFim}
-                      onChange={(e) => setDataPersonalizadaFim(e.target.value)}
-                      className="w-full px-3 py-2 border rounded-md"
-                    />
+                    <input type="date" value={dataPersonalizadaFim} onChange={(e) => setDataPersonalizadaFim(e.target.value)} className="w-full px-3 py-2 border rounded-md" />
                   </div>
                 </>
               )}
@@ -289,181 +300,97 @@ export default function DashboardVolante() {
 
         {/* Cards de Resumo */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900 border-blue-200 dark:border-blue-800">
+          <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-blue-900 dark:text-blue-100 flex items-center gap-2">
-                <Users className="h-4 w-4" />
-                Total de Visitas
+              <CardTitle className="text-sm font-medium text-blue-900 flex items-center gap-2">
+                <Users className="h-4 w-4" />Total de Visitas
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-blue-900 dark:text-blue-100">
-                {stats?.resumo.totalVisitas || 0}
-              </div>
+              <div className="text-3xl font-bold text-blue-900">{stats?.resumo.totalVisitas || 0}</div>
             </CardContent>
           </Card>
-
-          <Card className="bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-950 dark:to-amber-900 border-amber-200 dark:border-amber-800">
+          <Card className="bg-gradient-to-br from-amber-50 to-amber-100 border-amber-200">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-amber-900 dark:text-amber-100 flex items-center gap-2">
-                <XCircle className="h-4 w-4" />
-                Pendentes em Aberto
+              <CardTitle className="text-sm font-medium text-amber-900 flex items-center gap-2">
+                <XCircle className="h-4 w-4" />Pendentes em Aberto
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-amber-900 dark:text-amber-100">
-                {stats?.resumo.pendentesPendentes || 0}
-              </div>
+              <div className="text-3xl font-bold text-amber-900">{stats?.resumo.pendentesPendentes || 0}</div>
             </CardContent>
           </Card>
-
-          <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900 border-green-200 dark:border-green-800">
+          <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-green-900 dark:text-green-100 flex items-center gap-2">
-                <CheckCircle className="h-4 w-4" />
-                Pendentes Resolvidos
+              <CardTitle className="text-sm font-medium text-green-900 flex items-center gap-2">
+                <CheckCircle className="h-4 w-4" />Pendentes Resolvidos
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-green-900 dark:text-green-100">
-                {stats?.resumo.pendentesResolvidos || 0}
-              </div>
+              <div className="text-3xl font-bold text-green-900">{stats?.resumo.pendentesResolvidos || 0}</div>
             </CardContent>
           </Card>
-
-          <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950 dark:to-purple-900 border-purple-200 dark:border-purple-800">
+          <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-purple-900 dark:text-purple-100 flex items-center gap-2">
-                <TrendingUp className="h-4 w-4" />
-                Taxa de Resolução
+              <CardTitle className="text-sm font-medium text-purple-900 flex items-center gap-2">
+                <TrendingUp className="h-4 w-4" />Taxa de Resolução
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-purple-900 dark:text-purple-100">
-                {stats?.resumo.taxaResolucao || 0}%
-              </div>
+              <div className="text-3xl font-bold text-purple-900">{stats?.resumo.taxaResolucao || 0}%</div>
             </CardContent>
           </Card>
         </div>
 
         {/* Gráficos */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Evolução Temporal */}
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Activity className="h-5 w-5" />
-                Evolução Temporal
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[300px]">
-                {evolucaoData && <Line data={evolucaoData} options={chartOptions} />}
-              </div>
-            </CardContent>
+            <CardHeader><CardTitle className="flex items-center gap-2 text-base"><Activity className="h-5 w-5" />Evolução Temporal</CardTitle></CardHeader>
+            <CardContent><div className="h-[300px]">{evolucaoData && <Line data={evolucaoData} options={chartOptions} />}</div></CardContent>
           </Card>
-
-          {/* Tipos de Relatórios */}
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <PieChart className="h-5 w-5" />
-                Tipos de Relatórios
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[300px]">
-                {tiposRelatoriosData && <Pie data={tiposRelatoriosData} options={chartOptions} />}
-              </div>
-            </CardContent>
+            <CardHeader><CardTitle className="flex items-center gap-2 text-base"><PieChart className="h-5 w-5" />Tipos de Relatórios</CardTitle></CardHeader>
+            <CardContent><div className="h-[300px]">{tiposRelatoriosData && <Pie data={tiposRelatoriosData} options={chartOptions} />}</div></CardContent>
           </Card>
-
-          {/* Visitas por Loja */}
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5" />
-                Top 10 Lojas Mais Visitadas
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[300px]">
-                {visitasPorLojaData && <Bar data={visitasPorLojaData} options={chartOptions} />}
-              </div>
-            </CardContent>
+            <CardHeader><CardTitle className="flex items-center gap-2 text-base"><BarChart3 className="h-5 w-5" />Top 10 Lojas Mais Visitadas</CardTitle></CardHeader>
+            <CardContent><div className="h-[300px]">{visitasPorLojaData && <Bar data={visitasPorLojaData} options={chartOptions} />}</div></CardContent>
           </Card>
-
-          {/* Pendentes por Loja */}
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5" />
-                Top 10 Lojas com Mais Pendentes
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[300px]">
-                {pendentesPorLojaData && <Bar data={pendentesPorLojaData} options={chartOptions} />}
-              </div>
-            </CardContent>
+            <CardHeader><CardTitle className="flex items-center gap-2 text-base"><BarChart3 className="h-5 w-5" />Top 10 Lojas com Mais Pendentes</CardTitle></CardHeader>
+            <CardContent><div className="h-[300px]">{pendentesPorLojaData && <Bar data={pendentesPorLojaData} options={chartOptions} />}</div></CardContent>
           </Card>
         </div>
 
         {/* Rankings */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Top Lojas Visitadas */}
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="h-5 w-5 text-green-600" />
-                Top 5 Lojas Mais Visitadas
-              </CardTitle>
-            </CardHeader>
+            <CardHeader><CardTitle className="flex items-center gap-2 text-base"><TrendingUp className="h-5 w-5 text-green-600" />Top 5 Lojas Mais Visitadas</CardTitle></CardHeader>
             <CardContent>
               <div className="space-y-3">
                 {stats?.rankings.topLojasVisitadas.map((loja, index) => (
                   <div key={loja.lojaId} className="flex items-center justify-between p-3 bg-muted rounded-lg">
                     <div className="flex items-center gap-3">
-                      <div className={`flex items-center justify-center w-8 h-8 rounded-full font-bold text-sm ${
-                        index === 0 ? 'bg-yellow-400 text-yellow-900' :
-                        index === 1 ? 'bg-gray-300 text-gray-900' :
-                        index === 2 ? 'bg-amber-600 text-white' :
-                        'bg-blue-100 text-blue-900'
-                      }`}>
-                        {index + 1}
-                      </div>
+                      <div className={`flex items-center justify-center w-8 h-8 rounded-full font-bold text-sm ${index === 0 ? 'bg-yellow-400 text-yellow-900' : index === 1 ? 'bg-gray-300 text-gray-900' : index === 2 ? 'bg-amber-600 text-white' : 'bg-blue-100 text-blue-900'}`}>{index + 1}</div>
                       <span className="font-medium">{loja.lojaNome}</span>
                     </div>
-                    <div className="text-lg font-bold text-blue-600">
-                      {loja.visitas} visitas
-                    </div>
+                    <div className="text-lg font-bold text-blue-600">{loja.visitas} visitas</div>
                   </div>
                 ))}
               </div>
             </CardContent>
           </Card>
-
-          {/* Top Lojas com Pendentes */}
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <TrendingDown className="h-5 w-5 text-red-600" />
-                Top 5 Lojas com Mais Pendentes
-              </CardTitle>
-            </CardHeader>
+            <CardHeader><CardTitle className="flex items-center gap-2 text-base"><TrendingDown className="h-5 w-5 text-red-600" />Top 5 Lojas com Mais Pendentes</CardTitle></CardHeader>
             <CardContent>
               <div className="space-y-3">
                 {stats?.rankings.topLojasPendentes.map((loja, index) => (
                   <div key={loja.lojaId} className="flex items-center justify-between p-3 bg-muted rounded-lg">
                     <div className="flex items-center gap-3">
-                      <div className="flex items-center justify-center w-8 h-8 rounded-full font-bold text-sm bg-red-100 text-red-900">
-                        {index + 1}
-                      </div>
+                      <div className="flex items-center justify-center w-8 h-8 rounded-full font-bold text-sm bg-red-100 text-red-900">{index + 1}</div>
                       <span className="font-medium">{loja.lojaNome}</span>
                     </div>
-                    <div className="text-lg font-bold text-red-600">
-                      {loja.pendentesPendentes} pendentes
-                    </div>
+                    <div className="text-lg font-bold text-red-600">{loja.pendentesPendentes} pendentes</div>
                   </div>
                 ))}
               </div>
@@ -471,12 +398,12 @@ export default function DashboardVolante() {
           </Card>
         </div>
 
-        {/* Histórico de Envios de Relatórios Mensais */}
-        <Card className="col-span-full">
+        {/* Histórico de Envios */}
+        <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-base">
               <History className="h-5 w-5" />
-              Histórico de Envios de Relatórios Mensais do Volante
+              Histórico de Envios de Relatórios Mensais
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -484,6 +411,6 @@ export default function DashboardVolante() {
           </CardContent>
         </Card>
       </div>
-    </DashboardLayout>
+    </div>
   );
 }
