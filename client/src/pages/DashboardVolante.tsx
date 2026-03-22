@@ -35,28 +35,57 @@ ChartJS.register(
 );
 
 export default function DashboardVolante() {
-  const [token, setToken] = useState<string>("");
-  const [volanteNome, setVolanteNome] = useState<string>("");
+  // ✅ FIX: Inicializar token imediatamente da URL ou localStorage (sem esperar useEffect)
+  const [token, setToken] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      // 1. Tentar token da URL (?token=...)
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlToken = urlParams.get('token');
+      if (urlToken) return urlToken;
+
+      // 2. Tentar volanteAuth do localStorage
+      try {
+        const saved = localStorage.getItem("volanteAuth");
+        if (saved) {
+          const auth = JSON.parse(saved);
+          if (auth.token) return auth.token;
+        }
+      } catch {}
+
+      // 3. Fallback: loja_token
+      return localStorage.getItem("loja_token") || '';
+    }
+    return '';
+  });
+
+  // ✅ FIX: Inicializar volanteNome do localStorage imediatamente
+  const [volanteNome, setVolanteNome] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem("volanteAuth");
+        if (saved) {
+          const auth = JSON.parse(saved);
+          if (auth.volanteNome) return auth.volanteNome;
+        }
+      } catch {}
+    }
+    return '';
+  });
+
   const [periodoSelecionado, setPeriodoSelecionado] = useState<string>("30");
   const [dataPersonalizadaInicio, setDataPersonalizadaInicio] = useState<string>("");
   const [dataPersonalizadaFim, setDataPersonalizadaFim] = useState<string>("");
 
-  // Carregar token do localStorage (guardado pelo PortalLoja quando o volante faz login)
+  // Manter useEffect para atualizar nome se localStorage carregar depois
   useEffect(() => {
-    const saved = localStorage.getItem("volanteAuth");
-    if (saved) {
-      try {
-        const auth = JSON.parse(saved);
-        if (auth.token) setToken(auth.token);
-        if (auth.volanteNome) setVolanteNome(auth.volanteNome);
-      } catch {
-        // ignore
+    if (!volanteNome) {
+      const saved = localStorage.getItem("volanteAuth");
+      if (saved) {
+        try {
+          const auth = JSON.parse(saved);
+          if (auth.volanteNome) setVolanteNome(auth.volanteNome);
+        } catch {}
       }
-    }
-    // Também tentar loja_token como fallback
-    if (!token) {
-      const lojaToken = localStorage.getItem("loja_token");
-      if (lojaToken) setToken(lojaToken);
     }
   }, []);
 
@@ -68,9 +97,11 @@ export default function DashboardVolante() {
         dataFim: dataPersonalizadaFim,
       };
     }
+
     const fim = new Date();
     const dias = parseInt(periodoSelecionado);
     const inicio = new Date(fim.getTime() - dias * 24 * 60 * 60 * 1000);
+
     return {
       dataInicio: inicio.toISOString().split('T')[0],
       dataFim: fim.toISOString().split('T')[0],
@@ -98,6 +129,7 @@ export default function DashboardVolante() {
   // Dados do gráfico de evolução temporal
   const evolucaoData = useMemo(() => {
     if (!stats?.graficos.evolucaoTemporal) return null;
+
     return {
       labels: stats.graficos.evolucaoTemporal.map(e => e.semana),
       datasets: [
@@ -123,6 +155,7 @@ export default function DashboardVolante() {
 
   const tiposRelatoriosData = useMemo(() => {
     if (!stats?.graficos.tiposRelatorios) return null;
+
     return {
       labels: ['Relatórios Livres', 'Relatórios Completos'],
       datasets: [
@@ -138,7 +171,9 @@ export default function DashboardVolante() {
 
   const visitasPorLojaData = useMemo(() => {
     if (!stats?.graficos.visitasPorLoja) return null;
+
     const top10 = [...stats.graficos.visitasPorLoja].sort((a, b) => b.visitas - a.visitas).slice(0, 10);
+
     return {
       labels: top10.map(v => v.lojaNome),
       datasets: [
@@ -155,9 +190,11 @@ export default function DashboardVolante() {
 
   const pendentesPorLojaData = useMemo(() => {
     if (!stats?.graficos.pendentesPorLoja) return null;
+
     const top10 = [...stats.graficos.pendentesPorLoja]
       .sort((a, b) => (b.pendentes - b.resolvidos) - (a.pendentes - a.resolvidos))
       .slice(0, 10);
+
     return {
       labels: top10.map(p => p.lojaNome),
       datasets: [
@@ -184,6 +221,7 @@ export default function DashboardVolante() {
   const handleExportarPDF = async () => {
     try {
       const result = await exportarPDFMutation.mutateAsync({ dataInicio, dataFim, token });
+
       const byteCharacters = atob(result.pdf);
       const byteNumbers = new Array(byteCharacters.length);
       for (let i = 0; i < byteCharacters.length; i++) {
@@ -282,6 +320,7 @@ export default function DashboardVolante() {
                   </SelectContent>
                 </Select>
               </div>
+
               {periodoSelecionado === "personalizado" && (
                 <>
                   <div className="flex-1 min-w-[200px]">
@@ -310,6 +349,7 @@ export default function DashboardVolante() {
               <div className="text-3xl font-bold text-blue-900">{stats?.resumo.totalVisitas || 0}</div>
             </CardContent>
           </Card>
+
           <Card className="bg-gradient-to-br from-amber-50 to-amber-100 border-amber-200">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-amber-900 flex items-center gap-2">
@@ -320,6 +360,7 @@ export default function DashboardVolante() {
               <div className="text-3xl font-bold text-amber-900">{stats?.resumo.pendentesPendentes || 0}</div>
             </CardContent>
           </Card>
+
           <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-green-900 flex items-center gap-2">
@@ -330,6 +371,7 @@ export default function DashboardVolante() {
               <div className="text-3xl font-bold text-green-900">{stats?.resumo.pendentesResolvidos || 0}</div>
             </CardContent>
           </Card>
+
           <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-purple-900 flex items-center gap-2">
@@ -348,14 +390,17 @@ export default function DashboardVolante() {
             <CardHeader><CardTitle className="flex items-center gap-2 text-base"><Activity className="h-5 w-5" />Evolução Temporal</CardTitle></CardHeader>
             <CardContent><div className="h-[300px]">{evolucaoData && <Line data={evolucaoData} options={chartOptions} />}</div></CardContent>
           </Card>
+
           <Card>
             <CardHeader><CardTitle className="flex items-center gap-2 text-base"><PieChart className="h-5 w-5" />Tipos de Relatórios</CardTitle></CardHeader>
             <CardContent><div className="h-[300px]">{tiposRelatoriosData && <Pie data={tiposRelatoriosData} options={chartOptions} />}</div></CardContent>
           </Card>
+
           <Card>
             <CardHeader><CardTitle className="flex items-center gap-2 text-base"><BarChart3 className="h-5 w-5" />Top 10 Lojas Mais Visitadas</CardTitle></CardHeader>
             <CardContent><div className="h-[300px]">{visitasPorLojaData && <Bar data={visitasPorLojaData} options={chartOptions} />}</div></CardContent>
           </Card>
+
           <Card>
             <CardHeader><CardTitle className="flex items-center gap-2 text-base"><BarChart3 className="h-5 w-5" />Top 10 Lojas com Mais Pendentes</CardTitle></CardHeader>
             <CardContent><div className="h-[300px]">{pendentesPorLojaData && <Bar data={pendentesPorLojaData} options={chartOptions} />}</div></CardContent>
@@ -380,6 +425,7 @@ export default function DashboardVolante() {
               </div>
             </CardContent>
           </Card>
+
           <Card>
             <CardHeader><CardTitle className="flex items-center gap-2 text-base"><TrendingDown className="h-5 w-5 text-red-600" />Top 5 Lojas com Mais Pendentes</CardTitle></CardHeader>
             <CardContent>
