@@ -1034,3 +1034,65 @@ export function gerarHTMLNovoPedidoApoio(dados: {
 </html>
   `;
 }
+
+
+export function gerarHTMLOcorrenciaEstrutural(dados: {
+  gestorNome: string;
+  temaNome: string;
+  descricao: string;
+  abrangencia: string;
+  zonaAfetada?: string | null;
+  impacto: string;
+  sugestaoAcao?: string | null;
+  fotos?: string[];
+  criadoEm: Date;
+}): string {
+  const dataFormatada = dados.criadoEm.toLocaleDateString('pt-PT', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+    hour: '2-digit', minute: '2-digit',
+  });
+
+  const abrangenciaTexto: Record<string, string> = {
+    loja: 'Loja específica',
+    zona: 'Zona',
+    nacional: 'Nacional',
+  };
+
+  const impactoTexto: Record<string, string> = {
+    baixo: 'Baixo',
+    medio: 'Médio',
+    alto: 'Alto',
+    critico: 'Crítico',
+  };
+
+  const fotosHTML = (dados.fotos || []).length > 0
+    ? `<div style="margin-top:16px;"><strong>Fotos:</strong><br/>${(dados.fotos || []).map(url => `<img src="${url}" style="max-width:200px;margin:4px;border-radius:4px;" />`).join('')}</div>`
+    : '';
+
+  return `<!DOCTYPE html>
+<html lang="pt">
+<head><meta charset="UTF-8"></head>
+<body style="font-family: Arial, sans-serif; margin: 40px; color: #333;">
+  <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #ef4444; padding-bottom: 20px;">
+    <div style="font-size: 24px; font-weight: bold; color: #ef4444;">PoweringEG</div>
+    <div style="font-size: 18px; margin-top: 10px; color: #dc2626;">⚠️ Ocorrência Estrutural</div>
+  </div>
+  <div style="background: #fef2f2; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #ef4444;">
+    <p style="margin: 0; font-weight: bold; color: #991b1b;">Reportado por: ${dados.gestorNome}</p>
+    <p style="margin: 4px 0 0; color: #7f1d1d; font-size: 13px;">${dataFormatada}</p>
+  </div>
+  <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+    <p><strong>Tema:</strong> ${dados.temaNome}</p>
+    <p><strong>Abrangência:</strong> ${abrangenciaTexto[dados.abrangencia] || dados.abrangencia}</p>
+    ${dados.zonaAfetada ? `<p><strong>Zona Afetada:</strong> ${dados.zonaAfetada}</p>` : ''}
+    <p><strong>Impacto:</strong> ${impactoTexto[dados.impacto] || dados.impacto}</p>
+    <p><strong>Descrição:</strong> ${dados.descricao}</p>
+    ${dados.sugestaoAcao ? `<p><strong>Sugestão de Ação:</strong> ${dados.sugestaoAcao}</p>` : ''}
+  </div>
+  ${fotosHTML}
+  <div style="margin-top: 40px; text-align: center; font-size: 11px; color: #9ca3af;">
+    PoweringEG Platform 2.0 - a IA ao serviço da ExpressGlass
+  </div>
+</body>
+</html>`;
+}

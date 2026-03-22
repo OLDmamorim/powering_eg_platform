@@ -7,7 +7,7 @@ import { z } from "zod";
 import * as db from "./db";
 
 import { gerarRelatorioComIA, gerarDicaDashboard, gerarRelatorioIAGestor, gerarRelatorioIAGestorMultiplosMeses } from "./aiService";
-import { sendEmail, gerarHTMLRelatorioLivre, gerarHTMLRelatorioCompleto, gerarHTMLPedidoAprovado, gerarHTMLPedidoReprovado, gerarHTMLPedidoAnulado, gerarHTMLPedidoEditado, gerarHTMLNovoPedidoApoio } from "./emailService";
+import { sendEmail, gerarHTMLRelatorioLivre, gerarHTMLRelatorioCompleto, gerarHTMLPedidoAprovado, gerarHTMLPedidoReprovado, gerarHTMLPedidoAnulado, gerarHTMLPedidoEditado, gerarHTMLNovoPedidoApoio, gerarHTMLOcorrenciaEstrutural } from "./emailService";
 import { enviarResumoSemanal, verificarENotificarAlertas } from "./weeklyReport";
 import { gerarPrevisoes, gerarEGuardarPrevisoes } from "./previsaoService";
 import { gerarSugestoesMelhoria, formatarRelatorioLivre, formatarRelatorioCompleto } from "./sugestaoService";

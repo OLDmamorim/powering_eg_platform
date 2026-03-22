@@ -9124,6 +9124,10 @@ export async function createPedidoApoio(data: {
   periodo: 'manha' | 'tarde' | 'dia_todo';
   tipoApoio: 'cobertura_ferias' | 'substituicao_vidros' | 'outro';
   observacoes?: string;
+  atribuidoPorIA?: boolean;
+  scoreAtribuicao?: string;
+  scoreDetalhes?: string;
+  redireccionadoDe?: number;
 }): Promise<PedidoApoio | null> {
   const db = await getDb();
   if (!db) return null;
@@ -9135,7 +9139,11 @@ export async function createPedidoApoio(data: {
     periodo: data.periodo,
     tipoApoio: data.tipoApoio,
     observacoes: data.observacoes || null,
-    estado: 'pendente'
+    estado: 'pendente',
+    ...(data.atribuidoPorIA !== undefined && { atribuidoPorIA: data.atribuidoPorIA }),
+    ...(data.scoreAtribuicao !== undefined && { scoreAtribuicao: data.scoreAtribuicao }),
+    ...(data.scoreDetalhes !== undefined && { scoreDetalhes: data.scoreDetalhes }),
+    ...(data.redireccionadoDe !== undefined && { redireccionadoDe: data.redireccionadoDe }),
   });
   
   const insertId = result[0]?.insertId;
