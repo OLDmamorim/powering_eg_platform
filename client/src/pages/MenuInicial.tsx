@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation, useSearch } from "wouter";
+import { getLoginUrl } from "@/const";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Card } from "@/components/ui/card";
 import { 
@@ -38,7 +39,7 @@ const getLojaSession = () => {
 export default function MenuInicial() {
   const [, setLocation] = useLocation();
   const searchString = useSearch();
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const { language, setLanguage } = useLanguage();
   const [lojaSession, setLojaSession] = useState<any>(null);
@@ -157,7 +158,7 @@ export default function MenuInicial() {
           {/* Card Gestor/Admin */}
           <Card 
             className="p-8 cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-105 bg-white border-2 border-transparent hover:border-purple-400"
-            onClick={() => setLocation('/login')}
+            onClick={() => window.location.href = getLoginUrl()}
           >
             <div className="text-center">
               <div className="w-20 h-20 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -236,7 +237,7 @@ export default function MenuInicial() {
             <Button 
               variant="ghost" 
               size="sm"
-              onClick={() => setLocation('/login')}
+              onClick={() => logout()}
               className="h-8 w-8 p-0 text-gray-500 hover:text-gray-700 hover:bg-white/50 dark:text-gray-400 dark:hover:text-gray-200"
               title="Sair"
             >
