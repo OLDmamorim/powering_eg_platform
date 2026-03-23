@@ -1966,7 +1966,7 @@ export default function PortalLoja() {
             {/* Card Agenda SM - Disponível para todos */}
             <Card 
               className="cursor-pointer hover:shadow-lg transition-all hover:scale-[1.02] bg-gradient-to-br from-teal-500 to-emerald-600 text-white border-0"
-              onClick={() => window.open('https://agendamentosm.netlify.app/index.html', '_blank')}
+              onClick={() => window.open('https://agendamentosm.netlify.app/login.html', '_blank')}
             >
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
