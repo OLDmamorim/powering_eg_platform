@@ -11,11 +11,10 @@ export async function enviarRelatoriosMensaisVolante() {
   console.log('[Relatório Mensal Volante] Iniciando envio de relatórios...');
   
   try {
-    // Calcular mês anterior (o relatório do dia 20 refere-se ao mês anterior)
+    // O relatório refere-se ao mês corrente (enviado no dia 20 do próprio mês)
     const hoje = new Date();
-    const mesAnterior = hoje.getMonth(); // 0-11 (Janeiro = 0)
-    const anoAnterior = mesAnterior === 0 ? hoje.getFullYear() - 1 : hoje.getFullYear();
-    const mesRelatorio = mesAnterior === 0 ? 12 : mesAnterior;
+    const mesRelatorio = hoje.getMonth() + 1; // 1-12 (Janeiro = 1)
+    const anoRelatorio = hoje.getFullYear();
     
     const mesesNomes = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
     const mesNome = mesesNomes[mesRelatorio - 1];
@@ -51,11 +50,11 @@ export async function enviarRelatoriosMensaisVolante() {
     // Para cada volante, processar suas lojas
     for (const volante of volantes) {
       try {
-        // Obter serviços do volante no mês anterior
-        const servicos = await db.getServicosVolantePorMes(volante.id, mesRelatorio, anoAnterior);
+        // Obter serviços do volante no mês corrente
+        const servicos = await db.getServicosVolantePorMes(volante.id, mesRelatorio, anoRelatorio);
         
         if (!servicos || servicos.length === 0) {
-          console.log(`[Relatório Mensal Volante] Volante ${volante.nome} não tem serviços em ${mesRelatorio}/${anoAnterior}`);
+          console.log(`[Relatório Mensal Volante] Volante ${volante.nome} não tem serviços em ${mesRelatorio}/${anoRelatorio}`);
           continue;
         }
         
@@ -98,7 +97,7 @@ export async function enviarRelatoriosMensaisVolante() {
               lojaNome: loja.nome,
               volanteNome: volante.nome,
               mes: mesRelatorio,
-              ano: anoAnterior,
+              ano: anoRelatorio,
               servicos: servicosLoja.map(s => ({
                 data: s.data,
                 substituicaoLigeiro: s.substituicaoLigeiro || 0,
@@ -118,7 +117,7 @@ export async function enviarRelatoriosMensaisVolante() {
             if (loja.email) {
               const enviado = await sendEmail({
                 to: loja.email,
-                subject: `Relatório Mensal - Atividade do Volante ${volante.nome} - ${mesNome} ${anoAnterior}`,
+                subject: `Relatório Mensal - Atividade do Volante ${volante.nome} - ${mesNome} ${anoRelatorio}`,
                 html: htmlRelatorio,
               });
               
@@ -182,13 +181,13 @@ export async function enviarRelatoriosMensaisVolante() {
         const htmlGestor = gerarHTMLRelatorioMensalVolanteGestor({
           gestorNome: gestor.nome || 'Gestor',
           mes: mesRelatorio,
-          ano: anoAnterior,
+          ano: anoRelatorio,
           lojas: dadosLojas,
         });
         
         const enviado = await sendEmail({
           to: gestor.email,
-          subject: `Relatório Mensal Consolidado - Atividade dos Volantes - ${mesNome} ${anoAnterior}`,
+          subject: `Relatório Mensal Consolidado - Atividade dos Volantes - ${mesNome} ${anoRelatorio}`,
           html: htmlGestor,
         });
         
@@ -219,7 +218,7 @@ export async function enviarRelatoriosMensaisVolante() {
       await db.criarHistoricoEnvioRelatorio({
         tipo: 'volante',
         mesReferencia: mesRelatorio,
-        anoReferencia: anoAnterior,
+        anoReferencia: anoRelatorio,
         dataEnvio: new Date(),
         emailsEnviadosUnidades: emailsEnviadosLojas,
         emailsEnviadosGestores: emailsEnviadosGestores,

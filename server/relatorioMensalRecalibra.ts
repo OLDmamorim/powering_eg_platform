@@ -12,18 +12,17 @@ export async function enviarRelatoriosMensaisRecalibra() {
   console.log('[Relatório Mensal Recalibra] Iniciando envio de relatórios...');
   
   try {
-    // Calcular mês anterior (o relatório do dia 20 refere-se ao mês anterior)
+    // O relatório refere-se ao mês corrente (enviado no dia 20 do próprio mês)
     const hoje = new Date();
-    const mesAnterior = hoje.getMonth(); // 0-11 (Janeiro = 0)
-    const anoAnterior = mesAnterior === 0 ? hoje.getFullYear() - 1 : hoje.getFullYear();
-    const mesRelatorio = mesAnterior === 0 ? 12 : mesAnterior;
+    const mesRelatorio = hoje.getMonth() + 1; // 1-12 (Janeiro = 1)
+    const anoRelatorio = hoje.getFullYear();
     
     const mesesNomes = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
     const mesNome = mesesNomes[mesRelatorio - 1];
     
-    // Calcular primeiro e último dia do mês anterior
-    const primeiroDia = `${anoAnterior}-${String(mesRelatorio).padStart(2, '0')}-01`;
-    const ultimoDia = new Date(anoAnterior, mesRelatorio, 0).toISOString().split('T')[0];
+    // Calcular primeiro e último dia do mês corrente
+    const primeiroDia = `${anoRelatorio}-${String(mesRelatorio).padStart(2, '0')}-01`;
+    const ultimoDia = new Date(anoRelatorio, mesRelatorio, 0).toISOString().split('T')[0];
     
     // Obter todas as unidades Recalibra ativas
     const unidades = await db.getAllUnidadesRecalibra();
@@ -55,7 +54,7 @@ export async function enviarRelatoriosMensaisRecalibra() {
     // Para cada unidade, processar calibragens
     for (const unidade of unidades) {
       try {
-        // Obter calibragens da unidade no mês anterior
+        // Obter calibragens da unidade no mês corrente
         const calibragens = await db.getHistoricoCalibragens(
           unidade.id,
           primeiroDia,
@@ -63,7 +62,7 @@ export async function enviarRelatoriosMensaisRecalibra() {
         );
         
         if (!calibragens || calibragens.length === 0) {
-          console.log(`[Relatório Mensal Recalibra] Unidade ${unidade.nome} não tem calibragens em ${mesRelatorio}/${anoAnterior}`);
+          console.log(`[Relatório Mensal Recalibra] Unidade ${unidade.nome} não tem calibragens em ${mesRelatorio}/${anoRelatorio}`);
           continue;
         }
         
@@ -83,7 +82,7 @@ export async function enviarRelatoriosMensaisRecalibra() {
         const htmlRelatorio = gerarHTMLRelatorioMensalRecalibra({
           unidadeNome: unidade.nome,
           mes: mesRelatorio,
-          ano: anoAnterior,
+          ano: anoRelatorio,
           calibragens: calibragens.map(c => ({
             data: c.data,
             marca: c.marca,
@@ -106,7 +105,7 @@ export async function enviarRelatoriosMensaisRecalibra() {
         if (unidade.email) {
           const enviado = await sendEmail({
             to: unidade.email,
-            subject: `Relatório Mensal - Calibragens ${unidade.nome} - ${mesNome} ${anoAnterior}`,
+            subject: `Relatório Mensal - Calibragens ${unidade.nome} - ${mesNome} ${anoRelatorio}`,
             html: htmlRelatorio,
           });
           
@@ -163,13 +162,13 @@ export async function enviarRelatoriosMensaisRecalibra() {
         const htmlGestor = gerarHTMLRelatorioMensalRecalibraGestor({
           gestorNome: gestor.nome || 'Gestor',
           mes: mesRelatorio,
-          ano: anoAnterior,
+          ano: anoRelatorio,
           unidades: dadosUnidades,
         });
         
         const enviado = await sendEmail({
           to: gestor.email,
-          subject: `Relatório Mensal Consolidado - Calibragens Recalibra - ${mesNome} ${anoAnterior}`,
+          subject: `Relatório Mensal Consolidado - Calibragens Recalibra - ${mesNome} ${anoRelatorio}`,
           html: htmlGestor,
         });
         
@@ -200,7 +199,7 @@ export async function enviarRelatoriosMensaisRecalibra() {
       await db.criarHistoricoEnvioRelatorio({
         tipo: 'recalibra',
         mesReferencia: mesRelatorio,
-        anoReferencia: anoAnterior,
+        anoReferencia: anoRelatorio,
         dataEnvio: new Date(),
         emailsEnviadosUnidades: emailsEnviadosUnidades,
         emailsEnviadosGestores: emailsEnviadosGestores,

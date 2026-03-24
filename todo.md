@@ -948,3 +948,7 @@
 ## Política de Comissionamento - Remover barreira 22%
 - [x] Remover condição dos 22% como barreira para prémio (backend + frontend)
 - [x] Manter objectivo de 30% como meta e indicadores
+
+## Corrigir Período do Relatório Mensal (Volante + Recalibra)
+- [x] Relatório mensal volantes: deve mostrar dados do mês corrente (não do mês anterior)
+- [x] Verificar e corrigir o mesmo no relatório mensal recalibra
