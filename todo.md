@@ -958,3 +958,8 @@
 - [x] Identificar gestores de teste na BD (105 gestores de teste encontrados)
 - [x] Remover registos de teste após confirmação (limpo em cascata em todas as tabelas)
 - [ ] Guardar checkpoint
+
+## Envio Automático RH no Dia 24
+- [x] Investigar scheduler e lógica de envio RH
+- [x] Implementar envio automático no dia 24 de cada mês
+- [x] Testar e guardar checkpoint

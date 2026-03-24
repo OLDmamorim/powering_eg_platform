@@ -1845,6 +1845,13 @@ IMPORTANTE:
       const resultado = await enviarLembretesRH();
       return resultado;
     }),
+
+    // Executar envio automático de relação de colaboradores para RH (execução manual pelo admin)
+    executarEnvioRHAutomatico: adminProcedure.mutation(async () => {
+      const { enviarRelacaoRHAutomatico } = await import('./envioAutomaticoRH.js');
+      const resultado = await enviarRelacaoRHAutomatico();
+      return resultado;
+    }),
     
     // Verificar se deve mostrar lembrete de envio para RH (dia 20 ou posterior)
     verificarLembreteRH: gestorProcedure.query(async ({ ctx }) => {

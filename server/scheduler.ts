@@ -2,6 +2,7 @@ import cron from 'node-cron';
 import { sendTelegramMessageToMultiple } from './telegramService';
 import { enviarRelatoriosMensaisVolante } from './relatorioMensalVolante';
 import { enviarRelatoriosMensaisRecalibra } from './relatorioMensalRecalibra';
+import { enviarRelacaoRHAutomatico } from './envioAutomaticoRH';
 
 /**
  * Busca todos os volantes activos com Telegram configurado
@@ -156,6 +157,22 @@ export function setupScheduler() {
   });
 
   console.log('[SCHEDULER] Cron relatórios mensais: 09:00 Lisboa, dia 20');
+
+  // Envio automático da relação de colaboradores para RH - dia 20 de cada mês às 09:00 Lisboa
+  cron.schedule('0 0 9 20 * *', async () => {
+    const horaLisboa = new Date().toLocaleString('pt-PT', { timeZone: 'Europe/Lisbon' });
+    console.log(`[CRON-RH-AUTO] Envio automático de relação de colaboradores para RH - ${horaLisboa}`);
+    try {
+      const resultado = await enviarRelacaoRHAutomatico();
+      console.log(`[CRON-RH-AUTO] Concluído: ${resultado.enviados}/${resultado.total} enviados`);
+    } catch (error) {
+      console.error('[CRON-RH-AUTO] Erro:', error);
+    }
+  }, {
+    timezone: 'Europe/Lisbon'
+  });
+
+  console.log('[SCHEDULER] Cron envio automático RH: 09:00 Lisboa, dia 20');
   console.log('[SCHEDULER] Todos os cron jobs configurados!');
   console.log('[SCHEDULER] ========================================');
 }
