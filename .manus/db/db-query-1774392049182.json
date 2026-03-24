@@ -1,0 +1,418 @@
+{
+  "query": "SELECT id, nome, email, numeroLoja FROM lojas WHERE nome LIKE '%test%' OR nome LIKE '%Test%' OR nome LIKE '%TEST%' OR nome LIKE '%exemplo%' OR nome LIKE '%demo%' OR nome LIKE '%temp%' OR nome LIKE '%aaa%' OR nome LIKE '%bbb%' OR nome LIKE '%xxx%' OR nome LIKE '%123%' OR nome LIKE '%asdf%' OR nome = '' OR nome IS NULL ORDER BY id;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT id, nome, email, numeroLoja FROM lojas WHERE nome LIKE '%test%' OR nome LIKE '%Test%' OR nome LIKE '%TEST%' OR nome LIKE '%exemplo%' OR nome LIKE '%demo%' OR nome LIKE '%temp%' OR nome LIKE '%aaa%' OR nome LIKE '%bbb%' OR nome LIKE '%xxx%' OR nome LIKE '%123%' OR nome LIKE '%asdf%' OR nome = '' OR nome IS NULL ORDER BY id;",
+  "rows": [
+    {
+      "id": "1530001",
+      "nome": "Loja Email Test",
+      "email": "loja.email@test.com",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530002",
+      "nome": "Loja Comentarios Test",
+      "email": "loja.comentarios@test.com",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530003",
+      "nome": "Loja Teste Admin",
+      "email": "loja@test.com",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530004",
+      "nome": "Loja Teste Data/Hora",
+      "email": "teste@test.com",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530008",
+      "nome": "Loja Import Test 1",
+      "email": "import1@example.com",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530009",
+      "nome": "Loja Import Test 2",
+      "email": "import2@example.com",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530010",
+      "nome": "Loja Duplicada Test",
+      "email": "dup1@example.com",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530011",
+      "nome": "Loja Única Test",
+      "email": "unica@example.com",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530012",
+      "nome": "Loja Válida Test",
+      "email": "valida@example.com",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530013",
+      "nome": "Loja Email Válido Test",
+      "email": "valido@example.com",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530014",
+      "nome": "Loja Sem Email Test",
+      "email": "NULL",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530015",
+      "nome": "Loja Com Email Test",
+      "email": "com-email@example.com",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530016",
+      "nome": "Loja Batch Test 1",
+      "email": "batch1@example.com",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530017",
+      "nome": "Loja Batch Test 2",
+      "email": "batch2@example.com",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530018",
+      "nome": "Loja Batch Test 3",
+      "email": "batch3@example.com",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530019",
+      "nome": "Loja Batch Test 4",
+      "email": "batch4@example.com",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530020",
+      "nome": "Loja Batch Test 5",
+      "email": "batch5@example.com",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530021",
+      "nome": "Loja Batch Test 6",
+      "email": "batch6@example.com",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530022",
+      "nome": "Loja Batch Test 7",
+      "email": "batch7@example.com",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530023",
+      "nome": "Loja Batch Test 8",
+      "email": "batch8@example.com",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530024",
+      "nome": "Loja Batch Test 9",
+      "email": "batch9@example.com",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530025",
+      "nome": "Loja Batch Test 10",
+      "email": "batch10@example.com",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530026",
+      "nome": "Loja Batch Test 11",
+      "email": "batch11@example.com",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530027",
+      "nome": "Loja Batch Test 12",
+      "email": "batch12@example.com",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530028",
+      "nome": "Loja Batch Test 13",
+      "email": "batch13@example.com",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530029",
+      "nome": "Loja Batch Test 14",
+      "email": "batch14@example.com",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530030",
+      "nome": "Loja Batch Test 15",
+      "email": "batch15@example.com",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530031",
+      "nome": "Loja Test 1",
+      "email": "loja1@test.com",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530032",
+      "nome": "Loja Test 2",
+      "email": "loja2@test.com",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530033",
+      "nome": "Loja Test 3",
+      "email": "loja3@test.com",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530037",
+      "nome": "Loja Test Cumprimento 1774368008085",
+      "email": "NULL",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530039",
+      "nome": "Loja Teste Ordenação 1774368009417",
+      "email": "teste@example.com",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530040",
+      "nome": "Loja Email Test",
+      "email": "loja.email@test.com",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530041",
+      "nome": "Loja Comentarios Test",
+      "email": "loja.comentarios@test.com",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530042",
+      "nome": "Loja Teste Admin",
+      "email": "loja@test.com",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530043",
+      "nome": "Loja Teste Data/Hora",
+      "email": "teste@test.com",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530047",
+      "nome": "Loja Test 1",
+      "email": "loja1@test.com",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530048",
+      "nome": "Loja Test 2",
+      "email": "loja2@test.com",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530049",
+      "nome": "Loja Test 3",
+      "email": "loja3@test.com",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530053",
+      "nome": "Loja Test Cumprimento 1774368118596",
+      "email": "NULL",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530055",
+      "nome": "Loja Teste Ordenação 1774368119916",
+      "email": "teste@example.com",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530056",
+      "nome": "Loja Teste Admin",
+      "email": "loja@test.com",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530057",
+      "nome": "Loja Comentarios Test",
+      "email": "loja.comentarios@test.com",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530058",
+      "nome": "Loja Email Test",
+      "email": "loja.email@test.com",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530059",
+      "nome": "Loja Teste Data/Hora",
+      "email": "teste@test.com",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530063",
+      "nome": "Loja Test 1",
+      "email": "loja1@test.com",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530064",
+      "nome": "Loja Test 2",
+      "email": "loja2@test.com",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530065",
+      "nome": "Loja Test 3",
+      "email": "loja3@test.com",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530069",
+      "nome": "Loja Test Cumprimento 1774368249094",
+      "email": "NULL",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530071",
+      "nome": "Loja Teste Ordenação 1774368250723",
+      "email": "teste@example.com",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530072",
+      "nome": "Loja Teste Admin",
+      "email": "loja@test.com",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530073",
+      "nome": "Loja Comentarios Test",
+      "email": "loja.comentarios@test.com",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530074",
+      "nome": "Loja Email Test",
+      "email": "loja.email@test.com",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530075",
+      "nome": "Loja Teste Data/Hora",
+      "email": "teste@test.com",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530079",
+      "nome": "Loja Test 1",
+      "email": "loja1@test.com",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530080",
+      "nome": "Loja Test 2",
+      "email": "loja2@test.com",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530081",
+      "nome": "Loja Test 3",
+      "email": "loja3@test.com",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530085",
+      "nome": "Loja Test Cumprimento 1774368398597",
+      "email": "NULL",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530087",
+      "nome": "Loja Teste Ordenação 1774368400358",
+      "email": "teste@example.com",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530088",
+      "nome": "Loja Teste Admin",
+      "email": "loja@test.com",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530089",
+      "nome": "Loja Comentarios Test",
+      "email": "loja.comentarios@test.com",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530090",
+      "nome": "Loja Email Test",
+      "email": "loja.email@test.com",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530091",
+      "nome": "Loja Teste Data/Hora",
+      "email": "teste@test.com",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530095",
+      "nome": "Loja Test 1",
+      "email": "loja1@test.com",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530096",
+      "nome": "Loja Test 2",
+      "email": "loja2@test.com",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530097",
+      "nome": "Loja Test 3",
+      "email": "loja3@test.com",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530101",
+      "nome": "Loja Test Cumprimento 1774368539065",
+      "email": "NULL",
+      "numeroLoja": "NULL"
+    },
+    {
+      "id": "1530103",
+      "nome": "Loja Teste Ordenação 1774368540607",
+      "email": "teste@example.com",
+      "numeroLoja": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tnome\temail\tnumeroLoja\n1530001\tLoja Email Test\tloja.email@test.com\tNULL\n1530002\tLoja Comentarios Test\tloja.comentarios@test.com\tNULL\n1530003\tLoja Teste Admin\tloja@test.com\tNULL\n1530004\tLoja Teste Data/Hora\tteste@test.com\tNULL\n1530008\tLoja Import Test 1\timport1@example.com\tNULL\n1530009\tLoja Import Test 2\timport2@example.com\tNULL\n1530010\tLoja Duplicada Test\tdup1@example.com\tNULL\n1530011\tLoja Única Test\tunica@example.com\tNULL\n1530012\tLoja Válida Test\tvalida@example.com\tNULL\n1530013\tLoja Email Válido Test\tvalido@example.com\tNULL\n1530014\tLoja Sem Email Test\tNULL\tNULL\n1530015\tLoja Com Email Test\tcom-email@example.com\tNULL\n1530016\tLoja Batch Test 1\tbatch1@example.com\tNULL\n1530017\tLoja Batch Test 2\tbatch2@example.com\tNULL\n1530018\tLoja Batch Test 3\tbatch3@example.com\tNULL\n1530019\tLoja Batch Test 4\tbatch4@example.com\tNULL\n1530020\tLoja Batch Test 5\tbatch5@example.com\tNULL\n1530021\tLoja Batch Test 6\tbatch6@example.com\tNULL\n1530022\tLoja Batch Test 7\tbatch7@example.com\tNULL\n1530023\tLoja Batch Test 8\tbatch8@example.com\tNULL\n1530024\tLoja Batch Test 9\tbatch9@example.com\tNULL\n1530025\tLoja Batch Test 10\tbatch10@example.com\tNULL\n1530026\tLoja Batch Test 11\tbatch11@example.com\tNULL\n1530027\tLoja Batch Test 12\tbatch12@example.com\tNULL\n1530028\tLoja Batch Test 13\tbatch13@example.com\tNULL\n1530029\tLoja Batch Test 14\tbatch14@example.com\tNULL\n1530030\tLoja Batch Test 15\tbatch15@example.com\tNULL\n1530031\tLoja Test 1\tloja1@test.com\tNULL\n1530032\tLoja Test 2\tloja2@test.com\tNULL\n1530033\tLoja Test 3\tloja3@test.com\tNULL\n1530037\tLoja Test Cumprimento 1774368008085\tNULL\tNULL\n1530039\tLoja Teste Ordenação 1774368009417\tteste@example.com\tNULL\n1530040\tLoja Email Test\tloja.email@test.com\tNULL\n1530041\tLoja Comentarios Test\tloja.comentarios@test.com\tNULL\n1530042\tLoja Teste Admin\tloja@test.com\tNULL\n1530043\tLoja Teste Data/Hora\tteste@test.com\tNULL\n1530047\tLoja Test 1\tloja1@test.com\tNULL\n1530048\tLoja Test 2\tloja2@test.com\tNULL\n1530049\tLoja Test 3\tloja3@test.com\tNULL\n1530053\tLoja Test Cumprimento 1774368118596\tNULL\tNULL\n1530055\tLoja Teste Ordenação 1774368119916\tteste@example.com\tNULL\n1530056\tLoja Teste Admin\tloja@test.com\tNULL\n1530057\tLoja Comentarios Test\tloja.comentarios@test.com\tNULL\n1530058\tLoja Email Test\tloja.email@test.com\tNULL\n1530059\tLoja Teste Data/Hora\tteste@test.com\tNULL\n1530063\tLoja Test 1\tloja1@test.com\tNULL\n1530064\tLoja Test 2\tloja2@test.com\tNULL\n1530065\tLoja Test 3\tloja3@test.com\tNULL\n1530069\tLoja Test Cumprimento 1774368249094\tNULL\tNULL\n1530071\tLoja Teste Ordenação 1774368250723\tteste@example.com\tNULL\n1530072\tLoja Teste Admin\tloja@test.com\tNULL\n1530073\tLoja Comentarios Test\tloja.comentarios@test.com\tNULL\n1530074\tLoja Email Test\tloja.email@test.com\tNULL\n1530075\tLoja Teste Data/Hora\tteste@test.com\tNULL\n1530079\tLoja Test 1\tloja1@test.com\tNULL\n1530080\tLoja Test 2\tloja2@test.com\tNULL\n1530081\tLoja Test 3\tloja3@test.com\tNULL\n1530085\tLoja Test Cumprimento 1774368398597\tNULL\tNULL\n1530087\tLoja Teste Ordenação 1774368400358\tteste@example.com\tNULL\n1530088\tLoja Teste Admin\tloja@test.com\tNULL\n1530089\tLoja Comentarios Test\tloja.comentarios@test.com\tNULL\n1530090\tLoja Email Test\tloja.email@test.com\tNULL\n1530091\tLoja Teste Data/Hora\tteste@test.com\tNULL\n1530095\tLoja Test 1\tloja1@test.com\tNULL\n1530096\tLoja Test 2\tloja2@test.com\tNULL\n1530097\tLoja Test 3\tloja3@test.com\tNULL\n1530101\tLoja Test Cumprimento 1774368539065\tNULL\tNULL\n1530103\tLoja Teste Ordenação 1774368540607\tteste@example.com\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 55
+}

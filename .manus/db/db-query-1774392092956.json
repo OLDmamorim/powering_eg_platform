@@ -1,0 +1,16 @@
+{
+  "query": "SELECT \n  (SELECT COUNT(*) FROM lojas) as total_lojas,\n  (SELECT COUNT(*) FROM lojas WHERE nome LIKE '%test%' OR nome LIKE '%Test%' OR nome LIKE '%TEST%' OR nome LIKE '%exemplo%' OR nome LIKE '%demo%' OR nome LIKE '%Batch%' OR nome LIKE '%Import%' OR email LIKE '%@test.com' OR email LIKE '%@example.com') as lojas_teste,\n  (SELECT COUNT(*) FROM gestores) as total_gestores,\n  (SELECT COUNT(*) FROM gestores g JOIN users u ON g.userId = u.id WHERE u.email LIKE '%@test.com' OR u.name LIKE '%Test%' OR u.name LIKE '%test%') as gestores_teste;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT \n  (SELECT COUNT(*) FROM lojas) as total_lojas,\n  (SELECT COUNT(*) FROM lojas WHERE nome LIKE '%test%' OR nome LIKE '%Test%' OR nome LIKE '%TEST%' OR nome LIKE '%exemplo%' OR nome LIKE '%demo%' OR nome LIKE '%Batch%' OR nome LIKE '%Import%' OR email LIKE '%@test.com' OR email LIKE '%@example.com') as lojas_teste,\n  (SELECT COUNT(*) FROM gestores) as total_gestores,\n  (SELECT COUNT(*) FROM gestores g JOIN users u ON g.userId = u.id WHERE u.email LIKE '%@test.com' OR u.name LIKE '%Test%' OR u.name LIKE '%test%') as gestores_teste;",
+  "rows": [
+    {
+      "total_lojas": "174",
+      "lojas_teste": "98",
+      "total_gestores": "111",
+      "gestores_teste": "105"
+    }
+  ],
+  "messages": [],
+  "stdout": "total_lojas\tlojas_teste\ttotal_gestores\tgestores_teste\n174\t98\t111\t105\n",
+  "stderr": "",
+  "execution_time_ms": 56
+}

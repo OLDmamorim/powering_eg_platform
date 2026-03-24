@@ -952,3 +952,9 @@
 ## Corrigir Período do Relatório Mensal (Volante + Recalibra)
 - [x] Relatório mensal volantes: deve mostrar dados do mês corrente (não do mês anterior)
 - [x] Verificar e corrigir o mesmo no relatório mensal recalibra
+
+## Limpar Lojas e Gestores de Teste da BD
+- [x] Identificar lojas de teste na BD (98 lojas de teste encontradas)
+- [x] Identificar gestores de teste na BD (105 gestores de teste encontrados)
+- [x] Remover registos de teste após confirmação (limpo em cascata em todas as tabelas)
+- [ ] Guardar checkpoint

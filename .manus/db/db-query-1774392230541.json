@@ -1,0 +1,230 @@
+{
+  "query": "SELECT TABLE_NAME, COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND (COLUMN_NAME = 'lojaId' OR COLUMN_NAME = 'gestorId' OR COLUMN_NAME = 'userId') ORDER BY TABLE_NAME;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT TABLE_NAME, COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND (COLUMN_NAME = 'lojaId' OR COLUMN_NAME = 'gestorId' OR COLUMN_NAME = 'userId') ORDER BY TABLE_NAME;",
+  "rows": [
+    {
+      "TABLE_NAME": "agendamentos_loja",
+      "COLUMN_NAME": "lojaId"
+    },
+    {
+      "TABLE_NAME": "agendamentos_loja",
+      "COLUMN_NAME": "gestorId"
+    },
+    {
+      "TABLE_NAME": "agendamentos_volante",
+      "COLUMN_NAME": "lojaId"
+    },
+    {
+      "TABLE_NAME": "alertas",
+      "COLUMN_NAME": "lojaId"
+    },
+    {
+      "TABLE_NAME": "analises_fichas_servico",
+      "COLUMN_NAME": "gestorId"
+    },
+    {
+      "TABLE_NAME": "analises_stock",
+      "COLUMN_NAME": "gestorId"
+    },
+    {
+      "TABLE_NAME": "analises_stock",
+      "COLUMN_NAME": "lojaId"
+    },
+    {
+      "TABLE_NAME": "atividades",
+      "COLUMN_NAME": "lojaId"
+    },
+    {
+      "TABLE_NAME": "atividades",
+      "COLUMN_NAME": "gestorId"
+    },
+    {
+      "TABLE_NAME": "calibragens",
+      "COLUMN_NAME": "lojaId"
+    },
+    {
+      "TABLE_NAME": "classificacoes_eurocode",
+      "COLUMN_NAME": "lojaId"
+    },
+    {
+      "TABLE_NAME": "colaboradores",
+      "COLUMN_NAME": "lojaId"
+    },
+    {
+      "TABLE_NAME": "colaboradores",
+      "COLUMN_NAME": "gestorId"
+    },
+    {
+      "TABLE_NAME": "envios_rh",
+      "COLUMN_NAME": "gestorId"
+    },
+    {
+      "TABLE_NAME": "eurocodes_fichas",
+      "COLUMN_NAME": "lojaId"
+    },
+    {
+      "TABLE_NAME": "evolucao_analises",
+      "COLUMN_NAME": "lojaId"
+    },
+    {
+      "TABLE_NAME": "gestor_lojas",
+      "COLUMN_NAME": "lojaId"
+    },
+    {
+      "TABLE_NAME": "gestor_lojas",
+      "COLUMN_NAME": "gestorId"
+    },
+    {
+      "TABLE_NAME": "gestores",
+      "COLUMN_NAME": "userId"
+    },
+    {
+      "TABLE_NAME": "localidades_agendamento",
+      "COLUMN_NAME": "gestorId"
+    },
+    {
+      "TABLE_NAME": "loja_volante",
+      "COLUMN_NAME": "lojaId"
+    },
+    {
+      "TABLE_NAME": "notas",
+      "COLUMN_NAME": "lojaId"
+    },
+    {
+      "TABLE_NAME": "notas",
+      "COLUMN_NAME": "userId"
+    },
+    {
+      "TABLE_NAME": "notas_loja",
+      "COLUMN_NAME": "lojaId"
+    },
+    {
+      "TABLE_NAME": "notas_tags",
+      "COLUMN_NAME": "userId"
+    },
+    {
+      "TABLE_NAME": "nps_dados",
+      "COLUMN_NAME": "lojaId"
+    },
+    {
+      "TABLE_NAME": "ocorrencias_estruturais",
+      "COLUMN_NAME": "gestorId"
+    },
+    {
+      "TABLE_NAME": "pedidos_apoio",
+      "COLUMN_NAME": "lojaId"
+    },
+    {
+      "TABLE_NAME": "pendentes",
+      "COLUMN_NAME": "lojaId"
+    },
+    {
+      "TABLE_NAME": "pendentes_loja",
+      "COLUMN_NAME": "lojaId"
+    },
+    {
+      "TABLE_NAME": "planos_visitas",
+      "COLUMN_NAME": "gestorId"
+    },
+    {
+      "TABLE_NAME": "previsoes",
+      "COLUMN_NAME": "lojaId"
+    },
+    {
+      "TABLE_NAME": "projecoes_visitas",
+      "COLUMN_NAME": "gestorId"
+    },
+    {
+      "TABLE_NAME": "push_subscriptions",
+      "COLUMN_NAME": "userId"
+    },
+    {
+      "TABLE_NAME": "push_subscriptions",
+      "COLUMN_NAME": "lojaId"
+    },
+    {
+      "TABLE_NAME": "relacoes_lojas",
+      "COLUMN_NAME": "gestorId"
+    },
+    {
+      "TABLE_NAME": "relatorios_analise_loja",
+      "COLUMN_NAME": "lojaId"
+    },
+    {
+      "TABLE_NAME": "relatorios_completos",
+      "COLUMN_NAME": "gestorId"
+    },
+    {
+      "TABLE_NAME": "relatorios_completos",
+      "COLUMN_NAME": "lojaId"
+    },
+    {
+      "TABLE_NAME": "relatorios_livres",
+      "COLUMN_NAME": "lojaId"
+    },
+    {
+      "TABLE_NAME": "relatorios_livres",
+      "COLUMN_NAME": "gestorId"
+    },
+    {
+      "TABLE_NAME": "resultados_mensais",
+      "COLUMN_NAME": "lojaId"
+    },
+    {
+      "TABLE_NAME": "reunioes_quinzenais",
+      "COLUMN_NAME": "lojaId"
+    },
+    {
+      "TABLE_NAME": "servicos_volante",
+      "COLUMN_NAME": "lojaId"
+    },
+    {
+      "TABLE_NAME": "sugestoes_melhoria",
+      "COLUMN_NAME": "gestorId"
+    },
+    {
+      "TABLE_NAME": "sugestoes_melhoria",
+      "COLUMN_NAME": "lojaId"
+    },
+    {
+      "TABLE_NAME": "tokens_loja",
+      "COLUMN_NAME": "lojaId"
+    },
+    {
+      "TABLE_NAME": "topicos_reuniao_gestores",
+      "COLUMN_NAME": "gestorId"
+    },
+    {
+      "TABLE_NAME": "unidade_lojas",
+      "COLUMN_NAME": "lojaId"
+    },
+    {
+      "TABLE_NAME": "unidades_recalibra",
+      "COLUMN_NAME": "gestorId"
+    },
+    {
+      "TABLE_NAME": "vendas_complementares",
+      "COLUMN_NAME": "lojaId"
+    },
+    {
+      "TABLE_NAME": "vidros_destinatarios",
+      "COLUMN_NAME": "lojaId"
+    },
+    {
+      "TABLE_NAME": "visitas_planeadas",
+      "COLUMN_NAME": "lojaId"
+    },
+    {
+      "TABLE_NAME": "volante_lojas",
+      "COLUMN_NAME": "lojaId"
+    },
+    {
+      "TABLE_NAME": "volantes",
+      "COLUMN_NAME": "gestorId"
+    }
+  ],
+  "messages": [],
+  "stdout": "TABLE_NAME\tCOLUMN_NAME\nagendamentos_loja\tlojaId\nagendamentos_loja\tgestorId\nagendamentos_volante\tlojaId\nalertas\tlojaId\nanalises_fichas_servico\tgestorId\nanalises_stock\tgestorId\nanalises_stock\tlojaId\natividades\tlojaId\natividades\tgestorId\ncalibragens\tlojaId\nclassificacoes_eurocode\tlojaId\ncolaboradores\tlojaId\ncolaboradores\tgestorId\nenvios_rh\tgestorId\neurocodes_fichas\tlojaId\nevolucao_analises\tlojaId\ngestor_lojas\tlojaId\ngestor_lojas\tgestorId\ngestores\tuserId\nlocalidades_agendamento\tgestorId\nloja_volante\tlojaId\nnotas\tlojaId\nnotas\tuserId\nnotas_loja\tlojaId\nnotas_tags\tuserId\nnps_dados\tlojaId\nocorrencias_estruturais\tgestorId\npedidos_apoio\tlojaId\npendentes\tlojaId\npendentes_loja\tlojaId\nplanos_visitas\tgestorId\nprevisoes\tlojaId\nprojecoes_visitas\tgestorId\npush_subscriptions\tuserId\npush_subscriptions\tlojaId\nrelacoes_lojas\tgestorId\nrelatorios_analise_loja\tlojaId\nrelatorios_completos\tgestorId\nrelatorios_completos\tlojaId\nrelatorios_livres\tlojaId\nrelatorios_livres\tgestorId\nresultados_mensais\tlojaId\nreunioes_quinzenais\tlojaId\nservicos_volante\tlojaId\nsugestoes_melhoria\tgestorId\nsugestoes_melhoria\tlojaId\ntokens_loja\tlojaId\ntopicos_reuniao_gestores\tgestorId\nunidade_lojas\tlojaId\nunidades_recalibra\tgestorId\nvendas_complementares\tlojaId\nvidros_destinatarios\tlojaId\nvisitas_planeadas\tlojaId\nvolante_lojas\tlojaId\nvolantes\tgestorId\n",
+  "stderr": "",
+  "execution_time_ms": 147
+}

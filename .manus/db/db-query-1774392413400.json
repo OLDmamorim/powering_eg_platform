@@ -1,0 +1,15 @@
+{
+  "query": "SELECT \n  (SELECT COUNT(*) FROM lojas) as total_lojas,\n  (SELECT COUNT(*) FROM gestores) as total_gestores,\n  (SELECT COUNT(*) FROM users) as total_users;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT \n  (SELECT COUNT(*) FROM lojas) as total_lojas,\n  (SELECT COUNT(*) FROM gestores) as total_gestores,\n  (SELECT COUNT(*) FROM users) as total_users;",
+  "rows": [
+    {
+      "total_lojas": "76",
+      "total_gestores": "6",
+      "total_users": "10"
+    }
+  ],
+  "messages": [],
+  "stdout": "total_lojas\ttotal_gestores\ttotal_users\n76\t6\t10\n",
+  "stderr": "",
+  "execution_time_ms": 51
+}

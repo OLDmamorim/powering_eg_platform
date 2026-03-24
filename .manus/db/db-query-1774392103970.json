@@ -1,0 +1,13 @@
+{
+  "query": "SELECT COUNT(*) as lojas_reais FROM lojas WHERE nome NOT LIKE '%test%' AND nome NOT LIKE '%Test%' AND nome NOT LIKE '%TEST%' AND nome NOT LIKE '%exemplo%' AND nome NOT LIKE '%demo%' AND nome NOT LIKE '%Batch%' AND nome NOT LIKE '%Import%' AND (email IS NULL OR (email NOT LIKE '%@test.com' AND email NOT LIKE '%@example.com'));",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT COUNT(*) as lojas_reais FROM lojas WHERE nome NOT LIKE '%test%' AND nome NOT LIKE '%Test%' AND nome NOT LIKE '%TEST%' AND nome NOT LIKE '%exemplo%' AND nome NOT LIKE '%demo%' AND nome NOT LIKE '%Batch%' AND nome NOT LIKE '%Import%' AND (email IS NULL OR (email NOT LIKE '%@test.com' AND email NOT LIKE '%@example.com'));",
+  "rows": [
+    {
+      "lojas_reais": "76"
+    }
+  ],
+  "messages": [],
+  "stdout": "lojas_reais\n76\n",
+  "stderr": "",
+  "execution_time_ms": 59
+}

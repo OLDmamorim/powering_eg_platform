@@ -1,0 +1,66 @@
+{
+  "query": "SELECT TABLE_NAME, COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND (COLUMN_NAME = 'lojaId' OR COLUMN_NAME = 'gestorId' OR COLUMN_NAME = 'userId') AND TABLE_NAME > 'relatorios_livres' ORDER BY TABLE_NAME;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT TABLE_NAME, COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND (COLUMN_NAME = 'lojaId' OR COLUMN_NAME = 'gestorId' OR COLUMN_NAME = 'userId') AND TABLE_NAME > 'relatorios_livres' ORDER BY TABLE_NAME;",
+  "rows": [
+    {
+      "TABLE_NAME": "resultados_mensais",
+      "COLUMN_NAME": "lojaId"
+    },
+    {
+      "TABLE_NAME": "reunioes_quinzenais",
+      "COLUMN_NAME": "lojaId"
+    },
+    {
+      "TABLE_NAME": "servicos_volante",
+      "COLUMN_NAME": "lojaId"
+    },
+    {
+      "TABLE_NAME": "sugestoes_melhoria",
+      "COLUMN_NAME": "lojaId"
+    },
+    {
+      "TABLE_NAME": "sugestoes_melhoria",
+      "COLUMN_NAME": "gestorId"
+    },
+    {
+      "TABLE_NAME": "tokens_loja",
+      "COLUMN_NAME": "lojaId"
+    },
+    {
+      "TABLE_NAME": "topicos_reuniao_gestores",
+      "COLUMN_NAME": "gestorId"
+    },
+    {
+      "TABLE_NAME": "unidade_lojas",
+      "COLUMN_NAME": "lojaId"
+    },
+    {
+      "TABLE_NAME": "unidades_recalibra",
+      "COLUMN_NAME": "gestorId"
+    },
+    {
+      "TABLE_NAME": "vendas_complementares",
+      "COLUMN_NAME": "lojaId"
+    },
+    {
+      "TABLE_NAME": "vidros_destinatarios",
+      "COLUMN_NAME": "lojaId"
+    },
+    {
+      "TABLE_NAME": "visitas_planeadas",
+      "COLUMN_NAME": "lojaId"
+    },
+    {
+      "TABLE_NAME": "volante_lojas",
+      "COLUMN_NAME": "lojaId"
+    },
+    {
+      "TABLE_NAME": "volantes",
+      "COLUMN_NAME": "gestorId"
+    }
+  ],
+  "messages": [],
+  "stdout": "TABLE_NAME\tCOLUMN_NAME\nresultados_mensais\tlojaId\nreunioes_quinzenais\tlojaId\nservicos_volante\tlojaId\nsugestoes_melhoria\tlojaId\nsugestoes_melhoria\tgestorId\ntokens_loja\tlojaId\ntopicos_reuniao_gestores\tgestorId\nunidade_lojas\tlojaId\nunidades_recalibra\tgestorId\nvendas_complementares\tlojaId\nvidros_destinatarios\tlojaId\nvisitas_planeadas\tlojaId\nvolante_lojas\tlojaId\nvolantes\tgestorId\n",
+  "stderr": "",
+  "execution_time_ms": 49
+}

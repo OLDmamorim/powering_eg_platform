@@ -1,0 +1,676 @@
+{
+  "query": "SELECT g.id, g.userId, u.name, u.email FROM gestores g JOIN users u ON g.userId = u.id ORDER BY g.id;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT g.id, g.userId, u.name, u.email FROM gestores g JOIN users u ON g.userId = u.id ORDER BY g.id;",
+  "rows": [
+    {
+      "id": "30001",
+      "userId": "420030",
+      "name": "Marco Amorim",
+      "email": "mamorim@expressglass.pt"
+    },
+    {
+      "id": "120001",
+      "userId": "2160121",
+      "name": "Marco Vilar",
+      "email": "mvilar@expressglass.pt"
+    },
+    {
+      "id": "570003",
+      "userId": "6600028",
+      "name": "Rui Adriao ",
+      "email": "rui.adriao@expressglass.pt"
+    },
+    {
+      "id": "1350001",
+      "userId": "7980023",
+      "name": "Fabio Dias",
+      "email": "fdias@expressglass.pt"
+    },
+    {
+      "id": "1710023",
+      "userId": "2160125",
+      "name": "Mónica Correira",
+      "email": "mcorreia@expressglass.pt"
+    },
+    {
+      "id": "1800001",
+      "userId": "21960077",
+      "name": "Carlos Eduardo",
+      "email": "carlos.eduardo@expressglass.pt"
+    },
+    {
+      "id": "1950001",
+      "userId": "25950008",
+      "name": "Admin Comentarios Test",
+      "email": "admin.comentarios@test.com"
+    },
+    {
+      "id": "1950002",
+      "userId": "25950010",
+      "name": "Gestor Ocorrencias Test",
+      "email": "gestor.ocorrencias@test.com"
+    },
+    {
+      "id": "1950003",
+      "userId": "25950007",
+      "name": "Admin Email Test",
+      "email": "admin.email@test.com"
+    },
+    {
+      "id": "1950004",
+      "userId": "25950009",
+      "name": "Admin Teste",
+      "email": "admin@test.com"
+    },
+    {
+      "id": "1950005",
+      "userId": "25950011",
+      "name": "Gestor Email Test",
+      "email": "gestor.email@test.com"
+    },
+    {
+      "id": "1950006",
+      "userId": "25950013",
+      "name": "Gestor Comentarios Test",
+      "email": "gestor.comentarios@test.com"
+    },
+    {
+      "id": "1950007",
+      "userId": "25950012",
+      "name": "Gestor Teste",
+      "email": "gestor@test.com"
+    },
+    {
+      "id": "1950008",
+      "userId": "25950010",
+      "name": "Gestor Ocorrencias Test",
+      "email": "gestor.ocorrencias@test.com"
+    },
+    {
+      "id": "1950009",
+      "userId": "25950014",
+      "name": "Outro Gestor Test",
+      "email": "outro.gestor@test.com"
+    },
+    {
+      "id": "1950010",
+      "userId": "25950010",
+      "name": "Gestor Ocorrencias Test",
+      "email": "gestor.ocorrencias@test.com"
+    },
+    {
+      "id": "1950011",
+      "userId": "25950016",
+      "name": "Gestor Teste Data/Hora",
+      "email": "gestor.datahora@test.com"
+    },
+    {
+      "id": "1950012",
+      "userId": "25950015",
+      "name": "Gestor Multi-Lojas Test",
+      "email": "gestor.multilojas@test.com"
+    },
+    {
+      "id": "1950013",
+      "userId": "25950017",
+      "name": "Admin Topicos 1774368000459",
+      "email": "admin-topicos-1774368000459@test.com"
+    },
+    {
+      "id": "1950014",
+      "userId": "25950018",
+      "name": "Gestor Teste IA",
+      "email": "gestor-ia-test-1774368000555@test.com"
+    },
+    {
+      "id": "1950015",
+      "userId": "25950019",
+      "name": "Gestor Topicos 1774368000459",
+      "email": "gestor-topicos-1774368000459@test.com"
+    },
+    {
+      "id": "1950016",
+      "userId": "25950020",
+      "name": "Admin Teste",
+      "email": "admin-ia-test-1774368000877@test.com"
+    },
+    {
+      "id": "1950017",
+      "userId": "25950021",
+      "name": "Admin Lojas Test",
+      "email": "admin.lojas@test.com"
+    },
+    {
+      "id": "1950018",
+      "userId": "25950022",
+      "name": "Gestor Lojas Test",
+      "email": "gestor.lojas@test.com"
+    },
+    {
+      "id": "1950019",
+      "userId": "25950023",
+      "name": "Admin Reunioes Filtro",
+      "email": "admin-reunioes-filtro@test.com"
+    },
+    {
+      "id": "1950020",
+      "userId": "25950024",
+      "name": "Gestor Reunioes Filtro",
+      "email": "gestor-reunioes-filtro@test.com"
+    },
+    {
+      "id": "1950021",
+      "userId": "25950026",
+      "name": "Gestor Cumprimento 1774368007900",
+      "email": "cumprimento-1774368007900@test.com"
+    },
+    {
+      "id": "1950022",
+      "userId": "25950007",
+      "name": "Admin Email Test",
+      "email": "admin.email@test.com"
+    },
+    {
+      "id": "1950023",
+      "userId": "25950008",
+      "name": "Admin Comentarios Test",
+      "email": "admin.comentarios@test.com"
+    },
+    {
+      "id": "1950024",
+      "userId": "25950009",
+      "name": "Admin Teste",
+      "email": "admin@test.com"
+    },
+    {
+      "id": "1950025",
+      "userId": "25950010",
+      "name": "Gestor Ocorrencias Test",
+      "email": "gestor.ocorrencias@test.com"
+    },
+    {
+      "id": "1950026",
+      "userId": "25950011",
+      "name": "Gestor Email Test",
+      "email": "gestor.email@test.com"
+    },
+    {
+      "id": "1950027",
+      "userId": "25950013",
+      "name": "Gestor Comentarios Test",
+      "email": "gestor.comentarios@test.com"
+    },
+    {
+      "id": "1950028",
+      "userId": "25950012",
+      "name": "Gestor Teste",
+      "email": "gestor@test.com"
+    },
+    {
+      "id": "1950029",
+      "userId": "25950010",
+      "name": "Gestor Ocorrencias Test",
+      "email": "gestor.ocorrencias@test.com"
+    },
+    {
+      "id": "1950030",
+      "userId": "25950014",
+      "name": "Outro Gestor Test",
+      "email": "outro.gestor@test.com"
+    },
+    {
+      "id": "1950031",
+      "userId": "25950010",
+      "name": "Gestor Ocorrencias Test",
+      "email": "gestor.ocorrencias@test.com"
+    },
+    {
+      "id": "1950032",
+      "userId": "25950015",
+      "name": "Gestor Multi-Lojas Test",
+      "email": "gestor.multilojas@test.com"
+    },
+    {
+      "id": "1950033",
+      "userId": "25950016",
+      "name": "Gestor Teste Data/Hora",
+      "email": "gestor.datahora@test.com"
+    },
+    {
+      "id": "1950034",
+      "userId": "25950027",
+      "name": "Admin Topicos 1774368109985",
+      "email": "admin-topicos-1774368109985@test.com"
+    },
+    {
+      "id": "1950035",
+      "userId": "25950028",
+      "name": "Gestor Topicos 1774368109985",
+      "email": "gestor-topicos-1774368109985@test.com"
+    },
+    {
+      "id": "1950036",
+      "userId": "25950029",
+      "name": "Gestor Teste IA",
+      "email": "gestor-ia-test-1774368110742@test.com"
+    },
+    {
+      "id": "1950037",
+      "userId": "25950030",
+      "name": "Admin Teste",
+      "email": "admin-ia-test-1774368111016@test.com"
+    },
+    {
+      "id": "1950038",
+      "userId": "25950021",
+      "name": "Admin Lojas Test",
+      "email": "admin.lojas@test.com"
+    },
+    {
+      "id": "1950039",
+      "userId": "25950022",
+      "name": "Gestor Lojas Test",
+      "email": "gestor.lojas@test.com"
+    },
+    {
+      "id": "1950040",
+      "userId": "25950023",
+      "name": "Admin Reunioes Filtro",
+      "email": "admin-reunioes-filtro@test.com"
+    },
+    {
+      "id": "1950041",
+      "userId": "25950024",
+      "name": "Gestor Reunioes Filtro",
+      "email": "gestor-reunioes-filtro@test.com"
+    },
+    {
+      "id": "1950042",
+      "userId": "25950032",
+      "name": "Gestor Cumprimento 1774368118420",
+      "email": "cumprimento-1774368118420@test.com"
+    },
+    {
+      "id": "1950043",
+      "userId": "25950010",
+      "name": "Gestor Ocorrencias Test",
+      "email": "gestor.ocorrencias@test.com"
+    },
+    {
+      "id": "1950044",
+      "userId": "25950009",
+      "name": "Admin Teste",
+      "email": "admin@test.com"
+    },
+    {
+      "id": "1950045",
+      "userId": "25950008",
+      "name": "Admin Comentarios Test",
+      "email": "admin.comentarios@test.com"
+    },
+    {
+      "id": "1950046",
+      "userId": "25950007",
+      "name": "Admin Email Test",
+      "email": "admin.email@test.com"
+    },
+    {
+      "id": "1950047",
+      "userId": "25950011",
+      "name": "Gestor Email Test",
+      "email": "gestor.email@test.com"
+    },
+    {
+      "id": "1950048",
+      "userId": "25950013",
+      "name": "Gestor Comentarios Test",
+      "email": "gestor.comentarios@test.com"
+    },
+    {
+      "id": "1950049",
+      "userId": "25950012",
+      "name": "Gestor Teste",
+      "email": "gestor@test.com"
+    },
+    {
+      "id": "1950050",
+      "userId": "25950010",
+      "name": "Gestor Ocorrencias Test",
+      "email": "gestor.ocorrencias@test.com"
+    },
+    {
+      "id": "1950051",
+      "userId": "25950014",
+      "name": "Outro Gestor Test",
+      "email": "outro.gestor@test.com"
+    },
+    {
+      "id": "1950052",
+      "userId": "25950010",
+      "name": "Gestor Ocorrencias Test",
+      "email": "gestor.ocorrencias@test.com"
+    },
+    {
+      "id": "1950053",
+      "userId": "25950016",
+      "name": "Gestor Teste Data/Hora",
+      "email": "gestor.datahora@test.com"
+    },
+    {
+      "id": "1950054",
+      "userId": "25950015",
+      "name": "Gestor Multi-Lojas Test",
+      "email": "gestor.multilojas@test.com"
+    },
+    {
+      "id": "1950055",
+      "userId": "25950033",
+      "name": "Admin Topicos 1774368239547",
+      "email": "admin-topicos-1774368239547@test.com"
+    },
+    {
+      "id": "1950056",
+      "userId": "25950034",
+      "name": "Gestor Topicos 1774368239547",
+      "email": "gestor-topicos-1774368239547@test.com"
+    },
+    {
+      "id": "1950057",
+      "userId": "25950035",
+      "name": "Gestor Teste IA",
+      "email": "gestor-ia-test-1774368239669@test.com"
+    },
+    {
+      "id": "1950058",
+      "userId": "25950036",
+      "name": "Admin Teste",
+      "email": "admin-ia-test-1774368240057@test.com"
+    },
+    {
+      "id": "1950059",
+      "userId": "25950021",
+      "name": "Admin Lojas Test",
+      "email": "admin.lojas@test.com"
+    },
+    {
+      "id": "1950060",
+      "userId": "25950022",
+      "name": "Gestor Lojas Test",
+      "email": "gestor.lojas@test.com"
+    },
+    {
+      "id": "1950061",
+      "userId": "25950023",
+      "name": "Admin Reunioes Filtro",
+      "email": "admin-reunioes-filtro@test.com"
+    },
+    {
+      "id": "1950062",
+      "userId": "25950024",
+      "name": "Gestor Reunioes Filtro",
+      "email": "gestor-reunioes-filtro@test.com"
+    },
+    {
+      "id": "1950063",
+      "userId": "25950038",
+      "name": "Gestor Cumprimento 1774368248856",
+      "email": "cumprimento-1774368248857@test.com"
+    },
+    {
+      "id": "1950064",
+      "userId": "25950007",
+      "name": "Admin Email Test",
+      "email": "admin.email@test.com"
+    },
+    {
+      "id": "1950065",
+      "userId": "25950008",
+      "name": "Admin Comentarios Test",
+      "email": "admin.comentarios@test.com"
+    },
+    {
+      "id": "1950066",
+      "userId": "25950010",
+      "name": "Gestor Ocorrencias Test",
+      "email": "gestor.ocorrencias@test.com"
+    },
+    {
+      "id": "1950067",
+      "userId": "25950009",
+      "name": "Admin Teste",
+      "email": "admin@test.com"
+    },
+    {
+      "id": "1950068",
+      "userId": "25950011",
+      "name": "Gestor Email Test",
+      "email": "gestor.email@test.com"
+    },
+    {
+      "id": "1950069",
+      "userId": "25950012",
+      "name": "Gestor Teste",
+      "email": "gestor@test.com"
+    },
+    {
+      "id": "1950070",
+      "userId": "25950013",
+      "name": "Gestor Comentarios Test",
+      "email": "gestor.comentarios@test.com"
+    },
+    {
+      "id": "1950071",
+      "userId": "25950010",
+      "name": "Gestor Ocorrencias Test",
+      "email": "gestor.ocorrencias@test.com"
+    },
+    {
+      "id": "1950072",
+      "userId": "25950014",
+      "name": "Outro Gestor Test",
+      "email": "outro.gestor@test.com"
+    },
+    {
+      "id": "1950073",
+      "userId": "25950010",
+      "name": "Gestor Ocorrencias Test",
+      "email": "gestor.ocorrencias@test.com"
+    },
+    {
+      "id": "1950074",
+      "userId": "25950015",
+      "name": "Gestor Multi-Lojas Test",
+      "email": "gestor.multilojas@test.com"
+    },
+    {
+      "id": "1950075",
+      "userId": "25950016",
+      "name": "Gestor Teste Data/Hora",
+      "email": "gestor.datahora@test.com"
+    },
+    {
+      "id": "1950076",
+      "userId": "25950039",
+      "name": "Gestor Teste IA",
+      "email": "gestor-ia-test-1774368389459@test.com"
+    },
+    {
+      "id": "1950077",
+      "userId": "25950040",
+      "name": "Admin Teste",
+      "email": "admin-ia-test-1774368389746@test.com"
+    },
+    {
+      "id": "1950078",
+      "userId": "25950041",
+      "name": "Admin Topicos 1774368390522",
+      "email": "admin-topicos-1774368390522@test.com"
+    },
+    {
+      "id": "1950079",
+      "userId": "25950042",
+      "name": "Gestor Topicos 1774368390522",
+      "email": "gestor-topicos-1774368390522@test.com"
+    },
+    {
+      "id": "1950080",
+      "userId": "25950021",
+      "name": "Admin Lojas Test",
+      "email": "admin.lojas@test.com"
+    },
+    {
+      "id": "1950081",
+      "userId": "25950022",
+      "name": "Gestor Lojas Test",
+      "email": "gestor.lojas@test.com"
+    },
+    {
+      "id": "1950082",
+      "userId": "25950023",
+      "name": "Admin Reunioes Filtro",
+      "email": "admin-reunioes-filtro@test.com"
+    },
+    {
+      "id": "1950083",
+      "userId": "25950024",
+      "name": "Gestor Reunioes Filtro",
+      "email": "gestor-reunioes-filtro@test.com"
+    },
+    {
+      "id": "1950084",
+      "userId": "25950044",
+      "name": "Gestor Cumprimento 1774368398407",
+      "email": "cumprimento-1774368398407@test.com"
+    },
+    {
+      "id": "1950085",
+      "userId": "25950007",
+      "name": "Admin Email Test",
+      "email": "admin.email@test.com"
+    },
+    {
+      "id": "1950086",
+      "userId": "25950010",
+      "name": "Gestor Ocorrencias Test",
+      "email": "gestor.ocorrencias@test.com"
+    },
+    {
+      "id": "1950087",
+      "userId": "25950009",
+      "name": "Admin Teste",
+      "email": "admin@test.com"
+    },
+    {
+      "id": "1950088",
+      "userId": "25950008",
+      "name": "Admin Comentarios Test",
+      "email": "admin.comentarios@test.com"
+    },
+    {
+      "id": "1950089",
+      "userId": "25950012",
+      "name": "Gestor Teste",
+      "email": "gestor@test.com"
+    },
+    {
+      "id": "1950090",
+      "userId": "25950013",
+      "name": "Gestor Comentarios Test",
+      "email": "gestor.comentarios@test.com"
+    },
+    {
+      "id": "1950091",
+      "userId": "25950011",
+      "name": "Gestor Email Test",
+      "email": "gestor.email@test.com"
+    },
+    {
+      "id": "1950092",
+      "userId": "25950010",
+      "name": "Gestor Ocorrencias Test",
+      "email": "gestor.ocorrencias@test.com"
+    },
+    {
+      "id": "1950093",
+      "userId": "25950014",
+      "name": "Outro Gestor Test",
+      "email": "outro.gestor@test.com"
+    },
+    {
+      "id": "1950094",
+      "userId": "25950010",
+      "name": "Gestor Ocorrencias Test",
+      "email": "gestor.ocorrencias@test.com"
+    },
+    {
+      "id": "1950095",
+      "userId": "25950015",
+      "name": "Gestor Multi-Lojas Test",
+      "email": "gestor.multilojas@test.com"
+    },
+    {
+      "id": "1950096",
+      "userId": "25950016",
+      "name": "Gestor Teste Data/Hora",
+      "email": "gestor.datahora@test.com"
+    },
+    {
+      "id": "1950097",
+      "userId": "25950045",
+      "name": "Gestor Teste IA",
+      "email": "gestor-ia-test-1774368529268@test.com"
+    },
+    {
+      "id": "1950098",
+      "userId": "25950046",
+      "name": "Admin Teste",
+      "email": "admin-ia-test-1774368529565@test.com"
+    },
+    {
+      "id": "1950099",
+      "userId": "25950047",
+      "name": "Admin Topicos 1774368530421",
+      "email": "admin-topicos-1774368530421@test.com"
+    },
+    {
+      "id": "1950100",
+      "userId": "25950048",
+      "name": "Gestor Topicos 1774368530421",
+      "email": "gestor-topicos-1774368530421@test.com"
+    },
+    {
+      "id": "1950101",
+      "userId": "25950021",
+      "name": "Admin Lojas Test",
+      "email": "admin.lojas@test.com"
+    },
+    {
+      "id": "1950102",
+      "userId": "25950022",
+      "name": "Gestor Lojas Test",
+      "email": "gestor.lojas@test.com"
+    },
+    {
+      "id": "1950103",
+      "userId": "25950023",
+      "name": "Admin Reunioes Filtro",
+      "email": "admin-reunioes-filtro@test.com"
+    },
+    {
+      "id": "1950104",
+      "userId": "25950024",
+      "name": "Gestor Reunioes Filtro",
+      "email": "gestor-reunioes-filtro@test.com"
+    },
+    {
+      "id": "1950105",
+      "userId": "25950050",
+      "name": "Gestor Cumprimento 1774368538866",
+      "email": "cumprimento-1774368538866@test.com"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tuserId\tname\temail\n30001\t420030\tMarco Amorim\tmamorim@expressglass.pt\n120001\t2160121\tMarco Vilar\tmvilar@expressglass.pt\n570003\t6600028\tRui Adriao \trui.adriao@expressglass.pt\n1350001\t7980023\tFabio Dias\tfdias@expressglass.pt\n1710023\t2160125\tMónica Correira\tmcorreia@expressglass.pt\n1800001\t21960077\tCarlos Eduardo\tcarlos.eduardo@expressglass.pt\n1950001\t25950008\tAdmin Comentarios Test\tadmin.comentarios@test.com\n1950002\t25950010\tGestor Ocorrencias Test\tgestor.ocorrencias@test.com\n1950003\t25950007\tAdmin Email Test\tadmin.email@test.com\n1950004\t25950009\tAdmin Teste\tadmin@test.com\n1950005\t25950011\tGestor Email Test\tgestor.email@test.com\n1950006\t25950013\tGestor Comentarios Test\tgestor.comentarios@test.com\n1950007\t25950012\tGestor Teste\tgestor@test.com\n1950008\t25950010\tGestor Ocorrencias Test\tgestor.ocorrencias@test.com\n1950009\t25950014\tOutro Gestor Test\toutro.gestor@test.com\n1950010\t25950010\tGestor Ocorrencias Test\tgestor.ocorrencias@test.com\n1950011\t25950016\tGestor Teste Data/Hora\tgestor.datahora@test.com\n1950012\t25950015\tGestor Multi-Lojas Test\tgestor.multilojas@test.com\n1950013\t25950017\tAdmin Topicos 1774368000459\tadmin-topicos-1774368000459@test.com\n1950014\t25950018\tGestor Teste IA\tgestor-ia-test-1774368000555@test.com\n1950015\t25950019\tGestor Topicos 1774368000459\tgestor-topicos-1774368000459@test.com\n1950016\t25950020\tAdmin Teste\tadmin-ia-test-1774368000877@test.com\n1950017\t25950021\tAdmin Lojas Test\tadmin.lojas@test.com\n1950018\t25950022\tGestor Lojas Test\tgestor.lojas@test.com\n1950019\t25950023\tAdmin Reunioes Filtro\tadmin-reunioes-filtro@test.com\n1950020\t25950024\tGestor Reunioes Filtro\tgestor-reunioes-filtro@test.com\n1950021\t25950026\tGestor Cumprimento 1774368007900\tcumprimento-1774368007900@test.com\n1950022\t25950007\tAdmin Email Test\tadmin.email@test.com\n1950023\t25950008\tAdmin Comentarios Test\tadmin.comentarios@test.com\n1950024\t25950009\tAdmin Teste\tadmin@test.com\n1950025\t25950010\tGestor Ocorrencias Test\tgestor.ocorrencias@test.com\n1950026\t25950011\tGestor Email Test\tgestor.email@test.com\n1950027\t25950013\tGestor Comentarios Test\tgestor.comentarios@test.com\n1950028\t25950012\tGestor Teste\tgestor@test.com\n1950029\t25950010\tGestor Ocorrencias Test\tgestor.ocorrencias@test.com\n1950030\t25950014\tOutro Gestor Test\toutro.gestor@test.com\n1950031\t25950010\tGestor Ocorrencias Test\tgestor.ocorrencias@test.com\n1950032\t25950015\tGestor Multi-Lojas Test\tgestor.multilojas@test.com\n1950033\t25950016\tGestor Teste Data/Hora\tgestor.datahora@test.com\n1950034\t25950027\tAdmin Topicos 1774368109985\tadmin-topicos-1774368109985@test.com\n1950035\t25950028\tGestor Topicos 1774368109985\tgestor-topicos-1774368109985@test.com\n1950036\t25950029\tGestor Teste IA\tgestor-ia-test-1774368110742@test.com\n1950037\t25950030\tAdmin Teste\tadmin-ia-test-1774368111016@test.com\n1950038\t25950021\tAdmin Lojas Test\tadmin.lojas@test.com\n1950039\t25950022\tGestor Lojas Test\tgestor.lojas@test.com\n1950040\t25950023\tAdmin Reunioes Filtro\tadmin-reunioes-filtro@test.com\n1950041\t25950024\tGestor Reunioes Filtro\tgestor-reunioes-filtro@test.com\n1950042\t25950032\tGestor Cumprimento 1774368118420\tcumprimento-1774368118420@test.com\n1950043\t25950010\tGestor Ocorrencias Test\tgestor.ocorrencias@test.com\n1950044\t25950009\tAdmin Teste\tadmin@test.com\n1950045\t25950008\tAdmin Comentarios Test\tadmin.comentarios@test.com\n1950046\t25950007\tAdmin Email Test\tadmin.email@test.com\n1950047\t25950011\tGestor Email Test\tgestor.email@test.com\n1950048\t25950013\tGestor Comentarios Test\tgestor.comentarios@test.com\n1950049\t25950012\tGestor Teste\tgestor@test.com\n1950050\t25950010\tGestor Ocorrencias Test\tgestor.ocorrencias@test.com\n1950051\t25950014\tOutro Gestor Test\toutro.gestor@test.com\n1950052\t25950010\tGestor Ocorrencias Test\tgestor.ocorrencias@test.com\n1950053\t25950016\tGestor Teste Data/Hora\tgestor.datahora@test.com\n1950054\t25950015\tGestor Multi-Lojas Test\tgestor.multilojas@test.com\n1950055\t25950033\tAdmin Topicos 1774368239547\tadmin-topicos-1774368239547@test.com\n1950056\t25950034\tGestor Topicos 1774368239547\tgestor-topicos-1774368239547@test.com\n1950057\t25950035\tGestor Teste IA\tgestor-ia-test-1774368239669@test.com\n1950058\t25950036\tAdmin Teste\tadmin-ia-test-1774368240057@test.com\n1950059\t25950021\tAdmin Lojas Test\tadmin.lojas@test.com\n1950060\t25950022\tGestor Lojas Test\tgestor.lojas@test.com\n1950061\t25950023\tAdmin Reunioes Filtro\tadmin-reunioes-filtro@test.com\n1950062\t25950024\tGestor Reunioes Filtro\tgestor-reunioes-filtro@test.com\n1950063\t25950038\tGestor Cumprimento 1774368248856\tcumprimento-1774368248857@test.com\n1950064\t25950007\tAdmin Email Test\tadmin.email@test.com\n1950065\t25950008\tAdmin Comentarios Test\tadmin.comentarios@test.com\n1950066\t25950010\tGestor Ocorrencias Test\tgestor.ocorrencias@test.com\n1950067\t25950009\tAdmin Teste\tadmin@test.com\n1950068\t25950011\tGestor Email Test\tgestor.email@test.com\n1950069\t25950012\tGestor Teste\tgestor@test.com\n1950070\t25950013\tGestor Comentarios Test\tgestor.comentarios@test.com\n1950071\t25950010\tGestor Ocorrencias Test\tgestor.ocorrencias@test.com\n1950072\t25950014\tOutro Gestor Test\toutro.gestor@test.com\n1950073\t25950010\tGestor Ocorrencias Test\tgestor.ocorrencias@test.com\n1950074\t25950015\tGestor Multi-Lojas Test\tgestor.multilojas@test.com\n1950075\t25950016\tGestor Teste Data/Hora\tgestor.datahora@test.com\n1950076\t25950039\tGestor Teste IA\tgestor-ia-test-1774368389459@test.com\n1950077\t25950040\tAdmin Teste\tadmin-ia-test-1774368389746@test.com\n1950078\t25950041\tAdmin Topicos 1774368390522\tadmin-topicos-1774368390522@test.com\n1950079\t25950042\tGestor Topicos 1774368390522\tgestor-topicos-1774368390522@test.com\n1950080\t25950021\tAdmin Lojas Test\tadmin.lojas@test.com\n1950081\t25950022\tGestor Lojas Test\tgestor.lojas@test.com\n1950082\t25950023\tAdmin Reunioes Filtro\tadmin-reunioes-filtro@test.com\n1950083\t25950024\tGestor Reunioes Filtro\tgestor-reunioes-filtro@test.com\n1950084\t25950044\tGestor Cumprimento 1774368398407\tcumprimento-1774368398407@test.com\n1950085\t25950007\tAdmin Email Test\tadmin.email@test.com\n1950086\t25950010\tGestor Ocorrencias Test\tgestor.ocorrencias@test.com\n1950087\t25950009\tAdmin Teste\tadmin@test.com\n1950088\t25950008\tAdmin Comentarios Test\tadmin.comentarios@test.com\n1950089\t25950012\tGestor Teste\tgestor@test.com\n1950090\t25950013\tGestor Comentarios Test\tgestor.comentarios@test.com\n1950091\t25950011\tGestor Email Test\tgestor.email@test.com\n1950092\t25950010\tGestor Ocorrencias Test\tgestor.ocorrencias@test.com\n1950093\t25950014\tOutro Gestor Test\toutro.gestor@test.com\n1950094\t25950010\tGestor Ocorrencias Test\tgestor.ocorrencias@test.com\n1950095\t25950015\tGestor Multi-Lojas Test\tgestor.multilojas@test.com\n1950096\t25950016\tGestor Teste Data/Hora\tgestor.datahora@test.com\n1950097\t25950045\tGestor Teste IA\tgestor-ia-test-1774368529268@test.com\n1950098\t25950046\tAdmin Teste\tadmin-ia-test-1774368529565@test.com\n1950099\t25950047\tAdmin Topicos 1774368530421\tadmin-topicos-1774368530421@test.com\n1950100\t25950048\tGestor Topicos 1774368530421\tgestor-topicos-1774368530421@test.com\n1950101\t25950021\tAdmin Lojas Test\tadmin.lojas@test.com\n1950102\t25950022\tGestor Lojas Test\tgestor.lojas@test.com\n1950103\t25950023\tAdmin Reunioes Filtro\tadmin-reunioes-filtro@test.com\n1950104\t25950024\tGestor Reunioes Filtro\tgestor-reunioes-filtro@test.com\n1950105\t25950050\tGestor Cumprimento 1774368538866\tcumprimento-1774368538866@test.com\n",
+  "stderr": "",
+  "execution_time_ms": 58
+}
