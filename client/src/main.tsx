@@ -22,6 +22,9 @@ const queryClient = new QueryClient({
   },
 });
 
+// Páginas que usam autenticação por token (não OAuth) — nunca redirecionar para login OAuth
+const TOKEN_AUTH_PATHS = ['/portal-loja', '/portal-volante', '/dashboard-volante'];
+
 const redirectToLoginIfUnauthorized = (error: unknown) => {
   if (!(error instanceof TRPCClientError)) return;
   if (typeof window === "undefined") return;
@@ -29,6 +32,9 @@ const redirectToLoginIfUnauthorized = (error: unknown) => {
   const isUnauthorized = error.message === UNAUTHED_ERR_MSG;
 
   if (!isUnauthorized) return;
+
+  // Não redirecionar em páginas de acesso por token
+  if (TOKEN_AUTH_PATHS.some(p => window.location.pathname.startsWith(p))) return;
 
   window.location.href = getLoginUrl();
 };
