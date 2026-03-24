@@ -468,7 +468,7 @@ export async function gerarPDFResultados(
           { label: 'Serviços em Falta', valor: ritmo.servicosFaltam.toString(), cor: ritmo.servicosFaltam > 0 ? vermelho : verde },
           { label: 'Dias Úteis Rest.', valor: ritmo.diasUteisRestantes.toString(), cor: cinzaEscuro },
           { label: 'Serviços/Dia', valor: ritmo.servicosPorDia.toString(), cor: azul },
-          { label: 'Gap Rep. 22%', valor: ritmo.gapReparacoes.toString(), cor: ritmo.gapReparacoes > 0 ? laranja : verde },
+          { label: 'Gap Rep. 30%', valor: ritmo.gapReparacoes.toString(), cor: ritmo.gapReparacoes > 0 ? laranja : verde },
         ];
 
         ritmoData.forEach((item, i) => {

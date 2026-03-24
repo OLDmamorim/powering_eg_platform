@@ -3096,7 +3096,7 @@ export default function PortalLoja() {
 
                   {/* Taxa Reparação */}
                   <Card className={`bg-gradient-to-br ${
-                    parseFloat(String(dashboardData.resultados.taxaReparacao || 0)) >= 0.22 
+                    parseFloat(String(dashboardData.resultados.taxaReparacao || 0)) >= 0.30 
                       ? 'from-green-500 to-green-600' 
                       : 'from-amber-500 to-amber-600'
                   } text-white`}>
@@ -3854,8 +3854,8 @@ export default function PortalLoja() {
                           </CardTitle>
                           <CardDescription>
                             {language === 'pt' 
-                              ? 'Objetivo mínimo: 22%'
-                              : 'Minimum goal: 22%'}
+                              ? 'Objetivo mínimo: 30%'
+                              : 'Minimum goal: 30%'}
                           </CardDescription>
                         </CardHeader>
                         <CardContent>
@@ -3875,8 +3875,8 @@ export default function PortalLoja() {
                                     pointHoverRadius: 6,
                                   },
                                   {
-                                    label: language === 'pt' ? 'Objetivo (22%)' : 'Goal (22%)',
-                                    data: Array(labels.length).fill(22),
+                                    label: language === 'pt' ? 'Objetivo (30%)' : 'Goal (30%)',
+                                    data: Array(labels.length).fill(30),
                                     borderColor: 'rgb(239, 68, 68)',
                                     borderDash: [5, 5],
                                     fill: false,
@@ -3950,7 +3950,7 @@ export default function PortalLoja() {
                                         : '-'}
                                     </td>
                                     <td className={`text-right py-2 font-medium ${
-                                      parseFloat(String(e.taxaReparacao || 0)) >= 0.22 ? 'text-green-600' : 'text-amber-600'
+                                      parseFloat(String(e.taxaReparacao || 0)) >= 0.30 ? 'text-green-600' : 'text-amber-600'
                                     }`}>
                                       {e.taxaReparacao !== null 
                                         ? `${(parseFloat(String(e.taxaReparacao)) * 100).toFixed(1)}%`
@@ -7783,7 +7783,7 @@ END:VCALENDAR`;
 
                   {/* Taxa Reparação */}
                   <Card className={`bg-gradient-to-br ${
-                    parseFloat(String(dashboardLojaVolante.resultados?.taxaReparacao || 0)) >= 0.22 
+                    parseFloat(String(dashboardLojaVolante.resultados?.taxaReparacao || 0)) >= 0.30 
                       ? 'from-green-500 to-green-600' 
                       : 'from-amber-500 to-amber-600'
                   } text-white`}>

@@ -749,8 +749,8 @@ export const appRouter = router({
           desvioPercentualMes: desvioPercentual,
           taxaReparacao,
           totalReparacoes,
-          gapReparacoes22: taxaReparacao !== null && taxaReparacao < 0.22 
-            ? Math.ceil(totalServicos * 0.22 - totalReparacoes) 
+          gapReparacoes22: taxaReparacao !== null && taxaReparacao < 0.30 
+            ? Math.ceil(totalServicos * 0.30 - totalReparacoes) 
             : 0,
         };
         
@@ -801,10 +801,10 @@ export const appRouter = router({
         if (resultados) {
           // Alerta taxa de reparação
           const taxaRep = resultados.taxaReparacao !== null ? parseFloat(String(resultados.taxaReparacao)) : null;
-          if (taxaRep !== null && taxaRep < 0.22) {
+          if (taxaRep !== null && taxaRep < 0.30) {
             alertas.push({
               tipo: 'warning',
-              mensagem: `Taxa de reparação (${(taxaRep * 100).toFixed(1)}%) abaixo do objetivo de 22%`
+              mensagem: `Taxa de reparação (${(taxaRep * 100).toFixed(1)}%) abaixo do objetivo de 30%`
             });
           }
           
@@ -826,7 +826,7 @@ export const appRouter = router({
           if (resultados.gapReparacoes22 !== null && resultados.gapReparacoes22 > 0) {
             alertas.push({
               tipo: 'warning',
-              mensagem: `Faltam ${resultados.gapReparacoes22} reparações para atingir 22%`
+              mensagem: `Faltam ${resultados.gapReparacoes22} reparações para atingir 30%`
             });
           }
         }
@@ -1058,7 +1058,7 @@ export const appRouter = router({
         const taxaReparacao = taxaReparacaoExcel !== null ? taxaReparacaoExcel * 100 : 0;
         const escovasPercent = totalServicos > 0 ? (totalEscovas / totalServicos) * 100 : 0;
         const servicosFaltam = Math.max(0, totalObjetivo - totalServicos);
-        const reparacoesFaltam = Math.max(0, Math.ceil(totalServicos * 0.22) - totalReparacoes);
+        const reparacoesFaltam = Math.max(0, Math.ceil(totalServicos * 0.30) - totalReparacoes);
         
         // Buscar dados do mês anterior para comparativo
         const mesAnterior = mesesConsulta[0].mes === 1 ? 12 : mesesConsulta[0].mes - 1;
@@ -1087,7 +1087,7 @@ Analisa os resultados da loja ${loja.nome} e gera uma análise simples e motivac
 
 DADOS DO MÊS:
 - Serviços realizados: ${totalServicos} / Objetivo: ${totalObjetivo} (Desvio: ${desvioPercentual.toFixed(1)}%)
-- Taxa de reparação: ${taxaReparacao.toFixed(1)}% (objetivo: 22%)
+- Taxa de reparação: ${taxaReparacao.toFixed(1)}% (objetivo: 30%)
 - Escovas: ${escovasPercent.toFixed(1)}% (objetivo: 10%)
 - Dias úteis restantes: ${diasUteisRestantes}
 - Ritmo necessário: ${servicosPorDia} serviços/dia
@@ -1299,10 +1299,10 @@ IMPORTANTE:
         const alertas: { tipo: 'warning' | 'danger' | 'success'; mensagem: string }[] = [];
         
         const taxaRep = taxaReparacao !== null ? taxaReparacao : null;
-        if (taxaRep !== null && taxaRep < 0.22) {
+        if (taxaRep !== null && taxaRep < 0.30) {
           alertas.push({
             tipo: 'warning',
-            mensagem: `Taxa de reparação (${(taxaRep * 100).toFixed(1)}%) abaixo do objetivo de 22%`
+            mensagem: `Taxa de reparação (${(taxaRep * 100).toFixed(1)}%) abaixo do objetivo de 30%`
           });
         }
         
@@ -1342,8 +1342,8 @@ IMPORTANTE:
         }
         const servicosFaltam = Math.max(0, totalObjetivo - totalServicos);
         const servicosPorDia = diasUteisRestantes > 0 ? Math.ceil(servicosFaltam / diasUteisRestantes) : 0;
-        const gapReparacoes = taxaReparacao !== null && taxaReparacao < 0.22 
-          ? Math.ceil(totalServicos * 0.22 - totalReparacoes) 
+        const gapReparacoes = taxaReparacao !== null && taxaReparacao < 0.30 
+          ? Math.ceil(totalServicos * 0.30 - totalReparacoes) 
           : 0;
         
         // Buscar evolução mensal (6 meses)
@@ -1409,7 +1409,7 @@ Analisa os resultados da loja ${loja.nome} e gera uma análise simples e motivac
 
 DADOS DO MÊS:
 - Serviços realizados: ${totalServicos} / Objetivo: ${totalObjetivo} (Desvio: ${desvioPercentualCalc.toFixed(1)}%)
-- Taxa de reparação: ${taxaReparacaoCalc.toFixed(1)}% (objetivo: 22%)
+- Taxa de reparação: ${taxaReparacaoCalc.toFixed(1)}% (objetivo: 30%)
 - Escovas: ${escovasPercentCalc.toFixed(1)}% (objetivo: 10%)
 
 Gera uma resposta em JSON com esta estrutura exata:
@@ -7268,8 +7268,8 @@ IMPORTANTE:
           desvioPercentualMes: desvioPercentual,
           taxaReparacao,
           totalReparacoes,
-          gapReparacoes22: taxaReparacao !== null && taxaReparacao < 0.22 
-            ? Math.ceil(totalServicos * 0.22 - totalReparacoes) 
+          gapReparacoes22: taxaReparacao !== null && taxaReparacao < 0.30 
+            ? Math.ceil(totalServicos * 0.30 - totalReparacoes) 
             : 0,
         };
         
@@ -7320,10 +7320,10 @@ IMPORTANTE:
         if (resultados) {
           // Alerta taxa de reparação
           const taxaRep = resultados.taxaReparacao !== null ? parseFloat(String(resultados.taxaReparacao)) : null;
-          if (taxaRep !== null && taxaRep < 0.22) {
+          if (taxaRep !== null && taxaRep < 0.30) {
             alertas.push({
               tipo: 'warning',
-              mensagem: `Taxa de reparação (${(taxaRep * 100).toFixed(1)}%) abaixo do objetivo de 22%`
+              mensagem: `Taxa de reparação (${(taxaRep * 100).toFixed(1)}%) abaixo do objetivo de 30%`
             });
           }
           
@@ -7345,7 +7345,7 @@ IMPORTANTE:
           if (resultados.gapReparacoes22 !== null && resultados.gapReparacoes22 > 0) {
             alertas.push({
               tipo: 'warning',
-              mensagem: `Faltam ${resultados.gapReparacoes22} reparações para atingir 22%`
+              mensagem: `Faltam ${resultados.gapReparacoes22} reparações para atingir 30%`
             });
           }
         }
@@ -7633,8 +7633,8 @@ IMPORTANTE:
         if (desvioPercentual !== null && desvioPercentual < -0.15) {
           alertas.push({ tipo: 'warning', mensagem: `Desvio de ${(desvioPercentual * 100).toFixed(1)}% abaixo do objetivo` });
         }
-        if (taxaReparacao !== null && taxaReparacao < 0.22) {
-          alertas.push({ tipo: 'warning', mensagem: `Taxa de reparação (${(taxaReparacao * 100).toFixed(1)}%) abaixo do objetivo de 22%` });
+        if (taxaReparacao !== null && taxaReparacao < 0.30) {
+          alertas.push({ tipo: 'warning', mensagem: `Taxa de reparação (${(taxaReparacao * 100).toFixed(1)}%) abaixo do objetivo de 30%` });
         }
         if (escovasPercent !== null && escovasPercent < 0.10) {
           alertas.push({ tipo: 'info', mensagem: `Escovas (${(escovasPercent * 100).toFixed(1)}%) abaixo do objetivo de 10%` });
@@ -7688,7 +7688,7 @@ Fornece uma análise breve com:
         }
         const servicosFaltam = Math.max(0, totalObjetivo - totalServicos);
         const servicosPorDia = diasUteisRestantes > 0 ? servicosFaltam / diasUteisRestantes : 0;
-        const reparacoesNecessarias = Math.ceil(totalServicos * 0.22);
+        const reparacoesNecessarias = Math.ceil(totalServicos * 0.30);
         const gapReparacoes = Math.max(0, reparacoesNecessarias - totalReparacoes);
         
         // Preparar dados no formato DashboardData
@@ -8349,7 +8349,7 @@ Fornece uma análise breve com:
         const taxaReparacao = taxaReparacaoExcel !== null ? taxaReparacaoExcel * 100 : 0;
         const escovasPercent = totalServicos > 0 ? (totalEscovas / totalServicos) * 100 : 0;
         const servicosFaltam = Math.max(0, totalObjetivo - totalServicos);
-        const reparacoesFaltam = Math.max(0, Math.ceil(totalServicos * 0.22) - totalReparacoes);
+        const reparacoesFaltam = Math.max(0, Math.ceil(totalServicos * 0.30) - totalReparacoes);
         
         // Buscar dados do mês anterior para comparativo
         const mesAnterior = mesesConsulta[0].mes === 1 ? 12 : mesesConsulta[0].mes - 1;
@@ -8378,7 +8378,7 @@ Analisa os resultados da loja ${auth.loja.nome} e gera uma análise simples e mo
 
 DADOS DO MÊS:
 - Serviços realizados: ${totalServicos} / Objetivo: ${totalObjetivo} (Desvio: ${desvioPercentual.toFixed(1)}%)
-- Taxa de reparação: ${taxaReparacao.toFixed(1)}% (objetivo: 22%)
+- Taxa de reparação: ${taxaReparacao.toFixed(1)}% (objetivo: 30%)
 - Escovas: ${escovasPercent.toFixed(1)}% (objetivo: 10%)
 - Dias úteis restantes: ${diasUteisRestantes}
 - Ritmo necessário: ${servicosPorDia} serviços/dia
@@ -9585,8 +9585,8 @@ IMPORTANTE:
           desvioPercentualMes: desvioPercentual,
           taxaReparacao,
           totalReparacoes,
-          gapReparacoes22: taxaReparacao !== null && taxaReparacao < 0.22 
-            ? Math.ceil(totalServicos * 0.22 - totalReparacoes) 
+          gapReparacoes22: taxaReparacao !== null && taxaReparacao < 0.30 
+            ? Math.ceil(totalServicos * 0.30 - totalReparacoes) 
             : 0,
         };
         
@@ -9632,11 +9632,11 @@ IMPORTANTE:
         // Gerar alertas
         const alertas: Array<{tipo: string; mensagem: string}> = [];
         
-        if (taxaReparacao !== null && taxaReparacao < 0.22) {
-          const gapReparacoes = Math.ceil(totalServicos * 0.22 - totalReparacoes);
+        if (taxaReparacao !== null && taxaReparacao < 0.30) {
+          const gapReparacoes = Math.ceil(totalServicos * 0.30 - totalReparacoes);
           alertas.push({
             tipo: 'warning',
-            mensagem: `Taxa de reparação abaixo de 22% (${(taxaReparacao * 100).toFixed(1)}%). Faltam ${gapReparacoes} reparações.`,
+            mensagem: `Taxa de reparação abaixo de 30% (${(taxaReparacao * 100).toFixed(1)}%). Faltam ${gapReparacoes} reparações.`,
           });
         }
         

@@ -944,3 +944,7 @@
 
 - [x] Adaptar análise de fichas para aceitar ficheiro bruto XLS (sem macros) em vez do XLSM
 - [x] Remover rubrica "Fichas de serviço sem notas há mais de 5 dias" do frontend e backend
+
+## Política de Comissionamento - Remover barreira 22%
+- [x] Remover condição dos 22% como barreira para prémio (backend + frontend)
+- [x] Manter objectivo de 30% como meta e indicadores

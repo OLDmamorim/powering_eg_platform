@@ -68,10 +68,11 @@ A data atual está indicada no contexto. Quando perguntam sobre "este mês", "m�
 
 === METAS E OBJETIVOS IMPORTANTES ===
 - TAXA MÍNIMA DE ESCOVAS: 7.5% (percentagem mínima de escovas vendidas vs serviços realizados para prémio trimestral)
-- TAXA MÍNIMA DE REPARAÇÃO: 22% (percentagem mínima de reparações vs para-brisas)
+- OBJETIVO DE TAXA DE REPARAÇÃO: 30% (objetivo mínimo de reparações vs para-brisas)
+- Já NÃO existe barreira mínima de 22% para prémio QIV. Todas as lojas recebem comissão QIV.
 - Quando perguntam sobre "taxa de escovas", "percentagem de escovas", "estamos a cumprir escovas" - compara com o mínimo de 7.5%
-- Quando perguntam sobre "taxa de reparação", "estamos a cumprir reparações" - compara com o mínimo de 22%
-- Indica claramente se a loja está ACIMA ou ABAIXO do mínimo exigido
+- Quando perguntam sobre "taxa de reparação", "estamos a cumprir reparações" - compara com o objetivo de 30%
+- Indica claramente se a loja está ACIMA ou ABAIXO do objetivo
 
 === POLÍTICA DE COMISSIONAMENTO 2025 ===
 **REGRA CRÍTICA - FTE (Full Time Equivalent):**
@@ -138,11 +139,12 @@ Exemplo: Loja com 2 colaboradores e 82 serviços totais:
 **3. CALIBRAÇÃO:** Mesmo valor dos serviços ligeiros por cada calibragem (se atingir mínimo 35 serviços).
 
 **4. TAXA DE REPARAÇÃO (QIV) - Valor por cada reparação (APENAS SE CUMPRIR FTE):**
-- < 22%: 0€
-- 22% a 25%: 5€
+- < 25%: 5€
 - 25% a 30%: 10€
 - 30% a 40%: 12€
 - > 40%: 15€
+OBJETIVO: Atingir mínimo de 30% de taxa de reparação.
+NOTA: Já não existe barreira mínima de 22% para prémio.
 
 **5. VENDAS COMPLEMENTARES (APENAS SE CUMPRIR FTE):**
 - Escovas: 10% do valor faturado
@@ -247,10 +249,11 @@ A data atual está indicada no contexto. Quando perguntam sobre "este mês", "m�
 
 === METAS E OBJETIVOS IMPORTANTES ===
 - TAXA MÍNIMA DE ESCOVAS: 7.5% (percentagem mínima de escovas vendidas vs serviços realizados para prémio trimestral)
-- TAXA MÍNIMA DE REPARAÇÃO: 22% (percentagem mínima de reparações vs para-brisas)
+- OBJETIVO DE TAXA DE REPARAÇÃO: 30% (objetivo mínimo de reparações vs para-brisas)
+- Já NÃO existe barreira mínima de 22% para prémio QIV. Todas as lojas recebem comissão QIV.
 - Quando perguntam sobre "taxa de escovas", "percentagem de escovas", "estamos a cumprir escovas" - compara com o mínimo de 7.5%
-- Quando perguntam sobre "taxa de reparação", "estamos a cumprir reparações" - compara com o mínimo de 22%
-- Indica claramente se a loja está ACIMA ou ABAIXO do mínimo exigido
+- Quando perguntam sobre "taxa de reparação", "estamos a cumprir reparações" - compara com o objetivo de 30%
+- Indica claramente se a loja está ACIMA ou ABAIXO do objetivo
 
 Sê prestável, claro e objetivo. Usa emojis para tornar as respostas mais amigáveis.`;
 
@@ -486,8 +489,8 @@ function formatarContextoParaLoja(contextoNacional: any, dadosLoja: any, lojaNom
       const taxa = r.taxaReparacao ? `${(parseFloat(r.taxaReparacao) * 100).toFixed(1)}%` : 'N/A';
       const qtdRep = r.qtdReparacoes || 0;
       const qtdPB = r.qtdParaBrisas || 0;
-      const gap22 = r.gapReparacoes22 || 0;
-      texto += `    ${i + 1}º ${r.lojaNome}: ${taxa} (${qtdRep} rep. / ${qtdPB} PB, faltam ${gap22} para 22%)\n`;
+      const gap30 = r.taxaReparacao ? Math.max(0, Math.ceil((r.qtdParaBrisas || 0) * 0.30 - (r.qtdReparacoes || 0))) : (r.gapReparacoes22 || 0);
+      texto += `    ${i + 1}º ${r.lojaNome}: ${taxa} (${qtdRep} rep. / ${qtdPB} PB, faltam ${gap30} para 30%)\n`;
     });
     
     // RANKING POR QUANTIDADE DE REPARAÇÕES
@@ -534,7 +537,8 @@ function formatarContextoParaLoja(contextoNacional: any, dadosLoja: any, lojaNom
       texto += `      - TAXA REPARAÇÃO: ${r.taxaReparacao ? `${(parseFloat(r.taxaReparacao) * 100).toFixed(1)}%` : 'N/A'}\n`;
       texto += `      - Qtd Reparações: ${r.qtdReparacoes || 0}\n`;
       texto += `      - Qtd Para-Brisas: ${r.qtdParaBrisas || 0}\n`;
-      texto += `      - Gap para 22%: ${r.gapReparacoes22 || 0} reparações\n`;
+      const gap30Loja = Math.max(0, Math.ceil((r.qtdParaBrisas || 0) * 0.30 - (r.qtdReparacoes || 0)));
+      texto += `      - Gap para 30%: ${gap30Loja} reparações\n`;
     });
     
     // Posição da loja atual neste período

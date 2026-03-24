@@ -1215,11 +1215,12 @@ Exemplo 3: Loja com 1 colaborador e 70 serviços totais:
 **2. CALIBRAÇÃO:** Mesmo valor dos serviços ligeiros por cada calibragem (se atingir mínimo 35 serviços).
 
 **3. TAXA DE REPARAÇÃO (QIV) - Valor por cada reparação (APENAS SE CUMPRIR FTE):**
-- < 22%: 0€
-- 22% a 25%: 5€
+- < 25%: 5€
 - 25% a 30%: 10€
 - 30% a 40%: 12€
 - > 40%: 15€
+OBJETIVO: Atingir mínimo de 30% de taxa de reparação.
+NOTA: Já não existe barreira mínima de 22% para prémio. Todas as lojas recebem comissão QIV independentemente da taxa.
 NOTA: Se a loja não cumprir o FTE mínimo (35 serviços/colaborador), a comissão QIV é 0€.
 
 **4. VENDAS COMPLEMENTARES (APENAS SE CUMPRIR FTE):**

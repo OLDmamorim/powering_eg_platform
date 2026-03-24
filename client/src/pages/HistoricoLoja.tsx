@@ -1560,16 +1560,16 @@ export default function HistoricoLoja() {
                           activeDot={{ r: 8 }}
                         />
                         <ReferenceLine 
-                          y={22} 
+                          y={30} 
                           stroke="#10b981" 
                           strokeDasharray="5 5" 
-                          label={{ value: 'Objetivo 22%', position: 'right', fill: '#10b981', fontSize: 11 }}
+                          label={{ value: 'Objetivo 30%', position: 'right', fill: '#10b981', fontSize: 11 }}
                         />
                       </LineChart>
                     </ResponsiveContainer>
                   </div>
                   <p className="text-xs text-muted-foreground mt-2 text-center">
-                    A linha verde tracejada indica o objetivo de 22% de taxa de reparação
+                    A linha verde tracejada indica o objetivo de 30% de taxa de reparação
                   </p>
                 </CardContent>
               </Card>

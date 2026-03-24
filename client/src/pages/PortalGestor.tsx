@@ -1100,8 +1100,8 @@ export default function PortalGestor() {
                             </CardTitle>
                             <CardDescription>
                               {language === 'pt' 
-                                ? 'Objetivo mínimo: 22%'
-                                : 'Minimum goal: 22%'}
+                                ? 'Objetivo mínimo: 30%'
+                                : 'Minimum goal: 30%'}
                             </CardDescription>
                           </CardHeader>
                           <CardContent>
@@ -1121,8 +1121,8 @@ export default function PortalGestor() {
                                       pointHoverRadius: 6,
                                     },
                                     {
-                                      label: language === 'pt' ? 'Objetivo 22%' : 'Goal 22%',
-                                      data: Array(labels.length).fill(22),
+                                      label: language === 'pt' ? 'Objetivo 30%' : 'Goal 30%',
+                                      data: Array(labels.length).fill(30),
                                       borderColor: 'rgb(239, 68, 68)',
                                       borderDash: [5, 5],
                                       fill: false,

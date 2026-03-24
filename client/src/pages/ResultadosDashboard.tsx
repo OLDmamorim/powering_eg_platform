@@ -793,7 +793,7 @@ export function ResultadosDashboard() {
                   }
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Objetivo: 22%
+                  Objetivo: 30%
                 </p>
               </CardContent>
             </Card>
