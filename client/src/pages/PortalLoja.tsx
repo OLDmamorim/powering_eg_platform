@@ -9151,7 +9151,7 @@ END:VCALENDAR`;
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <HistoricoEnviosVolante />
+                <HistoricoEnviosVolante token={token} />
               </CardContent>
             </Card>
           </div>
