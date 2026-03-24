@@ -941,3 +941,6 @@
 - [ ] Frontend Portal Loja: estado do vidro (NE/VE/ST)
 - [ ] Frontend Gestor: vista calendário de todas as lojas
 - [ ] Frontend Gestor: gestão de localidades (adicionar/remover/cor)
+
+- [x] Adaptar análise de fichas para aceitar ficheiro bruto XLS (sem macros) em vez do XLSM
+- [x] Remover rubrica "Fichas de serviço sem notas há mais de 5 dias" do frontend e backend

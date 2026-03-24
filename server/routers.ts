@@ -10213,7 +10213,7 @@ IMPORTANTE:
         const buffer = Buffer.from(input.fileBase64, 'base64');
         
         // Processar análise
-        const resultado = processarAnalise(buffer, input.nomeArquivo);
+        const resultado = await processarAnalise(buffer, input.nomeArquivo);
         
         // Guardar análise na base de dados
         const analise = await db.createAnaliseFichasServico({
@@ -10295,7 +10295,7 @@ IMPORTANTE:
             fichasAposAgendamento: relatorio.fichasAposAgendamento.length,
             fichasStatusAlerta: relatorio.fichasStatusAlerta.length,
             fichasSemNotas: relatorio.fichasSemNotas.length,
-            fichasNotasAntigas: relatorio.fichasNotasAntigas.length,
+            fichasNotasAntigas: 0, // REMOVIDO da análise
             fichasDevolverVidro: relatorio.fichasDevolverVidro.length,
             fichasSemEmailCliente: 0, // REMOVIDO da análise
             conteudoRelatorio: relatorio.conteudoHTML,
@@ -10320,7 +10320,7 @@ IMPORTANTE:
             { fichas: relatorio.fichasAposAgendamento, categoria: 'aposAgendamento' },
             { fichas: relatorio.fichasStatusAlerta, categoria: 'statusAlerta' },
             { fichas: relatorio.fichasSemNotas, categoria: 'semNotas' },
-            { fichas: relatorio.fichasNotasAntigas, categoria: 'notasAntigas' },
+            // { fichas: relatorio.fichasNotasAntigas, categoria: 'notasAntigas' }, // REMOVIDO
             { fichas: relatorio.fichasDevolverVidro, categoria: 'devolverVidro' },
             // { fichas: relatorio.fichasSemEmailCliente, categoria: 'semEmailCliente' }, // REMOVIDO
           ];
@@ -10499,10 +10499,9 @@ IMPORTANTE:
             const variacaoApos = relatorio.fichasAposAgendamento.length - relatorioAnterior.fichasAposAgendamento;
             const variacaoAlerta = relatorio.fichasStatusAlerta.length - relatorioAnterior.fichasStatusAlerta;
             const variacaoSemNotas = relatorio.fichasSemNotas.length - relatorioAnterior.fichasSemNotas;
-            const variacaoNotasAntigas = relatorio.fichasNotasAntigas.length - relatorioAnterior.fichasNotasAntigas;
             const variacaoDevolver = relatorio.fichasDevolverVidro.length - relatorioAnterior.fichasDevolverVidro;
             
-            const totalVariacao = variacaoAbertas + variacaoApos + variacaoAlerta + variacaoSemNotas + variacaoNotasAntigas + variacaoDevolver;
+            const totalVariacao = variacaoAbertas + variacaoApos + variacaoAlerta + variacaoSemNotas + variacaoDevolver;
             let evolucaoGeral: 'melhorou' | 'piorou' | 'estavel' = 'estavel';
             let comentario = '';
             
@@ -10525,7 +10524,7 @@ IMPORTANTE:
               variacaoFichasAposAgendamento: variacaoApos,
               variacaoFichasStatusAlerta: variacaoAlerta,
               variacaoFichasSemNotas: variacaoSemNotas,
-              variacaoFichasNotasAntigas: variacaoNotasAntigas,
+              variacaoFichasNotasAntigas: 0,
               variacaoFichasDevolverVidro: variacaoDevolver,
               evolucaoGeral,
               comentario,
@@ -10681,7 +10680,6 @@ IMPORTANTE:
           fichasAposAgendamento: relatorio.fichasAposAgendamento,
           fichasStatusAlerta: relatorio.fichasStatusAlerta,
           fichasSemNotas: relatorio.fichasSemNotas,
-          fichasNotasAntigas: relatorio.fichasNotasAntigas,
           fichasDevolverVidro: relatorio.fichasDevolverVidro,
           fichasSemEmailCliente: relatorio.fichasSemEmailCliente,
           resumo: relatorio.resumo || '',
@@ -10739,7 +10737,6 @@ IMPORTANTE:
           fichasAposAgendamento: relatorio.fichasAposAgendamento,
           fichasStatusAlerta: relatorio.fichasStatusAlerta,
           fichasSemNotas: relatorio.fichasSemNotas,
-          fichasNotasAntigas: relatorio.fichasNotasAntigas,
           fichasDevolverVidro: relatorio.fichasDevolverVidro,
           fichasSemEmailCliente: relatorio.fichasSemEmailCliente,
           resumo: relatorio.resumo || '',
@@ -10756,7 +10753,6 @@ IMPORTANTE:
           fichasAposAgendamento: relatorio.fichasAposAgendamento,
           fichasStatusAlerta: relatorio.fichasStatusAlerta,
           fichasSemNotas: relatorio.fichasSemNotas,
-          fichasNotasAntigas: relatorio.fichasNotasAntigas,
           fichasDevolverVidro: relatorio.fichasDevolverVidro,
           fichasSemEmailCliente: relatorio.fichasSemEmailCliente,
           resumo: relatorio.resumo || '',
@@ -10863,7 +10859,6 @@ IMPORTANTE:
               fichasAposAgendamento: relatorio.fichasAposAgendamento,
               fichasStatusAlerta: relatorio.fichasStatusAlerta,
               fichasSemNotas: relatorio.fichasSemNotas,
-              fichasNotasAntigas: relatorio.fichasNotasAntigas,
               fichasDevolverVidro: relatorio.fichasDevolverVidro,
               fichasSemEmailCliente: relatorio.fichasSemEmailCliente,
               resumo: relatorio.resumo || '',
@@ -10880,7 +10875,6 @@ IMPORTANTE:
               fichasAposAgendamento: relatorio.fichasAposAgendamento,
               fichasStatusAlerta: relatorio.fichasStatusAlerta,
               fichasSemNotas: relatorio.fichasSemNotas,
-              fichasNotasAntigas: relatorio.fichasNotasAntigas,
               fichasDevolverVidro: relatorio.fichasDevolverVidro,
               fichasSemEmailCliente: relatorio.fichasSemEmailCliente,
               resumo: relatorio.resumo || '',
@@ -10983,7 +10977,7 @@ IMPORTANTE:
         const totalFichasEsperadas = relatorios.reduce((acc, r) => {
           return acc + (r.fichasAbertas5Dias || 0) + (r.fichasAposAgendamento || 0) + 
             (r.fichasStatusAlerta || 0) + (r.fichasSemNotas || 0) + 
-            (r.fichasNotasAntigas || 0) + (r.fichasDevolverVidro || 0) + 
+            (r.fichasDevolverVidro || 0) + 
             (r.fichasSemEmailCliente || 0);
         }, 0);
         
