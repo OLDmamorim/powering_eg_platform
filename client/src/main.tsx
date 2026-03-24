@@ -30,6 +30,12 @@ const redirectToLoginIfUnauthorized = (error: unknown) => {
 
   if (!isUnauthorized) return;
 
+  // Não redirecionar para login OAuth em páginas que usam autenticação por token
+  const pathname = window.location.pathname;
+  if (pathname.startsWith('/portal-loja') || pathname.startsWith('/portal-recalibra') || pathname.startsWith('/dashboard-volante')) {
+    return;
+  }
+
   window.location.href = getLoginUrl();
 };
 
