@@ -10186,6 +10186,28 @@ IMPORTANTE:
         }
         return await db.getHistoricoEnviosRelatorios({ tipo: 'volante' });
       }),
+
+    // Circulares/documentos do volante (via token)
+    getDocumentos: publicProcedure
+      .input(z.object({ token: z.string() }))
+      .query(async ({ input }) => {
+        const tokenData = await db.validateTokenVolante(input.token);
+        if (!tokenData) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        const lojas = await db.getLojasByVolanteId(tokenData.volante.id);
+        const documentosMap = new Map<number, any>();
+        for (const loja of lojas) {
+          const docs = await db.getDocumentosPorLoja(loja.id);
+          for (const doc of docs) {
+            if (!documentosMap.has(doc.id)) {
+              documentosMap.set(doc.id, doc);
+            }
+          }
+        }
+        return Array.from(documentosMap.values())
+          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      }),
   }),
 
   // ==================== ANÁLISE DE FICHAS DE SERVIÇO ====================
