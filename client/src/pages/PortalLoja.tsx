@@ -8743,7 +8743,7 @@ END:VCALENDAR`;
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <HistoricoEnviosVolante />
+                <HistoricoEnviosVolante token={token} />
               </CardContent>
             </Card>
           </div>
@@ -8752,7 +8752,7 @@ END:VCALENDAR`;
 
         {/* Vista Circulares */}
         {activeView === "circulares" && (() => {
-          const { data: documentos, isLoading } = trpc.documentos.listar.useQuery();
+          const { data: documentos, isLoading } = trpc.portalVolante.getDocumentos.useQuery({ token });
           
           return (
             <div className="container mx-auto px-4 py-6 space-y-6">
