@@ -453,7 +453,7 @@ export default function DashboardVolante() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <HistoricoEnviosVolante />
+            <HistoricoEnviosVolante token={token} />
           </CardContent>
         </Card>
       </div>

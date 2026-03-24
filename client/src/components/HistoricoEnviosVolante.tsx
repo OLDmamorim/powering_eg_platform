@@ -2,10 +2,19 @@ import { Badge } from "@/components/ui/badge";
 import { trpc } from "@/lib/trpc";
 import { Calendar, Mail, CheckCircle2, XCircle } from "lucide-react";
 
-export function HistoricoEnviosVolante() {
-  const { data: historico, isLoading } = trpc.relatorios.getHistoricoEnvios.useQuery({
-    tipo: 'volante',
-  });
+export function HistoricoEnviosVolante({ token }: { token?: string }) {
+  const { data: historicoByToken, isLoading: loadingByToken } = trpc.portalVolante.getHistoricoEnvios.useQuery(
+    { token: token! },
+    { enabled: !!token }
+  );
+
+  const { data: historicoProtected, isLoading: loadingProtected } = trpc.relatorios.getHistoricoEnvios.useQuery(
+    { tipo: 'volante' },
+    { enabled: !token }
+  );
+
+  const historico = token ? historicoByToken : historicoProtected;
+  const isLoading = token ? loadingByToken : loadingProtected;
 
   const mesesNomes = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
 

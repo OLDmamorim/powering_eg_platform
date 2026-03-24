@@ -10175,8 +10175,19 @@ IMPORTANTE:
           erros: erros.length > 0 ? erros : undefined,
         };
       }),
+
+    // Histórico de envios de relatórios mensais (via token)
+    getHistoricoEnvios: publicProcedure
+      .input(z.object({ token: z.string() }))
+      .query(async ({ input }) => {
+        const tokenData = await db.validateTokenVolante(input.token);
+        if (!tokenData) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        return await db.getHistoricoEnviosRelatorios({ tipo: 'volante' });
+      }),
   }),
-  
+
   // ==================== ANÁLISE DE FICHAS DE SERVIÇO ====================
   // Função auxiliar para gerar alerta de processos repetidos
   
