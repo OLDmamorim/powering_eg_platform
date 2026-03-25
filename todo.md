@@ -979,3 +979,11 @@
 - [x] Reverter para versão que funcionava (ficheiro com macros)
 - [x] Manter exclusão de fichas sem notas >5 dias (secção removida do HTML e resumo)
 - [x] Testar e guardar checkpoint
+
+## Integrar Módulo de Férias na Plataforma
+- [x] Analisar estrutura actual (menu, rotas, layout)
+- [x] Criar página React de Férias com calendário, análise e distribuição
+- [x] Adicionar rota /ferias no App.tsx
+- [x] Adicionar entrada no menu do DashboardLayout (após RH)
+- [x] Manter gestores/lojas hardcoded como no ficheiro original
+- [ ] Testar e guardar checkpoint

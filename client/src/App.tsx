@@ -75,6 +75,7 @@ const PortalLojaWidget = lazy(() => import("./pages/PortalLojaWidget"));
 const GestaoRecalibra = lazy(() => import("./pages/GestaoRecalibra"));
 const PortalRecalibra = lazy(() => import("./pages/PortalRecalibra"));
 const DashboardRecalibra = lazy(() => import("./pages/DashboardRecalibra"));
+const Ferias = lazy(() => import("./pages/Ferias"));
 const LoginNaoAutorizado = lazy(() => import("./pages/LoginNaoAutorizado"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
@@ -138,6 +139,7 @@ const allImports = [
   () => import("./pages/GestaoRecalibra"),
   () => import("./pages/PortalRecalibra"),
   () => import("./pages/DashboardRecalibra"),
+  () => import("./pages/Ferias"),
 ];
 
 function usePrefetchPages() {
@@ -166,6 +168,7 @@ function Router() {
         {/* Admin routes */}
         <Route path={"/lojas"} component={Lojas} />
         <Route path={"/rh"} component={RH} />
+        <Route path={"/ferias"} component={Ferias} />
         <Route path={"/historico-envios-relatorios"} component={HistoricoEnviosRelatorios} />
         <Route path={"/gestores"} component={Gestores} />
         <Route path={"/utilizadores"} component={GestaoUtilizadores} />
