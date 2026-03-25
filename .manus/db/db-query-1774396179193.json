@@ -1,0 +1,229 @@
+{
+  "query": "SELECT COUNT(*) as total FROM lojas; SELECT id, nome, numeroLoja FROM lojas ORDER BY nome;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT COUNT(*) as total FROM lojas; SELECT id, nome, numeroLoja FROM lojas ORDER BY nome;",
+  "rows": [
+    {
+      "total": "71"
+    },
+    {
+      "total": "id\tnome\tnumeroLoja"
+    },
+    {
+      "total": "180001\tAbrantes\t38"
+    },
+    {
+      "total": "180002\tAeroporto porto\t71"
+    },
+    {
+      "total": "180003\tÁgueda\t39"
+    },
+    {
+      "total": "180004\tAlgés\t63"
+    },
+    {
+      "total": "180005\tAlmada\t62"
+    },
+    {
+      "total": "180006\tAmadora\t22"
+    },
+    {
+      "total": "180007\tAmoreiras\t20"
+    },
+    {
+      "total": "180008\tAveiro\t40"
+    },
+    {
+      "total": "60002\tBarcelos\t23"
+    },
+    {
+      "total": "180009\tBeira baixa sm\t68"
+    },
+    {
+      "total": "180010\tBraga - minho center\t18"
+    },
+    {
+      "total": "180011\tBraga sm\t52"
+    },
+    {
+      "total": "180012\tCaldas da rainha\t10"
+    },
+    {
+      "total": "1500001\tCascais Shopping\t77"
+    },
+    {
+      "total": "180013\tCastanheira do ribatejo\t13"
+    },
+    {
+      "total": "180014\tCoimbra\t14"
+    },
+    {
+      "total": "180015\tCoimbra sm\t56"
+    },
+    {
+      "total": "180016\tCoimbra sul\t59"
+    },
+    {
+      "total": "180017\tCosta de prata sm\t69"
+    },
+    {
+      "total": "180018\tEntroncamento\t43"
+    },
+    {
+      "total": "60001\tFamalicão\t9"
+    },
+    {
+      "total": "180019\tFamalicão sm\t61"
+    },
+    {
+      "total": "180020\tFaro\t37"
+    },
+    {
+      "total": "180021\tFaro sm\t86"
+    },
+    {
+      "total": "180022\tGondomar\t17"
+    },
+    {
+      "total": "180023\tGuarda\t44"
+    },
+    {
+      "total": "180024\tGuimarães shopping\t7"
+    },
+    {
+      "total": "180025\tLeiria\t31"
+    },
+    {
+      "total": "180026\tLeiria sm\t57"
+    },
+    {
+      "total": "180027\tLeziria sm\t97"
+    },
+    {
+      "total": "180028\tLisboa sm\t53"
+    },
+    {
+      "total": "180029\tLisboa smr\t82"
+    },
+    {
+      "total": "180030\tMaia - maiashopping\t29"
+    },
+    {
+      "total": "180031\tMaia - moreira\t3"
+    },
+    {
+      "total": "180032\tMaia sm\t87"
+    },
+    {
+      "total": "180033\tMatosinhos\t2"
+    },
+    {
+      "total": "180034\tMontijo\t95"
+    },
+    {
+      "total": "180035\tMovida\t50"
+    },
+    {
+      "total": "180036\tMycarcenter\t8"
+    },
+    {
+      "total": "180037\tOdivelas - loures\t92"
+    },
+    {
+      "total": "60007\tPaços de Ferreira \t15"
+    },
+    {
+      "total": "60006\tParedes\t5"
+    },
+    {
+      "total": "180038\tParedes sm\t84"
+    },
+    {
+      "total": "180039\tPombal\t32"
+    },
+    {
+      "total": "180040\tPortimão\t36"
+    },
+    {
+      "total": "180041\tPorto - marquês\t12"
+    },
+    {
+      "total": "180042\tPorto - zona industrial\t30"
+    },
+    {
+      "total": "180043\tPorto alto\t94"
+    },
+    {
+      "total": "180044\tPorto sul sm\t80"
+    },
+    {
+      "total": "180045\tPóvoa de santa iria\t96"
+    },
+    {
+      "total": "60005\tPóvoa de Varzim\t11"
+    },
+    {
+      "total": "180046\tRotunda do relógio\t21"
+    },
+    {
+      "total": "180047\tSacavém\t25"
+    },
+    {
+      "total": "180048\tSanta maria da feira\t6"
+    },
+    {
+      "total": "180049\tSantarém\t72"
+    },
+    {
+      "total": "180050\tSeia\t45"
+    },
+    {
+      "total": "180051\tSeia sm\t91"
+    },
+    {
+      "total": "180052\tSm caldas da rainha\t33"
+    },
+    {
+      "total": "180053\tSm castanheira do ribatejo\t35"
+    },
+    {
+      "total": "180063\tSm pesados porto\t54"
+    },
+    {
+      "total": "180054\tSm viseu2\t16"
+    },
+    {
+      "total": "180055\tTelheiras\t48"
+    },
+    {
+      "total": "180056\tVale do tejo sm\t64"
+    },
+    {
+      "total": "60004\tViana do Castelo \t34"
+    },
+    {
+      "total": "180057\tViana do castelo sm\t85"
+    },
+    {
+      "total": "180058\tVila nova de gaia\t4"
+    },
+    {
+      "total": "180059\tVila nova de gaia - canelas\t65"
+    },
+    {
+      "total": "60003\tVila Verde\t49"
+    },
+    {
+      "total": "180060\tViseu\t46"
+    },
+    {
+      "total": "180061\tViseu sm\t66"
+    },
+    {
+      "total": "180062\tViseu smr\t67"
+    }
+  ],
+  "messages": [],
+  "stdout": "total\n71\nid\tnome\tnumeroLoja\n180001\tAbrantes\t38\n180002\tAeroporto porto\t71\n180003\tÁgueda\t39\n180004\tAlgés\t63\n180005\tAlmada\t62\n180006\tAmadora\t22\n180007\tAmoreiras\t20\n180008\tAveiro\t40\n60002\tBarcelos\t23\n180009\tBeira baixa sm\t68\n180010\tBraga - minho center\t18\n180011\tBraga sm\t52\n180012\tCaldas da rainha\t10\n1500001\tCascais Shopping\t77\n180013\tCastanheira do ribatejo\t13\n180014\tCoimbra\t14\n180015\tCoimbra sm\t56\n180016\tCoimbra sul\t59\n180017\tCosta de prata sm\t69\n180018\tEntroncamento\t43\n60001\tFamalicão\t9\n180019\tFamalicão sm\t61\n180020\tFaro\t37\n180021\tFaro sm\t86\n180022\tGondomar\t17\n180023\tGuarda\t44\n180024\tGuimarães shopping\t7\n180025\tLeiria\t31\n180026\tLeiria sm\t57\n180027\tLeziria sm\t97\n180028\tLisboa sm\t53\n180029\tLisboa smr\t82\n180030\tMaia - maiashopping\t29\n180031\tMaia - moreira\t3\n180032\tMaia sm\t87\n180033\tMatosinhos\t2\n180034\tMontijo\t95\n180035\tMovida\t50\n180036\tMycarcenter\t8\n180037\tOdivelas - loures\t92\n60007\tPaços de Ferreira \t15\n60006\tParedes\t5\n180038\tParedes sm\t84\n180039\tPombal\t32\n180040\tPortimão\t36\n180041\tPorto - marquês\t12\n180042\tPorto - zona industrial\t30\n180043\tPorto alto\t94\n180044\tPorto sul sm\t80\n180045\tPóvoa de santa iria\t96\n60005\tPóvoa de Varzim\t11\n180046\tRotunda do relógio\t21\n180047\tSacavém\t25\n180048\tSanta maria da feira\t6\n180049\tSantarém\t72\n180050\tSeia\t45\n180051\tSeia sm\t91\n180052\tSm caldas da rainha\t33\n180053\tSm castanheira do ribatejo\t35\n180063\tSm pesados porto\t54\n180054\tSm viseu2\t16\n180055\tTelheiras\t48\n180056\tVale do tejo sm\t64\n60004\tViana do Castelo \t34\n180057\tViana do castelo sm\t85\n180058\tVila nova de gaia\t4\n180059\tVila nova de gaia - canelas\t65\n60003\tVila Verde\t49\n180060\tViseu\t46\n180061\tViseu sm\t66\n180062\tViseu smr\t67\n",
+  "stderr": "",
+  "execution_time_ms": 60
+}

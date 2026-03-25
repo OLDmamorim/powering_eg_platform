@@ -1,0 +1,20 @@
+{
+  "query": "SELECT l.id, l.nome, l.numeroLoja FROM lojas l WHERE l.nome NOT IN (SELECT DISTINCT ef.nomeLoja FROM eurocodes_fichas ef WHERE ef.analiseId = 810001) ORDER BY l.nome LIMIT 10 OFFSET 20;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT l.id, l.nome, l.numeroLoja FROM lojas l WHERE l.nome NOT IN (SELECT DISTINCT ef.nomeLoja FROM eurocodes_fichas ef WHERE ef.analiseId = 810001) ORDER BY l.nome LIMIT 10 OFFSET 20;",
+  "rows": [
+    {
+      "id": "180057",
+      "nome": "Viana do castelo sm",
+      "numeroLoja": "85"
+    },
+    {
+      "id": "180062",
+      "nome": "Viseu smr",
+      "numeroLoja": "67"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tnome\tnumeroLoja\n180057\tViana do castelo sm\t85\n180062\tViseu smr\t67\n",
+  "stderr": "",
+  "execution_time_ms": 204
+}

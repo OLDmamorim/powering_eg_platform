@@ -1,0 +1,16 @@
+{
+  "query": "SELECT r.nomeLoja, r.lojaId, r.numeroLoja, l.nome as nomeBD FROM relatorios_analise_loja r LEFT JOIN lojas l ON r.lojaId = l.id WHERE r.analiseId = 810001 ORDER BY r.nomeLoja LIMIT 5 OFFSET 60;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT r.nomeLoja, r.lojaId, r.numeroLoja, l.nome as nomeBD FROM relatorios_analise_loja r LEFT JOIN lojas l ON r.lojaId = l.id WHERE r.analiseId = 810001 ORDER BY r.nomeLoja LIMIT 5 OFFSET 60;",
+  "rows": [
+    {
+      "nomeLoja": "Viseu SM",
+      "lojaId": "180061",
+      "numeroLoja": "NULL",
+      "nomeBD": "Viseu sm"
+    }
+  ],
+  "messages": [],
+  "stdout": "nomeLoja\tlojaId\tnumeroLoja\tnomeBD\nViseu SM\t180061\tNULL\tViseu sm\n",
+  "stderr": "",
+  "execution_time_ms": 77
+}

@@ -1,0 +1,130 @@
+{
+  "query": "SELECT r.nomeLoja, r.lojaId, r.numeroLoja, l.nome as nomeBD FROM relatorios_analise_loja r LEFT JOIN lojas l ON r.lojaId = l.id WHERE r.analiseId = 810001 ORDER BY r.nomeLoja LIMIT 20;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT r.nomeLoja, r.lojaId, r.numeroLoja, l.nome as nomeBD FROM relatorios_analise_loja r LEFT JOIN lojas l ON r.lojaId = l.id WHERE r.analiseId = 810001 ORDER BY r.nomeLoja LIMIT 20;",
+  "rows": [
+    {
+      "nomeLoja": " SM",
+      "lojaId": "180009",
+      "numeroLoja": "NULL",
+      "nomeBD": "Beira baixa sm"
+    },
+    {
+      "nomeLoja": "Abrantes",
+      "lojaId": "180001",
+      "numeroLoja": "38",
+      "nomeBD": "Abrantes"
+    },
+    {
+      "nomeLoja": "Águeda",
+      "lojaId": "180003",
+      "numeroLoja": "39",
+      "nomeBD": "Águeda"
+    },
+    {
+      "nomeLoja": "Algés",
+      "lojaId": "180004",
+      "numeroLoja": "63",
+      "nomeBD": "Algés"
+    },
+    {
+      "nomeLoja": "Almada",
+      "lojaId": "180005",
+      "numeroLoja": "62",
+      "nomeBD": "Almada"
+    },
+    {
+      "nomeLoja": "Amadora",
+      "lojaId": "180006",
+      "numeroLoja": "22",
+      "nomeBD": "Amadora"
+    },
+    {
+      "nomeLoja": "Amoreiras",
+      "lojaId": "180007",
+      "numeroLoja": "20",
+      "nomeBD": "Amoreiras"
+    },
+    {
+      "nomeLoja": "Aveiro",
+      "lojaId": "180008",
+      "numeroLoja": "40",
+      "nomeBD": "Aveiro"
+    },
+    {
+      "nomeLoja": "Barcelos",
+      "lojaId": "60002",
+      "numeroLoja": "23",
+      "nomeBD": "Barcelos"
+    },
+    {
+      "nomeLoja": "Beira baixa sm",
+      "lojaId": "180009",
+      "numeroLoja": "68",
+      "nomeBD": "Beira baixa sm"
+    },
+    {
+      "nomeLoja": "Braga",
+      "lojaId": "180010",
+      "numeroLoja": "18",
+      "nomeBD": "Braga - minho center"
+    },
+    {
+      "nomeLoja": "Caldas da Rainha",
+      "lojaId": "180012",
+      "numeroLoja": "10",
+      "nomeBD": "Caldas da rainha"
+    },
+    {
+      "nomeLoja": "Cascais",
+      "lojaId": "1500001",
+      "numeroLoja": "77",
+      "nomeBD": "Cascais Shopping"
+    },
+    {
+      "nomeLoja": "Castanheira do Ribatejo",
+      "lojaId": "180013",
+      "numeroLoja": "13",
+      "nomeBD": "Castanheira do ribatejo"
+    },
+    {
+      "nomeLoja": "Castanheira do Ribatejo SM",
+      "lojaId": "180013",
+      "numeroLoja": "NULL",
+      "nomeBD": "Castanheira do ribatejo"
+    },
+    {
+      "nomeLoja": "Coimbra",
+      "lojaId": "180014",
+      "numeroLoja": "14",
+      "nomeBD": "Coimbra"
+    },
+    {
+      "nomeLoja": "Coimbra SM",
+      "lojaId": "180015",
+      "numeroLoja": "NULL",
+      "nomeBD": "Coimbra sm"
+    },
+    {
+      "nomeLoja": "Costa de prata sm",
+      "lojaId": "180017",
+      "numeroLoja": "69",
+      "nomeBD": "Costa de prata sm"
+    },
+    {
+      "nomeLoja": "Entroncamento",
+      "lojaId": "180018",
+      "numeroLoja": "43",
+      "nomeBD": "Entroncamento"
+    },
+    {
+      "nomeLoja": "Famalicão",
+      "lojaId": "60001",
+      "numeroLoja": "9",
+      "nomeBD": "Famalicão"
+    }
+  ],
+  "messages": [],
+  "stdout": "nomeLoja\tlojaId\tnumeroLoja\tnomeBD\n SM\t180009\tNULL\tBeira baixa sm\nAbrantes\t180001\t38\tAbrantes\nÁgueda\t180003\t39\tÁgueda\nAlgés\t180004\t63\tAlgés\nAlmada\t180005\t62\tAlmada\nAmadora\t180006\t22\tAmadora\nAmoreiras\t180007\t20\tAmoreiras\nAveiro\t180008\t40\tAveiro\nBarcelos\t60002\t23\tBarcelos\nBeira baixa sm\t180009\t68\tBeira baixa sm\nBraga\t180010\t18\tBraga - minho center\nCaldas da Rainha\t180012\t10\tCaldas da rainha\nCascais\t1500001\t77\tCascais Shopping\nCastanheira do Ribatejo\t180013\t13\tCastanheira do ribatejo\nCastanheira do Ribatejo SM\t180013\tNULL\tCastanheira do ribatejo\nCoimbra\t180014\t14\tCoimbra\nCoimbra SM\t180015\tNULL\tCoimbra sm\nCosta de prata sm\t180017\t69\tCosta de prata sm\nEntroncamento\t180018\t43\tEntroncamento\nFamalicão\t60001\t9\tFamalicão\n",
+  "stderr": "",
+  "execution_time_ms": 534
+}

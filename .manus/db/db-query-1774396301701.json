@@ -1,0 +1,70 @@
+{
+  "query": "SELECT DISTINCT nomeLoja FROM eurocodes_fichas WHERE analiseId = 810001 ORDER BY nomeLoja LIMIT 20 OFFSET 40;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT DISTINCT nomeLoja FROM eurocodes_fichas WHERE analiseId = 810001 ORDER BY nomeLoja LIMIT 20 OFFSET 40;",
+  "rows": [
+    {
+      "nomeLoja": "Portimão"
+    },
+    {
+      "nomeLoja": "Porto"
+    },
+    {
+      "nomeLoja": "Porto Alto"
+    },
+    {
+      "nomeLoja": "Porto SM"
+    },
+    {
+      "nomeLoja": "Póvoa de santa iria"
+    },
+    {
+      "nomeLoja": "Póvoa de Varzim"
+    },
+    {
+      "nomeLoja": "Rotunda do relógio"
+    },
+    {
+      "nomeLoja": "Sacavém"
+    },
+    {
+      "nomeLoja": "Santa maria da feira"
+    },
+    {
+      "nomeLoja": "Santarém"
+    },
+    {
+      "nomeLoja": "Seia"
+    },
+    {
+      "nomeLoja": "Seia sm"
+    },
+    {
+      "nomeLoja": "Telheiras"
+    },
+    {
+      "nomeLoja": "Vale do Tejo SM"
+    },
+    {
+      "nomeLoja": "Viana"
+    },
+    {
+      "nomeLoja": "Vila nova de gaia"
+    },
+    {
+      "nomeLoja": "Vila nova de gaia - canelas"
+    },
+    {
+      "nomeLoja": "Vila Verde"
+    },
+    {
+      "nomeLoja": "Viseu"
+    },
+    {
+      "nomeLoja": "Viseu SM"
+    }
+  ],
+  "messages": [],
+  "stdout": "nomeLoja\nPortimão\nPorto\nPorto Alto\nPorto SM\nPóvoa de santa iria\nPóvoa de Varzim\nRotunda do relógio\nSacavém\nSanta maria da feira\nSantarém\nSeia\nSeia sm\nTelheiras\nVale do Tejo SM\nViana\nVila nova de gaia\nVila nova de gaia - canelas\nVila Verde\nViseu\nViseu SM\n",
+  "stderr": "",
+  "execution_time_ms": 79
+}

@@ -414,43 +414,10 @@ function fichaTemNotas(obs: string): boolean {
 }
 
 /**
- * Extrai data da última nota a partir do texto de observações
- * Formato esperado: "--- dd.mm.yyyy HH:MM:SS XXX ---"
- */
-function extrairDataUltimaNota(ultimaNota: string): Date | null {
-  if (!ultimaNota || typeof ultimaNota !== 'string') return null;
-  const match = ultimaNota.match(/(\d{2})\.(\d{2})\.(\d{4})/);
-  if (match) {
-    try {
-      const dia = parseInt(match[1], 10);
-      const mes = parseInt(match[2], 10) - 1;
-      const ano = parseInt(match[3], 10);
-      const data = new Date(ano, mes, dia);
-      if (!isNaN(data.getTime())) return data;
-    } catch { /* ignore */ }
-  }
-  return null;
-}
-
-/**
- * Calcula a diferença em dias entre duas datas (ignora horas)
- */
-function calcularDiferençaDias(dataInicio: Date | null, dataFim: Date): number {
-  if (!dataInicio) return 0;
-  const inicio = new Date(dataInicio);
-  inicio.setHours(0, 0, 0, 0);
-  const fim = new Date(dataFim);
-  fim.setHours(0, 0, 0, 0);
-  return Math.floor((fim.getTime() - inicio.getTime()) / (1000 * 60 * 60 * 24));
-}
-
-/**
  * Processa o ficheiro Excel e extrai as fichas de serviço
- * Detecta automaticamente se é ficheiro bruto (PHC) ou ficheiro com macros (Monitorização)
- * No caso do ficheiro bruto, calcula automaticamente: loja, gestor, coordenador, dias aberto, dias executado, data nota, dias nota
  * Retorna fichas para análise + fichas excluídas (Serviço Pronto, etc.) para cruzamento de eurocodes
  */
-export async function processarFicheiroExcel(buffer: Buffer, matrizLojas?: Map<number, { nomeLoja: string; gestor: string; coordenador: string }>): Promise<{ fichas: FichaServico[]; fichasExcluidas: FichaServico[] }> {
+export function processarFicheiroExcel(buffer: Buffer): { fichas: FichaServico[]; fichasExcluidas: FichaServico[] } {
   const workbook = XLSX.read(buffer, { type: 'buffer', cellDates: true });
   
   // Procurar a folha "Base" ou usar a primeira
@@ -471,37 +438,9 @@ export async function processarFicheiroExcel(buffer: Buffer, matrizLojas?: Map<n
     if (h) colIndex[h.toLowerCase().trim()] = i;
   });
   
-  // Detectar se é ficheiro bruto (sem colunas 'lojas', 'gestor', 'coordenador', 'nº dias aberto:')
-  const isFicheiroBruto = colIndex['lojas'] === undefined && colIndex['gestor'] === undefined;
-  
+  // Debug: mostrar cabeçalhos encontrados
   console.log('[processarFicheiroExcel] Cabeçalhos encontrados:', Object.keys(colIndex).join(', '));
-  console.log('[processarFicheiroExcel] Tipo de ficheiro:', isFicheiroBruto ? 'BRUTO (PHC)' : 'MACROS (Monitorização)');
-  
-  // Se é ficheiro bruto e não temos matriz, carregar da BD
-  let matriz = matrizLojas;
-  if (isFicheiroBruto && !matriz) {
-    try {
-      const { getAllLojas } = await import('./db');
-      const todasLojas = await getAllLojas();
-      matriz = new Map();
-      for (const loja of todasLojas) {
-        if (loja.numeroLoja) {
-          matriz.set(loja.numeroLoja, {
-            nomeLoja: loja.nome,
-            gestor: (loja as any).gestorNome || '',
-            coordenador: '', // coordenador será preenchido se disponível
-          });
-        }
-      }
-      console.log('[processarFicheiroExcel] Matriz carregada da BD com', matriz.size, 'lojas');
-    } catch (err) {
-      console.error('[processarFicheiroExcel] Erro ao carregar matriz da BD:', err);
-      matriz = new Map();
-    }
-  }
-  
-  const hoje = new Date();
-  hoje.setHours(0, 0, 0, 0);
+  console.log('[processarFicheiroExcel] Coluna lojas index:', colIndex['lojas']);
   
   // Processar linhas de dados
   const fichas: FichaServico[] = [];
@@ -516,72 +455,24 @@ export async function processarFicheiroExcel(buffer: Buffer, matrizLojas?: Map<n
     // Status excluídos da análise mas guardados para cruzamento de eurocodes com stock
     const isExcluido = STATUS_EXCLUIR.includes(status);
     
-    const nmdos = String(row[colIndex['nmdos']] || '');
-    const dataObra = parseExcelDate(row[colIndex['dataobra']]);
-    const dataServico = parseExcelDate(row[colIndex['dataserviço']]);
-    
-    let loja = '';
-    let gestor = '';
-    let coordenador = '';
-    let diasAberto = 0;
-    let diasExecutado = 0;
-    let dataNota: Date | null = null;
-    let diasNota = 0;
-    
-    if (isFicheiroBruto) {
-      // FICHEIRO BRUTO: calcular colunas em falta
-      
-      // 1. Calcular loja, gestor, coordenador a partir do nmdos + Matriz
-      const numeroLoja = extrairNumeroLoja(nmdos);
-      if (numeroLoja && matriz && matriz.has(numeroLoja)) {
-        const infoLoja = matriz.get(numeroLoja)!;
-        loja = infoLoja.nomeLoja;
-        gestor = infoLoja.gestor;
-        coordenador = infoLoja.coordenador;
-      }
-      
-      // 2. Calcular dias aberto (hoje - dataObra)
-      diasAberto = calcularDiferençaDias(dataObra, hoje);
-      if (diasAberto < 0) diasAberto = 0;
-      
-      // 3. Calcular dias executado (hoje - dataServiço)
-      diasExecutado = calcularDiferençaDias(dataServico, hoje);
-      
-      // 4. Extrair data da última nota do campo 'ultima_nota'
-      const ultimaNotaTexto = String(row[colIndex['ultima_nota']] || '');
-      dataNota = extrairDataUltimaNota(ultimaNotaTexto);
-      diasNota = dataNota ? calcularDiferençaDias(dataNota, hoje) : 0;
-      if (diasNota < 0) diasNota = 0;
-      
-    } else {
-      // FICHEIRO COM MACROS: ler colunas directamente
-      loja = String(row[colIndex['lojas']] || '');
-      gestor = String(row[colIndex['gestor']] || '');
-      coordenador = String(row[colIndex['coordenador']] || '');
-      diasAberto = parseInt(row[colIndex['nº dias aberto:']]) || 0;
-      diasExecutado = parseInt(row[colIndex['nº dias executado']]) || 0;
-      dataNota = parseExcelDate(row[colIndex['dta nota']]);
-      diasNota = parseInt(row[colIndex['dias nota:']]) || 0;
-    }
-    
     const ficha: FichaServico = {
       bostamp: String(row[colIndex['bostamp']] || ''),
-      nmdos: nmdos,
-      loja: loja,
-      gestor: gestor,
-      coordenador: coordenador,
+      nmdos: String(row[colIndex['nmdos']] || ''),
+      loja: String(row[colIndex['lojas']] || ''),
+      gestor: String(row[colIndex['gestor']] || ''),
+      coordenador: String(row[colIndex['coordenador']] || ''),
       obrano: parseInt(row[colIndex['obrano']]) || 0,
       matricula: String(row[colIndex['matricula']] || ''),
-      dataObra: dataObra,
-      diasAberto: diasAberto,
-      dataServico: dataServico,
-      diasExecutado: diasExecutado,
+      dataObra: parseExcelDate(row[colIndex['dataobra']]),
+      diasAberto: parseInt(row[colIndex['nº dias aberto:']]) || 0,
+      dataServico: parseExcelDate(row[colIndex['dataserviço']]),
+      diasExecutado: parseInt(row[colIndex['nº dias executado']]) || 0,
       horaInicio: String(row[colIndex['hora_inicio']] || ''),
       horaFim: String(row[colIndex['hora_fim']] || ''),
       status: status,
-      dataNota: dataNota,
-      diasNota: diasNota,
-      obs: isFicheiroBruto ? String(row[colIndex['ultima_nota']] || row[colIndex['obs']] || '') : String(row[colIndex['obs']] || ''),
+      dataNota: parseExcelDate(row[colIndex['dta nota']]),
+      diasNota: parseInt(row[colIndex['dias nota:']]) || 0,
+      obs: String(row[colIndex['obs']] || ''),
       email: String(row[colIndex['email']] || ''),
       segurado: String(row[colIndex['segurado']] || ''),
       marca: String(row[colIndex['marca']] || ''),
@@ -592,7 +483,7 @@ export async function processarFicheiroExcel(buffer: Buffer, matrizLojas?: Map<n
       serieFactura: String(row[colIndex['seriefcatura']] || ''),
       nrSinistro: String(row[colIndex['nrsinistro']] || ''),
       armazem: parseInt(row[colIndex['armazem']]) || 0,
-      fechado: row[colIndex['fechado']] === true || row[colIndex['fechado']] === 'True' || String(row[colIndex['fechado']] || '') === '0',
+      fechado: row[colIndex['fechado']] === true || row[colIndex['fechado']] === 'True',
       detalheDanos: String(row[colIndex['detalhe_danos']] || ''),
       contactoSegurado: String(row[colIndex['u_contsega']] || ''),
       nome: String(row[colIndex['nome']] || ''),
@@ -609,11 +500,8 @@ export async function processarFicheiroExcel(buffer: Buffer, matrizLojas?: Map<n
       console.log('[processarFicheiroExcel] Ficha ' + fichas.length + ':', {
         nmdos: ficha.nmdos,
         loja: ficha.loja,
-        gestor: ficha.gestor,
         obrano: ficha.obrano,
-        status: ficha.status,
-        diasAberto: ficha.diasAberto,
-        tipo: isFicheiroBruto ? 'BRUTO' : 'MACROS'
+        status: ficha.status
       });
     }
   }
@@ -1002,7 +890,7 @@ export function analisarFichas(fichas: FichaServico[], nomeArquivo: string, fich
  * Função principal que processa o ficheiro e retorna o resultado da análise
  */
 export async function processarAnalise(buffer: Buffer, nomeArquivo: string): Promise<ResultadoAnalise> {
-  const { fichas, fichasExcluidas } = await processarFicheiroExcel(buffer);
+  const { fichas, fichasExcluidas } = processarFicheiroExcel(buffer);
   // Passar fichasExcluidas para analisarFichas para que os eurocodes sejam incluídos
   // em fichasCompletas de cada loja (para cruzamento com stock)
   const resultado = analisarFichas(fichas, nomeArquivo, fichasExcluidas);

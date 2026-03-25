@@ -1,0 +1,130 @@
+{
+  "query": "SELECT r.nomeLoja, r.lojaId, r.numeroLoja, l.nome as nomeBD FROM relatorios_analise_loja r LEFT JOIN lojas l ON r.lojaId = l.id WHERE r.analiseId = 810001 ORDER BY r.nomeLoja LIMIT 20 OFFSET 20;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT r.nomeLoja, r.lojaId, r.numeroLoja, l.nome as nomeBD FROM relatorios_analise_loja r LEFT JOIN lojas l ON r.lojaId = l.id WHERE r.analiseId = 810001 ORDER BY r.nomeLoja LIMIT 20 OFFSET 20;",
+  "rows": [
+    {
+      "nomeLoja": "Faro",
+      "lojaId": "180020",
+      "numeroLoja": "37",
+      "nomeBD": "Faro"
+    },
+    {
+      "nomeLoja": "Faro SM",
+      "lojaId": "180021",
+      "numeroLoja": "86",
+      "nomeBD": "Faro sm"
+    },
+    {
+      "nomeLoja": "Gondomar",
+      "lojaId": "180022",
+      "numeroLoja": "17",
+      "nomeBD": "Gondomar"
+    },
+    {
+      "nomeLoja": "Guarda",
+      "lojaId": "180023",
+      "numeroLoja": "44",
+      "nomeBD": "Guarda"
+    },
+    {
+      "nomeLoja": "Guimarães",
+      "lojaId": "180024",
+      "numeroLoja": "7",
+      "nomeBD": "Guimarães shopping"
+    },
+    {
+      "nomeLoja": "Guimarães SM",
+      "lojaId": "180024",
+      "numeroLoja": "NULL",
+      "nomeBD": "Guimarães shopping"
+    },
+    {
+      "nomeLoja": "Leiria",
+      "lojaId": "180025",
+      "numeroLoja": "31",
+      "nomeBD": "Leiria"
+    },
+    {
+      "nomeLoja": "Leiria SM",
+      "lojaId": "180026",
+      "numeroLoja": "NULL",
+      "nomeBD": "Leiria sm"
+    },
+    {
+      "nomeLoja": "Lezíria SM",
+      "lojaId": "180027",
+      "numeroLoja": "97",
+      "nomeBD": "Leziria sm"
+    },
+    {
+      "nomeLoja": "Lisboa SM",
+      "lojaId": "180028",
+      "numeroLoja": "NULL",
+      "nomeBD": "Lisboa sm"
+    },
+    {
+      "nomeLoja": "Maia",
+      "lojaId": "180031",
+      "numeroLoja": "3",
+      "nomeBD": "Maia - moreira"
+    },
+    {
+      "nomeLoja": "Maia SM",
+      "lojaId": "180032",
+      "numeroLoja": "NULL",
+      "nomeBD": "Maia sm"
+    },
+    {
+      "nomeLoja": "Matosinhos",
+      "lojaId": "180033",
+      "numeroLoja": "2",
+      "nomeBD": "Matosinhos"
+    },
+    {
+      "nomeLoja": "Matosinhos SM",
+      "lojaId": "180033",
+      "numeroLoja": "NULL",
+      "nomeBD": "Matosinhos"
+    },
+    {
+      "nomeLoja": "Montijo",
+      "lojaId": "180034",
+      "numeroLoja": "95",
+      "nomeBD": "Montijo"
+    },
+    {
+      "nomeLoja": "Movida",
+      "lojaId": "180035",
+      "numeroLoja": "50",
+      "nomeBD": "Movida"
+    },
+    {
+      "nomeLoja": "Mycarcenter",
+      "lojaId": "180036",
+      "numeroLoja": "8",
+      "nomeBD": "Mycarcenter"
+    },
+    {
+      "nomeLoja": "Odivelas",
+      "lojaId": "180037",
+      "numeroLoja": "92",
+      "nomeBD": "Odivelas - loures"
+    },
+    {
+      "nomeLoja": "Paços de Ferreira ",
+      "lojaId": "60007",
+      "numeroLoja": "15",
+      "nomeBD": "Paços de Ferreira "
+    },
+    {
+      "nomeLoja": "Paredes",
+      "lojaId": "60006",
+      "numeroLoja": "5",
+      "nomeBD": "Paredes"
+    }
+  ],
+  "messages": [],
+  "stdout": "nomeLoja\tlojaId\tnumeroLoja\tnomeBD\nFaro\t180020\t37\tFaro\nFaro SM\t180021\t86\tFaro sm\nGondomar\t180022\t17\tGondomar\nGuarda\t180023\t44\tGuarda\nGuimarães\t180024\t7\tGuimarães shopping\nGuimarães SM\t180024\tNULL\tGuimarães shopping\nLeiria\t180025\t31\tLeiria\nLeiria SM\t180026\tNULL\tLeiria sm\nLezíria SM\t180027\t97\tLeziria sm\nLisboa SM\t180028\tNULL\tLisboa sm\nMaia\t180031\t3\tMaia - moreira\nMaia SM\t180032\tNULL\tMaia sm\nMatosinhos\t180033\t2\tMatosinhos\nMatosinhos SM\t180033\tNULL\tMatosinhos\nMontijo\t180034\t95\tMontijo\nMovida\t180035\t50\tMovida\nMycarcenter\t180036\t8\tMycarcenter\nOdivelas\t180037\t92\tOdivelas - loures\nPaços de Ferreira \t60007\t15\tPaços de Ferreira \nParedes\t60006\t5\tParedes\n",
+  "stderr": "",
+  "execution_time_ms": 327
+}

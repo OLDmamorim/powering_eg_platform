@@ -1,0 +1,70 @@
+{
+  "query": "SELECT DISTINCT nomeLoja FROM eurocodes_fichas WHERE analiseId = 810001 ORDER BY nomeLoja LIMIT 20 OFFSET 20;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT DISTINCT nomeLoja FROM eurocodes_fichas WHERE analiseId = 810001 ORDER BY nomeLoja LIMIT 20 OFFSET 20;",
+  "rows": [
+    {
+      "nomeLoja": "Faro SM"
+    },
+    {
+      "nomeLoja": "Gondomar"
+    },
+    {
+      "nomeLoja": "Guarda"
+    },
+    {
+      "nomeLoja": "Guimarães"
+    },
+    {
+      "nomeLoja": "Guimarães SM"
+    },
+    {
+      "nomeLoja": "Leiria"
+    },
+    {
+      "nomeLoja": "Leiria SM"
+    },
+    {
+      "nomeLoja": "Lezíria SM"
+    },
+    {
+      "nomeLoja": "Lisboa SM"
+    },
+    {
+      "nomeLoja": "Maia"
+    },
+    {
+      "nomeLoja": "Maia SM"
+    },
+    {
+      "nomeLoja": "Matosinhos"
+    },
+    {
+      "nomeLoja": "Matosinhos SM"
+    },
+    {
+      "nomeLoja": "Montijo"
+    },
+    {
+      "nomeLoja": "Movida"
+    },
+    {
+      "nomeLoja": "Mycarcenter"
+    },
+    {
+      "nomeLoja": "Odivelas"
+    },
+    {
+      "nomeLoja": "Paços de Ferreira "
+    },
+    {
+      "nomeLoja": "Paredes"
+    },
+    {
+      "nomeLoja": "Pombal"
+    }
+  ],
+  "messages": [],
+  "stdout": "nomeLoja\nFaro SM\nGondomar\nGuarda\nGuimarães\nGuimarães SM\nLeiria\nLeiria SM\nLezíria SM\nLisboa SM\nMaia\nMaia SM\nMatosinhos\nMatosinhos SM\nMontijo\nMovida\nMycarcenter\nOdivelas\nPaços de Ferreira \nParedes\nPombal\n",
+  "stderr": "",
+  "execution_time_ms": 81
+}

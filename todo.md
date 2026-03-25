@@ -963,3 +963,19 @@
 - [x] Investigar scheduler e lógica de envio RH
 - [x] Implementar envio automático no dia 24 de cada mês
 - [x] Testar e guardar checkpoint
+
+## Lojas em Falta na Análise de Fichas
+- [ ] Investigar porque só aparecem 62 lojas (deviam ser 71) e 11 suas lojas (deviam ser 14)
+- [ ] Verificar se a limpeza de teste removeu lojas reais
+- [ ] Corrigir dados em falta
+
+## Corrigir Carregamento Ficheiro XLS com Macros
+- [ ] Investigar o que mudou no processamento do ficheiro XLS (analiseFichasService)
+- [ ] Corrigir para funcionar como antes (mapeamento correcto de todas as lojas)
+- [ ] Testar e guardar checkpoint
+
+## Reverter Sistema de Carregamento para Versão Anterior
+- [x] Encontrar versão anterior do analiseFichasService no git (9f5e2f7)
+- [x] Reverter para versão que funcionava (ficheiro com macros)
+- [x] Manter exclusão de fichas sem notas >5 dias (secção removida do HTML e resumo)
+- [x] Testar e guardar checkpoint

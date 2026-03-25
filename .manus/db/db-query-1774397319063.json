@@ -1,0 +1,130 @@
+{
+  "query": "SELECT r.nomeLoja, r.lojaId, r.numeroLoja, l.nome as nomeBD FROM relatorios_analise_loja r LEFT JOIN lojas l ON r.lojaId = l.id WHERE r.analiseId = 810001 ORDER BY r.nomeLoja LIMIT 20 OFFSET 40;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT r.nomeLoja, r.lojaId, r.numeroLoja, l.nome as nomeBD FROM relatorios_analise_loja r LEFT JOIN lojas l ON r.lojaId = l.id WHERE r.analiseId = 810001 ORDER BY r.nomeLoja LIMIT 20 OFFSET 40;",
+  "rows": [
+    {
+      "nomeLoja": "Pombal",
+      "lojaId": "180039",
+      "numeroLoja": "32",
+      "nomeBD": "Pombal"
+    },
+    {
+      "nomeLoja": "Portimão",
+      "lojaId": "180040",
+      "numeroLoja": "36",
+      "nomeBD": "Portimão"
+    },
+    {
+      "nomeLoja": "Porto",
+      "lojaId": "180041",
+      "numeroLoja": "12",
+      "nomeBD": "Porto - marquês"
+    },
+    {
+      "nomeLoja": "Porto Alto",
+      "lojaId": "180043",
+      "numeroLoja": "94",
+      "nomeBD": "Porto alto"
+    },
+    {
+      "nomeLoja": "Porto SM",
+      "lojaId": "180002",
+      "numeroLoja": "NULL",
+      "nomeBD": "Aeroporto porto"
+    },
+    {
+      "nomeLoja": "Póvoa de santa iria",
+      "lojaId": "180045",
+      "numeroLoja": "96",
+      "nomeBD": "Póvoa de santa iria"
+    },
+    {
+      "nomeLoja": "Póvoa de Varzim",
+      "lojaId": "60005",
+      "numeroLoja": "11",
+      "nomeBD": "Póvoa de Varzim"
+    },
+    {
+      "nomeLoja": "Rotunda do relógio",
+      "lojaId": "180046",
+      "numeroLoja": "21",
+      "nomeBD": "Rotunda do relógio"
+    },
+    {
+      "nomeLoja": "Sacavém",
+      "lojaId": "180047",
+      "numeroLoja": "25",
+      "nomeBD": "Sacavém"
+    },
+    {
+      "nomeLoja": "Santa maria da feira",
+      "lojaId": "180048",
+      "numeroLoja": "6",
+      "nomeBD": "Santa maria da feira"
+    },
+    {
+      "nomeLoja": "Santarém",
+      "lojaId": "180049",
+      "numeroLoja": "72",
+      "nomeBD": "Santarém"
+    },
+    {
+      "nomeLoja": "Seia",
+      "lojaId": "180050",
+      "numeroLoja": "45",
+      "nomeBD": "Seia"
+    },
+    {
+      "nomeLoja": "Seia sm",
+      "lojaId": "180051",
+      "numeroLoja": "91",
+      "nomeBD": "Seia sm"
+    },
+    {
+      "nomeLoja": "Telheiras",
+      "lojaId": "180055",
+      "numeroLoja": "48",
+      "nomeBD": "Telheiras"
+    },
+    {
+      "nomeLoja": "Vale do Tejo SM",
+      "lojaId": "180056",
+      "numeroLoja": "64",
+      "nomeBD": "Vale do tejo sm"
+    },
+    {
+      "nomeLoja": "Viana",
+      "lojaId": "180057",
+      "numeroLoja": "85",
+      "nomeBD": "Viana do castelo sm"
+    },
+    {
+      "nomeLoja": "Vila nova de gaia",
+      "lojaId": "180058",
+      "numeroLoja": "4",
+      "nomeBD": "Vila nova de gaia"
+    },
+    {
+      "nomeLoja": "Vila nova de gaia - canelas",
+      "lojaId": "180059",
+      "numeroLoja": "65",
+      "nomeBD": "Vila nova de gaia - canelas"
+    },
+    {
+      "nomeLoja": "Vila Verde",
+      "lojaId": "60003",
+      "numeroLoja": "49",
+      "nomeBD": "Vila Verde"
+    },
+    {
+      "nomeLoja": "Viseu",
+      "lojaId": "180060",
+      "numeroLoja": "46",
+      "nomeBD": "Viseu"
+    }
+  ],
+  "messages": [],
+  "stdout": "nomeLoja\tlojaId\tnumeroLoja\tnomeBD\nPombal\t180039\t32\tPombal\nPortimão\t180040\t36\tPortimão\nPorto\t180041\t12\tPorto - marquês\nPorto Alto\t180043\t94\tPorto alto\nPorto SM\t180002\tNULL\tAeroporto porto\nPóvoa de santa iria\t180045\t96\tPóvoa de santa iria\nPóvoa de Varzim\t60005\t11\tPóvoa de Varzim\nRotunda do relógio\t180046\t21\tRotunda do relógio\nSacavém\t180047\t25\tSacavém\nSanta maria da feira\t180048\t6\tSanta maria da feira\nSantarém\t180049\t72\tSantarém\nSeia\t180050\t45\tSeia\nSeia sm\t180051\t91\tSeia sm\nTelheiras\t180055\t48\tTelheiras\nVale do Tejo SM\t180056\t64\tVale do tejo sm\nViana\t180057\t85\tViana do castelo sm\nVila nova de gaia\t180058\t4\tVila nova de gaia\nVila nova de gaia - canelas\t180059\t65\tVila nova de gaia - canelas\nVila Verde\t60003\t49\tVila Verde\nViseu\t180060\t46\tViseu\n",
+  "stderr": "",
+  "execution_time_ms": 626
+}

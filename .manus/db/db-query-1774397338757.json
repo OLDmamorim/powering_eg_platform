@@ -1,0 +1,70 @@
+{
+  "query": "SELECT r.nomeLoja as nomeExcel, r.lojaId, l.nome as nomeBD, r.numeroLoja FROM relatorios_analise_loja r LEFT JOIN lojas l ON r.lojaId = l.id WHERE r.analiseId = 810001 AND (r.nomeLoja IN ('Braga', 'Maia', 'Porto', 'Viana', 'Guimarães', 'Guimarães SM', 'Castanheira do Ribatejo SM', 'Porto SM', 'Matosinhos SM', ' SM')) ORDER BY r.nomeLoja;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT r.nomeLoja as nomeExcel, r.lojaId, l.nome as nomeBD, r.numeroLoja FROM relatorios_analise_loja r LEFT JOIN lojas l ON r.lojaId = l.id WHERE r.analiseId = 810001 AND (r.nomeLoja IN ('Braga', 'Maia', 'Porto', 'Viana', 'Guimarães', 'Guimarães SM', 'Castanheira do Ribatejo SM', 'Porto SM', 'Matosinhos SM', ' SM')) ORDER BY r.nomeLoja;",
+  "rows": [
+    {
+      "nomeExcel": " SM",
+      "lojaId": "180009",
+      "nomeBD": "Beira baixa sm",
+      "numeroLoja": "NULL"
+    },
+    {
+      "nomeExcel": "Braga",
+      "lojaId": "180010",
+      "nomeBD": "Braga - minho center",
+      "numeroLoja": "18"
+    },
+    {
+      "nomeExcel": "Castanheira do Ribatejo SM",
+      "lojaId": "180013",
+      "nomeBD": "Castanheira do ribatejo",
+      "numeroLoja": "NULL"
+    },
+    {
+      "nomeExcel": "Guimarães",
+      "lojaId": "180024",
+      "nomeBD": "Guimarães shopping",
+      "numeroLoja": "7"
+    },
+    {
+      "nomeExcel": "Guimarães SM",
+      "lojaId": "180024",
+      "nomeBD": "Guimarães shopping",
+      "numeroLoja": "NULL"
+    },
+    {
+      "nomeExcel": "Maia",
+      "lojaId": "180031",
+      "nomeBD": "Maia - moreira",
+      "numeroLoja": "3"
+    },
+    {
+      "nomeExcel": "Matosinhos SM",
+      "lojaId": "180033",
+      "nomeBD": "Matosinhos",
+      "numeroLoja": "NULL"
+    },
+    {
+      "nomeExcel": "Porto",
+      "lojaId": "180041",
+      "nomeBD": "Porto - marquês",
+      "numeroLoja": "12"
+    },
+    {
+      "nomeExcel": "Porto SM",
+      "lojaId": "180002",
+      "nomeBD": "Aeroporto porto",
+      "numeroLoja": "NULL"
+    },
+    {
+      "nomeExcel": "Viana",
+      "lojaId": "180057",
+      "nomeBD": "Viana do castelo sm",
+      "numeroLoja": "85"
+    }
+  ],
+  "messages": [],
+  "stdout": "nomeExcel\tlojaId\tnomeBD\tnumeroLoja\n SM\t180009\tBeira baixa sm\tNULL\nBraga\t180010\tBraga - minho center\t18\nCastanheira do Ribatejo SM\t180013\tCastanheira do ribatejo\tNULL\nGuimarães\t180024\tGuimarães shopping\t7\nGuimarães SM\t180024\tGuimarães shopping\tNULL\nMaia\t180031\tMaia - moreira\t3\nMatosinhos SM\t180033\tMatosinhos\tNULL\nPorto\t180041\tPorto - marquês\t12\nPorto SM\t180002\tAeroporto porto\tNULL\nViana\t180057\tViana do castelo sm\t85\n",
+  "stderr": "",
+  "execution_time_ms": 296
+}

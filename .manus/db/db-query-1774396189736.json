@@ -1,0 +1,140 @@
+{
+  "query": "SELECT u.name as gestor, l.nome as loja, l.numeroLoja FROM gestor_lojas gl INNER JOIN gestores g ON gl.gestorId = g.id INNER JOIN users u ON g.userId = u.id INNER JOIN lojas l ON gl.lojaId = l.id WHERE u.name LIKE '%Marco%' ORDER BY u.name, l.nome;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT u.name as gestor, l.nome as loja, l.numeroLoja FROM gestor_lojas gl INNER JOIN gestores g ON gl.gestorId = g.id INNER JOIN users u ON g.userId = u.id INNER JOIN lojas l ON gl.lojaId = l.id WHERE u.name LIKE '%Marco%' ORDER BY u.name, l.nome;",
+  "rows": [
+    {
+      "gestor": "Marco Amorim",
+      "loja": "Barcelos",
+      "numeroLoja": "23"
+    },
+    {
+      "gestor": "Marco Amorim",
+      "loja": "Braga - minho center",
+      "numeroLoja": "18"
+    },
+    {
+      "gestor": "Marco Amorim",
+      "loja": "Braga sm",
+      "numeroLoja": "52"
+    },
+    {
+      "gestor": "Marco Amorim",
+      "loja": "Famalicão",
+      "numeroLoja": "9"
+    },
+    {
+      "gestor": "Marco Amorim",
+      "loja": "Famalicão sm",
+      "numeroLoja": "61"
+    },
+    {
+      "gestor": "Marco Amorim",
+      "loja": "Guimarães shopping",
+      "numeroLoja": "7"
+    },
+    {
+      "gestor": "Marco Amorim",
+      "loja": "Mycarcenter",
+      "numeroLoja": "8"
+    },
+    {
+      "gestor": "Marco Amorim",
+      "loja": "Paços de Ferreira ",
+      "numeroLoja": "15"
+    },
+    {
+      "gestor": "Marco Amorim",
+      "loja": "Paredes",
+      "numeroLoja": "5"
+    },
+    {
+      "gestor": "Marco Amorim",
+      "loja": "Paredes sm",
+      "numeroLoja": "84"
+    },
+    {
+      "gestor": "Marco Amorim",
+      "loja": "Póvoa de Varzim",
+      "numeroLoja": "11"
+    },
+    {
+      "gestor": "Marco Amorim",
+      "loja": "Viana do Castelo ",
+      "numeroLoja": "34"
+    },
+    {
+      "gestor": "Marco Amorim",
+      "loja": "Viana do castelo sm",
+      "numeroLoja": "85"
+    },
+    {
+      "gestor": "Marco Amorim",
+      "loja": "Vila Verde",
+      "numeroLoja": "49"
+    },
+    {
+      "gestor": "Marco Vilar",
+      "loja": "Aeroporto porto",
+      "numeroLoja": "71"
+    },
+    {
+      "gestor": "Marco Vilar",
+      "loja": "Gondomar",
+      "numeroLoja": "17"
+    },
+    {
+      "gestor": "Marco Vilar",
+      "loja": "Maia - maiashopping",
+      "numeroLoja": "29"
+    },
+    {
+      "gestor": "Marco Vilar",
+      "loja": "Maia - moreira",
+      "numeroLoja": "3"
+    },
+    {
+      "gestor": "Marco Vilar",
+      "loja": "Maia sm",
+      "numeroLoja": "87"
+    },
+    {
+      "gestor": "Marco Vilar",
+      "loja": "Matosinhos",
+      "numeroLoja": "2"
+    },
+    {
+      "gestor": "Marco Vilar",
+      "loja": "Porto - marquês",
+      "numeroLoja": "12"
+    },
+    {
+      "gestor": "Marco Vilar",
+      "loja": "Porto - zona industrial",
+      "numeroLoja": "30"
+    },
+    {
+      "gestor": "Marco Vilar",
+      "loja": "Porto sul sm",
+      "numeroLoja": "80"
+    },
+    {
+      "gestor": "Marco Vilar",
+      "loja": "Santa maria da feira",
+      "numeroLoja": "6"
+    },
+    {
+      "gestor": "Marco Vilar",
+      "loja": "Vila nova de gaia",
+      "numeroLoja": "4"
+    },
+    {
+      "gestor": "Marco Vilar",
+      "loja": "Vila nova de gaia - canelas",
+      "numeroLoja": "65"
+    }
+  ],
+  "messages": [],
+  "stdout": "gestor\tloja\tnumeroLoja\nMarco Amorim\tBarcelos\t23\nMarco Amorim\tBraga - minho center\t18\nMarco Amorim\tBraga sm\t52\nMarco Amorim\tFamalicão\t9\nMarco Amorim\tFamalicão sm\t61\nMarco Amorim\tGuimarães shopping\t7\nMarco Amorim\tMycarcenter\t8\nMarco Amorim\tPaços de Ferreira \t15\nMarco Amorim\tParedes\t5\nMarco Amorim\tParedes sm\t84\nMarco Amorim\tPóvoa de Varzim\t11\nMarco Amorim\tViana do Castelo \t34\nMarco Amorim\tViana do castelo sm\t85\nMarco Amorim\tVila Verde\t49\nMarco Vilar\tAeroporto porto\t71\nMarco Vilar\tGondomar\t17\nMarco Vilar\tMaia - maiashopping\t29\nMarco Vilar\tMaia - moreira\t3\nMarco Vilar\tMaia sm\t87\nMarco Vilar\tMatosinhos\t2\nMarco Vilar\tPorto - marquês\t12\nMarco Vilar\tPorto - zona industrial\t30\nMarco Vilar\tPorto sul sm\t80\nMarco Vilar\tSanta maria da feira\t6\nMarco Vilar\tVila nova de gaia\t4\nMarco Vilar\tVila nova de gaia - canelas\t65\n",
+  "stderr": "",
+  "execution_time_ms": 55
+}
