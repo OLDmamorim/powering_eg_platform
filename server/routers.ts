@@ -183,6 +183,102 @@ setInterval(() => { db.cleanOldBackgroundJobs().catch(() => {}); }, 10 * 60 * 10
 
 export const appRouter = router({
   system: systemRouter,
+
+  // ==================== FÉRIAS ====================
+  ferias: router({
+    // Listar anos disponíveis
+    getAnos: protectedProcedure.query(async () => {
+      const anos = await db.getAnosFerias();
+      return anos;
+    }),
+
+    // Listar uploads de férias
+    listarUploads: protectedProcedure
+      .input(z.object({ ano: z.number().optional() }).optional())
+      .query(async ({ input }) => {
+        return db.listarFeriasUploads(input?.ano);
+      }),
+
+    // Obter último upload de um ano
+    getUltimoUpload: protectedProcedure
+      .input(z.object({ ano: z.number() }))
+      .query(async ({ input }) => {
+        return db.getUltimoFeriasUpload(input.ano);
+      }),
+
+    // Obter colaboradores de um upload
+    getColaboradores: protectedProcedure
+      .input(z.object({ uploadId: z.number() }))
+      .query(async ({ input }) => {
+        return db.getFeriasColaboradoresByUpload(input.uploadId);
+      }),
+
+    // Obter colaboradores por ano (último upload)
+    getColaboradoresPorAno: protectedProcedure
+      .input(z.object({ ano: z.number() }))
+      .query(async ({ input }) => {
+        const upload = await db.getUltimoFeriasUpload(input.ano);
+        if (!upload) return { upload: null, colaboradores: [] };
+        const colaboradores = await db.getFeriasColaboradoresByUpload(upload.id);
+        return { upload, colaboradores };
+      }),
+
+    // Upload e guardar dados de férias
+    guardarUpload: protectedProcedure
+      .input(z.object({
+        nomeArquivo: z.string(),
+        ano: z.number(),
+        colaboradores: z.array(z.object({
+          nome: z.string(),
+          loja: z.string(),
+          gestor: z.string().optional(),
+          dias: z.record(z.string(), z.string()),
+          totalAprovados: z.number(),
+          totalNaoAprovados: z.number(),
+          totalFeriados: z.number(),
+          totalFaltas: z.number(),
+        })),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        // Criar upload
+        const totalAprovados = input.colaboradores.reduce((s, c) => s + c.totalAprovados, 0);
+        const totalNaoAprovados = input.colaboradores.reduce((s, c) => s + c.totalNaoAprovados, 0);
+        const totalFaltas = input.colaboradores.reduce((s, c) => s + c.totalFaltas, 0);
+        const upload = await db.criarFeriasUpload({
+          nomeArquivo: input.nomeArquivo,
+          ano: input.ano,
+          uploadedBy: ctx.user.id,
+          uploadedByName: ctx.user.name || 'Desconhecido',
+          totalColaboradores: input.colaboradores.length,
+          totalDiasAprovados: totalAprovados,
+          totalDiasNaoAprovados: totalNaoAprovados,
+          totalFaltas: totalFaltas,
+        });
+        // Guardar colaboradores
+        const colabs = input.colaboradores.map(c => ({
+          uploadId: upload.id,
+          nome: c.nome,
+          loja: c.loja,
+          gestor: c.gestor || null,
+          ano: input.ano,
+          dias: c.dias,
+          totalAprovados: c.totalAprovados,
+          totalNaoAprovados: c.totalNaoAprovados,
+          totalFeriados: c.totalFeriados,
+          totalFaltas: c.totalFaltas,
+        }));
+        await db.guardarFeriasColaboradores(upload.id, colabs);
+        return upload;
+      }),
+
+    // Apagar upload
+    apagarUpload: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await db.apagarFeriasUpload(input.id);
+        return { ok: true };
+      }),
+  }),
   
   // ==================== NOTIFICAÇÕES ====================
   notificacoes: router({

@@ -995,3 +995,18 @@
 - [x] Corrigir 3 erros em server/aiService.ts (Set iteration)
 - [x] Corrigir erros em client/src/pages/ (PortalLoja, AgendamentosGestor, NPSDashboard, etc.)
 - [x] Verificar 0 erros e guardar checkpoint
+
+## Melhorias Módulo de Férias
+- [x] Schema BD para férias (uploads, dados colaboradores, dias)
+- [x] Procedures tRPC (guardar, listar, histórico uploads)
+- [x] Redesign: alinhar cabeçalho com tema da plataforma
+- [x] Redesign: melhorar estado vazio
+- [x] Redesign: selector de ano no cabeçalho
+- [x] Redesign: abas com ícones consistentes
+- [x] Persistir dados do Excel na BD ao carregar
+- [x] Histórico de uploads (quem carregou, quando)
+- [x] Filtro por tipo de ausência (aprovadas, recusadas, faltas)
+- [x] Exportar para Excel
+- [x] Comparação entre períodos (ano actual vs anterior)
+- [x] Testes vitest (12 testes passam)
+- [x] Testar e guardar checkpoint

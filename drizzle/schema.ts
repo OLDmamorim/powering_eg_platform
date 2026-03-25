@@ -1828,3 +1828,43 @@ export const agendamentosLoja = mysqlTable("agendamentos_loja", {
 });
 export type AgendamentoLoja = typeof agendamentosLoja.$inferSelect;
 export type InsertAgendamentoLoja = typeof agendamentosLoja.$inferInsert;
+
+
+/**
+ * Férias - Upload de ficheiros de férias
+ */
+export const feriasUploads = mysqlTable("ferias_uploads", {
+  id: int("id").autoincrement().primaryKey(),
+  nomeArquivo: varchar("nomeArquivo", { length: 255 }).notNull(),
+  ano: int("ano").notNull(),
+  uploadedBy: int("uploadedBy").notNull(), // userId
+  uploadedByName: varchar("uploadedByName", { length: 255 }),
+  totalColaboradores: int("totalColaboradores").default(0),
+  totalDiasAprovados: int("totalDiasAprovados").default(0),
+  totalDiasNaoAprovados: int("totalDiasNaoAprovados").default(0),
+  totalFaltas: int("totalFaltas").default(0),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type FeriasUpload = typeof feriasUploads.$inferSelect;
+export type InsertFeriasUpload = typeof feriasUploads.$inferInsert;
+
+/**
+ * Férias - Dados de colaboradores por upload
+ */
+export const feriasColaboradores = mysqlTable("ferias_colaboradores", {
+  id: int("id").autoincrement().primaryKey(),
+  uploadId: int("uploadId").notNull(),
+  nome: varchar("nome", { length: 255 }).notNull(),
+  loja: varchar("loja", { length: 255 }).notNull(),
+  gestor: varchar("gestor", { length: 255 }),
+  ano: int("ano").notNull(),
+  // JSON com os 365/366 dias: { "1": "aprovado", "2": "nao_aprovado", ... }
+  dias: json("dias").notNull(),
+  totalAprovados: int("totalAprovados").default(0),
+  totalNaoAprovados: int("totalNaoAprovados").default(0),
+  totalFeriados: int("totalFeriados").default(0),
+  totalFaltas: int("totalFaltas").default(0),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type FeriasColaborador = typeof feriasColaboradores.$inferSelect;
+export type InsertFeriasColaborador = typeof feriasColaboradores.$inferInsert;

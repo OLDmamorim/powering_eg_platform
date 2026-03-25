@@ -1,8 +1,22 @@
 import React, { useState, useRef, useCallback, useMemo, useEffect } from "react";
 import * as XLSX from "xlsx";
+import { trpc } from "@/lib/trpc";
+import { useAuth } from "@/_core/hooks/useAuth";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
-import { Upload, Calendar, BarChart3, PieChart, ChevronUp, ChevronDown, Search, Crosshair } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { toast } from "sonner";
+import {
+  Upload, Calendar, BarChart3, PieChart, Download, FileSpreadsheet,
+  Search, Users, Building2, Clock, Trash2, Filter, Sun, AlertTriangle,
+  CheckCircle2, XCircle, Eye, ChevronUp, ChevronDown, Crosshair
+} from "lucide-react";
 
 // ─── CONSTANTS ───
 const MONTHS_PT = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
@@ -12,8 +26,21 @@ const DAYS: Record<number,number> = {1:31,2:28,3:31,4:30,5:31,6:30,7:31,8:31,9:3
 
 type Status = 'approved' | 'rejected' | 'holiday' | 'weekend' | 'absent';
 
-const S_CLASS: Record<Status,string> = {approved:'bg-green-600 text-white',rejected:'bg-red-600 text-white',holiday:'bg-purple-600 text-white',weekend:'bg-yellow-300 text-yellow-900',absent:'bg-slate-500 text-white'};
+const S_CLASS: Record<Status,string> = {
+  approved:'bg-green-600 text-white',
+  rejected:'bg-red-600 text-white',
+  holiday:'bg-purple-600 text-white',
+  weekend:'bg-yellow-300 text-yellow-900',
+  absent:'bg-slate-500 text-white'
+};
 const S_LABEL: Record<Status,string> = {approved:'S',rejected:'N',holiday:'F',weekend:'-',absent:'A'};
+const S_DISPLAY: Record<Status,{bg:string;label:string}> = {
+  approved:{bg:'bg-green-500',label:'Aprovado'},
+  rejected:{bg:'bg-red-500',label:'Não Aprovado'},
+  holiday:{bg:'bg-purple-500',label:'Feriado'},
+  weekend:{bg:'bg-amber-300',label:'Fim-de-semana'},
+  absent:{bg:'bg-slate-500',label:'Falta'},
+};
 
 const COLOR_MAP: Record<string,Status> = {
   'FFBBF1FA':'holiday','BBF1FA':'holiday',
@@ -24,35 +51,12 @@ const COLOR_MAP: Record<string,Status> = {
 };
 
 const GESTORES: Record<string, string[]> = {
-  'Marco Amorim': [
-    'BARCELOS','BRAGA CENTRO','FAMALICÃO','GUIMARÃES','MYCARCENTER',
-    'PAÇOS FERREIRA','PAREDES','POVOA VARZIM','RECALIBRA MINHO',
-    'SM BRAGA','SM FAMALICÃO','SM PAREDES','SM VIANA CASTELO',
-    'VIANA CASTELO','VILA VERDE'
-  ],
-  'Fábio Dias': [
-    'ABRANTES','CALDAS DA RAINHA','CASTANHEIRA DO RIBATEJO',
-    'ENTRONCAMENTO','FARO','MONTIJO','PORTIMAO','PORTO ALTO',
-    'SANTAREM','SM FARO','SM PORTO ALTO','SM VALE DO TEJO'
-  ],
-  'Carlos Eduardo': [
-    'ALGÉS','ALMADA','AMADORA','CASCAISHOPPING','LISBOA-AMOREIRAS',
-    'LISBOA-RELOGIO','LOURES','MOVIDA','POVOA SANTA IRIA',
-    'RECALIBRA LISBOA','SACAVEM','SM LISBOA','SMR LISBOA','TELHEIRAS'
-  ],
-  'Marco Vilar': [
-    'CANELAS','FEIRA','GAIA','GONDOMAR','MAIA','MAIA AEROPORTO',
-    'MAIASHOPPING','MATOSINHOS','PORTO-MARQUÊS','PORTO-ZI',
-    'RECALIBRA PORTO','SM PORTO'
-  ],
-  'Mónica Correia': [
-    'AGUEDA','AVEIRO','COIMBRA','COIMBRA SUL','GUARDA','POMBAL',
-    'SEIA','SM BEIRA BAIXA','SM COIMBRA','SM COSTA PRATA',
-    'SM LEIRIA','SM SEIA','SM VISEU','SM VISEU 2','VISEU'
-  ],
-  'Rui Adrião': [
-    'SM CASTANHEIRA DO RIBATEJO','SM PESADOS PORTO','SMR VISEU'
-  ]
+  'Marco Amorim': ['BARCELOS','BRAGA CENTRO','FAMALICÃO','GUIMARÃES','MYCARCENTER','PAÇOS FERREIRA','PAREDES','POVOA VARZIM','RECALIBRA MINHO','SM BRAGA','SM FAMALICÃO','SM PAREDES','SM VIANA CASTELO','VIANA CASTELO','VILA VERDE'],
+  'Fábio Dias': ['ABRANTES','CALDAS DA RAINHA','CASTANHEIRA DO RIBATEJO','ENTRONCAMENTO','FARO','MONTIJO','PORTIMAO','PORTO ALTO','SANTAREM','SM FARO','SM PORTO ALTO','SM VALE DO TEJO'],
+  'Carlos Eduardo': ['ALGÉS','ALMADA','AMADORA','CASCAISHOPPING','LISBOA-AMOREIRAS','LISBOA-RELOGIO','LOURES','MOVIDA','POVOA SANTA IRIA','RECALIBRA LISBOA','SACAVEM','SM LISBOA','SMR LISBOA','TELHEIRAS'],
+  'Marco Vilar': ['CANELAS','FEIRA','GAIA','GONDOMAR','MAIA','MAIA AEROPORTO','MAIASHOPPING','MATOSINHOS','PORTO-MARQUÊS','PORTO-ZI','RECALIBRA PORTO','SM PORTO'],
+  'Mónica Correia': ['AGUEDA','AVEIRO','COIMBRA','COIMBRA SUL','GUARDA','POMBAL','SEIA','SM BEIRA BAIXA','SM COIMBRA','SM COSTA PRATA','SM LEIRIA','SM SEIA','SM VISEU','SM VISEU 2','VISEU'],
+  'Rui Adrião': ['SM CASTANHEIRA DO RIBATEJO','SM PESADOS PORTO','SMR VISEU'],
 };
 
 // ─── TYPES ───
@@ -63,21 +67,24 @@ interface Employee {
   days: Record<string, Status>;
 }
 
+interface EmpStats {
+  approved: number;
+  rejected: number;
+  absent: number;
+  holidays: number;
+  byMonth: Record<number, number>;
+  total: number;
+  gestor: string;
+}
+
 interface ParsedData {
   employees: Employee[];
   storeMap: Record<string, number>;
 }
 
-interface EmpStats {
-  approved: number;
-  rejected: number;
-  absent: number;
-  byMonth: Record<number, number>;
-  total: number;
-}
-
 // ─── HELPERS ───
 const norm = (s: string) => s.toUpperCase().replace(/\s*\|\s*\d+/g,'').replace(/\s+/g,' ').trim();
+const shortName = (n: string) => { const p = n.split(' '); return p.length > 1 ? p[0]+' '+p[p.length-1] : n; };
 
 function getGestorForStore(store: string): string {
   const ns = norm(store);
@@ -88,7 +95,7 @@ function getGestorForStore(store: string): string {
 }
 
 function empStats(emp: Employee): EmpStats {
-  let approved=0, rejected=0, absent=0;
+  let approved=0, rejected=0, absent=0, holidays=0;
   const byMonth: Record<number,number> = {};
   for (let m=1;m<=12;m++) byMonth[m]=0;
   for (const [key, status] of Object.entries(emp.days)) {
@@ -96,8 +103,9 @@ function empStats(emp: Employee): EmpStats {
     if (status==='approved') { approved++; byMonth[m]++; }
     else if (status==='rejected') rejected++;
     else if (status==='absent') absent++;
+    else if (status==='holiday') holidays++;
   }
-  return {approved, rejected, absent, byMonth, total: approved+rejected};
+  return {approved, rejected, absent, holidays, byMonth, total: approved+rejected, gestor: getGestorForStore(emp.store)};
 }
 
 function parseSheet(ws: XLSX.WorkSheet): ParsedData {
@@ -155,813 +163,855 @@ function parseSheet(ws: XLSX.WorkSheet): ParsedData {
 
 // ─── MAIN COMPONENT ───
 export default function Ferias() {
+  const { user } = useAuth();
+
   const today = useMemo(() => new Date(), []);
   const TM = today.getMonth()+1;
   const TD = today.getDate();
 
+  // State
+  const [ano, setAno] = useState(today.getFullYear());
   const [data, setData] = useState<ParsedData|null>(null);
-  const [page, setPage] = useState<'cal'|'an'|'dist'>('cal');
-  const [activeGestor, setActiveGestor] = useState<string>('');
-  const [activeMonths, setActiveMonths] = useState<Set<number>>(new Set());
-  const [activeStores, setActiveStores] = useState<Set<string>>(new Set());
-  const [activeEmps, setActiveEmps] = useState<Set<string>>(new Set());
+  const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState('cal');
+  const [gestorFilter, setGestorFilter] = useState('all');
+  const [lojaFilter, setLojaFilter] = useState('all');
+  const [monthFilter, setMonthFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [search, setSearch] = useState('');
-  const [summaryCollapsed, setSummaryCollapsed] = useState(false);
+  const [compareAno, setCompareAno] = useState<number|null>(null);
+  const [showHistory, setShowHistory] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const calRef = useRef<HTMLDivElement>(null);
 
-  // Analysis state
-  const [anGestor, setAnGestor] = useState('');
-  const [anSort, setAnSort] = useState('sem_ferias');
-  // Distribution state
-  const [distGestor, setDistGestor] = useState('');
-  const [distType, setDistType] = useState('approved');
+  // tRPC queries
+  const guardarUpload = trpc.ferias.guardarUpload.useMutation();
+  const apagarUpload = trpc.ferias.apagarUpload.useMutation();
+  const uploadsQuery = trpc.ferias.listarUploads.useQuery();
+  const dadosAnoQuery = trpc.ferias.getColaboradoresPorAno.useQuery({ ano });
+  const anosQuery = trpc.ferias.getAnos.useQuery();
 
-  const handleFile = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  // Load data from DB when year changes
+  useEffect(() => {
+    if (dadosAnoQuery.data?.upload && dadosAnoQuery.data.colaboradores.length > 0) {
+      const colabs = dadosAnoQuery.data.colaboradores;
+      const employees: Employee[] = colabs.map((c: any) => ({
+        store: c.loja,
+        num: String(c.id || '').substring(0, 6),
+        name: c.nome,
+        days: typeof c.dias === 'string' ? JSON.parse(c.dias) : c.dias,
+      }));
+      const storeMap: Record<string,number> = {};
+      employees.forEach(e => { storeMap[e.store] = (storeMap[e.store]||0)+1; });
+      setData({employees, storeMap});
+    } else if (!dadosAnoQuery.isLoading) {
+      setData(null);
+    }
+  }, [dadosAnoQuery.data, dadosAnoQuery.isLoading]);
+
+  // Compare data
+  const dadosCompareQuery = trpc.ferias.getColaboradoresPorAno.useQuery(
+    { ano: compareAno! },
+    { enabled: !!compareAno }
+  );
+  const compareData = useMemo(() => {
+    if (!dadosCompareQuery.data?.colaboradores?.length) return null;
+    return dadosCompareQuery.data.colaboradores.map((c: any) => ({
+      store: c.loja,
+      num: String(c.id || '').substring(0, 6),
+      name: c.nome,
+      days: typeof c.dias === 'string' ? JSON.parse(c.dias) : c.dias,
+    })) as Employee[];
+  }, [dadosCompareQuery.data]);
+
+  // File handler
+  const handleFile = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0]; if (!f) return;
-    const r = new FileReader();
-    r.onload = ev => {
-      try {
-        const wb = XLSX.read(ev.target?.result, {type:'array', cellStyles:true});
-        const ws = wb.Sheets['Calendario'] || wb.Sheets[wb.SheetNames[0]];
-        const parsed = parseSheet(ws);
-        setData(parsed);
-        setActiveGestor('');
-        setActiveMonths(new Set());
-        setActiveStores(new Set());
-        setActiveEmps(new Set());
-        setSearch('');
-        setPage('cal');
-      } catch(err: any) {
-        alert('Erro: '+err.message);
-      }
-    };
-    r.readAsArrayBuffer(f);
-    e.target.value = '';
-  }, []);
+    setLoading(true);
+    try {
+      const buffer = await f.arrayBuffer();
+      const wb = XLSX.read(buffer, {type:'array', cellStyles:true});
+      const ws = wb.Sheets['Calendario'] || wb.Sheets[wb.SheetNames[0]];
+      const parsed = parseSheet(ws);
+      setData(parsed);
 
-  // Filtered months
-  const months = useMemo(() => {
-    if (activeMonths.size === 0) return Array.from({length:12},(_,i)=>i+1);
-    return Array.from(activeMonths).sort((a,b)=>a-b);
-  }, [activeMonths]);
+      // Save to DB
+      const colaboradores = parsed.employees.map(emp => {
+        const stats = empStats(emp);
+        return {
+          nome: emp.name,
+          loja: emp.store,
+          gestor: stats.gestor !== '—' ? stats.gestor : undefined,
+          dias: emp.days,
+          totalAprovados: stats.approved,
+          totalNaoAprovados: stats.rejected,
+          totalFeriados: stats.holidays,
+          totalFaltas: stats.absent,
+        };
+      });
+      await guardarUpload.mutateAsync({ nomeArquivo: f.name, ano, colaboradores });
+      uploadsQuery.refetch();
+      dadosAnoQuery.refetch();
+      anosQuery.refetch();
+      toast.success(`${parsed.employees.length} colaboradores de ${Object.keys(parsed.storeMap).length} lojas processados e guardados.`);
+    } catch(err: any) {
+      toast.error(`Erro ao processar: ${err.message}`);
+    } finally {
+      setLoading(false);
+      if (fileRef.current) fileRef.current.value = '';
+    }
+  }, [ano, guardarUpload, toast, uploadsQuery, dadosAnoQuery, anosQuery]);
 
-  // Filtered stores
+  // Enriched data with stats
+  const enrichedData = useMemo(() => {
+    if (!data) return [];
+    return data.employees.map(e => ({...e, ...empStats(e)}));
+  }, [data]);
+
+  // Filtered data
+  const filteredData = useMemo(() => {
+    let result = enrichedData;
+    if (gestorFilter !== 'all') {
+      const gStores = GESTORES[gestorFilter]?.map(norm) || [];
+      result = result.filter(e => gStores.includes(norm(e.store)));
+    }
+    if (lojaFilter !== 'all') result = result.filter(e => norm(e.store) === norm(lojaFilter));
+    if (search) {
+      const s = search.toLowerCase();
+      result = result.filter(e => e.name.toLowerCase().includes(s) || e.store.toLowerCase().includes(s) || e.num.includes(s));
+    }
+    return result;
+  }, [enrichedData, gestorFilter, lojaFilter, search]);
+
+  // Available stores
   const availableStores = useMemo(() => {
     if (!data) return [];
-    const all = Object.keys(data.storeMap).sort((a,b)=>a.localeCompare(b,'pt'));
-    if (!activeGestor) return all;
-    const gStores = GESTORES[activeGestor]?.map(norm) || [];
-    return all.filter(s => gStores.includes(norm(s)));
-  }, [data, activeGestor]);
-
-  // Employees filtered
-  const {highlighted, storeEmps} = useMemo(() => {
-    if (!data) return {highlighted:[] as Employee[], storeEmps:[] as Employee[]};
-    const searchLow = search.toLowerCase();
-    
-    const hl = activeEmps.size
-      ? data.employees.filter(e => activeEmps.has(e.num) && (!searchLow || e.name.toLowerCase().includes(searchLow) || e.num.includes(searchLow)))
-      : [];
-    
-    let effectiveStores = activeStores;
-    if (!activeStores.size && activeGestor && GESTORES[activeGestor]) {
-      const gNorm = GESTORES[activeGestor].map(norm);
-      effectiveStores = new Set(Object.keys(data.storeMap).filter(s => gNorm.includes(norm(s))));
+    let stores = Object.keys(data.storeMap).sort((a,b)=>a.localeCompare(b,'pt'));
+    if (gestorFilter !== 'all') {
+      const gStores = GESTORES[gestorFilter]?.map(norm) || [];
+      stores = stores.filter(s => gStores.includes(norm(s)));
     }
-    
-    const activeEmpNums = new Set(hl.map(e=>e.num));
-    let se = effectiveStores.size
-      ? data.employees.filter(e => effectiveStores.has(e.store) && !activeEmpNums.has(e.num))
-      : (!activeEmpNums.size ? data.employees : []);
-    
-    if (searchLow) se = se.filter(e => e.name.toLowerCase().includes(searchLow) || e.num.includes(searchLow));
-    
-    return {highlighted: hl, storeEmps: se};
-  }, [data, activeEmps, activeStores, activeGestor, search]);
+    return stores;
+  }, [data, gestorFilter]);
 
-  const allEmps = useMemo(() => [...highlighted, ...storeEmps], [highlighted, storeEmps]);
+  // Visible months
+  const visibleMonths = useMemo(() => {
+    if (monthFilter !== 'all') return [parseInt(monthFilter)];
+    return Array.from({length:12},(_,i)=>i+1);
+  }, [monthFilter]);
 
-  // Stats
-  const stats = useMemo(() => {
-    const s = {approved:0,rejected:0,absent:0};
-    allEmps.forEach(emp => {
-      months.forEach(m => {
-        for (let d=1;d<=DAYS[m];d++) {
-          const status = emp.days[`${m}-${d}`];
-          if (status==='approved') s.approved++;
-          else if (status==='rejected') s.rejected++;
-          else if (status==='absent') s.absent++;
-        }
-      });
-    });
-    return s;
-  }, [allEmps, months]);
-
-  // Groups for calendar
-  const storeGroups = useMemo(() => {
-    const groups: Record<string,Employee[]> = {};
-    const order: string[] = [];
-    storeEmps.forEach(e => {
-      if (!groups[e.store]) { groups[e.store]=[]; order.push(e.store); }
-      groups[e.store].push(e);
-    });
-    order.sort((a,b) => a.localeCompare(b,'pt'));
-    return {groups, order};
-  }, [storeEmps]);
+  // Export Excel
+  const exportExcel = useCallback(() => {
+    if (!filteredData.length) return;
+    const rows = filteredData.map(e => ({
+      'Nome': e.name, 'Loja': e.store, 'Gestor': e.gestor,
+      'Dias Aprovados': e.approved, 'Dias Não Aprovados': e.rejected,
+      'Faltas': e.absent, 'Feriados': e.holidays, 'Total Marcados': e.total,
+    }));
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Férias');
+    XLSX.writeFile(wb, `ferias_${ano}_export.xlsx`);
+    toast.success('Ficheiro Excel exportado.');
+  }, [filteredData, ano]);
 
   // Scroll to today
   const scrollToToday = useCallback(() => {
-    const todayCell = calRef.current?.querySelector('.d-today');
-    if (todayCell && calRef.current) {
-      const cell = todayCell.getBoundingClientRect();
-      const wrap = calRef.current.getBoundingClientRect();
-      calRef.current.scrollLeft += cell.left - wrap.left - 200;
-    }
+    if (!calRef.current) return;
+    const cell = calRef.current.querySelector('.ring-sky-500');
+    if (cell) cell.scrollIntoView({ behavior:'smooth', block:'nearest', inline:'center' });
   }, []);
-
-  useEffect(() => {
-    if (data && page === 'cal') {
-      setTimeout(scrollToToday, 100);
-    }
-  }, [data, page, scrollToToday]);
-
-  // Toggle helpers
-  const toggleMonth = (m: number) => {
-    setActiveMonths(prev => {
-      const next = new Set(prev);
-      next.has(m) ? next.delete(m) : next.add(m);
-      return next;
-    });
-  };
-  const toggleStore = (s: string) => {
-    setActiveStores(prev => {
-      const next = new Set(prev);
-      next.has(s) ? next.delete(s) : next.add(s);
-      return next;
-    });
-  };
-  const toggleEmp = (num: string) => {
-    setActiveEmps(prev => {
-      const next = new Set(prev);
-      next.has(num) ? next.delete(num) : next.add(num);
-      return next;
-    });
-  };
-
-  // Analysis data
-  const analysisData = useMemo(() => {
-    if (!data) return [];
-    let emps = data.employees;
-    if (anGestor) {
-      const gStores = GESTORES[anGestor]?.map(norm) || [];
-      emps = emps.filter(e => gStores.includes(norm(e.store)));
-    }
-    const enriched = emps.map(e => ({...e, ...empStats(e), gz: getGestorForStore(e.store)}));
-    enriched.sort((a,b) => {
-      if (anSort==='sem_ferias') { const as2=a.total===0?1:0, bs2=b.total===0?1:0; return bs2-as2 || b.rejected-a.rejected; }
-      if (anSort==='menos_marcadas') return (a.approved+a.rejected) - (b.approved+b.rejected);
-      if (anSort==='nao_aprov') return b.rejected-a.rejected;
-      if (anSort==='aprovados') return b.approved-a.approved;
-      return a.name.localeCompare(b.name);
-    });
-    return enriched;
-  }, [data, anGestor, anSort]);
-
-  // Analysis KPIs
-  const anKpis = useMemo(() => {
-    const total = analysisData.length;
-    const totApr = analysisData.reduce((a,e)=>a+e.approved,0);
-    const totRej = analysisData.reduce((a,e)=>a+e.rejected,0);
-    const semFerias = analysisData.filter(e=>e.total===0).length;
-    const soRej = analysisData.filter(e=>e.total>0&&e.approved===0).length;
-    const pctApr = (totApr+totRej) ? Math.round(totApr/(totApr+totRej)*100) : 0;
-    return {total, totApr, totRej, semFerias, soRej, pctApr};
-  }, [analysisData]);
-
-  // Analysis month bars
-  const anMonthTotals = useMemo(() => {
-    const totals: Record<number,number> = {};
-    for (let m=1;m<=12;m++) totals[m] = analysisData.reduce((a,e)=>a+(e.byMonth[m]||0),0);
-    return totals;
-  }, [analysisData]);
-
-  // Analysis per store
-  const anLojas = useMemo(() => {
-    const lojas: Record<string,{total:number,approved:number,rejected:number,sem:number}> = {};
-    analysisData.forEach(e => {
-      if (!lojas[e.store]) lojas[e.store]={total:0,approved:0,rejected:0,sem:0};
-      const l=lojas[e.store]; l.total++;
-      l.approved+=e.approved; l.rejected+=e.rejected;
-      if (e.total===0) l.sem++;
-    });
-    return Object.entries(lojas).sort((a,b)=>b[1].sem-a[1].sem||b[1].rejected-a[1].rejected);
-  }, [analysisData]);
-
-  // Distribution data
-  const distData = useMemo(() => {
-    if (!data) return {gestores:[] as string[], gd:{} as any, mt:{} as Record<number,number>, grand:0, empc:0};
-    const gz = distGestor ? [distGestor] : Object.keys(GESTORES);
-    const gd: Record<string,{byM:Record<number,number>,total:number,ec:number}> = {};
-    gz.forEach(g => {
-      const gNorm = GESTORES[g]?.map(norm) || [];
-      const emps = data.employees.filter(e => gNorm.includes(norm(e.store)));
-      const byM: Record<number,number> = {};
-      let total = 0;
-      for (let m=1;m<=12;m++) byM[m]=0;
-      emps.forEach(e => {
-        Object.keys(e.days).forEach(k => {
-          const st = e.days[k];
-          const m = parseInt(k.split('-')[0]);
-          const ok = distType==='approved' ? st==='approved' : (st==='approved'||st==='rejected');
-          if (ok) { byM[m]++; total++; }
-        });
-      });
-      gd[g] = {byM, total, ec: emps.length};
-    });
-    const mt: Record<number,number> = {};
-    for (let m=1;m<=12;m++) mt[m]=0;
-    let grand=0, empc=0;
-    gz.forEach(g => { for (let m=1;m<=12;m++) mt[m]+=gd[g].byM[m]; grand+=gd[g].total; empc+=gd[g].ec; });
-    return {gestores:gz, gd, mt, grand, empc};
-  }, [data, distGestor, distType]);
-
-  // Distribution period data
-  const distPeriods = useMemo(() => {
-    const PR = [{l:'01 Jan > 31 Mai',m:[1,2,3,4,5]},{l:'01 Jun > 15 Set',m:[6,7,8,9]},{l:'16 Set > 31 Dez',m:[10,11,12]}];
-    return PR;
-  }, []);
-
-  // ─── RENDER ───
-  const shortName = (name: string) => {
-    const parts = name.split(' ');
-    return parts.length > 1 ? parts[0]+' '+parts[parts.length-1] : name;
-  };
 
   return (
     <DashboardLayout>
-      <input ref={fileRef} type="file" accept=".xlsx,.xls" onChange={handleFile} className="hidden" />
-      
-      <div className="flex flex-col h-full" style={{fontFamily:"'DM Sans',sans-serif"}}>
-        {/* TOPBAR */}
-        <div className="flex items-center gap-2 px-3 py-2 bg-[#0f2044] text-white flex-shrink-0">
-          <span className="font-bold text-sm">Férias <span className="text-blue-400">Express Glass</span></span>
-          
+    <div className="space-y-4 pb-8">
+      {/* HEADER */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+            <Sun className="h-6 w-6 text-amber-500" />
+            Gestão de Férias
+          </h1>
+          <p className="text-muted-foreground text-sm mt-1">Planeamento e análise de férias dos colaboradores</p>
+        </div>
+        <div className="flex items-center gap-2 flex-wrap">
+          <Select value={String(ano)} onValueChange={v => { setAno(Number(v)); }}>
+            <SelectTrigger className="w-[100px]"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {[2024,2025,2026,2027].map(y => <SelectItem key={y} value={String(y)}>{y}</SelectItem>)}
+            </SelectContent>
+          </Select>
+
+          <Dialog open={showHistory} onOpenChange={setShowHistory}>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="sm"><Clock className="h-4 w-4 mr-1" /> Histórico</Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>Histórico de Uploads</DialogTitle>
+                <DialogDescription>Registo de ficheiros de férias carregados</DialogDescription>
+              </DialogHeader>
+              <div className="max-h-[400px] overflow-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Data</TableHead>
+                      <TableHead>Ficheiro</TableHead>
+                      <TableHead>Ano</TableHead>
+                      <TableHead>Colab.</TableHead>
+                      <TableHead>Por</TableHead>
+                      <TableHead></TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {(!uploadsQuery.data || uploadsQuery.data.length === 0) && (
+                      <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">Nenhum upload registado</TableCell></TableRow>
+                    )}
+                    {uploadsQuery.data?.map((u: any) => (
+                      <TableRow key={u.id}>
+                        <TableCell className="text-xs">{new Date(u.createdAt).toLocaleString('pt-PT')}</TableCell>
+                        <TableCell className="font-medium text-sm">{u.nomeArquivo}</TableCell>
+                        <TableCell>{u.ano}</TableCell>
+                        <TableCell>{u.totalColaboradores}</TableCell>
+                        <TableCell className="text-xs">{u.uploadedByName}</TableCell>
+                        <TableCell>
+                          <Button variant="ghost" size="sm" className="text-destructive h-7 w-7 p-0"
+                            onClick={async () => {
+                              await apagarUpload.mutateAsync({ id: u.id });
+                              uploadsQuery.refetch(); dadosAnoQuery.refetch();
+                              toast.success('Upload apagado');
+                            }}>
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </DialogContent>
+          </Dialog>
+
           {data && (
-            <div className="flex-1 relative min-w-0 mx-2">
-              <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-white/35" />
-              <input
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                placeholder="Pesquisar colaborador..."
-                className="w-full bg-white/10 border border-white/15 text-white rounded-lg py-1.5 pl-8 pr-3 text-sm outline-none placeholder:text-white/35"
-              />
-            </div>
+            <Button variant="outline" size="sm" onClick={exportExcel}>
+              <Download className="h-4 w-4 mr-1" /> Exportar
+            </Button>
           )}
-          
-          <Button size="sm" onClick={() => fileRef.current?.click()} className="bg-blue-600 hover:bg-blue-500 text-white gap-1.5 flex-shrink-0">
-            <Upload className="w-4 h-4" /> Carregar
+
+          <input ref={fileRef} type="file" accept=".xls,.xlsx,.xlsm" className="hidden" onChange={handleFile} />
+          <Button onClick={() => fileRef.current?.click()} disabled={loading} className="bg-blue-600 hover:bg-blue-700">
+            <Upload className="h-4 w-4 mr-1" /> {loading ? 'A processar...' : 'Carregar Ficheiro'}
           </Button>
-          
-          {data && (
-            <button onClick={scrollToToday} className="text-xs bg-sky-600/80 text-white px-2 py-1 rounded-md flex-shrink-0">
-              <Crosshair className="w-3 h-3 inline mr-1" />{TD} {MONTHS_PT[TM-1]}
-            </button>
-          )}
-        </div>
-
-        {/* TABS */}
-        <div className="flex border-b border-slate-200 bg-white flex-shrink-0">
-          <button onClick={() => setPage('cal')} className={`flex items-center gap-1.5 px-4 py-2.5 text-xs font-semibold border-b-2 transition ${page==='cal' ? 'border-blue-600 text-blue-700' : 'border-transparent text-slate-500 hover:text-slate-700'}`}>
-            <Calendar className="w-3.5 h-3.5" /> Calendário
-          </button>
-          <button onClick={() => setPage('an')} className={`flex items-center gap-1.5 px-4 py-2.5 text-xs font-semibold border-b-2 transition ${page==='an' ? 'border-indigo-600 text-indigo-700' : 'border-transparent text-slate-500 hover:text-slate-700'}`}>
-            <BarChart3 className="w-3.5 h-3.5" /> Análise
-          </button>
-          <button onClick={() => setPage('dist')} className={`flex items-center gap-1.5 px-4 py-2.5 text-xs font-semibold border-b-2 transition ${page==='dist' ? 'border-violet-600 text-violet-700' : 'border-transparent text-slate-500 hover:text-slate-700'}`}>
-            <PieChart className="w-3.5 h-3.5" /> Distribuição
-          </button>
-        </div>
-
-        {/* CONTENT */}
-        <div className="flex-1 overflow-hidden">
-          {/* ═══ CALENDAR PAGE ═══ */}
-          {page === 'cal' && (
-            <>
-              {!data ? (
-                <div className="flex flex-col items-center justify-center h-full gap-4 text-slate-400">
-                  <Calendar className="w-16 h-16 text-slate-300" />
-                  <h3 className="text-lg font-semibold text-slate-600">Mapa de Férias</h3>
-                  <p className="text-sm">Carrega o ficheiro <strong>Férias.xlsx</strong> para começar.</p>
-                  <Button onClick={() => fileRef.current?.click()} className="bg-blue-600 hover:bg-blue-500 text-white gap-2">
-                    <Upload className="w-4 h-4" /> Carregar Ficheiro
-                  </Button>
-                </div>
-              ) : (
-                <div className="flex flex-col h-full">
-                  {/* Filter bar */}
-                  <div className="flex items-center gap-1 px-2 py-1.5 bg-white border-b border-slate-200 flex-shrink-0 overflow-x-auto text-xs">
-                    <span className="text-[10px] font-bold uppercase text-slate-400 px-1 flex-shrink-0">Gestor</span>
-                    <select
-                      value={activeGestor}
-                      onChange={e => { setActiveGestor(e.target.value); setActiveStores(new Set()); setActiveEmps(new Set()); }}
-                      className="h-7 px-2 border border-slate-200 rounded-lg bg-slate-50 text-xs font-medium cursor-pointer outline-none flex-shrink-0"
-                    >
-                      <option value="">— Todos —</option>
-                      {Object.keys(GESTORES).map(g => <option key={g} value={g}>{g}</option>)}
-                    </select>
-
-                    <div className="w-px h-6 bg-slate-200 mx-1 flex-shrink-0" />
-                    <span className="text-[10px] font-bold uppercase text-slate-400 px-1 flex-shrink-0">Meses</span>
-                    <div className="flex gap-0.5 flex-shrink-0">
-                      <button onClick={() => setActiveMonths(new Set())} className={`px-1.5 py-0.5 rounded text-[10px] font-semibold ${activeMonths.size===0 ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>Todos</button>
-                      {MONTHS_PT.map((m,i) => (
-                        <button key={i} onClick={() => toggleMonth(i+1)} className={`px-1.5 py-0.5 rounded text-[10px] font-semibold ${activeMonths.has(i+1) ? 'bg-blue-600 text-white' : i+1===TM ? 'bg-sky-100 text-sky-700 hover:bg-sky-200' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>{m}</button>
-                      ))}
-                    </div>
-
-                    <div className="w-px h-6 bg-slate-200 mx-1 flex-shrink-0" />
-                    <span className="text-[10px] font-bold uppercase text-slate-400 px-1 flex-shrink-0">Lojas</span>
-                    <select
-                      value={activeStores.size === 1 ? Array.from(activeStores)[0] : ''}
-                      onChange={e => setActiveStores(e.target.value ? new Set([e.target.value]) : new Set())}
-                      className="h-7 px-2 border border-slate-200 rounded-lg bg-slate-50 text-xs cursor-pointer outline-none flex-shrink-0 max-w-[150px]"
-                    >
-                      <option value="">Todas ({availableStores.length})</option>
-                      {availableStores.map(s => <option key={s} value={s}>{s} ({data.storeMap[s]})</option>)}
-                    </select>
-                  </div>
-
-                  {/* Stats bar */}
-                  <div className="flex items-center gap-3 px-3 py-1.5 bg-slate-50 border-b border-slate-200 flex-shrink-0 text-xs">
-                    <span className="font-semibold text-slate-700">{allEmps.length} colaboradores</span>
-                    <span className="text-green-700 font-medium">{stats.approved} aprovados</span>
-                    <span className="text-red-700 font-medium">{stats.rejected} não aprov.</span>
-                    <span className="text-slate-500 font-medium">{stats.absent} faltas</span>
-                  </div>
-
-                  {/* Calendar table */}
-                  <div ref={calRef} className="flex-1 overflow-auto">
-                    <table className="border-collapse text-[11px]" style={{minWidth:'100%'}}>
-                      <thead className="sticky top-0 z-20 bg-white">
-                        <tr>
-                          <th className="sticky left-0 z-30 bg-[#0f2044] text-white text-left px-2 py-1 font-semibold" style={{minWidth:130}}>Colaborador</th>
-                          <th className="sticky z-30 bg-[#0f2044] text-white text-center px-1 py-1 font-semibold" style={{left:130,minWidth:36}}>N</th>
-                          {months.map(m => (
-                            <th key={m} colSpan={DAYS[m]} className={`text-center py-1 font-bold text-xs ${m===TM ? 'bg-sky-100 text-sky-700' : 'bg-slate-100 text-slate-600'}`}>
-                              {MONTHS_FULL[m-1].toUpperCase()}
-                            </th>
-                          ))}
-                        </tr>
-                        <tr>
-                          <th className="sticky left-0 z-30 bg-slate-50" style={{minWidth:130}}></th>
-                          <th className="sticky z-30 bg-slate-50" style={{left:130,minWidth:36}}></th>
-                          {months.map(m =>
-                            Array.from({length:DAYS[m]},(_,d)=>d+1).map(d => (
-                              <th key={`${m}-${d}`} className={`text-center px-0 py-0.5 text-[9px] font-normal text-slate-400 ${d===1?'border-l border-slate-300':''} ${m===TM&&d===TD?'bg-sky-500 text-white rounded-sm font-bold':''}`} style={{minWidth:20}}>
-                                {d}
-                              </th>
-                            ))
-                          )}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {/* Highlighted section */}
-                        {highlighted.length > 0 && (
-                          <>
-                            <tr>
-                              <td colSpan={2 + months.reduce((a,m)=>a+DAYS[m],0)} className="bg-gradient-to-r from-yellow-900 to-amber-600 text-white text-[10px] font-bold uppercase tracking-wider px-2 py-1">
-                                Em Destaque
-                              </td>
-                            </tr>
-                            {highlighted.map((emp,ri) => (
-                              <EmpRow key={`hl-${emp.num}`} emp={emp} months={months} TM={TM} TD={TD} isHighlighted ri={ri} />
-                            ))}
-                          </>
-                        )}
-                        {/* Store groups */}
-                        {storeGroups.order.map(store => (
-                          <StoreGroup key={store} store={store} employees={storeGroups.groups[store]} months={months} TM={TM} TD={TD} />
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-
-                  {/* Summary panel */}
-                  {activeStores.size > 0 && (
-                    <div className="border-t border-slate-200 bg-white max-h-[200px] overflow-auto flex-shrink-0">
-                      <div className="flex items-center justify-between px-3 py-1.5 bg-slate-50 border-b border-slate-200 cursor-pointer" onClick={() => setSummaryCollapsed(!summaryCollapsed)}>
-                        <div>
-                          <span className="text-xs font-bold text-slate-700">Resumo</span>
-                          <span className="text-[10px] text-slate-400 ml-2">{activeStores.size} loja(s) · {months.length} mês(es)</span>
-                        </div>
-                        {summaryCollapsed ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
-                      </div>
-                      {!summaryCollapsed && (
-                        <div className="flex flex-wrap gap-3 p-3">
-                          {Array.from(activeStores).sort().map(store => {
-                            const emps = storeEmps.filter(e => e.store === store);
-                            return (
-                              <div key={store} className="min-w-[200px]">
-                                <div className="text-[10px] font-bold uppercase text-slate-500 mb-1">{store}</div>
-                                {emps.map(emp => {
-                                  const es = empStats(emp);
-                                  const totalDays = months.reduce((a,m)=>a+DAYS[m],0);
-                                  return (
-                                    <div key={emp.num} className="flex items-center gap-2 text-[10px] py-0.5">
-                                      <span className="font-medium text-slate-700 w-24 truncate" title={emp.name}>{shortName(emp.name)}</span>
-                                      <span className="text-slate-400 w-8">{emp.num}</span>
-                                      <div className="flex-1 flex h-2 rounded overflow-hidden bg-slate-100">
-                                        {es.approved>0 && <div className="bg-green-500" style={{width:`${Math.max(es.approved/totalDays*100,2)}%`}} />}
-                                        {es.rejected>0 && <div className="bg-red-500" style={{width:`${Math.max(es.rejected/totalDays*100,2)}%`}} />}
-                                        {es.absent>0 && <div className="bg-slate-400" style={{width:`${Math.max(es.absent/totalDays*100,2)}%`}} />}
-                                      </div>
-                                      <div className="flex gap-1">
-                                        {es.approved>0 && <span className="text-green-700">{es.approved} apr.</span>}
-                                        {es.rejected>0 && <span className="text-red-700">{es.rejected} n.apr.</span>}
-                                        {es.absent>0 && <span className="text-slate-500">{es.absent} falt.</span>}
-                                        {es.approved===0&&es.rejected===0&&es.absent===0 && <span className="text-slate-300">sem registo</span>}
-                                      </div>
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              )}
-            </>
-          )}
-
-          {/* ═══ ANALYSIS PAGE ═══ */}
-          {page === 'an' && (
-            <div className="h-full overflow-auto p-4">
-              {!data ? (
-                <div className="flex flex-col items-center justify-center h-full gap-4 text-slate-400">
-                  <BarChart3 className="w-16 h-16 text-slate-300" />
-                  <h3 className="text-lg font-semibold text-slate-600">Análise de Férias</h3>
-                  <p className="text-sm">Carrega primeiro o ficheiro <strong>Férias.xlsx</strong> no Calendário.</p>
-                  <Button onClick={() => { setPage('cal'); }} variant="outline" className="gap-2">
-                    Ir para Calendário
-                  </Button>
-                </div>
-              ) : (
-                <div className="flex flex-col gap-4">
-                  {/* Filters */}
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-[10px] font-bold uppercase text-slate-400">Gestor</span>
-                    <select value={anGestor} onChange={e => setAnGestor(e.target.value)} className="h-7 px-2 border-2 border-indigo-500 rounded-lg bg-white text-indigo-600 text-xs font-semibold cursor-pointer outline-none">
-                      <option value="">— Todos —</option>
-                      {Object.keys(GESTORES).map(g => <option key={g} value={g}>{g}</option>)}
-                    </select>
-                    <span className="text-[10px] font-bold uppercase text-slate-400 ml-2">Ordenar por</span>
-                    <select value={anSort} onChange={e => setAnSort(e.target.value)} className="h-7 px-2 border border-slate-200 rounded-lg bg-slate-50 text-xs cursor-pointer outline-none">
-                      <option value="sem_ferias">Sem férias primeiro</option>
-                      <option value="menos_marcadas">Menos férias marcadas</option>
-                      <option value="nao_aprov">Mais não aprovados</option>
-                      <option value="aprovados">Mais aprovados</option>
-                      <option value="nome">Nome A-Z</option>
-                    </select>
-                  </div>
-
-                  {/* KPIs */}
-                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-                    <KpiCard label="Colaboradores" value={anKpis.total} sub="neste filtro" />
-                    <KpiCard label="Sem férias marcadas" value={anKpis.semFerias} sub="0 dias registados" danger={anKpis.semFerias>0} />
-                    <KpiCard label="Dias aprovados" value={anKpis.totApr} sub="total acumulado" ok />
-                    <KpiCard label="Não aprovados" value={anKpis.totRej} sub="dias pendentes" danger={anKpis.totRej>0} />
-                    <KpiCard label="Taxa aprovação" value={`${anKpis.pctApr}%`} sub={`${anKpis.soRej} só com não-aprov.`} ok={anKpis.pctApr>=80} warn={anKpis.pctApr>=50&&anKpis.pctApr<80} danger={anKpis.pctApr<50} />
-                  </div>
-
-                  {/* Month bars */}
-                  <div className="bg-white rounded-lg border border-slate-200 p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-sm font-bold text-slate-700">Distribuição por mês</span>
-                      <span className="text-[10px] text-slate-400">dias aprovados por mês · {analysisData.length} colaboradores</span>
-                    </div>
-                    <div className="flex items-end gap-1 h-24">
-                      {MONTHS_PT.map((lbl,i) => {
-                        const m=i+1;
-                        const v=anMonthTotals[m];
-                        const max = Math.max(...Object.values(anMonthTotals),1);
-                        const h = Math.round(v/max*72);
-                        return (
-                          <div key={m} className="flex-1 flex flex-col items-center gap-0.5">
-                            <span className="text-[9px] text-slate-500 font-medium">{v||''}</span>
-                            <div className={`w-full rounded-t ${m===TM?'bg-sky-500':'bg-blue-600'}`} style={{height:Math.max(h,2)}} />
-                            <span className={`text-[9px] font-medium ${m===TM?'text-sky-600':'text-slate-400'}`}>{lbl}</span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Critical table */}
-                  <div className="bg-white rounded-lg border border-slate-200 p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-sm font-bold text-slate-700">Situações a acompanhar</span>
-                      <span className="text-[10px] text-slate-400">{analysisData.length} colaboradores</span>
-                    </div>
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-xs">
-                        <thead>
-                          <tr className="border-b border-slate-200">
-                            <th className="text-left py-2 px-2 text-slate-500 font-semibold">Colaborador</th>
-                            <th className="text-left py-2 px-2 text-slate-500 font-semibold">Loja</th>
-                            <th className="text-left py-2 px-2 text-slate-500 font-semibold">Gestor</th>
-                            <th className="text-center py-2 px-2 text-slate-500 font-semibold">Aprovados</th>
-                            <th className="text-center py-2 px-2 text-slate-500 font-semibold">Não aprov.</th>
-                            <th className="text-left py-2 px-2 text-slate-500 font-semibold">Estado</th>
-                            <th className="text-left py-2 px-2 text-slate-500 font-semibold">Progresso</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {analysisData.map((e,i) => {
-                            const pct = Math.min(Math.round(e.approved/22*100),100);
-                            let estado: string, pillCls: string;
-                            if (e.total===0) { estado='Sem registo'; pillCls='bg-red-100 text-red-700'; }
-                            else if (e.approved===0) { estado='Tudo por aprovar'; pillCls='bg-red-100 text-red-700'; }
-                            else if (e.rejected>e.approved) { estado='Maioria p/ aprovar'; pillCls='bg-amber-100 text-amber-700'; }
-                            else { estado='Parcialmente ok'; pillCls='bg-amber-100 text-amber-700'; }
-                            return (
-                              <tr key={i} className="border-b border-slate-100 hover:bg-slate-50">
-                                <td className="py-1.5 px-2">
-                                  <div className="font-medium text-slate-700" title={e.name}>{shortName(e.name)}</div>
-                                  <div className="text-[10px] text-slate-400">{e.num}</div>
-                                </td>
-                                <td className="py-1.5 px-2 text-slate-600">{e.store}</td>
-                                <td className="py-1.5 px-2 text-slate-400">{e.gz}</td>
-                                <td className="py-1.5 px-2 text-center"><span className="px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-[10px] font-semibold">{e.approved}</span></td>
-                                <td className="py-1.5 px-2 text-center"><span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${e.rejected>0?'bg-red-100 text-red-700':'bg-slate-100 text-slate-400'}`}>{e.rejected}</span></td>
-                                <td className="py-1.5 px-2"><span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${pillCls}`}>{estado}</span></td>
-                                <td className="py-1.5 px-2">
-                                  <div className="flex items-center gap-1.5">
-                                    <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                                      <div className="h-full rounded-full" style={{width:`${pct}%`,background:pct>=80?'#16a34a':pct>=40?'#d97706':'#dc2626'}} />
-                                    </div>
-                                    <span className="text-[10px] text-slate-400 w-8">{pct}%</span>
-                                  </div>
-                                </td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-
-                  {/* Per store */}
-                  <div className="bg-white rounded-lg border border-slate-200 p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-sm font-bold text-slate-700">Resumo por loja</span>
-                      <span className="text-[10px] text-slate-400">{anLojas.length} lojas</span>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                      {anLojas.map(([store,l]) => {
-                        const pct = l.total ? Math.min(Math.round(l.approved/(l.total*22)*100),100) : 0;
-                        const color = l.sem>0?'#dc2626':l.rejected>5?'#d97706':'#16a34a';
-                        return (
-                          <div key={store} className="border border-slate-200 rounded-lg p-3" style={{borderLeftWidth:3,borderLeftColor:color}}>
-                            <div className="text-xs font-bold text-slate-700 mb-1.5">{store}</div>
-                            <div className="flex gap-1 mb-2 flex-wrap">
-                              <span className="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-blue-100 text-blue-700">{l.total} colab.</span>
-                              {l.sem>0 && <span className="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-red-100 text-red-700">{l.sem} sem férias</span>}
-                              {l.rejected>0 && <span className="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-amber-100 text-amber-700">{l.rejected} n.apr.</span>}
-                              {l.sem===0&&l.rejected===0 && <span className="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-green-100 text-green-700">ok</span>}
-                            </div>
-                            <div className="flex items-center justify-between text-[9px] text-slate-400 mb-0.5">
-                              <span>Aprovação</span><span>{l.approved} dias</span>
-                            </div>
-                            <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                              <div className="h-full rounded-full" style={{width:`${pct}%`,background:color}} />
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* ═══ DISTRIBUTION PAGE ═══ */}
-          {page === 'dist' && (
-            <div className="h-full overflow-auto p-4">
-              {!data ? (
-                <div className="flex flex-col items-center justify-center h-full gap-4 text-slate-400">
-                  <PieChart className="w-16 h-16 text-slate-300" />
-                  <h3 className="text-lg font-semibold text-slate-600">Distribuição de Férias</h3>
-                  <p className="text-sm">Carrega primeiro o ficheiro <strong>Férias.xlsx</strong> no Calendário.</p>
-                  <Button onClick={() => setPage('cal')} variant="outline" className="gap-2">Ir para Calendário</Button>
-                </div>
-              ) : (
-                <div className="flex flex-col gap-4">
-                  {/* Filters */}
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-[10px] font-bold uppercase text-slate-400">Gestor</span>
-                    <select value={distGestor} onChange={e => setDistGestor(e.target.value)} className="h-7 px-2 border-2 border-indigo-500 rounded-lg bg-white text-indigo-600 text-xs font-semibold cursor-pointer outline-none">
-                      <option value="">— Todos —</option>
-                      {Object.keys(GESTORES).map(g => <option key={g} value={g}>{g}</option>)}
-                    </select>
-                    <span className="text-[10px] font-bold uppercase text-slate-400 ml-2">Tipo</span>
-                    <select value={distType} onChange={e => setDistType(e.target.value)} className="h-7 px-2 border border-slate-200 rounded-lg bg-slate-50 text-xs cursor-pointer outline-none">
-                      <option value="approved">Só aprovadas</option>
-                      <option value="all">Aprovadas + Não aprovadas</option>
-                    </select>
-                  </div>
-
-                  {/* Monthly distribution table */}
-                  <div className="bg-white rounded-lg border border-slate-200 p-4">
-                    <div className="mb-3">
-                      <span className="text-sm font-bold text-slate-700">Distribuição mensal por gestor</span>
-                      <span className="text-[10px] text-slate-400 ml-2">dias por mês · % do total anual</span>
-                    </div>
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-xs border-collapse">
-                        <thead>
-                          <tr className="bg-slate-50">
-                            <th className="text-left py-2 px-2 text-slate-600 font-semibold border-b border-slate-200">Gestor</th>
-                            {Array.from({length:12},(_,i)=>i+1).map(m => (
-                              <th key={m} className={`text-center py-2 px-1 font-semibold border-b border-slate-200 ${m===TM?'text-sky-600 bg-sky-50':'text-slate-500'}`}>{MONTHS_PT[m-1]}</th>
-                            ))}
-                            <th className="text-center py-2 px-2 font-bold text-slate-700 border-b border-slate-200">Total</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {distData.gestores.map(g => {
-                            const d = distData.gd[g];
-                            return (
-                              <React.Fragment key={g}>
-                                <tr className="border-b border-slate-100">
-                                  <td className="py-1.5 px-2 font-semibold text-slate-700" rowSpan={2}>{g}</td>
-                                  {Array.from({length:12},(_,i)=>i+1).map(m => (
-                                    <td key={m} className="text-center py-1 px-1 text-slate-600">{d.byM[m]||''}</td>
-                                  ))}
-                                  <td className="text-center py-1 px-2 font-bold text-slate-700">{d.total}</td>
-                                </tr>
-                                <tr className="border-b border-slate-200">
-                                  {Array.from({length:12},(_,i)=>i+1).map(m => {
-                                    const p = d.total ? Math.round(d.byM[m]/d.total*100) : 0;
-                                    return <td key={m} className={`text-center py-0.5 px-1 text-[10px] ${p>=15?'text-amber-600 font-bold':'text-slate-400'}`}>{d.total?`${p}%`:''}</td>;
-                                  })}
-                                  <td className="text-center py-0.5 px-2 text-[10px] text-slate-400">100%</td>
-                                </tr>
-                              </React.Fragment>
-                            );
-                          })}
-                          {/* Totals */}
-                          <tr className="bg-slate-800 text-white">
-                            <td className="py-1.5 px-2 font-bold">TOTAL DIAS</td>
-                            {Array.from({length:12},(_,i)=>i+1).map(m => (
-                              <td key={m} className="text-center py-1.5 px-1">{distData.mt[m]||''}</td>
-                            ))}
-                            <td className="text-center py-1.5 px-2 font-bold">{distData.grand}</td>
-                          </tr>
-                          <tr className="bg-slate-100">
-                            <td className="py-1 px-2 text-slate-500 text-[10px]">Distribuição</td>
-                            {Array.from({length:12},(_,i)=>i+1).map(m => {
-                              const p = distData.grand ? Math.round(distData.mt[m]/distData.grand*100) : 0;
-                              return <td key={m} className={`text-center py-1 px-1 text-[10px] ${p>=15?'text-amber-600 font-bold':'text-slate-400'}`}>{p}%</td>;
-                            })}
-                            <td className="text-center py-1 px-2 text-[10px] text-slate-400">100%</td>
-                          </tr>
-                          <tr className="bg-slate-50">
-                            <td className="py-1 px-2 text-slate-500 text-[10px]">Média colab.</td>
-                            {Array.from({length:12},(_,i)=>i+1).map(m => {
-                              const av = distData.empc ? (distData.mt[m]/distData.empc).toFixed(1) : '';
-                              return <td key={m} className="text-center py-1 px-1 text-[10px] text-slate-400">{parseFloat(av as string)>0?av:''}</td>;
-                            })}
-                            <td className="text-center py-1 px-2 text-[10px] text-slate-400"></td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-
-                  {/* Period distribution table */}
-                  <div className="bg-white rounded-lg border border-slate-200 p-4">
-                    <div className="mb-3">
-                      <span className="text-sm font-bold text-slate-700">Distribuição por período</span>
-                      <span className="text-[10px] text-slate-400 ml-2">Jan-Mai · Jun-Set · Set-Dez</span>
-                    </div>
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-xs border-collapse">
-                        <thead>
-                          <tr className="bg-slate-50">
-                            <th className="text-left py-2 px-2 text-slate-600 font-semibold border-b border-slate-200">Gestor</th>
-                            {distPeriods.map((p,i) => <th key={i} className="text-center py-2 px-2 text-slate-500 font-semibold border-b border-slate-200">{p.l}</th>)}
-                            <th className="text-center py-2 px-2 font-bold text-slate-700 border-b border-slate-200">Total</th>
-                            {distPeriods.map((_,i) => <th key={`p${i}`} className="text-center py-2 px-2 text-slate-500 font-semibold border-b border-slate-200">%</th>)}
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {distData.gestores.map(g => {
-                            const d = distData.gd[g];
-                            const pc = distPeriods.map(p => p.m.reduce((a,m)=>a+d.byM[m],0));
-                            const pk = pc.indexOf(Math.max(...pc));
-                            return (
-                              <tr key={g} className="border-b border-slate-100">
-                                <td className="py-1.5 px-2 font-semibold text-slate-700">{g}</td>
-                                {pc.map((v,i) => <td key={i} className={`text-center py-1.5 px-2 ${i===pk?'font-bold text-blue-700':''}`}>{v||''}</td>)}
-                                <td className="text-center py-1.5 px-2 font-bold text-slate-700">{d.total}</td>
-                                {pc.map((v,i) => {
-                                  const pp = d.total ? Math.round(v/d.total*100) : 0;
-                                  return <td key={i} className={`text-center py-1.5 px-2 text-[10px] ${pp>=50?'text-amber-600 font-bold':'text-slate-400'}`}>{d.total?`${pp}%`:''}</td>;
-                                })}
-                              </tr>
-                            );
-                          })}
-                          {/* Period totals */}
-                          {(() => {
-                            const pt = distPeriods.map(p => p.m.reduce((a,m)=>a+distData.mt[m],0));
-                            const ppk = pt.indexOf(Math.max(...pt));
-                            return (
-                              <tr className="bg-slate-800 text-white">
-                                <td className="py-1.5 px-2 font-bold">TOTAL</td>
-                                {pt.map((v,i) => <td key={i} className={`text-center py-1.5 px-2 ${i===ppk?'font-bold':''}`}>{v}</td>)}
-                                <td className="text-center py-1.5 px-2 font-bold">{distData.grand}</td>
-                                {pt.map((v,i) => {
-                                  const pp = distData.grand ? Math.round(v/distData.grand*100) : 0;
-                                  return <td key={i} className="text-center py-1.5 px-2 text-[10px]">{pp}%</td>;
-                                })}
-                              </tr>
-                            );
-                          })()}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
         </div>
       </div>
+
+      {/* Last upload info */}
+      {dadosAnoQuery.data?.upload && (
+        <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 rounded-lg px-3 py-2">
+          <FileSpreadsheet className="h-3.5 w-3.5" />
+          <span>Último upload: <strong>{dadosAnoQuery.data.upload.nomeArquivo}</strong></span>
+          <span>·</span>
+          <span>{new Date(dadosAnoQuery.data.upload.createdAt).toLocaleString('pt-PT')}</span>
+          <span>·</span>
+          <span>por {dadosAnoQuery.data.upload.uploadedByName}</span>
+        </div>
+      )}
+
+      {/* EMPTY STATE */}
+      {!data && !dadosAnoQuery.isLoading && (
+        <Card className="border-dashed">
+          <CardContent className="flex flex-col items-center justify-center py-16 text-center">
+            <div className="rounded-full bg-amber-100 p-4 mb-4">
+              <Sun className="h-10 w-10 text-amber-500" />
+            </div>
+            <h3 className="text-lg font-semibold mb-2">Nenhum ficheiro de férias carregado para {ano}</h3>
+            <p className="text-muted-foreground text-sm mb-6 max-w-md">
+              Carregue o ficheiro Excel de férias (Férias.xlsx) para visualizar o calendário, análise e distribuição.
+            </p>
+            <Button onClick={() => fileRef.current?.click()} className="bg-blue-600 hover:bg-blue-700">
+              <Upload className="h-4 w-4 mr-2" /> Carregar Ficheiro de Férias
+            </Button>
+            <div className="mt-6 grid grid-cols-3 gap-4 text-xs text-muted-foreground">
+              <div className="flex flex-col items-center gap-1"><Calendar className="h-5 w-5 text-blue-400" /><span>Calendário Visual</span></div>
+              <div className="flex flex-col items-center gap-1"><BarChart3 className="h-5 w-5 text-green-400" /><span>Análise & KPIs</span></div>
+              <div className="flex flex-col items-center gap-1"><PieChart className="h-5 w-5 text-purple-400" /><span>Distribuição</span></div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* MAIN CONTENT */}
+      {data && (
+        <>
+          {/* FILTERS */}
+          <Card>
+            <CardContent className="pt-4 pb-3">
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="flex items-center gap-1.5">
+                  <Filter className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-xs font-medium text-muted-foreground">Filtros:</span>
+                </div>
+                <Select value={gestorFilter} onValueChange={v => { setGestorFilter(v); setLojaFilter('all'); }}>
+                  <SelectTrigger className="w-[180px] h-8 text-xs"><SelectValue placeholder="Gestor" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos os gestores</SelectItem>
+                    {Object.keys(GESTORES).sort().map(g => <SelectItem key={g} value={g}>{g}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+                <Select value={lojaFilter} onValueChange={setLojaFilter}>
+                  <SelectTrigger className="w-[180px] h-8 text-xs"><SelectValue placeholder="Loja" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todas as lojas</SelectItem>
+                    {availableStores.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+                <Select value={monthFilter} onValueChange={setMonthFilter}>
+                  <SelectTrigger className="w-[140px] h-8 text-xs"><SelectValue placeholder="Mês" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos os meses</SelectItem>
+                    {MONTHS_PT.map((m,i) => <SelectItem key={i} value={String(i+1)}>{m}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="w-[160px] h-8 text-xs"><SelectValue placeholder="Estado" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos os estados</SelectItem>
+                    <SelectItem value="approved">Aprovado</SelectItem>
+                    <SelectItem value="rejected">Não Aprovado</SelectItem>
+                    <SelectItem value="absent">Falta</SelectItem>
+                    <SelectItem value="holiday">Feriado</SelectItem>
+                  </SelectContent>
+                </Select>
+                <div className="relative flex-1 min-w-[150px]">
+                  <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                  <Input placeholder="Pesquisar colaborador..." value={search} onChange={e => setSearch(e.target.value)} className="pl-7 h-8 text-xs" />
+                </div>
+                <Badge variant="secondary" className="text-xs">{filteredData.length} colab.</Badge>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* TABS */}
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="cal" className="flex items-center gap-1.5"><Calendar className="h-4 w-4" /> Calendário</TabsTrigger>
+              <TabsTrigger value="an" className="flex items-center gap-1.5"><BarChart3 className="h-4 w-4" /> Análise</TabsTrigger>
+              <TabsTrigger value="dist" className="flex items-center gap-1.5"><PieChart className="h-4 w-4" /> Distribuição</TabsTrigger>
+            </TabsList>
+
+            {/* CALENDAR TAB */}
+            <TabsContent value="cal">
+              <CalendarTab data={filteredData} months={visibleMonths} statusFilter={statusFilter} ano={ano} TM={TM} TD={TD} calRef={calRef} scrollToToday={scrollToToday} />
+            </TabsContent>
+
+            {/* ANALYSIS TAB */}
+            <TabsContent value="an">
+              <AnalysisTab data={filteredData} allData={enrichedData} ano={ano} TM={TM} />
+            </TabsContent>
+
+            {/* DISTRIBUTION TAB */}
+            <TabsContent value="dist">
+              <DistributionTab data={enrichedData} gestorFilter={gestorFilter} ano={ano} TM={TM}
+                compareAno={compareAno} setCompareAno={setCompareAno} compareData={compareData}
+                anosDisponiveis={anosQuery.data?.map((a: any) => a.ano).filter((a: number) => a !== ano) || []} />
+            </TabsContent>
+          </Tabs>
+
+          {/* LEGEND */}
+          <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground px-1">
+            <span className="font-medium">Legenda:</span>
+            {Object.entries(S_DISPLAY).map(([k,v]) => (
+              <div key={k} className="flex items-center gap-1.5"><div className={`w-3 h-3 rounded-sm ${v.bg}`} /><span>{v.label}</span></div>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
     </DashboardLayout>
   );
 }
 
-// ─── SUB-COMPONENTS ───
+// ─── CALENDAR TAB ───
+function CalendarTab({ data, months, statusFilter, ano, TM, TD, calRef, scrollToToday }: {
+  data: (Employee & EmpStats)[]; months: number[]; statusFilter: string; ano: number; TM: number; TD: number;
+  calRef: React.RefObject<HTMLDivElement | null>; scrollToToday: () => void;
+}) {
+  const byStore = useMemo(() => {
+    const map: Record<string,(Employee & EmpStats)[]> = {};
+    const order: string[] = [];
+    data.forEach(e => {
+      if (!map[e.store]) { map[e.store]=[]; order.push(e.store); }
+      map[e.store].push(e);
+    });
+    return { map, order: order.sort((a,b) => a.localeCompare(b,'pt')) };
+  }, [data]);
 
-function EmpRow({ emp, months, TM, TD, isHighlighted, ri }: { emp: Employee; months: number[]; TM: number; TD: number; isHighlighted?: boolean; ri: number }) {
-  const parts = emp.name.split(' ');
-  const short = parts.length > 1 ? parts[0]+' '+parts[parts.length-1] : emp.name;
+  if (!data.length) return (
+    <Card><CardContent className="py-12 text-center text-muted-foreground">Nenhum colaborador encontrado com os filtros actuais.</CardContent></Card>
+  );
+
+  const isCurrentYear = ano === new Date().getFullYear();
+
   return (
-    <tr className={`${ri%2===0?'bg-white':'bg-slate-50/50'} ${isHighlighted?'bg-amber-50/50':''}`}>
-      <td className={`sticky left-0 z-10 px-2 py-0.5 font-medium text-slate-700 truncate ${isHighlighted?'border-l-[3px] border-amber-500 bg-amber-50':'bg-white'}`} style={{minWidth:130,maxWidth:130}} title={emp.name}>
-        {short}
-      </td>
-      <td className={`sticky z-10 text-center text-[10px] text-slate-400 ${isHighlighted?'bg-amber-50':'bg-white'}`} style={{left:130,minWidth:36}}>
-        {emp.num}
-      </td>
-      {months.map(m =>
-        Array.from({length:DAYS[m]},(_,d)=>d+1).map(d => {
-          const status = emp.days[`${m}-${d}`];
-          const isToday = m===TM && d===TD;
-          return (
-            <td key={`${m}-${d}`} className={`text-center text-[9px] py-0.5 ${d===1?'border-l border-slate-200':''} ${status ? S_CLASS[status] : ''} ${isToday?'ring-1 ring-sky-500 ring-inset':''}`} style={{minWidth:20}}>
-              {status ? S_LABEL[status] : ''}
-            </td>
-          );
-        })
+    <Card>
+      <CardHeader className="pb-2 flex flex-row items-center justify-between">
+        <CardTitle className="text-base">Calendário {ano}</CardTitle>
+        {isCurrentYear && <Button variant="outline" size="sm" onClick={scrollToToday}><Crosshair className="h-3.5 w-3.5 mr-1" /> Hoje</Button>}
+      </CardHeader>
+      <CardContent className="p-0">
+        <div ref={calRef as any} className="overflow-auto max-h-[65vh]">
+          <table className="border-collapse text-[11px]" style={{minWidth:'100%'}}>
+            <thead className="sticky top-0 z-20">
+              <tr>
+                <th className="sticky left-0 z-30 bg-slate-800 text-white text-left px-2 py-1 font-semibold" style={{minWidth:140}}>Colaborador</th>
+                <th className="sticky z-30 bg-slate-800 text-white text-center px-1 py-1 font-semibold" style={{left:140,minWidth:80}}>Loja</th>
+                {months.map(m => (
+                  <th key={m} colSpan={DAYS[m]} className={`text-center py-1 font-bold text-xs ${m===TM && isCurrentYear ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-600'}`}>
+                    {MONTHS_FULL[m-1].toUpperCase()}
+                  </th>
+                ))}
+              </tr>
+              <tr>
+                <th className="sticky left-0 z-30 bg-slate-50" style={{minWidth:140}}></th>
+                <th className="sticky z-30 bg-slate-50" style={{left:140,minWidth:80}}></th>
+                {months.map(m =>
+                  Array.from({length:DAYS[m]},(_,d)=>d+1).map(d => (
+                    <th key={`${m}-${d}`} className={`text-center px-0 py-0.5 text-[9px] font-normal text-slate-400 ${d===1?'border-l border-slate-300':''} ${m===TM&&d===TD&&isCurrentYear?'bg-blue-500 text-white rounded-sm font-bold':''}`} style={{minWidth:20}}>
+                      {d}
+                    </th>
+                  ))
+                )}
+              </tr>
+            </thead>
+            <tbody>
+              {byStore.order.map(store => (
+                <React.Fragment key={store}>
+                  <tr>
+                    <td colSpan={2 + months.reduce((a,m)=>a+DAYS[m],0)} className="sticky left-0 z-10 bg-gradient-to-r from-slate-700 to-slate-600 text-white text-[10px] font-bold uppercase tracking-wider px-2 py-1">
+                      {store} <span className="font-normal opacity-70 ml-1">({byStore.map[store].length})</span>
+                    </td>
+                  </tr>
+                  {byStore.map[store].sort((a,b)=>a.name.localeCompare(b.name,'pt')).map((emp,ri) => (
+                    <tr key={`${emp.num}-${ri}`} className={ri%2===0?'bg-white':'bg-slate-50/50'}>
+                      <td className="sticky left-0 z-10 bg-inherit px-2 py-0.5 font-medium text-slate-700 truncate" style={{minWidth:140,maxWidth:140}} title={emp.name}>
+                        {shortName(emp.name)}
+                      </td>
+                      <td className="sticky z-10 bg-inherit text-center text-[10px] text-slate-400 truncate" style={{left:140,minWidth:80,maxWidth:80}} title={emp.store}>
+                        {emp.store.length > 10 ? emp.store.substring(0,10)+'…' : emp.store}
+                      </td>
+                      {months.map(m =>
+                        Array.from({length:DAYS[m]},(_,d)=>d+1).map(d => {
+                          const dayKey = `${m}-${d}`;
+                          const status = emp.days[dayKey];
+                          const isToday = m===TM && d===TD && isCurrentYear;
+                          const show = statusFilter === 'all' || status === statusFilter;
+                          return (
+                            <td key={dayKey} className={`text-center text-[9px] py-0.5 ${d===1?'border-l border-slate-200':''} ${status && show ? S_CLASS[status] : ''} ${isToday?'ring-1 ring-sky-500 ring-inset':''}`} style={{minWidth:20}}>
+                              {status && show ? S_LABEL[status] : ''}
+                            </td>
+                          );
+                        })
+                      )}
+                    </tr>
+                  ))}
+                </React.Fragment>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+// ─── ANALYSIS TAB ───
+function AnalysisTab({ data, allData, ano, TM }: { data: (Employee & EmpStats)[]; allData: (Employee & EmpStats)[]; ano: number; TM: number }) {
+  const total = data.length;
+  const totApr = data.reduce((a,e)=>a+e.approved,0);
+  const totRej = data.reduce((a,e)=>a+e.rejected,0);
+  const totAbs = data.reduce((a,e)=>a+e.absent,0);
+  const semFerias = data.filter(e=>e.total===0).length;
+  const soRej = data.filter(e=>e.total>0&&e.approved===0).length;
+  const pctApr = (totApr+totRej) ? Math.round(totApr/(totApr+totRej)*100) : 0;
+
+  // Monthly
+  const monthlyData = useMemo(() => {
+    const m: Record<number,{approved:number;rejected:number}> = {};
+    for (let i=1;i<=12;i++) m[i]={approved:0,rejected:0};
+    data.forEach(e => {
+      Object.entries(e.days).forEach(([key,status]) => {
+        const mi = parseInt(key.split('-')[0]);
+        if (status==='approved') m[mi].approved++;
+        else if (status==='rejected') m[mi].rejected++;
+      });
+    });
+    return m;
+  }, [data]);
+
+  // Situations to follow
+  const situacoes = useMemo(() => {
+    return data
+      .filter(e => e.total===0 || (e.rejected>0&&e.approved===0) || e.absent>3)
+      .sort((a,b) => { if (a.total===0&&b.total!==0) return -1; if (b.total===0&&a.total!==0) return 1; return b.rejected-a.rejected; })
+      .slice(0,25);
+  }, [data]);
+
+  // Per store
+  const lojaResumo = useMemo(() => {
+    const map: Record<string,{total:number;approved:number;rejected:number;absent:number;sem:number}> = {};
+    data.forEach(e => {
+      if (!map[e.store]) map[e.store]={total:0,approved:0,rejected:0,absent:0,sem:0};
+      map[e.store].total++;
+      map[e.store].approved += e.approved;
+      map[e.store].rejected += e.rejected;
+      map[e.store].absent += e.absent;
+      if (e.total===0) map[e.store].sem++;
+    });
+    return Object.entries(map).sort(([a],[b])=>a.localeCompare(b,'pt'));
+  }, [data]);
+
+  return (
+    <div className="space-y-4">
+      {/* KPIs */}
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+        <KpiCard icon={<Users className="h-5 w-5 text-blue-500" />} label="Colaboradores" value={total} />
+        <KpiCard icon={<AlertTriangle className={`h-5 w-5 ${semFerias>0?'text-red-500':'text-green-500'}`} />} label="Sem férias" value={semFerias} danger={semFerias>0} ok={semFerias===0} />
+        <KpiCard icon={<CheckCircle2 className="h-5 w-5 text-green-500" />} label="Dias aprovados" value={totApr} ok />
+        <KpiCard icon={<XCircle className={`h-5 w-5 ${totRej>0?'text-red-500':'text-muted-foreground'}`} />} label="Não aprovados" value={totRej} danger={totRej>0} />
+        <KpiCard icon={<BarChart3 className={`h-5 w-5 ${pctApr>=80?'text-green-500':pctApr>=50?'text-amber-500':'text-red-500'}`} />} label="Taxa aprovação" value={`${pctApr}%`} ok={pctApr>=80} warn={pctApr>=50&&pctApr<80} danger={pctApr<50} />
+      </div>
+
+      {/* Monthly chart */}
+      <Card>
+        <CardHeader className="pb-2"><CardTitle className="text-base">Distribuição Mensal</CardTitle></CardHeader>
+        <CardContent>
+          <div className="flex items-end gap-1 h-[180px]">
+            {Object.entries(monthlyData).map(([m,vals]) => {
+              const max = Math.max(...Object.values(monthlyData).map(v=>v.approved+v.rejected),1);
+              const hA = (vals.approved/max)*160;
+              const hR = (vals.rejected/max)*160;
+              return (
+                <div key={m} className="flex-1 flex flex-col items-center gap-0.5">
+                  <div className="text-[9px] text-muted-foreground">{vals.approved+vals.rejected||''}</div>
+                  <div className="w-full flex flex-col justify-end" style={{height:160}}>
+                    {vals.rejected>0 && <div className="bg-red-400 rounded-t-sm mx-0.5" style={{height:hR}} />}
+                    {vals.approved>0 && <div className={`bg-green-500 mx-0.5 ${vals.rejected===0?'rounded-t-sm':''}`} style={{height:hA}} />}
+                  </div>
+                  <div className={`text-[10px] font-medium ${parseInt(m)===TM?'text-blue-600 font-bold':'text-muted-foreground'}`}>{MONTHS_PT[parseInt(m)-1]}</div>
+                </div>
+              );
+            })}
+          </div>
+          <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground justify-center">
+            <div className="flex items-center gap-1"><div className="w-3 h-3 rounded-sm bg-green-500" /> Aprovados</div>
+            <div className="flex items-center gap-1"><div className="w-3 h-3 rounded-sm bg-red-400" /> Não aprovados</div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Situations */}
+      {situacoes.length > 0 && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 text-amber-500" /> Situações a Acompanhar ({situacoes.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="overflow-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Colaborador</TableHead>
+                    <TableHead>Loja</TableHead>
+                    <TableHead>Gestor</TableHead>
+                    <TableHead className="text-center">Aprov.</TableHead>
+                    <TableHead className="text-center">N. Aprov.</TableHead>
+                    <TableHead className="text-center">Faltas</TableHead>
+                    <TableHead>Situação</TableHead>
+                    <TableHead>Progresso</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {situacoes.map((e,i) => {
+                    const pct = Math.min(Math.round(e.approved/22*100),100);
+                    return (
+                      <TableRow key={i}>
+                        <TableCell className="font-medium text-sm">{shortName(e.name)}</TableCell>
+                        <TableCell className="text-xs">{e.store}</TableCell>
+                        <TableCell className="text-xs">{e.gestor}</TableCell>
+                        <TableCell className="text-center"><span className="px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-[10px] font-semibold">{e.approved}</span></TableCell>
+                        <TableCell className="text-center">{e.rejected>0 ? <Badge variant="destructive" className="text-[10px]">{e.rejected}</Badge> : <span className="text-muted-foreground">0</span>}</TableCell>
+                        <TableCell className="text-center">{e.absent>0 ? <Badge variant="secondary" className="text-[10px]">{e.absent}</Badge> : <span className="text-muted-foreground">0</span>}</TableCell>
+                        <TableCell>
+                          {e.total===0 && <Badge variant="destructive" className="text-[10px]">Sem férias</Badge>}
+                          {e.total>0&&e.approved===0 && <Badge variant="outline" className="text-[10px] border-amber-400 text-amber-600">Tudo por aprovar</Badge>}
+                          {e.absent>3 && <Badge variant="secondary" className="text-[10px] ml-1">{e.absent} faltas</Badge>}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1.5 min-w-[80px]">
+                            <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
+                              <div className="h-full rounded-full" style={{width:`${pct}%`,background:pct>=80?'#16a34a':pct>=40?'#d97706':'#dc2626'}} />
+                            </div>
+                            <span className="text-[10px] text-muted-foreground w-7">{pct}%</span>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
       )}
-    </tr>
-  );
-}
 
-function StoreGroup({ store, employees, months, TM, TD }: { store: string; employees: Employee[]; months: number[]; TM: number; TD: number }) {
-  const totalDayCols = months.reduce((a,m)=>a+DAYS[m],0);
-  return (
-    <>
-      <tr>
-        <td className="sticky left-0 z-10 bg-gradient-to-r from-[#0f2044] to-blue-700 text-white text-[10px] font-bold uppercase tracking-wider px-2 py-1" style={{minWidth:130}}>
-          {store}
-        </td>
-        <td className="bg-blue-700" style={{minWidth:36}}></td>
-        <td colSpan={totalDayCols} className="bg-gradient-to-r from-blue-700 to-blue-600"></td>
-      </tr>
-      {employees.map((emp,ri) => (
-        <EmpRow key={emp.num} emp={emp} months={months} TM={TM} TD={TD} ri={ri} />
-      ))}
-    </>
-  );
-}
-
-function KpiCard({ label, value, sub, ok, warn, danger }: { label: string; value: string|number; sub: string; ok?: boolean; warn?: boolean; danger?: boolean }) {
-  let border = 'border-slate-200';
-  if (danger) border = 'border-red-300 bg-red-50/50';
-  else if (warn) border = 'border-amber-300 bg-amber-50/50';
-  else if (ok) border = 'border-green-300 bg-green-50/50';
-  return (
-    <div className={`border rounded-lg p-3 ${border}`}>
-      <div className="text-[10px] font-semibold uppercase text-slate-400">{label}</div>
-      <div className={`text-2xl font-bold ${danger?'text-red-600':ok?'text-green-600':'text-slate-700'}`}>{value}</div>
-      <div className="text-[10px] text-slate-400">{sub}</div>
+      {/* Per store */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base flex items-center gap-2"><Building2 className="h-4 w-4" /> Resumo por Loja ({lojaResumo.length})</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {lojaResumo.map(([loja,s]) => {
+              const pct = (s.approved+s.rejected) ? Math.round(s.approved/(s.approved+s.rejected)*100) : 0;
+              const color = s.sem>0 ? 'border-l-red-500' : s.rejected>5 ? 'border-l-amber-500' : 'border-l-green-500';
+              return (
+                <div key={loja} className={`border rounded-lg p-3 border-l-4 ${color}`}>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-medium text-sm truncate">{loja}</span>
+                    <Badge variant="secondary" className="text-[10px]">{s.total} colab.</Badge>
+                  </div>
+                  <div className="flex items-center gap-3 text-xs mb-2">
+                    <span className="text-green-600">{s.approved} aprov.</span>
+                    <span className="text-red-500">{s.rejected} n.aprov.</span>
+                    {s.sem>0 && <span className="text-amber-600 font-medium">{s.sem} sem férias</span>}
+                  </div>
+                  <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                    <div className={`h-full rounded-full ${pct>=80?'bg-green-500':pct>=50?'bg-amber-400':'bg-red-400'}`} style={{width:`${pct}%`}} />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
     </div>
+  );
+}
+
+// ─── DISTRIBUTION TAB ───
+function DistributionTab({ data, gestorFilter, ano, TM, compareAno, setCompareAno, compareData, anosDisponiveis }: {
+  data: (Employee & EmpStats)[]; gestorFilter: string; ano: number; TM: number;
+  compareAno: number|null; setCompareAno: (v: number|null) => void; compareData: Employee[]|null; anosDisponiveis: number[];
+}) {
+  const [distType, setDistType] = useState<'approved'|'all'>('approved');
+  const PERIODOS = [{l:'01 Jan > 31 Mai',m:[1,2,3,4,5]},{l:'01 Jun > 15 Set',m:[6,7,8,9]},{l:'16 Set > 31 Dez',m:[10,11,12]}];
+
+  const gestorData = useMemo(() => {
+    const gestores = gestorFilter !== 'all' ? [gestorFilter] : Object.keys(GESTORES).sort();
+    const result: Record<string,{byM:Record<number,number>;total:number;ec:number}> = {};
+    gestores.forEach(gz => {
+      const gStores = GESTORES[gz]?.map(norm) || [];
+      const emps = data.filter(e => gStores.includes(norm(e.store)));
+      const byM: Record<number,number> = {}; let total=0;
+      for (let m=1;m<=12;m++) byM[m]=0;
+      emps.forEach(e => {
+        Object.entries(e.days).forEach(([key,status]) => {
+          const m = parseInt(key.split('-')[0]);
+          const ok = distType==='approved' ? status==='approved' : (status==='approved'||status==='rejected');
+          if (ok) { byM[m]++; total++; }
+        });
+      });
+      result[gz] = {byM, total, ec: emps.length};
+    });
+    return result;
+  }, [data, gestorFilter, distType]);
+
+  const compareGestorData = useMemo(() => {
+    if (!compareData) return null;
+    const gestores = gestorFilter !== 'all' ? [gestorFilter] : Object.keys(GESTORES).sort();
+    const result: Record<string,{byM:Record<number,number>;total:number}> = {};
+    gestores.forEach(gz => {
+      const gStores = GESTORES[gz]?.map(norm) || [];
+      const emps = compareData.filter(e => gStores.includes(norm(e.store)));
+      const byM: Record<number,number> = {}; let total=0;
+      for (let m=1;m<=12;m++) byM[m]=0;
+      emps.forEach(e => {
+        Object.entries(e.days).forEach(([key,status]) => {
+          const m = parseInt(key.split('-')[0]);
+          const ok = distType==='approved' ? status==='approved' : (status==='approved'||status==='rejected');
+          if (ok) { byM[m]++; total++; }
+        });
+      });
+      result[gz] = {byM, total};
+    });
+    return result;
+  }, [compareData, gestorFilter, distType]);
+
+  const totals = useMemo(() => {
+    const mt: Record<number,number> = {}; let grand=0, empc=0;
+    for (let m=1;m<=12;m++) mt[m]=0;
+    Object.values(gestorData).forEach(d => { for (let m=1;m<=12;m++) mt[m]+=d.byM[m]; grand+=d.total; empc+=d.ec; });
+    return {mt, grand, empc};
+  }, [gestorData]);
+
+  const gestores = Object.keys(gestorData).sort();
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-3 flex-wrap">
+        <Select value={distType} onValueChange={v => setDistType(v as any)}>
+          <SelectTrigger className="w-[180px] h-8 text-xs"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="approved">Só aprovados</SelectItem>
+            <SelectItem value="all">Aprovados + Não aprovados</SelectItem>
+          </SelectContent>
+        </Select>
+        {anosDisponiveis.length > 0 && (
+          <Select value={compareAno ? String(compareAno) : 'none'} onValueChange={v => setCompareAno(v==='none'?null:Number(v))}>
+            <SelectTrigger className="w-[180px] h-8 text-xs"><SelectValue placeholder="Comparar com..." /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">Sem comparação</SelectItem>
+              {anosDisponiveis.map(a => <SelectItem key={a} value={String(a)}>Comparar com {a}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        )}
+      </div>
+
+      {/* Monthly table */}
+      <Card>
+        <CardHeader className="pb-2"><CardTitle className="text-base">Distribuição Mensal por Gestor — {ano}</CardTitle></CardHeader>
+        <CardContent className="p-0">
+          <div className="overflow-auto">
+            <table className="w-full text-xs border-collapse">
+              <thead>
+                <tr className="bg-muted/50">
+                  <th className="text-left px-3 py-2 font-semibold min-w-[140px]">Gestor</th>
+                  {MONTHS_PT.map((m,i) => <th key={i} className={`text-center px-1.5 py-2 font-medium ${i+1===TM?'bg-blue-100 text-blue-700':''}`}>{m}</th>)}
+                  <th className="text-center px-2 py-2 font-semibold">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {gestores.map(gz => {
+                  const d = gestorData[gz];
+                  const cd = compareGestorData?.[gz];
+                  return (
+                    <React.Fragment key={gz}>
+                      <tr className="border-t">
+                        <td className="px-3 py-1.5 font-medium" rowSpan={2}>{gz}</td>
+                        {Array.from({length:12},(_,i)=>i+1).map(m => (
+                          <td key={m} className={`text-center px-1.5 py-1.5 ${m===TM?'bg-blue-50':''}`}>
+                            {d.byM[m]||''}
+                            {cd && <span className="text-[9px] text-muted-foreground ml-0.5">({cd.byM[m]||0})</span>}
+                          </td>
+                        ))}
+                        <td className="text-center px-2 py-1.5 font-semibold">{d.total}</td>
+                      </tr>
+                      <tr className="border-b">
+                        {Array.from({length:12},(_,i)=>i+1).map(m => {
+                          const p = d.total ? Math.round(d.byM[m]/d.total*100) : 0;
+                          return <td key={m} className={`text-center px-1.5 py-1 text-[10px] ${p>=15?'font-semibold text-blue-600':'text-muted-foreground'}`}>{d.total?`${p}%`:''}</td>;
+                        })}
+                        <td className="text-center px-2 py-1 text-[10px] text-muted-foreground">100%</td>
+                      </tr>
+                    </React.Fragment>
+                  );
+                })}
+                <tr className="bg-slate-800 text-white font-semibold">
+                  <td className="px-3 py-2">TOTAL DIAS</td>
+                  {Array.from({length:12},(_,i)=>i+1).map(m => <td key={m} className="text-center px-1.5 py-2">{totals.mt[m]||''}</td>)}
+                  <td className="text-center px-2 py-2">{totals.grand}</td>
+                </tr>
+                <tr className="bg-muted/30">
+                  <td className="px-3 py-1.5 text-muted-foreground">Distribuição</td>
+                  {Array.from({length:12},(_,i)=>i+1).map(m => {
+                    const p = totals.grand ? Math.round(totals.mt[m]/totals.grand*100) : 0;
+                    return <td key={m} className={`text-center px-1.5 py-1.5 text-[10px] ${p>=15?'font-semibold text-blue-600':'text-muted-foreground'}`}>{p}%</td>;
+                  })}
+                  <td className="text-center px-2 py-1.5 text-[10px] text-muted-foreground">100%</td>
+                </tr>
+                <tr>
+                  <td className="px-3 py-1.5 text-muted-foreground">Média colab.</td>
+                  {Array.from({length:12},(_,i)=>i+1).map(m => {
+                    const av = totals.empc ? (totals.mt[m]/totals.empc).toFixed(1) : '';
+                    return <td key={m} className="text-center px-1.5 py-1.5 text-[10px] text-muted-foreground">{parseFloat(av as string)>0?av:''}</td>;
+                  })}
+                  <td></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Period table */}
+      <Card>
+        <CardHeader className="pb-2"><CardTitle className="text-base">Distribuição por Período</CardTitle></CardHeader>
+        <CardContent className="p-0">
+          <div className="overflow-auto">
+            <table className="w-full text-xs border-collapse">
+              <thead>
+                <tr className="bg-muted/50">
+                  <th className="text-left px-3 py-2 font-semibold min-w-[140px]">Gestor</th>
+                  {PERIODOS.map((p,i) => <th key={i} className="text-center px-2 py-2 font-medium">{p.l}</th>)}
+                  <th className="text-center px-2 py-2 font-semibold">Total</th>
+                  {PERIODOS.map((_,i) => <th key={`p${i}`} className="text-center px-2 py-2 font-medium">%</th>)}
+                </tr>
+              </thead>
+              <tbody>
+                {gestores.map(gz => {
+                  const d = gestorData[gz];
+                  const pc = PERIODOS.map(p => p.m.reduce((a,m)=>a+d.byM[m],0));
+                  const pk = pc.indexOf(Math.max(...pc));
+                  return (
+                    <tr key={gz} className="border-t">
+                      <td className="px-3 py-2 font-medium">{gz}</td>
+                      {pc.map((v,i) => <td key={i} className={`text-center px-2 py-2 ${i===pk?'font-bold text-blue-600':''}`}>{v||''}</td>)}
+                      <td className="text-center px-2 py-2 font-semibold">{d.total}</td>
+                      {pc.map((v,i) => {
+                        const pp = d.total ? Math.round(v/d.total*100) : 0;
+                        return <td key={i} className={`text-center px-2 py-2 text-[10px] ${pp>=50?'font-semibold text-blue-600':'text-muted-foreground'}`}>{d.total?`${pp}%`:''}</td>;
+                      })}
+                    </tr>
+                  );
+                })}
+                {(() => {
+                  const pt = PERIODOS.map(p => p.m.reduce((a,m)=>a+totals.mt[m],0));
+                  return (
+                    <tr className="bg-slate-800 text-white font-semibold border-t">
+                      <td className="px-3 py-2">TOTAL</td>
+                      {pt.map((v,i) => <td key={i} className="text-center px-2 py-2">{v}</td>)}
+                      <td className="text-center px-2 py-2">{totals.grand}</td>
+                      {pt.map((v,i) => {
+                        const pp = totals.grand ? Math.round(v/totals.grand*100) : 0;
+                        return <td key={i} className="text-center px-2 py-2 text-[10px]">{pp}%</td>;
+                      })}
+                    </tr>
+                  );
+                })()}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+// ─── KPI CARD ───
+function KpiCard({ icon, label, value, ok, warn, danger }: { icon: React.ReactNode; label: string; value: string|number; ok?: boolean; warn?: boolean; danger?: boolean }) {
+  let cls = '';
+  if (danger) cls = 'border-red-200 bg-red-50/50';
+  else if (warn) cls = 'border-amber-200 bg-amber-50/50';
+  else if (ok) cls = 'border-green-200 bg-green-50/50';
+  return (
+    <Card className={cls}>
+      <CardContent className="pt-4 pb-3 text-center">
+        <div className="mx-auto mb-1">{icon}</div>
+        <div className={`text-2xl font-bold ${danger?'text-red-600':ok?'text-green-600':''}`}>{value}</div>
+        <div className="text-xs text-muted-foreground">{label}</div>
+      </CardContent>
+    </Card>
   );
 }

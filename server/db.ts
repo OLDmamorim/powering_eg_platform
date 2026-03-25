@@ -13729,3 +13729,77 @@ export async function pesquisarMatriculaNasFichas(matricula: string, lojaId: num
     .limit(5);
   return { fichas: rowsGlobal, lojaActual: false };
 }
+
+
+// ==================== FÉRIAS ====================
+
+import { feriasUploads, InsertFeriasUpload, FeriasUpload, feriasColaboradores, InsertFeriasColaborador, FeriasColaborador } from "../drizzle/schema";
+
+export async function criarFeriasUpload(data: InsertFeriasUpload): Promise<FeriasUpload> {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  const result = await db.insert(feriasUploads).values(data);
+  const [row] = await db.select().from(feriasUploads).where(eq(feriasUploads.id, Number(result[0].insertId)));
+  return row;
+}
+
+export async function listarFeriasUploads(ano?: number): Promise<FeriasUpload[]> {
+  const db = await getDb();
+  if (!db) return [];
+  if (ano) {
+    return db.select().from(feriasUploads).where(eq(feriasUploads.ano, ano)).orderBy(desc(feriasUploads.createdAt));
+  }
+  return db.select().from(feriasUploads).orderBy(desc(feriasUploads.createdAt));
+}
+
+export async function getFeriasUploadById(id: number): Promise<FeriasUpload | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  const [row] = await db.select().from(feriasUploads).where(eq(feriasUploads.id, id));
+  return row;
+}
+
+export async function getUltimoFeriasUpload(ano: number): Promise<FeriasUpload | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  const [row] = await db.select().from(feriasUploads).where(eq(feriasUploads.ano, ano)).orderBy(desc(feriasUploads.createdAt)).limit(1);
+  return row;
+}
+
+export async function guardarFeriasColaboradores(uploadId: number, colaboradores: InsertFeriasColaborador[]): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  // Apagar colaboradores anteriores deste upload
+  await db.delete(feriasColaboradores).where(eq(feriasColaboradores.uploadId, uploadId));
+  // Inserir em batches de 50
+  for (let i = 0; i < colaboradores.length; i += 50) {
+    const batch = colaboradores.slice(i, i + 50);
+    await db.insert(feriasColaboradores).values(batch);
+  }
+}
+
+export async function getFeriasColaboradoresByUpload(uploadId: number): Promise<FeriasColaborador[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(feriasColaboradores).where(eq(feriasColaboradores.uploadId, uploadId));
+}
+
+export async function getFeriasColaboradoresByAno(ano: number): Promise<FeriasColaborador[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(feriasColaboradores).where(eq(feriasColaboradores.ano, ano)).orderBy(feriasColaboradores.loja, feriasColaboradores.nome);
+}
+
+export async function apagarFeriasUpload(id: number): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  await db.delete(feriasColaboradores).where(eq(feriasColaboradores.uploadId, id));
+  await db.delete(feriasUploads).where(eq(feriasUploads.id, id));
+}
+
+export async function getAnosFerias(): Promise<number[]> {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db.selectDistinct({ ano: feriasUploads.ano }).from(feriasUploads).orderBy(desc(feriasUploads.ano));
+  return rows.map((r: { ano: number }) => r.ano);
+}
