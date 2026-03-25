@@ -987,3 +987,11 @@
 - [x] Adicionar entrada no menu do DashboardLayout (após RH)
 - [x] Manter gestores/lojas hardcoded como no ficheiro original
 - [ ] Testar e guardar checkpoint
+
+## Corrigir Erros TypeScript no NPS
+- [x] Investigar erros de TypeScript no módulo NPS
+- [x] Corrigir parseDecimal no excelProcessor.ts (retornar string em vez de number)
+- [x] Corrigir 14 erros em server/db.ts (null safety, .rows, MapIterator)
+- [x] Corrigir 3 erros em server/aiService.ts (Set iteration)
+- [x] Corrigir erros em client/src/pages/ (PortalLoja, AgendamentosGestor, NPSDashboard, etc.)
+- [x] Verificar 0 erros e guardar checkpoint

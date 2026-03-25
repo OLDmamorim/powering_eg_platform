@@ -337,7 +337,7 @@ export default function ControloStock() {
       setIsUploading(false);
       const data = jobStatus.result as any;
       setResultadoGlobal(data);
-      const allGestores = new Set(data.porGestor.map((g: any) => g.gestorNome));
+      const allGestores = new Set<string>(data.porGestor.map((g: any) => g.gestorNome));
       setExpandedGestores(allGestores);
       setView('resultadoGlobal');
       toast.success(`Análise global concluída! ${data.totalArtigosProcessados} artigos em ${data.totalLojasAnalisadas} lojas.`);

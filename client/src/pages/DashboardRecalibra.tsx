@@ -369,7 +369,7 @@ export default function DashboardRecalibra() {
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={dadosLocalidade}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                    <XAxis dataKey="nome" tick={{ fontSize: 10, angle: -30 }} height={60} />
+                    <XAxis dataKey="nome" tick={{ fontSize: 10, angle: -30 } as any} height={60} />
                     <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
                     <Tooltip formatter={(value: number) => [value, 'Calibragens']} />
                     <Bar dataKey="valor" fill="#0891b2" radius={[4, 4, 0, 0]}>

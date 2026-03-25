@@ -304,7 +304,7 @@ function AgendamentosLoja({ token, language }: Props) {
     if (matNorm.length < 4) { setFichaEncontrada(null); return; }
     setPesquisandoMatricula(true);
     try {
-      const res = await trpc.agendamentos.pesquisarMatricula.query({ token, matricula: matNorm });
+      const res = await (trpc.agendamentos.pesquisarMatricula as any).query({ token, matricula: matNorm });
       if (res.fichas && res.fichas.length > 0) {
         const ficha = res.fichas[0];
         setFichaEncontrada({ ...ficha, lojaActual: res.lojaActual });
@@ -5010,7 +5010,7 @@ export default function PortalLoja() {
                                     if (val && val !== 'com_ficha_servico') {
                                       classificarStockMutation.mutate({
                                         token,
-                                        lojaId: detalheStock.lojaId,
+                                        lojaId: detalheStock.lojaId!,
                                         eurocode: refKey,
                                         unitIndex: d.unitIndex,
                                         classificacao: val as any,
@@ -5130,7 +5130,7 @@ export default function PortalLoja() {
                                         setOutrosPendingKey(null);
                                         classificarStockMutation.mutate({
                                           token,
-                                          lojaId: detalheStock.lojaId,
+                                          lojaId: detalheStock.lojaId!,
                                           eurocode: refKey,
                                           unitIndex: d.unitIndex,
                                           classificacao: val as any,
@@ -5165,7 +5165,7 @@ export default function PortalLoja() {
                                             if (texto) {
                                               classificarStockMutation.mutate({
                                                 token,
-                                                lojaId: detalheStock.lojaId,
+                                                lojaId: detalheStock.lojaId!,
                                                 eurocode: refKey,
                                                 unitIndex: d.unitIndex,
                                                 classificacao: 'outros',
@@ -5186,7 +5186,7 @@ export default function PortalLoja() {
                                           if (texto) {
                                             classificarStockMutation.mutate({
                                               token,
-                                              lojaId: detalheStock.lojaId,
+                                              lojaId: detalheStock.lojaId!,
                                               eurocode: refKey,
                                               unitIndex: d.unitIndex,
                                               classificacao: 'outros',
@@ -6612,7 +6612,7 @@ function VolanteInterface({
   t: (key: string) => string;
 }) {
   const { theme, toggleTheme } = useTheme();
-  const [activeView, setActiveView] = useState<"menu" | "agenda" | "resultados" | "historico" | "dashboard" | "circulares" | "configuracoes">("menu");
+  const [activeView, setActiveView] = useState<"menu" | "agenda" | "resultados" | "historico" | "historico-servicos" | "dashboard" | "circulares" | "configuracoes">("menu");
   const [activeTab, setActiveTab] = useState<"agenda" | "resultados">("agenda");
   const [mesSelecionado, setMesSelecionado] = useState(() => {
     const hoje = new Date();

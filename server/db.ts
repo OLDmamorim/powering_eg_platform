@@ -11180,7 +11180,7 @@ export async function getEstatisticasMensaisServicos(volanteId: number, ano: num
     totais.outros += s.outros;
     totais.total += s.substituicaoLigeiro + s.reparacao + s.calibragem + s.outros;
     totais.diasTrabalhados.add(s.data);
-    totais.lojas.add(s.lojaId);
+    totais.lojas.add(s.lojaId!);
   }
   
   // Agrupar por loja
@@ -11734,7 +11734,7 @@ export async function getTopLojasCalibragens(unidadeId: number, mesesSelecionado
   const porLoja = new Map<number, { lojaId: number; lojaNome: string; total: number; visitas: number }>();
   
   for (const item of calibs) {
-    const lojaId = item.calibragem.lojaId;
+    const lojaId = item.calibragem.lojaId!;
     const lojaNome = item.loja?.nome || 'Loja';
     
     if (!porLoja.has(lojaId)) {
@@ -11747,7 +11747,7 @@ export async function getTopLojasCalibragens(unidadeId: number, mesesSelecionado
   // Contar visitas (dias únicos por loja)
   const visitasPorLoja = new Map<number, Set<string>>();
   for (const item of calibs) {
-    const lojaId = item.calibragem.lojaId;
+    const lojaId = item.calibragem.lojaId!;
     if (!visitasPorLoja.has(lojaId)) {
       visitasPorLoja.set(lojaId, new Set());
     }
@@ -11755,7 +11755,7 @@ export async function getTopLojasCalibragens(unidadeId: number, mesesSelecionado
   }
   
   // Adicionar contagem de visitas
-  for (const [lojaId, dias] of visitasPorLoja.entries()) {
+  for (const [lojaId, dias] of Array.from(visitasPorLoja.entries())) {
     if (porLoja.has(lojaId)) {
       porLoja.get(lojaId)!.visitas = dias.size;
     }
@@ -13071,7 +13071,7 @@ export async function getBatchesStock(gestorId: number) {
     ORDER BY createdAt DESC
   `);
   
-  return (result.rows || result[0] || []) as Array<{
+  return ((result as any).rows || (result as any)[0] || []) as Array<{
     batchTime: string;
     createdAt: Date;
     totalAnalises: number;
@@ -13107,7 +13107,7 @@ export async function getBatchesStockAdmin() {
     ORDER BY createdAt DESC
   `);
   
-  return (result.rows || result[0] || []) as Array<{
+  return ((result as any).rows || (result as any)[0] || []) as Array<{
     batchTime: string;
     createdAt: Date;
     totalAnalises: number;
@@ -13134,13 +13134,13 @@ export async function eliminarBatchStock(batchTime: string, gestorId?: number) {
       WHERE (batchId = ${batchTime} OR (batchId IS NULL AND DATE_FORMAT(createdAt, '%Y-%m-%d %H:%i') = ${batchTime}))
       AND gestorId = ${gestorId}
     `);
-    return (result.rows || result[0] || { affectedRows: 0 }) as any;
+    return ((result as any).rows || (result as any)[0] || { affectedRows: 0 }) as any;
   } else {
     const result = await db.execute(sql`
       DELETE FROM analises_stock 
       WHERE (batchId = ${batchTime} OR (batchId IS NULL AND DATE_FORMAT(createdAt, '%Y-%m-%d %H:%i') = ${batchTime}))
     `);
-    return (result.rows || result[0] || { affectedRows: 0 }) as any;
+    return ((result as any).rows || (result as any)[0] || { affectedRows: 0 }) as any;
   }
 }
 
@@ -13168,25 +13168,25 @@ export async function getAnalisesByBatchTime(batchTime: string, gestorId?: numbe
 
 export async function createBackgroundJob(id: string) {
   const db = await getDb();
-  await db.insert(backgroundJobs).values({ id, status: 'processing', progress: 'A iniciar...' });
+  await db!.insert(backgroundJobs).values({ id, status: 'processing', progress: 'A iniciar...' });
   return { id };
 }
 
 export async function updateBackgroundJob(id: string, data: { status?: 'processing' | 'completed' | 'error'; progress?: string; result?: string; error?: string }) {
   const db = await getDb();
-  await db.update(backgroundJobs).set(data).where(eq(backgroundJobs.id, id));
+  await db!.update(backgroundJobs).set(data).where(eq(backgroundJobs.id, id));
 }
 
 export async function getBackgroundJob(id: string) {
   const db = await getDb();
-  const [job] = await db.select().from(backgroundJobs).where(eq(backgroundJobs.id, id));
+  const [job] = await db!.select().from(backgroundJobs).where(eq(backgroundJobs.id, id));
   return job || null;
 }
 
 export async function cleanOldBackgroundJobs() {
   const db = await getDb();
   const thirtyMinAgo = new Date(Date.now() - 30 * 60 * 1000);
-  await db.delete(backgroundJobs).where(sql`${backgroundJobs.createdAt} < ${thirtyMinAgo}`);
+  await db!.delete(backgroundJobs).where(sql`${backgroundJobs.createdAt} < ${thirtyMinAgo}`);
 }
 
 

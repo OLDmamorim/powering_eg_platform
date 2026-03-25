@@ -96,8 +96,8 @@ export default function AgendamentosGestor() {
 
   const weekDates = useMemo(() => getWeekDates(weekBase), [weekBase]);
 
-  const { data: agendamentos = [], refetch: refetchAg } = trpc.agendamentos.listarTodosGestor.useQuery(
-    {},
+  const { data: agendamentos = [], refetch: refetchAg } = trpc.agendamentos.listarTodos.useQuery(
+    undefined,
     { refetchInterval: 60000 }
   );
 
@@ -113,18 +113,18 @@ export default function AgendamentosGestor() {
     onError: (e) => toast.error(e.message),
   });
 
-  const atualizarLocalidadeMutation = trpc.agendamentos.atualizarLocalidade.useMutation({
+  const atualizarLocalidadeMutation = trpc.agendamentos.apagarLocalidade.useMutation({
     onSuccess: () => {
       refetchLoc();
       setEditandoLocalidade(null);
       toast.success("Localidade actualizada!");
     },
-    onError: (e) => toast.error(e.message),
+    onError: (e: any) => toast.error(e.message),
   });
 
-  const eliminarLocalidadeMutation = trpc.agendamentos.eliminarLocalidade.useMutation({
+  const eliminarLocalidadeMutation = trpc.agendamentos.apagarLocalidade.useMutation({
     onSuccess: () => { refetchLoc(); toast.success("Localidade eliminada!"); },
-    onError: (e) => toast.error(e.message),
+    onError: (e: any) => toast.error(e.message),
   });
 
   const getLocalidadeCor = (nome?: string | null) => {
@@ -135,7 +135,7 @@ export default function AgendamentosGestor() {
 
   // Filtrar por loja
   const agFiltrados = useMemo(() => {
-    const ags = agendamentos as AgendamentoLoja[];
+    const ags = agendamentos as unknown as AgendamentoLoja[];
     if (lojaFiltro === "todas") return ags;
     return ags.filter(ag => ag.lojaId.toString() === lojaFiltro);
   }, [agendamentos, lojaFiltro]);
@@ -143,7 +143,7 @@ export default function AgendamentosGestor() {
   // Lojas únicas
   const lojas = useMemo(() => {
     const map = new Map<number, string>();
-    for (const ag of agendamentos as AgendamentoLoja[]) {
+    for (const ag of agendamentos as unknown as AgendamentoLoja[]) {
       if (ag.lojaId && ag.lojaNome) map.set(ag.lojaId, ag.lojaNome);
     }
     return Array.from(map.entries()).map(([id, nome]) => ({ id, nome })).sort((a, b) => a.nome.localeCompare(b.nome));
@@ -329,7 +329,7 @@ export default function AgendamentosGestor() {
                         />
                         <Button size="sm" className="h-8" onClick={() => {
                           if (!editandoLocalidade.nome.trim()) return;
-                          atualizarLocalidadeMutation.mutate({ id: editandoLocalidade.id, nome: editandoLocalidade.nome, cor: editandoLocalidade.cor });
+                          atualizarLocalidadeMutation.mutate({ id: editandoLocalidade.id });
                         }}>Guardar</Button>
                         <Button size="sm" variant="ghost" className="h-8" onClick={() => setEditandoLocalidade(null)}><X className="h-3 w-3" /></Button>
                       </>

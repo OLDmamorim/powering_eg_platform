@@ -2173,7 +2173,7 @@ export function RelatorioIAResultados() {
                                   scales: {
                                     x: { beginAtZero: true, max: 100, title: { display: true, text: 'NPS (%)' } },
                                   }
-                                }}
+                                } as any}
                               />
                             </div>
                             <p className="text-xs text-muted-foreground mt-2 text-center">

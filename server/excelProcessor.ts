@@ -668,7 +668,7 @@ export async function processarExcelNPS(
 /**
  * Helper para converter valor para decimal (aceita percentagens e números)
  */
-function parseDecimal(value: any): number | null {
+function parseDecimal(value: any): string | null {
   if (value === null || value === undefined || value === '') return null;
   
   const str = String(value).trim();
@@ -677,7 +677,7 @@ function parseDecimal(value: any): number | null {
   if (str.includes('%')) {
     const num = parseFloat(str.replace('%', '').replace(',', '.'));
     if (isNaN(num)) return null;
-    return num / 100; // Converter para decimal (0.0 a 1.0)
+    return (num / 100).toString(); // Converter para decimal string (0.0 a 1.0)
   }
   
   // Se for número decimal (ex: "0.85" ou "0,85")
@@ -686,8 +686,8 @@ function parseDecimal(value: any): number | null {
   
   // Se o número for maior que 1, assumir que é percentagem sem %
   if (num > 1) {
-    return num / 100;
+    return (num / 100).toString();
   }
   
-  return num;
+  return num.toString();
 }

@@ -286,7 +286,7 @@ export function NPSDashboard() {
     });
     return maisRecente ? {
       data: maisRecente,
-      dataFormatada: maisRecente.toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+      dataFormatada: (maisRecente as Date).toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
       nomeArquivo,
     } : null;
   }, [dadosFiltrados]);

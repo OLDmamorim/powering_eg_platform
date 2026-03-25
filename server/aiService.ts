@@ -688,7 +688,7 @@ ${pontosNegativosRelatados.length > 0 ? pontosNegativosRelatados.join('\n') : 'N
     const camposTaxa = ['taxaRespostaJan', 'taxaRespostaFev', 'taxaRespostaMar', 'taxaRespostaAbr', 'taxaRespostaMai', 'taxaRespostaJun', 'taxaRespostaJul', 'taxaRespostaAgo', 'taxaRespostaSet', 'taxaRespostaOut', 'taxaRespostaNov', 'taxaRespostaDez'];
     
     // Buscar dados NPS para os anos dos meses selecionados
-    const anosUnicos = [...new Set(mesesParaBuscar.map(m => m.ano))];
+    const anosUnicos = Array.from(new Set(mesesParaBuscar.map(m => m.ano)));
     let todosNPS: any[] = [];
     for (const ano of anosUnicos) {
       const npsAno = await db.getNPSDadosTodasLojas(ano);
@@ -1722,7 +1722,7 @@ ${resumoRelatoriosPorLoja}
     const camposNPS = ['npsJan', 'npsFev', 'npsMar', 'npsAbr', 'npsMai', 'npsJun', 'npsJul', 'npsAgo', 'npsSet', 'npsOut', 'npsNov', 'npsDez'];
     const camposTaxa = ['taxaRespostaJan', 'taxaRespostaFev', 'taxaRespostaMar', 'taxaRespostaAbr', 'taxaRespostaMai', 'taxaRespostaJun', 'taxaRespostaJul', 'taxaRespostaAgo', 'taxaRespostaSet', 'taxaRespostaOut', 'taxaRespostaNov', 'taxaRespostaDez'];
     
-    const anosUnicos = [...new Set(mesesSelecionados.map(m => m.ano))];
+    const anosUnicos = Array.from(new Set(mesesSelecionados.map(m => m.ano)));
     let todosNPS: any[] = [];
     for (const ano of anosUnicos) {
       const npsAno = await db.getNPSDadosTodasLojas(ano);
@@ -2642,7 +2642,7 @@ export async function gerarRelatorioIAGestor(
     const camposNPS = ['npsJan', 'npsFev', 'npsMar', 'npsAbr', 'npsMai', 'npsJun', 'npsJul', 'npsAgo', 'npsSet', 'npsOut', 'npsNov', 'npsDez'];
     const camposTaxa = ['taxaRespostaJan', 'taxaRespostaFev', 'taxaRespostaMar', 'taxaRespostaAbr', 'taxaRespostaMai', 'taxaRespostaJun', 'taxaRespostaJul', 'taxaRespostaAgo', 'taxaRespostaSet', 'taxaRespostaOut', 'taxaRespostaNov', 'taxaRespostaDez'];
     
-    const anosUnicosG = [...new Set(mesesParaBuscarGestor.map(m => m.ano))];
+    const anosUnicosG = Array.from(new Set(mesesParaBuscarGestor.map(m => m.ano)));
     let todosNPSG: any[] = [];
     for (const ano of anosUnicosG) {
       const npsAno = await db.getNPSDadosTodasLojas(ano);
