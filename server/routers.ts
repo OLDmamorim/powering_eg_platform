@@ -358,6 +358,23 @@ export const appRouter = router({
         return relatorio;
       }),
 
+    // Exportar relatório de férias por loja em PDF
+    exportarRelatorioLojaPDF: protectedProcedure
+      .input(z.object({
+        relatorio: z.any(),
+        ano: z.number(),
+      }))
+      .mutation(async ({ input }) => {
+        const { gerarPDFRelatorioFeriasLoja } = await import('./pdfRelatorioFeriasLoja');
+        const pdfBuffer = await gerarPDFRelatorioFeriasLoja(input.relatorio, input.ano);
+        
+        // Upload para S3
+        const lojaNome = (input.relatorio.loja || 'loja').replace(/\s+/g, '-').toLowerCase();
+        const fileName = `relatorio-ferias-${lojaNome}-${input.ano}-${Date.now()}.pdf`;
+        const { url } = await storagePut(fileName, pdfBuffer, 'application/pdf');
+        return { url, fileName };
+      }),
+
     // Obter nomes dos volantes da DB para fixar no calendário
     getVolanteNames: protectedProcedure.query(async () => {
       const allVolantes = await db.getAllVolantes();

@@ -1559,6 +1559,16 @@ function DistributionTab({ data, gestorFilter, ano, TM, compareAno, setCompareAn
     },
   });
 
+  const exportarPDF = trpc.ferias.exportarRelatorioLojaPDF.useMutation({
+    onSuccess: (result) => {
+      window.open(result.url, '_blank');
+      toast.success('PDF gerado com sucesso!');
+    },
+    onError: (err) => {
+      toast.error(err.message || 'Erro ao gerar PDF');
+    },
+  });
+
   const gestorData = useMemo(() => {
     const gestores = gestorFilter !== 'all' ? [gestorFilter] : Object.keys(GESTORES).sort();
     const result: Record<string,{byM:Record<number,number>;total:number;ec:number}> = {};
@@ -1683,7 +1693,16 @@ function DistributionTab({ data, gestorFilter, ano, TM, compareAno, setCompareAn
             )}
           </div>
           {relatorioLojaData && (
-            <DialogFooter>
+            <DialogFooter className="flex-wrap gap-2">
+              <Button variant="default" size="sm" className="bg-teal-700 hover:bg-teal-800 text-white"
+                disabled={exportarPDF.isPending}
+                onClick={() => exportarPDF.mutate({ relatorio: relatorioLojaData, ano })}>
+                {exportarPDF.isPending ? (
+                  <><Loader2 className="h-4 w-4 mr-1 animate-spin" /> A gerar PDF...</>
+                ) : (
+                  <><FileText className="h-4 w-4 mr-1" /> Exportar PDF</>
+                )}
+              </Button>
               <Button variant="outline" size="sm" onClick={() => {
                 const md = relatorioLojaData.recomendacoesIA || '';
                 const blob = new Blob([md], { type: 'text/markdown' });
@@ -1694,7 +1713,7 @@ function DistributionTab({ data, gestorFilter, ano, TM, compareAno, setCompareAn
                 a.click();
                 URL.revokeObjectURL(url);
               }}>
-                <Download className="h-4 w-4 mr-1" /> Exportar Relatório
+                <Download className="h-4 w-4 mr-1" /> Exportar Markdown
               </Button>
               <Button variant="outline" size="sm" onClick={() => {
                 setRelatorioLojaData(null);

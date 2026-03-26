@@ -1086,3 +1086,13 @@
 - [x] Exportação do relatório em Markdown
 - [x] 10 testes vitest passados (feriasRelatorioLoja.test.ts)
 - [x] Guardar checkpoint
+
+## Exportação PDF do Relatório IA por Loja (Férias)
+- [x] Criar endpoint backend para gerar PDF com PDFKit (pdfRelatorioFeriasLoja.ts)
+- [x] KPIs, tabela por colaborador, sobreposições e recomendações IA no PDF
+- [x] Cores, badges e formatação visual completa preservada
+- [x] Rodapé com assinatura PoweringEG Platform 2.0
+- [x] Botão "Exportar PDF" no modal do relatório por loja
+- [x] Testar exportação e verificar fidelidade visual (6 páginas, PDF gerado com sucesso)
+- [x] 5 testes vitest passados (pdfRelatorioFeriasLoja.test.ts)
+- [ ] Guardar checkpoint
