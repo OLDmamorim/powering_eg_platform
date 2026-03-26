@@ -1033,3 +1033,8 @@
 - [x] Aplicar cores nos alertas de cobertura e meses críticos
 - [x] Aplicar cores no top mais/menos dias
 - [x] Guardar checkpoint
+
+## BUG: Scroll lateral calendário férias + Pin desaparecido
+- [x] Corrigir colunas Colaborador e Loja para ficarem fixas (sticky) no scroll lateral
+- [x] Restaurar botão de fixar colaboradores (pin) que desapareceu
+- [x] Guardar checkpoint
