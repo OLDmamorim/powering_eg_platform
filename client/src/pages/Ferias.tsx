@@ -11,13 +11,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
 import {
   Upload, Calendar, BarChart3, PieChart, Download, FileSpreadsheet,
   Search, Users, Building2, Clock, Trash2, Filter, Sun, AlertTriangle,
   CheckCircle2, XCircle, Eye, ChevronUp, ChevronDown, Crosshair, Pin, Star, Sparkles, Loader2, UserCheck,
-  FileText, Store, ArrowRight, CircleDot
+  FileText, Store, ArrowRight, CircleDot, Check, ChevronsUpDown
 } from "lucide-react";
 
 // ─── CONSTANTS ───
@@ -255,6 +257,8 @@ export default function Ferias() {
   // Estado para Recomendações IA
   const [showRecomendacoes, setShowRecomendacoes] = useState(false);
   const [relatorioIA, setRelatorioIA] = useState<string | null>(null);
+  const [iaLojasPopoverOpen, setIaLojasPopoverOpen] = useState(false);
+  const [iaLojasSelecionadas, setIaLojasSelecionadas] = useState<string[]>([]);
 
   // tRPC queries
   const guardarUpload = trpc.ferias.guardarUpload.useMutation();
@@ -604,9 +608,48 @@ export default function Ferias() {
             </CardContent>
           </Card>
 
-          {/* BOTÃO RECOMENDAÇÕES IA */}
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex-1" />
+          {/* BOTÃO RECOMENDAÇÕES IA COM SELETOR MULTI-LOJA */}
+          <div className="flex items-center justify-end gap-2">
+            <Popover open={iaLojasPopoverOpen} onOpenChange={setIaLojasPopoverOpen}>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" className="border-purple-200 text-purple-700 hover:bg-purple-50 gap-2 min-w-[180px] justify-between">
+                  <Store className="h-4 w-4" />
+                  {iaLojasSelecionadas.length === 0 ? 'Todas as lojas (geral)' : `${iaLojasSelecionadas.length} loja${iaLojasSelecionadas.length > 1 ? 's' : ''}`}
+                  <ChevronsUpDown className="h-3 w-3 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[280px] p-0" align="end">
+                <div className="p-3 border-b">
+                  <p className="text-xs font-medium text-muted-foreground">Selecionar lojas para análise IA</p>
+                  <p className="text-xs text-muted-foreground mt-1">Sem seleção = análise geral</p>
+                </div>
+                <div className="p-2 border-b">
+                  <Button variant="ghost" size="sm" className="w-full justify-start text-xs h-7" onClick={() => setIaLojasSelecionadas([])}>
+                    Limpar seleção
+                  </Button>
+                  <Button variant="ghost" size="sm" className="w-full justify-start text-xs h-7" onClick={() => setIaLojasSelecionadas([...availableStores])}>
+                    Selecionar todas
+                  </Button>
+                </div>
+                <div className="max-h-[250px] overflow-y-auto p-2 space-y-1">
+                  {availableStores.map(loja => (
+                    <label key={loja} className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-accent cursor-pointer text-sm">
+                      <Checkbox
+                        checked={iaLojasSelecionadas.includes(loja)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setIaLojasSelecionadas(prev => [...prev, loja].sort((a,b) => a.localeCompare(b,'pt')));
+                          } else {
+                            setIaLojasSelecionadas(prev => prev.filter(l => l !== loja));
+                          }
+                        }}
+                      />
+                      <span className="truncate">{loja}</span>
+                    </label>
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
             <Button
               variant="outline"
               size="sm"
@@ -615,7 +658,11 @@ export default function Ferias() {
               onClick={() => {
                 setShowRecomendacoes(true);
                 setRelatorioIA(null);
-                gerarRecomendacoesIA.mutate({ ano, gestorNome: user?.name || undefined });
+                gerarRecomendacoesIA.mutate({
+                  ano,
+                  gestorNome: user?.name || undefined,
+                  lojas: iaLojasSelecionadas.length > 0 ? iaLojasSelecionadas : undefined,
+                });
               }}
             >
               {gerarRecomendacoesIA.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
@@ -632,7 +679,9 @@ export default function Ferias() {
                   Recomendações IA — Férias {ano} {user?.name ? `(${user.name})` : ''}
                 </DialogTitle>
                 <DialogDescription>
-                  Análise automática com base no Procedimento Interno N.º 8 — Zona de {user?.name || 'Gestor'}
+                  {iaLojasSelecionadas.length > 0
+                    ? `Análise focada: ${iaLojasSelecionadas.join(', ')} — com destaque para férias coincidentes`
+                    : `Análise geral com base no Procedimento Interno N.º 8 — Zona de ${user?.name || 'Gestor'}`}
                 </DialogDescription>
               </DialogHeader>
               <div className="mt-2">
@@ -668,7 +717,11 @@ export default function Ferias() {
                   </Button>
                   <Button variant="outline" size="sm" onClick={() => {
                     setRelatorioIA(null);
-                    gerarRecomendacoesIA.mutate({ ano, gestorNome: user?.name || undefined });
+                    gerarRecomendacoesIA.mutate({
+                      ano,
+                      gestorNome: user?.name || undefined,
+                      lojas: iaLojasSelecionadas.length > 0 ? iaLojasSelecionadas : undefined,
+                    });
                   }}>
                     <Sparkles className="h-4 w-4 mr-1" /> Gerar Novamente
                   </Button>

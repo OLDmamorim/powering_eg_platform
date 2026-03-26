@@ -1117,3 +1117,14 @@
 - [x] feriasRelatorioLojaService.ts já usava dias registados (approved + not_approved) — confirmado
 - [x] 17 testes passados (12 relatório loja + 5 PDF)
 - [x] Guardar checkpoint
+
+## Seletor Multi-Loja nas Recomendações IA de Férias
+- [x] Adicionar seletor multi-loja ao botão Recomendações IA (popover com checkboxes de lojas)
+- [x] Sem seleção = análise geral (comportamento actual)
+- [x] Com seleção = análise focada nas lojas selecionadas
+- [x] Destaque especial para férias coincidentes entre colegas quando lojas selecionadas
+- [x] Modificar backend (feriasIAService) para aceitar filtro de lojas e secção de coincidências
+- [x] Coincidências entre lojas diferentes quando multi-loja selecionada
+- [x] Lojas ordenadas alfabeticamente, filtradas pelo gestor
+- [x] 17 testes passados (12 relatório loja + 5 PDF)
+- [x] Guardar checkpoint

@@ -286,6 +286,7 @@ export const appRouter = router({
       .input(z.object({
         ano: z.number(),
         gestorNome: z.string().optional(),
+        lojas: z.array(z.string()).optional(), // Filtro multi-loja: se vazio/undefined = análise geral
       }))
       .mutation(async ({ input, ctx }) => {
         // Obter último upload do ano
@@ -312,19 +313,28 @@ export const appRouter = router({
         // Filtrar pela zona do gestor logado (se não for admin)
         const nomeGestor = input.gestorNome || ctx.user.name || '';
         if (ctx.user.role !== 'admin' && nomeGestor) {
-          // Filtrar colaboradores que pertencem à zona do gestor
           colabs = colabs.filter(c => {
             const gestorDoColab = (c.gestor || '').toLowerCase().trim();
             return gestorDoColab === nomeGestor.toLowerCase().trim();
           });
         }
 
-        if (colabs.length === 0) {
-          throw new TRPCError({ code: 'NOT_FOUND', message: `Nenhum colaborador encontrado para a zona de ${nomeGestor}` });
+        // Filtrar por lojas selecionadas (se fornecidas)
+        const lojasSelecionadas = input.lojas && input.lojas.length > 0 ? input.lojas : undefined;
+        if (lojasSelecionadas) {
+          const lojasLower = lojasSelecionadas.map(l => l.toLowerCase().trim());
+          colabs = colabs.filter(c => lojasLower.includes((c.loja || '').toLowerCase().trim()));
         }
 
-        const relatorio = await gerarRecomendacoesFerias(colabs, input.ano, nomeGestor);
-        return { relatorio, totalColaboradores: colabs.length, ano: input.ano, gestor: nomeGestor };
+        if (colabs.length === 0) {
+          const msg = lojasSelecionadas 
+            ? `Nenhum colaborador encontrado para as lojas: ${lojasSelecionadas.join(', ')}`
+            : `Nenhum colaborador encontrado para a zona de ${nomeGestor}`;
+          throw new TRPCError({ code: 'NOT_FOUND', message: msg });
+        }
+
+        const relatorio = await gerarRecomendacoesFerias(colabs, input.ano, nomeGestor, lojasSelecionadas);
+        return { relatorio, totalColaboradores: colabs.length, ano: input.ano, gestor: nomeGestor, lojas: lojasSelecionadas };
       }),
 
     // Gerar relatório IA por loja com análise de problemas e sugestões de redistribuição

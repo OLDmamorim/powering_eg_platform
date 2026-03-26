@@ -56,7 +56,7 @@ interface ColaboradorFerias {
   totalFaltas: number;
 }
 
-function analisarDadosParaPrompt(colaboradores: ColaboradorFerias[], ano: number): string {
+function analisarDadosParaPrompt(colaboradores: ColaboradorFerias[], ano: number, lojasSelecionadas?: string[]): string {
   const MONTHS_FULL = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
   
   // Estatísticas gerais
@@ -184,19 +184,82 @@ function analisarDadosParaPrompt(colaboradores: ColaboradorFerias[], ano: number
     prompt += `${loja}: ${r.total} colab, ${r.registados} dias registados${r.sem > 0 ? `, ${r.sem} sem férias` : ''}\n`;
   });
   
+  // Se há lojas selecionadas, adicionar secção detalhada de coincidências
+  if (lojasSelecionadas && lojasSelecionadas.length > 0) {
+    prompt += `\n=== FÉRIAS COINCIDENTES ENTRE COLEGAS (DESTAQUE ESPECIAL) ===\n`;
+    // Detalhar dia a dia as coincidências
+    const MONTHS_FULL_PT = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+    Object.entries(lojaDias).sort(([a],[b]) => a.localeCompare(b)).forEach(([loja, dias]) => {
+      const coincidencias: { data: string; nomes: string[] }[] = [];
+      Object.entries(dias).forEach(([key, nomes]) => {
+        if (nomes.length > 1) {
+          const [m, d] = key.split('-');
+          coincidencias.push({ data: `${d} ${MONTHS_FULL_PT[parseInt(m)-1]}`, nomes });
+        }
+      });
+      if (coincidencias.length > 0) {
+        prompt += `\n${loja} (${coincidencias.length} dias com coincidências):\n`;
+        // Agrupar por combinação de nomes
+        const porGrupo: Record<string, string[]> = {};
+        coincidencias.forEach(c => {
+          const key = c.nomes.sort().join(' + ');
+          if (!porGrupo[key]) porGrupo[key] = [];
+          porGrupo[key].push(c.data);
+        });
+        Object.entries(porGrupo).forEach(([nomes, datas]) => {
+          prompt += `  - ${nomes}: ${datas.length} dias coincidentes (${datas.slice(0, 10).join(', ')}${datas.length > 10 ? '...' : ''})\n`;
+        });
+      }
+    });
+    
+    // Coincidências ENTRE lojas diferentes (mesmo gestor, mesmos dias)
+    if (lojasSelecionadas.length > 1) {
+      prompt += `\n=== COINCIDÊNCIAS ENTRE LOJAS DIFERENTES ===\n`;
+      const todosColabDias: Record<string, { nome: string; loja: string }[]> = {};
+      colaboradores.forEach(c => {
+        Object.entries(c.dias).forEach(([key, status]) => {
+          if (status === 'approved' || status === 'not_approved') {
+            if (!todosColabDias[key]) todosColabDias[key] = [];
+            todosColabDias[key].push({ nome: c.nome, loja: c.loja });
+          }
+        });
+      });
+      // Encontrar dias onde colaboradores de LOJAS DIFERENTES coincidem
+      const interLoja: { data: string; colabs: { nome: string; loja: string }[] }[] = [];
+      Object.entries(todosColabDias).forEach(([key, colabs]) => {
+        const lojasNoDia = new Set(colabs.map(c => c.loja));
+        if (lojasNoDia.size > 1) {
+          const [m, d] = key.split('-');
+          interLoja.push({ data: `${d} ${MONTHS_FULL_PT[parseInt(m)-1]}`, colabs });
+        }
+      });
+      if (interLoja.length > 0) {
+        prompt += `${interLoja.length} dias com férias em múltiplas lojas em simultâneo\n`;
+      } else {
+        prompt += `Sem coincidências entre lojas diferentes.\n`;
+      }
+    }
+  }
+  
   return prompt;
 }
 
 export async function gerarRecomendacoesFerias(
   colaboradores: ColaboradorFerias[],
   ano: number,
-  gestorNome?: string
+  gestorNome?: string,
+  lojasSelecionadas?: string[]
 ): Promise<string> {
-  const dadosAnalise = analisarDadosParaPrompt(colaboradores, ano);
+  const dadosAnalise = analisarDadosParaPrompt(colaboradores, ano, lojasSelecionadas);
   
-  const contextoGestor = gestorNome 
-    ? `Este relatório é para o gestor de zona **${gestorNome}** e abrange apenas os colaboradores e lojas da sua zona.`
-    : 'Este relatório abrange todos os colaboradores a nível nacional.';
+  let contextoGestor = '';
+  if (lojasSelecionadas && lojasSelecionadas.length > 0) {
+    contextoGestor = `Este relatório foca-se especificamente nas lojas: **${lojasSelecionadas.join(', ')}**. Dá ESPECIAL DESTAQUE às férias coincidentes entre colegas da mesma loja e entre lojas diferentes.`;
+  } else if (gestorNome) {
+    contextoGestor = `Este relatório é para o gestor de zona **${gestorNome}** e abrange apenas os colaboradores e lojas da sua zona.`;
+  } else {
+    contextoGestor = 'Este relatório abrange todos os colaboradores a nível nacional.';
+  }
 
   const systemPrompt = `És um especialista em Recursos Humanos da ExpressGlass, responsável por analisar o mapa de férias e gerar recomendações com base no Procedimento Interno N.º 8.
 
@@ -220,8 +283,11 @@ Situações que requerem atenção mas não são violações diretas.
 ## 📊 Análise por Período
 Verificação do cumprimento dos parâmetros por período (Jan-Mai, Jun-Set, Set-Nov, Dez).
 
-## 🏪 Análise por Loja
+## 🏩 Análise por Loja
 Lojas com situações problemáticas (sobreposições, colaboradores sem férias, etc.).
+
+## 👥 Férias Coincidentes entre Colegas
+Se foram selecionadas lojas específicas, esta secção é OBRIGATÓRIA e deve ter DESTAQUE ESPECIAL. Lista detalhada de dias em que 2 ou mais colegas da mesma loja têm férias marcadas no mesmo dia. Agrupa por loja e por pares de colegas. Se houver múltiplas lojas selecionadas, inclui também coincidências entre lojas diferentes. Apresenta em formato de tabela Markdown quando possível.
 
 ## 🔄 Sugestões de Redistribuição
 Para cada colaborador com problemas, indica quantos dias mover e de/para que período. Exemplo: "Retirar 3 dias de Jun-Set e colocar em Jan-Mai".
