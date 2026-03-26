@@ -325,6 +325,12 @@ export const appRouter = router({
         const relatorio = await gerarRecomendacoesFerias(colabs, input.ano, nomeGestor);
         return { relatorio, totalColaboradores: colabs.length, ano: input.ano, gestor: nomeGestor };
       }),
+
+    // Obter nomes dos volantes da DB para fixar no calendário
+    getVolanteNames: protectedProcedure.query(async () => {
+      const allVolantes = await db.getAllVolantes();
+      return allVolantes.filter(v => v.ativo).map(v => v.nome.toUpperCase().trim());
+    }),
   }),
   
   // ==================== NOTIFICAÇÕES ====================

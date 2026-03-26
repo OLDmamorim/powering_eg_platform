@@ -1049,5 +1049,12 @@
 - [x] Guardar checkpoint
 
 ## BUG: Headers de grupo das lojas cortados no scroll lateral
-- [ ] Corrigir store header rows (ABRANTES, AGUEDA, etc.) para ficarem sticky left no scroll
-- [ ] Guardar checkpoint
+- [x] Corrigir store header rows (ABRANTES, AGUEDA, etc.) para ficarem sticky left no scroll
+- [x] Guardar checkpoint
+
+## Botão Fixar Todos os Volantes
+- [x] Identificar como os volantes são marcados nos dados (tabela volantes na DB)
+- [x] Criar endpoint getVolanteNames no router de férias
+- [x] Implementar botão "Fixar Volantes" e "Limpar" no calendário de férias
+- [x] Cruzar nomes da DB com dados do Excel para fixar automaticamente
+- [x] Guardar checkpoint

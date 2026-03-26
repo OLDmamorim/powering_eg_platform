@@ -16,7 +16,7 @@ import { toast } from "sonner";
 import {
   Upload, Calendar, BarChart3, PieChart, Download, FileSpreadsheet,
   Search, Users, Building2, Clock, Trash2, Filter, Sun, AlertTriangle,
-  CheckCircle2, XCircle, Eye, ChevronUp, ChevronDown, Crosshair, Pin, Star, Sparkles, Loader2
+  CheckCircle2, XCircle, Eye, ChevronUp, ChevronDown, Crosshair, Pin, Star, Sparkles, Loader2, UserCheck
 } from "lucide-react";
 
 // ─── CONSTANTS ───
@@ -205,6 +205,52 @@ export default function Ferias() {
     });
   }, []);
 
+  // Query para obter nomes dos volantes da DB
+  const { data: volanteNames } = trpc.ferias.getVolanteNames.useQuery();
+
+  // Ref para enrichedData (usado antes da declaração)
+  const enrichedDataRef = useRef<any[]>([]);
+
+  // Fixar todos os volantes de uma vez
+  const fixarTodosVolantes = useCallback(() => {
+    if (!volanteNames || volanteNames.length === 0) {
+      toast.error('Nenhum volante encontrado na base de dados');
+      return;
+    }
+    const enriched = enrichedDataRef.current;
+    if (!enriched || enriched.length === 0) {
+      toast.error('Carregue primeiro os dados de férias');
+      return;
+    }
+    // Cruzar nomes dos volantes com os colaboradores do Excel
+    const matchedNums = new Set<string>();
+    for (const emp of enriched) {
+      const empName = emp.name.toUpperCase().trim();
+      for (const vName of volanteNames) {
+        if (empName === vName || empName.includes(vName) || vName.includes(empName)) {
+          matchedNums.add(emp.num);
+          break;
+        }
+      }
+    }
+    if (matchedNums.size === 0) {
+      toast.info('Nenhum volante encontrado nos dados de férias carregados');
+      return;
+    }
+    setPinnedEmployees(prev => {
+      const next = new Set(prev);
+      matchedNums.forEach(n => next.add(n));
+      return next;
+    });
+    toast.success(`${matchedNums.size} volante(s) fixado(s) no topo`);
+  }, [volanteNames]);
+
+  // Desafixar todos
+  const desafixarTodos = useCallback(() => {
+    setPinnedEmployees(new Set());
+    toast.success('Todos os colaboradores desafixados');
+  }, []);
+
   // Estado para Recomendações IA
   const [showRecomendacoes, setShowRecomendacoes] = useState(false);
   const [relatorioIA, setRelatorioIA] = useState<string | null>(null);
@@ -301,6 +347,9 @@ export default function Ferias() {
     if (!data) return [];
     return data.employees.map(e => ({...e, ...empStats(e)}));
   }, [data]);
+
+  // Manter ref actualizado para uso no fixarTodosVolantes
+  useEffect(() => { enrichedDataRef.current = enrichedData; }, [enrichedData]);
 
   // Filtered data
   const filteredData = useMemo(() => {
@@ -540,6 +589,14 @@ export default function Ferias() {
                   <Badge variant="outline" className="text-xs border-amber-400 text-amber-600">
                     <Pin className="h-3 w-3 mr-1" />{pinnedEmployees.size} fixados
                   </Badge>
+                )}
+                <Button variant="outline" size="sm" className="h-8 text-xs gap-1 border-amber-300 text-amber-700 hover:bg-amber-50" onClick={fixarTodosVolantes} title="Fixar todos os volantes no topo">
+                  <UserCheck className="h-3.5 w-3.5" /> Fixar Volantes
+                </Button>
+                {pinnedEmployees.size > 0 && (
+                  <Button variant="ghost" size="sm" className="h-8 text-xs text-slate-500 hover:text-red-500" onClick={desafixarTodos} title="Desafixar todos">
+                    <XCircle className="h-3.5 w-3.5 mr-1" /> Limpar
+                  </Button>
                 )}
                 <Badge variant="secondary" className="text-xs">{filteredData.length} colab.</Badge>
               </div>
