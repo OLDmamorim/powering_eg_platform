@@ -799,6 +799,64 @@ function CalendarTab({ data, pinnedData, months, statusFilter, ano, TM, TD, calR
 }
 
 // ─── ANALYSIS TAB ───
+// Regras do Procedimento Interno N.º 8 para sistema de cores semáforo
+const REGRA_DIAS_TOTAL = 22; // Meta: 22 dias úteis por ano
+const REGRA_JAN_MAI_MIN = 5; // Mínimo 5 dias em Jan-Mai
+const REGRA_JUN_SET_MAX = 10; // Máximo 10 dias em Jun-Set
+const REGRA_DEZ_MAX = 3; // Mínimo possível em Dezembro
+
+// Função de cor semáforo
+function semaforo(value: number, greenMin: number, yellowMin: number): 'green'|'yellow'|'red' {
+  if (value >= greenMin) return 'green';
+  if (value >= yellowMin) return 'yellow';
+  return 'red';
+}
+function semaforoMax(value: number, greenMax: number, yellowMax: number): 'green'|'yellow'|'red' {
+  if (value <= greenMax) return 'green';
+  if (value <= yellowMax) return 'yellow';
+  return 'red';
+}
+function semaforoCls(cor: 'green'|'yellow'|'red'): string {
+  if (cor === 'green') return 'text-green-700 bg-green-100';
+  if (cor === 'yellow') return 'text-amber-700 bg-amber-100';
+  return 'text-red-700 bg-red-100';
+}
+function semaforoBorder(cor: 'green'|'yellow'|'red'): string {
+  if (cor === 'green') return 'border-green-500';
+  if (cor === 'yellow') return 'border-amber-500';
+  return 'border-red-500';
+}
+function semaforoBg(cor: 'green'|'yellow'|'red'): string {
+  if (cor === 'green') return '#16a34a';
+  if (cor === 'yellow') return '#d97706';
+  return '#dc2626';
+}
+function semaforoDot(cor: 'green'|'yellow'|'red'): string {
+  if (cor === 'green') return 'bg-green-500';
+  if (cor === 'yellow') return 'bg-amber-500';
+  return 'bg-red-500';
+}
+
+// Análise por período de cada colaborador
+function analisePeriodos(emp: Employee & EmpStats) {
+  let janMai = 0, junSet = 0, outNov = 0, dez = 0;
+  Object.entries(emp.days).forEach(([key, status]) => {
+    if (status !== 'approved') return;
+    const m = parseInt(key.split('-')[0]);
+    if (m >= 1 && m <= 5) janMai++;
+    else if (m >= 6 && m <= 9) junSet++;
+    else if (m >= 10 && m <= 11) outNov++;
+    else if (m === 12) dez++;
+  });
+  return {
+    janMai, junSet, outNov, dez,
+    corJanMai: semaforo(janMai, REGRA_JAN_MAI_MIN, 3),
+    corJunSet: semaforoMax(junSet, REGRA_JUN_SET_MAX, 12),
+    corDez: semaforoMax(dez, REGRA_DEZ_MAX, 5),
+    corTotal: semaforo(emp.approved, REGRA_DIAS_TOTAL, 15),
+  };
+}
+
 function AnalysisTab({ data, allData, ano, TM }: { data: (Employee & EmpStats)[]; allData: (Employee & EmpStats)[]; ano: number; TM: number }) {
   const total = data.length;
   const totApr = data.reduce((a,e)=>a+e.approved,0);
@@ -809,6 +867,11 @@ function AnalysisTab({ data, allData, ano, TM }: { data: (Employee & EmpStats)[]
   const pctApr = (totApr+totRej) ? Math.round(totApr/(totApr+totRej)*100) : 0;
   const mediaAprov = total > 0 ? Math.round(totApr / total * 10) / 10 : 0;
   const mediaRej = total > 0 ? Math.round(totRej / total * 10) / 10 : 0;
+
+  // Conformidade com procedimento
+  const com22dias = data.filter(e => e.approved >= 22).length;
+  const pctCom22 = total > 0 ? Math.round(com22dias / total * 100) : 0;
+  const corConformidade = semaforo(pctCom22, 80, 50);
 
   // Monthly data
   const monthlyData = useMemo(() => {
@@ -926,11 +989,57 @@ function AnalysisTab({ data, allData, ano, TM }: { data: (Employee & EmpStats)[]
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
         <KpiCard icon={<Users className="h-5 w-5 text-blue-500" />} label="Colaboradores" value={total} />
         <KpiCard icon={<AlertTriangle className={`h-5 w-5 ${semFerias>0?'text-red-500':'text-green-500'}`} />} label="Sem férias" value={semFerias} danger={semFerias>0} ok={semFerias===0} />
-        <KpiCard icon={<CheckCircle2 className="h-5 w-5 text-green-500" />} label="Dias aprovados" value={totApr} ok />
-        <KpiCard icon={<XCircle className={`h-5 w-5 ${totRej>0?'text-red-500':'text-muted-foreground'}`} />} label="Não aprovados" value={totRej} danger={totRej>0} />
-        <KpiCard icon={<BarChart3 className={`h-5 w-5 ${pctApr>=80?'text-green-500':pctApr>=50?'text-amber-500':'text-red-500'}`} />} label="Taxa aprovação" value={`${pctApr}%`} ok={pctApr>=80} warn={pctApr>=50&&pctApr<80} danger={pctApr<50} />
-        <KpiCard icon={<Calendar className="h-5 w-5 text-purple-500" />} label="Média dias/colab" value={mediaAprov} />
+        <KpiCard icon={<CheckCircle2 className={`h-5 w-5 ${mediaAprov>=22?'text-green-500':mediaAprov>=15?'text-amber-500':'text-red-500'}`} />} label="Média dias/colab" value={mediaAprov} ok={mediaAprov>=22} warn={mediaAprov>=15&&mediaAprov<22} danger={mediaAprov<15} />
+        <KpiCard icon={<BarChart3 className={`h-5 w-5 ${pctApr>=90?'text-green-500':pctApr>=70?'text-amber-500':'text-red-500'}`} />} label="Taxa aprovação" value={`${pctApr}%`} ok={pctApr>=90} warn={pctApr>=70&&pctApr<90} danger={pctApr<70} />
+        <KpiCard icon={<CheckCircle2 className={`h-5 w-5 ${corConformidade==='green'?'text-green-500':corConformidade==='yellow'?'text-amber-500':'text-red-500'}`} />} label="Com 22 dias" value={`${pctCom22}%`} ok={corConformidade==='green'} warn={corConformidade==='yellow'} danger={corConformidade==='red'} />
+        <KpiCard icon={<XCircle className={`h-5 w-5 ${semFerias>0||totRej>10?'text-red-500':totRej>0?'text-amber-500':'text-green-500'}`} />} label="A corrigir" value={semFerias + soRej} danger={semFerias>0||soRej>0} ok={semFerias===0&&soRej===0} />
       </div>
+
+      {/* Conformidade por Período - Regras do Procedimento */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base flex items-center gap-2">
+            <BarChart3 className="h-4 w-4 text-indigo-500" /> Conformidade por Período (Procedimento N.º 8)
+          </CardTitle>
+          <p className="text-xs text-muted-foreground">Cores baseadas nas regras: Jan-Mai mín. 5 dias | Jun-15Set máx. 10 dias | Dez mínimo possível | Total 22 dias</p>
+        </CardHeader>
+        <CardContent>
+          {(() => {
+            const periodoStats = data.map(e => ({ ...e, periodos: analisePeriodos(e) }));
+            const okJanMai = periodoStats.filter(e => e.periodos.corJanMai === 'green').length;
+            const okJunSet = periodoStats.filter(e => e.periodos.corJunSet === 'green').length;
+            const okDez = periodoStats.filter(e => e.periodos.corDez === 'green').length;
+            const okTotal = periodoStats.filter(e => e.periodos.corTotal === 'green').length;
+            const pJM = total > 0 ? Math.round(okJanMai/total*100) : 0;
+            const pJS = total > 0 ? Math.round(okJunSet/total*100) : 0;
+            const pD = total > 0 ? Math.round(okDez/total*100) : 0;
+            const pT = total > 0 ? Math.round(okTotal/total*100) : 0;
+            const periodos = [
+              { label: 'Jan-Mai (≥ 5 dias)', pct: pJM, cor: semaforo(pJM, 80, 50) },
+              { label: 'Jun-Set (≤ 10 dias)', pct: pJS, cor: semaforo(pJS, 80, 50) },
+              { label: 'Dezembro (mínimo)', pct: pD, cor: semaforo(pD, 80, 50) },
+              { label: 'Total (≥ 22 dias)', pct: pT, cor: semaforo(pT, 80, 50) },
+            ];
+            return (
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                {periodos.map(p => (
+                  <div key={p.label} className={`rounded-lg border-2 p-4 text-center ${semaforoBorder(p.cor)}`}>
+                    <div className="flex items-center justify-center gap-2 mb-2">
+                      <div className={`w-3 h-3 rounded-full ${semaforoDot(p.cor)}`} />
+                      <span className="text-xs font-medium text-muted-foreground">{p.label}</span>
+                    </div>
+                    <div className={`text-3xl font-bold ${p.cor==='green'?'text-green-700':p.cor==='yellow'?'text-amber-700':'text-red-700'}`}>{p.pct}%</div>
+                    <div className="text-[10px] text-muted-foreground mt-1">em conformidade</div>
+                    <div className="mt-2 h-2 bg-muted rounded-full overflow-hidden">
+                      <div className="h-full rounded-full" style={{width:`${p.pct}%`, background: semaforoBg(p.cor)}} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            );
+          })()}
+        </CardContent>
+      </Card>
 
       {/* Monthly chart + Peak months side by side */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -994,6 +1103,7 @@ function AnalysisTab({ data, allData, ano, TM }: { data: (Employee & EmpStats)[]
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-base flex items-center gap-2"><Users className="h-4 w-4 text-indigo-500" /> Resumo por Gestor</CardTitle>
+          <p className="text-xs text-muted-foreground">Média dias: 🟢 ≥22 | 🟡 15-21 | 🔴 &lt;15 — Taxa: 🟢 ≥90% | 🟡 70-89% | 🔴 &lt;70%</p>
         </CardHeader>
         <CardContent className="p-0">
           <div className="overflow-auto">
@@ -1003,33 +1113,46 @@ function AnalysisTab({ data, allData, ano, TM }: { data: (Employee & EmpStats)[]
                   <TableHead>Gestor</TableHead>
                   <TableHead className="text-center">Lojas</TableHead>
                   <TableHead className="text-center">Colab.</TableHead>
-                  <TableHead className="text-center">Aprov.</TableHead>
-                  <TableHead className="text-center">N. Aprov.</TableHead>
-                  <TableHead className="text-center">Faltas</TableHead>
+                  <TableHead className="text-center">Média Dias</TableHead>
+                  <TableHead className="text-center">Com 22d</TableHead>
                   <TableHead className="text-center">Sem férias</TableHead>
                   <TableHead>Taxa Aprov.</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {gestorResumo.map((g) => (
-                  <TableRow key={g.gestor}>
-                    <TableCell className="font-medium text-sm">{g.gestor}</TableCell>
-                    <TableCell className="text-center">{g.lojas}</TableCell>
-                    <TableCell className="text-center">{g.total}</TableCell>
-                    <TableCell className="text-center"><span className="px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-[10px] font-semibold">{g.approved}</span></TableCell>
-                    <TableCell className="text-center">{g.rejected>0 ? <Badge variant="destructive" className="text-[10px]">{g.rejected}</Badge> : <span className="text-muted-foreground">0</span>}</TableCell>
-                    <TableCell className="text-center">{g.absent>0 ? <Badge variant="secondary" className="text-[10px]">{g.absent}</Badge> : <span className="text-muted-foreground">0</span>}</TableCell>
-                    <TableCell className="text-center">{g.sem>0 ? <Badge variant="destructive" className="text-[10px]">{g.sem}</Badge> : <span className="text-green-600 text-xs">0</span>}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1.5 min-w-[80px]">
-                        <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
-                          <div className="h-full rounded-full" style={{width:`${g.pct}%`,background:g.pct>=80?'#16a34a':g.pct>=50?'#d97706':'#dc2626'}} />
+                {gestorResumo.map((g) => {
+                  const media = g.total > 0 ? Math.round(g.approved / g.total * 10) / 10 : 0;
+                  const corMedia = semaforo(media, 22, 15);
+                  const corTaxa = semaforo(g.pct, 90, 70);
+                  // Contar quantos têm 22 dias nesta zona
+                  const gestorEmps = data.filter(e => e.gestor === g.gestor);
+                  const com22 = gestorEmps.filter(e => e.approved >= 22).length;
+                  const pctCom22g = gestorEmps.length > 0 ? Math.round(com22/gestorEmps.length*100) : 0;
+                  const corCom22 = semaforo(pctCom22g, 80, 50);
+                  return (
+                    <TableRow key={g.gestor}>
+                      <TableCell className="font-medium text-sm">{g.gestor}</TableCell>
+                      <TableCell className="text-center">{g.lojas}</TableCell>
+                      <TableCell className="text-center">{g.total}</TableCell>
+                      <TableCell className="text-center">
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${semaforoCls(corMedia)}`}>{media}</span>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${semaforoCls(corCom22)}`}>{pctCom22g}%</span>
+                      </TableCell>
+                      <TableCell className="text-center">{g.sem>0 ? <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold text-red-700 bg-red-100">{g.sem}</span> : <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold text-green-700 bg-green-100">0</span>}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1.5 min-w-[100px]">
+                          <div className={`w-2.5 h-2.5 rounded-full ${semaforoDot(corTaxa)}`} />
+                          <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+                            <div className="h-full rounded-full" style={{width:`${g.pct}%`,background:semaforoBg(corTaxa)}} />
+                          </div>
+                          <span className={`text-[10px] font-semibold w-9 ${corTaxa==='green'?'text-green-700':corTaxa==='yellow'?'text-amber-700':'text-red-700'}`}>{g.pct}%</span>
                         </div>
-                        <span className="text-[10px] text-muted-foreground w-8">{g.pct}%</span>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </div>
@@ -1080,7 +1203,7 @@ function AnalysisTab({ data, allData, ano, TM }: { data: (Employee & EmpStats)[]
         </Card>
       )}
 
-      {/* Top / Bottom colaboradores side by side */}
+      {/* Top / Bottom colaboradores com semáforo por período */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Card>
           <CardHeader className="pb-2">
@@ -1094,20 +1217,27 @@ function AnalysisTab({ data, allData, ano, TM }: { data: (Employee & EmpStats)[]
                     <TableHead>#</TableHead>
                     <TableHead>Colaborador</TableHead>
                     <TableHead>Loja</TableHead>
-                    <TableHead className="text-center">Aprov.</TableHead>
-                    <TableHead className="text-center">N.Apr.</TableHead>
+                    <TableHead className="text-center">Total</TableHead>
+                    <TableHead className="text-center">Jan-Mai</TableHead>
+                    <TableHead className="text-center">Jun-Set</TableHead>
+                    <TableHead className="text-center">Dez</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {topColabs.map((e,i) => (
-                    <TableRow key={i}>
-                      <TableCell className="text-xs text-muted-foreground">{i+1}</TableCell>
-                      <TableCell className="font-medium text-sm">{shortName(e.name)}</TableCell>
-                      <TableCell className="text-xs">{e.store}</TableCell>
-                      <TableCell className="text-center"><span className="px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-[10px] font-semibold">{e.approved}</span></TableCell>
-                      <TableCell className="text-center">{e.rejected>0 ? <span className="text-red-500 text-xs">{e.rejected}</span> : <span className="text-muted-foreground">0</span>}</TableCell>
-                    </TableRow>
-                  ))}
+                  {topColabs.map((e,i) => {
+                    const p = analisePeriodos(e);
+                    return (
+                      <TableRow key={i}>
+                        <TableCell className="text-xs text-muted-foreground">{i+1}</TableCell>
+                        <TableCell className="font-medium text-sm">{shortName(e.name)}</TableCell>
+                        <TableCell className="text-xs">{e.store}</TableCell>
+                        <TableCell className="text-center"><span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${semaforoCls(p.corTotal)}`}>{e.approved}</span></TableCell>
+                        <TableCell className="text-center"><span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${semaforoCls(p.corJanMai)}`}>{p.janMai}</span></TableCell>
+                        <TableCell className="text-center"><span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${semaforoCls(p.corJunSet)}`}>{p.junSet}</span></TableCell>
+                        <TableCell className="text-center"><span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${semaforoCls(p.corDez)}`}>{p.dez}</span></TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </div>
@@ -1126,20 +1256,27 @@ function AnalysisTab({ data, allData, ano, TM }: { data: (Employee & EmpStats)[]
                     <TableHead>#</TableHead>
                     <TableHead>Colaborador</TableHead>
                     <TableHead>Loja</TableHead>
-                    <TableHead className="text-center">Aprov.</TableHead>
-                    <TableHead className="text-center">N.Apr.</TableHead>
+                    <TableHead className="text-center">Total</TableHead>
+                    <TableHead className="text-center">Jan-Mai</TableHead>
+                    <TableHead className="text-center">Jun-Set</TableHead>
+                    <TableHead className="text-center">Dez</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {bottomColabs.map((e,i) => (
-                    <TableRow key={i}>
-                      <TableCell className="text-xs text-muted-foreground">{i+1}</TableCell>
-                      <TableCell className="font-medium text-sm">{shortName(e.name)}</TableCell>
-                      <TableCell className="text-xs">{e.store}</TableCell>
-                      <TableCell className="text-center"><span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${e.approved===0?'bg-red-100 text-red-700':'bg-amber-100 text-amber-700'}`}>{e.approved}</span></TableCell>
-                      <TableCell className="text-center">{e.rejected>0 ? <span className="text-red-500 text-xs">{e.rejected}</span> : <span className="text-muted-foreground">0</span>}</TableCell>
-                    </TableRow>
-                  ))}
+                  {bottomColabs.map((e,i) => {
+                    const p = analisePeriodos(e);
+                    return (
+                      <TableRow key={i}>
+                        <TableCell className="text-xs text-muted-foreground">{i+1}</TableCell>
+                        <TableCell className="font-medium text-sm">{shortName(e.name)}</TableCell>
+                        <TableCell className="text-xs">{e.store}</TableCell>
+                        <TableCell className="text-center"><span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${semaforoCls(p.corTotal)}`}>{e.approved}</span></TableCell>
+                        <TableCell className="text-center"><span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${semaforoCls(p.corJanMai)}`}>{p.janMai}</span></TableCell>
+                        <TableCell className="text-center"><span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${semaforoCls(p.corJunSet)}`}>{p.junSet}</span></TableCell>
+                        <TableCell className="text-center"><span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${semaforoCls(p.corDez)}`}>{p.dez}</span></TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </div>
@@ -1154,6 +1291,7 @@ function AnalysisTab({ data, allData, ano, TM }: { data: (Employee & EmpStats)[]
             <CardTitle className="text-base flex items-center gap-2">
               <AlertTriangle className="h-4 w-4 text-amber-500" /> Situações a Acompanhar ({situacoes.length})
             </CardTitle>
+            <p className="text-xs text-muted-foreground">Progresso: % dos 22 dias obrigatórios para subsídio de férias</p>
           </CardHeader>
           <CardContent className="p-0">
             <div className="overflow-auto">
@@ -1163,35 +1301,38 @@ function AnalysisTab({ data, allData, ano, TM }: { data: (Employee & EmpStats)[]
                     <TableHead>Colaborador</TableHead>
                     <TableHead>Loja</TableHead>
                     <TableHead>Gestor</TableHead>
-                    <TableHead className="text-center">Aprov.</TableHead>
-                    <TableHead className="text-center">N. Aprov.</TableHead>
-                    <TableHead className="text-center">Faltas</TableHead>
+                    <TableHead className="text-center">Total</TableHead>
+                    <TableHead className="text-center">Jan-Mai</TableHead>
+                    <TableHead className="text-center">Jun-Set</TableHead>
                     <TableHead>Situação</TableHead>
-                    <TableHead>Progresso</TableHead>
+                    <TableHead>Progresso (22d)</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {situacoes.map((e,i) => {
                     const pct = Math.min(Math.round(e.approved/22*100),100);
+                    const corPct = semaforo(pct, 80, 40);
+                    const p = analisePeriodos(e);
                     return (
                       <TableRow key={i}>
                         <TableCell className="font-medium text-sm">{shortName(e.name)}</TableCell>
                         <TableCell className="text-xs">{e.store}</TableCell>
                         <TableCell className="text-xs">{e.gestor}</TableCell>
-                        <TableCell className="text-center"><span className="px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-[10px] font-semibold">{e.approved}</span></TableCell>
-                        <TableCell className="text-center">{e.rejected>0 ? <Badge variant="destructive" className="text-[10px]">{e.rejected}</Badge> : <span className="text-muted-foreground">0</span>}</TableCell>
-                        <TableCell className="text-center">{e.absent>0 ? <Badge variant="secondary" className="text-[10px]">{e.absent}</Badge> : <span className="text-muted-foreground">0</span>}</TableCell>
+                        <TableCell className="text-center"><span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${semaforoCls(p.corTotal)}`}>{e.approved}</span></TableCell>
+                        <TableCell className="text-center"><span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${semaforoCls(p.corJanMai)}`}>{p.janMai}</span></TableCell>
+                        <TableCell className="text-center"><span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${semaforoCls(p.corJunSet)}`}>{p.junSet}</span></TableCell>
                         <TableCell>
-                          {e.total===0 && <Badge variant="destructive" className="text-[10px]">Sem férias</Badge>}
-                          {e.total>0&&e.approved===0 && <Badge variant="outline" className="text-[10px] border-amber-400 text-amber-600">Tudo por aprovar</Badge>}
-                          {e.absent>3 && <Badge variant="secondary" className="text-[10px] ml-1">{e.absent} faltas</Badge>}
+                          {e.total===0 && <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold text-red-700 bg-red-100">Sem férias</span>}
+                          {e.total>0&&e.approved===0 && <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold text-amber-700 bg-amber-100">Tudo por aprovar</span>}
+                          {e.absent>3 && <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold text-slate-700 bg-slate-100 ml-1">{e.absent} faltas</span>}
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-1.5 min-w-[80px]">
-                            <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
-                              <div className="h-full rounded-full" style={{width:`${pct}%`,background:pct>=80?'#16a34a':pct>=40?'#d97706':'#dc2626'}} />
+                          <div className="flex items-center gap-1.5 min-w-[100px]">
+                            <div className={`w-2.5 h-2.5 rounded-full ${semaforoDot(corPct)}`} />
+                            <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+                              <div className="h-full rounded-full" style={{width:`${pct}%`,background:semaforoBg(corPct)}} />
                             </div>
-                            <span className="text-[10px] text-muted-foreground w-7">{pct}%</span>
+                            <span className={`text-[10px] font-semibold w-7 ${corPct==='green'?'text-green-700':corPct==='yellow'?'text-amber-700':'text-red-700'}`}>{pct}%</span>
                           </div>
                         </TableCell>
                       </TableRow>
@@ -1208,26 +1349,32 @@ function AnalysisTab({ data, allData, ano, TM }: { data: (Employee & EmpStats)[]
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-base flex items-center gap-2"><Building2 className="h-4 w-4" /> Resumo por Loja ({lojaResumo.length})</CardTitle>
+          <p className="text-xs text-muted-foreground">Borda: 🟢 conforme | 🟡 atenção | 🔴 crítico (sem férias ou taxa &lt;70%)</p>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {lojaResumo.map(([loja,s]) => {
               const pct = (s.approved+s.rejected) ? Math.round(s.approved/(s.approved+s.rejected)*100) : 0;
-              const color = s.sem>0 ? 'border-l-red-500' : s.rejected>5 ? 'border-l-amber-500' : 'border-l-green-500';
+              const media = s.total > 0 ? Math.round(s.approved / s.total * 10) / 10 : 0;
+              const corTaxa = semaforo(pct, 90, 70);
+              const corMedia = semaforo(media, 22, 15);
+              const corGeral = s.sem > 0 ? 'red' as const : corTaxa === 'red' || corMedia === 'red' ? 'red' as const : corTaxa === 'yellow' || corMedia === 'yellow' ? 'yellow' as const : 'green' as const;
               return (
-                <div key={loja} className={`border rounded-lg p-3 border-l-4 ${color}`}>
+                <div key={loja} className={`border rounded-lg p-3 border-l-4 ${semaforoBorder(corGeral)}`}>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="font-medium text-sm truncate">{loja}</span>
+                    <div className="flex items-center gap-2">
+                      <div className={`w-2.5 h-2.5 rounded-full ${semaforoDot(corGeral)}`} />
+                      <span className="font-medium text-sm truncate">{loja}</span>
+                    </div>
                     <Badge variant="secondary" className="text-[10px]">{s.total} colab.</Badge>
                   </div>
                   <div className="flex items-center gap-3 text-xs mb-2">
-                    <span className="text-green-600">{s.approved} aprov.</span>
-                    <span className="text-red-500">{s.rejected} n.aprov.</span>
-                    {s.absent>0 && <span className="text-slate-500">{s.absent} faltas</span>}
-                    {s.sem>0 && <span className="text-amber-600 font-medium">{s.sem} sem férias</span>}
+                    <span className={`px-1.5 py-0.5 rounded ${semaforoCls(corMedia)}`} title="Média dias/colab">Ø {media}d</span>
+                    <span className={`px-1.5 py-0.5 rounded ${semaforoCls(corTaxa)}`} title="Taxa aprovação">{pct}%</span>
+                    {s.sem>0 && <span className="px-1.5 py-0.5 rounded text-red-700 bg-red-100 font-medium">{s.sem} sem férias</span>}
                   </div>
-                  <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                    <div className={`h-full rounded-full ${pct>=80?'bg-green-500':pct>=50?'bg-amber-400':'bg-red-400'}`} style={{width:`${pct}%`}} />
+                  <div className="h-2 bg-muted rounded-full overflow-hidden">
+                    <div className="h-full rounded-full" style={{width:`${pct}%`, background: semaforoBg(corTaxa)}} />
                   </div>
                 </div>
               );

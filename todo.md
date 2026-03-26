@@ -1025,3 +1025,11 @@
 - [x] Alterar backend para filtrar colaboradores pela zona do gestor logado
 - [x] Alterar frontend para passar info do gestor ao endpoint
 - [x] Guardar checkpoint
+
+## Sistema de Cores Semáforo na Análise de Férias
+- [x] Implementar cores verde/amarelo/vermelho nos KPIs baseado nas regras do procedimento
+- [x] Aplicar cores na tabela por gestor (taxa aprovação, dias, etc.)
+- [x] Aplicar cores na tabela por loja (sobreposições, cobertura)
+- [x] Aplicar cores nos alertas de cobertura e meses críticos
+- [x] Aplicar cores no top mais/menos dias
+- [x] Guardar checkpoint
