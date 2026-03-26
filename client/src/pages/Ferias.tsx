@@ -716,10 +716,12 @@ function CalendarTab({ data, pinnedData, months, statusFilter, ano, TM, TD, calR
               {/* PINNED EMPLOYEES SECTION */}
               {pinnedData.length > 0 && (
                 <>
-                  <tr>
-                    <td colSpan={2 + months.reduce((a,m)=>a+DAYS[m],0)} className="z-10 text-white text-[10px] font-bold uppercase tracking-wider px-2 py-1.5" style={{position:'sticky',left:0,background:'linear-gradient(to right, #b45309, #d97706)'}}>
+                  <tr style={{background:'#b45309'}}>
+                    <td className="sticky z-20 text-white text-[10px] font-bold uppercase tracking-wider px-2 py-1.5 whitespace-nowrap" style={{position:'sticky',left:0,background:'linear-gradient(to right, #b45309, #d97706)',minWidth:140,zIndex:20}}>
                       <span className="flex items-center gap-1.5"><Star className="h-3 w-3" /> Em Destaque ({pinnedData.length})</span>
                     </td>
+                    <td className="sticky z-20" style={{position:'sticky',left:140,background:'#d97706',minWidth:80,zIndex:20}}></td>
+                    {months.map(m => Array.from({length:DAYS[m]},(_,d)=>d+1).map(d => <td key={`${m}-${d}`} style={{background:'#d97706',minWidth:20}}></td>))}
                   </tr>
                   {pinnedData.sort((a,b)=>a.name.localeCompare(b.name,'pt')).map((emp,ri) => (
                     <tr key={`pin-${emp.num}-${ri}`} className="bg-amber-950/30">
@@ -755,10 +757,12 @@ function CalendarTab({ data, pinnedData, months, statusFilter, ano, TM, TD, calR
               {/* STORE GROUPS */}
               {byStore.order.map(store => (
                 <React.Fragment key={store}>
-                  <tr>
-                    <td colSpan={2 + months.reduce((a,m)=>a+DAYS[m],0)} className="z-20 text-white text-[10px] font-bold uppercase tracking-wider px-2 py-1" style={{position:'sticky',left:0,background:'#334155'}}>
+                  <tr style={{background:'#334155'}}>
+                    <td className="sticky z-20 text-white text-[10px] font-bold uppercase tracking-wider px-2 py-1 whitespace-nowrap" style={{position:'sticky',left:0,background:'#334155',minWidth:140,zIndex:20}}>
                       {store} <span className="font-normal opacity-70 ml-1">({byStore.map[store].length})</span>
                     </td>
+                    <td className="sticky z-20" style={{position:'sticky',left:140,background:'#334155',minWidth:80,zIndex:20}}></td>
+                    {months.map(m => Array.from({length:DAYS[m]},(_,d)=>d+1).map(d => <td key={`${m}-${d}`} style={{background:'#334155',minWidth:20}}></td>))}
                   </tr>
                   {byStore.map[store].sort((a,b)=>a.name.localeCompare(b.name,'pt')).map((emp,ri) => (
                     <tr key={`${emp.num}-${ri}`} className={ri%2===0?'bg-white':'bg-slate-50/50'}>

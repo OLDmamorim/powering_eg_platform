@@ -1047,3 +1047,7 @@
 ## BUG: Coluna Loja não fica fixa no scroll lateral
 - [x] Corrigir coluna Loja para ficar sticky left:140px em todas as linhas (pinned, store groups, header)
 - [x] Guardar checkpoint
+
+## BUG: Headers de grupo das lojas cortados no scroll lateral
+- [ ] Corrigir store header rows (ABRANTES, AGUEDA, etc.) para ficarem sticky left no scroll
+- [ ] Guardar checkpoint
