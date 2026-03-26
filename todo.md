@@ -1043,3 +1043,7 @@
 - [x] Tornar botão pin mais visível e garantir que aparece em produção
 - [x] Corrigir headers de grupo (nome da loja) cortados ao fazer scroll
 - [x] Guardar checkpoint
+
+## BUG: Coluna Loja não fica fixa no scroll lateral
+- [x] Corrigir coluna Loja para ficar sticky left:140px em todas as linhas (pinned, store groups, header)
+- [x] Guardar checkpoint

@@ -731,7 +731,7 @@ function CalendarTab({ data, pinnedData, months, statusFilter, ano, TM, TD, calR
                           <span className="truncate">{shortName(emp.name)}</span>
                         </span>
                       </td>
-                      <td className="z-10 text-center text-[10px] text-amber-300/70 truncate" style={{minWidth:80,maxWidth:80,background:'#1c1207',position:'sticky',left:140}} title={emp.store}>
+                      <td className="sticky z-10 text-center text-[10px] text-amber-300/70 truncate" style={{minWidth:80,maxWidth:80,background:'#1c1207',position:'sticky',left:140,zIndex:10}} title={emp.store}>
                         {emp.store.length > 10 ? emp.store.substring(0,10)+'…' : emp.store}
                       </td>
                       {months.map(m =>
@@ -762,7 +762,7 @@ function CalendarTab({ data, pinnedData, months, statusFilter, ano, TM, TD, calR
                   </tr>
                   {byStore.map[store].sort((a,b)=>a.name.localeCompare(b.name,'pt')).map((emp,ri) => (
                     <tr key={`${emp.num}-${ri}`} className={ri%2===0?'bg-white':'bg-slate-50/50'}>
-                      <td className="z-10 px-1 py-0.5 font-medium text-slate-700 truncate" style={{minWidth:140,maxWidth:140,position:'sticky',left:0,background:ri%2===0?'#ffffff':'#f8fafc'}} title={emp.name}>
+                      <td className="sticky z-10 px-1 py-0.5 font-medium text-slate-700 truncate" style={{minWidth:140,maxWidth:140,position:'sticky',left:0,background:ri%2===0?'#ffffff':'#f8fafc',zIndex:10}} title={emp.name}>
                         <span className="flex items-center gap-1">
                           <button onClick={() => togglePin(emp.num)} className={`shrink-0 p-0.5 rounded ${pinnedEmployees.has(emp.num) ? 'text-amber-500 bg-amber-100' : 'text-slate-400 hover:text-amber-500 hover:bg-amber-50'}`} title={pinnedEmployees.has(emp.num) ? 'Desafixar' : 'Fixar no topo'}>
                             <Pin className={`h-3.5 w-3.5 ${pinnedEmployees.has(emp.num) ? 'fill-current' : ''}`} />
@@ -770,7 +770,7 @@ function CalendarTab({ data, pinnedData, months, statusFilter, ano, TM, TD, calR
                           <span className="truncate">{shortName(emp.name)}</span>
                         </span>
                       </td>
-                      <td className="z-10 text-center text-[10px] text-slate-400 truncate" style={{minWidth:80,maxWidth:80,position:'sticky',left:140,background:ri%2===0?'#ffffff':'#f8fafc'}} title={emp.store}>
+                      <td className="sticky z-10 text-center text-[10px] text-slate-400 truncate" style={{minWidth:80,maxWidth:80,position:'sticky',left:140,background:ri%2===0?'#ffffff':'#f8fafc',zIndex:10}} title={emp.store}>
                         {emp.store.length > 10 ? emp.store.substring(0,10)+'…' : emp.store}
                       </td>
                       {months.map(m =>
