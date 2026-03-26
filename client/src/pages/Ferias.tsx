@@ -557,7 +557,7 @@ export default function Ferias() {
               onClick={() => {
                 setShowRecomendacoes(true);
                 setRelatorioIA(null);
-                gerarRecomendacoesIA.mutate({ ano });
+                gerarRecomendacoesIA.mutate({ ano, gestorNome: user?.name || undefined });
               }}
             >
               {gerarRecomendacoesIA.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
@@ -571,10 +571,10 @@ export default function Ferias() {
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2 text-purple-700">
                   <Sparkles className="h-5 w-5" />
-                  Recomendações IA — Férias {ano}
+                  Recomendações IA — Férias {ano} {user?.name ? `(${user.name})` : ''}
                 </DialogTitle>
                 <DialogDescription>
-                  Análise automática com base no Procedimento Interno N.º 8 (Férias {ano})
+                  Análise automática com base no Procedimento Interno N.º 8 — Zona de {user?.name || 'Gestor'}
                 </DialogDescription>
               </DialogHeader>
               <div className="mt-2">
@@ -610,7 +610,7 @@ export default function Ferias() {
                   </Button>
                   <Button variant="outline" size="sm" onClick={() => {
                     setRelatorioIA(null);
-                    gerarRecomendacoesIA.mutate({ ano });
+                    gerarRecomendacoesIA.mutate({ ano, gestorNome: user?.name || undefined });
                   }}>
                     <Sparkles className="h-4 w-4 mr-1" /> Gerar Novamente
                   </Button>

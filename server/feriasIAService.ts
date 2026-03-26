@@ -188,11 +188,18 @@ function analisarDadosParaPrompt(colaboradores: ColaboradorFerias[], ano: number
 
 export async function gerarRecomendacoesFerias(
   colaboradores: ColaboradorFerias[],
-  ano: number
+  ano: number,
+  gestorNome?: string
 ): Promise<string> {
   const dadosAnalise = analisarDadosParaPrompt(colaboradores, ano);
   
+  const contextoGestor = gestorNome 
+    ? `Este relatório é para o gestor de zona **${gestorNome}** e abrange apenas os colaboradores e lojas da sua zona.`
+    : 'Este relatório abrange todos os colaboradores a nível nacional.';
+
   const systemPrompt = `És um especialista em Recursos Humanos da ExpressGlass, responsável por analisar o mapa de férias e gerar recomendações com base no Procedimento Interno N.º 8.
+
+${contextoGestor}
 
 ${PROCEDIMENTO_FERIAS}
 
@@ -231,7 +238,10 @@ REGRAS:
 - Verifica se o período Jun-15Set não excede 10 dias por colaborador.
 - Verifica se Jan-Mai tem pelo menos 5 dias por colaborador.`;
 
-  const userPrompt = `Analisa os seguintes dados de férias do ano ${ano} e gera o relatório de recomendações:\n\n${dadosAnalise}`;
+  const tituloRelatorio = gestorNome 
+    ? `Analisa os seguintes dados de férias do ano ${ano} para a zona do gestor ${gestorNome}. Foca-te apenas nas lojas e colaboradores desta zona.`
+    : `Analisa os seguintes dados de férias do ano ${ano} e gera o relatório de recomendações.`;
+  const userPrompt = `${tituloRelatorio}\n\n${dadosAnalise}`;
 
   const response = await invokeLLM({
     messages: [

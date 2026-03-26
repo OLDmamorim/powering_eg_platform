@@ -1020,3 +1020,8 @@
 - [x] Implementar botão "Recomendações IA" e modal de relatório no frontend Ferias.tsx
 - [x] Alimentar o Chatbot IA com o procedimento de férias
 - [x] Testar e guardar checkpoint
+
+## Filtrar Recomendações IA por Zona do Gestor
+- [x] Alterar backend para filtrar colaboradores pela zona do gestor logado
+- [x] Alterar frontend para passar info do gestor ao endpoint
+- [x] Guardar checkpoint

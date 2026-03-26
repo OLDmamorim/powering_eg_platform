@@ -284,8 +284,9 @@ export const appRouter = router({
     gerarRecomendacoesIA: protectedProcedure
       .input(z.object({
         ano: z.number(),
+        gestorNome: z.string().optional(),
       }))
-      .mutation(async ({ input }) => {
+      .mutation(async ({ input, ctx }) => {
         // Obter último upload do ano
         const upload = await db.getUltimoFeriasUpload(input.ano);
         if (!upload) {
@@ -296,7 +297,7 @@ export const appRouter = router({
           throw new TRPCError({ code: 'NOT_FOUND', message: 'Nenhum colaborador encontrado neste upload' });
         }
         // Mapear para o formato esperado
-        const colabs = colaboradores.map((c: any) => ({
+        let colabs = colaboradores.map((c: any) => ({
           nome: c.nome,
           loja: c.loja,
           gestor: c.gestor || '',
@@ -306,8 +307,23 @@ export const appRouter = router({
           totalFeriados: c.totalFeriados || 0,
           totalFaltas: c.totalFaltas || 0,
         }));
-        const relatorio = await gerarRecomendacoesFerias(colabs, input.ano);
-        return { relatorio, totalColaboradores: colabs.length, ano: input.ano };
+
+        // Filtrar pela zona do gestor logado (se não for admin)
+        const nomeGestor = input.gestorNome || ctx.user.name || '';
+        if (ctx.user.role !== 'admin' && nomeGestor) {
+          // Filtrar colaboradores que pertencem à zona do gestor
+          colabs = colabs.filter(c => {
+            const gestorDoColab = (c.gestor || '').toLowerCase().trim();
+            return gestorDoColab === nomeGestor.toLowerCase().trim();
+          });
+        }
+
+        if (colabs.length === 0) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: `Nenhum colaborador encontrado para a zona de ${nomeGestor}` });
+        }
+
+        const relatorio = await gerarRecomendacoesFerias(colabs, input.ano, nomeGestor);
+        return { relatorio, totalColaboradores: colabs.length, ano: input.ano, gestor: nomeGestor };
       }),
   }),
   
