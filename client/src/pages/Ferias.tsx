@@ -16,7 +16,8 @@ import { toast } from "sonner";
 import {
   Upload, Calendar, BarChart3, PieChart, Download, FileSpreadsheet,
   Search, Users, Building2, Clock, Trash2, Filter, Sun, AlertTriangle,
-  CheckCircle2, XCircle, Eye, ChevronUp, ChevronDown, Crosshair, Pin, Star, Sparkles, Loader2, UserCheck
+  CheckCircle2, XCircle, Eye, ChevronUp, ChevronDown, Crosshair, Pin, Star, Sparkles, Loader2, UserCheck,
+  FileText, Store, ArrowRight, CircleDot
 } from "lucide-react";
 
 // ─── CONSTANTS ───
@@ -698,7 +699,8 @@ export default function Ferias() {
             <TabsContent value="dist">
               <DistributionTab data={enrichedData} gestorFilter={gestorFilter} ano={ano} TM={TM}
                 compareAno={compareAno} setCompareAno={setCompareAno} compareData={compareData}
-                anosDisponiveis={anosQuery.data?.map((a: any) => a.ano).filter((a: number) => a !== ano) || []} />
+                anosDisponiveis={anosQuery.data?.map((a: any) => a.ano).filter((a: number) => a !== ano) || []}
+                availableStores={availableStores} />
             </TabsContent>
           </Tabs>
 
@@ -1535,12 +1537,27 @@ function AnalysisTab({ data, allData, ano, TM }: { data: (Employee & EmpStats)[]
 }
 
 // ─── DISTRIBUTION TAB ───
-function DistributionTab({ data, gestorFilter, ano, TM, compareAno, setCompareAno, compareData, anosDisponiveis }: {
+function DistributionTab({ data, gestorFilter, ano, TM, compareAno, setCompareAno, compareData, anosDisponiveis, availableStores }: {
   data: (Employee & EmpStats)[]; gestorFilter: string; ano: number; TM: number;
   compareAno: number|null; setCompareAno: (v: number|null) => void; compareData: Employee[]|null; anosDisponiveis: number[];
+  availableStores: string[];
 }) {
   const [distType, setDistType] = useState<'approved'|'all'>('approved');
   const PERIODOS = [{l:'01 Jan > 31 Mai',m:[1,2,3,4,5]},{l:'01 Jun > 15 Set',m:[6,7,8,9]},{l:'16 Set > 31 Dez',m:[10,11,12]}];
+
+  // Relatório por Loja
+  const [showRelatorioLoja, setShowRelatorioLoja] = useState(false);
+  const [selectedLoja, setSelectedLoja] = useState<string>('');
+  const [relatorioLojaData, setRelatorioLojaData] = useState<any>(null);
+  const gerarRelatorioLoja = trpc.ferias.gerarRelatorioLoja.useMutation({
+    onSuccess: (result) => {
+      setRelatorioLojaData(result);
+      toast.success(`Relatório gerado para ${result.loja} (${result.totalColaboradores} colaboradores)`);
+    },
+    onError: (err) => {
+      toast.error(err.message || 'Erro ao gerar relatório');
+    },
+  });
 
   const gestorData = useMemo(() => {
     const gestores = gestorFilter !== 'all' ? [gestorFilter] : Object.keys(GESTORES).sort();
@@ -1611,7 +1628,84 @@ function DistributionTab({ data, gestorFilter, ano, TM, compareAno, setCompareAn
             </SelectContent>
           </Select>
         )}
+        <div className="flex-1" />
+        <Select value={selectedLoja} onValueChange={setSelectedLoja}>
+          <SelectTrigger className="w-[200px] h-8 text-xs border-teal-300">
+            <SelectValue placeholder="Selecionar loja..." />
+          </SelectTrigger>
+          <SelectContent>
+            {availableStores.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+          </SelectContent>
+        </Select>
+        <Button
+          variant="outline"
+          size="sm"
+          className="border-teal-300 text-teal-700 hover:bg-teal-50 gap-2 h-8"
+          disabled={!selectedLoja || gerarRelatorioLoja.isPending}
+          onClick={() => {
+            if (!selectedLoja) { toast.error('Selecione uma loja primeiro'); return; }
+            setShowRelatorioLoja(true);
+            setRelatorioLojaData(null);
+            gerarRelatorioLoja.mutate({ ano, loja: selectedLoja });
+          }}
+        >
+          {gerarRelatorioLoja.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileText className="h-3.5 w-3.5" />}
+          Relatório Loja
+        </Button>
       </div>
+
+      {/* MODAL RELATÓRIO POR LOJA */}
+      <Dialog open={showRelatorioLoja} onOpenChange={setShowRelatorioLoja}>
+        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-teal-700">
+              <Store className="h-5 w-5" />
+              Relatório de Férias — {selectedLoja} ({ano})
+            </DialogTitle>
+            <DialogDescription>
+              Análise de conformidade e sugestões de redistribuição baseadas no Procedimento Interno N.º 8
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-2">
+            {gerarRelatorioLoja.isPending ? (
+              <div className="flex flex-col items-center justify-center py-16 gap-4">
+                <Loader2 className="h-10 w-10 animate-spin text-teal-500" />
+                <p className="text-sm text-muted-foreground">A analisar colaboradores da loja {selectedLoja}...</p>
+                <p className="text-xs text-muted-foreground">Isto pode demorar até 30 segundos</p>
+              </div>
+            ) : relatorioLojaData ? (
+              <RelatorioLojaContent data={relatorioLojaData} ano={ano} />
+            ) : (
+              <div className="flex flex-col items-center justify-center py-16 gap-4">
+                <AlertTriangle className="h-10 w-10 text-amber-500" />
+                <p className="text-sm text-muted-foreground">Erro ao gerar relatório. Tente novamente.</p>
+              </div>
+            )}
+          </div>
+          {relatorioLojaData && (
+            <DialogFooter>
+              <Button variant="outline" size="sm" onClick={() => {
+                const md = relatorioLojaData.recomendacoesIA || '';
+                const blob = new Blob([md], { type: 'text/markdown' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `relatorio-loja-${selectedLoja}-${ano}.md`;
+                a.click();
+                URL.revokeObjectURL(url);
+              }}>
+                <Download className="h-4 w-4 mr-1" /> Exportar Relatório
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => {
+                setRelatorioLojaData(null);
+                gerarRelatorioLoja.mutate({ ano, loja: selectedLoja });
+              }}>
+                <Sparkles className="h-4 w-4 mr-1" /> Gerar Novamente
+              </Button>
+            </DialogFooter>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Monthly table */}
       <Card>
@@ -1726,6 +1820,215 @@ function DistributionTab({ data, gestorFilter, ano, TM, compareAno, setCompareAn
                 })()}
               </tbody>
             </table>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+// ─── RELATÓRIO LOJA CONTENT ───
+function RelatorioLojaContent({ data, ano }: { data: any; ano: number }) {
+  const corCls = (cor: string) => {
+    if (cor === 'green') return 'text-green-700 bg-green-100';
+    if (cor === 'yellow') return 'text-amber-700 bg-amber-100';
+    return 'text-red-700 bg-red-100';
+  };
+  const corDot = (cor: string) => {
+    if (cor === 'green') return 'bg-green-500';
+    if (cor === 'yellow') return 'bg-amber-500';
+    return 'bg-red-500';
+  };
+  const corBorder = (cor: string) => {
+    if (cor === 'green') return 'border-green-300';
+    if (cor === 'yellow') return 'border-amber-300';
+    return 'border-red-300';
+  };
+  const corBg = (cor: string) => {
+    if (cor === 'green') return 'bg-green-50';
+    if (cor === 'yellow') return 'bg-amber-50';
+    return 'bg-red-50';
+  };
+
+  return (
+    <div className="space-y-5">
+      {/* RESUMO KPIs */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className={`rounded-lg border p-3 text-center ${corBorder('green')} ${corBg('green')}`}>
+          <div className="text-2xl font-bold text-green-700">{data.resumo.conformes}</div>
+          <div className="text-xs text-green-600">Conformes</div>
+        </div>
+        <div className={`rounded-lg border p-3 text-center ${corBorder('yellow')} ${corBg('yellow')}`}>
+          <div className="text-2xl font-bold text-amber-700">{data.resumo.comAvisos}</div>
+          <div className="text-xs text-amber-600">Com Avisos</div>
+        </div>
+        <div className={`rounded-lg border p-3 text-center ${corBorder('red')} ${corBg('red')}`}>
+          <div className="text-2xl font-bold text-red-700">{data.resumo.criticos}</div>
+          <div className="text-xs text-red-600">Críticos</div>
+        </div>
+        <div className="rounded-lg border p-3 text-center border-slate-200 bg-slate-50">
+          <div className="text-2xl font-bold text-slate-700">{data.resumo.mediaAprovados}</div>
+          <div className="text-xs text-slate-500">Média dias/colab</div>
+        </div>
+      </div>
+
+      {/* ALERTAS RÁPIDOS */}
+      {(data.resumo.semFeriasMarcadas > 0 || data.resumo.subsidioEmRisco > 0 || data.sobreposicoes.length > 0) && (
+        <div className="flex flex-wrap gap-2">
+          {data.resumo.semFeriasMarcadas > 0 && (
+            <Badge variant="destructive" className="gap-1">
+              <XCircle className="h-3 w-3" /> {data.resumo.semFeriasMarcadas} sem férias marcadas
+            </Badge>
+          )}
+          {data.resumo.subsidioEmRisco > 0 && (
+            <Badge variant="outline" className="border-red-300 text-red-700 gap-1">
+              <AlertTriangle className="h-3 w-3" /> {data.resumo.subsidioEmRisco} subsídio em risco
+            </Badge>
+          )}
+          {data.sobreposicoes.length > 0 && (
+            <Badge variant="outline" className="border-amber-300 text-amber-700 gap-1">
+              <Users className="h-3 w-3" /> {data.sobreposicoes.length} dias com sobreposição
+            </Badge>
+          )}
+        </div>
+      )}
+
+      {/* TABELA DE ANÁLISE POR COLABORADOR */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <Users className="h-4 w-4 text-teal-600" />
+            Análise por Colaborador — {data.loja}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          <div className="overflow-auto">
+            <table className="w-full text-xs border-collapse">
+              <thead>
+                <tr className="bg-muted/50">
+                  <th className="text-left px-3 py-2 font-semibold min-w-[160px]">Colaborador</th>
+                  <th className="text-center px-2 py-2 font-medium">Total</th>
+                  <th className="text-center px-2 py-2 font-medium">Jan-Mai</th>
+                  <th className="text-center px-2 py-2 font-medium">Jun-Set</th>
+                  <th className="text-center px-2 py-2 font-medium">Out-Nov</th>
+                  <th className="text-center px-2 py-2 font-medium">Dez</th>
+                  <th className="text-left px-2 py-2 font-medium min-w-[200px]">Problemas</th>
+                  <th className="text-left px-2 py-2 font-medium min-w-[220px]">Sugestões</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.analiseColaboradores.map((c: any, i: number) => (
+                  <tr key={i} className={`border-t ${i % 2 === 0 ? '' : 'bg-muted/20'}`}>
+                    <td className="px-3 py-2">
+                      <div className="flex items-center gap-2">
+                        <div className={`w-2.5 h-2.5 rounded-full ${corDot(c.statusGeral)}`} />
+                        <span className="font-medium">{c.nome}</span>
+                      </div>
+                    </td>
+                    <td className="text-center px-2 py-2">
+                      <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold ${corCls(c.corTotal)}`}>
+                        {c.totalAprovados}/22
+                      </span>
+                    </td>
+                    <td className="text-center px-2 py-2">
+                      <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold ${corCls(c.corJanMai)}`}>
+                        {c.janMai}d
+                      </span>
+                    </td>
+                    <td className="text-center px-2 py-2">
+                      <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold ${corCls(c.corJunSet)}`}>
+                        {c.junSet}d
+                      </span>
+                    </td>
+                    <td className="text-center px-2 py-2">
+                      <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-700">
+                        {c.outNov}d
+                      </span>
+                    </td>
+                    <td className="text-center px-2 py-2">
+                      <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold ${corCls(c.corDez)}`}>
+                        {c.dez}d
+                      </span>
+                    </td>
+                    <td className="px-2 py-2">
+                      {c.problemas.length === 0 ? (
+                        <span className="text-green-600 text-[10px] flex items-center gap-1">
+                          <CheckCircle2 className="h-3 w-3" /> Conforme
+                        </span>
+                      ) : (
+                        <ul className="space-y-0.5">
+                          {c.problemas.map((p: string, j: number) => (
+                            <li key={j} className="text-[10px] text-red-700 flex items-start gap-1">
+                              <AlertTriangle className="h-3 w-3 shrink-0 mt-0.5" />
+                              <span>{p}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </td>
+                    <td className="px-2 py-2">
+                      {c.sugestoes.length > 0 && (
+                        <ul className="space-y-0.5">
+                          {c.sugestoes.map((s: string, j: number) => (
+                            <li key={j} className="text-[10px] text-teal-700 flex items-start gap-1">
+                              <ArrowRight className="h-3 w-3 shrink-0 mt-0.5" />
+                              <span>{s}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* SOBREPOSIÇÕES */}
+      {data.sobreposicoes.length > 0 && (
+        <Card className="border-amber-200">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-2 text-amber-700">
+              <AlertTriangle className="h-4 w-4" />
+              Sobreposições ({data.sobreposicoes.length} dias com mais de 1 colaborador)
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="overflow-auto max-h-[200px]">
+              <table className="w-full text-xs border-collapse">
+                <thead>
+                  <tr className="bg-amber-50">
+                    <th className="text-left px-3 py-2 font-semibold">Data</th>
+                    <th className="text-left px-3 py-2 font-semibold">Colaboradores</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.sobreposicoes.map((s: any, i: number) => (
+                    <tr key={i} className="border-t">
+                      <td className="px-3 py-1.5 font-medium">{s.data}</td>
+                      <td className="px-3 py-1.5">{s.colaboradores.join(' + ')}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* RECOMENDAÇÕES IA */}
+      <Card className="border-teal-200">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm flex items-center gap-2 text-teal-700">
+            <Sparkles className="h-4 w-4" />
+            Recomendações IA — Plano de Redistribuição
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="prose prose-sm dark:prose-invert max-w-none">
+            <Streamdown>{data.recomendacoesIA}</Streamdown>
           </div>
         </CardContent>
       </Card>

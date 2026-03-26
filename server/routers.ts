@@ -23,6 +23,7 @@ import { enviarLembretesRH, isDia20 } from "./lembreteRHService";
 import { storagePut } from "./storage";
 import { gerarExcelControloStock } from "./stockExcelService";
 import { gerarRecomendacoesFerias } from "./feriasIAService";
+import { gerarRelatorioLoja } from "./feriasRelatorioLojaService";
 
 // Função para obter feriados portugueses de um ano específico
 function obterFeriadosPortugueses(ano: number): string[] {
@@ -324,6 +325,37 @@ export const appRouter = router({
 
         const relatorio = await gerarRecomendacoesFerias(colabs, input.ano, nomeGestor);
         return { relatorio, totalColaboradores: colabs.length, ano: input.ano, gestor: nomeGestor };
+      }),
+
+    // Gerar relatório IA por loja com análise de problemas e sugestões de redistribuição
+    gerarRelatorioLoja: protectedProcedure
+      .input(z.object({
+        ano: z.number(),
+        loja: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        // Obter último upload do ano
+        const upload = await db.getUltimoFeriasUpload(input.ano);
+        if (!upload) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Nenhum upload de férias encontrado para este ano' });
+        }
+        const colaboradores = await db.getFeriasColaboradoresByUpload(upload.id);
+        if (!colaboradores || colaboradores.length === 0) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Nenhum colaborador encontrado neste upload' });
+        }
+        const colabs = colaboradores.map((c: any) => ({
+          nome: c.nome,
+          loja: c.loja,
+          gestor: c.gestor || '',
+          dias: typeof c.dias === 'string' ? JSON.parse(c.dias) : c.dias,
+          totalAprovados: c.totalAprovados,
+          totalNaoAprovados: c.totalNaoAprovados,
+          totalFeriados: c.totalFeriados || 0,
+          totalFaltas: c.totalFaltas || 0,
+        }));
+        
+        const relatorio = await gerarRelatorioLoja(colabs, input.loja, input.ano);
+        return relatorio;
       }),
 
     // Obter nomes dos volantes da DB para fixar no calendário

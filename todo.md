@@ -1066,3 +1066,23 @@
 - [x] Filtro por loja (sem filtro = todos, com filtro = só loja)
 - [x] Integrar no separador Análise
 - [x] Guardar checkpoint
+
+## Relatório IA por Loja (Análise Férias)
+- [ ] Criar serviço backend que analisa problemas nos pedidos de férias por loja
+- [ ] Gerar sugestões concretas de redistribuição de dias para ficar homogéneo
+- [ ] Implementar botão "Relatório Loja" no frontend com selector de loja
+- [ ] Modal com relatório IA formatado (tabela de problemas + sugestões)
+- [ ] Guardar checkpoint
+
+## Relatório IA por Loja (Férias) - Análise e Sugestões de Redistribuição
+- [x] Criar serviço backend feriasRelatorioLojaService.ts com análise por colaborador
+- [x] Endpoint tRPC ferias.gerarRelatorioLoja (protectedProcedure)
+- [x] Análise de conformidade por período (Jan-Mai, Jun-Set, Out-Nov, Dez)
+- [x] Detecção de problemas: sem férias, excesso Jun-Set, falta Jan-Mai, excesso Dez
+- [x] Detecção de sobreposições (>1 colaborador ausente no mesmo dia)
+- [x] Sugestões IA de redistribuição via LLM
+- [x] UI: Selector de loja + botão "Relatório Loja" no tab Distribuição
+- [x] Modal com KPIs, tabela de análise por colaborador, sobreposições, recomendações IA
+- [x] Exportação do relatório em Markdown
+- [x] 10 testes vitest passados (feriasRelatorioLoja.test.ts)
+- [x] Guardar checkpoint
