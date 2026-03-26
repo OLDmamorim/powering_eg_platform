@@ -13,7 +13,7 @@ vi.mock('./_core/llm', () => ({
 
 import { gerarRelatorioLoja } from './feriasRelatorioLojaService';
 
-describe('feriasRelatorioLojaService', () => {
+describe('feriasRelatorioLojaService — Dias Pedidos e % por Período', () => {
   const mockColaboradores = [
     {
       nome: 'João Silva',
@@ -83,67 +83,138 @@ describe('feriasRelatorioLojaService', () => {
     
     expect(result.loja).toBe('FAMALICÃO');
     expect(result.totalColaboradores).toBe(3);
-    // Não deve incluir Ana Ferreira (BRAGA CENTRO)
     expect(result.analiseColaboradores.map(c => c.nome)).not.toContain('Ana Ferreira');
   });
 
-  it('deve identificar colaborador sem férias marcadas', async () => {
+  it('deve usar totalPedidos (approved + not_approved) como base de análise', async () => {
+    // Criar colaborador com dias not_approved que DEVEM ser contados
+    const colabMisto = [{
+      nome: 'MISTO',
+      loja: 'TESTE',
+      gestor: 'Marco',
+      dias: {
+        '2-1': 'approved', '2-2': 'approved', '2-3': 'approved', '2-4': 'approved', '2-5': 'approved',
+        '7-1': 'not_approved', '7-2': 'not_approved', '7-3': 'not_approved', '7-4': 'not_approved', '7-5': 'not_approved',
+        '7-6': 'not_approved', '7-7': 'not_approved', '7-8': 'not_approved', '7-9': 'not_approved', '7-10': 'not_approved',
+        '10-1': 'approved', '10-2': 'approved', '10-3': 'approved', '10-4': 'approved', '10-5': 'approved',
+        '12-1': 'approved', '12-2': 'approved',
+      },
+      totalAprovados: 12, totalNaoAprovados: 10, totalFeriados: 0, totalFaltas: 0,
+    }];
+
+    const result = await gerarRelatorioLoja(colabMisto, 'TESTE', 2026);
+    const analise = result.analiseColaboradores[0];
+    
+    // Total = 5 + 10 + 5 + 2 = 22 (inclui not_approved!)
+    expect(analise.totalPedidos).toBe(22);
+    expect(analise.diasP1).toBe(5);
+    expect(analise.diasP2).toBe(10);
+    expect(analise.diasP3).toBe(5);
+    expect(analise.diasP4).toBe(2);
+  });
+
+  it('deve calcular % por período correctamente', async () => {
+    const colabSimples = [{
+      nome: 'PCT',
+      loja: 'TESTE2',
+      gestor: 'Marco',
+      dias: {
+        '2-1': 'approved', '2-2': 'approved', '2-3': 'approved', '2-4': 'approved', '2-5': 'approved',
+        '7-1': 'approved', '7-2': 'approved', '7-3': 'approved', '7-4': 'approved', '7-5': 'approved',
+        '7-6': 'approved', '7-7': 'approved', '7-8': 'approved', '7-9': 'approved', '7-10': 'approved',
+        '10-1': 'approved', '10-2': 'approved', '10-3': 'approved', '10-4': 'approved', '10-5': 'approved',
+        '12-1': 'approved', '12-2': 'approved',
+      },
+      totalAprovados: 22, totalNaoAprovados: 0, totalFeriados: 0, totalFaltas: 0,
+    }];
+
+    const result = await gerarRelatorioLoja(colabSimples, 'TESTE2', 2026);
+    const a = result.analiseColaboradores[0];
+    
+    expect(a.pctP1).toBe(23);  // 5/22 ≈ 23%
+    expect(a.pctP2).toBe(45);  // 10/22 ≈ 45%
+    expect(a.pctP3).toBe(23);  // 5/22 ≈ 23%
+    expect(a.pctP4).toBe(9);   // 2/22 ≈ 9%
+    expect(a.gravidade).toBe('conforme');
+    expect(a.corP1).toBe('green');
+    expect(a.corP2).toBe('green');
+  });
+
+  it('deve detectar excesso no 2.º período (>10 dias) e marcar vermelho', async () => {
+    const result = await gerarRelatorioLoja(mockColaboradores, 'FAMALICÃO', 2026);
+    
+    // João tem 14 dias em Jun-Set (12 em Jun + 2 em Jul)
+    const joao = result.analiseColaboradores.find(c => c.nome === 'João Silva');
+    expect(joao).toBeDefined();
+    expect(joao!.diasP2).toBeGreaterThan(10);
+    expect(joao!.corP2).toBe('red');
+    expect(joao!.problemas.some(p => p.includes('EXCEDE'))).toBe(true);
+    
+    // Maria tem 17 dias em Jun-Set
+    const maria = result.analiseColaboradores.find(c => c.nome === 'Maria Santos');
+    expect(maria).toBeDefined();
+    expect(maria!.diasP2).toBeGreaterThan(10);
+    expect(maria!.corP2).toBe('red');
+  });
+
+  it('deve detectar déficit no 1.º período (<5 dias)', async () => {
+    const result = await gerarRelatorioLoja(mockColaboradores, 'FAMALICÃO', 2026);
+    
+    // João tem apenas 3 dias em Jan-Mai
+    const joao = result.analiseColaboradores.find(c => c.nome === 'João Silva');
+    expect(joao).toBeDefined();
+    expect(joao!.diasP1).toBeLessThan(5);
+    expect(joao!.corP1).not.toBe('green');
+    expect(joao!.problemas.some(p => p.includes('1.º período'))).toBe(true);
+    
+    // Maria tem 0 dias em Jan-Mai
+    const maria = result.analiseColaboradores.find(c => c.nome === 'Maria Santos');
+    expect(maria).toBeDefined();
+    expect(maria!.diasP1).toBe(0);
+    expect(maria!.corP1).toBe('red');
+  });
+
+  it('deve identificar colaborador sem férias pedidas como crítico', async () => {
     const result = await gerarRelatorioLoja(mockColaboradores, 'FAMALICÃO', 2026);
     
     const pedro = result.analiseColaboradores.find(c => c.nome === 'Pedro Costa');
     expect(pedro).toBeDefined();
-    expect(pedro!.statusGeral).toBe('red');
-    expect(pedro!.problemas.some(p => p.includes('SEM FÉRIAS MARCADAS'))).toBe(true);
+    expect(pedro!.totalPedidos).toBe(0);
+    expect(pedro!.gravidade).toBe('critico');
+    expect(pedro!.problemas.some(p => p.includes('SEM FÉRIAS'))).toBe(true);
   });
 
-  it('deve identificar excesso em Jun-Set (>10 dias)', async () => {
-    const result = await gerarRelatorioLoja(mockColaboradores, 'FAMALICÃO', 2026);
-    
-    const joao = result.analiseColaboradores.find(c => c.nome === 'João Silva');
-    expect(joao).toBeDefined();
-    // João tem 13 dias em Jun-Set (meses 6 e 7)
-    expect(joao!.junSet).toBeGreaterThan(10);
-    expect(joao!.problemas.some(p => p.includes('Jun-Set'))).toBe(true);
-    expect(joao!.corJunSet).not.toBe('green');
-  });
-
-  it('deve identificar falta de dias em Jan-Mai (<5)', async () => {
-    const result = await gerarRelatorioLoja(mockColaboradores, 'FAMALICÃO', 2026);
-    
-    const joao = result.analiseColaboradores.find(c => c.nome === 'João Silva');
-    expect(joao).toBeDefined();
-    // João tem apenas 3 dias em Jan-Mai
-    expect(joao!.janMai).toBeLessThan(5);
-    expect(joao!.problemas.some(p => p.includes('Jan-Mai'))).toBe(true);
-  });
-
-  it('deve identificar excesso em Dezembro', async () => {
+  it('deve detectar excesso em Dezembro (>5 dias)', async () => {
     const result = await gerarRelatorioLoja(mockColaboradores, 'FAMALICÃO', 2026);
     
     const maria = result.analiseColaboradores.find(c => c.nome === 'Maria Santos');
     expect(maria).toBeDefined();
-    // Maria tem 5 dias em Dezembro
-    expect(maria!.dez).toBeGreaterThan(3);
-    expect(maria!.problemas.some(p => p.includes('Dezembro'))).toBe(true);
+    expect(maria!.diasP4).toBe(5);
+    // 5 dias em Dez → yellow (>3 mas ≤5)
+    expect(maria!.corP4).toBe('yellow');
   });
 
-  it('deve detectar sobreposições na mesma loja', async () => {
+  it('deve detectar sobreposições entre colegas (approved + not_approved)', async () => {
     const result = await gerarRelatorioLoja(mockColaboradores, 'FAMALICÃO', 2026);
     
-    // João e Maria ambos têm dias aprovados em 7-1 e 7-2
+    // João e Maria ambos têm dias em 7-1 e 7-2
     expect(result.sobreposicoes.length).toBeGreaterThan(0);
     const sobreposicao = result.sobreposicoes.find(s => 
       s.colaboradores.includes('João Silva') && s.colaboradores.includes('Maria Santos')
     );
     expect(sobreposicao).toBeDefined();
+    expect(result.resumo.totalSobreposicoes).toBeGreaterThan(0);
   });
 
-  it('deve calcular resumo correctamente', async () => {
+  it('deve calcular resumo com novos campos (comExcessoP2, comDeficitP1)', async () => {
     const result = await gerarRelatorioLoja(mockColaboradores, 'FAMALICÃO', 2026);
     
-    expect(result.resumo.totalDiasAprovados).toBe(44); // 22 + 22 + 0
-    expect(result.resumo.semFeriasMarcadas).toBe(1); // Pedro
+    expect(result.resumo.semFeriasPedidas).toBe(1); // Pedro
+    expect(result.resumo.comExcessoP2).toBeGreaterThanOrEqual(1); // João e/ou Maria
+    expect(result.resumo.comDeficitP1).toBeGreaterThanOrEqual(1); // João e Maria
     expect(result.resumo.conformes + result.resumo.comAvisos + result.resumo.criticos).toBe(3);
+    expect(result.resumo.totalDiasPedidos).toBe(44); // 22 + 22 + 0
+    expect(result.resumo.mediaDiasPedidos).toBeCloseTo(14.7, 0);
   });
 
   it('deve gerar recomendações IA', async () => {
@@ -160,16 +231,32 @@ describe('feriasRelatorioLojaService', () => {
     ).rejects.toThrow('Nenhum colaborador encontrado para a loja LOJA_INEXISTENTE');
   });
 
-  it('deve identificar Maria com falta de dias em Jan-Mai e excesso em Jun-Set', async () => {
-    const result = await gerarRelatorioLoja(mockColaboradores, 'FAMALICÃO', 2026);
+  it('deve ignorar dias com status diferente de approved/not_approved', async () => {
+    const colabComFeriados = [{
+      nome: 'COM FERIADOS',
+      loja: 'VIANA',
+      gestor: 'Marco',
+      dias: {
+        '2-1': 'approved', '2-2': 'approved', '2-3': 'approved', '2-4': 'approved', '2-5': 'approved',
+        '3-1': 'holiday', '5-1': 'holiday', // NÃO devem contar
+        '7-1': 'not_approved', '7-2': 'not_approved', '7-3': 'not_approved',
+        '7-4': 'not_approved', '7-5': 'not_approved', '7-6': 'not_approved',
+        '7-7': 'not_approved', '7-8': 'not_approved', '7-9': 'not_approved', '7-10': 'not_approved',
+        '9-15': 'absence', // NÃO deve contar
+        '10-1': 'approved', '10-2': 'approved', '10-3': 'approved', '10-4': 'approved', '10-5': 'approved',
+        '12-1': 'approved', '12-2': 'approved',
+      },
+      totalAprovados: 12, totalNaoAprovados: 10, totalFeriados: 2, totalFaltas: 1,
+    }];
+
+    const result = await gerarRelatorioLoja(colabComFeriados, 'VIANA', 2026);
+    const a = result.analiseColaboradores[0];
     
-    const maria = result.analiseColaboradores.find(c => c.nome === 'Maria Santos');
-    expect(maria).toBeDefined();
-    // Maria tem 0 dias em Jan-Mai
-    expect(maria!.janMai).toBe(0);
-    expect(maria!.corJanMai).toBe('red');
-    // Maria tem 17 dias em Jun-Set (12 em Jul + 5 em Ago)
-    expect(maria!.junSet).toBeGreaterThan(10);
-    expect(maria!.corJunSet).not.toBe('green');
+    // Apenas approved + not_approved = 22
+    expect(a.totalPedidos).toBe(22);
+    expect(a.diasP1).toBe(5);
+    expect(a.diasP2).toBe(10);
+    expect(a.diasP3).toBe(5);
+    expect(a.diasP4).toBe(2);
   });
 });

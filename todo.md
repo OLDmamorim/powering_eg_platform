@@ -1095,4 +1095,16 @@
 - [x] Botão "Exportar PDF" no modal do relatório por loja
 - [x] Testar exportação e verificar fidelidade visual (6 páginas, PDF gerado com sucesso)
 - [x] 5 testes vitest passados (pdfRelatorioFeriasLoja.test.ts)
-- [ ] Guardar checkpoint
+- [x] Guardar checkpoint
+
+## Reformulação Análise Férias — Foco nos Dias Pedidos e % por Período
+- [x] Reformular serviço de relatório: base = dias PEDIDOS (aprovados + não aprovados), não estado de aprovação
+- [x] Calcular % distribuição por período (1.º Jan-Mai, 2.º Jun-Set, 3.º Out-Nov, 4.º Dez) por colaborador
+- [x] Destacar a vermelho quando % num período excede o regulamento (ex: >45% no 2.º período)
+- [x] Detectar sobreposições entre colegas da mesma loja (dias comuns de férias)
+- [x] Remover lógica de "subsídio em risco" e foco em aprovação — focar em distribuição e regulamento
+- [x] Atualizar UI do modal com tabela de % por período e cores de gravidade (como na imagem)
+- [x] Atualizar PDF para refletir nova análise com % por período
+- [x] Atualizar recomendações IA para focar em redistribuição de dias pedidos
+- [x] 12 testes relatório loja + 5 testes PDF passados
+- [x] Guardar checkpoint

@@ -1848,14 +1848,15 @@ function DistributionTab({ data, gestorFilter, ano, TM, compareAno, setCompareAn
 
 // ─── RELATÓRIO LOJA CONTENT ───
 function RelatorioLojaContent({ data, ano }: { data: any; ano: number }) {
-  const corCls = (cor: string) => {
-    if (cor === 'green') return 'text-green-700 bg-green-100';
-    if (cor === 'yellow') return 'text-amber-700 bg-amber-100';
-    return 'text-red-700 bg-red-100';
+  // Cores baseadas na gravidade do período
+  const corCelula = (cor: string) => {
+    if (cor === 'green') return 'bg-green-100 text-green-800';
+    if (cor === 'yellow') return 'bg-amber-100 text-amber-800';
+    return 'bg-red-500 text-white';
   };
-  const corDot = (cor: string) => {
-    if (cor === 'green') return 'bg-green-500';
-    if (cor === 'yellow') return 'bg-amber-500';
+  const corDot = (grav: string) => {
+    if (grav === 'conforme') return 'bg-green-500';
+    if (grav === 'aviso') return 'bg-amber-500';
     return 'bg-red-500';
   };
   const corBorder = (cor: string) => {
@@ -1872,7 +1873,7 @@ function RelatorioLojaContent({ data, ano }: { data: any; ano: number }) {
   return (
     <div className="space-y-5">
       {/* RESUMO KPIs */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
         <div className={`rounded-lg border p-3 text-center ${corBorder('green')} ${corBg('green')}`}>
           <div className="text-2xl font-bold text-green-700">{data.resumo.conformes}</div>
           <div className="text-xs text-green-600">Conformes</div>
@@ -1885,23 +1886,32 @@ function RelatorioLojaContent({ data, ano }: { data: any; ano: number }) {
           <div className="text-2xl font-bold text-red-700">{data.resumo.criticos}</div>
           <div className="text-xs text-red-600">Críticos</div>
         </div>
+        <div className="rounded-lg border p-3 text-center border-red-300 bg-red-50">
+          <div className="text-2xl font-bold text-red-700">{data.resumo.comExcessoP2 || 0}</div>
+          <div className="text-xs text-red-600">Excesso 2.º Per.</div>
+        </div>
         <div className="rounded-lg border p-3 text-center border-slate-200 bg-slate-50">
-          <div className="text-2xl font-bold text-slate-700">{data.resumo.mediaAprovados}</div>
+          <div className="text-2xl font-bold text-slate-700">{data.resumo.mediaDiasPedidos ?? data.resumo.mediaAprovados}</div>
           <div className="text-xs text-slate-500">Média dias/colab</div>
         </div>
       </div>
 
       {/* ALERTAS RÁPIDOS */}
-      {(data.resumo.semFeriasMarcadas > 0 || data.resumo.subsidioEmRisco > 0 || data.sobreposicoes.length > 0) && (
+      {(data.resumo.semFeriasPedidas > 0 || data.resumo.comExcessoP2 > 0 || data.resumo.comDeficitP1 > 0 || data.sobreposicoes.length > 0) && (
         <div className="flex flex-wrap gap-2">
-          {data.resumo.semFeriasMarcadas > 0 && (
+          {data.resumo.semFeriasPedidas > 0 && (
             <Badge variant="destructive" className="gap-1">
-              <XCircle className="h-3 w-3" /> {data.resumo.semFeriasMarcadas} sem férias marcadas
+              <XCircle className="h-3 w-3" /> {data.resumo.semFeriasPedidas} sem férias pedidas
             </Badge>
           )}
-          {data.resumo.subsidioEmRisco > 0 && (
-            <Badge variant="outline" className="border-red-300 text-red-700 gap-1">
-              <AlertTriangle className="h-3 w-3" /> {data.resumo.subsidioEmRisco} subsídio em risco
+          {data.resumo.comExcessoP2 > 0 && (
+            <Badge variant="destructive" className="gap-1">
+              <AlertTriangle className="h-3 w-3" /> {data.resumo.comExcessoP2} com excesso no 2.º período
+            </Badge>
+          )}
+          {data.resumo.comDeficitP1 > 0 && (
+            <Badge variant="outline" className="border-amber-300 text-amber-700 gap-1">
+              <AlertTriangle className="h-3 w-3" /> {data.resumo.comDeficitP1} com déficit no 1.º período
             </Badge>
           )}
           {data.sobreposicoes.length > 0 && (
@@ -1912,27 +1922,38 @@ function RelatorioLojaContent({ data, ano }: { data: any; ano: number }) {
         </div>
       )}
 
-      {/* TABELA DE ANÁLISE POR COLABORADOR */}
+      {/* TABELA DE DISTRIBUIÇÃO % POR PERÍODO */}
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-sm flex items-center gap-2">
             <Users className="h-4 w-4 text-teal-600" />
-            Análise por Colaborador — {data.loja}
+            Distribuição de Dias Pedidos por Período — {data.loja}
           </CardTitle>
+          <p className="text-[10px] text-muted-foreground mt-1">
+            Base: todos os dias pedidos (aprovados + não aprovados). Cores indicam violação do regulamento.
+          </p>
         </CardHeader>
         <CardContent className="p-0">
           <div className="overflow-auto">
             <table className="w-full text-xs border-collapse">
               <thead>
-                <tr className="bg-muted/50">
+                <tr className="bg-teal-700 text-white">
                   <th className="text-left px-3 py-2 font-semibold min-w-[160px]">Colaborador</th>
                   <th className="text-center px-2 py-2 font-medium">Total</th>
-                  <th className="text-center px-2 py-2 font-medium">Jan-Mai</th>
-                  <th className="text-center px-2 py-2 font-medium">Jun-Set</th>
-                  <th className="text-center px-2 py-2 font-medium">Out-Nov</th>
-                  <th className="text-center px-2 py-2 font-medium">Dez</th>
+                  <th className="text-center px-2 py-2 font-medium">1.º Período<br/><span className="font-normal text-teal-200">Jan-Mai</span></th>
+                  <th className="text-center px-2 py-2 font-medium">2.º Período<br/><span className="font-normal text-teal-200">Jun-Set</span></th>
+                  <th className="text-center px-2 py-2 font-medium">3.º Período<br/><span className="font-normal text-teal-200">Out-Nov</span></th>
+                  <th className="text-center px-2 py-2 font-medium">4.º Período<br/><span className="font-normal text-teal-200">Dez</span></th>
                   <th className="text-left px-2 py-2 font-medium min-w-[200px]">Problemas</th>
-                  <th className="text-left px-2 py-2 font-medium min-w-[220px]">Sugestões</th>
+                </tr>
+                <tr className="bg-teal-50 text-teal-700">
+                  <td className="px-3 py-1 text-[10px] font-semibold">Regulamento:</td>
+                  <td className="text-center px-2 py-1 text-[10px]">22 dias</td>
+                  <td className="text-center px-2 py-1 text-[10px] font-semibold">Min. 5 dias</td>
+                  <td className="text-center px-2 py-1 text-[10px] font-semibold">Máx. 10 dias</td>
+                  <td className="text-center px-2 py-1 text-[10px]">Livre</td>
+                  <td className="text-center px-2 py-1 text-[10px] font-semibold">Min. possível</td>
+                  <td></td>
                 </tr>
               </thead>
               <tbody>
@@ -1940,58 +1961,42 @@ function RelatorioLojaContent({ data, ano }: { data: any; ano: number }) {
                   <tr key={i} className={`border-t ${i % 2 === 0 ? '' : 'bg-muted/20'}`}>
                     <td className="px-3 py-2">
                       <div className="flex items-center gap-2">
-                        <div className={`w-2.5 h-2.5 rounded-full ${corDot(c.statusGeral)}`} />
+                        <div className={`w-2.5 h-2.5 rounded-full ${corDot(c.gravidade || c.statusGeral)}`} />
                         <span className="font-medium">{c.nome}</span>
                       </div>
                     </td>
                     <td className="text-center px-2 py-2">
-                      <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold ${corCls(c.corTotal)}`}>
-                        {c.totalAprovados}/22
+                      <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold ${(c.totalPedidos ?? c.totalAprovados) < 22 ? 'bg-amber-100 text-amber-800' : 'bg-green-100 text-green-800'}`}>
+                        {c.totalPedidos ?? c.totalAprovados}
                       </span>
                     </td>
-                    <td className="text-center px-2 py-2">
-                      <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold ${corCls(c.corJanMai)}`}>
-                        {c.janMai}d
-                      </span>
+                    <td className={`text-center px-2 py-2 ${corCelula(c.corP1 || c.corJanMai)}`}>
+                      <div className="font-bold text-sm">{c.pctP1 ?? Math.round(((c.janMai || 0) / Math.max(1, c.totalPedidos || c.totalAprovados || 1)) * 100)}%</div>
+                      <div className="text-[9px] opacity-80">{c.diasP1 ?? c.janMai} dias</div>
                     </td>
-                    <td className="text-center px-2 py-2">
-                      <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold ${corCls(c.corJunSet)}`}>
-                        {c.junSet}d
-                      </span>
+                    <td className={`text-center px-2 py-2 ${corCelula(c.corP2 || c.corJunSet)}`}>
+                      <div className="font-bold text-sm">{c.pctP2 ?? Math.round(((c.junSet || 0) / Math.max(1, c.totalPedidos || c.totalAprovados || 1)) * 100)}%</div>
+                      <div className="text-[9px] opacity-80">{c.diasP2 ?? c.junSet} dias</div>
                     </td>
-                    <td className="text-center px-2 py-2">
-                      <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-700">
-                        {c.outNov}d
-                      </span>
+                    <td className={`text-center px-2 py-2 ${corCelula(c.corP3 || 'green')}`}>
+                      <div className="font-bold text-sm">{c.pctP3 ?? Math.round(((c.outNov || 0) / Math.max(1, c.totalPedidos || c.totalAprovados || 1)) * 100)}%</div>
+                      <div className="text-[9px] opacity-80">{c.diasP3 ?? c.outNov} dias</div>
                     </td>
-                    <td className="text-center px-2 py-2">
-                      <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold ${corCls(c.corDez)}`}>
-                        {c.dez}d
-                      </span>
+                    <td className={`text-center px-2 py-2 ${corCelula(c.corP4 || c.corDez || 'green')}`}>
+                      <div className="font-bold text-sm">{c.pctP4 ?? Math.round(((c.dez || 0) / Math.max(1, c.totalPedidos || c.totalAprovados || 1)) * 100)}%</div>
+                      <div className="text-[9px] opacity-80">{c.diasP4 ?? c.dez} dias</div>
                     </td>
                     <td className="px-2 py-2">
-                      {c.problemas.length === 0 ? (
+                      {(c.problemas || []).length === 0 ? (
                         <span className="text-green-600 text-[10px] flex items-center gap-1">
                           <CheckCircle2 className="h-3 w-3" /> Conforme
                         </span>
                       ) : (
                         <ul className="space-y-0.5">
-                          {c.problemas.map((p: string, j: number) => (
+                          {(c.problemas || []).map((p: string, j: number) => (
                             <li key={j} className="text-[10px] text-red-700 flex items-start gap-1">
                               <AlertTriangle className="h-3 w-3 shrink-0 mt-0.5" />
                               <span>{p}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </td>
-                    <td className="px-2 py-2">
-                      {c.sugestoes.length > 0 && (
-                        <ul className="space-y-0.5">
-                          {c.sugestoes.map((s: string, j: number) => (
-                            <li key={j} className="text-[10px] text-teal-700 flex items-start gap-1">
-                              <ArrowRight className="h-3 w-3 shrink-0 mt-0.5" />
-                              <span>{s}</span>
                             </li>
                           ))}
                         </ul>
@@ -2002,6 +2007,12 @@ function RelatorioLojaContent({ data, ano }: { data: any; ano: number }) {
               </tbody>
             </table>
           </div>
+          {/* Legenda */}
+          <div className="flex items-center gap-4 px-3 py-2 border-t text-[10px] text-muted-foreground">
+            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-red-500"></span> Excede regulamento</span>
+            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-amber-100 border border-amber-300"></span> Concentração elevada</span>
+            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-green-100 border border-green-300"></span> Conforme</span>
+          </div>
         </CardContent>
       </Card>
 
@@ -2011,8 +2022,9 @@ function RelatorioLojaContent({ data, ano }: { data: any; ano: number }) {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm flex items-center gap-2 text-amber-700">
               <AlertTriangle className="h-4 w-4" />
-              Sobreposições ({data.sobreposicoes.length} dias com mais de 1 colaborador)
+              Sobreposições na Loja ({data.sobreposicoes.length} dias com mais de 1 colaborador)
             </CardTitle>
+            <p className="text-[10px] text-amber-600 mt-1">Regra: Máximo 1 colaborador de férias por loja em cada momento.</p>
           </CardHeader>
           <CardContent className="p-0">
             <div className="overflow-auto max-h-[200px]">
@@ -2020,7 +2032,7 @@ function RelatorioLojaContent({ data, ano }: { data: any; ano: number }) {
                 <thead>
                   <tr className="bg-amber-50">
                     <th className="text-left px-3 py-2 font-semibold">Data</th>
-                    <th className="text-left px-3 py-2 font-semibold">Colaboradores</th>
+                    <th className="text-left px-3 py-2 font-semibold">Colaboradores em Férias</th>
                   </tr>
                 </thead>
                 <tbody>
