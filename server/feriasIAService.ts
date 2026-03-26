@@ -85,7 +85,7 @@ function analisarDadosParaPrompt(colaboradores: ColaboradorFerias[], ano: number
     let diasJanMai = 0, diasJunSet15 = 0, diasDez = 0;
     
     Object.entries(c.dias).forEach(([key, status]) => {
-      if (status !== 'approved') return;
+      if (status !== 'approved' && status !== 'not_approved') return; // Conta TODOS os dias registados
       const [mStr, dStr] = key.split('-');
       const m = parseInt(mStr);
       const d = parseInt(dStr);
@@ -95,27 +95,28 @@ function analisarDadosParaPrompt(colaboradores: ColaboradorFerias[], ano: number
       if ((m >= 6 && m <= 8) || (m === 9 && d <= 15)) diasJunSet15++;
       if (m === 12) diasDez++;
       
-      // Sobreposições por loja
+      // Sobreposições por loja (approved + not_approved)
       if (!lojaDias[c.loja]) lojaDias[c.loja] = {};
       if (!lojaDias[c.loja][key]) lojaDias[c.loja][key] = [];
       lojaDias[c.loja][key].push(c.nome);
     });
     
-    // Verificar violações
-    if (diasJanMai < 5 && c.totalAprovados > 0) {
-      violacoes.push(`${c.nome} (${c.loja}): apenas ${diasJanMai} dias aprovados Jan-Mai (mínimo 5 obrigatórios)`);
+    // Verificar violações — base = dias REGISTADOS (approved + not_approved)
+    const totalRegistados = c.totalAprovados + c.totalNaoAprovados;
+    if (diasJanMai < 5 && totalRegistados > 0) {
+      violacoes.push(`${c.nome} (${c.loja}): apenas ${diasJanMai} dias registados Jan-Mai (mínimo 5 obrigatórios)`);
     }
     if (diasJunSet15 > 10) {
-      violacoes.push(`${c.nome} (${c.loja}): ${diasJunSet15} dias aprovados Jun-15Set (MÁXIMO 10 permitidos)`);
+      violacoes.push(`${c.nome} (${c.loja}): ${diasJunSet15} dias registados Jun-15Set (MÁXIMO 10 permitidos)`);
     }
     if (diasDez > 5) {
       violacoes.push(`${c.nome} (${c.loja}): ${diasDez} dias em Dezembro (regra: mínimo possível)`);
     }
-    if (c.totalAprovados < 22 && c.totalAprovados > 0) {
-      violacoes.push(`${c.nome} (${c.loja}): apenas ${c.totalAprovados} dias aprovados de 22 (subsídio de férias em risco)`);
+    if (totalRegistados < 22 && totalRegistados > 0) {
+      violacoes.push(`${c.nome} (${c.loja}): apenas ${totalRegistados} dias registados de 22 — faltam ${22 - totalRegistados} dias por marcar`);
     }
-    if (c.totalAprovados === 0 && c.totalNaoAprovados === 0) {
-      violacoes.push(`${c.nome} (${c.loja}): SEM FÉRIAS MARCADAS (data-limite era 28 de Fevereiro)`);
+    if (totalRegistados === 0) {
+      violacoes.push(`${c.nome} (${c.loja}): SEM FÉRIAS REGISTADAS (data-limite era 28 de Fevereiro)`);
     }
   });
   
@@ -131,34 +132,34 @@ function analisarDadosParaPrompt(colaboradores: ColaboradorFerias[], ano: number
   });
   
   // Resumo por loja
-  const lojaResumo: Record<string, { total: number; aprov: number; sem: number }> = {};
+  const lojaResumo: Record<string, { total: number; registados: number; sem: number }> = {};
   colaboradores.forEach(c => {
-    if (!lojaResumo[c.loja]) lojaResumo[c.loja] = { total: 0, aprov: 0, sem: 0 };
+    if (!lojaResumo[c.loja]) lojaResumo[c.loja] = { total: 0, registados: 0, sem: 0 };
     lojaResumo[c.loja].total++;
-    lojaResumo[c.loja].aprov += c.totalAprovados;
+    lojaResumo[c.loja].registados += (c.totalAprovados + c.totalNaoAprovados);
     if (c.totalAprovados === 0 && c.totalNaoAprovados === 0) lojaResumo[c.loja].sem++;
   });
   
-  // Distribuição mensal
+  // Distribuição mensal (todos os dias registados)
   const mensal: Record<number, number> = {};
   for (let m = 1; m <= 12; m++) mensal[m] = 0;
   colaboradores.forEach(c => {
     Object.entries(c.dias).forEach(([key, status]) => {
-      if (status === 'approved') {
+      if (status === 'approved' || status === 'not_approved') {
         const m = parseInt(key.split('-')[0]);
         mensal[m]++;
       }
     });
   });
   
+  const totalRegistados = totalAprovados + totalNaoAprovados;
   let prompt = `=== DADOS DE FÉRIAS ${ano} ===\n`;
   prompt += `Total colaboradores: ${total}\n`;
-  prompt += `Sem férias marcadas: ${semFerias}\n`;
-  prompt += `Sem dias aprovados: ${semAprovados}\n`;
-  prompt += `Total dias aprovados: ${totalAprovados}\n`;
-  prompt += `Total dias não aprovados: ${totalNaoAprovados}\n\n`;
+  prompt += `Sem férias registadas: ${semFerias}\n`;
+  prompt += `Total dias registados (aprovados + por aprovar): ${totalRegistados}\n`;
+  prompt += `Média dias registados/colaborador: ${total > 0 ? (totalRegistados / total).toFixed(1) : 0}\n\n`;
   
-  prompt += `=== DISTRIBUIÇÃO MENSAL (dias aprovados) ===\n`;
+  prompt += `=== DISTRIBUIÇÃO MENSAL (dias registados) ===\n`;
   for (let m = 1; m <= 12; m++) {
     prompt += `${MONTHS_FULL[m-1]}: ${mensal[m]} dias\n`;
   }
@@ -180,7 +181,7 @@ function analisarDadosParaPrompt(colaboradores: ColaboradorFerias[], ano: number
   
   prompt += `\n=== RESUMO POR LOJA ===\n`;
   Object.entries(lojaResumo).sort(([a],[b]) => a.localeCompare(b)).forEach(([loja, r]) => {
-    prompt += `${loja}: ${r.total} colab, ${r.aprov} dias aprov${r.sem > 0 ? `, ${r.sem} sem férias` : ''}\n`;
+    prompt += `${loja}: ${r.total} colab, ${r.registados} dias registados${r.sem > 0 ? `, ${r.sem} sem férias` : ''}\n`;
   });
   
   return prompt;
@@ -222,21 +223,23 @@ Verificação do cumprimento dos parâmetros por período (Jan-Mai, Jun-Set, Set
 ## 🏪 Análise por Loja
 Lojas com situações problemáticas (sobreposições, colaboradores sem férias, etc.).
 
-## 💰 Impacto no Subsídio de Férias
-Colaboradores que podem perder o subsídio por não terem 22 dias agendados.
+## 🔄 Sugestões de Redistribuição
+Para cada colaborador com problemas, indica quantos dias mover e de/para que período. Exemplo: "Retirar 3 dias de Jun-Set e colocar em Jan-Mai".
 
 ## ✅ Recomendações de Ação
-Lista priorizada de ações a tomar, com responsável sugerido.
+Lista priorizada de ações a tomar.
 
 REGRAS:
+- A análise baseia-se nos dias REGISTADOS (aprovados + por aprovar), NÃO apenas nos aprovados.
 - Sê específico: menciona nomes, lojas e números concretos.
 - Prioriza as violações mais graves primeiro.
 - Usa linguagem profissional em português europeu.
 - Não inventes dados — usa apenas o que é fornecido.
 - Quando há sobreposições (>1 colaborador de férias na mesma loja no mesmo dia), destaca como violação.
-- Verifica se todos os colaboradores têm pelo menos 22 dias agendados (para subsídio).
 - Verifica se o período Jun-15Set não excede 10 dias por colaborador.
-- Verifica se Jan-Mai tem pelo menos 5 dias por colaborador.`;
+- Verifica se Jan-Mai tem pelo menos 5 dias por colaborador.
+- NÃO fales de subsídio de férias, perda de subsídio ou impacto no subsídio — foca-te APENAS na distribuição dos dias e no cumprimento do regulamento.
+- Foca a análise na percentagem de peso de cada período face ao total de dias registados.`;
 
   const tituloRelatorio = gestorNome 
     ? `Analisa os seguintes dados de férias do ano ${ano} para a zona do gestor ${gestorNome}. Foca-te apenas nas lojas e colaboradores desta zona.`

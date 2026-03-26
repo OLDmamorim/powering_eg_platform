@@ -904,7 +904,7 @@ function semaforoDot(cor: 'green'|'yellow'|'red'): string {
 function analisePeriodos(emp: Employee & EmpStats) {
   let janMai = 0, junSet = 0, outNov = 0, dez = 0;
   Object.entries(emp.days).forEach(([key, status]) => {
-    if (status !== 'approved') return;
+    if (status !== 'approved' && status !== 'rejected') return; // Conta TODOS os dias registados (aprovados + por aprovar)
     const m = parseInt(key.split('-')[0]);
     if (m >= 1 && m <= 5) janMai++;
     else if (m >= 6 && m <= 9) junSet++;
@@ -1441,7 +1441,7 @@ function AnalysisTab({ data, allData, ano, TM }: { data: (Employee & EmpStats)[]
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-base flex items-center gap-2"><PieChart className="h-4 w-4 text-purple-500" /> Distribuição de Férias por Períodos</CardTitle>
-          <p className="text-xs text-muted-foreground">% de férias (aprovadas) por período — Cores: 🟢 conforme | 🟡 atenção | 🔴 excede regulamento</p>
+          <p className="text-xs text-muted-foreground">% de férias (registadas) por período — Cores: 🟢 conforme | 🟡 atenção | 🔴 excede regulamento</p>
           <div className="flex items-center gap-2 mt-2">
             <Select value={distLojaFilter} onValueChange={setDistLojaFilter}>
               <SelectTrigger className="w-[200px] h-8 text-xs"><SelectValue placeholder="Filtrar por loja" /></SelectTrigger>

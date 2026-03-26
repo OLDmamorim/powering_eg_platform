@@ -1108,3 +1108,12 @@
 - [x] Atualizar recomendações IA para focar em redistribuição de dias pedidos
 - [x] 12 testes relatório loja + 5 testes PDF passados
 - [x] Guardar checkpoint
+
+## Correção Tabela Geral Distribuição + Remover Subsídio
+- [x] Tabela geral "Distribuição de Férias por Períodos": usar dias REGISTADOS (approved + rejected = todos os dias registados)
+- [x] Alterar legenda de "% de férias (aprovadas) por período" para "% de férias (registadas) por período"
+- [x] Remover TODAS as referências a "subsídio de férias" e "perda de subsídio" de feriasIAService.ts
+- [x] Análise IA: focar em distribuição % por período e sugestões de redistribuição (sem subsídio)
+- [x] feriasRelatorioLojaService.ts já usava dias registados (approved + not_approved) — confirmado
+- [x] 17 testes passados (12 relatório loja + 5 PDF)
+- [x] Guardar checkpoint
