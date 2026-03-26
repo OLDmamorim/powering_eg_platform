@@ -15,7 +15,7 @@ import { toast } from "sonner";
 import {
   Upload, Calendar, BarChart3, PieChart, Download, FileSpreadsheet,
   Search, Users, Building2, Clock, Trash2, Filter, Sun, AlertTriangle,
-  CheckCircle2, XCircle, Eye, ChevronUp, ChevronDown, Crosshair
+  CheckCircle2, XCircle, Eye, ChevronUp, ChevronDown, Crosshair, Pin, Star
 } from "lucide-react";
 
 // ─── CONSTANTS ───
@@ -181,8 +181,28 @@ export default function Ferias() {
   const [search, setSearch] = useState('');
   const [compareAno, setCompareAno] = useState<number|null>(null);
   const [showHistory, setShowHistory] = useState(false);
+  const [pinnedEmployees, setPinnedEmployees] = useState<Set<string>>(() => {
+    try {
+      const saved = localStorage.getItem('ferias_pinned_employees');
+      return saved ? new Set(JSON.parse(saved)) : new Set();
+    } catch { return new Set(); }
+  });
   const fileRef = useRef<HTMLInputElement>(null);
   const calRef = useRef<HTMLDivElement>(null);
+
+  // Persist pinned employees to localStorage
+  useEffect(() => {
+    localStorage.setItem('ferias_pinned_employees', JSON.stringify([...pinnedEmployees]));
+  }, [pinnedEmployees]);
+
+  const togglePin = useCallback((empNum: string) => {
+    setPinnedEmployees(prev => {
+      const next = new Set(prev);
+      if (next.has(empNum)) next.delete(empNum);
+      else next.add(empNum);
+      return next;
+    });
+  }, []);
 
   // tRPC queries
   const guardarUpload = trpc.ferias.guardarUpload.useMutation();
@@ -282,6 +302,22 @@ export default function Ferias() {
     }
     return result;
   }, [enrichedData, gestorFilter, lojaFilter, search]);
+
+  // Pinned employees (always visible from full dataset, filtered only by search)
+  const pinnedData = useMemo(() => {
+    if (pinnedEmployees.size === 0) return [];
+    let result = enrichedData.filter(e => pinnedEmployees.has(e.num));
+    if (search) {
+      const s = search.toLowerCase();
+      result = result.filter(e => e.name.toLowerCase().includes(s) || e.store.toLowerCase().includes(s) || e.num.includes(s));
+    }
+    return result;
+  }, [enrichedData, pinnedEmployees, search]);
+
+  // Store employees (filtered data excluding pinned)
+  const storeData = useMemo(() => {
+    return filteredData.filter(e => !pinnedEmployees.has(e.num));
+  }, [filteredData, pinnedEmployees]);
 
   // Available stores
   const availableStores = useMemo(() => {
@@ -486,6 +522,11 @@ export default function Ferias() {
                   <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
                   <Input placeholder="Pesquisar colaborador..." value={search} onChange={e => setSearch(e.target.value)} className="pl-7 h-8 text-xs" />
                 </div>
+                {pinnedEmployees.size > 0 && (
+                  <Badge variant="outline" className="text-xs border-amber-400 text-amber-600">
+                    <Pin className="h-3 w-3 mr-1" />{pinnedEmployees.size} fixados
+                  </Badge>
+                )}
                 <Badge variant="secondary" className="text-xs">{filteredData.length} colab.</Badge>
               </div>
             </CardContent>
@@ -501,7 +542,7 @@ export default function Ferias() {
 
             {/* CALENDAR TAB */}
             <TabsContent value="cal">
-              <CalendarTab data={filteredData} months={visibleMonths} statusFilter={statusFilter} ano={ano} TM={TM} TD={TD} calRef={calRef} scrollToToday={scrollToToday} />
+              <CalendarTab data={storeData} pinnedData={pinnedData} months={visibleMonths} statusFilter={statusFilter} ano={ano} TM={TM} TD={TD} calRef={calRef} scrollToToday={scrollToToday} pinnedEmployees={pinnedEmployees} togglePin={togglePin} />
             </TabsContent>
 
             {/* ANALYSIS TAB */}
@@ -532,9 +573,10 @@ export default function Ferias() {
 }
 
 // ─── CALENDAR TAB ───
-function CalendarTab({ data, months, statusFilter, ano, TM, TD, calRef, scrollToToday }: {
-  data: (Employee & EmpStats)[]; months: number[]; statusFilter: string; ano: number; TM: number; TD: number;
+function CalendarTab({ data, pinnedData, months, statusFilter, ano, TM, TD, calRef, scrollToToday, pinnedEmployees, togglePin }: {
+  data: (Employee & EmpStats)[]; pinnedData: (Employee & EmpStats)[]; months: number[]; statusFilter: string; ano: number; TM: number; TD: number;
   calRef: React.RefObject<HTMLDivElement | null>; scrollToToday: () => void;
+  pinnedEmployees: Set<string>; togglePin: (num: string) => void;
 }) {
   const byStore = useMemo(() => {
     const map: Record<string,(Employee & EmpStats)[]> = {};
@@ -546,7 +588,7 @@ function CalendarTab({ data, months, statusFilter, ano, TM, TD, calRef, scrollTo
     return { map, order: order.sort((a,b) => a.localeCompare(b,'pt')) };
   }, [data]);
 
-  if (!data.length) return (
+  if (!data.length && !pinnedData.length) return (
     <Card><CardContent className="py-12 text-center text-muted-foreground">Nenhum colaborador encontrado com os filtros actuais.</CardContent></Card>
   );
 
@@ -584,6 +626,46 @@ function CalendarTab({ data, months, statusFilter, ano, TM, TD, calRef, scrollTo
               </tr>
             </thead>
             <tbody>
+              {/* PINNED EMPLOYEES SECTION */}
+              {pinnedData.length > 0 && (
+                <>
+                  <tr>
+                    <td colSpan={2 + months.reduce((a,m)=>a+DAYS[m],0)} className="sticky left-0 z-10 bg-gradient-to-r from-amber-700 to-amber-600 text-white text-[10px] font-bold uppercase tracking-wider px-2 py-1.5">
+                      <span className="flex items-center gap-1.5"><Star className="h-3 w-3" /> Em Destaque ({pinnedData.length})</span>
+                    </td>
+                  </tr>
+                  {pinnedData.sort((a,b)=>a.name.localeCompare(b.name,'pt')).map((emp,ri) => (
+                    <tr key={`pin-${emp.num}-${ri}`} className="bg-amber-950/30">
+                      <td className="sticky left-0 z-10 px-1 py-0.5 font-medium text-amber-200 truncate border-l-[3px] border-amber-500" style={{minWidth:140,maxWidth:140,background:'#1c1207'}} title={emp.name}>
+                        <span className="flex items-center gap-1">
+                          <button onClick={() => togglePin(emp.num)} className="shrink-0 text-amber-400 hover:text-amber-300" title="Desafixar">
+                            <Pin className="h-3 w-3 fill-current" />
+                          </button>
+                          <span className="truncate">{shortName(emp.name)}</span>
+                        </span>
+                      </td>
+                      <td className="sticky z-10 text-center text-[10px] text-amber-300/70 truncate" style={{left:140,minWidth:80,maxWidth:80,background:'#1c1207'}} title={emp.store}>
+                        {emp.store.length > 10 ? emp.store.substring(0,10)+'…' : emp.store}
+                      </td>
+                      {months.map(m =>
+                        Array.from({length:DAYS[m]},(_,d)=>d+1).map(d => {
+                          const dayKey = `${m}-${d}`;
+                          const status = emp.days[dayKey];
+                          const isToday = m===TM && d===TD && isCurrentYear;
+                          const show = statusFilter === 'all' || status === statusFilter;
+                          return (
+                            <td key={dayKey} className={`text-center text-[9px] py-0.5 ${d===1?'border-l border-amber-900/30':''} ${status && show ? S_CLASS[status] : ''} ${isToday?'ring-1 ring-sky-500 ring-inset':''}`} style={{minWidth:20}}>
+                              {status && show ? S_LABEL[status] : ''}
+                            </td>
+                          );
+                        })
+                      )}
+                    </tr>
+                  ))}
+                </>
+              )}
+
+              {/* STORE GROUPS */}
               {byStore.order.map(store => (
                 <React.Fragment key={store}>
                   <tr>
@@ -593,8 +675,13 @@ function CalendarTab({ data, months, statusFilter, ano, TM, TD, calRef, scrollTo
                   </tr>
                   {byStore.map[store].sort((a,b)=>a.name.localeCompare(b.name,'pt')).map((emp,ri) => (
                     <tr key={`${emp.num}-${ri}`} className={ri%2===0?'bg-white':'bg-slate-50/50'}>
-                      <td className="sticky left-0 z-10 bg-inherit px-2 py-0.5 font-medium text-slate-700 truncate" style={{minWidth:140,maxWidth:140}} title={emp.name}>
-                        {shortName(emp.name)}
+                      <td className="sticky left-0 z-10 bg-inherit px-1 py-0.5 font-medium text-slate-700 truncate" style={{minWidth:140,maxWidth:140}} title={emp.name}>
+                        <span className="flex items-center gap-1">
+                          <button onClick={() => togglePin(emp.num)} className={`shrink-0 ${pinnedEmployees.has(emp.num) ? 'text-amber-500' : 'text-slate-300 hover:text-amber-400'}`} title={pinnedEmployees.has(emp.num) ? 'Desafixar' : 'Fixar no topo'}>
+                            <Pin className={`h-3 w-3 ${pinnedEmployees.has(emp.num) ? 'fill-current' : ''}`} />
+                          </button>
+                          <span className="truncate">{shortName(emp.name)}</span>
+                        </span>
                       </td>
                       <td className="sticky z-10 bg-inherit text-center text-[10px] text-slate-400 truncate" style={{left:140,minWidth:80,maxWidth:80}} title={emp.store}>
                         {emp.store.length > 10 ? emp.store.substring(0,10)+'…' : emp.store}
