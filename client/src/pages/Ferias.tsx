@@ -1044,6 +1044,35 @@ function AnalysisTab({ data, allData, ano, TM }: { data: (Employee & EmpStats)[]
     return data.filter(e => e.total > 0).sort((a,b) => a.approved - b.approved).slice(0,10);
   }, [data]);
 
+  // ─── DISTRIBUIÇÃO POR PERÍODOS (tabela tipo Excel do Marco) ───
+  const [distLojaFilter, setDistLojaFilter] = useState<string>('all');
+  const distStores = useMemo(() => {
+    const s = new Set(data.map(e => e.store));
+    return [...s].sort((a,b) => a.localeCompare(b,'pt'));
+  }, [data]);
+
+  const distData = useMemo(() => {
+    const filtered = distLojaFilter === 'all' ? data : data.filter(e => e.store === distLojaFilter);
+    return filtered.map(e => {
+      const p = analisePeriodos(e);
+      const totalDias = p.janMai + p.junSet + p.outNov + p.dez;
+      const pct1 = totalDias > 0 ? Math.round(p.janMai / totalDias * 100) : 0;
+      const pct2 = totalDias > 0 ? Math.round(p.junSet / totalDias * 100) : 0;
+      const pct3 = totalDias > 0 ? Math.round(p.outNov / totalDias * 100) : 0;
+      const pct4 = totalDias > 0 ? Math.round(p.dez / totalDias * 100) : 0;
+      // Cores baseadas no regulamento:
+      // P2 (Jun-Set): >50% = vermelho, 40-50% = amarelo, <40% = verde
+      // P1 (Jan-Mai): <15% = vermelho, 15-22% = amarelo, >=23% = verde
+      // P3 (Set-Nov): livre, sem alerta
+      // P4 (Dez): >20% = vermelho, 10-20% = amarelo, <10% = verde
+      const cor1 = pct1 >= 23 ? 'green' as const : pct1 >= 15 ? 'yellow' as const : 'red' as const;
+      const cor2 = pct2 <= 40 ? 'green' as const : pct2 <= 50 ? 'yellow' as const : 'red' as const;
+      const cor3 = 'green' as const; // livre
+      const cor4 = pct4 <= 10 ? 'green' as const : pct4 <= 20 ? 'yellow' as const : 'red' as const;
+      return { ...e, gestor: e.gestor, totalDias, pct1, pct2, pct3, pct4, cor1, cor2, cor3, cor4 };
+    }).sort((a,b) => a.store.localeCompare(b.store,'pt') || a.name.localeCompare(b.name,'pt'));
+  }, [data, distLojaFilter]);
+
   return (
     <div className="space-y-4">
       {/* KPIs */}
@@ -1405,6 +1434,64 @@ function AnalysisTab({ data, allData, ano, TM }: { data: (Employee & EmpStats)[]
           </CardContent>
         </Card>
       )}
+
+      {/* ─── DISTRIBUIÇÃO POR PERÍODOS ─── */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base flex items-center gap-2"><PieChart className="h-4 w-4 text-purple-500" /> Distribuição de Férias por Períodos</CardTitle>
+          <p className="text-xs text-muted-foreground">% de férias (aprovadas) por período — Cores: 🟢 conforme | 🟡 atenção | 🔴 excede regulamento</p>
+          <div className="flex items-center gap-2 mt-2">
+            <Select value={distLojaFilter} onValueChange={setDistLojaFilter}>
+              <SelectTrigger className="w-[200px] h-8 text-xs"><SelectValue placeholder="Filtrar por loja" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas as lojas ({distStores.length})</SelectItem>
+                {distStores.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            <Badge variant="secondary" className="text-xs">{distData.length} colab.</Badge>
+          </div>
+        </CardHeader>
+        <CardContent className="p-0">
+          <div className="overflow-auto max-h-[500px]">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/50">
+                  <TableHead className="sticky left-0 bg-muted/50 z-10 text-xs">Gestor</TableHead>
+                  <TableHead className="sticky left-[100px] bg-muted/50 z-10 text-xs">Centro</TableHead>
+                  <TableHead className="text-xs text-center">N.º</TableHead>
+                  <TableHead className="text-xs">Nome</TableHead>
+                  <TableHead className="text-center text-xs">1.º Período<br/><span className="text-[9px] font-normal">Jan-Mai</span></TableHead>
+                  <TableHead className="text-center text-xs">2.º Período<br/><span className="text-[9px] font-normal">Jun-Set</span></TableHead>
+                  <TableHead className="text-center text-xs">3.º Período<br/><span className="text-[9px] font-normal">Out-Nov</span></TableHead>
+                  <TableHead className="text-center text-xs">4.º Período<br/><span className="text-[9px] font-normal">Dez</span></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {distData.map((e, i) => (
+                  <TableRow key={i} className="hover:bg-muted/30">
+                    <TableCell className="sticky left-0 bg-background z-10 text-xs text-muted-foreground">{e.gestor.split(' ')[0]}<br/><span className="text-[9px]">{e.gestor.split(' ').slice(1).join(' ')}</span></TableCell>
+                    <TableCell className="sticky left-[100px] bg-background z-10 text-xs font-medium">{e.store}</TableCell>
+                    <TableCell className="text-center text-xs text-muted-foreground">{e.num}</TableCell>
+                    <TableCell className="text-xs font-medium">{shortName(e.name)}</TableCell>
+                    <TableCell className="text-center">
+                      <span className={`px-2 py-1 rounded text-xs font-bold ${e.cor1==='green'?'bg-white text-slate-700':e.cor1==='yellow'?'bg-amber-400 text-amber-900':'bg-red-600 text-white'}`}>{e.pct1}%</span>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <span className={`px-2 py-1 rounded text-xs font-bold ${e.cor2==='green'?'bg-white text-slate-700':e.cor2==='yellow'?'bg-amber-400 text-amber-900':'bg-red-600 text-white'}`}>{e.pct2}%</span>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <span className={`px-2 py-1 rounded text-xs font-bold ${e.cor3==='green'?'bg-white text-slate-700':e.cor3==='yellow'?'bg-amber-400 text-amber-900':'bg-red-600 text-white'}`}>{e.pct3}%</span>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <span className={`px-2 py-1 rounded text-xs font-bold ${e.cor4==='green'?'bg-white text-slate-700':e.cor4==='yellow'?'bg-amber-400 text-amber-900':'bg-red-600 text-white'}`}>{e.pct4}%</span>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Per store */}
       <Card>

@@ -1058,3 +1058,11 @@
 - [x] Implementar botão "Fixar Volantes" e "Limpar" no calendário de férias
 - [x] Cruzar nomes da DB com dados do Excel para fixar automaticamente
 - [x] Guardar checkpoint
+
+## Tabela Distribuição Férias por Períodos
+- [x] Definir 4 períodos com base no regulamento e limiares de cores
+- [x] Criar tabela com Gestor, Loja, N.º, Nome e % por período
+- [x] Cores semáforo (verde/amarelo/vermelho) baseadas no regulamento
+- [x] Filtro por loja (sem filtro = todos, com filtro = só loja)
+- [x] Integrar no separador Análise
+- [x] Guardar checkpoint
