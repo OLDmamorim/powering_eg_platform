@@ -725,8 +725,8 @@ function CalendarTab({ data, pinnedData, months, statusFilter, ano, TM, TD, calR
                     <tr key={`pin-${emp.num}-${ri}`} className="bg-amber-950/30">
                       <td className="sticky z-10 px-1 py-0.5 font-medium text-amber-200 truncate border-l-[3px] border-amber-500" style={{minWidth:140,maxWidth:140,background:'#1c1207',position:'sticky',left:0}} title={emp.name}>
                         <span className="flex items-center gap-1">
-                          <button onClick={() => togglePin(emp.num)} className="shrink-0 text-amber-400 hover:text-amber-300" title="Desafixar">
-                            <Pin className="h-3 w-3 fill-current" />
+                          <button onClick={() => togglePin(emp.num)} className="shrink-0 p-0.5 rounded text-amber-400 hover:text-amber-300 bg-amber-800/50" title="Desafixar">
+                            <Pin className="h-3.5 w-3.5 fill-current" />
                           </button>
                           <span className="truncate">{shortName(emp.name)}</span>
                         </span>
@@ -756,7 +756,7 @@ function CalendarTab({ data, pinnedData, months, statusFilter, ano, TM, TD, calR
               {byStore.order.map(store => (
                 <React.Fragment key={store}>
                   <tr>
-                    <td colSpan={2 + months.reduce((a,m)=>a+DAYS[m],0)} className="z-10 text-white text-[10px] font-bold uppercase tracking-wider px-2 py-1" style={{position:'sticky',left:0,background:'linear-gradient(to right, #334155, #475569)'}}>
+                    <td colSpan={2 + months.reduce((a,m)=>a+DAYS[m],0)} className="z-20 text-white text-[10px] font-bold uppercase tracking-wider px-2 py-1" style={{position:'sticky',left:0,background:'#334155'}}>
                       {store} <span className="font-normal opacity-70 ml-1">({byStore.map[store].length})</span>
                     </td>
                   </tr>
@@ -764,8 +764,8 @@ function CalendarTab({ data, pinnedData, months, statusFilter, ano, TM, TD, calR
                     <tr key={`${emp.num}-${ri}`} className={ri%2===0?'bg-white':'bg-slate-50/50'}>
                       <td className="z-10 px-1 py-0.5 font-medium text-slate-700 truncate" style={{minWidth:140,maxWidth:140,position:'sticky',left:0,background:ri%2===0?'#ffffff':'#f8fafc'}} title={emp.name}>
                         <span className="flex items-center gap-1">
-                          <button onClick={() => togglePin(emp.num)} className={`shrink-0 ${pinnedEmployees.has(emp.num) ? 'text-amber-500' : 'text-slate-300 hover:text-amber-400'}`} title={pinnedEmployees.has(emp.num) ? 'Desafixar' : 'Fixar no topo'}>
-                            <Pin className={`h-3 w-3 ${pinnedEmployees.has(emp.num) ? 'fill-current' : ''}`} />
+                          <button onClick={() => togglePin(emp.num)} className={`shrink-0 p-0.5 rounded ${pinnedEmployees.has(emp.num) ? 'text-amber-500 bg-amber-100' : 'text-slate-400 hover:text-amber-500 hover:bg-amber-50'}`} title={pinnedEmployees.has(emp.num) ? 'Desafixar' : 'Fixar no topo'}>
+                            <Pin className={`h-3.5 w-3.5 ${pinnedEmployees.has(emp.num) ? 'fill-current' : ''}`} />
                           </button>
                           <span className="truncate">{shortName(emp.name)}</span>
                         </span>

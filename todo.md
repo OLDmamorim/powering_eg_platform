@@ -1038,3 +1038,8 @@
 - [x] Corrigir colunas Colaborador e Loja para ficarem fixas (sticky) no scroll lateral
 - [x] Restaurar botão de fixar colaboradores (pin) que desapareceu
 - [x] Guardar checkpoint
+
+## BUG: Botão pin invisível e headers grupo cortados (produção)
+- [x] Tornar botão pin mais visível e garantir que aparece em produção
+- [x] Corrigir headers de grupo (nome da loja) cortados ao fazer scroll
+- [x] Guardar checkpoint
