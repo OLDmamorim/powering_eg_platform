@@ -1010,3 +1010,7 @@
 - [x] Comparação entre períodos (ano actual vs anterior)
 - [x] Testes vitest (12 testes passam)
 - [x] Testar e guardar checkpoint
+
+## Melhorar Análise de Férias
+- [x] Rever e melhorar o separador Análise com dados reais e insights úteis
+- [x] Guardar checkpoint

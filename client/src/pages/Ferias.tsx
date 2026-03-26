@@ -720,19 +720,67 @@ function AnalysisTab({ data, allData, ano, TM }: { data: (Employee & EmpStats)[]
   const semFerias = data.filter(e=>e.total===0).length;
   const soRej = data.filter(e=>e.total>0&&e.approved===0).length;
   const pctApr = (totApr+totRej) ? Math.round(totApr/(totApr+totRej)*100) : 0;
+  const mediaAprov = total > 0 ? Math.round(totApr / total * 10) / 10 : 0;
+  const mediaRej = total > 0 ? Math.round(totRej / total * 10) / 10 : 0;
 
-  // Monthly
+  // Monthly data
   const monthlyData = useMemo(() => {
-    const m: Record<number,{approved:number;rejected:number}> = {};
-    for (let i=1;i<=12;i++) m[i]={approved:0,rejected:0};
+    const m: Record<number,{approved:number;rejected:number;absent:number;empCount:number}> = {};
+    for (let i=1;i<=12;i++) m[i]={approved:0,rejected:0,absent:0,empCount:0};
     data.forEach(e => {
+      const monthsWithDays = new Set<number>();
       Object.entries(e.days).forEach(([key,status]) => {
         const mi = parseInt(key.split('-')[0]);
-        if (status==='approved') m[mi].approved++;
-        else if (status==='rejected') m[mi].rejected++;
+        if (status==='approved') { m[mi].approved++; monthsWithDays.add(mi); }
+        else if (status==='rejected') { m[mi].rejected++; monthsWithDays.add(mi); }
+        else if (status==='absent') m[mi].absent++;
       });
+      monthsWithDays.forEach(mi => m[mi].empCount++);
     });
     return m;
+  }, [data]);
+
+  // Peak months (top 3)
+  const peakMonths = useMemo(() => {
+    return Object.entries(monthlyData)
+      .map(([m,v]) => ({month:parseInt(m), total:v.approved+v.rejected, approved:v.approved, rejected:v.rejected, empCount:v.empCount}))
+      .sort((a,b) => b.total - a.total)
+      .slice(0,3);
+  }, [monthlyData]);
+
+  // Cobertura por loja/mês — alertas de sobreposição
+  const coberturaAlertas = useMemo(() => {
+    const lojaMonth: Record<string, Record<number, number>> = {};
+    data.forEach(e => {
+      if (!lojaMonth[e.store]) { lojaMonth[e.store] = {}; for(let m=1;m<=12;m++) lojaMonth[e.store][m]=0; }
+      Object.entries(e.days).forEach(([key,status]) => {
+        if (status === 'approved') {
+          const mi = parseInt(key.split('-')[0]);
+          lojaMonth[e.store][mi]++;
+        }
+      });
+    });
+    // Contar colaboradores por loja
+    const lojaCount: Record<string,number> = {};
+    data.forEach(e => { lojaCount[e.store] = (lojaCount[e.store]||0)+1; });
+    // Alertas: lojas com >50% dos colaboradores de férias num mês
+    const alertas: {store:string;month:number;days:number;total:number;pct:number}[] = [];
+    Object.entries(lojaMonth).forEach(([store,months]) => {
+      const tc = lojaCount[store] || 1;
+      Object.entries(months).forEach(([m,days]) => {
+        const mi = parseInt(m);
+        const daysInMonth = DAYS[mi] || 30;
+        // Média de dias de férias por colaborador neste mês
+        const avgDaysPerEmp = days / tc;
+        // Se média > 5 dias e loja tem poucos colaboradores, é alerta
+        if (avgDaysPerEmp >= 5 && tc <= 3 && days >= 10) {
+          alertas.push({store, month:mi, days, total:tc, pct: Math.round(avgDaysPerEmp/daysInMonth*100)});
+        } else if (days >= 15 && tc >= 2) {
+          alertas.push({store, month:mi, days, total:tc, pct: Math.round(days/(tc*daysInMonth)*100)});
+        }
+      });
+    });
+    return alertas.sort((a,b) => b.days - a.days).slice(0,15);
   }, [data]);
 
   // Situations to follow
@@ -741,6 +789,24 @@ function AnalysisTab({ data, allData, ano, TM }: { data: (Employee & EmpStats)[]
       .filter(e => e.total===0 || (e.rejected>0&&e.approved===0) || e.absent>3)
       .sort((a,b) => { if (a.total===0&&b.total!==0) return -1; if (b.total===0&&a.total!==0) return 1; return b.rejected-a.rejected; })
       .slice(0,25);
+  }, [data]);
+
+  // Per gestor
+  const gestorResumo = useMemo(() => {
+    const map: Record<string,{total:number;approved:number;rejected:number;absent:number;sem:number;lojas:Set<string>}> = {};
+    data.forEach(e => {
+      const g = e.gestor || '—';
+      if (!map[g]) map[g]={total:0,approved:0,rejected:0,absent:0,sem:0,lojas:new Set()};
+      map[g].total++;
+      map[g].approved += e.approved;
+      map[g].rejected += e.rejected;
+      map[g].absent += e.absent;
+      if (e.total===0) map[g].sem++;
+      map[g].lojas.add(e.store);
+    });
+    return Object.entries(map)
+      .map(([g,s]) => ({gestor:g, ...s, lojas: s.lojas.size, pct: (s.approved+s.rejected) ? Math.round(s.approved/(s.approved+s.rejected)*100) : 0}))
+      .sort((a,b) => a.gestor.localeCompare(b.gestor,'pt'));
   }, [data]);
 
   // Per store
@@ -757,44 +823,242 @@ function AnalysisTab({ data, allData, ano, TM }: { data: (Employee & EmpStats)[]
     return Object.entries(map).sort(([a],[b])=>a.localeCompare(b,'pt'));
   }, [data]);
 
+  // Top colaboradores com mais dias aprovados
+  const topColabs = useMemo(() => {
+    return [...data].sort((a,b) => b.approved - a.approved).slice(0,10);
+  }, [data]);
+
+  // Colaboradores com menos dias aprovados (que têm férias marcadas)
+  const bottomColabs = useMemo(() => {
+    return data.filter(e => e.total > 0).sort((a,b) => a.approved - b.approved).slice(0,10);
+  }, [data]);
+
   return (
     <div className="space-y-4">
       {/* KPIs */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
         <KpiCard icon={<Users className="h-5 w-5 text-blue-500" />} label="Colaboradores" value={total} />
         <KpiCard icon={<AlertTriangle className={`h-5 w-5 ${semFerias>0?'text-red-500':'text-green-500'}`} />} label="Sem férias" value={semFerias} danger={semFerias>0} ok={semFerias===0} />
         <KpiCard icon={<CheckCircle2 className="h-5 w-5 text-green-500" />} label="Dias aprovados" value={totApr} ok />
         <KpiCard icon={<XCircle className={`h-5 w-5 ${totRej>0?'text-red-500':'text-muted-foreground'}`} />} label="Não aprovados" value={totRej} danger={totRej>0} />
         <KpiCard icon={<BarChart3 className={`h-5 w-5 ${pctApr>=80?'text-green-500':pctApr>=50?'text-amber-500':'text-red-500'}`} />} label="Taxa aprovação" value={`${pctApr}%`} ok={pctApr>=80} warn={pctApr>=50&&pctApr<80} danger={pctApr<50} />
+        <KpiCard icon={<Calendar className="h-5 w-5 text-purple-500" />} label="Média dias/colab" value={mediaAprov} />
       </div>
 
-      {/* Monthly chart */}
-      <Card>
-        <CardHeader className="pb-2"><CardTitle className="text-base">Distribuição Mensal</CardTitle></CardHeader>
-        <CardContent>
-          <div className="flex items-end gap-1 h-[180px]">
-            {Object.entries(monthlyData).map(([m,vals]) => {
-              const max = Math.max(...Object.values(monthlyData).map(v=>v.approved+v.rejected),1);
-              const hA = (vals.approved/max)*160;
-              const hR = (vals.rejected/max)*160;
-              return (
-                <div key={m} className="flex-1 flex flex-col items-center gap-0.5">
-                  <div className="text-[9px] text-muted-foreground">{vals.approved+vals.rejected||''}</div>
-                  <div className="w-full flex flex-col justify-end" style={{height:160}}>
-                    {vals.rejected>0 && <div className="bg-red-400 rounded-t-sm mx-0.5" style={{height:hR}} />}
-                    {vals.approved>0 && <div className={`bg-green-500 mx-0.5 ${vals.rejected===0?'rounded-t-sm':''}`} style={{height:hA}} />}
+      {/* Monthly chart + Peak months side by side */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <Card className="lg:col-span-2">
+          <CardHeader className="pb-2"><CardTitle className="text-base">Distribuição Mensal</CardTitle></CardHeader>
+          <CardContent>
+            <div className="flex items-end gap-1 h-[180px]">
+              {Object.entries(monthlyData).map(([m,vals]) => {
+                const max = Math.max(...Object.values(monthlyData).map(v=>v.approved+v.rejected),1);
+                const hA = (vals.approved/max)*160;
+                const hR = (vals.rejected/max)*160;
+                return (
+                  <div key={m} className="flex-1 flex flex-col items-center gap-0.5">
+                    <div className="text-[9px] text-muted-foreground">{vals.approved+vals.rejected||''}</div>
+                    <div className="w-full flex flex-col justify-end" style={{height:160}}>
+                      {vals.rejected>0 && <div className="bg-red-400 rounded-t-sm mx-0.5" style={{height:hR}} />}
+                      {vals.approved>0 && <div className={`bg-green-500 mx-0.5 ${vals.rejected===0?'rounded-t-sm':''}`} style={{height:hA}} />}
+                    </div>
+                    <div className={`text-[10px] font-medium ${parseInt(m)===TM?'text-blue-600 font-bold':'text-muted-foreground'}`}>{MONTHS_PT[parseInt(m)-1]}</div>
                   </div>
-                  <div className={`text-[10px] font-medium ${parseInt(m)===TM?'text-blue-600 font-bold':'text-muted-foreground'}`}>{MONTHS_PT[parseInt(m)-1]}</div>
+                );
+              })}
+            </div>
+            <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground justify-center">
+              <div className="flex items-center gap-1"><div className="w-3 h-3 rounded-sm bg-green-500" /> Aprovados</div>
+              <div className="flex items-center gap-1"><div className="w-3 h-3 rounded-sm bg-red-400" /> Não aprovados</div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Peak months + quick stats */}
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-base flex items-center gap-2"><Sun className="h-4 w-4 text-amber-500" /> Meses Críticos</CardTitle></CardHeader>
+          <CardContent className="space-y-3">
+            {peakMonths.map((pm,i) => (
+              <div key={pm.month} className="flex items-center gap-3">
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${i===0?'bg-red-100 text-red-700':i===1?'bg-amber-100 text-amber-700':'bg-blue-100 text-blue-700'}`}>
+                  {i+1}
                 </div>
-              );
-            })}
-          </div>
-          <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground justify-center">
-            <div className="flex items-center gap-1"><div className="w-3 h-3 rounded-sm bg-green-500" /> Aprovados</div>
-            <div className="flex items-center gap-1"><div className="w-3 h-3 rounded-sm bg-red-400" /> Não aprovados</div>
+                <div className="flex-1">
+                  <div className="font-medium text-sm">{MONTHS_FULL[pm.month-1]}</div>
+                  <div className="text-[10px] text-muted-foreground">{pm.total} dias ({pm.empCount} colab.)</div>
+                </div>
+                <div className="text-right">
+                  <span className="text-green-600 text-xs font-medium">{pm.approved}</span>
+                  {pm.rejected > 0 && <span className="text-red-500 text-xs ml-1">+{pm.rejected}</span>}
+                </div>
+              </div>
+            ))}
+            <div className="border-t pt-3 mt-3 space-y-1.5">
+              <div className="flex justify-between text-xs"><span className="text-muted-foreground">Média dias aprovados/colab</span><span className="font-medium">{mediaAprov}</span></div>
+              <div className="flex justify-between text-xs"><span className="text-muted-foreground">Média dias n.aprovados/colab</span><span className="font-medium">{mediaRej}</span></div>
+              <div className="flex justify-between text-xs"><span className="text-muted-foreground">Total faltas</span><span className="font-medium">{totAbs}</span></div>
+              <div className="flex justify-between text-xs"><span className="text-muted-foreground">Só c/ não aprovados</span><span className="font-medium text-amber-600">{soRej}</span></div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Per Gestor */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base flex items-center gap-2"><Users className="h-4 w-4 text-indigo-500" /> Resumo por Gestor</CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          <div className="overflow-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Gestor</TableHead>
+                  <TableHead className="text-center">Lojas</TableHead>
+                  <TableHead className="text-center">Colab.</TableHead>
+                  <TableHead className="text-center">Aprov.</TableHead>
+                  <TableHead className="text-center">N. Aprov.</TableHead>
+                  <TableHead className="text-center">Faltas</TableHead>
+                  <TableHead className="text-center">Sem férias</TableHead>
+                  <TableHead>Taxa Aprov.</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {gestorResumo.map((g) => (
+                  <TableRow key={g.gestor}>
+                    <TableCell className="font-medium text-sm">{g.gestor}</TableCell>
+                    <TableCell className="text-center">{g.lojas}</TableCell>
+                    <TableCell className="text-center">{g.total}</TableCell>
+                    <TableCell className="text-center"><span className="px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-[10px] font-semibold">{g.approved}</span></TableCell>
+                    <TableCell className="text-center">{g.rejected>0 ? <Badge variant="destructive" className="text-[10px]">{g.rejected}</Badge> : <span className="text-muted-foreground">0</span>}</TableCell>
+                    <TableCell className="text-center">{g.absent>0 ? <Badge variant="secondary" className="text-[10px]">{g.absent}</Badge> : <span className="text-muted-foreground">0</span>}</TableCell>
+                    <TableCell className="text-center">{g.sem>0 ? <Badge variant="destructive" className="text-[10px]">{g.sem}</Badge> : <span className="text-green-600 text-xs">0</span>}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1.5 min-w-[80px]">
+                        <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
+                          <div className="h-full rounded-full" style={{width:`${g.pct}%`,background:g.pct>=80?'#16a34a':g.pct>=50?'#d97706':'#dc2626'}} />
+                        </div>
+                        <span className="text-[10px] text-muted-foreground w-8">{g.pct}%</span>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </div>
         </CardContent>
       </Card>
+
+      {/* Cobertura Alertas */}
+      {coberturaAlertas.length > 0 && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 text-red-500" /> Alertas de Cobertura — Lojas com Muitas Férias Simultâneas
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="overflow-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Loja</TableHead>
+                    <TableHead className="text-center">Mês</TableHead>
+                    <TableHead className="text-center">Dias Férias</TableHead>
+                    <TableHead className="text-center">Colaboradores</TableHead>
+                    <TableHead>Impacto</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {coberturaAlertas.map((a,i) => (
+                    <TableRow key={i}>
+                      <TableCell className="font-medium text-sm">{a.store}</TableCell>
+                      <TableCell className="text-center text-sm">{MONTHS_FULL[a.month-1]}</TableCell>
+                      <TableCell className="text-center"><Badge variant="destructive" className="text-[10px]">{a.days} dias</Badge></TableCell>
+                      <TableCell className="text-center text-sm">{a.total}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1.5 min-w-[80px]">
+                          <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
+                            <div className="h-full rounded-full bg-red-500" style={{width:`${Math.min(a.pct,100)}%`}} />
+                          </div>
+                          <span className="text-[10px] text-red-600 font-medium w-8">{a.pct}%</span>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Top / Bottom colaboradores side by side */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2"><ChevronUp className="h-4 w-4 text-green-500" /> Top 10 — Mais Dias Aprovados</CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="overflow-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>#</TableHead>
+                    <TableHead>Colaborador</TableHead>
+                    <TableHead>Loja</TableHead>
+                    <TableHead className="text-center">Aprov.</TableHead>
+                    <TableHead className="text-center">N.Apr.</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {topColabs.map((e,i) => (
+                    <TableRow key={i}>
+                      <TableCell className="text-xs text-muted-foreground">{i+1}</TableCell>
+                      <TableCell className="font-medium text-sm">{shortName(e.name)}</TableCell>
+                      <TableCell className="text-xs">{e.store}</TableCell>
+                      <TableCell className="text-center"><span className="px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-[10px] font-semibold">{e.approved}</span></TableCell>
+                      <TableCell className="text-center">{e.rejected>0 ? <span className="text-red-500 text-xs">{e.rejected}</span> : <span className="text-muted-foreground">0</span>}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2"><ChevronDown className="h-4 w-4 text-red-500" /> Top 10 — Menos Dias Aprovados</CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="overflow-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>#</TableHead>
+                    <TableHead>Colaborador</TableHead>
+                    <TableHead>Loja</TableHead>
+                    <TableHead className="text-center">Aprov.</TableHead>
+                    <TableHead className="text-center">N.Apr.</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {bottomColabs.map((e,i) => (
+                    <TableRow key={i}>
+                      <TableCell className="text-xs text-muted-foreground">{i+1}</TableCell>
+                      <TableCell className="font-medium text-sm">{shortName(e.name)}</TableCell>
+                      <TableCell className="text-xs">{e.store}</TableCell>
+                      <TableCell className="text-center"><span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${e.approved===0?'bg-red-100 text-red-700':'bg-amber-100 text-amber-700'}`}>{e.approved}</span></TableCell>
+                      <TableCell className="text-center">{e.rejected>0 ? <span className="text-red-500 text-xs">{e.rejected}</span> : <span className="text-muted-foreground">0</span>}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Situations */}
       {situacoes.length > 0 && (
@@ -872,6 +1136,7 @@ function AnalysisTab({ data, allData, ano, TM }: { data: (Employee & EmpStats)[]
                   <div className="flex items-center gap-3 text-xs mb-2">
                     <span className="text-green-600">{s.approved} aprov.</span>
                     <span className="text-red-500">{s.rejected} n.aprov.</span>
+                    {s.absent>0 && <span className="text-slate-500">{s.absent} faltas</span>}
                     {s.sem>0 && <span className="text-amber-600 font-medium">{s.sem} sem férias</span>}
                   </div>
                   <div className="h-1.5 bg-muted rounded-full overflow-hidden">
