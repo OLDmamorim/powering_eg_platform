@@ -1014,3 +1014,9 @@
 ## Melhorar Análise de Férias
 - [x] Rever e melhorar o separador Análise com dados reais e insights úteis
 - [x] Guardar checkpoint
+
+## Recomendações IA de Férias + Chatbot
+- [x] Criar procedimento tRPC server-side para gerar recomendações IA com base no regulamento
+- [x] Implementar botão "Recomendações IA" e modal de relatório no frontend Ferias.tsx
+- [x] Alimentar o Chatbot IA com o procedimento de férias
+- [x] Testar e guardar checkpoint

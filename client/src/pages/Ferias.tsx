@@ -1,4 +1,5 @@
 import React, { useState, useRef, useCallback, useMemo, useEffect } from "react";
+import { Streamdown } from "streamdown";
 import * as XLSX from "xlsx";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -15,7 +16,7 @@ import { toast } from "sonner";
 import {
   Upload, Calendar, BarChart3, PieChart, Download, FileSpreadsheet,
   Search, Users, Building2, Clock, Trash2, Filter, Sun, AlertTriangle,
-  CheckCircle2, XCircle, Eye, ChevronUp, ChevronDown, Crosshair, Pin, Star
+  CheckCircle2, XCircle, Eye, ChevronUp, ChevronDown, Crosshair, Pin, Star, Sparkles, Loader2
 } from "lucide-react";
 
 // ─── CONSTANTS ───
@@ -204,9 +205,22 @@ export default function Ferias() {
     });
   }, []);
 
+  // Estado para Recomendações IA
+  const [showRecomendacoes, setShowRecomendacoes] = useState(false);
+  const [relatorioIA, setRelatorioIA] = useState<string | null>(null);
+
   // tRPC queries
   const guardarUpload = trpc.ferias.guardarUpload.useMutation();
   const apagarUpload = trpc.ferias.apagarUpload.useMutation();
+  const gerarRecomendacoesIA = trpc.ferias.gerarRecomendacoesIA.useMutation({
+    onSuccess: (result) => {
+      setRelatorioIA(result.relatorio);
+      toast.success(`Recomendações geradas para ${result.totalColaboradores} colaboradores`);
+    },
+    onError: (err) => {
+      toast.error(err.message || 'Erro ao gerar recomendações');
+    },
+  });
   const uploadsQuery = trpc.ferias.listarUploads.useQuery();
   const dadosAnoQuery = trpc.ferias.getColaboradoresPorAno.useQuery({ ano });
   const anosQuery = trpc.ferias.getAnos.useQuery();
@@ -531,6 +545,79 @@ export default function Ferias() {
               </div>
             </CardContent>
           </Card>
+
+          {/* BOTÃO RECOMENDAÇÕES IA */}
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex-1" />
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-purple-300 text-purple-700 hover:bg-purple-50 gap-2"
+              disabled={gerarRecomendacoesIA.isPending}
+              onClick={() => {
+                setShowRecomendacoes(true);
+                setRelatorioIA(null);
+                gerarRecomendacoesIA.mutate({ ano });
+              }}
+            >
+              {gerarRecomendacoesIA.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+              Recomendações IA
+            </Button>
+          </div>
+
+          {/* MODAL RECOMENDAÇÕES IA */}
+          <Dialog open={showRecomendacoes} onOpenChange={setShowRecomendacoes}>
+            <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2 text-purple-700">
+                  <Sparkles className="h-5 w-5" />
+                  Recomendações IA — Férias {ano}
+                </DialogTitle>
+                <DialogDescription>
+                  Análise automática com base no Procedimento Interno N.º 8 (Férias {ano})
+                </DialogDescription>
+              </DialogHeader>
+              <div className="mt-2">
+                {gerarRecomendacoesIA.isPending ? (
+                  <div className="flex flex-col items-center justify-center py-16 gap-4">
+                    <Loader2 className="h-10 w-10 animate-spin text-purple-500" />
+                    <p className="text-sm text-muted-foreground">A analisar {filteredData.length} colaboradores...</p>
+                    <p className="text-xs text-muted-foreground">Isto pode demorar até 30 segundos</p>
+                  </div>
+                ) : relatorioIA ? (
+                  <div className="prose prose-sm dark:prose-invert max-w-none">
+                    <Streamdown>{relatorioIA}</Streamdown>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-16 gap-4">
+                    <AlertTriangle className="h-10 w-10 text-amber-500" />
+                    <p className="text-sm text-muted-foreground">Erro ao gerar recomendações. Tente novamente.</p>
+                  </div>
+                )}
+              </div>
+              {relatorioIA && (
+                <DialogFooter>
+                  <Button variant="outline" size="sm" onClick={() => {
+                    const blob = new Blob([relatorioIA], { type: 'text/markdown' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `recomendacoes-ferias-${ano}.md`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                  }}>
+                    <Download className="h-4 w-4 mr-1" /> Exportar Relatório
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => {
+                    setRelatorioIA(null);
+                    gerarRecomendacoesIA.mutate({ ano });
+                  }}>
+                    <Sparkles className="h-4 w-4 mr-1" /> Gerar Novamente
+                  </Button>
+                </DialogFooter>
+              )}
+            </DialogContent>
+          </Dialog>
 
           {/* TABS */}
           <Tabs value={activeTab} onValueChange={setActiveTab}>

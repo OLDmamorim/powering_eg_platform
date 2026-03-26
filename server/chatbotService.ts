@@ -1274,6 +1274,59 @@ Faturas PP Pendentes:
 
 USA ESTAS REGRAS PARA FAZER CÁLCULOS DE COMISSÕES QUANDO O UTILIZADOR PERGUNTAR.
 
+=== PROCEDIMENTO INTERNO N.º 8 — FÉRIAS ANO 2026 (ExpressGlass) ===
+
+Conheces o regulamento completo de férias da ExpressGlass. Podes responder a perguntas sobre regras de marcação, direitos, prazos e procedimentos.
+
+**PRINCÍPIOS GERAIS:**
+- Direito a férias remuneradas em cada ano civil, vence a 1 de janeiro.
+- No ano de admissão, direito vence após 6 meses completos de contrato.
+- Direito a férias é irrenunciável.
+- Férias podem ser interrompidas por: Doença, Licença Parental, Exigências imperiosas da empresa.
+
+**DURAÇÃO:** 22 dias úteis por ano.
+- Ano de admissão: 2 dias úteis por mês completo, até máximo 20 dias.
+- Admissão entre dia 01 e dia 15 do mês: +1 dia adicional (máx. 20).
+
+**ANO GOZO:** Gozadas no ano civil em que vencem. Por acordo, até 30 de abril do ano seguinte.
+
+**REGRAS INTERNAS - TODOS OS COLABORADORES:**
+- Dias de férias de 2025 por gozar: obrigatório agendar e gozar até 30 de abril 2026.
+- DATA-LIMITE PARA MARCAÇÃO: 28 de Fevereiro de 2026.
+- Não marcação nos prazos: empresa pode marcar.
+
+**REGRAS PARA LOJAS, SERVIÇOS MÓVEIS, GESTORES DE ZONA (CRÍTICAS):**
+- Responsáveis de lojas NÃO podem tirar férias na última semana do ano.
+- Máximo 1 colaborador de férias por loja em cada momento.
+- PARÂMETROS DE MARCAÇÃO POR PERÍODO:
+  * 1 Jan – 30 Mai: mínimo 5 dias obrigatórios
+  * 1 Jun – 15 Set: MÁXIMO 10 dias úteis por colaborador
+  * 16 Set – 30 Nov: agendar livremente
+  * 1 Dez – 31 Dez: mínimo de dias possível
+- BENEFÍCIO: quem NÃO marcar férias de 1 Abr a 30 Set → prioridade na validação + 1 dia extra OU voucher ODISSEIAS 100€.
+
+**REMARCAÇÃO PELA EMPRESA:**
+- Dias em desacordo Jun-Set serão remarcados.
+- Critérios: 1º) Períodos gozados em anos anteriores; 2º) Antiguidade.
+
+**SUBSÍDIO DE FÉRIAS:**
+- IMPORTANTE: Subsídio apenas processado se colaborador agendar os 22 dias de férias úteis.
+- Processado no mês anterior ao do maior período de férias agendadas.
+- Subsídio de alimentação descontado na totalidade no mesmo mês.
+
+**TRABALHO TEMPORÁRIO:**
+- Vínculo temporário NÃO confere direito a férias sem consulta a RH.
+
+**ELABORAÇÃO DO MAPA:**
+- Mapas elaborados até último dia útil de março.
+- Afixados entre 15 de Abril e 31 de Outubro.
+- Mapa definitivo enviado por RH até 15 de abril.
+- Deve ser impresso, carimbado, assinado pelo gestor de zona e colaboradores, digitalizado e enviado para RH.
+
+**CONTACTO RH:** recursoshumanos@expressglass.pt
+
+USA ESTAS REGRAS PARA RESPONDER A PERGUNTAS SOBRE FÉRIAS.
+
 === IMPORTANTE: CONTEXTO PESSOAL VS NACIONAL ===
 ${infoUtilizador}
 

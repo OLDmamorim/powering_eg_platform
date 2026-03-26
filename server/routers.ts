@@ -22,6 +22,7 @@ import { gerarPDFRelacaoRH } from "./pdfRelacaoRH";
 import { enviarLembretesRH, isDia20 } from "./lembreteRHService";
 import { storagePut } from "./storage";
 import { gerarExcelControloStock } from "./stockExcelService";
+import { gerarRecomendacoesFerias } from "./feriasIAService";
 
 // Função para obter feriados portugueses de um ano específico
 function obterFeriadosPortugueses(ano: number): string[] {
@@ -277,6 +278,36 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         await db.apagarFeriasUpload(input.id);
         return { ok: true };
+      }),
+
+    // Gerar recomendações IA com base no regulamento de férias
+    gerarRecomendacoesIA: protectedProcedure
+      .input(z.object({
+        ano: z.number(),
+      }))
+      .mutation(async ({ input }) => {
+        // Obter último upload do ano
+        const upload = await db.getUltimoFeriasUpload(input.ano);
+        if (!upload) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Nenhum upload de férias encontrado para este ano' });
+        }
+        const colaboradores = await db.getFeriasColaboradoresByUpload(upload.id);
+        if (!colaboradores || colaboradores.length === 0) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Nenhum colaborador encontrado neste upload' });
+        }
+        // Mapear para o formato esperado
+        const colabs = colaboradores.map((c: any) => ({
+          nome: c.nome,
+          loja: c.loja,
+          gestor: c.gestor || '',
+          dias: typeof c.dias === 'string' ? JSON.parse(c.dias) : c.dias,
+          totalAprovados: c.totalAprovados,
+          totalNaoAprovados: c.totalNaoAprovados,
+          totalFeriados: c.totalFeriados || 0,
+          totalFaltas: c.totalFaltas || 0,
+        }));
+        const relatorio = await gerarRecomendacoesFerias(colabs, input.ano);
+        return { relatorio, totalColaboradores: colabs.length, ano: input.ano };
       }),
   }),
   
