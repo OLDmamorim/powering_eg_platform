@@ -1208,3 +1208,7 @@
 ## Férias - Corrigir Estilo Visual do Verde na Tabela de Períodos
 - [x] Mudar bg-white para bg-green-100 text-green-700 quando cor é verde
 - [ ] Guardar checkpoint
+
+## Corrigir Nome do Menu Reuniões Livres no Sidebar
+- [x] Verificar e corrigir nome/tradução do menu no DashboardLayout (adicionada chave em pt.json e en.json)
+- [ ] Guardar checkpoint
