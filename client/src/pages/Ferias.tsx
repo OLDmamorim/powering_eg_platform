@@ -1115,15 +1115,15 @@ function AnalysisTab({ data, allData, ano, TM }: { data: (Employee & EmpStats)[]
       const pct2 = totalDias > 0 ? Math.round(p.junSet / totalDias * 100) : 0;
       const pct3 = totalDias > 0 ? Math.round(p.outNov / totalDias * 100) : 0;
       const pct4 = totalDias > 0 ? Math.round(p.dez / totalDias * 100) : 0;
-      // Cores baseadas no regulamento:
-      // P2 (Jun-Set): >50% = vermelho, 40-50% = amarelo, <40% = verde
-      // P1 (Jan-Mai): <15% = vermelho, 15-22% = amarelo, >=23% = verde
-      // P3 (Set-Nov): livre, sem alerta
-      // P4 (Dez): >20% = vermelho, 10-20% = amarelo, <10% = verde
-      const cor1 = pct1 >= 23 ? 'green' as const : pct1 >= 15 ? 'yellow' as const : 'red' as const;
-      const cor2 = pct2 <= 40 ? 'green' as const : pct2 <= 50 ? 'yellow' as const : 'red' as const;
+      // Cores baseadas em DIAS ABSOLUTOS vs meta do Procedimento N.º 8:
+      // P1 (Jan-Mai): mín 5 dias → verde se ≥5d, amarelo se 3-4d, vermelho se <3d
+      // P2 (Jun-Set): máx 10 dias → verde se ≤10d, amarelo se 11-12d, vermelho se >12d
+      // P3 (Out-Nov): livre, sem alerta
+      // P4 (Dez): máx 3 dias → verde se ≤3d, amarelo se 4-5d, vermelho se >5d
+      const cor1 = p.janMai >= 5 ? 'green' as const : p.janMai >= 3 ? 'yellow' as const : 'red' as const;
+      const cor2 = p.junSet <= 10 ? 'green' as const : p.junSet <= 12 ? 'yellow' as const : 'red' as const;
       const cor3 = 'green' as const; // livre
-      const cor4 = pct4 <= 10 ? 'green' as const : pct4 <= 20 ? 'yellow' as const : 'red' as const;
+      const cor4 = p.dez <= 3 ? 'green' as const : p.dez <= 5 ? 'yellow' as const : 'red' as const;
       // Dias que deveria ter por período (baseado em proporção de 22 dias úteis)
       // Regra: Jan-Mai mín 5d, Jun-Set máx 10d, Out-Nov livre, Dez mín possível (máx 3d)
       const metaJanMai = REGRA_JAN_MAI_MIN; // mínimo 5 dias

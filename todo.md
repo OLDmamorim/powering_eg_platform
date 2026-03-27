@@ -1195,4 +1195,12 @@
 - [x] Analisar dados disponíveis no backend (dias gozados, dias totais por período)
 - [x] Modificar frontend para mostrar "X/Y dias" ao lado de cada percentagem
 - [x] Coluna Total dias adicionada com cor semáforo
+- [x] Guardar checkpoint
+
+## Férias - Corrigir Cores da Tabela de Períodos (Dias Absolutos vs Meta)
+- [x] Corrigir cores para usar dias reais vs meta (não percentagem)
+- [x] P1 Jan-Mai: verde se ≥5d, amarelo se 3-4d, vermelho se <3d
+- [x] P2 Jun-Set: verde se ≤10d, amarelo se 11-12d, vermelho se >12d
+- [x] P3 Out-Nov: livre (sem alerta)
+- [x] P4 Dez: verde se ≤3d, amarelo se 4-5d, vermelho se >5d
 - [ ] Guardar checkpoint
