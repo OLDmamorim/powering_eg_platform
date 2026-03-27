@@ -1172,3 +1172,21 @@
 - [x] Lista de gravações mostra transcrição por blocos quando disponível
 - [x] 33 testes passados (gravacao + relatorio loja + PDF)
 - [x] Guardar checkpoint
+
+## Sistema de Reuniões Completo
+- [x] Schema DB: tabelas reunioes_livres + reuniao_tipos
+- [x] Migrar schema para DB (pnpm db:push)
+- [x] Backend tRPC: CRUD reuniões (criar, listar, obter, atualizar, eliminar)
+- [x] Backend tRPC: CRUD tipos/tags de reunião (criar, listar, eliminar)
+- [x] Página de Reuniões com listagem/histórico (filtros por tipo, estado, pesquisa)
+- [x] Formulário de criação/edição de reunião (data, hora, local, presenças, temas, conclusões, observações)
+- [x] Gestão de tipos/tags com cores personalizáveis
+- [x] Integração com gravador de áudio (NovaGravacaoDialog)
+- [x] Associar gravação existente a reunião
+- [x] Visualização de transcrição e resumo IA na reunião
+- [x] Menu "Reunião Livre" no sidebar (grupo Reuniões)
+- [x] Rota /reunioes-livres no App.tsx
+- [x] Ações: arquivar, restaurar, eliminar reuniões
+- [x] Detalhe da reunião com visualização completa
+- [x] 12 testes vitest passados (tipos + CRUD reuniões)
+- [ ] Guardar checkpoint

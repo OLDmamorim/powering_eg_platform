@@ -1614,6 +1614,58 @@ export const gravacoesReuniao = mysqlTable("gravacoes_reuniao", {
 export type GravacaoReuniao = typeof gravacoesReuniao.$inferSelect;
 export type InsertGravacaoReuniao = typeof gravacoesReuniao.$inferInsert;
 
+/**
+ * Tipos/Tags de Reunião - Categorização de reuniões livres
+ * Ex: "Reunião Semanal", "Reunião Mensal", "Formação", "Briefing", etc.
+ */
+export const reuniaoTipos = mysqlTable("reuniao_tipos", {
+  id: int("id").autoincrement().primaryKey(),
+  nome: varchar("nome", { length: 100 }).notNull(),
+  cor: varchar("cor", { length: 20 }).default("#6366f1"), // Cor da tag
+  userId: int("userId").notNull(), // FK para users.id (quem criou)
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type ReuniaoTipo = typeof reuniaoTipos.$inferSelect;
+export type InsertReuniaoTipo = typeof reuniaoTipos.$inferInsert;
+
+/**
+ * Reuniões Livres - Sistema de reuniões com histórico completo
+ * Cada reunião tem data, presenças, temas, conclusões, tipo/tag
+ * Opcionalmente integra com gravação de áudio, transcrição e resumo IA
+ */
+export const reunioesLivres = mysqlTable("reunioes_livres", {
+  id: int("id").autoincrement().primaryKey(),
+  titulo: varchar("titulo", { length: 500 }).notNull(),
+  data: varchar("data", { length: 10 }).notNull(), // YYYY-MM-DD
+  hora: varchar("hora", { length: 5 }), // HH:MM (opcional)
+  local: varchar("local", { length: 255 }), // Local da reunião (opcional)
+  
+  // Tipo/Tag da reunião
+  tipoId: int("tipoId"), // FK para reuniao_tipos.id
+  
+  // Participantes (JSON array de strings com nomes)
+  presencas: text("presencas"), // JSON: ["Marco Amorim", "João Silva", ...]
+  
+  // Conteúdo da reunião
+  temas: mediumtext("temas"), // Temas discutidos (rich text ou texto livre)
+  conclusoes: mediumtext("conclusoes"), // Conclusões da reunião
+  observacoes: mediumtext("observacoes"), // Observações adicionais
+  
+  // Integração com gravação de áudio
+  gravacaoId: int("gravacaoId"), // FK opcional para gravacoes_reuniao.id
+  
+  // Quem criou
+  userId: int("userId").notNull(), // FK para users.id
+  
+  // Estado
+  estado: mysqlEnum("estado", ["rascunho", "concluida", "arquivada"]).default("rascunho").notNull(),
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type ReuniaoLivre = typeof reunioesLivres.$inferSelect;
+export type InsertReuniaoLivre = typeof reunioesLivres.$inferInsert;
+
 
 /**
  * ========================================

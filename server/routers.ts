@@ -12333,6 +12333,100 @@ Mantém o resumo conciso e profissional.`
       }),
   }),
 
+  // ==================== REUNIÕES LIVRES ====================
+  reunioesLivres: router({
+    // Listar tipos/tags de reunião
+    listarTipos: protectedProcedure
+      .query(async ({ ctx }) => {
+        return db.listarReuniaoTipos(ctx.user.id);
+      }),
+
+    // Criar tipo/tag de reunião
+    criarTipo: protectedProcedure
+      .input(z.object({
+        nome: z.string().min(1).max(100),
+        cor: z.string().default('#6366f1'),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        return db.criarReuniaoTipo({ ...input, userId: ctx.user.id });
+      }),
+
+    // Eliminar tipo/tag de reunião
+    eliminarTipo: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        await db.eliminarReuniaoTipo(input.id, ctx.user.id);
+        return { success: true };
+      }),
+
+    // Listar reuniões
+    listar: protectedProcedure
+      .input(z.object({
+        tipoId: z.number().optional(),
+        estado: z.string().optional(),
+        pesquisa: z.string().optional(),
+      }).optional())
+      .query(async ({ ctx, input }) => {
+        return db.listarReunioesLivres(ctx.user.id, input || {});
+      }),
+
+    // Obter reunião por ID
+    getById: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ ctx, input }) => {
+        return db.getReuniaoLivre(input.id, ctx.user.id);
+      }),
+
+    // Criar reunião
+    criar: protectedProcedure
+      .input(z.object({
+        titulo: z.string().min(1).max(500),
+        data: z.string(), // YYYY-MM-DD
+        hora: z.string().optional(),
+        local: z.string().optional(),
+        tipoId: z.number().optional(),
+        presencas: z.string().optional(), // JSON array
+        temas: z.string().optional(),
+        conclusoes: z.string().optional(),
+        observacoes: z.string().optional(),
+        gravacaoId: z.number().optional(),
+        estado: z.enum(['rascunho', 'concluida', 'arquivada']).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        return db.criarReuniaoLivre({ ...input, userId: ctx.user.id });
+      }),
+
+    // Atualizar reunião
+    atualizar: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        titulo: z.string().optional(),
+        data: z.string().optional(),
+        hora: z.string().optional(),
+        local: z.string().optional(),
+        tipoId: z.number().nullable().optional(),
+        presencas: z.string().optional(),
+        temas: z.string().optional(),
+        conclusoes: z.string().optional(),
+        observacoes: z.string().optional(),
+        gravacaoId: z.number().nullable().optional(),
+        estado: z.enum(['rascunho', 'concluida', 'arquivada']).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const { id, ...data } = input;
+        await db.atualizarReuniaoLivre(id, ctx.user.id, data);
+        return { success: true };
+      }),
+
+    // Eliminar reunião
+    eliminar: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        await db.eliminarReuniaoLivre(input.id, ctx.user.id);
+        return { success: true };
+      }),
+  }),
+
   // ==================== NOTAS DA LOJA ====================
   notasLoja: router({
     // Listar notas de uma loja

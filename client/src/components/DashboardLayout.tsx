@@ -150,6 +150,7 @@ const getMenuGroups = (userRole?: string, t?: (key: string) => string): MenuGrou
       color: 'bg-cyan-100/80 dark:bg-cyan-900/30',
       items: [
         { icon: CalendarDays, label: tr('menu.items.reunioesGestores', 'Reuniões Gestores'), path: "/reunioes-gestores", show: true, showBadge: false },
+        { icon: FileText, label: tr('menu.items.reunioesLivres', 'Reunião Livre'), path: "/reunioes-livres", show: true, showBadge: false },
         { icon: MessageSquarePlus, label: tr('menu.items.topicosReuniao', 'Tópicos Reunião'), path: "/topicos-reuniao", show: true, showBadge: false },
         { icon: Store, label: tr('menu.items.reunioesLojas', 'Reuniões Lojas'), path: "/reunioes-lojas", show: true, showBadge: false },
         { icon: Users2, label: tr('menu.items.portalLoja', 'Portal da Loja'), path: "/reunioes-quinzenais", show: true, showBadge: false },

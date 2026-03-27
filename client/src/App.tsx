@@ -76,6 +76,7 @@ const GestaoRecalibra = lazy(() => import("./pages/GestaoRecalibra"));
 const PortalRecalibra = lazy(() => import("./pages/PortalRecalibra"));
 const DashboardRecalibra = lazy(() => import("./pages/DashboardRecalibra"));
 const Ferias = lazy(() => import("./pages/Ferias"));
+const ReunioesLivres = lazy(() => import("./pages/ReunioesLivres"));
 const LoginNaoAutorizado = lazy(() => import("./pages/LoginNaoAutorizado"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
@@ -200,6 +201,7 @@ function Router() {
         <Route path={"/configuracoes-alertas"} component={ConfiguracoesAlertas} />
         <Route path={"/categorias"} component={Categorias} />
         <Route path={"/reunioes-gestores"} component={ReuniõesGestores} />
+        <Route path={"/reunioes-livres"} component={ReunioesLivres} />
         <Route path={"/topicos-reuniao"} component={TopicosReuniao} />
         <Route path={"/reunioes-lojas"} component={ReuniõesLojas} />
         <Route path={"/resultados-upload"} component={ResultadosUpload} />

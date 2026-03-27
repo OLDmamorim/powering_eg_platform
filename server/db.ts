@@ -198,7 +198,13 @@ import {
   BackgroundJob,
   notasLoja,
   NotaLoja,
-  InsertNotaLoja
+  InsertNotaLoja,
+  reuniaoTipos,
+  ReuniaoTipo,
+  InsertReuniaoTipo,
+  reunioesLivres,
+  ReuniaoLivre,
+  InsertReuniaoLivre
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -13859,4 +13865,187 @@ export async function getAnosFerias(): Promise<number[]> {
   if (!db) return [];
   const rows = await db.selectDistinct({ ano: feriasUploads.ano }).from(feriasUploads).orderBy(desc(feriasUploads.ano));
   return rows.map((r: { ano: number }) => r.ano);
+}
+
+
+// =============================================
+// REUNIÕES LIVRES - Sistema de Reuniões
+// =============================================
+
+/**
+ * Listar tipos/tags de reunião de um utilizador
+ */
+export async function listarReuniaoTipos(userId: number): Promise<ReuniaoTipo[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(reuniaoTipos).where(eq(reuniaoTipos.userId, userId)).orderBy(reuniaoTipos.nome);
+}
+
+/**
+ * Criar tipo/tag de reunião
+ */
+export async function criarReuniaoTipo(data: { nome: string; cor: string; userId: number }): Promise<ReuniaoTipo> {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  const [result] = await db.insert(reuniaoTipos).values(data).$returningId();
+  const [row] = await db.select().from(reuniaoTipos).where(eq(reuniaoTipos.id, result.id));
+  return row;
+}
+
+/**
+ * Eliminar tipo/tag de reunião
+ */
+export async function eliminarReuniaoTipo(id: number, userId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  // Remover referência das reuniões que usam este tipo
+  await db.update(reunioesLivres).set({ tipoId: null }).where(eq(reunioesLivres.tipoId, id));
+  await db.delete(reuniaoTipos).where(and(eq(reuniaoTipos.id, id), eq(reuniaoTipos.userId, userId)));
+}
+
+/**
+ * Listar reuniões livres de um utilizador (com tipo/tag)
+ */
+export async function listarReunioesLivres(userId: number, filtros?: { tipoId?: number; estado?: string; pesquisa?: string }): Promise<any[]> {
+  const db = await getDb();
+  if (!db) return [];
+
+  const conditions: any[] = [eq(reunioesLivres.userId, userId)];
+  if (filtros?.tipoId) {
+    conditions.push(eq(reunioesLivres.tipoId, filtros.tipoId));
+  }
+  if (filtros?.estado) {
+    conditions.push(eq(reunioesLivres.estado, filtros.estado as any));
+  }
+
+  const rows = await db.select({
+    reuniao: reunioesLivres,
+    tipoNome: reuniaoTipos.nome,
+    tipoCor: reuniaoTipos.cor,
+  })
+    .from(reunioesLivres)
+    .leftJoin(reuniaoTipos, eq(reunioesLivres.tipoId, reuniaoTipos.id))
+    .where(and(...conditions))
+    .orderBy(desc(reunioesLivres.data), desc(reunioesLivres.createdAt));
+
+  // Filtro de pesquisa em memória (título, temas, conclusões, presenças)
+  let result = rows.map(r => ({
+    ...r.reuniao,
+    tipoNome: r.tipoNome,
+    tipoCor: r.tipoCor,
+  }));
+
+  if (filtros?.pesquisa) {
+    const termo = filtros.pesquisa.toLowerCase();
+    result = result.filter(r =>
+      r.titulo.toLowerCase().includes(termo) ||
+      (r.temas && r.temas.toLowerCase().includes(termo)) ||
+      (r.conclusoes && r.conclusoes.toLowerCase().includes(termo)) ||
+      (r.presencas && r.presencas.toLowerCase().includes(termo))
+    );
+  }
+
+  return result;
+}
+
+/**
+ * Obter uma reunião livre por ID
+ */
+export async function getReuniaoLivre(id: number, userId: number): Promise<any | null> {
+  const db = await getDb();
+  if (!db) return null;
+
+  const [row] = await db.select({
+    reuniao: reunioesLivres,
+    tipoNome: reuniaoTipos.nome,
+    tipoCor: reuniaoTipos.cor,
+  })
+    .from(reunioesLivres)
+    .leftJoin(reuniaoTipos, eq(reunioesLivres.tipoId, reuniaoTipos.id))
+    .where(and(eq(reunioesLivres.id, id), eq(reunioesLivres.userId, userId)));
+
+  if (!row) return null;
+
+  // Se tem gravação associada, buscar dados da gravação
+  let gravacao = null;
+  if (row.reuniao.gravacaoId) {
+    const [g] = await db.select().from(gravacoesReuniao).where(eq(gravacoesReuniao.id, row.reuniao.gravacaoId));
+    gravacao = g || null;
+  }
+
+  return {
+    ...row.reuniao,
+    tipoNome: row.tipoNome,
+    tipoCor: row.tipoCor,
+    gravacao,
+  };
+}
+
+/**
+ * Criar reunião livre
+ */
+export async function criarReuniaoLivre(data: {
+  titulo: string;
+  data: string;
+  hora?: string;
+  local?: string;
+  tipoId?: number;
+  presencas?: string;
+  temas?: string;
+  conclusoes?: string;
+  observacoes?: string;
+  gravacaoId?: number;
+  userId: number;
+  estado?: 'rascunho' | 'concluida' | 'arquivada';
+}): Promise<ReuniaoLivre> {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  const [result] = await db.insert(reunioesLivres).values({
+    titulo: data.titulo,
+    data: data.data,
+    hora: data.hora || null,
+    local: data.local || null,
+    tipoId: data.tipoId || null,
+    presencas: data.presencas || null,
+    temas: data.temas || null,
+    conclusoes: data.conclusoes || null,
+    observacoes: data.observacoes || null,
+    gravacaoId: data.gravacaoId || null,
+    userId: data.userId,
+    estado: data.estado || 'rascunho',
+  }).$returningId();
+  const [row] = await db.select().from(reunioesLivres).where(eq(reunioesLivres.id, result.id));
+  return row;
+}
+
+/**
+ * Atualizar reunião livre
+ */
+export async function atualizarReuniaoLivre(id: number, userId: number, data: {
+  titulo?: string;
+  data?: string;
+  hora?: string;
+  local?: string;
+  tipoId?: number | null;
+  presencas?: string;
+  temas?: string;
+  conclusoes?: string;
+  observacoes?: string;
+  gravacaoId?: number | null;
+  estado?: 'rascunho' | 'concluida' | 'arquivada';
+}): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(reunioesLivres)
+    .set(data)
+    .where(and(eq(reunioesLivres.id, id), eq(reunioesLivres.userId, userId)));
+}
+
+/**
+ * Eliminar reunião livre
+ */
+export async function eliminarReuniaoLivre(id: number, userId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.delete(reunioesLivres).where(and(eq(reunioesLivres.id, id), eq(reunioesLivres.userId, userId)));
 }
