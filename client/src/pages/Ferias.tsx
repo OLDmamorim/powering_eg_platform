@@ -1124,7 +1124,13 @@ function AnalysisTab({ data, allData, ano, TM }: { data: (Employee & EmpStats)[]
       const cor2 = pct2 <= 40 ? 'green' as const : pct2 <= 50 ? 'yellow' as const : 'red' as const;
       const cor3 = 'green' as const; // livre
       const cor4 = pct4 <= 10 ? 'green' as const : pct4 <= 20 ? 'yellow' as const : 'red' as const;
-      return { ...e, gestor: e.gestor, totalDias, pct1, pct2, pct3, pct4, cor1, cor2, cor3, cor4 };
+      // Dias que deveria ter por período (baseado em proporção de 22 dias úteis)
+      // Regra: Jan-Mai mín 5d, Jun-Set máx 10d, Out-Nov livre, Dez mín possível (máx 3d)
+      const metaJanMai = REGRA_JAN_MAI_MIN; // mínimo 5 dias
+      const metaJunSet = REGRA_JUN_SET_MAX; // máximo 10 dias
+      const metaDez = REGRA_DEZ_MAX; // máximo 3 dias
+      const metaOutNov = REGRA_DIAS_TOTAL - metaJanMai - metaJunSet - metaDez; // restante = 4 dias
+      return { ...e, gestor: e.gestor, totalDias, pct1, pct2, pct3, pct4, cor1, cor2, cor3, cor4, diasJanMai: p.janMai, diasJunSet: p.junSet, diasOutNov: p.outNov, diasDez: p.dez, metaJanMai, metaJunSet, metaOutNov, metaDez };
     }).sort((a,b) => a.store.localeCompare(b.store,'pt') || a.name.localeCompare(b.name,'pt'));
   }, [data, distLojaFilter]);
 
@@ -1519,6 +1525,7 @@ function AnalysisTab({ data, allData, ano, TM }: { data: (Employee & EmpStats)[]
                   <TableHead className="text-center text-xs">2.º Período<br/><span className="text-[9px] font-normal">Jun-Set</span></TableHead>
                   <TableHead className="text-center text-xs">3.º Período<br/><span className="text-[9px] font-normal">Out-Nov</span></TableHead>
                   <TableHead className="text-center text-xs">4.º Período<br/><span className="text-[9px] font-normal">Dez</span></TableHead>
+                  <TableHead className="text-center text-xs">Total<br/><span className="text-[9px] font-normal">dias</span></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -1529,16 +1536,34 @@ function AnalysisTab({ data, allData, ano, TM }: { data: (Employee & EmpStats)[]
                     <TableCell className="text-center text-xs text-muted-foreground">{e.num}</TableCell>
                     <TableCell className="text-xs font-medium">{shortName(e.name)}</TableCell>
                     <TableCell className="text-center">
-                      <span className={`px-2 py-1 rounded text-xs font-bold ${e.cor1==='green'?'bg-white text-slate-700':e.cor1==='yellow'?'bg-amber-400 text-amber-900':'bg-red-600 text-white'}`}>{e.pct1}%</span>
+                      <div className="flex flex-col items-center gap-0.5">
+                        <span className={`px-2 py-0.5 rounded text-xs font-bold ${e.cor1==='green'?'bg-white text-slate-700':e.cor1==='yellow'?'bg-amber-400 text-amber-900':'bg-red-600 text-white'}`}>{e.pct1}%</span>
+                        <span className="text-[9px] text-muted-foreground">{e.diasJanMai}/{e.metaJanMai}d</span>
+                      </div>
                     </TableCell>
                     <TableCell className="text-center">
-                      <span className={`px-2 py-1 rounded text-xs font-bold ${e.cor2==='green'?'bg-white text-slate-700':e.cor2==='yellow'?'bg-amber-400 text-amber-900':'bg-red-600 text-white'}`}>{e.pct2}%</span>
+                      <div className="flex flex-col items-center gap-0.5">
+                        <span className={`px-2 py-0.5 rounded text-xs font-bold ${e.cor2==='green'?'bg-white text-slate-700':e.cor2==='yellow'?'bg-amber-400 text-amber-900':'bg-red-600 text-white'}`}>{e.pct2}%</span>
+                        <span className="text-[9px] text-muted-foreground">{e.diasJunSet}/{e.metaJunSet}d</span>
+                      </div>
                     </TableCell>
                     <TableCell className="text-center">
-                      <span className={`px-2 py-1 rounded text-xs font-bold ${e.cor3==='green'?'bg-white text-slate-700':e.cor3==='yellow'?'bg-amber-400 text-amber-900':'bg-red-600 text-white'}`}>{e.pct3}%</span>
+                      <div className="flex flex-col items-center gap-0.5">
+                        <span className={`px-2 py-0.5 rounded text-xs font-bold ${e.cor3==='green'?'bg-white text-slate-700':e.cor3==='yellow'?'bg-amber-400 text-amber-900':'bg-red-600 text-white'}`}>{e.pct3}%</span>
+                        <span className="text-[9px] text-muted-foreground">{e.diasOutNov}/{e.metaOutNov}d</span>
+                      </div>
                     </TableCell>
                     <TableCell className="text-center">
-                      <span className={`px-2 py-1 rounded text-xs font-bold ${e.cor4==='green'?'bg-white text-slate-700':e.cor4==='yellow'?'bg-amber-400 text-amber-900':'bg-red-600 text-white'}`}>{e.pct4}%</span>
+                      <div className="flex flex-col items-center gap-0.5">
+                        <span className={`px-2 py-0.5 rounded text-xs font-bold ${e.cor4==='green'?'bg-white text-slate-700':e.cor4==='yellow'?'bg-amber-400 text-amber-900':'bg-red-600 text-white'}`}>{e.pct4}%</span>
+                        <span className="text-[9px] text-muted-foreground">{e.diasDez}/{e.metaDez}d</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <div className="flex flex-col items-center gap-0.5">
+                        <span className={`px-2 py-0.5 rounded text-xs font-bold ${e.totalDias >= 22 ? 'bg-green-100 text-green-700' : e.totalDias >= 15 ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'}`}>{e.totalDias}</span>
+                        <span className="text-[9px] text-muted-foreground">/{REGRA_DIAS_TOTAL}d</span>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}

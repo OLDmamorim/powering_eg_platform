@@ -1189,4 +1189,10 @@
 - [x] Ações: arquivar, restaurar, eliminar reuniões
 - [x] Detalhe da reunião com visualização completa
 - [x] 12 testes vitest passados (tipos + CRUD reuniões)
+- [x] Guardar checkpoint
+
+## Férias - Mostrar Dias Gozados / Dias Totais ao Lado das Percentagens
+- [x] Analisar dados disponíveis no backend (dias gozados, dias totais por período)
+- [x] Modificar frontend para mostrar "X/Y dias" ao lado de cada percentagem
+- [x] Coluna Total dias adicionada com cor semáforo
 - [ ] Guardar checkpoint
