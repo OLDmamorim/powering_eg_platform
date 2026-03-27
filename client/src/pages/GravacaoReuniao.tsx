@@ -55,17 +55,22 @@ const ESTADO_CONFIG: Record<string, { label: string; color: string; icon: any }>
   erro: { label: "Erro", color: "bg-red-100 text-red-700", icon: AlertCircle },
 };
 
-// ==================== GRAVADOR DE ÁUDIO ====================
+// ==================== GRAVADOR DE ÁUDIO (COM SUPORTE A BLOCOS) ====================
+const BLOCO_DURACAO_SEG = 8 * 60; // 8 minutos por bloco
+
 function AudioRecorder({
   onGravacaoConcluida,
+  onBlocoPronto,
 }: {
   onGravacaoConcluida: (audioBlob: Blob, duracao: number, mimeType: string) => void;
+  onBlocoPronto?: (audioBlob: Blob, blocoIndex: number, mimeType: string, duracaoBloco: number) => void;
 }) {
   const [isRecording, setIsRecording] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [duracao, setDuracao] = useState(0);
   const [audioLevel, setAudioLevel] = useState(0);
   const [modoCaptura, setModoCaptura] = useState<"completo" | "microfone">("completo");
+  const [blocosEnviados, setBlocosEnviados] = useState(0);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -74,16 +79,32 @@ function AudioRecorder({
   const streamRef = useRef<MediaStream | null>(null);
   const allStreamsRef = useRef<MediaStream[]>([]);
   const audioCtxRef = useRef<AudioContext | null>(null);
+  const blocoIndexRef = useRef(0);
+  const blocoDuracaoRef = useRef(0);
+  const blocoTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const mimeTypeRef = useRef('audio/webm');
 
   // Limpar ao desmontar
   useEffect(() => {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
+      if (blocoTimerRef.current) clearInterval(blocoTimerRef.current);
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
       allStreamsRef.current.forEach(s => s.getTracks().forEach(t => t.stop()));
       if (audioCtxRef.current) audioCtxRef.current.close();
     };
   }, []);
+
+  // Função para cortar bloco e iniciar novo
+  const cortarBloco = () => {
+    const mr = mediaRecorderRef.current;
+    if (!mr || mr.state !== 'recording') return;
+    
+    // Parar o recorder atual para obter o blob
+    mr.stop();
+    // O onstop vai criar o blob e chamar onBlocoPronto
+    // Depois precisamos reiniciar a gravação com o mesmo stream
+  };
 
   const startRecording = async () => {
     try {
@@ -150,27 +171,61 @@ function AudioRecorder({
         ? "audio/mp4"
         : "audio/webm";
 
-      const mediaRecorder = new MediaRecorder(combinedStream, { mimeType });
-      mediaRecorderRef.current = mediaRecorder;
-      chunksRef.current = [];
+      mimeTypeRef.current = mimeType;
+      blocoIndexRef.current = 0;
+      blocoDuracaoRef.current = 0;
+      setBlocosEnviados(0);
 
-      mediaRecorder.ondataavailable = (e) => {
-        if (e.data.size > 0) chunksRef.current.push(e.data);
+      // Flag para saber se o stop é por corte de bloco ou stop final
+      let isBlocoCut = false;
+
+      const iniciarRecorder = () => {
+        const mr = new MediaRecorder(combinedStream, { mimeType });
+        mediaRecorderRef.current = mr;
+        chunksRef.current = [];
+
+        mr.ondataavailable = (e) => {
+          if (e.data.size > 0) chunksRef.current.push(e.data);
+        };
+
+        mr.onstop = () => {
+          const blob = new Blob(chunksRef.current, { type: mimeType });
+          const duracaoBloco = blocoDuracaoRef.current;
+
+          if (isBlocoCut) {
+            // Bloco intermediário: enviar e reiniciar
+            if (onBlocoPronto) {
+              onBlocoPronto(blob, blocoIndexRef.current, mimeType.split(";")[0], duracaoBloco);
+            }
+            blocoIndexRef.current += 1;
+            blocoDuracaoRef.current = 0;
+            setBlocosEnviados(prev => prev + 1);
+            isBlocoCut = false;
+            // Reiniciar gravação com o mesmo stream
+            iniciarRecorder();
+            toast.info(`Bloco ${blocoIndexRef.current} a gravar... (gravação contínua)`);
+          } else {
+            // Stop final: enviar como último bloco ou como gravação completa
+            if (onBlocoPronto && blocoIndexRef.current > 0) {
+              // Temos blocos anteriores, enviar este como último bloco
+              onBlocoPronto(blob, blocoIndexRef.current, mimeType.split(";")[0], duracaoBloco);
+            }
+            // Sempre chamar onGravacaoConcluida para sinalizar fim
+            onGravacaoConcluida(blob, duracao, mimeType.split(";")[0]);
+            allStreamsRef.current.forEach(s => s.getTracks().forEach(t => t.stop()));
+            allStreamsRef.current = [];
+            streamRef.current = null;
+            if (audioCtxRef.current) {
+              audioCtxRef.current.close();
+              audioCtxRef.current = null;
+            }
+          }
+        };
+
+        mr.start(1000); // Chunks de 1 segundo
       };
 
-      mediaRecorder.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: mimeType });
-        onGravacaoConcluida(blob, duracao, mimeType.split(";")[0]);
-        allStreamsRef.current.forEach(s => s.getTracks().forEach(t => t.stop()));
-        allStreamsRef.current = [];
-        streamRef.current = null;
-        if (audioCtxRef.current) {
-          audioCtxRef.current.close();
-          audioCtxRef.current = null;
-        }
-      };
-
-      mediaRecorder.start(1000); // Chunks de 1 segundo
+      iniciarRecorder();
       setIsRecording(true);
       setIsPaused(false);
       setDuracao(0);
@@ -181,10 +236,20 @@ function AudioRecorder({
         toast.success("A gravar microfone + áudio do sistema");
       }
 
-      // Timer de duração
+      // Timer de duração global
       timerRef.current = setInterval(() => {
         setDuracao(prev => prev + 1);
+        blocoDuracaoRef.current += 1;
       }, 1000);
+
+      // Timer de corte de blocos (a cada BLOCO_DURACAO_SEG segundos)
+      blocoTimerRef.current = setInterval(() => {
+        const mr = mediaRecorderRef.current;
+        if (mr && mr.state === 'recording') {
+          isBlocoCut = true;
+          mr.stop(); // Vai disparar onstop que reinicia
+        }
+      }, BLOCO_DURACAO_SEG * 1000);
 
       // Visualização de nível de áudio
       const updateLevel = () => {
@@ -219,15 +284,12 @@ function AudioRecorder({
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
       if (timerRef.current) clearInterval(timerRef.current);
+      if (blocoTimerRef.current) clearInterval(blocoTimerRef.current);
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
       setIsRecording(false);
       setIsPaused(false);
     }
   };
-
-  // Verificar tamanho estimado (16MB limit)
-  const tamanhoEstimado = duracao * 16000; // ~16KB/s para webm opus
-  const excedeLimite = tamanhoEstimado > 16 * 1024 * 1024;
 
   return (
     <div className="space-y-4">
@@ -293,10 +355,10 @@ function AudioRecorder({
             </span>
           </div>
         )}
-        {excedeLimite && (
-          <p className="text-xs text-destructive mt-1 flex items-center justify-center gap-1">
-            <AlertCircle className="h-3 w-3" />
-            Gravação longa — pode exceder o limite de 16MB
+        {blocosEnviados > 0 && (
+          <p className="text-xs text-green-600 mt-1 flex items-center justify-center gap-1">
+            <CheckCircle2 className="h-3 w-3" />
+            {blocosEnviados} bloco{blocosEnviados > 1 ? 's' : ''} processado{blocosEnviados > 1 ? 's' : ''} (gravação contínua sem limite)
           </p>
         )}
       </div>
@@ -477,7 +539,15 @@ function TranscricaoEditavel({
   );
 }
 
-// ==================== DIALOG DE NOVA GRAVAÇÃO ====================
+// ==================== DIALOG DE NOVA GRAVAÇÃO (COM BLOCOS) ====================
+interface BlocoProcessado {
+  blocoIndex: number;
+  audioUrl: string;
+  text: string;
+  segmentos: Segmento[];
+  duracaoBloco: number;
+}
+
 export function NovaGravacaoDialog({
   open,
   onClose,
@@ -493,15 +563,99 @@ export function NovaGravacaoDialog({
   const [resumo, setResumo] = useState("");
   const [processando, setProcessando] = useState(false);
   const [etapaProcesso, setEtapaProcesso] = useState("");
+  const [progressoBlocos, setProgressoBlocos] = useState({ total: 0, processados: 0 });
 
   const utils = trpc.useUtils();
+  const blocosProcessadosRef = useRef<BlocoProcessado[]>([]);
+  const blocosEmFilaRef = useRef<{ blob: Blob; blocoIndex: number; mimeType: string; duracaoBloco: number }[]>([]);
+  const gravacaoIdRef = useRef<number | null>(null);
+  const aProcessarBlocoRef = useRef(false);
 
   const criarMutation = trpc.notas.criarGravacao.useMutation();
   const uploadMutation = trpc.notas.uploadAudioGravacao.useMutation();
+  // @ts-ignore - endpoints adicionados ao router notas
+  const uploadBlocoMutation = (trpc.notas as any).uploadBlocoAudio.useMutation();
+  // @ts-ignore
+  const transcreverBlocoMutation = (trpc.notas as any).transcreverBlocoAudio.useMutation();
   const transcreverMutation = trpc.notas.transcreverGravacao.useMutation();
+  // @ts-ignore
+  const finalizarBlocosMutation = (trpc.notas as any).finalizarGravacaoBlocos.useMutation();
   const guardarTranscricaoMutation = trpc.notas.guardarTranscricaoEditada.useMutation();
   const resumoMutation = trpc.notas.gerarResumoGravacao.useMutation();
 
+  // Processar fila de blocos em background
+  const processarFilaBlocos = async () => {
+    if (aProcessarBlocoRef.current) return;
+    aProcessarBlocoRef.current = true;
+
+    while (blocosEmFilaRef.current.length > 0) {
+      const bloco = blocosEmFilaRef.current.shift()!;
+      const gId = gravacaoIdRef.current;
+      if (!gId) break;
+
+      try {
+        // Upload do bloco
+        const base64 = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve((reader.result as string).split(",")[1]);
+          reader.readAsDataURL(bloco.blob);
+        });
+
+        const uploadResult = await uploadBlocoMutation.mutateAsync({
+          gravacaoId: gId,
+          blocoIndex: bloco.blocoIndex,
+          audioBase64: base64,
+          mimeType: bloco.mimeType,
+        });
+
+        // Transcrever o bloco
+        const transcResult = await transcreverBlocoMutation.mutateAsync({
+          audioUrl: uploadResult.url,
+          blocoIndex: bloco.blocoIndex,
+        });
+
+        blocosProcessadosRef.current.push({
+          blocoIndex: bloco.blocoIndex,
+          audioUrl: uploadResult.url,
+          text: transcResult.text,
+          segmentos: transcResult.segmentos,
+          duracaoBloco: bloco.duracaoBloco,
+        });
+
+        setProgressoBlocos(prev => ({ ...prev, processados: prev.processados + 1 }));
+      } catch (err: any) {
+        console.error(`Erro ao processar bloco ${bloco.blocoIndex}:`, err);
+        toast.error(`Erro no bloco ${bloco.blocoIndex + 1}: ${err.message || 'Erro desconhecido'}`);
+      }
+    }
+
+    aProcessarBlocoRef.current = false;
+  };
+
+  // Callback quando um bloco fica pronto durante a gravação
+  const handleBlocoPronto = async (audioBlob: Blob, blocoIndex: number, mimeType: string, duracaoBloco: number) => {
+    // Garantir que temos um gravacaoId
+    if (!gravacaoIdRef.current) {
+      // Criar registo na DB se ainda não existe
+      if (!titulo.trim()) return;
+      try {
+        const gravacao = await criarMutation.mutateAsync({ titulo: titulo.trim() });
+        if (gravacao) {
+          gravacaoIdRef.current = gravacao.id;
+          setGravacaoId(gravacao.id);
+        }
+      } catch (err) {
+        console.error('Erro ao criar gravação:', err);
+        return;
+      }
+    }
+
+    setProgressoBlocos(prev => ({ ...prev, total: prev.total + 1 }));
+    blocosEmFilaRef.current.push({ blob: audioBlob, blocoIndex, mimeType, duracaoBloco });
+    processarFilaBlocos();
+  };
+
+  // Quando a gravação termina (stop final)
   const handleGravacaoConcluida = async (audioBlob: Blob, duracao: number, mimeType: string) => {
     if (!titulo.trim()) {
       toast.error("Insere um título para a gravação");
@@ -512,54 +666,83 @@ export function NovaGravacaoDialog({
     setProcessando(true);
 
     try {
-      // 1. Criar registo na DB
-      setEtapaProcesso("A criar registo...");
-      const gravacao = await criarMutation.mutateAsync({ titulo: titulo.trim() });
-      if (!gravacao) throw new Error("Erro ao criar gravação");
-      setGravacaoId(gravacao.id);
+      const temBlocos = blocosProcessadosRef.current.length > 0 || blocosEmFilaRef.current.length > 0;
 
-      // 2. Upload áudio para S3
-      setEtapaProcesso("A enviar áudio...");
-      const reader = new FileReader();
-      const base64 = await new Promise<string>((resolve) => {
-        reader.onload = () => {
-          const result = reader.result as string;
-          resolve(result.split(",")[1]);
-        };
-        reader.readAsDataURL(audioBlob);
-      });
+      if (temBlocos) {
+        // ===== MODO BLOCOS: gravação longa =====
+        // O último bloco já foi adicionado pelo AudioRecorder via onBlocoPronto
+        // Esperar que todos os blocos em fila sejam processados
+        setEtapaProcesso(`A processar blocos... (${blocosProcessadosRef.current.length} processados)`);
+        
+        // Esperar que a fila esvazie
+        let tentativas = 0;
+        while (blocosEmFilaRef.current.length > 0 || aProcessarBlocoRef.current) {
+          await new Promise(r => setTimeout(r, 2000));
+          setEtapaProcesso(`A processar blocos... (${blocosProcessadosRef.current.length}/${progressoBlocos.total})`);
+          tentativas++;
+          if (tentativas > 120) break; // timeout 4 min
+        }
 
-      await uploadMutation.mutateAsync({
-        gravacaoId: gravacao.id,
-        audioBase64: base64,
-        mimeType,
-        duracaoSegundos: duracao,
-      });
+        if (blocosProcessadosRef.current.length === 0) {
+          throw new Error('Nenhum bloco foi processado com sucesso');
+        }
 
-      // 3. Transcrever (agora devolve segmentos)
-      setEtapaProcesso("A transcrever áudio...");
-      const resultTranscricao = await transcreverMutation.mutateAsync({
-        gravacaoId: gravacao.id,
-      });
-      setTranscricao(resultTranscricao.transcricao);
-      
-      // Se temos segmentos, mostrar a etapa de edição
-      const segs = (resultTranscricao as any).segmentos;
-      if (segs && segs.length > 0) {
-        setSegmentos(segs);
+        // Finalizar: juntar todos os blocos
+        const gId = gravacaoIdRef.current!;
+        setEtapaProcesso("A juntar transcrições...");
+        const resultado = await finalizarBlocosMutation.mutateAsync({
+          gravacaoId: gId,
+          blocos: blocosProcessadosRef.current,
+          duracaoTotal: duracao,
+        });
+
+        setGravacaoId(gId);
+        setTranscricao(resultado.transcricao);
+        if (resultado.segmentos.length > 0) {
+          setSegmentos(resultado.segmentos);
+        } else {
+          const frases = resultado.transcricao.split(/(?<=[.!?])\s+/).filter((f: string) => f.trim());
+          setSegmentos(frases.map((f: string, i: number) => ({ start: i * 30, end: (i + 1) * 30, text: f.trim() })));
+        }
         setEtapa("editar");
-        toast.success("Transcrição concluída! Reveja e corrija os blocos antes de gerar o resumo.");
+        toast.success(`Transcrição concluída! (${blocosProcessadosRef.current.length} blocos processados)`);
       } else {
-        // Sem segmentos, criar blocos artificiais (1 bloco por frase)
-        const frases = resultTranscricao.transcricao.split(/(?<=[.!?])\s+/).filter((f: string) => f.trim());
-        const segsFallback: Segmento[] = frases.map((f: string, i: number) => ({
-          start: i * 30,
-          end: (i + 1) * 30,
-          text: f.trim(),
-        }));
-        setSegmentos(segsFallback);
+        // ===== MODO SIMPLES: gravação curta (<8 min) =====
+        setEtapaProcesso("A criar registo...");
+        const gravacao = await criarMutation.mutateAsync({ titulo: titulo.trim() });
+        if (!gravacao) throw new Error("Erro ao criar gravação");
+        setGravacaoId(gravacao.id);
+        gravacaoIdRef.current = gravacao.id;
+
+        setEtapaProcesso("A enviar áudio...");
+        const base64 = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve((reader.result as string).split(",")[1]);
+          reader.readAsDataURL(audioBlob);
+        });
+
+        await uploadMutation.mutateAsync({
+          gravacaoId: gravacao.id,
+          audioBase64: base64,
+          mimeType,
+          duracaoSegundos: duracao,
+        });
+
+        setEtapaProcesso("A transcrever áudio...");
+        const resultTranscricao = await transcreverMutation.mutateAsync({
+          gravacaoId: gravacao.id,
+        });
+        setTranscricao(resultTranscricao.transcricao);
+
+        const segs = (resultTranscricao as any).segmentos;
+        if (segs && segs.length > 0) {
+          setSegmentos(segs);
+        } else {
+          const frases = resultTranscricao.transcricao.split(/(?<=[.!?])\s+/).filter((f: string) => f.trim());
+          setSegmentos(frases.map((f: string, i: number) => ({ start: i * 30, end: (i + 1) * 30, text: f.trim() })));
+        }
         setEtapa("editar");
-        toast.success("Transcrição concluída! Reveja os blocos antes de gerar o resumo.");
+        toast.success("Transcrição concluída!");
       }
     } catch (err: any) {
       toast.error(err.message || "Erro ao processar gravação");
@@ -619,6 +802,11 @@ export function NovaGravacaoDialog({
     setResumo("");
     setProcessando(false);
     setEtapaProcesso("");
+    setProgressoBlocos({ total: 0, processados: 0 });
+    blocosProcessadosRef.current = [];
+    blocosEmFilaRef.current = [];
+    gravacaoIdRef.current = null;
+    aProcessarBlocoRef.current = false;
     onClose();
   };
 
@@ -644,7 +832,10 @@ export function NovaGravacaoDialog({
               placeholder="Título da reunião (ex: Reunião semanal Famalicão)"
               className="text-lg"
             />
-            <AudioRecorder onGravacaoConcluida={handleGravacaoConcluida} />
+            <AudioRecorder 
+              onGravacaoConcluida={handleGravacaoConcluida}
+              onBlocoPronto={handleBlocoPronto}
+            />
           </div>
         )}
 
@@ -652,8 +843,24 @@ export function NovaGravacaoDialog({
           <div className="flex flex-col items-center justify-center py-12 space-y-4">
             <Loader2 className="h-12 w-12 text-primary animate-spin" />
             <p className="text-lg font-medium">{etapaProcesso}</p>
+            {progressoBlocos.total > 0 && (
+              <div className="w-full max-w-xs">
+                <div className="flex justify-between text-xs text-muted-foreground mb-1">
+                  <span>Blocos processados</span>
+                  <span>{progressoBlocos.processados}/{progressoBlocos.total}</span>
+                </div>
+                <div className="w-full bg-muted rounded-full h-2">
+                  <div 
+                    className="bg-primary rounded-full h-2 transition-all duration-500"
+                    style={{ width: `${progressoBlocos.total > 0 ? (progressoBlocos.processados / progressoBlocos.total) * 100 : 0}%` }}
+                  />
+                </div>
+              </div>
+            )}
             <p className="text-sm text-muted-foreground">
-              Isto pode demorar alguns segundos...
+              {progressoBlocos.total > 0 
+                ? "A processar blocos de áudio... Gravações longas demoram mais."
+                : "Isto pode demorar alguns segundos..."}
             </p>
           </div>
         )}

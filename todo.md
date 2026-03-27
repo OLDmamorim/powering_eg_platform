@@ -1207,8 +1207,20 @@
 
 ## Férias - Corrigir Estilo Visual do Verde na Tabela de Períodos
 - [x] Mudar bg-white para bg-green-100 text-green-700 quando cor é verde
-- [ ] Guardar checkpoint
+- [x] Guardar checkpoint
 
 ## Corrigir Nome do Menu Reuniões Livres no Sidebar
 - [x] Verificar e corrigir nome/tradução do menu no DashboardLayout (adicionada chave em pt.json e en.json)
+- [x] Guardar checkpoint
+
+## Gravação por Blocos para Reuniões Longas (até 1h+)
+- [x] Analisar componentes existentes de gravação
+- [x] Backend: 3 endpoints (uploadBlocoAudio, transcreverBlocoAudio, finalizarGravacaoBlocos)
+- [x] Frontend: AudioRecorder com corte automático a cada 8 min
+- [x] Frontend: NovaGravacaoDialog com processamento de blocos em background
+- [x] Barra de progresso de blocos no diálogo de processamento
+- [x] Removido aviso de limite 16MB (já não se aplica)
+- [x] Transcrição contínua: segmentos com offset de tempo correcto
+- [x] Resumo IA usa transcrição completa (todos os blocos juntos)
+- [x] 6 testes vitest passados
 - [ ] Guardar checkpoint

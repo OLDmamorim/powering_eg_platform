@@ -12321,6 +12321,110 @@ Mantém o resumo conciso e profissional.`
         return { success: true };
       }),
 
+    // Upload de um bloco de áudio para S3 (para gravações longas por blocos)
+    uploadBlocoAudio: protectedProcedure
+      .input(z.object({
+        gravacaoId: z.number(),
+        blocoIndex: z.number(),
+        audioBase64: z.string(),
+        mimeType: z.string(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const ext = input.mimeType.includes('webm') ? 'webm' : input.mimeType.includes('mp4') ? 'mp4' : 'mp3';
+        const fileKey = `gravacoes/${ctx.user.id}/${input.gravacaoId}-bloco${input.blocoIndex}-${Date.now()}.${ext}`;
+        const audioBuffer = Buffer.from(input.audioBase64, 'base64');
+        
+        if (audioBuffer.length > 16 * 1024 * 1024) {
+          throw new TRPCError({ code: 'BAD_REQUEST', message: `Bloco ${input.blocoIndex} excede 16MB.` });
+        }
+        
+        const { url } = await storagePut(fileKey, audioBuffer, input.mimeType);
+        return { url, blocoIndex: input.blocoIndex };
+      }),
+
+    // Transcrever um bloco de áudio individual
+    transcreverBlocoAudio: protectedProcedure
+      .input(z.object({
+        audioUrl: z.string(),
+        blocoIndex: z.number(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const { transcribeAudio } = await import('./_core/voiceTranscription');
+        const result = await transcribeAudio({
+          audioUrl: input.audioUrl,
+          language: 'pt',
+          prompt: 'Transcrever reunião de trabalho em português. Nomes de pessoas, lojas e termos técnicos de vidro automóvel.',
+        });
+        
+        if ('error' in result) {
+          throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: `Erro no bloco ${input.blocoIndex}: ${result.error}` });
+        }
+        
+        const segmentos = result.segments?.map((s: any) => ({
+          start: s.start,
+          end: s.end,
+          text: s.text?.trim() || '',
+        })) || [];
+        
+        return { text: result.text, segmentos, blocoIndex: input.blocoIndex, duration: result.duration };
+      }),
+
+    // Finalizar gravação por blocos: juntar transcrições e guardar
+    finalizarGravacaoBlocos: protectedProcedure
+      .input(z.object({
+        gravacaoId: z.number(),
+        blocos: z.array(z.object({
+          blocoIndex: z.number(),
+          audioUrl: z.string(),
+          text: z.string(),
+          segmentos: z.array(z.object({
+            start: z.number(),
+            end: z.number(),
+            text: z.string(),
+          })),
+          duracaoBloco: z.number(),
+        })),
+        duracaoTotal: z.number(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        // Ordenar blocos por index
+        const blocosOrdenados = [...input.blocos].sort((a, b) => a.blocoIndex - b.blocoIndex);
+        
+        // Juntar transcrições
+        const transcricaoCompleta = blocosOrdenados.map(b => b.text).join(' ');
+        
+        // Juntar segmentos com offset de tempo
+        let offsetSegundos = 0;
+        const todosSegmentos: { start: number; end: number; text: string }[] = [];
+        for (const bloco of blocosOrdenados) {
+          for (const seg of bloco.segmentos) {
+            todosSegmentos.push({
+              start: seg.start + offsetSegundos,
+              end: seg.end + offsetSegundos,
+              text: seg.text,
+            });
+          }
+          offsetSegundos += bloco.duracaoBloco;
+        }
+        
+        // Usar o primeiro URL de áudio como principal (ou concatenar)
+        const audioUrl = blocosOrdenados[0]?.audioUrl || '';
+        
+        await db.atualizarGravacaoReuniao(input.gravacaoId, ctx.user.id, {
+          audioUrl,
+          duracaoSegundos: input.duracaoTotal,
+          transcricao: transcricaoCompleta,
+          transcricaoSegmentos: JSON.stringify(todosSegmentos),
+          estado: 'transcrito',
+        });
+        
+        return {
+          transcricao: transcricaoCompleta,
+          segmentos: todosSegmentos,
+          duracaoTotal: input.duracaoTotal,
+        };
+      }),
+
     // Associar gravação a uma nota
     associarGravacaoANota: protectedProcedure
       .input(z.object({
