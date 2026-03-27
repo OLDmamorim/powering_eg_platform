@@ -1142,3 +1142,6 @@
 - [x] Lista de gravações com player, transcrição e resumo expansíveis
 - [x] 16 testes vitest passados (gravacaoReuniao.test.ts)
 - [x] Guardar checkpoint
+
+## Publicação
+- [x] Forçar novo checkpoint para republicação (27/03/2026)
