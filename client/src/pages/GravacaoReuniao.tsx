@@ -62,33 +62,82 @@ function AudioRecorder({
   const [isPaused, setIsPaused] = useState(false);
   const [duracao, setDuracao] = useState(0);
   const [audioLevel, setAudioLevel] = useState(0);
+  const [modoCaptura, setModoCaptura] = useState<"completo" | "microfone">("completo");
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const animFrameRef = useRef<number | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const allStreamsRef = useRef<MediaStream[]>([]);
+  const audioCtxRef = useRef<AudioContext | null>(null);
 
   // Limpar ao desmontar
   useEffect(() => {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
-      if (streamRef.current) streamRef.current.getTracks().forEach(t => t.stop());
+      allStreamsRef.current.forEach(s => s.getTracks().forEach(t => t.stop()));
+      if (audioCtxRef.current) audioCtxRef.current.close();
     };
   }, []);
 
   const startRecording = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      streamRef.current = stream;
+      const audioCtx = new AudioContext();
+      audioCtxRef.current = audioCtx;
+      const destination = audioCtx.createMediaStreamDestination();
+
+      // 1. Microfone (voz do utilizador)
+      const micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      allStreamsRef.current.push(micStream);
+      const micSource = audioCtx.createMediaStreamSource(micStream);
+      micSource.connect(destination);
+
+      // 2. Áudio do sistema (o que se ouve) - via getDisplayMedia
+      let temAudioSistema = false;
+      if (modoCaptura === "completo") {
+        try {
+          const displayStream = await navigator.mediaDevices.getDisplayMedia({
+            video: true, // obrigatório, mas não usamos
+            audio: true, // áudio do sistema
+          });
+          allStreamsRef.current.push(displayStream);
+
+          // Verificar se tem tracks de áudio
+          const audioTracks = displayStream.getAudioTracks();
+          if (audioTracks.length > 0) {
+            const sysSource = audioCtx.createMediaStreamSource(
+              new MediaStream(audioTracks)
+            );
+            sysSource.connect(destination);
+            temAudioSistema = true;
+          }
+
+          // Parar o vídeo (não precisamos)
+          displayStream.getVideoTracks().forEach(t => t.stop());
+
+          // Se o utilizador parar a partilha de ecrã, parar gravação
+          displayStream.getAudioTracks().forEach(t => {
+            t.onended = () => {
+              // Track de áudio do sistema parou, mas a gravação continua só com microfone
+            };
+          });
+        } catch (displayErr) {
+          // Utilizador cancelou a partilha de ecrã ou browser não suporta
+          // Continuar só com microfone
+          console.warn("Sem áudio do sistema, a gravar só com microfone");
+        }
+      }
+
+      // Stream combinado para gravação
+      const combinedStream = destination.stream;
+      streamRef.current = combinedStream;
 
       // Analisador de áudio para visualização
-      const audioCtx = new AudioContext();
-      const source = audioCtx.createMediaStreamSource(stream);
       const analyser = audioCtx.createAnalyser();
       analyser.fftSize = 256;
-      source.connect(analyser);
+      micSource.connect(analyser); // Visualizar nível do microfone
       analyserRef.current = analyser;
 
       // Determinar formato suportado
@@ -98,7 +147,7 @@ function AudioRecorder({
         ? "audio/mp4"
         : "audio/webm";
 
-      const mediaRecorder = new MediaRecorder(stream, { mimeType });
+      const mediaRecorder = new MediaRecorder(combinedStream, { mimeType });
       mediaRecorderRef.current = mediaRecorder;
       chunksRef.current = [];
 
@@ -109,14 +158,25 @@ function AudioRecorder({
       mediaRecorder.onstop = () => {
         const blob = new Blob(chunksRef.current, { type: mimeType });
         onGravacaoConcluida(blob, duracao, mimeType.split(";")[0]);
-        stream.getTracks().forEach(t => t.stop());
+        allStreamsRef.current.forEach(s => s.getTracks().forEach(t => t.stop()));
+        allStreamsRef.current = [];
         streamRef.current = null;
+        if (audioCtxRef.current) {
+          audioCtxRef.current.close();
+          audioCtxRef.current = null;
+        }
       };
 
       mediaRecorder.start(1000); // Chunks de 1 segundo
       setIsRecording(true);
       setIsPaused(false);
       setDuracao(0);
+
+      if (modoCaptura === "completo" && !temAudioSistema) {
+        toast.info("A gravar só com microfone (sem áudio do sistema)");
+      } else if (temAudioSistema) {
+        toast.success("A gravar microfone + áudio do sistema");
+      }
 
       // Timer de duração
       timerRef.current = setInterval(() => {
@@ -168,6 +228,39 @@ function AudioRecorder({
 
   return (
     <div className="space-y-4">
+      {/* Selector de modo de captura */}
+      {!isRecording && (
+        <div className="flex justify-center gap-2">
+          <button
+            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors flex items-center gap-1.5 ${
+              modoCaptura === "completo"
+                ? "bg-red-100 text-red-700 ring-1 ring-red-300"
+                : "bg-muted text-muted-foreground hover:bg-muted/80"
+            }`}
+            onClick={() => setModoCaptura("completo")}
+          >
+            <Volume2 className="h-3.5 w-3.5" />
+            Reunião Completa
+          </button>
+          <button
+            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors flex items-center gap-1.5 ${
+              modoCaptura === "microfone"
+                ? "bg-blue-100 text-blue-700 ring-1 ring-blue-300"
+                : "bg-muted text-muted-foreground hover:bg-muted/80"
+            }`}
+            onClick={() => setModoCaptura("microfone")}
+          >
+            <Mic className="h-3.5 w-3.5" />
+            Só Microfone
+          </button>
+        </div>
+      )}
+      {!isRecording && modoCaptura === "completo" && (
+        <p className="text-[11px] text-muted-foreground text-center">
+          Ao iniciar, o browser vai pedir para partilhar o ecrã. Selecione o separador/janela da reunião e marque <strong>"Partilhar áudio"</strong> para captar o que ouve.
+        </p>
+      )}
+
       {/* Visualização de nível de áudio */}
       {isRecording && (
         <div className="flex items-center justify-center gap-1 h-16">
@@ -238,7 +331,7 @@ function AudioRecorder({
 
       {!isRecording && duracao === 0 && (
         <p className="text-xs text-muted-foreground text-center">
-          Clica no microfone para começar a gravar a reunião
+          Clica no microfone para começar a gravar
         </p>
       )}
     </div>

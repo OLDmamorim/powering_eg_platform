@@ -1145,3 +1145,11 @@
 
 ## Publicação
 - [x] Forçar novo checkpoint para republicação (27/03/2026)
+
+## Gravador: Captar Áudio do Sistema + Microfone
+- [x] Usar getDisplayMedia com audio:true para captar áudio do sistema (o que se ouve)
+- [x] Misturar com getUserMedia (microfone) usando AudioContext/MediaStreamDestination
+- [x] Permitir fallback para só microfone se o browser não suportar áudio do sistema
+- [x] Selector de modo: "Reunião Completa" (mic+sistema) vs "Só Microfone"
+- [x] Instruções claras sobre partilhar áudio do ecrã
+- [ ] Guardar checkpoint
