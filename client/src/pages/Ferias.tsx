@@ -1537,25 +1537,25 @@ function AnalysisTab({ data, allData, ano, TM }: { data: (Employee & EmpStats)[]
                     <TableCell className="text-xs font-medium">{shortName(e.name)}</TableCell>
                     <TableCell className="text-center">
                       <div className="flex flex-col items-center gap-0.5">
-                        <span className={`px-2 py-0.5 rounded text-xs font-bold ${e.cor1==='green'?'bg-white text-slate-700':e.cor1==='yellow'?'bg-amber-400 text-amber-900':'bg-red-600 text-white'}`}>{e.pct1}%</span>
+                        <span className={`px-2 py-0.5 rounded text-xs font-bold ${e.cor1==='green'?'bg-green-100 text-green-700':e.cor1==='yellow'?'bg-amber-400 text-amber-900':'bg-red-600 text-white'}`}>{e.pct1}%</span>
                         <span className="text-[9px] text-muted-foreground">{e.diasJanMai}/{e.metaJanMai}d</span>
                       </div>
                     </TableCell>
                     <TableCell className="text-center">
                       <div className="flex flex-col items-center gap-0.5">
-                        <span className={`px-2 py-0.5 rounded text-xs font-bold ${e.cor2==='green'?'bg-white text-slate-700':e.cor2==='yellow'?'bg-amber-400 text-amber-900':'bg-red-600 text-white'}`}>{e.pct2}%</span>
+                        <span className={`px-2 py-0.5 rounded text-xs font-bold ${e.cor2==='green'?'bg-green-100 text-green-700':e.cor2==='yellow'?'bg-amber-400 text-amber-900':'bg-red-600 text-white'}`}>{e.pct2}%</span>
                         <span className="text-[9px] text-muted-foreground">{e.diasJunSet}/{e.metaJunSet}d</span>
                       </div>
                     </TableCell>
                     <TableCell className="text-center">
                       <div className="flex flex-col items-center gap-0.5">
-                        <span className={`px-2 py-0.5 rounded text-xs font-bold ${e.cor3==='green'?'bg-white text-slate-700':e.cor3==='yellow'?'bg-amber-400 text-amber-900':'bg-red-600 text-white'}`}>{e.pct3}%</span>
+                        <span className={`px-2 py-0.5 rounded text-xs font-bold ${e.cor3==='green'?'bg-green-100 text-green-700':e.cor3==='yellow'?'bg-amber-400 text-amber-900':'bg-red-600 text-white'}`}>{e.pct3}%</span>
                         <span className="text-[9px] text-muted-foreground">{e.diasOutNov}/{e.metaOutNov}d</span>
                       </div>
                     </TableCell>
                     <TableCell className="text-center">
                       <div className="flex flex-col items-center gap-0.5">
-                        <span className={`px-2 py-0.5 rounded text-xs font-bold ${e.cor4==='green'?'bg-white text-slate-700':e.cor4==='yellow'?'bg-amber-400 text-amber-900':'bg-red-600 text-white'}`}>{e.pct4}%</span>
+                        <span className={`px-2 py-0.5 rounded text-xs font-bold ${e.cor4==='green'?'bg-green-100 text-green-700':e.cor4==='yellow'?'bg-amber-400 text-amber-900':'bg-red-600 text-white'}`}>{e.pct4}%</span>
                         <span className="text-[9px] text-muted-foreground">{e.diasDez}/{e.metaDez}d</span>
                       </div>
                     </TableCell>

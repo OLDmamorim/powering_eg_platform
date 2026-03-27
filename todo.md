@@ -1203,4 +1203,8 @@
 - [x] P2 Jun-Set: verde se ≤10d, amarelo se 11-12d, vermelho se >12d
 - [x] P3 Out-Nov: livre (sem alerta)
 - [x] P4 Dez: verde se ≤3d, amarelo se 4-5d, vermelho se >5d
+- [x] Guardar checkpoint
+
+## Férias - Corrigir Estilo Visual do Verde na Tabela de Períodos
+- [x] Mudar bg-white para bg-green-100 text-green-700 quando cor é verde
 - [ ] Guardar checkpoint
