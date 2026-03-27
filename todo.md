@@ -1153,3 +1153,11 @@
 - [x] Selector de modo: "Reunião Completa" (mic+sistema) vs "Só Microfone"
 - [x] Instruções claras sobre partilhar áudio do ecrã
 - [ ] Guardar checkpoint
+
+## Notas Favoritas (fixas no topo)
+- [x] Adicionar campo `favorita` (boolean) na tabela notas do schema DB + migração
+- [x] Endpoint backend: campo favorita no endpoint actualizarNota
+- [x] Estrela nos cards para marcar/desmarcar favorita (hover + click)
+- [x] Favoritas fixas no topo com label dourada + estrela, depois fixadas, depois outras
+- [x] Opção no dropdown menu do card para marcar/remover favorito
+- [x] Guardar checkpoint

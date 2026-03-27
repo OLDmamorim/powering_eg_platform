@@ -12046,6 +12046,7 @@ IMPORTANTE:
         estado: z.string().optional(),
         cor: z.string().optional(),
         fixada: z.boolean().optional(),
+        favorita: z.boolean().optional(),
         arquivada: z.boolean().optional(),
         tagIds: z.array(z.number()).optional(),
       }))

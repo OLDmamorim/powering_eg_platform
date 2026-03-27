@@ -58,6 +58,7 @@ import {
   FileDown,
   ListChecks,
   Mic,
+  Star,
 } from "lucide-react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
@@ -997,6 +998,13 @@ export default function Notas() {
     });
   };
 
+  const handleFavoritar = (nota: any) => {
+    actualizarMutation.mutate({
+      id: nota.id,
+      favorita: !nota.favorita,
+    });
+  };
+
   const handleArquivar = (nota: any) => {
     actualizarMutation.mutate({
       id: nota.id,
@@ -1011,9 +1019,10 @@ export default function Notas() {
     });
   };
 
-  // Separar fixadas das não fixadas
-  const notasFixadas = useMemo(() => notasData?.filter((n: any) => n.fixada) || [], [notasData]);
-  const notasNormais = useMemo(() => notasData?.filter((n: any) => !n.fixada) || [], [notasData]);
+  // Separar favoritas, fixadas e normais
+  const notasFavoritas = useMemo(() => notasData?.filter((n: any) => n.favorita) || [], [notasData]);
+  const notasFixadas = useMemo(() => notasData?.filter((n: any) => n.fixada && !n.favorita) || [], [notasData]);
+  const notasNormais = useMemo(() => notasData?.filter((n: any) => !n.fixada && !n.favorita) || [], [notasData]);
 
   const notaParaEditar = notaCompleta || notaAtual;
 
@@ -1156,6 +1165,31 @@ export default function Notas() {
           </div>
         )}
 
+        {/* Notas Favoritas */}
+        {notasFavoritas.length > 0 && (
+          <div>
+            <p className="text-xs font-semibold text-amber-600 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+              <Star className="h-3.5 w-3.5 fill-amber-500 text-amber-500" />
+              Favoritas
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+              {notasFavoritas.map((nota: any) => (
+                <NotaCard
+                  key={nota.id}
+                  nota={nota}
+                  onEdit={() => handleEditarNota(nota)}
+                  onFixar={() => handleFixar(nota)}
+                  onFavoritar={() => handleFavoritar(nota)}
+                  onArquivar={() => handleArquivar(nota)}
+                  onEliminar={() => eliminarMutation.mutate({ id: nota.id })}
+                  onMudarEstado={(estado) => handleMudarEstado(nota, estado)}
+                  onExportarPDF={() => exportarNotaPDF(nota)}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Notas Fixadas */}
         {notasFixadas.length > 0 && (
           <div>
@@ -1169,6 +1203,7 @@ export default function Notas() {
                   nota={nota}
                   onEdit={() => handleEditarNota(nota)}
                   onFixar={() => handleFixar(nota)}
+                  onFavoritar={() => handleFavoritar(nota)}
                   onArquivar={() => handleArquivar(nota)}
                   onEliminar={() => eliminarMutation.mutate({ id: nota.id })}
                   onMudarEstado={(estado) => handleMudarEstado(nota, estado)}
@@ -1182,7 +1217,7 @@ export default function Notas() {
         {/* Notas Normais */}
         {notasNormais.length > 0 && (
           <div>
-            {notasFixadas.length > 0 && (
+            {(notasFixadas.length > 0 || notasFavoritas.length > 0) && (
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
                 Outras
               </p>
@@ -1194,6 +1229,7 @@ export default function Notas() {
                   nota={nota}
                   onEdit={() => handleEditarNota(nota)}
                   onFixar={() => handleFixar(nota)}
+                  onFavoritar={() => handleFavoritar(nota)}
                   onArquivar={() => handleArquivar(nota)}
                   onEliminar={() => eliminarMutation.mutate({ id: nota.id })}
                   onMudarEstado={(estado) => handleMudarEstado(nota, estado)}
@@ -1260,6 +1296,7 @@ function NotaCard({
   nota,
   onEdit,
   onFixar,
+  onFavoritar,
   onArquivar,
   onEliminar,
   onMudarEstado,
@@ -1268,6 +1305,7 @@ function NotaCard({
   nota: any;
   onEdit: () => void;
   onFixar: () => void;
+  onFavoritar: () => void;
   onArquivar: () => void;
   onEliminar: () => void;
   onMudarEstado: (estado: string) => void;
@@ -1300,6 +1338,25 @@ function NotaCard({
       style={{ backgroundColor: cardCor }}
       onClick={onEdit}
     >
+      {/* Ícone de favorita */}
+      {nota.favorita && (
+        <button
+          className="absolute top-1.5 left-1.5 z-10"
+          onClick={(e) => { e.stopPropagation(); onFavoritar(); }}
+          title="Remover dos favoritos"
+        >
+          <Star className="h-4 w-4 fill-amber-400 text-amber-400 drop-shadow-sm" />
+        </button>
+      )}
+      {!nota.favorita && (
+        <button
+          className="absolute top-1.5 left-1.5 z-10 opacity-0 group-hover:opacity-100 transition-opacity"
+          onClick={(e) => { e.stopPropagation(); onFavoritar(); }}
+          title="Marcar como favorita"
+        >
+          <Star className="h-4 w-4 text-foreground/30 hover:text-amber-400 hover:fill-amber-400 transition-colors" />
+        </button>
+      )}
       {/* Ícone de fixada */}
       {nota.fixada && (
         <div className="absolute top-1.5 right-1.5">
@@ -1316,6 +1373,10 @@ function NotaCard({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+            <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onFavoritar(); }}>
+              <Star className={`h-3.5 w-3.5 mr-2 ${nota.favorita ? "fill-amber-400 text-amber-400" : ""}`} />
+              {nota.favorita ? "Remover favorito" : "Marcar favorita"}
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onFixar(); }}>
               {nota.fixada ? <PinOff className="h-3.5 w-3.5 mr-2" /> : <Pin className="h-3.5 w-3.5 mr-2" />}
               {nota.fixada ? "Desafixar" : "Fixar"}

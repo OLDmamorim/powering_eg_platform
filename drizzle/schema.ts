@@ -1543,6 +1543,7 @@ export const notas = mysqlTable("notas", {
   estado: mysqlEnum("estado", ["rascunho", "pendente", "discutido", "aprovado", "adiado", "em_analise", "concluido"]).default("rascunho").notNull(),
   cor: varchar("cor", { length: 20 }).default("#ffffff"), // Cor de fundo do card
   fixada: boolean("fixada").default(false).notNull(),
+  favorita: boolean("favorita").default(false).notNull(),
   arquivada: boolean("arquivada").default(false).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),

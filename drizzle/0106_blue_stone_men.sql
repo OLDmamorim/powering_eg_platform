@@ -1,0 +1,1 @@
+ALTER TABLE `notas` ADD `favorita` boolean DEFAULT false NOT NULL;
