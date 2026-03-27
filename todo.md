@@ -1161,3 +1161,14 @@
 - [x] Favoritas fixas no topo com label dourada + estrela, depois fixadas, depois outras
 - [x] Opção no dropdown menu do card para marcar/remover favorito
 - [x] Guardar checkpoint
+
+## Transcrição por Blocos Editáveis
+- [x] Backend: devolver segmentos com timestamps da transcrição Whisper
+- [x] Guardar segmentos editados na DB (campo transcricaoSegmentos + endpoint guardarTranscricaoEditada)
+- [x] UI: transcrição por blocos com timestamp, cada bloco editável ao clicar
+- [x] Etapa intermédia "Rever Transcrição" antes de gerar resumo IA
+- [x] Botão "Guardar Alterações" aparece quando há edições
+- [x] Resumo IA usa transcrição editada (não a original)
+- [x] Lista de gravações mostra transcrição por blocos quando disponível
+- [x] 33 testes passados (gravacao + relatorio loja + PDF)
+- [x] Guardar checkpoint

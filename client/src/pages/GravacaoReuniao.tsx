@@ -29,7 +29,10 @@ import {
   Download,
   ChevronDown,
   ChevronUp,
+  Save,
+  Pencil,
 } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 import { Streamdown } from "streamdown";
 
 // Formatar duração em mm:ss ou hh:mm:ss
@@ -338,6 +341,142 @@ function AudioRecorder({
   );
 }
 
+// ==================== TIPO SEGMENTO ====================
+interface Segmento {
+  start: number;
+  end: number;
+  text: string;
+}
+
+function formatTimestamp(seconds: number): string {
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60);
+  return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+}
+
+// ==================== TRANSCRIÇÃO EDITÁVEL POR BLOCOS ====================
+function TranscricaoEditavel({
+  segmentos,
+  onSegmentosChange,
+  onGuardar,
+  aGuardar,
+  editavel,
+}: {
+  segmentos: Segmento[];
+  onSegmentosChange: (segs: Segmento[]) => void;
+  onGuardar: () => void;
+  aGuardar: boolean;
+  editavel: boolean;
+}) {
+  const [editandoIdx, setEditandoIdx] = useState<number | null>(null);
+  const [textoEditado, setTextoEditado] = useState("");
+  const [alterado, setAlterado] = useState(false);
+
+  const iniciarEdicao = (idx: number) => {
+    if (!editavel) return;
+    setEditandoIdx(idx);
+    setTextoEditado(segmentos[idx].text);
+  };
+
+  const confirmarEdicao = (idx: number) => {
+    const novosSegmentos = [...segmentos];
+    novosSegmentos[idx] = { ...novosSegmentos[idx], text: textoEditado };
+    onSegmentosChange(novosSegmentos);
+    setEditandoIdx(null);
+    setAlterado(true);
+  };
+
+  const cancelarEdicao = () => {
+    setEditandoIdx(null);
+    setTextoEditado("");
+  };
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between mb-1">
+        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+          <FileText className="h-4 w-4" />
+          Transcrição por Blocos
+        </h3>
+        {editavel && alterado && (
+          <Button
+            size="sm"
+            variant="default"
+            className="h-7 text-xs gap-1"
+            onClick={() => { onGuardar(); setAlterado(false); }}
+            disabled={aGuardar}
+          >
+            {aGuardar ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
+            Guardar Alterações
+          </Button>
+        )}
+      </div>
+      {editavel && (
+        <p className="text-xs text-muted-foreground mb-2">
+          Clique num bloco para editar o texto. Corrija nomes, termos técnicos ou frases incorretas antes de gerar o resumo.
+        </p>
+      )}
+      <div className="max-h-[350px] overflow-y-auto space-y-1 pr-1">
+        {segmentos.map((seg, idx) => (
+          <div
+            key={idx}
+            className={`group flex gap-2 rounded-lg p-2 transition-colors ${
+              editandoIdx === idx
+                ? 'bg-blue-50 dark:bg-blue-950/30 ring-1 ring-blue-300'
+                : editavel
+                  ? 'hover:bg-muted/60 cursor-pointer'
+                  : 'bg-muted/30'
+            }`}
+            onClick={() => editandoIdx === null && iniciarEdicao(idx)}
+          >
+            {/* Timestamp */}
+            <div className="flex-shrink-0 pt-0.5">
+              <span className="text-[10px] font-mono text-muted-foreground bg-muted rounded px-1.5 py-0.5">
+                {formatTimestamp(seg.start)}
+              </span>
+            </div>
+            {/* Texto */}
+            <div className="flex-1 min-w-0">
+              {editandoIdx === idx ? (
+                <div className="space-y-1.5">
+                  <Textarea
+                    value={textoEditado}
+                    onChange={(e) => setTextoEditado(e.target.value)}
+                    className="text-xs min-h-[60px] resize-none"
+                    autoFocus
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        confirmarEdicao(idx);
+                      }
+                      if (e.key === 'Escape') cancelarEdicao();
+                    }}
+                  />
+                  <div className="flex gap-1">
+                    <Button size="sm" variant="default" className="h-6 text-[10px] gap-0.5" onClick={() => confirmarEdicao(idx)}>
+                      <Save className="h-2.5 w-2.5" /> OK
+                    </Button>
+                    <Button size="sm" variant="ghost" className="h-6 text-[10px]" onClick={cancelarEdicao}>
+                      Cancelar
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-start gap-1">
+                  <p className="text-xs leading-relaxed flex-1">{seg.text}</p>
+                  {editavel && (
+                    <Pencil className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 flex-shrink-0 mt-0.5" />
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ==================== DIALOG DE NOVA GRAVAÇÃO ====================
 export function NovaGravacaoDialog({
   open,
@@ -347,8 +486,9 @@ export function NovaGravacaoDialog({
   onClose: () => void;
 }) {
   const [titulo, setTitulo] = useState("");
-  const [etapa, setEtapa] = useState<"gravar" | "processar" | "resultado">("gravar");
+  const [etapa, setEtapa] = useState<"gravar" | "processar" | "editar" | "a_resumir" | "resultado">("gravar");
   const [gravacaoId, setGravacaoId] = useState<number | null>(null);
+  const [segmentos, setSegmentos] = useState<Segmento[]>([]);
   const [transcricao, setTranscricao] = useState("");
   const [resumo, setResumo] = useState("");
   const [processando, setProcessando] = useState(false);
@@ -359,6 +499,7 @@ export function NovaGravacaoDialog({
   const criarMutation = trpc.notas.criarGravacao.useMutation();
   const uploadMutation = trpc.notas.uploadAudioGravacao.useMutation();
   const transcreverMutation = trpc.notas.transcreverGravacao.useMutation();
+  const guardarTranscricaoMutation = trpc.notas.guardarTranscricaoEditada.useMutation();
   const resumoMutation = trpc.notas.gerarResumoGravacao.useMutation();
 
   const handleGravacaoConcluida = async (audioBlob: Blob, duracao: number, mimeType: string) => {
@@ -395,23 +536,31 @@ export function NovaGravacaoDialog({
         duracaoSegundos: duracao,
       });
 
-      // 3. Transcrever
+      // 3. Transcrever (agora devolve segmentos)
       setEtapaProcesso("A transcrever áudio...");
       const resultTranscricao = await transcreverMutation.mutateAsync({
         gravacaoId: gravacao.id,
       });
       setTranscricao(resultTranscricao.transcricao);
-
-      // 4. Gerar resumo IA
-      setEtapaProcesso("A gerar resumo IA...");
-      const resultResumo = await resumoMutation.mutateAsync({
-        gravacaoId: gravacao.id,
-      });
-      setResumo(typeof resultResumo.resumo === 'string' ? resultResumo.resumo : '');
-
-      setEtapa("resultado");
-      utils.notas.listarGravacoes.invalidate();
-      toast.success("Gravação processada com sucesso!");
+      
+      // Se temos segmentos, mostrar a etapa de edição
+      const segs = (resultTranscricao as any).segmentos;
+      if (segs && segs.length > 0) {
+        setSegmentos(segs);
+        setEtapa("editar");
+        toast.success("Transcrição concluída! Reveja e corrija os blocos antes de gerar o resumo.");
+      } else {
+        // Sem segmentos, criar blocos artificiais (1 bloco por frase)
+        const frases = resultTranscricao.transcricao.split(/(?<=[.!?])\s+/).filter((f: string) => f.trim());
+        const segsFallback: Segmento[] = frases.map((f: string, i: number) => ({
+          start: i * 30,
+          end: (i + 1) * 30,
+          text: f.trim(),
+        }));
+        setSegmentos(segsFallback);
+        setEtapa("editar");
+        toast.success("Transcrição concluída! Reveja os blocos antes de gerar o resumo.");
+      }
     } catch (err: any) {
       toast.error(err.message || "Erro ao processar gravação");
       setEtapa("gravar");
@@ -421,10 +570,51 @@ export function NovaGravacaoDialog({
     }
   };
 
+  const handleGuardarTranscricao = async () => {
+    if (!gravacaoId) return;
+    try {
+      await guardarTranscricaoMutation.mutateAsync({
+        gravacaoId,
+        segmentos,
+      });
+      toast.success("Transcrição guardada com sucesso!");
+    } catch (err: any) {
+      toast.error(err.message || "Erro ao guardar transcrição");
+    }
+  };
+
+  const handleGerarResumo = async () => {
+    if (!gravacaoId) return;
+    setEtapa("a_resumir");
+    setProcessando(true);
+    try {
+      // Guardar transcrição editada primeiro
+      await guardarTranscricaoMutation.mutateAsync({
+        gravacaoId,
+        segmentos,
+      });
+      
+      // Gerar resumo IA
+      const resultResumo = await resumoMutation.mutateAsync({
+        gravacaoId,
+      });
+      setResumo(typeof resultResumo.resumo === 'string' ? resultResumo.resumo : '');
+      setEtapa("resultado");
+      utils.notas.listarGravacoes.invalidate();
+      toast.success("Resumo IA gerado com sucesso!");
+    } catch (err: any) {
+      toast.error(err.message || "Erro ao gerar resumo");
+      setEtapa("editar");
+    } finally {
+      setProcessando(false);
+    }
+  };
+
   const handleClose = () => {
     setTitulo("");
     setEtapa("gravar");
     setGravacaoId(null);
+    setSegmentos([]);
     setTranscricao("");
     setResumo("");
     setProcessando(false);
@@ -438,7 +628,11 @@ export function NovaGravacaoDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Mic className="h-5 w-5 text-red-500" />
-            {etapa === "gravar" ? "Gravar Reunião" : etapa === "processar" ? "A Processar..." : "Resultado"}
+            {etapa === "gravar" ? "Gravar Reunião" 
+              : etapa === "processar" ? "A Processar..." 
+              : etapa === "editar" ? "Rever Transcrição" 
+              : etapa === "a_resumir" ? "A Gerar Resumo..."
+              : "Resultado"}
           </DialogTitle>
         </DialogHeader>
 
@@ -464,18 +658,55 @@ export function NovaGravacaoDialog({
           </div>
         )}
 
+        {etapa === "editar" && (
+          <div className="space-y-4">
+            <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3">
+              <p className="text-sm text-amber-800 dark:text-amber-200">
+                <strong>Reveja a transcrição abaixo.</strong> Clique em qualquer bloco para corrigir nomes, termos técnicos ou frases incorretas. Quando estiver satisfeito, clique em <strong>"Gerar Resumo IA"</strong>.
+              </p>
+            </div>
+            <TranscricaoEditavel
+              segmentos={segmentos}
+              onSegmentosChange={setSegmentos}
+              onGuardar={handleGuardarTranscricao}
+              aGuardar={guardarTranscricaoMutation.isPending}
+              editavel={true}
+            />
+          </div>
+        )}
+
+        {etapa === "a_resumir" && (
+          <div className="flex flex-col items-center justify-center py-12 space-y-4">
+            <Loader2 className="h-12 w-12 text-purple-500 animate-spin" />
+            <p className="text-lg font-medium">A gerar resumo IA...</p>
+            <p className="text-sm text-muted-foreground">
+              A analisar a transcrição corrigida...
+            </p>
+          </div>
+        )}
+
         {etapa === "resultado" && (
           <div className="space-y-6">
-            {/* Transcrição */}
-            <div>
-              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                <FileText className="h-4 w-4" />
-                Transcrição
-              </h3>
-              <div className="bg-muted/50 rounded-lg p-4 max-h-[200px] overflow-y-auto text-sm whitespace-pre-wrap">
-                {transcricao || "Sem transcrição disponível"}
+            {/* Transcrição por blocos (só leitura) */}
+            {segmentos.length > 0 ? (
+              <TranscricaoEditavel
+                segmentos={segmentos}
+                onSegmentosChange={() => {}}
+                onGuardar={() => {}}
+                aGuardar={false}
+                editavel={false}
+              />
+            ) : (
+              <div>
+                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                  <FileText className="h-4 w-4" />
+                  Transcrição
+                </h3>
+                <div className="bg-muted/50 rounded-lg p-4 max-h-[200px] overflow-y-auto text-sm whitespace-pre-wrap">
+                  {transcricao || "Sem transcrição disponível"}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Resumo IA */}
             <div>
@@ -490,7 +721,13 @@ export function NovaGravacaoDialog({
           </div>
         )}
 
-        <DialogFooter>
+        <DialogFooter className="gap-2">
+          {etapa === "editar" && (
+            <Button onClick={handleGerarResumo} className="gap-1">
+              <Sparkles className="h-4 w-4" />
+              Gerar Resumo IA
+            </Button>
+          )}
           <Button variant="outline" onClick={handleClose}>
             {etapa === "resultado" ? "Fechar" : "Cancelar"}
           </Button>
@@ -593,13 +830,51 @@ function GravacaoCard({
               <div className="space-y-3 mt-2">
                 {gravacao.transcricao && (
                   <div>
-                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 flex items-center gap-1">
-                      <FileText className="h-3 w-3" />
-                      Transcrição
-                    </h4>
-                    <div className="bg-muted/50 rounded-lg p-3 max-h-[200px] overflow-y-auto text-xs whitespace-pre-wrap">
-                      {gravacao.transcricao}
-                    </div>
+                    {gravacao.transcricaoSegmentos ? (() => {
+                      try {
+                        const segs: Segmento[] = JSON.parse(gravacao.transcricaoSegmentos);
+                        return (
+                          <div>
+                            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 flex items-center gap-1">
+                              <FileText className="h-3 w-3" />
+                              Transcrição por Blocos
+                            </h4>
+                            <div className="max-h-[250px] overflow-y-auto space-y-0.5">
+                              {segs.map((seg, idx) => (
+                                <div key={idx} className="flex gap-2 p-1.5 rounded bg-muted/30">
+                                  <span className="text-[9px] font-mono text-muted-foreground bg-muted rounded px-1 py-0.5 flex-shrink-0">
+                                    {formatTimestamp(seg.start)}
+                                  </span>
+                                  <p className="text-xs leading-relaxed">{seg.text}</p>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      } catch {
+                        return (
+                          <div>
+                            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 flex items-center gap-1">
+                              <FileText className="h-3 w-3" />
+                              Transcrição
+                            </h4>
+                            <div className="bg-muted/50 rounded-lg p-3 max-h-[200px] overflow-y-auto text-xs whitespace-pre-wrap">
+                              {gravacao.transcricao}
+                            </div>
+                          </div>
+                        );
+                      }
+                    })() : (
+                      <div>
+                        <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 flex items-center gap-1">
+                          <FileText className="h-3 w-3" />
+                          Transcrição
+                        </h4>
+                        <div className="bg-muted/50 rounded-lg p-3 max-h-[200px] overflow-y-auto text-xs whitespace-pre-wrap">
+                          {gravacao.transcricao}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
                 {gravacao.resumoIA && (

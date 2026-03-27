@@ -1604,6 +1604,7 @@ export const gravacoesReuniao = mysqlTable("gravacoes_reuniao", {
   audioFileKey: varchar("audioFileKey", { length: 500 }), // Chave S3
   duracaoSegundos: int("duracaoSegundos"), // Duração do áudio em segundos
   transcricao: mediumtext("transcricao"), // Transcrição limpa do áudio
+  transcricaoSegmentos: mediumtext("transcricaoSegmentos"), // JSON array de segmentos [{start, end, text}]
   resumoIA: mediumtext("resumoIA"), // Resumo gerado pela IA
   idioma: varchar("idioma", { length: 10 }).default("pt"), // Idioma detectado
   estado: mysqlEnum("estado", ["a_gravar", "gravado", "a_transcrever", "transcrito", "a_resumir", "concluido", "erro"]).default("a_gravar").notNull(),

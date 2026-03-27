@@ -1,0 +1,1 @@
+ALTER TABLE `gravacoes_reuniao` ADD `transcricaoSegmentos` mediumtext;

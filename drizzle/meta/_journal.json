@@ -750,6 +750,13 @@
       "when": 1774602344034,
       "tag": "0106_blue_stone_men",
       "breakpoints": true
+    },
+    {
+      "idx": 107,
+      "version": "5",
+      "when": 1774605262281,
+      "tag": "0107_awesome_raider",
+      "breakpoints": true
     }
   ]
 }

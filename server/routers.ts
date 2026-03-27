@@ -12212,13 +12212,48 @@ IMPORTANTE:
           throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: result.error, cause: result });
         }
         
+        // Guardar segmentos com timestamps (se disponíveis)
+        const segmentos = result.segments?.map((s: any) => ({
+          start: s.start,
+          end: s.end,
+          text: s.text?.trim() || '',
+        })) || [];
+        
         await db.atualizarGravacaoReuniao(input.gravacaoId, ctx.user.id, {
           transcricao: result.text,
+          transcricaoSegmentos: segmentos.length > 0 ? JSON.stringify(segmentos) : null,
           idioma: result.language || 'pt',
           estado: 'transcrito',
         });
         
-        return { transcricao: result.text, idioma: result.language, duracao: result.duration };
+        return { transcricao: result.text, segmentos, idioma: result.language, duracao: result.duration };
+      }),
+
+    // Guardar transcrição editada (segmentos corrigidos pelo utilizador)
+    guardarTranscricaoEditada: protectedProcedure
+      .input(z.object({
+        gravacaoId: z.number(),
+        segmentos: z.array(z.object({
+          start: z.number(),
+          end: z.number(),
+          text: z.string(),
+        })),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const gravacao = await db.getGravacaoReuniao(input.gravacaoId, ctx.user.id);
+        if (!gravacao) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Gravação não encontrada' });
+        }
+        
+        // Reconstruir transcrição completa a partir dos segmentos editados
+        const transcricaoCompleta = input.segmentos.map(s => s.text).join(' ');
+        
+        await db.atualizarGravacaoReuniao(input.gravacaoId, ctx.user.id, {
+          transcricao: transcricaoCompleta,
+          transcricaoSegmentos: JSON.stringify(input.segmentos),
+        });
+        
+        return { sucesso: true };
       }),
 
     // Gerar resumo IA da transcrição
