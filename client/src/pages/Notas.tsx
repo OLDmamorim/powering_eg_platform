@@ -1,5 +1,6 @@
 import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
+import { NovaGravacaoDialog, ListaGravacoes } from "./GravacaoReuniao";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -56,6 +57,7 @@ import {
   FileCheck,
   FileDown,
   ListChecks,
+  Mic,
 } from "lucide-react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
@@ -882,6 +884,8 @@ export default function Notas() {
   const [mostrarArquivadas, setMostrarArquivadas] = useState(false);
   const [editorOpen, setEditorOpen] = useState(false);
   const [notaAtual, setNotaAtual] = useState<any>(null);
+  const [tabAtivo, setTabAtivo] = useState<"notas" | "gravacoes">("notas");
+  const [gravacaoDialogOpen, setGravacaoDialogOpen] = useState(false);
 
   const utils = trpc.useUtils();
 
@@ -1027,12 +1031,48 @@ export default function Notas() {
               Dossiers para reuniões, discussões e acompanhamento
             </p>
           </div>
-          <Button onClick={handleNovaNota} className="gap-2">
-            <Plus className="h-4 w-4" />
-            Nova Nota
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={handleNovaNota} className="gap-2">
+              <Plus className="h-4 w-4" />
+              Nova Nota
+            </Button>
+            <Button onClick={() => setGravacaoDialogOpen(true)} variant="outline" className="gap-2 border-red-200 text-red-600 hover:bg-red-50">
+              <Mic className="h-4 w-4" />
+              Gravar Reunião
+            </Button>
+          </div>
         </div>
 
+        {/* Tabs: Notas vs Gravações */}
+        <div className="flex gap-1 border-b">
+          <button
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+              tabAtivo === "notas"
+                ? "border-primary text-primary"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            }`}
+            onClick={() => setTabAtivo("notas")}
+          >
+            <StickyNote className="h-4 w-4 inline mr-1.5" />
+            Notas
+          </button>
+          <button
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+              tabAtivo === "gravacoes"
+                ? "border-red-500 text-red-600"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            }`}
+            onClick={() => setTabAtivo("gravacoes")}
+          >
+            <Mic className="h-4 w-4 inline mr-1.5" />
+            Gravações
+          </button>
+        </div>
+
+        {tabAtivo === "gravacoes" ? (
+          <ListaGravacoes />
+        ) : (
+          <>
         {/* Filtros */}
         <div className="flex flex-wrap gap-2 items-center">
           <div className="relative flex-1 min-w-[200px] max-w-[300px]">
@@ -1184,6 +1224,15 @@ export default function Notas() {
             )}
           </div>
         )}
+
+        </>
+        )}
+
+        {/* Dialog de Gravação */}
+        <NovaGravacaoDialog
+          open={gravacaoDialogOpen}
+          onClose={() => setGravacaoDialogOpen(false)}
+        />
 
         {/* Editor Dialog */}
         {editorOpen && (

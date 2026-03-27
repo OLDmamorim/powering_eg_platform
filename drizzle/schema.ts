@@ -1590,6 +1590,28 @@ export const notasTagsRelacao = mysqlTable("notas_tags_relacao", {
 export type NotaTagRelacao = typeof notasTagsRelacao.$inferSelect;
 export type InsertNotaTagRelacao = typeof notasTagsRelacao.$inferInsert;
 
+/**
+ * Gravações de Reuniões - Gravação de áudio, transcrição e resumo IA
+ * Associada opcionalmente a uma nota para integração no sistema de notas
+ */
+export const gravacoesReuniao = mysqlTable("gravacoes_reuniao", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(), // FK para users.id (quem gravou)
+  notaId: int("notaId"), // FK opcional para notas.id (associar a uma nota)
+  titulo: varchar("titulo", { length: 500 }).notNull(),
+  audioUrl: text("audioUrl"), // URL S3 do ficheiro de áudio
+  audioFileKey: varchar("audioFileKey", { length: 500 }), // Chave S3
+  duracaoSegundos: int("duracaoSegundos"), // Duração do áudio em segundos
+  transcricao: mediumtext("transcricao"), // Transcrição limpa do áudio
+  resumoIA: mediumtext("resumoIA"), // Resumo gerado pela IA
+  idioma: varchar("idioma", { length: 10 }).default("pt"), // Idioma detectado
+  estado: mysqlEnum("estado", ["a_gravar", "gravado", "a_transcrever", "transcrito", "a_resumir", "concluido", "erro"]).default("a_gravar").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type GravacaoReuniao = typeof gravacoesReuniao.$inferSelect;
+export type InsertGravacaoReuniao = typeof gravacoesReuniao.$inferInsert;
+
 
 /**
  * ========================================

@@ -1128,3 +1128,17 @@
 - [x] Lojas ordenadas alfabeticamente, filtradas pelo gestor
 - [x] 17 testes passados (12 relatório loja + 5 PDF)
 - [x] Guardar checkpoint
+
+## Gravação de Reuniões (Notas)
+- [x] Analisar estrutura actual das Notas e capacidades de transcrição
+- [x] Criar schema DB para gravações de reuniões (tabela gravacoesReuniao)
+- [x] Criar endpoint upload de áudio para S3 (notas.uploadAudioGravacao)
+- [x] Criar endpoint de transcrição Whisper (notas.transcreverGravacao)
+- [x] Criar endpoint de resumo IA (notas.gerarResumoGravacao)
+- [x] Implementar UI gravador de áudio com MediaRecorder API + visualização de nível
+- [x] Fluxo automático: Gravar → Upload S3 → Transcrever → Gerar resumo IA
+- [x] Guardar gravação, transcrição e resumo na base de dados
+- [x] Integrar na secção Notas com tab Gravações + botão Gravar Reunião
+- [x] Lista de gravações com player, transcrição e resumo expansíveis
+- [x] 16 testes vitest passados (gravacaoReuniao.test.ts)
+- [x] Guardar checkpoint

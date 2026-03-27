@@ -176,6 +176,9 @@ import {
   notasTagsRelacao,
   NotaTagRelacao,
   InsertNotaTagRelacao,
+  gravacoesReuniao,
+  GravacaoReuniao,
+  InsertGravacaoReuniao,
   vidrosDestinatarios,
   VidroDestinatario,
   InsertVidroDestinatario,
@@ -12318,6 +12321,60 @@ export async function definirTagsNota(notaId: number, tagIds: number[]) {
   return true;
 }
 
+
+// ========================================
+// GRAVAÇÕES DE REUNIÕES
+// ========================================
+
+export async function criarGravacaoReuniao(data: InsertGravacaoReuniao): Promise<GravacaoReuniao | null> {
+  const db = await getDb();
+  if (!db) return null;
+  const [result] = await db.insert(gravacoesReuniao).values(data);
+  const [gravacao] = await db.select().from(gravacoesReuniao).where(eq(gravacoesReuniao.id, result.insertId));
+  return gravacao || null;
+}
+
+export async function getGravacaoReuniao(id: number, userId: number): Promise<GravacaoReuniao | null> {
+  const db = await getDb();
+  if (!db) return null;
+  const [gravacao] = await db.select().from(gravacoesReuniao)
+    .where(and(eq(gravacoesReuniao.id, id), eq(gravacoesReuniao.userId, userId)));
+  return gravacao || null;
+}
+
+export async function listarGravacoesReuniao(userId: number): Promise<GravacaoReuniao[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(gravacoesReuniao)
+    .where(eq(gravacoesReuniao.userId, userId))
+    .orderBy(desc(gravacoesReuniao.createdAt));
+}
+
+export async function atualizarGravacaoReuniao(id: number, userId: number, data: Partial<InsertGravacaoReuniao>): Promise<boolean> {
+  const db = await getDb();
+  if (!db) return false;
+  await db.update(gravacoesReuniao)
+    .set({ ...data, updatedAt: new Date() })
+    .where(and(eq(gravacoesReuniao.id, id), eq(gravacoesReuniao.userId, userId)));
+  return true;
+}
+
+export async function eliminarGravacaoReuniao(id: number, userId: number): Promise<boolean> {
+  const db = await getDb();
+  if (!db) return false;
+  await db.delete(gravacoesReuniao)
+    .where(and(eq(gravacoesReuniao.id, id), eq(gravacoesReuniao.userId, userId)));
+  return true;
+}
+
+export async function associarGravacaoANota(gravacaoId: number, notaId: number, userId: number): Promise<boolean> {
+  const db = await getDb();
+  if (!db) return false;
+  await db.update(gravacoesReuniao)
+    .set({ notaId })
+    .where(and(eq(gravacoesReuniao.id, gravacaoId), eq(gravacoesReuniao.userId, userId)));
+  return true;
+}
 
 // ========================================
 // RECEPÇÃO DE VIDROS

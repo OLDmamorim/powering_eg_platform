@@ -12125,6 +12125,176 @@ IMPORTANTE:
         await db.eliminarTag(input.tagId, ctx.user.id);
         return { success: true };
       }),
+
+    // ==================== GRAVAÇÕES DE REUNIÕES ====================
+    // Listar gravações do utilizador
+    listarGravacoes: protectedProcedure
+      .query(async ({ ctx }) => {
+        return db.listarGravacoesReuniao(ctx.user.id);
+      }),
+
+    // Obter gravação por ID
+    getGravacao: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ ctx, input }) => {
+        return db.getGravacaoReuniao(input.id, ctx.user.id);
+      }),
+
+    // Criar gravação
+    criarGravacao: protectedProcedure
+      .input(z.object({
+        titulo: z.string().min(1),
+        notaId: z.number().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const gravacao = await db.criarGravacaoReuniao({
+          titulo: input.titulo,
+          userId: ctx.user.id,
+          notaId: input.notaId || null,
+          estado: 'a_gravar',
+        });
+        return gravacao;
+      }),
+
+    // Upload áudio da gravação para S3
+    uploadAudioGravacao: protectedProcedure
+      .input(z.object({
+        gravacaoId: z.number(),
+        audioBase64: z.string(),
+        mimeType: z.string(),
+        duracaoSegundos: z.number(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const ext = input.mimeType.includes('webm') ? 'webm' : input.mimeType.includes('mp4') ? 'mp4' : 'mp3';
+        const fileKey = `gravacoes/${ctx.user.id}/${input.gravacaoId}-${Date.now()}.${ext}`;
+        const audioBuffer = Buffer.from(input.audioBase64, 'base64');
+        
+        // Verificar tamanho (16MB)
+        if (audioBuffer.length > 16 * 1024 * 1024) {
+          throw new TRPCError({ code: 'BAD_REQUEST', message: 'Áudio excede 16MB. Tente gravações mais curtas.' });
+        }
+        
+        const { url } = await storagePut(fileKey, audioBuffer, input.mimeType);
+        
+        await db.atualizarGravacaoReuniao(input.gravacaoId, ctx.user.id, {
+          audioUrl: url,
+          audioFileKey: fileKey,
+          duracaoSegundos: input.duracaoSegundos,
+          estado: 'gravado',
+        });
+        
+        return { url };
+      }),
+
+    // Transcrever áudio da gravação
+    transcreverGravacao: protectedProcedure
+      .input(z.object({
+        gravacaoId: z.number(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const gravacao = await db.getGravacaoReuniao(input.gravacaoId, ctx.user.id);
+        if (!gravacao || !gravacao.audioUrl) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Gravação não encontrada ou sem áudio' });
+        }
+        
+        await db.atualizarGravacaoReuniao(input.gravacaoId, ctx.user.id, { estado: 'a_transcrever' });
+        
+        const { transcribeAudio } = await import('./_core/voiceTranscription');
+        const result = await transcribeAudio({
+          audioUrl: gravacao.audioUrl,
+          language: 'pt',
+          prompt: 'Transcrever reunião de trabalho em português. Nomes de pessoas, lojas e termos técnicos de vidro automóvel.',
+        });
+        
+        if ('error' in result) {
+          await db.atualizarGravacaoReuniao(input.gravacaoId, ctx.user.id, { estado: 'erro' });
+          throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: result.error, cause: result });
+        }
+        
+        await db.atualizarGravacaoReuniao(input.gravacaoId, ctx.user.id, {
+          transcricao: result.text,
+          idioma: result.language || 'pt',
+          estado: 'transcrito',
+        });
+        
+        return { transcricao: result.text, idioma: result.language, duracao: result.duration };
+      }),
+
+    // Gerar resumo IA da transcrição
+    gerarResumoGravacao: protectedProcedure
+      .input(z.object({
+        gravacaoId: z.number(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const gravacao = await db.getGravacaoReuniao(input.gravacaoId, ctx.user.id);
+        if (!gravacao || !gravacao.transcricao) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Gravação não encontrada ou sem transcrição' });
+        }
+        
+        await db.atualizarGravacaoReuniao(input.gravacaoId, ctx.user.id, { estado: 'a_resumir' });
+        
+        const { invokeLLM } = await import('./_core/llm');
+        const response = await invokeLLM({
+          messages: [
+            {
+              role: 'system',
+              content: `És um assistente especializado em gerar resumos de reuniões de trabalho.
+Gera um resumo estruturado em Português Europeu com as seguintes secções:
+
+## Resumo da Reunião
+Breve parágrafo com o contexto geral.
+
+## Pontos Principais
+- Lista dos pontos discutidos
+
+## Decisões Tomadas
+- Lista de decisões
+
+## Ações a Tomar
+- Lista de ações com responsável (se mencionado)
+
+## Notas Adicionais
+- Observações relevantes
+
+Se alguma secção não tiver conteúdo relevante, omite-a.
+Mantém o resumo conciso e profissional.`
+            },
+            {
+              role: 'user',
+              content: `Transcreve a seguinte reunião e gera um resumo estruturado:\n\n${gravacao.transcricao}`
+            }
+          ],
+        });
+        
+        const rawContent = response.choices?.[0]?.message?.content;
+        const resumo = typeof rawContent === 'string' ? rawContent : 'Não foi possível gerar o resumo.';
+        
+        await db.atualizarGravacaoReuniao(input.gravacaoId, ctx.user.id, {
+          resumoIA: resumo,
+          estado: 'concluido',
+        });
+        
+        return { resumo };
+      }),
+
+    // Eliminar gravação
+    eliminarGravacao: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        await db.eliminarGravacaoReuniao(input.id, ctx.user.id);
+        return { success: true };
+      }),
+
+    // Associar gravação a uma nota
+    associarGravacaoANota: protectedProcedure
+      .input(z.object({
+        gravacaoId: z.number(),
+        notaId: z.number(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        await db.associarGravacaoANota(input.gravacaoId, input.notaId, ctx.user.id);
+        return { success: true };
+      }),
   }),
 
   // ==================== NOTAS DA LOJA ====================

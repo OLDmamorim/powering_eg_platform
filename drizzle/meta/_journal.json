@@ -736,6 +736,13 @@
       "when": 1774464043627,
       "tag": "0104_military_iceman",
       "breakpoints": true
+    },
+    {
+      "idx": 105,
+      "version": "5",
+      "when": 1774597277738,
+      "tag": "0105_striped_tomorrow_man",
+      "breakpoints": true
     }
   ]
 }
