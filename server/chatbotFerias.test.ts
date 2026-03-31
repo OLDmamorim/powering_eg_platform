@@ -2,142 +2,161 @@ import { describe, it, expect } from 'vitest';
 
 /**
  * Testes unitários para a lógica de formatação de férias no contexto do chatbot.
- * Testa a conversão de dia do ano para data legível e a extração de períodos.
+ * Formato real da BD: chaves são 'mes-dia' (ex: '5-7' = 7 de maio), valores são 'approved'/'rejected'/'holiday'/'weekend'
  */
 
-// Função auxiliar: converter dia do ano para data legível (replicada do chatbotService)
-function diaParaData(diaAno: number, ano: number): string {
-  const d = new Date(ano, 0, diaAno);
-  return `${d.getDate()}/${d.getMonth() + 1}`;
-}
-
-// Função auxiliar: extrair períodos de férias de um mapa de dias
-function extrairPeriodos(dias: Record<string, string>, ano: number, estado: string): string[] {
-  const periodos: string[] = [];
-  let inicio: number | null = null;
-  const totalDias = (ano % 4 === 0 && (ano % 100 !== 0 || ano % 400 === 0)) ? 366 : 365;
-  
-  for (let d = 1; d <= totalDias; d++) {
-    const estadoDia = dias[String(d)];
-    if (estadoDia === estado) {
-      if (inicio === null) inicio = d;
-    } else {
-      if (inicio !== null) {
-        const fim = d - 1;
-        periodos.push(inicio === fim ? diaParaData(inicio, ano) : `${diaParaData(inicio, ano)}-${diaParaData(fim, ano)}`);
-        inicio = null;
+// Função auxiliar: extrair datas por estado do mapa de dias (formato real da BD)
+function extrairDatas(dias: Record<string, string>, ano: number, estado: string): Date[] {
+  const datas: Date[] = [];
+  for (const [chave, valor] of Object.entries(dias)) {
+    const partes = chave.split('-');
+    if (partes.length === 2) {
+      const mes = parseInt(partes[0]);
+      const dia = parseInt(partes[1]);
+      if (!isNaN(mes) && !isNaN(dia) && valor === estado) {
+        datas.push(new Date(ano, mes - 1, dia));
       }
     }
   }
-  if (inicio !== null) {
-    periodos.push(inicio === totalDias ? diaParaData(inicio, ano) : `${diaParaData(inicio, ano)}-${diaParaData(totalDias, ano)}`);
-  }
+  return datas;
+}
+
+// Função auxiliar: agrupar datas contínuas em períodos legíveis
+function agruparPeriodos(datas: Date[]): string[] {
+  if (datas.length === 0) return [];
+  datas.sort((a, b) => a.getTime() - b.getTime());
+  const periodos: string[] = [];
+  let inicio = datas[0];
+  let anterior = datas[0];
   
+  for (let i = 1; i <= datas.length; i++) {
+    if (i < datas.length) {
+      const diff = (datas[i].getTime() - anterior.getTime()) / (1000 * 60 * 60 * 24);
+      if (diff <= 1.5) { anterior = datas[i]; continue; }
+    }
+    const fmtInicio = `${inicio.getDate()}/${inicio.getMonth() + 1}`;
+    const fmtFim = `${anterior.getDate()}/${anterior.getMonth() + 1}`;
+    periodos.push(inicio.getTime() === anterior.getTime() ? fmtInicio : `${fmtInicio} a ${fmtFim}`);
+    if (i < datas.length) { inicio = datas[i]; anterior = datas[i]; }
+  }
   return periodos;
 }
 
-describe('diaParaData', () => {
-  it('deve converter dia 1 do ano para 1/1', () => {
-    expect(diaParaData(1, 2026)).toBe('1/1');
+describe('extrairDatas - formato real BD (mes-dia)', () => {
+  it('deve extrair datas approved corretamente', () => {
+    const dias: Record<string, string> = {
+      '2-12': 'approved',
+      '5-7': 'rejected',
+      '1-1': 'holiday',
+      '1-10': 'weekend',
+    };
+    
+    const datas = extrairDatas(dias, 2026, 'approved');
+    expect(datas).toHaveLength(1);
+    expect(datas[0].getDate()).toBe(12);
+    expect(datas[0].getMonth()).toBe(1); // Fevereiro (0-indexed)
   });
   
-  it('deve converter dia 32 para 1/2 (1 de fevereiro)', () => {
-    expect(diaParaData(32, 2026)).toBe('1/2');
+  it('deve extrair datas rejected corretamente', () => {
+    const dias: Record<string, string> = {
+      '5-7': 'rejected',
+      '5-8': 'rejected',
+      '5-11': 'rejected',
+      '5-12': 'rejected',
+      '5-13': 'rejected',
+      '2-12': 'approved',
+    };
+    
+    const datas = extrairDatas(dias, 2026, 'rejected');
+    expect(datas).toHaveLength(5);
   });
   
-  it('deve converter dia 182 para data correta em 2026', () => {
-    // Dia 182 de 2026 = 1 de julho
-    const result = diaParaData(182, 2026);
-    expect(result).toBe('1/7');
-  });
-  
-  it('deve converter dia 365 para 31/12 em ano não bissexto', () => {
-    expect(diaParaData(365, 2026)).toBe('31/12');
-  });
-  
-  it('deve converter dia 366 para 31/12 em ano bissexto', () => {
-    expect(diaParaData(366, 2024)).toBe('31/12');
+  it('deve ignorar holidays e weekends', () => {
+    const dias: Record<string, string> = {
+      '1-1': 'holiday',
+      '1-10': 'weekend',
+      '1-11': 'weekend',
+      '5-7': 'rejected',
+    };
+    
+    const datasApproved = extrairDatas(dias, 2026, 'approved');
+    expect(datasApproved).toHaveLength(0);
   });
 });
 
-describe('extrairPeriodos', () => {
-  it('deve extrair período contínuo de férias aprovadas', () => {
-    const dias: Record<string, string> = {};
-    // Dias 182-191 (1 jul - 10 jul) aprovados
-    for (let d = 182; d <= 191; d++) {
-      dias[String(d)] = 'aprovado';
-    }
+describe('agruparPeriodos', () => {
+  it('deve agrupar dias consecutivos num único período', () => {
+    const datas = [
+      new Date(2026, 4, 7),  // 7/5
+      new Date(2026, 4, 8),  // 8/5
+    ];
     
-    const periodos = extrairPeriodos(dias, 2026, 'aprovado');
+    const periodos = agruparPeriodos(datas);
     expect(periodos).toHaveLength(1);
-    expect(periodos[0]).toBe('1/7-10/7');
+    expect(periodos[0]).toBe('7/5 a 8/5');
   });
   
-  it('deve extrair múltiplos períodos separados', () => {
-    const dias: Record<string, string> = {};
-    // Período 1: dias 1-5 (1-5 jan)
-    for (let d = 1; d <= 5; d++) {
-      dias[String(d)] = 'aprovado';
-    }
-    // Período 2: dias 182-186 (1-5 jul)
-    for (let d = 182; d <= 186; d++) {
-      dias[String(d)] = 'aprovado';
-    }
+  it('deve separar períodos não consecutivos', () => {
+    const datas = [
+      new Date(2026, 4, 7),   // 7/5
+      new Date(2026, 4, 8),   // 8/5
+      new Date(2026, 4, 11),  // 11/5
+      new Date(2026, 4, 12),  // 12/5
+      new Date(2026, 4, 13),  // 13/5
+    ];
     
-    const periodos = extrairPeriodos(dias, 2026, 'aprovado');
+    const periodos = agruparPeriodos(datas);
     expect(periodos).toHaveLength(2);
-    expect(periodos[0]).toBe('1/1-5/1');
-    expect(periodos[1]).toBe('1/7-5/7');
+    expect(periodos[0]).toBe('7/5 a 8/5');
+    expect(periodos[1]).toBe('11/5 a 13/5');
   });
   
-  it('deve extrair dia único como data simples', () => {
-    const dias: Record<string, string> = {};
-    dias['100'] = 'aprovado';
+  it('deve mostrar dia único sem intervalo', () => {
+    const datas = [new Date(2026, 10, 2)]; // 2/11
     
-    const periodos = extrairPeriodos(dias, 2026, 'aprovado');
+    const periodos = agruparPeriodos(datas);
     expect(periodos).toHaveLength(1);
-    // Dia 100 de 2026 = 10 de abril
-    expect(periodos[0]).toBe('10/4');
+    expect(periodos[0]).toBe('2/11');
   });
   
-  it('deve retornar array vazio se não houver dias com o estado', () => {
-    const dias: Record<string, string> = {};
-    dias['100'] = 'nao_aprovado';
-    
-    const periodos = extrairPeriodos(dias, 2026, 'aprovado');
+  it('deve retornar array vazio se não houver datas', () => {
+    const periodos = agruparPeriodos([]);
     expect(periodos).toHaveLength(0);
   });
-  
-  it('deve extrair férias por aprovar separadamente', () => {
-    const dias: Record<string, string> = {};
-    // Aprovados: dias 1-5
-    for (let d = 1; d <= 5; d++) {
-      dias[String(d)] = 'aprovado';
-    }
-    // Por aprovar: dias 182-186
-    for (let d = 182; d <= 186; d++) {
-      dias[String(d)] = 'nao_aprovado';
-    }
+});
+
+describe('Caso real: Ana Filipa Campos Moreira', () => {
+  it('deve extrair correctamente os períodos por aprovar da Ana Filipa', () => {
+    // Dados reais da BD (parcial)
+    const dias: Record<string, string> = {
+      '1-1': 'holiday', '1-10': 'weekend', '1-11': 'weekend',
+      '2-12': 'approved',
+      '5-7': 'rejected', '5-8': 'rejected',
+      '5-11': 'rejected', '5-12': 'rejected', '5-13': 'rejected',
+      '6-22': 'rejected', '6-23': 'rejected', '6-24': 'rejected', '6-25': 'rejected', '6-26': 'rejected',
+      '8-3': 'rejected', '8-4': 'rejected', '8-5': 'rejected', '8-6': 'rejected', '8-7': 'rejected',
+      '8-10': 'rejected', '8-11': 'rejected', '8-12': 'rejected', '8-13': 'rejected', '8-14': 'rejected',
+      '11-2': 'rejected',
+    };
     
-    const periodosAprovados = extrairPeriodos(dias, 2026, 'aprovado');
-    const periodosPorAprovar = extrairPeriodos(dias, 2026, 'nao_aprovado');
+    const datasPorAprovar = extrairDatas(dias, 2026, 'rejected');
+    expect(datasPorAprovar).toHaveLength(21);
     
+    const periodos = agruparPeriodos(datasPorAprovar);
+    expect(periodos).toHaveLength(6);
+    expect(periodos[0]).toBe('7/5 a 8/5');
+    expect(periodos[1]).toBe('11/5 a 13/5');
+    expect(periodos[2]).toBe('22/6 a 26/6');
+    expect(periodos[3]).toBe('3/8 a 7/8');
+    expect(periodos[4]).toBe('10/8 a 14/8');
+    expect(periodos[5]).toBe('2/11');
+    
+    const datasAprovadas = extrairDatas(dias, 2026, 'approved');
+    expect(datasAprovadas).toHaveLength(1);
+    
+    const periodosAprovados = agruparPeriodos(datasAprovadas);
     expect(periodosAprovados).toHaveLength(1);
-    expect(periodosPorAprovar).toHaveLength(1);
-    expect(periodosAprovados[0]).toBe('1/1-5/1');
-    expect(periodosPorAprovar[0]).toBe('1/7-5/7');
-  });
-  
-  it('deve lidar com período que vai até ao final do ano', () => {
-    const dias: Record<string, string> = {};
-    // Dias 360-365 aprovados (final do ano)
-    for (let d = 360; d <= 365; d++) {
-      dias[String(d)] = 'aprovado';
-    }
-    
-    const periodos = extrairPeriodos(dias, 2026, 'aprovado');
-    expect(periodos).toHaveLength(1);
-    expect(periodos[0]).toBe('26/12-31/12');
+    expect(periodosAprovados[0]).toBe('12/2');
   });
 });
 

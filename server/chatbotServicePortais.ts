@@ -848,44 +848,48 @@ function formatarContextoParaLoja(contextoNacional: any, dadosLoja: any, lojaNom
     dadosLoja.feriasColaboradores.forEach((c: any) => {
       texto += `  - ${c.nome}: ${c.totalAprovados || 0} dias aprovados, ${c.totalNaoAprovados || 0} dias por aprovar, ${c.totalFaltas || 0} faltas\n`;
       
+      // Formato real da BD: chaves são 'mes-dia' (ex: '5-7' = 7 de maio), valores são 'approved'/'rejected'
       if (c.dias) {
         const dias = typeof c.dias === 'string' ? JSON.parse(c.dias) : c.dias;
-        const periodosAprovados: string[] = [];
-        const periodosPorAprovar: string[] = [];
-        let inicioAprovado: number | null = null;
-        let inicioPorAprovar: number | null = null;
-        
-        const diaParaData = (diaAno: number, ano: number): string => {
-          const d = new Date(ano, 0, diaAno);
-          return `${d.getDate()}/${d.getMonth() + 1}`;
-        };
-        
         const ano = c.ano || new Date().getFullYear();
-        const totalDias = (ano % 4 === 0 && (ano % 100 !== 0 || ano % 400 === 0)) ? 366 : 365;
         
-        for (let d = 1; d <= totalDias; d++) {
-          const estado = dias[String(d)];
-          if (estado === 'aprovado') {
-            if (inicioAprovado === null) inicioAprovado = d;
-          } else {
-            if (inicioAprovado !== null) {
-              const fim = d - 1;
-              periodosAprovados.push(inicioAprovado === fim ? diaParaData(inicioAprovado, ano) : `${diaParaData(inicioAprovado, ano)}-${diaParaData(fim, ano)}`);
-              inicioAprovado = null;
-            }
-          }
-          if (estado === 'nao_aprovado') {
-            if (inicioPorAprovar === null) inicioPorAprovar = d;
-          } else {
-            if (inicioPorAprovar !== null) {
-              const fim = d - 1;
-              periodosPorAprovar.push(inicioPorAprovar === fim ? diaParaData(inicioPorAprovar, ano) : `${diaParaData(inicioPorAprovar, ano)}-${diaParaData(fim, ano)}`);
-              inicioPorAprovar = null;
+        const datasAprovadas: Date[] = [];
+        const datasPorAprovar: Date[] = [];
+        
+        for (const [chave, valor] of Object.entries(dias)) {
+          const partes = chave.split('-');
+          if (partes.length === 2) {
+            const mes = parseInt(partes[0]);
+            const dia = parseInt(partes[1]);
+            if (!isNaN(mes) && !isNaN(dia)) {
+              const data = new Date(ano, mes - 1, dia);
+              if (valor === 'approved') datasAprovadas.push(data);
+              if (valor === 'rejected') datasPorAprovar.push(data);
             }
           }
         }
-        if (inicioAprovado !== null) periodosAprovados.push(`${diaParaData(inicioAprovado, ano)}-${diaParaData(totalDias, ano)}`);
-        if (inicioPorAprovar !== null) periodosPorAprovar.push(`${diaParaData(inicioPorAprovar, ano)}-${diaParaData(totalDias, ano)}`);
+        
+        const agruparPeriodos = (datas: Date[]): string[] => {
+          if (datas.length === 0) return [];
+          datas.sort((a, b) => a.getTime() - b.getTime());
+          const periodos: string[] = [];
+          let inicio = datas[0];
+          let anterior = datas[0];
+          for (let i = 1; i <= datas.length; i++) {
+            if (i < datas.length) {
+              const diff = (datas[i].getTime() - anterior.getTime()) / (1000 * 60 * 60 * 24);
+              if (diff <= 1.5) { anterior = datas[i]; continue; }
+            }
+            const fmtInicio = `${inicio.getDate()}/${inicio.getMonth() + 1}`;
+            const fmtFim = `${anterior.getDate()}/${anterior.getMonth() + 1}`;
+            periodos.push(inicio.getTime() === anterior.getTime() ? fmtInicio : `${fmtInicio} a ${fmtFim}`);
+            if (i < datas.length) { inicio = datas[i]; anterior = datas[i]; }
+          }
+          return periodos;
+        };
+        
+        const periodosAprovados = agruparPeriodos(datasAprovadas);
+        const periodosPorAprovar = agruparPeriodos(datasPorAprovar);
         
         if (periodosAprovados.length > 0) texto += `    ✅ Aprovadas: ${periodosAprovados.join(', ')}\n`;
         if (periodosPorAprovar.length > 0) texto += `    ⏳ Por aprovar: ${periodosPorAprovar.join(', ')}\n`;

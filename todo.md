@@ -1285,3 +1285,9 @@
 - [x] Atualizar prompt do chatbot para saber interpretar dados de férias
 - [x] Adicionar dados de férias ao chatbot do Portal da Loja (chatbotServicePortais.ts)
 - [x] Guardar checkpoint
+
+## Corrigir Formato Dados Férias no Chatbot
+- [x] Corrigir extração de períodos: chaves são 'mes-dia' (ex: '5-7'), valores são 'approved'/'rejected' (não 'aprovado'/'nao_aprovado')
+- [x] Atualizar chatbotService.ts (contexto pessoal + contexto nacional)
+- [x] Atualizar chatbotServicePortais.ts (portal da loja)
+- [x] Guardar checkpoint
