@@ -48,6 +48,7 @@ Se perguntarem "quantos pendentes tem a zona X" ou "quantos pendentes há no pa�
 - Reuniões realizadas
 - Resultados mensais e vendas complementares
 - Histórico de visitas de gestores
+- FÉRIAS dos colaboradores: dias aprovados, por aprovar, períodos detalhados. Podes responder a perguntas como "Quem tem férias em julho?", "Quantos dias de férias tem o colaborador X?", "Há sobreposição de férias?"
 
 === COMO RESPONDER ===
 - Quando perguntam sobre "pendentes", "tarefas", "alertas" → APENAS dados da loja ${lojaNome}
@@ -408,6 +409,26 @@ async function obterDadosLoja(lojaId: number): Promise<any> {
     // Ignorar erro
   }
   
+  // Férias dos colaboradores da loja
+  let feriasColaboradores: any[] = [];
+  try {
+    const anoAtual = new Date().getFullYear();
+    const todasFerias = await db.getFeriasColaboradoresByAno(anoAtual);
+    // Filtrar por nome da loja
+    if (loja) {
+      feriasColaboradores = todasFerias.filter(f => f.loja.toLowerCase() === loja.nome.toLowerCase());
+    }
+    // Se não houver dados do ano atual, tentar ano anterior
+    if (feriasColaboradores.length === 0) {
+      const feriasAnterior = await db.getFeriasColaboradoresByAno(anoAtual - 1);
+      if (loja) {
+        feriasColaboradores = feriasAnterior.filter(f => f.loja.toLowerCase() === loja.nome.toLowerCase());
+      }
+    }
+  } catch (e) {
+    // Ignorar erro
+  }
+  
   return {
     loja,
     pendentes,
@@ -418,7 +439,8 @@ async function obterDadosLoja(lojaId: number): Promise<any> {
     reunioes,
     resultadosMensais,
     vendasComplementares,
-    npsLoja
+    npsLoja,
+    feriasColaboradores
   };
 }
 
@@ -817,6 +839,59 @@ function formatarContextoParaLoja(contextoNacional: any, dadosLoja: any, lojaNom
         texto += `  ${i + 1}º ${r.nome}: NPS ${(r.nps * 100).toFixed(1)}% | Taxa ${(r.taxa * 100).toFixed(1)}% ${status}${isLoja}\n`;
       });
     }
+  }
+  
+  // ========== FÉRIAS DOS COLABORADORES DA LOJA ==========
+  if (dadosLoja.feriasColaboradores && dadosLoja.feriasColaboradores.length > 0) {
+    texto += `\n🏖️ FÉRIAS DOS COLABORADORES (${dadosLoja.feriasColaboradores.length}):\n`;
+    
+    dadosLoja.feriasColaboradores.forEach((c: any) => {
+      texto += `  - ${c.nome}: ${c.totalAprovados || 0} dias aprovados, ${c.totalNaoAprovados || 0} dias por aprovar, ${c.totalFaltas || 0} faltas\n`;
+      
+      if (c.dias) {
+        const dias = typeof c.dias === 'string' ? JSON.parse(c.dias) : c.dias;
+        const periodosAprovados: string[] = [];
+        const periodosPorAprovar: string[] = [];
+        let inicioAprovado: number | null = null;
+        let inicioPorAprovar: number | null = null;
+        
+        const diaParaData = (diaAno: number, ano: number): string => {
+          const d = new Date(ano, 0, diaAno);
+          return `${d.getDate()}/${d.getMonth() + 1}`;
+        };
+        
+        const ano = c.ano || new Date().getFullYear();
+        const totalDias = (ano % 4 === 0 && (ano % 100 !== 0 || ano % 400 === 0)) ? 366 : 365;
+        
+        for (let d = 1; d <= totalDias; d++) {
+          const estado = dias[String(d)];
+          if (estado === 'aprovado') {
+            if (inicioAprovado === null) inicioAprovado = d;
+          } else {
+            if (inicioAprovado !== null) {
+              const fim = d - 1;
+              periodosAprovados.push(inicioAprovado === fim ? diaParaData(inicioAprovado, ano) : `${diaParaData(inicioAprovado, ano)}-${diaParaData(fim, ano)}`);
+              inicioAprovado = null;
+            }
+          }
+          if (estado === 'nao_aprovado') {
+            if (inicioPorAprovar === null) inicioPorAprovar = d;
+          } else {
+            if (inicioPorAprovar !== null) {
+              const fim = d - 1;
+              periodosPorAprovar.push(inicioPorAprovar === fim ? diaParaData(inicioPorAprovar, ano) : `${diaParaData(inicioPorAprovar, ano)}-${diaParaData(fim, ano)}`);
+              inicioPorAprovar = null;
+            }
+          }
+        }
+        if (inicioAprovado !== null) periodosAprovados.push(`${diaParaData(inicioAprovado, ano)}-${diaParaData(totalDias, ano)}`);
+        if (inicioPorAprovar !== null) periodosPorAprovar.push(`${diaParaData(inicioPorAprovar, ano)}-${diaParaData(totalDias, ano)}`);
+        
+        if (periodosAprovados.length > 0) texto += `    ✅ Aprovadas: ${periodosAprovados.join(', ')}\n`;
+        if (periodosPorAprovar.length > 0) texto += `    ⏳ Por aprovar: ${periodosPorAprovar.join(', ')}\n`;
+      }
+    });
+    texto += '\n';
   }
   
   return texto;

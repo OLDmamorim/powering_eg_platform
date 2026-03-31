@@ -1277,3 +1277,11 @@
 - [x] Atualizar PDF de resultados: remover marcador de 7.5% na barra de escovas
 - [x] Atualizar textos/legendas para refletir nova política (comissão a partir da 1.ª escova)
 - [x] Guardar checkpoint
+
+## Chatbot: Acesso a Dados de Férias
+- [x] Analisar como o contexto do chatbot é construído (chatbotService.ts)
+- [x] Identificar dados de férias disponíveis na BD (ferias_colaboradores, ferias_uploads)
+- [x] Adicionar dados de férias ao contexto do chatbot (aprovadas, por aprovar, por colaborador/loja)
+- [x] Atualizar prompt do chatbot para saber interpretar dados de férias
+- [x] Adicionar dados de férias ao chatbot do Portal da Loja (chatbotServicePortais.ts)
+- [x] Guardar checkpoint

@@ -143,6 +143,7 @@ interface ContextoPlataforma {
   comparacaoVendas: any; // Comparação de vendas entre períodos
   estatisticasGerais: any;
   dadosNPS: any[]; // Dados NPS de todas as lojas
+  dadosFerias: any[]; // Dados de férias de todos os colaboradores
   // Novos campos para contexto pessoal
   gestorAtual?: {
     id: number;
@@ -161,6 +162,7 @@ interface ContextoPlataforma {
     minhasVendasComplementares: any[];
     meusResultadosMensais: any[];
     meusNPS: any[]; // NPS das lojas do gestor
+    minhasFerias: any[]; // Férias dos colaboradores das lojas do gestor
   };
 }
 
@@ -358,6 +360,19 @@ async function obterContextoPlataforma(userId: number, userRole: string): Promis
     console.error('Erro ao carregar dados NPS para chatbot:', e);
   }
   
+  // ========== FÉRIAS - Dados de colaboradores ==========
+  let dadosFerias: any[] = [];
+  try {
+    const anoFerias = agora.getFullYear();
+    dadosFerias = await db.getFeriasColaboradoresByAno(anoFerias);
+    // Se não houver dados do ano atual, tentar ano anterior
+    if (dadosFerias.length === 0) {
+      dadosFerias = await db.getFeriasColaboradoresByAno(anoFerias - 1);
+    }
+  } catch (e) {
+    console.error('Erro ao carregar dados de férias para chatbot:', e);
+  }
+  
   // ========== NOVO: Contexto pessoal para gestores ==========
   let gestorAtual: ContextoPlataforma['gestorAtual'] = undefined;
   let contextoPessoal: ContextoPlataforma['contextoPessoal'] = undefined;
@@ -409,7 +424,12 @@ async function obterContextoPlataforma(userId: number, userRole: string): Promis
         meusTodos: todos.filter(t => t.criadoPorId === userId || lojaIdsDoGestor.includes(t.atribuidoLojaId || 0)),
         minhasVendasComplementares: vendasComplementares.filter(v => lojaIdsDoGestor.includes(v.lojaId)),
         meusResultadosMensais: resultadosMensais.filter(r => lojaIdsDoGestor.includes(r.lojaId)),
-        meusNPS: dadosNPS.filter((n: any) => lojaIdsDoGestor.includes(n.nps?.lojaId || n.lojaId))
+        meusNPS: dadosNPS.filter((n: any) => lojaIdsDoGestor.includes(n.nps?.lojaId || n.lojaId)),
+        minhasFerias: dadosFerias.filter((f: any) => {
+          // Filtrar por nome do gestor ou por lojas associadas
+          const lojasNomes = lojasDoGestor.map(l => l.nome.toLowerCase());
+          return f.gestor?.toLowerCase() === nomeGestor.toLowerCase() || lojasNomes.includes(f.loja?.toLowerCase());
+        })
       };
     }
   }
@@ -432,6 +452,7 @@ async function obterContextoPlataforma(userId: number, userRole: string): Promis
     comparacaoVendas,
     estatisticasGerais,
     dadosNPS,
+    dadosFerias,
     gestorAtual,
     contextoPessoal
   };
@@ -660,6 +681,87 @@ function formatarContextoPessoal(contexto: ContextoPlataforma): string {
       const qtdReparacoes = r.qtdReparacoes || 0;
       const qtdParaBrisas = r.qtdParaBrisas || 0;
       texto += `- ${r.lojaNome}: ${r.totalServicos || 0} serviços, objetivo: ${r.objetivoMensal || 'N/A'}, desvio: ${desvio}, taxa reparação: ${taxaRep}, reparações: ${qtdReparacoes}, para-brisas: ${qtdParaBrisas}\n`;
+    });
+    texto += '\n';
+  }
+  
+  // Férias dos colaboradores das minhas lojas
+  if (cp.minhasFerias && cp.minhasFerias.length > 0) {
+    texto += `🏖️ FÉRIAS DOS COLABORADORES DAS MINHAS LOJAS (${cp.minhasFerias.length} colaboradores):\n`;
+    
+    // Agrupar por loja
+    const feriasPorLoja: Record<string, any[]> = {};
+    cp.minhasFerias.forEach((f: any) => {
+      if (!feriasPorLoja[f.loja]) feriasPorLoja[f.loja] = [];
+      feriasPorLoja[f.loja].push(f);
+    });
+    
+    const mesesNomes = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+    
+    Object.entries(feriasPorLoja).forEach(([loja, colaboradores]) => {
+      texto += `\n  🏢 ${loja} (${colaboradores.length} colaboradores):\n`;
+      colaboradores.forEach((c: any) => {
+        texto += `    - ${c.nome}: ${c.totalAprovados || 0} dias aprovados, ${c.totalNaoAprovados || 0} dias por aprovar, ${c.totalFaltas || 0} faltas\n`;
+        
+        // Detalhar os períodos de férias (aprovadas e por aprovar)
+        if (c.dias) {
+          const dias = typeof c.dias === 'string' ? JSON.parse(c.dias) : c.dias;
+          const periodosAprovados: string[] = [];
+          const periodosPorAprovar: string[] = [];
+          
+          let inicioAprovado: number | null = null;
+          let inicioPorAprovar: number | null = null;
+          
+          // Converter dia do ano para data legível
+          const diaParaData = (diaAno: number, ano: number): string => {
+            const d = new Date(ano, 0, diaAno);
+            return `${d.getDate()}/${d.getMonth() + 1}`;
+          };
+          
+          const ano = c.ano || new Date().getFullYear();
+          const totalDias = (ano % 4 === 0 && (ano % 100 !== 0 || ano % 400 === 0)) ? 366 : 365;
+          
+          for (let d = 1; d <= totalDias; d++) {
+            const estado = dias[String(d)];
+            
+            // Aprovados
+            if (estado === 'aprovado') {
+              if (inicioAprovado === null) inicioAprovado = d;
+            } else {
+              if (inicioAprovado !== null) {
+                const fim = d - 1;
+                periodosAprovados.push(inicioAprovado === fim ? diaParaData(inicioAprovado, ano) : `${diaParaData(inicioAprovado, ano)}-${diaParaData(fim, ano)}`);
+                inicioAprovado = null;
+              }
+            }
+            
+            // Por aprovar
+            if (estado === 'nao_aprovado') {
+              if (inicioPorAprovar === null) inicioPorAprovar = d;
+            } else {
+              if (inicioPorAprovar !== null) {
+                const fim = d - 1;
+                periodosPorAprovar.push(inicioPorAprovar === fim ? diaParaData(inicioPorAprovar, ano) : `${diaParaData(inicioPorAprovar, ano)}-${diaParaData(fim, ano)}`);
+                inicioPorAprovar = null;
+              }
+            }
+          }
+          // Fechar períodos abertos no final do ano
+          if (inicioAprovado !== null) {
+            periodosAprovados.push(inicioAprovado === totalDias ? diaParaData(inicioAprovado, ano) : `${diaParaData(inicioAprovado, ano)}-${diaParaData(totalDias, ano)}`);
+          }
+          if (inicioPorAprovar !== null) {
+            periodosPorAprovar.push(inicioPorAprovar === totalDias ? diaParaData(inicioPorAprovar, ano) : `${diaParaData(inicioPorAprovar, ano)}-${diaParaData(totalDias, ano)}`);
+          }
+          
+          if (periodosAprovados.length > 0) {
+            texto += `      ✅ Aprovadas: ${periodosAprovados.join(', ')}\n`;
+          }
+          if (periodosPorAprovar.length > 0) {
+            texto += `      ⏳ Por aprovar: ${periodosPorAprovar.join(', ')}\n`;
+          }
+        }
+      });
     });
     texto += '\n';
   }
@@ -1070,6 +1172,74 @@ function formatarContextoParaPrompt(contexto: ContextoPlataforma): string {
     }
   }
   
+  // ========== DADOS DE FÉRIAS ==========
+  if (contexto.dadosFerias && contexto.dadosFerias.length > 0) {
+    texto += `\n🏖️ DADOS DE FÉRIAS (${contexto.dadosFerias.length} colaboradores):\n`;
+    
+    // Agrupar por loja
+    const feriasPorLoja: Record<string, any[]> = {};
+    contexto.dadosFerias.forEach((f: any) => {
+      if (!feriasPorLoja[f.loja]) feriasPorLoja[f.loja] = [];
+      feriasPorLoja[f.loja].push(f);
+    });
+    
+    // Resumo por loja
+    Object.entries(feriasPorLoja).forEach(([loja, colaboradores]) => {
+      const totalAprovados = colaboradores.reduce((sum: number, c: any) => sum + (c.totalAprovados || 0), 0);
+      const totalPorAprovar = colaboradores.reduce((sum: number, c: any) => sum + (c.totalNaoAprovados || 0), 0);
+      texto += `  🏢 ${loja}: ${colaboradores.length} colaboradores, ${totalAprovados} dias aprovados, ${totalPorAprovar} dias por aprovar\n`;
+      
+      colaboradores.forEach((c: any) => {
+        texto += `    - ${c.nome}: ${c.totalAprovados || 0} aprovados, ${c.totalNaoAprovados || 0} por aprovar, ${c.totalFaltas || 0} faltas\n`;
+        
+        // Detalhar períodos
+        if (c.dias) {
+          const dias = typeof c.dias === 'string' ? JSON.parse(c.dias) : c.dias;
+          const periodosAprovados: string[] = [];
+          const periodosPorAprovar: string[] = [];
+          let inicioAprovado: number | null = null;
+          let inicioPorAprovar: number | null = null;
+          
+          const diaParaData = (diaAno: number, ano: number): string => {
+            const d = new Date(ano, 0, diaAno);
+            return `${d.getDate()}/${d.getMonth() + 1}`;
+          };
+          
+          const ano = c.ano || new Date().getFullYear();
+          const totalDias = (ano % 4 === 0 && (ano % 100 !== 0 || ano % 400 === 0)) ? 366 : 365;
+          
+          for (let d = 1; d <= totalDias; d++) {
+            const estado = dias[String(d)];
+            if (estado === 'aprovado') {
+              if (inicioAprovado === null) inicioAprovado = d;
+            } else {
+              if (inicioAprovado !== null) {
+                const fim = d - 1;
+                periodosAprovados.push(inicioAprovado === fim ? diaParaData(inicioAprovado, ano) : `${diaParaData(inicioAprovado, ano)}-${diaParaData(fim, ano)}`);
+                inicioAprovado = null;
+              }
+            }
+            if (estado === 'nao_aprovado') {
+              if (inicioPorAprovar === null) inicioPorAprovar = d;
+            } else {
+              if (inicioPorAprovar !== null) {
+                const fim = d - 1;
+                periodosPorAprovar.push(inicioPorAprovar === fim ? diaParaData(inicioPorAprovar, ano) : `${diaParaData(inicioPorAprovar, ano)}-${diaParaData(fim, ano)}`);
+                inicioPorAprovar = null;
+              }
+            }
+          }
+          if (inicioAprovado !== null) periodosAprovados.push(`${diaParaData(inicioAprovado, ano)}-${diaParaData(totalDias, ano)}`);
+          if (inicioPorAprovar !== null) periodosPorAprovar.push(`${diaParaData(inicioPorAprovar, ano)}-${diaParaData(totalDias, ano)}`);
+          
+          if (periodosAprovados.length > 0) texto += `      ✅ Aprovadas: ${periodosAprovados.join(', ')}\n`;
+          if (periodosPorAprovar.length > 0) texto += `      ⏳ Por aprovar: ${periodosPorAprovar.join(', ')}\n`;
+        }
+      });
+    });
+    texto += '\n';
+  }
+  
   return texto;
 }
 
@@ -1123,6 +1293,7 @@ Tens acesso a todos os dados da plataforma e podes responder a perguntas sobre:
 - HISTÓRICO DE VISITAS POR GESTOR: Podes responder a perguntas como "Quando foi a última visita do gestor X à loja Y?" ou "Quantas visitas fez o gestor X este mês?"
 - COMPARAÇÃO DE VENDAS ENTRE PERÍODOS: Podes analisar a evolução das vendas complementares entre meses, identificar tendências de crescimento ou queda, e comparar performance entre lojas
 - POLÍTICA DE COMISSIONAMENTO 2026: Conheces toda a política de prémios e comissões da ExpressGlass. Podes responder a perguntas sobre cálculos de comissões, regras, penalizações e fazer simulações
+- DADOS DE FÉRIAS: Tens acesso aos dados reais de férias de todos os colaboradores (aprovadas, por aprovar, faltas, períodos detalhados). Podes responder a perguntas como "Quem tem férias aprovadas em julho?", "Quantos dias de férias tem o colaborador X?", "Quais são as férias por aprovar na loja Y?", "Há sobreposição de férias na loja Z?", "As férias estão em conformidade com o regulamento?"
 
 === POLÍTICA DE COMISSIONAMENTO 2026 - EXPRESSGLASS ===
 
@@ -1496,6 +1667,8 @@ Se a informação não estiver preenchida, informa que ainda não foi registada 
 13. **MUITO IMPORTANTE**: Respeita sempre a distinção entre perguntas pessoais e gerais. Se a pergunta for pessoal, usa APENAS os dados pessoais do gestor.
 14. Para perguntas sobre NPS, elegibilidade para prémio, ou cálculos de comissionamento que envolvam NPS, consulta a secção "DADOS NPS" no contexto
 15. Quando calculares comissões, verifica SEMPRE se a loja cumpre os critérios NPS (>= 80%) e Taxa de Resposta (>= 7,5%) - se não cumprir, a comissão é 0€
+16. Para perguntas sobre férias (aprovadas, por aprovar, períodos, conformidade com regulamento), consulta a secção "DADOS DE FÉRIAS" no contexto. Podes cruzar estes dados com o regulamento de férias (Procedimento Interno N.º 8) para verificar conformidade (ex: máximo 10 dias úteis Jun-Set, máximo 1 colaborador por loja ao mesmo tempo, etc.)
+17. Quando o utilizador perguntar sobre férias dos "meus" colaboradores, usa a secção "FÉRIAS DOS COLABORADORES DAS MINHAS LOJAS" nos dados pessoais
 
 ${contextoPessoalFormatado}
 ${contextoNacional}`;
