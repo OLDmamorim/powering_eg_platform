@@ -1237,4 +1237,9 @@
 - [x] Formato: "Férias - [Nome]", dia inteiro, com loja na descrição
 - [x] Botão "Exportar Outlook" no header da página
 - [x] 4 testes vitest passados
+- [x] Guardar checkpoint
+
+## Histórico da Loja - Gráfico de Evolução de Serviços
+- [x] Analisar dados disponíveis (serviços por mês, objetivo)
+- [x] Adicionar gráfico de Evolução de Serviços (barras serviços vs objetivo, verde quando atinge)
 - [ ] Guardar checkpoint

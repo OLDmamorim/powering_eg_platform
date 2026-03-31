@@ -1520,6 +1520,68 @@ export default function HistoricoLoja() {
               </Card>
             )}
 
+            {/* Gráfico de Evolução de Serviços */}
+            {historyData.dadosMensais?.resultados && historyData.dadosMensais.resultados.length > 0 && (
+              <Card className="border-blue-200">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-blue-900">
+                    <BarChart3 className="h-5 w-5" />
+                    Evolução de Serviços
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-[350px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={historyData.dadosMensais.resultados}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+                        <XAxis 
+                          dataKey="mes" 
+                          tick={{ fontSize: 12 }}
+                          stroke="#3b82f6"
+                        />
+                        <YAxis 
+                          tick={{ fontSize: 12 }}
+                          stroke="#3b82f6"
+                          domain={[0, 'auto']}
+                        />
+                        <Tooltip 
+                          formatter={(value: number, name: string) => [
+                            value, 
+                            name === 'servicos' ? 'Serviços' : 'Objetivo'
+                          ]}
+                          contentStyle={{ backgroundColor: '#f8fafc', borderColor: '#3b82f6' }}
+                        />
+                        <Legend />
+                        <Bar 
+                          dataKey="servicos" 
+                          name="Serviços"
+                          fill="#3b82f6" 
+                          radius={[4, 4, 0, 0]}
+                        >
+                          {historyData.dadosMensais.resultados.map((entry: any, index: number) => (
+                            <Cell 
+                              key={`cell-${index}`} 
+                              fill={entry.servicos >= entry.objetivo ? '#22c55e' : '#3b82f6'} 
+                            />
+                          ))}
+                        </Bar>
+                        <Bar 
+                          dataKey="objetivo" 
+                          name="Objetivo"
+                          fill="#94a3b8" 
+                          radius={[4, 4, 0, 0]}
+                          opacity={0.5}
+                        />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <p className="text-xs text-center text-muted-foreground mt-2">
+                    Barras verdes indicam meses em que o objetivo foi atingido ou superado
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Gráfico de Taxa de Reparação */}
             {historyData.dadosMensais?.resultados && historyData.dadosMensais.resultados.length > 0 && (
               <Card className="border-indigo-200">
