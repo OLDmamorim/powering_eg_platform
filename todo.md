@@ -1242,4 +1242,4 @@
 ## Histórico da Loja - Gráfico de Evolução de Serviços
 - [x] Analisar dados disponíveis (serviços por mês, objetivo)
 - [x] Adicionar gráfico de Evolução de Serviços (barras serviços vs objetivo, verde quando atinge)
-- [ ] Guardar checkpoint
+- [x] Guardar checkpoint

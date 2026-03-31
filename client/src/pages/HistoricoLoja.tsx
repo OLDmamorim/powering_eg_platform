@@ -1530,9 +1530,9 @@ export default function HistoricoLoja() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="h-[350px]">
+                  <div className="h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={historyData.dadosMensais.resultados}>
+                      <LineChart data={historyData.dadosMensais.resultados}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
                         <XAxis 
                           dataKey="mes" 
@@ -1547,36 +1547,34 @@ export default function HistoricoLoja() {
                         <Tooltip 
                           formatter={(value: number, name: string) => [
                             value, 
-                            name === 'servicos' ? 'Serviços' : 'Objetivo'
+                            name === 'servicos' ? 'Serviços Realizados' : 'Objetivo'
                           ]}
                           contentStyle={{ backgroundColor: '#f8fafc', borderColor: '#3b82f6' }}
                         />
                         <Legend />
-                        <Bar 
+                        <Line 
+                          type="monotone" 
                           dataKey="servicos" 
-                          name="Serviços"
-                          fill="#3b82f6" 
-                          radius={[4, 4, 0, 0]}
-                        >
-                          {historyData.dadosMensais.resultados.map((entry: any, index: number) => (
-                            <Cell 
-                              key={`cell-${index}`} 
-                              fill={entry.servicos >= entry.objetivo ? '#22c55e' : '#3b82f6'} 
-                            />
-                          ))}
-                        </Bar>
-                        <Bar 
+                          name="Serviços Realizados"
+                          stroke="#3b82f6" 
+                          strokeWidth={3}
+                          dot={{ fill: '#3b82f6', strokeWidth: 2, r: 5 }}
+                          activeDot={{ r: 8 }}
+                        />
+                        <Line 
+                          type="monotone" 
                           dataKey="objetivo" 
                           name="Objetivo"
-                          fill="#94a3b8" 
-                          radius={[4, 4, 0, 0]}
-                          opacity={0.5}
+                          stroke="#10b981" 
+                          strokeWidth={2}
+                          strokeDasharray="5 5"
+                          dot={{ fill: '#10b981', r: 3 }}
                         />
-                      </BarChart>
+                      </LineChart>
                     </ResponsiveContainer>
                   </div>
                   <p className="text-xs text-center text-muted-foreground mt-2">
-                    Barras verdes indicam meses em que o objetivo foi atingido ou superado
+                    A linha verde tracejada indica o objetivo mensal de serviços
                   </p>
                 </CardContent>
               </Card>
