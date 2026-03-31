@@ -435,9 +435,28 @@ export const appRouter = router({
         const now = new Date();
         const dtstamp = now.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
         
+        // Helper: extrair primeiro e último nome
+        function primeiroUltimoNome(nomeCompleto: string): string {
+          const partes = nomeCompleto.trim().split(/\s+/);
+          if (partes.length <= 2) return nomeCompleto.trim();
+          return `${partes[0]} ${partes[partes.length - 1]}`;
+        }
+        
+        // Mapa de cores do Outlook por loja (rotação cíclica)
+        const outlookColors = [
+          'Blue Category', 'Green Category', 'Orange Category', 'Purple Category',
+          'Red Category', 'Yellow Category'
+        ];
+        const lojasUnicas = [...new Set(colaboradores.map((c: any) => (c.loja || '').toLowerCase().trim()))].sort();
+        const lojaColorMap: Record<string, string> = {};
+        lojasUnicas.forEach((loja, idx) => {
+          lojaColorMap[loja] = outlookColors[idx % outlookColors.length];
+        });
+        
         for (const colab of colaboradores) {
           const dias = typeof (colab as any).dias === 'string' ? JSON.parse((colab as any).dias) : (colab as any).dias;
-          const nome = (colab as any).nome;
+          const nomeCompleto = (colab as any).nome;
+          const nome = primeiroUltimoNome(nomeCompleto);
           const loja = (colab as any).loja;
           
           // Encontrar dias aprovados (formato chave: "mês-dia", valor: "approved")
@@ -490,7 +509,11 @@ export const appRouter = router({
             
             const uid = `ferias-${(colab as any).id}-bloco${b}-${ano}@poweringeg`;
             const summary = loja ? `Férias - ${nome} (${loja})` : `Férias - ${nome}`;
-            const description = `Férias aprovadas de ${nome}\\nLoja: ${loja}\\nDuração: ${numDias} dia(s)\\nPeríodo: ${blocos[b].inicio.toLocaleDateString('pt-PT')} a ${blocos[b].fim.toLocaleDateString('pt-PT')}`;
+            const description = `Férias aprovadas de ${nomeCompleto}\\nLoja: ${loja}\\nDuração: ${numDias} dia(s)\\nPeríodo: ${blocos[b].inicio.toLocaleDateString('pt-PT')} a ${blocos[b].fim.toLocaleDateString('pt-PT')}`;
+            
+            // Cor do Outlook baseada na loja
+            const lojaKey = (loja || '').toLowerCase().trim();
+            const outlookCategory = lojaColorMap[lojaKey] || 'Blue Category';
             
             events.push([
               'BEGIN:VEVENT',
@@ -502,7 +525,7 @@ export const appRouter = router({
               `DESCRIPTION:${description}`,
               'TRANSP:TRANSPARENT',
               'X-MICROSOFT-CDO-BUSYSTATUS:FREE',
-              `CATEGORIES:Férias`,
+              `CATEGORIES:${outlookCategory}`,
               'END:VEVENT',
             ].join('\r\n'));
           }
@@ -523,7 +546,19 @@ export const appRouter = router({
         // Upload para S3
         const fileName = `ferias-${ano}-${Date.now()}.ics`;
         const { url } = await storagePut(fileName, Buffer.from(icsContent, 'utf-8'), 'text/calendar');
-        return { url, fileName, totalEventos: events.length, totalColaboradores: colaboradores.length };
+        // Construir mapa legível de loja -> cor
+        const coresLoja: Record<string, string> = {};
+        const corPTMap: Record<string, string> = {
+          'Blue Category': 'Azul', 'Green Category': 'Verde', 'Orange Category': 'Laranja',
+          'Purple Category': 'Roxo', 'Red Category': 'Vermelho', 'Yellow Category': 'Amarelo'
+        };
+        for (const [lojaLower, cat] of Object.entries(lojaColorMap)) {
+          // Encontrar nome original da loja (com capitalização)
+          const original = colaboradores.find((c: any) => (c.loja || '').toLowerCase().trim() === lojaLower);
+          const nomeLoja = original ? (original as any).loja : lojaLower;
+          coresLoja[nomeLoja] = corPTMap[cat] || cat;
+        }
+        return { url, fileName, totalEventos: events.length, totalColaboradores: colaboradores.length, coresLoja };
       }),
   }),
   

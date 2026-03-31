@@ -1254,4 +1254,9 @@
 
 ## Exportação .ics - Adicionar Nome da Loja
 - [x] Incluir nome da loja no título do evento (ex: "Férias - Tiago Costa (Barcelos)")
-- [ ] Guardar checkpoint
+- [x] Guardar checkpoint
+
+## Exportação .ics - Melhorias nomes e cores
+- [x] Usar apenas primeiro e último nome nos eventos (ex: "Vania Oliveira" em vez de "Vania Sofia Oliveira")
+- [x] Adicionar cores/categorias diferentes por loja nos eventos do Outlook
+- [x] Guardar checkpoint

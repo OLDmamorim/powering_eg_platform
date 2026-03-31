@@ -2180,9 +2180,13 @@ function OutlookExportTab({ data, allData, ano, gestorFilter, userName }: {
   const [selectedColabs, setSelectedColabs] = useState<Set<string>>(new Set());
   const [searchIcs, setSearchIcs] = useState('');
   const exportarICS = trpc.ferias.exportarICS.useMutation({
-    onSuccess: (result) => {
+    onSuccess: (result: any) => {
       window.open(result.url, '_blank');
-      toast.success(`Ficheiro .ics gerado com ${result.totalEventos} eventos de ${result.totalColaboradores} colaboradores`);
+      const coresInfo = result.coresLoja ? Object.entries(result.coresLoja).map(([loja, cor]: [string, any]) => `${loja}: ${cor}`).join(', ') : '';
+      toast.success(`Ficheiro .ics gerado com ${result.totalEventos} eventos de ${result.totalColaboradores} colaboradores`, {
+        description: coresInfo ? `Cores no Outlook: ${coresInfo}` : undefined,
+        duration: 8000,
+      });
     },
     onError: (err) => {
       toast.error(err.message || 'Erro ao gerar ficheiro .ics');
@@ -2411,7 +2415,8 @@ function OutlookExportTab({ data, allData, ano, gestorFilter, userName }: {
             <p className="mt-0.5">1. Clique em "Exportar" para descarregar o ficheiro .ics</p>
             <p>2. Abra o ficheiro — o Outlook abre automaticamente</p>
             <p>3. Confirme a importação dos eventos no calendário</p>
-            <p className="mt-1 text-blue-600">Cada evento aparece como "Férias - [Nome]" com a loja e duração na descrição.</p>
+            <p className="mt-1 text-blue-600">Cada evento aparece como "Férias - [Primeiro Último Nome] (Loja)".</p>
+            <p className="text-blue-600">Cada loja tem uma cor diferente no Outlook (Azul, Verde, Laranja, Roxo, Vermelho, Amarelo).</p>
           </div>
         </div>
       </CardContent>
