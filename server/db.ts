@@ -13869,6 +13869,53 @@ export async function getAnosFerias(): Promise<number[]> {
 
 
 // =============================================
+// FÉRIAS VOLANTES MARCADOS
+// =============================================
+
+import { feriasVolantesMarcados, InsertFeriasVolanteMarcado, FeriasVolanteMarcado } from "../drizzle/schema";
+
+/**
+ * Obter volantes marcados por um gestor
+ */
+export async function getFeriasVolantesMarcados(gestorNome: string): Promise<FeriasVolanteMarcado[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(feriasVolantesMarcados)
+    .where(eq(feriasVolantesMarcados.gestorNome, gestorNome))
+    .orderBy(feriasVolantesMarcados.nomeColaborador);
+}
+
+/**
+ * Definir volantes marcados para um gestor (substitui todos os anteriores)
+ */
+export async function setFeriasVolantesMarcados(
+  gestorNome: string,
+  userId: number,
+  colaboradores: { nome: string; loja: string }[]
+): Promise<FeriasVolanteMarcado[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  // Apagar todos os anteriores deste gestor
+  await db.delete(feriasVolantesMarcados)
+    .where(eq(feriasVolantesMarcados.gestorNome, gestorNome));
+  
+  // Inserir novos
+  if (colaboradores.length > 0) {
+    await db.insert(feriasVolantesMarcados).values(
+      colaboradores.map(c => ({
+        nomeColaborador: c.nome,
+        loja: c.loja,
+        gestorNome,
+        marcadoPorUserId: userId,
+      }))
+    );
+  }
+  
+  return getFeriasVolantesMarcados(gestorNome);
+}
+
+// =============================================
 // REUNIÕES LIVRES - Sistema de Reuniões
 // =============================================
 

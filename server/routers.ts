@@ -391,6 +391,26 @@ export const appRouter = router({
       return allVolantes.filter(v => v.ativo).map(v => v.nome.toUpperCase().trim());
     }),
 
+    // Obter volantes marcados para o calendário de férias (por gestor)
+    getVolantesMarcados: protectedProcedure
+      .input(z.object({ gestorNome: z.string() }))
+      .query(async ({ input }) => {
+        return db.getFeriasVolantesMarcados(input.gestorNome);
+      }),
+
+    // Definir volantes marcados para o calendário de férias
+    setVolantesMarcados: protectedProcedure
+      .input(z.object({
+        gestorNome: z.string(),
+        colaboradores: z.array(z.object({
+          nome: z.string(),
+          loja: z.string(),
+        })),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        return db.setFeriasVolantesMarcados(input.gestorNome, ctx.user.id, input.colaboradores);
+      }),
+
     // Exportar férias aprovadas como ficheiro .ics (iCalendar) para Outlook
     exportarICS: protectedProcedure
       .input(z.object({

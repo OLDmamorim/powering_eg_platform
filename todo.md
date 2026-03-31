@@ -1260,3 +1260,12 @@
 - [x] Usar apenas primeiro e último nome nos eventos (ex: "Vania Oliveira" em vez de "Vania Sofia Oliveira")
 - [x] Adicionar cores/categorias diferentes por loja nos eventos do Outlook
 - [x] Guardar checkpoint
+
+## Fixar Volantes no Calendário de Férias
+- [x] Analisar botão "fixar volantes" existente e vista do calendário
+- [x] Criar tabela/campo na BD para guardar quais colaboradores são volantes (por gestor/upload)
+- [x] Criar endpoints backend para listar e atualizar volantes
+- [x] Implementar diálogo de seleção: ao clicar "fixar volantes", abrir lista de colaboradores do gestor
+- [x] Destacar volantes visualmente no calendário de férias (cor/ícone diferente)
+- [x] Destacar volantes na exportação Excel
+- [x] Guardar checkpoint

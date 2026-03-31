@@ -208,16 +208,100 @@ export default function Ferias() {
     });
   }, []);
 
-  // Query para obter nomes dos volantes da DB
+  // Query para obter nomes dos volantes da DB (tabela volantes)
   const { data: volanteNames } = trpc.ferias.getVolanteNames.useQuery();
 
   // Ref para enrichedData (usado antes da declaração)
   const enrichedDataRef = useRef<any[]>([]);
 
-  // Fixar todos os volantes de uma vez
+  // Estado para diálogo de seleção de volantes
+  const [showVolantesDialog, setShowVolantesDialog] = useState(false);
+  const [volantesSeleccionados, setVolantesSeleccionados] = useState<Set<string>>(new Set());
+  const [volantesSearchTerm, setVolantesSearchTerm] = useState('');
+
+  // Determinar o gestor ativo para queries de volantes marcados
+  const gestorAtivoNome = useMemo(() => {
+    if (gestorFilter !== 'all') return gestorFilter;
+    return user?.name || '';
+  }, [gestorFilter, user]);
+
+  // Query de volantes marcados na BD
+  const volantesMarQuery = trpc.ferias.getVolantesMarcados.useQuery(
+    { gestorNome: gestorAtivoNome },
+    { enabled: !!gestorAtivoNome }
+  );
+  const setVolantesMarcadosMut = trpc.ferias.setVolantesMarcados.useMutation({
+    onSuccess: (result) => {
+      volantesMarQuery.refetch();
+      toast.success(`${result.length} volante(s) guardado(s)`);
+      setShowVolantesDialog(false);
+      // Fixar automaticamente no topo
+      const enriched = enrichedDataRef.current;
+      if (enriched.length > 0 && result.length > 0) {
+        const nomes = new Set(result.map((v: any) => v.nomeColaborador.toUpperCase().trim()));
+        const matchedNums = new Set<string>();
+        for (const emp of enriched) {
+          if (nomes.has(emp.name.toUpperCase().trim())) matchedNums.add(emp.num);
+        }
+        setPinnedEmployees(matchedNums);
+      }
+    },
+    onError: (err) => toast.error(err.message || 'Erro ao guardar volantes'),
+  });
+
+  // Nomes dos volantes marcados (para destaque no calendário)
+  const volantesNomesMarcados = useMemo(() => {
+    if (!volantesMarQuery.data) return new Set<string>();
+    return new Set(volantesMarQuery.data.map((v: any) => v.nomeColaborador.toUpperCase().trim()));
+  }, [volantesMarQuery.data]);
+
+  // Set de números de colaboradores que são volantes (para destaque)
+  const volantesNumSet = useMemo(() => {
+    if (volantesNomesMarcados.size === 0) return new Set<string>();
+    const enriched = enrichedDataRef.current;
+    const nums = new Set<string>();
+    for (const emp of enriched) {
+      if (volantesNomesMarcados.has(emp.name.toUpperCase().trim())) nums.add(emp.num);
+    }
+    return nums;
+  }, [volantesNomesMarcados, data]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Abrir diálogo de seleção de volantes
+  const abrirDialogoVolantes = useCallback(() => {
+    const enriched = enrichedDataRef.current;
+    if (!enriched || enriched.length === 0) {
+      toast.error('Carregue primeiro os dados de férias');
+      return;
+    }
+    // Pré-selecionar os que já estão marcados
+    const preSelected = new Set<string>();
+    for (const emp of enriched) {
+      if (volantesNomesMarcados.has(emp.name.toUpperCase().trim())) {
+        preSelected.add(`${emp.name}|||${emp.store}`);
+      }
+    }
+    setVolantesSeleccionados(preSelected);
+    setVolantesSearchTerm('');
+    setShowVolantesDialog(true);
+  }, [volantesNomesMarcados]);
+
+  // Guardar volantes seleccionados
+  const guardarVolantesSelecionados = useCallback(() => {
+    const colaboradores = Array.from(volantesSeleccionados).map(key => {
+      const [nome, loja] = key.split('|||');
+      return { nome, loja };
+    });
+    setVolantesMarcadosMut.mutate({
+      gestorNome: gestorAtivoNome,
+      colaboradores,
+    });
+  }, [volantesSeleccionados, gestorAtivoNome, setVolantesMarcadosMut]);
+
+  // Fixar todos os volantes de uma vez (usa os marcados da BD)
   const fixarTodosVolantes = useCallback(() => {
-    if (!volanteNames || volanteNames.length === 0) {
-      toast.error('Nenhum volante encontrado na base de dados');
+    if (volantesNomesMarcados.size === 0) {
+      // Se não há marcados, abrir diálogo
+      abrirDialogoVolantes();
       return;
     }
     const enriched = enrichedDataRef.current;
@@ -225,19 +309,14 @@ export default function Ferias() {
       toast.error('Carregue primeiro os dados de férias');
       return;
     }
-    // Cruzar nomes dos volantes com os colaboradores do Excel
     const matchedNums = new Set<string>();
     for (const emp of enriched) {
-      const empName = emp.name.toUpperCase().trim();
-      for (const vName of volanteNames) {
-        if (empName === vName || empName.includes(vName) || vName.includes(empName)) {
-          matchedNums.add(emp.num);
-          break;
-        }
+      if (volantesNomesMarcados.has(emp.name.toUpperCase().trim())) {
+        matchedNums.add(emp.num);
       }
     }
     if (matchedNums.size === 0) {
-      toast.info('Nenhum volante encontrado nos dados de férias carregados');
+      toast.info('Nenhum volante encontrado nos dados carregados');
       return;
     }
     setPinnedEmployees(prev => {
@@ -246,7 +325,7 @@ export default function Ferias() {
       return next;
     });
     toast.success(`${matchedNums.size} volante(s) fixado(s) no topo`);
-  }, [volanteNames]);
+  }, [volantesNomesMarcados, abrirDialogoVolantes]);
 
   // Desafixar todos
   const desafixarTodos = useCallback(() => {
@@ -407,17 +486,35 @@ export default function Ferias() {
   // Export Excel
   const exportExcel = useCallback(() => {
     if (!filteredData.length) return;
-    const rows = filteredData.map(e => ({
-      'Nome': e.name, 'Loja': e.store, 'Gestor': e.gestor,
-      'Dias Aprovados': e.approved, 'Dias Não Aprovados': e.rejected,
-      'Faltas': e.absent, 'Feriados': e.holidays, 'Total Marcados': e.total,
-    }));
+    const rows = filteredData.map(e => {
+      const isVol = volantesNomesMarcados.has(e.name.toUpperCase().trim());
+      return {
+        'Nome': e.name, 'Loja': e.store, 'Gestor': e.gestor,
+        'Volante': isVol ? 'Sim' : '',
+        'Dias Aprovados': e.approved, 'Dias Não Aprovados': e.rejected,
+        'Faltas': e.absent, 'Feriados': e.holidays, 'Total Marcados': e.total,
+      };
+    });
     const ws = XLSX.utils.json_to_sheet(rows);
+    // Destacar linhas de volantes com fundo laranja
+    const range = XLSX.utils.decode_range(ws['!ref'] || 'A1');
+    for (let r = 1; r <= range.e.r; r++) {
+      const volanteCell = ws[XLSX.utils.encode_cell({ r, c: 3 })];
+      if (volanteCell && volanteCell.v === 'Sim') {
+        for (let c = range.s.c; c <= range.e.c; c++) {
+          const addr = XLSX.utils.encode_cell({ r, c });
+          if (ws[addr]) {
+            ws[addr].s = { fill: { fgColor: { rgb: 'FFF3E0' } }, font: { bold: true, color: { rgb: 'E65100' } } };
+          }
+        }
+      }
+    }
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Férias');
     XLSX.writeFile(wb, `ferias_${ano}_export.xlsx`);
-    toast.success('Ficheiro Excel exportado.');
-  }, [filteredData, ano]);
+    const volCount = rows.filter(r => r['Volante'] === 'Sim').length;
+    toast.success(`Ficheiro Excel exportado. ${volCount > 0 ? `${volCount} volante(s) destacado(s).` : ''}`);
+  }, [filteredData, ano, volantesNomesMarcados]);
 
   // Scroll to today
   const scrollToToday = useCallback(() => {
@@ -600,8 +697,16 @@ export default function Ferias() {
                     <Pin className="h-3 w-3 mr-1" />{pinnedEmployees.size} fixados
                   </Badge>
                 )}
+                {volantesNomesMarcados.size > 0 && (
+                  <Badge variant="outline" className="text-xs border-orange-400 text-orange-600">
+                    <UserCheck className="h-3 w-3 mr-1" />{volantesNomesMarcados.size} volantes
+                  </Badge>
+                )}
                 <Button variant="outline" size="sm" className="h-8 text-xs gap-1 border-amber-300 text-amber-700 hover:bg-amber-50" onClick={fixarTodosVolantes} title="Fixar todos os volantes no topo">
                   <UserCheck className="h-3.5 w-3.5" /> Fixar Volantes
+                </Button>
+                <Button variant="outline" size="sm" className="h-8 text-xs gap-1 border-orange-300 text-orange-700 hover:bg-orange-50" onClick={abrirDialogoVolantes} title="Selecionar quem são os volantes">
+                  <Users className="h-3.5 w-3.5" /> Editar Volantes
                 </Button>
                 {pinnedEmployees.size > 0 && (
                   <Button variant="ghost" size="sm" className="h-8 text-xs text-slate-500 hover:text-red-500" onClick={desafixarTodos} title="Desafixar todos">
@@ -746,7 +851,7 @@ export default function Ferias() {
 
             {/* CALENDAR TAB */}
             <TabsContent value="cal">
-              <CalendarTab data={storeData} pinnedData={pinnedData} months={visibleMonths} statusFilter={statusFilter} ano={ano} TM={TM} TD={TD} calRef={calRef} scrollToToday={scrollToToday} pinnedEmployees={pinnedEmployees} togglePin={togglePin} />
+              <CalendarTab data={storeData} pinnedData={pinnedData} months={visibleMonths} statusFilter={statusFilter} ano={ano} TM={TM} TD={TD} calRef={calRef} scrollToToday={scrollToToday} pinnedEmployees={pinnedEmployees} togglePin={togglePin} volantesNumSet={volantesNumSet} />
             </TabsContent>
 
             {/* ANALYSIS TAB */}
@@ -777,16 +882,125 @@ export default function Ferias() {
           </div>
         </>
       )}
+
+      {/* DIÁLOGO DE SELEÇÃO DE VOLANTES */}
+      <Dialog open={showVolantesDialog} onOpenChange={setShowVolantesDialog}>
+        <DialogContent className="max-w-2xl max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <UserCheck className="h-5 w-5 text-orange-600" />
+              Selecionar Volantes {gestorAtivoNome !== 'all' ? `(${gestorAtivoNome})` : ''}
+            </DialogTitle>
+            <DialogDescription>
+              Selecione os colaboradores que são volantes. Estes ficarão destacados no calendário e no Excel.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="relative">
+              <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Pesquisar colaborador..."
+                value={volantesSearchTerm}
+                onChange={e => setVolantesSearchTerm(e.target.value)}
+                className="pl-8"
+              />
+            </div>
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <span>{volantesSeleccionados.size} seleccionado(s)</span>
+              <div className="flex gap-2">
+                <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => {
+                  const all = new Set<string>();
+                  enrichedDataRef.current.forEach(emp => {
+                    if (gestorFilter !== 'all') {
+                      const gStores = GESTORES[gestorFilter]?.map(norm) || [];
+                      if (!gStores.includes(norm(emp.store))) return;
+                    }
+                    all.add(`${emp.name}|||${emp.store}`);
+                  });
+                  setVolantesSeleccionados(all);
+                }}>Selecionar Todos</Button>
+                <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setVolantesSeleccionados(new Set())}>Limpar</Button>
+              </div>
+            </div>
+            <div className="overflow-auto max-h-[400px] border rounded-lg">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-10"></TableHead>
+                    <TableHead>Nome</TableHead>
+                    <TableHead>Loja</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {(() => {
+                    let colabs = enrichedDataRef.current || [];
+                    if (gestorFilter !== 'all') {
+                      const gStores = GESTORES[gestorFilter]?.map(norm) || [];
+                      colabs = colabs.filter(e => gStores.includes(norm(e.store)));
+                    }
+                    if (volantesSearchTerm) {
+                      const s = volantesSearchTerm.toLowerCase();
+                      colabs = colabs.filter(e => e.name.toLowerCase().includes(s) || e.store.toLowerCase().includes(s));
+                    }
+                    colabs = [...colabs].sort((a, b) => a.name.localeCompare(b.name, 'pt'));
+                    return colabs.map((emp, i) => {
+                      const key = `${emp.name}|||${emp.store}`;
+                      const isSelected = volantesSeleccionados.has(key);
+                      return (
+                        <TableRow
+                          key={`vol-${i}`}
+                          className={`cursor-pointer ${isSelected ? 'bg-orange-50' : 'hover:bg-slate-50'}`}
+                          onClick={() => {
+                            setVolantesSeleccionados(prev => {
+                              const next = new Set(prev);
+                              if (next.has(key)) next.delete(key);
+                              else next.add(key);
+                              return next;
+                            });
+                          }}
+                        >
+                          <TableCell className="text-center">
+                            <Checkbox checked={isSelected} />
+                          </TableCell>
+                          <TableCell className="font-medium text-sm">
+                            <span className="flex items-center gap-1.5">
+                              {isSelected && <UserCheck className="h-3.5 w-3.5 text-orange-600" />}
+                              {shortName(emp.name)}
+                            </span>
+                          </TableCell>
+                          <TableCell className="text-xs text-muted-foreground">{emp.store}</TableCell>
+                        </TableRow>
+                      );
+                    });
+                  })()}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
+          <DialogFooter className="flex items-center justify-between">
+            <Button variant="outline" onClick={() => setShowVolantesDialog(false)}>Cancelar</Button>
+            <Button
+              className="bg-orange-600 hover:bg-orange-700 gap-1.5"
+              disabled={setVolantesMarcadosMut.isPending}
+              onClick={guardarVolantesSelecionados}
+            >
+              {setVolantesMarcadosMut.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+              Guardar {volantesSeleccionados.size} Volante(s)
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
     </DashboardLayout>
   );
 }
 
 // ─── CALENDAR TAB ───
-function CalendarTab({ data, pinnedData, months, statusFilter, ano, TM, TD, calRef, scrollToToday, pinnedEmployees, togglePin }: {
+function CalendarTab({ data, pinnedData, months, statusFilter, ano, TM, TD, calRef, scrollToToday, pinnedEmployees, togglePin, volantesNumSet }: {
   data: (Employee & EmpStats)[]; pinnedData: (Employee & EmpStats)[]; months: number[]; statusFilter: string; ano: number; TM: number; TD: number;
   calRef: React.RefObject<HTMLDivElement | null>; scrollToToday: () => void;
   pinnedEmployees: Set<string>; togglePin: (num: string) => void;
+  volantesNumSet: Set<string>;
 }) {
   const byStore = useMemo(() => {
     const map: Record<string,(Employee & EmpStats)[]> = {};
@@ -887,14 +1101,17 @@ function CalendarTab({ data, pinnedData, months, statusFilter, ano, TM, TD, calR
                     <td className="sticky z-20" style={{position:'sticky',left:140,background:'#334155',minWidth:80,zIndex:20}}></td>
                     {months.map(m => Array.from({length:DAYS[m]},(_,d)=>d+1).map(d => <td key={`${m}-${d}`} style={{background:'#334155',minWidth:20}}></td>))}
                   </tr>
-                  {byStore.map[store].sort((a,b)=>a.name.localeCompare(b.name,'pt')).map((emp,ri) => (
-                    <tr key={`${emp.num}-${ri}`} className={ri%2===0?'bg-white':'bg-slate-50/50'}>
-                      <td className="sticky z-10 px-1 py-0.5 font-medium text-slate-700 truncate" style={{minWidth:140,maxWidth:140,position:'sticky',left:0,background:ri%2===0?'#ffffff':'#f8fafc',zIndex:10}} title={emp.name}>
+                  {byStore.map[store].sort((a,b)=>a.name.localeCompare(b.name,'pt')).map((emp,ri) => {
+                    const isVolante = volantesNumSet.has(emp.num);
+                    return (
+                    <tr key={`${emp.num}-${ri}`} className={`${ri%2===0?'bg-white':'bg-slate-50/50'} ${isVolante ? 'border-l-[3px] border-l-orange-400' : ''}`}>
+                      <td className="sticky z-10 px-1 py-0.5 font-medium truncate" style={{minWidth:140,maxWidth:140,position:'sticky',left:0,background:isVolante ? (ri%2===0?'#fff7ed':'#fef3e2') : (ri%2===0?'#ffffff':'#f8fafc'),zIndex:10}} title={`${emp.name}${isVolante ? ' (Volante)' : ''}`}>
                         <span className="flex items-center gap-1">
                           <button onClick={() => togglePin(emp.num)} className={`shrink-0 p-0.5 rounded ${pinnedEmployees.has(emp.num) ? 'text-amber-500 bg-amber-100' : 'text-slate-400 hover:text-amber-500 hover:bg-amber-50'}`} title={pinnedEmployees.has(emp.num) ? 'Desafixar' : 'Fixar no topo'}>
                             <Pin className={`h-3.5 w-3.5 ${pinnedEmployees.has(emp.num) ? 'fill-current' : ''}`} />
                           </button>
-                          <span className="truncate">{shortName(emp.name)}</span>
+                          {isVolante && <UserCheck className="h-3 w-3 text-orange-600 shrink-0" />}
+                          <span className={`truncate ${isVolante ? 'text-orange-800 font-semibold' : 'text-slate-700'}`}>{shortName(emp.name)}</span>
                         </span>
                       </td>
                       <td className="sticky z-10 text-center text-[10px] text-slate-400 truncate" style={{minWidth:80,maxWidth:80,position:'sticky',left:140,background:ri%2===0?'#ffffff':'#f8fafc',zIndex:10}} title={emp.store}>
@@ -914,7 +1131,8 @@ function CalendarTab({ data, pinnedData, months, statusFilter, ano, TM, TD, calR
                         })
                       )}
                     </tr>
-                  ))}
+                  );
+                  })}
                 </React.Fragment>
               ))}
             </tbody>

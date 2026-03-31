@@ -1944,3 +1944,18 @@ export const feriasColaboradores = mysqlTable("ferias_colaboradores", {
 });
 export type FeriasColaborador = typeof feriasColaboradores.$inferSelect;
 export type InsertFeriasColaborador = typeof feriasColaboradores.$inferInsert;
+
+/**
+ * Férias Volantes Marcados - Colaboradores marcados como volantes no calendário de férias
+ * Permite que cada gestor marque quais colaboradores são volantes na sua zona
+ */
+export const feriasVolantesMarcados = mysqlTable("ferias_volantes_marcados", {
+  id: int("id").autoincrement().primaryKey(),
+  nomeColaborador: varchar("nomeColaborador", { length: 255 }).notNull(), // Nome do colaborador (do Excel)
+  loja: varchar("loja", { length: 255 }).notNull(), // Loja do colaborador
+  gestorNome: varchar("gestorNome", { length: 255 }).notNull(), // Nome do gestor que marcou
+  marcadoPorUserId: int("marcadoPorUserId").notNull(), // FK para users.id
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type FeriasVolanteMarcado = typeof feriasVolantesMarcados.$inferSelect;
+export type InsertFeriasVolanteMarcado = typeof feriasVolantesMarcados.$inferInsert;
