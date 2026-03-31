@@ -1,0 +1,8 @@
+{
+  "query": "SELECT DISTINCT JSON_UNQUOTE(jt.val) as valor FROM ferias_colaboradores, JSON_TABLE(dias, '$.*' COLUMNS (val VARCHAR(50) PATH '$')) AS jt WHERE uploadId = (SELECT id FROM ferias_uploads ORDER BY id DESC LIMIT 1) LIMIT 20;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT DISTINCT JSON_UNQUOTE(jt.val) as valor FROM ferias_colaboradores, JSON_TABLE(dias, '$.*' COLUMNS (val VARCHAR(50) PATH '$')) AS jt WHERE uploadId = (SELECT id FROM ferias_uploads ORDER BY id DESC LIMIT 1) LIMIT 20;",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1064 (42000) at line 1: You have an error in your SQL syntax; check the manual that corresponds to your TiDB version for the right syntax to use line 1 column 84 near \"(dias, '$.*' COLUMNS (val VARCHAR(50) PATH '$')) AS jt WHERE uploadId = (SELECT id FROM ferias_uploads ORDER BY id DESC LIMIT 1) LIMIT 20\""
+  ]
+}

@@ -440,39 +440,39 @@ export const appRouter = router({
           const nome = (colab as any).nome;
           const loja = (colab as any).loja;
           
-          // Encontrar blocos consecutivos de dias aprovados
-          const diasAprovados: number[] = [];
+          // Encontrar dias aprovados (formato chave: "mês-dia", valor: "approved")
+          // Converter para datas reais
+          const datasAprovadas: Date[] = [];
           for (const [key, val] of Object.entries(dias)) {
-            if (val === 'aprovado') {
-              diasAprovados.push(parseInt(key));
+            if (val === 'approved' || val === 'aprovado') {
+              const parts = key.split('-');
+              if (parts.length === 2) {
+                const mes = parseInt(parts[0]) - 1; // mês é 0-indexed em JS
+                const dia = parseInt(parts[1]);
+                datasAprovadas.push(new Date(ano, mes, dia));
+              }
             }
           }
-          diasAprovados.sort((a, b) => a - b);
+          datasAprovadas.sort((a, b) => a.getTime() - b.getTime());
           
-          if (diasAprovados.length === 0) continue;
+          if (datasAprovadas.length === 0) continue;
           
           // Agrupar em blocos consecutivos
-          const blocos: { inicio: number; fim: number }[] = [];
-          let blocoInicio = diasAprovados[0];
-          let blocoFim = diasAprovados[0];
+          const blocos: { inicio: Date; fim: Date }[] = [];
+          let blocoInicio = datasAprovadas[0];
+          let blocoFim = datasAprovadas[0];
           
-          for (let i = 1; i < diasAprovados.length; i++) {
-            if (diasAprovados[i] === blocoFim + 1) {
-              blocoFim = diasAprovados[i];
+          for (let i = 1; i < datasAprovadas.length; i++) {
+            const diff = (datasAprovadas[i].getTime() - blocoFim.getTime()) / (1000 * 60 * 60 * 24);
+            if (diff === 1) {
+              blocoFim = datasAprovadas[i];
             } else {
               blocos.push({ inicio: blocoInicio, fim: blocoFim });
-              blocoInicio = diasAprovados[i];
-              blocoFim = diasAprovados[i];
+              blocoInicio = datasAprovadas[i];
+              blocoFim = datasAprovadas[i];
             }
           }
           blocos.push({ inicio: blocoInicio, fim: blocoFim });
-          
-          // Converter dia-do-ano para data
-          function diaParaData(diaDoAno: number, anoRef: number): Date {
-            const d = new Date(anoRef, 0, 1);
-            d.setDate(d.getDate() + diaDoAno - 1);
-            return d;
-          }
           
           function formatDate(d: Date): string {
             const y = d.getFullYear();
@@ -483,20 +483,21 @@ export const appRouter = router({
           
           // Criar evento para cada bloco
           for (let b = 0; b < blocos.length; b++) {
-            const dataInicio = diaParaData(blocos[b].inicio, ano);
-            const dataFim = diaParaData(blocos[b].fim + 1, ano); // +1 porque DTEND é exclusivo em all-day events
-            const numDias = blocos[b].fim - blocos[b].inicio + 1;
+            const dataInicio = blocos[b].inicio;
+            const dataFimEvt = new Date(blocos[b].fim);
+            dataFimEvt.setDate(dataFimEvt.getDate() + 1); // +1 porque DTEND é exclusivo em all-day events
+            const numDias = Math.round((blocos[b].fim.getTime() - blocos[b].inicio.getTime()) / (1000 * 60 * 60 * 24)) + 1;
             
             const uid = `ferias-${(colab as any).id}-bloco${b}-${ano}@poweringeg`;
             const summary = `Férias - ${nome}`;
-            const description = `Férias aprovadas de ${nome}\\nLoja: ${loja}\\nDuração: ${numDias} dia(s)\\nPeríodo: ${diaParaData(blocos[b].inicio, ano).toLocaleDateString('pt-PT')} a ${diaParaData(blocos[b].fim, ano).toLocaleDateString('pt-PT')}`;
+            const description = `Férias aprovadas de ${nome}\\nLoja: ${loja}\\nDuração: ${numDias} dia(s)\\nPeríodo: ${blocos[b].inicio.toLocaleDateString('pt-PT')} a ${blocos[b].fim.toLocaleDateString('pt-PT')}`;
             
             events.push([
               'BEGIN:VEVENT',
               `UID:${uid}`,
               `DTSTAMP:${dtstamp}`,
               `DTSTART;VALUE=DATE:${formatDate(dataInicio)}`,
-              `DTEND;VALUE=DATE:${formatDate(dataFim)}`,
+              `DTEND;VALUE=DATE:${formatDate(dataFimEvt)}`,
               `SUMMARY:${summary}`,
               `DESCRIPTION:${description}`,
               'TRANSP:TRANSPARENT',

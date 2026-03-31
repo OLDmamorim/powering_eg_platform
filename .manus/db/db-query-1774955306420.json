@@ -1,0 +1,24 @@
+{
+  "query": "SELECT id, nome, loja, SUBSTRING(CAST(dias AS CHAR), 1, 500) as dias_sample, totalAprovados FROM ferias_colaboradores WHERE uploadId = (SELECT id FROM ferias_uploads ORDER BY id DESC LIMIT 1) AND totalAprovados > 0 LIMIT 2;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT id, nome, loja, SUBSTRING(CAST(dias AS CHAR), 1, 500) as dias_sample, totalAprovados FROM ferias_colaboradores WHERE uploadId = (SELECT id FROM ferias_uploads ORDER BY id DESC LIMIT 1) AND totalAprovados > 0 LIMIT 2;",
+  "rows": [
+    {
+      "id": "30001",
+      "nome": "RODRIGO AZEVEDO",
+      "loja": "ALGÉS",
+      "dias_sample": "{\"1-1\": \"holiday\", \"1-10\": \"weekend\", \"1-11\": \"weekend\", \"1-17\": \"weekend\", \"1-18\": \"weekend\", \"1-24\": \"weekend\", \"1-25\": \"weekend\", \"1-3\": \"weekend\", \"1-31\": \"weekend\", \"1-4\": \"weekend\", \"10-10\": \"weekend\", \"10-11\": \"weekend\", \"10-17\": \"weekend\", \"10-18\": \"weekend\", \"10-24\": \"weekend\", \"10-25\": \"weekend\", \"10-3\": \"weekend\", \"10-31\": \"weekend\", \"10-4\": \"weekend\", \"10-5\": \"holiday\", \"11-1\": \"weekend\", \"11-14\": \"weekend\", \"11-15\": \"weekend\", \"11-21\": \"weekend\", \"11-22\": \"weekend\", \"11-28\": \"weeken",
+      "totalAprovados": "5"
+    },
+    {
+      "id": "30002",
+      "nome": "BRUNA SOFIA ALMEIDA VICENTE",
+      "loja": "ALMADA",
+      "dias_sample": "{\"1-1\": \"holiday\", \"1-10\": \"weekend\", \"1-11\": \"weekend\", \"1-17\": \"weekend\", \"1-18\": \"weekend\", \"1-19\": \"absent\", \"1-20\": \"absent\", \"1-21\": \"absent\", \"1-22\": \"absent\", \"1-23\": \"absent\", \"1-24\": \"weekend\", \"1-25\": \"weekend\", \"1-3\": \"weekend\", \"1-31\": \"weekend\", \"1-4\": \"weekend\", \"10-10\": \"weekend\", \"10-11\": \"weekend\", \"10-17\": \"weekend\", \"10-18\": \"weekend\", \"10-24\": \"weekend\", \"10-25\": \"weekend\", \"10-3\": \"weekend\", \"10-31\": \"weekend\", \"10-4\": \"weekend\", \"10-5\": \"holiday\", \"11-1\": \"weekend\", \"11-14",
+      "totalAprovados": "7"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tnome\tloja\tdias_sample\ttotalAprovados\n30001\tRODRIGO AZEVEDO\tALGÉS\t{\"1-1\": \"holiday\", \"1-10\": \"weekend\", \"1-11\": \"weekend\", \"1-17\": \"weekend\", \"1-18\": \"weekend\", \"1-24\": \"weekend\", \"1-25\": \"weekend\", \"1-3\": \"weekend\", \"1-31\": \"weekend\", \"1-4\": \"weekend\", \"10-10\": \"weekend\", \"10-11\": \"weekend\", \"10-17\": \"weekend\", \"10-18\": \"weekend\", \"10-24\": \"weekend\", \"10-25\": \"weekend\", \"10-3\": \"weekend\", \"10-31\": \"weekend\", \"10-4\": \"weekend\", \"10-5\": \"holiday\", \"11-1\": \"weekend\", \"11-14\": \"weekend\", \"11-15\": \"weekend\", \"11-21\": \"weekend\", \"11-22\": \"weekend\", \"11-28\": \"weeken\t5\n30002\tBRUNA SOFIA ALMEIDA VICENTE\tALMADA\t{\"1-1\": \"holiday\", \"1-10\": \"weekend\", \"1-11\": \"weekend\", \"1-17\": \"weekend\", \"1-18\": \"weekend\", \"1-19\": \"absent\", \"1-20\": \"absent\", \"1-21\": \"absent\", \"1-22\": \"absent\", \"1-23\": \"absent\", \"1-24\": \"weekend\", \"1-25\": \"weekend\", \"1-3\": \"weekend\", \"1-31\": \"weekend\", \"1-4\": \"weekend\", \"10-10\": \"weekend\", \"10-11\": \"weekend\", \"10-17\": \"weekend\", \"10-18\": \"weekend\", \"10-24\": \"weekend\", \"10-25\": \"weekend\", \"10-3\": \"weekend\", \"10-31\": \"weekend\", \"10-4\": \"weekend\", \"10-5\": \"holiday\", \"11-1\": \"weekend\", \"11-14\t7\n",
+  "stderr": "",
+  "execution_time_ms": 59
+}

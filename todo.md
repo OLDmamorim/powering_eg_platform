@@ -1243,3 +1243,11 @@
 - [x] Analisar dados disponíveis (serviços por mês, objetivo)
 - [x] Adicionar gráfico de Evolução de Serviços (barras serviços vs objetivo, verde quando atinge)
 - [x] Guardar checkpoint
+
+## Bug: Exportação .ics Férias Vazia (sem eventos)
+- [x] Ficheiro .ics gerado só com cabeçalho VCALENDAR, sem VEVENT
+- [x] Causa: formato chave era "mês-dia" (ex: "3-10") mas código esperava dia-do-ano (número)
+- [x] Causa: valor era "approved" (inglês) mas código comparava com "aprovado" (português)
+- [x] Corrigido: parsing de chaves mês-dia para Date, aceita 'approved' e 'aprovado'
+- [x] Blocos consecutivos agora calculados por diferença de datas reais
+- [ ] Guardar checkpoint
