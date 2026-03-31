@@ -1522,9 +1522,9 @@ export default function HistoricoLoja() {
 
             {/* Gráfico de Evolução de Serviços */}
             {historyData.dadosMensais?.resultados && historyData.dadosMensais.resultados.length > 0 && (
-              <Card className="border-blue-200">
+              <Card className="border-orange-200">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-blue-900">
+                  <CardTitle className="flex items-center gap-2 text-orange-900">
                     <BarChart3 className="h-5 w-5" />
                     Evolução de Serviços
                   </CardTitle>
@@ -1537,11 +1537,11 @@ export default function HistoricoLoja() {
                         <XAxis 
                           dataKey="mes" 
                           tick={{ fontSize: 12 }}
-                          stroke="#3b82f6"
+                          stroke="#ea580c"
                         />
                         <YAxis 
                           tick={{ fontSize: 12 }}
-                          stroke="#3b82f6"
+                          stroke="#ea580c"
                           domain={[0, 'auto']}
                         />
                         <Tooltip 
@@ -1549,32 +1549,32 @@ export default function HistoricoLoja() {
                             value, 
                             name === 'servicos' ? 'Serviços Realizados' : 'Objetivo'
                           ]}
-                          contentStyle={{ backgroundColor: '#f8fafc', borderColor: '#3b82f6' }}
+                          contentStyle={{ backgroundColor: '#fff7ed', borderColor: '#ea580c' }}
                         />
                         <Legend />
                         <Line 
                           type="monotone" 
                           dataKey="servicos" 
                           name="Serviços Realizados"
-                          stroke="#3b82f6" 
+                          stroke="#ea580c" 
                           strokeWidth={3}
-                          dot={{ fill: '#3b82f6', strokeWidth: 2, r: 5 }}
+                          dot={{ fill: '#ea580c', strokeWidth: 2, r: 5 }}
                           activeDot={{ r: 8 }}
                         />
                         <Line 
                           type="monotone" 
                           dataKey="objetivo" 
                           name="Objetivo"
-                          stroke="#10b981" 
+                          stroke="#dc2626" 
                           strokeWidth={2}
                           strokeDasharray="5 5"
-                          dot={{ fill: '#10b981', r: 3 }}
+                          dot={{ fill: '#dc2626', r: 3 }}
                         />
                       </LineChart>
                     </ResponsiveContainer>
                   </div>
                   <p className="text-xs text-center text-muted-foreground mt-2">
-                    A linha verde tracejada indica o objetivo mensal de serviços
+                    A linha vermelha tracejada indica o objetivo mensal de serviços
                   </p>
                 </CardContent>
               </Card>
