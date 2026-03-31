@@ -489,7 +489,7 @@ export const appRouter = router({
             const numDias = Math.round((blocos[b].fim.getTime() - blocos[b].inicio.getTime()) / (1000 * 60 * 60 * 24)) + 1;
             
             const uid = `ferias-${(colab as any).id}-bloco${b}-${ano}@poweringeg`;
-            const summary = `Férias - ${nome}`;
+            const summary = loja ? `Férias - ${nome} (${loja})` : `Férias - ${nome}`;
             const description = `Férias aprovadas de ${nome}\\nLoja: ${loja}\\nDuração: ${numDias} dia(s)\\nPeríodo: ${blocos[b].inicio.toLocaleDateString('pt-PT')} a ${blocos[b].fim.toLocaleDateString('pt-PT')}`;
             
             events.push([

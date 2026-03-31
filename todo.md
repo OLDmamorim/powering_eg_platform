@@ -1250,4 +1250,8 @@
 - [x] Causa: valor era "approved" (inglês) mas código comparava com "aprovado" (português)
 - [x] Corrigido: parsing de chaves mês-dia para Date, aceita 'approved' e 'aprovado'
 - [x] Blocos consecutivos agora calculados por diferença de datas reais
+- [x] Guardar checkpoint
+
+## Exportação .ics - Adicionar Nome da Loja
+- [x] Incluir nome da loja no título do evento (ex: "Férias - Tiago Costa (Barcelos)")
 - [ ] Guardar checkpoint
