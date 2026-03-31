@@ -1959,3 +1959,34 @@ export const feriasVolantesMarcados = mysqlTable("ferias_volantes_marcados", {
 });
 export type FeriasVolanteMarcado = typeof feriasVolantesMarcados.$inferSelect;
 export type InsertFeriasVolanteMarcado = typeof feriasVolantesMarcados.$inferInsert;
+
+
+/**
+ * Chatbot Sessões - Sessões de conversa com o chatbot IA
+ * Cada sessão agrupa um conjunto de mensagens de uma conversa
+ */
+export const chatbotSessoes = mysqlTable("chatbot_sessoes", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(), // FK para users.id (gestor) ou 0 para portal loja
+  portalToken: varchar("portalToken", { length: 255 }), // Token do portal da loja (se aplicável)
+  portalLoja: varchar("portalLoja", { length: 255 }), // Nome da loja (se portal)
+  titulo: varchar("titulo", { length: 500 }), // Título da sessão (primeira pergunta resumida)
+  totalMensagens: int("totalMensagens").default(0),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type ChatbotSessao = typeof chatbotSessoes.$inferSelect;
+export type InsertChatbotSessao = typeof chatbotSessoes.$inferInsert;
+
+/**
+ * Chatbot Mensagens - Mensagens individuais dentro de uma sessão
+ */
+export const chatbotMensagens = mysqlTable("chatbot_mensagens", {
+  id: int("id").autoincrement().primaryKey(),
+  sessaoId: int("sessaoId").notNull(), // FK para chatbot_sessoes.id
+  role: mysqlEnum("role", ["user", "assistant"]).notNull(),
+  content: mediumtext("content").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type ChatbotMensagem = typeof chatbotMensagens.$inferSelect;
+export type InsertChatbotMensagem = typeof chatbotMensagens.$inferInsert;

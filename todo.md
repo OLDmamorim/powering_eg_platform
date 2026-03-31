@@ -1291,3 +1291,10 @@
 - [x] Atualizar chatbotService.ts (contexto pessoal + contexto nacional)
 - [x] Atualizar chatbotServicePortais.ts (portal da loja)
 - [x] Guardar checkpoint
+
+## Histórico de Conversas do Chatbot
+- [x] Criar tabelas na BD para sessões e mensagens do chatbot
+- [x] Criar endpoints backend para guardar mensagens e listar sessões/conversas
+- [x] Implementar UI: lista de conversas anteriores, carregar histórico, nova conversa
+- [ ] Aplicar ao chatbot do portal da loja (futuro)
+- [x] Guardar checkpoint

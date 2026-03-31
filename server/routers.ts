@@ -8864,7 +8864,7 @@ IMPORTANTE:
   
   // ==================== CHATBOT IA ====================
   chatbot: router({
-    // Processar pergunta do utilizador
+    // Processar pergunta do utilizador (com persistência de histórico)
     pergunta: protectedProcedure
       .input(z.object({
         pergunta: z.string().min(1),
@@ -8872,15 +8872,57 @@ IMPORTANTE:
           role: z.enum(["user", "assistant"]),
           content: z.string(),
         })).optional(),
+        sessaoId: z.number().optional(), // ID da sessão existente (null = nova sessão)
       }))
       .mutation(async ({ input, ctx }) => {
+        let sessaoId = input.sessaoId;
+        
+        // Se não há sessão, criar uma nova
+        if (!sessaoId) {
+          try {
+            sessaoId = await db.criarSessaoChatbot({
+              userId: ctx.user.id,
+              titulo: input.pergunta.substring(0, 100),
+            });
+          } catch (e) {
+            console.error('[Chatbot] Erro ao criar sessão:', e);
+          }
+        }
+        
+        // Guardar mensagem do utilizador
+        if (sessaoId) {
+          try {
+            await db.guardarMensagemChatbot({
+              sessaoId,
+              role: 'user',
+              content: input.pergunta,
+            });
+          } catch (e) {
+            console.error('[Chatbot] Erro ao guardar mensagem user:', e);
+          }
+        }
+        
         const resultado = await processarPergunta(
           input.pergunta,
           input.historico || [],
           ctx.user.id,
           ctx.user.role
         );
-        return resultado;
+        
+        // Guardar resposta do assistente
+        if (sessaoId) {
+          try {
+            await db.guardarMensagemChatbot({
+              sessaoId,
+              role: 'assistant',
+              content: resultado.resposta,
+            });
+          } catch (e) {
+            console.error('[Chatbot] Erro ao guardar mensagem assistant:', e);
+          }
+        }
+        
+        return { ...resultado, sessaoId };
       }),
     
     // Sugestões de perguntas para o chatbot
@@ -8888,6 +8930,26 @@ IMPORTANTE:
       .input(z.object({ language: z.string().optional() }).optional())
       .query(async ({ input }) => {
         return await getSugestoesPergunta(input?.language || 'pt');
+      }),
+    
+    // Listar sessões de conversa do utilizador
+    listarSessoes: protectedProcedure
+      .query(async ({ ctx }) => {
+        return await db.listarSessoesChatbot(ctx.user.id);
+      }),
+    
+    // Obter mensagens de uma sessão
+    obterSessao: protectedProcedure
+      .input(z.object({ sessaoId: z.number() }))
+      .query(async ({ input }) => {
+        return await db.obterMensagensSessao(input.sessaoId);
+      }),
+    
+    // Eliminar uma sessão
+    eliminarSessao: protectedProcedure
+      .input(z.object({ sessaoId: z.number() }))
+      .mutation(async ({ input, ctx }) => {
+        return await db.eliminarSessaoChatbot(input.sessaoId, ctx.user.id);
       }),
   }),
   

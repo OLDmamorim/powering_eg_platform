@@ -204,7 +204,13 @@ import {
   InsertReuniaoTipo,
   reunioesLivres,
   ReuniaoLivre,
-  InsertReuniaoLivre
+  InsertReuniaoLivre,
+  chatbotSessoes,
+  ChatbotSessao,
+  InsertChatbotSessao,
+  chatbotMensagens,
+  ChatbotMensagem,
+  InsertChatbotMensagem
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -14095,4 +14101,129 @@ export async function eliminarReuniaoLivre(id: number, userId: number): Promise<
   const db = await getDb();
   if (!db) return;
   await db.delete(reunioesLivres).where(and(eq(reunioesLivres.id, id), eq(reunioesLivres.userId, userId)));
+}
+
+
+// ==================== CHATBOT HISTÓRICO ====================
+
+/**
+ * Criar uma nova sessão de chatbot
+ */
+export async function criarSessaoChatbot(data: {
+  userId: number;
+  titulo: string;
+  portalToken?: string;
+  portalLoja?: string;
+}): Promise<number> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.insert(chatbotSessoes).values({
+    userId: data.userId,
+    titulo: data.titulo.substring(0, 500),
+    portalToken: data.portalToken || null,
+    portalLoja: data.portalLoja || null,
+    totalMensagens: 0,
+  });
+  
+  return (result as any)[0].insertId;
+}
+
+/**
+ * Guardar uma mensagem numa sessão
+ */
+export async function guardarMensagemChatbot(data: {
+  sessaoId: number;
+  role: 'user' | 'assistant';
+  content: string;
+}): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.insert(chatbotMensagens).values({
+    sessaoId: data.sessaoId,
+    role: data.role,
+    content: data.content,
+  });
+  
+  // Atualizar contador de mensagens na sessão
+  await db.update(chatbotSessoes)
+    .set({ totalMensagens: sql`totalMensagens + 1` })
+    .where(eq(chatbotSessoes.id, data.sessaoId));
+}
+
+/**
+ * Listar sessões de chatbot de um utilizador
+ */
+export async function listarSessoesChatbot(userId: number, limit = 50): Promise<ChatbotSessao[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.select()
+    .from(chatbotSessoes)
+    .where(eq(chatbotSessoes.userId, userId))
+    .orderBy(desc(chatbotSessoes.updatedAt))
+    .limit(limit);
+}
+
+/**
+ * Listar sessões de chatbot de um portal de loja
+ */
+export async function listarSessoesChatbotPortal(portalToken: string, limit = 50): Promise<ChatbotSessao[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.select()
+    .from(chatbotSessoes)
+    .where(eq(chatbotSessoes.portalToken, portalToken))
+    .orderBy(desc(chatbotSessoes.updatedAt))
+    .limit(limit);
+}
+
+/**
+ * Obter mensagens de uma sessão
+ */
+export async function obterMensagensSessao(sessaoId: number): Promise<ChatbotMensagem[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.select()
+    .from(chatbotMensagens)
+    .where(eq(chatbotMensagens.sessaoId, sessaoId))
+    .orderBy(chatbotMensagens.createdAt);
+}
+
+/**
+ * Eliminar uma sessão e as suas mensagens
+ */
+export async function eliminarSessaoChatbot(sessaoId: number, userId: number): Promise<boolean> {
+  const db = await getDb();
+  if (!db) return false;
+  
+  // Verificar que a sessão pertence ao utilizador
+  const sessao = await db.select()
+    .from(chatbotSessoes)
+    .where(and(eq(chatbotSessoes.id, sessaoId), eq(chatbotSessoes.userId, userId)))
+    .limit(1);
+  
+  if (sessao.length === 0) return false;
+  
+  // Eliminar mensagens primeiro
+  await db.delete(chatbotMensagens).where(eq(chatbotMensagens.sessaoId, sessaoId));
+  // Eliminar sessão
+  await db.delete(chatbotSessoes).where(eq(chatbotSessoes.id, sessaoId));
+  
+  return true;
+}
+
+/**
+ * Atualizar título de uma sessão
+ */
+export async function atualizarTituloSessao(sessaoId: number, titulo: string): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  
+  await db.update(chatbotSessoes)
+    .set({ titulo: titulo.substring(0, 500) })
+    .where(eq(chatbotSessoes.id, sessaoId));
 }

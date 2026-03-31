@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
@@ -18,7 +18,13 @@ import {
   MessageSquare,
   Lightbulb,
   HelpCircle,
-  Mic
+  Mic,
+  Plus,
+  History,
+  Trash2,
+  ChevronLeft,
+  Clock,
+  X
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Streamdown } from 'streamdown';
@@ -35,18 +41,20 @@ export default function AssistenteIA() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [sessaoAtualId, setSessaoAtualId] = useState<number | null>(null);
+  const [showHistorico, setShowHistorico] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   
   const chatMutation = trpc.chatbot.pergunta.useMutation();
   const { data: sugestoes, isLoading: sugestoesLoading, refetch: refetchSugestoes } = trpc.chatbot.sugestoes.useQuery({ language });
+  const { data: sessoes, isLoading: sessoesLoading, refetch: refetchSessoes } = trpc.chatbot.listarSessoes.useQuery();
+  const eliminarSessaoMutation = trpc.chatbot.eliminarSessao.useMutation();
   
   // Auto-scroll para a última mensagem
   useEffect(() => {
     if (scrollRef.current) {
-      // O ScrollArea do Radix usa um viewport interno para o scroll
       const viewport = scrollRef.current.querySelector('[data-slot="scroll-area-viewport"]') as HTMLDivElement;
       if (viewport) {
-        // Usar requestAnimationFrame para garantir que o DOM foi atualizado
         requestAnimationFrame(() => {
           viewport.scrollTo({
             top: viewport.scrollHeight,
@@ -57,7 +65,7 @@ export default function AssistenteIA() {
     }
   }, [messages, isLoading]);
 
-  // Scroll adicional quando o conteúdo da última mensagem muda (para respostas longas)
+  // Scroll adicional quando o conteúdo da última mensagem muda
   const lastMessageContent = messages[messages.length - 1]?.content;
   useEffect(() => {
     if (lastMessageContent && scrollRef.current) {
@@ -94,8 +102,16 @@ export default function AssistenteIA() {
       
       const resultado = await chatMutation.mutateAsync({
         pergunta,
-        historico
+        historico,
+        sessaoId: sessaoAtualId || undefined,
       });
+      
+      // Se é uma nova sessão, guardar o ID
+      if (resultado.sessaoId && !sessaoAtualId) {
+        setSessaoAtualId(resultado.sessaoId);
+        // Atualizar lista de sessões
+        refetchSessoes();
+      }
       
       const novaMensagemBot: Message = {
         role: 'assistant',
@@ -121,20 +137,80 @@ export default function AssistenteIA() {
     enviarPergunta(input);
   };
 
-  // Handler para transcrição de voz
   const handleVoiceTranscription = (transcription: string) => {
-    // Enviar automaticamente a transcrição como pergunta
     enviarPergunta(transcription);
   };
   
-  const limparConversa = () => {
+  const novaConversa = () => {
     setMessages([]);
+    setSessaoAtualId(null);
+    setShowHistorico(false);
   };
+  
+  const carregarSessao = async (sessaoId: number) => {
+    try {
+      // Usar fetch direto para obter mensagens da sessão
+      const utils = trpc.useUtils();
+      const mensagens = await utils.chatbot.obterSessao.fetch({ sessaoId });
+      
+      if (mensagens && mensagens.length > 0) {
+        const msgs: Message[] = mensagens.map((m: any) => ({
+          role: m.role as 'user' | 'assistant',
+          content: m.content,
+          timestamp: new Date(m.createdAt),
+        }));
+        setMessages(msgs);
+        setSessaoAtualId(sessaoId);
+        setShowHistorico(false);
+      }
+    } catch (error) {
+      toast.error('Erro ao carregar conversa');
+    }
+  };
+  
+  const eliminarSessao = async (sessaoId: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      await eliminarSessaoMutation.mutateAsync({ sessaoId });
+      refetchSessoes();
+      // Se a sessão eliminada é a atual, limpar
+      if (sessaoId === sessaoAtualId) {
+        novaConversa();
+      }
+      toast.success('Conversa eliminada');
+    } catch (error) {
+      toast.error('Erro ao eliminar conversa');
+    }
+  };
+  
+  const formatarData = (data: Date | string) => {
+    const d = new Date(data);
+    const agora = new Date();
+    const diff = agora.getTime() - d.getTime();
+    const dias = Math.floor(diff / (1000 * 60 * 60 * 24));
+    
+    if (dias === 0) return 'Hoje';
+    if (dias === 1) return 'Ontem';
+    if (dias < 7) return `Há ${dias} dias`;
+    return d.toLocaleDateString('pt-PT', { day: '2-digit', month: 'short' });
+  };
+
+  // Agrupar sessões por data
+  const sessoesAgrupadas = useMemo(() => {
+    if (!sessoes) return {};
+    const grupos: Record<string, typeof sessoes> = {};
+    sessoes.forEach((s) => {
+      const label = formatarData(s.updatedAt);
+      if (!grupos[label]) grupos[label] = [];
+      grupos[label].push(s);
+    });
+    return grupos;
+  }, [sessoes]);
   
   return (
     <DashboardLayout>
       <div className="h-[calc(100vh-8rem)] md:h-[calc(100vh-6rem)] flex flex-col gap-3 md:gap-4 overflow-hidden">
-        {/* Header - Mobile optimized */}
+        {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-0 flex-shrink-0">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-primary/10 rounded-lg">
@@ -151,6 +227,18 @@ export default function AssistenteIA() {
             <Button 
               variant="outline" 
               size="sm"
+              onClick={() => setShowHistorico(!showHistorico)}
+              className="text-xs md:text-sm"
+            >
+              <History className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" />
+              <span className="hidden sm:inline">Histórico</span>
+              {sessoes && sessoes.length > 0 && (
+                <Badge variant="secondary" className="ml-1 text-[10px] px-1.5 py-0">{sessoes.length}</Badge>
+              )}
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm"
               onClick={() => refetchSugestoes()}
               className="text-xs md:text-sm"
             >
@@ -159,19 +247,97 @@ export default function AssistenteIA() {
             </Button>
             {messages.length > 0 && (
               <Button 
-                variant="outline" 
+                variant="default" 
                 size="sm"
-                onClick={limparConversa}
+                onClick={novaConversa}
                 className="text-xs md:text-sm"
               >
-                <MessageSquare className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" />
-                <span className="hidden sm:inline">{t('assistenteIA.limparConversa')}</span>
+                <Plus className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" />
+                <span className="hidden sm:inline">Nova Conversa</span>
               </Button>
             )}
           </div>
         </div>
         
         <div className="flex-1 flex gap-4 min-h-0 overflow-hidden">
+          {/* Painel de Histórico */}
+          {showHistorico && (
+            <Card className="w-72 md:w-80 flex-shrink-0 flex flex-col overflow-hidden">
+              <CardHeader className="pb-2 flex-shrink-0">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm font-medium flex items-center gap-2">
+                    <History className="h-4 w-4 text-primary" />
+                    Conversas Anteriores
+                  </CardTitle>
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => setShowHistorico(false)}>
+                    <X className="h-3 w-3" />
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="flex-1 overflow-hidden p-0">
+                <ScrollArea className="h-full px-3 pb-3">
+                  {sessoesLoading ? (
+                    Array.from({ length: 5 }).map((_, i) => (
+                      <div key={i} className="py-2 px-2">
+                        <Skeleton className="h-4 w-full mb-1" />
+                        <Skeleton className="h-3 w-2/3" />
+                      </div>
+                    ))
+                  ) : !sessoes || sessoes.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <MessageSquare className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                      <p className="text-sm">Sem conversas anteriores</p>
+                      <p className="text-xs mt-1">As suas conversas serão guardadas automaticamente</p>
+                    </div>
+                  ) : (
+                    Object.entries(sessoesAgrupadas).map(([label, grupo]) => (
+                      <div key={label} className="mb-3">
+                        <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium px-2 py-1">
+                          {label}
+                        </div>
+                        {grupo.map((sessao) => (
+                          <div
+                            key={sessao.id}
+                            onClick={() => carregarSessao(sessao.id)}
+                            className={`group flex items-start gap-2 py-2 px-2 rounded-md cursor-pointer transition-colors ${
+                              sessao.id === sessaoAtualId 
+                                ? 'bg-primary/10 border border-primary/20' 
+                                : 'hover:bg-muted/50'
+                            }`}
+                          >
+                            <MessageSquare className="h-3.5 w-3.5 mt-0.5 flex-shrink-0 text-muted-foreground" />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium truncate leading-tight">
+                                {sessao.titulo || 'Conversa sem título'}
+                              </p>
+                              <div className="flex items-center gap-1 mt-0.5">
+                                <Clock className="h-2.5 w-2.5 text-muted-foreground" />
+                                <span className="text-[10px] text-muted-foreground">
+                                  {new Date(sessao.updatedAt).toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })}
+                                </span>
+                                <span className="text-[10px] text-muted-foreground">
+                                  · {sessao.totalMensagens || 0} msgs
+                                </span>
+                              </div>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
+                              onClick={(e) => eliminarSessao(sessao.id, e)}
+                            >
+                              <Trash2 className="h-3 w-3 text-destructive" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    ))
+                  )}
+                </ScrollArea>
+              </CardContent>
+            </Card>
+          )}
+          
           {/* Área de Chat */}
           <Card className="flex-1 flex flex-col min-h-0 overflow-hidden">
             <CardContent className="h-full flex flex-col p-3 md:p-4 overflow-hidden">
@@ -221,6 +387,19 @@ export default function AssistenteIA() {
                         {t('assistenteIA.resultados')}
                       </Badge>
                     </div>
+                    
+                    {/* Botão de histórico quando não há mensagens */}
+                    {sessoes && sessoes.length > 0 && !showHistorico && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="mt-4"
+                        onClick={() => setShowHistorico(true)}
+                      >
+                        <History className="h-4 w-4 mr-2" />
+                        Ver {sessoes.length} conversa{sessoes.length > 1 ? 's' : ''} anterior{sessoes.length > 1 ? 'es' : ''}
+                      </Button>
+                    )}
                   </div>
                 ) : (
                   <div className="space-y-3 md:space-y-4 py-3 md:py-4">
@@ -297,7 +476,7 @@ export default function AssistenteIA() {
                 )}
               </ScrollArea>
               
-              {/* Input com botão de voz - Fixed at bottom */}
+              {/* Input com botão de voz */}
               <form onSubmit={handleSubmit} className="mt-3 md:mt-4 flex gap-2 flex-shrink-0">
                 <div className="flex-1 flex gap-2 items-center bg-background border rounded-md px-2">
                   <Input
@@ -330,7 +509,6 @@ export default function AssistenteIA() {
             <CardContent className="flex-1">
               <div className="space-y-2">
                 {sugestoesLoading ? (
-                  // Skeleton loading para sugestões
                   Array.from({ length: 5 }).map((_, index) => (
                     <div key={index} className="flex items-start gap-2 py-2 px-3">
                       <Skeleton className="h-3 w-3 rounded-sm flex-shrink-0 mt-0.5" />
@@ -363,8 +541,6 @@ export default function AssistenteIA() {
             </CardContent>
           </Card>
         </div>
-        
-
       </div>
     </DashboardLayout>
   );
