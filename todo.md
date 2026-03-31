@@ -1223,4 +1223,18 @@
 - [x] Transcrição contínua: segmentos com offset de tempo correcto
 - [x] Resumo IA usa transcrição completa (todos os blocos juntos)
 - [x] 6 testes vitest passados
+- [x] Guardar checkpoint
+
+## Exportação de Férias para Outlook (.ics)
+- [x] Analisar schema de férias aprovadas e dados disponíveis
+- [x] Backend: endpoint para gerar ficheiro .ics com férias aprovadas
+- [x] Backend: geração de ficheiro .ics com blocos consecutivos separados
+- [x] Frontend: nova tab "Outlook" na página de Férias
+- [x] Frontend: tabela de colaboradores com filtro, seleção e pesquisa
+- [x] Frontend: botão individual por colaborador para download .ics
+- [x] Frontend: botão global "Exportar Todos/Selecionados" para download .ics
+- [x] Eventos separados por cada bloco consecutivo de férias
+- [x] Formato: "Férias - [Nome]", dia inteiro, com loja na descrição
+- [x] Botão "Exportar Outlook" no header da página
+- [x] 4 testes vitest passados
 - [ ] Guardar checkpoint

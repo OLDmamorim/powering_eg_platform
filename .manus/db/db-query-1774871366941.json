@@ -1,0 +1,20 @@
+{
+  "query": "SELECT id, openId, email, name, loginMethod, role, createdAt, lastSignedIn FROM users WHERE name LIKE '%carlos%' OR email LIKE '%carlos%' OR openId LIKE '%carlos%' LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2rEtBRZHWZUfGJS.3b07a01772f8 --database 3c9MozLH35e233uWy5WDtH --execute SELECT id, openId, email, name, loginMethod, role, createdAt, lastSignedIn FROM users WHERE name LIKE '%carlos%' OR email LIKE '%carlos%' OR openId LIKE '%carlos%' LIMIT 10;",
+  "rows": [
+    {
+      "id": "26430020",
+      "openId": "nwnhcUWn6vh3mqGaZDr9X8",
+      "email": "carlos.eduardo@expressglass.pt",
+      "name": "Carlos Eduardo",
+      "loginMethod": "email",
+      "role": "gestor",
+      "createdAt": "2026-03-30 10:28:12",
+      "lastSignedIn": "2026-03-30 11:49:13"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\topenId\temail\tname\tloginMethod\trole\tcreatedAt\tlastSignedIn\n26430020\tnwnhcUWn6vh3mqGaZDr9X8\tcarlos.eduardo@expressglass.pt\tCarlos Eduardo\temail\tgestor\t2026-03-30 10:28:12\t2026-03-30 11:49:13\n",
+  "stderr": "",
+  "execution_time_ms": 57
+}

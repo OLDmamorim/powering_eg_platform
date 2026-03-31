@@ -19,7 +19,7 @@ import {
   Upload, Calendar, BarChart3, PieChart, Download, FileSpreadsheet,
   Search, Users, Building2, Clock, Trash2, Filter, Sun, AlertTriangle,
   CheckCircle2, XCircle, Eye, ChevronUp, ChevronDown, Crosshair, Pin, Star, Sparkles, Loader2, UserCheck,
-  FileText, Store, ArrowRight, CircleDot, Check, ChevronsUpDown
+  FileText, Store, ArrowRight, CircleDot, Check, ChevronsUpDown, CalendarPlus
 } from "lucide-react";
 
 // ─── CONSTANTS ───
@@ -497,9 +497,14 @@ export default function Ferias() {
           </Dialog>
 
           {data && (
-            <Button variant="outline" size="sm" onClick={exportExcel}>
-              <Download className="h-4 w-4 mr-1" /> Exportar
-            </Button>
+            <>
+              <Button variant="outline" size="sm" onClick={exportExcel}>
+                <Download className="h-4 w-4 mr-1" /> Exportar Excel
+              </Button>
+              <Button variant="outline" size="sm" className="border-blue-300 text-blue-700 hover:bg-blue-50" onClick={() => { setActiveTab('ics'); }}>
+                <CalendarPlus className="h-4 w-4 mr-1" /> Exportar Outlook
+              </Button>
+            </>
           )}
 
           <input ref={fileRef} type="file" accept=".xls,.xlsx,.xlsm" className="hidden" onChange={handleFile} />
@@ -732,10 +737,11 @@ export default function Ferias() {
 
           {/* TABS */}
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="cal" className="flex items-center gap-1.5"><Calendar className="h-4 w-4" /> Calendário</TabsTrigger>
               <TabsTrigger value="an" className="flex items-center gap-1.5"><BarChart3 className="h-4 w-4" /> Análise</TabsTrigger>
               <TabsTrigger value="dist" className="flex items-center gap-1.5"><PieChart className="h-4 w-4" /> Distribuição</TabsTrigger>
+              <TabsTrigger value="ics" className="flex items-center gap-1.5"><CalendarPlus className="h-4 w-4" /> Outlook</TabsTrigger>
             </TabsList>
 
             {/* CALENDAR TAB */}
@@ -754,6 +760,11 @@ export default function Ferias() {
                 compareAno={compareAno} setCompareAno={setCompareAno} compareData={compareData}
                 anosDisponiveis={anosQuery.data?.map((a: any) => a.ano).filter((a: number) => a !== ano) || []}
                 availableStores={availableStores} />
+            </TabsContent>
+
+            {/* OUTLOOK EXPORT TAB */}
+            <TabsContent value="ics">
+              <OutlookExportTab data={filteredData} allData={enrichedData} ano={ano} gestorFilter={gestorFilter} userName={user?.name || ''} />
             </TabsContent>
           </Tabs>
 
@@ -2157,6 +2168,252 @@ function KpiCard({ icon, label, value, ok, warn, danger }: { icon: React.ReactNo
         <div className="mx-auto mb-1">{icon}</div>
         <div className={`text-2xl font-bold ${danger?'text-red-600':ok?'text-green-600':''}`}>{value}</div>
         <div className="text-xs text-muted-foreground">{label}</div>
+      </CardContent>
+    </Card>
+  );
+}
+
+// ─── OUTLOOK EXPORT TAB ───
+function OutlookExportTab({ data, allData, ano, gestorFilter, userName }: {
+  data: (Employee & EmpStats)[]; allData: (Employee & EmpStats)[]; ano: number; gestorFilter: string; userName: string;
+}) {
+  const [selectedColabs, setSelectedColabs] = useState<Set<string>>(new Set());
+  const [searchIcs, setSearchIcs] = useState('');
+  const exportarICS = trpc.ferias.exportarICS.useMutation({
+    onSuccess: (result) => {
+      window.open(result.url, '_blank');
+      toast.success(`Ficheiro .ics gerado com ${result.totalEventos} eventos de ${result.totalColaboradores} colaboradores`);
+    },
+    onError: (err) => {
+      toast.error(err.message || 'Erro ao gerar ficheiro .ics');
+    },
+  });
+
+  // Usar dados filtrados pelo gestor
+  const colabsVisiveis = useMemo(() => {
+    let result = data;
+    if (searchIcs) {
+      const s = searchIcs.toLowerCase();
+      result = result.filter(e => e.name.toLowerCase().includes(s) || e.store.toLowerCase().includes(s));
+    }
+    return result.filter(e => e.approved > 0);
+  }, [data, searchIcs]);
+
+  const toggleColab = (num: string) => {
+    setSelectedColabs(prev => {
+      const next = new Set(prev);
+      if (next.has(num)) next.delete(num);
+      else next.add(num);
+      return next;
+    });
+  };
+
+  const selectAll = () => {
+    setSelectedColabs(new Set(colabsVisiveis.map(e => e.num)));
+  };
+
+  const deselectAll = () => {
+    setSelectedColabs(new Set());
+  };
+
+  // Calcular blocos de férias para cada colaborador
+  const getBlocosFerias = (emp: Employee & EmpStats) => {
+    const diasAprovados: { m: number; d: number; key: string }[] = [];
+    Object.entries(emp.days).forEach(([key, status]) => {
+      if (status === 'approved') {
+        const [m, d] = key.split('-').map(Number);
+        diasAprovados.push({ m, d, key });
+      }
+    });
+    // Ordenar por mês e dia
+    diasAprovados.sort((a, b) => a.m !== b.m ? a.m - b.m : a.d - b.d);
+    
+    // Agrupar em blocos consecutivos
+    const blocos: { inicio: string; fim: string; dias: number }[] = [];
+    if (diasAprovados.length === 0) return blocos;
+    
+    let blocoInicio = diasAprovados[0];
+    let blocoFim = diasAprovados[0];
+    let count = 1;
+    
+    for (let i = 1; i < diasAprovados.length; i++) {
+      const curr = diasAprovados[i];
+      const prev = diasAprovados[i - 1];
+      // Verificar se é consecutivo (mesmo mês, dia+1 ou mudança de mês)
+      const prevDate = new Date(ano, prev.m - 1, prev.d);
+      const currDate = new Date(ano, curr.m - 1, curr.d);
+      const diffDays = (currDate.getTime() - prevDate.getTime()) / (1000 * 60 * 60 * 24);
+      
+      if (diffDays === 1) {
+        blocoFim = curr;
+        count++;
+      } else {
+        blocos.push({
+          inicio: `${blocoInicio.d}/${blocoInicio.m}`,
+          fim: `${blocoFim.d}/${blocoFim.m}`,
+          dias: count,
+        });
+        blocoInicio = curr;
+        blocoFim = curr;
+        count = 1;
+      }
+    }
+    blocos.push({
+      inicio: `${blocoInicio.d}/${blocoInicio.m}`,
+      fim: `${blocoFim.d}/${blocoFim.m}`,
+      dias: count,
+    });
+    return blocos;
+  };
+
+  const handleExportar = (individual?: string) => {
+    const lojas = gestorFilter !== 'all' ? GESTORES[gestorFilter]?.map(s => s) : undefined;
+    
+    if (individual) {
+      // Exportar individual - encontrar o colaborador pelo num
+      const colab = colabsVisiveis.find(e => e.num === individual);
+      if (!colab) return;
+      exportarICS.mutate({
+        ano,
+        gestorNome: gestorFilter !== 'all' ? gestorFilter : userName,
+        lojas: [colab.store],
+      });
+    } else {
+      // Exportar selecionados ou todos
+      const colabsParaExportar = selectedColabs.size > 0
+        ? colabsVisiveis.filter(e => selectedColabs.has(e.num))
+        : colabsVisiveis;
+      
+      const lojasUnicas = [...new Set(colabsParaExportar.map(e => e.store))];
+      exportarICS.mutate({
+        ano,
+        gestorNome: gestorFilter !== 'all' ? gestorFilter : userName,
+        lojas: lojasUnicas,
+      });
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base flex items-center gap-2">
+          <CalendarPlus className="h-5 w-5 text-blue-600" />
+          Exportar Férias para Outlook
+        </CardTitle>
+        <p className="text-xs text-muted-foreground mt-1">
+          Selecione os colaboradores e exporte um ficheiro .ics para importar no Outlook. Cada bloco de férias consecutivo cria um evento separado no calendário.
+        </p>
+      </CardHeader>
+      <CardContent>
+        {/* Barra de ações */}
+        <div className="flex flex-wrap items-center gap-3 mb-4">
+          <div className="relative flex-1 min-w-[200px]">
+            <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+            <Input placeholder="Pesquisar colaborador ou loja..." value={searchIcs} onChange={e => setSearchIcs(e.target.value)} className="pl-7 h-8 text-xs" />
+          </div>
+          <Button variant="outline" size="sm" className="h-8 text-xs" onClick={selectAll}>
+            <Check className="h-3.5 w-3.5 mr-1" /> Selecionar Todos
+          </Button>
+          <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={deselectAll}>
+            <XCircle className="h-3.5 w-3.5 mr-1" /> Limpar
+          </Button>
+          <Badge variant="secondary" className="text-xs">
+            {selectedColabs.size > 0 ? `${selectedColabs.size} selecionados` : `${colabsVisiveis.length} colaboradores`}
+          </Badge>
+          <Button
+            size="sm"
+            className="h-8 text-xs bg-blue-600 hover:bg-blue-700 gap-1.5"
+            disabled={exportarICS.isPending || colabsVisiveis.length === 0}
+            onClick={() => handleExportar()}
+          >
+            {exportarICS.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
+            {selectedColabs.size > 0 ? `Exportar ${selectedColabs.size} para Outlook` : 'Exportar Todos para Outlook'}
+          </Button>
+        </div>
+
+        {/* Tabela de colaboradores */}
+        <div className="overflow-auto max-h-[500px] border rounded-lg">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-muted/50">
+                <TableHead className="w-[40px]">
+                  <Checkbox
+                    checked={selectedColabs.size === colabsVisiveis.length && colabsVisiveis.length > 0}
+                    onCheckedChange={(checked) => checked ? selectAll() : deselectAll()}
+                  />
+                </TableHead>
+                <TableHead className="text-xs font-semibold">Colaborador</TableHead>
+                <TableHead className="text-xs font-semibold">Loja</TableHead>
+                <TableHead className="text-xs font-semibold text-center">Dias Aprovados</TableHead>
+                <TableHead className="text-xs font-semibold">Períodos de Férias</TableHead>
+                <TableHead className="text-xs font-semibold text-center w-[100px]">Ação</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {colabsVisiveis.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground text-sm">
+                    Nenhum colaborador com férias aprovadas encontrado
+                  </TableCell>
+                </TableRow>
+              ) : colabsVisiveis.map(emp => {
+                const blocos = getBlocosFerias(emp);
+                return (
+                  <TableRow key={emp.num} className={selectedColabs.has(emp.num) ? 'bg-blue-50/50' : ''}>
+                    <TableCell>
+                      <Checkbox
+                        checked={selectedColabs.has(emp.num)}
+                        onCheckedChange={() => toggleColab(emp.num)}
+                      />
+                    </TableCell>
+                    <TableCell className="font-medium text-sm">{emp.name}</TableCell>
+                    <TableCell className="text-xs text-muted-foreground">{emp.store}</TableCell>
+                    <TableCell className="text-center">
+                      <Badge variant={emp.approved >= 22 ? 'default' : 'destructive'} className="text-xs">
+                        {emp.approved}d
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-1">
+                        {blocos.map((b, i) => (
+                          <span key={i} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-100 text-green-800 text-[10px] font-medium">
+                            <Calendar className="h-2.5 w-2.5" />
+                            {b.dias === 1 ? b.inicio : `${b.inicio} → ${b.fim}`}
+                            <span className="text-green-600">({b.dias}d)</span>
+                          </span>
+                        ))}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 text-xs text-blue-600 hover:text-blue-800 hover:bg-blue-50 gap-1"
+                        disabled={exportarICS.isPending}
+                        onClick={() => handleExportar(emp.num)}
+                        title={`Exportar férias de ${emp.name} para Outlook`}
+                      >
+                        <CalendarPlus className="h-3.5 w-3.5" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </div>
+
+        {/* Info */}
+        <div className="mt-3 flex items-start gap-2 text-xs text-muted-foreground bg-blue-50 rounded-lg px-3 py-2">
+          <CalendarPlus className="h-4 w-4 text-blue-500 shrink-0 mt-0.5" />
+          <div>
+            <p className="font-medium text-blue-700">Como usar o ficheiro .ics:</p>
+            <p className="mt-0.5">1. Clique em "Exportar" para descarregar o ficheiro .ics</p>
+            <p>2. Abra o ficheiro — o Outlook abre automaticamente</p>
+            <p>3. Confirme a importação dos eventos no calendário</p>
+            <p className="mt-1 text-blue-600">Cada evento aparece como "Férias - [Nome]" com a loja e duração na descrição.</p>
+          </div>
+        </div>
       </CardContent>
     </Card>
   );

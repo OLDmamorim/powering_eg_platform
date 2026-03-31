@@ -390,6 +390,140 @@ export const appRouter = router({
       const allVolantes = await db.getAllVolantes();
       return allVolantes.filter(v => v.ativo).map(v => v.nome.toUpperCase().trim());
     }),
+
+    // Exportar férias aprovadas como ficheiro .ics (iCalendar) para Outlook
+    exportarICS: protectedProcedure
+      .input(z.object({
+        ano: z.number(),
+        colaboradorIds: z.array(z.number()).optional(), // IDs específicos, ou todos se vazio
+        gestorNome: z.string().optional(), // Filtrar por gestor
+        lojas: z.array(z.string()).optional(), // Filtrar por lojas
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const upload = await db.getUltimoFeriasUpload(input.ano);
+        if (!upload) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Nenhum upload de férias encontrado para este ano' });
+        }
+        let colaboradores = await db.getFeriasColaboradoresByUpload(upload.id);
+        
+        // Filtrar por IDs específicos
+        if (input.colaboradorIds && input.colaboradorIds.length > 0) {
+          colaboradores = colaboradores.filter((c: any) => input.colaboradorIds!.includes(c.id));
+        }
+        
+        // Filtrar por gestor
+        if (input.gestorNome && ctx.user.role !== 'admin') {
+          colaboradores = colaboradores.filter((c: any) => {
+            const g = (c.gestor || '').toLowerCase().trim();
+            return g === input.gestorNome!.toLowerCase().trim();
+          });
+        }
+        
+        // Filtrar por lojas
+        if (input.lojas && input.lojas.length > 0) {
+          const lojasLower = input.lojas.map(l => l.toLowerCase().trim());
+          colaboradores = colaboradores.filter((c: any) => lojasLower.includes((c.loja || '').toLowerCase().trim()));
+        }
+        
+        if (colaboradores.length === 0) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Nenhum colaborador encontrado com os filtros aplicados' });
+        }
+        
+        // Gerar ficheiro .ics
+        const ano = input.ano;
+        const events: string[] = [];
+        const now = new Date();
+        const dtstamp = now.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+        
+        for (const colab of colaboradores) {
+          const dias = typeof (colab as any).dias === 'string' ? JSON.parse((colab as any).dias) : (colab as any).dias;
+          const nome = (colab as any).nome;
+          const loja = (colab as any).loja;
+          
+          // Encontrar blocos consecutivos de dias aprovados
+          const diasAprovados: number[] = [];
+          for (const [key, val] of Object.entries(dias)) {
+            if (val === 'aprovado') {
+              diasAprovados.push(parseInt(key));
+            }
+          }
+          diasAprovados.sort((a, b) => a - b);
+          
+          if (diasAprovados.length === 0) continue;
+          
+          // Agrupar em blocos consecutivos
+          const blocos: { inicio: number; fim: number }[] = [];
+          let blocoInicio = diasAprovados[0];
+          let blocoFim = diasAprovados[0];
+          
+          for (let i = 1; i < diasAprovados.length; i++) {
+            if (diasAprovados[i] === blocoFim + 1) {
+              blocoFim = diasAprovados[i];
+            } else {
+              blocos.push({ inicio: blocoInicio, fim: blocoFim });
+              blocoInicio = diasAprovados[i];
+              blocoFim = diasAprovados[i];
+            }
+          }
+          blocos.push({ inicio: blocoInicio, fim: blocoFim });
+          
+          // Converter dia-do-ano para data
+          function diaParaData(diaDoAno: number, anoRef: number): Date {
+            const d = new Date(anoRef, 0, 1);
+            d.setDate(d.getDate() + diaDoAno - 1);
+            return d;
+          }
+          
+          function formatDate(d: Date): string {
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${y}${m}${day}`;
+          }
+          
+          // Criar evento para cada bloco
+          for (let b = 0; b < blocos.length; b++) {
+            const dataInicio = diaParaData(blocos[b].inicio, ano);
+            const dataFim = diaParaData(blocos[b].fim + 1, ano); // +1 porque DTEND é exclusivo em all-day events
+            const numDias = blocos[b].fim - blocos[b].inicio + 1;
+            
+            const uid = `ferias-${(colab as any).id}-bloco${b}-${ano}@poweringeg`;
+            const summary = `Férias - ${nome}`;
+            const description = `Férias aprovadas de ${nome}\\nLoja: ${loja}\\nDuração: ${numDias} dia(s)\\nPeríodo: ${diaParaData(blocos[b].inicio, ano).toLocaleDateString('pt-PT')} a ${diaParaData(blocos[b].fim, ano).toLocaleDateString('pt-PT')}`;
+            
+            events.push([
+              'BEGIN:VEVENT',
+              `UID:${uid}`,
+              `DTSTAMP:${dtstamp}`,
+              `DTSTART;VALUE=DATE:${formatDate(dataInicio)}`,
+              `DTEND;VALUE=DATE:${formatDate(dataFim)}`,
+              `SUMMARY:${summary}`,
+              `DESCRIPTION:${description}`,
+              'TRANSP:TRANSPARENT',
+              'X-MICROSOFT-CDO-BUSYSTATUS:FREE',
+              `CATEGORIES:Férias`,
+              'END:VEVENT',
+            ].join('\r\n'));
+          }
+        }
+        
+        const icsContent = [
+          'BEGIN:VCALENDAR',
+          'VERSION:2.0',
+          'PRODID:-//PoweringEG//Férias//PT',
+          'CALSCALE:GREGORIAN',
+          'METHOD:PUBLISH',
+          `X-WR-CALNAME:Férias ${ano} - PoweringEG`,
+          'X-WR-TIMEZONE:Europe/Lisbon',
+          ...events,
+          'END:VCALENDAR',
+        ].join('\r\n');
+        
+        // Upload para S3
+        const fileName = `ferias-${ano}-${Date.now()}.ics`;
+        const { url } = await storagePut(fileName, Buffer.from(icsContent, 'utf-8'), 'text/calendar');
+        return { url, fileName, totalEventos: events.length, totalColaboradores: colaboradores.length };
+      }),
   }),
   
   // ==================== NOTIFICAÇÕES ====================
