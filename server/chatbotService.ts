@@ -1224,10 +1224,11 @@ NOTA: Já não existe barreira mínima de 22% para prémio. Todas as lojas receb
 NOTA: Se a loja não cumprir o FTE mínimo (35 serviços/colaborador), a comissão QIV é 0€.
 
 **4. VENDAS COMPLEMENTARES (APENAS SE CUMPRIR FTE):**
-- Escovas: 10% do valor faturado
+- Escovas: 10% do valor faturado por cada escova vendida (SEM objetivo mínimo - comissão a partir da 1.ª escova)
 - Películas: 2,5% do valor faturado (5% para Coimbra Sul)
 - Outros serviços (polimentos, lavagens, etc.): 30% do valor faturado (apenas serviços, não peças)
 NOTA: Se a loja não cumprir o FTE mínimo (35 serviços/colaborador), a comissão de vendas complementares é 0€.
+NOTA: Já NÃO existe objetivo mínimo de escovas. O objetivo nacional é 30% de serviços com escovas, mas a comissão é paga por cada escova vendida.
 **5. CRITÉRIOS MÍNIMOS OBRIGATÓRIOS (NPS):**
 - NPS >= 80% (obrigatório para receber prémio)
 - Taxa de Resposta >= 7,5% (obrigatório para receber prémio)

@@ -1230,14 +1230,9 @@ export const appRouter = router({
         }
         
         if (complementares) {
-          // Alerta escovas
+          // Alerta escovas (sem mínimo obrigatório - comissão a partir da 1.ª escova)
           const escovasPerc = complementares.escovasPercent !== null ? parseFloat(String(complementares.escovasPercent)) : null;
-          if (escovasPerc !== null && escovasPerc < 0.075) {
-            alertas.push({
-              tipo: 'warning',
-              mensagem: `Escovas (${(escovasPerc * 100).toFixed(1)}%) abaixo do objetivo de 7.5%`
-            });
-          } else if (escovasPerc !== null && escovasPerc >= 0.10) {
+          if (escovasPerc !== null && escovasPerc >= 0.10) {
             alertas.push({
               tipo: 'success',
               mensagem: `Excelente! Escovas acima de 10% (${(escovasPerc * 100).toFixed(1)}%)`
@@ -1716,13 +1711,9 @@ IMPORTANTE:
           });
         }
         
+        // Escovas: sem mínimo obrigatório - comissão a partir da 1.ª escova
         const escovasPerc = escovasPercent !== null ? escovasPercent : null;
-        if (escovasPerc !== null && escovasPerc < 0.075) {
-          alertas.push({
-            tipo: 'warning',
-            mensagem: `Escovas (${(escovasPerc * 100).toFixed(1)}%) abaixo do objetivo de 7.5%`
-          });
-        } else if (escovasPerc !== null && escovasPerc >= 0.10) {
+        if (escovasPerc !== null && escovasPerc >= 0.10) {
           alertas.push({
             tipo: 'success',
             mensagem: `Excelente! Escovas acima de 10% (${(escovasPerc * 100).toFixed(1)}%)`
@@ -7756,14 +7747,9 @@ IMPORTANTE:
         }
         
         if (complementares) {
-          // Alerta escovas
+          // Alerta escovas (sem mínimo obrigatório - comissão a partir da 1.ª escova)
           const escovasPerc = complementares.escovasPercent !== null ? parseFloat(String(complementares.escovasPercent)) : null;
-          if (escovasPerc !== null && escovasPerc < 0.075) {
-            alertas.push({
-              tipo: 'warning',
-              mensagem: `Escovas (${(escovasPerc * 100).toFixed(1)}%) abaixo do objetivo de 7.5%`
-            });
-          } else if (escovasPerc !== null && escovasPerc >= 0.10) {
+          if (escovasPerc !== null && escovasPerc >= 0.10) {
             alertas.push({
               tipo: 'success',
               mensagem: `Excelente! Escovas acima de 10% (${(escovasPerc * 100).toFixed(1)}%)`
@@ -10045,15 +10031,11 @@ IMPORTANTE:
           });
         }
         
-        if (escovasPercent !== null && escovasPercent < 0.075) {
+        // Escovas: sem mínimo obrigatório - comissão a partir da 1.ª escova vendida
+        if (escovasPercent !== null && escovasPercent < 0.10) {
           alertas.push({
-            tipo: 'danger',
-            mensagem: `Percentagem de escovas abaixo do mínimo (${(escovasPercent * 100).toFixed(1)}% < 7.5%)`,
-          });
-        } else if (escovasPercent !== null && escovasPercent < 0.10) {
-          alertas.push({
-            tipo: 'warning',
-            mensagem: `Percentagem de escovas abaixo do objetivo (${(escovasPercent * 100).toFixed(1)}% < 10%)`,
+            tipo: 'info',
+            mensagem: `Percentagem de escovas: ${(escovasPercent * 100).toFixed(1)}% (objetivo nacional: 10%)`,
           });
         }
         

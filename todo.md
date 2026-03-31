@@ -1269,3 +1269,11 @@
 - [x] Destacar volantes visualmente no calendário de férias (cor/ícone diferente)
 - [x] Destacar volantes na exportação Excel
 - [x] Guardar checkpoint
+
+## Remover Objetivo Mínimo de Escovas 7.5% (Nova Política 2026)
+- [x] Identificar todos os ficheiros com regra de escovas 7.5% (routers, chatbot, PDF)
+- [x] Remover alertas de escovas abaixo de 7.5% nos dashboards de resultados (gestor + portal loja)
+- [x] Atualizar chatbot: remover referência a taxa mínima de escovas 7.5%
+- [x] Atualizar PDF de resultados: remover marcador de 7.5% na barra de escovas
+- [x] Atualizar textos/legendas para refletir nova política (comissão a partir da 1.ª escova)
+- [x] Guardar checkpoint

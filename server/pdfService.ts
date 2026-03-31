@@ -505,7 +505,7 @@ export async function gerarPDFResultados(
         doc.fontSize(14).fillColor('#1f2937');
         doc.text(item.valor.toString(), boxX + 3, currentY + 20, { width: compWidth - 6, align: 'center' });
         if (item.percent !== undefined && item.percent !== null) {
-          doc.fontSize(7).fillColor(item.percent >= 0.10 ? verde : item.percent >= 0.075 ? amarelo : vermelho);
+          doc.fontSize(7).fillColor(item.percent >= 0.10 ? verde : amarelo);
           doc.text(`(${(item.percent * 100).toFixed(1)}%)`, boxX + 3, currentY + 35, { width: compWidth - 6, align: 'center' });
         }
       });
@@ -525,19 +525,16 @@ export async function gerarPDFResultados(
       
       // Barra de progresso
       const progressWidth = Math.min((escovasPercent / 15) * barraWidth, barraWidth);
-      const progressColor = escovasPercent >= 10 ? verde : escovasPercent >= 7.5 ? amarelo : vermelho;
+      const progressColor = escovasPercent >= 10 ? verde : amarelo;
       doc.rect(40, currentY, progressWidth, barraHeight).fill(progressColor);
       
-      // Marcadores
-      const marker75 = (7.5 / 15) * barraWidth;
+      // Marcador apenas do objetivo nacional (10%)
       const marker10 = (10 / 15) * barraWidth;
       doc.strokeColor(cinzaEscuro).lineWidth(2);
-      doc.moveTo(40 + marker75, currentY).lineTo(40 + marker75, currentY + barraHeight).stroke();
       doc.moveTo(40 + marker10, currentY).lineTo(40 + marker10, currentY + barraHeight).stroke();
       
-      // Labels dos marcadores
+      // Label do marcador
       doc.fontSize(7).fillColor(cinzaEscuro);
-      doc.text('7.5%', 40 + marker75 - 10, currentY + barraHeight + 2);
       doc.text('10%', 40 + marker10 - 8, currentY + barraHeight + 2);
       
       // Valor atual
