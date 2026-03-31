@@ -1565,10 +1565,10 @@ export default function HistoricoLoja() {
                           type="monotone" 
                           dataKey="objetivo" 
                           name="Objetivo"
-                          stroke="#dc2626" 
+                          stroke="#1e3a5f" 
                           strokeWidth={2}
                           strokeDasharray="5 5"
-                          dot={{ fill: '#dc2626', r: 3 }}
+                          dot={{ fill: '#1e3a5f', r: 3 }}
                         />
                       </LineChart>
                     </ResponsiveContainer>
