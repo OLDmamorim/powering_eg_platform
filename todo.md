@@ -1309,3 +1309,8 @@
 - [x] Favoritos devem aparecer no topo, separados das restantes notas
 - [x] Destaque visual claro para notas favoritas (borda dourada + estrela preenchida)
 - [x] Guardar checkpoint
+
+## BUG: Estrela de favoritos não persiste ao clicar
+- [x] Diagnosticar: função actualizarNota no db.ts não tinha o campo 'favorita'
+- [x] Corrigir o bug - adicionado campo favorita ao db.ts
+- [x] Guardar checkpoint

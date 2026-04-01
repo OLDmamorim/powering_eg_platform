@@ -12215,6 +12215,7 @@ export async function actualizarNota(id: number, userId: number, data: {
   estado?: string;
   cor?: string;
   fixada?: boolean;
+  favorita?: boolean;
   arquivada?: boolean;
 }) {
   const db = await getDb();
@@ -12227,6 +12228,7 @@ export async function actualizarNota(id: number, userId: number, data: {
   if (data.estado !== undefined) updateData.estado = data.estado;
   if (data.cor !== undefined) updateData.cor = data.cor;
   if (data.fixada !== undefined) updateData.fixada = data.fixada;
+  if (data.favorita !== undefined) updateData.favorita = data.favorita;
   if (data.arquivada !== undefined) updateData.arquivada = data.arquivada;
   
   await db.update(notas).set(updateData).where(and(eq(notas.id, id), eq(notas.userId, userId)));
