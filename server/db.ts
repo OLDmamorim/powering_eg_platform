@@ -12112,7 +12112,7 @@ export async function listarNotas(userId: number, filtros?: {
     .from(notas)
     .leftJoin(lojas, eq(notas.lojaId, lojas.id))
     .where(and(...conditions))
-    .orderBy(desc(notas.fixada), desc(notas.updatedAt));
+    .orderBy(desc(notas.favorita), desc(notas.fixada), desc(notas.updatedAt));
   
   // Buscar tags e imagens para cada nota
   const notaIds = resultado.map(r => r.nota.id);

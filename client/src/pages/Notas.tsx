@@ -1334,29 +1334,24 @@ function NotaCard({
 
   return (
     <Card
-      className="group cursor-pointer hover:shadow-md transition-shadow overflow-hidden aspect-square flex flex-col justify-between relative"
+      className={`group cursor-pointer hover:shadow-md transition-shadow overflow-hidden aspect-square flex flex-col justify-between relative ${
+        nota.favorita ? "ring-2 ring-amber-400/60 shadow-amber-100" : ""
+      }`}
       style={{ backgroundColor: cardCor }}
       onClick={onEdit}
     >
-      {/* Ícone de favorita */}
-      {nota.favorita && (
-        <button
-          className="absolute top-1.5 left-1.5 z-10"
-          onClick={(e) => { e.stopPropagation(); onFavoritar(); }}
-          title="Remover dos favoritos"
-        >
-          <Star className="h-4 w-4 fill-amber-400 text-amber-400 drop-shadow-sm" />
-        </button>
-      )}
-      {!nota.favorita && (
-        <button
-          className="absolute top-1.5 left-1.5 z-10 opacity-0 group-hover:opacity-100 transition-opacity"
-          onClick={(e) => { e.stopPropagation(); onFavoritar(); }}
-          title="Marcar como favorita"
-        >
-          <Star className="h-4 w-4 text-foreground/30 hover:text-amber-400 hover:fill-amber-400 transition-colors" />
-        </button>
-      )}
+      {/* Ícone de favorita - sempre visível */}
+      <button
+        className="absolute top-2 left-2 z-10"
+        onClick={(e) => { e.stopPropagation(); onFavoritar(); }}
+        title={nota.favorita ? "Remover dos favoritos" : "Marcar como favorita"}
+      >
+        <Star className={`h-5 w-5 transition-colors ${
+          nota.favorita
+            ? "fill-amber-400 text-amber-400 drop-shadow-md"
+            : "text-foreground/20 hover:text-amber-400 hover:fill-amber-400"
+        }`} />
+      </button>
       {/* Ícone de fixada */}
       {nota.fixada && (
         <div className="absolute top-1.5 right-1.5">

@@ -1298,3 +1298,14 @@
 - [x] Implementar UI: lista de conversas anteriores, carregar histórico, nova conversa
 - [ ] Aplicar ao chatbot do portal da loja (futuro)
 - [x] Guardar checkpoint
+
+## BUG: Portal da Loja crash - "An unexpected error occurred"
+- [ ] Diagnosticar causa do erro no Portal da Loja
+- [ ] Corrigir o erro
+- [ ] Guardar checkpoint
+
+## BUG: Favoritos nas Notas não funcionam
+- [x] Adicionar estrela visível em cada card de nota para marcar/desmarcar favorito
+- [x] Favoritos devem aparecer no topo, separados das restantes notas
+- [x] Destaque visual claro para notas favoritas (borda dourada + estrela preenchida)
+- [x] Guardar checkpoint
