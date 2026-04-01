@@ -3523,11 +3523,11 @@ export default function PortalLoja() {
                             <span className="text-sm font-medium">
                               {dashboardData.complementares.escovasQtd || 0} 
                               <span className={`ml-2 ${
-                                parseFloat(String(dashboardData.complementares.escovasPercent || 0)) >= 0.10 
-                                  ? 'text-green-600' 
-                                  : parseFloat(String(dashboardData.complementares.escovasPercent || 0)) >= 0.075
-                                    ? 'text-amber-600'
-                                    : 'text-red-600'
+                              parseFloat(String(dashboardData.complementares.escovasPercent || 0)) >= 0.10 
+                                ? 'text-green-600' 
+                                : parseFloat(String(dashboardData.complementares.escovasPercent || 0)) > 0
+                                  ? 'text-amber-600'
+                                  : 'text-muted-foreground'
                               }`}>
                                 ({dashboardData.complementares.escovasPercent !== null 
                                   ? `${(parseFloat(String(dashboardData.complementares.escovasPercent)) * 100).toFixed(1)}%`
@@ -3540,9 +3540,9 @@ export default function PortalLoja() {
                               className={`h-4 rounded-full transition-all ${
                                 parseFloat(String(dashboardData.complementares.escovasPercent || 0)) >= 0.10 
                                   ? 'bg-green-500' 
-                                  : parseFloat(String(dashboardData.complementares.escovasPercent || 0)) >= 0.075
+                                  : parseFloat(String(dashboardData.complementares.escovasPercent || 0)) > 0
                                     ? 'bg-amber-500'
-                                    : 'bg-red-500'
+                                    : 'bg-gray-300'
                               }`}
                               style={{ width: `${Math.min(parseFloat(String(dashboardData.complementares.escovasPercent || 0)) * 1000, 100)}%` }}
                             />
@@ -7953,9 +7953,9 @@ END:VCALENDAR`;
                               <span className={`ml-2 ${
                                 parseFloat(String(dashboardLojaVolante.complementares.escovasPercent || 0)) >= 0.10 
                                   ? 'text-green-600' 
-                                  : parseFloat(String(dashboardLojaVolante.complementares.escovasPercent || 0)) >= 0.075
+                                  : parseFloat(String(dashboardLojaVolante.complementares.escovasPercent || 0)) > 0
                                     ? 'text-amber-600'
-                                    : 'text-red-600'
+                                    : 'text-muted-foreground'
                               }`}>
                                 ({dashboardLojaVolante.complementares.escovasPercent !== null 
                                   ? `${(parseFloat(String(dashboardLojaVolante.complementares.escovasPercent)) * 100).toFixed(1)}%`
@@ -7968,9 +7968,9 @@ END:VCALENDAR`;
                               className={`h-4 rounded-full transition-all ${
                                 parseFloat(String(dashboardLojaVolante.complementares.escovasPercent || 0)) >= 0.10 
                                   ? 'bg-green-500' 
-                                  : parseFloat(String(dashboardLojaVolante.complementares.escovasPercent || 0)) >= 0.075
+                                  : parseFloat(String(dashboardLojaVolante.complementares.escovasPercent || 0)) > 0
                                     ? 'bg-amber-500'
-                                    : 'bg-red-500'
+                                    : 'bg-gray-300'
                               }`}
                               style={{ width: `${Math.min(parseFloat(String(dashboardLojaVolante.complementares.escovasPercent || 0)) * 1000, 100)}%` }}
                             />

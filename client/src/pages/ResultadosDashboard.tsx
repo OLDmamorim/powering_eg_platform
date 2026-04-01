@@ -1314,7 +1314,7 @@ export function ResultadosDashboard() {
                           {(estatisticasComplementares.mediaEscovasPercent * 100)?.toFixed(1) || '0.0'}%
                         </div>
                         <div className="text-xs text-amber-600 dark:text-amber-400 mt-1">
-                          Objetivo: 7.5%
+                          Objetivo nacional: 10% (sem mínimo obrigatório)
                         </div>
                       </div>
                       <div className="text-right">
@@ -1411,8 +1411,8 @@ export function ResultadosDashboard() {
                             <div className="flex-1 text-sm">{item.lojaNome}</div>
                             <div className="w-20 text-center">
                               <Badge 
-                                variant={item.escovasPercent >= 0.075 ? "default" : "outline"}
-                                className={item.escovasPercent >= 0.075 ? "bg-green-500" : ""}
+                                variant={item.escovasPercent > 0 ? "default" : "outline"}
+                                className={item.escovasPercent >= 0.10 ? "bg-green-500" : item.escovasPercent > 0 ? "bg-amber-500" : ""}
                               >
                                 {(item.escovasPercent * 100)?.toFixed(1) || '0.0'}%
                               </Badge>

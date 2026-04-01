@@ -1314,3 +1314,9 @@
 - [x] Diagnosticar: função actualizarNota no db.ts não tinha o campo 'favorita'
 - [x] Corrigir o bug - adicionado campo favorita ao db.ts
 - [x] Guardar checkpoint
+
+## BUG: Alerta escovas 7.5% ainda aparece no dashboard
+- [x] Encontrar alerta remanescente - estava no ResultadosDashboard.tsx e PortalLoja.tsx (frontend)
+- [x] Remover referências a 0.075 no frontend: cores de barra, badges, texto de objetivo
+- [x] Atualizar para: verde >=10%, âmbar >0%, cinza =0%
+- [x] Guardar checkpoint
