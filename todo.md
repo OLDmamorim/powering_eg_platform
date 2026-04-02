@@ -1320,3 +1320,9 @@
 - [x] Remover referências a 0.075 no frontend: cores de barra, badges, texto de objetivo
 - [x] Atualizar para: verde >=10%, âmbar >0%, cinza =0%
 - [x] Guardar checkpoint
+
+## Ordenação Tabela NPS - Elegíveis por resultado
+- [x] Ordenar elegíveis por NPS Mês descendente (desempate por NPS Anual, depois Taxa Resposta)
+- [x] Não elegíveis ficam no fundo
+- [x] Adicionada coluna NPS Anual à tabela
+- [x] Guardar checkpoint

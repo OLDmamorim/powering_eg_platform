@@ -1140,25 +1140,36 @@ export function ResultadosDashboard() {
           const npsRankingData = (ranking || []).map((item: any) => {
             const npsVal = getNPSMes(item.lojaId);
             const taxaVal = getTaxaRespostaMes(item.lojaId);
+            // NPS Anual
+            const npsLoja = npsPorLoja.get(item.lojaId);
+            const npsAnualVal = npsLoja?.npsAnoTotal ? parseFloat(npsLoja.npsAnoTotal) : null;
             return {
               lojaId: item.lojaId,
               lojaNome: item.lojaNome,
               zona: item.zona,
               nps: npsVal,
               taxaResposta: taxaVal,
+              npsAnual: npsAnualVal,
               elegivelPremio: npsVal !== null && taxaVal !== null && npsVal >= 0.8 && taxaVal >= 0.075,
               motivoInelegivel: npsVal !== null ? (
-                npsVal < 0.8 && taxaVal !== null && taxaVal < 0.075 ? 'NPS < 80% e Taxa < 7.5%' :
+                npsVal < 0.8 && taxaVal !== null && taxaVal < 0.075 ? 'NPS < 80% e Taxa < 7,5%' :
                 npsVal < 0.8 ? 'NPS < 80%' :
-                taxaVal !== null && taxaVal < 0.075 ? 'Taxa resposta < 7.5%' : null
+                taxaVal !== null && taxaVal < 0.075 ? 'Taxa resposta < 7,5%' : null
               ) : null,
             };
           }).filter((item: any) => item.nps !== null)
            .sort((a: any, b: any) => {
-             // Ordenar: elegíveis primeiro (por NPS desc), depois inelegíveis (por NPS desc)
+             // Elegíveis primeiro, depois inelegíveis
              if (a.elegivelPremio && !b.elegivelPremio) return -1;
              if (!a.elegivelPremio && b.elegivelPremio) return 1;
-             return (b.nps || 0) - (a.nps || 0);
+             // Dentro de cada grupo: NPS Mês desc
+             const diffNps = (b.nps || 0) - (a.nps || 0);
+             if (diffNps !== 0) return diffNps;
+             // Desempate: NPS Anual desc
+             const diffAnual = (b.npsAnual || 0) - (a.npsAnual || 0);
+             if (diffAnual !== 0) return diffAnual;
+             // Desempate: Taxa de Resposta desc
+             return (b.taxaResposta || 0) - (a.taxaResposta || 0);
            });
           
           const totalElegivel = npsRankingData.filter((i: any) => i.elegivelPremio).length;
@@ -1205,8 +1216,9 @@ export function ResultadosDashboard() {
                         <th className="text-left py-3 px-2 w-10">#</th>
                         <th className="text-left py-3 px-2">Loja</th>
                         <th className="text-left py-3 px-2">Zona</th>
-                        <th className="text-right py-3 px-2">NPS</th>
+                        <th className="text-right py-3 px-2">NPS Mês</th>
                         <th className="text-right py-3 px-2">Taxa Resp.</th>
+                        <th className="text-right py-3 px-2">NPS Anual</th>
                         <th className="text-center py-3 px-2">Prémio</th>
                         <th className="text-left py-3 px-2">Motivo</th>
                       </tr>
@@ -1240,6 +1252,11 @@ export function ResultadosDashboard() {
                               item.taxaResposta !== null && item.taxaResposta < 0.075 ? 'text-red-500' : ''
                             }`}>
                               {item.taxaResposta !== null ? `${(item.taxaResposta * 100).toFixed(1)}%` : '-'}
+                            </span>
+                          </td>
+                          <td className="py-2 px-2 text-right">
+                            <span className="font-medium text-muted-foreground">
+                              {item.npsAnual !== null ? `${(item.npsAnual * 100).toFixed(1)}%` : '-'}
                             </span>
                           </td>
                           <td className="py-2 px-2 text-center">
