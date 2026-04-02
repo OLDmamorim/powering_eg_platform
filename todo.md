@@ -1326,3 +1326,10 @@
 - [x] Não elegíveis ficam no fundo
 - [x] Adicionada coluna NPS Anual à tabela
 - [x] Guardar checkpoint
+
+## Corrigir desempate NPS Anual na tabela
+- [x] Quando NPS Mês é igual, ordenar por NPS Anual desc (ex: Viana 100% antes de Barcelos 92.6%)
+- [x] Reforçada lógica com Math.round para evitar problemas de precisão float
+- [x] NPS Anual null tratado como -1 (lojas sem dados ficam abaixo)
+- [x] 8 testes unitários passados
+- [ ] Guardar checkpoint

@@ -1162,14 +1162,18 @@ export function ResultadosDashboard() {
              // Elegíveis primeiro, depois inelegíveis
              if (a.elegivelPremio && !b.elegivelPremio) return -1;
              if (!a.elegivelPremio && b.elegivelPremio) return 1;
-             // Dentro de cada grupo: NPS Mês desc
-             const diffNps = (b.nps || 0) - (a.nps || 0);
-             if (diffNps !== 0) return diffNps;
-             // Desempate: NPS Anual desc
-             const diffAnual = (b.npsAnual || 0) - (a.npsAnual || 0);
-             if (diffAnual !== 0) return diffAnual;
-             // Desempate: Taxa de Resposta desc
-             return (b.taxaResposta || 0) - (a.taxaResposta || 0);
+             // Dentro de cada grupo: NPS Mês desc (arredondar a 4 casas para evitar problemas de float)
+             const aNpsMes = Math.round((a.nps ?? 0) * 10000);
+             const bNpsMes = Math.round((b.nps ?? 0) * 10000);
+             if (bNpsMes !== aNpsMes) return bNpsMes - aNpsMes;
+             // Desempate 1: NPS Anual desc (quem tem valor > quem não tem)
+             const aNpsAnual = Math.round((a.npsAnual ?? -1) * 10000);
+             const bNpsAnual = Math.round((b.npsAnual ?? -1) * 10000);
+             if (bNpsAnual !== aNpsAnual) return bNpsAnual - aNpsAnual;
+             // Desempate 2: Taxa de Resposta desc
+             const aTaxa = Math.round((a.taxaResposta ?? 0) * 10000);
+             const bTaxa = Math.round((b.taxaResposta ?? 0) * 10000);
+             return bTaxa - aTaxa;
            });
           
           const totalElegivel = npsRankingData.filter((i: any) => i.elegivelPremio).length;
