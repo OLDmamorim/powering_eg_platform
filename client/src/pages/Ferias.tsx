@@ -179,7 +179,8 @@ export default function Ferias() {
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('cal');
   const [gestorFilter, setGestorFilter] = useState('all');
-  const [lojaFilter, setLojaFilter] = useState('all');
+  const [lojaFilter, setLojaFilter] = useState<string[]>([]);
+  const [lojaPopoverOpen, setLojaPopoverOpen] = useState(false);
   const [monthFilter, setMonthFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
   const [search, setSearch] = useState('');
@@ -442,7 +443,7 @@ export default function Ferias() {
       const gStores = GESTORES[gestorFilter]?.map(norm) || [];
       result = result.filter(e => gStores.includes(norm(e.store)));
     }
-    if (lojaFilter !== 'all') result = result.filter(e => norm(e.store) === norm(lojaFilter));
+    if (lojaFilter.length > 0) result = result.filter(e => lojaFilter.map(norm).includes(norm(e.store)));
     if (search) {
       const s = search.toLowerCase();
       result = result.filter(e => e.name.toLowerCase().includes(s) || e.store.toLowerCase().includes(s) || e.num.includes(s));
@@ -657,20 +658,42 @@ export default function Ferias() {
                   <Filter className="h-4 w-4 text-muted-foreground" />
                   <span className="text-xs font-medium text-muted-foreground">Filtros:</span>
                 </div>
-                <Select value={gestorFilter} onValueChange={v => { setGestorFilter(v); setLojaFilter('all'); }}>
+                <Select value={gestorFilter} onValueChange={v => { setGestorFilter(v); setLojaFilter([]); }}>
                   <SelectTrigger className="w-[180px] h-8 text-xs"><SelectValue placeholder="Gestor" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Todos os gestores</SelectItem>
                     {Object.keys(GESTORES).sort().map(g => <SelectItem key={g} value={g}>{g}</SelectItem>)}
                   </SelectContent>
                 </Select>
-                <Select value={lojaFilter} onValueChange={setLojaFilter}>
-                  <SelectTrigger className="w-[180px] h-8 text-xs"><SelectValue placeholder="Loja" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todas as lojas</SelectItem>
-                    {availableStores.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                  </SelectContent>
-                </Select>
+                <Popover open={lojaPopoverOpen} onOpenChange={setLojaPopoverOpen}>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" size="sm" className="w-[200px] h-8 text-xs gap-1 justify-between font-normal">
+                      <Building2 className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                      <span className="truncate">{lojaFilter.length === 0 ? 'Todas as lojas' : lojaFilter.length === 1 ? lojaFilter[0] : `${lojaFilter.length} lojas`}</span>
+                      <ChevronsUpDown className="h-3 w-3 opacity-50 shrink-0" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[260px] p-0" align="start">
+                    <div className="p-2 border-b flex gap-1">
+                      <Button variant="ghost" size="sm" className="flex-1 text-xs h-7" onClick={() => setLojaFilter([])}>Limpar</Button>
+                      <Button variant="ghost" size="sm" className="flex-1 text-xs h-7" onClick={() => setLojaFilter([...availableStores])}>Todas</Button>
+                    </div>
+                    <div className="max-h-[280px] overflow-y-auto p-1">
+                      {availableStores.map(s => (
+                        <label key={s} className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-accent cursor-pointer text-xs">
+                          <Checkbox
+                            checked={lojaFilter.includes(s)}
+                            onCheckedChange={(checked) => {
+                              if (checked) setLojaFilter(prev => [...prev, s]);
+                              else setLojaFilter(prev => prev.filter(l => l !== s));
+                            }}
+                          />
+                          {s}
+                        </label>
+                      ))}
+                    </div>
+                  </PopoverContent>
+                </Popover>
                 <Select value={monthFilter} onValueChange={setMonthFilter}>
                   <SelectTrigger className="w-[140px] h-8 text-xs"><SelectValue placeholder="Mês" /></SelectTrigger>
                   <SelectContent>

@@ -1332,4 +1332,12 @@
 - [x] Reforçada lógica com Math.round para evitar problemas de precisão float
 - [x] NPS Anual null tratado como -1 (lojas sem dados ficam abaixo)
 - [x] 8 testes unitários passados
+- [x] Guardar checkpoint
+
+## Filtro Multi-Select de Lojas na Página de Férias
+- [x] Modificar filtro de lojas para permitir selecção múltipla (Popover com checkboxes)
+- [x] Mostrar férias de todas as lojas seleccionadas em simultâneo
+- [x] Manter compatibilidade com filtro de gestor existente (reset ao mudar gestor)
+- [x] Botões "Limpar" e "Todas" para facilitar selecção
+- [x] Sem erros TypeScript
 - [ ] Guardar checkpoint
