@@ -1341,3 +1341,15 @@
 - [x] Botões "Limpar" e "Todas" para facilitar selecção
 - [x] Sem erros TypeScript
 - [ ] Guardar checkpoint
+
+## Bug: Filtro "Último mês" no Dashboard NPS mostra 0% e tabela vazia
+- [ ] Investigar porque o filtro "Último mês" não mostra dados NPS
+- [ ] Corrigir a lógica de filtragem
+- [ ] Guardar checkpoint
+
+## Bug: Ordenação NPS Ranking - Barcelos acima de Viana (NPS Anual inferior)
+- [x] Investigar porque Barcelos (92.6% anual) aparece acima de Viana (100% anual) quando NPS Mês é igual
+- [x] Causa: NPSDashboard.tsx não tinha desempate por NPS Anual (só o ResultadosDashboard tinha)
+- [x] Corrigido ambos os sorts no NPSDashboard.tsx (rankingLojas + sortedRanking)
+- [x] 8 testes unitários passados
+- [ ] Guardar checkpoint

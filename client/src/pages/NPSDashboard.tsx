@@ -201,7 +201,20 @@ export function NPSDashboard() {
         };
       })
       .filter((item: any) => item.nps !== null)
-      .sort((a: any, b: any) => (b.nps || 0) - (a.nps || 0));
+      .sort((a: any, b: any) => {
+        // NPS Mês desc (arredondar para evitar problemas de float)
+        const aNpsMes = Math.round((a.nps ?? 0) * 10000);
+        const bNpsMes = Math.round((b.nps ?? 0) * 10000);
+        if (bNpsMes !== aNpsMes) return bNpsMes - aNpsMes;
+        // Desempate 1: NPS Anual desc
+        const aNpsAnual = Math.round((a.npsAnual ?? -1) * 10000);
+        const bNpsAnual = Math.round((b.npsAnual ?? -1) * 10000);
+        if (bNpsAnual !== aNpsAnual) return bNpsAnual - aNpsAnual;
+        // Desempate 2: Taxa de Resposta desc
+        const aTaxa = Math.round((a.taxaResposta ?? 0) * 10000);
+        const bTaxa = Math.round((b.taxaResposta ?? 0) * 10000);
+        return bTaxa - aTaxa;
+      });
   }, [dadosFiltrados, mesSelecionado, currentMonth]);
   
   // Dados para gráfico de barras (ranking)
@@ -563,7 +576,18 @@ export function NPSDashboard() {
                     const bElegivel = b.nps >= 0.8 && b.taxaResposta !== null && b.taxaResposta >= 0.075;
                     if (aElegivel && !bElegivel) return -1;
                     if (!aElegivel && bElegivel) return 1;
-                    return (b.nps || 0) - (a.nps || 0);
+                    // NPS Mês desc (arredondar para evitar problemas de float)
+                    const aNpsMes = Math.round((a.nps ?? 0) * 10000);
+                    const bNpsMes = Math.round((b.nps ?? 0) * 10000);
+                    if (bNpsMes !== aNpsMes) return bNpsMes - aNpsMes;
+                    // Desempate 1: NPS Anual desc
+                    const aNpsAnual = Math.round((a.npsAnual ?? -1) * 10000);
+                    const bNpsAnual = Math.round((b.npsAnual ?? -1) * 10000);
+                    if (bNpsAnual !== aNpsAnual) return bNpsAnual - aNpsAnual;
+                    // Desempate 2: Taxa de Resposta desc
+                    const aTaxa = Math.round((a.taxaResposta ?? 0) * 10000);
+                    const bTaxa = Math.round((b.taxaResposta ?? 0) * 10000);
+                    return bTaxa - aTaxa;
                   });
                   const totalElegivel = sortedRanking.filter((i: any) => i.nps >= 0.8 && i.taxaResposta !== null && i.taxaResposta >= 0.075).length;
                   const totalInelegivel = sortedRanking.length - totalElegivel;
