@@ -1041,20 +1041,20 @@ export function ResultadosDashboard() {
                   );
                 })()}
                 {/* Cabeçalhos de coluna - dinâmicos conforme métrica */}
-                <div className="flex items-center gap-3 pb-2 border-b text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                  <div className="w-8 text-center">#</div>
-                  <div className="flex-1">Loja</div>
-                  <div className="text-right min-w-[60px]">
-                    {metricaRanking === 'totalServicos' ? 'Serviços' :
-                     metricaRanking === 'taxaReparacao' ? 'Taxa Rep.' :
-                     metricaRanking === 'desvioPercentualMes' ? 'Desvio %' :
-                     'Serv./Colab.'}
+                <div className="flex items-center gap-2 md:gap-3 pb-2 border-b text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  <div className="w-6 md:w-8 text-center">#</div>
+                  <div className="flex-1 min-w-0">Loja</div>
+                  <div className="text-right min-w-[40px] md:min-w-[60px]">
+                    {metricaRanking === 'totalServicos' ? 'Serv.' :
+                     metricaRanking === 'taxaReparacao' ? 'Taxa' :
+                     metricaRanking === 'desvioPercentualMes' ? 'Desv.' :
+                     'S/C'}
                   </div>
                   {metricaRanking !== 'totalServicos' && (
-                    <div className="text-right min-w-[60px]">Serviços</div>
+                    <div className="text-right min-w-[40px] md:min-w-[60px] hidden sm:block">Serviços</div>
                   )}
-                  <div className="text-right min-w-[60px]">Objetivo</div>
-                  {npsPorLoja.size > 0 && <div className="text-right min-w-[85px] border-l pl-3">NPS</div>}
+                  <div className="text-right min-w-[40px] md:min-w-[60px]">Obj.</div>
+                  {npsPorLoja.size > 0 && <div className="text-right min-w-[55px] md:min-w-[85px] border-l pl-2 md:pl-3">NPS</div>}
                 </div>
                 {ranking.map((item, idx) => {
                   let valorDisplay = '';
@@ -1069,9 +1069,9 @@ export function ResultadosDashboard() {
                   }
                   
                   return (
-                    <div key={idx} className="flex items-center gap-3">
+                    <div key={idx} className="flex items-center gap-2 md:gap-3">
                       <div className={`
-                        flex items-center justify-center w-8 h-8 rounded-full font-bold text-sm
+                        flex items-center justify-center w-6 h-6 md:w-8 md:h-8 rounded-full font-bold text-xs md:text-sm flex-shrink-0
                         ${idx === 0 ? 'bg-yellow-500 text-white' : ''}
                         ${idx === 1 ? 'bg-gray-400 text-white' : ''}
                         ${idx === 2 ? 'bg-orange-600 text-white' : ''}
@@ -1079,20 +1079,20 @@ export function ResultadosDashboard() {
                       `}>
                         {idx + 1}
                       </div>
-                      <div className="flex-1">
-                        <div className="font-medium">{item.lojaNome}</div>
-                        <div className="text-sm text-muted-foreground">{item.zona}</div>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium text-sm md:text-base truncate">{item.lojaNome}</div>
+                        <div className="text-xs md:text-sm text-muted-foreground truncate">{item.zona}</div>
                       </div>
-                      <div className="text-right min-w-[60px]">
-                        <div className="font-bold">{valorDisplay}</div>
+                      <div className="text-right min-w-[40px] md:min-w-[60px]">
+                        <div className="font-bold text-sm md:text-base">{valorDisplay}</div>
                       </div>
                       {metricaRanking !== 'totalServicos' && (
-                        <div className="text-right min-w-[60px]">
+                        <div className="text-right min-w-[40px] md:min-w-[60px] hidden sm:block">
                           <div className="font-bold text-muted-foreground">{item.totalServicos || '-'}</div>
                         </div>
                       )}
-                      <div className="text-right min-w-[60px]">
-                        <div className="font-bold text-muted-foreground">{item.objetivoMensal || '-'}</div>
+                      <div className="text-right min-w-[40px] md:min-w-[60px]">
+                        <div className="font-bold text-sm md:text-base text-muted-foreground">{item.objetivoMensal || '-'}</div>
                       </div>
                       {/* Coluna NPS com elegibilidade prémio */}
                       {npsPorLoja.size > 0 && (() => {
@@ -1102,8 +1102,8 @@ export function ResultadosDashboard() {
                         const npsAbaixo = npsVal !== null && npsVal < 0.8;
                         const taxaAbaixo = taxaVal !== null && taxaVal < 0.075;
                         return (
-                          <div className="text-right min-w-[85px] border-l pl-3">
-                            <div className={`font-bold text-sm ${
+                          <div className="text-right min-w-[55px] md:min-w-[85px] border-l pl-2 md:pl-3">
+                            <div className={`font-bold text-xs md:text-sm ${
                               npsVal !== null 
                                 ? npsVal >= 0.8 ? 'text-green-600' 
                                   : npsVal >= 0.5 ? 'text-yellow-600' 
@@ -1214,25 +1214,25 @@ export function ResultadosDashboard() {
                 
                 {/* Tabela */}
                 <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
+                  <table className="w-full text-xs md:text-sm">
                     <thead>
                       <tr className="border-b">
-                        <th className="text-left py-3 px-2 w-10">#</th>
-                        <th className="text-left py-3 px-2">Loja</th>
-                        <th className="text-left py-3 px-2">Zona</th>
-                        <th className="text-right py-3 px-2">NPS Mês</th>
-                        <th className="text-right py-3 px-2">Taxa Resp.</th>
-                        <th className="text-right py-3 px-2">NPS Anual</th>
-                        <th className="text-center py-3 px-2">Prémio</th>
-                        <th className="text-left py-3 px-2">Motivo</th>
+                        <th className="text-left py-2 md:py-3 px-1 md:px-2 w-8 md:w-10">#</th>
+                        <th className="text-left py-2 md:py-3 px-1 md:px-2">Loja</th>
+                        <th className="text-left py-2 md:py-3 px-1 md:px-2 hidden md:table-cell">Zona</th>
+                        <th className="text-right py-2 md:py-3 px-1 md:px-2">NPS</th>
+                        <th className="text-right py-2 md:py-3 px-1 md:px-2">Taxa</th>
+                        <th className="text-right py-2 md:py-3 px-1 md:px-2">Anual</th>
+                        <th className="text-center py-2 md:py-3 px-1 md:px-2">Prémio</th>
+                        <th className="text-left py-2 md:py-3 px-1 md:px-2 hidden sm:table-cell">Motivo</th>
                       </tr>
                     </thead>
                     <tbody>
                       {npsRankingData.map((item: any, idx: number) => (
                         <tr key={item.lojaId} className={`border-b hover:bg-muted/50 ${!item.elegivelPremio ? 'opacity-70' : ''}`}>
-                          <td className="py-2 px-2">
+                          <td className="py-1.5 md:py-2 px-1 md:px-2">
                             <div className={`
-                              flex items-center justify-center w-7 h-7 rounded-full font-bold text-xs
+                              flex items-center justify-center w-6 h-6 md:w-7 md:h-7 rounded-full font-bold text-[10px] md:text-xs
                               ${item.elegivelPremio && idx === 0 ? 'bg-yellow-500 text-white' : ''}
                               ${item.elegivelPremio && idx === 1 ? 'bg-gray-400 text-white' : ''}
                               ${item.elegivelPremio && idx === 2 ? 'bg-orange-600 text-white' : ''}
@@ -1241,9 +1241,12 @@ export function ResultadosDashboard() {
                               {idx + 1}
                             </div>
                           </td>
-                          <td className="py-2 px-2 font-medium">{item.lojaNome}</td>
-                          <td className="py-2 px-2 text-muted-foreground text-xs">{item.zona}</td>
-                          <td className="py-2 px-2 text-right">
+                          <td className="py-1.5 md:py-2 px-1 md:px-2">
+                            <div className="font-medium text-xs md:text-sm">{item.lojaNome}</div>
+                            <div className="text-[10px] text-muted-foreground md:hidden">{item.zona}</div>
+                          </td>
+                          <td className="py-1.5 md:py-2 px-1 md:px-2 text-muted-foreground text-xs hidden md:table-cell">{item.zona}</td>
+                          <td className="py-1.5 md:py-2 px-1 md:px-2 text-right">
                             <span className={`font-bold ${
                               item.nps >= 0.8 ? 'text-green-600' :
                               item.nps >= 0.5 ? 'text-yellow-600' : 'text-red-600'
@@ -1251,30 +1254,32 @@ export function ResultadosDashboard() {
                               {(item.nps * 100).toFixed(1)}%
                             </span>
                           </td>
-                          <td className="py-2 px-2 text-right">
-                            <span className={`font-medium ${
+                          <td className="py-1.5 md:py-2 px-1 md:px-2 text-right">
+                            <span className={`font-medium text-xs md:text-sm ${
                               item.taxaResposta !== null && item.taxaResposta < 0.075 ? 'text-red-500' : ''
                             }`}>
                               {item.taxaResposta !== null ? `${(item.taxaResposta * 100).toFixed(1)}%` : '-'}
                             </span>
                           </td>
-                          <td className="py-2 px-2 text-right">
-                            <span className="font-medium text-muted-foreground">
+                          <td className="py-1.5 md:py-2 px-1 md:px-2 text-right">
+                            <span className="font-medium text-xs md:text-sm text-muted-foreground">
                               {item.npsAnual !== null ? `${(item.npsAnual * 100).toFixed(1)}%` : '-'}
                             </span>
                           </td>
-                          <td className="py-2 px-2 text-center">
+                          <td className="py-1.5 md:py-2 px-1 md:px-2 text-center">
                             {item.elegivelPremio ? (
-                              <Badge className="bg-green-100 text-green-800 hover:bg-green-100 dark:bg-green-900 dark:text-green-200">
-                                ✓ Elegível
+                              <Badge className="bg-green-100 text-green-800 hover:bg-green-100 dark:bg-green-900 dark:text-green-200 text-[10px] md:text-xs px-1 md:px-2">
+                                <span className="hidden sm:inline">✓ Elegível</span>
+                                <span className="sm:hidden">✓</span>
                               </Badge>
                             ) : (
                               <Badge variant="destructive" className="text-xs">
-                                Sem Prémio
+                                <span className="hidden sm:inline">Sem Prémio</span>
+                                <span className="sm:hidden">✗</span>
                               </Badge>
                             )}
                           </td>
-                          <td className="py-2 px-2 text-xs text-red-500">
+                          <td className="py-1.5 md:py-2 px-1 md:px-2 text-xs text-red-500 hidden sm:table-cell">
                             {item.motivoInelegivel || ''}
                           </td>
                         </tr>

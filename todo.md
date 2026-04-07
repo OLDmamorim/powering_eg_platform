@@ -1353,3 +1353,13 @@
 - [x] Corrigido ambos os sorts no NPSDashboard.tsx (rankingLojas + sortedRanking)
 - [x] 8 testes unitários passados
 - [ ] Guardar checkpoint
+
+## Bug: Dashboard Resultados - Tabela ranking cortada no mobile
+- [x] Tabela de ranking não cabe no ecrã mobile - reduzidos min-widths e paddings
+- [x] Nomes de zona: escondidos como coluna separada no mobile, mostrados abaixo do nome da loja
+- [x] Coluna Serviços escondida no mobile (hidden sm:block)
+- [x] Coluna Motivo escondida no mobile (hidden sm:table-cell)
+- [x] Badges de prémio reduzidos no mobile (✓ / ✗)
+- [x] Tabela NPS Ranking também corrigida para mobile
+- [x] Tabela principal de ranking também corrigida com truncate nos nomes
+- [ ] Guardar checkpoint
