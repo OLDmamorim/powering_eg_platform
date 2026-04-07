@@ -9008,6 +9008,7 @@ IMPORTANTE:
         email: z.string().email().optional().nullable(),
         telefone: z.string().optional().nullable(),
         ativo: z.boolean().optional(),
+        telegramChatId: z.string().optional().nullable(),
       }))
       .mutation(async ({ ctx, input }) => {
         // Verificar se o volante pertence ao gestor
@@ -9021,6 +9022,7 @@ IMPORTANTE:
           email: input.email ?? undefined,
           telefone: input.telefone ?? undefined,
           ativo: input.ativo,
+          telegramChatId: input.telegramChatId !== undefined ? (input.telegramChatId ?? null) : undefined,
         });
         
         return updated;

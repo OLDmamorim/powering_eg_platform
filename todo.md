@@ -1363,3 +1363,9 @@
 - [x] Tabela NPS Ranking também corrigida para mobile
 - [x] Tabela principal de ranking também corrigida com truncate nos nomes
 - [ ] Guardar checkpoint
+
+## Adicionar campo Telegram Chat ID ao formulário de edição de volantes
+- [x] Adicionar campo Telegram Chat ID ao diálogo de editar volante
+- [x] Adicionar telegramChatId ao router atualizar no backend
+- [x] Sem erros TypeScript
+- [ ] Guardar checkpoint

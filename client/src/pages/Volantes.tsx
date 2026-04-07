@@ -39,6 +39,7 @@ export default function Volantes() {
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [telefone, setTelefone] = useState("");
+  const [telegramChatId, setTelegramChatId] = useState("");
   
   // Queries
   const { data: volantes, isLoading, refetch } = trpc.volantes.listar.useQuery();
@@ -125,6 +126,7 @@ export default function Volantes() {
     setNome("");
     setEmail("");
     setTelefone("");
+    setTelegramChatId("");
   };
   
   const handleOpenDialog = (volante?: any) => {
@@ -133,6 +135,7 @@ export default function Volantes() {
       setNome(volante.nome);
       setEmail(volante.email || "");
       setTelefone(volante.telefone || "");
+      setTelegramChatId(volante.telegramChatId || "");
     } else {
       setEditingVolante(null);
       resetForm();
@@ -147,6 +150,7 @@ export default function Volantes() {
         nome,
         email: email || null,
         telefone: telefone || null,
+        telegramChatId: telegramChatId || null,
       });
     } else {
       criarVolante.mutate({
@@ -249,6 +253,17 @@ export default function Volantes() {
                     onChange={(e) => setTelefone(e.target.value)}
                     placeholder="+351 912 345 678"
                   />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="telegramChatId">Telegram Chat ID</Label>
+                  <Input
+                    id="telegramChatId"
+                    value={telegramChatId}
+                    onChange={(e) => setTelegramChatId(e.target.value)}
+                    placeholder="Ex: 123456789"
+                  />
+                  <p className="text-xs text-muted-foreground">ID do chat Telegram para receber notificações</p>
                 </div>
               </div>
               
