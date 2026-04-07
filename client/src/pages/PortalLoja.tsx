@@ -6612,6 +6612,7 @@ function VolanteInterface({
   t: (key: string) => string;
 }) {
   const { theme, toggleTheme } = useTheme();
+  const utils = trpc.useUtils();
   const [activeView, setActiveView] = useState<"menu" | "agenda" | "resultados" | "historico" | "historico-servicos" | "dashboard" | "circulares" | "configuracoes">("menu");
   const [activeTab, setActiveTab] = useState<"agenda" | "resultados">("agenda");
   const [mesSelecionado, setMesSelecionado] = useState(() => {
@@ -6788,10 +6789,12 @@ function VolanteInterface({
 
   // Mutation para aprovar pedido
   const aprovarMutation = trpc.pedidosApoio.aprovar.useMutation({
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success(language === 'pt' ? 'Pedido aprovado com sucesso!' : 'Request approved successfully!');
-      refetchPedidos();
-      refetchEstadoMes();
+      await Promise.all([
+        utils.pedidosApoio.listarPorVolante.invalidate(),
+        utils.pedidosApoio.estadoCompletoMes.invalidate(),
+      ]);
       setPedidoSelecionado(null);
     },
     onError: (error) => {
@@ -6801,10 +6804,12 @@ function VolanteInterface({
 
   // Mutation para anular pedido
   const anularMutation = trpc.portalVolante.anularPedido.useMutation({
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success(language === 'pt' ? 'Pedido anulado com sucesso!' : 'Request cancelled successfully!');
-      refetchPedidos();
-      refetchEstadoMes();
+      await Promise.all([
+        utils.pedidosApoio.listarPorVolante.invalidate(),
+        utils.pedidosApoio.estadoCompletoMes.invalidate(),
+      ]);
       setPedidoSelecionado(null);
       setAnularDialogOpen(false);
       setMotivoAnulacao("");
@@ -6816,10 +6821,12 @@ function VolanteInterface({
 
   // Mutation para editar pedido
   const editarMutation = trpc.portalVolante.editarPedido.useMutation({
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success(language === 'pt' ? 'Pedido atualizado com sucesso!' : 'Request updated successfully!');
-      refetchPedidos();
-      refetchEstadoMes();
+      await Promise.all([
+        utils.pedidosApoio.listarPorVolante.invalidate(),
+        utils.pedidosApoio.estadoCompletoMes.invalidate(),
+      ]);
       setPedidoSelecionado(null);
       setEditarDialogOpen(false);
       setEditarData("");
@@ -6834,10 +6841,12 @@ function VolanteInterface({
 
   // Mutation para reprovar pedido
   const reprovarMutation = trpc.pedidosApoio.reprovar.useMutation({
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success(language === 'pt' ? 'Pedido reprovado' : 'Request rejected');
-      refetchPedidos();
-      refetchEstadoMes();
+      await Promise.all([
+        utils.pedidosApoio.listarPorVolante.invalidate(),
+        utils.pedidosApoio.estadoCompletoMes.invalidate(),
+      ]);
       setPedidoSelecionado(null);
       setReprovarDialogOpen(false);
       setMotivoReprovacao("");
@@ -6849,10 +6858,12 @@ function VolanteInterface({
 
   // Mutation para criar agendamento pelo volante
   const criarAgendamentoMutation = trpc.pedidosApoio.criarAgendamento.useMutation({
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success(language === 'pt' ? 'Agendamento criado com sucesso!' : 'Appointment created successfully!');
-      refetchPedidos();
-      refetchEstadoMes();
+      await Promise.all([
+        utils.pedidosApoio.listarPorVolante.invalidate(),
+        utils.pedidosApoio.estadoCompletoMes.invalidate(),
+      ]);
       setCriarAgendamentoOpen(false);
       setNovoAgendamentoData('');
       setNovoAgendamentoPeriodo('manha');
@@ -6868,10 +6879,12 @@ function VolanteInterface({
 
   // Mutation para eliminar agendamento
   const eliminarAgendamentoMutation = trpc.pedidosApoio.eliminarAgendamento.useMutation({
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success(language === 'pt' ? 'Agendamento eliminado!' : 'Appointment deleted!');
-      refetchPedidos();
-      refetchEstadoMes();
+      await Promise.all([
+        utils.pedidosApoio.listarPorVolante.invalidate(),
+        utils.pedidosApoio.estadoCompletoMes.invalidate(),
+      ]);
       setDiaDetalheOpen(false);
     },
     onError: (error) => {
@@ -6881,10 +6894,12 @@ function VolanteInterface({
 
   // Mutation para editar agendamento
   const editarAgendamentoMutation = trpc.pedidosApoio.editarAgendamento.useMutation({
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success(language === 'pt' ? 'Agendamento atualizado!' : 'Appointment updated!');
-      refetchPedidos();
-      refetchEstadoMes();
+      await Promise.all([
+        utils.pedidosApoio.listarPorVolante.invalidate(),
+        utils.pedidosApoio.estadoCompletoMes.invalidate(),
+      ]);
       setEditarAgendamentoOpen(false);
     },
     onError: (error) => {
@@ -6894,10 +6909,12 @@ function VolanteInterface({
 
   // Mutation para criar bloqueio
   const criarBloqueioMutation = trpc.pedidosApoio.criarBloqueio.useMutation({
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success(language === 'pt' ? 'Dia bloqueado com sucesso!' : 'Day blocked successfully!');
-      refetchPedidos();
-      refetchEstadoMes();
+      await Promise.all([
+        utils.pedidosApoio.listarPorVolante.invalidate(),
+        utils.pedidosApoio.estadoCompletoMes.invalidate(),
+      ]);
       setBloquearDiaOpen(false);
       setBloqueioData('');
       setBloqueioPeriodo('dia_todo');
@@ -6911,10 +6928,12 @@ function VolanteInterface({
 
   // Mutation para eliminar bloqueio
   const eliminarBloqueioMutation = trpc.pedidosApoio.eliminarBloqueio.useMutation({
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success(language === 'pt' ? 'Bloqueio removido!' : 'Block removed!');
-      refetchPedidos();
-      refetchEstadoMes();
+      await Promise.all([
+        utils.pedidosApoio.listarPorVolante.invalidate(),
+        utils.pedidosApoio.estadoCompletoMes.invalidate(),
+      ]);
     },
     onError: (error) => {
       toast.error(error.message);

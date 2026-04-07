@@ -1369,3 +1369,10 @@
 - [x] Adicionar telegramChatId ao router atualizar no backend
 - [x] Sem erros TypeScript
 - [ ] Guardar checkpoint
+
+## Bug: Calendário não actualiza dinamicamente quando volante confirma/cancela agendamento
+- [x] Investigar como o calendário obtém dados de agendamentos (estadoCompletoMes query)
+- [x] Substituir refetch() por utils.invalidate() em todas as 10 mutations do portal do volante
+- [x] Adicionado await para garantir que invalidação completa antes de limpar estados
+- [x] Sem erros TypeScript
+- [ ] Guardar checkpoint
