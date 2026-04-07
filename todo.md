@@ -1388,3 +1388,15 @@
 - [x] Badge Volante agora é azul (bg-blue-600) na tabela principal e na preview
 - [x] Recalbra mantém-se laranja (bg-orange-500)
 - [ ] Guardar checkpoint
+
+## Bug: Chatbot IA não responde a perguntas sobre comissionamento (pede dados em vez de calcular)
+- [x] Investigar código do chatbot e system prompt sobre comissionamento
+- [x] Verificar que dados de comissionamento existem na BD (serviços, colaboradores, vendas, NPS)
+- [x] Corrigir chatbot: adicionar numColaboradores e FTE aos dados pessoais do gestor
+- [x] Corrigir chatbot: adicionar numColaboradores e FTE aos dados nacionais
+- [x] Corrigir chatbot: adicionar vendas complementares pessoais com comissões pré-calculadas
+- [x] Corrigir chatbot: adicionar instruções fortes para cálculo proactivo (NUNCA pedir dados)
+- [x] Corrigir chatbot portal loja: mesma instrução de cálculo proactivo
+- [x] Mostrar TODOS os meses (não só o último) nos dados pessoais para cálculos trimestrais
+- [x] 6 testes unitários passados
+- [ ] Testar com pergunta "Qual o valor de comissionamento do primeiro trimestre?"

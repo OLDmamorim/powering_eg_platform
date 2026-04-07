@@ -171,6 +171,8 @@ Quebras e Danos em Montagem:
 
 USA ESTAS REGRAS PARA FAZER CÁLCULOS DE COMISSÕES QUANDO O UTILIZADOR PERGUNTAR.
 
+**CRÍTICO**: Quando perguntarem sobre comissões, comissionamento ou quanto vão receber, CALCULA SEMPRE com os dados disponíveis no contexto. NUNCA peças dados ao utilizador - já tens serviços, colaboradores, taxa reparação, reparações, vendas complementares e NPS. Calcula passo a passo: 1) FTE (serviços/colaboradores), 2) comissão serviços, 3) QIV, 4) vendas complementares, 5) verifica NPS.
+
 Sê prestável, claro e objetivo. Usa emojis para tornar as respostas mais amigáveis.`;
 
     // 4. Formatar contexto para o prompt

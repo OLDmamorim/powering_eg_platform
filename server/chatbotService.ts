@@ -658,31 +658,89 @@ function formatarContextoPessoal(contexto: ContextoPlataforma): string {
   }
   texto += '\n';
   
-  // Resumo de performance das minhas lojas
+  // Resumo de performance das minhas lojas - TODOS os meses disponíveis (para cálculos trimestrais)
   if (cp.meusResultadosMensais.length > 0) {
-    texto += `📊 PERFORMANCE DAS MINHAS LOJAS (último mês disponível):\n`;
-    // Agrupar por loja e pegar o mais recente
-    const resultadosPorLoja: Record<number, any> = {};
+    const mesesNomes = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+    
+    // Agrupar por período (mês/ano)
+    const resultadosPorPeriodo: Record<string, any[]> = {};
     cp.meusResultadosMensais.forEach(r => {
-      if (!resultadosPorLoja[r.lojaId] || 
-          (r.ano > resultadosPorLoja[r.lojaId].ano) ||
-          (r.ano === resultadosPorLoja[r.lojaId].ano && r.mes > resultadosPorLoja[r.lojaId].mes)) {
-        resultadosPorLoja[r.lojaId] = r;
+      const chave = `${r.mes}-${r.ano}`;
+      if (!resultadosPorPeriodo[chave]) {
+        resultadosPorPeriodo[chave] = [];
       }
+      resultadosPorPeriodo[chave].push(r);
     });
     
-    Object.values(resultadosPorLoja).forEach(r => {
-      const desvio = r.desvioPercentualMes != null 
-        ? (typeof r.desvioPercentualMes === 'number' ? r.desvioPercentualMes * 100 : parseFloat(r.desvioPercentualMes) * 100).toFixed(1) + '%' 
-        : 'N/A';
-      const taxaRep = r.taxaReparacao != null
-        ? (typeof r.taxaReparacao === 'number' ? r.taxaReparacao * 100 : parseFloat(r.taxaReparacao) * 100).toFixed(1) + '%'
-        : 'N/A';
-      const qtdReparacoes = r.qtdReparacoes || 0;
-      const qtdParaBrisas = r.qtdParaBrisas || 0;
-      texto += `- ${r.lojaNome}: ${r.totalServicos || 0} serviços, objetivo: ${r.objetivoMensal || 'N/A'}, desvio: ${desvio}, taxa reparação: ${taxaRep}, reparações: ${qtdReparacoes}, para-brisas: ${qtdParaBrisas}\n`;
+    // Ordenar períodos do mais recente para o mais antigo
+    const periodosOrdenados = Object.keys(resultadosPorPeriodo).sort((a, b) => {
+      const [mesA, anoA] = a.split('-').map(Number);
+      const [mesB, anoB] = b.split('-').map(Number);
+      if (anoB !== anoA) return anoB - anoA;
+      return mesB - mesA;
     });
-    texto += '\n';
+    
+    texto += `📊 PERFORMANCE DAS MINHAS LOJAS (${periodosOrdenados.length} meses disponíveis, dados para cálculo de comissões):\n\n`;
+    
+    periodosOrdenados.forEach(periodo => {
+      const [mes, ano] = periodo.split('-').map(Number);
+      const resultados = resultadosPorPeriodo[periodo];
+      const mesNome = mesesNomes[mes - 1];
+      
+      texto += `=== ${mesNome} ${ano} ===\n`;
+      resultados.forEach(r => {
+        const desvio = r.desvioPercentualMes != null 
+          ? (typeof r.desvioPercentualMes === 'number' ? r.desvioPercentualMes * 100 : parseFloat(r.desvioPercentualMes) * 100).toFixed(1) + '%' 
+          : 'N/A';
+        const taxaRep = r.taxaReparacao != null
+          ? (typeof r.taxaReparacao === 'number' ? r.taxaReparacao * 100 : parseFloat(r.taxaReparacao) * 100).toFixed(1) + '%'
+          : 'N/A';
+        const qtdReparacoes = r.qtdReparacoes || 0;
+        const qtdParaBrisas = r.qtdParaBrisas || 0;
+        const numColab = r.numColaboradores || 0;
+        const totalServ = r.totalServicos || 0;
+        const servPorColab = numColab > 0 ? (totalServ / numColab).toFixed(1) : 'N/A';
+        const cumpreFTE = numColab > 0 && (totalServ / numColab) >= 35;
+        texto += `- ${r.lojaNome}: ${totalServ} serviços, ${numColab} colaboradores, serv/colab: ${servPorColab} (FTE: ${cumpreFTE ? '✅ Cumpre ≥35' : '❌ NÃO cumpre <35'}), objetivo: ${r.objetivoMensal || 'N/A'}, desvio: ${desvio}, taxa reparação: ${taxaRep}, reparações: ${qtdReparacoes}, para-brisas: ${qtdParaBrisas}\n`;
+      });
+      texto += '\n';
+    });
+  }
+  
+  // Vendas complementares das minhas lojas (para cálculo de comissões)
+  if (cp.minhasVendasComplementares && cp.minhasVendasComplementares.length > 0) {
+    const mesesVC = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+    
+    // Agrupar por período
+    const vendasPorPeriodo: Record<string, any[]> = {};
+    cp.minhasVendasComplementares.forEach(v => {
+      const chave = `${v.mes}-${v.ano}`;
+      if (!vendasPorPeriodo[chave]) vendasPorPeriodo[chave] = [];
+      vendasPorPeriodo[chave].push(v);
+    });
+    
+    const periodosOrd = Object.keys(vendasPorPeriodo).sort((a, b) => {
+      const [mesA, anoA] = a.split('-').map(Number);
+      const [mesB, anoB] = b.split('-').map(Number);
+      if (anoB !== anoA) return anoB - anoA;
+      return mesB - mesA;
+    });
+    
+    texto += `💰 VENDAS COMPLEMENTARES DAS MINHAS LOJAS (para cálculo de comissões):\n\n`;
+    periodosOrd.forEach(periodo => {
+      const [mes, ano] = periodo.split('-').map(Number);
+      const vendas = vendasPorPeriodo[periodo];
+      texto += `=== ${mesesVC[mes - 1]} ${ano} ===\n`;
+      vendas.forEach(v => {
+        const escovasVendas = v.escovasVendas ? parseFloat(v.escovasVendas).toFixed(2) : '0.00';
+        const peliculaVendas = v.peliculaVendas ? parseFloat(v.peliculaVendas).toFixed(2) : '0.00';
+        const polimentoVendas = v.polimentoVendas ? parseFloat(v.polimentoVendas).toFixed(2) : '0.00';
+        const totalVendas = v.totalVendas ? parseFloat(v.totalVendas).toFixed(2) : '0.00';
+        const lavagens = v.lavagensTotal || 0;
+        texto += `- ${v.lojaNome}: Total €${totalVendas} | Escovas: €${escovasVendas} (comissão 10%: €${(parseFloat(escovasVendas) * 0.10).toFixed(2)}) | Películas: €${peliculaVendas} (comissão 2.5%: €${(parseFloat(peliculaVendas) * 0.025).toFixed(2)}) | Polimento: €${polimentoVendas} | Lavagens: ${lavagens}\n`;
+      });
+      texto += '\n';
+    });
   }
   
   // Férias dos colaboradores das minhas lojas
@@ -960,7 +1018,10 @@ function formatarContextoParaPrompt(contexto: ContextoPlataforma): string {
         const ultimoDiaMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0).getDate();
         const diasRestantes = Math.max(1, ultimoDiaMes - hoje.getDate());
         const mediaDiariaNecessaria = servicosEmFalta > 0 ? (servicosEmFalta / diasRestantes).toFixed(1) : '0';
-        texto += `- ${r.lojaNome}: ${servicosRealizados} serviços realizados, objetivo mensal: ${objetivoMensalNum}, objetivo ao dia: ${objetivoDia}, serviços em falta: ${servicosEmFalta}, média diária necessária: ${mediaDiariaNecessaria} serviços/dia, desvio mensal: ${desvio}, desvio diário: ${desvioDia}, taxa reparação: ${taxaRep}, reparações: ${qtdReparacoes}, para-brisas: ${qtdParaBrisas}\n`;
+        const numColab = r.numColaboradores || 0;
+        const servPorColab = numColab > 0 ? (servicosRealizados / numColab).toFixed(1) : 'N/A';
+        const cumpreFTE = numColab > 0 && (servicosRealizados / numColab) >= 35;
+        texto += `- ${r.lojaNome}: ${servicosRealizados} serviços, ${numColab} colab, serv/colab: ${servPorColab} (FTE: ${cumpreFTE ? '✅≥35' : '❌<35'}), obj mensal: ${objetivoMensalNum}, em falta: ${servicosEmFalta}, desvio: ${desvio}, taxa rep: ${taxaRep}, reparações: ${qtdReparacoes}, para-brisas: ${qtdParaBrisas}\n`;
       });
       texto += '\n';
     });
@@ -1655,7 +1716,7 @@ Se a informação não estiver preenchida, informa que ainda não foi registada 
 1. Responde sempre em português europeu
 2. Sê conciso mas completo nas respostas
 3. Usa dados concretos quando disponíveis
-4. Se não tiveres dados suficientes, indica isso claramente
+4. Se não tiveres dados suficientes, indica isso claramente. MAS para cálculos de comissões, verifica PRIMEIRO se tens os dados nos resultados mensais e vendas complementares antes de dizer que não tens dados
 5. Podes fazer cálculos e análises com base nos dados
 6. Mantém um tom profissional mas amigável
 7. Se a pergunta for ambígua, pede esclarecimento
@@ -1669,6 +1730,17 @@ Se a informação não estiver preenchida, informa que ainda não foi registada 
 15. Quando calculares comissões, verifica SEMPRE se a loja cumpre os critérios NPS (>= 80%) e Taxa de Resposta (>= 7,5%) - se não cumprir, a comissão é 0€
 16. Para perguntas sobre férias (aprovadas, por aprovar, períodos, conformidade com regulamento), consulta a secção "DADOS DE FÉRIAS" no contexto. Podes cruzar estes dados com o regulamento de férias (Procedimento Interno N.º 8) para verificar conformidade (ex: máximo 10 dias úteis Jun-Set, máximo 1 colaborador por loja ao mesmo tempo, etc.)
 17. Quando o utilizador perguntar sobre férias dos "meus" colaboradores, usa a secção "FÉRIAS DOS COLABORADORES DAS MINHAS LOJAS" nos dados pessoais
+18. **CRÍTICO - CÁLCULO DE COMISSÕES**: Quando o utilizador perguntar sobre comissões, comissionamento, prémios ou quanto vai receber, CALCULA SEMPRE com os dados disponíveis. NUNCA peças dados ao utilizador se já os tens no contexto. Os dados de resultados mensais já incluem: total de serviços, número de colaboradores, taxa de reparação, quantidade de reparações. Os dados de vendas complementares incluem: escovas (valor e quantidade), películas, polimentos. Os dados NPS incluem: NPS e taxa de resposta por mês. Tens TUDO o que precisas para calcular comissões.
+19. **PASSOS PARA CALCULAR COMISSÕES DE UMA LOJA NUM MÊS**:
+    a) Obter totalServicos e numColaboradores dos resultados mensais
+    b) Calcular FTE: totalServicos ÷ numColaboradores. Se < 35 → 0€ em TUDO
+    c) Se FTE >= 35, consultar tabela de comissões por colaborador e multiplicar por numColaboradores
+    d) Calcular comissão QIV: taxaReparação → valor por reparação × qtdReparações
+    e) Calcular vendas complementares: escovas 10% do valor, películas 2.5%, outros 30%
+    f) Verificar NPS: se NPS < 80% ou Taxa Resposta < 7.5% → 0€ em TUDO
+    g) Somar tudo para o total do mês
+    h) Para trimestre, somar os 3 meses
+20. **IMPORTANTE**: Se o utilizador perguntar "quanto vou receber" ou "meu comissionamento", usa os dados PESSOAIS (secção PERFORMANCE DAS MINHAS LOJAS) que já incluem serviços, colaboradores, FTE, taxa reparação, etc. Calcula para CADA loja e CADA mês, depois soma o trimestre.
 
 ${contextoPessoalFormatado}
 ${contextoNacional}`;
