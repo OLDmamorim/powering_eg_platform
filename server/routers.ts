@@ -1960,9 +1960,27 @@ IMPORTANTE:
         tipo: z.enum(["loja", "volante", "recalbra"]).optional(),
         ativo: z.boolean().optional(),
       }))
-      .mutation(async ({ input }) => {
+      .mutation(async ({ input, ctx }) => {
         const { id, ...data } = input;
-        await db.updateColaborador(id, data);
+        
+        // Limpar campos undefined para evitar que o Drizzle os converta em NULL
+        const cleanData: Record<string, any> = {};
+        for (const [key, value] of Object.entries(data)) {
+          if (value !== undefined) {
+            cleanData[key] = value;
+          }
+        }
+        
+        // Se o tipo está a mudar para volante/recalbra e não foi enviado gestorId,
+        // preservar o gestorId actual (associar ao gestor logado se não tiver)
+        if ((cleanData.tipo === 'volante' || cleanData.tipo === 'recalbra') && !('gestorId' in cleanData)) {
+          const colaboradorAtual = await db.getColaboradorById(id);
+          if (!colaboradorAtual?.gestorId && ctx.gestor) {
+            cleanData.gestorId = ctx.gestor.id;
+          }
+        }
+        
+        await db.updateColaborador(id, cleanData);
         return { success: true };
       }),
     

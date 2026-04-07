@@ -857,7 +857,7 @@ export default function RH() {
                         <TableCell>{colaborador.codigoColaborador || "-"}</TableCell>
                         <TableCell>
                           {colaborador.tipo === "volante" ? (
-                            <Badge variant="secondary">
+                            <Badge variant="default" className="bg-blue-600">
                               <Car className="mr-1 h-3 w-3" />
                               Volante
                             </Badge>
@@ -1125,7 +1125,7 @@ export default function RH() {
                           <TableRow key={idx}>
                             <TableCell className="font-medium">
                               {v.nome}
-                              <Badge variant="secondary" className="ml-2">Volante</Badge>
+                              <Badge variant="default" className="ml-2 bg-blue-600">Volante</Badge>
                             </TableCell>
                             <TableCell>{v.codigoColaborador || "-"}</TableCell>
                             <TableCell>{cargoNomes[v.cargo] || v.cargo}</TableCell>

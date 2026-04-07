@@ -1376,3 +1376,15 @@
 - [x] Adicionado await para garantir que invalidação completa antes de limpar estados
 - [x] Sem erros TypeScript
 - [ ] Guardar checkpoint
+
+## Bug: Classificar colaborador como volante remove gestorId (desaparece da vista do gestor)
+- [x] Restaurar gestorId do Diogo Ferreira na BD (gestorId = 30001)
+- [x] Causa: Drizzle inclui campos undefined no SET como NULL
+- [x] Corrigido backend: limpar campos undefined antes de enviar ao Drizzle
+- [x] Preservar gestorId ao mudar tipo para volante/recalbra
+- [ ] Guardar checkpoint
+
+## Destacar badge Volante com cor distinta na tabela RH
+- [x] Badge Volante agora é azul (bg-blue-600) na tabela principal e na preview
+- [x] Recalbra mantém-se laranja (bg-orange-500)
+- [ ] Guardar checkpoint
