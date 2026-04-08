@@ -1459,3 +1459,15 @@
 - [x] Corrigido routers.ts (6 ocorrências: nomes ficheiros PDF/ICS/CSV)
 - [x] Zero ocorrências de toISOString.split('T')[0] restantes no código (apenas em ficheiros .test.ts)
 - [x] 36 testes unitários passados
+
+## Bug PERSISTENTE: Desfasamento 1 dia no calendário mensal do volante (ainda acontece após fix frontend)
+- [x] Causa raiz: new Date("2026-04-20") = meia-noite UTC = 23:00 dia anterior em Portugal
+- [x] Corrigido routers.ts: criar pedido apoio (T12:00:00)
+- [x] Corrigido routers.ts: criar agendamento volante (T12:00:00)
+- [x] Corrigido routers.ts: actualizar agendamento (T12:00:00)
+- [x] Corrigido routers.ts: criar bloqueio (T12:00:00)
+- [x] Corrigido db.ts: editar pedido apoio (T12:00:00)
+- [x] Corrigidos 30 pedidos_apoio existentes na BD (23:00 -> 12:00)
+- [x] Corrigidos 25 agendamentos_volante existentes na BD (00:00 -> 12:00)
+- [x] Corrigidos 3 bloqueios_volante existentes na BD (00:00 -> 12:00)
+- [x] Zero erros TypeScript, servidor a funcionar

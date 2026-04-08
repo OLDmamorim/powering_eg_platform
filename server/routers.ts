@@ -9226,7 +9226,9 @@ IMPORTANTE:
           throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
         }
         
-        const dataApoio = new Date(input.data);
+        // Normalizar data: input.data vem como "2026-04-20" do frontend
+        // Usar T12:00:00 para evitar desfasamento de timezone (new Date("2026-04-20") = meia-noite UTC = 23:00 dia anterior em Portugal)
+        const dataApoio = new Date(input.data + 'T12:00:00');
         
         // ATRIBUIÇÃO INTELIGENTE: Usar algoritmo de scoring para escolher o melhor volante
         const resultado = await db.atribuirVolanteInteligente(
@@ -9645,8 +9647,8 @@ IMPORTANTE:
         const volanteId = tokenData.volante.id;
         // Normalizar data para UTC (apenas data, sem horas)
         // input.data vem como "2026-02-13" do frontend
-        const [year, month, day] = input.data.split('-').map(Number);
-        const dataAgendamento = new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0));
+        // Usar T12:00:00 para evitar desfasamento de timezone
+        const dataAgendamento = new Date(input.data + 'T12:00:00');
         
         // Verificar se o dia/período está bloqueado
         const bloqueio = await db.verificarBloqueio(volanteId, dataAgendamento, input.periodo);
@@ -9760,7 +9762,7 @@ IMPORTANTE:
         
         const agendamentoAtualizado = await db.atualizarAgendamentoVolante(input.agendamentoId, volanteId, {
           lojaId: input.lojaId,
-          data: input.data ? new Date(input.data) : undefined,
+          data: input.data ? new Date(input.data + 'T12:00:00') : undefined,
           agendamento_volante_periodo: input.periodo,
           agendamento_volante_tipo: input.tipoApoio,
           titulo: input.titulo,
@@ -9803,7 +9805,7 @@ IMPORTANTE:
         
         const bloqueio = await db.criarBloqueioVolante({
           volanteId: tokenData.volante.id,
-          data: new Date(input.data),
+          data: new Date(input.data + 'T12:00:00'),
           periodo: input.periodo,
           tipo: input.tipo,
           motivo: input.motivo,
@@ -10248,7 +10250,8 @@ IMPORTANTE:
           const tipoApoioTexto = (input.tipoApoio || pedidoExistente.tipoApoio) === 'cobertura_ferias' ? 'Cobertura de Férias' : 
                                 (input.tipoApoio || pedidoExistente.tipoApoio) === 'substituicao_vidros' ? 'Substituição de Vidros' : 'Outro';
           const periodoTexto = (input.periodo || pedidoExistente.periodo) === 'manha' ? 'Manhã (9h-13h)' : 'Tarde (14h-18h)';
-          const dataFormatada = new Date(input.data || pedidoExistente.data).toLocaleDateString('pt-PT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+          const _rawData = input.data || pedidoExistente.data;
+          const dataFormatada = new Date(typeof _rawData === 'string' ? (_rawData.includes('T') ? _rawData : _rawData + 'T12:00:00') : _rawData).toLocaleDateString('pt-PT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
           
           try {
             await sendEmail({
