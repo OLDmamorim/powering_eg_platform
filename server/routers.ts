@@ -1327,16 +1327,12 @@ export const appRouter = router({
             const npsPercent = npsMedio * 100;
             const taxaPercent = (taxaRespostaNPS || 0) * 100;
             
-            if (npsPercent >= 80 && taxaPercent >= 7.5) {
+            // Elegibilidade: basta cumprir UM critério (NPS >= 80% OU Taxa >= 7.5%)
+            if (npsPercent >= 80 || taxaPercent >= 7.5) {
               npsElegivel = true;
             } else {
-              if (npsPercent < 80 && taxaPercent < 7.5) {
-                motivoInelegibilidade = `NPS (${npsPercent.toFixed(0)}%) abaixo de 80% e Taxa de Resposta (${taxaPercent.toFixed(1)}%) abaixo de 7,5%`;
-              } else if (npsPercent < 80) {
-                motivoInelegibilidade = `NPS (${npsPercent.toFixed(0)}%) abaixo de 80%`;
-              } else {
-                motivoInelegibilidade = `Taxa de Resposta (${taxaPercent.toFixed(1)}%) abaixo de 7,5%`;
-              }
+              // Não cumpre NENHUM dos critérios
+              motivoInelegibilidade = `NPS (${npsPercent.toFixed(0)}%) abaixo de 80% e Taxa de Resposta (${taxaPercent.toFixed(1)}%) abaixo de 7,5% - não cumpre nenhum critério`;
             }
             
             if (!npsElegivel && motivoInelegibilidade) {
@@ -7861,20 +7857,15 @@ IMPORTANTE:
               taxaRespostaNPS = taxasValidas.reduce((sum, d) => sum + (d.taxaResposta || 0), 0) / taxasValidas.length;
             }
             
-            // Verificar elegibilidade: NPS >= 80% E Taxa Resposta >= 7.5%
+            // Verificar elegibilidade: NPS >= 80% OU Taxa Resposta >= 7.5% (basta UM critério)
             const npsPercent = npsMedio * 100;
             const taxaPercent = (taxaRespostaNPS || 0) * 100;
             
-            if (npsPercent >= 80 && taxaPercent >= 7.5) {
+            if (npsPercent >= 80 || taxaPercent >= 7.5) {
               npsElegivel = true;
             } else {
-              if (npsPercent < 80 && taxaPercent < 7.5) {
-                motivoInelegibilidade = `NPS (${npsPercent.toFixed(0)}%) abaixo de 80% e Taxa de Resposta (${taxaPercent.toFixed(1)}%) abaixo de 7,5%`;
-              } else if (npsPercent < 80) {
-                motivoInelegibilidade = `NPS (${npsPercent.toFixed(0)}%) abaixo de 80%`;
-              } else {
-                motivoInelegibilidade = `Taxa de Resposta (${taxaPercent.toFixed(1)}%) abaixo de 7,5%`;
-              }
+              // Não cumpre NENHUM dos critérios
+              motivoInelegibilidade = `NPS (${npsPercent.toFixed(0)}%) abaixo de 80% e Taxa de Resposta (${taxaPercent.toFixed(1)}%) abaixo de 7,5% - não cumpre nenhum critério`;
             }
             
             // Adicionar alertas NPS

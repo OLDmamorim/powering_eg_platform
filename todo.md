@@ -1400,3 +1400,16 @@
 - [x] Mostrar TODOS os meses (não só o último) nos dados pessoais para cálculos trimestrais
 - [x] 6 testes unitários passados
 - [ ] Testar com pergunta "Qual o valor de comissionamento do primeiro trimestre?"
+
+## Alteração regra NPS: de E para OU (basta um critério)
+- [x] Alterar chatbotService.ts - system prompt (regras de comissionamento)
+- [x] Alterar chatbotService.ts - formatação NPS pessoal (elegibilidade)
+- [x] Alterar chatbotService.ts - formatação NPS nacional (elegibilidade)
+- [x] Alterar chatbotService.ts - instruções gerais (ponto 15)
+- [x] Alterar chatbotServicePortais.ts - system prompt portal loja
+- [x] Alterar chatbotServicePortais.ts - ranking NPS nacional
+- [x] Alterar aiService.ts - relatório IA admin (2 ocorrências)
+- [x] Alterar aiService.ts - relatório IA gestor
+- [x] Alterar routers.ts - cálculo elegibilidade portal gestor (2 ocorrências)
+- [x] Alterar ExportarRelatorioIAPDF.tsx - texto PDF
+- [x] 13 testes unitários passados

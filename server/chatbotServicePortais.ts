@@ -154,9 +154,9 @@ NOTA: Já não existe barreira mínima de 22% para prémio.
 NOTA: Já NÃO existe objetivo mínimo de escovas. A comissão é paga por cada escova vendida.
 
 **6. CRITÉRIOS MÍNIMOS OBRIGATÓRIOS (NPS):**
-- NPS >= 80% (obrigatório para receber prémio)
-- Taxa de Resposta >= 7,5% (obrigatório para receber prémio)
-- Se NPS < 80% OU Taxa de Resposta < 7,5% -> A LOJA NÃO TEM DIREITO A NENHUM PRÉMIO
+- NPS >= 80% OU Taxa de Resposta >= 7,5% (basta cumprir UM dos critérios)
+- Se NPS < 80% E Taxa de Resposta < 7,5% (não cumpre NENHUM critério) -> A LOJA NÃO TEM DIREITO A NENHUM PRÉMIO
+- Se a loja cumprir pelo menos um dos critérios, TEM direito a prémio
 - Os dados NPS da loja estão disponíveis no contexto. Consulta-os para responder sobre elegibilidade.
 
 **7. PENALIZAÇÕES TRIMESTRAIS:**
@@ -766,7 +766,7 @@ function formatarContextoParaLoja(contextoNacional: any, dadosLoja: any, lojaNom
     const camposNPS = ['npsJan', 'npsFev', 'npsMar', 'npsAbr', 'npsMai', 'npsJun', 'npsJul', 'npsAgo', 'npsSet', 'npsOut', 'npsNov', 'npsDez'];
     const camposTaxa = ['taxaRespostaJan', 'taxaRespostaFev', 'taxaRespostaMar', 'taxaRespostaAbr', 'taxaRespostaMai', 'taxaRespostaJun', 'taxaRespostaJul', 'taxaRespostaAgo', 'taxaRespostaSet', 'taxaRespostaOut', 'taxaRespostaNov', 'taxaRespostaDez'];
     
-    texto += `  Regras: NPS >= 80% E Taxa de Resposta >= 7,5% para ter direito a prémio\n\n`;
+    texto += `  Regras: NPS >= 80% OU Taxa de Resposta >= 7,5% para ter direito a prémio (basta UM critério)\n\n`;
     
     for (let i = 0; i < 12; i++) {
       const npsVal = nps[camposNPS[i]];
@@ -776,14 +776,17 @@ function formatarContextoParaLoja(contextoNacional: any, dadosLoja: any, lojaNom
         const taxaPercent = taxaVal ? (parseFloat(taxaVal) * 100).toFixed(1) : 'N/A';
         const npsOk = parseFloat(npsVal) >= 0.80;
         const taxaOk = taxaVal ? parseFloat(taxaVal) >= 0.075 : false;
-        const elegivel = npsOk && taxaOk;
+        const elegivel = npsOk || taxaOk;
         const status = elegivel ? '✅ Elegível para prémio' : '❌ Sem direito a prémio';
         let motivo = '';
         if (!elegivel) {
-          const motivos: string[] = [];
-          if (!npsOk) motivos.push(`NPS ${npsPercent}% < 80%`);
-          if (!taxaOk) motivos.push(`Taxa ${taxaPercent}% < 7,5%`);
-          motivo = ` (${motivos.join(', ')})`;
+          motivo = ` (NPS ${npsPercent}% < 80% E Taxa ${taxaPercent}% < 7,5% - não cumpre nenhum critério)`;
+        } else if (npsOk && taxaOk) {
+          motivo = ' (cumpre ambos)';
+        } else if (npsOk) {
+          motivo = ' (cumpre NPS)';
+        } else {
+          motivo = ' (cumpre Taxa Resposta)';
         }
         texto += `  ${mesesNPS[i]}: NPS ${npsPercent}% | Taxa Resp: ${taxaPercent}% | ${status}${motivo}\n`;
       }
@@ -835,7 +838,7 @@ function formatarContextoParaLoja(contextoNacional: any, dadosLoja: any, lojaNom
       ranking.forEach((r: any, i: number) => {
         const npsOk = r.nps >= 0.80;
         const taxaOk = r.taxa >= 0.075;
-        const elegivel = npsOk && taxaOk;
+        const elegivel = npsOk || taxaOk;
         const status = elegivel ? '✅' : '❌';
         const isLoja = r.nome === lojaNome ? ' ← A TUA LOJA' : '';
         texto += `  ${i + 1}º ${r.nome}: NPS ${(r.nps * 100).toFixed(1)}% | Taxa ${(r.taxa * 100).toFixed(1)}% ${status}${isLoja}\n`;

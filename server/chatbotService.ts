@@ -616,7 +616,7 @@ function formatarContextoPessoal(contexto: ContextoPlataforma): string {
     const camposTaxa = ['taxaRespostaJan', 'taxaRespostaFev', 'taxaRespostaMar', 'taxaRespostaAbr', 'taxaRespostaMai', 'taxaRespostaJun', 'taxaRespostaJul', 'taxaRespostaAgo', 'taxaRespostaSet', 'taxaRespostaOut', 'taxaRespostaNov', 'taxaRespostaDez'];
     
     texto += `📊 NPS DAS MINHAS LOJAS (ELEGIBILIDADE PARA PRÉMIO):\n`;
-    texto += `Regras: NPS >= 80% E Taxa de Resposta >= 7,5% para ter direito a prémio\n\n`;
+    texto += `Regras: NPS >= 80% OU Taxa de Resposta >= 7,5% para ter direito a prémio (basta cumprir UM dos critérios)\n\n`;
     
     cp.meusNPS.forEach((item: any) => {
       const nps = item.nps || item;
@@ -634,14 +634,17 @@ function formatarContextoPessoal(contexto: ContextoPlataforma): string {
           const taxaPercent = taxaVal ? (parseFloat(taxaVal) * 100).toFixed(1) : 'N/A';
           const npsOk = parseFloat(npsVal) >= 0.80;
           const taxaOk = taxaVal ? parseFloat(taxaVal) >= 0.075 : false;
-          const elegivel = npsOk && taxaOk;
+          const elegivel = npsOk || taxaOk;
           const status = elegivel ? '✅ Elegível' : '❌ Sem prémio';
           let motivo = '';
           if (!elegivel) {
-            const motivos: string[] = [];
-            if (!npsOk) motivos.push(`NPS ${npsPercent}% < 80%`);
-            if (!taxaOk) motivos.push(`Taxa ${taxaPercent}% < 7,5%`);
-            motivo = ` (${motivos.join(', ')})`;
+            motivo = ` (NPS ${npsPercent}% < 80% E Taxa ${taxaPercent}% < 7,5% - não cumpre nenhum critério)`;
+          } else if (npsOk && taxaOk) {
+            motivo = ' (cumpre ambos)';
+          } else if (npsOk) {
+            motivo = ' (cumpre NPS)';
+          } else {
+            motivo = ' (cumpre Taxa Resposta)';
           }
           texto += `    ${mesesNPS[i]}: NPS ${npsPercent}% | Taxa Resp: ${taxaPercent}% | ${status}${motivo}\n`;
         }
@@ -1158,8 +1161,8 @@ function formatarContextoParaPrompt(contexto: ContextoPlataforma): string {
     
     texto += `\n🌟 DADOS NPS - NET PROMOTER SCORE (ELEGIBILIDADE PARA PRÉMIO):\n`;
     texto += `========================================\n`;
-    texto += `REGRAS DE ELEGIBILIDADE: NPS >= 80% E Taxa de Resposta >= 7,5% para ter direito a prémio\n`;
-    texto += `Se NPS < 80% OU Taxa de Resposta < 7,5% -> SEM DIREITO A PRÉMIO (aplica-se a TODAS as comissões)\n\n`;
+    texto += `REGRAS DE ELEGIBILIDADE: NPS >= 80% OU Taxa de Resposta >= 7,5% para ter direito a prémio (basta UM critério)\n`;
+    texto += `Se NPS < 80% E Taxa de Resposta < 7,5% (não cumpre NENHUM) -> SEM DIREITO A PRÉMIO (aplica-se a TODAS as comissões)\n\n`;
     
     // Agrupar por ano
     const npsPorAno: Record<number, any[]> = {};
@@ -1189,7 +1192,7 @@ function formatarContextoParaPrompt(contexto: ContextoPlataforma): string {
             const nps = item.nps || item;
             const npsVal = parseFloat(nps[camposNPS[mesIdx]]);
             const taxaVal = nps[camposTaxa[mesIdx]] ? parseFloat(nps[camposTaxa[mesIdx]]) : 0;
-            return npsVal >= 0.80 && taxaVal >= 0.075;
+            return npsVal >= 0.80 || taxaVal >= 0.075;
           });
           
           texto += `  📅 ${mesesNPS[mesIdx]} ${ano}: ${elegiveis.length}/${lojasComDados.length} lojas elegíveis para prémio\n`;
@@ -1213,7 +1216,7 @@ function formatarContextoParaPrompt(contexto: ContextoPlataforma): string {
             const taxaPercent = taxaVal ? (parseFloat(taxaVal) * 100).toFixed(1) : 'N/A';
             const npsOk = parseFloat(npsVal) >= 0.80;
             const taxaOk = taxaVal ? parseFloat(taxaVal) >= 0.075 : false;
-            const elegivel = npsOk && taxaOk;
+            const elegivel = npsOk || taxaOk;
             const status = elegivel ? '✅' : '❌';
             texto += `    ${mesesNPS[i]}: NPS ${npsPercent}% | Taxa ${taxaPercent}% ${status}\n`;
           }
@@ -1462,9 +1465,9 @@ NOTA: Se a loja não cumprir o FTE mínimo (35 serviços/colaborador), a comiss�
 NOTA: Se a loja não cumprir o FTE mínimo (35 serviços/colaborador), a comissão de vendas complementares é 0€.
 NOTA: Já NÃO existe objetivo mínimo de escovas. O objetivo nacional é 30% de serviços com escovas, mas a comissão é paga por cada escova vendida.
 **5. CRITÉRIOS MÍNIMOS OBRIGATÓRIOS (NPS):**
-- NPS >= 80% (obrigatório para receber prémio)
-- Taxa de Resposta >= 7,5% (obrigatório para receber prémio)
-- Se NPS < 80% OU Taxa de Resposta < 7,5% -> A LOJA NÃO TEM DIREITO A NENHUM PRÉMIO
+- NPS >= 80% OU Taxa de Resposta >= 7,5% (basta cumprir UM dos critérios)
+- Se NPS < 80% E Taxa de Resposta < 7,5% (não cumpre NENHUM critério) -> A LOJA NÃO TEM DIREITO A NENHUM PRÉMIO
+- Se a loja cumprir pelo menos um dos critérios (NPS >= 80% OU Taxa >= 7,5%), TEM direito a prémio
 - Os dados NPS estão disponíveis na secção "DADOS NPS" do contexto
 - Quando o utilizador perguntar sobre NPS, elegibilidade ou prémios, consulta essa secção
 - Podes cruzar dados NPS com dados de serviços para calcular comissões completas
@@ -1727,7 +1730,7 @@ Se a informação não estiver preenchida, informa que ainda não foi registada 
 12. Sê proativo em sugerir funcionalidades relacionadas que possam ser úteis
 13. **MUITO IMPORTANTE**: Respeita sempre a distinção entre perguntas pessoais e gerais. Se a pergunta for pessoal, usa APENAS os dados pessoais do gestor.
 14. Para perguntas sobre NPS, elegibilidade para prémio, ou cálculos de comissionamento que envolvam NPS, consulta a secção "DADOS NPS" no contexto
-15. Quando calculares comissões, verifica SEMPRE se a loja cumpre os critérios NPS (>= 80%) e Taxa de Resposta (>= 7,5%) - se não cumprir, a comissão é 0€
+15. Quando calculares comissões, verifica se a loja cumpre PELO MENOS UM dos critérios NPS: NPS >= 80% OU Taxa de Resposta >= 7,5%. Basta cumprir UM. Só se NÃO cumprir NENHUM dos dois é que a comissão é 0€
 16. Para perguntas sobre férias (aprovadas, por aprovar, períodos, conformidade com regulamento), consulta a secção "DADOS DE FÉRIAS" no contexto. Podes cruzar estes dados com o regulamento de férias (Procedimento Interno N.º 8) para verificar conformidade (ex: máximo 10 dias úteis Jun-Set, máximo 1 colaborador por loja ao mesmo tempo, etc.)
 17. Quando o utilizador perguntar sobre férias dos "meus" colaboradores, usa a secção "FÉRIAS DOS COLABORADORES DAS MINHAS LOJAS" nos dados pessoais
 18. **CRÍTICO - CÁLCULO DE COMISSÕES**: Quando o utilizador perguntar sobre comissões, comissionamento, prémios ou quanto vai receber, CALCULA SEMPRE com os dados disponíveis. NUNCA peças dados ao utilizador se já os tens no contexto. Os dados de resultados mensais já incluem: total de serviços, número de colaboradores, taxa de reparação, quantidade de reparações. Os dados de vendas complementares incluem: escovas (valor e quantidade), películas, polimentos. Os dados NPS incluem: NPS e taxa de resposta por mês. Tens TUDO o que precisas para calcular comissões.
@@ -1737,7 +1740,7 @@ Se a informação não estiver preenchida, informa que ainda não foi registada 
     c) Se FTE >= 35, consultar tabela de comissões por colaborador e multiplicar por numColaboradores
     d) Calcular comissão QIV: taxaReparação → valor por reparação × qtdReparações
     e) Calcular vendas complementares: escovas 10% do valor, películas 2.5%, outros 30%
-    f) Verificar NPS: se NPS < 80% ou Taxa Resposta < 7.5% → 0€ em TUDO
+    f) Verificar NPS: se NPS < 80% E Taxa Resposta < 7.5% (não cumpre NENHUM) → 0€ em TUDO. Basta cumprir UM dos critérios para ter direito
     g) Somar tudo para o total do mês
     h) Para trimestre, somar os 3 meses
 20. **IMPORTANTE**: Se o utilizador perguntar "quanto vou receber" ou "meu comissionamento", usa os dados PESSOAIS (secção PERFORMANCE DAS MINHAS LOJAS) que já incluem serviços, colaboradores, FTE, taxa reparação, etc. Calcula para CADA loja e CADA mês, depois soma o trimestre.

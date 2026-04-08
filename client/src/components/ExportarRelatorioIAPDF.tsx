@@ -1406,7 +1406,7 @@ export function ExportarRelatorioIAPDF({ analiseIA, periodo }: Props) {
         doc.setFontSize(8);
         doc.setTextColor(80, 80, 100);
         doc.setFont('helvetica', 'italic');
-        doc.text('Criterios: NPS >= 80% e Taxa de Resposta >= 7.5% para ter direito a premio', pageWidth / 2, yPos + 3, { align: 'center' });
+        doc.text('Criterios: NPS >= 80% OU Taxa de Resposta >= 7.5% (basta UM criterio) para ter direito a premio', pageWidth / 2, yPos + 3, { align: 'center' });
         doc.setFont('helvetica', 'normal');
         yPos += 12;
         

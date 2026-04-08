@@ -790,8 +790,8 @@ ${pontosNegativosRelatados.length > 0 ? pontosNegativosRelatados.join('\n') : 'N
   - Por Taxa de Resposta < 7.5%: ${taxaBaixa} lojas
 
 REGRAS DE ELEGIBILIDADE PARA PRÉMIO NPS:
-- NPS >= 80% E Taxa de Resposta >= 7.5% = Elegível
-- NPS < 80% OU Taxa de Resposta < 7.5% = SEM direito a prémio
+- NPS >= 80% OU Taxa de Resposta >= 7.5% = Elegível (basta UM critério)
+- NPS < 80% E Taxa de Resposta < 7.5% (não cumpre NENHUM) = SEM direito a prémio
 
 ═══ TOP 10 - MELHOR NPS ═══
 `;
@@ -1818,8 +1818,8 @@ ${resumoRelatoriosPorLoja}
   - Por Taxa de Resposta < 7.5%: ${taxaBaixa} lojas
 
 REGRAS DE ELEGIBILIDADE PARA PR\u00c9MIO NPS:
-- NPS >= 80% E Taxa de Resposta >= 7.5% = Eleg\u00edvel
-- NPS < 80% OU Taxa de Resposta < 7.5% = SEM direito a pr\u00e9mio
+- NPS >= 80% OU Taxa de Resposta >= 7.5% = Eleg\u00edvel (basta UM crit\u00e9rio)
+- NPS < 80% E Taxa de Resposta < 7.5% (n\u00e3o cumpre NENHUM) = SEM direito a pr\u00e9mio
 
 \u2550\u2550\u2550 TOP 10 - MELHOR NPS \u2550\u2550\u2550
 `;
@@ -2675,12 +2675,10 @@ export async function gerarRelatorioIAGestor(
         if (mesesComDados > 0) {
           const npsMedia = (npsTotal / mesesComDados) * 100;
           const taxaMedia = (taxaTotal / mesesComDados) * 100;
-          const elegivel = npsMedia >= 80 && taxaMedia >= 7.5;
+          const elegivel = npsMedia >= 80 || taxaMedia >= 7.5;
           let motivo = '';
           if (!elegivel) {
-            if (npsMedia < 80 && taxaMedia < 7.5) motivo = 'NPS < 80% e Taxa < 7.5%';
-            else if (npsMedia < 80) motivo = 'NPS < 80%';
-            else motivo = 'Taxa de Resposta < 7.5%';
+            motivo = 'NPS < 80% e Taxa < 7.5% (não cumpre nenhum critério)';
           }
           npsRankingG.push({ loja: lojaNome, nps: parseFloat(npsMedia.toFixed(1)), taxaResposta: parseFloat(taxaMedia.toFixed(1)), elegivel, motivo: motivo || undefined });
           somaNPSG += npsMedia; somaTaxaRespG += taxaMedia; contNPSG++;
