@@ -130,16 +130,16 @@ export function ResultadosDashboard() {
   
   // Calcular limite e filtro para ranking
   const rankingLimit = useMemo(() => {
-    // Se "Minhas Lojas" selecionado, buscar todas as lojas do gestor (até 100)
+    // Se "Minhas Lojas" selecionado, buscar todas as lojas do gestor
     if (lojaSelecionada === 'minhas' && lojas) {
-      return Math.max(lojas.length, 10);
+      return Math.max(lojas.length, 20);
     }
-    // Se loja individual, buscar apenas 1
+    // Se loja individual, buscar apenas essa
     if (typeof lojaSelecionada === 'number') {
       return 10;
     }
-    // Caso contrário, top 10
-    return 10;
+    // Nacional/Todas/Zona: mostrar TODAS as lojas
+    return 200;
   }, [lojaSelecionada, lojas]);
   
   const rankingLojasIds = useMemo(() => {

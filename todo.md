@@ -1424,3 +1424,7 @@
 - [x] Alterar ExportarRelatorioIAPDF.tsx - texto critérios
 - [x] 19 testes unitários passados
 - [x] Zero ocorrências de regra NPS E (&&) restantes no projecto
+
+## Bug: Ranking NPS no dashboard admin só mostra 10 lojas
+- [x] Identificado: rankingLimit hardcoded a 10 no ResultadosDashboard.tsx
+- [x] Corrigido: Nacional/Todas/Zona agora mostra até 200 lojas (todas)
