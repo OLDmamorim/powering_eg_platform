@@ -63,17 +63,17 @@ function obterFeriadosPortugueses(ano: number): string[] {
   // Carnaval (47 dias antes da Páscoa)
   const carnaval = new Date(pascoa);
   carnaval.setDate(pascoa.getDate() - 47);
-  feriados.push(carnaval.toISOString().split('T')[0]);
+  feriados.push(`${carnaval.getFullYear()}-${String(carnaval.getMonth()+1).padStart(2,'0')}-${String(carnaval.getDate()).padStart(2,'0')}`);
   
   // Sexta-feira Santa (2 dias antes da Páscoa)
   const sextaSanta = new Date(pascoa);
   sextaSanta.setDate(pascoa.getDate() - 2);
-  feriados.push(sextaSanta.toISOString().split('T')[0]);
+  feriados.push(`${sextaSanta.getFullYear()}-${String(sextaSanta.getMonth()+1).padStart(2,'0')}-${String(sextaSanta.getDate()).padStart(2,'0')}`);
   
   // Corpo de Deus (60 dias depois da Páscoa)
   const corpoDeus = new Date(pascoa);
   corpoDeus.setDate(pascoa.getDate() + 60);
-  feriados.push(corpoDeus.toISOString().split('T')[0]);
+  feriados.push(`${corpoDeus.getFullYear()}-${String(corpoDeus.getMonth()+1).padStart(2,'0')}-${String(corpoDeus.getDate()).padStart(2,'0')}`);
   
   return feriados;
 }
@@ -3791,7 +3791,7 @@ IMPORTANTE:
           // Verificar se é dia útil (não é fim de semana e não é feriado)
           const diaSem = dia.getDay();
           if (diaSem !== 0 && diaSem !== 6) {
-            const dataStr = dia.toISOString().split('T')[0];
+            const dataStr = `${dia.getFullYear()}-${String(dia.getMonth()+1).padStart(2,'0')}-${String(dia.getDate()).padStart(2,'0')}`;
             if (!feriadosPortugueses.includes(dataStr)) {
               // Para "esta semana", só incluir dias a partir de hoje
               if (input.tipoPeriodo === 'esta_semana') {
@@ -4013,10 +4013,9 @@ IMPORTANTE:
           const descricao = removeAcentos(`Visita de supervisao a loja ${visita.lojaNome}\n\nMotivo: ${visita.detalheMotivo || 'Visita planeada'}${listaPendentes}`);
           const local = removeAcentos(visita.lojaNome);
           
-          // Formatar datas
-          const dataBase = visita.dataVisita instanceof Date 
-            ? visita.dataVisita.toISOString().split('T')[0] 
-            : new Date(visita.dataVisita).toISOString().split('T')[0];
+          // Formatar datas (usar hora local para evitar desfasamento UTC)
+          const _dv = visita.dataVisita instanceof Date ? visita.dataVisita : new Date(visita.dataVisita);
+          const dataBase = `${_dv.getFullYear()}-${String(_dv.getMonth()+1).padStart(2,'0')}-${String(_dv.getDate()).padStart(2,'0')}`;
           const horaInicio = visita.horaInicio || '09:00';
           const horaFim = visita.horaFim || '12:00';
           
@@ -14135,7 +14134,8 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
         }>();
         
         for (const a of analises) {
-          const dataKey = new Date(a.createdAt).toISOString().split('T')[0]; // YYYY-MM-DD
+          const _dc = new Date(a.createdAt);
+          const dataKey = `${_dc.getFullYear()}-${String(_dc.getMonth()+1).padStart(2,'0')}-${String(_dc.getDate()).padStart(2,'0')}`; // YYYY-MM-DD (hora local)
           const existing = porData.get(dataKey);
           if (existing) {
             existing.totalItensStock += a.totalItensStock || 0;

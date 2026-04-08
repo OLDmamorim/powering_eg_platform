@@ -8904,8 +8904,9 @@ export async function getHistoricoScore(volanteId: number, lojaId: number): Prom
   
   const tresMesesAtras = new Date();
   tresMesesAtras.setMonth(tresMesesAtras.getMonth() - 3);
-  const dataInicio = tresMesesAtras.toISOString().split('T')[0];
-  const dataFim = new Date().toISOString().split('T')[0];
+  const dataInicio = `${tresMesesAtras.getFullYear()}-${String(tresMesesAtras.getMonth()+1).padStart(2,'0')}-${String(tresMesesAtras.getDate()).padStart(2,'0')}`;
+  const agora = new Date();
+  const dataFim = `${agora.getFullYear()}-${String(agora.getMonth()+1).padStart(2,'0')}-${String(agora.getDate()).padStart(2,'0')}`;
   
   // Contar serviços do volante nesta loja
   const servicos = await db.select().from(servicosVolante).where(and(
@@ -9448,9 +9449,10 @@ export async function getEstadoDiasDoMes(volanteId: number, year: number, month:
       sql`${pedidosApoio.estado} NOT IN ('reprovado', 'anulado', 'cancelado')`
     ));
   
-  // Agrupar por dia
+  // Agrupar por dia (usar hora local para evitar desfasamento UTC)
   for (const pedido of pedidos) {
-    const dataStr = pedido.data.toISOString().split('T')[0];
+    const d = new Date(pedido.data);
+    const dataStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
     
     if (!resultado.has(dataStr)) {
       resultado.set(dataStr, { estado: 'livre', pedidos: [] });
@@ -9759,9 +9761,10 @@ export async function getEstadoCompletoDoMes(volanteId: number, year: number, mo
       lte(agendamentosVolante.data, endDate)
     ));
   
-  // Agrupar por dia
+  // Agrupar por dia (usar hora local para evitar desfasamento UTC)
   for (const pedido of pedidos) {
-    const dataStr = pedido.data.toISOString().split('T')[0];
+    const d = new Date(pedido.data);
+    const dataStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
     
     if (!resultado.has(dataStr)) {
       resultado.set(dataStr, { estado: 'livre', pedidos: [], bloqueios: [], agendamentos: [] });
@@ -9775,7 +9778,8 @@ export async function getEstadoCompletoDoMes(volanteId: number, year: number, mo
   }
   
   for (const bloqueio of bloqueios) {
-    const dataStr = bloqueio.data.toISOString().split('T')[0];
+    const db2 = new Date(bloqueio.data);
+    const dataStr = `${db2.getFullYear()}-${String(db2.getMonth()+1).padStart(2,'0')}-${String(db2.getDate()).padStart(2,'0')}`;
     
     if (!resultado.has(dataStr)) {
       resultado.set(dataStr, { estado: 'livre', pedidos: [], bloqueios: [], agendamentos: [] });
@@ -9785,7 +9789,8 @@ export async function getEstadoCompletoDoMes(volanteId: number, year: number, mo
   }
   
   for (const { agendamento, loja } of agendamentos) {
-    const dataStr = agendamento.data.toISOString().split('T')[0];
+    const da = new Date(agendamento.data);
+    const dataStr = `${da.getFullYear()}-${String(da.getMonth()+1).padStart(2,'0')}-${String(da.getDate()).padStart(2,'0')}`;
     
     if (!resultado.has(dataStr)) {
       resultado.set(dataStr, { estado: 'livre', pedidos: [], bloqueios: [], agendamentos: [] });
@@ -11165,9 +11170,10 @@ export async function getEstatisticasMensaisServicos(volanteId: number, ano: num
   const db = await getDb();
   if (!db) return null;
   
-  // Calcular primeiro e último dia do mês
-  const primeiroDia = new Date(ano, mes - 1, 1).toISOString().split('T')[0];
-  const ultimoDia = new Date(ano, mes, 0).toISOString().split('T')[0];
+  // Calcular primeiro e último dia do mês (usar hora local para evitar desfasamento UTC)
+  const primeiroDia = `${ano}-${String(mes).padStart(2, '0')}-01`;
+  const udm = new Date(ano, mes, 0);
+  const ultimoDia = `${udm.getFullYear()}-${String(udm.getMonth()+1).padStart(2,'0')}-${String(udm.getDate()).padStart(2,'0')}`;
   
   const servicos = await db.select()
     .from(servicosVolante)
@@ -11902,7 +11908,8 @@ export async function getServicosVolantePorMes(volanteId: number, mes: number, a
   
   // Calcular primeiro e último dia do mês
   const primeiroDia = `${ano}-${String(mes).padStart(2, '0')}-01`;
-  const ultimoDia = new Date(ano, mes, 0).toISOString().split('T')[0]; // Último dia do mês
+  const udm2 = new Date(ano, mes, 0);
+  const ultimoDia = `${udm2.getFullYear()}-${String(udm2.getMonth()+1).padStart(2,'0')}-${String(udm2.getDate()).padStart(2,'0')}`; // Último dia do mês (hora local)
   
   return await db.select().from(servicosVolante)
     .where(and(

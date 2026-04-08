@@ -1438,3 +1438,13 @@
 - [x] Integrar no portal da loja (secção Análise de Stock, antes da pesquisa global)
 - [ ] Integrar na análise de stock do gestor/admin
 - [x] 9 testes unitários passados
+
+## Bug: Agendamento volante com desfasamento de 1 dia (pedidos aparecem um dia antes)
+- [x] Causa raiz: toISOString().split('T')[0] converte para UTC, recuando 1 dia em Portugal (UTC+1/+2)
+- [x] Corrigido AgendamentosLoja.tsx formatDate() - hora local
+- [x] Corrigido AgendamentosGestor.tsx formatDate() - hora local
+- [x] Corrigido db.ts: agrupamento pedidos/bloqueios/agendamentos volante por dia (4 ocorrências)
+- [x] Corrigido db.ts: cálculo primeiro/último dia do mês (3 ocorrências)
+- [x] Corrigido routers.ts: feriados (Carnaval, Sexta-Santa, Corpo de Deus)
+- [x] Corrigido routers.ts: cálculo dias úteis, datas visitas ICS, agrupamento análises
+- [x] 8 testes unitários passados
