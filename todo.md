@@ -1484,3 +1484,9 @@
 - [x] Remover indicador "2d" (dias aberto) dos resultados
 - [x] Aplicar a ambas as pesquisas (Eurocode e Matrícula)
 - [x] Resultados compactos numa linha (Eurocode/Mat + Status + FS + Mat/Eurocode + Marca)
+
+## Fix: Input matrícula com formato visual XX-XX-XX
+- [x] Reformatar input para parecer matrícula portuguesa (3 caixas de 2 chars com traços entre elas)
+- [x] Cursor salta automaticamente para a caixa seguinte ao preencher 2 caracteres
+- [x] Pesquisa activa a partir do 2º caractere (sem contar traços)
+- [x] Botão limpar (✕) para reset rápido

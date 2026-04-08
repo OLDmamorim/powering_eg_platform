@@ -5351,32 +5351,78 @@ export default function PortalLoja() {
                   <Search className="h-5 w-5 text-amber-600" />
                   <div>
                     <span className="font-bold text-sm text-amber-700">{language === 'pt' ? 'Pesquisar por Matrícula' : 'Search by License Plate'}</span>
-                    <p className="text-[10px] text-gray-500">{language === 'pt' ? 'Digite os primeiros caracteres da matrícula (ex: AA12, 1234)' : 'Type the first characters of the plate (e.g. AA12, 1234)'}</p>
+                    <p className="text-[10px] text-gray-500">{language === 'pt' ? 'Digite a matrícula e o sistema filtra automaticamente' : 'Type the plate and the system filters automatically'}</p>
                   </div>
                 </div>
                 <div className="flex gap-4 items-start">
-                  {/* Input à esquerda */}
-                  <div className="w-1/3 min-w-[140px] flex-shrink-0">
-                    <div className="relative">
-                      <input
-                        type="text"
-                        placeholder={language === 'pt' ? 'Ex: AA-12...' : 'Ex: AA-12...'}
-                        value={matriculaPrefixoInput}
-                        onChange={e => setMatriculaPrefixoInput(e.target.value)}
-                        className="w-full text-lg font-mono font-bold tracking-wider border-2 border-amber-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 bg-amber-50/50 uppercase"
-                        autoComplete="off"
-                      />
+                  {/* Input à esquerda - formato matrícula XX-XX-XX */}
+                  <div className="flex-shrink-0">
+                    <div className="flex items-center gap-1 bg-amber-50 border-2 border-amber-300 rounded-lg px-3 py-2">
+                      {(() => {
+                        const raw = matriculaPrefixoInput.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+                        const g1 = raw.slice(0, 2);
+                        const g2 = raw.slice(2, 4);
+                        const g3 = raw.slice(4, 6);
+                        const handleChange = (groupIdx: number, val: string) => {
+                          const clean = val.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(0, 2);
+                          let newRaw = '';
+                          if (groupIdx === 0) newRaw = clean + raw.slice(2);
+                          else if (groupIdx === 1) newRaw = raw.slice(0, 2) + clean + raw.slice(4);
+                          else newRaw = raw.slice(0, 4) + clean;
+                          setMatriculaPrefixoInput(newRaw.slice(0, 6));
+                        };
+                        const focusNext = (groupIdx: number) => {
+                          const next = document.getElementById(`mat-group-${groupIdx + 1}`);
+                          if (next) (next as HTMLInputElement).focus();
+                        };
+                        return (
+                          <>
+                            <input
+                              id="mat-group-0"
+                              type="text"
+                              maxLength={2}
+                              value={g1}
+                              onChange={e => { handleChange(0, e.target.value); if (e.target.value.replace(/[^a-zA-Z0-9]/g, '').length >= 2) focusNext(0); }}
+                              placeholder="AA"
+                              className="w-[52px] text-center text-xl font-mono font-black tracking-widest bg-white border-2 border-amber-200 rounded px-1 py-2 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 uppercase"
+                              autoComplete="off"
+                            />
+                            <span className="text-2xl font-bold text-amber-400">-</span>
+                            <input
+                              id="mat-group-1"
+                              type="text"
+                              maxLength={2}
+                              value={g2}
+                              onChange={e => { handleChange(1, e.target.value); if (e.target.value.replace(/[^a-zA-Z0-9]/g, '').length >= 2) focusNext(1); }}
+                              placeholder="00"
+                              className="w-[52px] text-center text-xl font-mono font-black tracking-widest bg-white border-2 border-amber-200 rounded px-1 py-2 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 uppercase"
+                              autoComplete="off"
+                            />
+                            <span className="text-2xl font-bold text-amber-400">-</span>
+                            <input
+                              id="mat-group-2"
+                              type="text"
+                              maxLength={2}
+                              value={g3}
+                              onChange={e => handleChange(2, e.target.value)}
+                              placeholder="BB"
+                              className="w-[52px] text-center text-xl font-mono font-black tracking-widest bg-white border-2 border-amber-200 rounded px-1 py-2 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 uppercase"
+                              autoComplete="off"
+                            />
+                          </>
+                        );
+                      })()}
                       {matriculaPrefixoInput && (
                         <button
                           onClick={() => setMatriculaPrefixoInput('')}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                          className="ml-1 text-gray-400 hover:text-gray-600 text-sm"
                         >
                           ✕
                         </button>
                       )}
                     </div>
                     {matriculaPrefixoDebounced.length < 2 && matriculaPrefixoInput.length > 0 && (
-                      <p className="text-xs text-gray-400 py-1">{language === 'pt' ? 'Mínimo 2 caracteres...' : 'Minimum 2 characters...'}</p>
+                      <p className="text-xs text-gray-400 py-1 text-center">{language === 'pt' ? 'Mínimo 2 caracteres...' : 'Min 2 chars...'}</p>
                     )}
                   </div>
                   {/* Resultados à direita */}
