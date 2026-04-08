@@ -1497,3 +1497,5 @@
 - [x] Manter resultados à direita em layout horizontal
 - [x] Bug: Página do Portal da Loja não começa no topo — arranca a meio ao entrar
 - [x] Bug: Erro "Invalid time value" ao abrir formulário Pedir Apoio no calendário do volante
+- [x] Bug: Política NPS no NPSDashboard.tsx usa AND (ambos critérios) em vez de OR (basta um) — corrigir para OR
+- [x] Bug: Textos de legenda/regras NPS inconsistentes em RelatorioIAResultados.tsx (diz "E" em vez de "OU")

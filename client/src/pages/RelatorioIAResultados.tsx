@@ -975,8 +975,8 @@ export function RelatorioIAResultados() {
                           </Table>
                         )}
                         <div className="mt-3 flex gap-4 text-xs text-muted-foreground">
-                          <span>✅ NPS ≥ 80% E Taxa ≥ 7.5% = Elegível</span>
-                          <span>❌ NPS &lt; 80% ou Taxa &lt; 7.5% = Sem Prémio</span>
+                          <span>✅ NPS ≥ 80% OU Taxa ≥ 7.5% = Elegível (basta um critério)</span>
+                          <span>❌ NPS &lt; 80% E Taxa &lt; 7.5% = Sem Prémio (não cumpre nenhum)</span>
                         </div>
                       </CardContent>
                     </Card>
@@ -2177,7 +2177,7 @@ export function RelatorioIAResultados() {
                               />
                             </div>
                             <p className="text-xs text-muted-foreground mt-2 text-center">
-                              🟢 Elegível (NPS ≥ 80% + Taxa ≥ 7.5%) | 🔴 Sem Prémio
+                              🟢 Elegível (NPS ≥ 80% OU Taxa ≥ 7.5%) | 🔴 Sem Prémio
                             </p>
                           </CardContent>
                         </Card>

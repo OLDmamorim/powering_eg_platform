@@ -572,8 +572,8 @@ export function NPSDashboard() {
                 {(() => {
                   // Ordenar: elegíveis primeiro (por NPS desc), depois inelegíveis (por NPS desc)
                   const sortedRanking = [...rankingLojas].sort((a: any, b: any) => {
-                    const aElegivel = a.nps >= 0.8 && a.taxaResposta !== null && a.taxaResposta >= 0.075;
-                    const bElegivel = b.nps >= 0.8 && b.taxaResposta !== null && b.taxaResposta >= 0.075;
+                    const aElegivel = (a.nps >= 0.8) || (a.taxaResposta !== null && a.taxaResposta >= 0.075);
+                    const bElegivel = (b.nps >= 0.8) || (b.taxaResposta !== null && b.taxaResposta >= 0.075);
                     if (aElegivel && !bElegivel) return -1;
                     if (!aElegivel && bElegivel) return 1;
                     // NPS Mês desc (arredondar para evitar problemas de float)
@@ -589,7 +589,7 @@ export function NPSDashboard() {
                     const bTaxa = Math.round((b.taxaResposta ?? 0) * 10000);
                     return bTaxa - aTaxa;
                   });
-                  const totalElegivel = sortedRanking.filter((i: any) => i.nps >= 0.8 && i.taxaResposta !== null && i.taxaResposta >= 0.075).length;
+                  const totalElegivel = sortedRanking.filter((i: any) => (i.nps >= 0.8) || (i.taxaResposta !== null && i.taxaResposta >= 0.075)).length;
                   const totalInelegivel = sortedRanking.length - totalElegivel;
                   
                   return sortedRanking.length > 0 ? (
@@ -626,13 +626,12 @@ export function NPSDashboard() {
                           </thead>
                           <tbody>
                             {sortedRanking.map((item: any, idx: number) => {
-                              const elegivelPremio = item.nps >= 0.8 && item.taxaResposta !== null && item.taxaResposta >= 0.075;
+                              const elegivelPremio = (item.nps >= 0.8) || (item.taxaResposta !== null && item.taxaResposta >= 0.075);
                               const npsAbaixo = item.nps < 0.8;
                               const taxaAbaixo = item.taxaResposta !== null && item.taxaResposta < 0.075;
                               const motivo = !elegivelPremio ? (
                                 npsAbaixo && taxaAbaixo ? t('npsDashboard.npsETaxaAbaixo') :
-                                npsAbaixo ? t('npsDashboard.npsAbaixo80') :
-                                taxaAbaixo ? t('npsDashboard.taxaAbaixo75') : ''
+                                npsAbaixo ? t('npsDashboard.npsAbaixo80') : ''
                               ) : '';
                               
                               return (
