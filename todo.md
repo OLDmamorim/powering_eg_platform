@@ -1448,3 +1448,14 @@
 - [x] Corrigido routers.ts: feriados (Carnaval, Sexta-Santa, Corpo de Deus)
 - [x] Corrigido routers.ts: cálculo dias úteis, datas visitas ICS, agrupamento análises
 - [x] 8 testes unitários passados
+
+## Bug: Desfasamento 1 dia no calendário MENSAL do volante (agendamentos no domingo em vez de segunda)
+- [x] Corrigido formatDate() no PortalLoja.tsx (função global)
+- [x] Corrigido 13 ocorrências de toISOString no PortalLoja.tsx (getCorDia, diaDisponivel, diaSelecionado, editarData, etc.)
+- [x] Corrigido ExportarRelatorioIAPDF.tsx (nome ficheiro PDF)
+- [x] Corrigido HistoricoRelatoriosIA.tsx (nome ficheiro PDF)
+- [x] Corrigido DashboardVolante.tsx (período datas)
+- [x] Corrigido relatorioMensalRecalibra.ts (último dia do mês)
+- [x] Corrigido routers.ts (6 ocorrências: nomes ficheiros PDF/ICS/CSV)
+- [x] Zero ocorrências de toISOString.split('T')[0] restantes no código (apenas em ficheiros .test.ts)
+- [x] 36 testes unitários passados

@@ -1849,7 +1849,7 @@ IMPORTANTE:
         // Retornar como base64
         return {
           pdf: pdfBuffer.toString('base64'),
-          filename: `resultados_${loja.nome.replace(/\s+/g, '_').toLowerCase()}_${new Date().toISOString().split('T')[0]}.pdf`
+          filename: (() => { const _d = new Date(); return `resultados_${loja.nome.replace(/\s+/g, '_').toLowerCase()}_${_d.getFullYear()}-${String(_d.getMonth()+1).padStart(2,'0')}-${String(_d.getDate()).padStart(2,'0')}.pdf`; })()
         };
       }),
   }),
@@ -4054,7 +4054,7 @@ IMPORTANTE:
         
         return {
           icsContent,
-          filename: `projecao-visitas-${new Date().toISOString().split('T')[0]}.ics`,
+          filename: (() => { const _d = new Date(); return `projecao-visitas-${_d.getFullYear()}-${String(_d.getMonth()+1).padStart(2,'0')}-${String(_d.getDate()).padStart(2,'0')}.ics`; })(),
           totalVisitas: visitas.length
         };
       }),
@@ -4304,7 +4304,7 @@ IMPORTANTE:
             </div>
           `,
           attachments: [{
-            filename: `relatorio-ia-${new Date(relatorio.createdAt).toISOString().split('T')[0]}.pdf`,
+            filename: (() => { const _d = new Date(relatorio.createdAt); return `relatorio-ia-${_d.getFullYear()}-${String(_d.getMonth()+1).padStart(2,'0')}-${String(_d.getDate()).padStart(2,'0')}.pdf`; })(),
             content: pdfBase64,
             contentType: 'application/pdf',
           }],
@@ -8204,7 +8204,8 @@ Fornece uma análise breve com:
           analiseIAFormatada
         );
         
-        const dataAtual = new Date().toISOString().split('T')[0];
+        const _da = new Date();
+        const dataAtual = `${_da.getFullYear()}-${String(_da.getMonth()+1).padStart(2,'0')}-${String(_da.getDate()).padStart(2,'0')}`;
         const filename = `resultados_${lojaNome.replace(/\s+/g, '_').toLowerCase()}_${dataAtual}.pdf`;
         
         return {
@@ -11147,7 +11148,7 @@ IMPORTANTE:
         
         return {
           pdfBase64,
-          filename: `Analise_Fichas_${relatorio.nomeLoja.replace(/\s+/g, '_')}_${new Date(analise.dataUpload).toISOString().split('T')[0]}.pdf`,
+          filename: (() => { const _d = new Date(analise.dataUpload); return `Analise_Fichas_${relatorio.nomeLoja.replace(/\s+/g, '_')}_${_d.getFullYear()}-${String(_d.getMonth()+1).padStart(2,'0')}-${String(_d.getDate()).padStart(2,'0')}.pdf`; })(),
         };
       }),
     
@@ -11691,7 +11692,7 @@ IMPORTANTE:
         
         return {
           pdf: pdfBuffer.toString('base64'),
-          filename: `dashboard_volante_${dataInicio.toISOString().split('T')[0]}_${dataFim.toISOString().split('T')[0]}.pdf`,
+          filename: `dashboard_volante_${dataInicio.getFullYear()}-${String(dataInicio.getMonth()+1).padStart(2,'0')}-${String(dataInicio.getDate()).padStart(2,'0')}_${dataFim.getFullYear()}-${String(dataFim.getMonth()+1).padStart(2,'0')}-${String(dataFim.getDate()).padStart(2,'0')}.pdf`,
         };
       }),
   }),

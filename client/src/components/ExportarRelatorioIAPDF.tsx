@@ -1551,7 +1551,8 @@ export function ExportarRelatorioIAPDF({ analiseIA, periodo }: Props) {
       }
 
       // Download
-      const fileName = `Relatorio_${periodoLabels[periodo]?.replace(/ /g, '') || periodo}_${new Date().toISOString().split('T')[0]}.pdf`;
+      const _rd = new Date();
+      const fileName = `Relatorio_${periodoLabels[periodo]?.replace(/ /g, '') || periodo}_${_rd.getFullYear()}-${String(_rd.getMonth()+1).padStart(2,'0')}-${String(_rd.getDate()).padStart(2,'0')}.pdf`;
       doc.save(fileName);
       toast.success('PDF exportado com sucesso!');
     } catch (error) {

@@ -103,8 +103,8 @@ export default function DashboardVolante() {
     const inicio = new Date(fim.getTime() - dias * 24 * 60 * 60 * 1000);
 
     return {
-      dataInicio: inicio.toISOString().split('T')[0],
-      dataFim: fim.toISOString().split('T')[0],
+      dataInicio: `${inicio.getFullYear()}-${String(inicio.getMonth()+1).padStart(2,'0')}-${String(inicio.getDate()).padStart(2,'0')}`,
+      dataFim: `${fim.getFullYear()}-${String(fim.getMonth()+1).padStart(2,'0')}-${String(fim.getDate()).padStart(2,'0')}`,
     };
   }, [periodoSelecionado, dataPersonalizadaInicio, dataPersonalizadaFim]);
 

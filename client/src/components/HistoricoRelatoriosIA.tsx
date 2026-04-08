@@ -244,7 +244,8 @@ export function HistoricoRelatoriosIA() {
       }
       
       // Guardar ficheiro
-      const dataFormatada = new Date(selectedRelatorio.createdAt).toISOString().split('T')[0];
+      const _df = new Date(selectedRelatorio.createdAt);
+      const dataFormatada = `${_df.getFullYear()}-${String(_df.getMonth()+1).padStart(2,'0')}-${String(_df.getDate()).padStart(2,'0')}`;
       doc.save(`relatorio-ia-${dataFormatada}.pdf`);
       toast.success(language === 'pt' ? "Relatório exportado com sucesso!" : "Report exported successfully!");
     } catch (error) {

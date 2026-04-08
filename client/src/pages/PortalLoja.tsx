@@ -225,7 +225,10 @@ function getWeekDates(baseDate: Date): Date[] {
 }
 
 function formatDate(d: Date): string {
-  return d.toISOString().split("T")[0];
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 function formatDatePT(d: Date): string {
@@ -6250,7 +6253,8 @@ function VolanteTab({
   const getCorDia = (data: Date): string => {
     if (data.getTime() === 0) return 'bg-transparent';
     
-    const dataStr = data.toISOString().split('T')[0];
+    const _d1 = new Date(data);
+    const dataStr = `${_d1.getFullYear()}-${String(_d1.getMonth()+1).padStart(2,'0')}-${String(_d1.getDate()).padStart(2,'0')}`;
     const estado = estadoDias?.[dataStr];
     
     if (!estado) return 'bg-white hover:bg-gray-100';
@@ -6270,7 +6274,8 @@ function VolanteTab({
     if (data.getTime() === 0) return false;
     if (data < hoje) return false;
     
-    const dataStr = data.toISOString().split('T')[0];
+    const _d2 = new Date(data);
+    const dataStr = `${_d2.getFullYear()}-${String(_d2.getMonth()+1).padStart(2,'0')}-${String(_d2.getDate()).padStart(2,'0')}`;
     const estado = estadoDias?.[dataStr];
     
     return !estado || (estado.estado !== 'dia_completo' && estado.estado !== 'bloqueado');
@@ -6482,7 +6487,8 @@ function VolanteTab({
         <DialogContent>
           {(() => {
             // Verificar se o dia está disponível
-            const dataStr = diaSelecionado?.toISOString().split('T')[0];
+            const _ds1 = diaSelecionado ? new Date(diaSelecionado) : null;
+            const dataStr = _ds1 ? `${_ds1.getFullYear()}-${String(_ds1.getMonth()+1).padStart(2,'0')}-${String(_ds1.getDate()).padStart(2,'0')}` : undefined;
             const estadoDia = dataStr ? estadoDias?.[dataStr] : null;
             const diaFechado = estadoDia?.estado === 'dia_completo';
             const pedidosDoDia = estadoDia?.pedidos || [];
@@ -6659,7 +6665,8 @@ function VolanteTab({
                     onClick={() => {
                       if (diaSelecionado) {
                         // Verificar se o dia está bloqueado
-                        const dataStr = diaSelecionado.toISOString().split('T')[0];
+                        const _ds2 = new Date(diaSelecionado);
+                        const dataStr = `${_ds2.getFullYear()}-${String(_ds2.getMonth()+1).padStart(2,'0')}-${String(_ds2.getDate()).padStart(2,'0')}`;
                         const estadoDia = estadoDias?.[dataStr];
                         const bloqueiosDia = estadoDia?.bloqueios || [];
                         
@@ -9511,7 +9518,8 @@ END:VCALENDAR`;
         setEditarDialogOpen(open);
         if (open && pedidoSelecionado) {
           // Preencher com dados atuais
-          const dataStr = new Date(pedidoSelecionado.data).toISOString().split('T')[0];
+          const _pe = new Date(pedidoSelecionado.data);
+          const dataStr = `${_pe.getFullYear()}-${String(_pe.getMonth()+1).padStart(2,'0')}-${String(_pe.getDate()).padStart(2,'0')}`;
           setEditarData(dataStr);
           setEditarPeriodo(pedidoSelecionado.periodo);
           setEditarTipoApoio(pedidoSelecionado.tipoApoio);
@@ -9701,7 +9709,8 @@ END:VCALENDAR`;
                       className="flex-1"
                       onClick={() => {
                         setPedidoSelecionado(pedido);
-                        setEditarData(new Date(pedido.data).toISOString().split('T')[0]);
+                        const _pd = new Date(pedido.data);
+                        setEditarData(`${_pd.getFullYear()}-${String(_pd.getMonth()+1).padStart(2,'0')}-${String(_pd.getDate()).padStart(2,'0')}`);
                         setEditarPeriodo(pedido.periodo);
                         setDiaDetalheOpen(false);
                         setEditarDialogOpen(true);
@@ -9808,7 +9817,8 @@ END:VCALENDAR`;
                         className="flex-1"
                         onClick={() => {
                           setAgendamentoSelecionado(agendamento);
-                          setEditarAgendamentoData(new Date(agendamento.data).toISOString().split('T')[0]);
+                          const _ag = new Date(agendamento.data);
+                          setEditarAgendamentoData(`${_ag.getFullYear()}-${String(_ag.getMonth()+1).padStart(2,'0')}-${String(_ag.getDate()).padStart(2,'0')}`);
                           setEditarAgendamentoPeriodo(agendamento.agendamento_volante_periodo);
                           setEditarAgendamentoLojaId(agendamento.lojaId);
                           setEditarAgendamentoTipoApoio(agendamento.agendamento_volante_tipo);
@@ -9956,7 +9966,7 @@ END:VCALENDAR`;
                 type="date"
                 value={novoAgendamentoData}
                 onChange={(e) => setNovoAgendamentoData(e.target.value)}
-                min={new Date().toISOString().split('T')[0]}
+                min={(() => { const _n = new Date(); return `${_n.getFullYear()}-${String(_n.getMonth()+1).padStart(2,'0')}-${String(_n.getDate()).padStart(2,'0')}`; })()}
               />
             </div>
 
@@ -10417,7 +10427,7 @@ function RegistarServicosHoje({
   // Data de hoje no formato YYYY-MM-DD
   const hoje = useMemo(() => {
     const d = new Date();
-    return d.toISOString().split('T')[0];
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
   }, []);
 
   // Buscar agendamentos de hoje
@@ -11254,7 +11264,8 @@ function MonitorVidrosSection({ token, language }: { token: string; language: st
       }
       // Filtro por data
       if (filtroData) {
-        const dataVidro = new Date(v.createdAt).toISOString().split('T')[0];
+        const _dv = new Date(v.createdAt);
+        const dataVidro = `${_dv.getFullYear()}-${String(_dv.getMonth()+1).padStart(2,'0')}-${String(_dv.getDate()).padStart(2,'0')}`;
         if (dataVidro !== filtroData) return false;
       }
       return true;
@@ -11279,7 +11290,8 @@ function MonitorVidrosSection({ token, language }: { token: string; language: st
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `recepcao_vidros_${new Date().toISOString().split('T')[0]}.csv`;
+    const _csv = new Date();
+    a.download = `recepcao_vidros_${_csv.getFullYear()}-${String(_csv.getMonth()+1).padStart(2,'0')}-${String(_csv.getDate()).padStart(2,'0')}.csv`;
     a.click();
     URL.revokeObjectURL(url);
     toast.success(language === 'pt' ? 'Excel exportado!' : 'Excel exported!');
@@ -11315,7 +11327,8 @@ function MonitorVidrosSection({ token, language }: { token: string; language: st
         alternateRowStyles: { fillColor: [245, 247, 250] },
         columnStyles: { 0: { fontStyle: 'bold', textColor: [37, 99, 235] } },
       });
-      doc.save(`recepcao_vidros_${new Date().toISOString().split('T')[0]}.pdf`);
+      const _pdf = new Date();
+      doc.save(`recepcao_vidros_${_pdf.getFullYear()}-${String(_pdf.getMonth()+1).padStart(2,'0')}-${String(_pdf.getDate()).padStart(2,'0')}.pdf`);
       toast.success(language === 'pt' ? 'PDF exportado!' : 'PDF exported!');
     } catch (e) {
       toast.error('Erro ao gerar PDF');
@@ -11378,7 +11391,8 @@ function MonitorVidrosSection({ token, language }: { token: string; language: st
                 setFiltroData('');
               } else {
                 setFiltroCard('hoje');
-                const hoje = new Date().toISOString().split('T')[0];
+                const _hj = new Date();
+                const hoje = `${_hj.getFullYear()}-${String(_hj.getMonth()+1).padStart(2,'0')}-${String(_hj.getDate()).padStart(2,'0')}`;
                 setFiltroData(hoje);
                 setBusca('');
               }

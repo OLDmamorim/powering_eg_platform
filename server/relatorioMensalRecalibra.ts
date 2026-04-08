@@ -22,7 +22,8 @@ export async function enviarRelatoriosMensaisRecalibra() {
     
     // Calcular primeiro e último dia do mês corrente
     const primeiroDia = `${anoRelatorio}-${String(mesRelatorio).padStart(2, '0')}-01`;
-    const ultimoDia = new Date(anoRelatorio, mesRelatorio, 0).toISOString().split('T')[0];
+    const _ud = new Date(anoRelatorio, mesRelatorio, 0);
+    const ultimoDia = `${_ud.getFullYear()}-${String(_ud.getMonth()+1).padStart(2,'0')}-${String(_ud.getDate()).padStart(2,'0')}`;
     
     // Obter todas as unidades Recalibra ativas
     const unidades = await db.getAllUnidadesRecalibra();
