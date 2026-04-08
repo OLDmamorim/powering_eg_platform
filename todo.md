@@ -1428,3 +1428,13 @@
 ## Bug: Ranking NPS no dashboard admin só mostra 10 lojas
 - [x] Identificado: rankingLimit hardcoded a 10 no ResultadosDashboard.tsx
 - [x] Corrigido: Nacional/Todas/Zona agora mostra até 200 lojas (todas)
+
+## Feature: Pesquisa por Eurocode (análise stock + portal loja)
+- [x] Investigar estrutura de dados (tabela eurocodes_fichas: 61835 registos, 90+ lojas)
+- [x] Criar função pesquisarEurocodePorPrefixo no db.ts (LIKE prefixo%, última análise por loja)
+- [x] Criar endpoints pesquisarEurocodePrefixo (gestor) e pesquisarEurocodePrefixoPortal (público) no routers.ts
+- [x] Criar componente UI no portal da loja: input grande com debounce 300ms, resultados em tempo real
+- [x] Mostra: Eurocode, FS (obrano), Matrícula, Status (com cores por tipo), Marca/Modelo, Dias aberto
+- [x] Integrar no portal da loja (secção Análise de Stock, antes da pesquisa global)
+- [ ] Integrar na análise de stock do gestor/admin
+- [x] 9 testes unitários passados

@@ -856,6 +856,8 @@ export default function PortalLoja() {
   // Pesquisa global de eurocode (todas as lojas)
   const [eurocodeGlobalInput, setEurocodeGlobalInput] = useState('');
   const [eurocodeGlobalSearch, setEurocodeGlobalSearch] = useState('');
+  // Pesquisa de fichas por prefixo de Eurocode (tempo real)
+  const [eurocodePrefixoInput, setEurocodePrefixoInput] = useState('');
   const [analiseIA, setAnaliseIA] = useState<any>(null);
   const [gerandoAnaliseIA, setGerandoAnaliseIA] = useState(false);
   // Estado para texto personalizado de classificação "Outros" (chave: eurocode_unitIndex)
@@ -1234,6 +1236,20 @@ export default function PortalLoja() {
   const { data: eurocodeGlobalResultados, isLoading: eurocodeGlobalLoading } = trpc.stock.pesquisarEurocodeGlobal.useQuery(
     { eurocode: eurocodeGlobalSearch, token },
     { enabled: eurocodeGlobalSearch.length >= 3, staleTime: 30 * 1000 }
+  );
+
+  // Pesquisa de fichas por prefixo de Eurocode (tempo real com debounce)
+  const [eurocodePrefixoDebounced, setEurocodePrefixoDebounced] = useState('');
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setEurocodePrefixoDebounced(eurocodePrefixoInput.trim());
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [eurocodePrefixoInput]);
+
+  const { data: fichasPorPrefixo, isLoading: fichasPrefixoLoading } = trpc.stock.pesquisarEurocodePrefixoPortal.useQuery(
+    { prefixo: eurocodePrefixoDebounced, lojaId: lojaIdAtiva || undefined },
+    { enabled: eurocodePrefixoDebounced.length >= 2 && activeTab === 'analise_stock', staleTime: 10 * 1000 }
   );
 
   // Notas da loja
@@ -5227,6 +5243,102 @@ export default function PortalLoja() {
           ) : (
             /* VISTA LISTA DE ANÁLISES */
             <>
+              {/* Pesquisa de Fichas por Eurocode (tempo real) */}
+              <div className="bg-white border-2 border-emerald-300 rounded-xl p-4 shadow-sm">
+                <div className="flex items-center gap-2 mb-3">
+                  <Search className="h-5 w-5 text-emerald-600" />
+                  <div>
+                    <span className="font-bold text-sm text-emerald-700">{language === 'pt' ? 'Identificar Vidro por Eurocode' : 'Identify Glass by Eurocode'}</span>
+                    <p className="text-[10px] text-gray-500">{language === 'pt' ? 'Digite os primeiros números do Eurocode para ver fichas associadas' : 'Type the first numbers of the Eurocode to see associated records'}</p>
+                  </div>
+                </div>
+                <div className="relative mb-3">
+                  <input
+                    type="text"
+                    placeholder={language === 'pt' ? 'Ex: 8345...' : 'Ex: 8345...'}
+                    value={eurocodePrefixoInput}
+                    onChange={e => setEurocodePrefixoInput(e.target.value)}
+                    className="w-full text-lg font-mono font-bold tracking-wider border-2 border-emerald-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 bg-emerald-50/50"
+                    autoComplete="off"
+                  />
+                  {eurocodePrefixoInput && (
+                    <button
+                      onClick={() => setEurocodePrefixoInput('')}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+                {fichasPrefixoLoading && eurocodePrefixoDebounced.length >= 2 && (
+                  <div className="flex items-center gap-2 text-sm text-gray-500 py-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    {language === 'pt' ? 'A pesquisar fichas...' : 'Searching records...'}
+                  </div>
+                )}
+                {eurocodePrefixoDebounced.length >= 2 && !fichasPrefixoLoading && fichasPorPrefixo && fichasPorPrefixo.length > 0 && (
+                  <div className="space-y-1.5 max-h-[400px] overflow-y-auto">
+                    <p className="text-xs text-gray-500 mb-2">{fichasPorPrefixo.length} {language === 'pt' ? 'ficha(s) encontrada(s)' : 'record(s) found'}</p>
+                    {fichasPorPrefixo.map((ficha: any, idx: number) => {
+                      const statusColor = ficha.status === 'AUTORIZADO' ? 'bg-green-100 text-green-700 border-green-200'
+                        : ficha.status === 'Serviço Pronto' ? 'bg-blue-100 text-blue-700 border-blue-200'
+                        : ficha.status === 'RECUSADO' ? 'bg-red-100 text-red-700 border-red-200'
+                        : ficha.status === 'Consulta / Orçamento' ? 'bg-yellow-100 text-yellow-700 border-yellow-200'
+                        : ficha.status === 'Pedido Autorização' ? 'bg-orange-100 text-orange-700 border-orange-200'
+                        : ficha.status === 'INCIDÊNCIA' ? 'bg-purple-100 text-purple-700 border-purple-200'
+                        : 'bg-gray-100 text-gray-700 border-gray-200';
+                      return (
+                        <div key={idx} className="border rounded-lg p-3 bg-white hover:bg-gray-50 transition-colors">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="font-mono font-bold text-sm text-emerald-700">{ficha.eurocode}</span>
+                                <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium border ${statusColor}`}>
+                                  {ficha.status || '-'}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-3 mt-1.5 text-xs text-gray-600">
+                                <span className="flex items-center gap-1">
+                                  <span className="font-medium">{language === 'pt' ? 'FS' : 'SR'}:</span>
+                                  <span className="font-bold text-gray-800">{ficha.obrano}</span>
+                                </span>
+                                {ficha.matricula && (
+                                  <span className="flex items-center gap-1">
+                                    <span className="font-medium">{language === 'pt' ? 'Mat.' : 'Plate'}:</span>
+                                    <span className="font-bold text-gray-800">{ficha.matricula}</span>
+                                  </span>
+                                )}
+                                {ficha.marca && (
+                                  <span className="text-gray-400">{ficha.marca} {ficha.modelo || ''}</span>
+                                )}
+                              </div>
+                              {ficha.nomeLoja && ficha.lojaId !== lojaIdAtiva && (
+                                <div className="text-[10px] text-amber-600 mt-1">
+                                  ⚠️ {ficha.nomeLoja}
+                                </div>
+                              )}
+                            </div>
+                            {ficha.diasAberto != null && ficha.diasAberto > 0 && (
+                              <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${
+                                ficha.diasAberto > 30 ? 'bg-red-100 text-red-600' : ficha.diasAberto > 15 ? 'bg-amber-100 text-amber-600' : 'bg-gray-100 text-gray-500'
+                              }`}>
+                                {ficha.diasAberto}d
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+                {eurocodePrefixoDebounced.length >= 2 && !fichasPrefixoLoading && fichasPorPrefixo && fichasPorPrefixo.length === 0 && (
+                  <p className="text-sm text-gray-400 py-2 text-center">{language === 'pt' ? 'Nenhuma ficha encontrada com este prefixo' : 'No records found with this prefix'}</p>
+                )}
+                {eurocodePrefixoDebounced.length < 2 && eurocodePrefixoInput.length > 0 && (
+                  <p className="text-xs text-gray-400 py-1">{language === 'pt' ? 'Mínimo 2 caracteres...' : 'Minimum 2 characters...'}</p>
+                )}
+              </div>
+
               {/* Pesquisa Global de Eurocode */}
               <div className="bg-white border border-blue-200 rounded-xl p-4">
                 <div className="flex items-center gap-2 mb-3">
