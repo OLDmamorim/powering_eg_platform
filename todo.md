@@ -1490,3 +1490,8 @@
 - [x] Cursor salta automaticamente para a caixa seguinte ao preencher 2 caracteres
 - [x] Pesquisa activa a partir do 2º caractere (sem contar traços)
 - [x] Botão limpar (✕) para reset rápido
+
+## Fix: Simplificar input matrícula - campo único com auto-formatação de traços
+- [x] Remover as 3 caixas separadas, usar um único input limpo (como o do Eurocode)
+- [x] Auto-formatar com traços à medida que se escreve (37 → 37-, 37PJ → 37-PJ-, 37PJ00 → 37-PJ-00)
+- [x] Manter resultados à direita em layout horizontal
