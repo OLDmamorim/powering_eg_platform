@@ -1496,3 +1496,4 @@
 - [x] Auto-formatar com traços à medida que se escreve (37 → 37-, 37PJ → 37-PJ-, 37PJ00 → 37-PJ-00)
 - [x] Manter resultados à direita em layout horizontal
 - [x] Bug: Página do Portal da Loja não começa no topo — arranca a meio ao entrar
+- [x] Bug: Erro "Invalid time value" ao abrir formulário Pedir Apoio no calendário do volante

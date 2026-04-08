@@ -9226,9 +9226,10 @@ IMPORTANTE:
           throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
         }
         
-        // Normalizar data: input.data vem como "2026-04-20" do frontend
-        // Usar T12:00:00 para evitar desfasamento de timezone (new Date("2026-04-20") = meia-noite UTC = 23:00 dia anterior em Portugal)
-        const dataApoio = new Date(input.data + 'T12:00:00');
+        // Normalizar data: input.data pode vir como ISO string completa ("2026-04-20T00:00:00.000Z") ou como "2026-04-20"
+        // Extrair apenas YYYY-MM-DD e usar T12:00:00 para evitar desfasamento de timezone
+        const dataStr = input.data.split('T')[0]; // Extrair YYYY-MM-DD de qualquer formato
+        const dataApoio = new Date(dataStr + 'T12:00:00');
         
         // ATRIBUIÇÃO INTELIGENTE: Usar algoritmo de scoring para escolher o melhor volante
         const resultado = await db.atribuirVolanteInteligente(
@@ -9645,10 +9646,9 @@ IMPORTANTE:
         }
         
         const volanteId = tokenData.volante.id;
-        // Normalizar data para UTC (apenas data, sem horas)
-        // input.data vem como "2026-02-13" do frontend
-        // Usar T12:00:00 para evitar desfasamento de timezone
-        const dataAgendamento = new Date(input.data + 'T12:00:00');
+        // Normalizar data: input.data pode vir como ISO string ou YYYY-MM-DD
+        // Extrair apenas YYYY-MM-DD e usar T12:00:00 para evitar desfasamento de timezone
+        const dataAgendamento = new Date(input.data.split('T')[0] + 'T12:00:00');
         
         // Verificar se o dia/período está bloqueado
         const bloqueio = await db.verificarBloqueio(volanteId, dataAgendamento, input.periodo);
@@ -9762,7 +9762,7 @@ IMPORTANTE:
         
         const agendamentoAtualizado = await db.atualizarAgendamentoVolante(input.agendamentoId, volanteId, {
           lojaId: input.lojaId,
-          data: input.data ? new Date(input.data + 'T12:00:00') : undefined,
+          data: input.data ? new Date(input.data.split('T')[0] + 'T12:00:00') : undefined,
           agendamento_volante_periodo: input.periodo,
           agendamento_volante_tipo: input.tipoApoio,
           titulo: input.titulo,
@@ -9805,7 +9805,7 @@ IMPORTANTE:
         
         const bloqueio = await db.criarBloqueioVolante({
           volanteId: tokenData.volante.id,
-          data: new Date(input.data + 'T12:00:00'),
+          data: new Date(input.data.split('T')[0] + 'T12:00:00'),
           periodo: input.periodo,
           tipo: input.tipo,
           motivo: input.motivo,
