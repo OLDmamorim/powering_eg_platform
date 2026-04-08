@@ -885,6 +885,16 @@ export default function PortalLoja() {
   const pushNotifications = usePushNotificationsLoja(token);
   const [isPWAInstalled, setIsPWAInstalled] = useState(false);
   
+  // Scroll para o topo quando a página carrega
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  // Scroll para o topo quando muda de tab
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [activeTab]);
+
   // Verificar se PWA está instalada
   useEffect(() => {
     const checkInstalled = () => {
