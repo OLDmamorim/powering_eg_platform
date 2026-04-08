@@ -1413,3 +1413,14 @@
 - [x] Alterar routers.ts - cálculo elegibilidade portal gestor (2 ocorrências)
 - [x] Alterar ExportarRelatorioIAPDF.tsx - texto PDF
 - [x] 13 testes unitários passados
+
+## Corrigir regra NPS no frontend portal da loja (dashboard resultados)
+- [x] Alterar texto descritivo de "e" para "ou" no CardDescription NPS (PortalLoja.tsx)
+- [x] Alterar cálculo elegibilidade mensal na tabela (PortalLoja.tsx: && para ||)
+- [x] Alterar ResultadosDashboard.tsx - cálculo elegibilidade inline (2 ocorrências)
+- [x] Alterar ResultadosDashboard.tsx - ranking NPS motivo inelegibilidade
+- [x] Alterar ResultadosDashboard.tsx - texto regras e legenda
+- [x] Corrigir 2 ocorrências restantes no aiService.ts (ranking NPS admin e gestor)
+- [x] Alterar ExportarRelatorioIAPDF.tsx - texto critérios
+- [x] 19 testes unitários passados
+- [x] Zero ocorrências de regra NPS E (&&) restantes no projecto

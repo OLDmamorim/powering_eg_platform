@@ -3159,10 +3159,9 @@ export default function PortalLoja() {
                         {language === 'pt' ? 'NPS - Elegibilidade para Prémio' : 'NPS - Prize Eligibility'}
                       </CardTitle>
                       <CardDescription>
-                        {language === 'pt' 
-                          ? 'NPS ≥ 80% e Taxa de Resposta ≥ 7,5% para ter direito a prémio'
-                          : 'NPS ≥ 80% and Response Rate ≥ 7.5% for prize eligibility'}
-                      </CardDescription>
+            {language === 'pt' 
+                           ? 'NPS \u2265 80% OU Taxa de Resposta \u2265 7,5% (basta um crit\u00e9rio) para ter direito a pr\u00e9mio'
+                           : 'NPS \u2265 80% OR Response Rate \u2265 7.5% (just one criterion needed) for prize eligibility'}        </CardDescription>
                       {dashboardData.nps.dadosMensais?.length > 0 && (() => {
                         const ultimoMes = dashboardData.nps.dadosMensais[dashboardData.nps.dadosMensais.length - 1];
                         const mesesPTShort = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
@@ -3346,7 +3345,7 @@ export default function PortalLoja() {
                                 {dashboardData.nps.dadosMensais.map((d: any, i: number) => {
                                   const npsVal = d.nps !== null ? d.nps * 100 : null;
                                   const taxaVal = d.taxaResposta !== null ? d.taxaResposta * 100 : null;
-                                  const elegMes = npsVal !== null && npsVal >= 80 && taxaVal !== null && taxaVal >= 7.5;
+                                  const elegMes = (npsVal !== null && npsVal >= 80) || (taxaVal !== null && taxaVal >= 7.5);
                                   return (
                                     <tr key={i} className="border-b border-gray-100">
                                       <td className="py-2">

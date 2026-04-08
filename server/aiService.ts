@@ -729,12 +729,10 @@ ${pontosNegativosRelatados.length > 0 ? pontosNegativosRelatados.join('\n') : 'N
         if (mesesComDados > 0) {
           const npsMedia = (npsTotal / mesesComDados) * 100;
           const taxaMedia = (taxaTotal / mesesComDados) * 100;
-          const elegivel = npsMedia >= 80 && taxaMedia >= 7.5;
+          const elegivel = npsMedia >= 80 || taxaMedia >= 7.5;
           let motivo = '';
           if (!elegivel) {
-            if (npsMedia < 80 && taxaMedia < 7.5) motivo = 'NPS < 80% e Taxa < 7.5%';
-            else if (npsMedia < 80) motivo = 'NPS < 80%';
-            else motivo = 'Taxa de Resposta < 7.5%';
+            motivo = 'NPS < 80% e Taxa < 7.5% (não cumpre nenhum critério)';
           }
           
           npsRanking.push({
@@ -1761,12 +1759,10 @@ ${resumoRelatoriosPorLoja}
         if (mesesComDados > 0) {
           const npsMedia = (npsTotal / mesesComDados) * 100;
           const taxaMedia = (taxaTotal / mesesComDados) * 100;
-          const elegivel = npsMedia >= 80 && taxaMedia >= 7.5;
+          const elegivel = npsMedia >= 80 || taxaMedia >= 7.5;
           let motivo = '';
           if (!elegivel) {
-            if (npsMedia < 80 && taxaMedia < 7.5) motivo = 'NPS < 80% e Taxa < 7.5%';
-            else if (npsMedia < 80) motivo = 'NPS < 80%';
-            else motivo = 'Taxa de Resposta < 7.5%';
+            motivo = 'NPS < 80% e Taxa < 7.5% (não cumpre nenhum critério)';
           }
           
           npsRanking.push({

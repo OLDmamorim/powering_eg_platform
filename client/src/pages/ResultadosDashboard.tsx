@@ -1098,7 +1098,7 @@ export function ResultadosDashboard() {
                       {npsPorLoja.size > 0 && (() => {
                         const npsVal = getNPSMes(item.lojaId);
                         const taxaVal = getTaxaRespostaMes(item.lojaId);
-                        const elegivelPremio = npsVal !== null && taxaVal !== null && npsVal >= 0.8 && taxaVal >= 0.075;
+                        const elegivelPremio = (npsVal !== null && npsVal >= 0.8) || (taxaVal !== null && taxaVal >= 0.075);
                         const npsAbaixo = npsVal !== null && npsVal < 0.8;
                         const taxaAbaixo = taxaVal !== null && taxaVal < 0.075;
                         return (
@@ -1150,12 +1150,12 @@ export function ResultadosDashboard() {
               nps: npsVal,
               taxaResposta: taxaVal,
               npsAnual: npsAnualVal,
-              elegivelPremio: npsVal !== null && taxaVal !== null && npsVal >= 0.8 && taxaVal >= 0.075,
-              motivoInelegivel: npsVal !== null ? (
-                npsVal < 0.8 && taxaVal !== null && taxaVal < 0.075 ? 'NPS < 80% e Taxa < 7,5%' :
-                npsVal < 0.8 ? 'NPS < 80%' :
-                taxaVal !== null && taxaVal < 0.075 ? 'Taxa resposta < 7,5%' : null
-              ) : null,
+              elegivelPremio: (npsVal !== null && npsVal >= 0.8) || (taxaVal !== null && taxaVal >= 0.075),
+              motivoInelegivel: (
+                (npsVal === null || npsVal < 0.8) && (taxaVal === null || taxaVal < 0.075)
+                  ? 'NPS < 80% e Taxa < 7,5% (não cumpre nenhum critério)'
+                  : null
+              ),
             };
           }).filter((item: any) => item.nps !== null)
            .sort((a: any, b: any) => {
@@ -1191,7 +1191,7 @@ export function ResultadosDashboard() {
                 <CardDescription className="space-y-1">
                   <span>{periodoSelecionado && periodos.find((p: any) => p.mes === periodoSelecionado.mes && p.ano === periodoSelecionado.ano)?.label}</span>
                   <span className="block text-xs">
-                    Regras: NPS {'>'}= 80% <strong>e</strong> Taxa de Resposta {'>'}= 7,5% para ter direito a prémio
+          Regras: NPS {'>'}= 80% <strong>OU</strong> Taxa de Resposta {'>'}= 7,5% (basta um critério) para ter direito a prémio
                   </span>
                 </CardDescription>
               </CardHeader>
@@ -1292,15 +1292,11 @@ export function ResultadosDashboard() {
                 <div className="mt-4 pt-4 border-t flex flex-wrap gap-4 text-xs text-muted-foreground">
                   <div className="flex items-center gap-1">
                     <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                    NPS ≥ 80% e Taxa ≥ 7,5% = Elegível
+                    NPS ≥ 80% OU Taxa ≥ 7,5% = Elegível (basta 1)
                   </div>
                   <div className="flex items-center gap-1">
                     <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                    NPS {'<'} 80% = Sem prémio
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <div className="w-3 h-3 rounded-full bg-orange-500"></div>
-                    Taxa resposta {'<'} 7,5% = Sem prémio
+                    NPS {'<'} 80% E Taxa {'<'} 7,5% = Sem prémio
                   </div>
                 </div>
               </CardContent>
