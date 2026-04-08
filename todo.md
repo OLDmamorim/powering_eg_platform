@@ -1471,3 +1471,10 @@
 - [x] Corrigidos 25 agendamentos_volante existentes na BD (00:00 -> 12:00)
 - [x] Corrigidos 3 bloqueios_volante existentes na BD (00:00 -> 12:00)
 - [x] Zero erros TypeScript, servidor a funcionar
+
+## Feature: Pesquisa por Matrícula na Análise de Stock (portal loja)
+- [x] Criar função pesquisarMatriculaPorPrefixo no db.ts (LIKE prefixo%, normaliza hífens/espaços)
+- [x] Criar endpoints no routers.ts (gestor + portal)
+- [x] Criar componente UI no portal da loja abaixo da pesquisa por Eurocode (caixa amber)
+- [x] Mostrar: Matrícula, FS (obrano), Eurocode, Status (com cores), Marca/Modelo, Dias aberto
+- [x] 5 testes unitários passados

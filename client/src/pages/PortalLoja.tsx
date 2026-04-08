@@ -861,6 +861,8 @@ export default function PortalLoja() {
   const [eurocodeGlobalSearch, setEurocodeGlobalSearch] = useState('');
   // Pesquisa de fichas por prefixo de Eurocode (tempo real)
   const [eurocodePrefixoInput, setEurocodePrefixoInput] = useState('');
+  // Pesquisa de fichas por prefixo de Matrícula (tempo real)
+  const [matriculaPrefixoInput, setMatriculaPrefixoInput] = useState('');
   const [analiseIA, setAnaliseIA] = useState<any>(null);
   const [gerandoAnaliseIA, setGerandoAnaliseIA] = useState(false);
   // Estado para texto personalizado de classificação "Outros" (chave: eurocode_unitIndex)
@@ -1253,6 +1255,20 @@ export default function PortalLoja() {
   const { data: fichasPorPrefixo, isLoading: fichasPrefixoLoading } = trpc.stock.pesquisarEurocodePrefixoPortal.useQuery(
     { prefixo: eurocodePrefixoDebounced, lojaId: lojaIdAtiva || undefined },
     { enabled: eurocodePrefixoDebounced.length >= 2 && activeTab === 'analise_stock', staleTime: 10 * 1000 }
+  );
+
+  // Pesquisa de fichas por prefixo de Matrícula (tempo real com debounce)
+  const [matriculaPrefixoDebounced, setMatriculaPrefixoDebounced] = useState('');
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setMatriculaPrefixoDebounced(matriculaPrefixoInput.trim());
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [matriculaPrefixoInput]);
+
+  const { data: fichasPorMatricula, isLoading: fichasMatriculaLoading } = trpc.stock.pesquisarMatriculaPrefixoPortal.useQuery(
+    { prefixo: matriculaPrefixoDebounced, lojaId: lojaIdAtiva || undefined },
+    { enabled: matriculaPrefixoDebounced.length >= 2 && activeTab === 'analise_stock', staleTime: 10 * 1000 }
   );
 
   // Notas da loja
@@ -5338,6 +5354,100 @@ export default function PortalLoja() {
                   <p className="text-sm text-gray-400 py-2 text-center">{language === 'pt' ? 'Nenhuma ficha encontrada com este prefixo' : 'No records found with this prefix'}</p>
                 )}
                 {eurocodePrefixoDebounced.length < 2 && eurocodePrefixoInput.length > 0 && (
+                  <p className="text-xs text-gray-400 py-1">{language === 'pt' ? 'Mínimo 2 caracteres...' : 'Minimum 2 characters...'}</p>
+                )}
+              </div>
+
+              {/* Pesquisa de Fichas por Matrícula (tempo real) */}
+              <div className="bg-white border-2 border-amber-300 rounded-xl p-4 shadow-sm">
+                <div className="flex items-center gap-2 mb-3">
+                  <Search className="h-5 w-5 text-amber-600" />
+                  <div>
+                    <span className="font-bold text-sm text-amber-700">{language === 'pt' ? 'Pesquisar por Matrícula' : 'Search by License Plate'}</span>
+                    <p className="text-[10px] text-gray-500">{language === 'pt' ? 'Digite os primeiros caracteres da matrícula (ex: AA12, 1234)' : 'Type the first characters of the plate (e.g. AA12, 1234)'}</p>
+                  </div>
+                </div>
+                <div className="relative mb-3">
+                  <input
+                    type="text"
+                    placeholder={language === 'pt' ? 'Ex: AA-12-BB ou AA12BB...' : 'Ex: AA-12-BB or AA12BB...'}
+                    value={matriculaPrefixoInput}
+                    onChange={e => setMatriculaPrefixoInput(e.target.value)}
+                    className="w-full text-lg font-mono font-bold tracking-wider border-2 border-amber-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 bg-amber-50/50 uppercase"
+                    autoComplete="off"
+                  />
+                  {matriculaPrefixoInput && (
+                    <button
+                      onClick={() => setMatriculaPrefixoInput('')}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+                {fichasMatriculaLoading && matriculaPrefixoDebounced.length >= 2 && (
+                  <div className="flex items-center gap-2 text-sm text-gray-500 py-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    {language === 'pt' ? 'A pesquisar fichas...' : 'Searching records...'}
+                  </div>
+                )}
+                {matriculaPrefixoDebounced.length >= 2 && !fichasMatriculaLoading && fichasPorMatricula && fichasPorMatricula.length > 0 && (
+                  <div className="space-y-1.5 max-h-[400px] overflow-y-auto">
+                    <p className="text-xs text-gray-500 mb-2">{fichasPorMatricula.length} {language === 'pt' ? 'ficha(s) encontrada(s)' : 'record(s) found'}</p>
+                    {fichasPorMatricula.map((ficha: any, idx: number) => {
+                      const statusColor = ficha.status === 'AUTORIZADO' ? 'bg-green-100 text-green-700 border-green-200'
+                        : ficha.status === 'Serviço Pronto' ? 'bg-blue-100 text-blue-700 border-blue-200'
+                        : ficha.status === 'RECUSADO' ? 'bg-red-100 text-red-700 border-red-200'
+                        : ficha.status === 'Consulta / Orçamento' ? 'bg-yellow-100 text-yellow-700 border-yellow-200'
+                        : ficha.status === 'Pedido Autorização' ? 'bg-orange-100 text-orange-700 border-orange-200'
+                        : ficha.status === 'INCIDÊNCIA' ? 'bg-purple-100 text-purple-700 border-purple-200'
+                        : 'bg-gray-100 text-gray-700 border-gray-200';
+                      return (
+                        <div key={idx} className="border rounded-lg p-3 bg-white hover:bg-gray-50 transition-colors">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="font-mono font-bold text-sm text-amber-700">{ficha.matricula || '-'}</span>
+                                <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium border ${statusColor}`}>
+                                  {ficha.status || '-'}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-3 mt-1.5 text-xs text-gray-600">
+                                <span className="flex items-center gap-1">
+                                  <span className="font-medium">{language === 'pt' ? 'FS' : 'SR'}:</span>
+                                  <span className="font-bold text-gray-800">{ficha.obrano}</span>
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <span className="font-medium">Eurocode:</span>
+                                  <span className="font-bold text-emerald-700 font-mono">{ficha.eurocode}</span>
+                                </span>
+                                {ficha.marca && (
+                                  <span className="text-gray-400">{ficha.marca} {ficha.modelo || ''}</span>
+                                )}
+                              </div>
+                              {ficha.nomeLoja && ficha.lojaId !== lojaIdAtiva && (
+                                <div className="text-[10px] text-amber-600 mt-1">
+                                  ⚠️ {ficha.nomeLoja}
+                                </div>
+                              )}
+                            </div>
+                            {ficha.diasAberto != null && ficha.diasAberto > 0 && (
+                              <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${
+                                ficha.diasAberto > 30 ? 'bg-red-100 text-red-600' : ficha.diasAberto > 15 ? 'bg-amber-100 text-amber-600' : 'bg-gray-100 text-gray-500'
+                              }`}>
+                                {ficha.diasAberto}d
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+                {matriculaPrefixoDebounced.length >= 2 && !fichasMatriculaLoading && fichasPorMatricula && fichasPorMatricula.length === 0 && (
+                  <p className="text-sm text-gray-400 py-2 text-center">{language === 'pt' ? 'Nenhuma ficha encontrada com esta matrícula' : 'No records found with this plate'}</p>
+                )}
+                {matriculaPrefixoDebounced.length < 2 && matriculaPrefixoInput.length > 0 && (
                   <p className="text-xs text-gray-400 py-1">{language === 'pt' ? 'Mínimo 2 caracteres...' : 'Minimum 2 characters...'}</p>
                 )}
               </div>

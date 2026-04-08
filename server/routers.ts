@@ -14093,6 +14093,27 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
         return await db.pesquisarEurocodePorPrefixo(input.prefixo, input.lojaId);
       }),
 
+    // Pesquisar fichas de serviço por prefixo de Matrícula (para gestor)
+    pesquisarMatriculaPrefixo: gestorProcedure
+      .input(z.object({
+        prefixo: z.string().min(2),
+        lojaId: z.number().optional(),
+      }))
+      .query(async ({ ctx, input }) => {
+        return await db.pesquisarMatriculaPorPrefixo(input.prefixo, input.lojaId);
+      }),
+
+    // Pesquisar fichas de serviço por prefixo de Matrícula (para portal da loja - público)
+    pesquisarMatriculaPrefixoPortal: publicProcedure
+      .input(z.object({
+        prefixo: z.string().min(2),
+        lojaId: z.number().optional(),
+        token: z.string().optional(),
+      }))
+      .query(async ({ input }) => {
+        return await db.pesquisarMatriculaPorPrefixo(input.prefixo, input.lojaId);
+      }),
+
     // Exportar eurocodes sem classificação (para Excel)
     exportarSemClassificacao: gestorProcedure
       .query(async ({ ctx }) => {

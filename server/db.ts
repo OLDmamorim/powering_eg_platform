@@ -13896,6 +13896,87 @@ export async function pesquisarEurocodePorPrefixo(
   }));
 }
 
+// ==================== PESQUISA POR MATRÍCULA ====================
+
+export async function pesquisarMatriculaPorPrefixo(
+  prefixo: string,
+  lojaId?: number,
+  limit: number = 50
+): Promise<Array<{
+  eurocode: string;
+  obrano: number;
+  matricula: string | null;
+  status: string | null;
+  nomeLoja: string;
+  lojaId: number | null;
+  marca: string | null;
+  modelo: string | null;
+  ref: string | null;
+  diasAberto: number | null;
+}>> {
+  const db = await getDb();
+  if (!db) return [];
+  const { eurocodesFichas } = await import("../drizzle/schema");
+  const { like, desc, eq, and, sql } = await import("drizzle-orm");
+  
+  // Normalizar: remover espaços e hífens, uppercase
+  const prefixoNorm = prefixo.toUpperCase().replace(/[\s\-]/g, '').trim();
+  if (prefixoNorm.length < 2) return []; // Mínimo 2 caracteres
+  
+  // Construir condição WHERE - pesquisar matrícula removendo hífens
+  const conditions = [
+    sql`UPPER(REPLACE(${eurocodesFichas.matricula}, '-', '')) LIKE ${prefixoNorm + '%'}`
+  ];
+  
+  if (lojaId) {
+    conditions.push(eq(eurocodesFichas.lojaId, lojaId));
+  }
+  
+  const rows = await db.select({
+    eurocode: eurocodesFichas.eurocode,
+    obrano: eurocodesFichas.obrano,
+    matricula: eurocodesFichas.matricula,
+    status: eurocodesFichas.status,
+    nomeLoja: eurocodesFichas.nomeLoja,
+    lojaId: eurocodesFichas.lojaId,
+    marca: eurocodesFichas.marca,
+    modelo: eurocodesFichas.modelo,
+    ref: eurocodesFichas.ref,
+    diasAberto: eurocodesFichas.diasAberto,
+    analiseId: eurocodesFichas.analiseId,
+  })
+    .from(eurocodesFichas)
+    .where(and(...conditions))
+    .orderBy(desc(eurocodesFichas.analiseId))
+    .limit(limit * 3);
+  
+  // Filtrar apenas registos da última análise por loja
+  const ultimaAnalisePorLoja = new Map<number | null, number>();
+  for (const row of rows) {
+    const key = row.lojaId;
+    if (!ultimaAnalisePorLoja.has(key) || (row.analiseId > (ultimaAnalisePorLoja.get(key) || 0))) {
+      ultimaAnalisePorLoja.set(key, row.analiseId);
+    }
+  }
+  
+  const filtrados = rows
+    .filter(row => row.analiseId === ultimaAnalisePorLoja.get(row.lojaId))
+    .slice(0, limit);
+  
+  return filtrados.map(r => ({
+    eurocode: r.eurocode,
+    obrano: r.obrano,
+    matricula: r.matricula,
+    status: r.status,
+    nomeLoja: r.nomeLoja,
+    lojaId: r.lojaId,
+    marca: r.marca,
+    modelo: r.modelo,
+    ref: r.ref,
+    diasAberto: r.diasAberto,
+  }));
+}
+
 // ==================== FÉRIAS ====================
 
 import { feriasUploads, InsertFeriasUpload, FeriasUpload, feriasColaboradores, InsertFeriasColaborador, FeriasColaborador } from "../drizzle/schema";
