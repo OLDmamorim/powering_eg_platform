@@ -570,24 +570,20 @@ export function NPSDashboard() {
               </CardHeader>
               <CardContent>
                 {(() => {
-                  // Ordenar: elegíveis primeiro (por NPS desc), depois inelegíveis (por NPS desc)
+                  // Ordenar: NPS Mês desc, desempate por Taxa de Resposta desc, depois NPS Anual desc
                   const sortedRanking = [...rankingLojas].sort((a: any, b: any) => {
-                    const aElegivel = (a.nps >= 0.8) || (a.taxaResposta !== null && a.taxaResposta >= 0.075);
-                    const bElegivel = (b.nps >= 0.8) || (b.taxaResposta !== null && b.taxaResposta >= 0.075);
-                    if (aElegivel && !bElegivel) return -1;
-                    if (!aElegivel && bElegivel) return 1;
-                    // NPS Mês desc (arredondar para evitar problemas de float)
+                    // 1. NPS Mês desc
                     const aNpsMes = Math.round((a.nps ?? 0) * 10000);
                     const bNpsMes = Math.round((b.nps ?? 0) * 10000);
                     if (bNpsMes !== aNpsMes) return bNpsMes - aNpsMes;
-                    // Desempate 1: NPS Anual desc
-                    const aNpsAnual = Math.round((a.npsAnual ?? -1) * 10000);
-                    const bNpsAnual = Math.round((b.npsAnual ?? -1) * 10000);
-                    if (bNpsAnual !== aNpsAnual) return bNpsAnual - aNpsAnual;
-                    // Desempate 2: Taxa de Resposta desc
+                    // 2. Desempate: Taxa de Resposta desc
                     const aTaxa = Math.round((a.taxaResposta ?? 0) * 10000);
                     const bTaxa = Math.round((b.taxaResposta ?? 0) * 10000);
-                    return bTaxa - aTaxa;
+                    if (bTaxa !== aTaxa) return bTaxa - aTaxa;
+                    // 3. Desempate: NPS Anual desc
+                    const aNpsAnual = Math.round((a.npsAnual ?? -1) * 10000);
+                    const bNpsAnual = Math.round((b.npsAnual ?? -1) * 10000);
+                    return bNpsAnual - aNpsAnual;
                   });
                   const totalElegivel = sortedRanking.filter((i: any) => (i.nps >= 0.8) || (i.taxaResposta !== null && i.taxaResposta >= 0.075)).length;
                   const totalInelegivel = sortedRanking.length - totalElegivel;

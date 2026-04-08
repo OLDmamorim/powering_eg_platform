@@ -1499,3 +1499,4 @@
 - [x] Bug: Erro "Invalid time value" ao abrir formulário Pedir Apoio no calendário do volante
 - [x] Bug: Política NPS no NPSDashboard.tsx usa AND (ambos critérios) em vez de OR (basta um) — corrigir para OR
 - [x] Bug: Textos de legenda/regras NPS inconsistentes em RelatorioIAResultados.tsx (diz "E" em vez de "OU")
+- [x] Bug: Ranking NPS coloca Paredes/Paredes sm no topo apesar de taxa baixa — ordenar por NPS desc + taxa desc sem separar elegíveis/inelegíveis
