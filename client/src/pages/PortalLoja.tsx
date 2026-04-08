@@ -5271,91 +5271,78 @@ export default function PortalLoja() {
                     <p className="text-[10px] text-gray-500">{language === 'pt' ? 'Digite os primeiros números do Eurocode para ver fichas associadas' : 'Type the first numbers of the Eurocode to see associated records'}</p>
                   </div>
                 </div>
-                <div className="relative mb-3">
-                  <input
-                    type="text"
-                    placeholder={language === 'pt' ? 'Ex: 8345...' : 'Ex: 8345...'}
-                    value={eurocodePrefixoInput}
-                    onChange={e => setEurocodePrefixoInput(e.target.value)}
-                    className="w-full text-lg font-mono font-bold tracking-wider border-2 border-emerald-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 bg-emerald-50/50"
-                    autoComplete="off"
-                  />
-                  {eurocodePrefixoInput && (
-                    <button
-                      onClick={() => setEurocodePrefixoInput('')}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                    >
-                      ✕
-                    </button>
-                  )}
-                </div>
-                {fichasPrefixoLoading && eurocodePrefixoDebounced.length >= 2 && (
-                  <div className="flex items-center gap-2 text-sm text-gray-500 py-2">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    {language === 'pt' ? 'A pesquisar fichas...' : 'Searching records...'}
+                <div className="flex gap-4 items-start">
+                  {/* Input à esquerda */}
+                  <div className="w-1/3 min-w-[140px] flex-shrink-0">
+                    <div className="relative">
+                      <input
+                        type="text"
+                        placeholder={language === 'pt' ? 'Ex: 8345...' : 'Ex: 8345...'}
+                        value={eurocodePrefixoInput}
+                        onChange={e => setEurocodePrefixoInput(e.target.value)}
+                        className="w-full text-lg font-mono font-bold tracking-wider border-2 border-emerald-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 bg-emerald-50/50"
+                        autoComplete="off"
+                      />
+                      {eurocodePrefixoInput && (
+                        <button
+                          onClick={() => setEurocodePrefixoInput('')}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
+                    {eurocodePrefixoDebounced.length < 2 && eurocodePrefixoInput.length > 0 && (
+                      <p className="text-xs text-gray-400 py-1">{language === 'pt' ? 'Mínimo 2 caracteres...' : 'Minimum 2 characters...'}</p>
+                    )}
                   </div>
-                )}
-                {eurocodePrefixoDebounced.length >= 2 && !fichasPrefixoLoading && fichasPorPrefixo && fichasPorPrefixo.length > 0 && (
-                  <div className="space-y-1.5 max-h-[400px] overflow-y-auto">
-                    <p className="text-xs text-gray-500 mb-2">{fichasPorPrefixo.length} {language === 'pt' ? 'ficha(s) encontrada(s)' : 'record(s) found'}</p>
-                    {fichasPorPrefixo.map((ficha: any, idx: number) => {
-                      const statusColor = ficha.status === 'AUTORIZADO' ? 'bg-green-100 text-green-700 border-green-200'
-                        : ficha.status === 'Serviço Pronto' ? 'bg-blue-100 text-blue-700 border-blue-200'
-                        : ficha.status === 'RECUSADO' ? 'bg-red-100 text-red-700 border-red-200'
-                        : ficha.status === 'Consulta / Orçamento' ? 'bg-yellow-100 text-yellow-700 border-yellow-200'
-                        : ficha.status === 'Pedido Autorização' ? 'bg-orange-100 text-orange-700 border-orange-200'
-                        : ficha.status === 'INCIDÊNCIA' ? 'bg-purple-100 text-purple-700 border-purple-200'
-                        : 'bg-gray-100 text-gray-700 border-gray-200';
-                      return (
-                        <div key={idx} className="border rounded-lg p-3 bg-white hover:bg-gray-50 transition-colors">
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="flex-1 min-w-0">
+                  {/* Resultados à direita */}
+                  <div className="flex-1 min-w-0">
+                    {fichasPrefixoLoading && eurocodePrefixoDebounced.length >= 2 && (
+                      <div className="flex items-center gap-2 text-sm text-gray-500 py-2">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        {language === 'pt' ? 'A pesquisar...' : 'Searching...'}
+                      </div>
+                    )}
+                    {eurocodePrefixoDebounced.length >= 2 && !fichasPrefixoLoading && fichasPorPrefixo && fichasPorPrefixo.length > 0 && (
+                      <div className="space-y-1.5 max-h-[300px] overflow-y-auto">
+                        <p className="text-xs text-gray-500 mb-1">{fichasPorPrefixo.length} {language === 'pt' ? 'ficha(s)' : 'record(s)'}</p>
+                        {fichasPorPrefixo.map((ficha: any, idx: number) => {
+                          const statusColor = ficha.status === 'AUTORIZADO' ? 'bg-green-100 text-green-700 border-green-200'
+                            : ficha.status === 'Serviço Pronto' ? 'bg-blue-100 text-blue-700 border-blue-200'
+                            : ficha.status === 'RECUSADO' ? 'bg-red-100 text-red-700 border-red-200'
+                            : ficha.status === 'Consulta / Orçamento' ? 'bg-yellow-100 text-yellow-700 border-yellow-200'
+                            : ficha.status === 'Pedido Autorização' ? 'bg-orange-100 text-orange-700 border-orange-200'
+                            : ficha.status === 'INCIDÊNCIA' ? 'bg-purple-100 text-purple-700 border-purple-200'
+                            : 'bg-gray-100 text-gray-700 border-gray-200';
+                          return (
+                            <div key={idx} className="border rounded-lg px-3 py-2 bg-white hover:bg-gray-50 transition-colors">
                               <div className="flex items-center gap-2 flex-wrap">
                                 <span className="font-mono font-bold text-sm text-emerald-700">{ficha.eurocode}</span>
                                 <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium border ${statusColor}`}>
                                   {ficha.status || '-'}
                                 </span>
-                              </div>
-                              <div className="flex items-center gap-3 mt-1.5 text-xs text-gray-600">
-                                <span className="flex items-center gap-1">
-                                  <span className="font-medium">{language === 'pt' ? 'FS' : 'SR'}:</span>
-                                  <span className="font-bold text-gray-800">{ficha.obrano}</span>
-                                </span>
+                                <span className="text-xs"><span className="font-medium text-gray-500">{language === 'pt' ? 'FS' : 'SR'}:</span> <span className="font-bold text-gray-800">{ficha.obrano}</span></span>
                                 {ficha.matricula && (
-                                  <span className="flex items-center gap-1">
-                                    <span className="font-medium">{language === 'pt' ? 'Mat.' : 'Plate'}:</span>
-                                    <span className="font-bold text-gray-800">{ficha.matricula}</span>
-                                  </span>
+                                  <span className="text-xs"><span className="font-medium text-gray-500">{language === 'pt' ? 'Mat.' : 'Plate'}:</span> <span className="font-bold text-gray-800">{ficha.matricula}</span></span>
                                 )}
                                 {ficha.marca && (
-                                  <span className="text-gray-400">{ficha.marca} {ficha.modelo || ''}</span>
+                                  <span className="text-xs text-gray-400">{ficha.marca} {ficha.modelo || ''}</span>
                                 )}
                               </div>
                               {ficha.nomeLoja && ficha.lojaId !== lojaIdAtiva && (
-                                <div className="text-[10px] text-amber-600 mt-1">
-                                  ⚠️ {ficha.nomeLoja}
-                                </div>
+                                <div className="text-[10px] text-amber-600 mt-0.5">⚠️ {ficha.nomeLoja}</div>
                               )}
                             </div>
-                            {ficha.diasAberto != null && ficha.diasAberto > 0 && (
-                              <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${
-                                ficha.diasAberto > 30 ? 'bg-red-100 text-red-600' : ficha.diasAberto > 15 ? 'bg-amber-100 text-amber-600' : 'bg-gray-100 text-gray-500'
-                              }`}>
-                                {ficha.diasAberto}d
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
+                          );
+                        })}
+                      </div>
+                    )}
+                    {eurocodePrefixoDebounced.length >= 2 && !fichasPrefixoLoading && fichasPorPrefixo && fichasPorPrefixo.length === 0 && (
+                      <p className="text-sm text-gray-400 py-2">{language === 'pt' ? 'Nenhuma ficha encontrada' : 'No records found'}</p>
+                    )}
                   </div>
-                )}
-                {eurocodePrefixoDebounced.length >= 2 && !fichasPrefixoLoading && fichasPorPrefixo && fichasPorPrefixo.length === 0 && (
-                  <p className="text-sm text-gray-400 py-2 text-center">{language === 'pt' ? 'Nenhuma ficha encontrada com este prefixo' : 'No records found with this prefix'}</p>
-                )}
-                {eurocodePrefixoDebounced.length < 2 && eurocodePrefixoInput.length > 0 && (
-                  <p className="text-xs text-gray-400 py-1">{language === 'pt' ? 'Mínimo 2 caracteres...' : 'Minimum 2 characters...'}</p>
-                )}
+                </div>
               </div>
 
               {/* Pesquisa de Fichas por Matrícula (tempo real) */}
@@ -5367,89 +5354,76 @@ export default function PortalLoja() {
                     <p className="text-[10px] text-gray-500">{language === 'pt' ? 'Digite os primeiros caracteres da matrícula (ex: AA12, 1234)' : 'Type the first characters of the plate (e.g. AA12, 1234)'}</p>
                   </div>
                 </div>
-                <div className="relative mb-3">
-                  <input
-                    type="text"
-                    placeholder={language === 'pt' ? 'Ex: AA-12-BB ou AA12BB...' : 'Ex: AA-12-BB or AA12BB...'}
-                    value={matriculaPrefixoInput}
-                    onChange={e => setMatriculaPrefixoInput(e.target.value)}
-                    className="w-full text-lg font-mono font-bold tracking-wider border-2 border-amber-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 bg-amber-50/50 uppercase"
-                    autoComplete="off"
-                  />
-                  {matriculaPrefixoInput && (
-                    <button
-                      onClick={() => setMatriculaPrefixoInput('')}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                    >
-                      ✕
-                    </button>
-                  )}
-                </div>
-                {fichasMatriculaLoading && matriculaPrefixoDebounced.length >= 2 && (
-                  <div className="flex items-center gap-2 text-sm text-gray-500 py-2">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    {language === 'pt' ? 'A pesquisar fichas...' : 'Searching records...'}
+                <div className="flex gap-4 items-start">
+                  {/* Input à esquerda */}
+                  <div className="w-1/3 min-w-[140px] flex-shrink-0">
+                    <div className="relative">
+                      <input
+                        type="text"
+                        placeholder={language === 'pt' ? 'Ex: AA-12...' : 'Ex: AA-12...'}
+                        value={matriculaPrefixoInput}
+                        onChange={e => setMatriculaPrefixoInput(e.target.value)}
+                        className="w-full text-lg font-mono font-bold tracking-wider border-2 border-amber-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 bg-amber-50/50 uppercase"
+                        autoComplete="off"
+                      />
+                      {matriculaPrefixoInput && (
+                        <button
+                          onClick={() => setMatriculaPrefixoInput('')}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
+                    {matriculaPrefixoDebounced.length < 2 && matriculaPrefixoInput.length > 0 && (
+                      <p className="text-xs text-gray-400 py-1">{language === 'pt' ? 'Mínimo 2 caracteres...' : 'Minimum 2 characters...'}</p>
+                    )}
                   </div>
-                )}
-                {matriculaPrefixoDebounced.length >= 2 && !fichasMatriculaLoading && fichasPorMatricula && fichasPorMatricula.length > 0 && (
-                  <div className="space-y-1.5 max-h-[400px] overflow-y-auto">
-                    <p className="text-xs text-gray-500 mb-2">{fichasPorMatricula.length} {language === 'pt' ? 'ficha(s) encontrada(s)' : 'record(s) found'}</p>
-                    {fichasPorMatricula.map((ficha: any, idx: number) => {
-                      const statusColor = ficha.status === 'AUTORIZADO' ? 'bg-green-100 text-green-700 border-green-200'
-                        : ficha.status === 'Serviço Pronto' ? 'bg-blue-100 text-blue-700 border-blue-200'
-                        : ficha.status === 'RECUSADO' ? 'bg-red-100 text-red-700 border-red-200'
-                        : ficha.status === 'Consulta / Orçamento' ? 'bg-yellow-100 text-yellow-700 border-yellow-200'
-                        : ficha.status === 'Pedido Autorização' ? 'bg-orange-100 text-orange-700 border-orange-200'
-                        : ficha.status === 'INCIDÊNCIA' ? 'bg-purple-100 text-purple-700 border-purple-200'
-                        : 'bg-gray-100 text-gray-700 border-gray-200';
-                      return (
-                        <div key={idx} className="border rounded-lg p-3 bg-white hover:bg-gray-50 transition-colors">
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="flex-1 min-w-0">
+                  {/* Resultados à direita */}
+                  <div className="flex-1 min-w-0">
+                    {fichasMatriculaLoading && matriculaPrefixoDebounced.length >= 2 && (
+                      <div className="flex items-center gap-2 text-sm text-gray-500 py-2">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        {language === 'pt' ? 'A pesquisar...' : 'Searching...'}
+                      </div>
+                    )}
+                    {matriculaPrefixoDebounced.length >= 2 && !fichasMatriculaLoading && fichasPorMatricula && fichasPorMatricula.length > 0 && (
+                      <div className="space-y-1.5 max-h-[300px] overflow-y-auto">
+                        <p className="text-xs text-gray-500 mb-1">{fichasPorMatricula.length} {language === 'pt' ? 'ficha(s)' : 'record(s)'}</p>
+                        {fichasPorMatricula.map((ficha: any, idx: number) => {
+                          const statusColor = ficha.status === 'AUTORIZADO' ? 'bg-green-100 text-green-700 border-green-200'
+                            : ficha.status === 'Serviço Pronto' ? 'bg-blue-100 text-blue-700 border-blue-200'
+                            : ficha.status === 'RECUSADO' ? 'bg-red-100 text-red-700 border-red-200'
+                            : ficha.status === 'Consulta / Orçamento' ? 'bg-yellow-100 text-yellow-700 border-yellow-200'
+                            : ficha.status === 'Pedido Autorização' ? 'bg-orange-100 text-orange-700 border-orange-200'
+                            : ficha.status === 'INCIDÊNCIA' ? 'bg-purple-100 text-purple-700 border-purple-200'
+                            : 'bg-gray-100 text-gray-700 border-gray-200';
+                          return (
+                            <div key={idx} className="border rounded-lg px-3 py-2 bg-white hover:bg-gray-50 transition-colors">
                               <div className="flex items-center gap-2 flex-wrap">
                                 <span className="font-mono font-bold text-sm text-amber-700">{ficha.matricula || '-'}</span>
                                 <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium border ${statusColor}`}>
                                   {ficha.status || '-'}
                                 </span>
-                              </div>
-                              <div className="flex items-center gap-3 mt-1.5 text-xs text-gray-600">
-                                <span className="flex items-center gap-1">
-                                  <span className="font-medium">{language === 'pt' ? 'FS' : 'SR'}:</span>
-                                  <span className="font-bold text-gray-800">{ficha.obrano}</span>
-                                </span>
-                                <span className="flex items-center gap-1">
-                                  <span className="font-medium">Eurocode:</span>
-                                  <span className="font-bold text-emerald-700 font-mono">{ficha.eurocode}</span>
-                                </span>
+                                <span className="text-xs"><span className="font-medium text-gray-500">{language === 'pt' ? 'FS' : 'SR'}:</span> <span className="font-bold text-gray-800">{ficha.obrano}</span></span>
+                                <span className="text-xs"><span className="font-medium text-gray-500">Eurocode:</span> <span className="font-bold text-emerald-700 font-mono">{ficha.eurocode}</span></span>
                                 {ficha.marca && (
-                                  <span className="text-gray-400">{ficha.marca} {ficha.modelo || ''}</span>
+                                  <span className="text-xs text-gray-400">{ficha.marca} {ficha.modelo || ''}</span>
                                 )}
                               </div>
                               {ficha.nomeLoja && ficha.lojaId !== lojaIdAtiva && (
-                                <div className="text-[10px] text-amber-600 mt-1">
-                                  ⚠️ {ficha.nomeLoja}
-                                </div>
+                                <div className="text-[10px] text-amber-600 mt-0.5">⚠️ {ficha.nomeLoja}</div>
                               )}
                             </div>
-                            {ficha.diasAberto != null && ficha.diasAberto > 0 && (
-                              <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${
-                                ficha.diasAberto > 30 ? 'bg-red-100 text-red-600' : ficha.diasAberto > 15 ? 'bg-amber-100 text-amber-600' : 'bg-gray-100 text-gray-500'
-                              }`}>
-                                {ficha.diasAberto}d
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
+                          );
+                        })}
+                      </div>
+                    )}
+                    {matriculaPrefixoDebounced.length >= 2 && !fichasMatriculaLoading && fichasPorMatricula && fichasPorMatricula.length === 0 && (
+                      <p className="text-sm text-gray-400 py-2">{language === 'pt' ? 'Nenhuma ficha encontrada' : 'No records found'}</p>
+                    )}
                   </div>
-                )}
-                {matriculaPrefixoDebounced.length >= 2 && !fichasMatriculaLoading && fichasPorMatricula && fichasPorMatricula.length === 0 && (
-                  <p className="text-sm text-gray-400 py-2 text-center">{language === 'pt' ? 'Nenhuma ficha encontrada com esta matrícula' : 'No records found with this plate'}</p>
-                )}
-                {matriculaPrefixoDebounced.length < 2 && matriculaPrefixoInput.length > 0 && (
-                  <p className="text-xs text-gray-400 py-1">{language === 'pt' ? 'Mínimo 2 caracteres...' : 'Minimum 2 characters...'}</p>
-                )}
+                </div>
               </div>
 
               {/* Pesquisa Global de Eurocode */}

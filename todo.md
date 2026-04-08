@@ -1478,3 +1478,9 @@
 - [x] Criar componente UI no portal da loja abaixo da pesquisa por Eurocode (caixa amber)
 - [x] Mostrar: Matrícula, FS (obrano), Eurocode, Status (com cores), Marca/Modelo, Dias aberto
 - [x] 5 testes unitários passados
+
+## Fix: Layout pesquisa Eurocode/Matrícula + remover dias aberto
+- [x] Corrigir layout: input à esquerda (1/3), resultados à direita (2/3) - layout horizontal
+- [x] Remover indicador "2d" (dias aberto) dos resultados
+- [x] Aplicar a ambas as pesquisas (Eurocode e Matrícula)
+- [x] Resultados compactos numa linha (Eurocode/Mat + Status + FS + Mat/Eurocode + Marca)
