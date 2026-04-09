@@ -1974,7 +1974,7 @@ export default function PortalLoja() {
                       </Badge>
                     )}
                   </div>
-                  <h3 className="text-xl font-bold mb-2">{volanteAtribuido.nome}</h3>
+                  <h3 className="text-xl font-bold mb-2">{language === 'pt' ? 'Volante' : 'Mobile Team'}</h3>
                   <p className="text-sm opacity-80">{language === 'pt' ? 'Pedir apoio do volante' : 'Request support from mobile team'}</p>
                 </CardContent>
               </Card>
