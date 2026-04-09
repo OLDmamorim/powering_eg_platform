@@ -1504,3 +1504,4 @@
 - [x] Feature: Calendário consolidado do Gestor para ver ocupação de todos os volantes
 - [x] Bug: Card Volante no Portal da Loja mostra nome do volante em vez de "Volante" genérico
 - [x] Bug: Data dos pedidos de apoio deslocada 1 dia para trás (loja pede dia 13, aparece dia 12)
+- [x] Bug: Nome do volante (Hugo Silva) aparece no cabeçalho do calendário dentro do Portal da Loja — deve mostrar apenas "Volante"

@@ -6416,7 +6416,7 @@ function VolanteTab({
           <div className="flex items-center gap-3">
             <Car className="h-8 w-8" />
             <div>
-              <h2 className="text-xl font-bold">{volanteNome}</h2>
+              <h2 className="text-xl font-bold">{language === 'pt' ? 'Volante' : 'Mobile Team'}</h2>
               <p className="text-sm opacity-90">
                 {language === 'pt' ? 'Pedir apoio do volante' : 'Request mobile team support'}
               </p>
