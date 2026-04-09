@@ -1,0 +1,1 @@
+ALTER TABLE `agendamentos_volante` MODIFY COLUMN `agendamento_volante_tipo` enum('cobertura_ferias','substituicao_vidros','substituicao','reparacao','entrega','recolha','outro');

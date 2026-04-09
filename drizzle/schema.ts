@@ -1111,7 +1111,7 @@ export type InsertBloqueioVolante = typeof bloqueiosVolante.$inferInsert;
  * Pode ser para uma loja específica ou compromisso pessoal (lojaId = null)
  */
 export const agendamentoVolantePeriodoEnum = mysqlEnum('agendamento_volante_periodo', ['manha', 'tarde', 'dia_todo']);
-export const agendamentoVolanteTipoEnum = mysqlEnum('agendamento_volante_tipo', ['cobertura_ferias', 'substituicao_vidros', 'outro']);
+export const agendamentoVolanteTipoEnum = mysqlEnum('agendamento_volante_tipo', ['cobertura_ferias', 'substituicao_vidros', 'substituicao', 'reparacao', 'entrega', 'recolha', 'outro']);
 
 export const agendamentosVolante = mysqlTable("agendamentos_volante", {
   id: int("id").autoincrement().primaryKey(),

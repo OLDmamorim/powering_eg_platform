@@ -1514,3 +1514,4 @@
 - [x] Feature: Transferir pedido de apoio entre volantes no Calendário do Gestor
 - [x] Bug: Amarelo pendente no calendário da loja aparece para todas as lojas — deve aparecer só para a loja que pediu
 - [x] Bug: Cores do calendário da loja mostram período ocupado — devem mostrar período DISPONÍVEL
+- [x] Bug: Criar Agendamento no Calendário do Gestor falhava - enum agendamento_volante_tipo não tinha os valores substituicao/reparacao/entrega/recolha
