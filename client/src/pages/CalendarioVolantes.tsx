@@ -59,6 +59,7 @@ export default function CalendarioVolantes() {
   // Query para o calendário consolidado
   const { data: dadosCalendario, isLoading } = trpc.volantes.calendarioConsolidado.useQuery(
     { ano: mesSelecionado.ano, mes: mesSelecionado.mes + 1 },
+    { refetchInterval: 15000 }
   );
 
   const volantes = dadosCalendario?.volantes || [];

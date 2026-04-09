@@ -1224,7 +1224,7 @@ export default function PortalLoja() {
   // Pedidos de apoio ao volante (para contar pendentes)
   const { data: pedidosVolante, refetch: refetchPedidosVolante } = trpc.pedidosApoio.listarPorLoja.useQuery(
     { token },
-    { enabled: !!token && !!lojaAuth && !!volanteAtribuido }
+    { enabled: !!token && !!lojaAuth && !!volanteAtribuido, refetchInterval: 15000 }
   );
 
   const pedidosVolantePendentes = pedidosVolante?.filter((p: any) => p.estado === 'pendente').length || 0;
@@ -6289,13 +6289,13 @@ function VolanteTab({
   // Query para obter estado dos dias do mês
   const { data: estadoDias, refetch: refetchEstadoDias } = trpc.pedidosApoio.estadoMes.useQuery(
     { token, mes: mesSelecionado.mes + 1, ano: mesSelecionado.ano },
-    { enabled: !!token }
+    { enabled: !!token, refetchInterval: 15000 }
   );
 
   // Query para obter pedidos da loja
   const { data: meusPedidos, refetch: refetchMeusPedidos } = trpc.pedidosApoio.listarPorLoja.useQuery(
     { token },
-    { enabled: !!token }
+    { enabled: !!token, refetchInterval: 15000 }
   );
 
   // Mutation para criar pedido
@@ -6896,13 +6896,13 @@ function VolanteInterface({
   // Query para obter pedidos de apoio do volante
   const { data: pedidosApoio, refetch: refetchPedidos, isLoading: loadingPedidos } = trpc.pedidosApoio.listarPorVolante.useQuery(
     { token },
-    { enabled: !!token }
+    { enabled: !!token, refetchInterval: 15000 }
   );
 
   // Query para obter estado dos dias do mês (calendário)
   const { data: estadoMes, refetch: refetchEstadoMes } = trpc.pedidosApoio.estadoCompletoMes.useQuery(
     { token, ano: mesSelecionado.ano, mes: mesSelecionado.mes },
-    { enabled: !!token }
+    { enabled: !!token, refetchInterval: 15000 }
   );
 
   // Query para obter resultados das lojas (lista simples)
@@ -10553,7 +10553,7 @@ function RegistarServicosHoje({
       ano: new Date().getFullYear(),
       mes: new Date().getMonth() + 1,
     },
-    { enabled: !!token }
+    { enabled: !!token, refetchInterval: 15000 }
   );
 
   // Buscar serviços já registados hoje

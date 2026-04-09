@@ -1515,3 +1515,6 @@
 - [x] Bug: Amarelo pendente no calendário da loja aparece para todas as lojas — deve aparecer só para a loja que pediu
 - [x] Bug: Cores do calendário da loja mostram período ocupado — devem mostrar período DISPONÍVEL
 - [x] Bug: Criar Agendamento no Calendário do Gestor falhava - enum agendamento_volante_tipo não tinha os valores substituicao/reparacao/entrega/recolha
+- [x] Limpar BD: apagar todos os pedidos/agendamentos/bloqueios dos volantes do Marco Amorim a partir de 13 Abril
+- [x] Limpar pedido pendente Viana do Castelo dia 12 Abril (domingo) e verificar outros restantes
+- [x] Calendário da loja dinâmico: atualizar cores automaticamente quando pedido é aprovado/rejeitado (polling)
