@@ -27,7 +27,7 @@ const ESTADO_CORES: Record<string, { bg: string; label: string; emoji: string }>
   bloqueado: { bg: 'bg-gray-400', label: 'Bloqueado', emoji: '🔒' },
 };
 
-const DIAS_SEMANA = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+const DIAS_SEMANA = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
 export default function CalendarioVolantes() {
   const hoje = new Date();
@@ -50,20 +50,23 @@ export default function CalendarioVolantes() {
     const primeiroDia = new Date(mesSelecionado.ano, mesSelecionado.mes, 1);
     const ultimoDia = new Date(mesSelecionado.ano, mesSelecionado.mes + 1, 0);
     
-    // Dia da semana do primeiro dia (0=Dom, ajustar para Seg=0)
-    let diaSemanaInicio = primeiroDia.getDay() - 1;
-    if (diaSemanaInicio < 0) diaSemanaInicio = 6;
+    // Dia da semana do primeiro dia para grelha 6 colunas (Seg-Sáb)
+    const jsDay = primeiroDia.getDay(); // 0=Dom, 1=Seg, ..., 6=Sáb
+    const diasVazios = jsDay === 0 ? 0 : (jsDay === 1 ? 0 : jsDay - 1);
     
     const dias: (Date | null)[] = [];
     
     // Dias vazios antes
-    for (let i = 0; i < diaSemanaInicio; i++) {
+    for (let i = 0; i < diasVazios; i++) {
       dias.push(null);
     }
     
-    // Dias do mês
+    // Dias do mês (excluindo domingos)
     for (let d = 1; d <= ultimoDia.getDate(); d++) {
-      dias.push(new Date(mesSelecionado.ano, mesSelecionado.mes, d));
+      const dia = new Date(mesSelecionado.ano, mesSelecionado.mes, d);
+      if (dia.getDay() !== 0) { // Excluir domingos
+        dias.push(dia);
+      }
     }
     
     return dias;
@@ -273,7 +276,7 @@ export default function CalendarioVolantes() {
             ) : (
               <div className="overflow-x-auto">
                 {/* Cabeçalho dias da semana */}
-                <div className="grid grid-cols-7 gap-1 mb-1">
+                <div className="grid grid-cols-6 gap-1 mb-1">
                   {DIAS_SEMANA.map(dia => (
                     <div key={dia} className="text-center text-xs font-semibold text-muted-foreground py-1">
                       {dia}
@@ -282,7 +285,7 @@ export default function CalendarioVolantes() {
                 </div>
 
                 {/* Grid do calendário */}
-                <div className="grid grid-cols-7 gap-1">
+                <div className="grid grid-cols-6 gap-1">
                   {diasDoMes.map((data, idx) => {
                     if (!data) {
                       return <div key={`empty-${idx}`} className="min-h-[80px]" />;
@@ -292,7 +295,6 @@ export default function CalendarioVolantes() {
                     const dadosDia = calendario[dataStr];
                     const ehHoje = isHoje(data);
                     const ehPassado = data < new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
-                    const ehDomingo = data.getDay() === 0;
 
                     return (
                       <div
@@ -301,7 +303,7 @@ export default function CalendarioVolantes() {
                         className={`min-h-[80px] rounded-lg border p-1 transition-all cursor-pointer hover:shadow-md
                           ${ehHoje ? 'ring-2 ring-blue-500 border-blue-500' : 'border-gray-200'}
                           ${ehPassado ? 'opacity-50' : ''}
-                          ${ehDomingo ? 'bg-gray-50' : 'bg-white'}
+                          bg-white
                           ${dadosDia?.combinado === 'dia_completo' ? 'bg-red-50' : ''}
                           ${dadosDia?.combinado === 'bloqueado' ? 'bg-gray-100' : ''}
                         `}

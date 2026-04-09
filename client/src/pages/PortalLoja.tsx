@@ -6333,16 +6333,23 @@ function VolanteTab({
     const ultimoDia = new Date(mesSelecionado.ano, mesSelecionado.mes + 1, 0);
     const dias: Date[] = [];
     
-    // Adicionar dias vazios para alinhar com o dia da semana
-    const diaSemanaInicio = primeiroDia.getDay();
-    const diasVazios = diaSemanaInicio === 0 ? 6 : diaSemanaInicio - 1; // Segunda = 0
+    // Calcular placeholders para grelha de 6 colunas (Seg-Sáb, sem Domingo)
+    // Mapear: Seg=0, Ter=1, Qua=2, Qui=3, Sex=4, Sáb=5
+    const jsDay = primeiroDia.getDay(); // 0=Dom, 1=Seg, ..., 6=Sáb
+    // Se começa ao domingo, o primeiro dia útil é segunda (0 placeholders)
+    // Se começa à segunda, 0 placeholders; terça, 1; ...; sábado, 5
+    const colIndex = jsDay === 0 ? -1 : (jsDay === 1 ? 0 : jsDay - 1); // -1 = domingo (ignorado)
+    const diasVazios = jsDay === 0 ? 0 : colIndex;
     for (let i = 0; i < diasVazios; i++) {
       dias.push(new Date(0)); // Placeholder
     }
     
-    // Adicionar dias do mês
+    // Adicionar dias do mês (excluindo domingos)
     for (let d = 1; d <= ultimoDia.getDate(); d++) {
-      dias.push(new Date(mesSelecionado.ano, mesSelecionado.mes, d));
+      const dia = new Date(mesSelecionado.ano, mesSelecionado.mes, d);
+      if (dia.getDay() !== 0) { // Excluir domingos
+        dias.push(dia);
+      }
     }
     
     return dias;
@@ -6465,8 +6472,8 @@ function VolanteTab({
         </CardHeader>
         <CardContent>
           {/* Cabeçalho dos dias da semana */}
-          <div className="grid grid-cols-7 gap-1 mb-2">
-            {['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'].map((dia) => (
+          <div className="grid grid-cols-6 gap-1 mb-2">
+            {['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map((dia) => (
               <div key={dia} className="text-center text-sm font-medium text-muted-foreground py-2">
                 {dia}
               </div>
@@ -6474,7 +6481,7 @@ function VolanteTab({
           </div>
           
           {/* Dias do mês */}
-          <div className="grid grid-cols-7 gap-1">
+          <div className="grid grid-cols-6 gap-1">
             {dias.map((data, index) => {
               const ehPlaceholder = data.getTime() === 0;
               const ehHoje = !ehPlaceholder && data.toDateString() === hoje.toDateString();
@@ -6487,8 +6494,6 @@ function VolanteTab({
                   onClick={() => {
                     if (!ehPlaceholder && !passado) {
                       setDiaSelecionado(data);
-                      // Se o dia está disponível, abrir dialog para criar pedido
-                      // Se não está disponível (fechado), abrir dialog para ver o que tem
                       setDialogOpen(true);
                     }
                   }}
@@ -7224,17 +7229,23 @@ END:VCALENDAR`;
     const primeiroDia = new Date(mesSelecionado.ano, mesSelecionado.mes - 1, 1);
     const ultimoDia = new Date(mesSelecionado.ano, mesSelecionado.mes, 0);
     const diasNoMes = ultimoDia.getDate();
-    const diaSemanaInicio = primeiroDia.getDay();
+    const jsDay = primeiroDia.getDay(); // 0=Dom, 1=Seg, ..., 6=Sáb
 
     const dias = [];
     
-    // Dias vazios no início
-    for (let i = 0; i < diaSemanaInicio; i++) {
+    // Dias vazios no início (grelha 6 colunas: Seg=0, Ter=1, ..., Sáb=5)
+    // Se começa ao domingo, primeiro dia útil é segunda = 0 placeholders
+    const diasVazios = jsDay === 0 ? 0 : (jsDay === 1 ? 0 : jsDay - 1);
+    for (let i = 0; i < diasVazios; i++) {
       dias.push(<div key={`empty-${i}`} className="h-20 bg-gray-50 rounded-lg"></div>);
     }
 
     // Dias do mês
     for (let dia = 1; dia <= diasNoMes; dia++) {
+      // Saltar domingos
+      const diaDate = new Date(mesSelecionado.ano, mesSelecionado.mes - 1, dia);
+      if (diaDate.getDay() === 0) continue;
+      
       const dataStr = `${mesSelecionado.ano}-${String(mesSelecionado.mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
       const estadoDia = estadoMes?.[dataStr];
       // Filtrar pedidos rejeitados - não devem aparecer no calendário
@@ -7365,8 +7376,8 @@ END:VCALENDAR`;
     : ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
   const diasSemana = language === 'pt'
-    ? ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
-    : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    ? ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
+    : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   // Se está na vista de menu, mostrar os dois cards de entrada
   if (activeView === "menu") {
@@ -7802,7 +7813,7 @@ END:VCALENDAR`;
               </CardHeader>
               <CardContent>
                 {/* Cabeçalho dos dias da semana */}
-                <div className="grid grid-cols-7 gap-1 mb-2">
+                <div className="grid grid-cols-6 gap-1 mb-2">
                   {diasSemana.map(dia => (
                     <div key={dia} className="text-center text-xs font-medium text-gray-500 py-2">
                       {dia}
@@ -7810,7 +7821,7 @@ END:VCALENDAR`;
                   ))}
                 </div>
                 {/* Grid do calendário */}
-                <div className="grid grid-cols-7 gap-1">
+                <div className="grid grid-cols-6 gap-1">
                   {renderCalendario()}
                 </div>
               </CardContent>
