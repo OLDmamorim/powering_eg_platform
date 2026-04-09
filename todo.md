@@ -1512,3 +1512,5 @@
 - [x] Feature: Gestor pode criar agendamentos/bloqueios para volantes no Calendário Volantes
 - [ ] Feature: Gestor pode reorganizar (mover) agendamentos entre volantes
 - [x] Feature: Transferir pedido de apoio entre volantes no Calendário do Gestor
+- [x] Bug: Amarelo pendente no calendário da loja aparece para todas as lojas — deve aparecer só para a loja que pediu
+- [x] Bug: Cores do calendário da loja mostram período ocupado — devem mostrar período DISPONÍVEL

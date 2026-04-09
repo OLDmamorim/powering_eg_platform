@@ -9574,12 +9574,28 @@ IMPORTANTE:
           throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido ou nenhum volante atribuído' });
         }
         
-        // Se só há 1 volante, comportamento original
+        // Se só há 1 volante, comportamento com filtros
         if (volanteIds.length === 1) {
           const estadoDias = await db.getEstadoCompletoDoMes(volanteIds[0], input.ano, input.mes);
           const resultado: Record<string, { estado: string; pedidos: any[]; bloqueios?: any[]; agendamentos?: any[] }> = {};
           estadoDias.forEach((value, key) => {
-            resultado[key] = value;
+            let estado = value.estado;
+            // Filtrar pendentes: só mostrar amarelo se ESTA loja tem pedidos pendentes
+            if (lojaId && estado === 'pendente') {
+              const temPendenteDaLoja = (value.pedidos || []).some((p: any) => p.estado === 'pendente' && p.lojaId === lojaId);
+              if (!temPendenteDaLoja) estado = 'livre';
+            }
+            // Inverter lógica: mostrar período DISPONÍVEL
+            if (estado === 'manha_ocupada') estado = 'tarde_disponivel';
+            else if (estado === 'tarde_ocupada') estado = 'manha_disponivel';
+            else if (estado === 'manha_aprovada') {
+              // Se é token de loja, mostrar tarde disponível
+              if (lojaId) estado = 'tarde_disponivel';
+            }
+            else if (estado === 'tarde_aprovada') {
+              if (lojaId) estado = 'manha_disponivel';
+            }
+            resultado[key] = { ...value, estado };
           });
           return resultado;
         }
@@ -9621,19 +9637,25 @@ IMPORTANTE:
             return est === 'dia_completo' || est === 'bloqueado' || est === 'tarde_ocupada' || est === 'tarde_aprovada';
           });
           const todosBloquados = estadosPorVolante.every(e => e.estado === 'bloqueado');
-          const temPendente = todosPedidos.some((p: any) => p.estado === 'pendente');
+          // Filtrar pendentes: só mostrar amarelo se ESTA loja tem pedidos pendentes
+          const temPendenteDaLoja = lojaId 
+            ? todosPedidos.some((p: any) => p.estado === 'pendente' && p.lojaId === lojaId)
+            : todosPedidos.some((p: any) => p.estado === 'pendente');
           
           // Determinar estado combinado
+          // LÓGICA INVERTIDA: mostrar período DISPONÍVEL (o que interessa à loja)
           let estadoCombinado: string;
           if (todosBloquados) {
             estadoCombinado = 'bloqueado';
           } else if (manhaOcupadaGlobal && tardeOcupadaGlobal) {
             estadoCombinado = 'dia_completo';
           } else if (manhaOcupadaGlobal) {
-            estadoCombinado = 'manha_ocupada';
+            // Manhã ocupada = só tarde disponível
+            estadoCombinado = 'tarde_disponivel';
           } else if (tardeOcupadaGlobal) {
-            estadoCombinado = 'tarde_ocupada';
-          } else if (temPendente) {
+            // Tarde ocupada = só manhã disponível
+            estadoCombinado = 'manha_disponivel';
+          } else if (temPendenteDaLoja) {
             estadoCombinado = 'pendente';
           } else {
             estadoCombinado = 'livre';

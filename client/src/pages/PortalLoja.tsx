@@ -6371,8 +6371,10 @@ function VolanteTab({
     
     switch (estado.estado) {
       case 'pendente': return 'bg-yellow-200 hover:bg-yellow-300'; // Amarelo - pedido pendente
-      case 'manha_aprovada': case 'manha_ocupada': return 'bg-purple-300 hover:bg-purple-400'; // Roxo - manhã aprovada/ocupada
-      case 'tarde_aprovada': case 'tarde_ocupada': return 'bg-blue-300 hover:bg-blue-400'; // Azul - tarde aprovada/ocupada
+      case 'manha_disponivel': return 'bg-purple-200 hover:bg-purple-300'; // Roxo claro - só manhã disponível
+      case 'tarde_disponivel': return 'bg-blue-200 hover:bg-blue-300'; // Azul claro - só tarde disponível
+      case 'manha_aprovada': case 'manha_ocupada': return 'bg-purple-300 hover:bg-purple-400';
+      case 'tarde_aprovada': case 'tarde_ocupada': return 'bg-blue-300 hover:bg-blue-400';
       case 'dia_completo': return 'bg-red-400 text-white cursor-not-allowed'; // Vermelho - dia completo
       case 'bloqueado': return 'bg-gray-400 text-white cursor-not-allowed'; // Cinza - bloqueado
       default: return 'bg-white hover:bg-gray-100';
@@ -6442,16 +6444,16 @@ function VolanteTab({
               <span>{language === 'pt' ? 'Pendente' : 'Pending'}</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded bg-purple-300 border"></div>
-              <span>{language === 'pt' ? 'Manhã aprovada' : 'Morning approved'}</span>
+              <div className="w-4 h-4 rounded bg-purple-200 border"></div>
+              <span>{language === 'pt' ? 'Só manhã disponível' : 'Morning available'}</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded bg-blue-300 border"></div>
-              <span>{language === 'pt' ? 'Tarde aprovada' : 'Afternoon approved'}</span>
+              <div className="w-4 h-4 rounded bg-blue-200 border"></div>
+              <span>{language === 'pt' ? 'Só tarde disponível' : 'Afternoon available'}</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded bg-red-400 border"></div>
-              <span>{language === 'pt' ? 'Dia completo' : 'Full day'}</span>
+              <span>{language === 'pt' ? 'Indisponível' : 'Unavailable'}</span>
             </div>
           </div>
         </CardContent>
@@ -6690,15 +6692,15 @@ function VolanteTab({
                 </DialogHeader>
                 
                 <div className="space-y-4">
-                  {/* Mostrar aviso se algum período já está ocupado */}
-                  {estadoDia?.estado === 'manha_ocupada' && (
+                  {/* Mostrar informação do período disponível */}
+                  {estadoDia?.estado === 'manha_disponivel' && (
                     <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 text-sm text-purple-700">
-                      {language === 'pt' ? 'A manhã deste dia já está ocupada' : 'Morning is already booked'}
+                      {language === 'pt' ? '🟣 Só a manhã está disponível neste dia' : '🟣 Only morning is available'}
                     </div>
                   )}
-                  {estadoDia?.estado === 'tarde_ocupada' && (
+                  {estadoDia?.estado === 'tarde_disponivel' && (
                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm text-blue-700">
-                      {language === 'pt' ? 'A tarde deste dia já está ocupada' : 'Afternoon is already booked'}
+                      {language === 'pt' ? '🟦 Só a tarde está disponível neste dia' : '🟦 Only afternoon is available'}
                     </div>
                   )}
                   
@@ -6712,17 +6714,17 @@ function VolanteTab({
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="manha" disabled={estadoDia?.estado === 'manha_ocupada'}>
+                        <SelectItem value="manha" disabled={estadoDia?.estado === 'tarde_disponivel'}>
                           {language === 'pt' ? 'Manhã (9h-13h)' : 'Morning (9am-1pm)'}
-                          {estadoDia?.estado === 'manha_ocupada' && ' ✘'}
+                          {estadoDia?.estado === 'tarde_disponivel' && ' ✘'}
                         </SelectItem>
-                        <SelectItem value="tarde" disabled={estadoDia?.estado === 'tarde_ocupada'}>
+                        <SelectItem value="tarde" disabled={estadoDia?.estado === 'manha_disponivel'}>
                           {language === 'pt' ? 'Tarde (14h-18h)' : 'Afternoon (2pm-6pm)'}
-                          {estadoDia?.estado === 'tarde_ocupada' && ' ✘'}
+                          {estadoDia?.estado === 'manha_disponivel' && ' ✘'}
                         </SelectItem>
-                        <SelectItem value="dia_todo" disabled={estadoDia?.estado !== undefined && estadoDia?.estado !== 'livre'}>
+                        <SelectItem value="dia_todo" disabled={estadoDia?.estado !== undefined && estadoDia?.estado !== 'livre' && estadoDia?.estado !== 'pendente'}>
                           {language === 'pt' ? 'Dia Todo (9h-18h)' : 'Full Day (9am-6pm)'}
-                          {estadoDia?.estado !== undefined && estadoDia?.estado !== 'livre' && ' ✘'}
+                          {estadoDia?.estado !== undefined && estadoDia?.estado !== 'livre' && estadoDia?.estado !== 'pendente' && ' ✘'}
                         </SelectItem>
                       </SelectContent>
                     </Select>
