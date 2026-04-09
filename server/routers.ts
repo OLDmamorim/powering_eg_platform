@@ -9290,6 +9290,116 @@ IMPORTANTE:
           calendario,
         };
       }),
+    
+    // ==================== GESTÃO PELO GESTOR ====================
+    // Aprovar pedido de apoio (pelo gestor)
+    gestorAprovarPedido: gestorProcedure
+      .input(z.object({ pedidoId: z.number() }))
+      .mutation(async ({ input }) => {
+        const pedidoExistente = await db.getPedidoApoioById(input.pedidoId);
+        if (!pedidoExistente) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Pedido não encontrado' });
+        }
+        const dataInicio = new Date(pedidoExistente.data);
+        const horaInicio = pedidoExistente.periodo === 'manha' ? 9 : 14;
+        const horaFim = pedidoExistente.periodo === 'manha' ? 13 : 18;
+        if (pedidoExistente.periodo === 'dia_todo') {
+          dataInicio.setHours(9, 0, 0, 0);
+        } else {
+          dataInicio.setHours(horaInicio, 0, 0, 0);
+        }
+        const dataFim = new Date(dataInicio);
+        dataFim.setHours(pedidoExistente.periodo === 'dia_todo' ? 18 : horaFim, 0, 0, 0);
+        const links = {
+          google: `https://calendar.google.com/calendar/render?action=TEMPLATE&text=Apoio+Volante&dates=${dataInicio.toISOString().replace(/[-:]/g,'').replace('.000','')}/${dataFim.toISOString().replace(/[-:]/g,'').replace('.000','')}&details=Apoio+volante`,
+        };
+        const pedido = await db.aprovarPedidoApoio(input.pedidoId, links);
+        return pedido;
+      }),
+    
+    // Reprovar pedido de apoio (pelo gestor)
+    gestorReprovarPedido: gestorProcedure
+      .input(z.object({ pedidoId: z.number(), motivo: z.string().optional() }))
+      .mutation(async ({ input }) => {
+        const pedido = await db.reprovarPedidoApoio(input.pedidoId, input.motivo);
+        return pedido;
+      }),
+    
+    // Anular pedido de apoio (pelo gestor)
+    gestorAnularPedido: gestorProcedure
+      .input(z.object({ pedidoId: z.number(), motivo: z.string().optional() }))
+      .mutation(async ({ input }) => {
+        await db.anularPedidoApoio(input.pedidoId, input.motivo);
+        return { success: true };
+      }),
+    
+    // Eliminar agendamento de volante (pelo gestor)
+    gestorEliminarAgendamento: gestorProcedure
+      .input(z.object({ agendamentoId: z.number(), volanteId: z.number() }))
+      .mutation(async ({ input }) => {
+        await db.eliminarAgendamentoVolante(input.agendamentoId, input.volanteId);
+        return { success: true };
+      }),
+    
+    // Eliminar bloqueio de volante (pelo gestor)
+    gestorEliminarBloqueio: gestorProcedure
+      .input(z.object({ bloqueioId: z.number(), volanteId: z.number() }))
+      .mutation(async ({ input }) => {
+        await db.eliminarBloqueioVolante(input.bloqueioId, input.volanteId);
+        return { success: true };
+      }),
+    
+    // Criar agendamento para volante (pelo gestor)
+    gestorCriarAgendamento: gestorProcedure
+      .input(z.object({
+        volanteId: z.number(),
+        lojaId: z.number(),
+        data: z.string(),
+        periodo: z.enum(['manha', 'tarde', 'dia_todo']),
+        tipo: z.enum(['substituicao', 'reparacao', 'entrega', 'recolha', 'outro']),
+        observacoes: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const dataStr = input.data.split('T')[0];
+        const agendamento = await db.criarAgendamentoVolante({
+          volanteId: input.volanteId,
+          lojaId: input.lojaId,
+          data: new Date(dataStr + 'T12:00:00Z'),
+          agendamento_volante_periodo: input.periodo,
+          agendamento_volante_tipo: input.tipo as any,
+          descricao: input.observacoes,
+        });
+        return agendamento;
+      }),
+    
+    // Criar bloqueio para volante (pelo gestor)
+    gestorCriarBloqueio: gestorProcedure
+      .input(z.object({
+        volanteId: z.number(),
+        data: z.string(),
+        periodo: z.enum(['manha', 'tarde', 'dia_todo']),
+        tipo: z.enum(['ferias', 'falta', 'formacao', 'pessoal', 'outro']),
+        motivo: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const dataStr = input.data.split('T')[0];
+        const bloqueio = await db.criarBloqueioVolante({
+          volanteId: input.volanteId,
+          data: new Date(dataStr + 'T12:00:00Z'),
+          periodo: input.periodo,
+          tipo: input.tipo,
+          motivo: input.motivo,
+        });
+        return bloqueio;
+      }),
+    
+    // Listar lojas atribuídas a um volante (para o gestor selecionar)
+    gestorLojasVolante: gestorProcedure
+      .input(z.object({ volanteId: z.number() }))
+      .query(async ({ input }) => {
+        const lojasAtribuidas = await db.getLojasByVolanteId(input.volanteId);
+        return lojasAtribuidas;
+      }),
   }),
   
   // ==================== PEDIDOS DE APOIO (VOLANTES) ====================

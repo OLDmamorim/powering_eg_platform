@@ -1507,3 +1507,7 @@
 - [x] Bug: Nome do volante (Hugo Silva) aparece no cabeçalho do calendário dentro do Portal da Loja — deve mostrar apenas "Volante"
 - [x] Remover pedido pendente ID 1470006 do dia 13 abril
 - [x] Esconder domingos de todos os calendários de volantes (Portal Loja, Dashboard Volante, Calendário Gestor)
+- [x] Feature: Gestor pode aprovar/reprovar pedidos de apoio no Calendário Volantes
+- [x] Feature: Gestor pode remover agendamentos dos volantes no Calendário Volantes
+- [x] Feature: Gestor pode criar agendamentos/bloqueios para volantes no Calendário Volantes
+- [ ] Feature: Gestor pode reorganizar (mover) agendamentos entre volantes
