@@ -9206,6 +9206,90 @@ IMPORTANTE:
         const volante = await db.getVolanteByLojaId(input.lojaId);
         return volante;
       }),
+
+    // Calendário consolidado do gestor - ver ocupação de TODOS os volantes
+    calendarioConsolidado: gestorProcedure
+      .input(z.object({
+        ano: z.number(),
+        mes: z.number(),
+      }))
+      .query(async ({ ctx, input }) => {
+        // Buscar volantes: do gestor específico ou todos (para admin)
+        let volantesAtivos: Awaited<ReturnType<typeof db.getVolantesByGestorId>>;
+        if (ctx.gestor) {
+          const volantesDoGestor = await db.getVolantesByGestorId(ctx.gestor.id);
+          volantesAtivos = volantesDoGestor.filter(v => v.ativo);
+        } else {
+          // Admin sem gestor associado: buscar todos os volantes ativos
+          const todosVolantes = await db.getAllVolantes();
+          volantesAtivos = todosVolantes.filter(v => v.ativo);
+        }
+        
+        if (volantesAtivos.length === 0) {
+          return { volantes: [], calendario: {} };
+        }
+        
+        // Buscar estado completo de cada volante
+        const estadosPorVolante = await Promise.all(
+          volantesAtivos.map(async (volante) => {
+            const estado = await db.getEstadoCompletoDoMes(volante.id, input.ano, input.mes);
+            const estadoObj: Record<string, { estado: string; pedidos: any[]; bloqueios: any[]; agendamentos: any[] }> = {};
+            estado.forEach((value, key) => {
+              estadoObj[key] = value;
+            });
+            return {
+              volanteId: volante.id,
+              volanteNome: volante.nome,
+              estado: estadoObj,
+            };
+          })
+        );
+        
+        // Recolher todas as datas únicas
+        const todasDatas = new Set<string>();
+        estadosPorVolante.forEach(ev => {
+          Object.keys(ev.estado).forEach(d => todasDatas.add(d));
+        });
+        
+        // Construir calendário consolidado: para cada dia, estado de cada volante + estado combinado
+        const calendario: Record<string, {
+          combinado: string;
+          porVolante: Record<number, { estado: string; pedidos: any[]; bloqueios: any[]; agendamentos: any[] }>;
+        }> = {};
+        
+        for (const dataStr of todasDatas) {
+          const porVolante: Record<number, { estado: string; pedidos: any[]; bloqueios: any[]; agendamentos: any[] }> = {};
+          
+          const estados: string[] = [];
+          for (const ev of estadosPorVolante) {
+            const estadoDia = ev.estado[dataStr] || { estado: 'livre', pedidos: [], bloqueios: [], agendamentos: [] };
+            porVolante[ev.volanteId] = estadoDia;
+            estados.push(estadoDia.estado);
+          }
+          
+          // Estado combinado: livre se pelo menos 1 está livre
+          const todosOcupados = estados.every(e => e === 'dia_completo' || e === 'bloqueado');
+          const todosBloquados = estados.every(e => e === 'bloqueado');
+          const manhaOcupadaGlobal = estados.every(e => e === 'dia_completo' || e === 'bloqueado' || e === 'manha_ocupada' || e === 'manha_aprovada');
+          const tardeOcupadaGlobal = estados.every(e => e === 'dia_completo' || e === 'bloqueado' || e === 'tarde_ocupada' || e === 'tarde_aprovada');
+          const temPendente = estados.some(e => e === 'pendente');
+          
+          let combinado: string;
+          if (todosBloquados) combinado = 'bloqueado';
+          else if (todosOcupados || (manhaOcupadaGlobal && tardeOcupadaGlobal)) combinado = 'dia_completo';
+          else if (manhaOcupadaGlobal) combinado = 'manha_ocupada';
+          else if (tardeOcupadaGlobal) combinado = 'tarde_ocupada';
+          else if (temPendente) combinado = 'pendente';
+          else combinado = 'livre';
+          
+          calendario[dataStr] = { combinado, porVolante };
+        }
+        
+        return {
+          volantes: volantesAtivos.map(v => ({ id: v.id, nome: v.nome })),
+          calendario,
+        };
+      }),
   }),
   
   // ==================== PEDIDOS DE APOIO (VOLANTES) ====================

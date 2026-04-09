@@ -76,6 +76,7 @@ const GestaoRecalibra = lazy(() => import("./pages/GestaoRecalibra"));
 const PortalRecalibra = lazy(() => import("./pages/PortalRecalibra"));
 const DashboardRecalibra = lazy(() => import("./pages/DashboardRecalibra"));
 const Ferias = lazy(() => import("./pages/Ferias"));
+const CalendarioVolantes = lazy(() => import("./pages/CalendarioVolantes"));
 const ReunioesLivres = lazy(() => import("./pages/ReunioesLivres"));
 const LoginNaoAutorizado = lazy(() => import("./pages/LoginNaoAutorizado"));
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -98,6 +99,7 @@ const allImports = [
   () => import("./pages/MinhasLojas"),
   () => import("./pages/RelacoesLojas"),
   () => import("./pages/Volantes"),
+  () => import("./pages/CalendarioVolantes"),
   () => import("./pages/LogAtribuicoes"),
   () => import("./pages/PortalGestor"),
   () => import("./pages/AnaliseFichas"),
@@ -180,6 +182,7 @@ function Router() {
         <Route path={"/minhas-lojas"} component={MinhasLojas} />
         <Route path={"/relacoes-lojas"} component={RelacoesLojas} />
         <Route path={"/volantes"} component={Volantes} />
+        <Route path={"/calendario-volantes"} component={CalendarioVolantes} />
         <Route path={"/log-atribuicoes"} component={LogAtribuicoes} />
         <Route path={"/portal-gestor"} component={PortalGestor} />
         <Route path={"/analise-fichas"} component={AnaliseFichas} />

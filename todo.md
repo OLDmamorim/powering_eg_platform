@@ -1501,3 +1501,4 @@
 - [x] Bug: Textos de legenda/regras NPS inconsistentes em RelatorioIAResultados.tsx (diz "E" em vez de "OU")
 - [x] Bug: Ranking NPS coloca Paredes/Paredes sm no topo apesar de taxa baixa — ordenar por NPS desc + taxa desc sem separar elegíveis/inelegíveis
 - [x] Feature: Calendário Portal da Loja deve mostrar disponibilidade combinada de todos os volantes — dia só fica vermelho quando TODOS estão ocupados
+- [x] Feature: Calendário consolidado do Gestor para ver ocupação de todos os volantes
