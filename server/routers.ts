@@ -9313,7 +9313,7 @@ IMPORTANTE:
         // Normalizar data: input.data pode vir como ISO string completa ("2026-04-20T00:00:00.000Z") ou como "2026-04-20"
         // Extrair apenas YYYY-MM-DD e usar T12:00:00 para evitar desfasamento de timezone
         const dataStr = input.data.split('T')[0]; // Extrair YYYY-MM-DD de qualquer formato
-        const dataApoio = new Date(dataStr + 'T12:00:00');
+        const dataApoio = new Date(dataStr + 'T12:00:00Z');
         
         // ATRIBUIÇÃO INTELIGENTE: Usar algoritmo de scoring para escolher o melhor volante
         const resultado = await db.atribuirVolanteInteligente(
@@ -9795,7 +9795,7 @@ IMPORTANTE:
         const volanteId = tokenData.volante.id;
         // Normalizar data: input.data pode vir como ISO string ou YYYY-MM-DD
         // Extrair apenas YYYY-MM-DD e usar T12:00:00 para evitar desfasamento de timezone
-        const dataAgendamento = new Date(input.data.split('T')[0] + 'T12:00:00');
+        const dataAgendamento = new Date(input.data.split('T')[0] + 'T12:00:00Z');
         
         // Verificar se o dia/período está bloqueado
         const bloqueio = await db.verificarBloqueio(volanteId, dataAgendamento, input.periodo);
@@ -9909,7 +9909,7 @@ IMPORTANTE:
         
         const agendamentoAtualizado = await db.atualizarAgendamentoVolante(input.agendamentoId, volanteId, {
           lojaId: input.lojaId,
-          data: input.data ? new Date(input.data.split('T')[0] + 'T12:00:00') : undefined,
+          data: input.data ? new Date(input.data.split('T')[0] + 'T12:00:00Z') : undefined,
           agendamento_volante_periodo: input.periodo,
           agendamento_volante_tipo: input.tipoApoio,
           titulo: input.titulo,
@@ -9952,7 +9952,7 @@ IMPORTANTE:
         
         const bloqueio = await db.criarBloqueioVolante({
           volanteId: tokenData.volante.id,
-          data: new Date(input.data.split('T')[0] + 'T12:00:00'),
+          data: new Date(input.data.split('T')[0] + 'T12:00:00Z'),
           periodo: input.periodo,
           tipo: input.tipo,
           motivo: input.motivo,
@@ -10398,7 +10398,7 @@ IMPORTANTE:
                                 (input.tipoApoio || pedidoExistente.tipoApoio) === 'substituicao_vidros' ? 'Substituição de Vidros' : 'Outro';
           const periodoTexto = (input.periodo || pedidoExistente.periodo) === 'manha' ? 'Manhã (9h-13h)' : 'Tarde (14h-18h)';
           const _rawData = input.data || pedidoExistente.data;
-          const dataFormatada = new Date(typeof _rawData === 'string' ? (_rawData.includes('T') ? _rawData : _rawData + 'T12:00:00') : _rawData).toLocaleDateString('pt-PT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+          const dataFormatada = new Date(typeof _rawData === 'string' ? (_rawData.includes('T') ? _rawData : _rawData + 'T12:00:00Z') : _rawData).toLocaleDateString('pt-PT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
           
           try {
             await sendEmail({

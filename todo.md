@@ -1503,3 +1503,4 @@
 - [x] Feature: Calendário Portal da Loja deve mostrar disponibilidade combinada de todos os volantes — dia só fica vermelho quando TODOS estão ocupados
 - [x] Feature: Calendário consolidado do Gestor para ver ocupação de todos os volantes
 - [x] Bug: Card Volante no Portal da Loja mostra nome do volante em vez de "Volante" genérico
+- [x] Bug: Data dos pedidos de apoio deslocada 1 dia para trás (loja pede dia 13, aparece dia 12)

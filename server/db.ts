@@ -9362,7 +9362,7 @@ export async function editarPedidoApoio(pedidoId: number, dados: {
   if (!db) return null;
   
   const updateData: Record<string, unknown> = {};
-  if (dados.data) updateData.data = new Date(dados.data + (dados.data.includes('T') ? '' : 'T12:00:00'));
+  if (dados.data) updateData.data = new Date(dados.data + (dados.data.includes('T') ? '' : 'T12:00:00Z'));
   if (dados.periodo) updateData.periodo = dados.periodo;
   if (dados.tipoApoio) updateData.tipoApoio = dados.tipoApoio;
   if (dados.observacoes !== undefined) updateData.observacoes = dados.observacoes;

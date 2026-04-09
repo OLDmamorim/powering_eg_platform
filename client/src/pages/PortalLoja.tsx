@@ -6788,7 +6788,7 @@ function VolanteTab({
                         
                         criarPedidoMutation.mutate({
                           token,
-                          data: diaSelecionado.toISOString(),
+                          data: `${diaSelecionado.getFullYear()}-${String(diaSelecionado.getMonth()+1).padStart(2,'0')}-${String(diaSelecionado.getDate()).padStart(2,'0')}`,
                           periodo: periodoSelecionado,
                           tipoApoio,
                           observacoes: observacoes || undefined,
