@@ -1511,3 +1511,4 @@
 - [x] Feature: Gestor pode remover agendamentos dos volantes no Calendário Volantes
 - [x] Feature: Gestor pode criar agendamentos/bloqueios para volantes no Calendário Volantes
 - [ ] Feature: Gestor pode reorganizar (mover) agendamentos entre volantes
+- [x] Feature: Transferir pedido de apoio entre volantes no Calendário do Gestor

@@ -9350,6 +9350,19 @@ export async function anularPedidoApoio(pedidoId: number, motivo?: string): Prom
 }
 
 /**
+ * Transferir pedido de apoio para outro volante (pelo gestor)
+ */
+export async function transferirPedidoApoio(pedidoId: number, novoVolanteId: number): Promise<boolean> {
+  const db = await getDb();
+  if (!db) return false;
+  
+  await db.update(pedidosApoio).set({ 
+    volanteId: novoVolanteId,
+  }).where(eq(pedidosApoio.id, pedidoId));
+  return true;
+}
+
+/**
  * Editar pedido de apoio (pelo volante)
  */
 export async function editarPedidoApoio(pedidoId: number, dados: {

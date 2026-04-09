@@ -9333,6 +9333,14 @@ IMPORTANTE:
         return { success: true };
       }),
     
+    // Transferir pedido de apoio para outro volante (pelo gestor)
+    gestorTransferirPedido: gestorProcedure
+      .input(z.object({ pedidoId: z.number(), novoVolanteId: z.number() }))
+      .mutation(async ({ input }) => {
+        await db.transferirPedidoApoio(input.pedidoId, input.novoVolanteId);
+        return { success: true };
+      }),
+    
     // Eliminar agendamento de volante (pelo gestor)
     gestorEliminarAgendamento: gestorProcedure
       .input(z.object({ agendamentoId: z.number(), volanteId: z.number() }))

@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { ChevronLeft, ChevronRight, Car, Calendar, Users, Clock, MapPin, AlertTriangle, Check, X, Trash2, Plus, Ban } from "lucide-react";
+import { ChevronLeft, ChevronRight, Car, Calendar, Users, Clock, MapPin, AlertTriangle, Check, X, Trash2, Plus, Ban, ArrowRightLeft } from "lucide-react";
 import { toast } from "sonner";
 
 const CORES_VOLANTE = [
@@ -42,6 +42,8 @@ export default function CalendarioVolantes() {
   const [showCriarDialog, setShowCriarDialog] = useState<{ tipo: 'agendamento' | 'bloqueio'; volanteId: number; data: string } | null>(null);
   const [motivoReprovar, setMotivoReprovar] = useState('');
   const [showReprovarDialog, setShowReprovarDialog] = useState<number | null>(null);
+  const [showTransferirDialog, setShowTransferirDialog] = useState<{ pedidoId: number; volanteAtualId: number } | null>(null);
+  const [transferirVolanteId, setTransferirVolanteId] = useState('');
 
   // Form state for creating
   const [criarForm, setCriarForm] = useState({
@@ -117,6 +119,16 @@ export default function CalendarioVolantes() {
       utils.volantes.calendarioConsolidado.invalidate();
       setShowCriarDialog(null);
       setCriarForm({ lojaId: '', periodo: 'dia_todo', tipo: '', observacoes: '', motivo: '' });
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
+  const transferirPedidoMutation = trpc.volantes.gestorTransferirPedido.useMutation({
+    onSuccess: () => {
+      toast.success('Pedido transferido com sucesso');
+      utils.volantes.calendarioConsolidado.invalidate();
+      setShowTransferirDialog(null);
+      setTransferirVolanteId('');
     },
     onError: (err) => toast.error(err.message),
   });
@@ -496,6 +508,20 @@ export default function CalendarioVolantes() {
                                       <Ban className="h-3 w-3" /> Anular
                                     </Button>
                                   )}
+                                  {/* Botão transferir - disponível para pendente e aprovado */}
+                                  {(p.estado === 'pendente' || p.estado === 'aprovado') && volantes.length > 1 && (
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className="h-6 text-[10px] gap-1 text-blue-600 border-blue-300"
+                                      onClick={() => {
+                                        setShowTransferirDialog({ pedidoId: p.id, volanteAtualId: v.id });
+                                        setTransferirVolanteId('');
+                                      }}
+                                    >
+                                      <ArrowRightLeft className="h-3 w-3" /> Transferir
+                                    </Button>
+                                  )}
                                 </div>
                               </div>
                             ))}
@@ -722,6 +748,54 @@ export default function CalendarioVolantes() {
                 disabled={criarAgendamentoMutation.isPending || criarBloqueioMutation.isPending}
               >
                 {showCriarDialog?.tipo === 'agendamento' ? 'Criar Agendamento' : 'Criar Bloqueio'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* ========== DIALOG TRANSFERIR PEDIDO ========== */}
+        <Dialog open={!!showTransferirDialog} onOpenChange={(open) => !open && setShowTransferirDialog(null)}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <ArrowRightLeft className="h-5 w-5 text-blue-600" />
+                Transferir Pedido
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-3">
+              <p className="text-sm text-muted-foreground">
+                Selecione o volante para o qual pretende transferir este pedido:
+              </p>
+              <Select value={transferirVolanteId} onValueChange={setTransferirVolanteId}>
+                <SelectTrigger><SelectValue placeholder="Selecionar volante..." /></SelectTrigger>
+                <SelectContent>
+                  {volantes
+                    .filter(v => v.id !== showTransferirDialog?.volanteAtualId)
+                    .map((v, idx) => (
+                      <SelectItem key={v.id} value={String(v.id)}>
+                        {v.nome}
+                      </SelectItem>
+                    ))
+                  }
+                </SelectContent>
+              </Select>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowTransferirDialog(null)}>Cancelar</Button>
+              <Button
+                className="bg-blue-600 hover:bg-blue-700"
+                onClick={() => {
+                  if (showTransferirDialog && transferirVolanteId) {
+                    transferirPedidoMutation.mutate({
+                      pedidoId: showTransferirDialog.pedidoId,
+                      novoVolanteId: parseInt(transferirVolanteId),
+                    });
+                  }
+                }}
+                disabled={!transferirVolanteId || transferirPedidoMutation.isPending}
+              >
+                <ArrowRightLeft className="h-4 w-4 mr-1" />
+                Transferir
               </Button>
             </DialogFooter>
           </DialogContent>
