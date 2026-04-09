@@ -9351,36 +9351,99 @@ IMPORTANTE:
       }))
       .query(async ({ input }) => {
         // Tentar validar como token de volante primeiro
-        let volanteId: number | null = null;
+        let volanteIds: number[] = [];
         let lojaId: number | null = null;
         
         const tokenVolante = await db.validateTokenVolante(input.token);
         if (tokenVolante) {
-          volanteId = tokenVolante.volante.id;
+          // Token de volante: mostrar apenas esse volante
+          volanteIds = [tokenVolante.volante.id];
         } else {
-          // Tentar como token de loja
+          // Tentar como token de loja: buscar TODOS os volantes atribuídos
           const tokenLoja = await db.validarTokenLoja(input.token);
           if (tokenLoja) {
             lojaId = tokenLoja.loja.id;
-            const volante = await db.getVolanteByLojaId(tokenLoja.loja.id);
-            if (volante) {
-              volanteId = volante.id;
-            }
+            const volantesLoja = await db.getVolantesByLojaId(tokenLoja.loja.id);
+            volanteIds = volantesLoja.map(v => v.id);
           }
         }
         
-        if (!volanteId) {
-          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inv\u00e1lido ou nenhum volante atribu\u00eddo' });
+        if (volanteIds.length === 0) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido ou nenhum volante atribuído' });
         }
         
-        const estadoDias = await db.getEstadoCompletoDoMes(volanteId, input.ano, input.mes);
+        // Se só há 1 volante, comportamento original
+        if (volanteIds.length === 1) {
+          const estadoDias = await db.getEstadoCompletoDoMes(volanteIds[0], input.ano, input.mes);
+          const resultado: Record<string, { estado: string; pedidos: any[]; bloqueios?: any[]; agendamentos?: any[] }> = {};
+          estadoDias.forEach((value, key) => {
+            resultado[key] = value;
+          });
+          return resultado;
+        }
         
-        // Mostrar ocupação GLOBAL do volante para que as lojas saibam quando está disponível
-        // Não filtrar por lojaId - todas as lojas precisam ver todos os agendamentos
-        const resultado: Record<string, { estado: string; pedidos: any[]; bloqueios?: any[]; agendamentos?: any[] }> = {};
-        estadoDias.forEach((value, key) => {
-          resultado[key] = value;
+        // MÚLTIPLOS VOLANTES: combinar disponibilidade
+        // Buscar estado de cada volante
+        const todosEstados = await Promise.all(
+          volanteIds.map(vid => db.getEstadoCompletoDoMes(vid, input.ano, input.mes))
+        );
+        
+        // Recolher todas as datas únicas
+        const todasDatas = new Set<string>();
+        todosEstados.forEach(mapa => {
+          for (const key of mapa.keys()) todasDatas.add(key);
         });
+        
+        const resultado: Record<string, { estado: string; pedidos: any[]; bloqueios?: any[]; agendamentos?: any[] }> = {};
+        
+        for (const dataStr of todasDatas) {
+          // Para cada dia, verificar se PELO MENOS UM volante está disponível
+          const estadosPorVolante = volanteIds.map((vid, idx) => {
+            const mapa = todosEstados[idx];
+            return mapa.get(dataStr) || { estado: 'livre', pedidos: [], bloqueios: [], agendamentos: [] };
+          });
+          
+          // Combinar pedidos, bloqueios e agendamentos de todos os volantes
+          const todosPedidos = estadosPorVolante.flatMap(e => e.pedidos || []);
+          const todosBloqueios = estadosPorVolante.flatMap(e => e.bloqueios || []);
+          const todosAgendamentos = estadosPorVolante.flatMap(e => e.agendamentos || []);
+          
+          // Verificar disponibilidade por período
+          // Um período está ocupado GLOBALMENTE só se TODOS os volantes estão ocupados nesse período
+          const manhaOcupadaGlobal = estadosPorVolante.every(e => {
+            const est = e.estado;
+            return est === 'dia_completo' || est === 'bloqueado' || est === 'manha_ocupada' || est === 'manha_aprovada';
+          });
+          const tardeOcupadaGlobal = estadosPorVolante.every(e => {
+            const est = e.estado;
+            return est === 'dia_completo' || est === 'bloqueado' || est === 'tarde_ocupada' || est === 'tarde_aprovada';
+          });
+          const todosBloquados = estadosPorVolante.every(e => e.estado === 'bloqueado');
+          const temPendente = todosPedidos.some((p: any) => p.estado === 'pendente');
+          
+          // Determinar estado combinado
+          let estadoCombinado: string;
+          if (todosBloquados) {
+            estadoCombinado = 'bloqueado';
+          } else if (manhaOcupadaGlobal && tardeOcupadaGlobal) {
+            estadoCombinado = 'dia_completo';
+          } else if (manhaOcupadaGlobal) {
+            estadoCombinado = 'manha_ocupada';
+          } else if (tardeOcupadaGlobal) {
+            estadoCombinado = 'tarde_ocupada';
+          } else if (temPendente) {
+            estadoCombinado = 'pendente';
+          } else {
+            estadoCombinado = 'livre';
+          }
+          
+          resultado[dataStr] = {
+            estado: estadoCombinado,
+            pedidos: todosPedidos,
+            bloqueios: todosBloqueios,
+            agendamentos: todosAgendamentos,
+          };
+        }
         
         return resultado;
       }),
