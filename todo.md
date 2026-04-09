@@ -1518,3 +1518,4 @@
 - [x] Limpar BD: apagar todos os pedidos/agendamentos/bloqueios dos volantes do Marco Amorim a partir de 13 Abril
 - [x] Limpar pedido pendente Viana do Castelo dia 12 Abril (domingo) e verificar outros restantes
 - [x] Calendário da loja dinâmico: atualizar cores automaticamente quando pedido é aprovado/rejeitado (polling)
+- [x] Bug: Calendário da loja não mostra pedidos aprovados (dia branco quando deveria ter cor)

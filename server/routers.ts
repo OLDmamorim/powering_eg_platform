@@ -9642,18 +9642,53 @@ IMPORTANTE:
             ? todosPedidos.some((p: any) => p.estado === 'pendente' && p.lojaId === lojaId)
             : todosPedidos.some((p: any) => p.estado === 'pendente');
           
+          // Verificar se ESTA loja tem pedidos aprovados (para mostrar cor no calendário da loja)
+          const pedidosAprovadosLoja = lojaId
+            ? todosPedidos.filter((p: any) => p.estado === 'aprovado' && p.lojaId === lojaId)
+            : todosPedidos.filter((p: any) => p.estado === 'aprovado');
+          const manhaAprovadaLoja = pedidosAprovadosLoja.some((p: any) => p.periodo === 'manha' || p.periodo === 'dia_todo');
+          const tardeAprovadaLoja = pedidosAprovadosLoja.some((p: any) => p.periodo === 'tarde' || p.periodo === 'dia_todo');
+          
+          // Verificar agendamentos para ESTA loja
+          const agendamentosLoja = lojaId
+            ? todosAgendamentos.filter((a: any) => a.lojaId === lojaId || a.loja?.id === lojaId)
+            : todosAgendamentos;
+          const manhaAgendadaLoja = agendamentosLoja.some((a: any) => {
+            const per = a.agendamento_volante_periodo || a.periodo;
+            return per === 'manha' || per === 'dia_todo';
+          });
+          const tardeAgendadaLoja = agendamentosLoja.some((a: any) => {
+            const per = a.agendamento_volante_periodo || a.periodo;
+            return per === 'tarde' || per === 'dia_todo';
+          });
+          
           // Determinar estado combinado
-          // LÓGICA INVERTIDA: mostrar período DISPONÍVEL (o que interessa à loja)
+          // Prioridade: bloqueado > dia_completo > aprovado/agendado para esta loja > ocupado global > pendente > livre
           let estadoCombinado: string;
           if (todosBloquados) {
             estadoCombinado = 'bloqueado';
           } else if (manhaOcupadaGlobal && tardeOcupadaGlobal) {
             estadoCombinado = 'dia_completo';
+          } else if ((manhaAprovadaLoja || manhaAgendadaLoja) && (tardeAprovadaLoja || tardeAgendadaLoja)) {
+            // Esta loja tem volante confirmado o dia todo
+            estadoCombinado = 'dia_completo';
+          } else if (manhaAprovadaLoja || manhaAgendadaLoja) {
+            // Esta loja tem volante confirmado de manhã
+            if (tardeOcupadaGlobal) {
+              estadoCombinado = 'dia_completo';
+            } else {
+              estadoCombinado = 'tarde_disponivel'; // Manhã ocupada com esta loja, tarde ainda disponível
+            }
+          } else if (tardeAprovadaLoja || tardeAgendadaLoja) {
+            // Esta loja tem volante confirmado à tarde
+            if (manhaOcupadaGlobal) {
+              estadoCombinado = 'dia_completo';
+            } else {
+              estadoCombinado = 'manha_disponivel'; // Tarde ocupada com esta loja, manhã ainda disponível
+            }
           } else if (manhaOcupadaGlobal) {
-            // Manhã ocupada = só tarde disponível
             estadoCombinado = 'tarde_disponivel';
           } else if (tardeOcupadaGlobal) {
-            // Tarde ocupada = só manhã disponível
             estadoCombinado = 'manha_disponivel';
           } else if (temPendenteDaLoja) {
             estadoCombinado = 'pendente';
