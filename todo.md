@@ -1519,3 +1519,4 @@
 - [x] Limpar pedido pendente Viana do Castelo dia 12 Abril (domingo) e verificar outros restantes
 - [x] Calendário da loja dinâmico: atualizar cores automaticamente quando pedido é aprovado/rejeitado (polling)
 - [x] Bug: Calendário da loja não mostra pedidos aprovados (dia branco quando deveria ter cor)
+- [x] Adicionar legenda com texto de status nos dias do calendário da loja (Livre, Ocupado Manhã, etc.)

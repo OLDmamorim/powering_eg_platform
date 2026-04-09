@@ -6381,6 +6381,25 @@ function VolanteTab({
     }
   };
 
+  // Obter texto de status para cada dia
+  const getTextoStatus = (data: Date): string => {
+    if (data.getTime() === 0) return '';
+    const _ds = new Date(data);
+    const dataStr = `${_ds.getFullYear()}-${String(_ds.getMonth()+1).padStart(2,'0')}-${String(_ds.getDate()).padStart(2,'0')}`;
+    const estado = estadoDias?.[dataStr];
+    if (!estado) return language === 'pt' ? 'Livre' : 'Free';
+    switch (estado.estado) {
+      case 'pendente': return language === 'pt' ? 'Pendente' : 'Pending';
+      case 'manha_disponivel': return language === 'pt' ? 'Manhã Livre' : 'Morning Free';
+      case 'tarde_disponivel': return language === 'pt' ? 'Tarde Livre' : 'Afternoon Free';
+      case 'manha_aprovada': case 'manha_ocupada': return language === 'pt' ? 'Manhã Ocup.' : 'Morning Busy';
+      case 'tarde_aprovada': case 'tarde_ocupada': return language === 'pt' ? 'Tarde Ocup.' : 'Afternoon Busy';
+      case 'dia_completo': return language === 'pt' ? 'Ocupado' : 'Busy';
+      case 'bloqueado': return language === 'pt' ? 'Bloqueado' : 'Blocked';
+      default: return language === 'pt' ? 'Livre' : 'Free';
+    }
+  };
+
   // Verificar se dia está disponível
   const diaDisponivel = (data: Date): boolean => {
     if (data.getTime() === 0) return false;
@@ -6501,7 +6520,7 @@ function VolanteTab({
                   }}
                   disabled={ehPlaceholder || passado}
                   className={`
-                    aspect-square rounded-lg text-sm font-medium transition-all
+                    rounded-lg text-xs font-medium transition-all flex flex-col items-center justify-center p-1 min-h-[52px]
                     ${ehPlaceholder ? 'invisible' : ''}
                     ${ehHoje ? 'ring-2 ring-cyan-500' : ''}
                     ${passado ? 'opacity-40 cursor-not-allowed' : ''}
@@ -6509,7 +6528,12 @@ function VolanteTab({
                     ${!passado ? 'cursor-pointer' : ''}
                   `}
                 >
-                  {!ehPlaceholder && data.getDate()}
+                  {!ehPlaceholder && (
+                    <>
+                      <span className="font-bold text-sm leading-none">{data.getDate()}</span>
+                      <span className="text-[9px] leading-tight mt-0.5 opacity-80">{getTextoStatus(data)}</span>
+                    </>
+                  )}
                 </button>
               );
             })}
