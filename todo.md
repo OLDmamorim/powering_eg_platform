@@ -1529,3 +1529,5 @@
 - [x] Calendário loja: dividir dia em duas metades (manhã/tarde) com cores independentes
 - [x] Fix visual: adicionar bordo às células divididas manhã/tarde no calendário da loja
 - [x] Bug: Restaurar botão Agendamento Próprio no calendário do volante
+- [x] Volantes: permitir cancelar agendamentos próprios (já existia)
+- [x] Volante: adicionar botão Anular diretamente no diálogo Atividades do Dia (sem precisar de ir a Editar primeiro)

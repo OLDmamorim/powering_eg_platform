@@ -9919,6 +9919,19 @@ END:VCALENDAR`;
                       <Pencil className="h-4 w-4 mr-1" />
                       {language === 'pt' ? 'Editar' : 'Edit'}
                     </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="flex-1 text-orange-600 border-orange-300 hover:bg-orange-50"
+                      onClick={() => {
+                        setPedidoSelecionado(pedido);
+                        setDiaDetalheOpen(false);
+                        setAnularDialogOpen(true);
+                      }}
+                    >
+                      <Ban className="h-4 w-4 mr-1" />
+                      {language === 'pt' ? 'Anular' : 'Cancel'}
+                    </Button>
                     {(() => {
                       const links = gerarLinksCalendario(pedido);
                       return (
