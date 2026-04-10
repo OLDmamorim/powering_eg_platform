@@ -1526,3 +1526,4 @@
 - [x] Calendário loja: mostrar nome do volante aprovado e período nos dias com apoio confirmado
 - [x] Notificação Telegram ao volante quando gestor cancela agendamento
 - [x] Mudar abreviaturas M/T/DT para Manhã/Tarde/Dia Todo no calendário da loja
+- [x] Calendário loja: dividir dia em duas metades (manhã/tarde) com cores independentes

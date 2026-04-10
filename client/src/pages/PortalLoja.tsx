@@ -6360,62 +6360,74 @@ function VolanteTab({
   hoje.setHours(0, 0, 0, 0);
 
   // Obter cor do dia baseado no estado
-  const getCorDia = (data: Date): string => {
-    if (data.getTime() === 0) return 'bg-transparent';
+  // Obter info de cada período (manhã/tarde) para um dia
+  const getInfoPeriodo = (data: Date): { manha: { cor: string; texto: string }; tarde: { cor: string; texto: string }; isSame: boolean } => {
+    const livre = { cor: 'bg-white', texto: 'Livre' };
+    if (data.getTime() === 0) return { manha: livre, tarde: livre, isSame: true };
     
     const _d1 = new Date(data);
     const dataStr = `${_d1.getFullYear()}-${String(_d1.getMonth()+1).padStart(2,'0')}-${String(_d1.getDate()).padStart(2,'0')}`;
-    const estado = estadoDias?.[dataStr];
+    const estado = estadoDias?.[dataStr] as any;
     
-    if (!estado) return 'bg-white hover:bg-gray-100';
+    if (!estado) return { manha: livre, tarde: livre, isSame: true };
     
-    switch (estado.estado) {
-      case 'pendente': return 'bg-yellow-200 hover:bg-yellow-300'; // Amarelo - pedido pendente
-      case 'manha_disponivel': return 'bg-purple-200 hover:bg-purple-300'; // Roxo claro - só manhã disponível
-      case 'tarde_disponivel': return 'bg-blue-200 hover:bg-blue-300'; // Azul claro - só tarde disponível
-      case 'manha_aprovada': case 'manha_ocupada': return 'bg-purple-300 hover:bg-purple-400';
-      case 'tarde_aprovada': case 'tarde_ocupada': return 'bg-blue-300 hover:bg-blue-400';
-      case 'dia_completo': return 'bg-red-400 text-white cursor-not-allowed'; // Vermelho - dia completo
-      case 'bloqueado': return 'bg-gray-400 text-white cursor-not-allowed'; // Cinza - bloqueado
-      default: return 'bg-white hover:bg-gray-100';
+    const volanteInfo = estado.volanteInfo as { nome: string; periodo: string }[] | undefined;
+    
+    // Determinar estado da manhã
+    let manhaInfo = { ...livre };
+    let tardeInfo = { ...livre };
+    
+    if (estado.estado === 'bloqueado') {
+      const bloq = { cor: 'bg-gray-400 text-white', texto: 'Bloqueado' };
+      return { manha: bloq, tarde: bloq, isSame: true };
     }
+    
+    // Verificar volantes aprovados por período
+    const volantesManha = volanteInfo?.filter((v: any) => v.periodo === 'manha' || v.periodo === 'dia_todo') || [];
+    const volantesTarde = volanteInfo?.filter((v: any) => v.periodo === 'tarde' || v.periodo === 'dia_todo') || [];
+    
+    // Verificar pendentes por período
+    const pedidos = estado.pedidos || [];
+    const pendenteManha = pedidos.some((p: any) => p.estado === 'pendente' && (p.periodo === 'manha' || p.periodo === 'dia_todo'));
+    const pendenteTarde = pedidos.some((p: any) => p.estado === 'pendente' && (p.periodo === 'tarde' || p.periodo === 'dia_todo'));
+    
+    // Manhã
+    if (volantesManha.length > 0) {
+      const nomes = volantesManha.map((v: any) => v.nome.split(' ')[0]).join(', ');
+      manhaInfo = { cor: 'bg-red-400 text-white', texto: `${nomes} (Manhã)` };
+    } else if (estado.estado === 'dia_completo' || estado.estado === 'manha_ocupada' || estado.estado === 'manha_aprovada') {
+      manhaInfo = { cor: 'bg-red-400 text-white', texto: 'Ocupado' };
+    } else if (pendenteManha) {
+      manhaInfo = { cor: 'bg-yellow-200', texto: 'Pendente' };
+    }
+    
+    // Tarde
+    if (volantesTarde.length > 0) {
+      const nomes = volantesTarde.map((v: any) => v.nome.split(' ')[0]).join(', ');
+      tardeInfo = { cor: 'bg-red-400 text-white', texto: `${nomes} (Tarde)` };
+    } else if (estado.estado === 'dia_completo' || estado.estado === 'tarde_ocupada' || estado.estado === 'tarde_aprovada') {
+      tardeInfo = { cor: 'bg-red-400 text-white', texto: 'Ocupado' };
+    } else if (pendenteTarde) {
+      tardeInfo = { cor: 'bg-yellow-200', texto: 'Pendente' };
+    }
+    
+    // Se ambos têm volante dia_todo, mostrar como um só
+    const volantesDiaTodo = volanteInfo?.filter((v: any) => v.periodo === 'dia_todo') || [];
+    if (volantesDiaTodo.length > 0 && volantesManha.length === volantesDiaTodo.length && volantesTarde.length === volantesDiaTodo.length) {
+      const nomes = volantesDiaTodo.map((v: any) => v.nome.split(' ')[0]).join(', ');
+      const full = { cor: 'bg-red-400 text-white', texto: `${nomes} (Dia Todo)` };
+      return { manha: full, tarde: full, isSame: true };
+    }
+    
+    const isSame = manhaInfo.cor === tardeInfo.cor && manhaInfo.texto === tardeInfo.texto;
+    return { manha: manhaInfo, tarde: tardeInfo, isSame };
   };
 
-  // Obter texto de status para cada dia
-  const getTextoStatus = (data: Date): string | React.ReactNode => {
-    if (data.getTime() === 0) return '';
-    const _ds = new Date(data);
-    const dataStr = `${_ds.getFullYear()}-${String(_ds.getMonth()+1).padStart(2,'0')}-${String(_ds.getDate()).padStart(2,'0')}`;
-    const estado = estadoDias?.[dataStr] as any;
-    if (!estado) return language === 'pt' ? 'Livre' : 'Free';
-    
-    // Se há info do volante aprovado, mostrar nome
-    const volanteInfo = estado.volanteInfo as { nome: string; periodo: string }[] | undefined;
-    if (volanteInfo && volanteInfo.length > 0) {
-      const nomes = volanteInfo.map((v: any) => {
-        const per = v.periodo === 'manha' ? 'Manhã' : v.periodo === 'tarde' ? 'Tarde' : 'Dia Todo';
-        return `${v.nome.split(' ')[0]} (${per})`;
-      });
-      const textoVolante = nomes.join(', ');
-      // Se ainda há período livre
-      if (estado.estado === 'tarde_disponivel') {
-        return `${textoVolante}\nTarde Livre`;
-      } else if (estado.estado === 'manha_disponivel') {
-        return `${textoVolante}\nManhã Livre`;
-      }
-      return textoVolante;
-    }
-    
-    switch (estado.estado) {
-      case 'pendente': return language === 'pt' ? 'Pendente' : 'Pending';
-      case 'manha_disponivel': return language === 'pt' ? 'Tarde Livre' : 'Afternoon Free';
-      case 'tarde_disponivel': return language === 'pt' ? 'Tarde Livre' : 'Afternoon Free';
-      case 'manha_aprovada': case 'manha_ocupada': return language === 'pt' ? 'Manhã Ocup.' : 'Morning Busy';
-      case 'tarde_aprovada': case 'tarde_ocupada': return language === 'pt' ? 'Tarde Ocup.' : 'Afternoon Busy';
-      case 'dia_completo': return language === 'pt' ? 'Ocupado' : 'Busy';
-      case 'bloqueado': return language === 'pt' ? 'Bloqueado' : 'Blocked';
-      default: return language === 'pt' ? 'Livre' : 'Free';
-    }
+  // Manter getCorDia para compatibilidade (usado no dialog)
+  const getCorDia = (data: Date): string => {
+    const info = getInfoPeriodo(data);
+    if (info.isSame) return info.manha.cor;
+    return 'bg-white'; // Split view usa cores internas
   };
 
   // Verificar se dia está disponível
@@ -6526,6 +6538,7 @@ function VolanteTab({
               const ehHoje = !ehPlaceholder && data.toDateString() === hoje.toDateString();
               const disponivel = diaDisponivel(data);
               const passado = !ehPlaceholder && data < hoje;
+              const info = getInfoPeriodo(data);
               
               return (
                 <button
@@ -6538,19 +6551,33 @@ function VolanteTab({
                   }}
                   disabled={ehPlaceholder || passado}
                   className={`
-                    rounded-lg text-xs font-medium transition-all flex flex-col items-center justify-center p-1 min-h-[60px]
+                    rounded-lg text-xs font-medium transition-all overflow-hidden min-h-[64px]
                     ${ehPlaceholder ? 'invisible' : ''}
                     ${ehHoje ? 'ring-2 ring-cyan-500' : ''}
                     ${passado ? 'opacity-40 cursor-not-allowed' : ''}
-                    ${getCorDia(data)}
                     ${!passado ? 'cursor-pointer' : ''}
+                    ${info.isSame ? info.manha.cor : 'bg-white'}
                   `}
                 >
                   {!ehPlaceholder && (
-                    <>
-                      <span className="font-bold text-sm leading-none">{data.getDate()}</span>
-                      <span className="text-[8px] leading-tight mt-0.5 opacity-90 whitespace-pre-line text-center">{getTextoStatus(data)}</span>
-                    </>
+                    info.isSame ? (
+                      <div className="flex flex-col items-center justify-center h-full p-1">
+                        <span className="font-bold text-sm leading-none">{data.getDate()}</span>
+                        <span className="text-[8px] leading-tight mt-0.5 opacity-90 text-center">{info.manha.texto}</span>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col h-full w-full">
+                        {/* Manhã - metade superior */}
+                        <div className={`flex-1 flex flex-col items-center justify-center px-1 pt-1 rounded-t-lg ${info.manha.cor}`}>
+                          <span className="font-bold text-sm leading-none">{data.getDate()}</span>
+                          <span className="text-[7px] leading-tight opacity-90 text-center">{info.manha.texto}</span>
+                        </div>
+                        {/* Tarde - metade inferior */}
+                        <div className={`flex-1 flex flex-col items-center justify-center px-1 pb-1 rounded-b-lg ${info.tarde.cor}`}>
+                          <span className="text-[7px] leading-tight opacity-90 text-center">{info.tarde.texto}</span>
+                        </div>
+                      </div>
+                    )
                   )}
                 </button>
               );
