@@ -9743,9 +9743,11 @@ export async function getEstadoCompletoDoMes(volanteId: number, year: number, mo
       updatedAt: pedidosApoio.updatedAt,
       lojaNome: lojas.nome,
       lojaEmail: lojas.email,
+      volanteNome: volantes.nome,
     })
     .from(pedidosApoio)
     .leftJoin(lojas, eq(pedidosApoio.lojaId, lojas.id))
+    .leftJoin(volantes, eq(pedidosApoio.volanteId, volantes.id))
     .where(and(
       eq(pedidosApoio.volanteId, volanteId),
       gte(pedidosApoio.data, startDate),
@@ -9765,9 +9767,10 @@ export async function getEstadoCompletoDoMes(volanteId: number, year: number, mo
   
   // Obter agendamentos do volante
   const agendamentos = await db
-    .select({ agendamento: agendamentosVolante, loja: lojas })
+    .select({ agendamento: agendamentosVolante, loja: lojas, volanteNome: volantes.nome })
     .from(agendamentosVolante)
     .leftJoin(lojas, eq(agendamentosVolante.lojaId, lojas.id))
+    .leftJoin(volantes, eq(agendamentosVolante.volanteId, volantes.id))
     .where(and(
       eq(agendamentosVolante.volanteId, volanteId),
       gte(agendamentosVolante.data, startDate),
@@ -9801,7 +9804,7 @@ export async function getEstadoCompletoDoMes(volanteId: number, year: number, mo
     resultado.get(dataStr)!.bloqueios.push(bloqueio);
   }
   
-  for (const { agendamento, loja } of agendamentos) {
+  for (const { agendamento, loja, volanteNome: agendVolanteNome } of agendamentos) {
     const da = new Date(agendamento.data);
     const dataStr = `${da.getFullYear()}-${String(da.getMonth()+1).padStart(2,'0')}-${String(da.getDate()).padStart(2,'0')}`;
     
@@ -9814,6 +9817,7 @@ export async function getEstadoCompletoDoMes(volanteId: number, year: number, mo
       ...agendamento, 
       periodo: agendamento.agendamento_volante_periodo, // Adicionar campo 'periodo' para compatibilidade
       tipo: agendamento.agendamento_volante_tipo,
+      volanteNome: agendVolanteNome,
       loja 
     } as any);
   }

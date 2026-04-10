@@ -6382,15 +6382,33 @@ function VolanteTab({
   };
 
   // Obter texto de status para cada dia
-  const getTextoStatus = (data: Date): string => {
+  const getTextoStatus = (data: Date): string | React.ReactNode => {
     if (data.getTime() === 0) return '';
     const _ds = new Date(data);
     const dataStr = `${_ds.getFullYear()}-${String(_ds.getMonth()+1).padStart(2,'0')}-${String(_ds.getDate()).padStart(2,'0')}`;
-    const estado = estadoDias?.[dataStr];
+    const estado = estadoDias?.[dataStr] as any;
     if (!estado) return language === 'pt' ? 'Livre' : 'Free';
+    
+    // Se há info do volante aprovado, mostrar nome
+    const volanteInfo = estado.volanteInfo as { nome: string; periodo: string }[] | undefined;
+    if (volanteInfo && volanteInfo.length > 0) {
+      const nomes = volanteInfo.map((v: any) => {
+        const per = v.periodo === 'manha' ? 'M' : v.periodo === 'tarde' ? 'T' : 'DT';
+        return `${v.nome.split(' ')[0]} (${per})`;
+      });
+      const textoVolante = nomes.join(', ');
+      // Se ainda há período livre
+      if (estado.estado === 'tarde_disponivel') {
+        return `${textoVolante}\nTarde Livre`;
+      } else if (estado.estado === 'manha_disponivel') {
+        return `${textoVolante}\nManhã Livre`;
+      }
+      return textoVolante;
+    }
+    
     switch (estado.estado) {
       case 'pendente': return language === 'pt' ? 'Pendente' : 'Pending';
-      case 'manha_disponivel': return language === 'pt' ? 'Manhã Livre' : 'Morning Free';
+      case 'manha_disponivel': return language === 'pt' ? 'Tarde Livre' : 'Afternoon Free';
       case 'tarde_disponivel': return language === 'pt' ? 'Tarde Livre' : 'Afternoon Free';
       case 'manha_aprovada': case 'manha_ocupada': return language === 'pt' ? 'Manhã Ocup.' : 'Morning Busy';
       case 'tarde_aprovada': case 'tarde_ocupada': return language === 'pt' ? 'Tarde Ocup.' : 'Afternoon Busy';
@@ -6520,7 +6538,7 @@ function VolanteTab({
                   }}
                   disabled={ehPlaceholder || passado}
                   className={`
-                    rounded-lg text-xs font-medium transition-all flex flex-col items-center justify-center p-1 min-h-[52px]
+                    rounded-lg text-xs font-medium transition-all flex flex-col items-center justify-center p-1 min-h-[60px]
                     ${ehPlaceholder ? 'invisible' : ''}
                     ${ehHoje ? 'ring-2 ring-cyan-500' : ''}
                     ${passado ? 'opacity-40 cursor-not-allowed' : ''}
@@ -6531,7 +6549,7 @@ function VolanteTab({
                   {!ehPlaceholder && (
                     <>
                       <span className="font-bold text-sm leading-none">{data.getDate()}</span>
-                      <span className="text-[9px] leading-tight mt-0.5 opacity-80">{getTextoStatus(data)}</span>
+                      <span className="text-[8px] leading-tight mt-0.5 opacity-90 whitespace-pre-line text-center">{getTextoStatus(data)}</span>
                     </>
                   )}
                 </button>

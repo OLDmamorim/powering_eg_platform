@@ -9638,7 +9638,7 @@ IMPORTANTE:
         // Se só há 1 volante, comportamento com filtros
         if (volanteIds.length === 1) {
           const estadoDias = await db.getEstadoCompletoDoMes(volanteIds[0], input.ano, input.mes);
-          const resultado: Record<string, { estado: string; pedidos: any[]; bloqueios?: any[]; agendamentos?: any[] }> = {};
+          const resultado: Record<string, any> = {};
           estadoDias.forEach((value, key) => {
             let estado = value.estado;
             // Filtrar pendentes: só mostrar amarelo se ESTA loja tem pedidos pendentes
@@ -9650,13 +9650,36 @@ IMPORTANTE:
             if (estado === 'manha_ocupada') estado = 'tarde_disponivel';
             else if (estado === 'tarde_ocupada') estado = 'manha_disponivel';
             else if (estado === 'manha_aprovada') {
-              // Se é token de loja, mostrar tarde disponível
               if (lojaId) estado = 'tarde_disponivel';
             }
             else if (estado === 'tarde_aprovada') {
               if (lojaId) estado = 'manha_disponivel';
             }
-            resultado[key] = { ...value, estado };
+            
+            // Extrair info do volante aprovado para esta loja (single volante)
+            const volanteInfoAprovado: { nome: string; periodo: string }[] = [];
+            if (lojaId) {
+              const pedAprovLoja = (value.pedidos || []).filter((p: any) => p.estado === 'aprovado' && p.lojaId === lojaId);
+              for (const p of pedAprovLoja) {
+                volanteInfoAprovado.push({
+                  nome: (p as any).volanteNome || 'Volante',
+                  periodo: p.periodo,
+                });
+              }
+              const agendLoja = (value.agendamentos || []).filter((a: any) => (a.lojaId || a.loja?.id) === lojaId);
+              for (const a of agendLoja) {
+                volanteInfoAprovado.push({
+                  nome: (a as any).volanteNome || 'Volante',
+                  periodo: (a as any).periodo || (a as any).agendamento_volante_periodo,
+                });
+              }
+            }
+            
+            resultado[key] = { 
+              ...value, 
+              estado,
+              volanteInfo: volanteInfoAprovado.length > 0 ? volanteInfoAprovado : undefined,
+            };
           });
           return resultado;
         }
@@ -9757,12 +9780,34 @@ IMPORTANTE:
             estadoCombinado = 'livre';
           }
           
+          // Extrair info do volante aprovado para esta loja
+          const volanteInfoAprovado: { nome: string; periodo: string }[] = [];
+          if (lojaId) {
+            // Pedidos aprovados para esta loja
+            const pedAprovLoja = todosPedidos.filter((p: any) => p.estado === 'aprovado' && p.lojaId === lojaId);
+            for (const p of pedAprovLoja) {
+              volanteInfoAprovado.push({
+                nome: (p as any).volanteNome || 'Volante',
+                periodo: p.periodo,
+              });
+            }
+            // Agendamentos para esta loja
+            const agendLoja = todosAgendamentos.filter((a: any) => (a.lojaId || a.loja?.id) === lojaId);
+            for (const a of agendLoja) {
+              volanteInfoAprovado.push({
+                nome: (a as any).volanteNome || 'Volante',
+                periodo: (a as any).periodo || (a as any).agendamento_volante_periodo,
+              });
+            }
+          }
+          
           resultado[dataStr] = {
             estado: estadoCombinado,
             pedidos: todosPedidos,
             bloqueios: todosBloqueios,
             agendamentos: todosAgendamentos,
-          };
+            volanteInfo: volanteInfoAprovado.length > 0 ? volanteInfoAprovado : undefined,
+          } as any;
         }
         
         return resultado;

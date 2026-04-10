@@ -1523,3 +1523,4 @@
 - [x] Notificação Telegram ao volante quando gestor cria agendamento direto (informativa, sem aceitar)
 - [x] Adicionar campo 'Link do Portal' na configuração do volante e usar nas notificações Telegram
 - [x] Admin deve ver e configurar todos os volantes de todos os gestores
+- [x] Calendário loja: mostrar nome do volante aprovado e período nos dias com apoio confirmado
