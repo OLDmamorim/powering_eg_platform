@@ -1542,3 +1542,10 @@
 - [x] Corrigir resumo geral IA: com dados correctos de todos os meses, a IA gera resumo completo
 - [x] Testes unitários para parsing do período e cálculo NPS
 - [ ] Guardar checkpoint
+
+## Bug: NPS inconsistente entre Dashboard Resultados e Relatório IA (trimestre)
+- [x] Investigar como cada menu calcula NPS para múltiplos meses
+- [x] Unificar cálculo: Dashboard Resultados agora calcula média dos meses selecionados (antes só lia o 1º mês)
+- [x] Garantir que os valores NPS são idênticos nos dois locais (ambos usam média + regra OU)
+- [x] Testes unitários para NPS multi-month averaging
+- [ ] Testar com trimestre Jan+Fev+Mar 2026

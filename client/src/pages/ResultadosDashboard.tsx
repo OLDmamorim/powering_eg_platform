@@ -243,25 +243,46 @@ export function ResultadosDashboard() {
     return map;
   }, [npsData]);
   
-  // Obter NPS do mês selecionado para uma loja
+  // Obter NPS médio dos meses selecionados para uma loja
   const getNPSMes = (lojaId: number) => {
     const nps = npsPorLoja.get(lojaId);
     if (!nps) return null;
     const mesKeys = ['npsJan', 'npsFev', 'npsMar', 'npsAbr', 'npsMai', 'npsJun', 'npsJul', 'npsAgo', 'npsSet', 'npsOut', 'npsNov', 'npsDez'];
-    if (!periodoSelecionado) return null;
-    const key = mesKeys[periodoSelecionado.mes - 1];
-    const val = nps[key];
-    return val !== null && val !== undefined ? parseFloat(val) : null;
+    if (mesesSelecionados.length === 0) return null;
+    
+    // Calcular média dos meses selecionados
+    let soma = 0;
+    let count = 0;
+    for (const periodo of mesesSelecionados) {
+      const key = mesKeys[periodo.mes - 1];
+      const val = nps[key];
+      if (val !== null && val !== undefined) {
+        soma += parseFloat(val);
+        count++;
+      }
+    }
+    return count > 0 ? soma / count : null;
   };
   
+  // Obter taxa de resposta média dos meses selecionados para uma loja
   const getTaxaRespostaMes = (lojaId: number) => {
     const nps = npsPorLoja.get(lojaId);
     if (!nps) return null;
     const mesKeys = ['taxaRespostaJan', 'taxaRespostaFev', 'taxaRespostaMar', 'taxaRespostaAbr', 'taxaRespostaMai', 'taxaRespostaJun', 'taxaRespostaJul', 'taxaRespostaAgo', 'taxaRespostaSet', 'taxaRespostaOut', 'taxaRespostaNov', 'taxaRespostaDez'];
-    if (!periodoSelecionado) return null;
-    const key = mesKeys[periodoSelecionado.mes - 1];
-    const val = nps[key];
-    return val !== null && val !== undefined ? parseFloat(val) : null;
+    if (mesesSelecionados.length === 0) return null;
+    
+    // Calcular média dos meses selecionados
+    let soma = 0;
+    let count = 0;
+    for (const periodo of mesesSelecionados) {
+      const key = mesKeys[periodo.mes - 1];
+      const val = nps[key];
+      if (val !== null && val !== undefined) {
+        soma += parseFloat(val);
+        count++;
+      }
+    }
+    return count > 0 ? soma / count : null;
   };
 
   // Query de evolução individual
