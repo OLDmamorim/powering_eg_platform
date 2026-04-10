@@ -6551,7 +6551,7 @@ function VolanteTab({
                   }}
                   disabled={ehPlaceholder || passado}
                   className={`
-                    rounded-lg text-xs font-medium transition-all overflow-hidden min-h-[64px]
+                    rounded-lg text-xs font-medium transition-all overflow-hidden min-h-[68px] border border-gray-300
                     ${ehPlaceholder ? 'invisible' : ''}
                     ${ehHoje ? 'ring-2 ring-cyan-500' : ''}
                     ${passado ? 'opacity-40 cursor-not-allowed' : ''}
@@ -6568,12 +6568,14 @@ function VolanteTab({
                     ) : (
                       <div className="flex flex-col h-full w-full">
                         {/* Manhã - metade superior */}
-                        <div className={`flex-1 flex flex-col items-center justify-center px-1 pt-1 rounded-t-lg ${info.manha.cor}`}>
+                        <div className={`flex-1 flex flex-col items-center justify-center px-1 pt-1 ${info.manha.cor}`}>
                           <span className="font-bold text-sm leading-none">{data.getDate()}</span>
                           <span className="text-[7px] leading-tight opacity-90 text-center">{info.manha.texto}</span>
                         </div>
+                        {/* Separador */}
+                        <div className="border-t border-gray-300 w-full"></div>
                         {/* Tarde - metade inferior */}
-                        <div className={`flex-1 flex flex-col items-center justify-center px-1 pb-1 rounded-b-lg ${info.tarde.cor}`}>
+                        <div className={`flex-1 flex flex-col items-center justify-center px-1 pb-1 ${info.tarde.cor}`}>
                           <span className="text-[7px] leading-tight opacity-90 text-center">{info.tarde.texto}</span>
                         </div>
                       </div>
