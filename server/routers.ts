@@ -16,7 +16,7 @@ import { notificarGestorRelatorioAdmin } from "./notificacaoGestor";
 import { notifyOwner } from "./_core/notification";
 import { processarPergunta, getSugestoesPergunta } from "./chatbotService";
 import { vapidPublicKey, notificarGestorNovaTarefa, notificarLojaNovaTarefa, notificarGestorRespostaLoja, notificarLojaRespostaGestor } from "./pushService";
-import { notificarNovoPedidoApoio, notificarPedidoAnulado, notificarPedidoEditado, notificarAgendamentoCriado, notificarAgendamentoGestor } from "./telegramService";
+import { notificarNovoPedidoApoio, notificarPedidoAnulado, notificarPedidoEditado, notificarAgendamentoCriado, notificarAgendamentoGestor, notificarCancelamentoAgendamento } from "./telegramService";
 import { processarAnalise, ResultadoAnalise, RelatorioLoja, gerarHTMLEmailAnalise } from "./analiseFichasService";
 import { gerarPDFRelacaoRH } from "./pdfRelacaoRH";
 import { enviarLembretesRH, isDia20 } from "./lembreteRHService";
@@ -9375,8 +9375,34 @@ IMPORTANTE:
     // Eliminar agendamento de volante (pelo gestor)
     gestorEliminarAgendamento: gestorProcedure
       .input(z.object({ agendamentoId: z.number(), volanteId: z.number() }))
-      .mutation(async ({ input }) => {
+      .mutation(async ({ input, ctx }) => {
+        // Buscar dados do agendamento antes de eliminar para a notificação
+        const agendamento = await db.getAgendamentoVolanteById(input.agendamentoId);
+        const volante = await db.getVolanteById(input.volanteId);
+        
         await db.eliminarAgendamentoVolante(input.agendamentoId, input.volanteId);
+        
+        // Enviar notificação Telegram ao volante
+        if (agendamento && volante && volante.telegramChatId) {
+          try {
+            const loja = agendamento.lojaId ? await db.getLojaById(agendamento.lojaId) : null;
+            await notificarCancelamentoAgendamento(
+              volante.telegramChatId,
+              {
+                volanteNome: volante.nome,
+                gestorNome: ctx.user?.name || 'Gestor',
+                lojaNome: loja?.nome || 'Loja',
+                data: agendamento.data,
+                periodo: (agendamento.agendamento_volante_periodo as 'manha' | 'tarde' | 'dia_todo') || 'dia_todo',
+                tipo: agendamento.agendamento_volante_tipo || 'outro',
+                portalUrl: (volante as any).portalUrl || undefined,
+              }
+            );
+          } catch (e) {
+            console.error('Erro ao enviar notificação de cancelamento:', e);
+          }
+        }
+        
         return { success: true };
       }),
     

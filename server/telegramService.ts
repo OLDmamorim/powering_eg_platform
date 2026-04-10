@@ -704,3 +704,62 @@ ${agendamento.portalUrl ? `
   const result = await sendTelegramMessageToMultiple(chatIds, message, 'HTML');
   return result.success > 0;
 }
+
+/**
+ * Notificar volante que o gestor cancelou um agendamento
+ */
+export async function notificarCancelamentoAgendamento(
+  chatIds: string,
+  info: {
+    volanteNome: string;
+    gestorNome: string;
+    lojaNome: string;
+    data: Date;
+    periodo: 'manha' | 'tarde' | 'dia_todo';
+    tipo: string;
+    portalUrl?: string;
+  }
+): Promise<boolean> {
+  const dataFormatada = new Date(info.data).toLocaleDateString('pt-PT', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+
+  const periodoTexto = info.periodo === 'manha' 
+    ? 'Manhã (9h-13h)' 
+    : info.periodo === 'tarde' 
+      ? 'Tarde (14h-18h)' 
+      : 'Dia Todo (9h-18h)';
+  
+  const tipoTexto = ({
+    substituicao: 'Substituição',
+    reparacao: 'Reparação',
+    entrega: 'Entrega',
+    recolha: 'Recolha',
+    cobertura_ferias: 'Cobertura de Férias',
+    substituicao_vidros: 'Substituição de Vidros',
+    outro: 'Outro',
+  }[info.tipo] || info.tipo);
+
+  const message = `
+❌ <b>Agendamento Cancelado</b>
+
+Olá ${info.volanteNome},
+
+O gestor <b>${info.gestorNome}</b> cancelou o seguinte agendamento:
+
+🏪 <b>Loja:</b> ${info.lojaNome}
+📅 <b>Data:</b> ${dataFormatada}
+⏰ <b>Período:</b> ${periodoTexto}
+🔧 <b>Tipo:</b> ${tipoTexto}
+
+<i>Este agendamento foi removido do teu calendário.</i>
+${info.portalUrl ? `
+🔗 <a href="${info.portalUrl}">Abrir Portal</a>` : ''}
+  `.trim();
+
+  const result = await sendTelegramMessageToMultiple(chatIds, message, 'HTML');
+  return result.success > 0;
+}

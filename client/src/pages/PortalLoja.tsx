@@ -6393,7 +6393,7 @@ function VolanteTab({
     const volanteInfo = estado.volanteInfo as { nome: string; periodo: string }[] | undefined;
     if (volanteInfo && volanteInfo.length > 0) {
       const nomes = volanteInfo.map((v: any) => {
-        const per = v.periodo === 'manha' ? 'M' : v.periodo === 'tarde' ? 'T' : 'DT';
+        const per = v.periodo === 'manha' ? 'Manhã' : v.periodo === 'tarde' ? 'Tarde' : 'Dia Todo';
         return `${v.nome.split(' ')[0]} (${per})`;
       });
       const textoVolante = nomes.join(', ');
