@@ -315,6 +315,9 @@ export default function Volantes() {
                       </div>
                       <div>
                         <CardTitle className="text-lg">{volante.nome}</CardTitle>
+                        {volante.gestorNome && (
+                          <p className="text-xs text-muted-foreground">Gestor: {volante.gestorNome}</p>
+                        )}
                         <CardDescription className="flex items-center gap-4 mt-1">
                           {volante.email && (
                             <span className="flex items-center gap-1">

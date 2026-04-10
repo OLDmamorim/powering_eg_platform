@@ -8964,19 +8964,31 @@ IMPORTANTE:
   
   // ==================== VOLANTES ====================
   volantes: router({
-    // Listar volantes do gestor
+    // Listar volantes do gestor (admin vê todos)
     listar: gestorProcedure.query(async ({ ctx }) => {
-      if (!ctx.gestor) {
-        throw new TRPCError({ code: 'NOT_FOUND', message: 'Gestor não encontrado' });
+      let volantes;
+      if (ctx.user.role === 'admin') {
+        // Admin vê todos os volantes de todos os gestores
+        volantes = await db.getAllVolantes();
+      } else {
+        if (!ctx.gestor) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Gestor não encontrado' });
+        }
+        volantes = await db.getVolantesByGestorId(ctx.gestor.id);
       }
-      const volantes = await db.getVolantesByGestorId(ctx.gestor.id);
       
-      // Para cada volante, buscar as lojas atribuídas (com preferencial) e o token
+      // Para cada volante, buscar as lojas atribuídas (com preferencial), o token e o nome do gestor
       const volantesComLojas = await Promise.all(
         volantes.map(async (volante) => {
           const lojas = await db.getLojasComPreferencialByVolanteId(volante.id);
           const token = await db.getTokenVolante(volante.id);
-          return { ...volante, lojas, token };
+          // Buscar nome do gestor para o admin
+          let gestorNome: string | null = null;
+          if (ctx.user.role === 'admin') {
+            const gestorVolante = await db.getGestorById(volante.gestorId);
+            gestorNome = gestorVolante?.nome || null;
+          }
+          return { ...volante, lojas, token, gestorNome };
         })
       );
       
@@ -9021,10 +9033,13 @@ IMPORTANTE:
         portalUrl: z.string().optional().nullable(),
       }))
       .mutation(async ({ ctx, input }) => {
-        // Verificar se o volante pertence ao gestor
+        // Verificar se o volante pertence ao gestor (admin pode editar qualquer volante)
         const volante = await db.getVolanteById(input.id);
-        if (!volante || (ctx.gestor && volante.gestorId !== ctx.gestor.id)) {
+        if (!volante) {
           throw new TRPCError({ code: 'NOT_FOUND', message: 'Volante não encontrado' });
+        }
+        if (ctx.user.role !== 'admin' && ctx.gestor && volante.gestorId !== ctx.gestor.id) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Sem permissão para editar este volante' });
         }
         
         const updated = await db.updateVolante(input.id, {
@@ -9044,8 +9059,11 @@ IMPORTANTE:
       .input(z.object({ id: z.number() }))
       .mutation(async ({ ctx, input }) => {
         const volante = await db.getVolanteById(input.id);
-        if (!volante || (ctx.gestor && volante.gestorId !== ctx.gestor.id)) {
+        if (!volante) {
           throw new TRPCError({ code: 'NOT_FOUND', message: 'Volante não encontrado' });
+        }
+        if (ctx.user.role !== 'admin' && ctx.gestor && volante.gestorId !== ctx.gestor.id) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Sem permissão para eliminar este volante' });
         }
         
         await db.deleteVolante(input.id);
@@ -9060,8 +9078,11 @@ IMPORTANTE:
       }))
       .mutation(async ({ ctx, input }) => {
         const volante = await db.getVolanteById(input.volanteId);
-        if (!volante || (ctx.gestor && volante.gestorId !== ctx.gestor.id)) {
+        if (!volante) {
           throw new TRPCError({ code: 'NOT_FOUND', message: 'Volante não encontrado' });
+        }
+        if (ctx.user.role !== 'admin' && ctx.gestor && volante.gestorId !== ctx.gestor.id) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Sem permissão para editar este volante' });
         }
         
         await db.assignLojasToVolante(input.volanteId, input.lojaIds);
@@ -9106,6 +9127,11 @@ IMPORTANTE:
     
     // Obter lojas disponíveis para atribuir (lojas do gestor)
     lojasDisponiveis: gestorProcedure.query(async ({ ctx }) => {
+      if (ctx.user.role === 'admin') {
+        // Admin vê todas as lojas
+        const allLojas = await db.getAllLojas();
+        return allLojas;
+      }
       if (!ctx.gestor) {
         throw new TRPCError({ code: 'NOT_FOUND', message: 'Gestor não encontrado' });
       }
@@ -9119,8 +9145,11 @@ IMPORTANTE:
       .input(z.object({ volanteId: z.number() }))
       .mutation(async ({ ctx, input }) => {
         const volante = await db.getVolanteById(input.volanteId);
-        if (!volante || (ctx.gestor && volante.gestorId !== ctx.gestor.id)) {
+        if (!volante) {
           throw new TRPCError({ code: 'NOT_FOUND', message: 'Volante não encontrado' });
+        }
+        if (ctx.user.role !== 'admin' && ctx.gestor && volante.gestorId !== ctx.gestor.id) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Sem permissão' });
         }
         
         const token = await db.getOrCreateTokenVolante(input.volanteId);
