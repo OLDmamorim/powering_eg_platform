@@ -641,3 +641,63 @@ ${topLojasTexto}
 
   return await sendTelegramMessageToMultiple(chatIds, mensagem, 'HTML');
 }
+
+
+/**
+ * Notifica o volante quando o gestor cria um agendamento direto no calendário
+ * Notificação informativa (sem necessidade de aceitar)
+ */
+export async function notificarAgendamentoGestor(
+  chatIds: string,
+  agendamento: {
+    volanteNome: string;
+    gestorNome: string;
+    lojaNome: string;
+    data: Date;
+    periodo: 'manha' | 'tarde' | 'dia_todo';
+    tipo: string;
+    observacoes?: string;
+  }
+): Promise<boolean> {
+  const dataFormatada = new Date(agendamento.data).toLocaleDateString('pt-PT', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+
+  const periodoTexto = agendamento.periodo === 'manha' 
+    ? 'Manhã (9h-13h)' 
+    : agendamento.periodo === 'tarde' 
+      ? 'Tarde (14h-18h)' 
+      : 'Dia Todo (9h-18h)';
+  
+  const tipoTexto = ({
+    substituicao: 'Substituição',
+    reparacao: 'Reparação',
+    entrega: 'Entrega',
+    recolha: 'Recolha',
+    cobertura_ferias: 'Cobertura de Férias',
+    substituicao_vidros: 'Substituição de Vidros',
+    outro: 'Outro',
+  }[agendamento.tipo] || agendamento.tipo);
+
+  const message = `
+📋 <b>Novo Agendamento pelo Gestor</b>
+
+Olá ${agendamento.volanteNome},
+
+O gestor <b>${agendamento.gestorNome}</b> criou um agendamento para ti:
+
+🏪 <b>Loja:</b> ${agendamento.lojaNome}
+📅 <b>Data:</b> ${dataFormatada}
+⏰ <b>Período:</b> ${periodoTexto}
+🔧 <b>Tipo:</b> ${tipoTexto}
+${agendamento.observacoes ? `📝 <b>Observações:</b> ${agendamento.observacoes}` : ''}
+
+<i>Este agendamento já está confirmado. Bom trabalho!</i>
+  `.trim();
+
+  const result = await sendTelegramMessageToMultiple(chatIds, message, 'HTML');
+  return result.success > 0;
+}

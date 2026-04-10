@@ -16,7 +16,7 @@ import { notificarGestorRelatorioAdmin } from "./notificacaoGestor";
 import { notifyOwner } from "./_core/notification";
 import { processarPergunta, getSugestoesPergunta } from "./chatbotService";
 import { vapidPublicKey, notificarGestorNovaTarefa, notificarLojaNovaTarefa, notificarGestorRespostaLoja, notificarLojaRespostaGestor } from "./pushService";
-import { notificarNovoPedidoApoio, notificarPedidoAnulado, notificarPedidoEditado, notificarAgendamentoCriado } from "./telegramService";
+import { notificarNovoPedidoApoio, notificarPedidoAnulado, notificarPedidoEditado, notificarAgendamentoCriado, notificarAgendamentoGestor } from "./telegramService";
 import { processarAnalise, ResultadoAnalise, RelatorioLoja, gerarHTMLEmailAnalise } from "./analiseFichasService";
 import { gerarPDFRelacaoRH } from "./pdfRelacaoRH";
 import { enviarLembretesRH, isDia20 } from "./lembreteRHService";
@@ -9367,7 +9367,7 @@ IMPORTANTE:
         tipo: z.enum(['substituicao', 'reparacao', 'entrega', 'recolha', 'outro']),
         observacoes: z.string().optional(),
       }))
-      .mutation(async ({ input }) => {
+      .mutation(async ({ input, ctx }) => {
         const dataStr = input.data.split('T')[0];
         const agendamento = await db.criarAgendamentoVolante({
           volanteId: input.volanteId,
@@ -9377,6 +9377,32 @@ IMPORTANTE:
           agendamento_volante_tipo: input.tipo as any,
           descricao: input.observacoes,
         });
+        
+        // Enviar notificação Telegram ao volante (informativa)
+        try {
+          const volante = await db.getVolanteById(input.volanteId);
+          const loja = await db.getLojaById(input.lojaId);
+          const gestorNome = ctx.user?.name || 'Gestor';
+          
+          if (volante?.telegramChatId && loja) {
+            await notificarAgendamentoGestor(
+              volante.telegramChatId,
+              {
+                volanteNome: volante.nome,
+                gestorNome,
+                lojaNome: loja.nome,
+                data: new Date(dataStr + 'T12:00:00Z'),
+                periodo: input.periodo,
+                tipo: input.tipo,
+                observacoes: input.observacoes,
+              }
+            );
+            console.log(`[Telegram] Notificação de agendamento enviada ao volante ${volante.nome}`);
+          }
+        } catch (err) {
+          console.error('[Telegram] Erro ao notificar volante sobre agendamento:', err);
+        }
+        
         return agendamento;
       }),
     
