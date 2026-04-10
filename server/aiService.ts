@@ -364,10 +364,13 @@ export async function gerarRelatorioComIA(
       mesesParaBuscar.push({ mes: i, ano: anoAnterior });
     }
   } else if (periodo.startsWith('meses_')) {
-    // Formato personalizado: meses_1/2026 ou meses_1/2026_2/2026
-    const partes = periodo.replace('meses_', '').split('_');
+    // Formato personalizado: meses_1/2026, 2/2026, 3/2026 (frontend) ou meses_1/2026_2/2026 (legacy)
+    const conteudo = periodo.replace('meses_', '');
+    // Suportar ambos os separadores: ', ' (frontend) e '_' (legacy)
+    const partes = conteudo.includes(', ') ? conteudo.split(', ') : conteudo.split('_');
     for (const parte of partes) {
-      const [mesStr, anoStr] = parte.split('/');
+      const trimmed = parte.trim();
+      const [mesStr, anoStr] = trimmed.split('/');
       const mes = parseInt(mesStr, 10);
       const ano = parseInt(anoStr, 10);
       if (!isNaN(mes) && !isNaN(ano) && mes >= 1 && mes <= 12) {
@@ -2475,10 +2478,15 @@ export async function gerarRelatorioIAGestor(
     }
   }
   
-  if (periodo.startsWith('meses_')) {
-    const partes = periodo.replace('meses_', '').split('_');
+  if (periodo.startsWith('meses_') && mesesParaBuscarGestor.length === 0) {
+    // O frontend envia formato: "meses_1/2026, 2/2026, 3/2026"
+    // Primeiro tentar separar por ', ' (formato do frontend)
+    const conteudo = periodo.replace('meses_', '');
+    // Suportar ambos os separadores: ', ' (frontend) e '_' (legacy)
+    const partes = conteudo.includes(', ') ? conteudo.split(', ') : conteudo.split('_');
     for (const parte of partes) {
-      const [mesStr, anoStr] = parte.split('/');
+      const trimmed = parte.trim();
+      const [mesStr, anoStr] = trimmed.split('/');
       const mes = parseInt(mesStr, 10);
       const ano = parseInt(anoStr, 10);
       if (!isNaN(mes) && !isNaN(ano)) mesesParaBuscarGestor.push({ mes, ano });
@@ -2621,13 +2629,57 @@ export async function gerarRelatorioIAGestor(
       distribuicaoDesvios: distribuicaoDesviosG,
     };
     
-    // Buscar vendas complementares
-    const primeiroMesG = mesesParaBuscarGestor[0];
-    if (primeiroMesG) {
-      const dadosAvG = await db.getDadosAnaliseAvancada(primeiroMesG.mes, primeiroMesG.ano, lojasIdsGestor);
+    // Buscar vendas complementares - AGREGAR TODOS OS MESES
+    let somaVendasComp = 0, somaEscovasQtd = 0, somaEscovasPerc = 0;
+    let lojasComVendasTotal = 0, totalLojasComp = 0, mesesCompContados = 0;
+    let somaPolimentoQtd = 0, somaTratamentoQtd = 0, somaLavagensQtd = 0;
+    let somaEscovasVal = 0, somaPolimentoVal = 0, somaTratamentoVal = 0, somaOutrosVal = 0, somaPeliculasVal = 0, somaLavagensVal = 0;
+    let somaLojasComEscovas = 0;
+    
+    for (const mesG of mesesParaBuscarGestor) {
+      const dadosAvG = await db.getDadosAnaliseAvancada(mesG.mes, mesG.ano, lojasIdsGestor);
       if (dadosAvG?.estatisticasComplementares) {
-        estatisticasComplementaresGestor = dadosAvG.estatisticasComplementares;
+        const ec = dadosAvG.estatisticasComplementares;
+        somaVendasComp += ec.somaVendas || 0;
+        somaEscovasQtd += ec.totalEscovasQtd || 0;
+        somaEscovasPerc += ec.mediaEscovasPercent || 0;
+        lojasComVendasTotal += ec.lojasComVendas || 0;
+        totalLojasComp += ec.totalLojas || 0;
+        somaPolimentoQtd += ec.totalPolimentoQtd || 0;
+        somaTratamentoQtd += ec.totalTratamentoQtd || 0;
+        somaLavagensQtd += ec.totalLavagensQtd || 0;
+        somaEscovasVal += ec.somaEscovas || 0;
+        somaPolimentoVal += ec.somaPolimento || 0;
+        somaTratamentoVal += ec.somaTratamento || 0;
+        somaOutrosVal += ec.somaOutros || 0;
+        somaPeliculasVal += ec.somaPeliculas || 0;
+        somaLavagensVal += ec.somaLavagens || 0;
+        somaLojasComEscovas += ec.lojasComEscovas || 0;
+        mesesCompContados++;
       }
+    }
+    
+    if (mesesCompContados > 0) {
+      const avgTotalLojas = Math.round(totalLojasComp / mesesCompContados);
+      estatisticasComplementaresGestor = {
+        totalLojas: avgTotalLojas,
+        lojasComVendas: Math.round(lojasComVendasTotal / mesesCompContados),
+        lojasSemVendas: avgTotalLojas - Math.round(lojasComVendasTotal / mesesCompContados),
+        somaVendas: somaVendasComp,
+        somaEscovas: somaEscovasVal,
+        somaPolimento: somaPolimentoVal,
+        somaTratamento: somaTratamentoVal,
+        somaOutros: somaOutrosVal,
+        somaPeliculas: somaPeliculasVal,
+        somaLavagens: somaLavagensVal,
+        totalEscovasQtd: somaEscovasQtd,
+        totalPolimentoQtd: somaPolimentoQtd,
+        totalTratamentoQtd: somaTratamentoQtd,
+        totalLavagensQtd: somaLavagensQtd,
+        mediaEscovasPercent: somaEscovasPerc / mesesCompContados,
+        lojasComEscovas: Math.round(somaLojasComEscovas / mesesCompContados),
+        percentLojasComEscovas: avgTotalLojas ? (Math.round(somaLojasComEscovas / mesesCompContados) / avgTotalLojas) * 100 : 0,
+      };
     }
   } catch (error) {
     console.log('[gerarRelatorioIAGestor] Erro ao buscar dados de resultados:', error);

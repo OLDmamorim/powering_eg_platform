@@ -1532,3 +1532,13 @@
 - [x] Volantes: permitir cancelar agendamentos próprios (já existia)
 - [x] Volante: adicionar botão Anular diretamente no diálogo Atividades do Dia (sem precisar de ir a Editar primeiro)
 - [x] Bug: Volante não deve poder apagar/editar agendamentos criados pelo gestor
+
+## Bug: Relatório de Resultados não agrega dados corretamente para múltiplos meses
+- [x] Investigar lógica de agregação multi-mês no backend (serviços, objetivos, NPS)
+- [x] Corrigir parsing do período: frontend envia "meses_1/2026, 2/2026, 3/2026" mas backend separava por '_' em vez de ', '
+- [x] Corrigir para mostrar acumulado dos 3 meses quando trimestre selecionado (fix em gerarRelatorioIAGestor e gerarRelatorioComIA)
+- [x] Corrigir NPS: problema era parsing do período (só lia 1 mês), agora lê todos os meses correctamente
+- [x] Corrigir vendas complementares: agora agrega todos os meses em vez de só o primeiro
+- [x] Corrigir resumo geral IA: com dados correctos de todos os meses, a IA gera resumo completo
+- [x] Testes unitários para parsing do período e cálculo NPS
+- [ ] Guardar checkpoint
