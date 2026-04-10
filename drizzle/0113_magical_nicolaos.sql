@@ -1,0 +1,1 @@
+ALTER TABLE `agendamentos_volante` ADD `criadoPor` enum('volante','gestor') DEFAULT 'volante' NOT NULL;

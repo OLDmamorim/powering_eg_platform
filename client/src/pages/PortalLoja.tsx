@@ -10022,7 +10022,12 @@ END:VCALENDAR`;
                         <span className="ml-1 text-gray-700">{agendamento.descricao}</span>
                       </div>
                     )}
-                    {/* Botões de editar e apagar */}
+                    {/* Botões de editar e apagar - só para agendamentos criados pelo volante */}
+                    {agendamento.criadoPor === 'gestor' ? (
+                      <div className="mt-3 text-xs text-gray-500 italic">
+                        {language === 'pt' ? 'Agendamento criado pelo gestor (não editável)' : 'Appointment created by manager (not editable)'}
+                      </div>
+                    ) : (
                     <div className="mt-3 flex gap-2">
                       <Button
                         size="sm"
@@ -10062,6 +10067,7 @@ END:VCALENDAR`;
                         {language === 'pt' ? 'Apagar' : 'Delete'}
                       </Button>
                     </div>
+                    )}
                   </div>
                 ))}
               </>

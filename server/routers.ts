@@ -9433,6 +9433,7 @@ IMPORTANTE:
           agendamento_volante_periodo: input.periodo,
           agendamento_volante_tipo: input.tipo as any,
           descricao: input.observacoes,
+          criadoPor: 'gestor',
         });
         
         // Enviar notificação Telegram ao volante (informativa)
@@ -10130,6 +10131,7 @@ IMPORTANTE:
           agendamento_volante_tipo: input.tipoApoio,
           titulo: input.titulo,
           descricao: input.descricao,
+          criadoPor: 'volante',
         });
         
         // Enviar notificação Telegram para o próprio volante (confirmação do agendamento)
@@ -10208,6 +10210,11 @@ IMPORTANTE:
           throw new TRPCError({ code: 'NOT_FOUND', message: 'Agendamento não encontrado' });
         }
         
+        // Não permitir editar agendamentos criados pelo gestor
+        if (agendamentoExistente.criadoPor === 'gestor') {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Não pode editar agendamentos criados pelo gestor' });
+        }
+        
         // Se for para uma loja, verificar se o volante tem acesso
         if (input.lojaId !== undefined && input.lojaId !== null) {
           const lojas = await db.getLojasByVolanteId(volanteId);
@@ -10239,6 +10246,12 @@ IMPORTANTE:
         const tokenData = await db.validateTokenVolante(input.token);
         if (!tokenData) {
           throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        
+        // Verificar se o agendamento foi criado pelo volante (não pelo gestor)
+        const agendamento = await db.getAgendamentoVolanteById(input.agendamentoId);
+        if (agendamento && agendamento.criadoPor === 'gestor') {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Não pode eliminar agendamentos criados pelo gestor' });
         }
         
         await db.eliminarAgendamentoVolante(input.agendamentoId, tokenData.volante.id);

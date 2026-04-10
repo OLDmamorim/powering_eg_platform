@@ -1128,6 +1128,9 @@ export const agendamentosVolante = mysqlTable("agendamentos_volante", {
   titulo: varchar("titulo", { length: 255 }), // Título do agendamento (se for pessoal)
   descricao: text("descricao"), // Descrição/observações
   
+  // Quem criou o agendamento
+  criadoPor: mysqlEnum("criadoPor", ['volante', 'gestor']).default('volante').notNull(),
+  
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

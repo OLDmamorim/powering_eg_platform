@@ -1531,3 +1531,4 @@
 - [x] Bug: Restaurar botão Agendamento Próprio no calendário do volante
 - [x] Volantes: permitir cancelar agendamentos próprios (já existia)
 - [x] Volante: adicionar botão Anular diretamente no diálogo Atividades do Dia (sem precisar de ir a Editar primeiro)
+- [x] Bug: Volante não deve poder apagar/editar agendamentos criados pelo gestor
