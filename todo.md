@@ -1528,3 +1528,4 @@
 - [x] Mudar abreviaturas M/T/DT para Manhã/Tarde/Dia Todo no calendário da loja
 - [x] Calendário loja: dividir dia em duas metades (manhã/tarde) com cores independentes
 - [x] Fix visual: adicionar bordo às células divididas manhã/tarde no calendário da loja
+- [x] Bug: Restaurar botão Agendamento Próprio no calendário do volante

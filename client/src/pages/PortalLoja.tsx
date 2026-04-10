@@ -128,6 +128,7 @@ import {
   CheckCircle,
   Boxes,
   Search,
+  CalendarPlus,
 } from "lucide-react";
 
 interface LojaAuth {
@@ -7854,6 +7855,18 @@ END:VCALENDAR`;
                   >
                     <Ban className="h-4 w-4 mr-1" />
                     {language === 'pt' ? 'Bloquear Dia' : 'Block Day'}
+                  </Button>
+
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="border-teal-500 text-teal-700"
+                    onClick={() => {
+                      setCriarAgendamentoOpen(true);
+                    }}
+                  >
+                    <CalendarPlus className="h-4 w-4 mr-1" />
+                    {language === 'pt' ? 'Agendamento Próprio' : 'Own Appointment'}
                   </Button>
                 </div>
                 {/* Legenda */}
