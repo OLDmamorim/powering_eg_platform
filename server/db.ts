@@ -8586,7 +8586,7 @@ export async function getAllVolantes(): Promise<Volante[]> {
 /**
  * Atualizar volante
  */
-export async function updateVolante(id: number, data: { nome?: string; email?: string; telefone?: string; ativo?: boolean; telegramChatId?: string | null }): Promise<Volante | null> {
+export async function updateVolante(id: number, data: { nome?: string; email?: string; telefone?: string; ativo?: boolean; telegramChatId?: string | null; portalUrl?: string | null }): Promise<Volante | null> {
   const db = await getDb();
   if (!db) return null;
   

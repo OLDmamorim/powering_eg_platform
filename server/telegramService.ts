@@ -657,6 +657,7 @@ export async function notificarAgendamentoGestor(
     periodo: 'manha' | 'tarde' | 'dia_todo';
     tipo: string;
     observacoes?: string;
+    portalUrl?: string;
   }
 ): Promise<boolean> {
   const dataFormatada = new Date(agendamento.data).toLocaleDateString('pt-PT', {
@@ -696,6 +697,8 @@ O gestor <b>${agendamento.gestorNome}</b> criou um agendamento para ti:
 ${agendamento.observacoes ? `📝 <b>Observações:</b> ${agendamento.observacoes}` : ''}
 
 <i>Este agendamento já está confirmado. Bom trabalho!</i>
+${agendamento.portalUrl ? `
+🔗 <a href="${agendamento.portalUrl}">Abrir Portal</a>` : ''}
   `.trim();
 
   const result = await sendTelegramMessageToMultiple(chatIds, message, 'HTML');

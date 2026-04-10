@@ -9018,6 +9018,7 @@ IMPORTANTE:
         telefone: z.string().optional().nullable(),
         ativo: z.boolean().optional(),
         telegramChatId: z.string().optional().nullable(),
+        portalUrl: z.string().optional().nullable(),
       }))
       .mutation(async ({ ctx, input }) => {
         // Verificar se o volante pertence ao gestor
@@ -9032,6 +9033,7 @@ IMPORTANTE:
           telefone: input.telefone ?? undefined,
           ativo: input.ativo,
           telegramChatId: input.telegramChatId !== undefined ? (input.telegramChatId ?? null) : undefined,
+          portalUrl: input.portalUrl !== undefined ? (input.portalUrl ?? null) : undefined,
         });
         
         return updated;
@@ -9395,6 +9397,7 @@ IMPORTANTE:
                 periodo: input.periodo,
                 tipo: input.tipo,
                 observacoes: input.observacoes,
+                portalUrl: volante.portalUrl || undefined,
               }
             );
             console.log(`[Telegram] Notificação de agendamento enviada ao volante ${volante.nome}`);
@@ -9521,10 +9524,13 @@ IMPORTANTE:
         // Enviar notificação Telegram ao volante (se configurado)
         if (volante.telegramChatId) {
           try {
-            // Obter token do volante para o link do portal
-            const tokenVolante = await db.getOrCreateTokenVolante(volante.id);
-            const baseUrl = process.env.VITE_APP_URL || 'https://poweringeg-3c9mozlh.manus.space';
-            const portalUrl = tokenVolante ? `${baseUrl}/portal-volante?token=${tokenVolante.token}` : baseUrl;
+            // Usar link personalizado do volante se configurado, senão gerar com token
+            let portalUrl = volante.portalUrl;
+            if (!portalUrl) {
+              const tokenVolante = await db.getOrCreateTokenVolante(volante.id);
+              const baseUrl = process.env.VITE_APP_URL || 'https://poweringeg-3c9mozlh.manus.space';
+              portalUrl = tokenVolante ? `${baseUrl}/portal-volante?token=${tokenVolante.token}` : baseUrl;
+            }
             
             await notificarNovoPedidoApoio(volante.telegramChatId, {
               lojaNome: tokenData.loja.nome,
@@ -9898,9 +9904,12 @@ IMPORTANTE:
               // Notificar o novo volante por Telegram
               if (outroVolante.telegramChatId) {
                 try {
-                  const tokenVolante = await db.getOrCreateTokenVolante(outroVolante.id);
-                  const baseUrl = process.env.VITE_APP_URL || 'https://poweringeg-3c9mozlh.manus.space';
-                  const portalUrl = tokenVolante ? `${baseUrl}/portal-volante?token=${tokenVolante.token}` : baseUrl;
+                  let portalUrl = outroVolante.portalUrl;
+                  if (!portalUrl) {
+                    const tokenVolante = await db.getOrCreateTokenVolante(outroVolante.id);
+                    const baseUrl = process.env.VITE_APP_URL || 'https://poweringeg-3c9mozlh.manus.space';
+                    portalUrl = tokenVolante ? `${baseUrl}/portal-volante?token=${tokenVolante.token}` : baseUrl;
+                  }
                   
                   await notificarNovoPedidoApoio(outroVolante.telegramChatId, {
                     lojaNome: `${loja?.nome || 'Loja'} (Redireccionado)`,

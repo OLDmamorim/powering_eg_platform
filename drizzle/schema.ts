@@ -973,6 +973,7 @@ export const volantes = mysqlTable("volantes", {
   subZonaPreferencial: varchar("subZonaPreferencial", { length: 100 }), // Sub-zona preferencial do volante (ex: "Minho Norte", "Vale do Sousa")
   telegramChatId: varchar("telegramChatId", { length: 100 }), // Chat ID do Telegram para notificações
   telegramUsername: varchar("telegramUsername", { length: 100 }), // Username do Telegram (opcional)
+  portalUrl: varchar("portalUrl", { length: 500 }), // Link personalizado do portal do volante (enviado nas notificações Telegram)
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

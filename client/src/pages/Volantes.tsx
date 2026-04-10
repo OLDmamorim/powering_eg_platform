@@ -40,6 +40,7 @@ export default function Volantes() {
   const [email, setEmail] = useState("");
   const [telefone, setTelefone] = useState("");
   const [telegramChatId, setTelegramChatId] = useState("");
+  const [portalUrl, setPortalUrl] = useState("");
   
   // Queries
   const { data: volantes, isLoading, refetch } = trpc.volantes.listar.useQuery();
@@ -127,6 +128,7 @@ export default function Volantes() {
     setEmail("");
     setTelefone("");
     setTelegramChatId("");
+    setPortalUrl("");
   };
   
   const handleOpenDialog = (volante?: any) => {
@@ -136,6 +138,7 @@ export default function Volantes() {
       setEmail(volante.email || "");
       setTelefone(volante.telefone || "");
       setTelegramChatId(volante.telegramChatId || "");
+      setPortalUrl(volante.portalUrl || "");
     } else {
       setEditingVolante(null);
       resetForm();
@@ -151,6 +154,7 @@ export default function Volantes() {
         email: email || null,
         telefone: telefone || null,
         telegramChatId: telegramChatId || null,
+        portalUrl: portalUrl || null,
       });
     } else {
       criarVolante.mutate({
@@ -264,6 +268,17 @@ export default function Volantes() {
                     placeholder="Ex: 123456789"
                   />
                   <p className="text-xs text-muted-foreground">ID do chat Telegram para receber notificações</p>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="portalUrl">Link do Portal</Label>
+                  <Input
+                    id="portalUrl"
+                    value={portalUrl}
+                    onChange={(e) => setPortalUrl(e.target.value)}
+                    placeholder="https://..."
+                  />
+                  <p className="text-xs text-muted-foreground">Link personalizado enviado nas notificações Telegram</p>
                 </div>
               </div>
               

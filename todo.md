@@ -1521,3 +1521,4 @@
 - [x] Bug: Calendário da loja não mostra pedidos aprovados (dia branco quando deveria ter cor)
 - [x] Adicionar legenda com texto de status nos dias do calendário da loja (Livre, Ocupado Manhã, etc.)
 - [x] Notificação Telegram ao volante quando gestor cria agendamento direto (informativa, sem aceitar)
+- [x] Adicionar campo 'Link do Portal' na configuração do volante e usar nas notificações Telegram

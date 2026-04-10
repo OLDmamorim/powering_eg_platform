@@ -1,0 +1,1 @@
+ALTER TABLE `volantes` ADD `portalUrl` varchar(500);
