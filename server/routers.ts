@@ -9493,6 +9493,177 @@ IMPORTANTE:
         const lojasAtribuidas = await db.getLojasByVolanteId(input.volanteId);
         return lojasAtribuidas;
       }),
+    
+    // ==================== DASHBOARD VOLANTES (GESTOR) ====================
+    dashboardGestor: gestorProcedure
+      .input(z.object({
+        mesesSelecionados: z.array(z.string()).optional(), // formato "YYYY-MM"
+      }).optional())
+      .query(async ({ ctx, input }) => {
+        // Obter volantes do gestor (admin vê todos)
+        let volantesAtivos: Awaited<ReturnType<typeof db.getVolantesByGestorId>>;
+        if (ctx.user.role === 'admin') {
+          volantesAtivos = (await db.getAllVolantes()).filter(v => v.ativo);
+        } else {
+          if (!ctx.gestor) throw new TRPCError({ code: 'FORBIDDEN', message: 'Sem permissão' });
+          volantesAtivos = (await db.getVolantesByGestorId(ctx.gestor.id)).filter(v => v.ativo);
+        }
+        
+        if (volantesAtivos.length === 0) {
+          return {
+            totalVolantes: 0,
+            kpis: { totalServicos: 0, totalSubstituicoes: 0, totalReparacoes: 0, totalCalibragens: 0, totalOutros: 0, diasTrabalhados: 0, mediaPorDia: 0, mediaInfluencia: 0 },
+            porVolante: [],
+            pedidosApoio: { total: 0, aprovados: 0, pendentes: 0, reprovados: 0 },
+            topLojas: [],
+            influenciaPorLoja: [] as { lojaId: number; lojaNome: string; servicosVolante: number; totalServicosLoja: number; percentagemInfluencia: number }[],
+            evolucaoMensal: [],
+          };
+        }
+        
+        const mesesSel = input?.mesesSelecionados;
+        
+        // Estatísticas por volante
+        const porVolantePromises = volantesAtivos.map(async (v) => {
+          const stats = await db.getEstatisticasServicos(v.id, mesesSel);
+          const lojas = await db.getLojasByVolanteId(v.id);
+          return {
+            volanteId: v.id,
+            nome: v.nome,
+            email: v.email,
+            telefone: v.telefone,
+            subZona: v.subZonaPreferencial,
+            totalLojas: lojas.length,
+            totalServicos: stats?.totalServicos || 0,
+            substituicoes: stats?.substituicoes || 0,
+            reparacoes: stats?.reparacoes || 0,
+            calibragens: stats?.calibragens || 0,
+            outros: stats?.outros || 0,
+            diasTrabalhados: stats?.diasTrabalhados || 0,
+            mediaPorDia: stats?.mediaPorDia ? parseFloat(stats.mediaPorDia.toFixed(1)) : 0,
+          };
+        });
+        const porVolante = await Promise.all(porVolantePromises);
+        
+        // KPIs agregados
+        const kpis = {
+          totalServicos: porVolante.reduce((s, v) => s + v.totalServicos, 0),
+          totalSubstituicoes: porVolante.reduce((s, v) => s + v.substituicoes, 0),
+          totalReparacoes: porVolante.reduce((s, v) => s + v.reparacoes, 0),
+          totalCalibragens: porVolante.reduce((s, v) => s + v.calibragens, 0),
+          totalOutros: porVolante.reduce((s, v) => s + v.outros, 0),
+          diasTrabalhados: porVolante.reduce((s, v) => s + v.diasTrabalhados, 0),
+          mediaPorDia: porVolante.length > 0 
+            ? parseFloat((porVolante.reduce((s, v) => s + v.totalServicos, 0) / Math.max(1, porVolante.reduce((s, v) => s + v.diasTrabalhados, 0))).toFixed(1))
+            : 0,
+        };
+        
+        // Pedidos de apoio agregados
+        let pedidosTotal = 0, pedidosAprovados = 0, pedidosPendentes = 0, pedidosReprovados = 0;
+        for (const v of volantesAtivos) {
+          const pedidos = await db.getPedidosApoioByVolanteId(v.id);
+          // getPedidosApoioByVolanteId already excludes reprovado/anulado/cancelado
+          // We need to count all states, so query raw
+          const allPedidos = await db.getAllPedidosApoioByVolanteId(v.id, mesesSel);
+          pedidosTotal += allPedidos.length;
+          pedidosAprovados += allPedidos.filter(p => p.estado === 'aprovado').length;
+          pedidosPendentes += allPedidos.filter(p => p.estado === 'pendente').length;
+          pedidosReprovados += allPedidos.filter(p => p.estado === 'reprovado').length;
+        }
+        
+        // Top lojas com mais serviços (agregado de todos os volantes)
+        const lojaServicosMap = new Map<number, { lojaId: number; lojaNome: string; total: number }>(); 
+        for (const v of volantesAtivos) {
+          const topLojas = await db.getTopLojasServicos(v.id, 100, mesesSel);
+          for (const l of topLojas) {
+            const existing = lojaServicosMap.get(l.lojaId);
+            if (existing) {
+              existing.total += l.totalServicos;
+            } else {
+              lojaServicosMap.set(l.lojaId, { lojaId: l.lojaId, lojaNome: l.lojaNome, total: l.totalServicos });
+            }
+          }
+        }
+        
+        // Calcular percentagem de influência do volante nos resultados da loja
+        // Para cada loja: (serviços do volante / total serviços da loja no período) * 100
+        const influenciaPorLoja: { lojaId: number; lojaNome: string; servicosVolante: number; totalServicosLoja: number; percentagemInfluencia: number }[] = [];
+        let totalInfluencia = 0;
+        let lojasComDados = 0;
+        
+        // Parse meses selecionados para consultar resultadosMensais
+        const mesesParsed = mesesSel?.map(m => {
+          const [ano, mesNum] = m.split('-');
+          return { mes: parseInt(mesNum), ano: parseInt(ano) };
+        }) || [{ mes: new Date().getMonth() + 1, ano: new Date().getFullYear() }];
+        
+        for (const [lojaId, lojaData] of lojaServicosMap) {
+          if (!lojaId) continue; // Skip null lojaId (serviços sem loja)
+          
+          // Somar total de serviços da loja nos meses selecionados (dos resultadosMensais)
+          let totalServicosLoja = 0;
+          for (const mp of mesesParsed) {
+            const resultado = await db.getResultadosMensaisPorLoja(lojaId, mp.mes, mp.ano);
+            if (resultado?.totalServicos) {
+              totalServicosLoja += resultado.totalServicos;
+            }
+          }
+          
+          const percentagem = totalServicosLoja > 0 
+            ? parseFloat(((lojaData.total / totalServicosLoja) * 100).toFixed(1))
+            : 0;
+          
+          influenciaPorLoja.push({
+            lojaId,
+            lojaNome: lojaData.lojaNome,
+            servicosVolante: lojaData.total,
+            totalServicosLoja,
+            percentagemInfluencia: percentagem,
+          });
+          
+          if (totalServicosLoja > 0) {
+            totalInfluencia += percentagem;
+            lojasComDados++;
+          }
+        }
+        
+        influenciaPorLoja.sort((a, b) => b.percentagemInfluencia - a.percentagemInfluencia);
+        const mediaInfluencia = lojasComDados > 0 ? parseFloat((totalInfluencia / lojasComDados).toFixed(1)) : 0;
+        
+        const topLojas = Array.from(lojaServicosMap.values()).sort((a, b) => b.total - a.total).slice(0, 10);
+        
+        // Evolução mensal (últimos 6 meses)
+        const evolucaoMensal: { mes: string; totalServicos: number; substituicoes: number; reparacoes: number; calibragens: number }[] = [];
+        const agora = new Date();
+        for (let i = 5; i >= 0; i--) {
+          const d = new Date(agora.getFullYear(), agora.getMonth() - i, 1);
+          const mesKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+          const mesesNomes = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+          const label = `${mesesNomes[d.getMonth()]} ${d.getFullYear()}`;
+          
+          let totalMes = 0, subMes = 0, repMes = 0, calMes = 0;
+          for (const v of volantesAtivos) {
+            const stats = await db.getEstatisticasServicos(v.id, [mesKey]);
+            if (stats) {
+              totalMes += stats.totalServicos;
+              subMes += stats.substituicoes;
+              repMes += stats.reparacoes;
+              calMes += stats.calibragens;
+            }
+          }
+          evolucaoMensal.push({ mes: label, totalServicos: totalMes, substituicoes: subMes, reparacoes: repMes, calibragens: calMes });
+        }
+        
+        return {
+          totalVolantes: volantesAtivos.length,
+          kpis: { ...kpis, mediaInfluencia },
+          porVolante: porVolante.sort((a, b) => b.totalServicos - a.totalServicos),
+          pedidosApoio: { total: pedidosTotal, aprovados: pedidosAprovados, pendentes: pedidosPendentes, reprovados: pedidosReprovados },
+          topLojas,
+          influenciaPorLoja,
+          evolucaoMensal,
+        };
+      }),
   }),
   
   // ==================== PEDIDOS DE APOIO (VOLANTES) ====================

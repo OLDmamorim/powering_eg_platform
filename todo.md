@@ -1549,3 +1549,13 @@
 - [x] Garantir que os valores NPS são idênticos nos dois locais (ambos usam média + regra OU)
 - [x] Testes unitários para NPS multi-month averaging
 - [ ] Testar com trimestre Jan+Fev+Mar 2026
+
+## Feature: Dashboard de Volantes (Gestor)
+- [x] Investigar modelo de dados dos volantes existente
+- [x] Criar procedures backend para estatísticas dos volantes (dashboardGestor)
+- [x] Criar função getAllPedidosApoioByVolanteId no db.ts
+- [x] Criar página DashboardVolantesGestor.tsx com KPIs, tabela, gráficos
+- [x] Adicionar KPI de percentagem de influência do volante nos resultados da loja
+- [x] Integrar no menu/navegação (App.tsx + DashboardLayout.tsx)
+- [x] Testes unitários (9 testes passam)
+- [ ] Guardar checkpoint

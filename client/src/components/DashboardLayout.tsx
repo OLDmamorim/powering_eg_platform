@@ -99,6 +99,7 @@ const getMenuGroups = (userRole?: string, t?: (key: string) => string): MenuGrou
         { icon: Building2, label: tr('menu.items.minhasLojas', 'Minhas Lojas'), path: "/minhas-lojas", show: isGestor, showBadge: false },
         { icon: Link2, label: tr('menu.items.relacoesLojas', 'Relações Lojas'), path: "/relacoes-lojas", show: isGestor || isAdmin, showBadge: false },
         { icon: Car, label: tr('menu.items.volantes', 'Volantes'), path: "/volantes", show: isGestor || isAdmin, showBadge: false },
+        { icon: BarChart3, label: 'Dashboard Volantes', path: "/dashboard-volantes", show: isGestor || isAdmin, showBadge: false },
         { icon: CalendarDays, label: 'Calendário Volantes', path: "/calendario-volantes", show: isGestor || isAdmin, showBadge: false },
         { icon: Route, label: 'Log Atribuições', path: "/log-atribuicoes", show: isGestor || isAdmin, showBadge: false },
         { icon: Settings, label: 'Recalibra', path: "/gestao-recalibra", show: isGestor || isAdmin, showBadge: false },

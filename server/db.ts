@@ -14421,3 +14421,30 @@ export async function atualizarTituloSessao(sessaoId: number, titulo: string): P
     .set({ titulo: titulo.substring(0, 500) })
     .where(eq(chatbotSessoes.id, sessaoId));
 }
+
+
+// ==================== DASHBOARD VOLANTES (GESTOR) ====================
+
+/**
+ * Obter todos os pedidos de apoio de um volante (sem filtro de estado),
+ * opcionalmente filtrado por meses selecionados
+ */
+export async function getAllPedidosApoioByVolanteId(volanteId: number, mesesSelecionados?: string[]): Promise<PedidoApoio[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const conditions = [eq(pedidosApoio.volanteId, volanteId)];
+  
+  if (mesesSelecionados && mesesSelecionados.length > 0) {
+    const mesesConditions = mesesSelecionados.map(mes => {
+      const [ano, mesNum] = mes.split('-');
+      return sql`YEAR(${pedidosApoio.data}) = ${ano} AND MONTH(${pedidosApoio.data}) = ${mesNum}`;
+    });
+    conditions.push(or(...mesesConditions)!);
+  }
+  
+  return await db.select()
+    .from(pedidosApoio)
+    .where(and(...conditions))
+    .orderBy(desc(pedidosApoio.data));
+}
