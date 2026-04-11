@@ -1558,4 +1558,12 @@
 - [x] Adicionar KPI de percentagem de influência do volante nos resultados da loja
 - [x] Integrar no menu/navegação (App.tsx + DashboardLayout.tsx)
 - [x] Testes unitários (9 testes passam)
+- [x] Guardar checkpoint
+
+## Feature: Filtros por Volante e Loja no Dashboard Volantes
+- [x] Adicionar dropdown filtro por volante (Todos / volante individual)
+- [x] Adicionar dropdown filtro por loja (Todas / loja individual)
+- [x] Atualizar backend para aceitar filtros de volante e loja (volanteId, lojaId)
+- [x] Botão "Limpar filtros" quando filtros ativos
+- [x] Testes passam (9/9)
 - [ ] Guardar checkpoint

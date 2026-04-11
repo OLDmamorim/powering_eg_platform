@@ -3,6 +3,7 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import FiltroMesesCheckbox, { MesSelecionado } from "@/components/FiltroMesesCheckbox";
 import { 
   Car, 
@@ -21,6 +22,7 @@ import {
   ArrowUpDown,
   ChevronDown,
   ChevronUp,
+  Filter,
 } from "lucide-react";
 import { Line, Bar, Doughnut } from "react-chartjs-2";
 import {
@@ -55,6 +57,8 @@ export default function DashboardVolantesGestor() {
     const agora = new Date();
     return [{ mes: agora.getMonth() + 1, ano: agora.getFullYear() }];
   });
+  const [selectedVolanteId, setSelectedVolanteId] = useState<string>("todos");
+  const [selectedLojaId, setSelectedLojaId] = useState<string>("todas");
   const [sortField, setSortField] = useState<string>("totalServicos");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const [expandedVolante, setExpandedVolante] = useState<number | null>(null);
@@ -65,8 +69,16 @@ export default function DashboardVolantesGestor() {
     return mesesSelecionados.map(m => `${m.ano}-${String(m.mes).padStart(2, '0')}`);
   }, [mesesSelecionados]);
 
+  const queryInput = useMemo(() => {
+    const input: { mesesSelecionados?: string[]; volanteId?: number; lojaId?: number } = {};
+    if (mesesParam) input.mesesSelecionados = mesesParam;
+    if (selectedVolanteId !== "todos") input.volanteId = parseInt(selectedVolanteId);
+    if (selectedLojaId !== "todas") input.lojaId = parseInt(selectedLojaId);
+    return Object.keys(input).length > 0 ? input : undefined;
+  }, [mesesParam, selectedVolanteId, selectedLojaId]);
+
   const { data, isLoading } = trpc.volantes.dashboardGestor.useQuery(
-    mesesParam ? { mesesSelecionados: mesesParam } : undefined,
+    queryInput,
     { enabled: true }
   );
 
@@ -264,27 +276,86 @@ export default function DashboardVolantesGestor() {
     </th>
   );
 
+  // Active filters indicator
+  const activeFilters = [
+    selectedVolanteId !== "todos" ? "Volante" : null,
+    selectedLojaId !== "todas" ? "Loja" : null,
+  ].filter(Boolean);
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-              <BarChart3 className="h-7 w-7 text-emerald-600" />
-              Dashboard Volantes
-            </h1>
-            <p className="text-gray-500 dark:text-gray-400 mt-1">
-              Estatísticas e atividade dos volantes
-            </p>
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                <BarChart3 className="h-7 w-7 text-emerald-600" />
+                Dashboard Volantes
+              </h1>
+              <p className="text-gray-500 dark:text-gray-400 mt-1">
+                Estatísticas e atividade dos volantes
+              </p>
+            </div>
           </div>
-          <div className="w-full sm:w-auto">
-            <FiltroMesesCheckbox
-              mesesSelecionados={mesesSelecionados}
-              onMesesChange={setMesesSelecionados}
-              maxMeses={6}
-              placeholder="Filtrar por meses"
-            />
+
+          {/* Filtros */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-end gap-3 flex-wrap">
+            <div className="w-full sm:w-auto">
+              <label className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 block">Período</label>
+              <FiltroMesesCheckbox
+                mesesSelecionados={mesesSelecionados}
+                onMesesChange={setMesesSelecionados}
+                maxMeses={6}
+                placeholder="Filtrar por meses"
+              />
+            </div>
+
+            <div className="w-full sm:w-52">
+              <label className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 block">
+                <Car className="h-3 w-3 inline mr-1" />
+                Volante
+              </label>
+              <Select value={selectedVolanteId} onValueChange={setSelectedVolanteId}>
+                <SelectTrigger className="h-9">
+                  <SelectValue placeholder="Todos os volantes" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todos">Todos os volantes</SelectItem>
+                  {data?.todosVolantes?.sort((a, b) => a.nome.localeCompare(b.nome)).map(v => (
+                    <SelectItem key={v.id} value={String(v.id)}>{v.nome}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="w-full sm:w-52">
+              <label className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 block">
+                <Building2 className="h-3 w-3 inline mr-1" />
+                Loja
+              </label>
+              <Select value={selectedLojaId} onValueChange={setSelectedLojaId}>
+                <SelectTrigger className="h-9">
+                  <SelectValue placeholder="Todas as lojas" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todas">Todas as lojas</SelectItem>
+                  {data?.todasLojas?.map(l => (
+                    <SelectItem key={l.id} value={String(l.id)}>{l.nome}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {activeFilters.length > 0 && (
+              <button
+                onClick={() => { setSelectedVolanteId("todos"); setSelectedLojaId("todas"); }}
+                className="text-xs text-rose-600 hover:text-rose-700 dark:text-rose-400 dark:hover:text-rose-300 flex items-center gap-1 pb-2"
+              >
+                <XCircle className="h-3 w-3" />
+                Limpar filtros ({activeFilters.join(", ")})
+              </button>
+            )}
           </div>
         </div>
 
@@ -293,7 +364,7 @@ export default function DashboardVolantesGestor() {
             <Activity className="h-8 w-8 animate-spin text-emerald-500" />
             <span className="ml-3 text-gray-500">A carregar estatísticas...</span>
           </div>
-        ) : !data || data.totalVolantes === 0 ? (
+        ) : !data || (data.totalVolantes === 0 && !data.todosVolantes?.length) ? (
           <Card>
             <CardContent className="py-12 text-center">
               <Car className="h-12 w-12 mx-auto mb-4 text-gray-300" />
@@ -548,18 +619,9 @@ export default function DashboardVolantesGestor() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-2 gap-4 mb-4">
-                    <div className="flex items-center gap-2 p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50">
-                      <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                        <Activity className="h-4 w-4 text-blue-600" />
-                      </div>
-                      <div>
-                        <div className="text-xs text-gray-500">Total</div>
-                        <div className="text-lg font-bold text-gray-900 dark:text-white">{data.pedidosApoio.total}</div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50">
-                      <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                  <div className="grid grid-cols-2 gap-3 mb-4">
+                    <div className="flex items-center gap-2 p-2 rounded-lg bg-green-50 dark:bg-green-950/20">
+                      <div className="p-1.5 rounded-full bg-green-100 dark:bg-green-900/30">
                         <CheckCircle className="h-4 w-4 text-green-600" />
                       </div>
                       <div>
@@ -567,8 +629,8 @@ export default function DashboardVolantesGestor() {
                         <div className="text-lg font-bold text-green-600">{data.pedidosApoio.aprovados}</div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50">
-                      <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+                    <div className="flex items-center gap-2 p-2 rounded-lg bg-amber-50 dark:bg-amber-950/20">
+                      <div className="p-1.5 rounded-full bg-amber-100 dark:bg-amber-900/30">
                         <Clock className="h-4 w-4 text-amber-600" />
                       </div>
                       <div>
@@ -576,13 +638,22 @@ export default function DashboardVolantesGestor() {
                         <div className="text-lg font-bold text-amber-600">{data.pedidosApoio.pendentes}</div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50">
-                      <div className="w-8 h-8 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                    <div className="flex items-center gap-2 p-2 rounded-lg bg-red-50 dark:bg-red-950/20">
+                      <div className="p-1.5 rounded-full bg-red-100 dark:bg-red-900/30">
                         <XCircle className="h-4 w-4 text-red-600" />
                       </div>
                       <div>
                         <div className="text-xs text-gray-500">Reprovados</div>
                         <div className="text-lg font-bold text-red-600">{data.pedidosApoio.reprovados}</div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 p-2 rounded-lg bg-gray-50 dark:bg-gray-800/50">
+                      <div className="p-1.5 rounded-full bg-gray-100 dark:bg-gray-700/30">
+                        <Activity className="h-4 w-4 text-gray-600" />
+                      </div>
+                      <div>
+                        <div className="text-xs text-gray-500">Total</div>
+                        <div className="text-lg font-bold text-gray-700 dark:text-gray-300">{data.pedidosApoio.total}</div>
                       </div>
                     </div>
                   </div>
