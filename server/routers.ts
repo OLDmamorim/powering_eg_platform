@@ -9706,6 +9706,150 @@ IMPORTANTE:
           todasLojas,
         };
       }),
+    
+    // Exportar Dashboard Volantes para PDF
+    exportarDashboardPDF: gestorProcedure
+      .input(z.object({
+        mesesSelecionados: z.array(z.string()).optional(),
+        volanteId: z.number().optional(),
+        lojaId: z.number().optional(),
+      }).optional())
+      .mutation(async ({ ctx, input }) => {
+        // Reutilizar a mesma lógica do dashboardGestor para obter os dados
+        let volantesAtivos: Awaited<ReturnType<typeof db.getVolantesByGestorId>>;
+        if (ctx.user.role === 'admin') {
+          volantesAtivos = (await db.getAllVolantes()).filter(v => v.ativo);
+        } else {
+          if (!ctx.gestor) throw new TRPCError({ code: 'FORBIDDEN', message: 'Sem permiss\u00e3o' });
+          volantesAtivos = (await db.getVolantesByGestorId(ctx.gestor.id)).filter(v => v.ativo);
+        }
+        
+        let filtroVolante: string | undefined;
+        let filtroLoja: string | undefined;
+        
+        if (input?.volanteId) {
+          const vol = volantesAtivos.find(v => v.id === input.volanteId);
+          filtroVolante = vol?.nome;
+          volantesAtivos = volantesAtivos.filter(v => v.id === input.volanteId);
+        }
+        
+        const mesesSel = input?.mesesSelecionados;
+        
+        // Calcular dados (mesma l\u00f3gica do dashboardGestor)
+        const porVolantePromises = volantesAtivos.map(async (v) => {
+          const stats = await db.getEstatisticasServicos(v.id, mesesSel);
+          const lojas = await db.getLojasByVolanteId(v.id);
+          return {
+            volanteId: v.id,
+            nome: v.nome,
+            subZona: v.subZonaPreferencial,
+            totalLojas: lojas.length,
+            totalServicos: stats?.totalServicos || 0,
+            substituicoes: stats?.substituicoes || 0,
+            reparacoes: stats?.reparacoes || 0,
+            calibragens: stats?.calibragens || 0,
+            outros: stats?.outros || 0,
+            diasTrabalhados: stats?.diasTrabalhados || 0,
+            mediaPorDia: stats?.mediaPorDia ? parseFloat(stats.mediaPorDia.toFixed(1)) : 0,
+          };
+        });
+        const porVolante = await Promise.all(porVolantePromises);
+        
+        const kpis = {
+          totalServicos: porVolante.reduce((s, v) => s + v.totalServicos, 0),
+          totalSubstituicoes: porVolante.reduce((s, v) => s + v.substituicoes, 0),
+          totalReparacoes: porVolante.reduce((s, v) => s + v.reparacoes, 0),
+          totalCalibragens: porVolante.reduce((s, v) => s + v.calibragens, 0),
+          totalOutros: porVolante.reduce((s, v) => s + v.outros, 0),
+          diasTrabalhados: porVolante.reduce((s, v) => s + v.diasTrabalhados, 0),
+          mediaPorDia: porVolante.length > 0 
+            ? parseFloat((porVolante.reduce((s, v) => s + v.totalServicos, 0) / Math.max(1, porVolante.reduce((s, v) => s + v.diasTrabalhados, 0))).toFixed(1))
+            : 0,
+        };
+        
+        // Pedidos de apoio
+        let pedidosTotal = 0, pedidosAprovados = 0, pedidosPendentes = 0, pedidosReprovados = 0;
+        for (const v of volantesAtivos) {
+          const allPedidos = await db.getAllPedidosApoioByVolanteId(v.id, mesesSel);
+          pedidosTotal += allPedidos.length;
+          pedidosAprovados += allPedidos.filter(p => p.estado === 'aprovado').length;
+          pedidosPendentes += allPedidos.filter(p => p.estado === 'pendente').length;
+          pedidosReprovados += allPedidos.filter(p => p.estado === 'reprovado').length;
+        }
+        
+        // Top lojas
+        const lojaServicosMap = new Map<number, { lojaId: number; lojaNome: string; total: number }>();
+        for (const v of volantesAtivos) {
+          const topLojas = await db.getTopLojasServicos(v.id, 100, mesesSel);
+          for (const l of topLojas) {
+            const existing = lojaServicosMap.get(l.lojaId);
+            if (existing) { existing.total += l.totalServicos; }
+            else { lojaServicosMap.set(l.lojaId, { lojaId: l.lojaId, lojaNome: l.lojaNome, total: l.totalServicos }); }
+          }
+        }
+        
+        // Influ\u00eancia por loja
+        const influenciaPorLoja: { lojaId: number; lojaNome: string; servicosVolante: number; totalServicosLoja: number; percentagemInfluencia: number }[] = [];
+        let totalInfluencia = 0;
+        let lojasComDados = 0;
+        const mesesParsed = mesesSel?.map(m => {
+          const [ano, mesNum] = m.split('-');
+          return { mes: parseInt(mesNum), ano: parseInt(ano) };
+        }) || [{ mes: new Date().getMonth() + 1, ano: new Date().getFullYear() }];
+        
+        for (const [lojaId, lojaData] of lojaServicosMap) {
+          if (!lojaId) continue;
+          let totalServicosLoja = 0;
+          for (const mp of mesesParsed) {
+            const resultado = await db.getResultadosMensaisPorLoja(lojaId, mp.mes, mp.ano);
+            if (resultado?.totalServicos) totalServicosLoja += resultado.totalServicos;
+          }
+          const percentagem = totalServicosLoja > 0 ? parseFloat(((lojaData.total / totalServicosLoja) * 100).toFixed(1)) : 0;
+          influenciaPorLoja.push({ lojaId, lojaNome: lojaData.lojaNome, servicosVolante: lojaData.total, totalServicosLoja, percentagemInfluencia: percentagem });
+          if (totalServicosLoja > 0) { totalInfluencia += percentagem; lojasComDados++; }
+        }
+        influenciaPorLoja.sort((a, b) => b.percentagemInfluencia - a.percentagemInfluencia);
+        const mediaInfluencia = lojasComDados > 0 ? parseFloat((totalInfluencia / lojasComDados).toFixed(1)) : 0;
+        
+        let topLojasArr = Array.from(lojaServicosMap.values());
+        let influenciaFiltrada = influenciaPorLoja;
+        if (input?.lojaId) {
+          topLojasArr = topLojasArr.filter(l => l.lojaId === input.lojaId);
+          influenciaFiltrada = influenciaPorLoja.filter(l => l.lojaId === input.lojaId);
+          const lojaFiltro = topLojasArr[0];
+          if (lojaFiltro) filtroLoja = lojaFiltro.lojaNome;
+        }
+        const topLojas = topLojasArr.sort((a, b) => b.total - a.total).slice(0, 10);
+        
+        // Gerar label do per\u00edodo
+        const mesesNomes = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+        let periodoLabel = 'M\u00eas atual';
+        if (mesesSel && mesesSel.length > 0) {
+          periodoLabel = mesesSel.map(m => {
+            const [ano, mesNum] = m.split('-');
+            return `${mesesNomes[parseInt(mesNum) - 1]} ${ano}`;
+          }).join(', ');
+        }
+        
+        // Gerar PDF
+        const { gerarPDFDashboardVolantesGestor } = await import('./pdfDashboardVolantesGestor');
+        const pdfBuffer = await gerarPDFDashboardVolantesGestor({
+          totalVolantes: volantesAtivos.length,
+          kpis: { ...kpis, mediaInfluencia },
+          porVolante: porVolante.sort((a, b) => b.totalServicos - a.totalServicos),
+          pedidosApoio: { total: pedidosTotal, aprovados: pedidosAprovados, pendentes: pedidosPendentes, reprovados: pedidosReprovados },
+          topLojas,
+          influenciaPorLoja: influenciaFiltrada,
+          periodoLabel,
+          filtroVolante,
+          filtroLoja,
+        });
+        
+        return {
+          pdf: pdfBuffer.toString('base64'),
+          filename: `dashboard_volantes_${periodoLabel.replace(/[\s,\/]/g, '_')}.pdf`,
+        };
+      }),
   }),
   
   // ==================== PEDIDOS DE APOIO (VOLANTES) ====================

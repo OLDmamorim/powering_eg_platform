@@ -1567,3 +1567,12 @@
 - [x] Botão "Limpar filtros" quando filtros ativos
 - [x] Testes passam (9/9)
 - [ ] Guardar checkpoint
+
+## Feature: Exportação PDF do Dashboard Volantes
+- [x] Investigar padrão de geração PDF existente no projeto (PDFKit)
+- [x] Criar pdfDashboardVolantesGestor.ts com geração completa
+- [x] Criar endpoint backend exportarDashboardPDF no volantes router
+- [x] Adicionar botão "Exportar PDF" no frontend com loading state
+- [x] PDF inclui KPIs, tabela atividade, pedidos apoio, top lojas, influência, rodapé PoweringEG
+- [x] Testes unitários (5/5 passam)
+- [ ] Guardar checkpoint

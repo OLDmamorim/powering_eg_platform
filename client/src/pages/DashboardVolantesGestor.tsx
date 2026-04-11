@@ -5,6 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import FiltroMesesCheckbox, { MesSelecionado } from "@/components/FiltroMesesCheckbox";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import { 
   Car, 
   Wrench, 
@@ -23,6 +25,8 @@ import {
   ChevronDown,
   ChevronUp,
   Filter,
+  FileDown,
+  Loader2,
 } from "lucide-react";
 import { Line, Bar, Doughnut } from "react-chartjs-2";
 import {
@@ -81,6 +85,30 @@ export default function DashboardVolantesGestor() {
     queryInput,
     { enabled: true }
   );
+
+  const exportarPDF = trpc.volantes.exportarDashboardPDF.useMutation({
+    onSuccess: (result) => {
+      const byteCharacters = atob(result.pdf);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = result.filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast.success('PDF exportado com sucesso');
+    },
+    onError: () => {
+      toast.error('Erro ao exportar PDF');
+    },
+  });
 
   // Sorting
   const sortedVolantes = useMemo(() => {
@@ -297,6 +325,20 @@ export default function DashboardVolantesGestor() {
                 Estatísticas e atividade dos volantes
               </p>
             </div>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={exportarPDF.isPending || isLoading || !data}
+              onClick={() => exportarPDF.mutate(queryInput)}
+              className="flex items-center gap-2"
+            >
+              {exportarPDF.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <FileDown className="h-4 w-4" />
+              )}
+              Exportar PDF
+            </Button>
           </div>
 
           {/* Filtros */}
