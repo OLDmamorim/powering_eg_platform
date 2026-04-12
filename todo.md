@@ -1576,3 +1576,14 @@
 - [x] PDF inclui KPIs, tabela atividade, pedidos apoio, top lojas, influência, rodapé PoweringEG
 - [x] Testes unitários (5/5 passam)
 - [ ] Guardar checkpoint
+
+## Bug: PDF Dashboard Volantes mal desenhado
+- [x] Instalar chartjs-node-canvas para gerar gráficos no PDF
+- [x] Redesenhar PDF compacto (max 2 páginas) com header colorido
+- [x] Adicionar gráfico barras stacked para Serviços por Volante
+- [x] Adicionar gráfico doughnut para Pedidos de Apoio
+- [x] Adicionar gráfico barras horizontais para Top Lojas
+- [x] Adicionar gráfico barras horizontais para Influência por Loja (com cores)
+- [x] Eliminar páginas em branco extra
+- [x] Testes passam (5/5)
+- [ ] Guardar checkpoint

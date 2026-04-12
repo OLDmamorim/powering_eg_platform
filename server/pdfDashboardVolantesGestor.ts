@@ -1,4 +1,6 @@
 import PDFDocument from 'pdfkit';
+import { ChartJSNodeCanvas } from 'chartjs-node-canvas';
+import type { ChartConfiguration } from 'chart.js';
 
 interface KPIs {
   totalServicos: number;
@@ -58,351 +60,300 @@ export interface DashboardVolantesGestorData {
   filtroLoja?: string;
 }
 
-const mesesNomes = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+// Chart renderer - reusable instance
+const chartWidth = 260;
+const chartHeight = 160;
+const chartCanvas = new ChartJSNodeCanvas({ width: chartWidth, height: chartHeight, backgroundColour: 'white' });
+
+const smallChartCanvas = new ChartJSNodeCanvas({ width: 180, height: 160, backgroundColour: 'white' });
+
+async function renderChart(config: ChartConfiguration, canvas?: ChartJSNodeCanvas): Promise<Buffer> {
+  const c = canvas || chartCanvas;
+  return await c.renderToBuffer(config as any);
+}
+
+// Colors
+const emerald = '#10B981';
+const blue = '#3B82F6';
+const amber = '#F59E0B';
+const purple = '#8B5CF6';
+const teal = '#14B8A6';
+const indigo = '#6366F1';
+const rose = '#F43F5E';
+const cyan = '#06B6D4';
+const gray = '#6B7280';
+const darkText = '#1F2937';
+const lightGreen = '#D1FAE5';
+const lightBlue = '#DBEAFE';
+const lightRose = '#FFE4E6';
 
 export async function gerarPDFDashboardVolantesGestor(data: DashboardVolantesGestorData): Promise<Buffer> {
+  // Pre-render all charts as PNG buffers
+  const chartImages = await renderAllCharts(data);
+
   return new Promise((resolve, reject) => {
     try {
-      const doc = new PDFDocument({ size: 'A4', margin: 40, bufferPages: true });
+      const doc = new PDFDocument({ size: 'A4', margin: 30, bufferPages: true });
       const chunks: Buffer[] = [];
 
       doc.on('data', (chunk) => chunks.push(chunk));
       doc.on('end', () => resolve(Buffer.concat(chunks)));
       doc.on('error', reject);
 
-      const leftMargin = 40;
-      const pageWidth = doc.page.width - 80;
-      const pageHeight = doc.page.height;
+      const LM = 30; // left margin
+      const PW = doc.page.width - 60; // page width
+      const PH = doc.page.height;
+      const rowH = 14;
 
-      // Cores
-      const emerald = '#10B981';
-      const blue = '#3B82F6';
-      const amber = '#F59E0B';
-      const purple = '#8B5CF6';
-      const teal = '#14B8A6';
-      const indigo = '#6366F1';
-      const rose = '#F43F5E';
-      const cyan = '#06B6D4';
-      const gray = '#6B7280';
-      const darkText = '#1F2937';
+      // ========== PAGE 1: HEADER + KPIs + TABLE + CHARTS ==========
 
-      // Helper: check page break
-      function checkPageBreak(neededHeight: number) {
-        if (doc.y + neededHeight > pageHeight - 60) {
-          doc.addPage();
-          return true;
-        }
-        return false;
-      }
-
-      // Helper: draw a colored KPI box
-      function drawKPIBox(x: number, y: number, w: number, h: number, label: string, value: string, color: string, sublabel?: string) {
-        // Background
-        doc.rect(x, y, w, h).lineWidth(1.5).strokeColor(color).stroke();
-        // Label
-        doc.fontSize(7).font('Helvetica-Bold').fillColor(color).text(label, x + 6, y + 6, { width: w - 12 });
-        // Value
-        doc.fontSize(16).font('Helvetica-Bold').fillColor(color).text(value, x + 6, y + 20, { width: w - 12, align: 'center' });
-        // Sublabel
-        if (sublabel) {
-          doc.fontSize(6).font('Helvetica').fillColor(gray).text(sublabel, x + 6, y + 38, { width: w - 12, align: 'center' });
-        }
-      }
-
-      // ========== CABEÇALHO ==========
-      // Logo
-      try {
-        doc.image('/home/ubuntu/powering_eg_platform/server/assets/expressglass-logo.png', leftMargin, 30, { width: 100 });
-      } catch (e) {
-        // Fallback sem logo
-      }
-
-      doc.fontSize(18).font('Helvetica-Bold').fillColor(emerald)
-         .text('Dashboard Volantes', leftMargin, 55, { align: 'center', width: pageWidth });
-      
-      doc.fontSize(10).font('Helvetica').fillColor(gray)
-         .text(`Período: ${data.periodoLabel}`, leftMargin, 77, { align: 'center', width: pageWidth });
+      // Header bar
+      doc.rect(0, 0, doc.page.width, 50).fill(emerald);
+      doc.fontSize(18).font('Helvetica-Bold').fillColor('white')
+         .text('Dashboard Volantes', LM, 12, { width: PW, align: 'center' });
+      doc.fontSize(9).font('Helvetica').fillColor('white')
+         .text(`Período: ${data.periodoLabel}`, LM, 33, { width: PW, align: 'center' });
 
       // Filtros ativos
+      let startY = 56;
       const filtros: string[] = [];
       if (data.filtroVolante) filtros.push(`Volante: ${data.filtroVolante}`);
       if (data.filtroLoja) filtros.push(`Loja: ${data.filtroLoja}`);
       if (filtros.length > 0) {
-        doc.fontSize(8).font('Helvetica').fillColor(rose)
-           .text(`Filtros: ${filtros.join(' | ')}`, leftMargin, 90, { align: 'center', width: pageWidth });
+        doc.fontSize(7).font('Helvetica').fillColor(rose)
+           .text(`Filtros ativos: ${filtros.join(' | ')}`, LM, startY, { width: PW, align: 'center' });
+        startY += 12;
       }
 
-      // Linha separadora
-      const lineY = filtros.length > 0 ? 103 : 93;
-      doc.strokeColor(emerald).lineWidth(2);
-      doc.moveTo(leftMargin, lineY).lineTo(leftMargin + pageWidth, lineY).stroke();
-      doc.y = lineY + 12;
+      // ---- KPIs: 2 rows of 4 compact boxes ----
+      const kpiW = (PW - 9) / 4; // 3px spacing between
+      const kpiH = 36;
+      const kpiGap = 3;
 
-      // ========== KPIs ==========
-      doc.fontSize(12).font('Helvetica-Bold').fillColor(darkText).text('Indicadores Chave', leftMargin, doc.y);
-      doc.y += 16;
+      function drawKPI(x: number, y: number, label: string, value: string, color: string, sub?: string) {
+        doc.rect(x, y, kpiW, kpiH).lineWidth(1.2).strokeColor(color).stroke();
+        doc.fontSize(6).font('Helvetica-Bold').fillColor(color).text(label, x + 4, y + 3, { width: kpiW - 8 });
+        doc.fontSize(14).font('Helvetica-Bold').fillColor(color).text(value, x + 4, y + 12, { width: kpiW - 8, align: 'center' });
+        if (sub) {
+          doc.fontSize(5).font('Helvetica').fillColor(gray).text(sub, x + 4, y + 28, { width: kpiW - 8, align: 'center' });
+        }
+      }
 
-      const kpiY = doc.y;
-      const kpiW = (pageWidth - 21) / 4; // 4 per row, 7px spacing
-      const kpiH = 48;
-      const kpiSpacing = 7;
+      drawKPI(LM, startY, 'Volantes Ativos', data.totalVolantes.toString(), emerald);
+      drawKPI(LM + kpiW + kpiGap, startY, 'Total Serviços', data.kpis.totalServicos.toString(), blue);
+      drawKPI(LM + (kpiW + kpiGap) * 2, startY, 'Substituições', data.kpis.totalSubstituicoes.toString(), cyan);
+      drawKPI(LM + (kpiW + kpiGap) * 3, startY, 'Reparações', data.kpis.totalReparacoes.toString(), amber);
 
-      // Row 1
-      drawKPIBox(leftMargin, kpiY, kpiW, kpiH, 'Volantes Ativos', data.totalVolantes.toString(), emerald);
-      drawKPIBox(leftMargin + kpiW + kpiSpacing, kpiY, kpiW, kpiH, 'Total Serviços', data.kpis.totalServicos.toString(), blue);
-      drawKPIBox(leftMargin + (kpiW + kpiSpacing) * 2, kpiY, kpiW, kpiH, 'Substituições', data.kpis.totalSubstituicoes.toString(), cyan);
-      drawKPIBox(leftMargin + (kpiW + kpiSpacing) * 3, kpiY, kpiW, kpiH, 'Reparações', data.kpis.totalReparacoes.toString(), amber);
+      const kpiY2 = startY + kpiH + 3;
+      drawKPI(LM, kpiY2, 'Calibragens', data.kpis.totalCalibragens.toString(), purple);
+      drawKPI(LM + kpiW + kpiGap, kpiY2, 'Dias Trabalhados', data.kpis.diasTrabalhados.toString(), teal);
+      drawKPI(LM + (kpiW + kpiGap) * 2, kpiY2, 'Média/Dia', data.kpis.mediaPorDia.toFixed(1), indigo);
+      drawKPI(LM + (kpiW + kpiGap) * 3, kpiY2, 'Influência Média', `${data.kpis.mediaInfluencia.toFixed(1)}%`, rose, 'nos resultados da loja');
 
-      // Row 2
-      const kpiY2 = kpiY + kpiH + 6;
-      drawKPIBox(leftMargin, kpiY2, kpiW, kpiH, 'Calibragens', data.kpis.totalCalibragens.toString(), purple);
-      drawKPIBox(leftMargin + kpiW + kpiSpacing, kpiY2, kpiW, kpiH, 'Dias Trabalhados', data.kpis.diasTrabalhados.toString(), teal);
-      drawKPIBox(leftMargin + (kpiW + kpiSpacing) * 2, kpiY2, kpiW, kpiH, 'Média/Dia', data.kpis.mediaPorDia.toString(), indigo);
-      drawKPIBox(leftMargin + (kpiW + kpiSpacing) * 3, kpiY2, kpiW, kpiH, 'Influência Média', `${data.kpis.mediaInfluencia}%`, rose, 'nos resultados da loja');
+      doc.y = kpiY2 + kpiH + 10;
 
-      doc.y = kpiY2 + kpiH + 18;
+      // ---- TABELA ATIVIDADE POR VOLANTE ----
+      doc.fontSize(10).font('Helvetica-Bold').fillColor(darkText).text('Atividade por Volante', LM, doc.y);
+      doc.y += 12;
 
-      // ========== TABELA ATIVIDADE POR VOLANTE ==========
-      doc.fontSize(12).font('Helvetica-Bold').fillColor(darkText).text('Atividade por Volante', leftMargin, doc.y);
-      doc.y += 14;
-
-      // Table headers
       const cols = [
-        { label: 'Volante', width: 110 },
-        { label: 'Lojas', width: 35 },
-        { label: 'Total', width: 40 },
-        { label: 'Subst.', width: 40 },
-        { label: 'Repar.', width: 40 },
-        { label: 'Calib.', width: 40 },
-        { label: 'Outros', width: 40 },
-        { label: 'Dias', width: 35 },
-        { label: 'Méd/Dia', width: 42 },
+        { label: 'Volante', w: 100 },
+        { label: 'Lojas', w: 32 },
+        { label: 'Total', w: 38 },
+        { label: 'Subst.', w: 38 },
+        { label: 'Repar.', w: 38 },
+        { label: 'Calib.', w: 38 },
+        { label: 'Outros', w: 38 },
+        { label: 'Dias', w: 32 },
+        { label: 'Méd/Dia', w: 42 },
       ];
 
-      const tableRowH = 16;
-      let tableX = leftMargin;
-      let tableY = doc.y;
+      // Adjust last column to fill remaining width
+      const totalColW = cols.reduce((s, c) => s + c.w, 0);
+      if (totalColW < PW) cols[cols.length - 1].w += PW - totalColW;
 
-      // Header row
-      doc.rect(leftMargin, tableY, pageWidth, tableRowH).fillAndStroke('#D1FAE5', '#D1FAE5');
-      let colX = leftMargin;
-      cols.forEach(col => {
-        doc.fontSize(7).font('Helvetica-Bold').fillColor(darkText)
-           .text(col.label, colX + 3, tableY + 4, { width: col.width - 6 });
-        colX += col.width;
+      let tY = doc.y;
+
+      // Header
+      doc.rect(LM, tY, PW, rowH).fillAndStroke(lightGreen, lightGreen);
+      let cX = LM;
+      cols.forEach(c => {
+        doc.fontSize(6).font('Helvetica-Bold').fillColor(darkText).text(c.label, cX + 2, tY + 3, { width: c.w - 4 });
+        cX += c.w;
       });
-      tableY += tableRowH;
+      tY += rowH;
 
-      // Data rows
-      const sortedVolantes = [...data.porVolante].sort((a, b) => b.totalServicos - a.totalServicos);
-      sortedVolantes.forEach((v, idx) => {
-        checkPageBreak(tableRowH);
-        const bgColor = idx % 2 === 0 ? '#F9FAFB' : '#FFFFFF';
-        doc.rect(leftMargin, tableY, pageWidth, tableRowH).fillAndStroke(bgColor, bgColor);
-
-        colX = leftMargin;
-        const values = [
-          v.nome,
-          v.totalLojas.toString(),
-          v.totalServicos.toString(),
-          v.substituicoes.toString(),
-          v.reparacoes.toString(),
-          v.calibragens.toString(),
-          v.outros.toString(),
-          v.diasTrabalhados.toString(),
-          v.mediaPorDia.toString(),
-        ];
-        const colors = [darkText, gray, emerald, blue, amber, purple, gray, teal, indigo];
-
-        values.forEach((val, i) => {
-          doc.fontSize(7).font(i === 0 || i === 2 ? 'Helvetica-Bold' : 'Helvetica')
-             .fillColor(colors[i])
-             .text(val, colX + 3, tableY + 4, { width: cols[i].width - 6 });
-          colX += cols[i].width;
+      const sorted = [...data.porVolante].sort((a, b) => b.totalServicos - a.totalServicos);
+      sorted.forEach((v, idx) => {
+        const bg = idx % 2 === 0 ? '#F9FAFB' : '#FFFFFF';
+        doc.rect(LM, tY, PW, rowH).fillAndStroke(bg, bg);
+        cX = LM;
+        const vals = [v.nome, v.totalLojas, v.totalServicos, v.substituicoes, v.reparacoes, v.calibragens, v.outros, v.diasTrabalhados, v.mediaPorDia.toFixed(1)];
+        const clrs = [darkText, gray, emerald, blue, amber, purple, gray, teal, indigo];
+        vals.forEach((val, i) => {
+          doc.fontSize(6).font(i === 0 || i === 2 ? 'Helvetica-Bold' : 'Helvetica')
+             .fillColor(clrs[i]).text(String(val), cX + 2, tY + 3, { width: cols[i].w - 4 });
+          cX += cols[i].w;
         });
-        tableY += tableRowH;
+        tY += rowH;
       });
 
       // Totals row
-      if (sortedVolantes.length > 1) {
-        doc.rect(leftMargin, tableY, pageWidth, tableRowH).fillAndStroke('#D1FAE5', emerald);
-        colX = leftMargin;
-        const totals = [
-          'TOTAL',
-          '-',
-          data.kpis.totalServicos.toString(),
-          data.kpis.totalSubstituicoes.toString(),
-          data.kpis.totalReparacoes.toString(),
-          data.kpis.totalCalibragens.toString(),
-          data.kpis.totalOutros.toString(),
-          data.kpis.diasTrabalhados.toString(),
-          data.kpis.mediaPorDia.toString(),
-        ];
+      if (sorted.length > 1) {
+        doc.rect(LM, tY, PW, rowH).fillAndStroke(lightGreen, emerald);
+        cX = LM;
+        const totals = ['TOTAL', '-', data.kpis.totalServicos, data.kpis.totalSubstituicoes, data.kpis.totalReparacoes, data.kpis.totalCalibragens, data.kpis.totalOutros, data.kpis.diasTrabalhados, data.kpis.mediaPorDia.toFixed(1)];
         totals.forEach((val, i) => {
-          doc.fontSize(7).font('Helvetica-Bold').fillColor(darkText)
-             .text(val, colX + 3, tableY + 4, { width: cols[i].width - 6 });
-          colX += cols[i].width;
+          doc.fontSize(6).font('Helvetica-Bold').fillColor(darkText).text(String(val), cX + 2, tY + 3, { width: cols[i].w - 4 });
+          cX += cols[i].w;
         });
-        tableY += tableRowH;
+        tY += rowH;
       }
 
-      doc.y = tableY + 16;
+      doc.y = tY + 8;
 
-      // ========== PEDIDOS DE APOIO ==========
-      checkPageBreak(80);
-      doc.fontSize(12).font('Helvetica-Bold').fillColor(darkText).text('Pedidos de Apoio', leftMargin, doc.y);
-      doc.y += 14;
+      // ---- CHARTS ROW: Serviços por Volante (bar) + Pedidos de Apoio (doughnut) ----
+      const chartsY = doc.y;
+      const chartLeftW = PW * 0.6;
+      const chartRightW = PW * 0.4 - 6;
 
-      const apoioY = doc.y;
-      const apoioW = (pageWidth - 21) / 4;
+      // Section label
+      doc.fontSize(10).font('Helvetica-Bold').fillColor(darkText).text('Serviços por Volante', LM, chartsY);
+      doc.fontSize(10).font('Helvetica-Bold').fillColor(darkText).text('Pedidos de Apoio', LM + chartLeftW + 6, chartsY);
       
-      drawKPIBox(leftMargin, apoioY, apoioW, 42, 'Total', data.pedidosApoio.total.toString(), gray);
-      drawKPIBox(leftMargin + apoioW + kpiSpacing, apoioY, apoioW, 42, 'Aprovados', data.pedidosApoio.aprovados.toString(), '#22C55E');
-      drawKPIBox(leftMargin + (apoioW + kpiSpacing) * 2, apoioY, apoioW, 42, 'Pendentes', data.pedidosApoio.pendentes.toString(), amber);
-      drawKPIBox(leftMargin + (apoioW + kpiSpacing) * 3, apoioY, apoioW, 42, 'Reprovados', data.pedidosApoio.reprovados.toString(), '#EF4444');
+      const chartImgY = chartsY + 12;
 
-      doc.y = apoioY + 42 + 16;
-
-      // ========== TOP 10 LOJAS ==========
-      if (data.topLojas.length > 0) {
-        checkPageBreak(30 + data.topLojas.length * 16);
-        doc.fontSize(12).font('Helvetica-Bold').fillColor(darkText).text('Top 10 Lojas com Mais Serviços', leftMargin, doc.y);
-        doc.y += 14;
-
-        const lojaTableY = doc.y;
-        const lojaColWidths = [30, pageWidth - 95, 65];
-
-        // Header
-        doc.rect(leftMargin, lojaTableY, pageWidth, tableRowH).fillAndStroke('#DBEAFE', '#DBEAFE');
-        doc.fontSize(7).font('Helvetica-Bold').fillColor(darkText)
-           .text('#', leftMargin + 4, lojaTableY + 4, { width: lojaColWidths[0] - 8 })
-           .text('Loja', leftMargin + lojaColWidths[0] + 4, lojaTableY + 4, { width: lojaColWidths[1] - 8 })
-           .text('Serviços', leftMargin + lojaColWidths[0] + lojaColWidths[1] + 4, lojaTableY + 4, { width: lojaColWidths[2] - 8, align: 'right' });
-
-        let lY = lojaTableY + tableRowH;
-        data.topLojas.forEach((loja, idx) => {
-          const bgColor = idx % 2 === 0 ? '#F9FAFB' : '#FFFFFF';
-          doc.rect(leftMargin, lY, pageWidth, tableRowH).fillAndStroke(bgColor, bgColor);
-          
-          const medal = idx === 0 ? '1.' : idx === 1 ? '2.' : idx === 2 ? '3.' : `${idx + 1}.`;
-          doc.fontSize(7).font('Helvetica-Bold').fillColor(idx < 3 ? emerald : gray)
-             .text(medal, leftMargin + 4, lY + 4, { width: lojaColWidths[0] - 8 });
-          doc.fontSize(7).font('Helvetica').fillColor(darkText)
-             .text(loja.lojaNome, leftMargin + lojaColWidths[0] + 4, lY + 4, { width: lojaColWidths[1] - 8 });
-          doc.fontSize(7).font('Helvetica-Bold').fillColor(blue)
-             .text(loja.total.toString(), leftMargin + lojaColWidths[0] + lojaColWidths[1] + 4, lY + 4, { width: lojaColWidths[2] - 8, align: 'right' });
-          lY += tableRowH;
-        });
-
-        doc.y = lY + 16;
+      if (chartImages.servicosPorVolante) {
+        doc.image(chartImages.servicosPorVolante, LM, chartImgY, { width: chartLeftW, height: 140 });
       }
 
-      // ========== INFLUÊNCIA POR LOJA ==========
+      if (chartImages.pedidosApoio) {
+        doc.image(chartImages.pedidosApoio, LM + chartLeftW + 6, chartImgY, { width: chartRightW, height: 140 });
+      } else {
+        // Fallback: show numbers
+        const apoioY = chartImgY + 10;
+        const apoioW = chartRightW / 2 - 2;
+        drawKPI(LM + chartLeftW + 6, apoioY, 'Aprovados', data.pedidosApoio.aprovados.toString(), '#22C55E');
+        drawKPI(LM + chartLeftW + 6 + apoioW + 4, apoioY, 'Pendentes', data.pedidosApoio.pendentes.toString(), amber);
+        drawKPI(LM + chartLeftW + 6, apoioY + kpiH + 4, 'Reprovados', data.pedidosApoio.reprovados.toString(), '#EF4444');
+        drawKPI(LM + chartLeftW + 6 + apoioW + 4, apoioY + kpiH + 4, 'Total', data.pedidosApoio.total.toString(), gray);
+      }
+
+      doc.y = chartImgY + 140 + 8;
+
+      // ---- CHARTS ROW 2: Top Lojas (bar horizontal) + Influência (bar horizontal) ----
+      // Check if we need a new page
+      if (doc.y + 170 > PH - 40) {
+        doc.addPage();
+        doc.y = 30;
+      }
+
+      const charts2Y = doc.y;
+      doc.fontSize(10).font('Helvetica-Bold').fillColor(darkText).text('Top 10 Lojas', LM, charts2Y);
+      doc.fontSize(10).font('Helvetica-Bold').fillColor(darkText).text('Influência por Loja', LM + chartLeftW + 6, charts2Y);
+
+      const chart2ImgY = charts2Y + 12;
+
+      if (chartImages.topLojas) {
+        doc.image(chartImages.topLojas, LM, chart2ImgY, { width: chartLeftW, height: 150 });
+      }
+
+      if (chartImages.influencia) {
+        doc.image(chartImages.influencia, LM + chartLeftW + 6, chart2ImgY, { width: chartRightW, height: 150 });
+      }
+
+      doc.y = chart2ImgY + 150 + 8;
+
+      // ---- INFLUÊNCIA TABLE (compact, on page 2 if needed) ----
       if (data.influenciaPorLoja.length > 0) {
-        const neededHeight = 30 + Math.min(data.influenciaPorLoja.length, 20) * 16;
-        checkPageBreak(neededHeight);
+        if (doc.y + 30 + Math.min(data.influenciaPorLoja.length, 15) * rowH > PH - 40) {
+          doc.addPage();
+          doc.y = 30;
+        }
 
-        doc.fontSize(12).font('Helvetica-Bold').fillColor(darkText)
-           .text('Influência dos Volantes nos Resultados por Loja', leftMargin, doc.y);
-        doc.fontSize(7).font('Helvetica').fillColor(gray)
-           .text('Percentagem dos serviços totais da loja realizados pelos volantes', leftMargin, doc.y + 14);
-        doc.y += 26;
+        doc.fontSize(10).font('Helvetica-Bold').fillColor(darkText)
+           .text('Detalhe Influência por Loja', LM, doc.y);
+        doc.fontSize(6).font('Helvetica').fillColor(gray)
+           .text('Percentagem dos serviços totais da loja realizados pelos volantes', LM, doc.y + 12);
+        doc.y += 22;
 
-        const infColWidths = [25, pageWidth - 195, 55, 55, 60];
-        const infTableY = doc.y;
+        const infCols = [
+          { label: '#', w: 20 },
+          { label: 'Loja', w: PW - 180 },
+          { label: 'Serv. Vol.', w: 50 },
+          { label: 'Total Loja', w: 50 },
+          { label: 'Influência', w: 60 },
+        ];
+
+        let iY = doc.y;
 
         // Header
-        doc.rect(leftMargin, infTableY, pageWidth, tableRowH).fillAndStroke('#FFE4E6', '#FFE4E6');
-        let infX = leftMargin;
-        ['#', 'Loja', 'Serv. Vol.', 'Total Loja', 'Influência'].forEach((label, i) => {
-          doc.fontSize(7).font('Helvetica-Bold').fillColor(darkText)
-             .text(label, infX + 3, infTableY + 4, { width: infColWidths[i] - 6, align: i >= 2 ? 'right' : 'left' });
-          infX += infColWidths[i];
+        doc.rect(LM, iY, PW, rowH).fillAndStroke(lightRose, lightRose);
+        let iX = LM;
+        infCols.forEach(c => {
+          doc.fontSize(6).font('Helvetica-Bold').fillColor(darkText).text(c.label, iX + 2, iY + 3, { width: c.w - 4, align: c.label === '#' || c.label === 'Loja' ? 'left' : 'right' });
+          iX += c.w;
         });
+        iY += rowH;
 
-        let infY = infTableY + tableRowH;
-        // Show max 20 rows
-        const influenciaToShow = data.influenciaPorLoja.slice(0, 20);
-        influenciaToShow.forEach((l, idx) => {
-          if (infY + tableRowH > pageHeight - 60) {
+        const toShow = data.influenciaPorLoja.slice(0, 15);
+        toShow.forEach((l, idx) => {
+          if (iY + rowH > PH - 40) {
             doc.addPage();
-            infY = 40;
+            iY = 30;
           }
 
-          const bgColor = idx % 2 === 0 ? '#F9FAFB' : '#FFFFFF';
-          doc.rect(leftMargin, infY, pageWidth, tableRowH).fillAndStroke(bgColor, bgColor);
+          const bg = idx % 2 === 0 ? '#F9FAFB' : '#FFFFFF';
+          doc.rect(LM, iY, PW, rowH).fillAndStroke(bg, bg);
 
-          infX = leftMargin;
-          doc.fontSize(7).font('Helvetica').fillColor(gray)
-             .text((idx + 1).toString(), infX + 3, infY + 4, { width: infColWidths[0] - 6 });
-          infX += infColWidths[0];
+          iX = LM;
+          doc.fontSize(6).font('Helvetica').fillColor(gray).text((idx + 1).toString(), iX + 2, iY + 3, { width: infCols[0].w - 4 });
+          iX += infCols[0].w;
 
-          doc.fontSize(7).font('Helvetica').fillColor(darkText)
-             .text(l.lojaNome, infX + 3, infY + 4, { width: infColWidths[1] - 6 });
-          infX += infColWidths[1];
+          doc.fontSize(6).font('Helvetica').fillColor(darkText).text(l.lojaNome, iX + 2, iY + 3, { width: infCols[1].w - 4 });
+          iX += infCols[1].w;
 
-          doc.fontSize(7).font('Helvetica-Bold').fillColor(emerald)
-             .text(l.servicosVolante.toString(), infX + 3, infY + 4, { width: infColWidths[2] - 6, align: 'right' });
-          infX += infColWidths[2];
+          doc.fontSize(6).font('Helvetica-Bold').fillColor(emerald).text(l.servicosVolante.toString(), iX + 2, iY + 3, { width: infCols[2].w - 4, align: 'right' });
+          iX += infCols[2].w;
 
-          doc.fontSize(7).font('Helvetica').fillColor(gray)
-             .text(l.totalServicosLoja > 0 ? l.totalServicosLoja.toString() : 's/ dados', infX + 3, infY + 4, { width: infColWidths[3] - 6, align: 'right' });
-          infX += infColWidths[3];
+          doc.fontSize(6).font('Helvetica').fillColor(gray).text(l.totalServicosLoja > 0 ? l.totalServicosLoja.toString() : 's/ dados', iX + 2, iY + 3, { width: infCols[3].w - 4, align: 'right' });
+          iX += infCols[3].w;
 
-          // Influence with color coding
+          // Influence bar + percentage
           const infColor = l.percentagemInfluencia >= 50 ? '#EF4444' : l.percentagemInfluencia >= 25 ? '#F59E0B' : '#10B981';
-          const infText = l.totalServicosLoja > 0 ? `${l.percentagemInfluencia}%` : '-';
-
-          // Draw mini bar
           if (l.totalServicosLoja > 0) {
-            const barX = infX + 3;
-            const barW = infColWidths[4] - 30;
-            const barH = 5;
-            const barY = infY + 2;
+            const barX = iX + 2;
+            const barW = infCols[4].w - 28;
+            const barH = 4;
+            const barY = iY + 2;
             doc.rect(barX, barY, barW, barH).fillAndStroke('#E5E7EB', '#E5E7EB');
             const fillW = Math.min(barW, (l.percentagemInfluencia / 100) * barW);
-            if (fillW > 0) {
-              doc.rect(barX, barY, fillW, barH).fillAndStroke(infColor, infColor);
-            }
+            if (fillW > 0) doc.rect(barX, barY, fillW, barH).fillAndStroke(infColor, infColor);
           }
+          doc.fontSize(6).font('Helvetica-Bold').fillColor(infColor)
+             .text(l.totalServicosLoja > 0 ? `${l.percentagemInfluencia.toFixed(1)}%` : '-', iX + 2, iY + 7, { width: infCols[4].w - 4, align: 'right' });
 
-          doc.fontSize(7).font('Helvetica-Bold').fillColor(infColor)
-             .text(infText, infX + 3, infY + 8, { width: infColWidths[4] - 6, align: 'right' });
-
-          infY += tableRowH;
+          iY += rowH;
         });
 
         // Legend
-        infY += 6;
-        if (infY + 14 > pageHeight - 60) {
-          doc.addPage();
-          infY = 40;
-        }
-        doc.fontSize(6).font('Helvetica').fillColor(gray)
-           .text('Legenda: ', leftMargin, infY, { continued: true });
+        iY += 4;
+        doc.fontSize(5).font('Helvetica').fillColor(gray).text('Legenda: ', LM, iY, { continued: true });
         doc.fillColor('#10B981').text('< 25%  ', { continued: true });
         doc.fillColor('#F59E0B').text('25-50%  ', { continued: true });
         doc.fillColor('#EF4444').text('> 50%  ', { continued: true });
-        doc.fillColor(gray).text(`| Média: ${data.kpis.mediaInfluencia}%`);
-
-        doc.y = infY + 16;
+        doc.fillColor(gray).text(`| Média: ${data.kpis.mediaInfluencia.toFixed(1)}%`);
       }
 
-      // ========== RODAPÉ EM TODAS AS PÁGINAS ==========
+      // ========== FOOTER ON ALL PAGES ==========
       const pages = doc.bufferedPageRange();
       for (let i = 0; i < pages.count; i++) {
         doc.switchToPage(i);
-        
-        // Linha separadora
-        doc.strokeColor('#E5E7EB').lineWidth(0.5);
-        doc.moveTo(leftMargin, pageHeight - 35).lineTo(leftMargin + pageWidth, pageHeight - 35).stroke();
-        
-        doc.fontSize(7).font('Helvetica').fillColor(gray)
-           .text('PoweringEG Platform 2.0 - a IA ao serviço da Expressglass', leftMargin, pageHeight - 30, { align: 'center', width: pageWidth });
-
+        doc.fontSize(6).font('Helvetica').fillColor(gray)
+           .text('PoweringEG Platform 2.0 - a IA ao serviço da Expressglass', LM, PH - 25, { align: 'center', width: PW });
         const now = new Date();
-        const dataFormatada = `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()} às ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-        doc.fontSize(6).text(`Gerado em ${dataFormatada} | Página ${i + 1} de ${pages.count}`, leftMargin, pageHeight - 22, { align: 'center', width: pageWidth });
+        const df = `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()} às ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+        doc.fontSize(5).text(`Gerado em ${df} | Página ${i + 1} de ${pages.count}`, LM, PH - 18, { align: 'center', width: PW });
       }
 
       doc.end();
@@ -411,4 +362,146 @@ export async function gerarPDFDashboardVolantesGestor(data: DashboardVolantesGes
       reject(error);
     }
   });
+}
+
+// ========== CHART RENDERERS ==========
+
+async function renderAllCharts(data: DashboardVolantesGestorData) {
+  const results: {
+    servicosPorVolante?: Buffer;
+    pedidosApoio?: Buffer;
+    topLojas?: Buffer;
+    influencia?: Buffer;
+  } = {};
+
+  // 1. Serviços por Volante - Stacked Bar
+  if (data.porVolante.length > 0) {
+    const sorted = [...data.porVolante].sort((a, b) => b.totalServicos - a.totalServicos);
+    const labels = sorted.map(v => v.nome.length > 12 ? v.nome.substring(0, 12) + '...' : v.nome);
+    
+    const config: ChartConfiguration = {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [
+          { label: 'Subst.', data: sorted.map(v => v.substituicoes), backgroundColor: 'rgba(59, 130, 246, 0.8)' },
+          { label: 'Repar.', data: sorted.map(v => v.reparacoes), backgroundColor: 'rgba(245, 158, 11, 0.8)' },
+          { label: 'Calib.', data: sorted.map(v => v.calibragens), backgroundColor: 'rgba(139, 92, 247, 0.8)' },
+          { label: 'Outros', data: sorted.map(v => v.outros), backgroundColor: 'rgba(107, 114, 128, 0.6)' },
+        ],
+      },
+      options: {
+        responsive: false,
+        plugins: {
+          legend: { display: true, position: 'top', labels: { font: { size: 9 }, boxWidth: 10 } },
+          title: { display: false },
+        },
+        scales: {
+          x: { stacked: true, ticks: { font: { size: 8 } } },
+          y: { stacked: true, beginAtZero: true, ticks: { font: { size: 8 } } },
+        },
+      },
+    };
+    results.servicosPorVolante = await renderChart(config);
+  }
+
+  // 2. Pedidos de Apoio - Doughnut
+  if (data.pedidosApoio.total > 0) {
+    const config: ChartConfiguration = {
+      type: 'doughnut',
+      data: {
+        labels: ['Aprovados', 'Pendentes', 'Reprovados'],
+        datasets: [{
+          data: [data.pedidosApoio.aprovados, data.pedidosApoio.pendentes, data.pedidosApoio.reprovados],
+          backgroundColor: ['rgba(34, 197, 94, 0.8)', 'rgba(245, 158, 11, 0.8)', 'rgba(239, 68, 68, 0.8)'],
+          borderColor: ['rgb(34, 197, 94)', 'rgb(245, 158, 11)', 'rgb(239, 68, 68)'],
+          borderWidth: 2,
+        }],
+      },
+      options: {
+        responsive: false,
+        plugins: {
+          legend: { display: true, position: 'bottom', labels: { font: { size: 9 }, boxWidth: 10 } },
+          title: { display: false },
+        },
+      },
+    };
+    results.pedidosApoio = await renderChart(config, smallChartCanvas);
+  }
+
+  // 3. Top Lojas - Horizontal Bar
+  if (data.topLojas.length > 0) {
+    const top = data.topLojas.slice(0, 10);
+    const labels = top.map(l => l.lojaNome.length > 18 ? l.lojaNome.substring(0, 18) + '...' : l.lojaNome);
+    
+    const config: ChartConfiguration = {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Serviços',
+          data: top.map(l => l.total),
+          backgroundColor: top.map((_, i) => {
+            const colors = [
+              'rgba(16, 185, 129, 0.8)', 'rgba(59, 130, 246, 0.8)', 'rgba(245, 158, 11, 0.8)',
+              'rgba(139, 92, 247, 0.8)', 'rgba(6, 182, 212, 0.8)', 'rgba(99, 102, 241, 0.8)',
+              'rgba(244, 63, 94, 0.8)', 'rgba(20, 184, 166, 0.8)', 'rgba(168, 85, 247, 0.8)',
+              'rgba(34, 197, 94, 0.8)',
+            ];
+            return colors[i % colors.length];
+          }),
+        }],
+      },
+      options: {
+        responsive: false,
+        indexAxis: 'y',
+        plugins: {
+          legend: { display: false },
+          title: { display: false },
+        },
+        scales: {
+          x: { beginAtZero: true, ticks: { font: { size: 8 } } },
+          y: { ticks: { font: { size: 7 } } },
+        },
+      },
+    };
+    results.topLojas = await renderChart(config);
+  }
+
+  // 4. Influência por Loja - Horizontal Bar
+  if (data.influenciaPorLoja.length > 0) {
+    const top = [...data.influenciaPorLoja].sort((a, b) => b.percentagemInfluencia - a.percentagemInfluencia).slice(0, 10);
+    const labels = top.map(l => l.lojaNome.length > 16 ? l.lojaNome.substring(0, 16) + '...' : l.lojaNome);
+    
+    const config: ChartConfiguration = {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Influência %',
+          data: top.map(l => l.percentagemInfluencia),
+          backgroundColor: top.map(l => {
+            if (l.percentagemInfluencia >= 50) return 'rgba(239, 68, 68, 0.8)';
+            if (l.percentagemInfluencia >= 25) return 'rgba(245, 158, 11, 0.8)';
+            return 'rgba(16, 185, 129, 0.8)';
+          }),
+        }],
+      },
+      options: {
+        responsive: false,
+        indexAxis: 'y',
+        plugins: {
+          legend: { display: false },
+          title: { display: false },
+        },
+        scales: {
+          x: { beginAtZero: true, max: 100, ticks: { font: { size: 8 }, callback: (v) => `${v}%` } },
+          y: { ticks: { font: { size: 7 } } },
+        },
+      },
+    };
+    results.influencia = await renderChart(config, smallChartCanvas);
+  }
+
+  return results;
 }
