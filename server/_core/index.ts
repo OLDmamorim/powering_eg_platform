@@ -9,6 +9,7 @@ import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { processarWebhookTelegram } from "../telegramService";
 import { setupScheduler } from "../scheduler";
+import { externalApiRouter } from "../externalApi";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -58,6 +59,9 @@ async function startServer() {
       res.status(200).json({ ok: true }); // Sempre retornar 200 para o Telegram
     }
   });
+  // API REST Externa (protegida por API Key)
+  app.use('/api/external', externalApiRouter);
+
   // tRPC API
   app.use(
     "/api/trpc",

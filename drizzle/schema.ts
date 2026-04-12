@@ -1994,3 +1994,26 @@ export const chatbotMensagens = mysqlTable("chatbot_mensagens", {
 });
 export type ChatbotMensagem = typeof chatbotMensagens.$inferSelect;
 export type InsertChatbotMensagem = typeof chatbotMensagens.$inferInsert;
+
+
+/**
+ * API Keys - Chaves de acesso para API externa
+ * Permite que aplicações externas acedam aos dados da plataforma
+ */
+export const apiKeys = mysqlTable("api_keys", {
+  id: int("id").autoincrement().primaryKey(),
+  nome: varchar("nome", { length: 255 }).notNull(), // Nome descritivo da chave (ex: "App Mobile", "Power BI")
+  keyHash: varchar("keyHash", { length: 255 }).notNull(), // Hash SHA-256 da chave
+  keyPrefix: varchar("keyPrefix", { length: 10 }).notNull(), // Primeiros 8 caracteres da chave (para identificação)
+  permissoes: json("permissoes").notNull().$type<string[]>(), // Array de permissões: ["resultados", "lojas", "nps"]
+  ativo: boolean("ativo").default(true).notNull(),
+  ultimoUso: timestamp("ultimoUso"), // Última vez que a chave foi usada
+  totalRequests: int("totalRequests").default(0).notNull(), // Contador de requests
+  criadoPor: int("criadoPor").notNull(), // FK para users.id (admin que criou)
+  criadoPorNome: varchar("criadoPorNome", { length: 255 }),
+  expiresAt: timestamp("expiresAt"), // Data de expiração (null = sem expiração)
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type ApiKey = typeof apiKeys.$inferSelect;
+export type InsertApiKey = typeof apiKeys.$inferInsert;

@@ -1587,3 +1587,14 @@
 - [x] Eliminar páginas em branco extra
 - [x] Testes passam (5/5)
 - [ ] Guardar checkpoint
+
+## Feature: API REST Externa para Resultados das Lojas
+- [x] Criar tabela apiKeys no schema (id, nome, keyHash, keyPrefix, permissões, ativo, expiresAt, criadoPor, ultimoUso, totalRequests)
+- [x] Implementar middleware de validação de API key (SHA-256 hash, expiração, permissões)
+- [x] Criar endpoints REST: GET /api/external/lojas, GET /api/external/resultados, GET /api/external/resultados/:lojaId, GET /api/external/nps
+- [x] Suportar filtros por período (mes/ano), zona, lojaId
+- [x] Criar UI de gestão de API keys no painel admin (ApiKeysAdmin.tsx - apenas admin)
+- [x] Documentação da API inline no dialog (exemplos curl, endpoints, respostas)
+- [x] tRPC procedures admin: criar, listar, toggleAtivo, eliminar
+- [x] Testes unitários (14/14 passam)
+- [ ] Guardar checkpoint

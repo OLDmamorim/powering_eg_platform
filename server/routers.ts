@@ -15478,5 +15478,83 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
       }),
   }),
 
+  // ==================== API KEYS (Admin only) ====================
+  apiKeys: router({
+    listar: adminProcedure.query(async () => {
+      const dbConn = await db.getDb();
+      if (!dbConn) return [];
+      const { apiKeys: apiKeysTable } = await import('../drizzle/schema');
+      const keys = await dbConn.select({
+        id: apiKeysTable.id,
+        nome: apiKeysTable.nome,
+        keyPrefix: apiKeysTable.keyPrefix,
+        permissoes: apiKeysTable.permissoes,
+        ativo: apiKeysTable.ativo,
+        ultimoUso: apiKeysTable.ultimoUso,
+        totalRequests: apiKeysTable.totalRequests,
+        criadoPorNome: apiKeysTable.criadoPorNome,
+        expiresAt: apiKeysTable.expiresAt,
+        createdAt: apiKeysTable.createdAt,
+      }).from(apiKeysTable).orderBy(apiKeysTable.createdAt);
+      return keys;
+    }),
+
+    criar: adminProcedure
+      .input(z.object({
+        nome: z.string().min(1, 'Nome obrigatório'),
+        permissoes: z.array(z.string()).min(1, 'Pelo menos uma permissão'),
+        expiresAt: z.string().optional(), // ISO date string
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const dbConn = await db.getDb();
+        if (!dbConn) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'DB indisponível' });
+        const { apiKeys: apiKeysTable } = await import('../drizzle/schema');
+        const crypto = await import('crypto');
+        
+        // Gerar chave aleatória
+        const rawKey = `peg_${crypto.default.randomBytes(32).toString('hex')}`;
+        const keyHash = crypto.default.createHash('sha256').update(rawKey).digest('hex');
+        const keyPrefix = rawKey.substring(0, 12);
+        
+        await dbConn.insert(apiKeysTable).values({
+          nome: input.nome,
+          keyHash,
+          keyPrefix,
+          permissoes: input.permissoes,
+          ativo: true,
+          criadoPor: ctx.user.id,
+          criadoPorNome: ctx.user.name || ctx.user.email || 'Admin',
+          expiresAt: input.expiresAt ? new Date(input.expiresAt) : null,
+        });
+        
+        // Retornar a chave completa (só visível uma vez)
+        return { key: rawKey, prefix: keyPrefix };
+      }),
+
+    toggleAtivo: adminProcedure
+      .input(z.object({ id: z.number(), ativo: z.boolean() }))
+      .mutation(async ({ input }) => {
+        const dbConn = await db.getDb();
+        if (!dbConn) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'DB indisponível' });
+        const { apiKeys: apiKeysTable } = await import('../drizzle/schema');
+        const { eq } = await import('drizzle-orm');
+        await dbConn.update(apiKeysTable)
+          .set({ ativo: input.ativo })
+          .where(eq(apiKeysTable.id, input.id));
+        return { ok: true };
+      }),
+
+    eliminar: adminProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const dbConn = await db.getDb();
+        if (!dbConn) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'DB indisponível' });
+        const { apiKeys: apiKeysTable } = await import('../drizzle/schema');
+        const { eq } = await import('drizzle-orm');
+        await dbConn.delete(apiKeysTable).where(eq(apiKeysTable.id, input.id));
+        return { ok: true };
+      }),
+  }),
+
 });
 export type AppRouter = typeof appRouter;

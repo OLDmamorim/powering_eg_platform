@@ -79,6 +79,7 @@ const Ferias = lazy(() => import("./pages/Ferias"));
 const CalendarioVolantes = lazy(() => import("./pages/CalendarioVolantes"));
 const DashboardVolantesGestor = lazy(() => import("./pages/DashboardVolantesGestor"));
 const ReunioesLivres = lazy(() => import("./pages/ReunioesLivres"));
+const ApiKeysAdmin = lazy(() => import("./pages/ApiKeysAdmin"));
 const LoginNaoAutorizado = lazy(() => import("./pages/LoginNaoAutorizado"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
@@ -145,6 +146,7 @@ const allImports = [
   () => import("./pages/PortalRecalibra"),
   () => import("./pages/DashboardRecalibra"),
   () => import("./pages/Ferias"),
+  () => import("./pages/ApiKeysAdmin"),
 ];
 
 function usePrefetchPages() {
@@ -248,6 +250,9 @@ function Router() {
         
         {/* Portal do Volante (acesso público via token) */}
         <Route path={"/portal-volante"} component={PortalLoja} />
+        
+        {/* API Keys (Admin) */}
+        <Route path={"/api-keys"} component={ApiKeysAdmin} />
         
         {/* Recalibra */}
         <Route path={"/gestao-recalibra"} component={GestaoRecalibra} />
