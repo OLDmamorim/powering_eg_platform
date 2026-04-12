@@ -1,0 +1,1 @@
+ALTER TABLE `api_keys` MODIFY COLUMN `keyPrefix` varchar(16) NOT NULL;

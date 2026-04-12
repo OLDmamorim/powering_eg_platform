@@ -2004,7 +2004,7 @@ export const apiKeys = mysqlTable("api_keys", {
   id: int("id").autoincrement().primaryKey(),
   nome: varchar("nome", { length: 255 }).notNull(), // Nome descritivo da chave (ex: "App Mobile", "Power BI")
   keyHash: varchar("keyHash", { length: 255 }).notNull(), // Hash SHA-256 da chave
-  keyPrefix: varchar("keyPrefix", { length: 10 }).notNull(), // Primeiros 8 caracteres da chave (para identificação)
+  keyPrefix: varchar("keyPrefix", { length: 16 }).notNull(), // Primeiros 12 caracteres da chave (para identificação)
   permissoes: json("permissoes").notNull().$type<string[]>(), // Array de permissões: ["resultados", "lojas", "nps"]
   ativo: boolean("ativo").default(true).notNull(),
   ultimoUso: timestamp("ultimoUso"), // Última vez que a chave foi usada

@@ -43,7 +43,7 @@ import {
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { Button } from "./ui/button";
 
-import { Building2, ClipboardList, FileText, ListTodo, Sparkles, History, Bell, Settings, Tag, BarChart3, UserCog, CalendarDays, Store, TrendingUp, GitCompare, Users2, AlertTriangle, Bot, MessageSquarePlus, Route, Link2, Eye, Car, FileSpreadsheet, SmilePlus, StickyNote, Package, Warehouse, Key } from "lucide-react";
+import { Building2, ClipboardList, FileText, ListTodo, Sparkles, History, Bell, Settings, Tag, BarChart3, UserCog, CalendarDays, Store, TrendingUp, GitCompare, Users2, AlertTriangle, Bot, MessageSquarePlus, Route, Link2, Eye, Car, FileSpreadsheet, SmilePlus, StickyNote, Package, Warehouse, Key, X } from "lucide-react";
 
 // Grupos de menu com cores
 type MenuGroup = {
@@ -296,10 +296,18 @@ function DashboardLayoutContent({
   const isMobile = useIsMobile();
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [isPWAInstalled, setIsPWAInstalled] = useState(false);
+  const [installBannerDismissed, setInstallBannerDismissed] = useState(() => {
+    return localStorage.getItem('pwa_install_dismissed') === 'true';
+  });
   
   // Push Notifications
   const pushNotifications = usePushNotifications();
   
+  const dismissInstallBanner = () => {
+    setInstallBannerDismissed(true);
+    localStorage.setItem('pwa_install_dismissed', 'true');
+  };
+
   // Verificar se PWA já está instalada
   useEffect(() => {
     const checkInstalled = () => {
@@ -582,17 +590,26 @@ function DashboardLayoutContent({
               </div>
             </div>
             {/* Linha 2: Botão Instalar ou Ativar Notificações */}
-            {!isPWAInstalled ? (
-              <div className="flex items-center justify-center pb-2 px-2">
+            {!isPWAInstalled && !installBannerDismissed ? (
+              <div className="flex items-center justify-center pb-2 px-2 gap-1">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={handleInstallPWA}
-                  className="h-8 px-4 text-xs font-medium bg-green-50 text-green-700 border-green-300 hover:bg-green-100 w-full max-w-xs"
+                  className="h-8 px-4 text-xs font-medium bg-green-50 text-green-700 border-green-300 hover:bg-green-100 flex-1 max-w-xs"
                   title={language === 'pt' ? 'Instalar App' : 'Install App'}
                 >
                   <Download className="h-4 w-4 mr-2" />
                   {language === 'pt' ? 'Instalar PoweringEG' : 'Install PoweringEG'}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={dismissInstallBanner}
+                  className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground shrink-0"
+                  title={language === 'pt' ? 'Fechar' : 'Close'}
+                >
+                  <X className="h-3.5 w-3.5" />
                 </Button>
               </div>
             ) : pushNotifications.isSupported && !pushNotifications.isSubscribed && (

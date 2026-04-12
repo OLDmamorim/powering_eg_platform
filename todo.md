@@ -1598,3 +1598,13 @@
 - [x] tRPC procedures admin: criar, listar, toggleAtivo, eliminar
 - [x] Testes unitários (14/14 passam)
 - [ ] Guardar checkpoint
+
+## Bug: Banner "Instalar PoweringEG" aparece sempre
+- [x] Adicionado botão X para fechar o banner
+- [x] Persistência via localStorage (pwa_install_dismissed)
+- [ ] Guardar checkpoint
+
+## Bug: Criar API Key falha com erro de insert na BD
+- [x] Problema: keyPrefix varchar(10) mas código gera 12 chars (peg_ + 8 hex)
+- [x] Corrigido schema para varchar(16) e migrado BD
+- [ ] Guardar checkpoint
