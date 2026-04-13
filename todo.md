@@ -1608,3 +1608,10 @@
 - [x] Problema: keyPrefix varchar(10) mas código gera 12 chars (peg_ + 8 hex)
 - [x] Corrigido schema para varchar(16) e migrado BD
 - [ ] Guardar checkpoint
+
+## Feature: Tabela de Ocupação do Volante por Loja
+- [x] Calcular % de ocupação de cada volante por loja (serviços e dias)
+- [x] Adicionar ocupacaoPorVolante ao backend dashboardGestor
+- [x] Adicionar tabela no frontend com barras de progresso por volante
+- [x] Testes passam (542/565)
+- [x] Guardar checkpoint

@@ -713,6 +713,81 @@ export default function DashboardVolantesGestor() {
               </Card>
             </div>
 
+            {/* Ocupação dos Volantes por Loja */}
+            {data.ocupacaoPorVolante && data.ocupacaoPorVolante.length > 0 && (
+              <Card className="border-0 shadow-lg">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Users className="h-5 w-5 text-indigo-500" />
+                    Ocupação dos Volantes por Loja
+                  </CardTitle>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Distribuição percentual dos serviços de cada volante pelas lojas no período selecionado</p>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-6">
+                    {data.ocupacaoPorVolante.map((v) => {
+                      if (v.lojas.length === 0) return null;
+                      return (
+                        <div key={v.volanteId} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                          <div className="flex items-center gap-2 mb-3">
+                            <Users className="h-4 w-4 text-indigo-500" />
+                            <h4 className="font-semibold text-gray-900 dark:text-white">{v.volanteNome}</h4>
+                            <Badge variant="outline" className="ml-auto text-xs">{v.lojas.length} lojas</Badge>
+                          </div>
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-sm">
+                              <thead>
+                                <tr className="text-xs text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
+                                  <th className="px-3 py-2 text-left">Loja</th>
+                                  <th className="px-3 py-2 text-right">Serviços</th>
+                                  <th className="px-3 py-2 text-right">Dias</th>
+                                  <th className="px-3 py-2 text-right">% Serviços</th>
+                                  <th className="px-3 py-2 text-right">% Dias</th>
+                                  <th className="px-3 py-2 text-left w-40">Ocupação</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                                {v.lojas.map((l) => (
+                                  <tr key={l.lojaId} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                                    <td className="px-3 py-2">
+                                      <div className="flex items-center gap-2">
+                                        <Building2 className="h-3.5 w-3.5 text-gray-400" />
+                                        <span className="font-medium text-gray-900 dark:text-white text-xs">{l.lojaNome}</span>
+                                      </div>
+                                    </td>
+                                    <td className="px-3 py-2 text-right font-medium text-indigo-600 dark:text-indigo-400">{l.servicos}</td>
+                                    <td className="px-3 py-2 text-right text-gray-600 dark:text-gray-300">{l.dias}</td>
+                                    <td className="px-3 py-2 text-right font-bold text-sm">
+                                      <span className={l.percentagemServicos >= 40 ? 'text-indigo-600 dark:text-indigo-400' : l.percentagemServicos >= 20 ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-300'}>
+                                        {l.percentagemServicos}%
+                                      </span>
+                                    </td>
+                                    <td className="px-3 py-2 text-right font-bold text-sm">
+                                      <span className={l.percentagemDias >= 40 ? 'text-amber-600 dark:text-amber-400' : l.percentagemDias >= 20 ? 'text-orange-500 dark:text-orange-400' : 'text-gray-600 dark:text-gray-300'}>
+                                        {l.percentagemDias}%
+                                      </span>
+                                    </td>
+                                    <td className="px-3 py-2">
+                                      <div className="w-full h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                                        <div 
+                                          className={`h-full rounded-full transition-all ${l.percentagemServicos >= 40 ? 'bg-indigo-500' : l.percentagemServicos >= 20 ? 'bg-blue-500' : 'bg-sky-400'}`}
+                                          style={{ width: `${Math.min(100, l.percentagemServicos)}%` }}
+                                        />
+                                      </div>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Tabela de Influência por Loja */}
             {data.influenciaPorLoja && data.influenciaPorLoja.length > 0 && (
               <Card>

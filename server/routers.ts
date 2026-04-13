@@ -9527,6 +9527,7 @@ IMPORTANTE:
             pedidosApoio: { total: 0, aprovados: 0, pendentes: 0, reprovados: 0 },
             topLojas: [],
             influenciaPorLoja: [] as { lojaId: number; lojaNome: string; servicosVolante: number; totalServicosLoja: number; percentagemInfluencia: number }[],
+            ocupacaoPorVolante: [] as { volanteId: number; volanteNome: string; lojas: { lojaId: number; lojaNome: string; servicos: number; dias: number; percentagemServicos: number; percentagemDias: number }[] }[],
             evolucaoMensal: [],
             todosVolantes,
             todasLojas: [] as { id: number; nome: string }[],
@@ -9541,6 +9542,7 @@ IMPORTANTE:
             pedidosApoio: { total: 0, aprovados: 0, pendentes: 0, reprovados: 0 },
             topLojas: [],
             influenciaPorLoja: [] as { lojaId: number; lojaNome: string; servicosVolante: number; totalServicosLoja: number; percentagemInfluencia: number }[],
+            ocupacaoPorVolante: [] as { volanteId: number; volanteNome: string; lojas: { lojaId: number; lojaNome: string; servicos: number; dias: number; percentagemServicos: number; percentagemDias: number }[] }[],
             evolucaoMensal: [],
             todosVolantes,
             todasLojas: [] as { id: number; nome: string }[],
@@ -9672,6 +9674,23 @@ IMPORTANTE:
           influenciaFiltrada = influenciaPorLoja.filter(l => l.lojaId === input.lojaId);
         }
         
+        // Ocupação por volante: distribuição percentual dos serviços de cada volante por loja
+        const ocupacaoPorVolante: { volanteId: number; volanteNome: string; lojas: { lojaId: number; lojaNome: string; servicos: number; dias: number; percentagemServicos: number; percentagemDias: number }[] }[] = [];
+        for (const v of volantesAtivos) {
+          const topLojasV = await db.getTopLojasServicos(v.id, 100, mesesSel);
+          const totalServV = topLojasV.reduce((s: number, l: any) => s + l.totalServicos, 0);
+          const totalDiasV = topLojasV.reduce((s: number, l: any) => s + (l.visitas || 0), 0);
+          const lojasOcupacao = topLojasV.map((l: any) => ({
+            lojaId: l.lojaId,
+            lojaNome: l.lojaNome || 'Loja',
+            servicos: l.totalServicos,
+            dias: l.visitas || 0,
+            percentagemServicos: totalServV > 0 ? parseFloat(((l.totalServicos / totalServV) * 100).toFixed(1)) : 0,
+            percentagemDias: totalDiasV > 0 ? parseFloat((((l.visitas || 0) / totalDiasV) * 100).toFixed(1)) : 0,
+          })).sort((a: any, b: any) => b.percentagemServicos - a.percentagemServicos);
+          ocupacaoPorVolante.push({ volanteId: v.id, volanteNome: v.nome, lojas: lojasOcupacao });
+        }
+        
         // Evolução mensal (últimos 6 meses)
         const evolucaoMensal: { mes: string; totalServicos: number; substituicoes: number; reparacoes: number; calibragens: number }[] = [];
         const agora = new Date();
@@ -9701,6 +9720,7 @@ IMPORTANTE:
           pedidosApoio: { total: pedidosTotal, aprovados: pedidosAprovados, pendentes: pedidosPendentes, reprovados: pedidosReprovados },
           topLojas,
           influenciaPorLoja: influenciaFiltrada,
+          ocupacaoPorVolante,
           evolucaoMensal,
           todosVolantes,
           todasLojas,
