@@ -48,6 +48,21 @@ interface TopLoja {
   total: number;
 }
 
+interface OcupacaoVolante {
+  volanteId: number;
+  volanteNome: string;
+  totalServicos: number;
+  totalDias: number;
+  lojas: {
+    lojaId: number;
+    lojaNome: string;
+    servicos: number;
+    dias: number;
+    percentagemServicos: number;
+    percentagemDias: number;
+  }[];
+}
+
 export interface DashboardVolantesGestorData {
   totalVolantes: number;
   kpis: KPIs;
@@ -55,17 +70,27 @@ export interface DashboardVolantesGestorData {
   pedidosApoio: PedidosApoio;
   topLojas: TopLoja[];
   influenciaPorLoja: InfluenciaLoja[];
+  ocupacaoPorVolante?: OcupacaoVolante[];
   periodoLabel: string;
   filtroVolante?: string;
   filtroLoja?: string;
 }
 
-// Chart renderer - reusable instance
-const chartWidth = 260;
-const chartHeight = 160;
-const chartCanvas = new ChartJSNodeCanvas({ width: chartWidth, height: chartHeight, backgroundColour: 'white' });
+// Font family used in all charts
+const FONT_FAMILY = 'DejaVu Sans';
+const FONT_PATH = '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf';
+const FONT_BOLD_PATH = '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf';
 
-const smallChartCanvas = new ChartJSNodeCanvas({ width: 180, height: 160, backgroundColour: 'white' });
+// Chart renderer with font registration
+function createChartCanvas(width: number, height: number): ChartJSNodeCanvas {
+  const canvas = new ChartJSNodeCanvas({ width, height, backgroundColour: 'white' });
+  canvas.registerFont(FONT_PATH, { family: FONT_FAMILY });
+  canvas.registerFont(FONT_BOLD_PATH, { family: FONT_FAMILY, weight: 'bold' });
+  return canvas;
+}
+
+const chartCanvas = createChartCanvas(280, 170);
+const smallChartCanvas = createChartCanvas(200, 170);
 
 async function renderChart(config: ChartConfiguration, canvas?: ChartJSNodeCanvas): Promise<Buffer> {
   const c = canvas || chartCanvas;
@@ -86,9 +111,9 @@ const darkText = '#1F2937';
 const lightGreen = '#D1FAE5';
 const lightBlue = '#DBEAFE';
 const lightRose = '#FFE4E6';
+const lightAmber = '#FEF3C7';
 
 export async function gerarPDFDashboardVolantesGestor(data: DashboardVolantesGestorData): Promise<Buffer> {
-  // Pre-render all charts as PNG buffers
   const chartImages = await renderAllCharts(data);
 
   return new Promise((resolve, reject) => {
@@ -96,46 +121,51 @@ export async function gerarPDFDashboardVolantesGestor(data: DashboardVolantesGes
       const doc = new PDFDocument({ size: 'A4', margin: 30, bufferPages: true });
       const chunks: Buffer[] = [];
 
-      doc.on('data', (chunk) => chunks.push(chunk));
+      doc.on('data', (chunk: Buffer) => chunks.push(chunk));
       doc.on('end', () => resolve(Buffer.concat(chunks)));
       doc.on('error', reject);
 
-      const LM = 30; // left margin
-      const PW = doc.page.width - 60; // page width
+      const LM = 30;
+      const PW = doc.page.width - 60;
       const PH = doc.page.height;
-      const rowH = 14;
+      const rowH = 13;
+      const footerH = 30;
 
-      // ========== PAGE 1: HEADER + KPIs + TABLE + CHARTS ==========
+      function checkPageBreak(needed: number) {
+        if (doc.y + needed > PH - footerH) {
+          doc.addPage();
+          doc.y = 30;
+        }
+      }
 
-      // Header bar
-      doc.rect(0, 0, doc.page.width, 50).fill(emerald);
-      doc.fontSize(18).font('Helvetica-Bold').fillColor('white')
-         .text('Dashboard Volantes', LM, 12, { width: PW, align: 'center' });
-      doc.fontSize(9).font('Helvetica').fillColor('white')
-         .text(`Período: ${data.periodoLabel}`, LM, 33, { width: PW, align: 'center' });
+      // ========== HEADER ==========
+      doc.rect(0, 0, doc.page.width, 48).fill(emerald);
+      doc.fontSize(16).font('Helvetica-Bold').fillColor('white')
+         .text('Dashboard Volantes', LM, 10, { width: PW, align: 'center' });
+      doc.fontSize(8).font('Helvetica').fillColor('white')
+         .text(`Período: ${data.periodoLabel}`, LM, 30, { width: PW, align: 'center' });
 
-      // Filtros ativos
-      let startY = 56;
+      let startY = 54;
       const filtros: string[] = [];
       if (data.filtroVolante) filtros.push(`Volante: ${data.filtroVolante}`);
       if (data.filtroLoja) filtros.push(`Loja: ${data.filtroLoja}`);
       if (filtros.length > 0) {
         doc.fontSize(7).font('Helvetica').fillColor(rose)
            .text(`Filtros ativos: ${filtros.join(' | ')}`, LM, startY, { width: PW, align: 'center' });
-        startY += 12;
+        startY += 11;
       }
 
-      // ---- KPIs: 2 rows of 4 compact boxes ----
-      const kpiW = (PW - 9) / 4; // 3px spacing between
-      const kpiH = 36;
+      // ========== KPIs: 2 rows of 4 ==========
+      const kpiW = (PW - 9) / 4;
+      const kpiH = 34;
       const kpiGap = 3;
 
       function drawKPI(x: number, y: number, label: string, value: string, color: string, sub?: string) {
-        doc.rect(x, y, kpiW, kpiH).lineWidth(1.2).strokeColor(color).stroke();
-        doc.fontSize(6).font('Helvetica-Bold').fillColor(color).text(label, x + 4, y + 3, { width: kpiW - 8 });
-        doc.fontSize(14).font('Helvetica-Bold').fillColor(color).text(value, x + 4, y + 12, { width: kpiW - 8, align: 'center' });
+        doc.rect(x, y, kpiW, kpiH).lineWidth(1).strokeColor(color).stroke();
+        doc.fontSize(5.5).font('Helvetica-Bold').fillColor(color).text(label, x + 3, y + 2, { width: kpiW - 6 });
+        doc.fontSize(13).font('Helvetica-Bold').fillColor(color).text(value, x + 3, y + 10, { width: kpiW - 6, align: 'center' });
         if (sub) {
-          doc.fontSize(5).font('Helvetica').fillColor(gray).text(sub, x + 4, y + 28, { width: kpiW - 8, align: 'center' });
+          doc.fontSize(4.5).font('Helvetica').fillColor(gray).text(sub, x + 3, y + 26, { width: kpiW - 6, align: 'center' });
         }
       }
 
@@ -150,35 +180,33 @@ export async function gerarPDFDashboardVolantesGestor(data: DashboardVolantesGes
       drawKPI(LM + (kpiW + kpiGap) * 2, kpiY2, 'Média/Dia', data.kpis.mediaPorDia.toFixed(1), indigo);
       drawKPI(LM + (kpiW + kpiGap) * 3, kpiY2, 'Influência Média', `${data.kpis.mediaInfluencia.toFixed(1)}%`, rose, 'nos resultados da loja');
 
-      doc.y = kpiY2 + kpiH + 10;
+      doc.y = kpiY2 + kpiH + 8;
 
-      // ---- TABELA ATIVIDADE POR VOLANTE ----
-      doc.fontSize(10).font('Helvetica-Bold').fillColor(darkText).text('Atividade por Volante', LM, doc.y);
-      doc.y += 12;
+      // ========== TABELA ATIVIDADE POR VOLANTE ==========
+      doc.fontSize(9).font('Helvetica-Bold').fillColor(darkText).text('Atividade por Volante', LM, doc.y);
+      doc.y += 11;
 
       const cols = [
         { label: 'Volante', w: 100 },
-        { label: 'Lojas', w: 32 },
-        { label: 'Total', w: 38 },
-        { label: 'Subst.', w: 38 },
-        { label: 'Repar.', w: 38 },
-        { label: 'Calib.', w: 38 },
-        { label: 'Outros', w: 38 },
-        { label: 'Dias', w: 32 },
-        { label: 'Méd/Dia', w: 42 },
+        { label: 'Lojas', w: 30 },
+        { label: 'Total', w: 36 },
+        { label: 'Subst.', w: 36 },
+        { label: 'Repar.', w: 36 },
+        { label: 'Calib.', w: 36 },
+        { label: 'Outros', w: 36 },
+        { label: 'Dias', w: 30 },
+        { label: 'Méd/Dia', w: 40 },
       ];
-
-      // Adjust last column to fill remaining width
       const totalColW = cols.reduce((s, c) => s + c.w, 0);
       if (totalColW < PW) cols[cols.length - 1].w += PW - totalColW;
 
       let tY = doc.y;
 
-      // Header
+      // Header row
       doc.rect(LM, tY, PW, rowH).fillAndStroke(lightGreen, lightGreen);
       let cX = LM;
       cols.forEach(c => {
-        doc.fontSize(6).font('Helvetica-Bold').fillColor(darkText).text(c.label, cX + 2, tY + 3, { width: c.w - 4 });
+        doc.fontSize(5.5).font('Helvetica-Bold').fillColor(darkText).text(c.label, cX + 2, tY + 3, { width: c.w - 4 });
         cX += c.w;
       });
       tY += rowH;
@@ -191,7 +219,7 @@ export async function gerarPDFDashboardVolantesGestor(data: DashboardVolantesGes
         const vals = [v.nome, v.totalLojas, v.totalServicos, v.substituicoes, v.reparacoes, v.calibragens, v.outros, v.diasTrabalhados, v.mediaPorDia.toFixed(1)];
         const clrs = [darkText, gray, emerald, blue, amber, purple, gray, teal, indigo];
         vals.forEach((val, i) => {
-          doc.fontSize(6).font(i === 0 || i === 2 ? 'Helvetica-Bold' : 'Helvetica')
+          doc.fontSize(5.5).font(i === 0 || i === 2 ? 'Helvetica-Bold' : 'Helvetica')
              .fillColor(clrs[i]).text(String(val), cX + 2, tY + 3, { width: cols[i].w - 4 });
           cX += cols[i].w;
         });
@@ -204,55 +232,49 @@ export async function gerarPDFDashboardVolantesGestor(data: DashboardVolantesGes
         cX = LM;
         const totals = ['TOTAL', '-', data.kpis.totalServicos, data.kpis.totalSubstituicoes, data.kpis.totalReparacoes, data.kpis.totalCalibragens, data.kpis.totalOutros, data.kpis.diasTrabalhados, data.kpis.mediaPorDia.toFixed(1)];
         totals.forEach((val, i) => {
-          doc.fontSize(6).font('Helvetica-Bold').fillColor(darkText).text(String(val), cX + 2, tY + 3, { width: cols[i].w - 4 });
+          doc.fontSize(5.5).font('Helvetica-Bold').fillColor(darkText).text(String(val), cX + 2, tY + 3, { width: cols[i].w - 4 });
           cX += cols[i].w;
         });
         tY += rowH;
       }
 
-      doc.y = tY + 8;
+      doc.y = tY + 6;
 
-      // ---- CHARTS ROW: Serviços por Volante (bar) + Pedidos de Apoio (doughnut) ----
-      const chartsY = doc.y;
-      const chartLeftW = PW * 0.6;
-      const chartRightW = PW * 0.4 - 6;
+      // ========== CHARTS ROW 1: Serviços por Volante + Pedidos de Apoio ==========
+      checkPageBreak(175);
+      const chartLeftW = PW * 0.58;
+      const chartRightW = PW * 0.42 - 6;
 
-      // Section label
-      doc.fontSize(10).font('Helvetica-Bold').fillColor(darkText).text('Serviços por Volante', LM, chartsY);
-      doc.fontSize(10).font('Helvetica-Bold').fillColor(darkText).text('Pedidos de Apoio', LM + chartLeftW + 6, chartsY);
+      doc.fontSize(9).font('Helvetica-Bold').fillColor(darkText).text('Serviços por Volante', LM, doc.y);
+      doc.fontSize(9).font('Helvetica-Bold').fillColor(darkText).text('Pedidos de Apoio', LM + chartLeftW + 6, doc.y);
       
-      const chartImgY = chartsY + 12;
+      const chartImgY = doc.y + 10;
 
       if (chartImages.servicosPorVolante) {
-        doc.image(chartImages.servicosPorVolante, LM, chartImgY, { width: chartLeftW, height: 140 });
+        doc.image(chartImages.servicosPorVolante, LM, chartImgY, { width: chartLeftW, height: 145 });
       }
 
       if (chartImages.pedidosApoio) {
-        doc.image(chartImages.pedidosApoio, LM + chartLeftW + 6, chartImgY, { width: chartRightW, height: 140 });
+        doc.image(chartImages.pedidosApoio, LM + chartLeftW + 6, chartImgY, { width: chartRightW, height: 145 });
       } else {
-        // Fallback: show numbers
+        // Fallback: show numbers as text
         const apoioY = chartImgY + 10;
-        const apoioW = chartRightW / 2 - 2;
-        drawKPI(LM + chartLeftW + 6, apoioY, 'Aprovados', data.pedidosApoio.aprovados.toString(), '#22C55E');
-        drawKPI(LM + chartLeftW + 6 + apoioW + 4, apoioY, 'Pendentes', data.pedidosApoio.pendentes.toString(), amber);
-        drawKPI(LM + chartLeftW + 6, apoioY + kpiH + 4, 'Reprovados', data.pedidosApoio.reprovados.toString(), '#EF4444');
-        drawKPI(LM + chartLeftW + 6 + apoioW + 4, apoioY + kpiH + 4, 'Total', data.pedidosApoio.total.toString(), gray);
+        doc.fontSize(8).font('Helvetica').fillColor(darkText);
+        doc.text(`Aprovados: ${data.pedidosApoio.aprovados}`, LM + chartLeftW + 10, apoioY);
+        doc.text(`Pendentes: ${data.pedidosApoio.pendentes}`, LM + chartLeftW + 10, apoioY + 14);
+        doc.text(`Reprovados: ${data.pedidosApoio.reprovados}`, LM + chartLeftW + 10, apoioY + 28);
+        doc.text(`Total: ${data.pedidosApoio.total}`, LM + chartLeftW + 10, apoioY + 42);
       }
 
-      doc.y = chartImgY + 140 + 8;
+      doc.y = chartImgY + 145 + 6;
 
-      // ---- CHARTS ROW 2: Top Lojas (bar horizontal) + Influência (bar horizontal) ----
-      // Check if we need a new page
-      if (doc.y + 170 > PH - 40) {
-        doc.addPage();
-        doc.y = 30;
-      }
-
+      // ========== CHARTS ROW 2: Top Lojas + Influência ==========
+      checkPageBreak(175);
       const charts2Y = doc.y;
-      doc.fontSize(10).font('Helvetica-Bold').fillColor(darkText).text('Top 10 Lojas', LM, charts2Y);
-      doc.fontSize(10).font('Helvetica-Bold').fillColor(darkText).text('Influência por Loja', LM + chartLeftW + 6, charts2Y);
+      doc.fontSize(9).font('Helvetica-Bold').fillColor(darkText).text('Top 10 Lojas', LM, charts2Y);
+      doc.fontSize(9).font('Helvetica-Bold').fillColor(darkText).text('Influência por Loja', LM + chartLeftW + 6, charts2Y);
 
-      const chart2ImgY = charts2Y + 12;
+      const chart2ImgY = charts2Y + 10;
 
       if (chartImages.topLojas) {
         doc.image(chartImages.topLojas, LM, chart2ImgY, { width: chartLeftW, height: 150 });
@@ -262,83 +284,148 @@ export async function gerarPDFDashboardVolantesGestor(data: DashboardVolantesGes
         doc.image(chartImages.influencia, LM + chartLeftW + 6, chart2ImgY, { width: chartRightW, height: 150 });
       }
 
-      doc.y = chart2ImgY + 150 + 8;
+      doc.y = chart2ImgY + 150 + 6;
 
-      // ---- INFLUÊNCIA TABLE (compact, on page 2 if needed) ----
-      if (data.influenciaPorLoja.length > 0) {
-        if (doc.y + 30 + Math.min(data.influenciaPorLoja.length, 15) * rowH > PH - 40) {
-          doc.addPage();
-          doc.y = 30;
-        }
+      // ========== TABELA OCUPAÇÃO POR VOLANTE ==========
+      if (data.ocupacaoPorVolante && data.ocupacaoPorVolante.length > 0) {
+        checkPageBreak(60);
+        doc.fontSize(9).font('Helvetica-Bold').fillColor(darkText).text('Ocupação dos Volantes por Loja', LM, doc.y);
+        doc.fontSize(5.5).font('Helvetica').fillColor(gray)
+           .text('Distribuição dos serviços e dias de cada volante pelas lojas', LM, doc.y + 11);
+        doc.y += 20;
 
-        doc.fontSize(10).font('Helvetica-Bold').fillColor(darkText)
-           .text('Detalhe Influência por Loja', LM, doc.y);
-        doc.fontSize(6).font('Helvetica').fillColor(gray)
-           .text('Percentagem dos serviços totais da loja realizados pelos volantes', LM, doc.y + 12);
-        doc.y += 22;
-
-        const infCols = [
-          { label: '#', w: 20 },
-          { label: 'Loja', w: PW - 180 },
-          { label: 'Serv. Vol.', w: 50 },
-          { label: 'Total Loja', w: 50 },
-          { label: 'Influência', w: 60 },
+        const ocCols = [
+          { label: 'Loja', w: PW - 200 },
+          { label: 'Serviços', w: 50 },
+          { label: '% Serv.', w: 50 },
+          { label: 'Dias', w: 50 },
+          { label: '% Dias', w: 50 },
         ];
 
-        let iY = doc.y;
+        data.ocupacaoPorVolante.forEach((vol) => {
+          checkPageBreak(rowH * (vol.lojas.length + 2) + 10);
+
+          // Volante header
+          doc.rect(LM, doc.y, PW, rowH + 1).fillAndStroke(lightBlue, lightBlue);
+          doc.fontSize(6).font('Helvetica-Bold').fillColor(indigo)
+             .text(`${vol.volanteNome}`, LM + 3, doc.y + 3, { width: PW * 0.4 });
+          doc.fontSize(5).font('Helvetica').fillColor(gray)
+             .text(`${vol.lojas.length} lojas | ${vol.totalServicos} serviços | ${vol.totalDias} dias`, LM + PW * 0.4, doc.y + 4, { width: PW * 0.6, align: 'right' });
+          doc.y += rowH + 1;
+
+          // Column headers
+          doc.rect(LM, doc.y, PW, rowH).fillAndStroke('#F3F4F6', '#F3F4F6');
+          let oX = LM;
+          ocCols.forEach(c => {
+            doc.fontSize(5).font('Helvetica-Bold').fillColor(gray).text(c.label, oX + 2, doc.y + 3, { width: c.w - 4, align: c.label === 'Loja' ? 'left' : 'right' });
+            oX += c.w;
+          });
+          doc.y += rowH;
+
+          // Loja rows
+          const topLojas = vol.lojas.slice(0, 8);
+          topLojas.forEach((l, idx) => {
+            checkPageBreak(rowH);
+            const bg = idx % 2 === 0 ? '#FFFFFF' : '#F9FAFB';
+            doc.rect(LM, doc.y, PW, rowH).fillAndStroke(bg, bg);
+            oX = LM;
+
+            doc.fontSize(5.5).font('Helvetica').fillColor(darkText).text(l.lojaNome, oX + 2, doc.y + 3, { width: ocCols[0].w - 4 });
+            oX += ocCols[0].w;
+
+            doc.fontSize(5.5).font('Helvetica-Bold').fillColor(blue).text(l.servicos.toString(), oX + 2, doc.y + 3, { width: ocCols[1].w - 4, align: 'right' });
+            oX += ocCols[1].w;
+
+            const sColor = l.percentagemServicos >= 40 ? indigo : l.percentagemServicos >= 20 ? blue : gray;
+            doc.fontSize(5.5).font('Helvetica-Bold').fillColor(sColor).text(`${l.percentagemServicos.toFixed(1)}%`, oX + 2, doc.y + 3, { width: ocCols[2].w - 4, align: 'right' });
+            oX += ocCols[2].w;
+
+            doc.fontSize(5.5).font('Helvetica').fillColor(teal).text(l.dias.toString(), oX + 2, doc.y + 3, { width: ocCols[3].w - 4, align: 'right' });
+            oX += ocCols[3].w;
+
+            const dColor = l.percentagemDias >= 40 ? indigo : l.percentagemDias >= 20 ? teal : gray;
+            doc.fontSize(5.5).font('Helvetica-Bold').fillColor(dColor).text(`${l.percentagemDias.toFixed(1)}%`, oX + 2, doc.y + 3, { width: ocCols[4].w - 4, align: 'right' });
+
+            doc.y += rowH;
+          });
+
+          if (vol.lojas.length > 8) {
+            doc.fontSize(5).font('Helvetica').fillColor(gray)
+               .text(`... e mais ${vol.lojas.length - 8} lojas`, LM + 3, doc.y + 1);
+            doc.y += 10;
+          }
+
+          doc.y += 4;
+        });
+      }
+
+      // ========== TABELA INFLUÊNCIA POR LOJA ==========
+      if (data.influenciaPorLoja.length > 0) {
+        checkPageBreak(30 + Math.min(data.influenciaPorLoja.length, 15) * rowH);
+
+        doc.fontSize(9).font('Helvetica-Bold').fillColor(darkText)
+           .text('Detalhe Influência por Loja', LM, doc.y);
+        doc.fontSize(5.5).font('Helvetica').fillColor(gray)
+           .text('Percentagem dos serviços totais da loja realizados pelos volantes', LM, doc.y + 11);
+        doc.y += 20;
+
+        const infCols = [
+          { label: '#', w: 18 },
+          { label: 'Loja', w: PW - 158 },
+          { label: 'Serv. Vol.', w: 45 },
+          { label: 'Total Loja', w: 45 },
+          { label: 'Influência', w: 50 },
+        ];
 
         // Header
-        doc.rect(LM, iY, PW, rowH).fillAndStroke(lightRose, lightRose);
+        doc.rect(LM, doc.y, PW, rowH).fillAndStroke(lightRose, lightRose);
         let iX = LM;
         infCols.forEach(c => {
-          doc.fontSize(6).font('Helvetica-Bold').fillColor(darkText).text(c.label, iX + 2, iY + 3, { width: c.w - 4, align: c.label === '#' || c.label === 'Loja' ? 'left' : 'right' });
+          doc.fontSize(5.5).font('Helvetica-Bold').fillColor(darkText).text(c.label, iX + 2, doc.y + 3, { width: c.w - 4, align: c.label === '#' || c.label === 'Loja' ? 'left' : 'right' });
           iX += c.w;
         });
-        iY += rowH;
+        doc.y += rowH;
 
         const toShow = data.influenciaPorLoja.slice(0, 15);
         toShow.forEach((l, idx) => {
-          if (iY + rowH > PH - 40) {
-            doc.addPage();
-            iY = 30;
-          }
+          checkPageBreak(rowH);
 
           const bg = idx % 2 === 0 ? '#F9FAFB' : '#FFFFFF';
-          doc.rect(LM, iY, PW, rowH).fillAndStroke(bg, bg);
+          doc.rect(LM, doc.y, PW, rowH).fillAndStroke(bg, bg);
 
           iX = LM;
-          doc.fontSize(6).font('Helvetica').fillColor(gray).text((idx + 1).toString(), iX + 2, iY + 3, { width: infCols[0].w - 4 });
+          doc.fontSize(5.5).font('Helvetica').fillColor(gray).text((idx + 1).toString(), iX + 2, doc.y + 3, { width: infCols[0].w - 4 });
           iX += infCols[0].w;
 
-          doc.fontSize(6).font('Helvetica').fillColor(darkText).text(l.lojaNome, iX + 2, iY + 3, { width: infCols[1].w - 4 });
+          doc.fontSize(5.5).font('Helvetica').fillColor(darkText).text(l.lojaNome, iX + 2, doc.y + 3, { width: infCols[1].w - 4 });
           iX += infCols[1].w;
 
-          doc.fontSize(6).font('Helvetica-Bold').fillColor(emerald).text(l.servicosVolante.toString(), iX + 2, iY + 3, { width: infCols[2].w - 4, align: 'right' });
+          doc.fontSize(5.5).font('Helvetica-Bold').fillColor(emerald).text(l.servicosVolante.toString(), iX + 2, doc.y + 3, { width: infCols[2].w - 4, align: 'right' });
           iX += infCols[2].w;
 
-          doc.fontSize(6).font('Helvetica').fillColor(gray).text(l.totalServicosLoja > 0 ? l.totalServicosLoja.toString() : 's/ dados', iX + 2, iY + 3, { width: infCols[3].w - 4, align: 'right' });
+          doc.fontSize(5.5).font('Helvetica').fillColor(gray).text(l.totalServicosLoja > 0 ? l.totalServicosLoja.toString() : 's/ dados', iX + 2, doc.y + 3, { width: infCols[3].w - 4, align: 'right' });
           iX += infCols[3].w;
 
-          // Influence bar + percentage
           const infColor = l.percentagemInfluencia >= 50 ? '#EF4444' : l.percentagemInfluencia >= 25 ? '#F59E0B' : '#10B981';
+          // Progress bar
           if (l.totalServicosLoja > 0) {
             const barX = iX + 2;
-            const barW = infCols[4].w - 28;
-            const barH = 4;
-            const barY = iY + 2;
+            const barW = infCols[4].w - 26;
+            const barH = 3;
+            const barY = doc.y + 2;
             doc.rect(barX, barY, barW, barH).fillAndStroke('#E5E7EB', '#E5E7EB');
             const fillW = Math.min(barW, (l.percentagemInfluencia / 100) * barW);
             if (fillW > 0) doc.rect(barX, barY, fillW, barH).fillAndStroke(infColor, infColor);
           }
-          doc.fontSize(6).font('Helvetica-Bold').fillColor(infColor)
-             .text(l.totalServicosLoja > 0 ? `${l.percentagemInfluencia.toFixed(1)}%` : '-', iX + 2, iY + 7, { width: infCols[4].w - 4, align: 'right' });
+          doc.fontSize(5.5).font('Helvetica-Bold').fillColor(infColor)
+             .text(l.totalServicosLoja > 0 ? `${l.percentagemInfluencia.toFixed(1)}%` : '-', iX + 2, doc.y + 6, { width: infCols[4].w - 4, align: 'right' });
 
-          iY += rowH;
+          doc.y += rowH;
         });
 
         // Legend
-        iY += 4;
-        doc.fontSize(5).font('Helvetica').fillColor(gray).text('Legenda: ', LM, iY, { continued: true });
+        doc.y += 3;
+        doc.fontSize(5).font('Helvetica').fillColor(gray).text('Legenda: ', LM, doc.y, { continued: true });
         doc.fillColor('#10B981').text('< 25%  ', { continued: true });
         doc.fillColor('#F59E0B').text('25-50%  ', { continued: true });
         doc.fillColor('#EF4444').text('> 50%  ', { continued: true });
@@ -349,11 +436,11 @@ export async function gerarPDFDashboardVolantesGestor(data: DashboardVolantesGes
       const pages = doc.bufferedPageRange();
       for (let i = 0; i < pages.count; i++) {
         doc.switchToPage(i);
-        doc.fontSize(6).font('Helvetica').fillColor(gray)
-           .text('PoweringEG Platform 2.0 - a IA ao serviço da Expressglass', LM, PH - 25, { align: 'center', width: PW });
+        doc.fontSize(5.5).font('Helvetica').fillColor(gray)
+           .text('PoweringEG Platform 2.0 - a IA ao serviço da Expressglass', LM, PH - 24, { align: 'center', width: PW });
         const now = new Date();
         const df = `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()} às ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-        doc.fontSize(5).text(`Gerado em ${df} | Página ${i + 1} de ${pages.count}`, LM, PH - 18, { align: 'center', width: PW });
+        doc.fontSize(4.5).text(`Gerado em ${df} | Página ${i + 1} de ${pages.count}`, LM, PH - 17, { align: 'center', width: PW });
       }
 
       doc.end();
@@ -374,10 +461,12 @@ async function renderAllCharts(data: DashboardVolantesGestorData) {
     influencia?: Buffer;
   } = {};
 
+  const fontOpts = { family: FONT_FAMILY };
+
   // 1. Serviços por Volante - Stacked Bar
   if (data.porVolante.length > 0) {
     const sorted = [...data.porVolante].sort((a, b) => b.totalServicos - a.totalServicos);
-    const labels = sorted.map(v => v.nome.length > 12 ? v.nome.substring(0, 12) + '...' : v.nome);
+    const labels = sorted.map(v => v.nome.length > 14 ? v.nome.substring(0, 14) + '…' : v.nome);
     
     const config: ChartConfiguration = {
       type: 'bar',
@@ -393,12 +482,12 @@ async function renderAllCharts(data: DashboardVolantesGestorData) {
       options: {
         responsive: false,
         plugins: {
-          legend: { display: true, position: 'top', labels: { font: { size: 9 }, boxWidth: 10 } },
+          legend: { display: true, position: 'top', labels: { font: { ...fontOpts, size: 9 }, boxWidth: 10, padding: 6 } },
           title: { display: false },
         },
         scales: {
-          x: { stacked: true, ticks: { font: { size: 8 } } },
-          y: { stacked: true, beginAtZero: true, ticks: { font: { size: 8 } } },
+          x: { stacked: true, ticks: { font: { ...fontOpts, size: 8 } } },
+          y: { stacked: true, beginAtZero: true, ticks: { font: { ...fontOpts, size: 8 } } },
         },
       },
     };
@@ -421,7 +510,7 @@ async function renderAllCharts(data: DashboardVolantesGestorData) {
       options: {
         responsive: false,
         plugins: {
-          legend: { display: true, position: 'bottom', labels: { font: { size: 9 }, boxWidth: 10 } },
+          legend: { display: true, position: 'bottom', labels: { font: { ...fontOpts, size: 9 }, boxWidth: 10, padding: 6 } },
           title: { display: false },
         },
       },
@@ -432,7 +521,7 @@ async function renderAllCharts(data: DashboardVolantesGestorData) {
   // 3. Top Lojas - Horizontal Bar
   if (data.topLojas.length > 0) {
     const top = data.topLojas.slice(0, 10);
-    const labels = top.map(l => l.lojaNome.length > 18 ? l.lojaNome.substring(0, 18) + '...' : l.lojaNome);
+    const labels = top.map(l => l.lojaNome.length > 20 ? l.lojaNome.substring(0, 20) + '…' : l.lojaNome);
     
     const config: ChartConfiguration = {
       type: 'bar',
@@ -460,8 +549,8 @@ async function renderAllCharts(data: DashboardVolantesGestorData) {
           title: { display: false },
         },
         scales: {
-          x: { beginAtZero: true, ticks: { font: { size: 8 } } },
-          y: { ticks: { font: { size: 7 } } },
+          x: { beginAtZero: true, ticks: { font: { ...fontOpts, size: 8 } } },
+          y: { ticks: { font: { ...fontOpts, size: 7 } } },
         },
       },
     };
@@ -471,7 +560,7 @@ async function renderAllCharts(data: DashboardVolantesGestorData) {
   // 4. Influência por Loja - Horizontal Bar
   if (data.influenciaPorLoja.length > 0) {
     const top = [...data.influenciaPorLoja].sort((a, b) => b.percentagemInfluencia - a.percentagemInfluencia).slice(0, 10);
-    const labels = top.map(l => l.lojaNome.length > 16 ? l.lojaNome.substring(0, 16) + '...' : l.lojaNome);
+    const labels = top.map(l => l.lojaNome.length > 18 ? l.lojaNome.substring(0, 18) + '…' : l.lojaNome);
     
     const config: ChartConfiguration = {
       type: 'bar',
@@ -495,8 +584,8 @@ async function renderAllCharts(data: DashboardVolantesGestorData) {
           title: { display: false },
         },
         scales: {
-          x: { beginAtZero: true, max: 100, ticks: { font: { size: 8 }, callback: (v) => `${v}%` } },
-          y: { ticks: { font: { size: 7 } } },
+          x: { beginAtZero: true, max: 100, ticks: { font: { ...fontOpts, size: 8 }, callback: (v) => `${v}%` } },
+          y: { ticks: { font: { ...fontOpts, size: 7 } } },
         },
       },
     };

@@ -1615,3 +1615,11 @@
 - [x] Adicionar tabela no frontend com barras de progresso por volante
 - [x] Testes passam (542/565)
 - [x] Guardar checkpoint
+
+## Bug: PDF Dashboard Volantes v2 - Fontes ilegíveis e páginas vazias
+- [x] Corrigir fontes nos gráficos (registerFont com DejaVu Sans)
+- [x] Remover páginas vazias (checkPageBreak com footerH)
+- [x] Corrigir paginação (bufferedPageRange correcto)
+- [x] Adicionar tabela de ocupação por volante ao PDF
+- [x] Testes passam (5/5)
+- [x] Guardar checkpoint
