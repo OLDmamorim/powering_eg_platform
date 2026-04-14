@@ -1623,3 +1623,9 @@
 - [x] Adicionar tabela de ocupação por volante ao PDF
 - [x] Testes passam (5/5)
 - [x] Guardar checkpoint
+
+## Card QuizEG no Portal da Loja
+- [x] Fazer upload do logo QuizEG e obter CDN URL
+- [x] Adicionar card QuizEG ao Portal da Loja ao lado dos resultados
+- [x] Card com logo e link para https://quizglass.netlify.app/
+- [x] Testar visualização

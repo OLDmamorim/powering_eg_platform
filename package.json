@@ -60,6 +60,7 @@
     "@types/pdfkit": "^0.17.4",
     "axios": "^1.12.0",
     "browser-image-compression": "^2.0.2",
+    "canvas": "^3.2.3",
     "chart.js": "^4.5.1",
     "chartjs-node-canvas": "^5.0.0",
     "class-variance-authority": "^0.7.1",

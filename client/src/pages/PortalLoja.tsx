@@ -1861,6 +1861,21 @@ export default function PortalLoja() {
               </CardContent>
             </Card>
 
+            {/* Card QuizEG - Disponível para todos */}
+            <Card 
+              className="cursor-pointer hover:shadow-lg transition-all hover:scale-[1.02] bg-white dark:bg-gray-800 border-2 border-purple-200 dark:border-purple-700 overflow-hidden"
+              onClick={() => window.open('https://quizglass.netlify.app/', '_blank')}
+            >
+              <CardContent className="p-4 flex flex-col items-center justify-center">
+                <img 
+                  src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663088836799/trcrUUxmSPCjwaSn.png" 
+                  alt="QuizEG" 
+                  className="w-full max-w-[160px] h-auto object-contain mb-2" 
+                />
+                <p className="text-sm text-purple-600 dark:text-purple-400 font-medium text-center">{language === 'pt' ? 'Testar conhecimentos' : 'Test your knowledge'}</p>
+              </CardContent>
+            </Card>
+
             {/* Card Chatbot IA - Disponível para todos */}
             <Card 
               className="cursor-pointer hover:shadow-lg transition-all hover:scale-[1.02] bg-gradient-to-br from-indigo-500 to-violet-600 text-white border-0"
