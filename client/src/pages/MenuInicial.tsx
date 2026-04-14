@@ -260,7 +260,7 @@ export default function MenuInicial() {
 
       {/* Cards Selecionáveis */}
       <div className="flex-1 flex items-center justify-center">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl w-full">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl w-full">
           {/* Card Dashboard */}
           <Card 
             className="p-8 cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-105 bg-white dark:bg-gray-800 border-2 border-transparent hover:border-blue-400 group"
@@ -274,6 +274,20 @@ export default function MenuInicial() {
               <p className="text-gray-500 dark:text-gray-400 text-sm">
                 {language === 'pt' ? 'Painel de gestão completo com todas as funcionalidades' : 'Complete management panel with all features'}
               </p>
+            </div>
+          </Card>
+
+          {/* Card QuizEG */}
+          <Card 
+            className="p-8 cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-105 bg-gradient-to-br from-purple-500 to-violet-600 border-2 border-transparent hover:border-purple-400 group"
+            onClick={() => window.open('https://quizglass.netlify.app/', '_blank')}
+          >
+            <div className="flex items-center justify-center h-full">
+              <img 
+                src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663088836799/woNXutmWAhopcbEE.png" 
+                alt="QuizEG" 
+                className="w-32 h-32 object-contain" 
+              />
             </div>
           </Card>
 

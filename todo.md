@@ -1629,3 +1629,11 @@
 - [x] Adicionar card QuizEG ao Portal da Loja ao lado dos resultados
 - [x] Card com logo e link para https://quizglass.netlify.app/
 - [x] Testar visualização
+
+## Card QuizEG no Portal do Volante e Portal Gestores
+- [x] Adicionar card QuizEG ao Portal do Volante (ao lado dos cards existentes)
+- [x] Adicionar card QuizEG ao portal inicial dos gestores (ao lado do card Dashboard)
+- [x] Testar visualização em ambos os portais
+- [x] Corrigir estilo card QuizEG Portal da Loja: fundo roxo gradiente, logo branco, sem texto "Testar conhecimentos"
+- [x] Corrigir estilo card QuizEG Portal do Volante: mesmo estilo roxo
+- [x] Adicionar card QuizEG ao MenuInicial dos gestores ao lado do Dashboard

@@ -1863,16 +1863,15 @@ export default function PortalLoja() {
 
             {/* Card QuizEG - Disponível para todos */}
             <Card 
-              className="cursor-pointer hover:shadow-lg transition-all hover:scale-[1.02] bg-white dark:bg-gray-800 border-2 border-purple-200 dark:border-purple-700 overflow-hidden"
+              className="cursor-pointer hover:shadow-lg transition-all hover:scale-[1.02] bg-gradient-to-br from-purple-500 to-violet-600 text-white border-0"
               onClick={() => window.open('https://quizglass.netlify.app/', '_blank')}
             >
-              <CardContent className="p-4 flex flex-col items-center justify-center">
+              <CardContent className="p-6 flex items-center justify-center h-full">
                 <img 
-                  src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663088836799/trcrUUxmSPCjwaSn.png" 
+                  src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663088836799/woNXutmWAhopcbEE.png" 
                   alt="QuizEG" 
-                  className="w-full max-w-[160px] h-auto object-contain mb-2" 
+                  className="w-full max-w-[160px] h-auto object-contain" 
                 />
-                <p className="text-sm text-purple-600 dark:text-purple-400 font-medium text-center">{language === 'pt' ? 'Testar conhecimentos' : 'Test your knowledge'}</p>
               </CardContent>
             </Card>
 
@@ -7649,6 +7648,20 @@ END:VCALENDAR`;
                 <p className="text-gray-500 dark:text-gray-400 text-sm">
                   {language === 'pt' ? 'Notificações Telegram' : 'Telegram notifications'}
                 </p>
+              </div>
+            </Card>
+
+            {/* Card QuizEG */}
+            <Card 
+              className="p-8 cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-105 bg-gradient-to-br from-purple-500 to-violet-600 border-2 border-transparent hover:border-purple-400 group"
+              onClick={() => window.open('https://quizglass.netlify.app/', '_blank')}
+            >
+              <div className="flex items-center justify-center h-full">
+                <img 
+                  src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663088836799/woNXutmWAhopcbEE.png" 
+                  alt="QuizEG" 
+                  className="w-32 h-32 object-contain" 
+                />
               </div>
             </Card>
           </div>
