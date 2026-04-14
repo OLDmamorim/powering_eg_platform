@@ -279,15 +279,21 @@ export default function MenuInicial() {
 
           {/* Card QuizEG */}
           <Card 
-            className="p-8 cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-105 bg-gradient-to-br from-purple-500 to-violet-600 border-2 border-transparent hover:border-purple-400 group"
+            className="p-8 cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-105 bg-white dark:bg-gray-800 border-2 border-transparent hover:border-purple-400 group"
             onClick={() => window.open('https://quizglass.netlify.app/', '_blank')}
           >
-            <div className="flex items-center justify-center h-full">
-              <img 
-                src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663088836799/woNXutmWAhopcbEE.png" 
-                alt="QuizEG" 
-                className="w-32 h-32 object-contain" 
-              />
+            <div className="text-center">
+              <div className="w-24 h-24 bg-purple-100 dark:bg-purple-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-purple-200 dark:group-hover:bg-purple-900/50 transition-colors">
+                <img 
+                  src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663088836799/trcrUUxmSPCjwaSn.png" 
+                  alt="QuizEG" 
+                  className="h-12 w-12 object-contain" 
+                />
+              </div>
+              <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">QuizEG</h2>
+              <p className="text-gray-500 dark:text-gray-400 text-sm">
+                {language === 'pt' ? 'Testar conhecimentos ExpressGlass' : 'Test ExpressGlass knowledge'}
+              </p>
             </div>
           </Card>
 

@@ -129,6 +129,7 @@ import {
   Boxes,
   Search,
   CalendarPlus,
+  ExternalLink,
 } from "lucide-react";
 
 interface LojaAuth {
@@ -1866,12 +1867,17 @@ export default function PortalLoja() {
               className="cursor-pointer hover:shadow-lg transition-all hover:scale-[1.02] bg-gradient-to-br from-purple-500 to-violet-600 text-white border-0"
               onClick={() => window.open('https://quizglass.netlify.app/', '_blank')}
             >
-              <CardContent className="p-6 flex items-center justify-center h-full">
-                <img 
-                  src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663088836799/woNXutmWAhopcbEE.png" 
-                  alt="QuizEG" 
-                  className="w-full max-w-[160px] h-auto object-contain" 
-                />
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <img 
+                    src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663088836799/woNXutmWAhopcbEE.png" 
+                    alt="QuizEG" 
+                    className="h-10 w-auto object-contain opacity-80" 
+                  />
+                  <ExternalLink className="h-6 w-6 opacity-60" />
+                </div>
+                <h3 className="text-xl font-bold mb-2">QuizEG</h3>
+                <p className="text-sm opacity-80">{language === 'pt' ? 'Testar conhecimentos ExpressGlass' : 'Test ExpressGlass knowledge'}</p>
               </CardContent>
             </Card>
 

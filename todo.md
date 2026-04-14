@@ -1637,3 +1637,5 @@
 - [x] Corrigir estilo card QuizEG Portal da Loja: fundo roxo gradiente, logo branco, sem texto "Testar conhecimentos"
 - [x] Corrigir estilo card QuizEG Portal do Volante: mesmo estilo roxo
 - [x] Adicionar card QuizEG ao MenuInicial dos gestores ao lado do Dashboard
+- [x] Portal da Loja: QuizEG card com logo maior e descrição curta como os outros cards
+- [x] MenuInicial gestores: QuizEG card branco com logo pequeno num quadrado, título e descrição (como Dashboard, Chatbot IA)
