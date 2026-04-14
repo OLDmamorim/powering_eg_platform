@@ -6552,11 +6552,11 @@ function VolanteTab({
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded bg-purple-200 border"></div>
-              <span>{language === 'pt' ? 'Só manhã disponível' : 'Morning available'}</span>
+              <span>{language === 'pt' ? 'Manhã disponível' : 'Morning available'}</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded bg-blue-200 border"></div>
-              <span>{language === 'pt' ? 'Só tarde disponível' : 'Afternoon available'}</span>
+              <span>{language === 'pt' ? 'Tarde disponível' : 'Afternoon available'}</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded bg-red-400 border"></div>
