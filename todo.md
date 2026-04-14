@@ -1639,3 +1639,4 @@
 - [x] Adicionar card QuizEG ao MenuInicial dos gestores ao lado do Dashboard
 - [x] Portal da Loja: QuizEG card com logo maior e descrição curta como os outros cards
 - [x] MenuInicial gestores: QuizEG card branco com logo pequeno num quadrado, título e descrição (como Dashboard, Chatbot IA)
+- [x] Bug: Calendário volantes mostra "Livre" (branco) quando deveria mostrar estado parcial (ex: "Só tarde disponível" azul claro) baseado no estado combinado dos volantes

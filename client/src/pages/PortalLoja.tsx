@@ -6403,6 +6403,43 @@ function VolanteTab({
       return { manha: bloq, tarde: bloq, isSame: true };
     }
     
+    // Mapear estados combinados do backend directamente para cores da legenda
+    // tarde_disponivel = manhã ocupada globalmente, só tarde livre → bg-blue-200
+    // manha_disponivel = tarde ocupada globalmente, só manhã livre → bg-purple-200
+    if (estado.estado === 'tarde_disponivel') {
+      const volantesManha = volanteInfo?.filter((v: any) => v.periodo === 'manha' || v.periodo === 'dia_todo') || [];
+      if (volantesManha.length > 0) {
+        const nomes = volantesManha.map((v: any) => v.nome.split(' ')[0]).join(', ');
+        return {
+          manha: { cor: 'bg-red-400 text-white', texto: `${nomes} (Manhã)` },
+          tarde: { cor: 'bg-blue-200', texto: 'Livre' },
+          isSame: false
+        };
+      }
+      return {
+        manha: { cor: 'bg-red-400 text-white', texto: 'Ocupado' },
+        tarde: { cor: 'bg-blue-200', texto: 'Livre' },
+        isSame: false
+      };
+    }
+    
+    if (estado.estado === 'manha_disponivel') {
+      const volantesTarde = volanteInfo?.filter((v: any) => v.periodo === 'tarde' || v.periodo === 'dia_todo') || [];
+      if (volantesTarde.length > 0) {
+        const nomes = volantesTarde.map((v: any) => v.nome.split(' ')[0]).join(', ');
+        return {
+          manha: { cor: 'bg-purple-200', texto: 'Livre' },
+          tarde: { cor: 'bg-red-400 text-white', texto: `${nomes} (Tarde)` },
+          isSame: false
+        };
+      }
+      return {
+        manha: { cor: 'bg-purple-200', texto: 'Livre' },
+        tarde: { cor: 'bg-red-400 text-white', texto: 'Ocupado' },
+        isSame: false
+      };
+    }
+    
     // Verificar volantes aprovados por período
     const volantesManha = volanteInfo?.filter((v: any) => v.periodo === 'manha' || v.periodo === 'dia_todo') || [];
     const volantesTarde = volanteInfo?.filter((v: any) => v.periodo === 'tarde' || v.periodo === 'dia_todo') || [];
