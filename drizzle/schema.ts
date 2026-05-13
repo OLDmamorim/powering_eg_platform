@@ -1890,6 +1890,7 @@ export const agendamentosLoja = mysqlTable("agendamentos_loja", {
   matricula: varchar("matricula", { length: 20 }).notNull(),
   viatura: varchar("viatura", { length: 150 }),
   tipoServico: mysqlEnum("tipoServico", ["PB", "LT", "OC", "REP", "POL"]).notNull(),
+  servicos: text("servicos"), // JSON array de TipoServico[], e.g. ["PB","LT"]
   localidade: varchar("localidade", { length: 100 }),
   data: varchar("data", { length: 10 }),
   periodo: mysqlEnum("periodo", ["manha", "tarde"]),

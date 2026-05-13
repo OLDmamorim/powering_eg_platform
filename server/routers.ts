@@ -11503,8 +11503,41 @@ IMPORTANTE:
           erros: erros.length > 0 ? erros : undefined,
         };
       }),
+
+    // Histórico de envios de relatórios mensais (via token)
+    getHistoricoEnvios: publicProcedure
+      .input(z.object({ token: z.string() }))
+      .query(async ({ input }) => {
+        const tokenData = await db.validateTokenVolante(input.token);
+        if (!tokenData) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        return await db.getHistoricoEnviosRelatorios({ tipo: 'volante' });
+      }),
+
+    // Circulares/documentos do volante (via token)
+    getDocumentos: publicProcedure
+      .input(z.object({ token: z.string() }))
+      .query(async ({ input }) => {
+        const tokenData = await db.validateTokenVolante(input.token);
+        if (!tokenData) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
+        }
+        const lojas = await db.getLojasByVolanteId(tokenData.volante.id);
+        const documentosMap = new Map<number, any>();
+        for (const loja of lojas) {
+          const docs = await db.getDocumentosPorLoja(loja.id);
+          for (const doc of docs) {
+            if (!documentosMap.has(doc.id)) {
+              documentosMap.set(doc.id, doc);
+            }
+          }
+        }
+        return Array.from(documentosMap.values())
+          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      }),
   }),
-  
+
   // ==================== ANÁLISE DE FICHAS DE SERVIÇO ====================
   // Função auxiliar para gerar alerta de processos repetidos
   
@@ -15455,6 +15488,7 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
         matricula: z.string().min(1).max(20),
         viatura: z.string().max(150).optional(),
         tipoServico: z.enum(["PB", "LT", "OC", "REP", "POL"]),
+        servicos: z.array(z.enum(["PB", "LT", "OC", "REP", "POL"])).optional(),
         localidade: z.string().max(100).optional(),
         data: z.string().max(10).optional(),
         periodo: z.enum(["manha", "tarde"]).optional(),
@@ -15467,12 +15501,13 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
         obraNo: z.number().optional(),
       }))
       .mutation(async ({ input }) => {
-        const { token, ...dados } = input;
+        const { token, servicos, ...dados } = input;
         const auth = await db.validarTokenLoja(token);
         if (!auth) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
         const gestor = await db.getGestorByLojaId(auth.loja.id);
         if (!gestor) throw new TRPCError({ code: 'FORBIDDEN', message: 'Loja sem gestor associado' });
-        return await db.criarAgendamento({ ...dados, lojaId: auth.loja.id, gestorId: gestor.id });
+        const servicosJson = servicos && servicos.length > 0 ? JSON.stringify(servicos) : undefined;
+        return await db.criarAgendamento({ ...dados, lojaId: auth.loja.id, gestorId: gestor.id, servicos: servicosJson });
       }),
 
     // Atualizar agendamento (via token loja)
@@ -15483,6 +15518,7 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
         matricula: z.string().min(1).max(20).optional(),
         viatura: z.string().max(150).optional(),
         tipoServico: z.enum(["PB", "LT", "OC", "REP", "POL"]).optional(),
+        servicos: z.array(z.enum(["PB", "LT", "OC", "REP", "POL"])).optional(),
         localidade: z.string().max(100).optional(),
         data: z.string().max(10).nullable().optional(),
         periodo: z.enum(["manha", "tarde"]).nullable().optional(),
@@ -15495,12 +15531,15 @@ Se não conseguires ler algum campo, coloca string vazia "" ou array vazio [].`
         sortIndex: z.number().optional(),
       }))
       .mutation(async ({ input }) => {
-        const { token, id, ...updates } = input;
+        const { token, id, servicos, ...updates } = input;
         const auth = await db.validarTokenLoja(token);
         if (!auth) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
         const filtered = Object.fromEntries(
           Object.entries(updates).filter(([, v]) => v !== undefined)
         ) as Parameters<typeof db.atualizarAgendamento>[2];
+        if (servicos !== undefined) {
+          (filtered as any).servicos = JSON.stringify(servicos);
+        }
         await db.atualizarAgendamento(id, auth.loja.id, filtered);
         return { ok: true };
       }),
