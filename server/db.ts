@@ -13736,7 +13736,7 @@ export async function getAgendamentosGestor(gestorId: number) {
 
 export async function criarAgendamento(data: {
   lojaId: number; gestorId: number; matricula: string; viatura?: string;
-  tipoServico: "PB" | "LT" | "OC" | "REP" | "POL"; localidade?: string;
+  tipoServico: "PB" | "LT" | "OC" | "REP" | "POL"; servicos?: string; localidade?: string;
   data?: string; periodo?: "manha" | "tarde";
   estadoVidro?: "nao_encomendado" | "encomendado" | "terminado";
   morada?: string; telefone?: string; notas?: string; extra?: string;
@@ -13755,7 +13755,7 @@ export async function criarAgendamento(data: {
 
 export async function atualizarAgendamento(id: number, lojaId: number, updates: Partial<{
   matricula: string; viatura: string; tipoServico: "PB" | "LT" | "OC" | "REP" | "POL";
-  localidade: string; data: string; periodo: "manha" | "tarde";
+  servicos: string; localidade: string; data: string; periodo: "manha" | "tarde";
   estadoVidro: "nao_encomendado" | "encomendado" | "terminado";
   morada: string; telefone: string; notas: string; extra: string;
   km: number; sortIndex: number; obraNo: number;

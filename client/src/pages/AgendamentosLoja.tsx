@@ -24,6 +24,7 @@ interface AgendamentoLoja {
   matricula: string;
   viatura?: string | null;
   tipoServico: TipoServico;
+  servicos?: string | null; // JSON array, e.g. '["PB","LT"]'
   localidade?: string | null;
   data?: string | null;
   periodo?: Periodo | null;
@@ -56,6 +57,32 @@ const TIPO_LABELS: Record<TipoServico, string> = {
   REP: "Reparação",
   POL: "Polimento",
 };
+
+// Tempo estimado por tipo de serviço (em minutos)
+const TEMPO_MINUTOS: Record<TipoServico, number> = {
+  PB: 90,
+  LT: 60,
+  OC: 30,
+  REP: 60,
+  POL: 90,
+};
+
+function formatTempo(minutos: number): string {
+  if (minutos < 60) return `${minutos}min`;
+  const h = Math.floor(minutos / 60);
+  const m = minutos % 60;
+  return m > 0 ? `${h}h ${m}min` : `${h}h`;
+}
+
+function parseServicos(ag: AgendamentoLoja): TipoServico[] {
+  if (ag.servicos) {
+    try {
+      const parsed = JSON.parse(ag.servicos);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed as TipoServico[];
+    } catch {}
+  }
+  return [ag.tipoServico];
+}
 
 const TIPO_COLORS: Record<TipoServico, string> = {
   PB: "bg-blue-500",
@@ -103,7 +130,7 @@ function formatDatePT(d: Date): string {
 const emptyForm = {
   matricula: "",
   viatura: "",
-  tipoServico: "PB" as TipoServico,
+  servicos: ["PB"] as TipoServico[],
   localidade: "",
   data: "",
   periodo: "" as Periodo | "",
@@ -164,11 +191,13 @@ export default function AgendamentosLoja({ token, language }: Props) {
 
   const handleSubmit = () => {
     if (!form.matricula.trim()) return toast.error("Matrícula obrigatória");
+    if (form.servicos.length === 0) return toast.error("Adicione pelo menos um serviço");
     const payload = {
       token,
       matricula: form.matricula.trim().toUpperCase(),
       viatura: form.viatura || undefined,
-      tipoServico: form.tipoServico,
+      tipoServico: form.servicos[0],
+      servicos: form.servicos,
       localidade: form.localidade || undefined,
       data: form.data || undefined,
       periodo: (form.periodo as Periodo) || undefined,
@@ -191,7 +220,7 @@ export default function AgendamentosLoja({ token, language }: Props) {
     setForm({
       matricula: ag.matricula,
       viatura: ag.viatura || "",
-      tipoServico: ag.tipoServico,
+      servicos: parseServicos(ag),
       localidade: ag.localidade || "",
       data: ag.data || "",
       periodo: ag.periodo || "",
@@ -255,7 +284,11 @@ export default function AgendamentosLoja({ token, language }: Props) {
     >
       <div className="flex items-center justify-between gap-1">
         <span className="font-bold truncate">{ag.matricula}</span>
-        <span className={`rounded px-1 text-[10px] font-bold text-white ${TIPO_COLORS[ag.tipoServico]}`}>{ag.tipoServico}</span>
+        <div className="flex gap-0.5 flex-wrap justify-end">
+          {parseServicos(ag).map((tipo, i) => (
+            <span key={i} className={`rounded px-1 text-[10px] font-bold text-white ${TIPO_COLORS[tipo]}`}>{tipo}</span>
+          ))}
+        </div>
       </div>
       {ag.viatura && <div className="truncate opacity-90 text-[11px]">{ag.viatura}</div>}
       <div className="flex items-center gap-1 mt-1">
@@ -371,7 +404,9 @@ export default function AgendamentosLoja({ token, language }: Props) {
                     style={{ backgroundColor: getLocalidadeCor(ag.localidade) }}
                   />
                   <span className="font-bold text-sm">{ag.matricula}</span>
-                  <Badge className={`text-white text-xs ${TIPO_COLORS[ag.tipoServico]}`}>{ag.tipoServico}</Badge>
+                  {parseServicos(ag).map((tipo, i) => (
+                    <Badge key={i} className={`text-white text-xs ${TIPO_COLORS[tipo]}`}>{tipo}</Badge>
+                  ))}
                   {ag.viatura && <span className="text-xs text-muted-foreground truncate">{ag.viatura}</span>}
                   {ag.localidade && <span className="text-xs text-muted-foreground">{ag.localidade}</span>}
                   <div className="ml-auto flex items-center gap-1">
@@ -426,24 +461,63 @@ export default function AgendamentosLoja({ token, language }: Props) {
                 />
               </div>
               <div>
-                <Label>Tipo de Serviço *</Label>
-                <Select value={form.tipoServico} onValueChange={v => setForm(f => ({ ...f, tipoServico: v as TipoServico }))}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(TIPO_LABELS).map(([k, v]) => (
-                      <SelectItem key={k} value={k}>{k} – {v}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Label>Viatura</Label>
+                <Input
+                  value={form.viatura}
+                  onChange={e => setForm(f => ({ ...f, viatura: e.target.value }))}
+                  placeholder="Ex: Peugeot 308"
+                />
               </div>
             </div>
             <div>
-              <Label>Viatura</Label>
-              <Input
-                value={form.viatura}
-                onChange={e => setForm(f => ({ ...f, viatura: e.target.value }))}
-                placeholder="Ex: Peugeot 308"
-              />
+              <Label>Serviços *</Label>
+              <div className="space-y-2 mt-1">
+                {form.servicos.map((tipo, idx) => (
+                  <div key={idx} className="flex items-center gap-2">
+                    <Select
+                      value={tipo}
+                      onValueChange={v => setForm(f => {
+                        const s = [...f.servicos];
+                        s[idx] = v as TipoServico;
+                        return { ...f, servicos: s };
+                      })}
+                    >
+                      <SelectTrigger className="flex-1"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(TIPO_LABELS).map(([k, v]) => (
+                          <SelectItem key={k} value={k}>
+                            <span className={`inline-block rounded px-1.5 py-0.5 text-[11px] font-bold text-white mr-2 ${TIPO_COLORS[k as TipoServico]}`}>{k}</span>
+                            {v}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {form.servicos.length > 1 && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-9 w-9 p-0 shrink-0"
+                        onClick={() => setForm(f => ({ ...f, servicos: f.servicos.filter((_, i) => i !== idx) }))}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="w-full"
+                  onClick={() => setForm(f => ({ ...f, servicos: [...f.servicos, "PB" as TipoServico] }))}
+                >
+                  <Plus className="h-4 w-4 mr-1" /> Adicionar Serviço
+                </Button>
+                <p className="text-xs text-muted-foreground">
+                  ⏱️ Tempo estimado: <strong>{formatTempo(form.servicos.reduce((acc, t) => acc + TEMPO_MINUTOS[t], 0))}</strong>
+                </p>
+              </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
